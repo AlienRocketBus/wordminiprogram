@@ -60,13 +60,13 @@
 
   // ===== 武器图标 =====
   var WICON = {
-    0:'<img src="weapons/bow.png?v=899" alt="">',
-    1:'<img src="weapons/pistol.png?v=899" alt="">',
-    2:'<img src="weapons/machinegun.png?v=899" alt="">',
-    3:'<img src="weapons/sniper.png?v=899" alt="">',
-    4:'<img src="weapons/gatling.png?v=899" alt="">',
-    5:'<img src="weapons/cannon.png?v=899" alt="">',
-    6:'<img src="weapons/photon.png?v=899" alt="">'
+    0:'<img src="weapons/bow.webp?v=900" alt="">',
+    1:'<img src="weapons/pistol.webp?v=900" alt="">',
+    2:'<img src="weapons/machinegun.webp?v=900" alt="">',
+    3:'<img src="weapons/sniper.webp?v=900" alt="">',
+    4:'<img src="weapons/gatling.webp?v=900" alt="">',
+    5:'<img src="weapons/cannon.webp?v=900" alt="">',
+    6:'<img src="weapons/photon.webp?v=900" alt="">'
   };
 
   // ===== 🎨 配色皮肤(12 变量/套) =====
@@ -248,7 +248,7 @@
       entry.className='util-card'; entry.id='hsnGearEntry';
       entry.setAttribute('onclick','HansenGear.open()');
       // 🔴v648 装备菜单图标 emoji⚔️→新3D装备宝箱图(适中48px·高清512源·onerror回退⚔️)
-      entry.innerHTML='<span class="u-icon"><img src="icons/ic_equip.png" alt="" draggable="false" style="width:70px;height:70px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,-1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">装备</div>';
+      entry.innerHTML='<span class="u-icon"><img src="icons/ic_equip.webp" alt="" draggable="false" style="width:70px;height:70px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,-1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">装备</div>';
       anyCard.parentElement.insertBefore(entry, anyCard);
     }catch(e){}
   }

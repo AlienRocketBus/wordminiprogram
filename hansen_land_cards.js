@@ -5,45 +5,45 @@
   if(window.__hansenLandCardsLoaded){ return; } window.__hansenLandCardsLoaded = true;
 
   var LAND_CARDS = [
-    {id:'L11', land:1, name:'虫群先锋·刃翼领主', img:'bosses/land_renyi.png', frame:'#94a3b8', rarity:'common', desc:'振翅如刃, 虫群之锋所向, 万物退避。'},
-    {id:'L12', land:1, name:'未成形之神·万形之胚', img:'bosses/land_wanxing.png', frame:'#84cc16', rarity:'uncommon', desc:'尚未定形的初生之神, 万般可能皆蛰伏其中。'},
-    {id:'L13', land:1, name:'逆相之影·镜渊领主', img:'bosses/land_jingyuan.png', frame:'#c084fc', rarity:'rare', desc:'镜渊深处的倒影之主, 照见你最恐惧的模样。'},
-    {id:'L14', land:1, name:'混沌之种·万象侵蚀者', img:'bosses/land_hundun.png', frame:'#22d3ee', rarity:'epic', desc:'一粒混沌之种, 悄然吞噬万象的秩序。'},
-    {id:'L15', land:1, name:'魔皇·小丑至尊', img:'bosses/land_mohuang.png', frame:'#fbbf24', rarity:'legendary', desc:'笑面之下是魔皇, 一场好戏才刚刚开场。'},
-    {id:'L21', land:2, name:'丛林幽灵·兵王', img:'bosses/land_bingwang.png', frame:'#94a3b8', rarity:'common', desc:'穿林而过无声无息, 丛林之中他即是王。'},
-    {id:'L22', land:2, name:'暗影先锋·破阵者', img:'bosses/s1_vanguard.png', frame:'#84cc16', rarity:'uncommon', desc:'目镜锁定, 卡宾点射, 千军之阵一击破开。'},
-    {id:'L23', land:2, name:'银翼·麻烦终结者', img:'bosses/land_yinyi.png', frame:'#c084fc', rarity:'rare', desc:'银翼掠过, 三段变形, 所有麻烦就此终结。'},
-    {id:'L24', land:2, name:'决斗大师·千招之约', img:'bosses/land_juedou.png', frame:'#22d3ee', rarity:'epic', desc:'千招在胸, 一诺既出, 唯有决斗见分晓。'},
-    {id:'L25', land:2, name:'武器大师·战争铁砧', img:'bosses/s1_waranvil.png', frame:'#fbbf24', rarity:'legendary', desc:'全副武库为砧, 六联导弹为锤, 战争在此锻造。'},
-    {id:'L31', land:3, name:'火柴人·原初线条', img:'bosses/land_huochairen.png', frame:'#94a3b8', rarity:'common', desc:'最简的线条, 最纯的力量, 万象皆由此起笔。'},
-    {id:'L32', land:3, name:'影守·永夜之壁', img:'bosses/land_yingshou.png', frame:'#84cc16', rarity:'uncommon', desc:'永夜筑成的高墙, 光无法逾越的守望者。'},
-    {id:'L33', land:3, name:'万典之灵·未被写下的故事', img:'bosses/land_wandian.png', frame:'#c084fc', rarity:'rare', desc:'万卷之灵, 一段尚未落笔的传说等你续写。'},
-    {id:'L34', land:3, name:'凋零与新生之龙·四季轮转', img:'bosses/land_sijilong.png', frame:'#22d3ee', rarity:'epic', desc:'一息凋零, 一息新生, 四季在它鳞下轮转。'},
-    {id:'L35', land:3, name:'时之君主·克罗诺斯之影', img:'bosses/timelord.png', frame:'#fbbf24', rarity:'legendary', desc:'时间的君主, 连过去与未来都俯首听命。'},
-    {id:'L41', land:4, name:'机械主教·组装者', img:'bosses/s1_assembler.png', frame:'#94a3b8', rarity:'common', desc:'独眼扫描, 流水线不息, 钢铁之躯源源不绝。'},
-    {id:'L42', land:4, name:'苍穹守卫·阿尔基昂', img:'bosses/land_archeon.png', frame:'#84cc16', rarity:'uncommon', desc:'翱翔于苍穹之巅, 天空的边界由它守卫。'},
-    {id:'L43', land:4, name:'万械之神·奥米伽', img:'bosses/land_omiga.png', frame:'#c084fc', rarity:'rare', desc:'万械归一, 终焉之神, 机械文明的终点。'},
-    {id:'L44', land:4, name:'量子观测者·阿尔戈', img:'bosses/land_argo.png', frame:'#22d3ee', rarity:'epic', desc:'观测即改变, 你的每一步它早已算尽。'},
-    {id:'L45', land:4, name:'无光之渊·暗噬君主', img:'bosses/abysslord.png', frame:'#fbbf24', rarity:'legendary', desc:'深渊无光, 一切坠入其中皆被吞噬殆尽。'},
-    {id:'L51', land:5, name:'画壁判官·墨渊', img:'bosses/land_moyuan.png', frame:'#94a3b8', rarity:'common', desc:'笔落成壁, 墨渊为狱, 善恶皆由他一笔定夺。'},
-    {id:'L52', land:5, name:'夜罗刹·红莲战鬼', img:'bosses/land_yecha.png', frame:'#84cc16', rarity:'uncommon', desc:'红莲燃夜, 罗刹出鞘, 战意如火焚尽苍穹。'},
-    {id:'L53', land:5, name:'破坏神·终焉之相', img:'bosses/land_pohuai.png', frame:'#c084fc', rarity:'rare', desc:'当他显出终焉之相, 世界便走向尽头。'},
-    {id:'L54', land:5, name:'不动明王·焚天镇狱尊', img:'bosses/land_mingwang.png', frame:'#22d3ee', rarity:'epic', desc:'焚天之焰, 镇狱之威, 明王一坐, 群魔不动。'},
+    {id:'L11', land:1, name:'虫群先锋·刃翼领主', img:'bosses/land_renyi.webp', frame:'#94a3b8', rarity:'common', desc:'振翅如刃, 虫群之锋所向, 万物退避。'},
+    {id:'L12', land:1, name:'未成形之神·万形之胚', img:'bosses/land_wanxing.webp', frame:'#84cc16', rarity:'uncommon', desc:'尚未定形的初生之神, 万般可能皆蛰伏其中。'},
+    {id:'L13', land:1, name:'逆相之影·镜渊领主', img:'bosses/land_jingyuan.webp', frame:'#c084fc', rarity:'rare', desc:'镜渊深处的倒影之主, 照见你最恐惧的模样。'},
+    {id:'L14', land:1, name:'混沌之种·万象侵蚀者', img:'bosses/land_hundun.webp', frame:'#22d3ee', rarity:'epic', desc:'一粒混沌之种, 悄然吞噬万象的秩序。'},
+    {id:'L15', land:1, name:'魔皇·小丑至尊', img:'bosses/land_mohuang.webp', frame:'#fbbf24', rarity:'legendary', desc:'笑面之下是魔皇, 一场好戏才刚刚开场。'},
+    {id:'L21', land:2, name:'丛林幽灵·兵王', img:'bosses/land_bingwang.webp', frame:'#94a3b8', rarity:'common', desc:'穿林而过无声无息, 丛林之中他即是王。'},
+    {id:'L22', land:2, name:'暗影先锋·破阵者', img:'bosses/s1_vanguard.webp', frame:'#84cc16', rarity:'uncommon', desc:'目镜锁定, 卡宾点射, 千军之阵一击破开。'},
+    {id:'L23', land:2, name:'银翼·麻烦终结者', img:'bosses/land_yinyi.webp', frame:'#c084fc', rarity:'rare', desc:'银翼掠过, 三段变形, 所有麻烦就此终结。'},
+    {id:'L24', land:2, name:'决斗大师·千招之约', img:'bosses/land_juedou.webp', frame:'#22d3ee', rarity:'epic', desc:'千招在胸, 一诺既出, 唯有决斗见分晓。'},
+    {id:'L25', land:2, name:'武器大师·战争铁砧', img:'bosses/s1_waranvil.webp', frame:'#fbbf24', rarity:'legendary', desc:'全副武库为砧, 六联导弹为锤, 战争在此锻造。'},
+    {id:'L31', land:3, name:'火柴人·原初线条', img:'bosses/land_huochairen.webp', frame:'#94a3b8', rarity:'common', desc:'最简的线条, 最纯的力量, 万象皆由此起笔。'},
+    {id:'L32', land:3, name:'影守·永夜之壁', img:'bosses/land_yingshou.webp', frame:'#84cc16', rarity:'uncommon', desc:'永夜筑成的高墙, 光无法逾越的守望者。'},
+    {id:'L33', land:3, name:'万典之灵·未被写下的故事', img:'bosses/land_wandian.webp', frame:'#c084fc', rarity:'rare', desc:'万卷之灵, 一段尚未落笔的传说等你续写。'},
+    {id:'L34', land:3, name:'凋零与新生之龙·四季轮转', img:'bosses/land_sijilong.webp', frame:'#22d3ee', rarity:'epic', desc:'一息凋零, 一息新生, 四季在它鳞下轮转。'},
+    {id:'L35', land:3, name:'时之君主·克罗诺斯之影', img:'bosses/timelord.webp', frame:'#fbbf24', rarity:'legendary', desc:'时间的君主, 连过去与未来都俯首听命。'},
+    {id:'L41', land:4, name:'机械主教·组装者', img:'bosses/s1_assembler.webp', frame:'#94a3b8', rarity:'common', desc:'独眼扫描, 流水线不息, 钢铁之躯源源不绝。'},
+    {id:'L42', land:4, name:'苍穹守卫·阿尔基昂', img:'bosses/land_archeon.webp', frame:'#84cc16', rarity:'uncommon', desc:'翱翔于苍穹之巅, 天空的边界由它守卫。'},
+    {id:'L43', land:4, name:'万械之神·奥米伽', img:'bosses/land_omiga.webp', frame:'#c084fc', rarity:'rare', desc:'万械归一, 终焉之神, 机械文明的终点。'},
+    {id:'L44', land:4, name:'量子观测者·阿尔戈', img:'bosses/land_argo.webp', frame:'#22d3ee', rarity:'epic', desc:'观测即改变, 你的每一步它早已算尽。'},
+    {id:'L45', land:4, name:'无光之渊·暗噬君主', img:'bosses/abysslord.webp', frame:'#fbbf24', rarity:'legendary', desc:'深渊无光, 一切坠入其中皆被吞噬殆尽。'},
+    {id:'L51', land:5, name:'画壁判官·墨渊', img:'bosses/land_moyuan.webp', frame:'#94a3b8', rarity:'common', desc:'笔落成壁, 墨渊为狱, 善恶皆由他一笔定夺。'},
+    {id:'L52', land:5, name:'夜罗刹·红莲战鬼', img:'bosses/land_yecha.webp', frame:'#84cc16', rarity:'uncommon', desc:'红莲燃夜, 罗刹出鞘, 战意如火焚尽苍穹。'},
+    {id:'L53', land:5, name:'破坏神·终焉之相', img:'bosses/land_pohuai.webp', frame:'#c084fc', rarity:'rare', desc:'当他显出终焉之相, 世界便走向尽头。'},
+    {id:'L54', land:5, name:'不动明王·焚天镇狱尊', img:'bosses/land_mingwang.webp', frame:'#22d3ee', rarity:'epic', desc:'焚天之焰, 镇狱之威, 明王一坐, 群魔不动。'},
     {id:'L55', land:5, name:'剑神·万剑归一', img:'bosses/land_jianshen.webp', frame:'#fbbf24', rarity:'legendary', desc:'万剑归一, 一念既起, 天下剑意尽入其鞘。'},
-    {id:'L61', land:6, name:'诅咒之躯·绷带亡骸', img:'bosses/land_bengdai.png', frame:'#94a3b8', rarity:'common', desc:'层层绷带缠裹千年诅咒, 亡骸不朽亦不安。'},
-    {id:'L62', land:6, name:'亡灵咒术师·阿努比斯之影', img:'bosses/land_anubis.png', frame:'#84cc16', rarity:'uncommon', desc:'死神之影, 亡灵听令, 冥界大门由他执掌。'},
-    {id:'L63', land:6, name:'古埃及大祭司·真理之口的裁决者', img:'bosses/land_priest.png', frame:'#c084fc', rarity:'rare', desc:'真理之口开启时, 谎言者的心将被称量。'},
-    {id:'L64', land:6, name:'法老王·不朽金身', img:'bosses/land_pharaoh.png', frame:'#22d3ee', rarity:'epic', desc:'黄金铸就不朽之躯, 千年王权从未落幕。'},
-    {id:'L65', land:6, name:'天界守护者·黄金斯芬克斯', img:'bosses/land_sphinx.png', frame:'#fbbf24', rarity:'legendary', desc:'谜语无人能解, 黄金之翼镇守天界之门。'},
-    {id:'L71', land:7, name:'月之引航者·寂静潮汐', img:'bosses/land_yuezhi.png', frame:'#94a3b8', rarity:'common', desc:'月光牵引潮汐起落, 寂静之海任其调遣。'},
-    {id:'L72', land:7, name:'星陨武士·流亡之刃', img:'bosses/s1_exileblade.png', frame:'#84cc16', rarity:'uncommon', desc:'银蓝光刃, 斗篷残影, 流亡之星一闪定生死。'},
-    {id:'L73', land:7, name:'星核泰坦·虚空造物主', img:'bosses/land_xinghe.png', frame:'#c084fc', rarity:'rare', desc:'以虚空为炉, 以星核为料, 亲手锻造星系。'},
-    {id:'L74', land:7, name:'统御天使·圣光之翼', img:'bosses/lightangel.png', frame:'#22d3ee', rarity:'epic', desc:'万道圣光自天而降, 圣翼之名即是审判。'},
-    {id:'L75', land:7, name:'铸星者·原初匠人', img:'bosses/starmaker.png', frame:'#fbbf24', rarity:'legendary', desc:'星辰皆出自他手, 创世的第一锤仍在回响。'},
-    {id:'L81', land:8, name:'破晓仲裁者·索拉里斯', img:'bosses/land_poxiao.png', frame:'#94a3b8', rarity:'common', desc:'第一缕破晓之光, 亦是无可违抗的仲裁。'},
-    {id:'L82', land:8, name:'天启征服者·索拉里斯', img:'bosses/land_solaris.png', frame:'#84cc16', rarity:'uncommon', desc:'天启号角吹响, 征服的铁蹄踏平一切。'},
-    {id:'L83', land:8, name:'终末观测者·边界守夜人', img:'bosses/observer.png', frame:'#c084fc', rarity:'rare', desc:'守望世界的边界, 记录终末降临的每一刻。'},
-    {id:'L84', land:8, name:'活体行星·古老意志', img:'bosses/s1_ancientwill.png', frame:'#22d3ee', rarity:'epic', desc:'一颗苏醒的行星, 以引力低语碾碎星海万物。'},
+    {id:'L61', land:6, name:'诅咒之躯·绷带亡骸', img:'bosses/land_bengdai.webp', frame:'#94a3b8', rarity:'common', desc:'层层绷带缠裹千年诅咒, 亡骸不朽亦不安。'},
+    {id:'L62', land:6, name:'亡灵咒术师·阿努比斯之影', img:'bosses/land_anubis.webp', frame:'#84cc16', rarity:'uncommon', desc:'死神之影, 亡灵听令, 冥界大门由他执掌。'},
+    {id:'L63', land:6, name:'古埃及大祭司·真理之口的裁决者', img:'bosses/land_priest.webp', frame:'#c084fc', rarity:'rare', desc:'真理之口开启时, 谎言者的心将被称量。'},
+    {id:'L64', land:6, name:'法老王·不朽金身', img:'bosses/land_pharaoh.webp', frame:'#22d3ee', rarity:'epic', desc:'黄金铸就不朽之躯, 千年王权从未落幕。'},
+    {id:'L65', land:6, name:'天界守护者·黄金斯芬克斯', img:'bosses/land_sphinx.webp', frame:'#fbbf24', rarity:'legendary', desc:'谜语无人能解, 黄金之翼镇守天界之门。'},
+    {id:'L71', land:7, name:'月之引航者·寂静潮汐', img:'bosses/land_yuezhi.webp', frame:'#94a3b8', rarity:'common', desc:'月光牵引潮汐起落, 寂静之海任其调遣。'},
+    {id:'L72', land:7, name:'星陨武士·流亡之刃', img:'bosses/s1_exileblade.webp', frame:'#84cc16', rarity:'uncommon', desc:'银蓝光刃, 斗篷残影, 流亡之星一闪定生死。'},
+    {id:'L73', land:7, name:'星核泰坦·虚空造物主', img:'bosses/land_xinghe.webp', frame:'#c084fc', rarity:'rare', desc:'以虚空为炉, 以星核为料, 亲手锻造星系。'},
+    {id:'L74', land:7, name:'统御天使·圣光之翼', img:'bosses/lightangel.webp', frame:'#22d3ee', rarity:'epic', desc:'万道圣光自天而降, 圣翼之名即是审判。'},
+    {id:'L75', land:7, name:'铸星者·原初匠人', img:'bosses/starmaker.webp', frame:'#fbbf24', rarity:'legendary', desc:'星辰皆出自他手, 创世的第一锤仍在回响。'},
+    {id:'L81', land:8, name:'破晓仲裁者·索拉里斯', img:'bosses/land_poxiao.webp', frame:'#94a3b8', rarity:'common', desc:'第一缕破晓之光, 亦是无可违抗的仲裁。'},
+    {id:'L82', land:8, name:'天启征服者·索拉里斯', img:'bosses/land_solaris.webp', frame:'#84cc16', rarity:'uncommon', desc:'天启号角吹响, 征服的铁蹄踏平一切。'},
+    {id:'L83', land:8, name:'终末观测者·边界守夜人', img:'bosses/observer.webp', frame:'#c084fc', rarity:'rare', desc:'守望世界的边界, 记录终末降临的每一刻。'},
+    {id:'L84', land:8, name:'活体行星·古老意志', img:'bosses/s1_ancientwill.webp', frame:'#22d3ee', rarity:'epic', desc:'一颗苏醒的行星, 以引力低语碾碎星海万物。'},
     {id:'L85', land:8, name:'星核帝皇·弗沙欧', img:'bosses/land_fushaou.webp', frame:'#fbbf24', rarity:'legendary', desc:'三皇归一之躯, 以星核为心, 一束终焉白光可焚灭万象。'},
   ];
 
@@ -168,12 +168,12 @@
         var un=cb.has(c.id);
         if(un){
           h+='<div onclick="window.HansenLandGachaUI&&window.HansenLandGachaUI.detail(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=899" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=900" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img src="'+c.img+'?v=899" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img src="'+c.img+'?v=900" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -270,7 +270,7 @@
         '<div class="gr-face gr-front gr-card'+(isLeg?' leg':'')+'">'+
           '<div class="gr-myst"><div class="gr-myst-q">?</div></div>'+
           '<div class="gr-real"><div class="gr-rarity" style="color:'+ri.color+'">'+(isLeg?'✨ 至尊 ✨':ri.cn)+'</div>'+
-          '<img class="gr-img" src="'+c.img+'?v=899" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
+          '<img class="gr-img" src="'+c.img+'?v=900" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
           '<div class="gr-name" style="color:'+ri.color+'">'+esc(c.name)+'</div></div>'+
         '</div><div class="gr-face gr-back"></div>'+
       '</div></div>'+
@@ -310,7 +310,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=899" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=900" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);

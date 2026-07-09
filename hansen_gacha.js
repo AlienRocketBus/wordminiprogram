@@ -62,7 +62,7 @@
     try{
       if(window.BOSS_CARDS){ return window.BOSS_CARDS.find(function(c){return c.lv===lv;}); }
     }catch(e){}
-    return {lv:lv, name:'卡牌'+lv, img:'bosses/lv'+(lv<10?'0':'')+lv+'.png', rarity:'common'};
+    return {lv:lv, name:'卡牌'+lv, img:'bosses/lv'+(lv<10?'0':'')+lv+'.webp', rarity:'common'};
   }
 
   // 暴露抽卡核心给外部(测试/复用)
@@ -471,7 +471,7 @@
     var st=document.createElement('style'); st.id='hsnGachaCSS'; st.textContent=css; document.head.appendChild(st);
   }
   // ========== 自动注入抽卡入口(首页util-card区) ==========
-  function injectEntry(){ /* 🔴 v594: 抽卡入口已移至游戏模式网格(火眼金睛旁, 用新joker图 gacha_joker_v594.png, onclick=HansenGacha.open), 不再注入 util-card(Hansen: 去掉主题商店旁重复抽卡入口) */ }
+  function injectEntry(){ /* 🔴 v594: 抽卡入口已移至游戏模式网格(火眼金睛旁, 用新joker图 gacha_joker_v594.webp, onclick=HansenGacha.open), 不再注入 util-card(Hansen: 去掉主题商店旁重复抽卡入口) */ }
 
   // 启动: 注入入口(等DOM就绪)
   function startGacha(){ injectEntry(); }

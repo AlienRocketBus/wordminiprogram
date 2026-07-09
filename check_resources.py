@@ -67,7 +67,7 @@ if stale == 0:
     ok("无写死低版本主戳 (0 stale)")
 
 # ---- 检查5: 无空文件 (html/js/mp3) ----
-empties = [fn for fn in html_js + glob.glob("words/*.mp3") + glob.glob("bosses/*.png")
+empties = [fn for fn in html_js + glob.glob("words/*.mp3") + glob.glob("bosses/*.webp")
            if os.path.getsize(fn) == 0]
 if empties:
     fail("发现空文件: %s" % empties)
@@ -127,8 +127,8 @@ else:
         ok("word_map.js 语法OK, %d键无重复, %d个引用文件全部存在" % (len(keys), len(paths)))
 
 # ---- 检查10: boss 图齐 (lv01-20 + saelya = 21) ----
-bosses = glob.glob("bosses/*.png")
-need = ["bosses/lv%02d.png" % n for n in range(1, 21)] + ["bosses/saelya.png"]
+bosses = glob.glob("bosses/*.webp")
+need = ["bosses/lv%02d.webp" % n for n in range(1, 21)] + ["bosses/saelya.webp"]
 bmiss = [b for b in need if not os.path.exists(b)]
 if bmiss:
     fail("缺boss图: %s" % bmiss)
@@ -422,7 +422,7 @@ else:
     ok("(未找到 hansen_boss_lock.js, 跳过检查21)")
 
 # ---- 检查22: ★boss 立绘 SVG <image> 必须带 xlink:href (BUG#59: 微信X5内核只认 SVG1.1 的 xlink:href, 裸 href 加载不出 → boss 立绘空白) ----
-# 事故(BUG#59): boss 立绘是 PNG 包在 SVG 里(`<svg><image href="bosses/lvNN.png">`)。SVG2 的裸 `href` 在 Chrome 能渲染,
+# 事故(BUG#59): boss 立绘是 PNG 包在 SVG 里(`<svg><image href="bosses/lvNN.webp">`)。SVG2 的裸 `href` 在 Chrome 能渲染,
 #   但【微信内置浏览器(X5/系统webview)只认 SVG1.1 的 `xlink:href`】→ boss 立绘在微信里整片空白(用户实拍: 动物岛 boss 图没了)。
 #   修复 = 全岛 boss 图 SVG 补 `xmlns:xlink` + `<image>` 同时写 `href` 和 `xlink:href`(新旧浏览器通吃)。
 # 静态守: 每岛 `<image href="bosses/` 的个数必须 ≤ `xlink:href="bosses/` 的个数(即每个 boss 图 href 都配了 xlink:href)。
@@ -507,9 +507,9 @@ else:
     _fxn = _hba_c.count("':{t:'")
     if "window.HansenBossAttack" not in _hba_c: _hba_bad.append("未定义 window.HansenBossAttack")
     if _fxn < 21: _hba_bad.append("FX映射仅 %d 条(应>=21)" % _fxn)
-    # 🔴 v497: 机械泰坦拳头攻击改用真实立绘图(bosses/mechfist_real.png, 已预旋45°顺时针·拳头朝右下·透明PNG·用<img>), 守卫图存在+被引用(防被删/改回旧丑SVG)
-    if "mechfist_real.png" not in _hba_c: _hba_bad.append("机械泰坦未引用拳头图 mechfist_real.png")
-    if not os.path.exists("bosses/mechfist_real.png"): _hba_bad.append("缺 bosses/mechfist_real.png(机械泰坦拳头攻击图)")
+    # 🔴 v497: 机械泰坦拳头攻击改用真实立绘图(bosses/mechfist_real.webp, 已预旋45°顺时针·拳头朝右下·透明PNG·用<img>), 守卫图存在+被引用(防被删/改回旧丑SVG)
+    if "mechfist_real.webp" not in _hba_c: _hba_bad.append("机械泰坦未引用拳头图 mechfist_real.webp")
+    if not os.path.exists("bosses/mechfist_real.webp"): _hba_bad.append("缺 bosses/mechfist_real.webp(机械泰坦拳头攻击图)")
     # 🔴 v499 BUG#67: 机械泰坦拳头是【唯一外部图片】的boss特效, 必须 init 预加载+解码 + makeWeapon 克隆复用 →
     #   否则每次现新建<img>, 首次/慢解码时 slam动画(500ms)放完前图还没出来 → 拳头空白没出现(Hansen实测)。守卫三件: 预加载Image/decode预解码/cloneNode即时绘制。
     if "__hbaFistImg" not in _hba_c or "new Image()" not in _hba_c: _hba_bad.append("拳头图未预加载(BUG#67·缺 __hbaFistImg/new Image)")
@@ -750,7 +750,7 @@ for _f in sorted(glob.glob("island_*.html")):
 if _g68: fail("BUG#68: bossAnswer allOpts[i] 未防护(FX/掉血/台词可能被跳过): " + str(_g68[:4]))
 else: ok("\u2605bossAnswer allOpts[i] 两处(\u7b54\u9519/\u7b54\u5bf9)\u516819\u5c9b\u6709 if \u9632\u62a4 (BUG#68\u00b7\u9009\u9879\u7f3a\u5931\u4e5f\u4e0d\u62a5\u9519\u00b7\u4fdd\u8bc1FX/\u6389\u8840/\u53f0\u8bcd\u4e0d\u88ab\u8df3\u8fc7)")
 
-# 🔴 v501: Hansen 定稿——机械泰坦拳头改【竖直砸下·高86px】(去掉旧45°斜角·mechfist_real.png 已转正为竖直图)。
+# 🔴 v501: Hansen 定稿——机械泰坦拳头改【竖直砸下·高86px】(去掉旧45°斜角·mechfist_real.webp 已转正为竖直图)。
 #   守: makeWeapon 拳头显示尺寸必须竖直(高>宽), 防回归成方形斜拳头。
 _mw=re.search(r"m\.width=(\d+);m\.height=(\d+)", open("hansen_boss_attack.js",encoding="utf-8").read())
 if not _mw: fail("v501: 未找到机械泰坦拳头 m.width/m.height")
@@ -770,7 +770,7 @@ else: ok("\u673a\u68b0\u6cf0\u5766\u62f3\u5934\u65b0\u6548\u679c\u5728\u4f4d (hb
 # 🔴 v503: 上古太阳神攻击改为【太阳火球】(外部图·从小变大砸向勇者[同机械泰坦拳头模式]·命中血条火焰燃烧·零震屏零屏闪)。
 _hba3=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s3=[]
-if not os.path.exists("bosses/sunball_real.png"): _s3.append("\u7f3a sunball_real.png")
+if not os.path.exists("bosses/sunball_real.webp"): _s3.append("\u7f3a sunball_real.webp")
 if "__hbaSunImg" not in _hba3 or "_sunImg.decode" not in _hba3: _s3.append("\u592a\u9633\u706b\u7403\u672a\u9884\u52a0\u8f7d+\u89e3\u7801")
 if "function makeSunball" not in _hba3 or "__hbaSunImg.cloneNode" not in _hba3: _s3.append("\u706b\u7403\u672a\u514b\u9686\u590d\u7528")
 # v531起 sunslam 退役(上古太阳神→sungod)·分支/makeSunball/sunFireBurn 保留为死代码·__hbaSunImg 预加载仍现役(sungod 聚日成阳直接复用)
@@ -781,8 +781,8 @@ else: ok("\u4e0a\u53e4\u592a\u9633\u795e\u592a\u9633\u706b\u7403 (\u5916\u90e8\u
 # 🔴 v504/v505: 混沌魔尊(Lv19)/外星霸主(Lv18)攻击改为【光波/光束】(外部图·从boss处细端clip揭示逐渐展开·大端抵达血条命中+掉血·尺寸按boss→勇者距离动态贴合·速度每boss可调 --wdur·同拳头/火球预加载克隆防首次空白)。
 _hba4=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s4=[]
-if not os.path.exists("bosses/chaoswave_real.png"): _s4.append("缺 chaoswave_real.png(混沌漩涡)")
-if not os.path.exists("bosses/alienbeam_real.png"): _s4.append("缺 alienbeam_real.png(外星光束)")
+if not os.path.exists("bosses/chaoswave_real.webp"): _s4.append("缺 chaoswave_real.webp(混沌漩涡)")
+if not os.path.exists("bosses/alienbeam_real.webp"): _s4.append("缺 alienbeam_real.webp(外星光束)")
 if "__hbaWaveImg" not in _hba4 or "_waveImg.decode" not in _hba4: _s4.append("漩涡未预加载+解码")
 if "__hbaBeamImg" not in _hba4 or "_beamImg.decode" not in _hba4: _s4.append("光束未预加载+解码")
 if "function makeWaveImg" not in _hba4 or ".cloneNode" not in _hba4: _s4.append("makeWaveImg历史死代码被误删")
@@ -796,7 +796,7 @@ else: ok("两图预加载完好·wave全退役为死代码 (光束图随alienlor
 _hba6=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s6=[]
 import glob as _g6
-_vf=[p for p in ["bosses/vfang_tl.png","bosses/vfang_tr.png","bosses/vfang_bl.png","bosses/vfang_br.png"] if not os.path.exists(p)]
+_vf=[p for p in ["bosses/vfang_tl.webp","bosses/vfang_tr.webp","bosses/vfang_bl.webp","bosses/vfang_br.webp"] if not os.path.exists(p)]
 if _vf: _s6.append("缺牙齿图:"+str(_vf))
 if "__hbaVfangImgs" not in _hba6 or "_vfangSrcs" not in _hba6: _s6.append("4颗牙未预加载")
 if "function makeVfang" not in _hba6 or "cloneNode" not in _hba6: _s6.append("牙齿未克隆复用")
@@ -809,7 +809,7 @@ else: ok("暗夜吸血鬼獠牙咬合 (4颗牙齿图预加载/克隆·上下咬�
 # 🔴 v507: 暗影忍者(Lv2)攻击改为【扔手里剑】(手里剑图·边飞边旋转命中勇者血条·血液飞溅+掉血·第六个外部图FX·同样预加载/克隆防空白)。
 _hba7=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s7=[]
-if not os.path.exists("bosses/shuriken.png"): _s7.append("缺手里剑图 bosses/shuriken.png")
+if not os.path.exists("bosses/shuriken.webp"): _s7.append("缺手里剑图 bosses/shuriken.webp")
 if "__hbaShuriImg" not in _hba7 or "_shuriSrc" not in _hba7: _s7.append("手里剑未预加载")
 if "function makeShuriken" not in _hba7 or "function bloodSplatter" not in _hba7: _s7.append("缺 makeShuriken或bloodSplatter")
 if "t==='shuriken'" not in _hba7 or "rotate(" not in _hba7: _s7.append("缺 shuriken分支或旋转")
@@ -848,7 +848,7 @@ else: ok("meteorrain历史组件完好 (v511遗产·陨石SVG+地火+爆炸复�
 _hba12=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s12=[]
 import os as _os12
-if not _os12.path.exists("bosses/hammer_real.png"): _s12.append("缺战锤图 bosses/hammer_real.png")
+if not _os12.path.exists("bosses/hammer_real.webp"): _s12.append("缺战锤图 bosses/hammer_real.webp")
 _orcf=re.search(r"'百战兽人':\{[^}]*\}", _hba12)
 _orcc=_orcf.group(0) if _orcf else ""
 if "hammerquake" not in _orcc: _s12.append("百战兽人未配置 hammerquake")
@@ -1027,10 +1027,10 @@ for _kf in ["hbaXwRiftShimmer","hbaXwHit","hbaXwRingHit","hbaXwBeamFlick","hbaXw
 if _s19: fail("v519 异次元巫师五元素轮舞: " + str(_s19[:8]))
 else: ok("异次元巫师换维度裂隙五元素轮舞 (dimrift·五元素公转+双裂隙瞬移连击+斜向五色光柱崩塌·全SVG内联无外部图·异次元紫·零震屏零屏闪·v519)")
 
-# 🔴 v520: 龙骑士统帅(Lv11)巨龙之翼焚天枪雨(Hansen 定稿·Hansen真枪图)。①巨龙之翼遮天蔽日(升级版SVG巨翼: 双层膜景深+黑曜金边四指骨+骨节金钉+腕部金尖骨爪+指尖橙刺+焰脉发光+外缘炽光+余烬星点·展开回弹过冲480ms·wflex层持续扇动呼吸·横贯屏顶) ②统帅号令(金色龙魂SVG盘旋一周640ms+龙吼双环+枪尖蓄力金光) ③焚天枪雨(880ms·真枪图bosses/dragonlance.png 165x360·round(12*fxi)根错峰65ms从翼下垂直坠落·橙色速度残影hba-dktrailv·落点贯穿闪+碎星·5根精准砸血条0.18~0.82连击·钉住220/300ms淡出) ④终焉巨枪(rainEnd后巨翼收拢扇下brightness1.45·300ms后1.95倍巨枪正中坠落·命中deal+大爆闪+火环+碎片13+浓烟3+地面火舌4+全屏橙红柔震·巨枪钉住后拔出)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaDkLance·落枪cloneNode·兜底新建img。龙焰橙硬编码·hba-dk前缀·全fixed贴body·零震屏零屏闪。旧spear分支为历史死代码保留。
+# 🔴 v520: 龙骑士统帅(Lv11)巨龙之翼焚天枪雨(Hansen 定稿·Hansen真枪图)。①巨龙之翼遮天蔽日(升级版SVG巨翼: 双层膜景深+黑曜金边四指骨+骨节金钉+腕部金尖骨爪+指尖橙刺+焰脉发光+外缘炽光+余烬星点·展开回弹过冲480ms·wflex层持续扇动呼吸·横贯屏顶) ②统帅号令(金色龙魂SVG盘旋一周640ms+龙吼双环+枪尖蓄力金光) ③焚天枪雨(880ms·真枪图bosses/dragonlance.webp 165x360·round(12*fxi)根错峰65ms从翼下垂直坠落·橙色速度残影hba-dktrailv·落点贯穿闪+碎星·5根精准砸血条0.18~0.82连击·钉住220/300ms淡出) ④终焉巨枪(rainEnd后巨翼收拢扇下brightness1.45·300ms后1.95倍巨枪正中坠落·命中deal+大爆闪+火环+碎片13+浓烟3+地面火舌4+全屏橙红柔震·巨枪钉住后拔出)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaDkLance·落枪cloneNode·兜底新建img。龙焰橙硬编码·hba-dk前缀·全fixed贴body·零震屏零屏闪。旧spear分支为历史死代码保留。
 _hba20=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s20=[]
-if not os.path.exists("bosses/dragonlance.png"): _s20.append("缺真枪图 bosses/dragonlance.png")
+if not os.path.exists("bosses/dragonlance.webp"): _s20.append("缺真枪图 bosses/dragonlance.webp")
 _dkf=re.search(r"'龙骑士统帅':\{[^}]*\}", _hba20)
 _dkc=_dkf.group(0) if _dkf else ""
 if "dragonrain" not in _dkc: _s20.append("龙骑士统帅未配置 dragonrain")
@@ -1042,7 +1042,7 @@ if "function hbaDkWingSVG" not in _hba20: _s20.append("缺 hbaDkWingSVG(巨翼)"
 if "function hbaDkSoulSVG" not in _hba20: _s20.append("缺 hbaDkSoulSVG(龙魂)")
 if "function hbaDkDropSpear" not in _hba20: _s20.append("缺 hbaDkDropSpear(落枪)")
 if "window.__hbaDkLance" not in _hba20: _s20.append("缺真枪图预加载 __hbaDkLance")
-if "dragonlance.png?v=" not in _hba20: _s20.append("真枪图src缺?v=缓存戳")
+if "dragonlance.webp?v=" not in _hba20: _s20.append("真枪图src缺?v=缓存戳")
 if "t==='spear'" not in _hba20: _s20.append("spear历史死代码被误删")
 for _cls in [".hba-dkdome{",".hba-dkvign{",".hba-dkwing{",".hba-dksoul{",".hba-dkroar{",".hba-dkcharge{",".hba-dkspear{",".hba-dktrailv{",".hba-dkpierce{",".hba-dkstar{",".hba-dkflame{",".hba-dkember{",".hba-dksmoke{",".hba-dkflash{",".hba-dkring{",".hba-dkshard{",".hba-dkcombo{"]:
     if _cls not in _hba20: _s20.append("缺 "+_cls+" CSS")
@@ -1051,10 +1051,10 @@ for _kf in ["hbaDkBreath","hbaDkGlow","hbaDkVein","hbaDkTw","hbaDkRoar","hbaDkPi
 if _s20: fail("v520 龙骑士统帅焚天枪雨: " + str(_s20[:8]))
 else: ok("龙骑士统帅换巨龙之翼焚天枪雨 (dragonrain·升级巨翼遮天蔽日+龙魂号令+真枪图枪雨12根+终焉巨枪·预加载decode防BUG#67·龙焰橙·零震屏零屏闪·v520)")
 
-# 🔴 v521: 暗黑灯神(Lv12)神灯魂狱万魂诅咒(Hansen 定稿·Hansen真神灯图)。①神灯降世黑暗烟雾笼罩(金辉爆闪+双金环+金辉光锥×3动态钳位·真神灯图bosses/genielamp.png 400x203砸落入场过冲回弹+lbob悬浮轻晃·灯嘴interval 70ms狂涌靛紫浓烟2.85s+烟海铺底×5+烟中三对绿眼明灭) ②三个愿望诅咒降临(八角金星40px+旋转光环hbaGnHalo依次升起错峰280ms·300ms白闪→诅咒侵蚀换暗紫裂纹星+尖刺光环·400ms旋转重砸血条0.26/0.5/0.74·紫金双环+碎星5+金色连击) ③灵魂之爪(烟雾翻涌×6·126px魂爪从烟海升起340ms罩住勇者: 五指骨节高光+五枚翠绿魂爪尖发光+掌心魂之印记hbaGnSigil脉动+腕部烟雾卷须·500ms后猛攥拳换hbaGnHandFistSVG: 指节四峰入轮廓+四绿爪破剪影+拳背印记爆亮·攥拳闪+柔光+血条泛光·两缕翠绿魂光错峰110ms被拽出螺旋330ms拉向灯嘴·神灯绿芒逐魂brightness增亮) ④万烟归灯魂狱审判(arrived===2触发hbaGnJudgment: 9团烟错峰38ms从四周倒吸进灯嘴scale→0.15·180ms蓄能珠+神灯暴震狂闪金绿紫340ms·560ms审判光柱: 灯嘴→血条rot=atan2斜射·L=hypot动态·bo金→绿→紫渐变clip-path锥+bi白芯hbaGnBeamFlick·540ms·烧灼184ms: 巨爆闪70+紫金双环+16三色碎片(金/紫/绿)+4魂光四散逃逸+浓烟3+全屏靛紫柔震.6·deal·260ms后神灯熄火喷烟沉降)。BUG#67方案: IIFE预加载+decode存window.__hbaGnLamp·cloneNode秒绘·兜底新建img。暗黑靛硬编码·hba-gn前缀·全fixed贴body·零震屏零屏闪。旧carpet分支为历史死代码保留。
+# 🔴 v521: 暗黑灯神(Lv12)神灯魂狱万魂诅咒(Hansen 定稿·Hansen真神灯图)。①神灯降世黑暗烟雾笼罩(金辉爆闪+双金环+金辉光锥×3动态钳位·真神灯图bosses/genielamp.webp 400x203砸落入场过冲回弹+lbob悬浮轻晃·灯嘴interval 70ms狂涌靛紫浓烟2.85s+烟海铺底×5+烟中三对绿眼明灭) ②三个愿望诅咒降临(八角金星40px+旋转光环hbaGnHalo依次升起错峰280ms·300ms白闪→诅咒侵蚀换暗紫裂纹星+尖刺光环·400ms旋转重砸血条0.26/0.5/0.74·紫金双环+碎星5+金色连击) ③灵魂之爪(烟雾翻涌×6·126px魂爪从烟海升起340ms罩住勇者: 五指骨节高光+五枚翠绿魂爪尖发光+掌心魂之印记hbaGnSigil脉动+腕部烟雾卷须·500ms后猛攥拳换hbaGnHandFistSVG: 指节四峰入轮廓+四绿爪破剪影+拳背印记爆亮·攥拳闪+柔光+血条泛光·两缕翠绿魂光错峰110ms被拽出螺旋330ms拉向灯嘴·神灯绿芒逐魂brightness增亮) ④万烟归灯魂狱审判(arrived===2触发hbaGnJudgment: 9团烟错峰38ms从四周倒吸进灯嘴scale→0.15·180ms蓄能珠+神灯暴震狂闪金绿紫340ms·560ms审判光柱: 灯嘴→血条rot=atan2斜射·L=hypot动态·bo金→绿→紫渐变clip-path锥+bi白芯hbaGnBeamFlick·540ms·烧灼184ms: 巨爆闪70+紫金双环+16三色碎片(金/紫/绿)+4魂光四散逃逸+浓烟3+全屏靛紫柔震.6·deal·260ms后神灯熄火喷烟沉降)。BUG#67方案: IIFE预加载+decode存window.__hbaGnLamp·cloneNode秒绘·兜底新建img。暗黑靛硬编码·hba-gn前缀·全fixed贴body·零震屏零屏闪。旧carpet分支为历史死代码保留。
 _hba21=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s21=[]
-if not os.path.exists("bosses/genielamp.png"): _s21.append("缺真神灯图 bosses/genielamp.png")
+if not os.path.exists("bosses/genielamp.webp"): _s21.append("缺真神灯图 bosses/genielamp.webp")
 _gnf=re.search(r"'暗黑灯神':\{[^}]*\}", _hba21)
 _gnc=_gnf.group(0) if _gnf else ""
 if "geniecurse" not in _gnc: _s21.append("暗黑灯神未配置 geniecurse")
@@ -1069,7 +1069,7 @@ if "function hbaGnHandFistSVG" not in _hba21: _s21.append("缺 hbaGnHandFistSVG(
 if "function hbaGnSmoke" not in _hba21: _s21.append("缺 hbaGnSmoke(烟雾)")
 if "function hbaGnQB" not in _hba21: _s21.append("缺 hbaGnQB(贝塞尔)")
 if "window.__hbaGnLamp" not in _hba21: _s21.append("缺真神灯图预加载 __hbaGnLamp")
-if "genielamp.png?v=" not in _hba21: _s21.append("真神灯图src缺?v=缓存戳")
+if "genielamp.webp?v=" not in _hba21: _s21.append("真神灯图src缺?v=缓存戳")
 if "t==='carpet'" not in _hba21: _s21.append("carpet历史死代码被误删")
 for _cls in [".hba-gndome{",".hba-gnvign{",".hba-gnlamp{",".hba-gnray{",".hba-gnsmoke{",".hba-gneyes{",".hba-gnwish{",".hba-gnwishtr{",".hba-gnhit{",".hba-gnring{",".hba-gnstar{",".hba-gnhand{",".hba-gnsoul{",".hba-gnsoultr{",".hba-gncharge{",".hba-gnbeam{",".hba-gnflash{",".hba-gnshard{",".hba-gncombo{"]:
     if _cls not in _hba21: _s21.append("缺 "+_cls+" CSS")
@@ -1335,21 +1335,21 @@ else: ok("星海女帝换星海圣典超新星挽歌 (starempress双形态·繁�
 
 # 🔴 v505 历史欠账补登守卫(v525贾维斯四方一致性审计抓出: 代码有//🔴标记但守卫缺位)。
 # 🔴 v508 同上补登(拳头200%尺寸定稿)。
-# v505: 外星霸主(Lv18)光束图 bosses/alienbeam_real.png——第四个外部图片FX(预加载+decode+克隆防BUG#67空白)。
+# v505: 外星霸主(Lv18)光束图 bosses/alienbeam_real.webp——第四个外部图片FX(预加载+decode+克隆防BUG#67空白)。
 # v508: 机械泰坦拳头新图(赛博机械拳套·201×360·前臂在上指节朝下)200%尺寸定稿(高172=旧86×2·宽96)。
 import os as _os55
 _s55=[]
 _hbaA=open("hansen_boss_attack.js",encoding="utf-8").read()
-if not _os55.path.exists("bosses/alienbeam_real.png"): _s55.append("缺光束图 bosses/alienbeam_real.png(v505)")
-if "bosses/alienbeam_real.png?v=" not in _hbaA: _s55.append("光束图未带?v=缓存戳预加载(v505)")
+if not _os55.path.exists("bosses/alienbeam_real.webp"): _s55.append("缺光束图 bosses/alienbeam_real.webp(v505)")
+if "bosses/alienbeam_real.webp?v=" not in _hbaA: _s55.append("光束图未带?v=缓存戳预加载(v505)")
 if "__hbaBeamImg" not in _hbaA or "__hbaBeamReady" not in _hbaA: _s55.append("光束图预加载/解码全局变量缺失(v505)")
-if not _os55.path.exists("bosses/mechfist_real.png"): _s55.append("缺拳头图 bosses/mechfist_real.png(v497/v508)")
+if not _os55.path.exists("bosses/mechfist_real.webp"): _s55.append("缺拳头图 bosses/mechfist_real.webp(v497/v508)")
 if "m.width=96;m.height=172;" not in _hbaA: _s55.append("拳头200%尺寸定稿(96x172)被改动(v508)")
 if _s55: fail("v505/v508 外部图FX守卫: " + str(_s55[:5]))
 else: ok("v505光束图+v508拳头200%定稿 守卫在位 (alienbeam/mechfist 存在·?v=戳·预加载变量·尺寸定稿·历史欠账已补·v525)")
 
 # 🔴 v536(BUG#69+BUG#70): Hansen 真机三连报修。
-# BUG#69 混沌魔尊光波盘端被裁: vortex 容器底=barBot+16(答题区保护线·不动), 旋转显示下最低可见点=漩涡盘左下缘投影(比纯轴向尾端多 0.22~0.25H, 屏幕越高越严重), 曾被容器底切平一块。修复=按真图(chaoswave_real.png alpha>40)凸包三支撑点(显示坐标系含1.075拉伸·α∈20°~65°零误差)精确算最低下探 hlOff, 门+光波整体上移 hlLift(两端同移→距离/角度/图高全不变), 保证最低可见点≤barBot+10。
+# BUG#69 混沌魔尊光波盘端被裁: vortex 容器底=barBot+16(答题区保护线·不动), 旋转显示下最低可见点=漩涡盘左下缘投影(比纯轴向尾端多 0.22~0.25H, 屏幕越高越严重), 曾被容器底切平一块。修复=按真图(chaoswave_real.webp alpha>40)凸包三支撑点(显示坐标系含1.075拉伸·α∈20°~65°零误差)精确算最低下探 hlOff, 门+光波整体上移 hlLift(两端同移→距离/角度/图高全不变), 保证最低可见点≤barBot+10。
 # BUG#70 前景特效层(z9980)盖 boss 立绘: 龙骑士巨翼盖住统帅的脸 / 地狱犬王拱门盖住三头犬(v517 设计本意=门在 boss 身后·boss 剪影于门火前, v533 全量迁前景层后被反转)。修复=新增背景特效层 #hansenFxLayerBack(fixed inset0·pointer-events:none·z-index:-1·沉到页面全部内容之下 body 背景之上), 巨翼与拱门挂背景层→boss 立绘天然在前; 调度入口对两层同步设同一 filter(调色面板对背景层同样生效·无配色双层都归'none')。
 _hba36=open("hansen_boss_attack.js",encoding="utf-8").read()
 _s36=[]
@@ -1645,7 +1645,7 @@ _s53=[]
 for _frag,_msg in [
   ("t==='hammerquake'","hammerquake 分支缺失"),
   ("hba-hq4rage","狂暴虚影缺失"),
-  ("bosses/lv03.png","虚影须用 lv03 立绘"),
+  ("bosses/lv03.webp","虚影须用 lv03 立绘"),
   ("hba-hq4roar","粗音浪缺失"),
   ("hba-hq4pebble","碎石弹跳缺失"),
   ("function hq4Swing","连锤函数缺失"),
@@ -1664,14 +1664,14 @@ for _frag,_msg in [
 if _s53: fail('v553 百战兽人狂暴怒嚎百战连锤: ' + str(_s53[:8]))
 else: ok('v553 百战兽人·狂暴怒嚎百战连锤 (三阶段: 狂暴虚影压近+双粗音浪+碎石弹跳→左右双连锤包夹各起小地裂→300px大锤升空充能岩浆滴+悬停震颤+垂直轰落+灭世大地裂fxi1.5+部落绿环+熔岩柱x3+尘墙x4+锤嵌地反弹拔起·deal实测2150兜底2600·零震屏零屏闪·hba-hq4前缀·虚影图+锤图实载·真机全要素DOM断言+零泄漏+五关键帧截图+0报错·v553)')
 
-# 🔴 v551(Hansen: 暗影忍者 Lv2 攻击特效·按形象台词做到最棒): 影舞·三连杀。台词三象逐句可视化——"忍法!隐身术!"→开场 boss 处忍者烟雾×3 遁入暗影; "影舞步!你看不见我!"→屏上三处闪现影分身(lv02.png 黑剪影 brightness(0)+紫磷光 drop-shadow), 每分身各掷一枚手里剑·三镖多方向包夹旋飞(720°)·错峰命中小紫闪+血条微光; "一刀致命!"→1.6 倍大手里剑带紫刀光拖尾(沿飞行角度渐变光带)急速射出(1080°), 命中十字斩光×2(±45°)+血溅+暗影爆→deal。不变量: deal 兜底 dealDelay 1900 / 零震屏零屏闪 / hba-sd 前缀 / 手里剑图 decode 克隆 / 老 shuriken 分支保留勿删(v528 先例)。
+# 🔴 v551(Hansen: 暗影忍者 Lv2 攻击特效·按形象台词做到最棒): 影舞·三连杀。台词三象逐句可视化——"忍法!隐身术!"→开场 boss 处忍者烟雾×3 遁入暗影; "影舞步!你看不见我!"→屏上三处闪现影分身(lv02.webp 黑剪影 brightness(0)+紫磷光 drop-shadow), 每分身各掷一枚手里剑·三镖多方向包夹旋飞(720°)·错峰命中小紫闪+血条微光; "一刀致命!"→1.6 倍大手里剑带紫刀光拖尾(沿飞行角度渐变光带)急速射出(1080°), 命中十字斩光×2(±45°)+血溅+暗影爆→deal。不变量: deal 兜底 dealDelay 1900 / 零震屏零屏闪 / hba-sd 前缀 / 手里剑图 decode 克隆 / 老 shuriken 分支保留勿删(v528 先例)。
 _ba51=open('hansen_boss_attack.js',encoding='utf-8').read()
 _s51=[]
 for _frag,_msg in [
   ("t==='shadowdance'","shadowdance 分支缺失"),
   ("hba-sdsmoke","忍者烟雾缺失"),
   ("hba-sdclone","影分身缺失"),
-  ("bosses/lv02.png","影分身须用 lv02 立绘剪影"),
+  ("bosses/lv02.webp","影分身须用 lv02 立绘剪影"),
   ("brightness(0) drop-shadow","剪影滤镜缺失"),
   ("hba-sdhitflash","命中紫闪缺失"),
   ("hba-sdtrail","紫刀光拖尾缺失"),
@@ -1692,7 +1692,7 @@ _s52=[]
 for _frag,_msg in [
   ("t==='ghostprank'","ghostprank 分支缺失"),
   ("hba-gpphantom","幽灵虚影缺失"),
-  ("bosses/lv01.png","虚影须用 lv01 立绘"),
+  ("bosses/lv01.webp","虚影须用 lv01 立绘"),
   ("function gpSFly","S 形飘行函数缺失"),
   ("hba-gporb","嘟嘟弹缺失"),
   ("hba-gpripple","灵光涟漪缺失"),
@@ -1717,7 +1717,7 @@ _s54=[]
 for _frag,_msg in [
   ("t==='rexapex'","rexapex 分支缺失"),
   ("hba-rx2apex","霸主虚影缺失"),
-  ("bosses/lv04.png","虚影须用 lv04 立绘"),
+  ("bosses/lv04.webp","虚影须用 lv04 立绘"),
   ("hba-rx2wave","咆哮音波缺失"),
   ("hba-rx2jaw","巨颚缺失"),
   ("hbaRxJawSVG('x2u","上颚 SVG 调用缺失"),
@@ -1739,16 +1739,16 @@ if "(function(k){ var tt=0.18+k*0.16; setTimeout(" not in _ba54: _s54.append('�
 if _s54: fail('v554 史前霸王龙灭绝之咬: ' + str(_s54[:8]))
 else: ok('v554 史前霸王龙·灭绝之咬[已退役保留] (三阶段: 霸主虚影压近+三咆哮波+碎石震跳→巨颚上下探入悬停蓄势咔嚓咬合+白闪碎屑撕痕→灭绝陨石(色变量必设)斜砸+火星拖尾+化石化大环(亮白196px)+琥珀晶x5+石化尘·deal实测2150兜底2600·零震屏零屏闪·hba-rx2前缀·虚影图实载·真机全要素DOM断言+零泄漏+关键帧截图+0报错·老dinocombo保留·v554)')
 
-# 🔴 v555(Hansen 亲制四件套真图, 弃 v554 陨石): 史前霸王龙·远古之怒·灭绝之颚。①lv04 虚影血红霸主光压近+双咆哮波(RxWaveSVG); ②白色刀光先扫(速度感)→左爪三趾撕痕真图(rexclaw_l.png)自左上扑入定格(brightness1.22+saturate1.3+双层琥珀 drop-shadow·vw80% 大件)·命中白闪+琥珀碎屑×6+bloodSplatter→右爪镜像交叉撕; ③上颚(rexjaw_top)自屏顶+下颚(rexjaw_bot)自屏底对准勇者血条·大张悬停(血条暴露巨口中央·GAP=JW*0.17)·蓄势微颤→110ms 急合咬死(重叠 JW*160/720)→命中(实测≈2100): 爆闪+压紧微动+血条红色出血覆盖层 1150ms 脉冲(双颚弹开后仍可见)+血珠×7 滴落+bloodSplatter→deal→双颚反向弹开退场。四图预加载 __hbaRfImgs(BUG#67 克隆模式)。**排障**: 爪痕初版 vw52% 太小太暗被白闪盖→深底浅色大件三件套(亮色+发光+加大至 vw80%)+白闪缩半。不变量: 零震屏零屏闪/禁 tintOverlay/hba-rf 前缀/老 rexapex(v554)+dinocombo(v513) 分支全保留(v528 先例)/deal 兜底 dealDelay 2500/闭包循环变量全在 setTimeout 外(v554 tt 血案)。
+# 🔴 v555(Hansen 亲制四件套真图, 弃 v554 陨石): 史前霸王龙·远古之怒·灭绝之颚。①lv04 虚影血红霸主光压近+双咆哮波(RxWaveSVG); ②白色刀光先扫(速度感)→左爪三趾撕痕真图(rexclaw_l.webp)自左上扑入定格(brightness1.22+saturate1.3+双层琥珀 drop-shadow·vw80% 大件)·命中白闪+琥珀碎屑×6+bloodSplatter→右爪镜像交叉撕; ③上颚(rexjaw_top)自屏顶+下颚(rexjaw_bot)自屏底对准勇者血条·大张悬停(血条暴露巨口中央·GAP=JW*0.17)·蓄势微颤→110ms 急合咬死(重叠 JW*160/720)→命中(实测≈2100): 爆闪+压紧微动+血条红色出血覆盖层 1150ms 脉冲(双颚弹开后仍可见)+血珠×7 滴落+bloodSplatter→deal→双颚反向弹开退场。四图预加载 __hbaRfImgs(BUG#67 克隆模式)。**排障**: 爪痕初版 vw52% 太小太暗被白闪盖→深底浅色大件三件套(亮色+发光+加大至 vw80%)+白闪缩半。不变量: 零震屏零屏闪/禁 tintOverlay/hba-rf 前缀/老 rexapex(v554)+dinocombo(v513) 分支全保留(v528 先例)/deal 兜底 dealDelay 2500/闭包循环变量全在 setTimeout 外(v554 tt 血案)。
 _ba55=open('hansen_boss_attack.js',encoding='utf-8').read()
 _s55=[]
 for _frag,_msg in [
   ("t==='rexfury'","rexfury 分支缺失"),
   ("window.__hbaRfImgs=_rfImgs;","四件套预加载缺失(BUG#67)"),
-  ("bosses/rexclaw_l.png","左爪图引用缺失"),
-  ("bosses/rexclaw_r.png","右爪图引用缺失"),
-  ("bosses/rexjaw_top.png","上颚图引用缺失"),
-  ("bosses/rexjaw_bot.png","下颚图引用缺失"),
+  ("bosses/rexclaw_l.webp","左爪图引用缺失"),
+  ("bosses/rexclaw_r.webp","右爪图引用缺失"),
+  ("bosses/rexjaw_top.webp","上颚图引用缺失"),
+  ("bosses/rexjaw_bot.webp","下颚图引用缺失"),
   ("hba-rf-apex","霸主虚影缺失"),
   ("hba-rf-slash","刀光缺失"),
   ("hba-rf-claw","爪痕容器缺失"),
@@ -1769,7 +1769,7 @@ if "var di; // 碎屑循环变量(setTimeout 外)" not in _ba55: _s55.append('�
 if "var bi; // 循环变量(setTimeout 外)" not in _ba55: _s55.append('血珠循环变量 bi 定义位置被改')
 # 素材文件存在性
 import os as _os55
-for _f in ['bosses/rexclaw_l.png','bosses/rexclaw_r.png','bosses/rexjaw_top.png','bosses/rexjaw_bot.png']:
+for _f in ['bosses/rexclaw_l.webp','bosses/rexclaw_r.webp','bosses/rexjaw_top.webp','bosses/rexjaw_bot.webp']:
     if not _os55.path.isfile(_f): _s55.append('素材文件缺失: '+_f)
 if _s55: fail('v555 史前霸王龙远古之怒·灭绝之颚: ' + str(_s55[:8]))
 else: ok('v555 史前霸王龙·远古之怒·灭绝之颚 (Hansen亲制真图四件套: 虚影咆哮+刀光+左右爪真图撕痕(vw80%提亮双层琥珀光)+双颚真图对准血条大张悬停蓄势急合咬死+爆闪压紧+血条红色出血层1150ms+血珠x7+bloodSplatter·deal实测2100兜底2500·四图预加载BUG#67·零震屏零屏闪·hba-rf前缀·真机全要素DOM断言+零泄漏+关键帧截图+0报错·老rexapex/dinocombo保留·v555)')
@@ -1817,11 +1817,11 @@ _s58=[]
 for _frag,_msg in [
   ("t==='zombieseal'","zombieseal 分支缺失"),
   ("window.__hbaZsImgs=_zsImgs;","五件套预加载缺失(BUG#67)"),
-  ("bosses/zb_talisman.png","定身符图引用缺失"),
-  ("bosses/zb_fists_all.png","百拳全景图引用缺失"),
-  ("bosses/zb_fist1.png","单拳1引用缺失"),
-  ("bosses/zb_fist2.png","单拳2引用缺失"),
-  ("bosses/zb_fist3.png","单拳3引用缺失"),
+  ("bosses/zb_talisman.webp","定身符图引用缺失"),
+  ("bosses/zb_fists_all.webp","百拳全景图引用缺失"),
+  ("bosses/zb_fist1.webp","单拳1引用缺失"),
+  ("bosses/zb_fist2.webp","单拳2引用缺失"),
+  ("bosses/zb_fist3.webp","单拳3引用缺失"),
   ("hba-zs-apex","僵尸虚影缺失"),
   ("hba-zs-tali","符容器缺失"),
   ("hba-zs-bind","束缚圈缺失(定身感)"),
@@ -1838,20 +1838,20 @@ for _frag,_msg in [
 for _vchk in ["var zsgi; // 磷火循环变量(setTimeout 外)","var zli; // 速度线循环变量(setTimeout 外)","var zri; // 三重冲击环循环变量(setTimeout 外)"]:
     if _vchk not in _ba58: _s58.append('循环变量定义位置被改: '+_vchk[:14])
 import os as _os58
-for _f in ['bosses/zb_talisman.png','bosses/zb_fists_all.png','bosses/zb_fist1.png','bosses/zb_fist2.png','bosses/zb_fist3.png']:
+for _f in ['bosses/zb_talisman.webp','bosses/zb_fists_all.webp','bosses/zb_fist1.webp','bosses/zb_fist2.webp','bosses/zb_fist3.webp']:
     if not _os58.path.isfile(_f): _s58.append('素材文件缺失: '+_f)
 if _s58: fail('v558 千年僵尸封印百拳·定身符爆[已退役保留]: ' + str(_s58[:8]))
 else: ok('v558 千年僵尸·封印百拳·定身符爆[已退役保留] (Hansen亲制双素材: 定住你了哈哈黄符+清装百拳全景+单拳x3·虚影蹦跳两段+磷火→符旋飞啪贴住squash+束缚金圈定身→震颤蓄爆→爆裂金碎片→单拳POV冲脸x6(白闪+冲击环+速度线x8+纸屑)加速连击→百拳全景1.28x冲满屏总命中三重冲击环·deal实测3360兜底3800·五图预加载BUG#67·零震屏零屏闪·hba-zs前缀·真机全要素DOM断言+零泄漏+九帧精确卡点+0报错·老zombiecurse保留·v558)')
 
-# 🔴 v559(Hansen 二代素材, v558 一日重做): 千年僵尸·定身符咒·万拳齐发。Hansen 判 v558 没达预期换图: 左/右尸拳自带绿色尸气爆发光环+符纸(460px), 新百拳全景每拳带爆发圈(880px), 符复用 zb_talisman.png 同 URL 走缓存。三段: ①虚影蹦跳+磷火(v558 验证保留); ②符旋飞"啪"贴住+束缚金圈——符全程贴着不爆+持续高频挣扎抖动(22 关键帧随机抖, 被定住挨揍叙事), 总命中才炸裂(金碎片×8 定身解除); ③左右尸拳斜向冲脸交替×8(自两侧 ±34%vw scale.3→1 斜冲+blur 渐清+急停回弹, 命中点 ±26px 交替偏移交叉重拳, 间隔 180→110ms 递减"刷刷刷"), 每拳命中=白闪+冲击环+速度线×6+纸屑×2, 命中后 100ms 急撤无缝→新百拳全景 scale.2→1.3 冲满屏→总命中(实测≈2960): 最强白闪+三重冲击环+符炸裂→deal。四图预加载 __hbaZfImgs(BUG#67)。不变量: hba-zf 前缀/老 zombiecurse(v514)+zombieseal(v558) 全保留/dealDelay 3400/零震屏/循环变量全 setTimeout 外。
+# 🔴 v559(Hansen 二代素材, v558 一日重做): 千年僵尸·定身符咒·万拳齐发。Hansen 判 v558 没达预期换图: 左/右尸拳自带绿色尸气爆发光环+符纸(460px), 新百拳全景每拳带爆发圈(880px), 符复用 zb_talisman.webp 同 URL 走缓存。三段: ①虚影蹦跳+磷火(v558 验证保留); ②符旋飞"啪"贴住+束缚金圈——符全程贴着不爆+持续高频挣扎抖动(22 关键帧随机抖, 被定住挨揍叙事), 总命中才炸裂(金碎片×8 定身解除); ③左右尸拳斜向冲脸交替×8(自两侧 ±34%vw scale.3→1 斜冲+blur 渐清+急停回弹, 命中点 ±26px 交替偏移交叉重拳, 间隔 180→110ms 递减"刷刷刷"), 每拳命中=白闪+冲击环+速度线×6+纸屑×2, 命中后 100ms 急撤无缝→新百拳全景 scale.2→1.3 冲满屏→总命中(实测≈2960): 最强白闪+三重冲击环+符炸裂→deal。四图预加载 __hbaZfImgs(BUG#67)。不变量: hba-zf 前缀/老 zombiecurse(v514)+zombieseal(v558) 全保留/dealDelay 3400/零震屏/循环变量全 setTimeout 外。
 _ba59=open('hansen_boss_attack.js',encoding='utf-8').read()
 _s59=[]
 for _frag,_msg in [
   ("t==='zombiefury'","zombiefury 分支缺失"),
   ("window.__hbaZfImgs=_zfImgs;","二代四件套预加载缺失(BUG#67)"),
-  ("bosses/zf_fist_l.png","左尸拳图引用缺失"),
-  ("bosses/zf_fist_r.png","右尸拳图引用缺失"),
-  ("bosses/zf_fists_all.png","新百拳全景引用缺失"),
+  ("bosses/zf_fist_l.webp","左尸拳图引用缺失"),
+  ("bosses/zf_fist_r.webp","右尸拳图引用缺失"),
+  ("bosses/zf_fists_all.webp","新百拳全景引用缺失"),
   ("hba-zf-tali","符容器缺失"),
   ("hba-zf-bind","束缚圈缺失(定身感)"),
   ("hba-zf-fist","尸拳容器缺失"),
@@ -1869,7 +1869,7 @@ for _frag,_msg in [
 for _vchk in ["var zfgi; // 磷火循环变量(setTimeout 外)","var zfli; // 速度线循环变量(setTimeout 外)","var zfri; // 三重冲击环循环变量(setTimeout 外)"]:
     if _vchk not in _ba59: _s59.append('循环变量定义位置被改: '+_vchk[:14])
 import os as _os59
-for _f in ['bosses/zf_fist_l.png','bosses/zf_fist_r.png','bosses/zf_fists_all.png','bosses/zb_talisman.png']:
+for _f in ['bosses/zf_fist_l.webp','bosses/zf_fist_r.webp','bosses/zf_fists_all.webp','bosses/zb_talisman.webp']:
     if not _os59.path.isfile(_f): _s59.append('素材文件缺失: '+_f)
 if _s59: fail('v559 千年僵尸定身符咒·万拳齐发: ' + str(_s59[:8]))
 else: ok('v559 千年僵尸·定身符咒·万拳齐发 (Hansen二代素材: 尸气爆发左右拳+新百拳全景·符贴住全程挣扎抖动22帧总命中才炸·左右斜冲交替x8间隔180→110刷刷刷(白闪+冲击环+速度线x6+纸屑)·新百拳全景1.3x冲满屏总命中三重环+符爆金碎片·deal实测2960兜底3400·四图预加载BUG#67·零震屏零屏闪·hba-zf前缀·真机全要素DOM断言+零泄漏+八帧精确卡点+0报错·老zombiecurse/zombieseal保留·v559)')
@@ -1885,7 +1885,7 @@ for _frag,_msg in [
   ("var cloud=hbaTlCloud2(vw);","编排未换二代乌云"),
   ("hbaTl2RealBolt(cloud, hx, midY, sz, sp);","④天罚主雷未换真雷电"),
   ("window.__hbaTl2BoltImg=_tl2Bolt;","真雷电预加载缺失(BUG#67)"),
-  ("bosses/tl_bolt.png","雷电图引用缺失"),
+  ("bosses/tl_bolt.webp","雷电图引用缺失"),
   ("feTurbulence","噪声云 feTurbulence 被删(2D flash 回归)"),
   ("hbaTl2Tb4","底缘亮边噪声层缺失(体积感关键)"),
   ("tl-lite tl-lite1","二代云 tl-lite1 兼容类缺失(hbaTlOmen 依赖)"),
@@ -1903,7 +1903,7 @@ for _sel in ['.hba-tl2-bolt{','.hba-tl2-bolt img{']:
     _bi=_ba60.find(_sel)
     if _bi>-1 and 'drop-shadow' in _ba60[_bi:_ba60.find('}',_bi)]: _s60.append('真雷电 CSS 出现 drop-shadow(大图渲染黑洞铁律): '+_sel)
 import os as _os60
-if not _os60.path.isfile('bosses/tl_bolt.png'): _s60.append('素材文件缺失: bosses/tl_bolt.png')
+if not _os60.path.isfile('bosses/tl_bolt.webp'): _s60.append('素材文件缺失: bosses/tl_bolt.webp')
 if _s60: fail('v560 雷电之主二代乌云真雷电: ' + str(_s60[:8]))
 else: ok('v560 雷电之主·二代乌云+真雷电 (Hansen 1024x1536 分形闪电 DEMO 过关融入·hbaTlCloud2 噪声真实云四层+青调底缘亮边+三速翻滚 140 高·④天罚主雷换真雷电频闪三连(主闪→镜像回闪→余闪)+空气辉光·几何顶端贴云底底端咬入血条+30·命中全家桶原时序 deal 不变 dealDelay 3700·大图禁 drop-shadow 铁律守卫·老 Cloud/BoltTree 保留·真机全要素+_boltSeen 亮度实证+零泄漏+0报错+五帧卡点·v560)')
 
@@ -2029,7 +2029,7 @@ else:
     _na=_dseg.count('<animate')
     if _na<55: _s64.append('动画元素应 ≥55, 实为 '+str(_na))
     for _frag,_msg in [
-      ("icons/hand_point.png?v=","画师手指图引用缺失(v565 hand 范式)"),
+      ("icons/hand_point.webp?v=","画师手指图引用缺失(v565 hand 范式)"),
       ("scale(-1 1)","画师手镜像基底缺失(these 防颠倒)"),
       ("values='1;1;.45;.45;1' dur='2.4s'","which 左球被指高亮缺失"),
       ("values='.45;.45;1;1;.45' dur='2.4s'","which 右球被指高亮缺失"),
@@ -2045,7 +2045,7 @@ if _s64: fail('v564 疑问岛 17 图标根治重做: ' + str(_s64[:8]))
 else: ok('v564 疑问岛 17 图标根治重做[v565 手已换画师图] (Hansen 验收反馈修复·清晰侧视手 hand 范式(圆拳+伸直食指+指尖正对目标+聚焦圈)·which 手移两球上方食指朝下摆角正对+被指球交替高亮·he-she 性别符号角标 ♂♀·物主=头像吊牌 2.0(牌内画主人头+麻绳流动+摇摆)·I 头顶箭头+胸星·you 大手指画外+出画箭头+虚线你·that-those-there-they 同步换新手·真机 32/32+四屏复查+which-his-you 三联 modal+0报错·v564)')
 
 # 🔴 v565(Hansen: 我画的手指太难看, 直接给画师图——所有用手指指东西的地方全换这张, 缩放+调方向): 疑问岛 9 处指向手全部换画师图。
-#   素材: icons/hand_point.png(画师黄色卡通指向手, 原图 1254² bbox 紧裁缩至 256×178, 35KB, 默认指向右, 指尖在 0.996W/0.346H)。
+#   素材: icons/hand_point.webp(画师黄色卡通指向手, 原图 1254² bbox 紧裁缩至 256×178, 35KB, 默认指向右, 指尖在 0.996W/0.346H)。
 #   hand() 图片版几何完全兼容 v564: 指尖落 (cx+20*scale, cy), 外层 rotate(rot cx cy) 原样——this/which 等所有对位自动继承; |rot|>90 用镜像基底 translate(2cx) scale(-1 1) + rotate(rot-180) 防手上下颠倒(these rot=128 唯一镜像)。
 #   引用 href+xlink:href 双写带 ?v=564 戳(build.py 精确匹配旧戳自动刷新), SVG <image> 外部引用走浏览器缓存 9 处一次下载。9 处: which/this/that/these/those/there/they/you/their。
 _qp65=open('island_question.html',encoding='utf-8').read()
@@ -2055,14 +2055,14 @@ _dj=_qp65.find('];',_di)
 _dseg=_qp65[_di:_dj] if _di>-1 and _dj>_di else ''
 if not _dseg: _s65.append('DATA 定位失败')
 else:
-    _nh=_dseg.count('hand_point.png')
+    _nh=_dseg.count('hand_point.webp')
     if _nh<18: _s65.append('画师手引用应 ≥18(href+xlink 双写×9), 实为 '+str(_nh))
     if "scale(-1 1)" not in _dseg: _s65.append('these 镜像基底缺失')
-    if "xlink:href='icons/hand_point.png" not in _dseg: _s65.append('xlink:href 兼容双写缺失')
+    if "xlink:href='icons/hand_point.webp" not in _dseg: _s65.append('xlink:href 兼容双写缺失')
 import os as _os65
-if not _os65.path.isfile('icons/hand_point.png'): _s65.append('素材缺失: icons/hand_point.png')
+if not _os65.path.isfile('icons/hand_point.webp'): _s65.append('素材缺失: icons/hand_point.webp')
 if _s65: fail('v565 画师手指图: ' + str(_s65[:8]))
-else: ok('v565 疑问岛 9 处指向手换画师图 (Hansen 提供黄色卡通指向手·icons/hand_point.png 256x178 指尖 0.996W/0.346H·hand() 图片版几何兼容 v564 指尖对位全继承·|rot|>90 镜像基底防颠倒·href+xlink 双写+?v= 戳自动刷新·真机 9 image 挂载+0 请求失败+四屏复查+0报错·v565)')
+else: ok('v565 疑问岛 9 处指向手换画师图 (Hansen 提供黄色卡通指向手·icons/hand_point.webp 256x178 指尖 0.996W/0.346H·hand() 图片版几何兼容 v564 指尖对位全继承·|rot|>90 镜像基底防颠倒·href+xlink 双写+?v= 戳自动刷新·真机 9 image 挂载+0 请求失败+四屏复查+0报错·v565)')
 
 # 🔴 v566(Hansen 语言学指导: 第三人称=对话之外的人): he/she/you 换"对话角色"版。
 #   you=两人面对面: 左"我"(绿衣)+说话气泡(···脉冲)+画师手指向对面的人, 右=you(放大+头顶红色向下点动箭头)——"我对着说话的那个人就是 you"。
@@ -2234,8 +2234,8 @@ else: ok('v550/v556 补登守卫 (兽人怒气绿环·霸王龙 rexfury sz0.5 �
 #   比 v571 的 70px 更矮); ⑥boss_lock 覆盖层同步 58px/单 float 动画/凹坑按压/padding:10px 70px+gap 6。
 _s72=[]
 import os as _os72
-if not (_os72.path.exists('icons/map_home.png') and _os72.path.getsize('icons/map_home.png')>10000):
-    _s72.append('icons/map_home.png 藏宝图缺失或为空')
+if not (_os72.path.exists('icons/map_home.webp') and _os72.path.getsize('icons/map_home.webp')>8000):
+    _s72.append('icons/map_home.webp 藏宝图缺失或为空')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     if '>🗺️</a>' in _t: _s72.append(_fn+' 旧 emoji 返回键残留'); break
@@ -2245,7 +2245,7 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     if _t.count('id="streakCount"')!=1: _s72.append(_fn+' streakCount 不是恰好 1 处'); break
     for _frag,_msg in [
       ('class="wmb-socket"','凹坑载体 HTML'),
-      ('icons/map_home.png?v=','藏宝图引用(带主戳)'),
+      ('icons/map_home.webp?v=','藏宝图引用(带主戳)'),
       ("onerror=\"this.parentNode.innerHTML='🗺️'\"",'onerror 兜底'),
       ('class="hsn-streak-inline">打卡天数 <span id="streakCount">','名字行打卡天数'),
       ('.stat-row{display:flex;flex-direction:column','徽章竖排 CSS'),
@@ -2387,21 +2387,21 @@ else: ok('v576 底栏宠物→复习+成就→卡册 (Hansen: 宠物重复→复
 
 # 🔴 v577(Hansen: "Boss入口换我给的街机图标(占大些)·删右上角HOT·背景红→黄·只写'挑战Boss'四个白字·
 #   挑战模式里的Boss入口删掉只留每日行那个·挑战模式标题改游戏模式·排版精美"):
-#   ① icons/boss_arcade.png(Hansen 街机柜图 384x384)存在非空; ② 19 岛每日行 Boss 卡 = boss-card class +
+#   ① icons/boss_arcade.webp(Hansen 街机柜图 384x384)存在非空; ② 19 岛每日行 Boss 卡 = boss-card class +
 #   img.boss-card-img(街机图·48px·onerror兜底🧞) + "挑战Boss"白字 label, 黄金橙渐变(--c1:#fbbf24/--c2:#f97316),
 #   旧🧞emoji+"Boss战"+"击败挑战"三行结构绝迹; ③ 全岛 Boss 入口唯一(showScreen('boss') 恰 1 处, 挑战模式
 #   六宫格那个已删); ④ "HOT" 徽章(m-badge HOT)全库绝迹; ⑤ section-label "挑战模式"→"游戏模式"。
 _s77=[]
 import os as _os77
-if not (_os77.path.exists('icons/boss_arcade.png') and _os77.path.getsize('icons/boss_arcade.png')>10000):
-    _s77.append('icons/boss_arcade.png 街机图缺失或为空')
+if not (_os77.path.exists('icons/boss_arcade.webp') and _os77.path.getsize('icons/boss_arcade.webp')>8000):
+    _s77.append('icons/boss_arcade.webp 街机图缺失或为空')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     if 'm-badge">HOT' in _t: _s77.append(_fn+' HOT徽章残留'); break
     if '<div class="section-label">挑战模式</div>' in _t: _s77.append(_fn+' 挑战模式标题未改游戏模式'); break
     if _t.count("onclick=\"showScreen('boss')\"")!=1: _s77.append(_fn+' Boss入口数!=1(应唯一)'); break
-    # 🔴 挑战BOSS 图标: 赛季岛(星海词汇大冒险)单独用 gameconsole.png·其余岛 boss_arcade.png(Hansen 只换赛季岛这一个)
-    _bicon = 'icons/gameconsole.png?v=' if _fn=='island_season.html' else 'icons/boss_arcade.png?v='
+    # 🔴 挑战BOSS 图标: 赛季岛(星海词汇大冒险)单独用 gameconsole.webp·其余岛 boss_arcade.webp(Hansen 只换赛季岛这一个)
+    _bicon = 'icons/gameconsole.webp?v=' if _fn=='island_season.html' else 'icons/boss_arcade.webp?v='
     if _bicon not in _t: _s77.append('%s 缺街机图引用(带主戳·赛季岛=gameconsole/其余=boss_arcade)' % _fn); break
     for _frag,_msg in [
       ('class="daily-card boss-card"','Boss卡 class'),
@@ -2412,10 +2412,10 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     ]:
         if _frag not in _t: _s77.append('%s 缺 %s' % (_fn,_msg)); break
 if _s77: fail('v577 Boss街机入口+游戏模式: ' + str(_s77[:6]))
-else: ok('v577 Boss街机入口+游戏模式 (Hansen 街机图 icons/boss_arcade.png 384x384·19 岛每日行 boss-card 街机图+onerror兜底+挑战Boss白字(背景/尺寸细节见 v578)·旧🧞/Boss战/击败挑战三行绝迹·HOT徽章绝迹·全岛 Boss 入口唯一(挑战模式六宫格那个已删)·挑战模式→游戏模式·真机 Boss卡样式/唯一入口/点击进Boss页/游戏模式标题/六宫格剩5(打地鼠钓鱼泡泡极速火眼)/0报错·v577)')
+else: ok('v577 Boss街机入口+游戏模式 (Hansen 街机图 icons/boss_arcade.webp 384x384·19 岛每日行 boss-card 街机图+onerror兜底+挑战Boss白字(背景/尺寸细节见 v578)·旧🧞/Boss战/击败挑战三行绝迹·HOT徽章绝迹·全岛 Boss 入口唯一(挑战模式六宫格那个已删)·挑战模式→游戏模式·真机 Boss卡样式/唯一入口/点击进Boss页/游戏模式标题/六宫格剩5(打地鼠钓鱼泡泡极速火眼)/0报错·v577)')
 
 # 🔴 v578(Hansen: "街机图标再大些·挑战Boss四字往下移·背景用亮黄更凸显游戏机"): 在 v577 基础上微调
-#   ① boss_arcade.png 换 Hansen 新图(彩虹霓虹街机柜, 同名覆盖, 主戳自动 bump 解决缓存); ② 图标 48→60px;
+#   ① boss_arcade.webp 换 Hansen 新图(彩虹霓虹街机柜, 同名覆盖, 主戳自动 bump 解决缓存); ② 图标 48→60px;
 #   ③ 挑战Boss label margin-top 3→6px(下移)+描边加深; ④ 背景金橙(#fbbf24/#f97316)→亮黄(#fde047/#facc15)。
 _s78=[]
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
@@ -2427,10 +2427,10 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     ]:
         if _frag not in _t: _s78.append('%s 缺 %s' % (_fn,_msg)); break
 import os as _os78
-if not (_os78.path.exists('icons/boss_arcade.png') and _os78.path.getsize('icons/boss_arcade.png')>10000):
-    _s78.append('boss_arcade.png 缺失或过小')
+if not (_os78.path.exists('icons/boss_arcade.webp') and _os78.path.getsize('icons/boss_arcade.webp')>8000):
+    _s78.append('boss_arcade.webp 缺失或过小')
 if _s78: fail('v578 街机图标加大+亮黄底+挑战Boss下移: ' + str(_s78[:6]))
-else: ok('v578 街机图标加大+亮黄底+挑战Boss下移 (Hansen 新街机图 boss_arcade.png 同名覆盖·19 岛图标 48→60→72→84px(尺寸细节见 v583)·挑战Boss label 下移+白字描边加深·背景金橙→亮黄(#fde047→#facc15 更凸显街机柜)·唯一Boss入口/无HOT/点击进Boss页 真机 0 报错·v578)')
+else: ok('v578 街机图标加大+亮黄底+挑战Boss下移 (Hansen 新街机图 boss_arcade.webp 同名覆盖·19 岛图标 48→60→72→84px(尺寸细节见 v583)·挑战Boss label 下移+白字描边加深·背景金橙→亮黄(#fde047→#facc15 更凸显街机柜)·唯一Boss入口/无HOT/点击进Boss页 真机 0 报错·v578)')
 
 # 🔴 v580(Hansen: "boss背景调色板移到所有boss最下面(滑到底才出现)·顶部加'已击败 boss X/20'·开关前加'特效'二字且与上行有间隔"):
 #   renderBossPicker 重排(hansen_cards.js): ① 顶部横条上行"选择boss挑战"+金色"已击败 boss X/20"(beatenCount 用 islandClears 真实通关数)
@@ -2493,18 +2493,18 @@ if _s82: fail('v582 首页整体放大+Boss卡下移: ' + str(_s82[:6]))
 else: ok('v582 首页整体放大+Boss卡下移 (Hansen 嫌字小: 19岛每日卡图标28→34/标题13→15/副12→13·模式卡图标34→40→62(尺寸细节见v592)/标题12→14/副12→13+padding收紧防窄屏溢出·挑战Boss图标下移(尺寸/padding细节见 v583)·真机 393/360 双视口 放大尺寸/零溢出/Boss图标72/Boss内容下移imgTop15/网格对齐/0报错·v582)')
 
 # 🔴 v583(Hansen: "Boss街机图标再放大(72还不够)·听音辨义蓝底太暗换亮色+喇叭换新3D图·卡册图标太丑换新3D卡册图(底栏+工具网格两处, 无框直贴显眼)"):
-#   ① Boss图标 72→84px(顶padding 14→8腾位); ② 听音辨义卡 蓝(#0ea5e9)→亮琥珀橙(#fbbf24/#fb923c) + emoji🔊→icons/speaker_3d.png(img, onerror兜底🔊);
-#   ③ 卡册图标 icons/cardbook_3d.png 替换: 底栏 navCards(🎴→img) + 工具网格 hsnCardEntry(📕→img, hansen_cards.js), 均 img 无框+drop-shadow+onerror兜底。
+#   ① Boss图标 72→84px(顶padding 14→8腾位); ② 听音辨义卡 蓝(#0ea5e9)→亮琥珀橙(#fbbf24/#fb923c) + emoji🔊→icons/speaker_3d.webp(img, onerror兜底🔊);
+#   ③ 卡册图标 icons/cardbook_3d.webp 替换: 底栏 navCards(🎴→img) + 工具网格 hsnCardEntry(📕→img, hansen_cards.js), 均 img 无框+drop-shadow+onerror兜底。
 _s83=[]
 import os as _os83
-for _f in ['icons/speaker_3d.png','icons/ic_cards.png']:
+for _f in ['icons/speaker_3d.webp','icons/ic_cards.webp']:
     if not (_os83.path.exists(_f) and _os83.path.getsize(_f)>10000): _s83.append(_f+' 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     for _frag,_msg in [
       ('--c1:#fbbf24;--c2:#fb923c','听音辨义亮橙底'),
-      ('icons/speaker_3d.png','听音辨义新喇叭图'),
-      ('icons/ic_cards.png','卡册新图(底栏)'),
+      ('icons/speaker_3d.webp','听音辨义新喇叭图'),
+      ('icons/ic_cards.webp','卡册新图(底栏)'),
     ]:
         if _frag not in _t: _s83.append('%s 缺 %s' % (_fn,_msg)); break
     # 听音辨义旧蓝底不得残留
@@ -2513,114 +2513,114 @@ _cd83=open('hansen_cards.js',encoding='utf-8').read()
 # 🔴 v594: 工具网格卡册入口已移除(仅留右下角底栏 navCards), 移除"工具网格卡册图"断言(底栏卡册图仍由 v583 上方逐岛断言守护)
 if "entry.innerHTML = '<span class=\"u-icon\">📕</span>" in _cd83: _s83.append('hansen_cards.js 工具网格仍是旧📕')
 if _s83: fail('v583 Boss图标放大+听音辨义换色换图+卡册换图: ' + str(_s83[:6]))
-else: ok('v583 Boss图标放大+听音辨义换色换图+卡册换图 (Hansen: Boss街机图标 72→84px(顶padding14→8腾位不溢出)·听音辨义 蓝#0ea5e9→亮琥珀橙#fbbf24/#fb923c(原蓝暗+喇叭暗看不清)+emoji🔊→3D喇叭speaker_3d.png·卡册图标换3D卡册cardbook_3d.png 底栏navCards+工具网格hsnCardEntry两处 img无框+drop-shadow显眼+onerror兜底·真机393/360双视口 Boss84不溢出/听音辨义亮橙+新喇叭/卡册两处新图/0报错·v583)')
+else: ok('v583 Boss图标放大+听音辨义换色换图+卡册换图 (Hansen: Boss街机图标 72→84px(顶padding14→8腾位不溢出)·听音辨义 蓝#0ea5e9→亮琥珀橙#fbbf24/#fb923c(原蓝暗+喇叭暗看不清)+emoji🔊→3D喇叭speaker_3d.webp·卡册图标换3D卡册cardbook_3d.webp 底栏navCards+工具网格hsnCardEntry两处 img无框+drop-shadow显眼+onerror兜底·真机393/360双视口 Boss84不溢出/听音辨义亮橙+新喇叭/卡册两处新图/0报错·v583)')
 
 # 🔴 v584(Hansen: "卡册图标换这张新图(满卡牌的深蓝收藏册), 并加白边——像字幕黑字白边那样防深色背景里看不清"):
-#   ① cardbook_3d.png 换 Hansen 新图(albums.png)且【图片层烧入白色描边】(PIL alpha 轮廓 MaxFilter 扩张+羽化+垫白底);
+#   ① cardbook_3d.webp 换 Hansen 新图(albums.webp)且【图片层烧入白色描边】(PIL alpha 轮廓 MaxFilter 扩张+羽化+垫白底);
 #   ② 底栏 navCards + 工具网格 hsnCardEntry 两处 img 的 CSS filter 加白色微光 drop-shadow(0 0 2px rgba(255,255,255,.9)) 双保险。
 _s84=[]
 import os as _os84
-if not (_os84.path.exists('icons/ic_cards.png') and _os84.path.getsize('icons/ic_cards.png')>10000): _s84.append('ic_cards.png 缺失或过小')
+if not (_os84.path.exists('icons/ic_cards.webp') and _os84.path.getsize('icons/ic_cards.webp')>8000): _s84.append('ic_cards.webp 缺失或过小')
 pass  # v655: 卡册已换 Hansen 新图 ic_cards·不再烧白边(靠下方CSS白色微光drop-shadow)
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     if 'drop-shadow(0 0 2px rgba(255,255,255,.9))' not in _t: _s84.append(_fn+' 底栏卡册白色微光缺失'); break
-    if 'icons/ic_cards.png' not in _t: _s84.append(_fn+' 卡册图(ic_cards)引用丢失'); break
+    if 'icons/ic_cards.webp' not in _t: _s84.append(_fn+' 卡册图(ic_cards)引用丢失'); break
 # 🔴 v594: 工具网格卡册入口已移除(仅留右下角底栏 navCards), 移除「工具网格卡册白光」断言(底栏卡册白光仍由上方逐岛守护)
 if _s84: fail('v584 卡册图换新+白边防糊: ' + str(_s84[:6]))
 else: ok('v584 卡册图换新+白边防糊 (Hansen: 卡册换满卡牌深蓝收藏册新图+图片层烧入白色描边(PIL alpha轮廓MaxFilter扩张羽化垫白底, 像字幕黑字白边防深色背景看不清)·底栏navCards+工具网格hsnCardEntry两处CSS加白色微光drop-shadow双保险·真机 两处图加载+白光生效/深色背景白边清晰/0报错·v584)')
 
-# 🔴 v585(Hansen: "打地鼠图标换这张新图"): 19 岛打地鼠 mode 卡 emoji🎯→icons/mole_3d.png(彩虹机械锤砸科技地鼠图, img width:1em+onerror兜底🎯), 绿底/startMoles 不变。
+# 🔴 v585(Hansen: "打地鼠图标换这张新图"): 19 岛打地鼠 mode 卡 emoji🎯→icons/mole_3d.webp(彩虹机械锤砸科技地鼠图, img width:1em+onerror兜底🎯), 绿底/startMoles 不变。
 _s85=[]
 import os as _os85
-if not (_os85.path.exists('icons/mole_3d.png') and _os85.path.getsize('icons/mole_3d.png')>50000): _s85.append('mole_3d.png 缺失或过小')
+if not (_os85.path.exists('icons/mole_3d.webp') and _os85.path.getsize('icons/mole_3d.webp')>8000): _s85.append('mole_3d.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/mole_3d.png' not in _t: _s85.append(_fn+' 打地鼠新图引用缺失'); break
+    if 'icons/mole_3d.webp' not in _t: _s85.append(_fn+' 打地鼠新图引用缺失'); break
     # 打地鼠卡仍是绿底+startMoles
     if 'onclick="startMoles()"' not in _t: _s85.append(_fn+' startMoles入口丢失'); break
 if _s85: fail('v585 打地鼠图标换新图: ' + str(_s85[:6]))
-else: ok('v585 打地鼠图标换新图 (Hansen 打地鼠 emoji🎯→新3D图 icons/mole_3d.png(彩虹机械锤砸科技地鼠)·19岛 img width:1em+onerror兜底🎯·绿底#84cc16/startMoles入口不变·真机393/360双视口 新图加载/零溢出/startMoles可调/0报错·v585)')
+else: ok('v585 打地鼠图标换新图 (Hansen 打地鼠 emoji🎯→新3D图 icons/mole_3d.webp(彩虹机械锤砸科技地鼠)·19岛 img width:1em+onerror兜底🎯·绿底#84cc16/startMoles入口不变·真机393/360双视口 新图加载/零溢出/startMoles可调/0报错·v585)')
 
-# 🔴 v586(Hansen: "打字大师图标换这张新图"): 19 岛打字大师 mode 卡 emoji⌨️→icons/typer_3d.png(复古米色台式机CRT跑像素游戏+键盘图, img width:1em+onerror兜底⌨️), 紫底/showTypingMenu入口不变。
+# 🔴 v586(Hansen: "打字大师图标换这张新图"): 19 岛打字大师 mode 卡 emoji⌨️→icons/typer_3d.webp(复古米色台式机CRT跑像素游戏+键盘图, img width:1em+onerror兜底⌨️), 紫底/showTypingMenu入口不变。
 _s86=[]
 import os as _os86
-if not (_os86.path.exists('icons/typer_3d.png') and _os86.path.getsize('icons/typer_3d.png')>50000): _s86.append('typer_3d.png 缺失或过小')
+if not (_os86.path.exists('icons/typer_3d.webp') and _os86.path.getsize('icons/typer_3d.webp')>8000): _s86.append('typer_3d.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/typer_3d.png' not in _t: _s86.append(_fn+' 打字大师新图引用缺失'); break
+    if 'icons/typer_3d.webp' not in _t: _s86.append(_fn+' 打字大师新图引用缺失'); break
     if 'onclick="showTypingMenu()"' not in _t: _s86.append(_fn+' showTypingMenu入口丢失'); break
 if _s86: fail('v586 打字大师图标换新图: ' + str(_s86[:6]))
-else: ok('v586 打字大师图标换新图 (Hansen 打字大师 emoji⌨️→新3D图 icons/typer_3d.png(复古米色台式机CRT跑像素游戏+键盘)·19岛 img width:1em+onerror兜底⌨️·紫底#8b5cf6/showTypingMenu入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v586)')
+else: ok('v586 打字大师图标换新图 (Hansen 打字大师 emoji⌨️→新3D图 icons/typer_3d.webp(复古米色台式机CRT跑像素游戏+键盘)·19岛 img width:1em+onerror兜底⌨️·紫底#8b5cf6/showTypingMenu入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v586)')
 
-# 🔴 v587(Hansen: "钓鱼大师图标换这张新图"): 19 岛钓鱼大师 mode 卡 emoji🎣→icons/fish_3d.png(金黑鱼竿钓蓝色小鲨鱼图, img width:1em+onerror兜底🎣), 蓝底/startFish入口不变。
+# 🔴 v587(Hansen: "钓鱼大师图标换这张新图"): 19 岛钓鱼大师 mode 卡 emoji🎣→icons/fish_3d.webp(金黑鱼竿钓蓝色小鲨鱼图, img width:1em+onerror兜底🎣), 蓝底/startFish入口不变。
 _s87=[]
 import os as _os87
-if not (_os87.path.exists('icons/fish_3d.png') and _os87.path.getsize('icons/fish_3d.png')>30000): _s87.append('fish_3d.png 缺失或过小')
+if not (_os87.path.exists('icons/fish_3d.webp') and _os87.path.getsize('icons/fish_3d.webp')>8000): _s87.append('fish_3d.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/fish_3d.png' not in _t: _s87.append(_fn+' 钓鱼大师新图引用缺失'); break
+    if 'icons/fish_3d.webp' not in _t: _s87.append(_fn+' 钓鱼大师新图引用缺失'); break
     if 'onclick="startFish()"' not in _t: _s87.append(_fn+' startFish入口丢失'); break
 if _s87: fail('v587 钓鱼大师图标换新图: ' + str(_s87[:6]))
-else: ok('v587 钓鱼大师图标换新图 (Hansen 钓鱼大师 emoji🎣→新3D图 icons/fish_3d.png(金黑鱼竿钓蓝色小鲨鱼)·19岛 img width:1em+onerror兜底🎣·蓝底#0284c7/startFish入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v587)')
+else: ok('v587 钓鱼大师图标换新图 (Hansen 钓鱼大师 emoji🎣→新3D图 icons/fish_3d.webp(金黑鱼竿钓蓝色小鲨鱼)·19岛 img width:1em+onerror兜底🎣·蓝底#0284c7/startFish入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v587)')
 
 # 🔴 v588(Hansen: "每日宝箱未签到(还没点击打卡前)的图标换这张金宝箱新图"): 19 岛每日宝箱卡 未签到态图标
-#   emoji🎁→icons/chest_gold.png(金色锁宝箱图). 实现: HTML 初始 chestIcon 用 img; updateChestBadge 的图标切换从
+#   emoji🎁→icons/chest_gold.webp(金色锁宝箱图). 实现: HTML 初始 chestIcon 用 img; updateChestBadge 的图标切换从
 #   textContent 改 innerHTML(canOpen?金宝箱img:📂)——图片不能用 textContent。已签到态📂/翡翠绿不变。
 _s88=[]
 import os as _os88
-if not (_os88.path.exists('icons/chest_gold.png') and _os88.path.getsize('icons/chest_gold.png')>50000): _s88.append('chest_gold.png 缺失或过小')
+if not (_os88.path.exists('icons/chest_gold.webp') and _os88.path.getsize('icons/chest_gold.webp')>8000): _s88.append('chest_gold.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/chest_gold.png' not in _t: _s88.append(_fn+' 金宝箱图引用缺失'); break
+    if 'icons/chest_gold.webp' not in _t: _s88.append(_fn+' 金宝箱图引用缺失'); break
     # JS 必须用 innerHTML(不能 textContent, 否则img当纯文本)
     if "icon.innerHTML = canOpen ?" not in _t: _s88.append(_fn+' updateChestBadge未改innerHTML'); break
     if "icon.textContent = canOpen ? '🎁'" in _t: _s88.append(_fn+' 仍用textContent设🎁(img会变纯文本)'); break
     # 已签到态图标(v589 起换 chest_open 图, 此处不再锚 📂; 已签到态校验交 v589)
 if _s88: fail('v588 未签到宝箱图标换金宝箱图: ' + str(_s88[:6]))
-else: ok('v588 未签到宝箱图标换金宝箱图 (Hansen 每日宝箱未签到态 emoji🎁→新金宝箱图 icons/chest_gold.png(金色锁宝箱)·HTML初始chestIcon用img+updateChestBadge图标切换textContent→innerHTML(canOpen?金宝箱img:📂, 图片不能用textContent)·已签到态(v589换打开金宝箱)/翡翠绿不变·真机 未签到金宝箱图+pending/已签到📂+claimed/切换可逆/0报错·v588)')
+else: ok('v588 未签到宝箱图标换金宝箱图 (Hansen 每日宝箱未签到态 emoji🎁→新金宝箱图 icons/chest_gold.webp(金色锁宝箱)·HTML初始chestIcon用img+updateChestBadge图标切换textContent→innerHTML(canOpen?金宝箱img:📂, 图片不能用textContent)·已签到态(v589换打开金宝箱)/翡翠绿不变·真机 未签到金宝箱图+pending/已签到📂+claimed/切换可逆/0报错·v588)')
 
 # 🔴 v589(Hansen: "签到/领取宝箱之后的图标换这张打开的金宝箱图"): 19 岛每日宝箱【已签到态】图标
-#   emoji📂→icons/chest_open.png(打开冒金币金宝箱). updateChestBadge 已签到分支(canOpen?...:此处)用 img+onerror兜底📂。
+#   emoji📂→icons/chest_open.webp(打开冒金币金宝箱). updateChestBadge 已签到分支(canOpen?...:此处)用 img+onerror兜底📂。
 #   未签到态 chest_gold(v588)不变, 翡翠绿 chest-claimed 不变。(joker 卡牌抽卡图标待 Hansen 重传)
 _s89=[]
 import os as _os89
-if not (_os89.path.exists('icons/chest_open.png') and _os89.path.getsize('icons/chest_open.png')>50000): _s89.append('chest_open.png 缺失或过小')
+if not (_os89.path.exists('icons/chest_open.webp') and _os89.path.getsize('icons/chest_open.webp')>8000): _s89.append('chest_open.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/chest_open.png' not in _t: _s89.append(_fn+' 打开金宝箱图引用缺失'); break
-    if 'icons/chest_gold.png' not in _t: _s89.append(_fn+' 未签到金宝箱图丢失(v588)'); break
+    if 'icons/chest_open.webp' not in _t: _s89.append(_fn+' 打开金宝箱图引用缺失'); break
+    if 'icons/chest_gold.webp' not in _t: _s89.append(_fn+' 未签到金宝箱图丢失(v588)'); break
     # 已签到分支不得还是纯📂(应是img)
     if "': '📂';" in _t.replace(' ',''): _s89.append(_fn+' 已签到态仍是纯📂(应换img)'); break
 if _s89: fail('v589 已签到宝箱图标换打开金宝箱: ' + str(_s89[:6]))
-else: ok('v589 已签到宝箱图标换打开金宝箱 (Hansen 签到/领取后图标 emoji📂→打开冒金币金宝箱 icons/chest_open.png·updateChestBadge已签到分支用img+onerror兜底📂·未签到态chest_gold(v588)+翡翠绿chest-claimed不变·与未签到锁宝箱呼应(锁着→打开冒金币)·真机 已签到打开金宝箱图加载+claimed+今日已签/切回未签到金锁宝箱恢复/0报错·v589)')
+else: ok('v589 已签到宝箱图标换打开金宝箱 (Hansen 签到/领取后图标 emoji📂→打开冒金币金宝箱 icons/chest_open.webp·updateChestBadge已签到分支用img+onerror兜底📂·未签到态chest_gold(v588)+翡翠绿chest-claimed不变·与未签到锁宝箱呼应(锁着→打开冒金币)·真机 已签到打开金宝箱图加载+claimed+今日已签/切回未签到金锁宝箱恢复/0报错·v589)')
 
 # 🔴 v590(Hansen: "完形填空换这张放大镜选项图·抽卡换这张joker卡牌图"):
-#   ① 19 岛完形填空 mode 卡 emoji📝→icons/cloze_3d.png(蓝光放大镜照填空句+ABC选项TRIP/JOURNEY/VOYAGE图, img width:1em+onerror兜底📝), 粉底/startCloze不变;
-#   ② 抽卡入口(hansen_gacha.js 注入 util-card #hsnGachaEntry) emoji🎴→icons/gacha_joker.png(紫金Q牌joker小丑卡, img+onerror兜底🎴), HansenGacha.open不变。
+#   ① 19 岛完形填空 mode 卡 emoji📝→icons/cloze_3d.webp(蓝光放大镜照填空句+ABC选项TRIP/JOURNEY/VOYAGE图, img width:1em+onerror兜底📝), 粉底/startCloze不变;
+#   ② 抽卡入口(hansen_gacha.js 注入 util-card #hsnGachaEntry) emoji🎴→icons/gacha_joker.webp(紫金Q牌joker小丑卡, img+onerror兜底🎴), HansenGacha.open不变。
 _s90=[]
 import os as _os90
-for _f in ['icons/cloze_3d.png','icons/gacha_joker_v594.png']:  # v594起抽卡图=gacha_joker_v594.png(旧 gacha_joker.png 已删·见icons清理)
+for _f in ['icons/cloze_3d.webp','icons/gacha_joker_v594.webp']:  # v594起抽卡图=gacha_joker_v594.webp(旧 gacha_joker.webp 已删·见icons清理)
     if not (_os90.path.exists(_f) and _os90.path.getsize(_f)>30000): _s90.append(_f+' 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/cloze_3d.png' not in _t: _s90.append(_fn+' 完形填空新图引用缺失'); break
+    if 'icons/cloze_3d.webp' not in _t: _s90.append(_fn+' 完形填空新图引用缺失'); break
     if 'onclick="startCloze()"' not in _t: _s90.append(_fn+' startCloze入口丢失'); break
 _g90=open('hansen_gacha.js',encoding='utf-8').read()
 if "u-icon\">🎴</span>" in _g90 or "u-icon'>🎴" in _g90: _s90.append('hansen_gacha.js 抽卡仍是emoji🎴')
 if _s90: fail('v590 完形填空+抽卡图标换新图: ' + str(_s90[:6]))
-else: ok('v590 完形填空+抽卡图标换新图 (Hansen 完形填空 emoji📝→放大镜选项图 icons/cloze_3d.png(蓝光放大镜照填空句+ABC选项)·19岛 img width:1em+onerror兜底📝·粉底#ec4899/startCloze不变; 抽卡入口 emoji🎴→joker卡牌图 icons/gacha_joker.png(紫金Q牌小丑卡)·hansen_gacha.js注入#hsnGachaEntry img+onerror兜底🎴·HansenGacha.open不变·真机393/360双视口 两图加载/零溢出/startCloze+HansenGacha.open可调/0报错·v590)')
+else: ok('v590 完形填空+抽卡图标换新图 (Hansen 完形填空 emoji📝→放大镜选项图 icons/cloze_3d.webp(蓝光放大镜照填空句+ABC选项)·19岛 img width:1em+onerror兜底📝·粉底#ec4899/startCloze不变; 抽卡入口 emoji🎴→joker卡牌图 icons/gacha_joker.webp(紫金Q牌小丑卡)·hansen_gacha.js注入#hsnGachaEntry img+onerror兜底🎴·HansenGacha.open不变·真机393/360双视口 两图加载/零溢出/startCloze+HansenGacha.open可调/0报错·v590)')
 
-# 🔴 v591(Hansen: "字母拼拼乐图标换这张新图"): 19 岛字母拼拼乐 mode 卡 emoji🔤→icons/spell_3d.png(彩色3D字母拼成FUNNY图, img width:1em+onerror兜底🔤), 绿底/startScramble入口不变。
+# 🔴 v591(Hansen: "字母拼拼乐图标换这张新图"): 19 岛字母拼拼乐 mode 卡 emoji🔤→icons/spell_3d.webp(彩色3D字母拼成FUNNY图, img width:1em+onerror兜底🔤), 绿底/startScramble入口不变。
 _s91=[]
 import os as _os91
-if not (_os91.path.exists('icons/spell_3d.png') and _os91.path.getsize('icons/spell_3d.png')>30000): _s91.append('spell_3d.png 缺失或过小')
+if not (_os91.path.exists('icons/spell_3d.webp') and _os91.path.getsize('icons/spell_3d.webp')>8000): _s91.append('spell_3d.webp 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'icons/spell_3d.png' not in _t: _s91.append(_fn+' 字母拼拼乐新图引用缺失'); break
+    if 'icons/spell_3d.webp' not in _t: _s91.append(_fn+' 字母拼拼乐新图引用缺失'); break
     if 'onclick="startScramble()"' not in _t: _s91.append(_fn+' startScramble入口丢失'); break
 if _s91: fail('v591 字母拼拼乐图标换新图: ' + str(_s91[:6]))
-else: ok('v591 字母拼拼乐图标换新图 (Hansen 字母拼拼乐 emoji🔤→新3D图 icons/spell_3d.png(彩色3D字母拼成FUNNY)·19岛 img width:1em+onerror兜底🔤·绿底#22c55e/startScramble入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v591)')
+else: ok('v591 字母拼拼乐图标换新图 (Hansen 字母拼拼乐 emoji🔤→新3D图 icons/spell_3d.webp(彩色3D字母拼成FUNNY)·19岛 img width:1em+onerror兜底🔤·绿底#22c55e/startScramble入口不变·真机393/360双视口 新图加载/零溢出/入口可调/0报错·v591)')
 
 # 🔴 v592(Hansen: "图标做出来就是为了好看吸引人, 别弄这么小! 整体放大充满卡片·文字缩成一行去掉副标题·每日宝箱图标也放大但保留两行(未签到\"等待开启\"/已签\"今日已签\")·抽卡卡册图标放大看清楚·宝箱详情页点进去也要用新图(签前签后都用)"):
 #   ① mode卡 m-icon 40→62px(大幅放大充满卡片)+标题单行nowrap+【删全部 m-desc 副标题】(19岛各11个);
@@ -2629,7 +2629,7 @@ else: ok('v591 字母拼拼乐图标换新图 (Hansen 字母拼拼乐 emoji🔤�
 #   ④ 宝箱详情页 chest-box大宝箱emoji🎁→chest_gold图(未领·140px满)·已领📂→chest_open图·screen-title🎁→chest_gold小图。
 _s92=[]
 import os as _os92
-for _f in ['icons/chest_gold.png','icons/chest_open.png']:
+for _f in ['icons/chest_gold.webp','icons/chest_open.webp']:
     if not (_os92.path.exists(_f) and _os92.path.getsize(_f)>50000): _s92.append(_f+' 缺失')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
@@ -2640,8 +2640,8 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     if 'class="chest-badge" id="chestSub">可领' not in _t: _s92.append(_fn+' 宝箱可领角标缺v667'); break
     if 'class="chest-badge" id="chestSub">已签' not in _t: _s92.append(_fn+' 宝箱已签角标缺v667'); break
     # ④ 详情页换图: chest-box内img(chest_gold) + 已领chest_open + 标题图
-    if 'id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.png' not in _t: _s92.append(_fn+' 详情页chest-box未换chest_gold图'); break
-    if 'icons/chest_open.png' not in _t: _s92.append(_fn+' 详情页已领chest_open图缺失'); break
+    if 'id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp' not in _t: _s92.append(_fn+' 详情页chest-box未换chest_gold图'); break
+    if 'icons/chest_open.webp' not in _t: _s92.append(_fn+' 详情页已领chest_open图缺失'); break
 if _s92: fail('v592 图标整体放大+单行文字+宝箱详情页换图: ' + str(_s92[:6]))
 else: ok('v592 图标整体放大+单行文字+宝箱详情页换图 (Hansen 嫌图标小: ①mode卡 m-icon 40→62px充满卡片+标题单行nowrap+删全部m-desc副标题(各11)·②每日宝箱 #chestCard d-icon单独52px(留两行)+未签到文案打卡签到→等待开启(HTML+JS, 已签今日已签不变)·③util-card u-icon 22→34px(抽卡joker/卡册看清)·④宝箱详情页 chest-box emoji🎁→chest_gold图140px满/已领📂→chest_open图/标题🎁→chest_gold小图·真机393/360双视口 mode图标62/无副标题/标题不换行/零溢出/宝箱等待开启+今日已签/util34/详情页未领chest_gold满+已领chest_open/0报错·v592)')
 
@@ -2661,10 +2661,10 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
 if _s93: fail('v593 图标放大充满+防重合排版: ' + str(_s93[:6]))
 else: ok('v593 图标放大充满卡片+结构防重合 (Hansen 嫌图标小+图标文字重合·根因 m-icon img 写死1em方框横图被压扁/margin1px致重合 → mode图标区改flex:1吃满空间+img height:100%!important按容器高撑满(横图竖图统一·横图56→71px@393占卡67%)+7px间距结构防重合+标题flex:none+padding压5px4px6px·宝箱d-icon52→72px(真机77px)·util u-icon34→42px(卡册joker看清)·boss-card未碰·真机393/360双视口 打字大师等横图71/60px充满/图标↔标题7px零重合/零溢出/宝箱77px/util42-46px/0报错·v593)')
 
-# \U0001f534 v594(Hansen 密集需求): \u2460 火眼金睛旁加抽卡入口(新joker图 gacha_joker_v594.png + 深蓝靛底#1e3a8a/#312e81, onclick=HansenGacha.open, 文字"抽卡") \u2461 util 删复习(底栏已有), 抽卡/卡册不再注入util(钻石店那排去重; 卡册仅留右下角底栏) \u2462 每日任务图标 34\u2192 72(=每日宝箱) \u2463 挑战Boss图 84\u2192 100 填富余空间(daily-row 行高144不变, 不超框)+图\u2194 字距 2\u2192 5 \u2464 字母拼拼乐绿底\u2192 靛蓝#4f46e5/#4338ca(原绿与图标彩色字母绿重合) \u2465 底栏卡册 1.2\u2192 1.45em(不超顶线) \u2466 mode图标再放大(padding5\u2192 4 / margin7\u2192 6)
+# \U0001f534 v594(Hansen 密集需求): \u2460 火眼金睛旁加抽卡入口(新joker图 gacha_joker_v594.webp + 深蓝靛底#1e3a8a/#312e81, onclick=HansenGacha.open, 文字"抽卡") \u2461 util 删复习(底栏已有), 抽卡/卡册不再注入util(钻石店那排去重; 卡册仅留右下角底栏) \u2462 每日任务图标 34\u2192 72(=每日宝箱) \u2463 挑战Boss图 84\u2192 100 填富余空间(daily-row 行高144不变, 不超框)+图\u2194 字距 2\u2192 5 \u2464 字母拼拼乐绿底\u2192 靛蓝#4f46e5/#4338ca(原绿与图标彩色字母绿重合) \u2465 底栏卡册 1.2\u2192 1.45em(不超顶线) \u2466 mode图标再放大(padding5\u2192 4 / margin7\u2192 6)
 _s94=[]
 import os as _os94
-if not _os94.path.exists('icons/gacha_joker_v594.png'): _s94.append('\u65b0\u62bd\u5361joker\u56fe gacha_joker_v594.png \u7f3a\u5931')
+if not _os94.path.exists('icons/gacha_joker_v594.webp'): _s94.append('\u65b0\u62bd\u5361joker\u56fe gacha_joker_v594.webp \u7f3a\u5931')
 _g94=open('hansen_gacha.js',encoding='utf-8').read()
 if '\u62bd\u5361\u5165\u53e3\u5df2\u79fb\u81f3\u6e38\u620f\u6a21\u5f0f\u7f51\u683c' not in _g94: _s94.append('hansen_gacha.js \u672a\u505c\u6b62\u6ce8\u5165util\u62bd\u5361')
 _cd94=open('hansen_cards.js',encoding='utf-8').read()
@@ -2672,7 +2672,7 @@ if '\u5361\u518c\u5165\u53e3\u4ec5\u4fdd\u7559\u53f3\u4e0b\u89d2\u5e95\u680f' no
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     if 'onclick="HansenGacha.open()"' not in _t: _s94.append(_fn+' \u6e38\u620f\u7f51\u683c\u7f3a\u62bd\u5361\u5165\u53e3\u5361'); break  # v596 relax: was --c1:#1e3a8a deep blue; v596->light blue (#dbeafe/#93c5fd), only anchor onclick (bg color guarded by v596)
-    if 'icons/gacha_joker_v594.png' not in _t: _s94.append(_fn+' \u62bd\u5361\u5361\u672a\u7528\u65b0joker\u56fe'); break
+    if 'icons/gacha_joker_v594.webp' not in _t: _s94.append(_fn+' \u62bd\u5361\u5361\u672a\u7528\u65b0joker\u56fe'); break
     if '\u62bd\u5361</div>' not in _t: _s94.append(_fn+' \u62bd\u5361\u5361\u7f3a\u6807\u9898'); break  # v596 relax: title got inline color style, anchor only the 抽卡</div> text (color guarded by v596)
     if 'onclick="showScreen(\'review\')"><span class="u-icon">\U0001f501</span><div class="u-label">\u590d\u4e60</div>' in _t: _s94.append(_fn+' util\u590d\u4e60\u672a\u5220'); break
     if '.daily-card .d-icon{font-size:72px' not in _t: _s94.append(_fn+' \u6bcf\u65e5\u4efb\u52a1\u56fe\u6807\u672a\u653e\u592770'); break
@@ -2681,7 +2681,7 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     if '--c1:#4f46e5;--c2:#4338ca" onclick="startScramble' not in _t: _s94.append(_fn+' \u5b57\u6bcd\u62fc\u62fc\u4e50\u80cc\u666f\u672a\u6362\u9753\u84dd'); break
     if 'style="width:50px;height:50px' not in _t: _s94.append(_fn+' \u5e95\u680f\u5361\u518c\u672a\u653e\u59271.45em'); break
 if _s94: fail('v594 \u62bd\u5361\u5165\u53e3\u79fb\u4f4d+\u5165\u53e3\u53bb\u91cd+\u56fe\u6807\u591a\u9879\u653e\u5927\u8c03\u8272: ' + str(_s94[:6]))
-else: ok('v594 \u62bd\u5361\u5165\u53e3\u79fb\u6e38\u620f\u7f51\u683c+util\u5165\u53e3\u53bb\u91cd+\u591a\u9879\u56fe\u6807\u653e\u5927\u8c03\u8272 (Hansen \u5bc6\u96c6\u9700\u6c42: \u706b\u773c\u91d1\u775b\u65c1\u52a0\u62bd\u5361\u5165\u53e3(\u65b0joker\u56fegacha_joker_v594.png\u6df1\u84dd\u9753\u5e95\u00b7onclick HansenGacha.open\u00b7\u6587\u5b57\u62bd\u5361)\u00b7util\u5220\u590d\u4e60(\u5e95\u680f\u5df2\u6709)\u4e14\u62bd\u5361/\u5361\u518c\u4e0d\u518d\u6ce8\u5165util(\u94bb\u77f3\u5e97\u90a3\u6392\u53bb\u91cd\u00b7\u5361\u518c\u4ec5\u7559\u53f3\u4e0b\u89d2\u5e95\u680f)\u00b7\u6bcf\u65e5\u4efb\u52a1\u56fe\u680734\u2192 72(=\u6bcf\u65e5\u5b9d\u7bb1)\u00b7\u6311\u6218Boss\u56fe84\u2192 100\u586b\u5bcc\u4f59\u7a7a\u95f4(\u884c\u9ad8144\u4e0d\u53d8\u4e0d\u8d85\u6846)+\u56fe\u5b57\u8ddd2\u2192 5\u00b7\u5b57\u6bcd\u62fc\u62fc\u4e50\u7eff\u5e95\u2192 \u9753\u84dd#4f46e5/#4338ca(\u539f\u7eff\u4e0e\u56fe\u6807\u5f69\u8272\u5b57\u6bcd\u91cd\u5408)\u00b7\u5e95\u680f\u5361\u518c1.2\u2192 1.45em(\u4e0d\u8d85\u9876\u7ebf)\u00b7mode\u56fe\u6807\u518d\u653e\u5927(padding5\u2192 4/margin7\u2192 6)\u00b7\u771f\u673a393/360\u53cc\u89c6\u53e3 \u62bd\u5361\u5361\u53ef\u62bd/util\u53ea\u5269\u94bb\u77f3\u5e97+\u6211\u7684\u5b66\u4e60+\u6210\u5c31+\u7edf\u8ba1+\u8bbe\u7f6e(\u65e0\u62bd\u5361/\u5361\u518c/\u590d\u4e60)/\u6bcf\u65e5\u4efb\u52a172/Boss100\u4e0d\u8d85\u6846/\u5b57\u6bcd\u62fc\u62fc\u4e50\u9753\u84dd/\u5e95\u680f\u5361\u518c\u5927/0\u62a5\u9519\u00b7v594)')
+else: ok('v594 \u62bd\u5361\u5165\u53e3\u79fb\u6e38\u620f\u7f51\u683c+util\u5165\u53e3\u53bb\u91cd+\u591a\u9879\u56fe\u6807\u653e\u5927\u8c03\u8272 (Hansen \u5bc6\u96c6\u9700\u6c42: \u706b\u773c\u91d1\u775b\u65c1\u52a0\u62bd\u5361\u5165\u53e3(\u65b0joker\u56fegacha_joker_v594.webp\u6df1\u84dd\u9753\u5e95\u00b7onclick HansenGacha.open\u00b7\u6587\u5b57\u62bd\u5361)\u00b7util\u5220\u590d\u4e60(\u5e95\u680f\u5df2\u6709)\u4e14\u62bd\u5361/\u5361\u518c\u4e0d\u518d\u6ce8\u5165util(\u94bb\u77f3\u5e97\u90a3\u6392\u53bb\u91cd\u00b7\u5361\u518c\u4ec5\u7559\u53f3\u4e0b\u89d2\u5e95\u680f)\u00b7\u6bcf\u65e5\u4efb\u52a1\u56fe\u680734\u2192 72(=\u6bcf\u65e5\u5b9d\u7bb1)\u00b7\u6311\u6218Boss\u56fe84\u2192 100\u586b\u5bcc\u4f59\u7a7a\u95f4(\u884c\u9ad8144\u4e0d\u53d8\u4e0d\u8d85\u6846)+\u56fe\u5b57\u8ddd2\u2192 5\u00b7\u5b57\u6bcd\u62fc\u62fc\u4e50\u7eff\u5e95\u2192 \u9753\u84dd#4f46e5/#4338ca(\u539f\u7eff\u4e0e\u56fe\u6807\u5f69\u8272\u5b57\u6bcd\u91cd\u5408)\u00b7\u5e95\u680f\u5361\u518c1.2\u2192 1.45em(\u4e0d\u8d85\u9876\u7ebf)\u00b7mode\u56fe\u6807\u518d\u653e\u5927(padding5\u2192 4/margin7\u2192 6)\u00b7\u771f\u673a393/360\u53cc\u89c6\u53e3 \u62bd\u5361\u5361\u53ef\u62bd/util\u53ea\u5269\u94bb\u77f3\u5e97+\u6211\u7684\u5b66\u4e60+\u6210\u5c31+\u7edf\u8ba1+\u8bbe\u7f6e(\u65e0\u62bd\u5361/\u5361\u518c/\u590d\u4e60)/\u6bcf\u65e5\u4efb\u52a172/Boss100\u4e0d\u8d85\u6846/\u5b57\u6bcd\u62fc\u62fc\u4e50\u9753\u84dd/\u5e95\u680f\u5361\u518c\u5927/0\u62a5\u9519\u00b7v594)')
 
 # 🔴 v595/BUG#69(Hansen 报): 听音辨义玩完无总结页。根因: 听音是唯一"无限轮"模式 —— 一轮(本档单词)听完只弹 toast 就自动重洗下一轮(nextListenQ), 永不结算, 玩家退出时看不到任何总结。全模式排查证实仅此一处缺结算页(match/boss/moles/fish/bubble/speed/cloze/typing/scramble/eagle 都有 xxxComplete 结算页)。修: 新增 listenComplete() 结算页(答对/正确率/金币/经验/挑战下一档/再来一轮/回主页, 风格同 clozeComplete/eagleComplete), 听音池空(答对分支+答错分支共2处)改为调 listenComplete() 而非 toast+重洗。守卫锁死: listenComplete 必存在 + 池空必跳结算 + 旧 toast 重洗绝迹 + 全模式结算函数齐全(防任何模式再漏总结页)。
 _s95=[]
@@ -2705,7 +2705,7 @@ for _fn in sorted(_g96.glob('island_*.html')):
     if '--c1:#dbeafe;--c2:#93c5fd" onclick="HansenGacha.open()"' not in _t: _s96.append(_fn+' 抽卡卡非浅蓝底#dbeafe/#93c5fd'); break
     if '#1e3a8a;--c2:#312e81" onclick="HansenGacha.open()"' in _t: _s96.append(_fn+' 抽卡旧深蓝底残留(应换浅蓝)'); break
     if '<div class="m-title" style="font-size:12px;color:var(--pal-surf-1,#0f172a);transform:translate(0,2px)">抽卡' not in _t: _s96.append(_fn+' 抽卡标题缺深色#0f172a(v664)'); break
-    if 'typer_3d.png' not in _t: _s96.append(_fn+' 打字大师缺typer_3d图(尺寸v664守卫接管)'); break
+    if 'typer_3d.webp' not in _t: _s96.append(_fn+' 打字大师缺typer_3d图(尺寸v664守卫接管)'); break
 if _s96: fail('v596 抽卡浅蓝底+打字大师放大: ' + str(_s96[:6]))
 else: ok('v596 抽卡卡浅蓝底+打字大师图标放大 (Hansen: ①抽卡背景深蓝靛#1e3a8a/#312e81→浅蓝#dbeafe/#93c5fd(嫌深蓝难看·紫品金joker小丑图在深冷蓝上融背景不跳→浅蓝衬托紫品金醒目)+标题改深蓝字#1e40af(浅底白字看不清)·②打字大师图标 transform:scale(1.2)放大(嫌小·typer_3d近方图四周留白·scale后裁掉留白主体更大·不超框不压标题)·19岛统一·真机393首页 抽卡浅蓝joker跳出+深蓝字清晰/打字大师电脑图明显更大充满卡片/0报错。守卫: 抽卡浅蓝底存在+旧深蓝底绝迹+标题深蓝字#1e40af+打字scale(1.2)(岛内唯一)·已放宽v594两处(抽卡卡只锚onclick不锚色+标题只锚"抽卡</div>"不锚style, 由v596单一接管色)·v596)')
 
@@ -2714,7 +2714,7 @@ _s98=[]
 import glob as _g98
 for _fn in sorted(_g98.glob('island_*.html')):
     _t=open(_fn,encoding='utf-8').read()
-    if '<div class="m-icon"><img src="icons/typer_3d.png' not in _t: _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4f4d\u7f6e\u5f02\u5e38(v598\u5e94translateY(3px)\u4e0a\u63d0\u4e0d\u8d34\u9876)'); break
+    if '<div class="m-icon"><img src="icons/typer_3d.webp' not in _t: _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4f4d\u7f6e\u5f02\u5e38(v598\u5e94translateY(3px)\u4e0a\u63d0\u4e0d\u8d34\u9876)'); break
     if '<div class="m-title" style="font-size:13px;color:#fbbf24;transform:translate(0,3px)">打字大师' not in _t: _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u6587\u5b57\u5f02\u5e38(v598\u5e94translateY2+font11+\u4eae\u9ec4fde047)'); break
 if _s98: fail('v598 \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4e0a\u63d0+\u6587\u5b57\u4e0a\u63d0\u7f29\u5c0f\u4eae\u9ec4: ' + str(_s98[:6]))
 else: ok('v598 \u6253\u5b57\u5927\u5e08 \u56fe\u6807\u4e0a\u63d0+\u6587\u5b57\u4e0a\u63d0\u7f29\u5c0f\u6362\u4eae\u9ec4\u7a81\u51fa\u8272 (Hansen\u63a5v597\u8fed\u4ee3: v597\u6574\u4f53\u4e0b\u79fb6px\u504f\u591a\u2192\u56fe\u6807translateY 6\u21923px\u4e0a\u63d0\u4f46\u7559\u9876\u90e8\u7a7a\u9699\u4e0d\u8d34\u9876\u00b7\u6587\u5b57translateY 6\u21922px\u4e0a\u63d0\u79bb\u5e95+font-size 13\u219211px\u7f29\u5c0f+color\u767d\u2192#fde047\u4eae\u9ec4(\u7d2b\u5e95#8b5cf6\u4e0a\u4e92\u8865\u6700\u9192\u76ee\u7a81\u51fa\u00b7\u66f4\u6613\u6ce8\u610f)\u00b7scale(1.2)\u56fe\u6807\u5927\u5c0f\u4ecd\u4e0d\u53d8\u00b719\u5c9b\u7edf\u4e00\u00b7\u771f\u673a393\u9996\u9875 \u56fe\u6807\u9876\u79bb\u5361\u9876\u6709\u7a7a\u9699+\u6587\u5b57\u4eae\u9ec4\u7f29\u5c0f\u79bb\u5e95+0\u62a5\u9519\u00b7\u4e0ev596 scale(1.2)\u5b88\u536b\u5e76\u5b58\u00b7v598)')
@@ -2810,7 +2810,7 @@ else: ok('v607 武器特效改为打击感优先 (淘汰屏上摆写实武器PNG
 _swp=[]
 import os as _os2
 for _wp in ['bow','pistol','machinegun','sniper','gatling','cannon','photon']:
-    _pth='weapons/'+_wp+'.png'
+    _pth='weapons/'+_wp+'.webp'
     if not _os2.path.exists(_pth): _swp.append('武器图缺:'+_wp); continue
     if _os2.path.getsize(_pth) > 600*1024: _swp.append(_wp+'未优化大于600KB')
 if _swp: fail('v604 武器图清晰化: '+str(_swp[:5]))
@@ -2874,7 +2874,7 @@ if 'function flyer' not in _wj or 'function beam' not in _wj: _swb.append('weapo
 if 'heroWeaponBox' not in _wj: _swb.append('weapon_fx未从武器框射击')
 if 'brightness' in _wj: _swb.append('weapon_fx含brightness-BUG52!')
 _wpng=['bow','pistol','machinegun','sniper','gatling','cannon','photon']
-_miss=[w for w in _wpng if not _owb.path.exists('weapons/'+w+'.png')]
+_miss=[w for w in _wpng if not _owb.path.exists('weapons/'+w+'.webp')]
 if _miss: _swb.append('缺武器图'+str(_miss))
 if _swb: fail('v609 武器展示框HSN_WEAPON_BOX铁律: '+str(_swb[:6]))
 else: ok('v609 勇者血条左侧武器展示框 + 攻击从正前方射向boss (Hansen: ⚔️→当前装备武器图标·独立框圈住·图标放大; 攻击从武器框正前方射弹丸→boss命中爆发)。HSN_WEAPON_BOX铁律: 19岛hero-weapon-box(heroWeaponBox+hero-weapon-box-CSS+HSN_WEAPON_BOX标志) + 武器图=HansenGear.getWeaponIcon(weaponLvl→weapons/png) + 攻击从heroWeaponBox射出(muzzle开火+flyer/beam投射→boss·到达触发命中爆发+popDamage(v611七武器差异化)) + 无rotate/brightness(防晕+守BUG52)。真机验证animal: 武器框lvl6=photon/lvl0=bow加载成功·弹丸0-140ms飞行3元素+175ms boss爆发18元素·0报错。武器图齐全7把。守卫: 19岛武器框+gear-getWeaponIcon+weapon_fx-muzzle/flyer/beam/从武器框射击/无brightness(v611七武器·静态朝向合规)+武器图齐全 v609)')
@@ -3183,8 +3183,8 @@ else: ok('v633 BUG#81: boss结算页+各模式结算/通关页亮主题下文字
 
 # 🐾 v634 宠物奇幻进化展示系统(36阶·全岛·卡牌式展示器+每只可选背景色)
 _petfx_g=[]
-_miss=[i for i in range(36) if not os.path.exists('pets/pet_%02d.png'%i)]
-if _miss: _petfx_g.append('缺画像pets/pet_%s.png'%_miss)
+_miss=[i for i in range(36) if not os.path.exists('pets/pet_%02d.webp'%i)]
+if _miss: _petfx_g.append('缺画像pets/pet_%s.webp'%_miss)
 if not os.path.exists('hansen_pet_showcase.js'):
     _petfx_g.append('缺hansen_pet_showcase.js')
 else:
@@ -3196,7 +3196,7 @@ if len(_isl)!=19: _petfx_g.append('岛数!=19:%d'%len(_isl))
 for _f in _isl:
     _t=open(_f,encoding='utf-8',errors='replace').read()
     if _t.count("img:'pets/pet_")!=36: _petfx_g.append('%s画像引用!=36(%d)'%(_f,_t.count("img:'pets/pet_")))
-    if "pets/pet_00.png?v=" not in _t: _petfx_g.append('%s pet图路径缺?v=缓存戳(换图时缓存不失效)'%_f)
+    if "pets/pet_00.webp?v=" not in _t: _petfx_g.append('%s pet图路径缺?v=缓存戳(换图时缓存不失效)'%_f)
     if 'window.PET_STAGES=PET_STAGES' not in _t: _petfx_g.append('%s未暴露window.PET_STAGES'%_f)
     if 'hansen_pet_showcase.js?v=' not in _t: _petfx_g.append('%s未加载宠物模块'%_f)
 if _petfx_g: fail('v634 宠物展示系统: '+str(_petfx_g[:6]))
@@ -3301,7 +3301,7 @@ if os.path.exists('hansen_pet_showcase.js'):
     if '🔴v642' not in _pm: _v642.append('模块缺🔴v642标记')
 # 36张宠物画像统一画布(确保 contain 后长边渲染一致=统一大小的前提)
 import glob as _glob
-_pngs=sorted(_glob.glob('pets/pet_*.png'))
+_pngs=sorted(_glob.glob('pets/pet_*.webp'))
 if len(_pngs)<36: _v642.append('宠物画像不足36张(%d)'%len(_pngs))
 else:
     try:
@@ -3376,60 +3376,60 @@ else: ok('v645 挑战Boss 标签彩虹霓虹渐变(贴合街机柜风格·Hansen
 # ---- v646 极速60秒 新3D秒表图标 ----
 _v646=[]
 import glob as _g646
-if not os.path.exists('icons/speed_3d.png'):
-    _v646.append('缺 icons/speed_3d.png')
+if not os.path.exists('icons/speed_3d.webp'):
+    _v646.append('缺 icons/speed_3d.webp')
 _miss646=[]; _isl646=sorted(_g646.glob('island_*.html'))
 for _f in _isl646:
     _t=open(_f,encoding='utf-8',errors='replace').read()
     _nm=_f.replace('island_','').replace('.html','')
-    if 'icons/speed_3d.png' not in _t: _miss646.append(_nm)
+    if 'icons/speed_3d.webp' not in _t: _miss646.append(_nm)
     elif '<div class="m-icon">\u26a1</div>' in _t: _miss646.append(_nm+'(残留⚡emoji)')
 if _miss646: _v646.append('极速60秒未换3D图标的岛:'+str(_miss646[:6]))
-if _isl646 and not any('icons/speed_3d.png' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('无岛引用speed_3d.png')
+if _isl646 and not any('icons/speed_3d.webp' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('无岛引用speed_3d.webp')
 if _isl646 and not any('\U0001f534v646' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('缺🔴v646标记')
 if _v646: fail('v646 极速60秒3D图标: '+str(_v646[:6]))
-else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.png·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.png(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=645/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
+else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.webp·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.webp(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=645/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
 
 # ---- v647 火眼金睛 新3D金眼图标 ----
 _v647=[]
 import glob as _g647
-if not os.path.exists('icons/eagle_3d.png'):
-    _v647.append('缺 icons/eagle_3d.png')
+if not os.path.exists('icons/eagle_3d.webp'):
+    _v647.append('缺 icons/eagle_3d.webp')
 _miss647=[]; _isl647=sorted(_g647.glob('island_*.html'))
 for _f in _isl647:
     _t=open(_f,encoding='utf-8',errors='replace').read()
     _nm=_f.replace('island_','').replace('.html','')
-    if 'icons/eagle_3d.png' not in _t: _miss647.append(_nm)
+    if 'icons/eagle_3d.webp' not in _t: _miss647.append(_nm)
     elif '<div class="m-icon">\U0001f440</div>' in _t: _miss647.append(_nm+'(残留👀emoji)')
 if _miss647: _v647.append('火眼金睛未换3D图标的岛:'+str(_miss647[:6]))
 # 留顶部间距: eagle_3d 必须带 transform:scale(<1)缩小(否则.m-icon img的height:100%!important会撑满74px顶到天花板·Hansen明确不要太近)
 _one647=open('island_animal.html',encoding='utf-8',errors='replace').read() if os.path.exists('island_animal.html') else ''
 import re as _re647
-_mimg=_re647.search(r'<img src="icons/eagle_3d\.png[^>]*>', _one647)
+_mimg=_re647.search(r'<img src="icons/eagle_3d\.webp[^>]*>', _one647)
 _eimg=_mimg.group(0) if _mimg else ''
 if _eimg and 'width:81px' not in _eimg: _v647.append('火眼金睛图标未按v664尺寸width:81px')
-if _isl647 and not any('icons/eagle_3d.png' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl647): _v647.append('无岛引用eagle_3d.png')
+if _isl647 and not any('icons/eagle_3d.webp' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl647): _v647.append('无岛引用eagle_3d.webp')
 if _isl647 and not any('\U0001f534v647' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl647): _v647.append('缺🔴v647标记')
 if _v647: fail('v647 火眼金睛3D图标: '+str(_v647[:6]))
-else: ok('v647 火眼金睛 换新3D金眼图标(Hansen上传Photoroom抠图版666666-Photoroom.png·要求换图+尽量大但别贴框顶+非常合适的底色): 把19岛"火眼金睛"模式卡的 emoji👀 换成 icons/eagle_3d.png(金色火眼+金焰+蓝紫宝石格+绿色对勾·原1254方图压512优化·已带透明). 底色 --c1/--c2 由紫(#a855f7/#7e22ce)改深royal蓝(#2563eb/#1e3a8a)·金色在深蓝上最跳+呼应图中深蓝宝石格(比紫更高级·与周围橙红极速/浅蓝抽卡区分). ★尺寸+顶部间距(Hansen明确"尽量大但别离天花板太近太近"): .m-icon img 有 height:100%!important 会把任何图撑满图标区(74px)顶到上下(gap=0·现有图标都贴顶)·故此图必须用 transform:scale(0.85) 缩小→渲染≈63px·居中后顶部留≈6px间距(舒服不贴顶)·又尽量大. 真机验证(animal·393×880·DSF3): img512加载成功·渲染63×63·顶部间距6px(对比无scale=0顶满)·深蓝底·与打地鼠/极速同档协调; color岛: 加载成功+蓝底+0报错. ⚠️坑: .m-icon img{height:100%!important}吃掉inline的width/height:1em·控大小只能靠transform:scale(不受!important影响). 19岛 startEagle 卡底色原本一致(都#a855f7)·👀作m-icon仅此卡专有·批量安全. 各岛其它图标/玩法/经济零改动.')
+else: ok('v647 火眼金睛 换新3D金眼图标(Hansen上传Photoroom抠图版666666-Photoroom.webp·要求换图+尽量大但别贴框顶+非常合适的底色): 把19岛"火眼金睛"模式卡的 emoji👀 换成 icons/eagle_3d.webp(金色火眼+金焰+蓝紫宝石格+绿色对勾·原1254方图压512优化·已带透明). 底色 --c1/--c2 由紫(#a855f7/#7e22ce)改深royal蓝(#2563eb/#1e3a8a)·金色在深蓝上最跳+呼应图中深蓝宝石格(比紫更高级·与周围橙红极速/浅蓝抽卡区分). ★尺寸+顶部间距(Hansen明确"尽量大但别离天花板太近太近"): .m-icon img 有 height:100%!important 会把任何图撑满图标区(74px)顶到上下(gap=0·现有图标都贴顶)·故此图必须用 transform:scale(0.85) 缩小→渲染≈63px·居中后顶部留≈6px间距(舒服不贴顶)·又尽量大. 真机验证(animal·393×880·DSF3): img512加载成功·渲染63×63·顶部间距6px(对比无scale=0顶满)·深蓝底·与打地鼠/极速同档协调; color岛: 加载成功+蓝底+0报错. ⚠️坑: .m-icon img{height:100%!important}吃掉inline的width/height:1em·控大小只能靠transform:scale(不受!important影响). 19岛 startEagle 卡底色原本一致(都#a855f7)·👀作m-icon仅此卡专有·批量安全. 各岛其它图标/玩法/经济零改动.')
 
 # ---- v648 装备菜单 新3D装备宝箱图标 ----
 _v648=[]
-if not os.path.exists('icons/ic_equip.png'):
-    _v648.append('缺 icons/ic_equip.png')
+if not os.path.exists('icons/ic_equip.webp'):
+    _v648.append('缺 icons/ic_equip.webp')
 if os.path.exists('hansen_gear.js'):
     _gj=open('hansen_gear.js',encoding='utf-8',errors='replace').read()
-    if 'icons/ic_equip.png' not in _gj: _v648.append('gear.js装备菜单未换ic_equip图标')
+    if 'icons/ic_equip.webp' not in _gj: _v648.append('gear.js装备菜单未换ic_equip图标')
     if 'u-icon"><img' not in _gj.replace(' ',''): _v648.append('装备菜单u-icon未用img(emoji⚔️未替换)')
     # 必须有明确尺寸(适中·u-icon无height:100%规则·靠px控大小)
     import re as _re648
-    _m648=_re648.search(r'ic_equip\.png[^>]*', _gj)
+    _m648=_re648.search(r'ic_equip\.webp[^>]*', _gj)
     if _m648 and 'width:' not in _m648.group(0): _v648.append('装备图标未设width尺寸(大小失控)')
     if '\U0001f534v648' not in _gj: _v648.append('缺🔴v648标记')
 else:
     _v648.append('缺hansen_gear.js')
 if _v648: fail('v648 装备3D图标: '+str(_v648[:6]))
-else: ok('v648 装备菜单 换新3D装备宝箱图标(Hansen上传equipment.png·要求换图+大小适中+完美展现+非常高清): 把功能菜单"装备"瓦片的 emoji⚔️(在共享 hansen_gear.js injectEntry 注入的 <span class="u-icon">⚔️</span>)换成 icons/equipment_3d.png(3D金甲宝箱+盾+剑+发光宝石·原1254方图压512高清·已带透明·onerror回退⚔️). 尺寸: .u-icon无height:100%强制规则(不同于.m-icon)·故img直接设 width/height:54px 控大小·与邻居emoji(💎🏆📈·font-size42px)视觉相当(适中·略大让3D细节看清)·所在util-card网格行自动等高对齐(装备卡=同行钻石店/成就/统计等高). 高清: 512源@54px显示=约10倍过采样·任意DPR都锐利清晰. 真机验证(island_animal·DSF3): img512加载成功·渲染54×54·与💎🏆同档·同行瓦片等高对齐·两行高度差肉眼不显·0报错. 共享gear.js改一处19岛全生效(都加载gear.js·都在功能菜单注入装备入口)·?v=戳build统一. 其它菜单图标(钻石店/成就/统计/设置/我的学习仍emoji)/玩法/经济零改动.')
+else: ok('v648 装备菜单 换新3D装备宝箱图标(Hansen上传equipment.webp·要求换图+大小适中+完美展现+非常高清): 把功能菜单"装备"瓦片的 emoji⚔️(在共享 hansen_gear.js injectEntry 注入的 <span class="u-icon">⚔️</span>)换成 icons/equipment_3d.webp(3D金甲宝箱+盾+剑+发光宝石·原1254方图压512高清·已带透明·onerror回退⚔️). 尺寸: .u-icon无height:100%强制规则(不同于.m-icon)·故img直接设 width/height:54px 控大小·与邻居emoji(💎🏆📈·font-size42px)视觉相当(适中·略大让3D细节看清)·所在util-card网格行自动等高对齐(装备卡=同行钻石店/成就/统计等高). 高清: 512源@54px显示=约10倍过采样·任意DPR都锐利清晰. 真机验证(island_animal·DSF3): img512加载成功·渲染54×54·与💎🏆同档·同行瓦片等高对齐·两行高度差肉眼不显·0报错. 共享gear.js改一处19岛全生效(都加载gear.js·都在功能菜单注入装备入口)·?v=戳build统一. 其它菜单图标(钻石店/成就/统计/设置/我的学习仍emoji)/玩法/经济零改动.')
 
 # ---- v649 彻底删除👹红鬼占位 + 加载重试 + 消除蛋闪 ----
 _v649=[]
@@ -3455,7 +3455,7 @@ for _f in sorted(_g649.glob('island_*.html')):
         _egg.append(_f.replace('island_','').replace('.html',''))
 if _egg: _v649.append('heroPet仍残留蛋占位的岛:'+str(_egg[:6]))
 if _v649: fail('v649 删红鬼+加载重试+消蛋闪: '+str(_v649[:6]))
-else: ok('v649 彻底删除👹红鬼占位+加载失败自动重试+消除宠物蛋闪(Hansen强烈要求: 网慢时boss立绘没加载出来就显示一个红色双角鬼罗刹头像极丑·要从整个系统彻底删除·加载失败也绝不许出现它·并修加载慢·并消除"先闪老图再换新图"): ①根因 hansen_cards.js 的 window.hansenImgErr(v171加的boss立绘onerror兜底)原本失败→隐藏img→贴深色底+48px👹·只在加载失败时出现(Hansen网慢超时→onerror→红鬼). 重写为: 加载失败先自动重试3次(递增延迟450*(n+1)ms·src加__rt=N参数强制重拉·imgTries计数)→网慢瞬时失败大多重试即成功(真正解决"加载不出来")·仍失败才用干净中性占位(深色linear-gradient+暗淡#334155色"?"·绝不再用👹). ②addiction.js积分明细"👹 Boss×50"→"⚔️ Boss×50". ③全系统👹彻底清零(0处·含注释). ④19岛 #heroPet 初始硬编码🥚(图片版宠物系统前的旧占位)→空·进岛宠物位先闪蛋(="先看到不是现有宠物的老图")已消除·模块updateHero可靠填真实宠物img. 排查确认: 岛页+index.html均无service worker(排除SW缓存老资源)·boss立绘bosses/lvNN.png均带?v=戳(版本化URL不服旧内容)·index的"lamp"x6是CSS clamp()误匹配非神灯开场·神灯/genielamp在boss_attack.js是灯神Boss(lv12)攻击特效非老开场. 真机验证(python-playwright·animal/food/school): 宠物位填真实img不闪蛋·hansenImgErr重试生效·最终兜底为"?"非👹·0报错. 教训(贾维斯): 绝不用丑emoji(👹等)做加载占位; 加载失败先重试再用中性兜底; 元素初始硬编码内容应与JS最终填充一致或留空·避免"老内容→新内容"闪烁.')
+else: ok('v649 彻底删除👹红鬼占位+加载失败自动重试+消除宠物蛋闪(Hansen强烈要求: 网慢时boss立绘没加载出来就显示一个红色双角鬼罗刹头像极丑·要从整个系统彻底删除·加载失败也绝不许出现它·并修加载慢·并消除"先闪老图再换新图"): ①根因 hansen_cards.js 的 window.hansenImgErr(v171加的boss立绘onerror兜底)原本失败→隐藏img→贴深色底+48px👹·只在加载失败时出现(Hansen网慢超时→onerror→红鬼). 重写为: 加载失败先自动重试3次(递增延迟450*(n+1)ms·src加__rt=N参数强制重拉·imgTries计数)→网慢瞬时失败大多重试即成功(真正解决"加载不出来")·仍失败才用干净中性占位(深色linear-gradient+暗淡#334155色"?"·绝不再用👹). ②addiction.js积分明细"👹 Boss×50"→"⚔️ Boss×50". ③全系统👹彻底清零(0处·含注释). ④19岛 #heroPet 初始硬编码🥚(图片版宠物系统前的旧占位)→空·进岛宠物位先闪蛋(="先看到不是现有宠物的老图")已消除·模块updateHero可靠填真实宠物img. 排查确认: 岛页+index.html均无service worker(排除SW缓存老资源)·boss立绘bosses/lvNN.webp均带?v=戳(版本化URL不服旧内容)·index的"lamp"x6是CSS clamp()误匹配非神灯开场·神灯/genielamp在boss_attack.js是灯神Boss(lv12)攻击特效非老开场. 真机验证(python-playwright·animal/food/school): 宠物位填真实img不闪蛋·hansenImgErr重试生效·最终兜底为"?"非👹·0报错. 教训(贾维斯): 绝不用丑emoji(👹等)做加载占位; 加载失败先重试再用中性兜底; 元素初始硬编码内容应与JS最终填充一致或留空·避免"老内容→新内容"闪烁.')
 
 # ---- v650 删Boss入口/页老残留(神灯精灵兜底+标题精灵+独角兽介绍页) ----
 _v650=[]
@@ -3562,30 +3562,30 @@ _v655=[]
 import glob as _g655, os as _os655
 _ICONS655=['ic_home','ic_wrong','ic_review','ic_cards','ic_diamond','ic_equip','ic_achieve','ic_stats','ic_settings','ic_study']
 for _ic655 in _ICONS655:
-    _pp655='icons/'+_ic655+'.png'
-    if not (_os655.path.exists(_pp655) and _os655.path.getsize(_pp655)>3000): _v655.append(_ic655+'.png 缺失或过小')
-for _old655 in ['icons/cardbook_3d.png','icons/equipment_3d.png']:
+    _pp655='icons/'+_ic655+'.webp'
+    if not (_os655.path.exists(_pp655) and _os655.path.getsize(_pp655)>3000): _v655.append(_ic655+'.webp 缺失或过小')
+for _old655 in ['icons/cardbook_3d.webp','icons/equipment_3d.webp']:
     if _os655.path.exists(_old655): _v655.append('旧图未彻底删除:'+_old655)
 _OLDEMO655=['u-icon">🏆','u-icon">📊','u-icon">⚙️','ni-icon">🏠','ni-icon">🔁','ni-icon">📚']
 for _fn655 in sorted(_g655.glob('island_*.html')):
     _t655=open(_fn655,encoding='utf-8',errors='replace').read()
-    for _need655 in ['icons/ic_achieve.png','icons/ic_stats.png','icons/ic_settings.png','icons/ic_home.png','icons/ic_review.png','icons/ic_wrong.png','icons/ic_cards.png']:
+    for _need655 in ['icons/ic_achieve.webp','icons/ic_stats.webp','icons/ic_settings.webp','icons/ic_home.webp','icons/ic_review.webp','icons/ic_wrong.webp','icons/ic_cards.webp']:
         if _need655 not in _t655: _v655.append(_fn655+' 缺 '+_need655); break
     for _emo655 in _OLDEMO655:
         if _emo655 in _t655: _v655.append(_fn655+' util/nav残留旧emoji'); break
     if 'drop-shadow(0 0 2px rgba(255,255,255,.9))' not in _t655: _v655.append(_fn655+' 底栏图标白色微光缺失')
 _djs655=open('hansen_diamond_shop.js',encoding='utf-8',errors='replace').read()
-if 'icons/ic_diamond.png' not in _djs655 or 'u-icon">💎' in _djs655: _v655.append('diamond_shop 钻石店未换ic_diamond')
+if 'icons/ic_diamond.webp' not in _djs655 or 'u-icon">💎' in _djs655: _v655.append('diamond_shop 钻石店未换ic_diamond')
 _gjs655=open('hansen_gear.js',encoding='utf-8',errors='replace').read()
-if 'icons/ic_equip.png' not in _gjs655 or 'equipment_3d' in _gjs655: _v655.append('gear 装备未换ic_equip')
+if 'icons/ic_equip.webp' not in _gjs655 or 'equipment_3d' in _gjs655: _v655.append('gear 装备未换ic_equip')
 _mjs655=open('hansen_mylearning.js',encoding='utf-8',errors='replace').read()
-if 'icons/ic_study.png' not in _mjs655 or 'u-icon">📈' in _mjs655: _v655.append('mylearning 我的学习未换ic_study')
+if 'icons/ic_study.webp' not in _mjs655 or 'u-icon">📈' in _mjs655: _v655.append('mylearning 我的学习未换ic_study')
 _wjs655=open('hansen_wrong_overview.js',encoding='utf-8',errors='replace').read()
-if 'icons/ic_wrong.png' not in _wjs655 or 'ni-icon">📕' in _wjs655: _v655.append('wrong_overview 错题未换ic_wrong')
+if 'icons/ic_wrong.webp' not in _wjs655 or 'ni-icon">📕' in _wjs655: _v655.append('wrong_overview 错题未换ic_wrong')
 if not any('🔴v655' in open(_f,encoding='utf-8',errors='replace').read() for _f in sorted(_g655.glob('island_*.html'))):
     _v655.append('缺v655标记')
 if _v655: fail('v655 菜单/导航图标全换新图: '+str(_v655[:6]))
-else: ok('v655 首页 util 菜单网格(6图标)+底部导航(4图标)全部换成 Hansen 上传的新3D图标·统一规格·彻底删除所有旧 emoji 与旧图(Hansen 明确: 全部换掉·不要占位符·直接用我的图·老图彻底删掉不要再出现). 来源截图=island 主页底部. 渲染来源混合: 静态HTML(19岛)=成就🏆/统计📊/设置⚙️(util)·主页🏠/复习🔁/单词📚(nav)·卡册(原cardbook_3d图); JS动态注入=钻石店💎(hansen_diamond_shop.js)·装备(原equipment_3d图·hansen_gear.js)·我的学习📈(hansen_mylearning.js)·错题📕(hansen_wrong_overview.js把单词改错题). 替换: 10个图标→icons/ic_home/ic_wrong/ic_review/ic_cards/ic_diamond/ic_equip/ic_achieve/ic_stats/ic_settings/ic_study.png(原1254方图统一裁透明边+正方画布留白8pct+缩放256统一规格). 静态6图标+卡册19岛批量换img·4个JS注入换img·全部 onerror 走 hansenImgErr(重试3次+中性问号·绝不回退旧emoji). 统一尺寸: util图标 width/height 54px·nav图标 42px·nav额外加白色微光drop-shadow(深色底栏更清晰). 旧图 cardbook_3d.png/equipment_3d.png 已从 icons 删除(grep确认无任何引用). 同步更新被触发旧守卫 v583(cardbook_3d→ic_cards)/v584(→ic_cards并移除PIL白边检测靠CSS白光)/v648(equipment_3d→ic_equip). 真机渲染确认(island_animal): util 6图标全ic_*新图统一54px·nav 4图标全ic_*新图统一42px·无任何旧emoji残留·0报错·排版整齐. ★教训: 同一菜单区图标渲染来源可能混合(静态HTML + 多个JS动态注入)·必须查渲染DOM(非静态grep)才能找全(本例静态grep只见3个util-card·渲染出6个·钻石店/装备/我的学习/错题均JS注入); 换图后旧文件需grep确认无引用再删·并同步更新引用旧文件的守卫.')
+else: ok('v655 首页 util 菜单网格(6图标)+底部导航(4图标)全部换成 Hansen 上传的新3D图标·统一规格·彻底删除所有旧 emoji 与旧图(Hansen 明确: 全部换掉·不要占位符·直接用我的图·老图彻底删掉不要再出现). 来源截图=island 主页底部. 渲染来源混合: 静态HTML(19岛)=成就🏆/统计📊/设置⚙️(util)·主页🏠/复习🔁/单词📚(nav)·卡册(原cardbook_3d图); JS动态注入=钻石店💎(hansen_diamond_shop.js)·装备(原equipment_3d图·hansen_gear.js)·我的学习📈(hansen_mylearning.js)·错题📕(hansen_wrong_overview.js把单词改错题). 替换: 10个图标→icons/ic_home/ic_wrong/ic_review/ic_cards/ic_diamond/ic_equip/ic_achieve/ic_stats/ic_settings/ic_study.webp(原1254方图统一裁透明边+正方画布留白8pct+缩放256统一规格). 静态6图标+卡册19岛批量换img·4个JS注入换img·全部 onerror 走 hansenImgErr(重试3次+中性问号·绝不回退旧emoji). 统一尺寸: util图标 width/height 54px·nav图标 42px·nav额外加白色微光drop-shadow(深色底栏更清晰). 旧图 cardbook_3d.webp/equipment_3d.webp 已从 icons 删除(grep确认无任何引用). 同步更新被触发旧守卫 v583(cardbook_3d→ic_cards)/v584(→ic_cards并移除PIL白边检测靠CSS白光)/v648(equipment_3d→ic_equip). 真机渲染确认(island_animal): util 6图标全ic_*新图统一54px·nav 4图标全ic_*新图统一42px·无任何旧emoji残留·0报错·排版整齐. ★教训: 同一菜单区图标渲染来源可能混合(静态HTML + 多个JS动态注入)·必须查渲染DOM(非静态grep)才能找全(本例静态grep只见3个util-card·渲染出6个·钻石店/装备/我的学习/错题均JS注入); 换图后旧文件需grep确认无引用再删·并同步更新引用旧文件的守卫.')
 
 # ---- v656 菜单util图标(54→68)+底栏nav图标(42→50)放大·不溢出框·底栏对齐不超天花板 ----
 _v656=[]
@@ -3614,8 +3614,8 @@ import glob as _g657, os as _os657
 try:
     from PIL import Image as _IM657
     for _ic657 in ['ic_home','ic_wrong','ic_review','ic_cards','ic_diamond','ic_equip','ic_achieve','ic_stats','ic_settings','ic_study']:
-        _pp657='icons/'+_ic657+'.png'
-        if not _os657.path.exists(_pp657): _v657.append(_ic657+'.png 缺失'); continue
+        _pp657='icons/'+_ic657+'.webp'
+        if not _os657.path.exists(_pp657): _v657.append(_ic657+'.webp 缺失'); continue
         _wh657=_IM657.open(_pp657).size
         if _wh657[0]<512 or _wh657[1]<512: _v657.append(_ic657+(' 分辨率%dx%d非512高清'%_wh657))
 except Exception as _e657: _v657.append('图片尺寸检测异常:'+str(_e657))
@@ -3668,10 +3668,10 @@ _isl660=open('island_animal.html',encoding='utf-8',errors='replace').read()
 # 静态图标尺寸(islands): util achieve/stats/settings · nav home/review/cards
 for _src in ['ic_achieve','ic_stats','ic_settings']:
     _sz=_UTIL660[_src]
-    if ('icons/'+_src+'.png" alt="" draggable="false" style="width:'+str(_sz)+'px;height:'+str(_sz)+'px') not in _isl660: _v660.append(_src+' 静态尺寸不符v660')
+    if ('icons/'+_src+'.webp" alt="" draggable="false" style="width:'+str(_sz)+'px;height:'+str(_sz)+'px') not in _isl660: _v660.append(_src+' 静态尺寸不符v660')
 for _src in ['ic_home','ic_review','ic_cards']:
     _sz=_NAV660[_src]
-    if ('icons/'+_src+'.png" alt="" draggable="false" style="width:'+str(_sz)+'px;height:'+str(_sz)+'px') not in _isl660: _v660.append(_src+' 静态尺寸不符v660')
+    if ('icons/'+_src+'.webp" alt="" draggable="false" style="width:'+str(_sz)+'px;height:'+str(_sz)+'px') not in _isl660: _v660.append(_src+' 静态尺寸不符v660')
 # JS注入图标尺寸
 for _jf,_src,_sz in [('hansen_diamond_shop.js','ic_diamond',72),('hansen_gear.js','ic_equip',70),('hansen_mylearning.js','ic_study',75),('hansen_wrong_overview.js','ic_wrong',50)]:
     if ('width:'+str(_sz)+'px;height:'+str(_sz)+'px') not in open(_jf,encoding='utf-8',errors='replace').read(): _v660.append(_src+' JS尺寸不符v660')
@@ -3707,21 +3707,21 @@ else: ok('v662 底栏文字(主页/错题/复习/卡册)与图标重合·最小�
 _v663=[]
 import glob as _g663, os as _os663
 _isl663=open(sorted(_g663.glob('island_*.html'))[0],encoding='utf-8',errors='replace').read()
-for _ic663 in ['icons/explore_3d.png','icons/bubble_3d.png','icons/task_3d.png']:
+for _ic663 in ['icons/explore_3d.webp','icons/bubble_3d.webp','icons/task_3d.webp']:
     if _ic663 not in _isl663: _v663.append(_ic663+'未引用')
 for _old663 in ['<div class="m-icon">📚</div>','<div class="m-icon">🫧</div>','<span class="d-icon">📋</span>']:
     if _old663 in _isl663: _v663.append('旧emoji元素残留')
 for _c1663 in ['--c1:#ED7098','--c1:#4CD97B','--c1:#4338ca']:
     if _c1663 not in _isl663: _v663.append('缺高对比背景'+_c1663)
-_miss663=[_os663.path.basename(_f) for _f in sorted(_g663.glob('island_*.html')) if not all(_x in open(_f,encoding='utf-8',errors='replace').read() for _x in ['icons/explore_3d.png','icons/bubble_3d.png','icons/task_3d.png','--c1:#ED7098','--c1:#4CD97B','--c1:#4338ca'])]
+_miss663=[_os663.path.basename(_f) for _f in sorted(_g663.glob('island_*.html')) if not all(_x in open(_f,encoding='utf-8',errors='replace').read() for _x in ['icons/explore_3d.webp','icons/bubble_3d.webp','icons/task_3d.webp','--c1:#ED7098','--c1:#4CD97B','--c1:#4338ca'])]
 if _miss663: _v663.append('部分岛缺v663:'+str(_miss663[:3]))
 if not any('\U0001f534v663' in open(_f,encoding='utf-8',errors='replace').read() for _f in sorted(_g663.glob('island_*.html'))): _v663.append('缺v663标记')
-for _fn663 in ['explore_3d.png','task_3d.png','bubble_3d.png']:
+for _fn663 in ['explore_3d.webp','task_3d.webp','bubble_3d.webp']:
     _pp663='icons/'+_fn663
     if not _os663.path.exists(_pp663): _v663.append(_fn663+'缺失')
     elif _os663.path.getsize(_pp663)<10000: _v663.append(_fn663+'过小')
 if _v663: fail('v663 图标替换: '+str(_v663[:8]))
-else: ok('v663 首页三个 emoji 图标→新图片(Hansen提供·均已抠图透明背景). 探索单词(mode-card emoji📚)→icons/explore_3d.png·每日任务(daily-card emoji📋)→icons/task_3d.png·泡泡大作战(mode-card emoji🫧)→icons/bubble_3d.png. 图标源均512x512高清(裁切到内容bbox+居中到方形画布·较长边偅92%填充·留~8px边距). mode-card图片由 .mode-card .m-icon img{height:100%!important} 自动填高(74px·与其他图片卡一致·已到卡片布局上限); daily-card图片 width:1em(1em=d-icon 72px). 高对比深背景(因新图标明亮多彩·深色让图标跳出): 探索单词粉#ED7098(v705 Hansen指定·原深青#0e7490)·每日任务深紫#7c3aed→#5b21b6(衬暖金清单板)·泡泡深靖#4338ca→#312e81(衬彩虹泡泡+黄光). 均锁定到具体元素/onclick替换(因emoji在其他界面也出现·背景色被多卡共用). 原这三个是emoji不是图片文件·icons目录无旧图片可删. onerror兑底回退原emoji. 真机393(animal navy主题): 三图标均显示为img·填满卡片·与邻卡一致·背景高对比图标跳出·卡片与深色页面区分明显. 各岛主题背景不同(navy/紫/teal)·背景色固定·在部分主题上对比略弱但可接受.')
+else: ok('v663 首页三个 emoji 图标→新图片(Hansen提供·均已抠图透明背景). 探索单词(mode-card emoji📚)→icons/explore_3d.webp·每日任务(daily-card emoji📋)→icons/task_3d.webp·泡泡大作战(mode-card emoji🫧)→icons/bubble_3d.webp. 图标源均512x512高清(裁切到内容bbox+居中到方形画布·较长边偅92%填充·留~8px边距). mode-card图片由 .mode-card .m-icon img{height:100%!important} 自动填高(74px·与其他图片卡一致·已到卡片布局上限); daily-card图片 width:1em(1em=d-icon 72px). 高对比深背景(因新图标明亮多彩·深色让图标跳出): 探索单词粉#ED7098(v705 Hansen指定·原深青#0e7490)·每日任务深紫#7c3aed→#5b21b6(衬暖金清单板)·泡泡深靖#4338ca→#312e81(衬彩虹泡泡+黄光). 均锁定到具体元素/onclick替换(因emoji在其他界面也出现·背景色被多卡共用). 原这三个是emoji不是图片文件·icons目录无旧图片可删. onerror兑底回退原emoji. 真机393(animal navy主题): 三图标均显示为img·填满卡片·与邻卡一致·背景高对比图标跳出·卡片与深色页面区分明显. 各岛主题背景不同(navy/紫/teal)·背景色固定·在部分主题上对比略弱但可接受.')
 
 
 # ---- v664 首页图标/文字按调节器参数统一(尺寸/偏移/置顶/颜色) ----
@@ -3732,7 +3732,7 @@ _isl664=_no_subisle(sorted(_g664.glob('island_*.html'))); _bad664={}
 for _f in _isl664:
     _t=open(_f,encoding='utf-8',errors='replace').read(); _nm=_f.replace('island_','').replace('.html',''); _miss=[]
     for _src,_sz in _ICON664.items():
-        _m=_re664.search(r'icons/'+_re664.escape(_src)+r'\.png[^>]*?width:(\d+)px;height:\1px', _t)
+        _m=_re664.search(r'icons/'+_re664.escape(_src)+r'\.webp[^>]*?width:(\d+)px;height:\1px', _t)
         if not _m or _m.group(1)!=str(_sz): _miss.append(_src+'='+(_m.group(1) if _m else '?'))
     if '.boss-card-img{width:91px;height:91px' not in _t: _miss.append('boss图标规则非91px')
     if 'font-size:74px;line-height:1;display:inline-block">\U0001f0cf' not in _t: _miss.append('记忆翻牌emoji非74px')
@@ -3831,7 +3831,7 @@ for _f668 in sorted(_g668.glob('island_*.html')):
     if '.daily-card.chest-claimed .chest-badge{background:#2b00ff}' not in _t668: _m668.append('已签蓝角标缺')
     if 'width:91px;height:91px' not in _t668: _m668.append('签到前金箱非90')
     if 'width:98px;height:98px' not in _t668: _m668.append('签到后开箱非96')
-    if 'transform:translate(0,3px)"><img src="icons/chest_open.png' not in _t668: _m668.append('签到后下移5缺')
+    if 'transform:translate(0,3px)"><img src="icons/chest_open.webp' not in _t668: _m668.append('签到后下移5缺')
     if '.chest-badge{position:absolute;top:0;right:-6px;transform:scale(.98)' not in _t668: _m668.append('角标位置101缺')
     if '🔴v668' not in _t668: _m668.append('v668标记缺')
     if _m668:
@@ -3901,9 +3901,9 @@ else:
     _v672.append('缺hansen_pet_showcase.js')
 # 宠物图36张全引用无冗余 + 临时截图绝不残留
 import glob as _g672
-_petpng=sorted(_g672.glob('pets/pet_*.png'))
+_petpng=sorted(_g672.glob('pets/pet_*.webp'))
 if len(_petpng)!=36: _v672.append('宠物图非36张(%d)'%len(_petpng))
-if _g672.glob('_pet_*.png') or _g672.glob('_home_hero.png'): _v672.append('🔴临时截图_pet*.png残留(会被打进部署包)')
+if _g672.glob('_pet_*.webp') or _g672.glob('_home_hero.webp'): _v672.append('🔴临时截图_pet*.webp残留(会被打进部署包)')
 if _v672: fail('v672 宠物系统改造: '+str(_v672[:8]))
 else: ok('v672 宠物系统改造(Hansen亲定6项·共享模块hansen_pet_showcase.js改一处19岛全生效): ①"现 在"→"现在"去空格 ②主页展示宠物可自选(卡牌器"设为主页展示"按钮·HOMEKEY存已解锁某阶index·默认/回落当前阶·updateHero用getHomeIdx取图与形态名·昵称仍全局名·XP仍overall) ③hero宠物图212→252放大+收留白后卡片更饱满·卡牌器宠物322→344/卡片360→376放大 ④收"我的宠物"标题与小字间32px→12px大留白(.psw margin-top:-20px·仅宠物页scoped不动通用标题) ⑤进化map未解锁宠物彻底封存纯黑:不渲染宠物图(capInner=uk?vis:?)+只显"?"+纯黑背景(#161d30→#070b14)+去onclick不可点击+openCard守卫i>curStage+卡牌器next限curStage(双重封死·完全看不到锁定宠物样子保留悬念)·删旧grayscale可见剪影 ⑥宠物图36张全引用无冗余(全工程扫描·bosses_bg/gacha动态引用非孤儿)·清临时截图. 真机验证(island_animal·393): 留白32→12·hero宠物252·现在无空格·curStage12时13解锁全可点/23锁定全部无宠物图+只显?+不可点·卡牌器停当前阶next禁用+openCard(14)被守卫挡·选第5阶→存储5+按钮"已在主页展示"+主页hero显示pet_05+双尾灵狐崽·清home回落当前阶pet_12·0报错. 🔴铁律:放大/重排/封存均Hansen明确授权·已解锁宠物可见性不动·v672)')
 
@@ -3915,9 +3915,9 @@ _bad673=[]
 for _f673 in sorted(_g673.glob('island_*.html')):
     _t673=open(_f673,encoding='utf-8').read()
     _m673=[]
-    if _t673.count('translate(0,10px)"><img src="icons/chest_gold.png')!=2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
-    if 'translate(0,0px)"><img src="icons/chest_gold.png' in _t673: _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
-    if 'translate(0,3px)"><img src="icons/chest_open.png' not in _t673: _m673.append('已签开箱translate(0,5px)被误动')
+    if _t673.count('translate(0,10px)"><img src="icons/chest_gold.webp')!=2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
+    if 'translate(0,0px)"><img src="icons/chest_gold.webp' in _t673: _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
+    if 'translate(0,3px)"><img src="icons/chest_open.webp' not in _t673: _m673.append('已签开箱translate(0,5px)被误动')
     if '#chestCard .d-label{transform:translateY(9.5px)}' not in _t673: _m673.append('每日宝箱文字可领态translateY(11.5)被动(应不动·v671)')
     if '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t673: _m673.append('每日宝箱文字已签态translateY(4.5)被动(应不动·v671)')
     if _m673:
@@ -4119,7 +4119,7 @@ for _i in islands:
 if _v86:
     fail("拼写对战图标 BUG#86: " + str(_v86[:6]))
 else:
-    ok("v710 BUG#86: 拼写对战 mode卡图标=88px+下移1px · 标题 Baloo2/15px/行高0.9/彩虹/小写/置顶(Hansen 用校准1:1调节器多轮微调·v689→72px·v695→80px·v696→82px·v697→85px·v698→88px·v699→86px·v700→87px·v710→88px(现行·v698曾88被否·现再选88)·下移1px不变·字体 Baloo2 内嵌防回退·调节器真机卡宽与游戏差0.02px). [历史]v689: 92px→72px+标题排紧(Hansen两轮: 原92px顶部触角溢出卡片被切→一度调到64px又嫌太小→再放大到72px但要在边框内). 根因: mode-card正方形(aspect-ratio:1)+overflow:hidden·spelling_bee.png内容包围盒(PIL getbbox)占满整图0%留白(蜜蜂触角贴图顶)不像邻卡fish有6.2%留白·叠上标题spelling bee占一行高·导致图标区被压窄(390px=64px·360px窄屏=54px). 解法: ①仅此一个图标(🐝 onerror专属锚点·19岛唯一·不误伤别的mode图标) width/height 92→72px; ②把这一个卡的标题 line-height 1.45→1.1 去掉padding-bottom·排紧腾出约8px竖向空间(标题是1行·仅压缩文字框高不影响换行). 选72px依据(真机三屏阈值实测·排紧标题后): 360px窄屏图标区62px·72px刚好不切(顶余0·蜜蜂底离标题1px不重叠)·390px顶余5px·414px更宽松. 元教训: 卡片图标尺寸不是越大越好也不是越小越好·要同时看图本身留白(PIL getbbox)+标题占高+最窄屏(360px)图标区·并在360/390/414多屏真机实测阈值(窄屏是瓶颈)·标题排紧是腾空间让图标可以更大的关键手段. 注: Hansen明确要求的尺寸调整(非违反几何参数不改铁律). v689")
+    ok("v710 BUG#86: 拼写对战 mode卡图标=88px+下移1px · 标题 Baloo2/15px/行高0.9/彩虹/小写/置顶(Hansen 用校准1:1调节器多轮微调·v689→72px·v695→80px·v696→82px·v697→85px·v698→88px·v699→86px·v700→87px·v710→88px(现行·v698曾88被否·现再选88)·下移1px不变·字体 Baloo2 内嵌防回退·调节器真机卡宽与游戏差0.02px). [历史]v689: 92px→72px+标题排紧(Hansen两轮: 原92px顶部触角溢出卡片被切→一度调到64px又嫌太小→再放大到72px但要在边框内). 根因: mode-card正方形(aspect-ratio:1)+overflow:hidden·spelling_bee.webp内容包围盒(PIL getbbox)占满整图0%留白(蜜蜂触角贴图顶)不像邻卡fish有6.2%留白·叠上标题spelling bee占一行高·导致图标区被压窄(390px=64px·360px窄屏=54px). 解法: ①仅此一个图标(🐝 onerror专属锚点·19岛唯一·不误伤别的mode图标) width/height 92→72px; ②把这一个卡的标题 line-height 1.45→1.1 去掉padding-bottom·排紧腾出约8px竖向空间(标题是1行·仅压缩文字框高不影响换行). 选72px依据(真机三屏阈值实测·排紧标题后): 360px窄屏图标区62px·72px刚好不切(顶余0·蜜蜂底离标题1px不重叠)·390px顶余5px·414px更宽松. 元教训: 卡片图标尺寸不是越大越好也不是越小越好·要同时看图本身留白(PIL getbbox)+标题占高+最窄屏(360px)图标区·并在360/390/414多屏真机实测阈值(窄屏是瓶颈)·标题排紧是腾空间让图标可以更大的关键手段. 注: Hansen明确要求的尺寸调整(非违反几何参数不改铁律). v689")
 # ---- 🔴BUG#87: 进岛提速(DOM就绪即揭开iframe·不再等onload·加加载提示) 防回退 ----
 try:
     _idx87 = open("index.html", encoding="utf-8").read()
@@ -4152,7 +4152,7 @@ try:
         from PIL import Image as _Img88
         _bigboss = []
         for _n in range(1, 21):
-            _bp = "bosses/lv%02d.png" % _n
+            _bp = "bosses/lv%02d.webp" % _n
             if _os88.path.exists(_bp):
                 try:
                     with _Img88.open(_bp) as _bi:
@@ -4351,7 +4351,7 @@ try:
     if _v92:
         fail("BUG#92 宠物首帧: " + str(_v92[:6]))
     else:
-        ok("BUG#92: 宠物图进岛首帧即显·三管齐下=①hansen_pet_showcase.js updateHero 存当前宠物图URL到 localStorage('hansen_pet_hero_img') ②全19岛 #heroPet 后早期内联脚本(在44模块~1.9MB前)读该URL立即填heroPet=首帧瞬时 ③hansen_preload.js 外壳preheatIslandEntryResources 最高优先预热该URL(进岛前已缓存). 根因: 宠物图pets/pet_NN.png每张170-400KB·updateHero在全模块JS后才设img·且是JS注入非静态故v693 DOMParse预热抽不到→进岛现场拉300KB空白等很久. 解决后:进岛宠物首帧即显·冷启外壳已预热. 跨版本?v=戳变化旧戳图命中缓存秒显·updateHero新戳同图无感覆盖. BUG#92")
+        ok("BUG#92: 宠物图进岛首帧即显·三管齐下=①hansen_pet_showcase.js updateHero 存当前宠物图URL到 localStorage('hansen_pet_hero_img') ②全19岛 #heroPet 后早期内联脚本(在44模块~1.9MB前)读该URL立即填heroPet=首帧瞬时 ③hansen_preload.js 外壳preheatIslandEntryResources 最高优先预热该URL(进岛前已缓存). 根因: 宠物图pets/pet_NN.webp每张170-400KB·updateHero在全模块JS后才设img·且是JS注入非静态故v693 DOMParse预热抽不到→进岛现场拉300KB空白等很久. 解决后:进岛宠物首帧即显·冷启外壳已预热. 跨版本?v=戳变化旧戳图命中缓存秒显·updateHero新戳同图无感覆盖. BUG#92")
 except Exception as _e92:
     fail("BUG#92 检查异常: " + str(_e92))
 
@@ -4432,7 +4432,7 @@ if os.path.exists("template.html") and os.path.exists("island_data.json"):
     _BMst = {'DATA':'DATA','BOSSES':'BOSSES','LISTEN':'LISTEN_LEVELS','TYPING':'TYPING_LEVELS','CLOZE':'CLOZE_LEVELS','AVATARS':'avatars'}
     def _genst(_tpl, _d):
         _t = _tpl.replace(_PHst['SHORTKEY'], _d['short_key']).replace(_PHst['KEY'], _d['key']).replace(_PHst['ENISLE'], _d['en_isle']).replace(_PHst['ENTITLE'], _d['en_title']).replace(_PHst['THEME'], _d['theme']).replace(_PHst['ZH'], _d['zh'])
-        _t = _t.replace(_PHst['LOCALAUDIO'], _d['local_audio'] if _d.get('local_audio') else 'null').replace(_PHst['EXTRACSS'], _d['extra_css'] if _d.get('extra_css') else '').replace(_PHst['BOSSICON'], _d.get('boss_icon', 'boss_arcade.png')).replace(_PHst['BLABEL'], _d.get('boss_label_color', '#0f172a'))
+        _t = _t.replace(_PHst['LOCALAUDIO'], _d['local_audio'] if _d.get('local_audio') else 'null').replace(_PHst['EXTRACSS'], _d['extra_css'] if _d.get('extra_css') else '').replace(_PHst['BOSSICON'], _d.get('boss_icon', 'boss_arcade.webp')).replace(_PHst['BLABEL'], _d.get('boss_label_color', '#0f172a'))
         for _n in _BMst: _t = _t.replace(_PHst[_n], _d[_BMst[_n]])
         return _t
     _tplst = open("template.html", encoding="utf-8").read()
@@ -5414,26 +5414,26 @@ try:
     _b762 = []
     import os as _os762
     _sb762 = open("spelling_bee.html", encoding="utf-8", errors="replace").read()
-    if not _os762.path.exists("robots/bot_3.png"):
-        _b762.append("bot_3.png-missing")
-    if not _os762.path.exists("robots/bot_4.png"):
-        _b762.append("bot_4.png-missing")
-    if "botAvatar:'robots/bot_3.png'" not in _sb762:
+    if not _os762.path.exists("robots/bot_3.webp"):
+        _b762.append("bot_3.webp-missing")
+    if not _os762.path.exists("robots/bot_4.webp"):
+        _b762.append("bot_4.webp-missing")
+    if "botAvatar:'robots/bot_3.webp'" not in _sb762:
         _b762.append("default-bot-avatar-not-robot3")
-    if "var ROBOT_AV=['robots/bot_3.png','robots/bot_4.png']" not in _sb762:
+    if "var ROBOT_AV=['robots/bot_3.webp','robots/bot_4.webp']" not in _sb762:
         _b762.append("ROBOT_AV-missing")
     if "grid(ROBOT_AV.concat(BOSS_AV))" not in _sb762:
         _b762.append("picker-no-robots")
-    if '<div class="setic"><img src="robots/bot_3.png' not in _sb762:
+    if '<div class="setic"><img src="robots/bot_3.webp' not in _sb762:
         _b762.append("setting-icon-not-replaced")
-    if '<div class="ovsp-lab"><img src="robots/bot_3.png' not in _sb762:
+    if '<div class="ovsp-lab"><img src="robots/bot_3.webp' not in _sb762:
         _b762.append("result-label-not-replaced")
-    if '<div class="rw lose"><img src="robots/bot_3.png' not in _sb762:
+    if '<div class="rw lose"><img src="robots/bot_3.webp' not in _sb762:
         _b762.append("lose-label-not-replaced")
     if _b762:
         fail("v762 robot-avatar: " + str(_b762[:8]))
     else:
-        ok("v762 (Hansen:spelling bee那个机器人emoji太难看·有没有别的机器人emoji·要机器人但不要这个·给几个选择 → 选了3和4): Unicode 里机器人脸只有一个 robot emoji·没有第二个·所以改为【我自画的机器人头像PNG】。我画了6个机器人方案给用户选·用户选了3(屏幕脸·紫)和4(独眼·绿)。实现: SVG画好后用chromium栅格化成256x256 PNG(robots/bot_3.png屏幕脸·robots/bot_4.png独眼)·放robots/目录(部署zip根目录·随包)。【为何PNG非SVG】img加载svg需服务器给 image/svg+xml MIME·部分静态服务器不一定给对→裂图·改用PNG与现有boss/宠物头像一致最稳。接入头像系统: ①S默认 botAvatar 从 bosses/lv01.png 改为 robots/bot_3.png(对战页avBot/VS页vsBotAv/设置预览avBotPrev 经 applyAvatars/renderAvPreviews 自动显示机器人3·avHTML用img src+?v= 缓存戳build.py统一管)。②新增 ROBOT_AV=[bot_3,bot_4]·头像选择器(openAvPicker)把机器人两项 concat 排在boss图最前·用户可在游戏里点头像切机器人3或4。③硬编码初始🤖(avBotPrev/vsBotAv/avBot)换成机器人3 img·避免JS执行前闪一下emoji。④静态标签🤖→机器人3小图: 设置「机器人名字」图标(.setic)、结算「机器人」标签(.ovsp-lab)、输赢文案「…赢了」(.rw lose)。【保留】难度选择「中等」那个🤖是速度档位图标(和🐢慢/⚡快/🎚️自定义一组)·不属于机器人对手形象·不动。真机(本地服务): 默认botAvatar=robots/bot_3.png·设置预览图naturalWidth256加载成功·选择器前两项=bot_3/bot_4且都加载·设置机器人名字图标加载·0报错。v762")
+        ok("v762 (Hansen:spelling bee那个机器人emoji太难看·有没有别的机器人emoji·要机器人但不要这个·给几个选择 → 选了3和4): Unicode 里机器人脸只有一个 robot emoji·没有第二个·所以改为【我自画的机器人头像PNG】。我画了6个机器人方案给用户选·用户选了3(屏幕脸·紫)和4(独眼·绿)。实现: SVG画好后用chromium栅格化成256x256 PNG(robots/bot_3.webp屏幕脸·robots/bot_4.webp独眼)·放robots/目录(部署zip根目录·随包)。【为何PNG非SVG】img加载svg需服务器给 image/svg+xml MIME·部分静态服务器不一定给对→裂图·改用PNG与现有boss/宠物头像一致最稳。接入头像系统: ①S默认 botAvatar 从 bosses/lv01.webp 改为 robots/bot_3.webp(对战页avBot/VS页vsBotAv/设置预览avBotPrev 经 applyAvatars/renderAvPreviews 自动显示机器人3·avHTML用img src+?v= 缓存戳build.py统一管)。②新增 ROBOT_AV=[bot_3,bot_4]·头像选择器(openAvPicker)把机器人两项 concat 排在boss图最前·用户可在游戏里点头像切机器人3或4。③硬编码初始🤖(avBotPrev/vsBotAv/avBot)换成机器人3 img·避免JS执行前闪一下emoji。④静态标签🤖→机器人3小图: 设置「机器人名字」图标(.setic)、结算「机器人」标签(.ovsp-lab)、输赢文案「…赢了」(.rw lose)。【保留】难度选择「中等」那个🤖是速度档位图标(和🐢慢/⚡快/🎚️自定义一组)·不属于机器人对手形象·不动。真机(本地服务): 默认botAvatar=robots/bot_3.webp·设置预览图naturalWidth256加载成功·选择器前两项=bot_3/bot_4且都加载·设置机器人名字图标加载·0报错。v762")
 except Exception as _e762:
     fail("v762 check error: " + str(_e762))
 
@@ -5441,7 +5441,7 @@ except Exception as _e762:
 try:
     _b763 = []
     _sb763 = open("spelling_bee.html", encoding="utf-8", errors="replace").read()
-    # (v764起: 中等档已由兔子emoji换成 medium.png 卡通图·不再要求兔子emoji·此处仅保留"难度档无robot emoji"校验)
+    # (v764起: 中等档已由兔子emoji换成 medium.webp 卡通图·不再要求兔子emoji·此处仅保留"难度档无robot emoji"校验)
     if '<div class="ic">🤖</div>' in _sb763:
         _b763.append("mid-icon-still-robot-emoji")
     if _b763:
@@ -5456,19 +5456,19 @@ try:
     _b764 = []
     import os as _os764
     _sb764 = open("spelling_bee.html", encoding="utf-8", errors="replace").read()
-    for _fn764 in ["speed/slow.png","speed/medium.png","speed/fast.png"]:
+    for _fn764 in ["speed/slow.webp","speed/medium.webp","speed/fast.webp"]:
         if not _os764.path.exists(_fn764):
             _b764.append(_fn764+"-missing")
-    if 'data-bot="easy" style="--cc:#22c55e;--ccbg:rgba(34,197,94,.16)"><div class="dot"></div><div class="ic"><img src="speed/slow.png' not in _sb764:
+    if 'data-bot="easy" style="--cc:#22c55e;--ccbg:rgba(34,197,94,.16)"><div class="dot"></div><div class="ic"><img src="speed/slow.webp' not in _sb764:
         _b764.append("easy-chip-not-slow")
-    if 'data-bot="mid" style="--cc:#fbbf24;--ccbg:rgba(251,191,36,.16)"><div class="dot"></div><div class="ic"><img src="speed/medium.png' not in _sb764:
+    if 'data-bot="mid" style="--cc:#fbbf24;--ccbg:rgba(251,191,36,.16)"><div class="dot"></div><div class="ic"><img src="speed/medium.webp' not in _sb764:
         _b764.append("mid-chip-not-medium")
-    if 'data-bot="hard" style="--cc:#ef4444;--ccbg:rgba(239,68,68,.16)"><div class="dot"></div><div class="ic"><img src="speed/fast.png' not in _sb764:
+    if 'data-bot="hard" style="--cc:#ef4444;--ccbg:rgba(239,68,68,.16)"><div class="dot"></div><div class="ic"><img src="speed/fast.webp' not in _sb764:
         _b764.append("hard-chip-not-fast")
     if _b764:
         fail("v764 difficulty-custom-icons: " + str(_b764[:7]))
     else:
-        ok("v764 (Hansen:spelling bee难度那几个图标帮我换成我做好的·容易用slow对应小乌龟·中等用medium小兔子·困难用fast·最快的用flash树懒·文件在压缩包里): 难度选择器(对手强度/机器人打字速度)三档图标由 emoji 改为用户上传的卡通运动员图标。映射: 容易(20字母/分)=slow.png(乌龟驮蜗牛) / 中等(50)=medium.png(兔子) / 困难(80)=fast.png(树懒·即用户说的Flash树懒反差梗·最快档用树懒) / 自定义=滑杆emoji不动。处理: 用户给的原图1254x1254 RGBA透明PNG·偏大·用PIL LANCZOS缩到240x240(显示44px·DPR3够清晰)·optimize·放 speed/ 目录随包(34-46KB每张)。替换: easy/mid/hard 三个 .chip 的 .ic 由 emoji(🐢/🐇/⚡)改为 img(width44 height44 object-fit contain)·按 data-bot 精确锚定替换。保留: 自定义档滑杆图标、自定义滑杆的慢/快刻度标签里的乌龟闪电、单词表里turtle/lightning词义emoji——都与难度档图标无关·不动。真机(本地服务渲染botBox): 三档.ic img=speed/slow|medium|fast.png 全部naturalWidth>0加载成功·难度卡排版正常·0报错。v764")
+        ok("v764 (Hansen:spelling bee难度那几个图标帮我换成我做好的·容易用slow对应小乌龟·中等用medium小兔子·困难用fast·最快的用flash树懒·文件在压缩包里): 难度选择器(对手强度/机器人打字速度)三档图标由 emoji 改为用户上传的卡通运动员图标。映射: 容易(20字母/分)=slow.webp(乌龟驮蜗牛) / 中等(50)=medium.webp(兔子) / 困难(80)=fast.webp(树懒·即用户说的Flash树懒反差梗·最快档用树懒) / 自定义=滑杆emoji不动。处理: 用户给的原图1254x1254 RGBA透明PNG·偏大·用PIL LANCZOS缩到240x240(显示44px·DPR3够清晰)·optimize·放 speed/ 目录随包(34-46KB每张)。替换: easy/mid/hard 三个 .chip 的 .ic 由 emoji(🐢/🐇/⚡)改为 img(width44 height44 object-fit contain)·按 data-bot 精确锚定替换。保留: 自定义档滑杆图标、自定义滑杆的慢/快刻度标签里的乌龟闪电、单词表里turtle/lightning词义emoji——都与难度档图标无关·不动。真机(本地服务渲染botBox): 三档.ic img=speed/slow|medium|fast.webp 全部naturalWidth>0加载成功·难度卡排版正常·0报错。v764")
 except Exception as _e764:
     fail("v764 check error: " + str(_e764))
 
@@ -5556,22 +5556,22 @@ try:
     import os as _os769
     _b769 = []
     _sb769 = open("spelling_bee.html", encoding="utf-8", errors="replace").read()
-    if "speed/custom.png" not in _sb769:
+    if "speed/custom.webp" not in _sb769:
         _b769.append("custom-img-not-referenced")
     if '<div class="ic">\U0001F39B</div>' in _sb769:
         _b769.append("old-fader-emoji-still-there")
-    if not _os769.path.exists("speed/custom.png"):
+    if not _os769.path.exists("speed/custom.webp"):
         _b769.append("custom-png-file-missing")
     if _sb769.count('class="diffIc"') != 4:
         _b769.append("diffIc!=4:" + str(_sb769.count('class="diffIc"')))
     _ci = _sb769.find('data-bot="custom"')
     _seg = _sb769[_ci:_ci+350] if _ci >= 0 else ""
-    if 'class="diffIc"' not in _seg or "speed/custom.png" not in _seg:
+    if 'class="diffIc"' not in _seg or "speed/custom.webp" not in _seg:
         _b769.append("custom-icon-not-diffIc-in-chip")
     if _b769:
         fail("v769 custom-icon: " + str(_b769[:6]))
     else:
-        ok("v769 (Hansen:自定义这个图标可以使用这个[上传的卡通形象]·而且也要加入可以自行调节大小的功能·加到spelling bee里面的自定义): 把『自定义』难度卡的图标从 fader滑杆emoji 换成用户上传的卡通形象(用户自制·ChatGPT生成已抠背景的全身图)·并纳入图标大小调节。处理: 用户上传1024x1536竖图(RGBA透明背景)→PIL getbbox裁透明边→按最长边等比缩到240(得160x240)→optimize存 speed/custom.png(28.6KB)。嵌入: 自定义chip的 <div class=ic>🎚️</div> 换成 <div class=ic><img src=speed/custom.png?v= class=diffIc></div>·关键=加 class=diffIc → 自动受『图标大小』滑块(--diffIcSize)控制·和容易/中等/困难三个一起缩放。竖图在方形图标框(object-fit:contain)等比显示不变形(偏瘦长属正常·全身图特性)。框高仍由--chipH独立控制(v768解耦不受影响·#botBox .chip)。diffIc总数3→4(已同步更新v765/v766计数守卫)。真机: 自定义图标加载成功(complete+naturalWidth>0·src=speed/custom.png)·botBox .diffIc=4·默认宽44; 设图标大小72→自定义72容易72(跟同一滑块一起缩放); 0报错; 截图确认形象在自定义卡内、框高一致。v769")
+        ok("v769 (Hansen:自定义这个图标可以使用这个[上传的卡通形象]·而且也要加入可以自行调节大小的功能·加到spelling bee里面的自定义): 把『自定义』难度卡的图标从 fader滑杆emoji 换成用户上传的卡通形象(用户自制·ChatGPT生成已抠背景的全身图)·并纳入图标大小调节。处理: 用户上传1024x1536竖图(RGBA透明背景)→PIL getbbox裁透明边→按最长边等比缩到240(得160x240)→optimize存 speed/custom.webp(28.6KB)。嵌入: 自定义chip的 <div class=ic>🎚️</div> 换成 <div class=ic><img src=speed/custom.webp?v= class=diffIc></div>·关键=加 class=diffIc → 自动受『图标大小』滑块(--diffIcSize)控制·和容易/中等/困难三个一起缩放。竖图在方形图标框(object-fit:contain)等比显示不变形(偏瘦长属正常·全身图特性)。框高仍由--chipH独立控制(v768解耦不受影响·#botBox .chip)。diffIc总数3→4(已同步更新v765/v766计数守卫)。真机: 自定义图标加载成功(complete+naturalWidth>0·src=speed/custom.webp)·botBox .diffIc=4·默认宽44; 设图标大小72→自定义72容易72(跟同一滑块一起缩放); 0报错; 截图确认形象在自定义卡内、框高一致。v769")
 except Exception as _e769:
     fail("v769 check error: " + str(_e769))
 
@@ -5609,7 +5609,7 @@ try:
             _bAV.append("js-token-missing:" + _tok)
     if "rotate(" in _avjs or "animation:spin" in _avjs or "@keyframes spin" in _avjs:
         _bAV.append("rotation-violation")
-    _miss = [n for n in range(1, 67) if not _osAV.path.exists("avatars/%02d.png" % n)]
+    _miss = [n for n in range(1, 67) if not _osAV.path.exists("avatars/%02d.webp" % n)]
     if _miss:
         _bAV.append("avatar-img-missing:" + str(_miss[:5]))
     _tplAV = open("template.html", encoding="utf-8", errors="replace").read()
@@ -5623,7 +5623,7 @@ try:
     if _bAV:
         fail("v771 avatar-system: " + str(_bAV[:6]))
     else:
-        ok("v771 (Hansen:把左上角头像做成换头像功能不要任何框·65动物形象+僵尸舞王共66·卡牌纯色背景可调色·设为头像·融入小程序绝不能有bug): 换头像系统模块 hansen_avatar.js。66形象(65动物职业立绘+僵尸舞王特别形象)优化进 avatars/01-66.png(裁透明边·缩380宽·透明PNG)。模块运行时改造 #avatarIcon: 去3px金边+隐藏旋转光环(无框·守旋转禁区)·显示所选动物头部(cover·top居中)·底为该角色卡牌纯色·右下小「换」角标·点击开选择器。选择器(class全加hsn-av-前缀防冲突·纯display切换不用全局hidden·padding-bottom撑3比4): 66卡牌网格→形象详情大卡(角色立纯色背景+24色板+自定义色)→设为头像。localStorage hsn_avatar cur+每角色colors 跨岛同步·默认01。template第2347行 updateTopBar 改为『有HsnAvatar则render否则回退等级emoji』防擦除+ body末加载模块·generate重生成19岛。冒险者图鉴 showLevelMap 从头像移到名字行不丢失。真机(animal+adjective): 无框渲染·66格·设为头像持久·updateTopBar不擦除·刷新+跨岛同步·名字行showLevelMap·顶栏Lv金币XP正常·0报错。v771")
+        ok("v771 (Hansen:把左上角头像做成换头像功能不要任何框·65动物形象+僵尸舞王共66·卡牌纯色背景可调色·设为头像·融入小程序绝不能有bug): 换头像系统模块 hansen_avatar.js。66形象(65动物职业立绘+僵尸舞王特别形象)优化进 avatars/01-66.webp(裁透明边·缩380宽·透明PNG)。模块运行时改造 #avatarIcon: 去3px金边+隐藏旋转光环(无框·守旋转禁区)·显示所选动物头部(cover·top居中)·底为该角色卡牌纯色·右下小「换」角标·点击开选择器。选择器(class全加hsn-av-前缀防冲突·纯display切换不用全局hidden·padding-bottom撑3比4): 66卡牌网格→形象详情大卡(角色立纯色背景+24色板+自定义色)→设为头像。localStorage hsn_avatar cur+每角色colors 跨岛同步·默认01。template第2347行 updateTopBar 改为『有HsnAvatar则render否则回退等级emoji』防擦除+ body末加载模块·generate重生成19岛。冒险者图鉴 showLevelMap 从头像移到名字行不丢失。真机(animal+adjective): 无框渲染·66格·设为头像持久·updateTopBar不擦除·刷新+跨岛同步·名字行showLevelMap·顶栏Lv金币XP正常·0报错。v771")
 except Exception as _eAV:
     fail("v771 avatar check error: " + str(_eAV))
 
@@ -5642,15 +5642,15 @@ try:
         fail("v773 头像图缓存戳 HSNAVV 缺失(否则覆盖高清图后老用户仍缓存旧糊图)")
     else:
         import struct as _st773
-        with open("avatars/27.png", "rb") as _f773:
+        with open("avatars/27.webp", "rb") as _f773:
             _f773.read(16)
             _w773 = _st773.unpack(">I", _f773.read(4))[0]
         if _w773 < 500:
-            fail("v773 章鱼立绘 avatars/27.png 宽仅 %d(应≥500·已升最长边720高清·否则放大模糊)" % _w773)
+            fail("v773 章鱼立绘 avatars/27.webp 宽仅 %d(应≥500·已升最长边720高清·否则放大模糊)" % _w773)
         else:
             ok("v773 头像详情卡修复(Hansen:「名字别压住人物形象·章鱼八爪要完整显示·图片要清晰·用心做」): ①名字移出卡片→卡下独立框 hsn-av-nameplate(大名+动物职业)·卡内只放形象不再遮挡。②卡片形象改 contain(max-width/max-height:92%·底4%锚定)·宽如章鱼八爪按宽适配完整·高如狼按高适配·都不裁。③网格同样图完整(缩略图固定128px+max86% contain)+名字移到缩略图下方独立条·并修 grid 在 flex:1 容器内 auto 行塌成22px 的bug(min-height:0+grid-auto-rows:max-content+align-content:start→行174.5px)。④66立绘从380宽重做到最长边720高清(总21.8MB)+缓存戳 HSNAVV(?v=随build升版刷新)。真机(animal): 章鱼八爪完整在卡内·名字框在卡下方不压形象·720清晰·网格66格全身+名字·0报错。v773")
 except FileNotFoundError:
-    fail("v773 hansen_avatar.js 或 avatars/27.png 不存在")
+    fail("v773 hansen_avatar.js 或 avatars/27.webp 不存在")
 except Exception as _e773:
     fail("v773 avatar-card check error: " + str(_e773))
 
@@ -5790,14 +5790,14 @@ try:
     else:
         if "getAdvLevel().emoji" in _avline780:
             _bad780.append("头像渲染行仍回退等级emoji(应回退默认角色#1·头像路径不得有emoji)")
-        if "avatars/01.png" not in _avline780:
-            _bad780.append("头像catch未回退默认角色#1(avatars/01.png)")
+        if "avatars/01.webp" not in _avline780:
+            _bad780.append("头像catch未回退默认角色#1(avatars/01.webp)")
         if "img.hsn-av-img" not in _avline780:
             _bad780.append("头像渲染行缺角色立绘hsn-av-img")
     if _bad780:
         fail("v780 头像未彻底弃用emoji: "+"·".join(_bad780))
     else:
-        ok("v780 头像路径彻底弃用等级emoji(Hansen:既已固定角色头像·不该再保留旧等级emoji兜底·删干净免每次加载占位影响小程序): 头像渲染唯一残留emoji是catch分支(读localStorage崩溃才触发·正常永不走)·改成连catch也回退默认角色#1(avatars/01.png)·头像渲染行彻底零emoji(守卫断言该行无getAdvLevel().emoji)。★说明: 等级emoji(🎒🌱…⚔️)是unicode字符非图片·本就不加载/无占位图/不影响性能·avatars仅66张新角色图无任何旧头像文件·此版纯为代码洁净彻底移除头像对emoji引用。注: 等级emoji仍用于设置/统计的等级标签(🏕 Lv.x 荒野旅人·属冒险等级身份非头像·unicode无加载)·如需一并去掉再说。v780")
+        ok("v780 头像路径彻底弃用等级emoji(Hansen:既已固定角色头像·不该再保留旧等级emoji兜底·删干净免每次加载占位影响小程序): 头像渲染唯一残留emoji是catch分支(读localStorage崩溃才触发·正常永不走)·改成连catch也回退默认角色#1(avatars/01.webp)·头像渲染行彻底零emoji(守卫断言该行无getAdvLevel().emoji)。★说明: 等级emoji(🎒🌱…⚔️)是unicode字符非图片·本就不加载/无占位图/不影响性能·avatars仅66张新角色图无任何旧头像文件·此版纯为代码洁净彻底移除头像对emoji引用。注: 等级emoji仍用于设置/统计的等级标签(🏕 Lv.x 荒野旅人·属冒险等级身份非头像·unicode无加载)·如需一并去掉再说。v780")
 except FileNotFoundError:
     fail("v780 template.html 不存在")
 except Exception as _e780:
@@ -5984,7 +5984,7 @@ try:
     if _bad787:
         fail("v787 图片加载重试不达标: "+"·".join(_bad787))
     else:
-        ok("v787 图片加载失败自动重试·全app根治'图片偶尔加载不出来一直空白'(Hansen:头像里沙翁(骆驼·教授/18号)没加载出来只剩背景色·要彻底解决这种小程序加载不及时·不要再出现·并让贾维斯把它当bug盯住): 根因——文件本身完好(18.png 308×720有效·66张全在)·是微信WebView慢网络下图片加载失败后【没有任何重试·一失败就永久空白】; 而头像所有img都没接全局重试器hansenImgErr(宠物/boss图都接了·唯独头像漏)。三层修复: ①头像4处img全接onerror重试(网格图hsn-av-thumb·详情大图hsnAvCardImg·顶栏头像hsn-av-img createElement·详情切换复用同img)+新增_avImgReset(切换头像复用同img时清掉上一张失败残留[重试计数/errored标记/?占位]让新图重新走3次重试)。②hansenImgErr加__heBusy防重入(全局捕获器capture阶段+img自带onerror target阶段同次error派发会双触发→去重避免计数翻倍)。③【彻底解决】全局图片错误捕获器: img的error事件不冒泡但capture阶段经过document→hansen_cards.js挂document.addEventListener('error',fn,true)拦下【全app所有在DOM里的<img>】加载失败·自动走hansenImgErr的3次重试(带缓存破坏__rt·递增延迟450/900/1350ms)·3次后显?占位; 各岛都加载cards.js故全岛覆盖; 4个独立运行页(boss_hall/spelling_bee/season_showcase/index不加载cards.js)各自插入自带的同款全局器(__hsnGImgErr)。这样无论哪个模块/页面的图·哪怕没单独写onerror·一次网络抖动失败也自动重试恢复而非永久空白。真机(animal)6项全过: hansenImgErr在·全局器__hsnGlobalImgErr已注册·头像网格66/66带onerror·详情卡img带onerror·全局器拦下【没写onerror的坏图】并重试(imgTries=2·src含__rt)·缓存破坏生效·0报错。★守卫盯死: 头像4处img重试+_avImgReset·hansenImgErr防重入·cards.js全局capture捕获器·4独立页自带全局器。v787")
+        ok("v787 图片加载失败自动重试·全app根治'图片偶尔加载不出来一直空白'(Hansen:头像里沙翁(骆驼·教授/18号)没加载出来只剩背景色·要彻底解决这种小程序加载不及时·不要再出现·并让贾维斯把它当bug盯住): 根因——文件本身完好(18.webp 308×720有效·66张全在)·是微信WebView慢网络下图片加载失败后【没有任何重试·一失败就永久空白】; 而头像所有img都没接全局重试器hansenImgErr(宠物/boss图都接了·唯独头像漏)。三层修复: ①头像4处img全接onerror重试(网格图hsn-av-thumb·详情大图hsnAvCardImg·顶栏头像hsn-av-img createElement·详情切换复用同img)+新增_avImgReset(切换头像复用同img时清掉上一张失败残留[重试计数/errored标记/?占位]让新图重新走3次重试)。②hansenImgErr加__heBusy防重入(全局捕获器capture阶段+img自带onerror target阶段同次error派发会双触发→去重避免计数翻倍)。③【彻底解决】全局图片错误捕获器: img的error事件不冒泡但capture阶段经过document→hansen_cards.js挂document.addEventListener('error',fn,true)拦下【全app所有在DOM里的<img>】加载失败·自动走hansenImgErr的3次重试(带缓存破坏__rt·递增延迟450/900/1350ms)·3次后显?占位; 各岛都加载cards.js故全岛覆盖; 4个独立运行页(boss_hall/spelling_bee/season_showcase/index不加载cards.js)各自插入自带的同款全局器(__hsnGImgErr)。这样无论哪个模块/页面的图·哪怕没单独写onerror·一次网络抖动失败也自动重试恢复而非永久空白。真机(animal)6项全过: hansenImgErr在·全局器__hsnGlobalImgErr已注册·头像网格66/66带onerror·详情卡img带onerror·全局器拦下【没写onerror的坏图】并重试(imgTries=2·src含__rt)·缓存破坏生效·0报错。★守卫盯死: 头像4处img重试+_avImgReset·hansenImgErr防重入·cards.js全局capture捕获器·4独立页自带全局器。v787")
 except FileNotFoundError as _fe787:
     fail("v787 图片重试守卫: 文件缺失 "+str(_fe787))
 except Exception as _e787:
@@ -6075,7 +6075,7 @@ try:
     if _bad790:
         fail("v790 boss卡静态/破图兜底不达标: "+"·".join(_bad790))
     else:
-        ok("v790 boss卡详情彻底静态·根治'卡片里一片一片彩虹闪+一卡一卡卡顿' + boss图弱网破损优雅兜底(Hansen:打开卡册里boss卡·boss图片都加载不出来变破图·而且卡片后面还有东西一闪一闪一片一片的像卡顿那种闪·为什么越修毛病越多·守永久禁旋转/微光闪铁律): 真凶(v785/v788漏查)——boss_hall.html的initTilt()里有个requestAnimationFrame死循环loop()·【空闲时让全息箔纸.foil用Math.sin(t/2600)/Math.cos(t/3100)持续漂移background-position=彩虹斜条一片一片地闪·并每帧给卡片cardEl应用rotateY/rotateX(空闲虽0deg但每帧重新赋值transform)=持续重绘→一卡一卡卡顿】·均违反禁旋转/微光闪铁律。之前v785删motes/v788冻.kb冻.zbd都没碰到这个loop。boss图破损时箔纸更明显(露出底下一直在动的箔纸)。彻底修(boss_hall.html): ①initTilt改纯静态——删掉整个rAF死循环loop+倾斜监听·卡片transform='none'不旋转·箔纸.foil固定backgroundPosition='50% 50%'居中不漂移·炫光.glare固定居中。主卡(initTilt(stage,card))与放大卡(openZoom里initTilt(zoom,clone))都走这=都静态。②boss图弱网加载失败优雅兜底——#artImg加内联onerror='this.style.visibility=hidden'(隐藏破图标·露出底下卡面背景·不再显示难看📷)+onload='visibility='(全局重试__hsnGImgErr重试成功则自动恢复显示)·内联属性确保cloneNode到放大卡也带着。boss图文件本身都在(部署包含bosses/lv01-20.png+bosses_bg)·是弱网(电量16%信号差)加载失败·全局重试3次仍失败才隐藏。真机(boss_hall?lv=3&own=1,3,7): 主卡transform=none·箔纸pos=50% 50%·点放大→放大卡transform=none且t1==t2(不随时间变=无rAF重绘)·箔纸不随时间漂移·artImg有onerror+onload·设坏src后artImg自动visibility=hidden(不显示破图)·0报错。★彻底解决: boss卡(主+放大)零旋转零漂移零持续重绘·物理上没有任何会动会闪的东西·破图也优雅隐藏。v790")
+        ok("v790 boss卡详情彻底静态·根治'卡片里一片一片彩虹闪+一卡一卡卡顿' + boss图弱网破损优雅兜底(Hansen:打开卡册里boss卡·boss图片都加载不出来变破图·而且卡片后面还有东西一闪一闪一片一片的像卡顿那种闪·为什么越修毛病越多·守永久禁旋转/微光闪铁律): 真凶(v785/v788漏查)——boss_hall.html的initTilt()里有个requestAnimationFrame死循环loop()·【空闲时让全息箔纸.foil用Math.sin(t/2600)/Math.cos(t/3100)持续漂移background-position=彩虹斜条一片一片地闪·并每帧给卡片cardEl应用rotateY/rotateX(空闲虽0deg但每帧重新赋值transform)=持续重绘→一卡一卡卡顿】·均违反禁旋转/微光闪铁律。之前v785删motes/v788冻.kb冻.zbd都没碰到这个loop。boss图破损时箔纸更明显(露出底下一直在动的箔纸)。彻底修(boss_hall.html): ①initTilt改纯静态——删掉整个rAF死循环loop+倾斜监听·卡片transform='none'不旋转·箔纸.foil固定backgroundPosition='50% 50%'居中不漂移·炫光.glare固定居中。主卡(initTilt(stage,card))与放大卡(openZoom里initTilt(zoom,clone))都走这=都静态。②boss图弱网加载失败优雅兜底——#artImg加内联onerror='this.style.visibility=hidden'(隐藏破图标·露出底下卡面背景·不再显示难看📷)+onload='visibility='(全局重试__hsnGImgErr重试成功则自动恢复显示)·内联属性确保cloneNode到放大卡也带着。boss图文件本身都在(部署包含bosses/lv01-20.webp+bosses_bg)·是弱网(电量16%信号差)加载失败·全局重试3次仍失败才隐藏。真机(boss_hall?lv=3&own=1,3,7): 主卡transform=none·箔纸pos=50% 50%·点放大→放大卡transform=none且t1==t2(不随时间变=无rAF重绘)·箔纸不随时间漂移·artImg有onerror+onload·设坏src后artImg自动visibility=hidden(不显示破图)·0报错。★彻底解决: boss卡(主+放大)零旋转零漂移零持续重绘·物理上没有任何会动会闪的东西·破图也优雅隐藏。v790")
 except FileNotFoundError as _fe790:
     fail("v790 boss卡静态守卫: 文件缺失 "+str(_fe790))
 except Exception as _e790:
@@ -6144,7 +6144,7 @@ try:
     if _bad792:
         fail("v792 boss角色立绘加载根治不达标: "+"·".join(_bad792))
     else:
-        ok("v792 boss角色立绘加载根治·根治'点开boss卡只剩背景没有角色立绘'(Hansen怒:点boss卡上面按理说应该有角色形象·结果啥都没有直接空了光有一个背景·会不会办事): 真凶——boss卡角色立绘`#artImg`(`bosses/lvNN.png`·256x256小图)初始`src=\u0022\u0022`空值·空值在微信WebView会触发error→v787全局重试R()(document错误捕获)把它的src改成`?__rt=`(=`split('#')[0]`空串拼`?__rt`·解析成【页面HTML地址】非图片)·且这个改写的setTimeout在renderBoss刚`artImg.src=artPath`设好真src【之后】触发→覆盖真src→角色图加载的是页面HTML=永远失败·再被v790的onerror隐藏=卡面只剩场景背景没角色立绘。Chrome不对空src报错所以Playwright正常·微信WebView会=只在真机出现(匹配Hansen真机现象)。关键:角色图在DOM里受全局R影响·而场景图`bgPath`用游离`new Image()`加载【不在DOM·error不冒泡到document·不受R影响】→场景能加载·角色被坏重试覆盖='359KB大图能出来·46KB小图反而失败'的反常根源。彻底修(boss_hall.html): ①`#artImg`删掉初始`src=\u0022\u0022`空值·改为无src属性·由renderBoss才设真src→无空src报错→无坏重试。②全局重试R()加固——只重试真正的图片URL(正则`/\\.(png|jpe?g|webp|gif|svg)(\\?|#|$)/i`校验)·空src/页面URL一律跳过return→即使有空/非图片error也不会把src改成页面地址覆盖真src。③启动后延迟1.2s预加载【全部20张】角色立绘(各19-46KB·共~600KB·弱网提前缓存·切到任意boss立即显示)·相邻boss立绘也在setSceneBg预加载。真机验证: 主卡artImg正常加载(naturalWidth=256·可见)·R加固后空src/非图片src不被改写、真图片src失败仍正常重试加__rt·0报错。★彻底解决: boss卡角色立绘不再被空src坏重试覆盖·弱网也提前缓存·点开boss卡角色形象正常显示在场景之上。v792")
+        ok("v792 boss角色立绘加载根治·根治'点开boss卡只剩背景没有角色立绘'(Hansen怒:点boss卡上面按理说应该有角色形象·结果啥都没有直接空了光有一个背景·会不会办事): 真凶——boss卡角色立绘`#artImg`(`bosses/lvNN.webp`·256x256小图)初始`src=\u0022\u0022`空值·空值在微信WebView会触发error→v787全局重试R()(document错误捕获)把它的src改成`?__rt=`(=`split('#')[0]`空串拼`?__rt`·解析成【页面HTML地址】非图片)·且这个改写的setTimeout在renderBoss刚`artImg.src=artPath`设好真src【之后】触发→覆盖真src→角色图加载的是页面HTML=永远失败·再被v790的onerror隐藏=卡面只剩场景背景没角色立绘。Chrome不对空src报错所以Playwright正常·微信WebView会=只在真机出现(匹配Hansen真机现象)。关键:角色图在DOM里受全局R影响·而场景图`bgPath`用游离`new Image()`加载【不在DOM·error不冒泡到document·不受R影响】→场景能加载·角色被坏重试覆盖='359KB大图能出来·46KB小图反而失败'的反常根源。彻底修(boss_hall.html): ①`#artImg`删掉初始`src=\u0022\u0022`空值·改为无src属性·由renderBoss才设真src→无空src报错→无坏重试。②全局重试R()加固——只重试真正的图片URL(正则`/\\.(png|jpe?g|webp|gif|svg)(\\?|#|$)/i`校验)·空src/页面URL一律跳过return→即使有空/非图片error也不会把src改成页面地址覆盖真src。③启动后延迟1.2s预加载【全部20张】角色立绘(各19-46KB·共~600KB·弱网提前缓存·切到任意boss立即显示)·相邻boss立绘也在setSceneBg预加载。真机验证: 主卡artImg正常加载(naturalWidth=256·可见)·R加固后空src/非图片src不被改写、真图片src失败仍正常重试加__rt·0报错。★彻底解决: boss卡角色立绘不再被空src坏重试覆盖·弱网也提前缓存·点开boss卡角色形象正常显示在场景之上。v792")
 except FileNotFoundError as _fe792:
     fail("v792 boss角色立绘守卫: 文件缺失 "+str(_fe792))
 except Exception as _e792:
@@ -6452,7 +6452,7 @@ try:
 except Exception as _e802:
     fail("v802 season-fx check error: " + str(_e802))
 
-# 🔴 v803: 终末观测者·边界守夜人 → 星图烙印(starbrand) canvas 攻击特效移植进引擎 + 占位SVG换真立绘(bosses/observer.png)。
+# 🔴 v803: 终末观测者·边界守夜人 → 星图烙印(starbrand) canvas 攻击特效移植进引擎 + 占位SVG换真立绘(bosses/observer.webp)。
 # 星点逐个亮→星座连线逐段画across连到勇者→火花沿线游走逐点引爆→勇者处终爆(网状连线引爆·非光束·与时之君主激光柱运动完全不同·Hansen否决雷同后重做)。
 # 零震屏零屏闪、不重绘boss(DOM立绘)、纯canvas无外部图(无BUG#67)、clip到barBot+16(答题区零侵犯)、命中调deal()幂等一次、一层fixed canvas播完即移除、全ES5微信内核安全。
 try:
@@ -6466,13 +6466,13 @@ try:
     if _bnm803 not in _v803: _v803_bad.append("FX\u672a\u6620\u5c04\u7ec8\u672b\u89c2\u6d4b\u8005")
     if "clipBottom=barBot+16" not in _v803: _v803_bad.append("hbaStarBrand\u7f3a clipBottom=barBot+16 \u7b54\u9898\u533a\u94b3\u4f4d")
     _idj803 = open("island_data.json", encoding="utf-8").read()
-    if "bosses/observer.png" not in _idj803: _v803_bad.append("island_data\u672a\u5f15\u7528 bosses/observer.png \u771f\u7acb\u7ed8")
+    if "bosses/observer.webp" not in _idj803: _v803_bad.append("island_data\u672a\u5f15\u7528 bosses/observer.webp \u771f\u7acb\u7ed8")
     if 'id="oe"' in _idj803: _v803_bad.append("\u7ec8\u672b\u89c2\u6d4b\u8005\u5360\u4f4dSVG\u6b8b\u7559")
-    if not os.path.exists("bosses/observer.png"): _v803_bad.append("\u7f3a\u7acb\u7ed8\u6587\u4ef6 bosses/observer.png")
+    if not os.path.exists("bosses/observer.webp"): _v803_bad.append("\u7f3a\u7acb\u7ed8\u6587\u4ef6 bosses/observer.webp")
     if _v803_bad:
         for _b803 in _v803_bad: fail("v803 \u661f\u56fe\u70d9\u5370: " + _b803)
     else:
-        print("\u2705 v803 \u7ec8\u672b\u89c2\u6d4b\u8005\u661f\u56fe\u70d9\u5370(starbrand)+\u771f\u7acb\u7ed8: hbaStarBrand/__hbaSbBurst/playFx\u5206\u652f/FX\u6761\u76ee/clipBottom\u94b3\u4f4d \u5747\u5728; bosses/observer.png \u5df2\u66ff\u6362\u5360\u4f4dSVG(3\u5173). v803")
+        print("\u2705 v803 \u7ec8\u672b\u89c2\u6d4b\u8005\u661f\u56fe\u70d9\u5370(starbrand)+\u771f\u7acb\u7ed8: hbaStarBrand/__hbaSbBurst/playFx\u5206\u652f/FX\u6761\u76ee/clipBottom\u94b3\u4f4d \u5747\u5728; bosses/observer.webp \u5df2\u66ff\u6362\u5360\u4f4dSVG(3\u5173). v803")
 except Exception as _e803:
     fail("v803 starbrand check error: " + str(_e803))
 
@@ -6547,7 +6547,7 @@ try:
 except Exception as _e807:
     fail("v807 unlock-fix check error: " + str(_e807))
 
-# 🔴 v808: 终末观测者立绘(bosses/observer.png)修复——原 384×384 且头脚顶到上下边(横切·Hansen 反馈"两边横切、显示不清楚")。重做: 用高清源 nigher.png(1254)→ 保留完整场景(人物+宇宙装饰)→ 缩到 800×800 留余量(内容长边~776·上下各~12px)居中 → 不横切 + 高清, 和其他4个赛季boss(~800)风格统一。
+# 🔴 v808: 终末观测者立绘(bosses/observer.webp)修复——原 384×384 且头脚顶到上下边(横切·Hansen 反馈"两边横切、显示不清楚")。重做: 用高清源 nigher.webp(1254)→ 保留完整场景(人物+宇宙装饰)→ 缩到 800×800 留余量(内容长边~776·上下各~12px)居中 → 不横切 + 高清, 和其他4个赛季boss(~800)风格统一。
 try:
     try:
         from PIL import Image as _Img808
@@ -6555,23 +6555,23 @@ try:
     except Exception:
         _Img808 = None
     if _Img808 is not None:
-        _ob = _Img808.open("bosses/observer.png").convert("RGBA")
+        _ob = _Img808.open("bosses/observer.webp").convert("RGBA")
         _ow, _oh = _ob.size
         _oa = _np808.array(_ob)[:, :, 3]
         _bad808 = []
-        if min(_ow, _oh) < 700: _bad808.append("observer.png 太小(%dx%d·应≥700·和兄弟boss ~800 统一高清)" % (_ow, _oh))
-        if int((_oa[0, :] > 5).sum()) > 5 or int((_oa[-1, :] > 5).sum()) > 5: _bad808.append("observer.png 内容顶到上下边(横切·头脚被切)")
-        if int((_oa[:, 0] > 5).sum()) > 5 or int((_oa[:, -1] > 5).sum()) > 5: _bad808.append("observer.png 内容顶到左右边(横切)")
+        if min(_ow, _oh) < 700: _bad808.append("observer.webp 太小(%dx%d·应≥700·和兄弟boss ~800 统一高清)" % (_ow, _oh))
+        if int((_oa[0, :] > 5).sum()) > 5 or int((_oa[-1, :] > 5).sum()) > 5: _bad808.append("observer.webp 内容顶到上下边(横切·头脚被切)")
+        if int((_oa[:, 0] > 5).sum()) > 5 or int((_oa[:, -1] > 5).sum()) > 5: _bad808.append("observer.webp 内容顶到左右边(横切)")
         if _bad808:
             for _b808 in _bad808: fail("v808 终末观测者立绘: " + _b808)
         else:
-            print("\u2705 v808 终末观测者立绘 observer.png: %dx%d·四边均有余量(无横切)·高清完整场景. v808" % (_ow, _oh))
+            print("\u2705 v808 终末观测者立绘 observer.webp: %dx%d·四边均有余量(无横切)·高清完整场景. v808" % (_ow, _oh))
     else:
         print("\u2139 v808 observer 立绘检查跳过(PIL/numpy 不可用)")
 except Exception as _e808:
     fail("v808 observer-art check error: " + str(_e808))
 
-# 🔴 v809: 5个赛季守关boss立绘全部用高清原图(1254×1254·Hansen提供)重做——原 ~800 太糊。处理: 密度裁剪去边角噪点(保留halo)→ 缩到1200画布(接近1254源原生·1.5×于旧800·适配retina高分屏)留余量(内容长边~1152·四边~24px)居中 → 高清+不横切+和兄弟统一。涉及 starmaker/lightangel/abysslord/timelord/observer.png(boss战 + v805 赛季boss卡共用)。
+# 🔴 v809: 5个赛季守关boss立绘全部用高清原图(1254×1254·Hansen提供)重做——原 ~800 太糊。处理: 密度裁剪去边角噪点(保留halo)→ 缩到1200画布(接近1254源原生·1.5×于旧800·适配retina高分屏)留余量(内容长边~1152·四边~24px)居中 → 高清+不横切+和兄弟统一。涉及 starmaker/lightangel/abysslord/timelord/observer.webp(boss战 + v805 赛季boss卡共用)。
 try:
     try:
         from PIL import Image as _Img809
@@ -6581,7 +6581,7 @@ try:
     if _Img809 is not None:
         _bad809 = []
         for _bn in ['starmaker', 'lightangel', 'abysslord', 'timelord', 'observer']:
-            _bp = 'bosses/%s.png' % _bn
+            _bp = 'bosses/%s.webp' % _bn
             _bi = _Img809.open(_bp).convert('RGBA')
             _bw, _bh = _bi.size
             _ba = _np809.array(_bi)[:, :, 3]
@@ -6869,7 +6869,7 @@ else:
     ok('v844 赛尔娅限定卡星系展示(season_showcase·星系只给女帝): season_showcase.html参数化CARDS(赛尔娅S1·FORMS=CARD.forms·名字台词从CARD填充)·赛尔娅限定卡(__hs_gcard)点击走openShowcase(星系canvas+3D倾斜卡+闪卡+多形态切换+背景切换)·【星系专属女帝】其他5守关boss改走boss_hall无星系(见v845)')
 
 # ---- 检查: ★v847 神秘殿堂卡片缩略图统一(1:1框消顶部留白·赛尔娅用透明立绘·底对齐·防回退) ----
-# 🔴v847(Hansen·反复强调"boss太小/顶部留白太大/赛尔娅规格不统一"): 神秘殿堂(openHall)卡片网格——5个守关boss立绘是1200x1200正方形硬塞进3:4竖框→按宽适配·顶部空出~25%大留白; 赛尔娅(__hs_gcard)缩略图用的是HD整张卡面图saelya_hd(1086x1448·居中contain)→人物缩在中间像"卡里套小卡"·与5boss"透明立绘+本命背景"两套渲染。本次统一: ①缩略图框3:4→1:1(正方形立绘在正方形框里完美填满·顶部留白归零·人物最大化·零裁切——已量5立绘人物含装饰占宽86.9~95.8%·透明边最窄仅2.1%·根本无法靠放大去填满竖框·故改框形而非放大) ②赛尔娅缩略图改用透明立绘formPng(默认bosses/saelya.png·600x800正好竖图)替代HD卡面图·底对齐·与5boss同款渲染 ③换形象实时刷新+赛季面板当季卡同步统一·全局一致。
+# 🔴v847(Hansen·反复强调"boss太小/顶部留白太大/赛尔娅规格不统一"): 神秘殿堂(openHall)卡片网格——5个守关boss立绘是1200x1200正方形硬塞进3:4竖框→按宽适配·顶部空出~25%大留白; 赛尔娅(__hs_gcard)缩略图用的是HD整张卡面图saelya_hd(1086x1448·居中contain)→人物缩在中间像"卡里套小卡"·与5boss"透明立绘+本命背景"两套渲染。本次统一: ①缩略图框3:4→1:1(正方形立绘在正方形框里完美填满·顶部留白归零·人物最大化·零裁切——已量5立绘人物含装饰占宽86.9~95.8%·透明边最窄仅2.1%·根本无法靠放大去填满竖框·故改框形而非放大) ②赛尔娅缩略图改用透明立绘formPng(默认bosses/saelya.webp·600x800正好竖图)替代HD卡面图·底对齐·与5boss同款渲染 ③换形象实时刷新+赛季面板当季卡同步统一·全局一致。
 _v847_bad = []
 _se847 = _r31('hansen_season.js')
 # ① 两类缩略图框都改正方形 1:1(消顶部留白)
@@ -6882,18 +6882,18 @@ if "aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:'+tBg" in _se
     _v847_bad.append('赛尔娅缩略图框回退成3:4(应1:1)')
 if "aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:'+bcBg" in _se847:
     _v847_bad.append('5守关boss缩略图框回退成3:4(应1:1)')
-# ② 赛尔娅神秘殿堂缩略图用透明立绘formPng/saelya.png(非HD卡面图·规格统一)
-if "(pref&&pref.formPng)?pref.formPng:'bosses/saelya.png'" not in _se847:
-    _v847_bad.append('赛尔娅神秘殿堂缩略图未改用透明立绘formPng/saelya.png')
+# ② 赛尔娅神秘殿堂缩略图用透明立绘formPng/saelya.webp(非HD卡面图·规格统一)
+if "(pref&&pref.formPng)?pref.formPng:'bosses/saelya.webp'" not in _se847:
+    _v847_bad.append('赛尔娅神秘殿堂缩略图未改用透明立绘formPng/saelya.webp')
 if "(pref&&pref.formImg)?pref.formImg:s.card.img" in _se847:
     _v847_bad.append('赛尔娅神秘殿堂缩略图回退成HD卡面图(formImg/s.card.img·应formPng透明立绘)')
 # ③ 赛季面板当季卡同步用透明立绘
-if "(pPref&&pPref.formPng)?pPref.formPng:'bosses/saelya.png'" not in _se847:
+if "(pPref&&pPref.formPng)?pPref.formPng:'bosses/saelya.webp'" not in _se847:
     _v847_bad.append('赛季面板当季卡缩略图未改用透明立绘formPng')
 if "(pPref&&pPref.formImg)?pPref.formImg:season.card.img" in _se847:
     _v847_bad.append('赛季面板当季卡缩略图回退成HD卡面图(应formPng)')
 # ④ 换形象实时刷新缩略图保持透明立绘+底对齐(不回退HD)
-if "var _sp=(pref.formPng||'bosses/saelya.png')" not in _se847 or "img.style.objectPosition='center bottom'" not in _se847:
+if "var _sp=(pref.formPng||'bosses/saelya.webp')" not in _se847 or "img.style.objectPosition='center bottom'" not in _se847:
     _v847_bad.append('换形象实时刷新(apply)未保持透明立绘+底对齐')
 # ⑤ 立绘底对齐: 缩略图img(赛尔娅gcard与5boss bcard)统一 object-position:center bottom(同款filter→应≥2处)
 if _se847.count("object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))") < 2:
@@ -6901,7 +6901,7 @@ if _se847.count("object-fit:contain;object-position:center bottom;filter:drop-sh
 if _v847_bad:
     fail('v847 神秘殿堂缩略图统一: ' + ' | '.join(_v847_bad))
 else:
-    ok('v847 神秘殿堂卡片缩略图统一(Hansen·反复强调"boss太小/顶部留白太大/赛尔娅规格不统一"): ①缩略图框3:4→1:1正方形(5个守关boss 1200x1200正方形立绘完美填满·顶部留白归零·人物最大化·零裁切——量过立绘人物含装饰占宽86.9~95.8%·透明边最窄仅2.1%·无法靠放大填满竖框故改框形) ②赛尔娅神秘殿堂缩略图改用透明立绘formPng(默认bosses/saelya.png·600x800正好竖图)替代HD整张卡面图saelya_hd·底对齐(object-position:center bottom)·与5守关boss【同款渲染·规格统一】(不再"卡里套小卡") ③换形象实时刷新(apply)+赛季面板当季卡同步用透明立绘+底对齐·全局规格一致')
+    ok('v847 神秘殿堂卡片缩略图统一(Hansen·反复强调"boss太小/顶部留白太大/赛尔娅规格不统一"): ①缩略图框3:4→1:1正方形(5个守关boss 1200x1200正方形立绘完美填满·顶部留白归零·人物最大化·零裁切——量过立绘人物含装饰占宽86.9~95.8%·透明边最窄仅2.1%·无法靠放大填满竖框故改框形) ②赛尔娅神秘殿堂缩略图改用透明立绘formPng(默认bosses/saelya.webp·600x800正好竖图)替代HD整张卡面图saelya_hd·底对齐(object-position:center bottom)·与5守关boss【同款渲染·规格统一】(不再"卡里套小卡") ③换形象实时刷新(apply)+赛季面板当季卡同步用透明立绘+底对齐·全局规格一致')
 
 
 # ---- 检查: ★v846 season_showcase全面消除"一闪一闪"(明灭/脉动/粒子/爆闪·同boss_hall v785/v788/v790·防回退) ----
@@ -6939,7 +6939,7 @@ _se845 = _r31('hansen_season.js')
 if 'SEASON_BOSSES' not in _bh845:
     _v845_bad.append('boss_hall缺SEASON_BOSSES数据')
 for _k845 in ['starmaker','lightangel','abysslord','timelord','observer']:
-    if ("bosses/"+_k845+".png") not in _bh845:
+    if ("bosses/"+_k845+".webp") not in _bh845:
         _v845_bad.append('boss_hall的SEASON_BOSSES缺立绘'+_k845)
 if "QS.get('season')" not in _bh845 or 'BOSSES=SEASON_BOSSES' not in _bh845:
     _v845_bad.append('boss_hall未按?season切换到SEASON_BOSSES')
@@ -7177,7 +7177,7 @@ _v851_bad=[]
 _hc851=_r31('hansen_cards.js')
 _tpl851=_r31('template.html')
 # 🔴v874(Hansen定稿): 星海旧内容(宇宙地图/5星域子岛/信物/星轨)整套废除——番外篇=单词大陆8岛(land_map)·hub=女帝终战竞技场。改验新语义+防复活。
-for _m in ['星海女帝 · 终战','还需通关','决战星海女帝','hsn_landmap_cleared_','hansenStartRebattle(6)','saelya.png','🔴v874']:
+for _m in ['星海女帝 · 终战','还需通关','决战星海女帝','hsn_landmap_cleared_','hansenStartRebattle(6)','saelya.webp','🔴v874']:
     if _m not in _hc851: _v851_bad.append('女帝竞技场缺标记: '+_m)
 if '第一星域' in _hc851: _v851_bad.append('旧星域内容复活(第一星域)')
 for _n in range(1,6):
@@ -7205,7 +7205,7 @@ try:
 except: pass
 # 2.🔴v874: 星域立绘/锁定纯黑随宇宙地图废除——改验女帝面板立绘方块完整形象
 if 'object-fit:contain' not in _hc852: _v852_bad.append('女帝立绘未完整展示(应object-fit:contain)')
-if 'saelya.png' not in _hc852: _v852_bad.append('女帝面板缺赛尔娅立绘')
+if 'saelya.webp' not in _hc852: _v852_bad.append('女帝面板缺赛尔娅立绘')
 if _v852_bad:
     fail('v852 星海落地页+立绘方块+锁定纯黑: '+' | '.join(_v852_bad))
 else:
@@ -7392,10 +7392,10 @@ if "bossEl=(bossEl.querySelector&&bossEl.querySelector('svg,img'))||bossEl" not 
 _bl859=open('hansen_boss_lock.js',encoding='utf-8',errors='replace').read()
 if "'#bossScreen .boss-arena.bts-typing .boss-sprite-wrap{margin:34px 0 0!important}'" not in _bl859: _b859.append('typing margin pin缺#bossScreen特异性(会被基座68压过→拼写下移34溢出762)')
 if "'#bossScreen .boss-arena.bts-compact .boss-sprite-wrap{margin:34px 0 0!important}'" not in _bl859: _b859.append('compact margin pin缺#bossScreen特异性')
-# ③ 普通20boss高清: lv*.png须≥760px(EDSR x4超分768·256源在214/258显示必糊·Hansen"更高清"法令)
+# ③ 普通20boss高清: lv*.webp须≥760px(EDSR x4超分768·256源在214/258显示必糊·Hansen"更高清"法令)
 import glob as _g859
 from PIL import Image as _I859
-for _f859 in sorted(_g859.glob('bosses/lv*.png')):
+for _f859 in sorted(_g859.glob('bosses/lv*.webp')):
     try:
         with _I859.open(_f859) as _im859:
             if max(_im859.size) < 760: _b859.append('%s 仅%dpx(须≥760超分高清·v859法令)' % (_f859,max(_im859.size))); break
@@ -7609,7 +7609,7 @@ try:
     if _pcnt72!=60: _l72.append('特效调参面板BOSSES!=60:%d'%_pcnt72)
     _hs72=open('hansen_season.js',encoding='utf-8',errors='replace').read()  # 🔴v874: 入口卡已撤·番外篇横幅=唯一入口
     if "window.location.href='land_map.html'" not in _hs72: _l72.append('番外篇横幅未指向land_map(v874:横幅=唯一入口)')
-    _art72=[_x for _x in glob.glob('bosses/land_*.png')]+[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
+    _art72=[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
     if len(_art72)!=30: _l72.append('land立绘数!=30:%d'%len(_art72))
 except Exception as _e72:
     _l72.append('守卫自身异常:'+str(_e72)[:80])
@@ -8054,7 +8054,7 @@ else: ok('v884 (Hansen: 密码要解锁所有卡牌+卡牌背景+所有关卡·"
 
 
 # 🔴 v885(Hansen: 单词大陆"挑战BOSS"图标加载慢·像贴上去的·要彻底钉死零加载·删占位符·图彻底融为一体): 挑战BOSS图base64内联。
-#   根因: gameconsole.png有725KB(显示才91px·原图768x768)·慢网下要下载→出现空白/加载态·像"贴上去的"。
+#   根因: gameconsole.webp有725KB(显示才91px·原图768x768)·慢网下要下载→出现空白/加载态·像"贴上去的"。
 #   修复: 压成200px WEBP(16KB·2x Retina清晰度)→base64 data URI直接内联进8个land岛的挑战BOSS卡·图变成页面本身一部分·零网络请求零加载·删onerror占位兜底。生成器gen_land_islands.py同步内联(重新生成也钉死)。
 _l885=[]
 try:
@@ -8062,8 +8062,8 @@ try:
     _ok=0
     for _f in sorted(_g885.glob('island_land[1-8].html')):
         _t=open(_f,encoding='utf-8',errors='replace').read()
-        # ① 挑战BOSS图必须是data URI内联(不再是icons/gameconsole.png外部文件)
-        if 'src="icons/gameconsole.png' in _t: _l885.append(_f+' 挑战BOSS图仍用外部png(未内联·慢网会加载)')
+        # ① 挑战BOSS图必须是data URI内联(不再是icons/gameconsole.webp外部文件)
+        if 'src="icons/gameconsole.webp' in _t: _l885.append(_f+' 挑战BOSS图仍用外部png(未内联·慢网会加载)')
         # ② boss-card-img必须是data:image内联
         import re
         _m=re.search(r'<img class="boss-card-img" src="(data:image/[^"]{100,})"', _t)
@@ -8083,7 +8083,7 @@ try:
 except Exception as _e885:
     _l885.append('守卫自身异常:'+str(_e885)[:80])
 if _l885: fail('v885 挑战BOSS图内联: '+str(_l885[:8]))
-else: ok('v885 (Hansen: 单词大陆挑战BOSS图标加载慢像贴上去的·要彻底钉死零加载删占位·图彻底融为一体): 挑战BOSS图【base64内联·彻底钉死零加载】——根因gameconsole.png有725KB(显示才91px·原图768x768 RGBA)·慢网下要下载→出现空白/加载态·Hansen感觉"像贴上去的还得加载"。修复: 压成200px WEBP(16.3KB·2x Retina清晰度足够·比原图小45倍)→base64 data URI(22KB)直接内联进8个land岛的挑战BOSS卡img的src·图变成页面本身的一部分·零网络请求·零加载·无论多慢网都瞬间显示。删掉onerror占位兜底(图内联在页面里永不失败·不需要占位)。生成器map8/gen_land_islands.py同步加内联替换(重新生成land岛也钉死内联)。真机Playwright验证(拦截icons/gameconsole请求延迟3s模拟慢网): 挑战BOSS图src=data URI内联·img.complete=true立即可见·naturalWidth=200有内容·onerror已删·gameconsole.png零网络请求(纯内联不下载)·0报错。注: 只改land岛(Hansen指单词大陆)·正片岛/season岛的boss图标(各自BOSSICON)不动·season过印章不直改。')
+else: ok('v885 (Hansen: 单词大陆挑战BOSS图标加载慢像贴上去的·要彻底钉死零加载删占位·图彻底融为一体): 挑战BOSS图【base64内联·彻底钉死零加载】——根因gameconsole.webp有725KB(显示才91px·原图768x768 RGBA)·慢网下要下载→出现空白/加载态·Hansen感觉"像贴上去的还得加载"。修复: 压成200px WEBP(16.3KB·2x Retina清晰度足够·比原图小45倍)→base64 data URI(22KB)直接内联进8个land岛的挑战BOSS卡img的src·图变成页面本身的一部分·零网络请求·零加载·无论多慢网都瞬间显示。删掉onerror占位兜底(图内联在页面里永不失败·不需要占位)。生成器map8/gen_land_islands.py同步加内联替换(重新生成land岛也钉死内联)。真机Playwright验证(拦截icons/gameconsole请求延迟3s模拟慢网): 挑战BOSS图src=data URI内联·img.complete=true立即可见·naturalWidth=200有内容·onerror已删·gameconsole.webp零网络请求(纯内联不下载)·0报错。注: 只改land岛(Hansen指单词大陆)·正片岛/season岛的boss图标(各自BOSSICON)不动·season过印章不直改。')
 
 
 # 🔴 v886(Hansen: 挑战BOSS卡黑底看着不舒服·换晴空天空蓝·只换单词大陆·千万别动18正片岛): 挑战BOSS卡背景 #0A1228→#38BDF8。
@@ -8197,7 +8197,7 @@ _l890=[]
 try:
     import os as _os890
     # ① 旧P模式PNG必须已删除(彻底删)
-    if _os890.path.exists('bosses/land_jianshen.png'): _l890.append('旧land_jianshen.png未删除(P模式微信不显示·必须删)')
+    if _os890.path.exists('bosses/land_jianshen.png'): _l890.append('旧land_jianshen.webp未删除(P模式微信不显示·必须删)')
     # ② 新WEBP存在且是RGBA(非P模式)
     if not _os890.path.exists('bosses/land_jianshen.webp'): _l890.append('新land_jianshen.webp缺失')
     else:
@@ -8207,15 +8207,15 @@ try:
             if _im.format!='WEBP': _l890.append('剑神图非WEBP格式(实'+str(_im.format)+')')
             if _im.mode not in ('RGBA','LA'): _l890.append('剑神WEBP非RGBA透明(实'+_im.mode+')')
         except Exception: pass
-    # ③ 3处引用都指向.webp·无.png残留
+    # ③ 3处引用都指向.webp·无.webp残留
     for _f in ['island_land5.html','hansen_land_cards.js']:
         _t=open(_f,encoding='utf-8',errors='replace').read()
-        if 'land_jianshen.png' in _t: _l890.append(_f+' 仍残留land_jianshen.png引用')
+        if 'land_jianshen.png' in _t: _l890.append(_f+' 仍残留land_jianshen.webp引用')
         if 'land_jianshen.webp' not in _t: _l890.append(_f+' 未引用land_jianshen.webp')
 except Exception as _e890:
     _l890.append('守卫自身异常:'+str(_e890)[:80])
 if _l890: fail('v890 剑神图P模式→WEBP修复: '+str(_l890[:8]))
-else: ok('v890 (Hansen: 剑神图完全没显示出来·彻底删旧图重弄·彻底删些): P模式PNG→WEBP修复。根因: v887用pngquant把land_jianshen压成P模式(调色板)PNG·微信X5 WebView【不显示带透明通道的P模式PNG】→剑神boss立绘和卡片图全空白(Hansen"完全都没有显示出来")。修复: Hansen重新上传原图(896x1195 RGBA 949KB)·转WEBP q85(896x1195 RGBA透明·176KB·远低于800KB预算·微信X5原生支持WEBP+RGBA不会有P模式的显示问题)·旧P模式land_jianshen.png【彻底删除】·3处引用(island_land5.html boss立绘SVG image href两处+hansen_land_cards.js卡片img+生成器gen_land_islands.py)全改.webp。真机验证: WEBP HTTP可访问(180052字节)·卡L55 img=land_jianshen.webp·boss立绘href=land_jianshen.webp?v加载成功200·立绘区域采样有内容(白发1651亮像素+深衣1377暗像素)·0报错。教训: 图片压缩绝不能转P模式(pngquant默认转P)·微信X5 WebView对带透明的P模式PNG支持有问题→用WEBP q85(RGBA)或PNG optimize(保RGBA)·WEBP压缩率远高于PNG(949KB→176KB)且微信X5支持。')
+else: ok('v890 (Hansen: 剑神图完全没显示出来·彻底删旧图重弄·彻底删些): P模式PNG→WEBP修复。根因: v887用pngquant把land_jianshen压成P模式(调色板)PNG·微信X5 WebView【不显示带透明通道的P模式PNG】→剑神boss立绘和卡片图全空白(Hansen"完全都没有显示出来")。修复: Hansen重新上传原图(896x1195 RGBA 949KB)·转WEBP q85(896x1195 RGBA透明·176KB·远低于800KB预算·微信X5原生支持WEBP+RGBA不会有P模式的显示问题)·旧P模式land_jianshen.webp【彻底删除】·3处引用(island_land5.html boss立绘SVG image href两处+hansen_land_cards.js卡片img+生成器gen_land_islands.py)全改.webp。真机验证: WEBP HTTP可访问(180052字节)·卡L55 img=land_jianshen.webp·boss立绘href=land_jianshen.webp?v加载成功200·立绘区域采样有内容(白发1651亮像素+深衣1377暗像素)·0报错。教训: 图片压缩绝不能转P模式(pngquant默认转P)·微信X5 WebView对带透明的P模式PNG支持有问题→用WEBP q85(RGBA)或PNG optimize(保RGBA)·WEBP压缩率远高于PNG(949KB→176KB)且微信X5支持。')
 
 
 # 🔴 v891(Hansen: boss战所有题型对齐打字题高位·狂怒坚决不溢出天花板·特效跟随boss缩放·彻底锁死): 三处改动全在共享模块。
