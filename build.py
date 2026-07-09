@@ -106,7 +106,7 @@ EXCLUDE_FILE = {"audio_test.html", "spelling_bee_demo.html",
 count = 0
 with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as z:
     for dirpath, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if not d.startswith(".") and d != "__pycache__"]
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d != "__pycache__" and d not in ("map8","newboss","releases","evolution_reports")]  # 🔴v899 map8/newboss/releases/reports只进git+交接包·绝不进部署包
         for fn in files:
             full = os.path.join(dirpath, fn)
             rel = os.path.relpath(full, ".")

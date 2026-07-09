@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>单词大陆 · 拼图地图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#241c14}
+#stage{position:relative;width:100%;height:100%;
+  background:radial-gradient(ellipse at 50% 42%, #f2e6ca 0%, #e6d6b4 55%, #d6c49c 100%);overflow:hidden}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 90px 30px rgba(90,66,40,.5), inset 0 0 24px 8px rgba(60,44,26,.4);
+  border:8px solid #b79a68}
+#stage::after{content:"";position:absolute;inset:8px;pointer-events:none;
+  border:1.5px solid rgba(111,90,60,.7)}
+svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.piece{cursor:pointer;transition:transform .14s cubic-bezier(.34,1.5,.5,1);transform-origin:center;transform-box:fill-box}
+.piece:active{transform:scale(.93)}
+.plabel,.psub{pointer-events:none}
+#overlay{position:absolute;inset:0;background:rgba(30,22,14,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#overlay.show{display:flex}
+#panel{width:100%;max-width:340px;max-height:86%;background:#f3ecd8;border-radius:16px;
+  border:3px solid #6f5a3c;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;transform:scale(.9);opacity:0;transition:.2s}
+#overlay.show #panel{transform:scale(1);opacity:1}
+#phead{padding:14px 16px 10px;border-bottom:2px solid #d8c8a8;position:relative;flex-shrink:0}
+#phead h2{font-size:18px;color:#4a3c28;font-weight:800}
+#phead .th{font-size:12px;color:#8a6f48;margin-top:3px}
+#pclose{position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:#e0d0b0;border-radius:50%;font-size:18px;color:#6f5a3c;cursor:pointer;line-height:1}
+#pboss{padding:8px 16px;background:#efe4c8;font-size:12px;color:#8a5030;font-weight:700;flex-shrink:0;border-bottom:1px solid #d8c8a8}
+#pwords{overflow-y:auto;padding:6px 12px;flex:1;-webkit-overflow-scrolling:touch}
+.wrow{display:flex;align-items:baseline;padding:7px 8px;border-bottom:1px solid #e6dcc2;gap:8px}
+.wrow:last-child{border-bottom:none}
+.wen{font-size:15px;font-weight:700;color:#3a3020;min-width:96px}
+.wpn{font-size:11px;color:#a08858;flex:1}
+.wcn{font-size:13px;color:#6a5838;text-align:right}
+#pfoot{padding:12px 16px;flex-shrink:0;border-top:2px solid #d8c8a8;display:flex;gap:10px}
+.pbtn{flex:1;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+.pbtn.enter{background:linear-gradient(#e0a850,#c88830);color:#fff;box-shadow:0 3px 0 #a86818}
+.pbtn:active{transform:translateY(2px);box-shadow:none}
+#hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;color:#6f5a3c;pointer-events:none;z-index:5;font-weight:600}
+#progress{position:absolute;top:12px;left:0;right:0;text-align:center;z-index:5;pointer-events:none}
+#progress .pt{display:inline-block;background:#d8c298;border:1.4px solid #6f5a3c;border-radius:20px;padding:5px 16px;font-size:13px;color:#4a3c28;font-weight:800}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="map" viewBox="0 0 380 560" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="progress"><span class="pt" id="ptext">进度 0 / 8</span></div>
+  <div id="hint">点击岛屿查看单词 · 顺序随意 · 全通解锁女帝</div>
+</div>
+<div id="overlay"><div id="panel">
+  <div id="phead"><h2 id="ptitle"></h2><div class="th" id="psubtitle"></div><button id="pclose">×</button></div>
+  <div id="pboss"></div><div id="pwords"></div><div id="pfoot"></div>
+</div></div>
+<script>window.MAP_GROUPS=[{"id": 1, "terrain": "lake", "name": "迷雾心湖", "theme": "情绪心境", "boss": 3, "words": [{"en": "nervous", "pn": "/ˈnɜːvəs/", "cn": "紧张的"}, {"en": "anxious", "pn": "/ˈæŋkʃəs/", "cn": "焦虑的"}, {"en": "curious", "pn": "/ˈkjʊəriəs/", "cn": "好奇的"}, {"en": "proud", "pn": "/praʊd/", "cn": "自豪的"}, {"en": "grateful", "pn": "/ˈɡreɪtfl/", "cn": "感激的"}, {"en": "disappointed", "pn": "/ˌdɪsəˈpɔɪntɪd/", "cn": "失望的"}, {"en": "embarrassed", "pn": "/ɪmˈbærəst/", "cn": "尴尬的"}, {"en": "frightened", "pn": "/ˈfraɪtnd/", "cn": "害怕的"}, {"en": "satisfied", "pn": "/ˈsætɪsfaɪd/", "cn": "满意的"}, {"en": "confused", "pn": "/kənˈfjuːzd/", "cn": "困惑的"}, {"en": "lonely", "pn": "/ˈləʊnli/", "cn": "孤独的"}, {"en": "jealous", "pn": "/ˈdʒeləs/", "cn": "嫉妒的"}, {"en": "relaxed", "pn": "/rɪˈlækst/", "cn": "放松的"}, {"en": "ashamed", "pn": "/əˈʃeɪmd/", "cn": "羞愧的"}, {"en": "eager", "pn": "/ˈiːɡə/", "cn": "渴望的"}, {"en": "miserable", "pn": "/ˈmɪzrəbl/", "cn": "痛苦的"}, {"en": "delighted", "pn": "/dɪˈlaɪtɪd/", "cn": "欣喜的"}, {"en": "furious", "pn": "/ˈfjʊəriəs/", "cn": "狂怒的"}, {"en": "amazed", "pn": "/əˈmeɪzd/", "cn": "惊讶的"}, {"en": "comfort", "pn": "/ˈkʌmfət/", "cn": "安慰"}, {"en": "polite", "pn": "/pəˈlaɪt/", "cn": "有礼貌的"}, {"en": "humble", "pn": "/ˈhʌmbl/", "cn": "谦虚的"}, {"en": "stubborn", "pn": "/ˈstʌbən/", "cn": "固执的"}, {"en": "reliable", "pn": "/rɪˈlaɪəbl/", "cn": "可靠的"}, {"en": "cautious", "pn": "/ˈkɔːʃəs/", "cn": "谨慎的"}, {"en": "optimistic", "pn": "/ˌɒptɪˈmɪstɪk/", "cn": "乐观的"}, {"en": "sincere", "pn": "/sɪnˈsɪə/", "cn": "真诚的"}, {"en": "loyal", "pn": "/ˈlɔɪəl/", "cn": "忠诚的"}, {"en": "strict", "pn": "/strɪkt/", "cn": "严格的"}, {"en": "selfish", "pn": "/ˈselfɪʃ/", "cn": "自私的"}]}, {"id": 2, "terrain": "plains", "name": "风纹草原", "theme": "性格品质", "boss": 3, "words": [{"en": "mature", "pn": "/məˈtʃʊə/", "cn": "成熟的"}, {"en": "energetic", "pn": "/ˌenəˈdʒetɪk/", "cn": "精力充沛的"}, {"en": "modest", "pn": "/ˈmɒdɪst/", "cn": "谦逊的"}, {"en": "cheerful", "pn": "/ˈtʃɪəfl/", "cn": "开朗的"}, {"en": "hardworking", "pn": "/ˌhɑːdˈwɜːkɪŋ/", "cn": "勤奋的"}, {"en": "sensitive", "pn": "/ˈsensətɪv/", "cn": "敏感的"}, {"en": "determined", "pn": "/dɪˈtɜːmɪnd/", "cn": "坚定的"}, {"en": "outgoing", "pn": "/ˌaʊtˈɡəʊɪŋ/", "cn": "外向的"}, {"en": "talkative", "pn": "/ˈtɔːkətɪv/", "cn": "健谈的"}, {"en": "calm", "pn": "/kɑːm/", "cn": "冷静的"}, {"en": "important", "pn": "/ɪmˈpɔːtnt/", "cn": "重要的"}, {"en": "possible", "pn": "/ˈpɒsəbl/", "cn": "可能的"}, {"en": "useful", "pn": "/ˈjuːsfl/", "cn": "有用的"}, {"en": "valuable", "pn": "/ˈvæljuəbl/", "cn": "有价值的"}, {"en": "similar", "pn": "/ˈsɪmələ/", "cn": "相似的"}, {"en": "modern", "pn": "/ˈmɒdn/", "cn": "现代的"}, {"en": "ancient", "pn": "/ˈeɪnʃənt/", "cn": "古代的"}, {"en": "popular", "pn": "/ˈpɒpjələ/", "cn": "受欢迎的"}, {"en": "ordinary", "pn": "/ˈɔːdnri/", "cn": "普通的"}, {"en": "famous", "pn": "/ˈfeɪməs/", "cn": "著名的"}, {"en": "comfortable", "pn": "/ˈkʌmftəbl/", "cn": "舒适的"}, {"en": "convenient", "pn": "/kənˈviːniənt/", "cn": "方便的"}, {"en": "complex", "pn": "/ˈkɒmpleks/", "cn": "复杂的"}, {"en": "typical", "pn": "/ˈtɪpɪkl/", "cn": "典型的"}, {"en": "flexible", "pn": "/ˈfleksəbl/", "cn": "灵活的"}, {"en": "accurate", "pn": "/ˈækjərət/", "cn": "准确的"}, {"en": "essential", "pn": "/ɪˈsenʃl/", "cn": "必不可少的"}, {"en": "available", "pn": "/əˈveɪləbl/", "cn": "可获得的;可用的"}, {"en": "suitable", "pn": "/ˈsuːtəbl/", "cn": "合适的"}, {"en": "practical", "pn": "/ˈpræktɪkl/", "cn": "实用的"}]}, {"id": 3, "terrain": "clock", "name": "时之钟谷", "theme": "时间表达", "boss": 4, "words": [{"en": "suddenly", "pn": "/ˈsʌdənli/", "cn": "突然地"}, {"en": "immediately", "pn": "/ɪˈmiːdiətli/", "cn": "立即"}, {"en": "recently", "pn": "/ˈriːsntli/", "cn": "最近"}, {"en": "finally", "pn": "/ˈfaɪnəli/", "cn": "终于"}, {"en": "occasionally", "pn": "/əˈkeɪʒnəli/", "cn": "偶尔"}, {"en": "eventually", "pn": "/ɪˈventʃuəli/", "cn": "最终"}, {"en": "meanwhile", "pn": "/ˈmiːnwaɪl/", "cn": "与此同时"}, {"en": "nowadays", "pn": "/ˈnaʊədeɪz/", "cn": "如今"}, {"en": "rarely", "pn": "/ˈreəli/", "cn": "很少"}, {"en": "constantly", "pn": "/ˈkɒnstəntli/", "cn": "不断地"}, {"en": "temporary", "pn": "/ˈtemprəri/", "cn": "暂时的"}, {"en": "permanent", "pn": "/ˈpɜːmənənt/", "cn": "永久的"}, {"en": "instantly", "pn": "/ˈɪnstəntli/", "cn": "立刻"}, {"en": "currently", "pn": "/ˈkʌrəntli/", "cn": "目前"}, {"en": "previously", "pn": "/ˈpriːviəsli/", "cn": "以前"}, {"en": "seldom", "pn": "/ˈseldəm/", "cn": "很少"}, {"en": "regularly", "pn": "/ˈreɡjələli/", "cn": "定期地"}, {"en": "decade", "pn": "/ˈdekeɪd/", "cn": "十年"}, {"en": "period", "pn": "/ˈpɪəriəd/", "cn": "时期"}, {"en": "schedule", "pn": "/ˈʃedjuːl/", "cn": "日程"}, {"en": "explain", "pn": "/ɪkˈspleɪn/", "cn": "解释"}, {"en": "describe", "pn": "/dɪˈskraɪb/", "cn": "描述"}, {"en": "suggest", "pn": "/səˈdʒest/", "cn": "建议"}, {"en": "persuade", "pn": "/pəˈsweɪd/", "cn": "说服"}, {"en": "argue", "pn": "/ˈɑːɡjuː/", "cn": "争论"}, {"en": "discuss", "pn": "/dɪˈskʌs/", "cn": "讨论"}, {"en": "compare", "pn": "/kəmˈpeə/", "cn": "比较"}, {"en": "imagine", "pn": "/ɪˈmædʒɪn/", "cn": "想象"}, {"en": "predict", "pn": "/prɪˈdɪkt/", "cn": "预测"}, {"en": "realize", "pn": "/ˈrɪəlaɪz/", "cn": "意识到"}]}, {"id": 4, "terrain": "forge", "name": "铸剑锻炉山", "theme": "思考行动", "boss": 4, "words": [{"en": "recognize", "pn": "/ˈrekəɡnaɪz/", "cn": "认出"}, {"en": "consider", "pn": "/kənˈsɪdə/", "cn": "考虑"}, {"en": "express", "pn": "/ɪkˈspres/", "cn": "表达"}, {"en": "mention", "pn": "/ˈmenʃn/", "cn": "提到"}, {"en": "doubt", "pn": "/daʊt/", "cn": "怀疑"}, {"en": "admit", "pn": "/ədˈmɪt/", "cn": "承认"}, {"en": "indicate", "pn": "/ˈɪndɪkeɪt/", "cn": "表明"}, {"en": "comment", "pn": "/ˈkɒment/", "cn": "评论"}, {"en": "debate", "pn": "/dɪˈbeɪt/", "cn": "辩论"}, {"en": "assume", "pn": "/əˈsjuːm/", "cn": "假设"}, {"en": "attempt", "pn": "/əˈtempt/", "cn": "尝试"}, {"en": "avoid", "pn": "/əˈvɔɪd/", "cn": "避免"}, {"en": "prevent", "pn": "/prɪˈvent/", "cn": "预防"}, {"en": "provide", "pn": "/prəˈvaɪd/", "cn": "提供"}, {"en": "produce", "pn": "/prəˈdjuːs/", "cn": "生产"}, {"en": "reduce", "pn": "/rɪˈdjuːs/", "cn": "减少"}, {"en": "increase", "pn": "/ɪnˈkriːs/", "cn": "增加"}, {"en": "develop", "pn": "/dɪˈveləp/", "cn": "发展;发育"}, {"en": "invent", "pn": "/ɪnˈvent/", "cn": "发明"}, {"en": "destroy", "pn": "/dɪˈstrɔɪ/", "cn": "摧毁;毁坏"}, {"en": "repair", "pn": "/rɪˈpeə/", "cn": "修理"}, {"en": "prepare", "pn": "/prɪˈpeə/", "cn": "准备"}, {"en": "establish", "pn": "/ɪˈstæblɪʃ/", "cn": "建立"}, {"en": "maintain", "pn": "/meɪnˈteɪn/", "cn": "维持"}, {"en": "manage", "pn": "/ˈmænɪdʒ/", "cn": "管理"}, {"en": "handle", "pn": "/ˈhændl/", "cn": "处理"}, {"en": "perform", "pn": "/pəˈfɔːm/", "cn": "表演"}, {"en": "contribute", "pn": "/kənˈtrɪbjuːt/", "cn": "贡献"}, {"en": "struggle", "pn": "/ˈstrʌɡl/", "cn": "奋斗;挣扎"}, {"en": "succeed", "pn": "/səkˈsiːd/", "cn": "成功"}]}, {"id": 5, "terrain": "crystal", "name": "晶石回廊", "theme": "数量逻辑", "boss": 5, "words": [{"en": "several", "pn": "/ˈsevrəl/", "cn": "几个"}, {"en": "plenty", "pn": "/ˈplenti/", "cn": "大量"}, {"en": "enormous", "pn": "/ɪˈnɔːməs/", "cn": "巨大的"}, {"en": "tiny", "pn": "/ˈtaɪni/", "cn": "微小的"}, {"en": "huge", "pn": "/hjuːdʒ/", "cn": "巨大的"}, {"en": "major", "pn": "/ˈmeɪdʒə/", "cn": "主要的"}, {"en": "minor", "pn": "/ˈmaɪnə/", "cn": "次要的"}, {"en": "average", "pn": "/ˈævərɪdʒ/", "cn": "平均的"}, {"en": "entire", "pn": "/ɪnˈtaɪə/", "cn": "整个的"}, {"en": "amount", "pn": "/əˈmaʊnt/", "cn": "数量"}, {"en": "quantity", "pn": "/ˈkwɒntəti/", "cn": "数量"}, {"en": "majority", "pn": "/məˈdʒɒrəti/", "cn": "大多数"}, {"en": "approximately", "pn": "/əˈprɒksɪmətli/", "cn": "大约"}, {"en": "sufficient", "pn": "/səˈfɪʃnt/", "cn": "足够的"}, {"en": "numerous", "pn": "/ˈnjuːmərəs/", "cn": "许多的"}, {"en": "multiple", "pn": "/ˈmʌltɪpl/", "cn": "多个的"}, {"en": "additional", "pn": "/əˈdɪʃənl/", "cn": "额外的"}, {"en": "maximum", "pn": "/ˈmæksɪməm/", "cn": "最大值;最大的"}, {"en": "minimum", "pn": "/ˈmɪnɪməm/", "cn": "最小值;最小的"}, {"en": "dozen", "pn": "/ˈdʌzn/", "cn": "一打"}, {"en": "however", "pn": "/haʊˈevə/", "cn": "然而"}, {"en": "therefore", "pn": "/ˈðeəfɔː/", "cn": "因此"}, {"en": "although", "pn": "/ɔːlˈðəʊ/", "cn": "尽管"}, {"en": "instead", "pn": "/ɪnˈsted/", "cn": "反而;作为替代"}, {"en": "besides", "pn": "/bɪˈsaɪdz/", "cn": "此外"}, {"en": "otherwise", "pn": "/ˈʌðəwaɪz/", "cn": "否则"}, {"en": "moreover", "pn": "/mɔːrˈəʊvə/", "cn": "此外"}, {"en": "perhaps", "pn": "/pəˈhæps/", "cn": "也许"}, {"en": "probably", "pn": "/ˈprɒbəbli/", "cn": "可能"}, {"en": "certainly", "pn": "/ˈsɜːtnli/", "cn": "当然"}]}, {"id": 6, "terrain": "forest", "name": "智慧藏书林", "theme": "学习探究", "boss": 5, "words": [{"en": "especially", "pn": "/ɪˈspeʃəli/", "cn": "尤其"}, {"en": "exactly", "pn": "/ɪɡˈzæktli/", "cn": "确切地"}, {"en": "nearly", "pn": "/ˈnɪəli/", "cn": "几乎"}, {"en": "actually", "pn": "/ˈæktʃuəli/", "cn": "实际上"}, {"en": "furthermore", "pn": "/ˌfɜːðəˈmɔː/", "cn": "此外"}, {"en": "nevertheless", "pn": "/ˌnevəðəˈles/", "cn": "尽管如此"}, {"en": "consequently", "pn": "/ˈkɒnsɪkwəntli/", "cn": "因此;结果"}, {"en": "similarly", "pn": "/ˈsɪmələli/", "cn": "同样地"}, {"en": "generally", "pn": "/ˈdʒenrəli/", "cn": "通常;一般来说"}, {"en": "fortunately", "pn": "/ˈfɔːtʃənətli/", "cn": "幸好;幸运的是"}, {"en": "research", "pn": "/rɪˈsɜːtʃ/", "cn": "研究"}, {"en": "education", "pn": "/ˌedʒuˈkeɪʃn/", "cn": "教育"}, {"en": "experiment", "pn": "/ɪkˈsperɪmənt/", "cn": "实验"}, {"en": "theory", "pn": "/ˈθɪəri/", "cn": "理论"}, {"en": "concept", "pn": "/ˈkɒnsept/", "cn": "概念"}, {"en": "analyze", "pn": "/ˈænəlaɪz/", "cn": "分析"}, {"en": "conclude", "pn": "/kənˈkluːd/", "cn": "得出结论"}, {"en": "summarize", "pn": "/ˈsʌməraɪz/", "cn": "总结"}, {"en": "achieve", "pn": "/əˈtʃiːv/", "cn": "实现"}, {"en": "review", "pn": "/rɪˈvjuː/", "cn": "复习"}, {"en": "memorize", "pn": "/ˈmeməraɪz/", "cn": "记住"}, {"en": "translate", "pn": "/trænzˈleɪt/", "cn": "翻译"}, {"en": "solution", "pn": "/səˈluːʃn/", "cn": "解决方案"}, {"en": "standard", "pn": "/ˈstændəd/", "cn": "标准"}, {"en": "method", "pn": "/ˈmeθəd/", "cn": "方法"}, {"en": "principle", "pn": "/ˈprɪnsəpl/", "cn": "原则"}, {"en": "define", "pn": "/dɪˈfaɪn/", "cn": "定义"}, {"en": "examine", "pn": "/ɪɡˈzæmɪn/", "cn": "检查"}, {"en": "observe", "pn": "/əbˈzɜːv/", "cn": "观察"}, {"en": "calculate", "pn": "/ˈkælkjuleɪt/", "cn": "计算"}]}, {"id": 7, "terrain": "port", "name": "万邦港城", "theme": "社会生活", "boss": 5, "words": [{"en": "society", "pn": "/səˈsaɪəti/", "cn": "社会"}, {"en": "tradition", "pn": "/trəˈdɪʃn/", "cn": "传统"}, {"en": "custom", "pn": "/ˈkʌstəm/", "cn": "习俗"}, {"en": "government", "pn": "/ˈɡʌvənmənt/", "cn": "政府"}, {"en": "public", "pn": "/ˈpʌblɪk/", "cn": "公共的;公众的"}, {"en": "citizen", "pn": "/ˈsɪtɪzn/", "cn": "公民"}, {"en": "neighbor", "pn": "/ˈneɪbə/", "cn": "邻居"}, {"en": "stranger", "pn": "/ˈstreɪndʒə/", "cn": "陌生人"}, {"en": "customer", "pn": "/ˈkʌstəmə/", "cn": "顾客"}, {"en": "population", "pn": "/ˌpɒpjuˈleɪʃn/", "cn": "人口"}, {"en": "charity", "pn": "/ˈtʃærəti/", "cn": "慈善"}, {"en": "volunteer", "pn": "/ˌvɒlənˈtɪə/", "cn": "志愿者"}, {"en": "economy", "pn": "/ɪˈkɒnəmi/", "cn": "经济"}, {"en": "industry", "pn": "/ˈɪndəstri/", "cn": "工业"}, {"en": "organization", "pn": "/ˌɔːɡənaɪˈzeɪʃn/", "cn": "组织"}, {"en": "generation", "pn": "/ˌdʒenəˈreɪʃn/", "cn": "一代人"}, {"en": "individual", "pn": "/ˌɪndɪˈvɪdʒuəl/", "cn": "个人"}, {"en": "private", "pn": "/ˈpraɪvət/", "cn": "私人的"}, {"en": "official", "pn": "/əˈfɪʃl/", "cn": "官方的"}, {"en": "ceremony", "pn": "/ˈserəməni/", "cn": "典礼"}, {"en": "energy", "pn": "/ˈenədʒi/", "cn": "能量"}, {"en": "electricity", "pn": "/ɪˌlekˈtrɪsəti/", "cn": "电"}, {"en": "gravity", "pn": "/ˈɡrævəti/", "cn": "重力"}, {"en": "planet", "pn": "/ˈplænɪt/", "cn": "行星"}, {"en": "universe", "pn": "/ˈjuːnɪvɜːs/", "cn": "宇宙"}, {"en": "climate", "pn": "/ˈklaɪmət/", "cn": "气候"}, {"en": "temperature", "pn": "/ˈtemprətʃə/", "cn": "温度"}, {"en": "oxygen", "pn": "/ˈɒksɪdʒən/", "cn": "氧气"}, {"en": "surface", "pn": "/ˈsɜːfɪs/", "cn": "表面"}, {"en": "material", "pn": "/məˈtɪəriəl/", "cn": "材料"}]}, {"id": 8, "terrain": "volcano", "name": "星火火山口", "theme": "自然科学", "boss": 5, "words": [{"en": "chemical", "pn": "/ˈkemɪkl/", "cn": "化学物质;化学的"}, {"en": "natural", "pn": "/ˈnætʃrəl/", "cn": "自然的"}, {"en": "resource", "pn": "/rɪˈsɔːs/", "cn": "资源"}, {"en": "creature", "pn": "/ˈkriːtʃə/", "cn": "生物"}, {"en": "atmosphere", "pn": "/ˈætməsfɪə/", "cn": "大气"}, {"en": "scientific", "pn": "/ˌsaɪənˈtɪfɪk/", "cn": "科学的"}, {"en": "technology", "pn": "/tekˈnɒlədʒi/", "cn": "技术"}, {"en": "particle", "pn": "/ˈpɑːtɪkl/", "cn": "粒子"}, {"en": "invention", "pn": "/ɪnˈvenʃn/", "cn": "发明"}, {"en": "galaxy", "pn": "/ˈɡæləksi/", "cn": "星系"}, {"en": "career", "pn": "/kəˈrɪə/", "cn": "职业生涯"}, {"en": "profession", "pn": "/prəˈfeʃn/", "cn": "职业"}, {"en": "business", "pn": "/ˈbɪznəs/", "cn": "生意;商业"}, {"en": "success", "pn": "/səkˈses/", "cn": "成功"}, {"en": "failure", "pn": "/ˈfeɪljə/", "cn": "失败"}, {"en": "effort", "pn": "/ˈefət/", "cn": "努力"}, {"en": "responsibility", "pn": "/rɪˌspɒnsəˈbɪləti/", "cn": "责任"}, {"en": "talent", "pn": "/ˈtælənt/", "cn": "才能"}, {"en": "ability", "pn": "/əˈbɪləti/", "cn": "能力"}, {"en": "progress", "pn": "/ˈprəʊɡres/", "cn": "进步"}, {"en": "goal", "pn": "/ɡəʊl/", "cn": "目标"}, {"en": "skill", "pn": "/skɪl/", "cn": "技能"}, {"en": "position", "pn": "/pəˈzɪʃn/", "cn": "职位"}, {"en": "salary", "pn": "/ˈsæləri/", "cn": "薪水"}, {"en": "employee", "pn": "/ɪmˈplɔɪiː/", "cn": "员工;雇员"}, {"en": "interview", "pn": "/ˈɪntəvjuː/", "cn": "面试"}, {"en": "project", "pn": "/ˈprɒdʒekt/", "cn": "项目"}, {"en": "promotion", "pn": "/prəˈməʊʃn/", "cn": "晋升"}, {"en": "reputation", "pn": "/ˌrepjuˈteɪʃn/", "cn": "声誉"}, {"en": "colleague", "pn": "/ˈkɒliːɡ/", "cn": "同事"}]}];</script>
+<script>
+const G=window.MAP_GROUPS;
+const DONE_KEY='wc_puzzle_done_v2';
+let done={}; try{done=JSON.parse(localStorage.getItem(DONE_KEY)||'{}')}catch(e){done={}}
+const TERR={
+ lake:{f:'#8fb8cd',e:'#3f7a95',t:'#0d3a4d'}, plains:{f:'#b8cc7a',e:'#6f9a3a',t:'#3a5010'},
+ clock:{f:'#d0ac78',e:'#9a7a48',t:'#4a3410'}, forge:{f:'#dd8a56',e:'#a85a2a',t:'#5a2408'},
+ crystal:{f:'#bb9ad8',e:'#8060b0',t:'#3a2060'}, forest:{f:'#7fae66',e:'#4f8040',t:'#1a3a10'},
+ port:{f:'#cdb488',e:'#9a8050',t:'#4a3818'}, volcano:{f:'#cc6a48',e:'#943a1a',t:'#5a1808'},
+};
+const NS='http://www.w3.org/2000/svg';
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+
+// 拼图边: 从(x0,y0)到(x1,y1), tab: 0平 +1凸出 -1凹入
+function edge(x0,y0,x1,y1,tab){
+  const dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy);
+  const ux=dx/len,uy=dy/len;
+  if(tab===0)return `L ${x1.toFixed(1)} ${y1.toFixed(1)} `;
+  const r=len*0.15, m=len/2;
+  const p1x=x0+ux*(m-r),p1y=y0+uy*(m-r);
+  const p2x=x0+ux*(m+r),p2y=y0+uy*(m+r);
+  const sweep=tab>0?1:0;
+  return `L ${p1x.toFixed(1)} ${p1y.toFixed(1)} A ${r.toFixed(1)} ${r.toFixed(1)} 0 1 ${sweep} ${p2x.toFixed(1)} ${p2y.toFixed(1)} L ${x1.toFixed(1)} ${y1.toFixed(1)} `;
+}
+// 一块拼图path: 单元格(cx,cy)边长C, 四边tab
+function piecePath(cx,cy,C,tabs){ // tabs={top,right,bottom,left}
+  const TL=[cx,cy],TR=[cx+C,cy],BR=[cx+C,cy+C],BL=[cx,cy+C];
+  let d=`M ${TL[0]} ${TL[1]} `;
+  d+=edge(TL[0],TL[1],TR[0],TR[1],tabs.top);
+  d+=edge(TR[0],TR[1],BR[0],BR[1],tabs.right);
+  d+=edge(BR[0],BR[1],BL[0],BL[1],tabs.bottom);
+  d+=edge(BL[0],BL[1],TL[0],TL[1],tabs.left);
+  return d+'Z';
+}
+// 3x3网格布局
+const C=98, OX=(380-3*C)/2, OY=88;
+function cellXY(col,row){return [OX+col*C, OY+row*C]}
+// (col,row) -> 岛id 或 'E'
+const LAYOUT={'0,0':1,'1,0':2,'2,0':3,'0,1':8,'1,1':'E','2,1':4,'0,2':7,'1,2':6,'2,2':5};
+// 每块tab: 右/下凸(+1), 左/上凹(-1), 边界平(0) —— 保证互补咬合
+function tabsFor(col,row){
+  return {
+    top: row>0?-1:0,
+    left: col>0?-1:0,
+    right: col<2?1:0,
+    bottom: row<2?1:0,
+  };
+}
+const svg=document.getElementById('map');
+// 标题
+const tb=el('g',{});
+tb.appendChild(el('rect',{x:100,y:20,width:180,height:32,rx:7,fill:'#d8c298',stroke:'#6f5a3c','stroke-width':1.4}));
+let x=el('text',{x:190,y:36,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#4a3c28'});x.textContent='单词大陆 · 拼图地图';tb.appendChild(x);
+x=el('text',{x:190,y:49,'text-anchor':'middle','font-size':10.5,fill:'#6f5a3c'});x.textContent='8 岛独立挑战 · 全通解锁女帝';tb.appendChild(x);
+svg.appendChild(tb);
+
+const NUM='①②③④⑤⑥⑦⑧';
+// 先画8岛
+for(const key in LAYOUT){
+  const [col,row]=key.split(',').map(Number);
+  const id=LAYOUT[key];
+  if(id==='E')continue;
+  const g=G.find(x=>x.id===id);
+  const [cx,cy]=cellXY(col,row);
+  const t=TERR[g.terrain];
+  const isDone=!!done[id];
+  const tabs=tabsFor(col,row);
+  const grp=el('g',{class:'piece','data-id':id});
+  const path=el('path',{d:piecePath(cx,cy,C,tabs),fill:t.f,stroke:isDone?'#3f9a3a':t.e,
+    'stroke-width':isDone?3.5:1.6,'stroke-linejoin':'round'});
+  grp.appendChild(path);
+  // 地貌底纹(块底部一条深色地平)
+  grp.appendChild(el('path',{d:`M ${cx+12} ${cy+C-16} q ${(C-24)/2} 10 ${C-24} 0`,fill:'none',stroke:t.e,'stroke-width':2,opacity:.4}));
+  const mx=cx+C/2, my=cy+C/2;
+  let e=el('text',{x:mx,y:my-10,'text-anchor':'middle','font-size':15,'font-weight':800,fill:t.t,class:'plabel'});e.textContent=NUM[id-1];grp.appendChild(e);
+  e=el('text',{x:mx,y:my+8,'text-anchor':'middle','font-size':12.5,'font-weight':800,fill:t.t,class:'plabel'});e.textContent=g.name;grp.appendChild(e);
+  e=el('text',{x:mx,y:my+24,'text-anchor':'middle','font-size':10,fill:t.t,class:'psub',opacity:.85});e.textContent='30词·'+g.boss+'boss';grp.appendChild(e);
+  if(isDone){
+    const fx=cx+C-20,fy=cy+20;
+    grp.appendChild(el('line',{x1:fx,y1:fy,x2:fx,y2:fy-15,stroke:'#3f7a1a','stroke-width':2}));
+    grp.appendChild(el('path',{d:`M ${fx} ${fy-15} l 11 4 l -11 4 z`,fill:'#3f9a3a',stroke:'#fff','stroke-width':1}));
+  }
+  grp.addEventListener('click',()=>openIsland(id));
+  svg.appendChild(grp);
+}
+// 中心女帝块(最后画,在上)
+const [ecx,ecy]=cellXY(1,1);
+const allDone=G.every(g=>done[g.id]);
+const eg=el('g',{class:'piece',id:'empress'});
+const epath=el('path',{d:piecePath(ecx,ecy,C,tabsFor(1,1)),
+  fill:allDone?'#d4537e':'#c3b2ba',stroke:allDone?'#993556':'#8a7a82','stroke-width':allDone?3.5:2});
+eg.appendChild(epath);
+const emx=ecx+C/2, emy=ecy+C/2;
+if(allDone){
+  let e=el('text',{x:emx,y:emy-10,'text-anchor':'middle','font-size':13,'font-weight':800,fill:'#fff'});e.textContent='★女帝★';eg.appendChild(e);
+  e=el('text',{x:emx,y:emy+7,'text-anchor':'middle','font-size':10.5,fill:'#ffe0ec'});e.textContent='赛尔娅';eg.appendChild(e);
+  e=el('text',{x:emx,y:emy+23,'text-anchor':'middle','font-size':10.5,'font-weight':800,fill:'#fff'});e.textContent='▶挑战';eg.appendChild(e);
+}else{
+  eg.appendChild(el('rect',{x:emx-14,y:emy-2,width:28,height:22,rx:3,fill:'#6a5a62'}));
+  eg.appendChild(el('path',{d:`M ${emx-9} ${emy-2} v-7 a9 9 0 0 1 18 0 v7`,fill:'none',stroke:'#6a5a62','stroke-width':3.5}));
+  let e=el('text',{x:emx,y:emy+36,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'#5a4a52'});e.textContent='星海女帝';eg.appendChild(e);
+  e=el('text',{x:emx,y:emy+49,'text-anchor':'middle','font-size':9.5,fill:'#7a6a72'});e.textContent='全通解锁';eg.appendChild(e);
+}
+eg.addEventListener('click',openEmpress);
+svg.appendChild(eg);
+
+function updP(){const n=G.filter(g=>done[g.id]).length;document.getElementById('ptext').textContent='进度 '+n+' / 8'+(n===8?' · 女帝解锁!':'')}
+updP();
+
+const overlay=document.getElementById('overlay');
+function openIsland(id){
+  const g=G.find(x=>x.id===id);
+  document.getElementById('ptitle').textContent=NUM[id-1]+' '+g.name;
+  document.getElementById('psubtitle').textContent=g.theme+' · '+g.words.length+' 词';
+  document.getElementById('pboss').textContent='⚔ 这座岛聚集了 '+g.boss+' 个 Boss';
+  const wc=document.getElementById('pwords');wc.innerHTML='';
+  g.words.forEach(w=>{const r=document.createElement('div');r.className='wrow';
+    r.innerHTML='<span class="wen">'+w.en+'</span><span class="wpn">'+(w.pn||'')+'</span><span class="wcn">'+w.cn+'</span>';wc.appendChild(r)});
+  wc.scrollTop=0;
+  const foot=document.getElementById('pfoot');foot.innerHTML='';const isDone=!!done[id];
+  const enter=document.createElement('button');enter.className='pbtn enter';enter.textContent='进入学习 · 打 Boss';
+  enter.onclick=()=>toggleDone(id);foot.appendChild(enter);
+  const mark=document.createElement('button');mark.className='pbtn';mark.textContent=isDone?'✓已通关':'标记通关';
+  mark.style.cssText='flex:0 0 auto;padding:11px 14px;'+(isDone?'background:#8fc470;color:#fff;box-shadow:0 3px 0 #4f8030':'background:#d8c8a8;color:#6a5838;box-shadow:0 3px 0 #b8a888');
+  mark.onclick=()=>toggleDone(id);foot.appendChild(mark);
+  overlay.classList.add('show');
+}
+function openEmpress(){
+  const n=G.filter(g=>done[g.id]).length;
+  if(n<8){
+    document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+    document.getElementById('psubtitle').textContent='最终 BOSS · 尚未解锁';
+    document.getElementById('pboss').textContent='🔒 还需通关 '+(8-n)+' 座岛屿';
+    const wc=document.getElementById('pwords');wc.innerHTML='';
+    G.forEach(g=>{const r=document.createElement('div');r.className='wrow';
+      r.innerHTML='<span class="wen" style="min-width:auto">'+NUM[g.id-1]+' '+g.name+'</span><span class="wcn">'+(done[g.id]?'✓ 已通关':'○ 未通关')+'</span>';wc.appendChild(r)});
+    document.getElementById('pfoot').innerHTML='<button class="pbtn" style="background:#d8c8a8;color:#6a5838" onclick="closeP()">返回地图</button>';
+  }else{
+    document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+    document.getElementById('psubtitle').textContent='最终决战 · 已解锁';
+    document.getElementById('pboss').textContent='👑 8 座岛屿全部通关 · 终战开启!';
+    document.getElementById('pwords').innerHTML='<div style="padding:24px;text-align:center;color:#6a5838;font-size:14px;line-height:1.9">你已征服全部 240 个单词。<br>星海女帝在星域深处等你。<br><br>⚔️ 准备好终战了吗？</div>';
+    document.getElementById('pfoot').innerHTML='<button class="pbtn enter" onclick="closeP()">▶ 挑战星海女帝</button>';
+  }
+  overlay.classList.add('show');
+}
+function toggleDone(id){done[id]=!done[id];if(!done[id])delete done[id];
+  localStorage.setItem(DONE_KEY,JSON.stringify(done));overlay.classList.remove('show');setTimeout(()=>location.reload(),140)}
+function closeP(){overlay.classList.remove('show')}
+document.getElementById('pclose').onclick=closeP;
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeP()});
+</script>
+</body>
+</html>

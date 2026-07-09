@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""gen_land_islands.py — 从 island_season1.html 模板生成 island_land1..8.html
+   替换: DATA(30词) / BOSSES(5boss) / 存档键 / 进度键 / 通关旗 / 品牌串 / 标题
+"""
+import re, json, pickle, os
+
+DEV='/home/claude/v846/dev'
+V='872'  # 当前 ?v= 戳(与全局一致, build.py 会统一升)
+
+tpl=open(os.path.join(DEV,'island_season1.html'),encoding='utf-8',errors='replace').read()
+entries=pickle.load(open('/home/claude/map8/word_entries.pkl','rb'))  # [(en, 引擎词条原文)]
+groups=json.load(open('/home/claude/map8/groups.json',encoding='utf-8'))
+
+# ============ 8岛定义 ============
+# key: landN; 名; 主题; emoji; 2分类名
+ISLANDS=[
+ dict(n=1,name='迷雾心湖',theme='情绪心境',em='🌊',cats=['🌊 心湖·情绪 Ⅰ','🌫️ 心湖·情绪 Ⅱ']),
+ dict(n=2,name='风纹草原',theme='性格品质',em='🌾',cats=['🌾 草原·性格 Ⅰ','🍃 草原·品质 Ⅱ']),
+ dict(n=3,name='时之钟谷',theme='时间表达',em='⏰',cats=['⏰ 钟谷·时间 Ⅰ','⌛ 钟谷·表达 Ⅱ']),
+ dict(n=4,name='铸剑锻炉山',theme='思考行动',em='⚒️',cats=['⚒️ 锻炉·思考 Ⅰ','🔥 锻炉·行动 Ⅱ']),
+ dict(n=5,name='晶石回廊',theme='数量逻辑',em='💎',cats=['💎 晶廊·数量 Ⅰ','🔮 晶廊·逻辑 Ⅱ']),
+ dict(n=6,name='智慧藏书林',theme='学习探究',em='📚',cats=['📚 书林·学习 Ⅰ','🔍 书林·探究 Ⅱ']),
+ dict(n=7,name='万邦港城',theme='社会生活',em='⚓',cats=['⚓ 港城·社会 Ⅰ','🏙️ 港城·生活 Ⅱ']),
+ dict(n=8,name='星火火山口',theme='自然科学',em='🌋',cats=['🌋 火山·自然 Ⅰ','🔭 火山·科学 Ⅱ']),
+]
+
+# ============ 39 boss 元数据(名须与FX注册表键完全一致) ============
+# art: land_<key>.png(新29) 或 已有文件名; hp按岛内梯度; color; taunts×3
+B=lambda name,art,color,t1,t2,t3: dict(name=name,art=art,color=color,taunts=[t1,t2,t3])
+BOSS_META={
+ # ① 迷雾心湖 · 混沌异形系
+ '虫群先锋·刃翼领主':B('虫群先锋·刃翼领主','land_renyi.png','#7fae3a','虫巢在低语…','刃翼, 撕裂它!','你也将成为巢的一部分!'),
+ '未成形之神·万形之胚':B('未成形之神·万形之胚','land_wanxing.png','#c9a6e8','我是万形, 亦是无形…','猜猜我下一秒是什么?','你的形态…我要了!'),
+ '逆相之影·镜渊领主':B('逆相之影·镜渊领主','land_jingyuan.png','#8fb8d8','镜中的你在笑呢…','来, 看看真正的自己!','碎镜千片, 皆是你!'),
+ '混沌之种·万象侵蚀者':B('混沌之种·万象侵蚀者','land_hundun.png','#9a6ac8','腐化…已经开始了。','万象终将归于混沌!','连光都会被我吞噬!'),
+ '魔皇·小丑至尊':B('魔皇·小丑至尊','land_mohuang.png','#c04a9a','欢迎来到我的马戏团!','哈哈哈! 抽一张牌吧!','游戏结束…我赢了♠!'),
+ # ② 风纹草原 · 军事战术系
+ '丛林幽灵·兵王':B('丛林幽灵·兵王','land_bingwang.png','#4f7a3a','你已进入我的狩猎区。','红点亮起…锁定!','幽灵, 无声收割。'),
+ '暗影先锋·破阵者':B('暗影先锋·破阵者','s1_vanguard.png','#ff8a3a','突破口, 找到了。','阵型? 我来撕开!','先锋开路, 全军突击!'),
+ '银翼·麻烦终结者':B('银翼·麻烦终结者','land_yinyi.png','#8ab0c8','麻烦? 交给我终结。','银翼展开, 目标清除。','三…二…一, 完事。'),
+ '决斗大师·千招之约':B('决斗大师·千招之约','land_juedou.png','#e0a850','千招之约, 现在开始!','这一招, 你接得住吗?','武道无涯, 请指教!'),
+ '武器大师·战争铁砧':B('武器大师·战争铁砧','s1_waranvil.png','#ff6a2a','全武库…装填完毕。','尝尝钢铁的重量!','火力压制, 无处可逃!'),
+ # ③ 时之钟谷 · 概念抽象系
+ '火柴人·原初线条':B('火柴人·原初线条','land_huochairen.png','#5a5a5a','一笔一划, 皆是力量。','线条虽简, 招招致命!','我是最初, 也是最纯粹。'),
+ '影守·永夜之壁':B('影守·永夜之壁','land_yingshou.png','#4a5a8a','永夜降临, 壁垒无声。','光, 到此为止。','黑暗中, 我即是墙。'),
+ '万典之灵·未被写下的故事':B('万典之灵·未被写下的故事','land_wandian.png','#c8a860','你的结局…尚未写下。','千卷万典, 皆听我令!','这一页, 就写你的败北。'),
+ '凋零与新生之龙·四季轮转':B('凋零与新生之龙·四季轮转','land_sijilong.png','#7ab87a','春生…冬亡…轮转不息。','四季在我翼下更迭!','凋零之后, 才有新生。'),
+ '时之君主·克罗诺斯之影':B('时之君主·克罗诺斯之影','timelord.png','#d8b860','时间…由我裁定。','十二钟响, 终焉时刻!','你的时间, 到此为止。'),
+ # ④ 铸剑锻炉山 · 机械科技系
+ '机械主教·组装者':B('机械主教·组装者','s1_assembler.png','#ff3a2a','检测到杂质…清理协议启动。','流水线, 全功率复产!','组装完毕, 出击!'),
+ '苍穹守卫·阿尔基昂':B('苍穹守卫·阿尔基昂','land_archeon.png','#4a9ad8','苍穹之下, 由我守护。','热视线, 锁定目标!','裂开吧, 天空!'),
+ '万械之神·奥米伽':B('万械之神·奥米伽','land_omiga.png','#5ab0c8','众生皆是数据。','齿轮转动, 神谕降临。','奥米伽, 即是终解。'),
+ '量子观测者·阿尔戈':B('量子观测者·阿尔戈','land_argo.png','#6ac8b8','当我观测, 结局唯一。','所有可能性…坍缩!','你逃不出概率之网。'),
+ '无光之渊·暗噬君主':B('无光之渊·暗噬君主','abysslord.png','#8a4ac8','渊口已开…坠入吧。','暗链锁魂, 无处可逃!','连灵魂都要吞噬!'),
+ # ⑤ 晶石回廊 · 神性东方系
+ '画壁判官·墨渊':B('画壁判官·墨渊','land_moyuan.png','#4a4a4a','一笔落下, 善恶已判。','墨染乾坤, 皆是轮回。','入我画壁, 永世为囚。'),
+ '夜罗刹·红莲战鬼':B('夜罗刹·红莲战鬼','land_yecha.png','#d83a3a','血月当空, 红莲怒放!','战鬼之焰, 永不熄灭!','杀气…压不住了!'),
+ '破坏神·终焉之相':B('破坏神·终焉之相','land_pohuai.png','#b84ad8','终焉之相, 显现!','天崩地裂, 万物寂灭!','毁灭…即是我的存在。'),
+ '不动明王·焚天镇狱尊':B('不动明王·焚天镇狱尊','land_mingwang.png','#e08030','烈焰法轮, 镇狱焚天!','佛怒金焰, 净化汝身!','不动如山, 焚尽罪孽!'),
+ '剑神·万剑归宗':B('剑神·万剑归宗','land_jianshen.webp','#8ab4d8','万剑…听我号令!','一剑既出, 天地放射!','剑心通明, 汝可敢接?'),
+ # ⑥ 智慧藏书林 · 埃及神话系
+ '诅咒之躯·绷带亡骸':B('诅咒之躯·绷带亡骸','land_bengdai.png','#9aa06a','千年怨念…苏醒了。','绷带缠身, 诅咒缠魂!','陪我长眠于此吧…'),
+ '亡灵咒术师·阿努比斯之影':B('亡灵咒术师·阿努比斯之影','land_anubis.png','#5a7ac8','冥界之门, 为你而开。','引魂丝已缠上你!','胡狼低语…审判将至。'),
+ '古埃及大祭司·真理之口的裁决者':B('古埃及大祭司·真理之口的裁决者','land_priest.png','#c8a850','将你的心脏放上天平。','真理之羽, 称量罪孽!','有罪…判决执行!'),
+ '法老王·不朽金身':B('法老王·不朽金身','land_pharaoh.png','#e0b040','凡人, 跪拜于法老!','黄金葬衣, 万世不朽!','王的诅咒, 无人可逃!'),
+ '天界守护者·黄金斯芬克斯':B('天界守护者·黄金斯芬克斯','land_sphinx.png','#e8c050','回答我的谜题…或死。','四翼展开, 翼日临世!','谜底…就是你的终结。'),
+ # ⑦ 万邦港城 · 星辰守护系
+ '月之引航者·寂静潮汐':B('月之引航者·寂静潮汐','land_yuezhi.png','#8ab0d8','潮汐随我心意起落。','月光之下, 迷途者止步。','寂静之海…将你吞没。'),
+ '星陨武士·流亡之刃':B('星陨武士·流亡之刃','s1_exileblade.png','#8ab4ff','垂死之星…见证此战。','光刃一闪, 胜负已分。','流亡者, 无所畏惧。'),
+ '星核泰坦·虚空造物主':B('星核泰坦·虚空造物主','land_xinghe.png','#e0a040','一次搏动, 星系诞生。','虚空之中, 我即造物!','星核燃烧…感受创世!'),
+ '统御天使·圣光之翼':B('统御天使·圣光之翼','lightangel.png','#f0e0a0','圣光普照, 罪无所遁。','万道光柱, 天降审判!','以圣翼之名…裁决!'),
+ '铸星者·原初匠人':B('铸星者·原初匠人','starmaker.png','#f0a830','星辰…皆出自我手。','创世锻造, 开始!','这一锤, 铸的是你的败局!'),
+ # ⑧ 星火火山口 · 终末宇宙系
+ '破晓仲裁者·索拉里斯':B('破晓仲裁者·索拉里斯','land_poxiao.png','#f0c060','第一缕晨光, 即是审判。','破晓之刻, 无所遁形!','黎明属于胜利者!'),
+ '天启征服者·索拉里斯':B('天启征服者·索拉里斯','land_solaris.png','#d8a040','六色宝石…齐亮了。','天启降临, 众星臣服!','创世之力, 尽在此拳!'),
+ '终末观测者·边界守夜人':B('终末观测者·边界守夜人','observer.png','#5ac8c0','边界之外…我看见了终末。','星图烙印, 命运锁定!','守夜人…从不闭眼。'),
+ '活体行星·古老意志':B('活体行星·古老意志','s1_ancientwill.png','#ffcf7a','亿万年的孤独…你懂吗?','引力坍塌…万物归一。','我即行星, 行星即我。'),
+}
+
+ranked=json.load(open('/home/claude/map8/boss_ranked.json',encoding='utf-8'))
+HP=[88,96,106,116,128]  # 岛内5boss强度梯度(守关最强)
+HP4=[92,104,116,130]    # 第8岛只有4个
+
+def boss_entry(meta,hp):
+    svg=('<svg viewBox=\\"0 0 100 100\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\">'
+         '<image href=\\"bosses/%s?v=%s\\" xlink:href=\\"bosses/%s?v=%s\\" width=\\"100\\" height=\\"100\\" preserveAspectRatio=\\"xMidYMid meet\\"/></svg>')%(meta['art'],V,meta['art'],V)
+    t="','".join(meta['taunts'])
+    return "{name:'%s',emoji:'%s',hp:%d,color:'%s',taunts:['%s']}"%(meta['name'],svg,hp,meta['color'],t)
+
+def block_span(src,anchor):
+    i=src.find(anchor); st=src.find('[',i); depth=0
+    for k in range(st,len(src)):
+        if src[k]=='[':depth+=1
+        elif src[k]==']':
+            depth-=1
+            if depth==0: return i,k+1
+    return -1,-1
+
+report=[]
+for isl in ISLANDS:
+    N=isl['n']
+    s=tpl
+
+    # --- 1) DATA: 30词分2类 ---
+    ws=entries[(N-1)*30:N*30]
+    half=15
+    c1=',\n'.join(e for _,e in ws[:half])
+    c2=',\n'.join(e for _,e in ws[half:])
+    newdata='const DATA=[\n{cat:"%s",words:[\n%s\n]},\n{cat:"%s",words:[\n%s\n]}\n]'%(isl['cats'][0],c1,isl['cats'][1],c2)
+    di,dj=block_span(s,'const DATA=[')
+    s=s[:di]+newdata+s[dj:]
+
+    # --- 2) BOSSES: 岛内5(或4)boss ---
+    key=[k for k in ranked if k.startswith('①②③④⑤⑥⑦⑧'[N-1])][0]
+    blist=[b['name'].replace('⭐','') for b in ranked[key]['bosses']]
+    hps=HP if len(blist)==5 else HP4
+    bentries=',\n'.join(boss_entry(BOSS_META[nm],hps[i]) for i,nm in enumerate(blist))
+    newboss='const BOSSES=[\n'+bentries+'\n]'
+    bi,bj=block_span(s,'const BOSSES=[')
+    s=s[:bi]+newboss+s[bj:]
+
+    # --- 3) 键/regex/旗 替换 ---
+    s=s.replace("island_season1\\.html","island_land%d\\.html"%N)
+    s=s.replace("season1_prog","land%d_prog"%N)
+    s=s.replace("wordIslandSeason1","wordIslandLand%d"%N)
+    # 通关旗: season([1-5]) → land 专属(victory块)
+    s=s.replace("match(/island_season([1-5])\\.html/)","match(/island_land([1-8])\\.html/)")
+    s=s.replace("hsn_seasonmap_cleared_","hsn_landmap_cleared_")
+    s=s.replace("island_season[1-5]\\.html","island_land[1-8]\\.html")
+    s=s.replace("openIsland('island_season.html')","openIsland('land_map.html')")
+    s=s.replace("window.location.href = 'island_season.html'","window.location.href = 'land_map.html'")
+    s=s.replace("HansenSpellBee.open('season1')","HansenSpellBee.open('land%d')"%N)
+    # --- 4) 品牌串/标题 ---
+    brand='单词大陆·%s%s'%('①②③④⑤⑥⑦⑧'[N-1],isl['name'])
+    s=s.replace('星海·第一星域·铸星者',brand)
+    s=s.replace('Star Sea I: Emotion & Character','Word Continent %d: %s'%(N,isl['theme']))
+
+    # --- 4.5) 🔴v885(Hansen: 挑战BOSS图标加载慢·要彻底钉死零加载): gameconsole.png(725KB)→200px WEBP base64内联·图变成页面一部分零网络请求 ---
+    try:
+        _uri=open(os.path.join(os.path.dirname(__file__),'gameconsole_datauri.txt')).read().strip()
+        _old='<img class="boss-card-img" src="icons/gameconsole.png?v=884" alt="" draggable="false" onerror="window.hansenImgErr&&window.hansenImgErr(this)">'
+        _new='<img class="boss-card-img" src="'+_uri+'" alt="挑战BOSS" draggable="false">'
+        if _old in s: s=s.replace(_old,_new,1)
+        else:
+            # 兼容不同?v=戳
+            import re
+            s=re.sub(r'<img class="boss-card-img" src="icons/gameconsole\.png\?v=\d+" alt="" draggable="false" onerror="window\.hansenImgErr&&window\.hansenImgErr\(this\)">', _new, s, count=1)
+    except Exception as _e: print('  [warn] 挑战BOSS图内联失败:', _e)
+
+    # --- 4.6) 🔴v886(Hansen: 挑战BOSS卡黑底看着不舒服·换晴空天空蓝): land岛挑战BOSS卡背景 #0A1228→#38BDF8(仅单词大陆·图片透明背景故改卡底即可) ---
+    s=s.replace('.daily-card.boss-card{background:#0A1228!important}', '.daily-card.boss-card{background:#38BDF8!important}')
+
+    out=os.path.join(DEV,'island_land%d.html'%N)
+    open(out,'w',encoding='utf-8').write(s)
+    # 残留审计
+    leftover=[]
+    for kw in ['第一星域','星海·','season1','铸星者!','40 词','Season1']:
+        c=s.count(kw)
+        if c: leftover.append('%s×%d'%(kw,c))
+    report.append((N,isl['name'],len(ws),len(blist),len(s)//1024,leftover))
+
+print('生成完成:')
+for N,name,wc,bc,kb,lo in report:
+    print('  island_land%d.html %s %d词 %dboss %dKB 残留:%s'%(N,name,wc,bc,kb,lo or '无✅'))

@@ -1,9 +1,4 @@
-releases/
-evolution_reports/
-.evolution_backups/
 __pycache__/
 *.pyc
 nohup.out
-*.zip
 .DS_Store
-_fxtest.html
