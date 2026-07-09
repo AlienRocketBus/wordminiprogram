@@ -1,5 +1,6 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v896**：接着上一版继续挖你反馈的听音拼词没声音问题。你追问“衣服、家、疑问词、宝藏这几个岛里我专门补过音频的词，为什么没声音了”——查清楚了，**音频一个都没丢，是我上一版判断错了**。这几个词（T-shirt、washing machine、how many/much/old/long/far、next to）的音频100%还在，只是文件名跟拼写页猜的不一样：多词短语存成了编号文件（how many其实是 word_10.mp3、washing machine是 word_08.mp3、next to是 word_16.mp3 等），T-shirt存成了带连字符的 t-shirt.mp3。主游戏能正常播是因为它查一张全局映射表（word_map.js）和岛屏音频表来找文件；但听音拼词是个独立页面、有自己一套播音代码，只会按“单词转小写去符号”猜文件名（how many→how_many.mp3，不存在），从不查那张映射表，所以找不到、回退到没声的TTS。跟上一版是同一个根子（拼写页找音频的方式跟文件实际命名对不上），换了个马甲。这版把听音拼词的播音改成跟主游戏一模一样——先查那张映射表，再按单词大陆的 _season 规则，再猜文件名；另外把 T-shirt 这一条补进映射表。实测：这几个词全部恢复读音，单词大陆和常规岛不受影响，零报错。现在全部936个拼词单词都有正常读音了。含v895（单词大陆听音拼词发声）等全部。
 - **v895**：修复星海副本（单词大陆）里有些岛的 Spelling Bee 点进去没声音的问题。你反馈星海那些岛的听音拼词根本听不到声音——查到根因了：Spelling Bee 是独立的听音拼词页面，它播单词音频时找的是 words/<单词>.mp3，但单词大陆这8个岛（land1-8）的单词音频文件全都带了个 _season 后缀（叫 <单词>_season.mp3，这是当初为了岛与岛之间音频隔离做的、跟主游戏一致），所以这240个单词的音频它全都找不到、就回退到浏览器TTS，而微信浏览器里TTS是没声音的——于是玩家点进去完全听不到单词。星海副本因为把8个岛的单词都汇在一起考，所以最严重、全程没声。这版在 Spelling Bee 的播音逻辑里补上：碰到单词大陆的词就自动去找带 _season 的音频文件。实测：单词大陆各岛+星海副本的听音拼词现在都能正常发出单词读音（HTTP 200），常规岛（动物、食物等）不受影响照常有声，零报错。含v894（剑神改名万剑归一）等全部。
 - **v894**：把剑神boss改名成“剑神·万剑归一”，并换上你新发的立绘、把旧图彻底删干净。剑神在单词大陆第5岛（晶石回廊）当守关boss，他的招式一直叫“万剑归一”，但boss名之前是“剑神·万剑归宗”，这版把名字统一成招式名“剑神·万剑归一”。同时用你新发的高清立绘（896×1195透明）换掉旧图、旧图删干净——转成webp（微信原生支持，绝不用会导致微信不显示的P模式PNG，剑神这张之前就被P模式坑过）。改名是全局一次替换，boss名、收藏卡（L55）、攻击特效的派发注册、地图数据、生成器全部同步改到，特效派发键也一起改了所以万剑归一特效照常触发。实测：第5岛打剑神显示新名“剑神·万剑归一”、用新图、新图加载正常、万剑归一穿血条特效正常触发、零报错。含v893（弗沙欧当第8岛守关boss）等全部。
 - **v893**：把弗沙欧（星核帝皇）正式做成“星火火山口”（单词大陆第8岛·自然科学）的守关大boss。之前v892只是把弗沙欧的攻击特效（三皇归一·终焉白光）接好了，但它还只是个“有特效没归属”的boss；这版把它落地成真正可挑战的守关关主。第8岛原本只有4个守关boss（别的岛都是5个），正缺第5个，弗沙欧补上刚好凑齐、而且星核帝皇镇守火山口主题也贴。①第8岛boss阵容加第5个弗沙欧（血量1300，全岛最强压轴守关，梯度接在760/880/1000/1150之后）；进度和选关自动认出第5关（不用额外改），选关界面自动多出弗沙欧那一关。②弗沙欧立绘转成webp高清透明图（微信原生支持）。③收藏卡册给弗沙欧加守关传说卡（L85），同时把原第4张（古老意志）从传说降为史诗，让第8岛五张卡稀有度阶梯（普通→罕见→稀有→史诗→传说）和别的岛完全一致。④攻击特效沿用v892接好的（任何名为“星核帝皇·弗沙欧”的boss出手就放三皇归一·终焉白光）。实测：第8岛5个boss、第5个是弗沙欧（血1300）、立绘加载正常、攻击特效全屏出现、零报错。绝不屏震/闪光/旋转。
@@ -49,6 +50,8 @@
 > 3. **必在矮视口验**(高 ≤ 620px·腾讯 webapp 顶栏吃高度): 文字裁切几乎只在矮屏暴露, 高视口看不出(BUG#82 就这么漏的)。
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
+
+> **当前版本: v896（🔊 听音拼词音频·彻底修全）。** 接着上一版继续挖你反馈的没声音问题。你追问“衣服、家、疑问词、宝藏这几个岛里我专门补过音频的词，为什么没声音了”——**先说结论：音频一个都没丢，是我上一版判断错了，跟你道个歉**。**真正的原因**：这几个词（T-shirt、washing machine、how many/much/old/long/far、next to）的音频100%还在，只是文件名跟听音拼词猜的对不上——多词短语当初存成了编号文件（“how many”其实是 word_10.mp3、“washing machine”是 word_08.mp3、“next to”是 word_16.mp3 等等），“T-shirt”存成了带连字符的 t-shirt.mp3。**主游戏能正常播**，是因为它查一张全局映射表（word_map.js 里的 WORD_MAP，419条 单词→文件 的对应）和岛屏音频表来找正确文件；**但听音拼词是个独立页面、有自己一套播音代码**，只会用“单词转小写、去掉符号、空格变下划线”去猜文件名（“how many”→how_many.mp3，根本不存在），从来不查那张映射表——所以这些词它全找不到、回退到浏览器TTS，而微信里TTS没声。**这跟上一版是同一个根子**（听音拼词找音频的方式跟文件的实际命名对不上），只是换了个马甲：上一版是单词大陆的词带 _season 后缀，这一版是多词短语用编号文件。**修复**：把听音拼词的播音逻辑改成跟主游戏一模一样——先查那张全局映射表（多词短语、编号文件都在里面），查不到再按单词大陆的 _season 规则，再退回猜文件名；另外 T-shirt 这一条本来只在衣服岛的音频表里、没进全局映射表，我给全局映射表补了这一条。**实测**（真机模拟12个词）：T-shirt、how many/much/old/long/far、washing machine、next to 全部拿到正确音频、HTTP 200 能播；单词大陆（nervous 等）和常规岛（动物、食物）不受影响、照常有声；零报错。把全部936个拼词单词过了一遍，三种找法（映射表／_season／猜名）合起来之后，**没有一个词是找不到音频的了**。⚠ 本版改 spelling_bee.html（加载 word_map.js + 播音改用映射表）+ word_map.js（补 T-shirt 一条）。含 v895（单词大陆听音拼词发声）等全部。 ❗ 用 v896 · 清 CDN · 微信重进。
 
 > **当前版本: v895（🔊 修复星海副本Spelling Bee没声音）。** 你反馈的星海副本（单词大陆）里有些岛的听音拼词没声音，修好了。**根因**：Spelling Bee（听音拼词）是个独立页面，它播单词读音时找的文件名是 words/<单词>.mp3；但单词大陆这8个岛（land1-8，共240个单词）的音频文件当初为了“岛与岛之间音频隔离”都带了个 _season 后缀（实际文件叫 <单词>_season.mp3，跟主游戏里一致）。所以Spelling Bee按 words/<单词>.mp3 去找这240个单词的音频，全都找不到 → 回退到浏览器自带的TTS语音 → 而微信X5浏览器里TTS是不发声的 → 玩家点进去完全听不到单词、没法拼。星海副本因为把8个岛的单词汇在一起考，所以整个副本全程没声、最严重；常规岛（动物、食物等）的单词有正常的 <单词>.mp3 所以一直有声（你也没抱怨那些）。**修复**：在Spelling Bee的播音逻辑里加一句——碰到单词大陆的词（岛屏标记是land1到land8）就自动给音频文件名补上 _season 后缀去找正确的文件。星海副本汇总的那些单词也一样自动生效。**实测**（真机模拟6个岛）：单词大陆第1/5/8岛 + 星海副本 都正确拿到 <单词>_season.mp3、HTTP 200 能播；动物、食物等常规岛拿到普通的 <单词>.mp3、200、不受影响；零报错。⚠ 本版只改 spelling_bee.html（一行播音逻辑）。另有个小遗留：常规岛里8个多词短语（T-shirt、washing machine、how many/much/old/long/far、next to）本来就缺音频文件、会回退TTS，不是这次的重点，你要的话我另外补。含 v894（剑神改名万剑归一）等全部。 ❗ 用 v895 · 清 CDN · 微信重进。
 
@@ -10283,7 +10286,7 @@ _wa840_bad = []
 import re as _re840, os as _os840
 _tmpl840 = _r31('template.html'); _sb840 = _r31('spelling_bee.html'); _pre840 = _r31('hansen_preload.js')
 _m_tmpl840 = _re840.search(r"localMp3 \+ '(\?v\d+)'", _tmpl840)
-_m_sb840 = _re840.search(r"\.mp3(\?v\d+)'", _sb840)
+_m_sb840 = _re840.search(r"src\+'(\?v\d+)'", _sb840) or _re840.search(r"\.mp3(\?v\d+)'", _sb840)  # v896: speak改用 src+'?v215'(WORD_MAP解析), 兼容旧 .mp3?v215' 
 _m_pre840 = _re840.search(r"WORD_VER\s*=\s*'(\?v\d+)'", _pre840)
 if not _m_tmpl840: _wa840_bad.append("template.html 找不到 island speak 词音频戳(localMp3+'?vNNN')")
 if not _m_sb840: _wa840_bad.append("spelling_bee.html 找不到词音频戳(.mp3?vNNN)")
@@ -11590,6 +11593,20 @@ except Exception as _e895:
     _l895.append('guard self exc:'+str(_e895)[:80])
 if _l895: fail('v895 spelling bee land audio: '+str(_l895[:10]))
 else: ok("v895 (Hansen: 星海副本spelling bee没声音): 拼写蜜蜂land岛(单词大陆)+星海season副本发声修复。根因: land词音频文件全是 <word>_season.mp3(与主游戏 __ISLAND_LOCAL_AUDIO 岛隔离一致), 而 spelling_bee.html 的 speak() 默认只找 words/<word>.mp3 → 240个land词全部落空 → 静默TTS在微信X5无声 → 玩家听不到单词没法拼。修复: speak() 在 curWord.isl 为 land1-8 时给文件名补 _season 后缀。season副本池化所有land词(isl=land1-8)同样生效。常规岛(animal/food等)不受影响仍用 plain <word>.mp3。真机Playwright: land1/5/8+season都拿到 <word>_season.mp3 HTTP200 audio/mpeg, animal/food拿plain.mp3 200, 0报错。")
+
+_l896=[]
+try:
+    _sb896=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    _wm896=open('word_map.js',encoding='utf-8',errors='replace').read()
+    if 'word_map.js' not in _sb896: _l896.append('spelling_bee not loading word_map.js')
+    if 'window.WORD_MAP[_lo]' not in _sb896: _l896.append('spelling_bee speak not using WORD_MAP')
+    if "'t-shirt'" not in _wm896 and '"t-shirt"' not in _wm896: _l896.append('word_map.js missing t-shirt entry')
+    for _k in ['how many','washing machine','next to']:
+        if ('"'+_k+'"') not in _wm896 and ("'"+_k+"'") not in _wm896: _l896.append('WORD_MAP missing '+_k)
+except Exception as _e896:
+    _l896.append('guard self exc:'+str(_e896)[:80])
+if _l896: fail('v896 spellbee WORD_MAP audio: '+str(_l896[:10]))
+else: ok("v896 (Hansen: 星海spelling bee没声音·深挖第2轮): 拼写页多词短语+带符号文件也没声。根因: land词是_season(v895已修), 但多词短语(how many/washing machine/how much-old-long-far/next to)音频是编号文件(word_08~word_16.mp3等)、T-shirt是t-shirt.mp3(带连字符), 全靠主游戏的 WORD_MAP(word_map.js)和岛隔离表映射; 而 spelling_bee.html 有自己的 speak() 只朴素派生 words/<word>.mp3(how many→how_many.mp3 不存在), 从不查 WORD_MAP → 静默TTS微信无声。音频从没丢, 只是拼写页没按正确文件名找。修复: spelling_bee.html 加载 word_map.js, speak() 改成与主游戏同款解析(先查 WORD_MAP, 再 land 词 _season, 再朴素派生); T-shirt 唯一只在clothes岛隔离表不在WORD_MAP, 给 WORD_MAP 补一条 t-shirt→words/t-shirt.mp3。真机Playwright: T-shirt/how many-much-old-long-far/washing machine/next to 全拿到正确音频200, land/常规岛不受影响, 0报错。936词三法合解后0词无音频。")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

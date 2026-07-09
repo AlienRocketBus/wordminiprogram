@@ -1,5 +1,6 @@
 // 单词 mp3 映射 - 仅多词短语 (单词级走原牛津/百度/TTS 链)
 window.WORD_MAP = {
+  't-shirt': 'words/t-shirt.mp3',  // 🔴v896 拼写页通过WORD_MAP找到(主游戏原用clothes岛隔离表)
  "post office": "words/word_01.mp3",
  "police station": "words/word_02.mp3",
  "fire station": "words/word_03.mp3",
