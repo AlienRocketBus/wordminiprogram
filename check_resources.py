@@ -8297,6 +8297,24 @@ except Exception as _e893:
 if _l893: fail('v893 Fushaou land8 guardian boss: '+str(_l893[:10]))
 else: ok("v893 (Hansen: \u5f17\u6c99\u6b27\u5f53\u661f\u706b\u706b\u5c71\u53e3\u7684\u5b88\u5173\u5927boss): \u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27\u4f5c\u4e3a\u5355\u8bcd\u5927\u9646land8(\u661f\u706b\u706b\u5c71\u53e3\u00b7\u81ea\u7136\u79d1\u5b66)\u7b2c5\u4e2a=\u538b\u8f74\u5b88\u5173boss\u3002\u2460island_land8.html BOSSES\u52a0\u7b2c5\u6761hp1300(\u68af\u5ea6760/880/1000/1150\u2192\u5b88\u5173\u6700\u5f3a\u00b7\u7528boss4\u6a21\u677f\u4fdd\u8f6c\u4e49\u683c\u5f0f)\u00b7\u8fdb\u5ea6land8_prog\u4e0eBOSSES.length\u81ea\u9002\u5e94\u00b7\u9009\u5173\u7f51\u683c\u7531hansen_cards\u6309BOSSES\u6e32\u67d3\u81ea\u52a8\u663e5\u8282\u70b9\u3002\u2461\u7acb\u7ed8land_fushaou.webp(1086x1448 RGBA q85 236KB\u00b7\u7edd\u4e0dpngquant\u8f6cP\u6a21\u5f0f\u00b7\u5fae\u4fe1X5\u539f\u751f\u652f\u6301webp)\u3002\u2462L\u5361\u65b0\u589eL85\u5f17\u6c99\u6b27legendary\u5b88\u5173\u5361\u00b7L84\u53e4\u8001\u610f\u5fd7\u964d\u4e3aepic\u2192land8\u4e94\u5361common/uncommon/rare/epic/legendary\u4e0e\u5176\u4ed6\u5c9b\u4e00\u81f4\u3002\u2463\u653b\u51fb\u7279\u6548fxFushaou\u5df2\u5728v892\u63a5\u597d(FX\u914d\u7f6e\u5f17\u6c99\u6b27\u2192t fushaou)\u00b7\u4e00\u51fa\u624b\u5373\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149\u3002\u2464\u540c\u6b65\u751f\u6210\u5668BOSS_META+boss_ranked\u52a0\u5f17\u6c99\u6b27\u00b7\u4f46land8 html\u7684HP\u624b\u8c03\u4e0e\u751f\u6210\u5668\u5df2\u6f02\u79fb\u00b7\u5207\u52ff\u91cd\u65b0\u751f\u6210\u4f1a\u91cd\u7f6e\u6240\u6709boss HP\u3002\u771f\u673aPlaywright: land8 BOSSES.length=5\u00b7\u7b2c5\u4e2a\u5f17\u6c99\u6b27hp1300\u00b7\u7acb\u7ed8webp200\u00b7\u653b\u51fb\u7279\u6548canvas\u5168\u5c4f\u00b70\u62a5\u9519\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002")
 
+_l895=[]
+try:
+    _sb=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    import re as _re895, os as _os895
+    if "file += '_season'" not in _sb: _l895.append('spelling_bee speak missing _season patch')
+    if "/^land[1-8]$/.test(curWord.isl" not in _sb: _l895.append('spelling_bee missing land isl check')
+    for _w in ['nervous','chemical','several']:
+        if not _os895.path.exists('words/'+_w+'_season.mp3'): _l895.append('missing land audio words/'+_w+'_season.mp3')
+    _m=_re895.search(r"var WORDS=\[(.*?)\n\s*\];", _sb, _re895.DOTALL)
+    if _m:
+        _isls=_re895.findall(r'"isl":\s*"(land[1-8])"', _m.group(1))
+        if len(set(_isls))!=8: _l895.append('WORDS land coverage!=8:'+str(sorted(set(_isls))))
+    else: _l895.append('spelling_bee WORDS array not found')
+except Exception as _e895:
+    _l895.append('guard self exc:'+str(_e895)[:80])
+if _l895: fail('v895 spelling bee land audio: '+str(_l895[:10]))
+else: ok("v895 (Hansen: 星海副本spelling bee没声音): 拼写蜜蜂land岛(单词大陆)+星海season副本发声修复。根因: land词音频文件全是 <word>_season.mp3(与主游戏 __ISLAND_LOCAL_AUDIO 岛隔离一致), 而 spelling_bee.html 的 speak() 默认只找 words/<word>.mp3 → 240个land词全部落空 → 静默TTS在微信X5无声 → 玩家听不到单词没法拼。修复: speak() 在 curWord.isl 为 land1-8 时给文件名补 _season 后缀。season副本池化所有land词(isl=land1-8)同样生效。常规岛(animal/food等)不受影响仍用 plain <word>.mp3。真机Playwright: land1/5/8+season都拿到 <word>_season.mp3 HTTP200 audio/mpeg, animal/food拿plain.mp3 200, 0报错。")
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:

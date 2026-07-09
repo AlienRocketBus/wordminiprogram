@@ -1,5 +1,6 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v895**：修复星海副本（单词大陆）里有些岛的 Spelling Bee 点进去没声音的问题。你反馈星海那些岛的听音拼词根本听不到声音——查到根因了：Spelling Bee 是独立的听音拼词页面，它播单词音频时找的是 words/<单词>.mp3，但单词大陆这8个岛（land1-8）的单词音频文件全都带了个 _season 后缀（叫 <单词>_season.mp3，这是当初为了岛与岛之间音频隔离做的、跟主游戏一致），所以这240个单词的音频它全都找不到、就回退到浏览器TTS，而微信浏览器里TTS是没声音的——于是玩家点进去完全听不到单词。星海副本因为把8个岛的单词都汇在一起考，所以最严重、全程没声。这版在 Spelling Bee 的播音逻辑里补上：碰到单词大陆的词就自动去找带 _season 的音频文件。实测：单词大陆各岛+星海副本的听音拼词现在都能正常发出单词读音（HTTP 200），常规岛（动物、食物等）不受影响照常有声，零报错。含v894（剑神改名万剑归一）等全部。
 - **v894**：把剑神boss改名成“剑神·万剑归一”，并换上你新发的立绘、把旧图彻底删干净。剑神在单词大陆第5岛（晶石回廊）当守关boss，他的招式一直叫“万剑归一”，但boss名之前是“剑神·万剑归宗”，这版把名字统一成招式名“剑神·万剑归一”。同时用你新发的高清立绘（896×1195透明）换掉旧图、旧图删干净——转成webp（微信原生支持，绝不用会导致微信不显示的P模式PNG，剑神这张之前就被P模式坑过）。改名是全局一次替换，boss名、收藏卡（L55）、攻击特效的派发注册、地图数据、生成器全部同步改到，特效派发键也一起改了所以万剑归一特效照常触发。实测：第5岛打剑神显示新名“剑神·万剑归一”、用新图、新图加载正常、万剑归一穿血条特效正常触发、零报错。含v893（弗沙欧当第8岛守关boss）等全部。
 - **v893**：把弗沙欧（星核帝皇）正式做成“星火火山口”（单词大陆第8岛·自然科学）的守关大boss。之前v892只是把弗沙欧的攻击特效（三皇归一·终焉白光）接好了，但它还只是个“有特效没归属”的boss；这版把它落地成真正可挑战的守关关主。第8岛原本只有4个守关boss（别的岛都是5个），正缺第5个，弗沙欧补上刚好凑齐、而且星核帝皇镇守火山口主题也贴。①第8岛boss阵容加第5个弗沙欧（血量1300，全岛最强压轴守关，梯度接在760/880/1000/1150之后）；进度和选关自动认出第5关（不用额外改），选关界面自动多出弗沙欧那一关。②弗沙欧立绘转成webp高清透明图（微信原生支持）。③收藏卡册给弗沙欧加守关传说卡（L85），同时把原第4张（古老意志）从传说降为史诗，让第8岛五张卡稀有度阶梯（普通→罕见→稀有→史诗→传说）和别的岛完全一致。④攻击特效沿用v892接好的（任何名为“星核帝皇·弗沙欧”的boss出手就放三皇归一·终焉白光）。实测：第8岛5个boss、第5个是弗沙欧（血1300）、立绘加载正常、攻击特效全屏出现、零报错。绝不屏震/闪光/旋转。
 - **v892**：把九王殿9个新boss攻击特效完美融入正片，并且后台可调参。你在特效工坊重做的9个boss攻击特效（夜罗刹、刃翼领主、绷带亡骸、奥米伽、四季龙、影守、墨渊、阿尔戈，加上全新的星核帝皇·弗沙欧）全部外科手术式融入游戏——8个旧特效函数体原地替换成新版、函数名保持不变所以特效派发和后台调参零改动自动沿用；新增第9个弗沙欧特效（三皇归一·终焉白光）并接好派发+调参。新版刃翼领主的真枪、影守的黑手触手所需图片一并base64内联（零加载）。为新（更长）的动画把这8个boss掉血命中的时刻调到各自特效的高潮（4~6.3秒）。游戏原有FXCore引擎（含剑神穿透血条增强）完全没动。实测：弗沙欧/刃翼领主/影守/奥米伽/夜罗刹等5个特效通过真实战斗派发路径触发、画面全屏正常、零报错、语法校验通过。（弗沙欧作为可挑战守关boss放哪个岛还需你定，特效已接好、立绘已备。）
@@ -48,6 +49,8 @@
 > 3. **必在矮视口验**(高 ≤ 620px·腾讯 webapp 顶栏吃高度): 文字裁切几乎只在矮屏暴露, 高视口看不出(BUG#82 就这么漏的)。
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
+
+> **当前版本: v895（🔊 修复星海副本Spelling Bee没声音）。** 你反馈的星海副本（单词大陆）里有些岛的听音拼词没声音，修好了。**根因**：Spelling Bee（听音拼词）是个独立页面，它播单词读音时找的文件名是 words/<单词>.mp3；但单词大陆这8个岛（land1-8，共240个单词）的音频文件当初为了“岛与岛之间音频隔离”都带了个 _season 后缀（实际文件叫 <单词>_season.mp3，跟主游戏里一致）。所以Spelling Bee按 words/<单词>.mp3 去找这240个单词的音频，全都找不到 → 回退到浏览器自带的TTS语音 → 而微信X5浏览器里TTS是不发声的 → 玩家点进去完全听不到单词、没法拼。星海副本因为把8个岛的单词汇在一起考，所以整个副本全程没声、最严重；常规岛（动物、食物等）的单词有正常的 <单词>.mp3 所以一直有声（你也没抱怨那些）。**修复**：在Spelling Bee的播音逻辑里加一句——碰到单词大陆的词（岛屏标记是land1到land8）就自动给音频文件名补上 _season 后缀去找正确的文件。星海副本汇总的那些单词也一样自动生效。**实测**（真机模拟6个岛）：单词大陆第1/5/8岛 + 星海副本 都正确拿到 <单词>_season.mp3、HTTP 200 能播；动物、食物等常规岛拿到普通的 <单词>.mp3、200、不受影响；零报错。⚠ 本版只改 spelling_bee.html（一行播音逻辑）。另有个小遗留：常规岛里8个多词短语（T-shirt、washing machine、how many/much/old/long/far、next to）本来就缺音频文件、会回退TTS，不是这次的重点，你要的话我另外补。含 v894（剑神改名万剑归一）等全部。 ❗ 用 v895 · 清 CDN · 微信重进。
 
 > **当前版本: v894（⚔️ 剑神改名“万剑归一”+换新立绘）。** 剑神boss改好名、换好图了。**做了什么**：①**改名 剑神·万剑归宗→剑神·万剑归一**——剑神在单词大陆第5岛（晶石回廊）当守关boss，招式一直叫“万剑归一”，但boss名之前叫“剑神·万剑归宗”，这版把名字统一成招式名。改名是全局一次替换，所以boss名、收藏卡（L55的卡名和描述）、攻击特效的派发注册键、地图里的岛屏数据、岛屏生成器全部同步改到位——**特别是特效派发键也一起改了**，所以万剑归一那套穿血条的特效照常触发（改错这个键特效就不放了，我核过了）。②**换新立绘+删旧图**——用你新发的高清立绘（896×1195透明PNG）换掉旧的，旧图land_jianshen.webp先删干净再放新的，转成webp（296KB、微信X5原生支持透明）。绝不用会导致微信不显示的P模式PNG——剑神这张图之前v890就是被P模式坑过、微信里全白，这次继续用webp。boss立绘和收藏卡用的是同一个图片文件，所以换一次两处都换了。实测：第5岛打剑神，boss显示新名“剑神·万剑归一”、用新图、新图加载正常（webp 200）、万剑归一穿血条特效canvas全屏正常触发、零报错，全程不闪屏不旋转不震屏。⚠ 本版改 island_land5.html + hansen_land_cards.js + hansen_boss_attack.js + land_map.html（都是改名）+ 换 bosses/land_jianshen.webp（新图·旧图已删），并同步岛屏生成器。含 v893（弗沙欧当第8岛守关boss）等全部。 ❗ 用 v894 · 清 CDN · 微信重进。
 
@@ -11569,6 +11572,24 @@ except Exception as _e893:
     _l893.append('guard self exc:'+str(_e893)[:80])
 if _l893: fail('v893 Fushaou land8 guardian boss: '+str(_l893[:10]))
 else: ok("v893 (Hansen: \u5f17\u6c99\u6b27\u5f53\u661f\u706b\u706b\u5c71\u53e3\u7684\u5b88\u5173\u5927boss): \u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27\u4f5c\u4e3a\u5355\u8bcd\u5927\u9646land8(\u661f\u706b\u706b\u5c71\u53e3\u00b7\u81ea\u7136\u79d1\u5b66)\u7b2c5\u4e2a=\u538b\u8f74\u5b88\u5173boss\u3002\u2460island_land8.html BOSSES\u52a0\u7b2c5\u6761hp1300(\u68af\u5ea6760/880/1000/1150\u2192\u5b88\u5173\u6700\u5f3a\u00b7\u7528boss4\u6a21\u677f\u4fdd\u8f6c\u4e49\u683c\u5f0f)\u00b7\u8fdb\u5ea6land8_prog\u4e0eBOSSES.length\u81ea\u9002\u5e94\u00b7\u9009\u5173\u7f51\u683c\u7531hansen_cards\u6309BOSSES\u6e32\u67d3\u81ea\u52a8\u663e5\u8282\u70b9\u3002\u2461\u7acb\u7ed8land_fushaou.webp(1086x1448 RGBA q85 236KB\u00b7\u7edd\u4e0dpngquant\u8f6cP\u6a21\u5f0f\u00b7\u5fae\u4fe1X5\u539f\u751f\u652f\u6301webp)\u3002\u2462L\u5361\u65b0\u589eL85\u5f17\u6c99\u6b27legendary\u5b88\u5173\u5361\u00b7L84\u53e4\u8001\u610f\u5fd7\u964d\u4e3aepic\u2192land8\u4e94\u5361common/uncommon/rare/epic/legendary\u4e0e\u5176\u4ed6\u5c9b\u4e00\u81f4\u3002\u2463\u653b\u51fb\u7279\u6548fxFushaou\u5df2\u5728v892\u63a5\u597d(FX\u914d\u7f6e\u5f17\u6c99\u6b27\u2192t fushaou)\u00b7\u4e00\u51fa\u624b\u5373\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149\u3002\u2464\u540c\u6b65\u751f\u6210\u5668BOSS_META+boss_ranked\u52a0\u5f17\u6c99\u6b27\u00b7\u4f46land8 html\u7684HP\u624b\u8c03\u4e0e\u751f\u6210\u5668\u5df2\u6f02\u79fb\u00b7\u5207\u52ff\u91cd\u65b0\u751f\u6210\u4f1a\u91cd\u7f6e\u6240\u6709boss HP\u3002\u771f\u673aPlaywright: land8 BOSSES.length=5\u00b7\u7b2c5\u4e2a\u5f17\u6c99\u6b27hp1300\u00b7\u7acb\u7ed8webp200\u00b7\u653b\u51fb\u7279\u6548canvas\u5168\u5c4f\u00b70\u62a5\u9519\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002")
+
+_l895=[]
+try:
+    _sb=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    import re as _re895, os as _os895
+    if "file += '_season'" not in _sb: _l895.append('spelling_bee speak missing _season patch')
+    if "/^land[1-8]$/.test(curWord.isl" not in _sb: _l895.append('spelling_bee missing land isl check')
+    for _w in ['nervous','chemical','several']:
+        if not _os895.path.exists('words/'+_w+'_season.mp3'): _l895.append('missing land audio words/'+_w+'_season.mp3')
+    _m=_re895.search(r"var WORDS=\[(.*?)\n\s*\];", _sb, _re895.DOTALL)
+    if _m:
+        _isls=_re895.findall(r'"isl":\s*"(land[1-8])"', _m.group(1))
+        if len(set(_isls))!=8: _l895.append('WORDS land coverage!=8:'+str(sorted(set(_isls))))
+    else: _l895.append('spelling_bee WORDS array not found')
+except Exception as _e895:
+    _l895.append('guard self exc:'+str(_e895)[:80])
+if _l895: fail('v895 spelling bee land audio: '+str(_l895[:10]))
+else: ok("v895 (Hansen: 星海副本spelling bee没声音): 拼写蜜蜂land岛(单词大陆)+星海season副本发声修复。根因: land词音频文件全是 <word>_season.mp3(与主游戏 __ISLAND_LOCAL_AUDIO 岛隔离一致), 而 spelling_bee.html 的 speak() 默认只找 words/<word>.mp3 → 240个land词全部落空 → 静默TTS在微信X5无声 → 玩家听不到单词没法拼。修复: speak() 在 curWord.isl 为 land1-8 时给文件名补 _season 后缀。season副本池化所有land词(isl=land1-8)同样生效。常规岛(animal/food等)不受影响仍用 plain <word>.mp3。真机Playwright: land1/5/8+season都拿到 <word>_season.mp3 HTTP200 audio/mpeg, animal/food拿plain.mp3 200, 0报错。")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
