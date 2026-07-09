@@ -1634,7 +1634,7 @@ for _a,_b in [('chair','chair_home'),('hard','hard_treasure'),('when','when_trea
         if _hl49.md5(open('words/%s.mp3'%_a,'rb').read()).hexdigest()==_hl49.md5(open('words/%s.mp3'%_b,'rb').read()).hexdigest(): _s49.append('跨岛隔离失效! %s 与 %s 同文件'%(_a,_b))
     except Exception as _e: _s49.append('无法校验 %s/%s: %s'%(_a,_b,_e))
 # (d) 7 个无新文件的词保持旧指向(防误删)
-for _k,_v in [('how many','word_10'),('how much','word_11'),('how old','word_12'),('how long','word_13'),('how far','word_14'),('next to','word_16'),('washing machine','word_08')]:
+for _k,_v in [('how many','how_many'),('how much','how_much'),('how old','how_old'),('how long','how_long'),('how far','how_far'),('next to','next_to'),('washing machine','washing_machine')]:  # 🔴v897: 编号文件已改名规范名, pin同步更新
     if ('"%s": "words/%s.mp3"'%(_k,_v)) not in _wm49: _s49.append('%s 应保持旧录音 %s(新包无文件)'%(_k,_v))
 if _s49: fail('v549 本岛录音替换+跨岛隔离: ' + str(_s49[:8]))
 else: ok('v549 21词纠正·本岛新录音全替换 (15词换新包文件·12处WORD_MAP改指向新URL防缓存·跨岛三对chair/hard/when岛级隔离(__ISLAND_LOCAL_AUDIO岛内表优先+md5互异)·7词新包无文件保持旧真人录音·真机10/10验证各岛播本岛录音·?v214·v549)')
@@ -8328,6 +8328,57 @@ except Exception as _e896:
     _l896.append('guard self exc:'+str(_e896)[:80])
 if _l896: fail('v896 spellbee WORD_MAP audio: '+str(_l896[:10]))
 else: ok("v896 (Hansen: 星海spelling bee没声音·深挖第2轮): 拼写页多词短语+带符号文件也没声。根因: land词是_season(v895已修), 但多词短语(how many/washing machine/how much-old-long-far/next to)音频是编号文件(word_08~word_16.mp3等)、T-shirt是t-shirt.mp3(带连字符), 全靠主游戏的 WORD_MAP(word_map.js)和岛隔离表映射; 而 spelling_bee.html 有自己的 speak() 只朴素派生 words/<word>.mp3(how many→how_many.mp3 不存在), 从不查 WORD_MAP → 静默TTS微信无声。音频从没丢, 只是拼写页没按正确文件名找。修复: spelling_bee.html 加载 word_map.js, speak() 改成与主游戏同款解析(先查 WORD_MAP, 再 land 词 _season, 再朴素派生); T-shirt 唯一只在clothes岛隔离表不在WORD_MAP, 给 WORD_MAP 补一条 t-shirt→words/t-shirt.mp3。真机Playwright: T-shirt/how many-much-old-long-far/washing machine/next to 全拿到正确音频200, land/常规岛不受影响, 0报错。936词三法合解后0词无音频。")
+
+_l897=[]
+try:
+    import re as _re897, os as _os897, glob as _glob897
+    _wmsrc897=open('word_map.js',encoding='utf-8',errors='replace').read()
+    _wmm897=_re897.search(r"WORD_MAP\s*=\s*\{(.*?)\}\s*;", _wmsrc897, _re897.DOTALL)
+    _WM897={}
+    if _wmm897:
+        for _k,_v in _re897.findall(r'"([^"]+)"\s*:\s*"([^"]+)"', _wmm897.group(1)): _WM897[_k.lower()]=_v
+        for _k,_v in _re897.findall(r"'([^']+)'\s*:\s*'([^']+)'", _wmm897.group(1)): _WM897[_k.lower()]=_v
+    else: _l897.append('WORD_MAP not parsed')
+    # Part B: WORD_MAP 每条映射必须指向真实文件
+    for _k,_v in _WM897.items():
+        _pp=_v if _v.startswith('words/') else 'words/'+_v
+        if not _os897.path.exists(_pp): _l897.append('WORD_MAP bad map '+_k+'->'+_v)
+    # Part A: 拼写页每个词必须解析到真实本地音频(与 speak 同款: WORD_MAP -> land _season -> 派生)
+    _sbsrc897=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    _sbm897=_re897.search(r"var WORDS=\[(.*?)\n\s*\];", _sbsrc897, _re897.DOTALL)
+    _miss897=[]
+    if _sbm897:
+        for _en,_isl in _re897.findall(r'\{"en":\s*"([^"]*)"[^}]*"isl":\s*"([^"]*)"', _sbm897.group(1)):
+            _lo=_en.lower()
+            _f=_WM897.get(_lo)
+            if _f: _path=_f if _f.startswith('words/') else 'words/'+_f
+            else:
+                _d=_re897.sub(r'[^a-z ]','',_lo).strip().replace(' ','_')
+                if _re897.match(r'land[1-8]$',_isl): _d+='_season'
+                _path='words/'+_d+'.mp3'
+            if not _os897.path.exists(_path): _miss897.append(_en+'('+_isl+')->'+_path)
+    else: _l897.append('spelling_bee WORDS not found')
+    if _miss897: _l897.append('spellbee words w/o audio '+str(len(_miss897))+':'+str(_miss897[:8]))
+    # Part C: 每个岛的 __ISLAND_LOCAL_AUDIO 映射也必须指向真实文件
+    for _isf in _glob897.glob('island_*.html'):
+        _iss=open(_isf,encoding='utf-8',errors='replace').read()
+        _lm=_re897.search(r"__ISLAND_LOCAL_AUDIO\s*=\s*\{(.*?)\}\s*;", _iss, _re897.DOTALL)
+        if _lm:
+            _ps=_re897.findall(r'"([^"]+)"\s*:\s*"([^"]+)"', _lm.group(1))+_re897.findall(r"'([^']+)'\s*:\s*'([^']+)'", _lm.group(1))
+            for _k,_v in _ps:
+                _pp=_v if _v.startswith('words/') else 'words/'+_v
+                if not _os897.path.exists(_pp): _l897.append(_os897.path.basename(_isf)+' LOCAL_AUDIO bad '+_k+'->'+_v)
+    # Part D: v897改名后的旧编号/连字符名不该再出现在功能文件里(注释除外)
+    for _old in ['word_08.mp3','word_10.mp3','word_11.mp3','word_12.mp3','word_13.mp3','word_14.mp3','word_16.mp3','t-shirt.mp3']:
+        if _old in _wmsrc897: _l897.append('word_map.js still refs renamed '+_old)
+        _preld=open('hansen_preload.js',encoding='utf-8',errors='replace').read()
+        if _old in _preld: _l897.append('hansen_preload.js still refs renamed '+_old)
+        _clo=open('island_clothes.html',encoding='utf-8',errors='replace').read()
+        if _old in _clo: _l897.append('island_clothes.html still refs renamed '+_old)
+except Exception as _e897:
+    _l897.append('guard self exc:'+str(_e897)[:80])
+if _l897: fail('v897 audio pin: '+str(_l897[:12]))
+else: ok("v897 (Hansen上线定版: 把发音文件名改成对应单词/短语名, 每个单词的音频跟文件名钉死): ①把12个编号文件里唯一只有编号名的7个(word_08/10/11/12/13/14/16)改成规范名 washing_machine/how_many/how_much/how_old/how_long/how_far/next_to.mp3, T-shirt的 t-shirt.mp3 改成派生名 tshirt.mp3, 同步更新 word_map.js/hansen_preload.js/island_clothes.html 全部引用。②带岛后缀的文件(_season 240个 + cook_action/gloves_clothes/chair_home/hard_treasure 等13个)是岛隔离刻意为之(同一个词在不同岛用不同音频, 裸名会撞车)故保留。③本守卫全量钉死: 拼写页936个词逐个按 speak 同款解析(WORD_MAP->land _season->派生)必须命中真实本地文件; WORD_MAP 每条+每个岛 __ISLAND_LOCAL_AUDIO 每条映射必须指向真实文件; 改名后的旧名不得残留在功能文件。任何词找不到音频, 构建即失败, 上线前不可能再出现拼写页没声音。")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

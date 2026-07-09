@@ -233,9 +233,9 @@
     // 兜底/补全: 写死的 29 个单词 mp3 (index.html 没加载 word_map.js)
     var fallback = [
       'words/word_01.mp3','words/word_02.mp3','words/word_03.mp3','words/word_04.mp3','words/word_05.mp3',
-      'words/word_06.mp3','words/word_07.mp3','words/word_08.mp3','words/word_09.mp3','words/word_10.mp3',
-      'words/word_11.mp3','words/word_12.mp3','words/word_13.mp3','words/word_14.mp3','words/word_15.mp3',
-      'words/word_16.mp3','words/word_17.mp3','words/word_18.mp3','words/word_19.mp3','words/word_20.mp3',
+      'words/word_06.mp3','words/word_07.mp3','words/washing_machine.mp3','words/word_09.mp3','words/how_many.mp3',
+      'words/how_much.mp3','words/how_old.mp3','words/how_long.mp3','words/how_far.mp3','words/word_15.mp3',
+      'words/next_to.mp3','words/word_17.mp3','words/word_18.mp3','words/word_19.mp3','words/word_20.mp3',
       'words/word_21.mp3','words/word_23.mp3','words/word_24.mp3','words/word_25.mp3',
       'words/bed.mp3','words/have.mp3','words/do.mp3','words/cap.mp3','words/gloves.mp3'
     ];

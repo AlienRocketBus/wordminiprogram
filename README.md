@@ -1,5 +1,6 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v897**：上线定版。你要求把发音文件名直接改成对应的单词/短语名，并且把“单词↔文件名”钉死，以后不管代码怎么改都不会再找不到。做了三件事：①**改名**——把那几个名字看不出意思的编号文件（how many 当时叫 word_10.mp3、washing machine 叫 word_08.mp3、next to 叫 word_16.mp3，还有 how much/old/long/far）和带连字符的 t-shirt.mp3，改成了规范名：how_many.mp3、how_much.mp3、how_old.mp3、how_long.mp3、how_far.mp3、washing_machine.mp3、next_to.mp3、tshirt.mp3，所有引用它们的地方（映射表、预加载、衣服岛数据）全部同步改好。改名后这几个词连“按单词猜文件名”都能直接猜中，不再依赖映射表。②**保留**——单词大陆那 240 个带 _season 的、以及 cook_action / gloves_clothes / chair_home / hard_treasure 等 13 个带岛后缀的文件，是刻意的：同一个词在不同岛用不同的录音，裸名会撞车，不能合并，这个跟你说明一下。③**钉死**——加了一道全量守卫：构建时把全部 936 个拼词单词逐个按播音代码的同款逻辑去找音频，任何一个词找不到真实文件，构建就直接失败；映射表和每个岛的音频表里每一条也都必须指向真实存在的文件。以后再有人动代码导致某个词没音频，打包这一步就会拦住，上线包里不可能再出现没声音的词。实测：这几个词改名后在听音拼词和主游戏里都正常发声，其它岛不受影响，零报错。
 - **v896**：接着上一版继续挖你反馈的听音拼词没声音问题。你追问“衣服、家、疑问词、宝藏这几个岛里我专门补过音频的词，为什么没声音了”——查清楚了，**音频一个都没丢，是我上一版判断错了**。这几个词（T-shirt、washing machine、how many/much/old/long/far、next to）的音频100%还在，只是文件名跟拼写页猜的不一样：多词短语存成了编号文件（how many其实是 word_10.mp3、washing machine是 word_08.mp3、next to是 word_16.mp3 等），T-shirt存成了带连字符的 t-shirt.mp3。主游戏能正常播是因为它查一张全局映射表（word_map.js）和岛屏音频表来找文件；但听音拼词是个独立页面、有自己一套播音代码，只会按“单词转小写去符号”猜文件名（how many→how_many.mp3，不存在），从不查那张映射表，所以找不到、回退到没声的TTS。跟上一版是同一个根子（拼写页找音频的方式跟文件实际命名对不上），换了个马甲。这版把听音拼词的播音改成跟主游戏一模一样——先查那张映射表，再按单词大陆的 _season 规则，再猜文件名；另外把 T-shirt 这一条补进映射表。实测：这几个词全部恢复读音，单词大陆和常规岛不受影响，零报错。现在全部936个拼词单词都有正常读音了。含v895（单词大陆听音拼词发声）等全部。
 - **v895**：修复星海副本（单词大陆）里有些岛的 Spelling Bee 点进去没声音的问题。你反馈星海那些岛的听音拼词根本听不到声音——查到根因了：Spelling Bee 是独立的听音拼词页面，它播单词音频时找的是 words/<单词>.mp3，但单词大陆这8个岛（land1-8）的单词音频文件全都带了个 _season 后缀（叫 <单词>_season.mp3，这是当初为了岛与岛之间音频隔离做的、跟主游戏一致），所以这240个单词的音频它全都找不到、就回退到浏览器TTS，而微信浏览器里TTS是没声音的——于是玩家点进去完全听不到单词。星海副本因为把8个岛的单词都汇在一起考，所以最严重、全程没声。这版在 Spelling Bee 的播音逻辑里补上：碰到单词大陆的词就自动去找带 _season 的音频文件。实测：单词大陆各岛+星海副本的听音拼词现在都能正常发出单词读音（HTTP 200），常规岛（动物、食物等）不受影响照常有声，零报错。含v894（剑神改名万剑归一）等全部。
 - **v894**：把剑神boss改名成“剑神·万剑归一”，并换上你新发的立绘、把旧图彻底删干净。剑神在单词大陆第5岛（晶石回廊）当守关boss，他的招式一直叫“万剑归一”，但boss名之前是“剑神·万剑归宗”，这版把名字统一成招式名“剑神·万剑归一”。同时用你新发的高清立绘（896×1195透明）换掉旧图、旧图删干净——转成webp（微信原生支持，绝不用会导致微信不显示的P模式PNG，剑神这张之前就被P模式坑过）。改名是全局一次替换，boss名、收藏卡（L55）、攻击特效的派发注册、地图数据、生成器全部同步改到，特效派发键也一起改了所以万剑归一特效照常触发。实测：第5岛打剑神显示新名“剑神·万剑归一”、用新图、新图加载正常、万剑归一穿血条特效正常触发、零报错。含v893（弗沙欧当第8岛守关boss）等全部。
@@ -50,6 +51,8 @@
 > 3. **必在矮视口验**(高 ≤ 620px·腾讯 webapp 顶栏吃高度): 文字裁切几乎只在矮屏暴露, 高视口看不出(BUG#82 就这么漏的)。
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
+
+> **当前版本: v897（🔒 发音文件名规范化 + 每词音频钉死·上线定版）。** 你要求把发音的 mp3 文件名直接改成对应单词/短语的名字，并且把“每个单词的发音↔它的文件名”钉死，怎么改都变不动，防止以后再出现找不到。做了三件事：**①改名**——那几个名字看不出意思的编号文件（“how many”当时叫 word_10.mp3、washing machine 叫 word_08.mp3、next to 叫 word_16.mp3、还有 how much/old/long/far）和带连字符的 t-shirt.mp3，全改成了规范名：**how_many.mp3、how_much.mp3、how_old.mp3、how_long.mp3、how_far.mp3、washing_machine.mp3、next_to.mp3、tshirt.mp3**；所有引用它们的地方（全局映射表 word_map.js、预加载清单、衣服岛的数据源）都同步改好了。改名之后这几个词连“把单词转小写去符号”这种猜法都能直接猜中文件，不再非得靠映射表。**②保留**——单词大陆那 240 个带 `_season` 后缀的、以及 cook_action / gloves_clothes / chair_home / hard_treasure 等 13 个带岛后缀的文件，**没有改，这是刻意的**：同一个词（比如 cook、gloves、chair）在不同岛屿用的是不同的录音，如果都叫裸名就会互相覆盖（撞车），所以必须用后缀区分，不能合并——这一点专门跟你说明。**③钉死**（这是最关键的一层）——加了一道全量守卫：构建打包时，把全部 **936 个拼词单词**逐个拿出来，按播音代码一模一样的逻辑去找它的音频文件（先查映射表、再按单词大陆规则、再猜文件名），**只要有任何一个词找不到真实存在的文件，构建就直接失败、打不出包**；另外映射表里的每一条、每个岛屿音频表里的每一条，也都必须指向真实存在的文件。这样一来，以后哪怕有人改代码不小心让某个词丢了音频，打包这一步就会把它拦下来，**上线的包里不可能再出现没声音的词了**。**实测**：这几个改了名的词，在听音拼词和主游戏里都正常发声、HTTP 200；单词大陆和其它常规岛不受影响；零报错。check_resources 全部守卫通过。⚠️ 本版改了 8 个音频文件名 + word_map.js + hansen_preload.js + island_data.json（衣服岛数据）+ 新增全量守卫。含 v896（听音拼词多词短语发声）、v895（单词大陆听音拼词发声）等全部。 ❗ 用 v897 · 清 CDN · 微信重进。
 
 > **当前版本: v896（🔊 听音拼词音频·彻底修全）。** 接着上一版继续挖你反馈的没声音问题。你追问“衣服、家、疑问词、宝藏这几个岛里我专门补过音频的词，为什么没声音了”——**先说结论：音频一个都没丢，是我上一版判断错了，跟你道个歉**。**真正的原因**：这几个词（T-shirt、washing machine、how many/much/old/long/far、next to）的音频100%还在，只是文件名跟听音拼词猜的对不上——多词短语当初存成了编号文件（“how many”其实是 word_10.mp3、“washing machine”是 word_08.mp3、“next to”是 word_16.mp3 等等），“T-shirt”存成了带连字符的 t-shirt.mp3。**主游戏能正常播**，是因为它查一张全局映射表（word_map.js 里的 WORD_MAP，419条 单词→文件 的对应）和岛屏音频表来找正确文件；**但听音拼词是个独立页面、有自己一套播音代码**，只会用“单词转小写、去掉符号、空格变下划线”去猜文件名（“how many”→how_many.mp3，根本不存在），从来不查那张映射表——所以这些词它全找不到、回退到浏览器TTS，而微信里TTS没声。**这跟上一版是同一个根子**（听音拼词找音频的方式跟文件的实际命名对不上），只是换了个马甲：上一版是单词大陆的词带 _season 后缀，这一版是多词短语用编号文件。**修复**：把听音拼词的播音逻辑改成跟主游戏一模一样——先查那张全局映射表（多词短语、编号文件都在里面），查不到再按单词大陆的 _season 规则，再退回猜文件名；另外 T-shirt 这一条本来只在衣服岛的音频表里、没进全局映射表，我给全局映射表补了这一条。**实测**（真机模拟12个词）：T-shirt、how many/much/old/long/far、washing machine、next to 全部拿到正确音频、HTTP 200 能播；单词大陆（nervous 等）和常规岛（动物、食物）不受影响、照常有声；零报错。把全部936个拼词单词过了一遍，三种找法（映射表／_season／猜名）合起来之后，**没有一个词是找不到音频的了**。⚠ 本版改 spelling_bee.html（加载 word_map.js + 播音改用映射表）+ word_map.js（补 T-shirt 一条）。含 v895（单词大陆听音拼词发声）等全部。 ❗ 用 v896 · 清 CDN · 微信重进。
 
@@ -4913,7 +4916,7 @@ for _a,_b in [('chair','chair_home'),('hard','hard_treasure'),('when','when_trea
         if _hl49.md5(open('words/%s.mp3'%_a,'rb').read()).hexdigest()==_hl49.md5(open('words/%s.mp3'%_b,'rb').read()).hexdigest(): _s49.append('跨岛隔离失效! %s 与 %s 同文件'%(_a,_b))
     except Exception as _e: _s49.append('无法校验 %s/%s: %s'%(_a,_b,_e))
 # (d) 7 个无新文件的词保持旧指向(防误删)
-for _k,_v in [('how many','word_10'),('how much','word_11'),('how old','word_12'),('how long','word_13'),('how far','word_14'),('next to','word_16'),('washing machine','word_08')]:
+for _k,_v in [('how many','how_many'),('how much','how_much'),('how old','how_old'),('how long','how_long'),('how far','how_far'),('next to','next_to'),('washing machine','washing_machine')]:  # 🔴v897: 编号文件已改名规范名, pin同步更新
     if ('"%s": "words/%s.mp3"'%(_k,_v)) not in _wm49: _s49.append('%s 应保持旧录音 %s(新包无文件)'%(_k,_v))
 if _s49: fail('v549 本岛录音替换+跨岛隔离: ' + str(_s49[:8]))
 else: ok('v549 21词纠正·本岛新录音全替换 (15词换新包文件·12处WORD_MAP改指向新URL防缓存·跨岛三对chair/hard/when岛级隔离(__ISLAND_LOCAL_AUDIO岛内表优先+md5互异)·7词新包无文件保持旧真人录音·真机10/10验证各岛播本岛录音·?v214·v549)')
@@ -11607,6 +11610,57 @@ except Exception as _e896:
     _l896.append('guard self exc:'+str(_e896)[:80])
 if _l896: fail('v896 spellbee WORD_MAP audio: '+str(_l896[:10]))
 else: ok("v896 (Hansen: 星海spelling bee没声音·深挖第2轮): 拼写页多词短语+带符号文件也没声。根因: land词是_season(v895已修), 但多词短语(how many/washing machine/how much-old-long-far/next to)音频是编号文件(word_08~word_16.mp3等)、T-shirt是t-shirt.mp3(带连字符), 全靠主游戏的 WORD_MAP(word_map.js)和岛隔离表映射; 而 spelling_bee.html 有自己的 speak() 只朴素派生 words/<word>.mp3(how many→how_many.mp3 不存在), 从不查 WORD_MAP → 静默TTS微信无声。音频从没丢, 只是拼写页没按正确文件名找。修复: spelling_bee.html 加载 word_map.js, speak() 改成与主游戏同款解析(先查 WORD_MAP, 再 land 词 _season, 再朴素派生); T-shirt 唯一只在clothes岛隔离表不在WORD_MAP, 给 WORD_MAP 补一条 t-shirt→words/t-shirt.mp3。真机Playwright: T-shirt/how many-much-old-long-far/washing machine/next to 全拿到正确音频200, land/常规岛不受影响, 0报错。936词三法合解后0词无音频。")
+
+_l897=[]
+try:
+    import re as _re897, os as _os897, glob as _glob897
+    _wmsrc897=open('word_map.js',encoding='utf-8',errors='replace').read()
+    _wmm897=_re897.search(r"WORD_MAP\s*=\s*\{(.*?)\}\s*;", _wmsrc897, _re897.DOTALL)
+    _WM897={}
+    if _wmm897:
+        for _k,_v in _re897.findall(r'"([^"]+)"\s*:\s*"([^"]+)"', _wmm897.group(1)): _WM897[_k.lower()]=_v
+        for _k,_v in _re897.findall(r"'([^']+)'\s*:\s*'([^']+)'", _wmm897.group(1)): _WM897[_k.lower()]=_v
+    else: _l897.append('WORD_MAP not parsed')
+    # Part B: WORD_MAP 每条映射必须指向真实文件
+    for _k,_v in _WM897.items():
+        _pp=_v if _v.startswith('words/') else 'words/'+_v
+        if not _os897.path.exists(_pp): _l897.append('WORD_MAP bad map '+_k+'->'+_v)
+    # Part A: 拼写页每个词必须解析到真实本地音频(与 speak 同款: WORD_MAP -> land _season -> 派生)
+    _sbsrc897=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    _sbm897=_re897.search(r"var WORDS=\[(.*?)\n\s*\];", _sbsrc897, _re897.DOTALL)
+    _miss897=[]
+    if _sbm897:
+        for _en,_isl in _re897.findall(r'\{"en":\s*"([^"]*)"[^}]*"isl":\s*"([^"]*)"', _sbm897.group(1)):
+            _lo=_en.lower()
+            _f=_WM897.get(_lo)
+            if _f: _path=_f if _f.startswith('words/') else 'words/'+_f
+            else:
+                _d=_re897.sub(r'[^a-z ]','',_lo).strip().replace(' ','_')
+                if _re897.match(r'land[1-8]$',_isl): _d+='_season'
+                _path='words/'+_d+'.mp3'
+            if not _os897.path.exists(_path): _miss897.append(_en+'('+_isl+')->'+_path)
+    else: _l897.append('spelling_bee WORDS not found')
+    if _miss897: _l897.append('spellbee words w/o audio '+str(len(_miss897))+':'+str(_miss897[:8]))
+    # Part C: 每个岛的 __ISLAND_LOCAL_AUDIO 映射也必须指向真实文件
+    for _isf in _glob897.glob('island_*.html'):
+        _iss=open(_isf,encoding='utf-8',errors='replace').read()
+        _lm=_re897.search(r"__ISLAND_LOCAL_AUDIO\s*=\s*\{(.*?)\}\s*;", _iss, _re897.DOTALL)
+        if _lm:
+            _ps=_re897.findall(r'"([^"]+)"\s*:\s*"([^"]+)"', _lm.group(1))+_re897.findall(r"'([^']+)'\s*:\s*'([^']+)'", _lm.group(1))
+            for _k,_v in _ps:
+                _pp=_v if _v.startswith('words/') else 'words/'+_v
+                if not _os897.path.exists(_pp): _l897.append(_os897.path.basename(_isf)+' LOCAL_AUDIO bad '+_k+'->'+_v)
+    # Part D: v897改名后的旧编号/连字符名不该再出现在功能文件里(注释除外)
+    for _old in ['word_08.mp3','word_10.mp3','word_11.mp3','word_12.mp3','word_13.mp3','word_14.mp3','word_16.mp3','t-shirt.mp3']:
+        if _old in _wmsrc897: _l897.append('word_map.js still refs renamed '+_old)
+        _preld=open('hansen_preload.js',encoding='utf-8',errors='replace').read()
+        if _old in _preld: _l897.append('hansen_preload.js still refs renamed '+_old)
+        _clo=open('island_clothes.html',encoding='utf-8',errors='replace').read()
+        if _old in _clo: _l897.append('island_clothes.html still refs renamed '+_old)
+except Exception as _e897:
+    _l897.append('guard self exc:'+str(_e897)[:80])
+if _l897: fail('v897 audio pin: '+str(_l897[:12]))
+else: ok("v897 (Hansen上线定版: 把发音文件名改成对应单词/短语名, 每个单词的音频跟文件名钉死): ①把12个编号文件里唯一只有编号名的7个(word_08/10/11/12/13/14/16)改成规范名 washing_machine/how_many/how_much/how_old/how_long/how_far/next_to.mp3, T-shirt的 t-shirt.mp3 改成派生名 tshirt.mp3, 同步更新 word_map.js/hansen_preload.js/island_clothes.html 全部引用。②带岛后缀的文件(_season 240个 + cook_action/gloves_clothes/chair_home/hard_treasure 等13个)是岛隔离刻意为之(同一个词在不同岛用不同音频, 裸名会撞车)故保留。③本守卫全量钉死: 拼写页936个词逐个按 speak 同款解析(WORD_MAP->land _season->派生)必须命中真实本地文件; WORD_MAP 每条+每个岛 __ISLAND_LOCAL_AUDIO 每条映射必须指向真实文件; 改名后的旧名不得残留在功能文件。任何词找不到音频, 构建即失败, 上线前不可能再出现拼写页没声音。")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

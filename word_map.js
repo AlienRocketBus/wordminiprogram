@@ -1,6 +1,6 @@
 // 单词 mp3 映射 - 仅多词短语 (单词级走原牛津/百度/TTS 链)
 window.WORD_MAP = {
-  't-shirt': 'words/t-shirt.mp3',  // 🔴v896 拼写页通过WORD_MAP找到(主游戏原用clothes岛隔离表)
+  't-shirt': 'words/tshirt.mp3',  // 🔴v896 拼写页通过WORD_MAP找到(主游戏原用clothes岛隔离表)
  "post office": "words/word_01.mp3",
  "police station": "words/word_02.mp3",
  "fire station": "words/word_03.mp3",
@@ -8,15 +8,15 @@ window.WORD_MAP = {
  "ice cream": "words/ice_cream.mp3",
  "living room": "words/living_room.mp3",
  "dining room": "words/dining_room.mp3",
- "washing machine": "words/word_08.mp3",
+ "washing machine": "words/washing_machine.mp3",
  "air conditioner": "words/air_conditioner.mp3",
- "how many": "words/word_10.mp3",
- "how much": "words/word_11.mp3",
- "how old": "words/word_12.mp3",
- "how long": "words/word_13.mp3",
- "how far": "words/word_14.mp3",
+ "how many": "words/how_many.mp3",
+ "how much": "words/how_much.mp3",
+ "how old": "words/how_old.mp3",
+ "how long": "words/how_long.mp3",
+ "how far": "words/how_far.mp3",
  "thank you": "words/thank_you.mp3",
- "next to": "words/word_16.mp3",
+ "next to": "words/next_to.mp3",
  "firefighter": "words/word_17.mp3",
  "singer": "words/word_18.mp3",
  "who": "words/who.mp3",
