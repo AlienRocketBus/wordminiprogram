@@ -29,7 +29,7 @@
     {id:'L52', land:5, name:'夜罗刹·红莲战鬼', img:'bosses/land_yecha.png', frame:'#84cc16', rarity:'uncommon', desc:'红莲燃夜, 罗刹出鞘, 战意如火焚尽苍穹。'},
     {id:'L53', land:5, name:'破坏神·终焉之相', img:'bosses/land_pohuai.png', frame:'#c084fc', rarity:'rare', desc:'当他显出终焉之相, 世界便走向尽头。'},
     {id:'L54', land:5, name:'不动明王·焚天镇狱尊', img:'bosses/land_mingwang.png', frame:'#22d3ee', rarity:'epic', desc:'焚天之焰, 镇狱之威, 明王一坐, 群魔不动。'},
-    {id:'L55', land:5, name:'剑神·万剑归宗', img:'bosses/land_jianshen.webp', frame:'#fbbf24', rarity:'legendary', desc:'万剑归宗, 一念既起, 天下剑意尽入其鞘。'},
+    {id:'L55', land:5, name:'剑神·万剑归一', img:'bosses/land_jianshen.webp', frame:'#fbbf24', rarity:'legendary', desc:'万剑归一, 一念既起, 天下剑意尽入其鞘。'},
     {id:'L61', land:6, name:'诅咒之躯·绷带亡骸', img:'bosses/land_bengdai.png', frame:'#94a3b8', rarity:'common', desc:'层层绷带缠裹千年诅咒, 亡骸不朽亦不安。'},
     {id:'L62', land:6, name:'亡灵咒术师·阿努比斯之影', img:'bosses/land_anubis.png', frame:'#84cc16', rarity:'uncommon', desc:'死神之影, 亡灵听令, 冥界大门由他执掌。'},
     {id:'L63', land:6, name:'古埃及大祭司·真理之口的裁决者', img:'bosses/land_priest.png', frame:'#c084fc', rarity:'rare', desc:'真理之口开启时, 谎言者的心将被称量。'},
@@ -168,12 +168,12 @@
         var un=cb.has(c.id);
         if(un){
           h+='<div onclick="window.HansenLandGachaUI&&window.HansenLandGachaUI.detail(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=894" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img src="'+c.img+'?v=894" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -270,7 +270,7 @@
         '<div class="gr-face gr-front gr-card'+(isLeg?' leg':'')+'">'+
           '<div class="gr-myst"><div class="gr-myst-q">?</div></div>'+
           '<div class="gr-real"><div class="gr-rarity" style="color:'+ri.color+'">'+(isLeg?'✨ 至尊 ✨':ri.cn)+'</div>'+
-          '<img class="gr-img" src="'+c.img+'?v=893" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
+          '<img class="gr-img" src="'+c.img+'?v=894" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
           '<div class="gr-name" style="color:'+ri.color+'">'+esc(c.name)+'</div></div>'+
         '</div><div class="gr-face gr-back"></div>'+
       '</div></div>'+
@@ -310,7 +310,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=894" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);

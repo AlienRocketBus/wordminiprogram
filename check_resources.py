@@ -7574,7 +7574,7 @@ try:
     _isl72=sorted(glob.glob('island_land[1-8].html'))
     if len(_isl72)!=8: _l72.append('land岛数!=8:%d'%len(_isl72))
     _bc72={'island_land1.html':5,'island_land2.html':5,'island_land3.html':5,'island_land4.html':5,'island_land5.html':5,'island_land6.html':5,'island_land7.html':5,'island_land8.html':5}
-    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归宗','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'星核帝皇·弗沙欧'}
+    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归一','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'星核帝皇·弗沙欧'}
     for _f72 in _isl72:
         _t72=open(_f72,encoding='utf-8',errors='replace').read()
         _n72=int(_f72.replace('island_land','').replace('.html',''))
@@ -7600,7 +7600,7 @@ try:
     if 'var __WFX={' not in _ba72: _l72.append('boss_attack缺__WFX分发表')
     for _fx72 in ['fxWandian','fxJianshen','fxMohuang','fxSuolaris','fxMingwang']:
         if ('function '+_fx72+'(') not in _ba72: _l72.append('boss_attack缺特效函数:'+_fx72)
-    for _nm72 in ['剑神·万剑归宗','魔皇·小丑至尊','法老王·不朽金身']:
+    for _nm72 in ['剑神·万剑归一','魔皇·小丑至尊','法老王·不朽金身']:
         if ("'"+_nm72+"':{t:'") not in _ba72: _l72.append('FX注册表缺:'+_nm72)
     _pn72=_ba72.find("var BOSSES=[\n {n:'淘气小幽灵'")
     if _pn72<0: _pn72=_ba72.find("{n:'淘气小幽灵'")
@@ -8111,7 +8111,7 @@ else: ok('v886 (Hansen: 挑战BOSS卡黑底看着不舒服·换晴空天空蓝·
 
 
 # 🔴 v887(Hansen: 剑神boss形象+卡片都换成新上传的图·保持高清): 替换 bosses/land_jianshen.webp。
-#   剑神·万剑归宗(land5第5关legendary·卡L55)的boss立绘(island_land5.html)和卡片(hansen_land_cards.js L55)都引用同一文件land_jianshen.webp→只替换该图·两处都换。
+#   剑神·万剑归一(land5第5关legendary·卡L55)的boss立绘(island_land5.html)和卡片(hansen_land_cards.js L55)都引用同一文件land_jianshen.webp→只替换该图·两处都换。
 _l887=[]
 try:
     import os as _os887
@@ -8130,11 +8130,11 @@ try:
     _l5=open('island_land5.html',encoding='utf-8',errors='replace').read()
     if 'land_jianshen.webp' not in _l5: _l887.append('land5剑神立绘未引用land_jianshen.webp')
     _lc=open('hansen_land_cards.js',encoding='utf-8',errors='replace').read()
-    if "'剑神·万剑归宗'" not in _lc or 'land_jianshen.webp' not in _lc: _l887.append('剑神卡L55未引用land_jianshen.webp')
+    if "'剑神·万剑归一'" not in _lc or 'land_jianshen.webp' not in _lc: _l887.append('剑神卡L55未引用land_jianshen.webp')
 except Exception as _e887:
     _l887.append('守卫自身异常:'+str(_e887)[:80])
 if _l887: fail('v887 剑神图替换: '+str(_l887[:8]))
-else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归宗(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归宗HP940·0报错。build会bump缓存戳?v=887让新图生效。')
+else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归一(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归一HP940·0报错。build会bump缓存戳?v=887让新图生效。')
 
 
 # 🔴 v888(Hansen: 剑神"万剑归一"新特效做得非常棒·融入游戏成为剑神攻击特效): 新fxJianshen替换旧版。
