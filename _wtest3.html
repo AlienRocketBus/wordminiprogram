@@ -1,0 +1,80 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0}</style></head>
+<body><canvas id="c" width="1600" height="900"></canvas>
+<script>
+var cv=document.getElementById('c'), ctx=cv.getContext('2d'); ctx.scale(2,2);
+var bg=ctx.createRadialGradient(400,225,40,400,225,460); bg.addColorStop(0,"#1a2230"); bg.addColorStop(1,"#0a0d13");
+ctx.fillStyle=bg; ctx.fillRect(0,0,800,450);
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+/* ===== 实体重机枪(枪管朝+x) ===== */
+function drawHMG(cx,cy,s,rot,a){
+  ctx.save();ctx.globalAlpha=a;ctx.translate(cx,cy);ctx.rotate(rot);ctx.scale(s,s);
+  // 弹箱(左下·军绿)
+  var abg=ctx.createLinearGradient(0,8,0,40); abg.addColorStop(0,"#454e34"); abg.addColorStop(1,"#2c331f");
+  ctx.fillStyle=abg; rr(-52,8,32,32,3); ctx.fill(); ctx.strokeStyle="#5f6a45"; ctx.lineWidth=1.6; ctx.stroke();
+  ctx.fillStyle="#5f6a45"; rr(-49,11,26,4,1); ctx.fill(); // 箱盖条
+  // 弹链(黄铜子弹从弹箱斜向上进机匣)
+  for(var bi=0;bi<6;bi++){ var bxp=-46+bi*7.2, byp=9-bi*1.6; ctx.save();ctx.translate(bxp,byp);ctx.rotate(-0.42);
+    ctx.fillStyle="#b8912f";rr(-2.3,-5,4.6,10,1.4);ctx.fill(); ctx.fillStyle="#e6c065";rr(-2.3,-5,4.6,3,1.4);ctx.fill();
+    ctx.fillStyle="#8a6a20";ctx.fillRect(-2.3,3,4.6,1.5); ctx.restore(); }
+  // 机匣(大方块·金属渐变)
+  var rgd=ctx.createLinearGradient(0,-17,0,11); rgd.addColorStop(0,"#2c303a");rgd.addColorStop(.3,"#565d6b");rgd.addColorStop(.55,"#3e444e");rgd.addColorStop(1,"#22252b");
+  ctx.fillStyle=rgd; rr(-42,-17,64,29,5); ctx.fill(); ctx.strokeStyle="#5c6472"; ctx.lineWidth=1.8; ctx.stroke();
+  // 提把(顶部)
+  ctx.strokeStyle="#3a3f4a"; ctx.lineWidth=4.5; ctx.lineCap="round"; ctx.beginPath();ctx.moveTo(-22,-17);ctx.lineTo(-14,-28);ctx.lineTo(2,-28);ctx.lineTo(10,-17);ctx.stroke(); ctx.lineCap="butt";
+  // 侧散热槽
+  ctx.fillStyle="#191c22"; for(var v=0;v<4;v++){ rr(-34+v*7.5,-11,4,11,1); ctx.fill(); }
+  // 枪管护罩(粗·带散热孔)
+  var sgd=ctx.createLinearGradient(0,-10,0,9); sgd.addColorStop(0,"#33373f");sgd.addColorStop(.4,"#4a505c");sgd.addColorStop(1,"#26292f");
+  ctx.fillStyle=sgd; rr(24,-10,46,20,4); ctx.fill(); ctx.strokeStyle="#565d6b";ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle="#141619"; for(var h=0;h<5;h++){ ctx.beginPath();ctx.arc(32+h*8.5,-3.5,2.7,0,6.28);ctx.fill(); ctx.beginPath();ctx.arc(32+h*8.5,4,2.7,0,6.28);ctx.fill(); }
+  // 枪管(伸出·炽热橙红)
+  ctx.save();ctx.shadowBlur=12;ctx.shadowColor="#ff7a1a";
+  ctx.fillStyle="#5a2a18"; rr(70,-5.5,20,11,2); ctx.fill();
+  ctx.fillStyle="#ff7a1a"; rr(70,-2.5,17,5,2); ctx.fill();
+  ctx.fillStyle="#ffd08a"; rr(70,-1.5,10,2,1); ctx.fill();
+  ctx.restore();
+  // 枪口
+  ctx.fillStyle="#2a2d33"; rr(87,-7,9,14,2); ctx.fill(); ctx.strokeStyle="#565d6b";ctx.lineWidth=0.8;ctx.stroke();
+  // 握把+扳机
+  ctx.fillStyle="#2f333c"; ctx.beginPath();ctx.moveTo(-16,12);ctx.lineTo(-6,12);ctx.lineTo(-2,35);ctx.lineTo(-14,37);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#454b57";ctx.lineWidth=1.2;ctx.stroke();
+  ctx.strokeStyle="#3a3f4a"; ctx.lineWidth=2.6; ctx.beginPath();ctx.moveTo(-1,13);ctx.arc(4,19,6,-0.4,3.4);ctx.stroke();
+  // 后握杆
+  ctx.fillStyle="#2b2f38"; rr(-44,-9,9,15,3); ctx.fill();
+  ctx.restore();
+}
+
+/* ===== 实体军刀(重刃·刀刃朝+x·火焰等离子刃) ===== */
+function drawSaber(cx,cy,s,rot,a){
+  ctx.save();ctx.globalAlpha=a;ctx.translate(cx,cy);ctx.rotate(rot);ctx.scale(s,s);
+  // 握柄
+  ctx.fillStyle="#2b2f38"; rr(-26,-4,20,8,2.5); ctx.fill(); ctx.strokeStyle="#454b57";ctx.lineWidth=1;ctx.stroke();
+  ctx.strokeStyle="#1a1d22";ctx.lineWidth=1; for(var w=0;w<4;w++){ctx.beginPath();ctx.moveTo(-23+w*4.5,-4);ctx.lineTo(-21+w*4.5,4);ctx.stroke();}
+  ctx.fillStyle="#3a3f4a"; ctx.beginPath();ctx.arc(-27,0,3.4,0,6.28);ctx.fill(); // 尾锤
+  // 护手(横挡)
+  ctx.fillStyle="#4a505c"; rr(-7,-9,6,18,2); ctx.fill(); ctx.strokeStyle="#5c6472";ctx.lineWidth=1;ctx.stroke();
+  // 刀身(宽重刃·上直下弧·金属)
+  var bg2=ctx.createLinearGradient(0,-9,0,7); bg2.addColorStop(0,"#9aa3b3");bg2.addColorStop(.5,"#dfe6f0");bg2.addColorStop(1,"#727a88");
+  ctx.fillStyle=bg2;
+  ctx.beginPath(); ctx.moveTo(-1,-8); ctx.lineTo(46,-6); ctx.quadraticCurveTo(60,-2,64,2); ctx.quadraticCurveTo(52,7,30,8); ctx.lineTo(-1,7); ctx.closePath(); ctx.fill();
+  // 血槽
+  ctx.strokeStyle="rgba(120,130,150,.6)";ctx.lineWidth=1.4; ctx.beginPath();ctx.moveTo(2,-1);ctx.lineTo(50,-0.5);ctx.stroke();
+  // 火焰等离子刃(上下缘发光橙)
+  ctx.save();ctx.shadowBlur=11;ctx.shadowColor="#ff7a1a"; ctx.strokeStyle="#ffb060";ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(-1,-8);ctx.lineTo(46,-6);ctx.quadraticCurveTo(60,-2,64,2);ctx.stroke();
+  ctx.strokeStyle="#ff8a2a";ctx.lineWidth=1.4; ctx.beginPath();ctx.moveTo(30,8);ctx.lineTo(-1,7);ctx.stroke(); ctx.restore();
+  ctx.restore();
+}
+
+// 网格
+ctx.strokeStyle="rgba(255,255,255,.05)";ctx.lineWidth=0.5;
+for(var gx=0;gx<800;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,450);ctx.stroke();}
+for(var gy=0;gy<450;gy+=40){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(800,gy);ctx.stroke();}
+drawHMG(250,140,2.2,0.05,1);
+drawSaber(560,150,2.3,-0.2,1);
+drawHMG(230,340,1.5,0,1);
+drawSaber(560,350,1.6,0.1,1);
+ctx.fillStyle="#8892a4";ctx.font="14px sans-serif";
+ctx.fillText("实体重机枪",180,36); ctx.fillText("实体军刀",510,36);
+</script></body></html>

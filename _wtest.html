@@ -1,0 +1,122 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#0d1016}canvas{display:block}</style></head>
+<body><canvas id="c" width="1600" height="1000"></canvas>
+<script>
+var cv=document.getElementById('c'), ctx=cv.getContext('2d');
+ctx.scale(2,2); // 逻辑空间 800x500
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+/* ========= 爆能卡宾枪(实体) =========
+   坐标: 原点在握把上方(自然握持点)。枪管朝 +x(右), 枪托在 -x(左)。
+   分块画: 枪托/枪管/枪口/护木/机匣/能量核心/瞄准镜/握把/扳机护圈/弧形弹匣。 */
+function drawCarbine(cx,cy,s,rot,a){
+  ctx.save(); ctx.globalAlpha=a; ctx.translate(cx,cy); ctx.rotate(rot); ctx.scale(s,s);
+
+  // 枪托 stock(后端·折叠式骨架托)
+  ctx.fillStyle="#2b2f38";
+  ctx.beginPath();
+  ctx.moveTo(-40,-9); ctx.lineTo(-60,-13); ctx.lineTo(-86,-3);
+  ctx.lineTo(-86,9); ctx.lineTo(-60,11); ctx.lineTo(-40,7); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle="#4a505c"; ctx.lineWidth=1.6; ctx.stroke();
+  // 托内镂空(骨架感)
+  ctx.fillStyle="#171a20";
+  ctx.beginPath(); ctx.moveTo(-56,-6); ctx.lineTo(-76,0); ctx.lineTo(-56,6); ctx.closePath(); ctx.fill();
+  // 贴腮条高光
+  ctx.fillStyle="#3a3f4a"; rrect(-74,-13,32,4,2); ctx.fill();
+
+  // 枪管 barrel(金属圆柱渐变)
+  var bgd=ctx.createLinearGradient(0,-6,0,3);
+  bgd.addColorStop(0,"#2e323a"); bgd.addColorStop(.35,"#6b7380"); bgd.addColorStop(.6,"#494f5a"); bgd.addColorStop(1,"#22252b");
+  ctx.fillStyle=bgd; rrect(30,-6,58,9,3); ctx.fill();
+  // 枪口制退器 muzzle brake
+  ctx.fillStyle="#34383f"; rrect(80,-8,17,13,3); ctx.fill();
+  ctx.strokeStyle="#565d6b"; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle="#14161b"; // 排气槽
+  ctx.fillRect(84,-6,2.4,9); ctx.fillRect(88.5,-6,2.4,9); ctx.fillRect(93,-6,2.4,9);
+
+  // 护木 handguard(枪管根部·带导轨)
+  ctx.fillStyle="#33373f"; rrect(16,-10,42,11,3); ctx.fill();
+  ctx.fillStyle="#20232a"; // 导轨齿
+  for(var r=0;r<6;r++){ ctx.fillRect(20+r*6.5,-10,3,3); }
+
+  // 机匣 receiver(主体·金属渐变)
+  var rgd=ctx.createLinearGradient(0,-12,0,7);
+  rgd.addColorStop(0,"#2c303a"); rgd.addColorStop(.28,"#565d6b"); rgd.addColorStop(.5,"#41464f"); rgd.addColorStop(1,"#24272e");
+  ctx.fillStyle=rgd; rrect(-44,-12,64,19,4); ctx.fill();
+  ctx.strokeStyle="#5c6472"; ctx.lineWidth=1.6; ctx.stroke();
+  // 抛壳口
+  ctx.fillStyle="#15171c"; rrect(-6,-6,14,5,1.5); ctx.fill();
+
+  // 能量核心 energy cell(发光橙·爆能标志)
+  ctx.save(); ctx.shadowBlur=11; ctx.shadowColor="#ff9a4a";
+  ctx.fillStyle="#ff7a2a"; rrect(-34,-2,26,4.5,2); ctx.fill();
+  ctx.fillStyle="#ffd7a0"; rrect(-34,-2,26,1.6,1); ctx.fill();
+  ctx.restore();
+
+  // 瞄准镜 scope(顶部·削薄·金属渐变)
+  ctx.fillStyle="#2b2f38"; ctx.fillRect(-14,-15,4,4); ctx.fillRect(9,-15,4,4); // 支柱
+  var sgd=ctx.createLinearGradient(0,-28,0,-15);
+  sgd.addColorStop(0,"#2a2e36"); sgd.addColorStop(.4,"#525967"); sgd.addColorStop(1,"#282b32");
+  ctx.fillStyle=sgd; rrect(-18,-28,33,13,6); ctx.fill();
+  ctx.strokeStyle="#4a505c"; ctx.lineWidth=1.2; ctx.stroke();
+  // 后目镜环
+  ctx.fillStyle="#20232a"; rrect(-18,-27,4,11,2); ctx.fill();
+  // 前镜片(发光青)
+  ctx.save(); ctx.shadowBlur=9; ctx.shadowColor="#5ad8ff";
+  var lg=ctx.createRadialGradient(12,-21.5,0,12,-21.5,6);
+  lg.addColorStop(0,"#d6f6ff"); lg.addColorStop(.5,"#5ad8ff"); lg.addColorStop(1,"#155a78");
+  ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(12,-21.5,5,0,6.28); ctx.fill();
+  ctx.restore();
+
+  // 握把 grip
+  ctx.fillStyle="#2f333c";
+  ctx.beginPath(); ctx.moveTo(-28,6); ctx.lineTo(-18,6); ctx.lineTo(-13,31); ctx.lineTo(-25,33); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle="#454b57"; ctx.lineWidth=1.3; ctx.stroke();
+  // 防滑纹
+  ctx.strokeStyle="#20232a"; ctx.lineWidth=1;
+  for(var gk=0;gk<3;gk++){ ctx.beginPath(); ctx.moveTo(-26+gk*0.5,12+gk*6); ctx.lineTo(-16+gk*0.5,12+gk*6); ctx.stroke(); }
+
+  // 扳机护圈 trigger guard
+  ctx.strokeStyle="#3a3f4a"; ctx.lineWidth=2.6;
+  ctx.beginPath(); ctx.moveTo(-13,7); ctx.arc(-8,13,6,-0.35,3.4); ctx.stroke();
+  // 扳机
+  ctx.strokeStyle="#565d6b"; ctx.lineWidth=1.8;
+  ctx.beginPath(); ctx.moveTo(-9,8); ctx.lineTo(-9,13); ctx.stroke();
+
+  // 弧形弹匣 magazine(等离子电池·弯月形·发光橙)
+  ctx.fillStyle="#34383f";
+  ctx.beginPath();
+  ctx.moveTo(-4,6); ctx.lineTo(9,6);
+  ctx.quadraticCurveTo(15,25,10,43); ctx.lineTo(-2,45);
+  ctx.quadraticCurveTo(-3,25,-4,6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle="#4a505c"; ctx.lineWidth=1.3; ctx.stroke();
+  // 电池能量窗
+  ctx.save(); ctx.shadowBlur=8; ctx.shadowColor="#ff9a4a";
+  ctx.fillStyle="#ff7a2a";
+  ctx.beginPath(); ctx.moveTo(0,13); ctx.lineTo(6,13);
+  ctx.quadraticCurveTo(10,27,7,39); ctx.lineTo(1,40);
+  ctx.quadraticCurveTo(0,27,0,13); ctx.closePath(); ctx.fill();
+  // 电量刻度
+  ctx.shadowBlur=0; ctx.fillStyle="#ffe0b0";
+  ctx.fillRect(1,17,5,1.4); ctx.fillRect(1.5,23,4.5,1.4); ctx.fillRect(2,30,4,1.4);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+// 背景网格(仅测试参照)
+ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=0.5;
+for(var gx=0;gx<800;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,500);ctx.stroke();}
+for(var gy=0;gy<500;gy+=40){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(800,gy);ctx.stroke();}
+
+// 三个尺寸/角度看效果
+drawCarbine(210,150,2.4,0,1);            // 大·水平
+drawCarbine(560,150,2.0,-0.32,1);        // 抬枪瞄准角
+drawCarbine(400,380,1.5,0,1);            // 小
+
+// 标注
+ctx.fillStyle="#8892a4"; ctx.font="14px sans-serif";
+ctx.fillText("爆能卡宾枪 · 水平", 120, 40);
+ctx.fillText("抬枪瞄准", 500, 40);
+ctx.fillText("小尺寸", 360, 300);
+</script>
+</body></html>

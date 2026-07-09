@@ -1,0 +1,13 @@
+{
+  "created": "2026-06-10_09-28-00",
+  "items": {
+    "改进·性能|dead_assets": {
+      "first_seen": "2026-07-02_07-01-25",
+      "last_seen": "2026-07-02_08-17-46",
+      "msg": "20 个资产文件无任何引用·白占 6.7MB: bosses_bg/level12.webp, bosses_bg/level9.webp, bosses_bg/level5.webp, bosses_bg/level16.webp, bosses_bg/level17.webp, bosses_bg/level1.webp…",
+      "fix": "确认后删掉(部署包直接瘦身); 若是给未来功能预留的, 在知识库登记免得反复报",
+      "dim": "崩溃韧性",
+      "done": "2026-07-02_08-18-28"
+    }
+  }
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>云端版本诊断</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#1e293b,#0f172a);color:#e2e8f0;min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center}
+  h1{font-size:20px;margin:16px 0 20px;color:#fbbf24;text-align:center}
+  .card{background:rgba(30,41,59,0.7);border:2px solid #334155;border-radius:12px;padding:18px;width:100%;max-width:420px;margin-bottom:12px}
+  .label{font-size:13px;color:#94a3b8;margin-bottom:8px}
+  .value{font-size:30px;font-weight:900;letter-spacing:1px;font-family:monospace;text-align:center}
+  .ok{color:#22c55e}
+  .bad{color:#ef4444}
+  .info{color:#fbbf24}
+  .step{font-size:14px;line-height:1.7;color:#cbd5e1;margin-top:8px}
+  .step b{color:#fde047}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  th,td{padding:6px 8px;text-align:center;border:1px solid #334155}
+  th{background:rgba(15,23,42,0.6);color:#94a3b8;font-weight:600}
+  td{color:#cbd5e1}
+  .lv1-row{background:rgba(251,191,36,0.15);font-weight:700}
+</style>
+</head>
+<body>
+<h1>🔍 单词大冒险 · 云端版本诊断</h1>
+
+<div class="card">
+  <div class="label">当前云端跑的代码版本:</div>
+  <div class="value" id="version">检测中...</div>
+</div>
+
+<div class="card">
+  <div class="label">期望版本 (跟随部署自动更新, 不写死):</div>
+  <div class="value info" id="expected">检测中...</div>
+</div>
+
+<div class="card">
+  <div class="label">诊断:</div>
+  <div class="step" id="diag">正在分析...</div>
+</div>
+
+<div class="card" id="cfg-card" style="display:none">
+  <div class="label">20 个 boss 倒计时配置 (从云端读取):</div>
+  <table id="cfg-table"><thead><tr><th>Lv</th><th>秒</th><th>Lv</th><th>秒</th></tr></thead><tbody></tbody></table>
+</div>
+
+<script src="hansen_boss_lock.js?v=892"></script>
+<script>
+setTimeout(function(){
+  var vEl = document.getElementById('version');
+  var eEl = document.getElementById('expected');
+  var dEl = document.getElementById('diag');
+  var ver = window.__HBU_VERSION__;            // 云端实际跑的代码内版本
+  var cfg = window.__HBU_BOSS_CONFIG__;
+
+  // 期望版本 = 本页自己加载 hansen_boss_lock.js 时的 ?v= cache buster.
+  // build.py 每次出版本会同步它, 所以这里永远反映"最新部署版本", 不写死.
+  var expected = null;
+  var s = document.querySelector('script[src*="hansen_boss_lock.js"]');
+  if(s){ var mm = (s.getAttribute('src')||'').match(/\?v=([a-zA-Z0-9_]+)/); if(mm) expected = 'v' + mm[1].replace(/^v/,''); }
+  eEl.textContent = expected || '未知';
+
+  if(!ver){
+    vEl.textContent = '❌ 没找到';
+    vEl.className = 'value bad';
+    dEl.innerHTML = '<b style="color:#ef4444">问题: hansen_boss_lock.js 没加载</b><br><br>' +
+      '可能原因:<br>' +
+      '1. 你没把 <b>hansen_boss_lock.js</b> 上传到云端<br>' +
+      '2. 文件路径错误<br><br>' +
+      '<b>解决</b>: 重新解压最新 zip, 上传所有文件到云端';
+  } else if(!expected || ver === expected){
+    vEl.textContent = ver;
+    vEl.className = 'value ok';
+    dEl.innerHTML = '<b style="color:#22c55e">✓ 云端版本正确, 跑的就是最新部署的 ' + ver + '</b><br><br>' +
+      '如果某个功能仍不对, 截图发我.';
+  } else {
+    vEl.textContent = ver;
+    vEl.className = 'value bad';
+    dEl.innerHTML = '<b style="color:#ef4444">问题: 云端跑的是 ' + ver + ', 但最新部署应是 ' + expected + '</b><br><br>' +
+      '<b>说明 CDN 还在发旧代码</b>.<br><br>' +
+      '<b>解决步骤</b>:<br>' +
+      '1. 重新解压最新 zip, 上传所有文件到云端<br>' +
+      '2. 腾讯云控制台 → 静态网站托管 → 清除 CDN 缓存 → /*<br>' +
+      '3. 等 1-2 分钟<br>' +
+      '4. 退出微信进程重进<br>' +
+      '5. 刷新这个页面, 看版本是否变成 ' + expected;
+  }
+  
+  if(cfg && cfg.length === 20){
+    document.getElementById('cfg-card').style.display = 'block';
+    var tbody = document.querySelector('#cfg-table tbody');
+    for(var i = 0; i < 10; i++){
+      var tr = document.createElement('tr');
+      if(i === 0) tr.className = 'lv1-row';
+      tr.innerHTML = '<td>' + cfg[i].lv + '</td><td>' + cfg[i].timeLimit + 's</td>' +
+                     '<td>' + cfg[i+10].lv + '</td><td>' + cfg[i+10].timeLimit + 's</td>';
+      tbody.appendChild(tr);
+    }
+  }
+}, 1500);
+</script>
+
+</body>
+</html>
