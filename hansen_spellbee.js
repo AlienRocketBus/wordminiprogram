@@ -54,7 +54,7 @@
         + 'z-index:2147483600;background:#0a0f24;overflow:hidden;';
       var ifr = document.createElement('iframe');
       ifr.title = '拼写对战';
-      ifr.src = 'spelling_bee.html?v=897&island=' + encodeURIComponent(islandKey || '') + '&embed=1';
+      ifr.src = 'spelling_bee.html?v=898&island=' + encodeURIComponent(islandKey || '') + '&embed=1';
       ifr.style.cssText = 'display:block;width:100%;height:100%;border:0;margin:0;padding:0;background:#0a0f24;';
       ifr.setAttribute('allow', 'autoplay');
       ifr.setAttribute('scrolling', 'no');

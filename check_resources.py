@@ -8380,6 +8380,23 @@ except Exception as _e897:
 if _l897: fail('v897 audio pin: '+str(_l897[:12]))
 else: ok("v897 (Hansen上线定版: 把发音文件名改成对应单词/短语名, 每个单词的音频跟文件名钉死): ①把12个编号文件里唯一只有编号名的7个(word_08/10/11/12/13/14/16)改成规范名 washing_machine/how_many/how_much/how_old/how_long/how_far/next_to.mp3, T-shirt的 t-shirt.mp3 改成派生名 tshirt.mp3, 同步更新 word_map.js/hansen_preload.js/island_clothes.html 全部引用。②带岛后缀的文件(_season 240个 + cook_action/gloves_clothes/chair_home/hard_treasure 等13个)是岛隔离刻意为之(同一个词在不同岛用不同音频, 裸名会撞车)故保留。③本守卫全量钉死: 拼写页936个词逐个按 speak 同款解析(WORD_MAP->land _season->派生)必须命中真实本地文件; WORD_MAP 每条+每个岛 __ISLAND_LOCAL_AUDIO 每条映射必须指向真实文件; 改名后的旧名不得残留在功能文件。任何词找不到音频, 构建即失败, 上线前不可能再出现拼写页没声音。")
 
+_l898=[]
+try:
+    _sb898=open('spelling_bee.html',encoding='utf-8',errors='replace').read()
+    # ① 难度可用性: _sbSetupDiff 定义+调用(禁用空难度+自动切有词难度)
+    if 'function _sbSetupDiff()' not in _sb898: _l898.append('缺 _sbSetupDiff 定义')
+    if '_sbSetupDiff();' not in _sb898: _l898.append('缺 _sbSetupDiff 调用')
+    if 'sbDiffOff' not in _sb898: _l898.append('缺空难度禁用类 sbDiffOff')
+    if "c.classList.contains('sbDiffOff')" not in _sb898: _l898.append('bindPick 未跳过被禁用难度')
+    # ② 岛过滤加固: island缺失/空 都走fallback(绝不落全池)。旧的 if(_sbIsland){var _isl 结构已重构
+    if 'if(_sbIsland&&_isl.length)' not in _sb898: _l898.append('岛过滤未加固(缺 if(_sbIsland&&_isl.length))')
+    if 'if(_sbIsland){var _isl=WORDS.filter' in _sb898: _l898.append('旧岛过滤结构残留(空island仍会落全池)')
+    if '绝不落全池' not in _sb898: _l898.append('缺 绝不落全池 兜底')
+except Exception as _e898:
+    _l898.append('guard self exc:'+str(_e898)[:80])
+if _l898: fail('v898 spellbee island+difficulty: '+str(_l898[:10]))
+else: ok("v898 (Hansen: spelling bee 不论选容易/中级/高级难度, 有时点进去却考本岛所有单词): 根因有二。①难度: 若本岛没有所选难度的词(经统计 action无高级, land1/3/4/6/7无初级 共6岛), startMatch 的 if(!pool.length)pool=shuffle(WORDS.slice()) 会静默落回'全岛词·忽略难度'。②岛过滤: 原 if(_sbIsland){...} 若 island 参数缺失则整个跳过→WORDS保持全936→考所有岛的词。修复: ①加 _sbSetupDiff——按本岛实际词数给每个难度chip标注词数(如'17个'), 词数为0的难度直接禁用(灰+pointerEvents:none+bindPick跳过sbDiffOff), 若默认/当前选中难度为空则自动切到第一个有词的难度; 用户根本选不到空难度, 静默落回永不触发, 选的难度必然生效。②岛过滤重构为 island缺失或过滤为空都绝不落全池: 嵌在岛内→吃父岛allW(零维护精确本岛词), 否则→明确提示。真机Playwright: animal三难度正常(17/17/8), action高级/land1-3初级禁用且自动切到有词难度, 全部0落回。")
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
