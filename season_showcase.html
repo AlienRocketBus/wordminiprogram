@@ -139,7 +139,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
 .setmain.ismain{color:#9aa3c0;background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.14);box-shadow:none;cursor:default}
 </style></head>
 <body>
-<script src="hansen_perf.js?v=899"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf.js?v=900"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="sky"></div><canvas id="galaxy"></canvas>
 <div class="vign"></div>
 <div class="close" id="closePg">×</div>
@@ -157,7 +157,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
         <div class="wstars" id="wstars"></div>
         <div class="maintag" id="maintag">★ 主形象</div>
         <div class="foil"></div><div class="glare"></div>
-        <div class="art"><img src="bosses/saelya_hd.webp?v=899" onerror="this.onerror=null;this.src='bosses/saelya.png?v=899'" alt="星海女帝赛尔娅"></div>
+        <div class="art"><img src="bosses/saelya_hd.webp?v=900" onerror="this.onerror=null;this.src='bosses/saelya.webp?v=900'" alt="星海女帝赛尔娅"></div>
         <div class="wvig"></div>
         <div class="lockmask" id="lockmask"><div class="q">❔</div><div class="lt">尚未解锁</div><div class="bar"><i></i></div><div class="bt">集满 1000 赛季积分解锁（640 / 1000）</div></div>
       </div>
@@ -260,31 +260,31 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeZoom();
 var SID=(function(){try{return (new URLSearchParams(location.search)).get('boss')||'S1';}catch(e){return 'S1';}})();
 // 🔴v844(Hansen·重做): 全部赛季卡(限定卡赛尔娅 + 5守关boss)统一走本精美星系展示·CARDS按URL id参数化(去背景角色立绘+名字+典藏台词+专属本命背景场景)·boss与赛尔娅【完全同规格】(星系+3D倾斜卡+闪卡光泽+形态/背景切换+设为主形象)。
 var CARDS={
-  'S1':  {nm:'星海女帝 · 赛尔娅',       fl:'繁星为我加冕，银河在我足下流淌。',         forms:[{img:'bosses/saelya_hd.webp',png:'bosses/saelya.png'},{img:'bosses/saelya_hd2.webp',png:'bosses/saelya2.png'},{img:'bosses/saelya_hd3.webp',png:'bosses/saelya3.png'}], scene:''},
-  'S1B1':{nm:'铸星者 · 原初匠人',       fl:'星海创世的第一锤，万千星辰皆出自我的熔炉。', forms:[{img:'bosses/starmaker.png',png:'bosses/starmaker.png'}],   scene:'bosses_bg/starmaker.webp'},
-  'S1B2':{nm:'统御天使 · 圣光之翼',     fl:'圣光之翼展开即是裁决，无人能在审判之光下隐藏。', forms:[{img:'bosses/lightangel.png',png:'bosses/lightangel.png'}], scene:'bosses_bg/lightangel.webp'},
-  'S1B3':{nm:'无光之渊 · 暗噬君主',     fl:'坠入无光之渊的灵魂，永世再难回返。',         forms:[{img:'bosses/abysslord.png',png:'bosses/abysslord.png'}],   scene:'bosses_bg/abysslord.webp'},
-  'S1B4':{nm:'时之君主 · 克罗诺斯之影', fl:'十二时钟为我疯转，此刻即是终焉。',           forms:[{img:'bosses/timelord.png',png:'bosses/timelord.png'}],     scene:'bosses_bg/timelord.webp'},
-  'S1B5':{nm:'终末观测者 · 边界守夜人', fl:'我守望宇宙的边界，终末的目光从不闭合。',     forms:[{img:'bosses/observer.png',png:'bosses/observer.png'}],     scene:'bosses_bg/observer.webp'}
+  'S1':  {nm:'星海女帝 · 赛尔娅',       fl:'繁星为我加冕，银河在我足下流淌。',         forms:[{img:'bosses/saelya_hd.webp',png:'bosses/saelya.webp'},{img:'bosses/saelya_hd2.webp',png:'bosses/saelya2.webp'},{img:'bosses/saelya_hd3.webp',png:'bosses/saelya3.webp'}], scene:''},
+  'S1B1':{nm:'铸星者 · 原初匠人',       fl:'星海创世的第一锤，万千星辰皆出自我的熔炉。', forms:[{img:'bosses/starmaker.webp',png:'bosses/starmaker.webp'}],   scene:'bosses_bg/starmaker.webp'},
+  'S1B2':{nm:'统御天使 · 圣光之翼',     fl:'圣光之翼展开即是裁决，无人能在审判之光下隐藏。', forms:[{img:'bosses/lightangel.webp',png:'bosses/lightangel.webp'}], scene:'bosses_bg/lightangel.webp'},
+  'S1B3':{nm:'无光之渊 · 暗噬君主',     fl:'坠入无光之渊的灵魂，永世再难回返。',         forms:[{img:'bosses/abysslord.webp',png:'bosses/abysslord.webp'}],   scene:'bosses_bg/abysslord.webp'},
+  'S1B4':{nm:'时之君主 · 克罗诺斯之影', fl:'十二时钟为我疯转，此刻即是终焉。',           forms:[{img:'bosses/timelord.webp',png:'bosses/timelord.webp'}],     scene:'bosses_bg/timelord.webp'},
+  'S1B5':{nm:'终末观测者 · 边界守夜人', fl:'我守望宇宙的边界，终末的目光从不闭合。',     forms:[{img:'bosses/observer.webp',png:'bosses/observer.webp'}],     scene:'bosses_bg/observer.webp'}
 };
 var CARD=CARDS[SID]||CARDS['S1'];
 var FORMS=CARD.forms;
 // 🔴v844: boss 专属"本命"背景场景图 → unshift 为 BGS[0](默认选中·角色立绘叠在专属场景前)。赛尔娅无scene·保持原8渐变可切换。
-if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=899") center/cover',sw:'url("'+CARD.scene+'?v=899") center/cover',light:false}); }
+if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=900") center/cover',sw:'url("'+CARD.scene+'?v=900") center/cover',light:false}); }
 // 🔴v844: 名字+典藏台词从CARD动态填充(赛尔娅/boss通用。稀有度"传说限定"+赛季"第一赛季·星海觉醒"对全S1卡一致故保持不改)
 (function(){var _nm=document.querySelector('.nm');if(_nm)_nm.textContent=CARD.nm;var _fl=document.querySelector('.flavor');if(_fl)_fl.innerHTML='<span class="qm">「</span>'+CARD.fl+'<span class="qm">」</span>';
   // 🔴v844: 单形态boss隐藏形态切换UI(箭头/圆点/形象序号/设为主形象)·赛尔娅3形态保留
   if(FORMS.length<=1){var _fs=document.querySelector('.fswitch');if(_fs)_fs.style.display='none';var _sm=document.getElementById('setMainBtn');if(_sm)_sm.style.display='none';var _fn=document.getElementById('fname');if(_fn)_fn.style.display='none';}
 })();
-var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=899';}catch(e){return '?v=899';}})();
+var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=900';}catch(e){return '?v=900';}})();
 function loadPref(){try{var p=JSON.parse(localStorage.getItem('hs_showcase_'+SID)||'null');return (p&&typeof p==='object')?p:{};}catch(e){return {};}}
-function savePref(){try{var f=FORMS[mainFormIdx]||FORMS[0],b=BGS[curBg]||BGS[0];localStorage.setItem('hs_showcase_'+SID,JSON.stringify({formIdx:mainFormIdx,formImg:f.img,formPng:f.png,bgIdx:curBg,bgCss:b.bg}));}catch(e){}}
+function savePref(){try{var f=FORMS[mainFormIdx]||FORMS[0],b=BGS[curBg]||BGS[0];localStorage.setItem('hs_showcase_'+SID,JSON.stringify({formIdx:mainFormIdx,formImg:f.img,formPng:f.webp,bgIdx:curBg,bgCss:b.bg}));}catch(e){}}
 var mainFormIdx=0,curForm=0;
 var cardImgEl=document.querySelector('.art img'),soloEl=document.getElementById('soloChar'),fnameEl=document.getElementById('fname');
 function setForm(i){
   curForm=((i%FORMS.length)+FORMS.length)%FORMS.length;
   var f=FORMS[curForm];
-  if(cardImgEl){(function(fp){cardImgEl.onerror=function(){this.onerror=null;this.src=fp+VV;};})(f.png);cardImgEl.src=f.img+VV;}
+  if(cardImgEl){(function(fp){cardImgEl.onerror=function(){this.onerror=null;this.src=fp+VV;};})(f.webp);cardImgEl.src=f.img+VV;}
   if(soloEl)soloEl.src=f.img+VV;
   if(fnameEl)fnameEl.textContent='形 象  '+(curForm+1)+' / '+FORMS.length;
   var dots=document.querySelectorAll('.fdot');for(var k=0;k<dots.length;k++)dots[k].classList.toggle('on',k===curForm);

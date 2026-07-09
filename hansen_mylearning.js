@@ -195,7 +195,7 @@
       if(!row || row.querySelector('.hsn-ml-entry')) return true;
       var card = document.createElement('div');
       card.className = (cards[0].className || 'util-card') + ' hsn-ml-entry';
-      card.innerHTML = '<span class="u-icon"><img src="icons/ic_study.png" alt="" draggable="false" style="width:75px;height:75px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,0px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">我的学习</div>';
+      card.innerHTML = '<span class="u-icon"><img src="icons/ic_study.webp" alt="" draggable="false" style="width:75px;height:75px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,0px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">我的学习</div>';
       card.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openPanel(); });
       row.appendChild(card);
       return true;

@@ -234,7 +234,7 @@
                 '<button class="dia-btn buy" onclick="window.__hsnDiaBuy(\''+it.id+'\')">💎 '+it.price+'</button>'; }
       var imax=(series==='imax');
       h+='<div class="dia-item'+(imax?' dia-item-imax':'')+'">'+
-           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=899\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
+           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=900\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
            '<div class="dia-info"><div class="dia-name">'+it.name+(owned?' <span class="owned-tag">已拥有</span>':'')+'</div>'+
            '<div class="dia-desc">'+it.desc+'</div></div>'+
            '<div class="dia-action">'+btn+'</div>'+
@@ -411,9 +411,9 @@
     '.dia-imax-tip{font-size:11.5px;color:#c4b5fd;background:rgba(124,58,237,.12);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:8px 11px;line-height:1.6;margin:0 0 10px}'+
     '.dia-item-imax{border:1.5px solid rgba(251,191,36,.55)!important;box-shadow:0 0 14px rgba(251,191,36,.18),inset 0 1px 0 rgba(255,255,255,.06)}'+
     '.dia-imax-badge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:900;letter-spacing:1px;color:#1a1206;background:linear-gradient(135deg,#fde68a,#f59e0b);padding:1.5px 5px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.4)}'+
-    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=899) center 28%/cover}'+
-    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=899) center 22%/cover}'+
-    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=899) center 42%/cover}'+
+    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=900) center 28%/cover}'+
+    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=900) center 22%/cover}'+
+    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=900) center 42%/cover}'+
     '.dia-prev-theme_fireworks{background:linear-gradient(160deg,#5b3fc4,#ff6b9d)}'+
     '.dia-prev-theme_candyland{background:linear-gradient(160deg,#7ec8ff,#ffb3d1)}'+
     '.dia-prev-theme_balloon{background:linear-gradient(160deg,#41b8f5,#ffe680)}'+
@@ -438,7 +438,7 @@
       var entry=document.createElement('div');
       entry.className='util-card'; entry.id='hsnDiaEntry';
       entry.setAttribute('onclick','HansenDiamondShop.open()');
-      entry.innerHTML='<span class="u-icon"><img src="icons/ic_diamond.png" alt="" draggable="false" style="width:72px;height:72px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">主题商店</div>';
+      entry.innerHTML='<span class="u-icon"><img src="icons/ic_diamond.webp" alt="" draggable="false" style="width:72px;height:72px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">主题商店</div>';
       anyCard.parentElement.insertBefore(entry, anyCard);
     }catch(e){}
   }

@@ -43,7 +43,7 @@
       end:   '2026-12-31',   // 演示期放长一点, 方便你测试; 正式上线改成当月
       card: {
         name: '星海女帝·赛尔娅',
-        img:  'bosses/saelya_hd.webp',   // 高清卡图(神秘殿堂/陈列馆缩略图用); 岛内 boss 立绘由 island_season.html 单独引用 bosses/saelya.png
+        img:  'bosses/saelya_hd.webp',   // 高清卡图(神秘殿堂/陈列馆缩略图用); 岛内 boss 立绘由 island_season.html 单独引用 bosses/saelya.webp
         rarity: 'legend',             // legend 传说 / epic 史诗 / rare 稀有
         desc: '星海创世之初降临的女帝，只在第一赛季出现，绝版后不再获得。'
       },
@@ -59,13 +59,13 @@
         { points: 1500, reward: '👑 赛季称号',       type:'title', value:'星海征服者' }
       ],
       // 🔴v805(Hansen): 赛季守关 boss 卡组(和限定卡赛尔娅一起凑成完整赛季 boss 卡组·全传说·密码面板/一键通关解锁)。
-      //   立绘已有(starmaker/lightangel/abysslord/timelord/observer.png)。🔴v843(Hansen发图): 5张本命背景图已填入 bgImg(bosses_bg/xxx.webp·原918x1714 PNG转webp q82·138-388KB)·覆盖占位渐变·boss卡全屏观赏时立绘落在各自专属背景上(铸星者→starmaker熔炉/天使→lightangel圣光/暗噬君主→abysslord渊狱/时之君主→timelord钟楼/边界守夜人→observer星界)。
+      //   立绘已有(starmaker/lightangel/abysslord/timelord/observer.webp)。🔴v843(Hansen发图): 5张本命背景图已填入 bgImg(bosses_bg/xxx.webp·原918x1714 PNG转webp q82·138-388KB)·覆盖占位渐变·boss卡全屏观赏时立绘落在各自专属背景上(铸星者→starmaker熔炉/天使→lightangel圣光/暗噬君主→abysslord渊狱/时之君主→timelord钟楼/边界守夜人→observer星界)。
       bossCards: [
-        { id:'S1B1', name:'铸星者·原初匠人',       img:'bosses/starmaker.png',  rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#3a2a16,#0d0a05)', bgImg:'bosses_bg/starmaker.webp', desc:'星海创世的第一锤。万千星辰皆出自他的熔炉，原初的造物之力从未止息。' },
-        { id:'S1B2', name:'统御天使·圣光之翼',     img:'bosses/lightangel.png', rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#3a3420,#0d0c06)', bgImg:'bosses_bg/lightangel.webp', desc:'展开圣光之翼降下裁决。万道光柱即是他的旨意，无人能在审判之光下隐藏。' },
-        { id:'S1B3', name:'无光之渊·暗噬君主',     img:'bosses/abysslord.png',  rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#281a3a,#08060d)', bgImg:'bosses_bg/abysslord.webp', desc:'渊狱深处的吞噬者。被暗链拖入的灵魂，永坠无光之渊再难回返。' },
-        { id:'S1B4', name:'时之君主·克罗诺斯之影', img:'bosses/timelord.png',   rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#16332e,#06100d)', bgImg:'bosses_bg/timelord.webp', desc:'十二时钟为他疯转。时间在他面前停滞、倒流、又终结，是为终焉时刻。' },
-        { id:'S1B5', name:'终末观测者·边界守夜人', img:'bosses/observer.png',   rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#16333e,#060e10)', bgImg:'bosses_bg/observer.webp', desc:'守望宇宙边界的观测者。星图烙印连起命运的回响，终末的目光从不闭合。' }
+        { id:'S1B1', name:'铸星者·原初匠人',       img:'bosses/starmaker.webp',  rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#3a2a16,#0d0a05)', bgImg:'bosses_bg/starmaker.webp', desc:'星海创世的第一锤。万千星辰皆出自他的熔炉，原初的造物之力从未止息。' },
+        { id:'S1B2', name:'统御天使·圣光之翼',     img:'bosses/lightangel.webp', rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#3a3420,#0d0c06)', bgImg:'bosses_bg/lightangel.webp', desc:'展开圣光之翼降下裁决。万道光柱即是他的旨意，无人能在审判之光下隐藏。' },
+        { id:'S1B3', name:'无光之渊·暗噬君主',     img:'bosses/abysslord.webp',  rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#281a3a,#08060d)', bgImg:'bosses_bg/abysslord.webp', desc:'渊狱深处的吞噬者。被暗链拖入的灵魂，永坠无光之渊再难回返。' },
+        { id:'S1B4', name:'时之君主·克罗诺斯之影', img:'bosses/timelord.webp',   rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#16332e,#06100d)', bgImg:'bosses_bg/timelord.webp', desc:'十二时钟为他疯转。时间在他面前停滞、倒流、又终结，是为终焉时刻。' },
+        { id:'S1B5', name:'终末观测者·边界守夜人', img:'bosses/observer.webp',   rarity:'legend', bg:'radial-gradient(circle at 50% 30%,#16333e,#060e10)', bgImg:'bosses_bg/observer.webp', desc:'守望宇宙边界的观测者。星图烙印连起命运的回响，终末的目光从不闭合。' }
       ]
     }
     // 第二赛季起, 你团队往这里继续加 { id:'S2', ... }
@@ -458,7 +458,7 @@
       var hasThisCard = d.unlockedCards.indexOf(season.id) >= 0;
       var pPref = readCardPref(season.id);
       // 🔴v847(Hansen): 赛季面板当季卡缩略图同样用【透明立绘 formPng】, 全局规格统一
-      var pImg = (pPref&&pPref.formPng)?pPref.formPng:'bosses/saelya.png';
+      var pImg = (pPref&&pPref.formPng)?pPref.formPng:'bosses/saelya.webp';
       var pBg  = (pPref&&pPref.bgCss)?pPref.bgCss:'radial-gradient(circle at 50% 30%,#2a2350,#0d0a22)';
 
       var milestonesHtml = '';
@@ -487,7 +487,7 @@
           '<div'+(hasThisCard?' id="__hs_curcard" data-season="'+season.id+'"':'')+' style="background:linear-gradient(135deg,'+r.glow+',rgba(12,21,56,.3));border:2px solid '+r.color+';border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 0 20px '+r.glow+';'+(hasThisCard?'cursor:pointer':'')+'">'+
             '<div style="font-size:11px;color:'+r.color+';font-weight:800;letter-spacing:1px;margin-bottom:6px">★ '+r.name+'限定卡 ★</div>'+
             (hasThisCard
-              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=899" onerror="this.onerror=null;this.src=\'bosses/saelya.png?v=899\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
+              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=900" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=900\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
               : '<div style="font-size:46px;margin-bottom:6px">❓</div>')+
             '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:4px">'+(hasThisCard?season.card.name:'？？？')+'</div>'+
             '<div style="font-size:12px;color:#cbd5e1;line-height:1.5">'+(hasThisCard?'✨ 已收入囊中 · 点击进入全屏观赏':season.card.desc)+'</div>'+
@@ -547,7 +547,7 @@
     var pref = readCardPref(id); if(!pref) return;
     function apply(img, box){
       // 🔴v847(Hansen): 换形象后缩略图保持【透明立绘+底对齐】(用 formPng·不回退 HD 卡面图), 与神秘殿堂初始渲染统一
-      if(img){ var _sp=(pref.formPng||'bosses/saelya.png'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.png?v=899';}; img.src = _sp + '?v=899'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
+      if(img){ var _sp=(pref.formPng||'bosses/saelya.webp'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.webp?v=900';}; img.src = _sp + '?v=900'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
       if(box && pref.bgCss){ box.style.background = pref.bgCss; }
     }
     var hall = document.getElementById('__hs_hall_panel');
@@ -575,12 +575,12 @@
         ownedTotal++;
         var pref = readCardPref(s.id);
         // 🔴v847(Hansen): 神秘殿堂缩略图改用【透明立绘 formPng】(不再用 HD 卡面图 saelya_hd), 与5个守关boss同款渲染·规格统一
-        var tImg = (pref&&pref.formPng)?pref.formPng:'bosses/saelya.png';
+        var tImg = (pref&&pref.formPng)?pref.formPng:'bosses/saelya.webp';
         var tBg  = (pref&&pref.bgCss)?pref.bgCss:'radial-gradient(circle at 50% 30%,#2a2350,#0d0a22)';
         _saelyaH +=
           '<div class="__hs_gcard" data-season="'+s.id+'" style="background:linear-gradient(160deg,'+r.glow+',rgba(12,21,56,.35));border:2px solid '+r.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+r.glow+';cursor:pointer">'+
             '<div class="__hs_thumb_box" style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+tBg+';margin-bottom:8px">'+/* 🔴v847: 框改正方形·立绘底对齐 */
-              '<img src="'+tImg+'?v=899" onerror="this.onerror=null;this.src=\'bosses/saelya.png?v=899\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+              '<img src="'+tImg+'?v=900" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=900\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
             '</div>'+
             '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+s.card.name+'</div>'+
             '<div style="font-size:10px;color:'+r.color+';font-weight:800;margin-top:3px">★ '+r.name+'限定</div>'+
@@ -618,11 +618,11 @@
           var bcOwned = tempUnlockAll() || d.unlockedCards.indexOf(bc.id) >= 0;
           if(bcOwned){
             ownedTotal++;
-            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=899") center/cover') : bc.bg;
+            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=900") center/cover') : bc.bg;
             cardsHtml +=
               '<div class="__hs_bcard" data-bc="'+bc.id+'" style="background:linear-gradient(160deg,'+br2.glow+',rgba(12,21,56,.35));border:2px solid '+br2.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+br2.glow+';cursor:pointer">'+
                 '<div style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+bcBg+';margin-bottom:8px">'+/* 🔴v847(Hansen): 1200x1200正方形立绘配正方形框·零顶部留白·人物最大化·零裁切 */
-                  '<img src="'+bc.img+'?v=899" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+                  '<img src="'+bc.img+'?v=900" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
                 '</div>'+
                 '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+bc.name+'</div>'+
                 '<div style="font-size:10px;color:'+br2.color+';font-weight:800;margin-top:3px">★ '+br2.name+'限定</div>'+
@@ -677,7 +677,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'season_showcase.html?v=899&boss=' + encodeURIComponent(seasonId || '');
+    iframe.src = 'season_showcase.html?v=900&boss=' + encodeURIComponent(seasonId || '');
     iframe.setAttribute('title', '神秘殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -699,7 +699,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'boss_hall.html?v=899&season=1&lv=' + lv;
+    iframe.src = 'boss_hall.html?v=900&season=1&lv=' + lv;
     iframe.setAttribute('title', 'BOSS 殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -716,14 +716,14 @@
   function openBossCardView(card){
     if(!card || document.getElementById('__hs_bcv')) return;
     var r = RARITY_STYLE[card.rarity] || RARITY_STYLE.legend;
-    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=899") center/cover') : card.bg;
+    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=900") center/cover') : card.bg;
     var mask = document.createElement('div');
     mask.id = '__hs_bcv';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(8,8,18,.92);display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
     mask.innerHTML =
       '<div style="width:100%;max-width:330px">'+
         '<div style="position:relative;width:100%;aspect-ratio:3/4;border-radius:20px;overflow:hidden;border:3px solid '+r.color+';box-shadow:0 0 34px '+r.glow+',0 18px 50px rgba(0,0,0,.6);background:'+bgStyle+'">'+
-          '<img src="'+card.img+'?v=899" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
+          '<img src="'+card.img+'?v=900" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
           '<div style="position:absolute;top:11px;left:11px;background:'+r.color+';color:#1a1226;font-size:11px;font-weight:900;padding:3px 11px;border-radius:8px">★ '+r.name+'</div>'+
           '<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 15px 17px;background:linear-gradient(to top,rgba(8,8,18,.94),rgba(8,8,18,.55),transparent)">'+
             '<div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)">'+card.name+'</div>'+

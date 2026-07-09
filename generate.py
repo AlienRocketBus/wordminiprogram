@@ -28,7 +28,7 @@ def generate(tpl, d):
     t = t.replace(PH['LOCALAUDIO'], d['local_audio'] if d.get('local_audio') else 'null')
     t = t.replace(PH['EXTRACSS'], d['extra_css'] if d.get('extra_css') else '')
     # 🔴 挑战BOSS 图标: 默认 boss_arcade.png(全岛共用)·赛季岛单独用 boss_icon 字段(Hansen 只换星海词汇大冒险这一个)
-    t = t.replace(PH['BOSSICON'], d.get('boss_icon', 'boss_arcade.png'))
+    t = t.replace(PH['BOSSICON'], d.get('boss_icon', 'boss_arcade.webp'))
     # 🔴 挑战BOSS 标签字色: 默认 #0f172a(深·配亮黄底)·赛季岛 boss_label_color=#fff(白·配 #0A1228 深底·否则深字看不见)
     t = t.replace(PH['BLABEL'], d.get('boss_label_color', '#0f172a'))
     for n in BMAP:

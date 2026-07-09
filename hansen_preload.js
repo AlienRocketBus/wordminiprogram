@@ -11,7 +11,7 @@
 //
 // 关键: 预加载的 URL 必须和游戏真正请求的 URL 完全一致 (含 ?v 后缀),
 //   否则浏览器当成两个不同 URL, 缓存不命中 = 白下载。
-//   - boss 图:  bosses/lvNN.png?v=<当前版本>   (?v= 随 build 同步, 这里从自己的 script 标签动态读, 永远匹配)
+//   - boss 图:  bosses/lvNN.webp?v=<当前版本>   (?v= 随 build 同步, 这里从自己的 script 标签动态读, 永远匹配)
 //   - 单词 mp3: words/XXX.mp3?v215             (游戏里写死 ?v215, 见 island 的 speak)
 //   - 句子 mp3: sentences/sentence_NNNN.mp3?v91 (游戏里写死 ?v91, 见 island 的 speak)
 //
@@ -147,7 +147,7 @@
       };
       img.onload = rel;
       img.onerror = rel;
-      try { img.src = 'bosses/lv' + n + '.png' + BOSS_VER; } catch(e){ go(); }
+      try { img.src = 'bosses/lv' + n + '.webp' + BOSS_VER; } catch(e){ go(); }
     }
     loadNextImg();
   }
@@ -370,6 +370,38 @@
     }).catch(function(){ if(onAllDone) onAllDone(); });
   }
 
+  // ───────── 🔴v900 预热具名 boss 美术(saelya/land_* 等·星海&单词大陆岛的 boss 图) ─────────
+  //   根因: preloadBossImages 只管 lv01-20(常规章节 boss); 星海/land 岛用的是具名 boss 图(land_priest.webp/saelya.webp 等·~66张), 从不预载 → 进那些岛 boss 战现下现出(网慢就"图加载不出来")。
+  //   做法: 从各岛 HTML DOMParse 抽 bosses/*.webp(自维护·岛改引用自动跟随·排除已由 preloadBossImages 管的 lvNN), 最低优先·复用同套礼让(preheatUrlBatch: 碰屏/音频忙立刻让路中止在途)。
+  //   安全: 全程 fetch 只读进缓存·全 try/catch·失败静默·纯附加不动任何现有逻辑。图已转 WEBP(比 PNG 小 2-3 倍)→ 预热总量大幅下降。
+  function preloadNamedBossArt(){
+    try {
+      var islFiles = [], seen = {}, html = document.body ? document.body.innerHTML : '';
+      var re = /island_[a-z0-9]+\.html/g, m;
+      while((m = re.exec(html))){ if(!seen[m[0]]){ seen[m[0]] = 1; islFiles.push(m[0]); } }
+      if(!islFiles.length) return;
+      var vq = V ? ('?v=' + V) : '';
+      var artSeen = {}, artUrls = [], pending = islFiles.length;
+      function collectDone(){
+        if(--pending !== 0) return;
+        if(artUrls.length){ try { preheatUrlBatch(artUrls, 2, null); } catch(e){} }   // 最低优先·礼让式补进缓存
+      }
+      islFiles.forEach(function(f){
+        fetch(f + vq, { credentials: 'same-origin' }).then(function(r){ return r.text(); }).then(function(t){
+          try {
+            var re2 = /bosses\/[A-Za-z0-9_]+\.webp/g, mm;
+            while((mm = re2.exec(t))){
+              if(/\/lv\d+\.webp$/.test(mm[0])) continue;                 // lv01-20 已由 preloadBossImages 管
+              var u = mm[0] + vq;
+              if(!artSeen[u]){ artSeen[u] = 1; artUrls.push(u); }
+            }
+          } catch(e){}
+          collectDone();
+        }).catch(function(){ collectDone(); });
+      });
+    } catch(e){}
+  }
+
   // ───────── 启动 ─────────
   var AUDIO_DONE_KEY = 'hansen_audio_preload_done';
   function audioAlreadyDone(){
@@ -390,7 +422,7 @@
         try { inHomeShell = !!document.getElementById('islandFrameWrap'); } catch(e){}
         if(inHomeShell){
           // 🔴BUG#90 首页外壳: 最高优先预热"进任何岛必下"的44脚本+首屏图标+19岛HTML(秒进根治) → 全部完了再 boss图(最低优先·boss战才用)
-          preheatIslandEntryResources(function(){ try { preloadBossImages(); } catch(e){} });
+          preheatIslandEntryResources(function(){ try { preloadBossImages(); } catch(e){} try { preloadNamedBossArt(); } catch(e){} });
           return;
         }
         // 岛内(原逻辑·零改动): 只预热本岛真正会播的词 → 再 boss图

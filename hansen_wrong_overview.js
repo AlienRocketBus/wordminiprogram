@@ -128,7 +128,7 @@
 
     // 改图标和文字
     navExplore.innerHTML = `
-      <span class="ni-icon"><img src="icons/ic_wrong.png" alt="" draggable="false" style="width:50px;height:50px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px);filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 1px 3px rgba(0,0,0,.5))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><span class="ni-label">错题</span>
+      <span class="ni-icon"><img src="icons/ic_wrong.webp" alt="" draggable="false" style="width:50px;height:50px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px);filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 1px 3px rgba(0,0,0,.5))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><span class="ni-label">错题</span>
       <span class="hwo_total_badge" style="position:absolute;top:2px;right:14px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:10px;font-weight:800;padding:1px 5px;border-radius:8px;display:none;border:1.5px solid #0f172a;line-height:1.2"></span>
     `;
     navExplore.style.position = 'relative';

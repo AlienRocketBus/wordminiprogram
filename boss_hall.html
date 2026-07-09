@@ -131,7 +131,7 @@ body.smode .art img{transform:scale(1.16);transform-origin:center bottom}
 #wallHint.show{opacity:1}
 </style></head>
 <body>
-<script src="hansen_perf.js?v=899"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf.js?v=900"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="bgA" class="kb"></div><div id="bgB" class="kb"></div>
 <div class="vign" id="vign"></div>
 <img id="soloChar" alt=""><div id="soloGround"></div>
@@ -234,18 +234,18 @@ var BGS=[
  {n:'苍穹',bg:'linear-gradient(180deg,#0b2a52,#0e5180 50%,#062038)',sw:'linear-gradient(160deg,#7dd3fc,#0369a1,#082f49)'}
 ];
 var QS=(function(){try{return new URLSearchParams(location.search);}catch(e){return {get:function(){return null;}};}})();
-var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=899';})();
+var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=900';})();
 var OWN=(function(){var m=QS.get('own');if(!m)return null;var a=[];m.split(',').forEach(function(x){var n=parseInt(x,10);if(n>=1&&n<=20&&a.indexOf(n)<0)a.push(n);});return a.length?a.sort(function(x,y){return x-y;}):null;})();
 function isOwned(lv){return !OWN||OWN.indexOf(lv)>=0;}
 function bgPath(lv){return 'bosses_bg/level'+lv+'.webp'+VV;}
-function artPath(lv){return 'bosses/lv'+(lv<10?'0':'')+lv+'.png'+VV;}
+function artPath(lv){return 'bosses/lv'+(lv<10?'0':'')+lv+'.webp'+VV;}
 /* 🔴v845(Hansen·重做): 星海岛第一赛季5个守关boss复用本BOSS殿堂【完全同规格】(本命背景全屏Ken Burns + 角色立绘 + 5档稀有度卡框 + 背景13选 + 点击放大 + 左右滑切换)·【不用星系】(星系只给星海女帝赛尔娅·她仍走season_showcase.html)。URL ?season=1 进入·BOSSES替换为5守关boss·路径用立绘/本命背景字段(lv=1~5虚拟index)。 */
 var SEASON_BOSSES=[
- {lv:1, n:'铸星者 · 原初匠人',       r:'legendary', _art:'bosses/starmaker.png',  _scene:'bosses_bg/starmaker.webp',  d:'星海创世的第一锤，万千星辰皆出自他的熔炉。'},
- {lv:2, n:'统御天使 · 圣光之翼',     r:'legendary', _art:'bosses/lightangel.png', _scene:'bosses_bg/lightangel.webp', d:'圣光之翼展开即是裁决，无人能在审判之光下隐藏。'},
- {lv:3, n:'无光之渊 · 暗噬君主',     r:'legendary', _art:'bosses/abysslord.png',  _scene:'bosses_bg/abysslord.webp',  d:'坠入无光之渊的灵魂，永世再难回返。'},
- {lv:4, n:'时之君主 · 克罗诺斯之影', r:'legendary', _art:'bosses/timelord.png',   _scene:'bosses_bg/timelord.webp',   d:'十二时钟为他疯转，此刻即是终焉。'},
- {lv:5, n:'终末观测者 · 边界守夜人', r:'legendary', _art:'bosses/observer.png',   _scene:'bosses_bg/observer.webp',   d:'守望宇宙的边界，终末的目光从不闭合。'}
+ {lv:1, n:'铸星者 · 原初匠人',       r:'legendary', _art:'bosses/starmaker.webp',  _scene:'bosses_bg/starmaker.webp',  d:'星海创世的第一锤，万千星辰皆出自他的熔炉。'},
+ {lv:2, n:'统御天使 · 圣光之翼',     r:'legendary', _art:'bosses/lightangel.webp', _scene:'bosses_bg/lightangel.webp', d:'圣光之翼展开即是裁决，无人能在审判之光下隐藏。'},
+ {lv:3, n:'无光之渊 · 暗噬君主',     r:'legendary', _art:'bosses/abysslord.webp',  _scene:'bosses_bg/abysslord.webp',  d:'坠入无光之渊的灵魂，永世再难回返。'},
+ {lv:4, n:'时之君主 · 克罗诺斯之影', r:'legendary', _art:'bosses/timelord.webp',   _scene:'bosses_bg/timelord.webp',   d:'十二时钟为他疯转，此刻即是终焉。'},
+ {lv:5, n:'终末观测者 · 边界守夜人', r:'legendary', _art:'bosses/observer.webp',   _scene:'bosses_bg/observer.webp',   d:'守望宇宙的边界，终末的目光从不闭合。'}
 ];
 if(QS.get('season')){ BOSSES=SEASON_BOSSES; bgPath=function(lv){return BOSSES[lv-1]._scene+VV;}; artPath=function(lv){return BOSSES[lv-1]._art+VV;}; try{document.body.classList.add('smode');}catch(e){} }
 var N=BOSSES.length; /* 🔴v845: boss总数(season=5/normal=20)·替换原硬编码20·使切换/边界对两种模式都正确 */
