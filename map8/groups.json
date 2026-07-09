@@ -1,0 +1,1274 @@
+[
+ {
+  "id": 1,
+  "terrain": "lake",
+  "name": "迷雾心湖",
+  "theme": "情绪心境",
+  "boss": 3,
+  "words": [
+   {
+    "en": "nervous",
+    "pn": "/ˈnɜːvəs/",
+    "cn": "紧张的"
+   },
+   {
+    "en": "anxious",
+    "pn": "/ˈæŋkʃəs/",
+    "cn": "焦虑的"
+   },
+   {
+    "en": "curious",
+    "pn": "/ˈkjʊəriəs/",
+    "cn": "好奇的"
+   },
+   {
+    "en": "proud",
+    "pn": "/praʊd/",
+    "cn": "自豪的"
+   },
+   {
+    "en": "grateful",
+    "pn": "/ˈɡreɪtfl/",
+    "cn": "感激的"
+   },
+   {
+    "en": "disappointed",
+    "pn": "/ˌdɪsəˈpɔɪntɪd/",
+    "cn": "失望的"
+   },
+   {
+    "en": "embarrassed",
+    "pn": "/ɪmˈbærəst/",
+    "cn": "尴尬的"
+   },
+   {
+    "en": "frightened",
+    "pn": "/ˈfraɪtnd/",
+    "cn": "害怕的"
+   },
+   {
+    "en": "satisfied",
+    "pn": "/ˈsætɪsfaɪd/",
+    "cn": "满意的"
+   },
+   {
+    "en": "confused",
+    "pn": "/kənˈfjuːzd/",
+    "cn": "困惑的"
+   },
+   {
+    "en": "lonely",
+    "pn": "/ˈləʊnli/",
+    "cn": "孤独的"
+   },
+   {
+    "en": "jealous",
+    "pn": "/ˈdʒeləs/",
+    "cn": "嫉妒的"
+   },
+   {
+    "en": "relaxed",
+    "pn": "/rɪˈlækst/",
+    "cn": "放松的"
+   },
+   {
+    "en": "ashamed",
+    "pn": "/əˈʃeɪmd/",
+    "cn": "羞愧的"
+   },
+   {
+    "en": "eager",
+    "pn": "/ˈiːɡə/",
+    "cn": "渴望的"
+   },
+   {
+    "en": "miserable",
+    "pn": "/ˈmɪzrəbl/",
+    "cn": "痛苦的"
+   },
+   {
+    "en": "delighted",
+    "pn": "/dɪˈlaɪtɪd/",
+    "cn": "欣喜的"
+   },
+   {
+    "en": "furious",
+    "pn": "/ˈfjʊəriəs/",
+    "cn": "狂怒的"
+   },
+   {
+    "en": "amazed",
+    "pn": "/əˈmeɪzd/",
+    "cn": "惊讶的"
+   },
+   {
+    "en": "comfort",
+    "pn": "/ˈkʌmfət/",
+    "cn": "安慰"
+   },
+   {
+    "en": "polite",
+    "pn": "/pəˈlaɪt/",
+    "cn": "有礼貌的"
+   },
+   {
+    "en": "humble",
+    "pn": "/ˈhʌmbl/",
+    "cn": "谦虚的"
+   },
+   {
+    "en": "stubborn",
+    "pn": "/ˈstʌbən/",
+    "cn": "固执的"
+   },
+   {
+    "en": "reliable",
+    "pn": "/rɪˈlaɪəbl/",
+    "cn": "可靠的"
+   },
+   {
+    "en": "cautious",
+    "pn": "/ˈkɔːʃəs/",
+    "cn": "谨慎的"
+   },
+   {
+    "en": "optimistic",
+    "pn": "/ˌɒptɪˈmɪstɪk/",
+    "cn": "乐观的"
+   },
+   {
+    "en": "sincere",
+    "pn": "/sɪnˈsɪə/",
+    "cn": "真诚的"
+   },
+   {
+    "en": "loyal",
+    "pn": "/ˈlɔɪəl/",
+    "cn": "忠诚的"
+   },
+   {
+    "en": "strict",
+    "pn": "/strɪkt/",
+    "cn": "严格的"
+   },
+   {
+    "en": "selfish",
+    "pn": "/ˈselfɪʃ/",
+    "cn": "自私的"
+   }
+  ]
+ },
+ {
+  "id": 2,
+  "terrain": "plains",
+  "name": "风纹草原",
+  "theme": "性格品质",
+  "boss": 3,
+  "words": [
+   {
+    "en": "mature",
+    "pn": "/məˈtʃʊə/",
+    "cn": "成熟的"
+   },
+   {
+    "en": "energetic",
+    "pn": "/ˌenəˈdʒetɪk/",
+    "cn": "精力充沛的"
+   },
+   {
+    "en": "modest",
+    "pn": "/ˈmɒdɪst/",
+    "cn": "谦逊的"
+   },
+   {
+    "en": "cheerful",
+    "pn": "/ˈtʃɪəfl/",
+    "cn": "开朗的"
+   },
+   {
+    "en": "hardworking",
+    "pn": "/ˌhɑːdˈwɜːkɪŋ/",
+    "cn": "勤奋的"
+   },
+   {
+    "en": "sensitive",
+    "pn": "/ˈsensətɪv/",
+    "cn": "敏感的"
+   },
+   {
+    "en": "determined",
+    "pn": "/dɪˈtɜːmɪnd/",
+    "cn": "坚定的"
+   },
+   {
+    "en": "outgoing",
+    "pn": "/ˌaʊtˈɡəʊɪŋ/",
+    "cn": "外向的"
+   },
+   {
+    "en": "talkative",
+    "pn": "/ˈtɔːkətɪv/",
+    "cn": "健谈的"
+   },
+   {
+    "en": "calm",
+    "pn": "/kɑːm/",
+    "cn": "冷静的"
+   },
+   {
+    "en": "important",
+    "pn": "/ɪmˈpɔːtnt/",
+    "cn": "重要的"
+   },
+   {
+    "en": "possible",
+    "pn": "/ˈpɒsəbl/",
+    "cn": "可能的"
+   },
+   {
+    "en": "useful",
+    "pn": "/ˈjuːsfl/",
+    "cn": "有用的"
+   },
+   {
+    "en": "valuable",
+    "pn": "/ˈvæljuəbl/",
+    "cn": "有价值的"
+   },
+   {
+    "en": "similar",
+    "pn": "/ˈsɪmələ/",
+    "cn": "相似的"
+   },
+   {
+    "en": "modern",
+    "pn": "/ˈmɒdn/",
+    "cn": "现代的"
+   },
+   {
+    "en": "ancient",
+    "pn": "/ˈeɪnʃənt/",
+    "cn": "古代的"
+   },
+   {
+    "en": "popular",
+    "pn": "/ˈpɒpjələ/",
+    "cn": "受欢迎的"
+   },
+   {
+    "en": "ordinary",
+    "pn": "/ˈɔːdnri/",
+    "cn": "普通的"
+   },
+   {
+    "en": "famous",
+    "pn": "/ˈfeɪməs/",
+    "cn": "著名的"
+   },
+   {
+    "en": "comfortable",
+    "pn": "/ˈkʌmftəbl/",
+    "cn": "舒适的"
+   },
+   {
+    "en": "convenient",
+    "pn": "/kənˈviːniənt/",
+    "cn": "方便的"
+   },
+   {
+    "en": "complex",
+    "pn": "/ˈkɒmpleks/",
+    "cn": "复杂的"
+   },
+   {
+    "en": "typical",
+    "pn": "/ˈtɪpɪkl/",
+    "cn": "典型的"
+   },
+   {
+    "en": "flexible",
+    "pn": "/ˈfleksəbl/",
+    "cn": "灵活的"
+   },
+   {
+    "en": "accurate",
+    "pn": "/ˈækjərət/",
+    "cn": "准确的"
+   },
+   {
+    "en": "essential",
+    "pn": "/ɪˈsenʃl/",
+    "cn": "必不可少的"
+   },
+   {
+    "en": "available",
+    "pn": "/əˈveɪləbl/",
+    "cn": "可获得的;可用的"
+   },
+   {
+    "en": "suitable",
+    "pn": "/ˈsuːtəbl/",
+    "cn": "合适的"
+   },
+   {
+    "en": "practical",
+    "pn": "/ˈpræktɪkl/",
+    "cn": "实用的"
+   }
+  ]
+ },
+ {
+  "id": 3,
+  "terrain": "clock",
+  "name": "时之钟谷",
+  "theme": "时间表达",
+  "boss": 4,
+  "words": [
+   {
+    "en": "suddenly",
+    "pn": "/ˈsʌdənli/",
+    "cn": "突然地"
+   },
+   {
+    "en": "immediately",
+    "pn": "/ɪˈmiːdiətli/",
+    "cn": "立即"
+   },
+   {
+    "en": "recently",
+    "pn": "/ˈriːsntli/",
+    "cn": "最近"
+   },
+   {
+    "en": "finally",
+    "pn": "/ˈfaɪnəli/",
+    "cn": "终于"
+   },
+   {
+    "en": "occasionally",
+    "pn": "/əˈkeɪʒnəli/",
+    "cn": "偶尔"
+   },
+   {
+    "en": "eventually",
+    "pn": "/ɪˈventʃuəli/",
+    "cn": "最终"
+   },
+   {
+    "en": "meanwhile",
+    "pn": "/ˈmiːnwaɪl/",
+    "cn": "与此同时"
+   },
+   {
+    "en": "nowadays",
+    "pn": "/ˈnaʊədeɪz/",
+    "cn": "如今"
+   },
+   {
+    "en": "rarely",
+    "pn": "/ˈreəli/",
+    "cn": "很少"
+   },
+   {
+    "en": "constantly",
+    "pn": "/ˈkɒnstəntli/",
+    "cn": "不断地"
+   },
+   {
+    "en": "temporary",
+    "pn": "/ˈtemprəri/",
+    "cn": "暂时的"
+   },
+   {
+    "en": "permanent",
+    "pn": "/ˈpɜːmənənt/",
+    "cn": "永久的"
+   },
+   {
+    "en": "instantly",
+    "pn": "/ˈɪnstəntli/",
+    "cn": "立刻"
+   },
+   {
+    "en": "currently",
+    "pn": "/ˈkʌrəntli/",
+    "cn": "目前"
+   },
+   {
+    "en": "previously",
+    "pn": "/ˈpriːviəsli/",
+    "cn": "以前"
+   },
+   {
+    "en": "seldom",
+    "pn": "/ˈseldəm/",
+    "cn": "很少"
+   },
+   {
+    "en": "regularly",
+    "pn": "/ˈreɡjələli/",
+    "cn": "定期地"
+   },
+   {
+    "en": "decade",
+    "pn": "/ˈdekeɪd/",
+    "cn": "十年"
+   },
+   {
+    "en": "period",
+    "pn": "/ˈpɪəriəd/",
+    "cn": "时期"
+   },
+   {
+    "en": "schedule",
+    "pn": "/ˈʃedjuːl/",
+    "cn": "日程"
+   },
+   {
+    "en": "explain",
+    "pn": "/ɪkˈspleɪn/",
+    "cn": "解释"
+   },
+   {
+    "en": "describe",
+    "pn": "/dɪˈskraɪb/",
+    "cn": "描述"
+   },
+   {
+    "en": "suggest",
+    "pn": "/səˈdʒest/",
+    "cn": "建议"
+   },
+   {
+    "en": "persuade",
+    "pn": "/pəˈsweɪd/",
+    "cn": "说服"
+   },
+   {
+    "en": "argue",
+    "pn": "/ˈɑːɡjuː/",
+    "cn": "争论"
+   },
+   {
+    "en": "discuss",
+    "pn": "/dɪˈskʌs/",
+    "cn": "讨论"
+   },
+   {
+    "en": "compare",
+    "pn": "/kəmˈpeə/",
+    "cn": "比较"
+   },
+   {
+    "en": "imagine",
+    "pn": "/ɪˈmædʒɪn/",
+    "cn": "想象"
+   },
+   {
+    "en": "predict",
+    "pn": "/prɪˈdɪkt/",
+    "cn": "预测"
+   },
+   {
+    "en": "realize",
+    "pn": "/ˈrɪəlaɪz/",
+    "cn": "意识到"
+   }
+  ]
+ },
+ {
+  "id": 4,
+  "terrain": "forge",
+  "name": "铸剑锻炉山",
+  "theme": "思考行动",
+  "boss": 4,
+  "words": [
+   {
+    "en": "recognize",
+    "pn": "/ˈrekəɡnaɪz/",
+    "cn": "认出"
+   },
+   {
+    "en": "consider",
+    "pn": "/kənˈsɪdə/",
+    "cn": "考虑"
+   },
+   {
+    "en": "express",
+    "pn": "/ɪkˈspres/",
+    "cn": "表达"
+   },
+   {
+    "en": "mention",
+    "pn": "/ˈmenʃn/",
+    "cn": "提到"
+   },
+   {
+    "en": "doubt",
+    "pn": "/daʊt/",
+    "cn": "怀疑"
+   },
+   {
+    "en": "admit",
+    "pn": "/ədˈmɪt/",
+    "cn": "承认"
+   },
+   {
+    "en": "indicate",
+    "pn": "/ˈɪndɪkeɪt/",
+    "cn": "表明"
+   },
+   {
+    "en": "comment",
+    "pn": "/ˈkɒment/",
+    "cn": "评论"
+   },
+   {
+    "en": "debate",
+    "pn": "/dɪˈbeɪt/",
+    "cn": "辩论"
+   },
+   {
+    "en": "assume",
+    "pn": "/əˈsjuːm/",
+    "cn": "假设"
+   },
+   {
+    "en": "attempt",
+    "pn": "/əˈtempt/",
+    "cn": "尝试"
+   },
+   {
+    "en": "avoid",
+    "pn": "/əˈvɔɪd/",
+    "cn": "避免"
+   },
+   {
+    "en": "prevent",
+    "pn": "/prɪˈvent/",
+    "cn": "预防"
+   },
+   {
+    "en": "provide",
+    "pn": "/prəˈvaɪd/",
+    "cn": "提供"
+   },
+   {
+    "en": "produce",
+    "pn": "/prəˈdjuːs/",
+    "cn": "生产"
+   },
+   {
+    "en": "reduce",
+    "pn": "/rɪˈdjuːs/",
+    "cn": "减少"
+   },
+   {
+    "en": "increase",
+    "pn": "/ɪnˈkriːs/",
+    "cn": "增加"
+   },
+   {
+    "en": "develop",
+    "pn": "/dɪˈveləp/",
+    "cn": "发展;发育"
+   },
+   {
+    "en": "invent",
+    "pn": "/ɪnˈvent/",
+    "cn": "发明"
+   },
+   {
+    "en": "destroy",
+    "pn": "/dɪˈstrɔɪ/",
+    "cn": "摧毁;毁坏"
+   },
+   {
+    "en": "repair",
+    "pn": "/rɪˈpeə/",
+    "cn": "修理"
+   },
+   {
+    "en": "prepare",
+    "pn": "/prɪˈpeə/",
+    "cn": "准备"
+   },
+   {
+    "en": "establish",
+    "pn": "/ɪˈstæblɪʃ/",
+    "cn": "建立"
+   },
+   {
+    "en": "maintain",
+    "pn": "/meɪnˈteɪn/",
+    "cn": "维持"
+   },
+   {
+    "en": "manage",
+    "pn": "/ˈmænɪdʒ/",
+    "cn": "管理"
+   },
+   {
+    "en": "handle",
+    "pn": "/ˈhændl/",
+    "cn": "处理"
+   },
+   {
+    "en": "perform",
+    "pn": "/pəˈfɔːm/",
+    "cn": "表演"
+   },
+   {
+    "en": "contribute",
+    "pn": "/kənˈtrɪbjuːt/",
+    "cn": "贡献"
+   },
+   {
+    "en": "struggle",
+    "pn": "/ˈstrʌɡl/",
+    "cn": "奋斗;挣扎"
+   },
+   {
+    "en": "succeed",
+    "pn": "/səkˈsiːd/",
+    "cn": "成功"
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "terrain": "crystal",
+  "name": "晶石回廊",
+  "theme": "数量逻辑",
+  "boss": 5,
+  "words": [
+   {
+    "en": "several",
+    "pn": "/ˈsevrəl/",
+    "cn": "几个"
+   },
+   {
+    "en": "plenty",
+    "pn": "/ˈplenti/",
+    "cn": "大量"
+   },
+   {
+    "en": "enormous",
+    "pn": "/ɪˈnɔːməs/",
+    "cn": "巨大的"
+   },
+   {
+    "en": "tiny",
+    "pn": "/ˈtaɪni/",
+    "cn": "微小的"
+   },
+   {
+    "en": "huge",
+    "pn": "/hjuːdʒ/",
+    "cn": "巨大的"
+   },
+   {
+    "en": "major",
+    "pn": "/ˈmeɪdʒə/",
+    "cn": "主要的"
+   },
+   {
+    "en": "minor",
+    "pn": "/ˈmaɪnə/",
+    "cn": "次要的"
+   },
+   {
+    "en": "average",
+    "pn": "/ˈævərɪdʒ/",
+    "cn": "平均的"
+   },
+   {
+    "en": "entire",
+    "pn": "/ɪnˈtaɪə/",
+    "cn": "整个的"
+   },
+   {
+    "en": "amount",
+    "pn": "/əˈmaʊnt/",
+    "cn": "数量"
+   },
+   {
+    "en": "quantity",
+    "pn": "/ˈkwɒntəti/",
+    "cn": "数量"
+   },
+   {
+    "en": "majority",
+    "pn": "/məˈdʒɒrəti/",
+    "cn": "大多数"
+   },
+   {
+    "en": "approximately",
+    "pn": "/əˈprɒksɪmətli/",
+    "cn": "大约"
+   },
+   {
+    "en": "sufficient",
+    "pn": "/səˈfɪʃnt/",
+    "cn": "足够的"
+   },
+   {
+    "en": "numerous",
+    "pn": "/ˈnjuːmərəs/",
+    "cn": "许多的"
+   },
+   {
+    "en": "multiple",
+    "pn": "/ˈmʌltɪpl/",
+    "cn": "多个的"
+   },
+   {
+    "en": "additional",
+    "pn": "/əˈdɪʃənl/",
+    "cn": "额外的"
+   },
+   {
+    "en": "maximum",
+    "pn": "/ˈmæksɪməm/",
+    "cn": "最大值;最大的"
+   },
+   {
+    "en": "minimum",
+    "pn": "/ˈmɪnɪməm/",
+    "cn": "最小值;最小的"
+   },
+   {
+    "en": "dozen",
+    "pn": "/ˈdʌzn/",
+    "cn": "一打"
+   },
+   {
+    "en": "however",
+    "pn": "/haʊˈevə/",
+    "cn": "然而"
+   },
+   {
+    "en": "therefore",
+    "pn": "/ˈðeəfɔː/",
+    "cn": "因此"
+   },
+   {
+    "en": "although",
+    "pn": "/ɔːlˈðəʊ/",
+    "cn": "尽管"
+   },
+   {
+    "en": "instead",
+    "pn": "/ɪnˈsted/",
+    "cn": "反而;作为替代"
+   },
+   {
+    "en": "besides",
+    "pn": "/bɪˈsaɪdz/",
+    "cn": "此外"
+   },
+   {
+    "en": "otherwise",
+    "pn": "/ˈʌðəwaɪz/",
+    "cn": "否则"
+   },
+   {
+    "en": "moreover",
+    "pn": "/mɔːrˈəʊvə/",
+    "cn": "此外"
+   },
+   {
+    "en": "perhaps",
+    "pn": "/pəˈhæps/",
+    "cn": "也许"
+   },
+   {
+    "en": "probably",
+    "pn": "/ˈprɒbəbli/",
+    "cn": "可能"
+   },
+   {
+    "en": "certainly",
+    "pn": "/ˈsɜːtnli/",
+    "cn": "当然"
+   }
+  ]
+ },
+ {
+  "id": 6,
+  "terrain": "forest",
+  "name": "智慧藏书林",
+  "theme": "学习探究",
+  "boss": 5,
+  "words": [
+   {
+    "en": "especially",
+    "pn": "/ɪˈspeʃəli/",
+    "cn": "尤其"
+   },
+   {
+    "en": "exactly",
+    "pn": "/ɪɡˈzæktli/",
+    "cn": "确切地"
+   },
+   {
+    "en": "nearly",
+    "pn": "/ˈnɪəli/",
+    "cn": "几乎"
+   },
+   {
+    "en": "actually",
+    "pn": "/ˈæktʃuəli/",
+    "cn": "实际上"
+   },
+   {
+    "en": "furthermore",
+    "pn": "/ˌfɜːðəˈmɔː/",
+    "cn": "此外"
+   },
+   {
+    "en": "nevertheless",
+    "pn": "/ˌnevəðəˈles/",
+    "cn": "尽管如此"
+   },
+   {
+    "en": "consequently",
+    "pn": "/ˈkɒnsɪkwəntli/",
+    "cn": "因此;结果"
+   },
+   {
+    "en": "similarly",
+    "pn": "/ˈsɪmələli/",
+    "cn": "同样地"
+   },
+   {
+    "en": "generally",
+    "pn": "/ˈdʒenrəli/",
+    "cn": "通常;一般来说"
+   },
+   {
+    "en": "fortunately",
+    "pn": "/ˈfɔːtʃənətli/",
+    "cn": "幸好;幸运的是"
+   },
+   {
+    "en": "research",
+    "pn": "/rɪˈsɜːtʃ/",
+    "cn": "研究"
+   },
+   {
+    "en": "education",
+    "pn": "/ˌedʒuˈkeɪʃn/",
+    "cn": "教育"
+   },
+   {
+    "en": "experiment",
+    "pn": "/ɪkˈsperɪmənt/",
+    "cn": "实验"
+   },
+   {
+    "en": "theory",
+    "pn": "/ˈθɪəri/",
+    "cn": "理论"
+   },
+   {
+    "en": "concept",
+    "pn": "/ˈkɒnsept/",
+    "cn": "概念"
+   },
+   {
+    "en": "analyze",
+    "pn": "/ˈænəlaɪz/",
+    "cn": "分析"
+   },
+   {
+    "en": "conclude",
+    "pn": "/kənˈkluːd/",
+    "cn": "得出结论"
+   },
+   {
+    "en": "summarize",
+    "pn": "/ˈsʌməraɪz/",
+    "cn": "总结"
+   },
+   {
+    "en": "achieve",
+    "pn": "/əˈtʃiːv/",
+    "cn": "实现"
+   },
+   {
+    "en": "review",
+    "pn": "/rɪˈvjuː/",
+    "cn": "复习"
+   },
+   {
+    "en": "memorize",
+    "pn": "/ˈmeməraɪz/",
+    "cn": "记住"
+   },
+   {
+    "en": "translate",
+    "pn": "/trænzˈleɪt/",
+    "cn": "翻译"
+   },
+   {
+    "en": "solution",
+    "pn": "/səˈluːʃn/",
+    "cn": "解决方案"
+   },
+   {
+    "en": "standard",
+    "pn": "/ˈstændəd/",
+    "cn": "标准"
+   },
+   {
+    "en": "method",
+    "pn": "/ˈmeθəd/",
+    "cn": "方法"
+   },
+   {
+    "en": "principle",
+    "pn": "/ˈprɪnsəpl/",
+    "cn": "原则"
+   },
+   {
+    "en": "define",
+    "pn": "/dɪˈfaɪn/",
+    "cn": "定义"
+   },
+   {
+    "en": "examine",
+    "pn": "/ɪɡˈzæmɪn/",
+    "cn": "检查"
+   },
+   {
+    "en": "observe",
+    "pn": "/əbˈzɜːv/",
+    "cn": "观察"
+   },
+   {
+    "en": "calculate",
+    "pn": "/ˈkælkjuleɪt/",
+    "cn": "计算"
+   }
+  ]
+ },
+ {
+  "id": 7,
+  "terrain": "port",
+  "name": "万邦港城",
+  "theme": "社会生活",
+  "boss": 5,
+  "words": [
+   {
+    "en": "society",
+    "pn": "/səˈsaɪəti/",
+    "cn": "社会"
+   },
+   {
+    "en": "tradition",
+    "pn": "/trəˈdɪʃn/",
+    "cn": "传统"
+   },
+   {
+    "en": "custom",
+    "pn": "/ˈkʌstəm/",
+    "cn": "习俗"
+   },
+   {
+    "en": "government",
+    "pn": "/ˈɡʌvənmənt/",
+    "cn": "政府"
+   },
+   {
+    "en": "public",
+    "pn": "/ˈpʌblɪk/",
+    "cn": "公共的;公众的"
+   },
+   {
+    "en": "citizen",
+    "pn": "/ˈsɪtɪzn/",
+    "cn": "公民"
+   },
+   {
+    "en": "neighbor",
+    "pn": "/ˈneɪbə/",
+    "cn": "邻居"
+   },
+   {
+    "en": "stranger",
+    "pn": "/ˈstreɪndʒə/",
+    "cn": "陌生人"
+   },
+   {
+    "en": "customer",
+    "pn": "/ˈkʌstəmə/",
+    "cn": "顾客"
+   },
+   {
+    "en": "population",
+    "pn": "/ˌpɒpjuˈleɪʃn/",
+    "cn": "人口"
+   },
+   {
+    "en": "charity",
+    "pn": "/ˈtʃærəti/",
+    "cn": "慈善"
+   },
+   {
+    "en": "volunteer",
+    "pn": "/ˌvɒlənˈtɪə/",
+    "cn": "志愿者"
+   },
+   {
+    "en": "economy",
+    "pn": "/ɪˈkɒnəmi/",
+    "cn": "经济"
+   },
+   {
+    "en": "industry",
+    "pn": "/ˈɪndəstri/",
+    "cn": "工业"
+   },
+   {
+    "en": "organization",
+    "pn": "/ˌɔːɡənaɪˈzeɪʃn/",
+    "cn": "组织"
+   },
+   {
+    "en": "generation",
+    "pn": "/ˌdʒenəˈreɪʃn/",
+    "cn": "一代人"
+   },
+   {
+    "en": "individual",
+    "pn": "/ˌɪndɪˈvɪdʒuəl/",
+    "cn": "个人"
+   },
+   {
+    "en": "private",
+    "pn": "/ˈpraɪvət/",
+    "cn": "私人的"
+   },
+   {
+    "en": "official",
+    "pn": "/əˈfɪʃl/",
+    "cn": "官方的"
+   },
+   {
+    "en": "ceremony",
+    "pn": "/ˈserəməni/",
+    "cn": "典礼"
+   },
+   {
+    "en": "energy",
+    "pn": "/ˈenədʒi/",
+    "cn": "能量"
+   },
+   {
+    "en": "electricity",
+    "pn": "/ɪˌlekˈtrɪsəti/",
+    "cn": "电"
+   },
+   {
+    "en": "gravity",
+    "pn": "/ˈɡrævəti/",
+    "cn": "重力"
+   },
+   {
+    "en": "planet",
+    "pn": "/ˈplænɪt/",
+    "cn": "行星"
+   },
+   {
+    "en": "universe",
+    "pn": "/ˈjuːnɪvɜːs/",
+    "cn": "宇宙"
+   },
+   {
+    "en": "climate",
+    "pn": "/ˈklaɪmət/",
+    "cn": "气候"
+   },
+   {
+    "en": "temperature",
+    "pn": "/ˈtemprətʃə/",
+    "cn": "温度"
+   },
+   {
+    "en": "oxygen",
+    "pn": "/ˈɒksɪdʒən/",
+    "cn": "氧气"
+   },
+   {
+    "en": "surface",
+    "pn": "/ˈsɜːfɪs/",
+    "cn": "表面"
+   },
+   {
+    "en": "material",
+    "pn": "/məˈtɪəriəl/",
+    "cn": "材料"
+   }
+  ]
+ },
+ {
+  "id": 8,
+  "terrain": "volcano",
+  "name": "星火火山口",
+  "theme": "自然科学",
+  "boss": 5,
+  "words": [
+   {
+    "en": "chemical",
+    "pn": "/ˈkemɪkl/",
+    "cn": "化学物质;化学的"
+   },
+   {
+    "en": "natural",
+    "pn": "/ˈnætʃrəl/",
+    "cn": "自然的"
+   },
+   {
+    "en": "resource",
+    "pn": "/rɪˈsɔːs/",
+    "cn": "资源"
+   },
+   {
+    "en": "creature",
+    "pn": "/ˈkriːtʃə/",
+    "cn": "生物"
+   },
+   {
+    "en": "atmosphere",
+    "pn": "/ˈætməsfɪə/",
+    "cn": "大气"
+   },
+   {
+    "en": "scientific",
+    "pn": "/ˌsaɪənˈtɪfɪk/",
+    "cn": "科学的"
+   },
+   {
+    "en": "technology",
+    "pn": "/tekˈnɒlədʒi/",
+    "cn": "技术"
+   },
+   {
+    "en": "particle",
+    "pn": "/ˈpɑːtɪkl/",
+    "cn": "粒子"
+   },
+   {
+    "en": "invention",
+    "pn": "/ɪnˈvenʃn/",
+    "cn": "发明"
+   },
+   {
+    "en": "galaxy",
+    "pn": "/ˈɡæləksi/",
+    "cn": "星系"
+   },
+   {
+    "en": "career",
+    "pn": "/kəˈrɪə/",
+    "cn": "职业生涯"
+   },
+   {
+    "en": "profession",
+    "pn": "/prəˈfeʃn/",
+    "cn": "职业"
+   },
+   {
+    "en": "business",
+    "pn": "/ˈbɪznəs/",
+    "cn": "生意;商业"
+   },
+   {
+    "en": "success",
+    "pn": "/səkˈses/",
+    "cn": "成功"
+   },
+   {
+    "en": "failure",
+    "pn": "/ˈfeɪljə/",
+    "cn": "失败"
+   },
+   {
+    "en": "effort",
+    "pn": "/ˈefət/",
+    "cn": "努力"
+   },
+   {
+    "en": "responsibility",
+    "pn": "/rɪˌspɒnsəˈbɪləti/",
+    "cn": "责任"
+   },
+   {
+    "en": "talent",
+    "pn": "/ˈtælənt/",
+    "cn": "才能"
+   },
+   {
+    "en": "ability",
+    "pn": "/əˈbɪləti/",
+    "cn": "能力"
+   },
+   {
+    "en": "progress",
+    "pn": "/ˈprəʊɡres/",
+    "cn": "进步"
+   },
+   {
+    "en": "goal",
+    "pn": "/ɡəʊl/",
+    "cn": "目标"
+   },
+   {
+    "en": "skill",
+    "pn": "/skɪl/",
+    "cn": "技能"
+   },
+   {
+    "en": "position",
+    "pn": "/pəˈzɪʃn/",
+    "cn": "职位"
+   },
+   {
+    "en": "salary",
+    "pn": "/ˈsæləri/",
+    "cn": "薪水"
+   },
+   {
+    "en": "employee",
+    "pn": "/ɪmˈplɔɪiː/",
+    "cn": "员工;雇员"
+   },
+   {
+    "en": "interview",
+    "pn": "/ˈɪntəvjuː/",
+    "cn": "面试"
+   },
+   {
+    "en": "project",
+    "pn": "/ˈprɒdʒekt/",
+    "cn": "项目"
+   },
+   {
+    "en": "promotion",
+    "pn": "/prəˈməʊʃn/",
+    "cn": "晋升"
+   },
+   {
+    "en": "reputation",
+    "pn": "/ˌrepjuˈteɪʃn/",
+    "cn": "声誉"
+   },
+   {
+    "en": "colleague",
+    "pn": "/ˈkɒliːɡ/",
+    "cn": "同事"
+   }
+  ]
+ }
+]

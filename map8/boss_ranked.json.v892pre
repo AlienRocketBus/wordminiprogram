@@ -1,0 +1,279 @@
+{
+ "① 迷雾心湖": {
+  "theme": "情绪",
+  "sys": "混沌·异形系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "虫群先锋·刃翼领主",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 2,
+    "name": "未成形之神·万形之胚",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 3,
+    "name": "逆相之影·镜渊领主",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 4,
+    "name": "混沌之种·万象侵蚀者",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 5,
+    "name": "魔皇·小丑至尊",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "② 风纹草原": {
+  "theme": "性格",
+  "sys": "军事·战术系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "丛林幽灵·兵王",
+    "power": 2,
+    "boss_star": 2
+   },
+   {
+    "rank": 2,
+    "name": "暗影先锋·破阵者",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 3,
+    "name": "银翼·麻烦终结者",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 4,
+    "name": "决斗大师·千招之约",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 5,
+    "name": "武器大师·战争铁砧",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "③ 时之钟谷": {
+  "theme": "时间",
+  "sys": "概念·抽象系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "火柴人·原初线条",
+    "power": 2,
+    "boss_star": 2
+   },
+   {
+    "rank": 2,
+    "name": "影守·永夜之壁",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 3,
+    "name": "万典之灵·未被写下的故事",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 4,
+    "name": "凋零与新生之龙·四季轮转",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 5,
+    "name": "⭐时之君主·克罗诺斯之影",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "④ 铸剑锻炉山": {
+  "theme": "思考行动",
+  "sys": "机械·科技系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "机械主教·组装者",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 2,
+    "name": "苍穹守卫·阿尔基昂",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 3,
+    "name": "万械之神·奥米伽",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 4,
+    "name": "量子观测者·阿尔戈",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 5,
+    "name": "⭐无光之渊·暗噬君主",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "⑤ 晶石回廊": {
+  "theme": "数量逻辑",
+  "sys": "神性·东方系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "画壁判官·墨渊",
+    "power": 3
+   },
+   {
+    "rank": 2,
+    "name": "夜罗刹·红莲战鬼",
+    "power": 4
+   },
+   {
+    "rank": 3,
+    "name": "破坏神·终焉之相",
+    "power": 5
+   },
+   {
+    "rank": 4,
+    "name": "不动明王·焚天镇狱尊",
+    "power": 5
+   },
+   {
+    "rank": 5,
+    "name": "剑神·万剑归宗",
+    "power": 5
+   }
+  ]
+ },
+ "⑥ 智慧藏书林": {
+  "theme": "学习",
+  "sys": "埃及·神话系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "诅咒之躯·绷带亡骸",
+    "power": 3,
+    "boss_star": 3
+   },
+   {
+    "rank": 2,
+    "name": "亡灵咒术师·阿努比斯之影",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 3,
+    "name": "古埃及大祭司·真理之口的裁决者",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 4,
+    "name": "法老王·不朽金身",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 5,
+    "name": "天界守护者·黄金斯芬克斯",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "⑦ 万邦港城": {
+  "theme": "社会",
+  "sys": "星辰·守护系",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "月之引航者·寂静潮汐",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 2,
+    "name": "星陨武士·流亡之刃",
+    "power": 4,
+    "boss_star": 4
+   },
+   {
+    "rank": 3,
+    "name": "星核泰坦·虚空造物主",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 4,
+    "name": "⭐统御天使·圣光之翼",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 5,
+    "name": "⭐铸星者·原初匠人",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ },
+ "⑧ 星火火山口": {
+  "theme": "自然科学",
+  "sys": "终末·宇宙系(最强)",
+  "bosses": [
+   {
+    "rank": 1,
+    "name": "破晓仲裁者·索拉里斯",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 2,
+    "name": "天启征服者·索拉里斯",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 3,
+    "name": "⭐终末观测者·边界守夜人",
+    "power": 5,
+    "boss_star": 5
+   },
+   {
+    "rank": 4,
+    "name": "活体行星·古老意志",
+    "power": 5,
+    "boss_star": 5
+   }
+  ]
+ }
+}

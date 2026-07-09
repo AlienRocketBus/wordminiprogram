@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>单词大陆 · 冒险地图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#1a1410}
+#stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background-size:cover;background-position:center;overflow:hidden}
+.spot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;transition:transform .15s cubic-bezier(.34,1.5,.5,1)}
+.spot:active{transform:translate(-50%,-50%) scale(.88)}
+.spot .ring{width:var(--sz);height:var(--sz);border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.55);
+  box-shadow:0 0 0 3px rgba(90,60,30,.35), 0 3px 10px rgba(0,0,0,.4), inset 0 0 20px rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;position:relative;background:rgba(255,255,255,.06)}
+.spot.done .ring{border-color:#ffd24a;box-shadow:0 0 0 3px rgba(224,176,64,.5),0 0 16px rgba(255,210,74,.6),inset 0 0 20px rgba(255,220,120,.3)}
+.spot .num{font-size:22px;font-weight:900;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.7)}
+.spot .flag{position:absolute;top:-14px;right:-10px;font-size:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.spot .name{margin-top:5px;font-size:12px;font-weight:800;color:#fff;background:rgba(60,44,26,.82);
+  padding:3px 9px;border-radius:11px;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.25)}
+.spot.done .name{background:rgba(60,110,40,.9);border-color:#9fe07a}
+.spot .sub{margin-top:2px;font-size:9.5px;color:#ffe;background:rgba(40,30,18,.7);padding:1px 7px;border-radius:8px;white-space:nowrap}
+.pulse{position:absolute;width:var(--sz);height:var(--sz);border-radius:50%;border:2px solid rgba(255,255,255,.6);animation:pl 2s ease-out infinite;pointer-events:none}
+@keyframes pl{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+
+/* 女帝 */
+#empress .ring{--sz:78px;border-color:rgba(255,220,180,.7)}
+#empress.locked .ring{border-color:rgba(180,160,170,.7)}
+#empress .crown{font-size:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+
+#topbar{position:absolute;top:10px;left:0;right:0;text-align:center;z-index:10;pointer-events:none}
+#topbar .pt{display:inline-block;background:rgba(216,194,152,.95);border:1.5px solid #6f5a3c;border-radius:20px;padding:6px 18px;font-size:13px;color:#4a3c28;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:#fff;z-index:10;pointer-events:none;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+
+#overlay{position:fixed;inset:0;background:rgba(20,14,8,.6);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+#overlay.show{display:flex}
+#panel{width:100%;max-width:340px;max-height:84%;background:#f3ecd8;border-radius:16px;border:3px solid #6f5a3c;box-shadow:0 12px 40px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;transform:scale(.9);opacity:0;transition:.2s}
+#overlay.show #panel{transform:scale(1);opacity:1}
+#phead{padding:14px 16px 10px;border-bottom:2px solid #d8c8a8;position:relative;flex-shrink:0}
+#phead h2{font-size:18px;color:#4a3c28;font-weight:800}
+#phead .th{font-size:12px;color:#8a6f48;margin-top:3px}
+#pclose{position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:#e0d0b0;border-radius:50%;font-size:18px;color:#6f5a3c;cursor:pointer;line-height:1}
+#pboss{padding:8px 16px;background:#efe4c8;font-size:12px;color:#8a5030;font-weight:700;flex-shrink:0;border-bottom:1px solid #d8c8a8}
+#pwords{overflow-y:auto;padding:6px 12px;flex:1;-webkit-overflow-scrolling:touch}
+.wrow{display:flex;align-items:baseline;padding:7px 8px;border-bottom:1px solid #e6dcc2;gap:8px}
+.wrow:last-child{border-bottom:none}
+.wen{font-size:15px;font-weight:700;color:#3a3020;min-width:96px}
+.wpn{font-size:11px;color:#a08858;flex:1}
+.wcn{font-size:13px;color:#6a5838;text-align:right}
+#pfoot{padding:12px 16px;flex-shrink:0;border-top:2px solid #d8c8a8;display:flex;gap:10px}
+.pbtn{flex:1;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+.pbtn.enter{background:linear-gradient(#e0a850,#c88830);color:#fff;box-shadow:0 3px 0 #a86818}
+.pbtn:active{transform:translateY(2px);box-shadow:none}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="topbar"><span class="pt" id="ptext">进度 0 / 8</span></div>
+<div id="hint">点击地图上的地点 · 顺序随意 · 全通解锁女帝</div>
+<div id="overlay"><div id="panel">
+  <div id="phead"><h2 id="ptitle"></h2><div class="th" id="psubtitle"></div><button id="pclose">×</button></div>
+  <div id="pboss"></div><div id="pwords"></div><div id="pfoot"></div>
+</div></div>
+<script>__DATA__</script>
+<script>__BG__</script>
+<script>
+const G=window.MAP_GROUPS;
+const BG=window.MAP_BG;
+const DONE_KEY='wc_realmap_v1';
+let done={}; try{done=JSON.parse(localStorage.getItem(DONE_KEY)||'{}')}catch(e){done={}}
+const AR=1672/941; // 底图宽高比
+
+// 8地点在底图上的百分比坐标(对应ChatGPT图区域)
+const POS={
+ 1:[26,20], 2:[50,16], 3:[74,20],   // 湖/草原/钟谷
+ 8:[18,50], 4:[82,50],              // 火山/锻炉
+ 7:[25,80], 6:[50,84], 5:[74,80],   // 港城/书林/晶石
+};
+const NUM='①②③④⑤⑥⑦⑧';
+
+const stage=document.getElementById('stage');
+// 按屏幕比例铺满底图(cover), 记录实际显示尺寸用于定位
+function layout(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  // 让底图cover填满, 但保持比例; 用较大缩放
+  let w,h;
+  if(vh/vw > AR){ h=vh; w=vh/AR; } else { w=vw; h=vw*AR; }
+  stage.style.width=w+'px'; stage.style.height=h+'px';
+  stage.style.backgroundImage='url('+BG+')';
+}
+layout();
+window.addEventListener('resize',()=>{location.reload()});
+
+function makeSpot(id){
+  const g=G.find(x=>x.id===id);
+  const [px,py]=POS[id];
+  const isDone=!!done[id];
+  const s=document.createElement('div');
+  s.className='spot'+(isDone?' done':'');
+  s.style.left=px+'%'; s.style.top=py+'%';
+  s.style.setProperty('--sz','54px');
+  s.innerHTML=
+    (isDone?'':'<div class="pulse" style="--sz:54px"></div>')+
+    '<div class="ring"><span class="num">'+NUM[id-1]+'</span>'+(isDone?'<span class="flag">🚩</span>':'')+'</div>'+
+    '<div class="name">'+g.name+'</div>'+
+    '<div class="sub">30词 · '+g.boss+'boss</div>';
+  s.onclick=()=>openIsland(id);
+  stage.appendChild(s);
+}
+G.forEach(g=>makeSpot(g.id));
+
+// 女帝
+const allDone=G.every(g=>done[g.id]);
+const em=document.createElement('div');
+em.className='spot'+(allDone?'':' locked');em.id='empress';
+em.style.left='50%';em.style.top='49%';
+em.innerHTML=
+  (allDone?'<div class="pulse" style="--sz:78px;border-color:rgba(255,210,120,.7)"></div>':'')+
+  '<div class="ring"><span class="crown">'+(allDone?'👑':'🔒')+'</span></div>'+
+  '<div class="name" style="'+(allDone?'background:rgba(150,50,90,.9);border-color:#f0a0c0':'background:rgba(70,60,66,.9)')+'">★ 星海女帝 ★</div>'+
+  '<div class="sub">'+(allDone?'赛尔娅 · 点击挑战':'全通后解锁')+'</div>';
+em.onclick=openEmpress;
+stage.appendChild(em);
+
+function updP(){const n=G.filter(g=>done[g.id]).length;document.getElementById('ptext').textContent='进度 '+n+' / 8'+(n===8?' · 女帝解锁!':'')}
+updP();
+
+const overlay=document.getElementById('overlay');
+function openIsland(id){
+  const g=G.find(x=>x.id===id);
+  document.getElementById('ptitle').textContent=NUM[id-1]+' '+g.name;
+  document.getElementById('psubtitle').textContent=g.theme+' · '+g.words.length+' 词';
+  document.getElementById('pboss').textContent='⚔ 这座岛聚集了 '+g.boss+' 个 Boss';
+  const wc=document.getElementById('pwords');wc.innerHTML='';
+  g.words.forEach(w=>{const r=document.createElement('div');r.className='wrow';
+    r.innerHTML='<span class="wen">'+w.en+'</span><span class="wpn">'+(w.pn||'')+'</span><span class="wcn">'+w.cn+'</span>';wc.appendChild(r)});
+  wc.scrollTop=0;
+  const foot=document.getElementById('pfoot');foot.innerHTML='';const isDone=!!done[id];
+  const enter=document.createElement('button');enter.className='pbtn enter';enter.textContent='进入学习 · 打 Boss';
+  enter.onclick=()=>toggleDone(id);foot.appendChild(enter);
+  const mark=document.createElement('button');mark.textContent=isDone?'✓已通关':'标记通关';mark.className='pbtn';
+  mark.style.cssText='flex:0 0 auto;padding:11px 14px;'+(isDone?'background:#8fc470;color:#fff;box-shadow:0 3px 0 #4f8030':'background:#d8c8a8;color:#6a5838;box-shadow:0 3px 0 #b8a888');
+  mark.onclick=()=>toggleDone(id);foot.appendChild(mark);
+  overlay.classList.add('show');
+}
+function openEmpress(){
+  const n=G.filter(g=>done[g.id]).length;
+  if(n<8){
+    document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+    document.getElementById('psubtitle').textContent='最终 BOSS · 尚未解锁';
+    document.getElementById('pboss').textContent='🔒 还需通关 '+(8-n)+' 座岛屿';
+    const wc=document.getElementById('pwords');wc.innerHTML='';
+    G.forEach(g=>{const r=document.createElement('div');r.className='wrow';
+      r.innerHTML='<span class="wen" style="min-width:auto">'+NUM[g.id-1]+' '+g.name+'</span><span class="wcn">'+(done[g.id]?'✓ 已通关':'○ 未通关')+'</span>';wc.appendChild(r)});
+    document.getElementById('pfoot').innerHTML='<button class="pbtn" style="background:#d8c8a8;color:#6a5838" onclick="closeP()">返回地图</button>';
+  }else{
+    document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+    document.getElementById('psubtitle').textContent='最终决战 · 已解锁';
+    document.getElementById('pboss').textContent='👑 8 座岛屿全部通关 · 终战开启!';
+    document.getElementById('pwords').innerHTML='<div style="padding:24px;text-align:center;color:#6a5838;font-size:14px;line-height:1.9">你已征服全部 240 个单词。<br>星海女帝在星域深处等你。<br><br>⚔️ 准备好终战了吗？</div>';
+    document.getElementById('pfoot').innerHTML='<button class="pbtn enter" onclick="closeP()">▶ 挑战星海女帝</button>';
+  }
+  overlay.classList.add('show');
+}
+function toggleDone(id){done[id]=!done[id];if(!done[id])delete done[id];
+  localStorage.setItem(DONE_KEY,JSON.stringify(done));overlay.classList.remove('show');setTimeout(()=>location.reload(),140)}
+function closeP(){overlay.classList.remove('show')}
+document.getElementById('pclose').onclick=closeP;
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeP()});
+</script>
+</body>
+</html>

@@ -1,0 +1,4188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=(g.src||"").split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="renderer" content="webkit">
+<meta name="full-screen" content="yes">
+<meta name="x5-fullscreen" content="true">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
+<title>单词大冒险 · 单词大冒险</title>
+<script>/* 🔴v856 配色防闪: 首帧前同步把配色类加到<html>(v855教训:同步加不闪·亮色系加hsn-pal-light) */try{var _hp=localStorage.getItem("hansen_palette_global");if(_hp&&_hp!=="cosmos"&&/^[a-z]+$/.test(_hp)){var _hl={cloud:1,sakura:1,cream:1,mint:1};document.documentElement.className+=" hsn-pal-"+_hp+(_hl[_hp]?" hsn-pal-light":"");}}catch(e){}</script>
+<meta name="description" content="18 关大冒险屿 · 711+ 英语单词 · 12 种学习挑战 · 22 阶进化宠物">
+<!--
+  ============================================================
+  📁 部署说明
+  ============================================================
+  把以下 19 个 HTML 文件放在 *同一个文件夹* 里就能用：
+    · 单词大冒险.html   ← 这个文件 (首页)
+    · island_food.html
+    · island_animal.html
+    · island_city.html
+    · island_time.html
+    · island_family.html
+    · island_clothes.html
+    · island_nature.html
+    · island_color.html
+    · island_school.html
+    · island_home.html
+    · island_traffic.html
+    · island_sports.html
+    · island_action.html
+    · island_adjective.html
+    · island_job.html
+    · island_question.html
+    · island_treasure.html
+    · island_body.html       ← 新增
+  双击本文件即可打开. 如要部署到网络, 把本文件改名为 index.html.
+  ============================================================
+-->
+<!-- Google Fonts (微信国内可能慢, 已用系统字体 fallback) -->
+<!-- 字体: 用本地 cartoon_font.woff2, 已删除 Google Fonts 依赖 -->
+
+<style>
+/* ============================================================
+   🎨 让孩子兴奋的字体 + 美化系统
+   ============================================================ */
+
+/* 1) 注入思源黑体 Black (子集化, 613 KB) */
+@font-face{
+  font-family: 'CartoonBlack';
+  src: url('cartoon_font.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2) 字体 stack: 优先卡通黑体, 然后系统最粗 */
+:root{
+  --font-cartoon: 'CartoonBlack', '微软雅黑 Heavy', 'Microsoft YaHei UI', 'Microsoft YaHei', '微软雅黑', 'PingFang SC Heavy', 'PingFang SC', 'HarmonyOS Sans SC', 'Heiti SC', 'Noto Sans SC', sans-serif;
+  --font-body: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
+}
+
+/* 3) 全局加重字重 */
+body{
+  font-family: var(--font-body);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 4) 主标题: 渐变彩虹 + 描边 + 发光 (像超级飞侠 logo) */
+h1, h1.main, .main-title, .brand-title{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #fbbf24 0%, #ec4899 35%, #a855f7 70%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.6);
+  filter: drop-shadow(0 4px 8px rgba(251,191,36,.4)) drop-shadow(0 0 20px rgba(236,72,153,.3));
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.15),
+    0 4px 12px rgba(0,0,0,.3);
+  animation: titleBreathe 3s ease-in-out infinite;
+}
+
+@keyframes titleBreathe{
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 8px rgba(251,191,36,.4)) drop-shadow(0 0 20px rgba(236,72,153,.3)) }
+  50%      { transform: scale(1.02); filter: drop-shadow(0 6px 12px rgba(251,191,36,.6)) drop-shadow(0 0 30px rgba(236,72,153,.5)) }
+}
+
+/* 5) 二级标题: 加粗 + 阴影 (有立体感) */
+h2, h3, .section-title, .island-name{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px;
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.2),
+    0 4px 6px rgba(0,0,0,.3);
+}
+
+/* 6) 按钮: 大字 + 圆润 + 阴影 */
+.btn, button, .game-btn, .island-btn{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+
+/* 7) 数字 (XP, 关卡): 粗体 + 金色光泽 */
+.num, .stat-num, .xp-text, .level-num, .lvl-num{
+  font-family: 'Bowlby One', 'Impact', 'Arial Black', var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: .5px;
+  text-shadow: 
+    0 2px 4px rgba(0,0,0,.4),
+    0 0 8px rgba(251,191,36,.5);
+}
+
+/* 8) 单词卡片标题 (English) - 粗体 + 颜色对比 */
+.word-en, .word-title, .word-card-title{
+  font-family: 'Bowlby One', 'Fredoka One', 'Impact', sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: .5px;
+}
+
+/* 9) 中文释义 - 加粗 + 大字 */
+.word-cn, .word-meaning{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+}
+
+/* 10) 任务/成就名 - 卡通粗体 */
+.quest-title, .ach-name, .pet-name, .level-name{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+
+/* 11) Toast / 弹窗标题 - 卡通粗体 */
+.toast-text, .modal-title, .alert-title, #floatText{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+}
+
+/* 12) 字体加载失败时的 fallback 增强 */
+.title-fallback{
+  font-weight: 900 !important;
+  -webkit-text-stroke: 1.5px currentColor;
+  text-shadow: 
+    -2px -2px 0 rgba(0,0,0,.3),
+    2px -2px 0 rgba(0,0,0,.3),
+    -2px 2px 0 rgba(0,0,0,.3),
+    2px 2px 0 rgba(0,0,0,.3),
+    0 4px 8px rgba(0,0,0,.4);
+}
+
+/* 首页 hero 区域 - 超级游戏 logo 风 */
+.tagline{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #fbbf24 0%, #ec4899 33%, #a855f7 66%, #06b6d4 100%) !important;
+  background-size: 200% 200% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,.5);
+  filter: 
+    drop-shadow(0 4px 12px rgba(251,191,36,.5))
+    drop-shadow(0 0 24px rgba(236,72,153,.4));
+  animation: rainbowFlow 6s ease infinite, titleBreathe 3s ease-in-out infinite !important;
+  letter-spacing: 3px !important;
+}
+
+@keyframes rainbowFlow{
+  0%, 100% { background-position: 0% 50% }
+  50%      { background-position: 100% 50% }
+}
+
+/* 副标题 */
+.subtitle{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.3),
+    0 4px 10px rgba(0,0,0,.4),
+    0 0 20px rgba(251,191,36,.3) !important;
+  letter-spacing: 2px !important;
+}
+
+/* 岛屿卡片名称 */
+.island-card .island-name, .island-card h3, .card-title{
+  font-family: var(--font-cartoon) !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px;
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.25),
+    0 4px 8px rgba(0,0,0,.3) !important;
+}
+
+/* 统计数字大字 */
+.stat-num{
+  font-family: 'Bowlby One', 'Impact', 'Arial Black' !important;
+  font-weight: 900 !important;
+  filter: drop-shadow(0 2px 8px rgba(251,191,36,.5));
+}
+
+/* 防止微信滚动穿透 */
+html,body{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* 微信小程序 / iOS 安全区适配 */
+html,body{
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);
+}
+@supports not (padding-top: env(safe-area-inset-top)){
+  html,body{padding-top:0}
+}
+
+
+/* ═══════════════════════ 6 主题系统 ═══════════════════════ */
+:root, body[data-theme="cosmos"]{
+  --th-bg-deep: #0c1538;
+  --th-bg-mid: #1a2660;
+  --th-bg-glow: #1e3a8a;
+  --th-cosmos-1: rgba(168,85,247,.35);
+  --th-cosmos-2: rgba(59,130,246,.40);
+  --th-cosmos-3: rgba(236,72,153,.25);
+  --th-cosmos-4: rgba(34,211,238,.22);
+  --th-accent: #fbbf24;
+}
+body[data-theme="pink"]{
+  --th-bg-deep: #fce7f3;        /* 最浅: 樱花花瓣粉 */
+  --th-bg-mid: #f9a8d4;         /* 中色: 粉霞 */
+  --th-bg-glow: #d8b4fe;        /* 远处: 薰衣草紫 */
+  --th-cosmos-1: rgba(244,114,182,.35);
+  --th-cosmos-2: rgba(216,180,254,.40);
+  --th-cosmos-3: rgba(253,224,71,.30);   /* 阳光黄 */
+  --th-cosmos-4: rgba(252,165,165,.25);  /* 桃粉 */
+  --th-accent: #db2777;
+}
+body[data-theme="ocean"]{
+  --th-bg-deep: #082f49;        /* 深海蓝 */
+  --th-bg-mid: #0369a1;         /* 海水蓝 */
+  --th-bg-glow: #38bdf8;        /* 海面阳光 */
+  --th-cosmos-1: rgba(59,130,246,.40);
+  --th-cosmos-2: rgba(14,165,233,.40);
+  --th-cosmos-3: rgba(34,211,238,.35);
+  --th-cosmos-4: rgba(125,211,252,.30);
+  --th-accent: #7dd3fc;
+}
+body[data-theme="forest"]{
+  --th-bg-deep: #84cc16;        /* 阳光草地 */
+  --th-bg-mid: #65a30d;         /* 中草地 */
+  --th-bg-glow: #fbbf24;        /* 阳光暖黄 */
+  --th-cosmos-1: rgba(132,204,22,.45);
+  --th-cosmos-2: rgba(253,224,71,.50);
+  --th-cosmos-3: rgba(34,197,94,.35);
+  --th-cosmos-4: rgba(217,249,157,.40);
+  --th-accent: #fde047;
+}
+body[data-theme="rainbow"]{
+  --th-bg-deep: #4c1d95;        /* 深紫 (天空底部) */
+  --th-bg-mid: #7c3aed;         /* 中紫 */
+  --th-bg-glow: #f472b6;        /* 粉霞 (天空上方) */
+  --th-cosmos-1: rgba(251,146,60,.40);
+  --th-cosmos-2: rgba(34,211,238,.40);
+  --th-cosmos-3: rgba(236,72,153,.35);
+  --th-cosmos-4: rgba(132,204,22,.30);
+  --th-accent: #fcd34d;
+}
+body[data-theme="peach"]{
+  --th-bg-deep: #fff7ed;        /* 最浅奶白桃 (天空底部) */
+  --th-bg-mid: #fed7aa;         /* 桃粉 (天空中间) */
+  --th-bg-glow: #fb923c;        /* 桃橙 (天空顶部) */
+  --th-cosmos-1: rgba(251,146,60,.40);
+  --th-cosmos-2: rgba(253,164,175,.45);
+  --th-cosmos-3: rgba(254,215,170,.40);
+  --th-cosmos-4: rgba(252,231,166,.35);
+  --th-accent: #c2410c;
+}
+
+/* 通用主题背景 (含星云效果) */
+body{
+  background:
+    radial-gradient(ellipse at 15% 5%, var(--th-cosmos-1), transparent 55%),
+    radial-gradient(ellipse at 85% 10%, var(--th-cosmos-2), transparent 55%),
+    radial-gradient(ellipse at 65% 75%, var(--th-cosmos-3), transparent 60%),
+    radial-gradient(ellipse at 30% 90%, var(--th-cosmos-4), transparent 55%),
+    linear-gradient(180deg, var(--th-bg-deep) 0%, var(--th-bg-mid) 50%, var(--th-bg-deep) 100%) !important;
+  background-attachment: fixed !important;
+}
+
+
+:root{
+  --bg-deep:#0c1538;
+  --bg-mid:#1a2660;
+  --bg-glow:#2d3a8c;
+  --ink:#f8fafc;
+  --ink-soft:#e2e8f0;
+  --ink-mute:#cbd5e1;
+  --gold:#fbbf24;
+  --gold-soft:#fde68a;
+
+  /* island palettes */
+  --food-1:#fb923c; --food-2:#ef4444; --food-3:#fde047;
+  --animal-1:#22c55e; --animal-2:#0d9488; --animal-3:#a3e635;
+  --city-1:#3b82f6; --city-2:#06b6d4; --city-3:#a78bfa;
+  --time-1:#a855f7; --time-2:#ec4899; --time-3:#f472b6;
+}
+/* 微信兼容: 字体 fallback (Google Fonts 加载慢时降级) */
+.tagline{font-family:"Ma Shan Zheng",STKaiti,"楷体","KaiTi",cursive,serif !important}
+.subtitle, .stat-num, h1.main{font-family:"Bowlby One",Impact,"Arial Black",sans-serif !important}
+body{font-family:"Microsoft YaHei","微软雅黑","Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Heiti SC",sans-serif !important}
+
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{
+  font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--th-bg-deep);
+  color:var(--ink);
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+
+/* ─────────────  宇宙飞行元素 (UFO + 火箭 + 奇幻动物) ───────────── */
+.flyer{
+  position:fixed;
+  z-index:-1;
+  pointer-events:none;
+  will-change:transform;
+}
+
+/* 🛸 飞碟 — v798 特性化轨迹: 悬停+急转(UFO经典行为·停在空中→突然闪移→再悬停)·全程水平不旋转(防晕) */
+.flyer-ufo{
+  font-size:48px;
+  filter:drop-shadow(0 0 12px rgba(168,85,247,.7)) drop-shadow(0 0 24px rgba(59,130,246,.5));
+  animation:flyUfo 30s linear infinite, bobSlow 3.5s ease-in-out infinite;
+}
+@keyframes flyUfo{
+  /* hold相同坐标=悬停; 小%大位移+急转缓动=瞬间闪移 */
+  0%   {transform:translate(-130px, 13vh); animation-timing-function:cubic-bezier(.55,0,.3,1)}
+  5%   {transform:translate(13vw, 16vh)}
+  24%  {transform:translate(13vw, 16vh); animation-timing-function:cubic-bezier(.55,0,.3,1)}
+  28%  {transform:translate(40vw, 8vh)}
+  47%  {transform:translate(40vw, 8vh); animation-timing-function:cubic-bezier(.55,0,.3,1)}
+  51%  {transform:translate(64vw, 22vh)}
+  70%  {transform:translate(64vw, 22vh); animation-timing-function:cubic-bezier(.55,0,.3,1)}
+  74%  {transform:translate(85vw, 12vh)}
+  93%  {transform:translate(85vw, 12vh); animation-timing-function:cubic-bezier(.55,0,.3,1)}
+  100% {transform:translate(calc(100vw + 130px), 16vh)}
+}
+
+/* 🚀 火箭 — v798 特性化轨迹: 点火加速上升+重力转向弧线(底部缓慢起步→越升越快冲出顶部)·关键帧间距递增=加速·固定朝上倾角不旋转 */
+.flyer-rocket{
+  font-size:42px;
+  filter:drop-shadow(0 0 14px rgba(251,146,60,.8)) drop-shadow(0 0 28px rgba(239,68,68,.5));
+  animation:flyRocket 22s linear infinite;
+  animation-delay:-8s;
+}
+@keyframes flyRocket{
+  /* Δy 递增(22→30→40→58vh)=越升越快; 同时右偏=重力转向; 两端均在屏外无跳变 */
+  0%   {transform:translate(7vw, 110vh) rotate(-35deg)}
+  25%  {transform:translate(10vw, 88vh) rotate(-35deg)}
+  50%  {transform:translate(16vw, 58vh) rotate(-35deg)}
+  75%  {transform:translate(28vw, 18vh) rotate(-35deg)}
+  100% {transform:translate(52vw, -40vh) rotate(-35deg)}
+}
+
+/* 🛰️ 人造卫星 — v798 特性化轨迹: 椭圆轨道匀速环绕(沿固定轨道绕行·8点采样椭圆)·匀速linear·【去掉持续自转·防晕】 */
+.flyer-satellite{
+  font-size:38px;
+  filter:drop-shadow(0 0 10px rgba(34,211,238,.7)) drop-shadow(0 0 20px rgba(168,85,247,.4));
+  animation:flySatellite 50s linear infinite;
+  animation-delay:-12s;
+}
+@keyframes flySatellite{
+  /* 椭圆: 圆心(45vw,42vh) 横半径40vw 纵半径16vh · 0%==100% 无缝闭合轨道 */
+  0%    {transform:translate(85vw, 42vh)}
+  12.5% {transform:translate(73vw, 53vh)}
+  25%   {transform:translate(45vw, 58vh)}
+  37.5% {transform:translate(17vw, 53vh)}
+  50%   {transform:translate(5vw, 42vh)}
+  62.5% {transform:translate(17vw, 31vh)}
+  75%   {transform:translate(45vw, 26vh)}
+  87.5% {transform:translate(73vw, 31vh)}
+  100%  {transform:translate(85vw, 42vh)}
+}
+
+/* ☄️ 彗星 — v798 特性化轨迹: 高速抛物线俯冲(出现→加速坠落拖尾→冲出消失·周期划过)·Δy递增=重力加速·固定拖尾倾角不旋转 */
+.flyer-comet{
+  font-size:36px;
+  filter:drop-shadow(0 0 14px rgba(34,211,238,.9)) drop-shadow(0 0 28px rgba(168,85,247,.6));
+  animation:flyComet 15s linear infinite;
+  animation-delay:-6s;
+}
+@keyframes flyComet{
+  /* 7%出现→Δy递增(34→30→58vh)抛物线加速坠落→72%冲出屏外消失→留白等下次划过 */
+  0%   {transform:translate(84vw, -20vh) rotate(-18deg); opacity:0}
+  7%   {transform:translate(79vw, -4vh) rotate(-18deg); opacity:1}
+  38%  {transform:translate(61vw, 30vh) rotate(-18deg); opacity:1}
+  58%  {transform:translate(45vw, 60vh) rotate(-18deg); opacity:1}
+  72%  {transform:translate(31vw, 118vh) rotate(-18deg); opacity:0}
+  100% {transform:translate(31vw, 118vh) rotate(-18deg); opacity:0}
+}
+
+/* 🌟 流星 — 快速划过, 短暂出现 */
+.flyer-star{
+  font-size:28px;
+  filter:drop-shadow(0 0 16px rgba(253,224,71,1)) drop-shadow(0 0 30px rgba(251,191,36,.7));
+  animation:flyStar 14s linear infinite;
+  animation-delay:-5s;
+}
+@keyframes flyStar{
+  0%{transform:translate(-80px, -10vh) rotate(45deg); opacity:0}
+  5%{opacity:1}
+  35%{transform:translate(50vw, 40vh) rotate(45deg); opacity:1}
+  45%{opacity:0}
+  100%{transform:translate(50vw, 40vh) rotate(45deg); opacity:0}
+}
+
+/* ═══════════════ 主题专属元素 显示/隐藏 ═══════════════ */
+/* 默认: 显示 cosmos 主题元素, 隐藏所有其他主题元素 */
+.flyer[data-flyer-theme]{display:none}
+/* 🔴 v731(Hansen·彻底修复主题串台): 钻石主题(装备 或 试用中)期间·强制隐藏【所有】免费/环境装饰元素。
+   根因: 钻石主题(影院/典藏)只换了背景层+自己的场景元素·但首页有【三套】装饰系统都盖不住·残留漂在钻石主题背景上→试用时看不清钻石主题真面目:
+     ① .flyer[data-flyer-theme] = 当前免费主题的飞行元素(UFO/火箭/海豚等·5~10个·z-index 控制);
+     ② #deco .deco-emoji = JS 生成的【全屏环境浮动 emoji】(14个·随机采样所有主题·🍕🏙️🚌📅🌙📚💎🎁等·opacity:.10 极淡·z-index:-1)——【v734 新增·之前漏掉的真凶】Hansen 反复看到的礼物/书/楼/车/钻石就是它;
+     ③ .island .float-bg = 岛卡片内的小装饰(属卡片UI·保留)。
+   HansenDiamondShop.applyTheme 装备/试用时给 body 加 .hsn-dia-on(卸下/试用结束自动摘掉·并沿 parent 链同步到顶层主页·首页轮询也兜底)·这里据此一刀切隐藏 ①+②·钻石主题=纯净只剩它自己。!important 压过所有 display 规则。 */
+body.hsn-dia-on .flyer[data-flyer-theme], body.hsn-dia-on .deco{display:none!important}
+/* 🔴 v732(Hansen·主题串台根治2·背景中和): 钻石主题生效时·body 自身的免费主题背景渐变(body{background:...!important}·用 --th-* 变量·随 data-theme 变色)必须被中和——否则浅色免费主题(樱花粉/桃)的亮渐变会从钻石主题的半透明极光层(z-index:-2·blur)底下透出来·导致试用深海等钻石主题时背景整体还是樱花粉(Hansen 实测)。
+   解法: 用比 body{} 更高优先级的 body.hsn-dia-on{} + !important 覆盖·背景取钻石主题自己的基色 var(--hsn-dia-bg)(由 hansen_diamond_shop.applyTheme 动态写入 = 该主题 g.bg)·兜底深色#0a0e1a。钻石主题的极光层/场景层(金粒/气泡等)叠在这层纯色基底上→纯净只剩钻石主题。卸下时 hsn-dia-on 摘掉·自动恢复免费主题渐变。 */
+body.hsn-dia-on{background:var(--hsn-dia-bg,#0a0e1a)!important;background-attachment:fixed!important}
+body[data-theme="cosmos"] .flyer[data-flyer-theme="cosmos"]{display:block}
+body[data-theme="pink"] .flyer[data-flyer-theme="pink"]{display:block}
+/* 其他主题如果没有专属元素, fallback 到 cosmos 元素 */
+body[data-theme="ocean"] .flyer[data-flyer-theme="cosmos"]{display:block}
+body[data-theme="forest"] .flyer[data-flyer-theme="cosmos"]{display:block}
+body[data-theme="rainbow"] .flyer[data-flyer-theme="cosmos"]{display:block}
+body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
+
+/* ═══════════════ 🌸 樱花粉 专属飞行元素 ═══════════════ */
+
+/* 🌸 大樱花花瓣 - 缓慢飘落 (左侧) */
+.flyer-petal-big{
+  font-size:36px;
+  filter:drop-shadow(0 0 8px rgba(236,72,153,.6));
+  animation:petalFall1 18s linear infinite;
+  opacity:.85;
+}
+@keyframes petalFall1{
+  0%{transform:translate(12vw, -50px) rotate(0deg)}
+  50%{transform:translate(8vw, 50vh) rotate(180deg)}
+  100%{transform:translate(20vw, calc(100vh + 50px)) rotate(360deg)}
+}
+
+/* 🌸 小樱花花瓣 - 飘落 (中部, 快速) */
+.flyer-petal-small1{
+  font-size:24px;
+  filter:drop-shadow(0 0 6px rgba(244,114,182,.6));
+  animation:petalFall2 14s linear infinite;
+  animation-delay:-3s;
+  opacity:.8;
+}
+@keyframes petalFall2{
+  0%{transform:translate(45vw, -50px) rotate(0deg)}
+  50%{transform:translate(55vw, 50vh) rotate(-180deg)}
+  100%{transform:translate(40vw, calc(100vh + 50px)) rotate(-360deg)}
+}
+
+/* 🌸 小樱花花瓣 - 飘落 (右侧, 错开) */
+.flyer-petal-small2{
+  font-size:28px;
+  filter:drop-shadow(0 0 6px rgba(236,72,153,.6));
+  animation:petalFall3 16s linear infinite;
+  animation-delay:-8s;
+  opacity:.85;
+}
+@keyframes petalFall3{
+  0%{transform:translate(78vw, -50px) rotate(0deg)}
+  50%{transform:translate(82vw, 50vh) rotate(220deg)}
+  100%{transform:translate(72vw, calc(100vh + 50px)) rotate(440deg)}
+}
+
+/* 🦋 粉色蝴蝶 - 中部飘飞 */
+.flyer-butterfly-pink{
+  font-size:34px;
+  filter:drop-shadow(0 0 10px rgba(244,114,182,.8)) drop-shadow(0 0 20px rgba(168,85,247,.5)) hue-rotate(-20deg) saturate(1.4);
+  animation:flyButterflyPink 32s linear infinite, butterflyBob 1.8s ease-in-out infinite;
+  animation-delay:-10s;
+}
+@keyframes flyButterflyPink{
+  0%{transform:translate(-80px, 42vh) rotate(-4deg)}
+  25%{transform:translate(25vw, 30vh) rotate(6deg)}
+  50%{transform:translate(50vw, 48vh) rotate(-5deg)}
+  75%{transform:translate(75vw, 36vh) rotate(7deg)}
+  100%{transform:translate(calc(100vw + 80px), 44vh) rotate(-4deg)}
+}
+@keyframes butterflyBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-8px}
+}
+
+/* 🧚‍♀️ 小仙女 - 顶部漂浮 */
+.flyer-fairy{
+  font-size:40px;
+  filter:drop-shadow(0 0 12px rgba(253,224,71,.8)) drop-shadow(0 0 22px rgba(236,72,153,.5));
+  animation:flyFairy 36s linear infinite, fairyBob 2.5s ease-in-out infinite;
+  animation-delay:-5s;
+}
+@keyframes flyFairy{
+  0%{transform:translate(-80px, 18vh) rotate(0deg)}
+  30%{transform:translate(30vw, 14vh) rotate(5deg)}
+  60%{transform:translate(60vw, 22vh) rotate(-6deg)}
+  100%{transform:translate(calc(100vw + 80px), 20vh) rotate(0deg)}
+}
+@keyframes fairyBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-14px}
+}
+
+/* 🦄 独角兽 - 中下部漂浮, 粉紫光 */
+.flyer-unicorn-pink{
+  font-size:42px;
+  filter:drop-shadow(0 0 14px rgba(236,72,153,.8)) drop-shadow(0 0 24px rgba(168,85,247,.5));
+  animation:flyUnicornPink 40s linear infinite, fairyBob 3s ease-in-out infinite reverse;
+  animation-delay:-15s;
+}
+@keyframes flyUnicornPink{
+  0%{transform:translate(calc(100vw + 100px), 60vh) rotate(0deg)}
+  25%{transform:translate(75vw, 64vh) rotate(-5deg)}
+  50%{transform:translate(50vw, 56vh) rotate(3deg)}
+  75%{transform:translate(25vw, 68vh) rotate(-4deg)}
+  100%{transform:translate(-100px, 60vh) rotate(0deg)}
+}
+
+/* ☁️ 白云 - 底部缓缓横穿 */
+.flyer-cloud-white{
+  font-size:64px;
+  filter:drop-shadow(0 0 12px rgba(255,255,255,.7)) drop-shadow(0 0 22px rgba(255,255,255,.4));
+  animation:flyCloudWhite 38s linear infinite, fairyBob 3.2s ease-in-out infinite;
+  animation-delay:-20s;
+  opacity:.95;
+}
+@keyframes flyCloudWhite{
+  0%{transform:translate(-150px, 72vh)}
+  25%{transform:translate(25vw, 78vh)}
+  50%{transform:translate(50vw, 70vh)}
+  75%{transform:translate(75vw, 76vh)}
+  100%{transform:translate(calc(100vw + 150px), 73vh)}
+}
+
+/* 🌈 彩色云 - 中部反向飘, 颜色不断循环变化 */
+.flyer-cloud-rainbow{
+  font-size:62px;
+  animation:flyCloudRainbow 34s linear infinite, fairyBob 2.6s ease-in-out infinite reverse, cloudColorCycle 8s linear infinite;
+  animation-delay:-12s, -4s, 0s;
+}
+@keyframes cloudColorCycle{
+  0%   {filter:drop-shadow(0 0 14px rgba(236,72,153,.85)) drop-shadow(0 0 22px rgba(236,72,153,.6)) hue-rotate(0deg) saturate(2.5) brightness(1.05)}
+  16%  {filter:drop-shadow(0 0 14px rgba(251,146,60,.85)) drop-shadow(0 0 22px rgba(251,146,60,.6)) hue-rotate(60deg) saturate(2.5) brightness(1.05)}
+  33%  {filter:drop-shadow(0 0 14px rgba(253,224,71,.85)) drop-shadow(0 0 22px rgba(253,224,71,.6)) hue-rotate(120deg) saturate(2.5) brightness(1.05)}
+  50%  {filter:drop-shadow(0 0 14px rgba(34,197,94,.85)) drop-shadow(0 0 22px rgba(34,197,94,.6)) hue-rotate(180deg) saturate(2.5) brightness(1.05)}
+  66%  {filter:drop-shadow(0 0 14px rgba(59,130,246,.85)) drop-shadow(0 0 22px rgba(59,130,246,.6)) hue-rotate(240deg) saturate(2.5) brightness(1.05)}
+  83%  {filter:drop-shadow(0 0 14px rgba(168,85,247,.85)) drop-shadow(0 0 22px rgba(168,85,247,.6)) hue-rotate(300deg) saturate(2.5) brightness(1.05)}
+  100% {filter:drop-shadow(0 0 14px rgba(236,72,153,.85)) drop-shadow(0 0 22px rgba(236,72,153,.6)) hue-rotate(360deg) saturate(2.5) brightness(1.05)}
+}
+
+/* ═══════════════ 🌊 海洋蓝 专属飞行元素 ═══════════════ */
+
+/* 🌊 显示控制: ocean 主题显示海洋元素, 不再 fallback cosmos */
+body[data-theme="ocean"] .flyer[data-flyer-theme="cosmos"]{display:none}
+body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
+
+/* 🐋 鲸鱼 - 慢悠悠地游过中部 */
+.flyer-whale{
+  font-size:60px;
+  filter:drop-shadow(0 0 16px rgba(125,211,252,.7)) drop-shadow(0 0 28px rgba(59,130,246,.4));
+  animation:flyWhale 42s linear infinite, bobSlow 4.5s ease-in-out infinite;
+}
+@keyframes flyWhale{
+  0%{transform:translate(-150px, 38vh) scaleX(-1)}
+  50%{transform:translate(55vw, 45vh) scaleX(-1)}
+  100%{transform:translate(calc(100vw + 150px), 40vh) scaleX(-1)}
+}
+
+/* 🐬 海豚 - 跳跃式前进 */
+.flyer-dolphin{
+  font-size:42px;
+  filter:drop-shadow(0 0 12px rgba(125,211,252,.8));
+  animation:flyDolphin 28s linear infinite;
+  animation-delay:-8s;
+}
+@keyframes flyDolphin{
+  0%{transform:translate(calc(100vw + 100px), 28vh) rotate(0deg)}
+  10%{transform:translate(85vw, 22vh) rotate(15deg)}
+  20%{transform:translate(70vw, 35vh) rotate(-15deg)}
+  30%{transform:translate(55vw, 25vh) rotate(15deg)}
+  40%{transform:translate(42vw, 32vh) rotate(-10deg)}
+  50%{transform:translate(28vw, 22vh) rotate(12deg)}
+  60%{transform:translate(15vw, 30vh) rotate(-8deg)}
+  100%{transform:translate(-100px, 28vh) rotate(0deg)}
+}
+
+/* 🐙 章鱼 - 漂浮加摇摆 */
+.flyer-octopus{
+  font-size:46px;
+  filter:drop-shadow(0 0 14px rgba(244,114,182,.6)) drop-shadow(0 0 22px rgba(168,85,247,.4));
+  animation:flyOctopus 38s linear infinite, octopusBob 1.8s ease-in-out infinite;
+  animation-delay:-12s;
+}
+@keyframes flyOctopus{
+  0%{transform:translate(-100px, 62vh) rotate(0deg)}
+  25%{transform:translate(28vw, 58vh) rotate(-5deg)}
+  50%{transform:translate(52vw, 66vh) rotate(5deg)}
+  75%{transform:translate(78vw, 60vh) rotate(-5deg)}
+  100%{transform:translate(calc(100vw + 100px), 64vh) rotate(0deg)}
+}
+@keyframes octopusBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-12px}
+}
+
+/* ⭐ 海星 (橘红色染色) - 慢慢翻转 */
+.flyer-starfish{
+  font-size:34px;
+  filter:drop-shadow(0 0 10px rgba(251,146,60,.8)) drop-shadow(0 0 18px rgba(239,68,68,.5)) hue-rotate(-30deg) saturate(2.5) brightness(.95);
+  animation:flyStarfish 36s linear infinite, starfishSpin 8s linear infinite;
+  animation-delay:-18s;
+}
+@keyframes flyStarfish{
+  0%{left:-80px; top:48vh}
+  25%{left:25vw; top:52vh}
+  50%{left:50vw; top:46vh}
+  75%{left:75vw; top:54vh}
+  100%{left:calc(100vw + 80px); top:50vh}
+}
+@keyframes starfishSpin{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(360deg)}
+}
+
+/* 🐠 热带鱼 - 快速游 */
+.flyer-fish{
+  font-size:32px;
+  filter:drop-shadow(0 0 10px rgba(253,224,71,.7)) drop-shadow(0 0 18px rgba(251,146,60,.5));
+  animation:flyFish 22s linear infinite, fishBob 1.4s ease-in-out infinite;
+  animation-delay:-5s;
+}
+@keyframes flyFish{
+  0%{transform:translate(calc(100vw + 80px), 70vh)}
+  100%{transform:translate(-80px, 72vh)}
+}
+@keyframes fishBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-6px}
+}
+
+/* ⛵ 探险帆船 - 在海面航行, 上下颠簸 */
+.flyer-ship{
+  font-size:52px;
+  filter:drop-shadow(0 0 14px rgba(253,224,71,.7)) drop-shadow(0 0 24px rgba(251,146,60,.5));
+  animation:flyShip 46s linear infinite, shipRock 3s ease-in-out infinite;
+  animation-delay:-22s;
+}
+@keyframes flyShip{
+  0%{transform:translate(-120px, 12vh) rotate(-2deg)}
+  15%{transform:translate(12vw, 8vh) rotate(3deg)}
+  30%{transform:translate(28vw, 14vh) rotate(-3deg)}
+  45%{transform:translate(45vw, 9vh) rotate(2deg)}
+  60%{transform:translate(60vw, 13vh) rotate(-2deg)}
+  75%{transform:translate(76vw, 8vh) rotate(3deg)}
+  90%{transform:translate(90vw, 12vh) rotate(-2deg)}
+  100%{transform:translate(calc(100vw + 120px), 10vh) rotate(-2deg)}
+}
+@keyframes shipRock{
+  0%,100%{margin-top:0}
+  50%{margin-top:-8px}
+}
+
+/* ═══════════════ 🌳 森林绿 专属飞行元素 ═══════════════ */
+body[data-theme="forest"] .flyer[data-flyer-theme="cosmos"]{display:none}
+body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
+
+/* 🦁 狮子 - 正面脸, 小范围摇摆 (左下角) */
+.flyer-lion{
+  font-size:54px;
+  filter:drop-shadow(0 0 14px rgba(251,191,36,.7)) drop-shadow(0 0 24px rgba(217,119,6,.5));
+  animation:lionSway 8s ease-in-out infinite, bobSlow 3s ease-in-out infinite;
+  left:8vw;
+  bottom:18vh;
+  position:fixed;
+}
+@keyframes lionSway{
+  0%,100%{transform:translate(0, 0) rotate(-3deg)}
+  50%{transform:translate(8px, -4px) rotate(3deg)}
+}
+
+/* 🐅 老虎 - 头朝左, 从右向左走 */
+.flyer-tiger{
+  font-size:46px;
+  filter:drop-shadow(0 0 12px rgba(251,146,60,.7)) drop-shadow(0 0 20px rgba(220,38,38,.4));
+  animation:flyTiger 36s linear infinite, bobMed 1.5s ease-in-out infinite;
+  animation-delay:-10s;
+}
+@keyframes flyTiger{
+  0%{transform:translate(calc(100vw + 100px), 72vh)}
+  100%{transform:translate(-100px, 70vh)}
+}
+
+/* 🐘 大象 - 头朝左, 从右向左缓慢走 */
+.flyer-elephant{
+  font-size:60px;
+  filter:drop-shadow(0 0 14px rgba(148,163,184,.7)) drop-shadow(0 0 22px rgba(100,116,139,.5));
+  animation:flyElephant 50s linear infinite, bobSlow 3.5s ease-in-out infinite;
+  animation-delay:-20s;
+}
+@keyframes flyElephant{
+  0%{transform:translate(calc(100vw + 120px), 76vh)}
+  100%{transform:translate(-120px, 78vh)}
+}
+
+/* 🦓 斑马 - 头朝左, 从右向左走 (中速) */
+.flyer-zebra{
+  font-size:50px;
+  filter:drop-shadow(0 0 12px rgba(255,255,255,.6)) drop-shadow(0 0 20px rgba(100,116,139,.5));
+  animation:flyZebra 40s linear infinite, bobMed 1.6s ease-in-out infinite;
+  animation-delay:-25s;
+}
+@keyframes flyZebra{
+  0%{transform:translate(calc(100vw + 100px), 80vh)}
+  100%{transform:translate(-100px, 82vh)}
+}
+
+/* 🐇 兔子 - 跳跃前进 (从右向左) */
+.flyer-rabbit{
+  font-size:38px;
+  filter:drop-shadow(0 0 10px rgba(254,202,202,.7)) drop-shadow(0 0 18px rgba(244,114,182,.5));
+  animation:flyRabbit 26s linear infinite;
+  animation-delay:-8s;
+}
+@keyframes flyRabbit{
+  0%{transform:translate(calc(100vw + 80px), 85vh) rotate(0deg)}
+  8%{transform:translate(90vw, 78vh) rotate(-8deg)}
+  16%{transform:translate(80vw, 87vh) rotate(8deg)}
+  24%{transform:translate(70vw, 78vh) rotate(-8deg)}
+  32%{transform:translate(60vw, 87vh) rotate(8deg)}
+  40%{transform:translate(50vw, 78vh) rotate(-8deg)}
+  48%{transform:translate(40vw, 87vh) rotate(8deg)}
+  56%{transform:translate(30vw, 78vh) rotate(-8deg)}
+  64%{transform:translate(20vw, 87vh) rotate(8deg)}
+  72%{transform:translate(10vw, 78vh) rotate(-8deg)}
+  100%{transform:translate(-80px, 85vh) rotate(0deg)}
+}
+
+/* 🧚‍♀️ 花仙子 - 顶部空中飞舞 */
+.flyer-fairy-forest{
+  font-size:42px;
+  filter:drop-shadow(0 0 14px rgba(253,224,71,.85)) drop-shadow(0 0 24px rgba(253,224,71,.5)) drop-shadow(0 0 36px rgba(132,204,22,.4));
+  animation:flyFairyForest 32s linear infinite, fairyBob 2.2s ease-in-out infinite;
+  animation-delay:-5s;
+}
+@keyframes flyFairyForest{
+  0%{transform:translate(-100px, 22vh) rotate(-5deg)}
+  25%{transform:translate(25vw, 14vh) rotate(8deg)}
+  50%{transform:translate(50vw, 25vh) rotate(-6deg)}
+  75%{transform:translate(75vw, 16vh) rotate(7deg)}
+  100%{transform:translate(calc(100vw + 100px), 20vh) rotate(-5deg)}
+}
+
+/* 🐝 蜜蜂 - Z 字形飞舞 (中部) */
+.flyer-bee{
+  font-size:32px;
+  filter:drop-shadow(0 0 12px rgba(253,224,71,.85)) drop-shadow(0 0 22px rgba(251,191,36,.6));
+  animation:flyBee 24s linear infinite, beeBob 0.25s ease-in-out infinite;
+  animation-delay:-5s;
+}
+@keyframes flyBee{
+  0%{transform:translate(-80px, 32vh) rotate(0deg) scaleX(-1)}
+  12%{transform:translate(12vw, 28vh) rotate(8deg) scaleX(-1)}
+  24%{transform:translate(25vw, 36vh) rotate(-8deg) scaleX(-1)}
+  36%{transform:translate(38vw, 30vh) rotate(8deg) scaleX(-1)}
+  48%{transform:translate(50vw, 38vh) rotate(-8deg) scaleX(-1)}
+  60%{transform:translate(62vw, 32vh) rotate(8deg) scaleX(-1)}
+  72%{transform:translate(75vw, 38vh) rotate(-8deg) scaleX(-1)}
+  84%{transform:translate(88vw, 30vh) rotate(8deg) scaleX(-1)}
+  100%{transform:translate(calc(100vw + 80px), 34vh) rotate(0deg) scaleX(-1)}
+}
+@keyframes beeBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-2px}
+}
+
+/* 🐦 小燕子 - 滑翔 (高空) */
+.flyer-swallow{
+  font-size:36px;
+  filter:drop-shadow(0 0 12px rgba(34,211,238,.7)) drop-shadow(0 0 22px rgba(59,130,246,.4));
+  animation:flySwallow 28s linear infinite;
+  animation-delay:-10s;
+}
+@keyframes flySwallow{
+  0%{transform:translate(-80px, 18vh) rotate(-8deg) scaleX(-1)}
+  20%{transform:translate(22vw, 12vh) rotate(10deg) scaleX(-1)}
+  40%{transform:translate(45vw, 22vh) rotate(-8deg) scaleX(-1)}
+  60%{transform:translate(65vw, 14vh) rotate(8deg) scaleX(-1)}
+  80%{transform:translate(85vw, 22vh) rotate(-6deg) scaleX(-1)}
+  100%{transform:translate(calc(100vw + 80px), 18vh) rotate(-8deg) scaleX(-1)}
+}
+
+/* 🐞 瓢虫 - 慢慢爬 (草地附近) */
+.flyer-ladybug{
+  font-size:28px;
+  filter:drop-shadow(0 0 10px rgba(239,68,68,.7)) drop-shadow(0 0 18px rgba(220,38,38,.4));
+  animation:flyLadybug 34s linear infinite, ladybugBob 2s ease-in-out infinite;
+  animation-delay:-18s;
+}
+@keyframes flyLadybug{
+  0%{transform:translate(calc(100vw + 60px), 56vh) rotate(0deg)}
+  25%{transform:translate(72vw, 60vh) rotate(-4deg)}
+  50%{transform:translate(48vw, 54vh) rotate(4deg)}
+  75%{transform:translate(22vw, 58vh) rotate(-3deg)}
+  100%{transform:translate(-60px, 56vh) rotate(0deg)}
+}
+@keyframes ladybugBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-5px}
+}
+
+/* ═══════════════ 🌈 彩虹云朵 专属飞行元素 ═══════════════ */
+body[data-theme="rainbow"] .flyer[data-flyer-theme="cosmos"]{display:none}
+body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
+
+/* 🧙‍♀️ + 🧹 女巫骑扫帚 - 横穿天空 */
+.flyer-witch{
+  width:80px;
+  height:60px;
+  position:fixed;
+  filter:drop-shadow(0 0 14px rgba(168,85,247,.7)) drop-shadow(0 0 24px rgba(236,72,153,.5));
+  animation:flyWitch 32s linear infinite, fairyBob 2.5s ease-in-out infinite;
+  animation-delay:-8s;
+}
+.flyer-witch .witch-broom{
+  position:absolute;
+  font-size:50px;
+  bottom:0;
+  left:0;
+  transform:rotate(-20deg);
+}
+.flyer-witch .witch-person{
+  position:absolute;
+  font-size:36px;
+  top:0;
+  left:20px;
+}
+@keyframes flyWitch{
+  0%{transform:translate(-150px, 24vh) rotate(-3deg)}
+  25%{transform:translate(25vw, 18vh) rotate(4deg)}
+  50%{transform:translate(50vw, 28vh) rotate(-3deg)}
+  75%{transform:translate(75vw, 20vh) rotate(4deg)}
+  100%{transform:translate(calc(100vw + 150px), 24vh) rotate(-3deg)}
+}
+
+/* 🐲 西式坏龙 - 喷火, 中部蜿蜒 */
+.flyer-evil-dragon{
+  font-size:54px;
+  position:fixed;
+  filter:drop-shadow(0 0 16px rgba(239,68,68,.8)) drop-shadow(0 0 28px rgba(220,38,38,.5));
+  animation:flyEvilDragon 38s linear infinite, bobMed 2.8s ease-in-out infinite;
+  animation-delay:-14s;
+}
+.flyer-evil-dragon::before{
+  content:'🔥🔥';
+  position:absolute;
+  right:100%;
+  top:50%;
+  transform:translateY(-40%);
+  font-size:30px;
+  letter-spacing:-10px;
+  filter:drop-shadow(0 0 8px rgba(251,146,60,1)) drop-shadow(0 0 14px rgba(239,68,68,.8)) blur(.4px);
+  animation:flameFlicker .15s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes flyEvilDragon{
+  0%{transform:translate(-180px, 50vh) rotate(-4deg) scaleX(-1)}
+  20%{transform:translate(22vw, 55vh) rotate(5deg) scaleX(-1)}
+  40%{transform:translate(45vw, 45vh) rotate(-4deg) scaleX(-1)}
+  60%{transform:translate(68vw, 58vh) rotate(5deg) scaleX(-1)}
+  80%{transform:translate(88vw, 48vh) rotate(-3deg) scaleX(-1)}
+  100%{transform:translate(calc(100vw + 180px), 52vh) rotate(-4deg) scaleX(-1)}
+}
+
+/* 🔮 水晶球 - 漂浮闪烁 (慢) */
+.flyer-crystal-ball{
+  font-size:36px;
+  filter:drop-shadow(0 0 14px rgba(168,85,247,.9)) drop-shadow(0 0 26px rgba(236,72,153,.6));
+  animation:flyCrystal 40s linear infinite, crystalPulse 2.5s ease-in-out infinite;
+  animation-delay:-18s;
+}
+@keyframes flyCrystal{
+  0%{transform:translate(calc(100vw + 80px), 38vh)}
+  50%{transform:translate(50vw, 32vh)}
+  100%{transform:translate(-80px, 40vh)}
+}
+@keyframes crystalPulse{
+  0%,100%{margin-top:0; filter:drop-shadow(0 0 14px rgba(168,85,247,.9)) drop-shadow(0 0 26px rgba(236,72,153,.6))}
+  50%{margin-top:-10px; filter:drop-shadow(0 0 20px rgba(168,85,247,1)) drop-shadow(0 0 36px rgba(236,72,153,.9))}
+}
+
+/* 🪄 魔法棒 - 旋转飞 */
+.flyer-wand{
+  font-size:32px;
+  filter:drop-shadow(0 0 12px rgba(253,224,71,.9)) drop-shadow(0 0 22px rgba(168,85,247,.6));
+  animation:flyWand 28s linear infinite, wandSpin 4s linear infinite;
+  animation-delay:-5s;
+}
+@keyframes flyWand{
+  0%{left:-80px; top:64vh}
+  25%{left:25vw; top:70vh}
+  50%{left:50vw; top:60vh}
+  75%{left:75vw; top:68vh}
+  100%{left:calc(100vw + 80px); top:64vh}
+}
+@keyframes wandSpin{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(360deg)}
+}
+
+/* ✨ 闪光特效 - 随机出现 */
+.flyer-sparkle{
+  font-size:26px;
+  filter:drop-shadow(0 0 12px rgba(253,224,71,1)) drop-shadow(0 0 22px rgba(255,255,255,.8));
+  animation:flySparkle 12s linear infinite, sparkleSpin 1s linear infinite;
+  animation-delay:-3s;
+}
+@keyframes flySparkle{
+  0%{transform:translate(20vw, 80vh); opacity:0}
+  10%{opacity:1}
+  25%{transform:translate(40vw, 30vh); opacity:1}
+  35%{opacity:0}
+  50%{transform:translate(70vw, 60vh); opacity:0}
+  60%{opacity:1}
+  75%{transform:translate(85vw, 25vh); opacity:1}
+  85%{opacity:0}
+  100%{transform:translate(20vw, 80vh); opacity:0}
+}
+@keyframes sparkleSpin{
+  0%{margin-top:0}
+  50%{margin-top:-5px}
+  100%{margin-top:0}
+}
+
+/* 👻 幽灵 - 飘 (慢, 半透明) */
+.flyer-ghost{
+  font-size:42px;
+  opacity:.85;
+  filter:drop-shadow(0 0 14px rgba(255,255,255,.85)) drop-shadow(0 0 24px rgba(168,85,247,.5));
+  animation:flyGhost 36s linear infinite, ghostBob 3s ease-in-out infinite;
+  animation-delay:-20s;
+}
+@keyframes flyGhost{
+  0%{transform:translate(calc(100vw + 100px), 42vh)}
+  100%{transform:translate(-100px, 46vh)}
+}
+@keyframes ghostBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-14px}
+}
+/* 🎃 南瓜头 - 漂浮 (中上部) */
+.flyer-pumpkin{
+  font-size:44px;
+  filter:drop-shadow(0 0 14px rgba(251,146,60,.85)) drop-shadow(0 0 24px rgba(239,68,68,.5));
+  animation:flyPumpkin 30s linear infinite, pumpkinBob 2.2s ease-in-out infinite;
+  animation-delay:-9s;
+}
+@keyframes flyPumpkin{
+  0%{transform:translate(-100px, 28vh) rotate(-6deg)}
+  25%{transform:translate(25vw, 20vh) rotate(8deg)}
+  50%{transform:translate(50vw, 30vh) rotate(-5deg)}
+  75%{transform:translate(75vw, 22vh) rotate(7deg)}
+  100%{transform:translate(calc(100vw + 100px), 28vh) rotate(-6deg)}
+}
+@keyframes pumpkinBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-10px}
+}
+
+/* 🐎 + 🗡️ 砍龙骑士 - 追逐喷火龙 */
+.flyer-knight{
+  width:90px;
+  height:60px;
+  position:fixed;
+  filter:drop-shadow(0 0 14px rgba(253,224,71,.8)) drop-shadow(0 0 24px rgba(251,191,36,.5));
+  animation:flyKnight 34s linear infinite, knightGallop .3s ease-in-out infinite;
+  animation-delay:-22s;
+}
+.flyer-knight .knight-horse{
+  position:absolute;
+  font-size:54px;
+  bottom:0;
+  left:0;
+  transform:scaleX(-1);
+}
+@keyframes flyKnight{
+  0%{transform:translate(-180px, 60vh)}
+  25%{transform:translate(20vw, 64vh)}
+  50%{transform:translate(45vw, 56vh)}
+  75%{transform:translate(72vw, 62vh)}
+  100%{transform:translate(calc(100vw + 180px), 58vh)}
+}
+@keyframes knightGallop{
+  0%,100%{margin-top:0}
+  50%{margin-top:-5px}
+}
+
+/* ═══════════════ 🍑 桃子糖果 专属飞行元素 ═══════════════ */
+body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:none}
+body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
+
+/* 🍑 桃子 - 漂浮 (中上) */
+.flyer-peach{
+  font-size:46px;
+  filter:drop-shadow(0 0 14px rgba(251,146,60,.7)) drop-shadow(0 0 24px rgba(244,114,182,.5));
+  animation:flyPeach 38s linear infinite, fairyBob 2.6s ease-in-out infinite;
+  animation-delay:-8s;
+}
+@keyframes flyPeach{
+  0%{transform:translate(-100px, 22vh) rotate(-5deg)}
+  25%{transform:translate(25vw, 16vh) rotate(8deg)}
+  50%{transform:translate(50vw, 26vh) rotate(-5deg)}
+  75%{transform:translate(75vw, 18vh) rotate(7deg)}
+  100%{transform:translate(calc(100vw + 100px), 22vh) rotate(-5deg)}
+}
+
+/* 🍭 棒棒糖 - 旋转飞 */
+.flyer-lollipop{
+  font-size:42px;
+  filter:drop-shadow(0 0 12px rgba(236,72,153,.7)) drop-shadow(0 0 22px rgba(168,85,247,.5));
+  animation:flyLollipop 32s linear infinite, lollipopSpin 3s linear infinite;
+  animation-delay:-5s;
+}
+@keyframes flyLollipop{
+  0%{left:calc(100vw + 80px); top:30vh}
+  50%{left:50vw; top:36vh}
+  100%{left:-80px; top:32vh}
+}
+@keyframes lollipopSpin{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(360deg)}
+}
+
+/* 🍬 糖果 - Z字形跳跃 */
+.flyer-candy{
+  font-size:36px;
+  filter:drop-shadow(0 0 12px rgba(253,224,71,.8)) drop-shadow(0 0 22px rgba(251,146,60,.5));
+  animation:flyCandy 26s linear infinite, candyBob 1.4s ease-in-out infinite;
+  animation-delay:-12s;
+}
+@keyframes flyCandy{
+  0%{transform:translate(-80px, 40vh) rotate(-15deg)}
+  20%{transform:translate(22vw, 32vh) rotate(15deg)}
+  40%{transform:translate(45vw, 44vh) rotate(-15deg)}
+  60%{transform:translate(65vw, 32vh) rotate(15deg)}
+  80%{transform:translate(85vw, 42vh) rotate(-15deg)}
+  100%{transform:translate(calc(100vw + 80px), 38vh) rotate(-15deg)}
+}
+@keyframes candyBob{
+  0%,100%{margin-top:0}
+  50%{margin-top:-6px}
+}
+
+/* 🧁 纸杯蛋糕 - 慢悠悠飘 */
+.flyer-cupcake{
+  font-size:42px;
+  filter:drop-shadow(0 0 12px rgba(244,114,182,.7)) drop-shadow(0 0 22px rgba(168,85,247,.4));
+  animation:flyCupcake 40s linear infinite, fairyBob 3s ease-in-out infinite;
+  animation-delay:-18s;
+}
+@keyframes flyCupcake{
+  0%{transform:translate(calc(100vw + 80px), 50vh) rotate(0deg)}
+  25%{transform:translate(72vw, 56vh) rotate(-4deg)}
+  50%{transform:translate(48vw, 46vh) rotate(4deg)}
+  75%{transform:translate(22vw, 54vh) rotate(-3deg)}
+  100%{transform:translate(-80px, 50vh) rotate(0deg)}
+}
+
+/* 🍩 甜甜圈 - 旋转滚动 */
+.flyer-donut{
+  font-size:38px;
+  filter:drop-shadow(0 0 12px rgba(251,146,60,.7)) drop-shadow(0 0 22px rgba(244,114,182,.5));
+  animation:flyDonut 30s linear infinite, donutRoll 2s linear infinite;
+  animation-delay:-15s;
+}
+@keyframes flyDonut{
+  0%{left:-80px; top:60vh}
+  50%{left:50vw; top:64vh}
+  100%{left:calc(100vw + 80px); top:62vh}
+}
+@keyframes donutRoll{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(360deg)}
+}
+
+/* 🍓 草莓 - 漂浮 */
+.flyer-strawberry{
+  font-size:36px;
+  filter:drop-shadow(0 0 12px rgba(239,68,68,.7)) drop-shadow(0 0 22px rgba(244,114,182,.5));
+  animation:flyStrawberry 34s linear infinite, fairyBob 2.4s ease-in-out infinite;
+  animation-delay:-22s;
+}
+@keyframes flyStrawberry{
+  0%{transform:translate(-80px, 28vh) rotate(-6deg)}
+  25%{transform:translate(25vw, 36vh) rotate(8deg)}
+  50%{transform:translate(50vw, 28vh) rotate(-5deg)}
+  75%{transform:translate(75vw, 36vh) rotate(7deg)}
+  100%{transform:translate(calc(100vw + 80px), 30vh) rotate(-6deg)}
+}
+
+/* 🍒 樱桃 - 摆动飞 */
+.flyer-cherry{
+  font-size:34px;
+  filter:drop-shadow(0 0 12px rgba(239,68,68,.8)) drop-shadow(0 0 22px rgba(220,38,38,.5));
+  animation:flyCherry 28s linear infinite, fairyBob 1.8s ease-in-out infinite reverse;
+  animation-delay:-7s;
+}
+@keyframes flyCherry{
+  0%{transform:translate(calc(100vw + 80px), 70vh) rotate(0deg)}
+  25%{transform:translate(72vw, 76vh) rotate(-8deg)}
+  50%{transform:translate(48vw, 66vh) rotate(8deg)}
+  75%{transform:translate(22vw, 72vh) rotate(-6deg)}
+  100%{transform:translate(-80px, 70vh) rotate(0deg)}
+}
+
+/* 🍦 冰淇淋 - 慢飘 */
+.flyer-icecream{
+  font-size:44px;
+  filter:drop-shadow(0 0 14px rgba(253,224,71,.8)) drop-shadow(0 0 24px rgba(244,114,182,.5));
+  animation:flyIcecream 42s linear infinite, bobSlow 3.4s ease-in-out infinite;
+  animation-delay:-25s;
+}
+@keyframes flyIcecream{
+  0%{transform:translate(-100px, 14vh) rotate(-3deg)}
+  50%{transform:translate(50vw, 20vh) rotate(3deg)}
+  100%{transform:translate(calc(100vw + 100px), 16vh) rotate(-3deg)}
+}
+
+/* 👧 小女孩 (SVG 全身) - 中部漂浮 */
+.flyer-girl-kid{
+  width:68px;
+  height:100px;
+  filter:drop-shadow(0 2px 8px rgba(244,114,182,.6)) drop-shadow(0 0 18px rgba(236,72,153,.4));
+  animation:flyGirlKid 32s linear infinite, fairyBob 2.4s ease-in-out infinite;
+  animation-delay:-7s;
+}
+@keyframes flyGirlKid{
+  0%{transform:translate(-100px, 42vh) rotate(-4deg)}
+  25%{transform:translate(25vw, 48vh) rotate(6deg)}
+  50%{transform:translate(50vw, 40vh) rotate(-4deg)}
+  75%{transform:translate(75vw, 46vh) rotate(5deg)}
+  100%{transform:translate(calc(100vw + 100px), 42vh) rotate(-4deg)}
+}
+
+/* 👦 小男孩 (SVG 全身) - 中下部漂浮 */
+.flyer-boy-kid{
+  width:72px;
+  height:104px;
+  filter:drop-shadow(0 2px 8px rgba(59,130,246,.6)) drop-shadow(0 0 18px rgba(168,85,247,.4));
+  animation:flyBoyKid 34s linear infinite, fairyBob 2.6s ease-in-out infinite reverse;
+  animation-delay:-18s;
+}
+@keyframes flyBoyKid{
+  0%{transform:translate(calc(100vw + 100px), 56vh) rotate(4deg)}
+  25%{transform:translate(72vw, 50vh) rotate(-5deg)}
+  50%{transform:translate(48vw, 58vh) rotate(5deg)}
+  75%{transform:translate(22vw, 52vh) rotate(-4deg)}
+  100%{transform:translate(-100px, 56vh) rotate(4deg)}
+}
+
+
+
+
+
+
+
+
+
+
+@keyframes flyCloudRainbow{
+  0%{transform:translate(calc(100vw + 150px), 50vh)}
+  25%{transform:translate(72vw, 42vh)}
+  50%{transform:translate(48vw, 56vh)}
+  75%{transform:translate(22vw, 46vh)}
+  100%{transform:translate(-150px, 52vh)}
+}
+
+/* 共用浮动动画 */
+@keyframes bobSlow{0%,100%{margin-top:0}50%{margin-top:-14px}}
+@keyframes bobMed{0%,100%{margin-top:0}50%{margin-top:-10px}}
+@keyframes bobFast{0%,100%{margin-top:0}50%{margin-top:-7px}}
+
+/* ─────────────  STARRY BACKGROUND  ───────────── */
+.bg-cosmos{
+  position:fixed;inset:0;z-index:-3;
+  background:
+    radial-gradient(ellipse at 15% 5%, var(--th-cosmos-1), transparent 55%),
+    radial-gradient(ellipse at 85% 10%, var(--th-cosmos-2), transparent 55%),
+    radial-gradient(ellipse at 65% 75%, var(--th-cosmos-3), transparent 60%),
+    radial-gradient(ellipse at 30% 90%, var(--th-cosmos-4), transparent 55%),
+    linear-gradient(180deg, var(--th-bg-deep) 0%, var(--th-bg-mid) 35%, var(--th-bg-glow) 60%, var(--th-bg-mid) 85%, var(--th-bg-deep) 100%);
+  transition:background .6s ease;
+}
+.stars{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.star{
+  position:absolute;
+  background:#fff;border-radius:50%;
+  box-shadow:0 0 6px rgba(255,255,255,.6);
+  animation:twinkle 3s infinite;
+}
+@keyframes twinkle{
+  0%,100%{opacity:.3;transform:scale(.8)}
+  50%{opacity:1;transform:scale(1.2)}
+}
+/* shooting star */
+.shooter{
+  position:absolute;width:120px;height:1.5px;
+  background:linear-gradient(90deg, transparent, #fff, transparent);
+  opacity:0;transform-origin:right center;
+  animation:shoot 8s infinite;
+}
+@keyframes shoot{
+  0%,90%{opacity:0;transform:translate(0,0) rotate(-25deg)}
+  92%{opacity:1}
+  100%{opacity:0;transform:translate(-400px,180px) rotate(-25deg)}
+}
+
+/* ─────────────  FLOATING DECO EMOJIS  ───────────── */
+.deco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.deco-emoji{
+  position:absolute;
+  font-size:32px;
+  opacity:.10;
+  filter:blur(.3px) drop-shadow(0 0 12px currentColor);
+  animation:floaty 14s ease-in-out infinite;
+}
+@keyframes floaty{
+  0%,100%{transform:translateY(0) rotate(-5deg)}
+  50%{transform:translateY(-30px) rotate(5deg)}
+}
+
+/* ─────────────  PAGE LAYOUT  ───────────── */
+.page{
+  max-width:1100px;
+  margin:0 auto;
+  padding:48px 20px 60px;
+  position:relative;
+}
+
+/* ─────────────  HEADER  ───────────── */
+.brand{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:10px 18px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(251,191,36,.28), rgba(239,68,68,.28));
+  border:1px solid rgba(251,191,36,.6);
+  font-size:14px;letter-spacing:1.5px;font-weight:700;
+  color:#fef3c7;
+  text-shadow:0 1px 6px rgba(0,0,0,.6);
+  
+  animation:fadeUp .8s .1s both;
+}
+.brand .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 12px var(--gold);
+  animation:pulse 1.6s infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.3);opacity:.6}
+}
+
+.title-block{
+  margin-top:24px;
+  text-align:center;
+}
+.tagline{
+  font-family:'Ma Shan Zheng',serif;
+  font-size:22px;
+  color:#fde68a;
+  margin-bottom:8px;
+  letter-spacing:6px;
+  text-shadow:0 2px 12px rgba(0,0,0,.85), 0 0 16px rgba(251,191,36,.4);
+  animation:fadeUp .8s .2s both;
+}
+h1.main{
+  font-family:'ZCOOL KuaiLe','Ma Shan Zheng',serif;
+  font-size:clamp(54px, 9vw, 110px);
+  line-height:1;
+  letter-spacing:4px;
+  background:linear-gradient(135deg, #fbbf24 0%, #ef4444 30%, #ec4899 60%, #a855f7 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(251,191,36,.3));
+  animation:fadeUp 1s .3s both;
+  text-align:center;
+  position:relative;
+}
+h1.main::after{
+  content:'';display:block;
+  width:80px;height:4px;
+  margin:18px auto 0;
+  background:linear-gradient(90deg, var(--gold), transparent);
+  border-radius:2px;
+}
+.subtitle{
+  margin-top:18px;
+  font-family:'Bowlby One','ZCOOL KuaiLe',serif;
+  font-size:clamp(14px, 2vw, 18px);
+  color:#fef3c7;
+  letter-spacing:8px;
+  text-transform:uppercase;
+  text-align:center;
+  text-shadow:0 2px 8px rgba(0,0,0,.7);
+  animation:fadeUp .8s .5s both;
+}
+.intro{
+  max-width:580px;margin:24px auto 0;
+  font-size:16px;line-height:1.8;color:#f1f5f9;
+  text-align:center;
+  text-shadow:0 2px 10px rgba(0,0,0,.7), 0 0 4px rgba(0,0,0,.5);
+  animation:fadeUp .8s .6s both;
+}
+.intro b{color:var(--gold-soft);font-weight:600}
+
+/* ─────────────  STATS STRIP  ───────────── */
+.stats{
+  margin:48px auto 0;
+  display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+  animation:fadeUp .8s .7s both;
+}
+.stat{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;
+  border-radius:14px;
+  background:rgba(15,23,42,.85);
+  border:1px solid rgba(251,191,36,.35);
+  
+  transition:transform .3s, border-color .3s, background .3s;
+}
+.stat:hover{
+  transform:translateY(-2px);
+  border-color:rgba(251,191,36,.4);
+  background:rgba(251,191,36,.06);
+}
+.stat-icon{font-size:22px;filter:drop-shadow(0 0 8px currentColor)}
+.stat-num{font-family:'Bowlby One',serif;font-size:24px;color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.8), 0 0 16px rgba(251,191,36,.3)}
+.stat-lbl{font-size:13px;color:#f1f5f9;letter-spacing:1px;text-shadow:0 2px 6px rgba(0,0,0,.8);font-weight:600}
+
+/* ─────────────  ISLAND GRID  ───────────── */
+.islands{
+  margin-top:60px;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:18px;
+}
+@media (max-width:980px){
+  .islands{grid-template-columns:repeat(2, 1fr);gap:16px}
+}
+@media (max-width:600px){
+  .islands{grid-template-columns:repeat(3, 1fr);gap:8px}
+  .page{padding:32px 10px 40px}
+  /* 三列布局: 极致紧凑 */
+  .island{padding:10px 6px}
+  .island-icon{font-size:36px !important;margin-bottom:4px}
+  .island-name{font-size:13px !important;line-height:1.2;margin:3px 0}
+  .island-en{font-size:12px !important;letter-spacing:.2px;line-height:1.1}
+  .island-desc{display:none !important}  /* 三列空间不够, 隐藏描述 */
+  .island-tags{display:none !important}  /* 三列空间不够, 隐藏标签 */
+  .enter{font-size:12px !important;font-weight:700 !important;padding:6px 4px !important;margin-top:6px !important;letter-spacing:0 !important;white-space:nowrap !important;width:100% !important;justify-content:center !important;gap:3px !important;box-sizing:border-box}
+}
+
+/* 中等屏幕 (400-600px) 上, 强制 3 列但稍微宽松一点 */
+@media (min-width:400px) and (max-width:600px){
+  .islands{gap:10px}
+  .island{padding:12px 8px}
+  .island-name{font-size:14px !important}
+  .enter{font-size:13px !important;padding:7px 6px !important}
+}
+
+.island{
+  position:relative;
+  display:block;
+  text-decoration:none;
+  border-radius:28px;
+  padding:22px 18px;
+  min-height:240px;
+  overflow:hidden;
+  isolation:isolate;
+  background:linear-gradient(135deg, var(--c1), var(--c2));
+  border:1px solid var(--c3);
+  box-shadow:
+    0 20px 50px -20px var(--c1),
+    0 0 0 1px rgba(255,255,255,.05) inset;
+  transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s;
+  animation:cardIn .8s var(--delay) both;
+}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(40px) scale(.95)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.island::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:
+    radial-gradient(circle at 20% 100%, rgba(0,0,0,.35), transparent 50%),
+    radial-gradient(circle at 90% 0%, rgba(255,255,255,.18), transparent 60%);
+}
+/* noise overlay */
+.island::after{
+  content:'';position:absolute;inset:0;z-index:-1;
+  opacity:.07;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.island:hover{
+  transform:translateY(-8px) scale(1.01);
+  box-shadow:
+    0 30px 70px -20px var(--c1),
+    0 0 0 1px rgba(255,255,255,.15) inset,
+    0 0 60px -10px var(--c3);
+}
+.island:active{transform:translateY(-3px) scale(.99);transition-duration:.1s}
+
+/* floating emojis inside card */
+.island .float-bg{
+  position:absolute;inset:0;z-index:-1;overflow:hidden;
+  border-radius:inherit;
+}
+.island .float-bg span{
+  position:absolute;font-size:48px;opacity:.15;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.2));
+  animation:slowFloat 9s ease-in-out infinite;
+}
+@keyframes slowFloat{
+  0%,100%{transform:translateY(0) rotate(-8deg)}
+  50%{transform:translateY(-14px) rotate(8deg)}
+}
+
+.island-icon{
+  font-size:54px;
+  line-height:1;
+  margin-bottom:14px;
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.3));
+  display:inline-block;
+  transition:transform .4s;
+}
+.island:hover .island-icon{
+  transform:translateY(-4px) rotate(-6deg) scale(1.1);
+}
+.island-name{
+  font-family:'ZCOOL KuaiLe',serif;
+  font-size:22px;
+  letter-spacing:2px;
+  color:var(--pal-ink,#fff);
+  text-shadow:0 4px 14px rgba(0,0,0,.3);
+  line-height:1.1;
+  margin-bottom:4px;
+}
+.island-en{
+  font-family:'Bowlby One',serif;
+  font-size:14px;letter-spacing:3px;
+  color:rgba(255,255,255,.75);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.island-desc{
+  font-size:13.5px;line-height:1.7;
+  color:rgba(255,255,255,.92);
+  margin-bottom:20px;
+  max-width:340px;
+}
+
+.island-tags{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:20px;
+}
+.tag{
+  padding:4px 10px;border-radius:8px;
+  background:rgba(0,0,0,.55);
+  font-size:13px;font-weight:600;font-weight:600;letter-spacing:.5px;
+  color:rgba(255,255,255,.95);
+  border:1px solid rgba(255,255,255,.12);
+  
+}
+
+.enter{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 20px;
+  border-radius:14px;
+  background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.25);
+  
+  font-size:14px;font-weight:700;letter-spacing:1.5px;
+  color:var(--pal-ink,#fff);
+  transition:all .25s;
+  position:relative;
+}
+.enter .arrow{transition:transform .25s}
+.island:hover .enter{
+  background:rgba(0,0,0,.5);
+  border-color:rgba(255,255,255,.5);
+}
+.island:hover .enter .arrow{transform:translateX(4px)}
+
+/* ─────────────  THEME PALETTES  ───────────── */
+.island.food{--c1:#ea580c;--c2:#b91c1c;--c3:#fbbf24}
+.island.animal{--c1:#16a34a;--c2:#0f766e;--c3:#84cc16}
+.island.city{--c1:#1d4ed8;--c2:#0891b2;--c3:#a78bfa}
+.island.time{--c1:#7c3aed;--c2:#be185d;--c3:#f472b6}
+.island.family{--c1:#db2777;--c2:#9333ea;--c3:#fbbf24}
+.island.clothes{--c1:#0d9488;--c2:#0369a1;--c3:#fde047}
+.island.nature{--c1:#15803d;--c2:#ea580c;--c3:#fde047}
+.island.colornum{--c1:#dc2626;--c2:#7c3aed;--c3:#fde047}
+.island.school{--c1:#0891b2;--c2:#7c3aed;--c3:#fde047}
+.island.house{--c1:#d97706;--c2:#b91c1c;--c3:#fde047}
+.island.transport{--c1:#1d4ed8;--c2:var(--pal-surf-4,#475569);--c3:#fde047}
+.island.sports{--c1:#ea580c;--c2:#dc2626;--c3:#fde047}
+.island.verbs{--c1:#7c3aed;--c2:#0891b2;--c3:#fde047}
+.island.adj{--c1:#ec4899;--c2:#f97316;--c3:#fde047}
+.island.people{--c1:#0d9488;--c2:#d97706;--c3:#fb7185}
+.island.pronouns{--c1:#7c3aed;--c2:#1e3a8a;--c3:#fde047}
+.island.misc{--c1:var(--pal-surf-4,#475569);--c2:#64748b;--c3:#fde047}
+.island.body{--c1:#dc2626;--c2:#fb7185;--c3:#fbbf24}
+.island.adj{--c1:#ec4899;--c2:#f97316;--c3:#fde047}
+.island.people{--c1:#0d9488;--c2:#d97706;--c3:#fb7185}
+.island.pronouns{--c1:#7c3aed;--c2:#1e3a8a;--c3:#fde047}
+.island.misc{--c1:var(--pal-surf-4,#475569);--c2:#64748b;--c3:#fde047}
+.island.body{--c1:#dc2626;--c2:#fb7185;--c3:#fbbf24}
+
+/* featured wide card */
+.island.featured{
+  grid-column:1 / -1;
+  min-height:240px;
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  gap:24px;
+  align-items:center;
+}
+.island.featured .feat-left{position:relative;z-index:1}
+.island.featured .feat-right{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;
+}
+.island.featured .island-icon{font-size:96px;margin-bottom:0}
+.island.featured .island-name{font-size:42px}
+.featured-badge{
+  position:absolute;top:18px;right:20px;z-index:2;
+  padding:6px 14px;border-radius:999px;
+  background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.4);
+  font-size:13px;font-weight:600;font-weight:800;letter-spacing:2px;
+  color:var(--pal-ink,#fff);
+  
+  animation:badgeShine 2.5s infinite;
+}
+@keyframes badgeShine{
+  0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.7)}
+  50%{box-shadow:0 0 0 8px rgba(251,191,36,0)}
+}
+@media (max-width:720px){
+  .island.featured{
+    grid-template-columns:1fr;
+    gap:8px;
+    min-height:auto;
+  }
+  .island.featured .feat-right{order:-1;margin-top:8px}
+  .island.featured .island-icon{font-size:72px}
+  .island.featured .island-name{font-size:34px}
+}
+
+/* ─────────────  HOW IT WORKS  ───────────── */
+.how{
+  margin-top:80px;
+  padding:36px 28px;
+  border-radius:24px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.08);
+  
+}
+.how-title{
+  font-family:'ZCOOL KuaiLe',serif;
+  font-size:28px;letter-spacing:2px;
+  text-align:center;
+  margin-bottom:6px;
+  color:var(--gold-soft);
+text-shadow:0 2px 10px rgba(0,0,0,.7);
+}
+.how-sub{
+  text-align:center;font-size:13px;
+  color:var(--ink-mute);letter-spacing:3px;
+  text-transform:uppercase;font-family:'Bowlby One',serif;
+  margin-bottom:28px;
+}
+.how-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+}
+@media (max-width:760px){
+  .how-grid{grid-template-columns:repeat(2,1fr)}
+  .how{padding:28px 18px}
+}
+.how-step{
+  text-align:center;
+  padding:18px 12px;
+  border-radius:16px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.05);
+  transition:all .3s;
+}
+.how-step:hover{
+  border-color:rgba(251,191,36,.4);
+  background:rgba(251,191,36,.05);
+  transform:translateY(-3px);
+}
+.how-step .num{
+  font-family:'Bowlby One',serif;
+  font-size:13px;color:var(--gold);
+  letter-spacing:2px;margin-bottom:6px;
+  display:block;
+}
+.how-step .icon{font-size:36px;margin-bottom:8px;display:block}
+.how-step .title{
+  font-family:'ZCOOL KuaiLe',serif;
+  font-size:17px;letter-spacing:1px;
+  margin-bottom:4px;color:var(--pal-ink,#fff);
+text-shadow:0 2px 8px rgba(0,0,0,.7);
+}
+.how-step .desc{font-size:12px;line-height:1.7;color:var(--ink-soft)}
+
+/* ─────────────  FOOTER  ───────────── */
+.foot{
+  margin-top:60px;
+  text-align:center;
+  padding:30px 20px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.foot-brand{
+  font-family:'Ma Shan Zheng',serif;
+  font-size:24px;letter-spacing:6px;
+  color:var(--gold-soft);
+  margin-bottom:8px;
+text-shadow:0 2px 8px rgba(0,0,0,.7);
+}
+.foot-tip{
+  font-size:12px;color:var(--ink-mute);
+  line-height:1.8;letter-spacing:1px;
+text-shadow:0 1px 6px rgba(0,0,0,.7);
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* big screen polish */
+@media (min-width:900px){
+  .island{padding:38px 32px 32px;min-height:320px}
+  .island-name{font-size:38px}
+  .island-icon{font-size:72px}
+}
+
+/* reduced motion - 只禁用高强度震动/闪烁 (保留背景温和漂浮) */
+@media (prefers-reduced-motion:reduce){
+  .shake-screen, .boss-rage, [class*="hit-anim"]{
+    animation-duration:.01ms !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+/* v717(Hansen): 首页「更换主题」面板已彻底移除·主题统一在主题商店获取——原主题模态框/卡片 CSS 一并删除(冗余) */
+
+/* 🔴 v719/v720/v721/v722(Hansen): 首页左上角"沉浸欣赏主题"按钮 + 沉浸模式(只显示主题背景+特效, 隐藏所有 UI) */
+/* v722: Hansen 要【极小(≈2.5~3mm)·无任何描边·透明磨砂薄纱·不认真看几乎看不出来】的小圆点——只稍微透出"这是个按钮"·点一下看整个主题背景。
+   做法: 按钮本体 40px 透明(看不见·只作好按的点击区·防晕无动画); 可见的只是 ::before 一个 14px 薄纱圆点(无边框/无阴影·极淡白纱+backdrop 磨砂)。position:absolute 随首页滚动·z-index 10万·只在首页(岛里零泄漏)。 */
+.hsn-eye-btn{
+  position:absolute;
+  top:12px; left:12px;
+  z-index:100000;
+  width:40px; height:40px;            /* 透明大点击区·好按(本身看不见) */
+  padding:0; border:none; background:transparent; box-shadow:none;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  -webkit-appearance:none; appearance:none; outline:none;
+}
+/* 极小(≈2.5mm)透明薄纱圆点·无任何颜色描边·不认真看几乎看不出来 */
+.hsn-eye-btn::before{
+  content:''; position:absolute; top:50%; left:50%;
+  width:14px; height:14px; margin:-7px 0 0 -7px;
+  border-radius:50%;
+  background:rgba(255,255,255,.16);
+  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); /* v719薄纱豁免: Hansen钦定磨砂质感·14px极小面积·absolute随页滚·合成成本≈0·唯一合法backdrop */
+}
+.hsn-eye-btn:active::before{ background:rgba(255,255,255,.3); }
+/* 沉浸模式: 隐藏整个前景内容(main.page 含头部+世界地图), 只留主题背景层/特效·薄纱点略显便于退出 */
+body.hsn-theme-only main.page{ display:none !important; }
+body.hsn-theme-only .hsn-eye-btn::before{ background:rgba(255,255,255,.24); }
+
+
+
+/* ═══════ 🌸 樱花林梦境 (只在 pink 主题显示) ═══════ */
+.cherry-scene{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-theme="pink"] .cherry-scene{display:block}
+.cherry-scene svg{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:auto;
+  max-height:75vh;
+}
+/* 粉色主题下隐藏 cosmos 的星云背景 */
+body[data-theme="pink"] .bg-cosmos{opacity:.3}
+/* 粉色主题下星星稍微调亮 (粉色背景星星看不清) */
+body[data-theme="pink"] .stars{opacity:.5; filter:hue-rotate(-30deg) brightness(1.3)}
+
+
+/* 🌸 粉色主题下文字优化 (浅色背景需要深色文字) */
+body[data-theme="pink"] .tagline{
+  color:#831843;
+  text-shadow:0 2px 8px rgba(255,255,255,.7), 0 0 12px rgba(255,255,255,.5);
+}
+body[data-theme="pink"] .subtitle{
+  color:#9d174d;
+  text-shadow:0 2px 6px rgba(255,255,255,.7);
+}
+body[data-theme="pink"] .intro{
+  color:#831843;
+  text-shadow:0 1px 6px rgba(255,255,255,.8);
+}
+body[data-theme="pink"] .intro b{color:#be185d}
+body[data-theme="pink"] .stat-lbl{
+  color:#831843 !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.8);
+}
+body[data-theme="pink"] .stat-num{
+  color:#be185d !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.8), 0 0 10px rgba(244,114,182,.4);
+}
+body[data-theme="pink"] .brand{
+  background:linear-gradient(135deg, rgba(190,24,93,.2), rgba(244,114,182,.25));
+  border-color:rgba(190,24,93,.45);
+  color:#831843;
+  text-shadow:0 1px 4px rgba(255,255,255,.8);
+}
+body[data-theme="pink"] .stat{
+  background:rgba(255,255,255,.45) !important;
+  border-color:rgba(190,24,93,.35) !important;
+}
+body[data-theme="pink"] .how-title{
+  color:#9d174d;
+  text-shadow:0 2px 6px rgba(255,255,255,.7);
+}
+body[data-theme="pink"] .how-step{
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(190,24,93,.25);
+}
+body[data-theme="pink"] .how-step .title{
+  color:#831843;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="pink"] .how-step .desc{
+  color:#9d174d;
+}
+body[data-theme="pink"] .foot-brand{
+  color:#9d174d;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="pink"] .foot-tip{
+  color:#831843;
+  text-shadow:0 1px 3px rgba(255,255,255,.6);
+}
+/* h1.main 不动 — 它本身就是彩虹色 */
+
+
+
+/* ═══════ 🌊 海洋深处场景 (只在 ocean 主题显示) ═══════ */
+.ocean-scene{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-theme="ocean"] .ocean-scene{display:block}
+.ocean-scene svg{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:auto;
+  max-height:85vh;
+}
+/* 海洋主题下隐藏星云背景 */
+body[data-theme="ocean"] .bg-cosmos{opacity:.5}
+body[data-theme="ocean"] .stars{opacity:.7; filter:hue-rotate(180deg) brightness(1.2)}
+
+/* 海面波浪动画 - 浮动 */
+.ocean-wave{
+  animation:waveBob 4s ease-in-out infinite;
+}
+@keyframes waveBob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+
+
+/* 🌊 海洋蓝主题文字优化 */
+body[data-theme="ocean"] .tagline{
+  color:#bae6fd;
+  text-shadow:0 2px 10px rgba(0,0,0,.7), 0 0 16px rgba(125,211,252,.4);
+}
+body[data-theme="ocean"] .subtitle{
+  color:#e0f2fe;
+  text-shadow:0 2px 8px rgba(0,0,0,.7);
+}
+body[data-theme="ocean"] .intro{
+  color:#f0f9ff;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+}
+body[data-theme="ocean"] .intro b{color:#7dd3fc}
+body[data-theme="ocean"] .stat-num{
+  color:#7dd3fc !important;
+  text-shadow:0 2px 8px rgba(0,0,0,.8), 0 0 12px rgba(125,211,252,.5);
+}
+body[data-theme="ocean"] .stat-lbl{
+  color:#e0f2fe !important;
+}
+body[data-theme="ocean"] .brand{
+  background:linear-gradient(135deg, rgba(125,211,252,.18), rgba(56,189,248,.22));
+  border-color:rgba(125,211,252,.5);
+  color:#bae6fd;
+}
+body[data-theme="ocean"] .stat{
+  background:rgba(8,47,73,.55) !important;
+  border-color:rgba(125,211,252,.35) !important;
+}
+body[data-theme="ocean"] .how-step{
+  background:rgba(8,47,73,.45);
+  border:1px solid rgba(125,211,252,.25);
+}
+body[data-theme="ocean"] .how-step .title{
+  color:#7dd3fc;
+}
+body[data-theme="ocean"] .how-step .desc{
+  color:#e0f2fe;
+}
+
+
+
+/* ═══════ 🌳 森林场景 (只在 forest 主题显示) ═══════ */
+.forest-scene{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-theme="forest"] .forest-scene{display:block}
+.forest-scene svg{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:auto;
+  max-height:80vh;
+}
+body[data-theme="forest"] .bg-cosmos{opacity:.4}
+body[data-theme="forest"] .stars{opacity:.5; filter:hue-rotate(60deg) brightness(1.3)}
+
+
+/* 🌳 森林绿主题文字优化 */
+body[data-theme="forest"] .tagline{
+  color:#365314;
+  text-shadow:0 2px 8px rgba(255,255,255,.7), 0 0 12px rgba(253,224,71,.4);
+}
+body[data-theme="forest"] .subtitle{
+  color:#3f6212;
+  text-shadow:0 2px 6px rgba(255,255,255,.7);
+}
+body[data-theme="forest"] .intro{
+  color:#1a2e05;
+  text-shadow:0 1px 6px rgba(255,255,255,.8);
+}
+body[data-theme="forest"] .intro b{color:#854d0e}
+body[data-theme="forest"] .stat-num{
+  color:#854d0e !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.8), 0 0 10px rgba(253,224,71,.4);
+}
+body[data-theme="forest"] .stat-lbl{
+  color:#365314 !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.8);
+}
+body[data-theme="forest"] .brand{
+  background:linear-gradient(135deg, rgba(132,204,22,.25), rgba(253,224,71,.3));
+  border-color:rgba(133,77,14,.45);
+  color:#365314;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="forest"] .stat{
+  background:rgba(255,255,255,.45) !important;
+  border-color:rgba(133,77,14,.35) !important;
+}
+body[data-theme="forest"] .how-title{
+  color:#3f6212;
+  text-shadow:0 2px 6px rgba(255,255,255,.7);
+}
+body[data-theme="forest"] .how-step{
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(133,77,14,.25);
+}
+body[data-theme="forest"] .how-step .title{
+  color:#365314;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="forest"] .how-step .desc{
+  color:#3f6212;
+}
+body[data-theme="forest"] .foot-brand{
+  color:#3f6212;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="forest"] .foot-tip{
+  color:#365314;
+  text-shadow:0 1px 3px rgba(255,255,255,.6);
+}
+
+
+
+/* ═══════ 🌈 彩虹魔幻场景 (只在 rainbow 主题显示) ═══════ */
+.rainbow-scene{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-theme="rainbow"] .rainbow-scene{display:block}
+.rainbow-scene svg{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:auto;
+  max-height:90vh;
+}
+body[data-theme="rainbow"] .bg-cosmos{opacity:.5}
+body[data-theme="rainbow"] .stars{opacity:.7; filter:hue-rotate(-30deg) brightness(1.4)}
+
+/* 彩虹拱形闪烁 */
+@keyframes rainbowGlow{
+  0%,100%{filter:drop-shadow(0 0 16px rgba(236,72,153,.7)) drop-shadow(0 0 36px rgba(168,85,247,.5)) drop-shadow(0 0 60px rgba(255,255,255,.3))}
+  50%{filter:drop-shadow(0 0 28px rgba(236,72,153,1)) drop-shadow(0 0 55px rgba(168,85,247,.8)) drop-shadow(0 0 80px rgba(253,224,71,.5))}
+}
+
+
+/* 🌈 彩虹云朵主题文字优化 */
+body[data-theme="rainbow"] .tagline{
+  color:#fde047;
+  text-shadow:0 2px 10px rgba(0,0,0,.8), 0 0 16px rgba(253,224,71,.5);
+}
+body[data-theme="rainbow"] .subtitle{
+  color:#fef3c7;
+  text-shadow:0 2px 8px rgba(0,0,0,.7);
+}
+body[data-theme="rainbow"] .intro{
+  color:#fef3c7;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+}
+body[data-theme="rainbow"] .intro b{color:#fde047}
+body[data-theme="rainbow"] .stat-num{
+  color:#fde047 !important;
+  text-shadow:0 2px 8px rgba(0,0,0,.8), 0 0 12px rgba(253,224,71,.5);
+}
+body[data-theme="rainbow"] .stat-lbl{
+  color:#fef3c7 !important;
+  text-shadow:0 1px 4px rgba(0,0,0,.7);
+}
+body[data-theme="rainbow"] .brand{
+  background:linear-gradient(135deg, rgba(252,165,165,.2), rgba(253,224,71,.25));
+  border-color:rgba(253,224,71,.5);
+  color:#fef3c7;
+  text-shadow:0 1px 4px rgba(0,0,0,.7);
+}
+body[data-theme="rainbow"] .stat{
+  background:rgba(76,29,149,.55) !important;
+  border-color:rgba(253,224,71,.35) !important;
+}
+body[data-theme="rainbow"] .how-step{
+  background:rgba(76,29,149,.45);
+  border:1px solid rgba(253,224,71,.25);
+}
+body[data-theme="rainbow"] .how-step .title{
+  color:#fde047;
+  text-shadow:0 1px 4px rgba(0,0,0,.7);
+}
+body[data-theme="rainbow"] .how-step .desc{
+  color:#fef3c7;
+}
+
+
+
+/* ═══════ 🍑 桃子糖果场景 (只在 peach 主题显示) ═══════ */
+.peach-scene{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-theme="peach"] .peach-scene{display:block}
+.peach-scene svg{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:auto;
+  max-height:85vh;
+}
+body[data-theme="peach"] .bg-cosmos{opacity:.3}
+body[data-theme="peach"] .stars{opacity:.4; filter:hue-rotate(-30deg) brightness(1.4)}
+
+
+/* 🍑 桃子糖果主题文字优化 (浅色背景需深色文字) */
+body[data-theme="peach"] .tagline{
+  color:#9a3412;
+  text-shadow:0 2px 8px rgba(255,255,255,.8), 0 0 12px rgba(254,215,170,.5);
+}
+body[data-theme="peach"] .subtitle{
+  color:#7c2d12;
+  text-shadow:0 2px 6px rgba(255,255,255,.8);
+}
+body[data-theme="peach"] .intro{
+  color:#7c2d12;
+  text-shadow:0 1px 6px rgba(255,255,255,.85);
+}
+body[data-theme="peach"] .intro b{color:#c2410c}
+body[data-theme="peach"] .stat-num{
+  color:#c2410c !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.85), 0 0 10px rgba(251,146,60,.4);
+}
+body[data-theme="peach"] .stat-lbl{
+  color:#7c2d12 !important;
+  text-shadow:0 1px 4px rgba(255,255,255,.85);
+}
+body[data-theme="peach"] .brand{
+  background:linear-gradient(135deg, rgba(251,146,60,.25), rgba(244,114,182,.3));
+  border-color:rgba(194,65,12,.45);
+  color:#7c2d12;
+  text-shadow:0 1px 4px rgba(255,255,255,.75);
+}
+body[data-theme="peach"] .stat{
+  background:rgba(255,255,255,.5) !important;
+  border-color:rgba(194,65,12,.35) !important;
+}
+body[data-theme="peach"] .how-title{
+  color:#9a3412;
+  text-shadow:0 2px 6px rgba(255,255,255,.75);
+}
+body[data-theme="peach"] .how-step{
+  background:rgba(255,255,255,.5);
+  border:1px solid rgba(194,65,12,.25);
+}
+body[data-theme="peach"] .how-step .title{
+  color:#7c2d12;
+  text-shadow:0 1px 4px rgba(255,255,255,.7);
+}
+body[data-theme="peach"] .how-step .desc{
+  color:#9a3412;
+}
+body[data-theme="peach"] .foot-brand{
+  color:#9a3412;
+  text-shadow:0 1px 4px rgba(255,255,255,.75);
+}
+body[data-theme="peach"] .foot-tip{
+  color:#7c2d12;
+  text-shadow:0 1px 3px rgba(255,255,255,.65);
+}
+
+</style>
+<style id="kid-logo-final-css">
+/* ===========================================================
+   🎨 游戏 logo 风主标题 v2 - 居中修复
+   =========================================================== */
+
+/* 容器: 强制居中 */
+header{
+  text-align: center !important;
+}
+
+.title-block{
+  text-align: center !important;
+  width: 100% !important;
+  display: block !important;
+  margin: 24px auto !important;
+  padding: 12px 0 !important;
+  position: relative;
+}
+
+/* 标语 "单 词 大 冒 险 · 一 段 神 奇 旅 程" */
+.tagline{
+  font-family: 'CartoonBlack', 'Microsoft YaHei UI', 'Microsoft YaHei', '微软雅黑', 'PingFang SC Heavy', 'PingFang SC', 'HarmonyOS Sans SC', 'Heiti SC', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: clamp(14px, 3vw, 22px) !important;
+  color: #fde047 !important;
+  letter-spacing: 4px !important;
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.4),
+    0 4px 12px rgba(0,0,0,.5),
+    0 0 20px rgba(251,191,36,.6) !important;
+  margin-bottom: 12px !important;
+  -webkit-text-stroke: 0 !important;
+  -webkit-text-fill-color: #fde047 !important;
+  background: none !important;
+}
+
+/* 主标题 "单词大冒险" - 关键: text-align center 而不是 flex */
+h1.main.game-logo{
+  font-family: 'CartoonBlack', 'Microsoft YaHei UI', 'Microsoft YaHei', '微软雅黑', 'PingFang SC Heavy', 'PingFang SC', 'HarmonyOS Sans SC', 'Heiti SC', sans-serif !important;
+  font-size: clamp(40px, 10vw, 96px) !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 8px auto 24px !important;
+  padding: 12px 0 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  /* 重置任何之前的 background */
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+  color: initial !important;
+}
+
+/* 每个字 - inline-block 而不是 flex item */
+.logo-char{
+  display: inline-block !important;
+  font-family: inherit !important;
+  font-weight: 900 !important;
+  font-size: inherit !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+  position: relative;
+  /* 描边: 用 -webkit-text-stroke 干净不分层 */
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
+  /* 3D 立体堆叠投影 + 光晕 */
+  text-shadow: 
+    0 4px 0 #7c2d12,
+    0 6px 0 #7c2d12,
+    0 8px 0 #7c2d12,
+    0 12px 24px rgba(0,0,0,.5),
+    0 0 30px rgba(251,191,36,.6),
+    0 0 50px rgba(236,72,153,.4) !important;
+  animation: charBounce 2.5s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.12s);
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+  transform-origin: center bottom;
+}
+
+/* 6 个字 6 种颜色 + 轻微旋转 */
+.logo-char.c1{ color: #3b82f6 !important; transform: rotate(-5deg) }  /* 蓝 - 单 */
+.logo-char.c2{ color: #22c55e !important; transform: rotate(3deg) }   /* 绿 - 词 */
+.logo-char.c3{ color: #ef4444 !important; transform: rotate(-2deg) }  /* 红 - 大 */
+.logo-char.c4{ color: #facc15 !important; transform: rotate(4deg) }   /* 黄 - 冒 */
+.logo-char.c5{ color: #a855f7 !important; transform: rotate(-3deg) }  /* 紫 - 险 */
+.logo-char.c6{ color: #22c55e !important; transform: rotate(2deg) }   /* 备用 */
+
+/* 跳动动画 */
+@keyframes charBounce{
+  0%, 100% { translate: 0 0 }
+  50%      { translate: 0 -8px }
+}
+
+/* hover 时停止跳动 */
+@media (hover: hover){
+  h1.main.game-logo:hover .logo-char{
+    animation-play-state: paused;
+  }
+}
+
+/* 移动端 - 缩小字号防止溢出 */
+@media (max-width: 480px){
+  h1.main.game-logo{
+    font-size: clamp(36px, 12vw, 58px) !important;
+    padding: 8px 4px !important;
+  }
+  .logo-char{
+    text-shadow: 
+      -2px -2px 0 #fff,
+       2px -2px 0 #fff,
+      -2px  2px 0 #fff,
+       2px  2px 0 #fff,
+      0 3px 0 #7c2d12,
+      0 5px 0 #7c2d12,
+      0 8px 16px rgba(0,0,0,.5),
+      0 0 20px rgba(251,191,36,.5) !important;
+  }
+}
+
+/* 背景光晕 */
+.title-block::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(251,191,36,.15) 0%, rgba(236,72,153,.08) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  animation: heroBgPulse 4s ease-in-out infinite;
+}
+@keyframes heroBgPulse{
+  0%, 100% { opacity: .6 }
+  50%      { opacity: 1 }
+}
+
+/* 副标题 */
+.subtitle{
+  font-family: 'CartoonBlack', 'PingFang SC Heavy', 'PingFang SC', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: clamp(14px, 3vw, 18px) !important;
+  letter-spacing: 2px !important;
+  color: #fef3c7 !important;
+  -webkit-text-fill-color: #fef3c7 !important;
+  background: none !important;
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,.3),
+    0 4px 8px rgba(0,0,0,.4),
+    0 0 16px rgba(251,191,36,.4) !important;
+}
+
+/* ════════ 给作者留言 ════════ */
+.feedback-section{padding:40px 20px;max-width:480px;margin:0 auto;text-align:center}
+.feedback-big-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:20px 40px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:var(--pal-chrome-1,#1e1b4b);font-size:22px;font-weight:900;border:none;border-radius:18px;cursor:pointer;box-shadow:0 8px 24px rgba(251,191,36,.45),0 2px 6px rgba(0,0,0,.2);transition:all .15s;letter-spacing:1px;min-width:240px}
+.feedback-big-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(251,191,36,.6)}
+.feedback-big-btn:active{transform:scale(.96)}
+.feedback-big-btn .fbb-icon{font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.feedback-big-btn .fbb-text{line-height:1}
+.feedback-sub{font-size:14px;color:var(--pal-ink-3,#94a3b8);margin-top:14px;letter-spacing:1px}
+
+</style>
+
+
+<style id="hsnLightFix">
+/* 🔴v860 亮色可读性整改(Hansen真机: 亮色下多处字看不清 · 四个亮色逐元素对比度扫描实名修复) */
+/* tagline 渐变字: 亮底换深渐变(琥珀深→玫红深→紫深)·去发光阴影 */
+html.hsn-pal-light .tagline{ background:linear-gradient(135deg,#92400e 0%,#9f1239 45%,#5b21b6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; text-shadow:none !important; filter:drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
+/* hero 开场段: 正文深墨·所有彩色高亮统一深琥珀(强调仍在·字字可读) */
+html.hsn-pal-light .intro{ color:#1f2937 !important; text-shadow:none !important; }
+html.hsn-pal-light .intro span, html.hsn-pal-light .intro b, html.hsn-pal-light .intro strong{ color:#92400e !important; text-shadow:none !important; }
+/* 收获介绍卡(how): 标题深琥珀·副题石墨·步骤块翻成浅玻璃+深字 */
+html.hsn-pal-light .how-title{ color:#92400e !important; text-shadow:none !important; }
+html.hsn-pal-light .how-sub{ color:#57534e !important; }
+html.hsn-pal-light .how-step{ background:rgba(255,255,255,.62) !important; border-color:rgba(0,0,0,.08) !important; }
+html.hsn-pal-light .how-step .title{ color:#1f2937 !important; }
+html.hsn-pal-light .how-step .desc{ color:#44403c !important; }
+html.hsn-pal-light .how-step .icon{ filter:none; }
+/* 反馈卡副题 */
+html.hsn-pal-light .feedback-sub{ color:#57534e !important; }
+/* 岛卡英文名: 加投影(专救 misc 米色卡·其余彩卡不受影响) */
+html.hsn-pal-light .island-en{ text-shadow:0 1px 3px rgba(0,0,0,.5); }
+/* 进入冒险胶囊: 亮色下钉死深底金字(任何卡面上都清楚) */
+html.hsn-pal-light .enter{ background:rgba(15,23,42,.85) !important; color:#fbbf24 !important; border-color:rgba(251,191,36,.5) !important; }
+/* v863 页脚: 暗色描边+发光在亮底=糊 */
+html.hsn-pal-light .foot-slogan{ color:#78350f !important; text-shadow:none !important; }
+html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !important; }
+</style>
+</head>
+
+<body>
+
+<!-- 🔴 v684: 首页↔岛 一体化外壳 —— 岛在此 iframe 内【就地打开】, 首页永不重载, 零跳转零延迟。
+     岛的 goHome 会调 parent.closeIsland() 瞬回首页(hansen_home_link.js 早已内置此分支, 岛代码一行不改)。 -->
+<div id="islandFrameWrap" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:2147483600;background:#0c1538;overflow:hidden;">
+  <iframe id="islandFrame" title="大冒险" style="display:block;width:100%;height:100%;border:0;margin:0;padding:0;background:#0c1538;"></iframe>
+  <!--🔴BUG#87 进岛加载提示: 揭开iframe前显示, DOM就绪即隐藏. 无旋转/闪烁/震屏(仅进度条平滑宽度过渡)-->
+  <div id="islandLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;pointer-events:none;align-items:center;justify-content:center;flex-direction:column;color:#cdd6f4;font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <div id="islandLoadingEmoji" style="font-size:54px;margin-bottom:16px;line-height:1;">🚀</div><!-- 🔴v748(Hansen): 进岛加载图标默认值也=🚀(全岛统一·见 _showIslandLoading) -->
+    <div id="islandLoadingText" style="font-size:16px;letter-spacing:1px;opacity:.82;">正在进入…</div>
+    <div style="width:148px;height:4px;margin-top:20px;background:rgba(255,255,255,.13);border-radius:99px;overflow:hidden;">
+      <div id="islandLoadingBar" style="width:0%;height:100%;background:linear-gradient(90deg,#89b4fa,#a6e3a1);border-radius:99px;transition:width 6s ease;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COSMIC BACKGROUND -->
+<div class="bg-cosmos"></div>
+<!-- 🌸 樱花林梦境场景 -->
+<div class="cherry-scene">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 樱花团渐变 -->
+      <radialGradient id="blossomGrad">
+        <stop offset="0%" stop-color="#fce7f3" stop-opacity=".95"/>
+        <stop offset="60%" stop-color="#f9a8d4" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#ec4899" stop-opacity=".4"/>
+      </radialGradient>
+      <!-- 远山雾色 -->
+      <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e9d5ff" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#c084fc" stop-opacity=".5"/>
+      </linearGradient>
+      <!-- 草地渐变 -->
+      <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbcfe8" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#f472b6" stop-opacity=".9"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 远山 (层 1, 最远) -->
+    <path d="M0,420 L80,360 L180,400 L280,340 L380,390 L480,330 L600,380 L720,340 L840,370 L960,330 L1080,390 L1200,360 L1200,600 L0,600 Z" fill="url(#mountainGrad)" opacity=".5"/>
+
+    <!-- 中层山 (层 2) -->
+    <path d="M0,470 L60,440 L160,460 L260,420 L360,450 L460,420 L580,440 L700,420 L820,450 L940,420 L1060,460 L1200,440 L1200,600 L0,600 Z" fill="url(#mountainGrad)" opacity=".7"/>
+
+    <!-- 樱花树 1 (左远) -->
+    <g transform="translate(120, 380)">
+      <!-- 树干 -->
+      <path d="M0,150 Q-2,80 -5,40 Q-8,10 -10,-10" stroke="#7c2d12" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M-8,30 Q-20,15 -25,5" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M-7,15 Q5,5 15,-10" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 花团 -->
+      <ellipse cx="-12" cy="-10" rx="25" ry="22" fill="url(#blossomGrad)"/>
+      <ellipse cx="10" cy="-15" rx="28" ry="24" fill="url(#blossomGrad)"/>
+      <ellipse cx="-22" cy="5" rx="20" ry="18" fill="url(#blossomGrad)"/>
+      <ellipse cx="0" cy="-25" rx="22" ry="20" fill="url(#blossomGrad)"/>
+    </g>
+
+    <!-- 樱花树 2 (左中, 大) -->
+    <g transform="translate(280, 350)">
+      <path d="M0,200 Q-3,120 -8,60 Q-12,20 -15,-20" stroke="#7c2d12" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M-12,40 Q-30,20 -40,5" stroke="#7c2d12" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M-10,20 Q10,5 25,-15" stroke="#7c2d12" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M-14,0 Q-25,-15 -32,-30" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 大花团 -->
+      <ellipse cx="-22" cy="-15" rx="38" ry="32" fill="url(#blossomGrad)"/>
+      <ellipse cx="15" cy="-20" rx="42" ry="36" fill="url(#blossomGrad)"/>
+      <ellipse cx="-38" cy="5" rx="28" ry="24" fill="url(#blossomGrad)"/>
+      <ellipse cx="0" cy="-40" rx="32" ry="28" fill="url(#blossomGrad)"/>
+      <ellipse cx="-10" cy="-5" rx="34" ry="30" fill="url(#blossomGrad)"/>
+    </g>
+
+    <!-- 樱花树 3 (中右, 大) -->
+    <g transform="translate(880, 330)">
+      <path d="M0,220 Q3,130 8,70 Q12,25 15,-25" stroke="#7c2d12" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M12,40 Q30,20 42,5" stroke="#7c2d12" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M10,15 Q-10,0 -25,-20" stroke="#7c2d12" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M14,-10 Q25,-25 35,-40" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 大花团 -->
+      <ellipse cx="25" cy="-20" rx="42" ry="36" fill="url(#blossomGrad)"/>
+      <ellipse cx="-18" cy="-15" rx="38" ry="32" fill="url(#blossomGrad)"/>
+      <ellipse cx="42" cy="5" rx="30" ry="26" fill="url(#blossomGrad)"/>
+      <ellipse cx="5" cy="-45" rx="34" ry="30" fill="url(#blossomGrad)"/>
+      <ellipse cx="15" cy="-5" rx="36" ry="32" fill="url(#blossomGrad)"/>
+    </g>
+
+    <!-- 樱花树 4 (右远) -->
+    <g transform="translate(1060, 390)">
+      <path d="M0,150 Q2,80 5,40 Q8,10 10,-10" stroke="#7c2d12" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M8,25 Q20,10 28,0" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M7,10 Q-8,-3 -15,-15" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 花团 -->
+      <ellipse cx="15" cy="-15" rx="26" ry="22" fill="url(#blossomGrad)"/>
+      <ellipse cx="-8" cy="-12" rx="22" ry="20" fill="url(#blossomGrad)"/>
+      <ellipse cx="25" cy="5" rx="20" ry="18" fill="url(#blossomGrad)"/>
+      <ellipse cx="5" cy="-25" rx="20" ry="18" fill="url(#blossomGrad)"/>
+    </g>
+
+    <!-- 樱花树 5 (右近, 巨型) -->
+    <g transform="translate(620, 360)">
+      <path d="M0,240 Q-3,140 -8,70 Q-12,30 -15,-30" stroke="#7c2d12" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M-12,40 Q-35,20 -48,0" stroke="#7c2d12" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M-10,15 Q15,0 32,-20" stroke="#7c2d12" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M-14,-10 Q-28,-25 -38,-45" stroke="#7c2d12" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- 超大花团 -->
+      <ellipse cx="-28" cy="-15" rx="46" ry="40" fill="url(#blossomGrad)"/>
+      <ellipse cx="22" cy="-25" rx="48" ry="42" fill="url(#blossomGrad)"/>
+      <ellipse cx="-45" cy="0" rx="35" ry="30" fill="url(#blossomGrad)"/>
+      <ellipse cx="0" cy="-50" rx="40" ry="35" fill="url(#blossomGrad)"/>
+      <ellipse cx="-12" cy="-5" rx="42" ry="36" fill="url(#blossomGrad)"/>
+      <ellipse cx="35" cy="5" rx="32" ry="28" fill="url(#blossomGrad)"/>
+    </g>
+
+    <!-- 地面草地 -->
+    <path d="M0,560 L1200,560 L1200,600 L0,600 Z" fill="url(#grassGrad)" opacity=".8"/>
+    <path d="M0,580 L1200,580 L1200,600 L0,600 Z" fill="#ec4899" opacity=".4"/>
+  </svg>
+</div>
+
+<!-- 🌊 海洋梦境场景 -->
+<div class="ocean-scene">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 海面光线渐变 -->
+      <linearGradient id="surfaceGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#7dd3fc" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#0284c7" stop-opacity=".4"/>
+      </linearGradient>
+      <!-- 海底渐变 -->
+      <linearGradient id="seabedGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#06b6d4" stop-opacity=".3"/>
+        <stop offset="100%" stop-color="#164e63" stop-opacity=".9"/>
+      </linearGradient>
+      <!-- 珊瑚礁 -->
+      <radialGradient id="coralGrad">
+        <stop offset="0%" stop-color="#fb923c" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#c2410c" stop-opacity=".5"/>
+      </radialGradient>
+      <!-- 海藻 -->
+      <linearGradient id="seaweedGrad" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#15803d" stop-opacity=".8"/>
+        <stop offset="100%" stop-color="#84cc16" stop-opacity=".5"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 海面光柱 (从上往下射的太阳光) -->
+    <polygon points="200,0 280,400 240,400 160,0" fill="#7dd3fc" opacity=".15"/>
+    <polygon points="500,0 580,400 540,400 460,0" fill="#7dd3fc" opacity=".12"/>
+    <polygon points="850,0 930,400 890,400 810,0" fill="#7dd3fc" opacity=".15"/>
+
+    <!-- 海面波浪 (顶部) -->
+    <g class="ocean-wave">
+      <path d="M-50,40 Q150,20 300,40 T650,40 T1000,40 T1250,40" stroke="#7dd3fc" stroke-width="2" fill="none" opacity=".5"/>
+      <path d="M-50,70 Q200,55 400,70 T800,70 T1250,70" stroke="#bae6fd" stroke-width="1.5" fill="none" opacity=".4"/>
+    </g>
+
+    <!-- 海底 (底部 30%) -->
+    <path d="M0,420 L1200,420 L1200,600 L0,600 Z" fill="url(#seabedGrad)"/>
+
+    <!-- 海底起伏地形 -->
+    <path d="M0,470 Q200,440 380,460 T740,455 T1100,465 L1200,460 L1200,600 L0,600 Z" fill="#155e75" opacity=".7"/>
+
+    <!-- 珊瑚礁 (左侧) -->
+    <g transform="translate(80, 480)">
+      <ellipse cx="0" cy="60" rx="50" ry="20" fill="#164e63" opacity=".6"/>
+      <path d="M-20,55 Q-25,30 -15,5 Q-10,-10 0,-5 Q10,-10 15,10 Q25,30 20,55" fill="url(#coralGrad)"/>
+      <circle cx="-10" cy="10" r="6" fill="#fdba74" opacity=".8"/>
+      <circle cx="10" cy="0" r="5" fill="#fb923c" opacity=".8"/>
+      <circle cx="0" cy="20" r="4" fill="#f97316" opacity=".7"/>
+    </g>
+
+    <!-- 珊瑚礁 (右侧大) -->
+    <g transform="translate(1080, 470)">
+      <ellipse cx="0" cy="70" rx="70" ry="25" fill="#164e63" opacity=".6"/>
+      <path d="M-30,65 Q-40,30 -25,-5 Q-15,-25 -5,-15 Q5,-30 15,-10 Q30,15 35,55" fill="url(#coralGrad)"/>
+      <path d="M-15,60 Q-18,40 -10,20 Q-5,5 5,15" stroke="#ea580c" stroke-width="3" fill="none" opacity=".7"/>
+      <circle cx="-12" cy="5" r="5" fill="#fed7aa" opacity=".9"/>
+      <circle cx="12" cy="-5" r="6" fill="#fdba74" opacity=".9"/>
+      <circle cx="5" cy="25" r="4" fill="#fb923c" opacity=".8"/>
+    </g>
+
+    <!-- 海藻丛 (左中) -->
+    <g transform="translate(280, 460)">
+      <path d="M0,140 Q-8,100 -3,60 Q-12,30 -5,-10" stroke="url(#seaweedGrad)" stroke-width="6" fill="none" stroke-linecap="round" opacity=".8"/>
+      <path d="M12,140 Q5,100 15,60 Q8,25 18,-15" stroke="url(#seaweedGrad)" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>
+      <path d="M-15,140 Q-20,105 -12,70 Q-22,40 -15,-5" stroke="url(#seaweedGrad)" stroke-width="5" fill="none" stroke-linecap="round" opacity=".75"/>
+    </g>
+
+    <!-- 海藻丛 (中右) -->
+    <g transform="translate(820, 470)">
+      <path d="M0,130 Q-10,95 0,55 Q-8,25 0,-10" stroke="url(#seaweedGrad)" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
+      <path d="M15,130 Q8,95 18,55 Q10,25 22,-8" stroke="url(#seaweedGrad)" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>
+      <path d="M-12,130 Q-18,100 -8,65 Q-15,30 -6,-3" stroke="url(#seaweedGrad)" stroke-width="6" fill="none" stroke-linecap="round" opacity=".75"/>
+    </g>
+
+    <!-- 海藻丛 (右远) -->
+    <g transform="translate(530, 480)">
+      <path d="M0,120 Q-6,85 4,50 Q-3,20 2,-5" stroke="url(#seaweedGrad)" stroke-width="5" fill="none" stroke-linecap="round" opacity=".75"/>
+      <path d="M12,120 Q5,90 16,55 Q9,25 18,-2" stroke="url(#seaweedGrad)" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+    </g>
+
+    <!-- 海底沙石 (装饰) -->
+    <ellipse cx="200" cy="555" rx="40" ry="6" fill="#0c4a6e" opacity=".5"/>
+    <ellipse cx="450" cy="565" rx="50" ry="7" fill="#0c4a6e" opacity=".4"/>
+    <ellipse cx="700" cy="555" rx="35" ry="6" fill="#0c4a6e" opacity=".5"/>
+    <ellipse cx="950" cy="565" rx="45" ry="7" fill="#0c4a6e" opacity=".4"/>
+
+    <!-- 海底小气泡 -->
+    <circle cx="100" cy="450" r="3" fill="#bae6fd" opacity=".7"/>
+    <circle cx="350" cy="380" r="4" fill="#bae6fd" opacity=".6"/>
+    <circle cx="600" cy="410" r="3" fill="#bae6fd" opacity=".7"/>
+    <circle cx="900" cy="350" r="5" fill="#bae6fd" opacity=".6"/>
+  </svg>
+</div>
+
+<!-- 🌳 森林梦境场景 -->
+<div class="forest-scene">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 树冠渐变 -->
+      <radialGradient id="canopyGrad">
+        <stop offset="0%" stop-color="#a3e635" stop-opacity=".95"/>
+        <stop offset="70%" stop-color="#65a30d" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#365314" stop-opacity=".5"/>
+      </radialGradient>
+      <!-- 远山雾色 -->
+      <linearGradient id="forestMountainGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#86efac" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#16a34a" stop-opacity=".5"/>
+      </linearGradient>
+      <!-- 草地 -->
+      <linearGradient id="forestGrassGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#bef264" stop-opacity=".8"/>
+        <stop offset="100%" stop-color="#65a30d" stop-opacity=".95"/>
+      </linearGradient>
+      <!-- 阳光光柱 -->
+      <linearGradient id="sunRayGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fde047" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 阳光光柱 (从天而降的金色光) -->
+    <polygon points="180,0 230,500 200,500 150,0" fill="url(#sunRayGrad)" opacity=".7"/>
+    <polygon points="450,0 500,500 470,500 420,0" fill="url(#sunRayGrad)" opacity=".5"/>
+    <polygon points="780,0 830,500 800,500 750,0" fill="url(#sunRayGrad)" opacity=".7"/>
+    <polygon points="1020,0 1070,500 1040,500 990,0" fill="url(#sunRayGrad)" opacity=".5"/>
+
+    <!-- 远山 -->
+    <path d="M0,380 L100,320 L200,360 L320,300 L440,340 L560,290 L680,340 L800,300 L920,330 L1040,290 L1200,340 L1200,600 L0,600 Z" fill="url(#forestMountainGrad)" opacity=".55"/>
+    
+    <!-- 中层山 -->
+    <path d="M0,440 L80,400 L180,430 L280,390 L380,420 L480,395 L600,415 L720,395 L840,425 L960,400 L1080,430 L1200,415 L1200,600 L0,600 Z" fill="url(#forestMountainGrad)" opacity=".75"/>
+
+    <!-- 大树 1 (左远, 中等) -->
+    <g transform="translate(110, 400)">
+      <rect x="-6" y="20" width="12" height="80" fill="#78350f"/>
+      <ellipse cx="0" cy="-10" rx="36" ry="32" fill="url(#canopyGrad)"/>
+      <ellipse cx="-18" cy="0" rx="22" ry="20" fill="url(#canopyGrad)"/>
+      <ellipse cx="18" cy="0" rx="22" ry="20" fill="url(#canopyGrad)"/>
+    </g>
+
+    <!-- 大树 2 (左中, 巨型) -->
+    <g transform="translate(260, 350)">
+      <rect x="-10" y="40" width="20" height="120" fill="#78350f"/>
+      <ellipse cx="0" cy="-30" rx="55" ry="48" fill="url(#canopyGrad)"/>
+      <ellipse cx="-30" cy="5" rx="32" ry="28" fill="url(#canopyGrad)"/>
+      <ellipse cx="30" cy="5" rx="32" ry="28" fill="url(#canopyGrad)"/>
+      <ellipse cx="-15" cy="-50" rx="28" ry="24" fill="url(#canopyGrad)"/>
+      <ellipse cx="20" cy="-55" rx="25" ry="22" fill="url(#canopyGrad)"/>
+    </g>
+
+    <!-- 大树 3 (中, 巨型主树) -->
+    <g transform="translate(580, 320)">
+      <rect x="-12" y="60" width="24" height="150" fill="#78350f"/>
+      <ellipse cx="0" cy="-35" rx="68" ry="58" fill="url(#canopyGrad)"/>
+      <ellipse cx="-38" cy="5" rx="40" ry="34" fill="url(#canopyGrad)"/>
+      <ellipse cx="38" cy="5" rx="40" ry="34" fill="url(#canopyGrad)"/>
+      <ellipse cx="-15" cy="-65" rx="32" ry="28" fill="url(#canopyGrad)"/>
+      <ellipse cx="22" cy="-70" rx="30" ry="26" fill="url(#canopyGrad)"/>
+      <ellipse cx="0" cy="20" rx="35" ry="30" fill="url(#canopyGrad)"/>
+    </g>
+
+    <!-- 大树 4 (中右, 大) -->
+    <g transform="translate(870, 355)">
+      <rect x="-9" y="50" width="18" height="120" fill="#78350f"/>
+      <ellipse cx="0" cy="-25" rx="52" ry="44" fill="url(#canopyGrad)"/>
+      <ellipse cx="-28" cy="5" rx="30" ry="26" fill="url(#canopyGrad)"/>
+      <ellipse cx="28" cy="5" rx="30" ry="26" fill="url(#canopyGrad)"/>
+      <ellipse cx="-12" cy="-50" rx="26" ry="22" fill="url(#canopyGrad)"/>
+      <ellipse cx="18" cy="-50" rx="22" ry="20" fill="url(#canopyGrad)"/>
+    </g>
+
+    <!-- 大树 5 (右远) -->
+    <g transform="translate(1080, 405)">
+      <rect x="-6" y="20" width="12" height="80" fill="#78350f"/>
+      <ellipse cx="0" cy="-10" rx="36" ry="32" fill="url(#canopyGrad)"/>
+      <ellipse cx="-18" cy="0" rx="22" ry="20" fill="url(#canopyGrad)"/>
+      <ellipse cx="18" cy="0" rx="22" ry="20" fill="url(#canopyGrad)"/>
+    </g>
+
+    <!-- 草地 -->
+    <path d="M0,520 L1200,520 L1200,600 L0,600 Z" fill="url(#forestGrassGrad)"/>
+
+    <!-- 蘑菇 装饰 -->
+    <g transform="translate(420, 540)">
+      <ellipse cx="0" cy="8" rx="12" ry="3" fill="#365314" opacity=".4"/>
+      <rect x="-3" y="-4" width="6" height="12" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-6" rx="12" ry="9" fill="#dc2626"/>
+      <circle cx="-4" cy="-9" r="2" fill="#fef3c7"/>
+      <circle cx="4" cy="-5" r="1.5" fill="#fef3c7"/>
+      <circle cx="0" cy="-3" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(720, 555)">
+      <ellipse cx="0" cy="6" rx="10" ry="2.5" fill="#365314" opacity=".4"/>
+      <rect x="-2.5" y="-3" width="5" height="10" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-4" rx="10" ry="7" fill="#dc2626"/>
+      <circle cx="-3" cy="-6" r="1.5" fill="#fef3c7"/>
+      <circle cx="3" cy="-3" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(950, 545)">
+      <ellipse cx="0" cy="8" rx="11" ry="3" fill="#365314" opacity=".4"/>
+      <rect x="-3" y="-3" width="6" height="11" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-5" rx="11" ry="8" fill="#dc2626"/>
+      <circle cx="-3" cy="-7" r="1.5" fill="#fef3c7"/>
+      <circle cx="4" cy="-4" r="1.5" fill="#fef3c7"/>
+    </g>
+    
+    <!-- 小花朵 -->
+    <g transform="translate(180, 555)">
+      <circle cx="0" cy="0" r="4" fill="#fbbf24"/>
+      <circle cx="-4" cy="0" r="3" fill="#f9a8d4"/>
+      <circle cx="4" cy="0" r="3" fill="#f9a8d4"/>
+      <circle cx="0" cy="-4" r="3" fill="#f9a8d4"/>
+      <circle cx="0" cy="4" r="3" fill="#f9a8d4"/>
+    </g>
+    <g transform="translate(530, 565)">
+      <circle cx="0" cy="0" r="3" fill="#fbbf24"/>
+      <circle cx="-3" cy="0" r="2.5" fill="#fff"/>
+      <circle cx="3" cy="0" r="2.5" fill="#fff"/>
+      <circle cx="0" cy="-3" r="2.5" fill="#fff"/>
+      <circle cx="0" cy="3" r="2.5" fill="#fff"/>
+    </g>
+    <g transform="translate(1010, 565)">
+      <circle cx="0" cy="0" r="3" fill="#fbbf24"/>
+      <circle cx="-3" cy="0" r="2.5" fill="#a78bfa"/>
+      <circle cx="3" cy="0" r="2.5" fill="#a78bfa"/>
+      <circle cx="0" cy="-3" r="2.5" fill="#a78bfa"/>
+      <circle cx="0" cy="3" r="2.5" fill="#a78bfa"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 🌈 彩虹魔幻梦境场景 -->
+<div class="rainbow-scene">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 草地 -->
+      <linearGradient id="rainbowGrassGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#a3e635" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#65a30d" stop-opacity=".9"/>
+      </linearGradient>
+      <!-- 远处雾霭 -->
+      <linearGradient id="hazeGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e9d5ff" stop-opacity=".5"/>
+        <stop offset="100%" stop-color="#a78bfa" stop-opacity=".7"/>
+      </linearGradient>
+      <!-- 城堡渐变 -->
+      <linearGradient id="castleGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#581c87" stop-opacity=".9"/>
+        <stop offset="100%" stop-color="#3b0764" stop-opacity=".8"/>
+      </linearGradient>
+      <!-- 水晶光晕 -->
+      <radialGradient id="crystalGlow">
+        <stop offset="0%" stop-color="#fef3c7" stop-opacity=".9"/>
+        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- 🌈 巨型彩虹 (顶端在 viewBox 内, 不会被裁) -->
+    <g class="rainbow-arc" style="animation:rainbowGlow 4s ease-in-out infinite">
+      <!-- 整体外发光底层 -->
+      <ellipse cx="600" cy="730" rx="700" ry="700" fill="none" stroke="#ffffff" stroke-width="6" opacity=".4"/>
+      <!-- 7 道彩虹 (从外到内, 描边 28px, opacity 1.0) -->
+      <path d="M -100,730 A 700,700 0 0 1 1300,730" fill="none" stroke="#ef4444" stroke-width="28" opacity="1"/>
+      <path d="M  -72,730 A 672,672 0 0 1 1272,730" fill="none" stroke="#f97316" stroke-width="28" opacity="1"/>
+      <path d="M  -44,730 A 644,644 0 0 1 1244,730" fill="none" stroke="#fbbf24" stroke-width="28" opacity="1"/>
+      <path d="M  -16,730 A 616,616 0 0 1 1216,730" fill="none" stroke="#84cc16" stroke-width="28" opacity="1"/>
+      <path d="M   12,730 A 588,588 0 0 1 1188,730" fill="none" stroke="#06b6d4" stroke-width="28" opacity="1"/>
+      <path d="M   40,730 A 560,560 0 0 1 1160,730" fill="none" stroke="#3b82f6" stroke-width="28" opacity="1"/>
+      <path d="M   68,730 A 532,532 0 0 1 1132,730" fill="none" stroke="#a855f7" stroke-width="28" opacity="1"/>
+    </g>
+
+    <!-- 远处雾色地形 -->
+    <path d="M0,440 L1200,440 L1200,600 L0,600 Z" fill="url(#hazeGrad)"/>
+    
+    <!-- 魔法城堡剪影 (远处右, 1.6 倍大) -->
+    <g transform="translate(960, 340)">
+      <!-- 城墙主体 -->
+      <rect x="-64" y="32" width="128" height="96" fill="url(#castleGrad)"/>
+      <!-- 左塔 -->
+      <rect x="-88" y="-16" width="32" height="144" fill="url(#castleGrad)"/>
+      <polygon points="-88,-16 -72,-48 -56,-16" fill="#581c87"/>
+      <!-- 中塔 (高) -->
+      <rect x="-16" y="-48" width="32" height="176" fill="url(#castleGrad)"/>
+      <polygon points="-16,-48 0,-88 16,-48" fill="#581c87"/>
+      <!-- 右塔 -->
+      <rect x="56" y="-16" width="32" height="144" fill="url(#castleGrad)"/>
+      <polygon points="56,-16 72,-48 88,-16" fill="#581c87"/>
+      <!-- 城堡窗户 (黄色发光) -->
+      <rect x="-5" y="0" width="10" height="16" fill="#fef3c7"/>
+      <rect x="-77" y="32" width="7" height="10" fill="#fef3c7"/>
+      <rect x="-77" y="60" width="7" height="10" fill="#fef3c7"/>
+      <rect x="70" y="32" width="7" height="10" fill="#fef3c7"/>
+      <rect x="70" y="60" width="7" height="10" fill="#fef3c7"/>
+      <rect x="-50" y="60" width="6" height="9" fill="#fef3c7"/>
+      <rect x="44" y="60" width="6" height="9" fill="#fef3c7"/>
+      <!-- 城堡门 -->
+      <path d="M-13,80 Q-13,64 0,64 Q13,64 13,80 L13,128 L-13,128 Z" fill="var(--pal-chrome-1,#1e1b4b)"/>
+      <!-- 旗帜 -->
+      <line x1="0" y1="-88" x2="0" y2="-104" stroke="#fbbf24" stroke-width="2.5"/>
+      <polygon points="0,-100 13,-96 0,-92" fill="#ec4899"/>
+    </g>
+
+    <!-- 魔法城堡 (远处左, 中等大) -->
+    <g transform="translate(170, 380)">
+      <rect x="-38" y="22" width="76" height="60" fill="url(#castleGrad)" opacity=".85"/>
+      <rect x="-53" y="-8" width="22" height="90" fill="url(#castleGrad)" opacity=".85"/>
+      <polygon points="-53,-8 -42,-27 -31,-8" fill="#581c87" opacity=".85"/>
+      <rect x="-12" y="-22" width="24" height="104" fill="url(#castleGrad)" opacity=".85"/>
+      <polygon points="-12,-22 0,-48 12,-22" fill="#581c87" opacity=".85"/>
+      <rect x="32" y="-8" width="22" height="90" fill="url(#castleGrad)" opacity=".85"/>
+      <polygon points="32,-8 43,-27 54,-8" fill="#581c87" opacity=".85"/>
+      <rect x="-3" y="0" width="6" height="9" fill="#fef3c7"/>
+      <rect x="-46" y="22" width="5" height="7" fill="#fef3c7"/>
+      <rect x="42" y="22" width="5" height="7" fill="#fef3c7"/>
+      <!-- 旗 -->
+      <line x1="0" y1="-48" x2="0" y2="-60" stroke="#fbbf24" stroke-width="2"/>
+      <polygon points="0,-58 8,-55 0,-52" fill="#06b6d4"/>
+    </g>
+
+    <!-- 草地 -->
+    <path d="M0,520 L1200,520 L1200,600 L0,600 Z" fill="url(#rainbowGrassGrad)"/>
+
+    <!-- 稻草人 🤡 (SVG 绘制, 因为没有 emoji) -->
+    <g transform="translate(420, 470)">
+      <!-- 木桩 -->
+      <rect x="-3" y="0" width="6" height="60" fill="#92400e"/>
+      <!-- 横木 (手臂) -->
+      <rect x="-28" y="-10" width="56" height="6" fill="#92400e"/>
+      <!-- 头 (麻袋圆) -->
+      <ellipse cx="0" cy="-22" rx="14" ry="13" fill="#fef3c7"/>
+      <!-- 眼睛 (黑色十字) -->
+      <line x1="-7" y1="-26" x2="-3" y2="-22" stroke="var(--pal-chrome-1,#1e1b4b)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="-7" y1="-22" x2="-3" y2="-26" stroke="var(--pal-chrome-1,#1e1b4b)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="3" y1="-26" x2="7" y2="-22" stroke="var(--pal-chrome-1,#1e1b4b)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="3" y1="-22" x2="7" y2="-26" stroke="var(--pal-chrome-1,#1e1b4b)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- 嘴 -->
+      <path d="M-4,-15 Q0,-12 4,-15" stroke="var(--pal-chrome-1,#1e1b4b)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <!-- 草帽 -->
+      <ellipse cx="0" cy="-32" rx="18" ry="4" fill="#92400e"/>
+      <rect x="-7" y="-44" width="14" height="14" fill="#a16207" rx="2"/>
+      <ellipse cx="0" cy="-31" rx="9" ry="3" fill="#a16207"/>
+      <!-- 衣服 (彩色补丁) -->
+      <rect x="-12" y="0" width="24" height="22" fill="#dc2626" rx="2"/>
+      <rect x="-8" y="5" width="8" height="8" fill="#fbbf24" rx="1" opacity=".8"/>
+      <rect x="3" y="10" width="7" height="7" fill="#84cc16" rx="1" opacity=".8"/>
+      <!-- 稻草 (从手臂和脖子伸出来) -->
+      <line x1="-28" y1="-6" x2="-32" y2="-12" stroke="#eab308" stroke-width="1.5"/>
+      <line x1="-26" y1="-6" x2="-29" y2="-15" stroke="#eab308" stroke-width="1.5"/>
+      <line x1="28" y1="-6" x2="32" y2="-12" stroke="#eab308" stroke-width="1.5"/>
+      <line x1="26" y1="-6" x2="29" y2="-15" stroke="#eab308" stroke-width="1.5"/>
+      <line x1="-10" y1="0" x2="-12" y2="-3" stroke="#eab308" stroke-width="1.5"/>
+      <line x1="10" y1="0" x2="12" y2="-3" stroke="#eab308" stroke-width="1.5"/>
+    </g>
+
+    <!-- 5 个魔法蘑菇 -->
+    <g transform="translate(80, 555)">
+      <ellipse cx="0" cy="6" rx="14" ry="3" fill="#365314" opacity=".4"/>
+      <rect x="-4" y="-3" width="8" height="14" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-6" rx="16" ry="11" fill="#dc2626"/>
+      <circle cx="-5" cy="-10" r="2.5" fill="#fef3c7"/>
+      <circle cx="5" cy="-7" r="2" fill="#fef3c7"/>
+      <circle cx="0" cy="-3" r="2" fill="#fef3c7"/>
+      <circle cx="6" cy="-12" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(280, 568)">
+      <ellipse cx="0" cy="5" rx="10" ry="2.5" fill="#365314" opacity=".4"/>
+      <rect x="-2.5" y="-2" width="5" height="10" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-4" rx="11" ry="7" fill="#8b5cf6"/>
+      <circle cx="-3" cy="-7" r="1.5" fill="#fef3c7"/>
+      <circle cx="3" cy="-3" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(620, 562)">
+      <ellipse cx="0" cy="6" rx="12" ry="3" fill="#365314" opacity=".4"/>
+      <rect x="-3" y="-3" width="6" height="12" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-5" rx="13" ry="9" fill="#ec4899"/>
+      <circle cx="-4" cy="-9" r="2" fill="#fef3c7"/>
+      <circle cx="4" cy="-5" r="1.5" fill="#fef3c7"/>
+      <circle cx="0" cy="-2" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(780, 570)">
+      <ellipse cx="0" cy="4" rx="9" ry="2" fill="#365314" opacity=".4"/>
+      <rect x="-2" y="-1" width="4" height="9" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-3" rx="10" ry="6" fill="#06b6d4"/>
+      <circle cx="-2" cy="-5" r="1.5" fill="#fef3c7"/>
+      <circle cx="3" cy="-2" r="1.5" fill="#fef3c7"/>
+    </g>
+    <g transform="translate(1080, 558)">
+      <ellipse cx="0" cy="6" rx="13" ry="3" fill="#365314" opacity=".4"/>
+      <rect x="-3" y="-3" width="6" height="13" fill="#fef3c7"/>
+      <ellipse cx="0" cy="-5" rx="14" ry="10" fill="#84cc16"/>
+      <circle cx="-4" cy="-9" r="2" fill="#fef3c7"/>
+      <circle cx="5" cy="-5" r="2" fill="#fef3c7"/>
+      <circle cx="0" cy="-2" r="1.5" fill="#fef3c7"/>
+    </g>
+
+    <!-- 漂浮的水晶 (草地上散落) -->
+    <g transform="translate(540, 540)">
+      <ellipse cx="0" cy="10" rx="18" ry="4" fill="url(#crystalGlow)" opacity=".7"/>
+      <polygon points="-8,8 0,-12 8,8 4,12 -4,12" fill="#a78bfa" opacity=".85"/>
+      <polygon points="-8,8 0,-12 -4,4" fill="#7c3aed" opacity=".7"/>
+      <polygon points="8,8 0,-12 4,4" fill="#c084fc" opacity=".7"/>
+    </g>
+    <g transform="translate(900, 535)">
+      <ellipse cx="0" cy="12" rx="22" ry="5" fill="url(#crystalGlow)" opacity=".7"/>
+      <polygon points="-10,10 0,-16 10,10 5,15 -5,15" fill="#fbbf24" opacity=".85"/>
+      <polygon points="-10,10 0,-16 -5,5" fill="#f59e0b" opacity=".7"/>
+      <polygon points="10,10 0,-16 5,5" fill="#fde047" opacity=".7"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 🍑 桃子糖果乐园场景 -->
+<div class="peach-scene">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 草地 -->
+      <linearGradient id="peachGrassGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fda4af" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#f472b6" stop-opacity=".9"/>
+      </linearGradient>
+      <!-- 远处糖果云山 -->
+      <linearGradient id="candyHillGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbcfe8" stop-opacity=".7"/>
+        <stop offset="100%" stop-color="#f9a8d4" stop-opacity=".5"/>
+      </linearGradient>
+      <!-- 糖果屋墙 (饼干色) -->
+      <linearGradient id="cookieWallGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbbf24" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#d97706" stop-opacity="1"/>
+      </linearGradient>
+      <!-- 屋顶粉糖 -->
+      <linearGradient id="candyRoofGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fbcfe8" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#ec4899" stop-opacity="1"/>
+      </linearGradient>
+      <!-- 棒棒糖 (彩虹漩涡) -->
+      <radialGradient id="lollipopGrad">
+        <stop offset="0%" stop-color="#fef3c7"/>
+        <stop offset="50%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#ec4899"/>
+      </radialGradient>
+    </defs>
+
+    <!-- 糖果云山 (远景) -->
+    <ellipse cx="200" cy="450" rx="150" ry="60" fill="url(#candyHillGrad)"/>
+    <ellipse cx="450" cy="440" rx="140" ry="55" fill="url(#candyHillGrad)"/>
+    <ellipse cx="750" cy="450" rx="160" ry="65" fill="url(#candyHillGrad)"/>
+    <ellipse cx="1050" cy="445" rx="130" ry="55" fill="url(#candyHillGrad)"/>
+
+    <!-- 远处小糖果屋 (左) -->
+    <g transform="translate(160, 410)">
+      <!-- 屋身 -->
+      <rect x="-30" y="0" width="60" height="40" fill="url(#cookieWallGrad)" rx="2"/>
+      <!-- 屋顶 (粉色三角) -->
+      <polygon points="-36,0 0,-30 36,0" fill="url(#candyRoofGrad)"/>
+      <!-- 屋顶糖果点缀 -->
+      <circle cx="-12" cy="-12" r="3" fill="#fef3c7"/>
+      <circle cx="10" cy="-15" r="3" fill="#84cc16"/>
+      <circle cx="0" cy="-22" r="3" fill="#06b6d4"/>
+      <!-- 烟囱 -->
+      <rect x="10" y="-20" width="8" height="14" fill="#a16207"/>
+      <!-- 门 (粉色拱形) -->
+      <path d="M-7,40 Q-7,28 0,28 Q7,28 7,40 Z" fill="#ec4899"/>
+      <!-- 窗户 (糖果) -->
+      <circle cx="-18" cy="18" r="5" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+      <line x1="-22" y1="18" x2="-14" y2="18" stroke="#d97706" stroke-width="1"/>
+      <line x1="-18" y1="14" x2="-18" y2="22" stroke="#d97706" stroke-width="1"/>
+      <circle cx="18" cy="18" r="5" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+      <line x1="14" y1="18" x2="22" y2="18" stroke="#d97706" stroke-width="1"/>
+      <line x1="18" y1="14" x2="18" y2="22" stroke="#d97706" stroke-width="1"/>
+    </g>
+
+    <!-- 主糖果屋 (中右, 大!) -->
+    <g transform="translate(820, 380)">
+      <!-- 屋身 (大) -->
+      <rect x="-60" y="0" width="120" height="80" fill="url(#cookieWallGrad)" rx="4"/>
+      <!-- 屋顶 (大粉色三角) -->
+      <polygon points="-72,0 0,-55 72,0" fill="url(#candyRoofGrad)"/>
+      <!-- 屋顶大量糖果点缀 -->
+      <circle cx="-30" cy="-15" r="5" fill="#fef3c7"/>
+      <circle cx="-15" cy="-30" r="5" fill="#84cc16"/>
+      <circle cx="0" cy="-42" r="5" fill="#06b6d4"/>
+      <circle cx="20" cy="-32" r="5" fill="#fbbf24"/>
+      <circle cx="35" cy="-18" r="5" fill="#a855f7"/>
+      <circle cx="-45" cy="-5" r="4" fill="#ec4899"/>
+      <circle cx="45" cy="-5" r="4" fill="#ec4899"/>
+      <!-- 屋顶白色奶油边 -->
+      <path d="M-72,0 Q-55,8 -36,0 Q-18,8 0,0 Q18,8 36,0 Q55,8 72,0" stroke="#fef3c7" stroke-width="4" fill="none"/>
+      <!-- 烟囱 (条纹糖果柱) -->
+      <rect x="22" y="-44" width="14" height="22" fill="#fef3c7"/>
+      <line x1="22" y1="-38" x2="36" y2="-38" stroke="#ec4899" stroke-width="2"/>
+      <line x1="22" y1="-32" x2="36" y2="-32" stroke="#ec4899" stroke-width="2"/>
+      <line x1="22" y1="-26" x2="36" y2="-26" stroke="#ec4899" stroke-width="2"/>
+      <!-- 大门 (心形拱) -->
+      <path d="M-15,80 L-15,55 Q-15,40 0,40 Q15,40 15,55 L15,80 Z" fill="#dc2626"/>
+      <!-- 门把手 -->
+      <circle cx="10" cy="62" r="2" fill="#fbbf24"/>
+      <!-- 左窗 -->
+      <rect x="-45" y="15" width="20" height="22" rx="3" fill="#bfdbfe" stroke="#d97706" stroke-width="2"/>
+      <line x1="-35" y1="15" x2="-35" y2="37" stroke="#d97706" stroke-width="1.5"/>
+      <line x1="-45" y1="26" x2="-25" y2="26" stroke="#d97706" stroke-width="1.5"/>
+      <!-- 右窗 -->
+      <rect x="25" y="15" width="20" height="22" rx="3" fill="#bfdbfe" stroke="#d97706" stroke-width="2"/>
+      <line x1="35" y1="15" x2="35" y2="37" stroke="#d97706" stroke-width="1.5"/>
+      <line x1="25" y1="26" x2="45" y2="26" stroke="#d97706" stroke-width="1.5"/>
+      <!-- 心形心 (门上方) -->
+      <text x="0" y="50" font-size="14" text-anchor="middle">💕</text>
+    </g>
+
+    <!-- 草地 -->
+    <path d="M0,540 L1200,540 L1200,600 L0,600 Z" fill="url(#peachGrassGrad)"/>
+
+    <!-- 棒棒糖花园 (草地上) -->
+    <g transform="translate(380, 525)">
+      <!-- 杆 -->
+      <rect x="-1.5" y="0" width="3" height="40" fill="#fef3c7"/>
+      <!-- 棒棒糖头 (大) -->
+      <circle cx="0" cy="-5" r="22" fill="url(#lollipopGrad)"/>
+      <!-- 漩涡纹 -->
+      <path d="M0,-5 Q-15,-5 -15,5 Q-15,-20 0,-25 Q20,-20 20,-5 Q20,10 5,15 Q-10,15 -10,5" stroke="#ec4899" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(580, 530)">
+      <rect x="-1.5" y="0" width="3" height="35" fill="#fef3c7"/>
+      <circle cx="0" cy="-3" r="18" fill="#06b6d4"/>
+      <path d="M-12,-3 Q-12,5 0,8 Q12,5 12,-3 Q12,-12 0,-15 Q-12,-12 -12,-3" stroke="#fef3c7" stroke-width="2" fill="none"/>
+      <path d="M-6,-3 Q-6,3 0,4 Q6,3 6,-3" stroke="#fef3c7" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(960, 530)">
+      <rect x="-1.5" y="0" width="3" height="36" fill="#fef3c7"/>
+      <circle cx="0" cy="-4" r="20" fill="#a855f7"/>
+      <path d="M-13,-4 Q-13,6 0,9 Q13,6 13,-4 Q13,-14 0,-17 Q-13,-14 -13,-4" stroke="#fde047" stroke-width="2.5" fill="none"/>
+    </g>
+    <g transform="translate(110, 540)">
+      <rect x="-1" y="0" width="2" height="28" fill="#fef3c7"/>
+      <circle cx="0" cy="-3" r="14" fill="#84cc16"/>
+      <path d="M-8,-3 Q-8,4 0,6 Q8,4 8,-3" stroke="#fef3c7" stroke-width="1.5" fill="none"/>
+    </g>
+    <g transform="translate(1100, 535)">
+      <rect x="-1.2" y="0" width="2.4" height="32" fill="#fef3c7"/>
+      <circle cx="0" cy="-4" r="16" fill="#fbbf24"/>
+      <path d="M-10,-4 Q-10,5 0,7 Q10,5 10,-4 Q10,-13 0,-15 Q-10,-13 -10,-4" stroke="#ec4899" stroke-width="2" fill="none"/>
+    </g>
+
+    <!-- 糖珠 散落草地 -->
+    <circle cx="240" cy="558" r="4" fill="#fbbf24"/>
+    <circle cx="245" cy="565" r="3" fill="#84cc16"/>
+    <circle cx="252" cy="560" r="4" fill="#06b6d4"/>
+    <circle cx="480" cy="572" r="4" fill="#ec4899"/>
+    <circle cx="488" cy="568" r="3" fill="#fbbf24"/>
+    <circle cx="710" cy="565" r="4" fill="#a855f7"/>
+    <circle cx="715" cy="572" r="3" fill="#84cc16"/>
+    <circle cx="722" cy="567" r="3" fill="#ec4899"/>
+    <circle cx="1040" cy="570" r="4" fill="#06b6d4"/>
+    <circle cx="1048" cy="565" r="3" fill="#fbbf24"/>
+  </svg>
+</div>
+
+<div class="stars" id="stars"></div>
+<!-- 🌌 星空夜专属飞行元素 -->
+<div class="flyer flyer-ufo" data-flyer-theme="cosmos">🛸</div>
+<div class="flyer flyer-rocket" data-flyer-theme="cosmos">🚀</div>
+<div class="flyer flyer-satellite" data-flyer-theme="cosmos">🛰️</div>
+<div class="flyer flyer-comet" data-flyer-theme="cosmos">☄️</div>
+<div class="flyer flyer-star" data-flyer-theme="cosmos">🌟</div>
+
+<!-- 🌸 樱花粉专属飞行元素 -->
+<div class="flyer flyer-petal-big" data-flyer-theme="pink">🌸</div>
+<div class="flyer flyer-petal-small1" data-flyer-theme="pink">🌸</div>
+<div class="flyer flyer-petal-small2" data-flyer-theme="pink">🌸</div>
+<div class="flyer flyer-butterfly-pink" data-flyer-theme="pink">🦋</div>
+<div class="flyer flyer-fairy" data-flyer-theme="pink">🧚‍♀️</div>
+<div class="flyer flyer-unicorn-pink" data-flyer-theme="pink">🦄</div>
+<div class="flyer flyer-cloud-white" data-flyer-theme="pink">☁️</div>
+<div class="flyer flyer-cloud-rainbow" data-flyer-theme="pink">☁️</div>
+
+<!-- 🌊 海洋蓝专属飞行元素 -->
+<div class="flyer flyer-whale" data-flyer-theme="ocean">🐋</div>
+<div class="flyer flyer-dolphin" data-flyer-theme="ocean">🐬</div>
+<div class="flyer flyer-octopus" data-flyer-theme="ocean">🐙</div>
+<div class="flyer flyer-starfish" data-flyer-theme="ocean">⭐</div>
+<div class="flyer flyer-fish" data-flyer-theme="ocean">🐠</div>
+<div class="flyer flyer-ship" data-flyer-theme="ocean">⛵</div>
+
+<!-- 🌳 森林绿专属飞行元素 -->
+<div class="flyer flyer-lion" data-flyer-theme="forest">🦁</div>
+<div class="flyer flyer-tiger" data-flyer-theme="forest">🐅</div>
+<div class="flyer flyer-elephant" data-flyer-theme="forest">🐘</div>
+<div class="flyer flyer-zebra" data-flyer-theme="forest">🦓</div>
+<div class="flyer flyer-rabbit" data-flyer-theme="forest">🐇</div>
+<div class="flyer flyer-fairy-forest" data-flyer-theme="forest">🧚‍♀️</div>
+<div class="flyer flyer-bee" data-flyer-theme="forest">🐝</div>
+<div class="flyer flyer-swallow" data-flyer-theme="forest">🐦</div>
+<div class="flyer flyer-ladybug" data-flyer-theme="forest">🐞</div>
+
+<!-- 🌈 彩虹云朵专属飞行元素 -->
+<div class="flyer flyer-witch" data-flyer-theme="rainbow">
+  <span class="witch-broom">🧹</span>
+  <span class="witch-person">🧙‍♀️</span>
+</div>
+<div class="flyer flyer-evil-dragon" data-flyer-theme="rainbow">🐲</div>
+<div class="flyer flyer-crystal-ball" data-flyer-theme="rainbow">🔮</div>
+<div class="flyer flyer-wand" data-flyer-theme="rainbow">🪄</div>
+<div class="flyer flyer-sparkle" data-flyer-theme="rainbow">✨</div>
+<div class="flyer flyer-ghost" data-flyer-theme="rainbow">👻</div>
+<div class="flyer flyer-pumpkin" data-flyer-theme="rainbow">🎃</div>
+<div class="flyer flyer-knight" data-flyer-theme="rainbow">
+  <span class="knight-horse">🐎</span>
+</div>
+
+<!-- 🍑 桃子糖果专属飞行元素 -->
+<div class="flyer flyer-peach" data-flyer-theme="peach">🍑</div>
+<div class="flyer flyer-lollipop" data-flyer-theme="peach">🍭</div>
+<div class="flyer flyer-candy" data-flyer-theme="peach">🍬</div>
+<div class="flyer flyer-cupcake" data-flyer-theme="peach">🧁</div>
+<div class="flyer flyer-donut" data-flyer-theme="peach">🍩</div>
+<div class="flyer flyer-strawberry" data-flyer-theme="peach">🍓</div>
+<div class="flyer flyer-cherry" data-flyer-theme="peach">🍒</div>
+<div class="flyer flyer-icecream" data-flyer-theme="peach">🍦</div>
+<!-- 👧 小女孩 (SVG 自绘, 全身) -->
+<div class="flyer flyer-girl-kid" data-flyer-theme="peach">
+  <svg width="68" height="100" viewBox="0 0 68 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- 蝴蝶结 (头顶) -->
+    <ellipse cx="22" cy="13" rx="6" ry="4" fill="#ec4899"/>
+    <ellipse cx="46" cy="13" rx="6" ry="4" fill="#ec4899"/>
+    <circle cx="34" cy="14" r="3" fill="#be185d"/>
+    <!-- 头发 (棕色双马尾) -->
+    <ellipse cx="34" cy="22" rx="17" ry="14" fill="#78350f"/>
+    <ellipse cx="14" cy="32" rx="6" ry="14" fill="#78350f"/>
+    <ellipse cx="54" cy="32" rx="6" ry="14" fill="#78350f"/>
+    <!-- 双马尾末端 (橡皮筋粉色) -->
+    <circle cx="14" cy="45" r="3" fill="#ec4899"/>
+    <circle cx="54" cy="45" r="3" fill="#ec4899"/>
+    <!-- 脸 -->
+    <ellipse cx="34" cy="28" rx="13" ry="14" fill="#fde6c8"/>
+    <!-- 刘海 -->
+    <path d="M22,18 Q34,12 46,18 Q40,22 34,21 Q28,22 22,18 Z" fill="#78350f"/>
+    <!-- 眼睛 -->
+    <circle cx="28" cy="28" r="2" fill="var(--pal-chrome-1,#1e1b4b)"/>
+    <circle cx="40" cy="28" r="2" fill="var(--pal-chrome-1,#1e1b4b)"/>
+    <circle cx="28.5" cy="27.5" r=".6" fill="#fff"/>
+    <circle cx="40.5" cy="27.5" r=".6" fill="#fff"/>
+    <!-- 腮红 -->
+    <circle cx="24" cy="32" r="2.5" fill="#fda4af" opacity=".7"/>
+    <circle cx="44" cy="32" r="2.5" fill="#fda4af" opacity=".7"/>
+    <!-- 嘴 (微笑) -->
+    <path d="M30,35 Q34,38 38,35" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- 脖子 -->
+    <rect x="30" y="40" width="8" height="5" fill="#fde6c8"/>
+    <!-- 连衣裙 (粉色 A 字裙) -->
+    <path d="M22,45 L46,45 L52,75 L16,75 Z" fill="#f472b6"/>
+    <!-- 裙子花纹 -->
+    <circle cx="28" cy="55" r="2" fill="#fef3c7"/>
+    <circle cx="40" cy="60" r="2" fill="#fef3c7"/>
+    <circle cx="34" cy="68" r="2" fill="#fef3c7"/>
+    <!-- 裙子腰带 -->
+    <rect x="22" y="45" width="24" height="3" fill="#ec4899"/>
+    <!-- 手臂 (左) -->
+    <rect x="14" y="46" width="6" height="22" rx="3" fill="#fde6c8"/>
+    <!-- 手臂 (右, 举棒棒糖) -->
+    <rect x="48" y="42" width="6" height="22" rx="3" fill="#fde6c8" transform="rotate(15, 51, 53)"/>
+    <!-- 棒棒糖 (右手) -->
+    <line x1="58" y1="40" x2="58" y2="28" stroke="#fef3c7" stroke-width="1.5"/>
+    <circle cx="58" cy="25" r="6" fill="#ec4899"/>
+    <path d="M54,25 Q54,29 58,30 Q62,29 62,25 Q62,21 58,20 Q54,21 54,25" stroke="#fef3c7" stroke-width=".8" fill="none"/>
+    <!-- 腿 (左) -->
+    <rect x="26" y="75" width="6" height="15" rx="2" fill="#fde6c8"/>
+    <!-- 腿 (右) -->
+    <rect x="36" y="75" width="6" height="15" rx="2" fill="#fde6c8"/>
+    <!-- 鞋子 -->
+    <ellipse cx="29" cy="93" rx="5" ry="3" fill="#dc2626"/>
+    <ellipse cx="39" cy="93" rx="5" ry="3" fill="#dc2626"/>
+  </svg>
+</div>
+
+<!-- 👦 小男孩 (SVG 自绘, Q 版可爱风) -->
+<div class="flyer flyer-boy-kid" data-flyer-theme="peach">
+  <svg width="72" height="104" viewBox="0 0 72 104" xmlns="http://www.w3.org/2000/svg">
+    <!-- ═══ 头部 (Q 版大头) ═══ -->
+    <!-- 耳朵 (先画在头后) -->
+    <ellipse cx="16" cy="32" rx="3" ry="4" fill="#fde6c8"/>
+    <circle cx="16" cy="32" r="1" fill="#fda4af" opacity=".5"/>
+    <ellipse cx="56" cy="32" rx="3" ry="4" fill="#fde6c8"/>
+    <circle cx="56" cy="32" r="1" fill="#fda4af" opacity=".5"/>
+    
+    <!-- 脸 (大圆脸, Q 版) -->
+    <circle cx="36" cy="30" r="17" fill="#fde6c8"/>
+    
+    <!-- 刘海 (棕色卡通弧形, 帽子下) -->
+    <path d="M21,22 Q23,17 30,17 Q33,21 36,19 Q39,21 42,17 Q49,17 51,22 Q49,19 45,21 Q42,24 39,22 Q36,24 33,22 Q30,24 27,21 Q23,19 21,22 Z" fill="#78350f"/>
+    
+    <!-- ═══ 棒球帽 ═══ -->
+    <!-- 帽顶 (圆弧形, 更萌) -->
+    <path d="M18,20 Q18,9 36,7 Q54,9 54,20 Q54,21 53,21 L19,21 Q18,21 18,20 Z" fill="#3b82f6"/>
+    <!-- 帽顶接缝高光 -->
+    <path d="M36,8 Q36,15 36,20" stroke="#1e40af" stroke-width=".6" fill="none" opacity=".5"/>
+    <!-- 帽顶纽扣 -->
+    <circle cx="36" cy="9" r="1.5" fill="#1e40af"/>
+    <!-- 帽檐 (前方弧形) -->
+    <path d="M16,21 Q36,26 56,21 Q56,23 50,24 Q36,26 22,24 Q16,23 16,21 Z" fill="#1e40af"/>
+    <!-- 帽檐高光 -->
+    <path d="M22,22 Q36,24 50,22" stroke="#60a5fa" stroke-width=".5" fill="none" opacity=".7"/>
+    <!-- 帽子前方星星标志 -->
+    <polygon points="36,15 36.8,17 39,17.2 37.3,18.6 37.8,20.8 36,19.7 34.2,20.8 34.7,18.6 33,17.2 35.2,17" fill="#fef3c7"/>
+    
+    <!-- ═══ 眉毛 (微弧形, 表情) ═══ -->
+    <path d="M27,29 Q30,27.5 32.5,29" stroke="#78350f" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M39.5,29 Q42,27.5 45,29" stroke="#78350f" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    
+    <!-- ═══ 眼睛 (大闪眼) ═══ -->
+    <!-- 眼白 -->
+    <ellipse cx="29.5" cy="33" rx="3" ry="3.5" fill="#fff"/>
+    <ellipse cx="42.5" cy="33" rx="3" ry="3.5" fill="#fff"/>
+    <!-- 黑眼珠 (大) -->
+    <ellipse cx="29.5" cy="33.5" rx="2.2" ry="2.8" fill="var(--pal-chrome-1,#1e1b4b)"/>
+    <ellipse cx="42.5" cy="33.5" rx="2.2" ry="2.8" fill="var(--pal-chrome-1,#1e1b4b)"/>
+    <!-- 眼睛大高光 -->
+    <circle cx="30.5" cy="32" r="1" fill="#fff"/>
+    <circle cx="43.5" cy="32" r="1" fill="#fff"/>
+    <!-- 眼睛小高光 -->
+    <circle cx="28.8" cy="34.5" r=".5" fill="#fff" opacity=".8"/>
+    <circle cx="41.8" cy="34.5" r=".5" fill="#fff" opacity=".8"/>
+    
+    <!-- ═══ 鼻子 (小点) ═══ -->
+    <ellipse cx="36" cy="37.5" rx=".8" ry=".5" fill="#dca37a" opacity=".7"/>
+    
+    <!-- ═══ 腮红 ═══ -->
+    <ellipse cx="25" cy="38" rx="3" ry="2" fill="#fda4af" opacity=".7"/>
+    <ellipse cx="47" cy="38" rx="3" ry="2" fill="#fda4af" opacity=".7"/>
+    
+    <!-- ═══ 嘴 (开心大笑, 有牙) ═══ -->
+    <path d="M30,41 Q36,46 42,41 Q42,45 36,46 Q30,45 30,41 Z" fill="#dc2626"/>
+    <!-- 牙齿 -->
+    <path d="M33,42 Q36,43 39,42 L39,44 L33,44 Z" fill="#fff"/>
+    <!-- 舌头 -->
+    <ellipse cx="36" cy="44.5" rx="2" ry=".8" fill="#f472b6"/>
+    
+    <!-- ═══ 脖子 ═══ -->
+    <rect x="32" y="46" width="8" height="4" fill="#fde6c8"/>
+    
+    <!-- ═══ 左手臂 (T 恤 *之前* 画, 让袖子盖住肩膀) ═══ -->
+    <rect x="18" y="50" width="6" height="24" rx="3" fill="#fde6c8" stroke="#dca37a" stroke-width=".4"/>
+    <!-- 左手 -->
+    <circle cx="21" cy="76" r="3.5" fill="#fde6c8" stroke="#dca37a" stroke-width=".4"/>
+    
+    <!-- 右手臂 (用 path 画弯曲的胳膊, 举到冰淇淋位置) -->
+    <path d="M48,53 Q53,46 58,41 L62,44 Q57,49 51,57 Z" fill="#fde6c8" stroke="#dca37a" stroke-width=".5"/>
+    <!-- 右手 (拳头握冰淇淋杆) -->
+    <circle cx="61" cy="40" r="3.5" fill="#fde6c8" stroke="#dca37a" stroke-width=".5"/>
+    
+    <!-- ═══ T 恤 (黄色, 圆领) — 画在手臂上, 形成袖子盖住肩膀 ═══ -->
+    <path d="M21,50 Q36,49 51,50 L52,76 L20,76 Z" fill="#fbbf24"/>
+    <!-- T 恤袖子 (左, 盖住肩膀那段手臂) -->
+    <path d="M16,50 Q21,49 24,52 L24,58 L17,60 Z" fill="#fbbf24"/>
+    <!-- T 恤袖子 (右) -->
+    <path d="M48,52 Q51,49 56,50 L55,60 L48,58 Z" fill="#fbbf24"/>
+    <!-- 圆领 -->
+    <path d="M30,50 Q36,53 42,50" stroke="#d97706" stroke-width="1.2" fill="none"/>
+    <!-- T 恤红条纹 -->
+    <rect x="20" y="60" width="32" height="3" fill="#dc2626"/>
+    <!-- T 恤胸前图案 (爱心) -->
+    <path d="M36,68 L34,66 Q32,64 34,63 Q36,63 36,65 Q36,63 38,63 Q40,64 38,66 Z" fill="#fff"/>
+    
+    <!-- ═══ 短裤 (蓝色, 短点露腿) ═══ -->
+    <rect x="20" y="76" width="32" height="10" fill="#1e40af"/>
+    <!-- 短裤中线分裤腿 -->
+    <line x1="36" y1="78" x2="36" y2="86" stroke="#1e3a8a" stroke-width="1.5"/>
+    <!-- 腰带 -->
+    <rect x="20" y="76" width="32" height="2" fill="#1e3a8a"/>
+    <!-- 裤腿底边 (深色) -->
+    <rect x="20" y="85" width="14" height="1.5" fill="#1e3a8a"/>
+    <rect x="38" y="85" width="14" height="1.5" fill="#1e3a8a"/>
+    
+    <!-- ═══ 冰淇淋 (右手举着) ═══ -->
+    <!-- 甜筒 (烤纹) -->
+    <polygon points="57,37 65,37 61,26" fill="#d97706"/>
+    <line x1="58" y1="35" x2="64" y2="35" stroke="#78350f" stroke-width=".4"/>
+    <line x1="58.5" y1="32" x2="63.5" y2="32" stroke="#78350f" stroke-width=".4"/>
+    <line x1="59" y1="29" x2="63" y2="29" stroke="#78350f" stroke-width=".4"/>
+    <!-- 冰淇淋球 (粉) -->
+    <ellipse cx="61" cy="23" rx="5.5" ry="5" fill="#fbcfe8"/>
+    <ellipse cx="59" cy="21" rx="1.5" ry="1" fill="#fff" opacity=".8"/>
+    <!-- 樱桃 -->
+    <circle cx="61" cy="17" r="1.8" fill="#dc2626"/>
+    <line x1="61" y1="16" x2="62" y2="14" stroke="#15803d" stroke-width=".6"/>
+    
+    <!-- ═══ 腿 (从裤腿下面延伸) ═══ -->
+    <rect x="25" y="86" width="7" height="11" rx="2" fill="#fde6c8"/>
+    <rect x="40" y="86" width="7" height="11" rx="2" fill="#fde6c8"/>
+    
+    <!-- ═══ 运动鞋 (白红) ═══ -->
+    <ellipse cx="29" cy="99" rx="5.5" ry="3" fill="#fff"/>
+    <ellipse cx="29" cy="100.5" rx="5.5" ry="1.8" fill="#dc2626"/>
+    <path d="M27,98 L31,98" stroke="#dc2626" stroke-width=".6"/>
+    <ellipse cx="43" cy="99" rx="5.5" ry="3" fill="#fff"/>
+    <ellipse cx="43" cy="100.5" rx="5.5" ry="1.8" fill="#dc2626"/>
+    <path d="M41,98 L45,98" stroke="#dc2626" stroke-width=".6"/>
+  </svg>
+</div>
+<div class="deco" id="deco"></div>
+
+<!-- 🔴 v719/v720/v721(Hansen): 首页左上角"沉浸欣赏主题"按钮——【纯磨砂薄纱圆按钮·不放眼睛图标】(很多人看眼睛不适); 点一下只显示主题背景与特效(隐藏所有 UI), 再点恢复。【只在首页·岛里绝不出现】。注意: 放在 main.page 前·随首页一起滚动(position:absolute·非 fixed)·往上滑会跟着划走。 -->
+<button type="button" id="hsnThemeEye" class="hsn-eye-btn" onclick="window.__hsnToggleThemeOnly&&window.__hsnToggleThemeOnly()" aria-label="沉浸欣赏主题"></button>
+
+<!-- 🔴 v733(Hansen): 版本水印——首页右下角极淡小字·一眼确认部署是否真生效(看到 v733 = 新版已上线; 看到旧版号 = 微信/腾讯云 CDN 还在吃旧缓存·根本没加载到新代码)。仅首页·pointer-events:none 不挡任何操作·随时可让我撤掉。 -->
+<div id="hsnVerStamp" style="position:fixed;right:7px;bottom:5px;z-index:6;font:600 9px/1 ui-monospace,Menlo,Consolas,monospace;color:rgba(251,191,36,.30);letter-spacing:.5px;pointer-events:none;-webkit-user-select:none;user-select:none"></div>
+
+<main class="page">
+
+  <!-- ════════ HEADER ════════ -->
+  <header style="text-align:center">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>🎒 单词大冒险家联盟 · 招募中</span>
+    </div>
+
+    <div class="title-block">
+      <div class="tagline">单 词 大 冒 险 · 一 段 神 奇 旅 程</div>
+      <h1 class="main game-logo">
+  <span class="logo-char c1" style="--i:0">单</span><span class="logo-char c2" style="--i:1">词</span><span class="logo-char c3" style="--i:2">大</span><span class="logo-char c4" style="--i:3">冒</span><span class="logo-char c5" style="--i:4">险</span>
+</h1>
+      <div class="subtitle">Word Adventures</div>
+      <p class="intro">
+        🦸 Hey 勇敢的小冒险家, 欢迎加入！<br>
+        快穿越 <b>18 关神奇大冒险</b>, 收集 <b>711+ 单词宝藏</b>, <br>
+        玩转 <b>12 种超酷挑战</b>, 还能孵化你专属的 <b>22 阶进化宠物</b> 🐣！
+      </p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-icon">🗺️</span>
+        <div><div class="stat-num">18</div><div class="stat-lbl">主题岛屿</div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">📚</span>
+        <div><div class="stat-num">711+</div><div class="stat-lbl">英语单词</div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">🎮</span>
+        <div><div class="stat-num">12</div><div class="stat-lbl">学习模式</div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">🐾</span>
+        <div><div class="stat-num">22</div><div class="stat-lbl">宠物阶段</div></div>
+      </div>
+      <div class="stat" id="recentLearnStat" onclick="continueLastIsland()" style="cursor:pointer">
+        <span class="stat-icon" id="recentEmoji">📍</span>
+        <div><div class="stat-lbl" id="recentLbl" style="font-size:17px;color:var(--gold);font-weight:700;letter-spacing:1px;line-height:1.2">最近探险的岛屿</div><div class="stat-num" id="recentNum" style="font-size:15px;line-height:1.4;color:var(--pal-ink-2,#cbd5e1);font-family:'Inter',sans-serif;font-weight:600;margin-top:2px">快去玩</div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════ ISLANDS ════════ -->
+  <section class="islands">
+
+    <!-- 动物 -->
+    <a href="island_animal.html" class="island animal" style="--delay:0.05s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🦁</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🐘</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🦒</span>
+      </div>
+      <div class="island-icon">🦁</div>
+      <div class="island-name">动物大冒险</div>
+      <div class="island-en">Animal Island</div>
+      <div class="island-desc">穿越丛林、海洋与农场，认识从 cat 到 elephant，从 panda 到 dolphin 的可爱动物伙伴。</div>
+      <div class="island-tags">
+        <span class="tag">🌿 农场</span>
+        <span class="tag">🌊 海洋</span>
+        <span class="tag">🌳 丛林</span>
+        <span class="tag">🐦 鸟类</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 食物 -->
+    <a href="island_food.html" class="island food" style="--delay:0.10s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🍕</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🍔</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🍎</span>
+      </div>
+      <div class="island-icon">🍔</div>
+      <div class="island-name">食物大冒险</div>
+      <div class="island-en">Food Island</div>
+      <div class="island-desc">从中式早餐到西式快餐，从水果蔬菜到甜点饮料，把每天吃的东西都说成英文！</div>
+      <div class="island-tags">
+        <span class="tag">🥬 蔬果</span>
+        <span class="tag">🍞 主食</span>
+        <span class="tag">🍰 甜点</span>
+        <span class="tag">🥤 饮料</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 运动爱好 -->
+    <a href="island_sports.html" class="island sports" style="--delay:0.15s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">⚽</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🏀</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🏊</span>
+      </div>
+      <div class="island-icon">⚽</div>
+      <div class="island-name">运动大冒险</div>
+      <div class="island-en">Sports &amp; Hobbies</div>
+      <div class="island-desc">从 football、basketball 到 swimming、yoga，把球类、运动项目、兴趣爱好全部拿下。30 个高频词。</div>
+      <div class="island-tags">
+        <span class="tag">⚽ 球类</span>
+        <span class="tag">🏊 运动</span>
+        <span class="tag">🎨 爱好</span>
+        <span class="tag">🏆 比赛</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 人物职业 -->
+    <a href="island_job.html" class="island people" style="--delay:0.20s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">👨‍⚕️</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">👨‍🚀</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">👨‍🏫</span>
+      </div>
+      <div class="island-icon">👨‍⚕️</div>
+      <div class="island-name">职业大冒险</div>
+      <div class="island-en">People &amp; Professions</div>
+      <div class="island-desc">从 man、woman 到 astronaut、firefighter，人物称呼和 22 种职业的英文全收齐。梦想职业小作文必备！</div>
+      <div class="island-tags">
+        <span class="tag">🧑 人物</span>
+        <span class="tag">👫 关系</span>
+        <span class="tag">⚕️ 服务</span>
+        <span class="tag">🎭 艺术</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 颜色数字 -->
+    <a href="island_color.html" class="island colornum" style="--delay:0.25s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🎨</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🔢</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🏅</span>
+      </div>
+      <div class="island-icon">🎨</div>
+      <div class="island-name">色彩数字大冒险</div>
+      <div class="island-en">Colors &amp; Numbers</div>
+      <div class="island-desc">12 种颜色 + 23 个数字，全部专属手画图标。必备基础大本营！</div>
+      <div class="island-tags">
+        <span class="tag">🎨 颜色</span>
+        <span class="tag">1️⃣ 基本数</span>
+        <span class="tag">💯 大数</span>
+        <span class="tag">🏅 序数</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 自然 -->
+    <a href="island_nature.html" class="island nature" style="--delay:0.30s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">☀️</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🌈</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🌳</span>
+      </div>
+      <div class="island-icon">🌈</div>
+      <div class="island-name">自然大冒险</div>
+      <div class="island-en">Nature Island</div>
+      <div class="island-desc">从 sun、moon 到 mountain、lightning，把整个大自然装进英语口袋。40 个高频词, 大自然小达人必备！</div>
+      <div class="island-tags">
+        <span class="tag">☀️ 天空</span>
+        <span class="tag">🌧️ 天气</span>
+        <span class="tag">🍁 四季</span>
+        <span class="tag">🌳 植物</span>
+        <span class="tag">🏔️ 山水</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 动作动词 -->
+    <a href="island_action.html" class="island verbs" style="--delay:0.35s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🏃</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">✍️</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🗣️</span>
+      </div>
+      <div class="island-icon">🏃</div>
+      <div class="island-name">动作大冒险</div>
+      <div class="island-en">Action Verbs</div>
+      <div class="island-desc">从 go、come 到 finish、answer，把英语里最核心的 67 个动词一网打尽。阅读和写作的"动词肌肉"。</div>
+      <div class="island-tags">
+        <span class="tag">🏃 运动</span>
+        <span class="tag">📖 学习</span>
+        <span class="tag">✋ 拿握</span>
+        <span class="tag">❤️ 情感</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 交通出行 -->
+    <a href="island_traffic.html" class="island transport" style="--delay:0.40s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🚗</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">✈️</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🚂</span>
+      </div>
+      <div class="island-icon">🚗</div>
+      <div class="island-name">交通大冒险</div>
+      <div class="island-en">Transportation</div>
+      <div class="island-desc">从 car、bus 到 motorcycle、helicopter，路上、海上、天上的交通工具全部掌握。30 个高频词。</div>
+      <div class="island-tags">
+        <span class="tag">🚗 车辆</span>
+        <span class="tag">✈️ 飞机船</span>
+        <span class="tag">🛣️ 道路</span>
+        <span class="tag">👆 方向</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 身体部位 -->
+    <a href="island_body.html" class="island body" style="--delay:0.45s">
+      <div class="float-bg">
+        <span style="top:8%;right:8%">👁️</span>
+        <span style="top:48%;right:22%;animation-delay:-2s">❤️</span>
+        <span style="bottom:10%;right:10%;animation-delay:-4s">💪</span>
+      </div>
+      <div class="island-icon">👤</div>
+      <div class="island-name">身体大冒险</div>
+      <div class="island-en">Body Parts</div>
+      <div class="island-desc">从 head、eye 到 hand、stomach，35 个身体部位的英文一网打尽！</div>
+      <div class="island-tags">
+        <span class="tag">👤 头部</span>
+        <span class="tag">👀 五官</span>
+        <span class="tag">💪 上身</span>
+        <span class="tag">🦵 下身</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 城市 -->
+    <a href="island_city.html" class="island city" style="--delay:0.50s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🏙️</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🚌</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🏪</span>
+      </div>
+      <div class="island-icon">🏙️</div>
+      <div class="island-name">城市大冒险</div>
+      <div class="island-en">City Island</div>
+      <div class="island-desc">学校、医院、超市、公园…走遍城市的每个角落，把生活场景的英文都装进口袋。</div>
+      <div class="island-tags">
+        <span class="tag">🏫 学校</span>
+        <span class="tag">🏥 设施</span>
+        <span class="tag">🚇 交通</span>
+        <span class="tag">🏞️ 场所</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 服装 -->
+    <a href="island_clothes.html" class="island clothes" style="--delay:0.55s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">👕</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">👖</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">👟</span>
+      </div>
+      <div class="island-icon">👗</div>
+      <div class="island-name">服装大冒险</div>
+      <div class="island-en">Clothes Island</div>
+      <div class="island-desc">从 T-shirt、jeans 到 sweater、raincoat，把衣柜里每一件衣物都说成英语。30 个手画专属图标！</div>
+      <div class="island-tags">
+        <span class="tag">👕 上身</span>
+        <span class="tag">👖 下身</span>
+        <span class="tag">👟 鞋袜</span>
+        <span class="tag">🧢 配饰</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 房屋家具 -->
+    <a href="island_home.html" class="island house" style="--delay:0.60s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🏠</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🛋️</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🛏️</span>
+      </div>
+      <div class="island-icon">🏠</div>
+      <div class="island-name">家居大冒险</div>
+      <div class="island-en">House &amp; Furniture</div>
+      <div class="island-desc">从 bedroom、kitchen 到 fridge、microwave，家里看得见用得上的英语全在这里。35 个高频词。</div>
+      <div class="island-tags">
+        <span class="tag">🏠 房间</span>
+        <span class="tag">🛋️ 家具</span>
+        <span class="tag">🍳 厨房</span>
+        <span class="tag">💡 电器</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 家庭 -->
+    <a href="island_family.html" class="island family" style="--delay:0.65s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">👨‍👩‍👧‍👦</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">👶</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">👴</span>
+      </div>
+      <div class="island-icon">👨‍👩‍👧‍👦</div>
+      <div class="island-name">家庭大冒险</div>
+      <div class="island-en">Family Island</div>
+      <div class="island-desc">从 dad、mom 到 grandparents、stepfather，把每一位家人的英文称呼都学到位。</div>
+      <div class="island-tags">
+        <span class="tag">🏠 小家</span>
+        <span class="tag">👫 兄弟姐妹</span>
+        <span class="tag">👴 长辈</span>
+        <span class="tag">🤝 亲戚</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 学校文具 -->
+    <a href="island_school.html" class="island school" style="--delay:0.70s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">🏫</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">✏️</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">📚</span>
+      </div>
+      <div class="island-icon">🏫</div>
+      <div class="island-name">学校大冒险</div>
+      <div class="island-en">School &amp; Stationery</div>
+      <div class="island-desc">从 pencil、book 到 dictionary、homework，校园英语全在这里。38 个高频词，写作小能手必备！</div>
+      <div class="island-tags">
+        <span class="tag">🏫 师生</span>
+        <span class="tag">✏️ 文具</span>
+        <span class="tag">📝 课业</span>
+        <span class="tag">🔬 学科</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 时间 -->
+    <a href="island_time.html" class="island time" style="--delay:0.75s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">⏰</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">📅</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🌙</span>
+      </div>
+      <div class="island-icon">⏰</div>
+      <div class="island-name">时间大冒险</div>
+      <div class="island-en">Time Island</div>
+      <div class="island-desc">从 second 到 century，从 Monday 到 weekend，把所有时间的英文表达一网打尽。</div>
+      <div class="island-tags">
+        <span class="tag">⏱️ 单位</span>
+        <span class="tag">📆 星期</span>
+        <span class="tag">🗓️ 月份</span>
+        <span class="tag">🌅 时段</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 常见形容词 -->
+    <a href="island_adjective.html" class="island adj" style="--delay:0.80s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">😊</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🌹</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🦁</span>
+      </div>
+      <div class="island-icon">✨</div>
+      <div class="island-name">形容大冒险</div>
+      <div class="island-en">Common Adjectives</div>
+      <div class="island-desc">从 big、small 到 beautiful、dangerous，描述大小、性格、情感的 51 个高频形容词。写英文小作文"加料神器"！</div>
+      <div class="island-tags">
+        <span class="tag">📐 大小</span>
+        <span class="tag">⚖️ 性质</span>
+        <span class="tag">😊 情感</span>
+        <span class="tag">🔊 判断</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 其他常用 -->
+    <a href="island_treasure.html" class="island misc" style="--delay:0.85s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">✅</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">💡</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">🔗</span>
+      </div>
+      <div class="island-icon">🔤</div>
+      <div class="island-name">百宝大冒险</div>
+      <div class="island-en">Common Misc Words</div>
+      <div class="island-desc">礼貌用语、连词、副词、介词、抽象名词全收齐 60 个！日常英语高频小词宝库。</div>
+      <div class="island-tags">
+        <span class="tag">👋 礼貌</span>
+        <span class="tag">🔗 连词</span>
+        <span class="tag">⏰ 时间</span>
+        <span class="tag">📍 介词</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+
+    <!-- 疑问词代词 -->
+    <a href="island_question.html" class="island pronouns" style="--delay:0.90s">
+      <div class="float-bg">
+        <span style="top:8%;right:6%">❓</span>
+        <span style="top:55%;right:18%;animation-delay:-2s">🤔</span>
+        <span style="bottom:8%;right:8%;animation-delay:-4s">👉</span>
+      </div>
+      <div class="island-icon">❓</div>
+      <div class="island-name">疑问大冒险</div>
+      <div class="island-en">Pronouns &amp; Question Words</div>
+      <div class="island-desc">5W1H + 8 大代词 + How 词组全部一网打尽。阅读理解里超常用的"语法地基"。</div>
+      <div class="island-tags">
+        <span class="tag">❓ 5W1H</span>
+        <span class="tag">🔢 How 词组</span>
+        <span class="tag">👉 指示代词</span>
+        <span class="tag">👥 人称代词</span>
+      </div>
+      <div class="enter">进入冒险 <span class="arrow">→</span></div>
+    </a>
+  </section>
+
+  <!-- ════════ HOW IT WORKS ════════ -->
+  <section class="how">
+    <h2 class="how-title">🎯 在大冒险, 你会收获什么</h2>
+    <div class="how-sub">What awaits you</div>
+    <div class="how-grid">
+      <div class="how-step">
+        <span class="num">01</span>
+        <span class="icon">📖</span>
+        <div class="title">自然学习</div>
+        <div class="desc">主题分组 · 听音 · 看图 · 例句 一站式掌握</div>
+      </div>
+      <div class="how-step">
+        <span class="num">02</span>
+        <span class="icon">🎮</span>
+        <div class="title">12 种玩法</div>
+        <div class="desc">打地鼠 · 钓鱼 · 拼词 · 打字 · 完形填空…</div>
+      </div>
+      <div class="how-step">
+        <span class="num">03</span>
+        <span class="icon">🐾</span>
+        <div class="title">宠物养成</div>
+        <div class="desc">22 阶进化 · 每天练习让宠物更强大</div>
+      </div>
+      <div class="how-step">
+        <span class="num">04</span>
+        <span class="icon">🏆</span>
+        <div class="title">每日挑战</div>
+        <div class="desc">任务 · 宝箱 · 成就 · 连续打卡奖励</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 给作者留言 ════════ -->
+  <section class="feedback-section">
+    <button class="feedback-big-btn" onclick="window.open('https://wj.qq.com/s2/26724943/589f/','_blank')">
+      <span class="fbb-icon">✉️</span>
+      <span class="fbb-text">给作者留言</span>
+    </button>
+    <div class="feedback-sub">Bug · 建议 · 表扬, 都告诉我</div>
+  </section>
+
+
+  <!-- ════════ FOOTER ════════ -->
+  <footer class="foot">
+    <div class="foot-brand">🌟 单词大冒险 🎮</div>
+    <div class="foot-slogan" style="color:#fde047;font-weight:900;font-size:24px;margin-top:8px;margin-bottom:6px;letter-spacing:2px;-webkit-text-stroke:2.5px var(--pal-surf-2,#1e293b);paint-order:stroke fill;text-shadow:-2px -2px 0 var(--pal-surf-2,#1e293b),2px -2px 0 var(--pal-surf-2,#1e293b),-2px 2px 0 var(--pal-surf-2,#1e293b),2px 2px 0 var(--pal-surf-2,#1e293b),-2px 0 0 var(--pal-surf-2,#1e293b),2px 0 0 var(--pal-surf-2,#1e293b),0 -2px 0 var(--pal-surf-2,#1e293b),0 2px 0 var(--pal-surf-2,#1e293b),0 6px 12px rgba(0,0,0,.5)">学渣的快乐 · 学霸的秘密</div>
+    <div class="foot-tip">
+      💡 每天玩 10 分钟, 一个月后你会发现自己超厉害！<br>
+      🎒 进度自动保存 · 关掉网络也能玩
+    </div>
+  </footer>
+
+
+</main>
+
+<script>
+/* ============================================================
+ * 单词大冒险 © 2026 Hansen / 大冒险教育科技工作室
+ * Copyright © 2026 Hansen. All Rights Reserved.
+ * 
+ * 本代码受中国著作权法保护. 任何未经书面授权的复制、
+ * 修改、再发布、商业使用均构成侵权.
+ * 
+ * UNAUTHORIZED COPYING IS PROHIBITED.
+ * ============================================================ */
+
+// ============= 防爬保护 (仅 PC 端启用) =============
+(function(){
+  // 检测是否移动端 - 移动端 (微信内) 完全不启用任何拦截!
+  var ua = navigator.userAgent || '';
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile|MicroMessenger|MiniProgram/i.test(ua);
+  
+  // 控制台警告 (无论平台都显示)
+  if(typeof console !== 'undefined' && console.log){
+    try {
+      console.log('%c⚠️ 单词大冒险 © 2026 Hansen', 'color:red;font-size:20px;font-weight:bold');
+      console.log('%c版权所有, 禁止盗用. 联系: wj.qq.com/s2/26724943/589f/', 'color:blue;font-size:13px');
+    } catch(e) {}
+  }
+  
+  // 移动端 不加任何拦截, 直接返回
+  if(isMobile) return;
+  
+  // ===== 以下仅 PC 端启用 =====
+  
+  // 1. 禁用右键 (PC)
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    return false;
+  });
+  
+  // 2. 禁用 F12 / Ctrl+Shift+I / Ctrl+U (PC)
+  document.addEventListener('keydown', function(e){
+    if(e.keyCode === 123){ e.preventDefault(); return false; }
+    if(e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)){
+      e.preventDefault(); return false;
+    }
+    if(e.ctrlKey && e.keyCode === 85){ e.preventDefault(); return false; }
+    if(e.ctrlKey && e.keyCode === 83){ e.preventDefault(); return false; }
+  });
+})();
+// === 防爬保护 END ===
+
+// 全局错误捕获 (防止 JS 错误导致白屏)
+window.addEventListener('error', function(e){
+  // 静默捕获, 防止白屏. 关键错误已经通过 try-catch 处理
+  console.warn('JS error:', e.message);
+  return true;
+});
+window.addEventListener('unhandledrejection', function(e){
+  console.warn('Unhandled promise:', e.reason);
+  e.preventDefault();
+});
+
+// ───── starfield ─────
+(function(){
+  const s=document.getElementById('stars');
+  const N=80;
+  for(let i=0;i<N;i++){
+    const e=document.createElement('div');
+    e.className='star';
+    const sz=Math.random()*2+1;
+    e.style.width=sz+'px';e.style.height=sz+'px';
+    e.style.left=Math.random()*100+'%';
+    e.style.top=Math.random()*100+'%';
+    e.style.animationDelay=(Math.random()*3)+'s';
+    e.style.animationDuration=(2+Math.random()*3)+'s';
+    s.appendChild(e);
+  }
+  // 2 shooting stars
+  for(let i=0;i<2;i++){
+    const e=document.createElement('div');
+    e.className='shooter';
+    e.style.right=(10+Math.random()*40)+'%';
+    e.style.top=(5+Math.random()*30)+'%';
+    e.style.animationDelay=(i*4)+'s';
+    s.appendChild(e);
+  }
+})();
+
+// ───── floating decorative emojis ─────
+(function(){
+  const d=document.getElementById('deco');
+  // emojis sampling all 4 themes
+  const pool=['🍔','🍕','🦁','🐘','🏙️','🚌','⏰','📅','🌙','🎮','🐉','📚','⭐','💎','🎯','🐾','🏆','🎁','🦋','🌟'];
+  const N=14;
+  for(let i=0;i<N;i++){
+    const e=document.createElement('div');
+    e.className='deco-emoji';
+    e.textContent=pool[Math.floor(Math.random()*pool.length)];
+    e.style.left=Math.random()*100+'%';
+    e.style.top=Math.random()*120+'%';
+    e.style.fontSize=(24+Math.random()*40)+'px';
+    e.style.animationDuration=(10+Math.random()*10)+'s';
+    e.style.animationDelay=(-Math.random()*8)+'s';
+    e.style.color=['#fbbf24','#22c55e','#3b82f6','#a855f7','#ef4444'][i%5];
+    d.appendChild(e);
+  }
+})();
+
+// ───── parallax (subtle) ─────
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const deco=document.getElementById('deco');
+  const stars=document.getElementById('stars');
+  let tx=0,ty=0,cx=0,cy=0;
+  document.addEventListener('mousemove',e=>{
+    tx=(e.clientX/window.innerWidth-.5)*20;
+    ty=(e.clientY/window.innerHeight-.5)*20;
+  });
+  function tick(){
+    cx+=(tx-cx)*.05;
+    cy+=(ty-cy)*.05;
+    stars.style.transform=`translate(${cx*.3}px,${cy*.3}px)`;
+    deco.style.transform=`translate(${cx}px,${cy}px)`;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+// ───── click feedback ─────
+document.querySelectorAll('.island').forEach(el=>{
+  el.addEventListener('click',function(e){
+    // brief flash before navigation
+    this.style.transition='transform .15s, box-shadow .15s';
+    this.style.transform='scale(.97)';
+  });
+});
+
+// ───── Recent island tracker ─────
+(function(){
+  // 18 个岛的元信息: localStorage key, 文件名, emoji, 简短名
+  const ISLAND_META = {
+    'wordIslandAnimal':    {file:'island_animal.html', emoji:'🐯', short:'动物'},
+    'wordIslandFood':      {file:'island_food.html',         emoji:'🍔', short:'食物'},
+    'wordIslandSports':    {file:'island_sports.html',     emoji:'⚽', short:'运动'},
+    'wordIslandPeople':    {file:'island_job.html',     emoji:'🦸', short:'职业'},
+    'wordIslandColorNum':  {file:'island_color.html',     emoji:'🌈', short:'颜色数字'},
+    'wordIslandNature':    {file:'island_nature.html',         emoji:'🌳', short:'自然'},
+    'wordIslandVerbs':     {file:'island_action.html',     emoji:'🏃', short:'动词'},
+    'wordIslandTransport': {file:'island_traffic.html',     emoji:'🚗', short:'交通'},
+    'wordIslandBody':      {file:'island_body.html',     emoji:'👤', short:'身体'},
+    'wordIslandCity':      {file:'island_city.html',         emoji:'🏙️', short:'城市'},
+    'wordIslandClothes':   {file:'island_clothes.html',         emoji:'👕', short:'服装'},
+    'wordIslandHouse':     {file:'island_home.html',     emoji:'🏠', short:'房屋'},
+    'wordIslandFamily':    {file:'island_family.html',         emoji:'👨‍👩‍👦', short:'家庭'},
+    'wordIslandSchool':    {file:'island_school.html',     emoji:'🎒', short:'学校'},
+    'wordIslandTime':      {file:'island_time.html',         emoji:'⏰', short:'时间'},
+    'wordIslandAdj':       {file:'island_adjective.html',   emoji:'😊', short:'形容词'},
+    'wordIslandMisc':      {file:'island_treasure.html',     emoji:'🔤', short:'常用词'},
+    'wordIslandPronouns':  {file:'island_question.html',   emoji:'❓', short:'代词'}
+  };
+  
+  // 决定最近学习的岛: 优先用 lastIslandKey, 否则扫描各岛 localStorage 找最后活动时间
+  function findRecentIsland(){
+    // 1) 显式记录的 lastIslandKey
+    let lastKey = localStorage.getItem('lastIslandKey');
+    let lastTime = parseInt(localStorage.getItem('lastIslandTime')||'0');
+    
+    // 2) 扫描所有岛的进度数据, 找最近更新的
+    let bestKey = null, bestTime = lastTime;
+    for(const k in ISLAND_META){
+      try{
+        const raw = localStorage.getItem(k);
+        if(!raw) continue;
+        const data = JSON.parse(raw);
+        const t = data.lastSaveTime || 0;
+        if(t > bestTime){ bestTime = t; bestKey = k; }
+      }catch(e){}
+    }
+    if(bestKey) return {key: bestKey, time: bestTime};
+    if(lastKey && ISLAND_META[lastKey]) return {key: lastKey, time: lastTime};
+    return null;
+  }
+  
+  function renderRecent(){
+    const recentEl = document.getElementById('recentLearnStat');
+    if(!recentEl) return;
+    const recent = findRecentIsland();
+    const emojiEl = document.getElementById('recentEmoji');
+    const numEl = document.getElementById('recentNum');
+    const lblEl = document.getElementById('recentLbl');
+    if(!recent){
+      // 没有任何记录
+      if(emojiEl) emojiEl.textContent = '📍';
+      if(numEl) { numEl.textContent = '快去玩'; numEl.style.fontSize='15px'; }
+      if(lblEl) lblEl.textContent = '最近探险的岛屿';
+      recentEl._target = null;
+      return;
+    }
+    const meta = ISLAND_META[recent.key];
+    if(!meta) return;
+    if(emojiEl) emojiEl.textContent = meta.emoji;
+    if(numEl){ numEl.textContent = meta.emoji + ' ' + meta.short + ' · 点击继续 →'; numEl.style.fontSize='15px'; }
+    if(lblEl) lblEl.textContent = '最近探险的岛屿';
+    recentEl._target = meta.file;
+  }
+  
+  // 暴露 global continueLastIsland 给 onclick 使用
+  window.continueLastIsland = function(){
+    const el = document.getElementById('recentLearnStat');
+    const target = el && el._target;
+    if(target){
+      // 记录最近一次跳转的岛
+      localStorage.setItem('lastIslandKey', findRecentIsland().key);
+      localStorage.setItem('lastIslandTime', String(Date.now()));
+      openIsland(target);
+    } else {
+      // 没有进度, 滚动到岛列表
+      const isl = document.querySelector('.islands');
+      if(isl) isl.scrollIntoView({behavior:'smooth'});
+    }
+  };
+
+  /* 🔴 v684: 首页外壳——在 iframe 里【就地】打开/关闭岛, 首页永不重载, 零跳转零延迟。
+     岛的 goHome 检测到 parent.closeIsland 即调它瞬回首页(hansen_home_link.js 已内置)。
+     ★用 location.replace 导航 iframe(不往与父页共享的会话历史加条目)——否则 iframe 的多次导航会污染
+       历史栈, 使 history.back() 误把【顶层页面】导到某个岛的 URL(顶层就离开首页了)。返回键只受
+       openIsland 里这唯一一条 pushState 控制; 关闭统一由 popstate 处理(goHome 与返回键同一路径)。 */
+  var _islandPending = null;  /* 🔴 换岛遮罩: 正在切换加载的目标岛(DOM就绪才把 iframe 由透明转可见, 盖住"浏览器保持的旧岛画面") */
+  /* 🔴BUG#87/#89 进岛加载提示: 揭开iframe前显示岛名+平滑进度条, DOM就绪即淡出(无旋转/闪烁/震屏·仅平滑淡入淡出) */
+  function _showIslandLoading(file){
+    try{
+      var el = document.getElementById('islandLoading'); if(!el) return;
+      var emoji = '🚀', name = '';   /* 🔴v748(Hansen): 进岛加载图标【全岛统一=🚀火箭】·原各岛各显各emoji(动物🐯/美食🍔…)·Hansen要求统一一个图标·emoji是系统字体字形零网速瞬间出现。注: 仅统一"加载遮罩"图标·首页"最近探险"卡片(meta.emoji)仍按岛显示·世界地图各岛图标不变。 */
+      for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ name = ISLAND_META[k].short || ''; break; } }   /* 只取岛名(正在进入X岛)·不再取各岛emoji(已统一🚀) */
+      var em = document.getElementById('islandLoadingEmoji'); if(em) em.textContent = emoji;
+      var tx = document.getElementById('islandLoadingText'); if(tx) tx.textContent = '正在进入' + (name ? (' ' + name + '岛') : '') + '…';
+      var bar = document.getElementById('islandLoadingBar');
+      if(bar){ bar.style.transition = 'none'; bar.style.width = '0%'; void bar.offsetWidth; bar.style.transition = 'width 1.8s ease'; bar.style.width = '95%'; }   /* 🔴v747(Hansen): 进度条1.8s充到95%(贴合2秒加载上限·原6s到90%在2秒上限下只到~26%再跳100%有跳变) */
+      el.style.transition = 'none'; el.style.opacity = '1';   /* 🔴BUG#89 重置·覆盖上次的淡出残留, 再显示 */
+      el.style.display = 'flex';
+    }catch(e){}
+  }
+  function _hideIslandLoading(immediate){
+    try{
+      var el = document.getElementById('islandLoading'); if(!el) return;
+      var bar = document.getElementById('islandLoadingBar'); if(bar){ bar.style.transition = 'width .2s ease'; bar.style.width = '100%'; }
+      if(immediate){
+        /* 保活瞬时进岛: 立即隐藏(无需淡出) */
+        el.style.transition = 'none'; el.style.opacity = '0'; el.style.display = 'none';
+      } else {
+        /* 🔴BUG#89 换岛揭开: 加载提示平滑淡出(与岛淡入同步crossfade·不再突然消失闪一下) */
+        el.style.transition = 'opacity 0.3s ease'; el.style.opacity = '0';
+        setTimeout(function(){ try{ el.style.display = 'none'; }catch(e){} }, 320);
+      }
+    }catch(e){}
+  }
+  function openIsland(file){
+    if(!file) return;
+    try{ for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ localStorage.setItem('lastIslandKey', k); localStorage.setItem('lastIslandTime', String(Date.now())); break; } } }catch(e){}
+    var wrap = document.getElementById('islandFrameWrap');
+    var frame = document.getElementById('islandFrame');
+    if(!wrap || !frame){ window.location.href = file; return; }  /* 兜底: 无外壳则退回原生跳转 */
+    var cur = '';
+    try{ cur = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
+    if(cur === file){
+      /* 🔴 保活: iframe 当前就是这个岛(上次进的·没卸载)→ 瞬时显示, 零重载零淡入(内容本就在·真·瞬时再进)。 */
+      _islandPending = null;
+      frame.style.transition = 'none'; frame.style.opacity = '1';
+      wrap.style.display = 'block';
+      _hideIslandLoading(true);
+    } else {
+      /* 🔴BUG#90 换岛/首次进岛【真·秒进·零闪】: ①先把 iframe 瞬时设透明(transition:none)【再】显示 wrap → wrap 出现时 iframe 已隐藏·绝不闪旧岛画面;
+         ②wrap/iframe 暗底已与岛 body(#0c1538)统一(BUG#89 保留)→揭岛背景零跳变; ③加载提示【延迟250ms】才显(预热后瞬时揭开根本不显·真秒进无闪); ④等首屏图标【真正加载完】再【瞬时】揭开完整岛(替代 v692 的0.3s淡入——淡入本身被反馈为"闪一下"; 图片全就绪故无图标逐个蹦)。
+         秒进根本: hansen_preload.js 在首页【预热44脚本(含705KB boss_attack)+首屏图标+岛HTML】进缓存 → 点岛时同 URL 命中 → readyState 秒到 interactive + 图标已就绪 → 瞬时完整揭开。
+         🔴BUG#87 揭开时机: 轮询新岛 readyState, interactive(脚本全跑完)后再等首屏图标就绪即揭(软封顶2s); onload + 9s 兜底·绝不卡死。 */
+      try{ window.__hsnIslandBusyUntil = Date.now() + 12000; }catch(e){}   /* 🔴BUG#88 进岛期间暂停首页外壳预载, 把带宽全留给iframe, 揭岛后2.5s恢复 */
+      _islandPending = file;
+      var _tStart = Date.now();         /* 🔴v747(Hansen): 点击那一刻起计时 */
+      var _DEADLINE = 1900;             /* 🔴v747(Hansen): 进岛加载页绝对上限【撑死2秒·留100ms余量防主线程抖动→真机稳<2秒】·到点无论加载到哪步都必揭进岛·冷加载也绝不超2秒(原逻辑等图片+软封顶+9秒兜底→冷加载实测3-4秒·Hansen强烈不满) */
+      frame.style.transition = 'none'; frame.style.opacity = '0';   /* 瞬时隐藏(无淡出·盖住旧岛画面) */
+      wrap.style.display = 'block';
+      /* 🔴BUG#90 加载提示延迟 250ms 再显: 预热后多为瞬时揭开(<250ms)→提示根本不出现·真·秒进无任何闪; 仅冷加载(>250ms)才显提示。透明提示层(文字浮在 #0c1538 暗底上)。 */
+      var _loadHintTimer = setTimeout(function(){ if(_islandPending === file){ _showIslandLoading(file); } }, 250);
+      var _tInteractive = 0;
+      function _homeImagesReady(){
+        /* 🔴BUG#90 首屏 #homeScreen 内图标是否都加载完(complete && naturalWidth>0)→ 揭开即"图片全在"·杜绝图标一个个蹦出来。跨文档读异常则视为就绪(绝不卡住)。 */
+        try{
+          var d = frame.contentDocument; if(!d) return false;
+          var imgs = d.querySelectorAll('#homeScreen img');
+          if(!imgs || !imgs.length) return true;
+          for(var i=0;i<imgs.length;i++){ var im = imgs[i]; if(!im.complete || im.naturalWidth === 0) return false; }
+          return true;
+        }catch(e){ return true; }
+      }
+      function _revealIsland(){
+        if(_islandPending !== file) return;   /* 用户已切走/返回 → 不揭 */
+        _islandPending = null;
+        try{ clearTimeout(_loadHintTimer); }catch(e){}
+        /* 🔴BUG#90 瞬间完整揭开(替代 v692 的 0.3s 淡入——淡入本身被反馈为"闪一下"): 首屏图片已就绪(见 _pollReady)→ 直接【瞬时】显示完整岛, 加载提示瞬时隐藏。
+           背景三者统一 #0c1538(BUG#89 保留) + 图片全就绪 + 瞬时显示 = 同一暗底上"一下子整页全出"·零淡入闪烁·零图标逐个蹦·真·秒进。 */
+        frame.style.transition = 'none';
+        frame.style.opacity = '1';
+        _hideIslandLoading(true);   /* 瞬时隐藏(透明提示层·岛已完整渲染在其下) */
+        try{ window.__hsnIslandBusyUntil = Date.now() + 2500; }catch(e){}   /* 🔴BUG#88 揭岛后2.5s恢复预载 */
+      }
+      function _pollReady(){
+        if(_islandPending !== file) return;
+        var rs = '', url = '';
+        try{ rs = frame.contentDocument.readyState; }catch(e){}
+        try{ url = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
+        /* 🔴v747 🔴BUG#102(Hansen·进岛≤2秒): 到达绝对上限→无论 readyState/图片是否就绪都立即揭开进岛(岛背景#0c1538与遮罩同色·不闪)·冷加载也绝不超2秒 */
+        if(Date.now() - _tStart >= _DEADLINE){ _revealIsland(); return; }
+        /* url===file 才是【新岛】文档(旧岛 url 不同·不会误命中); interactive=DOMContentLoaded=44脚本全跑完·内容已就绪 */
+        if(url === file && (rs === 'interactive' || rs === 'complete')){
+          if(!_tInteractive) _tInteractive = Date.now();
+          /* 暖加载(预热命中)快路径: 内容就绪+首屏图标就绪→瞬时揭开(亚秒·无闪无蹦); 未就绪继续轮询·最迟2秒硬揭(见上) */
+          if(_homeImagesReady()){ _revealIsland(); return; }
+        }
+        setTimeout(_pollReady, 40);
+      }
+      frame.onload = function(){ frame.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
+      try{ frame.contentWindow.location.replace(file); }catch(e){ try{ frame.src = file; }catch(e2){} }
+      setTimeout(_pollReady, 40);
+      setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */
+    }
+    try{ document.body.style.overflow = 'hidden'; }catch(e){}
+    /* ★ pushState 必须在 replace【之后】: 否则会先压一个 iframe=旧岛 的历史快照, 使 goHome 的 history.back()
+       把 iframe 弹回旧岛(历史污染)。放最后 → 快照里 iframe 已是新岛, back 不会乱跳。唯一历史条目, 专给返回键。 */
+    try{ history.pushState({ hsnIsland: file }, ''); }catch(e){}
+  }
+  /* 纯显示关闭: 只隐藏外壳 + 刷新首页(幂等)。🔴 保活岛——【不卸载岛】(不 replace about:blank), 只隐藏 →
+     再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。岛无后台音乐(只按需单词发音),
+     隐藏时不会响; 切到别的岛时 openIsland 会 replace 覆盖掉旧岛(内存恒 1 岛)。 */
+  function _closeIslandNow(){
+    _islandPending = null;  /* 取消任何"换岛加载途中待显示"的岛(用户在新岛就绪前就返回了) */
+    _hideIslandLoading();
+    var wrap = document.getElementById('islandFrameWrap');
+    if(!wrap || wrap.style.display === 'none') return;
+    wrap.style.display = 'none';
+    try{ document.body.style.overflow = ''; }catch(e){}
+    try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
+  }
+  /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
+     岛内 spelling bee 等覆盖层有自己的历史条目, 返回键会先关覆盖层再关岛(嵌套返回); 覆盖层开着时 goHome 按钮被
+     盖住点不到, 所以 closeIsland 触发时岛内绝不残留打开的覆盖层。 */
+  function closeIsland(){
+    _islandPending = null;
+    var wrap = document.getElementById('islandFrameWrap');
+    if(wrap && wrap.style.display !== 'none'){
+      _closeIslandNow();
+      try{ history.back(); }catch(e){}
+    }
+  }
+  window.openIsland = openIsland;
+  window.closeIsland = closeIsland;
+  /* 硬件/浏览器返回键, 以及 goHome 的 history.back → 都汇聚到这里统一关闭显示 */
+  window.addEventListener('popstate', function(){ _closeIslandNow(); });
+
+  // 给每个岛卡加 click handler 记录"最近访问"
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('a.island').forEach(a=>{
+      const href = a.getAttribute('href')||'';
+      a.addEventListener('click', function(e){
+        // 🔴 v684: 不走网页跳转, 在首页外壳里就地打开岛(openIsland 内部已记录"最近访问")
+        if(href){ e.preventDefault(); openIsland(href); }
+      });
+    });
+    renderRecent();
+  });
+  
+  // 如果 DOMContentLoaded 已经触发, 直接渲染
+  if(document.readyState !== 'loading') renderRecent();
+  
+  // 暴露到全局, 让 iframe closeIsland 等可调用
+  window.renderRecent = renderRecent;
+  
+  // === 关键: 各种场景下重新渲染 "最近探险的岛屿" 卡片 ===
+  
+  // 1) 页面变为可见 (从 iframe 退出 / 切回标签页 / 浏览器返回) → 立刻刷新
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') renderRecent();
+  });
+  
+  // 2) 浏览器 back/forward 缓存 (BFCache) 恢复页面 → 立刻刷新
+  window.addEventListener('pageshow', function(e){
+    renderRecent();
+  });
+  
+  // 3) localStorage 改变 (其他标签页 / iframe 内更新) → 立刻刷新
+  window.addEventListener('storage', function(e){
+    if(e.key && (e.key.startsWith('wordIsland') || e.key === 'lastIslandKey' || e.key === 'lastIslandTime')){
+      renderRecent();
+    }
+  });
+  
+  // 4) 高频轮询: 当 iframe 打开时, 每 2 秒检查一次 localStorage
+  //    (storage 事件在同窗口不会触发, 所以需要轮询)
+  setInterval(function(){
+    renderRecent();
+  }, 2000);
+  
+})();
+
+
+// 6 主题系统 - 启动时应用 + 跨岛同步
+(function(){
+  function applyTheme(name){
+    /* 🔴 v542/v717: 钻石主题(装备或试用中)期间, 免费底色恢复器必须让位——否则 1.5s 轮询会把 data-theme 写回, 盖掉钻石主题背景。
+       🔴 v732(Hansen·主题串台根治2): 钻石主题生效时·本页(首页)轮询主动给 body 打 hsn-dia-on(CSS 据此①隐藏所有免费主题 flyer ②中和免费主题背景渐变)·并让位不写 data-theme; 卸下/无钻石主题时摘掉 hsn-dia-on 并恢复免费主题。这样无论钻石主题从哪条路径生效(商店试用/装备/bfcache 回首页)·首页 1.5s 轮询都兜底保证 hsn-dia-on 正确·彻底杜绝回首页时免费主题元素/背景残留。
+       注: 首页「更换主题」面板已于 v717 彻底移除(主题统一在主题商店获取); 本块仅保留"维持默认底色 + 钻石主题卸下后自动回归默认"的渲染职责, 不再提供任何主题切换 UI。 */
+    var _diaOn = false;
+    try{ if(window.HansenDiamondShop && window.HansenDiamondShop.getEquipped && window.HansenDiamondShop.getEquipped()) _diaOn = true; }catch(e){}
+    /* 🔴 v733(Hansen·首帧不闪): 本内联脚本先于 hansen_diamond_shop.js 执行·首帧 window.HansenDiamondShop 还没定义→装备态会被漏判·导致回首页瞬间免费主题元素闪现一下。直接读商店存档(已装备且已拥有)·首帧就判得出·彻底杜绝闪现(不依赖脚本加载顺序)。 */
+    if(!_diaOn){ try{ var _ds=JSON.parse(localStorage.getItem('hansen_diamond_shop')||'null'); if(_ds && _ds.equipped) _diaOn=true; }catch(e){} }  /* v734: 只要 equipped 有值就算钻石主题生效(放宽·owned 结构差异不卡) */
+    try{ var __tr=JSON.parse(sessionStorage.getItem('hansen_dia_trial')||'null'); if(__tr && __tr.until > Date.now()) _diaOn = true; }catch(e){}
+    /* 🔴 v734(Hansen·关键兜底): body 上只要有钻石主题 class(hsn-dia-theme_*·由主题商店 applyTheme 添加·哪怕部署的是旧版 JS 没加 hsn-dia-on)·就判定钻石主题生效→补上 hsn-dia-on。这样即便外部 hansen_diamond_shop.js 是旧缓存(只换了背景没加隐藏标记)·首页轮询也能从 DOM 上的主题 class 认出钻石主题·把免费装饰隐藏掉(根治"换了浏览器/版本号已是新的·但飞行元素+背景小元素仍残留")。 */
+    if(!_diaOn){ try{ if((document.body.className||'').indexOf('hsn-dia-theme')>=0) _diaOn=true; }catch(e){} }
+    if(_diaOn){ document.body.classList.add('hsn-dia-on'); return; }
+    document.body.classList.remove('hsn-dia-on');
+    if(!name) name = localStorage.getItem('theme') || 'cosmos';
+    document.body.dataset.theme = name;
+  }
+  applyTheme();
+  // 跨标签页同步
+  window.addEventListener('storage', function(e){
+    if(e.key === 'theme') applyTheme(e.newValue || 'cosmos');
+  });
+  // 1.5 秒兜底轮询 (防 iframe 内变更没触发 storage)
+  setInterval(applyTheme, 1500);
+})();
+
+
+
+// v717(Hansen): 首页「更换主题」选择面板 JS 已彻底移除(冗余)——主题统一在主题商店获取/购买; 首页不再提供任何更换主题入口/模态框/主题清单。
+
+// 🔴 v719/v720(Hansen): 左上角"沉浸欣赏主题"小眼睛——点击只显示主题背景+特效(隐藏所有 UI), 再点恢复。
+(function(){
+  window.__hsnToggleThemeOnly = function(){
+    try{ document.body.classList.toggle('hsn-theme-only'); }catch(e){}
+  };
+  /* 🔴 v720(Hansen 防"新东西被老版本挡住"铁律): 确保小眼睛永远在最上层、永不被任何老的覆盖层挡住——
+     ①把它移到 body 末尾(同 z-index 时 DOM 越靠后越在上层); ②真机式自检(elementFromPoint 看那个点的顶层元素是不是自己·
+     不是就 console.warn 报出谁挡住了, 便于一眼揪出"老覆盖层挡新元素"类问题)。 */
+  function ensureEyeOnTop(){
+    try{
+      var eye=document.getElementById('hsnThemeEye'); if(!eye) return;
+      if(document.body.lastElementChild!==eye){ document.body.appendChild(eye); }   // 移到 body 末尾·DOM 顶层
+      var r=eye.getBoundingClientRect(); var cx=Math.round(r.left+r.width/2), cy=Math.round(r.top+r.height/2);
+      var top=document.elementFromPoint(cx,cy);
+      if(top && top!==eye && !eye.contains(top)){ console.warn('[小眼睛自检] 被遮挡! 该点顶层元素是:', top.id||top.className||top.tagName, '——检查是否有老的高 z-index 覆盖层'); }
+    }catch(e){}
+  }
+  if(document.readyState!=='loading') ensureEyeOnTop(); else document.addEventListener('DOMContentLoaded', ensureEyeOnTop);
+  // 重新进入首页(含 bfcache 快照恢复): 回到正常视图(沉浸态下世界地图隐藏·只能点眼睛退出·故不持久化) + 再确保眼睛在顶层
+  window.addEventListener('pageshow', function(){ try{ document.body.classList.remove('hsn-theme-only'); }catch(e){} ensureEyeOnTop(); });
+})();
+
+
+
+</script>
+
+
+<script src="perf_boost.js?v=863"></script>
+<script src="hansen_preload.js?v=863"></script>
+<script src="copy_protect.js?v=863"></script>
+<script src="click_sound.js?v=863"></script>
+<script src="click_setting.js?v=863"></script>
+<script src="vocab_all.js?v=863"></script>
+<script src="hansen_upgrade.js?v=863"></script>
+<script src="hansen_onboarding.js?v=863"></script>
+<script src="hansen_theme_shop.js?v=863"></script>
+<script src="hansen_season.js?v=863"></script>
+<script src="hansen_cinema_themes.js?v=863"></script>
+<script src="hansen_diamond_shop.js?v=863"></script>
+<script src="hansen_gem_system.js?v=863"></script>
+<script src="hansen_stability.js?v=863"></script>
+<script src="hansen_home_link.js?v=863"></script>
+<script src="hansen_palette.js?v=863"></script>
+<script src="hansen_perf.js?v=863"></script><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
+<script>/* 🔴 v733(Hansen): 版本水印取值——从已加载脚本的 ?v= 戳读当前构建号(build.py 每次构建自动维护·永远=真实部署版本·无需手改)。若加载到的是旧缓存 index.html·这里读到的就是旧版号→Hansen 一眼就知道没刷新到新代码。 */
+(function(){try{var el=document.getElementById('hsnVerStamp');if(!el)return;var s=document.querySelector('script[src*="?v="]');var m=s&&s.src.match(/[?&]v=(\d+)/);el.textContent=m?('v'+m[1]):'';}catch(e){}})();</script>
+</body>
+</html>

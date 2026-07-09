@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>单词大陆 · 拼图地图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#2a2118}
+#stage{position:relative;width:100%;height:100%;
+  background:
+    radial-gradient(ellipse at 50% 40%, #f0e4c8 0%, #e6d6b4 55%, #d8c49c 100%);
+  overflow:hidden}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 90px 30px rgba(90,66,40,.5), inset 0 0 24px 8px rgba(60,44,26,.4);
+  border:8px solid #b79a68;border-radius:2px}
+#stage::after{content:"";position:absolute;inset:8px;pointer-events:none;
+  border:1.5px solid rgba(111,90,60,.7);border-radius:2px}
+svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.piece{cursor:pointer;transition:transform .13s cubic-bezier(.3,1.4,.5,1);transform-origin:center;transform-box:fill-box}
+.piece:active{transform:scale(.94)}
+.piece.done{}
+.plabel{pointer-events:none;font-weight:800;text-shadow:0 1px 2px rgba(255,255,255,.5)}
+.psub{pointer-events:none;text-shadow:0 1px 2px rgba(255,255,255,.5)}
+.title-banner{fill:#d8c298;stroke:#6f5a3c;stroke-width:1.4}
+.done-flag{pointer-events:none}
+
+/* 弹窗 */
+#overlay{position:absolute;inset:0;background:rgba(30,22,14,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#overlay.show{display:flex}
+#panel{width:100%;max-width:340px;max-height:86%;background:#f3ecd8;border-radius:16px;
+  border:3px solid #6f5a3c;box-shadow:0 12px 40px rgba(0,0,0,.5);
+  display:flex;flex-direction:column;overflow:hidden;transform:scale(.9);opacity:0;transition:.2s}
+#overlay.show #panel{transform:scale(1);opacity:1}
+#phead{padding:14px 16px 10px;border-bottom:2px solid #d8c8a8;position:relative;flex-shrink:0}
+#phead h2{font-size:18px;color:#4a3c28;font-weight:800}
+#phead .th{font-size:12px;color:#8a6f48;margin-top:3px}
+#pclose{position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;background:#e0d0b0;
+  border-radius:50%;font-size:18px;color:#6f5a3c;cursor:pointer;line-height:1}
+#pboss{padding:8px 16px;background:#efe4c8;font-size:12px;color:#8a5030;font-weight:700;flex-shrink:0;
+  border-bottom:1px solid #d8c8a8}
+#pwords{overflow-y:auto;padding:6px 12px;flex:1;-webkit-overflow-scrolling:touch}
+.wrow{display:flex;align-items:baseline;padding:7px 8px;border-bottom:1px solid #e6dcc2;gap:8px}
+.wrow:last-child{border-bottom:none}
+.wen{font-size:15px;font-weight:700;color:#3a3020;min-width:96px}
+.wpn{font-size:11px;color:#a08858;flex:1}
+.wcn{font-size:13px;color:#6a5838;text-align:right}
+#pfoot{padding:12px 16px;flex-shrink:0;border-top:2px solid #d8c8a8;display:flex;gap:10px}
+.pbtn{flex:1;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+.pbtn.enter{background:linear-gradient(#e0a850,#c88830);color:#fff;box-shadow:0 3px 0 #a86818}
+.pbtn.done{background:linear-gradient(#8fc470,#6fa450);color:#fff;box-shadow:0 3px 0 #4f8030}
+.pbtn:active{transform:translateY(2px);box-shadow:none}
+
+#hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;
+  color:#6f5a3c;pointer-events:none;z-index:5;font-weight:600}
+#progress{position:absolute;top:14px;left:0;right:0;text-align:center;z-index:5;pointer-events:none}
+#progress .pt{display:inline-block;background:#d8c298;border:1.4px solid #6f5a3c;border-radius:20px;
+  padding:5px 16px;font-size:13px;color:#4a3c28;font-weight:800}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="map" viewBox="0 0 380 620" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="progress"><span class="pt" id="ptext">进度 0 / 8</span></div>
+  <div id="hint">点击岛屿查看单词 · 8 岛顺序随意 · 全通解锁女帝</div>
+</div>
+
+<div id="overlay">
+  <div id="panel">
+    <div id="phead">
+      <h2 id="ptitle">岛名</h2>
+      <div class="th" id="psubtitle">主题 · 30 词</div>
+      <button id="pclose">×</button>
+    </div>
+    <div id="pboss" id="pbossline">聚集 boss</div>
+    <div id="pwords"></div>
+    <div id="pfoot">
+      <button class="pbtn enter" id="penter">进入学习 · 打 Boss</button>
+    </div>
+  </div>
+</div>
+
+<script src="_data.js"></script>
+<script>
+const G = window.MAP_GROUPS;
+const DONE_KEY = 'wc_puzzle_done_v1';
+let done = {};
+try{ done = JSON.parse(localStorage.getItem(DONE_KEY)||'{}'); }catch(e){ done={}; }
+
+// 地貌配色
+const TERR = {
+  lake:    {fill:'#8fb8cd', edge:'#3f7a95', tf:'#0d3a4d'},
+  plains:  {fill:'#b8cc7a', edge:'#7a9a3a', tf:'#3a5010'},
+  clock:   {fill:'#c9a878', edge:'#9a7a48', tf:'#4a3410'},
+  forge:   {fill:'#d88a5a', edge:'#a85a2a', tf:'#5a2810'},
+  crystal: {fill:'#b89ad4', edge:'#8060b0', tf:'#3a2060'},
+  forest:  {fill:'#7fae6a', edge:'#4f8040', tf:'#1a3a10'},
+  port:    {fill:'#c9b489', edge:'#9a8050', tf:'#4a3818'},
+  volcano: {fill:'#c46a4a', edge:'#943a1a', tf:'#5a1808'},
+};
+
+// 8块拼图: 环绕中心女帝. 用扇形拼图块(带凹凸榫)
+// 中心(190,300) 半径内圈70 外圈方形边界
+// 8块按八方位排列, 每块一个自定义path
+const CX=190, CY=300;
+
+// 生成一个环形扇区拼图块path (角度a0~a1, 内半径ri, 外半径ro), 带榫卯凸起
+function sectorPuzzle(a0,a1,ri,ro,knob){
+  const p=(ang,r)=>[CX+r*Math.cos(ang), CY+r*Math.sin(ang)];
+  const rad=d=>d*Math.PI/180;
+  a0=rad(a0); a1=rad(a1);
+  const am=(a0+a1)/2;
+  const [ix0,iy0]=p(a0,ri), [ix1,iy1]=p(a1,ri);
+  const [ox0,oy0]=p(a0,ro), [ox1,oy1]=p(a1,ro);
+  // 外弧中点凸起(拼图榫)
+  const [omx,omy]=p(am,ro+ (knob?14:0));
+  let d=`M ${ix0.toFixed(1)} ${iy0.toFixed(1)} `;
+  d+=`L ${ox0.toFixed(1)} ${oy0.toFixed(1)} `;
+  // 外弧 (带中间凸起用Q)
+  d+=`Q ${omx.toFixed(1)} ${omy.toFixed(1)} ${ox1.toFixed(1)} ${oy1.toFixed(1)} `;
+  d+=`L ${ix1.toFixed(1)} ${iy1.toFixed(1)} `;
+  // 内弧回来
+  const [imx,imy]=p(am,ri-(knob?0:8));
+  d+=`Q ${imx.toFixed(1)} ${imy.toFixed(1)} ${ix0.toFixed(1)} ${iy0.toFixed(1)} Z`;
+  return d;
+}
+
+const svg=document.getElementById('map');
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+// 标题横幅
+const tb=el('g',{});
+const trect=el('rect',{x:100,y:22,width:180,height:34,rx:7,class:'title-banner'});
+tb.appendChild(trect);
+const tt=el('text',{x:190,y:39,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#4a3c28'});tt.textContent='单词大陆 · 拼图地图';
+const ts=el('text',{x:190,y:53,'text-anchor':'middle','font-size':11,fill:'#6f5a3c'});ts.textContent='8 岛独立挑战 · 全通解锁女帝';
+tb.appendChild(tt);tb.appendChild(ts);
+svg.appendChild(tb);
+
+// 8块位置: 每块45度, 从-112.5度开始(顶部留给...其实环形均分)
+// 让①在左上, 顺时针
+const startAngle=-157.5; // 起始
+const seg=45;
+const RI=76, RO=150;
+
+// label锚点角度中点 -> 放文字位置(在块中央半径处)
+G.forEach((g,idx)=>{
+  const a0=startAngle+idx*seg;
+  const a1=a0+seg-3; // 留3度缝隙
+  const t=TERR[g.terrain];
+  const isDone=!!done[g.id];
+  const pathD=sectorPuzzle(a0,a1,RI,RO,true);
+  const grp=el('g',{class:'piece'+(isDone?' done':''),'data-id':g.id});
+  const path=el('path',{d:pathD,fill:t.fill,stroke:t.edge,'stroke-width':isDone?3:1.5,
+    'stroke-linejoin':'round',opacity:isDone?1:0.96});
+  if(isDone) path.setAttribute('stroke',t.edge);
+  grp.appendChild(path);
+  // 地貌小图标(简化: 用地貌色的小装饰) - 放块中央
+  const am=(a0+a1)/2*Math.PI/180;
+  const lr=(RI+RO)/2;
+  const lx=CX+lr*Math.cos(am), ly=CY+lr*Math.sin(am);
+  // 编号+岛名
+  const numTxt=el('text',{x:lx,y:ly-8,'text-anchor':'middle','font-size':15,class:'plabel',fill:t.tf});
+  numTxt.textContent='①②③④⑤⑥⑦⑧'[idx];
+  const nameTxt=el('text',{x:lx,y:ly+9,'text-anchor':'middle','font-size':13,class:'plabel',fill:t.tf});
+  nameTxt.textContent=g.name;
+  const subTxt=el('text',{x:lx,y:ly+24,'text-anchor':'middle','font-size':10,class:'psub',fill:t.tf});
+  subTxt.textContent='30词·'+g.boss+'boss';
+  grp.appendChild(numTxt);grp.appendChild(nameTxt);grp.appendChild(subTxt);
+  // 通关插旗
+  if(isDone){
+    const fx=CX+(RO-16)*Math.cos(am), fy=CY+(RO-16)*Math.sin(am);
+    const flag=el('g',{class:'done-flag'});
+    flag.appendChild(el('line',{x1:fx,y1:fy,x2:fx,y2:fy-16,stroke:'#5a3c1a','stroke-width':2}));
+    const fp=el('path',{d:`M ${fx} ${fy-16} l 12 4 l -12 4 z`,fill:'#3f9a3a',stroke:'#fff','stroke-width':1});
+    flag.appendChild(fp);
+    grp.appendChild(flag);
+  }
+  grp.addEventListener('click',()=>openIsland(g.id));
+  svg.appendChild(grp);
+});
+
+// 中心女帝
+const allDone=G.every(g=>done[g.id]);
+const cg=el('g',{class:'piece',id:'empress','data-empress':1});
+const cpath=el('circle',{cx:CX,cy:CY,r:66,fill:allDone?'#d4537e':'#b8a8b0',
+  stroke:allDone?'#993556':'#8a7a82','stroke-width':allDone?4:2,opacity:allDone?1:0.85});
+cg.appendChild(cpath);
+if(!allDone){
+  // 锁
+  const lock=el('g',{});
+  lock.appendChild(el('rect',{x:CX-16,y:CY-4,width:32,height:26,rx:4,fill:'#6a5a62'}));
+  lock.appendChild(el('path',{d:`M ${CX-10} ${CY-4} v-8 a10 10 0 0 1 20 0 v8`,fill:'none',stroke:'#6a5a62','stroke-width':4}));
+  cg.appendChild(lock);
+  const et=el('text',{x:CX,y:CY+40,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'#5a4a52'});et.textContent='星海女帝';
+  const es=el('text',{x:CX,y:CY+55,'text-anchor':'middle','font-size':10,fill:'#7a6a72'});es.textContent='全通解锁';
+  cg.appendChild(et);cg.appendChild(es);
+}else{
+  const et=el('text',{x:CX,y:CY-6,'text-anchor':'middle','font-size':15,'font-weight':800,fill:'#fff'});et.textContent='★ 星海女帝 ★';
+  const es=el('text',{x:CX,y:CY+12,'text-anchor':'middle','font-size':11,fill:'#ffe0ec'});es.textContent='赛尔娅 · 终战';
+  const es2=el('text',{x:CX,y:CY+30,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'#fff'});es2.textContent='▶ 点击挑战';
+  cg.appendChild(et);cg.appendChild(es);cg.appendChild(es2);
+}
+cg.addEventListener('click',()=>openEmpress());
+svg.appendChild(cg);
+
+// 进度
+function updateProgress(){
+  const n=G.filter(g=>done[g.id]).length;
+  document.getElementById('ptext').textContent='进度 '+n+' / 8'+(n===8?' · 女帝已解锁!':'');
+}
+updateProgress();
+
+// ===== 弹窗 =====
+const overlay=document.getElementById('overlay');
+let curId=null;
+function openIsland(id){
+  curId=id;
+  const g=G.find(x=>x.id===id);
+  document.getElementById('ptitle').textContent='①②③④⑤⑥⑦⑧'[id-1]+' '+g.name;
+  document.getElementById('psubtitle').textContent=g.theme+' · '+g.words.length+' 词';
+  document.getElementById('pboss').textContent='⚔ 这座岛聚集了 '+g.boss+' 个 Boss';
+  const wc=document.getElementById('pwords');
+  wc.innerHTML='';
+  g.words.forEach(w=>{
+    const r=document.createElement('div');r.className='wrow';
+    r.innerHTML='<span class="wen">'+w.en+'</span><span class="wpn">'+(w.pn||'')+'</span><span class="wcn">'+w.cn+'</span>';
+    wc.appendChild(r);
+  });
+  wc.scrollTop=0;
+  const foot=document.getElementById('pfoot');
+  const isDone=!!done[id];
+  foot.innerHTML='';
+  const enter=document.createElement('button');
+  enter.className='pbtn enter';enter.textContent='进入学习 · 打 Boss';
+  enter.onclick=()=>{ /* 接进游戏时这里跳转对应岛 */ toggleDone(id); };
+  foot.appendChild(enter);
+  const mark=document.createElement('button');
+  mark.className='pbtn '+(isDone?'done':'');
+  mark.textContent=isDone?'✓ 已通关(点击取消)':'标记为已通关';
+  mark.style.flex='0 0 auto';mark.style.padding='11px 14px';
+  if(!isDone){mark.style.background='#d8c8a8';mark.style.color='#6a5838';mark.style.boxShadow='0 3px 0 #b8a888';}
+  mark.onclick=()=>toggleDone(id);
+  foot.appendChild(mark);
+  overlay.classList.add('show');
+}
+function openEmpress(){
+  if(!G.every(g=>done[g.id])){
+    // 未解锁提示
+    const n=G.filter(g=>done[g.id]).length;
+    document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+    document.getElementById('psubtitle').textContent='最终 BOSS · 尚未解锁';
+    document.getElementById('pboss').textContent='🔒 还需通关 '+(8-n)+' 座岛屿才能挑战';
+    const wc=document.getElementById('pwords');wc.innerHTML='';
+    G.forEach(g=>{
+      const r=document.createElement('div');r.className='wrow';
+      r.innerHTML='<span class="wen" style="min-width:auto">'+('①②③④⑤⑥⑦⑧'[g.id-1])+' '+g.name+'</span><span class="wcn">'+(done[g.id]?'✓ 已通关':'○ 未通关')+'</span>';
+      wc.appendChild(r);
+    });
+    document.getElementById('pfoot').innerHTML='<button class="pbtn" style="background:#d8c8a8;color:#6a5838" onclick="closeP()">返回地图</button>';
+    overlay.classList.add('show');
+    return;
+  }
+  document.getElementById('ptitle').textContent='★ 星海女帝 · 赛尔娅';
+  document.getElementById('psubtitle').textContent='最终决战 · 已解锁';
+  document.getElementById('pboss').textContent='👑 8 座岛屿全部通关 · 终战开启!';
+  const wc=document.getElementById('pwords');
+  wc.innerHTML='<div style="padding:20px;text-align:center;color:#6a5838;font-size:14px;line-height:1.8">你已征服全部 240 个单词、40 位 Boss。<br>星海女帝赛尔娅在星域深处等你。<br><br>⚔️ 准备好终战了吗？</div>';
+  document.getElementById('pfoot').innerHTML='<button class="pbtn enter" onclick="closeP()">▶ 挑战星海女帝</button>';
+  overlay.classList.add('show');
+}
+function toggleDone(id){
+  done[id]=!done[id];
+  if(!done[id])delete done[id];
+  localStorage.setItem(DONE_KEY,JSON.stringify(done));
+  overlay.classList.remove('show');
+  setTimeout(()=>location.reload(),150); // 重绘地图(插旗/解锁)
+}
+function closeP(){overlay.classList.remove('show');}
+document.getElementById('pclose').onclick=closeP;
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeP();});
+</script>
+</body>
+</html>
