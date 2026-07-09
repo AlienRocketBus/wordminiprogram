@@ -43,7 +43,8 @@
     {id:'L81', land:8, name:'破晓仲裁者·索拉里斯', img:'bosses/land_poxiao.png', frame:'#94a3b8', rarity:'common', desc:'第一缕破晓之光, 亦是无可违抗的仲裁。'},
     {id:'L82', land:8, name:'天启征服者·索拉里斯', img:'bosses/land_solaris.png', frame:'#84cc16', rarity:'uncommon', desc:'天启号角吹响, 征服的铁蹄踏平一切。'},
     {id:'L83', land:8, name:'终末观测者·边界守夜人', img:'bosses/observer.png', frame:'#c084fc', rarity:'rare', desc:'守望世界的边界, 记录终末降临的每一刻。'},
-    {id:'L84', land:8, name:'活体行星·古老意志', img:'bosses/s1_ancientwill.png', frame:'#fbbf24', rarity:'legendary', desc:'一颗苏醒的行星, 以引力低语碾碎星海万物。'},
+    {id:'L84', land:8, name:'活体行星·古老意志', img:'bosses/s1_ancientwill.png', frame:'#22d3ee', rarity:'epic', desc:'一颗苏醒的行星, 以引力低语碾碎星海万物。'},
+    {id:'L85', land:8, name:'星核帝皇·弗沙欧', img:'bosses/land_fushaou.webp', frame:'#fbbf24', rarity:'legendary', desc:'三皇归一之躯, 以星核为心, 一束终焉白光可焚灭万象。'},
   ];
 
   // 稀有度中文+配色(与正片一致口径)
@@ -167,12 +168,12 @@
         var un=cb.has(c.id);
         if(un){
           h+='<div onclick="window.HansenLandGachaUI&&window.HansenLandGachaUI.detail(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=892" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img src="'+c.img+'?v=892" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -269,7 +270,7 @@
         '<div class="gr-face gr-front gr-card'+(isLeg?' leg':'')+'">'+
           '<div class="gr-myst"><div class="gr-myst-q">?</div></div>'+
           '<div class="gr-real"><div class="gr-rarity" style="color:'+ri.color+'">'+(isLeg?'✨ 至尊 ✨':ri.cn)+'</div>'+
-          '<img class="gr-img" src="'+c.img+'?v=892" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
+          '<img class="gr-img" src="'+c.img+'?v=893" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
           '<div class="gr-name" style="color:'+ri.color+'">'+esc(c.name)+'</div></div>'+
         '</div><div class="gr-face gr-back"></div>'+
       '</div></div>'+
@@ -309,7 +310,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=892" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=893" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);

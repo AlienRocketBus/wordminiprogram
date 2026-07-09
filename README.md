@@ -1,5 +1,6 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v893**：把弗沙欧（星核帝皇）正式做成“星火火山口”（单词大陆第8岛·自然科学）的守关大boss。之前v892只是把弗沙欧的攻击特效（三皇归一·终焉白光）接好了，但它还只是个“有特效没归属”的boss；这版把它落地成真正可挑战的守关关主。第8岛原本只有4个守关boss（别的岛都是5个），正缺第5个，弗沙欧补上刚好凑齐、而且星核帝皇镇守火山口主题也贴。①第8岛boss阵容加第5个弗沙欧（血量1300，全岛最强压轴守关，梯度接在760/880/1000/1150之后）；进度和选关自动认出第5关（不用额外改），选关界面自动多出弗沙欧那一关。②弗沙欧立绘转成webp高清透明图（微信原生支持）。③收藏卡册给弗沙欧加守关传说卡（L85），同时把原第4张（古老意志）从传说降为史诗，让第8岛五张卡稀有度阶梯（普通→罕见→稀有→史诗→传说）和别的岛完全一致。④攻击特效沿用v892接好的（任何名为“星核帝皇·弗沙欧”的boss出手就放三皇归一·终焉白光）。实测：第8岛5个boss、第5个是弗沙欧（血1300）、立绘加载正常、攻击特效全屏出现、零报错。绝不屏震/闪光/旋转。
 - **v892**：把九王殿9个新boss攻击特效完美融入正片，并且后台可调参。你在特效工坊重做的9个boss攻击特效（夜罗刹、刃翼领主、绷带亡骸、奥米伽、四季龙、影守、墨渊、阿尔戈，加上全新的星核帝皇·弗沙欧）全部外科手术式融入游戏——8个旧特效函数体原地替换成新版、函数名保持不变所以特效派发和后台调参零改动自动沿用；新增第9个弗沙欧特效（三皇归一·终焉白光）并接好派发+调参。新版刃翼领主的真枪、影守的黑手触手所需图片一并base64内联（零加载）。为新（更长）的动画把这8个boss掉血命中的时刻调到各自特效的高潮（4~6.3秒）。游戏原有FXCore引擎（含剑神穿透血条增强）完全没动。实测：弗沙欧/刃翼领主/影守/奥米伽/夜罗刹等5个特效通过真实战斗派发路径触发、画面全屏正常、零报错、语法校验通过。（弗沙欧作为可挑战守关boss放哪个岛还需你定，特效已接好、立绘已备。）
 - **v891**：修复打boss时不同题型boss高度不一致的问题。打字题的boss比其他题型高了一截，现在把所有题型（选择题、完形填空等）的boss、血条、对话框都对齐到打字题的高位，全部平行一致。同时把boss狂怒变大彻底锁死不溢出屏幕——狂怒时boss和屏幕顶部（天花板）始终保持约30px安全距离，绝不顶出去。另外boss狂怒变大时，攻击特效也跟着一起放大，不再位移错位。全在共享模块改，正片+单词大陆所有岛的boss战都生效。实测：所有题型boss同高、狂怒离天花板38px安全、特效跟随、零报错。
 - **v890**：修复剑神图完全不显示的问题。根因是上个版本用错了压缩方式——把剑神图压成了「P模式（调色板）PNG」，微信 X5 浏览器不显示带透明的 P 模式 PNG，所以剑神立绘和卡片全空白。用重新发的原图转成 WEBP（896×1195 高清透明 176KB，微信原生支持），旧 P 模式 PNG 彻底删除，引用全改 webp。实测正常显示、彻底删干净、零报错。
@@ -46,6 +47,8 @@
 > 3. **必在矮视口验**(高 ≤ 620px·腾讯 webapp 顶栏吃高度): 文字裁切几乎只在矮屏暴露, 高视口看不出(BUG#82 就这么漏的)。
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
+
+> **当前版本: v893（🌋 弗沙欧当“星火火山口”守关大boss）。** 弗沙欧正式落地成单词大陆第8岛（星火火山口·自然科学）的守关大boss了——之前v892只是把它的攻击特效（三皇归一·终焉白光）接好，这版做成真正能打的守关关主。**做了什么**：①**第8岛加第5个守关boss弗沙欧**——第8岛原来只有4个boss（别的岛都5个），正缺第5个，弗沙欧补上刚好凑齐、星核帝皇镇守火山口主题也贴；血量1300是全岛最强压轴（梯度760/880/1000/1150→1300）。进度和选关自动认第5关，选关界面自动多一关（选关网格本来就按boss阵容动态渲染，不用额外改）。②**立绘转webp**——弗沙欧立绘（1086×1448高清透明）转成webp、微信X5原生支持（绝不用会导致微信不显示的P模式PNG）。③**收藏卡L85**——卡册给弗沙欧加守关传说卡，把原第4张（古老意志）从传说降为史诗，让第8岛五张卡稀有度阶梯（普通→罕见→稀有→史诗→传说）和其他岛一致。④**特效沿用**——攻击特效用v892接好的那套，弗沙欧出手就放三皇归一·终焉白光。实测：第8岛5个boss、第5个弗沙欧血1300、立绘加载正常（webp 200）、攻击特效canvas全屏出现、零报错，全程不闪屏不旋转不震屏。⚠️ 本版改 island_land8.html（加第5boss）+ hansen_land_cards.js（新增L85+L84降级epic）+ 新增 land_fushaou.webp，并同步岛屿生成器（gen_land_islands.py + boss_ranked.json）保证以后重新生成不丢弗沙欧。含 v892（九王殿9特效融入正片+后台可调参）等全部。 ❗ 用 v893 · 清 CDN · 微信重进。
 
 > **当前版本: v892（✨ 九王殿9个新boss攻击特效融入正片+后台可调参）。** 你在特效工坊重做的那9个boss攻击特效，全部完美融入游戏了。**做了什么**：①**8个旧特效原地换新**——夜罗刹、刃翼领主、绷带亡骸、奥米伽、四季龙、影守、墨渊、阿尔戈这8个单词大陆守关boss的攻击特效，函数体原地替换成你工坊做的新版，函数名保持不变，所以游戏的特效派发表和后台调参配置分毫不用改、自动就用上新特效。②**新增第9个·星核帝皇弗沙欧**——三皇归一·终焉白光特效整套加进来，已经接好派发+后台调参（任何名为“星核帝皇·弗沙欧”的boss攻击就会放这个特效）。③**图片一并内联**——新版刃翼领主的真枪、影守的黑手触手需要的图片，base64内联进去、零加载。④**甲伤时刻对齐新动画**——新特效更长，把这8个boss掉血命中的时刻调到各自特效的高潮点（4~6.3秒），伤害精准落在最震撼那一下。⑤**剑神特效等全保留**——游戏原有的FXCore引擎（含上版剑神穿透血条的增强）完全没动，新9个特效用同一套接口、行为和你工坊里一模一样。全在共享模块 hansen_boss_attack.js 改，正片+单词大陆所有岛的这些boss战都生效。实测：弗沙欧/刃翼领主/影守/奥米伽/夜罗刹等5个特效通过真实战斗派发路径触发、画面全屏正常出现、真枪黑手图片加载成功、零报错、node语法校验通过。⚠️ **关于弗沙欧作为一个能打的守关boss放到哪个岛**——特效已经完全接好，但把它做成真正可挑战的守关关主还需要你定一下放哪个岛、第几关（会牵动那个岛的卡册和词汇分配，我不想乱猜出bug），你说一声我就接上（立绘我已经有了）。含 v891（boss题型对齐+狂怒锁死）等全部。 ❗ 用 v892 · 清 CDN · 微信重进。
 
@@ -10840,8 +10843,8 @@ try:
     import json as _j72
     _isl72=sorted(glob.glob('island_land[1-8].html'))
     if len(_isl72)!=8: _l72.append('land岛数!=8:%d'%len(_isl72))
-    _bc72={'island_land1.html':5,'island_land2.html':5,'island_land3.html':5,'island_land4.html':5,'island_land5.html':5,'island_land6.html':5,'island_land7.html':5,'island_land8.html':4}
-    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归宗','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'活体行星·古老意志'}
+    _bc72={'island_land1.html':5,'island_land2.html':5,'island_land3.html':5,'island_land4.html':5,'island_land5.html':5,'island_land6.html':5,'island_land7.html':5,'island_land8.html':5}
+    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归宗','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'星核帝皇·弗沙欧'}
     for _f72 in _isl72:
         _t72=open(_f72,encoding='utf-8',errors='replace').read()
         _n72=int(_f72.replace('island_land','').replace('.html',''))
@@ -10877,11 +10880,11 @@ try:
     _hs72=open('hansen_season.js',encoding='utf-8',errors='replace').read()  # 🔴v874: 入口卡已撤·番外篇横幅=唯一入口
     if "window.location.href='land_map.html'" not in _hs72: _l72.append('番外篇横幅未指向land_map(v874:横幅=唯一入口)')
     _art72=[_x for _x in glob.glob('bosses/land_*.png')]+[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
-    if len(_art72)!=29: _l72.append('land立绘数!=29:%d'%len(_art72))
+    if len(_art72)!=30: _l72.append('land立绘数!=30:%d'%len(_art72))
 except Exception as _e72:
     _l72.append('守卫自身异常:'+str(_e72)[:80])
 if _l72: fail('v873 单词大陆8岛+特效全接入: '+str(_l72[:8]))
-else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板60boss·index入口卡·29立绘≤800KB)')
+else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板60boss·index入口卡·30立绘≤800KB)')
 
 
 # 🔴 v874(Hansen真机三诉求·定稿): ①旧Boss介绍屏(挑战来啦/开始挑战)彻底删除·点打boss直进选关网格 ②番外篇星海觉醒=单词大陆(横幅直进land_map·旧宇宙地图/5星域整套废除) ③选关网格底部配色牌
@@ -11260,7 +11263,7 @@ try:
     else:
         _lc=open('hansen_land_cards.js',encoding='utf-8',errors='replace').read()
         _n883=_lc.count("id:'L")
-        if _n883!=39: _l883.append('LAND_CARDS卡数!=39(实'+str(_n883)+')')
+        if _n883!=40: _l883.append('LAND_CARDS卡数!=40(实'+str(_n883)+')')
         # ② 独立存档(不碰正片HansenCardbook)
         if 'hansen_land_cardbook' not in _lc: _l883.append('缺独立存档key hansen_land_cardbook')
         if 'HansenLandCardbook' not in _lc: _l883.append('缺HansenLandCardbook')
@@ -11538,6 +11541,31 @@ except Exception as _e892:
     _l892.append('守卫自身异常:'+str(_e892)[:80])
 if _l892: fail('v892 \u4e5d\u738b\u6bbf9\u7279\u6548\u5916\u79d1\u878d\u5165+\u5f17\u6c99\u6b27: '+str(_l892[:10]))
 else: ok('v892 (Hansen: \u628a\u4e5d\u738b\u6bbf9\u4e2a\u65b0boss\u653b\u51fb\u7279\u6548\u5b8c\u7f8e\u878d\u5165\u6b63\u7247\u00b7\u540e\u53f0\u53ef\u8c03\u53c2\u00b7\u5f17\u6c99\u6b27\u5907\u6218): \u5916\u79d1\u624b\u672f\u5f0f\u96c6\u6210\u00b7\u96f6wiring\u6539\u52a8\u3002\u2460\u66ff\u63628\u4e2a\u65e7\u7279\u6548\u51fd\u6570\u4f53(fxYecha/fxRenyi/fxBengdai/fxOmega/fxSijilong/fxYingshou/fxMoyuan/fxLiangzi\u00b7\u5747\u4e3a\u5355\u8bcd\u5927\u9646land1-6\u5b88\u5173boss\u7684\u53cd\u51fb\u7279\u6548)\u00b7\u4fdd\u6301\u51fd\u6570\u540d\u4e0d\u53d8\u2192__WFX\u8868/FX\u914d\u7f6e\u81ea\u52a8\u6cbf\u7528\u96f6\u6539\u52a8\u3002\u2461\u65b0\u589efxFushaou(\u7b2c9\u4e2aboss\u661f\u6838\u5e1d\u7687\u00b7\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149)\u3002\u2462\u65b0\u7248fxRenyi(\u771f\u67aa\u624e\u4e0b)\u9700IMGS.renyi_spear\u3001\u65b0\u7248fxYingshou(\u9ed1\u624b\u89e6\u624b)\u9700IMGS.hand1-5\u2192\u52a0\u5165base64\u56fe\u7247\u5757(||\u5e42\u7b49\u4e0d\u8986\u76d6)\u3002\u2463\u4e3a\u65b0(\u66f4\u957f)\u52a8\u753b\u628a8\u4e2aboss\u7684dealDelay\u4ece2600\u8c03\u5230\u5404\u81ea\u9ad8\u6f6e\u65f6\u523b(4000~6300ms\u00b7\u7532\u4f24\u7cbe\u51c6\u843d\u5728\u65b0\u7279\u6548\u9ad8\u6f6e)\u3002\u2464\u4fdd\u7559\u6e38\u620fFXCore\u8d85\u96c6(\u542bv888\u5251\u795eclipExtra)\u4e0d\u52a8\u00b7\u65b09\u51fd\u6570\u7528\u540cshell API\u4e0d\u4f20clipExtra=\u884c\u4e3a\u4e0e\u4e0a\u4f20FXCore\u5b8c\u5168\u4e00\u81f4\u3002\u771f\u673aPlaywright\u9a8c\u8bc1: \u5f17\u6c99\u6b27/\u5203\u7ffc\u9886\u4e3b/\u5f71\u5b88/\u5965\u7c73\u4f3d/\u591c\u7f57\u5239\u7b495\u4e2a\u901a\u8fc7HansenBossAttack\u771f\u5b9e\u6d3e\u53d1\u8def\u5f84\u89e6\u53d1canvas\u5747\u6b63\u5e38\u51fa\u73b0(393\u5168\u5c4f)\u00b7IMGS\u771f\u67aa/\u9ed1\u624bbase64\u52a0\u8f7d\u6210\u529f\u00b70\u62a5\u9519\u00b7node --check\u901a\u8fc7\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002')
+
+_l893=[]
+try:
+    _l8=open('island_land8.html',encoding='utf-8',errors='replace').read()
+    _lc=open('hansen_land_cards.js',encoding='utf-8',errors='replace').read()
+    import re as _re893
+    _bm=_re893.search(r"const BOSSES=\[(.*?)\n\];", _l8, _re893.DOTALL)
+    if not _bm: _l893.append('land8 BOSSES not found')
+    else:
+        _bn=_re893.findall(r"name:'([^']*)'", _bm.group(1))
+        if len(_bn)!=5: _l893.append('land8 boss count=%d (want 5)'%len(_bn))
+        if not _bn or '\u5f17\u6c99\u6b27' not in _bn[-1]: _l893.append('land8 5th guardian not Fushaou')
+    if _l8.count('land_fushaou.webp')<2: _l893.append('Fushaou art land_fushaou.webp refs <2')
+    if 'land_fushaou.png' in _l8: _l893.append('Fushaou uses png (must webp for WeChat X5)')
+    if "id:'L85'" not in _lc or '\u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27' not in _lc: _l893.append('missing L85 Fushaou card')
+    _l85=_re893.search(r"\{id:'L85'[^}]*\}", _lc)
+    if _l85 and "rarity:'legendary'" not in _l85.group(0): _l893.append('L85 Fushaou not legendary')
+    _l84=_re893.search(r"\{id:'L84'[^}]*\}", _lc)
+    if _l84 and "rarity:'epic'" not in _l84.group(0): _l893.append('L84 not demoted to epic')
+    _ba893=open('hansen_boss_attack.js',encoding='utf-8',errors='replace').read()
+    if ("'\u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27':{t:'fushaou'") not in _ba893: _l893.append('FX config Fushaou missing (attack fx not fire)')
+except Exception as _e893:
+    _l893.append('guard self exc:'+str(_e893)[:80])
+if _l893: fail('v893 Fushaou land8 guardian boss: '+str(_l893[:10]))
+else: ok("v893 (Hansen: \u5f17\u6c99\u6b27\u5f53\u661f\u706b\u706b\u5c71\u53e3\u7684\u5b88\u5173\u5927boss): \u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27\u4f5c\u4e3a\u5355\u8bcd\u5927\u9646land8(\u661f\u706b\u706b\u5c71\u53e3\u00b7\u81ea\u7136\u79d1\u5b66)\u7b2c5\u4e2a=\u538b\u8f74\u5b88\u5173boss\u3002\u2460island_land8.html BOSSES\u52a0\u7b2c5\u6761hp1300(\u68af\u5ea6760/880/1000/1150\u2192\u5b88\u5173\u6700\u5f3a\u00b7\u7528boss4\u6a21\u677f\u4fdd\u8f6c\u4e49\u683c\u5f0f)\u00b7\u8fdb\u5ea6land8_prog\u4e0eBOSSES.length\u81ea\u9002\u5e94\u00b7\u9009\u5173\u7f51\u683c\u7531hansen_cards\u6309BOSSES\u6e32\u67d3\u81ea\u52a8\u663e5\u8282\u70b9\u3002\u2461\u7acb\u7ed8land_fushaou.webp(1086x1448 RGBA q85 236KB\u00b7\u7edd\u4e0dpngquant\u8f6cP\u6a21\u5f0f\u00b7\u5fae\u4fe1X5\u539f\u751f\u652f\u6301webp)\u3002\u2462L\u5361\u65b0\u589eL85\u5f17\u6c99\u6b27legendary\u5b88\u5173\u5361\u00b7L84\u53e4\u8001\u610f\u5fd7\u964d\u4e3aepic\u2192land8\u4e94\u5361common/uncommon/rare/epic/legendary\u4e0e\u5176\u4ed6\u5c9b\u4e00\u81f4\u3002\u2463\u653b\u51fb\u7279\u6548fxFushaou\u5df2\u5728v892\u63a5\u597d(FX\u914d\u7f6e\u5f17\u6c99\u6b27\u2192t fushaou)\u00b7\u4e00\u51fa\u624b\u5373\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149\u3002\u2464\u540c\u6b65\u751f\u6210\u5668BOSS_META+boss_ranked\u52a0\u5f17\u6c99\u6b27\u00b7\u4f46land8 html\u7684HP\u624b\u8c03\u4e0e\u751f\u6210\u5668\u5df2\u6f02\u79fb\u00b7\u5207\u52ff\u91cd\u65b0\u751f\u6210\u4f1a\u91cd\u7f6e\u6240\u6709boss HP\u3002\u771f\u673aPlaywright: land8 BOSSES.length=5\u00b7\u7b2c5\u4e2a\u5f17\u6c99\u6b27hp1300\u00b7\u7acb\u7ed8webp200\u00b7\u653b\u51fb\u7279\u6548canvas\u5168\u5c4f\u00b70\u62a5\u9519\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

@@ -7573,8 +7573,8 @@ try:
     import json as _j72
     _isl72=sorted(glob.glob('island_land[1-8].html'))
     if len(_isl72)!=8: _l72.append('land岛数!=8:%d'%len(_isl72))
-    _bc72={'island_land1.html':5,'island_land2.html':5,'island_land3.html':5,'island_land4.html':5,'island_land5.html':5,'island_land6.html':5,'island_land7.html':5,'island_land8.html':4}
-    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归宗','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'活体行星·古老意志'}
+    _bc72={'island_land1.html':5,'island_land2.html':5,'island_land3.html':5,'island_land4.html':5,'island_land5.html':5,'island_land6.html':5,'island_land7.html':5,'island_land8.html':5}
+    _guards72={'island_land1.html':'魔皇·小丑至尊','island_land2.html':'武器大师·战争铁砧','island_land3.html':'时之君主·克罗诺斯之影','island_land4.html':'无光之渊·暗噬君主','island_land5.html':'剑神·万剑归宗','island_land6.html':'天界守护者·黄金斯芬克斯','island_land7.html':'铸星者·原初匠人','island_land8.html':'星核帝皇·弗沙欧'}
     for _f72 in _isl72:
         _t72=open(_f72,encoding='utf-8',errors='replace').read()
         _n72=int(_f72.replace('island_land','').replace('.html',''))
@@ -7610,11 +7610,11 @@ try:
     _hs72=open('hansen_season.js',encoding='utf-8',errors='replace').read()  # 🔴v874: 入口卡已撤·番外篇横幅=唯一入口
     if "window.location.href='land_map.html'" not in _hs72: _l72.append('番外篇横幅未指向land_map(v874:横幅=唯一入口)')
     _art72=[_x for _x in glob.glob('bosses/land_*.png')]+[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
-    if len(_art72)!=29: _l72.append('land立绘数!=29:%d'%len(_art72))
+    if len(_art72)!=30: _l72.append('land立绘数!=30:%d'%len(_art72))
 except Exception as _e72:
     _l72.append('守卫自身异常:'+str(_e72)[:80])
 if _l72: fail('v873 单词大陆8岛+特效全接入: '+str(_l72[:8]))
-else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板60boss·index入口卡·29立绘≤800KB)')
+else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板60boss·index入口卡·30立绘≤800KB)')
 
 
 # 🔴 v874(Hansen真机三诉求·定稿): ①旧Boss介绍屏(挑战来啦/开始挑战)彻底删除·点打boss直进选关网格 ②番外篇星海觉醒=单词大陆(横幅直进land_map·旧宇宙地图/5星域整套废除) ③选关网格底部配色牌
@@ -7993,7 +7993,7 @@ try:
     else:
         _lc=open('hansen_land_cards.js',encoding='utf-8',errors='replace').read()
         _n883=_lc.count("id:'L")
-        if _n883!=39: _l883.append('LAND_CARDS卡数!=39(实'+str(_n883)+')')
+        if _n883!=40: _l883.append('LAND_CARDS卡数!=40(实'+str(_n883)+')')
         # ② 独立存档(不碰正片HansenCardbook)
         if 'hansen_land_cardbook' not in _lc: _l883.append('缺独立存档key hansen_land_cardbook')
         if 'HansenLandCardbook' not in _lc: _l883.append('缺HansenLandCardbook')
@@ -8271,6 +8271,31 @@ except Exception as _e892:
     _l892.append('守卫自身异常:'+str(_e892)[:80])
 if _l892: fail('v892 \u4e5d\u738b\u6bbf9\u7279\u6548\u5916\u79d1\u878d\u5165+\u5f17\u6c99\u6b27: '+str(_l892[:10]))
 else: ok('v892 (Hansen: \u628a\u4e5d\u738b\u6bbf9\u4e2a\u65b0boss\u653b\u51fb\u7279\u6548\u5b8c\u7f8e\u878d\u5165\u6b63\u7247\u00b7\u540e\u53f0\u53ef\u8c03\u53c2\u00b7\u5f17\u6c99\u6b27\u5907\u6218): \u5916\u79d1\u624b\u672f\u5f0f\u96c6\u6210\u00b7\u96f6wiring\u6539\u52a8\u3002\u2460\u66ff\u63628\u4e2a\u65e7\u7279\u6548\u51fd\u6570\u4f53(fxYecha/fxRenyi/fxBengdai/fxOmega/fxSijilong/fxYingshou/fxMoyuan/fxLiangzi\u00b7\u5747\u4e3a\u5355\u8bcd\u5927\u9646land1-6\u5b88\u5173boss\u7684\u53cd\u51fb\u7279\u6548)\u00b7\u4fdd\u6301\u51fd\u6570\u540d\u4e0d\u53d8\u2192__WFX\u8868/FX\u914d\u7f6e\u81ea\u52a8\u6cbf\u7528\u96f6\u6539\u52a8\u3002\u2461\u65b0\u589efxFushaou(\u7b2c9\u4e2aboss\u661f\u6838\u5e1d\u7687\u00b7\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149)\u3002\u2462\u65b0\u7248fxRenyi(\u771f\u67aa\u624e\u4e0b)\u9700IMGS.renyi_spear\u3001\u65b0\u7248fxYingshou(\u9ed1\u624b\u89e6\u624b)\u9700IMGS.hand1-5\u2192\u52a0\u5165base64\u56fe\u7247\u5757(||\u5e42\u7b49\u4e0d\u8986\u76d6)\u3002\u2463\u4e3a\u65b0(\u66f4\u957f)\u52a8\u753b\u628a8\u4e2aboss\u7684dealDelay\u4ece2600\u8c03\u5230\u5404\u81ea\u9ad8\u6f6e\u65f6\u523b(4000~6300ms\u00b7\u7532\u4f24\u7cbe\u51c6\u843d\u5728\u65b0\u7279\u6548\u9ad8\u6f6e)\u3002\u2464\u4fdd\u7559\u6e38\u620fFXCore\u8d85\u96c6(\u542bv888\u5251\u795eclipExtra)\u4e0d\u52a8\u00b7\u65b09\u51fd\u6570\u7528\u540cshell API\u4e0d\u4f20clipExtra=\u884c\u4e3a\u4e0e\u4e0a\u4f20FXCore\u5b8c\u5168\u4e00\u81f4\u3002\u771f\u673aPlaywright\u9a8c\u8bc1: \u5f17\u6c99\u6b27/\u5203\u7ffc\u9886\u4e3b/\u5f71\u5b88/\u5965\u7c73\u4f3d/\u591c\u7f57\u5239\u7b495\u4e2a\u901a\u8fc7HansenBossAttack\u771f\u5b9e\u6d3e\u53d1\u8def\u5f84\u89e6\u53d1canvas\u5747\u6b63\u5e38\u51fa\u73b0(393\u5168\u5c4f)\u00b7IMGS\u771f\u67aa/\u9ed1\u624bbase64\u52a0\u8f7d\u6210\u529f\u00b70\u62a5\u9519\u00b7node --check\u901a\u8fc7\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002')
+
+_l893=[]
+try:
+    _l8=open('island_land8.html',encoding='utf-8',errors='replace').read()
+    _lc=open('hansen_land_cards.js',encoding='utf-8',errors='replace').read()
+    import re as _re893
+    _bm=_re893.search(r"const BOSSES=\[(.*?)\n\];", _l8, _re893.DOTALL)
+    if not _bm: _l893.append('land8 BOSSES not found')
+    else:
+        _bn=_re893.findall(r"name:'([^']*)'", _bm.group(1))
+        if len(_bn)!=5: _l893.append('land8 boss count=%d (want 5)'%len(_bn))
+        if not _bn or '\u5f17\u6c99\u6b27' not in _bn[-1]: _l893.append('land8 5th guardian not Fushaou')
+    if _l8.count('land_fushaou.webp')<2: _l893.append('Fushaou art land_fushaou.webp refs <2')
+    if 'land_fushaou.png' in _l8: _l893.append('Fushaou uses png (must webp for WeChat X5)')
+    if "id:'L85'" not in _lc or '\u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27' not in _lc: _l893.append('missing L85 Fushaou card')
+    _l85=_re893.search(r"\{id:'L85'[^}]*\}", _lc)
+    if _l85 and "rarity:'legendary'" not in _l85.group(0): _l893.append('L85 Fushaou not legendary')
+    _l84=_re893.search(r"\{id:'L84'[^}]*\}", _lc)
+    if _l84 and "rarity:'epic'" not in _l84.group(0): _l893.append('L84 not demoted to epic')
+    _ba893=open('hansen_boss_attack.js',encoding='utf-8',errors='replace').read()
+    if ("'\u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27':{t:'fushaou'") not in _ba893: _l893.append('FX config Fushaou missing (attack fx not fire)')
+except Exception as _e893:
+    _l893.append('guard self exc:'+str(_e893)[:80])
+if _l893: fail('v893 Fushaou land8 guardian boss: '+str(_l893[:10]))
+else: ok("v893 (Hansen: \u5f17\u6c99\u6b27\u5f53\u661f\u706b\u706b\u5c71\u53e3\u7684\u5b88\u5173\u5927boss): \u661f\u6838\u5e1d\u7687\u00b7\u5f17\u6c99\u6b27\u4f5c\u4e3a\u5355\u8bcd\u5927\u9646land8(\u661f\u706b\u706b\u5c71\u53e3\u00b7\u81ea\u7136\u79d1\u5b66)\u7b2c5\u4e2a=\u538b\u8f74\u5b88\u5173boss\u3002\u2460island_land8.html BOSSES\u52a0\u7b2c5\u6761hp1300(\u68af\u5ea6760/880/1000/1150\u2192\u5b88\u5173\u6700\u5f3a\u00b7\u7528boss4\u6a21\u677f\u4fdd\u8f6c\u4e49\u683c\u5f0f)\u00b7\u8fdb\u5ea6land8_prog\u4e0eBOSSES.length\u81ea\u9002\u5e94\u00b7\u9009\u5173\u7f51\u683c\u7531hansen_cards\u6309BOSSES\u6e32\u67d3\u81ea\u52a8\u663e5\u8282\u70b9\u3002\u2461\u7acb\u7ed8land_fushaou.webp(1086x1448 RGBA q85 236KB\u00b7\u7edd\u4e0dpngquant\u8f6cP\u6a21\u5f0f\u00b7\u5fae\u4fe1X5\u539f\u751f\u652f\u6301webp)\u3002\u2462L\u5361\u65b0\u589eL85\u5f17\u6c99\u6b27legendary\u5b88\u5173\u5361\u00b7L84\u53e4\u8001\u610f\u5fd7\u964d\u4e3aepic\u2192land8\u4e94\u5361common/uncommon/rare/epic/legendary\u4e0e\u5176\u4ed6\u5c9b\u4e00\u81f4\u3002\u2463\u653b\u51fb\u7279\u6548fxFushaou\u5df2\u5728v892\u63a5\u597d(FX\u914d\u7f6e\u5f17\u6c99\u6b27\u2192t fushaou)\u00b7\u4e00\u51fa\u624b\u5373\u4e09\u7687\u5f52\u4e00\u7ec8\u7109\u767d\u5149\u3002\u2464\u540c\u6b65\u751f\u6210\u5668BOSS_META+boss_ranked\u52a0\u5f17\u6c99\u6b27\u00b7\u4f46land8 html\u7684HP\u624b\u8c03\u4e0e\u751f\u6210\u5668\u5df2\u6f02\u79fb\u00b7\u5207\u52ff\u91cd\u65b0\u751f\u6210\u4f1a\u91cd\u7f6e\u6240\u6709boss HP\u3002\u771f\u673aPlaywright: land8 BOSSES.length=5\u00b7\u7b2c5\u4e2a\u5f17\u6c99\u6b27hp1300\u00b7\u7acb\u7ed8webp200\u00b7\u653b\u51fb\u7279\u6548canvas\u5168\u5c4f\u00b70\u62a5\u9519\u3002\u7edd\u4e0d\u5c4f\u9707/\u95ea\u5149/\u65cb\u8f6c\u3002")
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
