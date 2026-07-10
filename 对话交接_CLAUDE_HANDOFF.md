@@ -121,6 +121,7 @@
 ---
 
 ## 10. 对比度审计器 audit6.mjs（`/home/claude/_hc/`·可靠·本次对话打磨）
+- **位置：仓库 `.devtools/audit6_contrast_auditor.mjs`**（点开头 → build.py 打包剪枝·不进部署包·仅供开发）。同目录 `boss_fx_verify_template.mjs` = boss 特效分相位截图模板。
 - 用途：亮色配色下逐元素扫**对比度 <3** 的低可读文字。
 - **核心：hex 渐变感知**——`pc()` 支持 hex(`#rgb`/`#rrggbb`→`[r,g,b,1]`)；`firstCol()` 从 gradient 抓 rgba **OR** hex 首色。**旧版只抓 rgba，漏 hex 渐变卡首色（如 `linear-gradient(135deg,#f59e0b)` 橙卡）→ 返回错误浅底 → 假读数**，务必用 hex 版。`effBg()` 用 `over()` 合成半透明遮罩，不当不透明黑。
 - 触发：`addInitScript` 设 `localStorage.hansen_palette_global='cloud'`（cloud=一种亮色）→ 加载页 → `startEagle()`/`startScramble()` 等 → 每 context 用 `newContext` 隔离。
