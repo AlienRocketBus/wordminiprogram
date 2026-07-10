@@ -1,3 +1,26 @@
+/* 🔴v901 桌面端=手机端: 电脑浏览器直接打开小程序时, 把整页塞进一个"手机尺寸的 iframe"居中显示 → iframe 的视口宽度就是手机宽(414px), 页面里所有 vw/vh/position:fixed 都按手机算, 于是电脑端和手机端显示【完全一致】。仅【顶层窗口 + 宽屏(>520px, 即真电脑)】才触发; iframe 内的实例 window.top!==window.self 会自动跳过 = 绝不无限套娃。全程 try/catch, 万一出错就原样正常显示、绝不影响手机端与游戏。 */
+(function(){
+  try {
+    if (window.top !== window.self) return;                       // 已在 iframe 里(被包裹的内容实例)→ 不再包
+    if (!window.innerWidth || window.innerWidth <= 520) return;   // 手机/窄窗(<=520px)→ 本就是手机尺寸, 无需包
+    var src = String(location.href).replace(/"/g, '%22');
+    var shell = '<!doctype html><html lang="zh"><head><meta charset="utf-8">'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<title>单词大冒险</title>'
+      + '<style>*{margin:0;padding:0;box-sizing:border-box}'
+      + 'html,body{height:100%;width:100%;overflow:hidden;'
+      + 'background:radial-gradient(circle at 50% 24%,#1e1e42,#0a0a16 72%)}'
+      + '#hsnDev{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;'
+      + 'align-items:center;justify-content:center}'
+      + '#hsnPhone{width:414px;height:96vh;max-height:900px;border:0;border-radius:26px;'
+      + 'box-shadow:0 18px 70px rgba(0,0,0,.6),0 0 0 8px #14142a;background:#000;display:block}'
+      + '</style></head><body><div id="hsnDev">'
+      + '<iframe id="hsnPhone" src="' + src + '" allow="autoplay; fullscreen"></iframe>'
+      + '</div></body></html>';
+    document.open(); document.write(shell); document.close();
+  } catch(e){}
+})();
+
 // hansen_perf.js v1 —— 🔴v858 性能引擎 (Hansen: "上下滑动卡顿·图片加载慢·彻底优化到极致")
 //
 // 三板斧(全部零视觉损失):
