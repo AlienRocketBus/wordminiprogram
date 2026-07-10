@@ -1381,19 +1381,19 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 .vb-icon svg{width:100%;height:100%;display:block;overflow:visible}
 .vb-icon{display:inline-block;width:1em;height:1em;vertical-align:-0.15em;line-height:1}
 </style>
-<script src="sentence_map.js?v=908"></script>
-<script src="word_map.js?v=908"></script>
-<script src="highlight_helper.js?v=908"></script>
-<script src="perf_boost.js?v=908"></script>
-<script src="hansen_preload.js?v=908"></script>
-<script src="copy_protect.js?v=908"></script>
-<script src="click_sound.js?v=908"></script>
-<script src="click_setting.js?v=908"></script>
-<script src="hansen_mute.js?v=908"></script>
-<script src="hansen_early.js?v=908"></script>
+<script src="sentence_map.js?v=909"></script>
+<script src="word_map.js?v=909"></script>
+<script src="highlight_helper.js?v=909"></script>
+<script src="perf_boost.js?v=909"></script>
+<script src="hansen_preload.js?v=909"></script>
+<script src="copy_protect.js?v=909"></script>
+<script src="click_sound.js?v=909"></script>
+<script src="click_setting.js?v=909"></script>
+<script src="hansen_mute.js?v=909"></script>
+<script src="hansen_early.js?v=909"></script>
 </head>
 <body>
-<a href="javascript:void(0)" onclick="return goHome()" class="world-map-btn" title="回到大冒险地图" aria-label="回首页"><span class="wmb-socket"><img class="wmb-img" src="icons/map_home.webp?v=908" alt="" draggable="false" onerror="this.parentNode.innerHTML='🗺️'"></span></a>
+<a href="javascript:void(0)" onclick="return goHome()" class="world-map-btn" title="回到大冒险地图" aria-label="回首页"><span class="wmb-socket"><img class="wmb-img" src="icons/map_home.webp?v=909" alt="" draggable="false" onerror="this.parentNode.innerHTML='🗺️'"></span></a>
 
 <div class="app" id="app">
 <!-- TOP BAR -->
@@ -1433,19 +1433,19 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 <!-- Daily rewards row -->
 <div class="daily-row">
   <div class="daily-card" id="chestCard" style="--c1:#6096eb;--c2:#6096eb" onclick="openChest()"><!-- 🔴 v575: 每日宝箱=打卡签到入口, 未领缓慢闪烁/已领变绿+开盒 -->
-    <span class="d-icon" id="chestIcon"><!-- 🔴 v588: 未签到金宝箱图 --><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=908" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎁'"><span class="chest-badge" id="chestSub">可领</span></span></span>
+    <span class="d-icon" id="chestIcon"><!-- 🔴 v588: 未签到金宝箱图 --><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=909" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎁'"><span class="chest-badge" id="chestSub">可领</span></span></span>
     <div class="d-label">每日宝箱</div>
     
-    <div class="d-dot" id="chestDot" style="display:none"></div><script>/*🔴BUG#84 宝箱首帧闪烁根治:渲染前读【全局】签到状态hansen_checkin_last(非per-island S.chestDay),已签则提前画已签态→进岛不再闪可领→已签*/try{var _hd=new Date(),_ht=_hd.getFullYear()+'-'+(_hd.getMonth()+1)+'-'+_hd.getDate();if(localStorage.getItem('hansen_checkin_last')===_ht){var _hic=document.getElementById('chestIcon'),_hcc=document.getElementById('chestCard');if(_hic)_hic.innerHTML='<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=908" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';if(_hcc)_hcc.classList.add('chest-claimed');}}catch(e){}</script>
+    <div class="d-dot" id="chestDot" style="display:none"></div><script>/*🔴BUG#84 宝箱首帧闪烁根治:渲染前读【全局】签到状态hansen_checkin_last(非per-island S.chestDay),已签则提前画已签态→进岛不再闪可领→已签*/try{var _hd=new Date(),_ht=_hd.getFullYear()+'-'+(_hd.getMonth()+1)+'-'+_hd.getDate();if(localStorage.getItem('hansen_checkin_last')===_ht){var _hic=document.getElementById('chestIcon'),_hcc=document.getElementById('chestCard');if(_hic)_hic.innerHTML='<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=909" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';if(_hcc)_hcc.classList.add('chest-claimed');}}catch(e){}</script>
   </div>
   <div class="daily-card" style="--c1:#4CD97B;--c2:#4CD97B" onclick="showScreen('quests')">
-    <span class="d-icon"><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/task_3d.webp?v=908" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📋'"><span class="quest-badge" id="questSub">0/3</span></span></span>
+    <span class="d-icon"><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/task_3d.webp?v=909" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📋'"><span class="quest-badge" id="questSub">0/3</span></span></span>
     <div class="d-label">每日任务</div>
     <div class="d-dot" id="questDot" style="display:none"></div>
   </div>
   <div class="daily-card boss-card" style="--c1:#fde047;--c2:#facc15" onclick="showScreen('boss')"><!-- 🔴 v578: 亮黄底凸显街机柜(原v577金橙→亮黄) + 街机图标加大 + 挑战Boss下移 -->
     <!-- 🔴v650: Boss入口/页清除神灯精灵兜底+标题精灵图标+独角兽介绍页占位·入口图改重试中性兜底 -->
-    <img class="boss-card-img" src="icons/boss_arcade.webp?v=908" alt="" draggable="false" onerror="window.hansenImgErr&&window.hansenImgErr(this)">
+    <img class="boss-card-img" src="icons/boss_arcade.webp?v=909" alt="" draggable="false" onerror="window.hansenImgErr&&window.hansenImgErr(this)">
     <div class="d-label boss-card-label" style="color:#0f172a!important;-webkit-text-fill-color:#0f172a!important;background:none!important;-webkit-background-clip:border-box!important;filter:none!important">挑战BOSS</div>
   </div>
 </div>
@@ -1453,11 +1453,11 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 <div class="section-label">精学模式</div>
 <div class="mode-grid">
   <div class="mode-card" style="--c1:#ED7098;--c2:#ED7098" onclick="showScreen('explore')">
-    <div class="m-icon"><img src="icons/explore_3d.webp?v=908" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📚'"></div>
+    <div class="m-icon"><img src="icons/explore_3d.webp?v=909" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📚'"></div>
     <div class="m-title">探索单词</div>
   </div>
   <div class="mode-card" style="--c1:#fbbf24;--c2:#fb923c" onclick="startListen()"><!-- 🔴 v583: 蓝→亮琥珀橙(原蓝偏暗+喇叭暗看不清); emoji🔊→新3D喇叭图 -->
-    <div class="m-icon"><img src="icons/speaker_3d.webp?v=908" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔊'"></div>
+    <div class="m-icon"><img src="icons/speaker_3d.webp?v=909" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔊'"></div>
     <div class="m-title">听音辨义</div>
   </div>
   <div class="mode-card" style="--c1:#14b8a6;--c2:#0d9488" onclick="startMatch()">
@@ -1465,15 +1465,15 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
     <div class="m-title">记忆翻牌</div>
   </div>
   <div class="mode-card" style="--c1:#8b5cf6;--c2:#7c3aed" onclick="showTypingMenu()"><!-- 🔴 v586: 打字大师 emoji⌨️→新3D复古电脑图 -->
-    <div class="m-icon"><img src="icons/typer_3d.webp?v=908" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle;transform:translate(-2px,2px)" onerror="this.outerHTML='⌨️'"></div><!-- 🔴 v730: 整体放大1px(90→91)+向左移动2px(translateX 0→-2·Hansen微调) -->
+    <div class="m-icon"><img src="icons/typer_3d.webp?v=909" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle;transform:translate(-2px,2px)" onerror="this.outerHTML='⌨️'"></div><!-- 🔴 v730: 整体放大1px(90→91)+向左移动2px(translateX 0→-2·Hansen微调) -->
     <div class="m-title" style="font-size:13px;color:#fbbf24;transform:translate(0,3px)">打字大师</div><!-- 🔴 v598: 文字上提离底(translateY 6→2)+缩小(13→11)+亮黄#fde047突出色(紫底上醒目) -->
   </div>
   <div class="mode-card" style="--c1:#ec4899;--c2:#db2777" onclick="startCloze()"><!-- 🔴 v590: 完形填空 emoji📝→新3D放大镜选项图 -->
-    <div class="m-icon"><img src="icons/cloze_3d.webp?v=908" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📝'"></div>
+    <div class="m-icon"><img src="icons/cloze_3d.webp?v=909" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📝'"></div>
     <div class="m-title">完形填空</div>
   </div>
   <div class="mode-card" style="--c1:#4f46e5;--c2:#4338ca" onclick="startScramble()"><!-- 🔴 v591: 字母拼拼乐 emoji🔤→新3D拼字母FUNNY图 -->
-    <div class="m-icon"><img src="icons/spell_3d.webp?v=908" alt="" draggable="false" style="width:74px;height:74px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔤'"></div>
+    <div class="m-icon"><img src="icons/spell_3d.webp?v=909" alt="" draggable="false" style="width:74px;height:74px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔤'"></div>
     <div class="m-title">字母拼拼乐</div>
   </div>
 </div>
@@ -1481,31 +1481,31 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 <div class="section-label">畅玩模式</div><!-- v577: 标题更名, Boss入口已移至每日行 -->
 <div class="mode-grid">
 <div class="mode-card" style="background:#fff;border:1px solid #e2e8f0" onclick="HansenSpellBee.open('adjective')">
-    <div class="m-icon"><img src="icons/spelling_bee.webp?v=908" alt="" draggable="false" style="width:88px;height:88px;object-fit:contain;vertical-align:middle;transform:translate(0px,1px)" onerror="this.outerHTML='🐝'"></div><!--🔴BUG#86 蜜蜂图标92→72px+标题排紧(line-height1.45→1.1去下边距腾出8px图标区):spelling_bee.webp内容占满整图0留白·窄屏360px图标区排紧后62px·72px顶部刚好不被overflow:hidden切-->
+    <div class="m-icon"><img src="icons/spelling_bee.webp?v=909" alt="" draggable="false" style="width:88px;height:88px;object-fit:contain;vertical-align:middle;transform:translate(0px,1px)" onerror="this.outerHTML='🐝'"></div><!--🔴BUG#86 蜜蜂图标92→72px+标题排紧(line-height1.45→1.1去下边距腾出8px图标区):spelling_bee.webp内容占满整图0留白·窄屏360px图标区排紧后62px·72px顶部刚好不被overflow:hidden切-->
     <div class="m-title" style="font-family:'Baloo2',sans-serif;text-transform:lowercase;background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b,#22c55e,#3b82f6,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-size:15px;font-weight:800;letter-spacing:0;line-height:0.9;padding-bottom:0px;white-space:normal">spelling bee</div>
   </div>
 <div class="mode-card" style="--c1:#84cc16;--c2:#65a30d" onclick="startMoles()"><!-- 🔴 v585: 打地鼠 emoji🎯→新3D打地鼠图 -->
-    <div class="m-icon"><img src="icons/mole_3d.webp?v=908" alt="" draggable="false" style="width:78px;height:78px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎯'"></div>
+    <div class="m-icon"><img src="icons/mole_3d.webp?v=909" alt="" draggable="false" style="width:78px;height:78px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎯'"></div>
     <div class="m-title">打地鼠</div>
   </div>
   <div class="mode-card" style="--c1:#0284c7;--c2:#0369a1" onclick="startFish()"><!-- 🔴 v587: 钓鱼大师 emoji🎣→新3D钓鱼图 -->
-    <div class="m-icon"><img src="icons/fish_3d.webp?v=908" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎣'"></div>
+    <div class="m-icon"><img src="icons/fish_3d.webp?v=909" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎣'"></div>
     <div class="m-title">钓鱼大师</div>
   </div>
   <div class="mode-card" style="--c1:#4338ca;--c2:var(--pal-chrome-2,#312e81)" onclick="startBubble()">
-    <div class="m-icon"><img src="icons/bubble_3d.webp?v=908" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🫧'"></div>
+    <div class="m-icon"><img src="icons/bubble_3d.webp?v=909" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🫧'"></div>
     <div class="m-title">泡泡大作战</div>
   </div>
   <div class="mode-card" style="--c1:#fb923c;--c2:#dc2626" onclick="startSpeed()">
-    <div class="m-icon"><img src="icons/speed_3d.webp?v=908" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='⚡'"></div><!-- 🔴v646: 极速60秒 emoji⚡→新3D秒表60图 -->
+    <div class="m-icon"><img src="icons/speed_3d.webp?v=909" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='⚡'"></div><!-- 🔴v646: 极速60秒 emoji⚡→新3D秒表60图 -->
     <div class="m-title">极速60秒</div>
   </div>
   <!-- 🔴v654 火眼金睛(eagle)放大scale0.85→1.1·极速60秒(speed)缩小scale1.15→0.9留顶距 --><div class="mode-card" style="--c1:#2563eb;--c2:#1e3a8a" onclick="startEagle()">
-    <div class="m-icon"><img src="icons/eagle_3d.webp?v=908" alt="" draggable="false" style="width:81px;height:81px;object-fit:contain;vertical-align:middle;transform:translate(0px,-2px)" onerror="this.outerHTML='👀'"></div><!-- 🔴v647: 火眼金睛 emoji👀→新3D金眼图·scale0.85留顶部间距不贴顶 -->
+    <div class="m-icon"><img src="icons/eagle_3d.webp?v=909" alt="" draggable="false" style="width:81px;height:81px;object-fit:contain;vertical-align:middle;transform:translate(0px,-2px)" onerror="this.outerHTML='👀'"></div><!-- 🔴v647: 火眼金睛 emoji👀→新3D金眼图·scale0.85留顶部间距不贴顶 -->
     <div class="m-title">火眼金睛</div>
   </div>
   <div class="mode-card" style="--c1:#dbeafe;--c2:#93c5fd" onclick="HansenGacha.open()"><!-- 🔴 v596: 抽卡背景深蓝靛#1e3a8a/var(--pal-chrome-2,#312e81)→浅蓝#dbeafe/#93c5fd(Hansen嫌深蓝难看·紫品金joker在深冷蓝上不跳→浅蓝衬托更醒目)+标题改深蓝字(浅底白字看不清) -->
-    <div class="m-icon"><img src="icons/gacha_joker_v594.webp?v=908" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px)" onerror="this.outerHTML='🎴'"></div>
+    <div class="m-icon"><img src="icons/gacha_joker_v594.webp?v=909" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px)" onerror="this.outerHTML='🎴'"></div>
     <div class="m-title" style="font-size:12px;color:var(--pal-surf-1,#0f172a);transform:translate(0,2px)">抽卡</div>
   </div>
 </div>
@@ -1643,7 +1643,7 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 <!-- ============ CHEST ============ -->
 <div class="screen" id="chestScreen">
   <button class="back-btn" onclick="showScreen('home')">← 返回</button>
-  <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none"><img src="icons/chest_gold.webp?v=908" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-0.2em" onerror="this.outerHTML='🎁'"></span> 每日宝箱</div>
+  <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none"><img src="icons/chest_gold.webp?v=909" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-0.2em" onerror="this.outerHTML='🎁'"></span> 每日宝箱</div>
   <div id="chestContent" class="chest-area"></div>
 </div>
 
@@ -2422,7 +2422,7 @@ document.getElementById('coinCount').textContent=(window.HansenCoins?HansenCoins
 document.getElementById('streakCount').textContent=S.streak;
 /* 🔴 v575: streakDaysDaily 元素已随"连续签到卡"移除, 此写入改为安全空操作(打卡天数现由名字行 streakCount 显示) */
 const avatars=['⚔️','🗡️','🛡️','🏹','👑','🐉','🌟','🦁','🔥','💫'];
-if(window.HsnAvatar&&HsnAvatar.render){HsnAvatar.render();}else{try{var _av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var _ac=parseInt(_av.cur,10)||1;var _an=(_ac<10?'0':'')+_ac;var _ae=document.getElementById('avatarIcon');if(_ae&&!_ae.querySelector('img.hsn-av-img')){_ae.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:'+((_av.colors&&_av.colors[_ac])||'#2a3360')+';';_ae.innerHTML='<img class="hsn-av-img" src="avatars/'+_an+'.webp?v=908" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e){try{var _ae2=document.getElementById('avatarIcon');if(_ae2&&!_ae2.querySelector('img.hsn-av-img')){_ae2.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:#2a3360;';_ae2.innerHTML='<img class="hsn-av-img" src="avatars/01.webp?v=908" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e2){}}}/*🔴v780 头像彻底弃用等级emoji:连catch也回退默认角色#1(avatars/01.webp)不再用emoji·头像路径零emoji。🔴v779 首帧防闪:有模块则渲染所选头像·否则用localStorage的cur显角色立绘·宠物图首帧加尺寸·模块加载前不闪*/
+if(window.HsnAvatar&&HsnAvatar.render){HsnAvatar.render();}else{try{var _av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var _ac=parseInt(_av.cur,10)||1;var _an=(_ac<10?'0':'')+_ac;var _ae=document.getElementById('avatarIcon');if(_ae&&!_ae.querySelector('img.hsn-av-img')){_ae.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:'+((_av.colors&&_av.colors[_ac])||'#2a3360')+';';_ae.innerHTML='<img class="hsn-av-img" src="avatars/'+_an+'.webp?v=909" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e){try{var _ae2=document.getElementById('avatarIcon');if(_ae2&&!_ae2.querySelector('img.hsn-av-img')){_ae2.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:#2a3360;';_ae2.innerHTML='<img class="hsn-av-img" src="avatars/01.webp?v=909" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e2){}}}/*🔴v780 头像彻底弃用等级emoji:连catch也回退默认角色#1(avatars/01.webp)不再用emoji·头像路径零emoji。🔴v779 首帧防闪:有模块则渲染所选头像·否则用localStorage的cur显角色立绘·宠物图首帧加尺寸·模块加载前不闪*/
 updatePetHero();
 updateQuestBadge();
 updateChestBadge();
@@ -2512,42 +2512,42 @@ function getXpForNextLevel(){
 
 
 const PET_STAGES=[
-{emoji:'🥚',name:'星雾之卵',text:'裹着流动星雾的蛋, 壳上微光符纹缓缓游动',img:'pets/pet_00.webp?v=908',req:{xp:0,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌟',name:'裂晓微光',text:'蛋壳裂开一道金线, 缝隙里透出光',img:'pets/pet_01.webp?v=908',req:{xp:25,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌫️',name:'雾隐幽雏',text:'半透明的雾团身子, 只有一双发亮的眼睛',img:'pets/pet_02.webp?v=908',req:{xp:70,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'✨',name:'萤芯小精',text:'凝出小小身形, 周身萦绕萤火般的光点',img:'pets/pet_03.webp?v=908',req:{xp:135,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💠',name:'灵纹初兽',text:'体表浮现淡蓝灵纹的小幻兽',img:'pets/pet_04.webp?v=908',req:{xp:220,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦊',name:'双尾灵狐崽',text:'奇幻双尾、尾尖凝着光珠',img:'pets/pet_05.webp?v=908',req:{xp:310,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🔥',name:'焰息幼兽',text:'尾尖燃起火苗, 鬃毛带火星',img:'pets/pet_06.webp?v=908',req:{xp:415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'❄️',name:'霜羽冰貂',text:'一对薄冰般的小翼, 呵气成霜',img:'pets/pet_07.webp?v=908',req:{xp:535,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'⚡',name:'雷鳞游蜥',text:'体表游走细密电纹, 鳞片泛蓝光',img:'pets/pet_08.webp?v=908',req:{xp:660,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌪️',name:'风翎灵兽',text:'身缠风带, 羽翎随风浮动',img:'pets/pet_09.webp?v=908',req:{xp:795,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💧',name:'渊光水灵',text:'半透明水体身躯, 体内流光涌动',img:'pets/pet_10.webp?v=908',req:{xp:945,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💎',name:'岩心晶兽',text:'晶岩外壳, 胸口核心发光',img:'pets/pet_11.webp?v=908',req:{xp:1100,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦄',name:'焰角麒麟驹',text:'独角 + 火鬃的幼麒麟',img:'pets/pet_12.webp?v=908',req:{xp:1265,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐆',name:'霜翼雪豹',text:'背生冰晶之翼的雪豹',img:'pets/pet_13.webp?v=908',req:{xp:1435,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦕',name:'雷鳞角龙',text:'小型角龙, 鳞甲流转雷纹',img:'pets/pet_14.webp?v=908',req:{xp:1615,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦅',name:'星羽幼鹫',text:'双翼洒落星辉的幼鹫',img:'pets/pet_15.webp?v=908',req:{xp:1805,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐺',name:'幽影噬狼',text:'暗影缠身、眼瞳猩红的奇幻狼',img:'pets/pet_16.webp?v=908',req:{xp:2000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦊',name:'琉璃九尾',text:'通体琉璃光泽的九尾灵兽',img:'pets/pet_17.webp?v=908',req:{xp:2205,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐦‍🔥',name:'炎纹凤雏',text:'初生凤凰, 尾羽燃着火焰',img:'pets/pet_18.webp?v=908',req:{xp:2415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'苍渊蛟',text:'入海化蛟, 鳞泛幽蓝深渊光',img:'pets/pet_19.webp?v=908',req:{xp:2635,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦅',name:'雷霆狮鹫',text:'鹰首狮身, 雷云相随',img:'pets/pet_20.webp?v=908',req:{xp:2860,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐅',name:'霜月白虎',text:'通体霜白、额生月纹的虎神兽',img:'pets/pet_21.webp?v=908',req:{xp:3090,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦄',name:'星辉天角兽',text:'带翼独角兽, 鬃毛流淌星河',img:'pets/pet_22.webp?v=908',req:{xp:3330,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'业火黑麟',text:'黑鳞缠绕业火的麒麟',img:'pets/pet_23.webp?v=908',req:{xp:3575,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐦‍🔥',name:'涅槃凤皇',text:'浴火重生的成年凤, 七彩烈焰羽翼',img:'pets/pet_24.webp?v=908',req:{xp:3830,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'沧溟应龙',text:'双翼应龙, 呼风唤雨',img:'pets/pet_25.webp?v=908',req:{xp:4085,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐋',name:'九霄雷鲲',text:'雷云中遨游的巨鲲',img:'pets/pet_26.webp?v=908',req:{xp:4350,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦌',name:'玄冰麒麟尊',text:'冰晶铸成的神麒麟',img:'pets/pet_27.webp?v=908',req:{xp:4620,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐺',name:'噬星天狼',text:'吞星之狼, 星辰为鬃',img:'pets/pet_28.webp?v=908',req:{xp:4900,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦁',name:'鎏金圣兽',text:'通体金光流转的圣兽',img:'pets/pet_29.webp?v=908',req:{xp:5180,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'星河神龙',text:'身缠整条星河的东方神龙',img:'pets/pet_30.webp?v=908',req:{xp:5470,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'苍穹龙皇',text:'端坐云海的龙皇',img:'pets/pet_31.webp?v=908',req:{xp:5765,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌠',name:'创世幻兽',text:'集六元素于一身的创世之兽',img:'pets/pet_32.webp?v=908',req:{xp:6065,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌌',name:'虚空噬天兽',text:'吞噬虚空、身后裂开星门的巨兽',img:'pets/pet_33.webp?v=908',req:{xp:6370,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'永恒星界龙神',text:'横贯星界的龙神形态',img:'pets/pet_34.webp?v=908',req:{xp:6685,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'👑',name:'万象天尊·寰宇主宰',text:'主宰寰宇的至尊终焉形态',img:'pets/pet_35.webp?v=908',req:{xp:7000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}}
+{emoji:'🥚',name:'星雾之卵',text:'裹着流动星雾的蛋, 壳上微光符纹缓缓游动',img:'pets/pet_00.webp?v=909',req:{xp:0,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌟',name:'裂晓微光',text:'蛋壳裂开一道金线, 缝隙里透出光',img:'pets/pet_01.webp?v=909',req:{xp:25,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌫️',name:'雾隐幽雏',text:'半透明的雾团身子, 只有一双发亮的眼睛',img:'pets/pet_02.webp?v=909',req:{xp:70,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'✨',name:'萤芯小精',text:'凝出小小身形, 周身萦绕萤火般的光点',img:'pets/pet_03.webp?v=909',req:{xp:135,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💠',name:'灵纹初兽',text:'体表浮现淡蓝灵纹的小幻兽',img:'pets/pet_04.webp?v=909',req:{xp:220,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦊',name:'双尾灵狐崽',text:'奇幻双尾、尾尖凝着光珠',img:'pets/pet_05.webp?v=909',req:{xp:310,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🔥',name:'焰息幼兽',text:'尾尖燃起火苗, 鬃毛带火星',img:'pets/pet_06.webp?v=909',req:{xp:415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'❄️',name:'霜羽冰貂',text:'一对薄冰般的小翼, 呵气成霜',img:'pets/pet_07.webp?v=909',req:{xp:535,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'⚡',name:'雷鳞游蜥',text:'体表游走细密电纹, 鳞片泛蓝光',img:'pets/pet_08.webp?v=909',req:{xp:660,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌪️',name:'风翎灵兽',text:'身缠风带, 羽翎随风浮动',img:'pets/pet_09.webp?v=909',req:{xp:795,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💧',name:'渊光水灵',text:'半透明水体身躯, 体内流光涌动',img:'pets/pet_10.webp?v=909',req:{xp:945,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💎',name:'岩心晶兽',text:'晶岩外壳, 胸口核心发光',img:'pets/pet_11.webp?v=909',req:{xp:1100,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦄',name:'焰角麒麟驹',text:'独角 + 火鬃的幼麒麟',img:'pets/pet_12.webp?v=909',req:{xp:1265,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐆',name:'霜翼雪豹',text:'背生冰晶之翼的雪豹',img:'pets/pet_13.webp?v=909',req:{xp:1435,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦕',name:'雷鳞角龙',text:'小型角龙, 鳞甲流转雷纹',img:'pets/pet_14.webp?v=909',req:{xp:1615,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦅',name:'星羽幼鹫',text:'双翼洒落星辉的幼鹫',img:'pets/pet_15.webp?v=909',req:{xp:1805,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐺',name:'幽影噬狼',text:'暗影缠身、眼瞳猩红的奇幻狼',img:'pets/pet_16.webp?v=909',req:{xp:2000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦊',name:'琉璃九尾',text:'通体琉璃光泽的九尾灵兽',img:'pets/pet_17.webp?v=909',req:{xp:2205,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐦‍🔥',name:'炎纹凤雏',text:'初生凤凰, 尾羽燃着火焰',img:'pets/pet_18.webp?v=909',req:{xp:2415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'苍渊蛟',text:'入海化蛟, 鳞泛幽蓝深渊光',img:'pets/pet_19.webp?v=909',req:{xp:2635,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦅',name:'雷霆狮鹫',text:'鹰首狮身, 雷云相随',img:'pets/pet_20.webp?v=909',req:{xp:2860,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐅',name:'霜月白虎',text:'通体霜白、额生月纹的虎神兽',img:'pets/pet_21.webp?v=909',req:{xp:3090,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦄',name:'星辉天角兽',text:'带翼独角兽, 鬃毛流淌星河',img:'pets/pet_22.webp?v=909',req:{xp:3330,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'业火黑麟',text:'黑鳞缠绕业火的麒麟',img:'pets/pet_23.webp?v=909',req:{xp:3575,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐦‍🔥',name:'涅槃凤皇',text:'浴火重生的成年凤, 七彩烈焰羽翼',img:'pets/pet_24.webp?v=909',req:{xp:3830,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'沧溟应龙',text:'双翼应龙, 呼风唤雨',img:'pets/pet_25.webp?v=909',req:{xp:4085,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐋',name:'九霄雷鲲',text:'雷云中遨游的巨鲲',img:'pets/pet_26.webp?v=909',req:{xp:4350,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦌',name:'玄冰麒麟尊',text:'冰晶铸成的神麒麟',img:'pets/pet_27.webp?v=909',req:{xp:4620,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐺',name:'噬星天狼',text:'吞星之狼, 星辰为鬃',img:'pets/pet_28.webp?v=909',req:{xp:4900,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦁',name:'鎏金圣兽',text:'通体金光流转的圣兽',img:'pets/pet_29.webp?v=909',req:{xp:5180,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'星河神龙',text:'身缠整条星河的东方神龙',img:'pets/pet_30.webp?v=909',req:{xp:5470,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'苍穹龙皇',text:'端坐云海的龙皇',img:'pets/pet_31.webp?v=909',req:{xp:5765,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌠',name:'创世幻兽',text:'集六元素于一身的创世之兽',img:'pets/pet_32.webp?v=909',req:{xp:6065,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌌',name:'虚空噬天兽',text:'吞噬虚空、身后裂开星门的巨兽',img:'pets/pet_33.webp?v=909',req:{xp:6370,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'永恒星界龙神',text:'横贯星界的龙神形态',img:'pets/pet_34.webp?v=909',req:{xp:6685,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'👑',name:'万象天尊·寰宇主宰',text:'主宰寰宇的至尊终焉形态',img:'pets/pet_35.webp?v=909',req:{xp:7000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}}
 ];
 window.PET_STAGES=PET_STAGES;
 
@@ -2785,7 +2785,7 @@ function updateChestBadge(){
   /* v667: 副标题改右上角角标(可领/已签)·文字在icon.innerHTML里设 */ // 🔴 v592: 未签到"打卡签到"→"等待开启"
   // 🔴 v588: 未签到→金宝箱图(chest_gold.webp), 已签到→开盒📂. 用 innerHTML(图片不能用 textContent)
   // 🔴 v589: 未签到→金锁宝箱(chest_gold), 已签到→打开冒金币宝箱(chest_open). 都用img+onerror兜底
-  if(icon) icon.innerHTML = canOpen ? '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=908" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;🎁&quot;"><span class="chest-badge" id="chestSub">可领</span></span>' : '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=908" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';
+  if(icon) icon.innerHTML = canOpen ? '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=909" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;🎁&quot;"><span class="chest-badge" id="chestSub">可领</span></span>' : '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=909" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';
   if(card){
     card.classList.toggle('chest-pending', canOpen);   // 未签到=缓慢柔光闪烁
     card.classList.toggle('chest-claimed', !canOpen);  // 已签到=翡翠绿+开盒
@@ -2812,11 +2812,11 @@ function renderCheckinPage(streak, curMult, claimed){
   // 主操作区
   if(claimed){
     html += '<div style="margin:16px 0;padding:16px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);border-radius:14px;text-align:center">'
-          + '<div style="width:80px;height:80px;margin:0 auto"><img src="icons/chest_open.webp?v=908" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML=&quot;<span style=&#39;font-size:46px&#39;>📂</span>&quot;"></div>'
+          + '<div style="width:80px;height:80px;margin:0 auto"><img src="icons/chest_open.webp?v=909" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML=&quot;<span style=&#39;font-size:46px&#39;>📂</span>&quot;"></div>'
           + '<div style="font-size:15px;font-weight:800;color:#10b981;margin-top:6px">今日已打卡 ✓</div>'
           + '<div style="font-size:12px;color:#cbd5e1;margin-top:6px">明天再来打卡，连续天数 +1，倍率更高！</div></div>';
   } else {
-    html += '<div style="text-align:center;margin:14px 0"><div class="chest-box" id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp?v=908" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent=&quot;🎁&quot;"></div>'
+    html += '<div style="text-align:center;margin:14px 0"><div class="chest-box" id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp?v=909" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent=&quot;🎁&quot;"></div>'
           + '<div class="chest-msg">👆 点击打卡领取今日奖励</div></div>';
   }
   // 规则说明
@@ -3964,26 +3964,26 @@ let bossCombo=0,bossRageMode=false,bossCurrent=null,bossPhase=1;
 let bossQuestionsAsked=0;
 
 const BOSSES=[
-{name:'淘气小幽灵',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv01.webp?v=908" xlink:href="bosses/lv01.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:55,color:'#94a3b8',taunts:['呜~ 来抓我呀!','嘿嘿 我可不怕你!','飘飘飘! 抓不到我~']},
-{name:'暗影忍者',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv02.webp?v=908" xlink:href="bosses/lv02.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:75,color:'#1f2937',taunts:['影舞步! 你看不见我!','忍法! 隐身术!','一刀致命!']},
-{name:'百战兽人',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv03.webp?v=908" xlink:href="bosses/lv03.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:95,color:'#65a30d',taunts:['吼——! 又一个挑战者!','我的战锤渴望胜利!','为部落而战!','百战不败, 岂会输你!','让你见识真正的勇士!']},
-{name:'史前霸王龙',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv04.webp?v=908" xlink:href="bosses/lv04.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:120,color:'#dc2626',taunts:['吼!!! 史前霸主驾到!','你将化为化石!','感受远古之力!']},
-{name:'千年僵尸',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv05.webp?v=908" xlink:href="bosses/lv05.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:150,color:'#365314',taunts:['啊...啊...!','古老咒语启动!','一同腐烂吧!']},
-{name:'暗夜吸血鬼',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv06.webp?v=908" xlink:href="bosses/lv06.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:185,color:'#7f1d1d',taunts:['血液 给我!','黑夜永恒!','你将成为我的仆从!']},
-{name:'蒙面大魔王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv07.webp?v=908" xlink:href="bosses/lv07.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:225,color:'#6b21a8',taunts:['哈哈哈... 你以为能赢?','黑暗之力降临!','向魔王臣服吧!']},
-{name:'地狱犬王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv08.webp?v=908" xlink:href="bosses/lv08.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:270,color:'#991b1b',taunts:['嗷呜~ 地狱传来咆哮!','三个头颅一齐袭来!','永堕黑暗深渊!']},
-{name:'黑森林巫婆',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv09.webp?v=908" xlink:href="bosses/lv09.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:320,color:'#7c3aed',taunts:['老婆子的毒苹果, 尝一口吧!','咕噜咕噜, 魔药煮沸啦!','骑上扫帚, 看你往哪逃!']},
-{name:'异次元巫师',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv10.webp?v=908" xlink:href="bosses/lv10.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:375,color:'#a855f7',taunts:['空间撕裂!','禁忌魔法吟唱!','嘿嘿 维度崩塌!']},
-{name:'龙骑士统帅',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv11.webp?v=908" xlink:href="bosses/lv11.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:440,color:'#c2410c',taunts:['巨龙之翼 遮天蔽日!','龙焰焚天!','跪下吧 渺小者!']},
-{name:'暗黑灯神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv12.webp?v=908" xlink:href="bosses/lv12.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:510,color:'#4338ca',taunts:['三个愿望? 不可能!','黑暗烟雾笼罩!','你的灵魂归我!']},
-{name:'海底巨怪',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv13.webp?v=908" xlink:href="bosses/lv13.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:585,color:'#0e7490',taunts:['八爪缠绕 无处可逃!','深渊呼唤着你!','嘎咕咕... 美味!']},
-{name:'寒冰女王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv14.webp?v=908" xlink:href="bosses/lv14.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:665,color:'#06b6d4',taunts:['冻结一切 包括你!','冰封万古之力!','哈哈 你瑟瑟发抖了吗?']},
-{name:'烈焰魔神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv15.webp?v=908" xlink:href="bosses/lv15.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:750,color:'#ea580c',taunts:['焚尽世间一切!','烈火地狱降临!','嗯哼哼... 化为灰烬吧!']},
-{name:'雷电之主',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv16.webp?v=908" xlink:href="bosses/lv16.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:840,color:'#facc15',taunts:['天雷轰顶!','闪电之力 无可匹敌!','颤抖吧 凡人!']},
-{name:'机械泰坦',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv17.webp?v=908" xlink:href="bosses/lv17.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:940,color:'#475569',taunts:['SYSTEM ONLINE.','TARGET LOCKED.','TERMINATING.']},
-{name:'外星霸主',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv18.webp?v=908" xlink:href="bosses/lv18.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1050,color:'#10b981',taunts:['你的星球归我了!','宇宙最强生物!','哼哼... 弱小地球人!']},
-{name:'混沌魔尊',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv19.webp?v=908" xlink:href="bosses/lv19.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1170,color:'#581c87',taunts:['哈哈哈哈哈!','深渊审判!','地狱之门已开启!']},
-{name:'上古太阳神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv20.webp?v=908" xlink:href="bosses/lv20.webp?v=908" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1300,color:'#fbbf24',taunts:['吾 即是万物之始!','宇宙在我掌中!','凡人 终须臣服!']}
+{name:'淘气小幽灵',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv01.webp?v=909" xlink:href="bosses/lv01.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:55,color:'#94a3b8',taunts:['呜~ 来抓我呀!','嘿嘿 我可不怕你!','飘飘飘! 抓不到我~']},
+{name:'暗影忍者',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv02.webp?v=909" xlink:href="bosses/lv02.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:75,color:'#1f2937',taunts:['影舞步! 你看不见我!','忍法! 隐身术!','一刀致命!']},
+{name:'百战兽人',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv03.webp?v=909" xlink:href="bosses/lv03.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:95,color:'#65a30d',taunts:['吼——! 又一个挑战者!','我的战锤渴望胜利!','为部落而战!','百战不败, 岂会输你!','让你见识真正的勇士!']},
+{name:'史前霸王龙',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv04.webp?v=909" xlink:href="bosses/lv04.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:120,color:'#dc2626',taunts:['吼!!! 史前霸主驾到!','你将化为化石!','感受远古之力!']},
+{name:'千年僵尸',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv05.webp?v=909" xlink:href="bosses/lv05.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:150,color:'#365314',taunts:['啊...啊...!','古老咒语启动!','一同腐烂吧!']},
+{name:'暗夜吸血鬼',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv06.webp?v=909" xlink:href="bosses/lv06.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:185,color:'#7f1d1d',taunts:['血液 给我!','黑夜永恒!','你将成为我的仆从!']},
+{name:'蒙面大魔王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv07.webp?v=909" xlink:href="bosses/lv07.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:225,color:'#6b21a8',taunts:['哈哈哈... 你以为能赢?','黑暗之力降临!','向魔王臣服吧!']},
+{name:'地狱犬王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv08.webp?v=909" xlink:href="bosses/lv08.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:270,color:'#991b1b',taunts:['嗷呜~ 地狱传来咆哮!','三个头颅一齐袭来!','永堕黑暗深渊!']},
+{name:'黑森林巫婆',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv09.webp?v=909" xlink:href="bosses/lv09.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:320,color:'#7c3aed',taunts:['老婆子的毒苹果, 尝一口吧!','咕噜咕噜, 魔药煮沸啦!','骑上扫帚, 看你往哪逃!']},
+{name:'异次元巫师',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv10.webp?v=909" xlink:href="bosses/lv10.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:375,color:'#a855f7',taunts:['空间撕裂!','禁忌魔法吟唱!','嘿嘿 维度崩塌!']},
+{name:'龙骑士统帅',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv11.webp?v=909" xlink:href="bosses/lv11.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:440,color:'#c2410c',taunts:['巨龙之翼 遮天蔽日!','龙焰焚天!','跪下吧 渺小者!']},
+{name:'暗黑灯神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv12.webp?v=909" xlink:href="bosses/lv12.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:510,color:'#4338ca',taunts:['三个愿望? 不可能!','黑暗烟雾笼罩!','你的灵魂归我!']},
+{name:'海底巨怪',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv13.webp?v=909" xlink:href="bosses/lv13.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:585,color:'#0e7490',taunts:['八爪缠绕 无处可逃!','深渊呼唤着你!','嘎咕咕... 美味!']},
+{name:'寒冰女王',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv14.webp?v=909" xlink:href="bosses/lv14.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:665,color:'#06b6d4',taunts:['冻结一切 包括你!','冰封万古之力!','哈哈 你瑟瑟发抖了吗?']},
+{name:'烈焰魔神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv15.webp?v=909" xlink:href="bosses/lv15.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:750,color:'#ea580c',taunts:['焚尽世间一切!','烈火地狱降临!','嗯哼哼... 化为灰烬吧!']},
+{name:'雷电之主',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv16.webp?v=909" xlink:href="bosses/lv16.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:840,color:'#facc15',taunts:['天雷轰顶!','闪电之力 无可匹敌!','颤抖吧 凡人!']},
+{name:'机械泰坦',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv17.webp?v=909" xlink:href="bosses/lv17.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:940,color:'#475569',taunts:['SYSTEM ONLINE.','TARGET LOCKED.','TERMINATING.']},
+{name:'外星霸主',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv18.webp?v=909" xlink:href="bosses/lv18.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1050,color:'#10b981',taunts:['你的星球归我了!','宇宙最强生物!','哼哼... 弱小地球人!']},
+{name:'混沌魔尊',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv19.webp?v=909" xlink:href="bosses/lv19.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1170,color:'#581c87',taunts:['哈哈哈哈哈!','深渊审判!','地狱之门已开启!']},
+{name:'上古太阳神',emoji:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image href="bosses/lv20.webp?v=909" xlink:href="bosses/lv20.webp?v=909" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>',hp:1300,color:'#fbbf24',taunts:['吾 即是万物之始!','宇宙在我掌中!','凡人 终须臣服!']}
 ];
 
 //🔴v811 赛季岛 boss 绑定各自 40 词 + 错词优先。boss N(1-6)守主题 2N-1,2N = allW[(N-1)*40 .. N*40)(12主题×20词·2主题/boss·连续切片)。
@@ -7577,42 +7577,42 @@ window.addEventListener('storage', function(e){
 });
 
 </script>
-<script src="vocab_all.js?v=908"></script>
-<script src="hansen_upgrade.js?v=908"></script>
-<script src="hansen_spell_practice.js?v=908"></script>
-<script src="hansen_review.js?v=908"></script>
-  <script src="hansen_mylearning.js?v=908"></script>
-<script src="hansen_boss_anim.js?v=908"></script>
-<script src="hansen_boss_lock.js?v=908"></script>
-<script src="hansen_game_antifreeze.js?v=908"></script>
-<script src="hansen_boss_attack.js?v=908"></script>
-<script src="hansen_boss_progress.js?v=908"></script>
-<script src="hansen_cardbook_wallet.js?v=908"></script>
-<script src="hansen_totals_wallet.js?v=908"></script>
-<script src="hansen_cards.js?v=908"></script>
-<script src="hansen_gacha.js?v=908"></script>
-<script src="hansen_land_cards.js?v=908"></script>
-<script src="hansen_cinema_themes.js?v=908"></script>
-<script src="hansen_diamond_shop.js?v=908"></script>
-<script src="hansen_season.js?v=908"></script>
-<script src="hansen_coin_wallet.js?v=908"></script>
-<script src="hansen_theme_lock.js?v=908"></script>
-<script src="hansen_palette.js?v=908"></script>
-<script src="hansen_perf.js?v=908"></script>
-<script src="hansen_econ_guide.js?v=908"></script><!-- 🔴v861 金币/钻石/宠物三份说明书(可折叠·设置页) -->
-<script src="hansen_round_bar.js?v=908"></script><!-- 🔴v862 大满贯进度器 -->
-<script src="hansen_spellbee_gems.js?v=908"></script><!-- 🔴v862 Bee钻石里程碑 --><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
-<script src="hansen_ach_wallet.js?v=908"></script>
-<script src="hansen_island_upgrade.js?v=908"></script>
-<script src="hansen_gem_system.js?v=908"></script>
-<script src="hansen_gear.js?v=908"></script>
-<script src="hansen_crystal.js?v=908"></script><!-- 🔴v828 知识结晶引擎:单词记忆熟练度→间隔复习→永久掌握结晶钻石 -->
+<script src="vocab_all.js?v=909"></script>
+<script src="hansen_upgrade.js?v=909"></script>
+<script src="hansen_spell_practice.js?v=909"></script>
+<script src="hansen_review.js?v=909"></script>
+  <script src="hansen_mylearning.js?v=909"></script>
+<script src="hansen_boss_anim.js?v=909"></script>
+<script src="hansen_boss_lock.js?v=909"></script>
+<script src="hansen_game_antifreeze.js?v=909"></script>
+<script src="hansen_boss_attack.js?v=909"></script>
+<script src="hansen_boss_progress.js?v=909"></script>
+<script src="hansen_cardbook_wallet.js?v=909"></script>
+<script src="hansen_totals_wallet.js?v=909"></script>
+<script src="hansen_cards.js?v=909"></script>
+<script src="hansen_gacha.js?v=909"></script>
+<script src="hansen_land_cards.js?v=909"></script>
+<script src="hansen_cinema_themes.js?v=909"></script>
+<script src="hansen_diamond_shop.js?v=909"></script>
+<script src="hansen_season.js?v=909"></script>
+<script src="hansen_coin_wallet.js?v=909"></script>
+<script src="hansen_theme_lock.js?v=909"></script>
+<script src="hansen_palette.js?v=909"></script>
+<script src="hansen_perf.js?v=909"></script>
+<script src="hansen_econ_guide.js?v=909"></script><!-- 🔴v861 金币/钻石/宠物三份说明书(可折叠·设置页) -->
+<script src="hansen_round_bar.js?v=909"></script><!-- 🔴v862 大满贯进度器 -->
+<script src="hansen_spellbee_gems.js?v=909"></script><!-- 🔴v862 Bee钻石里程碑 --><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
+<script src="hansen_ach_wallet.js?v=909"></script>
+<script src="hansen_island_upgrade.js?v=909"></script>
+<script src="hansen_gem_system.js?v=909"></script>
+<script src="hansen_gear.js?v=909"></script>
+<script src="hansen_crystal.js?v=909"></script><!-- 🔴v828 知识结晶引擎:单词记忆熟练度→间隔复习→永久掌握结晶钻石 -->
 
-<script src="hansen_freepass.js?v=908"></script>
-<script src="hansen_round_reward.js?v=908"></script>
-<script src="hansen_weapon_fx.js?v=908"></script>
-<script src="hansen_addiction.js?v=908"></script>
-<script src="hansen_wrong_overview.js?v=908"></script>
+<script src="hansen_freepass.js?v=909"></script>
+<script src="hansen_round_reward.js?v=909"></script>
+<script src="hansen_weapon_fx.js?v=909"></script>
+<script src="hansen_addiction.js?v=909"></script>
+<script src="hansen_wrong_overview.js?v=909"></script>
 <script>
 // v142k: 字母拼拼乐键盘支持
 (function(){
@@ -7637,13 +7637,13 @@ window.addEventListener('storage', function(e){
 })();
 </script>
 
-<script src="hansen_checkin_global.js?v=908"></script>
+<script src="hansen_checkin_global.js?v=909"></script>
 <script>/* [COIN-WALLET-DISPLAY-OK] v437 金币一致性修复: HansenCoins(全局钱包)在内联主脚本之后才加载, 导致形容词岛【初始顶栏】曾显示旧的本地 S.coins(而非全局钱包), 与其余18岛(靠升级补丁脚本在钱包后重刷)不一致。这里在所有脚本加载完后, 强制按全局钱包刷新一次顶栏, 保证金币数与其余岛绝对一致。监察官[D]检查会校验本标记或升级补丁二者必居其一。*/
 (function(){function r(){try{if(typeof updateTopBar==='function')updateTopBar();}catch(e){}}r();if(document.readyState!=='complete'){window.addEventListener('load',r);}setTimeout(r,250);})();</script>
-<script src="hansen_stability.js?v=908"></script>
-<script src="hansen_home_link.js?v=908"></script>
-<script src="hansen_spellbee.js?v=908"></script>
-<script src="hansen_pet_showcase.js?v=908"></script>
-<script src="hansen_avatar.js?v=908"></script>
+<script src="hansen_stability.js?v=909"></script>
+<script src="hansen_home_link.js?v=909"></script>
+<script src="hansen_spellbee.js?v=909"></script>
+<script src="hansen_pet_showcase.js?v=909"></script>
+<script src="hansen_avatar.js?v=909"></script>
 </body>
 </html>
