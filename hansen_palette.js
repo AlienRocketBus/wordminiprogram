@@ -201,6 +201,8 @@
     css+=L+'.psw-th, '+L+'.psw-th span, '+L+'.psw-th b{color:#92400e!important;text-shadow:none!important}\n';
     // 🔴v863终刀: 深提示条linear-gradient写法(⑭三写法漏网·stats"点一下"条)
     css+=L+'[style*="linear-gradient(135deg,#1e1b4b"] *{color:#e2e8f0!important}\n';
+    // 🔴v907 难度卡内奖励盒(rgba(0,0,0,.5)深遮罩+行内#fff)保白字: 深遮罩压彩卡=深底·须白字才可读(否则被①#fff→深墨映射翻深=深压深糊成一团·Hansen真机点名"做题下面解释看不清")。带两属性特异性(0,0,3,1)压过①的通用#fff映射(0,0,2,1)·且晚于金渐变③规则→通杀
+    css+=L+'[style*="background:rgba(0,0,0,.5)"][style*="color:#fff"]{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.55)!important}\n';
     // 亮色系兜底: 默认文字全走深墨
     css+='html.hsn-pal-light body{color:var(--pal-ink)}\n';
     var st=document.createElement('style'); st.id='hsnPaletteCSS'; st.textContent=css;
