@@ -1,5 +1,9 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v912**：修复你实拍的**龙骑士统帅（Lv11）大招「巨龙之翼展开」不见了**，并按你的要求做了一套**「特效不可破坏」守卫机制**。
+  - **根因（关键：没有任何一行特效代码被改）**：巨翼是按 BUG#70／v536 的钦定挂在**背景特效层**（`__hansenFxLayerBack`，z-index **−1**）上的——只有挂在这一层，翅膀才能从龙骑士**背后**展开（当年挂前景层时翅膀盖住了 boss 的脸，是你真机实拍抓出来的）。而 **v905** 为了修「boss 战横向割裂」，给 `#bossScreen` **自身**涂了一层**填满整屏的不透明暗底**。按 CSS 绘制顺序（负 z 层 → 内容块背景 → 内容），这层底把**整个背景特效层盖死**了。枪雨在前景层（z 9980）所以还在，翅膀就这么没了。**同一个原因还埋掉了地狱犬王（Lv8）的「地狱之门升起」**——一起修好了。
+  - **修法**：`#bossScreen` 自身改成透明，把那层暗底移到 `#bossScreen::before`（fixed 铺满视口、**z-index −2**），**沉到背景特效层之下**。割裂照样不出现（底仍铺满整屏），巨翼／地狱之门重新可见。改到位的一共 **28 处**：模板 + 19 个常规岛 + 8 个单词大陆岛 + 亮色主题（`hansen_palette.js` 里还藏着第二层同样的不透明底）。真机像素实测：巨翼 **0% → 33%**、地狱之门 **0% → 8%**、亮色主题下巨翼 **15%**；屏幕下部暗色 100%（割裂没回来）。
+  - **⭐ 防再犯机制（你要的那套）**：`check_resources` 的几百条守卫**全是盯代码字符串的**——这次没改一行特效代码，所以**全部通过、照常上线**。字符串守卫对「被别人遮住」完全瞎。所以新增 **`fx_guard.py` + `fx_probe.mjs` + `hansen_fx_lock.json`**：每次构建（build 第 **6.5** 步）在**真浏览器**里把 **20 个 boss 的攻击特效各放一遍**，冻结动画后拍三帧（全开／关前景层／关背景层），**用像素差证明特效真的画在屏幕上**。铁律：**只要某一层里有特效元素，就必须画出像素；有元素却一个像素都没画出来 = 被谁遮死了 = 特效已被破坏 → 拒绝打包**；另加每个 boss 的像素地板值（防悄悄缩水）和「特效播放期间 0 报错」。**实测把 v905 那次破坏原样注回去：龙骑士统帅背景特效 9.1% → 0.3%，守卫当场 ❌ 拦下拒绝打包**——也就是说 v905 那天这套机制会直接把构建卡住，根本上不了线。同时补了一条秒级字符串守卫钉死这次的修复（暗底不得涂回 `#bossScreen` 自身、背景层 z-index −1 不得改、两个特效必须挂背景层）。
 - **v911**：修复你实拍的**雷电之主（Lv16）大招时雷暴云把 boss 的头整个盖住**。查清根因：雷暴云（thunderlord 特效的积雨云）原本**钉死在屏幕顶 top:0**、云盒高 140px，而云盒内 **0~100px 是完全不透明（α255）的云体**；v891 为了「所有题型对齐打字题高位」把全体 boss **上移了 34px**（boss-sprite-wrap margin 68→34），立绘顶从 86.6 变成 **52.6**、头顶从 96.5 变成 **62.5**——正好整个埋进那 100px 不透明云体里（v891 之前头在 96.5、刚好落在云的半透明须边，所以看着是好的）。v910 的台词改动完全没碰这个特效，只是版本号一变刷新了缓存、把 v891 之后的布局刷了出来。修法：**不写死数值**，改成**云按 boss 立绘实时定位**——云顶 =「立绘顶 − 118」，让不透明云体收在头顶之上、只留柔和云须搭在头冠上；狂怒时 boss 变大、立绘顶上移，云会**自动跟着上移**，任何机型／任何题型／任何状态都不遮头。闪电起点本就按云盒实时算（cloudBottom = 云盒顶 + 72%），自动跟随、不会断裂。真机 Playwright 像素实测：修复前头露出 **0%**（被不透明云完全盖死）→ 修复后 **91%**、色差仅 9（等于云根本没压到头）；狂怒态 boss 涨到 229.7px、立绘顶上移到 36.8，云自动跟到 −79.9、不透明云体收在 20.1，**离头顶还有 27px**。check_resources 同步新增 2 条守卫钉死此修复（防止以后又被改回钉死 top:0 遮头），全 363 条守卫通过、node --check 通过、0 报错。
 - **v910**：修复你实拍的弗沙欧 boss 大招台词压在立绘身上（脸/上半身）的问题，并把其余几个九王殿 boss 的台词一并查修。查清根因：台词原来钉在立绘身上——弗沙欧钉在立绘中心上移到胸口、绷带亡骸/欧米伽/四季轮转/影兽/量子观测者钉在勇者血条上方（对全身立绘=落在立绘脚底/腿部）。因为立绘框是固定 230px 的正方形、立绘几乎占满整框，不管钉哪都压在立绘身上；而屏幕上半被大招能量球占、下半被 boss 名字/血条＋你（勇者）的血条占，没有一块空地。修法：给全部 6 个有台词的 boss 统一做了个「字幕位」——台词一律落在立绘脚下方，只盖住 boss 自己的名字/血条那一条（像角色说话时底下的字幕），既不压立绘、也不压顶上的能量球、更不挡你自己的血条，并 clamp 死守在勇者血条上方；决战双行改为向下堆叠。立绘框固定 230px，此字幕位在任何手机/任何 boss/任何岛都稳定一致。真机比例 Playwright 实测：弗沙欧台词从胸口(110~142)移到字幕位(281~303)、彻底离开立绘、能量球辉光止于约165不干扰、勇者血条(352)之上不遮挡；跨岛（land4 量子观测者）字幕落点一致均为 281.5；node --check + check_resources 全过、0 报错。
 - **v909**：修复弗沙欧 boss 大招特效溢出屏幕顶部——能量汇聚点 Pnt.y(原≈0.6屏顶)与手指光束 topY(原-24屏外)因立绘贴顶无余量而越界，均下钳回屏内(Pnt.y≥60*sz、topY改20*sz)。各相位顶边溢出归 0、能量球仍完整。
@@ -65,7 +69,7 @@
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
 
-> **当前版本: v911** · 修复雷电之主(Lv16)大招雷暴云遮住 boss 头。根因：云钉死 top:0、云盒内 0~100px 完全不透明，而 v891 全体 boss 上移 34px 后立绘顶=52.6/头顶=62.5 整个埋进不透明云体。改为按 boss 立绘实时定位(云顶 = 立绘顶 − 118)，狂怒变大时云自动跟随上移；闪电起点按云盒实时算不断裂。像素实测头露出 0%→91%(色差 9)、狂怒态离头顶 27px。含 v910(6 个 boss 台词移到字幕位)。
+> **当前版本: v912** · 修复龙骑士统帅(Lv11)巨龙之翼展开特效消失 + 新增【特效不可破坏守卫】。根因: 巨翼按BUG#70挂在背景特效层(z-index:-1·必须从boss背后展开), 而v905把不透明暗底涂在#bossScreen自身上→按CSS绘制顺序把整个背景层盖死(地狱犬王的地狱之门同样被埋), 且没改一行特效代码, 字符串守卫全过。修复: 暗底沉到#bossScreen::before(z-index:-2)背景层之下(28处)。机制: fx_guard 每次构建真机放一遍20个boss特效, 有元素却0像素=被遮死=拒绝打包(把v905破坏注回去实测: 9.1%→0.3%当场拦下)。含 v911(雷暴云不再遮头)。
 > **v908** · 修复弗沙欧 boss 台词错位（脚底→胸口台词框）。根因：工坊特效台词 y 锚 hero 血条中心 midY，对全身立绘落在脚底；改锚立绘中心 st.by 上移胸口 + 加圆角台词框。逐行像素对比验证：台词框 y≈84~172(胸口)、脚底差异归 0。
 > **v907** · 亮色调可读性全站大扫除。**根因**：palette 引擎 L99 `[style*="color:#fff"]→var(--pal-ink)!important` 全局把行内白字翻深墨（深底元素→深压深看不清），本版在 palette 亮色段加豁免规则保奖励盒白字，并主页/顶栏逐元素深字或白字黑晕。奖励盒实测计算后=白、雄鹰/拼词选择器审计全过、岛名像素跨度154强对比。审计器补 hex 渐变首色解析。
 > **v906**（浅色皮肤深底深字全站可读性修复）** 换亮色调后深色背景上很多字看不清，用正确 alpha 合成的对比度审计器系统扫描全部游戏模式一次性修复：不透明深底上的字固定白、浮空亮字给固定深底/深胶囊/描边、亮彩底上的深字保留，打地鼠板真机截图验证白字可读。关键教训：半透明遮罩必须与父层 alpha 合成，不能当不透明黑处理。
@@ -3262,6 +3266,22 @@ r = subprocess.run([sys.executable, "check_resources.py"])
 if r.returncode != 0:
     print("  \u274c check_resources 未通过, 拒绝打包")
     sys.exit(1)
+
+# ---- 6.5 特效不可破坏守卫 (v912) ----
+# Hansen 钦令: boss 攻击特效一旦定稿, 绝不允许被任何改动无声破坏。
+# check_resources 全是【盯代码字符串】的守卫 —— v905 没改一行特效代码, 只是把不透明底涂在 #bossScreen 上,
+# 就把 z-index:-1 的背景特效层盖死(龙骑士统帅巨翼 / 地狱犬王地狱之门双双消失), 而所有字符串守卫全部通过、照常上线。
+# fx_guard 在【真浏览器】里把 20 个 boss 的特效各放一遍, 用【像素】证明特效真的画在屏幕上:
+#   有元素却 0 像素 = 被谁遮死了 = 特效已被破坏 → 拒绝打包。
+# 跳过方式: 只有明确知道自己在干什么时才 SKIP_FX_GUARD=1(交付给 Hansen 的包永远不许跳)。
+if os.environ.get("SKIP_FX_GUARD") == "1":
+    print("  [6.5] \u26a0\ufe0f 特效守卫被跳过(SKIP_FX_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.5] 跑 fx_guard.py (真机放一遍 20 个 boss 的攻击特效, 像素级证明没被破坏) ...")
+    r = subprocess.run([sys.executable, "fx_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 特效守卫未通过: 有 boss 的攻击特效被破坏了, 拒绝打包")
+        sys.exit(1)
 
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
@@ -10787,7 +10807,7 @@ else: ok('v862 (Hansen: 大满贯真发钻+按岛每日防刷+星海100+Bee每�
 # 🔴v863: ①#bossScreen深底归位(v856电影感钦令补完: 此前只还原内联字·屏底与继承字漏网) ②深色纯件还原(util-card/psw三件/ach-total字浅+金回金) ③通用inline金五色+#cbd5e1→深琥珀/深灰(!important必须: inline优先级>一切非imp规则) ④mode-card全域白+黑晕(任何own底可读) ⑤金渐变容器属性选内文深棕 ⑥灭晕(screen低优全局+island-hero/section-label imp) ⑦横幅金系补还原 ⑧亮色ink-2/3深化 ⑨back-btn浅字 ⑩ach-foot2/prog琥珀 ⑪⑮⑰⑳宠物屏系 ⑫⑯设置卡翻浅玻璃+h3琥珀 ⑭深提示条(#1e1b4b三写法+linear变体)字浅 ⑱settings警示红深化 ⑲cbd5e1通用+深区还原
 _b863 = []
 _p863 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
-for _k863, _lab863 in (("#bossScreen{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:#92400e!important}', '金转琥珀imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#3a2400', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:#92400e", '设置h3琥珀'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
+for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:#92400e!important}', '金转琥珀imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#3a2400', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:#92400e", '设置h3琥珀'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
     if _k863 not in _p863: _b863.append('palette缺【%s】' % _lab863)
 _i863 = open('index.html', encoding='utf-8', errors='replace').read()
 for _k863, _lab863 in (('.foot-slogan{ color:#78350f !important', '页脚slogan'), ('.foot-tip{ color:#57534e !important', '页脚tips')):
@@ -11711,6 +11731,40 @@ except Exception as _e898:
     _l898.append('guard self exc:'+str(_e898)[:80])
 if _l898: fail('v898 spellbee island+difficulty: '+str(_l898[:10]))
 else: ok("v898 (Hansen: spelling bee 不论选容易/中级/高级难度, 有时点进去却考本岛所有单词): 根因有二。①难度: 若本岛没有所选难度的词(经统计 action无高级, land1/3/4/6/7无初级 共6岛), startMatch 的 if(!pool.length)pool=shuffle(WORDS.slice()) 会静默落回'全岛词·忽略难度'。②岛过滤: 原 if(_sbIsland){...} 若 island 参数缺失则整个跳过→WORDS保持全936→考所有岛的词。修复: ①加 _sbSetupDiff——按本岛实际词数给每个难度chip标注词数(如'17个'), 词数为0的难度直接禁用(灰+pointerEvents:none+bindPick跳过sbDiffOff), 若默认/当前选中难度为空则自动切到第一个有词的难度; 用户根本选不到空难度, 静默落回永不触发, 选的难度必然生效。②岛过滤重构为 island缺失或过滤为空都绝不落全池: 嵌在岛内→吃父岛allW(零维护精确本岛词), 否则→明确提示。真机Playwright: animal三难度正常(17/17/8), action高级/land1-3初级禁用且自动切到有词难度, 全部0落回。")
+
+
+# ---- ⭐ v912 (Hansen真机: 龙骑士统帅的巨龙之翼展开特效没了): 背景特效层不得被任何不透明底盖死 ----
+# 根因: 巨翼(龙骑士统帅Lv11)与地狱之门(地狱犬王Lv8)按 BUG#70/v536 钦定挂在【背景特效层 __hansenFxLayerBack(z-index:-1)】,
+#       这样特效才能从 boss【背后】展开/升起。而 v905 为修"boss战横向割裂"把一层【不透明暗底直接涂在 #bossScreen 自身】上,
+#       按 CSS 绘制顺序(负z层 → 内容块背景 → 内容), 这层底把整个背景特效层【盖死】→ 两个特效双双消失, 却没有任何特效代码被改,
+#       所有字符串守卫全部通过、照常上线。本守卫钉死修复: boss屏的暗底必须待在 ::before(z-index:-2, 沉在背景特效层之下), 绝不可涂回 #bossScreen 自身。
+# 注: 真正的兜底是 fx_guard.py(真机像素级证明每个 boss 特效都画在屏幕上, build 第6.5步), 本守卫是秒级的第一道闸。
+_b912 = []
+_bal912 = open('hansen_boss_attack.js', encoding='utf-8', errors='replace').read()
+if "z-index:-1;'; document.body.appendChild(B); window.__hansenFxLayerBack=B;" not in _bal912:
+    _b912.append('背景特效层__hansenFxLayerBack的z-index:-1被改(巨翼/地狱之门会跑到boss前面盖脸)')
+if "(window.__hansenFxLayerBack||window.__hansenFxLayer||document.body).appendChild(w)" not in _bal912:
+    _b912.append('龙骑士统帅巨翼未挂背景层(BUG#70: 翅膀必须从背后展开)')
+if "if(window.__hansenFxLayerBack)window.__hansenFxLayerBack.appendChild(g);" not in _bal912:
+    _b912.append('地狱犬王地狱之门未挂背景层(BUG#70: 门必须在boss身后升起)')
+_pal912 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
+if "#bossScreen{background:transparent!important}" not in _pal912:
+    _b912.append('亮色主题把不透明底涂回#bossScreen自身(会盖死背景特效层)')
+for _f912 in ['template.html'] + sorted(glob.glob('island_*.html')):
+    _t912 = open(_f912, encoding='utf-8', errors='replace').read()
+    if '#bossScreen{background:linear-gradient' in _t912:
+        _b912.append('%s: 不透明底涂在#bossScreen自身(v905血案·会盖死背景特效层→巨翼/地狱之门消失)' % _f912)
+    if 'spelling' in _f912 or 'boss' not in _t912:
+        continue
+    if '#bossScreen::before' not in _t912 or 'z-index:-2' not in _t912:
+        _b912.append('%s: boss屏暗底未沉到::before(z-index:-2)之下' % _f912)
+if not os.path.exists('fx_guard.py') or not os.path.exists('fx_probe.mjs') or not os.path.exists('hansen_fx_lock.json'):
+    _b912.append('特效不可破坏守卫文件缺失(fx_guard.py/fx_probe.mjs/hansen_fx_lock.json)')
+_bp912 = open('build.py', encoding='utf-8', errors='replace').read()
+if 'fx_guard.py' not in _bp912:
+    _b912.append('build.py 未接入特效守卫(特效被破坏也能打包)')
+if _b912: fail('v912 背景特效层不得被盖死 + 特效守卫在位: ' + str(_b912[:6]))
+else: ok('v912 (Hansen真机: 龙骑士统帅巨龙之翼展开特效没了) 背景特效层不可被盖死·特效不可破坏守卫在位。根因: 巨翼(Lv11)/地狱之门(Lv8)按BUG#70挂背景特效层(z-index:-1·必须从boss背后展开), 而v905把不透明暗底直接涂在#bossScreen自身→按CSS绘制顺序(负z层→内容块背景→内容)把整个背景层盖死→两特效双双消失, 且没改一行特效代码, 字符串守卫全过照常上线。修复: #bossScreen自身改transparent, 暗底移到#bossScreen::before(fixed铺满视口·z-index:-2)沉到背景特效层之下(28处: 模板+19岛+8单词大陆岛+亮色主题) → 割裂照样不出现, 巨翼/地狱之门重新可见(真机像素: 巨翼0%→33%·地狱之门0%→8%·亮色主题15%)。防再犯: ①本守卫钉死(暗底不得涂回#bossScreen自身·背景层z-index:-1不得改·两特效必须挂背景层) ②fx_guard.py真机像素守卫接入build第6.5步——20个boss特效各放一遍, 有元素却0像素=被遮死=拒绝打包(实测把v905破坏注回去: 背景特效9.1%→0.3%, 守卫当场拦下)。')
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
