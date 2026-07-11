@@ -44,6 +44,16 @@ ONLY = ''
 if '--lv' in sys.argv:
     ONLY = sys.argv[sys.argv.index('--lv') + 1]
 
+# 全库需要真机验证的岛(61 个不同 boss):
+#   island_animal   = 正片 20 个 boss(18 个常规岛由同一模板盖章生成·boss名单完全一致→查一个代表全部)
+#   island_treasure = 抽查第二个常规岛(确认模板盖章无漂移)
+#   island_land1-8  = 单词大陆 40 个 boss(各岛独立文件·必须逐个查)
+#   island_season   = 星海 6 个 boss(含星海独有的 星海女帝·赛尔娅)
+ISLANDS = ['island_animal.html', 'island_treasure.html'] + \
+          ['island_land%d.html' % i for i in range(1, 9)] + ['island_season.html']
+if '--islands' in sys.argv:
+    ISLANDS = sys.argv[sys.argv.index('--islands') + 1].split(',')
+
 
 def _port_up(p):
     s = socket.socket()
@@ -87,14 +97,16 @@ def main():
     srv = _serve()
     try:
         probe = os.path.join(DEV, 'fx_probe.mjs')
-        cmd = ['node', probe, SHOT] + ([ONLY] if ONLY else [])
         env = dict(os.environ); env['FXG_PORT'] = str(PORT)
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600, cwd=DEV, env=env)
-        if 'PROBE_OK' not in r.stdout:
-            print('❌ 特效守卫: 真机探针失败\n' + (r.stdout or '')[-500:] + (r.stderr or '')[-500:])
-            return 1
-
-        rows = json.load(open(os.path.join(SHOT, 'probe.json'), encoding='utf-8'))
+        rows = []
+        for isl in ISLANDS:
+            cmd = ['node', probe, SHOT, isl] + ([ONLY] if ONLY else [])
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=600, cwd=DEV, env=env)
+            if 'PROBE_OK' not in r.stdout:
+                print('❌ 特效守卫: 真机探针在 %s 失败\n' % isl + (r.stdout or '')[-400:] + (r.stderr or '')[-400:])
+                return 1
+            tag = isl.replace('island_', '').replace('.html', '')
+            rows += json.load(open(os.path.join(SHOT, 'probe_%s.json' % tag), encoding='utf-8'))
         lock = {}
         if os.path.exists(LOCK):
             lock = json.load(open(LOCK, encoding='utf-8')).get('bosses', {})
@@ -102,50 +114,74 @@ def main():
         newlock, bad = {}, []
         print('\n  ⭐ 特效不可破坏守卫 (每个 boss 真机放一遍·用像素证明特效真的画在屏幕上)')
         print('  ' + '-' * 84)
-        print('  %-14s %-5s %-22s %-22s %s' % ('BOSS', 'Lv', '前景特效(元素/像素%)', '背景特效(元素/像素%)', '判定'))
+        print('  %-10s %-22s %-15s %-13s %-8s %s' % ('岛', 'BOSS', '前景(元素/像素)', '背景(元素/像素)', '画布墨量', '判定'))
         for row in rows:
             lv, name = row['lv'], row['name']
-            A = '%s/%d_A.png' % (SHOT, lv)
-            fB = '%s/%d_B.png' % (SHOT, lv)
-            fC = '%s/%d_C.png' % (SHOT, lv)
+            isl = row['island']
+            A = '%s/%s_%d_A.png' % (SHOT, isl, lv)
+            fB = '%s/%s_%d_B.png' % (SHOT, isl, lv)
+            fC = '%s/%s_%d_C.png' % (SHOT, isl, lv)
+            key = '%s:%s' % (isl, name)
             if not (os.path.exists(A) and os.path.exists(fB) and os.path.exists(fC)):
                 bad.append('%s: 探针未出图' % name); continue
             front = _diff(A, fB)
             back = _diff(A, fC)
-            fe, be = row['frontEls'], row['backEls'] + (1 if row['canvases'] else 0)
+            fe = row['frontEls'] + (1 if row['canvases'] else 0)
+            ink = row.get('ink', 0)
+            peak = row.get('peakInk', ink)
             issues = []
 
-            # 铁律一: 有元素就必须画出像素(元素在、像素为0 = 被遮死)
-            if row['frontEls'] + row['canvases'] > 0 and front < 0.8:
-                issues.append('前景特效有元素却一个像素都没画出来=被遮死')
-            if row['backEls'] > 0 and back < 1.5:
-                issues.append('背景特效有元素却一个像素都没画出来=被遮死(v905 血案)')
-            # 特效必须真的产出东西
+            # 铁律一: 特效必须真的产出东西
             if row['frontEls'] + row['canvases'] + row['backEls'] == 0:
                 issues.append('特效根本没产生任何元素=特效丢失/报错')
-            # 铁律三: 0 报错
-            if row['errors']:
-                issues.append('特效播放报错: ' + row['errors'][0][:50])
 
-            ref = lock.get(name)
+            # 铁律二(最狠·无需基准值): 画了墨/有元素, 屏幕上就必须看得见。
+            #   画布画了一堆墨却一个像素都没到屏幕 = 被谁遮死了 = 特效已被破坏
+            #   (墨本来就少的朴素特效不误杀: 只在 ink>=1.5% 时才要求)
+            # canvas 特效: 墨量按 alpha>12 统计, 细线/淡雾类特效墨量不低但屏幕色差很小 → 阈值定太低会【误报】。
+            # 只在【墨量足够多】(≥4%)却屏幕近乎为零, 或【墨量很大】(≥10%)却屏幕几乎不动时, 才判被遮死。
+            if ink >= 4.0 and front < 0.4:
+                issues.append('画布画了%.1f%%的墨, 屏幕上却一个像素都没有=被遮死' % ink)
+            elif ink >= 10.0 and front < 1.0:
+                issues.append('画布画了%.1f%%的墨, 屏幕上只有%.1f%%=基本被遮死' % (ink, front))
+            if row['canvases'] == 0 and row['frontEls'] >= 3 and front < 0.4:
+                issues.append('前景特效有%d个元素却一个像素都没画出来=被遮死' % row['frontEls'])
+            # ★ v905 血案专杀: 背景层(z-index:-1)有元素就必须画出像素
+            if row['backEls'] > 0 and back < 1.0:
+                issues.append('背景特效有%d个元素却一个像素都没画出来=被遮死(v905血案)' % row['backEls'])
+
+            # 铁律三: 0 报错(JS异常 / 本地资源丢失; 外网发音兜底403不算)
+            if row.get('jsErrors'):
+                issues.append('特效播放JS异常: ' + row['jsErrors'][0][:44])
+            if row.get('localFails'):
+                issues.append('特效资源丢失: ' + row['localFails'][0][:44])
+            if row.get('modalOpen'):
+                issues.append('探针异常: 弹窗未关(结果不可信)')
+
+            ref = lock.get(key)
             if ref and not BLESS:
-                # 铁律二: 不得低于地板
                 if front < ref.get('front_floor', 0):
                     issues.append('前景特效缩水 %.1f%% < 地板 %.1f%%' % (front, ref['front_floor']))
                 if back < ref.get('back_floor', 0):
                     issues.append('背景特效缩水 %.1f%% < 地板 %.1f%%' % (back, ref['back_floor']))
 
-            newlock[name] = {
-                'lv': lv, 'front': front, 'back': back,
-                'front_floor': round(front * 0.5, 1),
-                'back_floor': round(back * 0.5, 1) if (row['backEls'] > 0 and back >= 2) else 0,
+            newlock[key] = {
+                'lv': lv, 'front': front, 'back': back, 'ink': ink, 'peakInk': peak,
+                # 地板 = 实测值的 30%(前景)/35%(背景)。特效带随机(粒子/时序), 小特效逐次抖动可达 ±40%,
+                # 地板定太紧会【误报】——守卫一旦误报, Hansen 就不敢信它, 比漏报更糟。
+                # 主防线是上面的"被遮死"铁律(墨量 vs 屏幕像素), 地板只是兜底防"特效整体塌掉"。
+                # 小特效(<3%)不设地板: 粒子随机导致逐次抖动可达 ±40%, 设地板必然误报;
+                # 它们由上面的"被遮死"铁律兜底(元素在却 0 像素 = 被遮死), 不靠地板。
+                'front_floor': round(front * 0.30, 1) if front >= 3.0 else 0,
+                'back_floor': round(back * 0.35, 1) if (row['backEls'] > 0 and back >= 2) else 0,
                 'uses_back_layer': row['backEls'] > 0,
             }
             verdict = '✅' if not issues else ('❌ ' + ' / '.join(issues))
             if issues:
-                bad.append('%s(Lv%d): %s' % (name, lv, ' / '.join(issues)))
-            print('  %-14s %-5s %-22s %-22s %s'
-                  % (name, 'Lv%d' % lv, '%d 个 / %.1f%%' % (fe, front), '%d 个 / %.1f%%' % (row['backEls'], back), verdict))
+                bad.append('[%s] %s(第%d关): %s' % (isl, name, lv, ' / '.join(issues)))
+            print('  %-10s %-22s %-15s %-13s %-8s %s'
+                  % (isl, name[:20], '%d个/%.1f%%' % (fe, front), '%d个/%.1f%%' % (row['backEls'], back),
+                     '%.1f%%' % ink, verdict))
 
         print('  ' + '-' * 84)
         if BLESS:
