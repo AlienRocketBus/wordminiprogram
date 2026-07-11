@@ -197,7 +197,7 @@ window.WORD_MAP = {
  "history": "words/history.mp3",
  "geography": "words/geography.mp3",
  "computer": "words/computer.mp3",
- "map": "words/map.mp3",
+ "map": "words/map_r2.mp3",
  "dictionary": "words/dictionary.mp3",
  "library": "words/library.mp3",
  "math": "words/math.mp3",
