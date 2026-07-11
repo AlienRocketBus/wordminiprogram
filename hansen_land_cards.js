@@ -168,12 +168,12 @@
         var un=cb.has(c.id);
         if(un){
           h+='<div onclick="window.HansenLandGachaUI&&window.HansenLandGachaUI.detail(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=913" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img src="'+c.img+'?v=914" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img src="'+c.img+'?v=913" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img src="'+c.img+'?v=914" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -270,7 +270,7 @@
         '<div class="gr-face gr-front gr-card'+(isLeg?' leg':'')+'">'+
           '<div class="gr-myst"><div class="gr-myst-q">?</div></div>'+
           '<div class="gr-real"><div class="gr-rarity" style="color:'+ri.color+'">'+(isLeg?'✨ 至尊 ✨':ri.cn)+'</div>'+
-          '<img class="gr-img" src="'+c.img+'?v=913" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
+          '<img class="gr-img" src="'+c.img+'?v=914" alt="" onerror="hansenImgErr&&hansenImgErr(this)">'+
           '<div class="gr-name" style="color:'+ri.color+'">'+esc(c.name)+'</div></div>'+
         '</div><div class="gr-face gr-back"></div>'+
       '</div></div>'+
@@ -310,7 +310,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=913" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img src="'+c.img+'?v=914" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);

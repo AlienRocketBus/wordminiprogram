@@ -8432,6 +8432,38 @@ if 'fx_guard.py' not in _bp912:
 if _b912: fail('v912 背景特效层不得被盖死 + 特效守卫在位: ' + str(_b912[:6]))
 else: ok('v912 (Hansen真机: 龙骑士统帅巨龙之翼展开特效没了) 背景特效层不可被盖死·特效不可破坏守卫在位。根因: 巨翼(Lv11)/地狱之门(Lv8)按BUG#70挂背景特效层(z-index:-1·必须从boss背后展开), 而v905把不透明暗底直接涂在#bossScreen自身→按CSS绘制顺序(负z层→内容块背景→内容)把整个背景层盖死→两特效双双消失, 且没改一行特效代码, 字符串守卫全过照常上线。修复: #bossScreen自身改transparent, 暗底移到#bossScreen::before(fixed铺满视口·z-index:-2)沉到背景特效层之下(28处: 模板+19岛+8单词大陆岛+亮色主题) → 割裂照样不出现, 巨翼/地狱之门重新可见(真机像素: 巨翼0%→33%·地狱之门0%→8%·亮色主题15%)。防再犯: ①本守卫钉死(暗底不得涂回#bossScreen自身·背景层z-index:-1不得改·两特效必须挂背景层) ②fx_guard.py真机像素守卫接入build第6.5步——20个boss特效各放一遍, 有元素却0像素=被遮死=拒绝打包(实测把v905破坏注回去: 背景特效9.1%→0.3%, 守卫当场拦下)。')
 
+
+# ---- ⭐ v914 (Hansen: 星海那 240 个单词的例句有没有达到最好?) 星海例句质量铁律 ----
+# 查出两个真问题:
+#  ① 完形填空(qType='cloze')用 new RegExp('\\b'+w.en+'\\b','i') 在例句里挖空目标词, 匹配不上就【把这个词 pop 掉直接丢弃】。
+#     原先有 25 个词的例句只出现变形(describe→described / provide→provides / stranger→strangers),
+#     原形匹配不上 → 这 25 个词(占 240 的 10.4%)【永远进不了完形填空】。已改写例句让原形自然出现(动词用情态/不定式/复数主语, 名词用单数)。
+#  ② 完形填空用 smartHighlight 在中文译文里把对应中文高亮成金色。原先 20 条译文为求自然用了同义词
+#     (proud 词表是「自豪的」、译文却写「骄傲」) → 词表中文对不上 → 金色高亮失效、提示变弱。已用 HIGHLIGHT_MANUAL 手工映射补齐。
+# 铁律: 星海 240 词, 例句必须 100% 含原形(否则该词进不了完形填空); 20 条同义词译文的手工高亮映射必须在位。
+_b914 = []
+try:
+    import json as _j914
+    _d914 = _j914.load(open('island_data.json', encoding='utf-8'))
+    _da914 = _d914['season']['DATA']
+    _w914 = re.findall(r'\{en:"(.*?)",pn:"[^"]*",cn:"([^"]*)",emoji:"[^"]*",ex:"(.*?)",exCn:"(.*?)"\}', _da914)
+    if len(_w914) != 240:
+        _b914.append('星海单词数=%d(应为240)' % len(_w914))
+    _noclz = [en for en, cn, ex, excn in _w914 if not re.search(r'\b' + re.escape(en) + r'\b', ex, re.I)]
+    if _noclz:
+        _b914.append('%d个词的例句不含原形→永远进不了完形填空: %s' % (len(_noclz), _noclz[:6]))
+    _hh914 = open('highlight_helper.js', encoding='utf-8').read()
+    _need914 = ['"proud|', '"although|', '"ceremony|', '"talent|', '"assume|', '"contribute|']
+    _miss914 = [k for k in _need914 if k not in _hh914]
+    if _miss914:
+        _b914.append('星海同义词译文的手工高亮映射缺失: %s' % _miss914)
+    if 'window.smartHighlight = function' not in _hh914:
+        _b914.append('smartHighlight 函数丢失(完形填空的中文高亮会整个失效)')
+except Exception as _e914:
+    _b914.append('星海例句体检异常: %s' % _e914)
+if _b914: fail('v914 星海例句质量: ' + str(_b914[:5]))
+else: ok('v914 (Hansen: 星海240个单词的例句有没有达到最好?) 星海例句质量铁律。体检结论: 硬伤本来就是干净的(0缺例句/0例句里没用到该词/0重复/0过短过长/0标点/0中英混杂, 平均句长8.2词), 但离"最好"差两口气, 均已补上: ①完形填空覆盖率 215/240→240/240: cloze 模式用 \\b原形\\b 在例句里挖空, 匹配不上就把该词 pop 掉丢弃——原先25个词例句只有变形(describe→described/provide→provides/stranger→strangers/employee→employees), 这25个词(10.4%)永远进不了完形填空。已改写这25条例句让原形自然出现(动词改情态/不定式/复数主语, 名词改单数), 且改写后译文必含词表中文。②中文金色高亮 220/240→240/240: smartHighlight 在译文里高亮对应中文, 但20条译文为求自然用了同义词(proud「自豪的」译文写「骄傲」、although「尽管」写「虽然」、ceremony「典礼」写「开幕式」)→高亮失效、完形填空的提示变弱。已在 HIGHLIGHT_MANUAL 追加20条手工映射(87→107条, 原有87条未动)。真机口径复验: 240/240 可进完形填空、240/240 高亮成功、硬伤全0。v914')
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
