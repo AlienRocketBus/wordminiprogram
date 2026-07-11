@@ -131,7 +131,7 @@ body.smode .art img{transform:scale(1.16);transform-origin:center bottom}
 #wallHint.show{opacity:1}
 </style></head>
 <body>
-<script src="hansen_perf.js?v=921"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf.js?v=922"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="bgA" class="kb"></div><div id="bgB" class="kb"></div>
 <div class="vign" id="vign"></div>
 <img id="soloChar" alt=""><div id="soloGround"></div>
@@ -234,7 +234,7 @@ var BGS=[
  {n:'苍穹',bg:'linear-gradient(180deg,#0b2a52,#0e5180 50%,#062038)',sw:'linear-gradient(160deg,#7dd3fc,#0369a1,#082f49)'}
 ];
 var QS=(function(){try{return new URLSearchParams(location.search);}catch(e){return {get:function(){return null;}};}})();
-var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=921';})();
+var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=922';})();
 var OWN=(function(){var m=QS.get('own');if(!m)return null;var a=[];m.split(',').forEach(function(x){var n=parseInt(x,10);if(n>=1&&n<=20&&a.indexOf(n)<0)a.push(n);});return a.length?a.sort(function(x,y){return x-y;}):null;})();
 function isOwned(lv){return !OWN||OWN.indexOf(lv)>=0;}
 function bgPath(lv){return 'bosses_bg/level'+lv+'.webp'+VV;}
