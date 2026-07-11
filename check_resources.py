@@ -8485,6 +8485,50 @@ for _f915 in ['template.html'] + sorted(glob.glob('island_land[1-8].html')) + so
 if _b915: fail('v915 选项不得出现同义词: ' + str(_b915[:5]))
 else: ok('v915 (Hansen: 完形填空每道题都用这个单词自己的例句吧? 所有bug都修好了吗?) 选项不得出现同义词。★真机端到端复验完形填空(强制出题·逐题读渲染结果): 240/240个单词都能出完形填空、每题都用【它自己】的例句(w.ex/w.exCn对得上)、题面只有1个空、0题泄露答案、中文金色提示全有、4选项含正确答案且不重复、0 JS异常; 修复前(v913)实测只有215/240、25个词永远出不来。★但由此揪出另一个bug: 干扰项从整份词表随机抽, 原代码只按 en 去重不管中文, 而全库有10组词中文意思一模一样(星海6组: rarely/seldom「很少」·enormous/huge「巨大的」·besides/moreover/furthermore「此外」·amount/quantity「数量」·invent/invention「发明」·succeed/success「成功」; land3 1组; land5 3组) → 抽到同义词就出现【两个一模一样的中文选项】(英译汉/听音辨意, 一个判对一个判错)或【两个答案都对】(完形填空)。真机2200题实测: 修复前中招4次(如 besides 的选项是「此外」「此外」「生物」「努力」), 修复后0次。修复: 四选项的中文也必须互不相同(en+cn双重去重·400次兜底防死循环), 共45处(模板5处盖章到19岛 + 单词大陆8岛各5处)。真机复验: 星海2200题/land5 2200题 中文重复0·英文重复0·完形填空覆盖240/240与30/30·0报错。v915')
 
+
+# ---- ⭐ v916 (配例句音频前的对齐): 240 词的例句必须【全库唯一】——赛季岛与 8 个星域岛必须逐字相同 ----
+# 背景: 星海 240 词 = 赛季岛(island_season) 一整份 + 8 个星域岛(island_land1-8)各 30 个, 是【同一批词】。
+# 但两边是【两套独立数据】: 赛季岛的词表在 island_data.json→season→DATA(盖章生成),
+# 8 个星域岛是独立 HTML。v914 改了 25 条例句只改了赛季岛 → 星域岛还是老例句,
+# 那 25 个词【在星域岛依然进不了完形填空】(land3:2 / land4:14 / land6:2 / land7:2 / land8:5), 而且同一个词两个岛显示两句不同的例句。
+# 这在配【例句音频】时是致命的: 一个词一条音频, 两个岛例句不同就必然对不上。
+# 铁律: ①每个词的例句必须 100% 含原形(否则进不了完形填空) ②赛季岛与星域岛的 ex/exCn 必须逐字一致。
+_b916 = []
+def _pex916(_f):
+    _s = open(_f, encoding='utf-8', errors='replace').read()
+    if 'const DATA=[' not in _s: return None
+    _i = _s.index('const DATA=['); _d = 0; _j = _i + len('const DATA=')
+    _end = len(_s)
+    for _k in range(_j, len(_s)):
+        if _s[_k] == '[': _d += 1
+        elif _s[_k] == ']':
+            _d -= 1
+            if _d == 0: _end = _k + 1; break
+    _o = {}
+    for _cat, _body in re.findall(r'\{cat:"([^"]+)",words:\[(.*?)\n\]\}', _s[_j:_end], re.S):
+        for _r in re.findall(r'\{en:"(.*?)",pn:"[^"]*",cn:"[^"]*",emoji:"[^"]*",ex:"(.*?)",exCn:"(.*?)"\}', _body):
+            _o[_r[0]] = (_r[1], _r[2])
+    return _o
+try:
+    _se916 = _pex916('island_season.html')
+    if not _se916 or len(_se916) != 240:
+        _b916.append('赛季岛例句解析异常(%s 条, 应 240)' % (len(_se916) if _se916 else 0))
+    else:
+        _nc = [en for en, (ex, _) in _se916.items() if not re.search(r'\b' + re.escape(en) + r'\b', ex, re.I)]
+        if _nc: _b916.append('赛季岛 %d 个词例句不含原形→进不了完形填空: %s' % (len(_nc), _nc[:5]))
+        for _n in range(1, 9):
+            _f = 'island_land%d.html' % _n
+            _L = _pex916(_f)
+            if not _L: _b916.append('%s 例句解析失败' % _f); continue
+            _mis = [en for en in _L if en in _se916 and _L[en] != _se916[en]]
+            if _mis: _b916.append('%s 有 %d 个词的例句与赛季岛不一致(配例句音频必然对不上): %s' % (_f, len(_mis), _mis[:5]))
+            _nc2 = [en for en, (ex, _) in _L.items() if not re.search(r'\b' + re.escape(en) + r'\b', ex, re.I)]
+            if _nc2: _b916.append('%s 有 %d 个词例句不含原形→进不了完形填空: %s' % (_f, len(_nc2), _nc2[:5]))
+except Exception as _e916:
+    _b916.append('例句跨岛一致性体检异常: %s' % _e916)
+if _b916: fail('v916 例句必须全库唯一: ' + str(_b916[:5]))
+else: ok('v916 (Hansen要给例句配音频·配之前必须先对齐) 星海240词例句【全库唯一】铁律。查出并修复: 星海240词 = 赛季岛一整份 + 8个星域岛各30个, 是同一批词但【两套独立数据】(赛季岛词表在 island_data.json→season→DATA 盖章生成; 8个星域岛是独立HTML)。v914 改的那25条例句【只改了赛季岛】→ 星域岛仍是老例句: 那25个词在星域岛依然进不了完形填空(land3:2 describe/realize · land4:14 mention/admit/indicate/comment/debate/provide/produce/invent/destroy/repair/establish/manage/handle/perform · land6:2 examine/calculate · land7:2 stranger/customer · land8:5 chemical/creature/particle/employee/colleague), 且同一个词两个岛显示两句不同的例句。这在配【例句音频】时是致命的——一个词一条音频, 两个岛例句不同必然对不上。已把25条同步到星域岛。复验: 8个星域岛 进不了完形填空 0 个 · 例句与赛季岛不一致 0 个 → 240词每词只有【唯一一条】例句, 一条音频全岛通用。本守卫钉死: 例句必须100%含原形 + 赛季岛与8个星域岛的 ex/exCn 必须逐字一致。v916')
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
