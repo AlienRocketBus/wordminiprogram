@@ -152,7 +152,7 @@
     // ④ mode卡标签万能白晕: 各卡自带深浅不一的own色底, 白字+黑晕任何底都读得清(island-en同款验证过的疗法)
     css+=L+'.mode-card,'+L+'.mode-card *{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.55)!important}\n'; // 三批: 扩全卡(副行文字之前漏)
     // ⑤ 金底容器(内联金渐变)内文一律深棕: 已掌握块/等级图鉴金bar/一切金底=属性选一网打尽·零渲染源改动
-    css+=L+'[style*="linear-gradient(135deg,#fbbf24"] *, '+L+'[style*="linear-gradient(135deg, #fbbf24"] *{color:#3a2400!important;text-shadow:none!important}\n'; // 终刀β: 逗号后带空格写法(stats掌握卡)
+    css+=L+'[style*="linear-gradient(135deg,#fbbf24"] *, '+L+'[style*="linear-gradient(135deg, #fbbf24"] *{color:#1a1200!important;text-shadow:none!important}\n'; // 终刀β: 逗号后带空格写法(stats掌握卡)
     // ⑥ 发光灭霸: 暗色时代的glow描边在亮底=发糊的元凶(Hansen: "很多字特别模糊")
     css+=L+'.screen-title,'+L+'.screen-title *{text-shadow:none!important}\n';
     // ⑦ 赛季横幅金系补还原(v860只还原了灰白系·金系漏网→通用琥珀映射会误伤深蓝横幅里的金字)
@@ -208,6 +208,76 @@
     css+=L+'[style*="background:rgba(0,0,0,.5)"][style*="color:#fff"]{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.55)!important}\n';
     // 亮色系兜底: 默认文字全走深墨
     css+='html.hsn-pal-light body{color:var(--pal-ink)}\n';
+
+    // ══════════════════════════════════════════════════════════════════
+    // ⭐ v928 亮色主题总修 (Hansen: 配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的字)
+    // 根因: 亮色主题此前【只改了 body 的字色】(上面那一行), 卡片/面板/弹窗的【底色】压根没被接管:
+    //   · .exp-card 的渐变只有第一个色是变量, 第二个 #1a1f3a 是【写死的深蓝黑】→ 亮色下变成"浅→深"的脏灰渐变
+    //   · .exp-card.learned / .modal / .mode-card / .util-card / .ach-* / .psw-* / .back-btn … 全是写死的深底
+    //   · 而文字被 --pal-ink 改成了【深色】→ 深字压深底 = 灰不拉几 + 看不清
+    //   · 弹窗里 .m-cn(中文释义)=#fbbf24 金、.m-excn(例句翻译)=#fde047 黄, 写死的 → 浅底上几乎隐形
+    // 真机量过: 单词卡中文 2.23:1 · 顶栏名字 1.47:1 · 分类标题 1.38:1 · 统计页文字 1:1(纯隐形) —— WCAG AA 要 4.5:1
+    // 修法: 亮色下所有卡面翻成干净浅色 + 文字走深墨 + 金/黄字改深琥珀(仍是金的味道但看得清),
+    //       饱和色按钮保留底色但强制白字。#bossScreen 按既有铁律一律不动(打Boss保持电影感)。
+    // ══════════════════════════════════════════════════════════════════
+    var _L='html.hsn-pal-light ';
+    var _SF='linear-gradient(135deg,#ffffff,var(--pal-surf-2,#eef2f8))';
+    var _BD='1px solid rgba(var(--pal-line-rgb,99,102,241),.28)';
+    var _SH='0 2px 10px rgba(30,41,59,.07)';
+    var _AM='#92400e';                       // 金 → 深琥珀(#b45309 实测4.42:1差一点·再深一档到6:1+)
+    var _IK='var(--pal-ink,#1c2942)';
+    var _IK2='var(--pal-ink-2,#46587a)';
+    ['.exp-card','.modal','.mode-card','.util-card','.ach-card2','.ach-total','.ach-bar',
+     '.psw-cap','.psw-hero','.psw-ped','.psw-bar','.psw-pethalo','.scramble-cn','.moles-prompt',
+     '.ms-item','.fs-item','.settings-textarea','.small-btn.gray','.match-back'].forEach(function(sel){
+      css+=_L+sel+'{background:'+_SF+'!important;border:'+_BD+'!important;box-shadow:'+_SH+'!important;color:'+_IK+'!important}\n';
+    });
+    css+=_L+'.exp-card .word{color:'+_IK+'!important}\n';
+    css+=_L+'.exp-card .cn{color:'+_IK2+'!important}\n';
+    css+=_L+'.cat-title{color:#4338ca!important}\n';
+    css+=_L+'.cat-progress,'+_L+'.section-label,'+_L+'.st,'+_L+'.psw-sub,'+_L+'.pet-text{color:'+_IK2+'!important}\n';
+    css+=_L+'.ach-tier,'+_L+'.pet-stage,'+_L+'.rsb{color:'+_IK+'!important}\n';
+    css+=_L+'.exp-card.learned{background:linear-gradient(135deg,#f0fdf4,#dcfce7)!important;border:1px solid #22c55e!important}\n';
+    css+=_L+'.exp-card.learned .word,'+_L+'.exp-card.learned .cn{color:#14532d!important}\n';
+    css+=_L+'.modal .m-word{color:'+_IK+'!important}\n';
+    css+=_L+'.modal .m-pn{color:#4338ca!important}\n';
+    css+=_L+'.modal .m-cn{color:'+_AM+'!important}\n';
+    css+=_L+'.modal .m-ex{color:'+_IK+'!important}\n';
+    css+=_L+'.modal .m-excn{color:'+_AM+'!important}\n';
+    css+=_L+'.modal .close{background:#ef4444!important;color:#fff!important;border-color:#dc2626!important}\n';
+    css+=_L+'.m-btn,'+_L+'.game-btn,'+_L+'.back-btn,'+_L+'.danger-btn{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.35)!important}\n';
+    css+=_L+'.m-btn.listen{background:linear-gradient(135deg,#6366f1,#4f46e5)!important;border:none!important}\n';
+    css+=_L+'.m-btn.slow{background:linear-gradient(135deg,#14b8a6,#0f766e)!important;border:none!important}\n';
+    css+=_L+'.m-btn.sentence{background:linear-gradient(135deg,#f59e0b,#d97706)!important;border:none!important}\n';
+    css+=_L+'.m-btn.got-it{background:linear-gradient(135deg,#22c55e,#16a34a)!important;border:none!important}\n';
+    css+=_L+'.back-btn{background:linear-gradient(135deg,#6366f1,#4338ca)!important;border:none!important}\n';
+    // 设置页"Boss特效调节"锁定项: 淡紫字压白底 1.36:1 / 2.92:1 → 深紫
+    css+=_L+'.hbafx-entry b{color:#5b21b6!important}\n';
+    css+=_L+'.hbafx-entry span{color:#6d28d9!important}\n';
+    // 统计页行内浅灰字(#cbd5e1)压在半透明深板上 → 亮色下那板子变浅灰, 浅字就糊了 3.13:1 → 改深墨
+    css+=_L+'[style*="color:#cbd5e1"],'+_L+'[style*="color:#e2e8f0"],'+_L+'[style*="color:#94a3b8"]{color:'+_IK+'!important}\n';
+    // 首页"挑战BOSS": 白字压在浅蓝boss图上 2.58:1 → 垫一层深底板(白字立刻 10:1+)
+    // 首页"挑战BOSS"标签: 行内样式带 !important(color:#fff!important + -webkit-text-fill-color:#fff!important,
+    // v664"首页文字按调节器统一"故意锁死) → 行内!important 压过任何样式表规则, 改色改不动。
+    // 而 boss 图有深有浅, 白字本来就是通用解 —— 正确修法是【加重描边】(描边行内没锁, 样式表能加)。
+    css+=_L+'.d-label.boss-card-label{text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 7px rgba(0,0,0,.75),0 0 2px rgba(0,0,0,.9)!important}\n';
+    css+=_L+'.top-name{color:'+_AM+'!important;text-shadow:none!important}\n';
+    css+=_L+'.ni-label{color:'+_AM+'!important;text-shadow:none!important}\n';
+    css+=_L+'.m-title,'+_L+'.d-label{color:'+_IK+'!important;text-shadow:none!important}\n';
+    // 浅卡里残留的深色主题【浅灰字】(#e2e8f0/#cbd5e1) → 亮底上实测 1.19:1 = 隐形, 全部改深墨
+    css+=_L+'.ach-name2,'+_L+'.ach-bar-name,'+_L+'.u-label,'+_L+'.nm,'+_L+'.d-label,'+_L+'.rt{color:'+_IK+'!important;text-shadow:none!important}\n';
+    css+=_L+'.ach-desc2{color:'+_IK2+'!important}\n';
+    // 饱和按钮: 底色必须够深, 白字才压得住(实测 slow 3.61:1 → 换 700/800 档)
+    css+=_L+'.m-btn.slow{background:linear-gradient(135deg,#0f766e,#115e59)!important}\n';
+    css+=_L+'.m-btn.sentence{background:linear-gradient(135deg,#b45309,#92400e)!important}\n';
+    css+=_L+'.m-btn.got-it{background:linear-gradient(135deg,#16a34a,#15803d)!important}\n';
+    css+=_L+'.game-btn{background:linear-gradient(135deg,#4f46e5,#4338ca)!important}\n';
+    // 像素级实测补漏(边缘环取真实底色·非渐变平均): 最后 6 处
+    css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // 白字压在浅蓝boss图上 2.14:1 → 加重描边
+    css+=_L+'[style*="color:#e9d5ff"],'+_L+'[style*="color:#a78bfa"],'+_L+'[style*="color:#c4b5fd"],'+_L+'[style*="color:#ddd6fe"]{color:#5b21b6!important}\n'; // 设置页淡紫字 1.36:1 → 深紫
+    css+=_L+'.stat-card,'+_L+'.stats-card,'+_L+'.st-card{background:'+_SF+'!important;border:'+_BD+'!important;color:'+_IK+'!important}\n';
+    // ⚠️ 不能一刀切改所有金色行内字: 有些金字是【压在深色/饱和卡上的】, 改深了反而更看不清。
+    //    只接管【确定坐在浅底上】的那几处(顶栏/底栏已单独处理), 其余保持原样。
     var st=document.createElement('style'); st.id='hsnPaletteCSS'; st.textContent=css;
     (document.head||document.documentElement).appendChild(st);
   }

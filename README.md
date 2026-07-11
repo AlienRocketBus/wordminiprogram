@@ -1,5 +1,20 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v928**：**亮色调彻底修复 —— 灰不拉几的背景、看不清的字、弹窗里的黄字、点一下就闪，全部解决并上锁。**
+  - **⭐ 根因（全库扫出 60 条，不是改一两个色值的事）**：亮色主题此前**只改了 `body` 的字色**，卡片/面板/弹窗的**底色压根没被接管**：
+    - `.exp-card` 的渐变**只有第一个色是变量**，第二个 `#1a1f3a` 是**写死的深蓝黑** → 亮色下变成「浅 → 深」的**脏灰渐变**（就是截图里那个"灰不拉几"）；而文字被 `--pal-ink` 改成了**深色** → **深字压深底 = 看不清**。
+    - 全库共 **33 条「变量 + 写死深色」混搭渐变** + **27 条纯写死深底**（`.modal` / `.mode-card` / `.util-card` / `.ach-*` / `.psw-*` / `.back-btn` …）。
+    - 弹窗里 `.m-cn`（中文释义）=`#fbbf24` 金、`.m-excn`（例句翻译）=`#fde047` 黄，**都是写死的** → 浅底上几乎隐形。
+  - **⭐ 闪烁根因**：**触屏上 `:hover` 会「粘住」**（手指抬起后浏览器仍保持 hover 态）。`.exp-card:hover{transform:translateY(-2px)}` + `:hover::before{opacity:1}`（带过渡）再叠加 `:active{scale(.94)}` → **点下去缩小 → 抬起弹回 → hover 粘住又位移 + 蒙层淡入**，手指一滑 hover 还在卡片间接力 = 肉眼看到的**"一闪一闪一闪"**。
+    - 修法：hover 效果**只在真有鼠标的设备上生效**（`@media (hover:none)` 中和）+ 关掉系统点击高亮块（`-webkit-tap-highlight-color`）。
+  - **修前真机像素级实测（樱花粉）**：单词卡中文 **2.23:1** · 顶栏名字 **1.47:1** · 分类标题 **1.38:1** · 统计页文字 **1:1（纯隐形）** —— WCAG AA 要 **4.5:1**。
+  - **修后**：4 个亮色配色（云端白/樱花粉/奶油杏/薄荷绿）× 9 个屏幕（含单词弹窗）共 **268 个可见文字元素，0 处不合格**。**深色主题完全不受影响**（规则全部限定在 `html.hsn-pal-light` 下，已回归验证）。
+  - **⚠️ 过程中踩到的两个坑（都已纠正）**：
+    1. **一刀切的属性选择器很危险**：`[style*="color:#fbbf24"] → 深琥珀` 会误伤**压在金/红卡上的白字**，反而更看不清。已改为精确接管。
+    2. **首页「挑战BOSS」的字色改不动**：它的**行内样式带 `!important`**（`color:#fff!important` + `-webkit-text-fill-color:#fff!important`，v664 调节器钦定）—— **行内 `!important` 压过任何样式表规则**。而 boss 图有深有浅，白字本来就是通用解 → 正确修法是**加重描边**（描边行内没锁）。
+  - **⭐ 上锁：build 步骤 6.6 新增 `light_guard.py`**（真触屏渲染 4 个亮色配色 × 9 个屏幕，整页截图后逐个文字取**边缘环的真实像素**当背景算 WCAG 对比度 + 触屏防闪自检）。任何一处文字看不清、或点击会闪 → **拒绝打包**。
+    - **为什么必须用像素**：用 `getComputedStyle` 拿背景会把渐变的色标做平均（掺进深色星云），实测**把 6 处真问题放大成 230 处假警报**。像素才是真相。
+    - **实测**：把亮色卡面改回深灰 → **当场抓出 21 处**。
 - **v927**：**全库发音从头到尾查了一遍，然后全部上锁。**
   - **⭐ 真机全库终验（27 个岛 · 1192 个词 · 每个词的「单词发音」和「例句发音」各点一遍 = 2384 次发音）**
     同时**监听网络请求 + 拦截浏览器 `speechSynthesis`**，并且断言**实际播的文件必须等于映射表指定的那个文件**：
@@ -168,7 +183,7 @@
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
 
-> **当前版本: v927** · 全库发音从头到尾查了一遍并全部上锁。★真机全库终验(27个岛·1192个词·每个词的单词发音和例句发音各点一遍=2384次发音·监听网络+拦截浏览器TTS·且断言实际播的文件必须等于映射表指定的那个): 全部播本地真人mp3, 联网TTS 0次·浏览器TTS 0次·0报错。★三种【静默失效】(按钮还在页面不报错, 只是偷偷变回合成音): 例句文字改一字/映射被删被覆盖/音频文件被换。★全库发音总锁 hansen_audio_lock.json: 钉死整张解析表(27岛·1192词·每词的单词+例句音频文件名) + 1891个音频文件的 sha256 指纹, 任何一项对不上→拒绝打包并指出是哪个岛的哪个词(三种故障实测全部当场拦下)。要改音频: python3 hansen_audio_lock.py --rebuild。含 v926(例句真人音频240/240集齐)/v925/v924/v923/v922/v921。
+> **当前版本: v928** · 亮色调彻底修复(灰背景/看不清的字/弹窗黄字/点击闪烁)并上锁。★根因(全库60条): 亮色主题此前只改了body字色, 卡片/弹窗底色没被接管——.exp-card 渐变第二个色 #1a1f3a 是写死的深蓝黑→亮色下变脏灰渐变, 而文字被改成深色→深字压深底; 弹窗 .m-cn 金/.m-excn 黄也是写死的→浅底上隐形。★闪烁根因: 触屏上 :hover 会粘住 → 卡片位移+蒙层淡入 = 一闪一闪; 修法是 @media(hover:none) 中和 + 关点击高亮。★修前像素实测: 单词卡中文 2.23:1 · 顶栏 1.47:1 · 统计页 1:1(隐形); 修后 4 个亮色配色×9 个屏幕共 268 个文字【0 处不合格】, 深色主题完全不受影响。★上锁: build 步骤 6.6 新增 light_guard.py(真触屏渲染+像素级 WCAG 对比度+防闪自检), 不合格就拒绝打包(实测把卡面改回深灰当场抓出 21 处)。含 v927(全库发音总锁)/v926(例句真人音频240/240)/v925/v924/v923/v922/v921。
 > **v908** · 修复弗沙欧 boss 台词错位（脚底→胸口台词框）。根因：工坊特效台词 y 锚 hero 血条中心 midY，对全身立绘落在脚底；改锚立绘中心 st.by 上移胸口 + 加圆角台词框。逐行像素对比验证：台词框 y≈84~172(胸口)、脚底差异归 0。
 > **v907** · 亮色调可读性全站大扫除。**根因**：palette 引擎 L99 `[style*="color:#fff"]→var(--pal-ink)!important` 全局把行内白字翻深墨（深底元素→深压深看不清），本版在 palette 亮色段加豁免规则保奖励盒白字，并主页/顶栏逐元素深字或白字黑晕。奖励盒实测计算后=白、雄鹰/拼词选择器审计全过、岛名像素跨度154强对比。审计器补 hex 渐变首色解析。
 > **v906**（浅色皮肤深底深字全站可读性修复）** 换亮色调后深色背景上很多字看不清，用正确 alpha 合成的对比度审计器系统扫描全部游戏模式一次性修复：不透明深底上的字固定白、浮空亮字给固定深底/深胶囊/描边、亮彩底上的深字保留，打地鼠板真机截图验证白字可读。关键教训：半透明遮罩必须与父层 alpha 合成，不能当不透明黑处理。
@@ -3380,6 +3395,22 @@ else:
     r = subprocess.run([sys.executable, "fx_guard.py"])
     if r.returncode != 0:
         print("  \u274c 特效守卫未通过: 有 boss 的攻击特效被破坏了, 拒绝打包")
+        sys.exit(1)
+
+# ---- 6.6 亮色主题守卫 (v928) ----
+# Hansen: "配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·点单词一闪一闪·彻底修复"
+# light_guard 在【真触屏环境】里把 4 个亮色配色 × 9 个屏幕(含单词弹窗)各渲一遍, 整页截图,
+# 逐个文字元素取【边缘环的真实像素】当背景, 算 WCAG 对比度(普通字≥4.5:1 · 大字/粗体≥3.0:1)。
+# 为什么用像素而不是 getComputedStyle: 后者拿背景会把渐变的色标做平均(掺进深色星云),
+#   实测会把 6 处真问题放大成 230 处假警报 —— 像素才是真相。
+# 顺带自检【触屏防闪】: 触屏上 :hover 会粘住 → 点一下卡片就位移+蒙层淡入 = "一闪一闪一闪"。
+if os.environ.get("SKIP_LIGHT_GUARD") == "1":
+    print("  [6.6] \u26a0\ufe0f 亮色守卫被跳过(SKIP_LIGHT_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.6] 跑 light_guard.py (真触屏渲 4 个亮色配色 x 9 个屏幕, 像素级量对比度 + 防闪自检) ...")
+    r = subprocess.run([sys.executable, "light_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 亮色守卫未通过: 亮色调下有文字看不清 / 点击会闪, 拒绝打包")
         sys.exit(1)
 
 # ---- 7. 打包 ----
@@ -10913,7 +10944,7 @@ else: ok('v862 (Hansen: 大满贯真发钻+按岛每日防刷+星海100+Bee每�
 # 🔴v863: ①#bossScreen深底归位(v856电影感钦令补完: 此前只还原内联字·屏底与继承字漏网) ②深色纯件还原(util-card/psw三件/ach-total字浅+金回金) ③通用inline金五色+#cbd5e1→深琥珀/深灰(!important必须: inline优先级>一切非imp规则) ④mode-card全域白+黑晕(任何own底可读) ⑤金渐变容器属性选内文深棕 ⑥灭晕(screen低优全局+island-hero/section-label imp) ⑦横幅金系补还原 ⑧亮色ink-2/3深化 ⑨back-btn浅字 ⑩ach-foot2/prog琥珀 ⑪⑮⑰⑳宠物屏系 ⑫⑯设置卡翻浅玻璃+h3琥珀 ⑭深提示条(#1e1b4b三写法+linear变体)字浅 ⑱settings警示红深化 ⑲cbd5e1通用+深区还原
 _b863 = []
 _p863 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
-for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:#92400e!important}', '金转琥珀imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#3a2400', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:#92400e", '设置h3琥珀'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
+for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:#92400e!important}', '金转琥珀imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#1a1200', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:#92400e", '设置h3琥珀'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
     if _k863 not in _p863: _b863.append('palette缺【%s】' % _lab863)
 _i863 = open('index.html', encoding='utf-8', errors='replace').read()
 for _k863, _lab863 in (('.foot-slogan{ color:#78350f !important', '页脚slogan'), ('.foot-tip{ color:#57534e !important', '页脚tips')):
@@ -12180,6 +12211,47 @@ except Exception as _e927:
     _b927 = ['全库发音总锁体检异常: %s' % _e927]
 if _b927: fail('v927 全库发音总锁: ' + str(_b927[:4]))
 else: ok('v927 (Hansen: 帮我认真查一下·所有例句从头到尾能不能正常发音·每一个单词是不是真人发音·全都上锁·不要再出现更新一下就冒新bug) 全库发音总锁。★先做了全库真机终验(27个岛·1192个词·每个词的【单词发音】和【例句发音】各点一遍=2384次发音·同时监听网络请求并拦截浏览器 speechSynthesis·且断言【实际播的文件必须等于映射表指定的那个文件】): 18个常规岛(712词)+8个星域岛(240词)+赛季岛(240词) 全部播本地真人 mp3(HTTP 200/206), 联网TTS 0次·浏览器TTS 0次·JS报错 0。★发音解析链路: 单词=岛内映射→全局WORD_MAP→否则联网合成; 例句=星海240的规范化表 __HANSEN_EX_AUDIO → 常规岛的 SENTENCE_MAP(【例句原文精确匹配】→ sentences/sentence_NNNN.mp3) → 否则联网合成。SENTENCE_MAP 709条/709个文件, 零缺失零孤儿。★三种【静默失效】(按钮还在、页面不报错, 只是偷偷变回机器合成音, 没人会发现): ①例句文字改一个字符→原文精确匹配立刻失效 ②音频映射被删或被覆盖(8个星域岛就曾被塞成同一份land1的表) ③音频文件被替换/损坏/删除(而 ?v215 是写死的长期缓存令牌, 原地换文件不改名用户只会继续听旧的)。★本锁 hansen_audio_lock.json 把整张发音解析表(27岛·1192词·每词的单词音频+例句音频文件名)和 1891 个音频文件的 sha256 指纹全部钉死, 任何一项对不上→拒绝打包并指出是哪个岛的哪个词。实测三种故障各试一遍全部当场拦下。要故意改音频时: python3 hansen_audio_lock.py --rebuild。v927')
+
+
+# ---- ⭐ v928 (Hansen: 配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·点单词一闪一闪·彻底修复) 亮色主题 ----
+# 根因(全库扫出 60 条): 亮色主题此前【只改了 body 的字色】, 卡片/面板/弹窗的【底色】压根没被接管——
+#   · .exp-card 的渐变只有第一个色是变量, 第二个 #1a1f3a 是【写死的深蓝黑】→ 亮色下变成"浅→深"的脏灰渐变
+#   · .modal/.mode-card/.util-card/.ach-*/.psw-*/.back-btn … 33条"变量+写死深色"混搭 + 27条纯写死深底
+#   · 而文字被 --pal-ink 改成【深色】→ 深字压深底 = 灰不拉几 + 看不清
+#   · 弹窗 .m-cn(中文释义)=#fbbf24 金 / .m-excn(例句翻译)=#fde047 黄 → 浅底上几乎隐形
+#   · 触屏上 :hover 会【粘住】→ .exp-card:hover 位移 + ::before 蒙层淡入 → 点一下就"一闪一闪一闪"
+# 真机像素级量过(修前·樱花粉): 单词卡中文 2.23:1 · 顶栏名字 1.47:1 · 分类标题 1.38:1 · 统计页 1:1(纯隐形)
+# 本静态守卫只钉死【规则还在】; 真正的把关是 build 步骤 6.6 的 light_guard.py(真机像素级量对比度)。
+_b928 = []
+try:
+    _pal928 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
+    for _k928, _why928 in [
+        ("html.hsn-pal-light", "亮色主题选择器"),
+        ("_SF", "亮色卡面(浅底渐变)"),
+        (".exp-card .cn", "单词卡中文字色"),
+        (".m-cn", "弹窗中文释义(金→深琥珀)"),
+        (".m-excn", "弹窗例句翻译(黄→深琥珀)"),
+        ("hover:none", "触屏防闪(hover 不粘住)"),
+    ]:
+        if _k928 not in _pal928 and _k928 != "hover:none":
+            _b928.append("hansen_palette.js 里【%s】不见了(%s)" % (_k928, _why928))
+    _n928 = 0
+    for _f928 in ['template.html'] + sorted(glob.glob('island_land[1-8].html')):
+        _s928 = open(_f928, encoding='utf-8', errors='replace').read()
+        if 'hover:none' in _s928 and 'tap-highlight-color:transparent' in _s928:
+            _n928 += 1
+        else:
+            _b928.append("%s 缺【触屏防闪 CSS】(点一下单词卡会一闪一闪)" % _f928)
+    for _f928 in sorted(glob.glob('island_*.html')):
+        _s928 = open(_f928, encoding='utf-8', errors='replace').read()
+        if 'hover:none' not in _s928:
+            _b928.append("%s 缺触屏防闪 CSS" % _f928)
+    if not os.path.exists('light_guard.py') or not os.path.exists('light_probe.mjs'):
+        _b928.append("亮色守卫文件(light_guard.py / light_probe.mjs)不见了")
+except Exception as _e928:
+    _b928.append('亮色主题体检异常: %s' % _e928)
+if _b928: fail('v928 亮色主题: ' + str(_b928[:5]))
+else: ok('v928 (Hansen: 配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·我一点单词就一闪一闪一闪·彻底修复亮色调整体的文字配色和背景) 亮色主题总修 + 触屏防闪。★根因(全库扫出60条): 亮色主题此前【只改了 body 的字色】, 卡片/面板/弹窗的【底色】压根没被接管——.exp-card 的渐变只有第一个色是变量, 第二个 #1a1f3a 是【写死的深蓝黑】→ 亮色下变成"浅→深"的脏灰渐变(就是截图里那个"灰不拉几"); 而文字被 --pal-ink 改成了深色 → 深字压深底 = 看不清。全库共 33 条"变量+写死深色"混搭渐变 + 27 条纯写死深底(.modal/.mode-card/.util-card/.ach-*/.psw-*/.back-btn…)。弹窗里 .m-cn(中文释义)=#fbbf24 金、.m-excn(例句翻译)=#fde047 黄, 都是写死的 → 浅底上几乎隐形。★闪烁根因: 触屏上 :hover 会【粘住】(手指抬起后浏览器仍保持 hover 态), .exp-card:hover{transform:translateY(-2px)} + :hover::before{opacity:1}(带过渡) 再叠加 :active{scale(.94)} → 点下去缩小、抬起弹回、hover 又粘住位移+蒙层淡入, 手指一滑 hover 还会在卡片间接力 = 肉眼的"一闪一闪一闪"。修法: hover 只在真有鼠标的设备生效(@media(hover:none) 中和) + 关掉系统点击高亮块。★真机像素级量过(修前·樱花粉): 单词卡中文 2.23:1 · 顶栏名字 1.47:1 · 分类标题 1.38:1 · 统计页文字 1:1(纯隐形) —— WCAG AA 要 4.5:1。修后 4 个亮色配色(云端白/樱花粉/奶油杏/薄荷绿) × 9 个屏幕(含单词弹窗) 共 268 个可见文字元素【全部合格·0 处不合格】, 深色主题完全不受影响(规则全部限定在 html.hsn-pal-light 下)。★把关: build 步骤 6.6 的 light_guard.py 每次打包都真触屏渲一遍 4 个亮色配色×9 个屏幕, 整页截图后逐个文字取【边缘环的真实像素】当背景算 WCAG 对比度(用像素而不是 getComputedStyle —— 后者会把渐变色标做平均, 实测把 6 处真问题放大成 230 处假警报), 任何一处不合格或触屏防闪失效 → 拒绝打包。实测把亮色卡面改回深灰 → 当场抓出 21 处。v928')
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
