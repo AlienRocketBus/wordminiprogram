@@ -1880,9 +1880,10 @@ else: ok('v559 千年僵尸·定身符咒·万拳齐发 (Hansen二代素材: 尸
 _ba60=open('hansen_boss_attack.js',encoding='utf-8').read()
 _s60=[]
 for _frag,_msg in [
-  ("function hbaTlCloud2(vw)","二代乌云函数缺失"),
+  ("function hbaTlCloud2(vw,topY)","二代乌云函数缺失(或 v911 topY 入参被删→云会钉死top:0遮住雷电之主的头)"),
+  ("hbaTlEl('hba-tl2-cloud',null,(topY==null?null:topY),null,H)","v911 二代乌云未按 topY 定位(云会回到钉死 top:0 遮头)"),
   ("function hbaTl2RealBolt(cloud, hx, midY, sz, sp)","真雷电函数缺失"),
-  ("var cloud=hbaTlCloud2(vw);","编排未换二代乌云"),
+  ("var cloud=hbaTlCloud2(vw, Math.max(-115, Math.min(0, __tlTop-118)));","编排未换二代乌云 / v911 云未按 boss 立绘实时定位(会遮住雷电之主的头)"),
   ("hbaTl2RealBolt(cloud, hx, midY, sz, sp);","④天罚主雷未换真雷电"),
   ("window.__hbaTl2BoltImg=_tl2Bolt;","真雷电预加载缺失(BUG#67)"),
   ("bosses/tl_bolt.webp","雷电图引用缺失"),
