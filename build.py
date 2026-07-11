@@ -106,6 +106,22 @@ else:
         print("  \u274c 特效守卫未通过: 有 boss 的攻击特效被破坏了, 拒绝打包")
         sys.exit(1)
 
+# ---- 6.6 亮色主题守卫 (v928) ----
+# Hansen: "配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·点单词一闪一闪·彻底修复"
+# light_guard 在【真触屏环境】里把 4 个亮色配色 × 9 个屏幕(含单词弹窗)各渲一遍, 整页截图,
+# 逐个文字元素取【边缘环的真实像素】当背景, 算 WCAG 对比度(普通字≥4.5:1 · 大字/粗体≥3.0:1)。
+# 为什么用像素而不是 getComputedStyle: 后者拿背景会把渐变的色标做平均(掺进深色星云),
+#   实测会把 6 处真问题放大成 230 处假警报 —— 像素才是真相。
+# 顺带自检【触屏防闪】: 触屏上 :hover 会粘住 → 点一下卡片就位移+蒙层淡入 = "一闪一闪一闪"。
+if os.environ.get("SKIP_LIGHT_GUARD") == "1":
+    print("  [6.6] \u26a0\ufe0f 亮色守卫被跳过(SKIP_LIGHT_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.6] 跑 light_guard.py (真触屏渲 4 个亮色配色 x 9 个屏幕, 像素级量对比度 + 防闪自检) ...")
+    r = subprocess.run([sys.executable, "light_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 亮色守卫未通过: 亮色调下有文字看不清 / 点击会闪, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
