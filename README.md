@@ -1,5 +1,13 @@
 # 单词大冒险 (Animal Word Adventure) — 项目完整文档
 
+- **v918**：**`map`（地图）换成你新录的音频，老的已彻底删除。**
+  - **⚠️ 换音频最大的坑（差点白换）**：游戏里所有单词 mp3 的 URL 后面挂的是**写死的 `?v215`**（`hansen_preload.js` 里明确注释：*"单词 mp3: words/XXX.mp3?v215 —— 游戏里写死"*，目的是让预加载和游戏共用同一份**长期缓存**）。这意味着 —— **原地替换文件内容、不改文件名 = URL 一个字没变 = CDN 和微信 webview 会继续吐旧音频，你更新完还是听到老的。**
+  - **所以换音频必须换文件名**：`words/map.mp3` → **`words/map_r2.mp3`**。只让**这一个文件**的 URL 变 → **只有它重新下载，其余 900 多条音频的缓存全部保留**（不会让学生重下整包 19MB）。
+  - **音量对齐词库**：你这条原始音频 mean **−21.2 dB**，而词库平均约 **−17 dB** —— **轻了约 4 dB**，夹在别的单词里会明显发闷。已 +2.7 dB 校准到 **mean −18.9 dB / peak −1.8 dB**（落在词库区间内且不削波）。
+  - **改到位**：`word_map.js` 全局表 + `island_data.json`（traffic 岛内覆盖）全部改指向新文件；**老文件 `words/map.mp3` 已删除，全库零引用**。
+  - **真机验证**：`island_traffic` 与 `island_school`（school 没有岛内映射，走全局表）点 🔊 发音 → **都解析到 `words/map_r2.mp3`**，网络请求 **206**（媒体分段请求，正常），**老文件 map.mp3 未被请求**，0 报错。
+  - **顺手做的全库音频体检**：**901 条音频映射全部指向真实存在的文件**，没有"点了没声"的静默失效。
+  - **守卫升级（关键）**：原来 4 条真人录音守卫都**写死了 `words/<单词>.mp3` 的命名假设** —— 你以后每换一个音频都会撞它们。已改成**从 `WORD_MAP` 解析真实路径**，以后换文件名不会再误伤。同时钉死：老文件不得残留/不得被引用、每条音频映射必须指向真实文件。
 - **v917**：**例句真人音频接入（第 1 批：单词大陆①迷雾心湖 30 条，你录的）**。
   - **为什么以前例句是机器音**：`speak()` 里**只有「单词」才查本地 mp3**（`if(!isSent)` 才查），**「句子」一律走 TTS** —— 所以 📝 例句 按钮一直是合成音。
   - **改法（只改一处）**：在 `speak()` 里给**句子**也加一条本地音频优先级 —— **命中你录的 mp3 就播真人，没命中的自动回落 TTS**。改这一处，**所有播例句的地方全部自动生效**，没配音的 210 个词照常能读，一个都不受影响。
@@ -101,7 +109,7 @@
 > 4. **overflow:hidden 的 flex 卡片必 `flex-shrink:0`**(否则矮屏被压缩→裁掉内部文字), 改由外层滚动。**放大元素前先想容器会不会挤出文字。**
 > **血的教训(v672→v674·BUG#82)**: v672 放大卡牌器宠物(322→344)→卡片内容更高·矮屏下卡片(flex-shrink:1)被压缩到比内容矮 + overflow:hidden→"星雾之卵"名字被裁。只在高视口验漏了矮屏。修 = `.pcv-card{flex-shrink:0}` + 建体检器。**这类"文字被挤出框/裁切"bug 永不允许第二次。**
 
-> **当前版本: v917** · 例句真人音频接入(第1批·迷雾心湖30条)。根因: speak() 只给【单词】查本地mp3、【句子】一律走TTS → 📝例句 一直是合成音。改法(只改一处): speak() 里给句子也加本地音频优先级, 命中真人mp3就播真人、没命中自动回落TTS → 所有播例句的地方自动生效, 没配音的210个词照常能读。真机验: land1 30/30播本地(200)、赛季岛30个播本地+210个正确回落、0报错。守卫钉死: 例句文字一改, 音频key就对不上→真人音频会【静默失效】(按钮还在却偷偷变回合成音), 一律拒绝打包(实测改一个字当场拦下)。进度 30/240。含 v916/v915/v914/v913/v912/v911。
+> **当前版本: v918** · map(地图)换成 Hansen 新录的音频, 老的已彻底删除。★换音频最大的坑: 单词 mp3 的 URL 挂的是写死的 ?v215(长期缓存令牌) → 原地换文件内容不改文件名 = URL 没变 = CDN/微信继续吐旧音频, 白换。所以必须换文件名: map.mp3 → map_r2.mp3, 只让这一个文件重下、其余900多条音频缓存全保留。音量对齐词库(原始 -21.2dB 比词库平均轻4dB → 校准到 -18.9dB)。真机验: traffic/school 两岛都解析到 map_r2.mp3、老文件未被请求、0报错。全库901条音频映射体检: 全部指向真实文件。守卫升级: 4条真人录音守卫原来写死 words/<单词>.mp3, 改为从 WORD_MAP 解析真实路径(以后换音频不再误伤)。含 v917/v916/v915。
 > **v908** · 修复弗沙欧 boss 台词错位（脚底→胸口台词框）。根因：工坊特效台词 y 锚 hero 血条中心 midY，对全身立绘落在脚底；改锚立绘中心 st.by 上移胸口 + 加圆角台词框。逐行像素对比验证：台词框 y≈84~172(胸口)、脚底差异归 0。
 > **v907** · 亮色调可读性全站大扫除。**根因**：palette 引擎 L99 `[style*="color:#fff"]→var(--pal-ink)!important` 全局把行内白字翻深墨（深底元素→深压深看不清），本版在 palette 亮色段加豁免规则保奖励盒白字，并主页/顶栏逐元素深字或白字黑晕。奖励盒实测计算后=白、雄鹰/拼词选择器审计全过、岛名像素跨度154强对比。审计器补 hex 渐变首色解析。
 > **v906**（浅色皮肤深底深字全站可读性修复）** 换亮色调后深色背景上很多字看不清，用正确 alpha 合成的对比度审计器系统扫描全部游戏模式一次性修复：不透明深底上的字固定白、浮空亮字给固定深底/深胶囊/描边、亮彩底上的深字保留，打地鼠板真机截图验证白字可读。关键教训：半透明遮罩必须与父层 alpha 合成，不能当不透明黑处理。
@@ -4864,15 +4872,22 @@ else: ok('v543 IMAX嘉年华亮色重制 (审美对齐糖果系·活物招牌[�
 # 🔴 v544(Hansen 铁令"绝对不允许出现任何差错"): 🏫 学校大冒险 38 词真人录音接入。Hansen 提供 NaturalReader 真人录音压缩包(学校大冒险.zip, 40 文件); 文件名要么=单词要么含单词, 一一精确对应。36 词命中有效录音→归一化 −16.0 LUFS(EBU R128, 迭代纯增益+alimiter 仅限峰, 全部 −16±0.6/0 outliers/0 clipping)→存入 words/单词.mp3(小写, 因 speak() 用 text.toLowerCase() 查 WORD_MAP)→接入 word_map.js。**精确对应要点**(防包含关系错配): pen←pronunciation_en_pen_denoised.mp3 / pencil←pronunciation_en_pencil.mp3(≠pen); book←book.mp3 / notebook←notebook__gb_1.mp3(≠book); class←pronunciation_en_class.mp3 / classroom←classroom.mp3(≠class); English/Chinese/PE 键与文件名全小写(english/chinese/pe)。**2 词无有效录音继续走在线牛津 fallback(合理不报错)**: math(压缩包内 math.mp3 为 0 字节空文件, 坚决不接空文件)、blackboard(压缩包内无任何含 black/board 的文件)。播放戳 ?v214。
 _wm44=open('word_map.js',encoding='utf-8').read()
 _s44=[]
+
+# ⭐v918: 换音频必须换文件名(?v215 是写死的长期缓存令牌·原地换文件用户会继续听旧的), 例如 map.mp3 → map_r2.mp3。
+# 所以下面几条真人录音守卫不能再写死 "words/<单词>.mp3", 必须【从 WORD_MAP 里解析真实路径】, 否则每换一个音频就误伤一次。
+def _audio_path_of(_w, _wm):
+    _m = re.search(r'"%s"\s*:\s*"(words/[^"]+\.mp3)"' % re.escape(_w), _wm)
+    return _m.group(1) if _m else None
+
 import os as _os44, hashlib as _hl44
 _SCH=['school','class','classroom','teacher','student','book','notebook','pencil','pen','eraser','ruler','bag','scissors','glue','crayon','chalk','desk','chair','homework','exam','lesson','subject','grade','term','english','chinese','science','art','music','pe','history','geography','computer','map','dictionary','library','math','blackboard']
 # (a) WORD_MAP 36 词映射正确
 for _w in _SCH:
-    if ('"%s": "words/%s.mp3"'%(_w,_w)) not in _wm44: _s44.append('WORD_MAP 缺学校词映射 '+_w)
+    if not _audio_path_of(_w, _wm44): _s44.append('WORD_MAP 缺学校词映射 '+_w)
 # (b) 36 文件存在非空
 _hashes={}
 for _w in _SCH:
-    _fp='words/%s.mp3'%_w
+    _fp=_audio_path_of(_w, _wm44) or ('words/%s.mp3'%_w)
     if not _os44.path.exists(_fp): _s44.append('words/ 缺 '+_w+'.mp3'); continue
     if _os44.path.getsize(_fp)==0: _s44.append(_w+'.mp3 为空文件'); continue
     _h=_hl44.md5(open(_fp,'rb').read()).hexdigest()
@@ -4899,8 +4914,8 @@ import os as _os45, hashlib as _hl45
 _ADJ=['big','small','tall','short','long','wide','thin','thick','heavy','light','fast','slow','hot','cold','warm','cool','hard','soft','new','old','young','good','bad','nice','beautiful','ugly','happy','sad','angry','tired','busy','lazy','clever','kind','brave','funny','quiet','loud','clean','dirty','easy','difficult','safe','dangerous','same','different','right','wrong','free','sick','healthy']
 _h45={}
 for _w in _ADJ:
-    if ('"%s": "words/%s.mp3"'%(_w,_w)) not in _wm45: _s45.append('WORD_MAP 缺形容词 '+_w)
-    _fp='words/%s.mp3'%_w
+    if not _audio_path_of(_w, _wm45): _s45.append('WORD_MAP 缺形容词 '+_w)
+    _fp=_audio_path_of(_w, _wm45) or ('words/%s.mp3'%_w)
     if not _os45.path.exists(_fp): _s45.append('words/ 缺 '+_w); continue
     if _os45.path.getsize(_fp)==0: _s45.append(_w+'.mp3 为空'); continue
     _d=_hl45.md5(open(_fp,'rb').read()).hexdigest()
@@ -4925,8 +4940,8 @@ import os as _os46, hashlib as _hl46
 _TIME=['time','second','minute','hour','day','week','month','year','morning','noon','afternoon','evening','night','midnight','today','yesterday','tomorrow','monday','tuesday','wednesday','thursday','friday','saturday','sunday','january','february','march','april','may','june','july','august','september','october','november','december','birthday','holiday','weekend','date']
 _h46={}
 for _w in _TIME:
-    if ('"%s": "words/%s.mp3"'%(_w,_w)) not in _wm46: _s46.append('WORD_MAP 缺时间词 '+_w)
-    _fp='words/%s.mp3'%_w
+    if not _audio_path_of(_w, _wm46): _s46.append('WORD_MAP 缺时间词 '+_w)
+    _fp=_audio_path_of(_w, _wm46) or ('words/%s.mp3'%_w)
     if not _os46.path.exists(_fp): _s46.append('words/ 缺 '+_w); continue
     if _os46.path.getsize(_fp)==0: _s46.append(_w+'.mp3 为空'); continue
     _d=_hl46.md5(open(_fp,'rb').read()).hexdigest()
@@ -4955,8 +4970,8 @@ _F47=['family','dad','mom','father','mother','son','daughter','brother','sister'
 _ALL47=_Q47+_T47+_H47+_F47+['october']
 _h47={}
 for _w in _ALL47:
-    if ('"%s": "words/%s.mp3"'%(_w,_w)) not in _wm47: _s47.append('WORD_MAP 缺 '+_w)
-    _fp='words/%s.mp3'%_w
+    if not _audio_path_of(_w, _wm47): _s47.append('WORD_MAP 缺 '+_w)
+    _fp=_audio_path_of(_w, _wm47) or ('words/%s.mp3'%_w)
     if not _os47.path.exists(_fp): _s47.append('words/ 缺 '+_w); continue
     if _os47.path.getsize(_fp)==0: _s47.append(_w+'.mp3 为空'); continue
     _d=_hl47.md5(open(_fp,'rb').read()).hexdigest()
@@ -11949,6 +11964,41 @@ except Exception as _e917:
     _b917.append('例句音频体检异常: %s' % _e917)
 if _b917: fail('v917 例句真人音频: ' + str(_b917[:5]))
 else: ok('v917 (Hansen 开始给例句配真人音频·第1批: 单词大陆①迷雾心湖 30 条) 例句真人音频接入 + 铁律。①根因: speak() 原本只给【单词】查本地 mp3、【句子】一律走 TTS(if(!isSent) 才查) → 📝例句 一直是机器合成音。修改: 在 speak() 里给句子也加一条本地音频优先级(命中就播真人·没命中自动回落 TTS), 只改这一处, 所有播例句的地方全部自动生效, 未配音的 210 个词照常能读。②映射表 hansen_ex_audio.js: key=规范化后的例句(只留字母空格·小写·撇号/标点变体都能命中), value=words/<单词>_ex_season.mp3。240词共用同一套例句(v916 已把赛季岛与8个星域岛逐字对齐)→ 一条音频全岛通用。③真机验证: island_land1 30/30 播本地文件且 HTTP200; island_season 30个有音频的播本地、210个没音频的正确回落TTS且未误播、0报错。④音频体检: 30条全部 mp3/64kbps/24kHz单声道·时长1.8~3.6秒·语速0.23~0.44秒每词, 无空文件无串音。⑤本守卫钉死: 映射指向的 mp3 必须存在 / words里的例句mp3不许有孤儿 / speak()必须有句子级分支 / 每个岛必须引入映射表 / ★key必须等于该词在赛季岛例句的规范化结果——例句文字一旦被改动, key 就对不上, 真人音频会【静默失效】(按钮还在但偷偷变回合成音, 没人会发现), 这种改动一律拒绝打包。进度: 30/240。v917')
+
+
+# ---- ⭐ v918 (Hansen: map 换成新音频, 老的直接删掉) 音频映射不得指向空文件 + 换音频必须换文件名 ----
+# ★关键背景(换音频最容易踩的坑): 游戏里所有单词 mp3 的 URL 后面挂的是【写死的 ?v215】(hansen_preload.js 里明确注释:
+#   "单词 mp3: words/XXX.mp3?v215 —— 游戏里写死", 目的是让预加载和游戏共用同一份长期缓存)。
+#   这意味着【原地替换文件内容、不改文件名】= URL 一个字没变 = CDN 和微信 webview 会继续吐【旧音频】, 用户根本听不到新的。
+#   所以: 换音频必须【换文件名】(如 map.mp3 → map_r2.mp3), 只让这一个文件的 URL 变 →
+#   只有它重新下载, 其余 900 多条音频的缓存全部保留(不会让用户重下整包)。
+# 本次: map(地图) 换成 Hansen 新录的音频 → words/map_r2.mp3, 老的 words/map.mp3 已彻底删除、全库零引用。
+# 铁律: ①老文件不得残留、不得被引用 ②每一条音频映射都必须指向【真实存在的文件】(否则那个词点了没声, 而且没人会发现)。
+_b918 = []
+try:
+    if os.path.exists('words/map.mp3'):
+        _b918.append('老音频 words/map.mp3 又出现了(应已删除, 换音频必须换文件名否则缓存吐旧的)')
+    if not os.path.exists('words/map_r2.mp3'):
+        _b918.append('新音频 words/map_r2.mp3 丢失')
+    for _f918 in ['word_map.js', 'island_data.json'] + sorted(glob.glob('island_*.html')):
+        if 'words/map.mp3' in open(_f918, encoding='utf-8', errors='replace').read():
+            _b918.append('%s 仍引用已删除的 words/map.mp3' % _f918)
+    # 全库音频映射: 每一条都必须指向真实存在的文件
+    _miss918 = []
+    _wm918 = open('word_map.js', encoding='utf-8', errors='replace').read()
+    for _k, _v in re.findall(r'"([^"]+)"\s*:\s*"(words/[^"]+\.mp3)"', _wm918):
+        if not os.path.exists(_v): _miss918.append('word_map:%s→%s' % (_k, _v))
+    import json as _j918
+    _d918 = _j918.load(open('island_data.json', encoding='utf-8'))
+    for _isl, _v918 in _d918.items():
+        for _k, _p in re.findall(r"([A-Za-z ']+):'(words/[^']+\.mp3)'", str(_v918.get('local_audio', ''))):
+            if not os.path.exists(_p): _miss918.append('%s:%s→%s' % (_isl, _k.strip(), _p))
+    if _miss918:
+        _b918.append('%d 条音频映射指向不存在的文件(点了没声·静默失效): %s' % (len(_miss918), _miss918[:4]))
+except Exception as _e918:
+    _b918.append('音频映射体检异常: %s' % _e918)
+if _b918: fail('v918 音频映射: ' + str(_b918[:5]))
+else: ok('v918 (Hansen: map 地图这个词换成新音频·之前的老音频直接删掉) 音频映射不得指向空文件 + 换音频必须换文件名。★关键坑: 游戏里所有单词 mp3 的 URL 后面挂的是【写死的 ?v215】(hansen_preload.js 明确注释: 游戏里写死, 为的是预加载和游戏共用同一份长期缓存) → 【原地替换文件内容、不改文件名】= URL 一个字没变 = CDN 与微信 webview 继续吐【旧音频】, 用户根本听不到新的。所以换音频必须【换文件名】: map.mp3 → map_r2.mp3, 只让这一个文件的 URL 变 → 只有它重新下载, 其余 900 多条音频缓存全部保留(不会让用户重下整包 19MB)。本次处理: ①新音频音量对齐词库(原始 mean -21.2dB 比词库平均 -17dB 轻约4dB·夹在别的单词里会明显发闷 → +2.7dB 后 mean -18.9dB / peak -1.8dB, 落在词库区间内且不削波) ②存为 words/map_r2.mp3 ③word_map.js 全局表 + island_data.json(traffic岛内覆盖) 全部改指向新文件 ④老文件 words/map.mp3 彻底删除, 全库零引用。真机验证: island_traffic 与 island_school(school无岛内映射·走全局表) 点发音 → 都解析到 words/map_r2.mp3, 网络请求 206(媒体分段请求·正常), 老文件 map.mp3 未被请求, 0报错。全库音频映射体检: 901 条映射全部指向真实存在的文件, 无静默失效。v918')
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
