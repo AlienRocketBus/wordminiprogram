@@ -14,7 +14,7 @@
   //   (Hansen 实测"机械泰坦拳头有几次没出现"·已用延迟图片复现: slam 可见期拳头 img 未解码)。
   //   修法: ①页面加载即【预加载 + 解码】拳头图并保留引用(防 GC) → 用户走到战斗(总在数秒后)首次攻击时图已在内存解码好;
   //         ②makeWeapon 改为【克隆预加载好的图】(cloneNode·共享已解码位图·即时绘制, 不重新请求/解码) → 每次攻击拳头必即时显示。
-  var _fistSrc='bosses/mechfist_real.webp?v=909';
+  var _fistSrc='bosses/mechfist_real.webp?v=910';
   var _fistImg=new Image();
   _fistImg.src=_fistSrc;
   if(_fistImg.decode){ try{ _fistImg.decode().then(function(){ window.__hbaFistReady=true; }).catch(function(){}); }catch(e){} }
@@ -22,7 +22,7 @@
   window.__hbaFistImg=_fistImg;   // 保留引用 + 供 makeWeapon 克隆复用
 
   // 🔴 v503: 上古太阳神火球图(同拳头——第二个外部图片FX, 同样预加载+解码+克隆, 防首次/慢解码时火球空白 BUG#67同理)
-  var _sunSrc='bosses/sunball_real.webp?v=909';
+  var _sunSrc='bosses/sunball_real.webp?v=910';
   var _sunImg=new Image();
   _sunImg.src=_sunSrc;
   if(_sunImg.decode){ try{ _sunImg.decode().then(function(){ window.__hbaSunReady=true; }).catch(function(){}); }catch(e){} }
@@ -30,7 +30,7 @@
   window.__hbaSunImg=_sunImg;
 
   // 🔴 v504: 混沌魔尊(Lv19)光波图(第三个外部图片FX——同拳头/火球: 预加载+解码+克隆, 防首次/慢解码空白 BUG#67同理)。
-  var _waveSrc='bosses/chaoswave_real.webp?v=909';
+  var _waveSrc='bosses/chaoswave_real.webp?v=910';
   var _waveImg=new Image();
   _waveImg.src=_waveSrc;
   if(_waveImg.decode){ try{ _waveImg.decode().then(function(){ window.__hbaWaveReady=true; }).catch(function(){}); }catch(e){} }
@@ -38,7 +38,7 @@
   window.__hbaWaveImg=_waveImg;
 
   // 🔴 v505: 外星霸主(Lv18)光束图(第四个外部图片FX——同拳头/火球/光波: 预加载+解码+克隆防空白)。
-  var _beamSrc='bosses/alienbeam_real.webp?v=909';
+  var _beamSrc='bosses/alienbeam_real.webp?v=910';
   var _beamImg=new Image();
   _beamImg.src=_beamSrc;
   if(_beamImg.decode){ try{ _beamImg.decode().then(function(){ window.__hbaBeamReady=true; }).catch(function(){}); }catch(e){} }
@@ -46,43 +46,43 @@
   window.__hbaBeamImg=_beamImg;
 
   // 🔴 v506: 暗夜吸血鬼(Lv6)獠牙咬合——4 颗牙齿图(第五个外部图片FX·同样预加载+解码防空白)。tl/tr=上牙(尖朝下) bl/br=下牙(尖朝上)。
-  var _vfangSrcs={tl:'bosses/vfang_tl.webp?v=909',tr:'bosses/vfang_tr.webp?v=909',bl:'bosses/vfang_bl.webp?v=909',br:'bosses/vfang_br.webp?v=909'};
+  var _vfangSrcs={tl:'bosses/vfang_tl.webp?v=910',tr:'bosses/vfang_tr.webp?v=910',bl:'bosses/vfang_bl.webp?v=910',br:'bosses/vfang_br.webp?v=910'};
   var _vfangDim={tl:[191,417],tr:[191,417],bl:[183,512],br:[182,509]};
   var _vfangImgs={};
   ['tl','tr','bl','br'].forEach(function(k){ var im=new Image(); im.src=_vfangSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _vfangImgs[k]=im; });
   window.__hbaVfangImgs=_vfangImgs;
 
   // 🔴 v507: 暗影忍者(Lv2)攻击——扔手里剑(第六个外部图片FX·同样预加载+解码防空白)。边飞边旋转·命中血液飞溅。
-  var _shuriSrc='bosses/shuriken.webp?v=909';
+  var _shuriSrc='bosses/shuriken.webp?v=910';
   var _shuriImg=new Image(); _shuriImg.src=_shuriSrc; if(_shuriImg.decode){ try{ _shuriImg.decode().then(function(){}).catch(function(){}); }catch(e){} }
   window.__hbaShuriImg=_shuriImg;
 
   // 🔴 v512: 百战兽人(Lv3)战锤震地——真实战锤图(第七个外部图片FX·同拳头/火球: 预加载+解码+克隆 防首次/慢解码时锤子空白 BUG#67同理)。绕锤柄底为轴心抡弧砸地。
-  var _hammerSrc='bosses/hammer_real.webp?v=909';
+  var _hammerSrc='bosses/hammer_real.webp?v=910';
   var _hammerImg=new Image(); _hammerImg.src=_hammerSrc; if(_hammerImg.decode){ try{ _hammerImg.decode().then(function(){ window.__hbaHammerReady=true; }).catch(function(){}); }catch(e){} }
   _hammerImg.onload=function(){ window.__hbaHammerReady=true; };
   window.__hbaHammerImg=_hammerImg;
 
   // 🔴 v555: 史前霸王龙(Lv4)新四件套——Hansen 亲制真图(左爪撕痕/右爪撕痕/上颚獠牙/下颚獠牙, 第八组外部图片FX·预加载+解码+克隆 BUG#67 模式)。
-  var _rfSrcs={cl:'bosses/rexclaw_l.webp?v=909',cr:'bosses/rexclaw_r.webp?v=909',jt:'bosses/rexjaw_top.webp?v=909',jb:'bosses/rexjaw_bot.webp?v=909'};
+  var _rfSrcs={cl:'bosses/rexclaw_l.webp?v=910',cr:'bosses/rexclaw_r.webp?v=910',jt:'bosses/rexjaw_top.webp?v=910',jb:'bosses/rexjaw_bot.webp?v=910'};
   var _rfImgs={};
   ['cl','cr','jt','jb'].forEach(function(k){ var im=new Image(); im.src=_rfSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _rfImgs[k]=im; });
   window.__hbaRfImgs=_rfImgs;
 
   // 🔴 v558: 千年僵尸(Lv5)封印百拳五件套——Hansen 亲制(定身符/百拳全景/单拳x3, 第九组外部图片FX·BUG#67 模式)。
-  var _zsSrcs={tl:'bosses/zb_talisman.webp?v=909',al:'bosses/zb_fists_all.webp?v=909',zb_fist1:'bosses/zb_fist1.webp?v=909',zb_fist2:'bosses/zb_fist2.webp?v=909',zb_fist3:'bosses/zb_fist3.webp?v=909'};
+  var _zsSrcs={tl:'bosses/zb_talisman.webp?v=910',al:'bosses/zb_fists_all.webp?v=910',zb_fist1:'bosses/zb_fist1.webp?v=910',zb_fist2:'bosses/zb_fist2.webp?v=910',zb_fist3:'bosses/zb_fist3.webp?v=910'};
   var _zsImgs={};
   Object.keys(_zsSrcs).forEach(function(k){ var im=new Image(); im.src=_zsSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _zsImgs[k]=im; });
   window.__hbaZsImgs=_zsImgs;
 
   // 🔴 v559: 千年僵尸(Lv5)二代四件套——左/右尸拳(自带尸气爆发光环)+新百拳全景, 符复用 zb_talisman.webp 同 URL 走缓存(第十组外部图片FX·BUG#67)。
-  var _zfSrcs={fl:'bosses/zf_fist_l.webp?v=909',fr:'bosses/zf_fist_r.webp?v=909',al:'bosses/zf_fists_all.webp?v=909',tl:'bosses/zb_talisman.webp?v=909'};
+  var _zfSrcs={fl:'bosses/zf_fist_l.webp?v=910',fr:'bosses/zf_fist_r.webp?v=910',al:'bosses/zf_fists_all.webp?v=910',tl:'bosses/zb_talisman.webp?v=910'};
   var _zfImgs={};
   Object.keys(_zfSrcs).forEach(function(k){ var im=new Image(); im.src=_zfSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _zfImgs[k]=im; });
   window.__hbaZfImgs=_zfImgs;
 
   // 🔴 v560: 雷电之主真雷电图预加载(BUG#67)。铁律: 大尺寸 PNG 严禁 drop-shadow(合成器渲染黑洞, DEMO 血案: opacity 0.96 整层被丢)。
-  var _tl2Bolt=new Image(); _tl2Bolt.src='bosses/tl_bolt.webp?v=909';
+  var _tl2Bolt=new Image(); _tl2Bolt.src='bosses/tl_bolt.webp?v=910';
   if(_tl2Bolt.decode){ try{ _tl2Bolt.decode().then(function(){}).catch(function(){}); }catch(e){} }
   window.__hbaTl2BoltImg=_tl2Bolt;
 
@@ -1141,7 +1141,7 @@
     wrap.style.width=W+'px'; wrap.style.height=H+'px';
     var img;
     if(window.__hbaHammerImg && (window.__hbaHammerImg.complete||window.__hbaHammerReady)){ img=window.__hbaHammerImg.cloneNode(true); }
-    else { img=new Image(); img.src='bosses/hammer_real.webp?v=909'; }
+    else { img=new Image(); img.src='bosses/hammer_real.webp?v=910'; }
     img.alt=''; img.draggable=false; wrap.appendChild(img);
     wrap._w=W; wrap._h=H; return wrap;
   }
@@ -2484,7 +2484,7 @@
     },lastHit+120/sp);
   }
   // 🔴 v520: 龙骑士统帅·焚天枪雨——SVG巨翼/龙魂 + Hansen真枪图(bosses/dragonlance.webp 165x360)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaDkLance·落枪cloneNode秒绘。龙焰橙硬编码。
-  var _hbaDkLanceSrc='bosses/dragonlance.webp?v=909';
+  var _hbaDkLanceSrc='bosses/dragonlance.webp?v=910';
   var _hbaDkLW=165, _hbaDkLH=360;
   window.__hbaDkLance=null;
   (function(){
@@ -2718,7 +2718,7 @@
     },rainEnd);
   }
   // 🔴 v521: 暗黑灯神·神灯魂狱——SVG许愿星/魂爪 + Hansen真神灯图(bosses/genielamp.webp 400x203)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaGnLamp·使用cloneNode秒绘。暗黑靛硬编码。
-  var _hbaGnLampSrc='bosses/genielamp.webp?v=909';
+  var _hbaGnLampSrc='bosses/genielamp.webp?v=910';
   var _hbaGnLW=400, _hbaGnLH=203;
   window.__hbaGnLamp=null;
   (function(){
@@ -4123,7 +4123,7 @@
     holder.style.left=(hx-BW/2)+'px'; holder.style.top=cloudBottom+'px';
     holder.style.width=BW+'px'; holder.style.height=BH+'px';
     var img=(im&&im.complete&&im.naturalWidth>0)?im.cloneNode(false):new Image();
-    if(!img.src)img.src='bosses/tl_bolt.webp?v=909';
+    if(!img.src)img.src='bosses/tl_bolt.webp?v=910';
     img.draggable=false; img.alt='';
     holder.appendChild(img);
     (window.__hansenFxLayer||document.body).appendChild(holder);
@@ -8204,7 +8204,7 @@
         pp.x=Math.max(56,Math.min(gvw-56,pp.x)); pp.y=Math.max(72,Math.min(gvh-130,pp.y));
         setTimeout(function(){
           var ph=gpEl('hba-gpphantom', pp.x, pp.y, Math.round(92*gsz), Math.round(92*gsz));
-          ph.innerHTML='<img src="bosses/lv01.webp?v=909" alt="" draggable="false">';
+          ph.innerHTML='<img src="bosses/lv01.webp?v=910" alt="" draggable="false">';
           try{ ph.animate([{opacity:0,transform:'translate(-50%,-50%) translateY(8px) scale(.78)'},{opacity:.6,transform:'translate(-50%,-50%) translateY(-4px) scale(1)',offset:.4},{opacity:.55,transform:'translate(-50%,-50%) translateY(2px) scale(.98)',offset:.7},{opacity:0,transform:'translate(-50%,-50%) translateY(-9px) scale(.86)'}],{duration:GT(380),easing:'ease-in-out',fill:'forwards'}); }catch(e){}
           rm(ph,GT(430));
         }, GT(120+i*200));
@@ -8219,7 +8219,7 @@
         var startX=(bc.x<gvw*0.5)?(gvw-70):70, startY=Math.max(90,bc.y-40);
         var BW=Math.round(128*gsz);
         var body=gpEl('hba-gpphantom big', startX, startY, BW, BW);
-        body.innerHTML='<img src="bosses/lv01.webp?v=909" alt="" draggable="false">';
+        body.innerHTML='<img src="bosses/lv01.webp?v=910" alt="" draggable="false">';
         var faceX=gpx, faceY=Math.max(96,gpy-58);
         gpSFly(body, startX, startY, faceX, faceY, GT(480), 34, 'cubic-bezier(.45,.05,.6,.9)');
         setTimeout(function(){
@@ -8357,7 +8357,7 @@
         cp.x=Math.max(58,Math.min(vw-58,cp.x)); cp.y=Math.max(70,Math.min(vh-120,cp.y));
         setTimeout(function(){
           var cl=sdEl('hba-sdclone', cp.x, cp.y, 104, 104);
-          cl.innerHTML='<img src="bosses/lv02.webp?v=909" alt="" draggable="false">';
+          cl.innerHTML='<img src="bosses/lv02.webp?v=910" alt="" draggable="false">';
           try{ cl.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:.62,transform:'translate(-50%,-50%) scale(1)',offset:.4},{opacity:0,transform:'translate(-50%,-50%) scale(.92)'}],{duration:T(300),easing:'ease-out',fill:'forwards'}); }catch(e){}
           rm(cl,T(340));
         }, T(200+i*180));
@@ -8668,7 +8668,7 @@
       var zfbx=zfbs.left+zfbs.width/2, zfby=zfbs.top+zfbs.height*0.45;
       // ===== ① 僵尸驾到: 虚影蹦跳两段 + 磷火(v558 验证模式) =====
       var zfapex=hbaRxEl('hba-zf-apex', zfbx, zfby, Math.round(120*zfsz), Math.round(120*zfsz));
-      zfapex.innerHTML='<img src="bosses/lv05.webp?v=909" alt="" draggable="false">';
+      zfapex.innerHTML='<img src="bosses/lv05.webp?v=910" alt="" draggable="false">';
       try{ zfapex.animate([
         {opacity:0,transform:'translate(-50%,-50%) translate(0,0) scale(.85)'},
         {opacity:.62,transform:'translate(-50%,-50%) translate(0,-26px) scale(1.05)',offset:.25},
@@ -8690,7 +8690,7 @@
       var zfTali=null;
       setTimeout(function(){
         zfTali=hbaRxEl('hba-zf-tali', zfTX, zfTY, zfTW, zfTH);
-        zfTali.appendChild(zfImg('tl','bosses/zb_talisman.webp?v=909'));
+        zfTali.appendChild(zfImg('tl','bosses/zb_talisman.webp?v=910'));
         var fdx=zfbx-zfTX, fdy=zfby-zfTY;
         try{ zfTali.animate([
           {opacity:0,transform:'translate(-50%,-50%) translate('+fdx+'px,'+fdy+'px) scale(.3) rotate(-340deg)'},
@@ -8731,7 +8731,7 @@
         var key=(side==='l')?'fl':'fr';
         setTimeout(function(){
           var fi=hbaRxEl('hba-zf-fist', px, py, zfFW, zfFW);
-          fi.appendChild(zfImg(key, side==='l'?'bosses/zf_fist_l.webp?v=909':'bosses/zf_fist_r.webp?v=909'));
+          fi.appendChild(zfImg(key, side==='l'?'bosses/zf_fist_l.webp?v=910':'bosses/zf_fist_r.webp?v=910'));
           var fromX=-sgn*Math.round(zfvw*0.34), fromY=Math.round(zfFW*0.26);
           try{ fi.animate([
             {opacity:0,transform:'translate(-50%,-50%) translate('+fromX+'px,'+fromY+'px) scale(.3) rotate('+(sgn*-10)+'deg)',filter:'blur(4px)'},
@@ -8781,7 +8781,7 @@
       var zfAll=null;
       setTimeout(function(){
         zfAll=hbaRxEl('hba-zf-all', zfhx, zfhy-Math.round(zfAW*0.04), zfAW, zfAW);
-        zfAll.appendChild(zfImg('al','bosses/zf_fists_all.webp?v=909'));
+        zfAll.appendChild(zfImg('al','bosses/zf_fists_all.webp?v=910'));
         try{ zfAll.animate([
           {opacity:0,transform:'translate(-50%,-50%) scale(.2)',filter:'blur(6px)'},
           {opacity:1,transform:'translate(-50%,-50%) scale(.5)',filter:'blur(3px)',offset:.4},
@@ -8845,7 +8845,7 @@
       var zsbx=zsbs.left+zsbs.width/2, zsby=zsbs.top+zsbs.height*0.45;
       // ===== ① 僵尸驾到: 虚影蹦跳两段压近 + 绿磷火 =====
       var zsapex=hbaRxEl('hba-zs-apex', zsbx, zsby, Math.round(120*zssz), Math.round(120*zssz));
-      zsapex.innerHTML='<img src="bosses/lv05.webp?v=909" alt="" draggable="false">';
+      zsapex.innerHTML='<img src="bosses/lv05.webp?v=910" alt="" draggable="false">';
       try{ zsapex.animate([
         {opacity:0,transform:'translate(-50%,-50%) translate(0,0) scale(.85)'},
         {opacity:.62,transform:'translate(-50%,-50%) translate(0,-26px) scale(1.05)',offset:.25},
@@ -8867,7 +8867,7 @@
       var zsTali=null;
       setTimeout(function(){
         zsTali=hbaRxEl('hba-zs-tali', zsTaliX, zsTaliY, zsTW, zsTH);
-        zsTali.appendChild(zsImg('tl','bosses/zb_talisman.webp?v=909'));
+        zsTali.appendChild(zsImg('tl','bosses/zb_talisman.webp?v=910'));
         var fdx=zsbx-zsTaliX, fdy=zsby-zsTaliY;
         try{ zsTali.animate([
           {opacity:0,transform:'translate(-50%,-50%) translate('+fdx+'px,'+fdy+'px) scale(.3) rotate(-340deg)'},
@@ -8929,7 +8929,7 @@
         // 冲脸: scale .18→1.06 + 模糊渐清, 急停回弹撤出
         setTimeout(function(){
           var fi=hbaRxEl('hba-zs-fist', px, py, zsFW, zsFW);
-          fi.appendChild(zsImg(key,'bosses/'+key+'.webp?v=909'));
+          fi.appendChild(zsImg(key,'bosses/'+key+'.webp?v=910'));
           try{ fi.animate([
             {opacity:0,transform:'translate(-50%,-50%) scale(.18)',filter:'blur(5px) brightness(1.15)'},
             {opacity:1,transform:'translate(-50%,-50%) scale(.55)',filter:'blur(2px) brightness(1.1)',offset:.42},
@@ -8976,7 +8976,7 @@
       var zsAll=null;
       setTimeout(function(){
         zsAll=hbaRxEl('hba-zs-all', zshx, zshy-Math.round(zsAW*0.04), zsAW, zsAW);
-        zsAll.appendChild(zsImg('al','bosses/zb_fists_all.webp?v=909'));
+        zsAll.appendChild(zsImg('al','bosses/zb_fists_all.webp?v=910'));
         try{ zsAll.animate([
           {opacity:0,transform:'translate(-50%,-50%) scale(.2)',filter:'blur(6px)'},
           {opacity:1,transform:'translate(-50%,-50%) scale(.5)',filter:'blur(3px)',offset:.4},
@@ -9039,7 +9039,7 @@
       function rfImg(key,src){ var im; if(rfImgs[key]&&rfImgs[key].complete&&rfImgs[key].naturalWidth>0){ im=rfImgs[key].cloneNode(false); } else { im=new Image(); im.src=src; } im.draggable=false; im.alt=''; return im; }
       // ===== ① 霸主驾到 (0~460ms) =====
       var rfapex=hbaRxEl('hba-rf-apex', bc.x, bc.y, Math.round(128*rfsz), Math.round(128*rfsz));
-      rfapex.innerHTML='<img src="bosses/lv04.webp?v=909" alt="" draggable="false">';
+      rfapex.innerHTML='<img src="bosses/lv04.webp?v=910" alt="" draggable="false">';
       try{ rfapex.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.82)'},{opacity:.66,transform:'translate(-50%,-50%) scale(1.3)',offset:.45},{opacity:.5,transform:'translate(-50%,-50%) scale(1.68)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1.92)'}],{duration:RFT(460),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(rfapex,RFT(520));
       var rfwk; // 咆哮波循环变量(定义在 setTimeout 外)
@@ -9066,7 +9066,7 @@
         // 爪痕真图扑入
         setTimeout(function(){
           var cl=hbaRxEl('hba-rf-claw', cx, cy, rfCW, rfCW);
-          cl.appendChild(rfImg(side==='l'?'cl':'cr', side==='l'?'bosses/rexclaw_l.webp?v=909':'bosses/rexclaw_r.webp?v=909'));
+          cl.appendChild(rfImg(side==='l'?'cl':'cr', side==='l'?'bosses/rexclaw_l.webp?v=910':'bosses/rexclaw_r.webp?v=910'));
           var fromX=-sgn*Math.round(rfCW*0.34), fromY=-Math.round(rfCW*0.3);
           try{ cl.animate([
             {opacity:0,transform:'translate(-50%,-50%) translate('+fromX+'px,'+fromY+'px) scale(.5) rotate('+(sgn*-9)+'deg)'},
@@ -9106,9 +9106,9 @@
       var rfJawT=null, rfJawB=null;
       setTimeout(function(){
         rfJawT=hbaRxEl('hba-rf-jaw', rfbx, 0, rfJW, rfJHt); rfJawT.style.top='0px'; rfJawT.style.transform='translateX(-50%)';
-        rfJawT.appendChild(rfImg('jt','bosses/rexjaw_top.webp?v=909'));
+        rfJawT.appendChild(rfImg('jt','bosses/rexjaw_top.webp?v=910'));
         rfJawB=hbaRxEl('hba-rf-jaw', rfbx, 0, rfJW, rfJHb); rfJawB.style.top='0px'; rfJawB.style.transform='translateX(-50%)';
-        rfJawB.appendChild(rfImg('jb','bosses/rexjaw_bot.webp?v=909'));
+        rfJawB.appendChild(rfImg('jb','bosses/rexjaw_bot.webp?v=910'));
         // 入场: 屏外 → 悬停位(大张, 血条暴露巨口中央)
         try{ rfJawT.animate([{transform:'translateX(-50%) translateY('+(-rfJHt-20)+'px)'},{transform:'translateX(-50%) translateY('+rfTopHold+'px)'}],{duration:RFT(320),easing:'cubic-bezier(.25,.6,.3,1)',fill:'forwards'}); }catch(e){}
         try{ rfJawB.animate([{transform:'translateX(-50%) translateY('+(rfvh+20)+'px)'},{transform:'translateX(-50%) translateY('+rfBotHold+'px)'}],{duration:RFT(320),easing:'cubic-bezier(.25,.6,.3,1)',fill:'forwards'}); }catch(e){}
@@ -9177,7 +9177,7 @@
       var rvw=window.innerWidth, rvh=window.innerHeight;
       // ===== ① 霸主驾到 (0~500ms) =====
       var apex=hbaRxEl('hba-rx2apex', bc.x, bc.y, Math.round(124*rsz), Math.round(124*rsz));
-      apex.innerHTML='<img src="bosses/lv04.webp?v=909" alt="" draggable="false">';
+      apex.innerHTML='<img src="bosses/lv04.webp?v=910" alt="" draggable="false">';
       try{ apex.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.85)'},{opacity:.64,transform:'translate(-50%,-50%) scale(1.28)',offset:.42},{opacity:.5,transform:'translate(-50%,-50%) scale(1.66)',offset:.78},{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'}],{duration:RT(460),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(apex,RT(510));
       for(var rwi=0;rwi<3;rwi++){ (function(k){ setTimeout(function(){
@@ -9294,7 +9294,7 @@
       function hq4El(cls,x,y,w,h){var d=document.createElement('div');d.className=cls;d.style.left=x+'px';d.style.top=y+'px';if(w){d.style.width=w+'px';d.style.height=(h||w)+'px';}(window.__hansenFxLayer||document.body).appendChild(d);return d;}
       // ===== ① 狂暴变身 (0~450ms) =====
       var rage=hq4El('hba-hq4rage', bc.x, bc.y, Math.round(120*hsz), Math.round(120*hsz));
-      rage.innerHTML='<img src="bosses/lv03.webp?v=909" alt="" draggable="false">';
+      rage.innerHTML='<img src="bosses/lv03.webp?v=910" alt="" draggable="false">';
       try{ rage.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.85)'},{opacity:.62,transform:'translate(-50%,-50%) scale(1.25)',offset:.42},{opacity:.5,transform:'translate(-50%,-50%) scale(1.62)',offset:.78},{opacity:0,transform:'translate(-50%,-50%) scale(1.85)'}],{duration:HT(440),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(rage,HT(490));
       for(var wi=0;wi<2;wi++){ (function(i){ setTimeout(function(){
@@ -9623,7 +9623,14 @@ window.FXCore=(function(){
     setTimeout(st.fire,(fx.dealDelay||2800)/sp);
     return st;
   }
-  return {mkCanvas:mkCanvas,g:g,rnd:rnd,pool:pool,empty:empty,burst:burst,jet:jet,suck:suck,ring:ring,shards:shards,beam:beam,flash:flash,trail:trail,stepDraw:stepDraw,shell:shell};
+  // ⭐台词字幕位(Hansen真机: 台词压立绘上半身/脸=bug): 一律落在立绘脚下方·压boss自己的名字/血条(=对话字幕位)·
+  // 既不压立绘·也不压顶部光球·还clamp在勇者血条上方(two=为决战双行第2行预留位). 立绘框固定230px→对任意视口/任意boss稳定.
+  function subY(st,two){ var sz=(st&&st.sz)||1;
+    var boxBot=(st&&st.br)?(st.by+st.br.height*0.5):(((st&&st.by)||200)+107*sz);
+    var y=boxBot+14*sz;
+    var cap=((st&&st.hy!=null)?st.hy:(y+80))-(two?46:24)*sz;
+    return y>cap?cap:y; }
+  return {mkCanvas:mkCanvas,g:g,rnd:rnd,pool:pool,empty:empty,burst:burst,jet:jet,suck:suck,ring:ring,shards:shards,beam:beam,flash:flash,trail:trail,stepDraw:stepDraw,shell:shell,subY:subY};
 })();
 
 function fxWandian(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
@@ -10928,8 +10935,8 @@ function fxRenyi(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
     ctx.restore();
     var mg=ctx.createRadialGradient(LZ0.x,LZ0.y,1,LZ0.x,LZ0.y,26*sz*amp); mg.addColorStop(0,g(WHITE+','+(0.7*amp))); mg.addColorStop(0.4,g(GRN_L+','+(0.4*amp))); mg.addColorStop(1,g(GRN+',0')); ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(LZ0.x,LZ0.y,26*sz*amp,0,6.283); ctx.fill(); }
   function drawLines(ctx,st,sz,t){ function line(txt,y,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center'; ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor=g(POIS_XD+',0.9'); ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
-    if(t>=240&&t<1600){ var a1=Math.sin(Math.min(1,(t-240)/320)*Math.PI)*(t<1300?1:(1-(t-1300)/300)); if(a1>0)line('「万虫噬空——刃翼天罗。」',st.hy-110*sz,Math.max(0,a1),13,GRN_L); }
-    if(t>=spearImpactT+80&&t<5100){ var a2=Math.sin(Math.min(1,(t-spearImpactT-80)/340)*Math.PI)*(t<4700?1:(1-(t-4700)/400)); if(a2>0)line('「毒枪封喉——血肉尽噬。」',st.hy-110*sz,Math.max(0,a2),13,GRN_L); }
+    if(t>=240&&t<1600){ var a1=Math.sin(Math.min(1,(t-240)/320)*Math.PI)*(t<1300?1:(1-(t-1300)/300)); if(a1>0)line('「万虫噬空——刃翼天罗。」',F.subY(st),Math.max(0,a1),13,GRN_L); }
+    if(t>=spearImpactT+80&&t<5100){ var a2=Math.sin(Math.min(1,(t-spearImpactT-80)/340)*Math.PI)*(t<4700?1:(1-(t-4700)/400)); if(a2>0)line('「毒枪封喉——血肉尽噬。」',F.subY(st),Math.max(0,a2),13,GRN_L); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
 
@@ -11325,8 +11332,8 @@ function fxOmega(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   }});
 
   function drawLines(ctx,st,sz,t){ function line(txt,y,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center'; ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor='rgba(40,6,8,0.9)'; ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
-    if(t>=hexT0+200&&t<3400){ var a1=Math.sin(Math.min(1,(t-hexT0-200)/340)*Math.PI)*(t<3100?1:(1-(t-3100)/300)); if(a1>0)line('「六极阵成——万械献祭。」',st.hy-104*sz,Math.max(0,a1),13,TECH_L); }
-    if(t>=coreFull-500&&t<fireT+40){ var a2=Math.sin(Math.min(1,(t-(coreFull-500))/300)*Math.PI); a2=clamp(a2,0,1); if(a2>0)line('「核心过载——湮灭主炮。」',st.hy-104*sz,a2,13,RED_L); }
+    if(t>=hexT0+200&&t<3400){ var a1=Math.sin(Math.min(1,(t-hexT0-200)/340)*Math.PI)*(t<3100?1:(1-(t-3100)/300)); if(a1>0)line('「六极阵成——万械献祭。」',F.subY(st),Math.max(0,a1),13,TECH_L); }
+    if(t>=coreFull-500&&t<fireT+40){ var a2=Math.sin(Math.min(1,(t-(coreFull-500))/300)*Math.PI); a2=clamp(a2,0,1); if(a2>0)line('「核心过载——湮灭主炮。」',F.subY(st),a2,13,RED_L); }
     if(t>=hitT+80&&t<6700){ var a3=Math.sin(Math.min(1,(t-hitT-80)/340)*Math.PI)*(t<6300?1:(1-(t-6300)/400)); if(a3>0)line('—— 洞穿。',st.hy-104*sz,Math.max(0,a3),15,WH); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
@@ -12021,8 +12028,8 @@ function fxSijilong(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
         ctx.fillStyle=g(SEA[cur].lite+','+(la*0.9)); ctx.shadowBlur=10; ctx.shadowColor=g(SEA[cur].prim+',0.8');
         ctx.fillText(SEA[cur].name, st.vw/2, Math.max(20,st.br.top-16*sz)); ctx.restore(); ctx.shadowBlur=0; }
     }
-    if(t>=360&&t<1560){ var a1=Math.sin(Math.min(1,(t-360)/320)*Math.PI)*(t<1260?1:(1-(t-1260)/300)); if(a1>0)line('「四时流转——荣枯，一念之间。」',st.hy-96*sz,Math.max(0,a1),13,'236,232,220'); }
-    if(t>=6360&&t<7500){ var a2=Math.sin(Math.min(1,(t-6360)/340)*Math.PI)*(t<7150?1:(1-(t-7150)/300)); if(a2>0)line('「荣枯——尽归于此。」',st.hy-96*sz,Math.max(0,a2),14,SP_L); }
+    if(t>=360&&t<1560){ var a1=Math.sin(Math.min(1,(t-360)/320)*Math.PI)*(t<1260?1:(1-(t-1260)/300)); if(a1>0)line('「四时流转——荣枯，一念之间。」',F.subY(st),Math.max(0,a1),13,'236,232,220'); }
+    if(t>=6360&&t<7500){ var a2=Math.sin(Math.min(1,(t-6360)/340)*Math.PI)*(t<7150?1:(1-(t-7150)/300)); if(a2>0)line('「荣枯——尽归于此。」',F.subY(st),Math.max(0,a2),14,SP_L); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
 
@@ -12614,8 +12621,8 @@ function fxYingshou(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
     ctx.shadowBlur=0; ctx.fillStyle=g(SOUL_W+','+(0.9*it)); ctx.shadowBlur=8; ctx.shadowColor=g(SOUL_L+',1'); ctx.beginPath(); ctx.arc(x,y,R*0.32,0,6.283); ctx.fill(); ctx.shadowBlur=0;
   }
   function drawLines(ctx,st,sz,t){ function line(txt,y,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center'; ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor=g(VOID+',0.95'); ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
-    if(t>=grabT+80&&t<soulOutT){ var a1=Math.sin(Math.min(1,(t-grabT-80)/300)*Math.PI)*(t<soulOutT-300?1:(1-(t-(soulOutT-300))/300)); if(a1>0)line('「万影噬魂——交出你的灵魂。」',st.hy-118*sz,Math.max(0,a1),13,RIM_L); }
-    if(t>=absorbT+80&&t<6600){ var a2=Math.sin(Math.min(1,(t-absorbT-80)/340)*Math.PI)*(t<6200?1:(1-(t-6200)/400)); if(a2>0)line('「吸入身躯——归于永夜。」',st.hy-118*sz,Math.max(0,a2),13,RIM_L); }
+    if(t>=grabT+80&&t<soulOutT){ var a1=Math.sin(Math.min(1,(t-grabT-80)/300)*Math.PI)*(t<soulOutT-300?1:(1-(t-(soulOutT-300))/300)); if(a1>0)line('「万影噬魂——交出你的灵魂。」',F.subY(st),Math.max(0,a1),13,RIM_L); }
+    if(t>=absorbT+80&&t<6600){ var a2=Math.sin(Math.min(1,(t-absorbT-80)/340)*Math.PI)*(t<6200?1:(1-(t-6200)/400)); if(a2>0)line('「吸入身躯——归于永夜。」',F.subY(st),Math.max(0,a2),13,RIM_L); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
 
@@ -13539,8 +13546,8 @@ function fxLiangzi(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   function drawLines(ctx,st,sz,t){ function line(txt,y,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center'; ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor='rgba(20,22,34,0.9)'; ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
     if(t>=eyeT0+220 && t<eraseT-120){ var la=Math.sin(Math.min(1,(t-(eyeT0+220))/260)*Math.PI*0.5); if(t>eraseT-320)la*=(1-ease((t-(eraseT-320))/200)); la=clamp(la,0,1)*0.9;
       if(la>0.03){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='800 '+(11*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center'; ctx.fillStyle=g(QT_L+','+la); ctx.shadowBlur=8; ctx.shadowColor=g(QT+',0.9'); ctx.fillText('◉ 观测中 · P → 0 ◉',st.hx,st.hy-64*sz); ctx.restore(); ctx.shadowBlur=0; } }
-    if(t>=360&&t<1700){ var a1=Math.sin(Math.min(1,(t-360)/320)*Math.PI)*(t<1400?1:(1-(t-1400)/300)); if(a1>0)line('「波函数展开——存在，不过是一种概率。」',st.hy-98*sz,Math.max(0,a1),13,QT_L); }
-    if(t>=eraseT+60&&t<6700){ var a2=Math.sin(Math.min(1,(t-eraseT-60)/320)*Math.PI)*(t<6400?1:(1-(t-6400)/300)); if(a2>0)line('「概率归零——抹除。」',st.hy-98*sz,Math.max(0,a2),14,WH); }
+    if(t>=360&&t<1700){ var a1=Math.sin(Math.min(1,(t-360)/320)*Math.PI)*(t<1400?1:(1-(t-1400)/300)); if(a1>0)line('「波函数展开——存在，不过是一种概率。」',F.subY(st),Math.max(0,a1),13,QT_L); }
+    if(t>=eraseT+60&&t<6700){ var a2=Math.sin(Math.min(1,(t-eraseT-60)/320)*Math.PI)*(t<6400?1:(1-(t-6400)/300)); if(a2>0)line('「概率归零——抹除。」',F.subY(st),Math.max(0,a2),14,WH); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
 
@@ -13695,14 +13702,14 @@ function fxFushaou(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   }
   function drawLines(ctx,st,sz,t){
     // ⭐v907 (Hansen真机: 台词出现在boss脚底=重大bug): 原锤midY(=勇者血条中心357)-98落在立绘腿部(立绘54~268・台词259)。改锤boss立绘中心(st.by)上方胸口+加半透明台词框→脌离腿部且成为专门台词框
-    var LY=st.by-st.br.height*0.16;
+    var LY=F.subY(st,true);
     function rr(cc,x,y,w,h,r){ cc.beginPath(); cc.moveTo(x+r,y); cc.arcTo(x+w,y,x+w,y+h,r); cc.arcTo(x+w,y+h,x,y+h,r); cc.arcTo(x,y+h,x,y,r); cc.arcTo(x,y,x+w,y,r); cc.closePath(); }
     function line(txt,y,a,fs,col,glow){ ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center';
       var tw=ctx.measureText(txt).width, padX=14*sz, boxH=(fs*sz)+13*sz, bx0=st.vw/2-tw/2-padX, by0=y-(fs*sz)*0.74-6*sz, bw2=tw+padX*2;
       rr(ctx,bx0,by0,bw2,boxH,8*sz); ctx.fillStyle=g('14,7,28,'+(a*0.62)); ctx.fill(); ctx.strokeStyle=g(col+','+(a*0.40)); ctx.lineWidth=1*sz; ctx.stroke();
       ctx.fillStyle=g(col+','+a); ctx.shadowBlur=10; ctx.shadowColor=g(glow+',0.9'); ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
     if(t>=fingerT+120&&t<2200){ var a1=Math.sin(Math.min(1,(t-fingerT-120)/300)*Math.PI)*(t<1900?1:(1-(t-1900)/300)); if(a1>0)line('「别躲。让我看看——你值不值得我用第二根手指。」',LY,Math.max(0,a1),12,PINK_L,PUR_D); }
-    if(t>=5350&&t<fireT+40){ var a2=Math.sin(Math.min(1,(t-5350)/360)*Math.PI); a2=clamp(a2,0,1); if(a2>0){ line('「你是我遇见过的最强的对手。」',LY-16*sz,a2,14,'255,236,246',PINK_D); line('「为了表示敬意，我将用我全部的力量，送你最后一程。」',LY+16*sz,a2,11,PINK_L,PUR_D); } }
+    if(t>=5350&&t<fireT+40){ var a2=Math.sin(Math.min(1,(t-5350)/360)*Math.PI); a2=clamp(a2,0,1); if(a2>0){ line('「你是我遇见过的最强的对手。」',LY,a2,14,'255,236,246',PINK_D); line('「为了表示敬意，我将用我全部的力量，送你最后一程。」',LY+22*sz,a2,11,PINK_L,PUR_D); } }
     if(t>=hitT+120&&t<7900){ var a3=Math.sin(Math.min(1,(t-hitT-120)/340)*Math.PI)*(t<7500?1:(1-(t-7500)/400)); if(a3>0)line('—— 终焉白光。',LY,Math.max(0,a3),15,WH,GOLD); }
   }
 }catch(e){ try{deal();}catch(e2){} } }
@@ -15362,7 +15369,7 @@ function openPanel(userMode){
        '<div class="hbafx-row"><label>📏 大小</label><input type="range" min="30" max="120" value="69" id="diffIcSizeRange"><span class="hbafx-val" id="diffIcSizeVal">69px</span></div>'+
        '<div class="hbafx-row"><label>↕️ 上下</label><input type="range" min="-30" max="30" value="0" id="diffIcDyRange"><span class="hbafx-val" id="diffIcDyVal">0px</span></div>'+
        '<div class="hbafx-row"><label>📦 框大小</label><input type="range" min="48" max="150" value="60" id="diffIcHRange"><span class="hbafx-val" id="diffIcHVal">60px</span></div>'+
-       '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:9px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px"><div id="diffIcPvB0" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv0" src="speed/slow.webp?v=909" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB1" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv1" src="speed/medium.webp?v=909" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB2" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv2" src="speed/fast.webp?v=909" alt="" style="width:69px;height:69px;object-fit:contain"></div></div>'+
+       '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:9px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px"><div id="diffIcPvB0" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv0" src="speed/slow.webp?v=910" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB1" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv1" src="speed/medium.webp?v=910" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB2" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv2" src="speed/fast.webp?v=910" alt="" style="width:69px;height:69px;object-fit:contain"></div></div>'+
        '</div>';
     /* 🔴v775 左上角头像大小调节器(藏管理员·难度图标下方·Hansen嫌头像太小): 框大小+形象大小各自独立·拖动写localStorage·各岛开机读取生效 */
     h+='<div style="margin-top:10px;padding:12px 13px;background:#1c1230;border:1.5px solid #4c3268;border-radius:12px">'+
@@ -15371,7 +15378,7 @@ function openPanel(userMode){
        '<div class="hbafx-row"><label>📦 方框大小</label><input type="range" min="32" max="60" value="60" id="avFrameRange"><span class="hbafx-val" id="avFrameVal">60px</span></div>'+
        '<div class="hbafx-row"><label>🧍 形象大小</label><input type="range" min="55" max="115" value="95" id="avImgRange"><span class="hbafx-val" id="avImgVal">95%</span></div>'+
        '<div style="display:flex;align-items:center;justify-content:center;margin-top:9px;padding:18px;background:rgba(255,255,255,.04);border-radius:10px">'+
-         '<div id="avPvBox" style="width:var(--hsnAvSize,60px);height:var(--hsnAvSize,60px);border-radius:13px;background:#34c3e0;overflow:hidden;position:relative;flex:none"><img id="avPvImg" src="avatars/01.webp?v=909" alt="" style="position:absolute;inset:0;margin:auto;max-width:var(--hsnAvImg,95%);max-height:var(--hsnAvImg,95%);width:auto;height:auto;object-fit:contain"></div>'+
+         '<div id="avPvBox" style="width:var(--hsnAvSize,60px);height:var(--hsnAvSize,60px);border-radius:13px;background:#34c3e0;overflow:hidden;position:relative;flex:none"><img id="avPvImg" src="avatars/01.webp?v=910" alt="" style="position:absolute;inset:0;margin:auto;max-width:var(--hsnAvImg,95%);max-height:var(--hsnAvImg,95%);width:auto;height:auto;object-fit:contain"></div>'+
        '</div>'+
        '</div>';
     /* 🔴 v804: 一键通关所有 Boss 开关(藏管理员·头像调节器下方·Hansen): ON=18岛360关全标记通关, OFF=精确还原真实进度 */
@@ -15411,7 +15418,7 @@ function openPanel(userMode){
     var de=document.documentElement;
     de.style.setProperty('--hsnAvSize',fr+'px'); de.style.setProperty('--hsnAvImg',ig+'%');
     /* 预览显示当前头像角色立绘(只换src·尺寸靠CSS变量自动随动) */
-    try{var av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var cur=parseInt(av.cur,10)||1;var pi=o.querySelector('#avPvImg');if(pi)pi.src='avatars/'+(cur<10?'0'+cur:cur)+'.webp?v=909';}catch(e){}
+    try{var av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var cur=parseInt(av.cur,10)||1;var pi=o.querySelector('#avPvImg');if(pi)pi.src='avatars/'+(cur<10?'0'+cur:cur)+'.webp?v=910';}catch(e){}
     var rF=o.querySelector('#avFrameRange'),rI=o.querySelector('#avImgRange');
     if(rF){rF.value=fr; var fV=o.querySelector('#avFrameVal'); if(fV)fV.textContent=fr+'px';
       rF.addEventListener('input',function(){fr=+this.value; var l=o.querySelector('#avFrameVal'); if(l)l.textContent=fr+'px'; try{localStorage.setItem(KF,String(fr));}catch(e){} de.style.setProperty('--hsnAvSize',fr+'px');});}
