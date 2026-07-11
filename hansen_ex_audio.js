@@ -1,9 +1,10 @@
-/* ⭐v917 例句真人音频映射表 (Hansen 录制)
+/* ⭐v917+ 例句真人音频映射表 (Hansen 录制)
  * key   = 【规范化后的例句】(只留字母和空格·小写) —— 撇号/逗号/句号差异都能命中, 不怕标点变体
  * value = words/<单词>_ex_season.mp3
  * 240 个词共用同一套例句(赛季岛与 8 个星域岛已逐字对齐·v916 守卫钉死), 所以一条音频全岛通用。
- * speak() 里给【句子】加了本地音频优先级: 命中就播真人, 没命中自动回落 TTS —— 所以未配音的词照常能读。
- * 进度: 已配 30 / 240 条。 */
+ * speak() 里给【句子】加了本地音频优先级: 命中就播真人, 没命中自动回落 TTS —— 未配音的词照常能读。
+ * ⚠️ 例句文字一旦被改动, key 就对不上 → 真人音频会【静默失效】(按钮还在却偷偷变回合成音)。check_resources v917 守卫已钉死。
+ * 进度: 已配 60 / 240 条。 */
 window.__HANSEN_EX_AUDIO = {
   "i always feel nervous before a big exam": "words/nervous_ex_season.mp3",
   "she felt anxious while waiting for the test results": "words/anxious_ex_season.mp3",
@@ -34,9 +35,38 @@ window.__HANSEN_EX_AUDIO = {
   "please accept my sincere apology for being late": "words/sincere_ex_season.mp3",
   "a dog is a loyal companion that never leaves your side": "words/loyal_ex_season.mp3",
   "our maths teacher is very strict about homework": "words/strict_ex_season.mp3",
-  "it was selfish of him to keep all the snacks for himself": "words/selfish_ex_season.mp3"
+  "it was selfish of him to keep all the snacks for himself": "words/selfish_ex_season.mp3",
+  "shes very mature for her age": "words/mature_ex_season.mp3",
+  "the puppy is so energetic that it never stops running": "words/energetic_ex_season.mp3",
+  "hes modest about his achievements and rarely talks about them": "words/modest_ex_season.mp3",
+  "she greeted everyone with a cheerful smile": "words/cheerful_ex_season.mp3",
+  "hes a hardworking student who never gives up": "words/hardworking_ex_season.mp3",
+  "shes sensitive and cries easily at sad films": "words/sensitive_ex_season.mp3",
+  "he was determined to finish the race no matter what": "words/determined_ex_season.mp3",
+  "being outgoing she makes friends wherever she goes": "words/outgoing_ex_season.mp3",
+  "my grandmother is very talkative and loves a good chat": "words/talkative_ex_season.mp3",
+  "he stayed calm even during the emergency": "words/calm_ex_season.mp3",
+  "its important to eat breakfast every morning": "words/important_ex_season.mp3",
+  "is it possible to finish this by tomorrow": "words/possible_ex_season.mp3",
+  "this app is really useful for learning new words": "words/useful_ex_season.mp3",
+  "time is the most valuable thing we have": "words/valuable_ex_season.mp3",
+  "these two paintings look quite similar": "words/similar_ex_season.mp3",
+  "they live in a modern flat in the city centre": "words/modern_ex_season.mp3",
+  "we visited an ancient temple in the mountains": "words/ancient_ex_season.mp3",
+  "this song is very popular among teenagers": "words/popular_ex_season.mp3",
+  "it was just an ordinary day and nothing special happened": "words/ordinary_ex_season.mp3",
+  "paris is famous for the eiffel tower": "words/famous_ex_season.mp3",
+  "this sofa is so comfortable that i could fall asleep on it": "words/comfortable_ex_season.mp3",
+  "living near the station is very convenient": "words/convenient_ex_season.mp3",
+  "the human brain is incredibly complex": "words/complex_ex_season.mp3",
+  "it was a typical rainy day in london": "words/typical_ex_season.mp3",
+  "my schedule is flexible so we can meet anytime": "words/flexible_ex_season.mp3",
+  "her description of the man was surprisingly accurate": "words/accurate_ex_season.mp3",
+  "water is essential for all living things": "words/essential_ex_season.mp3",
+  "tickets are still available for tonights show": "words/available_ex_season.mp3",
+  "this film isnt suitable for young children": "words/suitable_ex_season.mp3",
+  "she gave me some practical advice for the interview": "words/practical_ex_season.mp3"
 };
-/* 单词 → 例句音频 (备用查法) */
 window.__HANSEN_EX_AUDIO_BY_WORD = {
-  "nervous": "words/nervous_ex_season.mp3", "anxious": "words/anxious_ex_season.mp3", "curious": "words/curious_ex_season.mp3", "proud": "words/proud_ex_season.mp3", "grateful": "words/grateful_ex_season.mp3", "disappointed": "words/disappointed_ex_season.mp3", "embarrassed": "words/embarrassed_ex_season.mp3", "frightened": "words/frightened_ex_season.mp3", "satisfied": "words/satisfied_ex_season.mp3", "confused": "words/confused_ex_season.mp3", "lonely": "words/lonely_ex_season.mp3", "jealous": "words/jealous_ex_season.mp3", "relaxed": "words/relaxed_ex_season.mp3", "ashamed": "words/ashamed_ex_season.mp3", "eager": "words/eager_ex_season.mp3", "miserable": "words/miserable_ex_season.mp3", "delighted": "words/delighted_ex_season.mp3", "furious": "words/furious_ex_season.mp3", "amazed": "words/amazed_ex_season.mp3", "comfort": "words/comfort_ex_season.mp3", "polite": "words/polite_ex_season.mp3", "humble": "words/humble_ex_season.mp3", "stubborn": "words/stubborn_ex_season.mp3", "reliable": "words/reliable_ex_season.mp3", "cautious": "words/cautious_ex_season.mp3", "optimistic": "words/optimistic_ex_season.mp3", "sincere": "words/sincere_ex_season.mp3", "loyal": "words/loyal_ex_season.mp3", "strict": "words/strict_ex_season.mp3", "selfish": "words/selfish_ex_season.mp3"
+  "nervous": "words/nervous_ex_season.mp3", "anxious": "words/anxious_ex_season.mp3", "curious": "words/curious_ex_season.mp3", "proud": "words/proud_ex_season.mp3", "grateful": "words/grateful_ex_season.mp3", "disappointed": "words/disappointed_ex_season.mp3", "embarrassed": "words/embarrassed_ex_season.mp3", "frightened": "words/frightened_ex_season.mp3", "satisfied": "words/satisfied_ex_season.mp3", "confused": "words/confused_ex_season.mp3", "lonely": "words/lonely_ex_season.mp3", "jealous": "words/jealous_ex_season.mp3", "relaxed": "words/relaxed_ex_season.mp3", "ashamed": "words/ashamed_ex_season.mp3", "eager": "words/eager_ex_season.mp3", "miserable": "words/miserable_ex_season.mp3", "delighted": "words/delighted_ex_season.mp3", "furious": "words/furious_ex_season.mp3", "amazed": "words/amazed_ex_season.mp3", "comfort": "words/comfort_ex_season.mp3", "polite": "words/polite_ex_season.mp3", "humble": "words/humble_ex_season.mp3", "stubborn": "words/stubborn_ex_season.mp3", "reliable": "words/reliable_ex_season.mp3", "cautious": "words/cautious_ex_season.mp3", "optimistic": "words/optimistic_ex_season.mp3", "sincere": "words/sincere_ex_season.mp3", "loyal": "words/loyal_ex_season.mp3", "strict": "words/strict_ex_season.mp3", "selfish": "words/selfish_ex_season.mp3", "mature": "words/mature_ex_season.mp3", "energetic": "words/energetic_ex_season.mp3", "modest": "words/modest_ex_season.mp3", "cheerful": "words/cheerful_ex_season.mp3", "hardworking": "words/hardworking_ex_season.mp3", "sensitive": "words/sensitive_ex_season.mp3", "determined": "words/determined_ex_season.mp3", "outgoing": "words/outgoing_ex_season.mp3", "talkative": "words/talkative_ex_season.mp3", "calm": "words/calm_ex_season.mp3", "important": "words/important_ex_season.mp3", "possible": "words/possible_ex_season.mp3", "useful": "words/useful_ex_season.mp3", "valuable": "words/valuable_ex_season.mp3", "similar": "words/similar_ex_season.mp3", "modern": "words/modern_ex_season.mp3", "ancient": "words/ancient_ex_season.mp3", "popular": "words/popular_ex_season.mp3", "ordinary": "words/ordinary_ex_season.mp3", "famous": "words/famous_ex_season.mp3", "comfortable": "words/comfortable_ex_season.mp3", "convenient": "words/convenient_ex_season.mp3", "complex": "words/complex_ex_season.mp3", "typical": "words/typical_ex_season.mp3", "flexible": "words/flexible_ex_season.mp3", "accurate": "words/accurate_ex_season.mp3", "essential": "words/essential_ex_season.mp3", "available": "words/available_ex_season.mp3", "suitable": "words/suitable_ex_season.mp3", "practical": "words/practical_ex_season.mp3"
 };
