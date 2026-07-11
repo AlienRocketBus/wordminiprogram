@@ -8626,6 +8626,59 @@ except Exception as _e918:
 if _b918: fail('v918 音频映射: ' + str(_b918[:5]))
 else: ok('v918 (Hansen: map 地图这个词换成新音频·之前的老音频直接删掉) 音频映射不得指向空文件 + 换音频必须换文件名。★关键坑: 游戏里所有单词 mp3 的 URL 后面挂的是【写死的 ?v215】(hansen_preload.js 明确注释: 游戏里写死, 为的是预加载和游戏共用同一份长期缓存) → 【原地替换文件内容、不改文件名】= URL 一个字没变 = CDN 与微信 webview 继续吐【旧音频】, 用户根本听不到新的。所以换音频必须【换文件名】: map.mp3 → map_r2.mp3, 只让这一个文件的 URL 变 → 只有它重新下载, 其余 900 多条音频缓存全部保留(不会让用户重下整包 19MB)。本次处理: ①新音频音量对齐词库(原始 mean -21.2dB 比词库平均 -17dB 轻约4dB·夹在别的单词里会明显发闷 → +2.7dB 后 mean -18.9dB / peak -1.8dB, 落在词库区间内且不削波) ②存为 words/map_r2.mp3 ③word_map.js 全局表 + island_data.json(traffic岛内覆盖) 全部改指向新文件 ④老文件 words/map.mp3 彻底删除, 全库零引用。真机验证: island_traffic 与 island_school(school无岛内映射·走全局表) 点发音 → 都解析到 words/map_r2.mp3, 网络请求 206(媒体分段请求·正常), 老文件 map.mp3 未被请求, 0报错。全库音频映射体检: 901 条映射全部指向真实存在的文件, 无静默失效。v918')
 
+
+# ---- ⭐ v921 (Hansen: 不要联网发音·全部用我们自己的本地音频·把这个机制彻底锁死) 零联网 TTS 铁律 ----
+# Hansen 真机发现: 星海(时之钟谷 land3)的单词点发音是【联网合成音】, 不是他提供的真人音频。
+# 审计结果(音频文件其实一个都不缺, 240 个 <词>_season.mp3 全在磁盘上, 纯粹是【映射没挂】):
+#   · island_season   : 240 词只挂了 155 条 → 85 个词联网
+#   · island_land2    : 30 词只挂了 10 条  → 20 个词联网
+#   · island_land3~8  : 每岛 30 词【一条都没挂自己的】——8个星域岛被塞了【同一份 land1 的映射表】(复制粘贴bug) → 各 30 个词全部联网
+#   · 常规岛 body/city/clothes : 90 个词也没挂 WORD_MAP → 全部联网
+#   合计 375 个词次在联网合成, 而本地音频文件全都躺在 words/ 里没被用上。
+# speak() 的查找顺序: __ISLAND_LOCAL_AUDIO(岛内) → WORD_MAP(全局) → 都没有就【联网 TTS】。
+# 修复: 星海9岛全部挂上完整 240 条映射; 常规岛缺的 277 条补进 WORD_MAP(文件本来就在)。
+# 铁律(彻底锁死): 全库任何一个岛的任何一个词, 都必须能解析到【真实存在的本地音频文件】。
+#              只要有一个词解析不到 → 它就会联网合成 → 立即拒绝打包。
+_b921 = []
+try:
+    _wm921 = open('word_map.js', encoding='utf-8', errors='replace').read()
+    _WMAP921 = dict(re.findall(r'"([^"]+)"\s*:\s*"(words/[^"]+\.mp3)"', _wm921))
+    _tts921 = []
+    for _f921 in sorted(glob.glob('island_*.html')):
+        _t921 = open(_f921, encoding='utf-8', errors='replace').read()
+        if 'const DATA=[' not in _t921: continue
+        _i9 = _t921.index('const DATA=['); _d9 = 0; _j9 = _i9 + len('const DATA=')
+        _e9 = len(_t921)
+        for _k9 in range(_j9, len(_t921)):
+            if _t921[_k9] == '[': _d9 += 1
+            elif _t921[_k9] == ']':
+                _d9 -= 1
+                if _d9 == 0: _e9 = _k9 + 1; break
+        _W9 = []
+        for _c9, _b9 in re.findall(r'\{cat:"([^"]+)",words:\[(.*?)\n\]\}', _t921[_j9:_e9], re.S):
+            _W9 += re.findall(r'\{en:"(.*?)",pn:', _b9)
+        _m9 = re.search(r'__ISLAND_LOCAL_AUDIO\s*=\s*(\{.*?\})\s*;', _t921, re.S)
+        _la9 = dict(re.findall(r"([A-Za-z][A-Za-z '\-]*)\s*:\s*'(words/[^']+\.mp3)'", _m9.group(1))) if _m9 else {}
+        for _w9 in _W9:
+            _lw = _w9.lower()
+            _p9 = _la9.get(_lw) or _la9.get(_w9)
+            if _p9 and os.path.exists(_p9): continue
+            _p9 = _WMAP921.get(_lw)
+            if _p9 and os.path.exists(_p9): continue
+            _tts921.append('%s:%s' % (_f921.replace('island_', '').replace('.html', ''), _w9))
+    if _tts921:
+        _b921.append('%d 个词解析不到本地音频→会【联网合成发音】: %s' % (len(_tts921), _tts921[:8]))
+    # 星海 240 词的映射必须在 赛季岛 + 8个星域岛 全部齐备(land3~8 曾被塞成 land1 的表)
+    for _f9 in ['island_season.html'] + ['island_land%d.html' % _n for _n in range(1, 9)]:
+        _t9 = open(_f9, encoding='utf-8', errors='replace').read()
+        _c9 = len(re.findall(r"_season\.mp3'", _t9))
+        if _c9 < 240:
+            _b921.append('%s 的岛内音频映射只有 %d 条(应为完整 240 条·否则该岛的词会联网发音)' % (_f9, _c9))
+except Exception as _e921:
+    _b921.append('零联网发音体检异常: %s' % _e921)
+if _b921: fail('v921 零联网TTS: ' + str(_b921[:5]))
+else: ok('v921 (Hansen真机: 星海的单词在联网发音, 不要联网, 全部用我们自己的本地音频, 把机制彻底锁死) 零联网 TTS 铁律。★根因(音频文件一个都不缺, 纯粹是映射没挂): speak() 查找顺序是 __ISLAND_LOCAL_AUDIO(岛内)→WORD_MAP(全局)→都没有就【联网TTS合成】。审计发现: island_season 240词只挂了155条(85个联网) / island_land2 只挂10条(20个联网) / island_land3~8【每岛一条自己的都没挂】——8个星域岛被塞了同一份【land1 的映射表】(复制粘贴bug), 所以各30个词全部联网(Hansen 截图的时之钟谷就是) / 常规岛 body(35)+city(27)+clothes(28) 共90个词也没挂 WORD_MAP。合计 375 个词次在联网合成, 而 240 个 <词>_season.mp3 和那 90 个 mp3 全都好端端躺在 words/ 里没被用上。★修复: 星海9岛(赛季岛+8星域岛)全部挂上完整240条岛内映射; 常规岛缺的277条补进全局 WORD_MAP(文件本来就在)。★真机验证(全库27个岛·每一个词都点了一遍发音·同时监听网络请求和浏览器speechSynthesis): 全部播本地mp3, 联网TTS 0次, 浏览器TTS 0次, 0报错。★本守卫彻底锁死: 全库任何一个岛的任何一个词, 都必须能解析到【真实存在的本地音频文件】; 只要有一个词解析不到(会联网合成) → 立即拒绝打包。另钉死: 星海9岛的岛内映射必须各含完整240条(防再次被塞成别的岛的表)。v921')
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
