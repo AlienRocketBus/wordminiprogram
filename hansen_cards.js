@@ -17,26 +17,26 @@
 
   // 20 个 boss 卡牌数据
   var BOSS_CARDS = [
-    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=911', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
-    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=911', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
-    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=911', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
-    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=911', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
-    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=911', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
-    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=911', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
-    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=911', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
-    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=911', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
-    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=911', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
-    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=911', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
-    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=911', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
-    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=911', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
-    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=911', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
-    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=911', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
-    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=911', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
-    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=911', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
-    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=911', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
-    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=911', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
-    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=911', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
-    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=911', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
+    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=912', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
+    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=912', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
+    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=912', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
+    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=912', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
+    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=912', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
+    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=912', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
+    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=912', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
+    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=912', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
+    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=912', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
+    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=912', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
+    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=912', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
+    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=912', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
+    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=912', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
+    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=912', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
+    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=912', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
+    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=912', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
+    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=912', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
+    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=912', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
+    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=912', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
+    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=912', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
   ];
 
   // 稀有度配色 (frame + 标签)
@@ -553,7 +553,7 @@
     html+='<div style="font-size:19px;font-weight:900;background:linear-gradient(90deg,#c4b5fd,#fde047,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent">\ud83d\udc51 星海女帝 · 终战</div>';
     html+='<div style="font-size:11.5px;color:#a78bca;margin:4px 0 10px">单词大陆 8 岛全通后 · 决战赛尔娅 · 考全部 240 词</div>';
     html+='<div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:#e9d5ff;font-weight:700">特效</span>'+hansenFxSwitchHTML()+'</div>';
-    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=911" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
+    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=912" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
     var _fp76h=false; try{ _fp76h=!!(window.HansenFreepass&&window.HansenFreepass.active()); }catch(_fe){}
     if(_lc>=8 || _fp76h){  //🔴v876: 72小时试用期女帝也可试打(限定卡/纪事解锁仍按真实进度)
       try{ if(window.S){ window.S.bossUnlocked=6; if(typeof window.save==="function") window.save(); } }catch(_se){}
@@ -969,7 +969,7 @@
     mask.id='__hsn_bosshall';
     mask.style.cssText='position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe=document.createElement('iframe');
-    iframe.src='boss_hall.html?v=911&lv='+lv+'&own='+own.join(',');
+    iframe.src='boss_hall.html?v=912&lv='+lv+'&own='+own.join(',');
     iframe.setAttribute('title','BOSS 殿堂');
     iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);

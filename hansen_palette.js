@@ -130,7 +130,10 @@
     // 🔴v863 亮色全面整改(Hansen真机: 亮色下岛内大量文字看不清/发糊 · 七屏×两亮色逐元素扫描驱动·palette层统一修=24岛+index一次全治)
     var L='html.hsn-pal-light ';
     // ① boss屏深底归位: v856钦令"打Boss任何配色不动(电影感)"·此前只还原了内联字色, 屏底与继承字漏网→亮色下选关墙深卡字被调深+页底变浅全乱。整屏钉回深色=一条通杀。
-    css+=L+'#bossScreen{background:linear-gradient(180deg,#131c3a,#0c1538)!important}\n';
+    /* ⭐v912(Hansen真机: 龙骑士统帅巨翼特效消失): 与 v905 同因——boss屏暗底【绝不能涂在 #bossScreen 自身】, 那是普通内容层, 会盖死 z-index:-1 的背景特效层
+       (BUG#70/v536 钦定挂背景层: 龙骑士统帅巨翼从背后展开 / 三头犬地狱之门在身后升起)。改涂到 #bossScreen::before(fixed 铺满视口·z-index:-2), 沉到背景特效层之下。 */
+    css+=L+'#bossScreen{background:transparent!important}\n';
+    css+=L+'#bossScreen::before{background:linear-gradient(180deg,#131c3a,#0c1538)!important}\n';
     css+=L+'#bossScreen, '+L+'#bossScreen *{--pal-ink:#f1f5f9;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8}\n';
     css+=L+'#bossScreen{color:#e2e8f0}\n';
     // ② 深色纯部件(任何配色下都是深底): 继承字回浅·金字回金(id/类+属性特异性压过③通用琥珀映射)

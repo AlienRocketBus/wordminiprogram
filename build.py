@@ -90,6 +90,22 @@ if r.returncode != 0:
     print("  \u274c check_resources 未通过, 拒绝打包")
     sys.exit(1)
 
+# ---- 6.5 特效不可破坏守卫 (v912) ----
+# Hansen 钦令: boss 攻击特效一旦定稿, 绝不允许被任何改动无声破坏。
+# check_resources 全是【盯代码字符串】的守卫 —— v905 没改一行特效代码, 只是把不透明底涂在 #bossScreen 上,
+# 就把 z-index:-1 的背景特效层盖死(龙骑士统帅巨翼 / 地狱犬王地狱之门双双消失), 而所有字符串守卫全部通过、照常上线。
+# fx_guard 在【真浏览器】里把 20 个 boss 的特效各放一遍, 用【像素】证明特效真的画在屏幕上:
+#   有元素却 0 像素 = 被谁遮死了 = 特效已被破坏 → 拒绝打包。
+# 跳过方式: 只有明确知道自己在干什么时才 SKIP_FX_GUARD=1(交付给 Hansen 的包永远不许跳)。
+if os.environ.get("SKIP_FX_GUARD") == "1":
+    print("  [6.5] \u26a0\ufe0f 特效守卫被跳过(SKIP_FX_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.5] 跑 fx_guard.py (真机放一遍 20 个 boss 的攻击特效, 像素级证明没被破坏) ...")
+    r = subprocess.run([sys.executable, "fx_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 特效守卫未通过: 有 boss 的攻击特效被破坏了, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
