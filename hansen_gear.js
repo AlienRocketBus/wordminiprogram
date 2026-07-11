@@ -60,13 +60,13 @@
 
   // ===== 武器图标 =====
   var WICON = {
-    0:'<img src="weapons/bow.webp?v=916" alt="">',
-    1:'<img src="weapons/pistol.webp?v=916" alt="">',
-    2:'<img src="weapons/machinegun.webp?v=916" alt="">',
-    3:'<img src="weapons/sniper.webp?v=916" alt="">',
-    4:'<img src="weapons/gatling.webp?v=916" alt="">',
-    5:'<img src="weapons/cannon.webp?v=916" alt="">',
-    6:'<img src="weapons/photon.webp?v=916" alt="">'
+    0:'<img src="weapons/bow.webp?v=917" alt="">',
+    1:'<img src="weapons/pistol.webp?v=917" alt="">',
+    2:'<img src="weapons/machinegun.webp?v=917" alt="">',
+    3:'<img src="weapons/sniper.webp?v=917" alt="">',
+    4:'<img src="weapons/gatling.webp?v=917" alt="">',
+    5:'<img src="weapons/cannon.webp?v=917" alt="">',
+    6:'<img src="weapons/photon.webp?v=917" alt="">'
   };
 
   // ===== 🎨 配色皮肤(12 变量/套) =====

@@ -8529,6 +8529,61 @@ except Exception as _e916:
 if _b916: fail('v916 例句必须全库唯一: ' + str(_b916[:5]))
 else: ok('v916 (Hansen要给例句配音频·配之前必须先对齐) 星海240词例句【全库唯一】铁律。查出并修复: 星海240词 = 赛季岛一整份 + 8个星域岛各30个, 是同一批词但【两套独立数据】(赛季岛词表在 island_data.json→season→DATA 盖章生成; 8个星域岛是独立HTML)。v914 改的那25条例句【只改了赛季岛】→ 星域岛仍是老例句: 那25个词在星域岛依然进不了完形填空(land3:2 describe/realize · land4:14 mention/admit/indicate/comment/debate/provide/produce/invent/destroy/repair/establish/manage/handle/perform · land6:2 examine/calculate · land7:2 stranger/customer · land8:5 chemical/creature/particle/employee/colleague), 且同一个词两个岛显示两句不同的例句。这在配【例句音频】时是致命的——一个词一条音频, 两个岛例句不同必然对不上。已把25条同步到星域岛。复验: 8个星域岛 进不了完形填空 0 个 · 例句与赛季岛不一致 0 个 → 240词每词只有【唯一一条】例句, 一条音频全岛通用。本守卫钉死: 例句必须100%含原形 + 赛季岛与8个星域岛的 ex/exCn 必须逐字一致。v916')
 
+
+# ---- ⭐ v917 (Hansen 开始给例句配真人音频·第1批30条) 例句音频铁律 ----
+# speak() 原本【只给单词查本地 mp3, 句子一律走 TTS】(if(!isSent) 才查本地) → 📝 例句 一直是机器合成音。
+# 修改: 在 speak() 里给【句子】也加一条本地音频优先级(命中 Hansen 录的 mp3 就播真人, 没命中自动回落 TTS)。
+# 只改这一处, 所有播例句的地方全部自动生效, 未配音的词照常能读。
+# 映射表 hansen_ex_audio.js 的 key = 【规范化后的例句】(只留字母和空格·小写), value = words/<单词>_ex_season.mp3。
+# ★最关键的一条: 例句文字一旦被改动, key 就对不上 → 音频【静默失效】(按钮还在, 但偷偷变回了合成音, 没人会发现)。
+#   所以本守卫强制: 映射表里的每个 key 必须【等于】该单词在赛季岛里例句的规范化结果。对不上 = 拒绝打包。
+_b917 = []
+def _nrm917(_t):
+    _t = _t.replace('\u2019', "'")
+    _t = re.sub(r'[^A-Za-z ]', '', _t)
+    return re.sub(r'\s+', ' ', _t).strip().lower()
+try:
+    if not os.path.exists('hansen_ex_audio.js'):
+        _b917.append('hansen_ex_audio.js 丢失(例句真人音频映射表)')
+    else:
+        _ea917 = open('hansen_ex_audio.js', encoding='utf-8', errors='replace').read()
+        # 只解析【按例句做 key】的主表; 后面还有一张 __HANSEN_EX_AUDIO_BY_WORD(按单词做 key 的备用表), 不能混进来
+        _main917 = _ea917.split('__HANSEN_EX_AUDIO_BY_WORD')[0]
+        _map917 = dict(re.findall(r'"([^"]+)":\s*"(words/[a-zA-Z]+_ex_season\.mp3)"', _main917))
+        if not _map917:
+            _b917.append('hansen_ex_audio.js 里一条映射都没有')
+        # ① 映射指向的 mp3 必须真实存在
+        for _k, _v in _map917.items():
+            if not os.path.exists(_v):
+                _b917.append('例句音频文件缺失: %s' % _v)
+        # ② words/ 里的例句 mp3 必须都在映射表里(不许有孤儿文件·白打包)
+        for _f in glob.glob('words/*_ex_season.mp3'):
+            if _f.replace('\\', '/') not in _map917.values():
+                _b917.append('例句音频未接入映射表(白放进包里): %s' % _f)
+        # ③ ★key 必须等于该词在赛季岛例句的规范化结果(例句一改, 音频就静默失效 → 必须拦下)
+        _sea917 = open('island_season.html', encoding='utf-8', errors='replace').read()
+        for _k, _v in _map917.items():
+            _w917 = os.path.basename(_v).replace('_ex_season.mp3', '')
+            _m917 = re.search(r'\{en:"%s",pn:"[^"]*",cn:"[^"]*",emoji:"[^"]*",ex:"(.*?)",exCn:' % re.escape(_w917), _sea917)
+            if not _m917:
+                _b917.append('%s: 赛季岛找不到这个词' % _w917); continue
+            if _nrm917(_m917.group(1)) != _k:
+                _b917.append('%s 的例句被改过, 音频 key 对不上→真人音频会静默失效(变回合成音): 例句="%s" key="%s"'
+                             % (_w917, _m917.group(1)[:40], _k[:40]))
+    # ④ speak() 必须有句子级本地音频分支; 每个岛必须引入映射表
+    for _f917 in ['template.html'] + sorted(glob.glob('island_land[1-8].html')) + sorted(glob.glob('island_*.html')):
+        _t917 = open(_f917, encoding='utf-8', errors='replace').read()
+        if 'function speak(' not in _t917:
+            continue
+        if 'if(isSent && window.__HANSEN_EX_AUDIO)' not in _t917:
+            _b917.append('%s: speak() 缺句子级本地音频分支(例句会退回机器合成音)' % _f917)
+        if 'hansen_ex_audio.js' not in _t917:
+            _b917.append('%s: 未引入 hansen_ex_audio.js(映射表加载不到→例句无音频)' % _f917)
+except Exception as _e917:
+    _b917.append('例句音频体检异常: %s' % _e917)
+if _b917: fail('v917 例句真人音频: ' + str(_b917[:5]))
+else: ok('v917 (Hansen 开始给例句配真人音频·第1批: 单词大陆①迷雾心湖 30 条) 例句真人音频接入 + 铁律。①根因: speak() 原本只给【单词】查本地 mp3、【句子】一律走 TTS(if(!isSent) 才查) → 📝例句 一直是机器合成音。修改: 在 speak() 里给句子也加一条本地音频优先级(命中就播真人·没命中自动回落 TTS), 只改这一处, 所有播例句的地方全部自动生效, 未配音的 210 个词照常能读。②映射表 hansen_ex_audio.js: key=规范化后的例句(只留字母空格·小写·撇号/标点变体都能命中), value=words/<单词>_ex_season.mp3。240词共用同一套例句(v916 已把赛季岛与8个星域岛逐字对齐)→ 一条音频全岛通用。③真机验证: island_land1 30/30 播本地文件且 HTTP200; island_season 30个有音频的播本地、210个没音频的正确回落TTS且未误播、0报错。④音频体检: 30条全部 mp3/64kbps/24kHz单声道·时长1.8~3.6秒·语速0.23~0.44秒每词, 无空文件无串音。⑤本守卫钉死: 映射指向的 mp3 必须存在 / words里的例句mp3不许有孤儿 / speak()必须有句子级分支 / 每个岛必须引入映射表 / ★key必须等于该词在赛季岛例句的规范化结果——例句文字一旦被改动, key 就对不上, 真人音频会【静默失效】(按钮还在但偷偷变回合成音, 没人会发现), 这种改动一律拒绝打包。进度: 30/240。v917')
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
