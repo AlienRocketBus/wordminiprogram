@@ -8464,6 +8464,27 @@ except Exception as _e914:
 if _b914: fail('v914 星海例句质量: ' + str(_b914[:5]))
 else: ok('v914 (Hansen: 星海240个单词的例句有没有达到最好?) 星海例句质量铁律。体检结论: 硬伤本来就是干净的(0缺例句/0例句里没用到该词/0重复/0过短过长/0标点/0中英混杂, 平均句长8.2词), 但离"最好"差两口气, 均已补上: ①完形填空覆盖率 215/240→240/240: cloze 模式用 \\b原形\\b 在例句里挖空, 匹配不上就把该词 pop 掉丢弃——原先25个词例句只有变形(describe→described/provide→provides/stranger→strangers/employee→employees), 这25个词(10.4%)永远进不了完形填空。已改写这25条例句让原形自然出现(动词改情态/不定式/复数主语, 名词改单数), 且改写后译文必含词表中文。②中文金色高亮 220/240→240/240: smartHighlight 在译文里高亮对应中文, 但20条译文为求自然用了同义词(proud「自豪的」译文写「骄傲」、although「尽管」写「虽然」、ceremony「典礼」写「开幕式」)→高亮失效、完形填空的提示变弱。已在 HIGHLIGHT_MANUAL 追加20条手工映射(87→107条, 原有87条未动)。真机口径复验: 240/240 可进完形填空、240/240 高亮成功、硬伤全0。v914')
 
+
+# ---- ⭐ v915 (Hansen: 完形填空每道题都要用这个单词自己的例句吧? 所有 bug 都修好了吗?) 选项不得出现同义词 ----
+# 真机端到端验证完形填空时揪出的另一个 bug: 干扰项是从整份词表【随机抽】的, 原代码只按 en 去重、【不管中文】。
+# 而全库有 10 组词【中文意思一模一样】(星海6组: rarely/seldom「很少」· enormous/huge「巨大的」·
+# besides/moreover/furthermore「此外」· amount/quantity「数量」· invent/invention「发明」· succeed/success「成功」;
+# 单词大陆 land3 1组 / land5 3组)。一旦抽到同义词当干扰项:
+#   · 英译汉/听音辨意 → 屏幕上出现【两个一模一样的中文选项】(一个判对一个判错) —— 真机2200题实测中招4次
+#   · 完形填空       → 【两个选项都对】
+# 修复: 四个选项的【中文也必须互不相同】(en 与 cn 双重去重), 并加 400 次兜底防词库凑不满时死循环。
+# 共改 45 处(模板5处 → 盖章到19岛; 单词大陆8岛各5处)。
+_b915 = []
+_key915 = 'if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)'
+for _f915 in ['template.html'] + sorted(glob.glob('island_land[1-8].html')) + sorted(glob.glob('island_*.html')):
+    _t915 = open(_f915, encoding='utf-8', errors='replace').read()
+    if 'const opts=[w]' not in _t915:
+        continue
+    if _key915 not in _t915:
+        _b915.append('%s: 选项未做中文去重(同义词干扰项→两个一样的中文选项/完形填空两个答案都对)' % _f915)
+if _b915: fail('v915 选项不得出现同义词: ' + str(_b915[:5]))
+else: ok('v915 (Hansen: 完形填空每道题都用这个单词自己的例句吧? 所有bug都修好了吗?) 选项不得出现同义词。★真机端到端复验完形填空(强制出题·逐题读渲染结果): 240/240个单词都能出完形填空、每题都用【它自己】的例句(w.ex/w.exCn对得上)、题面只有1个空、0题泄露答案、中文金色提示全有、4选项含正确答案且不重复、0 JS异常; 修复前(v913)实测只有215/240、25个词永远出不来。★但由此揪出另一个bug: 干扰项从整份词表随机抽, 原代码只按 en 去重不管中文, 而全库有10组词中文意思一模一样(星海6组: rarely/seldom「很少」·enormous/huge「巨大的」·besides/moreover/furthermore「此外」·amount/quantity「数量」·invent/invention「发明」·succeed/success「成功」; land3 1组; land5 3组) → 抽到同义词就出现【两个一模一样的中文选项】(英译汉/听音辨意, 一个判对一个判错)或【两个答案都对】(完形填空)。真机2200题实测: 修复前中招4次(如 besides 的选项是「此外」「此外」「生物」「努力」), 修复后0次。修复: 四选项的中文也必须互不相同(en+cn双重去重·400次兜底防死循环), 共45处(模板5处盖章到19岛 + 单词大陆8岛各5处)。真机复验: 星海2200题/land5 2200题 中文重复0·英文重复0·完形填空覆盖240/240与30/30·0报错。v915')
+
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))
     for x in FAIL:
