@@ -8856,9 +8856,16 @@ try:
         _b929.append('hansen_cards.js 选关墙的 boss 图丢了 loading=lazy(会把整面墙 2.5MB 全下下来)')
     if 'setTimeout(init, 200)' in _c929:
         _b929.append('hansen_cards.js 卡册图预下载又回到进岛 200ms(会抢首屏带宽)')
-    # 图片尺寸: 别再塞回超大图
+    # 图片尺寸: 别再塞回超大图 —— 但上限必须按【真实最大展示位】定, 不能只按顶栏算
+    # ⚠️ v933 修正: v929 定 avatars 上限 220px 时【只量了顶栏头像(46px)】, 漏掉了同一张图的另外两个展示位:
+    #      · 形象选择器网格缩略图 —— 显示 110px (3倍屏需要 330px)
+    #      · 形象详情大卡片       —— 显示 331px (3倍屏需要 993px)
+    #    大卡片的 CSS 是 width:auto —— 图按【原始尺寸】画, 只有超过上限才缩小。
+    #    192px 的小图【根本够不着 331px 的上限】→ 就按 192px 原样画 = 只占卡片 53% = 缩成一小坨(Hansen 截图那个)。
+    #    现在: avatars/ 小图上限 360px(够网格的 330px); 大卡片单独走 avatars/hd/(720px 原图, 只在打开详情时加载一张)。
+    #    真机像素级把关交给 build 步骤 6.8 的 img_guard.py(量源图尺寸 vs 展示位尺寸), 这里只挡"又塞回超大图"。
     from PIL import Image as _Im929
-    for _d929, _cap929 in (('icons', 320), ('avatars', 220)):
+    for _d929, _cap929 in (('icons', 320), ('avatars', 360)):
         for _fn929 in os.listdir(_d929):
             if not _fn929.lower().endswith(('.webp', '.png', '.jpg')):
                 continue
@@ -8867,8 +8874,24 @@ try:
             except Exception:
                 continue
             if max(_w929, _h929) > _cap929:
-                _b929.append('%s/%s 又变成 %dx%d(实测最大只显示 91px/46px·超标就是白烧用户流量)' % (_d929, _fn929, _w929, _h929))
+                _b929.append('%s/%s 又变成 %dx%d(超过真实最大展示位所需·超标就是白烧用户流量)' % (_d929, _fn929, _w929, _h929))
                 break
+    # v933: 形象详情大卡片必须有高清图撑着, 否则立绘缩成一小坨(只占卡片 53%)
+    if not os.path.isdir('avatars/hd'):
+        _b929.append('avatars/hd/ 不见了 —— 形象详情大卡片会退回小图, 立绘缩成一小坨')
+    else:
+        _hd933 = [x for x in os.listdir('avatars/hd') if x.lower().endswith('.webp')]
+        if len(_hd933) < 66:
+            _b929.append('avatars/hd/ 只有 %d 张(应 66 张) —— 缺的那些形象详情会缩成一小坨' % len(_hd933))
+        else:
+            _w933, _h933 = _Im929.open('avatars/hd/01.webp').size
+            if max(_w933, _h933) < 600:
+                _b929.append('avatars/hd/01.webp 只有 %dx%d —— 高清图被压过头, 大卡片(显示331px)撑不起来' % (_w933, _h933))
+    _a933 = open('hansen_avatar.js', encoding='utf-8', errors='replace').read()
+    if 'avatars/hd/' not in _a933:
+        _b929.append('hansen_avatar.js 的形象详情大卡片没在用 avatars/hd/ 高清图 —— 立绘会缩成一小坨')
+    if not (os.path.exists('img_guard.py') and os.path.exists('img_size_audit.mjs')):
+        _b929.append('img_guard.py / img_size_audit.mjs 不见了 —— 图片尺寸守卫失效, 压图压过头没人拦得住')
     if not (os.path.exists('perf_guard.py') and os.path.exists('perf_probe.mjs')):
         _b929.append('性能守卫文件(perf_guard.py / perf_probe.mjs)不见了')
 except Exception as _e929:
