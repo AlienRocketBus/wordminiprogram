@@ -36,7 +36,7 @@
 
 // hansen_boss_upgrade.js v152 (双保险覆盖原 cFall/lvlIn keyframes, 防止旧动画名残留)
 // v143v: 顶部立即导出版本号到 window, 不依赖 init() (诊断页面用)
-window.__HBU_VERSION__ = 'v929';
+window.__HBU_VERSION__ = 'v930';
 window.__HBU_LOADED_AT__ = Date.now();
 
 // Boss 战升级: 难度递增 (答错伤害 + 倒计时) + 最后 Boss 全词覆盖 + 半血惩罚 + 高奖励
@@ -1000,6 +1000,24 @@ window.__HBU_LOADED_AT__ = Date.now();
         '#bossScreen .boss-name{text-shadow:0 1px 3px rgba(0,0,0,.92),0 0 14px rgba(0,0,0,.7),0 0 20px rgba(239,68,68,.45) !important}',
         '#bossScreen .boss-question{text-shadow:0 1px 3px rgba(0,0,0,.92),0 0 12px rgba(0,0,0,.6),0 0 14px rgba(251,191,36,.35) !important}',
         '#bossScreen .boss-q-sub{color:#eef2f7 !important;font-weight:600 !important;text-shadow:0 1px 3px rgba(0,0,0,.95),0 1px 9px rgba(0,0,0,.7) !important}',
+        /* ══════════════════════════════════════════════════════════════════════════
+           ⭐ v930 打Boss 题面/HUD 可读性总修
+           (Hansen: "打boss做拼写题的时候, 这个中文字颜色根本就看不清楚。我背后用了一个主题,
+                     然后这个字他现在根本就看不清楚, 你帮我彻底解决")
+           根因: 上面那几条只加了【描影】。描影在【深色 boss 背景】上够用(实测金字 11.55:1),
+                 但 boss 的电影主题(HansenCinema 九款: 糖果乐园/云端气球/云端梦境/彩虹甜心…)
+                 全是【明亮高饱和的糖果风背景】—— 金字/浅灰字直接【裸压】在这种花哨亮底上,
+                 实测暴跌到 2.07~2.93:1(WCAG AA 要 4.5:1)= 根本看不清。描影救不了。
+           修法: 给这些【裸字】垫一层【半透明深色底板】—— 和 boss 台词气泡 / 选项卡 / 题型标签
+                 完全同一套视觉语言(它们本来就有底板, 所以一直很清楚)。
+                 底板不挑背景: 深底/亮底/花底 一律稳读。
+           注意: 这是【所有配色统一】的基础样式(不随调色板变), 不违反"打Boss任何配色都不动"的铁律。
+           ══════════════════════════════════════════════════════════════════════════ */
+        '#bossScreen .boss-name{display:table !important;margin:2px auto !important;color:#f87171 !important;background:rgba(6,10,20,.88) !important;padding:2px 12px !important;border-radius:9px !important;border:1px solid rgba(248,113,113,.35) !important}',
+        '#bossScreen .boss-hp-text{display:table !important;margin:1px auto 0 !important;background:rgba(8,12,26,.82) !important;padding:1px 10px !important;border-radius:8px !important}',
+        '#bossScreen .boss-q-sub{display:table !important;margin:0 auto 4px !important;background:rgba(8,12,26,.82) !important;padding:3px 12px !important;border-radius:9px !important}',
+        '#bossScreen .boss-question{display:table !important;margin:2px auto 1px !important;background:rgba(8,12,26,.86) !important;padding:4px 16px !important;border-radius:11px !important;border:1px solid rgba(251,191,36,.42) !important}',
+        '#bossScreen .hero-hp-text{text-shadow:0 1px 3px rgba(0,0,0,.9) !important}',
         //🔴BUG#81(v633·Hansen): boss战败/胜利【结算页】在亮主题(糖果乐园等)下文字发虚看不清 — 战败/胜利页无遮罩(遮罩仅战斗中·见BUG#79/#80), 亮主题直接透上来, 而结算文案("战败…"/"VICTORY!"/"别灰心…"/评分/奖励)是直接浮在主题背景上、无面板衬底→发虚。修复(对齐v629文字可读性思路): .boss-victory 纯色字加深色光晕text-shadow(继承给所有子文字); 渐变标题h2(背景裁剪文字)必须排除继承的text-shadow(否则渐变字会被压黑·v629铁律)改用drop-shadow滤镜。对任何主题都生效(暗主题下光晕几乎不可见·无副作用)。
         '.boss-victory{text-shadow:0 1px 3px rgba(0,0,0,.92),0 1px 2px rgba(0,0,0,.85),0 0 8px rgba(0,0,0,.55) !important}',
         '.boss-victory h2{text-shadow:none !important;filter:drop-shadow(0 2px 4px rgba(0,0,0,.88)) drop-shadow(0 0 10px rgba(0,0,0,.5)) !important}',
@@ -1024,16 +1042,16 @@ window.__HBU_LOADED_AT__ = Date.now();
         '@keyframes hansenHitFxRage{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.02);filter:brightness(2.2) saturate(1.5)}60%{transform:scale(.99);filter:brightness(1.4)}100%{transform:scale(1);filter:brightness(1)}}',
         'body.hsn-boss-battle .combo-badge{top:6px !important;padding:4px 11px !important;font-size:12px !important}',  // 🔴 v857 (Hansen): 战斗中绿色连击+金币提示框压到最顶(顶部已清空·中央无遮挡)·紧凑不占boss空间
         // boss 信息区紧凑
-        '#bossScreen .boss-name{margin:2px 0 !important;font-size:15px !important}',
+        '#bossScreen .boss-name{margin:2px auto !important;font-size:15px !important}'   /* v930: 横向 0→auto, 配合 display:table 让底板贴合文字并居中 */,
         '#bossScreen .boss-hp-bar{margin:2px auto !important}',
-        '#bossScreen .boss-hp-text{margin-top:0 !important;font-size:11px !important}',
+        '#bossScreen .boss-hp-text{margin:0 auto !important;font-size:11px !important}'   /* v930: 同上 */,
         '#bossScreen .boss-divider{margin:2px 0 !important}',
         // hero 区紧凑
         '#bossScreen .hero-section{padding:5px 2px !important;margin:3px -11px !important}',
         // 答题区放大字号 + 紧凑
         '#bossScreen .boss-q-type{margin-top:4px !important;font-size:11px !important}',
-        '#bossScreen .boss-question{font-size:20px !important;margin:4px 0 2px !important;min-height:26px !important;line-height:1.2 !important}',
-        '#bossScreen .boss-q-sub{font-size:12px !important;margin-bottom:4px !important}',
+        '#bossScreen .boss-question{font-size:20px !important;margin:4px auto 2px !important;min-height:26px !important;line-height:1.2 !important}',
+        '#bossScreen .boss-q-sub{font-size:12px !important;margin:0 auto 4px !important}'   /* v930: 同上 */,
         '#bossScreen .boss-opts{margin-top:2px !important}',
         // ─── 命中特效 (Hansen 反馈: 去掉晃动, 改刀斩/炮轰) ───
         // 覆盖原 boss-hit-anim 的旋转 (晃来晃去看头晕) → 只保留缩放+亮度
@@ -1896,7 +1914,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     // 🔴 BUG #10 关联: 下面这行 HBU_RUNTIME_VERSION 由 build.py 自动同步, 不要手改!
     // 手改会和 __HBU_VERSION__ / cache buster 形成"版本号打架"(check.html 误报)。
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    window.HBU_RUNTIME_VERSION = 'v929';
+    window.HBU_RUNTIME_VERSION = 'v930';
     setTimeout(function(){
       try {
         var versions = new Set();
