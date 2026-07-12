@@ -83,7 +83,7 @@ h1, h1.main, .main-title, .brand-title{
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1px rgba(255,255,255,.6);
-  filter: drop-shadow(0 4px 8px rgba(251,191,36,.4)) drop-shadow(0 0 20px rgba(236,72,153,.3));
+  text-shadow:0 4px 8px rgba(251,191,36,.4), 0 0 20px rgba(236,72,153,.3);
   text-shadow: 
     0 2px 0 rgba(0,0,0,.15),
     0 4px 12px rgba(0,0,0,.3);
@@ -91,8 +91,8 @@ h1, h1.main, .main-title, .brand-title{
 }
 
 @keyframes titleBreathe{
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 8px rgba(251,191,36,.4)) drop-shadow(0 0 20px rgba(236,72,153,.3)) }
-  50%      { transform: scale(1.02); filter: drop-shadow(0 6px 12px rgba(251,191,36,.6)) drop-shadow(0 0 30px rgba(236,72,153,.5)) }
+  0%, 100% { transform: scale(1); text-shadow:0 4px 8px rgba(251,191,36,.4), 0 0 20px rgba(236,72,153,.3)}
+  50%      { transform: scale(1.02); text-shadow:0 6px 12px rgba(251,191,36,.6), 0 0 30px rgba(236,72,153,.5)}
 }
 
 /* 5) 二级标题: 加粗 + 阴影 (有立体感) */
@@ -172,9 +172,7 @@ h2, h3, .section-title, .island-name{
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   -webkit-text-stroke: 1.5px rgba(255,255,255,.5);
-  filter: 
-    drop-shadow(0 4px 12px rgba(251,191,36,.5))
-    drop-shadow(0 0 24px rgba(236,72,153,.4));
+  text-shadow:0 4px 12px rgba(251,191,36,.5), 0 0 24px rgba(236,72,153,.4);
   animation: rainbowFlow 6s ease infinite, titleBreathe 3s ease-in-out infinite !important;
   letter-spacing: 3px !important;
 }
@@ -209,7 +207,7 @@ h2, h3, .section-title, .island-name{
 .stat-num{
   font-family: 'Bowlby One', 'Impact', 'Arial Black' !important;
   font-weight: 900 !important;
-  filter: drop-shadow(0 2px 8px rgba(251,191,36,.5));
+  text-shadow:0 2px 8px rgba(251,191,36,.5);
 }
 
 /* 防止微信滚动穿透 */
@@ -347,7 +345,7 @@ body{
 /* 🛸 飞碟 — v798 特性化轨迹: 悬停+急转(UFO经典行为·停在空中→突然闪移→再悬停)·全程水平不旋转(防晕) */
 .flyer-ufo{
   font-size:48px;
-  filter:drop-shadow(0 0 12px rgba(168,85,247,.7)) drop-shadow(0 0 24px rgba(59,130,246,.5));
+  text-shadow:0 0 12px rgba(168,85,247,.7), 0 0 24px rgba(59,130,246,.5);
   animation:flyUfo 30s linear infinite, bobSlow 3.5s ease-in-out infinite;
 }
 @keyframes flyUfo{
@@ -367,7 +365,7 @@ body{
 /* 🚀 火箭 — v798 特性化轨迹: 点火加速上升+重力转向弧线(底部缓慢起步→越升越快冲出顶部)·关键帧间距递增=加速·固定朝上倾角不旋转 */
 .flyer-rocket{
   font-size:42px;
-  filter:drop-shadow(0 0 14px rgba(251,146,60,.8)) drop-shadow(0 0 28px rgba(239,68,68,.5));
+  text-shadow:0 0 14px rgba(251,146,60,.8), 0 0 28px rgba(239,68,68,.5);
   animation:flyRocket 22s linear infinite;
   animation-delay:-8s;
 }
@@ -383,7 +381,7 @@ body{
 /* 🛰️ 人造卫星 — v798 特性化轨迹: 椭圆轨道匀速环绕(沿固定轨道绕行·8点采样椭圆)·匀速linear·【去掉持续自转·防晕】 */
 .flyer-satellite{
   font-size:38px;
-  filter:drop-shadow(0 0 10px rgba(34,211,238,.7)) drop-shadow(0 0 20px rgba(168,85,247,.4));
+  text-shadow:0 0 10px rgba(34,211,238,.7), 0 0 20px rgba(168,85,247,.4);
   animation:flySatellite 50s linear infinite;
   animation-delay:-12s;
 }
@@ -403,7 +401,7 @@ body{
 /* ☄️ 彗星 — v798 特性化轨迹: 高速抛物线俯冲(出现→加速坠落拖尾→冲出消失·周期划过)·Δy递增=重力加速·固定拖尾倾角不旋转 */
 .flyer-comet{
   font-size:36px;
-  filter:drop-shadow(0 0 14px rgba(34,211,238,.9)) drop-shadow(0 0 28px rgba(168,85,247,.6));
+  text-shadow:0 0 14px rgba(34,211,238,.9), 0 0 28px rgba(168,85,247,.6);
   animation:flyComet 15s linear infinite;
   animation-delay:-6s;
 }
@@ -420,7 +418,7 @@ body{
 /* 🌟 流星 — 快速划过, 短暂出现 */
 .flyer-star{
   font-size:28px;
-  filter:drop-shadow(0 0 16px rgba(253,224,71,1)) drop-shadow(0 0 30px rgba(251,191,36,.7));
+  text-shadow:0 0 16px rgba(253,224,71,1), 0 0 30px rgba(251,191,36,.7);
   animation:flyStar 14s linear infinite;
   animation-delay:-5s;
 }
@@ -458,7 +456,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* 🌸 大樱花花瓣 - 缓慢飘落 (左侧) */
 .flyer-petal-big{
   font-size:36px;
-  filter:drop-shadow(0 0 8px rgba(236,72,153,.6));
+  text-shadow:0 0 8px rgba(236,72,153,.6);
   animation:petalFall1 18s linear infinite;
   opacity:.85;
 }
@@ -471,7 +469,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* 🌸 小樱花花瓣 - 飘落 (中部, 快速) */
 .flyer-petal-small1{
   font-size:24px;
-  filter:drop-shadow(0 0 6px rgba(244,114,182,.6));
+  text-shadow:0 0 6px rgba(244,114,182,.6);
   animation:petalFall2 14s linear infinite;
   animation-delay:-3s;
   opacity:.8;
@@ -485,7 +483,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* 🌸 小樱花花瓣 - 飘落 (右侧, 错开) */
 .flyer-petal-small2{
   font-size:28px;
-  filter:drop-shadow(0 0 6px rgba(236,72,153,.6));
+  text-shadow:0 0 6px rgba(236,72,153,.6);
   animation:petalFall3 16s linear infinite;
   animation-delay:-8s;
   opacity:.85;
@@ -518,7 +516,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* 🧚‍♀️ 小仙女 - 顶部漂浮 */
 .flyer-fairy{
   font-size:40px;
-  filter:drop-shadow(0 0 12px rgba(253,224,71,.8)) drop-shadow(0 0 22px rgba(236,72,153,.5));
+  text-shadow:0 0 12px rgba(253,224,71,.8), 0 0 22px rgba(236,72,153,.5);
   animation:flyFairy 36s linear infinite, fairyBob 2.5s ease-in-out infinite;
   animation-delay:-5s;
 }
@@ -536,7 +534,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* 🦄 独角兽 - 中下部漂浮, 粉紫光 */
 .flyer-unicorn-pink{
   font-size:42px;
-  filter:drop-shadow(0 0 14px rgba(236,72,153,.8)) drop-shadow(0 0 24px rgba(168,85,247,.5));
+  text-shadow:0 0 14px rgba(236,72,153,.8), 0 0 24px rgba(168,85,247,.5);
   animation:flyUnicornPink 40s linear infinite, fairyBob 3s ease-in-out infinite reverse;
   animation-delay:-15s;
 }
@@ -551,7 +549,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="cosmos"]{display:block}
 /* ☁️ 白云 - 底部缓缓横穿 */
 .flyer-cloud-white{
   font-size:64px;
-  filter:drop-shadow(0 0 12px rgba(255,255,255,.7)) drop-shadow(0 0 22px rgba(255,255,255,.4));
+  text-shadow:0 0 12px rgba(255,255,255,.7), 0 0 22px rgba(255,255,255,.4);
   animation:flyCloudWhite 38s linear infinite, fairyBob 3.2s ease-in-out infinite;
   animation-delay:-20s;
   opacity:.95;
@@ -589,7 +587,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
 /* 🐋 鲸鱼 - 慢悠悠地游过中部 */
 .flyer-whale{
   font-size:60px;
-  filter:drop-shadow(0 0 16px rgba(125,211,252,.7)) drop-shadow(0 0 28px rgba(59,130,246,.4));
+  text-shadow:0 0 16px rgba(125,211,252,.7), 0 0 28px rgba(59,130,246,.4);
   animation:flyWhale 42s linear infinite, bobSlow 4.5s ease-in-out infinite;
 }
 @keyframes flyWhale{
@@ -601,7 +599,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
 /* 🐬 海豚 - 跳跃式前进 */
 .flyer-dolphin{
   font-size:42px;
-  filter:drop-shadow(0 0 12px rgba(125,211,252,.8));
+  text-shadow:0 0 12px rgba(125,211,252,.8);
   animation:flyDolphin 28s linear infinite;
   animation-delay:-8s;
 }
@@ -619,7 +617,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
 /* 🐙 章鱼 - 漂浮加摇摆 */
 .flyer-octopus{
   font-size:46px;
-  filter:drop-shadow(0 0 14px rgba(244,114,182,.6)) drop-shadow(0 0 22px rgba(168,85,247,.4));
+  text-shadow:0 0 14px rgba(244,114,182,.6), 0 0 22px rgba(168,85,247,.4);
   animation:flyOctopus 38s linear infinite, octopusBob 1.8s ease-in-out infinite;
   animation-delay:-12s;
 }
@@ -642,13 +640,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
   animation:flyStarfish 36s linear infinite, starfishSpin 8s linear infinite;
   animation-delay:-18s;
 }
-@keyframes flyStarfish{
-  0%{left:-80px; top:48vh}
-  25%{left:25vw; top:52vh}
-  50%{left:50vw; top:46vh}
-  75%{left:75vw; top:54vh}
-  100%{left:calc(100vw + 80px); top:50vh}
-}
+@keyframes flyStarfish{0%{transform:translate(0,48vh)}25%{transform:translate(calc(25vw + 80px),52vh)}50%{transform:translate(calc(50vw + 80px),46vh)}75%{transform:translate(calc(75vw + 80px),54vh)}100%{transform:translate(calc(100vw + 160px),50vh)}}
 @keyframes starfishSpin{
   0%{transform:rotate(0deg)}
   100%{transform:rotate(360deg)}
@@ -657,7 +649,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
 /* 🐠 热带鱼 - 快速游 */
 .flyer-fish{
   font-size:32px;
-  filter:drop-shadow(0 0 10px rgba(253,224,71,.7)) drop-shadow(0 0 18px rgba(251,146,60,.5));
+  text-shadow:0 0 10px rgba(253,224,71,.7), 0 0 18px rgba(251,146,60,.5);
   animation:flyFish 22s linear infinite, fishBob 1.4s ease-in-out infinite;
   animation-delay:-5s;
 }
@@ -673,7 +665,7 @@ body[data-theme="ocean"] .flyer[data-flyer-theme="ocean"]{display:block}
 /* ⛵ 探险帆船 - 在海面航行, 上下颠簸 */
 .flyer-ship{
   font-size:52px;
-  filter:drop-shadow(0 0 14px rgba(253,224,71,.7)) drop-shadow(0 0 24px rgba(251,146,60,.5));
+  text-shadow:0 0 14px rgba(253,224,71,.7), 0 0 24px rgba(251,146,60,.5);
   animation:flyShip 46s linear infinite, shipRock 3s ease-in-out infinite;
   animation-delay:-22s;
 }
@@ -699,7 +691,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🦁 狮子 - 正面脸, 小范围摇摆 (左下角) */
 .flyer-lion{
   font-size:54px;
-  filter:drop-shadow(0 0 14px rgba(251,191,36,.7)) drop-shadow(0 0 24px rgba(217,119,6,.5));
+  text-shadow:0 0 14px rgba(251,191,36,.7), 0 0 24px rgba(217,119,6,.5);
   animation:lionSway 8s ease-in-out infinite, bobSlow 3s ease-in-out infinite;
   left:8vw;
   bottom:18vh;
@@ -713,7 +705,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐅 老虎 - 头朝左, 从右向左走 */
 .flyer-tiger{
   font-size:46px;
-  filter:drop-shadow(0 0 12px rgba(251,146,60,.7)) drop-shadow(0 0 20px rgba(220,38,38,.4));
+  text-shadow:0 0 12px rgba(251,146,60,.7), 0 0 20px rgba(220,38,38,.4);
   animation:flyTiger 36s linear infinite, bobMed 1.5s ease-in-out infinite;
   animation-delay:-10s;
 }
@@ -725,7 +717,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐘 大象 - 头朝左, 从右向左缓慢走 */
 .flyer-elephant{
   font-size:60px;
-  filter:drop-shadow(0 0 14px rgba(148,163,184,.7)) drop-shadow(0 0 22px rgba(100,116,139,.5));
+  text-shadow:0 0 14px rgba(148,163,184,.7), 0 0 22px rgba(100,116,139,.5);
   animation:flyElephant 50s linear infinite, bobSlow 3.5s ease-in-out infinite;
   animation-delay:-20s;
 }
@@ -737,7 +729,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🦓 斑马 - 头朝左, 从右向左走 (中速) */
 .flyer-zebra{
   font-size:50px;
-  filter:drop-shadow(0 0 12px rgba(255,255,255,.6)) drop-shadow(0 0 20px rgba(100,116,139,.5));
+  text-shadow:0 0 12px rgba(255,255,255,.6), 0 0 20px rgba(100,116,139,.5);
   animation:flyZebra 40s linear infinite, bobMed 1.6s ease-in-out infinite;
   animation-delay:-25s;
 }
@@ -749,7 +741,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐇 兔子 - 跳跃前进 (从右向左) */
 .flyer-rabbit{
   font-size:38px;
-  filter:drop-shadow(0 0 10px rgba(254,202,202,.7)) drop-shadow(0 0 18px rgba(244,114,182,.5));
+  text-shadow:0 0 10px rgba(254,202,202,.7), 0 0 18px rgba(244,114,182,.5);
   animation:flyRabbit 26s linear infinite;
   animation-delay:-8s;
 }
@@ -770,7 +762,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🧚‍♀️ 花仙子 - 顶部空中飞舞 */
 .flyer-fairy-forest{
   font-size:42px;
-  filter:drop-shadow(0 0 14px rgba(253,224,71,.85)) drop-shadow(0 0 24px rgba(253,224,71,.5)) drop-shadow(0 0 36px rgba(132,204,22,.4));
+  text-shadow:0 0 14px rgba(253,224,71,.85), 0 0 24px rgba(253,224,71,.5), 0 0 36px rgba(132,204,22,.4);
   animation:flyFairyForest 32s linear infinite, fairyBob 2.2s ease-in-out infinite;
   animation-delay:-5s;
 }
@@ -785,7 +777,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐝 蜜蜂 - Z 字形飞舞 (中部) */
 .flyer-bee{
   font-size:32px;
-  filter:drop-shadow(0 0 12px rgba(253,224,71,.85)) drop-shadow(0 0 22px rgba(251,191,36,.6));
+  text-shadow:0 0 12px rgba(253,224,71,.85), 0 0 22px rgba(251,191,36,.6);
   animation:flyBee 24s linear infinite, beeBob 0.25s ease-in-out infinite;
   animation-delay:-5s;
 }
@@ -808,7 +800,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐦 小燕子 - 滑翔 (高空) */
 .flyer-swallow{
   font-size:36px;
-  filter:drop-shadow(0 0 12px rgba(34,211,238,.7)) drop-shadow(0 0 22px rgba(59,130,246,.4));
+  text-shadow:0 0 12px rgba(34,211,238,.7), 0 0 22px rgba(59,130,246,.4);
   animation:flySwallow 28s linear infinite;
   animation-delay:-10s;
 }
@@ -824,7 +816,7 @@ body[data-theme="forest"] .flyer[data-flyer-theme="forest"]{display:block}
 /* 🐞 瓢虫 - 慢慢爬 (草地附近) */
 .flyer-ladybug{
   font-size:28px;
-  filter:drop-shadow(0 0 10px rgba(239,68,68,.7)) drop-shadow(0 0 18px rgba(220,38,38,.4));
+  text-shadow:0 0 10px rgba(239,68,68,.7), 0 0 18px rgba(220,38,38,.4);
   animation:flyLadybug 34s linear infinite, ladybugBob 2s ease-in-out infinite;
   animation-delay:-18s;
 }
@@ -878,7 +870,7 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
 .flyer-evil-dragon{
   font-size:54px;
   position:fixed;
-  filter:drop-shadow(0 0 16px rgba(239,68,68,.8)) drop-shadow(0 0 28px rgba(220,38,38,.5));
+  text-shadow:0 0 16px rgba(239,68,68,.8), 0 0 28px rgba(220,38,38,.5);
   animation:flyEvilDragon 38s linear infinite, bobMed 2.8s ease-in-out infinite;
   animation-delay:-14s;
 }
@@ -906,7 +898,7 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
 /* 🔮 水晶球 - 漂浮闪烁 (慢) */
 .flyer-crystal-ball{
   font-size:36px;
-  filter:drop-shadow(0 0 14px rgba(168,85,247,.9)) drop-shadow(0 0 26px rgba(236,72,153,.6));
+  text-shadow:0 0 14px rgba(168,85,247,.9), 0 0 26px rgba(236,72,153,.6);
   animation:flyCrystal 40s linear infinite, crystalPulse 2.5s ease-in-out infinite;
   animation-delay:-18s;
 }
@@ -916,24 +908,18 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
   100%{transform:translate(-80px, 40vh)}
 }
 @keyframes crystalPulse{
-  0%,100%{margin-top:0; filter:drop-shadow(0 0 14px rgba(168,85,247,.9)) drop-shadow(0 0 26px rgba(236,72,153,.6))}
-  50%{margin-top:-10px; filter:drop-shadow(0 0 20px rgba(168,85,247,1)) drop-shadow(0 0 36px rgba(236,72,153,.9))}
+  0%,100%{margin-top:0; text-shadow:0 0 14px rgba(168,85,247,.9), 0 0 26px rgba(236,72,153,.6)}
+  50%{margin-top:-10px; text-shadow:0 0 20px rgba(168,85,247,1), 0 0 36px rgba(236,72,153,.9)}
 }
 
 /* 🪄 魔法棒 - 旋转飞 */
 .flyer-wand{
   font-size:32px;
-  filter:drop-shadow(0 0 12px rgba(253,224,71,.9)) drop-shadow(0 0 22px rgba(168,85,247,.6));
+  text-shadow:0 0 12px rgba(253,224,71,.9), 0 0 22px rgba(168,85,247,.6);
   animation:flyWand 28s linear infinite, wandSpin 4s linear infinite;
   animation-delay:-5s;
 }
-@keyframes flyWand{
-  0%{left:-80px; top:64vh}
-  25%{left:25vw; top:70vh}
-  50%{left:50vw; top:60vh}
-  75%{left:75vw; top:68vh}
-  100%{left:calc(100vw + 80px); top:64vh}
-}
+@keyframes flyWand{0%{transform:translate(0,64vh)}25%{transform:translate(calc(25vw + 80px),70vh)}50%{transform:translate(calc(50vw + 80px),60vh)}75%{transform:translate(calc(75vw + 80px),68vh)}100%{transform:translate(calc(100vw + 160px),64vh)}}
 @keyframes wandSpin{
   0%{transform:rotate(0deg)}
   100%{transform:rotate(360deg)}
@@ -942,7 +928,7 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
 /* ✨ 闪光特效 - 随机出现 */
 .flyer-sparkle{
   font-size:26px;
-  filter:drop-shadow(0 0 12px rgba(253,224,71,1)) drop-shadow(0 0 22px rgba(255,255,255,.8));
+  text-shadow:0 0 12px rgba(253,224,71,1), 0 0 22px rgba(255,255,255,.8);
   animation:flySparkle 12s linear infinite, sparkleSpin 1s linear infinite;
   animation-delay:-3s;
 }
@@ -967,7 +953,7 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
 .flyer-ghost{
   font-size:42px;
   opacity:.85;
-  filter:drop-shadow(0 0 14px rgba(255,255,255,.85)) drop-shadow(0 0 24px rgba(168,85,247,.5));
+  text-shadow:0 0 14px rgba(255,255,255,.85), 0 0 24px rgba(168,85,247,.5);
   animation:flyGhost 36s linear infinite, ghostBob 3s ease-in-out infinite;
   animation-delay:-20s;
 }
@@ -982,7 +968,7 @@ body[data-theme="rainbow"] .flyer[data-flyer-theme="rainbow"]{display:block}
 /* 🎃 南瓜头 - 漂浮 (中上部) */
 .flyer-pumpkin{
   font-size:44px;
-  filter:drop-shadow(0 0 14px rgba(251,146,60,.85)) drop-shadow(0 0 24px rgba(239,68,68,.5));
+  text-shadow:0 0 14px rgba(251,146,60,.85), 0 0 24px rgba(239,68,68,.5);
   animation:flyPumpkin 30s linear infinite, pumpkinBob 2.2s ease-in-out infinite;
   animation-delay:-9s;
 }
@@ -1033,7 +1019,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍑 桃子 - 漂浮 (中上) */
 .flyer-peach{
   font-size:46px;
-  filter:drop-shadow(0 0 14px rgba(251,146,60,.7)) drop-shadow(0 0 24px rgba(244,114,182,.5));
+  text-shadow:0 0 14px rgba(251,146,60,.7), 0 0 24px rgba(244,114,182,.5);
   animation:flyPeach 38s linear infinite, fairyBob 2.6s ease-in-out infinite;
   animation-delay:-8s;
 }
@@ -1048,15 +1034,11 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍭 棒棒糖 - 旋转飞 */
 .flyer-lollipop{
   font-size:42px;
-  filter:drop-shadow(0 0 12px rgba(236,72,153,.7)) drop-shadow(0 0 22px rgba(168,85,247,.5));
+  text-shadow:0 0 12px rgba(236,72,153,.7), 0 0 22px rgba(168,85,247,.5);
   animation:flyLollipop 32s linear infinite, lollipopSpin 3s linear infinite;
   animation-delay:-5s;
 }
-@keyframes flyLollipop{
-  0%{left:calc(100vw + 80px); top:30vh}
-  50%{left:50vw; top:36vh}
-  100%{left:-80px; top:32vh}
-}
+@keyframes flyLollipop{0%{transform:translate(calc(100vw + 160px),30vh)}50%{transform:translate(calc(50vw + 80px),36vh)}100%{transform:translate(0,32vh)}}
 @keyframes lollipopSpin{
   0%{transform:rotate(0deg)}
   100%{transform:rotate(360deg)}
@@ -1065,7 +1047,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍬 糖果 - Z字形跳跃 */
 .flyer-candy{
   font-size:36px;
-  filter:drop-shadow(0 0 12px rgba(253,224,71,.8)) drop-shadow(0 0 22px rgba(251,146,60,.5));
+  text-shadow:0 0 12px rgba(253,224,71,.8), 0 0 22px rgba(251,146,60,.5);
   animation:flyCandy 26s linear infinite, candyBob 1.4s ease-in-out infinite;
   animation-delay:-12s;
 }
@@ -1085,7 +1067,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🧁 纸杯蛋糕 - 慢悠悠飘 */
 .flyer-cupcake{
   font-size:42px;
-  filter:drop-shadow(0 0 12px rgba(244,114,182,.7)) drop-shadow(0 0 22px rgba(168,85,247,.4));
+  text-shadow:0 0 12px rgba(244,114,182,.7), 0 0 22px rgba(168,85,247,.4);
   animation:flyCupcake 40s linear infinite, fairyBob 3s ease-in-out infinite;
   animation-delay:-18s;
 }
@@ -1100,15 +1082,11 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍩 甜甜圈 - 旋转滚动 */
 .flyer-donut{
   font-size:38px;
-  filter:drop-shadow(0 0 12px rgba(251,146,60,.7)) drop-shadow(0 0 22px rgba(244,114,182,.5));
+  text-shadow:0 0 12px rgba(251,146,60,.7), 0 0 22px rgba(244,114,182,.5);
   animation:flyDonut 30s linear infinite, donutRoll 2s linear infinite;
   animation-delay:-15s;
 }
-@keyframes flyDonut{
-  0%{left:-80px; top:60vh}
-  50%{left:50vw; top:64vh}
-  100%{left:calc(100vw + 80px); top:62vh}
-}
+@keyframes flyDonut{0%{transform:translate(0,60vh)}50%{transform:translate(calc(50vw + 80px),64vh)}100%{transform:translate(calc(100vw + 160px),62vh)}}
 @keyframes donutRoll{
   0%{transform:rotate(0deg)}
   100%{transform:rotate(360deg)}
@@ -1117,7 +1095,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍓 草莓 - 漂浮 */
 .flyer-strawberry{
   font-size:36px;
-  filter:drop-shadow(0 0 12px rgba(239,68,68,.7)) drop-shadow(0 0 22px rgba(244,114,182,.5));
+  text-shadow:0 0 12px rgba(239,68,68,.7), 0 0 22px rgba(244,114,182,.5);
   animation:flyStrawberry 34s linear infinite, fairyBob 2.4s ease-in-out infinite;
   animation-delay:-22s;
 }
@@ -1132,7 +1110,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍒 樱桃 - 摆动飞 */
 .flyer-cherry{
   font-size:34px;
-  filter:drop-shadow(0 0 12px rgba(239,68,68,.8)) drop-shadow(0 0 22px rgba(220,38,38,.5));
+  text-shadow:0 0 12px rgba(239,68,68,.8), 0 0 22px rgba(220,38,38,.5);
   animation:flyCherry 28s linear infinite, fairyBob 1.8s ease-in-out infinite reverse;
   animation-delay:-7s;
 }
@@ -1147,7 +1125,7 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 /* 🍦 冰淇淋 - 慢飘 */
 .flyer-icecream{
   font-size:44px;
-  filter:drop-shadow(0 0 14px rgba(253,224,71,.8)) drop-shadow(0 0 24px rgba(244,114,182,.5));
+  text-shadow:0 0 14px rgba(253,224,71,.8), 0 0 24px rgba(244,114,182,.5);
   animation:flyIcecream 42s linear infinite, bobSlow 3.4s ease-in-out infinite;
   animation-delay:-25s;
 }
@@ -1313,7 +1291,7 @@ h1.main{
   background:linear-gradient(135deg, #fbbf24 0%, #ef4444 30%, #ec4899 60%, #a855f7 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
-  filter:drop-shadow(0 0 30px rgba(251,191,36,.3));
+  text-shadow:0 0 30px rgba(251,191,36,.3);
   animation:fadeUp 1s .3s both;
   text-align:center;
   position:relative;
@@ -1365,7 +1343,7 @@ h1.main::after{
   border-color:rgba(251,191,36,.4);
   background:rgba(251,191,36,.06);
 }
-.stat-icon{font-size:22px;filter:drop-shadow(0 0 8px currentColor)}
+.stat-icon{font-size:22px;text-shadow:0 0 8px currentColor}
 .stat-num{font-family:'Bowlby One',serif;font-size:24px;color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.8), 0 0 16px rgba(251,191,36,.3)}
 .stat-lbl{font-size:13px;color:#f1f5f9;letter-spacing:1px;text-shadow:0 2px 6px rgba(0,0,0,.8);font-weight:600}
 
@@ -1451,7 +1429,7 @@ h1.main::after{
 }
 .island .float-bg span{
   position:absolute;font-size:48px;opacity:.15;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.2));
+  text-shadow:0 4px 8px rgba(0,0,0,.2);
   animation:slowFloat 9s ease-in-out infinite;
 }
 @keyframes slowFloat{
@@ -1463,7 +1441,7 @@ h1.main::after{
   font-size:54px;
   line-height:1;
   margin-bottom:14px;
-  filter:drop-shadow(0 8px 16px rgba(0,0,0,.3));
+  text-shadow:0 8px 16px rgba(0,0,0,.3);
   display:inline-block;
   transition:transform .4s;
 }
@@ -1982,8 +1960,8 @@ body[data-theme="rainbow"] .stars{opacity:.7; filter:hue-rotate(-30deg) brightne
 
 /* 彩虹拱形闪烁 */
 @keyframes rainbowGlow{
-  0%,100%{filter:drop-shadow(0 0 16px rgba(236,72,153,.7)) drop-shadow(0 0 36px rgba(168,85,247,.5)) drop-shadow(0 0 60px rgba(255,255,255,.3))}
-  50%{filter:drop-shadow(0 0 28px rgba(236,72,153,1)) drop-shadow(0 0 55px rgba(168,85,247,.8)) drop-shadow(0 0 80px rgba(253,224,71,.5))}
+  0%,100%{text-shadow:0 0 16px rgba(236,72,153,.7), 0 0 36px rgba(168,85,247,.5), 0 0 60px rgba(255,255,255,.3)}
+  50%{text-shadow:0 0 28px rgba(236,72,153,1), 0 0 55px rgba(168,85,247,.8), 0 0 80px rgba(253,224,71,.5)}
 }
 
 
@@ -2277,7 +2255,7 @@ h1.main.game-logo{
 .feedback-big-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:20px 40px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:var(--pal-chrome-1,#1e1b4b);font-size:22px;font-weight:900;border:none;border-radius:18px;cursor:pointer;box-shadow:0 8px 24px rgba(251,191,36,.45),0 2px 6px rgba(0,0,0,.2);transition:all .15s;letter-spacing:1px;min-width:240px}
 .feedback-big-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(251,191,36,.6)}
 .feedback-big-btn:active{transform:scale(.96)}
-.feedback-big-btn .fbb-icon{font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.feedback-big-btn .fbb-icon{font-size:30px;line-height:1;text-shadow:0 2px 4px rgba(0,0,0,.2)}
 .feedback-big-btn .fbb-text{line-height:1}
 .feedback-sub{font-size:14px;color:var(--pal-ink-3,#94a3b8);margin-top:14px;letter-spacing:1px}
 
@@ -2287,7 +2265,7 @@ h1.main.game-logo{
 <style id="hsnLightFix">
 /* 🔴v860 亮色可读性整改(Hansen真机: 亮色下多处字看不清 · 四个亮色逐元素对比度扫描实名修复) */
 /* tagline 渐变字: 亮底换深渐变(琥珀深→玫红深→紫深)·去发光阴影 */
-html.hsn-pal-light .tagline{ background:linear-gradient(135deg,#92400e 0%,#9f1239 45%,#5b21b6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; text-shadow:none !important; filter:drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
+html.hsn-pal-light .tagline{ background:linear-gradient(135deg,#92400e 0%,#9f1239 45%,#5b21b6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; text-shadow:none !important; text-shadow:0 1px 1px rgba(0,0,0,.28); }
 /* hero 开场段: 正文深墨·所有彩色高亮统一深琥珀(强调仍在·字字可读) */
 html.hsn-pal-light .intro{ color:#1f2937 !important; text-shadow:none !important; }
 html.hsn-pal-light .intro span, html.hsn-pal-light .intro b, html.hsn-pal-light .intro strong{ color:#92400e !important; text-shadow:none !important; }
@@ -2313,6 +2291,15 @@ html.hsn-pal-light .enter{ background:rgba(15,23,42,.85) !important; color:#fbbf
 /* v863 页脚: 暗色描边+发光在亮底=糊 */
 html.hsn-pal-light .foot-slogan{ color:#78350f !important; text-shadow:none !important; }
 html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !important; }
+
+/* ⭐ v932 (Hansen: "要极致丝滑") 这 4 个飞行装饰原本动的是 left/top ——
+   动 left/top 会让浏览器【每一帧重新布局整个文档】(1000+ 节点), 是最贵的一类动画。
+   改成 transform 后走 GPU 合成, 视觉轨迹完全一致, 但不再碰布局。 */
+.flyer-starfish,.flyer-wand,.flyer-lollipop,.flyer-donut{ left:-80px !important; top:0 !important; will-change:transform; }
+
+/* ⭐ v932: 滚出屏幕的岛屿卡片, 内部装饰动画自动暂停(看不见的东西不该烧 CPU·视觉零差别)
+   ⚠️ .flyer-* 是 position:fixed 横穿屏幕的, 绝不能暂停(会停在半空), 这里只管岛屿卡片内部。 */
+.island.hsn-offscreen *{ animation-play-state: paused !important; }
 </style>
 </head>
 
@@ -3774,7 +3761,7 @@ window.addEventListener('unhandledrejection', function(e){
 // ───── starfield ─────
 (function(){
   const s=document.getElementById('stars');
-  const N=80;
+  const N=36;   /* v932: 80→36, 每颗星都挂着永不停的 twinkle 动画, 减一半多帧率立涨 */
   for(let i=0;i<N;i++){
     const e=document.createElement('div');
     e.className='star';
@@ -4184,24 +4171,42 @@ document.querySelectorAll('.island').forEach(el=>{
 </script>
 
 
-<script src="perf_boost.js?v=930"></script>
-<script src="hansen_preload.js?v=930"></script>
-<script src="copy_protect.js?v=930"></script>
-<script src="click_sound.js?v=930"></script>
-<script src="click_setting.js?v=930"></script>
-<script src="vocab_all.js?v=930"></script>
-<script src="hansen_upgrade.js?v=930"></script>
-<script src="hansen_onboarding.js?v=930"></script>
-<script src="hansen_theme_shop.js?v=930"></script>
-<script src="hansen_season.js?v=930"></script>
-<script src="hansen_cinema_themes.js?v=930"></script>
-<script src="hansen_diamond_shop.js?v=930"></script>
-<script src="hansen_gem_system.js?v=930"></script>
-<script src="hansen_stability.js?v=930"></script>
-<script src="hansen_home_link.js?v=930"></script>
-<script src="hansen_palette.js?v=930"></script>
-<script src="hansen_perf.js?v=930"></script><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
+<script src="perf_boost.js?v=932"></script>
+<script src="hansen_preload.js?v=932"></script>
+<script src="copy_protect.js?v=932"></script>
+<script src="click_sound.js?v=932"></script>
+<script src="click_setting.js?v=932"></script>
+<script src="vocab_all.js?v=932"></script>
+<script src="hansen_upgrade.js?v=932"></script>
+<script src="hansen_onboarding.js?v=932"></script>
+<script src="hansen_theme_shop.js?v=932"></script>
+<script src="hansen_season.js?v=932"></script>
+<script src="hansen_cinema_themes.js?v=932"></script>
+<script src="hansen_diamond_shop.js?v=932"></script>
+<script src="hansen_gem_system.js?v=932"></script>
+<script src="hansen_stability.js?v=932"></script>
+<script src="hansen_home_link.js?v=932"></script>
+<script src="hansen_palette.js?v=932"></script>
+<script src="hansen_perf.js?v=932"></script><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
 <script>/* 🔴 v733(Hansen): 版本水印取值——从已加载脚本的 ?v= 戳读当前构建号(build.py 每次构建自动维护·永远=真实部署版本·无需手改)。若加载到的是旧缓存 index.html·这里读到的就是旧版号→Hansen 一眼就知道没刷新到新代码。 */
 (function(){try{var el=document.getElementById('hsnVerStamp');if(!el)return;var s=document.querySelector('script[src*="?v="]');var m=s&&s.src.match(/[?&]v=(\d+)/);el.textContent=m?('v'+m[1]):'';}catch(e){}})();</script>
+
+<script>
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  function boot(){
+    var cards=document.querySelectorAll('.island');
+    if(!cards.length) return setTimeout(boot,300);
+    var io=new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++){
+        if(es[i].isIntersecting) es[i].target.classList.remove('hsn-offscreen');
+        else es[i].target.classList.add('hsn-offscreen');
+      }
+    },{rootMargin:'120px 0px'});
+    for(var i=0;i<cards.length;i++) io.observe(cards[i]);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 </body>
 </html>

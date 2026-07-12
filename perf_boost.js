@@ -16,17 +16,27 @@
 (function(){
   'use strict';
 
-  // ============ 1. Hook AudioContext 跟踪所有上下文 ============
+  // ============ 1. Hook AudioContext: 【全局单例】 ============
+  // ⭐ v932 (Hansen: "操作有点卡顿") CPU 采样实锤: HookedAC 自耗时 804ms —— 全项目最烧 CPU 的函数。
+  //    根因: new AudioContext() 本身极贵(要起一条音频线程 + 初始化音频图), 中端手机上一次就要几百毫秒。
+  //    而项目里【至少 3 处各建一个】: template 的 _unlockAudio、template 的 _getAudioCtx、hansen_cards.js。
+  //    浏览器对每页的 AudioContext 数量还有上限(约 6 个), 建多了直接抛异常。
+  //    修法: 在 hook 这一层做【真·单例】—— 谁 new 都返回同一个 ctx, 全app只创建一次。
+  //    游戏只用它放提示音(beep), 共用一个上下文完全安全, 也是标准做法。
+  //    (万一某处把 ctx close() 了, 下次 new 会自动重建一个新的, 不会坏。)
   var OrigAC = window.AudioContext || window.webkitAudioContext;
   var allContexts = [];
+  var sharedCtx = null;
 
   if(OrigAC){
     function HookedAC(){
       try {
-        // 调原始构造器
+        // 已有一个还活着 → 直接复用, 一分钱 CPU 都不花
+        if(sharedCtx && sharedCtx.state !== 'closed') return sharedCtx;
         var ctx = arguments.length ?
           new OrigAC(arguments[0]) :
           new OrigAC();
+        sharedCtx = ctx;
         allContexts.push(ctx);
         return ctx;
       } catch(e){
