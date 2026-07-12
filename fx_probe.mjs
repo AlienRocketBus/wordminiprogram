@@ -108,6 +108,10 @@ const run = async () => {
       try { showScreen('boss'); } catch (e) {}
       try { startBoss(); } catch (e) {}
     }, { lv: b.lv, land: IS_LAND });
+    // ⭐ v929: boss 引擎(2.44MB)改成了【按需加载】—— 进岛不下载, 首屏画完后空闲预取。
+    //   探针是【绕过 showScreen 直接调 HansenBossAttack】的, 所以必须先等引擎真正就位,
+    //   否则调到的是占位函数 → 特效为空 = 假警报。(真实玩家走 showScreen('boss'), 钩子会自动等它。)
+    try { await page.waitForFunction(() => window.__hansenBossFXLoaded === true, { timeout: 25000 }); } catch (e) {}
     await page.waitForTimeout(420);
     await killModals();
 
