@@ -122,13 +122,39 @@
     try { var iu = window.__hsnIslandBusyUntil || 0; if(iu > u) u = iu; } catch(e){}
     return u;
   }
+  /* ⭐⭐ v932 (Hansen: "操作卡顿·18个岛有的图加载不出来·要极致丝滑") —— 预载抢带宽的根治
+     实测: 每次进岛, 后台要偷偷下【20张 lv boss 图 + ~66张具名 boss 图】= 2MB 以上。
+     后果两条, 正好就是 Hansen 遇到的:
+       ① 抢带宽 → 用户真正要看的图(卡册/头像/单词图)下不下来 → 重试3次失败 → 变成灰色的"?"方块
+       ② 这么多图的【解码】要占主线程 → 滑动/点击一顿一顿
+     修法三件套:
+       1) fetchPriority='low' —— 告诉浏览器这些是【最低优先级】, 永远排在用户真正要的东西后面,
+          绝不抢带宽。这是最关键的一条(浏览器原生支持, 比自己写让路逻辑可靠得多)。
+       2) 弱网(2G/3G)或用户开了"省流量" → 【一张都不预下】。boss 图在真正开打时按需加载即可。
+       3) 预载量减半(下一章够用就行), 间隔从 90ms 拉到 220ms —— 细水长流, 不跟用户抢。 */
+  function _hsnNetIsSlow(){
+    try{
+      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if(!c) return false;
+      if(c.saveData) return true;                                   // 用户开了省流量
+      var t = c.effectiveType || '';
+      return (t === 'slow-2g' || t === '2g' || t === '3g');
+    }catch(e){ return false; }
+  }
+  function _hsnLowPrio(img){
+    try{ img.fetchPriority = 'low'; }catch(e){}
+    try{ img.decoding = 'async'; }catch(e){}
+    return img;
+  }
+
   function preloadBossImages(){
     var i = 1;
     // 按章预载: 只预载到"当前进度 + 1 章(+4 关)", 上限 20.
     // 新玩家只预载 lv01-05 (~1MB), 不再一上来就拉全部 17-20 张 (~3.5MB).
     // 没预载到的高级 boss 仍会在进入那场 boss 战时按需加载 (无害, 不影响可玩性).
-    var CAP = 20;
-    try { CAP = Math.min(20, maxBossUnlocked() + 4); } catch(e){ CAP = 20; }
+    if(_hsnNetIsSlow()) return;                       /* v932: 弱网/省流量 → 一张都不预下 */
+    var CAP = 8;
+    try { CAP = Math.min(8, maxBossUnlocked() + 2); } catch(e){ CAP = 8; }   /* v932: 20→8, +4→+2 */
     function loadNextImg(){
       if(i > CAP) return;
       // 用户正在操作 或 有音频在播 → 让路 (boss 图较大, 更不能和"点击发音/例句"抢带宽)
@@ -137,9 +163,9 @@
       if(now < until){ var d = (until - now) + 80; if(d > 500) d = 500; setTimeout(loadNextImg, d); return; }
       var num = i; i++;
       var n = (num < 10 ? '0' : '') + num;
-      var img = new Image();
+      var img = _hsnLowPrio(new Image());   /* v932: 最低优先级, 绝不跟用户抢带宽 */
       _imgRefs.push(img);                   // 持有引用, 防下载中途被 GC 中断
-      var go = function(){ setTimeout(loadNextImg, 90); };   // 错开 ~90ms, 一张一张来, 不一次性挤爆
+      var go = function(){ setTimeout(loadNextImg, 220); };  // v932: 90→220ms, 细水长流
       var rel = function(){                 // 下载完/失败 → 释放 (文件已进 HTTP 缓存)
         var k = _imgRefs.indexOf(img);
         if(k >= 0) _imgRefs[k] = null;
@@ -320,7 +346,7 @@
           var done = false;
           var fin = function(){ if(done) return; done = true; var k = active.indexOf(rec); if(k >= 0) active.splice(k, 1); maybeDone(); pump(); };
           try {
-            fetch(u, ctrl ? { signal: ctrl.signal, credentials: 'same-origin' } : { credentials: 'same-origin' })
+            fetch(u, ctrl ? { priority:'low', signal: ctrl.signal, credentials: 'same-origin' } : { credentials: 'same-origin' })
               .then(function(r){ return r.blob(); })   // 读完 body → 确保整文件进 HTTP 缓存
               .then(function(){ fin(); })
               .catch(function(){ fin(); });            // 失败/被 abort → 静默(被 abort 的已放回队首)
@@ -375,6 +401,7 @@
   //   做法: 从各岛 HTML DOMParse 抽 bosses/*.webp(自维护·岛改引用自动跟随·排除已由 preloadBossImages 管的 lvNN), 最低优先·复用同套礼让(preheatUrlBatch: 碰屏/音频忙立刻让路中止在途)。
   //   安全: 全程 fetch 只读进缓存·全 try/catch·失败静默·纯附加不动任何现有逻辑。图已转 WEBP(比 PNG 小 2-3 倍)→ 预热总量大幅下降。
   function preloadNamedBossArt(){
+    if(_hsnNetIsSlow()) return;   /* v932: 弱网 → 66 张具名 boss 美术一张都不预下(开打时按需加载) */
     try {
       var islFiles = [], seen = {}, html = document.body ? document.body.innerHTML : '';
       var re = /island_[a-z0-9]+\.html/g, m;

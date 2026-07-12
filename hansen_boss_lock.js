@@ -36,7 +36,7 @@
 
 // hansen_boss_upgrade.js v152 (双保险覆盖原 cFall/lvlIn keyframes, 防止旧动画名残留)
 // v143v: 顶部立即导出版本号到 window, 不依赖 init() (诊断页面用)
-window.__HBU_VERSION__ = 'v930';
+window.__HBU_VERSION__ = 'v932';
 window.__HBU_LOADED_AT__ = Date.now();
 
 // Boss 战升级: 难度递增 (答错伤害 + 倒计时) + 最后 Boss 全词覆盖 + 半血惩罚 + 高奖励
@@ -1013,7 +1013,7 @@ window.__HBU_LOADED_AT__ = Date.now();
                  底板不挑背景: 深底/亮底/花底 一律稳读。
            注意: 这是【所有配色统一】的基础样式(不随调色板变), 不违反"打Boss任何配色都不动"的铁律。
            ══════════════════════════════════════════════════════════════════════════ */
-        '#bossScreen .boss-name{display:table !important;margin:2px auto !important;color:#f87171 !important;background:rgba(6,10,20,.88) !important;padding:2px 12px !important;border-radius:9px !important;border:1px solid rgba(248,113,113,.35) !important}',
+        '#bossScreen .boss-name{display:table !important;margin:2px auto !important;color:#f87171 !important;background:rgba(6,10,20,.93) !important;padding:2px 12px !important;border-radius:9px !important;border:1px solid rgba(248,113,113,.35) !important}',
         '#bossScreen .boss-hp-text{display:table !important;margin:1px auto 0 !important;background:rgba(8,12,26,.82) !important;padding:1px 10px !important;border-radius:8px !important}',
         '#bossScreen .boss-q-sub{display:table !important;margin:0 auto 4px !important;background:rgba(8,12,26,.82) !important;padding:3px 12px !important;border-radius:9px !important}',
         '#bossScreen .boss-question{display:table !important;margin:2px auto 1px !important;background:rgba(8,12,26,.86) !important;padding:4px 16px !important;border-radius:11px !important;border:1px solid rgba(251,191,36,.42) !important}',
@@ -1914,7 +1914,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     // 🔴 BUG #10 关联: 下面这行 HBU_RUNTIME_VERSION 由 build.py 自动同步, 不要手改!
     // 手改会和 __HBU_VERSION__ / cache buster 形成"版本号打架"(check.html 误报)。
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    window.HBU_RUNTIME_VERSION = 'v930';
+    window.HBU_RUNTIME_VERSION = 'v932';
     setTimeout(function(){
       try {
         var versions = new Set();
