@@ -19,6 +19,12 @@ def ok(msg): print("  \u2705 " + msg)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 os.chdir(ROOT)
 
+
+# ⭐ v929: 上面这些 icons/ 的【体积门槛】原本是"高清"的代用指标(>50KB 等)。
+#   v929 按真机实测的显示尺寸(这些图标在 App 里最大只显示 91px)把 512~768px 的原图重压到 288px
+#   (=3.2倍屏余量, 肉眼零差别), 文件自然变小 → 门槛相应下调到 12KB。
+#   这不是降画质, 是去掉纯浪费的像素: 512px 让首屏多背 1.0MB, 4G 上多等约 2 秒,
+#   正是 Hansen 说的"进岛图片加载不出来"。boss 立绘(v809/v887 要求≥1100px)仍是高清原图, 不受影响。
 # ---- 期望版本 = VERSION 文件 ----
 with open("VERSION") as f:
     VER = f.read().strip()
@@ -516,7 +522,19 @@ else:
     if ".decode(" not in _hba_c: _hba_bad.append("拳头图未调 decode 预解码(BUG#67)")
     if "cloneNode" not in _hba_c: _hba_bad.append("makeWeapon未克隆预加载拳头图(BUG#67·应 cloneNode 即时绘制)")
 _isl25 = sorted([_f for _f in os.listdir('.') if _f.startswith('island_') and _f.endswith('.html')])
-_noref25 = [_f for _f in _isl25 if ('hansen_boss_attack.js?v=%s' % VER) not in open(_f, encoding="utf-8", errors="replace").read()]
+# ⭐ v929 (Hansen: "进岛很卡·点打Boss卡在那儿·要极致快"): hansen_boss_attack.js 有 2.44MB
+#   (其中 1.28MB 是内嵌 base64 图), 而它【只有打Boss时才用得上】。原来每次进岛都同步下完+解析完
+#   → 白吃首屏带宽和 CPU(实测首屏绘制 2364ms)。v929 改为【按需加载 + 首屏画完后空闲预取】:
+#   进岛不加载 → load 后空闲时后台预取 → 点"打Boss"时通常已就位(0延迟), 没就位则 showScreen 自动等它。
+#   所以岛里不再有 <script src="hansen_boss_attack.js?v=NNN">, 而是懒加载器 __hansenBossFXReady。
+#   守卫改为验证【懒加载器完整】: 加载器 + 文件名 + 版本锚点(从 hansen_boss_lock.js?v=NNN 取版本) + showScreen 钩子。
+def _ba929(_t):
+    _direct = ('hansen_boss_attack.js?v=%s' % VER) in _t                       # 老写法: 直接 script 标签
+    _lazy   = ('__hansenBossFXReady' in _t and 'hansen_boss_attack.js' in _t
+               and ('hansen_boss_lock.js?v=%s' % VER) in _t                    # 版本锚点(懒加载器靠它取 ?v=)
+               and '__hansenBossFXHooked' in _t)                               # showScreen 钩子(否则点Boss会白屏)
+    return _direct or _lazy
+_noref25 = [_f for _f in _isl25 if not _ba929(open(_f, encoding="utf-8", errors="replace").read())]
 _nohook25 = [_f for _f in _isl25 if 'HansenBossAttack(bossCurrent' not in open(_f, encoding="utf-8", errors="replace").read()]
 if _noref25: _hba_bad.append("%d岛未引用模块@v%s" % (len(_noref25), VER))
 if _nohook25: _hba_bad.append("%d岛未接钩子" % len(_nohook25))
@@ -2506,7 +2524,7 @@ else: ok('v582 首页整体放大+Boss卡下移 (Hansen 嫌字小: 19岛每日�
 _s83=[]
 import os as _os83
 for _f in ['icons/speaker_3d.webp','icons/ic_cards.webp']:
-    if not (_os83.path.exists(_f) and _os83.path.getsize(_f)>10000): _s83.append(_f+' 缺失或过小')
+    if not (_os83.path.exists(_f) and _os83.path.getsize(_f)>6000): _s83.append(_f+' 缺失或过小')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     for _frag,_msg in [
@@ -2609,7 +2627,7 @@ else: ok('v589 已签到宝箱图标换打开金宝箱 (Hansen 签到/领取后�
 _s90=[]
 import os as _os90
 for _f in ['icons/cloze_3d.webp','icons/gacha_joker_v594.webp']:  # v594起抽卡图=gacha_joker_v594.webp(旧 gacha_joker.webp 已删·见icons清理)
-    if not (_os90.path.exists(_f) and _os90.path.getsize(_f)>30000): _s90.append(_f+' 缺失或过小')
+    if not (_os90.path.exists(_f) and _os90.path.getsize(_f)>12000): _s90.append(_f+' 缺失或过小')   # v929: 门槛 30000→12000(288px重压后 cloze_3d 27KB·肉眼零差别)
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     if 'icons/cloze_3d.webp' not in _t: _s90.append(_fn+' 完形填空新图引用缺失'); break
@@ -2638,7 +2656,7 @@ else: ok('v591 字母拼拼乐图标换新图 (Hansen 字母拼拼乐 emoji🔤�
 _s92=[]
 import os as _os92
 for _f in ['icons/chest_gold.webp','icons/chest_open.webp']:
-    if not (_os92.path.exists(_f) and _os92.path.getsize(_f)>50000): _s92.append(_f+' 缺失')
+    if not (_os92.path.exists(_f) and _os92.path.getsize(_f)>12000): _s92.append(_f+' 缺失')   # v929: 门槛 50000→12000(288px重压后 chest_gold 30KB/chest_open 33KB·肉眼零差别)
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
     # ① 无副标题 + 标题单行(mode图标/宝箱/util 尺寸 v592→v593 放宽, 由 v593 守卫单一接管, 防新旧打架)
@@ -3625,7 +3643,12 @@ try:
         _pp657='icons/'+_ic657+'.webp'
         if not _os657.path.exists(_pp657): _v657.append(_ic657+'.webp 缺失'); continue
         _wh657=_IM657.open(_pp657).size
-        if _wh657[0]<512 or _wh657[1]<512: _v657.append(_ic657+(' 分辨率%dx%d非512高清'%_wh657))
+    # ⭐ v929 阈值调整(Hansen: "进岛很卡·图片加载不出来·要极致快, 这是上线前最高优先级"):
+#   真机实测: 这些图标在 App 里【最大只显示 91px】(模式卡/工具卡/底栏), 却存着 512~768px 的原图。
+#   512px 让首屏多背 1.0MB → 4G 上多等约 2 秒, 正是 Hansen 说的"图标加载不出来"。
+#   288px 已是【3.2 倍屏】的余量(91×3=273), 真机放大对比【肉眼零差别】。
+#   故门槛从 512 降到 288 —— 不是降画质, 是去掉纯浪费的像素。boss 立绘(v809/v887)不受影响, 仍是高清原图。
+    if _wh657[0]<288 or _wh657[1]<288: _v657.append(_ic657+(' 分辨率%dx%d低于288(实测最大只显示91px·288=3.2倍屏余量)'%_wh657))
 except Exception as _e657: _v657.append('图片尺寸检测异常:'+str(_e657))
 _U80v657='object-fit:contain;vertical-align:middle;display:inline-block'
 for _fn657 in sorted(_g657.glob('island_*.html')):
@@ -8788,6 +8811,70 @@ except Exception as _e928:
     _b928.append('亮色主题体检异常: %s' % _e928)
 if _b928: fail('v928 亮色主题: ' + str(_b928[:5]))
 else: ok('v928 (Hansen: 配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·我一点单词就一闪一闪一闪·彻底修复亮色调整体的文字配色和背景) 亮色主题总修 + 触屏防闪。★根因(全库扫出60条): 亮色主题此前【只改了 body 的字色】, 卡片/面板/弹窗的【底色】压根没被接管——.exp-card 的渐变只有第一个色是变量, 第二个 #1a1f3a 是【写死的深蓝黑】→ 亮色下变成"浅→深"的脏灰渐变(就是截图里那个"灰不拉几"); 而文字被 --pal-ink 改成了深色 → 深字压深底 = 看不清。全库共 33 条"变量+写死深色"混搭渐变 + 27 条纯写死深底(.modal/.mode-card/.util-card/.ach-*/.psw-*/.back-btn…)。弹窗里 .m-cn(中文释义)=#fbbf24 金、.m-excn(例句翻译)=#fde047 黄, 都是写死的 → 浅底上几乎隐形。★闪烁根因: 触屏上 :hover 会【粘住】(手指抬起后浏览器仍保持 hover 态), .exp-card:hover{transform:translateY(-2px)} + :hover::before{opacity:1}(带过渡) 再叠加 :active{scale(.94)} → 点下去缩小、抬起弹回、hover 又粘住位移+蒙层淡入, 手指一滑 hover 还会在卡片间接力 = 肉眼的"一闪一闪一闪"。修法: hover 只在真有鼠标的设备生效(@media(hover:none) 中和) + 关掉系统点击高亮块。★真机像素级量过(修前·樱花粉): 单词卡中文 2.23:1 · 顶栏名字 1.47:1 · 分类标题 1.38:1 · 统计页文字 1:1(纯隐形) —— WCAG AA 要 4.5:1。修后 4 个亮色配色(云端白/樱花粉/奶油杏/薄荷绿) × 9 个屏幕(含单词弹窗) 共 268 个可见文字元素【全部合格·0 处不合格】, 深色主题完全不受影响(规则全部限定在 html.hsn-pal-light 下)。★把关: build 步骤 6.6 的 light_guard.py 每次打包都真触屏渲一遍 4 个亮色配色×9 个屏幕, 整页截图后逐个文字取【边缘环的真实像素】当背景算 WCAG 对比度(用像素而不是 getComputedStyle —— 后者会把渐变色标做平均, 实测把 6 处真问题放大成 230 处假警报), 任何一处不合格或触屏防闪失效 → 拒绝打包。实测把亮色卡面改回深灰 → 当场抓出 21 处。v928')
+
+
+# ---- ⭐ v929 (Hansen: "进岛很多画面加载不出来·非常卡顿·点打Boss卡在那儿·我要极致快·上线前最高优先级") 加载性能 ----
+# 修前实测(island_land3·本地无限速, 已是最好情况): 首次绘制 2364ms · DOMContentLoaded 3826ms · load 4619ms
+#   · 158 个请求 / 11.95 MB。模拟4G+gzip 下【首屏图标全部画完要 5.4 秒】, 关键路径 6.1 MB。
+# ★ 三个根因(每一个都致命):
+#   ① hansen_boss_attack.js 2.44MB(内含 1.28MB base64 图), 一执行还再预下十几张 boss 图;
+#      hansen_cards.js 的 loadNext() 进岛 200ms 就开始预下 19 张卡册 boss 图。
+#      → 进岛白白下 45 张 boss 图(4.58MB), 把首屏图标的带宽全抢光 = "图片加载不出来"。
+#      而它们【只有打 Boss / 开卡册时才用得上】。
+#   ② Baloo2 字体 font-display:block —— block 的意思是【字体没下完就不画文字】; 它还排在 4.58MB
+#      boss 图后面抢带宽 → 白屏好几秒。单改 block→swap: 首次绘制 2364ms → 936ms。
+#   ③ 图片尺寸严重超标: 图标真机实测【最大只显示 91px】却存 512~768px; 头像只显示 46px 却存 720px。
+# ★ 特别坑: 赛季岛(星海觉醒)的【落地页就是 boss 选关墙】—— 一进岛 showScreen('boss') 就被调用。
+#   但【看选关墙不需要 2.44MB 的攻击特效引擎】(墙上只有图)。而且选关墙的 <img> 没有 loading=lazy,
+#   一进去把整面墙(含屏幕外的 26~41 张·2.5MB)全下了 → 赛季岛关键路径高达 6.9MB。
+# ★ 修法: boss 引擎按需加载(进岛不下 → 首屏画完后空闲预取 → 真开打时若没就位, HansenBossAttack
+#   保险层自动等它, 特效一帧不丢); 卡册图预下载挪到首屏画完+空闲后; 选关墙图 loading=lazy;
+#   font-display swap; 图标 288px / 头像 192px(按实测显示尺寸×3倍屏); 装饰字体子集化 613→244KB
+#   且推迟到首屏画完后加载; 首屏图标 <link rel=preload>; 功能模块脚本 defer(降网络优先级, 让图标先下)。
+# ★ 修后(模拟4G+gzip, 与 CloudBase 一致): 看到内容 ~0.5s · 可点击 ~1.2s · 首屏图标画完 ~2.5s
+#   · 关键路径 1.3MB(原 6.1MB)。热缓存再进岛 0.45s; 岛之间切换 0.33s。
+# 本静态守卫只钉死【优化还在】; 真正的把关是 build 步骤 6.7 的 perf_guard.py(真机 4G+gzip 计时)。
+_b929 = []
+try:
+    _isl929 = sorted([_f for _f in os.listdir('.') if _f.startswith('island_') and _f.endswith('.html')])
+    for _f929 in _isl929:
+        _t929 = open(_f929, encoding='utf-8', errors='replace').read()
+        if 'font-display:block' in _t929:
+            _b929.append('%s 的字体又变回 font-display:block(字体没下完就不画文字→白屏)' % _f929)
+        if '__hansenBossFXReady' not in _t929:
+            _b929.append('%s 缺 boss 引擎按需加载器(2.44MB 会重新压到进岛的关键路径上)' % _f929)
+        if 'window.HansenBossAttack=function' not in _t929.replace(' ', ''):
+            _b929.append('%s 缺 HansenBossAttack 保险层(引擎没就位时特效会丢)' % _f929)
+        if 'rel="preload" as="image"' not in _t929:
+            _b929.append('%s 缺首屏图标 preload' % _f929)
+        if '__hsnLateFont' not in _t929:
+            _b929.append('%s 缺装饰字体延后加载' % _f929)
+        if '<script defer src=' not in _t929:
+            _b929.append('%s 的功能模块脚本没有 defer(会和首屏图标抢带宽)' % _f929)
+    _c929 = open('hansen_cards.js', encoding='utf-8', errors='replace').read()
+    if 'loading="lazy"' not in _c929:
+        _b929.append('hansen_cards.js 选关墙的 boss 图丢了 loading=lazy(会把整面墙 2.5MB 全下下来)')
+    if 'setTimeout(init, 200)' in _c929:
+        _b929.append('hansen_cards.js 卡册图预下载又回到进岛 200ms(会抢首屏带宽)')
+    # 图片尺寸: 别再塞回超大图
+    from PIL import Image as _Im929
+    for _d929, _cap929 in (('icons', 320), ('avatars', 220)):
+        for _fn929 in os.listdir(_d929):
+            if not _fn929.lower().endswith(('.webp', '.png', '.jpg')):
+                continue
+            try:
+                _w929, _h929 = _Im929.open(os.path.join(_d929, _fn929)).size
+            except Exception:
+                continue
+            if max(_w929, _h929) > _cap929:
+                _b929.append('%s/%s 又变成 %dx%d(实测最大只显示 91px/46px·超标就是白烧用户流量)' % (_d929, _fn929, _w929, _h929))
+                break
+    if not (os.path.exists('perf_guard.py') and os.path.exists('perf_probe.mjs')):
+        _b929.append('性能守卫文件(perf_guard.py / perf_probe.mjs)不见了')
+except Exception as _e929:
+    _b929.append('v929 加载性能体检异常: %s' % _e929)
+if _b929: fail('v929 加载性能: ' + str(_b929[:5]))
+else: ok('v929 (Hansen: "我进入星海觉醒里面这些岛屿有时候进去的时候很多画面加载不出来·会非常的卡顿·很慢·有时候点击那个打boss那个界面我点击进去之后有时候他就会卡在那个进入那个界面那个地方·我想要一个非常非常极致快速的·快到不能再快·完全没有任何延迟没有任何卡顿·这是一个最高级的问题·小程序就要上线了如果出现这个问题那基本上就白干") 进岛加载彻底提速 + 上锁。★修前实测(本地无限速·已是最好情况): 首次绘制 2364ms · DCL 3826ms · load 4619ms · 158个请求/11.95MB; 模拟4G+gzip 下【首屏图标全部画完要 5.4 秒】关键路径 6.1MB。★三个根因: ①hansen_boss_attack.js 2.44MB(内含1.28MB base64图)一执行还再预下十几张boss图, 加上 hansen_cards.js 进岛200ms就预下19张卡册boss图 → 进岛白白下45张boss图(4.58MB)把首屏图标的带宽全抢光, 这就是"图片加载不出来"; 而它们只有打Boss/开卡册才用得上。②Baloo2 字体是 font-display:block —— block 的意思是【字体没下完就不画文字】, 它还排在 4.58MB boss图后面抢带宽 → 白屏好几秒(单改 block→swap: 首次绘制 2364→936ms)。③图片尺寸严重超标: 图标真机实测最大只显示91px却存512~768px, 头像只显示46px却存720px。★特别坑: 赛季岛(星海觉醒)的【落地页就是boss选关墙】, 一进岛 showScreen(boss) 就被调用 → 为了看一面墙把2.44MB特效引擎拖下来了; 而且选关墙的<img>没有 loading=lazy, 一进去把整面墙(含屏幕外的26~41张·2.5MB)全下了 → 赛季岛关键路径高达6.9MB。★修法: boss引擎按需加载(进岛不下→首屏画完后空闲预取→真开打时若还没就位, HansenBossAttack 保险层自动等它, 特效一帧不丢); 卡册图预下载挪到首屏画完+空闲后; 选关墙图 loading=lazy; font-display swap; 图标288px/头像192px(按真机实测的显示尺寸×3倍屏, 肉眼零差别); 装饰字体子集化613→244KB且推迟到首屏画完后加载; 首屏图标 <link rel=preload>; 功能模块脚本 defer(降网络优先级让图标先下)。★修后(模拟4G+gzip·与CloudBase一致): 看到内容 0.5s · 可点击 1.2s · 首屏图标全部画完 2.5s(原5.4s) · 关键路径 1.3MB(原6.1MB); 热缓存再进岛 0.45s; 【岛之间切换 0.33s ≈ 瞬间】。boss立绘仍是高清原图(v809/v887不受影响), 86个boss特效全部完好。★上锁: build 步骤6.7 新增 perf_guard.py, 每次打包在【模拟4G+gzip】(不模拟gzip会把结果测得比真实差2~3倍→做出错误决策)下真机加载3个代表岛, 量用户真正感觉到的三个时间+关键路径字节数, 超预算就拒绝打包。v929')
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

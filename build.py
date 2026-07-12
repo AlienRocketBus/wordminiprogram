@@ -122,6 +122,22 @@ else:
         print("  \u274c 亮色守卫未通过: 亮色调下有文字看不清 / 点击会闪, 拒绝打包")
         sys.exit(1)
 
+# ---- 6.7 加载性能守卫 (v929) ----
+# Hansen: "进岛很卡·很多画面加载不出来·点打Boss卡在那儿·要极致快·上线前最高优先级"
+# perf_guard 在【模拟 4G + gzip】(和用户手机上的 CloudBase 一致)下真机加载 3 个代表岛,
+# 量【用户真正感觉到的】三个时间: 看到内容 / 可点击 / 首屏图标全部画完, 外加【关键路径字节数】。
+# 任何一项超预算 → 拒绝打包。
+# ⚠️ gzip 必须模拟: CloudBase 对文本开 gzip, 本地裸 http 不开 —— 不模拟会把结果测得比真实差 2~3 倍,
+#    从而做出错误的优化决策(实测差异: 同一个页面 6.6s vs 1.2s)。
+if os.environ.get("SKIP_PERF_GUARD") == "1":
+    print("  [6.7] \u26a0\ufe0f 性能守卫被跳过(SKIP_PERF_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.7] 跑 perf_guard.py (模拟4G+gzip 真机加载3个岛, 量用户真正感觉到的时间 + 关键路径字节) ...")
+    r = subprocess.run([sys.executable, "perf_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 性能守卫未通过: 进岛变慢了 / 关键路径变胖了, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
