@@ -214,6 +214,25 @@ else:
         print("  \u274c 影响面守卫未通过: 有使用方没被验证到 / 资源撑不起展示位 / 动画撞车, 拒绝打包")
         sys.exit(1)
 
+# ---- 6.12 宠物经验/进化守卫 (v938) ----
+# Hansen: "为什么宠物不进化??? 感觉宠物好像没有得到经验和进化。"
+# 5 个根因全是【看不见的】: 页面不报错、按钮都在、像素也正常, 但宠物就是不长:
+#  ① 8个星域岛不在宠物的岛屿名单里(27个岛, 名单只有19个) → 星海觉醒里打的经验宠物根本看不见 → 永不进化
+#  ② 打字/完形的关卡没有 petXp 字段 → 传 undefined → addXP 里 isFinite(NaN)=false 直接 return → 0 经验, 飘字还骗人
+#  ③ 得到经验后没有任何东西刷新宠物界面 → 宠物页开着也纹丝不动
+#  ④ 宠物页只有一个百分比 → 看不到"现在多少/还差多少", 也看不出卡在哪个条件
+#  ⑤ perf_boost 把 save() 改成防抖延迟写盘, 而宠物读 localStorage → 读到旧值 → 显示"经验 0"
+# 本守卫真机跑全链路(18项)。关键是: 【每一个岛的经验宠物都必须算得进去】——
+# 以后再加新岛(land9...), 只要宠物算不到, 这里当场变红。
+if os.environ.get("SKIP_PET_GUARD") == "1":
+    print("  [6.12] \u26a0\ufe0f 宠物守卫被跳过(SKIP_PET_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.12] 跑 pet_guard.py (宠物: 经验到账·跨岛累计·真的进化·界面实时刷新) ...")
+    r = subprocess.run([sys.executable, "pet_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 宠物守卫未通过: 宠物拿不到经验/不进化/界面不刷新, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
