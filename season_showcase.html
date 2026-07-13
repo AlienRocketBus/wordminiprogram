@@ -139,7 +139,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
 .setmain.ismain{color:#9aa3c0;background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.14);box-shadow:none;cursor:default}
 </style></head>
 <body>
-<script src="hansen_perf.js?v=934"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf.js?v=935"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="sky"></div><canvas id="galaxy"></canvas>
 <div class="vign"></div>
 <div class="close" id="closePg">×</div>
@@ -157,7 +157,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
         <div class="wstars" id="wstars"></div>
         <div class="maintag" id="maintag">★ 主形象</div>
         <div class="foil"></div><div class="glare"></div>
-        <div class="art"><img src="bosses/saelya_hd.webp?v=934" onerror="this.onerror=null;this.src='bosses/saelya.webp?v=934'" alt="星海女帝赛尔娅"></div>
+        <div class="art"><img src="bosses/saelya_hd.webp?v=935" onerror="this.onerror=null;this.src='bosses/saelya.webp?v=935'" alt="星海女帝赛尔娅"></div>
         <div class="wvig"></div>
         <div class="lockmask" id="lockmask"><div class="q">❔</div><div class="lt">尚未解锁</div><div class="bar"><i></i></div><div class="bt">集满 1000 赛季积分解锁（640 / 1000）</div></div>
       </div>
@@ -270,13 +270,13 @@ var CARDS={
 var CARD=CARDS[SID]||CARDS['S1'];
 var FORMS=CARD.forms;
 // 🔴v844: boss 专属"本命"背景场景图 → unshift 为 BGS[0](默认选中·角色立绘叠在专属场景前)。赛尔娅无scene·保持原8渐变可切换。
-if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=934") center/cover',sw:'url("'+CARD.scene+'?v=934") center/cover',light:false}); }
+if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=935") center/cover',sw:'url("'+CARD.scene+'?v=935") center/cover',light:false}); }
 // 🔴v844: 名字+典藏台词从CARD动态填充(赛尔娅/boss通用。稀有度"传说限定"+赛季"第一赛季·星海觉醒"对全S1卡一致故保持不改)
 (function(){var _nm=document.querySelector('.nm');if(_nm)_nm.textContent=CARD.nm;var _fl=document.querySelector('.flavor');if(_fl)_fl.innerHTML='<span class="qm">「</span>'+CARD.fl+'<span class="qm">」</span>';
   // 🔴v844: 单形态boss隐藏形态切换UI(箭头/圆点/形象序号/设为主形象)·赛尔娅3形态保留
   if(FORMS.length<=1){var _fs=document.querySelector('.fswitch');if(_fs)_fs.style.display='none';var _sm=document.getElementById('setMainBtn');if(_sm)_sm.style.display='none';var _fn=document.getElementById('fname');if(_fn)_fn.style.display='none';}
 })();
-var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=934';}catch(e){return '?v=934';}})();
+var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=935';}catch(e){return '?v=935';}})();
 function loadPref(){try{var p=JSON.parse(localStorage.getItem('hs_showcase_'+SID)||'null');return (p&&typeof p==='object')?p:{};}catch(e){return {};}}
 function savePref(){try{var f=FORMS[mainFormIdx]||FORMS[0],b=BGS[curBg]||BGS[0];localStorage.setItem('hs_showcase_'+SID,JSON.stringify({formIdx:mainFormIdx,formImg:f.img,formPng:f.webp,bgIdx:curBg,bgCss:b.bg}));}catch(e){}}
 var mainFormIdx=0,curForm=0;

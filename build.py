@@ -169,13 +169,28 @@ else:
         print("  \u274c 字体子集守卫未通过: 有字会悄悄回退成系统默认字体, 拒绝打包")
         sys.exit(1)
 
+# ---- 6.10 端到端回归守卫 (v935) ----
+# 前面的守卫各管一摊(特效/配色/性能/图片/字体/发音), 但有一类问题它们都管不到:
+# 【功能本身被改坏了】—— 按钮还在、页面不报错、像素也正常, 但点下去不起作用。
+# 这次会话里我就干过这些改动: boss引擎改按需加载 / AudioContext 改成手势后才建 / 卡册加 loading=lazy /
+# 新增打Boss主题选择器 / 形象详情改用高清图 —— 每一个写错了都是"静态检查全过, 用户一点就废"。
+# 本守卫真机把这些功能【真的用一遍】, 任何一项失败就拒绝打包。
+if os.environ.get("SKIP_E2E_GUARD") == "1":
+    print("  [6.10] \u26a0\ufe0f 端到端守卫被跳过(SKIP_E2E_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.10] 跑 e2e_guard.py (真机把改过的功能各用一遍: 打Boss主题/按需加载引擎/卡册/形象详情) ...")
+    r = subprocess.run([sys.executable, "e2e_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 端到端守卫未通过: 有功能被改坏了(点下去不起作用), 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
 # 🔴v526: --label 真正接入 zip 名(旧版此处硬编码陈年标签"食物运动真人发音", 且 --label 解析了从未使用, 每次交付都要手动改名)
 desc = label if label else "部署"
 zip_name = "%s/\u5355\u8bcd\u5927\u5192\u9669_v%s_%s.zip" % (OUT, new, desc)
-EXCLUDE_EXT = (".md", ".py", ".txt", ".zip")  # 🔴 必须含 .zip! 否则工作区残留的源码包/旧zip会被打进部署包(曾导致 v469 部署包 61MB=多塞了31MB的v468源码包)。别删 .zip。
+EXCLUDE_EXT = (".md", ".py", ".txt", ".zip", ".mjs")  # 🔴v935 补上 .mjs: 我的测试探针(*_probe.mjs / *_audit.mjs)本来被打进了部署包(12个) —— 无害但脏, 而且把内部测试代码发到了线上。App 运行时一个 .mjs 都不用。  # 🔴 必须含 .zip! 否则工作区残留的源码包/旧zip会被打进部署包(曾导致 v469 部署包 61MB=多塞了31MB的v468源码包)。别删 .zip。
 # 🔴v526: 引擎产物与死存根不得进部署包——本轮"先跑jarvis体检后打包"使 kb/backlog json 被打进包(=部署包污染,
 #   .json 不在 EXCLUDE_EXT); mespeak 两个 21 字节 json 存根在 v525 线上包亦不存在(线上实证不需要; mespeak.js 本体保留对齐线上)。
 EXCLUDE_FILE = {"audio_test.html", "spelling_bee_demo.html",
