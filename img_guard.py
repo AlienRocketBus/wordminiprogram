@@ -25,6 +25,7 @@ Hansen 截图: "为什么我点击这个左上角这个动物的头像进来之�
 ★ 自证有效: 把 hansen_avatar.js 的高清图改回小图 → 本守卫当场报出
    "只占容器 53% avatars/01.webp 源图111x192 显示111x192 容器300x360 [形象详情]"。
 """
+import re
 import subprocess
 import sys
 import time
@@ -43,15 +44,21 @@ def main():
     time.sleep(2)
     try:
         r = subprocess.run(["node", "img_size_audit.mjs", PORT],
-                           capture_output=True, text=True, timeout=300)
+                           capture_output=True, text=True, timeout=420, cwd=ROOT)
         out = r.stdout
         print(out.rstrip())
-        bad = ("撑不起展示位的图 (原始尺寸太小, 在大展示位里缩成一小坨): 0 个" not in out
-               or "被拉糊的图 (显示尺寸 x3 超过源图 1.5 倍以上): 0 个" not in out)
-        if bad:
+        # ⚠️ v934: 原来靠【匹配输出里的文字】来判通过/不通过 —— 我一改体检的措辞, 判定就误报了(体检明明 0 问题却说不通过)。
+        #    这又是"改了一样东西没检查它的使用方"。改成【看退出码】: img_size_audit.mjs 有问题就 exit(1), 没问题 exit(0)。
+        #    另外必须确认体检【真的扫到东西了】—— "什么都没找到"的绿灯不是绿灯(渲染失败也会是 0 问题)。
+        m = re.search(r"(\d+)\s*个界面\s*·\s*(\d+)\s*张图", out)
+        if not m or int(m.group(1)) < 20 or int(m.group(2)) < 100:
+            print("  ❌ 图片尺寸守卫: 体检没扫到足够的界面/图片(渲染失败) —— 这种情况绝不能当成'通过'")
+            return 1
+        if r.returncode != 0:
             print("  ❌ 图片尺寸守卫未通过: 有图在大展示位上撑不起来 / 被拉糊")
             return 1
-        print("  ✅ 图片尺寸守卫: 全库真机渲染, 没有一张图在展示位上撑不起来或被拉糊")
+        print("  ✅ 图片尺寸守卫: 全库真机渲染 %s 个界面 %s 张图, 没有一张在展示位上撑不起来或被拉糊"
+              % (m.group(1), m.group(2)))
         return 0
     except Exception as e:
         print("  ❌ 图片尺寸守卫执行失败: %s" % e)
