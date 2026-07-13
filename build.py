@@ -155,6 +155,20 @@ else:
         print("  \u274c 图片尺寸守卫未通过: 有图在大展示位上缩成一小坨 / 被拉糊, 拒绝打包")
         sys.exit(1)
 
+# ---- 6.9 字体子集守卫 (v934) ----
+# v929 把 cartoon_font.woff2 从 613KB(1694字) 子集化到 244KB(1060字), 砍掉了 562 个【真的会显示】的字。
+# 缺字不会报错、不会空白 —— 浏览器会【悄悄回退到系统默认字体】, 那几个字和旁边的卡通字长得不一样。
+# 这种问题肉眼极难发现。本守卫真机渲染全库每个屏+每个单词弹窗, 把【真的用卡通字体画出来】的每一个字
+# 收集起来去字体 cmap 里逐字查, 缺任何一个 → 拒绝打包。(emoji/箭头排除, 它们永远由系统表情字体画。)
+if os.environ.get("SKIP_FONT_GUARD") == "1":
+    print("  [6.9] \u26a0\ufe0f 字体子集守卫被跳过(SKIP_FONT_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.9] 跑 font_guard.py (真机渲染全库, 逐字查卡通字体子集有没有漏字) ...")
+    r = subprocess.run([sys.executable, "font_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 字体子集守卫未通过: 有字会悄悄回退成系统默认字体, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
