@@ -8932,6 +8932,36 @@ except Exception as _e937:
 if _g937:
     fail('v937 守卫墙: ' + str(_g937[:5]))
 
+# ═══ v938 iOS微信(WKWebView)兼容锁 ═══
+# requestIdleCallback 在老 iOS 上不存在, navigator.vibrate 在 iOS 上永远不存在 ——
+# 【裸调用】= iOS 微信里 ReferenceError/TypeError, 调用它的脚本当场死。
+# 现库 40 处调用全部有保护(if(window.X) / 'X' in window / if(navigator.vibrate)+try)。
+# 这道锁保证以后新写的代码也必须带保护。
+_c938 = []
+try:
+    import glob as _glob938
+    _files938 = sorted(_glob938.glob('*.js')) + sorted(_glob938.glob('island_*.html')) + ['template.html', 'index.html']
+    for _f938 in _files938:
+        if not os.path.exists(_f938):
+            continue
+        _s938 = open(_f938, encoding='utf-8', errors='replace').read()
+        _s938 = re.sub(r'\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), _s938)
+        for _m938 in re.finditer(r'requestIdleCallback\s*\(', _s938):
+            _ctx938 = _s938[max(0, _m938.start() - 160):_m938.start()]
+            if not re.search(r"window\.requestIdleCallback\s*[)&?|]|['\"]requestIdleCallback['\"]\s*in\s*window|typeof\s+(window\.)?requestIdleCallback", _ctx938):
+                _c938.append('%s: requestIdleCallback 裸调用(老 iOS 微信直接 ReferenceError)' % _f938)
+                break
+        for _m938 in re.finditer(r'navigator\.vibrate\s*\(', _s938):
+            _ctx938 = _s938[max(0, _m938.start() - 320):_m938.start()]
+            if not re.search(r'navigator\.vibrate\s*[)&?|]|typeof\s+navigator', _ctx938):
+                _c938.append('%s: navigator.vibrate 裸调用(iOS 上是 undefined, 调用即 TypeError)' % _f938)
+                break
+except Exception as _e938:
+    _c938.append('兼容锁自检异常: %s' % _e938)
+if _c938:
+    fail('v938 iOS微信兼容: ' + str(_c938[:4]))
+
+
 else: ok('v929 (Hansen: "我进入星海觉醒里面这些岛屿有时候进去的时候很多画面加载不出来·会非常的卡顿·很慢·有时候点击那个打boss那个界面我点击进去之后有时候他就会卡在那个进入那个界面那个地方·我想要一个非常非常极致快速的·快到不能再快·完全没有任何延迟没有任何卡顿·这是一个最高级的问题·小程序就要上线了如果出现这个问题那基本上就白干") 进岛加载彻底提速 + 上锁。★修前实测(本地无限速·已是最好情况): 首次绘制 2364ms · DCL 3826ms · load 4619ms · 158个请求/11.95MB; 模拟4G+gzip 下【首屏图标全部画完要 5.4 秒】关键路径 6.1MB。★三个根因: ①hansen_boss_attack.js 2.44MB(内含1.28MB base64图)一执行还再预下十几张boss图, 加上 hansen_cards.js 进岛200ms就预下19张卡册boss图 → 进岛白白下45张boss图(4.58MB)把首屏图标的带宽全抢光, 这就是"图片加载不出来"; 而它们只有打Boss/开卡册才用得上。②Baloo2 字体是 font-display:block —— block 的意思是【字体没下完就不画文字】, 它还排在 4.58MB boss图后面抢带宽 → 白屏好几秒(单改 block→swap: 首次绘制 2364→936ms)。③图片尺寸严重超标: 图标真机实测最大只显示91px却存512~768px, 头像只显示46px却存720px。★特别坑: 赛季岛(星海觉醒)的【落地页就是boss选关墙】, 一进岛 showScreen(boss) 就被调用 → 为了看一面墙把2.44MB特效引擎拖下来了; 而且选关墙的<img>没有 loading=lazy, 一进去把整面墙(含屏幕外的26~41张·2.5MB)全下了 → 赛季岛关键路径高达6.9MB。★修法: boss引擎按需加载(进岛不下→首屏画完后空闲预取→真开打时若还没就位, HansenBossAttack 保险层自动等它, 特效一帧不丢); 卡册图预下载挪到首屏画完+空闲后; 选关墙图 loading=lazy; font-display swap; 图标288px/头像192px(按真机实测的显示尺寸×3倍屏, 肉眼零差别); 装饰字体子集化613→244KB且推迟到首屏画完后加载; 首屏图标 <link rel=preload>; 功能模块脚本 defer(降网络优先级让图标先下)。★修后(模拟4G+gzip·与CloudBase一致): 看到内容 0.5s · 可点击 1.2s · 首屏图标全部画完 2.5s(原5.4s) · 关键路径 1.3MB(原6.1MB); 热缓存再进岛 0.45s; 【岛之间切换 0.33s ≈ 瞬间】。boss立绘仍是高清原图(v809/v887不受影响), 86个boss特效全部完好。★上锁: build 步骤6.7 新增 perf_guard.py, 每次打包在【模拟4G+gzip】(不模拟gzip会把结果测得比真实差2~3倍→做出错误决策)下真机加载3个代表岛, 量用户真正感觉到的三个时间+关键路径字节数, 超预算就拒绝打包。v929')
 
 
