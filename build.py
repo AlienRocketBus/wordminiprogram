@@ -196,6 +196,24 @@ else:
         print("  \u274c 端到端守卫未通过: 有功能被改坏了(点下去不起作用), 拒绝打包")
         sys.exit(1)
 
+# ---- 6.11 影响面守卫 (v937) ----
+# Hansen: "这么容易出bug, 能不能做一个机制, 防止每次更新内容的时候出现bug?"
+# 病因(这次会话每个 bug 结构完全一样): 【我改了 X, X 被 {A,B,C} 用着, 我只验了 A】
+#   头像压小→只量了顶栏(46px), 忘了网格(110px)和详情大卡(331px)
+#   字体子集化→只留了想到的字, 砍掉 562 个真的会显示的
+#   飞行装饰改 transform→没看到那些元素还挂着第二条自转动画(两条都动 transform, 后者赢)
+# 本守卫真机渲染建【依赖图】(54 个界面), 对每个改动自动算出【它被哪些地方用着】并全部打印,
+# 让"只验了一处"在物理上不可能发生; 同时跑机械判据(资源撑不撑得起最大展示位/字体缺不缺字/
+# 动画有没有 transform 撞车), 任何一条不过就拒绝打包。
+if os.environ.get("SKIP_IMPACT_GUARD") == "1":
+    print("  [6.11] \u26a0\ufe0f 影响面守卫被跳过(SKIP_IMPACT_GUARD=1) —— 交付包严禁跳过!")
+else:
+    print("  [6.11] 跑 impact_guard.py (算出这次改动的影响面, 逐个验证每一个使用方) ...")
+    r = subprocess.run([sys.executable, "impact_guard.py"])
+    if r.returncode != 0:
+        print("  \u274c 影响面守卫未通过: 有使用方没被验证到 / 资源撑不起展示位 / 动画撞车, 拒绝打包")
+        sys.exit(1)
+
 # ---- 7. 打包 ----
 OUT = "/mnt/user-data/outputs"
 os.makedirs(OUT, exist_ok=True)
