@@ -12,22 +12,34 @@ jobs:
   snapshot:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out full history
+      - name: Check out exact main with full history
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Bundle exact main history
+      - name: Verify and archive Git metadata
         shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
         run: |
-          git branch -f main-snapshot "${{ github.event.pull_request.base.sha || github.sha }}"
-          git bundle create wordminiprogram-v939-main.bundle main-snapshot
-          git bundle verify wordminiprogram-v939-main.bundle
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin https://github.com/AlienRocketBus/wordminiprogram.git
+          git branch -f main "$BASE_SHA"
+          git fsck --full
+          git status --porcelain
+          tar --format=posix -cf wordminiprogram-v939-gitdir.tar .git
+          sha256sum wordminiprogram-v939-gitdir.tar > wordminiprogram-v939-gitdir.tar.sha256
 
-      - name: Upload private Git bundle
+      - name: Upload private Git metadata
         uses: actions/upload-artifact@v4
         with:
-          name: wordminiprogram-v939-main-git-bundle
-          path: wordminiprogram-v939-main.bundle
+          name: wordminiprogram-v939-main-gitdir
+          path: |
+            wordminiprogram-v939-gitdir.tar
+            wordminiprogram-v939-gitdir.tar.sha256
           if-no-files-found: error
           retention-days: 1
+          compression-level: 0
