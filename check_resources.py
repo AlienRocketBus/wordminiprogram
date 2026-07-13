@@ -8916,6 +8916,7 @@ _GUARDS937 = [
     ("e2e_guard.py",    '"e2e_guard.py"]',    "端到端功能(点下去还灵不灵)"),
     ("impact_guard.py", '"impact_guard.py"]', "影响面(我改的东西被谁用着)"),
     ("pet_guard.py",    '"pet_guard.py"]',    "宠物经验/进化(经验到账·跨岛累计·真进化·界面实时刷新)"),
+    ("sb_guard.py",     '"sb_guard.py"]',     "拼写蜂(27岛出题池一个词不差·机器人不抢跑)"),
 ]
 try:
     _bp937 = open('build.py', encoding='utf-8', errors='replace').read()
@@ -8924,7 +8925,7 @@ try:
             _g937.append('守卫文件 %s 不见了 —— %s 这道墙没了' % (_f937, _what937))
         elif ('subprocess.run([sys.executable, ' + _call937) not in _bp937:
             _g937.append('%s 的调用被从 build.py 里摘掉了 —— %s 这道墙形同虚设' % (_f937, _what937))
-    for _dep937 in ('dep_map.mjs', 'img_size_audit.mjs', 'font_probe.mjs', 'e2e_probe.mjs', 'pet_probe.mjs'):
+    for _dep937 in ('dep_map.mjs', 'img_size_audit.mjs', 'font_probe.mjs', 'e2e_probe.mjs', 'pet_probe.mjs', 'sb_audit.mjs', 'sb_race.mjs'):
         if not os.path.exists(_dep937):
             _g937.append('守卫依赖的探针 %s 不见了' % _dep937)
 except Exception as _e937:

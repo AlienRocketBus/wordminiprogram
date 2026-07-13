@@ -1479,7 +1479,43 @@ var _sbIsland=(_sbParams.get('island')||'').trim();
 var _sbFrom=_sbParams.get('from')||'index.html';
 var _sbEmbed=_sbParams.get('embed')==='1'; /* 在岛内覆盖层(iframe)里运行: 返回=关覆盖层, 不跳转 */
 var ISLAND_CN={animal:'动物',food:'食物',sports:'运动',job:'职业',color:'色彩数字',time:'时间',family:'家庭',clothes:'服装',nature:'自然',school:'学校',home:'家居',traffic:'交通',action:'动作',adjective:'形容词',question:'疑问词',treasure:'藏宝',body:'身体',season:'星海终战',city:'城市',land1:'迷雾心湖',land2:'风纹草原',land3:'时之钟谷',land4:'铸剑锻炉山',land5:'晶石回廊',land6:'智慧藏书林',land7:'万邦港城',land8:'星火火山口'};
-/*🔴v876+v898(Hansen "进来直接考所有单词"根治): 岛过滤——island参数缺失 或 过滤结果为空, 都【绝不落全池·绝不落回全936词池】: ①嵌在岛内(iframe)→直接吃父岛 allW(任何岛/未来新岛零维护精确本岛词) ②否则→明确提示本岛未接入。*/var _isl=_sbIsland?WORDS.filter(function(w){return w.isl===_sbIsland || (_sbIsland==='season' && /^land[1-8]$/.test(w.isl));}):[];if(_sbIsland&&_isl.length){WORDS=_isl;}else{var _pw=null;try{if(_sbEmbed&&window.parent&&window.parent!==window&&parent.allW&&parent.allW.length){_pw=parent.allW;}}catch(_pe){}if(_pw){WORDS=_pw.map(function(w){return {en:w.en,pn:w.pn||'',cn:w.cn,emoji:w.emoji||'📝',isl:(_sbIsland||'')};});}else{WORDS=WORDS.slice(0,0);try{document.addEventListener('DOMContentLoaded',function(){var s=document.querySelector('.sub');if(s)s.textContent='⚠️ 本岛词库未接入拼写蜂';});}catch(_pe2){}}}
+/*🔴v876+v898(Hansen "进来直接考所有单词"根治): 岛过滤——island参数缺失 或 过滤结果为空, 都【绝不落全池·绝不落回全936词池】: ①嵌在岛内(iframe)→直接吃父岛 allW(任何岛/未来新岛零维护精确本岛词) ②否则→明确提示本岛未接入。*//* 🔴🔴 v939 根因修复 (Hansen: "岛里明明有40个单词, 拼写蜂却只考25个, 不全面")
+   ★ 病根: 拼写蜂自带一份【独立词库】(936条), 建库时【按英文去重】了 ——
+     每个英文词只有一条、只能挂【一个】isl 标签。
+     但岛之间是【共享单词】的: orange 既在食物岛也在颜色岛, fish 既在食物岛也在动物岛,
+     teacher 既在学校岛也在职业岛, driver 既在交通岛也在职业岛……
+     去重时这些词被分给了其中一个岛 → 【另一个岛就永远考不到它】。
+     真机全库核对: 27 个岛的词位共 952 个, 词库只有 936 条 → 正好差 16 个,
+     和实测漏掉的 16 个词完全对上:
+       traffic 30→25 (map/driver/right/turn/stop 全没了)
+       food 56→53 (orange/chicken/fish)   treasure 60→57 (when/hard/answer)
+       school 38→36 (teacher/chair)       adjective 51→50 (clean)
+       job 30→29 (cook)                   time 40→39 (second)
+   ★ 修法(治本, 不打补丁): 拼写蜂在【岛内】运行时(现在永远是岛内 iframe),
+     【直接用岛自己的词表 parent.allW】—— 那就是这个岛的真实词表,
+     永远完整、永远同步、以后加新岛/加新词自动生效, 不存在"两份词库漂移"这回事。
+     自带的 936 条词库只作为【独立打开(非岛内)】时的兜底。
+   ★ 兼容: 岛词表字段 {en,pn,cn,emoji,ex,exCn} 全部带过来(例句要用), isl 补成当前岛。 */
+var _pw=null;
+try{
+  if(_sbEmbed && window.parent && window.parent!==window && parent.allW && parent.allW.length){ _pw=parent.allW; }
+}catch(_pe){}
+if(_pw){
+  /* ① 岛内: 用岛自己的词表 —— 一个词都不会少 */
+  WORDS=_pw.map(function(w){
+    return {en:w.en, pn:w.pn||'', cn:w.cn, emoji:w.emoji||'📝',
+            ex:w.ex||'', exCn:w.exCn||'', isl:(_sbIsland||'')};
+  });
+}else if(_sbIsland){
+  /* ② 非岛内但带了 island 参数(直接开网页调试): 退回自带词库按标签筛 */
+  var _isl=WORDS.filter(function(w){return w.isl===_sbIsland || (_sbIsland==='season' && /^land[1-8]$/.test(w.isl));});
+  if(_isl.length){ WORDS=_isl; }
+  else{
+    WORDS=WORDS.slice(0,0);
+    try{document.addEventListener('DOMContentLoaded',function(){var s=document.querySelector('.sub');if(s)s.textContent='⚠️ 本岛词库未接入拼写蜂';});}catch(_pe2){}
+  }
+}
+/* ③ 完全独立打开(无 island 参数): 用完整的 936 条词库, 不动 */
 function letters(w){return w.en.toLowerCase().replace(/[^a-z]/g,'');} // 拼写目标(去空格/符号)
 var LEVELS={
   beginner:{test:function(w){return letters(w).length<=4;}},
@@ -1573,6 +1609,41 @@ function speak(text){
     var pr=a.play();if(pr&&pr.catch)pr.catch(function(err){if(err&&err.name==='AbortError')return;if(!fb){fb=true;ttsSpeak(text);}});
   }catch(e){ttsSpeak(text);}
 }
+/* 🔴 v939 (Hansen: "我希望他念完单词之后我再拼写, 有时候单词还没念, 对面的机器人就已经开始拼写了")
+   ★ 病根(nextWord 里的时序):
+       started=Date.now();                                  // 玩家计时【立刻】开始
+       botTimer=setTimeout(botStep, 500+random*500);        // 机器人 0.5~1.0 秒后开打
+       if(S.mode==='listen') setTimeout(()=>speak(...),300);// 单词 0.3 秒才【开始】念
+     念一个单词要 0.8~1.5 秒 —— 机器人 0.5 秒就动手了。
+     听读音模式下单词是【藏着的】, 玩家还没听清, 机器人已经领先 0.1~1.3 秒;
+     而且玩家是在"听的时候"就被计时了, 双重不公平。
+   ★ 修法: 先念, 【念完】再启动机器人 + 才开始给玩家计时。
+     speakThen(text, cb) = 念 + 念完回调:
+       · 音频文件播完 → onended 触发
+       · 音频坏了回退 TTS → utterance.onend 触发
+       · 两者都不响(静音/权限/文件全丢) → 3.5 秒兜底也一定触发, 绝不卡死
+     回调保证只触发一次。 */
+var _sbSpeakSeq = 0;
+function speakThen(text, cb){
+  var seq = ++_sbSpeakSeq;
+  var fired = false;
+  var fire = function(){
+    if(fired || seq !== _sbSpeakSeq) return;   /* 只认最后一次请求, 防止上一题的回调打到这一题 */
+    fired = true;
+    try{ cb && cb(); }catch(e){}
+  };
+  var guard = setTimeout(fire, 3500);          /* 兜底: 音频/TTS 全哑也一定开赛 */
+  var done = function(){ clearTimeout(guard); fire(); };
+  try{
+    var a = _ensureSbAudio();
+    if(a){ a.onended = done; }
+  }catch(e){}
+  /* TTS 回退路径: 给这一次的 utterance 挂 onend */
+  _sbTtsOnEnd = done;
+  try{ speak(text); }catch(e){ done(); }
+}
+var _sbTtsOnEnd = null;
+
 function ttsSpeak(text){
   try{
     if(!('speechSynthesis'in window))return;
@@ -1580,7 +1651,7 @@ function ttsSpeak(text){
     var u=new SpeechSynthesisUtterance(String(text).replace(/[^a-zA-Z \-]/g,''));
     u.lang='en-US';u.rate=.82;u.pitch=1;
     var vs=speechSynthesis.getVoices();var ev=vs.filter(function(v){return /^en(-|_)/i.test(v.lang);})[0];if(ev)u.voice=ev;
-    speechSynthesis.speak(u);
+    try{ u.onend=function(){ try{ if(_sbTtsOnEnd){ var f=_sbTtsOnEnd; _sbTtsOnEnd=null; f(); } }catch(e){} }; }catch(e){} speechSynthesis.speak(u);
   }catch(e){}
 }
 try{if('speechSynthesis'in window)speechSynthesis.onvoiceschanged=function(){};}catch(e){}
@@ -1715,13 +1786,32 @@ function nextWord(){
   $('laneYou').className='lane you';$('laneBot').className='lane bot';
   $('sttYou').textContent='拼写中…';$('sttBot').textContent='拼写中…';
   renderPrompt();renderYou();renderBot();
-  started=Date.now();startTimer();
-  // 机器人:反应时间后开始逐字打(*遮住)
-  var cpm=S.bot==='custom'?S.customCpm:BOT_CPM[S.bot];
-  var msPerChar=60000/Math.max(1,cpm);curMs=msPerChar;
+    var cpm=S.bot==='custom'?S.customCpm:BOT_CPM[S.bot];
+  var msPerChar=60000/Math.max(1,cpm); curMs=msPerChar;
   clearTimeout(botTimer);
-  botTimer=setTimeout(function(){botStep(msPerChar);},500+Math.random()*500);
-  if(S.mode==='listen')setTimeout(function(){speak(curWord.en);},300);
+
+  /* 🔴 v939 (Hansen: "我希望他念完单词之后我再拼写, 有时候单词还没念, 机器人就已经开始拼写了")
+     原来的时序是错的:
+        started=Date.now();                              // 玩家【立刻】开始计时
+        botTimer=setTimeout(botStep, 500+random*500);    // 机器人 0.5~1.0 秒后就开打
+        setTimeout(()=>speak(word), 300);                // 单词 0.3 秒才【开始】念(念完要 0.8~1.5 秒)
+     → 单词还在念, 机器人已经在拼; 听读音模式下单词是藏着的, 玩家还没听清就已经落后;
+       而且玩家在"听的时候"就被计时了 —— 双重不公平。
+     现在: 【念完单词, 才开始比赛】—— 机器人和玩家计时都等 speakThen 的"念完"回调。
+     兜底: 音频坏了/TTS不响 → speakThen 内 3.5 秒强制开赛, 绝不卡死。
+     "🔊 再听一次" 只是重播, 不会重开赛(speakThen 的回调按题序号只认最后一次·且只触发一次)。 */
+  var _startRace=function(){
+    started=Date.now(); startTimer();                    /* 玩家计时从【听完】才开始 */
+    $('sttYou').textContent='拼写中…'; $('sttBot').textContent='拼写中…';
+    botTimer=setTimeout(function(){botStep(msPerChar);},500+Math.random()*500);
+  };
+  if(S.mode==='listen'){
+    started=Date.now();                                  /* 先占位, 免得 startTimer 前读到脏值 */
+    $('sttYou').textContent='🔊 听单词…'; $('sttBot').textContent='🔊 听单词…';
+    speakThen(curWord.en, _startRace);
+  }else{
+    _startRace();                                        /* 汉译英模式: 中文一出现就能拼, 无需等音频 */
+  }
 }
 function botStep(ms){
   if(raceOver)return;
