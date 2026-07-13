@@ -53,6 +53,7 @@ def run(args, **kw):
 
 def main():
     strict = "--strict" in sys.argv
+    prebuild = "--pre-build" in sys.argv   # 构建时用: 不查"工作区干净"(正在改代码, 当然脏), 漏网文件只警告
     token = os.environ.get("GH_TOKEN", "").strip()
     problems = []
     print("  ══ 沙盒 ↔ GitHub 同步体检 ══\n")
@@ -71,7 +72,9 @@ def main():
     run(["git", "update-index", "--refresh"])
     r = run(["git", "status", "--porcelain"])
     dirty = [l for l in r.stdout.split("\n") if l.strip()]
-    if dirty:
+    if prebuild:
+        print("   ② 工作区干净        —— 构建模式跳过(正在改代码, 有未提交改动是正常的: %d 处)" % len(dirty))
+    elif dirty:
         problems.append("工作区有 %d 处未提交的改动" % len(dirty))
         print("   ② 工作区干净        ❌ %d 处未提交: %s" % (len(dirty), [d[:40] for d in dirty[:3]]))
     else:
@@ -93,7 +96,11 @@ def main():
                             capture_output=True)
         ignored = {p.decode("utf-8", "surrogateescape") for p in rr.stdout.split(b"\0") if p}
     leaked = [u for u in untracked if u not in ignored]
-    if leaked:
+    if leaked and prebuild:
+        print("   ③ 没有漏网文件      ⚠️ %d 个新文件还没 git add(打包后【必须】提交, 否则沙盒重置就没了):" % len(leaked))
+        for u in leaked[:8]:
+            print("        %s" % u)
+    elif leaked:
         problems.append("有 %d 个文件【没进 GitHub】—— 沙盒一重置就永久丢失!" % len(leaked))
         print("   ③ 没有漏网文件      ❌ %d 个文件不在 GitHub 上!" % len(leaked))
         for u in leaked[:6]:

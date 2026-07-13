@@ -28,6 +28,18 @@ if os.path.exists("template.html") and os.path.exists("island_data.json"):
         print("  \u274c generate.py 失败, 拒绝构建")
         sys.exit(1)
 
+# ---- 0. 沙盒 ↔ GitHub 同步守卫 (v936) ----
+# Hansen: "我怕沙盒模式会破坏我们做过的小程序, 一定要保证 GitHub 上的文件绝对是最新的。"
+# 沙盒是【临时的】: 可能重置、可能只恢复了一半、可能是上次会话的旧快照。
+# 如果在一棵【落后的/残缺的/被改坏的】树上打包再 push, 就会把 GitHub 上好好的代码覆盖成旧的或坏的。
+# 这是这个项目最致命的风险 —— 比任何 UI bug 都严重, 所以放在第 0 步, 什么都还没干就先查。
+# (构建模式: 不查"工作区干净"——正在改代码当然脏; 漏网文件只警告并列出来, 提醒打包后必须提交。)
+print("  [0] 跑 sync_guard.py --pre-build (核对沙盒和 GitHub 是不是一致) ...")
+_r0 = subprocess.run([sys.executable, "sync_guard.py", "--pre-build"])
+if _r0.returncode != 0:
+    print("  \u274c 沙盒与 GitHub 不一致(旧快照/文件残缺/仓库损坏), 拒绝打包 —— 否则会把 GitHub 上好的版本覆盖掉")
+    sys.exit(1)
+
 # ---- 1. 版本号 ----
 with open("VERSION") as f:
     old = f.read().strip()
