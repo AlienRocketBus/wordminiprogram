@@ -96,21 +96,68 @@
   var PET_XP_CAP=15000; // 旋钮①: 满级所需累计经验(练习量·想留存更久调大如20000~25000)
   var MASTER_HITS=3;    // 旋钮②: 一个词答对几次算"掌握"(任意模式累计)
   var TOTAL_WORDS=752;  // 全19岛单词总数(满级需全部掌握·日后加词改这里)
-  function globalXP(){
-    var sum=0;
-    for(var i=0;i<HSN_ISLAND_KEYS.length;i++){
-      try{var raw=localStorage.getItem(HSN_ISLAND_KEYS[i]); if(!raw)continue; var s=JSON.parse(raw); sum+=Math.max((+s.xp||0),(+s.totalXP||0));}catch(e){}
+  /* 🔴🔴 v938 根因修复 (Hansen: "为什么宠物不进化? 感觉宠物好像没有得到经验和进化")
+   ★ 原来这两个函数只累加【手写死的 HSN_ISLAND_KEYS 名单】里的 19 个岛。
+     但全库现在有 27 个岛 —— 后加的 8 个星域岛(island_land1~8, 存档键 wordIslandLand1~8)
+     【从来没被加进这份名单】。结果:
+       你在【星海觉醒】(= 主力新内容)里打的每一点经验, 宠物系统【根本看不见】,
+       globalXP() 永远算成 0 → 宠物永远卡在第 1 阶 → 永不进化。
+     (真机实测: 打 5 把火眼金睛拿到 305 经验, getPetStage() 依然返回 0。)
+   ★ 又是同一个病: 加了新东西(8个岛), 却没更新它的【使用方名单】。
+   ★ 所以这次不修名单 —— 改成【动态扫描 localStorage 里所有岛存档】,
+     以后再加多少个岛都自动算进去, 这个 bug 不可能再犯。
+     (排除 _bak 备份键和非岛存档, 避免重复计数。) */
+/* 🔴 v938 (Hansen: "为什么宠物不进化?")
+   ★ 原来 globalXP/globalMastered 只累加【手写死的 HSN_ISLAND_KEYS 名单】里的 19 个岛,
+     而全库有 27 个 —— 后加的 8 个星域岛(island_land1~8 = 星海觉醒)从来没进过名单。
+     结果: 在星海觉醒里打的每一点经验, 宠物系统根本看不见 → globalXP() 永远算 0 → 宠物永不进化。
+     (真机: 打5把火眼金睛拿到305经验, getPetStage() 依然返回 0。)
+     → 改成【动态扫描全部 wordIsland* 存档】, 以后再加多少岛都自动算进去。
+
+   ★★ 但第一版动态扫描【把加载拖慢了 350ms】(perf_guard 当场拦下, 不是我自己发现的):
+      一次渲染里 gStageFromXP/gProgress/curStage/progress 会反复调 globalXP+globalMastered 六七次,
+      每次都把 27 个岛的存档【全部 JSON.parse 一遍】—— 存档里有 learned/wrongs/stats, 一点都不小。
+      island_season 首屏从 2506ms 涨到 2853ms。
+   ★★ 修法(既对又快): 【别的岛的存档在本页打开期间根本不会变】—— 只扫一次, 把两个总和缓存起来;
+      当前岛永远读内存里的 S(零解析、永远最新)。之后每次调用都是 O(1)。
+      (另开标签页改了别的岛 → storage 事件把缓存作废, 不会读到脏数据。) */
+var _hsnOtherXP = null, _hsnOtherM = null;
+function _hsnScanOthers(){
+  var xp=0, m=0, cur=null;
+  try{ cur = window.__hsnSaveKey || null; }catch(e){}
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k || k.indexOf('wordIsland')!==0) continue;
+      if(/_bak$|_backup$|_tmp$/i.test(k)) continue;   /* 备份键不算, 否则重复计数 */
+      if(cur && k===cur) continue;                    /* 当前岛不读盘, 用内存 S */
+      var raw=localStorage.getItem(k);
+      if(!raw) continue;
+      var o=null;
+      try{ o=JSON.parse(raw); }catch(e){ continue; }
+      if(!o || typeof o!=='object' || Array.isArray(o)) continue;
+      if(o.totalXP===undefined && o.xp===undefined && o.learned===undefined) continue;
+      xp += Math.max((+o.xp||0), (+o.totalXP||0));
+      m  += (o.learned && o.learned.length) ? o.learned.length : 0;
     }
-    return sum;
-  }
+  }catch(e){}
+  _hsnOtherXP = xp; _hsnOtherM = m;
+}
+try{ window.addEventListener('storage', function(){ _hsnOtherXP=null; _hsnOtherM=null; }); }catch(e){}
+function globalXP(){
+  if(_hsnOtherXP===null) _hsnScanOthers();
+  var mine=0;
+  try{ if(window.S) mine = Math.max((+window.S.xp||0), (+window.S.totalXP||0)); }catch(e){}
+  return _hsnOtherXP + mine;
+}
+function globalMastered(){
+  if(_hsnOtherM===null) _hsnScanOthers();
+  var mine=0;
+  try{ if(window.S && window.S.learned) mine = window.S.learned.length||0; }catch(e){}
+  return _hsnOtherM + mine;
+}
   // 全局已掌握单词数 = 各岛 mc[idx]>=MASTER_HITS 的词数之和(mc=每词答对计数·markAnswer包裹累加)
-  function globalMastered(){
-    var n=0;
-    for(var i=0;i<HSN_ISLAND_KEYS.length;i++){
-      try{var s=JSON.parse(localStorage.getItem(HSN_ISLAND_KEYS[i])||'{}');var mc=s.mc||{};for(var k in mc){if((+mc[k]||0)>=MASTER_HITS)n++;}}catch(e){}
-    }
-    return n;
-  }
+  
   // 经验门槛(较缓^1.8·前期驱动·秒孵化) + 掌握门槛(后置^2.5·中后期卡关·满级=全部词)
   function xpReq(i){var n=N()-1;if(i<=0)return 0;if(i>=n)return PET_XP_CAP;return Math.round(PET_XP_CAP*Math.pow(i/n,1.8)/5)*5;}
   function masterReq(i){var n=N()-1;if(i<=0)return 0;if(i>=n)return TOTAL_WORDS;return Math.round(TOTAL_WORDS*Math.pow(i/n,2.5));}
@@ -119,6 +166,38 @@
   function gProgress(){var st=gStageFromXP(),n=N();if(st>=n-1)return 100;var m=globalMastered(),x=globalXP();var mLo=masterReq(st),mHi=masterReq(st+1),xLo=xpReq(st),xHi=xpReq(st+1);var mp=mHi>mLo?(m-mLo)/(mHi-mLo):1,xp2=xHi>xLo?(x-xLo)/(xHi-xLo):1;return Math.max(0,Math.min(100,Math.round(Math.min(mp,xp2)*100)));}
   // 覆盖全局阶段/进度→模块渲染(curStage/progress)与各岛据此·全岛同一只宠物
   try{ window.getPetStage=gStageFromXP; window.getPetProgress=gProgress; }catch(e){}
+
+/* 🔴 v938 (Hansen: "我玩完一个火眼金睛得到的宠物经验, 然后我们看宠物的时候, 能及时看到宠物增加的经验")
+   原来: 得到经验后【没有任何东西去刷新宠物页】。宠物页如果开着, 数字纹丝不动;
+         就算退出去重进, 首页的宠物条也不一定更新 —— 用户完全感觉不到"宠物在长"。
+   现在: 把 addXP 包一层 —— 只要经验有变化, 就【立刻】重画首页宠物条 + (若宠物页开着)重画宠物页,
+         并在宠物页顶上飘一个 "+N 经验" 的提示, 让人一眼看到涨了多少。 */
+(function(){
+  function petScreenOpen(){
+    var el=document.getElementById('petScreen');
+    return !!(el && (el.classList.contains('active') || getComputedStyle(el).display!=='none'));
+  }
+  function refreshPetUI(gain){
+    try{ if(typeof window.updatePetHero==='function') window.updatePetHero(); }catch(e){}
+    if(!petScreenOpen()) return;
+    try{ if(typeof window.renderPetScreen==='function') window.renderPetScreen(); }catch(e){}
+    if(gain>0){
+      try{
+        var t=document.createElement('div');
+        t.className='psw-gain';
+        t.textContent='\ud83d\udc3e \u5ba0\u7269\u7ecf\u9a8c +'+gain;
+        var host=document.getElementById('petScreen')||document.body;
+        host.appendChild(t);
+        setTimeout(function(){ try{ t.parentNode && t.parentNode.removeChild(t); }catch(e){} }, 1800);
+      }catch(e){}
+    }
+  }
+  window.__hsnRefreshPetUI = refreshPetUI;
+
+  /* v938: 原来这里还 hook 了 window.addXP —— 多余而且有害:
+     游戏里的 addXP 是同一脚本内的函数声明, 改 window.addXP 根本拦不住它(实测拦不到),
+     反而把外部对 window.addXP 的调用包坏了。刷新改成在 petTaskComplete 里【直接调】, 确定性最高。 */
+})();
   // 🔴v644 掌握度统计: 包裹 markAnswer·答对则该词 mc+1(不动19岛·boot时挂) + 一次性迁移(老用户已学会的词补成已掌握·宠物不被重置)
   var _hsnMarkWrapped=false; // 模块级·保证只包裹一次(可靠·不依赖函数属性)
   function hsnTrackMastery(){
@@ -188,7 +267,7 @@
 '.psw-hero .nm{font-size:21px;font-weight:900;color:#fff;margin-top:6px}',
 '.psw-hero .sg{font-size:13px;color:var(--g1);font-weight:700;margin-top:2px}',
 '.psw-hero .qt{font-size:12.5px;color:var(--ink2);font-style:italic;margin:9px 8px 13px;line-height:1.55}',
-'.psw-bar{height:9px;border-radius:6px;background:rgba(8,12,24,.7);overflow:hidden;margin:0 2px;border:1px solid rgba(96,118,170,.25)}',
+'.psw-bar{height:9px;border-radius:6px;background:rgba(8,12,24,.7);overflow:hidden;margin:0 2px;border:1px solid rgba(96,118,170,.25)}.psw-req{margin:10px 0 4px;display:flex;flex-direction:column;gap:6px}.psw-req-row{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}.psw-req-row>span{flex:0 0 auto;opacity:.9}.psw-req-row>b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800}.psw-req-row>i{flex:0 0 auto;font-style:normal;font-size:12px;opacity:.85;min-width:62px;text-align:right}.psw-req-slow{background:rgba(251,191,36,.14);border-color:rgba(251,191,36,.45)}.psw-req-tip{font-size:12px;opacity:.85;padding:2px 2px 0;line-height:1.5}.psw-gain{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:99999;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1206;font-weight:900;font-size:16px;padding:10px 18px;border-radius:999px;box-shadow:0 8px 24px rgba(251,191,36,.45);animation:pswGain 1.8s ease forwards;pointer-events:none}@keyframes pswGain{0%{opacity:0;transform:translate(-50%,10px) scale(.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.06)}30%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}',
 '.psw-bar > i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--g1),var(--g2));box-shadow:0 0 11px rgba(251,191,36,.5)}',
 '.psw-barlab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink2);margin:0 2px 6px}',
 '.psw-barlab b{color:#fff}',
@@ -329,7 +408,37 @@
     h+='<div class="sg">第 '+(disp+1)+' / '+n+' 阶 · '+nameOf(disp)+'</div>';
     h+='<div class="qt">“'+descOf(disp)+'”</div>';
     if(isCur){
-      h+='<div class="psw-barlab"><span>'+(dnx?('距离进化为 '+dnx):'🏆 已达终焉形态!')+'</span><span><b>'+prog+'%</b></span></div>';
+      /* v938 (Hansen: "希望宠物进化相关的经验可以及时显示, 玩完火眼金睛能及时看到宠物增加的经验")
+   原来这里【只给一个百分比】, 用户根本看不出:
+     · 现在多少经验? 还差多少?
+     · 为什么卡在 0%? (进化要【经验】和【已掌握单词数】两个条件同时满足,
+       min(两者) 决定进度 —— 只要有一项没到, 百分比就被它按死, 而界面什么都不说)
+   现在: 两个条件各自把【当前值 / 需要值】明明白白写出来, 并标出是哪一项在拖后腿。 */
+(function(){
+  var _m=globalMastered(), _x=globalXP(), _st=gStageFromXP(), _n=N();
+  var _xLo=xpReq(_st), _xHi=xpReq(_st+1), _mLo=masterReq(_st), _mHi=masterReq(_st+1);
+  var _xp2=(_xHi>_xLo)?Math.max(0,Math.min(100,Math.round((_x-_xLo)/(_xHi-_xLo)*100))):100;
+  var _mp =(_mHi>_mLo)?Math.max(0,Math.min(100,Math.round((_m-_mLo)/(_mHi-_mLo)*100))):100;
+  var _slow=(_st>=_n-1)?'':(_mp<_xp2?'words':(_xp2<_mp?'xp':''));
+  h+='<div class="psw-barlab"><span>'+(dnx?('\u8ddd\u79bb\u8fdb\u5316\u4e3a '+dnx):'\ud83c\udfc6 \u5df2\u8fbe\u7ec8\u7109\u5f62\u6001!')+'</span><span><b>'+prog+'%</b></span></div>';
+  if(_st<_n-1){
+    h+='<div class="psw-req">'
+      +'<div class="psw-req-row'+(_slow==='xp'?' psw-req-slow':'')+'">'
+        +'<span>\u26a1 \u7ecf\u9a8c</span>'
+        +'<b id="pswXpNum">'+_x+' / '+_xHi+'</b>'
+        +'<i>'+(_x>=_xHi?'\u2705 \u5df2\u591f':('\u8fd8\u5dee '+Math.max(0,_xHi-_x)))+'</i>'
+      +'</div>'
+      +((_mHi>_mLo)?('<div class="psw-req-row'+(_slow==='words'?' psw-req-slow':'')+'">'
+        +'<span>\ud83d\udcda \u5df2\u638c\u63e1\u5355\u8bcd</span>'
+        +'<b id="pswWdNum">'+_m+' / '+_mHi+'</b>'
+        +'<i>'+(_m>=_mHi?'\u2705 \u5df2\u591f':('\u8fd8\u5dee '+Math.max(0,_mHi-_m)+' \u4e2a'))+'</i>'
+      +'</div>'):'')
+      +(_slow?'<div class="psw-req-tip">'+(_slow==='words'
+          ? '\ud83d\udca1 \u7ecf\u9a8c\u591f\u4e86\uff0c\u5361\u5728\u3010\u5df2\u638c\u63e1\u5355\u8bcd\u3011\u2014\u2014 \u53bb\u63a2\u7d22\u5355\u8bcd\u91cc\u628a\u65b0\u8bcd\u5b66\u4f1a\u5c31\u80fd\u8fdb\u5316'
+          : '\ud83d\udca1 \u5355\u8bcd\u591f\u4e86\uff0c\u5361\u5728\u3010\u7ecf\u9a8c\u3011\u2014\u2014 \u591a\u73a9\u51e0\u5c40\u5c31\u80fd\u8fdb\u5316')+'</div>':'')
+    +'</div>';
+  }
+})();
       h+='<div class="psw-bar"><i style="width:'+prog+'%"></i></div>';
     }else{
       h+='<div class="psw-dispst">'+(disp===0?'✦ 你的起点形态':('✦ 已进化获得 · 境'+Rd.num+' '+Rd.name))+'</div>';/*🔴BUG#93 去掉" · 🔒 已锁定"锁状态后缀(锁已删)*/
