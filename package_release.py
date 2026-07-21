@@ -502,18 +502,7 @@ def _scan_forbidden_text_colors(entries: list[tuple[str, bytes]]) -> None:
 def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
     """Fail closed if current runtime/cache URLs can revive superseded code."""
     raw = dict(entries)
-    # The packager unit tests deliberately build a tiny historical v942
-    # fixture. These are release invariants, not migration rules for isolated
-    # legacy fixtures.
     version = raw.get("VERSION", b"").decode("utf-8", "replace").strip()
-    if version not in {"946", "950", "951", "952", "953", "954", "955", "956", "957", "958", "959", "960"}:
-        return
-    text = {
-        name: data.decode("utf-8", "replace")
-        for name, data in entries
-        if PurePosixPath(name).suffix.lower() in {".html", ".js"}
-    }
-    sw = text.get("sw_v944.js", "")
     release_contracts = {
         "946": (("shell-10", "pages-8", "assets-8"), "v=946-hf7"),
         "950": (("shell-11", "pages-9", "assets-9"), "v=950"),
@@ -527,7 +516,28 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "958": (("shell-19", "pages-17", "assets-17", "icons-2"), "v=958"),
         "959": (("shell-20", "pages-18", "assets-18", "icons-2"), "v=959"),
         "960": (("shell-21", "pages-19", "assets-19", "icons-3"), "v=960"),
+        # 🔴v963 候选：逐星发钻+复习奖励；SW 代际 shell-22/pages-20/assets-20，图标未变仍 icons-3。
+        "963": (("shell-22", "pages-20", "assets-20", "icons-3"), "v=963"),
     }
+    if version not in release_contracts:
+        # The packager unit tests deliberately build tiny historical v942-v945
+        # fixtures that predate the runtime contract; only these may skip.
+        v_num = int(version) if version.isdigit() else -1
+        if 942 <= v_num <= 945:
+            return
+        # 🔴v963 fail-closed（交接文档要求）：未登记合同的版本一律拒绝打包。
+        # v961/v962 已被用户永久淘汰；任何新候选必须先补 release_contracts 再打包。
+        raise RuntimeError(
+            f"release contract missing for VERSION={version!r}; refusing to package "
+            "an unregistered version (v961/v962 permanently retired; register any "
+            "new candidate in release_contracts before packaging)"
+        )
+    text = {
+        name: data.decode("utf-8", "replace")
+        for name, data in entries
+        if PurePosixPath(name).suffix.lower() in {".html", ".js"}
+    }
+    sw = text.get("sw_v944.js", "")
     cache_generations, stamp = release_contracts[version]
     required_sw = tuple(f"CACHE_PREFIX + '{name}'" for name in cache_generations) + tuple(
         f"'./{name}.js?{stamp}'" for name in (
