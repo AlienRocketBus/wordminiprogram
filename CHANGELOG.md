@@ -8,6 +8,28 @@
 - 新奖励仅在**美食岛**激活体验；其余 18 岛加载模块后自动 no-op，8 个 Land 页完全未改动。
 - 设计原则（用户确认）：奖励只挂"真实答题证据"，SRS 自评"记住了"零奖励。
 
+### 探索单词·逐星即时发钻（第二轮迭代，用户 2026-07-21 明确要求）
+
+- 知识结晶从"满 5 星才一次性发 4 钻"改为**每锁一颗星当场 +1 💎**：普通聚焦挑战锁 1 星=+1💎，
+  记忆强化锁 2 星=当场 +2💎；集齐 5 星弹庆祝（钻石已逐星到账，共 5 💎/词）。
+- 老玩家自动迁移：已完成词补齐第 5 星 +1（历史 4 + 补齐 1 = 人人 5💎/词）；进行中的词
+  按已锁星级即时补发星钻。新方案完成词的旧大额收据被封存(amount:0)，历史对账**永不双发**。
+- 全部经 crystal:star:<岛>:<canonical槽>:<星级> 终身唯一收据；Land/Season 同词共用槽位不重复；
+  展示计数 hsn_crystal_gems 改按钱包账本(word+star 收据)重算，可自愈漂移。
+- 新增 test_crystal_star_gems_v963.mjs（补发/补齐/封存/重放幂等/展示重算五场景）；
+  test_crystal_schema_v942 与 test_crystal_migration_v942 的对账合同同步更新并注明变更原因。
+
+### 全量资源戳与版本元数据升级（版本自检器强制的一致性）
+
+- 全部运行文件 ?v=960 → ?v=963：template、27 岛页、8 Land 页、index/_frame/boss_hall/check/
+  land_map/season_showcase/spelling_bee、11 个共享 JS 与 island_data.json 数据源；页面内部版本
+  自检（hansen_boss_lock 第 3 层）恢复"?v= 全一致"零告警。
+- Service Worker 缓存代际原子轮换：shell-21→22、pages-19→20、assets-19→20（icons-3 不变）。
+- __HBU_VERSION__/HBU_RUNTIME_VERSION → v963；备份 CURRENT_APP_VERSION → 963 且
+  **显式继续拒绝 v961/v962**（永久淘汰线失败关闭）；取证下载文件名同步 v963。
+- test_food_icon_compression_v960 与 test_land_review_activation_v946 的资源戳断言改为动态读
+  VERSION（图标字节/映射/四入口与"仅一份复习运行时"合同不变）。
+
 ### 新增奖励（全部走 HansenCoins/HansenGems 幂等收据，防重复防刷）
 
 - 真实纠错（任意玩法错词实际 -1）：**+2 金币**，每词每天 3 次；

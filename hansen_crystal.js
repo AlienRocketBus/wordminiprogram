@@ -158,6 +158,46 @@
     return false;
   }
   function wordSource(id,idx){return 'crystal:word:'+String(id)+':'+String(idx);}
+  /* 🔴v963: 逐星即时发钻（用户 2026-07-21 明确要求即时反馈）。
+   * 每锁一颗星立刻 +1💎，取代旧的"满5星才一次性 GEM_PER_WORD"大额延迟。
+   * 收据 crystal:star:<岛>:<canonical槽>:<星级> 终身唯一；强化锁2星=当场+2💎；
+   * Land/Season 同词共用 canonical 槽位，绝不重复发。老玩家迁移见 reconcileCanonicalRewards。 */
+  function starSource(id,idx,lv){return 'crystal:star:'+String(id)+':'+String(idx)+':'+String(lv);}
+  function gemAwardExists(id){
+    try{
+      var raw=localStorage.getItem('hansen_gem_awards_v942');if(raw===null)return false;
+      var o=JSON.parse(raw);
+      return !!(o&&typeof o==='object'&&!Array.isArray(o)&&Object.prototype.hasOwnProperty.call(o,String(id)));
+    }catch(e){return false;}
+  }
+  function seedGemAwards(ids){
+    try{if(window.HansenGems&&typeof HansenGems.seedAwards==='function')return HansenGems.seedAwards(ids);}catch(e){}
+    return false;
+  }
+  function payStarGems(id,ci,fromLv,toLv){
+    var paid=0;
+    for(var L=Math.max(1,(fromLv|0)+1); L<=Math.min(MAX_LV,toLv|0); L++){
+      var sid=starSource(id,ci,L);
+      if(gemAwardExists(sid))continue;
+      if(awardGem(sid,1))paid++;
+    }
+    if(paid)recomputeCrystalGems();
+    return paid;
+  }
+  /* 展示计数改为按钱包账本重算(单词结晶=word/star两类收据金额和)，兼容新旧混合方案，可自愈漂移 */
+  function recomputeCrystalGems(){
+    try{
+      var raw=localStorage.getItem('hansen_gem_awards_v942');
+      if(raw===null){lsSet('hsn_crystal_gems',0);return;}
+      var o=JSON.parse(raw);if(!o||typeof o!=='object'||Array.isArray(o))return;
+      var sum=0;
+      Object.keys(o).forEach(function(k){
+        if((k.indexOf('crystal:word:')===0||k.indexOf('crystal:star:')===0)&&o[k]&&isFinite(o[k].amount))
+          sum+=Math.max(0,Math.floor(o[k].amount));
+      });
+      lsSet('hsn_crystal_gems',sum);
+    }catch(e){}
+  }
   var LEGACY_SEED_KEY='hansen_crystal_legacy_seed_v942',SEED_DONE_KEY='hansen_crystal_awards_seeded_v942';
   function legacySeedIds(h){
     var ids=[];
@@ -297,11 +337,20 @@
     var total = HC() ? canonicalDoneTotal() : lsInt('hsn_crystal_total') + 1;
     lsSet('hsn_crystal_total', total);
     var a=currentMap(),ci=HC()?HC().toCanonicalIndex(currentRef(),idx):idx;
-    var paid=awardGem(wordSource(a.id||islandKey(),ci),GEM_PER_WORD);
-    if(paid)lsSet('hsn_crystal_gems',total*GEM_PER_WORD);   // 单词结晶累计展示（段位/全岛 bonus 不计入）
     var en = wordEn(idx);
-    if(paid)toast('💎 记牢了'+(en?'「'+en+'」':'')+'！+'+GEM_PER_WORD+' 颗钻石', true);
-    else toast('⚠️ 已记牢，钻石正在安全补发；请勿清理浏览器数据',true);
+    /* 🔴v963: 第5星收据已存在 = 逐星方案词(钻石已在每次锁星时到账)。
+     * 封存旧大额收据防历史对账重复补发，只庆祝不再发大额。 */
+    var paid;
+    if(gemAwardExists(starSource(a.id||islandKey(),ci,MAX_LV))){
+      seedGemAwards([wordSource(a.id||islandKey(),ci)]);
+      paid=true;
+      toast('🌟 五星集齐'+(en?'「'+en+'」':'')+'！记忆结晶完成，钻石已逐星到账 💎', true);
+    }else{
+      paid=awardGem(wordSource(a.id||islandKey(),ci),GEM_PER_WORD);
+      if(paid)toast('💎 记牢了'+(en?'「'+en+'」':'')+'！+'+GEM_PER_WORD+' 颗钻石', true);
+      else toast('⚠️ 已记牢，钻石正在安全补发；请勿清理浏览器数据',true);
+    }
+    if(paid)recomputeCrystalGems();   // 单词结晶累计展示（段位/全岛 bonus 不计入）
     try{ refreshBadge(); }catch(e){}
     try{ checkRankUp(total); }catch(e){}        //🔴v830 探险家段位晋升
     try{ checkIslandComplete(); }catch(e){}     //🔴v830 单岛全词永久掌握大奖
@@ -350,8 +399,24 @@
     if(!captureLegacySeed(h))return {mastered:total,islands:0,bonus:0,pending:true,blocked:true};
     if(!seedExistingAwards(h))return {mastered:total,islands:0,bonus:0,pending:true};
     // done 已安全落图但钱包当时失败时，启动对账按稳定 source id 补发；重放只会 no-op。
-    h.islands.forEach(function(i){var m=loadCanonical(i.id);Object.keys(m).forEach(function(k){if(m[k]&&m[k].done)awardGem(wordSource(i.id,k),GEM_PER_WORD);});});
-    lsSet('hsn_crystal_gems',total*GEM_PER_WORD);
+    // 🔴v963 逐星迁移：老完成词保留历史大额并补齐第5星(+1，人人5💎/词)；
+    // 新方案完成词封存大额收据；进行中的词按已锁星级即时补发星钻。全部幂等可重放。
+    h.islands.forEach(function(i){var m=loadCanonical(i.id);Object.keys(m).forEach(function(k){
+      var r=m[k];if(!r)return;
+      if(r.done){
+        if(!gemAwardExists(starSource(i.id,k,MAX_LV))){
+          awardGem(wordSource(i.id,k),GEM_PER_WORD);
+          awardGem(starSource(i.id,k,MAX_LV),1);
+          seedGemAwards([starSource(i.id,k,1),starSource(i.id,k,2),starSource(i.id,k,3),starSource(i.id,k,4)]);
+        }else{
+          seedGemAwards([wordSource(i.id,k)]);
+        }
+      }else{
+        var lv=Math.max(0,Math.min(MAX_LV,r.lv|0));
+        if(lv>=1)payStarGems(i.id,k,0,lv);
+      }
+    });});
+    recomputeCrystalGems();
     try{checkRankUp(total);}catch(e){}
     var newly=0, bonus=0, walletReady=!!(window.HansenGems&&typeof HansenGems.award==='function');
     h.islands.forEach(function(i){
@@ -407,24 +472,27 @@
     var t=today();
     if(w.d===t)return {ok:true,changed:false,reason:'locked-today',level:Math.max(0,Math.min(MAX_LV,w.lv|0))};
     var gain=isBoosted()?BOOST_STAR:1;
+    var _oldLv=Math.max(0,Math.min(MAX_LV,w.lv|0));/*🔴v963 记录锁星前等级，用于逐星发钻*/
     w.lv=Math.min(MAX_LV,Math.max(0,w.lv|0)+gain);
     w.p=0;
     w.d=t;
+    var _a=currentMap(),_ci=HC()?HC().toCanonicalIndex(currentRef(),idx):idx,_cid=_a.id||islandKey();
     if(w.lv>=MAX_LV){
       w.done=1;
       m[idx]=w;
-      if(saveM(m)){crystallize(idx);return {ok:true,changed:true,done:true,level:MAX_LV};}
+      if(saveM(m)){payStarGems(_cid,_ci,_oldLv,w.lv);/*🔴v963 先逐星入账(含第5星)，crystallize据此跳过旧大额*/crystallize(idx);return {ok:true,changed:true,done:true,level:MAX_LV};}
       toast('⚠️ 记忆进度未能保存，本次不发钻石，请检查存储空间',true);
       return {ok:false,reason:'save-failed'};
     }
     m[idx]=w;
     if(saveM(m)===false)return {ok:false,reason:'save-failed'};
-    floatMemo(idx,'lock',w.lv,gain);
+    var _starPaid=payStarGems(_cid,_ci,_oldLv,w.lv);/*🔴v963 每颗星当场+1💎 即时反馈*/
+    floatMemo(idx,'lock',w.lv,gain,_starPaid);
     return {ok:true,changed:true,done:false,level:w.lv,gain:gain};
   }
 
   // ===== 🔴v832 即时记忆反馈浮层(单元素·替换式·节流·无旋转闪烁) =====
-  function floatMemo(idx, kind, lv, p){
+  function floatMemo(idx, kind, lv, p, gem){
     ensureCSS();
     var en = wordEn(idx);
     var el = document.getElementById('hsnCrystalMemo');
@@ -434,7 +502,7 @@
     var html='', cls='hcm';
     if(kind==='lock'){
       cls='hcm lock';
-      html = '<b>⭐ '+(en||'单词')+' 记忆 +'+((p&&p>1)?p:1)+'</b><span class="s">'+stars+'</span>';
+      html = '<b>⭐ '+(en||'单词')+' 记忆 +'+((p&&p>1)?p:1)+((gem&&gem>0)?' · 💎+'+gem:'')+'</b><span class="s">'+stars+'</span>';
     } else if(kind==='ready'){
       cls='hcm ready';
       html = '<b>✓ '+(en||'单词')+' 今天记牢了</b><span class="t">明天再来加固一颗星</span>';

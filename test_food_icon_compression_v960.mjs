@@ -63,7 +63,9 @@ assert.equal(rendered.length,56);
 assert.equal(globalWords.length,56);
 assert.equal(beeWords.length,53);
 for(const word of words){
-  const expected=`<span class='fd-icon fd-photo fd-photo-${word}' aria-hidden='true'><img src='${dir}/${word}.webp?v=960' alt='' decoding='async' draggable='false'></span>`;
+  /* 🔴v963 合同微调: 资源戳随候选版本演进(?v=<当前VERSION>)，10图字节/哈希/宽高/映射/四入口合同不变。 */
+  const appStamp=fs.readFileSync(new URL('./VERSION',import.meta.url),'utf8').trim();
+  const expected=`<span class='fd-icon fd-photo fd-photo-${word}' aria-hidden='true'><img src='${dir}/${word}.webp?v=${appStamp}' alt='' decoding='async' draggable='false'></span>`;
   for(const [index,list] of [canonical,rendered,globalWords,beeWords].entries()){
     const row=list.find(item=>item.en===word);
     assert.ok(row,`${word}: missing from surface ${index+1}`);

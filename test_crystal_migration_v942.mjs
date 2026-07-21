@@ -31,8 +31,10 @@ const awards={},paid=[];c1.HansenGems={
   seedAwards(ids){ids.forEach(id=>{if(!Object.hasOwn(awards,id))awards[id]={amount:0,migrated:true};});return true;},
   award(id,n){if(!Object.hasOwn(awards,id)){awards[id]={amount:n};paid.push([id,n]);}return true;},add(){return 0;}
 };
-out=c1.HansenCrystal.reconcileCanonicalRewards();assert.equal(out.pending,undefined);assert.deepEqual(paid,[['crystal:word:action:1',4]],'seed 后新增 done 不能被误种为历史已发');
-c1.HansenCrystal.reconcileCanonicalRewards();assert.deepEqual(paid,[['crystal:word:action:1',4]],'对账重放不得重复发钻');
+/* 🔴v963 合同更新: 逐星方案下所有done词(含legacy-seed的0号)对账补齐第5星+1💎；
+ * legacy词的大额仍被seed边界拦截(不重发)，新done词大额照发。重放全部幂等。 */
+out=c1.HansenCrystal.reconcileCanonicalRewards();assert.equal(out.pending,undefined);assert.deepEqual(paid,[['crystal:star:action:0:5',1],['crystal:word:action:1',4],['crystal:star:action:1:5',1]],'seed 后新增 done 不能被误种为历史已发；done 词逐星补齐第5星');
+c1.HansenCrystal.reconcileCanonicalRewards();assert.deepEqual(paid,[['crystal:star:action:0:5',1],['crystal:word:action:1',4],['crystal:star:action:1:5',1]],'对账重放不得重复发钻');
 
 // alias map 保存失败时绝不能先提交 source sig；权限恢复后仍能迁移。
 const s2=new Storage({hsn_crystal_action:'{}',hsn_crystal_island_action:j({0:{lv:3,p:0,d:'2026-7-10',done:0}})}),c2=make(s2);
