@@ -22,18 +22,24 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Release version: v$VERSION"
 
-      - name: Create GitHub Release (skip if exists)
+      - name: Build deploy package and create release (skip if exists)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="v${{ steps.version.outputs.version }}"
+          V="${{ steps.version.outputs.version }}"
+          TAG="v${V}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             echo "Release $TAG already exists, skipping."
-          else
-            gh release create "$TAG" \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "Release $TAG" \
-              --notes "Auto release for version ${{ steps.version.outputs.version }} (commit ${GITHUB_SHA})" \
-              --target "$GITHUB_SHA"
-            echo "Release $TAG created."
+            exit 0
           fi
+          # 用唯一正式打包器构建（未登记版本会失败关闭，防误发 v961/v962 等）
+          python3 package_release.py "$V" --out release-assets
+          DEPLOY="release-assets/单词大冒险_v${V}_可直接部署.zip"
+          test -f "$DEPLOY"
+          # 按用户要求：Release 只附可直接部署包
+          gh release create "$TAG" "$DEPLOY" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Release $TAG" \
+            --notes "自动发布 v${V}（commit ${GITHUB_SHA}）。附件为可直接部署包：解压后把全部文件原样上传到静态网站根目录即可（不要再套一层目录）。" \
+            --target "$GITHUB_SHA"
+          echo "Release $TAG created with deploy package."
