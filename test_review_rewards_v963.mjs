@@ -41,6 +41,16 @@ function mkWallet(){
 }
 globalThis.HansenCoins = mkWallet();
 globalThis.HansenGems  = mkWallet();
+/* 🔴迭代3 mock：横幅在Node中no-op；canonical提供全局到期计算所需最小面 */
+globalThis.document.querySelector = () => null;
+const CAN_STORE = { wrongs:{}, srs:{} };
+globalThis.HansenCanonical = {
+  TOTAL_WORDS: 952,
+  islands: [{id:'food', start:100, words:56},{id:'season', start:712, words:240}],
+  currentRef: () => 'wordIslandFood',
+  resolve: (ref) => /food/i.test(String(ref)) ? {id:'food'} : null,
+  read: () => CAN_STORE,
+};
 
 /* 与模板同语义的 markAnswer（错词增减内核） */
 globalThis.markAnswer = function(idx, correct){
@@ -125,6 +135,34 @@ console.log('T7 答错零奖励');
 const b2 = C.bal;
 markAnswer(11, false);
 ok(C.bal === b2, '答错不产生任何金币');
+
+/* T8: 全局/本岛到期统计（canonical口径·Land别名不重复·格式兼容） */
+console.log('T8 全局到期统计');
+CAN_STORE.wrongs = { '105':2, '110':1, '111':1, '120':1, '130':3, '800':1, '5':0 };
+CAN_STORE.srs = {
+  '110': { box:2, due: yest() },            // 到期(昨天)
+  '111': { box:0, due: '2000-1-1' },        // 到期(不补零历史格式)
+  '120': { box:1, due: '2099-12-31' },      // 未到期
+  '130': { box:5, due: '2000-1-1' },        // 已毕业盒 → 不计
+};
+{
+  const info = M._debug.globalDueInfo();
+  ok(info.ok === true, '全局统计可用');
+  ok(info.globalDue === 4, '全局到期=4 (105无SRS/110昨天/111旧格式/800跨岛)，实际='+info.globalDue);
+  ok(info.localDue === 3, '本岛到期=3 (105/110/111在food区间)，实际='+info.localDue);
+}
+
+/* T9: 横幅状态机（本岛→今日复习 / 跨岛→总览 / 已清 / 安心） */
+console.log('T9 横幅状态机');
+{
+  const t = ymd();
+  ok(M._debug.bannerState({globalDue:4, localDue:3}, {last:'', count:0}) === 'local',  '本岛有到期 → local');
+  ok(M._debug.bannerState({globalDue:2, localDue:0}, {last:'', count:0}) === 'cross',  '仅它岛有 → cross');
+  ok(M._debug.bannerState({globalDue:0, localDue:0}, {last:t, count:5}) === 'done',    '全清且今日已计连击 → done');
+  ok(M._debug.bannerState({globalDue:0, localDue:0}, {last:'', count:0}) === 'calm',   '无到期未打卡 → calm');
+  const mLocal = M._debug.bannerModel();
+  ok(/本岛 3/.test(mLocal.title) && /全部 4/.test(mLocal.title), '横幅文案含本岛/全部双数字');
+}
 
 console.log('');
 if(fails){ console.log('❌ 失败', fails, '项'); process.exit(1); }
