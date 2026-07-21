@@ -4,14 +4,14 @@
  *    ① 多久能看到内容(白屏时长) ② 多久能点(可交互) ③ 音频缺失时会不会卡死
  * E. 内存: 反复进出游戏 40 次, JS 堆涨幅 —— 泄漏会让低端手机越玩越卡直到闪退。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 let pass = 0, fail = 0;
 const chk = (n, ok, note) => { ok ? pass++ : fail++; console.log(`   ${ok ? '✅' : '❌'} ${n}${note ? '  ' + note : ''}`); };
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
 
   // ══ D. 3G 弱网 ══
   console.log('  ══ D. 弱网体验(3G · 750kbps · 100ms延迟) ══');

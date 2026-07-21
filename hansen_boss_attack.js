@@ -20,7 +20,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
   //   (Hansen 实测"机械泰坦拳头有几次没出现"·已用延迟图片复现: slam 可见期拳头 img 未解码)。
   //   修法: ①页面加载即【预加载 + 解码】拳头图并保留引用(防 GC) → 用户走到战斗(总在数秒后)首次攻击时图已在内存解码好;
   //         ②makeWeapon 改为【克隆预加载好的图】(cloneNode·共享已解码位图·即时绘制, 不重新请求/解码) → 每次攻击拳头必即时显示。
-  var _fistSrc='bosses/mechfist_real.webp?v=938';
+  var _fistSrc='bosses/mechfist_real.webp?v=960';
   var _fistImg=new Image();
   _fistImg.src=_fistSrc;
   if(_fistImg.decode){ try{ _fistImg.decode().then(function(){ window.__hbaFistReady=true; }).catch(function(){}); }catch(e){} }
@@ -28,7 +28,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
   window.__hbaFistImg=_fistImg;   // 保留引用 + 供 makeWeapon 克隆复用
 
   // 🔴 v503: 上古太阳神火球图(同拳头——第二个外部图片FX, 同样预加载+解码+克隆, 防首次/慢解码时火球空白 BUG#67同理)
-  var _sunSrc='bosses/sunball_real.webp?v=938';
+  var _sunSrc='bosses/sunball_real.webp?v=960';
   var _sunImg=new Image();
   _sunImg.src=_sunSrc;
   if(_sunImg.decode){ try{ _sunImg.decode().then(function(){ window.__hbaSunReady=true; }).catch(function(){}); }catch(e){} }
@@ -36,7 +36,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
   window.__hbaSunImg=_sunImg;
 
   // 🔴 v504: 混沌魔尊(Lv19)光波图(第三个外部图片FX——同拳头/火球: 预加载+解码+克隆, 防首次/慢解码空白 BUG#67同理)。
-  var _waveSrc='bosses/chaoswave_real.webp?v=938';
+  var _waveSrc='bosses/chaoswave_real.webp?v=960';
   var _waveImg=new Image();
   _waveImg.src=_waveSrc;
   if(_waveImg.decode){ try{ _waveImg.decode().then(function(){ window.__hbaWaveReady=true; }).catch(function(){}); }catch(e){} }
@@ -44,7 +44,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
   window.__hbaWaveImg=_waveImg;
 
   // 🔴 v505: 外星霸主(Lv18)光束图(第四个外部图片FX——同拳头/火球/光波: 预加载+解码+克隆防空白)。
-  var _beamSrc='bosses/alienbeam_real.webp?v=938';
+  var _beamSrc='bosses/alienbeam_real.webp?v=960';
   var _beamImg=new Image();
   _beamImg.src=_beamSrc;
   if(_beamImg.decode){ try{ _beamImg.decode().then(function(){ window.__hbaBeamReady=true; }).catch(function(){}); }catch(e){} }
@@ -52,43 +52,43 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
   window.__hbaBeamImg=_beamImg;
 
   // 🔴 v506: 暗夜吸血鬼(Lv6)獠牙咬合——4 颗牙齿图(第五个外部图片FX·同样预加载+解码防空白)。tl/tr=上牙(尖朝下) bl/br=下牙(尖朝上)。
-  var _vfangSrcs={tl:'bosses/vfang_tl.webp?v=938',tr:'bosses/vfang_tr.webp?v=938',bl:'bosses/vfang_bl.webp?v=938',br:'bosses/vfang_br.webp?v=938'};
+  var _vfangSrcs={tl:'bosses/vfang_tl.webp?v=960',tr:'bosses/vfang_tr.webp?v=960',bl:'bosses/vfang_bl.webp?v=960',br:'bosses/vfang_br.webp?v=960'};
   var _vfangDim={tl:[191,417],tr:[191,417],bl:[183,512],br:[182,509]};
   var _vfangImgs={};
   ['tl','tr','bl','br'].forEach(function(k){ var im=new Image(); im.src=_vfangSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _vfangImgs[k]=im; });
   window.__hbaVfangImgs=_vfangImgs;
 
   // 🔴 v507: 暗影忍者(Lv2)攻击——扔手里剑(第六个外部图片FX·同样预加载+解码防空白)。边飞边旋转·命中血液飞溅。
-  var _shuriSrc='bosses/shuriken.webp?v=938';
+  var _shuriSrc='bosses/shuriken.webp?v=960';
   var _shuriImg=new Image(); _shuriImg.src=_shuriSrc; if(_shuriImg.decode){ try{ _shuriImg.decode().then(function(){}).catch(function(){}); }catch(e){} }
   window.__hbaShuriImg=_shuriImg;
 
   // 🔴 v512: 百战兽人(Lv3)战锤震地——真实战锤图(第七个外部图片FX·同拳头/火球: 预加载+解码+克隆 防首次/慢解码时锤子空白 BUG#67同理)。绕锤柄底为轴心抡弧砸地。
-  var _hammerSrc='bosses/hammer_real.webp?v=938';
+  var _hammerSrc='bosses/hammer_real.webp?v=960';
   var _hammerImg=new Image(); _hammerImg.src=_hammerSrc; if(_hammerImg.decode){ try{ _hammerImg.decode().then(function(){ window.__hbaHammerReady=true; }).catch(function(){}); }catch(e){} }
   _hammerImg.onload=function(){ window.__hbaHammerReady=true; };
   window.__hbaHammerImg=_hammerImg;
 
   // 🔴 v555: 史前霸王龙(Lv4)新四件套——Hansen 亲制真图(左爪撕痕/右爪撕痕/上颚獠牙/下颚獠牙, 第八组外部图片FX·预加载+解码+克隆 BUG#67 模式)。
-  var _rfSrcs={cl:'bosses/rexclaw_l.webp?v=938',cr:'bosses/rexclaw_r.webp?v=938',jt:'bosses/rexjaw_top.webp?v=938',jb:'bosses/rexjaw_bot.webp?v=938'};
+  var _rfSrcs={cl:'bosses/rexclaw_l.webp?v=960',cr:'bosses/rexclaw_r.webp?v=960',jt:'bosses/rexjaw_top.webp?v=960',jb:'bosses/rexjaw_bot.webp?v=960'};
   var _rfImgs={};
   ['cl','cr','jt','jb'].forEach(function(k){ var im=new Image(); im.src=_rfSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _rfImgs[k]=im; });
   window.__hbaRfImgs=_rfImgs;
 
   // 🔴 v558: 千年僵尸(Lv5)封印百拳五件套——Hansen 亲制(定身符/百拳全景/单拳x3, 第九组外部图片FX·BUG#67 模式)。
-  var _zsSrcs={tl:'bosses/zb_talisman.webp?v=938',al:'bosses/zb_fists_all.webp?v=938',zb_fist1:'bosses/zb_fist1.webp?v=938',zb_fist2:'bosses/zb_fist2.webp?v=938',zb_fist3:'bosses/zb_fist3.webp?v=938'};
+  var _zsSrcs={tl:'bosses/zb_talisman.webp?v=960',al:'bosses/zb_fists_all.webp?v=960',zb_fist1:'bosses/zb_fist1.webp?v=960',zb_fist2:'bosses/zb_fist2.webp?v=960',zb_fist3:'bosses/zb_fist3.webp?v=960'};
   var _zsImgs={};
   Object.keys(_zsSrcs).forEach(function(k){ var im=new Image(); im.src=_zsSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _zsImgs[k]=im; });
   window.__hbaZsImgs=_zsImgs;
 
   // 🔴 v559: 千年僵尸(Lv5)二代四件套——左/右尸拳(自带尸气爆发光环)+新百拳全景, 符复用 zb_talisman.webp 同 URL 走缓存(第十组外部图片FX·BUG#67)。
-  var _zfSrcs={fl:'bosses/zf_fist_l.webp?v=938',fr:'bosses/zf_fist_r.webp?v=938',al:'bosses/zf_fists_all.webp?v=938',tl:'bosses/zb_talisman.webp?v=938'};
+  var _zfSrcs={fl:'bosses/zf_fist_l.webp?v=960',fr:'bosses/zf_fist_r.webp?v=960',al:'bosses/zf_fists_all.webp?v=960',tl:'bosses/zb_talisman.webp?v=960'};
   var _zfImgs={};
   Object.keys(_zfSrcs).forEach(function(k){ var im=new Image(); im.src=_zfSrcs[k]; if(im.decode){ try{ im.decode().then(function(){}).catch(function(){}); }catch(e){} } _zfImgs[k]=im; });
   window.__hbaZfImgs=_zfImgs;
 
   // 🔴 v560: 雷电之主真雷电图预加载(BUG#67)。铁律: 大尺寸 PNG 严禁 drop-shadow(合成器渲染黑洞, DEMO 血案: opacity 0.96 整层被丢)。
-  var _tl2Bolt=new Image(); _tl2Bolt.src='bosses/tl_bolt.webp?v=938';
+  var _tl2Bolt=new Image(); _tl2Bolt.src='bosses/tl_bolt.webp?v=960';
   if(_tl2Bolt.decode){ try{ _tl2Bolt.decode().then(function(){}).catch(function(){}); }catch(e){} }
   window.__hbaTl2BoltImg=_tl2Bolt;
 
@@ -1147,7 +1147,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
     wrap.style.width=W+'px'; wrap.style.height=H+'px';
     var img;
     if(window.__hbaHammerImg && (window.__hbaHammerImg.complete||window.__hbaHammerReady)){ img=window.__hbaHammerImg.cloneNode(true); }
-    else { img=new Image(); img.src='bosses/hammer_real.webp?v=938'; }
+    else { img=new Image(); img.src='bosses/hammer_real.webp?v=960'; }
     img.alt=''; img.draggable=false; wrap.appendChild(img);
     wrap._w=W; wrap._h=H; return wrap;
   }
@@ -2490,7 +2490,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
     },lastHit+120/sp);
   }
   // 🔴 v520: 龙骑士统帅·焚天枪雨——SVG巨翼/龙魂 + Hansen真枪图(bosses/dragonlance.webp 165x360)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaDkLance·落枪cloneNode秒绘。龙焰橙硬编码。
-  var _hbaDkLanceSrc='bosses/dragonlance.webp?v=938';
+  var _hbaDkLanceSrc='bosses/dragonlance.webp?v=960';
   var _hbaDkLW=165, _hbaDkLH=360;
   window.__hbaDkLance=null;
   (function(){
@@ -2724,7 +2724,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
     },rainEnd);
   }
   // 🔴 v521: 暗黑灯神·神灯魂狱——SVG许愿星/魂爪 + Hansen真神灯图(bosses/genielamp.webp 400x203)。BUG#67方案: IIFE初始化预加载+decode存window.__hbaGnLamp·使用cloneNode秒绘。暗黑靛硬编码。
-  var _hbaGnLampSrc='bosses/genielamp.webp?v=938';
+  var _hbaGnLampSrc='bosses/genielamp.webp?v=960';
   var _hbaGnLW=400, _hbaGnLH=203;
   window.__hbaGnLamp=null;
   (function(){
@@ -4129,7 +4129,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
     holder.style.left=(hx-BW/2)+'px'; holder.style.top=cloudBottom+'px';
     holder.style.width=BW+'px'; holder.style.height=BH+'px';
     var img=(im&&im.complete&&im.naturalWidth>0)?im.cloneNode(false):new Image();
-    if(!img.src)img.src='bosses/tl_bolt.webp?v=938';
+    if(!img.src)img.src='bosses/tl_bolt.webp?v=960';
     img.draggable=false; img.alt='';
     holder.appendChild(img);
     (window.__hansenFxLayer||document.body).appendChild(holder);
@@ -8216,7 +8216,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         pp.x=Math.max(56,Math.min(gvw-56,pp.x)); pp.y=Math.max(72,Math.min(gvh-130,pp.y));
         setTimeout(function(){
           var ph=gpEl('hba-gpphantom', pp.x, pp.y, Math.round(92*gsz), Math.round(92*gsz));
-          ph.innerHTML='<img src="bosses/lv01.webp?v=938" alt="" draggable="false">';
+          ph.innerHTML='<img src="bosses/lv01.webp?v=960" alt="" draggable="false">';
           try{ ph.animate([{opacity:0,transform:'translate(-50%,-50%) translateY(8px) scale(.78)'},{opacity:.6,transform:'translate(-50%,-50%) translateY(-4px) scale(1)',offset:.4},{opacity:.55,transform:'translate(-50%,-50%) translateY(2px) scale(.98)',offset:.7},{opacity:0,transform:'translate(-50%,-50%) translateY(-9px) scale(.86)'}],{duration:GT(380),easing:'ease-in-out',fill:'forwards'}); }catch(e){}
           rm(ph,GT(430));
         }, GT(120+i*200));
@@ -8231,7 +8231,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         var startX=(bc.x<gvw*0.5)?(gvw-70):70, startY=Math.max(90,bc.y-40);
         var BW=Math.round(128*gsz);
         var body=gpEl('hba-gpphantom big', startX, startY, BW, BW);
-        body.innerHTML='<img src="bosses/lv01.webp?v=938" alt="" draggable="false">';
+        body.innerHTML='<img src="bosses/lv01.webp?v=960" alt="" draggable="false">';
         var faceX=gpx, faceY=Math.max(96,gpy-58);
         gpSFly(body, startX, startY, faceX, faceY, GT(480), 34, 'cubic-bezier(.45,.05,.6,.9)');
         setTimeout(function(){
@@ -8369,7 +8369,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         cp.x=Math.max(58,Math.min(vw-58,cp.x)); cp.y=Math.max(70,Math.min(vh-120,cp.y));
         setTimeout(function(){
           var cl=sdEl('hba-sdclone', cp.x, cp.y, 104, 104);
-          cl.innerHTML='<img src="bosses/lv02.webp?v=938" alt="" draggable="false">';
+          cl.innerHTML='<img src="bosses/lv02.webp?v=960" alt="" draggable="false">';
           try{ cl.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:.62,transform:'translate(-50%,-50%) scale(1)',offset:.4},{opacity:0,transform:'translate(-50%,-50%) scale(.92)'}],{duration:T(300),easing:'ease-out',fill:'forwards'}); }catch(e){}
           rm(cl,T(340));
         }, T(200+i*180));
@@ -8680,7 +8680,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zfbx=zfbs.left+zfbs.width/2, zfby=zfbs.top+zfbs.height*0.45;
       // ===== ① 僵尸驾到: 虚影蹦跳两段 + 磷火(v558 验证模式) =====
       var zfapex=hbaRxEl('hba-zf-apex', zfbx, zfby, Math.round(120*zfsz), Math.round(120*zfsz));
-      zfapex.innerHTML='<img src="bosses/lv05.webp?v=938" alt="" draggable="false">';
+      zfapex.innerHTML='<img src="bosses/lv05.webp?v=960" alt="" draggable="false">';
       try{ zfapex.animate([
         {opacity:0,transform:'translate(-50%,-50%) translate(0,0) scale(.85)'},
         {opacity:.62,transform:'translate(-50%,-50%) translate(0,-26px) scale(1.05)',offset:.25},
@@ -8702,7 +8702,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zfTali=null;
       setTimeout(function(){
         zfTali=hbaRxEl('hba-zf-tali', zfTX, zfTY, zfTW, zfTH);
-        zfTali.appendChild(zfImg('tl','bosses/zb_talisman.webp?v=938'));
+        zfTali.appendChild(zfImg('tl','bosses/zb_talisman.webp?v=960'));
         var fdx=zfbx-zfTX, fdy=zfby-zfTY;
         try{ zfTali.animate([
           {opacity:0,transform:'translate(-50%,-50%) translate('+fdx+'px,'+fdy+'px) scale(.3) rotate(-340deg)'},
@@ -8743,7 +8743,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         var key=(side==='l')?'fl':'fr';
         setTimeout(function(){
           var fi=hbaRxEl('hba-zf-fist', px, py, zfFW, zfFW);
-          fi.appendChild(zfImg(key, side==='l'?'bosses/zf_fist_l.webp?v=938':'bosses/zf_fist_r.webp?v=938'));
+          fi.appendChild(zfImg(key, side==='l'?'bosses/zf_fist_l.webp?v=960':'bosses/zf_fist_r.webp?v=960'));
           var fromX=-sgn*Math.round(zfvw*0.34), fromY=Math.round(zfFW*0.26);
           try{ fi.animate([
             {opacity:0,transform:'translate(-50%,-50%) translate('+fromX+'px,'+fromY+'px) scale(.3) rotate('+(sgn*-10)+'deg)',filter:'blur(4px)'},
@@ -8793,7 +8793,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zfAll=null;
       setTimeout(function(){
         zfAll=hbaRxEl('hba-zf-all', zfhx, zfhy-Math.round(zfAW*0.04), zfAW, zfAW);
-        zfAll.appendChild(zfImg('al','bosses/zf_fists_all.webp?v=938'));
+        zfAll.appendChild(zfImg('al','bosses/zf_fists_all.webp?v=960'));
         try{ zfAll.animate([
           {opacity:0,transform:'translate(-50%,-50%) scale(.2)',filter:'blur(6px)'},
           {opacity:1,transform:'translate(-50%,-50%) scale(.5)',filter:'blur(3px)',offset:.4},
@@ -8857,7 +8857,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zsbx=zsbs.left+zsbs.width/2, zsby=zsbs.top+zsbs.height*0.45;
       // ===== ① 僵尸驾到: 虚影蹦跳两段压近 + 绿磷火 =====
       var zsapex=hbaRxEl('hba-zs-apex', zsbx, zsby, Math.round(120*zssz), Math.round(120*zssz));
-      zsapex.innerHTML='<img src="bosses/lv05.webp?v=938" alt="" draggable="false">';
+      zsapex.innerHTML='<img src="bosses/lv05.webp?v=960" alt="" draggable="false">';
       try{ zsapex.animate([
         {opacity:0,transform:'translate(-50%,-50%) translate(0,0) scale(.85)'},
         {opacity:.62,transform:'translate(-50%,-50%) translate(0,-26px) scale(1.05)',offset:.25},
@@ -8879,7 +8879,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zsTali=null;
       setTimeout(function(){
         zsTali=hbaRxEl('hba-zs-tali', zsTaliX, zsTaliY, zsTW, zsTH);
-        zsTali.appendChild(zsImg('tl','bosses/zb_talisman.webp?v=938'));
+        zsTali.appendChild(zsImg('tl','bosses/zb_talisman.webp?v=960'));
         var fdx=zsbx-zsTaliX, fdy=zsby-zsTaliY;
         try{ zsTali.animate([
           {opacity:0,transform:'translate(-50%,-50%) translate('+fdx+'px,'+fdy+'px) scale(.3) rotate(-340deg)'},
@@ -8941,7 +8941,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         // 冲脸: scale .18→1.06 + 模糊渐清, 急停回弹撤出
         setTimeout(function(){
           var fi=hbaRxEl('hba-zs-fist', px, py, zsFW, zsFW);
-          fi.appendChild(zsImg(key,'bosses/'+key+'.webp?v=938'));
+          fi.appendChild(zsImg(key,'bosses/'+key+'.webp?v=960'));
           try{ fi.animate([
             {opacity:0,transform:'translate(-50%,-50%) scale(.18)',filter:'blur(5px) brightness(1.15)'},
             {opacity:1,transform:'translate(-50%,-50%) scale(.55)',filter:'blur(2px) brightness(1.1)',offset:.42},
@@ -8988,7 +8988,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var zsAll=null;
       setTimeout(function(){
         zsAll=hbaRxEl('hba-zs-all', zshx, zshy-Math.round(zsAW*0.04), zsAW, zsAW);
-        zsAll.appendChild(zsImg('al','bosses/zb_fists_all.webp?v=938'));
+        zsAll.appendChild(zsImg('al','bosses/zb_fists_all.webp?v=960'));
         try{ zsAll.animate([
           {opacity:0,transform:'translate(-50%,-50%) scale(.2)',filter:'blur(6px)'},
           {opacity:1,transform:'translate(-50%,-50%) scale(.5)',filter:'blur(3px)',offset:.4},
@@ -9051,7 +9051,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       function rfImg(key,src){ var im; if(rfImgs[key]&&rfImgs[key].complete&&rfImgs[key].naturalWidth>0){ im=rfImgs[key].cloneNode(false); } else { im=new Image(); im.src=src; } im.draggable=false; im.alt=''; return im; }
       // ===== ① 霸主驾到 (0~460ms) =====
       var rfapex=hbaRxEl('hba-rf-apex', bc.x, bc.y, Math.round(128*rfsz), Math.round(128*rfsz));
-      rfapex.innerHTML='<img src="bosses/lv04.webp?v=938" alt="" draggable="false">';
+      rfapex.innerHTML='<img src="bosses/lv04.webp?v=960" alt="" draggable="false">';
       try{ rfapex.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.82)'},{opacity:.66,transform:'translate(-50%,-50%) scale(1.3)',offset:.45},{opacity:.5,transform:'translate(-50%,-50%) scale(1.68)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1.92)'}],{duration:RFT(460),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(rfapex,RFT(520));
       var rfwk; // 咆哮波循环变量(定义在 setTimeout 外)
@@ -9078,7 +9078,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
         // 爪痕真图扑入
         setTimeout(function(){
           var cl=hbaRxEl('hba-rf-claw', cx, cy, rfCW, rfCW);
-          cl.appendChild(rfImg(side==='l'?'cl':'cr', side==='l'?'bosses/rexclaw_l.webp?v=938':'bosses/rexclaw_r.webp?v=938'));
+          cl.appendChild(rfImg(side==='l'?'cl':'cr', side==='l'?'bosses/rexclaw_l.webp?v=960':'bosses/rexclaw_r.webp?v=960'));
           var fromX=-sgn*Math.round(rfCW*0.34), fromY=-Math.round(rfCW*0.3);
           try{ cl.animate([
             {opacity:0,transform:'translate(-50%,-50%) translate('+fromX+'px,'+fromY+'px) scale(.5) rotate('+(sgn*-9)+'deg)'},
@@ -9118,9 +9118,9 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var rfJawT=null, rfJawB=null;
       setTimeout(function(){
         rfJawT=hbaRxEl('hba-rf-jaw', rfbx, 0, rfJW, rfJHt); rfJawT.style.top='0px'; rfJawT.style.transform='translateX(-50%)';
-        rfJawT.appendChild(rfImg('jt','bosses/rexjaw_top.webp?v=938'));
+        rfJawT.appendChild(rfImg('jt','bosses/rexjaw_top.webp?v=960'));
         rfJawB=hbaRxEl('hba-rf-jaw', rfbx, 0, rfJW, rfJHb); rfJawB.style.top='0px'; rfJawB.style.transform='translateX(-50%)';
-        rfJawB.appendChild(rfImg('jb','bosses/rexjaw_bot.webp?v=938'));
+        rfJawB.appendChild(rfImg('jb','bosses/rexjaw_bot.webp?v=960'));
         // 入场: 屏外 → 悬停位(大张, 血条暴露巨口中央)
         try{ rfJawT.animate([{transform:'translateX(-50%) translateY('+(-rfJHt-20)+'px)'},{transform:'translateX(-50%) translateY('+rfTopHold+'px)'}],{duration:RFT(320),easing:'cubic-bezier(.25,.6,.3,1)',fill:'forwards'}); }catch(e){}
         try{ rfJawB.animate([{transform:'translateX(-50%) translateY('+(rfvh+20)+'px)'},{transform:'translateX(-50%) translateY('+rfBotHold+'px)'}],{duration:RFT(320),easing:'cubic-bezier(.25,.6,.3,1)',fill:'forwards'}); }catch(e){}
@@ -9189,7 +9189,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       var rvw=window.innerWidth, rvh=window.innerHeight;
       // ===== ① 霸主驾到 (0~500ms) =====
       var apex=hbaRxEl('hba-rx2apex', bc.x, bc.y, Math.round(124*rsz), Math.round(124*rsz));
-      apex.innerHTML='<img src="bosses/lv04.webp?v=938" alt="" draggable="false">';
+      apex.innerHTML='<img src="bosses/lv04.webp?v=960" alt="" draggable="false">';
       try{ apex.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.85)'},{opacity:.64,transform:'translate(-50%,-50%) scale(1.28)',offset:.42},{opacity:.5,transform:'translate(-50%,-50%) scale(1.66)',offset:.78},{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'}],{duration:RT(460),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(apex,RT(510));
       for(var rwi=0;rwi<3;rwi++){ (function(k){ setTimeout(function(){
@@ -9306,7 +9306,7 @@ window.__HSN_FX_IMGS=["renyi_spear","hand1","hand2","hand3","hand4","hand5"];
       function hq4El(cls,x,y,w,h){var d=document.createElement('div');d.className=cls;d.style.left=x+'px';d.style.top=y+'px';if(w){d.style.width=w+'px';d.style.height=(h||w)+'px';}(window.__hansenFxLayer||document.body).appendChild(d);return d;}
       // ===== ① 狂暴变身 (0~450ms) =====
       var rage=hq4El('hba-hq4rage', bc.x, bc.y, Math.round(120*hsz), Math.round(120*hsz));
-      rage.innerHTML='<img src="bosses/lv03.webp?v=938" alt="" draggable="false">';
+      rage.innerHTML='<img src="bosses/lv03.webp?v=960" alt="" draggable="false">';
       try{ rage.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.85)'},{opacity:.62,transform:'translate(-50%,-50%) scale(1.25)',offset:.42},{opacity:.5,transform:'translate(-50%,-50%) scale(1.62)',offset:.78},{opacity:0,transform:'translate(-50%,-50%) scale(1.85)'}],{duration:HT(440),easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'}); }catch(e){}
       rm(rage,HT(490));
       for(var wi=0;wi<2;wi++){ (function(i){ setTimeout(function(){
@@ -10207,156 +10207,220 @@ function fxDajisi(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   }});
 }catch(e){ try{deal();}catch(e2){} } }
 
+/* ═══════════════════════════════════════════════════════════════
+   v951 夜罗刹·红莲战鬼 —— 《红莲圣域 · 万瓣天葬》
+   三重景深红莲绽放 → 万瓣逆流聚向战斧 → 金红斧轨贯穿 → 主莲在勇者处合葬
+   铁律: 纯 FXCore/canvas；局部辉光；零外部图、零全屏闪白、零震屏、零场景旋转；答题区继续由 FXCore 裁剪
+   ═══════════════════════════════════════════════════════════════ */
 function fxYecha(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   var F=FXCore,g=F.g,rnd=F.rnd;
-  var WHITE='255,245,225', FIRE='255,140,52', FIRE_L='255,200,112', FIRE_H='255,236,182',
-      BLOOD='226,54,50', CRIM='250,94,62', BLOOD_D='160,28,36', EMBER='255,98,46', MOON='190,34,46';
-  function ease(x){ return x<0?0:(x>1?1:x*x*(3-2*x)); }
+  var IVORY='255,248,218', GOLD='255,205,105', HOT='255,132,52', EMBER='255,76,42',
+      PETAL='248,45,78', CRIMSON='188,20,49', WINE='96,10,34', DARK='32,5,17';
+  function clamp(x){ return x<0?0:(x>1?1:x); }
+  function ease(x){ x=clamp(x); return x*x*(3-2*x); }
+  function in3(x){ x=clamp(x); return x*x*x; }
+  function out3(x){ x=clamp(x); return 1-Math.pow(1-x,3); }
   function lerp(a,b,k){ return a+(b-a)*k; }
-  function qbez(p0,c,p1,u){ var m=1-u; return {x:m*m*p0.x+2*m*u*c.x+u*u*p1.x, y:m*m*p0.y+2*m*u*c.y+u*u*p1.y}; }
+  function bell(t,a,b){ if(t<=a||t>=b)return 0; return Math.sin((t-a)/(b-a)*Math.PI); }
 
-  var H0=null, MP=null, slashes=[], forming=[], moonA=0, coreA=0, novaT=-1, impDone=false;
-  var slashTimes=[2000,2340,2680,3020,3360], finalT=4900;
+  var hero=null,axe=null,lotusCenters=[],burstPetals=[];
+  var emberAcc=0,impactAcc=0,impactT=-1;
+  /* 网页试片 5350/3520ms 等比压入正式 Boss 的既有 2040ms 命中节奏，避免下一题先于受击反馈出现。 */
+  var CINEMA_SCALE=3520/2040;
 
-  F.shell(bsEl,hx,barL,barW,midY,barBot,fx,deal,{hardMs:Math.ceil(6600/(fx.sp||1)),endMs:6400,
-  busy:function(st){ return slashes.length>0 || moonA>0.02 || coreA>0.02 || (novaT>0&&st.t-novaT<700); },
+  F.shell(bsEl,hx,barL,barW,midY,barBot,fx,deal,{hardMs:Math.ceil(5900/(fx.sp||1)),endMs:4900,
+  busy:function(st){ return burstPetals.length>0 || st.t<3400 || (impactT>0&&st.t-impactT<1760); },
   tick:function(st){
-    var t=st.t, sz=st.sz, fxi=st.fxi, bw=st.br.width, bh=st.br.height;
-    if(!H0){ H0={x:st.hx,y:st.hy}; MP={x:st.bx, y:st.br.top-2*sz}; }
-    moonA = ease((t-120)/600) * (1-ease((t-6000)/450));
-    /* 序幕: boss聚火余烬 */
-    if(t>=180&&t<3700&&Math.random()<0.75*fxi){ F.jet(st.P,st.bx+rnd(-bw*0.4,bw*0.4),st.by+bh*0.25,-Math.PI/2,0.7,Math.random()<0.6?FIRE:EMBER,1,rnd(2,3.4),sz); }
-
-    /* ── 壹幕 业火凝爪(700-1900): boss周身火焰凝出爪形雏形 ── */
-    if(t>=700&&t<1950&&forming.length<3 && Math.random()<0.06){
-      var side=(forming.length%2===0)?-1:1;
-      forming.push({x:st.bx+side*bw*0.34, y:st.by-bh*0.1, born:t, side:side});
+    var t=st.t,ct=t*CINEMA_SCALE,sz=st.sz,fxi=Math.max(0.45,Math.min(1.35,st.fxi)),bw=st.br.width,bh=st.br.height;
+    if(!hero){
+      hero={x:st.hx,y:st.hy};
+      axe={x:Math.min(st.vw-34*sz,st.bx+bw*0.24),y:st.by-bh*0.08};
+      var bandTop=Math.max(52*sz,st.br.top+bh*0.20),bandBot=hero.y-42*sz;
+      if(bandBot<bandTop+48*sz)bandBot=bandTop+48*sz;
+      lotusCenters=[
+        {x:st.vw*0.18,y:lerp(bandTop,bandBot,0.46),scale:0.68,phase:0.16},
+        {x:st.vw*0.82,y:lerp(bandTop,bandBot,0.34),scale:0.82,phase:0.54},
+        {x:st.vw*0.50,y:lerp(bandTop,bandBot,0.86),scale:1.16,phase:0.92}
+      ];
     }
-    for(var i=forming.length-1;i>=0;i--){ var fm=forming[i];
-      if(t>2000){ forming.splice(i,1); continue; }
-      if(Math.random()<0.5*fxi){ /* 火沿爪形游走 */
-        var a=(fm.side<0?Math.PI*0.7:Math.PI*0.3)+rnd(-0.3,0.3);
-        F.burst(st.P,fm.x+rnd(-8,8)*sz,fm.y+rnd(-8,8)*sz,Math.random()<0.5?FIRE_L:BLOOD,1,1.8,sz*0.8);
+
+    /* 圣域初醒：余烬只在战区内缓慢上升，粒子池有硬上限。 */
+    if(ct>220&&ct<4280){
+      emberAcc=Math.min(2,emberAcc+st.dt*0.012*fxi);
+      while(emberAcc>=1&&st.P.sparks.length<104){ emberAcc-=1;
+        var lc=lotusCenters[Math.floor(rnd(0,2.999))];
+        F.jet(st.P,lc.x+rnd(-42,42)*sz,lc.y+rnd(-4,18)*sz,-Math.PI/2,0.46,Math.random()<0.58?EMBER:GOLD,1,rnd(1.2,2.6),sz*0.82);
       }
     }
 
-    /* ── 贰幕 业火千爪(2000-3600): 火焰能量爪连环横撕 ── */
-    for(var s=0;s<slashTimes.length;s++){ if(!st.fired['sl'+s] && t>=slashTimes[s]){ st.fired['sl'+s]=1;
-      var side=(s%2===0)?-1:1;
-      var ang = side<0 ? rnd(-0.45,-0.15) : Math.PI+rnd(0.15,0.45);   /* 左右交替横扫 */
-      var ox=H0.x - side*90*sz + rnd(-10,10)*sz, oy=H0.y - 40*sz + rnd(-20,20)*sz;
-      slashes.push({ox:ox,oy:oy,ang:ang,n:6+(s%2),len:(165+rnd(0,30))*sz,curve:side*rnd(16,30)*sz,born:t,dur:460});
-      /* 命中火花 + 冲击环 */
-      F.burst(st.P,H0.x,H0.y,FIRE_L,10,4,sz); F.burst(st.P,H0.x,H0.y,BLOOD,6,3.2,sz);
-      F.ring(st.P,H0.x,H0.y,FIRE,1.3,3*sz);
-    }}
-    for(var i=slashes.length-1;i>=0;i--){ if(t-slashes[i].born>slashes[i].dur+120) slashes.splice(i,1); }
+    /* 万瓣逆流抵达斧心时依次留下金红收束环。 */
+    if(!st.fired.gather&&ct>=1880){ st.fired.gather=1;
+      F.ring(st.P,axe.x,axe.y,PETAL,0.52,2.5*sz);
+      F.ring(st.P,axe.x,axe.y,GOLD,0.34,1.6*sz);
+    }
+    if(!st.fired.axe&&ct>=2520){ st.fired.axe=1;
+      F.flash(st.P,axe.x,axe.y,GOLD,34*sz,280);
+      F.ring(st.P,axe.x,axe.y,IVORY,0.72,3.0*sz);
+      F.burst(st.P,axe.x,axe.y,HOT,12,3.8,sz*0.85);
+    }
 
-    /* ── 叁幕 业火汇聚(3400-4600): 火核蓄成 ── */
-    coreA = ease((t-3450)/1000);
-    if(t>=3500&&t<finalT&&Math.random()<0.55*fxi){ var aa=Math.random()*6.283, rr=rnd(50,130)*sz;
-      F.suck(st.P,H0.x+Math.cos(aa)*rr,H0.y+Math.sin(aa)*rr,H0.x,H0.y,Math.random()<0.45?FIRE:BLOOD,sz); }
-
-    /* ── 肆幕 火焰新星(~4900) ── */
-    if(!impDone && t>=finalT){ impDone=true; novaT=t;
-      st.fire();
-      F.flash(st.P,H0.x,H0.y,FIRE_H,66*sz,360);                     /* 新星白炽爆(单次) */
-      F.ring(st.P,H0.x,H0.y,FIRE_H,2.0,6*sz);
-      F.ring(st.P,H0.x,H0.y,FIRE,1.5,4.4*sz);
-      F.ring(st.P,H0.x,H0.y,BLOOD,1.1,3*sz);
-      F.ring(st.P,H0.x,H0.y,CRIM,0.8,2.4*sz);
-      for(var b=0;b<22;b++){ var a=b/22*6.283; F.beam(st.P,H0.x,H0.y,a,Math.random()<0.5?FIRE_L:CRIM,1.0,true); } /* 放射火柱 */
-      F.burst(st.P,H0.x,H0.y,FIRE_H,34,5.4,sz);
-      F.burst(st.P,H0.x,H0.y,EMBER,22,3.8,sz);
-      F.burst(st.P,H0.x,H0.y,BLOOD,10,3,sz);
-    }
-    /* 新星后余烬雨 */
-    if(novaT>0 && t-novaT<900 && Math.random()<0.5){ F.burst(st.P,H0.x+rnd(-60,60)*sz,H0.y-60*sz+rnd(-20,20)*sz,EMBER,1,1.4,sz*0.8); }
-  },
-  solid:function(st){    /* 血月圆盘走 source-over */
-    var ctx=st.ctx, sz=st.sz, t=st.t;
-    if(moonA>0.02){ var mr=42*sz, my=lerp(MP.y+16*sz,MP.y,ease((t-120)/700));
-      var mg=ctx.createRadialGradient(MP.x-mr*0.3,my-mr*0.3,2,MP.x,my,mr);
-      mg.addColorStop(0,g(CRIM+','+(moonA*0.95))); mg.addColorStop(0.6,g(MOON+','+(moonA*0.9))); mg.addColorStop(1,g(BLOOD_D+','+(moonA*0.8)));
-      ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(MP.x,my,mr,0,6.283); ctx.fill();
-      ctx.fillStyle=g(BLOOD_D+','+(moonA*0.4)); ctx.beginPath(); ctx.arc(MP.x-11*sz,my-7*sz,6*sz,0,6.283); ctx.arc(MP.x+13*sz,my+6*sz,4.5*sz,0,6.283); ctx.fill();
-    }
-  },
-  glow:function(st){     /* 业火/能量走 lighter(叠加发光) */
-    var ctx=st.ctx, sz=st.sz, t=st.t;
-    /* 血月红染 */
-    if(moonA>0.02){ var vg=ctx.createRadialGradient(st.vw/2,st.br.top,20,st.vw/2,st.hy,Math.max(st.vw,st.vh)*0.6);
-      vg.addColorStop(0,g(BLOOD+','+(moonA*0.10))); vg.addColorStop(1,g(BLOOD+',0'));
-      ctx.fillStyle=vg; ctx.fillRect(0,0,st.vw,st.barBot+18); }
-    /* 凝爪火晕 */
-    for(var i=0;i<forming.length;i++){ var fm=forming[i]; var fp=ease((t-fm.born)/500);
-      var fr=(16+10*fp)*sz;
-      var fg=ctx.createRadialGradient(fm.x,fm.y,1,fm.x,fm.y,fr);
-      fg.addColorStop(0,g(FIRE_L+','+(0.4*fp))); fg.addColorStop(0.6,g(BLOOD+','+(0.2*fp))); fg.addColorStop(1,g(FIRE+',0'));
-      ctx.fillStyle=fg; ctx.beginPath(); ctx.arc(fm.x,fm.y,fr,0,6.283); ctx.fill();
-    }
-    /* 业火能量爪 */
-    for(var i=0;i<slashes.length;i++){ drawFireClaw(ctx,slashes[i],t,sz); }
-    /* 交战期勇者区火幕(提升整体炽烈感) */
-    if(t>1900 && t<3760){ var sa=0.2*(0.6+0.4*Math.sin(t*0.02)); var srr=68*sz;
-      var sgg=ctx.createRadialGradient(st.hx,st.hy,4,st.hx,st.hy,srr);
-      sgg.addColorStop(0,g(FIRE+','+sa)); sgg.addColorStop(0.5,g(BLOOD+','+(sa*0.6))); sgg.addColorStop(1,g(FIRE+',0'));
-      ctx.fillStyle=sgg; ctx.beginPath(); ctx.arc(st.hx,st.hy,srr,0,6.283); ctx.fill(); }
-    /* 业火火核(蓄成) */
-    if(coreA>0.05 && novaT<0){ var cr=(18+30*coreA+Math.sin(t*0.012)*5)*sz;
-      var cg=ctx.createRadialGradient(st.hx,st.hy,2,st.hx,st.hy,cr);
-      cg.addColorStop(0,g(FIRE_H+','+(0.65*coreA))); cg.addColorStop(0.4,g(FIRE+','+(0.4*coreA))); cg.addColorStop(0.75,g(BLOOD+','+(0.22*coreA))); cg.addColorStop(1,g(BLOOD+',0'));
-      ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(st.hx,st.hy,cr,0,6.283); ctx.fill();
-      /* 核心白炽点 */
-      ctx.fillStyle=g(WHITE+','+(0.7*coreA)); ctx.beginPath(); ctx.arc(st.hx,st.hy,4*sz*coreA,0,6.283); ctx.fill();
-    }
-    /* 火焰新星光幕 */
-    if(novaT>0){ var np=(t-novaT)/700, exp=ease(np), fade=1-exp;
-      if(fade>0.02){ var nr=exp*130*sz;
-        var ng=ctx.createRadialGradient(st.hx,st.hy,nr*0.3,st.hx,st.hy,nr);
-        ng.addColorStop(0,g(FIRE_H+','+(fade*0.5))); ng.addColorStop(0.5,g(FIRE+','+(fade*0.3))); ng.addColorStop(1,g(BLOOD+',0'));
-        ctx.fillStyle=ng; ctx.beginPath(); ctx.arc(st.hx,st.hy,nr,0,6.283); ctx.fill();
+    /* 第4套试片的 3320/3520ms 主莲合葬轴等比映射；正式战斗仍在 2040ms 且只结算一次反馈。 */
+    if(!st.fired.impact&&ct>=3520){ st.fired.impact=1; impactT=t; st.fire();
+      F.flash(st.P,hero.x,hero.y,IVORY,52*sz,320);
+      F.ring(st.P,hero.x,hero.y,IVORY,2.15,5.6*sz);
+      F.ring(st.P,hero.x,hero.y,GOLD,1.66,4.6*sz);
+      F.ring(st.P,hero.x,hero.y,HOT,1.24,3.7*sz);
+      F.ring(st.P,hero.x,hero.y,PETAL,0.90,2.8*sz);
+      var room=Math.max(0,136-st.P.sparks.length);
+      F.burst(st.P,hero.x,hero.y,IVORY,Math.min(16,room),5.7,sz); room=Math.max(0,136-st.P.sparks.length);
+      F.burst(st.P,hero.x,hero.y,HOT,Math.min(22,room),4.8,sz);
+      F.shards(st.P,hero.x,hero.y,PETAL,12,sz);
+      var pn=Math.max(20,Math.min(36,Math.round(28*fxi)));
+      for(var p=0;p<pn;p++){ var a=p/pn*6.283+rnd(-0.12,0.12),v=rnd(2.0,5.6)*sz;
+        burstPetals.push({x:hero.x+rnd(-7,7)*sz,y:hero.y+rnd(-5,5)*sz,vx:Math.cos(a)*v,vy:Math.sin(a)*v-rnd(0.5,2.0)*sz,rot:rnd(0,6.283),vr:rnd(-0.14,0.14),life:0,max:rnd(880,1500),s:rnd(3.0,6.8)*sz,col:Math.random()<0.28?HOT:PETAL});
       }
     }
-    drawLines(ctx,st,sz,t);
+    if(impactT>0&&t-impactT<980){
+      impactAcc=Math.min(2,impactAcc+st.dt*0.019*fxi);
+      while(impactAcc>=1&&st.P.sparks.length<136){ impactAcc-=1;
+        F.jet(st.P,hero.x+rnd(-58,58)*sz,hero.y+rnd(-2,18)*sz,-Math.PI/2,0.40,Math.random()<0.58?HOT:PETAL,1,rnd(1.7,3.4),sz);
+      }
+    }
+    for(var q=burstPetals.length-1;q>=0;q--){ var pt=burstPetals[q]; pt.life+=st.dt;
+      pt.x+=pt.vx*st.dt*0.06; pt.y+=pt.vy*st.dt*0.06; pt.vy+=0.011*st.dt*sz; pt.vx*=0.993; pt.rot+=pt.vr;
+      if(pt.life>=pt.max)burstPetals.splice(q,1);
+    }
+  },
+  solid:function(st){
+    var ctx=st.ctx,sz=st.sz,t=st.t*CINEMA_SCALE;
+    drawSanctuary(ctx,st,t,sz);
+    drawPetalRiver(ctx,st,t,sz);
+    drawAxeCharge(ctx,st,t,sz);
+    drawMainLotus(ctx,st,t,sz);
+    drawBurstPetals(ctx,burstPetals);
+  },
+  glow:function(st){
+    var ctx=st.ctx,sz=st.sz,t=st.t*CINEMA_SCALE;
+    drawSanctuaryGlow(ctx,st,t,sz);
+    drawAxeTrail(ctx,st,t,sz);
+    if(impactT>0){ var age=st.t-impactT,ap=clamp(age/1320),af=1-ease(ap);
+      if(af>0.01){ var rr=(26+ap*154)*sz;
+        var ig=ctx.createRadialGradient(hero.x,hero.y,0,hero.x,hero.y,rr);
+        ig.addColorStop(0,g(IVORY+','+(af*0.34))); ig.addColorStop(0.30,g(GOLD+','+(af*0.28)));
+        ig.addColorStop(0.58,g(PETAL+','+(af*0.18))); ig.addColorStop(1,g(CRIMSON+',0'));
+        ctx.fillStyle=ig; ctx.beginPath(); ctx.arc(hero.x,hero.y,rr,0,6.283); ctx.fill();
+      }
+    }
+    /* 字幕永远最后绘制，红莲与斧轨不会吞掉台词。 */
+    drawLines(ctx,st,t,sz);
   }});
 
-  /* 业火能量爪: N道并行弧形火焰能量条, 白炽芯+烈焰晕, 快速揭示后淡出 */
-  function drawFireClaw(ctx,sl,t,sz){
-    var age=t-sl.born, prog=ease(age/150), fade=1-ease((age-250)/210); if(fade<=0.01)return;
-    var nx=Math.cos(sl.ang+Math.PI/2), ny=Math.sin(sl.ang+Math.PI/2);
-    for(var k=0;k<sl.n;k++){
-      var off=(k-(sl.n-1)/2)*15*sz;
-      var p0={x:sl.ox+nx*off, y:sl.oy+ny*off};
-      var p1={x:p0.x+Math.cos(sl.ang)*sl.len, y:p0.y+Math.sin(sl.ang)*sl.len};
-      var c ={x:lerp(p0.x,p1.x,0.5)+nx*sl.curve, y:lerp(p0.y,p1.y,0.5)+ny*sl.curve};
-      /* 采样到 prog */
-      var N=14, pts=[]; for(var i=0;i<=N;i++){ var u=(i/N)*prog; pts.push(qbez(p0,c,p1,u)); }
-      if(pts.length<2)continue;
-      /* 外层烈焰晕 */
-      ctx.strokeStyle=g(BLOOD+','+(0.5*fade)); ctx.lineWidth=(9-k*0.5)*sz; ctx.lineCap='round';
-      ctx.shadowBlur=18; ctx.shadowColor=g(EMBER+','+fade);
-      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); for(var i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y); ctx.stroke();
-      /* 中层烈焰 */
-      ctx.strokeStyle=g(FIRE+','+(0.85*fade)); ctx.lineWidth=(5-k*0.35)*sz; ctx.shadowBlur=10; ctx.shadowColor=g(FIRE_L+','+fade);
-      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); for(var i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y); ctx.stroke();
-      /* 白炽芯 */
-      ctx.strokeStyle=g(FIRE_H+','+(0.95*fade)); ctx.lineWidth=Math.max(0.6,(1.8-k*0.15)*sz); ctx.shadowBlur=0;
-      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); for(var i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y); ctx.stroke();
-      /* 爪尖亮点 */
-      var tp=pts[pts.length-1];
-      ctx.fillStyle=g(WHITE+','+(0.9*fade)); ctx.shadowBlur=8; ctx.shadowColor=g(FIRE_L+','+fade);
-      ctx.beginPath(); ctx.arc(tp.x,tp.y,2.2*sz,0,6.283); ctx.fill(); ctx.shadowBlur=0;
+  function drawPetal(ctx,x,y,s,rot,a,col){ if(a<=0.005||s<=0.2)return;
+    ctx.save(); ctx.globalAlpha=a; ctx.translate(x,y); ctx.rotate(rot);
+    ctx.fillStyle=g((col||PETAL)+',0.90'); ctx.strokeStyle=g(GOLD+',0.72'); ctx.lineWidth=Math.max(0.55,s*0.075);
+    ctx.beginPath(); ctx.moveTo(0,-s*1.22);
+    ctx.bezierCurveTo(s*0.90,-s*0.30,s*0.72,s*0.74,0,s);
+    ctx.bezierCurveTo(-s*0.72,s*0.74,-s*0.90,-s*0.30,0,-s*1.22); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.globalAlpha=a*0.76; ctx.strokeStyle=g(IVORY+',0.72'); ctx.lineWidth=Math.max(0.45,s*0.045);
+    ctx.beginPath(); ctx.moveTo(0,-s*0.82); ctx.quadraticCurveTo(s*0.08,0,0,s*0.70); ctx.stroke();
+    ctx.restore();
+  }
+  function drawSanctuary(ctx,st,t,sz){
+    var bloom=out3((t-220)/1560),fade=1-ease((t-4080)/1200); if(bloom<=0||fade<=0.005)return;
+    for(var L=0;L<lotusCenters.length;L++){ var c=lotusCenters[L],base=(20+L*14)*bloom*sz*c.scale;
+      for(var i=0;i<12;i++){ var a=i/12*6.283+c.phase+t*(L%2?0.000055:-0.000045);
+        var rr=base*(0.72+0.28*Math.sin((i+1)*2.17));
+        drawPetal(ctx,c.x+Math.cos(a)*rr,c.y+Math.sin(a)*rr*0.48,(11+L*3)*bloom*sz*c.scale,a+Math.PI/2,bloom*fade*(0.32+L*0.10),i%3===0?HOT:PETAL);
+      }
+      ctx.save(); ctx.globalAlpha=bloom*fade*(0.38+L*0.08); ctx.strokeStyle=g(GOLD+',0.76'); ctx.lineWidth=(1.0+L*0.32)*sz;
+      ctx.beginPath(); ctx.ellipse(c.x,c.y,base*0.72,base*0.28,0,0,6.283); ctx.stroke(); ctx.restore();
     }
   }
-  function drawLines(ctx,st,sz,t){
-    function line(txt,y,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over';
-      ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center';
-      ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor=g(BLOOD_D+',0.9');
-      ctx.fillText(txt,st.vw/2,y); ctx.restore(); ctx.shadowBlur=0; }
-    if(t>=300&&t<1600){ var a1=Math.sin(Math.min(1,(t-300)/300)*Math.PI)*(t<1300?1:(1-(t-1300)/300)); if(a1>0)line('"业火加身——受千爪之刑。"',st.hy-96*sz,Math.max(0,a1),13,'255,205,190'); }
-    if(t>=4950&&t<6100){ var a2=Math.sin(Math.min(1,(t-4950)/320)*Math.PI)*(t<5800?1:(1-(t-5800)/300)); if(a2>0)line('"焚尽——寸草不生。"',st.hy-96*sz,Math.max(0,a2),14,FIRE_H); }
+  function drawSanctuaryGlow(ctx,st,t,sz){
+    var bloom=out3((t-220)/1560),fade=1-ease((t-4080)/1200); if(bloom<=0||fade<=0.005)return;
+    for(var i=0;i<lotusCenters.length;i++){ var c=lotusCenters[i],r=(62+i*28)*sz*c.scale;
+      var lg=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,r);
+      lg.addColorStop(0,g(GOLD+','+(bloom*fade*(0.15+i*0.03)))); lg.addColorStop(0.46,g(PETAL+','+(bloom*fade*0.13))); lg.addColorStop(1,g(CRIMSON+',0'));
+      ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(c.x,c.y,r,0,6.283); ctx.fill();
+    }
   }
+  function petalPath(i,k,st){
+    var src=lotusCenters[i%3],turn=(i%2?-1:1),orbit=(42+(i%7)*9)*st.sz;
+    var a=i/28*6.283+k*(3.4+((i%5)*0.08));
+    var sx=src.x+Math.cos(a+i*0.71)*orbit,sy=src.y+Math.sin(a+i*0.71)*orbit*0.48;
+    var c1x=st.vw*0.50+turn*(st.vw*(0.27-k*0.14)),c1y=lerp(src.y,axe.y,0.34)-Math.sin(i*1.37)*22*st.sz;
+    var c2x=axe.x-turn*(58+((i*13)%42))*st.sz,c2y=axe.y+(i%6-2.5)*12*st.sz;
+    var u=1-k,px=u*u*u*sx+3*u*u*k*c1x+3*u*k*k*c2x+k*k*k*axe.x;
+    var py=u*u*u*sy+3*u*u*k*c1y+3*u*k*k*c2y+k*k*k*axe.y;
+    return {x:px,y:py,a:a};
+  }
+  function drawPetalRiver(ctx,st,t,sz){
+    var gather=clamp((t-1880)/1580); if(gather<=0||gather>=1)return;
+    var k=ease(gather),alpha=0.28+gather*0.58;
+    for(var i=0;i<28;i++){ var delay=(i%7)*0.030,ki=clamp((k-delay)/(1-delay)),p=petalPath(i,ki,st);
+      drawPetal(ctx,p.x,p.y,(4.6+ki*5.4+(i%3)*0.7)*sz,p.a+Math.PI/2+ki*1.8,alpha*(0.64+(i%5)*0.07),i%4===0?GOLD:(i%3===0?HOT:PETAL));
+      if(i%3===0&&ki>0.12){ var prev=petalPath(i,Math.max(0,ki-0.08),st);
+        ctx.save(); ctx.globalAlpha=alpha*0.28; ctx.strokeStyle=g((i%2?PETAL:GOLD)+',0.64'); ctx.lineWidth=(0.8+(i%4)*0.22)*sz;
+        ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.restore(); }
+    }
+  }
+  function drawAxeCharge(ctx,st,t,sz){
+    var charge=ease((t-2280)/820),fade=1-ease((t-3520)/720); if(charge<=0||fade<=0.005)return;
+    var x=axe.x,y=axe.y,a=charge*fade,pulse=0.82+Math.sin(t*0.022)*0.18;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(-0.28+Math.sin(t*0.004)*0.025); ctx.globalAlpha=a;
+    ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=g(WINE+',0.94'); ctx.lineCap='round'; ctx.lineWidth=8.5*sz;
+    ctx.beginPath(); ctx.moveTo(-9*sz,50*sz); ctx.lineTo(7*sz,-44*sz); ctx.stroke();
+    ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=g(GOLD+',0.90'); ctx.lineWidth=2.3*sz; ctx.shadowBlur=12*sz; ctx.shadowColor=g(PETAL+',0.94');
+    ctx.beginPath(); ctx.moveTo(-9*sz,50*sz); ctx.lineTo(7*sz,-44*sz); ctx.stroke();
+    ctx.strokeStyle=g(PETAL+',0.92'); ctx.lineWidth=7.0*sz;
+    ctx.beginPath(); ctx.arc(-4*sz,-36*sz,28*sz*pulse,-1.46,0.62); ctx.stroke();
+    ctx.beginPath(); ctx.arc(18*sz,-31*sz,24*sz*pulse,2.45,4.70); ctx.stroke();
+    ctx.strokeStyle=g(IVORY+',0.86'); ctx.lineWidth=1.55*sz; ctx.shadowBlur=8*sz;
+    ctx.beginPath(); ctx.arc(-4*sz,-36*sz,28*sz*pulse,-1.46,0.62); ctx.stroke();
+    ctx.beginPath(); ctx.arc(18*sz,-31*sz,24*sz*pulse,2.45,4.70); ctx.stroke();
+    ctx.restore();
+    ctx.save(); ctx.globalAlpha=a*0.72; ctx.strokeStyle=g(GOLD+',0.88'); ctx.lineWidth=1.2*sz; ctx.shadowBlur=12*sz; ctx.shadowColor=g(PETAL+',0.9');
+    for(var i=0;i<3;i++){ var rr=(24+i*13+Math.sin(t*0.007+i)*4)*sz; ctx.beginPath(); ctx.arc(x,y-14*sz,rr,0,6.283); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawAxeTrail(ctx,st,t,sz){
+    var slash=ease((t-2980)/540),fade=1-ease((t-3650)/620); if(slash<=0||fade<=0.005)return;
+    var x0=axe.x,y0=axe.y-12*sz,x1=hero.x,y1=hero.y,ex=lerp(x0,x1,slash),ey=lerp(y0,y1,slash)-Math.sin(slash*Math.PI)*42*sz;
+    ctx.save(); ctx.globalAlpha=fade; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle=g(CRIMSON+',0.58'); ctx.lineWidth=(22-8*slash)*sz; ctx.shadowBlur=20*sz; ctx.shadowColor=g(PETAL+',0.94');
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.quadraticCurveTo((x0+x1)/2+54*sz,(y0+y1)/2-78*sz,ex,ey); ctx.stroke();
+    ctx.strokeStyle=g(HOT+',0.78'); ctx.lineWidth=(9-3*slash)*sz; ctx.shadowBlur=12*sz;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.quadraticCurveTo((x0+x1)/2+54*sz,(y0+y1)/2-78*sz,ex,ey); ctx.stroke();
+    ctx.strokeStyle=g(IVORY+',0.94'); ctx.lineWidth=(2.8-0.8*slash)*sz; ctx.shadowBlur=7*sz;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.quadraticCurveTo((x0+x1)/2+54*sz,(y0+y1)/2-78*sz,ex,ey); ctx.stroke();
+    ctx.restore();
+    var ag=bell(t,2460,3740); if(ag>0){ var r=(38+ag*72)*sz;
+      var gg=ctx.createRadialGradient(axe.x,axe.y,0,axe.x,axe.y,r); gg.addColorStop(0,g(IVORY+','+(ag*0.34))); gg.addColorStop(0.42,g(PETAL+','+(ag*0.20))); gg.addColorStop(1,g(CRIMSON+',0'));
+      ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(axe.x,axe.y,r,0,6.283); ctx.fill(); }
+  }
+  function drawMainLotus(ctx,st,t,sz){
+    var p=clamp((t-3320)/980); if(p<=0||p>=1)return;
+    var closing=ease((t-3320)/200),release=clamp((t-3520)/780);
+    var radius=(1-closing)*Math.min(st.vw,st.vh)*0.19+14*sz+release*26*sz,alpha=1-ease(release);
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(var i=0;i<10;i++){ var a=i/10*6.283-Math.PI/2,px=hero.x+Math.cos(a)*radius,py=hero.y+Math.sin(a)*radius*0.52;
+      drawPetal(ctx,px,py,(11+closing*13)*sz,a+Math.PI/2,alpha*(0.72+closing*0.26),i%3===0?GOLD:PETAL); }
+    ctx.globalAlpha=alpha*0.82; ctx.strokeStyle=g(GOLD+',0.90'); ctx.lineWidth=(2+(1-p)*4)*sz; ctx.shadowBlur=14*sz; ctx.shadowColor=g(PETAL+',0.92');
+    ctx.beginPath(); ctx.ellipse(hero.x,hero.y,radius*0.82,radius*0.38,0,0,6.283); ctx.stroke(); ctx.restore();
+  }
+  function drawBurstPetals(ctx,list){
+    for(var i=0;i<list.length;i++){ var p=list[i],pr=p.life/p.max,a=pr<0.12?pr/0.12:1-ease((pr-0.60)/0.40); if(a<=0)continue;
+      drawPetal(ctx,p.x,p.y,p.s,p.rot,a,p.col);
+    }
+  }
+  function drawLines(ctx,st,t,sz){
+    function line(txt,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over';
+      ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center';
+      ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor=g(DARK+',0.94'); ctx.fillText(txt,st.vw/2,subtitleY(st)); ctx.restore(); }
+    if(t>=360&&t<2040){ var a1=Math.min(1,(t-360)/300)*(1-ease((t-1620)/420)); if(a1>0)line('「红莲圣域——万瓣归刃。」',a1,13,'255,224,226'); }
+    if(t>=2760&&t<4520){ var a2=Math.min(1,(t-2760)/260)*(1-ease((t-4050)/470)); if(a2>0)line('「万瓣天葬——合。」',a2,14,IVORY); }
+  }
+  function subtitleY(st){ var boxBot=st.by+st.br.height*0.5,y=boxBot+14*st.sz,cap=st.hy-46*st.sz; return y>cap?cap:y; }
 }catch(e){ try{deal();}catch(e2){} } }
 
 
@@ -10954,10 +11018,9 @@ function fxRenyi(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
 
 
 /* ═══════════════════════════════════════════════════════════════
-   夜罗刹·红莲战鬼 Lv22 —— 《血月·业火千爪》(能量爪: 火焰/血光凝成)
-   血月 → 业火凝爪 → 业火千爪(火焰能量爪连环横撕) → 业火汇聚 → 火焰新星
-   核心: 爪由火焰血光凝成(非血肉), 白炽芯+烈焰晕+余烬拖尾; 终结火焰新星
-   铁律: 场景零旋转 零闪屏(仅新星单次) 零震屏 · 答题区clip
+   诅咒之躯·绷带亡骸 —— 《封棺擒魂》
+   绷带缠出 → 护符镇压 → 棺椁闭合；实体绷带与棺椁走 source-over
+   铁律: 零场景旋转、零全屏闪白、零震屏；答题区继续由 FXCore 裁剪
    ═══════════════════════════════════════════════════════════════ */
 function fxBengdai(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   var F=FXCore,g=F.g,rnd=F.rnd;
@@ -14824,7 +14887,7 @@ var FX={ '星核帝皇·弗沙欧':{t:'fushaou',sz:1.0,sp:1.0,fxi:1.0,dealDelay:
 '不动明王·焚天镇狱尊':{t:'mingwang',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 烈阳法轮·六臂金焰杵剑·焚天镇狱 */
 '亡灵咒术师·阿努比斯之影':{t:'anubis',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 银蓝冷焰·引魂丝·灵魂剥离 */
 '古埃及大祭司·真理之口的裁决者':{t:'dajisi',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 黄金天平·称量扫描·有罪判决 */
-'夜罗刹·红莲战鬼':{t:'yecha',sz:1.0,sp:1.0,fxi:1.0,dealDelay:4900}, /* 🔴 v873 工坊: 血月·业火四连爪·红莲爆 */
+'夜罗刹·红莲战鬼':{t:'yecha',sz:1.0,sp:1.0,fxi:1.0,dealDelay:4900}, /* v951: 红莲圣域·万瓣天葬；2040ms主动命中，4900仅作调速安全兜底 */
 '天界守护者·黄金斯芬克斯':{t:'sphinx',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 太阳金翼·符文环·日轮审判 */
 '未成形之神·万形之胚':{t:'wanxing',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 形态流变·丝线编织·万形归一 */
 '法老王·不朽金身':{t:'falao',sz:1.0,sp:1.0,fxi:1.0,dealDelay:2600}, /* 🔴 v873 工坊: 权杖铭文·金箔风暴·圣甲虫·诅咒爆 */
@@ -15042,7 +15105,7 @@ var BOSSES=[
  {n:'外星霸主',lv:'Lv18',mv:'歼星协议·轨道湮灭',pal:'异星翠绿',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'混沌魔尊',lv:'Lv19',mv:'深渊审判·地狱之门',pal:'深渊魔紫',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:160}},
  {n:'上古太阳神',lv:'Lv20',mv:'创世神谕·天降太阳',pal:'鎏金圣阳',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
- {n:'铸星者·原初匠人',lv:'赛季',mv:'创世锻造',pal:'熔金星核',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
+ {n:'铸星者·原初匠人',lv:'赛季',mv:'创世锻造',pal:'熔金星核',ps:['sz','sp','fxi'],df:{sz:55,sp:100,fxi:100}},
  {n:'统御天使·圣光之翼',lv:'赛季',mv:'圣光裁决',pal:'纯白圣光',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'无光之渊·暗噬君主',lv:'赛季',mv:'锁魂囚渊',pal:'渊狱紫',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'时之君主·克罗诺斯之影',lv:'赛季',mv:'终焉时刻',pal:'时空金青',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
@@ -15052,11 +15115,12 @@ var BOSSES=[
  {n:'星陨武士·流亡之刃',lv:'岛⑦',mv:'星陨连斩',pal:'银蓝孤星',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'机械主教·组装者',lv:'岛④',mv:'全功率复产',pal:'工业机红',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'活体行星·古老意志',lv:'岛⑧',mv:'引力坍塌',pal:'深蓝金环',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
+ {n:'星核帝皇·弗沙欧',lv:'岛⑧',mv:'三皇归一·终焉白光',pal:'终焉白金',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'万典之灵·未被写下的故事',lv:'岛③',mv:'删除线终结',pal:'典籍金蓝',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'不动明王·焚天镇狱尊',lv:'岛⑤',mv:'焚天镇狱',pal:'烈阳金焰',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'亡灵咒术师·阿努比斯之影',lv:'岛⑥',mv:'灵魂剥离',pal:'银蓝冷焰',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'古埃及大祭司·真理之口的裁决者',lv:'岛⑥',mv:'有罪判决',pal:'审判金光',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
- {n:'夜罗刹·红莲战鬼',lv:'岛⑤',mv:'红莲爆',pal:'血月红莲',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
+ {n:'夜罗刹·红莲战鬼',lv:'岛⑤',mv:'红莲圣域·万瓣天葬',pal:'红莲圣域',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'天界守护者·黄金斯芬克斯',lv:'岛⑥',mv:'日轮审判',pal:'圣金翼日',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'未成形之神·万形之胚',lv:'岛①',mv:'万形归一',pal:'虹彩胚光',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
  {n:'法老王·不朽金身',lv:'岛⑥',mv:'诅咒爆',pal:'不朽鎏金',ps:['sz','sp','fxi'],df:{sz:100,sp:100,fxi:100}},
@@ -15381,7 +15445,7 @@ function openPanel(userMode){
        '<div class="hbafx-row"><label>📏 大小</label><input type="range" min="30" max="120" value="69" id="diffIcSizeRange"><span class="hbafx-val" id="diffIcSizeVal">69px</span></div>'+
        '<div class="hbafx-row"><label>↕️ 上下</label><input type="range" min="-30" max="30" value="0" id="diffIcDyRange"><span class="hbafx-val" id="diffIcDyVal">0px</span></div>'+
        '<div class="hbafx-row"><label>📦 框大小</label><input type="range" min="48" max="150" value="60" id="diffIcHRange"><span class="hbafx-val" id="diffIcHVal">60px</span></div>'+
-       '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:9px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px"><div id="diffIcPvB0" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv0" src="speed/slow.webp?v=938" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB1" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv1" src="speed/medium.webp?v=938" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB2" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv2" src="speed/fast.webp?v=938" alt="" style="width:69px;height:69px;object-fit:contain"></div></div>'+
+       '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:9px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px"><div id="diffIcPvB0" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv0" src="speed/slow.webp?v=960" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB1" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv1" src="speed/medium.webp?v=960" alt="" style="width:69px;height:69px;object-fit:contain"></div><div id="diffIcPvB2" style="background:#fbfcfe;border:1.5px solid #e3e9f2;border-radius:12px;height:60px;padding:0 13px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><img id="diffIcPv2" src="speed/fast.webp?v=960" alt="" style="width:69px;height:69px;object-fit:contain"></div></div>'+
        '</div>';
     /* 🔴v775 左上角头像大小调节器(藏管理员·难度图标下方·Hansen嫌头像太小): 框大小+形象大小各自独立·拖动写localStorage·各岛开机读取生效 */
     h+='<div style="margin-top:10px;padding:12px 13px;background:#1c1230;border:1.5px solid #4c3268;border-radius:12px">'+
@@ -15390,7 +15454,7 @@ function openPanel(userMode){
        '<div class="hbafx-row"><label>📦 方框大小</label><input type="range" min="32" max="60" value="60" id="avFrameRange"><span class="hbafx-val" id="avFrameVal">60px</span></div>'+
        '<div class="hbafx-row"><label>🧍 形象大小</label><input type="range" min="55" max="115" value="95" id="avImgRange"><span class="hbafx-val" id="avImgVal">95%</span></div>'+
        '<div style="display:flex;align-items:center;justify-content:center;margin-top:9px;padding:18px;background:rgba(255,255,255,.04);border-radius:10px">'+
-         '<div id="avPvBox" style="width:var(--hsnAvSize,60px);height:var(--hsnAvSize,60px);border-radius:13px;background:#34c3e0;overflow:hidden;position:relative;flex:none"><img id="avPvImg" src="avatars/01.webp?v=938" alt="" style="position:absolute;inset:0;margin:auto;max-width:var(--hsnAvImg,95%);max-height:var(--hsnAvImg,95%);width:auto;height:auto;object-fit:contain"></div>'+
+         '<div id="avPvBox" style="width:var(--hsnAvSize,60px);height:var(--hsnAvSize,60px);border-radius:13px;background:#34c3e0;overflow:hidden;position:relative;flex:none"><img id="avPvImg" src="avatars/01.webp?v=960" alt="" style="position:absolute;inset:0;margin:auto;max-width:var(--hsnAvImg,95%);max-height:var(--hsnAvImg,95%);width:auto;height:auto;object-fit:contain"></div>'+
        '</div>'+
        '</div>';
     /* 🔴 v804: 一键通关所有 Boss 开关(藏管理员·头像调节器下方·Hansen): ON=18岛360关全标记通关, OFF=精确还原真实进度 */
@@ -15430,7 +15494,7 @@ function openPanel(userMode){
     var de=document.documentElement;
     de.style.setProperty('--hsnAvSize',fr+'px'); de.style.setProperty('--hsnAvImg',ig+'%');
     /* 预览显示当前头像角色立绘(只换src·尺寸靠CSS变量自动随动) */
-    try{var av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var cur=parseInt(av.cur,10)||1;var pi=o.querySelector('#avPvImg');if(pi)pi.src='avatars/'+(cur<10?'0'+cur:cur)+'.webp?v=938';}catch(e){}
+    try{var av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var cur=parseInt(av.cur,10)||1;var pi=o.querySelector('#avPvImg');if(pi)pi.src='avatars/'+(cur<10?'0'+cur:cur)+'.webp?v=960';}catch(e){}
     var rF=o.querySelector('#avFrameRange'),rI=o.querySelector('#avImgRange');
     if(rF){rF.value=fr; var fV=o.querySelector('#avFrameVal'); if(fV)fV.textContent=fr+'px';
       rF.addEventListener('input',function(){fr=+this.value; var l=o.querySelector('#avFrameVal'); if(l)l.textContent=fr+'px'; try{localStorage.setItem(KF,String(fr));}catch(e){} de.style.setProperty('--hsnAvSize',fr+'px');});}
@@ -15533,6 +15597,10 @@ function ensureEntry(){
   d.innerHTML = p.all ? '<b>🎚️ Boss 特效调节</b><span>已解锁 ›</span>'
                       : '<b>🔒 Boss 特效调节</b><span>通关全部 boss 解锁 '+p.done+'/'+p.total+'</span>';
 }
+/* v953: 管理面板继续随攻击引擎按需加载，但把两个窄入口显式交给常驻轻量桥。
+   只导出“打开已存在的密码门”和“刷新公开入口”，绝不导出密码、哈希校验或越权开关。 */
+window.__hsnOpenBossAdminGate=openHiddenGate;
+window.__hsnEnsureBossFxSettingsEntry=ensureEntry;
 function boot(){
   injectCSS();
   idbReconcile(); /* 🔴 v538: 开机用 IndexedDB 镜像校正锁/计数(清档难抹) */

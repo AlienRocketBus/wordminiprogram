@@ -1,0 +1,20 @@
+{
+  "name": "单词大冒险",
+  "short_name": "单词冒险",
+  "description": "在主题冒险岛中学习和复习英语单词。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c1538",
+  "theme_color": "#0c1538",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

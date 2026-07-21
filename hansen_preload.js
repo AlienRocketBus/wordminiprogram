@@ -1,4 +1,4 @@
-// hansen_preload.js v1 — 进入小程序即在后台预加载所有内容 (图片 + 声音)
+// hansen_preload.js v955 — 按需、可让路的有限预加载
 //
 // 目的:
 //   后台预载资源进浏览器缓存, 让玩的时候图片/发音立刻就在。
@@ -132,15 +132,67 @@
           绝不抢带宽。这是最关键的一条(浏览器原生支持, 比自己写让路逻辑可靠得多)。
        2) 弱网(2G/3G)或用户开了"省流量" → 【一张都不预下】。boss 图在真正开打时按需加载即可。
        3) 预载量减半(下一章够用就行), 间隔从 90ms 拉到 220ms —— 细水长流, 不跟用户抢。 */
+  /* 只有浏览器明确报告为非省流量 4G 时才允许批量后台下载。
+     Network Information API 缺失/信息未知时采用保守策略，避免在 iOS 等设备上
+     无意消耗移动流量。用户真正点击的资源仍照常按需加载。 */
+  function _hsnConnection(){
+    try{ return navigator.connection || navigator.mozConnection || navigator.webkitConnection || null; }
+    catch(e){ return null; }
+  }
   function _hsnNetIsSlow(){
     try{
-      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if(!c) return false;
+      var c = _hsnConnection();
+      if(!c) return true;
       if(c.saveData) return true;                                   // 用户开了省流量
       var t = c.effectiveType || '';
-      return (t === 'slow-2g' || t === '2g' || t === '3g');
-    }catch(e){ return false; }
+      if(!t) return true;
+      return t !== '4g';
+    }catch(e){ return true; }
   }
+  function _hsnPageVisible(){
+    try{
+      if(typeof document.visibilityState==='string') return document.visibilityState==='visible';
+      return !document.hidden;
+    }
+    catch(e){ return true; }
+  }
+  function _hsnCanBackgroundDownload(){
+    return !_hsnNetIsSlow() && navigator.onLine !== false && _hsnPageVisible();
+  }
+  var _backgroundWaiters=[];
+  function _waitForBackgroundResume(fn){
+    if(typeof fn!=='function')return;
+    if(_hsnCanBackgroundDownload()){setTimeout(fn,0);return;}
+    if(_backgroundWaiters.indexOf(fn)<0)_backgroundWaiters.push(fn);
+  }
+  function _wakeBackgroundWaiters(){
+    if(!_hsnCanBackgroundDownload()||!_backgroundWaiters.length)return;
+    var list=_backgroundWaiters.slice();_backgroundWaiters=[];
+    list.forEach(function(fn){setTimeout(function(){try{fn();}catch(e){}},0);});
+  }
+  try{
+    document.addEventListener('visibilitychange',_wakeBackgroundWaiters,{passive:true});
+    window.addEventListener('online',_wakeBackgroundWaiters,{passive:true});
+    var _conn=_hsnConnection();if(_conn&&typeof _conn.addEventListener==='function')_conn.addEventListener('change',_wakeBackgroundWaiters);
+    window.addEventListener('pagehide',function(){_backgroundWaiters=[];},{once:true});
+  }catch(e){}
+  function _hsnShouldYieldBackground(){
+    if(!_hsnCanBackgroundDownload()) return true;
+    var until = _holdUntil();
+    return Date.now() < until;
+  }
+  try {
+    window.HansenPreloadPolicy = Object.freeze({
+      version: 'v960',
+      /* 只有浏览器明确报告 4G、非省流量、页面可见时才允许批量后台请求。
+         网络信息缺失必须保守按“未知”处理，不能把 iOS/微信默认当成 Wi-Fi。 */
+      canBackgroundDownload: _hsnCanBackgroundDownload,
+      /* 用户刚触摸屏幕、正在播放音频、页面转入后台或网络变差时，
+         所有可选预载必须立即让路。 */
+      shouldYield: _hsnShouldYieldBackground,
+      connectionKnown: function(){ return !!_hsnConnection(); }
+    });
+  } catch(e){}
   function _hsnLowPrio(img){
     try{ img.fetchPriority = 'low'; }catch(e){}
     try{ img.decoding = 'async'; }catch(e){}
@@ -152,11 +204,12 @@
     // 按章预载: 只预载到"当前进度 + 1 章(+4 关)", 上限 20.
     // 新玩家只预载 lv01-05 (~1MB), 不再一上来就拉全部 17-20 张 (~3.5MB).
     // 没预载到的高级 boss 仍会在进入那场 boss 战时按需加载 (无害, 不影响可玩性).
-    if(_hsnNetIsSlow()) return;                       /* v932: 弱网/省流量 → 一张都不预下 */
+    if(!_hsnCanBackgroundDownload()){_waitForBackgroundResume(preloadBossImages);return;} /* 条件改善后事件驱动恢复 */
     var CAP = 8;
     try { CAP = Math.min(8, maxBossUnlocked() + 2); } catch(e){ CAP = 8; }   /* v932: 20→8, +4→+2 */
     function loadNextImg(){
       if(i > CAP) return;
+      if(!_hsnCanBackgroundDownload()){_waitForBackgroundResume(loadNextImg);return;} /* 事件驱动恢复，不永久停也不每秒轮询 */
       // 用户正在操作 或 有音频在播 → 让路 (boss 图较大, 更不能和"点击发音/例句"抢带宽)
       var now = Date.now();
       var until = _holdUntil();
@@ -208,6 +261,11 @@
       if(!pumpTimer){ pumpTimer = setTimeout(function(){ pumpTimer = null; pump(); }, PAUSE_MS + 60); }
     }
     function pump(){
+      if(!_hsnCanBackgroundDownload()){
+        if(active.length) abortActive();
+        _waitForBackgroundResume(pump);
+        return;
+      }
       var now = Date.now();
       var until = _holdUntil();   // 触屏让路 或 音频忙 → 取较晚者
       if(now < until){       // 用户正在操作 或 有音频在播 → 把带宽彻底让出来
@@ -334,6 +392,11 @@
     }
     function yieldNow(){ abortActive(); if(!pumpTimer){ pumpTimer = setTimeout(function(){ pumpTimer = null; pump(); }, PAUSE_MS + 60); } }
     function pump(){
+      if(!_hsnCanBackgroundDownload()){
+        if(active.length) abortActive();
+        _waitForBackgroundResume(pump);
+        return;
+      }
       var now = Date.now();
       var until = _holdUntil();   // 触屏让路 或 音频忙 → 取较晚者
       if(now < until){ if(active.length) abortActive(); var d = (until - now) + 60; if(d > 500) d = 500; if(!pumpTimer){ pumpTimer = setTimeout(function(){ pumpTimer = null; pump(); }, d); } return; }
@@ -362,19 +425,32 @@
   function preheatIslandEntryResources(onAllDone){
     // 仅首页外壳跑(岛内无 #islandFrameWrap·脚本已加载, 不需也不该重热)
     try { if(!document.getElementById('islandFrameWrap')){ if(onAllDone) onAllDone(); return; } } catch(e){ if(onAllDone) onAllDone(); return; }
+    if(!_hsnCanBackgroundDownload()){ if(onAllDone) onAllDone(); return; }
     // 🔴BUG#92 宠物图首帧极速:读上次显示的宠物图URL【最高优先·最先】预热(宠物图~300KB是updateHero的JS注入·非静态<img>·下方DOMParse的icons/抽取抽不到→必须单独显式预热)·进岛前已进缓存→岛内早期脚本读同URL填heroPet=首帧瞬时不空白
-    try { var _petImg = localStorage.getItem('hansen_pet_hero_img'); if(_petImg){ var _pim = new Image(); try{ _pim.fetchPriority = 'high'; }catch(e){} _pim.src = _petImg; } } catch(e){}
-    // 枚举岛文件: 读首页真实链接(openIsland('island_xxx.html'))→ 永远跟随首页实际有的岛
-    var islFiles = [];
     try {
-      var seen = {}, html = document.body ? document.body.innerHTML : '';
-      var re = /island_[a-z]+\.html/g, m;
-      while((m = re.exec(html))){ if(!seen[m[0]]){ seen[m[0]] = 1; islFiles.push(m[0]); } }
+      var _petImg = localStorage.getItem('hansen_pet_hero_img');
+      if(_petImg){
+        var _pu = new URL(_petImg, location.href);
+        if(_pu.origin === location.origin && /\/pets\/[^/]+\.(?:webp|png)$/i.test(_pu.pathname)){
+          var _pim = new Image(); try{ _pim.fetchPriority = 'low'; }catch(e){} _pim.src = _pu.href;
+        }
+      }
     } catch(e){}
-    if(!islFiles.length){ if(onAllDone) onAllDone(); return; }
+    // 只预热一个最可能进入的岛：最近学习岛；没有记录才取首页第一张岛卡。
+    // 不再枚举并下载全部岛 HTML，也不扫描全部具名 Boss 美术。
+    var target = '';
+    try {
+      var recent = document.getElementById('recentLearnStat');
+      if(recent && recent._target) target = String(recent._target);
+      if(!/^island_[a-z0-9]+\.html$/.test(target)){
+        var first = document.querySelector('a.island[href^="island_"]');
+        target = first ? String(first.getAttribute('href') || '') : '';
+      }
+    } catch(e){}
+    if(!/^island_[a-z0-9]+\.html$/.test(target)){ if(onAllDone) onAllDone(); return; }
     var vq = V ? ('?v=' + V) : '';
-    // 抓第一个岛HTML(顺带预热它)→ DOMParse 抽出它引用的全部脚本与首屏图标(自维护·和岛真实引用一字不差)
-    fetch(islFiles[0] + vq, { credentials: 'same-origin' }).then(function(r){ return r.text(); }).then(function(htmlText){
+    // 抓这一座岛并抽取其共享脚本和首屏图标；资源批次仍会在用户操作时立即让路。
+    fetch(target + vq, { credentials: 'same-origin', priority:'low' }).then(function(r){ return r.text(); }).then(function(htmlText){
       var scripts = [], icons = [];
       try {
         var doc = new DOMParser().parseFromString(htmlText, 'text/html');
@@ -383,50 +459,15 @@
         var ims = doc.querySelectorAll('img[src]'); var iseen = {};
         for(var j=0;j<ims.length;j++){ var im = ims[j].getAttribute('src'); if(im && im.indexOf('icons/') === 0 && !iseen[im]){ iseen[im] = 1; icons.push(im); } }
       } catch(e){}
-      // 优先: 脚本(进岛必须·含705KB boss_attack) 与 首屏图标(小·消除"图标逐个蹦") 【并行】预热(图标小先下完·用户快速点击时图标也已就绪) → 两者都完了再低优先预热其余岛HTML
+      // 只预热目标岛所需的共享脚本和首屏图标；完成后停止，不继续扫其他岛。
       var _pending = 2;
       function _entryDone(){
         if(--_pending !== 0) return;
-        var rest = [];
-        for(var k = 1; k < islFiles.length; k++){ rest.push(islFiles[k] + vq); }   // 第0个已抓
-        preheatUrlBatch(rest, 2, function(){ if(onAllDone) onAllDone(); });
+        if(onAllDone) onAllDone();
       }
       preheatUrlBatch(scripts, 4, _entryDone);   // 44脚本(1.9MB) 并发4
       preheatUrlBatch(icons, 3, _entryDone);     // 首屏图标 并发3 (与脚本同时跑·小文件很快进缓存)
     }).catch(function(){ if(onAllDone) onAllDone(); });
-  }
-
-  // ───────── 🔴v900 预热具名 boss 美术(saelya/land_* 等·星海&单词大陆岛的 boss 图) ─────────
-  //   根因: preloadBossImages 只管 lv01-20(常规章节 boss); 星海/land 岛用的是具名 boss 图(land_priest.webp/saelya.webp 等·~66张), 从不预载 → 进那些岛 boss 战现下现出(网慢就"图加载不出来")。
-  //   做法: 从各岛 HTML DOMParse 抽 bosses/*.webp(自维护·岛改引用自动跟随·排除已由 preloadBossImages 管的 lvNN), 最低优先·复用同套礼让(preheatUrlBatch: 碰屏/音频忙立刻让路中止在途)。
-  //   安全: 全程 fetch 只读进缓存·全 try/catch·失败静默·纯附加不动任何现有逻辑。图已转 WEBP(比 PNG 小 2-3 倍)→ 预热总量大幅下降。
-  function preloadNamedBossArt(){
-    if(_hsnNetIsSlow()) return;   /* v932: 弱网 → 66 张具名 boss 美术一张都不预下(开打时按需加载) */
-    try {
-      var islFiles = [], seen = {}, html = document.body ? document.body.innerHTML : '';
-      var re = /island_[a-z0-9]+\.html/g, m;
-      while((m = re.exec(html))){ if(!seen[m[0]]){ seen[m[0]] = 1; islFiles.push(m[0]); } }
-      if(!islFiles.length) return;
-      var vq = V ? ('?v=' + V) : '';
-      var artSeen = {}, artUrls = [], pending = islFiles.length;
-      function collectDone(){
-        if(--pending !== 0) return;
-        if(artUrls.length){ try { preheatUrlBatch(artUrls, 2, null); } catch(e){} }   // 最低优先·礼让式补进缓存
-      }
-      islFiles.forEach(function(f){
-        fetch(f + vq, { credentials: 'same-origin' }).then(function(r){ return r.text(); }).then(function(t){
-          try {
-            var re2 = /bosses\/[A-Za-z0-9_]+\.webp/g, mm;
-            while((mm = re2.exec(t))){
-              if(/\/lv\d+\.webp$/.test(mm[0])) continue;                 // lv01-20 已由 preloadBossImages 管
-              var u = mm[0] + vq;
-              if(!artSeen[u]){ artSeen[u] = 1; artUrls.push(u); }
-            }
-          } catch(e){}
-          collectDone();
-        }).catch(function(){ collectDone(); });
-      });
-    } catch(e){}
   }
 
   // ───────── 启动 ─────────
@@ -445,11 +486,13 @@
     //   全程"碰屏即中止在途 + 让路 1.5s", 点发音永远走空路、最快。
     var run = function(){
       try {
+        // 未知网络、弱网、省流量或离线：完全不做批量后台下载，全部改为用户点击时按需加载。
+        if(!_hsnCanBackgroundDownload()){_waitForBackgroundResume(run);return;}
         var inHomeShell = false;
         try { inHomeShell = !!document.getElementById('islandFrameWrap'); } catch(e){}
         if(inHomeShell){
-          // 🔴BUG#90 首页外壳: 最高优先预热"进任何岛必下"的44脚本+首屏图标+19岛HTML(秒进根治) → 全部完了再 boss图(最低优先·boss战才用)
-          preheatIslandEntryResources(function(){ try { preloadBossImages(); } catch(e){} try { preloadNamedBossArt(); } catch(e){} });
+          // 首页只预热最近/第一座岛及少量通用资源；不再扫全部岛和全部具名 Boss 图。
+          preheatIslandEntryResources(function(){ try { preloadBossImages(); } catch(e){} });
           return;
         }
         // 岛内(原逻辑·零改动): 只预热本岛真正会播的词 → 再 boss图
@@ -502,6 +545,7 @@
   var _warmed = {};                        // 已预取 url 去重
   function warmSentence(ex){
     try{
+      if(!window.HansenPreloadPolicy || !window.HansenPreloadPolicy.canBackgroundDownload()) return;
       if(!ex || !window.SENTENCE_MAP) return;
       var idx = window.SENTENCE_MAP[ex];
       if(idx == null) return;

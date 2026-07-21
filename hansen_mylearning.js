@@ -100,7 +100,7 @@
       '#hsn-ml .hsn-ml-cta .tx b{display:block;font-size:15px;color:#fff;font-weight:800}',
       '#hsn-ml .hsn-ml-cta .tx span{font-size:12px;color:#fed7aa}',
       '#hsn-ml .hsn-ml-cta.done .tx span{color:#a7f3d0}',
-      '#hsn-ml .hsn-ml-gobtn{flex:0 0 auto;background:#fff;color:#9a3412;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer}',
+      '#hsn-ml .hsn-ml-gobtn{flex:0 0 auto;background:#fff;color:#1e40af;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;cursor:pointer}',
       '#hsn-ml .hsn-ml-sec{font-size:14px;font-weight:800;color:#e2e8f0;margin:6px 2px 10px;display:flex;justify-content:space-between;align-items:center}',
       '#hsn-ml .hsn-ml-sec .cnt{font-size:13px;color:#a5b4fc;font-weight:600}',
       '#hsn-ml .hsn-ml-isl{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;margin-bottom:10px}',

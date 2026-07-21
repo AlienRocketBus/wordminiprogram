@@ -45,28 +45,28 @@
     {id:'cloud', name:'云端白', emoji:'☁️', light:true, vars:{
       c1:'#ffffff',c2:'#eef2ff',c1rgb:'255,255,255',navA:'rgba(255,255,255,.94)',navB:'rgba(238,242,255,.96)',
       s1:'#e3eaf6',s2:'#f4f7fd',s3:'#ffffff',s4:'#d3ddee',
-      ink:'#1c2942',inkHi:'#24324d',ink2:'#46587a',ink3:'#7387a8',line:'99,102,241',
+      ink:'#1c2942',inkHi:'#24324d',ink2:'#46587a',ink3:'#7387a8',accentText:'#3730a3',line:'99,102,241',
       glassA:'rgba(255,255,255,.80)',glassB:'rgba(238,243,252,.72)',
       deep:'#e8effc',mid:'#f6f9ff',glow:'#dbe7fb',
       n1:'rgba(129,140,248,.20)',n2:'rgba(56,189,248,.18)',n3:'rgba(244,114,182,.12)',n4:'rgba(52,211,153,.12)'}},
     {id:'sakura', name:'樱花粉', emoji:'🌸', light:true, vars:{
       c1:'#fff1f7',c2:'#fce7f1',c1rgb:'255,241,247',navA:'rgba(255,244,249,.94)',navB:'rgba(252,231,241,.96)',
       s1:'#f6e3ec',s2:'#fdf4f8',s3:'#ffffff',s4:'#ecd2de',
-      ink:'#431c31',inkHi:'#4f2440',ink2:'#7c4a63',ink3:'#a97e92',line:'236,72,153',
+      ink:'#431c31',inkHi:'#4f2440',ink2:'#7c4a63',ink3:'#a97e92',accentText:'#9f1239',line:'236,72,153',
       glassA:'rgba(255,246,250,.82)',glassB:'rgba(251,233,241,.74)',
       deep:'#fbe7f0',mid:'#fdf3f8',glow:'#f9d8e8',
       n1:'rgba(244,114,182,.20)',n2:'rgba(192,132,252,.14)',n3:'rgba(251,191,36,.10)',n4:'rgba(56,189,248,.10)'}},
     {id:'cream', name:'奶油杏', emoji:'🍦', light:true, vars:{
       c1:'#fff8ed',c2:'#faedd6',c1rgb:'255,248,237',navA:'rgba(255,250,240,.94)',navB:'rgba(250,237,214,.96)',
       s1:'#f2e4cd',s2:'#fbf3e4',s3:'#fffdf7',s4:'#e8d3b2',
-      ink:'#43301a',inkHi:'#4d3a22',ink2:'#79603f',ink3:'#a68a63',line:'217,119,6',
+      ink:'#43301a',inkHi:'#4d3a22',ink2:'#79603f',ink3:'#a68a63',accentText:'#1e40af',line:'217,119,6',
       glassA:'rgba(255,250,241,.82)',glassB:'rgba(250,240,220,.74)',
       deep:'#f7ecd9',mid:'#fcf6ea',glow:'#f3e0c2',
       n1:'rgba(251,146,60,.16)',n2:'rgba(251,191,36,.16)',n3:'rgba(244,114,182,.10)',n4:'rgba(163,230,53,.08)'}},
     {id:'mint', name:'薄荷绿', emoji:'🌿', light:true, vars:{
       c1:'#f4fdf8',c2:'#e2f6ec',c1rgb:'244,253,248',navA:'rgba(246,253,249,.94)',navB:'rgba(226,246,236,.96)',
       s1:'#ddefe5',s2:'#f1faf5',s3:'#ffffff',s4:'#cbe5d6',
-      ink:'#15342a',inkHi:'#1d4033',ink2:'#46705f',ink3:'#729a89',line:'16,185,129',
+      ink:'#15342a',inkHi:'#1d4033',ink2:'#46705f',ink3:'#729a89',accentText:'#065f46',line:'16,185,129',
       glassA:'rgba(246,253,249,.82)',glassB:'rgba(228,246,237,.74)',
       deep:'#e2f5ea',mid:'#f2fbf6',glow:'#d2eede',
       n1:'rgba(52,211,153,.18)',n2:'rgba(45,212,191,.16)',n3:'rgba(56,189,248,.12)',n4:'rgba(163,230,53,.10)'}}
@@ -83,7 +83,7 @@
         +'--pal-chrome-1:'+v.c1+';--pal-chrome-2:'+v.c2+';--pal-c1rgb:'+v.c1rgb+';'
         +'--pal-nav-a:'+v.navA+';--pal-nav-b:'+v.navB+';'
         +'--pal-surf-1:'+v.s1+';--pal-surf-2:'+v.s2+';--pal-surf-3:'+v.s3+';--pal-surf-4:'+v.s4+';'
-        +'--pal-ink:'+v.ink+';--pal-ink-hi:'+v.inkHi+';--pal-ink-2:'+v.ink2+';--pal-ink-3:'+v.ink3+';'
+        +'--pal-ink:'+v.ink+';--pal-ink-hi:'+v.inkHi+';--pal-ink-2:'+v.ink2+';--pal-ink-3:'+v.ink3+';--pal-accent-text:'+(v.accentText||v.inkHi)+';'
         +'--pal-line-rgb:'+v.line+';--pal-glass-a:'+v.glassA+';--pal-glass-b:'+v.glassB+'}\n';
       // body 星空底: html.hsn-pal-X body 比 body[data-theme] 优先级高 → 配色接管背景(默认深空不接管·旧主题照旧)
       css+='html.hsn-pal-'+p.id+' body{'
@@ -142,12 +142,12 @@
     ['#fbbf24','#fde047','#fde68a','#facc15','#fef3c7','#fcd34d'].forEach(function(gold){
       css+=DK.map(function(d){return L+d+' [style*="color:'+gold+'"]';}).join(',')+'{color:'+gold+'!important}\n';
     });
-    // ③ 通用金字系→深琥珀(亮底可读; 深区/boss屏/横幅有更高特异性还原不受影响)
+    // ③ 通用金字系→各亮色主题自己的高对比强调色；旧驼棕文字族永久禁用。
     ['#fbbf24','#fde047','#fde68a','#facc15','#fcd34d'].forEach(function(gold){
-      css+=L+'[style*="color:'+gold+'"]{color:#92400e!important}\n'; // !important必须: inline style优先级>一切非important规则(v863教训); 深区/boss屏/金bar/横幅还原特异性更高照样赢
+      css+=L+'[style*="color:'+gold+'"]{color:var(--pal-accent-text,#1e40af)!important}\n'; // !important必须: inline style优先级>一切非important规则(v863教训); 深区/boss屏/金bar/横幅还原特异性更高照样赢
     });
-    css+=L+'.quest-reward,'+L+'.ach-reward,'+L+'.ach-bar-count{color:#92400e!important}\n';
-    css+=L+'.pet-name{color:#92400e!important;text-shadow:none!important}\n';
+    css+=L+'.quest-reward,'+L+'.ach-reward,'+L+'.ach-bar-count{color:var(--pal-accent-text,#1e40af)!important}\n';
+    css+=L+'.pet-name{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
     css+=L+'.psw-sub,'+L+'.rsb{color:#475569!important}\n';
     // ④ mode卡标签万能白晕: 各卡自带深浅不一的own色底, 白字+黑晕任何底都读得清(island-en同款验证过的疗法)
     css+=L+'.mode-card,'+L+'.mode-card *{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.55)!important}\n'; // 三批: 扩全卡(副行文字之前漏)
@@ -165,10 +165,10 @@
     // ⑨ 返回钮(深胶囊)字回浅(⑧深化后会深压深)
     css+=L+'.back-btn{color:#e2e8f0!important}\n';
     // ⑩ 成就卡脚注金字(类色·非inline)
-    css+=L+'.ach-foot2,'+L+'.ach-prog{color:#92400e!important}\n';
+    css+=L+'.ach-foot2,'+L+'.ach-prog{color:var(--pal-accent-text,#1e40af)!important}\n';
     // ⑪ 宠物进化墙: 阶段标签浅蓝+psw-sub里类金(36/进化全程)
     css+=L+'#petScreen .st{color:#475569!important}\n';
-    css+=L+'.psw-sub b,'+L+'.psw-sub span{color:#92400e!important}\n';
+    css+=L+'.psw-sub b,'+L+'.psw-sub span{color:var(--pal-accent-text,#1e40af)!important}\n';
     // 🔴v863第三批(52条真清单终局):
     // ⑫ 设置卡翻浅玻璃(亮色统一语言·与how-step/说明书折叠卡一致): 卡浅+缺省深字·econ_guide三卡自动跟随
     css+=L+'.settings-section{background:rgba(255,255,255,.66)!important;border-color:rgba(0,0,0,.08)!important}\n';
@@ -182,13 +182,13 @@
     // ⑮ 宠物屏: 兜底深字+浅玻璃件点名·星灵简介深字
     css+=L+'#petScreen{color:#334155}\n';
     css+=L+'#petScreen .nm,'+L+'#petScreen .rnm{color:#334155!important}\n';
-    css+=L+'#petScreen .now{color:#92400e!important}\n';
+    css+=L+'#petScreen .now{color:var(--pal-accent-text,#1e40af)!important}\n';
     css+=L+'.pet-text{color:#334155!important;text-shadow:none!important}\n';
     // 🔴v863第四批(17条收官):
     // ⑯ 设置屏直系卡通杀翻浅(静音卡等非.settings-section类的注入卡一并·swatch深圆是孙级不受影响)
     css+=L+'#settingsContent > div{background:rgba(255,255,255,.66)!important;border-color:rgba(0,0,0,.08)!important;color:#334155}\n';
-    css+=L+'#settingsContent h3{color:#92400e!important;text-shadow:none!important}\n';
-    css+=L+'.settings-stat span{color:#92400e!important}\n';
+    css+=L+'#settingsContent h3{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    css+=L+'.settings-stat span{color:var(--pal-accent-text,#1e40af)!important}\n';
     // ⑰ 宠物hero深行里的名字: 深行浅字(修⑮对nm一刀切误伤)
     css+=L+'#petScreen .psw-nmrow, '+L+'#petScreen .psw-nmrow *{color:#e2e8f0!important}\n'; // 五批修: 升id级特异性(⑮的#petScreen .nm曾反杀两类版)
     // 🔴v863第五批(终刀·最后3病灶):
@@ -200,8 +200,8 @@
       css+=L+d+' [style*="color:#cbd5e1"]{color:#cbd5e1!important}\n';
     });
     css+=L+'[style*="background:#1e1b4b"] [style*="color:#cbd5e1"]{color:#cbd5e1!important}\n';
-    // ⑳ 宠物进化全程标题行(.psw-th 类金)→深琥珀去晕
-    css+=L+'.psw-th, '+L+'.psw-th span, '+L+'.psw-th b{color:#92400e!important;text-shadow:none!important}\n';
+    // ⑳ 宠物进化全程标题行改为主题强调色并去晕
+    css+=L+'.psw-th, '+L+'.psw-th span, '+L+'.psw-th b{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
     // 🔴v863终刀: 深提示条linear-gradient写法(⑭三写法漏网·stats"点一下"条)
     css+=L+'[style*="linear-gradient(135deg,#1e1b4b"] *{color:#e2e8f0!important}\n';
     // 🔴v907 难度卡内奖励盒(rgba(0,0,0,.5)深遮罩+行内#fff)保白字: 深遮罩压彩卡=深底·须白字才可读(否则被①#fff→深墨映射翻深=深压深糊成一团·Hansen真机点名"做题下面解释看不清")。带两属性特异性(0,0,3,1)压过①的通用#fff映射(0,0,2,1)·且晚于金渐变③规则→通杀
@@ -224,7 +224,7 @@
     var _SF='linear-gradient(135deg,#ffffff,var(--pal-surf-2,#eef2f8))';
     var _BD='1px solid rgba(var(--pal-line-rgb,99,102,241),.28)';
     var _SH='0 2px 10px rgba(30,41,59,.07)';
-    var _AM='#92400e';                       // 金 → 深琥珀(#b45309 实测4.42:1差一点·再深一档到6:1+)
+    var _AM='var(--pal-accent-text,#1e40af)'; // 浅底强调文字：主题化高对比蓝/紫/红/绿，禁止旧驼棕色族
     var _IK='var(--pal-ink,#1c2942)';
     var _IK2='var(--pal-ink-2,#46587a)';
     ['.exp-card','.modal','.mode-card','.util-card','.ach-card2','.ach-total','.ach-bar',

@@ -1,4 +1,4 @@
-// hansen_gear.js — 攻防成长系统(武器 / 血量 / 护甲)+ 多配色主题
+// hansen_gear.js v942 — 攻防成长系统 + 可恢复钻石购买事务
 // ============================================================
 // 用钻石(HansenGems)解锁三条成长线，对抗越来越强的 Boss：
 //   ⚔️ 武器：弓箭→手枪→机枪→狙击枪→加特林→加农炮→光子炮  (提升对Boss攻击)
@@ -14,6 +14,8 @@
   if(window.__hansenGearLoaded){ return; } window.__hansenGearLoaded = true;
 
   var KEY = 'hansen_gear';   // { weaponLvl:0-6, hpLvl:0-10, armorLvl:0-8 }
+  var PENDING_KEY = 'hansen_gear_purchase_pending_v942';
+  var PROOF_KEY = 'hansen_gear_purchase_transaction_v942';
 
   // ===== 数值表(与《Boss攻防成长系统设计方案》一致) =====
   var WEAPONS = [
@@ -31,16 +33,19 @@
   var ARMOR_PRICES= [30,45,65,95,130,175,225,290];                   // 升到 Lv1..Lv8
 
   // ===== 存档 =====
-  function read(){
-    try{ var o=JSON.parse(localStorage.getItem(KEY)); if(o&&typeof o==='object'){
-      o.weaponLvl=Math.max(0,Math.min(6, o.weaponLvl|0));
-      o.hpLvl    =Math.max(0,Math.min(10,o.hpLvl|0));
-      o.armorLvl =Math.max(0,Math.min(8, o.armorLvl|0));
-      return o;
-    }}catch(e){}
-    return { weaponLvl:0, hpLvl:0, armorLvl:0 };
+  function readState(){
+    try{ var raw=localStorage.getItem(KEY);if(raw===null)return {ok:true,value:{ weaponLvl:0, hpLvl:0, armorLvl:0 }};var o=JSON.parse(raw); if(o&&typeof o==='object'&&!Array.isArray(o)){
+      if(o.weaponLvl!=null&&(!Number.isInteger(Number(o.weaponLvl))||Number(o.weaponLvl)<0||Number(o.weaponLvl)>6))return {ok:false,value:null};
+      if(o.hpLvl!=null&&(!Number.isInteger(Number(o.hpLvl))||Number(o.hpLvl)<0||Number(o.hpLvl)>10))return {ok:false,value:null};
+      if(o.armorLvl!=null&&(!Number.isInteger(Number(o.armorLvl))||Number(o.armorLvl)<0||Number(o.armorLvl)>8))return {ok:false,value:null};
+      o.weaponLvl=o.weaponLvl==null?0:Number(o.weaponLvl);
+      o.hpLvl=o.hpLvl==null?0:Number(o.hpLvl);
+      o.armorLvl=o.armorLvl==null?0:Number(o.armorLvl);
+      return {ok:true,value:o};
+    }return {ok:false,value:null};}catch(e){return {ok:false,value:null};}
   }
-  function write(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+  function read(){var r=readState();return r.ok?r.value:{ weaponLvl:0, hpLvl:0, armorLvl:0 };}
+  function write(o){ try{var raw=JSON.stringify(o);localStorage.setItem(KEY,raw);return localStorage.getItem(KEY)===raw;}catch(e){return false;} }
 
   //🔴v853 武器试用功能完全移除(Hansen·"武器完全没有任何试用功能"): 有效武器等级=真实拥有的武器·不再有试玩临时武器。
   function effWeaponLvl(){ return read().weaponLvl; }
@@ -55,18 +60,21 @@
     getWeaponRange:function(){ return [WEAPONS[0].min, WEAPONS[0].max]; },
     getMaxHP:     function(){ return HP_BASE + read().hpLvl*HP_STEP; },
     getArmorPct:  function(){ return 0; },   //🔴v853 护甲删除(Hansen·"护甲没什么必要"): 恒0减伤·Boss战护甲项自然失效·商店护甲页签已删。
-    open: openShop
+    open: openShop,
+    buy: purchaseGear,
+    recoverPurchase: recoverPurchase,
+    pendingKey: PENDING_KEY
   };
 
   // ===== 武器图标 =====
   var WICON = {
-    0:'<img src="weapons/bow.webp?v=938" alt="">',
-    1:'<img src="weapons/pistol.webp?v=938" alt="">',
-    2:'<img src="weapons/machinegun.webp?v=938" alt="">',
-    3:'<img src="weapons/sniper.webp?v=938" alt="">',
-    4:'<img src="weapons/gatling.webp?v=938" alt="">',
-    5:'<img src="weapons/cannon.webp?v=938" alt="">',
-    6:'<img src="weapons/photon.webp?v=938" alt="">'
+    0:'<img src="weapons/bow.webp?v=960" alt="">',
+    1:'<img src="weapons/pistol.webp?v=960" alt="">',
+    2:'<img src="weapons/machinegun.webp?v=960" alt="">',
+    3:'<img src="weapons/sniper.webp?v=960" alt="">',
+    4:'<img src="weapons/gatling.webp?v=960" alt="">',
+    5:'<img src="weapons/cannon.webp?v=960" alt="">',
+    6:'<img src="weapons/photon.webp?v=960" alt="">'
   };
 
   // ===== 🎨 配色皮肤(12 变量/套) =====
@@ -134,8 +142,57 @@
     var st=document.createElement('style'); st.id='hsnGearCSS'; st.textContent=css; document.head.appendChild(st);
   }
 
-  function gems(){ return (window.HansenGems && HansenGems.get) ? HansenGems.get() : 0; }
+  function gemsState(){try{if(!window.HansenGems||typeof HansenGems.get!=='function')return {ok:false,value:NaN};var raw=localStorage.getItem('hansen_wallet_gems'),stored=raw===null?0:Number(raw),api=Number(HansenGems.get());return isFinite(stored)&&Math.floor(stored)===stored&&stored>=0&&api===stored?{ok:true,value:stored}:{ok:false,value:NaN};}catch(e){return {ok:false,value:NaN};}}
+  function gems(){var r=gemsState();return r.ok?r.value:NaN;}
   function spendGems(n){ return (window.HansenGems && HansenGems.spend) ? HansenGems.spend(n) : false; }
+
+  function priceFor(kind,level){
+    if(kind==='weapon'&&level>=1&&level<WEAPONS.length)return WEAPONS[level].price;
+    if(kind==='hp'&&level>=1&&level<=HP_PRICES.length)return HP_PRICES[level-1];
+    return 0;
+  }
+  function readPending(){
+    try{var raw=localStorage.getItem(PENDING_KEY);if(raw===null)return {ok:true,value:null};var p=JSON.parse(raw);if(!p||p.version!==942||(p.kind!=='weapon'&&p.kind!=='hp'))return {ok:false,value:null};
+      var level=Math.floor(Number(p.level)),price=priceFor(p.kind,level),before=Math.floor(Number(p.before));
+      if(!price||p.price!==price||!isFinite(before)||before<price||p.after!==before-price||(p.stage!=='prepared'&&p.stage!=='spent')||!/^gear-[a-z0-9-]{8,160}$/i.test(String(p.txid||'')))return {ok:false,value:null};
+      return {ok:true,value:{version:942,txid:String(p.txid),kind:p.kind,level:level,price:price,before:before,after:before-price,stage:p.stage}};
+    }catch(e){return {ok:false,value:null};}
+  }
+  function writePending(p){try{var raw=JSON.stringify(p);localStorage.setItem(PENDING_KEY,raw);return localStorage.getItem(PENDING_KEY)===raw;}catch(e){return false;}}
+  function clearPending(){try{localStorage.removeItem(PENDING_KEY);return localStorage.getItem(PENDING_KEY)===null;}catch(e){return false;}}
+  function proofFor(p,state){return {version:942,txid:p.txid,kind:p.kind,level:p.level,price:p.price,before:p.before,after:p.after,state:state};}
+  function readProof(p){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return {ok:true,value:null};var x=JSON.parse(raw);if(!x||x.version!==942||x.txid!==p.txid||x.kind!==p.kind||x.level!==p.level||x.price!==p.price||x.before!==p.before||x.after!==p.after||(x.state!=='prepared'&&x.state!=='paid'))return {ok:false,value:null};return {ok:true,value:x};}catch(e){return {ok:false,value:null};}}
+  function writeProof(p,state){try{var raw=JSON.stringify(proofFor(p,state));localStorage.setItem(PROOF_KEY,raw);return localStorage.getItem(PROOF_KEY)===raw;}catch(e){return false;}}
+  function confirmProof(p,balance){var r=readProof(p);if(!r.ok||!r.value||balance!==p.after)return false;return r.value.state==='paid'||writeProof(p,'paid');}
+  function clearProof(p){try{var r=readProof(p);if(!r.ok)return false;if(!r.value)return true;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function cleanup(p){return clearProof(p)&&clearPending();}
+  function clearOrphanProof(){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return true;var x=JSON.parse(raw),level=Math.floor(Number(x&&x.level)),price=x&&priceFor(x.kind,level),before=Number(x&&x.before);if(!x||x.version!==942||!price||x.price!==price||!isFinite(before)||Math.floor(before)!==before||before<price||x.after!==before-price||(x.state!=='prepared'&&x.state!=='paid')||!/^gear-[a-z0-9-]{8,160}$/i.test(String(x.txid||'')))return false;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function assetLevel(p){var r=readState();return r.ok?{ok:true,value:p.kind==='weapon'?r.value.weaponLvl:r.value.hpLvl}:{ok:false,value:0};}
+  function deliver(p){
+    var r=readState();if(!r.ok)return false;var g=r.value,prop=p.kind==='weapon'?'weaponLvl':'hpLvl',cur=g[prop];if(cur>=p.level)return true;
+    var gs=gemsState(),pf=readProof(p);if(cur!==p.level-1||!gs.ok||gs.value!==p.after||!pf.ok||!pf.value||pf.value.state!=='paid')return false;g[prop]=p.level;if(!write(g))return false;var check=readState();return check.ok&&check.value[prop]>=p.level;
+  }
+  function recoverPurchase(){
+    var pr=readPending();if(!pr.ok)return {status:'pending',reason:'storage'};var p=pr.value;if(!p)return {status:clearOrphanProof()?'none':'pending',reason:'proof'};
+    var level=assetLevel(p);if(!level.ok)return {status:'pending',kind:p.kind,level:p.level};if(level.value>=p.level){return {status:cleanup(p)?'committed':'pending',kind:p.kind,level:p.level};}
+    var gs=gemsState();if(!gs.ok)return {status:'pending',kind:p.kind,level:p.level};var balance=gs.value,pf=readProof(p);if(!pf.ok)return {status:'pending',kind:p.kind,level:p.level};
+    if(balance===p.before){if(pf.value&&pf.value.state==='paid')return {status:'pending',kind:p.kind,level:p.level};return {status:cleanup(p)?'cancelled':'pending',kind:p.kind,level:p.level};}
+    if(balance!==p.after||!pf.value||!confirmProof(p,balance))return {status:'pending',kind:p.kind,level:p.level};
+    if(!deliver(p))return {status:'pending',kind:p.kind,level:p.level};
+    return {status:cleanup(p)?'committed':'pending',kind:p.kind,level:p.level};
+  }
+  function purchaseGear(kind){
+    var prior=recoverPurchase();if(prior.status==='pending'||prior.status==='committed')return prior;
+    var gr=readState(),gs=gemsState();if(!gr.ok||!gs.ok)return {status:'rejected',kind:kind};var g=gr.value,level=kind==='weapon'?g.weaponLvl+1:(kind==='hp'?g.hpLvl+1:0),price=priceFor(kind,level),before=gs.value;
+    if(!price||before<price)return {status:'rejected',kind:kind};
+    var p={version:942,txid:'gear-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),kind:kind,level:level,price:price,before:before,after:before-price,stage:'prepared'};
+    if(!writePending(p))return {status:'rejected',kind:kind};
+    if(!writeProof(p,'prepared')){cleanup(p);return {status:'rejected',kind:kind};}spendGems(price);var as=gemsState();if(!as.ok)return {status:'pending',kind:kind,level:level};var after=as.value;
+    if(after===p.before){cleanup(p);return {status:'rejected',kind:kind};}if(after!==p.after||!confirmProof(p,after))return {status:'pending',kind:kind,level:level};
+    p.stage='spent';writePending(p);
+    if(!deliver(p))return {status:'pending',kind:kind,level:level};
+    return {status:cleanup(p)?'committed':'pending',kind:kind,level:level};
+  }
 
   function toast(msg){
     var t=document.createElement('div'); t.className='hg-toast'; t.textContent=msg; document.body.appendChild(t);
@@ -227,14 +284,14 @@
   }
 
   function buy(type, wi){
-    var g=read(), price, label;
+    var g=read(), result, label;
     //🔴v853 武器试用功能完全移除(Hansen·"武器完全没有任何试用功能"): 删掉 startTrial(开启全武器试玩) + trialW(试玩期切换武器) 两个处理器。
-    if(type==='buyW'){ var nw=WEAPONS[g.weaponLvl+1]; if(!nw) return; price=nw.price; label=nw.name;
-      if(!spendGems(price)){ toast('钻石不够啦！连续签到、通关整岛可得钻石 💎'); return; }
-      g.weaponLvl++; write(g); toast('已解锁皮肤「'+label+'」！打 Boss 换上更酷的攻击特效 🎬'); }  //🔴v853 武器皮肤化: 解锁的是攻击特效皮肤·不加战力
-    else if(type==='buyHP'){ if(g.hpLvl>=10) return; price=HP_PRICES[g.hpLvl];
-      if(!spendGems(price)){ toast('钻石不够啦！'); return; }
-      g.hpLvl++; write(g); toast('血量上限提升到 '+(HP_BASE+g.hpLvl*HP_STEP)+'！'); }
+    if(type==='buyW'){ var nw=WEAPONS[g.weaponLvl+1]; if(!nw) return;label=nw.name;result=purchaseGear('weapon');
+      if(result.status!=='committed'){toast(result.status==='pending'?'钻石已扣，皮肤将在重载后自动交付且不会重复扣款':'钻石不够或购买记录无法保存，本次未扣款');return;}
+      toast('已解锁皮肤「'+label+'」！打 Boss 换上更酷的攻击特效 🎬'); }  //🔴v853 武器皮肤化: 解锁的是攻击特效皮肤·不加战力
+    else if(type==='buyHP'){ if(g.hpLvl>=10) return;result=purchaseGear('hp');
+      if(result.status!=='committed'){toast(result.status==='pending'?'钻石已扣，血量升级将在重载后自动交付':'钻石不够或购买记录无法保存，本次未扣款');return;}
+      var latest=read();toast('血量上限提升到 '+(HP_BASE+latest.hpLvl*HP_STEP)+'！'); }
     //🔴v853 护甲删除(Hansen·"护甲没什么必要"): 删掉 buyAR 护甲购买处理器。
     render();
   }
@@ -255,4 +312,5 @@
 
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ setTimeout(injectEntry,300); }); }
   else { setTimeout(injectEntry,300); }
+  try{recoverPurchase();}catch(e){}
 })();

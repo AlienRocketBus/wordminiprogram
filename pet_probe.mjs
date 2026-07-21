@@ -15,7 +15,7 @@
  *
  * ★ 判据全部是真机渲染的事实, 不是静态扫描。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 const GAMES = [
@@ -28,7 +28,7 @@ let pass = 0, fail = 0;
 const chk = (n, ok, note) => { ok ? pass++ : fail++; console.log(`   ${ok ? '✅' : '❌'} ${n}${note ? '  ' + note : ''}`); };
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {

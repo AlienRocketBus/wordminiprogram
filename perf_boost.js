@@ -1,4 +1,4 @@
-// perf_boost.js v11 — 修复 speak() cb 漏调死锁 + 全部之前修复
+// perf_boost.js v12 (v942) — 性能优化不得吞掉真实运行时错误
 //
 // 作用:
 //   1. save() 去抖, 大幅减少 localStorage 同步写阻塞主线程
@@ -245,6 +245,35 @@
   var allIntervals = [];
   var origSetInterval = window.setInterval;
   var origClearInterval = window.clearInterval;
+  function reportIntervalError(error){
+    /*
+     * v942: 旧实现 catch 后什么也不做，任何定时任务损坏都会从全局 error、
+     * 黑匣子和自动巡检中消失，形成“界面不工作但贾维斯全绿”。性能包装器
+     * 可以保护下一次 interval 继续运行，但不能篡改浏览器的可观测错误语义。
+     */
+    try{
+      if(typeof window.reportError === 'function'){
+        window.reportError(error);
+        return;
+      }
+    }catch(_reportErrorFailure){}
+    try{
+      var event;
+      if(typeof ErrorEvent === 'function'){
+        event = new ErrorEvent('error', {
+          message: String(error && error.message || error),
+          error: error,
+          filename: 'perf_boost.js'
+        });
+      }else{
+        event = new Event('error');
+        event.error = error;
+      }
+      window.dispatchEvent(event);
+    }catch(_dispatchFailure){
+      try{ console.error('[perf_boost interval]', error); }catch(_consoleFailure){}
+    }
+  }
   window.setInterval = function(fn, ms){
     // v10 智能节流: 200ms 这种"轮询检查"类间隔降到 1000ms
     // 200ms 是 syncModalState 的特征值, 改成 1000ms 用户感受不到差别
@@ -255,7 +284,7 @@
     var wrapped = function(){
       // 后台时跳过 (除非是关键的音频/计时器)
       if(document.visibilityState === 'hidden') return;
-      try { fn.apply(this, arguments); } catch(e){}
+      try { fn.apply(this, arguments); } catch(e){ reportIntervalError(e); }
     };
     var id = origSetInterval.call(window, wrapped, actualMs);
     allIntervals.push(id);
@@ -371,4 +400,3 @@
     };
   };
 })();
-

@@ -1,5 +1,5 @@
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
+import { chromium } from './playwright_loader.mjs';
+const b=await chromium.launch({executablePath: process.env.HANSEN_CHROMIUM_PATH,args:['--no-sandbox']});
 // ---- season1 选关 ----
 const p=await b.newPage({viewport:{width:420,height:760}});const e1=[];p.on('pageerror',e=>e1.push(e.message));
 await p.goto('http://localhost:8864/island_season1.html');await p.waitForTimeout(1300);

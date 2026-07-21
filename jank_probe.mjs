@@ -2,13 +2,13 @@
  * Hansen: "进去之后操作有点卡顿" / "18个岛屿有的表面图片没加载出来" / "要求非常非常丝滑"
  * 用法: node jank_probe.mjs <island.html> <none|4g>
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const ISLAND = process.argv[2] || 'island_land1.html';
 const NET = process.argv[3] || 'none';
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {

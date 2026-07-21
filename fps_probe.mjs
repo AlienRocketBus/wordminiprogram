@@ -1,10 +1,10 @@
 /* v932: 测【真实帧率】—— 卡不卡, 帧率说了算 */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 const PAGE = process.argv[2] || 'index.html';
 const CPU = +(process.argv[3] || 4);
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {

@@ -62,6 +62,7 @@
   function curStage(){try{return (typeof getPetStage==='function')?getPetStage():((window.S&&S.pet&&S.pet.stage)||0);}catch(e){return 0;}}
   function progress(){try{return (typeof getPetProgress==='function')?Math.round(getPetProgress()):0;}catch(e){return 0;}}
   function petName(){try{return globalPetName();}catch(e){return '星灵';}}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function imgOf(i){var s=stages()[i];return s&&s.img?s.img:'';}
   function emOf(i){var s=stages()[i];return s&&s.emoji?s.emoji:'❓';}
   function nameOf(i){var s=stages()[i];return s&&s.name?s.name:('第'+(i+1)+'阶');}
@@ -91,11 +92,11 @@
 
   // ===== 🔴v643/v644 全局统一宠物系统 + 掌握制升级 =====
   // Hansen要求: 所有19岛共用一只宠物; 满级=把全部单词都"掌握"(学会+练熟)+一定练习; 强留存。
-  // v644 双门槛(取较低者·缺一不可): ①掌握单词数(每词答对≥MASTER_HITS次·任意模式累计·满级=掌握全部TOTAL_WORDS词=硬天花板·不学完练熟绝到不了满级) ②累计经验(较缓·前期驱动·各玩法都喂)。两个旋钮见下。
-  var HSN_ISLAND_KEYS=['wordIslandVerbs','wordIslandAdj','wordIslandAnimal','wordIslandBody','wordIslandCity','wordIslandClothes','wordIslandColorNum','wordIslandFamily','wordIslandFood','wordIslandHouse','wordIslandPeople','wordIslandNature','wordIslandPronouns','wordIslandSchool','wordIslandSeason','wordIslandSports','wordIslandTime','wordIslandTransport','wordIslandMisc'];
+  // 🔴v644/v946 双门槛(取较低者·缺一不可): ①掌握单词数(每词在打字大师中无提示、整词精确拼写≥MASTER_HITS次；其它题型不写 mc；满级=掌握全部TOTAL_WORDS词) ②累计经验(各玩法仍可正常累计)。
+  var HSN_ISLAND_KEYS=(window.HansenCanonical&&HansenCanonical.allSaveAliases)?HansenCanonical.allSaveAliases():['wordIslandVerbs','wordIslandAdj','wordIslandAnimal','wordIslandBody','wordIslandCity','wordIslandClothes','wordIslandColorNum','wordIslandFamily','wordIslandFood','wordIslandHouse','wordIslandPeople','wordIslandNature','wordIslandPronouns','wordIslandSchool','wordIslandSeason','wordIslandSports','wordIslandTime','wordIslandTransport','wordIslandMisc','wordIslandLand1','wordIslandLand2','wordIslandLand3','wordIslandLand4','wordIslandLand5','wordIslandLand6','wordIslandLand7','wordIslandLand8'];
   var PET_XP_CAP=15000; // 旋钮①: 满级所需累计经验(练习量·想留存更久调大如20000~25000)
-  var MASTER_HITS=3;    // 旋钮②: 一个词答对几次算"掌握"(任意模式累计)
-  var TOTAL_WORDS=752;  // 全19岛单词总数(满级需全部掌握·日后加词改这里)
+  var MASTER_HITS=3;    // 掌握门槛: 同词在打字大师中无提示、整词精确拼写 3 次
+  var TOTAL_WORDS=(window.HansenCanonical&&HansenCanonical.TOTAL_WORDS)||952;  // 712 常规 + 240 星海；Land 是星海切片，不重复算
   /* 🔴🔴 v938 根因修复 (Hansen: "为什么宠物不进化? 感觉宠物好像没有得到经验和进化")
    ★ 原来这两个函数只累加【手写死的 HSN_ISLAND_KEYS 名单】里的 19 个岛。
      但全库现在有 27 个岛 —— 后加的 8 个星域岛(island_land1~8, 存档键 wordIslandLand1~8)
@@ -137,26 +138,36 @@ function _hsnScanOthers(){
       try{ o=JSON.parse(raw); }catch(e){ continue; }
       if(!o || typeof o!=='object' || Array.isArray(o)) continue;
       if(o.totalXP===undefined && o.xp===undefined && o.learned===undefined) continue;
-      xp += Math.max((+o.xp||0), (+o.totalXP||0));
-      m  += (o.learned && o.learned.length) ? o.learned.length : 0;
+      var ox=Number(o.xp),ot=Number(o.totalXP);ox=isFinite(ox)&&ox>0?ox:0;ot=isFinite(ot)&&ot>0?ot:0;
+      xp=Math.min(1000000000,xp+Math.min(1000000000,Math.floor(Math.max(ox,ot))));
+      if(o.mc&&typeof o.mc==='object')Object.keys(o.mc).forEach(function(ix){if((+o.mc[ix]||0)>=MASTER_HITS)m++;});
     }
   }catch(e){}
   _hsnOtherXP = xp; _hsnOtherM = m;
 }
 try{ window.addEventListener('storage', function(){ _hsnOtherXP=null; _hsnOtherM=null; }); }catch(e){}
 function globalXP(){
-  if(_hsnOtherXP===null) _hsnScanOthers();
-  var mine=0;
-  try{ if(window.S) mine = Math.max((+window.S.xp||0), (+window.S.totalXP||0)); }catch(e){}
-  return _hsnOtherXP + mine;
+  // v942 人物与宠物共读同一个全局累计经验钱包。岛 totalXP 只作旧版迁移来源，
+  // 不再作为运行时权威；这样岛 save quota 失败也不会出现“人物涨了、宠物没涨”。
+  try{var n=Number(localStorage.getItem('hansen_wallet_charxp'));if(isFinite(n)&&n>=0)return Math.min(1000000000,Math.floor(n));}catch(e){}
+  if(_hsnOtherXP===null)_hsnScanOthers();var mine=0;
+  try{if(window.S){var a=Number(window.S.xp),b=Number(window.S.totalXP);mine=Math.max(isFinite(a)?a:0,isFinite(b)?b:0);}}catch(e){}
+  return Math.min(1000000000,_hsnOtherXP+mine);
 }
 function globalMastered(){
+  // v941 权威槽位：Land1~8 与 Season 共用 240 个 slot，掌握度按 mc>=3 去重。
+  try{
+    if(window.HansenCanonical){
+      HansenCanonical.absorbCurrent();
+      return HansenCanonical.totalMastered(MASTER_HITS);
+    }
+  }catch(e){}
   if(_hsnOtherM===null) _hsnScanOthers();
   var mine=0;
-  try{ if(window.S && window.S.learned) mine = window.S.learned.length||0; }catch(e){}
+  try{ if(window.S&&window.S.mc)Object.keys(window.S.mc).forEach(function(k){if((+window.S.mc[k]||0)>=MASTER_HITS)mine++;}); }catch(e){}
   return _hsnOtherM + mine;
 }
-  // 全局已掌握单词数 = 各岛 mc[idx]>=MASTER_HITS 的词数之和(mc=每词答对计数·markAnswer包裹累加)
+  // 全局已掌握单词数 = 各岛 mc[idx]>=MASTER_HITS 的词数之和；mc 只由一次性 pet proof 认可的打字大师精确拼写累加。
   
   // 经验门槛(较缓^1.8·前期驱动·秒孵化) + 掌握门槛(后置^2.5·中后期卡关·满级=全部词)
   function xpReq(i){var n=N()-1;if(i<=0)return 0;if(i>=n)return PET_XP_CAP;return Math.round(PET_XP_CAP*Math.pow(i/n,1.8)/5)*5;}
@@ -164,6 +175,26 @@ function globalMastered(){
   // 阶段=两门槛都满足的最高阶(取较低者=瓶颈卡关)
   function gStageFromXP(){var m=globalMastered(),x=globalXP(),n=N(),st=0;for(var i=1;i<n;i++){if(x>=xpReq(i)&&m>=masterReq(i))st=i;else break;}return st;}
   function gProgress(){var st=gStageFromXP(),n=N();if(st>=n-1)return 100;var m=globalMastered(),x=globalXP();var mLo=masterReq(st),mHi=masterReq(st+1),xLo=xpReq(st),xHi=xpReq(st+1);var mp=mHi>mLo?(m-mLo)/(mHi-mLo):1,xp2=xHi>xLo?(x-xLo)/(xHi-xLo):1;return Math.max(0,Math.min(100,Math.round(Math.min(mp,xp2)*100)));}
+  // v945 给探索页一个统一、只读的进化说明源。UI 不再复制门槛公式，避免以后
+  // 调平衡参数后“还差几个词”的提示与宠物实际升级条件分叉。
+  function progressSnapshot(){
+    var count=N(),mastered=globalMastered(),xp=globalXP(),stage=0;
+    for(var i=1;i<count;i++){if(xp>=xpReq(i)&&mastered>=masterReq(i))stage=i;else break;}
+    var maxed=count>0&&stage>=count-1;
+    var next= maxed ? stage : stage+1;
+    var needWords=masterReq(next),needXP=xpReq(next);
+    var pct=100;
+    if(!maxed&&count>0){
+      var mLo=masterReq(stage),xLo=xpReq(stage),mp=needWords>mLo?(mastered-mLo)/(needWords-mLo):1,xp2=needXP>xLo?(xp-xLo)/(needXP-xLo):1;
+      pct=Math.max(0,Math.min(100,Math.round(Math.min(mp,xp2)*100)));
+    }
+    return {
+      ok:count>0,stageIndex:stage,stageNumber:stage+1,totalStages:count,
+      stageName:nameOf(stage),nextStageIndex:maxed?null:next,nextStageName:maxed?null:nameOf(next),maxed:maxed,
+      mastered:mastered,masterHits:MASTER_HITS,nextMasterReq:needWords,remainingWords:Math.max(0,needWords-mastered),
+      xp:xp,nextXpReq:needXP,remainingXP:Math.max(0,needXP-xp),progress:pct,totalWords:TOTAL_WORDS
+    };
+  }
   // 覆盖全局阶段/进度→模块渲染(curStage/progress)与各岛据此·全岛同一只宠物
   try{ window.getPetStage=gStageFromXP; window.getPetProgress=gProgress; }catch(e){}
 
@@ -198,52 +229,85 @@ function globalMastered(){
      游戏里的 addXP 是同一脚本内的函数声明, 改 window.addXP 根本拦不住它(实测拦不到),
      反而把外部对 window.addXP 的调用包坏了。刷新改成在 petTaskComplete 里【直接调】, 确定性最高。 */
 })();
-  // 🔴v644 掌握度统计: 包裹 markAnswer·答对则该词 mc+1(不动19岛·boot时挂) + 一次性迁移(老用户已学会的词补成已掌握·宠物不被重置)
+  // 🔴v946 掌握度统计: mc 不再接受通用选择题的 markAnswer。
+  // 只有打字大师对一个词完成“无提示、整词精确拼写”后，由
+  // HansenSpellingProgressV946.run('pet', ...) 在同一个同步调用链中签发一次性证明。
+  // 历史 mc 原样保留；普通模式的金币、错题、统计仍由原 markAnswer 正常处理。
   var _hsnMarkWrapped=false; // 模块级·保证只包裹一次(可靠·不依赖函数属性)
   function hsnTrackMastery(){
     try{
       if(!_hsnMarkWrapped && typeof window.markAnswer==='function'){
         var _orig=window.markAnswer;
-        window.markAnswer=function(idx,correct){ try{ if(correct && (+idx)>=0 && window.S){ if(!S.mc||typeof S.mc!=='object')S.mc={}; S.mc[idx]=(+S.mc[idx]||0)+1; } }catch(e){} return _orig.apply(this,arguments); };
+        window.markAnswer=function(idx,correct){
+          var proof=null;
+          try{
+            if(correct && (+idx)>=0 && window.HansenSpellingProgressV946 &&
+               typeof HansenSpellingProgressV946.consume==='function'){
+              proof=HansenSpellingProgressV946.consume('pet',+idx);
+            }
+          }catch(e){proof=null;}
+          var masteryResult=null;
+          try{
+            if(proof && window.S){
+              if(!S.mc||typeof S.mc!=='object')S.mc={};
+              S.mc[idx]=(+S.mc[idx]||0)+1;
+              masteryResult={ok:true,changed:true,mastery:S.mc[idx]};
+            }
+          }catch(e){}
+          var result=_orig.apply(this,arguments);
+          try{
+            if(proof && window.HansenSpellingProgressV946 && typeof HansenSpellingProgressV946.settle==='function'){
+              HansenSpellingProgressV946.settle(proof,masteryResult||{ok:false,changed:false,reason:'mastery-write-failed'});
+            }
+          }catch(e){}
+          return result;
+        };
         window.markAnswer.__hsnMc=true;
         _hsnMarkWrapped=true;
       }
     }catch(e){}
-    // 迁移(一次): 已学会(learned)且当前无错账(wrongs)的词→视为已掌握(grandfather·不重置老用户宠物)
+    // 迁移(逐存档一次): 已学会(learned)且当前无错账(wrongs)的词→视为已掌握。
+    // v941 只有一个全局 flag，flag 写入后才恢复的老备份永远漏迁；v942 把标记写进每份存档。
     try{
-      if(!localStorage.getItem('hansen_mastery_migrated')){
-        for(var i=0;i<HSN_ISLAND_KEYS.length;i++){
-          try{
-            var k=HSN_ISLAND_KEYS[i], raw=localStorage.getItem(k); if(!raw)continue;
-            var s=JSON.parse(raw); if(!s.mc||typeof s.mc!=='object')s.mc={};
-            var learned=Array.isArray(s.learned)?s.learned:[], wrongs=(s.wrongs&&typeof s.wrongs==='object')?s.wrongs:{};
-            for(var j=0;j<learned.length;j++){var idx=learned[j], w=(+wrongs[idx]||0), seed=Math.max(0,MASTER_HITS-w); if((+s.mc[idx]||0)<seed)s.mc[idx]=seed;}
-            localStorage.setItem(k,JSON.stringify(s));
-          }catch(e){}
-        }
-        // 当前岛内存S也同步补种+存盘(否则页面随后 save() 会用旧的空mc覆盖掉迁移结果)
+      var keys=[];for(var i=0;i<localStorage.length;i++){var kk=localStorage.key(i);if(kk&&/^wordIsland/.test(kk)&&!/_tmp$|_backup$/i.test(kk))keys.push(kk);}
+      for(var i=0;i<keys.length;i++){
         try{
-          if(window.S){
-            if(!S.mc||typeof S.mc!=='object')S.mc={};
-            var Lw=Array.isArray(S.learned)?S.learned:[], Ww=(S.wrongs&&typeof S.wrongs==='object')?S.wrongs:{};
-            for(var a=0;a<Lw.length;a++){var ix=Lw[a], ww=(+Ww[ix]||0), sd=Math.max(0,MASTER_HITS-ww); if((+S.mc[ix]||0)<sd)S.mc[ix]=sd;}
-            if(typeof save==='function')save();
-          }
+          var k=keys[i],raw=localStorage.getItem(k);if(!raw)continue;
+          var s=JSON.parse(raw);if(!s||typeof s!=='object'||s._hsnMasteryV942===1)continue;
+          if(!s.mc||typeof s.mc!=='object')s.mc={};
+          var learned=Array.isArray(s.learned)?s.learned:[],wrongs=(s.wrongs&&typeof s.wrongs==='object')?s.wrongs:{};
+          for(var j=0;j<learned.length;j++){var idx=learned[j],w=(+wrongs[idx]||0),seed=Math.max(0,MASTER_HITS-w);if((+s.mc[idx]||0)<seed)s.mc[idx]=seed;}
+          s._hsnMasteryV942=1;localStorage.setItem(k,JSON.stringify(s));
         }catch(e){}
-        localStorage.setItem('hansen_mastery_migrated','1');
       }
+      // 当前岛内存也要带标记，否则下一次 save 会覆盖刚迁移的主存档。
+      try{
+        if(window.S&&S._hsnMasteryV942!==1){
+          if(!S.mc||typeof S.mc!=='object')S.mc={};
+          var Lw=Array.isArray(S.learned)?S.learned:[],Ww=(S.wrongs&&typeof S.wrongs==='object')?S.wrongs:{};
+          for(var a=0;a<Lw.length;a++){var ix=Lw[a],ww=(+Ww[ix]||0),sd=Math.max(0,MASTER_HITS-ww);if((+S.mc[ix]||0)<sd)S.mc[ix]=sd;}
+          S._hsnMasteryV942=1;if(typeof save==='function')save();
+        }
+      }catch(e){}
+      try{if(window.HansenCanonical){HansenCanonical.migrate();HansenCanonical.syncCurrent();}}catch(e){}
+      localStorage.setItem('hansen_mastery_migrated_v942','1');
     }catch(e){}
   }
   // 全局宠物名(原各岛独立 S.pet.name→统一到一个key·全岛同名)
   var PETNAMEKEY='hansen_pet_name';
+  function safePetName(value){
+    if(typeof value!=='string')return '';
+    var name=value.trim();if(!name||/[<>\u0000-\u001f\u007f]/.test(name)||name==='[object Object]')return '';
+    return Array.from(name).slice(0,8).join('');
+  }
   function globalPetName(){
-    try{var g=localStorage.getItem(PETNAMEKEY); if(g&&g.trim())return g.trim();}catch(e){}
-    var nm=''; try{nm=(window.S&&S.pet&&S.pet.name)||'';}catch(e){}
+    try{var g=safePetName(localStorage.getItem(PETNAMEKEY));if(g)return g;}catch(e){}
+    var nm='';try{nm=safePetName(window.S&&S.pet&&S.pet.name);}catch(e){}
     if(nm==='小蛋'||!nm)nm='星灵';
     try{localStorage.setItem(PETNAMEKEY,nm);}catch(e){}
     return nm;
   }
-  function setGlobalPetName(nn){try{localStorage.setItem(PETNAMEKEY,nn);}catch(e){} try{if(window.S&&S.pet){S.pet.name=nn;if(typeof save==='function')save();}}catch(e){}}
+  function setGlobalPetName(nn){nn=safePetName(nn)||'星灵';try{localStorage.setItem(PETNAMEKEY,nn);}catch(e){} try{if(window.S&&S.pet){S.pet.name=nn;if(typeof save==='function')save();}}catch(e){}}
 
   // ---------- CSS ----------
   function injectCSS(){
@@ -404,7 +468,7 @@ function globalMastered(){
     var heroHalo='radial-gradient(circle at 50% 46%,'+hexA(_hh,.6)+','+hexA(_hh,.14)+' 50%,transparent 72%)';
     h+='<div class="psw-hero'+(hb.lt?' lt':'')+'" style="background:'+heroBg+'">'+(isCur?'<div class="nb">现在</div>':'')+'<div class="rt">境'+Rd.num+' · '+Rd.name+'</div>';
     h+='<div class="psw-petbox"><div class="psw-pethalo" style="background:'+heroHalo+'"></div>'+vis(disp,'em')+'<div class="psw-ped"></div></div>';
-    h+='<div class="psw-nmrow"><div class="nm">'+petName()+'</div></div>';/*🔴BUG#93 去掉展示页hero的主页展示锁pswLock(与卡牌器pcvLock功能重复冲突·Hansen要求删·主页展示锁功能保留在卡牌器pcvLock·.psw-nmrow居中布局故去锁后名字仍居中不移位)*/
+    h+='<div class="psw-nmrow"><div class="nm">'+esc(petName())+'</div></div>';/* v942: 用户宠物名必须转义，禁止把名字当 HTML 执行。 */
     h+='<div class="sg">第 '+(disp+1)+' / '+n+' 阶 · '+nameOf(disp)+'</div>';
     h+='<div class="qt">“'+descOf(disp)+'”</div>';
     if(isCur){
@@ -434,7 +498,7 @@ function globalMastered(){
         +'<i>'+(_m>=_mHi?'\u2705 \u5df2\u591f':('\u8fd8\u5dee '+Math.max(0,_mHi-_m)+' \u4e2a'))+'</i>'
       +'</div>'):'')
       +(_slow?'<div class="psw-req-tip">'+(_slow==='words'
-          ? '\ud83d\udca1 \u7ecf\u9a8c\u591f\u4e86\uff0c\u5361\u5728\u3010\u5df2\u638c\u63e1\u5355\u8bcd\u3011\u2014\u2014 \u53bb\u63a2\u7d22\u5355\u8bcd\u91cc\u628a\u65b0\u8bcd\u5b66\u4f1a\u5c31\u80fd\u8fdb\u5316'
+          ? '\ud83d\udca1 \u7ecf\u9a8c\u591f\u4e86\uff0c\u5361\u5728\u3010\u5df2\u638c\u63e1\u5355\u8bcd\u3011\u2014\u2014 \u53bb\u63a2\u7d22\u5355\u8bcd\u7684\u300c\ud83d\udc3e \u5ba0\u7269\u51b2\u523a\u300d\uff0c\u628a\u5217\u51fa\u7684\u8bcd\u7d2f\u8ba1\u7b54\u5bf9 3 \u6b21\u5c31\u80fd\u8ba1\u5165\u8fdb\u5316'
           : '\ud83d\udca1 \u5355\u8bcd\u591f\u4e86\uff0c\u5361\u5728\u3010\u7ecf\u9a8c\u3011\u2014\u2014 \u591a\u73a9\u51e0\u5c40\u5c31\u80fd\u8fdb\u5316')+'</div>':'')
     +'</div>';
   }
@@ -572,7 +636,7 @@ function globalMastered(){
   }
 
   // 暴露 + 覆盖全局
-  window.HsnPet={openCard:openCard,closeCard:closeCard,render:renderShowcase,toggleHomeLock:toggleHomeLock,homePrev:function(){scStep(-1);},homeNext:function(){scStep(1);}};/*🔴v745 箭头→scStep只浏览(原homeStep设+锁已删)*/
+  window.HsnPet={openCard:openCard,closeCard:closeCard,render:renderShowcase,toggleHomeLock:toggleHomeLock,homePrev:function(){scStep(-1);},homeNext:function(){scStep(1);},progressSnapshot:progressSnapshot};/*🔴v745 箭头→scStep只浏览(原homeStep设+锁已删)*/
   window.renderPetScreen=renderShowcase;
   window.updatePetHero=updateHero;
   window.showPetEvolve=function(stage){ // 兼容旧签名(传stage对象): 找其index

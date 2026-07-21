@@ -6,7 +6,7 @@
  *
  * 输出 JSON: [{theme, boss, texts:[{cls,txt,ratio,need,ok}], fails}]
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
 
 const PORT = process.argv[2] || '8877';
@@ -15,7 +15,7 @@ const LEVELS = (process.argv[4] || '0,3,7').split(',').map(Number);   // 不同 
 const ISLAND = process.argv[5] || 'island_land1.html';
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const out = [];
   for (const TH of THEMES) {
     for (const LV of LEVELS) {

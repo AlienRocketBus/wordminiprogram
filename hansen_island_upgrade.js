@@ -20,9 +20,12 @@
   function detectIslandKey(){
     if(_islandKeyCache) return _islandKeyCache;
     try{
+      if(window.__hsnSaveKey){ _islandKeyCache=window.__hsnSaveKey; return _islandKeyCache; }
+    }catch(e){}
+    try{
       // 方法1: 从 save 源码提取(有的岛save直接写key)
       if(typeof window.save === 'function'){
-        var m = window.save.toString().match(/setItem\(['"](wordIsland[A-Za-z]+)['"]/);
+        var m = window.save.toString().match(/setItem\(['"](wordIsland[A-Za-z0-9]+)['"]/);
         if(m){ _islandKeyCache = m[1]; return _islandKeyCache; }
       }
     }catch(e){}
@@ -32,7 +35,7 @@
       var candidates=[];
       for(var i=0;i<localStorage.length;i++){
         var k=localStorage.key(i);
-        if(/^wordIsland[A-Za-z]+$/.test(k)){ candidates.push(k); }  // 排除 _bak 后缀
+        if(/^wordIsland[A-Za-z0-9]+$/.test(k)){ candidates.push(k); }  // 排除 _bak 后缀
       }
       if(candidates.length===1){ _islandKeyCache=candidates[0]; return _islandKeyCache; }
       // 多个候选: 选存档内容和当前S最接近的(learned长度一致 + totalAnswers一致)
@@ -76,6 +79,19 @@
     if(!window.HansenCoins){ return; }  // 没有全局钱包就不动(安全)
     if(window.__hsnCoinsUpgraded){ return; } window.__hsnCoinsUpgraded = true;
 
+    // v942 首次启用 first-win 幂等奖励账本时，把本岛历史 bossWon 记为已发，
+    // 避免升级/重置后给老通关记录再发一次首胜奖。
+    try{
+      if(HansenCoins.seedAwards){
+        var pm=(location.pathname||'').match(/island_([a-z0-9]+)\.html/i),physical=pm?pm[1].toLowerCase():'unknown',seed=[];
+        var seedKey='hansen_boss_awards_seeded_v942_'+physical;
+        if(localStorage.getItem(seedKey)!=='1'){
+          (Array.isArray(S.bossWon)?S.bossWon:[]).forEach(function(v){var m=String(v).match(/b(\d+)$/i),lv=m?Number(m[1]):Number(v);if(isFinite(lv)&&lv>0)seed.push('boss:first:'+physical+':'+Math.floor(lv));});
+          if(HansenCoins.seedAwards(seed)){localStorage.setItem(seedKey,'1');}
+        }
+      }
+    }catch(e){}
+
     // (a) 包装 addCoin: 原本 S.coins+=n, 改成 HansenCoins.add(n)
     if(typeof window.addCoin === 'function'){
       var _origAddCoin = window.addCoin;
@@ -108,28 +124,106 @@
       };
     }
 
-    // (d) 新增 earnCoinOnCorrect(旧岛没有): 答对1题给1金币, 每词每天3次 + 每日2000上限。
-    //     并挂到 markAnswer 上(答对时调用)。
+    // (d) 答对金币：每题 1 金币、每个 canonical 词位每天 3 次、全游戏每天 2000。
+    //     v941 不能再把次数只记在当前物理页 S.coinWordCount：Land1~8 与 Season 是
+    //     同一批 240 词的不同入口，换入口不应重置同一词的 3 次额度。
+    var ANSWER_LEDGER_KEY='hansen_answer_coin_words_v942',ANSWER_PENDING_KEY='hansen_answer_coin_pending_v942';
+    function answerCoinMirror(ledger){
+      // v941/旧 UI 只做镜像，任何失败都不影响 v942 单文件权威提交；下一次读取会自动修复。
+      try{localStorage.setItem('hansen_answer_coin_words_v941',JSON.stringify({version:941,day:ledger.day,words:ledger.words}));}catch(e){}
+      try{localStorage.setItem('hsn_ans_coin_day',ledger.day);localStorage.setItem('hsn_ans_coin_today',String(ledger.total));}catch(e){}
+    }
+    function writeAnswerCoinLedger(ledger){
+      try{var raw=JSON.stringify(ledger);localStorage.setItem(ANSWER_LEDGER_KEY,raw);if(localStorage.getItem(ANSWER_LEDGER_KEY)!==raw)return false;answerCoinMirror(ledger);return true;}catch(e){return false;}
+    }
+    function answerCoinLedger(t){
+      var ledger=null,raw=null;
+      try{raw=localStorage.getItem(ANSWER_LEDGER_KEY);ledger=raw?JSON.parse(raw):null;}catch(e){return null;}
+      if(ledger&&ledger.version===942&&ledger.day===t&&ledger.words&&typeof ledger.words==='object'&&!Array.isArray(ledger.words)){
+        var clean={},sum=0;Object.keys(ledger.words).forEach(function(k){var n=Math.max(0,Math.min(3,Math.floor(Number(ledger.words[k])||0)));if(n){clean[k]=n;sum+=n;}});ledger.words=clean;
+        var oldTotal=0;try{if(localStorage.getItem('hsn_ans_coin_day')===t)oldTotal=Math.max(0,Math.min(2000,Math.floor(Number(localStorage.getItem('hsn_ans_coin_today'))||0)));}catch(e){}
+        ledger.total=Math.max(Math.max(0,Math.min(2000,Math.floor(Number(ledger.total)||0))),Math.min(2000,sum),oldTotal);
+        // 旧 v942 账本没有 total，立即升级为“每词+日总量”同一原子 JSON。
+        if(raw!==JSON.stringify(ledger)&&!writeAnswerCoinLedger(ledger))return null;answerCoinMirror(ledger);return ledger;
+      }
+      ledger={version:942,day:t,total:0,words:{}};
+      // 接住 v941 当天已经记入的 canonical 额度。
+      try{var old=JSON.parse(localStorage.getItem('hansen_answer_coin_words_v941')||'null');if(old&&old.day===t&&old.words)Object.keys(old.words).forEach(function(k){ledger.words[k]=Math.max(+ledger.words[k]||0,+old.words[k]||0);});}catch(e){}
+      // 升级当天扫描所有旧物理页，按 canonical slot 取 max，换 Season/Land 入口也不能再领 3 次。
+      try{
+        for(var i=0;i<localStorage.length;i++){
+          var key=localStorage.key(i);if(!key||!/^wordIsland/.test(key)||/_bak$|_backup$|_tmp$/i.test(key))continue;
+          var s;try{s=JSON.parse(localStorage.getItem(key)||'null');}catch(e){continue;}
+          if(!s||s.coinDay!==t||!s.coinWordCount||typeof s.coinWordCount!=='object')continue;
+          Object.keys(s.coinWordCount).forEach(function(idx){
+            var slot='';try{if(window.HansenCanonical)slot=HansenCanonical.slotId(key,idx);}catch(e){}
+            if(!slot)slot=key+':'+String(idx|0);
+            ledger.words[slot]=Math.max(+ledger.words[slot]||0,+s.coinWordCount[idx]||0);
+          });
+        }
+        var oldDaily=0;if(localStorage.getItem('hsn_ans_coin_day')===t)oldDaily=Math.max(0,Math.min(2000,Math.floor(Number(localStorage.getItem('hsn_ans_coin_today'))||0)));
+        var sum=0;Object.keys(ledger.words).forEach(function(k){var n=Math.max(0,Math.min(3,Math.floor(Number(ledger.words[k])||0)));ledger.words[k]=n;sum+=n;});ledger.total=Math.max(oldDaily,Math.min(2000,sum));
+      }catch(e){return null;}
+      return writeAnswerCoinLedger(ledger)?ledger:null;
+    }
+    function readAnswerPending(){try{var raw=localStorage.getItem(ANSWER_PENDING_KEY);if(raw===null)return null;var p=JSON.parse(raw);return p&&typeof p==='object'&&!Array.isArray(p)?p:{invalid:1};}catch(e){return {invalid:1};}}
+    function validAnswerPending(p){return !!(p&&!p.invalid&&p.version===942&&typeof p.day==='string'&&p.day.length<=24&&typeof p.slot==='string'&&p.slot.length>0&&p.slot.length<=100&&!/[\u0000-\u001f\u007f]/.test(p.slot)&&Number.isInteger(p.ordinal)&&p.ordinal>=1&&p.ordinal<=3&&Number.isInteger(p.beforeTotal)&&p.beforeTotal>=0&&p.beforeTotal<2000&&p.targetTotal===p.beforeTotal+1&&p.id==='answer:'+p.day+':'+p.slot+':'+p.ordinal);}
+    function clearAnswerPending(){try{localStorage.removeItem(ANSWER_PENDING_KEY);return localStorage.getItem(ANSWER_PENDING_KEY)===null;}catch(e){return false;}}
+    function awardAnswer(p){
+      if(HansenCoins.award)return HansenCoins.award(p.id,1)===true;
+      var before=HansenCoins.get();HansenCoins.add(1);return HansenCoins.get()===before+1;
+    }
+    function recoverAnswerCoin(){
+      var p=readAnswerPending();if(!p)return {ok:true,pending:false};
+      if(!validAnswerPending(p)){clearAnswerPending();return {ok:false,pending:true,invalid:true};}
+      if(!awardAnswer(p))return {ok:false,pending:true};
+      var now=(typeof today==='function')?today():new Date().toDateString();
+      if(p.day===now){
+        var ledger=answerCoinLedger(now);if(!ledger)return {ok:false,pending:true};
+        ledger.words[p.slot]=Math.max(Math.floor(Number(ledger.words[p.slot])||0),p.ordinal);
+        ledger.total=Math.max(Math.floor(Number(ledger.total)||0),p.targetTotal);
+        if(ledger.total>2000||!writeAnswerCoinLedger(ledger))return {ok:false,pending:true};
+      }
+      var cleaned=clearAnswerPending();return {ok:true,pending:!cleaned,recovered:true,id:p.id};
+    }
     window.earnCoinOnCorrect = function(wordIdx){
       try{
         var DAILY_CAP=2000, PER_WORD_CAP=3;
         var t=(typeof today==='function')?today():new Date().toDateString();
-        // 🔴 v727: 每日答题金币上限改为【全局】(整个系统跨所有岛累计·而非每岛各自2000)。超过2000只能玩拼写对战额外赚。
-        var ga;
-        try{ if(localStorage.getItem('hsn_ans_coin_day')!==t){ localStorage.setItem('hsn_ans_coin_day',t); localStorage.setItem('hsn_ans_coin_today','0'); ga=0; } else { ga=parseInt(localStorage.getItem('hsn_ans_coin_today'),10)||0; } }catch(e){ ga=0; }
-        if(ga>=DAILY_CAP) return false;
-        if(S.coinDay!==t){ S.coinDay=t; S.coinWordCount={}; }   // 每词每天次数仍按岛存档(防刷同一个词)
-        if(!S.coinWordCount||typeof S.coinWordCount!=='object') S.coinWordCount={};
-        var wc=S.coinWordCount[wordIdx]||0;
+        // 先续做上一笔中断奖励；sourceId 使金币重放 no-op，权威 JSON 同时提交每词次数+全局日上限。
+        var recovered=recoverAnswerCoin();if(!recovered.ok)return false;
+        if(S.coinDay!==t){ S.coinDay=t; S.coinWordCount={}; }
+        if(typeof window.__hsnNormalizeCoinWordCount==='function')S.coinWordCount=window.__hsnNormalizeCoinWordCount(S.coinWordCount);
+        else if(!S.coinWordCount||typeof S.coinWordCount!=='object'||Array.isArray(S.coinWordCount))S.coinWordCount={};
+        var ledger=answerCoinLedger(t);if(!ledger)return false;
+        var ga=Math.max(0,Math.floor(Number(ledger.total)||0));if(ga>=DAILY_CAP)return false;
+        var slot='';
+        try{
+          if(window.HansenCanonical&&typeof HansenCanonical.slotId==='function'){
+            slot=HansenCanonical.slotId(HansenCanonical.currentRef(),wordIdx);
+          }
+        }catch(_canonicalErr){}
+        if(!slot) slot=String(detectIslandKey()||'unknown')+':'+String(wordIdx|0);
+        // 老版本当前页当天已经计过的次数取 max，升级当天也不能凭空重置额度。
+        var localCount=typeof window.__hsnSafeCoinWordCount==='function'?window.__hsnSafeCoinWordCount(S.coinWordCount[wordIdx]):0;
+        var ledgerCount=Number(ledger.words[slot]);if(!Number.isInteger(ledgerCount)||ledgerCount<0||ledgerCount>3)ledgerCount=0;
+        var wc=Math.max(ledgerCount,localCount);
         if(wc>=PER_WORD_CAP) return false;
-        HansenCoins.add(1);
-        try{ localStorage.setItem('hsn_ans_coin_today', String(ga+1)); }catch(e){}
-        S.coinWordCount[wordIdx]=wc+1;
+        // v942 先用稳定 sourceId 幂等发币，再提交次数账本。若次数账本写失败，
+        // 重试同一 ordinal 的 award 只会 no-op，不会丢币、重复币或白耗额度。
+        var answerAwardId='answer:'+t+':'+slot+':'+String(wc+1),pending={version:942,day:t,slot:slot,ordinal:wc+1,beforeTotal:ga,targetTotal:ga+1,id:answerAwardId};
+        try{var pendingRaw=JSON.stringify(pending);localStorage.setItem(ANSWER_PENDING_KEY,pendingRaw);if(localStorage.getItem(ANSWER_PENDING_KEY)!==pendingRaw)return false;}catch(_prepare){return false;}
+        if(!awardAnswer(pending))return false;
+        ledger.words[slot]=wc+1;ledger.total=ga+1;if(!writeAnswerCoinLedger(ledger))return false;
+        clearAnswerPending();
+        S.coinWordCount[wordIdx]=wc+1; // 兼容旧 UI/备份；权威次数是上面的 canonical 账本。
         if(typeof updateTopBar==='function') updateTopBar();
         if(typeof save==='function') save();
         return true;
       }catch(e){ return false; }
     };
+    // 页面重载时不等下一道题，直接续做已有 pending。
+    try{recoverAnswerCoin();}catch(e){}
 
     // (e) 包装 markAnswer: 仅追加"上报学习数据到全局汇总(跨岛累计)"。
     //     🔴BUG#100 (v727): 金币/本局金币(_lastCoinGain/_sessionCoins)已由各岛自己的 markAnswer→earnCoinOnCorrect 处理
@@ -153,15 +247,17 @@
       };
     }
 
-    // (f) 新手开局送300(全局只一次 — 用全局标记, 防止每个岛各送一次)
+    // (f) 新手开局送300：只复用钱包的永久 sourceId，绝不再走 add(300)。
+    // 钱包奖励已提交但 flag 写失败时，这里重放 starter:global 只会 no-op，再补 flag。
     try{
       var STARTER_FLAG='hansen_starter_coins_given';
       if(localStorage.getItem(STARTER_FLAG)!=='1'){
-        HansenCoins.add(300);
-        localStorage.setItem(STARTER_FLAG,'1');
-        try{ S.gotStarterCoins = true; }catch(e){}
-        if(typeof updateTopBar==='function') updateTopBar();
-        if(typeof save==='function') save();
+        if(HansenCoins.award&&HansenCoins.award('starter:global',300)===true){
+          localStorage.setItem(STARTER_FLAG,'1');
+          try{ S.gotStarterCoins = true; }catch(e){}
+          if(typeof updateTopBar==='function') updateTopBar();
+          if(typeof save==='function') save();
+        }
       }
     }catch(e){}
 
@@ -178,12 +274,12 @@
     // --- 新成就配置(替换旧的) ---
     var TIERS={bronze:{name:'铜',color:'#cd7f32',bg:'rgba(205,127,50,.15)'},silver:{name:'银',color:'#cbd5e1',bg:'rgba(203,213,225,.15)'},gold:{name:'金',color:'#fbbf24',bg:'rgba(251,191,36,.15)'},diamond:{name:'钻',color:'#22d3ee',bg:'rgba(34,211,238,.18)'}};
     var ACH=[
-      {id:'w1',cat:'背单词',name:'启程',desc:'学会第 1 个单词，万里长征第一步！',icon:'🌱',tier:'bronze',reward:{gems:5}},
-      {id:'w10',cat:'背单词',name:'十词成军',desc:'累计学会 10 个单词',icon:'📚',tier:'bronze',reward:{gems:15}},
-      {id:'w50',cat:'背单词',name:'小有积累',desc:'累计学会 50 个单词',icon:'📗',tier:'bronze',reward:{gems:20}},
-      {id:'w100',cat:'背单词',name:'词汇新星',desc:'累计学会 100 个单词',icon:'📘',tier:'silver',reward:{gems:40}},
-      {id:'w300',cat:'背单词',name:'词汇达人',desc:'累计学会 300 个单词',icon:'📙',tier:'gold',reward:{gems:80}},
-      {id:'wAll',cat:'背单词',name:'全部掌握',desc:'学会这个岛的全部单词！词汇王者',icon:'🎓',tier:'diamond',reward:{gems:200}},
+      {id:'w1',cat:'背单词',name:'启程',desc:'认识并加入第 1 个单词，万里长征第一步！',icon:'🌱',tier:'bronze',reward:{gems:5}},
+      {id:'w10',cat:'背单词',name:'十词成军',desc:'累计认识 10 个单词',icon:'📚',tier:'bronze',reward:{gems:15}},
+      {id:'w50',cat:'背单词',name:'小有积累',desc:'累计认识 50 个单词',icon:'📗',tier:'bronze',reward:{gems:20}},
+      {id:'w100',cat:'背单词',name:'词汇新星',desc:'累计认识 100 个单词',icon:'📘',tier:'silver',reward:{gems:40}},
+      {id:'w300',cat:'背单词',name:'词汇达人',desc:'累计认识 300 个单词',icon:'📙',tier:'gold',reward:{gems:80}},
+      {id:'wAll',cat:'背单词',name:'全岛已认识',desc:'把这个岛的全部单词加入学习！',icon:'🎓',tier:'diamond',reward:{gems:200}},
       {id:'wrongClear',cat:'背单词',name:'错词清零',desc:'把错题本里的错词全部攻克',icon:'✅',tier:'silver',reward:{gems:50}},
       {id:'boss1',cat:'打Boss',name:'初战告捷',desc:'第一次打赢 Boss',icon:'⚔️',tier:'bronze',reward:{gems:10}},
       {id:'bossCh1',cat:'打Boss',name:'过五关',desc:'打通第 1 章（前 4 个 Boss）',icon:'🗡️',tier:'bronze',reward:{gems:30}},
@@ -205,12 +301,13 @@
       {id:'petFinal',cat:'宠物',name:'宠物大师',desc:'把宠物养到最终进化形态',icon:'🐲',tier:'gold',reward:{gems:88}},
       {id:'mode1',cat:'游戏模式',name:'初露锋芒',desc:'玩过任意一个小游戏模式',icon:'🎮',tier:'bronze',reward:{gems:10}},
       {id:'allModes',cat:'游戏模式',name:'样样精通',desc:'玩过全部小游戏模式',icon:'🎮',tier:'silver',reward:{gems:30}},
-      {id:'modeHigh',cat:'游戏模式',name:'游戏高手',desc:'任意一个小游戏达到高分',icon:'🏆',tier:'silver',reward:{gems:30}},
-      {id:'coin1000',cat:'里程碑',name:'小富翁',desc:'累计赚到 1000 金币',icon:'💰',tier:'bronze',reward:{gems:20}},
+      {id:'modeHigh',cat:'游戏模式',name:'游戏高手',desc:'任意一种小游戏累计完成 10 局',icon:'🏆',tier:'silver',reward:{gems:30}},
+      {id:'coin1000',cat:'里程碑',name:'小富翁',desc:'累计获得 1000 金币（花掉也计入）',icon:'💰',tier:'bronze',reward:{gems:20}},
       {id:'gem1',cat:'里程碑',name:'钻石新贵',desc:'获得人生第 1 颗钻石',icon:'💎',tier:'bronze',reward:{gems:20}},
       {id:'lv5',cat:'里程碑',name:'小有所成',desc:'冒险等级达到 Lv.5',icon:'⭐',tier:'bronze',reward:{gems:10}},
       {id:'lv10',cat:'里程碑',name:'老将',desc:'冒险等级达到 Lv.10',icon:'🌟',tier:'silver',reward:{gems:25}},
-      {id:'hidNight',cat:'隐藏',name:'夜猫子',desc:'深夜还在偷偷学习的努力孩子',icon:'🌙',tier:'silver',reward:{gems:30},hidden:true},
+      // HF2: 保留旧 id 是为了不让已解锁/待领取的老存档变成孤儿；规则已从“深夜学习”改为健康时段学习。
+      {id:'hidNight',cat:'隐藏',name:'健康学习家',desc:'在合适的时间专心学习，也记得按时休息',icon:'☀️',tier:'silver',reward:{gems:30},hidden:true},
       {id:'hidPerfectDay',cat:'隐藏',name:'完美的一天',desc:'一天内打Boss、背新词、签到都做到了',icon:'🎂',tier:'silver',reward:{gems:40},hidden:true},
       {id:'hidLucky',cat:'隐藏',name:'欧皇附体',desc:'抽卡第一发就抽到至尊卡！天选之子',icon:'🍀',tier:'diamond',reward:{gems:200},hidden:true},
       {id:'hidComeback',cat:'隐藏',name:'卷土重来',desc:'一个Boss失败后立刻再战并打赢',icon:'🔁',tier:'bronze',reward:{gems:15},hidden:true}
@@ -247,24 +344,41 @@
     '.ach-prog-bar{flex:1;height:7px;background:rgba(148,163,184,.2);border-radius:5px;overflow:hidden}'+
     '.ach-prog-fill{height:100%;background:linear-gradient(90deg,#60a5fa,#3b82f6);border-radius:5px}'+
     '.ach-prog-txt{font-size:11px;font-weight:700;color:#93c5fd}'+
-    '.ach-new{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;z-index:2}'+
+    '.ach-new{position:absolute;top:-6px;right:-6px;background:#b91c1c;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;box-shadow:0 2px 6px rgba(127,29,29,.45);z-index:2}'+
     // 🔴v645 挑战Boss 标签彩虹霓虹渐变(贴合街机柜风格·静态防晕·暗描边保证黄底可读·只用 drop-shadow 不用 text-shadow)
     '.boss-card-label{background:linear-gradient(96deg,#ff2e63 0%,#ff8a00 17%,#ffd60a 31%,#39e75f 49%,#16d6e6 65%,#4d7cff 82%,#b14dff 100%) !important;-webkit-background-clip:text !important;background-clip:text !important;-webkit-text-fill-color:transparent !important;color:transparent !important;text-shadow:none !important;font-weight:900 !important;letter-spacing:1.2px !important;filter:drop-shadow(0 0 2px rgba(0,0,0,.92)) drop-shadow(0 1px 2px rgba(0,0,0,.6)) drop-shadow(0 0 9px rgba(96,170,255,.5))}';
     try{ var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st); }catch(e){}
+
+    // v942 成就信号总账：隐藏成就不能只写配置，必须有可验证、跨岛统一的触发事实。
+    function achToday(){try{return typeof today==='function'?today():new Date().toDateString();}catch(e){return new Date().toDateString();}}
+    function readDaily(){
+      var day=achToday(),o=null;try{o=JSON.parse(localStorage.getItem('hansen_ach_daily_v942')||'null');}catch(e){}
+      if(!o||o.day!==day)o={day:day,learned:false,boss:false,healthy:false};return o;
+    }
+    function noteDaily(field){var o=readDaily();o[field]=true;try{localStorage.setItem('hansen_ach_daily_v942',JSON.stringify(o));}catch(e){}return o;}
+    function globalModes(){
+      var played={},counts={},current=detectIslandKey();
+      function take(s){if(!s||typeof s!=='object')return;var st=s.stats||{};(Array.isArray(st.modesPlayed)?st.modesPlayed:[]).forEach(function(x){if(typeof x==='string')played[x]=1;});var gc=st.gameCounts||{};Object.keys(gc).forEach(function(k){var n=Number(gc[k]);if(isFinite(n)&&n>0)counts[k]=(counts[k]||0)+Math.floor(n);});}
+      try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!k||!/^wordIsland/.test(k)||/_bak$|_backup$|_tmp$/i.test(k)||k===current)continue;try{take(JSON.parse(localStorage.getItem(k)||'null'));}catch(e){}}}catch(e){}
+      take(S);var max=0;Object.keys(counts).forEach(function(k){max=Math.max(max,counts[k]);});return {played:Object.keys(played),counts:counts,max:max};
+    }
+    function wrongTotal(HC){var n=0;try{if(HC){var st=HC.read();HC.islands.forEach(function(i){var w=st.islands[i.id].wrongs||{};Object.keys(w).forEach(function(k){n+=Math.max(0,Number(w[k])||0);});});}else n=Object.keys(S.wrongs||{}).length;}catch(e){}if(n>0)try{localStorage.setItem('hansen_wrong_seen_v942','1');}catch(e){}return n;}
+    function maxGameCount(){return globalModes().max;}
 
     // --- 成就判定(累计型) ---
     window.checkAch = function(){
       try{
         try{ reportTotals(); }catch(e){}  // 先上报当前岛学习数据到全局汇总
         // 跨岛汇总: 学词数/连胜/等级 用全局汇总值(18岛加起来), 没有则回退单岛
-        var HT=window.HansenTotals;
-        var lw = HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length;
+        var HT=window.HansenTotals, HC=window.HansenCanonical;
+        try{if(HC)HC.absorbCurrent();}catch(e){}
+        var lw = HC ? HC.totalLearned() : (HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length);
         var mc = HT ? Math.max(HT.maxCombo(), (S.stats&&S.stats.maxCombo)||0) : ((S.stats&&S.stats.maxCombo)||0);
         var lvl = HT ? Math.max(HT.maxLevel(), S.level||1) : (S.level||1);
         if(lw>=1)unlockAch('w1'); if(lw>=10)unlockAch('w10'); if(lw>=50)unlockAch('w50');
         if(lw>=100)unlockAch('w100'); if(lw>=300)unlockAch('w300');
         if(typeof allW!=='undefined'&&allW.length&&(S.learned||[]).length>=allW.length)unlockAch('wAll');
-        if((S.learned||[]).length>0&&S.wrongs&&Object.keys(S.wrongs).length===0)unlockAch('wrongClear');
+        if(lw>0&&wrongTotal(HC)===0&&localStorage.getItem('hansen_wrong_seen_v942')==='1')unlockAch('wrongClear');
         if(mc>=10)unlockAch('combo10'); if(mc>=30)unlockAch('combo30'); if(mc>=50)unlockAch('combo50'); if(mc>=100)unlockAch('combo100');
         if(lvl>=5)unlockAch('lv5'); if(lvl>=10)unlockAch('lv10');
         var bw=Array.isArray(S.bossWon)?S.bossWon:[];
@@ -273,37 +387,45 @@
         var ch3=true;for(var i=1;i<=12;i++){if(bw.indexOf(i)<0){ch3=false;break;}}if(ch3)unlockAch('bossCh3');
         var a20=true;for(var j=1;j<=20;j++){if(bw.indexOf(j)<0){a20=false;break;}}if(a20)unlockAch('boss20');
         if(S.streak>=3)unlockAch('s3'); if(S.streak>=7)unlockAch('s7'); if(S.streak>=14)unlockAch('s14'); if(S.streak>=100)unlockAch('s100');
-        var coinNow=(window.HansenCoins&&HansenCoins.get())||S.coins||0; if(coinNow>=1000)unlockAch('coin1000');
+        var coinEarned=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0); if(coinEarned>=1000)unlockAch('coin1000');
         var gemNow=(window.HansenGems&&HansenGems.get())||0; if(gemNow>=1)unlockAch('gem1');
         if(S.pet&&S.pet.picked)unlockAch('petHatch');
-        var mp=(S.stats&&S.stats.modesPlayed)||[]; if(mp.length>=1)unlockAch('mode1'); if(mp.length>=11)unlockAch('allModes');
+        var gm=globalModes(),mp=gm.played;if(mp.length>=1)unlockAch('mode1'); if(mp.length>=11)unlockAch('allModes');
+        if(maxGameCount()>=10)unlockAch('modeHigh');
+        try{if(typeof getPetStage==='function'&&window.PET_STAGES&&getPetStage()>=PET_STAGES.length-1)unlockAch('petFinal');}catch(e){}
         if(window.HansenCardbook){
           var ownedC=HansenCardbook.ownedCount();
           if(ownedC>=1)unlockAch('card1');
           if(HansenCardbook.has(1)&&HansenCardbook.has(2)&&HansenCardbook.has(3)&&HansenCardbook.has(4))unlockAch('cardCh1');
           if(HansenCardbook.ownedCountByRarity('legendary')>=1)unlockAch('cardUlt');
           if(ownedC>=20)unlockAch('cardAll');
+          if(HansenCardbook.getTotalDraws&&HansenCardbook.getTotalDraws()===1&&HansenCardbook.ownedCountByRarity('legendary')>=1)unlockAch('hidLucky');
         }
+        var daily=readDaily();
+        if(daily.healthy)unlockAch('hidNight');
+        var checked=false;try{checked=!!(window.HansenCheckin&&HansenCheckin.claimedToday&&HansenCheckin.claimedToday());}catch(e){}
+        if(daily.learned&&daily.boss&&checked)unlockAch('hidPerfectDay');
       }catch(e){}
     };
 
     // --- 成就进度 ---
     window.getAchProgress = function(id){
       try{
-        var HT=window.HansenTotals;
-        var lw = HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length;
+        var HT=window.HansenTotals, HC=window.HansenCanonical;
+        try{if(HC)HC.absorbCurrent();}catch(e){}
+        var lw = HC ? HC.totalLearned() : (HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length);
         var mc = HT ? Math.max(HT.maxCombo(), (S.stats&&S.stats.maxCombo)||0) : ((S.stats&&S.stats.maxCombo)||0);
         var lvl = HT ? Math.max(HT.maxLevel(), S.level||1) : (S.level||1);
         var bw=Array.isArray(S.bossWon)?S.bossWon:[];
         var bwc=function(m){var n=0;for(var i=1;i<=m;i++)if(bw.indexOf(i)>=0)n++;return n;};
         var aw=(typeof allW!=='undefined'&&allW.length)?allW.length:712;
-        var coinNow=(window.HansenCoins&&HansenCoins.get())||S.coins||0;
-        var mp=(S.stats&&S.stats.modesPlayed)||[];
+        var coinNow=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0);
+        var gm=globalModes(),mp=gm.played;
         var m={w1:{cur:lw,need:1},w10:{cur:lw,need:10},w50:{cur:lw,need:50},w100:{cur:lw,need:100},w300:{cur:lw,need:300},wAll:{cur:(S.learned||[]).length,need:aw},
           combo10:{cur:mc,need:10},combo30:{cur:mc,need:30},combo50:{cur:mc,need:50},combo100:{cur:mc,need:100},
           boss1:{cur:bw.length,need:1},bossCh1:{cur:bwc(4),need:4},bossCh3:{cur:bwc(12),need:12},boss20:{cur:bwc(20),need:20},
           s3:{cur:S.streak||0,need:3},s7:{cur:S.streak||0,need:7},s14:{cur:S.streak||0,need:14},s100:{cur:S.streak||0,need:100},
-          lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11}}[id];
+          lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11},modeHigh:{cur:gm.max,need:10}}[id];
         if(!m)return null; return {cur:Math.min(m.cur,m.need),need:m.need};
       }catch(e){return null;}
     };
@@ -318,21 +440,40 @@
     // --- claimAch: 领取 ---
     window.claimAch = function(id){
       var ach=(window.ACHIEVEMENTS||[]).find(function(a){return a.id===id;}); if(!ach)return;
-      var ok=window.HansenAch?HansenAch.claim(id):false;
-      if(!ok)return;
-      // gem1「钻石新贵」名副其实发真钻石(💎); 其余成就维持原样发金币(🪙)。不动公共经济。
-      if(id==='gem1' && window.HansenGems){
-        if(ach.reward.gems) HansenGems.add(ach.reward.gems);
-        try{playLevelUp()}catch(e){}
-        try{floatText(window.innerWidth/2,250,'💎 +'+ach.reward.gems,'#60a5fa')}catch(e){}
-      } else {
-        if(ach.reward.gems&&typeof addGem==='function')addGem(ach.reward.gems);
-        try{playLevelUp()}catch(e){}
-        try{floatText(window.innerWidth/2,250,'🪙 +'+ach.reward.gems,'#fbbf24')}catch(e){}
-      }
+      if(!window.HansenAch||!HansenAch.isPending(id))return;
+      var amount=Math.max(0,Math.floor(Number(ach.reward&&ach.reward.gems)||0));
+      var paid=id==='gem1'?(window.HansenGems&&HansenGems.award&&HansenGems.award('achievement:'+id,amount)):(window.HansenCoins&&HansenCoins.award&&HansenCoins.award('achievement:'+id,amount));
+      if(!paid){try{showToast('⚠️ 奖励暂未安全入账，成就仍保留待领取，请稍后重试')}catch(e){}return;}
+      if(!HansenAch.claim(id)){try{showToast('⚠️ 奖励已安全记账，领取状态保存失败；再次点击不会重复发奖')}catch(e){}return;}
+      try{playLevelUp()}catch(e){}
+      try{floatText(window.innerWidth/2,250,(id==='gem1'?'💎 ':'🪙 ')+'+'+amount,id==='gem1'?'#60a5fa':'#fbbf24')}catch(e){}
       if(typeof save==='function')save();
       if(typeof renderAch==='function')renderAch();
     };
+
+    function installAchievementSignals(){
+      // 学会新词（包括错词毕业）由 learned 长度增加确定；只在增加时排队判定，避免 save→checkAch→save 递归。
+      if(typeof window.save==='function'&&!window.save.__hsnAchSignals){
+        var origSave=window.save,lastLearned=(S.learned||[]).length;
+        window.save=function(){
+          var n=(S.learned||[]).length,grew=n>lastLearned;if(n!==lastLearned)lastLearned=n;
+          if(grew){noteDaily('learned');var hr=new Date().getHours();if(hr>=6&&hr<21)noteDaily('healthy');}
+          var r=origSave.apply(this,arguments);if(grew)setTimeout(function(){try{checkAch();}catch(e){}},0);return r;
+        };
+        window.save.__hsnAchSignals=true;if(origSave.__perfBoosted)window.save.__perfBoosted=true;
+      }
+      if(typeof window.markAnswer==='function'&&!window.markAnswer.__hsnAchSignals){
+        var origAnswer=window.markAnswer;
+        window.markAnswer=function(idx,correct){var r=origAnswer.apply(this,arguments);if(correct){var hr=new Date().getHours();if(hr>=6&&hr<21)noteDaily('healthy');try{checkAch();}catch(e){}}return r;};
+        window.markAnswer.__hsnAchSignals=true;
+      }
+      var failedAt=0;
+      if(typeof window.bossDefeat==='function'&&!window.bossDefeat.__hsnAchSignals){var origDefeat=window.bossDefeat;window.bossDefeat=function(){var r=origDefeat.apply(this,arguments);failedAt=Date.now();return r;};window.bossDefeat.__hsnAchSignals=true;}
+      if(typeof window.bossVictory==='function'&&!window.bossVictory.__hsnAchSignals){var origVictory=window.bossVictory;window.bossVictory=function(){var comeback=failedAt&&Date.now()-failedAt<=30*60*1000;var r=origVictory.apply(this,arguments);noteDaily('boss');if(comeback)unlockAch('hidComeback');failedAt=0;try{checkAch();}catch(e){}return r;};window.bossVictory.__hsnAchSignals=true;}
+      if(typeof window.doOpenChest==='function'&&!window.doOpenChest.__hsnAchSignals){var origChest=window.doOpenChest;window.doOpenChest=function(){var r=origChest.apply(this,arguments);/* 全局签到包装器会在本函数返回后才 markClaimed，下一任务再判定才能可靠触发“完美一天”。 */setTimeout(function(){try{checkAch();}catch(e){}},0);return r;};window.doOpenChest.__hsnAchSignals=true;}
+      if(typeof window.bumpGameCount==='function'&&!window.bumpGameCount.__hsnAchSignals){var origBump=window.bumpGameCount;window.bumpGameCount=function(){var r=origBump.apply(this,arguments);try{checkAch();}catch(e){}return r;};window.bumpGameCount.__hsnAchSignals=true;}
+    }
+    installAchievementSignals();
 
     // --- 覆盖 renderAch: 折叠式 + 全局钱包 ---
     window.toggleAchCat = function(cat){ if(!window._achOpen)window._achOpen={}; window._achOpen[cat]=!window._achOpen[cat]; renderAch(); };
@@ -456,33 +597,8 @@
       };
     }
 
-    // (e) 金币说明书(包装 renderSettings): 跑完原版后, 在设置内容里插入金币说明section
-    if(typeof window.renderSettings==='function'){
-      var _origRS=window.renderSettings;
-      window.renderSettings=function(){
-        try{ _origRS.apply(this, arguments); }catch(e){}
-        try{
-          var box=document.getElementById('settingsContent'); if(!box)return;
-          if(document.getElementById('hsnCoinGuide'))return; // 防重复插入
-          var guide=document.createElement('div');
-          guide.id='hsnCoinGuide';
-          guide.className='settings-section';
-          guide.style.borderColor='rgba(251,191,36,.35)';
-          guide.innerHTML=''+
-            '<h3 style="color:#fbbf24">💰 金币说明书</h3>'+
-            '<div class="desc" style="line-height:1.7">金币用来抽卡、买主题、复活。下面是怎么赚金币：</div>'+
-            '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9"><div><b style="color:#fbbf24">📖 答对单词</b> — 每答对 1 题给 <b style="color:#fbbf24">1 金币</b>。</div>'+
-            '<div style="color:#fca5a5">⚠️ 同一个单词，每天最多给 <b>3 次</b>金币！超过 3 次就不给了（但可以继续练）。<br>💡 想多赚就答更多<b>不同的</b>单词 —— 鼓励你多背单词。</div>'+
-            '<div style="color:#94a3b8">（每天答题最多 2000 金币，次日重置）</div></div>'+
-            '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9"><div><b style="color:#fbbf24">⚔️ 打赢 Boss</b> — 每打赢新 Boss：第1章20/第2章30/第3章40/第4-5章50，重复打给5。</div></div>'+
-            '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9"><div><b style="color:#fbbf24">📅 每日签到</b> — 每天第一次开宝箱给 10~300 金币。</div></div>'+
-            '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9"><div><b style="color:#fbbf24">🔥 连胜奖励</b> — 5/10/20/30/50/100 连胜给额外金币，答错清零。</div></div>'+
-            '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9"><div><b style="color:#fbbf24">🎯 任务 / 成就</b> — 完成给金币。</div></div>'+
-            '<div class="desc" style="margin-top:8px;color:#94a3b8">🪙 金币全游戏通用：在任何岛赚的，所有岛都能用。</div>';
-          box.appendChild(guide);
-        }catch(e){}
-      };
-    }
+    // (e) v941: 旧版金币说明注入已删除；设置页统一由 hansen_econ_guide.js
+    // 注入三张可折叠说明卡，避免两个版本同时出现且规则互相矛盾。
   }
 
   // 启动: 等 DOM + 游戏脚本就绪

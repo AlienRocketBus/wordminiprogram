@@ -1,4 +1,4 @@
-// hansen_addiction.js v143i (王者段位弹窗叉号修复)
+// hansen_addiction.js v942 (里程碑奖励可恢复事务)
 // 上瘾度升级 5 件套:
 // 1. 战力分系统 (主页顶部显示总积分, 进岛刷新)
 // 2. 连续登录里程碑 (3/7/14/30/100 天 buff + 弹窗)
@@ -8,13 +8,14 @@
 (function(){
   'use strict';
   
-  // ─── 工具: 跨闭包读取 island.html 的 let 全局 ────
-  function _r(name){ 
-    try { 
-      var v = new Function('return typeof '+name+' !== "undefined" ? '+name+' : undefined')();
-      if(v !== undefined) return v;
-    } catch(e){} 
-    return window[name]; 
+  // ─── 工具: 读取 island.html 的已知全局 ────
+  // 显式访问全局词法绑定，避免 new Function/eval，便于部署严格 CSP。
+  function _r(name){
+    try {
+      if(name === 'S') return typeof S !== 'undefined' ? S : window.S;
+      if(name === 'STORAGE_KEY') return typeof STORAGE_KEY !== 'undefined' ? STORAGE_KEY : window.STORAGE_KEY;
+    } catch(e){}
+    return window[name];
   }
   
   function today(){ var d = new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
@@ -71,7 +72,7 @@
   
   // 战力等级
   function getPowerRank(power){
-    if(power < 100) return {name:'青铜', color:'#a16207', emoji:'🥉'};
+    if(power < 100) return {name:'青铜', color:'#60a5fa', emoji:'🥉'};
     if(power < 500) return {name:'白银', color:'#94a3b8', emoji:'🥈'};
     if(power < 1500) return {name:'黄金', color:'#fbbf24', emoji:'🥇'};
     if(power < 3500) return {name:'铂金', color:'#06b6d4', emoji:'💠'};
@@ -82,42 +83,134 @@
   
   // ─── 里程碑配置 ───────────────────────────
   // 🔴 已按新设计调整: 去掉"连签3天/7天发金币(200/500)"的金币里程碑(与每日宝箱三档冲突、会乱爆金币)。
-  //   只保留钻石里程碑(连签14/30/100天 = 5/10/30颗), 这正是新设计的钻石获取方式。
-  // 🔴v829 钻石已改为只从"知识结晶"获得(见 hansen_crystal.js)。连签里程碑改发: 金币 + 记忆强化buff(复习涨星翻倍) + 原有特典(头像框/双倍XP/宠物皮肤)。
+  //   保留 14/30/100 天的真实金币、强化与 XP 权益；连签不发钻石。
+  // v941 只展示并发放真实存在的权益。旧文案里的头像框/宠物皮肤没有装备实现，已删除。
   var MILESTONES = [
-    {days:14,  reward:'🪙 +120 金币 · ⚡加速2小时 · 限定头像框', coin:120, boost:120, buff:'frame'},
+    {days:14,  reward:'🪙 +120 金币 · ⚡加速2小时', coin:120, boost:120},
     {days:30,  reward:'🪙 +250 金币 · ⚡加速4小时 · 双倍 XP 3 天', coin:250, boost:240, buff:'xp2x', buffDays:3},
-    {days:100, reward:'🪙 +600 金币 · ⚡加速8小时 · 传说宠物皮肤', coin:600, boost:480, buff:'legendary_pet'},
+    {days:100, reward:'🪙 +600 金币 · ⚡加速8小时', coin:600, boost:480},
   ];
+  var MILESTONE_CLAIM_KEY='hansen_milestones_claimed';
+  var MILESTONE_EFFECT_KEY='hansen_milestone_effects_v942';
+  var MILESTONE_SEED_KEY='hansen_milestone_awards_seeded_v942';
+
+  function readStrict(key,parser,fallback){
+    try{var raw=localStorage.getItem(key);return {ok:true,value:raw===null?fallback:parser(raw)};}
+    catch(e){return {ok:false,value:fallback};}
+  }
+  function readJsonStrict(key,fallback){return readStrict(key,function(raw){return JSON.parse(raw);},fallback);}
+  function writeJsonStrict(key,value){try{var raw=JSON.stringify(value);localStorage.setItem(key,raw);return localStorage.getItem(key)===raw;}catch(e){return false;}}
+  function writeTextStrict(key,value){try{value=String(value);localStorage.setItem(key,value);return localStorage.getItem(key)===value;}catch(e){return false;}}
+  function milestoneByDay(days){for(var i=0;i<MILESTONES.length;i++)if(MILESTONES[i].days===days)return MILESTONES[i];return null;}
+  function normalizedClaimed(value){
+    if(!Array.isArray(value))return [];
+    var out=[];value.forEach(function(x){x=Math.floor(+x);if(milestoneByDay(x)&&out.indexOf(x)<0)out.push(x);});return out;
+  }
+  function effectMap(){
+    var r=readStrict(MILESTONE_EFFECT_KEY,function(raw){var o=JSON.parse(raw);if(!o||typeof o!=='object'||Array.isArray(o))throw new Error('里程碑账本结构损坏');return o;},{});
+    if(!r.ok)return {ok:false,value:{}};
+    return {ok:true,value:r.value};
+  }
+  function coinSource(m){return 'streak-milestone:'+m.days;}
+  var MAX_EFFECT_TIME=8640000000000000;
+  function validEffectTime(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&v>=0&&v<=MAX_EFFECT_TIME;}
+  function effectTarget(createdAt,base,duration){var t=Math.max(createdAt,base)+duration;return validEffectTime(t)?t:null;}
+  function currentBoost(){return readStrict('hsn_crystal_boost_until',function(v){var n=Number(v);if(!validEffectTime(n))throw new Error('加速权益损坏');return n;},0);}
+  function currentXP2X(){return readStrict('hansen_xp2x_until',function(v){var n=Date.parse(v);if(!validEffectTime(n))throw new Error('双倍经验权益损坏');return n;},0);}
+
+  function normalizeMilestoneTx(raw,m){
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))return null;
+    if(raw.migrated===true)return {version:942,days:m.days,source:coinSource(m),migrated:true,coin:true,boost:{confirmed:true},xp2x:{confirmed:true},complete:true};
+    if(raw.version!==942||+raw.days!==m.days||raw.source!==coinSource(m))return null;
+    var b=raw.boost&&typeof raw.boost==='object'?raw.boost:{};
+    var x=raw.xp2x&&typeof raw.xp2x==='object'?raw.xp2x:{};
+    var createdAt=raw.createdAt,boostMinutes=m.boost||0,xpDays=m.buff==='xp2x'?(m.buffDays||1):0;
+    if(!validEffectTime(createdAt)||createdAt<=0||!validEffectTime(b.base)||!validEffectTime(x.base))return null;
+    var bt=boostMinutes?effectTarget(createdAt,b.base,boostMinutes*60000):0,xt=xpDays?effectTarget(createdAt,x.base,xpDays*86400000):0;
+    if(b.minutes!==boostMinutes||x.days!==xpDays||b.target!==bt||x.target!==xt||bt===null||xt===null)return null;
+    return {version:942,days:m.days,source:coinSource(m),createdAt:createdAt,coin:raw.coin===true,
+      boost:{minutes:boostMinutes,base:b.base,target:b.target,confirmed:b.confirmed===true},
+      xp2x:{days:xpDays,base:x.base,target:x.target,confirmed:x.confirmed===true},complete:raw.complete===true};
+  }
+  function milestoneCarry(raw,m){
+    var out={coin:false,boostConfirmed:!m.boost,xpConfirmed:m.buff!=='xp2x',complete:false};if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+    var current=raw.version===942&&+raw.days===m.days&&raw.source===coinSource(m),legacy=Object.prototype.hasOwnProperty.call(raw,'boostUntil')||Object.prototype.hasOwnProperty.call(raw,'xpUntil');
+    if(!current&&!legacy)return out;
+    out.coin=raw.coin===true;out.boostConfirmed=out.boostConfirmed||(current&&raw.boost&&raw.boost.confirmed===true)||(legacy&&raw.boostConfirmed===true);
+    out.xpConfirmed=out.xpConfirmed||(current&&raw.xp2x&&raw.xp2x.confirmed===true)||(legacy&&raw.xpConfirmed===true);
+    out.complete=raw.complete===true&&out.boostConfirmed&&out.xpConfirmed;return out;
+  }
+
+  function ensureMilestoneTx(map,m){
+    var raw=map[m.days],existing=normalizeMilestoneTx(raw,m);
+    if(existing){map[m.days]=existing;return existing;}
+    var b=currentBoost(),x=currentXP2X();if(!b.ok||!x.ok)return null;
+    var now=Date.now(),boostMinutes=m.boost||0,xpDays=m.buff==='xp2x'?(m.buffDays||1):0,bt=boostMinutes?effectTarget(now,b.value,boostMinutes*60000):0,xt=xpDays?effectTarget(now,x.value,xpDays*86400000):0,carry=milestoneCarry(raw,m);
+    if(!validEffectTime(now)||now<=0||bt===null||xt===null)return null;
+    var tx={version:942,days:m.days,source:coinSource(m),createdAt:now,coin:carry.coin,
+      boost:{minutes:boostMinutes,base:b.value,target:bt,confirmed:carry.boostConfirmed},
+      xp2x:{days:xpDays,base:x.value,target:xt,confirmed:carry.xpConfirmed},complete:carry.complete};
+    map[m.days]=tx;
+    if(!writeJsonStrict(MILESTONE_EFFECT_KEY,map)){if(raw===undefined)delete map[m.days];else map[m.days]=raw;return null;}
+    return tx;
+  }
+  function saveMilestoneTx(map,tx){map[tx.days]=tx;return writeJsonStrict(MILESTONE_EFFECT_KEY,map);}
+  function confirmBoost(map,tx){
+    if(tx.boost.confirmed)return true;
+    var cur=currentBoost();if(!cur.ok)return false;
+    if(cur.value===tx.boost.base){if(!writeTextStrict('hsn_crystal_boost_until',tx.boost.target))return false;}
+    else if(cur.value!==tx.boost.target)return false;
+    cur=currentBoost();if(!cur.ok||cur.value!==tx.boost.target)return false;
+    tx.boost.confirmed=true;return saveMilestoneTx(map,tx);
+  }
+  function confirmXP2X(map,tx){
+    if(tx.xp2x.confirmed)return true;
+    var cur=currentXP2X();if(!cur.ok)return false;
+    var iso=new Date(tx.xp2x.target).toISOString();
+    if(cur.value===tx.xp2x.base){if(!writeTextStrict('hansen_xp2x_until',iso))return false;}
+    else if(cur.value!==tx.xp2x.target)return false;
+    cur=currentXP2X();if(!cur.ok||cur.value!==tx.xp2x.target)return false;
+    tx.xp2x.confirmed=true;return saveMilestoneTx(map,tx);
+  }
+  function seedClaimedMilestones(claimed,map){
+    var ids=claimed.map(function(d){return coinSource(milestoneByDay(d));});
+    try{
+      if(ids.length&&window.HansenCoins&&typeof HansenCoins.seedAwards==='function'&&HansenCoins.seedAwards(ids)!==true)return false;
+    }catch(e){return false;}
+    var changed=false;claimed.forEach(function(d){if(!map[d]){map[d]={version:942,days:d,source:coinSource(milestoneByDay(d)),migrated:true,coin:true,boost:{confirmed:true},xp2x:{confirmed:true},complete:true};changed=true;}});
+    if(changed&&!writeJsonStrict(MILESTONE_EFFECT_KEY,map))return false;
+    return writeTextStrict(MILESTONE_SEED_KEY,'1');
+  }
+
+  function currentGlobalStreak(){
+    try{ if(window.HansenCheckin&&HansenCheckin.getStreak) return HansenCheckin.getStreak(); }catch(e){}
+    try{ var n=parseInt(localStorage.getItem('hansen_checkin_streak')||'0',10); if(isFinite(n)&&n>0)return n; }catch(e){}
+    var s=_r('S'); return s&&isFinite(s.streak)?Math.max(0,s.streak|0):0;
+  }
   
   function checkMilestones(){
     try {
       var S = _r('S');
-      if(!S) return;
-      var streak = S.streak || 0;
-      var claimed = JSON.parse(localStorage.getItem('hansen_milestones_claimed') || '[]');
-      
-      MILESTONES.forEach(function(m){
-        if(streak >= m.days && claimed.indexOf(m.days) < 0){
-          // 解锁
-          claimed.push(m.days);
-          // 🔴v829 发奖改为: 金币 + 记忆强化buff(钻石已改为只从"知识结晶"获得·见 hansen_crystal.js)
-          if(window.HansenCoins && typeof window.HansenCoins.add === 'function'){
-            window.HansenCoins.add(m.coin || 0);
-          } else if(typeof window.addCoin === 'function'){ window.addCoin(m.coin || 0); }
-          if(m.boost && window.HansenCrystal && typeof window.HansenCrystal.grantBoost === 'function'){
-            window.HansenCrystal.grantBoost(m.boost, true);   // 记忆强化(静默·弹窗里已写明)
-          }
-          if(m.buff === 'xp2x'){
-            var until = new Date(); until.setDate(until.getDate() + (m.buffDays || 1));
-            localStorage.setItem('hansen_xp2x_until', until.toISOString());
-          }
-          // 弹窗
-          showMilestoneDialog(m);
+      if(!S) return false;
+      var streak = currentGlobalStreak();
+      var cr=readJsonStrict(MILESTONE_CLAIM_KEY,[]),er=effectMap();if(!cr.ok||!er.ok)return false;
+      var claimed=normalizedClaimed(cr.value),map=er.value;
+      var seeded=readStrict(MILESTONE_SEED_KEY,function(v){return v;},'');if(!seeded.ok)return false;
+      if(seeded.value!=='1'&&!seedClaimedMilestones(claimed,map))return false;
+      for(var i=0;i<MILESTONES.length;i++){
+        var m=MILESTONES[i];if(streak<m.days||claimed.indexOf(m.days)>=0)continue;
+        var tx=ensureMilestoneTx(map,m);if(!tx)return false;
+        if(!tx.coin){
+          if(!window.HansenCoins||typeof HansenCoins.award!=='function'||HansenCoins.award(tx.source,m.coin||0)!==true)return false;
+          tx.coin=true;if(!saveMilestoneTx(map,tx))return false;
         }
-      });
-      localStorage.setItem('hansen_milestones_claimed', JSON.stringify(claimed));
-    } catch(e){ console.error(e); }
+        if(!confirmBoost(map,tx)||!confirmXP2X(map,tx))return false;
+        if(!tx.complete){tx.complete=true;if(!saveMilestoneTx(map,tx))return false;}
+        var next=claimed.concat([m.days]);if(!writeJsonStrict(MILESTONE_CLAIM_KEY,next))return false;
+        claimed=next;showMilestoneDialog(m);
+      }
+      return true;
+    } catch(e){ try{console.error(e);}catch(_e){} return false; }
   }
   
   function showMilestoneDialog(m){
@@ -175,21 +268,21 @@
     {key:'wordIslandFood', name:'美食周', emoji:'🍔', short:'food'},
     {key:'wordIslandAnimal', name:'动物周', emoji:'🐾', short:'animal'},
     {key:'wordIslandColorNum', name:'颜色数字周', emoji:'🎨', short:'colornum'},
-    {key:'wordIslandPeople', name:'人物周', emoji:'👥', short:'people'},
+    {key:'wordIslandPeople', name:'职业周', emoji:'💼', short:'job'},
     {key:'wordIslandSports', name:'运动周', emoji:'🏆', short:'sports'},
     {key:'wordIslandFamily', name:'家庭周', emoji:'👨‍👩‍👧', short:'family'},
     {key:'wordIslandSchool', name:'学校周', emoji:'🎒', short:'school'},
-    {key:'wordIslandHome', name:'家居周', emoji:'🏠', short:'home'},
+    {key:'wordIslandHouse', name:'家居周', emoji:'🏠', short:'home'},
     {key:'wordIslandClothes', name:'衣物周', emoji:'👕', short:'clothes'},
     {key:'wordIslandNature', name:'自然周', emoji:'🌳', short:'nature'},
     {key:'wordIslandTransport', name:'交通周', emoji:'🚗', short:'transport'},
     {key:'wordIslandTime', name:'时间周', emoji:'⏰', short:'time'},
-    {key:'wordIslandJob', name:'职业周', emoji:'💼', short:'job'},
     {key:'wordIslandBody', name:'身体周', emoji:'💪', short:'body'},
-    {key:'wordIslandQuestion', name:'疑问词周', emoji:'❓', short:'question'},
-    {key:'wordIslandAction', name:'动作周', emoji:'🏃', short:'action'},
-    {key:'wordIslandAdjective', name:'形容词周', emoji:'✨', short:'adjective'},
+    {key:'wordIslandPronouns', name:'疑问词周', emoji:'❓', short:'question'},
+    {key:'wordIslandVerbs', name:'动作周', emoji:'🏃', short:'action'},
+    {key:'wordIslandAdj', name:'形容词周', emoji:'✨', short:'adjective'},
     {key:'wordIslandCity', name:'城市周', emoji:'🏙️', short:'city'},
+    {key:'wordIslandMisc', name:'宝藏周', emoji:'🗺️', short:'treasure'},
   ];
   
   function getCurrentTheme(){
@@ -382,6 +475,111 @@
   }
   
   // ─── 宝箱稀有度增强 ──────────────────────
+  var CHEST_EXTRA_KEY='hansen_addiction_chest_effects_v942';
+  var CHEST_RARITY={
+    common:{name:'普通',color:'#94a3b8',emoji:'⚪',glow:'rgba(148,163,184,.3)',extraCoin:0,petPiece:0},
+    rare:{name:'稀有',color:'#3b82f6',emoji:'🔵',glow:'rgba(59,130,246,.5)',extraCoin:5,petPiece:0},
+    epic:{name:'史诗',color:'#a855f7',emoji:'🟣',glow:'rgba(168,85,247,.6)',extraCoin:15,petPiece:0},
+    legendary:{name:'传说',color:'#fbbf24',emoji:'🟡',glow:'rgba(251,191,36,.8)',extraCoin:50,petPiece:1}
+  };
+  function legacyRarityRoll(txid){
+    var h=2166136261,s=String(txid||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0)/4294967296;
+  }
+  function validRarityRoll(v){return typeof v==='number'&&isFinite(v)&&v>=0&&v<1;}
+  function checkinReceipt(value){
+    if(value&&value.receipt)value=value.receipt;
+    if(!value||typeof value!=='object'||(value.ok!==true&&value.committed!==true))return null;
+    var day=String(value.day||''),txid=String(value.txid||'');
+    if(!/^\d{4}-\d{1,2}-\d{1,2}$/.test(day)||txid!=='checkin:'+day)return null;
+    var hasRoll=Object.prototype.hasOwnProperty.call(value,'rarityRoll');
+    // 有字段就必须严格是 [0,1) 有限数，绝不把伪造/NaN/越界值降级成 fallback。
+    if(hasRoll&&!validRarityRoll(value.rarityRoll))return null;
+    return {ok:true,day:day,txid:txid,rarityRoll:hasRoll?value.rarityRoll:legacyRarityRoll(txid),legacyRarityRoll:!hasRoll};
+  }
+  function officialCheckinReceipt(value){
+    var requested=checkinReceipt(value);if(!requested||!window.HansenCheckin||typeof HansenCheckin.getReceipt!=='function')return null;
+    try{
+      var official=checkinReceipt(HansenCheckin.getReceipt(requested.day));
+      if(!official||official.day!==requested.day||official.txid!==requested.txid||official.rarityRoll!==requested.rarityRoll)return null;
+      return official;
+    }catch(e){return null;}
+  }
+  /* 稀有度只读首次签到 receipt 已持久的 rarityRoll：70% 普通 / 20% 稀有 /
+     8% 史诗 / 2% 传说。传入旧 txid 字符串仅用于兼容旧无 roll receipt。 */
+  function chestRarity(value){
+    var r=typeof value==='number'?value:(value&&typeof value==='object'?value.rarityRoll:legacyRarityRoll(value));
+    if(!validRarityRoll(r))return null;
+    return r<0.02?'legendary':(r<0.10?'epic':(r<0.30?'rare':'common'));
+  }
+  function chestLedger(){var r=readJsonStrict(CHEST_EXTRA_KEY,{});return r.ok&&r.value&&typeof r.value==='object'&&!Array.isArray(r.value)?{ok:true,value:r.value}:{ok:false,value:{}};}
+  function readPieces(){return readStrict('hansen_pet_pieces',function(v){if(!/^(0|[1-9]\d*)$/.test(String(v)))throw new Error('宠物碎片余额损坏');var n=Number(v);if(!isFinite(n)||Math.floor(n)!==n||n<0||n>1000000000)throw new Error('宠物碎片余额越界');return n;},0);}
+  function chestSource(txid,suffix){return 'addiction:rare:'+txid+':'+suffix;}
+  function normalizeChestTx(raw,receipt){
+    if(!raw||typeof raw!=='object'||raw.version!==942||raw.txid!==receipt.txid||raw.day!==receipt.day)return null;
+    if(Object.prototype.hasOwnProperty.call(raw,'rarityRoll')&&(!validRarityRoll(raw.rarityRoll)||raw.rarityRoll!==receipt.rarityRoll))return null;
+    var rarity=chestRarity(receipt.rarityRoll),rc=CHEST_RARITY[rarity],pet=raw.pet&&typeof raw.pet==='object'?raw.pet:{};if(!rc)return null;
+    var amount=rc.petPiece,base,target=pet.target;
+    if(typeof target!=='number'||!isFinite(target)||Math.floor(target)!==target||target<amount||target>1000000000||pet.amount!==amount||pet.source!==chestSource(receipt.txid,'pet'))return null;
+    if(Object.prototype.hasOwnProperty.call(pet,'base'))base=pet.base;else base=target-amount; // 兼容已有 v942 tx；恢复仍要求当前余额精确命中 base/target。
+    if(typeof base!=='number'||!isFinite(base)||Math.floor(base)!==base||base<0||base>1000000000-amount||target!==base+amount)return null;
+    return {version:942,txid:receipt.txid,day:receipt.day,rarityRoll:receipt.rarityRoll,rarity:rarity,coinConfirmed:raw.coinConfirmed===true,
+      pet:{source:chestSource(receipt.txid,'pet'),amount:amount,base:base,target:target,confirmed:pet.confirmed===true},complete:raw.complete===true};
+  }
+  function ensureChestTx(map,receipt){
+    var has=Object.prototype.hasOwnProperty.call(map,receipt.txid),tx=normalizeChestTx(map[receipt.txid],receipt);if(tx){map[receipt.txid]=tx;return tx;}if(has)return null;
+    var rarity=chestRarity(receipt.rarityRoll),rc=CHEST_RARITY[rarity],pieces=readPieces();if(!rc||!pieces.ok)return null;
+    if(pieces.value>1000000000-rc.petPiece)return null;
+    tx={version:942,txid:receipt.txid,day:receipt.day,rarityRoll:receipt.rarityRoll,rarity:rarity,coinConfirmed:rc.extraCoin===0,
+      pet:{source:chestSource(receipt.txid,'pet'),amount:rc.petPiece,base:pieces.value,target:pieces.value+rc.petPiece,confirmed:rc.petPiece===0},complete:false};
+    map[receipt.txid]=tx;if(!writeJsonStrict(CHEST_EXTRA_KEY,map)){delete map[receipt.txid];return null;}return tx;
+  }
+  function saveChestTx(map,tx){map[tx.txid]=tx;return writeJsonStrict(CHEST_EXTRA_KEY,map);}
+  function settleChestReceipt(value){
+    var receipt=officialCheckinReceipt(value);if(!receipt)return false;
+    var lr=chestLedger();if(!lr.ok)return false;var map=lr.value,tx=ensureChestTx(map,receipt);if(!tx)return false;
+    var rc=CHEST_RARITY[tx.rarity];
+    if(!tx.coinConfirmed){
+      try{if(!window.HansenCoins||typeof HansenCoins.award!=='function'||HansenCoins.award(chestSource(tx.txid,'coins'),rc.extraCoin)!==true)return false;}catch(e){return false;}
+      tx.coinConfirmed=true;if(!saveChestTx(map,tx))return false;
+    }
+    if(!tx.pet.confirmed){
+      var p=readPieces();if(!p.ok)return false;
+      if(p.value===tx.pet.base){if(!writeTextStrict('hansen_pet_pieces',tx.pet.target))return false;}
+      else if(p.value!==tx.pet.target)return false;
+      p=readPieces();if(!p.ok||p.value!==tx.pet.target)return false;
+      tx.pet.confirmed=true;if(!saveChestTx(map,tx))return false;
+    }
+    if(!tx.complete){tx.complete=true;if(!saveChestTx(map,tx))return false;}
+    return true;
+  }
+  function recoverChestExtras(){
+    var ok=true,lr=chestLedger();if(!lr.ok)return false;
+    Object.keys(lr.value).forEach(function(k){
+      var raw=lr.value[k];if(!raw||raw.complete===true)return;
+      var probe={ok:true,day:raw.day,txid:raw.txid};if(Object.prototype.hasOwnProperty.call(raw,'rarityRoll'))probe.rarityRoll=raw.rarityRoll;
+      var receipt=officialCheckinReceipt(probe);if(!receipt||receipt.txid!==k||settleChestReceipt(receipt)!==true)ok=false;
+    });
+    /* 覆盖“签到已提交，但 addiction ledger 第一次写入就失败”的断点。 */
+    try{
+      if(window.HansenCheckin&&typeof HansenCheckin.getReceipt==='function'){
+        var receipt=checkinReceipt(HansenCheckin.getReceipt());if(receipt&&settleChestReceipt(receipt)!==true)ok=false;
+      }
+    }catch(e){ok=false;}
+    return ok;
+  }
+  function showChestRarityBanner(rc){
+    setTimeout(function(){
+      try {
+        var c=document.getElementById('chestContent');if(!c)return;
+        var banner=document.createElement('div');
+        banner.style.cssText='background:linear-gradient(135deg,'+rc.color+',rgba(0,0,0,.3));border:2px solid '+rc.color+';border-radius:12px;padding:10px;margin-bottom:14px;text-align:center;box-shadow:0 0 30px '+rc.glow+';animation:hanPulse 1.5s ease-in-out infinite';
+        var pieceText=rc.petPiece?'<div style="font-size:11px;color:#fde047;margin-top:4px">🐾 +1 限定宠物碎片!</div>':'';
+        var extraText=rc.extraCoin?'<div style="font-size:11px;color:#fff;margin-top:2px">额外 +'+rc.extraCoin+' 🪙</div>':'';
+        banner.innerHTML='<div style="font-size:30px;margin-bottom:4px">'+rc.emoji+'</div><div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:2px">'+rc.name+' 宝箱!</div>'+extraText+pieceText;
+        c.insertBefore(banner,c.firstChild);
+      }catch(e){try{console.error(e);}catch(_e){}}
+    },800);
+  }
   // 用 monkey patch 包装原 doOpenChest
   function patchChest(){
     if(typeof window.doOpenChest === 'undefined') return false;
@@ -391,60 +589,17 @@
     var origDoOpenChest = window.doOpenChest;
     
     window.doOpenChest = function(){
-      // 全局每日签到闸门: 今天已在任意岛领过 → 连"稀有度额外金币"也不再发(修复跨岛重复发币)
-      if(window.HansenCheckin && typeof window.HansenCheckin.claimedToday === 'function' && window.HansenCheckin.claimedToday()) return;
-      // 在原版执行前判断稀有度
-      var rand = Math.random();
-      var rarity;
-      if(rand < 0.02){ rarity = 'legendary'; }      // 2% 传说
-      else if(rand < 0.10){ rarity = 'epic'; }      // 8% 史诗
-      else if(rand < 0.30){ rarity = 'rare'; }      // 20% 稀有
-      else { rarity = 'common'; }                    // 70% 普通
-      
-      window._hansenChestRarity = rarity;
-      
-      // 调原版
-      origDoOpenChest.apply(this, arguments);
-      
-      // 在原版后追加稀有度标签
-      setTimeout(function(){
-        try {
-          var c = document.getElementById('chestContent');
-          if(!c) return;
-          
-          var rarityConfig = {
-            common: {name:'普通', color:'#94a3b8', emoji:'⚪', glow:'rgba(148,163,184,.3)'},
-            rare: {name:'稀有', color:'#3b82f6', emoji:'🔵', glow:'rgba(59,130,246,.5)', extraGem: 5},
-            epic: {name:'史诗', color:'#a855f7', emoji:'🟣', glow:'rgba(168,85,247,.6)', extraGem: 15},
-            legendary: {name:'传说', color:'#fbbf24', emoji:'🟡', glow:'rgba(251,191,36,.8)', extraGem: 50, petPiece: true},
-          };
-          var rc = rarityConfig[rarity];
-          
-          // 额外奖励给【金币】(方案B: 签到不给钻石, 钻石只连签里程碑给)
-          if(rc.extraGem && typeof window.addCoin === 'function'){
-            window.addCoin(rc.extraGem);
-          }else if(rc.extraGem && typeof window.addGem === 'function'){
-            window.addGem(rc.extraGem);  // 兜底(addGem已并入金币)
-          }
-          
-          // 传说: 给宠物碎片
-          if(rc.petPiece){
-            var pieces = parseInt(localStorage.getItem('hansen_pet_pieces') || '0');
-            pieces += 1;
-            localStorage.setItem('hansen_pet_pieces', String(pieces));
-          }
-          
-          // 在 chestContent 顶部插入稀有度横幅
-          var banner = document.createElement('div');
-          banner.style.cssText = 'background:linear-gradient(135deg,' + rc.color + ',rgba(0,0,0,.3));border:2px solid ' + rc.color + ';border-radius:12px;padding:10px;margin-bottom:14px;text-align:center;box-shadow:0 0 30px ' + rc.glow + ';animation:hanPulse 1.5s ease-in-out infinite';
-          var pieceText = rc.petPiece ? '<div style="font-size:11px;color:#fde047;margin-top:4px">🐾 +1 限定宠物碎片!</div>' : '';
-          var extraText = rc.extraGem ? '<div style="font-size:11px;color:#fff;margin-top:2px">额外 +' + rc.extraGem + ' 🪙</div>' : '';
-          banner.innerHTML = '<div style="font-size:30px;margin-bottom:4px">' + rc.emoji + '</div>' +
-            '<div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:2px">' + rc.name + ' 宝箱!</div>' +
-            extraText + pieceText;
-          c.insertBefore(banner, c.firstChild);
-        } catch(e){ console.error(e); }
-      }, 800);
+      // 是否可领完全服从正式签到事务的 receipt；不能在调用前自行猜测成功。
+      var result=origDoOpenChest.apply(this,arguments);
+      var receipt=result&&result.ok===true?officialCheckinReceipt(result):null;
+      if(!receipt){
+        /* 重复调用可携带历史 receipt 供 cleanup，但 ok:false 绝不触发本次 UI/新奖励。 */
+        try{if(result&&result.receipt)settleChestReceipt(result.receipt);}catch(e){}
+        return result;
+      }
+      var rarity=chestRarity(receipt.rarityRoll),rc=CHEST_RARITY[rarity];window._hansenChestRarity=rarity;
+      if(settleChestReceipt(receipt))showChestRarityBanner(rc);
+      return result;
     };
     return true;
   }
@@ -507,6 +662,8 @@
     injectCSS();
     snapshotToday();
     checkMilestones();
+    // 全局签到模块在本脚本之后加载；再对账一次，避免读到某岛旧 streak。
+    setTimeout(checkMilestones, 700);
     
     // 主页 UI 注入
     injectHomeUI();
@@ -514,6 +671,7 @@
     // 各种 patch
     setTimeout(function(){
       patchChest();
+      recoverChestExtras();
       patchAddXP();
       patchMarkAnswer();
     }, 300);
@@ -525,9 +683,12 @@
       getCurrentTheme: getCurrentTheme,
       getCompareData: getCompareData,
       MILESTONES: MILESTONES,
+      checkMilestones: checkMilestones,
+      _test:{effectMap:effectMap,ensureMilestoneTx:ensureMilestoneTx,normalizedClaimed:normalizedClaimed,
+        patchChest:patchChest,checkinReceipt:checkinReceipt,chestRarity:chestRarity,settleChestReceipt:settleChestReceipt,recoverChestExtras:recoverChestExtras}
     };
     
-    console.log('%c[HansenAddiction]%c v142ao 加载: 战力分 + 里程碑 + 每周主题 + 对比自己 + 宝箱稀有度',
+    console.log('%c[HansenAddiction]%c v942 加载: 战力分 + 可恢复里程碑 + 每周主题 + 对比自己 + 宝箱稀有度',
                 'color:#ec4899;font-weight:bold', 'color:#94a3b8');
   }
   

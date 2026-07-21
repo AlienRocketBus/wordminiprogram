@@ -1,0 +1,219 @@
+name: Jarvis verify and immutable three-file release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: jarvis-${{ github.workflow }}-${{ github.ref }}
+  # Do not interrupt an upload and strand a half-created release/tag.
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      version: ${{ steps.release_meta.outputs.version }}
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the exact revision and all release tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Require a new immutable VERSION
+        id: release_meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          [[ "$version" =~ ^[0-9]+$ ]]
+          mapfile -t versions < <(git tag --list 'v[0-9]*' | sed -nE 's/^v([0-9]+)$/\1/p' | sort -n)
+          latest=0
+          if (( ${#versions[@]} > 0 )); then latest="${versions[${#versions[@]}-1]}"; fi
+          if git rev-parse --verify --quiet "refs/tags/v${version}" >/dev/null; then
+            echo "Immutable tag v${version} already exists; increment VERSION." >&2
+            exit 1
+          fi
+          if (( version <= latest )); then
+            echo "VERSION v${version} must be greater than latest immutable release v${latest}." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned audit dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-audit.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Syntax and versioned regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile ./*.py
+          for file in ./*.js; do node --check "$file"; done
+          python -m http.server 8941 --bind 127.0.0.1 >/tmp/hansen-8941.log 2>&1 &
+          server_8941=$!
+          python -m http.server 8946 --bind 127.0.0.1 >/tmp/hansen-8946.log 2>&1 &
+          server_8946=$!
+          trap 'kill "$server_8941" "$server_8946" 2>/dev/null || true' EXIT
+          shopt -s nullglob
+          node_tests=(./test_*v*.mjs)
+          python_tests=(./test_*v942.py)
+          if (( ${#node_tests[@]} == 0 )); then
+            echo "No versioned Node regression tests found" >&2
+            exit 1
+          fi
+          for test_file in "${node_tests[@]}"; do node "$test_file"; done
+          for test_file in "${python_tests[@]}"; do python "$test_file"; done
+
+      - name: Static, economy, and fail-closed Jarvis guards
+        run: |
+          python economy_guard.py
+          python check_resources.py
+          python hansen_nav_guard.py
+          python jarvis.py --deep
+          # Jarvis reports are diagnostics, not release source mutations.
+          git restore -- evolution_dashboard.html hansen_evolve_kb.json hansen_evolve_backlog.json
+          rm -f hansen_inspector_report.md
+
+      - name: Browser regression wall
+        run: |
+          python fx_guard.py
+          python light_guard.py
+          python perf_guard.py
+          python img_guard.py
+          python font_guard.py
+          python e2e_guard.py
+          python impact_guard.py
+          python pet_guard.py
+          python sb_guard.py
+          python release_guard.py
+
+      - name: Build twice and prove reproducible release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          python package_release.py "$version" --out release-assets
+          python package_release.py "$version" --out release-assets-repro
+          for dir in release-assets release-assets-repro; do
+            test "$(find "$dir" -maxdepth 1 -type f | wc -l)" -eq 3
+            test -s "$dir/README.md"
+            mapfile -t zip_files < <(find "$dir" -maxdepth 1 -type f -name '*.zip' -print)
+            test "${#zip_files[@]}" -eq 2
+            for archive in "${zip_files[@]}"; do
+              python -m zipfile -t "$archive"
+              unzip -p "$archive" SHA256SUMS >/dev/null
+            done
+          done
+          for name in "单词大冒险_v${version}_可直接部署.zip" "单词大冒险_v${version}_含贾维斯完整源码.zip"; do
+            test "$(sha256sum "release-assets/$name" | cut -d' ' -f1)" = \
+                 "$(sha256sum "release-assets-repro/$name" | cut -d' ' -f1)"
+          done
+
+      - name: Preserve verified release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordminiprogram-v${{ steps.release_meta.outputs.version }}-three-files
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 90
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out release metadata
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download the exact verified assets
+        uses: actions/download-artifact@v4
+        with:
+          name: wordminiprogram-v${{ needs.verify.outputs.version }}-three-files
+          path: release-assets
+
+      - name: Publish a new release without mutating history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          tag="v${version}"
+          existing_release="$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq ".[] | select(.tag_name == \"${tag}\") | .id" | head -n1)"
+          if git rev-parse --verify --quiet "refs/tags/${tag}" >/dev/null || \
+             [[ -n "$existing_release" ]]; then
+            echo "Refusing to rewrite immutable release ${tag}; increment VERSION." >&2
+            exit 1
+          fi
+          assets=(release-assets/*.zip release-assets/README.md)
+          test "${#assets[@]}" -eq 3
+          notes="v${version} passed fail-closed Jarvis, economy, security, packaging, and browser regression walls. Assets: deploy ZIP, complete Jarvis source ZIP, and README.md."
+
+          release_id=""
+          cleanup_draft() {
+            if [[ -z "$release_id" ]]; then
+              release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+                --jq ".[] | select(.tag_name == \"${tag}\" and .draft == true) | .id" | head -n1 || true)"
+            fi
+            if [[ -n "$release_id" ]]; then
+              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/${release_id}" >/dev/null 2>&1 || true
+            fi
+          }
+          trap cleanup_draft ERR INT TERM
+          gh release create "$tag" "${assets[@]}" \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "单词大冒险 v${version}" \
+            --notes "$notes"
+          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq ".[] | select(.tag_name == \"${tag}\" and .draft == true) | .id" | head -n1)"
+          test -n "$release_id"
+
+          expected_assets="$(printf '%s\n' \
+            "README.md" \
+            "单词大冒险_v${version}_可直接部署.zip" \
+            "单词大冒险_v${version}_含贾维斯完整源码.zip" | sort)"
+          actual_assets="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '.assets[].name' | sort)"
+          test "$actual_assets" = "$expected_assets"
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '.assets | length')" -eq 3
+
+          mkdir uploaded-assets
+          while IFS=$'\t' read -r asset_id asset_name; do
+            gh api -H 'Accept: application/octet-stream' \
+              "repos/${GITHUB_REPOSITORY}/releases/assets/${asset_id}" > "uploaded-assets/${asset_name}"
+          done < <(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
+            --jq '.assets[] | [.id, .name] | @tsv')
+          for asset in "${assets[@]}"; do
+            name="${asset##*/}"
+            test "$(sha256sum "$asset" | cut -d' ' -f1)" = \
+                 "$(sha256sum "uploaded-assets/$name" | cut -d' ' -f1)"
+          done
+
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${release_id}" -F draft=false >/dev/null
+          trap - ERR INT TERM
+          tag_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${tag}" --jq '.object.sha')"
+          test "$tag_sha" = "$GITHUB_SHA"

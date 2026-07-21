@@ -19,7 +19,7 @@
  *      ★特别标出【同一个元素上两条动画都在动 transform】—— 后声明的会把前面的整个覆盖掉(飞行装饰就是这么废的)
  *   ③ 字体 → 真的画出来的字: 每个字体元素实际渲染了哪些字符
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
 
 const PORT = process.argv[2] || '8877';
@@ -39,7 +39,7 @@ function addAsset(src, rec) {
 }
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
 
   for (const PAGE of ['index.html', 'island_land1.html', 'island_season.html']) {
     const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

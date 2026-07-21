@@ -33,15 +33,84 @@
     });
   }
 
+  const MAX_WRONG_COUNT = 1000000;
+  const MAX_SMART_WEIGHT = 20;
+  const MAX_VOCAB_WORDS = 2000;
+  function safeWrongCount(value){
+    return typeof value === 'number' && Number.isInteger(value) &&
+      value >= 1 && value <= MAX_WRONG_COUNT ? value : 0;
+  }
+  function safeWrongWeight(value){
+    const count = safeWrongCount(value);
+    return count ? Math.min(MAX_SMART_WEIGHT, count * 2) : 0;
+  }
+  function safeText(value, maxLength){
+    if(typeof value !== 'string') return '';
+    return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').slice(0, maxLength);
+  }
+  function safeEmoji(value){
+    if(typeof value !== 'string' || !value || value.length > 32 || /[<>&]/.test(value)) return '📘';
+    return safeText(value, 32) || '📘';
+  }
+  function normalizeWord(value){
+    if(!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const en = safeText(value.en, 96).trim();
+    if(!en) return null;
+    return {
+      en,
+      cn: safeText(value.cn, 192),
+      pn: safeText(value.pn, 128),
+      ex: safeText(value.ex, 512),
+      exCn: safeText(value.exCn, 512),
+      emoji: safeEmoji(value.emoji),
+    };
+  }
+  function canonicalWrongIndex(key, vocabLength){
+    if(typeof key !== 'string' || !/^(?:0|[1-9]\d*)$/.test(key)) return -1;
+    const index = Number(key);
+    return Number.isSafeInteger(index) && index >= 0 && index < vocabLength ? index : -1;
+  }
+  function normalizeVocab(value, preserveIndexes){
+    if(!Array.isArray(value)) return [];
+    const length = Math.min(value.length, MAX_VOCAB_WORDS);
+    const result = [];
+    for(let index = 0; index < length; index++){
+      const word = normalizeWord(value[index]);
+      if(preserveIndexes) result[index] = word;
+      else if(word) result.push(word);
+    }
+    return result;
+  }
+  function normalizeStoredWrongs(wrongs, rawVocab){
+    const vocab = normalizeVocab(rawVocab, true);
+    if(!wrongs || typeof wrongs !== 'object' || Array.isArray(wrongs)) return [];
+    const result = [];
+    for(let index = 0; index < vocab.length; index++){
+      const key = String(index);
+      if(!Object.prototype.hasOwnProperty.call(wrongs, key)) continue;
+      const count = safeWrongCount(wrongs[key]);
+      if(!count || !vocab[index]) continue;
+      result.push({idx:index, count, weight:safeWrongWeight(count), word:vocab[index]});
+    }
+    return result;
+  }
+  function normalizeContextIndex(value, vocabLength){
+    if(typeof value === 'string') return canonicalWrongIndex(value, vocabLength);
+    return Number.isSafeInteger(value) && value >= 0 && value < vocabLength ? value : -1;
+  }
+  function safeColor(value){
+    return typeof value === 'string' && /^#[0-9a-f]{3,8}$/i.test(value) ? value : '#fbbf24';
+  }
+
   // v142af: 替代 alert 的漂亮提示
   function showToast(text, color){
-    color = color || '#fbbf24';
+    color = safeColor(color);
     const old = document.getElementById('hr_toast');
     if(old) old.remove();
     const t = document.createElement('div');
     t.id = 'hr_toast';
     t.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:30px;cursor:pointer';
-    t.innerHTML = '<div style="background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid ' + color + ';border-radius:18px;padding:30px 36px;text-align:center;color:#fff;font-size:18px;line-height:1.6;max-width:300px"><div style="font-size:48px;margin-bottom:10px">💡</div><div style="color:' + color + ';font-weight:800">' + text + '</div></div>';
+    t.innerHTML = '<div style="background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid ' + color + ';border-radius:18px;padding:30px 36px;text-align:center;color:#fff;font-size:18px;line-height:1.6;max-width:300px"><div style="font-size:48px;margin-bottom:10px">💡</div><div style="color:' + color + ';font-weight:800">' + esc(safeText(text, 240)) + '</div></div>';
     t.onclick = () => t.remove();
     document.body.appendChild(t);
     setTimeout(() => { if(t.parentNode) t.remove(); }, 2500);
@@ -49,7 +118,9 @@
 
   function safeJSON(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
   function getCurrentIsland(){
-    const m = location.pathname.match(/island_([a-z]+)\.html/i);
+    // v946 HF1: Land1-Land8 contain digits.  The old letters-only matcher
+    // returned null there and aborted the entire review module at boot.
+    const m = location.pathname.match(/island_([a-z0-9]+)\.html/i);
     return m ? m[1] : null;
   }
   const islandKey = getCurrentIsland();
@@ -61,7 +132,7 @@
     Object.keys(localStorage).forEach(k => {
       if(k.startsWith('wordIsland')){
         const d = safeJSON(k);
-        if(d && d.wrongs) total += Object.keys(d.wrongs).length;
+        total += normalizeStoredWrongs(d && d.wrongs, safeJSON('hansen_vocab_' + k)).length;
       }
     });
     return total;
@@ -73,34 +144,94 @@
     if(!window.STORAGE_KEY) return [];
     const data = safeJSON(window.STORAGE_KEY);
     if(!data || !data.wrongs) return [];
-    return Object.keys(data.wrongs).map(idx => ({
-      idx: Number(idx),
-      count: data.wrongs[idx],
-      word: (window.allW || [])[Number(idx)]
-    })).filter(x => x.word);
+    return normalizeStoredWrongs(data.wrongs, window.allW);
   }
   
   // 获取当前 context 下的 wrongs 列表 (优先用外部传入 context)
   function getContextWrongs(){
-    if(window._huReviewContext && window._huReviewContext.wrongsList){
-      return window._huReviewContext.wrongsList;
+    const context = window._huReviewContext;
+    if(context && Array.isArray(context.wrongsList)){
+      const rawVocab = Array.isArray(context.vocabList) ? context.vocabList.slice(0, MAX_VOCAB_WORDS) : [];
+      const result = [];
+      context.wrongsList.slice(0, MAX_VOCAB_WORDS).forEach(entry => {
+        if(!entry || typeof entry !== 'object' || Array.isArray(entry)) return;
+        const index = normalizeContextIndex(entry.idx, rawVocab.length);
+        const count = safeWrongCount(entry.count);
+        const word = normalizeWord(entry.word) || (index >= 0 ? normalizeWord(rawVocab[index]) : null);
+        if(index < 0 || !count || !word) return;
+        result.push({idx:index, count, weight:safeWrongWeight(count), word});
+      });
+      return result;
     }
     return getCurrentIslandWrongs();
   }
   // 获取当前 context 下的 vocab (全部单词)
   function getContextVocab(){
-    if(window._huReviewContext && window._huReviewContext.vocabList){
-      return window._huReviewContext.vocabList;
+    if(window._huReviewContext && Array.isArray(window._huReviewContext.vocabList)){
+      return normalizeVocab(window._huReviewContext.vocabList, false);
     }
-    return window.allW || [];
+    return normalizeVocab(window.allW, false);
   }
   // 获取标题前缀
   function getContextTitle(){
     if(window._huReviewContext && window._huReviewContext.title){
-      return window._huReviewContext.title;
+      return safeText(window._huReviewContext.title, 80);
     }
     return null;
   }
+
+  // Normalize the shared context in place before any child module reads it.
+  // hansen_spell_practice consumes this object directly, so returning a safe
+  // copy only from getContextWrongs() would leave its emoji HTML sink exposed.
+  function sanitizeReviewContext(){
+    const context = window._huReviewContext;
+    if(!context || typeof context !== 'object' || Array.isArray(context)) return;
+    const rawVocab = Array.isArray(context.vocabList) ? context.vocabList.slice(0, MAX_VOCAB_WORDS) : [];
+    const vocabList = [], indexMap = new Map();
+    rawVocab.forEach((value, oldIndex) => {
+      const word = normalizeWord(value);
+      if(!word) return;
+      indexMap.set(oldIndex, vocabList.length);
+      vocabList.push(word);
+    });
+    const wrongsList = [];
+    if(Array.isArray(context.wrongsList)){
+      context.wrongsList.slice(0, MAX_VOCAB_WORDS).forEach(entry => {
+        if(!entry || typeof entry !== 'object' || Array.isArray(entry)) return;
+        const oldIndex = normalizeContextIndex(entry.idx, rawVocab.length);
+        const index = indexMap.get(oldIndex);
+        const count = safeWrongCount(entry.count);
+        const word = normalizeWord(entry.word) || (index !== undefined ? vocabList[index] : null);
+        if(index === undefined || !count || !word) return;
+        wrongsList.push({idx:index, count, weight:safeWrongWeight(count), word});
+      });
+    }
+    window._huReviewContext = {
+      title: safeText(context.title, 80),
+      vocabList,
+      wrongsList,
+    };
+  }
+
+  // Generated island pages historically multiplied a wrong count without a
+  // ceiling.  Replace that global pool builder at runtime so corrupted state
+  // can never allocate an unbounded array; each valid wrong word contributes
+  // at most twenty weighted slots.
+  function installSmartPoolGuard(){
+    if(typeof window.getSmartPool !== 'function') return;
+    window.getSmartPool = function(){
+      const vocab = Array.isArray(window.allW) ? window.allW.slice(0, MAX_VOCAB_WORDS) : [];
+      const wrongs = window.S && window.S.wrongs;
+      const wrongPool = [];
+      normalizeStoredWrongs(wrongs, vocab).forEach(entry => {
+        for(let slot = 0; slot < entry.weight; slot++) wrongPool.push(entry.idx);
+      });
+      const normalPool = [];
+      for(let index = 0; index < vocab.length; index++) if(normalizeWord(vocab[index])) normalPool.push(index);
+      return wrongPool.concat(normalPool);
+    };
+  }
+  installSmartPoolGuard();
 
   // ─────────────────────────────────────────────
   // 拦截 util-card 的"复习" → 弹复习中心
@@ -126,10 +257,18 @@
   // 确保 S.srs 存在, 并把"还没纳入计划的错词"加入(盒0, 今天到期)
   function _ensureSrs(){
     if(!window.S) return null;
+    // HF2: Land1~8 和 Season 是同一批 canonical 词的别名入口。先从权威账本
+    // 回填当前切片，防止两个入口各自维护 due/box，也防止已清错词继续到期。
+    try{if(window.HansenCanonical&&typeof HansenCanonical.syncCurrent==='function')HansenCanonical.syncCurrent();}catch(e){}
     if(!window.S.srs || typeof window.S.srs !== 'object') window.S.srs = {};
     var srs = window.S.srs, wr = window.S.wrongs || {}, changed = false, t = _todayYMD();
-    Object.keys(wr).forEach(function(idx){
-      if(wr[idx] > 0 && !srs[idx]){
+    Object.keys(srs).forEach(function(idx){
+      var i=canonicalWrongIndex(idx,Array.isArray(window.allW)?window.allW.length:0);
+      if(i<0||safeWrongCount(wr[i])===0){delete srs[idx];changed=true;}
+    });
+    normalizeStoredWrongs(wr, window.allW).forEach(function(entry){
+      var idx = String(entry.idx);
+      if(!srs[idx]){
         srs[idx] = { box: 0, due: t, last: '' };
         changed = true;
       }
@@ -142,11 +281,14 @@
   function _dueList(){
     var srs = _ensureSrs();
     if(!srs) return [];
-    var t = _todayYMD(), vocab = window.allW || [], wr = (window.S && window.S.wrongs) || {}, out = [];
+    var t = _todayYMD(), vocab = normalizeVocab(window.allW, true), wr = (window.S && window.S.wrongs) || {}, out = [];
     Object.keys(srs).forEach(function(idx){
-      var e = srs[idx], i = Number(idx);
-      if(e && e.box < SRS_GRAD && e.due <= t && vocab[i]){
-        out.push({ idx: i, word: vocab[i], box: e.box, wrong: wr[i] || 0 });
+      var i = canonicalWrongIndex(idx, vocab.length), e = srs[idx];
+      var box = e && typeof e.box === 'number' && Number.isInteger(e.box) ? e.box : -1;
+      var due = e && typeof e.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.due) ? e.due : '';
+      var wrong=safeWrongCount(wr[i]);
+      if(i >= 0 && wrong>0 && box >= 0 && box < SRS_GRAD && due && due <= t && vocab[i]){
+        out.push({ idx: i, word: vocab[i], box: box, wrong: wrong });
       }
     });
     out.sort(function(a, b){ return (b.wrong - a.wrong) || (a.box - b.box); });
@@ -173,6 +315,12 @@
       e.box = 0; e.due = _addDaysYMD(SRS_GAP[0]); e.last = _todayYMD();
       srs[idx] = e;
     }
+    try{
+      if(window.HansenCanonical){
+        if(graduated&&typeof HansenCanonical.absorbAnswer==='function')HansenCanonical.absorbAnswer(idx);
+        if(typeof HansenCanonical.setCurrentSrs==='function')HansenCanonical.setCurrentSrs(idx,graduated?null:e);
+      }
+    }catch(_canonicalError){}
     if(typeof save === 'function'){ try { save(); } catch(e){} }
     return graduated;
   }
@@ -255,7 +403,7 @@
       if(!revealed){
         card.className = 'ht_card';
         card.innerHTML =
-          '<div class="ht_emoji">' + (w.emoji || '📝') + '</div>' +
+          '<div class="ht_emoji">' + safeEmoji(w.emoji) + '</div>' +
           '<div class="ht_en">' + esc(w.en) + '</div>' +
           (w.pn ? '<div class="ht_pn">' + esc(w.pn) + '</div>' : '') +
           '<div class="ht_box">📦 ' + (BOXNAME[it.box] || '复习') + '</div>' +
@@ -271,7 +419,7 @@
       } else {
         card.className = 'ht_card rev';
         card.innerHTML =
-          '<div class="ht_emoji">' + (w.emoji || '📝') + '</div>' +
+          '<div class="ht_emoji">' + safeEmoji(w.emoji) + '</div>' +
           '<div class="ht_en" style="font-size:30px">' + esc(w.en) + '</div>' +
           '<div class="ht_cn">' + esc(w.cn) + '</div>' +
           (w.ex ? '<div class="ht_ex">"' + esc(w.ex) + '"</div>' : '') +
@@ -474,12 +622,12 @@
       
       <div class="hr_header">
         <button class="hr_back" onclick="window.HansenReview._close()">←</button>
-        <div class="hr_title">🎯 ${customTitle || '复习中心'}</div>
+        <div class="hr_title">🎯 ${esc(customTitle || '复习中心')}</div>
       </div>
       <div class="hr_sub">温柔记住每一个不熟的单词</div>
       
       <div class="hr_stat_row">
-        <div class="hr_stat"><div class="num">${learnedCount}</div><div class="lbl">已掌握</div></div>
+        <div class="hr_stat"><div class="num">${learnedCount}</div><div class="lbl">已认识</div></div>
         <div class="hr_stat"><div class="num">${wrongCount}</div><div class="lbl">待复习</div></div>
         <div class="hr_stat"><div class="num">${allCount}</div><div class="lbl">本岛单词</div></div>
       </div>
@@ -514,7 +662,7 @@
         <span class="hr_icon">📚</span>
         <span class="hr_badge">${allCount} 个</span>
         <div class="hr_name">浏览全部</div>
-        <div class="hr_desc">查看所有单词卡 · 点击学习/标记掌握</div>
+        <div class="hr_desc">查看所有单词卡 · 点击查看认识、宠物掌握与知识结晶状态</div>
       </div>
       
       <div class="hr_card" style="--c1:#a16207;--c2:#854d0e" onclick="window.HansenReview._openWrongOnly()">
@@ -539,6 +687,7 @@
   window.HansenReview = {
     _open: function(){
       _beep();
+      sanitizeReviewContext();
       openReviewCenter();
     },
     // v142o: 关 overlay 后回复习中心
@@ -572,6 +721,7 @@
     // v243: 看汉语拼词 (替代原"单词雨"入口)
     _openSpellByCn: function(){
       _beep();
+      sanitizeReviewContext();
       window._huFromReview = true;
       window._huReviewKeepContext = true;
       // 🔴v791 防御·根治听音拼词/看汉意拼"只出读音卡住进不去": 强制复位复习中心z。
@@ -585,6 +735,7 @@
     // v243: 听音拼词 (替代原"耳朵听"入口)
     _openSpellByListen: function(){
       _beep();
+      sanitizeReviewContext();
       window._huFromReview = true;
       window._huReviewKeepContext = true;
       // 🔴v791 防御·根治听音拼词"只出读音卡住进不去"(详见 _openSpellByCn): 强制复位复习中心z·拼写页永远在最上。
@@ -607,6 +758,7 @@
     },
     _openFlashcard: function(){
       _beep();
+      sanitizeReviewContext();
       window._huFromReview = true;
       window._huReviewKeepContext = true;
       var _c=document.getElementById('hr_center'); if(_c) _c.style.zIndex='';  // 🔴v791 防御: 复位复习中心z(防上次关闭rAF未复位残留99998·会盖住本子界面z9999=点了打不开/卡住)
@@ -616,6 +768,7 @@
     // 🔴v796 已删除"听音循环"功能(_openListenLoop + openListenLoop + hr_listen界面)——不可达(无入口卡片onclick)·Hansen确认无用·彻底删除。
     _openExplore: function(){
       _beep();
+      sanitizeReviewContext();
       window._huFromReview = true;
       window._huReviewKeepContext = true;
       var _c=document.getElementById('hr_center'); if(_c) _c.style.zIndex='';  // 🔴v791 防御: 复位复习中心z(防残留99998盖住hr_flashcard=卡住)
@@ -649,21 +802,31 @@
     _dueCount: function(){ try { return _dueList().length; } catch(e){ return 0; } },
     _openWrongOnly: function(){
       _beep();
+      sanitizeReviewContext();
       window._huFromReview = true;
       window._huReviewKeepContext = true;
       var _c=document.getElementById('hr_center'); if(_c) _c.style.zIndex='';  // 🔴v791 防御: 复位复习中心z(防残留99998盖住hr_wrongbook=卡住)
       // 🔴v791 治本·零遮罩: 错题本子界面(hr_wrongbook z9999)盖在复习中心之上·复习中心留底下盖主页·零露出·无遮罩。关闭由_closeAndBack在其上重建复习中心再撤错题本。
       openWrongBook();
     },
+    _security: {
+      safeWrongCount,
+      safeWrongWeight,
+      safeEmoji,
+      normalizeWord,
+      normalizeStoredWrongs,
+    },
   };
 
   // ─────────────────────────────────────────────
   // 闪卡复习
   // ─────────────────────────────────────────────
-  function openFlashcard(){
+  function openFlashcard(directPool){
     const wrongs = getContextWrongs();
     let pool;
-    if(wrongs.length > 0){
+    if(Array.isArray(directPool)){
+      pool = normalizeVocab(directPool, false);
+    } else if(wrongs.length > 0){
       pool = wrongs.map(w => w.word);
     } else {
       // 没错题, 用前 20 个单词
@@ -763,7 +926,7 @@
         // 正面: 只显示英文 + emoji
         card.classList.remove('back');
         card.innerHTML = `
-          <div class="hr_card_emoji">${w.emoji || '📝'}</div>
+          <div class="hr_card_emoji">${safeEmoji(w.emoji)}</div>
           <div class="hr_card_en">${esc(w.en)}</div>
           ${w.pn ? `<div class="hr_card_pn">${esc(w.pn)}</div>` : ''}
           <div class="hr_card_tap_hint">👆 点卡片看答案</div>
@@ -772,7 +935,7 @@
         // 反面: 显示中文 + 例句
         card.classList.add('back');
         card.innerHTML = `
-          <div class="hr_card_emoji">${w.emoji || '📝'}</div>
+          <div class="hr_card_emoji">${safeEmoji(w.emoji)}</div>
           <div class="hr_card_cn">${esc(w.cn)}</div>
           ${w.ex ? `<div class="hr_card_ex">"${esc(w.ex)}"</div>` : ''}
           ${w.exCn ? `<div class="hr_card_excn">${esc(w.exCn)}</div>` : ''}
@@ -816,14 +979,7 @@
   function openBrowseAll(){
     const pool = getContextVocab();
     if(pool.length === 0){ showToast('暂无单词'); return; }
-    // 用闪卡形式浏览 - 临时替换 wrongsList 为 vocab
-    const oldCtx = window._huReviewContext;
-    window._huReviewContext = Object.assign({}, oldCtx, { 
-      wrongsList: pool.map(w => ({ idx: 0, count: 0, word: w })),
-    });
-    openFlashcard();
-    // openFlashcard 异步, 但 pool 已读取, 安全恢复
-    setTimeout(() => { window._huReviewContext = oldCtx; }, 100);
+    openFlashcard(pool);
   }
   
   // ─────────────────────────────────────────────
@@ -851,12 +1007,12 @@
     overlay.id = 'hr_wrongbook';
     let listHtml = wrongs.map(w => `
       <div class="hr_wb_item" data-en="${esc(w.word.en || '')}">
-        <span class="hr_wb_emoji">${w.word.emoji || '📝'}</span>
+        <span class="hr_wb_emoji">${safeEmoji(w.word.emoji)}</span>
         <div class="hr_wb_main">
           <div class="hr_wb_en">${esc(w.word.en)}</div>
           <div class="hr_wb_cn">${esc(w.word.cn) || ''}</div>
         </div>
-        <div class="hr_wb_count">错 ${w.count} 次</div>
+        <div class="hr_wb_count">错 ${safeWrongCount(w.count)} 次</div>
       </div>
     `).join('');
     

@@ -11,7 +11,7 @@
  *
  * 输出 JSON: {island, content, interactive, icons, criticalKB, requests}
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8891';
 const ISLANDS = (process.argv[3] || 'island_land3.html,island_season.html,island_animal.html').split(',');
@@ -19,7 +19,7 @@ const ISLANDS = (process.argv[3] || 'island_land3.html,island_season.html,island
 (async () => {
   const out = [];
   const b = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+    executablePath: process.env.HANSEN_CHROMIUM_PATH,
     args: ['--no-sandbox']
   });
   for (const ISL of ISLANDS) {

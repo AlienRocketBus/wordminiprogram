@@ -1,4 +1,4 @@
-// hansen_theme_shop.js v1 — 主题商店 (零侵入, 金币经济第一个出口)
+// hansen_theme_shop.js v942 — 主题商店（严格购买事务）
 // ============================================================================
 // 作用:
 //   把 6 个主题分成"免费"和"付费":
@@ -47,46 +47,125 @@
 
   var UNLOCK_KEY = 'hansen_unlocked_themes';
   var WALLET_KEY = 'hansen_wallet_coins';
+  var PENDING_KEY = 'hansen_theme_purchase_pending_v942';
+  /* 名称含 transaction，完整备份会把它当运行期证明排除；不能靠导入 spent/pending 免费交付。 */
+  var PROOF_KEY = 'hansen_theme_purchase_transaction_v942';
 
   // ---- 全局金币钱包 ----
-  function getWallet(){
+  function walletState(){
     try {
-      var v = parseInt(localStorage.getItem(WALLET_KEY), 10);
-      return (isFinite(v) && v >= 0) ? v : 0;
-    } catch(e){ return 0; }
+      var raw=localStorage.getItem(WALLET_KEY),v=raw===null?0:Number(raw);
+      if(!isFinite(v)||Math.floor(v)!==v||v<0)return {ok:false,value:NaN};
+      var api=window.HansenCoins&&typeof HansenCoins.get==='function'?Number(HansenCoins.get()):
+        (window.HansenWallet&&typeof HansenWallet.get==='function'&&HansenWallet.get!==getWallet?Number(HansenWallet.get()):v);
+      return isFinite(api)&&api===v?{ok:true,value:v}:{ok:false,value:NaN};
+    } catch(e){ return {ok:false,value:NaN}; }
   }
+  function getWallet(){var r=walletState();return r.ok?r.value:NaN;}
   function setWallet(n){
-    try { localStorage.setItem(WALLET_KEY, String(Math.max(0, Math.floor(n)))); } catch(e){}
+    try { var v=String(Math.max(0,Math.floor(n)));localStorage.setItem(WALLET_KEY,v);return localStorage.getItem(WALLET_KEY)===v; } catch(e){return false;}
   }
-  // 对外暴露, 供后续步骤(打卡/赚币)往钱包加币
-  window.HansenWallet = {
-    get: getWallet,
-    add: function(n){ n=Number(n); if(!isFinite(n))return getWallet(); var w=getWallet()+Math.floor(n); setWallet(w); return w; },
-    spend: function(n){ n=Number(n); if(!isFinite(n)||n<0)return false; var w=getWallet(); if(w<n)return false; setWallet(w-n); return true; }
-  };
+  function directSpend(n){n=Math.floor(Number(n));if(!isFinite(n)||n<0)return false;var w=getWallet();return w>=n&&setWallet(w-n);}
+  function spendCoins(n){
+    try{
+      if(window.HansenCoins&&typeof window.HansenCoins.spend==='function')return window.HansenCoins.spend(n)===true;
+      if(window.HansenWallet&&typeof window.HansenWallet.spend==='function')return window.HansenWallet.spend(n)===true;
+    }catch(e){return false;}
+    return directSpend(n);
+  }
+  /* 首页没有 coin_wallet 时才安装严格兼容适配器；已有 HansenWallet 永不覆盖。 */
+  if(!window.HansenWallet){
+    try{Object.defineProperty(window,'HansenWallet',{configurable:true,value:{
+      get:getWallet,
+      add:function(n){n=Math.floor(Number(n));if(!isFinite(n)||n<=0)return getWallet();var before=getWallet(),target=before+n;return setWallet(target)?target:before;},
+      spend:directSpend
+    }});}catch(e){}
+  }
 
   // ---- 已解锁主题 ----
-  function getUnlocked(){
+  function unlockedState(){
     var base = FREE_THEMES.slice();
     try {
       var raw = localStorage.getItem(UNLOCK_KEY);
-      if(raw){ var arr = JSON.parse(raw); if(Array.isArray(arr)) arr.forEach(function(k){ if(base.indexOf(k)<0) base.push(k); }); }
-    } catch(e){}
-    return base;
+      if(raw!==null){ var arr = JSON.parse(raw);if(!Array.isArray(arr)||arr.some(function(k){return typeof k!=='string';}))return {ok:false,value:base};arr.forEach(function(k){ if(Object.prototype.hasOwnProperty.call(THEME_PRICE,k)&&base.indexOf(k)<0) base.push(k); }); }
+      return {ok:true,value:base};
+    } catch(e){return {ok:false,value:base};}
   }
+  function sanitizeUnlockedState(){
+    try{var raw=localStorage.getItem(UNLOCK_KEY);if(raw===null)return true;var state=unlockedState();if(!state.ok)return false;var paid=state.value.filter(function(k){return Object.prototype.hasOwnProperty.call(THEME_PRICE,k);}).sort();var next=JSON.stringify(paid);if(raw!==next)localStorage.setItem(UNLOCK_KEY,next);return localStorage.getItem(UNLOCK_KEY)===next;}catch(e){return false;}
+  }
+  function getUnlocked(){return unlockedState().value;}
   function isUnlocked(key){
     if(FREE_THEMES.indexOf(key) >= 0) return true;       // 免费主题永远解锁
-    if(!(key in THEME_PRICE)) return true;               // 未知主题不拦(安全)
-    return getUnlocked().indexOf(key) >= 0;
+    if(!Object.prototype.hasOwnProperty.call(THEME_PRICE,key)) return true; /* 非本商店主题交给其所属模块。 */
+    var r=unlockedState();return r.ok&&r.value.indexOf(key) >= 0;
   }
   function unlock(key){
     try {
-      var arr = [];
-      var raw = localStorage.getItem(UNLOCK_KEY);
-      if(raw){ var p = JSON.parse(raw); if(Array.isArray(p)) arr = p; }
+      if(!Object.prototype.hasOwnProperty.call(THEME_PRICE,key))return false;
+      var state=unlockedState();if(!state.ok)return false;
+      var arr = state.value.filter(function(k){return Object.prototype.hasOwnProperty.call(THEME_PRICE,k);});
       if(arr.indexOf(key) < 0) arr.push(key);
-      localStorage.setItem(UNLOCK_KEY, JSON.stringify(arr));
-    } catch(e){}
+      arr.sort();var next=JSON.stringify(arr);localStorage.setItem(UNLOCK_KEY,next);
+      return localStorage.getItem(UNLOCK_KEY)===next&&isUnlocked(key);
+    } catch(e){return false;}
+  }
+
+  function readPending(){
+    try{
+      var raw=localStorage.getItem(PENDING_KEY);if(raw===null)return {ok:true,value:null};var p=JSON.parse(raw);if(!p||p.version!==942||typeof p.theme!=='string')return {ok:false,value:null};
+      var price=THEME_PRICE[p.theme],before=Math.floor(Number(p.before));
+      if(!price||p.price!==price||!isFinite(before)||before<price||p.target!==before-price||(p.stage!=='prepared'&&p.stage!=='spent')||!/^theme-[a-z0-9-]{8,160}$/i.test(String(p.txid||'')))return {ok:false,value:null};
+      return {ok:true,value:{version:942,theme:p.theme,price:price,before:before,target:before-price,stage:p.stage,txid:String(p.txid)}};
+    }catch(e){return {ok:false,value:null};}
+  }
+  function writePending(p){try{var raw=JSON.stringify(p);localStorage.setItem(PENDING_KEY,raw);return localStorage.getItem(PENDING_KEY)===raw;}catch(e){return false;}}
+  function clearPending(){try{localStorage.removeItem(PENDING_KEY);return localStorage.getItem(PENDING_KEY)===null;}catch(e){return false;}}
+  function markSpent(p){p.stage='spent';return writePending(p);}
+  function proofFor(p,state){return {version:942,txid:p.txid,theme:p.theme,price:p.price,before:p.before,target:p.target,state:state};}
+  function readProof(p){
+    try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return {ok:true,value:null};var x=JSON.parse(raw);
+      if(!x||x.version!==942||x.txid!==p.txid||x.theme!==p.theme||x.price!==p.price||x.before!==p.before||x.target!==p.target||(x.state!=='prepared'&&x.state!=='paid'))return {ok:false,value:null};
+      return {ok:true,value:x};
+    }catch(e){return {ok:false,value:null};}
+  }
+  function writeProof(p,state){try{var raw=JSON.stringify(proofFor(p,state));localStorage.setItem(PROOF_KEY,raw);return localStorage.getItem(PROOF_KEY)===raw;}catch(e){return false;}}
+  function confirmProof(p,balance){var r=readProof(p);if(!r.ok||!r.value||balance!==p.target)return false;return r.value.state==='paid'||writeProof(p,'paid');}
+  function clearProof(p){try{var r=readProof(p);if(!r.ok)return false;if(r.value===null)return true;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function cleanup(p){return clearProof(p)&&clearPending();}
+  function clearOrphanProof(){
+    try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return true;var x=JSON.parse(raw),price=x&&THEME_PRICE[x.theme],before=Number(x&&x.before);
+      if(!x||x.version!==942||!price||x.price!==price||!isFinite(before)||Math.floor(before)!==before||before<price||x.target!==before-price||(x.state!=='prepared'&&x.state!=='paid')||!/^theme-[a-z0-9-]{8,160}$/i.test(String(x.txid||'')))return false;
+      localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;
+    }catch(e){return false;}
+  }
+  function recoverPurchase(){
+    var pr=readPending();if(!pr.ok)return {status:'pending',reason:'storage'};var p=pr.value;if(!p)return {status:clearOrphanProof()?'none':'pending',reason:'proof'};
+    var us=unlockedState();if(!us.ok)return {status:'pending',theme:p.theme};
+    if(us.value.indexOf(p.theme)>=0){if(!cleanup(p))return {status:'pending',theme:p.theme};return {status:'committed',theme:p.theme};}
+    var ws=walletState();if(!ws.ok)return {status:'pending',theme:p.theme};var balance=ws.value,pf=readProof(p);if(!pf.ok)return {status:'pending',theme:p.theme};
+    if(balance===p.before){
+      if(pf.value&&pf.value.state==='paid')return {status:'pending',theme:p.theme};
+      return {status:cleanup(p)?'cancelled':'pending',theme:p.theme};
+    }
+    if(balance!==p.target||!pf.value||!confirmProof(p,balance))return {status:'pending',theme:p.theme};
+    if(!unlock(p.theme))return {status:'pending',theme:p.theme};
+    if(!cleanup(p))return {status:'pending',theme:p.theme};return {status:'committed',theme:p.theme};
+  }
+  function purchaseTheme(key){
+    var prior=recoverPurchase();if(prior.status==='pending')return false;
+    var us=unlockedState();if(!us.ok)return false;if(us.value.indexOf(key)>=0)return true;
+    var price=THEME_PRICE[key],ws=walletState(),before=ws.value;if(!price||!ws.ok||before<price)return false;
+    var p={version:942,txid:'theme-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),theme:key,price:price,before:before,target:before-price,stage:'prepared'};
+    if(!writePending(p))return false; /* pending 必须先于扣款。 */
+    if(!writeProof(p,'prepared')){cleanup(p);return false;}
+    spendCoins(price);var afterState=walletState();if(!afterState.ok)return false;var after=afterState.value;
+    if(after===p.before){cleanup(p);return false;}
+    if(after!==p.target)return false; /* 第三种余额保留 pending + proof，绝不清账或交付。 */
+    if(!confirmProof(p,after))return false;
+    markSpent(p); /* 写失败也可由 target 余额推断，不会二扣。 */
+    if(!unlock(key))return false;
+    return cleanup(p);
   }
 
   // ---- 简易弹窗 ----
@@ -128,9 +207,8 @@
     var buyBtn = enough ? document.getElementById('__ts_buy') : null;
     if(enough && buyBtn){
       buyBtn.addEventListener('click', function(){
-        // 扣币 + 解锁 + 立即应用
-        if(window.HansenWallet.spend(price)){
-          unlock(key);
+        // v942: pending → 严格扣币 → 回读解锁；任何中断均可重载恢复。
+        if(purchaseTheme(key)){
           close();
           // 解锁后立即切换到该主题 (调原始 pickTheme)
           if(typeof window.__origPickTheme === 'function'){
@@ -236,6 +314,13 @@
   }
 
   // ---- 轮询挂载 pickTheme (页面加载后才存在) ----
+  window.HansenThemeShopV942={
+    isUnlocked:isUnlocked,
+    purchase:purchaseTheme,
+    recover:recoverPurchase,
+    pendingKey:PENDING_KEY
+  };
+  try{sanitizeUnlockedState();recoverPurchase();}catch(e){}
   var tries = 0;
   var gridWatched = false;
   var timer = setInterval(function(){

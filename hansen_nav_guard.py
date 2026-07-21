@@ -107,7 +107,12 @@ def main():
     from playwright.sync_api import sync_playwright
     fails = []
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(viewport={'width':393,'height':820})
+        executable = (os.environ.get("HANSEN_CHROMIUM_PATH")
+                      or os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"))
+        launch_options = {"args": ["--no-sandbox"]}
+        if executable:
+            launch_options["executable_path"] = executable
+        b = p.chromium.launch(**launch_options); pg = b.new_page(viewport={'width':393,'height':820})
         for key in targets:
             try:
                 ok, msg = test_island(pg, key, base)

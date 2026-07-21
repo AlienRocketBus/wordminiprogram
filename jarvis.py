@@ -16,7 +16,9 @@
        · 工具备份同步: README《🧰核心开发工具源码备份》与七工具本体逐字比对,
          --apply-safe 自动同步修复(先备份README→重写fence→复验→失败回滚;
          v526起《自主进化引擎·完整说明书.md》嵌入源码同样 --apply-safe 自动同步);
-  ③ 汇报。
+  ③ v941 经济一致性守卫 economy_guard.py —— 金币、钻石、宠物经验与跨岛奖励
+     使用同一组不可刷、不可漏、可迁移的规则，任一不一致即拒绝发布；
+  ④ 汇报。
 
 贾维斯的「记忆」= 贾维斯_知识库.md(历次全部 bug #1–#101+ 与全部版本记录 + 对应防线 + v746 起的《贾维斯全景认知》总纲: 程序架构全景 + 全 bug 防线总览 + 持续优化原则)。
 启动时四方一致性审计会打印「全 bug 知识核验: 缺口 N 个」, N=0 即贾维斯已完整掌握所有要防的 bug。
@@ -29,8 +31,8 @@
   ③ --apply-safe 自动修【安全/可逆】类(先备份 → 改 → 重跑 check_resources 验证 → 不过自动回滚);
   ④ 风险类(改游戏逻辑/经济/UI)生成提案交人一键采纳 —— 绝不无监管乱改、保护游戏不被弄坏。
 
-可选参数(透传给引擎): --probe(崩溃压力) / --deep(深度体检, 含真机浏览器)
-                      / --ai / --apply-safe / --content / --watch
+默认即执行 --deep(含真浏览器)。可选参数: --probe / --ai / --apply-safe /
+--content / --watch。只有明确诊断时可用 --static-only；其结果不能作为发布放行结论。
 """
 import sys, os, subprocess, re
 
@@ -110,7 +112,11 @@ def _disposal(ai, apply_safe):
 
 
 def main():
-    args = sys.argv[1:]
+    raw_args = sys.argv[1:]
+    static_only = "--static-only" in raw_args
+    args = [a for a in raw_args if a != "--static-only"]
+    if not static_only and "--deep" not in args:
+        args.append("--deep")
     ai = "--ai" in args
     apply_safe = "--apply-safe" in args
 
@@ -126,11 +132,25 @@ def main():
         print("\n  ▶ 全面巡检最新版本(硬守卫 + 健康体检 + 运行时探测%s)…\n" % extra)
         rc = subprocess.run([sys.executable, engine] + args, cwd=ROOT).returncode
     elif os.path.exists(cr):
-        print("\n  ⚠️ 无引擎 hansen_evolve.py, 退而只跑出厂红线 check_resources.py …\n")
-        rc = subprocess.run([sys.executable, cr], cwd=ROOT).returncode
+        print("\n  ❌ 缺少 hansen_evolve.py；仅有静态守卫不足以形成发布结论。\n")
+        subprocess.run([sys.executable, cr], cwd=ROOT)
+        rc = 1
     else:
         print("\n  ❌ 既无引擎也无 check_resources.py, 无法巡检。")
         rc = 1
+
+    # 🔴 v941: 经济系统属于跨页面共享状态，单页看起来正常仍可能出现
+    # "这个岛发奖、另一个岛不发"或重复领取。把独立经济守卫并入 Jarvis
+    # 主路径，确保本地、CI、build 前巡检使用同一套判据。
+    economy = os.path.join(ROOT, "economy_guard.py")
+    if os.path.exists(economy):
+        print("\n  ▶ v941 经济一致性体检(金币 · 钻石 · 宠物经验 · 跨岛奖励)…\n")
+        economy_rc = subprocess.run([sys.executable, economy], cwd=ROOT).returncode
+        if economy_rc != 0:
+            rc = rc or economy_rc
+    else:
+        print("\n  ❌ 缺少 economy_guard.py，无法证明经济系统一致性。")
+        rc = rc or 1
 
     # 🔴 v877(Hansen「全面进化贾维斯」): 巡检后追加【贾维斯 2.0 超级全域体检】——
     #   8 大主动扫描器把整个代码库当陌生系统 X 光(死链/孤儿/缓存戳/重复ID/内存泄漏/危险模式/上线卫生/体积/HTML结构/JS语法),
@@ -141,11 +161,18 @@ def main():
         print("\n  ▶ 贾维斯 2.0 · 超级全域体检(8 大主动扫描器 · X 光全库)…\n")
         scan_rc = subprocess.run([sys.executable, scan], cwd=ROOT).returncode
         if scan_rc != 0:
-            rc = rc or scan_rc  # 2.0 发现致命 → 整体不放行
+            rc = rc or scan_rc  # 2.0 发现 CRIT/WARN 或报告失败 → 整体不放行
+    else:
+        print("\n  ❌ 缺少 jarvis_scan.py，主动全域扫描未执行。")
+        rc = rc or 1
 
     _hr()
-    if rc == 0:
-        print("  ✅ 贾维斯巡检完成 —— 全部硬守卫通过、无已知 bug 复发、体检通过、2.0 全域 X 光无致命。最新版本可放心打包。")
+    limited = static_only and rc == 0
+    if limited:
+        print("  ⚠️ 静态巡检无阻断项，但 --static-only 未执行浏览器断言，不能作为发布放行结论。")
+        rc = 2
+    elif rc == 0:
+        print("  ✅ 贾维斯巡检完成 —— 已执行深度浏览器断言；无 ERROR/WARN 阻断项。INFO 建议已计入报告健康分。")
     else:
         print("  ⛔ 贾维斯发现问题(见上)。已知 bug 复发会被守卫拦下; 按上面处置修好再打包。")
         print("     每修一个问题就会存入贾维斯, 以后自动防再犯。")

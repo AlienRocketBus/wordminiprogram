@@ -1,11 +1,11 @@
 /* v932: 全岛扫描 —— 找出所有【404 / 空白 / 没画出来】的图片 */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
 
 const ISLANDS = fs.readdirSync('.').filter(f => /^island_.*\.html$/.test(f)).sort();
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   let totalBad = 0;
   const missing = new Map();
   for (const isl of ISLANDS) {

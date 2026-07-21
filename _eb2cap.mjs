@@ -1,6 +1,6 @@
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--no-sandbox']});
+const b=await chromium.launch({executablePath: process.env.HANSEN_CHROMIUM_PATH,args:['--no-sandbox']});
 const p=await b.newPage({viewport:{width:420,height:840}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto('file:///mnt/user-data/outputs/流亡之刃_真立绘预览.html');await p.waitForTimeout(200);
 await p.evaluate(()=>window.play());

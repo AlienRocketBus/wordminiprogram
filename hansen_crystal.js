@@ -40,15 +40,251 @@
     catch(e){ return 'index'; }
   }
   function lsGet(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
-  function lsSet(k,v){ try{ localStorage.setItem(k,String(v)); }catch(e){} }
+  function lsSet(k,v){ try{var s=String(v);localStorage.setItem(k,s);return localStorage.getItem(k)===s;}catch(e){return false;} }
   function lsInt(k){ var n=parseInt(lsGet(k,'0'),10); return isFinite(n)?n:0; }
 
-  // ===== 每岛熟练度存档:{ idx: {lv, d, done} } =====
-  function loadM(){
-    try{ var o=JSON.parse(lsGet('hsn_crystal_'+islandKey(),'{}')); return (o&&typeof o==='object')?o:{}; }
+  // ===== v941: 19 岛 canonical 熟练度存档 =====
+  // Land1~8 / 旧 SeasonN 都映射到 season 的同一 240 槽位，不能各发一次钻石。
+  function HC(){ return window.HansenCanonical||null; }
+  function currentRef(){
+    try{ if(HC()) return HC().currentRef(); }catch(e){}
+    return islandKey();
+  }
+  function currentMap(){
+    var h=HC(), a=null;
+    try{ if(h)a=h.resolve(currentRef()); }catch(e){}
+    return a||{id:islandKey(),offset:0,length:(window.allW&&allW.length)||0,words:(window.allW&&allW.length)||0};
+  }
+  function canonicalKey(id){ return 'hsn_crystal_'+id; }
+  function parseMap(key){
+    try{ var o=JSON.parse(lsGet(key,'{}')); return (o&&typeof o==='object'&&!Array.isArray(o))?o:{}; }
     catch(e){ return {}; }
   }
-  function saveM(m){ try{ localStorage.setItem('hsn_crystal_'+islandKey(), JSON.stringify(m)); }catch(e){} }
+  function canonicalWords(id){
+    var h=HC(),n=0;
+    try{if(h&&Array.isArray(h.islands))h.islands.some(function(i){if(i&&i.id===id){n=Number(i.words)||0;return true;}return false;});}catch(e){}
+    return isFinite(n)&&n>0?Math.floor(n):0;
+  }
+  function validCrystalDay(v){
+    if(v==='')return true;
+    var m=typeof v==='string'&&v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(!m)return false;
+    var y=+m[1],mo=+m[2],d=+m[3],dt=new Date(Date.UTC(y,mo-1,d));
+    return y>=2000&&y<=9999&&dt.getUTCFullYear()===y&&dt.getUTCMonth()===mo-1&&dt.getUTCDate()===d;
+  }
+  function strictCanonicalRecord(rec){
+    if(!rec||typeof rec!=='object'||Array.isArray(rec))return null;
+    var lv=Object.prototype.hasOwnProperty.call(rec,'lv')?rec.lv:0;
+    var p=Object.prototype.hasOwnProperty.call(rec,'p')?rec.p:0;
+    var d=Object.prototype.hasOwnProperty.call(rec,'d')?rec.d:'';
+    var done=Object.prototype.hasOwnProperty.call(rec,'done')?rec.done:0;
+    if(typeof lv!=='number'||!isFinite(lv)||Math.floor(lv)!==lv||lv<0||lv>MAX_LV)return null;
+    if(typeof p!=='number'||!isFinite(p)||Math.floor(p)!==p||p<0||p>=STAR_NEED)return null;
+    if(typeof d!=='string'||!validCrystalDay(d))return null;
+    if(done!==0&&done!==1&&done!==false&&done!==true)return null;
+    done=(done===1||done===true)?1:0;
+    // 已完成必须是真实的 5 星终态；不接受只伪造 done 的矛盾记录。
+    if(done&&(lv!==MAX_LV||p!==0))return null;
+    return {lv:lv,p:p,d:d,done:done};
+  }
+  function sanitizeCanonicalMap(id,map){
+    var words=canonicalWords(id),out={},invalid=0,seen={};
+    if(!map||typeof map!=='object'||Array.isArray(map)||words<=0)return {map:{},invalid:1};
+    Object.keys(map).forEach(function(k){
+      if(!/^(?:0|[1-9]\d*)$/.test(k)){invalid++;return;}
+      var idx=Number(k);if(!isFinite(idx)||Math.floor(idx)!==idx||idx<0||idx>=words||seen[idx]){invalid++;return;}
+      var rec=strictCanonicalRecord(map[k]);if(!rec){invalid++;return;}
+      seen[idx]=1;out[idx]=rec;
+    });
+    return {map:out,invalid:invalid};
+  }
+  function mergeCanonicalMaps(a,b){
+    var out={},k;Object.keys(a||{}).forEach(function(x){out[x]=a[x];});
+    Object.keys(b||{}).forEach(function(x){k=String(x);out[k]=Object.prototype.hasOwnProperty.call(out,k)?stronger(out[k],b[k]):b[k];});
+    return out;
+  }
+  function saveCanonicalMap(id,map,exactBackup){
+    var key=canonicalKey(id),bak=key+'_bak',oldMain=null,oldBak=null;
+    try{
+      var checked=sanitizeCanonicalMap(id,map);if(checked.invalid)return false;map=checked.map;
+      oldMain=localStorage.getItem(key);oldBak=localStorage.getItem(bak);var raw=JSON.stringify(map),oldObj=null;
+      try{oldObj=JSON.parse(oldMain||'null');}catch(e){}
+      var snapshot=exactBackup?raw:((oldObj&&typeof oldObj==='object'&&!Array.isArray(oldObj))?oldMain:raw);
+      localStorage.setItem(key,raw);if(localStorage.getItem(key)!==raw)throw new Error('crystal main verify failed');
+      localStorage.setItem(bak,snapshot);if(localStorage.getItem(bak)!==snapshot)throw new Error('crystal backup verify failed');
+      return true;
+    }catch(e){
+      try{if(oldMain===null)localStorage.removeItem(key);else localStorage.setItem(key,oldMain);}catch(_e){}
+      try{if(oldBak===null)localStorage.removeItem(bak);else localStorage.setItem(bak,oldBak);}catch(_e){}
+      return false;
+    }
+  }
+  function stronger(a,b){
+    // 一条熟练度记录是一个整体：低等级记录的 p/d 绝不能拼到高等级记录上。
+    // 例如 canonical lv2/p0 + legacy lv1/p1 必须仍是 lv2/p0；否则旧进度会
+    // 污染新等级，导致下一次答题提前升星。只有等级相同才合并同级进度。
+    a=exactRecord(a); b=exactRecord(b);
+    if(a.done||b.done)return {lv:MAX_LV,p:0,d:a.done?a.d:b.d,done:1};
+    if(a.lv!==b.lv)return a.lv>b.lv?a:b;
+    var out={lv:a.lv,p:Math.max(a.p,b.p),d:'',done:0};
+    function dayValue(v){var m=String(v||'').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);return m?(+m[1]*10000+ +m[2]*100+ +m[3]):0;}
+    out.d=dayValue(b.d)>dayValue(a.d)?String(b.d||''):String(a.d||'');
+    return out;
+  }
+  function mergeInto(dst, idx, rec){
+    var before=JSON.stringify(dst[idx]||{}), after=stronger(dst[idx],rec);
+    dst[idx]=after; return before!==JSON.stringify(after);
+  }
+  function exactRecord(rec){
+    rec=(rec&&typeof rec==='object')?rec:{};
+    var out={
+      lv:Math.max(0,Math.min(MAX_LV,Math.floor(Number(rec.lv)||0))),
+      p:Math.max(0,Math.min(STAR_NEED-1,Math.floor(Number(rec.p)||0))),
+      d:typeof rec.d==='string'?rec.d:'',
+      done:(rec.done===1||rec.done===true)?1:0
+    };
+    if(out.done){out.lv=MAX_LV;out.p=0;}
+    return out;
+  }
+  function sourceSig(raw){
+    var h=2166136261,s=String(raw||'');
+    for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+    return s.length+':'+(h>>>0).toString(16);
+  }
+  function awardGem(source,n){
+    try{
+      if(window.HansenGems&&typeof HansenGems.award==='function')return HansenGems.award(source,n);
+      if(window.HansenGems&&typeof HansenGems.add==='function'){var before=HansenGems.get(),after=HansenGems.add(n);return after===before+n;}
+    }catch(e){}
+    return false;
+  }
+  function wordSource(id,idx){return 'crystal:word:'+String(id)+':'+String(idx);}
+  var LEGACY_SEED_KEY='hansen_crystal_legacy_seed_v942',SEED_DONE_KEY='hansen_crystal_awards_seeded_v942';
+  function legacySeedIds(h){
+    var ids=[];
+    if(h){
+      h.islands.forEach(function(i){var m=loadCanonical(i.id);Object.keys(m).forEach(function(k){if(m[k]&&m[k].done)ids.push(wordSource(i.id,k));});});
+      var ri=lsInt('hsn_crystal_rank');for(var r=1;r<=ri;r++)if(RANKS[r]&&RANKS[r].bonus>0)ids.push('crystal:rank:'+r);
+      h.islands.forEach(function(i){if(lsGet('hsn_crystal_isldone_'+i.id,'')==='1')ids.push('crystal:island:'+i.id);});
+    }
+    return ids.filter(function(id,i,a){return a.indexOf(id)===i;}).sort();
+  }
+  // 首次 v942 boot 就固化“升级前已完成”的 source 边界，与钻石钱包是否已就绪无关。
+  // 若边界写失败，boot 不挂答题 hook，防止这个窗口内的新完成被误当成历史已发。
+  function captureLegacySeed(h){
+    var raw=lsGet(LEGACY_SEED_KEY,''),o=null;
+    if(raw){try{o=JSON.parse(raw);}catch(e){return null;}if(!o||o.schema!==1||!Array.isArray(o.ids))return null;return o.ids.filter(function(x){return typeof x==='string';});}
+    var snap={schema:1,ids:legacySeedIds(h),createdAt:Date.now()};return lsSet(LEGACY_SEED_KEY,JSON.stringify(snap))?snap.ids:null;
+  }
+  // v942 首次启用幂等奖励账本时，把已经存在的完成/段位/全岛 flag 记为“历史已发”，
+  // 防止升级本身把老玩家的全部奖励再发一遍。此后每个新 source 都可失败重试且绝不重复。
+  function seedExistingAwards(h){
+    if(lsGet(SEED_DONE_KEY,'')==='1')return true;
+    var ids=captureLegacySeed(h);if(!ids)return false;
+    if(!window.HansenGems||typeof HansenGems.seedAwards!=='function')return false;
+    if(!HansenGems.seedAwards(ids))return false;
+    return lsSet(SEED_DONE_KEY,'1');
+  }
+  function migrateCrystalMaps(){
+    var h=HC(); if(!h)return;
+    var merged={}, changed={},pendingByIsland={},ledger={};
+    try{ledger=JSON.parse(lsGet('hansen_crystal_sources_v942','{}'))||{};}catch(e){ledger={};}
+    h.islands.forEach(function(i){merged[i.id]=loadCanonical(i.id);});
+    try{
+      for(var n=0;n<localStorage.length;n++){
+        var key=localStorage.key(n); if(!key||key.indexOf('hsn_crystal_')!==0)continue;
+        var tail=key.slice('hsn_crystal_'.length);
+        if(tail==='total'||tail==='gems'||tail==='rank'||tail.indexOf('boost_')===0||tail.indexOf('isldone_')===0)continue;
+        var a=h.resolve(tail); if(!a)continue;
+        // canonical 文件本身就是目的地；旧 island_/Land/Season 别名只在内容变化时迁移。
+        // 这样旧记录里的 p=1 不会在新逻辑把 p 清零后，每次启动又被 max() 回灌。
+        var raw=lsGet(key,'{}'), canonical=(key===canonicalKey(a.id));
+        var sig=sourceSig(raw);
+        if(!canonical&&ledger[key]===sig)continue;
+        var src=parseMap(key), dst=merged[a.id];
+        Object.keys(src).forEach(function(local){
+          var rec=strictCanonicalRecord(src[local]);if(!rec)return;
+          var ci=h.toCanonicalIndex(tail,local); if(ci>=0&&mergeInto(dst,ci,rec))changed[a.id]=1;
+        });
+        if(!canonical)(pendingByIsland[a.id]||(pendingByIsland[a.id]=[])).push([key,sig]);
+      }
+    }catch(e){}
+    var nextLedger={};Object.keys(ledger).forEach(function(k){nextLedger[k]=ledger[k];});
+    h.islands.forEach(function(i){
+      var needsSave=!!changed[i.id]||lsGet(canonicalKey(i.id),'')==='',ok=!needsSave||saveCanonicalMap(i.id,merged[i.id],false);
+      // 只有该 canonical map 已严格落盘，才提交它对应的 alias source sig。
+      // map 成功而 ledger 失败也没关系：下次合并幂等，仍会重试 ledger。
+      if(ok)(pendingByIsland[i.id]||[]).forEach(function(x){nextLedger[x[0]]=x[1];});
+    });
+    var ledgerOK=lsSet('hansen_crystal_sources_v942',JSON.stringify(nextLedger));
+    // 旧完成标记折算：常规岛直接承认；星海总岛或八个 Land 都领过时承认。
+    h.islands.forEach(function(i){
+      var flag='hsn_crystal_isldone_'+i.id; if(lsGet(flag,'')==='1')return;
+      if(lsGet('hsn_crystal_isldone_island_'+i.id,'')==='1')lsSet(flag,'1');
+    });
+    if(lsGet('hsn_crystal_isldone_season','')!=='1'){
+      if(lsGet('hsn_crystal_isldone_island_season','')==='1') lsSet('hsn_crystal_isldone_season','1');
+      else {
+        var allLand=true,allLegacy=true;
+        for(var li=1;li<=8;li++){
+          if(lsGet('hsn_crystal_isldone_island_land'+li,'')!=='1'&&lsGet('hsn_crystal_isldone_land'+li,'')!=='1'){allLand=false;break;}
+        }
+        for(var si=1;si<=5;si++){
+          if(lsGet('hsn_crystal_isldone_island_season'+si,'')!=='1'&&lsGet('hsn_crystal_isldone_season'+si,'')!=='1'){allLegacy=false;break;}
+        }
+        if(allLand||allLegacy)lsSet('hsn_crystal_isldone_season','1');
+      }
+    }
+    if(ledgerOK)lsSet('hansen_crystal_migrated_v941','1');
+    return ledgerOK;
+  }
+  function loadCanonical(id){
+    var key=canonicalKey(id),raw=lsGet(key,''),bakRaw=lsGet(key+'_bak',''),o=null,b=null;
+    try{o=JSON.parse(raw||'null');}catch(e){}try{b=JSON.parse(bakRaw||'null');}catch(e){b=null;}
+    var mainRoot=!!(o&&typeof o==='object'&&!Array.isArray(o));
+    var backupRoot=!!(b&&typeof b==='object'&&!Array.isArray(b));
+    var main=mainRoot?sanitizeCanonicalMap(id,o):null,backup=backupRoot?sanitizeCanonicalMap(id,b):null;
+    if(mainRoot){
+      // 主档可能只截断一个槽位，并不一定全空。已有主槽位是当前代的精确状态
+      // （p 在锁星后会从 1 合法回到 0），所以不能与旧备份取 max；只从上一份
+      // 已知良好备份补齐“主档缺失且通过严格 schema”的槽位。
+      var recovered={},changed=main.invalid>0;
+      if(backupRoot)Object.keys(backup.map).forEach(function(k){recovered[k]=backup.map[k];});
+      Object.keys(main.map).forEach(function(k){recovered[k]=main.map[k];});
+      if(backupRoot)Object.keys(backup.map).forEach(function(k){if(!Object.prototype.hasOwnProperty.call(main.map,k))changed=true;});
+      if(changed){saveCanonicalMap(id,recovered,true);return recovered;}
+      return main.map;
+    }
+    if(backupRoot){saveCanonicalMap(id,backup.map,true);return backup.map;}
+    return {};
+  }
+  // 对页面继续提供 local idx；底层始终写 canonical idx。
+  function loadM(){
+    var h=HC(), a=currentMap();
+    if(!h)return parseMap('hsn_crystal_'+islandKey());
+    var full=loadCanonical(a.id), local={};
+    Object.keys(full).forEach(function(ci){var li=h.fromCanonicalIndex(currentRef(),ci);if(li>=0)local[li]=full[ci];});
+    return local;
+  }
+  function saveM(m){
+    var h=HC(), a=currentMap();
+    if(!h){try{var localRaw=JSON.stringify(m),localKey='hsn_crystal_'+islandKey();localStorage.setItem(localKey,localRaw);return localStorage.getItem(localKey)===localRaw;}catch(e){return false;}}
+    var full=loadCanonical(a.id);
+    // 当前页面内存是这个切片的最新事实，必须精确覆盖。尤其锁星后 p 从 1→0，
+    // 若继续取 max，旧 p 会立刻回到 1，下一天只答一次就提前升星/发钻。
+    Object.keys(m||{}).forEach(function(li){var ci=h.toCanonicalIndex(currentRef(),li);if(ci>=0)full[ci]=exactRecord(m[li]);});
+    return saveCanonicalMap(a.id,full,false);
+  }
+  function snapshotCurrentSlice(){var a=currentMap();return {id:a.id,map:loadCanonical(a.id)};}
+  function restoreSnapshot(s){return !!(s&&s.id&&s.map&&saveCanonicalMap(s.id,s.map,true));}
+  function clearCurrentSlice(){
+    var a=currentMap(),full=loadCanonical(a.id),changed=false;
+    for(var i=a.offset;i<a.offset+a.length;i++)if(Object.prototype.hasOwnProperty.call(full,i)){delete full[i];changed=true;}
+    return changed?saveCanonicalMap(a.id,full,true):true;
+  }
+  function canonicalDoneTotal(){
+    var h=HC(); if(!h)return lsInt('hsn_crystal_total');
+    var n=0;h.islands.forEach(function(i){var m=loadCanonical(i.id);Object.keys(m).forEach(function(k){if(m[k]&&m[k].done)n++;});});return n;
+  }
 
   // 取单词文本(通知用)
   function wordEn(idx){
@@ -58,15 +294,18 @@
 
   // ===== 结晶发钻(全局)·🔴v832 每永久掌握1词 = 直接发 GEM_PER_WORD 颗💎 =====
   function crystallize(idx){
-    var total = lsInt('hsn_crystal_total') + 1;
+    var total = HC() ? canonicalDoneTotal() : lsInt('hsn_crystal_total') + 1;
     lsSet('hsn_crystal_total', total);
-    try{ if(window.HansenGems && HansenGems.add) HansenGems.add(GEM_PER_WORD); }catch(e){}
-    lsSet('hsn_crystal_gems', lsInt('hsn_crystal_gems') + GEM_PER_WORD);   // 累计结晶钻石(面板展示)
+    var a=currentMap(),ci=HC()?HC().toCanonicalIndex(currentRef(),idx):idx;
+    var paid=awardGem(wordSource(a.id||islandKey(),ci),GEM_PER_WORD);
+    if(paid)lsSet('hsn_crystal_gems',total*GEM_PER_WORD);   // 单词结晶累计展示（段位/全岛 bonus 不计入）
     var en = wordEn(idx);
-    toast('💎 记牢了'+(en?'「'+en+'」':'')+'！+'+GEM_PER_WORD+' 颗钻石', true);
+    if(paid)toast('💎 记牢了'+(en?'「'+en+'」':'')+'！+'+GEM_PER_WORD+' 颗钻石', true);
+    else toast('⚠️ 已记牢，钻石正在安全补发；请勿清理浏览器数据',true);
     try{ refreshBadge(); }catch(e){}
     try{ checkRankUp(total); }catch(e){}        //🔴v830 探险家段位晋升
     try{ checkIslandComplete(); }catch(e){}     //🔴v830 单岛全词永久掌握大奖
+    return paid;
   }
 
   // ===== 🔴v830 探险家段位(按全部岛累计永久掌握词数) =====
@@ -76,25 +315,57 @@
   function checkRankUp(total){
     var ri=rankIndexOf(total), awarded=lsInt('hsn_crystal_rank');
     if(ri>awarded){
-      var bonus=0; for(var k=awarded+1;k<=ri;k++){ bonus+=RANKS[k].bonus; }
-      if(bonus>0){ try{ if(window.HansenGems&&HansenGems.add) HansenGems.add(bonus); }catch(e){} }
-      lsSet('hsn_crystal_rank', ri);
-      setTimeout(function(){ toast('🏅 升到「'+RANKS[ri].n+'」！'+(bonus>0?'奖 '+bonus+' 颗钻石 💎':''), true); }, 800);
+      var bonus=0,last=awarded;for(var k=awarded+1;k<=ri;k++){
+        var b=RANKS[k].bonus||0;if(b>0&&!awardGem('crystal:rank:'+k,b))break;
+        if(!lsSet('hsn_crystal_rank',k))break;last=k;bonus+=b;
+      }
+      if(last<=awarded)return false;
+      setTimeout(function(){ toast('🏅 升到「'+RANKS[last].n+'」！'+(bonus>0?'奖 '+bonus+' 颗钻石 💎':''), true); }, 800);
+      return last===ri;
     }
+    return true;
   }
   // ===== 🔴v830 单岛全词永久掌握(一次性大奖) =====
   function checkIslandComplete(){
-    var total=0; try{ total=(window.allW&&allW.length)||0; }catch(e){}
+    var a=currentMap(), total=a.words||0;
     if(total<=0) return;
-    var m=loadM(), done=0; for(var k in m){ if(m.hasOwnProperty(k)&&m[k]&&m[k].done) done++; }
+    var m=HC()?loadCanonical(a.id):loadM(), done=0; for(var k in m){ if(m.hasOwnProperty(k)&&m[k]&&m[k].done) done++; }
     if(done>=total){
-      var flag='hsn_crystal_isldone_'+islandKey();
+      var flag='hsn_crystal_isldone_'+a.id;
       if(lsGet(flag,'')!=='1'){
-        lsSet(flag,'1');
-        try{ if(window.HansenGems&&HansenGems.add) HansenGems.add(ISLAND_BONUS); }catch(e){}
+        if(!awardGem('crystal:island:'+a.id,ISLAND_BONUS)||!lsSet(flag,'1'))return false;
         setTimeout(function(){ toast('🏝️ 这个岛的词全记牢了！多奖 '+ISLAND_BONUS+' 颗钻石 💎', true); }, 1600);
       }
     }
+    return true;
+  }
+
+  // v941 迁移对账：旧存档已有的永久掌握不能只搬数据却漏掉段位/全岛奖励。
+  // 先落账再发奖；每个 canonical 岛只有一个 flag，重复启动不会重复发。
+  function reconcileCanonicalRewards(){
+    migrateCrystalMaps();
+    var h=HC();
+    if(!h){ checkRankUp(lsInt('hsn_crystal_total')); checkIslandComplete(); return {mastered:lsInt('hsn_crystal_total'),islands:0,bonus:0}; }
+    var total=canonicalDoneTotal(); lsSet('hsn_crystal_total',total);
+    if(!captureLegacySeed(h))return {mastered:total,islands:0,bonus:0,pending:true,blocked:true};
+    if(!seedExistingAwards(h))return {mastered:total,islands:0,bonus:0,pending:true};
+    // done 已安全落图但钱包当时失败时，启动对账按稳定 source id 补发；重放只会 no-op。
+    h.islands.forEach(function(i){var m=loadCanonical(i.id);Object.keys(m).forEach(function(k){if(m[k]&&m[k].done)awardGem(wordSource(i.id,k),GEM_PER_WORD);});});
+    lsSet('hsn_crystal_gems',total*GEM_PER_WORD);
+    try{checkRankUp(total);}catch(e){}
+    var newly=0, bonus=0, walletReady=!!(window.HansenGems&&typeof HansenGems.award==='function');
+    h.islands.forEach(function(i){
+      var m=loadCanonical(i.id),done=0;
+      Object.keys(m).forEach(function(k){if(m[k]&&m[k].done)done++;});
+      if(done<i.words)return;
+      var flag='hsn_crystal_isldone_'+i.id;
+      if(lsGet(flag,'')==='1')return;
+      // 钱包未加载时绝不先写“已发”，稍后 boot 重试，避免奖励永久丢失。
+      if(!walletReady)return;
+      if(awardGem('crystal:island:'+i.id,ISLAND_BONUS)&&lsSet(flag,'1')){newly++;bonus+=ISLAND_BONUS;}
+    });
+    if(newly>0)setTimeout(function(){toast('🏝️ 已对账 '+newly+' 座全词岛！补发 '+bonus+' 颗钻石 💎',true);},1000);
+    return {mastered:total,islands:newly,bonus:bonus};
   }
 
   // ===== 答题 → 更新熟练度(核心) =====
@@ -111,8 +382,8 @@
         var gain = isBoosted() ? BOOST_STAR : 1;       // 记忆强化中 → 多涨
         w.lv = Math.min(MAX_LV, w.lv + gain);
         w.p = 0; w.d = t;
-        if(w.lv >= MAX_LV){ w.done = 1; m[idx]=w; saveM(m); crystallize(idx); return; }
-        m[idx]=w; saveM(m); floatMemo(idx,'lock',w.lv); return;   // 🔴v833 只在真正锁定一颗记忆星(稀少里程碑·一天每词一次)弹一下⭐·克制不刷屏
+        if(w.lv >= MAX_LV){ w.done = 1; m[idx]=w;if(saveM(m))crystallize(idx);else toast('⚠️ 记忆进度未能保存，本次不发钻石，请检查存储空间',true);return; }
+        m[idx]=w;if(saveM(m)!==false)floatMemo(idx,'lock',w.lv,gain);return;   // 🔴v833 只在真正锁定记忆星(稀少里程碑·一天每词一次)弹一下⭐·克制不刷屏
       }
       m[idx]=w; saveM(m);
       // 🔴v833 答对但未锁星(攒进度 / 今天这词已锁过)→ 不弹任何浮层。好反馈要克制:快节奏小游戏每次答对都弹会刷屏·孩子也来不及看·只把⭐留给锁星那一刻。
@@ -120,6 +391,36 @@
     }
     // 🔴v832 答错:不倒扣(鼓励大胆试错·只是这次不涨星)
     m[idx]=w; saveM(m);
+  }
+
+  // v946 探索页专用的 Spelling Bee 结晶结算。一次完整聚焦挑战
+  // (机器人 <50 CPM 正确 10 次、50~79 正确 7 次、>=80 正确 5 次)才锁星。
+  // 普通状态锁 1 星；已有“记忆强化”仍按旧权益锁 2 星，但绝不减少 5/7/10
+  // 的挑战次数。结算不预存同日进度；同词同日最多结算一次。
+  // 只能由下方 markAnswer wrapper 消费瞬时证明后调用。
+  function onQualifiedSpelling(idx, proof){
+    idx=Number(idx);
+    if(!isFinite(idx)||Math.floor(idx)!==idx||idx<0)return {ok:false,reason:'invalid-index'};
+    var m=loadM(),w=m[idx]||{lv:0,p:0,d:'',done:0};
+    if(typeof w.p!=='number')w.p=0;
+    if(w.done)return {ok:true,changed:false,reason:'done',level:MAX_LV};
+    var t=today();
+    if(w.d===t)return {ok:true,changed:false,reason:'locked-today',level:Math.max(0,Math.min(MAX_LV,w.lv|0))};
+    var gain=isBoosted()?BOOST_STAR:1;
+    w.lv=Math.min(MAX_LV,Math.max(0,w.lv|0)+gain);
+    w.p=0;
+    w.d=t;
+    if(w.lv>=MAX_LV){
+      w.done=1;
+      m[idx]=w;
+      if(saveM(m)){crystallize(idx);return {ok:true,changed:true,done:true,level:MAX_LV};}
+      toast('⚠️ 记忆进度未能保存，本次不发钻石，请检查存储空间',true);
+      return {ok:false,reason:'save-failed'};
+    }
+    m[idx]=w;
+    if(saveM(m)===false)return {ok:false,reason:'save-failed'};
+    floatMemo(idx,'lock',w.lv,gain);
+    return {ok:true,changed:true,done:false,level:w.lv,gain:gain};
   }
 
   // ===== 🔴v832 即时记忆反馈浮层(单元素·替换式·节流·无旋转闪烁) =====
@@ -133,7 +434,7 @@
     var html='', cls='hcm';
     if(kind==='lock'){
       cls='hcm lock';
-      html = '<b>⭐ '+(en||'单词')+' 记忆 +1</b><span class="s">'+stars+'</span>';
+      html = '<b>⭐ '+(en||'单词')+' 记忆 +'+((p&&p>1)?p:1)+'</b><span class="s">'+stars+'</span>';
     } else if(kind==='ready'){
       cls='hcm ready';
       html = '<b>✓ '+(en||'单词')+' 今天记牢了</b><span class="t">明天再来加固一颗星</span>';
@@ -156,6 +457,56 @@
     var totalWords=0; try{ totalWords=(window.allW&&allW.length)||0; }catch(e){}
     var gTotal=lsInt('hsn_crystal_total'), gGems=lsInt('hsn_crystal_gems');
     return {dist:dist, mastered:mastered, seen:seen, totalWords:totalWords, gTotal:gTotal, gGems:gGems, perWord:GEM_PER_WORD};
+  }
+
+  // v945 探索页批量只读快照。结晶完成(done)只证明学习状态，绝不等同于
+  // 钻石到账；到账必须由 HansenGems 的逐 source 奖励账本证明。整页只读一次
+  // canonical 结晶图、一次奖励账本，避免 240 张卡片各自访问 localStorage。
+  function rules(){
+    return {maxLevel:MAX_LV,hitsPerStar:STAR_NEED,gemsPerWord:GEM_PER_WORD,boostStarGain:BOOST_STAR,dailyStarLocks:1};
+  }
+  function sliceProgress(ref){
+    var h=HC(),requested=ref==null?currentRef():ref,a=null;
+    try{a=h&&h.resolve(requested);}catch(e){a=null;}
+    if(!h||!a)return {ok:false,reason:'canonical-unavailable',ref:String(requested||''),rules:rules(),items:[]};
+    try{
+      var raw=localStorage.getItem(canonicalKey(a.id)),bakRaw=localStorage.getItem(canonicalKey(a.id)+'_bak');
+      function checked(value){
+        if(value===null)return null;
+        var parsed=null;try{parsed=JSON.parse(value);}catch(e){return false;}
+        if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))return false;
+        return sanitizeCanonicalMap(a.id,parsed).invalid===0;
+      }
+      var mainOK=checked(raw),bakOK=checked(bakRaw);
+      if((raw!==null||bakRaw!==null)&&mainOK!==true&&bakOK!==true)return {ok:false,reason:'corrupt-store',ref:String(requested||''),id:a.id,rules:rules(),items:[]};
+    }catch(e){return {ok:false,reason:'storage-unreadable',ref:String(requested||''),id:a.id,rules:rules(),items:[]};}
+    var full=null;
+    try{full=loadCanonical(a.id);}catch(e){return {ok:false,reason:'storage-unreadable',ref:String(requested||''),id:a.id,rules:rules(),items:[]};}
+    if(!full||typeof full!=='object'||Array.isArray(full))return {ok:false,reason:'storage-unreadable',ref:String(requested||''),id:a.id,rules:rules(),items:[]};
+    var nowDay=today(),boosted=isBoosted(),boostMinutes=boostLeftMin(),requests=[],items=[];
+    for(var local=0;local<a.length;local++){
+      var ci=a.offset+local,raw=Object.prototype.hasOwnProperty.call(full,ci)?full[ci]:null;
+      var rec=raw?strictCanonicalRecord(raw):{lv:0,p:0,d:'',done:0};
+      if(!rec)return {ok:false,reason:'invalid-record',ref:String(requested||''),id:a.id,canonicalIndex:ci,rules:rules(),items:[]};
+      var source=wordSource(a.id,ci);
+      if(rec.done)requests.push({id:source,amount:GEM_PER_WORD});
+      items.push({
+        localIndex:local,canonicalIndex:ci,slotId:a.id+':'+ci,
+        lv:rec.lv,p:rec.p,d:rec.d,done:!!rec.done,
+        lockedToday:rec.d===nowDay,boosted:boosted,boostMinutes:boostMinutes,
+        rewardSource:source,reward:{state:rec.done?'checking':'not-earned',amount:null,at:null}
+      });
+    }
+    var rewardMap={};
+    try{
+      if(requests.length&&window.HansenGems&&typeof HansenGems.awardStates==='function')rewardMap=HansenGems.awardStates(requests)||{};
+    }catch(e){rewardMap={};}
+    items.forEach(function(item){
+      if(!item.done)return;
+      var status=rewardMap[item.rewardSource];
+      item.reward=(status&&typeof status==='object')?status:{state:'blocked',amount:null,at:null};
+    });
+    return {ok:true,ref:String(requested||''),id:a.id,offset:a.offset,length:a.length,words:a.words,rules:rules(),boosted:boosted,boostMinutes:boostMinutes,items:items};
   }
 
   // ===== Toast 提示 =====
@@ -249,7 +600,7 @@
     var rankHtml = '<div class="hcr-rank"><div class="rk-top">🏅 <b>'+rk.n+'</b></div>'
       + (nr ? '<div class="hcr-bar"><i style="width:'+rankPct+'%;background:linear-gradient(90deg,#f59e0b,#fcd34d)"></i></div><div class="rk-next">再记牢 '+(nr.need-s.gTotal)+' 个词，升「'+nr.n+'」'+(nr.bonus?'(奖 '+nr.bonus+' 💎)':'')+'</div>' : '<div class="rk-next">已经是最高级啦 🎉</div>')
       + '</div>';
-    var islDone = lsGet('hsn_crystal_isldone_'+islandKey(),'')==='1';
+    var islDone = lsGet('hsn_crystal_isldone_'+currentMap().id,'')==='1';
     var islHdr = islDone
       ? '<div style="font-size:13px;font-weight:700;color:#fcd34d;margin:4px 0 6px">🏝️ 这个岛的词全记牢啦！（'+s.totalWords+' 个）'+(ISLAND_BONUS?'　已奖 '+ISLAND_BONUS+' 💎':'')+'</div>'
       : '<div style="font-size:13px;font-weight:700;color:#cbd8ef;margin:4px 0 6px">这个岛共 '+s.totalWords+' 个词 · 练过 '+s.seen+' 个 · 全部记牢再奖 '+ISLAND_BONUS+' 💎</div>';
@@ -477,8 +828,21 @@
     if(window.markAnswer.__crystalWrapped){ return; }
     var orig = window.markAnswer;
     window.markAnswer = function(idx, correct){
+      var proof=null;
+      try{
+        if(correct && window.HansenSpellingProgressV946 &&
+           typeof HansenSpellingProgressV946.consume==='function'){
+          proof=HansenSpellingProgressV946.consume('crystal',+idx);
+        }
+      }catch(e){proof=null;}
       var r = orig.apply(this, arguments);
-      try{ onAnswer(idx, correct); refreshBadge(); }catch(e){}
+      try{
+        if(proof){
+          var qualified=onQualifiedSpelling(idx,proof);
+          if(window.HansenSpellingProgressV946&&typeof HansenSpellingProgressV946.settle==='function')HansenSpellingProgressV946.settle(proof,qualified);
+        }
+        refreshBadge();
+      }catch(e){}
       return r;
     };
     window.markAnswer.__crystalWrapped = true;
@@ -508,11 +872,25 @@
     grantBoost: grantBoost,      // 供其它机制调用:发"记忆强化"buff(分钟)
     isBoosted: isBoosted,
     boostLeftMin: boostLeftMin,
+    getRules:rules,
+    sliceProgress:sliceProgress,
+    reconcileCanonicalRewards: reconcileCanonicalRewards,
+    clearCurrentSlice:clearCurrentSlice,
+    snapshotCurrentSlice:snapshotCurrentSlice,
+    restoreSnapshot:restoreSnapshot,
+    _migrateCrystalMaps:migrateCrystalMaps,
+    _captureLegacySeed:captureLegacySeed,
     _onAnswer: onAnswer   // 供测试
   };
 
   // ===== 启动 =====
-  function boot(){ hook(); injectBtn(); hookSettings(); startWatch(); }  /* 🔴v841 +设置开关注入 +进游戏自动隐藏监听 */
+  function boot(){
+    try{
+      var resetPending=typeof window.__hsnHasResetPending==='function'&&window.__hsnHasResetPending();
+      if(resetPending){if(typeof window.__hsnResumeReset==='function')window.__hsnResumeReset(false);return;}
+    }catch(e){}
+    var result=reconcileCanonicalRewards();if(result&&result.blocked){setTimeout(boot,1000);return;}hook(); injectBtn(); hookSettings(); startWatch();
+  }  /* v942 重置日志先续做；否则才迁移/对账并挂答题 */
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); }
   else { boot(); }
 })();

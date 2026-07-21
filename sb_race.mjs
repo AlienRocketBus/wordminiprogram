@@ -10,7 +10,7 @@
  * ★ 顺带验: 玩家计时(timer)也必须从【念完】才开始, 否则"听的时候就在被计时"不公平。
  * ★ 顺带验: 音频全坏(404)时, 3.5 秒兜底一定开赛, 绝不卡死。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 let pass = 0, fail = 0;
@@ -34,7 +34,7 @@ async function openBee(b, { killAudio } = {}) {
 
 (async () => {
   const b = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+    executablePath: process.env.HANSEN_CHROMIUM_PATH,
     args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'],
   });
 

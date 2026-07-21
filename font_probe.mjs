@@ -7,7 +7,7 @@
  * 做法: 走遍全库每个屏, 找出所有【计算后的 font-family 里含 cartoon 字体】的元素,
  *       把它们渲染出来的文字逐字收集, 输出成 JSON, 再用 fontTools 去字体里逐字查。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
 
 const PORT = process.argv[2] || '8877';
@@ -16,7 +16,7 @@ const SCREENS = ['home', 'explore', 'listen', 'match', 'typing', 'cloze', 'scram
   'review', 'stats', 'pet', 'quests', 'ach', 'settings', 'boss'];
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const chars = new Set();
   const samples = {};
 

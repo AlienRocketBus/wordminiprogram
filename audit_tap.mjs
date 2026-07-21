@@ -4,14 +4,14 @@
  *   ② petTaskComplete 重复触发(一局游戏结算被点两次 → 经验翻倍)
  * 判据: 连点 5 次, 到账的必须和点 1 次一样。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 let pass = 0, fail = 0;
 const chk = (n, ok, note) => { ok ? pass++ : fail++; console.log(`   ${ok ? '✅' : '❌'} ${n}${note ? '  ' + note : ''}`); };
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try { localStorage.setItem('wordIslandLand1', JSON.stringify({ totalAnswers: 30, totalCorrect: 28, learned: [0, 1, 2, 3, 4], level: 5, xp: 100, totalXP: 100, coins: 100, stats: { maxCombo: 5, gameCounts: {}, modesPlayed: [] }, wrongs: {}, pet: { name: '星灵', stage: 1, xp: 0, picked: true } })); } catch (e) { }

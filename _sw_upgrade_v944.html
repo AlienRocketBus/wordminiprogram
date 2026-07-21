@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>单词大冒险 · 安全升级</title>
+<style>
+*{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 20%,#27357f,#0c1538 58%,#070b1c);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}.card{width:min(420px,100%);padding:28px 24px;border:1px solid rgba(255,255,255,.18);border-radius:22px;background:rgba(12,21,56,.9);box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}.orb{width:54px;height:54px;margin:0 auto 18px;border:5px solid rgba(255,255,255,.2);border-top-color:#8ab4ff;border-radius:50%;animation:spin .9s linear infinite}h1{font-size:21px;margin:0 0 10px}p{color:#cbd5e1;line-height:1.7;margin:0}button{display:none;margin:20px auto 0;padding:10px 20px;border:0;border-radius:999px;background:#fde047;color:#172554;font-weight:800;font-size:15px;cursor:pointer}@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main class="card" role="status" aria-live="polite">
+  <div class="orb" aria-hidden="true"></div>
+  <h1>正在安全升级到 v960</h1>
+  <p id="msg">正在清理旧缓存并接管页面，请不要关闭窗口。</p>
+  <button id="retry" type="button">重新尝试</button>
+</main>
+<script>
+(function(){
+  'use strict';
+  var msg=document.getElementById('msg'),retry=document.getElementById('retry');
+  var allowed={
+    'index.html':1,'_frame.html':1,'boss_hall.html':1,'land_map.html':1,
+    'season_showcase.html':1,'spelling_bee.html':1,
+    'island_action.html':1,'island_adjective.html':1,'island_animal.html':1,
+    'island_body.html':1,'island_city.html':1,'island_clothes.html':1,
+    'island_color.html':1,'island_family.html':1,'island_food.html':1,
+    'island_home.html':1,'island_job.html':1,'island_land1.html':1,
+    'island_land2.html':1,'island_land3.html':1,'island_land4.html':1,
+    'island_land5.html':1,'island_land6.html':1,'island_land7.html':1,
+    'island_land8.html':1,'island_nature.html':1,'island_question.html':1,
+    'island_school.html':1,'island_season.html':1,'island_sports.html':1,
+    'island_time.html':1,'island_traffic.html':1,'island_treasure.html':1
+  };
+  function safeReturn(){
+    try{
+      var raw=new URLSearchParams(location.search).get('return')||'index.html';
+      var here=new URL(location.href),target=new URL(raw,here);
+      var hereDir=here.pathname.slice(0,here.pathname.lastIndexOf('/')+1);
+      var targetDir=target.pathname.slice(0,target.pathname.lastIndexOf('/')+1);
+      var file=decodeURIComponent(target.pathname.slice(target.pathname.lastIndexOf('/')+1));
+      if(target.origin!==here.origin||targetDir!==hereDir||!allowed[file])return new URL('index.html',here).href;
+      return target.href;
+    }catch(_){return new URL('index.html',location.href).href;}
+  }
+  var destination=safeReturn(),done=false,timer=0;
+  function controllerIsV944(){
+    try{return !!(navigator.serviceWorker.controller&&/\/sw_v944\.js$/.test(new URL(navigator.serviceWorker.controller.scriptURL).pathname));}catch(_){return false;}
+  }
+  function finish(){
+    if(done||!controllerIsV944())return;
+    done=true;clearTimeout(timer);location.replace(destination);
+  }
+  function fail(text){
+    if(done)return;msg.textContent=text||'升级暂时没有完成，请检查网络后重试。';retry.style.display='block';
+  }
+  retry.addEventListener('click',function(){location.reload();});
+  if(!('serviceWorker' in navigator)){fail('当前浏览器不支持离线升级，请使用系统浏览器重新打开。');return;}
+  navigator.serviceWorker.addEventListener('controllerchange',finish);
+  timer=setTimeout(function(){fail('升级等待时间较长，请检查网络后重新尝试。');},12000);
+  navigator.serviceWorker.register('./sw_v944.js',{scope:'./',updateViaCache:'none'})
+    .then(function(registration){return registration.update().catch(function(){return registration;});})
+    .then(function(){finish();setTimeout(finish,50);})
+    .catch(function(error){fail('升级失败：'+((error&&error.message)||'网络不可用'));});
+  finish();
+})();
+</script>
+</body>
+</html>

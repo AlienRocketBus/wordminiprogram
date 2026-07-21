@@ -4,7 +4,7 @@
  *    如果 load() 不设防, 结果就是【白屏 + 存档全丢】—— 发布后最致命的事故。
  * F. 边界数据: 0经验/满级/宠物满阶/空错题本/巨大数值 —— 任何一种都不能崩。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 let pass = 0, fail = 0;
@@ -31,7 +31,7 @@ async function boot(b, saveVal, key) {
 }
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
 
   console.log('  ══ C. 存档安全: 坏存档绝不能白屏/丢档 ══');
   // C1 半截 JSON(写盘被打断)

@@ -17,26 +17,26 @@
 
   // 20 个 boss 卡牌数据
   var BOSS_CARDS = [
-    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=938', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
-    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=938', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
-    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=938', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
-    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=938', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
-    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=938', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
-    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=938', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
-    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=938', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
-    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=938', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
-    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=938', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
-    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=938', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
-    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=938', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
-    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=938', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
-    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=938', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
-    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=938', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
-    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=938', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
-    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=938', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
-    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=938', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
-    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=938', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
-    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=938', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
-    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=938', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
+    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=960', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
+    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=960', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
+    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=960', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
+    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=960', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
+    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=960', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
+    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=960', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
+    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=960', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
+    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=960', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
+    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=960', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
+    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=960', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
+    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=960', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
+    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=960', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
+    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=960', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
+    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=960', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
+    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=960', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
+    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=960', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
+    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=960', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
+    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=960', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
+    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=960', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
+    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=960', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
   ];
 
   // 稀有度配色 (frame + 标签)
@@ -124,20 +124,44 @@
   // loadData(rawOnly): 读取卡牌/皮肤/通关存档
   //   🛡️ v219 存档防护: 主存档读出来是坏的/空的, 自动从备份 key 恢复 (防"进度突然没了")
   //   rawOnly=true 时返回真实数据 (不应用临时全解锁覆盖)
+  function cleanCardData(raw){
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))return null;
+    var clears={},source=raw.islandClears;
+    if(source&&typeof source==='object'&&!Array.isArray(source)){
+      for(var lv=1;lv<=20;lv++){
+        var saved=source[lv];if(!Array.isArray(saved))continue;
+        var seen={},list=[];
+        for(var i=0;i<saved.length;i++){
+          var island=saved[i];
+          if(typeof island==='string'&&ALL_ISLANDS.indexOf(island)>=0&&!seen[island]){seen[island]=1;list.push(island);}
+        }
+        if(list.length)clears[lv]=list;
+      }
+    }
+    var collected=[],collectedSeen={};
+    if(Array.isArray(raw.collected))for(var j=0;j<raw.collected.length;j++){
+      var card=raw.collected[j];
+      if(typeof card==='number'&&isFinite(card)&&Math.floor(card)===card&&card>=1&&card<=20&&!collectedSeen[card]){
+        collectedSeen[card]=1;collected.push(card);
+      }
+    }
+    collected.sort(function(a,b){return a-b;});
+    return {islandClears:clears,collected:collected,masterUnlocked:raw.masterUnlocked===true&&collected.length===20};
+  }
   function loadData(rawOnly){
     var SK = getStorageKey();   // v330: 当前岛专属 key (各岛独立)
     var raw = '';
     try { raw = localStorage.getItem(SK) || ''; } catch(e){}
     var d = null;
     // 先试主存档
-    try { if(raw) d = JSON.parse(raw); } catch(e){ d = null; }
+    try { if(raw) d = cleanCardData(JSON.parse(raw)); } catch(e){ d = null; }
     // 🛡️ 主存档坏了或为空 → 从备份恢复
     if(!d || typeof d !== 'object'){
       try {
         var bak = localStorage.getItem(SK + '_bak');
         if(bak){
-          var bd = JSON.parse(bak);
-          if(bd && typeof bd === 'object'){
+          var bd = cleanCardData(JSON.parse(bak));
+          if(bd){
             d = bd;
             // 备份比主存档好, 顺手把主存档修回来
             try { localStorage.setItem(SK, bak); } catch(e){}
@@ -147,10 +171,7 @@
       } catch(e){}
     }
     try {
-      if(!d || typeof d !== 'object') d = {};
-      if(!d.islandClears || typeof d.islandClears !== 'object') d.islandClears = {};
-      if(!Array.isArray(d.collected)) d.collected = [];
-      if(typeof d.masterUnlocked !== 'boolean') d.masterUnlocked = false;
+      if(!d)d = {islandClears:{},collected:[],masterUnlocked:false};
 
       // v166: rawOnly = true 时不应用临时覆盖 (markBossWin 用这个去更新真实数据)
       if(rawOnly) return d;
@@ -236,17 +257,16 @@
     // v330: 每岛独立 — 在【当前岛】打通第 lv 关, 即解锁第 lv 关卡牌。
     //   (旧版要求在全部 18 个岛都打过第 lv 关才解锁, 是跨岛共享模式; 现在每岛独立存档,
     //    islandClears[lv] 在单岛里只会有自己一个岛名, 故改为单岛打通即解锁。)
-    var newlyUnlocked = false;
     if(d.collected.indexOf(lv) < 0){
       d.collected.push(lv);
       d.collected.sort(function(a,b){return a-b});
-      newlyUnlocked = true;
     }
 
     // 🔴 BUG#48 修复 (v469): 打 boss 胜利【绝不】再往全局卡册 HansenCardbook 填卡!
     //   规则(我们之前在 myword 那次定的): 卡牌只能靠【抽卡 hansen_gacha.js】获得(花金币抽), 打 boss 不直接送卡
-    //   —— 否则抽卡经济失去意义、卡牌等于白嫖。打 boss 只记 d.collected(boss 通关进度, 每关独立、不串联)
-    //   + 给首通奖励, 绝不碰卡册。全局卡册(收藏)由【抽卡】唯一填充。⚠️ 别把 HansenCardbook.obtain 加回这里!
+    //   —— 否则抽卡经济失去意义、卡牌等于白嫖。打 boss 只记 d.collected(boss 通关进度, 每关独立、不串联),
+    //   绝不碰卡册、金币、经验或强化。正式 Boss 奖励只由岛页 + hansen_round_reward.js 结算。
+    //   全局卡册(收藏)由【抽卡】唯一填充。⚠️ 别把 HansenCardbook.obtain 或任何经济发奖加回这里!
     //   (check_resources 检查14 会守卫: markBossWin 里一旦出现 HansenCardbook.obtain → 直接拒绝打包。)
     
     // 检查是否集齐 20 张 → 卡牌大师
@@ -259,24 +279,35 @@
     // v166: force=true 强制写真实数据 (即使有 __isTemp 也写)
     saveData(d, true);
     
-    // v166: 临时态下不弹"新解锁" toast (用户视觉上 20 张全已亮, 弹"新解锁"很突兀)
-    // 但奖励仍然给 (Hansen 实打实通关应得)
+    // v166: 临时态下不弹完成展示 (用户视觉上 20 张全已亮, 再弹完成很突兀)。
+    // v941: 卡牌模块是只记录/展示消费者，绝不在这里暗发金币、经验、钻石或强化。
     var inTemp = isTempActive();
-    
-    // 触发奖励
-    if(newlyUnlocked){
-      // 🔴 BUG#48 (v469): 不再弹"卡牌解锁"toast(打 boss 已不送卡, 留着会假报"得到卡牌")。
-      //   保留首次通关该 boss 的钻石+经验奖励(这是通关奖励, 不是卡牌)。卡牌请去抽卡。
-      if(typeof window.addGem === 'function') window.addGem(20);
-      if(typeof window.addXP === 'function') window.addXP(200);
-    }
+
     if(masterNowUnlocked){
       if(!inTemp) setTimeout(showMasterUnlocked, 1800);
-      if(typeof window.addGem === 'function') window.addGem(500);
-      if(typeof window.addXP === 'function') window.addXP(2000);
     }
   }
   window.hansenCardsMarkBoss = markBossWin;
+
+  // v941: 只解析【这一场实际正在打的本地 Boss 序号】。
+  // 严禁回退 S.level：它是玩家 XP 段位，不是 Boss 关号，曾造成高段位玩家把错误关卡写进卡牌进度。
+  function resolveActualBossLv(){
+    var n, max = 20;
+    try { if(typeof BOSSES !== 'undefined' && BOSSES && BOSSES.length) max = BOSSES.length; } catch(e){}
+    try {
+      n = Number(window._hansenRebattleLv);
+      if(window._hansenRebattleLv != null && isFinite(n) && n >= 1 && n <= max) return Math.floor(n);
+      n = Number(window._s1Idx);
+      if(window._s1Idx != null && isFinite(n) && n >= 0 && n < max) return Math.floor(n) + 1;
+      if(typeof BOSSES !== 'undefined' && typeof bossCurrent !== 'undefined' && bossCurrent){
+        for(var i = 0; i < BOSSES.length; i++) if(BOSSES[i] === bossCurrent) return i + 1;
+      }
+      n = window.S && Number(window.S.bossCurrentLv);
+      if(isFinite(n) && n >= 1 && n <= max) return Math.floor(n);
+    } catch(e){}
+    return 0; // 没有权威关号就不记，宁可漏一条展示记录，也绝不把 XP 段位冒充 Boss 关号。
+  }
+
   // 🔴v866(Hansen: 大满贯进度器统计不准的根修): 暴露【本岛真实已通关关号】只读接口=islandClears权威数据(与卡册"已击败 boss X/20"同源)。进度器改读它, 不再自己靠 S.level(冒险等级·跨岛共享)瞎猜。
   window.getIslandClearedLevels = function(){
     try{
@@ -303,7 +334,7 @@
     t.innerHTML = '<img src="'+b.img+'" onerror="hansenImgErr(this)" style="width:64px;height:64px;border-radius:10px;background:#1e293b;border:2px solid '+r.border+'"/>' +
       '<div style="color:#fff"><div style="font-size:11px;color:#fef3c7;font-weight:700">🎴 新卡牌解锁!</div>' +
       '<div style="font-size:18px;font-weight:900;margin:2px 0">'+b.name+'</div>' +
-      '<div style="font-size:11px;opacity:0.9">'+r.name+' · Lv.'+b.lv+' · 奖励 +20 🪙</div></div>';
+      '<div style="font-size:11px;opacity:0.9">'+r.name+' · Lv.'+b.lv+' · 通关记录已点亮</div></div>';
     document.body.appendChild(t);
     setTimeout(function(){
       t.style.transition = 'all 0.5s ease-in';
@@ -322,7 +353,7 @@
       '<div style="font-size:120px;line-height:1">✨</div>' +
       '<div style="font-size:36px;font-weight:900;background:linear-gradient(90deg,#fbbf24,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0">卡牌大师!</div>' +
       '<div style="font-size:18px;font-weight:700;color:#fef3c7">收集全部 20 张 boss 卡牌</div>' +
-      '<div style="font-size:14px;color:#fde68a;margin-top:8px">奖励: +500 🪙</div>' +
+      '<div style="font-size:14px;color:#fde68a;margin-top:8px">20 关通关记录已全部点亮</div>' +
       '<button id="hanMasterUnlockOk" style="margin-top:20px;background:#fbbf24;color:#1e293b;border:none;padding:12px 32px;font-size:16px;font-weight:900;border-radius:12px;cursor:pointer">太棒了!</button>' +
       '</div>';
     document.body.appendChild(t);
@@ -446,7 +477,7 @@
       var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
       var ov = document.createElement('div');
       ov.id = 'hsnStoryModal';
-      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483646;background:radial-gradient(ellipse at 50% 18%,#1a1340 0%,#0d0a22 55%,#070512 100%);display:flex;flex-direction:column;opacity:0;transition:opacity .3s ease';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483646;background:radial-gradient(ellipse at 50% 18%,#1a1340 0%,#0d0a22 55%,#070512 100%);display:flex;flex-direction:column;opacity:0;transition:opacity .3s ease;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif';
       var stars='';
       for(var i=0;i<26;i++){ var x=(i*37+13)%100, y=(i*53+7)%100, s=(i%3)+1; stars+='<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;border-radius:50%;background:rgba(255,255,255,'+(0.22+(i%4)*0.12).toFixed(2)+')"></div>'; }
       var blocksHtml='';
@@ -471,7 +502,7 @@
           '</div>'+
         '</div>'+
         '<div style="position:relative;padding:12px 18px max(16px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(13,10,34,0),#0d0a22 35%)">'+
-          '<button id="hsnStoryClose" style="display:block;width:100%;max-width:640px;margin:0 auto;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.5)">'+esc(opts.btnLabel||'迈出第一步 →')+'</button>'+
+          '<button id="hsnStoryClose" style="display:block;width:100%;max-width:640px;margin:0 auto;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-family:system-ui,-apple-system,&quot;Segoe UI&quot;,&quot;Microsoft YaHei&quot;,sans-serif!important;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.5)">'+esc(opts.btnLabel||'迈出第一步 →')+'</button>'+
         '</div>';
       document.body.appendChild(ov);
       requestAnimationFrame(function(){ ov.style.opacity='1'; });
@@ -553,7 +584,7 @@
     html+='<div style="font-size:19px;font-weight:900;background:linear-gradient(90deg,#c4b5fd,#fde047,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent">\ud83d\udc51 星海女帝 · 终战</div>';
     html+='<div style="font-size:11.5px;color:#a78bca;margin:4px 0 10px">单词大陆 8 岛全通后 · 决战赛尔娅 · 考全部 240 词</div>';
     html+='<div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:#e9d5ff;font-weight:700">特效</span>'+hansenFxSwitchHTML()+'</div>';
-    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=938" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
+    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=960" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
     var _fp76h=false; try{ _fp76h=!!(window.HansenFreepass&&window.HansenFreepass.active()); }catch(_fe){}
     if(_lc>=8 || _fp76h){  //🔴v876: 72小时试用期女帝也可试打(限定卡/纪事解锁仍按真实进度)
       try{ if(window.S){ window.S.bossUnlocked=6; if(typeof window.save==="function") window.save(); } }catch(_se){}
@@ -921,7 +952,7 @@
         '<div style="flex:none;display:flex;align-items:center;gap:2px;color:#fbbf24;font-size:13px;font-weight:800">进入<span style="font-size:19px;line-height:1">›</span></div>'+
       '</div></div>';
 
-    // 🔴v883(Hansen): 卡册页底部追加【单词大陆图鉴】分区(39张land boss卡·独立卡池·独立存档)·不影响正片20张卡区。
+    // 🔴v955: 卡册页底部追加【单词大陆图鉴】分区(40张 Land Boss 卡·独立卡池·独立存档)·不影响正片20张卡区。
     try{ if(window.hansenRenderLandCardSection){ html += window.hansenRenderLandCardSection(); } }catch(e){}
     screen.innerHTML = html;
   }
@@ -969,7 +1000,7 @@
     mask.id='__hsn_bosshall';
     mask.style.cssText='position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe=document.createElement('iframe');
-    iframe.src='boss_hall.html?v=938&lv='+lv+'&own='+own.join(',');
+    iframe.src='boss_hall.html?v=960&lv='+lv+'&own='+own.join(',');
     iframe.setAttribute('title','BOSS 殿堂');
     iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -1043,10 +1074,9 @@
       window.__hansenCardsBossHooked = true;
       var origBossVictory = window.bossVictory;
       window.bossVictory = function(){
-        // v208: 重战模式优先用标记的 lv (因为 S.level 已被还原)
-        var lv = (window._hansenRebattleLv != null)
-                  ? window._hansenRebattleLv
-                  : ((window.S && window.S.level) || 1);
+        // v941: 重战取 _hansenRebattleLv；普通战取实际 boss 对象/权威 bossCurrentLv。
+        // 不得读取 S.level（玩家 XP 段位），无法确认真实关号时 resolveActualBossLv 返回 0 并安全跳过记录。
+        var lv = resolveActualBossLv();
         var isRebattle = (window._hansenRebattleLv != null);
         var ret = origBossVictory.apply(this, arguments);
         try{ markBossWin(lv); } catch(e){}
@@ -1139,7 +1169,47 @@
   //   注意 (诚实说明): 这【不能】抢占玩家手机的网速优先级 (那是操作系统管的, 网页无权干预),
   //   但能做到"趁玩家在玩别的时, 图早就在后台下载好了", 等点选关界面时直接从缓存读, 不走网络.
   //   这是网页能做到的最好效果.
+  // HF2 统一后台媒体门禁：只有浏览器明确报告 4G、非省流量、在线且页面
+  // 可见时才可以预载。Network Information API 缺失就是 unknown，必须保守禁止。
+  // 真正点进 Boss/例句时仍会正常按需加载，所以该门禁只节省可选的后台流量。
+  function canBackgroundMedia(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(p && typeof p.canBackgroundDownload==='function') return !!p.canBackgroundDownload();
+      var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      return !!c && !c.saveData && c.effectiveType==='4g' && navigator.onLine!==false &&
+        (!document.visibilityState || document.visibilityState==='visible') && !document.hidden;
+    }catch(e){ return false; }
+  }
+  function shouldYieldBackgroundMedia(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(p && typeof p.shouldYield==='function') return !!p.shouldYield();
+      if(!canBackgroundMedia()) return true;
+      return Date.now()<Math.max(window.__hansenUserActiveUntil||0,window.__hansenAudioBusyUntil||0);
+    }catch(e){ return true; }
+  }
+  var _mediaWaiters=[];
+  function waitForBackgroundMedia(fn){
+    if(typeof fn!=='function')return;
+    if(canBackgroundMedia()){setTimeout(fn,0);return;}
+    if(_mediaWaiters.indexOf(fn)<0)_mediaWaiters.push(fn);
+  }
+  function wakeBackgroundMedia(){
+    if(!canBackgroundMedia()||!_mediaWaiters.length)return;
+    var list=_mediaWaiters.slice();_mediaWaiters=[];
+    list.forEach(function(fn){setTimeout(function(){try{fn();}catch(e){}},0);});
+  }
+  try{
+    document.addEventListener('visibilitychange',wakeBackgroundMedia,{passive:true});
+    window.addEventListener('online',wakeBackgroundMedia,{passive:true});
+    var _mediaConn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+    if(_mediaConn&&typeof _mediaConn.addEventListener==='function')_mediaConn.addEventListener('change',wakeBackgroundMedia);
+    window.addEventListener('pagehide',function(){_mediaWaiters=[];},{once:true});
+  }catch(e){}
+
   function preloadBossImages(){
+    if(!canBackgroundMedia()){waitForBackgroundMedia(preloadBossImages);return;}
     if(window.__hansenBossImgPreloaded) return;
     window.__hansenBossImgPreloaded = true;
     
@@ -1152,13 +1222,16 @@
     var i = 0;
     function loadNext(){
       if(i >= imgs.length) return;
+      if(!canBackgroundMedia()){waitForBackgroundMedia(loadNext);return;}  // 条件改善后事件驱动续传
       // 用户正在操作 → 让路 (不和点击抢带宽)
       var ua = Math.max(window.__hansenUserActiveUntil || 0, window.__hansenAudioBusyUntil || 0);
-      if(Date.now() < ua){ var d=(ua-Date.now())+80; if(d>500)d=500; setTimeout(loadNext, d); return; }
+      if(shouldYieldBackgroundMedia() || Date.now() < ua){ var d=(ua-Date.now())+80; if(d<120)d=120;if(d>500)d=500; setTimeout(loadNext, d); return; }
       var src = imgs[i];
       i++;
       try {
         var img = new Image();
+        try{ img.fetchPriority='low'; }catch(_fp){}
+        try{ img.decoding='async'; }catch(_dc){}
         // 加载完(成功或失败)都继续下一张, 不卡住
         img.onload = function(){ setTimeout(loadNext, 120); };
         img.onerror = function(){ setTimeout(loadNext, 120); };
@@ -1193,6 +1266,7 @@
   //   
   //   做法: 从 window.allW 读本岛单词的 ex (例句), 查 SENTENCE_MAP 得到 mp3 编号, 后台预加载.
   function preloadSentenceAudio(){
+    if(!canBackgroundMedia()){waitForBackgroundMedia(preloadSentenceAudio);return;}
     if(window.__hansenSentAudioPreloaded) return;
     if(!window.SENTENCE_MAP || !window.allW) return;  // 数据还没加载, 等下次
     window.__hansenSentAudioPreloaded = true;
@@ -1214,9 +1288,10 @@
     var i = 0;
     function loadNextAudio(){
       if(i >= idxList.length) return;
+      if(!canBackgroundMedia()){waitForBackgroundMedia(loadNextAudio);return;}  // 条件改善后事件驱动续传
       // 用户正在操作 → 让路 (不和"点击发音"抢带宽; 本岛例句温柔后台备好)
       var ua = Math.max(window.__hansenUserActiveUntil || 0, window.__hansenAudioBusyUntil || 0);
-      if(Date.now() < ua){ var d=(ua-Date.now())+80; if(d>500)d=500; setTimeout(loadNextAudio, d); return; }
+      if(shouldYieldBackgroundMedia() || Date.now() < ua){ var d=(ua-Date.now())+80; if(d<120)d=120;if(d>500)d=500; setTimeout(loadNextAudio, d); return; }
       var idx = idxList[i];
       i++;
       try {
@@ -1239,6 +1314,7 @@
   //   且要等 SENTENCE_MAP 和 allW 都加载好, 加重试
   function trySentencePreload(tries){
     tries = tries || 0;
+    if(!canBackgroundMedia()){waitForBackgroundMedia(function(){trySentencePreload(tries);});return;}
     if(window.SENTENCE_MAP && window.allW){
       preloadSentenceAudio();
     } else if(tries < 20){

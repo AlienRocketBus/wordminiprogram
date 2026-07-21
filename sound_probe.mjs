@@ -6,12 +6,12 @@
  * 做法: 真触屏点击, 然后拦住 AudioContext 的 createOscillator / <audio>.play(),
  *       数一数【真的有没有发出声音】。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {
