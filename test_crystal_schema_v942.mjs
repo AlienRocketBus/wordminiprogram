@@ -40,7 +40,9 @@ const paid=new Map();c.HansenGems={
 vm.runInContext(fs.readFileSync(new URL('./hansen_crystal.js',import.meta.url),'utf8'),c,{filename:'hansen_crystal.js'});
 let result=c.HansenCrystal.reconcileCanonicalRewards();
 assert.equal(result.mastered,1,'只能统计一条合法 5 星完成记录');
-assert.deepEqual([...paid.entries()],[['crystal:word:action:1',4]]);
+/* 🔴v963 合同更新(用户2026-07-21要求逐星即时发钻): 历史done词对账时补齐第5星+1💎，
+ * 使人人5💎/词；大额4仍按旧收据发放。故新增 crystal:star:*:5 条目。 */
+assert.deepEqual([...paid.entries()],[['crystal:word:action:1',4],['crystal:star:action:1:5',1]]);
 assert.equal(paid.has('crystal:word:action:0'),false,'done="false" 不得发钻');
 assert.equal(paid.has('crystal:word:action:999'),false,'越界槽位不得发钻');
 assert.equal(paid.has('crystal:island:action'),false,'越界/伪记录不得凑成全岛奖');

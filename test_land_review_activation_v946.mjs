@@ -12,7 +12,9 @@ assert.match(review,/\/island_\(\[a-z0-9\]\+\)\\\.html\/i/,'review boot matcher 
 assert.doesNotMatch(review,/\/island_\(\[a-z\]\+\)\\\.html\/i/,'letters-only review matcher must never return');
 for(let number=1;number<=8;number++){
   const html=fs.readFileSync(path.join(ROOT,`island_land${number}.html`),'utf8');
-  assert.equal((html.match(/src="hansen_review\.js\?v=960"/g)||[]).length,1,`Land${number} must load exactly one v951 review runtime`);
+  /* 🔴v963 合同微调: 资源戳随候选版本演进(动态读VERSION)，"恰好加载一份复习运行时"的合同不变。 */
+  const appStamp=fs.readFileSync(path.join(ROOT,'VERSION'),'utf8').trim();
+  assert.equal((html.match(new RegExp(`src="hansen_review\\.js\\?v=${appStamp}"`,'g'))||[]).length,1,`Land${number} must load exactly one v951 review runtime`);
 }
 
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.css':'text/css; charset=utf-8','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.mp3':'audio/mpeg','.woff2':'font/woff2','.webmanifest':'application/manifest+json'};

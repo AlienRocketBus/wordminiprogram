@@ -3,13 +3,14 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=960;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=963;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
   var MAX_SAFE_INT=Number.MAX_SAFE_INTEGER||9007199254740991;
   // The v942 key is a persistent schema identity and must never be renamed.
-  // v960 accepts compatible journals v942-v946 and the formal v950-v960 line.
+  // v963 accepts compatible journals v942-v946 and the formal v950-v960 + v963 line.
+  // 🔴 v961/v962 已被用户永久淘汰(见交接墓碑)：其备份/日志必须继续失败关闭，绝不接受。
   // Skipped v947-v949 and future journals fail closed; the v942 key remains the schema identity.
   var RESTORE_JOURNAL='hansen_backup_restore_journal_v942',JOURNAL_SCHEMA=1,MIN_JOURNAL_APP_VERSION=942;
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
@@ -18,7 +19,7 @@
   var TRANSIENT_KEY=/(?:^|[_:\-.])(?:pending|journal|transaction|txn)(?:[_:\-.]|$)|(?:^|_)tmp(?:_|$)/i;
   var NESTED_TX={hansen_wallet_cardbook:1,hansen_diamond_shop:1,hansen_share_draw:1};
   function transientKey(k){return typeof k==='string'&&/^(?:wordIsland|hansen_|hsn_|bs_hall_|hs_showcase_)/.test(k)&&TRANSIENT_KEY.test(k);}
-  function supportedJournalAppVersion(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&((v>=MIN_JOURNAL_APP_VERSION&&v<=946)||(v>=950&&v<=CURRENT_APP_VERSION));}
+  function supportedJournalAppVersion(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&v!==961&&v!==962&&((v>=MIN_JOURNAL_APP_VERSION&&v<=946)||(v>=950&&v<=CURRENT_APP_VERSION));}
 
   // hansen_vocab_* 是从页面自带词库重建出来的派生缓存，不是玩家存档。
   // 它不能进入可移植备份，但恢复/回滚必须认识它：成功恢复时清除旧缓存，
@@ -461,7 +462,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v960_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v963_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
