@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -15,28 +18,22 @@ jobs:
       - name: Read VERSION file
         id: version
         run: |
-          VERSION=$(cat VERSION)
+          VERSION=$(cat VERSION | tr -d '[:space:]')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Release version: $VERSION"
+          echo "Release version: v$VERSION"
 
-      - name: Check if release already exists
-        id: check_release
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ steps.version.outputs.version }}")
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-
-      - name: Create GitHub Release
-        if: steps.check_release.outputs.status == '404'
-        uses: actions/create-release@v1
+      - name: Create GitHub Release (skip if exists)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          release_name: Release v${{ steps.version.outputs.version }}
-          body: |
-            Auto release for version ${{ steps.version.outputs.version }}
-          draft: false
-          prerelease: false
-
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping."
+          else
+            gh release create "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Release $TAG" \
+              --notes "Auto release for version ${{ steps.version.outputs.version }} (commit ${GITHUB_SHA})" \
+              --target "$GITHUB_SHA"
+            echo "Release $TAG created."
+          fi
