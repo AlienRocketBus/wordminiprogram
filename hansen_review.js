@@ -352,6 +352,8 @@
         '<button id="hr_today_back" style="margin-top:28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;border:0;padding:13px 32px;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer">返回复习中心</button>';
       document.body.appendChild(overlay);
       document.getElementById('hr_today_back').onclick = _todayBackToCenter;
+      /* 🔴v963样机: 主动打开确认今日无到期 → 连击不断签(total=0 不发完成金) */
+      try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:0, graduated:0, total:0}); }catch(e){}
       return;
     }
 
@@ -443,6 +445,8 @@
     }
 
     function finish(){
+      /* 🔴v963样机: 通知复习奖励模块(今日复习完成+20/连击); 模块不存在或非试点岛时静默跳过 */
+      try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:reviewed, graduated:graduated, total:total}); }catch(e){}
       overlay.style.background = 'linear-gradient(180deg,#064e3b 0%,#0f172a 100%)';
       overlay.innerHTML =
         '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px">' +
@@ -633,6 +637,7 @@
       </div>
       
       ${srsCard}
+      <div id="hr_rewards_slot"></div><!-- 🔴v963样机: 复习奖励状态卡插槽(模块填充·非试点岛为空) -->
       <div class="hr_section_title">🌧️ 温柔复习 (零压力)</div>
       
       <div class="hr_card" style="--c1:#1e1b4b;--c2:#312e81" onclick="window.HansenReview._openSpellByCn()">
@@ -679,6 +684,8 @@
     `;
     
     document.body.appendChild(overlay);
+    /* 🔴v963样机: 中心挂载后填充复习奖励状态卡(非试点岛模块不存在→插槽保持空) */
+    try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.fillCenterSlot(); }catch(e){}
   }
 
   // ─────────────────────────────────────────────
