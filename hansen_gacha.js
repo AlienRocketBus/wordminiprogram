@@ -1,4 +1,4 @@
-// hansen_gacha.js — 抽卡系统(独立外挂)
+// hansen_gacha.js v942 — 抽卡系统(含可恢复付费交易)
 // ============================================================
 // 抽卡核心 + 界面 + 揭晓动画 + 保底进度条。零侵入独立文件, 各岛引用即有。
 // 依赖: HansenCoins(花金币)、HansenCardbook(填卡册+保底计数)、BOSS_CARDS(卡牌数据,在hansen_cards.js)。
@@ -37,8 +37,8 @@
     return BASE.legendary + t * (100 - BASE.legendary);
   }
 
-  // 抽一次, 返回卡的 lv。内部处理保底计数。
-  function drawOnce(){
+  // 只决定本抽结果，不改存档。付费流程必须先写交易日志、再扣款、最后一次性入册。
+  function planDraw(){
     var pity = window.HansenCardbook ? HansenCardbook.getPity() : 0;
     var legRate = legendaryRate(pity);
     var r = Math.random()*100;
@@ -50,11 +50,22 @@
       var r2=Math.random()*restTotal, acc=0; rarity='common';
       for(var i=0;i<rest.length;i++){ acc+=BASE[rest[i]]; if(r2<acc){rarity=rest[i];break;} }
     }
-    if(window.HansenCardbook) HansenCardbook.bumpPity(gotLeg);
     // 从该稀有度的卡里随机一张
     var range={common:[1,4],uncommon:[5,8],rare:[9,12],epic:[13,16],legendary:[17,20]}[rarity];
     var lv = range[0] + Math.floor(Math.random()*(range[1]-range[0]+1));
-    return lv;
+    return {lv:lv,rarity:rarity,gotLegendary:gotLeg};
+  }
+  function txId(prefix){
+    var rnd='';
+    try{ if(window.crypto&&crypto.getRandomValues){ var a=new Uint32Array(2);crypto.getRandomValues(a);rnd=a[0].toString(36)+a[1].toString(36); } }catch(e){}
+    if(!rnd) rnd=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+    return prefix+Date.now().toString(36)+'_'+rnd;
+  }
+  // 兼容旧测试/外部调用：免费抽一次，但 pity 与卡牌必须原子落盘。
+  function drawOnce(){
+    var CB=window.HansenCardbook,plan=planDraw();
+    if(!CB||typeof CB.commitFreeDraw!=='function') return null;
+    return CB.commitFreeDraw(txId('legacy_'),plan.lv,plan.gotLegendary)?plan.lv:null;
   }
 
   // 找卡牌数据(从 BOSS_CARDS)
@@ -70,6 +81,7 @@
     cost: function(){ return GACHA_COST; },
     setCost: function(n){ GACHA_COST = n|0; },
     drawOnce: drawOnce,
+    planDraw: planDraw,
     legendaryRate: legendaryRate,
     HARD_PITY: HARD_PITY,
     open: openGachaScreen
@@ -173,17 +185,56 @@
   // 执行一次抽卡
   window.__hsnDoDraw = function(){
     var CB=window.HansenCardbook, CO=window.HansenCoins;
-    if(!CB || !CO){ alert('抽卡系统未就绪'); return; }
+    if(!CB || !CO || typeof CO.spend!=='function' || typeof CB.beginPaidDraw!=='function'){
+      alert('抽卡系统未就绪'); return;
+    }
+    var old=CB.recoverPaidDraw(CO,GACHA_COST);
+    if(old.status==='pending'){
+      showGachaToast('上一笔抽卡正在安全恢复，请稍后重试（不会重复扣币）'); return;
+    }
+    if(old.status==='committed'){
+      showGachaToast('上一笔已扣款抽卡已经恢复并入册 ✅');
+      try{ if(typeof updateTopBar==='function') updateTopBar(); }catch(eR){}
+      return; // 本次点击只恢复旧交易；必须再次点击才会开始并扣款一笔新抽卡。
+    }
     var cost=GACHA_COST;
-    if(CO.get() < cost){
+    var before=Number(CO.get());
+    if(!isFinite(before)||before < cost){
       showGachaToast('金币不够啦！多答题、打Boss赚金币吧 🪙');
       return;
     }
-    // 扣金币
-    CO.spend ? CO.spend(cost) : CO.add(-cost);
-    // 抽
-    var lv = drawOnce();
-    var result = CB.obtain(lv);  // {dup, lv, rarity, frag?}
+    var plan=planDraw(),id=txId('gacha_');
+    // 先写入“将获得哪张卡”的日志；准备失败时绝不扣款。
+    if(!CB.beginPaidDraw({id:id,cost:cost,beforeCoins:before,lv:plan.lv,gotLegendary:plan.gotLegendary})){
+      showGachaToast('抽卡记录无法保存，本次未扣金币，请释放存储空间后重试'); return;
+    }
+    // 不能只相信 spend() 的布尔返回：适配器可能“报成功但没扣款”，也可能
+    // “已经扣款却在回读时返回 false”。余额必须精确命中 WAL 中的 target 才能交付。
+    try{ CO.spend(cost); }catch(eSpend){}
+    var after=NaN;
+    try{ after=Number(CO.get()); }catch(eGet){}
+    if(after!==before-cost){
+      if(after===before){
+        CB.cancelPaidDraw(id);
+        showGachaToast('金币未实际扣除，本次抽卡已取消');
+      }else{
+        // 余额出现第三种值时不能猜测是否扣款；保留 prepared 日志供恢复，绝不发卡或二扣。
+        showGachaToast('金币余额发生非预期变化，抽卡记录已保留；本次没有发卡或再次扣款');
+      }
+      return;
+    }
+    // 只有严格回读证实扣款后才把运行期 proof 提交为 paid；stage 只是诊断字段，绝不是付款证明。
+    if(typeof CB.confirmPaidDraw!=='function'||!CB.confirmPaidDraw(id,CO,cost)){
+      showGachaToast('金币已扣，付款证明处于待恢复状态；本次暂不发卡，重载后会按同一交易继续');return;
+    }
+    CB.markPaidDrawSpent(id);
+    var result=CB.finalizePaidDraw(id,CO,cost);
+    if(!result){
+      showGachaToast('金币已扣，卡牌已进入待恢复记录；重新打开或再次点击会自动入册，不会重复扣币');
+      try{ if(typeof updateTopBar==='function') updateTopBar(); }catch(e0){}
+      return;
+    }
+    var lv=plan.lv;
     // 同步顶栏金币
     try{ if(typeof updateTopBar==='function') updateTopBar(); }catch(e){}
     // 触发成就判定(集卡成就)
@@ -195,23 +246,41 @@
   // ========== 分享送抽卡 ==========
   // 必须先花金币抽过(揭晓后才出分享按钮)。分享成功→免费抽1次。每天最多3次。
   var SHARE_MAX_PER_DAY = 3;
+  var SHARE_KEY = 'hansen_share_draw';
   function _today(){ try{ return (typeof today==='function')?today():new Date().toDateString(); }catch(e){ return new Date().toDateString(); } }
-  function shareCountToday(){
+  function _shareId(day,slot){return 'share_'+String(day).replace(/[^a-z0-9]+/gi,'_').slice(0,48)+'_'+slot;}
+  function readShareState(){
     try{
-      var raw=localStorage.getItem('hansen_share_draw');
-      if(!raw) return 0;
-      var o=JSON.parse(raw);
-      if(o.day!==_today()) return 0;
-      return o.count||0;
-    }catch(e){ return 0; }
+      var day=_today(),raw=localStorage.getItem(SHARE_KEY),o=raw?JSON.parse(raw):null;
+      if(!o||o.day!==day)return {version:942,day:day,count:0,pending:null};
+      var count=Math.max(0,Math.min(SHARE_MAX_PER_DAY,Math.floor(Number(o.count)||0))),p=o.pending;
+      if(!p||typeof p!=='object')p=null;
+      if(p){
+        var slot=Math.floor(Number(p.slot)),lv=Math.floor(Number(p.lv)),expected=_shareId(day,slot);
+        if(slot!==count+1||slot<1||slot>SHARE_MAX_PER_DAY||p.id!==expected||lv<1||lv>20||p.gotLegendary!==(lv>=17))p=null;
+        else p={id:expected,slot:slot,lv:lv,gotLegendary:p.gotLegendary};
+      }
+      return {version:942,day:day,count:count,pending:p};
+    }catch(e){ return {version:942,day:_today(),count:0,pending:null,unreadable:true}; }
   }
+  function writeShareState(s){try{var raw=JSON.stringify(s);localStorage.setItem(SHARE_KEY,raw);return localStorage.getItem(SHARE_KEY)===raw;}catch(e){return false;}}
+  function shareCountToday(){ return readShareState().count; }
   function shareLeftToday(){ return Math.max(0, SHARE_MAX_PER_DAY - shareCountToday()); }
   function canShareForDraw(){ return shareLeftToday() > 0; }
-  function bumpShareCount(){
-    try{
-      var c=shareCountToday()+1;
-      localStorage.setItem('hansen_share_draw', JSON.stringify({day:_today(), count:c}));
-    }catch(e){}
+  function prepareShare(){
+    var s=readShareState();if(s.unreadable||s.count>=SHARE_MAX_PER_DAY)return null;
+    if(s.pending)return s.pending;
+    var plan=planDraw(),slot=s.count+1;
+    s.pending={id:_shareId(s.day,slot),slot:slot,lv:plan.lv,gotLegendary:plan.gotLegendary};
+    return writeShareState(s)?s.pending:null;
+  }
+  function finishShare(){
+    var s=readShareState(),p=s.pending,CB=window.HansenCardbook;
+    if(!p||!CB||typeof CB.commitFreeDraw!=='function')return null;
+    var result=CB.commitFreeDraw(p.id,p.lv,p.gotLegendary);if(!result)return null;
+    var done={version:942,day:s.day,count:p.slot,pending:null};
+    if(!writeShareState(done))return {pending:true,id:p.id,lv:p.lv,result:result};
+    return {pending:false,id:p.id,lv:p.lv,result:result};
   }
 
   // 点"分享免费再抽"按钮
@@ -219,34 +288,32 @@
     if(!canShareForDraw()){ showGachaToast('今天的分享次数用完啦，明天再来～'); return; }
     // 调微信分享(由小程序壳层接 window.wxShareAppMessage 之类)。
     // 如果在微信小程序环境且壳层提供了分享方法, 调它; 分享成功后壳层会回调 window.onShareSuccess()。
-    if(typeof window.wxShareForGacha === 'function'){
-      try{ window.wxShareForGacha(); }catch(e){}
-      // 真实分享: 等小程序壳层分享成功后调 window.onShareSuccess() 来发免费抽卡
-      return;
+    if(typeof window.wxShareForGacha !== 'function'){
+      // 网页部署不能把“没有分享桥”伪装成分享成功；否则每天可白拿三抽。
+      showGachaToast('当前环境未接入分享能力，本次不会占用次数或发卡');return;
     }
-    // ===== 测试后门: 不在小程序环境时, 直接当分享成功(方便网页测试) =====
-    showGachaToast('（测试模式）已分享，赠送1次免费抽卡！');
-    window.onShareSuccess();
+    if(!prepareShare()){showGachaToast('分享抽卡计划无法保存，本次不会发卡，请释放存储空间后重试');return;}
+    try{ window.wxShareForGacha(); }catch(e){showGachaToast('分享能力调用失败；计划已保留，再次点击会安全重试');}
+    // 真实分享: 等小程序壳层分享成功后调 window.onShareSuccess() 来发免费抽卡
   };
 
   // 小程序壳层"分享成功"后调这个 → 发1次免费抽卡
   window.onShareSuccess = function(){
-    if(!canShareForDraw()){ return; }
-    bumpShareCount();
+    var paid=finishShare();if(!paid)return false;
     // 关掉当前揭晓层
     var ov=document.querySelector('.gacha-reveal-overlay'); if(ov) ov.remove();
-    // 免费抽1次(不扣金币)
-    doFreeDraw();
+    if(paid.pending){showGachaToast('免费卡已安全入册，分享次数正在恢复；再次回调或重载后不会重复发卡');return false;}
+    try{ if(typeof updateTopBar==='function') updateTopBar(); }catch(e){}
+    try{ if(typeof checkAch==='function') checkAch(); }catch(e2){}
+    showReveal(paid.lv,paid.result,false);
+    return true;
   };
 
-  // 免费抽1次(分享得来的, 不扣金币, 揭晓不再显示分享按钮防套娃)
-  function doFreeDraw(){
-    var CB=window.HansenCardbook; if(!CB) return;
-    var lv=drawOnce();
-    var result=CB.obtain(lv);
-    try{ if(typeof updateTopBar==='function') updateTopBar(); }catch(e){}
-    try{ if(typeof checkAch==='function') checkAch(); }catch(e){}
-    showReveal(lv, result, false);  // isPaid=false: 免费抽,揭晓不显示分享按钮
+  // 失败/取消不删除计划：用户再次点击会重试同一个槽位。这样即使“成功回调已发卡、
+  // 随后又误报失败”或卡册回读短暂失败，也绝不会释放槽位后再发第二张。
+  window.onShareFailure = function(){
+    var s=readShareState();if(!s.pending)return true;
+    showGachaToast('分享未完成；再次点击会安全重试同一个免费抽卡名额');return false;
   };
 
   // ========== 炫酷多阶段揭晓: 蓄力悬念 → 爆发闪光 → 卡片登场(稀有度越高越炫) ==========
@@ -473,8 +540,19 @@
   // ========== 自动注入抽卡入口(首页util-card区) ==========
   function injectEntry(){ /* 🔴 v594: 抽卡入口已移至游戏模式网格(火眼金睛旁, 用新joker图 gacha_joker_v594.webp, onclick=HansenGacha.open), 不再注入 util-card(Hansen: 去掉主题商店旁重复抽卡入口) */ }
 
-  // 启动: 注入入口(等DOM就绪)
-  function startGacha(){ injectEntry(); }
+  function recoverPaidDraw(silent){
+    var CB=window.HansenCardbook,CO=window.HansenCoins;
+    if(!CB||!CO||typeof CB.recoverPaidDraw!=='function') return {status:'unavailable'};
+    var r=CB.recoverPaidDraw(CO,GACHA_COST);
+    if(!silent&&r.status==='committed') showGachaToast('上次中断的抽卡已安全入册，没有重复扣币 ✅');
+    if(!silent&&r.status==='pending') showGachaToast('检测到待恢复抽卡，交易记录已保留，请勿清理浏览器数据');
+    try{ if(r.status==='committed'&&typeof updateTopBar==='function') updateTopBar(); }catch(e){}
+    return r;
+  }
+  window.HansenGacha.recoverPending=recoverPaidDraw;
+
+  // 启动: 钱包脚本位于本脚本之后，延迟到整页解析完再恢复交易。
+  function startGacha(){ injectEntry(); recoverPaidDraw(false); }
   if(document.readyState==='complete'||document.readyState==='interactive'){ setTimeout(startGacha,400); }
   else{ document.addEventListener('DOMContentLoaded', function(){ setTimeout(startGacha,400); }); }
 })();

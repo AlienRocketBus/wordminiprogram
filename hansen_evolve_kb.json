@@ -2,97 +2,6 @@
   "created": "2026-06-10_09-28-00",
   "history": [
     {
-      "ts": "2026-06-26_11-32-04",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_11-32-19",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_11-34-31",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_11-55-19",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_11-57-38",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_18-29-51",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-26_18-32-35",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-27_06-15-10",
-      "score": 84,
-      "E": 1,
-      "W": 2,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-27_06-20-09",
-      "score": 94,
-      "E": 0,
-      "W": 2,
-      "I": 19
-    },
-    {
-      "ts": "2026-06-27_06-23-22",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-27_06-24-11",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-27_09-09-25",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
-      "ts": "2026-06-27_09-13-03",
-      "score": 100,
-      "E": 0,
-      "W": 0,
-      "I": 20
-    },
-    {
       "ts": "2026-06-27_09-13-24",
       "score": 100,
       "E": 0,
@@ -1400,6 +1309,97 @@
       "E": 0,
       "W": 1,
       "I": 21
+    },
+    {
+      "ts": "2026-07-14_00-40-27",
+      "score": 87,
+      "E": 1,
+      "W": 1,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_00-41-52",
+      "score": 100,
+      "E": 0,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_00-59-32",
+      "score": 100,
+      "E": 0,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_01-06-26",
+      "score": 100,
+      "E": 0,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_07-57-20",
+      "score": 50,
+      "E": 5,
+      "W": 0,
+      "I": 19
+    },
+    {
+      "ts": "2026-07-14_09-37-42",
+      "score": 80,
+      "E": 2,
+      "W": 0,
+      "I": 19
+    },
+    {
+      "ts": "2026-07-14_09-42-09",
+      "score": 90,
+      "E": 1,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_10-39-27",
+      "score": 100,
+      "E": 0,
+      "W": 0,
+      "I": 21
+    },
+    {
+      "ts": "2026-07-14_20-44-15",
+      "score": 80,
+      "E": 2,
+      "W": 0,
+      "I": 18
+    },
+    {
+      "ts": "2026-07-14_21-30-03",
+      "score": 90,
+      "E": 1,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-14_21-31-22",
+      "score": 100,
+      "E": 0,
+      "W": 0,
+      "I": 20
+    },
+    {
+      "ts": "2026-07-17_06-55-33",
+      "score": 97,
+      "E": 0,
+      "W": 1,
+      "I": 19
+    },
+    {
+      "ts": "2026-07-17_09-58-37",
+      "score": 97,
+      "E": 0,
+      "W": 1,
+      "I": 20
     }
   ],
   "known": {
@@ -1485,24 +1485,24 @@
     },
     "监察官:性能|insp_0": {
       "first_seen": "2026-06-10_09-28-00",
-      "last_seen": "2026-06-17_21-29-10",
-      "count": 149,
+      "last_seen": "2026-07-17_09-58-37",
+      "count": 151,
       "sev": "WARN",
       "msg": "部署包体偏大: 总 70.9MB (words 6.3MB, sentences 12.3MB, bosses 9.7MB, mespeak 0.0MB)。首屏/弱网/老机加载慢。建议: 音频更狠压缩或按需加载, 大图压缩。",
       "resolved": "2026-06-10_15-02-10"
     },
     "知识库一致|ver_readme_drift": {
       "first_seen": "2026-06-10_11-49-04",
-      "last_seen": "2026-07-11_07-58-25",
-      "count": 148,
+      "last_seen": "2026-07-14_00-40-27",
+      "count": 149,
       "sev": "ERROR",
       "msg": "VERSION=526 但 README 首条当前版本=v527 —— 出版本后 README 行未插或插错位",
       "resolved": "2026-06-10_11-54-44"
     },
     "静态质检|check_resources": {
       "first_seen": "2026-06-10_15-02-10",
-      "last_seen": "2026-07-02_22-30-58",
-      "count": 37,
+      "last_seen": "2026-07-14_07-57-20",
+      "count": 41,
       "sev": "ERROR",
       "msg": "v529 外星霸主歼星协议轨道湮灭: ['wave 现役链路(混沌魔尊)被误删!']",
       "resolved": "2026-06-10_15-07-25"
@@ -1685,10 +1685,11 @@
     },
     "知识库一致|kb_missing_v888": {
       "first_seen": "2026-07-08_21-08-45",
-      "last_seen": "2026-07-13_10-15-56",
-      "count": 59,
+      "last_seen": "2026-07-14_00-40-27",
+      "count": 60,
       "sev": "WARN",
-      "msg": "代码里有 //🔴 v888 标记但 贾维斯_知识库.md 无【v888 条目"
+      "msg": "代码里有 //🔴 v888 标记但 贾维斯_知识库.md 无【v888 条目",
+      "resolved": "2026-07-14_00-41-52"
     },
     "备份同步|bk_zone_missing": {
       "first_seen": "2026-07-08_23-13-39",
@@ -1697,6 +1698,45 @@
       "sev": "WARN",
       "msg": "README 缺《## 🧰 核心开发工具 · 完整源码备份》区段",
       "resolved": "2026-07-08_23-16-07"
+    },
+    "监察官|inspector_failed": {
+      "first_seen": "2026-07-14_07-57-20",
+      "last_seen": "2026-07-14_09-42-09",
+      "count": 3,
+      "sev": "ERROR",
+      "msg": "监察官·静态(A+B+KB) 退出码 1/新报告=False；断言未完成",
+      "resolved": "2026-07-14_10-39-27"
+    },
+    "健康检查|health_full": {
+      "first_seen": "2026-07-14_09-37-42",
+      "last_seen": "2026-07-14_09-37-42",
+      "count": 1,
+      "sev": "ERROR",
+      "msg": "健康检查失败/未完成(❌×1, 退出码 1): ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell ╔════════════════════════════════════════════════════════════╗ ║ Looks like Playwright was just installed or updated.       ║ ║ Please run the following command to download new browsers: ║ ║                                                            ║ ║     npx playwright install                                 ║ ║                                                            ║ ║ <3 Playwright Team                                         ║ ╚════════════════════════════════════════════════════════════╝  ",
+      "resolved": "2026-07-14_20-44-15"
+    },
+    "经济平衡|eco_钻石主题 equip 校验已购": {
+      "first_seen": "2026-07-14_20-44-15",
+      "last_seen": "2026-07-14_20-44-15",
+      "count": 1,
+      "sev": "ERROR",
+      "msg": "经济不变量缺失: 钻石主题 equip 校验已购 —— equip 须校验已购(防后台白嫖)"
+    },
+    "监察官:主题|insp_0": {
+      "first_seen": "2026-07-14_20-44-15",
+      "last_seen": "2026-07-14_20-44-15",
+      "count": 1,
+      "sev": "ERROR",
+      "msg": "hansen_diamond_shop.js equip 缺 owned 校验, 可白嫖钻石主题",
+      "resolved": "2026-07-14_21-30-03"
+    },
+    "性能|sw_atomic_upgrade_regress": {
+      "first_seen": "2026-07-14_21-30-03",
+      "last_seen": "2026-07-14_21-30-03",
+      "count": 1,
+      "sev": "ERROR",
+      "msg": "v943→v944 首载原子升级门缺失或顺序回退，可能执行新HTML+旧同名脚本的混版",
+      "resolved": "2026-07-14_21-31-22"
     }
   },
   "resolved_guards": [
@@ -1879,83 +1919,116 @@
       "fp": "备份同步|bk_zone_missing",
       "resolved": "2026-07-08_23-16-07",
       "msg": "README 缺《## 🧰 核心开发工具 · 完整源码备份》区段"
+    },
+    {
+      "fp": "知识库一致|kb_missing_v888",
+      "resolved": "2026-07-14_00-41-52",
+      "msg": "代码里有 //🔴 v888 标记但 贾维斯_知识库.md 无【v888 条目"
+    },
+    {
+      "fp": "监察官|inspector_failed",
+      "resolved": "2026-07-14_10-39-27",
+      "msg": "监察官·静态(A+B+KB) 退出码 1/新报告=False；断言未完成"
+    },
+    {
+      "fp": "健康检查|health_full",
+      "resolved": "2026-07-14_20-44-15",
+      "msg": "健康检查失败/未完成(❌×1, 退出码 1): ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell ╔════════════════════════════════════════════════════════════╗ ║ Looks like Playwright was just installed or updated.       ║ ║ Please run the following command to download new browsers: ║ ║                                                            ║ ║     npx playwright install                                 ║ ║                                                            ║ ║ <3 Playwright Team                                         ║ ╚════════════════════════════════════════════════════════════╝  "
+    },
+    {
+      "fp": "监察官:主题|insp_0",
+      "resolved": "2026-07-14_21-30-03",
+      "msg": "hansen_diamond_shop.js equip 缺 owned 校验, 可白嫖钻石主题"
+    },
+    {
+      "fp": "性能|sw_atomic_upgrade_regress",
+      "resolved": "2026-07-14_21-31-22",
+      "msg": "v943→v944 首载原子升级门缺失或顺序回退，可能执行新HTML+旧同名脚本的混版"
     }
   ],
   "file_hashes": {
-    "island_action.html": "8affed66f45f9646fc380b78eaf77eaf",
-    "island_adjective.html": "bf2f1e6440403b44a79a87de5cc2b071",
-    "island_animal.html": "1490caba87d616baccf07b4d6a5f8765",
-    "island_body.html": "588e2681cdd496a1601970819626658c",
-    "island_city.html": "50b13193b8f0a627087603d079ceb2ef",
-    "island_clothes.html": "c42538b0b5ec2d49d695cb7afe77c8d1",
-    "island_color.html": "21bbe6dfbe7e077e80c7f2f892582d1b",
-    "island_family.html": "89ad48dfbae4b9b1d58f47f587218c17",
-    "island_food.html": "b6aa0751cefc925db18f30e8d93b06f1",
-    "island_home.html": "7e9b4381198877abb81b3690567ac40a",
-    "island_job.html": "371a462185d8db7688769a47c5af8c54",
-    "island_land1.html": "14b08888e995658ef92c58385684beb1",
-    "island_land2.html": "067761ae1f4aee7943f2a9175718cded",
-    "island_land3.html": "69e40b5d57865e0d3e0756e8a084a6f0",
-    "island_land4.html": "608ec02c070174cd8db0d1427e88cc0a",
-    "island_land5.html": "ccded446da9546a311d0f10e5341b4c9",
-    "island_land6.html": "2e82889ce0557a2f95fc37bc62fbbaf4",
-    "island_land7.html": "410926ce1f204bd0a01354b9a7aaec21",
-    "island_land8.html": "aac46162b09f5b7a6c248307b7fd1757",
-    "island_nature.html": "a3e16aa090d0b66393448aba8c5ef026",
-    "island_question.html": "700e867870cdbb61348959336be0c3c1",
-    "island_school.html": "597e0ab054a2c016dd271b7f7e38008a",
-    "island_season.html": "d6437966b26a4cd0ea4afbd148494eea",
-    "island_sports.html": "163f93cdfe4ec8b3aa6c0c75f0c0bc0a",
-    "island_time.html": "467792f4b551d8cfaaa6c53810d6abca",
-    "island_traffic.html": "874c1baeef4a46ba460c5c6c1589cf1a",
-    "island_treasure.html": "afc6f7a1d88bbf6fcefa7c5394fbee57",
-    "hansen_ach_wallet.js": "7c728c93df3706f376cf5f44c352b617",
-    "hansen_addiction.js": "2d73c1b5b5a404f871f82c37aa2c3816",
-    "hansen_avatar.js": "7056b59e318794abda122aa873a04e76",
+    "island_action.html": "50b8b61edd353cca8fd3dfebf2bd30df",
+    "island_adjective.html": "b66b3fed4fbade7e4e99c0777c66b268",
+    "island_animal.html": "ef40363010c9150b74f10318e6193375",
+    "island_body.html": "7f962e698766af9de87408346dcd0a52",
+    "island_city.html": "05496b98fd3689a86e731e2ef48bf1a8",
+    "island_clothes.html": "d04de901ee8bc1c927c6d1fc9918a784",
+    "island_color.html": "0bef59c2cda2d15619db9c86085f5b5c",
+    "island_family.html": "a012bbd099d9d67f84d9c829b43791a7",
+    "island_food.html": "6c1193c4eba35d8395f06719e9717038",
+    "island_home.html": "06bc78b930a75dc67c6ac48b788c196b",
+    "island_job.html": "57e94efac6ed534562df755357c3da92",
+    "island_land1.html": "4d0eca46348f67542ae53462857ced1b",
+    "island_land2.html": "195126bca13fa7df4e647daa2e6f4bd1",
+    "island_land3.html": "9e4ac61fe1dcbf959be7fe0a8c570416",
+    "island_land4.html": "5fd06ec391636e916379d45e72609ba8",
+    "island_land5.html": "cb8f513dd5d898758483a71354b3d45c",
+    "island_land6.html": "bc19318a90e4f5f4bde5d36a9e92e4d8",
+    "island_land7.html": "905fe6d832599e0df2b05b1412d8bd20",
+    "island_land8.html": "4ed3fdf758cff768188291106a1c5f8a",
+    "island_nature.html": "c829ece09947b1d88a2e0594264e8633",
+    "island_question.html": "df257d2b92687856902974658ba2e2b5",
+    "island_school.html": "8b4a5577442590a5bbd442b66df00a99",
+    "island_season.html": "08e5a3c94a27a863e279ca6f930af9fc",
+    "island_sports.html": "91568c85626a665c7c5c7b3333fdd37d",
+    "island_time.html": "9679400bfb4503fa5573a1fad2d26913",
+    "island_traffic.html": "0411484f911851c71b4cc28d51605a40",
+    "island_treasure.html": "e23bafda50cbb2ce78eb30c9d1d20555",
+    "hansen_accessibility.js": "844a93a1e3f9faca6f57fd9ce139dd96",
+    "hansen_ach_wallet.js": "797b097df8a6bc1e297d93bb5682119e",
+    "hansen_addiction.js": "dcf8cda1ae86b4676663db3d14c9c0fa",
+    "hansen_avatar.js": "80fd254c4f45f3020be8e6dca8dadef0",
+    "hansen_backup_bootstrap_v944.js": "23f708184d201586c7ff0a44c1e8226a",
+    "hansen_backup_v944.js": "5c1fc96b9d93dd54a8cef550b4a18f16",
     "hansen_boss_anim.js": "d1cd578c5b4fb74d387b17f6f2a7d099",
-    "hansen_boss_attack.js": "b13f20984ebefa4457431b36a1147c61",
-    "hansen_boss_lock.js": "7d80e0102005cf009d635e59b16a83bf",
+    "hansen_boss_attack.js": "e231098f67fb23246e3fb163f4790b5a",
+    "hansen_boss_lock.js": "7ca981f050dd7ef7fe464326345fe255",
     "hansen_boss_progress.js": "a5fe7c517b41d2edf519cac02a236636",
-    "hansen_boss_theme.js": "4c4a7027b5a3adfeb481253d6e3ba382",
-    "hansen_cardbook_wallet.js": "33eeeb06664b88e3882785f130f70e70",
-    "hansen_cards.js": "c54d34de47e3a3e98a6088b372fe436d",
-    "hansen_checkin_global.js": "89a354ce634c7e5674c2d34dec1fad13",
-    "hansen_cinema_themes.js": "421cf4403dac9ab2d842cbcf1f9ceaa4",
-    "hansen_coin_wallet.js": "b9178a8416e5200c8c7ed308ea722b8b",
-    "hansen_crystal.js": "b9701d9986795b298aab6ffd3aabfc5e",
-    "hansen_diamond_shop.js": "c17ba32271b645bd71ede076b98e629e",
+    "hansen_boss_theme.js": "fb9954bff1d26137c5cc4790ee0b3704",
+    "hansen_canonical_progress.js": "67ed67babad19c184c29cd085e45388e",
+    "hansen_cardbook_wallet.js": "aadd385a1737aa223bf60f3f711950f9",
+    "hansen_cards.js": "e3922bd2583ddb58f43925e2fd0f36d4",
+    "hansen_checkin_global.js": "b191b91b2779e542f2535a30f40227e2",
+    "hansen_cinema_themes.js": "04d01f5b924ac1d53de673b29ad24382",
+    "hansen_coin_wallet.js": "3263e5f64c79c9377aefceda82a55895",
+    "hansen_crystal.js": "d2a826130717c1f3d70777536e547599",
+    "hansen_diamond_shop.js": "39a67a4e362218042e9e90feafb8a486",
     "hansen_early.js": "c2b3f959e6a2b03bfc67be5160835889",
-    "hansen_econ_guide.js": "f0384433de2384ea60a939f70164c2dd",
+    "hansen_econ_guide.js": "25f7015890dab044377f33bb50796e7b",
     "hansen_ex_audio.js": "7643448d5a9a921cbc3f19c18425b92c",
+    "hansen_explore_progress_v945.js": "28b129308195d889ff710a6942a4fe48",
+    "hansen_focused_typing_v946.js": "401473ad1be590fb9d67209fff74c04b",
     "hansen_freepass.js": "22badac21d462e12272b630ab4b7deb3",
-    "hansen_gacha.js": "648638191246ddc079673e9e0ea49c53",
-    "hansen_game_antifreeze.js": "db5980509179fb71dfc780890b669092",
-    "hansen_gear.js": "f9aa9a6e9cc84cc7e8a71558e3313daa",
-    "hansen_gem_system.js": "0a72a393e10cc12fae6b344eef869285",
+    "hansen_gacha.js": "8effc2eeee64a8c8d1db6c6323b89702",
+    "hansen_game_antifreeze.js": "3288f5749a4178c19c3bcbda4e1a31af",
+    "hansen_gear.js": "ff868c843c27c56239d682356eee8e42",
+    "hansen_gem_system.js": "421d3077f811cc717628dfbaa19a3018",
     "hansen_home_link.js": "58f2e395022c1739d3ae80e264a4c641",
-    "hansen_island_upgrade.js": "21bd273fb40d6043dd8b98519ffe342c",
-    "hansen_land_cards.js": "aa8ea8509caead1007573a9344346c84",
+    "hansen_island_upgrade.js": "48e7a0fec87d03214b1b9f4df3a1b772",
+    "hansen_land_cards.js": "352317eb59c21adc06c8e04ff823f3a8",
     "hansen_mute.js": "ad8df86104d8db7cd8a4094f8beaa595",
-    "hansen_mylearning.js": "e95eec32faf0f501435b91bf31fb7a91",
-    "hansen_onboarding.js": "b49d687ee5c8e886d8190a5705d51636",
-    "hansen_palette.js": "97c367fe762d363406d198020edf0563",
-    "hansen_perf.js": "4243ed068fe418b1a1e62336eddfa4c2",
-    "hansen_pet_showcase.js": "43fc9b675f452d4b74eddbccb4206cdd",
-    "hansen_preload.js": "19f289674af4ba2f3002aac1708fd491",
-    "hansen_review.js": "29d8d01819e2416d69731c6024b28d33",
-    "hansen_round_bar.js": "d9b4771777d1c148a9905af97b5d331a",
-    "hansen_round_reward.js": "c6f2cf07acd31772e890bb0180c3bd28",
-    "hansen_season.js": "e1dfe214cff7042c12557523325f60c1",
-    "hansen_spell_practice.js": "d6fa359696c7b931cbd7ebd77584ebd0",
-    "hansen_spellbee.js": "5613437cfd850dbbcfd576188174b142",
-    "hansen_spellbee_gems.js": "af1a3554f41788d992a7161b296342a2",
+    "hansen_mylearning.js": "b35003babf321ffa510973ed95d0a070",
+    "hansen_onboarding.js": "b659658b1e0197aca585dae9ff514087",
+    "hansen_palette.js": "60b5ba883872c48cb84a0929a4d82650",
+    "hansen_perf_v944.js": "f07c2f1a0b5e5aec8a98e4253d3c81b9",
+    "hansen_pet_showcase.js": "4cd88be67b4cabbe573dffeaa5f1e542",
+    "hansen_preload.js": "f262d8dda5cc9f0719e5c98e9a0720a0",
+    "hansen_quest_global.js": "4b84baa9871af2aeab1e4a36b750be09",
+    "hansen_review.js": "b8d0f5ad4689152336ca56c65a603821",
+    "hansen_round_bar.js": "29e0d661f7eee22b22d170266454f737",
+    "hansen_round_reward.js": "933a9bb3e1d7053f3ec58f0c6c6b1ce9",
+    "hansen_season.js": "05f5bdaf08e9f7cac3cf565f462a210e",
+    "hansen_spell_practice.js": "72c51cd8c0488d1cdb4256fbc953ddc9",
+    "hansen_spellbee.js": "d8ff1affaa2ec06e5028874d041074cc",
+    "hansen_spellbee_gems.js": "066b6f27eeeff2375b3627a90e829438",
     "hansen_stability.js": "d1a97fa95d630a84972139ce2e6bfed1",
-    "hansen_theme_lock.js": "efb4d59e55b6ae5b62a5dc18cfa84b41",
-    "hansen_theme_shop.js": "1b6ff883858bda3755a8cc2896745e9e",
-    "hansen_totals_wallet.js": "66a479e50127cc6a3110155823d22e04",
+    "hansen_sw_upgrade_gate_v944.js": "a0a161315ce6f51a08ff61b939d915a6",
+    "hansen_theme_lock.js": "00c6627e313c707a262b3ed760adde1e",
+    "hansen_theme_shop.js": "cc63c60d6622400eabd9ac4cc67e3933",
+    "hansen_totals_wallet.js": "3824c9e600a0fe021b20db857c7e8602",
     "hansen_upgrade.js": "ac512b39882112c2977fda962af681bc",
     "hansen_weapon_fx.js": "7486e8a6422aad183a97848b9d9ad4dc",
-    "hansen_wrong_overview.js": "1853d47df6c9b6c4a41b1326d160b1f5",
-    "word_map.js": "33501da91e6bc5dcb25b961470bc1e99"
+    "hansen_wrong_overview.js": "c27a1118571dce178b771536b9bc952e",
+    "word_map.js": "3b4d43afff30cfb2d0a99422408c0e24"
   }
 }

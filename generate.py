@@ -38,6 +38,7 @@ def generate(tpl, d):
 def main():
     tpl = open('template.html', encoding='utf-8').read()
     data = json.load(open('island_data.json', encoding='utf-8'))
+    key_slots = tpl.count(PH['KEY'])
     for name, ph in PH.items():
         if tpl.count(ph) < 1:
             print("❌ 模板缺占位符: %s (%s)" % (name, ph)); sys.exit(1)
@@ -47,7 +48,10 @@ def main():
         leftover = sum(html.count(ph) for ph in PH.values())
         if leftover:
             print("❌ %s 生成后占位符残留 %d 处" % (key, leftover)); sys.exit(1)
-        if d['zh'] not in html or html.count(d['key']) < 11:
+        # v942 把多份岛内经济/重置状态收口到全局权威账本后，模板里的存档 key
+        # 槽位从历史上的 11 个降为 4 个。断言应跟随模板真实槽位数，而不是把旧架构
+        # 的魔法数字当成质量门槛；任何槽位漏替换仍会被 leftover 检查拦住。
+        if d['zh'] not in html or html.count(d['key']) < key_slots:
             print("❌ %s 岛名/key 注入异常" % key); sys.exit(1)
         if ("HansenSpellBee.open('%s')" % d['short_key']) not in html:
             print("❌ %s 拼写对战短key注入异常" % key); sys.exit(1)

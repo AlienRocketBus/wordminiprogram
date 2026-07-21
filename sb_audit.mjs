@@ -11,7 +11,7 @@
  *   三个数必须一样。少一个词都算 bug。
  * ★ 并且把【差在哪几个词】逐个列出来 —— 这样才能修得准。
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 import fs from 'fs';
 
 const PORT = process.argv[2] || '8877';
@@ -28,7 +28,7 @@ function islandKeys() {
 }
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const list = islandKeys();
   console.log(`  共 ${list.length} 个岛\n`);
   console.log('  岛                       岛上真实词数   拼写蜂能考到   差额   判定');

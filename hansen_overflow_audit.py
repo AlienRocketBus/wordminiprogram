@@ -135,7 +135,12 @@ def main():
 
     findings = []
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        executable = (os.environ.get("HANSEN_CHROMIUM_PATH")
+                      or os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"))
+        launch_options = {"args": ["--no-sandbox"]}
+        if executable:
+            launch_options["executable_path"] = executable
+        browser = p.chromium.launch(**launch_options)
         for isl in islands:
             for (W, H) in VIEWPORTS:
                 page = browser.new_page(viewport={'width': W, 'height': H}, device_scale_factor=2)

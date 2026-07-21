@@ -25,7 +25,7 @@
   var curIdx = 0;
   var curMode = 'cn';
   var curKeyHandler = null;   // 物理键盘 handler (切题/关闭时移除)
-  var stats = { correct: 0, wrong: 0, total: 0 };
+  var stats = { correct: 0, assisted: 0, wrong: 0, total: 0 };
   // 🔴 BUG#51 (v471): 锁住整页滚动用 —— 复习/拼写练习是全屏覆盖层, 必须锁 body 滚动,
   // 否则手指在键盘上稍微上滑就会滚动背后的长页面、右侧冒出滚动条、没法打字。
   var _hspPrevHtmlOverflow = '';
@@ -143,7 +143,7 @@
     curMask = null;
     curWords = [];
     curIdx = 0;
-    stats = { correct: 0, wrong: 0, total: 0 };
+    stats = { correct: 0, assisted: 0, wrong: 0, total: 0 };
     // 🔴v784/v789 从复习页进来→关闭后回复习中心(零遮罩·见上)·叉号/返回键/超时关闭都走这
   }
 
@@ -186,6 +186,7 @@
     var target = (w.en || '').toLowerCase();
     var targetLetters = target.replace(/ /g, '').length;
     var typed = '';   // 已输入字母 (不含空格)
+    var hintUsed = false; // HF2: 用过任何字母提示就不再算“独立正确”。
 
     var prompt = curMode === 'listen'
       ? '<div style="font-size:13px;color:#94a3b8">听发音, 拼写单词:</div>'
@@ -262,8 +263,13 @@
       var isRight = typed.toLowerCase() === target.replace(/ /g, '');
       colorSlots(isRight ? '#22c55e' : '#ef4444');
       if(isRight){
-        stats.correct++;
-        if(hintEl) hintEl.innerHTML = '<span style="color:#22c55e;font-weight:900">✓ 正确!</span>';
+        if(hintUsed){
+          stats.assisted++;
+          if(hintEl) hintEl.innerHTML = '<span style="color:#fbbf24;font-weight:900">✓ 练习完成</span> <span style="color:#cbd5e1">· 使用了提示，不计独立答对</span>';
+        }else{
+          stats.correct++;
+          if(hintEl) hintEl.innerHTML = '<span style="color:#22c55e;font-weight:900">✓ 独立正确!</span>';
+        }
         try { if(window.playCorrect) window.playCorrect(); } catch(e){}
       } else {
         stats.wrong++;
@@ -309,6 +315,7 @@
     }
     function hspHint(){
       if(answered || myToken !== sessionToken) return;
+      hintUsed = true;
       var nonSpace = target.replace(/ /g, '');
       if(typed.length < nonSpace.length){
         typed += nonSpace[typed.length];
@@ -375,7 +382,8 @@
       '<div style="font-size:24px;font-weight:900;color:#fbbf24;margin-bottom:8px">'+msg+'</div>' +
       '<div style="font-size:14px;color:#cbd5e1;margin-bottom:24px">本次练习完成</div>' +
       '<div style="display:flex;justify-content:space-around;background:rgba(15,23,42,0.5);border-radius:14px;padding:18px 0;margin-bottom:24px">' +
-      '<div><div style="font-size:28px;font-weight:900;color:#22c55e">'+stats.correct+'</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">答对</div></div>' +
+      '<div><div style="font-size:28px;font-weight:900;color:#22c55e">'+stats.correct+'</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">独立答对</div></div>' +
+      '<div><div style="font-size:28px;font-weight:900;color:#fbbf24">'+stats.assisted+'</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">提示完成</div></div>' +
       '<div><div style="font-size:28px;font-weight:900;color:#ef4444">'+stats.wrong+'</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">答错</div></div>' +
       '<div><div style="font-size:28px;font-weight:900;color:#fbbf24">'+rate+'%</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">正确率</div></div>' +
       '</div>' +
@@ -407,7 +415,7 @@
     curMode = mode;
     curWords = words.slice();
     curIdx = 0;
-    stats = { correct: 0, wrong: 0, total: words.length };
+    stats = { correct: 0, assisted: 0, wrong: 0, total: words.length };
 
     curMask = document.createElement('div');
     curMask.id = 'hsp_mask';

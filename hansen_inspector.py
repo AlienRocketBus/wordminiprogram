@@ -10,7 +10,7 @@ v2 相比 v1 的升级:
   ★ 内置《超详细清单》体检大纲 (RUBRIC): 每次启动按清单**逐项检查**, 输出
     「按清单打勾的体检表」—— 能静态查的自动 ✅/❌, 能浏览器查的真实加载查,
     逻辑类交 AI 层, 需真机的明确标 👁(需眼检) 并告诉你看什么。
-  ★ 新增大量静态检查: mp3 缓存戳一致性 / 18岛联动矩阵 / 孤儿文件 / boss 防重复
+  ★ 新增大量静态检查: mp3 缓存戳一致性 / 27页联动矩阵 / 孤儿文件 / boss 防重复
     与计时器守卫 / 存读档健壮性 / 包体性能。
   ★ 浏览器层增强: 手机视口(360x640)下查横向溢出 + 赛季 boss 战斗界面是否超屏。
   ★ 修复工单 (--fix): 把所有发现连同**精确位置 + 修复建议**写成工单文件。
@@ -38,6 +38,7 @@ v2 相比 v1 的升级:
 ================================================================================
 """
 import os, re, sys, json, glob, socket, time, subprocess, datetime
+from pathlib import Path
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 os.chdir(ROOT)
@@ -63,6 +64,7 @@ def setstat(rid, icon, detail=""):
 ISLAND_NAMES = ["action","adjective","animal","body","city","clothes","color","family",
                 "food","home","job","nature","question","school","season","sports",
                 "time","traffic","treasure"]
+WORD_MAP_EXPECTED = 696
 
 # 应全岛接入的共享模块 (动物岛=原始岛, 不加载 island_upgrade, 属已知例外)
 SHARED_MODULES = ["hansen_coin_wallet","hansen_gem_system","hansen_diamond_shop","hansen_gacha",
@@ -81,8 +83,8 @@ KB = [
      "cat":"结算", "sev":ERROR, "type":"review", "fixed":"加3秒防重锁",
      "note":"任何'胜利/结算'入口都要有防重触发锁; AI 层重点审 award/settle 是否可能被调两次。"},
     {"id":"season_hooks_homepage_only", "title":"赛季钩子只挂首页、没挂全部岛",
-     "cat":"赛季/一致性", "sev":ERROR, "type":"review", "fixed":"全18岛接入",
-     "note":"任何系统性功能(赛季/签到/成就/货币)必须18岛+首页全接(铁律0.9)。"},
+     "cat":"赛季/一致性", "sev":ERROR, "type":"review", "fixed":"全27页接入",
+     "note":"任何系统性功能(赛季/签到/成就/货币)必须19个主/星海页+8个Land页全接。"},
     {"id":"timer_race", "title":"计时器竞态: 答对/退出/切屏后倒计时没停",
      "cat":"计时器", "sev":ERROR, "type":"review", "fixed":"-",
      "note":"答对、退出、切后台、最后一题都要 clearInterval/clearTimeout。"},
@@ -141,7 +143,7 @@ RUBRIC = [
     ("F.mp3v",    "版本",   "mp3 戳 ?vNNN 一致 (改mp3必升)", "static"),
     ("F.redbar",  "版本",   "运行时无版本不一致红条", "browser"),
     # ---- 音频 ----
-    ("G.vol",     "音频",   "154 词发音音量统一 (v399已归一化)", "manual"),
+    ("G.vol",     "音频",   "本地映射发音音量统一（以音频守卫为准）", "manual"),
     ("G.sentvol", "音频",   "例句音频音量是否也统一", "manual"),
     ("G.mute",    "音频",   "静音开关全声音生效/跨岛一致/记忆", "manual"),
     ("G.tts",     "音频",   "真人mp3缺失回退TTS且国内可用", "manual"),
@@ -150,7 +152,7 @@ RUBRIC = [
     ("H.safe",    "UI",     "刘海/灵动岛/底部安全区不遮挡", "manual"),
     ("H.touch",   "UI",     "按钮够大(≥44px)/间距/不误触", "manual"),
     ("H.longtxt", "UI",     "超长单词/例句/名称不撑破卡片", "manual"),
-    ("H.consist", "UI",     "18岛+首页 配色/字体/圆角/组件 视觉规格统一", "manual"),
+    ("H.consist", "UI",     "27页+首页 配色/字体/圆角/组件视觉规格统一", "manual"),
     ("H.space",   "UI",     "空间利用合理(留白/层级/首屏黄金区)", "manual"),
     ("H.theme",   "UI",     "换主题后文字对比度够/不撞色", "manual"),
     # ---- 18 岛统一 / 联动 ----
@@ -159,10 +161,10 @@ RUBRIC = [
     ("I.wallet",  "联动",   "全局钱包跨岛真共享(非各岛各算)", "manual"),
     ("I.cards",   "联动",   "卡册/抽卡跨岛累计同一套", "manual"),
     # ---- 系统性 ----
-    ("J.season",  "系统",   "赛季钩子全岛接入 (KB)", "static"),
-    ("J.signin",  "签到",   "★★每日宝箱跨岛只领一次 (v411/v431修复的【重大bug】, 重点必查): 领1岛 → 其余【全部18岛】逐个验, 必须全金币Δ=0 且不可点开 + 连签全局统一", "browser"),
-    ("J.seasoniso","赛季",   "★★赛季积分隔离 (v441修复的【重大bug】, 重点必查): 其余【全部18岛】答对题/打boss 赛季积分必须全Δ=0, 仅赛季岛 island_season.html 累加(否则18岛答题全在替赛季boss答题)", "browser"),
-    ("J.signw",   "签到",   "★签到修复在位: hansen_checkin_global.js存在+19岛全引用+addiction稀有度闸门 (防修复被删)", "static"),
+    ("J.season",  "系统",   "赛季只读展示/重复 Boss 守卫模块全岛接入", "static"),
+    ("J.signin",  "签到",   "★★每日宝箱跨页只领一次: 领1岛 → 其余26个普通/星海/Land页面逐个验, 必须全金币Δ=0 且不可点开 + 连签全局统一", "browser"),
+    ("J.seasoniso","赛季",   "★★旧赛季积分永久只读: 全27个普通/星海/Land页面模块在位，答题/Boss/addPoints 均不得改旧积分或防刷账本", "browser"),
+    ("J.signw",   "签到",   "★v942正式签到receipt在位: 全岛引用+addiction权威回读校验", "static"),
     ("J.empty",   "系统",   "赛季空窗期加分/抽卡不报错", "ai"),
     # ---- 抽卡 / 卡册 ----
     ("K.pity",    "抽卡",   "保底(软/硬)概率正确 (需模拟脚本)", "manual"),
@@ -177,7 +179,7 @@ RUBRIC = [
     ("M.mem",     "性能",   "长玩内存/AudioContext/DOM 回收 (BUG#5)", "manual"),
     ("M.anim",    "性能",   "低端机动画掉帧", "manual"),
     # ---- 数据完整性 ----
-    ("N.wm",      "数据",   "WORD_MAP 154键/引用文件全在", "static"),
+    ("N.wm",      "数据",   "WORD_MAP 696个唯一键/引用文件全在", "static"),
     ("N.orphan",  "数据",   "无孤儿/重复 js 文件占包体", "static"),
     ("N.online",  "数据",   "线上资源无404(本地有≠线上有)", "manual"),
     # ---- 时间 / 环境 ----
@@ -233,7 +235,7 @@ def layer_A_check_resources():
             add(ERROR, "静态质检", "check_resources", "check_resources.py 未通过 (详见上方输出)")
         setstat("F.mainv", "❌", "check_resources 未过"); setstat("N.wm", "❌", "check_resources 未过")
     else:
-        setstat("F.mainv", "✅", "主缓存戳全一致"); setstat("N.wm", "✅", "WORD_MAP 154/引用全在")
+        setstat("F.mainv", "✅", "主缓存戳全一致"); setstat("N.wm", "✅", "WORD_MAP %d/引用全在" % WORD_MAP_EXPECTED)
 
 # =============================================================================
 #  新增静态检查 (B2)
@@ -289,15 +291,39 @@ def check_orphan_files(ctx):
         setstat("N.orphan", "⚠️", "孤儿: %s" % ", ".join(orphans))
     else:
         setstat("N.orphan", "✅", "无孤儿 js")
-    # theme_shop vs diamond_shop 重叠
+    # theme_shop vs diamond_shop: v942 故意提供“首页网格 + 岛内商店”两个入口。
+    # 它们只有在基础主题的 key/价格/解锁库完全同源，且钻石商品仍走
+    # 独立 HansenGems 购买协议时，才不是“两套商店重复扣费”。
     has_theme = os.path.exists("hansen_theme_shop.js")
     has_dia = os.path.exists("hansen_diamond_shop.js")
-    idx = read("index.html") if os.path.exists("index.html") else ""
     if has_theme and has_dia:
-        add(INFO, "主题", "theme_dup",
-            "同时存在 hansen_theme_shop.js 与 hansen_diamond_shop.js(都卖主题), 可能功能重叠, 建议确认是否两套主题系统并存",
-            fix="确认主题购买唯一入口, 避免两套商店不一致/重复扣费")
-        setstat("L.dup", "⚠️", "theme_shop 与 diamond_shop 可能重叠")
+        theme, dia = read("hansen_theme_shop.js"), read("hansen_diamond_shop.js")
+        expected_catalog = {"cosmos":0, "pink":0, "ocean":300, "forest":1000, "rainbow":2000, "peach":3000}
+        tm = re.search(r"var\s+THEME_PRICE\s*=\s*\{(.*?)\};", theme, re.S)
+        tf = re.search(r"var\s+FREE_THEMES\s*=\s*\[(.*?)\]", theme, re.S)
+        theme_catalog = {k:int(v) for k, v in re.findall(r"\b([a-z][a-z0-9_]*)\s*:\s*(\d+)", tm.group(1) if tm else "")}
+        for free in re.findall(r"['\"]([a-z][a-z0-9_]*)['\"]", tf.group(1) if tf else ""):
+            theme_catalog[free] = 0
+        dm = re.search(r"var\s+BASIC_THEMES\s*=\s*\[(.*?)\n\s*\];", dia, re.S)
+        dia_catalog = {k:int(v) for k, v in re.findall(
+            r"\{\s*key\s*:\s*['\"]([a-z][a-z0-9_]*)['\"][^{}]*?\bprice\s*:\s*(\d+)",
+            dm.group(1) if dm else "", re.S)}
+        im = re.search(r"var\s+ITEMS\s*=\s*\[(.*?)\n\s*\];", dia, re.S)
+        premium_ids = set(re.findall(r"\bid\s*:\s*['\"]([a-z][a-z0-9_]*)['\"]", im.group(1) if im else ""))
+        shared_unlock = "hansen_unlocked_themes" in theme and "hansen_unlocked_themes" in dia
+        same_catalog = theme_catalog == expected_catalog and dia_catalog == expected_catalog
+        disjoint = not (set(expected_catalog) & premium_ids)
+        routed = ("function spendCoins(n)" in theme and "HansenCoins" in theme and
+                  "function _coinsSpend(n)" in dia and "type:'basic'" in dia and
+                  "if(p.type==='diamond')" in dia and "HansenGems" in dia)
+        if shared_unlock and same_catalog and disjoint and routed:
+            setstat("L.dup", "✅", "首页/岛内是同一基础主题库的两个入口；金币/钻石路由分离")
+        else:
+            add(WARN, "主题", "theme_dup",
+                "首页与岛内主题合同不一致: 首页=%s, 岛内=%s, 高级ID交集=%s, 同库=%s, 路由=%s" %
+                (theme_catalog, dia_catalog, sorted(set(expected_catalog) & premium_ids), shared_unlock, routed),
+                fix="两入口共享 hansen_unlocked_themes 及基础主题价格；钻石商品只走 HansenGems")
+            setstat("L.dup", "⚠️", "两入口的同源与货币路由不完整")
     else:
         setstat("L.dup", "✅", "无重复主题系统")
 
@@ -341,30 +367,56 @@ def dir_size(path):
     return total
 
 def check_package_size():
+    # 只测量 package_release 真正会放入“可直接部署 ZIP”的 allow-list。
+    # node_modules/报告/进化备份等开发文件不得污染用户包体结论。
+    try:
+        import package_release
+        deploy_files = list(package_release._iter_files("deploy", Path(ROOT) / "release-assets"))
+    except Exception as exc:
+        add(WARN, "性能", "pkg_measure", "无法按发布 allow-list 测量部署包: %s" % str(exc)[:120])
+        setstat("M.size", "⚠️", "部署包体测量失败")
+        deploy_files = []
     sizes = {}
     for d in ["words", "sentences", "bosses", "mespeak"]:
-        if os.path.isdir(d):
-            sizes[d] = dir_size(d)
-    total = dir_size(".")
+        members = [p for p, arc in deploy_files if arc == d or arc.startswith(d + "/")]
+        if members:
+            sizes[d] = sum(p.stat().st_size for p in members)
+    total = sum(p.stat().st_size for p, _ in deploy_files)
+    shell_total, shell_missing = 0, []
+    sw = read("sw_v944.js") if os.path.exists("sw_v944.js") else ""
+    shell_match = re.search(r"const\s+SHELL\s*=\s*\[(.*?)\];", sw, re.S)
+    shell_refs = re.findall(r"['\"]\./([^'\"?#]+)", shell_match.group(1)) if shell_match else []
+    for rel in shell_refs:
+        path = os.path.join(ROOT, rel)
+        if os.path.isfile(path): shell_total += os.path.getsize(path)
+        else: shell_missing.append(rel)
     mb = lambda b: round(b / 1048576.0, 1)
-    detail = "总 %sMB (%s)" % (mb(total), ", ".join("%s %sMB" % (k, mb(v)) for k, v in sizes.items()))
-    if total > 20 * 1048576:
+    detail = "资产库 %sMB（按需）·离线外壳 %sMB (%s)" % (
+        mb(total), mb(shell_total), ", ".join("%s %sMB" % (k, mb(v)) for k, v in sizes.items()))
+    # 总资产可以较大（发音/美术是按需请求）；真正会阻塞首次离线安装的是 SHELL。
+    # 这两条是明确的退化预算，真实首屏时延另由 perf_guard 测量。
+    if not deploy_files or shell_missing or total > 100 * 1048576 or shell_total > 2 * 1048576:
         add(WARN, "性能", "pkg_size",
-            "部署包体偏大: %s。首屏/弱网/老机加载慢。建议: 音频更狠压缩或按需加载, 大图压缩。" % detail,
-            fix="例句/发音音频压缩或懒加载; boss 大图压缩")
+            "部署预算超标或外壳引用缺失: %s；缺失=%s" % (detail, shell_missing or "无"),
+            fix="保持部署 allow-list≤100MB、离线 SHELL≤2MB，大型媒体按需加载")
         setstat("M.size", "⚠️", detail)
     else:
         setstat("M.size", "✅", detail)
     # 预加载拖慢首屏
     if os.path.exists("hansen_preload.js"):
         pt = read("hansen_preload.js")
-        if re.search(r"\.mp3", pt) and ("for" in pt or "forEach" in pt or "map(" in pt):
-            add(INFO, "性能", "preload_heavy",
-                "hansen_preload.js 进岛预载大量 mp3 -> 首屏 networkidle 长时间不空闲(监察官/health_check 慢也因此), 真实首屏也受影响。建议改'先进得去, 音频懒加载'。",
-                fix="把全量预载改为按需/懒加载, 或只预载当前关卡所需")
-            setstat("M.preload", "⚠️", "进岛全量预载 mp3")
+        sentence_builder_dormant = len(re.findall(r"\bgetSentenceUrls\s*\(", pt)) == 1
+        global_word_builder_dormant = len(re.findall(r"\bgetWordUrls\s*\(", pt)) == 1
+        bounded = ("preloadAudioBatch(islandWords, 3" in pt and "var CAP = 8" in pt and
+                   "_hsnNetIsSlow()" in pt and "requestIdleCallback" in pt and
+                   "只预热一个最可能进入的岛" in pt)
+        if sentence_builder_dormant and global_word_builder_dormant and bounded:
+            setstat("M.preload", "✅", "只预热当前岛单词(并发3)+最多8张Boss；例句按需")
         else:
-            setstat("M.preload", "✅", "预载不重")
+            add(WARN, "性能", "preload_heavy",
+                "预加载策略未能证明为 v942 的有界按需模式，可能在首屏批量下载音频/全岛资源",
+                fix="例句与全库单词不得批量调用；只预热当前岛，并发≤3，Boss≤8，弱网直接跳过")
+            setstat("M.preload", "⚠️", "按需/有界预热证据不完整")
     else:
         setstat("M.preload", "ℹ️", "无 preload")
 
@@ -403,28 +455,54 @@ def check_currency_static(ctx):
     else:
         setstat("K.frag", "⚠️", "未确认 exchangeByFrag 至尊不可换守卫(或已改名)"); add(WARN, "抽卡", "frag_guard", "hansen_cardbook_wallet.js 未见 exchangeByFrag+legendary+return null 同现")
 
-    # 钻石主题 equip 必须校验已购 (v454: 堵后台白嫖钻石主题, A-E真机验过)
-    if _has("hansen_diamond_shop.js", "function equip(id)", "!o.owned[id]) return"):
-        setstat("L.diaown", "✅", "钻石主题 equip 校验已购(未购不能装备, 堵后台白嫖)")
+    # 钻石主题 equip 必须校验目录、对象自身属性和严格布尔 true。v943 已把旧的
+    # `!o.owned[id]` 升级成更强的原型污染防护，监察官不能继续拿旧字符串误报。
+    _dia_src = read("hansen_diamond_shop.js")
+    _dia_start = _dia_src.find("function equip(id)")
+    _dia_end = _dia_src.find("function ", _dia_start + len("function equip(id)")) if _dia_start >= 0 else -1
+    _dia_equip = _dia_src[_dia_start:_dia_end if _dia_end >= 0 else len(_dia_src)] if _dia_start >= 0 else ""
+    _dia_owned_ok = all(token in _dia_equip for token in (
+        "!_diamondMeta(id)",
+        "!Object.prototype.hasOwnProperty.call(o.owned,id)",
+        "o.owned[id]!==true",
+        "return false",
+    ))
+    if _dia_owned_ok:
+        setstat("L.diaown", "✅", "钻石主题 equip 校验目录+own key+严格 true(未购/原型键均不能装备)")
     else:
-        setstat("L.diaown", "❌", "钻石主题 equip 缺已购校验(可后台白嫖!)"); add(ERROR, "主题", "diaown_guard", "hansen_diamond_shop.js equip 缺 owned 校验, 可白嫖钻石主题", fix="equip 加 if(id && !o.owned[id]) return;")
+        setstat("L.diaown", "❌", "钻石主题 equip 缺严格已购校验(可后台白嫖/接受原型键!)"); add(ERROR, "主题", "diaown_guard", "hansen_diamond_shop.js equip 缺目录+own key+严格 true 校验", fix="equip 同时校验 _diamondMeta、hasOwnProperty 与 owned[id]===true")
 
-    cap_ok    = _has("hansen_island_upgrade.js", "coinDay", "coinEarnedToday")
-    season_ok = _has("hansen_season.js", "o.day!==t")
-    if cap_ok and season_ok:
-        setstat("O.day", "✅", "金币上限 coinDay!==t 重置 + 赛季计数 o.day!==t 重置")
+    # v942 的权威答题上限是全局 canonical ledger，不再以旧 coinEarnedToday
+    # 或赛季私有计数器作真相。同时固化签到与每日任务的换日证据。
+    cap_ok = _has("hansen_island_upgrade.js", "ANSWER_LEDGER_KEY='hansen_answer_coin_words_v942'",
+                  "ledger&&ledger.version===942&&ledger.day===t", "ledger={version:942,day:t,total:0,words:{}}",
+                  "if(S.coinDay!==t)")
+    checkin_ok = _has("hansen_checkin_global.js", "function todayStr()", "function claimedToday()",
+                      "var day=todayStr(),receiptState=readReceiptState(day)")
+    quest_ok = _has("hansen_quest_global.js", "function today()", "raw.day !== expectedDay",
+                    "if (!s) s = makeDay(day)", "pending.day !== day", "if (!recoverPending())")
+    if cap_ok and checkin_ok and quest_ok:
+        setstat("O.day", "✅", "canonical金币日账本 + 签到receipt + 每日任务均按当地日切换")
     else:
-        miss = [n for n, ok in [("金币上限", cap_ok), ("赛季计数", season_ok)] if not ok]
+        miss = [n for n, ok in [("canonical金币上限", cap_ok), ("签到receipt", checkin_ok), ("每日任务", quest_ok)] if not ok]
         setstat("O.day", "⚠️", "跨天重置未全确认: %s" % miss); add(WARN, "环境", "day_guard", "跨天重置未确认: %s" % miss)
 
     if os.path.exists("island_season.html"):
         _st = read("island_season.html")
-        no_mod4 = ("%4" not in _st) and ("% 4" not in _st)
-        dyn = "findIndex" in _st
-        if no_mod4 and dyn:
-            setstat("A.optcnt", "✅", "无硬编码 %4 + findIndex 动态定位正确项(BUG#13)")
+        # 只审计 Boss 出题/答题函数；CSS 的 42% 等百分比不是取模运算。
+        start = _st.find("function nextBossQ()")
+        end = _st.find("function enterNewPhase()", start)
+        answer_start = _st.find("function bossAnswer(i)", end)
+        answer_end = _st.find("function ", answer_start + 12)
+        boss_build = _st[start:end] if start >= 0 and end > start else ""
+        boss_answer = _st[answer_start:answer_end if answer_end > answer_start else len(_st)] if answer_start >= 0 else ""
+        no_mod4 = not re.search(r"%(?:\s*)4\b", boss_build + boss_answer)
+        dyn = all(x in boss_build for x in ("while(opts.length<4)", "opts.findIndex", "window._bossCorrectIdx=correctIdx"))
+        consumes_dynamic = "const correctIdx=window._bossCorrectIdx" in boss_answer
+        if no_mod4 and dyn and consumes_dynamic:
+            setstat("A.optcnt", "✅", "Boss函数无硬编码 %4，动态补齐4项并以 findIndex 传递正解")
         else:
-            setstat("A.optcnt", "❌", "boss 选项可能越界 (含%4=%s, findIndex=%s)" % (not no_mod4, dyn)); add(ERROR, "崩溃", "optcnt_guard", "island_season boss 选项定位疑似硬编码 %4")
+            setstat("A.optcnt", "❌", f"boss 选项可能越界 (函数内含%4={not no_mod4}, 动态生成={dyn}, 动态正解={consumes_dynamic})"); add(ERROR, "崩溃", "optcnt_guard", "island_season boss 选项数/正解定位未能证明为动态安全")
 
 # =============================================================================
 #  B 扩展静态检查
@@ -464,13 +542,14 @@ def layer_B_static(ctx):
             add(WARN, "系统", "sys_%s" % key, "缺系统文件 %s" % fname)
     # --- 赛季钩子全岛 ---
     if ctx["systems"].get("season"):
-        missing = [n for n in ctx["islands"] if "hansen_season.js" not in read("island_%s.html" % n)]
+        all_islands = ctx["islands"] + ctx["extra_islands"]
+        missing = [n for n in all_islands if "hansen_season.js" not in read("island_%s.html" % n)]
         if missing:
             add(ERROR, "赛季/一致性", "season_all_islands", "赛季脚本没接到这些岛: %s" % ", ".join(missing))
             setstat("J.season", "❌", "漏接: %s" % missing)
         else:
-            add(INFO, "赛季/一致性", "season_all_islands", "赛季脚本已接入全部 %d 岛" % len(ctx["islands"]))
-            setstat("J.season", "✅", "全 %d 岛接入" % len(ctx["islands"]))
+            add(INFO, "赛季/一致性", "season_all_islands", "赛季只读展示/重复 Boss 守卫脚本已接入全部 %d 岛" % len(all_islands))
+            setstat("J.season", "✅", "全 %d 岛接入只读展示/重复 Boss 守卫" % len(all_islands))
     # --- 新增 6 组 ---
     check_mp3_buster()
     check_island_unification(ctx)
@@ -501,7 +580,7 @@ const ARENA = '<div class="screen active" style="display:block"><div id="bossCon
 (async () => {
   let out = [];
   let browser;
-  try { browser = await chromium.launch(); }
+  try { browser = await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_PATH||undefined,args:["--no-sandbox"]}); }
   catch(e){ console.log(JSON.stringify({launch_error:String(e).split("\n")[0]})); process.exit(0); }
   for (const i of ISL) {
     const p = "island_"+i+".html";
@@ -516,9 +595,7 @@ const ARENA = '<div class="screen active" style="display:block"><div id="bossCon
     await page.waitForTimeout(2000);
     const info = await page.evaluate((G)=>{
       const wm = window.WORD_MAP?Object.keys(window.WORD_MAP).length:-1;
-      let redbar=false;
-      document.querySelectorAll("div").forEach(d=>{const t=d.textContent||"";
-        if(/版本|不一致|mismatch/i.test(t)&&/缓存|刷新|mismatch|不一致/i.test(t)) redbar=true;});
+      const redbar=!!document.getElementById('__hansen_version_mismatch_warning');
       const bt = (document.body?document.body.innerText:"")||"";
       const garb = G.filter(g=>bt.includes(g));
       const de = document.documentElement;
@@ -561,7 +638,7 @@ def layer_C_browser(ctx):
         for rid in ["A.crash","A.console","D.garble","F.redbar","H.hover","C.bosssz"]:
             setstat(rid, "⚠️", "playwright 不可用")
         return
-    islands = ["animal","food","season"] if QUICK else ctx["islands"]
+    islands = ["animal","food","season"] if QUICK else ctx["islands"] + ctx["extra_islands"]
     PORT = free_port()
     srv = subprocess.Popen([sys.executable, "-m", "http.server", str(PORT)],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -588,8 +665,8 @@ def layer_C_browser(ctx):
             add(ERROR, "崩溃", "nav_%s" % isl, "%s 加载失败(白屏/崩溃)" % w, " | ".join(d["perr"])); n_crash += 1; continue
         if d["kids"] == 0:
             add(ERROR, "崩溃", "blank_%s" % isl, "%s 渲染为空(白屏)" % w); n_crash += 1
-        if d["wm"] != 154:
-            add(ERROR, "数据", "wm_%s" % isl, "%s WORD_MAP=%d (期望154)" % (w, d["wm"]))
+        if d["wm"] != WORD_MAP_EXPECTED:
+            add(ERROR, "数据", "wm_%s" % isl, "%s WORD_MAP=%d (期望%d个唯一键)" % (w, d["wm"], WORD_MAP_EXPECTED))
         if d["redbar"]:
             add(ERROR, "版本一致性", "redbar_%s" % isl, "%s 出现版本不一致红条" % w); n_red += 1
         if d["garb"]:
@@ -613,7 +690,7 @@ def layer_C_browser(ctx):
                 setstat("C.bosssz", "⚠️", "精灵%dx%d 区高%d/屏%d" % (bf["spriteW"], bf["spriteH"], bf["arenaH"], bf["vpH"]))
             else:
                 setstat("C.bosssz", "✅", "精灵%dx%d, 区高%d≤屏%d, 不超屏" % (bf["spriteW"], bf["spriteH"], bf["arenaH"], bf["vpH"]))
-    okn = sum(1 for d in data if d["nav"] and d["kids"] and d["wm"] == 154 and not d["redbar"])
+    okn = sum(1 for d in data if d["nav"] and d["kids"] and d["wm"] == WORD_MAP_EXPECTED and not d["redbar"])
     print("    浏览器层: %d/%d 岛干净通过 | 横向溢出 %d 岛" % (okn, len(data), n_hover))
     setstat("A.crash",   "✅" if n_crash == 0 else "❌", "%d/%d 岛无崩溃" % (len(data)-n_crash, len(data)))
     setstat("A.console", "✅" if n_console == 0 else "❌", "无报错" if n_console == 0 else "%d 处报错" % n_console)
@@ -784,14 +861,13 @@ def write_report(ctx, started, checklist_text):
     return n_err
 
 # =============================================================================
-#  ★ 每日签到"跨岛只领一次"检查 (v411 修复的重大 bug 的回归把关, 每次启动监察官必查)
-#  bug: 金币是全局钱包, 但原版"今天已领"S.chestDay/连签 S.streak 各岛各存 → 每岛各领一次都进
-#       总钱包(打开N个岛领N次)。修复=全局签到模块 hansen_checkin_global.js(包装 openChest/
-#       doOpenChest 用 HansenCheckin.claimedToday() 闸门 + 连签全局化) + 堵 addiction 宝箱稀有度
-#       的第二条发币路径。下面静态确认修复在位 + 行为确认跨岛只领一次。
+#  ★ 每日签到"跨岛只领一次"检查（v942 正式事务回归）
+#  全局签到模块先持久化唯一 receipt，再以稳定 sourceId 提交金币/XP；
+#  addiction 稀有奖必须回读 HansenCheckin.getReceipt(day) 并严格比对。
+#  claimedToday 仍是 UI/跨岛门闩，但不再被当作能自证奖励的权威凭证。
 # =============================================================================
 def check_checkin_wire(ctx):
-    """静态: 确认签到修复仍在位 (防被删/改坏)。"""
+    """静态: 确认 v942 正式签到 receipt 权威链仍在位。"""
     ok = True
     if not os.path.exists("hansen_checkin_global.js"):
         add(ERROR, "签到", "ci_nomodule", "缺少全局签到模块 hansen_checkin_global.js —— 每日签到跨岛重复发币 bug 会复活!",
@@ -799,8 +875,11 @@ def check_checkin_wire(ctx):
         ok = False
     else:
         m = read("hansen_checkin_global.js")
-        if ("HansenCheckin" not in m) or ("claimedToday" not in m) or ("doOpenChest" not in m):
-            add(ERROR, "签到", "ci_modulebad", "hansen_checkin_global.js 未定义 HansenCheckin/claimedToday 或未包装 doOpenChest",
+        formal = all(x in m for x in ("HansenCheckin", "claimedToday", "doOpenChest", "RECEIPT_PREFIX",
+                                      "function getReceipt(day)", "function claimReward(candidate)",
+                                      "writeReceipt(r)", "r.committed=true", "if(!r||!r.committed"))
+        if not formal:
+            add(ERROR, "签到", "ci_modulebad", "hansen_checkin_global.js 的正式 receipt/提交/开箱链不完整",
                 where="hansen_checkin_global.js")
             ok = False
     no_ref = [os.path.basename(f) for f in glob.glob("island_*.html") if "hansen_checkin_global.js" not in read(f)]
@@ -808,17 +887,36 @@ def check_checkin_wire(ctx):
         add(ERROR, "签到", "ci_noref", "这些岛未引用全局签到模块: " + ", ".join(no_ref),
             where=",".join(no_ref), fix='在各岛 </body> 前加 <script src="hansen_checkin_global.js?v=NNN">')
         ok = False
+    bad_order = []
+    for f in glob.glob("island_*.html"):
+        html = read(f)
+        checkin_tag = re.search(r"<script\b[^>]*\bsrc\s*=\s*['\"][^'\"]*hansen_checkin_global\.js[^'\"]*['\"][^>]*>", html, re.I)
+        addiction_tag = re.search(r"<script\b[^>]*\bsrc\s*=\s*['\"][^'\"]*hansen_addiction\.js[^'\"]*['\"][^>]*>", html, re.I)
+        if not checkin_tag or not addiction_tag or checkin_tag.start() >= addiction_tag.start():
+            bad_order.append(os.path.basename(f))
+    if bad_order:
+        add(ERROR, "签到", "ci_order", "这些岛未按 checkin → addiction 顺序加载: " + ", ".join(bad_order),
+            fix="正式签到模块必须先建立 receipt API，addiction 只能随后包装并消费权威 receipt")
+        ok = False
     if os.path.exists("hansen_addiction.js"):
         a = read("hansen_addiction.js")
-        if ("HansenCheckin" not in a) or ("claimedToday" not in a):
-            add(ERROR, "签到", "ci_noaddguard", "hansen_addiction.js 宝箱稀有度未加 HansenCheckin.claimedToday 闸门 —— 第二条发币路径会漏!",
-                where="hansen_addiction.js patchChest", fix="在其 doOpenChest 包装顶部加 if(HansenCheckin&&HansenCheckin.claimedToday())return")
+        authoritative = all(x in a for x in ("function officialCheckinReceipt(value)",
+                                              "HansenCheckin.getReceipt(requested.day)",
+                                              "official.day!==requested.day", "official.txid!==requested.txid",
+                                              "official.rarityRoll!==requested.rarityRoll",
+                                              "function settleChestReceipt(value)",
+                                              "var receipt=officialCheckinReceipt(value);if(!receipt)return false",
+                                              "result&&result.ok===true?officialCheckinReceipt(result):null"))
+        if not authoritative:
+            add(ERROR, "签到", "ci_noaddguard", "hansen_addiction.js 稀有奖未能证明只消费 HansenCheckin 正式已提交 receipt",
+                where="hansen_addiction.js patchChest", fix="以 getReceipt(day) 回读的权威 receipt 校验 txid/day/rarityRoll，失败必须拒绝奖励")
             ok = False
-    setstat("J.signw", "✅" if ok else "❌", "模块+19岛引用+addiction闸门在位" if ok else "修复缺失/被改坏!")
+    island_count = len(glob.glob("island_*.html"))
+    setstat("J.signw", "✅" if ok else "❌", ("正式receipt权威链+%d岛引用+addiction回读校验在位" % island_count) if ok else "正式签到权威链缺失/被改坏!")
     return ok
 
 def check_checkin_behavior(ctx):
-    """browser: 领1岛 → 其余岛逐个再领, 金币增量必须全=0 (跨岛重复发币回归测试)。"""
+    """browser: 领1岛 → 其余26页逐个再领, 金币增量必须全=0。"""
     if NO_BROWSER:
         setstat("J.signin", "❔", "--no-browser 跳过"); return
     try:
@@ -827,9 +925,9 @@ def check_checkin_behavior(ctx):
         setstat("J.signin", "⚠️", "playwright 不可用, 跳过行为测试"); return
     first = "animal"
     _ALL = ["animal","food","sports","job","color","nature","traffic","action","body",
-            "city","clothes","adjective","home","family","school","time","question","treasure","season"]
-    # ★重大bug: 以前只验 food/color/job, 漏了其他岛(所以"通过"但 bug 仍在)。现在领1岛→其余【全部18岛】
-    # 逐个验, 必须全 Δ=0 且【不可点开】。--quick 也覆盖含曾漏测的 school/treasure。
+            "city","clothes","adjective","home","family","school","time","question","treasure","season",
+            "land1","land2","land3","land4","land5","land6","land7","land8"]
+    # 全量覆盖 19 个主/星海页 + 8 个 Land；--quick 保留高价值代表页。
     others = ["food", "color", "school", "treasure"] if QUICK else [i for i in _ALL if i != first]
     print("\n[★] 每日宝箱跨岛只领一次 行为测试 (领 %s → 验其余 %d 岛, 必须全 Δ=0 且不可点开)" % (first, len(others)))
     PORT = free_port()
@@ -842,20 +940,24 @@ const BASE = "http://localhost:%d/";
 const FIRST = "island_%s.html";
 const OTHERS = %s;
 (async () => {
-  const browser = await chromium.launch();
-  const ctx = await browser.newContext(); const page = await ctx.newPage();
+  const browser = await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
+  const ctx = await browser.newContext({viewport:{width:360,height:640}}); const page = await ctx.newPage();
   async function coins(){ return await page.evaluate(()=> window.HansenCoins?HansenCoins.get():null); }
   async function tryClaim(){ await page.evaluate(()=>{ try{openChest();}catch(e){} try{doOpenChest();}catch(e){} }); await page.waitForTimeout(1200); }
-  await page.goto(BASE+FIRST,{waitUntil:"domcontentloaded",timeout:30000}); await page.waitForTimeout(1200);
-  const hasM = await page.evaluate(()=> typeof window.HansenCheckin==='object');
-  if(!hasM){ console.log("RESULT|nomodule"); await browser.close(); process.exit(0); }
+  await page.goto(BASE+FIRST,{waitUntil:"domcontentloaded",timeout:45000});
+  const firstState = await page.evaluate(()=>({module:typeof window.HansenCheckin==='object'&&typeof window.HansenCoins==='object',path:location.pathname}));
+  if(firstState.path!=="/"+FIRST){ console.log("RESULT|wrongpage|"+firstState.path); await browser.close(); process.exit(0); }
+  if(!firstState.module){ console.log("RESULT|nomodule"); await browser.close(); process.exit(0); }
   const b0=await coins(); await tryClaim(); const a0=await coins();
   const fr=(a0!=null&&b0!=null)?(a0-b0):-1;
   const c0=await page.evaluate(()=> HansenCheckin.claimedToday());
   const s0=await page.evaluate(()=> HansenCheckin.getStreak());
   let leaks=[];
   for(const o of OTHERS){
-    await page.goto(BASE+"island_"+o+".html",{waitUntil:"networkidle",timeout:30000}); await page.waitForTimeout(900);
+    const expected="/island_"+o+".html";
+    await page.goto(BASE+expected.slice(1),{waitUntil:"domcontentloaded",timeout:45000});
+    const state=await page.evaluate(()=>({module:typeof window.HansenCheckin==='object'&&typeof window.HansenCoins==='object',path:location.pathname}));
+    if(!state.module||state.path!==expected){leaks.push(o+":模块/导航异常("+state.path+")");continue;}
     const b=await coins();
     await page.evaluate(()=>{ try{openChest();}catch(e){} }); await page.waitForTimeout(180);
     const box = await page.evaluate(()=> !!document.getElementById('chestBox'));
@@ -868,22 +970,31 @@ const OTHERS = %s;
   console.log("RESULT|"+fr+"|"+c0+"|"+s0+"|"+(leaks.join(",")||"none"));
   process.exit(0);
 })();
-''' % (PORT, first, str(others))
+''' % (PORT, first, json.dumps(others))
     with open("/tmp/_insp_checkin.js", "w") as f:
         f.write(script)
-    r = subprocess.run(["node", "/tmp/_insp_checkin.js"], capture_output=True, text=True)
-    srv.terminate()
+    try:
+        r = subprocess.run(["node", "/tmp/_insp_checkin.js"], capture_output=True, text=True, timeout=900)
+    except subprocess.TimeoutExpired:
+        r = subprocess.CompletedProcess([], 124, stdout="", stderr="签到行为测试超时")
+    finally:
+        srv.terminate()
     line = ""
     for ln in r.stdout.splitlines():
         if ln.startswith("RESULT|"): line = ln
     if not line:
-        setstat("J.signin", "⚠️", "行为测试无输出")
-        add(WARN, "签到", "ci_norun", "签到行为测试未拿到结果", where="hansen_inspector")
+        setstat("J.signin", "❌", "行为测试无输出")
+        add(ERROR, "签到", "ci_norun", "签到行为测试未拿到结果: " + (r.stderr or "未知错误")[:180], where="hansen_inspector")
         return
     parts = line.split("|")
     if parts[1] == "nomodule":
         setstat("J.signin", "❌", "运行时签到模块未加载")
         add(ERROR, "签到", "ci_runtime_nomodule", "运行时 HansenCheckin 模块未加载")
+        return
+    if parts[1] == "wrongpage":
+        target = parts[2] if len(parts) > 2 else "未知"
+        setstat("J.signin", "❌", "行为测试被导航到错误页面: %s" % target)
+        add(ERROR, "签到", "ci_runtime_wrongpage", "签到行为测试未停留在目标岛页: " + target)
         return
     fr, c0, s0, leaks = parts[1], parts[2], parts[3], parts[4]
     leaked = (leaks not in ("none", ""))
@@ -896,18 +1007,15 @@ const OTHERS = %s;
         setstat("J.signin", "✅", "领1岛=%s 其余岛Δ=0 连签统一=%s" % (fr, s0))
 
 def check_season_isolation_behavior(ctx):
-    """browser: 其余【全部18岛】答对题/打boss → 赛季积分Δ必须全=0; 仅赛季岛 island_season.html 累加 (v441修复的重大bug回归)。"""
+    """browser: 全27页必须遵守 v941/v942 旧赛季积分永久只读契约。"""
     if NO_BROWSER:
         setstat("J.seasoniso", "❔", "--no-browser 跳过"); return
     try:
         subprocess.run(["node", "-e", "require.resolve('playwright')"], check=True, capture_output=True)
     except Exception:
         setstat("J.seasoniso", "⚠️", "playwright 不可用, 跳过行为测试"); return
-    _ALL = ["animal","food","sports","job","color","nature","traffic","action","body",
-            "city","clothes","adjective","home","family","school","time","question","treasure"]
-    # ★教训同签到: 必须验【全部18岛】, 不可只抽查几个。--quick 取代表(含曾漏测的 school/treasure)。
-    others = ["animal","food","school","treasure"] if QUICK else _ALL
-    print("\n[★] 赛季积分隔离 行为测试 (其余%d岛答对题/打boss → 赛季积分必须全Δ=0; 赛季岛 island_season 答题须Δ>0)" % len(others))
+    pages = ["animal","school","season","land1","land8"] if QUICK else ctx["islands"] + ctx["extra_islands"]
+    print("\n[★] 旧赛季积分永久只读 行为测试 (全%d页模块/只读API/答题/Boss/旧防刷账本)" % len(pages))
     PORT = free_port()
     srv = subprocess.Popen([sys.executable, "-m", "http.server", str(PORT)],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -915,62 +1023,75 @@ def check_season_isolation_behavior(ctx):
     script = r'''
 const { chromium } = require("playwright");
 const BASE = "http://localhost:%d/";
-const OTHERS = %s;
+const PAGES = %s;
 (async () => {
-  const browser = await chromium.launch();
-  async function pts(page){ return await page.evaluate(()=> window.HansenSeason?HansenSeason.getPoints():null); }
-  async function answer5(page){ await page.evaluate(()=>{ for(var i=0;i<5;i++){ try{window.markAnswer(i,true);}catch(e){} } }); await page.waitForTimeout(180); }
-  let leaks=[]; let nomodule=false;
-  for(const o of OTHERS){
-    const c = await browser.newContext(); const page = await c.newPage();
-    await page.goto(BASE+"island_"+o+".html",{waitUntil:"networkidle",timeout:30000}); await page.waitForTimeout(1200);
-    const has = await page.evaluate(()=> typeof window.HansenSeason==='object' && typeof window.markAnswer==='function');
-    if(!has){ nomodule=true; await c.close(); continue; }
-    const b=await pts(page); await answer5(page);
-    await page.evaluate(()=>{ try{ if(typeof window.bossVictory==='function') window.bossVictory(); }catch(e){} }); await page.waitForTimeout(150);
-    const a=await pts(page);
-    if(b!=null && a!=null && a-b!==0) leaks.push(o+":+"+(a-b));
-    await c.close();
-  }
-  let seasonDelta="na";
-  { const c=await browser.newContext(); const page=await c.newPage();
-    await page.goto(BASE+"island_season.html",{waitUntil:"networkidle",timeout:30000}); await page.waitForTimeout(1200);
-    const has = await page.evaluate(()=> typeof window.HansenSeason==='object' && typeof window.markAnswer==='function');
-    if(has){ const b=await pts(page); await answer5(page); const a=await pts(page); seasonDelta=(b!=null&&a!=null)?String(a-b):"null"; }
+  const browser = await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
+  const failures=[];
+  for(const name of PAGES){
+    const expected="/island_"+name+".html";
+    const c = await browser.newContext({viewport:{width:360,height:640}}); const page = await c.newPage();
+    try{
+      await page.goto(BASE+expected.slice(1),{waitUntil:"domcontentloaded",timeout:45000});
+      const state=await page.evaluate(()=>({path:location.pathname,module:typeof window.HansenSeason==='object',answer:typeof window.markAnswer==='function',boss:typeof window.bossVictory==='function'}));
+      if(state.path!==expected||!state.module||!state.answer||!state.boss){
+        failures.push(name+":导航/模块异常("+state.path+",season="+state.module+",answer="+state.answer+",boss="+state.boss+")");
+        await c.close();continue;
+      }
+      const result=await page.evaluate(()=>{
+        const keys=['hansen_season_data','hsn_season_answer_day','hsn_season_boss_day'];
+        localStorage.setItem(keys[0],JSON.stringify({points:{S1:199},unlockedCards:[],claimedMilestones:{S1:[]}}));
+        localStorage.setItem(keys[1],'readonly-answer-sentinel');
+        localStorage.setItem(keys[2],'readonly-boss-sentinel');
+        const before=keys.map(k=>localStorage.getItem(k));
+        const api={readOnly:HansenSeason.pointsReadOnly===true,add:HansenSeason.addPoints(999),next:HansenSeason.nextMilestone(),points:HansenSeason.data().points.S1};
+        for(let i=0;i<5;i++){try{window.markAnswer(i,true);}catch(e){}}
+        try{window.bossVictory();}catch(e){}
+        const addAgain=HansenSeason.addPoints(500);
+        return {api,addAgain,keys,before};
+      });
+      await page.waitForTimeout(250);
+      const after=await page.evaluate(keys=>keys.map(k=>localStorage.getItem(k)),result.keys);
+      const contract=result.api.readOnly===true&&result.api.add===false&&result.api.next===null&&result.api.points===199&&result.addAgain===false;
+      const unchanged=JSON.stringify(result.before)===JSON.stringify(after);
+      if(!contract||!unchanged)failures.push(name+":只读契约="+contract+",旧账本未改="+unchanged);
+    }catch(e){failures.push(name+":探针异常 "+String(e).split("\n")[0]);}
     await c.close();
   }
   await browser.close();
-  console.log("RESULT|"+(nomodule?"nomodule":"ok")+"|"+(leaks.join(",")||"none")+"|"+seasonDelta);
+  console.log("RESULT|"+JSON.stringify({pages:PAGES.length,failures}));
   process.exit(0);
 })();
-''' % (PORT, str(others))
+''' % (PORT, json.dumps(pages))
     with open("/tmp/_insp_seasoniso.js", "w") as f:
         f.write(script)
-    r = subprocess.run(["node", "/tmp/_insp_seasoniso.js"], capture_output=True, text=True, timeout=900)
-    srv.terminate()
+    try:
+        r = subprocess.run(["node", "/tmp/_insp_seasoniso.js"], capture_output=True, text=True, timeout=900)
+    except subprocess.TimeoutExpired:
+        r = subprocess.CompletedProcess([], 124, stdout="", stderr="旧赛季只读行为测试超时")
+    finally:
+        srv.terminate()
     line = ""
     for ln in r.stdout.splitlines():
         if ln.startswith("RESULT|"): line = ln
     if not line:
-        setstat("J.seasoniso", "⚠️", "行为测试无输出")
-        add(WARN, "赛季", "siso_norun", "赛季隔离行为测试未拿到结果", where="hansen_inspector"); return
-    parts = line.split("|")
-    leaks = parts[2]; seasonDelta = parts[3] if len(parts) > 3 else "na"
-    leaked = (leaks not in ("none", ""))
-    print("    其余岛喂赛季泄漏=%s | 赛季岛答5题Δ=%s" % (leaks if leaked else "无(全Δ=0)", seasonDelta))
-    if leaked:
-        setstat("J.seasoniso", "❌", "其余岛仍喂赛季: %s" % leaks)
-        add(ERROR, "赛季", "siso_leak",
-            "★赛季积分隔离失效! 其余岛答对题/打boss 仍在喂赛季 boss 进度: " + leaks + " —— 18岛答题又在替赛季boss答题, 重大bug复活!",
-            where="hansen_season.js hookScoreEvents", fix="markAnswer/bossVictory 埋点必须加 isSeasonIsland() 闸门, 只在 island_season.html 累加")
-    else:
-        try: sd = int(seasonDelta)
-        except Exception: sd = None
-        if sd is not None and sd <= 0:
-            setstat("J.seasoniso", "⚠️", "其余%d岛全Δ=0✅ 但赛季岛答题Δ=%s(应>0, 请核查是否过度隔离)" % (len(others), seasonDelta))
-            add(WARN, "赛季", "siso_overgate", "赛季岛答题未加分(Δ=%s), 可能过度隔离" % seasonDelta, where="hansen_season.js isSeasonIsland")
-        else:
-            setstat("J.seasoniso", "✅", "其余%d岛答题/打boss全Δ=0, 赛季岛答5题Δ=%s(仅赛季岛累加, 隔离正确)" % (len(others), seasonDelta))
+        setstat("J.seasoniso", "❌", "行为测试无输出")
+        add(ERROR, "赛季", "siso_norun", "旧赛季只读行为测试未拿到结果: " + (r.stderr or "未知错误")[:180], where="hansen_inspector"); return
+    try:
+        result = json.loads(line.split("|", 1)[1])
+    except Exception:
+        setstat("J.seasoniso", "❌", "行为测试输出不可解析")
+        add(ERROR, "赛季", "siso_parse", "旧赛季只读行为测试输出不可解析")
+        return
+    failures = result.get("failures") if isinstance(result, dict) else None
+    if not isinstance(failures, list) or failures:
+        detail = "; ".join(failures[:6]) if isinstance(failures, list) else "结果结构无效"
+        setstat("J.seasoniso", "❌", detail)
+        add(ERROR, "赛季", "siso_readonly", "旧赛季积分永久只读契约失效: " + detail,
+            where="hansen_season.js / 全页运行时", fix="保持 pointsReadOnly=true、addPoints=false、nextMilestone=null，任何答题/Boss不得改旧赛季三项账本")
+        return
+    checked = int(result.get("pages") or 0)
+    print("    %d/%d 页只读模块与旧账本不变" % (checked, len(pages)))
+    setstat("J.seasoniso", "✅", "全%d页只读API在位；答题/Boss/addPoints 后旧积分与防刷账本逐字节不变" % checked)
 
 # =============================================================================
 #  主流程
@@ -995,7 +1116,7 @@ def main():
         for rid in ["A.crash","A.console","D.garble","F.redbar","H.hover","C.bosssz"]:
             setstat(rid, "❔", "--no-browser 跳过")
     check_checkin_behavior(ctx)      # ★ 每日签到跨岛只领一次 (行为, J.signin; NO_BROWSER 内部设❔)
-    check_season_isolation_behavior(ctx)  # ★ 赛季积分隔离: 仅赛季岛累加 (行为, J.seasoniso; NO_BROWSER 内部设❔)
+    check_season_isolation_behavior(ctx)  # ★ v942 旧赛季积分永久只读 (行为, J.seasoniso)
     layer_D_ai(ctx)
     checklist_text = print_checklist()
     n_err = write_report(ctx, started, checklist_text)

@@ -1,11 +1,11 @@
 /* v933: 量【形象详情】大卡片里, 立绘到底画多大 (占卡片的百分比)
  * Hansen: "点进这个动物头像之后, 立体形象怎么变得这么小了?"
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 const PORT = process.argv[2] || '8877';
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {

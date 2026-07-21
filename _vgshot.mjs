@@ -1,5 +1,5 @@
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+import { chromium } from './playwright_loader.mjs';
+const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport:{width:420,height:760} });
 const errs=[];
 page.on('console', m=>{ if(m.type()==='error') errs.push(m.text()); });

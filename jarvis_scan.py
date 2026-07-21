@@ -23,12 +23,18 @@ import os, re, sys, glob, json, html, hashlib, datetime
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CRIT, WARN, INFO = "CRIT", "WARN", "INFO"
-W_CRIT, W_WARN = 8.0, 2.0   # 每个致命扣8·每个警告扣2·INFO不扣分
+# INFO is non-blocking, but it is still a finding. Giving it a small weight
+# prevents a report containing dozens of hygiene/performance issues from being
+# presented as a mathematically perfect 100/100.
+W_CRIT, W_WARN, W_INFO = 12.0, 3.0, 0.1
+_READ_ERRORS = {}
 
 def read(p):
     try:
         with open(p, encoding="utf-8", errors="replace") as f: return f.read()
-    except Exception: return ""
+    except Exception as exc:
+        _READ_ERRORS[os.path.relpath(p, ROOT)] = str(exc)[:160]
+        return ""
 
 def rel(p): return os.path.relpath(p, ROOT)
 
@@ -38,7 +44,8 @@ def lineno(text, idx):
 def html_files():
     return sorted(glob.glob(os.path.join(ROOT, "*.html")))
 def js_files():
-    return sorted(glob.glob(os.path.join(ROOT, "*.js")))
+    return sorted(p for p in glob.glob(os.path.join(ROOT, "*.js"))
+                  if not os.path.basename(p).startswith("_"))
 def all_code():
     return html_files() + js_files()
 
@@ -50,7 +57,9 @@ class Report:
         self.items.append({"sev": sev, "scanner": scanner, "title": title, "where": where, "detail": detail})
     def by_sev(self, sev): return [i for i in self.items if i["sev"] == sev]
     def score(self):
-        s = 100.0 - W_CRIT*len(self.by_sev(CRIT)) - W_WARN*len(self.by_sev(WARN))
+        s = (100.0 - W_CRIT*len(self.by_sev(CRIT))
+             - W_WARN*len(self.by_sev(WARN))
+             - W_INFO*len(self.by_sev(INFO)))
         return max(0.0, round(s, 1))
 
 # ══════════════════════════════════════════════════════════════════
@@ -79,8 +88,10 @@ def scan_resources(rep):
     orphan_exts = (".png",".jpg",".jpeg",".gif",".mp3",".wav",".webp")
     disk = []
     for root, dirs, files in os.walk(ROOT):
-        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules","evolution_reports",".evolution_backups","releases")]
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules","evolution_reports",".evolution_backups","releases","release-assets","map8","newboss")]
         for fn in files:
+            if root == ROOT and fn.startswith("_"):
+                continue
             if fn.lower().endswith(orphan_exts):
                 disk.append(os.path.relpath(os.path.join(root, fn), ROOT))
     orphans = []
@@ -94,7 +105,11 @@ def scan_resources(rep):
         orphans.sort(reverse=True)
         total_kb = sum(s for s,_ in orphans) // 1024
         # 汇总一条(不逐个刷屏)+ 只单列 top8 最大的(便于优先清理)
-        rep.add(INFO, "资源完整性", "孤儿资源共 %d 个·合计 %dKB(全库无引用·可清理省体积)" % (len(orphans), total_kb),
+        # Aggregate orphan detection is heuristic because several runtime paths
+        # are assembled dynamically. Keep normal cleanup debt non-blocking, but
+        # a truly release-sized orphan payload is a blocking resource incident.
+        orphan_severity = WARN if total_kb >= 50 * 1024 else INFO
+        rep.add(orphan_severity, "资源完整性", "孤儿资源共 %d 个·合计 %dKB(全库无引用·需核对动态引用)" % (len(orphans), total_kb),
                 "%s 等" % os.path.basename(orphans[0][1]), "疑早期生成素材残留·动态拼接引用者请忽略")
         for sz, d in orphans[:8]:
             if sz > 20*1024:
@@ -182,8 +197,10 @@ def scan_perf(rep):
     limits = {".html": 600, ".js": 150, ".png": 500, ".jpg": 500, ".jpeg": 500, ".mp3": 800, ".wav": 1500, ".gif": 800}
     heavy = []
     for root, dirs, files in os.walk(ROOT):
-        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules","evolution_reports",".evolution_backups","releases")]
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules","evolution_reports",".evolution_backups","releases","release-assets","map8","newboss")]
         for fn in files:
+            if root == ROOT and fn.startswith("_"):
+                continue
             ext = os.path.splitext(fn)[1].lower()
             if ext in limits:
                 fp = os.path.join(root, fn)
@@ -193,7 +210,14 @@ def scan_perf(rep):
                     heavy.append((kb, os.path.relpath(fp, ROOT), limits[ext]))
     heavy.sort(reverse=True)
     for kb, path, lim in heavy[:15]:
-        rep.add(INFO, "体积性能", "大文件 %dKB(超%dKB软阈)" % (kb, lim), path, "首屏/加载耗时·可压缩或懒加载")
+        # A deferred/lazy runtime module may legitimately exceed the soft JS
+        # budget. Block only catastrophic (>10x) code payloads; keep ordinary
+        # optimization debt visible and score-bearing as INFO.
+        hard_multiple = 10 if path.endswith((".js", ".html")) else 4
+        severity = WARN if kb > lim * hard_multiple else INFO
+        rep.add(severity, "体积性能", "大文件 %dKB(超%dKB%s阈)" % (
+            kb, lim, "硬" if severity == WARN else "软"), path,
+            "首屏/加载耗时·可压缩或懒加载")
 
 # ══════════════════════════════════════════════════════════════════
 # 扫描器 7: HTML 结构健康
@@ -225,7 +249,7 @@ def scan_js_syntax(rep):
             subprocess.run([c, "--version"], capture_output=True, timeout=10); node = c; break
         except Exception: pass
     if not node:
-        rep.add(INFO, "JS语法", "未找到 node·跳过语法校验", "", ""); return
+        rep.add(CRIT, "JS语法", "未找到 node·语法断言未执行", "", "安装 package.json 中锁定的 Node 依赖"); return
     # 独立 .js
     for p in js_files():
         r = subprocess.run([node, "--check", p], capture_output=True, text=True, timeout=30)
@@ -267,10 +291,24 @@ SCANNERS = [
 
 def run_all():
     rep = Report()
+    _READ_ERRORS.clear()
+    reported_read_errors = set()
     for name, fn in SCANNERS:
+        start = len(rep.items)
         try: fn(rep)
         except Exception as e:
-            rep.add(WARN, "引擎", "%s 扫描器异常: %s" % (name, str(e)[:80]), "", "")
+            # A scanner crash is not evidence that the scanned area is healthy.
+            rep.add(CRIT, "引擎", "%s 扫描器异常·断言未执行: %s" % (name, str(e)[:80]), "", "")
+        for path in sorted(set(_READ_ERRORS) - reported_read_errors):
+            rep.add(CRIT, "引擎", "源码读取失败·该区域断言不完整", path,
+                    _READ_ERRORS[path])
+            reported_read_errors.add(path)
+        # Preserve the exact scanner that produced each finding.  Scanner
+        # category labels differ slightly (for example 资源完整性 versus
+        # 资源引用完整性); heuristic prefix matching hid findings and made the
+        # console category totals disagree with the real total.
+        for item in rep.items[start:]:
+            item["runner"] = name
     return rep
 
 # ══════════════════════════════════════════════════════════════════
@@ -361,7 +399,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
   </div>
 </div>
 %s
-<div class="foot">贾维斯 2.0 超级体检引擎 · 纯静态全域扫描 · 与 check_resources(防复发)+hansen_evolve(使命体检) 三足鼎立<br>致命=8分/警告=2分/提示不扣分 &nbsp;·&nbsp; 报告由 jarvis_scan.py 生成</div>
+<div class="foot">贾维斯 2.0 超级体检引擎 · 纯静态全域扫描 · 与 check_resources(防复发)+hansen_evolve(使命体检) 三足鼎立<br>致命=12分/警告=3分/提示=0.1分 &nbsp;·&nbsp; 报告由 jarvis_scan.py 生成</div>
 </div></body></html>""" % (
         ver, ring, grade, ring, (score/100.0*414.7), int(score) if score==int(score) else score, grade,
         ver, ts, nc, nw, ni, len(SCANNERS), "\n".join(rows)
@@ -370,7 +408,11 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 
 # ══════════════════════════════════════════════════════════════════
 def main():
-    quiet = "--quiet" in sys.argv
+    unknown = [arg for arg in sys.argv[1:] if arg not in {"--quiet", "--report"}]
+    if unknown:
+        print("❌ unknown jarvis_scan arguments: %s" % unknown, file=sys.stderr)
+        return 2
+    quiet = "--quiet" in sys.argv[1:]
     rep = run_all()
     score = rep.score()
     nc, nw, ni = len(rep.by_sev(CRIT)), len(rep.by_sev(WARN)), len(rep.by_sev(INFO))
@@ -380,18 +422,12 @@ def main():
         print("=" * 62)
         print("  贾维斯 2.0 · 超级全域体检引擎")
         print("=" * 62)
-        for name, _ in SCANNERS:
-            n = sum(1 for i in rep.items if i["scanner"] == name.split("(")[0] or i["scanner"].startswith(name[:6]))
         # 按扫描器汇总
-        cat = {}
-        for i in rep.items:
-            cat.setdefault(i["scanner"], [0,0,0])
-            cat[i["scanner"]][{CRIT:0,WARN:1,INFO:2}[i["sev"]]] += 1
         for name, _ in SCANNERS:
-            key = None
-            for k in cat:
-                if k in name or name.startswith(k[:4]) or k.startswith(name[:4]): key = k; break
-            c = cat.get(key, [0,0,0]) if key else [0,0,0]
+            c = [0, 0, 0]
+            for item in rep.items:
+                if item.get("runner") == name:
+                    c[{CRIT:0, WARN:1, INFO:2}[item["sev"]]] += 1
             mark = "❌" if c[0] else ("⚠️ " if c[1] else "✅")
             print("  %s %-26s 致命%d 警告%d 提示%d" % (mark, name, c[0], c[1], c[2]))
         print("-" * 62)
@@ -416,7 +452,9 @@ def main():
     if report_ok and not quiet:
         print("  📊 可视化体检报告: %s" % rel(rpt))
     print("=" * 62)
-    return 0 if nc == 0 else 1
+    # WARN is actionable and blocks a release. INFO remains non-blocking, but
+    # is visible in both the score and wording, so it cannot masquerade as 100.
+    return 0 if nc == 0 and nw == 0 and report_ok else 1
 
 if __name__ == "__main__":
     sys.exit(main())

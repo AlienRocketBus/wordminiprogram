@@ -34,13 +34,8 @@
 - **仓库 = `AlienRocketBus/wordminiprogram`（私有·main 分支）= 唯一权威源。**
 - **铁律 2.0**：**每次开工及任何下一步操作前，先拿沙盒当前状态与 GitHub HEAD 逐一对照**（`git rev-parse HEAD` vs `git ls-remote main` + `git status --porcelain`），一致 / 无缺失才动手。永远「先对照、后操作」。
 - **每版必推 GitHub 并验 SYNCED**（本地 HEAD == remote HEAD）。
-- **访问**：用户名 `x-access-token` + Hansen 提供的 PAT。
-- **推送语法（POSIX / sh，注意 bash 是 sh）**：
-  ```
-  cd dev && git add -A && git commit -q -m "..." 2>/tmp/gc.log && \
-  timeout 200 git push "https://x-access-token:${TOKEN}@github.com/AlienRocketBus/wordminiprogram.git" main >/tmp/gp.log 2>&1
-  ```
-  然后 `sed -i "s/${TOKEN}/REDACTED/g" /tmp/gp.log /tmp/gc.log` 脱敏 → python 读日志 + `git rev-parse HEAD` 对 `git ls-remote ... main`(awk '{print $1}') 验 SYNCED。
+- **访问**：只使用 GitHub App、GitHub CLI 登录或系统凭据管理器；聊天中粘贴的 PAT 视为已泄露，必须撤销且不得继续使用。
+- **推送语法**：先用 `gh auth status` 核对账号与仓库，再通过正常远端执行 `git push origin main`。禁止把凭据拼进 Git URL、命令、日志或交付物。
 - **版本 SHA 链**：v905=`19a1626`、v906=`378802f`、v907=`a85cbf8`、v908=`1d478e6`、v909=`0a7d5f4`。
 
 ---
@@ -167,8 +162,8 @@
 ---
 
 ## 15. 下一次对话开场（★推荐动作）
-1. 读完本文 → 请 Hansen 提供 GitHub PAT。
-2. `git clone https://x-access-token:${TOKEN}@github.com/AlienRocketBus/wordminiprogram.git /home/claude/v846/dev`（沙盒是空的，必须先拉）。
+1. 读完本文 → 核对已连接的 GitHub App 或 `gh auth status`，不要索取或粘贴 PAT。
+2. 通过已认证的 GitHub App/CLI 执行标准 `git clone`；不得把凭据写入 clone URL。
 3. **铁律 2.0**：`git rev-parse HEAD` 对 `git ls-remote main` 确认对齐（应 = `0a7d5f4` 或更新）。
 4. 需要时读 `README.md`(版本史 + 工具备份) + `贾维斯_知识库.md`(各版根因修法) + 本文。
 5. 按 Hansen 当前需求开工，**全程遵守其工作风格(§1) + 五铁律(§5) + 三件套交付(§11)**；改 CSS/特效先想 §8/§9 的坑；视觉验证靠 PIL 像素(§4·view 常挂)。

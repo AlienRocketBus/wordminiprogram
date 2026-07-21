@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="hansen_sw_upgrade_gate_v944.js?v=960"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=960"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_coin_wallet.js?v=960"></script><!-- v942: 首页任何金币显示/消费前同步恢复跨页奖励事务 -->
 <meta charset="utf-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=(g.src||"").split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#0c1538">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico" type="image/png">
+<link rel="apple-touch-icon" href="favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
@@ -13,7 +20,7 @@
 <meta name="x5-orientation" content="portrait">
 <title>单词大冒险 · 单词大冒险</title>
 <script>/* 🔴v856 配色防闪: 首帧前同步把配色类加到<html>(v855教训:同步加不闪·亮色系加hsn-pal-light) */try{var _hp=localStorage.getItem("hansen_palette_global");if(_hp&&_hp!=="cosmos"&&/^[a-z]+$/.test(_hp)){var _hl={cloud:1,sakura:1,cream:1,mint:1};document.documentElement.className+=" hsn-pal-"+_hp+(_hl[_hp]?" hsn-pal-light":"");}}catch(e){}</script>
-<meta name="description" content="18 关大冒险屿 · 711+ 英语单词 · 12 种学习挑战 · 36 阶进化宠物">
+<meta name="description" content="27 座英语单词冒险岛 · 多种学习挑战 · 36 阶进化宠物">
 <!--
   ============================================================
   📁 部署说明
@@ -286,7 +293,7 @@ body[data-theme="peach"]{
   --th-cosmos-2: rgba(253,164,175,.45);
   --th-cosmos-3: rgba(254,215,170,.40);
   --th-cosmos-4: rgba(252,231,166,.35);
-  --th-accent: #c2410c;
+  --th-accent: #9f1239;
 }
 
 /* 通用主题背景 (含星云效果) */
@@ -1914,9 +1921,9 @@ body[data-theme="forest"] .intro{
   color:#1a2e05;
   text-shadow:0 1px 6px rgba(255,255,255,.8);
 }
-body[data-theme="forest"] .intro b{color:#854d0e}
+body[data-theme="forest"] .intro b{color:#14532d}
 body[data-theme="forest"] .stat-num{
-  color:#854d0e !important;
+  color:#14532d !important;
   text-shadow:0 1px 4px rgba(255,255,255,.8), 0 0 10px rgba(253,224,71,.4);
 }
 body[data-theme="forest"] .stat-lbl{
@@ -2057,30 +2064,30 @@ body[data-theme="peach"] .stars{opacity:.4; filter:hue-rotate(-30deg) brightness
 
 /* 🍑 桃子糖果主题文字优化 (浅色背景需深色文字) */
 body[data-theme="peach"] .tagline{
-  color:#9a3412;
+  color:#9f1239;
   text-shadow:0 2px 8px rgba(255,255,255,.8), 0 0 12px rgba(254,215,170,.5);
 }
 body[data-theme="peach"] .subtitle{
-  color:#7c2d12;
+  color:#831843;
   text-shadow:0 2px 6px rgba(255,255,255,.8);
 }
 body[data-theme="peach"] .intro{
-  color:#7c2d12;
+  color:#4c1d95;
   text-shadow:0 1px 6px rgba(255,255,255,.85);
 }
-body[data-theme="peach"] .intro b{color:#c2410c}
+body[data-theme="peach"] .intro b{color:#9f1239}
 body[data-theme="peach"] .stat-num{
-  color:#c2410c !important;
+  color:#9f1239 !important;
   text-shadow:0 1px 4px rgba(255,255,255,.85), 0 0 10px rgba(251,146,60,.4);
 }
 body[data-theme="peach"] .stat-lbl{
-  color:#7c2d12 !important;
+  color:#4c1d95 !important;
   text-shadow:0 1px 4px rgba(255,255,255,.85);
 }
 body[data-theme="peach"] .brand{
   background:linear-gradient(135deg, rgba(251,146,60,.25), rgba(244,114,182,.3));
   border-color:rgba(194,65,12,.45);
-  color:#7c2d12;
+  color:#4c1d95;
   text-shadow:0 1px 4px rgba(255,255,255,.75);
 }
 body[data-theme="peach"] .stat{
@@ -2088,7 +2095,7 @@ body[data-theme="peach"] .stat{
   border-color:rgba(194,65,12,.35) !important;
 }
 body[data-theme="peach"] .how-title{
-  color:#9a3412;
+  color:#9f1239;
   text-shadow:0 2px 6px rgba(255,255,255,.75);
 }
 body[data-theme="peach"] .how-step{
@@ -2096,18 +2103,18 @@ body[data-theme="peach"] .how-step{
   border:1px solid rgba(194,65,12,.25);
 }
 body[data-theme="peach"] .how-step .title{
-  color:#7c2d12;
+  color:#4c1d95;
   text-shadow:0 1px 4px rgba(255,255,255,.7);
 }
 body[data-theme="peach"] .how-step .desc{
-  color:#9a3412;
+  color:#9f1239;
 }
 body[data-theme="peach"] .foot-brand{
-  color:#9a3412;
+  color:#9f1239;
   text-shadow:0 1px 4px rgba(255,255,255,.75);
 }
 body[data-theme="peach"] .foot-tip{
-  color:#7c2d12;
+  color:#4c1d95;
   text-shadow:0 1px 3px rgba(255,255,255,.65);
 }
 
@@ -2186,9 +2193,9 @@ h1.main.game-logo{
   paint-order: stroke fill;
   /* 3D 立体堆叠投影 + 光晕 */
   text-shadow: 
-    0 4px 0 #7c2d12,
-    0 6px 0 #7c2d12,
-    0 8px 0 #7c2d12,
+    0 4px 0 #1e3a8a,
+    0 6px 0 #1e3a8a,
+    0 8px 0 #1e3a8a,
     0 12px 24px rgba(0,0,0,.5),
     0 0 30px rgba(251,191,36,.6),
     0 0 50px rgba(236,72,153,.4) !important;
@@ -2232,8 +2239,8 @@ h1.main.game-logo{
        2px -2px 0 #fff,
       -2px  2px 0 #fff,
        2px  2px 0 #fff,
-      0 3px 0 #7c2d12,
-      0 5px 0 #7c2d12,
+      0 3px 0 #1e3a8a,
+      0 5px 0 #1e3a8a,
       0 8px 16px rgba(0,0,0,.5),
       0 0 20px rgba(251,191,36,.5) !important;
   }
@@ -2278,7 +2285,7 @@ h1.main.game-logo{
 .feedback-big-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(251,191,36,.6)}
 .feedback-big-btn:active{transform:scale(.96)}
 .feedback-big-btn .fbb-icon{font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
-.feedback-big-btn .fbb-text{line-height:1}
+.feedback-big-btn .fbb-text{line-height:1;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
 .feedback-sub{font-size:14px;color:var(--pal-ink-3,#94a3b8);margin-top:14px;letter-spacing:1px}
 
 </style>
@@ -2286,17 +2293,38 @@ h1.main.game-logo{
 
 <style id="hsnLightFix">
 /* 🔴v860 亮色可读性整改(Hansen真机: 亮色下多处字看不清 · 四个亮色逐元素对比度扫描实名修复) */
-/* tagline 渐变字: 亮底换深渐变(琥珀深→玫红深→紫深)·去发光阴影 */
-html.hsn-pal-light .tagline{ background:linear-gradient(135deg,#92400e 0%,#9f1239 45%,#5b21b6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; text-shadow:none !important; filter:drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
-/* hero 开场段: 正文深墨·所有彩色高亮统一深琥珀(强调仍在·字字可读) */
+/* tagline 渐变字: 亮底改为皇家蓝→玫红→紫；旧驼棕文字族永久禁用。 */
+html.hsn-pal-light .tagline{ background:linear-gradient(135deg,#1e40af 0%,#9f1239 45%,#5b21b6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important; -webkit-text-fill-color:transparent !important; text-shadow:none !important; filter:drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
+/* hero 开场段: 正文深墨·所有彩色高亮使用当前亮色主题的高对比强调色。 */
 html.hsn-pal-light .intro{ color:#1f2937 !important; text-shadow:none !important; }
-html.hsn-pal-light .intro span, html.hsn-pal-light .intro b, html.hsn-pal-light .intro strong{ color:#92400e !important; text-shadow:none !important; }
-/* 收获介绍卡(how): 标题深琥珀·副题石墨·步骤块翻成浅玻璃+深字 */
-html.hsn-pal-light .how-title{ color:#92400e !important; text-shadow:none !important; }
-html.hsn-pal-light .subtitle{ color:#92400e !important; text-shadow:none !important; }
+html.hsn-pal-light .intro span, html.hsn-pal-light .intro b, html.hsn-pal-light .intro strong{ color:var(--pal-accent-text,#3730a3) !important; text-shadow:none !important; }
+/* 收获介绍卡(how): 标题与副题走主题强调色；步骤块翻成浅玻璃+深字。 */
+html.hsn-pal-light .how-title{ color:var(--pal-accent-text,#3730a3) !important; text-shadow:none !important; }
+html.hsn-pal-light .subtitle{ color:var(--pal-accent-text,#3730a3) !important; -webkit-text-fill-color:var(--pal-accent-text,#3730a3) !important; text-shadow:none !important; }
 html.hsn-pal-light .island-name{ color:#ffffff !important; text-shadow:0 1px 3px rgba(0,0,0,.6) !important; }
 html.hsn-pal-light .island-en{ color:#ffffff !important; text-shadow:0 1px 3px rgba(0,0,0,.55) !important; }
-html.hsn-pal-light #recentNum{ color:#cbd5e1 !important; }
+/* v946 HF3：四套亮色配色的“最近探险”必须是一张真正的浅色信息卡。
+   旧规则把副标题强制成 #cbd5e1，落在白色玻璃卡上仅约 1.5:1，真机几乎消失。 */
+html.hsn-pal-cloud{--hsn-recent-surface:#f7fbff;--hsn-recent-border:#818cf8;--hsn-recent-accent:#3730a3}
+html.hsn-pal-sakura{--hsn-recent-surface:#fff7fb;--hsn-recent-border:#ec4899;--hsn-recent-accent:#9f1239}
+html.hsn-pal-cream{--hsn-recent-surface:#fff9ed;--hsn-recent-border:#d97706;--hsn-recent-accent:#1e40af}
+html.hsn-pal-mint{--hsn-recent-surface:#f4fff9;--hsn-recent-border:#10b981;--hsn-recent-accent:#065f46}
+html.hsn-pal-light #recentLearnStat{
+  background:var(--hsn-recent-surface,#fff) !important;
+  border:1.5px solid var(--hsn-recent-border,#64748b) !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.12),0 0 0 3px rgba(255,255,255,.7) inset !important;
+}
+html.hsn-pal-light #recentLbl{
+  color:var(--hsn-recent-accent,#334155) !important;
+  -webkit-text-fill-color:currentColor !important;
+  text-shadow:none !important;
+}
+html.hsn-pal-light #recentNum{
+  color:#334155 !important;
+  -webkit-text-fill-color:#334155 !important;
+  text-shadow:none !important;
+  font-weight:800 !important;
+}
 html.hsn-pal-light .game-logo .logo-char, html.hsn-pal-light .logo-char{ -webkit-text-stroke-color:#1f2937 !important; }
 html.hsn-pal-light .brand, html.hsn-pal-light .brand span{ color:#1f2937 !important; text-shadow:none !important; }
 html.hsn-pal-light .how-sub{ color:#57534e !important; }
@@ -2311,13 +2339,31 @@ html.hsn-pal-light .island-en{ text-shadow:0 1px 3px rgba(0,0,0,.5); }
 /* 进入冒险胶囊: 亮色下钉死深底金字(任何卡面上都清楚) */
 html.hsn-pal-light .enter{ background:rgba(15,23,42,.85) !important; color:#fbbf24 !important; border-color:rgba(251,191,36,.5) !important; }
 /* v863 页脚: 暗色描边+发光在亮底=糊 */
-html.hsn-pal-light .foot-slogan{ color:#78350f !important; text-shadow:none !important; }
+html.hsn-pal-light .foot-slogan{ color:var(--pal-accent-text,#3730a3) !important; text-shadow:none !important; }
 html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !important; }
 
 /* ⭐ v934 唯一保留的优化(零视觉代价): 滚出屏幕的岛屿卡片, 内部装饰动画自动暂停。
    看不见的东西不该烧 CPU —— 视觉上零差别, 弱机上实打实省电省算力。
    ⚠️ .flyer-* 是 position:fixed 横穿屏幕的, 绝不能暂停(会停在半空), 这里只管岛屿卡片内部。 */
 .island.hsn-offscreen *{ animation-play-state: paused !important; }
+
+/* v943 回归修复：绝不能用“全局动画 0.01ms + 只跑一次”实现 reduced-motion。
+   飞行动物依靠 keyframes 的 transform/left/top 定位；动画瞬间结束后会回到未定位的
+   position:fixed 原点，全部堆在左上角。这里只缩短界面过渡；上方已有精确选择器负责
+   关闭 shake/rage/hit 等高强度动态，主题的温和移动继续保留。 */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto !important}
+  *,*::before,*::after{transition-duration:.01ms !important}
+}
+#privacyOpen{margin-top:12px;padding:8px 14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:rgba(15,23,42,.72);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+#privacyOpen:focus-visible,#privacyClose:focus-visible,#recentLearnStat:focus-visible{outline:3px solid #fde047;outline-offset:3px}
+#hansenPrivacy{width:min(92vw,560px);max-height:84vh;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:18px;background:#111a38;color:#eef2ff;box-shadow:0 24px 80px rgba(0,0,0,.65)}
+#hansenPrivacy::backdrop{background:rgba(3,7,18,.75)}
+.privacy-body{padding:22px 22px 18px;line-height:1.75;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.privacy-body h2{font-size:22px;margin:0 0 12px;color:#fde047}
+.privacy-body h3{font-size:15px;margin:14px 0 3px;color:#93c5fd}
+.privacy-body p{font-size:13.5px;color:#dbeafe;margin:0}
+#privacyClose{display:block;width:100%;margin-top:18px;padding:11px;border:0;border-radius:11px;background:#2563eb;color:#fff;font:inherit;font-weight:800;cursor:pointer}
 </style>
 </head>
 
@@ -2326,9 +2372,9 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
 <!-- 🔴 v684: 首页↔岛 一体化外壳 —— 岛在此 iframe 内【就地打开】, 首页永不重载, 零跳转零延迟。
      岛的 goHome 会调 parent.closeIsland() 瞬回首页(hansen_home_link.js 早已内置此分支, 岛代码一行不改)。 -->
 <div id="islandFrameWrap" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:2147483600;background:#0c1538;overflow:hidden;">
-  <iframe id="islandFrame" title="大冒险" style="display:block;width:100%;height:100%;border:0;margin:0;padding:0;background:#0c1538;"></iframe>
+  <iframe id="islandFrame" title="当前单词冒险岛" aria-label="当前单词冒险岛" style="display:block;width:100%;height:100%;border:0;margin:0;padding:0;background:#0c1538;"></iframe>
   <!--🔴BUG#87 进岛加载提示: 揭开iframe前显示, DOM就绪即隐藏. 无旋转/闪烁/震屏(仅进度条平滑宽度过渡)-->
-  <div id="islandLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;pointer-events:none;align-items:center;justify-content:center;flex-direction:column;color:#cdd6f4;font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;">
+  <div id="islandLoading" role="status" aria-live="polite" aria-hidden="true" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;pointer-events:none;align-items:center;justify-content:center;flex-direction:column;color:#cdd6f4;font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;">
     <div id="islandLoadingEmoji" style="font-size:54px;margin-bottom:16px;line-height:1;">🚀</div><!-- 🔴v748(Hansen): 进岛加载图标默认值也=🚀(全岛统一·见 _showIslandLoading) -->
     <div id="islandLoadingText" style="font-size:16px;letter-spacing:1px;opacity:.82;">正在进入…</div>
     <div style="width:148px;height:4px;margin-top:20px;background:rgba(255,255,255,.13);border-radius:99px;overflow:hidden;">
@@ -3290,7 +3336,7 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
         <span class="stat-icon">🐾</span>
         <div><div class="stat-num">36</div><div class="stat-lbl">宠物阶段</div></div>
       </div>
-      <div class="stat" id="recentLearnStat" onclick="continueLastIsland()" style="cursor:pointer">
+      <div class="stat" id="recentLearnStat" role="button" tabindex="0" aria-label="继续最近学习的岛屿" onclick="continueLastIsland()" style="cursor:pointer">
         <span class="stat-icon" id="recentEmoji">📍</span>
         <div><div class="stat-lbl" id="recentLbl" style="font-size:17px;color:var(--gold);font-weight:700;letter-spacing:1px;line-height:1.2">最近探险的岛屿</div><div class="stat-num" id="recentNum" style="font-size:15px;line-height:1.4;color:var(--pal-ink-2,#cbd5e1);font-family:'Inter',sans-serif;font-weight:600;margin-top:2px">快去玩</div></div>
       </div>
@@ -3696,7 +3742,7 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
 
   <!-- ════════ 给作者留言 ════════ -->
   <section class="feedback-section">
-    <button class="feedback-big-btn" onclick="window.open('https://wj.qq.com/s2/26724943/589f/','_blank')">
+    <button type="button" class="feedback-big-btn" id="feedbackBtn">
       <span class="fbb-icon">✉️</span>
       <span class="fbb-text">给作者留言</span>
     </button>
@@ -3710,9 +3756,25 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
     <div class="foot-slogan" style="color:#fde047;font-weight:900;font-size:24px;margin-top:8px;margin-bottom:6px;letter-spacing:2px;-webkit-text-stroke:2.5px var(--pal-surf-2,#1e293b);paint-order:stroke fill;text-shadow:-2px -2px 0 var(--pal-surf-2,#1e293b),2px -2px 0 var(--pal-surf-2,#1e293b),-2px 2px 0 var(--pal-surf-2,#1e293b),2px 2px 0 var(--pal-surf-2,#1e293b),-2px 0 0 var(--pal-surf-2,#1e293b),2px 0 0 var(--pal-surf-2,#1e293b),0 -2px 0 var(--pal-surf-2,#1e293b),0 2px 0 var(--pal-surf-2,#1e293b),0 6px 12px rgba(0,0,0,.5)">学渣的快乐 · 学霸的秘密</div>
     <div class="foot-tip">
       💡 每天玩 10 分钟, 一个月后你会发现自己超厉害！<br>
-      🎒 进度自动保存 · 关掉网络也能玩
+      🎒 进度保存在当前浏览器 · 已访问的基础页面可离线打开
     </div>
+    <button type="button" id="privacyOpen" aria-haspopup="dialog" aria-controls="hansenPrivacy">🔒 隐私与离线说明</button>
   </footer>
+
+  <dialog id="hansenPrivacy" aria-labelledby="privacyTitle">
+    <div class="privacy-body">
+      <h2 id="privacyTitle">隐私与离线说明</h2>
+      <h3>本地存档</h3>
+      <p>学习进度、金币、钻石、宠物和设置默认只保存在当前浏览器，不会自动上传云端。清除网站数据、无痕模式结束或更换设备可能导致存档丢失。</p>
+      <h3>发音服务</h3>
+      <p>游戏优先使用随程序提供的本地音频。个别本地音频缺失时，点击发音可能请求百度、有道或 Google 的在线语音服务；请求会包含需要朗读的单词或句子，并由对方接收常规网络信息。离线时可继续使用已有本地音频。</p>
+      <h3>离线缓存</h3>
+      <p>安装为网页应用后，只缓存程序外壳、必要脚本和最近访问的少量页面；不会预先下载完整音频与图片库。未访问过的岛屿、图片或在线发音仍可能需要联网。</p>
+      <h3>外部链接</h3>
+      <p>“给作者留言”会打开腾讯问卷，离开本程序后适用该网站自己的隐私规则。</p>
+      <button type="button" id="privacyClose">我知道了</button>
+    </div>
+  </dialog>
 
 
 </main>
@@ -3728,42 +3790,14 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
  * UNAUTHORIZED COPYING IS PROHIBITED.
  * ============================================================ */
 
-// ============= 防爬保护 (仅 PC 端启用) =============
+// ============= 非侵入式版权提示 =============
+// 浏览器原生复制、选择、右键、打印和辅助功能全部保留；客户端不能靠拦截这些能力保护源码。
 (function(){
-  // 检测是否移动端 - 移动端 (微信内) 完全不启用任何拦截!
-  var ua = navigator.userAgent || '';
-  var isMobile = /Android|iPhone|iPad|iPod|Mobile|MicroMessenger|MiniProgram/i.test(ua);
-  
-  // 控制台警告 (无论平台都显示)
-  if(typeof console !== 'undefined' && console.log){
-    try {
-      console.log('%c⚠️ 单词大冒险 © 2026 Hansen', 'color:red;font-size:20px;font-weight:bold');
-      console.log('%c版权所有, 禁止盗用. 联系: wj.qq.com/s2/26724943/589f/', 'color:blue;font-size:13px');
-    } catch(e) {}
-  }
-  
-  // 移动端 不加任何拦截, 直接返回
-  if(isMobile) return;
-  
-  // ===== 以下仅 PC 端启用 =====
-  
-  // 1. 禁用右键 (PC)
-  document.addEventListener('contextmenu', function(e){
-    e.preventDefault();
-    return false;
-  });
-  
-  // 2. 禁用 F12 / Ctrl+Shift+I / Ctrl+U (PC)
-  document.addEventListener('keydown', function(e){
-    if(e.keyCode === 123){ e.preventDefault(); return false; }
-    if(e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)){
-      e.preventDefault(); return false;
-    }
-    if(e.ctrlKey && e.keyCode === 85){ e.preventDefault(); return false; }
-    if(e.ctrlKey && e.keyCode === 83){ e.preventDefault(); return false; }
-  });
+  try {
+    console.log('%c单词大冒险 © 2026 Hansen', 'color:#2563eb;font-size:16px;font-weight:bold');
+    console.log('请尊重作者版权；学习摘录和辅助功能保持可用。');
+  } catch(e) {}
 })();
-// === 防爬保护 END ===
 
 // 全局错误捕获 (防止 JS 错误导致白屏)
 window.addEventListener('error', function(e){
@@ -3964,6 +3998,7 @@ document.querySelectorAll('.island').forEach(el=>{
       if(bar){ bar.style.transition = 'none'; bar.style.width = '0%'; void bar.offsetWidth; bar.style.transition = 'width 1.8s ease'; bar.style.width = '95%'; }   /* 🔴v747(Hansen): 进度条1.8s充到95%(贴合2秒加载上限·原6s到90%在2秒上限下只到~26%再跳100%有跳变) */
       el.style.transition = 'none'; el.style.opacity = '1';   /* 🔴BUG#89 重置·覆盖上次的淡出残留, 再显示 */
       el.style.display = 'flex';
+      el.setAttribute('aria-hidden','false');
     }catch(e){}
   }
   function _hideIslandLoading(immediate){
@@ -3973,15 +4008,19 @@ document.querySelectorAll('.island').forEach(el=>{
       if(immediate){
         /* 保活瞬时进岛: 立即隐藏(无需淡出) */
         el.style.transition = 'none'; el.style.opacity = '0'; el.style.display = 'none';
+        el.setAttribute('aria-hidden','true');
       } else {
         /* 🔴BUG#89 换岛揭开: 加载提示平滑淡出(与岛淡入同步crossfade·不再突然消失闪一下) */
         el.style.transition = 'opacity 0.3s ease'; el.style.opacity = '0';
-        setTimeout(function(){ try{ el.style.display = 'none'; }catch(e){} }, 320);
+        setTimeout(function(){ try{ el.style.display = 'none'; el.setAttribute('aria-hidden','true'); }catch(e){} }, 320);
       }
     }catch(e){}
   }
-  function openIsland(file){
-    if(!file) return;
+  function _validIslandFile(file){
+    return /^(?:island_[a-z0-9]+|land_map|season_showcase|boss_hall)\.html$/.test(String(file||''));
+  }
+  function openIsland(file, fromHistory){
+    if(!_validIslandFile(file)) return;
     try{ for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ localStorage.setItem('lastIslandKey', k); localStorage.setItem('lastIslandTime', String(Date.now())); break; } } }catch(e){}
     var wrap = document.getElementById('islandFrameWrap');
     var frame = document.getElementById('islandFrame');
@@ -4053,9 +4092,17 @@ document.querySelectorAll('.island').forEach(el=>{
       setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */
     }
     try{ document.body.style.overflow = 'hidden'; }catch(e){}
-    /* ★ pushState 必须在 replace【之后】: 否则会先压一个 iframe=旧岛 的历史快照, 使 goHome 的 history.back()
-       把 iframe 弹回旧岛(历史污染)。放最后 → 快照里 iframe 已是新岛, back 不会乱跳。唯一历史条目, 专给返回键。 */
-    try{ history.pushState({ hsnIsland: file }, ''); }catch(e){}
+    /* 一个打开中的岛只占一条顶层历史：岛内换岛使用 replaceState，不能不断 push。
+       来自 popstate/forward 的恢复不再写历史，避免递归污染联合会话历史。 */
+    if(!fromHistory){
+      try{
+        if(history.state && history.state.hsnIsland){
+          history.replaceState({ hsnIsland:file }, '', location.href);
+        } else {
+          history.pushState({ hsnIsland:file }, '', location.href);
+        }
+      }catch(e){}
+    }
   }
   /* 纯显示关闭: 只隐藏外壳 + 刷新首页(幂等)。🔴 保活岛——【不卸载岛】(不 replace about:blank), 只隐藏 →
      再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。岛无后台音乐(只按需单词发音),
@@ -4076,14 +4123,19 @@ document.querySelectorAll('.island').forEach(el=>{
     _islandPending = null;
     var wrap = document.getElementById('islandFrameWrap');
     if(wrap && wrap.style.display !== 'none'){
+      if(history.state && history.state.hsnIsland){
+        try{ history.back(); return; }catch(e){}
+      }
       _closeIslandNow();
-      try{ history.back(); }catch(e){}
     }
   }
   window.openIsland = openIsland;
   window.closeIsland = closeIsland;
-  /* 硬件/浏览器返回键, 以及 goHome 的 history.back → 都汇聚到这里统一关闭显示 */
-  window.addEventListener('popstate', function(){ _closeIslandNow(); });
+  /* 返回关闭岛；前进则恢复同一条岛状态。两种操作都不新增历史条目。 */
+  window.addEventListener('popstate', function(e){
+    if(e.state && _validIslandFile(e.state.hsnIsland)) openIsland(e.state.hsnIsland, true);
+    else _closeIslandNow();
+  });
 
   // 给每个岛卡加 click handler 记录"最近访问"
   document.addEventListener('DOMContentLoaded', function(){
@@ -4094,11 +4146,21 @@ document.querySelectorAll('.island').forEach(el=>{
         if(href){ e.preventDefault(); openIsland(href); }
       });
     });
+    var recentButton=document.getElementById('recentLearnStat');
+    if(recentButton){
+      recentButton.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){ e.preventDefault(); continueLastIsland(); }
+      });
+    }
     renderRecent();
+    try{ if(history.state && _validIslandFile(history.state.hsnIsland)) openIsland(history.state.hsnIsland,true); }catch(e){}
   });
   
   // 如果 DOMContentLoaded 已经触发, 直接渲染
-  if(document.readyState !== 'loading') renderRecent();
+  if(document.readyState !== 'loading'){
+    renderRecent();
+    try{ if(history.state && _validIslandFile(history.state.hsnIsland)) openIsland(history.state.hsnIsland,true); }catch(e){}
+  }
   
   // 暴露到全局, 让 iframe closeIsland 等可调用
   window.renderRecent = renderRecent;
@@ -4189,23 +4251,23 @@ document.querySelectorAll('.island').forEach(el=>{
 </script>
 
 
-<script src="perf_boost.js?v=938"></script>
-<script src="hansen_preload.js?v=938"></script>
-<script src="copy_protect.js?v=938"></script>
-<script src="click_sound.js?v=938"></script>
-<script src="click_setting.js?v=938"></script>
-<script src="vocab_all.js?v=938"></script>
-<script src="hansen_upgrade.js?v=938"></script>
-<script src="hansen_onboarding.js?v=938"></script>
-<script src="hansen_theme_shop.js?v=938"></script>
-<script src="hansen_season.js?v=938"></script>
-<script src="hansen_cinema_themes.js?v=938"></script>
-<script src="hansen_diamond_shop.js?v=938"></script>
-<script src="hansen_gem_system.js?v=938"></script>
-<script src="hansen_stability.js?v=938"></script>
-<script src="hansen_home_link.js?v=938"></script>
-<script src="hansen_palette.js?v=938"></script>
-<script src="hansen_perf.js?v=938"></script><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
+<script src="perf_boost.js?v=960"></script>
+<script src="hansen_preload.js?v=960"></script>
+<script src="copy_protect.js?v=960"></script>
+<script src="click_sound.js?v=960"></script>
+<script src="click_setting.js?v=960"></script>
+<script src="vocab_all.js?v=960"></script>
+<script src="hansen_upgrade.js?v=960"></script>
+<script src="hansen_onboarding.js?v=960"></script>
+<script src="hansen_theme_shop.js?v=960"></script>
+<script src="hansen_season.js?v=960"></script>
+<script src="hansen_cinema_themes.js?v=960"></script>
+<script src="hansen_diamond_shop.js?v=960"></script>
+<script src="hansen_gem_system.js?v=960"></script>
+<script src="hansen_stability.js?v=960"></script>
+<script src="hansen_home_link.js?v=960"></script>
+<script src="hansen_palette.js?v=960"></script>
+<script src="hansen_perf_v944.js?v=960"></script><!-- v944 性能引擎: 图片卫生·滚动不暂停主题·新路径跨越旧SW缓存 -->
 <script>/* 🔴 v733(Hansen): 版本水印取值——从已加载脚本的 ?v= 戳读当前构建号(build.py 每次构建自动维护·永远=真实部署版本·无需手改)。若加载到的是旧缓存 index.html·这里读到的就是旧版号→Hansen 一眼就知道没刷新到新代码。 */
 (function(){try{var el=document.getElementById('hsnVerStamp');if(!el)return;var s=document.querySelector('script[src*="?v="]');var m=s&&s.src.match(/[?&]v=(\d+)/);el.textContent=m?('v'+m[1]):'';}catch(e){}})();</script>
 
@@ -4224,6 +4286,35 @@ document.querySelectorAll('.island').forEach(el=>{
     for(var i=0;i<cards.length;i++) io.observe(cards[i]);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+<script>
+(function(){
+  var openBtn=document.getElementById('privacyOpen');
+  var closeBtn=document.getElementById('privacyClose');
+  var dlg=document.getElementById('hansenPrivacy');
+  var feedbackBtn=document.getElementById('feedbackBtn');
+  if(feedbackBtn) feedbackBtn.addEventListener('click',function(){
+    try{ var w=window.open('https://wj.qq.com/s2/26724943/589f/','_blank','noopener,noreferrer'); if(w) w.opener=null; }catch(e){}
+  });
+  if(openBtn&&dlg){
+    openBtn.addEventListener('click',function(){
+      try{ if(typeof dlg.showModal==='function') dlg.showModal(); else dlg.setAttribute('open',''); }catch(e){}
+    });
+    dlg.addEventListener('click',function(e){
+      if(e.target===dlg){ try{ dlg.close(); }catch(err){ dlg.removeAttribute('open'); } }
+    });
+  }
+  if(closeBtn&&dlg) closeBtn.addEventListener('click',function(){ try{ dlg.close(); }catch(e){ dlg.removeAttribute('open'); } });
+
+  /* 有限离线层：只缓存外壳、必要脚本与最近访问页面，不预下载完整媒体库。 */
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw_v944.js',{scope:'./',updateViaCache:'none'}).catch(function(err){
+        try{ console.warn('[离线基础] Service Worker 注册失败:',err&&err.message); }catch(e){}
+      });
+    },{once:true});
+  }
 })();
 </script>
 </body>

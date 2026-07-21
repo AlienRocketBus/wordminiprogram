@@ -1,5 +1,5 @@
 /* ============================================================================
- * hansen_boss_theme.js (v931) — 🥊 打Boss 专属主题引擎
+ * hansen_boss_theme.js (v955) — 🥊 打Boss 专属主题引擎
  *
  * Hansen(语音): "专门在打boss这一个模块儿, 设计一个主题。之前那个暗色调我们不用变,
  *               专门设计一个亮色调 —— 一个可以调成暗色调, 一个可以调成亮色调。
@@ -27,11 +27,11 @@
  *          "上古太阳神"这类)靠它才能"浮"起来, 不会糊成一片。
  * 面板: 全部换成【近白色的半透明板】+ 柔和描边 —— 和深色调里的深色板一一对应, 结构完全一致。
  * 文字: 全部换成深色高对比:
- *   · 大词/中文题目 #92400e (深琥珀 —— 保留原来金色的气质, 但在白板上有 6.97:1)
+ *   · 大词/中文题目 #1e40af (皇家蓝 —— 与旧驼棕文字彻底分离, 白板上 8.72:1)
  *   · 题目提示     #334155 (10.01:1)
  *   · boss 名      #b91c1c (深红 —— 仍有杀气, 6.31:1)
  *   · HP / 勇者    #1e293b (14.14:1)
- *   · 听音按钮     #7c2d12 深棕字 (原来是白字压在琥珀底上, 只有 1.9:1 —— 深色调里就是个隐患)
+ *   · 听音按钮     #3730a3 深靛蓝字 (原来是白字压在琥珀底上, 只有 1.9:1 —— 深色调里就是个隐患)
  * 每一对配色都【逐对算过对比度】, 而且是按【最坏情况】算的:
  *   半透明白板压在幕布【最暗的角落】(#bcd0ea) 上 —— 这是深色字最吃亏的情况。
  *   26 对配色全部 ≥ WCAG AA(正文 4.5:1 / 大号粗体 3.0:1)。最低的一项 4.83:1。
@@ -56,9 +56,88 @@
 
   // ── 幕布 + 全部面板/文字的两套配色 ──────────────────────────────────────
   var L = 'html.hsn-bt-light #bossScreen ';
+  var D = 'html.hsn-bt-dark #bossScreen ';
+  var C = 'html.hsn-bt-cinema #bossScreen ';
   var CSS = [
     /* ══ 幕布(暗) —— 原样, Hansen 说暗色调不用变 ══ */
     'html.hsn-bt-dark #bossScreen::before{background:linear-gradient(180deg,#0f1a38 0%,#0a1122 60%,#05070f 100%) !important}',
+
+    /* ══ v953: 深空/电影的 Boss 答题语义色 ══
+       全局亮色配色和 Boss 主题是两条独立轴。樱花配色会把行内金色改为 #9f1239，
+       若不在 Boss 层隔离，暗场景里就会变成截图中几乎看不见的酒红字。
+       这里用 #bossScreen + Boss 主题类的高特异性覆盖，仅修答题文字；
+       不改 Boss 立绘、HP、倒计时、攻击、奖励、存档和晨曦亮色主题。 */
+    'html.hsn-bt-dark #bossScreen,html.hsn-bt-cinema #bossScreen{' +
+      '--boss-answer-primary:#fde68a;--boss-answer-text:#f8fafc;--boss-answer-muted:#e2e8f0;' +
+      '--boss-answer-type:#bfdbfe;--boss-answer-correct:#86efac;--boss-answer-wrong:#fca5a5}',
+    D + '#bossQType,' + C + '#bossQType{color:var(--boss-answer-type) !important;text-shadow:0 1px 3px rgba(0,0,0,.82) !important}',
+    D + '#bossQ,' + C + '#bossQ{color:var(--boss-answer-primary) !important;text-shadow:0 1px 3px rgba(0,0,0,.82) !important}',
+    D + '#bossQSub,' + C + '#bossQSub{color:var(--boss-answer-muted) !important;text-shadow:0 1px 3px rgba(0,0,0,.82) !important}',
+    D + '.boss-answer-kicker,' + C + '.boss-answer-kicker,' +
+      D + '#bossQSub *,' + C + '#bossQSub *{color:var(--boss-answer-muted) !important}',
+    D + '.boss-answer-primary,' + C + '.boss-answer-primary,' +
+      D + '.boss-answer-secondary,' + C + '.boss-answer-secondary{color:var(--boss-answer-primary) !important}',
+    D + '#bossOpts .boss-opt,' + C + '#bossOpts .boss-opt,' +
+      D + '#bossOpts .boss-opt .boss-answer-choice-text,' + C + '#bossOpts .boss-opt .boss-answer-choice-text{' +
+      'color:var(--boss-answer-text) !important;text-shadow:0 1px 3px rgba(0,0,0,.82) !important}',
+    D + '#bossOpts .boss-answer-choice-label,' + C + '#bossOpts .boss-answer-choice-label{color:var(--boss-answer-primary) !important}',
+
+    /* 压过 hansen_palette.js 的亮色主题行内色映射。盖到题目、smartHighlight、
+       句子翻译和选项真实子节点，不再只修 #bossQ 外壳。 */
+    D + '#bossQ [style*="color:#fbbf24"],' + C + '#bossQ [style*="color:#fbbf24"],' +
+      D + '#bossQ [style*="color:#fde047"],' + C + '#bossQ [style*="color:#fde047"],' +
+      D + '#bossQ [style*="color:#fde68a"],' + C + '#bossQ [style*="color:#fde68a"],' +
+      D + '#bossQ [style*="color:#facc15"],' + C + '#bossQ [style*="color:#facc15"],' +
+      D + '#bossQ [style*="color:#fcd34d"],' + C + '#bossQ [style*="color:#fcd34d"]{' +
+      'color:var(--boss-answer-primary) !important}',
+    D + '#bossOpts .boss-opt [style*="color:#fbbf24"],' + C + '#bossOpts .boss-opt [style*="color:#fbbf24"],' +
+      D + '#bossOpts .boss-opt [style*="color:#fde047"],' + C + '#bossOpts .boss-opt [style*="color:#fde047"],' +
+      D + '#bossOpts .boss-opt [style*="color:#facc15"],' + C + '#bossOpts .boss-opt [style*="color:#facc15"]{' +
+      'color:var(--boss-answer-primary) !important}',
+
+    /* 听音题答后会给英文写入蓝/绿/紫/黄行内色。暗底统一换成对应的浅色阶。 */
+    D + '#bossOpts [style*="color:#3b82f6"],' + C + '#bossOpts [style*="color:#3b82f6"]{color:#93c5fd !important}',
+    D + '#bossOpts [style*="color:#22c55e"],' + C + '#bossOpts [style*="color:#22c55e"]{color:#86efac !important}',
+    D + '#bossOpts [style*="color:#a855f7"],' + C + '#bossOpts [style*="color:#a855f7"]{color:#d8b4fe !important}',
+    D + '#bossOpts [style*="color:#facc15"],' + C + '#bossOpts [style*="color:#facc15"]{color:#fde68a !important}',
+    D + '#bossQ [style*="color:#22c55e"],' + C + '#bossQ [style*="color:#22c55e"],' +
+      D + '#bossQSub [style*="color:#22c55e"],' + C + '#bossQSub [style*="color:#22c55e"]{' +
+      'color:var(--boss-answer-correct) !important}',
+    D + '#bossQ [style*="color:#ef4444"],' + C + '#bossQ [style*="color:#ef4444"],' +
+      D + '#bossQSub [style*="color:#ef4444"],' + C + '#bossQSub [style*="color:#ef4444"],' +
+      D + '#bossOpts [style*="color:#ef4444"],' + C + '#bossOpts [style*="color:#ef4444"]{' +
+      'color:var(--boss-answer-wrong) !important}',
+
+    /* 作答结果使用明亮的绿/粉红，而不是暗绿/暗红。状态规则必须在普通选项之后。 */
+    D + '#bossOpts .boss-opt.correct,' + C + '#bossOpts .boss-opt.correct,' +
+      D + '#bossOpts .boss-opt.correct *,' + C + '#bossOpts .boss-opt.correct *,' +
+      D + '.boss-answer-result-correct,' + C + '.boss-answer-result-correct,' +
+      D + '.boss-answer-result-correct *,' + C + '.boss-answer-result-correct *{' +
+      'color:var(--boss-answer-correct) !important}',
+    D + '#bossOpts .boss-opt.wrong,' + C + '#bossOpts .boss-opt.wrong,' +
+      D + '#bossOpts .boss-opt.wrong *,' + C + '#bossOpts .boss-opt.wrong *,' +
+      D + '.boss-answer-result-wrong,' + C + '.boss-answer-result-wrong,' +
+      D + '.boss-answer-result-wrong *,' + C + '.boss-answer-result-wrong *{' +
+      'color:var(--boss-answer-wrong) !important}',
+
+    /* 打字模式：已输入字母也必须是亮色。白色键盘仍保留深色键字。 */
+    D + '.bts-slot.filled,' + C + '.bts-slot.filled{color:var(--boss-answer-primary) !important;border-bottom-color:var(--boss-answer-primary) !important}',
+    D + '#btsHint,' + C + '#btsHint{color:var(--boss-answer-text) !important}',
+    D + '#btsKbd .key,' + C + '#btsKbd .key{color:#1c1c1e !important}',
+    D + '.bts-slot.boss-answer-result-correct,' + C + '.bts-slot.boss-answer-result-correct{' +
+      'color:var(--boss-answer-correct) !important;border-bottom-color:var(--boss-answer-correct) !important}',
+    D + '.bts-slot.boss-answer-result-wrong,' + C + '.bts-slot.boss-answer-result-wrong{' +
+      'color:var(--boss-answer-wrong) !important;border-bottom-color:var(--boss-answer-wrong) !important}',
+    D + '#btsHint.boss-answer-result-correct,' + C + '#btsHint.boss-answer-result-correct,' +
+      D + '#btsHint.boss-answer-result-correct *,' + C + '#btsHint.boss-answer-result-correct *{' +
+      'color:var(--boss-answer-correct) !important}',
+    D + '#btsHint.boss-answer-result-wrong,' + C + '#btsHint.boss-answer-result-wrong,' +
+      D + '#btsHint.boss-answer-result-wrong *,' + C + '#btsHint.boss-answer-result-wrong *{' +
+      'color:var(--boss-answer-wrong) !important}',
+
+    /* 拼写补全的待填空是“亮金底+深字”的可读特例；提交后再切换亮绿/浅红。 */
+    D + '#bsfHole:not(.boss-answer-result-correct):not(.boss-answer-result-wrong),' +
+      C + '#bsfHole:not(.boss-answer-result-correct):not(.boss-answer-result-wrong){color:#1e293b !important;background:#fbbf24 !important;text-shadow:none !important}',
 
     /* ══ 幕布(亮)「晨曦」 ══
        第一层 = boss 身后的舞台光晕(让亮底上的立绘"浮"起来, 尤其是金色发光的 boss)
@@ -71,7 +150,7 @@
     L + '.back-btn{background:rgba(255,255,255,.82) !important;color:#1e293b !important;border-color:rgba(30,41,59,.28) !important}',
     L + '.boss-phase-tag{background:linear-gradient(135deg,#4338ca,#3730a3) !important;color:#fff !important}',   /* 白字压深靛蓝 7.90:1 */
     L + '.boss-rage-tag{background:linear-gradient(135deg,#dc2626,#991b1b) !important;color:#fff !important}',    /* 4.83:1 */
-    L + '.boss-combo{background:rgba(255,255,255,.90) !important;color:#92400e !important;border-color:#b45309 !important}',
+    L + '.boss-combo{background:rgba(255,255,255,.90) !important;color:#1e40af !important;border-color:#4f46e5 !important}',
     L + '.boss-name{background:rgba(255,255,255,.94) !important;color:#b91c1c !important;border-color:rgba(185,28,28,.45) !important}',
     L + '.boss-hp-bar{background:#dbe4f0 !important;border-color:#dc2626 !important}',
     L + '.boss-hp-text{background:rgba(255,255,255,.92) !important;color:#1e293b !important}',
@@ -84,10 +163,10 @@
           ID 权重压过任何类选择器 —— 用 .boss-msg 写规则【根本盖不住】(实测: 亮底上还是奶油色字, 3.88:1)。
           所以这里必须【也用 ID】(#bossMsg), 权重才够。
        设计: 答对→整只气泡变绿 / 答错·阶段→整只变红 (原来只换字色, 绿字压琥珀底只有 3.98:1, 不合格)。 */
-    'html.hsn-bt-light #bossScreen #bossMsg{background:linear-gradient(135deg,rgba(254,243,199,.96),rgba(253,230,138,.94)) !important;border-color:#d97706 !important;color:#78350f !important}',
+    'html.hsn-bt-light #bossScreen #bossMsg{background:linear-gradient(135deg,rgba(239,246,255,.97),rgba(219,234,254,.95)) !important;border-color:#3b82f6 !important;color:#1e3a5f !important}',
     'html.hsn-bt-light #bossScreen #bossMsg.hit{background:linear-gradient(135deg,rgba(220,252,231,.96),rgba(187,247,208,.94)) !important;border-color:#16a34a !important;color:#14532d !important}',
-    'html.hsn-bt-light #bossScreen #bossMsg.crit{color:#92400e !important}',
-    'html.hsn-bt-light #bossScreen #bossMsg.rage{color:#92400e !important}',
+    'html.hsn-bt-light #bossScreen #bossMsg.crit{background:linear-gradient(135deg,rgba(250,245,255,.97),rgba(243,232,255,.95)) !important;border-color:#9333ea !important;color:#7e22ce !important}',
+    'html.hsn-bt-light #bossScreen #bossMsg.rage{background:linear-gradient(135deg,rgba(254,242,242,.97),rgba(254,226,226,.95)) !important;border-color:#dc2626 !important;color:#b91c1c !important}',
     'html.hsn-bt-light #bossScreen #bossMsg.miss{background:linear-gradient(135deg,rgba(254,226,226,.96),rgba(254,202,202,.94)) !important;border-color:#dc2626 !important;color:#991b1b !important}',
     'html.hsn-bt-light #bossScreen #bossMsg.phase{background:linear-gradient(135deg,rgba(254,226,226,.96),rgba(254,202,202,.94)) !important;border-color:#dc2626 !important;color:#991b1b !important}',
     /* 气泡内层也被双ID规则锁着(#bossScreen #bossMsg .boss-msg-inner) → 强制跟随外层字色 */
@@ -95,24 +174,44 @@
     /* 其余带 ID 的元素同样用 ID 兜一遍, 防止将来 boss_lock 加 ID 规则又把亮色调压回去 */
     'html.hsn-bt-light #bossScreen #bossName{background:rgba(255,255,255,.94) !important;color:#b91c1c !important;border-color:rgba(185,28,28,.45) !important;text-shadow:none !important}',
     'html.hsn-bt-light #bossScreen #bossHPText{background:rgba(255,255,255,.92) !important;color:#1e293b !important;text-shadow:none !important}',
-    'html.hsn-bt-light #bossScreen #bossQType{background:rgba(255,255,255,.90) !important;color:#92400e !important;border-color:rgba(180,83,9,.55) !important}',
-    'html.hsn-bt-light #bossScreen #bossQ,html.hsn-bt-light #bossScreen #bossQ *{color:#92400e !important;text-shadow:none !important}',
-    'html.hsn-bt-light #bossScreen #bossQ{background:rgba(255,255,255,.96) !important;border-color:rgba(180,83,9,.5) !important}',
+    'html.hsn-bt-light #bossScreen #bossQType{background:rgba(255,255,255,.92) !important;color:#1e40af !important;border-color:rgba(59,130,246,.55) !important}',
+    'html.hsn-bt-light #bossScreen #bossQ,html.hsn-bt-light #bossScreen #bossQ *{color:#1e40af !important;text-shadow:none !important}',
+    'html.hsn-bt-light #bossScreen #bossQ{background:rgba(255,255,255,.96) !important;border-color:rgba(59,130,246,.50) !important}',
     'html.hsn-bt-light #bossScreen #bossQSub,html.hsn-bt-light #bossScreen #bossQSub *{color:#334155 !important;text-shadow:none !important}',
     'html.hsn-bt-light #bossScreen #bossQSub{background:rgba(255,255,255,.92) !important}',
     'html.hsn-bt-light #bossScreen #heroHPText{color:#0c4a6e !important;text-shadow:none !important}',
     'html.hsn-bt-light #bossScreen #bossPhaseTag{background:linear-gradient(135deg,#4338ca,#3730a3) !important;color:#fff !important}',
     /* 题面 */
-    L + '.boss-q-type{background:rgba(255,255,255,.90) !important;color:#92400e !important;border-color:rgba(180,83,9,.55) !important}',
-    L + '.boss-question{background:rgba(255,255,255,.96) !important;color:#92400e !important;border-color:rgba(180,83,9,.5) !important}',
+    L + '.boss-q-type{background:rgba(255,255,255,.92) !important;color:#1e40af !important;border-color:rgba(59,130,246,.55) !important}',
+    L + '.boss-question{background:rgba(255,255,255,.96) !important;color:#1e40af !important;border-color:rgba(59,130,246,.50) !important}',
     L + '.boss-q-sub{background:rgba(255,255,255,.92) !important;color:#334155 !important}',
     /* 选项 4 态 */
     L + '.boss-opt{background:linear-gradient(135deg,#ffffff,#eaf1fb) !important;color:#1e293b !important;border-color:#a8bdd9 !important}',
     L + '.boss-opt:hover{background:linear-gradient(135deg,#e0e7ff,#c7d2fe) !important;color:#312e81 !important;border-color:#6366f1 !important}',
     L + '.boss-opt.correct{background:linear-gradient(135deg,#dcfce7,#bbf7d0) !important;color:#14532d !important;border-color:#22c55e !important}',
     L + '.boss-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca) !important;color:#7f1d1d !important;border-color:#ef4444 !important}',
-    /* 听音/喇叭按钮: 原来是【白字压在琥珀底】上 —— 只有 1.9:1, 深色调里也是个隐患。改深棕字 5.61:1 */
-    L + '.boss-listen-btn,' + L + '.boss-speaker-btn{color:#7c2d12 !important;border-color:rgba(120,53,15,.45) !important}',
+    'html.hsn-bt-light #bossScreen #bossOpts .boss-opt.correct,html.hsn-bt-light #bossScreen #bossOpts .boss-opt.correct *,' +
+      'html.hsn-bt-light #bossScreen .boss-answer-result-correct,html.hsn-bt-light #bossScreen .boss-answer-result-correct *{color:#14532d !important}',
+    'html.hsn-bt-light #bossScreen #bossOpts .boss-opt.wrong,html.hsn-bt-light #bossScreen #bossOpts .boss-opt.wrong *,' +
+      'html.hsn-bt-light #bossScreen .boss-answer-result-wrong,html.hsn-bt-light #bossScreen .boss-answer-result-wrong *{color:#7f1d1d !important}',
+    'html.hsn-bt-light #bossScreen .bts-slot.filled{color:#1e40af !important;border-bottom-color:#1e40af !important}',
+    'html.hsn-bt-light #bossScreen #btsHint{color:#1e293b !important}',
+    'html.hsn-bt-light #bossScreen #btsKbd .key{color:#1c1c1e !important}',
+    'html.hsn-bt-light #bossScreen #bsfHole:not(.boss-answer-result-correct):not(.boss-answer-result-wrong){color:#1e293b !important;background:#fbbf24 !important;text-shadow:none !important}',
+    'html.hsn-bt-light #bossScreen #bossQ .boss-answer-result-correct,' +
+      'html.hsn-bt-light #bossScreen #bossQ .boss-answer-result-correct *{color:#14532d !important}',
+    'html.hsn-bt-light #bossScreen #bossQ .boss-answer-result-wrong,' +
+      'html.hsn-bt-light #bossScreen #bossQ .boss-answer-result-wrong *{color:#7f1d1d !important}',
+    'html.hsn-bt-light #bossScreen #bossOpts .bts-slot.boss-answer-result-correct{' +
+      'color:#14532d !important;border-bottom-color:#16a34a !important}',
+    'html.hsn-bt-light #bossScreen #bossOpts .bts-slot.boss-answer-result-wrong{' +
+      'color:#7f1d1d !important;border-bottom-color:#dc2626 !important}',
+    'html.hsn-bt-light #bossScreen #btsHint.boss-answer-result-correct,' +
+      'html.hsn-bt-light #bossScreen #btsHint.boss-answer-result-correct *{color:#14532d !important}',
+    'html.hsn-bt-light #bossScreen #btsHint.boss-answer-result-wrong,' +
+      'html.hsn-bt-light #bossScreen #btsHint.boss-answer-result-wrong *{color:#7f1d1d !important}',
+    /* 听音/喇叭按钮: 改用深靛蓝，彻底避开旧驼棕文字族。 */
+    L + '.boss-listen-btn,' + L + '.boss-speaker-btn{color:#3730a3 !important;border-color:rgba(79,70,229,.45) !important}',
     L + '.boss-divider{background:linear-gradient(90deg,transparent,#94a3b8,transparent) !important}',
     /* 亮底上不能再用深色描影(会把深色字糊成一团) */
     L + '.boss-name,' + L + '.boss-question,' + L + '.boss-q-sub,' + L + '.boss-hp-text,' + L + '.hero-hp-text{text-shadow:none !important}',
@@ -130,11 +229,11 @@
        ⚠️ 严格限定在 #bossScreen 里 + 只在亮色调生效, 不会误伤别的界面。 */
     L + '[style*="color:#cbd5e1"],' + L + '[style*="color:#e2e8f0"]{color:#1e293b !important}',
     L + '[style*="color:#94a3b8"]{color:#475569 !important}',
-    L + '[style*="color:#fbbf24"]{color:#92400e !important}',
+    L + '[style*="color:#fbbf24"]{color:#1e40af !important}',
     L + '[style*="color:#22c55e"]{color:#15803d !important}',
     L + '[style*="color:#ef4444"]{color:#b91c1c !important}',
-    /* 胜利标题是【金色渐变裁切字】(background-clip:text) —— 亮底上糊成一片, 换成深琥珀渐变 */
-    L + '.boss-victory h2{background:linear-gradient(90deg,#b45309,#92400e) !important;-webkit-background-clip:text !important;background-clip:text !important;-webkit-text-fill-color:transparent !important}',
+    /* 胜利标题使用蓝紫裁切字；旧驼棕文字族在 Boss 内永久禁用。 */
+    L + '.boss-victory h2{background:linear-gradient(90deg,#1e40af,#6d28d9) !important;-webkit-background-clip:text !important;background-clip:text !important;-webkit-text-fill-color:transparent !important}',
 
     /* ══ 兜底 ③: 题目区里【写死的深色卡片】 ══
        ⚠️ 上面那条 #bossQ * 的兜底(把题目区所有字染深)会误伤这类卡片:
@@ -149,7 +248,8 @@
 
     /* ══ 打Boss 时不再画那个花哨的电影场景(Hansen: "后面就不要呈现出这个背景了") ══
        只有明确选了「电影场景」才画。 */
-    'html.hsn-bt-dark #hsnCinemaCanvas,html.hsn-bt-light #hsnCinemaCanvas{display:none !important}',
+    'html.hsn-bt-dark body.hsn-boss-noheader #hsnCinemaCanvas,html.hsn-bt-light body.hsn-boss-noheader #hsnCinemaCanvas,' +
+      'html.hsn-bt-dark body.hsn-boss-battle #hsnCinemaCanvas,html.hsn-bt-light body.hsn-boss-battle #hsnCinemaCanvas{display:none !important}',
 
     /* ══ ⭐ 让「晨曦」的幕布【真的亮起来】 ══
        坑: body 上还挂着一层【全屏固定的星云渐变】(body::before / body::after —— 紫/蓝的宇宙背景 + 星点)。
@@ -158,7 +258,8 @@
            文字对比度之所以还合格, 全靠底板够厚 —— 但那不是设计的样子。
        修: 只在【打Boss屏 + 晨曦主题】时把这层星云关掉(body.hsn-boss-noheader 是进 boss 屏才加的类),
            其它界面的星云一点不受影响。深色调保持原样(Hansen: 暗色调不用变)。 */
-    'html.hsn-bt-light body.hsn-boss-noheader::before,html.hsn-bt-light body.hsn-boss-noheader::after{display:none !important}'
+    'html.hsn-bt-light body.hsn-boss-noheader::before,html.hsn-bt-light body.hsn-boss-noheader::after,' +
+      'html.hsn-bt-light body.hsn-boss-battle::before,html.hsn-bt-light body.hsn-boss-battle::after{display:none !important}'
   ].join('\n');
 
   function ensureCSS() {
@@ -171,6 +272,51 @@
     if (st.textContent !== CSS) st.textContent = CSS;
   }
 
+  function inBossScreen() {
+    try {
+      return !!(document.body && (document.body.classList.contains('hsn-boss-noheader') ||
+        document.body.classList.contains('hsn-boss-battle')));
+    }
+    catch (e) { return false; }
+  }
+
+  var cinemaWasSuppressed = false;
+
+  function restoreActiveCinema() {
+    try {
+      var shop = window.HansenDiamondShop;
+      if (shop && typeof shop.restoreActiveTheme === 'function') {
+        shop.restoreActiveTheme();
+        return true;
+      }
+      var equipped = shop && shop.getEquipped && shop.getEquipped();
+      var tid = typeof equipped === 'string' ? equipped : equipped && (equipped.theme || equipped.imax || equipped.id);
+      if (tid && window.HansenCinema && window.HansenCinema.apply) return window.HansenCinema.apply(tid);
+    } catch (e) { }
+    return false;
+  }
+
+  /* Boss 的“深空/晨曦”只应在 Boss 屏抑制电影画布。离开 Boss 后必须恢复
+     当前装备或仍在计时的试用主题，不能把整座岛的动态主题一并关掉。 */
+  function syncCinema() {
+    try {
+      guardCinema();
+      var C = window.HansenCinema;
+      if (!C) return false;
+      var blocked = inBossScreen() && cur() !== 'cinema';
+      if (blocked) {
+        cinemaWasSuppressed = true;
+        if (C.stop) C.stop();
+        return false;
+      }
+      if (cinemaWasSuppressed) {
+        cinemaWasSuppressed = false;
+        return restoreActiveCinema();
+      }
+    } catch (e) { }
+    return true;
+  }
+
   function apply(id) {
     if (id !== 'light' && id !== 'cinema') id = 'dark';
     try { localStorage.setItem(KEY, id); } catch (e) { }
@@ -178,22 +324,23 @@
     h.classList.remove('hsn-bt-dark', 'hsn-bt-light', 'hsn-bt-cinema');
     h.classList.add('hsn-bt-' + id);
     ensureCSS();
-    // 不是「电影场景」→ 把电影引擎停掉(别白烧 CPU 画一个看不见的 canvas)
-    try {
-      if (id !== 'cinema' && window.HansenCinema && window.HansenCinema.stop) window.HansenCinema.stop();
-    } catch (e) { }
+    syncCinema();
     try { renderPicker(); } catch (e) { }
     return true;
   }
 
-  // 电影引擎可能被钻石商店的 lateBoot 重新拉起来 → 包一层, 没选「电影场景」就不让它画
+  // 电影引擎可能被钻石商店的 lateBoot 重新拉起来 → 只在 Boss 屏按 Boss 主题拦截。
   function guardCinema() {
     try {
       var C = window.HansenCinema;
       if (!C || C.__hsnBtWrapped) return;
       var origApply = C.apply;
       C.apply = function (tid) {
-        if (cur() !== 'cinema') { try { C.stop && C.stop(); } catch (e) { } return false; }
+        if (inBossScreen() && cur() !== 'cinema') {
+          cinemaWasSuppressed = true;
+          try { C.stop && C.stop(); } catch (e) { }
+          return false;
+        }
         return origApply.apply(C, arguments);
       };
       C.__hsnBtWrapped = true;
@@ -240,11 +387,7 @@
         return function () {
           apply(id);
           if (id === 'cinema') {
-            try {
-              var eq = window.HansenDiamondShop && window.HansenDiamondShop.getEquipped && window.HansenDiamondShop.getEquipped();
-              var tid = eq && (eq.theme || eq.imax || eq.id);
-              if (tid && window.HansenCinema) window.HansenCinema.apply(tid);
-            } catch (e) { }
+            try { restoreActiveCinema(); } catch (e) { }
           }
         };
       })(THEMES[j].id);
@@ -258,6 +401,21 @@
   function boot() {
     ensureCSS();
     guardCinema();
+    syncCinema();
+    /* island_season.html 的 Boss 选关与战斗共用同一屏：只有真正开战时才添加
+       hsn-boss-battle，且不会添加 hsn-boss-noheader。监听这个类的切换，确保开战
+       当帧暂停动态场景、胜负/离开后恢复；不依赖各岛脚本的加载顺序。 */
+    try {
+      if (document.body && window.MutationObserver && !document.body.__hsnBtClassObserver) {
+        var classObserver = new MutationObserver(function (records) {
+          for (var i = 0; i < records.length; i++) {
+            if (records[i].attributeName === 'class') { syncCinema(); break; }
+          }
+        });
+        classObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        document.body.__hsnBtClassObserver = classObserver;
+      }
+    } catch (e) { }
     try { renderPicker(); } catch (e) { }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
@@ -273,7 +431,7 @@
     window.showScreen = function (id) {
       var r = orig.apply(this, arguments);
       if (id === 'settings') { try { renderPicker(); } catch (e) { } }
-      if (id === 'boss') { try { ensureCSS(); guardCinema(); } catch (e) { } }
+      try { ensureCSS(); guardCinema(); syncCinema(); } catch (e) { }
       return r;
     };
   })();

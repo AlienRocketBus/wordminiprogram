@@ -1,4 +1,4 @@
-// hansen_diamond_shop.js — 主题商店(独立外挂)
+// hansen_diamond_shop.js v942 — 主题商店(含可恢复购买事务)
 // ============================================================
 // 花钻石买顶级品。当前商品: IMAX 史诗主题(8款·影院级canvas动态大场面) + 典藏画廊(18款·手绘场景·各30钻)。【v743: 流光系列(aurora 6款)已整体删除】
 // 依赖: HansenGems(花钻石)。零侵入独立文件, 各岛引用即有。
@@ -96,28 +96,108 @@
     theme_photo_magicschool: {bg:'#05102B', a:'radial-gradient(ellipse at 35% 30%, #05102B, transparent 60%)', b:'radial-gradient(ellipse at 65% 75%, #20223A, transparent 60%)'}
   };
 
-  function _read(){
+  var PROOF_KEY='hansen_diamond_purchase_transaction_v942';
+  function _readState(){
     try{
       var raw=localStorage.getItem(KEY);
-      if(!raw) return {owned:{}, equipped:null};
-      var o=JSON.parse(raw);
-      return {owned:(o.owned&&typeof o.owned==='object')?o.owned:{}, equipped:o.equipped||null};
-    }catch(e){ return {owned:{}, equipped:null}; }
+      if(raw===null) return {ok:true,value:_blank()};
+      var o=JSON.parse(raw);if(!o||typeof o!=='object'||Array.isArray(o))return {ok:false,value:_blank()};
+      if(o.owned!=null&&(typeof o.owned!=='object'||Array.isArray(o.owned)))return {ok:false,value:_blank()};
+      /* 历史版本可能留下已下架主题 id。未知 key 只要仍是布尔值就安全忽略；
+         非布尔值继续整份判坏，避免伪造结构绕过购买校验。 */
+      if(o.owned&&Object.keys(o.owned).some(function(id){return o.owned[id]!==true&&o.owned[id]!==false;}))return {ok:false,value:_blank()};
+      var pending=_normPending(o.pending),last=_normReceipt(o.lastReceipt);if(o.pending!=null&&!pending||o.lastReceipt!=null&&!last)return {ok:false,value:_blank()};
+      var owned=_normOwned(o.owned),savedEq=typeof o.equipped==='string'?(Object.prototype.hasOwnProperty.call(LEGACY_ITEM_MAP,o.equipped)?LEGACY_ITEM_MAP[o.equipped]:o.equipped):null;
+      var equipped=savedEq&&owned[savedEq]&&_diamondMeta(savedEq)?savedEq:null;
+      return {ok:true,value:{owned:owned,equipped:equipped,pending:pending,lastReceipt:last}};
+    }catch(e){ return {ok:false,value:_blank()}; }
   }
-  function _write(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+  function _read(){var r=_readState();if(r.ok)return r.value;var b=r.value;b.__unreadable=true;return b;}
+  function _blank(){ return {owned:{},equipped:null,pending:null,lastReceipt:null}; }
+  var LEGACY_ITEM_MAP={theme_storm:'theme_fireworks',theme_meteor:'theme_candyland',theme_sakurastorm:'theme_balloon',theme_abyss:'theme_lagoon',theme_goldenage:'theme_spacepark'};
+  function _diamondMeta(id){
+    for(var i=0;i<ITEMS.length;i++)if(ITEMS[i].id===id)return ITEMS[i];
+    return null;
+  }
+  function _normOwned(src){
+    var out={}; if(!src||typeof src!=='object'||Array.isArray(src)) return out;
+    Object.keys(src).forEach(function(id){var current=Object.prototype.hasOwnProperty.call(LEGACY_ITEM_MAP,id)?LEGACY_ITEM_MAP[id]:id;if(_diamondMeta(current)&&src[id]===true)out[current]=true;});
+    return out;
+  }
+  function _normPending(p){
+    if(!p||typeof p!=='object'||(p.type!=='diamond'&&p.type!=='basic')) return null;
+    var id=String(p.id||''),txid=String(p.txid||''),price=Math.floor(Number(p.price)||0),before=Math.floor(Number(p.before)||0);
+    var meta=p.type==='diamond'?_diamondMeta(id):_basicMeta(id);
+    if(!id||!txid||txid.length>160||!meta||price!==Math.floor(Number(meta.price)||0)||price<=0||before<price||(p.stage!=='prepared'&&p.stage!=='spent')||txid.indexOf(p.type+'_')!==0||!/^[a-z0-9_:-]+$/i.test(txid)) return null;
+    return {type:p.type,id:id,txid:txid,price:price,before:before,stage:p.stage,createdAt:Math.max(0,Math.floor(Number(p.createdAt)||0))};
+  }
+  function _normReceipt(r){
+    if(!r||typeof r!=='object'||!r.txid||!r.id) return null;
+    if(r.type!=='basic'&&r.type!=='diamond'||r.stage!=='delivered')return null;var type=r.type,id=String(r.id),txid=String(r.txid);
+    if(type==='basic'?!_basicMeta(id):!_diamondMeta(id))return null;
+    if(txid.indexOf(type+'_')!==0||txid.length>160||!/^[a-z0-9_:-]+$/i.test(txid))return null;
+    return {txid:txid,stage:'delivered',type:type,id:id,at:Math.max(0,Math.floor(Number(r.at)||0))};
+  }
+  function _write(o){
+    if(!o||o.__unreadable)return false;try{ var raw=JSON.stringify(o);localStorage.setItem(KEY,raw);return localStorage.getItem(KEY)===raw; }catch(e){ return false; }
+  }
+
+  function _proofFor(p,state){return {version:942,type:p.type,id:p.id,txid:p.txid,price:p.price,before:p.before,target:p.before-p.price,state:state};}
+  function _readProof(p){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return {ok:true,value:null};var x=JSON.parse(raw);if(!x||x.version!==942||x.type!==p.type||x.id!==p.id||x.txid!==p.txid||x.price!==p.price||x.before!==p.before||x.target!==p.before-p.price||(x.state!=='prepared'&&x.state!=='paid'))return {ok:false,value:null};return {ok:true,value:x};}catch(e){return {ok:false,value:null};}}
+  function _writeProof(p,state){try{var raw=JSON.stringify(_proofFor(p,state));localStorage.setItem(PROOF_KEY,raw);return localStorage.getItem(PROOF_KEY)===raw;}catch(e){return false;}}
+  function _clearProof(p){try{var r=_readProof(p);if(!r.ok)return false;if(!r.value)return true;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function _clearOrphanProof(){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return true;var x=JSON.parse(raw),meta=x&&(x.type==='diamond'?_diamondMeta(x.id):(x.type==='basic'?_basicMeta(x.id):null)),price=meta&&Math.floor(Number(meta.price)),before=Number(x&&x.before);if(!x||x.version!==942||!meta||x.price!==price||price<=0||!Number.isInteger(before)||before<price||x.target!==before-price||(x.state!=='prepared'&&x.state!=='paid')||String(x.txid||'').indexOf(x.type+'_')!==0||String(x.txid||'').length>160||!/^[a-z0-9_:-]+$/i.test(String(x.txid||'')))return false;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function _finishCommitted(p){
+    if(!_clearProof(p))return false;var rs=_readState();if(!rs.ok)return false;var o=rs.value;
+    if(!o.pending)return true;if(o.pending.txid!==p.txid||!o.lastReceipt||o.lastReceipt.txid!==p.txid)return false;
+    var asset=_assetExists(p,o);if(!asset.ok||!asset.value)return false;o.pending=null;return _write(o);
+  }
+
+  function _txId(prefix){
+    var rnd='';try{if(window.crypto&&crypto.getRandomValues){var a=new Uint32Array(2);crypto.getRandomValues(a);rnd=a[0].toString(36)+a[1].toString(36);}}catch(e){}
+    if(!rnd)rnd=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+    return prefix+Date.now().toString(36)+'_'+rnd;
+  }
+  function _beginPurchase(type,id,price,before){
+    var rs=_readState();if(!rs.ok||(type==='basic'&&!_basicState().ok))return null;var o=rs.value;if(o.pending)return null;
+    var txid=_txId(type+'_');
+    o.pending={type:type,id:id,txid:txid,price:price,before:before,stage:'prepared',createdAt:Date.now()};
+    if(!_write(o))return null;if(_writeProof(o.pending,'prepared'))return txid;if(!_clearProof(o.pending))return null;o.pending=null;_write(o);return null;
+  }
+  function _markPurchaseSpent(txid){
+    var rs=_readState();if(!rs.ok)return false;var o=rs.value;if(o.lastReceipt&&o.lastReceipt.txid===txid)return true;
+    if(!o.pending||o.pending.txid!==txid)return false;o.pending.stage='spent';return _write(o);
+  }
+  function _cancelPurchase(txid){
+    var rs=_readState();if(!rs.ok)return false;var o=rs.value;if(!o.pending)return true;if(o.pending.txid!==txid)return false;var pf=_readProof(o.pending);if(!pf.ok||(pf.value&&pf.value.state==='paid')||(pf.value&&!_clearProof(o.pending)))return false;o.pending=null;return _write(o);
+  }
+  function _commitDiamondPurchase(txid){
+    var rs=_readState();if(!rs.ok)return false;var o=rs.value;
+    if(o.lastReceipt&&o.lastReceipt.txid===txid){if(o.pending&&o.pending.txid===txid)return _finishCommitted(o.pending);return !!o.owned[o.lastReceipt.id];}
+    var p=o.pending;if(!p||p.txid!==txid||p.type!=='diamond')return false;
+    if(!o.owned[p.id]){var ws=_walletState(p),pf=_readProof(p);if(!ws.ok||ws.value!==p.before-p.price||!pf.ok||!pf.value||pf.value.state!=='paid')return false;}
+    o.owned[p.id]=true;o.lastReceipt={txid:txid,stage:'delivered',type:'diamond',id:p.id,at:Date.now()};
+    if(_write(o))return _finishCommitted(p);
+    var check=_readState(),delivered=!!(check.ok&&check.value.owned[p.id]&&check.value.lastReceipt&&check.value.lastReceipt.txid===txid);return delivered&&_finishCommitted(p);
+  }
 
   window.HansenDiamondShop = {
     /* 🔴 v542: 主题唯一真源——首页换主题面板从这里读, 杜绝第二份硬编码清单(v540 教训: index.html 内嵌 DIA_THEMES 漏掉 IMAX 六款) */
     listThemes: function(){ return ITEMS.filter(function(x){return x.type==='theme';}).map(function(x){ return {id:x.id,name:x.name,emoji:x.emoji,desc:x.desc,price:x.price,series:x.series||'aurora',c1:x.c1||'#0a0a1c',c2:x.c2||'#475569'}; }); },
-    isOwned: function(id){ return !!_read().owned[id]; },
+    isOwned: function(id){
+      var owned = _read().owned;
+      return Object.prototype.hasOwnProperty.call(owned, id) && owned[id] === true;
+    },
     getEquipped: function(){ return _read().equipped; },
+    restoreActiveTheme: function(){ applyActiveTheme(); return true; },
     open: openShop,
     // 应用当前已装备的主题(开机时调)
     applyEquipped: function(){ var o=_read(); var x=o.equipped; if(x && !o.owned[x]) return; applyTheme(x); },
     // 🔴 v716: 接收来自子页(岛 iframe)的主题同步——在本页(顶层主页/中间层)应用同一主题; applyTheme 内部会继续沿 parent 链往上传(到顶层 parent===window 自然停, 无回环)。试用/装备/卸下/试用结束统一走它。
     applyThemeId: function(id){ applyTheme(id); },
     // 🔴 v718: 切到基础主题(金币购买)时·静默清掉钻石主题装备(不弹 toast/不重渲, 由调用方统一重渲)——互斥用
-    clearEquipped: function(){ var o=_read(); if(o.equipped){ o.equipped=null; _write(o); applyTheme(null); } }
+    clearEquipped: function(){ var o=_read(); if(!o.equipped)return true;o.equipped=null;if(!_write(o))return false;applyTheme(null);return true; },
+    recoverPending: function(){ return recoverPendingPurchase(true); }
   };
 
   // ===== 主题视觉: 注入CSS + 给body加class =====
@@ -181,6 +261,7 @@
 
   // ===== 商店界面 =====
   function openShop(){
+    recoverPendingPurchase(false);
     ensureShopScreen();
     renderShop();
     if(typeof window.showScreen==='function'){ window.showScreen('diamondshop'); }
@@ -203,7 +284,7 @@
     var data=_read();
     var h='';
     h+='<div class="dia-bal">💎 我的钻石：<b>'+gems+'</b></div>';
-    h+='<div class="dia-tip">钻石极其珍贵（连续签到、通关整个岛才有）。这里只卖顶级专属品。</div>';
+    h+='<div class="dia-tip">钻石来自 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。</div>';
     /* 🎬 v540: 两个系列分开陈列, IMAX 史诗系列置顶(镇店之宝) */
     h+='<div class="dia-cat">🎬 IMAX 史诗主题 · 影院级动态大场面</div>';
     h+='<div class="dia-imax-tip">每款都有一个周期上演的「招牌大场面」：梦境流星雨 / 火山糖果喷发 / 闪电劈落 / 流星雨 / 花吹雪 / 鱼群巡游 / 数据光波 / 金环冲击。建议先点「试用」亲眼看 60 秒。</div>';
@@ -234,7 +315,7 @@
                 '<button class="dia-btn buy" onclick="window.__hsnDiaBuy(\''+it.id+'\')">💎 '+it.price+'</button>'; }
       var imax=(series==='imax');
       h+='<div class="dia-item'+(imax?' dia-item-imax':'')+'">'+
-           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=938\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
+           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=960\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
            '<div class="dia-info"><div class="dia-name">'+it.name+(owned?' <span class="owned-tag">已拥有</span>':'')+'</div>'+
            '<div class="dia-desc">'+it.desc+'</div></div>'+
            '<div class="dia-action">'+btn+'</div>'+
@@ -258,23 +339,79 @@
   ];
   var BASIC_UNLOCK_KEY = 'hansen_unlocked_themes';
   function _basicMeta(key){ for(var i=0;i<BASIC_THEMES.length;i++){ if(BASIC_THEMES[i].key===key) return BASIC_THEMES[i]; } return null; }
+  function _basicState(){try{var raw=localStorage.getItem(BASIC_UNLOCK_KEY);if(raw===null)return {ok:true,value:[]};var a=JSON.parse(raw);if(!Array.isArray(a)||a.some(function(x){return typeof x!=='string'||!_basicMeta(x);}))return {ok:false,value:[]};return {ok:true,value:a.slice()};}catch(e){return {ok:false,value:[]};}}
   function _basicUnlocked(key){
     if(BASIC_FREE.indexOf(key)>=0) return true;
-    try{ var raw=localStorage.getItem(BASIC_UNLOCK_KEY); if(raw){ var a=JSON.parse(raw); if(Array.isArray(a)&&a.indexOf(key)>=0) return true; } }catch(e){}
-    return false;
+    var r=_basicState();return r.ok&&r.value.indexOf(key)>=0;
   }
   function _basicDoUnlock(key){
-    try{ var a=[]; var raw=localStorage.getItem(BASIC_UNLOCK_KEY); if(raw){ var p=JSON.parse(raw); if(Array.isArray(p)) a=p; } if(a.indexOf(key)<0){ a.push(key); localStorage.setItem(BASIC_UNLOCK_KEY, JSON.stringify(a)); } }catch(e){}
+    try{
+      if(!_basicMeta(key))return false;
+      var bs=_basicState();if(!bs.ok)return false;var a=bs.value;
+      if(a.indexOf(key)<0)a.push(key);
+      var next=JSON.stringify(a);localStorage.setItem(BASIC_UNLOCK_KEY,next);
+      return localStorage.getItem(BASIC_UNLOCK_KEY)===next&&_basicUnlocked(key);
+    }catch(e){ return false; }
   }
-  function _coinsGet(){ try{ if(window.HansenCoins&&window.HansenCoins.get) return window.HansenCoins.get(); if(window.HansenWallet&&window.HansenWallet.get) return window.HansenWallet.get(); var v=parseInt(localStorage.getItem('hansen_wallet_coins'),10); return (isFinite(v)&&v>0)?v:0; }catch(e){ return 0; } }
-  function _coinsSpend(n){ try{ if(window.HansenCoins&&window.HansenCoins.spend) return window.HansenCoins.spend(n); if(window.HansenWallet&&window.HansenWallet.spend) return window.HansenWallet.spend(n); var c=_coinsGet(); if(c<n) return false; localStorage.setItem('hansen_wallet_coins', String(c-n)); return true; }catch(e){ return false; } }
+  function _coinState(){try{var raw=localStorage.getItem('hansen_wallet_coins'),stored=raw===null?0:Number(raw),api=window.HansenCoins&&typeof HansenCoins.get==='function'?Number(HansenCoins.get()):(window.HansenWallet&&typeof HansenWallet.get==='function'?Number(HansenWallet.get()):stored);return isFinite(stored)&&Math.floor(stored)===stored&&stored>=0&&api===stored?{ok:true,value:stored}:{ok:false,value:NaN};}catch(e){return {ok:false,value:NaN};}}
+  function _coinsGet(){var r=_coinState();return r.ok?r.value:NaN;}
+  function _coinsSpend(n){
+    try{
+      if(window.HansenCoins&&window.HansenCoins.spend)return window.HansenCoins.spend(n)===true;
+      if(window.HansenWallet&&window.HansenWallet.spend)return window.HansenWallet.spend(n)===true;
+      var c=_coinsGet();if(c<n)return false;var next=String(c-n);localStorage.setItem('hansen_wallet_coins',next);return localStorage.getItem('hansen_wallet_coins')===next;
+    }catch(e){ return false; }
+  }
+  function _commitBasicPurchase(txid){
+    var rs=_readState(),bs=_basicState();if(!rs.ok||!bs.ok)return false;var o=rs.value;if(o.lastReceipt&&o.lastReceipt.txid===txid){if(o.pending&&o.pending.txid===txid)return _finishCommitted(o.pending);return _basicUnlocked(o.lastReceipt.id);}
+    var p=o.pending;if(!p||p.txid!==txid||p.type!=='basic')return false;
+    if(!_basicUnlocked(p.id)){var ws=_walletState(p),pf=_readProof(p);if(!ws.ok||ws.value!==p.before-p.price||!pf.ok||!pf.value||pf.value.state!=='paid')return false;}
+    if(!_basicUnlocked(p.id)&&!_basicDoUnlock(p.id))return false;
+    // 解锁 key 与交易日志是两个 key：先严格回读资产，再清日志。若清日志失败，
+    // 下次恢复先看见资产已存在，只清日志，绝不会再次扣款。
+    rs=_readState();if(!rs.ok)return false;o=rs.value;if(!o.pending||o.pending.txid!==txid)return _basicUnlocked(p.id);
+    o.lastReceipt={txid:txid,stage:'delivered',type:'basic',id:p.id,at:Date.now()};
+    if(_write(o))return _finishCommitted(p);
+    var check=_readState(),delivered=!!(check.ok&&check.value.lastReceipt&&check.value.lastReceipt.txid===txid&&_basicUnlocked(p.id));return delivered&&_finishCommitted(p);
+  }
+  function _assetExists(p,o){if(p.type==='diamond')return {ok:true,value:!!o.owned[p.id]};var bs=_basicState();return {ok:bs.ok,value:bs.ok&&bs.value.indexOf(p.id)>=0};}
+  function _walletFor(p){
+    if(p.type==='diamond')return window.HansenGems&&typeof window.HansenGems.get==='function'?window.HansenGems:null;
+    if(window.HansenCoins&&typeof window.HansenCoins.get==='function')return window.HansenCoins;
+    if(window.HansenWallet&&typeof window.HansenWallet.get==='function')return window.HansenWallet;
+    return {get:_coinsGet};
+  }
+  function _walletState(p){
+    try{var wallet=_walletFor(p);if(!wallet||typeof wallet.get!=='function')return {ok:false,value:NaN};var key=p.type==='diamond'?'hansen_wallet_gems':'hansen_wallet_coins',raw=localStorage.getItem(key),stored=raw===null?0:Number(raw),api=Number(wallet.get());return isFinite(stored)&&Math.floor(stored)===stored&&stored>=0&&api===stored?{ok:true,value:stored}:{ok:false,value:NaN};}catch(e){return {ok:false,value:NaN};}
+  }
+  function _confirmProof(p,balance){var r=_readProof(p);if(!r.ok||!r.value||balance!==p.before-p.price)return false;return r.value.state==='paid'||_writeProof(p,'paid');}
+  function recoverPendingPurchase(silent){
+    var rs=_readState();if(!rs.ok)return {status:'pending',reason:'storage'};var o=rs.value,p=o.pending;if(!p)return {status:_clearOrphanProof()?'none':'pending',reason:'proof'};
+    // 资产已落盘但清日志时中断：只补收据/清日志，绝不再次扣款。
+    var asset=_assetExists(p,o);if(!asset.ok)return {status:'pending',txid:p.txid,id:p.id};if(asset.value){
+      var delivered=p.type==='basic'?_commitBasicPurchase(p.txid):_commitDiamondPurchase(p.txid);
+      return {status:delivered?'committed':'pending',txid:p.txid,id:p.id};
+    }
+    var ws=_walletState(p);if(!ws.ok)return {status:'pending',txid:p.txid,id:p.id};var balance=ws.value,pf=_readProof(p);if(!pf.ok)return {status:'pending',txid:p.txid,id:p.id};
+    if(balance===p.before-p.price&&pf.value&&_confirmProof(p,balance)){
+      var ok=p.type==='basic'?_commitBasicPurchase(p.txid):_commitDiamondPurchase(p.txid);
+      if(!silent&&ok)shopToast('上次中断的购买已恢复，未重复扣款 ✅');
+      return {status:ok?'committed':'pending',txid:p.txid,id:p.id};
+    }
+    if(balance===p.before){
+      if(pf.value&&pf.value.state==='paid')return {status:'pending',txid:p.txid,id:p.id};
+      var cancelled=_cancelPurchase(p.txid);
+      return {status:cancelled?'cancelled':'pending',txid:p.txid,id:p.id};
+    }
+    if(!silent)shopToast('检测到余额变化，购买记录已保留；为防重复扣款没有自动猜测');
+    return {status:'pending',txid:p.txid,id:p.id};
+  }
   function _curBasicKey(){ try{ return localStorage.getItem('theme')||'cosmos'; }catch(e){ return 'cosmos'; } }
   // 应用基础主题(仅已解锁): 静默清掉钻石主题装备(互斥) + 写 data-theme/localStorage(各页"6主题系统"维持渲染·钻石卸下回归默认)
   function applyBasicTheme(key){
     if(!_basicUnlocked(key)) return false;
-    var o=_read(); if(o.equipped){ o.equipped=null; _write(o); applyTheme(null); }   // 静默清钻石装备(不弹toast)
-    try{ document.body.dataset.theme = key; localStorage.setItem('theme', key); }catch(e){}
-    return true;
+    var o=_read();if(o.equipped){o.equipped=null;if(!_write(o))return false;applyTheme(null);}   // 静默清钻石装备(不弹toast)
+    try{localStorage.setItem('theme',key);if(localStorage.getItem('theme')!==key)return false;document.body.dataset.theme=key;return true;}catch(e){return false;}
   }
 
   function renderBasicThemes(data){
@@ -307,34 +444,67 @@
   // 金币购买基础主题(扣币 → 永久解锁 → 立即使用)
   window.__hsnBuyBasic = function(key){
     try{
+      var prior=recoverPendingPurchase(false);
+      if(prior.status==='pending'){shopToast('上一笔购买仍在恢复，本次未扣金币');return;}
+      if(prior.status==='committed'){renderShop();shopToast('上一笔购买已恢复；本次没有再次扣金币');return;}
       if(_basicUnlocked(key)){ window.__hsnUseBasic(key); return; }
-      var m=_basicMeta(key); var price=m?m.price:0;
-      var have=_coinsGet();
+      var m=_basicMeta(key);if(!m||m.price<=0){shopToast('无效商品，本次未扣金币');return;}var price=m.price;
+      var beforeState=_coinState();if(!beforeState.ok){shopToast('金币余额暂时无法核验，本次未扣金币');return;}var have=beforeState.value;
       if(have < price){ renderShop(); shopToast('金币不足，还差 '+(price-have)+' 💰（连续签到、通关整个岛可赚金币）'); return; }
-      if(_coinsSpend(price)){ _basicDoUnlock(key); applyBasicTheme(key); renderShop(); shopToast('🎉 已解锁并使用「'+(m?m.name:'主题')+'」'); }
-      else{ shopToast('购买失败，请重试'); }
-    }catch(e){}
+      var txid=_beginPurchase('basic',key,price,have);
+      if(!txid){shopToast('购买记录无法保存，本次未扣金币');return;}
+      try{_coinsSpend(price);}catch(eSpend){}
+      var afterState=_coinState(),afterCoins=afterState.ok?afterState.value:NaN;
+      if(!afterState.ok||afterCoins!==have-price){
+        if(afterState.ok&&afterCoins===have){_cancelPurchase(txid);shopToast('金币未实际扣除，本次购买已取消');}
+        else shopToast('金币余额发生非预期变化，购买记录已保留；本次没有交付或再次扣款');
+        return;
+      }
+      var rs=_readState(),p=rs.ok?rs.value.pending:null;if(!p||p.txid!==txid||!_confirmProof(p,afterCoins)){shopToast('付款凭证无法确认，购买记录已保留；本次没有交付或再次扣款');return;}
+      if(!_markPurchaseSpent(txid)){shopToast('购买记录暂时无法更新；交易会在下次打开商店时恢复，不会重复扣款');return;}
+      if(!_commitBasicPurchase(txid)){shopToast('金币已扣，主题处于待恢复状态；重新打开商店会自动解锁，不会重复扣款');return;}
+      var applied=applyBasicTheme(key);renderShop();
+      shopToast(applied?'🎉 已解锁并使用「'+m.name+'」':'🎉 已解锁「'+m.name+'」，自动使用未保存，可稍后手动选择');
+    }catch(e){shopToast('购买处理中断，交易日志已保留，重新打开商店会自动恢复');}
   };
 
   // 买
   window.__hsnDiaBuy = function(id){
     var it=ITEMS.find(function(x){return x.id===id;}); if(!it) return;
-    var GM=window.HansenGems; if(!GM){ alert('钻石系统未就绪'); return; }
-    if(GM.get() < it.price){ shopToast('钻石不够啦！连续签到、通关整个岛可以获得钻石 💎'); return; }
+    var GM=window.HansenGems;if(!GM||typeof GM.get!=='function'||typeof GM.spend!=='function'){alert('钻石系统未就绪');return;}
+    var prior=recoverPendingPurchase(false);
+    if(prior.status==='pending'){shopToast('上一笔购买仍在恢复，本次未扣钻石');return;}
+    if(prior.status==='committed'){renderShop();shopToast('上一笔购买已恢复；本次没有再次扣钻石');return;}
+    var store=_readState();if(!store.ok){shopToast('主题存档暂时无法核验，本次未扣钻石');return;}if(store.value.owned[id]){window.__hsnDiaEquip(id);return;}
+    var beforeState=_walletState({type:'diamond'}),before=beforeState.ok?beforeState.value:NaN;
+    if(!beforeState.ok){shopToast('钻石余额暂时无法核验，本次未扣钻石');return;}
+    if(before < it.price){ shopToast('钻石不够啦！可通过 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就获得；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。'); return; }
     // 确认
     if(!confirm('用 '+it.price+' 颗钻石购买「'+it.name+'」主题？')) return;
-    GM.spend ? GM.spend(it.price) : GM.add(-it.price);
-    var o=_read(); o.owned[id]=true; _write(o);
-    shopToast('🎉 购买成功！已解锁「'+it.name+'」主题');
+    var txid=_beginPurchase('diamond',id,it.price,before);
+    if(!txid){shopToast('购买记录无法保存，本次未扣钻石');return;}
+    try{GM.spend(it.price);}catch(eSpend){}
+    var afterState=_walletState({type:'diamond'}),afterGems=afterState.ok?afterState.value:NaN;
+    if(!afterState.ok||afterGems!==before-it.price){
+      if(afterState.ok&&afterGems===before){_cancelPurchase(txid);shopToast('钻石未实际扣除，本次购买已取消');}
+      else shopToast('钻石余额发生非预期变化，购买记录已保留；本次没有交付或再次扣款');
+      return;
+    }
+    var afterStore=_readState(),pending=afterStore.ok?afterStore.value.pending:null;if(!pending||pending.txid!==txid||!_confirmProof(pending,afterGems)){shopToast('付款凭证无法确认，购买记录已保留；本次没有交付或再次扣款');return;}
+    if(!_markPurchaseSpent(txid)){shopToast('购买记录暂时无法更新；交易会在下次打开商店时恢复，不会重复扣款');return;}
+    if(!_commitDiamondPurchase(txid)){
+      shopToast('钻石已扣，主题处于待恢复状态；重新打开商店会自动解锁，不会重复扣款');return;
+    }
     // 买了直接装备
-    equip(id);
+    var equipped=equip(id);
     renderShop();
+    shopToast(equipped?'🎉 购买成功！已解锁并使用「'+it.name+'」':'🎉 购买成功！主题已解锁；自动使用未保存，可稍后手动选择');
   };
   // 装备
-  window.__hsnDiaEquip = function(id){ if(id && !_read().owned[id]){ shopToast('这个主题还没解锁，先购买吧 💎'); renderShop(); return; } equip(id); renderShop(); shopToast('已切换到「'+(ITEMS.find(function(x){return x.id===id;})||{}).name+'」主题'); };
-  function equip(id){ var o=_read(); if(id && !o.owned[id]) return; o.equipped=id; _write(o); applyTheme(id); }  /* v454: 未购买不能装备(堵后台白嫖钻石主题) */
+  window.__hsnDiaEquip = function(id){ var o=_read();if(id!=null&&(!_diamondMeta(id)||!Object.prototype.hasOwnProperty.call(o.owned,id)||o.owned[id]!==true)){ shopToast('这个主题还没解锁，先购买吧 💎'); renderShop(); return; }var ok=equip(id);renderShop();shopToast(ok?'已切换到「'+(ITEMS.find(function(x){return x.id===id;})||{}).name+'」主题':'主题选择未能保存，请重试'); };
+  function equip(id){ var o=_read(); if(id!=null&&(!_diamondMeta(id)||!Object.prototype.hasOwnProperty.call(o.owned,id)||o.owned[id]!==true)) return false; o.equipped=id==null?null:id; if(!_write(o)) return false; applyTheme(o.equipped); return true; }  /* v943: 仅目录内且确实已购买的 own key 可装备；原型键与历史未知 id 一律拒绝 */
   // 卸下
-  window.__hsnDiaUnequip = function(){ var o=_read(); o.equipped=null; _write(o); applyTheme(null); renderShop(); shopToast('已恢复默认背景'); };
+  window.__hsnDiaUnequip = function(){var o=_read();o.equipped=null;if(!_write(o)){shopToast('恢复默认背景未能保存，请重试');return;}applyTheme(null);renderShop();shopToast('已恢复默认背景');};
 
   // ===== 1分钟试用(🔴 v541: sessionStorage 跨页持久——Hansen 实测: 商店页试用后回主页主题消失, 主题最重要的展示舞台恰恰是主页) =====
   var _trialTimer = null;
@@ -370,7 +540,11 @@
   function endTrial(silent){
     try{ sessionStorage.removeItem(TRIAL_SS); }catch(e){}
     if(_trialTimer){ clearInterval(_trialTimer); _trialTimer=null; }
-    if(_trialBar){ _trialBar.classList.remove('show'); var bar=_trialBar; setTimeout(function(){ if(bar)bar.remove(); },300); _trialBar=null; }
+    if(_trialBar){
+      var bar=_trialBar;_trialBar=null;
+      if(silent){ bar.remove(); }
+      else{ bar.classList.remove('show');setTimeout(function(){ if(bar)bar.remove(); },300); }
+    }
     // 恢复到真正装备的主题(没有就默认)
     if(!silent){ applyTheme(_read().equipped); }
   }
@@ -411,9 +585,9 @@
     '.dia-imax-tip{font-size:11.5px;color:#c4b5fd;background:rgba(124,58,237,.12);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:8px 11px;line-height:1.6;margin:0 0 10px}'+
     '.dia-item-imax{border:1.5px solid rgba(251,191,36,.55)!important;box-shadow:0 0 14px rgba(251,191,36,.18),inset 0 1px 0 rgba(255,255,255,.06)}'+
     '.dia-imax-badge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:900;letter-spacing:1px;color:#1a1206;background:linear-gradient(135deg,#fde68a,#f59e0b);padding:1.5px 5px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.4)}'+
-    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=938) center 28%/cover}'+
-    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=938) center 22%/cover}'+
-    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=938) center 42%/cover}'+
+    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=960) center 28%/cover}'+
+    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=960) center 22%/cover}'+
+    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=960) center 42%/cover}'+
     '.dia-prev-theme_fireworks{background:linear-gradient(160deg,#5b3fc4,#ff6b9d)}'+
     '.dia-prev-theme_candyland{background:linear-gradient(160deg,#7ec8ff,#ffb3d1)}'+
     '.dia-prev-theme_balloon{background:linear-gradient(160deg,#41b8f5,#ffe680)}'+
@@ -426,7 +600,31 @@
     '.dia-trial-bar button{background:#fff;color:#7c3aed;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit}'+
     '.dia-trial-bar button.trial-stop{background:rgba(255,255,255,.25);color:#fff}'+
     '.dia-toast{position:fixed;top:28%;left:50%;transform:translateX(-50%) translateY(-10px);background:rgba(15,23,42,.96);border:1px solid #22d3ee;color:#22d3ee;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:700;z-index:99999;opacity:0;transition:all .3s;max-width:80%;text-align:center}'+
-    '.dia-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}';
+    '.dia-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}'+
+    /* v946 HF3：亮色配色专用商店语言。
+       旧卡片把半透明深灰底与浅灰字原封不动搬到云端白/樱花粉/奶油杏/薄荷绿，
+       既“灰蒙蒙”又只有很低的文字对比度。暗色主题完全不进入这些选择器。 */
+    'html.hsn-pal-cloud{--hsn-shop-surface:#f7fbff;--hsn-shop-border:#818cf8;--hsn-shop-accent:#3730a3}'+
+    'html.hsn-pal-sakura{--hsn-shop-surface:#fff7fb;--hsn-shop-border:#ec4899;--hsn-shop-accent:#9f1239}'+
+    'html.hsn-pal-cream{--hsn-shop-surface:#fff9ed;--hsn-shop-border:#d97706;--hsn-shop-accent:#1e40af}'+
+    'html.hsn-pal-mint{--hsn-shop-surface:#f4fff9;--hsn-shop-border:#10b981;--hsn-shop-accent:#065f46}'+
+    'html.hsn-pal-light #diamondshopScreen .screen-title{background:none!important;color:var(--hsn-shop-accent,#3730a3)!important;-webkit-text-fill-color:currentColor!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-bal{color:#1e293b!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-bal b{color:var(--hsn-shop-accent,#3730a3)!important;-webkit-text-fill-color:currentColor!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-tip{color:#475569!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-cat{color:var(--hsn-shop-accent,#3730a3)!important;-webkit-text-fill-color:currentColor!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-item{background:var(--hsn-shop-surface,#fff)!important;border:1.5px solid var(--hsn-shop-border,#64748b)!important;box-shadow:0 6px 18px rgba(15,23,42,.10),0 0 0 2px rgba(255,255,255,.72) inset!important;color:#172033!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-item-imax{border-color:var(--hsn-shop-border,#64748b)!important;box-shadow:0 7px 20px rgba(15,23,42,.12),0 0 0 2px rgba(255,255,255,.75) inset!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-preview{border-color:rgba(15,23,42,.18)!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-name{color:#172033!important;-webkit-text-fill-color:#172033!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-desc{color:#3f4c5f!important;-webkit-text-fill-color:#3f4c5f!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .owned-tag{color:var(--hsn-shop-accent,#3730a3)!important;background:#fff!important;border:1px solid var(--hsn-shop-border,#64748b)!important;-webkit-text-fill-color:currentColor!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-imax-tip{color:#4c1d95!important;background:#f5f3ff!important;border-color:#a78bfa!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-btn.try{background:#ede9fe!important;color:#5b21b6!important;border-color:#7c3aed!important;-webkit-text-fill-color:#5b21b6!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-btn.buy{background:#0f766e!important;color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-btn.equipped{background:#e0f2fe!important;color:#075985!important;border:1px solid #0284c7!important;-webkit-text-fill-color:#075985!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-unequip{background:#fff!important;color:#334155!important;border-color:#64748b!important;-webkit-text-fill-color:#334155!important;text-shadow:none!important}'+
+    'html.hsn-pal-light #diamondshopScreen .dia-soon{background:var(--hsn-shop-surface,#fff)!important;color:#475569!important;border:1px solid var(--hsn-shop-border,#64748b)!important;text-shadow:none!important}';
     var st=document.createElement('style'); st.id='hsnDiaShopCSS'; st.textContent=css; document.head.appendChild(st);
   }
 
@@ -445,11 +643,11 @@
   /* 🔴 v543: v540-542 旧 IMAX id → 嘉年华新 id 一次性迁移(按相同价位对位, 已购/已装备无损平移) */
   function migrateImaxIds(){
     try{
-      var MAP={theme_storm:'theme_fireworks',theme_meteor:'theme_candyland',theme_sakurastorm:'theme_balloon',theme_abyss:'theme_lagoon',theme_goldenage:'theme_spacepark'};   /* 🗑️v744: 一款已删IMAX主题的旧id迁移项已移除 */
-      var o=_read(), changed=false;
-      Object.keys(MAP).forEach(function(k){ if(o.owned[k]){ delete o.owned[k]; o.owned[MAP[k]]=true; changed=true; } });
-      if(o.equipped && MAP[o.equipped]){ o.equipped=MAP[o.equipped]; changed=true; }
-      if(changed) _write(o);
+      var stored=localStorage.getItem(KEY);if(stored===null)return;
+      var raw=JSON.parse(stored),state=_readState();if(!state.ok)return;
+      /* _readState 已完成旧 id 映射并过滤历史未知 id；只要原始结构与纯净结构不同，
+         就一次性写回。pending/receipt 也由同一严格解析器保留，不会破坏未完成交易。 */
+      if(JSON.stringify(raw)!==JSON.stringify(state.value))_write(state.value);
     }catch(e){}
   }
   /* 🔴 v716(Hansen): 抽出"应用当前生效主题"(试用优先·否则装备)——供 start() 与 bfcache 恢复/可见性变化复用。 */
@@ -467,6 +665,7 @@
   }
   function start(){
     migrateImaxIds();
+    recoverPendingPurchase(false);
     applyActiveTheme();
     injectEntry();
   }

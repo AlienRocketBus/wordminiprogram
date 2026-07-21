@@ -42,6 +42,9 @@
     },
     // 汇总: 18岛学会的词加起来
     totalLearned: function(){
+      try{
+        if(window.HansenCanonical){HansenCanonical.absorbCurrent();return HansenCanonical.totalLearned();}
+      }catch(e){}
       var o=_read(), sum=0;
       Object.keys(o.perIsland).forEach(function(k){ sum += (o.perIsland[k].learned||0); });
       return sum;
@@ -59,7 +62,10 @@
       return mx;
     },
     // 玩过的岛数量(上报过的)
-    islandCount: function(){ return Object.keys(_read().perIsland).length; },
+    islandCount: function(){
+      try{if(window.HansenCanonical){var c=HansenCanonical.counts(),n=0;Object.keys(c).forEach(function(k){if(c[k].learned>0)n++;});return n;}}catch(e){}
+      return Object.keys(_read().perIsland).length;
+    },
     // 调试: 看各岛数据
     _dump: function(){ return _read().perIsland; }
   };

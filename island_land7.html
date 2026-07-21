@@ -16,21 +16,23 @@
 -->
 
 <html lang="zh-CN">
-<head><link rel="preload" as="image" href="icons/speaker_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/typer_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/cloze_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/spell_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/spelling_bee.webp?v=938">
-<link rel="preload" as="image" href="icons/mole_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/fish_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/bubble_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/speed_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/eagle_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/task_3d.webp?v=938">
-<link rel="preload" as="image" href="icons/chest_gold.webp?v=938">
+<head><script src="hansen_sw_upgrade_gate_v944.js?v=960"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=960"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<link rel="preload" as="image" href="icons/speaker_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/typer_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/cloze_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/spell_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/spelling_bee.webp?v=960">
+<link rel="preload" as="image" href="icons/mole_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/fish_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/bubble_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/speed_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/eagle_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/task_3d.webp?v=960">
+<link rel="preload" as="image" href="icons/chest_gold.webp?v=960">
 
 <meta charset="UTF-8"><!-- 🔴v669 宝箱三调:签到后蓝底改红底e60012+已签绿角标改蓝2b00ff+金箱90→91+开箱96→98+角标101→98横向-8→-6纵向1→0 --><!-- 🔴v668 宝箱再调:两态蓝底6096eb·签到前金箱90无偏移·签到后开箱96下移5·已签角标蓝改绿10b981·角标101%横向-8纵向1 --><!-- 🔴v667 每日宝箱角标(可领红/已签蓝)+签到前蓝底金箱91+签到后红底开箱98+图标上下(前-1后-7)+角标横向-6纵向0 --><!-- 🔴v666 每日任务X/Y角标+图标102+挑战BOSS大写+三标题统一15px+打字大师13px --><!-- 🔴v665 修复进岛闪最高阶+误弹进化(删岛内旧宠物渲染残留·交模块统一) --><!-- 🔴v664 首页图标/文字按调节器参数统一(图标尺寸/偏移+文字置顶/颜色/大小) --><!-- 🔴v663 探索单词/每日任务/泡泡大作战 emoji→新图片图标(高对比深背景·放大) --><!-- 🔴v662 底栏文字下移+置顶(不改底栏高度/图标尺寸·恢复v660几何·文字包ni-label浮于图标上层) --><!-- 🔴v661 底栏文字与图标重合修复·ni-icon瘇40→68px装下大图标不再下溢压字·文字锚底对齐离地·底栏70→96px --><!-- 🔴v660 按调节器参数逐图标套尺寸/偏移·菜单卡框固定94px+flex居中图标区·底栏固定70px --><!-- 🔴v659 util图标8056px适度收回(不撑大卡框)+util-row列锁minmax防网格溢出手机屏+卡高回原始 --><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,email=no,address=no">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,7 +73,6 @@
 @keyframes comboToastOut{
   to { opacity: 0; transform: translateX(-50%) translateY(30px) }
 }
-}
 
 /* 不同类型颜色 */
 .combo-toast.milestone-5  { background: linear-gradient(135deg,#fb923c,#f59e0b) }
@@ -96,6 +97,8 @@
 }
 @keyframes chestLegendShine{
   0%, 100% { background-position: 0% 50% }
+  50%      { background-position: 100% 50% }
+}
 /* 🐾 宠物进化 toast 专属彩虹色 */
 .combo-toast.pet-evolve{
   background: linear-gradient(90deg, #ec4899, #a855f7, #06b6d4);
@@ -110,9 +113,6 @@
 }
 @keyframes petEvolveShine{
   0%, 100% { background-position: 0% 50% }
-  50%      { background-position: 100% 50% }
-}
-
   50%      { background-position: 100% 50% }
 }
 
@@ -132,7 +132,7 @@
 .world-map-btn{ /* 🔴 v573: 去金属框(Hansen 验收反馈"太丑") — 藏宝图直贴蓝色顶栏, 按压时交接处下陷 */
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + 2px);
-  right: 6px;
+  right: max(6px, env(safe-area-inset-right, 0px));
   z-index: 999;  /* 低于 modal-bg (1000), 弹窗打开时被覆盖 */
   width: 58px;
   height: 58px;
@@ -410,49 +410,9 @@ h2, h3, .section-title, .island-name{
 .combo-badge::before{
   content: '';
 }
-  35%  { transform:translateX(-50%) scale(1.35) }
 
-
-/* 护盾获得动画 */
-20%  { transform:translate(-50%, -50%) scale(1.15) rotate(0deg); opacity:1 }
-  35%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  85%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  100% { transform:translate(-50%, -50%) scale(.6); opacity:0 }
-}
-
-/* 护盾抵消动画 */
-25%  { transform:translate(-50%, -50%) scale(1.2) rotate(0deg); opacity:1 }
-  40%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  85%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  100% { transform:translate(-50%, -50%) scale(.7); opacity:0 }
-}
-
-/* 里程碑弹窗内容 */
-50%      { transform:scale(1.1) rotate(0deg) }
-}
-50%      { box-shadow:0 4px 24px rgba(251,191,36,.7) }
-}
-
-/* 顶部 bar 闪光 (里程碑专用) */
-50%      { filter:brightness(1.8) saturate(1.8) }
-}
-
-  100% { transform:translateX(-50%) scale(1) }
-}
-
-/* 连胜里程碑 (全屏大字) */
-20%  { transform:translate(-50%, -50%) scale(1.15) rotate(0deg); opacity:1 }
-  35%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  80%  { transform:translate(-50%, -50%) scale(1) rotate(0); opacity:1 }
-  100% { transform:translate(-50%, -50%) scale(.6); opacity:0 }
-}
-
-/* 连胜中断 */
-20%  { transform:translate(-50%, -50%) scale(1.1); opacity:1 }
-  35%  { transform:translate(-50%, -50%) scale(1); opacity:1 }
-  80%  { transform:translate(-50%, -50%) scale(1); opacity:1 }
-  100% { transform:translate(-50%, -50%) scale(.9); opacity:0 }
-}
+/* v942: 删除旧全屏连胜/护盾动画遗留的孤立百分比帧。
+   对应动画和 DOM 已在早期版本退役；这些没有 @keyframes 外壳的规则会破坏 CSS 解析。 */
 
 /* 宝箱进度条 (右下角悬浮) */
 .chest-bar{
@@ -697,7 +657,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .app{max-width:500px;margin:0 auto;padding:0 0 90px;position:relative}
 
 /* ========== TOP BAR ========== */
-.top-bar{background:linear-gradient(135deg,var(--pal-chrome-1,#1e1b4b),var(--pal-chrome-2,#312e81));padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.top-bar{background:linear-gradient(135deg,var(--pal-chrome-1,#1e1b4b),var(--pal-chrome-2,#312e81));padding:calc(12px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 12px max(14px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 
 
 .avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:24px;border:3px solid #fbbf24;flex-shrink:0;box-shadow:0 0 12px rgba(251,191,36,.5);cursor:pointer;position:relative}
@@ -721,10 +681,10 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 @keyframes fire{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.15);filter:brightness(1.3)}}
 
 /* ========== SCREENS ========== */
-.screen{display:none;padding:14px 14px 8px;position:relative}/* 🔴BUG#91: 去切屏入场淡入(slideIn从opacity:0+上移)·屏瞬时出现·杜绝点任何页面进去闪一下 */
+.screen{display:none;padding:14px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px));position:relative}/* 🔴BUG#91: 去切屏入场淡入(slideIn从opacity:0+上移)·屏瞬时出现·杜绝点任何页面进去闪一下 */
 .screen.active{display:block}
 @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.back-btn{position:absolute;top:13px;left:14px;z-index:5;background:rgba(30,41,59,.82);border:1px solid rgba(148,163,184,.28);color:var(--pal-ink-2,#cbd5e1);padding:7px 13px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:0;transition:all .15s}.back-btn:active{transform:scale(.95);background:rgba(30,41,59,.85)}#bossScreen .back-btn{position:static;top:auto;left:auto;margin-bottom:14px;padding:9px 18px;font-size:14px;font-weight:700;letter-spacing:.5px;color:#e0e7ff;background:linear-gradient(135deg,rgba(var(--pal-line-rgb,99,102,241),.32),rgba(79,70,229,.22));border:1.5px solid rgba(129,140,248,.5);border-radius:14px;box-shadow:0 4px 16px rgba(49,46,129,.42),inset 0 1px 0 rgba(255,255,255,.14)}#bossScreen .back-btn:active{transform:scale(.94);background:linear-gradient(135deg,rgba(var(--pal-line-rgb,99,102,241),.46),rgba(79,70,229,.34));border-color:rgba(165,180,252,.65)}/* 🔴 v854 (Hansen): 打Boss页顶栏藏掉后返回键做好看——靛蓝玻璃胶囊+静态投影+内高光·无动画守铁律 */
+.back-btn{position:absolute;top:13px;left:max(14px,env(safe-area-inset-left,0px));z-index:5;background:rgba(30,41,59,.82);border:1px solid rgba(148,163,184,.28);color:var(--pal-ink-2,#cbd5e1);padding:7px 13px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:0;transition:all .15s;min-width:44px;min-height:44px}.back-btn:active{transform:scale(.95);background:rgba(30,41,59,.85)}#bossScreen .back-btn{position:static;top:auto;left:auto;margin-bottom:14px;padding:9px 18px;font-size:14px;font-weight:700;letter-spacing:.5px;color:#e0e7ff;background:linear-gradient(135deg,rgba(var(--pal-line-rgb,99,102,241),.32),rgba(79,70,229,.22));border:1.5px solid rgba(129,140,248,.5);border-radius:14px;box-shadow:0 4px 16px rgba(49,46,129,.42),inset 0 1px 0 rgba(255,255,255,.14)}#bossScreen .back-btn:active{transform:scale(.94);background:linear-gradient(135deg,rgba(var(--pal-line-rgb,99,102,241),.46),rgba(79,70,229,.34));border-color:rgba(165,180,252,.65)}/* 🔴 v854 (Hansen): 打Boss页顶栏藏掉后返回键做好看——靛蓝玻璃胶囊+静态投影·无动画守铁律 */
 .settings-section{background:linear-gradient(135deg,rgba(30,41,59,.82),rgba(15,23,42,.84));border:1px solid var(--pal-surf-3,#334155);border-radius:14px;padding:14px;margin-bottom:14px}
 .settings-section h3{font-size:15px;color:#fbbf24;margin-bottom:6px;font-weight:800;display:flex;align-items:center;gap:6px}
 .settings-section .desc{font-size:12px;color:var(--pal-ink-2,#cbd5e1);line-height:1.6;margin-bottom:12px}
@@ -739,7 +699,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .settings-msg.err{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
 .danger-btn{background:linear-gradient(135deg,#dc2626,#991b1b);color:var(--pal-ink,#fff);padding:10px 18px;border-radius:10px;border:1px solid #ef4444;font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
 .danger-btn:active{transform:scale(.95)}
-.small-btn{padding:10px 14px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;color:var(--pal-ink,#fff);transition:all .15s;min-height:40px;min-width:44px}
+.small-btn{padding:10px 14px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;color:var(--pal-ink,#fff);transition:all .15s;min-height:44px;min-width:44px}
 .small-btn:active{transform:scale(.95)}
 .small-btn.purple{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
 .small-btn.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
@@ -767,10 +727,18 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .daily-card{background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:14px;padding:3px 6px;text-align:center;cursor:pointer;position:relative;transition:all .15s;border:1px solid rgba(255,255,255,.1)}
 .daily-card:active{transform:scale(.96)}
 .daily-card .d-icon{font-size:72px;margin-bottom:3px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))} /* 🔴 v594: 每日任务图标=每日宝箱72(原34太小) */ /* 🔴 v582: 图标放大 28→34 */
-#chestCard .d-icon{font-size:72px;margin-bottom:3px;line-height:1} /* 🔴 v593: 宝箱图标 52→ 62 放大(Hansen 嫌小)+间距防贴文字 */ /* 🔴 v592: 每日宝箱图标单独放大52(保留两行文字, Hansen 要箱子也扩大) */
+#chestCard .d-icon{font-size:72px;line-height:1} /* 🔴 v593: 宝箱图标 52→ 62 放大(Hansen 嫌小)+间距防贴文字 */ /* 🔴 v592: 每日宝箱图标单独放大52(保留两行文字, Hansen 要箱子也扩大) */
 .daily-card .d-label{font-size:15px;font-weight:600;font-weight:700;color:var(--pal-ink,#fff);margin-top:3px;position:relative;z-index:5} /* 🔴 v582: 标题放大 13→15 */
-#chestCard .d-label{transform:translateY(9.5px)} /* 🔴 v842: 可领态文字 11.5→9.5(整体上移2px·配合图标translate 12→10·防"每日宝箱"四字快出框) 🔴 v671: "每日宝箱"四字纯视觉下移与每日任务/挑战BOSS对齐·默认=可领态(金箱91px)值 */
-#chestCard.chest-claimed .d-label{transform:translateY(2.5px)} /* 🔴 v842: 已签态文字 4.5→2.5(整体上移2px·配合图标translate 5→3) 🔴 v671: 已签态开箱98px比金箱91px高7px·文字少下移7→两态文字都落在同一基线 */
+/* 🔴 v954: 右侧挑战BOSS是锁定基准。前两卡使用同样的91px图标槽，标题固定在同一3px底线；
+   只按288px素材透明底边做同比例补偿（金箱8/288、任务9/288），不再用标题transform把文字推出卡片。 */
+.daily-card:not(.boss-card){display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.daily-card:not(.boss-card) .d-icon{width:100%;height:91px;min-height:91px;margin:0;display:flex;align-items:flex-end;justify-content:center;line-height:0}
+.daily-card:not(.boss-card) .d-icon>.qiw{display:block;width:min(91px,100%);max-width:100%;aspect-ratio:1/1;line-height:0;flex:none}
+.daily-card:not(.boss-card) .d-icon>.qiw>img{display:block;width:100%!important;height:100%!important;aspect-ratio:1/1;object-fit:contain}
+.daily-card:not(.boss-card) .d-label{position:absolute;left:0;right:0;bottom:3px;margin:0;transform:none;white-space:nowrap}
+#chestCard .d-icon>.qiw{transform:translateY(2.7778%)!important}
+#chestCard.chest-claimed .d-icon>.qiw{transform:translateY(0)!important}
+#questCard .d-icon>.qiw{transform:translateY(3.125%)!important}
 .daily-card .d-sub{font-size:13px;font-weight:600;color:rgba(255,255,255,.8);margin-top:2px}.quest-badge{position:absolute;top:1px;right:5px;background:#ef4444;color:var(--pal-ink,#fff);font-size:13px;font-weight:800;padding:2px 7px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.45);line-height:1.05;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none}.chest-badge{position:absolute;top:0;right:-6px;transform:scale(.98);transform-origin:top right;background:#ef4444;color:var(--pal-ink,#fff);font-size:13px;font-weight:800;padding:2px 7px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.45);line-height:1.05;white-space:nowrap;letter-spacing:.5px;pointer-events:none}.daily-card.chest-claimed .chest-badge{background:#2b00ff} /* 🔴 v582: 副标题放大 12→13 */
 .daily-card .d-dot{position:absolute;top:4px;right:4px;width:10px;height:10px;background:#ef4444;border-radius:50%;box-shadow:0 0 8px rgba(239,68,68,.8);animation:pulseDot 1.5s infinite}
 /* 🔴 v577: Boss 入口卡 — 街机图标放大占主体 + 挑战Boss 白字醒目 */
@@ -827,12 +795,12 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .cat-progress{font-size:13px;font-weight:600;color:var(--pal-ink-2,#cbd5e1);margin-left:auto;background:rgba(var(--pal-line-rgb,99,102,241),.15);padding:2px 8px;border-radius:8px;font-weight:600}
 
 /* ========== MODAL ========== */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
 .modal-bg.show{display:flex}/* 🔴BUG#91: 去弹窗入场淡入(fadeIn从opacity:0)·弹窗瞬时出现·不闪 */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:linear-gradient(135deg,var(--pal-surf-2,#1e293b),var(--pal-surf-1,#0f172a));border-radius:22px;padding:24px 20px;max-width:380px;width:100%;text-align:center;border:2px solid rgba(var(--pal-line-rgb,99,102,241),.4);position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(var(--pal-line-rgb,99,102,241),.2);animation:modalIn .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
-.modal .close{position:absolute;top:10px;right:10px;font-size:20px;cursor:pointer;color:var(--pal-ink,#fff);width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s;z-index:100;background:rgba(239,68,68,.85);user-select:none;-webkit-tap-highlight-color:rgba(239,68,68,.5);font-weight:700;border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.4),0 0 0 4px rgba(15,23,42,.4);padding:0;outline:none;font-family:inherit;line-height:1}
+.modal .close{position:absolute;top:10px;right:10px;font-size:20px;cursor:pointer;color:var(--pal-ink,#fff);width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s;z-index:100;background:rgba(239,68,68,.85);user-select:none;-webkit-tap-highlight-color:rgba(239,68,68,.5);font-weight:700;border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.4),0 0 0 4px rgba(15,23,42,.4);padding:0;outline:none;font-family:inherit;line-height:1}
 .modal .close:hover{background:#ef4444;color:var(--pal-ink,#fff);transform:scale(1.1)}
 .modal .close:active{transform:scale(.85);background:#dc2626;color:var(--pal-ink,#fff)}
 .modal .m-emoji{pointer-events:none}
@@ -843,7 +811,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .modal .m-ex{font-size:18px;font-weight:700;color:var(--pal-ink-hi,#e2e8f0);margin-bottom:6px;font-style:italic;line-height:1.5;padding:0 6px}
 .modal .m-excn{font-size:17px;font-weight:700;color:#fde047;margin-bottom:14px;line-height:1.5;padding:0 6px}
 .modal .m-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.modal .m-btn{padding:9px 14px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--pal-ink,#fff);display:inline-flex;align-items:center;gap:4px}
+.modal .m-btn{padding:9px 14px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--pal-ink,#fff);display:inline-flex;align-items:center;gap:4px;min-height:44px}
 .modal .m-btn:active{transform:scale(.94)}
 .m-btn.listen{background:linear-gradient(135deg,#6366f1,#4f46e5)}
 .m-btn.slow{background:linear-gradient(135deg,#0d9488,#0f766e)}
@@ -998,12 +966,6 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .boss-victory{padding:20px;text-align:center}
 .boss-victory h2{font-size:30px;background:linear-gradient(90deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;font-weight:900}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-
-
-
-  100% { transform: scale(1); opacity: 1 }
-}
-
 /* ========== WHACK-A-MOLE ========== */
 .moles-stats{display:flex;gap:12px;justify-content:center;font-size:13px;margin:8px 0}
 .ms-item{background:rgba(30,41,59,.6);padding:5px 12px;border-radius:8px;border:1px solid var(--pal-surf-3,#334155)}
@@ -1267,7 +1229,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .ach-prog-bar{flex:1;height:7px;background:rgba(148,163,184,.2);border-radius:5px;overflow:hidden}
 .ach-prog-fill{height:100%;background:linear-gradient(90deg,#60a5fa,#3b82f6);border-radius:5px}
 .ach-prog-txt{font-size:11px;font-weight:700;color:#93c5fd}
-.ach-new{position:absolute;top:-6px;right:-6px;background:#ef4444;color:var(--pal-ink,#fff);font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;box-shadow:0 2px 6px rgba(239,68,68,.5);z-index:2}
+.ach-new{position:absolute;top:-6px;right:-6px;background:#b91c1c!important;color:#fff!important;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;box-shadow:0 2px 6px rgba(127,29,29,.45);z-index:2}
 .ach-card2{position:relative}
 
 /* ========== STATS ========== */
@@ -1287,7 +1249,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 .pet-stat-prog{height:100%;background:linear-gradient(90deg,#22c55e,#10b981);border-radius:5px;transition:width .6s}
 
 /* ========== COMMON ========== */
-.game-btn{padding:12px 26px;border-radius:12px;border:none;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;color:var(--pal-ink,#fff);box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.game-btn{padding:12px 26px;border-radius:12px;border:none;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;color:var(--pal-ink,#fff);box-shadow:0 4px 14px rgba(0,0,0,.2);min-height:44px}
 .game-btn:active{transform:scale(.94)}
 .game-btn.purple{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
 .game-btn.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
@@ -1313,14 +1275,14 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 
 /* Achievement popup */
 .ach-popup{position:fixed;bottom:calc(140px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#4c1d95,#7c3aed);border:2px solid #fbbf24;border-radius:14px;padding:8px 14px;display:flex;align-items:center;gap:8px;z-index:9700;box-shadow:0 6px 20px rgba(251,191,36,.4);animation:achIn 3s ease-out forwards;font-size:12px;max-width:90vw;pointer-events:none}
-@keyframes achIn{0%{opacity:0;transform:translate(-50%,30px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,30px)}}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-40px)}}
+@keyframes achIn{0%{opacity:0;transform:translate(-50%,30px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,30px)}}
 .ach-popup .emoji{font-size:36px}
 .ach-popup .text{font-size:13px}
 .ach-popup .t-top{color:#fbbf24;font-weight:800}
 .ach-popup .t-btm{color:var(--pal-ink,#fff)}
 
 /* Bottom nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(var(--pal-c1rgb,30,27,75),.94),rgba(15,23,42,.97));border-top:1px solid rgba(var(--pal-line-rgb,99,102,241),.3);display:flex;height:calc(70px + env(safe-area-inset-bottom));z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(var(--pal-c1rgb,30,27,75),.94),rgba(15,23,42,.97));border-top:1px solid rgba(var(--pal-line-rgb,99,102,241),.3);display:flex;height:calc(70px + env(safe-area-inset-bottom));z-index:100;padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom) env(safe-area-inset-left,0px)}
 .bottom-nav .nav-item{flex:1;padding:6px 0;text-align:center;cursor:pointer;transition:all .15s;color:var(--pal-ink-2,#cbd5e1);font-size:12px;font-weight:600;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .bottom-nav .nav-item:active{background:rgba(var(--pal-line-rgb,99,102,241),.2)}
 .bottom-nav .nav-item.active{color:#fbbf24}
@@ -1332,6 +1294,22 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 /* match-board 强制 4 列 (4x4 16 张牌) */
 .match-board{grid-template-columns:repeat(4,1fr);gap:6px}
 .mode-grid{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* HF2: 320px 设备不能让 91px 日常图标撑宽三列。只在极窄屏收紧首页的
+   二次内边距并按卡片内容宽度缩图；360px 及以上完全保持原视觉。 */
+@media(max-width:340px){
+  .hero{margin-left:0;margin-right:0}
+  .daily-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding-left:0;padding-right:0}
+  .daily-card{min-width:0;padding-left:2px;padding-right:2px}
+  .daily-card .d-icon,.daily-card .d-icon>.qiw{display:block;width:100%;min-width:0;max-width:100%}
+  .daily-card .d-icon>.qiw>img,.daily-card.boss-card .boss-card-img{width:min(82px,100%)!important;height:auto!important;aspect-ratio:1/1}
+  .daily-card:not(.boss-card) .d-icon{height:82px;min-height:82px;display:flex}
+  .daily-card:not(.boss-card) .d-icon>.qiw{width:min(82px,100%);max-width:100%}
+  .daily-card .d-label,.daily-card.boss-card .boss-card-label{font-size:14px}
+  .mode-grid{gap:8px;padding-left:0;padding-right:0}
+  .util-row{padding-left:0;padding-right:0}
+  .section-label{margin-left:0;margin-right:0}
 }
 
 /* ========== 👀 EAGLE EYE ========== */
@@ -1401,27 +1379,27 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
   .mode-card:hover,.util-card:hover,.daily-card:hover{transform:none}
 }
 </style>
-<script src="sentence_map.js?v=938"></script>
-<script src="word_map.js?v=938"></script>
-<script src="highlight_helper.js?v=938"></script>
-<script src="hansen_ex_audio.js?v=938"></script>
-<script src="perf_boost.js?v=938"></script>
-<script src="hansen_preload.js?v=938"></script>
-<script src="copy_protect.js?v=938"></script>
-<script src="click_sound.js?v=938"></script>
-<script src="click_setting.js?v=938"></script>
-<script src="hansen_mute.js?v=938"></script>
-<script src="hansen_early.js?v=938"></script>
+<script src="sentence_map.js?v=960"></script>
+<script src="word_map.js?v=960"></script>
+<script src="highlight_helper.js?v=960"></script>
+<script src="hansen_ex_audio.js?v=960"></script>
+<script src="perf_boost.js?v=960"></script>
+<script src="hansen_preload.js?v=960"></script>
+<script src="copy_protect.js?v=960"></script>
+<script src="click_sound.js?v=960"></script>
+<script src="click_setting.js?v=960"></script>
+<script src="hansen_mute.js?v=960"></script>
+<script src="hansen_early.js?v=960"></script>
 
 <!-- ⭐ v929 (Hansen: "进岛很多画面加载不出来·非常卡顿") 首屏图标预加载 —— 根因与修法
      根因: 这些模式卡图标是【JS 渲染卡片时才被发现的】, 等于排在 1.4MB 脚本后面才开始下载
            → 用户已经看到卡片了, 图标却还是空的(就是"图片加载不出来")。
      修法: 在 <head> 里 preload + fetchpriority=high, 浏览器【第一时间】就和脚本并行下载,
            等 JS 把卡片渲染出来时图标已在缓存里 → 立刻显示, 零等待。 -->
-<link rel="preload" as="image" href="icons/explore_3d.webp?v=938">
+<link rel="preload" as="image" href="icons/explore_3d.webp?v=960">
 </head>
 <body>
-<a href="javascript:void(0)" onclick="return goHome()" class="world-map-btn" title="回到大冒险地图" aria-label="回首页"><span class="wmb-socket"><img class="wmb-img" src="icons/map_home.webp?v=938" alt="" draggable="false" onerror="this.parentNode.innerHTML='🗺️'"></span></a>
+<a href="javascript:void(0)" onclick="return goHome()" class="world-map-btn" title="回到大冒险地图" aria-label="回首页"><span class="wmb-socket"><img class="wmb-img" src="icons/map_home.webp?v=960" alt="" draggable="false" onerror="this.parentNode.innerHTML='🗺️'"></span></a>
 
 <div class="app" id="app">
 <!-- TOP BAR -->
@@ -1450,7 +1428,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <!-- Pet hero -->
 <div class="hero" onclick="showScreen('pet')">
   <div class="pet-slot"><div class="pet-emoji" id="heroPet"></div></div>
-  <script>/*🔴BUG#92 宠物首帧即显:进岛前读上次宠物图URL立即填heroPet(在44模块~1.9MB加载前・消除空白等待)・updateHero后用同URL幂等覆盖(缓存命中不重拉)*/try{var _ph=localStorage.getItem("hansen_pet_hero_img");if(_ph){var _pe=document.getElementById("heroPet");if(_pe&&!_pe.querySelector("img"))_pe.innerHTML='<img src="'+_ph+'" alt="" style="width:76px;height:76px;object-fit:contain;display:block" onload="var p=this.closest(&quot;.pet-slot&quot;);if(p)p.classList.add(&quot;pet-ready&quot;)" onerror="var p=this.closest(&quot;.pet-slot&quot;);if(p)p.classList.add(&quot;pet-ready&quot;);window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e){}</script>
+  <script>/* v942 宠物首帧只接受内置路径，并用 DOM 属性创建；localStorage 永不拼入 innerHTML/事件属性。 */try{var _ph=localStorage.getItem("hansen_pet_hero_img");if(/^pets\/pet_\d{2}\.webp(?:\?v=\d+)?$/.test(_ph||'')){var _pe=document.getElementById("heroPet");if(_pe&&!_pe.querySelector("img")){var _pi=document.createElement('img');_pi.alt='';_pi.style.cssText='width:76px;height:76px;object-fit:contain;display:block';_pi.addEventListener('load',function(){var p=this.closest('.pet-slot');if(p)p.classList.add('pet-ready')});_pi.addEventListener('error',function(){var p=this.closest('.pet-slot');if(p)p.classList.add('pet-ready');window.hansenImgErr&&window.hansenImgErr(this)});_pi.src=_ph;_pe.appendChild(_pi);}}}catch(e){}</script>
   <div class="pet-bubble">
     <div class="pet-name"><span id="heroPetName">星灵</span><span class="pet-stage" id="heroPetStage"></span></div>
     <div class="pet-text" id="heroPetText"></div>
@@ -1461,13 +1439,13 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <!-- Daily rewards row -->
 <div class="daily-row">
   <div class="daily-card" id="chestCard" style="--c1:#6096eb;--c2:#6096eb" onclick="openChest()"><!-- 🔴 v575: 每日宝箱=打卡签到入口, 未领缓慢闪烁/已领变绿+开盒 -->
-    <span class="d-icon" id="chestIcon"><!-- 🔴 v588: 未签到金宝箱图 --><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=938" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎁'"><span class="chest-badge" id="chestSub">可领</span></span></span>
+    <span class="d-icon" id="chestIcon"><!-- 🔴 v588: 未签到金宝箱图 --><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/chest_gold.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎁'"><span class="chest-badge" id="chestSub">可领</span></span></span>
     <div class="d-label">每日宝箱</div>
     
-    <div class="d-dot" id="chestDot" style="display:none"></div><script>/*🔴BUG#84 宝箱首帧闪烁根治:渲染前读【全局】签到状态hansen_checkin_last(非per-island S.chestDay),已签则提前画已签态→进岛不再闪可领→已签*/try{var _hd=new Date(),_ht=_hd.getFullYear()+'-'+(_hd.getMonth()+1)+'-'+_hd.getDate();if(localStorage.getItem('hansen_checkin_last')===_ht){var _hic=document.getElementById('chestIcon'),_hcc=document.getElementById('chestCard');if(_hic)_hic.innerHTML='<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=938" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';if(_hcc)_hcc.classList.add('chest-claimed');}}catch(e){}</script>
+    <div class="d-dot" id="chestDot" style="display:none"></div><script>/*🔴BUG#84 宝箱首帧闪烁根治:渲染前读【全局】签到状态hansen_checkin_last(非per-island S.chestDay),已签则提前画已签态→进岛不再闪可领→已签*/try{var _hd=new Date(),_ht=_hd.getFullYear()+'-'+(_hd.getMonth()+1)+'-'+_hd.getDate();if(localStorage.getItem('hansen_checkin_last')===_ht){var _hic=document.getElementById('chestIcon'),_hcc=document.getElementById('chestCard');if(_hic)_hic.innerHTML='<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/chest_open.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';if(_hcc)_hcc.classList.add('chest-claimed');}}catch(e){}</script>
   </div>
-  <div class="daily-card" style="--c1:#4CD97B;--c2:#4CD97B" onclick="showScreen('quests')">
-    <span class="d-icon"><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/task_3d.webp?v=938" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📋'"><span class="quest-badge" id="questSub">0/3</span></span></span>
+  <div class="daily-card" id="questCard" style="--c1:#4CD97B;--c2:#4CD97B" onclick="showScreen('quests')">
+    <span class="d-icon"><span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/task_3d.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📋'"><span class="quest-badge" id="questSub">0/3</span></span></span>
     <div class="d-label">每日任务</div>
     <div class="d-dot" id="questDot" style="display:none"></div>
   </div>
@@ -1481,11 +1459,11 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <div class="section-label">精学模式</div>
 <div class="mode-grid">
   <div class="mode-card" style="--c1:#ED7098;--c2:#ED7098" onclick="showScreen('explore')">
-    <div class="m-icon"><img src="icons/explore_3d.webp?v=938" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📚'"></div>
+    <div class="m-icon"><img src="icons/explore_3d.webp?v=960" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📚'"></div>
     <div class="m-title">探索单词</div>
   </div>
   <div class="mode-card" style="--c1:#fbbf24;--c2:#fb923c" onclick="startListen()"><!-- 🔴 v583: 蓝→亮琥珀橙(原蓝偏暗+喇叭暗看不清); emoji🔊→新3D喇叭图 -->
-    <div class="m-icon"><img src="icons/speaker_3d.webp?v=938" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔊'"></div>
+    <div class="m-icon"><img src="icons/speaker_3d.webp?v=960" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔊'"></div>
     <div class="m-title">听音辨义</div>
   </div>
   <div class="mode-card" style="--c1:#14b8a6;--c2:#0d9488" onclick="startMatch()">
@@ -1493,15 +1471,15 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
     <div class="m-title">记忆翻牌</div>
   </div>
   <div class="mode-card" style="--c1:#8b5cf6;--c2:#7c3aed" onclick="showTypingMenu()"><!-- 🔴 v586: 打字大师 emoji⌨️→新3D复古电脑图 -->
-    <div class="m-icon"><img src="icons/typer_3d.webp?v=938" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle;transform:translate(-2px,2px)" onerror="this.outerHTML='⌨️'"></div><!-- 🔴 v730: 整体放大1px(90→91)+向左移动2px(translateX 0→-2·Hansen微调) -->
+    <div class="m-icon"><img src="icons/typer_3d.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle;transform:translate(-2px,2px)" onerror="this.outerHTML='⌨️'"></div><!-- 🔴 v730: 整体放大1px(90→91)+向左移动2px(translateX 0→-2·Hansen微调) -->
     <div class="m-title" style="font-size:13px;color:#fbbf24;transform:translate(0,3px)">打字大师</div><!-- 🔴 v598: 文字上提离底(translateY 6→2)+缩小(13→11)+亮黄#fde047突出色(紫底上醒目) -->
   </div>
   <div class="mode-card" style="--c1:#ec4899;--c2:#db2777" onclick="startCloze()"><!-- 🔴 v590: 完形填空 emoji📝→新3D放大镜选项图 -->
-    <div class="m-icon"><img src="icons/cloze_3d.webp?v=938" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📝'"></div>
+    <div class="m-icon"><img src="icons/cloze_3d.webp?v=960" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='📝'"></div>
     <div class="m-title">完形填空</div>
   </div>
   <div class="mode-card" style="--c1:#4f46e5;--c2:#4338ca" onclick="startScramble()"><!-- 🔴 v591: 字母拼拼乐 emoji🔤→新3D拼字母FUNNY图 -->
-    <div class="m-icon"><img src="icons/spell_3d.webp?v=938" alt="" draggable="false" style="width:74px;height:74px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔤'"></div>
+    <div class="m-icon"><img src="icons/spell_3d.webp?v=960" alt="" draggable="false" style="width:74px;height:74px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🔤'"></div>
     <div class="m-title">字母拼拼乐</div>
   </div>
 </div>
@@ -1509,31 +1487,31 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <div class="section-label">畅玩模式</div><!-- v577: 标题更名, Boss入口已移至每日行 -->
 <div class="mode-grid">
 <div class="mode-card" style="background:#fff;border:1px solid #e2e8f0" onclick="HansenSpellBee.open('land7')">
-    <div class="m-icon"><img src="icons/spelling_bee.webp?v=938" alt="" draggable="false" style="width:88px;height:88px;object-fit:contain;vertical-align:middle;transform:translate(0px,1px)" onerror="this.outerHTML='🐝'"></div><!--🔴BUG#86 蜜蜂图标92→72px+标题排紧(line-height1.45→1.1去下边距腾出8px图标区):spelling_bee.webp内容占满整图0留白·窄屏360px图标区排紧后62px·72px顶部刚好不被overflow:hidden切-->
+    <div class="m-icon"><img src="icons/spelling_bee.webp?v=960" alt="" draggable="false" style="width:88px;height:88px;object-fit:contain;vertical-align:middle;transform:translate(0px,1px)" onerror="this.outerHTML='🐝'"></div><!--🔴BUG#86 蜜蜂图标92→72px+标题排紧(line-height1.45→1.1去下边距腾出8px图标区):spelling_bee.webp内容占满整图0留白·窄屏360px图标区排紧后62px·72px顶部刚好不被overflow:hidden切-->
     <div class="m-title" style="font-family:'Baloo2',sans-serif;text-transform:lowercase;background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b,#22c55e,#3b82f6,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-size:15px;font-weight:800;letter-spacing:0;line-height:0.9;padding-bottom:0px;white-space:normal">spelling bee</div>
   </div>
 <div class="mode-card" style="--c1:#84cc16;--c2:#65a30d" onclick="startMoles()"><!-- 🔴 v585: 打地鼠 emoji🎯→新3D打地鼠图 -->
-    <div class="m-icon"><img src="icons/mole_3d.webp?v=938" alt="" draggable="false" style="width:78px;height:78px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎯'"></div>
+    <div class="m-icon"><img src="icons/mole_3d.webp?v=960" alt="" draggable="false" style="width:78px;height:78px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎯'"></div>
     <div class="m-title">打地鼠</div>
   </div>
   <div class="mode-card" style="--c1:#0284c7;--c2:#0369a1" onclick="startFish()"><!-- 🔴 v587: 钓鱼大师 emoji🎣→新3D钓鱼图 -->
-    <div class="m-icon"><img src="icons/fish_3d.webp?v=938" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎣'"></div>
+    <div class="m-icon"><img src="icons/fish_3d.webp?v=960" alt="" draggable="false" style="width:86px;height:86px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🎣'"></div>
     <div class="m-title">钓鱼大师</div>
   </div>
   <div class="mode-card" style="--c1:#4338ca;--c2:var(--pal-chrome-2,#312e81)" onclick="startBubble()">
-    <div class="m-icon"><img src="icons/bubble_3d.webp?v=938" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🫧'"></div>
+    <div class="m-icon"><img src="icons/bubble_3d.webp?v=960" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='🫧'"></div>
     <div class="m-title">泡泡大作战</div>
   </div>
   <div class="mode-card" style="--c1:#fb923c;--c2:#dc2626" onclick="startSpeed()">
-    <div class="m-icon"><img src="icons/speed_3d.webp?v=938" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='⚡'"></div><!-- 🔴v646: 极速60秒 emoji⚡→新3D秒表60图 -->
+    <div class="m-icon"><img src="icons/speed_3d.webp?v=960" alt="" draggable="false" style="width:83px;height:83px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='⚡'"></div><!-- 🔴v646: 极速60秒 emoji⚡→新3D秒表60图 -->
     <div class="m-title">极速60秒</div>
   </div>
   <!-- 🔴v654 火眼金睛(eagle)放大scale0.85→1.1·极速60秒(speed)缩小scale1.15→0.9留顶距 --><div class="mode-card" style="--c1:#2563eb;--c2:#1e3a8a" onclick="startEagle()">
-    <div class="m-icon"><img src="icons/eagle_3d.webp?v=938" alt="" draggable="false" style="width:81px;height:81px;object-fit:contain;vertical-align:middle;transform:translate(0px,-2px)" onerror="this.outerHTML='👀'"></div><!-- 🔴v647: 火眼金睛 emoji👀→新3D金眼图·scale0.85留顶部间距不贴顶 -->
+    <div class="m-icon"><img src="icons/eagle_3d.webp?v=960" alt="" draggable="false" style="width:81px;height:81px;object-fit:contain;vertical-align:middle;transform:translate(0px,-2px)" onerror="this.outerHTML='👀'"></div><!-- 🔴v647: 火眼金睛 emoji👀→新3D金眼图·scale0.85留顶部间距不贴顶 -->
     <div class="m-title">火眼金睛</div>
   </div>
-  <div class="mode-card" style="--c1:#dbeafe;--c2:#93c5fd" onclick="HansenGacha.open()"><!-- 🔴 v596: 抽卡背景深蓝靛#1e3a8a/var(--pal-chrome-2,#312e81)→浅蓝#dbeafe/#93c5fd(Hansen嫌深蓝难看·紫品金joker在深冷蓝上不跳→浅蓝衬托更醒目)+标题改深蓝字(浅底白字看不清) -->
-    <div class="m-icon"><img src="icons/gacha_joker_v594.webp?v=938" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px)" onerror="this.outerHTML='🎴'"></div>
+  <div class="mode-card" style="--c1:#dbeafe;--c2:#93c5fd" onclick="HansenContextGacha.open()"><!-- 🔴 v955: 上下文路由·星海9页进40张专属池·普通岛保留20张正片池 -->
+    <div class="m-icon"><img src="icons/gacha_joker_v594.webp?v=960" alt="" draggable="false" style="width:82px;height:82px;object-fit:contain;vertical-align:middle;transform:translate(0px,2px)" onerror="this.outerHTML='🎴'"></div>
     <div class="m-title" style="font-size:12px;color:var(--pal-surf-1,#0f172a);transform:translate(0,2px)">抽卡</div>
   </div>
 </div>
@@ -1551,7 +1529,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <div class="screen" id="exploreScreen">
   <button class="back-btn" onclick="showScreen('home')">← 返回</button>
   <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none">📚</span> 探索单词</div>
-  <div style="text-align:center;font-size:12px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:12px">点击单词卡学习 · 掌握后亮⭐收集</div>
+  <div style="text-align:center;font-size:12px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:12px">点击单词查看：🐾 宠物掌握 · 💎 知识结晶</div>
   <div id="exploreContent"></div>
 </div>
 
@@ -1671,7 +1649,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <!-- ============ CHEST ============ -->
 <div class="screen" id="chestScreen">
   <button class="back-btn" onclick="showScreen('home')">← 返回</button>
-  <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none"><img src="icons/chest_gold.webp?v=938" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-0.2em" onerror="this.outerHTML='🎁'"></span> 每日宝箱</div>
+  <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none"><img src="icons/chest_gold.webp?v=960" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-0.2em" onerror="this.outerHTML='🎁'"></span> 每日宝箱</div>
   <div id="chestContent" class="chest-area"></div>
 </div>
 
@@ -1679,7 +1657,7 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 <div class="screen" id="achScreen">
   <button class="back-btn" onclick="showScreen('home')">← 返回</button>
   <div class="screen-title"><span style="-webkit-text-fill-color:initial;-webkit-background-clip:border-box;background:none;text-shadow:none">🏆</span> 成就殿堂</div>
-  <div style="text-align:center;font-size:12px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:14px"><span id="achCount">0</span> / <span id="achTotal">43</span> 已解锁</div>
+  <div style="text-align:center;font-size:12px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:14px"><span id="achCount">0</span> / <span id="achTotal">36</span> 已领取</div>
   <div id="achList"></div>
 </div>
 
@@ -1908,7 +1886,7 @@ const DATA=[
 ]}
 ];
 const allW=DATA.flatMap(d=>d.words);
-/* 🔴v861 官方跨模块答对通道(Hansen: Spelling Bee 拼对也要算单词熟练度): 按英文找到本岛词 → 走正牌 markAnswer(idx,true) 全家桶=结晶星(5个不同日子→永久掌握+4💎)/任务correct进度/答对金币(1金·日2000·同词3次上限)。词不属于本岛则返回false不打扰。 */
+/* v946 历史兼容答对通道：按英文定位本岛词并走普通 markAnswer。普通 Bee 已不再调用；该通道不会增加宠物掌握或知识结晶，只保留普通答题金币、任务与错题等兼容行为。 */
 window.hansenMarkWordCorrectByEn=function(en){try{en=String(en||'').trim().toLowerCase();if(!en)return false;var i=allW.findIndex(function(w){return String(w.en||'').trim().toLowerCase()===en;});if(i>=0){markAnswer(i,true);return true;}}catch(e){}return false;};window.allW=allW;
 window.__ISLAND_LOCAL_AUDIO = {nervous:'words/nervous_season.mp3', anxious:'words/anxious_season.mp3', curious:'words/curious_season.mp3', proud:'words/proud_season.mp3', grateful:'words/grateful_season.mp3', disappointed:'words/disappointed_season.mp3', embarrassed:'words/embarrassed_season.mp3', frightened:'words/frightened_season.mp3', satisfied:'words/satisfied_season.mp3', confused:'words/confused_season.mp3', lonely:'words/lonely_season.mp3', jealous:'words/jealous_season.mp3', relaxed:'words/relaxed_season.mp3', ashamed:'words/ashamed_season.mp3', eager:'words/eager_season.mp3', miserable:'words/miserable_season.mp3', delighted:'words/delighted_season.mp3', furious:'words/furious_season.mp3', amazed:'words/amazed_season.mp3', comfort:'words/comfort_season.mp3', polite:'words/polite_season.mp3', humble:'words/humble_season.mp3', stubborn:'words/stubborn_season.mp3', reliable:'words/reliable_season.mp3', cautious:'words/cautious_season.mp3', optimistic:'words/optimistic_season.mp3', sincere:'words/sincere_season.mp3', loyal:'words/loyal_season.mp3', strict:'words/strict_season.mp3', selfish:'words/selfish_season.mp3', mature:'words/mature_season.mp3', energetic:'words/energetic_season.mp3', modest:'words/modest_season.mp3', cheerful:'words/cheerful_season.mp3', hardworking:'words/hardworking_season.mp3', sensitive:'words/sensitive_season.mp3', determined:'words/determined_season.mp3', outgoing:'words/outgoing_season.mp3', talkative:'words/talkative_season.mp3', calm:'words/calm_season.mp3', important:'words/important_season.mp3', possible:'words/possible_season.mp3', useful:'words/useful_season.mp3', valuable:'words/valuable_season.mp3', similar:'words/similar_season.mp3', modern:'words/modern_season.mp3', ancient:'words/ancient_season.mp3', popular:'words/popular_season.mp3', ordinary:'words/ordinary_season.mp3', famous:'words/famous_season.mp3', comfortable:'words/comfortable_season.mp3', convenient:'words/convenient_season.mp3', complex:'words/complex_season.mp3', typical:'words/typical_season.mp3', flexible:'words/flexible_season.mp3', accurate:'words/accurate_season.mp3', essential:'words/essential_season.mp3', available:'words/available_season.mp3', suitable:'words/suitable_season.mp3', practical:'words/practical_season.mp3', suddenly:'words/suddenly_season.mp3', immediately:'words/immediately_season.mp3', recently:'words/recently_season.mp3', finally:'words/finally_season.mp3', occasionally:'words/occasionally_season.mp3', eventually:'words/eventually_season.mp3', meanwhile:'words/meanwhile_season.mp3', nowadays:'words/nowadays_season.mp3', rarely:'words/rarely_season.mp3', constantly:'words/constantly_season.mp3', temporary:'words/temporary_season.mp3', permanent:'words/permanent_season.mp3', instantly:'words/instantly_season.mp3', currently:'words/currently_season.mp3', previously:'words/previously_season.mp3', seldom:'words/seldom_season.mp3', regularly:'words/regularly_season.mp3', decade:'words/decade_season.mp3', period:'words/period_season.mp3', schedule:'words/schedule_season.mp3', explain:'words/explain_season.mp3', describe:'words/describe_season.mp3', suggest:'words/suggest_season.mp3', persuade:'words/persuade_season.mp3', argue:'words/argue_season.mp3', discuss:'words/discuss_season.mp3', compare:'words/compare_season.mp3', imagine:'words/imagine_season.mp3', predict:'words/predict_season.mp3', realize:'words/realize_season.mp3', recognize:'words/recognize_season.mp3', consider:'words/consider_season.mp3', express:'words/express_season.mp3', mention:'words/mention_season.mp3', doubt:'words/doubt_season.mp3', admit:'words/admit_season.mp3', indicate:'words/indicate_season.mp3', comment:'words/comment_season.mp3', debate:'words/debate_season.mp3', assume:'words/assume_season.mp3', attempt:'words/attempt_season.mp3', avoid:'words/avoid_season.mp3', prevent:'words/prevent_season.mp3', provide:'words/provide_season.mp3', produce:'words/produce_season.mp3', reduce:'words/reduce_season.mp3', increase:'words/increase_season.mp3', develop:'words/develop_season.mp3', invent:'words/invent_season.mp3', destroy:'words/destroy_season.mp3', repair:'words/repair_season.mp3', prepare:'words/prepare_season.mp3', establish:'words/establish_season.mp3', maintain:'words/maintain_season.mp3', manage:'words/manage_season.mp3', handle:'words/handle_season.mp3', perform:'words/perform_season.mp3', contribute:'words/contribute_season.mp3', struggle:'words/struggle_season.mp3', succeed:'words/succeed_season.mp3', several:'words/several_season.mp3', plenty:'words/plenty_season.mp3', enormous:'words/enormous_season.mp3', tiny:'words/tiny_season.mp3', huge:'words/huge_season.mp3', major:'words/major_season.mp3', minor:'words/minor_season.mp3', average:'words/average_season.mp3', entire:'words/entire_season.mp3', amount:'words/amount_season.mp3', quantity:'words/quantity_season.mp3', majority:'words/majority_season.mp3', approximately:'words/approximately_season.mp3', sufficient:'words/sufficient_season.mp3', numerous:'words/numerous_season.mp3', multiple:'words/multiple_season.mp3', additional:'words/additional_season.mp3', maximum:'words/maximum_season.mp3', minimum:'words/minimum_season.mp3', dozen:'words/dozen_season.mp3', however:'words/however_season.mp3', therefore:'words/therefore_season.mp3', although:'words/although_season.mp3', instead:'words/instead_season.mp3', besides:'words/besides_season.mp3', otherwise:'words/otherwise_season.mp3', moreover:'words/moreover_season.mp3', perhaps:'words/perhaps_season.mp3', probably:'words/probably_season.mp3', certainly:'words/certainly_season.mp3', especially:'words/especially_season.mp3', exactly:'words/exactly_season.mp3', nearly:'words/nearly_season.mp3', actually:'words/actually_season.mp3', furthermore:'words/furthermore_season.mp3', nevertheless:'words/nevertheless_season.mp3', consequently:'words/consequently_season.mp3', similarly:'words/similarly_season.mp3', generally:'words/generally_season.mp3', fortunately:'words/fortunately_season.mp3', research:'words/research_season.mp3', education:'words/education_season.mp3', experiment:'words/experiment_season.mp3', theory:'words/theory_season.mp3', concept:'words/concept_season.mp3', analyze:'words/analyze_season.mp3', conclude:'words/conclude_season.mp3', summarize:'words/summarize_season.mp3', achieve:'words/achieve_season.mp3', review:'words/review_season.mp3', memorize:'words/memorize_season.mp3', translate:'words/translate_season.mp3', solution:'words/solution_season.mp3', standard:'words/standard_season.mp3', method:'words/method_season.mp3', principle:'words/principle_season.mp3', define:'words/define_season.mp3', examine:'words/examine_season.mp3', observe:'words/observe_season.mp3', calculate:'words/calculate_season.mp3', society:'words/society_season.mp3', tradition:'words/tradition_season.mp3', custom:'words/custom_season.mp3', government:'words/government_season.mp3', public:'words/public_season.mp3', citizen:'words/citizen_season.mp3', neighbor:'words/neighbor_season.mp3', stranger:'words/stranger_season.mp3', customer:'words/customer_season.mp3', population:'words/population_season.mp3', charity:'words/charity_season.mp3', volunteer:'words/volunteer_season.mp3', economy:'words/economy_season.mp3', industry:'words/industry_season.mp3', organization:'words/organization_season.mp3', generation:'words/generation_season.mp3', individual:'words/individual_season.mp3', private:'words/private_season.mp3', official:'words/official_season.mp3', ceremony:'words/ceremony_season.mp3', energy:'words/energy_season.mp3', electricity:'words/electricity_season.mp3', gravity:'words/gravity_season.mp3', planet:'words/planet_season.mp3', universe:'words/universe_season.mp3', climate:'words/climate_season.mp3', temperature:'words/temperature_season.mp3', oxygen:'words/oxygen_season.mp3', surface:'words/surface_season.mp3', material:'words/material_season.mp3', chemical:'words/chemical_season.mp3', natural:'words/natural_season.mp3', resource:'words/resource_season.mp3', creature:'words/creature_season.mp3', atmosphere:'words/atmosphere_season.mp3', scientific:'words/scientific_season.mp3', technology:'words/technology_season.mp3', particle:'words/particle_season.mp3', invention:'words/invention_season.mp3', galaxy:'words/galaxy_season.mp3', career:'words/career_season.mp3', profession:'words/profession_season.mp3', business:'words/business_season.mp3', success:'words/success_season.mp3', failure:'words/failure_season.mp3', effort:'words/effort_season.mp3', responsibility:'words/responsibility_season.mp3', talent:'words/talent_season.mp3', ability:'words/ability_season.mp3', progress:'words/progress_season.mp3', goal:'words/goal_season.mp3', skill:'words/skill_season.mp3', position:'words/position_season.mp3', salary:'words/salary_season.mp3', employee:'words/employee_season.mp3', interview:'words/interview_season.mp3', project:'words/project_season.mp3', promotion:'words/promotion_season.mp3', reputation:'words/reputation_season.mp3', colleague:'words/colleague_season.mp3'};
 
@@ -1933,12 +1911,12 @@ for(const k in LISTEN_LEVELS){
 const ACH_TIERS={bronze:{name:'铜',color:'#cd7f32',bg:'rgba(205,127,50,.15)'},silver:{name:'银',color:'#cbd5e1',bg:'rgba(203,213,225,.15)'},gold:{name:'金',color:'#fbbf24',bg:'rgba(251,191,36,.15)'},diamond:{name:'钻',color:'#22d3ee',bg:'rgba(34,211,238,.18)'}};
 const ACHIEVEMENTS=[
 // 📖 背单词类(核心)
-{id:'w1',cat:'背单词',name:'启程',desc:'学会第 1 个单词，万里长征第一步！',icon:'🌱',tier:'bronze',reward:{gems:5}},
-{id:'w10',cat:'背单词',name:'十词成军',desc:'累计学会 10 个单词',icon:'📚',tier:'bronze',reward:{gems:15}},
-{id:'w50',cat:'背单词',name:'小有积累',desc:'累计学会 50 个单词',icon:'📗',tier:'bronze',reward:{gems:20}},
-{id:'w100',cat:'背单词',name:'词汇新星',desc:'累计学会 100 个单词',icon:'📘',tier:'silver',reward:{gems:40}},
-{id:'w300',cat:'背单词',name:'词汇达人',desc:'累计学会 300 个单词',icon:'📙',tier:'gold',reward:{gems:80}},
-{id:'wAll',cat:'背单词',name:'全部掌握',desc:'学会这个岛的全部单词！词汇王者',icon:'🎓',tier:'diamond',reward:{gems:200}},
+{id:'w1',cat:'背单词',name:'启程',desc:'认识并加入第 1 个单词，万里长征第一步！',icon:'🌱',tier:'bronze',reward:{gems:5}},
+{id:'w10',cat:'背单词',name:'十词成军',desc:'累计认识 10 个单词',icon:'📚',tier:'bronze',reward:{gems:15}},
+{id:'w50',cat:'背单词',name:'小有积累',desc:'累计认识 50 个单词',icon:'📗',tier:'bronze',reward:{gems:20}},
+{id:'w100',cat:'背单词',name:'词汇新星',desc:'累计认识 100 个单词',icon:'📘',tier:'silver',reward:{gems:40}},
+{id:'w300',cat:'背单词',name:'词汇达人',desc:'累计认识 300 个单词',icon:'📙',tier:'gold',reward:{gems:80}},
+{id:'wAll',cat:'背单词',name:'全岛已认识',desc:'把这个岛的全部单词加入学习！',icon:'🎓',tier:'diamond',reward:{gems:200}},
 {id:'wrongClear',cat:'背单词',name:'错词清零',desc:'把错题本里的错词全部攻克',icon:'✅',tier:'silver',reward:{gems:50}},
 // ⚔️ 打Boss类
 {id:'boss1',cat:'打Boss',name:'初战告捷',desc:'第一次打赢 Boss',icon:'⚔️',tier:'bronze',reward:{gems:10}},
@@ -1966,14 +1944,14 @@ const ACHIEVEMENTS=[
 // 🎮 游戏模式类(精简)
 {id:'mode1',cat:'游戏模式',name:'初露锋芒',desc:'玩过任意一个小游戏模式',icon:'🎮',tier:'bronze',reward:{gems:10}},
 {id:'allModes',cat:'游戏模式',name:'样样精通',desc:'玩过全部小游戏模式',icon:'🎮',tier:'silver',reward:{gems:30}},
-{id:'modeHigh',cat:'游戏模式',name:'游戏高手',desc:'任意一个小游戏达到高分',icon:'🏆',tier:'silver',reward:{gems:30}},
+{id:'modeHigh',cat:'游戏模式',name:'游戏高手',desc:'任意一种小游戏累计完成 10 局',icon:'🏆',tier:'silver',reward:{gems:30}},
 // 💰 财富/里程碑类
-{id:'coin1000',cat:'里程碑',name:'小富翁',desc:'累计赚到 1000 金币',icon:'💰',tier:'bronze',reward:{gems:20}},
+{id:'coin1000',cat:'里程碑',name:'小富翁',desc:'累计获得 1000 金币（花掉也计入）',icon:'💰',tier:'bronze',reward:{gems:20}},
 {id:'gem1',cat:'里程碑',name:'钻石新贵',desc:'获得人生第 1 颗钻石',icon:'💎',tier:'bronze',reward:{gems:20}},
 {id:'lv5',cat:'里程碑',name:'小有所成',desc:'冒险等级达到 Lv.5',icon:'⭐',tier:'bronze',reward:{gems:10}},
 {id:'lv10',cat:'里程碑',name:'老将',desc:'冒险等级达到 Lv.10',icon:'🌟',tier:'silver',reward:{gems:25}},
 // 🎭 隐藏成就(未解锁显示???)
-{id:'hidNight',cat:'隐藏',name:'夜猫子',desc:'深夜还在偷偷学习的努力孩子',icon:'🌙',tier:'silver',reward:{gems:30},hidden:true},
+{id:'hidNight',cat:'隐藏',name:'健康学习家',desc:'在合适的时间专心学习，也记得按时休息',icon:'☀️',tier:'silver',reward:{gems:30},hidden:true},
 {id:'hidPerfectDay',cat:'隐藏',name:'完美的一天',desc:'一天内打Boss、背新词、签到都做到了',icon:'🎂',tier:'silver',reward:{gems:40},hidden:true},
 {id:'hidLucky',cat:'隐藏',name:'欧皇附体',desc:'抽卡第一发就抽到至尊卡！天选之子',icon:'🍀',tier:'diamond',reward:{gems:200},hidden:true},
 {id:'hidComeback',cat:'隐藏',name:'卷土重来',desc:'一个Boss失败后立刻再战并打赢',icon:'🔁',tier:'bronze',reward:{gems:15},hidden:true},
@@ -1996,13 +1974,211 @@ let S={
   totalAnswers:0,totalCorrect:0
 };window.S=S;
 
-function save(){try{S.lastSaveTime=Date.now();var _j=JSON.stringify(S);localStorage.setItem('wordIslandLand7_bak',_j);localStorage.setItem('wordIslandLand7',_j);}catch(e){}}
+var __hsnSaveKey='wordIslandLand7',__hsnSaveWarnAt=0;
+function __hsnSaveNotice(msg,err){
+  window.__hsnSaveHealthy=false;window.__hsnLastSaveError=String((err&&err.message)||err||msg||'保存失败');
+  try{window.dispatchEvent(new CustomEvent('hansen-save-error',{detail:{message:msg,error:window.__hsnLastSaveError}}));}catch(e){}
+  if(Date.now()-__hsnSaveWarnAt<5000)return;__hsnSaveWarnAt=Date.now();
+  try{if(typeof showToast==='function')showToast('⚠️ '+msg);}catch(e){}
+}
+function save(){
+  if(window.__hsnStorageReadOnly){__hsnSaveNotice('存档读取曾失败，当前已进入只读保护；请先恢复浏览器存储权限并重新打开页面',new Error('storage read-only guard'));return false;}
+  S.lastSaveTime=Date.now();
+  var raw;try{raw=JSON.stringify(S);}catch(e){__hsnSaveNotice('进度无法序列化，刚才的变化没有保存',e);return false;}
+  var mainOK=false,bakOK=false,mainErr=null,bakErr=null,oldMain=null;
+  try{var oldRaw=localStorage.getItem(__hsnSaveKey);if(__hsnParseSave(oldRaw))oldMain=oldRaw;}catch(e){}
+  try{localStorage.setItem(__hsnSaveKey,raw);mainOK=localStorage.getItem(__hsnSaveKey)===raw;}catch(e){mainErr=e;}
+  // 只有新主档写入并回读成功，才把“上一份已知良好主档”推进备份。
+  // 主档写失败时绝不碰旧 _bak；首次保存没有旧主档，备份与新主档相同。
+  if(mainOK){try{var snap=oldMain||raw;localStorage.setItem(__hsnSaveKey+'_bak',snap);bakOK=localStorage.getItem(__hsnSaveKey+'_bak')===snap;}catch(e){bakErr=e;}}
+  window.__hsnSaveHealthy=mainOK&&bakOK;
+  if(!mainOK){__hsnSaveNotice('本机存储空间不足或被禁用，刚才的进度未保存；旧安全快照仍保留，请立即导出完整备份',mainErr);return false;}
+  if(!bakOK){__hsnSaveNotice('最新进度已保存，但上一份安全快照更新失败；请尽快导出完整备份',bakErr);return false;}
+  window.__hsnLastSaveError='';
+  return true;
+}
+// perf_boost 会把 window.save 换成防抖函数；重置/导入必须能够同步落盘后再刷新。
+window.__hsnSaveNow=save;
 /* v938: 把本岛存档键暴露给宠物系统 —— 宠物必须读【内存里的 S】而不是 localStorage,
    因为 perf_boost.js 把 save() 换成了防抖延迟写盘, 刚拿到的经验那一刻还没落盘,
    读盘只会读到旧值 → 宠物页显示'经验0'、进度不动 → 用户以为宠物没吃到经验。
    有了这个键, 宠物系统就知道【哪一份存档该用内存的、不要重复计算】。 */
 try{ window.__hsnSaveKey = 'wordIslandLand7'; }catch(e){}
-function load(){try{var r=localStorage.getItem('wordIslandLand7');if(!r){var _b=localStorage.getItem('wordIslandLand7_bak');if(_b){r=_b;try{localStorage.setItem('wordIslandLand7',_b);}catch(e){}}}if(r){var loaded;try{loaded=JSON.parse(r);}catch(_e){var _b2=localStorage.getItem('wordIslandLand7_bak');loaded=_b2?JSON.parse(_b2):{};try{localStorage.setItem('wordIslandLand7',JSON.stringify(loaded));}catch(e){}}Object.assign(S,loaded);if(typeof S.xp!=='number'||!isFinite(S.xp))S.xp=0;if(typeof S.level!=='number'||!isFinite(S.level))S.level=1;if(typeof S.stars!=='number'||!isFinite(S.stars))S.stars=0;if(typeof S.gems!=='number'||!isFinite(S.gems))S.gems=0;if(typeof S.coins!=='number'||!isFinite(S.coins))S.coins=0;if(typeof S.streak!=='number'||!isFinite(S.streak))S.streak=0;if(typeof S.totalXP!=='number'||!isFinite(S.totalXP))S.totalXP=S.xp||0;if(typeof S.totalAnswers!=='number'||!isFinite(S.totalAnswers))S.totalAnswers=0;if(typeof S.totalCorrect!=='number'||!isFinite(S.totalCorrect))S.totalCorrect=0;if(typeof S.lastDay!=='string')S.lastDay='';if(typeof S.chestDay!=='string')S.chestDay='';if(typeof S.coinDay!=='string')S.coinDay='';if(typeof S.coinEarnedToday!=='number'||!isFinite(S.coinEarnedToday))S.coinEarnedToday=0;if(!S.coinWordCount||typeof S.coinWordCount!=='object')S.coinWordCount={};if(!Array.isArray(S.bossWon))S.bossWon=[];if(typeof S.gotStarterCoins!=='boolean')S.gotStarterCoins=false;if(!Array.isArray(S.learned))S.learned=[];if(!S.wrongs||typeof S.wrongs!=='object')S.wrongs={};if(!Array.isArray(S.achievements))S.achievements=[];if(!Array.isArray(S.achPending))S.achPending=[];if(!Array.isArray(S.achNew))S.achNew=[];if(!S.stats||typeof S.stats!=='object')S.stats={};if(!Array.isArray(S.stats.modesPlayed))S.stats.modesPlayed=[];if(typeof S.stats.bossBeaten!=='number')S.stats.bossBeaten=0;if(S.stats.bubbleBest!==undefined&&typeof S.stats.bubbleBest!=='object'&&typeof S.stats.bubbleBest!=='number')S.stats.bubbleBest={easy:0,medium:0,hard:0};if(typeof S.stats.scrambleCleared!=='number')S.stats.scrambleCleared=0;if(typeof S.stats.matchPerfect!=='number')S.stats.matchPerfect=0;if(typeof S.stats.typeCount!=='number')S.stats.typeCount=0;if(typeof S.stats.clozeRight!=='number')S.stats.clozeRight=0;if(typeof S.stats.listenRight!=='number')S.stats.listenRight=0;if(typeof S.stats.maxCombo!=='number')S.stats.maxCombo=0;if(typeof S.stats.chestClaimed!=='number')S.stats.chestClaimed=0;if(typeof S.stats.daysPlayed!=='number')S.stats.daysPlayed=0;if(!S.stats.gameCounts||typeof S.stats.gameCounts!=='object')S.stats.gameCounts={};if(!S.pet||typeof S.pet!=='object')S.pet={name:'星灵',stage:0,xp:0,picked:false};if(typeof S.pet.stage!=='number')S.pet.stage=0;if(typeof S.pet.xp!=='number')S.pet.xp=0;if(!S.quests||typeof S.quests!=='object')S.quests={day:'',list:[]};if(!Array.isArray(S.quests.list))S.quests.list=[];if(typeof S.quests.allDay!=='string')S.quests.allDay='';}}catch(e){}}
+function __hsnParseSave(raw){try{var o=JSON.parse(raw);return o&&typeof o==='object'&&!Array.isArray(o)&&Array.isArray(o.learned)&&o.stats&&typeof o.stats==='object'&&!Array.isArray(o.stats)?o:null;}catch(e){return null;}}
+var __HSN_MAX_WRONG_COUNT=1000000;
+function __hsnSafeWrongCount(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&v>=1&&v<=__HSN_MAX_WRONG_COUNT?v:0;}
+function __hsnNormalizeWrongMap(raw){
+  var out={};if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+  Object.keys(raw).forEach(function(k){
+    if(!/^(?:0|[1-9][0-9]*)$/.test(k))return;
+    var i=Number(k),n=__hsnSafeWrongCount(raw[k]);
+    if(Number.isSafeInteger(i)&&i>=0&&i<allW.length&&n)out[k]=n;
+  });
+  return out;
+}
+function __hsnSafeCoinWordCount(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&v>=0&&v<=3?v:0;}
+function __hsnNormalizeCoinWordCount(raw){
+  var out={};if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+  Object.keys(raw).forEach(function(k){
+    if(!/^(?:0|[1-9][0-9]*)$/.test(k))return;
+    var i=Number(k),n=__hsnSafeCoinWordCount(raw[k]);
+    if(Number.isSafeInteger(i)&&i>=0&&i<allW.length&&n)out[k]=n;
+  });
+  return out;
+}
+var __HSN_MAX_STAT_COUNT=1000000;
+function __hsnSafeStatCount(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&v>=0&&v<=__HSN_MAX_STAT_COUNT?v:0;}
+function __hsnNormalizeBestStat(v){
+  if(typeof v==='number')v={easy:v,medium:0,hard:0};
+  if(!v||typeof v!=='object'||Array.isArray(v))v={};
+  return {easy:__hsnSafeStatCount(v.easy),medium:__hsnSafeStatCount(v.medium),hard:__hsnSafeStatCount(v.hard)};
+}
+function __hsnBestStatValue(v){v=__hsnNormalizeBestStat(v);return Math.max(v.easy,v.medium,v.hard);}
+function __hsnNormalizeStats(raw){
+  var s=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
+  ['bossBeaten','scrambleCleared','matchPerfect','typeCount','clozeRight','listenRight','maxCombo','chestClaimed','daysPlayed','molesCleared','fishCleared','eagleCleared','reviewToday','scrPerfectTotal','scrDayCount','scrHardCount'].forEach(function(k){s[k]=__hsnSafeStatCount(s[k]);});
+  ['molesBest','fishBest','bubbleBest','speedBest','eagleBest'].forEach(function(k){s[k]=__hsnNormalizeBestStat(s[k]);});
+  var counts={};if(s.gameCounts&&typeof s.gameCounts==='object'&&!Array.isArray(s.gameCounts))Object.keys(s.gameCounts).forEach(function(k){if(/^[A-Za-z0-9_-]{1,40}$/.test(k))counts[k]=__hsnSafeStatCount(s.gameCounts[k]);});s.gameCounts=counts;
+  if(!Array.isArray(s.modesPlayed))s.modesPlayed=[];else s.modesPlayed=s.modesPlayed.filter(function(x){return typeof x==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x);}).slice(0,100);
+  if(typeof s.reviewDay!=='string'||!/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(s.reviewDay))s.reviewDay='';
+  if(typeof s.scrDayKey!=='string'||!/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(s.scrDayKey))s.scrDayKey='';
+  if(!s.scrLevels||typeof s.scrLevels!=='object'||Array.isArray(s.scrLevels))s.scrLevels={};
+  s.scrLevels={easy:s.scrLevels.easy===true,medium:s.scrLevels.medium===true,hard:s.scrLevels.hard===true};
+  return s;
+}
+function __hsnNormalizePet(raw){
+  var p=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
+  var name=typeof p.name==='string'?p.name.trim():'';
+  if(!name||/[<>\u0000-\u001f\u007f]/.test(name))name='星灵';
+  else name=Array.from(name).slice(0,8).join('');
+  var stage=typeof p.stage==='number'&&isFinite(p.stage)&&Math.floor(p.stage)===p.stage&&p.stage>=0&&p.stage<=35?p.stage:0;
+  var xp=typeof p.xp==='number'&&isFinite(p.xp)&&Math.floor(p.xp)===p.xp&&p.xp>=0&&p.xp<=1000000000?p.xp:0;
+  return {name:name,stage:stage,xp:xp,picked:p.picked===true};
+}
+function __hsnResetJournalKey(){return 'hansen_reset_pending_v942:'+String(__hsnSaveKey||'unknown');}
+function __hsnResetPhysical(){try{var m=(location.pathname||'').match(/island_([a-z0-9]+)\.html/i);return m?m[1].toLowerCase():'';}catch(e){return '';}}
+function __hsnResetExtraKeys(physical){
+  physical=String(physical||'').toLowerCase();var out=[];
+  if(/^[a-z0-9]+$/.test(physical))out.push('hansen_card_data_'+physical,'hansen_card_data_'+physical+'_bak','hansen_boss_round_state_v946_'+physical);
+  // 星海总岛另有三份 Boss 权威进度；只在 island_season.html 整岛重置时清除，Land1~8 互不牵连。
+  if(physical==='season')out.push('season_word_mastery','season_wrong_words','season_boss_perfect');
+  var m=physical.match(/^land([1-8])$/);if(m)out.push('land'+m[1]+'_prog','hsn_landmap_cleared_'+m[1]);return out;
+}
+function __hsnResetJournalPayload(j){
+  return JSON.stringify([j.schema,j.saveKey,j.freshRaw,j.physical,j.mainDone,j.crystalDone,j.canonicalDone,j.extrasDone,j.reloadOnComplete,j.createdAt,j.updatedAt]);
+}
+function __hsnResetJournalChecksum(j){
+  var s=__hsnResetJournalPayload(j),h=2166136261;
+  for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return ('00000000'+(h>>>0).toString(16)).slice(-8);
+}
+function __hsnInvalidResetJournal(reason){
+  window.__hsnResetJournalError=String(reason||'重置日志无效');
+  return {__invalid:true,error:window.__hsnResetJournalError};
+}
+function __hsnReadResetPending(){
+  try{
+    var raw=localStorage.getItem(__hsnResetJournalKey());
+    if(raw===null){window.__hsnResetJournalError='';return null;}
+    var j;try{j=JSON.parse(raw);}catch(e){return __hsnInvalidResetJournal('重置日志不是合法 JSON');}
+    if(!j||typeof j!=='object'||Array.isArray(j))return __hsnInvalidResetJournal('重置日志结构无效');
+    if(j.schema!==1||j.saveKey!==__hsnSaveKey)return __hsnInvalidResetJournal('重置日志版本或存档键不匹配');
+    if(typeof j.freshRaw!=='string'||!__hsnParseSave(j.freshRaw))return __hsnInvalidResetJournal('重置日志中的新存档无效');
+    if(typeof j.physical!=='string'||j.physical!==__hsnResetPhysical())return __hsnInvalidResetJournal('重置日志不属于当前页面');
+    var bools=['mainDone','crystalDone','canonicalDone','extrasDone'];
+    for(var i=0;i<bools.length;i++)if(typeof j[bools[i]]!=='boolean')return __hsnInvalidResetJournal('重置日志阶段字段无效');
+    if(typeof j.reloadOnComplete!=='boolean')return __hsnInvalidResetJournal('重置日志刷新字段无效');
+    if(typeof j.createdAt!=='number'||!isFinite(j.createdAt)||j.createdAt<=0||Math.floor(j.createdAt)!==j.createdAt)return __hsnInvalidResetJournal('重置日志创建时间无效');
+    if(typeof j.updatedAt!=='number'||!isFinite(j.updatedAt)||j.updatedAt<j.createdAt||Math.floor(j.updatedAt)!==j.updatedAt)return __hsnInvalidResetJournal('重置日志更新时间无效');
+    if(typeof j.checksum!=='string'||j.checksum!==__hsnResetJournalChecksum(j))return __hsnInvalidResetJournal('重置日志校验和不匹配');
+    window.__hsnResetJournalError='';return j;
+  }catch(e){return __hsnInvalidResetJournal('重置日志读取失败：'+String((e&&e.message)||e));}
+}
+function __hsnWriteResetPending(j){
+  try{
+    if(!j||typeof j!=='object'||Array.isArray(j))return false;
+    if(typeof j.createdAt!=='number'||!isFinite(j.createdAt)||j.createdAt<=0)j.createdAt=Date.now();
+    if(typeof j.updatedAt!=='number'||!isFinite(j.updatedAt)||j.updatedAt<j.createdAt)j.updatedAt=j.createdAt;
+    j.checksum=__hsnResetJournalChecksum(j);
+    var raw=JSON.stringify(j),key=__hsnResetJournalKey();localStorage.setItem(key,raw);return localStorage.getItem(key)===raw;
+  }catch(e){return false;}
+}
+function __hsnHasResetPending(){return !!__hsnReadResetPending();}
+/* v942 崩溃可恢复整岛重置：日志是唯一的中间态，每个 phase 只做幂等操作并严格回读。
+   中途关页/崩溃后 load() 只加载 freshRaw，canonical/crystal 各自启动时再续做，
+   绝不会把旧主档与已清空的权威账本混成一份分裂存档。 */
+function __hsnResumeReset(requestReload){
+  var j=__hsnReadResetPending();if(!j)return true;
+  if(j.__invalid){window.__hsnStorageReadOnly=true;try{__hsnSaveNotice('重置安全日志已损坏；当前页面保持只读。请在设置中先下载“重置取证包”，再人工修复或双重确认放弃该日志',new Error(j.error));}catch(e){}return false;}
+  function phase(name){j[name]=true;j.updatedAt=Date.now();return __hsnWriteResetPending(j);}
+  try{
+    if(!j.mainDone){
+      localStorage.setItem(j.saveKey,j.freshRaw);if(localStorage.getItem(j.saveKey)!==j.freshRaw)throw new Error('重置主档回读失败');
+      localStorage.setItem(j.saveKey+'_bak',j.freshRaw);if(localStorage.getItem(j.saveKey+'_bak')!==j.freshRaw)throw new Error('重置安全快照回读失败');
+      if(!phase('mainDone'))throw new Error('重置主档 phase 无法提交');
+    }
+    if(!j.crystalDone){
+      if(!window.HansenCrystal||typeof HansenCrystal.clearCurrentSlice!=='function')return false;
+      if(HansenCrystal.clearCurrentSlice()!==true)throw new Error('知识结晶切片清除失败');
+      if(!phase('crystalDone'))throw new Error('知识结晶 phase 无法提交');
+    }
+    if(!j.canonicalDone){
+      if(!window.HansenCanonical||typeof HansenCanonical.clearCurrent!=='function')return false;
+      if(HansenCanonical.clearCurrent(['learned','wrongs','mc','srs'])!==true)throw new Error('权威学习切片清除失败');
+      if(!phase('canonicalDone'))throw new Error('权威学习 phase 无法提交');
+    }
+    if(!j.extrasDone){
+      __hsnResetExtraKeys(j.physical).forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('外围进度删除失败：'+k);});
+      if(!phase('extrasDone'))throw new Error('外围进度 phase 无法提交');
+    }
+    // 收口时再严格对齐一次双快照，然后才删 journal。
+    localStorage.setItem(j.saveKey,j.freshRaw);localStorage.setItem(j.saveKey+'_bak',j.freshRaw);
+    if(localStorage.getItem(j.saveKey)!==j.freshRaw||localStorage.getItem(j.saveKey+'_bak')!==j.freshRaw)throw new Error('重置收口校验失败');
+    try{var fresh=JSON.parse(j.freshRaw);Object.keys(S).forEach(function(k){delete S[k]});Object.assign(S,fresh);}catch(e){}
+    localStorage.removeItem(__hsnResetJournalKey());if(localStorage.getItem(__hsnResetJournalKey())!==null)throw new Error('重置日志清理失败');
+    if((requestReload||j.reloadOnComplete)&&location&&typeof location.reload==='function')location.reload();return true;
+  }catch(e){try{if(typeof __hsnSaveNotice==='function')__hsnSaveNotice('当前岛重置尚未完成，下次启动会从安全日志继续',e);}catch(_e){}return false;}
+}
+window.__hsnResumeReset=__hsnResumeReset;window.__hsnHasResetPending=__hsnHasResetPending;
+function load(){
+  try{
+    var mainRaw=localStorage.getItem(__hsnSaveKey),bakRaw=localStorage.getItem(__hsnSaveKey+'_bak');
+    window.__hsnStorageReadOnly=false;
+    var pending=(typeof __hsnReadResetPending==='function')?__hsnReadResetPending():null;
+    if(pending&&pending.__invalid){window.__hsnStorageReadOnly=true;__hsnSaveNotice('检测到损坏的重置安全日志；已停止载入，避免把半重置状态当成完整存档',new Error(pending.error));return;}
+    var main=__hsnParseSave(mainRaw),bak=__hsnParseSave(bakRaw),loaded=pending?__hsnParseSave(pending.freshRaw):(main||bak);
+    if(!loaded)return;
+    // 主档合法就始终以主档为准，_bak 保留上一代快照；仅主档缺失/损坏时用备份修复主档。
+    if(!pending&&!main&&bak){
+      try{var repaired=JSON.stringify(bak);localStorage.setItem(__hsnSaveKey,repaired);if(localStorage.getItem(__hsnSaveKey)!==repaired)throw new Error('写入后校验不一致');}
+      catch(e){__hsnSaveNotice('主存档损坏，已从安全快照载入内存，但主存档修复失败；请立即导出完整备份',e);}
+    }
+    // 不把 JSON 中的特殊属性交给 Object.assign，防止 __proto__ 等污染状态对象原型。
+    var safeLoaded={};Object.keys(loaded).forEach(function(k){if(k!=='__proto__'&&k!=='prototype'&&k!=='constructor')safeLoaded[k]=loaded[k];});
+    Object.assign(S,safeLoaded);
+    if(typeof S.xp!=='number'||!isFinite(S.xp))S.xp=0;if(typeof S.level!=='number'||!isFinite(S.level))S.level=1;
+    if(typeof S.stars!=='number'||!isFinite(S.stars))S.stars=0;if(typeof S.gems!=='number'||!isFinite(S.gems))S.gems=0;
+    if(typeof S.coins!=='number'||!isFinite(S.coins))S.coins=0;if(typeof S.streak!=='number'||!isFinite(S.streak))S.streak=0;
+    if(typeof S.totalXP!=='number'||!isFinite(S.totalXP))S.totalXP=S.xp||0;if(typeof S.charXP!=='number'||!isFinite(S.charXP)||Math.floor(S.charXP)!==S.charXP||S.charXP<0||S.charXP>1000000000)S.charXP=0;if(typeof S.totalAnswers!=='number'||!isFinite(S.totalAnswers))S.totalAnswers=0;
+    if(typeof S.totalCorrect!=='number'||!isFinite(S.totalCorrect))S.totalCorrect=0;if(typeof S.lastDay!=='string')S.lastDay='';
+    if(typeof S.chestDay!=='string')S.chestDay='';if(typeof S.coinDay!=='string')S.coinDay='';
+    if(typeof S.coinEarnedToday!=='number'||!isFinite(S.coinEarnedToday))S.coinEarnedToday=0;
+    S.coinWordCount=__hsnNormalizeCoinWordCount(S.coinWordCount);
+    if(!Array.isArray(S.bossWon))S.bossWon=[];if(typeof S.gotStarterCoins!=='boolean')S.gotStarterCoins=false;
+    if(!Array.isArray(S.learned))S.learned=[];S.wrongs=__hsnNormalizeWrongMap(S.wrongs);
+    if(!S.mc||typeof S.mc!=='object'||Array.isArray(S.mc))S.mc={};
+    if(!Array.isArray(S.achievements))S.achievements=[];if(!Array.isArray(S.achPending))S.achPending=[];if(!Array.isArray(S.achNew))S.achNew=[];
+    S.stats=__hsnNormalizeStats(S.stats);
+    if(typeof S.stats.bossBeaten!=='number')S.stats.bossBeaten=0;if(S.stats.bubbleBest!==undefined&&typeof S.stats.bubbleBest!=='object'&&typeof S.stats.bubbleBest!=='number')S.stats.bubbleBest={easy:0,medium:0,hard:0};
+    if(typeof S.stats.scrambleCleared!=='number')S.stats.scrambleCleared=0;if(typeof S.stats.matchPerfect!=='number')S.stats.matchPerfect=0;
+    if(typeof S.stats.typeCount!=='number')S.stats.typeCount=0;if(typeof S.stats.clozeRight!=='number')S.stats.clozeRight=0;
+    if(typeof S.stats.listenRight!=='number')S.stats.listenRight=0;if(typeof S.stats.maxCombo!=='number')S.stats.maxCombo=0;
+    if(typeof S.stats.chestClaimed!=='number')S.stats.chestClaimed=0;if(typeof S.stats.daysPlayed!=='number')S.stats.daysPlayed=0;
+    if(!S.stats.gameCounts||typeof S.stats.gameCounts!=='object'||Array.isArray(S.stats.gameCounts))S.stats.gameCounts={};
+    S.pet=__hsnNormalizePet(S.pet);
+    S.quests=__hsnNormalizeQuests(S.quests);
+  }catch(e){window.__hsnStorageReadOnly=true;__hsnSaveNotice('读取本机存档失败；已进入只读保护，不会用空白状态覆盖旧档。请恢复存储权限并重新打开页面',e);}
+}
 
 // ============================================================
 // 发音系统 (V4 - 句子完整朗读, 多 TTS 候选)
@@ -2381,10 +2557,16 @@ function playOpenChest(){playBeep(440,.1);setTimeout(()=>playBeep(554,.1),120);s
 // ============================================================
 function addXP(n){
   n = Number(n);
-  if(!isFinite(n)) return;
+  if(!isFinite(n)||n<=0) return false;
+  n=Math.min(1000000,Math.floor(n));
+  var beforeChar=Math.max(0,Math.floor(Number(S.charXP)||0)),targetChar=Math.min(1000000000,beforeChar+n);
+  try{
+    localStorage.setItem('hansen_wallet_charxp',String(targetChar));
+    if(localStorage.getItem('hansen_wallet_charxp')!==String(targetChar))throw new Error('人物经验回读不一致');
+  }catch(e){try{if(typeof __hsnSaveNotice==='function')__hsnSaveNotice('经验未能保存，本次经验奖励已取消',e);}catch(_e){}return false;}
   S.xp += n;
   S.totalXP = (S.totalXP||0) + n;
-  S.charXP = (S.charXP||0) + n; try{localStorage.setItem('hansen_wallet_charxp', String(S.charXP));}catch(e){}//🔴BUG#85
+  S.charXP = targetChar;
   
   // 检查是否升级 (用新的 30 级系统)
   var newLv = getAdvLevel().lv;
@@ -2398,13 +2580,13 @@ function addXP(n){
     if(S.level >= 5) unlockAch('lv5');
     if(S.level >= 10) unlockAch('lv10');
   }
-  
   // 同步当前等级内的 XP (用于 XP bar 显示)
   S.xp = getXpInCurrentLevel();
   
   updateTopBar();
   save();
   checkAllAlmost();
+  return true;
 }
 function addStar(n){/* 星星已废弃(顶栏早隐藏,无用途): 改空函数, 不再累加。保留函数名避免89处调用报错。不碰游戏逻辑。 */return;}
 /* 🔴 金币全局化: addGem/addCoin 改成写全局钱包 HansenCoins(各岛共享一个金币数), 不再写各岛 S.coins。
@@ -2476,7 +2658,7 @@ document.getElementById('coinCount').textContent=(window.HansenCoins?HansenCoins
 document.getElementById('streakCount').textContent=S.streak;
 /* 🔴 v575: streakDaysDaily 元素已随"连续签到卡"移除, 此写入改为安全空操作(打卡天数现由名字行 streakCount 显示) */
 const avatars=['⚔️','🗡️','🛡️','🏹','👑','🐉','🌟','🌌','🔥','💫'];
-if(window.HsnAvatar&&HsnAvatar.render){HsnAvatar.render();}else{try{var _av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var _ac=parseInt(_av.cur,10)||1;var _an=(_ac<10?'0':'')+_ac;var _ae=document.getElementById('avatarIcon');if(_ae&&!_ae.querySelector('img.hsn-av-img')){_ae.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:'+((_av.colors&&_av.colors[_ac])||'#2a3360')+';';_ae.innerHTML='<img class="hsn-av-img" src="avatars/'+_an+'.webp?v=938" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e){try{var _ae2=document.getElementById('avatarIcon');if(_ae2&&!_ae2.querySelector('img.hsn-av-img')){_ae2.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:#2a3360;';_ae2.innerHTML='<img class="hsn-av-img" src="avatars/01.webp?v=938" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e2){}}}/*🔴v780 头像彻底弃用等级emoji:连catch也回退默认角色#1(avatars/01.webp)不再用emoji·头像路径零emoji。🔴v779 首帧防闪:有模块则渲染所选头像·否则用localStorage的cur显角色立绘·宠物图首帧加尺寸·模块加载前不闪*/
+if(window.HsnAvatar&&HsnAvatar.render){HsnAvatar.render();}else{try{var _av=JSON.parse(localStorage.getItem('hsn_avatar')||'{}');var _ac=Math.floor(Number(_av.cur));if(!isFinite(_ac)||_ac<1||_ac>66)_ac=1;var _an=(_ac<10?'0':'')+_ac;var _rawc=_av.colors&&_av.colors[_ac],_avc=/^#[0-9a-f]{6}$/i.test(String(_rawc||''))?String(_rawc):'#2a3360';var _ae=document.getElementById('avatarIcon');if(_ae&&!_ae.querySelector('img.hsn-av-img')){_ae.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:'+_avc+';';_ae.innerHTML='<img class="hsn-av-img" src="avatars/'+_an+'.webp?v=960" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e){try{var _ae2=document.getElementById('avatarIcon');if(_ae2&&!_ae2.querySelector('img.hsn-av-img')){_ae2.style.cssText+=';border:0;box-shadow:none;border-radius:13px;overflow:hidden;background:#2a3360;';_ae2.innerHTML='<img class="hsn-av-img" src="avatars/01.webp?v=960" alt="" style="position:absolute;inset:0;margin:auto;max-width:95%;max-height:95%;object-fit:contain;display:block" onerror="window.hansenImgErr&&window.hansenImgErr(this)">';}}catch(e2){}}}/* v942 首帧头像只接受 1–66 号和六位十六进制颜色；损坏/恶意存档不得注入标签或外部 CSS。 */
 updatePetHero();
 updateQuestBadge();
 updateChestBadge();
@@ -2566,42 +2748,42 @@ function getXpForNextLevel(){
 
 
 const PET_STAGES=[
-{emoji:'🥚',name:'星雾之卵',text:'裹着流动星雾的蛋, 壳上微光符纹缓缓游动',img:'pets/pet_00.webp?v=938',req:{xp:0,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌟',name:'裂晓微光',text:'蛋壳裂开一道金线, 缝隙里透出光',img:'pets/pet_01.webp?v=938',req:{xp:25,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌫️',name:'雾隐幽雏',text:'半透明的雾团身子, 只有一双发亮的眼睛',img:'pets/pet_02.webp?v=938',req:{xp:70,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'✨',name:'萤芯小精',text:'凝出小小身形, 周身萦绕萤火般的光点',img:'pets/pet_03.webp?v=938',req:{xp:135,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💠',name:'灵纹初兽',text:'体表浮现淡蓝灵纹的小幻兽',img:'pets/pet_04.webp?v=938',req:{xp:220,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦊',name:'双尾灵狐崽',text:'奇幻双尾、尾尖凝着光珠',img:'pets/pet_05.webp?v=938',req:{xp:310,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🔥',name:'焰息幼兽',text:'尾尖燃起火苗, 鬃毛带火星',img:'pets/pet_06.webp?v=938',req:{xp:415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'❄️',name:'霜羽冰貂',text:'一对薄冰般的小翼, 呵气成霜',img:'pets/pet_07.webp?v=938',req:{xp:535,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'⚡',name:'雷鳞游蜥',text:'体表游走细密电纹, 鳞片泛蓝光',img:'pets/pet_08.webp?v=938',req:{xp:660,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌪️',name:'风翎灵兽',text:'身缠风带, 羽翎随风浮动',img:'pets/pet_09.webp?v=938',req:{xp:795,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💧',name:'渊光水灵',text:'半透明水体身躯, 体内流光涌动',img:'pets/pet_10.webp?v=938',req:{xp:945,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'💎',name:'岩心晶兽',text:'晶岩外壳, 胸口核心发光',img:'pets/pet_11.webp?v=938',req:{xp:1100,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦄',name:'焰角麒麟驹',text:'独角 + 火鬃的幼麒麟',img:'pets/pet_12.webp?v=938',req:{xp:1265,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐆',name:'霜翼雪豹',text:'背生冰晶之翼的雪豹',img:'pets/pet_13.webp?v=938',req:{xp:1435,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦕',name:'雷鳞角龙',text:'小型角龙, 鳞甲流转雷纹',img:'pets/pet_14.webp?v=938',req:{xp:1615,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦅',name:'星羽幼鹫',text:'双翼洒落星辉的幼鹫',img:'pets/pet_15.webp?v=938',req:{xp:1805,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐺',name:'幽影噬狼',text:'暗影缠身、眼瞳猩红的奇幻狼',img:'pets/pet_16.webp?v=938',req:{xp:2000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦊',name:'琉璃九尾',text:'通体琉璃光泽的九尾灵兽',img:'pets/pet_17.webp?v=938',req:{xp:2205,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐦‍🔥',name:'炎纹凤雏',text:'初生凤凰, 尾羽燃着火焰',img:'pets/pet_18.webp?v=938',req:{xp:2415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'苍渊蛟',text:'入海化蛟, 鳞泛幽蓝深渊光',img:'pets/pet_19.webp?v=938',req:{xp:2635,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦅',name:'雷霆狮鹫',text:'鹰首狮身, 雷云相随',img:'pets/pet_20.webp?v=938',req:{xp:2860,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐅',name:'霜月白虎',text:'通体霜白、额生月纹的虎神兽',img:'pets/pet_21.webp?v=938',req:{xp:3090,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦄',name:'星辉天角兽',text:'带翼独角兽, 鬃毛流淌星河',img:'pets/pet_22.webp?v=938',req:{xp:3330,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'业火黑麟',text:'黑鳞缠绕业火的麒麟',img:'pets/pet_23.webp?v=938',req:{xp:3575,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐦‍🔥',name:'涅槃凤皇',text:'浴火重生的成年凤, 七彩烈焰羽翼',img:'pets/pet_24.webp?v=938',req:{xp:3830,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'沧溟应龙',text:'双翼应龙, 呼风唤雨',img:'pets/pet_25.webp?v=938',req:{xp:4085,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐋',name:'九霄雷鲲',text:'雷云中遨游的巨鲲',img:'pets/pet_26.webp?v=938',req:{xp:4350,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦌',name:'玄冰麒麟尊',text:'冰晶铸成的神麒麟',img:'pets/pet_27.webp?v=938',req:{xp:4620,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐺',name:'噬星天狼',text:'吞星之狼, 星辰为鬃',img:'pets/pet_28.webp?v=938',req:{xp:4900,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🦁',name:'鎏金圣兽',text:'通体金光流转的圣兽',img:'pets/pet_29.webp?v=938',req:{xp:5180,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'星河神龙',text:'身缠整条星河的东方神龙',img:'pets/pet_30.webp?v=938',req:{xp:5470,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐲',name:'苍穹龙皇',text:'端坐云海的龙皇',img:'pets/pet_31.webp?v=938',req:{xp:5765,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌠',name:'创世幻兽',text:'集六元素于一身的创世之兽',img:'pets/pet_32.webp?v=938',req:{xp:6065,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🌌',name:'虚空噬天兽',text:'吞噬虚空、身后裂开星门的巨兽',img:'pets/pet_33.webp?v=938',req:{xp:6370,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'🐉',name:'永恒星界龙神',text:'横贯星界的龙神形态',img:'pets/pet_34.webp?v=938',req:{xp:6685,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
-{emoji:'👑',name:'万象天尊·寰宇主宰',text:'主宰寰宇的至尊终焉形态',img:'pets/pet_35.webp?v=938',req:{xp:7000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}}
+{emoji:'🥚',name:'星雾之卵',text:'裹着流动星雾的蛋, 壳上微光符纹缓缓游动',img:'pets/pet_00.webp?v=960',req:{xp:0,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌟',name:'裂晓微光',text:'蛋壳裂开一道金线, 缝隙里透出光',img:'pets/pet_01.webp?v=960',req:{xp:25,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌫️',name:'雾隐幽雏',text:'半透明的雾团身子, 只有一双发亮的眼睛',img:'pets/pet_02.webp?v=960',req:{xp:70,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'✨',name:'萤芯小精',text:'凝出小小身形, 周身萦绕萤火般的光点',img:'pets/pet_03.webp?v=960',req:{xp:135,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💠',name:'灵纹初兽',text:'体表浮现淡蓝灵纹的小幻兽',img:'pets/pet_04.webp?v=960',req:{xp:220,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦊',name:'双尾灵狐崽',text:'奇幻双尾、尾尖凝着光珠',img:'pets/pet_05.webp?v=960',req:{xp:310,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🔥',name:'焰息幼兽',text:'尾尖燃起火苗, 鬃毛带火星',img:'pets/pet_06.webp?v=960',req:{xp:415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'❄️',name:'霜羽冰貂',text:'一对薄冰般的小翼, 呵气成霜',img:'pets/pet_07.webp?v=960',req:{xp:535,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'⚡',name:'雷鳞游蜥',text:'体表游走细密电纹, 鳞片泛蓝光',img:'pets/pet_08.webp?v=960',req:{xp:660,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌪️',name:'风翎灵兽',text:'身缠风带, 羽翎随风浮动',img:'pets/pet_09.webp?v=960',req:{xp:795,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💧',name:'渊光水灵',text:'半透明水体身躯, 体内流光涌动',img:'pets/pet_10.webp?v=960',req:{xp:945,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'💎',name:'岩心晶兽',text:'晶岩外壳, 胸口核心发光',img:'pets/pet_11.webp?v=960',req:{xp:1100,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦄',name:'焰角麒麟驹',text:'独角 + 火鬃的幼麒麟',img:'pets/pet_12.webp?v=960',req:{xp:1265,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐆',name:'霜翼雪豹',text:'背生冰晶之翼的雪豹',img:'pets/pet_13.webp?v=960',req:{xp:1435,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦕',name:'雷鳞角龙',text:'小型角龙, 鳞甲流转雷纹',img:'pets/pet_14.webp?v=960',req:{xp:1615,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦅',name:'星羽幼鹫',text:'双翼洒落星辉的幼鹫',img:'pets/pet_15.webp?v=960',req:{xp:1805,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐺',name:'幽影噬狼',text:'暗影缠身、眼瞳猩红的奇幻狼',img:'pets/pet_16.webp?v=960',req:{xp:2000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦊',name:'琉璃九尾',text:'通体琉璃光泽的九尾灵兽',img:'pets/pet_17.webp?v=960',req:{xp:2205,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐦‍🔥',name:'炎纹凤雏',text:'初生凤凰, 尾羽燃着火焰',img:'pets/pet_18.webp?v=960',req:{xp:2415,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'苍渊蛟',text:'入海化蛟, 鳞泛幽蓝深渊光',img:'pets/pet_19.webp?v=960',req:{xp:2635,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦅',name:'雷霆狮鹫',text:'鹰首狮身, 雷云相随',img:'pets/pet_20.webp?v=960',req:{xp:2860,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐅',name:'霜月白虎',text:'通体霜白、额生月纹的虎神兽',img:'pets/pet_21.webp?v=960',req:{xp:3090,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦄',name:'星辉天角兽',text:'带翼独角兽, 鬃毛流淌星河',img:'pets/pet_22.webp?v=960',req:{xp:3330,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'业火黑麟',text:'黑鳞缠绕业火的麒麟',img:'pets/pet_23.webp?v=960',req:{xp:3575,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐦‍🔥',name:'涅槃凤皇',text:'浴火重生的成年凤, 七彩烈焰羽翼',img:'pets/pet_24.webp?v=960',req:{xp:3830,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'沧溟应龙',text:'双翼应龙, 呼风唤雨',img:'pets/pet_25.webp?v=960',req:{xp:4085,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐋',name:'九霄雷鲲',text:'雷云中遨游的巨鲲',img:'pets/pet_26.webp?v=960',req:{xp:4350,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦌',name:'玄冰麒麟尊',text:'冰晶铸成的神麒麟',img:'pets/pet_27.webp?v=960',req:{xp:4620,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐺',name:'噬星天狼',text:'吞星之狼, 星辰为鬃',img:'pets/pet_28.webp?v=960',req:{xp:4900,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🦁',name:'鎏金圣兽',text:'通体金光流转的圣兽',img:'pets/pet_29.webp?v=960',req:{xp:5180,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'星河神龙',text:'身缠整条星河的东方神龙',img:'pets/pet_30.webp?v=960',req:{xp:5470,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐲',name:'苍穹龙皇',text:'端坐云海的龙皇',img:'pets/pet_31.webp?v=960',req:{xp:5765,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌠',name:'创世幻兽',text:'集六元素于一身的创世之兽',img:'pets/pet_32.webp?v=960',req:{xp:6065,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🌌',name:'虚空噬天兽',text:'吞噬虚空、身后裂开星门的巨兽',img:'pets/pet_33.webp?v=960',req:{xp:6370,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'🐉',name:'永恒星界龙神',text:'横贯星界的龙神形态',img:'pets/pet_34.webp?v=960',req:{xp:6685,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}},
+{emoji:'👑',name:'万象天尊·寰宇主宰',text:'主宰寰宇的至尊终焉形态',img:'pets/pet_35.webp?v=960',req:{xp:7000,learned:0,boss:0,bubble:0,moles:0,fish:0,speed:0,eagle:0,listen:0,match:0,scramble:0,type:0,cloze:0,modes:0}}
 ];
 window.PET_STAGES=PET_STAGES;
 
@@ -2676,7 +2858,7 @@ function renderPetScreen(){
 const st=getPetStage();const stage=PET_STAGES[st];const prog=getPetProgress();
 const nextStage=st<PET_STAGES.length-1?PET_STAGES[st+1]:null;
 const c=S.stats.gameCounts||{};
-let h='<div class="pet-big">'+(stage.img?'<img src="'+stage.img+'" style="width:100%;height:100%;object-fit:contain" onerror="window.hansenImgErr&&window.hansenImgErr(this)">':'')+'</div><div class="pet-name-big">'+S.pet.name+'</div><div class="pet-stage-info">第 '+(st+1)+' / '+PET_STAGES.length+' 阶段 · '+stage.name+'</div>';
+let h='<div class="pet-big">'+(stage.img?'<img src="'+stage.img+'" style="width:100%;height:100%;object-fit:contain" onerror="window.hansenImgErr&&window.hansenImgErr(this)">':'')+'</div><div class="pet-name-big">'+hsnEscapeText(S.pet.name)+'</div><div class="pet-stage-info">第 '+(st+1)+' / '+PET_STAGES.length+' 阶段 · '+stage.name+'</div>';
 h+='<div class="pet-stat-bar"><div class="pet-stat-label"><span>'+(nextStage?'距离进化为 '+nextStage.name+' '+(nextStage.img?'<img src="'+nextStage.img+'" style="height:1.2em;vertical-align:middle;margin:0 2px" onerror="window.hansenImgErr&&window.hansenImgErr(this)">':''):'🏆 已达最终形态!')+'</span><span>'+Math.round(prog)+'%</span></div><div class="pet-stat-track"><div class="pet-stat-prog" style="width:'+prog+'%"></div></div></div>';
 h+='<div style="background:rgba(30,41,59,.5);border:1px solid #334155;border-radius:14px;padding:14px;margin:16px 10px;font-size:14px;color:#cbd5e1;line-height:1.6">💬 <i style="color:#fbbf24">"'+stage.text+'"</i></div>';
 
@@ -2736,8 +2918,7 @@ if(S.lastDay!==t){
   save();
 }}
 
-function rollDailyQuests(){const t=today();if(S.quests.day===t&&S.quests.list.length)return;
-const pool=[
+const DAILY_QUEST_POOL=[
 // ==== 学习类 (3) ====
 {id:'learn3',icon:'📚',title:'学会 3 个新单词',goal:3,type:'learn',reward:{xp:20,gems:2}},
 {id:'learn5',icon:'📖',title:'学会 5 个新单词',goal:5,type:'learn',reward:{xp:30,gems:3}},
@@ -2791,6 +2972,25 @@ const pool=[
 {id:'speed200',icon:'⚡',title:'极速模式得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
 {id:'speed500',icon:'⚡⚡',title:'极速模式得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
 ];
+function __hsnQuestDefinition(id){return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
+function __hsnNormalizeQuests(raw){
+  var out={day:'',list:[],allDay:''},valid=true,seen={};
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+  if(typeof raw.day==='string'&&/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(raw.day))out.day=raw.day;
+  if(typeof raw.allDay==='string'&&/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(raw.allDay))out.allDay=raw.allDay;
+  if(!Array.isArray(raw.list)||raw.list.length>7)return out;
+  raw.list.forEach(function(saved){
+    if(!saved||typeof saved!=='object'||Array.isArray(saved)||typeof saved.id!=='string'||seen[saved.id]){valid=false;return;}
+    var def=__hsnQuestDefinition(saved.id);if(!def){valid=false;return;}seen[saved.id]=1;
+    var progress=saved.progress,claimed=saved.claimed;
+    if(typeof progress!=='number'||!isFinite(progress)||Math.floor(progress)!==progress||progress<0||progress>def.goal||typeof claimed!=='boolean'||(claimed&&progress<def.goal)){valid=false;return;}
+    out.list.push(Object.assign({},def,{reward:Object.assign({},def.reward),progress:progress,claimed:claimed}));
+  });
+  if(!valid)out.list=[];
+  return out;
+}
+function rollDailyQuests(){const t=today();S.quests=__hsnNormalizeQuests(S.quests);if(S.quests.day===t&&S.quests.list.length)return;
+const pool=DAILY_QUEST_POOL;
 // 抽取策略: 每天 7 个任务, 类型不重复(7 种不同活动, 更不腻/覆盖更多玩法), 拼写重头戏含 1 拼词+1 打字
 const _noNew=(S.learned&&allW&&S.learned.length>=allW.length);
 const usedTypes=new Set();const picked=[];
@@ -2802,20 +3002,20 @@ for(const q of others){if(picked.length>=7)break;if(!usedTypes.has(q.type)){used
 S.quests.list=picked.slice(0,7).sort(()=>Math.random()-.5).map(q=>({...q,progress:0,claimed:false}));
 S.quests.day=t;save()}
 
-function progressQuest(type,amount){S.quests.list.forEach(q=>{if(q.type===type&&!q.claimed){q.progress=Math.min(q.goal,q.progress+(amount||1))}});save();updateQuestBadge()}
-function setQuest(type,value){S.quests.list.forEach(q=>{if(q.type===type&&!q.claimed){q.progress=Math.max(q.progress,Math.min(q.goal,value))}});save();updateQuestBadge()}
-function claimQuest(idx){const q=S.quests.list[idx];if(!q||q.claimed||q.progress<q.goal)return;q.claimed=true;var _qc=Math.max(20,Math.round((q.reward.xp||0)*0.6/5)*5);if(typeof addCoin==='function')addCoin(_qc);addXP(q.reward.xp);/*任务奖励=金币(约经验60%,向5取整,最低20)+经验, 见上面 _qc*/showToast('🎉 任务完成！ +'+_qc+'🪙 +'+q.reward.xp+' XP');playOpenChest();
+function progressQuest(type,amount){S.quests=__hsnNormalizeQuests(S.quests);S.quests.list.forEach(q=>{if(q.type===type&&!q.claimed){q.progress=Math.min(q.goal,q.progress+(amount||1))}});save();updateQuestBadge()}
+function setQuest(type,value){S.quests=__hsnNormalizeQuests(S.quests);S.quests.list.forEach(q=>{if(q.type===type&&!q.claimed){q.progress=Math.max(q.progress,Math.min(q.goal,value))}});save();updateQuestBadge()}
+function claimQuest(idx){S.quests=__hsnNormalizeQuests(S.quests);const q=S.quests.list[idx],def=q&&__hsnQuestDefinition(q.id);if(!q||!def||q.claimed||q.progress<def.goal)return;q.claimed=true;var rewardXp=def.reward.xp,_qc=Math.max(20,Math.round(rewardXp*0.6/5)*5);if(typeof addCoin==='function')addCoin(_qc);addXP(rewardXp);/*任务奖励只读内置任务定义，存档不能覆盖*/showToast('🎉 任务完成！ +'+_qc+'🪙 +'+rewardXp+' XP');playOpenChest();
 // ★ 完成全部每日任务 → 额外大奖励(每天一次; 金币随连签天数递增, 奖励"坚持回来")
 if(S.quests.list.length&&S.quests.list.every(function(x){return x.claimed})&&S.quests.allDay!==today()){S.quests.allDay=today();var _allBonus=100+Math.min((S.streak||0),7)*20;if(typeof addCoin==='function')addCoin(_allBonus);try{if(window.HansenCrystal&&HansenCrystal.grantBoost)HansenCrystal.grantBoost(90,true);}catch(e){}/*🔴v831 每日任务全清→记忆强化90分(复习涨星翻倍·让飞轮从最日常的循环转起来)*/setTimeout(function(){showToast('🏆 今日任务全部完成！+'+_allBonus+'🪙 + ⚡ 记忆强化90分');try{bigConfetti();}catch(e){}},800);}
 renderQuests();save()}
 
 function updateQuestBadge(){const done=S.quests.list.filter(q=>q.progress>=q.goal&&!q.claimed).length;const total=S.quests.list.length;document.getElementById('questSub').textContent=S.quests.list.filter(q=>q.claimed).length+'/'+total;document.getElementById('questDot').style.display=done>0?'block':'none'}
 
-function renderQuests(){let h='';if(S.quests.list.length&&S.quests.list.every(function(q){return q.claimed})){h+='<div style="text-align:center;padding:14px;margin-bottom:12px;background:linear-gradient(135deg,#f59e0b,#fbbf24);border-radius:14px;color:#3b2600;font-weight:800;font-size:15px;box-shadow:0 4px 14px rgba(245,158,11,.35)">🏆 今日任务全部完成！明天再来挑战 · 🔥 连续 '+(S.streak||0)+' 天</div>';}if(!S.quests.list.length){h='<div style="text-align:center;padding:30px;color:#cbd5e1">暂无任务，稍后再来！</div>'}
+function renderQuests(){S.quests=__hsnNormalizeQuests(S.quests);let h='';if(S.quests.list.length&&S.quests.list.every(function(q){return q.claimed})){h+='<div style="text-align:center;padding:14px;margin-bottom:12px;background:linear-gradient(135deg,#f59e0b,#fbbf24);border-radius:14px;color:#3b2600;font-weight:800;font-size:15px;box-shadow:0 4px 14px rgba(245,158,11,.35)">🏆 今日任务全部完成！明天再来挑战 · 🔥 连续 '+(S.streak||0)+' 天</div>';}if(!S.quests.list.length){h='<div style="text-align:center;padding:30px;color:#cbd5e1">暂无任务，稍后再来！</div>'}
 S.quests.list.forEach((q,i)=>{const pct=Math.min(100,q.progress/q.goal*100);const done=q.progress>=q.goal;
 h+='<div class="quest-card'+(q.claimed?' done':'')+'">';
-h+='<div class="quest-icon">'+q.icon+'</div>';
-h+='<div class="quest-body"><div class="quest-title">'+q.title+'</div>';
+h+='<div class="quest-icon">'+hsnEscapeText(q.icon)+'</div>';
+h+='<div class="quest-body"><div class="quest-title">'+hsnEscapeText(q.title)+'</div>';
 h+='<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:'+pct+'%"></div></div>';
 h+='<div class="quest-progress-text">'+Math.min(q.progress,q.goal)+' / '+q.goal+'</div></div>';
 if(q.claimed)h+='<div class="quest-reward claimed">✓ 已领取</div>';
@@ -2839,7 +3039,7 @@ function updateChestBadge(){
   /* v667: 副标题改右上角角标(可领/已签)·文字在icon.innerHTML里设 */ // 🔴 v592: 未签到"打卡签到"→"等待开启"
   // 🔴 v588: 未签到→金宝箱图(chest_gold.webp), 已签到→开盒📂. 用 innerHTML(图片不能用 textContent)
   // 🔴 v589: 未签到→金锁宝箱(chest_gold), 已签到→打开冒金币宝箱(chest_open). 都用img+onerror兜底
-  if(icon) icon.innerHTML = canOpen ? '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,10px)"><img src="icons/chest_gold.webp?v=938" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;🎁&quot;"><span class="chest-badge" id="chestSub">可领</span></span>' : '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle;transform:translate(0,3px)"><img src="icons/chest_open.webp?v=938" alt="" draggable="false" style="width:98px;height:98px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';
+  if(icon) icon.innerHTML = canOpen ? '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/chest_gold.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;🎁&quot;"><span class="chest-badge" id="chestSub">可领</span></span>' : '<span class="qiw" style="position:relative;display:inline-block;line-height:0;vertical-align:middle"><img src="icons/chest_open.webp?v=960" alt="" draggable="false" style="width:91px;height:91px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML=&quot;📂&quot;"><span class="chest-badge" id="chestSub">已签</span></span>';
   if(card){
     card.classList.toggle('chest-pending', canOpen);   // 未签到=缓慢柔光闪烁
     card.classList.toggle('chest-claimed', !canOpen);  // 已签到=翡翠绿+开盒
@@ -2866,11 +3066,11 @@ function renderCheckinPage(streak, curMult, claimed){
   // 主操作区
   if(claimed){
     html += '<div style="margin:16px 0;padding:16px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);border-radius:14px;text-align:center">'
-          + '<div style="width:80px;height:80px;margin:0 auto"><img src="icons/chest_open.webp?v=938" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML=&quot;<span style=&#39;font-size:46px&#39;>📂</span>&quot;"></div>'
+          + '<div style="width:80px;height:80px;margin:0 auto"><img src="icons/chest_open.webp?v=960" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML=&quot;<span style=&#39;font-size:46px&#39;>📂</span>&quot;"></div>'
           + '<div style="font-size:15px;font-weight:800;color:#10b981;margin-top:6px">今日已打卡 ✓</div>'
           + '<div style="font-size:12px;color:#cbd5e1;margin-top:6px">明天再来打卡，连续天数 +1，倍率更高！</div></div>';
   } else {
-    html += '<div style="text-align:center;margin:14px 0"><div class="chest-box" id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp?v=938" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent=&quot;🎁&quot;"></div>'
+    html += '<div style="text-align:center;margin:14px 0"><div class="chest-box" id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp?v=960" alt="" draggable="false" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.textContent=&quot;🎁&quot;"></div>'
           + '<div class="chest-msg">👆 点击打卡领取今日奖励</div></div>';
   }
   // 规则说明
@@ -2881,13 +3081,13 @@ function renderCheckinPage(streak, curMult, claimed){
   var rows = [
     {d:'第 1 天', m:'×1.0'}, {d:'第 2 天', m:'×1.2'}, {d:'第 3 天', m:'×1.4'},
     {d:'第 4 天', m:'×1.6'}, {d:'第 5 天', m:'×1.8'}, {d:'第 6 天', m:'×2.0'},
-    {d:'第 7 天起', m:'×2.0 (封顶)'}
+    {d:'第 7 天起', m:'×2.2 (封顶)'}
   ];
   html += '<div style="background:rgba(30,41,59,.55);border-radius:12px;padding:12px 14px;margin:12px 0">'
         + '<div style="font-weight:800;color:#fbbf24;margin-bottom:8px;font-size:13px">📈 连续打卡 · 奖励倍率阶梯</div>';
   for(var i=0;i<rows.length;i++){
     var reached = (streak >= (i+1)) || (i===6 && streak>=7);
-    var isCur = (streak===(i+1)) || (i===6 && streak>=7 && streak===7);
+    var isCur = i===6 ? streak>=7 : streak===(i+1);
     html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:8px;'
           + (isCur ? 'background:rgba(245,158,11,.18);' : '')
           + 'border-bottom:1px solid rgba(255,255,255,.05)">'
@@ -2901,19 +3101,16 @@ function renderCheckinPage(streak, curMult, claimed){
         + '<div style="font-weight:800;color:#fbbf24;margin-bottom:4px">🎁 每日奖励内容</div>'
         + '每次打卡可得金币 + 经验，金额按当前倍率放大：<br>'
         + '· 70% 概率：10~25 金币<br>· 25% 概率：30~50 金币<br>· 5% 概率：60~80 大奖金币<br>'
-        + '另有随机暴击：10% 触发 ×5、20% 触发 ×2，惊喜连连！</div>';
+        + '另有暴击：10% ×5、20% ×2、70% ×1；稀有度额外奖：70% +0、20% +5、8% +15、2% +50 金币并得 1 个宠物碎片。</div>';
   if(!claimed){
     html += '<div style="margin-top:6px"><button class="game-btn" onclick="showScreen(\'home\')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)">← 返回首页</button></div>';
   }
   return html;
 }
 
-function doOpenChest(){if(S.chestDay===today())return;S.chestDay=today();S.stats.chestClaimed++;
-if(S.stats.chestClaimed>=7)unlockAch('chest7');
-const box=document.getElementById('chestBox');/* 🔴v653 开箱光芒绽放动画 */(window.hansenChestFX?window.hansenChestFX(box):box.classList.add('shake'));playOpenChest();
-setTimeout(()=>{
+function doOpenChest(){
+if(S.chestDay===today())return {ok:false,already:true,receipt:(window.HansenCheckin&&HansenCheckin.getReceipt)?HansenCheckin.getReceipt():null};
 const bonus=1+Math.max(0,Math.min(S.streak-1,6))*.2;
-/* 💰 签到奖励改为"纯金币三档": 70%给10-30, 25%给50-100, 5%爆200-300; 连签越久bonus越高越易爆 */
 const rolls=[
 {chance:.70,type:'coin',min:10,max:25,emoji:'🪙',name:'金币'},
 {chance:.25,type:'coin',min:30,max:50,emoji:'🪙',name:'金币'},
@@ -2921,33 +3118,52 @@ const rolls=[
 ];
 let r=Math.random();let chosen=rolls[0];let acc=0;
 for(const roll of rolls){acc+=roll.chance;if(r<acc){chosen=roll;break}}
-chosen.amount=Math.floor((chosen.min+Math.random()*(chosen.max-chosen.min))*bonus);
-/* 💰 签到附带经验值: 20-40 XP, 同样享受连签bonus和暴击 */
-var __checkinXP=Math.floor((20+Math.random()*20)*bonus);
-// v140: 暴击倍数 (10% ×5, 20% ×2)
-var __huMult = 1, __huTag = 'normal';
-try {
-  if(window.HansenUpgrade && window.HansenUpgrade.rollChestReward){
-    var __r = window.HansenUpgrade.rollChestReward();
-    __huMult = __r.multiplier; __huTag = __r.tag;
-    chosen.amount = Math.round(chosen.amount * __huMult);
+/* 闭区间抽整数：25/50/80 和 40 XP 都真的可以抽到。 */
+chosen.amount=Math.floor((chosen.min+Math.floor(Math.random()*(chosen.max-chosen.min+1)))*bonus);
+var __checkinXP=Math.floor((20+Math.floor(Math.random()*21))*bonus);
+var __huMult=1,__huTag='normal';
+try{
+  if(window.HansenUpgrade&&window.HansenUpgrade.rollChestReward){
+    var __r=window.HansenUpgrade.rollChestReward();
+    __huMult=__r.multiplier;__huTag=__r.tag;
+    chosen.amount=Math.round(chosen.amount*__huMult);
   }
-} catch(e){}
+}catch(e){}
 __checkinXP=Math.round(__checkinXP*__huMult);
-addCoin(chosen.amount);
-addXP(__checkinXP);
-// v140: 暴击/great UI
-try {
-  if(__huTag === 'critical' && window.HansenUpgrade && window.HansenUpgrade.showCritical){
-    window.HansenUpgrade.showCritical('×5 奖励!');
-  } else if(__huTag === 'great' && window.HansenUpgrade && window.HansenUpgrade.showGreat){
-    window.HansenUpgrade.showGreat('×2 奖励!');
-  }
-} catch(e){}
-var __rewardTagHtml = __huTag === 'critical' ? '<div style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-weight:900;padding:6px 14px;border-radius:8px;display:inline-block;font-size:14px;margin-bottom:8px">💥 暴击 ×5!</div>' : (__huTag === 'great' ? '<div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;padding:5px 12px;border-radius:8px;display:inline-block;font-size:13px;margin-bottom:6px">🎁 ×2 奖励</div>' : '');
-document.getElementById('chestContent').innerHTML=__rewardTagHtml+'<div class="reward-card"><div class="reward-emoji">'+chosen.emoji+'</div><div class="reward-name">'+chosen.name+'</div><div class="reward-amount">+'+chosen.amount+'</div><div style="font-size:14px;color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9);font-weight:700;margin-top:6px">🎓 经验 +'+__checkinXP+'</div></div><div style="margin-top:14px"><button class="game-btn gold" onclick="showScreen(\'home\')">🎁 收下奖励</button></div>';
-bigConfetti();save()
-},1000)}
+/* v942 基础 receipt 的协议硬边界；稀有额外奖由 addiction 独立结算，不能混进这里。 */
+var __checkinCoinMax=880,__checkinXPMax=440;
+if(typeof chosen.amount!=='number'||!isFinite(chosen.amount)||Math.floor(chosen.amount)!==chosen.amount||chosen.amount<=0||chosen.amount>__checkinCoinMax||typeof __checkinXP!=='number'||!isFinite(__checkinXP)||Math.floor(__checkinXP)!==__checkinXP||__checkinXP<=0||__checkinXP>__checkinXPMax){
+  try{showToast('⚠️ 签到奖励参数异常，本次未发放任何奖励');}catch(e){}
+  return {ok:false,error:'invalid-checkin-candidate'};
+}
+/* v942 先持久化当日随机结果，再以 sourceId 事务入账。重试/重载会复用同一 receipt，
+   绝不重抽、绝不重复发币/XP；没有事务模块时 fail-closed，不写半份签到。 */
+if(!window.HansenCheckin||typeof HansenCheckin.claimReward!=='function'){
+  try{showToast('⚠️ 签到账本尚未加载，本次未扣/发任何奖励，请稍后重试');}catch(e){}
+  return {ok:false,error:'checkin-ledger-unavailable'};
+}
+var __receipt=HansenCheckin.claimReward({day:today(),coin:chosen.amount,xp:__checkinXP,tag:__huTag});
+if(!__receipt||__receipt.ok!==true){
+  try{showToast('⚠️ 今日奖励正在安全补发，重试不会重复领取');}catch(e){}
+  return __receipt||{ok:false,error:'checkin-transaction-failed'};
+}
+chosen.amount=__receipt.coin;__checkinXP=__receipt.xp;__huTag=__receipt.tag;
+try{if(S.stats.chestClaimed>=7)unlockAch('chest7');}catch(e){}
+const box=document.getElementById('chestBox');
+/* 账本先结算、动画后展示：快速离页不再丢签到奖励。 */
+try{if(window.hansenChestFX)window.hansenChestFX(box);else if(box)box.classList.add('shake');}catch(e){}playOpenChest();
+var __rewardTagHtml=__huTag==='critical'?'<div style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-weight:900;padding:6px 14px;border-radius:8px;display:inline-block;font-size:14px;margin-bottom:8px">💥 暴击 ×5!</div>':(__huTag==='great'?'<div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;padding:5px 12px;border-radius:8px;display:inline-block;font-size:13px;margin-bottom:6px">🎁 ×2 奖励</div>':'');
+setTimeout(function(){
+  try{
+    if(__huTag==='critical'&&window.HansenUpgrade&&window.HansenUpgrade.showCritical)window.HansenUpgrade.showCritical('×5 奖励!');
+    else if(__huTag==='great'&&window.HansenUpgrade&&window.HansenUpgrade.showGreat)window.HansenUpgrade.showGreat('×2 奖励!');
+  }catch(e){}
+  var content=document.getElementById('chestContent');
+  if(content)content.innerHTML=__rewardTagHtml+'<div class="reward-card"><div class="reward-emoji">'+chosen.emoji+'</div><div class="reward-name">'+chosen.name+'</div><div class="reward-amount">+'+chosen.amount+'</div><div style="font-size:14px;color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9);font-weight:700;margin-top:6px">🎓 经验 +'+__checkinXP+'</div></div><div style="margin-top:14px"><button class="game-btn gold" onclick="showScreen(\'home\')">🎁 收下奖励</button></div>';
+  try{bigConfetti();}catch(e){}
+},1000)
+return __receipt;
+}
 
 // ============================================================
 // ACHIEVEMENTS
@@ -2974,26 +3190,13 @@ function unlockAch(id){
 // 领取成就奖励(孩子手动点)
 function claimAch(id){
   const ach=ACHIEVEMENTS.find(a=>a.id===id);if(!ach)return;
-  var ok=false;
-  if(window.HansenAch){
-    ok=HansenAch.claim(id);          // 全局: 领取
-  }else{
-    if(!Array.isArray(S.achPending))S.achPending=[];
-    var i=S.achPending.indexOf(id);
-    if(i>=0){ S.achPending.splice(i,1); if(!S.achievements.includes(id))S.achievements.push(id);
-      var ni=S.achNew?S.achNew.indexOf(id):-1; if(ni>=0)S.achNew.splice(ni,1); ok=true; }
-  }
-  if(!ok)return;
-  // gem1「钻石新贵」名副其实发真钻石(💎); 其余成就维持原样发金币(🪙)。不动公共经济。
-  if(id==='gem1' && window.HansenGems){
-    if(ach.reward.gems) HansenGems.add(ach.reward.gems);
-    try{playLevelUp()}catch(e){}
-    try{floatText(window.innerWidth/2,250,'💎 +'+ach.reward.gems,'#60a5fa')}catch(e){}
-  } else {
-    if(ach.reward.gems)addGem(ach.reward.gems);  // 领取才给金币
-    try{playLevelUp()}catch(e){}
-    try{floatText(window.innerWidth/2,250,'🪙 +'+ach.reward.gems,'#fbbf24')}catch(e){}
-  }
+  if(!window.HansenAch||!HansenAch.isPending(id))return;
+  var amount=Math.max(0,Math.floor(Number(ach.reward&&ach.reward.gems)||0));
+  var paid=id==='gem1'?(window.HansenGems&&HansenGems.award&&HansenGems.award('achievement:'+id,amount)):(window.HansenCoins&&HansenCoins.award&&HansenCoins.award('achievement:'+id,amount));
+  if(!paid){showToast('⚠️ 奖励暂未安全入账，成就仍保留待领取，请稍后重试');return;}
+  if(!HansenAch.claim(id)){showToast('⚠️ 奖励已安全记账，领取状态保存失败；再次点击不会重复发奖');return;}
+  try{playLevelUp()}catch(e){}
+  try{floatText(window.innerWidth/2,250,(id==='gem1'?'💎 ':'🪙 ')+'+'+amount,id==='gem1'?'#60a5fa':'#fbbf24')}catch(e){}
   save();
   renderAch();
 }
@@ -3008,7 +3211,7 @@ function getAchProgress(id){
     var bw=Array.isArray(S.bossWon)?S.bossWon:[];
     var bwCount=function(max){var n=0;for(var i=1;i<=max;i++)if(bw.indexOf(i)>=0)n++;return n;};
     var allWlen=(typeof allW!=='undefined'&&allW.length)?allW.length:712;
-    var coinNow=(window.HansenCoins&&HansenCoins.get())||S.coins||0;
+    var coinNow=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0);
     var mp=(S.stats&&S.stats.modesPlayed)||[];
     var map={
       w1:{cur:lw,need:1}, w10:{cur:lw,need:10}, w50:{cur:lw,need:50},
@@ -3018,7 +3221,8 @@ function getAchProgress(id){
       s3:{cur:S.streak||0,need:3}, s7:{cur:S.streak||0,need:7}, s14:{cur:S.streak||0,need:14}, s100:{cur:S.streak||0,need:100},
       lv5:{cur:_lvl,need:5}, lv10:{cur:_lvl,need:10},
       coin1000:{cur:coinNow,need:1000},
-      allModes:{cur:mp.length,need:11}
+      allModes:{cur:mp.length,need:11},
+      modeHigh:{cur:Object.keys((S.stats&&S.stats.gameCounts)||{}).reduce(function(m,k){return Math.max(m,Number(S.stats.gameCounts[k])||0)},0),need:10}
     };
     var p=map[id];
     if(!p)return null;
@@ -3150,7 +3354,7 @@ function checkAch(){
     if(S.streak>=3)unlockAch('s3'); if(S.streak>=7)unlockAch('s7');
     if(S.streak>=14)unlockAch('s14'); if(S.streak>=100)unlockAch('s100');
     // 里程碑: 金币累计(用全局钱包) / 钻石
-    var coinNow=(window.HansenCoins&&HansenCoins.get())||S.coins||0;
+    var coinNow=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0);
     if(coinNow>=1000)unlockAch('coin1000');
     var gemNow=(window.HansenGems&&HansenGems.get())||0;
     if(gemNow>=1)unlockAch('gem1');
@@ -3160,6 +3364,7 @@ function checkAch(){
     var mp=(S.stats&&S.stats.modesPlayed)||[];
     if(mp.length>=1)unlockAch('mode1');
     if(mp.length>=11)unlockAch('allModes');
+    var _gc=(S.stats&&S.stats.gameCounts)||{},_gm=0;Object.keys(_gc).forEach(function(k){_gm=Math.max(_gm,Number(_gc[k])||0)});if(_gm>=10)unlockAch('modeHigh');
     // 卡牌收藏成就(用全局卡册 HansenCardbook)
     if(window.HansenCardbook){
       var owned=HansenCardbook.ownedCount();
@@ -3187,10 +3392,13 @@ function markMode(m){window._sessionCoins=0;window._xpAtStart=(typeof S!=='undef
 function showAlertMsg(msg, callback){
   const d = document.getElementById('alertInner');
   if(!d) return;
-  d.innerHTML = '<div style="font-size:18px;line-height:1.6;color:#fff;margin:20px 10px;white-space:pre-line">' + 
-    (msg || '').replace(/\n/g, '<br>') + 
-    '</div>' +
-    '<button class="game-btn gold" onclick="closeAlert();(window.__alertCb&&window.__alertCb())" style="margin-top:8px">确定</button>';
+  d.replaceChildren();
+  const text=document.createElement('div');
+  text.style.cssText='font-size:18px;line-height:1.6;color:#fff;margin:20px 10px;white-space:pre-line';
+  text.textContent=String(msg||'');
+  const ok=document.createElement('button');ok.type='button';ok.className='game-btn gold';ok.style.marginTop='8px';ok.textContent='确定';
+  ok.addEventListener('click',function(){var cb=window.__alertCb;closeAlert();if(typeof cb==='function')cb()});
+  d.append(text,ok);
   window.__alertCb = callback;
   document.getElementById('alertModal').classList.add('show');
 }
@@ -3198,13 +3406,14 @@ function showAlertMsg(msg, callback){
 function showConfirmMsg(msg, onOk, onCancel){
   const d = document.getElementById('alertInner');
   if(!d) return;
-  d.innerHTML = '<div style="font-size:18px;line-height:1.6;color:#fff;margin:20px 10px;white-space:pre-line">' + 
-    (msg || '').replace(/\n/g, '<br>') + 
-    '</div>' +
-    '<div style="display:flex;gap:10px;margin-top:12px">' +
-      '<button class="game-btn" style="flex:1;background:#475569" onclick="closeAlert();(window.__cancelCb&&window.__cancelCb())">取消</button>' +
-      '<button class="game-btn gold" style="flex:1" onclick="closeAlert();(window.__okCb&&window.__okCb())">确定</button>' +
-    '</div>';
+  d.replaceChildren();
+  const text=document.createElement('div');text.style.cssText='font-size:18px;line-height:1.6;color:#fff;margin:20px 10px;white-space:pre-line';text.textContent=String(msg||'');
+  const row=document.createElement('div');row.style.cssText='display:flex;gap:10px;margin-top:12px';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='game-btn';cancel.style.cssText='flex:1;background:#475569';cancel.textContent='取消';
+  const ok=document.createElement('button');ok.type='button';ok.className='game-btn gold';ok.style.cssText='flex:1';ok.textContent='确定';
+  cancel.addEventListener('click',function(){var cb=window.__cancelCb;closeAlert();if(typeof cb==='function')cb()});
+  ok.addEventListener('click',function(){var cb=window.__okCb;closeAlert();if(typeof cb==='function')cb()});
+  row.append(cancel,ok);d.append(text,row);
   window.__okCb = onOk;
   window.__cancelCb = onCancel;
   document.getElementById('alertModal').classList.add('show');
@@ -3214,18 +3423,19 @@ function showPromptMsg(msg, defaultVal, onOk, onCancel){
   const d = document.getElementById('alertInner');
   if(!d) return;
   const inputId = 'promptInput_' + Date.now();
-  d.innerHTML = '<div style="font-size:16px;line-height:1.6;color:#fff;margin:18px 10px 12px">' + 
-    (msg || '') + 
-    '</div>' +
-    '<input id="' + inputId + '" type="text" value="' + (defaultVal||'').replace(/"/g,'&quot;') + '" style="width:90%;padding:12px;font-size:18px;background:rgba(255,255,255,.95);color:#1e1b4b;border-radius:8px;border:2px solid #fbbf24;text-align:center;font-weight:600" maxlength="20" autocomplete="off"/>' +
-    '<div style="display:flex;gap:10px;margin-top:14px">' +
-      '<button class="game-btn" style="flex:1;background:#475569" onclick="closeAlert();(window.__cancelCb&&window.__cancelCb())">取消</button>' +
-      '<button class="game-btn gold" style="flex:1" onclick="(function(){var v=document.getElementById(\'' + inputId + '\').value;closeAlert();(window.__okCb&&window.__okCb(v))})()">确定</button>' +
-    '</div>';
+  d.replaceChildren();
+  const text=document.createElement('div');text.style.cssText='font-size:16px;line-height:1.6;color:#fff;margin:18px 10px 12px';text.textContent=String(msg||'');
+  const input=document.createElement('input');input.id=inputId;input.type='text';input.value=String(defaultVal||'');input.style.cssText='width:90%;padding:12px;font-size:18px;background:rgba(255,255,255,.95);color:#1e1b4b;border-radius:8px;border:2px solid #fbbf24;text-align:center;font-weight:600';input.maxLength=20;input.autocomplete='off';
+  const row=document.createElement('div');row.style.cssText='display:flex;gap:10px;margin-top:14px';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='game-btn';cancel.style.cssText='flex:1;background:#475569';cancel.textContent='取消';
+  const ok=document.createElement('button');ok.type='button';ok.className='game-btn gold';ok.style.cssText='flex:1';ok.textContent='确定';
+  cancel.addEventListener('click',function(){var cb=window.__cancelCb;closeAlert();if(typeof cb==='function')cb()});
+  ok.addEventListener('click',function(){var cb=window.__okCb,v=input.value;closeAlert();if(typeof cb==='function')cb(v)});
+  row.append(cancel,ok);d.append(text,input,row);
   window.__okCb = onOk;
   window.__cancelCb = onCancel;
   document.getElementById('alertModal').classList.add('show');
-  setTimeout(function(){ var el=document.getElementById(inputId); if(el){ el.focus(); el.select() } }, 100);
+  setTimeout(function(){ if(input.isConnected){ input.focus(); input.select() } }, 100);
 }
 
 
@@ -3993,7 +4203,7 @@ document.getElementById('exploreContent').innerHTML=h}
 
 function showWord(idx){const w=allW[idx];if(!w)return;const isL=S.learned.includes(idx);
 const m=document.getElementById('modalInner');
-m.innerHTML='<button type="button" class="close" onclick="event.stopPropagation();closeModal()" aria-label="关闭">✕</button><div class="m-emoji">'+w.emoji+'</div><div class="m-word">'+w.en+'</div><div class="m-pn">'+w.pn+'</div><div class="m-cn">'+w.cn+'</div><div class="m-ex">📝 '+w.ex+'</div><div class="m-excn">'+w.exCn+'</div><div class="m-btns"><button class="m-btn listen" onclick="speak(allW['+idx+'].en)">🔊 发音</button><button class="m-btn slow" onclick="speak(allW['+idx+'].en,0.6)">🐢 慢速</button><button class="m-btn sentence" onclick="speak(allW['+idx+'].ex)">📝 例句</button></div>'+(isL?'<div style="margin-top:12px;color:#22c55e;font-weight:700">✅ 已掌握</div>':'<button class="m-btn got-it" onclick="learnWord('+idx+')">💪 学会了！+10 经验</button>');
+m.innerHTML='<button type="button" class="close" onclick="event.stopPropagation();closeModal()" aria-label="关闭">✕</button><div class="m-emoji">'+w.emoji+'</div><div class="m-word">'+w.en+'</div><div class="m-pn">'+w.pn+'</div><div class="m-cn">'+w.cn+'</div><div class="m-ex">📝 '+w.ex+'</div><div class="m-excn">'+w.exCn+'</div><div class="m-btns"><button class="m-btn listen" onclick="speak(allW['+idx+'].en)">🔊 发音</button><button class="m-btn slow" onclick="speak(allW['+idx+'].en,0.6)">🐢 慢速</button><button class="m-btn sentence" onclick="speak(allW['+idx+'].ex)">📝 例句</button></div>'+(isL?'<div style="margin-top:12px;color:#22c55e;font-weight:700">✅ 已认识（已加入学习）</div>':'<button class="m-btn got-it" onclick="learnWord('+idx+')">📚 加入学习！+10 经验</button>');
 document.getElementById('wordModal').classList.add('show');
 speak(w.en)}
 function closeModal(){document.getElementById('wordModal').classList.remove('show')}
@@ -4004,9 +4214,9 @@ if(c>=1)unlockAch('w1');if(c>=10)unlockAch('w10');if(c>=25)unlockAch('w25');if(c
 save()}closeModal();renderExplore();updatePetHero()}
 
 // Track answer stats & wrongs
-function markAnswer(idx,correct){S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(S.wrongs[idx]){S.wrongs[idx]=Math.max(0,S.wrongs[idx]-1);if(S.wrongs[idx]===0)delete S.wrongs[idx]}}else{S.wrongs[idx]=(S.wrongs[idx]||0)+1}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
+function markAnswer(idx,correct){var _wrong=__hsnSafeWrongCount(S.wrongs[idx]);S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(_wrong){_wrong--;if(_wrong)S.wrongs[idx]=_wrong;else delete S.wrongs[idx]}}else{S.wrongs[idx]=Math.min(__HSN_MAX_WRONG_COUNT,_wrong+1)}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
 /* 💰 答对1题给1金币。完美方案: 每个词每天最多给3次(防盯着一个词刷) + 每天总上限2000(防换词刷太多); 跨天自动重置(金币不枯竭); 不影响签到/boss/任务给的钱。 */
-function earnCoinOnCorrect(wordIdx){var DAILY_CAP=2000;var PER_WORD_CAP=3;var t=today();var ga;try{if(localStorage.getItem('hsn_ans_coin_day')!==t){localStorage.setItem('hsn_ans_coin_day',t);localStorage.setItem('hsn_ans_coin_today','0');ga=0;}else{ga=parseInt(localStorage.getItem('hsn_ans_coin_today'),10)||0;}}catch(e){ga=0;}if(ga>=DAILY_CAP)return false;if(S.coinDay!==t){S.coinDay=t;S.coinWordCount={};}if(!S.coinWordCount||typeof S.coinWordCount!=='object')S.coinWordCount={};var wc=S.coinWordCount[wordIdx]||0;if(wc>=PER_WORD_CAP)return false;if(window.HansenCoins){HansenCoins.add(1);}else{S.coins=(S.coins||0)+1;}try{localStorage.setItem('hsn_ans_coin_today',String(ga+1));}catch(e){}S.coinWordCount[wordIdx]=wc+1;updateTopBar();save();if(typeof playCoin==='function'){try{playCoin()}catch(e){}}return true;}
+function earnCoinOnCorrect(wordIdx){var DAILY_CAP=2000;var PER_WORD_CAP=3;var t=today();var ga;try{if(localStorage.getItem('hsn_ans_coin_day')!==t){localStorage.setItem('hsn_ans_coin_day',t);localStorage.setItem('hsn_ans_coin_today','0');ga=0;}else{ga=parseInt(localStorage.getItem('hsn_ans_coin_today'),10)||0;}}catch(e){ga=0;}if(ga>=DAILY_CAP)return false;if(S.coinDay!==t){S.coinDay=t;S.coinWordCount={};}S.coinWordCount=__hsnNormalizeCoinWordCount(S.coinWordCount);var wc=__hsnSafeCoinWordCount(S.coinWordCount[wordIdx]);if(wc>=PER_WORD_CAP)return false;if(window.HansenCoins){HansenCoins.add(1);}else{S.coins=(S.coins||0)+1;}try{localStorage.setItem('hsn_ans_coin_today',String(ga+1));}catch(e){}S.coinWordCount[wordIdx]=wc+1;updateTopBar();save();if(typeof playCoin==='function'){try{playCoin()}catch(e){}}return true;}
 
 // ============================================================
 // ============================================================
@@ -4018,11 +4228,11 @@ let bossCombo=0,bossRageMode=false,bossCurrent=null,bossPhase=1;
 let bossQuestionsAsked=0;
 
 const BOSSES=[
-{name:'月之引航者·寂静潮汐',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/land_yuezhi.webp?v=938\" xlink:href=\"bosses/land_yuezhi.webp?v=938\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:700,color:'#8ab0d8',taunts:['潮汐随我心意起落。','月光之下, 迷途者止步。','寂静之海…将你吞没。']},
-{name:'星陨武士·流亡之刃',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/s1_exileblade.webp?v=938\" xlink:href=\"bosses/s1_exileblade.webp?v=938\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:780,color:'#8ab4ff',taunts:['垂死之星…见证此战。','光刃一闪, 胜负已分。','流亡者, 无所畏惧。']},
-{name:'星核泰坦·虚空造物主',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/land_xinghe.webp?v=938\" xlink:href=\"bosses/land_xinghe.webp?v=938\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:860,color:'#e0a040',taunts:['一次搏动, 星系诞生。','虚空之中, 我即造物!','星核燃烧…感受创世!']},
-{name:'统御天使·圣光之翼',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/lightangel.webp?v=938\" xlink:href=\"bosses/lightangel.webp?v=938\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:940,color:'#f0e0a0',taunts:['圣光普照, 罪无所遁。','万道光柱, 天降审判!','以圣翼之名…裁决!']},
-{name:'铸星者·原初匠人',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/starmaker.webp?v=938\" xlink:href=\"bosses/starmaker.webp?v=938\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:1050,color:'#f0a830',taunts:['星辰…皆出自我手。','创世锻造, 开始!','这一锤, 铸的是你的败局!']}
+{name:'月之引航者·寂静潮汐',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/land_yuezhi.webp?v=960\" xlink:href=\"bosses/land_yuezhi.webp?v=960\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:700,color:'#8ab0d8',taunts:['潮汐随我心意起落。','月光之下, 迷途者止步。','寂静之海…将你吞没。']},
+{name:'星陨武士·流亡之刃',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/s1_exileblade.webp?v=960\" xlink:href=\"bosses/s1_exileblade.webp?v=960\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:780,color:'#8ab4ff',taunts:['垂死之星…见证此战。','光刃一闪, 胜负已分。','流亡者, 无所畏惧。']},
+{name:'星核泰坦·虚空造物主',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/land_xinghe.webp?v=960\" xlink:href=\"bosses/land_xinghe.webp?v=960\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:860,color:'#e0a040',taunts:['一次搏动, 星系诞生。','虚空之中, 我即造物!','星核燃烧…感受创世!']},
+{name:'统御天使·圣光之翼',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/lightangel.webp?v=960\" xlink:href=\"bosses/lightangel.webp?v=960\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:940,color:'#f0e0a0',taunts:['圣光普照, 罪无所遁。','万道光柱, 天降审判!','以圣翼之名…裁决!']},
+{name:'铸星者·原初匠人',emoji:'<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image href=\"bosses/starmaker.webp?v=960\" xlink:href=\"bosses/starmaker.webp?v=960\" width=\"100\" height=\"100\" preserveAspectRatio=\"xMidYMid meet\"/></svg>',hp:1050,color:'#f0a830',taunts:['星辰…皆出自我手。','创世锻造, 开始!','这一锤, 铸的是你的败局!']}
 ];
 
 //🔴v811 赛季岛 boss 绑定各自 40 词 + 错词优先。boss N(1-6)守主题 2N-1,2N = allW[(N-1)*40 .. N*40)(12主题×20词·2主题/boss·连续切片)。
@@ -4045,16 +4255,8 @@ function __buildBossPool(){
 }
 //🔴v812 赛季 boss 进度(供 bossVictory + 选关界面共用): 已掌握 X/40(该 boss 40 词中 season_word_mastery≥3 的数) + 完美战(season_boss_perfect) + 是否已拿卡。
 //   拿卡两条件 = allMastered(40词各≥3) && perfect(一场0失误)。boss1-5→卡 S1B(N); boss6 赛尔娅→限定卡 S1(v813 终极)。
-/* 🔴v867 星海六柱已点亮查询(供大满贯进度器读·星海独立6关制): 柱N点亮=已拿守关卡S1B(N)(N=1..5), 第6柱=已拿限定卡S1(赛尔娅)。与正片20关彻底分开。 */
-  window.__seasonPillarsLit = function(){
-    var out=[];
-    try{
-      if(!(window.HansenSeason && HansenSeason.hasCard)) return out;
-      for(var N=1;N<=5;N++){ if(HansenSeason.hasCard('S1B'+N)) out.push(N); }
-      if(HansenSeason.hasCard('S1')) out.push(6);
-    }catch(e){}
-    return out;
-  };
+/* v941: 旧卡牌点亮不再被当作女帝终战奖励条件。
+   正式奖励只读 8 个 hsn_landmap_cleared_N 真实旗 + 实际 Lv6 胜利。 */
   window.__seasonBossProgress = function(bossLv){
   try{
     var N=Math.max(1,Math.min(6,bossLv|0));
@@ -4448,18 +4650,34 @@ function bossVictory(){bossActive=false;try{document.body.classList.remove('hsn-
      (选关界面设的, 挂window上最可靠), 再 S.bossCurrentLv, 最后才 S.level。
      绝不能直接用 S.level(玩家XP等级)算关卡 — 这是旧 BUG #17/#37/#39 反复踩的坑:
      等级高≠逐关打过, 用 S.level 会把"正在打的低级boss"误判成高章节、多给金币。 */
-  var bossLv;
-  if(window._hansenRebattleLv != null){
-    bossLv = Math.max(1, Math.min(20, window._hansenRebattleLv | 0));
+  var bossLv,bossWinKey;
+  var _landBossMatch=(location.pathname||'').match(/island_land([1-8])\.html/);
+  if(_landBossMatch){
+    /* v941 Land 用实际展示的本地 Boss 序号，旧 numeric bossWon 不得压掉新的物理首胜。 */
+    if(window._s1Idx!=null) bossLv=Math.max(1,Math.min((window.BOSSES&&BOSSES.length)||20,(window._s1Idx|0)+1));
+    else if(window._hansenRebattleLv!=null) bossLv=Math.max(1,Math.min((window.BOSSES&&BOSSES.length)||20,window._hansenRebattleLv|0));
+    else { var _lp=parseInt(localStorage.getItem('land'+_landBossMatch[1]+'_prog')||'0',10)||0; bossLv=Math.max(1,Math.min((window.BOSSES&&BOSSES.length)||20,_lp+1)); }
+    bossWinKey='land'+_landBossMatch[1]+':b'+bossLv;
+  } else if(window._hansenRebattleLv != null){
+    bossLv=Math.max(1,Math.min(20,window._hansenRebattleLv|0));
+    bossWinKey=bossLv;
   } else {
-    bossLv = Math.max(1, Math.min(20, (S.bossCurrentLv || S.level || 1) | 0));
+    bossLv=Math.max(1,Math.min(20,(S.bossCurrentLv||S.level||1)|0));
+    bossWinKey=bossLv;
   }
   if(!Array.isArray(S.bossWon))S.bossWon=[];
-  var isFirstWin=(S.bossWon.indexOf(bossLv)===-1);
-  if(isFirstWin)S.bossWon.push(bossLv);
+  var _bossPhysical=((location.pathname||'').match(/island_([a-z0-9]+)\.html/i)||[])[1]||'unknown';
+  var _bossAwardId='boss:first:'+_bossPhysical.toLowerCase()+':'+bossLv;
+  var _localFirst=(S.bossWon.indexOf(bossWinKey)===-1),_alreadyFirstPaid=false;
+  try{_alreadyFirstPaid=!!(window.HansenCoins&&HansenCoins.hasAward&&HansenCoins.hasAward(_bossAwardId));}catch(e){}
+  // 奖励账本才是首胜经济事实；S.bossWon 只是玩法/UI 进度。钱包失败时 source 仍未完成，
+  // 下次必须继续补首胜，不能因 S 已 push 就降成 5 金币复胜奖。
+  var isFirstWin=!_alreadyFirstPaid;
+  if(_localFirst)S.bossWon.push(bossWinKey);
   var coinReward=isFirstWin?bossCoinForLevel(bossLv):5;
   const xpReward=50+stars*15;
-  addCoin(coinReward);addXP(xpReward);try{checkAch();}catch(e){}
+  if(isFirstWin&&window.HansenCoins&&HansenCoins.award)HansenCoins.award(_bossAwardId,coinReward);else addCoin(coinReward);
+  addXP(xpReward);try{checkAch();}catch(e){}
   try{playLevelUp()}catch(e){}
   progressQuest('boss',1);
   if(S.stats.bossBeaten>=1)unlockAch('boss1');if(S.stats.bossBeaten>=5)unlockAch('boss5');bumpGameCount('boss');
@@ -6057,12 +6275,18 @@ let typeRound=1; // 1=初级(3-4字母), 2=中级(5-6字母), 3=高级(7+字母)
 
 // 三档配置
 const TYPING_LEVELS={
-  1:{petXp:25,name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',cb:'#4ade80',ct:'#bbf7d0',ct2:'#86efac',desc:'较短的词',example:'calm · eager · loyal',
-     filter:i=>allW[i].en.length<=7},
-  2:{petXp:40,name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',cb:'#fde047',ct:'#fef3c7',ct2:'#fcd34d',desc:'中等长度',example:'comfort · curious · furious',
-     filter:i=>allW[i].en.length>7&&allW[i].en.length<=8},
-  3:{petXp:60,name:'高级',icon:'🔥',c1:'#ef4444',c2:'#b91c1c',cb:'#fca5a5',ct:'#fecaca',ct2:'#f87171',desc:'较长的词',example:'reliable · stubborn · delighted',
-     filter:i=>allW[i].en.length>8}
+  1:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',cb:'#4ade80',ct:'#bbf7d0',ct2:'#86efac',
+     desc:'7 字母以内',example:'当前星海领域的较短词',
+     filter:i=>allW[i].en.length<=7,
+     xpPerWord:5,gemBonus:12,petXp:25},
+  2:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',cb:'#fde047',ct:'#fef3c7',ct2:'#fcd34d',
+     desc:'8 字母词',example:'当前星海领域的中等词',
+     filter:i=>allW[i].en.length>7&&allW[i].en.length<=8,
+     xpPerWord:10,gemBonus:25,petXp:40},
+  3:{name:'高级',icon:'🔥',c1:'#ef4444',c2:'#b91c1c',cb:'#fca5a5',ct:'#fecaca',ct2:'#f87171',
+     desc:'9+ 字母长词',example:'当前星海领域的长词挑战',
+     filter:i=>allW[i].en.length>8,
+     xpPerWord:18,gemBonus:50,petXp:70}
 };
 
 function startTyping(round){markMode('typing');showScreen('typing');typeActive=true;typeDone=0;
@@ -6335,9 +6559,18 @@ save()}
 // 每档完成一轮算一次任务, 自动停下来 (不会无限循环)
 // ============================================================
 const CLOZE_LEVELS={
-  easy:{petXp:25,name:'初级',icon:'🌱',c1:'#22c55e',c2:'#16a34a',desc:'较短的词',words:['calm','eager','loyal','proud','amazed','humble','lonely','mature','modest','polite','strict','anxious','ashamed']},
-  medium:{petXp:40,name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#f59e0b',desc:'中等长度',words:['comfort','curious','furious','jealous','nervous','relaxed','selfish','sincere','cautious','cheerful','confused','grateful','outgoing']},
-  hard:{petXp:60,name:'高级',icon:'🔥',c1:'#ef4444',c2:'#dc2626',desc:'较长的词',words:['reliable','stubborn','delighted','energetic','miserable','satisfied','sensitive','talkative','determined','frightened','optimistic','embarrassed','hardworking','disappointed']}
+  easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#16a34a',cb:'#4ade80',ct:'#bbf7d0',
+    desc:'7 字母以内',example:(allW.find(w=>w.en.length<=7)||allW[0]).ex,
+    xpPerQ:5,gemBonus:15,petXp:30,
+    words:allW.filter(w=>w.en.length<=7).map(w=>w.en)},
+  medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#f59e0b',cb:'#fde047',ct:'#fef3c7',
+    desc:'8 字母词',example:(allW.find(w=>w.en.length>7&&w.en.length<=8)||allW[0]).ex,
+    xpPerQ:8,gemBonus:25,petXp:45,
+    words:allW.filter(w=>w.en.length>7&&w.en.length<=8).map(w=>w.en)},
+  hard:{name:'高级',icon:'🔥',c1:'#ef4444',c2:'#dc2626',cb:'#fca5a5',ct:'#fecaca',
+    desc:'9+ 字母长词',example:(allW.find(w=>w.en.length>8)||allW[0]).ex,
+    xpPerQ:14,gemBonus:40,petXp:65,
+    words:allW.filter(w=>w.en.length>8).map(w=>w.en)}
 };
 // 把英文单词预映射成 allW 索引
 const CLOZE_LEVEL_IDX={};
@@ -6462,7 +6695,7 @@ document.getElementById('clozeContent').innerHTML=
 // ============================================================
 // REVIEW MODE
 // ============================================================
-function getSmartPool(){const wrongs=Object.keys(S.wrongs).map(Number);const wrongPool=[];wrongs.forEach(i=>{const count=S.wrongs[i];for(let k=0;k<count*2;k++)wrongPool.push(i)});const normalPool=[...Array(allW.length).keys()];return wrongPool.concat(normalPool)}
+function getSmartPool(){const wrongs=Object.keys(S.wrongs).map(Number).filter(i=>Number.isSafeInteger(i)&&i>=0&&i<allW.length);const wrongPool=[];wrongs.forEach(i=>{const weight=Math.min(20,__hsnSafeWrongCount(S.wrongs[i])*2);for(let k=0;k<weight;k++)wrongPool.push(i)});const normalPool=[...Array(allW.length).keys()];return wrongPool.concat(normalPool)}
 
 // ============================================================
 // 洗牌池系统 — 保证每个游戏第一轮覆盖全部单词后再循环
@@ -6482,16 +6715,16 @@ function resetPool(key){_shuffledPools[key]=null}
 let reviewState=null;
 
 function renderReview(){
-const wrongsList=Object.keys(S.wrongs).map(k=>({idx:+k,count:S.wrongs[k]})).filter(w=>allW[w.idx]).sort((a,b)=>b.count-a.count);
+const wrongsList=Object.keys(S.wrongs).map(k=>({idx:+k,count:__hsnSafeWrongCount(S.wrongs[k])})).filter(w=>Number.isSafeInteger(w.idx)&&w.idx>=0&&allW[w.idx]&&w.count>0).sort((a,b)=>b.count-a.count);
 const total=wrongsList.length;
 // 空状态
 if(total===0){
-document.getElementById('reviewContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:96px;animation:petFloat 2s infinite">🌟</div><div style="font-size:22px;color:#22c55e;font-weight:800;margin:16px 0">太棒啦！没有需要救援的单词！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.8">你已经掌握了所有学过的词～<br>继续玩游戏发现新单词吧！💪</div><button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:20px">🏠 回主页</button></div>';
+document.getElementById('reviewContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:96px;animation:petFloat 2s infinite">🌟</div><div style="font-size:22px;color:#22c55e;font-weight:800;margin:16px 0">太棒啦！没有需要救援的单词！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.8">所有错词都已救回～<br>普通答题用来巩固认识度；宠物掌握请进入打字大师，知识结晶请进入专属 Spelling Bee。</div><button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:20px">🏠 回主页</button></div>';
 return}
 // 今日救援计数
 const todayKey=today();
 if(S.stats.reviewDay!==todayKey){S.stats.reviewDay=todayKey;S.stats.reviewToday=0;save()}
-const todayCount=S.stats.reviewToday||0;
+const todayCount=__hsnSafeStatCount(S.stats.reviewToday);
 let h='';
 // HERO 卡
 h+='<div style="background:linear-gradient(135deg,#ef4444,#dc2626,#7f1d1d);border-radius:18px;padding:18px;text-align:center;margin:0 4px 14px;box-shadow:0 8px 24px rgba(239,68,68,.3);position:relative;overflow:hidden">';
@@ -6504,7 +6737,7 @@ h+='</div>';
 // 救援规则说明
 h+='<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);border-radius:12px;padding:12px;margin:0 4px 14px">';
 h+='<div style="font-size:13px;color:#fde047;font-weight:700;margin-bottom:6px">💡 救援规则</div>';
-h+='<div style="font-size:12px;color:#cbd5e1;line-height:1.7">每答对一次, 救援进度 -1。<br>救援进度归零 → 这个单词 ✨ 成为「已掌握」!</div>';
+h+='<div style="font-size:12px;color:#cbd5e1;line-height:1.7">每答对一次，救援进度 -1；同一单词每天前 3 次独立纠错各即时奖励 10 XP。<br>归零才算真正救回，并按“日期 + 权威单词槽”每天最多领取一次毕业奖励；宠物掌握仍只计算打字大师中无提示、整词精确拼写。</div>';
 h+='</div>';
 // 3 种模式 + 浏览
 h+='<div style="margin:0 4px">';
@@ -6517,7 +6750,7 @@ h+='<div style="flex:1;text-align:left">';
 h+='<div style="font-size:16px;font-weight:800;color:#fff">紧急救援</div>';
 h+='<div style="font-size:13px;font-weight:600;color:#fecaca;line-height:1.5">最难的 '+eCount+' 个词 · 推荐每天先做这个!</div>';
 h+='</div>';
-h+='<div style="font-size:13px;font-weight:600;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;font-weight:700;white-space:nowrap">+50 XP</div>';
+h+='<div style="font-size:12px;font-weight:700;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;white-space:nowrap">答对即时奖</div>';
 h+='</div>';
 // Mode 2: classic
 const cCount=Math.min(10,total);
@@ -6527,17 +6760,16 @@ h+='<div style="flex:1;text-align:left">';
 h+='<div style="font-size:16px;font-weight:800;color:#fff">经典复习</div>';
 h+='<div style="font-size:13px;font-weight:600;color:#bfdbfe;line-height:1.5">'+cCount+' 个词混合 4 种题型 · 全面巩固</div>';
 h+='</div>';
-h+='<div style="font-size:13px;font-weight:600;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;font-weight:700;white-space:nowrap">+100 XP</div>';
+h+='<div style="font-size:12px;font-weight:700;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;white-space:nowrap">答对即时奖</div>';
 h+='</div>';
 // Mode 3: full battle
-const allXp=100+total*5;
 h+='<div onclick="startReview(\'all\')" style="background:linear-gradient(135deg,#a855f7,#6b21a8);border-radius:14px;padding:14px;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:2px solid #c084fc;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">';
 h+='<div style="font-size:40px">⚔️</div>';
 h+='<div style="flex:1;text-align:left">';
 h+='<div style="font-size:16px;font-weight:800;color:#fff">全员大决战</div>';
 h+='<div style="font-size:13px;font-weight:600;color:#e9d5ff;line-height:1.5">救援全部 '+total+' 个词 · 一次性救援</div>';
 h+='</div>';
-h+='<div style="font-size:13px;font-weight:600;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;font-weight:700;white-space:nowrap">+'+allXp+' XP</div>';
+h+='<div style="font-size:12px;font-weight:700;color:#fde047;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:8px;white-space:nowrap">毕业再奖励</div>';
 h+='</div>';
 // Browse mode
 h+='<div onclick="renderReviewBrowse()" style="background:rgba(15,23,42,.5);border-radius:12px;padding:10px;text-align:center;cursor:pointer;border:1px dashed #475569;font-size:12px;color:#cbd5e1;margin-top:6px">';
@@ -6547,14 +6779,48 @@ h+='</div>';
 document.getElementById('reviewContent').innerHTML=h
 }
 
+function __hsnReviewDayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function __hsnReviewSlot(idx){
+try{if(window.HansenCanonical&&typeof HansenCanonical.slotId==='function'){const slot=HansenCanonical.slotId(window.__hsnSaveKey||location.pathname,idx);if(slot)return slot}}catch(e){}
+return String(window.__hsnSaveKey||'island').replace(/[^a-z0-9_-]/gi,'_')+':'+idx
+}
+function __hsnReviewLedger(){
+try{const raw=localStorage.getItem('hansen_reward_xp_awards_v942');if(raw===null)return {};const o=JSON.parse(raw);return o&&typeof o==='object'&&!Array.isArray(o)?o:null}catch(e){return null}
+}
+function __hsnPruneReviewXpLedger(){
+const key='hansen_reward_xp_awards_v942',ledger=__hsnReviewLedger();if(!ledger)return false;
+let pendingId='';try{const p=JSON.parse(localStorage.getItem('hansen_reward_xp_pending_v942')||'null');pendingId=p&&typeof p.id==='string'?p.id:''}catch(e){}
+const now=Date.now(),cutoff=now-45*86400000,reviewIds=Object.keys(ledger).filter(id=>/^review:\d{4}-\d{2}-\d{2}:/.test(id));let changed=false;
+reviewIds.forEach(id=>{const at=Number(ledger[id]&&ledger[id].at)||0;if(id!==pendingId&&at>0&&at<cutoff){delete ledger[id];changed=true}});
+const live=Object.keys(ledger).filter(id=>/^review:\d{4}-\d{2}-\d{2}:/.test(id)&&id!==pendingId).sort((a,b)=>(Number(ledger[b]&&ledger[b].at)||0)-(Number(ledger[a]&&ledger[a].at)||0));
+live.slice(4095).forEach(id=>{delete ledger[id];changed=true});
+if(!changed)return true;
+try{const raw=JSON.stringify(ledger);localStorage.setItem(key,raw);return localStorage.getItem(key)===raw}catch(e){return false}
+}
+function __hsnReviewAwardId(kind,idx,ordinal){return 'review:'+__hsnReviewDayKey()+':'+__hsnReviewSlot(idx)+':'+kind+(ordinal?':'+ordinal:'')}
+function __hsnReviewAwardOnce(id,amount){
+if(!__hsnPruneReviewXpLedger())return {ok:false,newAward:false,id};
+const before=__hsnReviewLedger();if(!before)return {ok:false,newAward:false,id};const existed=Object.prototype.hasOwnProperty.call(before,id);
+if(existed)return {ok:true,newAward:false,id};
+const effect=window.HansenRewardEffectsV942;
+if(!effect||typeof effect.xpAward!=='function'||effect.xpAward(id,amount)!==true)return {ok:false,newAward:false,id};
+return {ok:true,newAward:!existed,id}
+}
+function __hsnAwardReviewCorrect(idx){
+if(!__hsnPruneReviewXpLedger())return {ok:false,newAward:false};const ledger=__hsnReviewLedger();if(!ledger)return {ok:false,newAward:false};
+for(let ordinal=1;ordinal<=3;ordinal++){const id=__hsnReviewAwardId('correct',idx,ordinal);if(!Object.prototype.hasOwnProperty.call(ledger,id))return __hsnReviewAwardOnce(id,10)}
+return {ok:true,newAward:false,capped:true}
+}
+function __hsnAwardReviewGraduation(idx){return __hsnReviewAwardOnce(__hsnReviewAwardId('graduate',idx,0),30)}
+
 function startReview(mode){
-const wrongsList=Object.keys(S.wrongs).map(k=>({idx:+k,count:S.wrongs[k]})).filter(w=>allW[w.idx]).sort((a,b)=>b.count-a.count);
-let pool,reward,modeLabel;
-if(mode==='emergency'){pool=wrongsList.slice(0,Math.min(5,wrongsList.length));reward={xp:50,gems:5,petXp:30};modeLabel='🚨 紧急救援'}
-else if(mode==='classic'){pool=wrongsList.slice(0,Math.min(10,wrongsList.length));reward={xp:100,gems:10,petXp:50};modeLabel='📚 经典复习'}
-else{pool=wrongsList;reward={xp:100+wrongsList.length*5,gems:10+Math.floor(wrongsList.length/2),petXp:80};modeLabel='⚔️ 全员大决战'}
+const wrongsList=Object.keys(S.wrongs).map(k=>({idx:+k,count:__hsnSafeWrongCount(S.wrongs[k])})).filter(w=>Number.isSafeInteger(w.idx)&&w.idx>=0&&allW[w.idx]&&w.count>0).sort((a,b)=>b.count-a.count);
+let pool,modeLabel;
+if(mode==='emergency'){pool=wrongsList.slice(0,Math.min(5,wrongsList.length));modeLabel='🚨 紧急救援'}
+else if(mode==='classic'){pool=wrongsList.slice(0,Math.min(10,wrongsList.length));modeLabel='📚 经典复习'}
+else{pool=wrongsList;modeLabel='⚔️ 全员大决战'}
 pool=pool.slice().sort(()=>Math.random()-.5);
-reviewState={pool:pool.map(p=>p.idx),idx:0,correct:0,total:pool.length,rescued:[],mode:mode,modeLabel:modeLabel,reward:reward,currentQ:null};
+reviewState={pool:pool.map(p=>p.idx),idx:0,correct:0,total:pool.length,rescued:[],mode:mode,modeLabel:modeLabel,currentQ:null,settling:false,settled:false,settlementPlan:null};
 reviewNext()
 }
 
@@ -6564,7 +6830,7 @@ if(reviewState.idx>=reviewState.pool.length){reviewComplete();return}
 const idx=reviewState.pool[reviewState.idx];
 const w=allW[idx];
 if(!w){reviewState.idx++;reviewNext();return}
-const wrongCount=S.wrongs[idx]||0;
+const wrongCount=__hsnSafeWrongCount(S.wrongs[idx]);
 // 4 种题型随机
 const types=['cnChoose','enChoose','picMatch','listen'];
 const qType=types[Math.floor(Math.random()*types.length)];
@@ -6581,7 +6847,7 @@ distractors.push(r);
 // 不足 3 个干扰项时 (词库特别小), 减少选项
 const allOpts=[idx,...distractors].sort(()=>Math.random()-.5);
 const correctOptIdx=allOpts.indexOf(idx);
-reviewState.currentQ={idx:idx,qType:qType,allOpts:allOpts,correctOptIdx:correctOptIdx};
+reviewState.currentQ={idx:idx,qType:qType,allOpts:allOpts,correctOptIdx:correctOptIdx,beforeWrong:wrongCount};
 const progress=reviewState.idx+1;
 const totalQ=reviewState.pool.length;
 let h='';
@@ -6671,36 +6937,49 @@ else{o.style.opacity='0.4'}
 });
 if(correct){
 playCorrect();
-addXP(10);
-reviewState.correct++;
 markAnswer(targetIdx,true);
-confetti(window.innerWidth/2,300,12);
-const stillWrong=S.wrongs[targetIdx]||0;
+const stillWrong=__hsnSafeWrongCount(S.wrongs[targetIdx]);
+if(stillWrong<q.beforeWrong){
+  reviewState.correct++;
+  const instant=__hsnAwardReviewCorrect(targetIdx);
+  if(!instant.ok)showToast('⚠️ 纠错已保存；即时奖励正在安全恢复，下次操作会自动续做');
+  confetti(window.innerWidth/2,300,12);
+}else{
+  showToast('⚠️ 这次纠错未能安全保存，本题不计奖励');
+}
 if(stillWrong===0){
 // 毕业!
+if(!reviewState.rescued.includes(targetIdx))reviewState.rescued.push(targetIdx);
 if(!S.learned.includes(targetIdx)){
 S.learned.push(targetIdx);
 const c=S.learned.length;
 if(c>=1)unlockAch('w1');if(c>=10)unlockAch('w10');if(c>=25)unlockAch('w25');if(c>=allW.length)unlockAch('wAll');
-reviewState.rescued.push(targetIdx);
 save()
 }
 setTimeout(()=>{showRescueCelebration(targetW)},500);
-setTimeout(()=>{reviewState.idx++;reviewNext()},2500)
+__hsnAdvanceReviewAfter(q,2500)
 }else{
 showToast('🎯 太棒了! 再答对 '+stillWrong+' 次就毕业!');
-setTimeout(()=>{reviewState.idx++;reviewNext()},1200)
+__hsnAdvanceReviewAfter(q,1200)
 }
 }else{
 playWrong();
 markAnswer(targetIdx,false);
 showToast('🤔 这次差一点 ~ 没关系, 记住正确答案!');
-setTimeout(()=>{reviewState.idx++;reviewNext()},1800)
+__hsnAdvanceReviewAfter(q,1800)
 }
 }
 
+function __hsnAdvanceReviewAfter(question,delay){
+setTimeout(()=>{
+if(!reviewState||reviewState.settling||reviewState.settled||reviewState.currentQ!==question||!question.answered)return;
+reviewState.idx++;reviewNext()
+},delay)
+}
+
 function reviewSkip(){
-if(!reviewState)return;
+if(!reviewState||reviewState.settling||reviewState.settled)return;
+const q=reviewState.currentQ;if(!q||q.answered)return;q.answered=true;
 reviewState.idx++;
 reviewNext()
 }
@@ -6713,24 +6992,33 @@ function showRescueCelebration(w){
 }
 
 function reviewComplete(){
-if(!reviewState)return;
-const r=reviewState.reward;
+if(!reviewState||reviewState.settling||reviewState.settled)return;
+reviewState.settling=true;
 const correctCount=reviewState.correct;
 const totalCount=reviewState.total;
 const rescuedCount=reviewState.rescued.length;
 const rescuedList=reviewState.rescued.slice();
 const acc=totalCount>0?Math.round(correctCount/totalCount*100):0;
-// 今日救援计数
-S.stats.reviewToday=(S.stats.reviewToday||0)+rescuedCount;
-// 正确率奖励
-let bonusXp=0;
-if(acc===100)bonusXp=Math.floor(r.xp*0.5);
-else if(acc>=80)bonusXp=Math.floor(r.xp*0.2);
-const totalXp=r.xp+bonusXp;
-// 发奖励
-addXP(totalXp);
-addXP(r.gems);
-petTaskComplete('🚑 复习救援',r.petXp,'review');
+// HF2: 只有本轮真正把 wrong 降到 0 的词才有毕业奖励；同日同 canonical slot 只付一次。
+// 每个词使用稳定收据逐笔提交，部分成功后重试也不会重复；不再把随机 sessionId 写入永久账本。
+if(!reviewState.settlementPlan)reviewState.settlementPlan=rescuedList.map(idx=>({idx,done:false,newAward:false}));
+for(const item of reviewState.settlementPlan){
+  if(item.done)continue;
+  const result=__hsnAwardReviewGraduation(item.idx);
+  if(!result.ok){
+    reviewState.settling=false;
+    showToast('⚠️ 结算暂未安全入账，请再试一次；不会重复发奖');
+    const panel=document.getElementById('reviewContent');
+    if(panel)panel.innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:52px">🛡️</div><div style="color:#fde047;font-weight:900;font-size:18px;margin:12px 0">奖励正在安全恢复</div><div style="color:#cbd5e1;font-size:13px;line-height:1.7">已成功的单词不会重复入账，未完成的会沿用同一收据继续。</div><button class="game-btn gold" onclick="reviewComplete()" style="margin-top:18px">重新尝试安全结算</button></div>';
+    return;
+  }
+  item.done=true;item.newAward=!!result.newAward;
+}
+const newGraduationCount=reviewState.settlementPlan.filter(item=>item.newAward).length;
+const totalXp=newGraduationCount*20,petXpAward=newGraduationCount*10,combinedXp=totalXp+petXpAward;
+if(newGraduationCount>0)S.stats.reviewToday=Math.min(__HSN_MAX_STAT_COUNT,__hsnSafeStatCount(S.stats.reviewToday)+newGraduationCount);
+if(correctCount>0)try{if(typeof bumpGameCount==='function')bumpGameCount('review')}catch(e){}
+reviewState.settled=true;reviewState.settling=false;
 save();
 let h='<div style="text-align:center;padding:20px">';
 h+='<div style="font-size:80px;margin:10px 0;animation:petFloat 1.5s ease-in-out infinite">🎉</div>';
@@ -6754,8 +7042,8 @@ h+='</div></div>';
 // 奖励
 h+='<div style="background:linear-gradient(135deg,#fbbf24,#b45309);border-radius:14px;padding:12px;margin:12px 0;color:#fff">';
 h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px">🎁 获得奖励</div>';
-h+='<div style="font-size:16px;font-weight:900">+'+(totalXp+r.gems)+' XP · 🐾 宠物 +'+r.petXp+'</div>';
-if(bonusXp>0)h+='<div style="font-size:13px;font-weight:600;color:#fef3c7;margin-top:4px">'+(acc===100?'🌟 完美救援!':'⭐ 优秀!')+' 额外 +'+bonusXp+' XP</div>';
+h+=combinedXp>0?'<div style="font-size:16px;font-weight:900">今日毕业奖励：+'+totalXp+' XP · 🐾 宠物 +'+petXpAward+'</div>':
+  '<div style="font-size:14px;font-weight:800">'+(correctCount===0?'本次没有独立答对，暂不发放结算奖励':(rescuedCount===0?'本轮还没有单词真正归零；答对即时奖励已按每日上限结算':'这些单词今天的毕业奖励已经领过；不会重复发放'))+'</div>';
 h+='</div>';
 // 鼓励语
 let pep;
@@ -6776,13 +7064,13 @@ document.getElementById('reviewContent').innerHTML=h
 }
 
 function renderReviewBrowse(){
-const wrongs=Object.keys(S.wrongs).map(Number).filter(i=>allW[i]).sort((a,b)=>(S.wrongs[b]||0)-(S.wrongs[a]||0));
+const wrongs=Object.keys(S.wrongs).map(Number).filter(i=>Number.isSafeInteger(i)&&i>=0&&allW[i]&&__hsnSafeWrongCount(S.wrongs[i])>0).sort((a,b)=>__hsnSafeWrongCount(S.wrongs[b])-__hsnSafeWrongCount(S.wrongs[a]));
 let h='<button class="game-btn purple" onclick="renderReview()" style="margin:0 0 14px;padding:8px 16px;font-size:13px">← 返回救援队</button>';
 h+='<div style="text-align:center;font-size:13px;color:#cbd5e1;margin-bottom:14px">这些词需要救援, 点单词卡可查看详情</div>';
 if(wrongs.length===0){h+='<div style="text-align:center;padding:30px;color:#cbd5e1">✨ 暂时没有错词!</div>'}
 else{
 h+='<div class="explore-grid">';
-wrongs.forEach(idx=>{const w=allW[idx];if(!w)return;h+='<div class="exp-card" onclick="showWord('+idx+')"><div class="emoji">'+w.emoji+'</div><div class="word">'+w.en+'</div><div class="cn">'+w.cn+'</div><div style="position:absolute;top:4px;right:6px;font-size:12px;font-weight:600;color:#fff;background:#dc2626;padding:2px 6px;border-radius:6px;font-weight:700">×'+S.wrongs[idx]+'</div></div>'});
+wrongs.forEach(idx=>{const w=allW[idx],count=__hsnSafeWrongCount(S.wrongs[idx]);if(!w||!count)return;h+='<div class="exp-card" onclick="showWord('+idx+')"><div class="emoji">'+w.emoji+'</div><div class="word">'+w.en+'</div><div class="cn">'+w.cn+'</div><div style="position:absolute;top:4px;right:6px;font-size:12px;font-weight:600;color:#fff;background:#dc2626;padding:2px 6px;border-radius:6px;font-weight:700">×'+count+'</div></div>'});
 h+='</div>';
 }
 document.getElementById('reviewContent').innerHTML=h
@@ -6797,7 +7085,7 @@ const acc=S.totalAnswers>0?Math.round(S.totalCorrect/S.totalAnswers*100):0;
 const total=allW.length;
 // 单词分类
 const learnedSet=new Set(S.learned);
-const wrongsArr=Object.keys(S.wrongs).map(k=>({idx:+k,count:S.wrongs[k]}));
+const wrongsArr=Object.keys(S.wrongs).map(k=>({idx:+k,count:__hsnSafeWrongCount(S.wrongs[k])})).filter(w=>Number.isSafeInteger(w.idx)&&w.idx>=0&&allW[w.idx]&&w.count>0);
 const wrongsHard=wrongsArr.filter(w=>w.count>=3&&!learnedSet.has(w.idx));
 const wrongsMed=wrongsArr.filter(w=>w.count>=1&&w.count<3&&!learnedSet.has(w.idx));
 const seenSet=new Set([...S.learned,...wrongsArr.map(w=>w.idx)]);
@@ -6826,7 +7114,7 @@ h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom
 h+='<div onclick="showStatsWords(\'mastered\')" style="background:linear-gradient(135deg,#fbbf24,#b45309);border-radius:14px;padding:14px;text-align:center;cursor:pointer;border:2px solid #fcd34d;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.96)\'" ontouchend="this.style.transform=\'\'">';
 h+='<div style="font-size:36px;line-height:1">🌟</div>';
 h+='<div style="font-size:26px;font-weight:900;color:#fff;margin:6px 0 2px;text-shadow:0 2px 4px rgba(0,0,0,.3)">'+mastered+'</div>';
-h+='<div style="font-size:13px;font-weight:600;color:#fef3c7;font-weight:700">已掌握</div></div>';
+h+='<div style="font-size:13px;font-weight:600;color:#fef3c7;font-weight:700">已认识</div></div>';
 h+='<div onclick="showStatsWords(\'practice\')" style="background:linear-gradient(135deg,#dc2626,#7f1d1d);border-radius:14px;padding:14px;text-align:center;cursor:pointer;border:2px solid #f87171;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.96)\'" ontouchend="this.style.transform=\'\'">';
 h+='<div style="font-size:36px;line-height:1">⚠️</div>';
 h+='<div style="font-size:26px;font-weight:900;color:#fff;margin:6px 0 2px;text-shadow:0 2px 4px rgba(0,0,0,.3)">'+needPractice+'</div>';
@@ -6844,7 +7132,7 @@ h+='</div>';
 const pepMsg=pct<15?'🌱 才刚开始呢, 慢慢来哦！':pct<35?'💪 加油哦, 已经在路上了！':pct<60?'🌟 真不错, 已经走了一半！':pct<85?'🔥 你太棒了, 快通关了！':pct<100?'🏆 就差一点点啦, 加油！':'👑 你是真正的单词冠军！';
 h+='<div style="background:#0f172a;border-radius:10px;padding:10px 12px;border:1px solid #334155">';
 h+='<div style="font-size:13px;font-weight:600;color:#cbd5e1;display:flex;justify-content:space-between;margin-bottom:6px">';
-h+='<span>掌握进度</span><span style="color:#fbbf24;font-weight:700">'+pct+'% ('+mastered+'/'+total+')</span></div>';
+h+='<span>认识进度</span><span style="color:#fbbf24;font-weight:700">'+pct+'% ('+mastered+'/'+total+')</span></div>';
 h+='<div style="height:14px;background:#1e293b;border-radius:7px;overflow:hidden;border:1px solid #334155">';
 h+='<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#22c55e,#fbbf24,#ef4444);border-radius:7px;transition:width .6s"></div></div>';
 h+='<div style="font-size:12px;color:#fbbf24;margin-top:8px;text-align:center;font-weight:700">'+pepMsg+'</div></div></div>';
@@ -6858,7 +7146,7 @@ h+=gc('⌨️','打字数量',S.stats.typeCount||0,'#c084fc');
 h+=gc('🎯','地鼠轮数',S.stats.molesCleared||0,'#a3e635');
 h+=gc('🎣','钓鱼轮数',S.stats.fishCleared||0,'#38bdf8');
 h+=gc('👀','火眼轮数',S.stats.eagleCleared||0,'#fb923c');
-h+=gc('🫧','泡泡最高',S.stats.bubbleBest||0,'#f472b6');
+h+=gc('🫧','泡泡最高',__hsnBestStatValue(S.stats.bubbleBest),'#f472b6');
 h+=gc('⚔️','击败 Boss',S.stats.bossBeaten||0,'#ef4444');
 h+=gc('🔊','听音答对',S.stats.listenRight||0,'#22d3ee');
 h+=gc('📝','填空答对',S.stats.clozeRight||0,'#f9a8d4');
@@ -6884,7 +7172,7 @@ h+='<div style="background:linear-gradient(135deg,#1e293b,#0f172a);border-radius
 h+='<div style="font-size:16px;font-weight:800;color:#fbbf24;margin-bottom:10px">✨ 趣味数据</div>';
 h+='<div style="font-size:12px;color:#cbd5e1;line-height:2">';
 h+='<div>📊 你总共答了 <b style="color:#22c55e">'+S.totalAnswers+'</b> 题, 对了 <b style="color:#fbbf24">'+S.totalCorrect+'</b> 题</div>';
-h+='<div>🏆 你解锁了 <b style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">'+S.achievements.length+'/'+ACHIEVEMENTS.length+'</b> 个成就</div>';
+h+='<div>🏆 你解锁了 <b style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">'+((window.HansenAch&&HansenAch.getClaimed)?HansenAch.getClaimed().length:S.achievements.length)+'/'+((window.ACHIEVEMENTS||ACHIEVEMENTS).length)+'</b> 个成就</div>';
 if(bestGame)h+='<div>'+bestGame.e+' 你最厉害的游戏是: <b style="color:#fde047">'+bestGame.n+'</b></div>';
 if(hardestWord)h+='<div onclick="showWord('+hardestEntry.idx+')" style="cursor:pointer">🤔 最难的单词: <b style="color:#ef4444">'+hardestWord.en+'</b> ('+hardestWord.cn+') · 错了 '+hardestEntry.count+' 次 <span style="color:#cbd5e1;font-size:13px;font-weight:600">点我复习</span></div>';
 // 个性化鼓励
@@ -6892,7 +7180,7 @@ let pep;
 if(mastered===0&&S.totalAnswers===0)pep='🎉 欢迎来到大冒险！开始你的第一个游戏吧！';
 else if(needPractice>0)pep='💡 别忘了复习上面那 '+needPractice+' 个需要多练的单词哦！';
 else if(fresh>0)pep='🌱 还有 '+fresh+' 个新单词等你发现！';
-else if(mastered===total)pep='🏆 太棒了！你掌握了所有 '+total+' 个单词！';
+else if(mastered===total)pep='🏆 太棒了！你已认识全部 '+total+' 个单词！继续练到 🐾3/3 和 💎5/5 吧！';
 else pep='🌟 继续保持, 你做得很棒！';
 h+='<div style="margin-top:8px;color:#fbbf24;font-weight:700;background:rgba(251,191,36,.1);padding:8px 12px;border-radius:8px;border-left:3px solid #fbbf24">'+pep+'</div>';
 h+='</div></div>';
@@ -6900,10 +7188,10 @@ document.getElementById('statsContent').innerHTML=h}
 
 function showStatsWords(category){
 const learnedSet=new Set(S.learned);
-const wrongsArr=Object.keys(S.wrongs).map(k=>({idx:+k,count:S.wrongs[k]}));
+const wrongsArr=Object.keys(S.wrongs).map(k=>({idx:+k,count:__hsnSafeWrongCount(S.wrongs[k])})).filter(w=>Number.isSafeInteger(w.idx)&&w.idx>=0&&allW[w.idx]&&w.count>0);
 let title,emoji,words,desc,bg;
 if(category==='mastered'){
-  emoji='🌟';title='已掌握的单词';bg='linear-gradient(135deg,#fbbf24,#b45309)';
+  emoji='🌟';title='已认识的单词';bg='linear-gradient(135deg,#fbbf24,#b45309)';
   words=S.learned.map(idx=>({idx,count:0}));
   desc='这些单词你都很熟啦！😎 再玩游戏会更牢固～';
 }else if(category==='practice'){
@@ -6955,6 +7243,7 @@ function encodeProgress(obj){
   // JSON -> UTF-8 percent-encoded -> base64 (handles Chinese safely)
   return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
 }
+function hsnEscapeText(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function decodeProgress(str){
   return JSON.parse(decodeURIComponent(escape(atob(String(str).trim()))))
 }
@@ -6967,7 +7256,7 @@ function resetStat(key){
     scramble: '拼词通关次数', type: '打字次数', moles: '打地鼠次数',
     fish: '钓鱼次数', eagle: '火眼次数', bubble: '泡泡最高分',
     speed: '极速最高分', match: '翻牌完美',
-    wrongs: '错词列表', learned: '已掌握单词',
+    wrongs: '错词列表', learned: '已认识单词',
     achievements: '已解锁成就', quests: '今日任务', streak: '连续签到'
   };
   const label = labels[key] || key;
@@ -6976,7 +7265,56 @@ function resetStat(key){
   });
 }
 function _doResetStat(key, label){
-  
+  var authorityOK=true,beforeResetRaw='',storageBefore=Object.create(null),storageWritten=Object.create(null),storageKeys=[],authorityKeys=[];
+  var resetSaveKey=String(window.__hsnSaveKey||((typeof __hsnSaveKey!=='undefined'&&__hsnSaveKey)||''));
+  function addKey(raw,authority){
+    var k=String(raw||'');if(!k||storageKeys.indexOf(k)>=0){if(authority&&k&&authorityKeys.indexOf(k)<0)authorityKeys.push(k);return;}
+    storageKeys.push(k);if(authority)authorityKeys.push(k);
+  }
+  function addIslandAuthorityKeys(){
+    var bases=[resetSaveKey];
+    if(window.HansenCanonical&&typeof HansenCanonical.allSaveAliases==='function'){
+      var aliases=HansenCanonical.allSaveAliases();if(!Array.isArray(aliases))throw new Error('岛屿存档键列表无效');
+      aliases.forEach(function(k){if(typeof k==='string'&&/^wordIsland[A-Za-z0-9_]*$/.test(k)&&bases.indexOf(k)<0)bases.push(k);});
+    }
+    bases.forEach(function(k){if(!/^wordIsland[A-Za-z0-9_]*$/.test(k))return;addKey(k,true);addKey(k+'_bak',true);addKey(k+'_backup',true);});
+  }
+  /* v942 单项重置只预读它明确可能修改的键。任何预读失败都在改 S/权威账本前终止；
+     不再枚举整个 origin，更不会把同源其它应用的键卷入回滚。 */
+  try{
+    if(!resetSaveKey)throw new Error('当前岛存档键缺失');
+    addKey(resetSaveKey,false);addKey(resetSaveKey+'_bak',false);
+    if(key==='learned'||key==='wrongs'){
+      var canonicalKey=String((window.HansenCanonical&&HansenCanonical.STORE_KEY)||'hansen_canonical_progress_v941');
+      addKey(canonicalKey,true);addKey(canonicalKey+'_bak',true);
+    }
+    if(key==='achievements'){
+      addKey('hansen_wallet_ach',true);addKey('hansen_ach_reset_at_v942',true);addIslandAuthorityKeys();
+    }
+    if(key==='streak'){
+      addKey('hansen_checkin_streak',true);addKey('hansen_checkin_streak_day',true);addKey('hansen_checkin_streak_reset_at_v942',true);addIslandAuthorityKeys();
+    }
+    beforeResetRaw=JSON.stringify(S);if(typeof beforeResetRaw!=='string')throw new Error('当前进度无法快照');
+    storageKeys.forEach(function(k){storageBefore[k]=localStorage.getItem(k);});
+  }catch(e){
+    renderSettings();var blocked=document.getElementById('partialResetMsg');if(blocked){blocked.style.color='#fca5a5';blocked.textContent='⚠️ 未能完整保存：存储读取失败，未执行任何清除。';setTimeout(function(){if(blocked)blocked.textContent='';},3000);}return false;
+  }
+  function rememberWritten(k,value){
+    if(value===storageBefore[k])return;var a=storageWritten[k]||(storageWritten[k]=[]);if(a.indexOf(value)<0)a.push(value);
+  }
+  function captureAuthorityWrites(){
+    authorityKeys.forEach(function(k){var now=localStorage.getItem(k);if(now!==storageBefore[k])rememberWritten(k,now);});
+  }
+  function rollbackPartial(){
+    /* CAS 回滚：只逆转本事务观察到的写入；若另一标签页已写入不同的新值则保留。 */
+    Object.keys(storageWritten).forEach(function(k){
+      try{
+        var current=localStorage.getItem(k);if(storageWritten[k].indexOf(current)<0)return;
+        var old=storageBefore[k];if(old===null)localStorage.removeItem(k);else localStorage.setItem(k,old);
+      }catch(e){}
+    });
+    if(beforeResetRaw)try{var oldState=JSON.parse(beforeResetRaw);Object.keys(S).forEach(function(k){delete S[k]});Object.assign(S,oldState);}catch(e){}
+  }
   switch(key){
     case 'boss':     S.stats.bossBeaten = 0; break;
     case 'cloze':    S.stats.clozeRight = 0; break;
@@ -6995,11 +7333,23 @@ function _doResetStat(key, label){
     case 'bubble':   S.stats.bubbleBest = {easy:0,medium:0,hard:0}; break;
     case 'speed':    S.stats.speedBest = {easy:0,medium:0,hard:0}; break;
     case 'match':    S.stats.matchPerfect = 0; break;
-    case 'wrongs':   S.wrongs = {}; break;
-    case 'learned':  S.learned = []; break;
-    case 'achievements': S.achievements = []; break;
+    case 'wrongs':
+      S.wrongs = {};
+      try{if(window.HansenCanonical&&HansenCanonical.clearCurrent&&HansenCanonical.clearCurrent(['wrongs'])===false)authorityOK=false;}catch(e){authorityOK=false;}
+      break;
+    case 'learned':
+      S.learned = [];
+      try{if(window.HansenCanonical&&HansenCanonical.clearCurrent&&HansenCanonical.clearCurrent(['learned'])===false)authorityOK=false;}catch(e){authorityOK=false;}
+      break;
+    case 'achievements':
+      S.achievements=[];S.achPending=[];S.achNew=[];
+      try{if(window.HansenAch&&HansenAch.reset&&HansenAch.reset()===false)authorityOK=false;}catch(e){authorityOK=false;}
+      break;
     case 'quests':   S.quests = {day:'', list:[]}; break;
-    case 'streak':   S.streak = 0; S.lastSign = ''; break;
+    case 'streak':
+      S.streak=0;S.lastDay='';S.lastSign='';
+      try{if(window.HansenCheckin&&HansenCheckin.reset&&HansenCheckin.reset()===false)authorityOK=false;}catch(e){authorityOK=false;}
+      break;
   }
   // 重置该游戏的计数 (用于宠物进化判定)
   if(S.stats.gameCounts){
@@ -7015,56 +7365,52 @@ function _doResetStat(key, label){
     if(key === 'bubble') S.stats.gameCounts.bubble = 0;
     if(key === 'speed') S.stats.gameCounts.speed = 0;
   }
-  save();
+  try{captureAuthorityWrites();}catch(e){authorityOK=false;}
+  // 权威账本失败时恢复内存且不碰岛主档，避免“一边空、一边旧”的分裂状态。
+  if(!authorityOK)rollbackPartial();
+  var saved=false;if(authorityOK){
+    var intendedMain='',intendedBak='';
+    try{
+      intendedMain=JSON.stringify(S);if(typeof intendedMain!=='string')throw new Error('重置结果无法序列化');
+      intendedBak=(typeof __hsnParseSave==='function'&&__hsnParseSave(storageBefore[resetSaveKey]))?storageBefore[resetSaveKey]:intendedMain;
+      saved=(window.__hsnSaveNow||save)()===true;
+    }catch(e){saved=false;}
+    if(!saved){
+      // save() 的两个确定写入值可被安全识别；不同值视为并发标签页的新事实，绝不覆盖。
+      try{var nowMain=localStorage.getItem(resetSaveKey);if(nowMain===intendedMain)rememberWritten(resetSaveKey,nowMain);}catch(e){}
+      try{var nowBak=localStorage.getItem(resetSaveKey+'_bak');if(nowBak===intendedBak)rememberWritten(resetSaveKey+'_bak',nowBak);}catch(e){}
+      rollbackPartial();
+    }
+  }
+  // 先重画再取提示节点；旧顺序会刚写提示就被 renderSettings() 整块覆盖。
+  renderSettings();
   const msg = document.getElementById('partialResetMsg');
   if(msg){
-    msg.textContent = '✅ 已清除「'+label+'」';
+    if(saved&&authorityOK){msg.style.color='#22c55e';msg.textContent = '✅ 已清除「'+label+'」';}
+    else{msg.style.color='#fca5a5';msg.textContent='⚠️ 未能完整保存，清除未提交，原进度已安全保留，请重试。';}
     setTimeout(()=>{ if(msg) msg.textContent=''; }, 3000);
   }
-  // 局部刷新设置页 (显示新数字)
-  renderSettings();
+  return !!(saved&&authorityOK);
 }
 
 function renderSettings(){
   const totalWords=allW.length;
   const learnedCount=(S.learned||[]).length;
-  const achCount=(S.achievements||[]).length;
+  const achCount=(window.HansenAch&&HansenAch.getClaimed)?HansenAch.getClaimed().length:(S.achievements||[]).length;
   const bossCount=S.stats?(S.stats.bossBeaten||0):0;
   document.getElementById('settingsContent').innerHTML=
     '<div class="settings-section">'+
       '<h3>📊 当前进度概览</h3>'+
       '<div class="settings-stat"><span>等级</span><span>'+getAdvLevel().emoji+' Lv.'+S.level+' '+getAdvLevel().name+'</span></div>'+'<div class="settings-stat"><span>总经验</span><span>🎓 '+(S.charXP||0)+' 经验</span></div>'+
-      '<div class="settings-stat"><span>已掌握单词</span><span>'+learnedCount+' / '+totalWords+'</span></div>'+
+      '<div class="settings-stat"><span>已认识单词</span><span>'+learnedCount+' / '+totalWords+'</span></div>'+
       '<div class="settings-stat"><span>连续签到</span><span>🔥 '+S.streak+' 天</span></div>'+
       '<div class="settings-stat"><span>击败 Boss</span><span>⚔️ '+bossCount+' 次</span></div>'+
       '<div class="settings-stat"><span>解锁成就</span><span>🏆 '+achCount+'</span></div>'+
       '<div class="settings-stat"><span>钻石 / 金币</span><span>💎'+((window.HansenGems&&window.HansenGems.get())||0)+' 🪙'+((window.HansenCoins&&window.HansenCoins.get())||S.coins)+'</span></div>'+
     '</div>'+
-    '<div class="settings-section" style="border-color:rgba(251,191,36,.35)">'+
-      '<h3 style="color:#fbbf24">💰 金币说明书</h3>'+
-      '<div class="desc" style="line-height:1.7">金币用来抽卡、买主题、复活。下面是怎么赚金币：</div>'+
-      '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9">'+
-        '<div><b style="color:#fbbf24">📖 答对单词</b> — 每答对 1 题给 <b style="color:#fbbf24">1 金币</b>。</div>'+
-        '<div style="color:#fca5a5">⚠️ 同一个单词，每天最多给 <b>3 次</b>金币！答对超过 3 次就不再给金币（但可以继续练习）。<br>💡 想多赚金币？就去答更多<b>不同的</b>单词 —— 这正是为了鼓励你多背单词、不要反复刷同一个词。</div>'+
-        '<div style="color:#94a3b8">（每天答题最多赚 2000 金币，第二天自动重置）</div>'+
-      '</div>'+
-      '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9">'+
-        '<div><b style="color:#fbbf24">⚔️ 打赢 Boss</b> — 每打赢一个新 Boss 给金币：<br>第1章 20 / 第2章 30 / 第3章 40 / 第4-5章 50。重复打已通关的 Boss 给 5。</div>'+
-      '</div>'+
-      '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9">'+
-        '<div><b style="color:#fbbf24">📅 每日签到</b> — 每天第一次进游戏开宝箱，随机给 10~300 金币（运气好爆大奖）。</div>'+
-      '</div>'+
-      '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9">'+
-        '<div><b style="color:#fbbf24">🔥 连胜奖励</b> — 连续答对不出错，到 5/10/20/30/50/100 连胜给额外金币（越连越多）。答错就清零哦！</div>'+
-      '</div>'+
-      '<div class="settings-stat" style="display:block;padding:10px 12px;line-height:1.9">'+
-        '<div><b style="color:#fbbf24">🎯 任务 / 成就</b> — 完成每日任务、解锁成就也能赚金币。</div>'+
-      '</div>'+
-      '<div class="desc" style="margin-top:8px;color:#94a3b8">🪙 金币是全游戏通用的：在任何一个岛赚的金币，在所有岛都能用。</div>'+
-    '</div>'+
         '<div class="settings-section">'+
       '<h3>🎨 主题选择 (跨岛同步)</h3>'+
-      '<div class="desc">挑一个你喜欢的主题, 18 关大冒险和首页都会自动变成这个主题。</div>'+
+      '<div class="desc">挑一个你喜欢的主题，全部冒险页面和首页都会自动变成这个主题。</div>'+ 
       '<div id="themeBox" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px"></div>'+
     '</div>'+
             '<div class="settings-section" style="border-color:rgba(251,191,36,.3)">'+
@@ -7085,17 +7431,15 @@ function renderSettings(){
       '</div>'+
       '<div class="btn-row" style="margin-top:10px;flex-wrap:wrap;gap:6px">'+
         '<button class="small-btn gold" onclick="resetStat(\'wrongs\')">❌ 清错词列表</button>'+
-        '<button class="small-btn gold" onclick="resetStat(\'learned\')">📚 清已掌握单词</button>'+
+        '<button class="small-btn gold" onclick="resetStat(\'learned\')">📚 清已认识单词</button>'+
         '<button class="small-btn gold" onclick="resetStat(\'achievements\')">🏆 清成就 (保留奖励)</button>'+
-        '<button class="small-btn gold" onclick="resetStat(\'quests\')">📅 清今日任务</button>'+
-        '<button class="small-btn gold" onclick="resetStat(\'streak\')">🔥 清连续签到</button>'+
       '</div>'+
       '<div id="partialResetMsg" style="margin-top:10px;font-size:12px;color:#22c55e;min-height:18px"></div>'+
     '</div>'+
 '<div class="settings-section" style="border-color:rgba(239,68,68,.3)">'+
       '<h3 style="color:#ef4444">🗑️ 危险操作</h3>'+
-      '<div class="desc">清零会删除所有进度,包括等级、宠物、成就、收集的钻石。<b style="color:#ef4444">此操作无法撤销! 请慎重选择。</b></div>'+
-      '<button class="danger-btn" onclick="doReset()">🗑️ 清零所有数据</button>'+
+      '<div class="desc">只重置<b>当前岛</b>的已学词、错词、掌握度、本岛 Boss 和本岛统计；人物等级、全局宠物累计经验、其它岛进度以及全局金币、钻石、签到与成就保留。<b style="color:#ef4444">当前岛数据删除后无法撤销，请先导出完整备份。</b></div>'+
+      '<button class="danger-btn" onclick="doReset()">🗑️ 重置当前岛进度</button>'+
     '</div>'+
     '<div style="text-align:center;color:#cbd5e1;font-size:13px;font-weight:600;padding:14px 0">单词大陆·⑦万邦港城 · 进度自动保存到本设备</div>';
   setTimeout(renderVoiceList,100);
@@ -7146,92 +7490,45 @@ function testHello(){_stopAllAudio();speak('Hello, my friend!',1)}
 function testLong(){_stopAllAudio();speak('The teacher is very kind today.',1)}
 
 function doExport(){
-  try{
-    const code=encodeProgress(S);
-    const ta=document.getElementById('exportArea');
-    if(!ta){return}
-    ta.value=code;ta.select();
-    let copied=false;
-    try{copied=document.execCommand('copy')}catch(e){}
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(code).then(()=>{
-        showSettingsMsg('exportMsg','✅ 已复制到剪贴板! 长度: '+code.length+' 字符','ok')
-      }).catch(()=>{
-        showSettingsMsg('exportMsg',copied?'✅ 已复制! 长度: '+code.length+' 字符':'⚠️ 自动复制失败,请手动选中下方代码后复制','ok')
-      })
-    }else{
-      showSettingsMsg('exportMsg',copied?'✅ 已复制! 长度: '+code.length+' 字符':'请手动选中下方代码后复制 (Ctrl+C / 长按)','ok')
-    }
-  }catch(e){
-    showSettingsMsg('exportMsg','❌ 导出失败: '+e.message,'err')
-  }
+  if(window.HansenBackup&&HansenBackup.exportToArea)return HansenBackup.exportToArea();
+  try{showToast('⚠️ 完整备份模块尚未加载，请稍后重试')}catch(e){}
 }
 
 function doDownload(){
-  try{
-    const code=encodeProgress(S);
-    const filename='单词大陆·⑦万邦港城进度_'+new Date().toISOString().slice(0,10)+'.json';
-    const blob=new Blob([code],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=filename;
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    showSettingsMsg('exportMsg','✅ 文件已下载: '+filename,'ok')
-  }catch(e){
-    showSettingsMsg('exportMsg','❌ 下载失败: '+e.message,'err')
-  }
+  if(window.HansenBackup&&HansenBackup.download)return HansenBackup.download();
+  try{showToast('⚠️ 完整备份模块尚未加载，请稍后重试')}catch(e){}
 }
 
 function doImport(){
-  const ta=document.getElementById('importArea');
-  if(!ta){return}
-  const code=ta.value.trim();
-  if(!code){showSettingsMsg('importMsg','❌ 请先粘贴进度代码','err');return}
-  let data;
-  try{data=decodeProgress(code)}
-  catch(e){showSettingsMsg('importMsg','❌ 代码格式不对,请检查是否完整粘贴','err');return}
-  if(!data||typeof data!=='object'||typeof data.level==='undefined'){
-    showSettingsMsg('importMsg','❌ 不是有效的进度数据','err');return
-  }
-  const __importConfirmMsg = '确定要导入这份进度吗?\n当前数据 (Lv.'+S.level+', 已学 '+(S.learned||[]).length+' 词) 会被完全覆盖!\n\n导入的进度: Lv.'+(data.level||1)+', 已学 '+(data.learned?data.learned.length:0)+' 词';
-    const __importData = data;
-    showConfirmMsg(__importConfirmMsg, function(){ _doActualImport(__importData) });
-    return;
-  try{
-    localStorage.setItem('wordIslandLand7',JSON.stringify(data));
-    showSettingsMsg('importMsg','✅ 导入成功! 1 秒后自动刷新...','ok');
-    setTimeout(()=>location.reload(),1000)
-  }catch(e){
-    showSettingsMsg('importMsg','❌ 保存失败: '+e.message,'err')
-  }
+  if(window.HansenBackup&&HansenBackup.restoreFromArea)return HansenBackup.restoreFromArea();
+  try{showToast('⚠️ 完整备份模块尚未加载，请稍后重试')}catch(e){}
 }
 
 function doFileLoad(event){
-  const file=event.target.files&&event.target.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const ta=document.getElementById('importArea');
-    if(!ta)return;
-    ta.value=String(e.target.result).trim();
-    showSettingsMsg('importMsg','✅ 文件已读取,请点「确认导入」','ok')
-  };
-  reader.onerror=function(){showSettingsMsg('importMsg','❌ 文件读取失败','err')};
-  reader.readAsText(file);
-  event.target.value='' // reset so same file can be re-selected
+  if(window.HansenBackup&&HansenBackup.loadFile)return HansenBackup.loadFile(event);
 }
 
 function doReset(){
-  showConfirmMsg('⚠️ 确定要清零所有数据吗?\n这会删除等级、宠物、成就、所有收集物!\n\n此操作不可撤销, 请慎重选择!', function(){
-    showConfirmMsg('再问一次: 真的要全部清零吗?', function(){
+  showConfirmMsg('⚠️ 确定要重置当前岛进度吗?\n会删除当前岛已学词、错词、掌握度、Boss 和统计。\n\n人物等级、全局宠物累计经验、其它岛进度及全局金币、钻石、签到和成就保留。', function(){
+    showConfirmMsg('再确认一次：真的要重置当前岛吗？', function(){
       _actuallyDoReset();
     });
   });
 }
 function _actuallyDoReset(){
   try{
-    localStorage.removeItem('wordIslandLand7');
-    location.reload()
+    if(window.HansenRoundReward&&typeof HansenRoundReward.recover==='function'&&HansenRoundReward.recover()!==true){showAlertMsg('Boss 奖励还有一笔未完成结算。系统已停止重置，请重新打开 Boss 页面完成安全恢复后再试。');return false;}
+    var existing=__hsnReadResetPending();
+    if(existing&&existing.__invalid){window.__hsnStorageReadOnly=true;showAlertMsg('检测到损坏的重置安全日志。系统已保持只读且不会覆盖证据；请到“设置 → 完整备份与恢复”先下载重置取证包，再人工修复或双重确认放弃。');return false;}
+    if(existing){if(!__hsnResumeReset(true))showAlertMsg('已有一次重置尚未完成，系统已保留安全日志并会继续恢复。');return false;}
+    var keptTotalXP=Math.max(0,Number(S.totalXP)||0);
+    var keptCharXP=Math.max(0,Number(S.charXP)||0);try{keptCharXP=Math.max(keptCharXP,Math.max(0,Number(localStorage.getItem('hansen_wallet_charxp'))||0));}catch(e){}
+    var fresh={xp:Math.max(0,Number(S.xp)||0),level:Math.max(1,Number(S.level)||1),charXP:keptCharXP,stars:0,gems:0,coins:0,streak:0,lastDay:'',chestDay:'',coinDay:'',coinEarnedToday:0,coinWordCount:{},gotStarterCoins:false,bossWon:[],learned:[],wrongs:{},mc:{},pet:{name:'星灵',stage:0,xp:0,picked:false},achievements:[],achPending:[],achNew:[],stats:{bossBeaten:0,bubbleBest:{easy:0,medium:0,hard:0},scrambleCleared:0,matchPerfect:0,typeCount:0,clozeRight:0,listenRight:0,maxCombo:0,chestClaimed:0,daysPlayed:0,modesPlayed:[],gameCounts:{}},totalXP:keptTotalXP,quests:{day:'',list:[],allDay:''},totalAnswers:0,totalCorrect:0};
+    fresh.lastSaveTime=Date.now();
+    var journal={schema:1,saveKey:__hsnSaveKey,freshRaw:JSON.stringify(fresh),physical:__hsnResetPhysical(),mainDone:false,crystalDone:false,canonicalDone:false,extrasDone:false,reloadOnComplete:true,createdAt:Date.now(),updatedAt:Date.now()};
+    // 只有 journal 严格写入后才允许动任何玩家数据；这一点保证“发起失败”仍是原样。
+    if(!__hsnWriteResetPending(journal)){showAlertMsg('重置安全日志无法写入，未改动任何进度；请检查存储权限后重试。');return;}
+    if(!__hsnResumeReset(true))showAlertMsg('重置已进入安全恢复队列，但尚有一个账本未能写入。请保留页面数据并重新打开，系统会自动续做且不会复活旧进度。');
   }catch(e){showAlertMsg('清零失败: '+e.message)}
 }
 
@@ -7255,9 +7552,22 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Es
 document.addEventListener('keydown',function(e){if(document.getElementById('typingScreen').classList.contains('active')&&typeActive){const k=e.key.toLowerCase();if(/^[a-z]$/.test(k))typeKey(k);else if(k===' '){e.preventDefault();typeKey(' ')}else if(k==='-')typeKey('-');else if(/^[0-9]$/.test(k))typeKey(k);else if(k==='backspace')typeDel()}});
 
 load();
-try{if(localStorage.getItem('hansen_charxp_reset_v1')!=='1'){localStorage.setItem('hansen_wallet_charxp','0');localStorage.setItem('hansen_charxp_reset_v1','1');}var _gcx=parseInt(localStorage.getItem('hansen_wallet_charxp')||'0',10);S.charXP=isFinite(_gcx)?_gcx:0;if(typeof getAdvLevel==='function'){S.level=getAdvLevel().lv;S.xp=getXpInCurrentLevel();}}catch(e){}/*🔴BUG#85 人物等级全局化:全岛共用hansen_wallet_charxp·首跑清零·load后updateTopBar前同步·宝物S.totalXP不动*/
-/* 💰 新手开局送300金币(全局只送一次 — 用全局标记, 和其他岛统一, 防止每岛各送一次) */
-(function(){try{var F='hansen_starter_coins_given';if(localStorage.getItem(F)!=='1'){if(window.HansenCoins){HansenCoins.add(300);}else{S.coins=(S.coins||0)+300;}localStorage.setItem(F,'1');S.gotStarterCoins=true;save();}}catch(e){}})();
+try{
+  /* v942: 全局人物经验首次启用绝不清零。用所有岛真实 totalXP 之和作可重建下界；
+     每次启动重算，因此后来恢复的老存档也能补回，不受旧一次性迁移 flag 限制。 */
+  var _gcx=parseInt(localStorage.getItem('hansen_wallet_charxp')||'0',10);if(!isFinite(_gcx)||_gcx<0)_gcx=0;
+  var _legacyXP=0;
+  for(var _xi=0;_xi<localStorage.length;_xi++){
+    var _xk=localStorage.key(_xi);if(!_xk||!/^wordIsland/.test(_xk)||/_bak$|_backup$|_tmp$/i.test(_xk))continue;
+    try{var _xo=JSON.parse(localStorage.getItem(_xk)||'null'),_xn=Number(_xo&&_xo.totalXP);if(isFinite(_xn)&&_xn>0)_legacyXP=Math.min(1000000000,_legacyXP+Math.min(1000000000,Math.floor(_xn)));}catch(_xe){}
+  }
+  _gcx=Math.max(_gcx,_legacyXP,Math.max(0,Number(S.charXP)||0),Math.max(0,Number(S.totalXP)||0));
+  _gcx=Math.min(1000000000,Math.floor(_gcx));S.charXP=_gcx;
+  localStorage.setItem('hansen_wallet_charxp',String(_gcx));localStorage.setItem('hansen_charxp_reset_v1','1');localStorage.setItem('hansen_charxp_migrated_v942','1');
+  if(typeof getAdvLevel==='function'){S.level=getAdvLevel().lv;S.xp=getXpInCurrentLevel();}
+}catch(e){}
+/* v942 新手 300 金币由 hansen_coin_wallet 的 starter:global 幂等奖励统一发放。
+   这里绝不在钱包加载前写本岛 S.coins，避免 flag/余额两步分裂导致重复送或永久漏送。 */
 checkDaily();
 unlockAch('first');
 updateTopBar();
@@ -7497,7 +7807,7 @@ function eagleClick(i,isTarget){
     const r=cells[i].getBoundingClientRect();confetti(r.left,r.top,10);
     const sn=document.getElementById('eagleScore');if(sn)sn.textContent=eagleScore;
     const cn=document.getElementById('eagleCombo');if(cn)cn.textContent=eagleCombo;
-    addXP(L.xpPerQ);progressQuest('correct',1);markAnswer(allW.indexOf(eagleTarget),true);
+    addXP(L.xpPerQ);markAnswer(allW.indexOf(eagleTarget),true);
     if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}
     setTimeout(eagleNextRound,800);
   }else{
@@ -7611,14 +7921,14 @@ window.addEventListener('storage', function(e){
 });
 
 </script>
-<script defer src="vocab_all.js?v=938"></script>
-<script src="hansen_upgrade.js?v=938"></script>
-<script src="hansen_spell_practice.js?v=938"></script>
-<script defer src="hansen_review.js?v=938"></script>
-  <script src="hansen_mylearning.js?v=938"></script>
-<script src="hansen_boss_anim.js?v=938"></script>
-<script src="hansen_boss_lock.js?v=938"></script>
-<script src="hansen_game_antifreeze.js?v=938"></script>
+<script defer src="vocab_all.js?v=960"></script>
+<script src="hansen_upgrade.js?v=960"></script>
+<script src="hansen_spell_practice.js?v=960"></script>
+<script defer src="hansen_review.js?v=960"></script>
+  <script src="hansen_mylearning.js?v=960"></script>
+<script src="hansen_boss_anim.js?v=960"></script>
+<script src="hansen_boss_lock.js?v=960"></script>
+<script src="hansen_game_antifreeze.js?v=960"></script>
 <script>
 /* ⭐ v929 (Hansen: "进岛很卡·图片加载不出来·点打Boss卡在那儿·要极致快") boss 引擎按需加载
    问题: hansen_boss_attack.js 有 2.44MB(其中 1.28MB 是内嵌的 base64 图片), 而且一执行就再预下十几张 boss 图。
@@ -7651,7 +7961,7 @@ window.addEventListener('storage', function(e){
       s.src='hansen_boss_attack.js'+ver();
       /* 图片和脚本并行, 两个都到位才算就绪 —— 特效开画时图一定在, 一帧都不会丢 */
       s.onload=function(){ loadFXImgs().then(function(){ window.__hansenBossFXLoaded=true; res(); }); };
-      s.onerror=function(){ res(); };
+      s.onerror=function(){ P=null; res(); };
       document.head.appendChild(s);
     });
     return P;
@@ -7674,9 +7984,25 @@ window.addEventListener('storage', function(e){
      新写法: 预取只用 link rel=prefetch —— 浏览器【只把文件下进缓存, 一行代码都不解析】,
      全程零主线程开销。真正点"打Boss"时才用 script 标签加载, 那时文件已在缓存里 = 秒开,
      而且脚本已经从 2.44MB 瘦到 1.10MB(图片抠出去了), 解析成本再砍一半。 */
+  function canBackgroundBossPrefetch(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(p && typeof p.canBackgroundDownload==='function') return !!p.canBackgroundDownload();
+      var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      return !!c && !c.saveData && c.effectiveType==='4g' && navigator.onLine!==false &&
+        (!document.visibilityState || document.visibilityState==='visible') && !document.hidden;
+    }catch(e){ return false; }
+  }
   function prefetch(){
+    if(window.__hansenBossFXPrefetched || !canBackgroundBossPrefetch()) return;
     var go=function(){
       try{
+        if(window.__hansenBossFXPrefetched || !canBackgroundBossPrefetch()) return;
+        var pol=window.HansenPreloadPolicy;
+        if(pol && typeof pol.shouldYield==='function' && pol.shouldYield()){
+          setTimeout(go,500); return;  // 用户正在操作/播音时继续让路
+        }
+        window.__hansenBossFXPrefetched=true;
         var urls=['hansen_boss_attack.js'+ver()];
         for(var i=0;i<FXIMG.length;i++) urls.push('bossfx/'+FXIMG[i]+'.webp');
         for(var j=0;j<urls.length;j++){
@@ -7713,34 +8039,36 @@ window.addEventListener('storage', function(e){
   })();
 })();
 </script>
-<script src="hansen_boss_progress.js?v=938"></script>
-<script src="hansen_cardbook_wallet.js?v=938"></script>
-<script src="hansen_totals_wallet.js?v=938"></script>
-<script defer src="hansen_cards.js?v=938"></script>
-<script src="hansen_gacha.js?v=938"></script>
-<script src="hansen_land_cards.js?v=938"></script>
-<script defer src="hansen_cinema_themes.js?v=938"></script>
-<script defer src="hansen_diamond_shop.js?v=938"></script>
-<script defer src="hansen_season.js?v=938"></script>
-<script src="hansen_coin_wallet.js?v=938"></script>
-<script src="hansen_theme_lock.js?v=938"></script>
-<script src="hansen_palette.js?v=938"></script>
-<script src="hansen_boss_theme.js?v=938"></script>
-<script src="hansen_perf.js?v=938"></script>
-<script src="hansen_econ_guide.js?v=938"></script><!-- 🔴v861 金币/钻石/宠物三份说明书(可折叠·设置页) -->
-<script src="hansen_round_bar.js?v=938"></script><!-- 🔴v862 大满贯进度器 -->
-<script src="hansen_spellbee_gems.js?v=938"></script><!-- 🔴v862 Bee钻石里程碑 --><!-- 🔴v858 性能引擎: 滚动动画闸门+图片卫生 -->
-<script src="hansen_ach_wallet.js?v=938"></script>
-<script defer src="hansen_island_upgrade.js?v=938"></script>
-<script src="hansen_gem_system.js?v=938"></script>
-<script src="hansen_gear.js?v=938"></script>
-<script defer src="hansen_crystal.js?v=938"></script><!-- 🔴v828 知识结晶引擎:单词记忆熟练度→间隔复习→永久掌握结晶钻石 -->
+<script src="hansen_boss_progress.js?v=960"></script>
+<script src="hansen_cardbook_wallet.js?v=960"></script>
+<script src="hansen_canonical_progress.js?v=960"></script><!-- v941: 19岛/952唯一词槽权威账本，须早于所有消费模块 -->
+<script src="hansen_totals_wallet.js?v=960"></script>
+<script defer src="hansen_cards.js?v=960"></script>
+<script src="hansen_gacha.js?v=960"></script>
+<script src="hansen_land_cards.js?v=960"></script>
+<script defer src="hansen_cinema_themes.js?v=960"></script>
+<script defer src="hansen_diamond_shop.js?v=960"></script>
+<script defer src="hansen_season.js?v=960"></script>
+<script src="hansen_coin_wallet.js?v=960"></script>
+<script src="hansen_theme_lock.js?v=960"></script>
+<script src="hansen_palette.js?v=960"></script>
+<script src="hansen_boss_theme.js?v=960"></script>
+<script src="hansen_perf_v944.js?v=960"></script>
+<script src="hansen_econ_guide.js?v=960"></script><!-- v946 HF7：四份纯中文速查（可折叠·设置页） -->
+<script src="hansen_round_bar.js?v=960"></script><!-- 🔴v862 大满贯进度器 -->
+<script src="hansen_spellbee_gems.js?v=960"></script><!-- v946: 旧Bee钻石账本仅保留历史兼容，不接收新进度 --><!-- v944 性能引擎: 图片卫生·滚动不暂停主题 -->
+<script src="hansen_ach_wallet.js?v=960"></script>
+<script defer src="hansen_island_upgrade.js?v=960"></script>
+<script src="hansen_gem_system.js?v=960"></script>
+<script src="hansen_gear.js?v=960"></script>
+<script defer src="hansen_crystal.js?v=960"></script><!-- 🔴v828 知识结晶引擎:单词记忆熟练度→间隔复习→永久掌握结晶钻石 -->
 
-<script src="hansen_freepass.js?v=938"></script>
-<script src="hansen_round_reward.js?v=938"></script>
-<script src="hansen_weapon_fx.js?v=938"></script>
-<script src="hansen_addiction.js?v=938"></script>
-<script src="hansen_wrong_overview.js?v=938"></script>
+<script src="hansen_freepass.js?v=960"></script>
+<script src="hansen_round_reward.js?v=960"></script>
+<script src="hansen_weapon_fx.js?v=960"></script>
+<script src="hansen_checkin_global.js?v=960"></script><!-- v942: 先于 addiction 包装开箱，内层返回稳定 receipt，外层只据正式 receipt 发稀有加成 -->
+<script src="hansen_addiction.js?v=960"></script>
+<script src="hansen_wrong_overview.js?v=960"></script>
 <script>
 // v142k: 字母拼拼乐键盘支持
 (function(){
@@ -7765,14 +8093,18 @@ window.addEventListener('storage', function(e){
 })();
 </script>
 
-<script src="hansen_checkin_global.js?v=938"></script>
+<script src="hansen_backup_v944.js?v=960"></script><!-- v944: 独立路径跨越旧SW；全局白名单备份/原子恢复 -->
+<script src="hansen_quest_global.js?v=960"></script><!-- v941: 27页共享同一每日任务账本 -->
 <script>/* [COIN-WALLET-DISPLAY-OK] v437 金币一致性修复: HansenCoins(全局钱包)在内联主脚本之后才加载, 导致单词岛【初始顶栏】曾显示旧的本地 S.coins(而非全局钱包), 与其余18岛(靠升级补丁脚本在钱包后重刷)不一致。这里在所有脚本加载完后, 强制按全局钱包刷新一次顶栏, 保证金币数与其余岛绝对一致。监察官[D]检查会校验本标记或升级补丁二者必居其一。*/
 (function(){function r(){try{if(typeof updateTopBar==='function')updateTopBar();}catch(e){}}r();if(document.readyState!=='complete'){window.addEventListener('load',r);}setTimeout(r,250);})();</script>
-<script src="hansen_stability.js?v=938"></script>
-<script src="hansen_home_link.js?v=938"></script>
-<script src="hansen_spellbee.js?v=938"></script>
-<script defer src="hansen_pet_showcase.js?v=938"></script>
-<script src="hansen_avatar.js?v=938"></script>
+<script src="hansen_stability.js?v=960"></script>
+<script src="hansen_home_link.js?v=960"></script>
+<script src="hansen_spellbee.js?v=960"></script>
+<script defer src="hansen_pet_showcase.js?v=960"></script>
+<script defer src="hansen_focused_typing_v946.js?v=960"></script><!-- v946: 探索定向打字大师；连续精确拼写完成后才结算宠物掌握 -->
+<script defer src="hansen_explore_progress_v945.js?v=960"></script><!-- v946: 探索单词改为拼写训练导航，禁用四选一捷径 -->
+<script src="hansen_avatar.js?v=960"></script>
+<script src="hansen_accessibility.js?v=960"></script><!-- v942: 键盘、焦点、弹窗语义与缩放辅助 -->
 <script>
 /* ⭐ v929 (Hansen: "进岛很卡·图片加载不出来") 装饰字体延后加载
    CartoonBlack(子集化后仍有 244KB, 二进制·gzip 压不动)【只用在按钮和标题上】, 却在首屏就抢带宽,

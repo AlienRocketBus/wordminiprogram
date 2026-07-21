@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh">
 <head>
+<script src="hansen_sw_upgrade_gate_v944.js?v=960"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=960"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>单词大冒险</title>
@@ -11,11 +13,12 @@ html,body{height:100%;width:100%;overflow:hidden;color:#fff;font-family:"Microso
 h1{font-size:30px;letter-spacing:2px;margin-bottom:6px;background:linear-gradient(90deg,#8ab4ff,#c99bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
 .sub{color:#9aa0c8;font-size:15px;margin-bottom:28px;text-align:center}
 .row{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
-.card{width:196px;padding:28px 20px;border-radius:18px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);cursor:pointer;text-align:center;transition:.16s;-webkit-user-select:none;user-select:none}
+.card{width:196px;padding:28px 20px;border-radius:18px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);color:#fff;font:inherit;cursor:pointer;text-align:center;transition:.16s}
 .card:hover{transform:translateY(-5px);background:rgba(255,255,255,.12);border-color:#8ab4ff;box-shadow:0 16px 42px rgba(80,110,255,.32)}
-.card .ic{font-size:48px;margin-bottom:12px}
-.card .t{font-size:20px;font-weight:700;margin-bottom:7px}
-.card .d{font-size:12.5px;color:#9aa0c8;line-height:1.55}
+.card:focus-visible,#sw:focus-visible{outline:3px solid #fde047;outline-offset:4px}
+.card .ic{display:block;font-size:48px;margin-bottom:12px}
+.card .t{display:block;font-size:20px;font-weight:700;margin-bottom:7px}
+.card .d{display:block;font-size:12.5px;color:#9aa0c8;line-height:1.55}
 .card .rec{display:inline-block;margin-top:8px;font-size:11px;color:#8ab4ff;border:1px solid #8ab4ff;border-radius:10px;padding:1px 8px}
 #phone{width:414px;height:88vh;max-height:896px;border:0;border-radius:26px;box-shadow:0 18px 70px rgba(0,0,0,.6),0 0 0 8px #14142a;background:#000;display:block}
 #sw{padding:8px 18px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#cfd2ff;border-radius:20px;font-size:13px;cursor:pointer;transition:.15s}
@@ -27,11 +30,35 @@ h1{font-size:30px;letter-spacing:2px;margin-bottom:6px;background:linear-gradien
 <script>
 (function(){
   var KEY='hsnViewMode';
-  function q(n){ try{ var m=new RegExp('[?&]'+n+'=([^&]*)').exec(location.search); return m?decodeURIComponent(m[1]):''; }catch(e){ return ''; } }
-  function esc(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  /* 只允许当前目录内明确列出的正式游戏页面。不能把 u 当作任意跳转或 iframe 地址。 */
+  var ALLOWED_TARGETS = Object.freeze({
+    'index.html':1,'boss_hall.html':1,'land_map.html':1,'season_showcase.html':1,'spelling_bee.html':1,
+    'island_action.html':1,'island_adjective.html':1,'island_animal.html':1,'island_body.html':1,
+    'island_city.html':1,'island_clothes.html':1,'island_color.html':1,'island_family.html':1,
+    'island_food.html':1,'island_home.html':1,'island_job.html':1,'island_land1.html':1,
+    'island_land2.html':1,'island_land3.html':1,'island_land4.html':1,'island_land5.html':1,
+    'island_land6.html':1,'island_land7.html':1,'island_land8.html':1,'island_nature.html':1,
+    'island_question.html':1,'island_school.html':1,'island_season.html':1,'island_sports.html':1,
+    'island_time.html':1,'island_traffic.html':1,'island_treasure.html':1
+  });
+  function safeTarget(){
+    try{
+      var raw = new URLSearchParams(location.search).get('u') || 'index.html';
+      var here = new URL(location.href);
+      var target = new URL(raw, here);
+      var hereDir = here.pathname.slice(0, here.pathname.lastIndexOf('/') + 1);
+      var targetDir = target.pathname.slice(0, target.pathname.lastIndexOf('/') + 1);
+      var file = decodeURIComponent(target.pathname.slice(target.pathname.lastIndexOf('/') + 1));
+      if(target.protocol !== here.protocol || target.origin !== here.origin || targetDir !== hereDir || !ALLOWED_TARGETS[file]){
+        return 'index.html';
+      }
+      /* 路径已固定在白名单内；保留岛内必要的安全查询参数和 hash。 */
+      return file + target.search + target.hash;
+    }catch(e){ return 'index.html'; }
+  }
   function setMode(m){ try{ localStorage.setItem(KEY,m); }catch(e){} }
   function getMode(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
-  var u = q('u') || 'index.html';
+  var u = safeTarget();
   var mode = getMode();
   var wrap = document.getElementById('wrap');
 
@@ -40,17 +67,18 @@ h1{font-size:30px;letter-spacing:2px;margin-bottom:6px;background:linear-gradien
     return;
   }
   if(mode==='mobile'){                         // 手机版: 只放一个手机尺寸 iframe(游戏在里面跑一份, 别无他物=绝不重叠)
-    wrap.innerHTML = '<iframe id="phone" src="'+esc(u)+'" allow="autoplay; fullscreen"></iframe>'
-      + '<button id="sw">💻 切换到电脑版</button>';
-    var sw=document.getElementById('sw');
+    var phone=document.createElement('iframe');
+    phone.id='phone'; phone.title='单词大冒险手机版'; phone.allow='autoplay; fullscreen'; phone.src=u;
+    var sw=document.createElement('button'); sw.id='sw'; sw.type='button'; sw.textContent='💻 切换到电脑版';
+    wrap.replaceChildren(phone,sw);
     if(sw) sw.onclick=function(){ setMode('desktop'); try{location.replace(u);}catch(e){ location.href=u; } };
     return;
   }
   // 没选过 → 选择器
   wrap.innerHTML = '<h1>单词大冒险</h1><div class="sub">检测到你在电脑上打开，请选择显示方式</div>'
     + '<div class="row">'
-    + '<div class="card" id="cm"><div class="ic">📱</div><div class="t">手机版</div><div class="d">和手机上完全一样的样子</div><div class="rec">推荐</div></div>'
-    + '<div class="card" id="cd"><div class="ic">💻</div><div class="t">电脑版</div><div class="d">铺满整个浏览器窗口</div></div>'
+    + '<button type="button" class="card" id="cm"><span class="ic">📱</span><span class="t">手机版</span><span class="d">和手机上完全一样的样子</span><span class="rec">推荐</span></button>'
+    + '<button type="button" class="card" id="cd"><span class="ic">💻</span><span class="t">电脑版</span><span class="d">铺满整个浏览器窗口</span></button>'
     + '</div>';
   var cm=document.getElementById('cm'), cd=document.getElementById('cd');
   if(cm) cm.onclick=function(){ setMode('mobile'); try{location.reload();}catch(e){ location.href=location.href; } };

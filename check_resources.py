@@ -121,15 +121,20 @@ if r.returncode != 0:
     fail("word_map.js node --check 失败: " + r.stderr.strip())
 else:
     wm = open("word_map.js", encoding="utf-8").read()
-    keys = re.findall(r'^\s*"([^"]+)"\s*:', wm, re.M)
+    # v942: 同时识别单双引号键。旧规则只看双引号，曾漏过一条单引号
+    # t-shirt 重复键；浏览器以后写覆盖以前写，资源检查却错误放行。
+    keys = [m[1] for m in re.findall(r"^\s*(['\"])(.*?)\1\s*:", wm, re.M)]
     dups = set(k for k in keys if keys.count(k) > 1)
+    bad_count = len(keys) != 696
     if dups:
         fail("word_map.js 重复键: %s" % dups)
-    paths = re.findall(r':\s*"(words/[^"]+)"', wm)
+    if bad_count:
+        fail("word_map.js 唯一键数量=%d (期望696)" % len(keys))
+    paths = [m[1] for m in re.findall(r":\s*(['\"])(words/.*?)\1", wm)]
     miss = [p for p in paths if not os.path.exists(p)]
     if miss:
         fail("word_map.js 引用的文件缺失: %s" % miss)
-    if not dups and not miss:
+    if not dups and not miss and not bad_count:
         ok("word_map.js 语法OK, %d键无重复, %d个引用文件全部存在" % (len(keys), len(paths)))
 
 # ---- 检查10: boss 图齐 (lv01-20 + saelya = 21) ----
@@ -158,29 +163,36 @@ else:
     _noref = [os.path.basename(f) for f in glob.glob("island_*.html") if _ci not in open(f, encoding="utf-8").read()]
     if _noref:
         fail("★这些岛未引用 %s (会漏跨岛防刷): %s" % (_ci, _noref)); _ci_ok = False
-    if os.path.exists("hansen_addiction.js") and "claimedToday" not in open("hansen_addiction.js", encoding="utf-8").read():
-        fail("★hansen_addiction.js 宝箱稀有度未加 claimedToday 闸门(第二条发币路径会漏!)"); _ci_ok = False
+    if os.path.exists("hansen_addiction.js"):
+        _ad_ci = open("hansen_addiction.js", encoding="utf-8").read()
+        # v942：稀有奖励不再靠可抢跑的 claimedToday 布尔值，而是二次读取正式、已提交的
+        # HansenCheckin receipt。跨岛/重载只能重复结算同一个 txid，钱包 sourceId 再做最终幂等。
+        _ad_lack = [k for k in ["function officialCheckinReceipt(value)",
+                                "HansenCheckin.getReceipt(requested.day)",
+                                "var receipt=officialCheckinReceipt(value);if(!receipt)return false",
+                                "HansenCoins.award(chestSource(tx.txid,'coins')"] if k not in _ad_ci]
+        if _ad_lack:
+            fail("★hansen_addiction.js 宝箱稀有奖励缺正式签到 receipt 授权 %s(第二条发币路径会漏!)" % _ad_lack); _ci_ok = False
 if _ci_ok:
     ok("★每日宝箱跨岛防刷修复在位 (hansen_checkin_global.js + 双向同步 + 19岛全引用 + addiction闸门)")
 
-# ---- 检查12: ★赛季积分必须【只】在赛季岛累加 (重大bug回归防护: 曾经18岛答题全在喂赛季→赛季boss毫无意义) ----
-# 修复 = hansen_season.js 的 markAnswer / bossVictory 埋点都加 isSeasonIsland() 闸门, 只有 island_season.html
-# 才 addSeasonPoints。这里静态校验: ①必须定义 isSeasonIsland(); ②每一处 addSeasonPoints(POINTS.*) 调用
-# 必须与 isSeasonIsland 同在一行(被闸门保护)。一旦闸门被误删 → 18岛答题会重新喂赛季 → 打包直接失败、出不去。
-# 【行为测试】另见: 其余18岛答对题后 Δ赛季积分=0, 赛季岛答对题 Δ赛季积分>0(本次修复时已用 Playwright 实测通过)。
+# ---- 检查12: ★v941旧赛季积分永久只读 (重大bug回归防护) ----
+# 历史上曾用 isSeasonIsland() 把旧积分限制在赛季岛；v941 已进一步从根上停掉这套积分和200/500暗奖。
+# 当前铁律: addPoints 只保留兼容 no-op，markAnswer 不再包裹，任何页面都不能增加旧积分或触发里程碑。
 _sf = "hansen_season.js"
 _si_ok = True
 if not os.path.exists(_sf):
     fail("★缺 %s —— 赛季系统丢失!" % _sf); _si_ok = False
 else:
     _s = open(_sf, encoding="utf-8").read()
-    if "function isSeasonIsland" not in _s:
-        fail("★%s 未定义 isSeasonIsland() —— 赛季积分隔离闸门丢失, 18岛答题会重新喂赛季(重大bug复活)!" % _sf); _si_ok = False
-    _ungated = [ln.strip()[:90] for ln in _s.splitlines() if "addSeasonPoints(POINTS." in ln and "isSeasonIsland" not in ln]
-    if _ungated:
-        fail("★%s 有【未加赛季岛闸门】的 addSeasonPoints(会让18岛答题喂赛季、赛季boss失去意义!): %s" % (_sf, _ungated)); _si_ok = False
+    if "function addSeasonPoints(){ return false; }" not in _s or "pointsReadOnly: true" not in _s:
+        fail("★%s 的旧积分 API 不是永久只读 no-op —— 赛季暗奖可能复活!" % _sf); _si_ok = False
+    _old_score_tokens = ["addSeasonPoints(POINTS.", "checkMilestones", "origMA", "answerCorrect", "hsn_season_answer_day"]
+    _old_score_found = [x for x in _old_score_tokens if x in _s]
+    if _old_score_found:
+        fail("★%s 仍有旧积分增长/里程碑入口: %s" % (_sf, _old_score_found)); _si_ok = False
 if _si_ok:
-    ok("★赛季积分隔离在位 (markAnswer/bossVictory 埋点均受 isSeasonIsland() 闸门, 仅赛季岛 island_season.html 累加)")
+    ok("★v941旧赛季积分永久只读 (addPoints no-op·无答题埋点·无里程碑暗奖)")
 
 # ---- 检查13: ★做题游戏"答完还能改结果"原子性修复必须在位 (重大bug类回归防护 v464-v467) ----
 # 这一类bug根因 = 只锁被点的单个元素、没锁整轮 → 答错后正确元素还能点 → 补一个"对"(或重复计分/空难度档空壳)。
@@ -657,9 +669,14 @@ else:
         _bad29.append("缺 visibilitychange 回前台触发(安全核心: 正常游戏期间不动)")
     if "if (!MODES[i].verified) continue" not in _afsrc and "verified" not in _afsrc:
         _bad29.append("缺 verified 安全闸(未验证模式必须不运行)")
-    # eval 访问顶层 let(typeActive 等不在 window 上)
-    if "new Function" not in _afsrc:
-        _bad29.append("缺 eval 访问(读写岛内顶层 let 状态)")
+    # v942 安全边界: 状态访问必须是显式白名单/API；动态代码执行会绕过 CSP，
+    # 也会让任意状态名变成代码注入入口。
+    if "function G(name)" not in _afsrc or "switch(name)" not in _afsrc:
+        _bad29.append("缺显式状态白名单 API G(name)/switch(name)")
+    if "window.HansenAntiFreeze" not in _afsrc:
+        _bad29.append("缺 window.HansenAntiFreeze 显式状态/诊断 API")
+    if "new Function" in _afsrc or re.search(r"\beval\s*\(", _afsrc):
+        _bad29.append("禁止 eval/new Function 动态执行(违反 CSP 与显式状态 API)")
     # 已验证模式在位(全 7 个小游戏)
     for _mname in ["'typing'", "'fish'", "'bubble'", "'listen'", "'cloze'", "'moles'", "'review'"]:
         if _mname not in _afsrc:
@@ -677,7 +694,7 @@ else:
     if _bad29:
         fail("★小游戏防卡死看门狗异常: " + "; ".join(_bad29))
     else:
-        ok("★小游戏防卡死看门狗在位 (hansen_game_antifreeze.js 全%d岛加载; 只回前台触发→正常游戏不误伤; verified 闸=未验证模式不运行; eval 读写顶层let; 已真机最苛刻验证并启用【全7个】: 打字+钓鱼+泡泡+听音+完形+打地鼠+复习; 防 BUG#63 切后台卡死回归)" % (len(_isl) if _isl else 19))
+        ok("★小游戏防卡死看门狗在位 (hansen_game_antifreeze.js 全%d岛加载; 只回前台触发; verified 闸; 显式白名单状态 API; 禁 eval/new Function; 全7个小游戏; 防 BUG#63)" % (len(_isl) if _isl else 19))
 
 # ---- 检查30: ★抽卡翻转揭晓【防卡死 + 不剧透】在位 (BUG#64 · 防回归) ----
 # 抽卡揭晓靠 setTimeout 分阶段(蓄力→翻转→揭晓→确定); 切后台丢了会卡在转圈的"?"上、或"确定"一直不出来→关不掉。
@@ -2178,7 +2195,7 @@ for _f in sorted(_g69.glob('island_*.html')):
         _s69.append(_f+' achList 残留 ach-grid(成就页会崩)')
     # 🔴 v712 印章统一: 19 岛同壳·成就系统全部统一为 animal 内化 36 体系(标准壳自带)·不再有旧 18 岛的 (window.ACHIEVEMENTS||ACHIEVEMENTS) 写法
     if 'hansen_island_upgrade.js' not in _t: _s69.append(_f+' 未挂 hansen_island_upgrade.js(成就/金币升级层丢失)')
-    if "/'+ACHIEVEMENTS.length+'</b> 个成就" not in _t: _s69.append(_f+' 结算页成就分母未对齐 36 体系')
+    if "'+((window.ACHIEVEMENTS||ACHIEVEMENTS).length)+'</b> 个成就" not in _t: _s69.append(_f+' 结算页成就分母未对齐 36 体系')
     if "'+ACHIEVEMENTS.length+' 个成就等你解锁" not in _t: _s69.append(_f+' 欢迎弹窗成就数未对齐 36 体系')
     if 'function checkAch' not in _t or 'function claimAch' not in _t or 'function getAchProgress' not in _t: _s69.append(_f+' 缺标准壳成就系统函数(checkAch/claimAch/getAchProgress)')
 _anim69=open('island_animal.html',encoding='utf-8').read()
@@ -2295,7 +2312,7 @@ for _frag,_msg in [
   ('width:58px !important;height:58px !important','boss_lock 58px 新几何'),
   ('animation:worldMapFloat 3.5s ease-in-out infinite !important','boss_lock 单浮动动画'),
   ("'.world-map-btn:active{transform:translateY(2px) scale(.97) !important;animation:none !important}'",'boss_lock 按压'),
-  ("'.top-bar{padding:10px 70px 10px 14px !important;gap:6px !important}'",'boss_lock 顶栏压高+腾位70+gap6'),
+  ("'.top-bar{padding:calc(10px + env(safe-area-inset-top,0px)) calc(70px + env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px)) !important;gap:6px !important}'",'boss_lock 顶栏压高+刘海安全区+腾位70+gap6'),
   ("'.avatar{width:42px !important;height:42px !important}'",'boss_lock 头像 42 瘦身'),
 ]:
     if _frag not in _bl72: _s72.append('boss_lock 缺 %s' % _msg)
@@ -2697,7 +2714,7 @@ _cd94=open('hansen_cards.js',encoding='utf-8').read()
 if '\u5361\u518c\u5165\u53e3\u4ec5\u4fdd\u7559\u53f3\u4e0b\u89d2\u5e95\u680f' not in _cd94: _s94.append('hansen_cards.js \u672a\u505c\u6b62\u6ce8\u5165util\u5361\u518c')
 for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     _t=open(_fn,encoding='utf-8').read()
-    if 'onclick="HansenGacha.open()"' not in _t: _s94.append(_fn+' \u6e38\u620f\u7f51\u683c\u7f3a\u62bd\u5361\u5165\u53e3\u5361'); break  # v596 relax: was --c1:#1e3a8a deep blue; v596->light blue (#dbeafe/#93c5fd), only anchor onclick (bg color guarded by v596)
+    if 'onclick="HansenContextGacha.open()"' not in _t: _s94.append(_fn+' \u6e38\u620f\u7f51\u683c\u7f3a\u4e0a\u4e0b\u6587\u62bd\u5361\u5165\u53e3\u5361'); break  # v955: 统一入口按页面隔离普通20张池与星海40张池
     if 'icons/gacha_joker_v594.webp' not in _t: _s94.append(_fn+' \u62bd\u5361\u5361\u672a\u7528\u65b0joker\u56fe'); break
     if '\u62bd\u5361</div>' not in _t: _s94.append(_fn+' \u62bd\u5361\u5361\u7f3a\u6807\u9898'); break  # v596 relax: title got inline color style, anchor only the 抽卡</div> text (color guarded by v596)
     if 'onclick="showScreen(\'review\')"><span class="u-icon">\U0001f501</span><div class="u-label">\u590d\u4e60</div>' in _t: _s94.append(_fn+' util\u590d\u4e60\u672a\u5220'); break
@@ -2728,8 +2745,8 @@ _s96=[]
 import glob as _g96
 for _fn in sorted(_g96.glob('island_*.html')):
     _t=open(_fn,encoding='utf-8').read()
-    if '--c1:#dbeafe;--c2:#93c5fd" onclick="HansenGacha.open()"' not in _t: _s96.append(_fn+' 抽卡卡非浅蓝底#dbeafe/#93c5fd'); break
-    if '#1e3a8a;--c2:#312e81" onclick="HansenGacha.open()"' in _t: _s96.append(_fn+' 抽卡旧深蓝底残留(应换浅蓝)'); break
+    if '--c1:#dbeafe;--c2:#93c5fd" onclick="HansenContextGacha.open()"' not in _t: _s96.append(_fn+' 抽卡卡非浅蓝底或未接上下文路由'); break
+    if '#1e3a8a;--c2:#312e81" onclick="HansenContextGacha.open()"' in _t: _s96.append(_fn+' 抽卡旧深蓝底残留(应换浅蓝)'); break
     if '<div class="m-title" style="font-size:12px;color:var(--pal-surf-1,#0f172a);transform:translate(0,2px)">抽卡' not in _t: _s96.append(_fn+' 抽卡标题缺深色#0f172a(v664)'); break
     if 'typer_3d.webp' not in _t: _s96.append(_fn+' 打字大师缺typer_3d图(尺寸v664守卫接管)'); break
 if _s96: fail('v596 抽卡浅蓝底+打字大师放大: ' + str(_s96[:6]))
@@ -3016,15 +3033,22 @@ if _g64: fail(f'v615 24小时全开放 BUG#64: {_g64}')
 else: ok(f'v615 BUG#64: 24小时全开放(boss挑战/卡册图鉴/武器自由选)·到期自动关闭·零提醒 (Hansen). hansen_freepass.js: 首次进入设freepass_until=now+24h; 期内hook getUnlockedBossLv->20(所有boss可挑战·recordBossWin仍用真实bossUnlocked防跳关不污染)+设hansen_card_temp_unlock_until(卡册+图鉴全展示·复用游戏自带临时全解锁·rawOnly写真实)+设gear.trialUntil(全武器试玩·商店点任意武器切换); 到期三标记自然过期自动恢复真实进度·无弹窗/toast. 全{len(_isl64)}岛已加载. 真机: 首次全开放(boss20+卡册全+武器试玩剩24h)·24h后三标记过期全恢复真实(boss Lv1)·0报错 v615')
 
 
-# 🔴 v616 BUG#65(Hansen): 打通整轮20关boss(Lv1→Lv20全打赢)·可反复·不限轮数·防刷(必须打赢Lv20). 🔴v829改: 奖励从88钻改为"金币+记忆强化buff"(钻石只从知识结晶获得).
+# 🔴 v946 HF6 Boss 大满贯：每岛独立逐轮 state，必须把本轮每位 Boss 各打赢一次。
 _g65=[]
 try: _rr=open('hansen_round_reward.js',encoding='utf-8').read()
 except Exception: _rr=''
 if not _rr: _g65.append('hansen_round_reward.js缺失')
 else:
-    if 'hansen_boss_round_cleared' not in _rr: _g65.append('round_reward缺ROUND_KEY')
+    if "STATE_PREFIX = 'hansen_boss_round_state_v946_'" not in _rr: _g65.append('round_reward缺HF6逐轮STATE_PREFIX')
+    if 'function validState(x)' not in _rr or 'x.roundNo!==x.completedCount+1' not in _rr: _g65.append('round_reward缺state/roundNo严格校验')
+    if 'function recordRoundWin(lv)' not in _rr or 'if(merged.indexOf(lv)>=0)' not in _rr: _g65.append('round_reward缺本轮实际胜利记录/重复去重')
+    if 'function txStatus()' not in _rr or "receiptId:'round:v946:'" not in _rr: _g65.append('round_reward缺HF6 pending/receipt轮次凭证')
+    if 'function recoverFullStateWithoutTx(show)' not in _rr or 'if(status.absent)return recoverFullStateWithoutTx(show)' not in _rr: _g65.append('round_reward缺满轮state→pending崩溃恢复')
+    if 'Boss 本轮进度存档异常，奖励已暂停；原始数据已保留' not in _rr: _g65.append('round_reward缺损坏state fail-closed提示')
+    if 'window.getIslandClearedLevels()' in _rr: _g65.append('round_reward仍读取永久卡牌通关记录作为发奖证明')
+    if "localStorage.getItem(k+'_prog')" in _rr: _g65.append('round_reward仍读取landN_prog作为发奖证明')
     if 'REWARD_COIN' not in _rr: _g65.append('round_reward缺金币奖励常量REWARD_COIN')  #🔴v829
-    if 'TOTAL  = 20' not in _rr and 'TOTAL = 20' not in _rr: _g65.append('round_reward总关应为20')
+    if 'if(isLand(k)){' not in _rr or 'return 20;' not in _rr: _g65.append('round_reward缺常规20关/Land动态关数')
     if 'bossVictory' not in _rr: _g65.append('round_reward未hook bossVictory')
     if 'HansenCoins' not in _rr: _g65.append('round_reward未发金币')  #🔴v829 改发金币
     if 'grantBoost' not in _rr: _g65.append('round_reward未发记忆强化buff')  #🔴v829
@@ -3032,7 +3056,7 @@ _isl65=[f for f in os.listdir('.') if f.startswith('island_') and f.endswith('.h
 _norr=[f for f in _isl65 if 'hansen_round_reward.js' not in open(f,encoding='utf-8',errors='replace').read()]
 if _norr: _g65.append(f'{len(_norr)}岛未加载hansen_round_reward.js')
 if _g65: fail(f'v616 通关一轮20关奖励 BUG#65: {_g65}')
-else: ok(f'v616 BUG#65(v829改): 打通整轮20关boss奖励金币+记忆强化buff (钻石只从知识结晶获得). hook bossVictory记录本轮已打赢boss等级集合·集齐全部20个→HansenCoins.add(300)+HansenCrystal.grantBoost(120)+弹窗+清空进下轮; 打输不计·重复去重(必须打赢最强Lv20·防刷)·不限每天轮数. 全{len(_isl65)}岛已加载. v616/v829')
+else: ok(f'v946 HF6 Boss大满贯：每岛独立state记录本奖励轮实际胜利，重复关去重；集齐动态总关数后以roundNo receipt结算300金币+120分钟+88钻并清空进入下一轮；满轮state→pending崩溃可自动重建；永久通关/landN_prog不参与发奖。全{len(_isl65)}岛已加载。')
 
 
 # 🔴 v617 BUG#66(Hansen): 血量在高关失效修复。原Lv11-20伤害=heroMaxHP×百分比(血越高伤害越高完全抵消·血量高关白升), 改全20关固定伤害·护甲全效·血量护甲分工清晰.
@@ -3363,7 +3387,7 @@ _v644=[]
 if os.path.exists('hansen_pet_showcase.js'):
     _pm644=open('hansen_pet_showcase.js',encoding='utf-8',errors='replace').read()
     if 'MASTER_HITS' not in _pm644: _v644.append('缺MASTER_HITS(几次算掌握)')
-    if 'TOTAL_WORDS=752' not in _pm644.replace(' ',''): _v644.append('缺TOTAL_WORDS=752(满级需全部掌握)')
+    if 'HansenCanonical.TOTAL_WORDS)||952' not in _pm644.replace(' ',''): _v644.append('缺canonical TOTAL_WORDS=952(712常规+240星海)')
     if 'function globalMastered(' not in _pm644: _v644.append('缺globalMastered(全局已掌握词数)')
     for _fn in ['function masterReq(','function xpReq(']:
         if _fn not in _pm644: _v644.append('缺双门槛曲线:'+_fn)
@@ -3560,8 +3584,8 @@ for _f in sorted(_g653.glob('island_*.html')):
     if 'doOpenChest' in _t and 'hansenChestFX' not in _t: _noFX.append(_f.replace('island_','').replace('.html',''))
 if _noFX: _v653.append('doOpenChest未接入开箱动画的岛:'+str(_noFX[:6]))
 # 3) v653标记
-if not any('\U0001f534v653' in open(_f,encoding='utf-8',errors='replace').read() for _f in sorted(_g653.glob('island_*.html'))):
-    _v653.append('缺v653标记')
+if '\U0001f534v653' not in _ck:
+    _v653.append('共享签到模块缺v653标记')
 if _v653: fail('v653 每日宝箱开箱动画: '+str(_v653[:6]))
 else: ok('v653 每日宝箱「开箱光芒绽放」动画(Hansen: 宝箱打开时要有打开动画·越来越亮·放出光芒·光芒四射·然后金币飞出·有惊喜感·动画衔接到领奖): 原 doOpenChest 点击宝箱只是 box.classList.add(shake)抖动(违反防晕红线)+1秒后把chestContent换成奖励卡. 改为: 在共享 hansen_checkin_global.js 新增 window.hansenChestFX(box) 开箱动画函数(注入CSS一次)·岛内 doOpenChest 把 shake 改为调用它(无FX则回退shake). 动画三段: ①宝箱本体 filter:brightness 1→2.7 渐增 + drop-shadow金光 + 轻微scale 1→1.09(越来越亮·.hsn-chest-opening类·.62s). ②金光绽放 .hsn-bloom: 径向渐变(白→金→透明)的圆 translate居中 scale .32→2.8 + opacity 0→.96→0(.74s·光芒四射). ③金币飞出: 13枚🪙 向上扇形喷射·用WAAPI element.animate做 translate(calc位移)+scale+opacity 各异方向(无旋转·980ms). 光晕与金币挂到 document.body(z-index 9998/10001)·不随1秒后 chestContent 刷新被截断·金币仍在飞时奖励卡已出现=衔接惊喜感. 全程仅 缩放/位移/透明度/亮度滤镜/drop-shadow·无旋转无闪烁无抖动(守防晕红线). 金币用🪙(与奖励卡 reward-emoji 一致·非占位). 真机python-playwright验animal/food/treasure: 进宝箱屏点宝箱→亮度类生效+金光bloom×1+飞币13枚·1.2秒后奖励卡(reward-amount/收下奖励)出现·0报错. 教训: 开箱/特效动画严守防晕红线·绝不用旋转抖动(原shake要替换)·光芒用径向渐变缩放淡出实现·飞出粒子用WAAPI做各异方向translate; 需跨越内容刷新的特效元素挂body而非被刷新容器.')
 
@@ -3841,7 +3865,7 @@ for _f667 in sorted(_g667.glob('island_*.html')):
     if 'class="chest-badge" id="chestSub">可领' not in _t667: _m667.append('可领角标缺')
     if 'class="chest-badge" id="chestSub">已签' not in _t667: _m667.append('已签角标缺')
     if 'width:91px;height:91px' not in _t667: _m667.append('签到前金箱非90')
-    if 'width:98px;height:98px' not in _t667: _m667.append('签到后开箱非96')
+    if '🔴 v954:' not in _t667 and 'width:98px;height:98px' not in _t667: _m667.append('签到后开箱非96')
     if '<div class="d-sub" id="chestSub">' in _t667: _m667.append('旧chestSub副标题未删')
     if '🔴v667' not in _t667: _m667.append('v667标记缺')
     if _m667:
@@ -3861,8 +3885,8 @@ for _f668 in sorted(_g668.glob('island_*.html')):
     if '#FF2444,#FF2444)!important' not in _t668: _m668.append('已签红底缺')
     if '.daily-card.chest-claimed .chest-badge{background:#2b00ff}' not in _t668: _m668.append('已签蓝角标缺')
     if 'width:91px;height:91px' not in _t668: _m668.append('签到前金箱非90')
-    if 'width:98px;height:98px' not in _t668: _m668.append('签到后开箱非96')
-    if 'transform:translate(0,3px)"><img src="icons/chest_open.webp' not in _t668: _m668.append('签到后下移5缺')
+    if '🔴 v954:' not in _t668 and 'width:98px;height:98px' not in _t668: _m668.append('签到后开箱非96')
+    if '🔴 v954:' not in _t668 and 'transform:translate(0,3px)"><img src="icons/chest_open.webp' not in _t668: _m668.append('签到后下移5缺')
     if '.chest-badge{position:absolute;top:0;right:-6px;transform:scale(.98)' not in _t668: _m668.append('角标位置101缺')
     if '🔴v668' not in _t668: _m668.append('v668标记缺')
     if _m668:
@@ -3885,11 +3909,11 @@ for _f671 in sorted(_g671.glob('island_*.html')):
     if 'boss-card-img{width:100px;height:104px' in _t671: _m671.append('boss图标误改104(应严守100px铁律)')
     if 'boss-card-label{font-size:15px;font-weight:900;color:var(--pal-ink,#fff);margin-top:5px' not in _t671: _m671.append('boss标题margin-top未回5')
     if 'boss-card-label{font-size:15px;font-weight:900;color:#fff;margin-top:3px' in _t671: _m671.append('🔴v670 boss标题margin-top:3回潮')
-    if '#chestCard .d-label{transform:translateY(9.5px)}' not in _t671: _m671.append('每日宝箱文字可领态对齐规则(11.5)缺')
-    if '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t671: _m671.append('每日宝箱文字已签态对齐规则(4.5)缺')
+    if '🔴 v954:' not in _t671 and '#chestCard .d-label{transform:translateY(9.5px)}' not in _t671: _m671.append('每日宝箱文字可领态对齐规则(11.5)缺')
+    if '🔴 v954:' not in _t671 and '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t671: _m671.append('每日宝箱文字已签态对齐规则(4.5)缺')
     if 'width:91px;height:91px;object-fit:contain;vertical-align:middle' not in _t671: _m671.append('任务图标91px缺')
     if 'width:102px;height:102px;object-fit:contain;vertical-align:middle' in _t671: _m671.append('旧任务图标102px回潮')
-    if '🔴 v671:' not in _t671: _m671.append('v671标记缺')
+    if '🔴 v954:' not in _t671 and '🔴 v671:' not in _t671: _m671.append('v671标记缺')
     if _m671:
         _bad671.append(_f671.split('/')[-1]+':'+'/'.join(_m671))
         if len(_bad671)>=3: break
@@ -3946,11 +3970,11 @@ _bad673=[]
 for _f673 in sorted(_g673.glob('island_*.html')):
     _t673=open(_f673,encoding='utf-8').read()
     _m673=[]
-    if _t673.count('translate(0,10px)"><img src="icons/chest_gold.webp')!=2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
-    if 'translate(0,0px)"><img src="icons/chest_gold.webp' in _t673: _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
-    if 'translate(0,3px)"><img src="icons/chest_open.webp' not in _t673: _m673.append('已签开箱translate(0,5px)被误动')
-    if '#chestCard .d-label{transform:translateY(9.5px)}' not in _t673: _m673.append('每日宝箱文字可领态translateY(11.5)被动(应不动·v671)')
-    if '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t673: _m673.append('每日宝箱文字已签态translateY(4.5)被动(应不动·v671)')
+    if '🔴 v954:' not in _t673 and _t673.count('translate(0,10px)"><img src="icons/chest_gold.webp')!=2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
+    if '🔴 v954:' not in _t673 and 'translate(0,0px)"><img src="icons/chest_gold.webp' in _t673: _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
+    if '🔴 v954:' not in _t673 and 'translate(0,3px)"><img src="icons/chest_open.webp' not in _t673: _m673.append('已签开箱translate(0,5px)被误动')
+    if '🔴 v954:' not in _t673 and '#chestCard .d-label{transform:translateY(9.5px)}' not in _t673: _m673.append('每日宝箱文字可领态translateY(11.5)被动(应不动·v671)')
+    if '🔴 v954:' not in _t673 and '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t673: _m673.append('每日宝箱文字已签态translateY(4.5)被动(应不动·v671)')
     if _m673:
         _bad673.append(_f673.split('/')[-1]+':'+'/'.join(_m673))
         if len(_bad673)>=3: break
@@ -4099,8 +4123,8 @@ for _i in islands:
     except Exception:
         _v85.append(_fn85 + " 读取失败")
         continue
-    if "BUG#85" not in _s85:
-        _v85.append(_fn85 + " 缺BUG#85标记")
+    if "hansen_charxp_migrated_v942" not in _s85:
+        _v85.append(_fn85 + " 缺v942人物经验可重建迁移标记")
     if "var tx = S.charXP || 0;" not in _s85:
         _v85.append(_fn85 + " 等级未改读S.charXP")
     if "localStorage.setItem('hansen_wallet_charxp'" not in _s85:
@@ -4280,21 +4304,27 @@ try:
 except Exception as _e16:
     fail("BUG#16 检查异常: " + str(_e16))
 
-# ---- BUG#49: build.py 的 EXCLUDE_EXT 必须含 .zip(否则工作区残留zip被打进部署包·体积翻倍) ----
+# ---- BUG#49: 唯一打包器必须用部署白名单且源码显式排除 .zip(防旧包嵌套·体积翻倍) ----
 # 根因(v469): build.py EXCLUDE_EXT 漏 .zip → 工作区残留旧源码包被打进部署包(部署包 30M→61M=多塞31M旧源码包)。
-# 防线 = build.py EXCLUDE_EXT 含 ".zip"。被改回(删掉.zip)→ 拒绝打包。
+# v941 打包逻辑已唯一化到 package_release.py；build.py 只允许委托，不能再复制一套排除表。
+# 防线 = deploy allow-list 不含 .zip + source exclude 含 .zip + build 唯一委托。
 try:
     _build49 = open("build.py", encoding="utf-8", errors="replace").read() if os.path.exists("build.py") else ""
-    if not _build49:
-        ok("(未找到 build.py, 跳过 BUG#49 检查)")
+    _package49 = open("package_release.py", encoding="utf-8", errors="replace").read() if os.path.exists("package_release.py") else ""
+    if not _build49 or not _package49:
+        fail("部署包体积翻倍 BUG#49: build.py/package_release.py 缺失")
     else:
         import re as _re49
-        _m49 = _re49.search(r"EXCLUDE_EXT\s*=\s*\(([^)]*)\)", _build49)
-        _exc49 = _m49.group(1) if _m49 else ""
-        if ".zip" not in _exc49:
-            fail("部署包体积翻倍 BUG#49: build.py 的 EXCLUDE_EXT 未含 '.zip'(工作区残留源码包/旧zip会被打进部署包·曾致v469部署包61MB)。EXCLUDE_EXT 必须含 .zip")
+        _m49 = _re49.search(r"DEPLOY_ALLOWED_EXT\s*=\s*\{([^}]*)\}", _package49, _re49.S)
+        _allow49 = _m49.group(1) if _m49 else ""
+        if not _m49 or '".zip"' in _allow49:
+            fail("部署包体积翻倍 BUG#49: DEPLOY_ALLOWED_EXT 缺失或错误允许 .zip")
+        elif 'SOURCE_EXCLUDE_EXT = {".zip", ".pyc"}' not in _package49:
+            fail("部署包体积翻倍 BUG#49: 源码包未显式排除历史 .zip")
+        elif '"package_release.py", new, "--out"' not in _build49:
+            fail("部署包体积翻倍 BUG#49: build.py 未唯一委托 package_release.py")
         else:
-            ok("BUG#49: build.py EXCLUDE_EXT 含 .zip 在位(v469·防工作区残留zip被打进部署包致体积翻倍·打包自动排除所有.zip成员)")
+            ok("BUG#49: 部署白名单不允许 .zip + 源码排除 .zip + build.py 唯一委托在位")
 except Exception as _e49:
     fail("BUG#49 检查异常: " + str(_e49))
 
@@ -4377,8 +4407,8 @@ try:
         _v92.append("hansen_preload.js 缺 宠物图预热(hansen_pet_hero_img/BUG#92)")
     for _f92 in sorted(_g92.glob("island_*.html")):
         _t92 = open(_f92, encoding="utf-8", errors="replace").read()
-        if "BUG#92" not in _t92 or 'localStorage.getItem("hansen_pet_hero_img")' not in _t92:
-            _v92.append(_f92 + " 缺 宠物首帧早期脚本(BUG#92/hansen_pet_hero_img)")
+        if "v942 宠物首帧只接受内置路径" not in _t92 or 'localStorage.getItem("hansen_pet_hero_img")' not in _t92:
+            _v92.append(_f92 + " 缺 v942 安全宠物首帧早期脚本(hansen_pet_hero_img)")
     if _v92:
         fail("BUG#92 宠物首帧: " + str(_v92[:6]))
     else:
@@ -4665,6 +4695,7 @@ except Exception as _e723:
 _b724 = []
 try:
     _sb = open('spelling_bee.html', encoding='utf-8').read()
+    _sb_parent = open('hansen_spellbee.js', encoding='utf-8').read()
     _bee = open('hansen_spellbee.js', encoding='utf-8').read()
     # (a) 题目数量默认 100(原5)
     if 'qCount:100' not in _sb: _b724.append('题数默认非100')
@@ -4678,9 +4709,12 @@ try:
     if 'if(youStreak>=3){ bonusC=Math.min(youStreak-1,SB_STREAK_BONUS_CAP); }' not in _sb: _b724.append('缺连胜额外金币(v751 min(连胜-1,5))')
     if "type:'hsn_sb_reward'" not in _sb: _b724.append('缺 postMessage 奖励给父岛')
     if '_sessionCoins=0;_sessionXp=0;_bestStreak=0;' not in _sb: _b724.append('缺本局收获重置')
-    # (d) ★父岛(hansen_spellbee.js)监听并入系统: 复用 addCoin / addXP
+    # (d) ★v942 父岛以稳定 rewardId 幂等并入系统，成功后 ACK；不再信任 amount-only 消息。
     if "d.type !== 'hsn_sb_reward'" not in _bee: _b724.append('父岛缺奖励监听')
-    if 'window.addCoin(c)' not in _bee or 'window.addXP(x)' not in _bee: _b724.append('父岛未复用 addCoin/addXP 并入系统')
+    for _tok724 in ['hansen_sb_reward_pending_v942','HansenCoins.award','HansenRewardEffectsV942.xpAward','hsn_sb_reward_ack']:
+        if _tok724 not in _bee: _b724.append('父岛缺v942幂等奖励标记: '+_tok724)
+    for _tok724 in ['hansen_sb_reward_pending_v942','rewardId:id','function sbFlushRewardPending','function sbRewardAck']:
+        if _tok724 not in _sb: _b724.append('子页缺v942 pending/ACK标记: '+_tok724)
     # (e) 全程收获展示: 逐词(rearn/rtotal) + 结算(ovReward 块 + CSS)
     if 'class="rearn"' not in _sb or 'class="rtotal"' not in _sb: _b724.append('缺逐词收获展示')
     if "$('ovReward').innerHTML" not in _sb or 'id="ovReward"' not in _sb or '.over .ovreward{' not in _sb: _b724.append('缺结算收获展示')
@@ -4731,7 +4765,7 @@ try:
     # (b) 结果面板覆盖两条 lane(原只覆盖94px的bot lane导致内容溢出)
     if 'class="lanes-box"' not in _sb or '.lanes-box{position:relative}' not in _sb: _b726.append('lanes-box 包两lane缺失')
     # (c) 极简: 只显示金币·不显示经验(面板里 答对行/本局行 不含经验✨)
-    if "拼对又赢 <b>+'+win+'</b>🪙" not in _sb: _b726.append('结果面板金币行不符(v751 拼对又赢+win)')
+    if "拼对又赢 <b>+'+gainC+'</b>🪙" not in _sb: _b726.append('结果面板未显示经过日上限夹取后的实发gainC')
     if "本局已得 <b>'+_sessionCoins+'</b>🪙</div>" not in _sb: _b726.append('本局金币行不符(应只金币)')
     # 面板 head 的"你赢了"不带叹号(Hansen: 字别太大·去掉感叹)+ 字号17(原18+)
     if "rw win\">🎉 你赢了'+" not in _sb: _b726.append('你赢了文案/结构不符')
@@ -4740,8 +4774,10 @@ try:
     # (d) 结算页 ovReward 去掉经验列(只剩 金币 + 最高连胜)
     if "ovrw-v xp" in _sb or "✨ 经验</div>" in _sb: _b726.append('结算页仍残留经验列')
     if "本局收获 · 已并入金币</div>" not in _sb: _b726.append('结算标题未去经验')
-    # (e) 经验仍静默给宠物(postMessage 仍发 xp=base·只是不显示)·honor v724 宠物并入
-    if 'gainX=base;' not in _sb or "coins:gainC,xp:gainX" not in _sb: _b726.append('经验未静默给宠物(postMessage xp 缺失)')
+    # (e) 经验仍静默给宠物；v942 改为子页稳定 receipt→父页 ACK，不能退回裸 postMessage 金额。
+    if ('gainX=base;' not in _sb or "sbQueueCappedReward(want,gainX,'word')" not in _sb or
+        "HansenRewardEffectsV942.xpAward(base+':xp',r.xp)" not in _sb_parent):
+        _b726.append('经验未通过稳定奖励 receipt 静默给宠物')
     # (f) 旧的每词经验显示残留检查: 面板不应再出现 "+经验" / rstreak 旧类
     if 'class="rstreak"' in _sb: _b726.append('旧 rstreak 类残留')
     if _b726:
@@ -4771,10 +4807,12 @@ try:
     # (d) 拼写对战每日金币上限(2000答题上限之外额外赚的途径·但也封顶防无限刷): SB_DAILY_COIN_CAP + sbCoinToday + 独立计数 + 已满文案
     if 'SB_DAILY_COIN_CAP=2000' not in _sb: _b727.append('拼写对战每日上限常量缺失')
     if 'function sbCoinToday' not in _sb or 'hsn_sb_coin_today' not in _sb: _b727.append('拼写对战每日计数缺失')
-    if 'sbCoinToday()>=SB_DAILY_COIN_CAP' not in _sb: _b727.append('finish 未判拼写对战每日上限')
+    if 'function sbTakeCoin' not in _sb or 'Math.min(want,Math.max(0,SB_DAILY_COIN_CAP-now))' not in _sb: _b727.append('每笔未通过sbTakeCoin夹到日上限')
+    if '_sbCapped=!!(_wordReceipt&&_wordReceipt.capped===true)' not in _sb: _b727.append('finish未用 cap receipt 判定今日已满')
     if '今日拼写对战金币已满' not in _sb or 'class="rcap"' not in _sb: _b727.append('已满文案/rcap 缺失')
-    # (e) 拼对才发币: 仅 gainC>0 时 postMessage 上报(拼输 finish(bot) 不进 who==='you' 分支→0币)
-    if 'if(gainC>0){ try{ if(window.parent' not in _sb: _b727.append('未做"仅真发币时上报"')
+    # (e) 拼对才准备 receipt；sbQueueCappedReward 自身拒绝 want=0，拼输不进入 who==='you' 分支。
+    if "if(who==='you')" not in _sb or "sbQueueCappedReward(want,gainX,'word')" not in _sb:
+        _b727.append('未做“仅拼对时准备稳定奖励 receipt”')
     if _b727:
         fail('v727 金币经济平衡: ' + str(_b727[:10]))
     else:
@@ -4811,8 +4849,22 @@ try:
     # ① .replay 必须自包含高对比(白字#fff + 实心蓝渐变)·不依赖会随主题变/可能不翻转的 var(--bot)+淡translucent背景
     if 'color:#fff;background:linear-gradient(135deg,#3b82f6,#2563eb)' not in _sb: _b729.append('再听一次按钮非自包含高对比(应白字+实心蓝渐变)')
     if 'color:var(--bot);background:rgba(96,165,250,.16)' in _sb: _b729.append('再听一次按钮仍是旧淡色写法(亮主题看不清)')
-    # ② 顶栏药丸(题号pill/计时器tm/声音键sndtoggle)半透明黑底加深到 .5(亮主题下白/黄字才够清晰·原 .3 在浅底上偏淡)
-    if _sb.count('background:rgba(0,0,0,.5)') < 3: _b729.append('顶栏药丸黑底未加深到.5(亮主题白/黄字偏淡)')
+    # ② 顶栏药丸统一走状态色变量：暗色保持 .5 黑底，四个亮色使用不透明深蓝底。
+    # HF3 不再在三个选择器里重复写同一个 rgba，而是钉死一份主题契约，避免漏改其中一个。
+    if '--status-bg:rgba(0,0,0,.5);--status-fg:#fff;--status-hi:#fde047;' not in _sb:
+        _b729.append('暗色顶栏状态色变量缺失(.5黑底/白字/黄高亮)')
+    if '--status-bg:#17375f;--status-fg:#fff;--status-hi:#ffe08a;' not in _sb:
+        _b729.append('亮色顶栏状态色变量缺失(不透明深蓝底/白字/黄高亮)')
+    for _sel729 in ('.gtop .pill{', '.gtop .tm{', '.gtop .sndtoggle{'):
+        _css729 = _seg(_sb, _sel729)
+        if 'background:var(--status-bg)' not in _css729:
+            _b729.append(_sel729 + '未使用统一--status-bg')
+    if 'color:var(--status-fg)' not in _seg(_sb, '.gtop .pill{'):
+        _b729.append('题号药丸未使用--status-fg')
+    if 'color:var(--status-hi)' not in _seg(_sb, '.gtop .tm{'):
+        _b729.append('计时器未使用--status-hi')
+    if 'color:var(--status-fg)' not in _seg(_sb, '.gtop .sndtoggle{'):
+        _b729.append('声音键未使用--status-fg')
     if 'background:rgba(0,0,0,.3)' in _sb: _b729.append('顶栏仍残留 .3 淡黑底')
     if _b729:
         fail('v729 再听一次按钮/顶栏亮主题对比: ' + str(_b729[:6]))
@@ -5201,8 +5253,8 @@ try:
         _b751.append('赢一词金币未用 win(基础分×(1+对手系数))')
     if 'Math.min(youStreak-1,SB_STREAK_BONUS_CAP)' not in _sbn751:
         _b751.append('连胜额外公式不对(应 min(连胜-1,封顶5))')
-    if '_matchBonus=Math.round(10*sbOppCoef())' not in _sbn751:
-        _b751.append('缺赢下整局奖励 round(10×对手系数)')
+    if "_matchReceipt=sbQueueCappedReward(Math.round(10*sbOppCoef()),0,'match')" not in _sbn751:
+        _b751.append('赢下整局奖励未经过 cap journal/receipt 日上限事务')
     if 'SB_STREAK_BONUS_CAP=5' not in _sbn751:
         _b751.append('连胜封顶非5')
     if 'SB_DAILY_COIN_CAP=2000' not in _sbn751:
@@ -5792,8 +5844,8 @@ try:
         _bad779.append("template仍有头像旋转光环.avatar::after/@keyframes spin(应删·禁转动)")
     if "width:76px;height:76px;object-fit:contain;display:block" not in _tpl779:
         _bad779.append("template宠物首帧img缺内联尺寸(模块加载前会按原图巨大)")
-    if "v779 首帧防闪" not in _tpl779 or "img.hsn-av-img" not in _tpl779:
-        _bad779.append("template头像兜底未改成首帧显角色立绘")
+    if "v942 首帧头像只接受 1–66 号和六位十六进制颜色" not in _tpl779 or "img.hsn-av-img" not in _tpl779:
+        _bad779.append("template头像兜底未使用v942安全首帧角色立绘")
     _isl779=[fn for fn in _g779.glob("island_*.html")]
     _spinIsl=[fn for fn in _isl779 if "animation:spin" in open(fn,encoding="utf-8",errors="replace").read()]
     if _spinIsl: _bad779.append("仍有岛含旋转光环: "+",".join(_spinIsl[:3]))
@@ -6391,7 +6443,8 @@ try:
         _v799_bad.append(".bottom-nav仍是裸height70px(iPhone安全区下内容被挤压·须改calc)")
     _bn799 = _tpl799.find(".bottom-nav{")
     _bnb799 = _tpl799[_bn799:_bn799+400] if _bn799 >= 0 else ""
-    if "padding-bottom:env(safe-area-inset-bottom)" not in _bnb799:
+    if ("padding-bottom:env(safe-area-inset-bottom)" not in _bnb799 and
+        "padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom) env(safe-area-inset-left,0px)" not in _bnb799):
         _v799_bad.append(".bottom-nav缺padding-bottom:env(safe-area-inset-bottom)(home indicator区无内边距)")
     if _v799_bad:
         fail("v799 底部导航iPhone安全区不达标: " + "·".join(_v799_bad))
@@ -7112,18 +7165,17 @@ if _v837_bad:
 else:
     ok("★v835-v837 UI大白话 完整 (面板'我的钻石'/'加速'/'新手探险家'/'记牢一个单词'·玩家面前零生造术语·防回退)")
 
-# ---- 检查: ★Phase2 钻石只从结晶来(v829) ----
-# 其它发钻点全部改成"金币 + 记忆强化buff": 打Boss通关一轮 / 连签里程碑 / 赛季积分。钻石现在唯一来源 = 知识结晶。
+# ---- v941 高级货币边界：只有白名单系统能发真钻，旧addGem仍只发金币 ----
 _p2_bad = []
 if os.path.exists("hansen_round_reward.js"):
     _rr = open("hansen_round_reward.js", encoding="utf-8").read()
-    if "HansenGems.add(REWARD" in _rr: _p2_bad.append("通关一轮仍在发钻(应改金币)")
-    if "grantBoost(REWARD_BOOST" not in _rr: _p2_bad.append("通关一轮缺记忆强化buff")
-    if "HansenCoins.add(REWARD_COIN" not in _rr: _p2_bad.append("通关一轮缺发金币")
+    if "addBoost(REWARD_BOOST)" not in _rr: _p2_bad.append("通关一轮缺记忆强化buff")
+    if "addCoins(REWARD_COIN)" not in _rr: _p2_bad.append("通关一轮缺发金币")
+    if "addGems(gems)" not in _rr: _p2_bad.append("通关一轮缺白名单钻石结算")
 if os.path.exists("hansen_addiction.js"):
     _ad2 = open("hansen_addiction.js", encoding="utf-8").read()
     if "HansenGems.add(m.gems)" in _ad2: _p2_bad.append("连签里程碑仍在发钻(应改金币)")
-    if "grantBoost(m.boost" not in _ad2: _p2_bad.append("连签里程碑缺记忆强化buff")
+    if "function confirmBoost(map,tx)" not in _ad2 or "tx.boost.target" not in _ad2: _p2_bad.append("连签里程碑缺可恢复记忆强化事务")
 if os.path.exists("hansen_season.js"):
     _se2 = open("hansen_season.js", encoding="utf-8").read()
     if "type:'coinboost'" not in _se2: _p2_bad.append("赛季里程碑未改 coinboost")
@@ -7131,9 +7183,9 @@ if os.path.exists("template.html"):
     _tpl2 = open("template.html", encoding="utf-8").read()
     if "grantBoost(90" not in _tpl2: _p2_bad.append("每日任务全清未发记忆强化buff(v831·飞轮日常入口)")  #🔴v831
 if _p2_bad:
-    fail("★Phase2 钻石只从结晶来(v829) 异常: %s" % _p2_bad[:6])
+    fail("v941 高级货币白名单异常: %s" % _p2_bad[:6])
 else:
-    ok("★Phase2 钻石只从结晶来(v829) (打Boss通关/连签/赛季 全改金币+记忆强化buff·钻石唯一来源=知识结晶)")
+    ok("v946 高级货币白名单: focused Bee结晶/Boss大满贯/女帝终战/gem1发真钻；普通Bee旧里程碑停发，旧addGem与普通成就仍发金币")
 
 
 # ---- 检查: ★v848 星海觉醒(season岛)前3类60词真人发音接入(隔离命名·只作用于season·防泄漏其他岛) ----
@@ -7375,10 +7427,11 @@ else:
     ok('v857 打Boss界面精修(Hansen·"上面那块全都去掉·返回键很小的透明圆图标·boss整体变大更清晰狂怒再变大·下面位置固定不变不许位移·不许碰绿色小框·全力做到绝对好"): ①顶部清空=左上连击徽章隐藏(只藏不删DOM: template直写bossComboNum+boss_anim读值·删会崩)+右上回大地图藏宝图浮标boss屏整程隐藏(v855顶栏同口径)+阶段/狂怒徽章改绝对定位右上竖排脱流(Hansen点名保留) ②返回键v854大胶囊→极小半透明圆钮: 36px圆·只一个←·rgba(15,23,42,.28)底+白边.30融背景·绝对定位左上脱流·禁backdrop-filter ③立绘恒定盒230px全题型统一(盒顶38=屏顶4+margin34·盒底268=下方一次性+49px此后永恒): 普通svg scale(.826)=视觉190(比150大27%·384源图更清晰)·狂怒scale(1)=230(再大21%)·typing scale(.717)=165(键盘保住)·transform-origin底部中心+transition .45s平滑长大→狂怒切换/题型切换下方name/hp/opts位移全0 ④战斗绿框(连击+金币toast)压顶top:6紧凑·狂怒顶38(慢漂最高35)永不相碰 ⑤狂怒=烈焰双层红光+6s慢漂±3px(bossRageStatic收编·体积由svg层承担)·命中缩放上限1.02。真机393×747全验: 普通190/狂怒230/typing165·下方位移全0·绿框5..31与立绘77(普通)/38(狂怒)不碰·typing底728不溢出·0报错。')
 
 
-# ---- 🔴 v858 (Hansen×3: "上下滑动卡顿·图片加载慢·彻底优化到极致") 性能总攻成果钉死 ----
+# ---- 🔴 v858/v944 滚动性能成果钉死(图片卫生保留·主题动画不得再被暂停) ----
 # 三板斧: ①图片总攻67.7→41.9MB(-38%·法令全保: v809赛季boss1100/v773头像720不缩/女皇星空画质/spell_3d原件)
 #         ②backdrop-filter全项目清零(滚动卡顿第一杀手·唯一豁免=首页14px薄纱点v719钦定)
-#         ③hansen_perf.js滚动动画闸门(hsn-scrolling全暂停·停手180ms恢复)+图片卫生(decoding=async全量·同容器≥6图除前4张外loading=lazy)
+#         ③图片卫生(decoding=async全量·同容器≥6图除前4张外loading=lazy)。v944 真机证实旧 hsn-scrolling
+#           根级通配闸门会让所有主题图标在手指/惯性滚动时停止，故永久禁止恢复。
 import re as _re858, glob as _g858, os as _os858
 _b858=[]
 # ① backdrop零容忍(除v719薄纱豁免行)
@@ -7389,13 +7442,17 @@ for _p858 in [_x for _x in sorted(_g858.glob('*.html')) if _x!='evolution_dashbo
             _b858.append('%s:%d 出现backdrop-filter(滚动卡顿第一杀手·v858已全清零)' % (_os858.path.basename(_p858),_i858))
             break
     if _b858: break
-# ② perf引擎接线+三核心
+# ② perf引擎接线+图片卫生核心
 for _p858 in ['template.html','index.html','boss_hall.html','season_showcase.html','spelling_bee.html']+sorted(_g858.glob('island_*.html')):  # v859: 卫星页也要perf
-    if 'hansen_perf.js?v=' not in open(_p858,encoding='utf-8',errors='replace').read():
-        _b858.append(_os858.path.basename(_p858)+' 未接hansen_perf.js'); break
-_pj858=open('hansen_perf.js',encoding='utf-8',errors='replace').read() if _os858.path.exists('hansen_perf.js') else ''
-for _k858,_lab858 in (('hsn-scrolling','滚动动画闸门'),("setAttribute('decoding','async')",'解码async'),("setAttribute('loading','lazy')",'图片墙lazy'),('capture:true','内部滚动容器捕获')):
-    if _k858 not in _pj858: _b858.append('hansen_perf.js缺【%s】' % _lab858)
+    if 'hansen_perf_v944.js?v=' not in open(_p858,encoding='utf-8',errors='replace').read():
+        _b858.append(_os858.path.basename(_p858)+' 未接hansen_perf_v944.js'); break
+_pj858=open('hansen_perf_v944.js',encoding='utf-8',errors='replace').read() if _os858.path.exists('hansen_perf_v944.js') else ''
+for _k858,_lab858 in (("setAttribute('decoding','async')",'解码async'),("setAttribute('loading','lazy')",'图片墙lazy'),('MutationObserver','动态图片卫生')):
+    if _k858 not in _pj858: _b858.append('hansen_perf_v944.js缺【%s】' % _lab858)
+# v944 反回归: 不允许通过 running!important 白名单修补；应彻底没有滚动暂停闸门，
+# 否则会漏掉钻石/未来主题，或误覆盖鱼类倒计时、后台暂停等合法 paused 状态。
+if 'hsn-scrolling' in _pj858 or _re858.search(r'animation-play-state\s*:\s*paused', _pj858):
+    _b858.append('hansen_perf_v944.js恢复了滚动动画暂停(主题图标会在滑动时停止·v944禁止)')
 # ③ hintFade已改纯opacity(原关键帧动画backdrop=合成大杀器)
 _t858=open('template.html',encoding='utf-8',errors='replace').read()
 if '@keyframes hintFade{from{opacity:0}to{opacity:1}}' not in _t858: _b858.append('hintFade关键帧不是纯opacity(禁回backdrop动画)')
@@ -7407,7 +7464,7 @@ for _d858 in ('bosses','pets','icons','avatars','themes','bosses_bg','weapons'):
             _b858.append('%s %.0fKB超800KB预算(pngquant 78-95+类目上限·配方见知识库v858)' % (_f858,_os858.path.getsize(_f858)/1024)); break
     if any('超800KB' in _x858 for _x858 in _b858): break
 if _b858: fail('v858 性能总攻: '+str(_b858[:6]))
-else: ok('v858 性能总攻 (Hansen×3【滑动卡顿/图片慢/优化到极致】): ①图片67.7→41.9MB(-38%·170张瘦身·法令全保: v809赛季boss1100高清/v773头像720不缩/女皇星空三形态豁免/spell_3d原件) ②backdrop-filter全项目清零+补偿透明度(24处手术·唯一豁免首页14px薄纱点v719钦定磨砂·合成成本约0) ③hansen_perf.js: 滚动hsn-scrolling全动画暂停停手180ms恢复(WAAPI攻击特效不受影响·星空82颗twinkle滚动零负载)+全img decoding=async+同容器大于等于6图除前4张loading=lazy(boss选关16/20张lazy实测·节流验证) ④单张800KB预算+evolve性能哨兵六连(backdrop回归ERROR/图片预算/perf在位/动画预算index65模板32/巨图1400/死资产扫描). v858')
+else: ok('v858/v944 滚动性能链: ①图片压缩与800KB预算 ②backdrop-filter零容忍 ③hansen_perf_v944.js仅保留全img decoding=async+图片墙lazy+动态图片卫生 ④永久禁止hsn-scrolling/滚动时animation paused根级闸门，6主题在真实触摸与惯性滚动中持续运动 ⑤离屏岛屿与后台仍由独立机制合法暂停。v944')
 
 
 # ---- 🔴 v859 (Hansen真机截图: "boss放技能错位了·光球该在手上·光点该在眼睛" + "所有boss更大更高清·狂暴更大·别错位别碰上框") ----
@@ -7442,7 +7499,7 @@ _pal860 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
 for _k860, _lab860 in (("addEventListener('storage'", '配色storage监听'), ("addEventListener('pageshow'", '配色pageshow监听'), ("addEventListener('visibilitychange'", '配色visibility监听'), ('_hsnPalSync', '同步函数'), ('#hsnSeasonEntry [style*="color:#cbd5e1"]', '赛季横幅还原区')):
     if _k860 not in _pal860: _b860.append('hansen_palette.js缺【%s】(岛里换色首页不跟=复发)' % _lab860)
 _idx860 = open('index.html', encoding='utf-8', errors='replace').read()
-for _k860, _lab860 in (('id="hsnLightFix"', '亮色整改块'), ('html.hsn-pal-light .intro{ color:#1f2937', 'hero正文深墨'), ('html.hsn-pal-light .enter{ background:rgba(15,23,42,.85)', '进入冒险胶囊深底金字'), ('html.hsn-pal-light .how-step{ background:rgba(255,255,255,.62)', 'how步骤浅玻璃'), ('#92400e 0%,#9f1239 45%,#5b21b6', 'tagline深渐变')):
+for _k860, _lab860 in (('id="hsnLightFix"', '亮色整改块'), ('html.hsn-pal-light .intro{ color:#1f2937', 'hero正文深墨'), ('html.hsn-pal-light .enter{ background:rgba(15,23,42,.85)', '进入冒险胶囊深底金字'), ('html.hsn-pal-light .how-step{ background:rgba(255,255,255,.62)', 'how步骤浅玻璃'), ('#1e40af 0%,#9f1239 45%,#5b21b6', 'tagline深蓝紫渐变')):
     if _k860 not in _idx860: _b860.append('index缺亮色整改【%s】(亮色字看不清=复发)' % _lab860)
 _hl860 = open('hansen_home_link.js', encoding='utf-8', errors='replace').read()
 if "window.parent.openIsland('island_season.html')" not in _hl860: _b860.append('真goHome(home_link)缺子岛返回hub分支(v851壳内延伸)')
@@ -7454,71 +7511,97 @@ if _b860: fail('v860 同频+亮色可读+彻底相通: ' + str(_b860[:6]))
 else: ok('v860 (Hansen真机三连·配色不同步/亮色看不清/彻底相通): ①同步中枢=palette三监听storage(iframe一写父窗口当场重应用=零延迟同频)+pageshow(bfcache复活补对表)+visibilitychange兜底·apply幂等 ②亮色整改=四亮色逐元素对比度扫描实名修复(hero正文6.5/how标题7.1/步骤14.7/胶囊10.7·tagline深渐变+drop-shadow·misc岛英文投影·#hsnSeasonEntry深蓝横幅进还原区任何配色不碰) ③相通审计=spelling_bee/boss_hall/showcase全隔离iframe在壳内·cards赛季+错题跨岛收编parent.openIsland(裸iframe-href会污染联合历史=返回键乱=网页感元凶)·真goHome(home_link覆盖版·模板版是死代码)子岛返回回hub不跳级·真机验: 岛切云端白父窗口当场hsn-pal-light/切回深空蓝当场撤·子岛goHome后iframe=hub·换岛wrap=block·0报错. v860')
 
 
-# ---- 🔴 v861 (Hansen: 金币/钻石/宠物三份特别具体的说明书·可折叠·放设置 + Spelling Bee升格: 拼对计熟练度+最低10词) ----
-# 🔴v861: ①hansen_econ_guide.js三折叠卡(全实账: 任务金=XP×60%最低20/全清大奖100+连签×20/答对1金日2000同词3次/bee基础分×(1+对手系数)日2000/宝箱概率+连签1+(天-1)×0.2/boss首胜20-50复胜5/里程碑120·250·600/结晶4💎·5个不同日子/大满贯88💎/gear全价目/宠物36阶XP曲线) ②bee: numCommit硬钳10~100 ③官方通道hansenMarkWordCorrectByEn(template)+bee整词拼对postMessage hsn_sb_mastery+岛侧分支→markAnswer全家桶(星/任务/答题金)
+# ---- v861 历史接线 + v946 HF4 四份中文速查与拼写奖励隔离复核 ----
 _b861 = []
 import glob as _g861
 _eg861 = open('hansen_econ_guide.js', encoding='utf-8', errors='replace').read() if __import__('os').path.exists('hansen_econ_guide.js') else ''
-for _k861, _lab861 in (('金币全攻略', '金币卡'), ('钻石全攻略', '钻石卡'), ('宠物升级全攻略', '宠物卡'), ('每天这条路最多拿 <b>2000 金', '答题金日上限'), ('永久记住 = <b>+4💎</b>', '结晶4钻v862改述'), ('5 个不同的日子', '五日五星规则'), ('+88💎(每岛每天限一次)', '大满贯88v864按岛表述'), ('封顶的 240 金', '全清大奖240'), ('光子炮 <b>330💎', 'gear价目'), ('7000 XP', '宠物满级7000'), ('hsn-eg-hd', '折叠交互')):
+for _k861, _lab861 in (('金币怎么得', '金币卡'), ('钻石怎么得', '钻石卡'), ('宠物怎么升级', '宠物升级卡'), ('宠物经验怎么得', '宠物经验卡'), ('全天最多 2000', '答题金日上限'), ('得到 4 钻石', '结晶4钻'), ('同一单词每天最多完成一组', '同词同日结晶闸门'), ('88 钻石', '大满贯88'), ('七项全领，再得到 100～240', '全清大奖'), ('经验和单词全部保留', '升级不清零'), ('hsn-eg-toggle', '折叠交互')):
     if _k861 not in _eg861: _b861.append('econ_guide缺【%s】' % _lab861)
 for _p861 in ['template.html'] + sorted(_g861.glob('island_*.html')):
     if 'hansen_econ_guide.js?v=' not in open(_p861, encoding='utf-8', errors='replace').read():
         _b861.append(_p861 + ' 未接说明书模块'); break
 _sb861 = open('spelling_bee.html', encoding='utf-8', errors='replace').read()
-for _k861, _lab861 in (('if(v<10)v=10;if(v>100)v=100;', 'bee词数硬钳10~100'), ('(10~100)', 'bee词数文案'), ("type:'hsn_sb_mastery'", 'bee整词拼对上报')):
+for _k861, _lab861 in (('if(v<10)v=10;if(v>100)v=100;', 'bee词数硬钳10~100'), ('(10~100)', 'bee词数文案'), ('function sbQueueFocusComplete()', 'focused Bee 完整挑战证明')):
     if _k861 not in _sb861: _b861.append('spelling_bee缺【%s】' % _lab861)
-_t861 = open('template.html', encoding='utf-8', errors='replace').read()
-if 'window.hansenMarkWordCorrectByEn=function(en)' not in _t861: _b861.append('template缺官方答对通道hansenMarkWordCorrectByEn')
 _sj861 = open('hansen_spellbee.js', encoding='utf-8', errors='replace').read()
-if "d.type === 'hsn_sb_mastery'" not in _sj861: _b861.append('岛侧spellbee缺mastery分支')
+if "d.type === 'hsn_sb_mastery'" not in _sj861 or 'sbAck(e.source,masteryReceipt.rewardId)' not in _sj861:
+    _b861.append('岛侧 spellbee 缺遗留 mastery 严格 ACK 清理分支')
+if any(_tok861 in _sj861 for _tok861 in ('HansenSpellbeeGems.prepare(', 'HansenSpellbeeGems.begin(', 'HansenSpellbeeGems.commit(')):
+    _b861.append('普通 Bee 仍调用旧新词钻石链')
+_finish861 = _sb861[_sb861.find('function finish(who)'):_sb861.find('function nextWord()', _sb861.find('function finish(who)'))]
+if 'sbQueueMastery(' in _finish861: _b861.append('普通 Bee finish 仍生成 mastery receipt')
 if _b861: fail('v861 说明书+Bee升格: ' + str(_b861[:6]))
-else: ok('v861 (Hansen: 三份特别具体说明书+Bee升格): ①hansen_econ_guide.js三折叠卡进设置(配色选择器之后·默认折叠点标题展开·真机验: 三卡在位/开1102px合0px/关键数字2000·4💎·88全在)·内容全实账无一杜撰(七大金源+两口袋各日封2000+连签倍率2.2封顶+boss首胜价目+里程碑+结晶五日五星4💎+大满贯88不限轮+成就20💎+gear/血量/护甲全价目+宠物36阶XP曲线25→7000+XP排行) ②bee词数numCommit硬钳: 输1→10·输250→100·37→37(真机三连验·原1~999) ③拼对=真答对: bee整词拼对(不论输赢)postMessage hsn_sb_mastery→岛侧走官方通道hansenMarkWordCorrectByEn(小写trim匹配allW)→markAnswer(idx,true)全家桶=结晶星+任务correct进度+答题金(日2000/同词3次天然防刷)·真机验本岛词true外词false消息路径tcDelta=2. v861')
+else: ok('v946 Bee隔离：普通 Bee 保留自身金币/XP但不生成 mastery；旧 mastery 只严格 ACK；focused Bee 才能提交结晶完整挑战证明')
 
 
-# ---- 🔴 v862 (Hansen: Boss大满贯要给钻+按岛防刷+星海100+Bee里程碑+进度器UI+说明书重写删护甲) ----
-# 🔴v862: ①round_reward发钻恢复(v829起只发金·此前老注释误传"88钻"→v861说明书抄错)·按岛存储(ROUND_KEY/COUNT_KEY/GEMDAY_KEY全按_iKey()·星海GEM_AMOUNT=100·其余88·同岛日限一次·金币300+加速120照发)·老全局key一次性基线迁移不清老进度 ②hansen_round_bar.js进度器(#bossScreen底部·未领/已领/未通关三态·showScreen(boss)包装刷新) ③hansen_spellbee_gems.js日里程碑(5/10/20→1/3/8💎累计封顶·今日词集合去重·crystal.mastered已结晶不算·toast) ④岛侧spellbee mastery分支加钻石记录 ⑤econ_guide钻石卡重写(四路+elephant全流程+星海100+护甲已删声明+进度器提示+金币卡补第⑥条Boss每轮金奖)
+# ---- v946 HF6 首领逐轮账本 + HF4 玩家速查 ----
 _b862 = []
 _rr862 = open('hansen_round_reward.js', encoding='utf-8', errors='replace').read()
-for _k862, _lab862 in (('function _iKey()', '按岛key函数'), ("_isSeason(k)", '星海判定'), ('function GEM_AMOUNT()', 'GEM_AMOUNT函数'), ("_isSeason(_iKey()) ? 100 : 88", '星海100规则'), ('function gemPaidToday()', '每日防刷读'), ('function markGemPaidToday()', '每日防刷写'), ('ROUND_KEY_LEGACY', '老key迁移'), ('if(!paidBefore)', 'onWin按防刷发钻分支v866'), ('HansenGems.add(gemAmt)', '发钻'), ('gemAmount: GEM_AMOUNT', 'API暴露'), ('gemPaidToday: gemPaidToday', 'API暴露防刷')):
+for _k862, _lab862 in (
+    ('function islandKey()', '按岛key函数'),
+    ("function isSeason(k){ return k==='season'; }", '女帝主页面判定'),
+    ('function isLand(k)', 'Land判定'),
+    ('function gemAmount()', '钻石数函数'),
+    ('SEASON_GEMS = 100', '女帝100规则'),
+    ('return isSeason(islandKey()) ? SEASON_GEMS : 88', '常规/Land 88规则'),
+    ("STATE_PREFIX = 'hansen_boss_round_state_v946_'", '每岛独立逐轮state'),
+    ('function validState(x)', 'state严格校验'),
+    ('x.roundNo!==x.completedCount+1', 'roundNo连续性'),
+    ('function recordRoundWin(lv)', '本轮实际胜利记录'),
+    ('if(merged.indexOf(lv)>=0)', '同关每轮去重'),
+    ("receiptId:'round:v946:'", 'receipt绑定轮次'),
+    ('roundNo:tx.roundNo+1', '结算后推进下一轮'),
+    ('completedCount:tx.roundNo', '已完成轮数落账'),
+    ('lastReceipt:{id:tx.receiptId', '已结算receipt落state'),
+    ('Boss 本轮进度存档异常，奖励已暂停；原始数据已保留', '坏state fail-closed'),
+    ("SEASON_LEGACY_KEY = 'hansen_season_pillar_gems'", '旧六柱只迁移补差'),
+    ('addGems(gems)', '发钻'),
+    ('gemAmount:gemAmount', 'API暴露'),
+    ('roundNo:function()', 'API暴露当前奖励轮'),
+    ('status:function()', 'API暴露逐轮明细'),
+):
     if _k862 not in _rr862: _b862.append('round_reward缺【%s】' % _lab862)
+for _old862, _lab862 in (("window.getIslandClearedLevels()", '永久卡牌通关记录'),
+                         ("localStorage.getItem(k+'_prog')", 'landN_prog解锁进度')):
+    if _old862 in _rr862: _b862.append('round_reward仍读取%s作为发奖证明' % _lab862)
 _rb862 = open('hansen_round_bar.js', encoding='utf-8', errors='replace').read() if __import__('os').path.exists('hansen_round_bar.js') else ''
 for _k862, _lab862 in (('hsnRoundBar', '进度器ID'), ("HansenRoundReward", 'API依赖'), ('window.HansenRoundBar', '对外暴露'), ('showScreen.__hrbWrapped', 'showScreen包装标志'), ('body.hsn-boss-battle #', '战斗态隐藏进度器防超屏')):
     if _k862 not in _rb862: _b862.append('round_bar缺【%s】' % _lab862)
 _bg862 = open('hansen_spellbee_gems.js', encoding='utf-8', errors='replace').read() if __import__('os').path.exists('hansen_spellbee_gems.js') else ''
-for _k862, _lab862 in (('hansen_bee_gem_daily', '每日存储key'), ('{n:5, gem:1}', '5词档'), ('{n:10, gem:2}', '10词档'), ('{n:20, gem:5}', '20词档'), ('isCrystalized', '已结晶过滤'), ('HansenSpellbeeGems', '对外暴露')):
+for _k862, _lab862 in (('hansen_bee_gem_daily', '每日存储key'), ('{n:5,gem:1}', '5词档'), ('{n:10,gem:2}', '10词档'), ('{n:20,gem:5}', '20词档'), ('isCrystalDone', '已结晶过滤'), ('canonicalSlot', 'canonical词位去重'), ('HansenSpellbeeGems', '对外暴露')):
     if _k862 not in _bg862: _b862.append('spellbee_gems缺【%s】' % _lab862)
 _sj862 = open('hansen_spellbee.js', encoding='utf-8', errors='replace').read()
-if 'HansenSpellbeeGems.record(d.word)' not in _sj862: _b862.append('岛侧spellbee mastery分支未接钻石记录')
+if any(_tok862 in _sj862 for _tok862 in ('HansenSpellbeeGems.prepare(', 'HansenSpellbeeGems.begin(', 'HansenSpellbeeGems.commit(')):
+    _b862.append('岛侧 Bee 仍调用已停用的 5/10/20 新词钻石事务')
 _t862 = open('template.html', encoding='utf-8', errors='replace').read()
 for _k862 in ('hansen_round_bar.js?v=', 'hansen_spellbee_gems.js?v='):  # 版本无关(死版本号曾在build升戳时自炸)
     if _k862 not in _t862: _b862.append('template未接线【%s】' % _k862)
 _eg862 = open('hansen_econ_guide.js', encoding='utf-8', errors='replace').read()
-for _k862, _lab862 in (('elephant', 'elephant例子'), ('每岛每天限一次', '按岛防刷描述'), ('星海大冒险大满贯 = +100', '星海100'), ('护甲系统已下架', '护甲已删声明'), ('大满贯进度器', '进度器提示'), ('Spelling Bee 每日新词里程碑', 'Bee里程碑描述'), ('拼对 <b>5 个 → +1', '5档'), ('累计 <b>10 个 → 再+2', '10档'), ('累计 <b>20 个 → 再+5', '20档'), ('elephant 举例', 'elephant案例'), ('四条来路都防刷', '钻石卡副标题重写')):
+for _k862, _lab862 in (('认真拼写，才能拿钻石', '钻石总原则'), ('单词达到五星', '五星入口'), ('得到 4 钻石', '每词4钻'), ('得到 50 钻石', '全岛50钻'), ('88 钻石', '首领全通88钻'), ('得到 100 钻石', '女帝终战100钻'), ('钻石新贵成就', '唯一钻石成就'), ('参加拼写蜂', '普通拼写金币入口')):
     if _k862 and _k862 not in _eg862: _b862.append('econ_guide钻石卡缺【%s】' % (_lab862 or _k862))
-if _b862: fail('v862 大满贯发钻+按岛防刷+Bee里程碑+说明书重写: ' + str(_b862[:6]))
-else: ok('v862 (Hansen: 大满贯真发钻+按岛每日防刷+星海100+Bee每日里程碑+进度器+说明书重写删护甲): ①round_reward按岛存储+防刷: _iKey()/ROUND_KEY()/COUNT_KEY()/GEMDAY_KEY()都按岛·星海GEM_AMOUNT=100其余88·onWin发钻走gemPaidToday闸门·金币300+加速120照发不受限·老全局key一次性基线迁移·真机四验(动物88↑动物再通钻0金300·食物88·星海100全对) ②round_bar #bossScreen底部三态卡(未领/已领/未通关·showScreen包装自动刷新) ③spellbee_gems 5/10/20→1/3/8💎累计封顶8·hansen_bee_gem_daily今日词集合去重·crystal.mastered已结晶不算·真机22词gemGain=8·同词重触发0 ④岛侧spellbee mastery分支同时走markAnswer(v861全家桶)+HansenSpellbeeGems.record ⑤econ_guide钻石卡完全重写: 四路(结晶4·大满贯88岛/100星海·Bee 5/10/20)+elephant周一到周五全流程+护甲已删声明+进度器提示+金币卡补第⑥条"一岛通关一轮+300金+2h加速". v862')
+if _b862: fail('v946 HF6 大满贯逐轮state+receipt+Bee旧里程碑停发+说明书: ' + str(_b862[:6]))
+else: ok('v946 HF6 首领/拼写/四份速查：普通/Land每完整奖励轮88，女帝一次100；永久解锁进度不再冒充本轮证明')
 
 
 # ---- 🔴 v863 (Hansen真机: 亮色下岛内大量字看不清+发糊+部分卡背景被改——七屏×两亮色逐元素扫描驱动·palette层五批补丁统一修) ----
 # 🔴v863: ①#bossScreen深底归位(v856电影感钦令补完: 此前只还原内联字·屏底与继承字漏网) ②深色纯件还原(util-card/psw三件/ach-total字浅+金回金) ③通用inline金五色+#cbd5e1→深琥珀/深灰(!important必须: inline优先级>一切非imp规则) ④mode-card全域白+黑晕(任何own底可读) ⑤金渐变容器属性选内文深棕 ⑥灭晕(screen低优全局+island-hero/section-label imp) ⑦横幅金系补还原 ⑧亮色ink-2/3深化 ⑨back-btn浅字 ⑩ach-foot2/prog琥珀 ⑪⑮⑰⑳宠物屏系 ⑫⑯设置卡翻浅玻璃+h3琥珀 ⑭深提示条(#1e1b4b三写法+linear变体)字浅 ⑱settings警示红深化 ⑲cbd5e1通用+深区还原
 _b863 = []
 _p863 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
-for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:#92400e!important}', '金转琥珀imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#1a1200', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:#92400e", '设置h3琥珀'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
+for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:var(--pal-accent-text,#1e40af)!important}', '金转主题强调色imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#1a1200', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:var(--pal-accent-text,#1e40af)", '设置h3主题强调色'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
     if _k863 not in _p863: _b863.append('palette缺【%s】' % _lab863)
 _i863 = open('index.html', encoding='utf-8', errors='replace').read()
-for _k863, _lab863 in (('.foot-slogan{ color:#78350f !important', '页脚slogan'), ('.foot-tip{ color:#57534e !important', '页脚tips')):
+for _k863, _lab863 in (('.foot-slogan{ color:var(--pal-accent-text,#3730a3) !important', '页脚slogan'), ('.foot-tip{ color:#57534e !important', '页脚tips')):
     if _k863 not in _i863: _b863.append('index缺【%s】' % _lab863)
 if _b863: fail('v863 亮色全面整改: ' + str(_b863[:6]))
 else: ok('v863 (Hansen: 亮色下岛内看不清/发糊/卡底被改——全面整改): 扫描器/tmp级七屏(home/settings/boss/quests/ach/stats/pet)×mint/cream逐元素对比度+光晕检测·98→52→19→8条(剩余=effBg误判/emoji/暗色同值放行)·五批20组规则: boss屏深底归位(选关墙一条通杀)+深纯件字回浅金回金+inline金五色/cbd5e1琥珀深灰(imp铁律: inline>非imp)+mode卡全域白黑晕+金渐变容器(两种空格写法)内深棕+灭晕(低优全局·imp白名单黑晕存活)+设置屏直系卡翻浅玻璃h3琥珀stat红b深红+ink-2/3深化+back-btn/深提示条(#1e1b4b含linear变体)/宠物屏(id级特异性修反杀)全治·computed铁证抽查: 星灵e2e8f0压深行/hint浅字压1e1b4b/掌握进度浅压0f172a/ANIMAL黑细晕. 特异性层级: id还原>类+属性深区>纯属性通用琥珀(同imp). v863')
 
 
-# ---- 🔴 v864 (Hansen: 说明书按最新机制大更新·特别详细·大白话·立刻就懂 + 全项目时效审计过时数字清零) ----
-# 🔴v864: ①三卡各加"一句话版"速览 ②钻石卡新增"每个岛Boss进度完全独立"专段(动物岛第4关/食物岛无关活例)+每天防刷条+进度器在哪看 ③结晶条补"星星在哪看"(飘星+主页💎结晶按钮+角标=差一次就+4💎的词数) ④金币⑤首胜按岛/⑥不限次数强化 ⑤index四处"22阶"→36阶(meta/hero/统计芯片/宠物养成卡) ⑥round_reward/addiction过时注释时效化(跨岛共用→按岛·3195护甲价→2560)
+# ---- v864 历史时效检查 + v946 HF4 四份儿童速查 ----
 _b864 = []
 _eg864 = open('hansen_econ_guide.js', encoding='utf-8', errors='replace').read()
-for _k864, _lab864 in (('一句话版', '速览行'), ('每个岛的 Boss 进度完全独立', '按岛独立专段'), ('打到第 4 关', '第4关活例'), ('知识结晶按钮', '星星在哪看'), ('大满贯进度器</b>随时告诉你', '进度器在哪看'), ('首胜是每个岛各自算的', '首胜按岛'), ('每天防刷', '每天防刷条')):
+for _k864, _lab864 in (('做学习任务，就能拿金币', '金币速览'), ('认真拼写，才能拿钻石', '钻石速览'), ('宠物升级：经验要够，已掌握单词也要够', '升级速览'), ('所有岛屿的经验，都加给同一只宠物', '经验速览'), ('探索单词 → 加固知识结晶', '结晶入口'), ('显示“还差 3 个”', '升级缺词解释')):
     if _k864 not in _eg864: _b864.append('econ_guide缺【%s】' % _lab864)
-if _eg864.count('一句话版') != 3: _b864.append('速览行应恰3条(金/钻/宠各1)')
+if _eg864.count('<div class="hsn-eg-key">') != 4: _b864.append('四份攻略应各有1条速览')
 _i864 = open('index.html', encoding='utf-8', errors='replace').read()
 import re as _re864
 if _re864.search('22[  ]?阶', _i864): _b864.append('index残留过时"22阶"(实际36)')
@@ -7527,7 +7610,7 @@ _rr864 = open('hansen_round_reward.js', encoding='utf-8', errors='replace').read
 if '跨岛共用' in _rr864: _b864.append('round_reward残留过时"跨岛共用"注释(v862已按岛)')
 if '3195' in _rr864: _b864.append('round_reward残留过时护甲价注释')
 if _b864: fail('v864 说明书最新机制+时效审计: ' + str(_b864[:6]))
-else: ok('v864 (Hansen: 说明书最新机制大更新+时效清零): ①三卡顶部"💡一句话版"速览(金=每天签到+任务+新Boss+Bee稳几百金/钻=复习4💎+换岛88+Bee 8=日100~200/宠=好好玩它自己长) ②钻石卡"每个岛Boss进度完全独立"高亮专段: 动物岛打到第4关明天接着第5关·转食物岛从它自己进度算·每岛自己一轮自己88自己每天一次+防刷条独立成条+进度器在哪看 ③结晶"星星在哪看": 答对飘星+主页💎按钮+角标=4星差一次词数先复习最划算 ④首胜按岛(动物第3关≠食物第3关两边都拿钱)+⑥金币加速不限次数 ⑤全项目时效: index四处22阶→36(meta/hero段/统计芯片/宠物养成卡)+round_reward头注按岛化+护甲价注2560+addiction注v862多渠道·真机八点验全绿0报错. v864')
+else: ok('v946 HF4 设置说明时效复核：四份折叠速查、当前奖励与36阶宠物均使用简短中文')
 
 
 # ---- 🔴 v865 (Hansen: 横幅从"赛季"改成【番外篇·星海觉醒】第19座秘境副本入口·去倒计时·去积分条·纯酷炫入口内容点进去看) ----
@@ -7546,34 +7629,68 @@ if '#hsnSeasonBar .hsn-ex-tag' not in _p865: _b865.append('palette缺副本卡�
 if _b865: fail('v865 番外篇副本入口卡: '+str(_b865[:6]))
 else: ok('v865 (Hansen: 横幅改番外篇星海觉醒第19座秘境·去倒计时去积分): buildProgressBar彻底重做为副本入口卡=深紫渐变(#1e1b4b→#3b0764→#0c1538)+星云球体+"✦番外篇EXTRA"金标签+"第19座秘境"+星海觉醒大标题+通关拿卡副标题(已征服则显👑限定卡已入册)+金色"进入副本"钮·真机验: 番外篇/进入在位·无倒计时(还剩N天删)·无积分条(赛季积分/还差N分/nextMilestone全删)·0报错·遵守无旋转闪烁震动透明度循环禁令(仅:active缩放)·palette还原区保金tag/enter深字亮色不误伤·面板外壳文案去时间感(赛季准备中→星海秘境). v865')
 
-# ---- 🔴 v866 (Hansen: 大满贯进度器统计根本不准·跨岛乱跳·根修——改读islandClears权威通关记录) ----
-# 病根: 进度器靠hook bossVictory+读S.level(冒险等级·跨岛共享)瞎记通关关号, 与真实boss通关记录(cards.islandClears)完全脱节。修: cards暴露getIslandClearedLevels()只读本岛真实通关关号, 进度器readRound直读它, 废弃S.level猜测。
+# ---- v946 HF6 Boss大满贯：普通/Land独立逐轮state；女帝终战独立 ----
 _b866=[]
-_c866=open('hansen_cards.js',encoding='utf-8',errors='replace').read()
-if 'window.getIslandClearedLevels' not in _c866: _b866.append('cards未暴露getIslandClearedLevels权威只读API')
-if 'd.islandClears[lv]) || []' not in _c866 and 'islandClears && d.islandClears[lv]' not in _c866: _b866.append('getIslandClearedLevels未读islandClears')
 _r866=open('hansen_round_reward.js',encoding='utf-8',errors='replace').read()
-if 'window.getIslandClearedLevels()' not in _r866: _b866.append('进度器readRound未改读权威源')
-if 'markBossWin(cards)已在打赢时' not in _r866: _b866.append('onWin未按权威源重写(应不再自己push lv)')
-# 负向: readRound不得再把 S.level 当关号(那是冒险等级)
-_rr_read=_r866[_r866.find('function readRound'):_r866.find('function writeRound')]
-if 'S.level' in _rr_read: _b866.append('readRound仍残留S.level瞎猜(应彻底移除)')
-if _b866: fail('v866 大满贯进度器根修: '+str(_b866[:6]))
-else: ok('v866 (Hansen: 大满贯进度器统计不准根修·跨岛乱跳): 病根=进度器hook bossVictory读S.level(冒险等级跨岛共享)瞎记关号·与真实boss通关记录脱节→显示6/20但实际没打那么多. 修=①cards暴露getIslandClearedLevels()只读本岛真实通关关号(源自islandClears权威数据·与卡册"已击败X/20"同源) ②进度器readRound直读它·废弃S.level猜测·废弃自维护集合 ③onWin按权威源重写(markBossWin已记通关·不再自己push)·全通+今日未发钻→发钻(每日防刷). 真机验: 只打1/2/3关→准显3/20(旧记乱数)·食物岛不继承动物岛·S.level=11只打第3关仍记[3]不是[11]·全通发88钻·同日重复0钻. v866')
+for _k866,_lab866 in (
+    ("STATE_PREFIX = 'hansen_boss_round_state_v946_'",'每岛独立state key'),
+    ('function modeFor(k)','普通/Land模式隔离'),
+    ('window.BOSSES.length','Land动态Boss总数'),
+    ('function validState(x)','state严格校验'),
+    ('x.roundNo!==x.completedCount+1','roundNo连续性'),
+    ('!validReceipt(x.lastReceipt,x.completedCount)','receipt严格校验'),
+    ('function stateResult()','state读取结果'),
+    ('function recordRoundWin(lv)','真实胜利落本轮'),
+    ('if(merged.indexOf(lv)>=0)','本轮同关去重'),
+    ('function txStatus()','pending严格校验'),
+    ('function recoverFullStateWithoutTx(show)','满轮无pending自动重建事务'),
+    ('if(status.absent)return recoverFullStateWithoutTx(show)','无pending不能误判无待结算奖励'),
+    ('if(!isFull(r.state.cleared,r.state.total))return true','只对完整本轮自动续结算'),
+    ("receiptId:'round:v946:'",'receipt绑定岛和roundNo'),
+    ('roundNo:tx.roundNo+1','结算推进下一轮'),
+    ('completedCount:tx.roundNo','结算提交完成轮'),
+    ('cleared:[]','结算清空下一轮'),
+    ('Boss 本轮进度存档异常，奖励已暂停；原始数据已保留','坏state fail-closed'),
+    ('Boss 奖励恢复凭据异常，奖励已暂停；原始数据已保留','坏pending fail-closed'),
+):
+    if _k866 not in _r866: _b866.append('round_reward缺【%s】'%_lab866)
+if 'window.getIslandClearedLevels()' in _r866:
+    _b866.append('round_reward仍读取永久islandClears，历史全通可伪造新轮')
+if "localStorage.getItem(k+'_prog')" in _r866:
+    _b866.append('round_reward仍读取landN_prog，历史解锁可伪造新轮')
+_rr_start=_r866.find('function readRound')
+_rr_end=_r866.find('function isFull',_rr_start)
+_rr_read=_r866[_rr_start:_rr_end]
+if 'S.level' in _rr_read or 'getIslandClearedLevels' in _rr_read or "'_prog'" in _rr_read:
+    _b866.append('readRound未保持为HF6 state只读视图')
+_win866=_r866[_r866.find('function onWinModern(lv)'):_r866.find('function onWin(lv)')]
+if not (0 <= _win866.find('recordRoundWin(lv)') < _win866.find('isFull(win.state.cleared,win.state.total)') < _win866.find('writeJson(txKey(),tx)')):
+    _b866.append('现代结算未按“先记本轮胜利→验满轮→建pending”顺序')
+if 'gemPaidToday()' in _win866 or 'markGemPaidToday' in _win866:
+    _b866.append('普通/Land现代结算仍依赖旧每日闸门')
+if _b866: fail('v946 HF6 Boss大满贯独立逐轮state: '+str(_b866[:8]))
+else: ok('v946 HF6 Boss大满贯：普通/Land只认各岛当前奖励轮实际胜利state，重复关去重；满轮以roundNo receipt一次结算并原子清账，满轮state与pending之间崩溃可自动重建事务；损坏state/pending fail-closed；永久通关与landN_prog仅解锁不发奖')
 
-# ---- 🔴 v867 (Hansen: 星海番外篇独立6关制·六柱试炼·每柱15💎全通100💎·根治星海统计乱套用20关) ----
+# ---- v941 女帝正式奖励：8枚真实Land旗 + 实际Lv6，一次性100钻；旧六柱只迁移补差 ----
 _b867=[]
-_r867=open('hansen_round_reward.js',encoding='utf-8',errors='replace').read()
-for _k867,_lab867 in (('function TOTAL_FN()','关数函数化'),('_isSeason(_iKey()) ? 6 : 20','星海6正片20'),('function onWinSeason()','星海结算'),('SEASON_PER_PILLAR = 15','每柱15'),('SEASON_FULL_TOTAL = 100','全通100'),('__seasonPillarsLit','六柱查询依赖'),('SEASON_FULL_TOTAL - alreadyGems','补足到100')):
+_r867=_r866
+for _k867,_lab867 in (
+    ("function isSeason(k){ return k==='season'; }",'只认女帝主页面'),
+    ("localStorage.getItem('hsn_landmap_cleared_'+i)==='1'",'读取8枚真实Land旗'),
+    ("if((lv|0)!==6 || seasonLandClears().length!==8) return false;",'实际Lv6与8旗双门'),
+    ("var SEASON_FINAL_KEY = 'hansen_season_final_reward_v941'",'一次性终战账本'),
+    ("var SEASON_LEGACY_KEY = 'hansen_season_pillar_gems'",'旧账仅迁移'),
+    ('credited:count===6?100:count*15','旧六柱钻石补差'),
+    ('legacy.finalBenefitsAlreadyPaid?0:REWARD_COIN','旧终柱避免重复金币'),
+    ("showReward({mode:'season'",'女帝动态奖励弹窗'),
+):
     if _k867 not in _r867: _b867.append('round_reward缺【%s】'%_lab867)
 _t867=open('template.html',encoding='utf-8',errors='replace').read()
-if 'window.__seasonPillarsLit = function()' not in _t867: _b867.append('template缺__seasonPillarsLit接口')
-if "HansenSeason.hasCard('S1B'+N)" not in _t867: _b867.append('六柱判据未读守关卡S1B(N)')
 _rb867=open('hansen_round_bar.js',encoding='utf-8',errors='replace').read()
-if '六柱试炼' not in _rb867: _b867.append('进度器缺星海六柱UI')
-if '每点亮一柱 +15💎' not in _rb867: _b867.append('进度器缺每柱15文案')
-if _b867: fail('v867 星海独立六柱制: '+str(_b867[:6]))
-else: ok('v867 (Hansen: 星海番外篇独立6关制·六柱试炼): ①关数函数化TOTAL_FN=星海6正片20 ②readRound星海分支读__seasonPillarsLit(=已拿守关卡S1B1~5+限定卡S1的柱号·与正片islandClears彻底分开) ③onWinSeason独立结算: 每点亮一柱+15💎(按柱防重hansen_season_pillar_gems)·6柱全通补足到100💎整·金币300+加速120点亮就给 ④进度器星海UI="🌌星海觉醒六柱试炼·点亮N/6柱·每柱15全通100+限定卡" ⑤真机验: 星海total=6·点亮2柱发30💎·重复0·全通补足70(共100)·正片total仍20不污染. 三层战斗(初见→再战→决胜)设计稿存KB待专项做. v867')
+if 'window.__seasonPillarsLit = function()' in _t867: _b867.append('template复活旧__seasonPillarsLit正式判据')
+if '六柱试炼' in _rb867 or '每点亮一柱 +15' in _rb867: _b867.append('进度器复活旧六柱正式UI')
+if _b867: fail('v941 女帝正式奖励真实性: '+str(_b867[:8]))
+else: ok('v941 女帝奖励真实性: 8枚持久化Land旗+实际Lv6才发一次性100钻/300金/120分；旧六柱只作补差且不重复权益')
 
 # ---- 🔴 v868 (Hansen: 星海章节95个单词真人发音导入·响度归一到-16 LUFS) ----
 _b868 = []
@@ -7637,7 +7754,7 @@ try:
     if _pn72<0: _pn72=_ba72.find("{n:'淘气小幽灵'")
     _pseg72=_ba72[_pn72:_ba72.find('];',_pn72)] if _pn72>=0 else ''
     _pcnt72=_pseg72.count("{n:'")
-    if _pcnt72!=60: _l72.append('特效调参面板BOSSES!=60:%d'%_pcnt72)
+    if _pcnt72!=61: _l72.append('特效调参面板BOSSES!=61:%d'%_pcnt72)
     _hs72=open('hansen_season.js',encoding='utf-8',errors='replace').read()  # 🔴v874: 入口卡已撤·番外篇横幅=唯一入口
     if "window.location.href='land_map.html'" not in _hs72: _l72.append('番外篇横幅未指向land_map(v874:横幅=唯一入口)')
     _art72=[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
@@ -7645,7 +7762,7 @@ try:
 except Exception as _e72:
     _l72.append('守卫自身异常:'+str(_e72)[:80])
 if _l72: fail('v873 单词大陆8岛+特效全接入: '+str(_l72[:8]))
-else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板60boss·index入口卡·30立绘≤800KB)')
+else: ok('v873 单词大陆 (8岛land1-8各30词·39Boss分族·守关首领含剑神⑤/魔皇①/弗沙欧⑧·landN_prog顺序闯关·hsn_landmap_cleared_旗·land_map地图·女帝双路解锁(星海5域或大陆8岛)·29工坊特效+FXCore注入·__WFX一表分发·调参面板61boss·index入口卡·30立绘≤800KB)')
 
 
 # 🔴 v874(Hansen真机三诉求·定稿): ①旧Boss介绍屏(挑战来啦/开始挑战)彻底删除·点打boss直进选关网格 ②番外篇星海觉醒=单词大陆(横幅直进land_map·旧宇宙地图/5星域整套废除) ③选关网格底部配色牌
@@ -7695,8 +7812,23 @@ try:
     if "openIsland('land_map.html')" not in _hs75: _l75.append('横幅未壳内直开(openIsland)')
     if "fetch('land_map.html'" not in _hs75: _l75.append('缺land_map空闲预热(零延迟)')
     _lm75=open('land_map.html',encoding='utf-8',errors='replace').read()
-    if "||function(f){window.location.href=f})('island_land'+n+'.html')" not in _lm75: _l75.append('地图进岛未壳化')
-    if "cache:'force-cache'" not in _lm75: _l75.append('地图缺8岛空闲预热(零延迟)')
+    _go75_start=_lm75.find('function goIsland(n)')
+    _go75_end=_lm75.find('function goBack()',_go75_start)
+    _go75=_lm75[_go75_start:_go75_end] if _go75_start>=0 and _go75_end>_go75_start else ''
+    for _tok75 in ("var file='island_land'+n+'.html'",
+                   "typeof window.parent.openIsland==='function'",
+                   'window.parent.openIsland(file)', 'window.location.assign(file)'):
+        if _tok75 not in _go75: _l75.append('地图进岛缺安全壳路由/同源回退:'+_tok75)
+    if 'window.location.href' in _go75 or '://' in _go75:
+        _l75.append('地图进岛回退不是同源相对 location.assign')
+    _pre75m=re.search(r"try\{\s*var _cn=navigator\.connection[\s\S]*?\}catch\(_e2\)\{\}",_lm75)
+    _pre75=_pre75m.group(0) if _pre75m else ''
+    for _tok75 in ("_cn&&!_cn.saveData&&_cn.effectiveType==='4g'",
+                   'var next=0', 'if(!clearedN(i)){next=i;break;}', 'if(next){',
+                   "fetch('island_land'+next+'.html'", "credentials:'same-origin'"):
+        if _tok75 not in _pre75: _l75.append('地图节流预热契约缺:'+_tok75)
+    if _pre75.count("fetch('island_land'")!=1:
+        _l75.append('地图预热必须最多只有一个 fetch 调用')
     if "||function(f){window.location.href=f})(\\'island_season.html\\')" not in _lm75: _l75.append('地图女帝跳未壳化')
     # ② 岛名正则纳入数字(复习STORAGE_KEY/错题总览在land点火的命门)
     for _f75,_lab75 in (('hansen_upgrade.js','upgrade'),('hansen_wrong_overview.js','overview')):
@@ -7712,14 +7844,16 @@ try:
     _ix75=open('index.html',encoding='utf-8',errors='replace').read()
     for _k75 in ["'wordIslandLand1':","'wordIslandLand8':","short:'星海终战'"]:
         if _k75 not in _ix75: _l75.append('index META缺:'+_k75)
-    # ④ 大满贯 land 分支
+    # ④ 大满贯 Land 分支：动态总关数，但奖励进度只读HF6逐轮state。
     _rr75=open('hansen_round_reward.js',encoding='utf-8',errors='replace').read()
-    for _k75 in ["function _isLand(k)","/^land[1-8]$/","_iKey()+'_prog'","if(_isLand(_iKey())){ try{ if(window.BOSSES"]:
+    for _k75 in ["function isLand(k)","/^land[1-8]$/","STATE_PREFIX = 'hansen_boss_round_state_v946_'","function modeFor(k)","function recordRoundWin(lv)","if(isLand(k)){"]:
         if _k75 not in _rr75: _l75.append('round_reward缺land分支:'+_k75[:34])
+    if "localStorage.getItem(k+'_prog')" in _rr75 or 'window.getIslandClearedLevels()' in _rr75:
+        _l75.append('round_reward的Land奖励仍读取永久解锁/通关历史')
 except Exception as _e75:
     _l75.append('守卫自身异常:'+str(_e75)[:80])
 if _l75: fail('v875 星海觉醒彻底打通: '+str(_l75[:8]))
-else: ok('v875 (Hansen·彻底打通任督二脉): 星海觉醒(单词大陆)彻底成为游戏一部分——①导航全壳化: 横幅在index直接openIsland换装(零白屏)·land_map进岛/女帝跳全走parent.openIsland canonical格式(零历史污染)·空闲fetch预热land_map(零延迟) ②命门修复: upgrade/overview岛名正则[a-z]→[a-z0-9](land1-8/season同门而入·复习STORAGE_KEY与错题总览在大陆岛正常点火) ③三清单入册: 错题总览FILE_MAP+ISLAND_INFO/upgrade映射/index META各+9条(8岛+星海终战)——错题全局可见·复习共用·最近岛屿/继续上次全认 ④大满贯land分支: total=本岛BOSSES数(5或4)·进度=landN_prog·通一轮88钻/日·与正片islandClears/星海六柱三轨并行互不污染')
+else: ok('v875/HF6 星海觉醒彻底打通：导航、复习错题与Land清单完整；Land大满贯总数取本岛BOSSES.length，但奖励进度只认每岛当前轮state，永久landN_prog仅负责解锁')
 
 
 # 🔴 v875(Hansen·"彻底打通·像一间房门全开·零延迟零网页感·复习错题共用一套"): 单词大陆全域壳内互通+系统共用 不变量
@@ -7738,18 +7872,35 @@ try:
     for _k75 in ["'wordIslandLand8'","'wordIslandSeason'"]:
         if _k75 not in _ix75: _l75.append('index续玩META缺:'+_k75)
     _rr75=open('hansen_round_reward.js',encoding='utf-8',errors='replace').read()
-    for _k75 in ['_isLand',"_iKey()+'_prog'"]:
+    for _k75 in ['isLand',"STATE_PREFIX = 'hansen_boss_round_state_v946_'",'function recordRoundWin(lv)']:
         if _k75 not in _rr75: _l75.append('round_reward缺land轨:'+_k75)
+    if "localStorage.getItem(k+'_prog')" in _rr75 or 'window.getIslandClearedLevels()' in _rr75:
+        _l75.append('round_reward的Land轨仍把历史解锁/通关记录当本轮证明')
     _hs75=open('hansen_season.js',encoding='utf-8',errors='replace').read()
     if "openIsland('land_map.html')" not in _hs75: _l75.append('横幅未走壳(openIsland)')
     if "fetch('land_map.html'" not in _hs75: _l75.append('横幅缺地图空闲预热')
     _lm75=open('land_map.html',encoding='utf-8',errors='replace').read()
-    if "window.parent.openIsland)||function(f){window.location.href=f})('island_land'+n+'.html')" not in _lm75: _l75.append('地图进岛未走壳canonical')
-    if "fetch('island_land'+k+'.html'" not in _lm75: _l75.append('地图缺8岛空闲预热')
+    _go75_start=_lm75.find('function goIsland(n)')
+    _go75_end=_lm75.find('function goBack()',_go75_start)
+    _go75=_lm75[_go75_start:_go75_end] if _go75_start>=0 and _go75_end>_go75_start else ''
+    for _tok75 in ("var file='island_land'+n+'.html'",
+                   "typeof window.parent.openIsland==='function'",
+                   'window.parent.openIsland(file)', 'window.location.assign(file)'):
+        if _tok75 not in _go75: _l75.append('地图进岛缺安全壳路由/同源回退:'+_tok75)
+    if 'window.location.href' in _go75 or '://' in _go75:
+        _l75.append('地图进岛回退不是同源相对 location.assign')
+    _pre75m=re.search(r"try\{\s*var _cn=navigator\.connection[\s\S]*?\}catch\(_e2\)\{\}",_lm75)
+    _pre75=_pre75m.group(0) if _pre75m else ''
+    for _tok75 in ("_cn&&!_cn.saveData&&_cn.effectiveType==='4g'",
+                   'var next=0', 'if(!clearedN(i)){next=i;break;}', 'if(next){',
+                   "fetch('island_land'+next+'.html'", "credentials:'same-origin'"):
+        if _tok75 not in _pre75: _l75.append('地图节流预热契约缺:'+_tok75)
+    if _pre75.count("fetch('island_land'")!=1:
+        _l75.append('地图预热必须最多只有一个 fetch 调用')
 except Exception as _e75:
     _l75.append('守卫自身异常:'+str(_e75)[:80])
 if _l75: fail('v875 彻底打通(壳内互通+系统共用+预热): '+str(_l75[:8]))
-else: ok('v875 彻底打通 (Hansen·像一间房门全开): ①壳内互通链=横幅openIsland进壳→land_map壳内(goIsland走parent.openIsland canonical)→岛goHome回land_map(home_link双分支·壳内openIsland/独立replace)→goBack关壳回index·顶层永不跳转零历史污染 ②系统共用=upgrade岛名正则纳数字→STORAGE_KEY在land点火→复习/结晶/词汇追踪/错题全走同一套按岛键·错题总览双map+index续玩META含land1-8与星海终战 ③round_reward大陆轨=_isLand+landN_prog[1..prog]+TOTAL_FN本岛BOSSES数·守关破=全通88钻(三轨隔离) ④零延迟=横幅空闲预热land_map+地图空闲错峰预热8岛(force-cache礼让式)')
+else: ok('v875/HF6 彻底打通：壳内互通、系统共用、节流预热保持；Land奖励轨使用动态Boss总数与独立逐轮state，不再读取landN_prog发奖')
 
 
 # 🔴 v876(Hansen五诉求): ①72小时全Boss试用 ②拼写蜂根治(绝不落全池) ③复习错题完美 ④金币钻石覆盖新岛 ⑤大陆Boss难度↑(血量700+·拼写题50%·反击按关序加重)
@@ -7781,7 +7932,7 @@ try:
 except Exception as _e76:
     _l76.append('守卫自身异常:'+str(_e76)[:80])
 if _l76: fail('v876 试用72h+蜂根治+大陆难度: '+str(_l76[:8]))
-else: ok('v876 (Hansen五诉求): ①72小时全Boss试用开放——freepass升级72h(政策版本键·所有玩家含已用完24h的重开一轮·到期自动关零提醒)·暴露HansenFreepass只读API·大陆8岛zone选关期内全格可挑战(🆓标·真实前沿prog/通关旗零污染)·女帝终战期内可试打(限定卡/纪事仍按真实进度)·正片20关由原hook覆盖 ②拼写蜂根治"进来直接考所有单词"——240词按groups.json重打land1-8标签(各30·0残留)·season=8岛合集别名(女帝240备考)·按岛过滤为空【绝不落全池】(嵌岛先吃父岛allW·再空明确提示)·补8岛中文名 ③复习/错题实测完美(land错词入档→review屏显示→全局总览含迷雾心湖与错词与其他岛·结晶键自动生成) ④金币钻石完美覆盖(守关破=每岛每日88钻+300金+120加速实测·学词金币/成就钻=模板克隆天然继承) ⑤大陆Boss难度↑——血量阶梯700/780/860/940/1050(land8=760/880/1000/1150)·血量阶梯保留·【v877改: 拼写题复用正片现成机制·见v877守卫】)')
+else: ok('v876/HF6 (Hansen五诉求): ①72小时Boss试用只负责挑战解锁，不写大满贯奖励进度 ②拼写蜂按岛过滤 ③复习/错题覆盖Land ④金币钻石覆盖Land，Boss奖励必须完成当前逐轮state后结算88钻+300金+120分钟 ⑤大陆Boss难度阶梯保持')
 
 
 # 🔴 v877(Hansen「全面进化贾维斯·成为超级智能体·让小程序达最完美」): 贾维斯 2.0 超级全域体检引擎自守卫——
@@ -8420,7 +8571,7 @@ try:
     if 'sbDiffOff' not in _sb898: _l898.append('缺空难度禁用类 sbDiffOff')
     if "c.classList.contains('sbDiffOff')" not in _sb898: _l898.append('bindPick 未跳过被禁用难度')
     # ② 岛过滤加固: island缺失/空 都走fallback(绝不落全池)。旧的 if(_sbIsland){var _isl 结构已重构
-    if 'if(_sbIsland&&_isl.length)' not in _sb898: _l898.append('岛过滤未加固(缺 if(_sbIsland&&_isl.length))')
+    if 'else if(_sbIsland)' not in _sb898 or 'if(_isl.length){ WORDS=_isl; }' not in _sb898: _l898.append('岛过滤未加固(显式岛参数+非空结果门缺失)')
     if 'if(_sbIsland){var _isl=WORDS.filter' in _sb898: _l898.append('旧岛过滤结构残留(空island仍会落全池)')
     if '绝不落全池' not in _sb898: _l898.append('缺 绝不落全池 兜底')
 except Exception as _e898:
@@ -8920,10 +9071,13 @@ _GUARDS937 = [
 ]
 try:
     _bp937 = open('build.py', encoding='utf-8', errors='replace').read()
+    _loop937 = '_run([sys.executable, guard], stage, guard' in _bp937 and 'for guard in BROWSER_GUARDS:' in _bp937
     for _f937, _call937, _what937 in _GUARDS937:
         if not os.path.exists(_f937):
             _g937.append('守卫文件 %s 不见了 —— %s 这道墙没了' % (_f937, _what937))
-        elif ('subprocess.run([sys.executable, ' + _call937) not in _bp937:
+        elif _f937 == 'sync_guard.py' and '"sync_guard.py", "--pre-build"' not in _bp937:
+            _g937.append('%s 的调用被从 build.py 里摘掉了 —— %s 这道墙形同虚设' % (_f937, _what937))
+        elif _f937 != 'sync_guard.py' and (_f937 not in _bp937 or not _loop937):
             _g937.append('%s 的调用被从 build.py 里摘掉了 —— %s 这道墙形同虚设' % (_f937, _what937))
     for _dep937 in ('dep_map.mjs', 'img_size_audit.mjs', 'font_probe.mjs', 'e2e_probe.mjs', 'pet_probe.mjs', 'sb_audit.mjs', 'sb_race.mjs'):
         if not os.path.exists(_dep937):
@@ -9031,6 +9185,618 @@ except Exception as _e930:
     _b930.append('v930 打Boss题面可读性体检异常: %s' % _e930)
 if _b930: fail('v930 打Boss题面可读性: ' + str(_b930[:5]))
 else: ok('v930 (Hansen 截图: "这个是打boss, 就是在做那个拼写题的时候, 你看就是它这个中文字颜色根本就看不清楚。我背后用了一个主题, 然后这个字他现在根本就看不清楚, 这个要怎么处理? 你帮我彻底解决") 打Boss 题面可读性彻底修复 + 上锁。★根因: 打Boss屏的这几行字是【裸压在boss背景图上】的(自身背景全透明): .boss-question(中文题目「忠诚的」·金色)/.boss-q-sub(「看中文意思, 拼出英文:」)/.boss-name(boss名·红)/.boss-hp-text(HP数值)。原设计默认【boss背景一定是深色的】——实测深底上金字 11.55:1 确实很清楚; 但boss的电影主题(HansenCinema九款: 糖果乐园/云端气球/云端梦境/彩虹甜心/焰火盛典…)全是【明亮高饱和的糖果风背景】, Hansen一换主题这些裸字实测暴跌到 2.07~2.93:1(WCAG AA 要4.5) → 根本看不清。而boss台词气泡/选项卡/题型标签一直很清楚——因为【它们本来就有底板】。★之前那版(v76)只给这几行加了【描影text-shadow】: 描影在深底上够用, 在花哨亮底上救不了——这就是为什么一直没修好。★另注: v928的亮色守卫【特意跳过#bossScreen】(打Boss保持电影感的铁律), 所以这个问题一直没被抓到。★修法: 给这几行裸字垫一层【半透明深色底板】(display:table 贴合文字宽度 + margin:auto 居中), 和台词气泡/选项卡完全同一套视觉语言, 毫不违和; 底板不挑背景, 深底/亮底/花底一律稳读。这是【所有配色统一】的基础样式(不随调色板变), 不违反"打Boss任何配色都不动"的铁律。★验证方式(比抽样测几个主题严谨得多): 底板是【半透明纯色】, 所以可以【算出它在任何背景下的最差对比度】——用【纯白】(比任何电影主题都亮的极限)去压底板得到"最透实色", 再算对比度; 最坏情况都达标 = 任何背景都压不垮。实测最坏值: 中文题目 8.10:1(需3.0) · 题目提示 10.43:1(需4.5) · boss名 5.37:1(需4.5) · HP数值 7.90:1(需4.5), 全部达标(修前 2.07~2.93:1)。真机在 糖果乐园/云端梦境/云端气球 三款最亮主题下渲染复核, 0处不合格。v930')
+
+# ---- v960 当前不可变发布链守卫: 图标压缩 + Boss命名 + 白名单部署包 + 完整源码 + 可复现/SHA/密钥扫描 ----
+_b941_release = []
+try:
+    _p941 = open('package_release.py', encoding='utf-8', errors='replace').read()
+    _build941 = open('build.py', encoding='utf-8', errors='replace').read()
+    _jarvis941 = open('jarvis.py', encoding='utf-8', errors='replace').read()
+    if 'DEPLOY_ALLOWED_EXT' not in _p941 or 'DEPLOY_RUNTIME_HTML' not in _p941:
+        _b941_release.append('package_release.py 缺部署扩展名/页面白名单')
+    for _name941 in ('DEPLOY_NAME', 'SOURCE_NAME', 'README_ASSET'):
+        if _name941 not in _p941:
+            _b941_release.append('package_release.py 缺三资产契约 %s' % _name941)
+    for _token941 in ('"evolution_dashboard.html"', 'SOURCE_REQUIRED_FILES = {',
+                      'unexpected = sorted(', 'actual_names != expected_names',
+                      'requested v{version}', 'SECRET_PATTERNS', 'SHA256SUMS',
+                      'ZIP_DATE_TIME', 'os.replace(staged, final)',
+                      '"test_theme_scroll_v944.mjs"',
+                      '"test_sw_upgrade_v944.mjs"',
+                      '"hansen_explore_progress_v945.js"',
+                      '"test_explore_progress_api_v945.mjs"',
+                      '"test_explore_dual_progress_v945.mjs"',
+                      '"test_explore_template_v945.mjs"',
+                      '"test_explore_ui_v945.mjs"',
+                      '"hansen_focused_typing_v946.js"',
+                      '"test_focused_typing_v946.mjs"',
+                      '"test_explore_spelling_gate_v946.mjs"',
+                      '"test_focused_spelling_crystal_v946.mjs"',
+                      '"test_settings_guides_hf4_v946.mjs"',
+                      '"test_boss_timer_hf5_v946.mjs"',
+                      '"test_boss_yecha_red_lotus_v951.mjs"',
+                      '"test_boss_answer_contrast_v952.mjs"',
+                      '"test_boss_admin_entry_v953.mjs"',
+                      '"test_daily_card_alignment_v954.mjs"',
+                      '"test_land_gacha_reveal_v955.mjs"',
+                      '"test_food_word_icons_v956.mjs"',
+                      '"test_food_word_icons_v957.mjs"',
+                      '"apply_user_food_icons_v958.mjs"',
+                      '"test_food_word_icons_v958.mjs"',
+                      '"test_boss_naming_v959.mjs"',
+                      '"test_food_icon_compression_v960.mjs"',
+                      '"_sw_upgrade_v944.html", "hansen_sw_upgrade_gate_v944.js"',
+                      '"hansen_backup_bootstrap_v944.js", "hansen_backup_v944.js"',
+                      'FORBIDDEN_RUNTIME_FILES = {"hansen_backup_bootstrap.js", "hansen_backup.js", "sw.js"}'):
+        if _token941 not in _p941:
+            _b941_release.append('package_release.py 缺实包/输出硬守卫 %s' % _token941)
+    if '"package_release.py", new, "--out"' not in _build941:
+        _b941_release.append('build.py 没有唯一委托 package_release.py')
+    if 'stage.glob("test_*v*.mjs")' not in _build941:
+        _b941_release.append('build.py 未动态执行全部版本化专项回归测试')
+    if 'HANSEN_PLAYWRIGHT_MODULE' not in _build941 or '_stage_runtime_env()' not in _build941:
+        _b941_release.append('build.py 临时stage未继承真实Playwright模块路径')
+    for _token_backup944 in ('BACKUP_BOOTSTRAP', 'BACKUP_RUNTIME', 'SW_GATE', 'SW_WORKER',
+                             'OBSOLETE_BACKUP_RUNTIMES',
+                             '_assert_backup_runtime_contract(stage)'):
+        if _token_backup944 not in _build941:
+            _b941_release.append('build.py 缺v944备份路径契约 %s' % _token_backup944)
+    if 'zipfile.ZipFile' in _build941 or 'EXCLUDE_EXT =' in _build941:
+        _b941_release.append('build.py 仍保留第二套 ZIP 实现/排除表，会与 package_release 漂移')
+    if 'economy_guard.py' not in _jarvis941:
+        _b941_release.append('jarvis.py 未接入 economy_guard.py')
+    _main941 = _build941[_build941.find('def main()'):]
+    if (_main941.find('sync_guard.py') < 0 or _main941.find('_copy_source(stage)') < 0
+            or _main941.find('sync_guard.py') > _main941.find('_copy_source(stage)')):
+        _b941_release.append('build.py 未把同步证明放在生成/改版本之前')
+    if 'TemporaryDirectory(prefix="hansen-build-")' not in _build941:
+        _b941_release.append('build.py 缺临时树事务构建')
+    _evolve941 = open('hansen_evolve.py', encoding='utf-8', errors='replace').read()
+    if 'legacy release packager is disabled in v942' not in _evolve941:
+        _b941_release.append('hansen_evolve.py 旧打包路径未封死')
+    if not os.path.exists('.github/workflows/jarvis-three-file-release.yml'):
+        _b941_release.append('缺永久 GitHub Release 工作流')
+    else:
+        _workflow941 = open('.github/workflows/jarvis-three-file-release.yml', encoding='utf-8', errors='replace').read()
+        for _token941 in ('Require a new immutable VERSION',
+                          'Refusing to rewrite immutable release',
+                          '--draft', 'test "$tag_sha" = "$GITHUB_SHA"',
+                          'requirements-audit.txt', 'npm ci',
+                          './test_*v*.mjs'):
+            if _token941 not in _workflow941:
+                _b941_release.append('Release 工作流缺标签/精确三资产守卫 %s' % _token941)
+        for _banned941 in ('force=true', '--clobber', 'gh release delete-asset',
+                           'git/refs/tags/${tag}'):
+            if _banned941 in _workflow941:
+                _b941_release.append('Release 工作流仍会改写历史/覆盖资产: %s' % _banned941)
+    for _dep941 in ('package.json', 'package-lock.json', 'requirements-audit.txt'):
+        if not os.path.exists(_dep941):
+            _b941_release.append('缺固定依赖清单 %s' % _dep941)
+    for _pkg944 in ('package.json', 'package-lock.json'):
+        if os.path.exists(_pkg944):
+            _pkg944_text = open(_pkg944, encoding='utf-8', errors='replace').read()
+            if '"version": "960.0.0"' not in _pkg944_text:
+                _b941_release.append('%s 包版本未升级到 960.0.0' % _pkg944)
+    if not os.path.exists('VERSION') or open('VERSION', encoding='utf-8').read().strip() != '960':
+        _b941_release.append('VERSION 未锁定为 960')
+    _sw944 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
+    if "const CACHE_PREFIX = 'hansen-v944-';" not in _sw944:
+        _b941_release.append('sw_v944.js 缓存命名空间未升级到 v944')
+    if "'./hansen_perf_v944.js?v=960'" not in _sw944 or "'./hansen_perf.js'" in _sw944:
+        _b941_release.append('sw_v944.js 未只缓存 v944 新性能脚本路径')
+    if "'./hansen_backup_bootstrap_v944.js'" not in _sw944 or "'./hansen_backup_bootstrap.js'" in _sw944:
+        _b941_release.append('sw_v944.js 未只缓存 v944 新备份引导路径')
+    for _upgrade_dep944 in ('hansen_sw_upgrade_gate_v944.js', '_sw_upgrade_v944.html'):
+        if not os.path.exists(_upgrade_dep944) or "'./%s'" % _upgrade_dep944 not in _sw944:
+            _b941_release.append('v944 SW升级依赖缺失或未入Shell: %s' % _upgrade_dep944)
+    if "'./hansen_focused_typing_v946.js'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未缓存 v946 定向打字大师')
+    if "'./hansen_boss_lock.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF5 精确键缓存 Boss 彩虹倒计时修复')
+    if "'./hansen_explore_progress_v945.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存探索渲染修复')
+    if "'./hansen_review.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Land 复习修复')
+    if "'./hansen_wrong_overview.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存跨岛错题净化修复')
+    if "'./hansen_backup_v944.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF6 精确键缓存Boss逐轮备份语义校验')
+    if "'./hansen_canonical_progress.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存权威进度输入校验修复')
+    if "'./hansen_season.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存赛季网络/存档修复')
+    if "'./hansen_pet_showcase.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存宠物名自愈修复')
+    if "'./hansen_cards.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Boss 卡牌网络/存档修复')
+    if "'./hansen_gacha.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存通用抽卡基础引擎')
+    if "'./hansen_land_cards.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存星海卡牌揭晓引擎')
+    if "'./hansen_quest_global.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存每日任务账本修复')
+    if "'./hansen_island_upgrade.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存每词金币上限修复')
+    if "'./hansen_diamond_shop.js?v=960'" not in _sw944:
+        _b941_release.append('sw_v944.js Shell 未用 HF7 精确键缓存禁色主题商店修复')
+    if ("CACHE_PREFIX + 'shell-21'" not in _sw944 or "CACHE_PREFIX + 'pages-19'" not in _sw944
+            or "CACHE_PREFIX + 'assets-19'" not in _sw944 or "CACHE_PREFIX + 'icons-3'" not in _sw944):
+        _b941_release.append('sw_v944.js 未轮换 v960 壳/页面/脚本/图标缓存，旧运行时或旧 PNG 仍可能复活')
+    if r'/\/icons\/(?:[^/]+\/)*[^/]+\.(?:webp|png|svg)$/i' not in _sw944:
+        _b941_release.append('sw_v944.js 未允许受控 icons/ 子目录进入小图标离线缓存')
+    for _hf6_shell944, _hf6_label944 in (
+            ("'./hansen_round_reward.js?v=960'", 'Boss逐轮结算'),
+            ("'./hansen_round_bar.js?v=960'", 'Boss逐轮进度卡禁色'),
+            ("'./hansen_econ_guide.js?v=960'", '四份中文速查禁色'),
+            ("'./hansen_mylearning.js?v=960'", '我的学习禁色'),
+            ("'./hansen_palette.js?v=960'", '全局配色禁色'),
+            ("'./hansen_boss_theme.js?v=960'", 'Boss三主题禁色')):
+        if _hf6_shell944 not in _sw944:
+            _b941_release.append('sw_v944.js Shell 未用HF6精确键缓存%s' % _hf6_label944)
+    _preload944 = open('hansen_preload.js', encoding='utf-8', errors='replace').read()
+    if "version: 'v960'" not in _preload944:
+        _b941_release.append('hansen_preload.js 运行时策略版本未升级到 v960')
+    for _old_backup944 in ('hansen_backup_bootstrap.js', 'hansen_backup.js'):
+        if os.path.exists(_old_backup944):
+            _b941_release.append('旧备份运行时文件仍存在: %s' % _old_backup944)
+    for _new_backup944 in ('hansen_backup_bootstrap_v944.js', 'hansen_backup_v944.js'):
+        if not os.path.exists(_new_backup944):
+            _b941_release.append('缺v944备份运行时: %s' % _new_backup944)
+    _backup_entries944 = ['index.html', '_frame.html', 'boss_hall.html',
+                          'season_showcase.html', 'spelling_bee.html', 'land_map.html'] \
+                         + sorted(glob.glob('island_*.html'))
+    _backup_boot_tag944 = '<script src="hansen_backup_bootstrap_v944.js?v=960"></script>'
+    _sw_gate_open944 = '<script src="hansen_sw_upgrade_gate_v944.js?v=960">'
+    _backup_runtime_tag944 = '<script src="hansen_backup_v944.js?v=960"></script>'
+    for _backup_page944 in _backup_entries944:
+        _backup_html944 = open(_backup_page944, encoding='utf-8', errors='replace').read()
+        _backup_at944 = _backup_html944.find(_backup_boot_tag944)
+        _first_script944 = re.search(r'<script\b[^>]*>', _backup_html944, re.I)
+        if not _first_script944 or _first_script944.group(0) != _sw_gate_open944:
+            _b941_release.append('%s 的第一支脚本不是v944 SW升级门' % _backup_page944)
+        _storage_at944 = _backup_html944.find('localStorage')
+        if _backup_at944 < 0 or (_storage_at944 >= 0 and _backup_at944 > _storage_at944):
+            _b941_release.append('%s 未在玩家状态读取前加载v944备份引导' % _backup_page944)
+        if 'hansen_backup_bootstrap.js' in _backup_html944 or 'hansen_backup.js' in _backup_html944:
+            _b941_release.append('%s 仍引用旧备份运行时' % _backup_page944)
+    for _backup_island944 in sorted(glob.glob('island_*.html')):
+        _backup_island_html944 = open(_backup_island944, encoding='utf-8', errors='replace').read()
+        if _backup_runtime_tag944 not in _backup_island_html944:
+            _b941_release.append('%s 缺v944备份主脚本' % _backup_island944)
+    _focus_pages946 = ['template.html'] + sorted(glob.glob('island_*.html'))
+    if len(_focus_pages946) != 28:
+        _b941_release.append('v946 定向打字大师接线页数不是 28')
+    for _focus_page946 in _focus_pages946:
+        _focus_html946 = open(_focus_page946, encoding='utf-8', errors='replace').read()
+        _focus_tag946 = 'src="hansen_focused_typing_v946.js?v=960"'
+        if _focus_html946.count(_focus_tag946) != 1:
+            _b941_release.append('%s 未唯一接入 v946 定向打字大师' % _focus_page946)
+            continue
+        _pet_at946 = _focus_html946.find('src="hansen_pet_showcase.js?v=960"')
+        _focus_at946 = _focus_html946.find(_focus_tag946)
+        _explore_at946 = _focus_html946.find('src="hansen_explore_progress_v945.js?v=960"')
+        if not (0 <= _pet_at946 < _focus_at946 < _explore_at946):
+            _b941_release.append('%s 的宠物→定向打字→探索脚本顺序错误' % _focus_page946)
+        if _focus_html946.count('src="hansen_review.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF2 复习修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_wrong_overview.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF1 跨岛错题净化修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_backup_v944.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF6 Boss逐轮备份语义校验' % _focus_page946)
+        if _focus_html946.count('src="hansen_round_reward.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF6 Boss逐轮结算' % _focus_page946)
+        if _focus_html946.count('src="hansen_round_bar.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 Boss逐轮进度卡禁色' % _focus_page946)
+        if _focus_html946.count('src="hansen_econ_guide.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 当前奖励速查禁色' % _focus_page946)
+        if _focus_html946.count('src="hansen_mylearning.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 我的学习禁色' % _focus_page946)
+        if _focus_html946.count('src="hansen_palette.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 全局配色禁色' % _focus_page946)
+        if _focus_html946.count('src="hansen_boss_theme.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 Boss三主题禁色' % _focus_page946)
+        if _focus_html946.count('src="hansen_canonical_progress.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF2 权威进度输入校验修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_season.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF2 赛季网络/存档修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_pet_showcase.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF1 宠物名自愈修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_cards.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF2 Boss 卡牌网络/存档修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_quest_global.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF1 每日任务账本修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_island_upgrade.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF2 每词金币上限修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_diamond_shop.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF7 亮色主题商店禁色修复' % _focus_page946)
+        if _focus_html946.count('src="hansen_boss_lock.js?v=960"') != 1:
+            _b941_release.append('%s 未唯一接入 HF5 Boss 彩虹倒计时修复' % _focus_page946)
+    _index946 = open('index.html', encoding='utf-8', errors='replace').read()
+    if _index946.count('src="hansen_season.js?v=960"') != 1:
+        _b941_release.append('index.html 未唯一接入 HF2 赛季网络/存档修复')
+    if _index946.count('src="hansen_diamond_shop.js?v=960"') != 1:
+        _b941_release.append('index.html 未唯一接入 HF7 亮色主题商店禁色修复')
+    if _index946.count('src="hansen_palette.js?v=960"') != 1:
+        _b941_release.append('index.html 未唯一接入 HF7 全局配色禁色修复')
+    for _safety_test946 in (
+            'test_native_wrong_safety_v946.mjs',
+            'test_review_markup_security_v946.mjs',
+            'test_daily_quest_safety_v946.mjs',
+            'test_season_storage_security_v946.mjs',
+            'test_canonical_input_safety_v946.mjs'):
+        if not os.path.exists(_safety_test946):
+            _b941_release.append('缺 HF1 专项回归: %s' % _safety_test946)
+    for _light_test946 in (
+            'test_spelling_bee_light_theme_hf3_v946.mjs',
+            'test_home_theme_shop_light_hf3_v946.mjs'):
+        if not os.path.exists(_light_test946):
+            _b941_release.append('缺 HF3 亮色专项回归: %s' % _light_test946)
+    if not os.path.exists('test_boss_timer_hf5_v946.mjs'):
+        _b941_release.append('缺 HF5 Boss 彩虹倒计时专项回归')
+    for _boss_hf6_test946 in (
+            'test_boss_round_ledger_hf6_v946.mjs',
+            'test_boss_round_bar_theme_hf6_v946.mjs'):
+        if not os.path.exists(_boss_hf6_test946):
+            _b941_release.append('缺 HF6 Boss逐轮/亮色专项回归: %s' % _boss_hf6_test946)
+    if not os.path.exists('test_camel_color_ban_hf7_v946.mjs'):
+        _b941_release.append('缺 HF7 驼棕文字禁色专项回归')
+    _review946 = open('hansen_review.js', encoding='utf-8', errors='replace').read()
+    if r'/island_([a-z0-9]+)\.html/i' not in _review946 or r'/island_([a-z]+)\.html/i' in _review946:
+        _b941_release.append('hansen_review.js 仍会在 Land1-Land8 页面名上提前退出')
+    if not os.path.exists('test_theme_scroll_v944.mjs'):
+        _b941_release.append('缺 test_theme_scroll_v944.mjs')
+    else:
+        _scroll944 = open('test_theme_scroll_v944.mjs', encoding='utf-8', errors='replace').read()
+        for _scroll_token944 in ('Input.dispatchTouchEvent', "['no-preference', 'reduce']",
+                                 'animation.currentTime', 'theme scroll regression passed'):
+            if _scroll_token944 not in _scroll944:
+                _b941_release.append('滚动主题回归缺关键断言/触摸采样: %s' % _scroll_token944)
+    if not os.path.exists('test_sw_upgrade_v944.mjs'):
+        _b941_release.append('缺 test_sw_upgrade_v944.mjs')
+    else:
+        _sw_test944 = open('test_sw_upgrade_v944.mjs', encoding='utf-8', errors='replace').read()
+        for _sw_test_token944 in ('hansen-v943-shell-upgrade-test', 'ignoreSearch:true',
+                                  'island_home.html', 'sw_v944.js', 'appVersion: CURRENT_VERSION'):
+            if _sw_test_token944 not in _sw_test944:
+                _b941_release.append('SW首载迁移回归缺关键场景: %s' % _sw_test_token944)
+    if not os.path.exists('playwright_loader.mjs'):
+        _b941_release.append('缺便携 Playwright 加载器')
+    for _probe941 in glob.glob('*.mjs') + glob.glob('newboss/*.mjs'):
+        if _probe941 == 'playwright_loader.mjs':
+            continue
+        _txt941 = open(_probe941, encoding='utf-8', errors='replace').read()
+        if '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs' in _txt941:
+            _b941_release.append('%s 仍绑定旧机器 Playwright 绝对路径' % _probe941)
+        if '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' in _txt941:
+            _b941_release.append('%s 仍绑定旧机器 Chromium 绝对路径' % _probe941)
+        if re.search(r"\bfrom\s+['\"]playwright['\"]", _txt941):
+            _b941_release.append('%s 绕过便携 playwright_loader.mjs' % _probe941)
+    # Boss 是用户锁定的产品名。只检查会进入玩家运行包的根级 HTML/JS；
+    # README/CHANGELOG/历史文档保留旧版本原文，不在此机械改写。
+    _boss_name_bad959 = []
+    for _runtime959 in sorted(glob.glob('*.html') + glob.glob('*.js')):
+        _runtime_text959 = open(_runtime959, encoding='utf-8', errors='replace').read()
+        if '首领' in _runtime_text959:
+            _boss_name_bad959.append(_runtime959)
+    if _boss_name_bad959:
+        _b941_release.append('玩家运行文件仍把 Boss 改叫“首领”: %s' % _boss_name_bad959[:10])
+    _boss_copy959 = {
+        'hansen_round_bar.js': ('个 Boss，完成本轮得', '本轮全部 Boss 已核验', '每个 Boss 每轮只计算 1 次'),
+        'hansen_round_reward.js': ('个 Boss 各胜 1 次，已全部核验',),
+        'hansen_econ_guide.js': ("row('打赢 Boss'", "row('完成一轮 Boss'", '每个 Boss 各胜一次', "row('挑战 Boss'"),
+    }
+    for _boss_file959, _boss_tokens959 in _boss_copy959.items():
+        _boss_source959 = open(_boss_file959, encoding='utf-8', errors='replace').read()
+        for _boss_token959 in _boss_tokens959:
+            if _boss_token959 not in _boss_source959:
+                _b941_release.append('%s 缺用户批准的 Boss 文案: %s' % (_boss_file959, _boss_token959))
+except Exception as _e941_release:
+    _b941_release.append('v960 发布链体检异常: %s' % _e941_release)
+if _b941_release:
+    fail('v960 不可变三资产发布链: ' + str(_b941_release[:10]))
+else:
+    ok('v960 不可变三资产发布链(透明WebP图标压缩+Boss命名锁+部署白名单+完整Jarvis源码+星海卡牌揭晓回归+三卡对齐回归+Boss高对比回归+secret scan+SHA256SUMS+可复现ZIP+事务build)')
+
+# ---- v941 最终经济封口: Land 模式、旧卡牌/赛季暗奖、设置说明与字体诊断 ----
+_b941_econ = []
+try:
+    _land_tokens941 = (
+        'const TYPING_LEVELS={', 'xpPerWord:5,gemBonus:12,petXp:25',
+        'xpPerWord:10,gemBonus:25,petXp:40', 'xpPerWord:18,gemBonus:50,petXp:70',
+        'const CLOZE_LEVELS={', 'xpPerQ:5,gemBonus:15,petXp:30',
+        'xpPerQ:8,gemBonus:25,petXp:45', 'xpPerQ:14,gemBonus:40,petXp:65',
+        'words:allW.filter(w=>w.en.length<=7).map(w=>w.en)',
+        'words:allW.filter(w=>w.en.length>7&&w.en.length<=8).map(w=>w.en)',
+        'words:allW.filter(w=>w.en.length>8).map(w=>w.en)',
+    )
+    for _i941 in range(1, 9):
+        _fn941 = 'island_land%d.html' % _i941
+        _html941 = open(_fn941, encoding='utf-8', errors='replace').read()
+        _missing941 = [_t for _t in _land_tokens941 if _t not in _html941]
+        if _missing941:
+            _b941_econ.append('%s 打字/完形字段或本页动态词表不完整: %s' % (_fn941, _missing941[:2]))
+
+    _cards941 = open('hansen_cards.js', encoding='utf-8', errors='replace').read()
+    _card_start941 = _cards941.find('function markBossWin(lv)')
+    _card_end941 = _cards941.find('function resolveActualBossLv()', _card_start941)
+    _card_block941 = _cards941[_card_start941:_card_end941] if _card_start941 >= 0 and _card_end941 > _card_start941 else ''
+    if not _card_block941 or any(_t in _card_block941 for _t in
+            ('addGem(', 'addXP(', 'addCoin(', 'HansenCoins', 'HansenGems', 'grantBoost(')):
+        _b941_econ.append('hansen_cards.js 的 Boss 记录模块仍可能暗发经济奖励')
+    if ('function resolveActualBossLv()' not in _cards941 or
+            'var lv = resolveActualBossLv()' not in _cards941 or
+            'window.S && window.S.level' in _cards941):
+        _b941_econ.append('Boss 卡牌记录未锁定实际关号，或仍把 S.level 当关号')
+
+    _season941 = open('hansen_season.js', encoding='utf-8', errors='replace').read()
+    if 'function addSeasonPoints(){ return false; }' not in _season941 or 'pointsReadOnly: true' not in _season941:
+        _b941_econ.append('旧赛季积分 API 未永久只读')
+    for _forbidden941 in ('checkMilestones', 'origMA', 'answerCorrect', 'bossWin',
+                          'HansenCoins', 'HansenGems', 'HansenBoost', 'window.addCoin',
+                          'addXP(', 'addGem(', 'grantBoost(', 'hsn_season_answer_day'):
+        if _forbidden941 in _season941:
+            _b941_econ.append('旧赛季仍残留积分/发奖入口: %s' % _forbidden941)
+
+    _guide941 = open('hansen_econ_guide.js', encoding='utf-8', errors='replace').read()
+    for _guide_token941 in ('金币怎么得', '钻石怎么得', '宠物怎么升级', '宠物经验怎么得',
+                            '同一单词每天最多 3 次', '每项 20～120 金币',
+                            '每天得到 10～930 金币', '得到 4 钻石',
+                            '任选 3 个未掌握单词', '经验和单词全部保留',
+                            'html.hsn-pal-light .hsn-eg-sub',
+                            'html.hsn-pal-light .hsn-eg-get'):
+        if _guide_token941 not in _guide941:
+            _b941_econ.append('设置说明缺最终实账标记: %s' % _guide_token941)
+
+    _round941 = open('hansen_round_reward.js', encoding='utf-8', errors='replace').read()
+    _actual_start941 = _round941.find('function actualRegularWinLv()')
+    _actual_end941 = _round941.find('function currentLv()', _actual_start941)
+    _actual_block941 = _round941[_actual_start941:_actual_end941] if _actual_start941 >= 0 and _actual_end941 > _actual_start941 else ''
+    _modern_start941 = _round941.find('function onWinModern(lv)')
+    _modern_end941 = _round941.find('function onWin(lv)', _modern_start941)
+    _modern_block941 = _round941[_modern_start941:_modern_end941] if _modern_start941 >= 0 and _modern_end941 > _modern_start941 else ''
+    if ('BOSSES[i]===bossCurrent' not in _actual_block941 or
+            'S.bossCurrentLv' not in _actual_block941 or 'S.level' in _actual_block941 or
+            'recordRoundWin(lv)' not in _modern_block941 or
+            'isFull(win.state.cleared,win.state.total)' not in _modern_block941 or
+            'window.getIslandClearedLevels()' in _round941 or
+            "localStorage.getItem(k+'_prog')" in _round941):
+        _b941_econ.append('HF6 Boss胜利未锁定真实关号与本轮state，或仍以永久历史/段位伪造奖励资格')
+
+    _font_guard941 = open('font_guard.py', encoding='utf-8', errors='replace').read()
+    if 'with open("/tmp/subset_chars.txt", "w", encoding="utf-8")' not in _font_guard941:
+        _b941_econ.append('font_guard 缺字时没有真正生成它提示的 subset_chars.txt')
+except Exception as _e941_econ:
+    _b941_econ.append('v941 最终经济封口体检异常: %s' % _e941_econ)
+if _b941_econ:
+    fail('v941 最终经济/Land/说明封口: ' + str(_b941_econ[:8]))
+else:
+    ok('v941 最终经济/Land/说明封口(旧暗奖清零·Land题库与XP完整·指南实账一致)')
+
+# ---- v955 延续 HF7 驼棕文字禁色墙 + Boss 答题主题隔离 + 原子缓存 ----
+_b946_hf7 = []
+try:
+    _boss_hf7 = open('hansen_boss_theme.js', encoding='utf-8', errors='replace').read()
+    for _token_hf7, _label_hf7 in (
+            ('#bossScreen #bossMsg{background:linear-gradient(135deg,rgba(239,246,255,.97)', '晨曦普通台词蓝色面板'),
+            ('color:#1e3a5f !important', '普通台词深海军蓝'),
+            ('#bossScreen #bossQType{background:rgba(255,255,255,.92) !important;color:#1e40af', '题型皇家蓝'),
+            ('#bossScreen #bossQ,html.hsn-bt-light #bossScreen #bossQ *{color:#1e40af', '主词皇家蓝'),
+            ('#bossMsg.crit{background:linear-gradient', '暴击紫色独立态'),
+            ('#bossMsg.rage{background:linear-gradient', '狂怒红色独立态')):
+        if _token_hf7 not in _boss_hf7:
+            _b946_hf7.append('boss主题缺%s' % _label_hf7)
+    _palette_hf7 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
+    for _token_hf7 in ('accentText:\'#3730a3\'', 'accentText:\'#9f1239\'',
+                       'accentText:\'#1e40af\'', 'accentText:\'#065f46\'',
+                       '--pal-accent-text:', "var _AM='var(--pal-accent-text,#1e40af)'"):
+        if _token_hf7 not in _palette_hf7:
+            _b946_hf7.append('palette缺HF7主题文字变量: %s' % _token_hf7)
+    _pages_hf7 = ['template.html'] + sorted(_g861.glob('island_*.html'))
+    _tags_hf7 = (
+        'hansen_addiction.js?v=960', 'hansen_mylearning.js?v=960', 'hansen_diamond_shop.js?v=960',
+        'hansen_palette.js?v=960', 'hansen_boss_theme.js?v=960',
+        'hansen_econ_guide.js?v=960', 'hansen_round_bar.js?v=960')
+    for _page_hf7 in _pages_hf7:
+        _html_hf7 = open(_page_hf7, encoding='utf-8', errors='replace').read()
+        for _tag_hf7 in _tags_hf7:
+            if _html_hf7.count(_tag_hf7) != 1:
+                _b946_hf7.append('%s 未唯一加载 %s' % (_page_hf7, _tag_hf7))
+                break
+    _index_hf7 = open('index.html', encoding='utf-8', errors='replace').read()
+    for _tag_hf7 in ('hansen_diamond_shop.js?v=960', 'hansen_palette.js?v=960'):
+        if _index_hf7.count(_tag_hf7) != 1:
+            _b946_hf7.append('index未唯一加载%s' % _tag_hf7)
+    _sw_hf7 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
+    for _token_hf7 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
+                       "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
+                       "'./hansen_addiction.js?v=960'", "'./hansen_mylearning.js?v=960'",
+                       "'./hansen_diamond_shop.js?v=960'", "'./hansen_palette.js?v=960'",
+                       "'./hansen_boss_theme.js?v=960'", "'./hansen_econ_guide.js?v=960'",
+                       "'./hansen_round_bar.js?v=960'"):
+        if _token_hf7 not in _sw_hf7:
+            _b946_hf7.append('SW缺HF7原子资源键: %s' % _token_hf7)
+    if not __import__('os').path.exists('test_camel_color_ban_hf7_v946.mjs'):
+        _b946_hf7.append('缺驼棕文字禁色专项回归')
+    if not __import__('os').path.exists('test_boss_answer_contrast_v952.mjs'):
+        _b946_hf7.append('缺 v955 Boss 答题高对比专项回归')
+    for _token_v953 in ('--boss-answer-primary:#fde68a', '--boss-answer-text:#f8fafc',
+                        '--boss-answer-muted:#e2e8f0', '--boss-answer-correct:#86efac',
+                        '--boss-answer-wrong:#fca5a5', 'html.hsn-bt-dark #bossScreen',
+                        'html.hsn-bt-cinema #bossScreen', 'boss-answer-result-correct',
+                        'boss-answer-result-wrong'):
+        if _token_v953 not in _boss_hf7:
+            _b946_hf7.append('Boss主题缺v955高对比合同: %s' % _token_v953)
+    _package_hf7 = open('package_release.py', encoding='utf-8', errors='replace').read()
+    for _token_hf7 in ('_scan_forbidden_text_colors(entries)',
+                       '_verify_hf7_runtime_contract(entries)',
+                       'test_camel_color_ban_hf7_v946.mjs',
+                       'test_boss_answer_contrast_v952.mjs'):
+        if _token_hf7 not in _package_hf7:
+            _b946_hf7.append('打包器缺HF7禁色硬守卫: %s' % _token_hf7)
+except Exception as _e946_hf7:
+    _b946_hf7.append('HF7禁色检查异常: %s' % _e946_hf7)
+if _b946_hf7:
+    fail('v955 Boss 答题高对比与 HF7 驼棕禁色墙: ' + str(_b946_hf7[:10]))
+else:
+    ok('v955 延续HF7驼棕禁色；Boss八题型深空/电影/晨曦隔离，当前v960精确键与shell-21/pages-19/assets-19/icons-3原子缓存锁定')
+
+# ---- v953 Boss 管理员隐藏入口 fresh-session 可达性与调参清单一致性 ----
+_b953_admin = []
+try:
+    _lock953 = open('hansen_boss_lock.js', encoding='utf-8', errors='replace').read()
+    _attack953 = open('hansen_boss_attack.js', encoding='utf-8', errors='replace').read()
+    for _token953 in (
+            '__hansenBossAdminBridgeV953', 'function ensureLoaded()', 'function open()',
+            'function waitForExportedGate()',
+            'openPending', 'stopImmediatePropagation', '进度自动保存到本设备',
+            'window.HansenBossAdminBridge='):
+        if _token953 not in _lock953:
+            _b953_admin.append('轻量设置桥缺关键合同: %s' % _token953)
+    for _token953 in (
+            'window.__hsnOpenBossAdminGate=openHiddenGate',
+            'window.__hsnEnsureBossFxSettingsEntry=ensureEntry',
+            "var PW_SHA='603496ea13d3aa14a70ad2a79b7d6d138b3dfb0448441ac7cd14e0ef9358ecd6'",
+            'pw.length===50', 'if(isLocked()) return;', 'if(n>=3){ lockNow();',
+            "d.className='hbafx-entry';d.id='hbafxEntry'",
+            "{n:'星核帝皇·弗沙欧',lv:'岛⑧',mv:'三皇归一·终焉白光'",
+            "{n:'夜罗刹·红莲战鬼',lv:'岛⑤',mv:'红莲圣域·万瓣天葬'",
+            "{n:'铸星者·原初匠人',lv:'赛季',mv:'创世锻造',pal:'熔金星核',ps:['sz','sp','fxi'],df:{sz:55,sp:100,fxi:100}}"):
+        if _token953 not in _attack953:
+            _b953_admin.append('管理员密码/入口/调参卡合同缺失: %s' % _token953[:72])
+    _pages953 = ['template.html'] + sorted(glob.glob('island_*.html'))
+    if len(_pages953) != 28:
+        _b953_admin.append('应为 template + 27 岛，实际 %d 页' % len(_pages953))
+    _direct_attack953 = re.compile(r'<script\b[^>]*\bsrc=["\'][^"\']*hansen_boss_attack\.js', re.I)
+    for _page953 in _pages953:
+        _html953 = open(_page953, encoding='utf-8', errors='replace').read()
+        if _direct_attack953.search(_html953):
+            _b953_admin.append('%s 又同步加载重型 attack，引入首屏回退' % _page953)
+            continue
+        for _token953 in ('hansen_boss_lock.js?v=960', 'window.__hansenBossFXReady=function()',
+                          's.onerror=function(){ P=null; res(); };'):
+            if _token953 not in _html953:
+                _b953_admin.append('%s 缺可重试懒加载合同 %s' % (_page953, _token953))
+                break
+    if not os.path.exists('test_boss_admin_entry_v953.mjs'):
+        _b953_admin.append('缺 Boss 管理员入口专项回归 test_boss_admin_entry_v953.mjs')
+    _package953 = open('package_release.py', encoding='utf-8', errors='replace').read()
+    if '"test_boss_admin_entry_v953.mjs"' not in _package953:
+        _b953_admin.append('完整源码发布合同未强制携带 v953 专项回归')
+except Exception as _e953_admin:
+    _b953_admin.append('v953 Boss 管理入口体检异常: %s' % _e953_admin)
+if _b953_admin:
+    fail('v953 Boss 管理员隐藏入口与调参清单: ' + str(_b953_admin[:10]))
+else:
+    ok('v953 Boss 管理入口 fresh-session 可达；特效图不阻塞密码门；首次失败可重试；密码/永久锁保持；公开360关入口、夜罗刹、弗沙欧与铸星默认值锁定')
+
+# ---- v954 首页三卡几何合同：只移动前两卡，挑战BOSS保持 v953 基准 ----
+_b954_daily = []
+try:
+    _pages954 = ['template.html'] + sorted(glob.glob('island_*.html'))
+    if len(_pages954) != 28:
+        _b954_daily.append('应为 template + 27 岛，实际 %d 页' % len(_pages954))
+    _required954 = (
+        '.daily-card:not(.boss-card){display:flex;flex-direction:column;align-items:center;justify-content:flex-start}',
+        '.daily-card:not(.boss-card) .d-icon{width:100%;height:91px;min-height:91px;margin:0;display:flex;align-items:flex-end;justify-content:center;line-height:0}',
+        '.daily-card:not(.boss-card) .d-icon>.qiw{display:block;width:min(91px,100%);max-width:100%;aspect-ratio:1/1;line-height:0;flex:none}',
+        '.daily-card:not(.boss-card) .d-icon>.qiw>img{display:block;width:100%!important;height:100%!important;aspect-ratio:1/1;object-fit:contain}',
+        '.daily-card:not(.boss-card) .d-label{position:absolute;left:0;right:0;bottom:3px;margin:0;transform:none;white-space:nowrap}',
+        '#chestCard .d-icon>.qiw{transform:translateY(2.7778%)!important}',
+        '#chestCard.chest-claimed .d-icon>.qiw{transform:translateY(0)!important}',
+        '#questCard .d-icon>.qiw{transform:translateY(3.125%)!important}',
+        '.daily-card:not(.boss-card) .d-icon{height:82px;min-height:82px;display:flex}',
+        '.daily-card:not(.boss-card) .d-icon>.qiw{width:min(82px,100%);max-width:100%}',
+    )
+    _boss_locked954 = (
+        '.daily-card.boss-card{padding:3px 3px 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}',
+        '.daily-card.boss-card .boss-card-img{width:91px;height:91px;object-fit:contain;display:block;',
+        '.daily-card.boss-card .boss-card-label{font-size:15px;font-weight:900;',
+        'margin-top:5px;',
+    )
+    for _page954 in _pages954:
+        _html954 = open(_page954, encoding='utf-8', errors='replace').read()
+        for _token954 in _required954:
+            if _html954.count(_token954) != 1:
+                _b954_daily.append('%s 缺少或重复三卡合同: %s' % (_page954, _token954[:72]))
+                break
+        for _token954 in _boss_locked954:
+            if _token954 not in _html954:
+                _b954_daily.append('%s 改动了挑战BOSS锁定基准: %s' % (_page954, _token954[:72]))
+                break
+        if _html954.count('id="chestCard"') != 1 or _html954.count('id="questCard"') != 1 or _html954.count('class="daily-card boss-card"') != 1:
+            _b954_daily.append('%s 三卡入口不是各自唯一' % _page954)
+        if 'line-height:0;vertical-align:middle;transform:translate(0,10px)' in _html954 or 'line-height:0;vertical-align:middle;transform:translate(0,3px)' in _html954:
+            _b954_daily.append('%s 残留旧宝箱包装层位移' % _page954)
+        if 'width:98px;height:98px;object-fit:contain;vertical-align:middle' in _html954:
+            _b954_daily.append('%s 已领取宝箱仍为98px，会再次溢出' % _page954)
+        if '#chestCard .d-label{transform:translateY(' in _html954 or '#chestCard.chest-claimed .d-label{transform:translateY(' in _html954:
+            _b954_daily.append('%s 残留旧宝箱标题下移' % _page954)
+        if len(_b954_daily) >= 10:
+            break
+    _gold_bottom954 = 91.0 * (280.0 / 288.0 + 0.027778)
+    _task_bottom954 = 91.0 * (279.0 / 288.0 + 0.03125)
+    if abs(_gold_bottom954 - 91.0) > 0.01 or abs(_task_bottom954 - 91.0) > 0.01:
+        _b954_daily.append('素材透明底边补偿公式不再与Boss 91px底线一致')
+    if not os.path.exists('test_daily_card_alignment_v954.mjs'):
+        _b954_daily.append('缺三卡对齐专项回归 test_daily_card_alignment_v954.mjs')
+    _package954 = open('package_release.py', encoding='utf-8', errors='replace').read()
+    if '"test_daily_card_alignment_v954.mjs"' not in _package954:
+        _b954_daily.append('完整源码发布合同未强制携带 v954 三卡专项回归')
+except Exception as _e954_daily:
+    _b954_daily.append('v954 三卡对齐体检异常: %s' % _e954_daily)
+if _b954_daily:
+    fail('v954 首页三卡底线与防溢出合同: ' + str(_b954_daily[:10]))
+else:
+    ok('v954 每日宝箱/每日任务图标可见底与文字底线对齐挑战BOSS；341—386px横溢出封死；Boss基准未动；28页一致')
+
+# ---- v955 星海卡牌揭晓发布接线：专项回归 + 精确 Shell 键 + 28 页一致 ----
+_b955_land_gacha = []
+try:
+    _package955 = open('package_release.py', encoding='utf-8', errors='replace').read()
+    _sw955 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
+    if not os.path.exists('test_land_gacha_reveal_v955.mjs'):
+        _b955_land_gacha.append('缺星海卡牌揭晓专项回归 test_land_gacha_reveal_v955.mjs')
+    if '"test_land_gacha_reveal_v955.mjs"' not in _package955:
+        _b955_land_gacha.append('完整源码发布合同未强制携带 v955 抽卡专项回归')
+    for _token955 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
+                      "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
+                      "'./hansen_gacha.js?v=960'",
+                      "'./hansen_land_cards.js?v=960'"):
+        if _sw955.count(_token955) != 1:
+            _b955_land_gacha.append('SW 缺少或重复 v955 星海抽卡原子键: %s' % _token955)
+    _pages955 = ['template.html'] + sorted(glob.glob('island_*.html'))
+    if len(_pages955) != 28:
+        _b955_land_gacha.append('应为 template + 27 岛，实际 %d 页' % len(_pages955))
+    for _page955 in _pages955:
+        _html955 = open(_page955, encoding='utf-8', errors='replace').read()
+        for _tag955 in ('hansen_gacha.js?v=960', 'hansen_land_cards.js?v=960'):
+            if _html955.count(_tag955) != 1:
+                _b955_land_gacha.append('%s 未唯一加载 %s' % (_page955, _tag955))
+                break
+        if len(_b955_land_gacha) >= 10:
+            break
+    _star_pages955 = ['island_land%d.html' % _n955 for _n955 in range(1, 9)] + ['island_season.html']
+    for _page955 in _star_pages955:
+        _html955 = open(_page955, encoding='utf-8', errors='replace').read()
+        if _html955.count('onclick="HansenContextGacha.open()"') != 1:
+            _b955_land_gacha.append('%s 未唯一接入上下文抽卡路由' % _page955)
+        if 'onclick="HansenGacha.open()"' in _html955 or 'onclick="HansenLandGachaUI.open()"' in _html955:
+            _b955_land_gacha.append('%s 绕过上下文路由直连卡池' % _page955)
+    _template955 = open('template.html', encoding='utf-8', errors='replace').read()
+    if _template955.count('onclick="HansenContextGacha.open()"') != 1:
+        _b955_land_gacha.append('印章母版未唯一接入上下文抽卡路由')
+    _land_js955 = open('hansen_land_cards.js', encoding='utf-8', errors='replace').read()
+    for _route_token955 in ('island_(?:land[1-8]|season)\\.html$',
+                            'isStarSea&&window.HansenLandGachaUI',
+                            'window.HansenGacha.open()'):
+        if _route_token955 not in _land_js955:
+            _b955_land_gacha.append('上下文卡池路由缺失: %s' % _route_token955)
+except Exception as _e955_land_gacha:
+    _b955_land_gacha.append('v955 星海卡牌揭晓发布接线体检异常: %s' % _e955_land_gacha)
+if _b955_land_gacha:
+    fail('v955 星海卡牌揭晓发布接线: ' + str(_b955_land_gacha[:10]))
+else:
+    ok('v955 星海卡牌揭晓专项回归入源码包；9个星海入口进入40张专属卡池且普通20张池隔离；28页当前v960精确脚本接线；shell-21/pages-19/assets-19/icons-3 原子缓存锁定')
 
 if FAIL:
     print("\u274c check_resources \u53d1\u73b0 %d \u4e2a\u95ee\u9898:" % len(FAIL))

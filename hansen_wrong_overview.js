@@ -79,7 +79,81 @@
     'wordIslandLand8':    {file:'island_land8.html', emoji:'🌋', name:'星火火山口', shortName:'land8'}
   };
 
+  const MAX_WRONG_COUNT = 1000000;
+  const MAX_SMART_WEIGHT = 20;
+  const MAX_VOCAB_WORDS = 2000;
+
   function safeJSON(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
+  function safeWrongCount(value){
+    return typeof value === 'number' && Number.isInteger(value) &&
+      value >= 1 && value <= MAX_WRONG_COUNT ? value : 0;
+  }
+  function safeWrongWeight(value){
+    const count = safeWrongCount(value);
+    return count ? Math.min(MAX_SMART_WEIGHT, count * 2) : 0;
+  }
+  function safeText(value, maxLength){
+    if(typeof value !== 'string') return '';
+    return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').slice(0, maxLength);
+  }
+  function safeEmoji(value){
+    if(typeof value !== 'string' || !value || value.length > 32 || /[<>&]/.test(value)) return '📘';
+    return safeText(value, 32) || '📘';
+  }
+  function normalizeWord(value){
+    if(!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const en = safeText(value.en, 96).trim();
+    if(!en) return null;
+    return {
+      en,
+      cn: safeText(value.cn, 192),
+      pn: safeText(value.pn, 128),
+      ex: safeText(value.ex, 512),
+      exCn: safeText(value.exCn, 512),
+      emoji: safeEmoji(value.emoji),
+    };
+  }
+  function canonicalWrongIndex(key, vocabLength){
+    if(typeof key !== 'string' || !/^(?:0|[1-9]\d*)$/.test(key)) return -1;
+    const index = Number(key);
+    return Number.isSafeInteger(index) && index >= 0 && index < vocabLength ? index : -1;
+  }
+  function normalizeVocab(value){
+    if(!Array.isArray(value)) return null;
+    const length = Math.min(value.length, MAX_VOCAB_WORDS);
+    const words = new Array(length);
+    for(let index = 0; index < length; index++) words[index] = normalizeWord(value[index]);
+    return words;
+  }
+  function normalizedWrongEntries(data, vocab){
+    const wrongs = data && data.wrongs;
+    if(!vocab || !wrongs || typeof wrongs !== 'object' || Array.isArray(wrongs)) return [];
+    const result = [];
+    for(let index = 0; index < vocab.length; index++){
+      const key = String(index);
+      if(!Object.prototype.hasOwnProperty.call(wrongs, key)) continue;
+      const count = safeWrongCount(wrongs[key]);
+      if(!count || !vocab[index]) continue;
+      result.push({idx:index, count, weight:safeWrongWeight(count), word:vocab[index]});
+    }
+    return result;
+  }
+  function normalizeWrongEntries(data, rawVocab){
+    return normalizedWrongEntries(data, normalizeVocab(rawVocab));
+  }
+  const safeVocabCache = new Map();
+  function getSafeStoredVocab(storageKey){
+    const key = 'hansen_vocab_' + storageKey;
+    let raw = null;
+    try { raw = localStorage.getItem(key); } catch(e){}
+    const cached = safeVocabCache.get(key);
+    if(cached && cached.raw === raw) return cached.vocab;
+    let parsed = null;
+    try { parsed = JSON.parse(raw); } catch(e){}
+    const vocab = normalizeVocab(parsed);
+    safeVocabCache.set(key, {raw, vocab});
+    return vocab;
+  }
   function getCurrentIsland(){
     const m = location.pathname.match(/island_([a-z0-9]+)\.html/i);  //🔴v875(Hansen·彻底打通): 岛名正则纳入数字·land1-8/season同门而入·复习STORAGE_KEY与错题总览在大陆岛正常点火
     return m ? m[1] : null;
@@ -92,14 +166,15 @@
     const result = [];
     Object.keys(ISLAND_INFO).forEach(storageKey => {
       const data = safeJSON(storageKey);
-      if(!data || !data.wrongs) return;
-      const wrongCount = Object.keys(data.wrongs).length;
+      if(!data || !data.wrongs || typeof data.wrongs !== 'object' || Array.isArray(data.wrongs)) return;
+      const entries = normalizedWrongEntries(data, getSafeStoredVocab(storageKey));
+      const wrongCount = entries.length;
       if(wrongCount > 0){
         result.push({
           storageKey,
           info: ISLAND_INFO[storageKey],
           wrongCount,
-          wrongs: data.wrongs,
+          wrongs: entries,
         });
       }
     });
@@ -112,7 +187,8 @@
     let total = 0;
     Object.keys(ISLAND_INFO).forEach(k => {
       const d = safeJSON(k);
-      if(d && d.wrongs) total += Object.keys(d.wrongs).length;
+      if(!d || !d.wrongs || typeof d.wrongs !== 'object' || Array.isArray(d.wrongs)) return;
+      total += normalizedWrongEntries(d, getSafeStoredVocab(k)).length;
     });
     return total;
   }
@@ -333,23 +409,24 @@
       
       Object.keys(ISLAND_INFO).forEach(storageKey => {
         const data = safeJSON(storageKey);
-        const vocab = safeJSON('hansen_vocab_' + storageKey);
+        const vocab = getSafeStoredVocab(storageKey);
         if(!vocab) return;
-        
-        vocab.forEach(w => allVocab.push(w));
-        
-        if(data && data.wrongs){
-          Object.keys(data.wrongs).forEach(idx => {
-            const w = vocab[Number(idx)];
-            if(w){
-              allWrongs.push({
-                idx: Number(idx),
-                count: data.wrongs[idx],
-                word: w,
-              });
-            }
+        const globalIndexes = new Map();
+        vocab.forEach((word, localIndex) => {
+          if(!word) return;
+          globalIndexes.set(localIndex, allVocab.length);
+          allVocab.push(word);
+        });
+        normalizedWrongEntries(data, vocab).forEach(entry => {
+          const globalIndex = globalIndexes.get(entry.idx);
+          if(globalIndex === undefined) return;
+          allWrongs.push({
+            idx: globalIndex,
+            count: entry.count,
+            weight: entry.weight,
+            word: allVocab[globalIndex],
           });
-        }
+        });
       });
       
       if(allWrongs.length === 0){
@@ -371,7 +448,13 @@
       if(window.HansenReview && window.HansenReview._open){
         window.HansenReview._open();
       }
-        },
+    },
+    _security: {
+      safeWrongCount,
+      safeWrongWeight,
+      normalizeWord,
+      normalizeWrongEntries,
+    },
   };
 
   // ─────────────────────────────────────────────

@@ -1,282 +1,371 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Transactional release build orchestrator.
+
+The canonical GitHub synchronization proof is the first operation. Generation,
+cache/version rewriting, checks, and packaging then happen in a temporary copy.
+The source tree is updated only after every guard and both archives pass, and a
+failed commit is rolled back from byte-for-byte backups.
 """
-build.py — 自动化构建 (照 README 规格重建)
-步骤:
- 1. 确定新版本 (命令行参数, 或读 VERSION 自增1)
- 2. 全局 sed 主缓存戳 ?v=旧 -> ?v=新 (所有 *.html *.js; 不碰 mp3 戳 ?vNNN)
- 3. 同步 hansen_boss_lock.js 的 __HBU_VERSION__ / HBU_RUNTIME_VERSION
-    (banner 历史停在 v391、纯console文案不影响功能, 与真实构建一致, 不强改)
- 4. 先写 VERSION 文件 (在检查之前)
- 5. node --check 所有 *.js
- 6. 跑 check_resources.py (全过才继续)
- 7. 打 zip 到 /mnt/user-data/outputs/ (排除 *.md *.py *.txt 及死测试页; index.html 在根)
-任何一步失败 = 拒绝打包。
-用法: python3 build.py 398   |   python3 build.py   (自增)
-"""
-import os, re, sys, glob, subprocess, zipfile
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-os.chdir(ROOT)
+from __future__ import annotations
 
-# ---- 0. 「印章」统一架构: 先从 template.html + island_data.json 盖章生成 19 个岛 ----
-#   (改母版 template.html 或某岛数据 island_data.json 后重跑 build, 19 岛自动全部同步, 永不再分叉)
-if os.path.exists("template.html") and os.path.exists("island_data.json"):
-    print("  [0] 印章生成 19 岛 (template.html + island_data.json) ...")
-    r = subprocess.run([sys.executable, "generate.py"])
-    if r.returncode != 0:
-        print("  \u274c generate.py 失败, 拒绝构建")
-        sys.exit(1)
+import glob
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
 
-# ---- 0. 沙盒 ↔ GitHub 同步守卫 (v936) ----
-# Hansen: "我怕沙盒模式会破坏我们做过的小程序, 一定要保证 GitHub 上的文件绝对是最新的。"
-# 沙盒是【临时的】: 可能重置、可能只恢复了一半、可能是上次会话的旧快照。
-# 如果在一棵【落后的/残缺的/被改坏的】树上打包再 push, 就会把 GitHub 上好好的代码覆盖成旧的或坏的。
-# 这是这个项目最致命的风险 —— 比任何 UI bug 都严重, 所以放在第 0 步, 什么都还没干就先查。
-# (构建模式: 不查"工作区干净"——正在改代码当然脏; 漏网文件只警告并列出来, 提醒打包后必须提交。)
-print("  [0] 跑 sync_guard.py --pre-build (核对沙盒和 GitHub 是不是一致) ...")
-_r0 = subprocess.run([sys.executable, "sync_guard.py", "--pre-build"])
-if _r0.returncode != 0:
-    print("  \u274c 沙盒与 GitHub 不一致(旧快照/文件残缺/仓库损坏), 拒绝打包 —— 否则会把 GitHub 上好的版本覆盖掉")
-    sys.exit(1)
 
-# ---- 1. 版本号 ----
-with open("VERSION") as f:
-    old = f.read().strip()
-arg = [a for a in sys.argv[1:] if a.isdigit()]
-new = arg[0] if arg else str(int(old) + 1)
-label = ""
-for a in sys.argv[1:]:
-    if a.startswith("--label="):
-        label = a.split("=", 1)[1]
-print("== build.py: v%s -> v%s %s==" % (old, new, ("(" + label + ") ") if label else ""))
+ROOT = Path(__file__).resolve().parent
 
-html_js = sorted(glob.glob("*.html") + glob.glob("*.js"))
-# 🔴 v712 印章: island_data.json 的 BOSSES 内含 boss图 ?v= 戳, 必须一同 cache-bust(否则印章守卫复原对不上·boss图缓存也不刷新)
-if os.path.exists("island_data.json"):
-    html_js.append("island_data.json")
+BACKUP_BOOTSTRAP = "hansen_backup_bootstrap_v944.js"
+BACKUP_RUNTIME = "hansen_backup_v944.js"
+OBSOLETE_BACKUP_RUNTIMES = ("hansen_backup_bootstrap.js", "hansen_backup.js")
+SW_GATE = "hansen_sw_upgrade_gate_v944.js"
+SW_WORKER = "sw_v944.js"
+SW_UPGRADE_PAGE = "_sw_upgrade_v944.html"
 
-# ---- 2. 主缓存戳 ?v=old -> ?v=new (带等号; 不动 mp3 戳 ?vNNN) ----
-pat = re.compile(r'\?v=' + re.escape(old) + r'\b')
-n_cb = 0
-for fn in html_js:
-    txt = open(fn, encoding="utf-8").read()
-    new_txt, c = pat.subn('?v=' + new, txt)
-    if c:
-        open(fn, "w", encoding="utf-8").write(new_txt)
-        n_cb += c
-print("  [2] 主缓存戳 ?v=%s -> ?v=%s : %d 处" % (old, new, n_cb))
+BROWSER_GUARDS = [
+    "fx_guard.py", "light_guard.py", "perf_guard.py", "img_guard.py",
+    "font_guard.py", "e2e_guard.py", "impact_guard.py", "pet_guard.py",
+    "sb_guard.py", "release_guard.py",
+]
+SKIP_ENV = {
+    "fx_guard.py": "SKIP_FX_GUARD",
+    "light_guard.py": "SKIP_LIGHT_GUARD",
+    "perf_guard.py": "SKIP_PERF_GUARD",
+    "img_guard.py": "SKIP_IMG_GUARD",
+    "font_guard.py": "SKIP_FONT_GUARD",
+    "e2e_guard.py": "SKIP_E2E_GUARD",
+    "impact_guard.py": "SKIP_IMPACT_GUARD",
+    "pet_guard.py": "SKIP_PET_GUARD",
+    "sb_guard.py": "SKIP_SB_GUARD",
+    "release_guard.py": "SKIP_RELEASE_GUARD",
+}
 
-# ---- 3. 运行时版本变量 ----
-lock = open("hansen_boss_lock.js", encoding="utf-8").read()
-n_var = 0
-for var in ["__HBU_VERSION__", "HBU_RUNTIME_VERSION"]:
-    lock, c = re.subn(var + r"(\s*=\s*')v" + re.escape(old) + r"(')",
-                      var + r"\g<1>v" + new + r"\g<2>", lock)
-    n_var += c
-open("hansen_boss_lock.js", "w", encoding="utf-8").write(lock)
-print("  [3] __HBU_VERSION__ / HBU_RUNTIME_VERSION -> v%s : %d 处 (banner 维持原状, 纯文案)" % (new, n_var))
 
-# ---- 4. 写 VERSION (检查前) ----
-open("VERSION", "w").write(new + "\n")
-print("  [4] VERSION 文件 -> %s" % new)
+def _run(args: list[str], cwd: Path, label: str, *, env: dict[str, str] | None = None) -> None:
+    print(f"  ▶ {label}")
+    result = subprocess.run(args, cwd=cwd, env=env)
+    if result.returncode != 0:
+        raise RuntimeError(f"{label} failed with exit code {result.returncode}")
 
-# ---- 5. node --check 所有 js ----
-print("  [5] node --check 所有 *.js ...")
-syntax_bad = []
-for fn in sorted(glob.glob("*.js")):
-    r = subprocess.run(["node", "--check", fn], capture_output=True, text=True)
-    if r.returncode != 0:
-        syntax_bad.append((fn, r.stderr.strip().splitlines()[-1] if r.stderr else "?"))
-if syntax_bad:
-    print("  \u274c JS 语法错误:")
-    for fn, e in syntax_bad:
-        print("     - %s: %s" % (fn, e))
-    sys.exit(1)
-print("      \u2705 全部 .js 语法通过")
 
-# ---- 6. check_resources.py ----
-print("  [6] 跑 check_resources.py ...")
-r = subprocess.run([sys.executable, "check_resources.py"])
-if r.returncode != 0:
-    print("  \u274c check_resources 未通过, 拒绝打包")
-    sys.exit(1)
+def _stage_runtime_env() -> dict[str, str]:
+    """Keep browser tests portable after node_modules is omitted from the stage."""
+    env = os.environ.copy()
+    if env.get("HANSEN_PLAYWRIGHT_MODULE"):
+        return env
+    for relative in ("node_modules/playwright/index.mjs", "node_modules/playwright-core/index.mjs"):
+        candidate = ROOT / relative
+        if candidate.is_file():
+            env["HANSEN_PLAYWRIGHT_MODULE"] = str(candidate)
+            break
+    return env
 
-# ---- 6.5 特效不可破坏守卫 (v912) ----
-# Hansen 钦令: boss 攻击特效一旦定稿, 绝不允许被任何改动无声破坏。
-# check_resources 全是【盯代码字符串】的守卫 —— v905 没改一行特效代码, 只是把不透明底涂在 #bossScreen 上,
-# 就把 z-index:-1 的背景特效层盖死(龙骑士统帅巨翼 / 地狱犬王地狱之门双双消失), 而所有字符串守卫全部通过、照常上线。
-# fx_guard 在【真浏览器】里把 20 个 boss 的特效各放一遍, 用【像素】证明特效真的画在屏幕上:
-#   有元素却 0 像素 = 被谁遮死了 = 特效已被破坏 → 拒绝打包。
-# 跳过方式: 只有明确知道自己在干什么时才 SKIP_FX_GUARD=1(交付给 Hansen 的包永远不许跳)。
-if os.environ.get("SKIP_FX_GUARD") == "1":
-    print("  [6.5] \u26a0\ufe0f 特效守卫被跳过(SKIP_FX_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.5] 跑 fx_guard.py (真机放一遍 20 个 boss 的攻击特效, 像素级证明没被破坏) ...")
-    r = subprocess.run([sys.executable, "fx_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 特效守卫未通过: 有 boss 的攻击特效被破坏了, 拒绝打包")
-        sys.exit(1)
 
-# ---- 6.6 亮色主题守卫 (v928) ----
-# Hansen: "配色实在太差·灰不拉几·字都看不清·弹窗里还有黄色的·点单词一闪一闪·彻底修复"
-# light_guard 在【真触屏环境】里把 4 个亮色配色 × 9 个屏幕(含单词弹窗)各渲一遍, 整页截图,
-# 逐个文字元素取【边缘环的真实像素】当背景, 算 WCAG 对比度(普通字≥4.5:1 · 大字/粗体≥3.0:1)。
-# 为什么用像素而不是 getComputedStyle: 后者拿背景会把渐变的色标做平均(掺进深色星云),
-#   实测会把 6 处真问题放大成 230 处假警报 —— 像素才是真相。
-# 顺带自检【触屏防闪】: 触屏上 :hover 会粘住 → 点一下卡片就位移+蒙层淡入 = "一闪一闪一闪"。
-if os.environ.get("SKIP_LIGHT_GUARD") == "1":
-    print("  [6.6] \u26a0\ufe0f 亮色守卫被跳过(SKIP_LIGHT_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.6] 跑 light_guard.py (真触屏渲 4 个亮色配色 x 9 个屏幕, 像素级量对比度 + 防闪自检) ...")
-    r = subprocess.run([sys.executable, "light_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 亮色守卫未通过: 亮色调下有文字看不清 / 点击会闪, 拒绝打包")
-        sys.exit(1)
+def _read_version(root: Path) -> str:
+    value = (root / "VERSION").read_text(encoding="utf-8").strip()
+    if not value.isdigit() or int(value) <= 0:
+        raise RuntimeError(f"invalid VERSION: {value!r}")
+    return value
 
-# ---- 6.7 加载性能守卫 (v929) ----
-# Hansen: "进岛很卡·很多画面加载不出来·点打Boss卡在那儿·要极致快·上线前最高优先级"
-# perf_guard 在【模拟 4G + gzip】(和用户手机上的 CloudBase 一致)下真机加载 3 个代表岛,
-# 量【用户真正感觉到的】三个时间: 看到内容 / 可点击 / 首屏图标全部画完, 外加【关键路径字节数】。
-# 任何一项超预算 → 拒绝打包。
-# ⚠️ gzip 必须模拟: CloudBase 对文本开 gzip, 本地裸 http 不开 —— 不模拟会把结果测得比真实差 2~3 倍,
-#    从而做出错误的优化决策(实测差异: 同一个页面 6.6s vs 1.2s)。
-if os.environ.get("SKIP_PERF_GUARD") == "1":
-    print("  [6.7] \u26a0\ufe0f 性能守卫被跳过(SKIP_PERF_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.7] 跑 perf_guard.py (模拟4G+gzip 真机加载3个岛, 量用户真正感觉到的时间 + 关键路径字节) ...")
-    r = subprocess.run([sys.executable, "perf_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 性能守卫未通过: 进岛变慢了 / 关键路径变胖了, 拒绝打包")
-        sys.exit(1)
 
-# ---- 6.8 图片尺寸守卫 (v933) ----
-# Hansen 截图: "点这个动物头像进来之后, 立体形象怎么变得这么小了?"
-# 根因是 v929 提速时把头像 417x720 压到 111x192 —— 顶栏(46px)完全没问题, 但同一张图还被用在:
-#   · 形象详情大卡(显示 331px) → CSS 是 width:auto, 图按【原始尺寸】画, 192px 根本够不着 331px 的上限
-#                                → 就按 192px 原样画出来 = 只占卡片 53% = 缩成一小坨
-#   · 形象选择器网格(显示 110px) → 3 倍屏需要 330px, 192px 被放大 1.7 倍 = 发虚
-# 压图时【只按顶栏的显示尺寸算了一遍】, 忘了同一张图还有更大的展示位 —— 这个守卫就是钉死这件事。
-# 光看文件尺寸永远发现不了(192px 的文件本身很"正常"), 必须真机渲染量【源图尺寸 vs 展示位尺寸】。
-if os.environ.get("SKIP_IMG_GUARD") == "1":
-    print("  [6.8] \u26a0\ufe0f 图片尺寸守卫被跳过(SKIP_IMG_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.8] 跑 img_guard.py (真机渲染全库, 量每张图 源图尺寸 vs 展示位尺寸) ...")
-    r = subprocess.run([sys.executable, "img_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 图片尺寸守卫未通过: 有图在大展示位上缩成一小坨 / 被拉糊, 拒绝打包")
-        sys.exit(1)
+def _requested_version(old: str) -> str:
+    numeric = [arg for arg in sys.argv[1:] if arg.isdigit()]
+    unknown = [arg for arg in sys.argv[1:] if not arg.isdigit() and not arg.startswith("--label=")]
+    if unknown:
+        raise RuntimeError(f"unknown arguments: {unknown}")
+    new = numeric[0] if numeric else str(int(old) + 1)
+    if int(new) <= int(old):
+        raise RuntimeError(f"new version v{new} must be greater than current v{old}")
+    return new
 
-# ---- 6.9 字体子集守卫 (v934) ----
-# v929 把 cartoon_font.woff2 从 613KB(1694字) 子集化到 244KB(1060字), 砍掉了 562 个【真的会显示】的字。
-# 缺字不会报错、不会空白 —— 浏览器会【悄悄回退到系统默认字体】, 那几个字和旁边的卡通字长得不一样。
-# 这种问题肉眼极难发现。本守卫真机渲染全库每个屏+每个单词弹窗, 把【真的用卡通字体画出来】的每一个字
-# 收集起来去字体 cmap 里逐字查, 缺任何一个 → 拒绝打包。(emoji/箭头排除, 它们永远由系统表情字体画。)
-if os.environ.get("SKIP_FONT_GUARD") == "1":
-    print("  [6.9] \u26a0\ufe0f 字体子集守卫被跳过(SKIP_FONT_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.9] 跑 font_guard.py (真机渲染全库, 逐字查卡通字体子集有没有漏字) ...")
-    r = subprocess.run([sys.executable, "font_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 字体子集守卫未通过: 有字会悄悄回退成系统默认字体, 拒绝打包")
-        sys.exit(1)
 
-# ---- 6.10 端到端回归守卫 (v935) ----
-# 前面的守卫各管一摊(特效/配色/性能/图片/字体/发音), 但有一类问题它们都管不到:
-# 【功能本身被改坏了】—— 按钮还在、页面不报错、像素也正常, 但点下去不起作用。
-# 这次会话里我就干过这些改动: boss引擎改按需加载 / AudioContext 改成手势后才建 / 卡册加 loading=lazy /
-# 新增打Boss主题选择器 / 形象详情改用高清图 —— 每一个写错了都是"静态检查全过, 用户一点就废"。
-# 本守卫真机把这些功能【真的用一遍】, 任何一项失败就拒绝打包。
-if os.environ.get("SKIP_E2E_GUARD") == "1":
-    print("  [6.10] \u26a0\ufe0f 端到端守卫被跳过(SKIP_E2E_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.10] 跑 e2e_guard.py (真机把改过的功能各用一遍: 打Boss主题/按需加载引擎/卡册/形象详情) ...")
-    r = subprocess.run([sys.executable, "e2e_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 端到端守卫未通过: 有功能被改坏了(点下去不起作用), 拒绝打包")
-        sys.exit(1)
+def _copy_source(stage: Path) -> None:
+    excluded = {
+        ".git", "node_modules", "releases", "release-assets", "evolution_reports",
+        ".evolution_backups", "__pycache__", ".pytest_cache", ".mypy_cache",
+        ".ruff_cache",
+    }
 
-# ---- 6.11 影响面守卫 (v937) ----
-# Hansen: "这么容易出bug, 能不能做一个机制, 防止每次更新内容的时候出现bug?"
-# 病因(这次会话每个 bug 结构完全一样): 【我改了 X, X 被 {A,B,C} 用着, 我只验了 A】
-#   头像压小→只量了顶栏(46px), 忘了网格(110px)和详情大卡(331px)
-#   字体子集化→只留了想到的字, 砍掉 562 个真的会显示的
-#   飞行装饰改 transform→没看到那些元素还挂着第二条自转动画(两条都动 transform, 后者赢)
-# 本守卫真机渲染建【依赖图】(54 个界面), 对每个改动自动算出【它被哪些地方用着】并全部打印,
-# 让"只验了一处"在物理上不可能发生; 同时跑机械判据(资源撑不撑得起最大展示位/字体缺不缺字/
-# 动画有没有 transform 撞车), 任何一条不过就拒绝打包。
-if os.environ.get("SKIP_IMPACT_GUARD") == "1":
-    print("  [6.11] \u26a0\ufe0f 影响面守卫被跳过(SKIP_IMPACT_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.11] 跑 impact_guard.py (算出这次改动的影响面, 逐个验证每一个使用方) ...")
-    r = subprocess.run([sys.executable, "impact_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 影响面守卫未通过: 有使用方没被验证到 / 资源撑不起展示位 / 动画撞车, 拒绝打包")
-        sys.exit(1)
-
-# ---- 6.12 宠物经验/进化守卫 (v938) ----
-# Hansen: "为什么宠物不进化??? 感觉宠物好像没有得到经验和进化。"
-# 5 个根因全是【看不见的】: 页面不报错、按钮都在、像素也正常, 但宠物就是不长:
-#  ① 8个星域岛不在宠物的岛屿名单里(27个岛, 名单只有19个) → 星海觉醒里打的经验宠物根本看不见 → 永不进化
-#  ② 打字/完形的关卡没有 petXp 字段 → 传 undefined → addXP 里 isFinite(NaN)=false 直接 return → 0 经验, 飘字还骗人
-#  ③ 得到经验后没有任何东西刷新宠物界面 → 宠物页开着也纹丝不动
-#  ④ 宠物页只有一个百分比 → 看不到"现在多少/还差多少", 也看不出卡在哪个条件
-#  ⑤ perf_boost 把 save() 改成防抖延迟写盘, 而宠物读 localStorage → 读到旧值 → 显示"经验 0"
-# 本守卫真机跑全链路(18项)。关键是: 【每一个岛的经验宠物都必须算得进去】——
-# 以后再加新岛(land9...), 只要宠物算不到, 这里当场变红。
-if os.environ.get("SKIP_PET_GUARD") == "1":
-    print("  [6.12] \u26a0\ufe0f 宠物守卫被跳过(SKIP_PET_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.12] 跑 pet_guard.py (宠物: 经验到账·跨岛累计·真的进化·界面实时刷新) ...")
-    r = subprocess.run([sys.executable, "pet_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 宠物守卫未通过: 宠物拿不到经验/不进化/界面不刷新, 拒绝打包")
-        sys.exit(1)
-
-# ---- 6.13 拼写蜂守卫 (v939) ----
-# Hansen: "岛里明明有40个单词, 拼写蜂却只考25个" + "单词还没念完, 机器人就已经开始拼了"
-# 两个 bug 都是【看不见的】: 页面不报错、能玩、像素也正常, 但内容和公平性是错的。
-#  ① 拼写蜂自带一份独立词库(936条), 建库时按英文去重 → 一个词只能挂一个岛;
-#     而岛之间共享单词(orange 在食物岛也在颜色岛…) → 另一个岛永远考不到 → 27岛共漏 16 个词。
-#     修法: 岛内直接用岛自己的词表 parent.allW, 不再维护会漂移的第二份词库。
-#  ② nextWord 里机器人 0.5~1.0 秒就开打, 而单词 0.3 秒才开始念(念完要 0.8~1.5 秒)
-#     → 单词还在念机器人已经在拼; 玩家在"听的时候"就被计时。
-#     修法: speakThen(念完回调) —— 机器人和玩家计时都等念完; 音频坏了 3.5 秒兜底开赛。
-# 本守卫真机验: 27 岛逐词核对 + 时间轴(机器人落键必须晚于念完) + 音频全404不卡死。
-if os.environ.get("SKIP_SB_GUARD") == "1":
-    print("  [6.13] \u26a0\ufe0f 拼写蜂守卫被跳过(SKIP_SB_GUARD=1) —— 交付包严禁跳过!")
-else:
-    print("  [6.13] 跑 sb_guard.py (拼写蜂: 27岛出题池一个词不差 + 机器人不抢跑) ...")
-    r = subprocess.run([sys.executable, "sb_guard.py"])
-    if r.returncode != 0:
-        print("  \u274c 拼写蜂守卫未通过: 出题池不全 / 机器人抢跑, 拒绝打包")
-        sys.exit(1)
-
-# ---- 7. 打包 ----
-OUT = "/mnt/user-data/outputs"
-os.makedirs(OUT, exist_ok=True)
-# 🔴v526: --label 真正接入 zip 名(旧版此处硬编码陈年标签"食物运动真人发音", 且 --label 解析了从未使用, 每次交付都要手动改名)
-desc = label if label else "部署"
-zip_name = "%s/\u5355\u8bcd\u5927\u5192\u9669_v%s_%s.zip" % (OUT, new, desc)
-EXCLUDE_EXT = (".md", ".py", ".txt", ".zip", ".mjs")  # 🔴v935 补上 .mjs: 我的测试探针(*_probe.mjs / *_audit.mjs)本来被打进了部署包(12个) —— 无害但脏, 而且把内部测试代码发到了线上。App 运行时一个 .mjs 都不用。  # 🔴 必须含 .zip! 否则工作区残留的源码包/旧zip会被打进部署包(曾导致 v469 部署包 61MB=多塞了31MB的v468源码包)。别删 .zip。
-# 🔴v526: 引擎产物与死存根不得进部署包——本轮"先跑jarvis体检后打包"使 kb/backlog json 被打进包(=部署包污染,
-#   .json 不在 EXCLUDE_EXT); mespeak 两个 21 字节 json 存根在 v525 线上包亦不存在(线上实证不需要; mespeak.js 本体保留对齐线上)。
-EXCLUDE_FILE = {"audio_test.html", "spelling_bee_demo.html",
-                "hansen_evolve_kb.json", "hansen_evolve_backlog.json",
-                "mespeak_config.json", "en-us.json",
-                "template.html", "island_data.json"}  # 🔴 印章源文件(母版+每岛数据)只进交接源码包, 绝不进部署包
-count = 0
-with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as z:
-    for dirpath, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if not d.startswith(".") and d != "__pycache__" and d not in ("map8","newboss","releases","evolution_reports")]  # 🔴v899 map8/newboss/releases/reports只进git+交接包·绝不进部署包
-        for fn in files:
-            full = os.path.join(dirpath, fn)
-            rel = os.path.relpath(full, ".")
-            if fn.lower().endswith(EXCLUDE_EXT):
+    def ignore(_directory: str, names: list[str]) -> set[str]:
+        ignored = {name for name in names if name in excluded or name.endswith((".zip", ".pyc"))}
+        parent = Path(_directory)
+        for name in names:
+            candidate = parent / name
+            if not candidate.is_dir() or not (candidate / "README.md").is_file():
                 continue
-            if fn in EXCLUDE_FILE:
+            try:
+                child_names = {child.name for child in candidate.iterdir() if child.is_file()}
+            except OSError:
                 continue
-            z.write(full, rel)   # rel 保证 index.html 在根, 无包装文件夹
-            count += 1
-print("  [7] \u2705 \u6253\u5305\u5b8c\u6210: %s (%d \u4e2a\u6587\u4ef6)" % (zip_name, count))
-print("\u2705\u2705\u2705 build v%s \u5b8c\u6210" % new)
+            if (any(item.startswith("单词大冒险_v") and item.endswith("_可直接部署.zip") for item in child_names)
+                    and any(item.startswith("单词大冒险_v") and item.endswith("_含贾维斯完整源码.zip") for item in child_names)):
+                ignored.add(name)
+        return ignored
+
+    shutil.copytree(ROOT, stage, dirs_exist_ok=True, ignore=ignore)
+
+
+def _write_text(path: Path, text: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".build-tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _prepare_stage(stage: Path, old: str, new: str) -> set[str]:
+    if (stage / "template.html").is_file() and (stage / "island_data.json").is_file():
+        _run([sys.executable, "generate.py"], stage, "generate canonical islands")
+
+    candidates = sorted(stage.glob("*.html")) + sorted(stage.glob("*.js"))
+    if (stage / "island_data.json").is_file():
+        candidates.append(stage / "island_data.json")
+    # Hotfix suffixes belong only to the current product version.  Advancing to
+    # a new integer version must consume the whole old stamp, never create e.g.
+    # ``?v=947-hf2`` by replacing just the numeric prefix.
+    pattern = re.compile(r"\?v=" + re.escape(old) + r"(?:-hf\d+)?\b")
+    changed = 0
+    for path in candidates:
+        text = path.read_text(encoding="utf-8")
+        updated, count = pattern.subn("?v=" + new, text)
+        if count:
+            _write_text(path, updated)
+            changed += count
+    print(f"  ✅ cache stamp v{old} → v{new}: {changed} replacement(s)")
+
+    lock_path = stage / "hansen_boss_lock.js"
+    lock = lock_path.read_text(encoding="utf-8")
+    replacements = 0
+    for variable in ("__HBU_VERSION__", "HBU_RUNTIME_VERSION"):
+        lock, count = re.subn(
+            variable + r"(\s*=\s*')v" + re.escape(old) + r"(')",
+            variable + r"\g<1>v" + new + r"\g<2>",
+            lock,
+        )
+        replacements += count
+    if replacements == 0:
+        raise RuntimeError("runtime version variables were not updated")
+    _write_text(lock_path, lock)
+    _write_text(stage / "VERSION", new + "\n")
+
+    # Only these generated/versioned files are allowed to flow back to ROOT.
+    return {
+        path.name for path in candidates
+    } | {"VERSION", "hansen_boss_lock.js"}
+
+
+def _assert_backup_runtime_contract(root: Path) -> None:
+    for name in (BACKUP_BOOTSTRAP, BACKUP_RUNTIME, SW_GATE, SW_WORKER, SW_UPGRADE_PAGE):
+        if not (root / name).is_file():
+            raise RuntimeError(f"required v944 backup runtime is missing: {name}")
+    for name in OBSOLETE_BACKUP_RUNTIMES:
+        if (root / name).exists():
+            raise RuntimeError(f"obsolete backup runtime must not exist: {name}")
+    if (root / "sw.js").exists():
+        raise RuntimeError("legacy sw.js must not coexist with the v944 worker pathname")
+
+    version = _read_version(root)
+    bootstrap_tag = f'<script src="{BACKUP_BOOTSTRAP}?v={version}"></script>'
+    runtime_stamp = version + ("-hf2" if version == "946" else "")
+    runtime_tag = f'<script src="{BACKUP_RUNTIME}?v={runtime_stamp}"></script>'
+    entries = [
+        root / name for name in (
+            "index.html", "_frame.html", "boss_hall.html", "season_showcase.html",
+            "spelling_bee.html", "land_map.html",
+        )
+    ] + sorted(root.glob("island_*.html"))
+    for page in entries:
+        text = page.read_text(encoding="utf-8")
+        first_script = re.search(r"<script\b[^>]*>", text, re.IGNORECASE)
+        gate_open = f'<script src="{SW_GATE}?v={version}">'
+        if not first_script or first_script.group(0) != gate_open:
+            raise RuntimeError(f"{page.name} must load {SW_GATE} as its first script")
+        boot_at = text.find(bootstrap_tag)
+        storage_at = text.find("localStorage")
+        if boot_at < 0 or (storage_at >= 0 and boot_at > storage_at):
+            raise RuntimeError(
+                f"{page.name} must load {BACKUP_BOOTSTRAP} before player-state reads"
+            )
+        if any(name in text for name in OBSOLETE_BACKUP_RUNTIMES):
+            raise RuntimeError(f"{page.name} references an obsolete backup runtime")
+    for page in sorted(root.glob("island_*.html")):
+        if runtime_tag not in page.read_text(encoding="utf-8"):
+            raise RuntimeError(f"{page.name} is missing {BACKUP_RUNTIME}")
+
+    template = (root / "template.html").read_text(encoding="utf-8")
+    if bootstrap_tag not in template or runtime_tag not in template:
+        raise RuntimeError("template.html is not wired to both v944 backup runtimes")
+    shell = (root / SW_WORKER).read_text(encoding="utf-8")
+    if f"'./{BACKUP_BOOTSTRAP}'" not in shell or "'./hansen_backup_bootstrap.js'" in shell:
+        raise RuntimeError("service-worker shell is not pinned to the v944 backup bootstrap")
+    for name in (SW_GATE, SW_UPGRADE_PAGE):
+        if f"'./{name}'" not in shell:
+            raise RuntimeError(f"service-worker shell is missing the upgrade dependency: {name}")
+    index = (root / "index.html").read_text(encoding="utf-8")
+    if "serviceWorker.register('./sw_v944.js'" not in index or "serviceWorker.register('./sw.js'" in index:
+        raise RuntimeError("index.html must never switch the v944 scope back to the legacy sw.js pathname")
+
+
+def _syntax_and_regressions(stage: Path) -> None:
+    _assert_backup_runtime_contract(stage)
+    runtime_env = _stage_runtime_env()
+    js_files = sorted(stage.glob("*.js"))
+    if not js_files:
+        raise RuntimeError("no JavaScript files found")
+    for path in js_files:
+        _run(["node", "--check", path.name], stage, f"node --check {path.name}")
+
+    # Discover every versioned Node regression instead of silently skipping a
+    # newly added release line (v951) or older still-supported schema test.
+    node_tests = sorted(stage.glob("test_*v*.mjs"))
+    if not node_tests:
+        raise RuntimeError("no versioned Node regression tests found")
+    for path in node_tests:
+        _run(["node", path.name], stage, f"regression {path.name}", env=runtime_env)
+
+    python_tests = sorted(stage.glob("test_*v942.py"))
+    for path in python_tests:
+        _run([sys.executable, path.name], stage, f"regression {path.name}", env=runtime_env)
+
+
+def _guards(stage: Path) -> None:
+    runtime_env = _stage_runtime_env()
+    for guard in ("check_resources.py", "economy_guard.py", "hansen_nav_guard.py"):
+        if not (stage / guard).is_file():
+            raise RuntimeError(f"required guard is missing: {guard}")
+        _run([sys.executable, guard], stage, guard, env=runtime_env)
+
+    _run([sys.executable, "jarvis_scan.py"], stage, "Jarvis active scan", env=runtime_env)
+    _run([sys.executable, "hansen_health_check.py", "--quick"], stage,
+         "portable browser health check", env=runtime_env)
+
+    for guard in BROWSER_GUARDS:
+        if not (stage / guard).is_file():
+            raise RuntimeError(f"required browser guard is missing: {guard}")
+        skip = SKIP_ENV[guard]
+        if os.environ.get(skip) == "1":
+            raise RuntimeError(f"release build refuses disabled assertion wall: {skip}=1")
+        _run([sys.executable, guard], stage, guard, env=runtime_env)
+
+
+def _commit_stage(stage: Path, names: set[str], *, fail_at: int | None = None) -> dict[Path, bytes]:
+    backups: dict[Path, bytes] = {}
+    replaced: list[Path] = []
+    try:
+        for index, name in enumerate(sorted(names), 1):
+            source = stage / name
+            target = ROOT / name
+            if not source.is_file() or not target.is_file():
+                raise RuntimeError(f"transaction file is missing: {name}")
+            data = source.read_bytes()
+            if target.read_bytes() == data:
+                continue
+            backups[target] = target.read_bytes()
+            with tempfile.NamedTemporaryFile(dir=ROOT, prefix=f".{name}.", delete=False) as handle:
+                handle.write(data)
+                temp_name = Path(handle.name)
+            if fail_at == index:
+                temp_name.unlink(missing_ok=True)
+                raise RuntimeError(f"injected source commit failure at file {index}")
+            os.replace(temp_name, target)
+            replaced.append(target)
+    except Exception:
+        for target in reversed(replaced):
+            restore = target.with_name("." + target.name + ".rollback")
+            restore.write_bytes(backups[target])
+            os.replace(restore, target)
+        raise
+    return backups
+
+
+def _restore_source(backups: dict[Path, bytes]) -> None:
+    for target, data in backups.items():
+        with tempfile.NamedTemporaryFile(dir=ROOT, prefix=f".{target.name}.restore-", delete=False) as handle:
+            handle.write(data)
+            temp_name = Path(handle.name)
+        os.replace(temp_name, target)
+
+
+def _promote_release_assets(staged_dir: Path, out: Path, version: str,
+                            *, fail_at: int | None = None) -> None:
+    names = [
+        f"单词大冒险_v{version}_可直接部署.zip",
+        f"单词大冒险_v{version}_含贾维斯完整源码.zip",
+        "README.md",
+    ]
+    expected = set(names)
+    existing = {path.name for path in out.iterdir() if path.name != staged_dir.name}
+    unexpected = sorted(existing - expected)
+    if unexpected:
+        raise RuntimeError(f"release output has unexpected entries: {unexpected}")
+    pairs = [(staged_dir / name, out / name) for name in names]
+    backups: list[tuple[Path, Path]] = []
+    promoted: list[Path] = []
+    try:
+        for index, (_staged, final) in enumerate(pairs, 1):
+            if final.exists():
+                backup = staged_dir / f".previous-{index}-{final.name}"
+                os.replace(final, backup)
+                backups.append((final, backup))
+        for index, (staged, final) in enumerate(pairs, 1):
+            if fail_at == index:
+                raise RuntimeError(f"injected release promotion failure at asset {index}")
+            os.replace(staged, final)
+            promoted.append(final)
+    except Exception:
+        for final in reversed(promoted):
+            final.unlink(missing_ok=True)
+        for final, backup in reversed(backups):
+            if final.exists():
+                final.unlink()
+            os.replace(backup, final)
+        raise
+
+
+def main() -> int:
+    # Sync is intentionally before VERSION reads, generation, temp copies, or
+    # any other build action. The guard itself is fail closed in every mode.
+    try:
+        _run([sys.executable, "sync_guard.py", "--pre-build"], ROOT,
+             "step 0: prove GitHub synchronization")
+        old = _read_version(ROOT)
+        new = _requested_version(old)
+        print(f"== transactional build v{old} → v{new} ==")
+
+        with tempfile.TemporaryDirectory(prefix="hansen-build-") as tmp:
+            stage = Path(tmp) / "source"
+            _copy_source(stage)
+            commit_names = _prepare_stage(stage, old, new)
+            _syntax_and_regressions(stage)
+            _guards(stage)
+
+            out = Path(os.environ.get("HANSEN_RELEASE_OUT", str(ROOT / "release-assets"))).resolve()
+            out.mkdir(parents=True, exist_ok=True)
+            staged_assets = Path(tempfile.mkdtemp(prefix=".hansen-build-assets-", dir=out))
+            source_backups: dict[Path, bytes] = {}
+            try:
+                _run([sys.executable, "package_release.py", new, "--out", str(staged_assets)], stage,
+                     "build and verify exactly two ZIPs + README")
+                source_backups = _commit_stage(stage, commit_names)
+                try:
+                    _promote_release_assets(staged_assets, out, new)
+                except Exception:
+                    _restore_source(source_backups)
+                    raise
+            finally:
+                shutil.rmtree(staged_assets, ignore_errors=True)
+
+        print(f"✅✅✅ transactional build v{new} completed; source updated only after all checks")
+        return 0
+    except Exception as exc:
+        print(f"❌ Build aborted without committing staged source changes: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

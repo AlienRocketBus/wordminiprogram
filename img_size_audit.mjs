@@ -9,7 +9,7 @@
  *  ① 撑不起展示位: 源图尺寸 <= 画出来的尺寸(已顶格, 再也长不大), 展示位却大得多(填充<70%)
  *  ② 被拉糊: 显示尺寸x3(手机倍屏) 超过源图 1.5 倍
  */
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 
 const PORT = process.argv[2] || '8877';
 const ISLAND = process.argv[3] || 'island_land1.html';
@@ -19,7 +19,7 @@ const SCREENS = ['home','explore','listen','match','typing','cloze','scramble',
   'review','stats','pet','quests','ach','settings','boss'];
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--no-sandbox'] });
   const c = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await c.addInitScript(() => {
     try {

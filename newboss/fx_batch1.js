@@ -324,80 +324,199 @@ function fxDajisi(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   }});
 }catch(e){ try{deal();}catch(e2){} } }
 
-/* ⑤夜罗刹·红莲战鬼 —— 血月+业火爪连斩+红莲爆 */
+/* ═══════════════════════════════════════════════════════════════
+   v950 夜罗刹·红莲战鬼 —— 《血月焚界 04》
+   血月升起 → 四道熔链锁魂 → 双层红莲领域闭合 → 焚界火柱吞没目标
+   铁律: 只在勇者命中点局部增亮；零全屏闪白、零震屏、零场景旋转；答题区继续由 FXCore 裁剪
+   ═══════════════════════════════════════════════════════════════ */
 function fxYecha(bsEl,hx,barL,barW,midY,barBot,fx,deal){ try{
   var F=FXCore,g=F.g,rnd=F.rnd;
-  var C_R='255,70,40', C_O='255,150,50', C_M='200,40,50';
-  var moonA=0, claws=[], lotusT=-1;
-  function drawClaw(ctx,x,y,s,rot,a){ /* 三道业火爪痕(实体黑爪+火缘) */
-    ctx.save(); ctx.globalAlpha=a; ctx.translate(x,y); ctx.rotate(rot); ctx.scale(s,s);
-    for(var k=-1;k<=1;k++){ ctx.save(); ctx.translate(0,k*12);
-      var cg=ctx.createLinearGradient(-46,0,46,0); cg.addColorStop(0,'rgba(20,8,6,0)'); cg.addColorStop(.5,'#1c0e0a'); cg.addColorStop(1,'rgba(20,8,6,0)');
-      ctx.fillStyle=cg; ctx.beginPath(); ctx.moveTo(-46,0); ctx.quadraticCurveTo(0,-7,46,0); ctx.quadraticCurveTo(0,7,-46,0); ctx.closePath(); ctx.fill();
-      ctx.save(); ctx.shadowBlur=10; ctx.shadowColor='#ff5030'; ctx.strokeStyle='#ff7040'; ctx.lineWidth=1.6;
-      ctx.beginPath(); ctx.moveTo(-42,0); ctx.quadraticCurveTo(0,-5,42,0); ctx.stroke(); ctx.restore();
-      ctx.restore(); }
-    ctx.restore();
-  }
-  F.shell(bsEl,hx,barL,barW,midY,barBot,fx,deal,{hardMs:5600,endMs:3700,
-  busy:function(st){ return lotusT>0&&st.t-lotusT<760; },
+  var IVORY='255,249,226', GOLD='255,196,102', FIRE='255,103,54', EMBER='255,73,38',
+      PETAL='255,49,94', BLOOD='220,30,62', MOON='126,11,29', DARK='52,8,22', IRON='38,12,25';
+  function clamp(x){ return x<0?0:(x>1?1:x); }
+  function ease(x){ x=clamp(x); return x*x*(3-2*x); }
+  function out(x){ x=clamp(x); return 1-Math.pow(1-x,3); }
+  function lerp(a,b,k){ return a+(b-a)*k; }
+
+  var hero=null, moon=null, chains=[], petals=[], moonA=0, lotusA=0, lotusY=0;
+  var emberAcc=0, impactAcc=0;
+  var chainT=780, lockT=1640, pillarT=-1, impactT=-1;
+
+  F.shell(bsEl,hx,barL,barW,midY,barBot,fx,deal,{hardMs:Math.ceil(5900/(fx.sp||1)),endMs:4900,
+  busy:function(st){ return petals.length>0 || moonA>0.02 || (impactT>0&&st.t-impactT<1700); },
   tick:function(st){
-    var t=st.t,sz=st.sz;
-    moonA=Math.min(1,t/650);
-    if(t<800&&Math.random()<0.4)F.jet(st.P,st.bx+rnd(-70,70)*sz,st.by+rnd(-60,50)*sz,-1.57,0.5,C_R,1,2,sz);
-    /* ②850起 业火爪四连斩 */
-    if(!st.fired.claw&&t>=850){ st.fired.claw=1;
-      var angs=[-0.5,0.6,-1.1,0.2];
-      for(var i=0;i<4;i++)claws.push({ts:850+i*240,ang:angs[i],done:false});
-      st.fire();
+    var t=st.t,sz=st.sz,fxi=Math.max(0.45,Math.min(1.35,st.fxi)),bw=st.br.width,bh=st.br.height;
+    if(!hero){
+      hero={x:st.hx,y:st.hy};
+      /* 血月悬在立绘框上沿，不再压住夜罗刹的头、角和上半身。 */
+      var mr=Math.min(54,Math.max(38,bw*0.19))*sz;
+      var mx=st.bx+bw*0.22;
+      moon={x:Math.max(mr+8*sz,Math.min(st.vw-mr-8*sz,mx)),y:Math.max(mr+3*sz,st.br.top-mr*0.78),r:mr};
+      /* 红莲领域放在勇者血条上方，最下沿与 HP 数字保留约 8px 安全带。 */
+      lotusY=hero.y-34*sz;
     }
-    for(var ci=0;ci<claws.length;ci++){ var c=claws[ci];
-      if(!c.done&&t>=c.ts+120){ c.done=true;
-        F.burst(st.P,st.hx,st.hy,C_O,9,6.5,sz); F.ring(st.P,st.hx,st.hy,C_R,0.9,3*sz);
-      } }
-    /* ③2100 业火俯冲(火流从boss冲向勇者) */
-    if(!st.fired.dash&&t>=2100){ st.fired.dash=1;
-      for(var k=0;k<14;k++){ (function(kk){ setTimeout(function(){ if(st.dead)return;
-        var p=kk/14; var x=st.bx+(st.hx-st.bx)*p, y=st.by+(st.hy-st.by)*p;
-        F.burst(st.P,x,y,kk%2?C_R:C_O,4,4,st.sz);
-      },kk*30/st.sp); })(k); }
+    moonA=ease((t-100)/650)*(1-ease((t-4050)/650));
+    lotusA=ease((t-1320)/440)*(1-ease((t-3860)/560));
+
+    /* 血月升起时只放轻量余烬，低端手机不会形成无上限粒子池。 */
+    if(t>180&&t<3650){
+      emberAcc=Math.min(2,emberAcc+st.dt*0.013*fxi);
+      while(emberAcc>=1&&st.P.sparks.length<96){ emberAcc-=1;
+        F.jet(st.P,st.bx+rnd(-bw*0.38,bw*0.38),st.by+rnd(-bh*0.05,bh*0.30),-Math.PI/2,0.55,Math.random()<0.56?EMBER:GOLD,1,rnd(1.2,2.5),sz*0.85);
+      }
     }
-    /* ④2700 红莲爆 */
-    if(!st.fired.lotus&&t>=2700){ st.fired.lotus=1; lotusT=t;
-      F.flash(st.P,st.hx,st.hy,C_O,68*sz,300);
-      F.burst(st.P,st.hx,st.hy,C_R,30,9,sz); F.ring(st.P,st.hx,st.hy,C_R,1.7,6*sz); F.ring(st.P,st.hx,st.hy,C_O,1.1,4*sz);
-      F.shards(st.P,st.hx,st.hy,C_O,12,sz);
+
+    /* 四道锁链固定创建一次；端点避开勇者数值文字，只锁命中中心周围。 */
+    if(!st.fired.chains&&t>=chainT){ st.fired.chains=1;
+      var ys=[0.31,0.43,0.52,0.62], ex=[-24,22,-18,26], ey=[-17,12,18,-10];
+      for(var i=0;i<4;i++)chains.push({
+        sx:i%2===0?-34:st.vw+34, sy:st.br.top+bh*ys[i],
+        ex:hero.x+ex[i]*sz, ey:hero.y+ey[i]*sz,
+        born:chainT+i*85, phase:0.9+i*1.47, sag:(i<2?-1:1)*(10+i*2)*sz
+      });
+    }
+    if(!st.fired.lock&&t>=lockT){ st.fired.lock=1;
+      F.ring(st.P,hero.x,hero.y,PETAL,0.85,3.2*sz);
+      F.ring(st.P,hero.x,hero.y,GOLD,0.55,1.8*sz);
+      F.burst(st.P,hero.x,hero.y,PETAL,12,3.2,sz*0.9);
+    }
+
+    /* 与 04 号试片同轴：1820ms 火柱升起，2040ms 领域命中；伤害只结算一次。 */
+    if(!st.fired.pillar&&t>=1820){ st.fired.pillar=1; pillarT=t; }
+    if(!st.fired.impact&&t>=2040){ st.fired.impact=1; impactT=t; st.fire();
+      F.flash(st.P,hero.x,hero.y,IVORY,46*sz,300);
+      F.ring(st.P,hero.x,hero.y,IVORY,2.05,5.4*sz);
+      F.ring(st.P,hero.x,hero.y,GOLD,1.55,4.2*sz);
+      F.ring(st.P,hero.x,hero.y,PETAL,1.16,3.4*sz);
+      F.ring(st.P,hero.x,hero.y,BLOOD,0.82,2.5*sz);
+      var room=Math.max(0,128-st.P.sparks.length);
+      F.burst(st.P,hero.x,hero.y,IVORY,Math.min(16,room),5.4,sz); room=Math.max(0,128-st.P.sparks.length);
+      F.burst(st.P,hero.x,hero.y,FIRE,Math.min(20,room),4.5,sz);
+      F.shards(st.P,hero.x,hero.y,PETAL,10,sz);
+      var pn=Math.max(18,Math.min(34,Math.round(26*fxi)));
+      for(var p=0;p<pn;p++){ var a=p/pn*6.283+rnd(-0.10,0.10),v=rnd(1.8,5.2)*sz;
+        petals.push({x:hero.x+rnd(-8,8)*sz,y:hero.y+rnd(-5,5)*sz,vx:Math.cos(a)*v,vy:Math.sin(a)*v-rnd(0.4,1.8)*sz,rot:rnd(0,6.283),vr:rnd(-0.12,0.12),life:0,max:rnd(760,1320),s:rnd(2.8,6.3)*sz,col:Math.random()<0.32?FIRE:PETAL});
+      }
+    }
+    if(impactT>0&&t-impactT<860){
+      impactAcc=Math.min(2,impactAcc+st.dt*0.020*fxi);
+      while(impactAcc>=1&&st.P.sparks.length<132){ impactAcc-=1;
+        F.jet(st.P,hero.x+rnd(-54,54)*sz,hero.y+rnd(-5,14)*sz,-Math.PI/2,0.38,Math.random()<0.62?FIRE:PETAL,1,rnd(1.6,3.2),sz);
+      }
+    }
+    for(var q=petals.length-1;q>=0;q--){ var pt=petals[q]; pt.life+=st.dt;
+      pt.x+=pt.vx*st.dt*0.06; pt.y+=pt.vy*st.dt*0.06; pt.vy+=0.012*st.dt*sz; pt.vx*=0.993; pt.rot+=pt.vr;
+      if(pt.life>=pt.max)petals.splice(q,1);
     }
   },
   solid:function(st){
     var ctx=st.ctx,sz=st.sz,t=st.t;
-    for(var ci=0;ci<claws.length;ci++){ var c=claws[ci];
-      if(t>=c.ts&&t<c.ts+200){ var pr=(t-c.ts)/200; var a=pr<0.15?pr/0.15:(pr>0.8?(1-pr)/0.2:1);
-        drawClaw(ctx,st.hx,st.hy,(1.1+pr*0.5)*sz,c.ang,a); } }
+    drawMoon(ctx,st,t,sz);
+    for(var i=0;i<chains.length;i++)drawChain(ctx,chains[i],t,sz);
+    if(lotusA>0.01){
+      drawLotus(ctx,hero.x,lotusY,76*sz,lotusA,t*0.00042,sz);
+      drawLotus(ctx,hero.x,lotusY,46*sz,lotusA*0.88,-t*0.00066,sz);
+    }
+    drawPetals(ctx,petals);
   },
   glow:function(st){
     var ctx=st.ctx,sz=st.sz,t=st.t;
-    /* 血月(boss上方) */
-    if(moonA>0){ var mx=st.bx+80*sz, my=st.by-95*sz, R=30*sz;
-      ctx.save(); ctx.globalAlpha=moonA*0.95;
-      var mg=ctx.createRadialGradient(mx,my,0,mx,my,R*1.7); mg.addColorStop(0,g(C_M+',0.85')); mg.addColorStop(.55,g(C_M+',0.4')); mg.addColorStop(1,g(C_M+',0'));
-      ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(mx,my,R*1.7,0,6.283); ctx.fill();
-      ctx.fillStyle=g('255,110,90,0.9'); ctx.shadowBlur=18; ctx.shadowColor=g(C_M+',1');
-      ctx.beginPath(); ctx.arc(mx,my,R,0,6.283); ctx.fill(); ctx.shadowBlur=0; ctx.restore();
+    /* 局部血月染光，不做全屏闪白。 */
+    if(moonA>0.01){ var vg=ctx.createRadialGradient(moon.x,moon.y,8*sz,moon.x,moon.y,Math.max(130*sz,moon.r*2.8));
+      vg.addColorStop(0,g(PETAL+','+(moonA*0.22))); vg.addColorStop(0.55,g(BLOOD+','+(moonA*0.08))); vg.addColorStop(1,g(BLOOD+',0'));
+      ctx.fillStyle=vg; ctx.beginPath(); ctx.arc(moon.x,moon.y,Math.max(130*sz,moon.r*2.8),0,6.283); ctx.fill();
     }
-    /* 红莲绽放(④幕: 六瓣火莲) */
-    if(lotusT>0&&t-lotusT<760){ var pr=(t-lotusT)/760, env=Math.sin(Math.min(1,pr*1.15)*3.14);
-      ctx.save(); ctx.translate(st.hx,st.hy);
-      for(var k=0;k<6;k++){ var a=k/6*6.283+pr*0.8;
-        ctx.save(); ctx.rotate(a);
-        var pl=58*sz*env;
-        var lg=ctx.createLinearGradient(0,0,0,-pl); lg.addColorStop(0,g(C_R+','+(0.75*env))); lg.addColorStop(1,g(C_O+',0'));
-        ctx.fillStyle=lg;
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(-14*sz*env,-pl*0.55,0,-pl); ctx.quadraticCurveTo(14*sz*env,-pl*0.55,0,0); ctx.closePath(); ctx.fill();
-        ctx.restore(); }
-      ctx.restore();
+    drawPillar(ctx,st,t,sz);
+    if(impactT>0){ var age=t-impactT,ap=clamp(age/1150),af=1-ease(ap);
+      if(af>0.01){ var rr=(24+ap*142)*sz;
+        var ig=ctx.createRadialGradient(hero.x,hero.y,0,hero.x,hero.y,rr);
+        ig.addColorStop(0,g(IVORY+','+(af*0.30))); ig.addColorStop(0.36,g(FIRE+','+(af*0.22))); ig.addColorStop(1,g(PETAL+',0'));
+        ctx.fillStyle=ig; ctx.beginPath(); ctx.arc(hero.x,hero.y,rr,0,6.283); ctx.fill();
+      }
     }
+    /* 字幕永远最后绘制，不再被火柱、红莲或命中光吞掉。 */
+    drawLines(ctx,st,t,sz);
   }});
+
+  function drawMoon(ctx,st,t,sz){ if(moonA<=0.01)return;
+    var rise=out((t-100)/820),my=moon.y+(1-rise)*18*sz,mr=moon.r;
+    ctx.save(); ctx.globalAlpha=moonA; ctx.shadowColor=g(PETAL+',0.85'); ctx.shadowBlur=26*sz;
+    var mg=ctx.createRadialGradient(moon.x-mr*0.28,my-mr*0.28,2,moon.x,my,mr);
+    mg.addColorStop(0,g('255,112,126,0.92')); mg.addColorStop(0.34,g(PETAL+',0.94')); mg.addColorStop(0.72,g(MOON+',0.96')); mg.addColorStop(1,g(DARK+',0.96'));
+    ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(moon.x,my,mr,0,6.283); ctx.fill(); ctx.shadowBlur=0;
+    ctx.globalAlpha=moonA*0.36; ctx.strokeStyle=g('255,154,164,0.9'); ctx.lineWidth=1.2*sz;
+    for(var i=0;i<5;i++){ ctx.beginPath(); ctx.arc(moon.x-mr*0.22+i*mr*0.12,my-mr*0.09+i*2*sz,mr*(0.12+i*0.023),0,4.45); ctx.stroke(); }
+    ctx.restore();
+  }
+  function chainPoint(ch,u,t,sz){
+    var x=lerp(ch.sx,ch.ex,u),y=lerp(ch.sy,ch.ey,u);
+    var wave=Math.sin(u*6.283*2.4+ch.phase+t*0.006)*(1-u)*6.5*sz;
+    y+=Math.sin(u*Math.PI)*ch.sag+wave; x+=Math.cos(u*6.283*1.5+ch.phase)*wave*0.32;
+    return {x:x,y:y};
+  }
+  function drawChain(ctx,ch,t,sz){
+    var reveal=out((t-ch.born)/590),fade=1-ease((t-2780)/640); if(reveal<=0||fade<=0.01)return;
+    var a=reveal*fade,steps=18,pts=[];
+    for(var i=0;i<=steps;i++){ var u=reveal*i/steps; pts.push(chainPoint(ch,u,t,sz)); }
+    ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
+    /* 一次建路径，连续描出铁芯、血焰和金色高光；不再 solid/glow 各算一遍。 */
+    ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); for(var k=1;k<pts.length;k++)ctx.lineTo(pts[k].x,pts[k].y);
+    ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=g(IRON+','+(a*0.94)); ctx.lineWidth=7.2*sz; ctx.shadowBlur=0; ctx.stroke();
+    ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=g(PETAL+','+(a*0.62)); ctx.lineWidth=3.2*sz; ctx.shadowBlur=8*sz; ctx.shadowColor=g(PETAL+',0.88'); ctx.stroke();
+    ctx.shadowBlur=0; ctx.strokeStyle=g(GOLD+','+(a*0.68)); ctx.lineWidth=0.9*sz; ctx.stroke();
+    /* 独立椭圆链环让锁链不会退化成普通红线。 */
+    ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=g(BLOOD+','+(a*0.82)); ctx.lineWidth=1.65*sz; ctx.beginPath();
+    for(var j=2;j<steps;j+=2){ var p=pts[j],p0=pts[j-1],ang=Math.atan2(p.y-p0.y,p.x-p0.x)+(j%4?0:Math.PI/2);
+      ctx.moveTo(p.x+Math.cos(ang)*5.4*sz,p.y+Math.sin(ang)*5.4*sz);
+      ctx.ellipse(p.x,p.y,5.4*sz,2.8*sz,ang,0,6.283);
+    }
+    ctx.stroke();
+    if(reveal>0.88){ var tip=pts[pts.length-1]; ctx.globalCompositeOperation='lighter'; ctx.fillStyle=g(IVORY+','+(a*0.88)); ctx.beginPath(); ctx.arc(tip.x,tip.y,2.7*sz,0,6.283); ctx.fill(); }
+    ctx.restore();
+  }
+  function drawLotus(ctx,x,y,r,a,rot,sz){
+    ctx.save(); ctx.translate(x,y); ctx.scale(1,0.32); ctx.rotate(rot); ctx.globalAlpha=a;
+    /* 整朵莲花只建立一次路径，再复描外骨架与内辉光。 */
+    ctx.beginPath();
+    for(var i=0;i<12;i++){ ctx.save(); ctx.rotate(i/12*6.283); ctx.moveTo(0,0);
+      ctx.bezierCurveTo(r*0.17,-r*0.12,r*0.34,-r*0.12,r*0.56,0); ctx.bezierCurveTo(r*0.34,r*0.12,r*0.17,r*0.12,0,0); ctx.restore(); }
+    ctx.moveTo(r*0.70,0); ctx.arc(0,0,r*0.70,0,6.283);
+    ctx.moveTo(r*0.34,0); ctx.arc(0,0,r*0.34,0,6.283);
+    for(var k=0;k<16;k++){ var aa=k/16*6.283,ri=r*0.76,ro=r*(k%2?0.84:0.90); ctx.moveTo(Math.cos(aa)*ri,Math.sin(aa)*ri); ctx.lineTo(Math.cos(aa)*ro,Math.sin(aa)*ro); }
+    ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=g(BLOOD+',0.82'); ctx.lineWidth=3.0*sz; ctx.shadowBlur=0; ctx.stroke();
+    ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=g(PETAL+',0.92'); ctx.lineWidth=1.15*sz; ctx.shadowBlur=8*sz; ctx.shadowColor=g(PETAL+',0.86'); ctx.stroke();
+    ctx.restore();
+  }
+  function drawPillar(ctx,st,t,sz){ if(pillarT<0)return;
+    var age=t-pillarT,rise=out(age/340),fade=1-ease((age-1080)/570); if(rise<=0||fade<=0.01)return;
+    var top=Math.max(4,st.br.top-18*sz),bottom=hero.y+24*sz,w=(25+47*rise)*sz;
+    ctx.save(); ctx.globalAlpha=fade;
+    var pg=ctx.createLinearGradient(hero.x-w,0,hero.x+w,0);
+    pg.addColorStop(0,g(PETAL+',0')); pg.addColorStop(0.18,g(BLOOD+',0.38')); pg.addColorStop(0.38,g(FIRE+',0.72'));
+    pg.addColorStop(0.50,g(IVORY+',0.92')); pg.addColorStop(0.62,g(FIRE+',0.72')); pg.addColorStop(0.82,g(BLOOD+',0.38')); pg.addColorStop(1,g(PETAL+',0'));
+    ctx.fillStyle=pg; ctx.shadowColor=g(PETAL+',0.95'); ctx.shadowBlur=34*sz;
+    ctx.beginPath(); ctx.moveTo(hero.x-w*0.44,top); ctx.lineTo(hero.x+w*0.44,top); ctx.lineTo(hero.x+w,bottom); ctx.lineTo(hero.x-w,bottom); ctx.closePath(); ctx.fill();
+    ctx.shadowBlur=0; ctx.globalAlpha=fade*0.72;
+    for(var i=0;i<5;i++){ var off=(i-2)*w*0.22+Math.sin(t*0.012+i)*5*sz;
+      ctx.strokeStyle=g((i%2?GOLD:IVORY)+','+(0.58-i*0.05)); ctx.lineWidth=(i===2?3.2:1.4)*sz;
+      ctx.beginPath(); ctx.moveTo(hero.x+off*0.45,top); ctx.quadraticCurveTo(hero.x-off*0.18,(top+bottom)*0.52,hero.x+off,bottom); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawPetals(ctx,list){
+    for(var i=0;i<list.length;i++){ var p=list[i],pr=p.life/p.max,a=pr<0.12?pr/0.12:1-ease((pr-0.60)/0.40); if(a<=0)continue;
+      ctx.save(); ctx.globalAlpha=a; ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=g(p.col+',0.88');
+      ctx.beginPath(); ctx.moveTo(0,-p.s); ctx.bezierCurveTo(p.s*0.72,-p.s*0.36,p.s*0.56,p.s*0.70,0,p.s);
+      ctx.bezierCurveTo(-p.s*0.56,p.s*0.70,-p.s*0.72,-p.s*0.36,0,-p.s); ctx.fill(); ctx.restore();
+    }
+  }
+  function drawLines(ctx,st,t,sz){
+    function line(txt,a,fs,col){ ctx.save(); ctx.globalCompositeOperation='source-over';
+      ctx.font='700 '+(fs*sz)+'px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign='center';
+      ctx.fillStyle=g(col+','+a); ctx.shadowBlur=12; ctx.shadowColor=g(DARK+',0.92'); ctx.fillText(txt,st.vw/2,subtitleY(st)); ctx.restore(); }
+    if(t>=260&&t<1480){ var a1=Math.min(1,(t-260)/280)*(1-ease((t-1120)/360)); if(a1>0)line('「血月为界——红莲为狱。」',a1,13,'255,218,222'); }
+    if(t>=2500&&t<4100){ var a2=Math.min(1,(t-2500)/260)*(1-ease((t-3650)/450)); if(a2>0)line('「焚界——万物归烬。」',a2,14,IVORY); }
+  }
+  function subtitleY(st){ var boxBot=st.by+st.br.height*0.5,y=boxBot+14*st.sz,cap=st.hy-46*st.sz; return y>cap?cap:y; }
 }catch(e){ try{deal();}catch(e2){} } }
 
 /* ⑥天界守护者·黄金斯芬克斯 —— 太阳金翼+符文环+日轮审判 */

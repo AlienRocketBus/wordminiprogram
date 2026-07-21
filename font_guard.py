@@ -35,13 +35,45 @@ def font_char(ch):
     return (0x20 <= o <= 0x7E) or (0x4E00 <= o <= 0x9FFF) or (0x3000 <= o <= 0x303F) or (0xFF00 <= o <= 0xFF65)
 
 
-def main():
+def load_cmap(font_path):
+    """Read a WOFF2 cmap without making the guard depend on one decoder.
+
+    FontTools needs the optional Python Brotli extension for WOFF2.  Minimal
+    release runners often omit it even though their system font stack can read
+    WOFF2 perfectly well.  Prefer FontTools, then fall back to fontconfig's
+    authoritative charset output so a missing test-only module cannot create a
+    false product failure.
+    """
     try:
         from fontTools.ttLib import TTFont
-    except ImportError:
-        print("  ⚠️ 缺 fontTools, 跳过字体守卫(pip install fonttools)")
-        return 0
+        font = TTFont(font_path)
+        cmap = set()
+        for table in font["cmap"].tables:
+            cmap |= set(table.cmap.keys())
+        return cmap, "FontTools"
+    except Exception as fonttools_error:
+        try:
+            result = subprocess.run(
+                ["fc-query", "--format", "%{charset}", font_path],
+                capture_output=True, text=True, check=True, timeout=30,
+            )
+            cmap = set()
+            for token in result.stdout.split():
+                bounds = token.split("-", 1)
+                start = int(bounds[0], 16)
+                end = int(bounds[1], 16) if len(bounds) == 2 else start
+                cmap.update(range(start, end + 1))
+            if not cmap:
+                raise RuntimeError("fc-query returned an empty charset")
+            return cmap, "fontconfig (FontTools WOFF2 decoder unavailable: %s)" % fonttools_error
+        except Exception as fontconfig_error:
+            raise RuntimeError(
+                "cannot read WOFF2 cmap with FontTools (%s) or fontconfig (%s)"
+                % (fonttools_error, fontconfig_error)
+            )
 
+
+def main():
     srv = subprocess.Popen([sys.executable, "_imgguard_srv.py", PORT, ROOT],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT)
     time.sleep(2)
@@ -58,15 +90,19 @@ def main():
             print("  ❌ 字体守卫: 只抓到 %d 个字, 明显没渲染到位 —— 不能当成'通过'" % len(chars))
             return 1
 
-        f = TTFont(os.path.join(ROOT, "cartoon_font.woff2"))
-        cmap = set()
-        for t in f["cmap"].tables:
-            cmap |= set(t.cmap.keys())
+        cmap, cmap_reader = load_cmap(os.path.join(ROOT, "cartoon_font.woff2"))
 
         real = {c for c in chars if font_char(c)}
         missing = sorted(c for c in real if ord(c) not in cmap)
 
+        # Keep the exact, render-derived input next to the diagnostic promised below.
+        # This makes a failed guard directly repairable without guessing which UI
+        # strings happened to be visible during the full browser walk.
+        with open("/tmp/subset_chars.txt", "w", encoding="utf-8") as subset_file:
+            subset_file.write("".join(sorted(real)))
+
         print("  真机渲染: 全库 %d 个界面, 卡通字体画出来的字符 %d 个(emoji 已排除)" % (len(chars), len(real)))
+        print("  字体字符表解析: %s" % cmap_reader)
         if missing:
             print("  ❌ 字体子集守卫: 有 %d 个字【会显示、但字体里没有】→ 会悄悄回退成系统默认字体:" % len(missing))
             for c in missing[:12]:

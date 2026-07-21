@@ -36,7 +36,7 @@
 
 // hansen_boss_upgrade.js v152 (双保险覆盖原 cFall/lvlIn keyframes, 防止旧动画名残留)
 // v143v: 顶部立即导出版本号到 window, 不依赖 init() (诊断页面用)
-window.__HBU_VERSION__ = 'v938';
+window.__HBU_VERSION__ = 'v960';
 window.__HBU_LOADED_AT__ = Date.now();
 
 // Boss 战升级: 难度递增 (答错伤害 + 倒计时) + 最后 Boss 全词覆盖 + 半血惩罚 + 高奖励
@@ -57,16 +57,36 @@ window.__HBU_LOADED_AT__ = Date.now();
   ];
   
 
-  // ─── 跨闭包读写: 访问 island.html 里的 let 全局变量 (本文件最核心的黑科技) ───
-  // 背景: island.html 里的 boss 状态 (如 bossActive、bossWord) 是用 let 声明的,
-  //       let 不挂在 window 上, 所以本文件 (另一个 IIFE) 正常手段读不到。
-  // 手法: new Function() 在全局作用域执行一段 "return 那个变量名" 的代码, 借此读到 let 值。
-  // _r(name)      读取名为 name 的全局变量, 读不到回退到 window[name]
-  // _w(name, val) 把 val 写回名为 name 的全局变量
+  // ─── 跨闭包读写: 访问 island.html 里的已知 let 全局变量 ───
+  // 经典脚本共享全局词法环境；显式白名单引用替代 new Function/eval。
   // ⚠️ 注意 (关联 BUG #9): 不要假设 island 的 let 变量一定读得到; 涉及 boss 状态判断
   //    优先用 DOM 检测 (querySelector) 更可靠, 这就是 BUG #9 返回键修复的教训。
-  function _r(name){ try { var v = new Function('return typeof '+name+' !== "undefined" ? '+name+' : undefined')(); if(v !== undefined) return v; } catch(e){} return window[name]; }
-  function _w(name, val){ try { new Function('v','if(typeof '+name+' !== "undefined") '+name+' = v')(val); } catch(e){} }
+  function _r(name){
+    try {
+      switch(name){
+        case 'bossCurrent': return typeof bossCurrent !== 'undefined' ? bossCurrent : window.bossCurrent;
+        case 'bossActive': return typeof bossActive !== 'undefined' ? bossActive : window.bossActive;
+        case 'bossPhase': return typeof bossPhase !== 'undefined' ? bossPhase : window.bossPhase;
+        case 'bossHP': return typeof bossHP !== 'undefined' ? bossHP : window.bossHP;
+        case 'bossMaxHP': return typeof bossMaxHP !== 'undefined' ? bossMaxHP : window.bossMaxHP;
+        case 'bossRageMode': return typeof bossRageMode !== 'undefined' ? bossRageMode : window.bossRageMode;
+        case '_bossCorrectIdx': return typeof _bossCorrectIdx !== 'undefined' ? _bossCorrectIdx : window._bossCorrectIdx;
+        case 'heroHP': return typeof heroHP !== 'undefined' ? heroHP : window.heroHP;
+        case 'heroMaxHP': return typeof heroMaxHP !== 'undefined' ? heroMaxHP : window.heroMaxHP;
+        case 'bossCombo': return typeof bossCombo !== 'undefined' ? bossCombo : window.bossCombo;
+      }
+    } catch(e){}
+    return window[name];
+  }
+  function _w(name, val){
+    try {
+      if(name === 'bossHP'){
+        if(typeof bossHP !== 'undefined') bossHP = val; else window.bossHP = val;
+      } else if(name === 'heroHP'){
+        if(typeof heroHP !== 'undefined') heroHP = val; else window.heroHP = val;
+      }
+    } catch(e){}
+  }
 
   // ─── Boss 经典开场白 (战斗开始时, ≤12 字, 一行) ──────────
   var BOSS_QUOTES = {
@@ -355,15 +375,16 @@ window.__HBU_LOADED_AT__ = Date.now();
   //   (答完→下一题原版靠 setTimeout 1500/2000ms; 用答题时刻而非出题时刻算超时, 玩家想多久都不会误判)。
   var _lastAnswerAt = 0;
   
+  // v946 HF5: 这根彩虹条是功能性倒计时，不能被“减少动态效果”的全局
+  // transition-duration:.001ms!important 压成 0。它只在本元素上用行内 !important
+  // 覆盖该时长；原有 token、超时回调和答题状态机全部保持不变。
   // v143u: 答完题 fill 立即平滑回弹到 100% 满格, 停在那里, 直到下一题 startTimer 开始新倒计时
-  // 这样时间条永远不会出现"缩没了" / "消失" 的视觉状态
   function clearTimer(){
     timerToken++;  // v165: 让任何已 fired 但未处理的 setTimeout 回调失效
     if(timerInterval){ clearTimeout(timerInterval); timerInterval = null; }
     var fill = document.getElementById('bossTimerFill');
     if(fill){
-      // 0.3s 平滑回到 100% (从当前位置, 不管在哪)
-      fill.style.transition = 'transform 0.3s ease-out';
+      fill.style.setProperty('transition', 'transform 0.3s ease-out', 'important');
       fill.style.transform = 'scaleX(1)';
     }
   }
@@ -556,11 +577,11 @@ window.__HBU_LOADED_AT__ = Date.now();
     
     if(bqt) bqt.textContent = '🎯 拼写补全';
     bq.innerHTML = 
-      '<div style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:5px;text-shadow:0 0 12px rgba(251,191,36,0.4)">' + esc(w.cn || '') + '</div>' +
-      '<div style="font-size:10px;color:#cbd5e1;margin-bottom:2px">补全英文 (缺 ' + holeLen + ' 个字母):</div>' +
-      '<div id="bsfBox" style="font-size:18px;font-weight:900;letter-spacing:2px;color:#fff;font-family:Consolas,monospace;background:rgba(15,23,42,0.85);padding:5px 12px;border-radius:9px;border:2px solid #6366f1;display:inline-block">' + 
+      '<div class="boss-answer-primary" style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:5px;text-shadow:0 0 12px rgba(251,191,36,0.4)">' + esc(w.cn || '') + '</div>' +
+      '<div class="boss-answer-kicker" style="font-size:10px;color:#cbd5e1;margin-bottom:2px">补全英文 (缺 ' + holeLen + ' 个字母):</div>' +
+      '<div id="bsfBox" class="boss-answer-box" style="font-size:18px;font-weight:900;letter-spacing:2px;color:#fff;font-family:Consolas,monospace;background:rgba(15,23,42,0.85);padding:5px 12px;border-radius:9px;border:2px solid #6366f1;display:inline-block">' + 
       prefix + 
-      '<span id="bsfHole" style="color:#1e293b;background:#fbbf24;padding:0 5px;border-radius:4px;margin:0 2px">' + new Array(holeLen + 1).join('_') + '</span>' + 
+      '<span id="bsfHole" class="boss-answer-hole" style="color:#1e293b;background:#fbbf24;padding:0 5px;border-radius:4px;margin:0 2px">' + new Array(holeLen + 1).join('_') + '</span>' + 
       suffix + '</div>';
     bs.innerHTML = '';
     // v324: 存下来, 答完后在框里把空缺补成正确字母 (对=白色 / 错=红色)
@@ -575,7 +596,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     bo.style.gridTemplateColumns = 'repeat(2, 1fr)';
     bo.style.gap = '5px';
     bo.innerHTML = choices.map(function(c, i){
-      return '<div class="boss-opt" onclick="bossAnswer(' + i + ')" style="font-size:15px;font-weight:900;letter-spacing:2px;font-family:Consolas,monospace;color:#fbbf24;text-align:center;padding:7px 6px">' + c + '</div>';
+      return '<div class="boss-opt boss-answer-choice" onclick="bossAnswer(' + i + ')" style="font-size:15px;font-weight:900;letter-spacing:2px;font-family:Consolas,monospace;color:#fbbf24;text-align:center;padding:7px 6px">' + c + '</div>';
     }).join('');
     bo.dataset.done = '';
     
@@ -626,10 +647,10 @@ window.__HBU_LOADED_AT__ = Date.now();
     
     if(bqt) bqt.textContent = '🔤 拼字辨认 · 6 选 1';
     bq.innerHTML = 
-      '<div style="font-size:11px;color:#cbd5e1;margin-bottom:1px">中文意思:</div>' +
-      '<div style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:2px;text-shadow:0 0 12px rgba(251,191,36,0.4)">' + esc(w.cn || '') + '</div>' +
-      '<div style="font-size:11px;color:#cbd5e1;margin-bottom:1px">乱序字母 (选出正确拼写):</div>' +
-      '<div style="font-size:18px;font-weight:900;letter-spacing:3px;color:#fbbf24;font-family:Consolas,monospace;background:rgba(15,23,42,0.85);padding:3px 12px;border-radius:9px;border:2px dashed #a855f7;display:inline-block">' + scrambled + '</div>';
+      '<div class="boss-answer-kicker" style="font-size:11px;color:#cbd5e1;margin-bottom:1px">中文意思:</div>' +
+      '<div class="boss-answer-primary" style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:2px;text-shadow:0 0 12px rgba(251,191,36,0.4)">' + esc(w.cn || '') + '</div>' +
+      '<div class="boss-answer-kicker" style="font-size:11px;color:#cbd5e1;margin-bottom:1px">乱序字母 (选出正确拼写):</div>' +
+      '<div class="boss-answer-secondary boss-answer-box" style="font-size:18px;font-weight:900;letter-spacing:3px;color:#fbbf24;font-family:Consolas,monospace;background:rgba(15,23,42,0.85);padding:3px 12px;border-radius:9px;border:2px dashed #a855f7;display:inline-block">' + scrambled + '</div>';
     bs.innerHTML = '';   // 🔴 BUG#58(v483): 去掉冗余副标题(题型标签已写"6 选 1"), 省一行高度
 
     // 🔴 BUG#58 (v483): Hansen 要求 boss 做题页除打字外都【不缩立绘】(缩小只伤 boss 画质)。
@@ -643,7 +664,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     bo.style.gridTemplateColumns = 'repeat(3, 1fr)';   // 6 选项 → 3 列 2 行 (省一行高度, 短字母组合 3 列够宽)
     bo.style.gap = '5px';
     bo.innerHTML = choices.map(function(c, i){
-      return '<div class="boss-opt" onclick="bossAnswer(' + i + ')" style="font-size:14px;font-weight:800;font-family:Consolas,monospace;color:#fbbf24;text-align:center;padding:6px 3px">' + c + '</div>';
+      return '<div class="boss-opt boss-answer-choice" onclick="bossAnswer(' + i + ')" style="font-size:14px;font-weight:800;font-family:Consolas,monospace;color:#fbbf24;text-align:center;padding:6px 3px">' + c + '</div>';
     }).join('');
     bo.dataset.done = '';
     
@@ -686,16 +707,16 @@ window.__HBU_LOADED_AT__ = Date.now();
     // v238: Hansen 反馈仍有点厚, 再瘦 (上下 padding 6→3, line-height 1.45→1.3)
     // v323: 删掉多余的"中文句子:"标签 (Hansen: 谁都看得出下面是中文句子, 冗余)
     bq.innerHTML = 
-      '<div style="text-align:center"><div style="display:inline-block;font-size:16px;font-weight:700;color:#fbbf24;background:rgba(15,23,42,0.85);padding:3px 14px;border-radius:8px;border:2px solid #ef4444;line-height:1.3;max-width:100%">' + esc(w.exCn) + '</div></div>';
+      '<div style="text-align:center"><div class="boss-answer-primary boss-answer-box" style="display:inline-block;font-size:16px;font-weight:700;color:#fbbf24;background:rgba(15,23,42,0.85);padding:3px 14px;border-radius:8px;border:2px solid #ef4444;line-height:1.3;max-width:100%">' + esc(w.exCn) + '</div></div>';
     bs.innerHTML = '选出正确的英文翻译';
     
     bo.style.display = '';
     bo.style.gridTemplateColumns = '1fr';
     bo.style.gap = '5px';
     bo.innerHTML = choices.map(function(c, i){
-      return '<div class="boss-opt" onclick="bossAnswer(' + i + ')" style="padding:9px 12px;text-align:left;font-size:12.5px;line-height:1.4">' +
-        '<span style="color:#fbbf24;font-weight:900;margin-right:6px">' + 'ABCD'.charAt(i) + '.</span>' +
-        '<span style="color:#fff">' + esc(c) + '</span></div>';
+      return '<div class="boss-opt boss-answer-choice" onclick="bossAnswer(' + i + ')" style="padding:9px 12px;text-align:left;font-size:12.5px;line-height:1.4">' +
+        '<span class="boss-answer-choice-label" style="color:#fbbf24;font-weight:900;margin-right:6px">' + 'ABCD'.charAt(i) + '.</span>' +
+        '<span class="boss-answer-choice-text" style="color:#fff">' + esc(c) + '</span></div>';
     }).join('');
     bo.dataset.done = '';
     
@@ -731,8 +752,8 @@ window.__HBU_LOADED_AT__ = Date.now();
 
     // v300: 不再显示"打字模式"标签 (Hansen 要删, 省空间); 标签由 .bts-typing CSS 隐藏
     bq.innerHTML =
-      '<div style="font-size:10px;color:#cbd5e1;margin-bottom:2px">\u770b\u4e2d\u6587\u610f\u601d, \u62fc\u51fa\u82f1\u6587:</div>' +
-      '<div style="font-size:18px;font-weight:900;color:#fbbf24;line-height:1.05;text-shadow:0 0 12px rgba(251,191,36,0.5)">' + esc(w.cn || '') + '</div>';
+      '<div class="boss-answer-kicker" style="font-size:10px;color:#cbd5e1;margin-bottom:2px">\u770b\u4e2d\u6587\u610f\u601d, \u62fc\u51fa\u82f1\u6587:</div>' +
+      '<div class="boss-answer-primary" style="font-size:18px;font-weight:900;color:#fbbf24;line-height:1.05;text-shadow:0 0 12px rgba(251,191,36,0.5)">' + esc(w.cn || '') + '</div>';
     bs.innerHTML = '';
 
     var target = (w.en || '').toLowerCase();
@@ -834,11 +855,18 @@ window.__HBU_LOADED_AT__ = Date.now();
       var slots = document.querySelectorAll('.bts-slot');
       var col = isRight ? '#22c55e' : '#ef4444';
       for(var i = 0; i < slots.length; i++){
-        if(!slots[i].classList.contains('space')){ slots[i].style.borderBottomColor = col; slots[i].style.color = col; }
+        if(!slots[i].classList.contains('space')){
+          slots[i].style.borderBottomColor = col;
+          slots[i].style.color = col;
+          slots[i].classList.remove('boss-answer-result-correct', 'boss-answer-result-wrong');
+          slots[i].classList.add(isRight ? 'boss-answer-result-correct' : 'boss-answer-result-wrong');
+        }
       }
     } catch(e){}
     var hint = document.getElementById('btsHint');
     if(hint){
+      hint.classList.remove('boss-answer-result-correct', 'boss-answer-result-wrong');
+      hint.classList.add(isRight ? 'boss-answer-result-correct' : 'boss-answer-result-wrong');
       if(isRight) hint.innerHTML = icon3dCheck(30) + ' <span style="color:#22c55e;font-family:Consolas,monospace;letter-spacing:1px;vertical-align:middle">' + esc(w.en) + '</span>';
       else hint.innerHTML = icon3dCross(30) + ' <span style="color:#ef4444;font-family:Consolas,monospace;letter-spacing:1px;vertical-align:middle">' + esc(w.en) + '</span>';
     }
@@ -937,22 +965,22 @@ window.__HBU_LOADED_AT__ = Date.now();
     if(!el){
       el = document.createElement('div');
       el.id = 'bossTimerEl';
-      // 容器: 几乎不占空间 (2px 高), 100% 宽, 暗底
+      // 容器: 几乎不占空间 (3px 高), 100% 宽, 暗底
       el.style.cssText = 'height:3px;width:100%;max-width:360px;margin:3px auto;background:rgba(15,23,42,0.85);border-radius:2px;overflow:hidden;position:relative;box-shadow:inset 0 0 2px rgba(0,0,0,0.5)';
-      // 进度条本身: 从右往左缩 (transform-origin:right + scaleX 1→0)
+      // 进度条本身: 右端不断向左缩短
       el.innerHTML = '<div id="bossTimerFill" style="position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:left center;background:linear-gradient(90deg,#22c55e 0%,#fbbf24 50%,#ef4444 100%);box-shadow:0 0 6px rgba(251,191,36,0.5);border-radius:1px"></div>';
       subEl.parentNode.insertBefore(el, subEl.nextSibling);
     }
     el.style.display = 'block';
     
     var fill = document.getElementById('bossTimerFill');
-    // 先重置到满 (无 transition)
-    fill.style.transition = 'none';
+    // 先重置到满 (无 transition)。行内 !important 精准覆盖 reduced-motion 的通配规则。
+    fill.style.setProperty('transition', 'none', 'important');
     fill.style.transform = 'scaleX(1)';
-    
-    // 强制 reflow, 然后启动线性过渡
+
+    // 强制 reflow, 然后启动线性过渡；transform 由浏览器合成层推进，页面滑动时继续缩短。
     void fill.offsetWidth;
-    fill.style.transition = 'transform ' + seconds + 's linear';
+    fill.style.setProperty('transition', 'transform ' + seconds + 's linear', 'important');
     fill.style.transform = 'scaleX(0)';
     
     // 到时间触发 timeout (v165: 验证 token, 防上题 timer 在新题面 fire)
@@ -1130,12 +1158,12 @@ window.__HBU_LOADED_AT__ = Date.now();
         '@keyframes chestShake{0%,100%{transform:none}}',
         // ─── 🔴 v573: 藏宝图去框直贴版 (Hansen 验收反馈: 金属框太丑直接去掉) — 60px 图标贴 66px 顶栏, 凹坑按压在岛内 :active 实现 ───
         // 金光呼吸改挂 .wmb-img 的 drop-shadow(wmbGlowD, 贴图形轮廓无矩形感); 按钮本体仅保留 worldMapFloat 轻浮动
-        '.world-map-btn{position:fixed !important;top:2px !important;right:6px !important;width:58px !important;height:58px !important;border-radius:16px !important;border:none !important;background:transparent !important;padding:0 !important;box-shadow:none !important;animation:worldMapFloat 3.5s ease-in-out infinite !important;z-index:101 !important;filter:none !important}',
+        '.world-map-btn{position:fixed !important;top:calc(env(safe-area-inset-top,0px) + 2px) !important;right:max(6px,env(safe-area-inset-right,0px)) !important;width:58px !important;height:58px !important;border-radius:16px !important;border:none !important;background:transparent !important;padding:0 !important;box-shadow:none !important;animation:worldMapFloat 3.5s ease-in-out infinite !important;z-index:101 !important;filter:none !important}',
         '.world-map-btn:active{transform:translateY(2px) scale(.97) !important;animation:none !important}',
         // 弹窗打开时仍然隐藏地图按钮 (避免和 ✕ 重叠) — 覆盖原版 transform: scale(.4) 残留
         'body.modal-open .world-map-btn{opacity:0 !important;pointer-events:none !important;transform:none !important;animation:none !important}',
         // 🔴 v573: 顶栏压回原高度(上下 10px → 约66px, 比 v571 的 70px 更矮) + 给 60px 按钮腾右侧 74px
-        '.top-bar{padding:10px 70px 10px 14px !important;gap:6px !important}',
+        '.top-bar{padding:calc(10px + env(safe-area-inset-top,0px)) calc(70px + env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px)) !important;gap:6px !important}',
         // 🔴 v573: 头像 46→42 — 顶栏地板降到约62px(比 v571 的 70px 更矮), 同时给名字行释放 4px 横向空间
         '.avatar{width:42px !important;height:42px !important}',
         // 顶部内容紧凑化, 缩小一些让出空间, 包括 XP 条/数字/钻石金币 badge
@@ -1581,6 +1609,26 @@ window.__HBU_LOADED_AT__ = Date.now();
       
       // 调原函数
       origBossAnswer.apply(this, arguments);
+
+      // v953: 给原版完形/拼写结果补上稳定的语义状态类。
+      // 以前只靠 style.color=#22c55e/#ef4444，全局配色会改写行内色，
+      // 而且浏览器可能把 hex 序列化成 rgb，属性选择器不可靠。
+      // 状态类只用于颜色语义，不改答题、伤害、倒计时或奖励逻辑。
+      try {
+        var resultClass = isCorrect ? 'boss-answer-result-correct' : 'boss-answer-result-wrong';
+        var oppositeClass = isCorrect ? 'boss-answer-result-wrong' : 'boss-answer-result-correct';
+        var resultNode = null;
+        if(window._bossQType === 'spellFill'){
+          resultNode = document.getElementById('bsfHole');
+        } else if(window._bossQType === 'cloze'){
+          var qResultNodes = document.querySelectorAll('#bossQ span[style*="border-bottom"]');
+          if(qResultNodes.length) resultNode = qResultNodes[qResultNodes.length - 1];
+        }
+        if(resultNode && resultNode.classList){
+          resultNode.classList.remove(oppositeClass);
+          resultNode.classList.add(resultClass);
+        }
+      } catch(e){}
       
       // v150: 命中特效新规则 (Hansen 反馈每次出特效太累眼)
       //   普通命中 (1-4 / 6-9 / 11-14 ...): 完全无视觉特效, 只保留 boss 自身 hit-anim 轻缩放
@@ -1914,7 +1962,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     // 🔴 BUG #10 关联: 下面这行 HBU_RUNTIME_VERSION 由 build.py 自动同步, 不要手改!
     // 手改会和 __HBU_VERSION__ / cache buster 形成"版本号打架"(check.html 误报)。
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    window.HBU_RUNTIME_VERSION = 'v938';
+    window.HBU_RUNTIME_VERSION = 'v960';
     setTimeout(function(){
       try {
         var versions = new Set();
@@ -1935,6 +1983,7 @@ window.__HBU_LOADED_AT__ = Date.now();
           console.error('%c⚠️ 版本不一致! 发现多个 ?v= 版本:', 'color:#dc2626;font-weight:bold;font-size:14px', vs);
           // 屏幕顶部红色警告条
           var w = document.createElement('div');
+          w.id = '__hansen_version_mismatch_warning';
           w.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:#fff;padding:10px;font-weight:900;z-index:100000;text-align:center;font-size:13px;box-shadow:0 2px 12px rgba(0,0,0,.5);border-bottom:2px solid #fbbf24;cursor:pointer';
           w.innerHTML = '⚠️ 版本不一致! 发现 ?v=' + vs + ' &nbsp; (点击关闭) &nbsp; 请重新部署最新 zip';
           w.onclick = function(){ w.remove(); };
@@ -1956,5 +2005,168 @@ window.__HBU_LOADED_AT__ = Date.now();
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   v953 · Boss 管理入口可达性桥
+
+   v929 把 1MB+ 的 hansen_boss_attack.js 改成真正战斗时才解析，首屏因此更快；
+   但设置页的公开调节入口、底部秘密密码入口也在那个重文件里，fresh session
+   尚未打 Boss 时就完全不可达。本桥只常驻极少量监听代码：
+   - 平时绝不主动加载攻击引擎；
+   - 设置内容真正出现后才按需加载，恢复公开入口；
+   - 用户先点“进度自动保存到本设备”时，启动同一个单例 loader，重文件一导出
+     密码门就直接调用；不等待特效图、不伪造 click、不重复弹窗；
+   - 网络失败会清掉桥自己的 pending，下一次打开设置/点击可以重试。
+   原 SHA-256/djb2 密码校验、三次错误永久锁和 IndexedDB 镜像全部仍由重文件负责。
+   ════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  if(window.__hansenBossAdminBridgeV953) return;
+  window.__hansenBossAdminBridgeV953=true;
+
+  var pending=null;
+  var openPending=null;
+  var watcher=null;
+
+  function exportedGate(){
+    return typeof window.__hsnOpenBossAdminGate==='function'
+      ? window.__hsnOpenBossAdminGate : null;
+  }
+
+  function exportedRefresh(){
+    return typeof window.__hsnEnsureBossFxSettingsEntry==='function'
+      ? window.__hsnEnsureBossFxSettingsEntry : null;
+  }
+
+  function waitForLoader(){
+    return new Promise(function(resolve){
+      var tries=0;
+      (function poll(){
+        if(typeof window.__hansenBossFXReady==='function'){
+          resolve(window.__hansenBossFXReady);
+          return;
+        }
+        tries++;
+        if(tries>=120){ resolve(null); return; }
+        setTimeout(poll,25);
+      })();
+    });
+  }
+
+  /* 管理密码门只依赖脚本本身，不依赖 6 张 Boss 特效图。
+     正式 loader 为了保证战斗一帧不丢，会等图片全部 onload/onerror 后才 resolve；
+     管理入口若也等它，极端弱网图片悬挂时就会看起来再次“消失”。这里仅轮询
+     重文件已经导出的窄 gate，最多等 6 秒；战斗仍继续遵守原完整 ready Promise。 */
+  function waitForExportedGate(){
+    return new Promise(function(resolve){
+      var tries=0;
+      (function poll(){
+        if(exportedGate()){ resolve(true); return; }
+        tries++;
+        if(tries>=240){ resolve(false); return; }
+        setTimeout(poll,25);
+      })();
+    });
+  }
+
+  function ensureLoaded(){
+    if(exportedGate()) return Promise.resolve(true);
+    if(pending) return pending;
+    pending=waitForLoader().then(function(ready){
+      if(!ready) return false;
+      var started;
+      try{ started=ready(); }catch(e){ return false; }
+      var gateReady=waitForExportedGate();
+      if(started&&typeof started.then==='function'){
+        return Promise.race([
+          gateReady,
+          Promise.resolve(started).then(function(){
+            return !!exportedGate();
+          },function(){ return false; })
+        ]);
+      }
+      return gateReady;
+    }).then(function(ok){
+      if(!ok) pending=null;
+      return ok;
+    },function(){
+      pending=null;
+      return false;
+    });
+    return pending;
+  }
+
+  function refresh(){
+    return ensureLoaded().then(function(ok){
+      var fn=exportedRefresh();
+      if(ok&&fn){ try{fn();}catch(e){} }
+      return ok;
+    });
+  }
+
+  function open(){
+    if(openPending) return openPending;
+    openPending=ensureLoaded().then(function(ok){
+      var fn=exportedGate();
+      if(ok&&fn){ fn(); return true; }
+      return false;
+    }).then(function(ok){
+      openPending=null;
+      return ok;
+    },function(){
+      openPending=null;
+      return false;
+    });
+    return openPending;
+  }
+
+  function isSecretFooter(target){
+    if(!target||target.nodeType!==1) return false;
+    if(target.children&&target.children.length>0) return false;
+    var text=target.textContent||'';
+    return text.length<40&&text.indexOf('进度自动保存到本设备')>=0;
+  }
+
+  /* 本监听比重文件先注册。命中秘密行后由桥独占这一次事件，避免重文件加载完成后
+     自己的捕获监听又处理同一次 click，造成两个密码框。 */
+  try{
+    document.addEventListener('click',function(event){
+      var target=event&&event.target;
+      if(!isSecretFooter(target)) return;
+      try{ if(event.preventDefault)event.preventDefault(); }catch(e){}
+      try{ if(event.stopImmediatePropagation)event.stopImmediatePropagation(); }catch(e){}
+      open();
+    },true);
+  }catch(e){}
+
+  function armSettings(){
+    var settings=document.getElementById('settingsContent');
+    /* boss_lock 在所有岛页都位于 #settingsContent 之后；诊断页没有设置容器时直接退出，
+       不能为不存在的入口永久轮询。 */
+    if(!settings) return;
+    function onSettingsContent(){
+      if(settings.firstChild) refresh();
+    }
+    onSettingsContent();
+    try{
+      watcher=new MutationObserver(onSettingsContent);
+      watcher.observe(settings,{childList:true});
+    }catch(e){
+      setInterval(onSettingsContent,1200);
+    }
+  }
+
+  window.HansenBossAdminBridge={
+    ensureLoaded:ensureLoaded,
+    open:open,
+    refresh:refresh
+  };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',armSettings,{once:true});
+  }else{
+    armSettings();
   }
 })();

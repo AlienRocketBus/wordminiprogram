@@ -8,16 +8,19 @@
 -->
 <html lang="zh-CN">
 <head>
+<script src="hansen_sw_upgrade_gate_v944.js?v=960"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=960"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>单词大陆 · 冒险地图</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#1a1410}
 #stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background-size:cover;background-position:center;overflow:hidden}
-.spot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:transform .15s cubic-bezier(.34,1.5,.5,1)}
+.spot{position:absolute;transform:translate(-50%,-50%);cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:transform .15s cubic-bezier(.34,1.5,.5,1);border:0;background:none;color:inherit;font:inherit;padding:0}
 .spot:active{transform:translate(-50%,-50%) scale(.88)}
+.spot:focus-visible,#backBtn:focus-visible,#pclose:focus-visible,.pbtn:focus-visible{outline:3px solid #fde047;outline-offset:4px}
 .spot .ring{width:var(--sz);height:var(--sz);border-radius:50%;border:2.5px solid rgba(255,255,255,.55);
   box-shadow:0 0 0 3px rgba(90,60,30,.35),0 3px 10px rgba(0,0,0,.4),inset 0 0 20px rgba(255,255,255,.25);
   display:flex;align-items:center;justify-content:center;position:relative;background:rgba(255,255,255,.06)}
@@ -60,6 +63,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Micr
 .pbtn{flex:1;padding:11px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
 .pbtn.enter{background:linear-gradient(#e0a850,#c88830);color:#fff;box-shadow:0 3px 0 #a86818}
 .pbtn:active{transform:translateY(2px);box-shadow:none}
+/* v943: 保留依赖 keyframes 的定位；只缩短界面 transition，装饰脉冲单独静态化。 */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{transition-duration:.01ms!important}.pulse{animation:none!important;opacity:.28!important}}
 </style>
 </head>
 <body>
@@ -67,8 +72,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"PingFang SC","Micr
 <button id="backBtn" onclick="goBack()">← 返回</button>
 <div id="topbar"><span class="pt" id="ptext">进度 0 / 8</span></div>
 <div id="hint">点击岛屿查看单词与Boss · 顺序随意 · 全通解锁女帝</div>
-<div id="overlay"><div id="panel">
-  <div id="phead"><h2 id="ptitle"></h2><div class="th" id="psubtitle"></div><button id="pclose">×</button></div>
+<div id="overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ptitle"><div id="panel" tabindex="-1">
+  <div id="phead"><h2 id="ptitle"></h2><div class="th" id="psubtitle"></div><button id="pclose" type="button" aria-label="关闭岛屿详情">×</button></div>
   <div id="pboss"></div><div id="pwords"></div><div id="pfoot"></div>
 </div></div>
 <script>window.MAP_GROUPS=[{"id": 1, "name": "迷雾心湖", "theme": "情绪心境", "sys": "混沌·异形系", "words": [{"en": "nervous", "pn": "/ˈnɜːvəs/", "cn": "紧张的"}, {"en": "anxious", "pn": "/ˈæŋkʃəs/", "cn": "焦虑的"}, {"en": "curious", "pn": "/ˈkjʊəriəs/", "cn": "好奇的"}, {"en": "proud", "pn": "/praʊd/", "cn": "自豪的"}, {"en": "grateful", "pn": "/ˈɡreɪtfl/", "cn": "感激的"}, {"en": "disappointed", "pn": "/ˌdɪsəˈpɔɪntɪd/", "cn": "失望的"}, {"en": "embarrassed", "pn": "/ɪmˈbærəst/", "cn": "尴尬的"}, {"en": "frightened", "pn": "/ˈfraɪtnd/", "cn": "害怕的"}, {"en": "satisfied", "pn": "/ˈsætɪsfaɪd/", "cn": "满意的"}, {"en": "confused", "pn": "/kənˈfjuːzd/", "cn": "困惑的"}, {"en": "lonely", "pn": "/ˈləʊnli/", "cn": "孤独的"}, {"en": "jealous", "pn": "/ˈdʒeləs/", "cn": "嫉妒的"}, {"en": "relaxed", "pn": "/rɪˈlækst/", "cn": "放松的"}, {"en": "ashamed", "pn": "/əˈʃeɪmd/", "cn": "羞愧的"}, {"en": "eager", "pn": "/ˈiːɡə/", "cn": "渴望的"}, {"en": "miserable", "pn": "/ˈmɪzrəbl/", "cn": "痛苦的"}, {"en": "delighted", "pn": "/dɪˈlaɪtɪd/", "cn": "欣喜的"}, {"en": "furious", "pn": "/ˈfjʊəriəs/", "cn": "狂怒的"}, {"en": "amazed", "pn": "/əˈmeɪzd/", "cn": "惊讶的"}, {"en": "comfort", "pn": "/ˈkʌmfət/", "cn": "安慰"}, {"en": "polite", "pn": "/pəˈlaɪt/", "cn": "有礼貌的"}, {"en": "humble", "pn": "/ˈhʌmbl/", "cn": "谦虚的"}, {"en": "stubborn", "pn": "/ˈstʌbən/", "cn": "固执的"}, {"en": "reliable", "pn": "/rɪˈlaɪəbl/", "cn": "可靠的"}, {"en": "cautious", "pn": "/ˈkɔːʃəs/", "cn": "谨慎的"}, {"en": "optimistic", "pn": "/ˌɒptɪˈmɪstɪk/", "cn": "乐观的"}, {"en": "sincere", "pn": "/sɪnˈsɪə/", "cn": "真诚的"}, {"en": "loyal", "pn": "/ˈlɔɪəl/", "cn": "忠诚的"}, {"en": "strict", "pn": "/strɪkt/", "cn": "严格的"}, {"en": "selfish", "pn": "/ˈselfɪʃ/", "cn": "自私的"}], "bosses": ["虫群先锋·刃翼领主", "未成形之神·万形之胚", "逆相之影·镜渊领主", "混沌之种·万象侵蚀者", "魔皇·小丑至尊"]}, {"id": 2, "name": "风纹草原", "theme": "性格品质", "sys": "军事·战术系", "words": [{"en": "mature", "pn": "/məˈtʃʊə/", "cn": "成熟的"}, {"en": "energetic", "pn": "/ˌenəˈdʒetɪk/", "cn": "精力充沛的"}, {"en": "modest", "pn": "/ˈmɒdɪst/", "cn": "谦逊的"}, {"en": "cheerful", "pn": "/ˈtʃɪəfl/", "cn": "开朗的"}, {"en": "hardworking", "pn": "/ˌhɑːdˈwɜːkɪŋ/", "cn": "勤奋的"}, {"en": "sensitive", "pn": "/ˈsensətɪv/", "cn": "敏感的"}, {"en": "determined", "pn": "/dɪˈtɜːmɪnd/", "cn": "坚定的"}, {"en": "outgoing", "pn": "/ˌaʊtˈɡəʊɪŋ/", "cn": "外向的"}, {"en": "talkative", "pn": "/ˈtɔːkətɪv/", "cn": "健谈的"}, {"en": "calm", "pn": "/kɑːm/", "cn": "冷静的"}, {"en": "important", "pn": "/ɪmˈpɔːtnt/", "cn": "重要的"}, {"en": "possible", "pn": "/ˈpɒsəbl/", "cn": "可能的"}, {"en": "useful", "pn": "/ˈjuːsfl/", "cn": "有用的"}, {"en": "valuable", "pn": "/ˈvæljuəbl/", "cn": "有价值的"}, {"en": "similar", "pn": "/ˈsɪmələ/", "cn": "相似的"}, {"en": "modern", "pn": "/ˈmɒdn/", "cn": "现代的"}, {"en": "ancient", "pn": "/ˈeɪnʃənt/", "cn": "古代的"}, {"en": "popular", "pn": "/ˈpɒpjələ/", "cn": "受欢迎的"}, {"en": "ordinary", "pn": "/ˈɔːdnri/", "cn": "普通的"}, {"en": "famous", "pn": "/ˈfeɪməs/", "cn": "著名的"}, {"en": "comfortable", "pn": "/ˈkʌmftəbl/", "cn": "舒适的"}, {"en": "convenient", "pn": "/kənˈviːniənt/", "cn": "方便的"}, {"en": "complex", "pn": "/ˈkɒmpleks/", "cn": "复杂的"}, {"en": "typical", "pn": "/ˈtɪpɪkl/", "cn": "典型的"}, {"en": "flexible", "pn": "/ˈfleksəbl/", "cn": "灵活的"}, {"en": "accurate", "pn": "/ˈækjərət/", "cn": "准确的"}, {"en": "essential", "pn": "/ɪˈsenʃl/", "cn": "必不可少的"}, {"en": "available", "pn": "/əˈveɪləbl/", "cn": "可获得的;可用的"}, {"en": "suitable", "pn": "/ˈsuːtəbl/", "cn": "合适的"}, {"en": "practical", "pn": "/ˈpræktɪkl/", "cn": "实用的"}], "bosses": ["丛林幽灵·兵王", "暗影先锋·破阵者", "银翼·麻烦终结者", "决斗大师·千招之约", "武器大师·战争铁砧"]}, {"id": 3, "name": "时之钟谷", "theme": "时间表达", "sys": "概念·抽象系", "words": [{"en": "suddenly", "pn": "/ˈsʌdənli/", "cn": "突然地"}, {"en": "immediately", "pn": "/ɪˈmiːdiətli/", "cn": "立即"}, {"en": "recently", "pn": "/ˈriːsntli/", "cn": "最近"}, {"en": "finally", "pn": "/ˈfaɪnəli/", "cn": "终于"}, {"en": "occasionally", "pn": "/əˈkeɪʒnəli/", "cn": "偶尔"}, {"en": "eventually", "pn": "/ɪˈventʃuəli/", "cn": "最终"}, {"en": "meanwhile", "pn": "/ˈmiːnwaɪl/", "cn": "与此同时"}, {"en": "nowadays", "pn": "/ˈnaʊədeɪz/", "cn": "如今"}, {"en": "rarely", "pn": "/ˈreəli/", "cn": "很少"}, {"en": "constantly", "pn": "/ˈkɒnstəntli/", "cn": "不断地"}, {"en": "temporary", "pn": "/ˈtemprəri/", "cn": "暂时的"}, {"en": "permanent", "pn": "/ˈpɜːmənənt/", "cn": "永久的"}, {"en": "instantly", "pn": "/ˈɪnstəntli/", "cn": "立刻"}, {"en": "currently", "pn": "/ˈkʌrəntli/", "cn": "目前"}, {"en": "previously", "pn": "/ˈpriːviəsli/", "cn": "以前"}, {"en": "seldom", "pn": "/ˈseldəm/", "cn": "很少"}, {"en": "regularly", "pn": "/ˈreɡjələli/", "cn": "定期地"}, {"en": "decade", "pn": "/ˈdekeɪd/", "cn": "十年"}, {"en": "period", "pn": "/ˈpɪəriəd/", "cn": "时期"}, {"en": "schedule", "pn": "/ˈʃedjuːl/", "cn": "日程"}, {"en": "explain", "pn": "/ɪkˈspleɪn/", "cn": "解释"}, {"en": "describe", "pn": "/dɪˈskraɪb/", "cn": "描述"}, {"en": "suggest", "pn": "/səˈdʒest/", "cn": "建议"}, {"en": "persuade", "pn": "/pəˈsweɪd/", "cn": "说服"}, {"en": "argue", "pn": "/ˈɑːɡjuː/", "cn": "争论"}, {"en": "discuss", "pn": "/dɪˈskʌs/", "cn": "讨论"}, {"en": "compare", "pn": "/kəmˈpeə/", "cn": "比较"}, {"en": "imagine", "pn": "/ɪˈmædʒɪn/", "cn": "想象"}, {"en": "predict", "pn": "/prɪˈdɪkt/", "cn": "预测"}, {"en": "realize", "pn": "/ˈrɪəlaɪz/", "cn": "意识到"}], "bosses": ["火柴人·原初线条", "影守·永夜之壁", "万典之灵·未被写下的故事", "凋零与新生之龙·四季轮转", "时之君主·克罗诺斯之影"]}, {"id": 4, "name": "铸剑锻炉山", "theme": "思考行动", "sys": "机械·科技系", "words": [{"en": "recognize", "pn": "/ˈrekəɡnaɪz/", "cn": "认出"}, {"en": "consider", "pn": "/kənˈsɪdə/", "cn": "考虑"}, {"en": "express", "pn": "/ɪkˈspres/", "cn": "表达"}, {"en": "mention", "pn": "/ˈmenʃn/", "cn": "提到"}, {"en": "doubt", "pn": "/daʊt/", "cn": "怀疑"}, {"en": "admit", "pn": "/ədˈmɪt/", "cn": "承认"}, {"en": "indicate", "pn": "/ˈɪndɪkeɪt/", "cn": "表明"}, {"en": "comment", "pn": "/ˈkɒment/", "cn": "评论"}, {"en": "debate", "pn": "/dɪˈbeɪt/", "cn": "辩论"}, {"en": "assume", "pn": "/əˈsjuːm/", "cn": "假设"}, {"en": "attempt", "pn": "/əˈtempt/", "cn": "尝试"}, {"en": "avoid", "pn": "/əˈvɔɪd/", "cn": "避免"}, {"en": "prevent", "pn": "/prɪˈvent/", "cn": "预防"}, {"en": "provide", "pn": "/prəˈvaɪd/", "cn": "提供"}, {"en": "produce", "pn": "/prəˈdjuːs/", "cn": "生产"}, {"en": "reduce", "pn": "/rɪˈdjuːs/", "cn": "减少"}, {"en": "increase", "pn": "/ɪnˈkriːs/", "cn": "增加"}, {"en": "develop", "pn": "/dɪˈveləp/", "cn": "发展;发育"}, {"en": "invent", "pn": "/ɪnˈvent/", "cn": "发明"}, {"en": "destroy", "pn": "/dɪˈstrɔɪ/", "cn": "摧毁;毁坏"}, {"en": "repair", "pn": "/rɪˈpeə/", "cn": "修理"}, {"en": "prepare", "pn": "/prɪˈpeə/", "cn": "准备"}, {"en": "establish", "pn": "/ɪˈstæblɪʃ/", "cn": "建立"}, {"en": "maintain", "pn": "/meɪnˈteɪn/", "cn": "维持"}, {"en": "manage", "pn": "/ˈmænɪdʒ/", "cn": "管理"}, {"en": "handle", "pn": "/ˈhændl/", "cn": "处理"}, {"en": "perform", "pn": "/pəˈfɔːm/", "cn": "表演"}, {"en": "contribute", "pn": "/kənˈtrɪbjuːt/", "cn": "贡献"}, {"en": "struggle", "pn": "/ˈstrʌɡl/", "cn": "奋斗;挣扎"}, {"en": "succeed", "pn": "/səkˈsiːd/", "cn": "成功"}], "bosses": ["机械主教·组装者", "苍穹守卫·阿尔基昂", "万械之神·奥米伽", "量子观测者·阿尔戈", "无光之渊·暗噬君主"]}, {"id": 5, "name": "晶石回廊", "theme": "数量逻辑", "sys": "神性·东方系", "words": [{"en": "several", "pn": "/ˈsevrəl/", "cn": "几个"}, {"en": "plenty", "pn": "/ˈplenti/", "cn": "大量"}, {"en": "enormous", "pn": "/ɪˈnɔːməs/", "cn": "巨大的"}, {"en": "tiny", "pn": "/ˈtaɪni/", "cn": "微小的"}, {"en": "huge", "pn": "/hjuːdʒ/", "cn": "巨大的"}, {"en": "major", "pn": "/ˈmeɪdʒə/", "cn": "主要的"}, {"en": "minor", "pn": "/ˈmaɪnə/", "cn": "次要的"}, {"en": "average", "pn": "/ˈævərɪdʒ/", "cn": "平均的"}, {"en": "entire", "pn": "/ɪnˈtaɪə/", "cn": "整个的"}, {"en": "amount", "pn": "/əˈmaʊnt/", "cn": "数量"}, {"en": "quantity", "pn": "/ˈkwɒntəti/", "cn": "数量"}, {"en": "majority", "pn": "/məˈdʒɒrəti/", "cn": "大多数"}, {"en": "approximately", "pn": "/əˈprɒksɪmətli/", "cn": "大约"}, {"en": "sufficient", "pn": "/səˈfɪʃnt/", "cn": "足够的"}, {"en": "numerous", "pn": "/ˈnjuːmərəs/", "cn": "许多的"}, {"en": "multiple", "pn": "/ˈmʌltɪpl/", "cn": "多个的"}, {"en": "additional", "pn": "/əˈdɪʃənl/", "cn": "额外的"}, {"en": "maximum", "pn": "/ˈmæksɪməm/", "cn": "最大值;最大的"}, {"en": "minimum", "pn": "/ˈmɪnɪməm/", "cn": "最小值;最小的"}, {"en": "dozen", "pn": "/ˈdʌzn/", "cn": "一打"}, {"en": "however", "pn": "/haʊˈevə/", "cn": "然而"}, {"en": "therefore", "pn": "/ˈðeəfɔː/", "cn": "因此"}, {"en": "although", "pn": "/ɔːlˈðəʊ/", "cn": "尽管"}, {"en": "instead", "pn": "/ɪnˈsted/", "cn": "反而;作为替代"}, {"en": "besides", "pn": "/bɪˈsaɪdz/", "cn": "此外"}, {"en": "otherwise", "pn": "/ˈʌðəwaɪz/", "cn": "否则"}, {"en": "moreover", "pn": "/mɔːrˈəʊvə/", "cn": "此外"}, {"en": "perhaps", "pn": "/pəˈhæps/", "cn": "也许"}, {"en": "probably", "pn": "/ˈprɒbəbli/", "cn": "可能"}, {"en": "certainly", "pn": "/ˈsɜːtnli/", "cn": "当然"}], "bosses": ["画壁判官·墨渊", "夜罗刹·红莲战鬼", "破坏神·终焉之相", "不动明王·焚天镇狱尊", "剑神·万剑归一"]}, {"id": 6, "name": "智慧藏书林", "theme": "学习探究", "sys": "埃及·神话系", "words": [{"en": "especially", "pn": "/ɪˈspeʃəli/", "cn": "尤其"}, {"en": "exactly", "pn": "/ɪɡˈzæktli/", "cn": "确切地"}, {"en": "nearly", "pn": "/ˈnɪəli/", "cn": "几乎"}, {"en": "actually", "pn": "/ˈæktʃuəli/", "cn": "实际上"}, {"en": "furthermore", "pn": "/ˌfɜːðəˈmɔː/", "cn": "此外"}, {"en": "nevertheless", "pn": "/ˌnevəðəˈles/", "cn": "尽管如此"}, {"en": "consequently", "pn": "/ˈkɒnsɪkwəntli/", "cn": "因此;结果"}, {"en": "similarly", "pn": "/ˈsɪmələli/", "cn": "同样地"}, {"en": "generally", "pn": "/ˈdʒenrəli/", "cn": "通常;一般来说"}, {"en": "fortunately", "pn": "/ˈfɔːtʃənətli/", "cn": "幸好;幸运的是"}, {"en": "research", "pn": "/rɪˈsɜːtʃ/", "cn": "研究"}, {"en": "education", "pn": "/ˌedʒuˈkeɪʃn/", "cn": "教育"}, {"en": "experiment", "pn": "/ɪkˈsperɪmənt/", "cn": "实验"}, {"en": "theory", "pn": "/ˈθɪəri/", "cn": "理论"}, {"en": "concept", "pn": "/ˈkɒnsept/", "cn": "概念"}, {"en": "analyze", "pn": "/ˈænəlaɪz/", "cn": "分析"}, {"en": "conclude", "pn": "/kənˈkluːd/", "cn": "得出结论"}, {"en": "summarize", "pn": "/ˈsʌməraɪz/", "cn": "总结"}, {"en": "achieve", "pn": "/əˈtʃiːv/", "cn": "实现"}, {"en": "review", "pn": "/rɪˈvjuː/", "cn": "复习"}, {"en": "memorize", "pn": "/ˈmeməraɪz/", "cn": "记住"}, {"en": "translate", "pn": "/trænzˈleɪt/", "cn": "翻译"}, {"en": "solution", "pn": "/səˈluːʃn/", "cn": "解决方案"}, {"en": "standard", "pn": "/ˈstændəd/", "cn": "标准"}, {"en": "method", "pn": "/ˈmeθəd/", "cn": "方法"}, {"en": "principle", "pn": "/ˈprɪnsəpl/", "cn": "原则"}, {"en": "define", "pn": "/dɪˈfaɪn/", "cn": "定义"}, {"en": "examine", "pn": "/ɪɡˈzæmɪn/", "cn": "检查"}, {"en": "observe", "pn": "/əbˈzɜːv/", "cn": "观察"}, {"en": "calculate", "pn": "/ˈkælkjuleɪt/", "cn": "计算"}], "bosses": ["诅咒之躯·绷带亡骸", "亡灵咒术师·阿努比斯之影", "古埃及大祭司·真理之口的裁决者", "法老王·不朽金身", "天界守护者·黄金斯芬克斯"]}, {"id": 7, "name": "万邦港城", "theme": "社会生活", "sys": "星辰·守护系", "words": [{"en": "society", "pn": "/səˈsaɪəti/", "cn": "社会"}, {"en": "tradition", "pn": "/trəˈdɪʃn/", "cn": "传统"}, {"en": "custom", "pn": "/ˈkʌstəm/", "cn": "习俗"}, {"en": "government", "pn": "/ˈɡʌvənmənt/", "cn": "政府"}, {"en": "public", "pn": "/ˈpʌblɪk/", "cn": "公共的;公众的"}, {"en": "citizen", "pn": "/ˈsɪtɪzn/", "cn": "公民"}, {"en": "neighbor", "pn": "/ˈneɪbə/", "cn": "邻居"}, {"en": "stranger", "pn": "/ˈstreɪndʒə/", "cn": "陌生人"}, {"en": "customer", "pn": "/ˈkʌstəmə/", "cn": "顾客"}, {"en": "population", "pn": "/ˌpɒpjuˈleɪʃn/", "cn": "人口"}, {"en": "charity", "pn": "/ˈtʃærəti/", "cn": "慈善"}, {"en": "volunteer", "pn": "/ˌvɒlənˈtɪə/", "cn": "志愿者"}, {"en": "economy", "pn": "/ɪˈkɒnəmi/", "cn": "经济"}, {"en": "industry", "pn": "/ˈɪndəstri/", "cn": "工业"}, {"en": "organization", "pn": "/ˌɔːɡənaɪˈzeɪʃn/", "cn": "组织"}, {"en": "generation", "pn": "/ˌdʒenəˈreɪʃn/", "cn": "一代人"}, {"en": "individual", "pn": "/ˌɪndɪˈvɪdʒuəl/", "cn": "个人"}, {"en": "private", "pn": "/ˈpraɪvət/", "cn": "私人的"}, {"en": "official", "pn": "/əˈfɪʃl/", "cn": "官方的"}, {"en": "ceremony", "pn": "/ˈserəməni/", "cn": "典礼"}, {"en": "energy", "pn": "/ˈenədʒi/", "cn": "能量"}, {"en": "electricity", "pn": "/ɪˌlekˈtrɪsəti/", "cn": "电"}, {"en": "gravity", "pn": "/ˈɡrævəti/", "cn": "重力"}, {"en": "planet", "pn": "/ˈplænɪt/", "cn": "行星"}, {"en": "universe", "pn": "/ˈjuːnɪvɜːs/", "cn": "宇宙"}, {"en": "climate", "pn": "/ˈklaɪmət/", "cn": "气候"}, {"en": "temperature", "pn": "/ˈtemprətʃə/", "cn": "温度"}, {"en": "oxygen", "pn": "/ˈɒksɪdʒən/", "cn": "氧气"}, {"en": "surface", "pn": "/ˈsɜːfɪs/", "cn": "表面"}, {"en": "material", "pn": "/məˈtɪəriəl/", "cn": "材料"}], "bosses": ["月之引航者·寂静潮汐", "星陨武士·流亡之刃", "星核泰坦·虚空造物主", "统御天使·圣光之翼", "铸星者·原初匠人"]}, {"id": 8, "name": "星火火山口", "theme": "自然科学", "sys": "终末·宇宙系(最强)", "words": [{"en": "chemical", "pn": "/ˈkemɪkl/", "cn": "化学物质;化学的"}, {"en": "natural", "pn": "/ˈnætʃrəl/", "cn": "自然的"}, {"en": "resource", "pn": "/rɪˈsɔːs/", "cn": "资源"}, {"en": "creature", "pn": "/ˈkriːtʃə/", "cn": "生物"}, {"en": "atmosphere", "pn": "/ˈætməsfɪə/", "cn": "大气"}, {"en": "scientific", "pn": "/ˌsaɪənˈtɪfɪk/", "cn": "科学的"}, {"en": "technology", "pn": "/tekˈnɒlədʒi/", "cn": "技术"}, {"en": "particle", "pn": "/ˈpɑːtɪkl/", "cn": "粒子"}, {"en": "invention", "pn": "/ɪnˈvenʃn/", "cn": "发明"}, {"en": "galaxy", "pn": "/ˈɡæləksi/", "cn": "星系"}, {"en": "career", "pn": "/kəˈrɪə/", "cn": "职业生涯"}, {"en": "profession", "pn": "/prəˈfeʃn/", "cn": "职业"}, {"en": "business", "pn": "/ˈbɪznəs/", "cn": "生意;商业"}, {"en": "success", "pn": "/səkˈses/", "cn": "成功"}, {"en": "failure", "pn": "/ˈfeɪljə/", "cn": "失败"}, {"en": "effort", "pn": "/ˈefət/", "cn": "努力"}, {"en": "responsibility", "pn": "/rɪˌspɒnsəˈbɪləti/", "cn": "责任"}, {"en": "talent", "pn": "/ˈtælənt/", "cn": "才能"}, {"en": "ability", "pn": "/əˈbɪləti/", "cn": "能力"}, {"en": "progress", "pn": "/ˈprəʊɡres/", "cn": "进步"}, {"en": "goal", "pn": "/ɡəʊl/", "cn": "目标"}, {"en": "skill", "pn": "/skɪl/", "cn": "技能"}, {"en": "position", "pn": "/pəˈzɪʃn/", "cn": "职位"}, {"en": "salary", "pn": "/ˈsæləri/", "cn": "薪水"}, {"en": "employee", "pn": "/ɪmˈplɔɪiː/", "cn": "员工;雇员"}, {"en": "interview", "pn": "/ˈɪntəvjuː/", "cn": "面试"}, {"en": "project", "pn": "/ˈprɒdʒekt/", "cn": "项目"}, {"en": "promotion", "pn": "/prəˈməʊʃn/", "cn": "晋升"}, {"en": "reputation", "pn": "/ˌrepjuˈteɪʃn/", "cn": "声誉"}, {"en": "colleague", "pn": "/ˈkɒliːɡ/", "cn": "同事"}], "bosses": ["破晓仲裁者·索拉里斯", "天启征服者·索拉里斯", "终末观测者·边界守夜人", "活体行星·古老意志"]}];</script>
@@ -82,25 +87,37 @@ function progOf(i){ try{ return parseInt(localStorage.getItem('land'+i+'_prog')|
 const POS={1:[26,20],2:[50,16],3:[74,20],8:[18,50],4:[82,50],7:[25,80],6:[50,84],5:[74,80]};
 
 const stage=document.getElementById('stage');
-(function layout(){
+function layoutStage(){
   const vw=window.innerWidth, vh=window.innerHeight;
   let w,h; if(vh/vw>AR){h=vh;w=vh/AR;}else{w=vw;h=vw*AR;}
   stage.style.width=w+'px';stage.style.height=h+'px';
   stage.style.backgroundImage='url('+window.MAP_BG+')';
-})();
-window.addEventListener('resize',function(){location.reload()});
+}
+layoutStage();
+var _layoutTimer=null;
+window.addEventListener('resize',function(){clearTimeout(_layoutTimer);_layoutTimer=setTimeout(layoutStage,100)});
 
 /*🔴v875(Hansen·彻底打通): 壳内(index的iframe)走 parent.openIsland 换装=零白屏零历史污染; 无壳才整页跳。*/
-function goIsland(n){ ((window.parent&&window.parent!==window&&window.parent.openIsland)||function(f){window.location.href=f})('island_land'+n+'.html'); }
+function goIsland(n){
+  var file='island_land'+n+'.html';
+  try{ if(window.parent&&window.parent!==window&&typeof window.parent.openIsland==='function'){ window.parent.openIsland(file); return; } }catch(e){}
+  window.location.assign(file);
+}
 function goBack(){
   try{ if(window.parent&&window.parent!==window&&typeof window.parent.closeIsland==='function'){ window.parent.closeIsland(); return; } }catch(e){}
-  window.location.href='index.html';
+  try{
+    var ref=document.referrer?new URL(document.referrer):null;
+    if(ref&&ref.origin===location.origin&&/\/(?:index|_frame)\.html$/.test(ref.pathname)&&history.length>1){history.back();return;}
+  }catch(e){}
+  window.location.replace('index.html');
 }
 
 G.forEach(function(g){
   const n=g.id, p=POS[n], isDone=clearedN(n);
-  const s=document.createElement('div');
+  const s=document.createElement('button');
+  s.type='button';
   s.className='spot'+(isDone?' done':'');
+  s.setAttribute('aria-label',g.name+'，30个单词，'+g.bosses.length+'位Boss'+(isDone?'，已通关':'，查看详情'));
   s.style.left=p[0]+'%'; s.style.top=p[1]+'%';
   s.style.setProperty('--sz','54px');
   s.innerHTML=(isDone?'':'<div class="pulse" style="--sz:54px"></div>')+
@@ -112,8 +129,10 @@ G.forEach(function(g){
 });
 
 const allDone=G.every(function(g){return clearedN(g.id)});
-const em=document.createElement('div');
+const em=document.createElement('button');
+em.type='button';
 em.className='spot'+(allDone?'':' locked'); em.id='empress';
+em.setAttribute('aria-label',allDone?'星海女帝赛尔娅，已解锁，查看详情':'星海女帝赛尔娅，需通关八座岛屿后解锁');
 em.style.left='50%'; em.style.top='49%';
 em.innerHTML=(allDone?'<div class="pulse" style="--sz:78px;border-color:rgba(255,210,120,.7)"></div>':'')+
   '<div class="ring"><span class="crown">'+(allDone?'👑':'🔒')+'</span></div>'+
@@ -126,6 +145,13 @@ stage.appendChild(em);
   document.getElementById('ptext').textContent='进度 '+c+' / 8'+(c===8?' · 女帝已解锁!':''); })();
 
 const overlay=document.getElementById('overlay');
+let _lastMapFocus=null;
+function showPanel(){
+  _lastMapFocus=document.activeElement;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+  setTimeout(function(){document.getElementById('pclose').focus()},0);
+}
 function openIsland(n){
   const g=G.find(function(x){return x.id===n});
   const prog=progOf(n), done=clearedN(n);
@@ -143,7 +169,7 @@ function openIsland(n){
     r.innerHTML='<span class="wen">'+w.en+'</span><span class="wpn">'+(w.pn||'')+'</span><span class="wcn">'+w.cn+'</span>'; wc.appendChild(r); });
   wc.scrollTop=0;
   document.getElementById('pfoot').innerHTML='<button class="pbtn enter" onclick="goIsland('+n+')">'+(done?'重进这座岛':'进入学习 · 打 Boss')+'</button>';
-  overlay.classList.add('show');
+  showPanel();
 }
 function openEmpress(){
   var c=0; G.forEach(function(g){if(clearedN(g.id))c++;});
@@ -163,13 +189,39 @@ function openEmpress(){
     document.getElementById('pwords').innerHTML='<div style="padding:24px;text-align:center;color:#6a5838;font-size:14px;line-height:1.9">你已征服全部 240 个单词、39 位 Boss。<br>星海女帝赛尔娅在星海深处等你。<br><br>⚔️ 终战将考验全部 240 词!</div>';
     document.getElementById('pfoot').innerHTML='<button class="pbtn enter" onclick="((window.parent&&window.parent!==window&&window.parent.openIsland)||function(f){window.location.href=f})(\'island_season.html\')">▶ 前往星海 · 决战女帝</button>';
   }
-  overlay.classList.add('show');
+  showPanel();
 }
-function closeP(){overlay.classList.remove('show')}
+function closeP(){
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  if(_lastMapFocus&&typeof _lastMapFocus.focus==='function') _lastMapFocus.focus();
+  _lastMapFocus=null;
+}
 document.getElementById('pclose').onclick=closeP;
-//🔴v875(Hansen·没有任何延迟): 空闲礼让式预热8座岛进HTTP缓存(400ms错峰·失败静默)·点岛秒开
-try{ (window.requestIdleCallback||function(f){setTimeout(f,2200);})(function(){ for(var _pi=1;_pi<=8;_pi++){ (function(k){ setTimeout(function(){ try{ fetch('island_land'+k+'.html',{cache:'force-cache'}).catch(function(){}); }catch(_e){} }, k*400); })(_pi); } }); }catch(_e2){}
+// v942：仅在浏览器明确报告非省流量 4G 时，空闲预热“下一座未通关岛”；未知网络不后台下载。
+try{
+  var _cn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(_cn&&!_cn.saveData&&_cn.effectiveType==='4g'&&navigator.onLine!==false){
+    (window.requestIdleCallback||function(f){setTimeout(f,2200);})(function(){
+      var next=0; for(var i=1;i<=8;i++){if(!clearedN(i)){next=i;break;}}
+      if(next){
+        try{fetch('island_land'+next+'.html',{cache:'force-cache',credentials:'same-origin',priority:'low'}).catch(function(){});}catch(_e){}
+      }
+    });
+  }
+}catch(_e2){}
 overlay.addEventListener('click',function(e){if(e.target===overlay)closeP()});
+document.addEventListener('keydown',function(e){
+  if(!overlay.classList.contains('show')) return;
+  if(e.key==='Escape'){e.preventDefault();closeP();return;}
+  if(e.key==='Tab'){
+    var focusable=Array.from(overlay.querySelectorAll('button:not([disabled]),[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'));
+    if(!focusable.length){e.preventDefault();document.getElementById('panel').focus();return;}
+    var first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+});
 </script>
 </body>
 </html>

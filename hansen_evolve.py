@@ -44,7 +44,7 @@
 #    python3 hansen_evolve.py --mark-deployed  # 把"最近一次发布"标记为已上线(永久保留, 不被自动清理)
 #    python3 hansen_evolve.py --rollback-prep  # 准备回滚到上一个已上线版本(复制成 回滚到上一稳定版.zip + 打印回滚清单)
 #  可组合, 例: python3 hansen_evolve.py --probe --ai --apply-safe
-#  退出码: 发现任何 ERROR -> 1, 否则 0(方便接 CI / 报警)。
+#  退出码: 发现任何 ERROR 或 WARN -> 1；跳过/崩溃的断言按 ERROR 处理。
 # =============================================================================
 import os, sys, re, json, glob, time, shutil, subprocess, datetime, urllib.request, urllib.parse
 
@@ -53,7 +53,7 @@ PROBE       = "--probe" in ARGS
 DEEP        = "--deep" in ARGS
 USE_AI      = "--ai" in ARGS
 APPLY_SAFE  = "--apply-safe" in ARGS
-RELEASE     = "--release" in ARGS
+RELEASE     = "--release" in ARGS  # v942: 仅用于给出迁移错误；旧打包器已封死
 MARK_DEPLOYED = "--mark-deployed" in ARGS
 ROLLBACK_PREP = "--rollback-prep" in ARGS
 CONTENT     = "--content" in ARGS
@@ -145,7 +145,7 @@ def discover():
 def run_check_resources(run):
     p = os.path.join(ROOT, "check_resources.py")
     if not os.path.exists(p):
-        run.add(WARN, "工具", "no_check_resources", "缺 check_resources.py(可从 README 备份恢复)")
+        run.add(ERROR, "工具", "no_check_resources", "缺 check_resources.py；静态断言未执行")
         return
     try:
         r = subprocess.run([sys.executable, p], cwd=ROOT, capture_output=True, text=True, timeout=120)
@@ -161,7 +161,7 @@ def run_check_resources(run):
             if not run.by(ERROR):
                 run.add(ERROR, "静态质检", "check_resources", "check_resources 未通过(详见报告)")
     except Exception as e:
-        run.add(WARN, "工具", "check_resources_run", "check_resources 运行异常: %s" % str(e)[:80])
+        run.add(ERROR, "工具", "check_resources_run", "check_resources 运行异常；断言未执行: %s" % str(e)[:80])
 
 # =============================================================================
 #  4) 引擎自有 · 对齐使命的深查(与 check_resources 互补)
@@ -212,9 +212,19 @@ def mission_checks(run, disc):
                     "%s 有 %d 处 setInterval 但 0 处 clearInterval(长玩可能定时器堆积, 建议确认)" % (os.path.basename(p), si))
 
     # --- 价值#4 经济不变量(冗余守护, 与监察官互为双保险) ---
+    diamond_shop = read(os.path.join(ROOT, "hansen_diamond_shop.js"))
+    equip_start = diamond_shop.find("function equip(id)")
+    equip_end = diamond_shop.find("function ", equip_start + len("function equip(id)")) if equip_start >= 0 else -1
+    equip_body = diamond_shop[equip_start:equip_end if equip_end >= 0 else len(diamond_shop)] if equip_start >= 0 else ""
+    equip_owned_guard = all(token in equip_body for token in (
+        "!_diamondMeta(id)",
+        "!Object.prototype.hasOwnProperty.call(o.owned,id)",
+        "o.owned[id]!==true",
+        "return false",
+    ))
     economy = [
         ("钱包余额守卫(金币+钻石)", has("hansen_coin_wallet.js", "spend:", "return false") and has("hansen_gem_system.js", "spend:", "return false"), "spend 须先查余额不足返回 false"),
-        ("钻石主题 equip 校验已购", has("hansen_diamond_shop.js", "function equip(id)", "!o.owned[id]) return"), "equip 须校验已购(防后台白嫖)"),
+        ("钻石主题 equip 校验已购", equip_owned_guard, "equip 须同时验证目录、own key 与严格布尔 true(防原型键/后台白嫖)"),
         ("抽卡价 GACHA_COST 存在", has("hansen_gacha.js", "GACHA_COST"), "抽卡价变量须存在"),
     ]
     for name, ok, why in economy:
@@ -273,8 +283,9 @@ def improvement_scan(run, disc):
                 "代码里有 %d 处 debugger/TODO/FIXME 残留" % marks, where=", ".join(where), fix="清理未完成标记")
 
 def perf_sentinel(run):
-    """🔴v858 性能超级哨兵(Hansen: "上下滑动卡顿·图片加载慢·彻底优化到极致"——守住v858优化成果零回退 + 主动挖新机会)。
-       成果基线: 图片67.7MB→41.9MB(-38%·全部画质法令保留: v809赛季boss1100/v773头像720/女皇星空画质) · backdrop-filter 24处全清 · hansen_perf.js滚动闸门+图片卫生。"""
+    """🔴v858/v944 性能超级哨兵。
+       保留图片压缩、backdrop-filter 清理和图片卫生；v944 永久禁止会让主题
+       图标在真实触摸/惯性滚动中停止的根级动画暂停闸门。"""
     import glob as _g, re as _re
     # v859语料修正: 全量html(剔evolution_dashboard=报告回声会把死名单假活化)+全量js(此前只收hansen_*漏了perf_boost/click_sound等8个+boss_hall等卫星页→27项死名单几乎全是假阳性)
     _all_html = [p for p in sorted(_g.glob(os.path.join(ROOT, '*.html'))) if not p.endswith('evolution_dashboard.html')]
@@ -304,16 +315,47 @@ def perf_sentinel(run):
         run.add(WARN, '性能', 'img_budget', '%d 张图超800KB预算: %s' % (len(big), ', '.join(big[:5])),
                 fix='pngquant --quality=78-95 + 类目上限(普通boss768·赛季boss1100=v809高清法令·icons640·avatars不缩纯量化=v773的720法令·配方见知识库v858)')
     run.add(INFO, '性能', 'img_total', '图片资产总量 %.1fMB(v858守法基线41.9MB·超50MB就该再做一轮压缩)' % (total/1048576))
-    # ③ perf引擎在位(页面接线 + 核心逻辑齐全)
+    # ③ perf引擎在位(页面接线 + 图片卫生齐全 + 滚动不暂停主题)
     _wire = [os.path.join(ROOT, x) for x in ('template.html','index.html','boss_hall.html','season_showcase.html','spelling_bee.html')] + islands()
-    miss = [os.path.basename(p) for p in _wire if 'hansen_perf.js?v=' not in read(p)]
+    miss = [os.path.basename(p) for p in _wire if 'hansen_perf_v944.js?v=' not in read(p)]
     if miss:
-        run.add(ERROR, '性能', 'perf_engine_missing', '%d 个页面没接 hansen_perf.js(滚动闸门+图片卫生)' % len(miss),
-                where=', '.join(miss[:6]), fix='template/index 加 <script hansen_perf.js> 后重跑 generate')
-    pj = read(os.path.join(ROOT, 'hansen_perf.js'))
-    for key, label in (('hsn-scrolling','滚动动画闸门'), ("setAttribute('decoding','async')",'解码async'), ("setAttribute('loading','lazy')",'图片墙lazy')):
+        run.add(ERROR, '性能', 'perf_engine_missing', '%d 个页面没接 hansen_perf_v944.js(图片卫生+滚动连续性)' % len(miss),
+                where=', '.join(miss[:6]), fix='template/index 加 <script hansen_perf_v944.js> 后重跑 generate')
+    pj = read(os.path.join(ROOT, 'hansen_perf_v944.js'))
+    for key, label in (("setAttribute('decoding','async')",'解码async'), ("setAttribute('loading','lazy')",'图片墙lazy'), ('MutationObserver','动态图片卫生')):
         if key not in pj:
-            run.add(ERROR, '性能', 'perf_engine_gutted', 'hansen_perf.js 缺【%s】核心逻辑' % label, fix='对照知识库 v858 恢复')
+            run.add(ERROR, '性能', 'perf_engine_gutted', 'hansen_perf_v944.js 缺【%s】核心逻辑' % label, fix='对照知识库 v858 恢复')
+    if 'hsn-scrolling' in pj or _re.search(r'animation-play-state\s*:\s*paused', pj):
+        run.add(ERROR, '性能', 'scroll_animation_pause_regress',
+                'hansen_perf_v944.js 恢复了滚动动画暂停，主题图标会在手指/惯性滚动中停止',
+                fix='删除滚动暂停样式与 scroll/touchmove 闸门；保留图片卫生和独立后台/离屏暂停')
+    # v944 首载必须先跨越 v943 ignoreSearch Worker，再执行任何业务脚本。
+    # The regex below deliberately returns only the opening tag.  Compare like
+    # with like; including </script> here makes every healthy entry look broken.
+    cache_version = read(os.path.join(ROOT, 'VERSION')).strip()
+    gate_open = '<script src="hansen_sw_upgrade_gate_v944.js?v=%s">' % cache_version
+    upgrade_entries = [os.path.join(ROOT, name) for name in (
+        'index.html', '_frame.html', 'boss_hall.html', 'season_showcase.html',
+        'spelling_bee.html', 'land_map.html',
+    )] + islands()
+    bad_gate = []
+    for entry in upgrade_entries:
+        source = read(entry)
+        first = _re.search(r'<script\b[^>]*>', source, _re.I)
+        if not first or first.group(0) != gate_open:
+            bad_gate.append(os.path.basename(entry))
+    worker = read(os.path.join(ROOT, 'sw_v944.js'))
+    gate_source = read(os.path.join(ROOT, 'hansen_sw_upgrade_gate_v944.js'))
+    upgrade_source = read(os.path.join(ROOT, '_sw_upgrade_v944.html'))
+    if (bad_gate or not all((worker, gate_source, upgrade_source))
+            or "'./hansen_sw_upgrade_gate_v944.js'" not in worker
+            or "'./_sw_upgrade_v944.html'" not in worker
+            or 'serviceWorker.register(\'./sw_v944.js\'' not in read(os.path.join(ROOT, 'index.html'))
+            or os.path.exists(os.path.join(ROOT, 'sw.js'))):
+        run.add(ERROR, '性能', 'sw_atomic_upgrade_regress',
+                'v943→v944 首载原子升级门缺失或顺序回退，可能执行新HTML+旧同名脚本的混版',
+                where=', '.join(bad_gate[:8]),
+                fix='33入口首脚本固定hansen_sw_upgrade_gate_v944.js；仅注册sw_v944.js；保留隔离升级页和新备份pathname')
     # ④ 动画预算(infinite 数量超支预警)
     for fn, cap in (('index.html', 65), ('template.html', 32)):
         n = len(_re.findall(r'animation:[^;"}]*infinite', read(os.path.join(ROOT, fn))))
@@ -489,7 +531,10 @@ def kb_guard_sync_audit(run):
         # 2) 代码 //🔴 vNNN ⊆ 守卫 # 🔴 vNNN 且 ⊆ 知识库 【vNNN
         js_vers = set(re.findall(r"//\s*🔴\s*v(\d{3})", hba))
         cr_vers = set(re.findall(r"#\s*🔴\s*v(\d{3})", cr))
+        # 历史知识既有【vNNN】行，也有规范 Markdown 标题“## ... vNNN ...”。
+        # 两种都算已登记，避免明明存在完整章节却被误报为知识缺口。
         kb_vers = set(re.findall(r"【v(\d{3})", kb_md))
+        kb_vers |= set(re.findall(r"(?mi)^#{1,6}[^\n]*\bv(\d{3})\b", kb_md))
         for v in sorted(js_vers - cr_vers):
             run.add(WARN, "知识库一致", "guard_missing_v" + v,
                     "代码里有 //🔴 v%s 标记但 check_resources 无对应 # 🔴 v%s 守卫" % (v, v),
@@ -792,7 +837,12 @@ def self_check():
             try: json.loads(read(f))
             except Exception: notes.append("数据文件可能损坏 %s" % os.path.basename(f))
     if (PROBE or DEEP) and not shutil.which("node"):
-        notes.append("--probe/--deep 需要 node(Playwright)但未检测到, 这两层将跳过")
+        notes.append("--probe/--deep 需要 node(Playwright)但未检测到；浏览器断言无法执行")
+    # v942: source recovery is guaranteed by package_release.py's required-file
+    # list + SHA256SUMS, not by multi-megabyte embedded copies in documentation.
+    # Embedded copies inevitably drift and made a healthy engine report false
+    # confidence after checking the wrong snapshot.
+    return notes
     # v8.0: 引擎自完整性 —— 我的源码备份(README/说明书)是否与本体逐字一致(自动化铁律: 改了引擎忘同步会被自己抓住)
     try:
         mine = read(os.path.join(ROOT, "hansen_evolve.py"))
@@ -966,45 +1016,58 @@ def run_inspector(run, full):
        --ai 时 AI 层也传给监察官。把它的发现并入引擎。跑本引擎 = 也跑了监察官。"""
     p = os.path.join(ROOT, "hansen_inspector.py")
     if not os.path.exists(p):
-        run.add(WARN, "监察官", "no_inspector", "缺 hansen_inspector.py(可从 README 备份恢复)"); return
+        run.add(ERROR, "监察官", "no_inspector", "缺 hansen_inspector.py；监察断言未执行"); return
     ai_on = bool(USE_AI and os.environ.get("ANTHROPIC_API_KEY"))
     args = ([] if full else ["--no-browser"]) + (["--ai"] if ai_on else [])
     label = ("监察官·全部4层" + ("+AI" if ai_on else "")) if full else "监察官·静态(A+B+KB)"
     to = 600 if full else 180
     try:
+        inspector_report = os.path.join(ROOT, "hansen_inspector_report.md")
+        try:
+            os.remove(inspector_report)
+        except FileNotFoundError:
+            pass
         r = subprocess.run([sys.executable, p] + args, cwd=ROOT, capture_output=True, text=True, timeout=to)
         folded = _parse_inspector_report(run)
-        if r.returncode == 0 and folded == 0:
+        report_fresh = os.path.exists(inspector_report)
+        if r.returncode == 0 and folded == 0 and report_fresh:
             run.add(INFO, "监察官", "inspector_pass", "%s: 全部通过 ✅" % label)
             print("  ✅ %s: 全部通过" % label)
         else:
+            if (r.returncode != 0 or not report_fresh) and folded == 0:
+                run.add(ERROR, "监察官", "inspector_failed",
+                        "%s 退出码 %d/新报告=%s；断言未完成" % (label, r.returncode, report_fresh))
             print("  ⚠️ %s: 并入 %d 项 ERROR/WARN(详见 hansen_inspector_report.md)" % (label, folded))
     except subprocess.TimeoutExpired:
         _parse_inspector_report(run)
-        run.add(INFO, "监察官", "inspector_timeout", "%s 浏览器层超时(慢环境可正常; 静态层已跑并并入)" % label)
-        print("  ⚠️ %s 浏览器层超时(已并入静态发现)" % label)
+        run.add(ERROR, "监察官", "inspector_timeout", "%s 超时；断言未完整执行" % label)
+        print("  ❌ %s 超时，按未执行断言处理" % label)
     except Exception as e:
-        run.add(INFO, "监察官", "inspector_run", "%s 运行异常: %s" % (label, str(e)[:60]))
-        print("  ⚠️ %s 异常: %s" % (label, str(e)[:60]))
+        run.add(ERROR, "监察官", "inspector_run", "%s 运行异常；断言未执行: %s" % (label, str(e)[:60]))
+        print("  ❌ %s 异常: %s" % (label, str(e)[:60]))
 
 def run_health_full(run):
     """--deep: 健康检查全量(真机加载全部岛)。"""
     p = os.path.join(ROOT, "hansen_health_check.py")
-    if not os.path.exists(p): return
+    if not os.path.exists(p):
+        run.add(ERROR, "健康检查", "health_missing", "缺 hansen_health_check.py；浏览器断言未执行")
+        return
     try:
         r = subprocess.run([sys.executable, p], cwd=ROOT, capture_output=True, text=True, timeout=600)
         out = (r.stdout or "") + (r.stderr or ""); ec = out.count("❌")
-        if r.returncode != 0 or ec:
-            run.add(WARN, "健康检查", "health_full", "健康检查报告 %d 项疑似问题(退出码 %d)" % (ec, r.returncode))
-            print("  ⚠️ 健康检查全量: ❌×%d (退出码 %d)" % (ec, r.returncode))
+        if r.returncode != 0:
+            tail = out[-600:].replace("\n", " ")
+            run.add(ERROR, "健康检查", "health_full",
+                    "健康检查失败/未完成(❌×%d, 退出码 %d): %s" % (ec, r.returncode, tail))
+            print("  ❌ 健康检查全量: ❌×%d (退出码 %d)" % (ec, r.returncode))
         else:
             run.add(INFO, "健康检查", "health_full", "健康检查全量: 全部通过 ✅")
             print("  ✅ 健康检查全量: 全部通过")
     except subprocess.TimeoutExpired:
-        run.add(INFO, "健康检查", "health_timeout", "健康检查浏览器层超时(慢环境可正常)")
-        print("  ⚠️ 健康检查超时")
+        run.add(ERROR, "健康检查", "health_timeout", "健康检查浏览器层超时；断言未完整执行")
+        print("  ❌ 健康检查超时，按失败处理")
     except Exception as e:
-        run.add(INFO, "健康检查", "health_run", "健康检查异常: %s" % str(e)[:60])
+        run.add(ERROR, "健康检查", "health_run", "健康检查异常；断言未执行: %s" % str(e)[:60])
 
 # =============================================================================
 #  8) AI 深度推理层(--ai; 需 ANTHROPIC_API_KEY; 挖静态查不出的深层问题 + 提案)
@@ -1462,12 +1525,15 @@ def one_cycle():
     print("=" * 64)
     run = Run()
     selfnotes = self_check()
-    if selfnotes: print("  ⚠️ 引擎自检: " + "; ".join(selfnotes))
+    if selfnotes:
+        print("  ❌ 引擎自检: " + "; ".join(selfnotes))
+        for index, note in enumerate(selfnotes):
+            run.add(ERROR, "工具", "self_check_%d" % index, note)
     else: print("  🩺 引擎自检: 子工具/数据/环境就绪 ✅")
     mission = load_mission()
     disc = discover()
     print("\n[1/7] 静态主关(check_resources) ..."); run_check_resources(run)
-    print("[2/7] 对齐使命的深查(崩溃/经济/一致/健康) + v12四方一致性/退役守卫/备份同步 ..."); mission_checks(run, disc); improvement_scan(run, disc); perf_sentinel(run); cache_stamp_checks(run); dangling_ref_checks(run); inline_drift_checks(run); kb_guard_sync_audit(run); retired_fx_guard_audit(run); tool_backup_sync_check(run)
+    print("[2/7] 对齐使命的深查(崩溃/经济/一致/健康) + 四方一致性/退役守卫 ..."); mission_checks(run, disc); improvement_scan(run, disc); perf_sentinel(run); cache_stamp_checks(run); dangling_ref_checks(run); inline_drift_checks(run); kb_guard_sync_audit(run); retired_fx_guard_audit(run)
     print("[3/7] 集成监察官(%s) ..." % ("全部4层+真机浏览器" if DEEP else "静态A+B+KB; --deep 开启全部4层"))
     run_inspector(run, full=DEEP)
     if PROBE: print("[4/7] 真机崩溃压力测试 ..."); crash_fuzz(run)
@@ -1494,9 +1560,9 @@ def one_cycle():
     prop = write_proposals(run, autofixed)
     rep = write_report(run, disc, score, kbinfo, autofixed, prop, kb, dims, bkinfo, alerts, selfnotes, changes, actions)
     dash = _write_dashboard(kb, run, score, dims, bkinfo, alerts)
-    if RELEASE or (APPLY_SAFE and autofixed):
-        try: make_release(run, score, changes, autofixed)
-        except Exception as e: print("  ⚠️ 发布打包异常(不影响本轮检查): %s" % str(e)[:140])
+    if RELEASE:
+        run.add(ERROR, "工具", "legacy_release_disabled",
+                "--release 旧打包路径已封死；只能运行 package_release.py/build.py 的唯一发布契约")
     _E, _W = run.by(ERROR), run.by(WARN)
     if _E:   _hd = "❌ %s/100 有阻断问题" % score
     elif _W: _hd = "⚠️ %s/100 有待办项" % score
@@ -1521,7 +1587,7 @@ def one_cycle():
     print("看板: %s  (随时打开看引擎在干啥/学到啥)" % os.path.relpath(dash, ROOT))
     if prop: print("待审提案: %s" % os.path.relpath(prop, ROOT))
     print("耗时 %.1fs" % (time.time() - t0))
-    return 1 if run.by(ERROR) else 0
+    return 1 if (run.by(ERROR) or run.by(WARN)) else 0
 
 def _reldir():
     d = os.path.join(ROOT, "releases"); os.makedirs(d, exist_ok=True); return d
@@ -1632,7 +1698,12 @@ def make_release(run, score, changes=None, autofixed=None):
        维护 releases/单词大冒险_最新可部署包.zip 始终指向最新, 并写/更新 releases/发布说明.md
        (每个版本记录: 版本号/时间/健康分/相比上次发布改了哪些文件/本轮自动修复/当前已知问题/部署铁律)。
        只快照当前状态, 不改游戏(守安全宪章)。由 --release 触发, 或 --apply-safe 真正应用了修复后自动触发。"""
-    import hashlib, zipfile, shutil
+    raise RuntimeError(
+        "legacy release packager is disabled in v942; use package_release.py "
+        "through build.py so deploy allow-list, secret scan, SHA256SUMS, and "
+        "reproducible ZIP verification cannot be bypassed"
+    )
+    import hashlib, zipfile, shutil  # unreachable historical implementation
     rel = os.path.join(ROOT, "releases")
     os.makedirs(rel, exist_ok=True)
     ver = (read(os.path.join(ROOT, "VERSION")).strip() or "0")
@@ -1744,6 +1815,10 @@ def make_release(run, score, changes=None, autofixed=None):
     return {"tag": tag, "zip": zpath, "files": len(files), "changed": changed, "added": added, "removed": removed, "deploy_ok": deploy_ok, "pruned": pruned}
 
 def main():
+    if RELEASE or MARK_DEPLOYED or ROLLBACK_PREP:
+        print("❌ hansen_evolve 的旧发布/上线快照路径已在 v942 永久封死。")
+        print("   请使用 build.py → package_release.py → GitHub Actions 不可变 Release。")
+        sys.exit(2)
     if MARK_DEPLOYED:
         sys.exit(mark_deployed())
     if ROLLBACK_PREP:

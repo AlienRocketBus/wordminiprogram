@@ -1,4 +1,4 @@
-// hansen_theme_lock.js — 主题锁门禁 (岛内设置页) — 修复"设置里不解锁也能换主题"重大bug (v438)
+// hansen_theme_lock.js v942 — 主题锁门禁 + 严格购买事务
 // ============================================================================
 // 背景(重大bug, v438): 主题分免费/付费, 付费主题要在首页【主题商店】花金币解锁(扣全局钱包
 //   hansen_wallet_coins, 已解锁记 hansen_unlocked_themes)。但【岛内设置页】的主题选择直接调
@@ -25,28 +25,75 @@
   var THEME_ORDER = ['cosmos','pink','ocean','forest','rainbow','peach'];
   var UNLOCK_KEY  = 'hansen_unlocked_themes';
   var WALLET_KEY  = 'hansen_wallet_coins';
+  var PENDING_KEY = 'hansen_theme_purchase_pending_v942';
+  var PROOF_KEY = 'hansen_theme_purchase_transaction_v942';
   var FREE_DEFAULT = 'cosmos';
 
-  function getWallet(){ try{ var v=parseInt(localStorage.getItem(WALLET_KEY),10); return (isFinite(v)&&v>=0)?v:0; }catch(e){ return 0; } }
-  function setWallet(n){ try{ localStorage.setItem(WALLET_KEY,String(Math.max(0,Math.floor(n)))); }catch(e){} }
-  function getUnlocked(){
-    var base = FREE_THEMES.slice();
-    try{ var raw=localStorage.getItem(UNLOCK_KEY); if(raw){ var a=JSON.parse(raw); if(Array.isArray(a)) a.forEach(function(k){ if(base.indexOf(k)<0) base.push(k); }); } }catch(e){}
-    return base;
+  function walletState(){try{var raw=localStorage.getItem(WALLET_KEY),v=raw===null?0:Number(raw);if(!isFinite(v)||Math.floor(v)!==v||v<0)return {ok:false,value:NaN};var api=window.HansenCoins&&typeof HansenCoins.get==='function'?Number(HansenCoins.get()):v;return isFinite(api)&&api===v?{ok:true,value:v}:{ok:false,value:NaN};}catch(e){return {ok:false,value:NaN};}}
+  function getWallet(){var r=walletState();return r.ok?r.value:NaN;}
+  function setWallet(n){ try{var v=String(Math.max(0,Math.floor(n)));localStorage.setItem(WALLET_KEY,v);return localStorage.getItem(WALLET_KEY)===v;}catch(e){return false;} }
+  function spendCoins(n){
+    try{if(window.HansenCoins&&typeof window.HansenCoins.spend==='function')return window.HansenCoins.spend(n)===true;}catch(e){return false;}
+    var w=getWallet();return w>=n&&setWallet(w-n);
   }
+  function unlockedState(){
+    var base = FREE_THEMES.slice();
+    try{ var raw=localStorage.getItem(UNLOCK_KEY); if(raw!==null){ var a=JSON.parse(raw);if(!Array.isArray(a)||a.some(function(k){return typeof k!=='string';}))return {ok:false,value:base};a.forEach(function(k){ if(Object.prototype.hasOwnProperty.call(THEME_PRICE,k)&&base.indexOf(k)<0) base.push(k); }); }return {ok:true,value:base};}catch(e){return {ok:false,value:base};}
+  }
+  function sanitizeUnlockedState(){
+    try{var raw=localStorage.getItem(UNLOCK_KEY);if(raw===null)return true;var state=unlockedState();if(!state.ok)return false;var paid=state.value.filter(function(k){return Object.prototype.hasOwnProperty.call(THEME_PRICE,k);}).sort();var next=JSON.stringify(paid);if(raw!==next)localStorage.setItem(UNLOCK_KEY,next);return localStorage.getItem(UNLOCK_KEY)===next;}catch(e){return false;}
+  }
+  function getUnlocked(){return unlockedState().value;}
   function isUnlocked(key){
     if(!key) return true;
     if(FREE_THEMES.indexOf(key) >= 0) return true;     // 免费主题永远解锁
-    if(!(key in THEME_PRICE)) return true;             // 未知主题不拦(安全)
-    return getUnlocked().indexOf(key) >= 0;
+    if(!Object.prototype.hasOwnProperty.call(THEME_PRICE,key)) return true; /* 非六款基础主题不由本门禁收费。 */
+    var r=unlockedState();return r.ok&&r.value.indexOf(key) >= 0;
   }
   function unlock(key){
     try{
-      var arr=[]; var raw=localStorage.getItem(UNLOCK_KEY);
-      if(raw){ var p=JSON.parse(raw); if(Array.isArray(p)) arr=p; }
+      if(!Object.prototype.hasOwnProperty.call(THEME_PRICE,key))return false;
+      var state=unlockedState();if(!state.ok)return false;var arr=state.value.filter(function(k){return Object.prototype.hasOwnProperty.call(THEME_PRICE,k);});
       if(arr.indexOf(key)<0) arr.push(key);
-      localStorage.setItem(UNLOCK_KEY, JSON.stringify(arr));
-    }catch(e){}
+      arr.sort();var next=JSON.stringify(arr);localStorage.setItem(UNLOCK_KEY,next);
+      return localStorage.getItem(UNLOCK_KEY)===next&&isUnlocked(key);
+    }catch(e){return false;}
+  }
+
+  function readPending(){
+    try{var raw=localStorage.getItem(PENDING_KEY);if(raw===null)return {ok:true,value:null};var p=JSON.parse(raw);if(!p||p.version!==942||typeof p.theme!=='string')return {ok:false,value:null};
+      var price=THEME_PRICE[p.theme],before=Math.floor(Number(p.before));
+      if(!price||p.price!==price||!isFinite(before)||before<price||p.target!==before-price||(p.stage!=='prepared'&&p.stage!=='spent')||!/^theme-[a-z0-9-]{8,160}$/i.test(String(p.txid||'')))return {ok:false,value:null};
+      return {ok:true,value:{version:942,txid:String(p.txid),theme:p.theme,price:price,before:before,target:before-price,stage:p.stage}};
+    }catch(e){return {ok:false,value:null};}
+  }
+  function writePending(p){try{var raw=JSON.stringify(p);localStorage.setItem(PENDING_KEY,raw);return localStorage.getItem(PENDING_KEY)===raw;}catch(e){return false;}}
+  function clearPending(){try{localStorage.removeItem(PENDING_KEY);return localStorage.getItem(PENDING_KEY)===null;}catch(e){return false;}}
+  function proofFor(p,state){return {version:942,txid:p.txid,theme:p.theme,price:p.price,before:p.before,target:p.target,state:state};}
+  function readProof(p){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return {ok:true,value:null};var x=JSON.parse(raw);if(!x||x.version!==942||x.txid!==p.txid||x.theme!==p.theme||x.price!==p.price||x.before!==p.before||x.target!==p.target||(x.state!=='prepared'&&x.state!=='paid'))return {ok:false,value:null};return {ok:true,value:x};}catch(e){return {ok:false,value:null};}}
+  function writeProof(p,state){try{var raw=JSON.stringify(proofFor(p,state));localStorage.setItem(PROOF_KEY,raw);return localStorage.getItem(PROOF_KEY)===raw;}catch(e){return false;}}
+  function confirmProof(p,balance){var r=readProof(p);if(!r.ok||!r.value||balance!==p.target)return false;return r.value.state==='paid'||writeProof(p,'paid');}
+  function clearProof(p){try{var r=readProof(p);if(!r.ok)return false;if(!r.value)return true;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function cleanup(p){return clearProof(p)&&clearPending();}
+  function clearOrphanProof(){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return true;var x=JSON.parse(raw),price=x&&THEME_PRICE[x.theme],before=Number(x&&x.before);if(!x||x.version!==942||!price||x.price!==price||!isFinite(before)||Math.floor(before)!==before||before<price||x.target!==before-price||(x.state!=='prepared'&&x.state!=='paid')||!/^theme-[a-z0-9-]{8,160}$/i.test(String(x.txid||'')))return false;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
+  function recoverPurchase(){
+    var pr=readPending();if(!pr.ok)return {status:'pending',reason:'storage'};var p=pr.value;if(!p)return {status:clearOrphanProof()?'none':'pending',reason:'proof'};
+    var us=unlockedState();if(!us.ok)return {status:'pending',theme:p.theme};if(us.value.indexOf(p.theme)>=0){if(!cleanup(p))return {status:'pending',theme:p.theme};return {status:'committed',theme:p.theme};}
+    var ws=walletState();if(!ws.ok)return {status:'pending',theme:p.theme};var balance=ws.value,pf=readProof(p);if(!pf.ok)return {status:'pending',theme:p.theme};
+    if(balance===p.before){if(pf.value&&pf.value.state==='paid')return {status:'pending',theme:p.theme};return {status:cleanup(p)?'cancelled':'pending',theme:p.theme};}
+    if(balance!==p.target||!pf.value||!confirmProof(p,balance))return {status:'pending',theme:p.theme};
+    if(!unlock(p.theme))return {status:'pending',theme:p.theme};
+    if(!cleanup(p))return {status:'pending',theme:p.theme};return {status:'committed',theme:p.theme};
+  }
+  function purchaseTheme(key){
+    var prior=recoverPurchase();if(prior.status==='pending')return false;var us=unlockedState();if(!us.ok)return false;if(us.value.indexOf(key)>=0)return true;
+    var price=THEME_PRICE[key],ws=walletState(),before=ws.value;if(!price||!ws.ok||before<price)return false;
+    var p={version:942,txid:'theme-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),theme:key,price:price,before:before,target:before-price,stage:'prepared'};
+    if(!writePending(p))return false;
+    if(!writeProof(p,'prepared')){cleanup(p);return false;}spendCoins(price);var as=walletState();if(!as.ok)return false;var after=as.value;
+    if(after===p.before){cleanup(p);return false;}if(after!==p.target||!confirmProof(p,after))return false;
+    p.stage='spent';writePending(p);
+    if(!unlock(key))return false;return cleanup(p);
   }
 
   // 对外暴露(监察官 / 其它消费方)
@@ -55,7 +102,10 @@
     isLocked: function(k){ return !isUnlocked(k); },
     prices: THEME_PRICE,
     free: FREE_THEMES.slice(),
-    freeDefault: FREE_DEFAULT
+    freeDefault: FREE_DEFAULT,
+    purchase:purchaseTheme,
+    recover:recoverPurchase,
+    pendingKey:PENDING_KEY
   };
 
   function toast(msg){
@@ -90,9 +140,8 @@
     if(enough){
       var bbtn=document.getElementById('__tl_buy');
       if(bbtn) bbtn.addEventListener('click',function(){
-        var w=getWallet();
-        if(w>=price){
-          setWallet(w-price); unlock(key); close();
+        if(purchaseTheme(key)){
+          close();
           rawApply(key);  // 已解锁, 直接裸切换(不经包装器链, 防递归)
           try{ if(typeof window.renderThemeBox==='function') window.renderThemeBox(); }catch(e){}
           try{ decorateThemeBox(); }catch(e){}
@@ -176,6 +225,7 @@
   }
 
   // 立即尝试 + 轮询(applyTheme/renderThemeBox 通常在内联脚本里已定义)
+  try{sanitizeUnlockedState();recoverPurchase();}catch(e){}
   fixStolenTheme();
   hookApplyTheme();
   hookRenderThemeBox();

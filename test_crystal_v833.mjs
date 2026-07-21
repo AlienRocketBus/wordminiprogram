@@ -1,7 +1,15 @@
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from './playwright_loader.mjs';
 const PORT = 8946;
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-const page = await browser.newPage();
+const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH });
+// 与正式小程序一致使用手机视口，避免桌面外壳把页面导航到 _frame 选择页。
+const page = await browser.newPage({
+  viewport: { width: 390, height: 844 },
+  screen: { width: 390, height: 844 },
+  isMobile: true,
+  hasTouch: true,
+  deviceScaleFactor: 2,
+  serviceWorkers: 'block'
+});
 const errors = [];
 page.on('console', m => { if (m.type() === 'error') { const t = m.text(); const u = (m.location() && m.location().url) || ''; if (!/favicon|autoplay|net::ERR/i.test(t) && !/favicon/i.test(u)) errors.push('C:' + t); } });
 page.on('pageerror', e => errors.push('P:' + e.message));
@@ -9,10 +17,10 @@ await page.goto(`http://127.0.0.1:${PORT}/island_animal.html`, { waitUntil: 'net
 await page.waitForFunction(() => window.HansenCrystal && window.HansenCrystal._onAnswer && window.allW && window.allW.length > 0, { timeout: 15000 });
 
 const results = await page.evaluate(() => {
-  const KEY = 'hsn_crystal_island_animal';
+  const KEY = 'hsn_crystal_animal';
   const R = []; const ok = (n, c, info) => R.push({ n, pass: !!c, info: info || '' });
   const loadM = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } };
-  const saveM = (m) => localStorage.setItem(KEY, JSON.stringify(m));
+  const saveM = (m) => { const raw=JSON.stringify(m); localStorage.setItem(KEY,raw); localStorage.setItem(KEY+'_bak',raw); };
   const setW = (i, w) => { const m = loadM(); m[i] = w; saveM(m); };
   const getW = (i) => loadM()[i];
   const gems = () => parseInt(localStorage.getItem('hansen_wallet_gems') || '0', 10);
@@ -23,7 +31,7 @@ const results = await page.evaluate(() => {
   const killMemo = () => { const e = document.getElementById('hsnCrystalMemo'); if (e) e.remove(); };
   const memoShown = () => { const e = document.getElementById('hsnCrystalMemo'); return !!(e && e.classList.contains('show')); };
   const memoText = () => { const e = document.getElementById('hsnCrystalMemo'); return e ? e.textContent : ''; };
-  const reset = () => { saveM({}); setG('hsn_crystal_total', 0); setG('hsn_crystal_gems', 0); setG('hsn_crystal_rank', 0); localStorage.setItem('hansen_wallet_gems', '0'); localStorage.removeItem('hsn_crystal_boost_until'); localStorage.removeItem('hsn_crystal_isldone_island_animal'); };
+  const reset = () => { saveM({}); setG('hsn_crystal_total', 0); setG('hsn_crystal_gems', 0); setG('hsn_crystal_rank', 0); localStorage.setItem('hansen_wallet_gems', '0'); localStorage.removeItem('hsn_crystal_boost_until'); localStorage.removeItem('hsn_crystal_isldone_animal'); };
 
   // ===== VT1: 答对但未锁星(进度0→1) → 不弹浮层(不刷屏·v833核心) =====
   reset(); killMemo();
