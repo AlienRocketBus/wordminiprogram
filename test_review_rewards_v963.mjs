@@ -109,14 +109,20 @@ while(__hsnSafeWrongCount(S.wrongs[9])>0) markAnswer(9,true);
 ok(C.hasAward('rvrw:'+day+':food:9:grad'), '第3个毕业词入账');
 ok(C.ledger['rvrw:'+day+':clearall'] === 30, '毕业≥3 且错题清空 → +30');
 
-/* T6: 完成今日复习 +20 幂等 + 连击里程碑 */
-console.log('T6 今日完成与连击');
+/* T6: 🔴刺三新口径·全局清零时刻 = +20 = 连击打卡（同一时刻·幂等） */
+console.log('T6 全局清零口径与连击');
+CAN_STORE.wrongs = { '105':1 };            // 先有到期(105无SRS→今天到期)
+CAN_STORE.srs = {};
+M._debug.checkGlobalClear();               // 记录 hadDue
+ok(!C.hasAward('rvrw:'+day+':todaydone'), '仍有到期 → 不发+20');
 const balBefore = C.bal;
-M.onTodayComplete({reviewed:4, graduated:1, total:4});
-ok(C.ledger['rvrw:'+day+':todaydone'] === 20, '完成今日复习 +20');
-M.onTodayComplete({reviewed:4, graduated:1, total:4});
-ok(C.bal === balBefore + 20, '重复调用不重复发');
-ok(JSON.parse(store.get('hansen_review_streak_v963')).count === 1, '连击=1');
+CAN_STORE.wrongs = {};                     // 全局清零时刻
+M.onTodayComplete({reviewed:1, graduated:1, total:1});
+ok(C.ledger['rvrw:'+day+':todaydone'] === 20, '清零时刻发 +20');
+M.onTodayComplete({reviewed:1, graduated:1, total:1});
+M._debug.checkGlobalClear();
+ok(C.bal === balBefore + 20, '重复调用/刷新不重复发');
+ok(JSON.parse(store.get('hansen_review_streak_v963')).count === 1, '连击=1(与+20同刻打卡)');
 { const s = JSON.parse(store.get('hansen_review_streak_v963')); s.last=yest(); s.count=2;
   store.set('hansen_review_streak_v963', JSON.stringify(s)); }
 M._debug.tickStreak();
@@ -162,6 +168,31 @@ console.log('T9 横幅状态机');
   ok(M._debug.bannerState({globalDue:0, localDue:0}, {last:'', count:0}) === 'calm',   '无到期未打卡 → calm');
   const mLocal = M._debug.bannerModel();
   ok(/本岛 3/.test(mLocal.title) && /全部 4/.test(mLocal.title), '横幅文案含本岛/全部双数字');
+}
+
+/* T10: 🔴刺一·SRS吸收器接入（包装层喂真实答题·毕业双路径防双发） */
+console.log('T10 SRS吸收器接入');
+{
+  const absorbLog = []; let absorbNext = null;
+  globalThis.HansenReview = { absorbRealAnswer: (idx, c) => { absorbLog.push([idx, c]); return absorbNext; } };
+  absorbNext = { advanced:true, graduated:false, box:2, gapDays:4 };
+  markAnswer(20, true);
+  ok(absorbLog.length === 1 && absorbLog[0][0] === 20 && absorbLog[0][1] === true, '真实答对喂给吸收器');
+  ok(uiLog.some(x => /记忆盒 \+1 · 4天/.test(x)), '盒子前进飘字含间隔天数');
+  { const m = JSON.parse(store.get('hansen_review_wrong_since_v963')||'{}'); m['food:21'] = yest();
+    store.set('hansen_review_wrong_since_v963', JSON.stringify(m)); }
+  absorbNext = { advanced:true, graduated:true, box:5, hadWrong:true };
+  const gBal = C.bal;
+  markAnswer(21, true);
+  ok(C.ledger['rvrw:'+day+':food:21:grad'] === 15, '吸收器毕业(升满5盒删错词) → 同一毕业金例程 +15');
+  markAnswer(21, true);
+  ok(C.bal === gBal + 15, '同词当天毕业金收据防双发');
+  absorbNext = { advanced:true, graduated:true, box:5, hadWrong:false };
+  const g2 = C.bal;
+  markAnswer(23, true);
+  ok(C.bal === g2, '无错词的毕业(纯SRS收尾)不发毕业金');
+  absorbNext = null; markAnswer(22, false);
+  ok(absorbLog[absorbLog.length-1][1] === false, '答错也上报吸收器(correct=false)且不崩');
 }
 
 console.log('');

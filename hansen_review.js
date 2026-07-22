@@ -304,6 +304,21 @@
     if(ok){
       var nb = (e.box || 0) + 1;
       if(nb >= SRS_GRAD){
+        /* 🔴v963刺一·毕业闸门：自评"记住了"不能独自宣布毕业。
+         * 需要真实答题证据(e.rp=1,由任意玩法答对时记下,或当天直接在玩法里答对到期词
+         * 自动毕业走 _absorbRealAnswer 路径)。无证据 → 留在盒4、保持到期、不记 last
+         * (今天去玩法里答对一次立即毕业),并给出友好指引。 */
+        if(!e.rp){
+          srs[idx] = e;
+          try{
+            var _w = (Array.isArray(window.allW) && window.allW[canonicalWrongIndex(idx, window.allW.length)]) || null;
+            var _en = _w && _w.en ? String(_w.en) : '这个词';
+            if(typeof window.showToast === 'function') showToast('🎓 最后一关：去任意玩法里答对「'+_en+'」一次，即可正式毕业');
+          }catch(_gateToast){}
+          try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(idx, e); }catch(_gateSync){}
+          if(typeof save === 'function'){ try{ save(); }catch(_gateSave){} }
+          return false;
+        }
         delete srs[idx];
         if(window.S.wrongs) delete window.S.wrongs[idx];
         graduated = true;
@@ -323,6 +338,60 @@
     }catch(_canonicalError){}
     if(typeof save === 'function'){ try { save(); } catch(e){} }
     return graduated;
+  }
+
+  /* 🔴v963刺一(心脏手术·用户2026-07-21批准)：真实答题驱动 SRS。
+   * 任何现有玩法 markAnswer 真实答对到期词 → 盒子自动前进；升满5盒即毕业(删SRS+错词,
+   * 与自评毕业同一条 canonical 链路)。间隔科学保持：未到期不升盒(仅当 box>=4 时记 rp=1
+   * 真实证据备忘,供自评毕业闸门使用)；同词每天最多升一次(复用 last 字段,与自评互斥)。
+   * 答错不降盒(错误次数已由 markAnswer 加一,词继续到期;避免限时玩法误伤)。 */
+  function _absorbRealAnswer(idx, correct){
+    try{
+      if(correct !== true) return null;
+      if(!window.S || !Array.isArray(window.allW)) return null;
+      var i = canonicalWrongIndex(idx, window.allW.length);
+      if(i < 0) return null;
+      var srs = _ensureSrs();
+      if(!srs) return null;
+      var key = String(i), t = _todayYMD();
+      var wrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[i] : 0);
+      var e = srs[key];
+      if(!e || typeof e !== 'object'){
+        if(wrong <= 0) return null;           // 无错无计划 → 与 SRS 无关
+        e = { box: 0, due: t, last: '' };     // 兜底(理论上 _ensureSrs 已种)
+      }
+      var box = (typeof e.box === 'number' && e.box >= 0) ? e.box : 0;
+      if(box >= SRS_GRAD) return null;
+      if(e.last === t) return { advanced:false, reason:'daily-lock' };
+      var due = (typeof e.due === 'string') ? e.due : t;
+      if(due > t){
+        if(box >= SRS_GRAD - 1 && !e.rp){     // 未到期:只记证据不升盒(间隔不破)
+          e.rp = 1; srs[key] = e;
+          try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, e); }catch(_c){}
+          if(typeof save === 'function'){ try{ save(); }catch(_s){} }
+          return { advanced:false, reason:'not-due', proof:true };
+        }
+        return { advanced:false, reason:'not-due' };
+      }
+      var nb = box + 1;
+      if(nb >= SRS_GRAD){
+        delete srs[key];
+        if(wrong > 0 && window.S.wrongs) delete window.S.wrongs[i];
+        try{
+          if(window.HansenCanonical){
+            if(typeof HansenCanonical.absorbAnswer === 'function') HansenCanonical.absorbAnswer(i);
+            if(typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, null);
+          }
+        }catch(_c2){}
+        if(typeof save === 'function'){ try{ save(); }catch(_s2){} }
+        return { advanced:true, graduated:true, box:SRS_GRAD, hadWrong: wrong > 0 };
+      }
+      e.box = nb; e.due = _addDaysYMD(SRS_GAP[nb]); e.last = t;
+      srs[key] = e;
+      try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, e); }catch(_c3){}
+      if(typeof save === 'function'){ try{ save(); }catch(_s3){} }
+      return { advanced:true, graduated:false, box:nb, gapDays:SRS_GAP[nb] };
+    }catch(_absorbError){ return null; }
   }
 
   // ─────────────────────────────────────────────
@@ -692,6 +761,9 @@
   // 各种复习方式入口
   // ─────────────────────────────────────────────
   window.HansenReview = {
+    /* 🔴v963刺一：真实答题→SRS 的唯一公开入口(由 hansen_review_rewards_v963 的 markAnswer 包装层调用) */
+    absorbRealAnswer: _absorbRealAnswer,
+    _srsMeta: { GAP: SRS_GAP.slice(), GRAD: SRS_GRAD },
     _open: function(){
       _beep();
       sanitizeReviewContext();

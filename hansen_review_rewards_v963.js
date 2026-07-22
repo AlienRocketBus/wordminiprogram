@@ -93,13 +93,35 @@
     }catch(e){ return false; }
   }
 
-  /* ---------- 当日统计（状态卡/横幅展示） ---------- */
+  /* ---------- 当日统计（状态卡/横幅展示 + 🔴刺三全局清零追踪） ---------- */
   function dayState(){
     var t = ymd(), s = readJson(K_DAY);
-    if(!s || s.day !== t) s = { day:t, grads:0, coins:0 };
+    if(!s || s.day !== t) s = { day:t, grads:0, coins:0, hadDue:0, cleared:0 };
     if(typeof s.grads !== 'number' || s.grads < 0) s.grads = 0;
     if(typeof s.coins !== 'number' || s.coins < 0) s.coins = 0;
+    if(s.hadDue !== 1) s.hadDue = 0;
+    if(s.cleared !== 1) s.cleared = 0;
     return s;
+  }
+  /* 🔴刺三口径统一：连击打卡 = +20到账 = 横幅变绿 = "全局到期清零"同一时刻。
+   * 今天出现过到期(hadDue) 且 全局归零 且 今天未清 → 发+20、打卡连击、庆祝一次。
+   * 全天本就无到期 → autoMaintain 静默保连击(不发+20)。 */
+  function checkGlobalClear(info){
+    try{
+      info = info || globalDueInfo();
+      if(!info.ok) return false;
+      var s = dayState();
+      if(info.globalDue > 0){
+        if(!s.hadDue){ s.hadDue = 1; writeJson(K_DAY, s); }
+        return false;
+      }
+      if(!s.hadDue || s.cleared) return false;
+      s.cleared = 1; writeJson(K_DAY, s);
+      if(payCoinOnce('rvrw:'+ymd()+':todaydone', 20)) bumpDay(0, 20);
+      tickStreak();
+      toast('✅ 全部到期清零！<b>+20 金币</b> · 连击已保住 🔥');
+      return true;
+    }catch(e){ return false; }
   }
   function bumpDay(grads, coinAmt){
     var s = dayState();
@@ -209,6 +231,22 @@
   }
 
   /* ---------- 包装 markAnswer（真实纠错/毕业奖励） ---------- */
+  /* 毕业发放例程：错词归零(答题递减)与 SRS 升满毕业(吸收器删档)两条路径共用；收据幂等防双发 */
+  function payGraduation(slot){
+    if(!gradEligible(slot)){ clearSince(slot); return false; }
+    var gid = 'rvrw:'+ymd()+':'+slot+':grad';
+    if(!payCoinOnce(gid, 15)){ clearSince(slot); return false; }
+    var st = bumpDay(1, 15);
+    floatCoin('+15 毕业金 🎓');
+    if(st.grads >= 3 && islandWrongsEmpty()){
+      if(payCoinOnce('rvrw:'+ymd()+':clearall', 30)){
+        bumpDay(0, 30);
+        toast('🏆 今日错题全部清空！<b>+30 金币</b>');
+      }
+    }
+    clearSince(slot);
+    return true;
+  }
   function onWrongDecreased(idx, slot, nowZero){
     var day = ymd(), paidAny = 0;
     for(var ord = 1; ord <= 3; ord++){
@@ -219,23 +257,7 @@
       break;
     }
     if(paidAny) bumpDay(0, paidAny);
-
-    if(nowZero){
-      if(gradEligible(slot)){
-        var gid = 'rvrw:'+day+':'+slot+':grad';
-        if(payCoinOnce(gid, 15)){
-          var st = bumpDay(1, 15);
-          floatCoin('+15 毕业金 🎓');
-          if(st.grads >= 3 && islandWrongsEmpty()){
-            if(payCoinOnce('rvrw:'+day+':clearall', 30)){
-              bumpDay(0, 30);
-              toast('🏆 今日错题全部清空！<b>+30 金币</b>');
-            }
-          }
-        }
-      }
-      clearSince(slot);
-    }
+    if(nowZero) payGraduation(slot);
     refreshUI();
   }
 
@@ -251,6 +273,24 @@
         var w1 = safeWrong(window.S && S.wrongs ? S.wrongs[idx] : 0);
         if(w1 > w0 && w0 === 0) stampSince(slotOf(idx));
         else if(w1 < w0) onWrongDecreased(idx, slotOf(idx), w1 === 0);
+      }catch(e){}
+      /* 🔴刺一：真实答题喂给 SRS 吸收器(复习模块拥有语义)。到期答对→盒子前进；
+       * 升满5盒→毕业(吸收器已删SRS+错词并走canonical链路)，此处补发毕业金并反馈。 */
+      try{
+        var HR = window.HansenReview;
+        if(HR && typeof HR.absorbRealAnswer === 'function'){
+          var ab = HR.absorbRealAnswer(idx, correct === true);
+          if(ab && ab.advanced){
+            if(ab.graduated){
+              floatCoin('🎓 复习毕业！');
+              if(ab.hadWrong) payGraduation(slotOf(idx));
+              refreshUI();
+            }else{
+              floatCoin('📦 记忆盒 +1 · '+(ab.gapDays||'?')+'天后再见');
+              refreshUI();
+            }
+          }
+        }
       }catch(e){}
       return r;
     }
@@ -301,18 +341,14 @@
     }catch(e){}
   }
 
-  /* ---------- 今日复习完成回调 ---------- */
+  /* ---------- 今日复习完成回调（🔴刺三：改走全局口径） ---------- */
   function onTodayComplete(info){
     try{
       info = info || {};
-      var total = (typeof info.total === 'number') ? info.total : 0;
-      if(total >= 1){
-        if(payCoinOnce('rvrw:'+ymd()+':todaydone', 20)){
-          bumpDay(0, 20);
-          toast('✅ 完成今日复习！<b>+20 金币</b>');
-        }
+      var g = globalDueInfo();
+      if(!checkGlobalClear(g) && g.ok && g.globalDue > 0 && (info.total|0) >= 1){
+        toast('👍 本岛清完 · 其它岛还有 <b>'+g.globalDue+'</b> 个到期 → 点首页横幅跨岛清理');
       }
-      tickStreak();
       refreshUI();
     }catch(e){}
   }
@@ -415,7 +451,7 @@
       if(slot) slot.innerHTML = cardHtml();
     }catch(e){}
   }
-  function refreshUI(){ fillCenterSlot(); renderBanner(); }
+  function refreshUI(){ try{ checkGlobalClear(); }catch(e){} fillCenterSlot(); renderBanner(); }
 
   /* ---------- 启动 ---------- */
   function boot(){
@@ -440,6 +476,7 @@
     refresh: refreshUI,
     _debug: { ymd: ymd, dayNum: dayNum, streak: streak, dayState: dayState, sinceMap: sinceMap,
               gradEligible: gradEligible, tickStreak: tickStreak,
-              globalDueInfo: globalDueInfo, bannerState: bannerState, bannerModel: bannerModel }
+              globalDueInfo: globalDueInfo, bannerState: bannerState, bannerModel: bannerModel,
+              checkGlobalClear: checkGlobalClear }
   };
 })();
