@@ -305,59 +305,45 @@
    * 规则与今日复习一致：有错词 且 (尚无SRS计划 → 视为今天到期 / 有计划 → box<5 且 due<=今天)。
    * Land/Season 别名共用 canonical 槽位，天然不重复计数。 */
   function globalDueInfo(){
-    var out = { globalDue:0, localDue:0, ok:false };
+    /* 🔴v969真机修复：canonical 真实形态为 {islands:{岛id:{wrongs,srs}}} 嵌套结构。
+     * 到期定义 = 有错词 且 (未建档 或 盒期已到)——新答错立即计入,横幅马上喊人。 */
+    var out = { ok:false, globalDue:0, localDue:0, islandsWithDue:0, patrolDue:0 };
     try{
       var HC = window.HansenCanonical;
       if(!HC || typeof HC.read !== 'function') return out;
-      var store = HC.read();
-      if(!store || typeof store !== 'object') return out;
-      var wrongs = (store.wrongs && typeof store.wrongs === 'object') ? store.wrongs : {};
-      var srs = (store.srs && typeof store.srs === 'object') ? store.srs : {};
-      var total = (typeof HC.TOTAL_WORDS === 'number' && HC.TOTAL_WORDS > 0) ? HC.TOTAL_WORDS : 952;
-      var tNum = dayNum(ymd());
-      var lo = -1, hi = -1;
+      var st = HC.read();
+      var islands = (st && st.islands && typeof st.islands === 'object') ? st.islands : {};
+      var today = dayNum(ymd());
+      var curId = '';
       try{
-        var ref = (typeof HC.currentRef === 'function') ? HC.currentRef() : (window.__hsnSaveKey||'');
-        var a = (typeof HC.resolve === 'function') ? HC.resolve(ref) : null;
-        if(a && HC.islands && HC.islands.length){
-          for(var ii=0; ii<HC.islands.length; ii++){
-            if(HC.islands[ii] && HC.islands[ii].id === a.id){
-              lo = Number(HC.islands[ii].start)|0;
-              hi = lo + (Number(HC.islands[ii].words)|0);
-              break;
-            }
-          }
-          /* Land 切片：resolve 可能带自己的 offset/length（星海子段） */
-          if(a && typeof a.offset === 'number' && typeof a.length === 'number' && a.length > 0 && a.length < (hi-lo)){
-            lo = lo + a.offset; hi = lo + a.length;
-          }
-        }
-      }catch(e){ lo = -1; hi = -1; }
-      Object.keys(wrongs).forEach(function(k){
-        var i = Number(k);
-        if(!Number.isInteger(i) || i < 0 || i >= total) return;
-        if(safeWrong(wrongs[k]) <= 0) return;
-        var e = srs[k] || srs[i];
-        var due;
-        if(!e || typeof e !== 'object'){ due = true; }
-        else{
-          var box = (typeof e.box === 'number') ? e.box : 0;
-          var dn = dayNum(e.due);
-          due = box >= 0 && box < 5 && (dn === 0 || dn <= tNum);
-        }
-        if(due){
-          out.globalDue++;
-          if(lo >= 0 && i >= lo && i < hi) out.localDue++;
+        var ref = (typeof HC.currentRef === 'function') ? HC.currentRef() : '';
+        var a0 = (typeof HC.resolve === 'function') ? HC.resolve(ref) : null;
+        if(a0 && a0.id) curId = a0.id;
+      }catch(eC){}
+      Object.keys(islands).forEach(function(iid){
+        var isle = islands[iid] || {};
+        var wr = isle.wrongs || {}, sr = isle.srs || {};
+        var due = 0;
+        Object.keys(wr).forEach(function(k){
+          var wc = Number(wr[k]);
+          if(!(wc > 0)) return;
+          var e = sr[k];
+          if(!e || typeof e !== 'object'){ due++; return; }        // 新错未建档=到期
+          if((e.box|0) >= 5) return;
+          if(dayNum(e.due) <= today) due++;
+        });
+        if(due > 0){
+          out.globalDue += due;
+          out.islandsWithDue++;
+          if(iid === curId) out.localDue = due;
         }
       });
       out.ok = true;
     }catch(e){}
-    try{ out.patrolDue = patrolDueList().length; }catch(e){ out.patrolDue = 0; }
+    try{ out.patrolDue = patrolDueList().length; }catch(e2){ out.patrolDue = 0; }
     return out;
   }
 
-  /* ---------- 包装 markAnswer（真实纠错/毕业奖励） ---------- */
-  /* 毕业发放例程：错词归零(答题递减)与 SRS 升满毕业(吸收器删档)两条路径共用；收据幂等防双发 */
   function payGraduation(slot){
     if(!gradEligible(slot)){ clearSince(slot); return false; }
     var gid = 'rvrw:'+ymd()+':'+slot+':grad';
