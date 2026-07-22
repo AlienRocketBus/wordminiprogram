@@ -195,6 +195,49 @@ console.log('T10 SRS吸收器接入');
   ok(absorbLog[absorbLog.length-1][1] === false, '答错也上报吸收器(correct=false)且不崩');
 }
 
+/* T11: 🔴刺二·幽灵巡检（30/90两关·答对+3升段·答错温柔归队·口径隔离） */
+console.log('T11 幽灵巡检');
+{
+  globalThis.HansenReview = { absorbRealAnswer: () => null };   // 关闭吸收干扰
+  const D = M._debug;
+  // a) 毕业事件 → 入30天巡检名单（经 onGraduated 统一入口）
+  { const m = JSON.parse(store.get('hansen_review_wrong_since_v963')||'{}'); m['food:40']=yest();
+    store.set('hansen_review_wrong_since_v963', JSON.stringify(m)); }
+  M.onGraduated(40);
+  { const p = D.patrolMap()['food:40'];
+    ok(p && p.stage === 1 && p.due === D.addDaysYmd(30), '毕业即入册：stage1 · 30天后到窗'); }
+  // b) 未到窗偶遇 → 纹丝不动（间隔科学）
+  markAnswer(40, true);
+  ok(D.patrolMap()['food:40'].stage === 1, '未到窗答对不动巡检档案');
+  // c) 到窗答对 → +3 · 升第二关(90天)
+  { const m = D.patrolMap(); m['food:40'].due = yest(); store.set('hansen_review_patrol_v963', JSON.stringify(m)); }
+  const pBal = C.bal;
+  markAnswer(40, true);
+  ok(C.ledger['rvrw:'+day+':food:40:patrol'] === 3 && C.bal === pBal + 3, '30天巡检通过 +3 金币');
+  { const p = D.patrolMap()['food:40'];
+    ok(p && p.stage === 2 && p.due === D.addDaysYmd(90), '升入90天第二关'); }
+  // d) 第二关到窗答对 → 结业销档（当日收据防重复+3）
+  { const m = D.patrolMap(); m['food:40'].due = yest(); store.set('hansen_review_patrol_v963', JSON.stringify(m)); }
+  const p2 = C.bal;
+  markAnswer(40, true);
+  ok(!D.patrolMap()['food:40'], '90天巡检通过 → 记忆封存销档');
+  ok(C.bal === p2, '同日巡检收据不重复发');
+  // e) 到窗答错 → 温柔归队：销档 + 错词机制自然接管
+  D.schedulePatrol('food:41', 1);
+  { const m = D.patrolMap(); m['food:41'].due = yest(); store.set('hansen_review_patrol_v963', JSON.stringify(m)); }
+  markAnswer(41, false);
+  ok(!D.patrolMap()['food:41'], '答错销档(错词机制接管归队)');
+  ok(__hsnSafeWrongCount(S.wrongs[41]) === 1, '归队=错词+1(既有机制,无额外惩罚)');
+  ok(uiLog.some(x => /温柔归队/.test(x)), '归队提示温柔无焦虑');
+  // f) 口径隔离：巡检到窗不计入清零判定,仅计入 patrolDue 告知
+  D.schedulePatrol('food:42', 1);
+  { const m = D.patrolMap(); m['food:42'].due = yest(); store.set('hansen_review_patrol_v963', JSON.stringify(m)); }
+  CAN_STORE.wrongs = { '41': 1 }; CAN_STORE.srs = {};
+  { const info = D.globalDueInfo();
+    ok(info.patrolDue === 1, 'patrolDue 独立计数=1');
+    ok(info.globalDue === 1, 'globalDue 只算真实错词到期(41),巡检不进清零口径'); }
+}
+
 console.log('');
 if(fails){ console.log('❌ 失败', fails, '项'); process.exit(1); }
 console.log('🎉 v963 复习奖励逻辑回归 全部通过 (钱包终额:', C.bal, '金币 /', G.bal, '钻石)');

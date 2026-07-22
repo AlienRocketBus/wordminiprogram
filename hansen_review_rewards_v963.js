@@ -130,6 +130,80 @@
     return s;
   }
 
+  /* ---------- 🔴刺二：幽灵巡检（长程防遗忘） ----------
+   * 毕业不是永别：毕业后 +30 天进入第一道巡检窗，通过后 +90 天第二道，两关全过即长期信任。
+   * 验证零新题型：任何现有玩法里"偶遇"该词——答对=巡检通过(+3金币回访礼)，
+   * 答错=错词机制自然接管(温柔归队重学)，巡检档案即销。
+   * 巡检"到窗"不设截止、不计入清零/连击口径(不制造焦虑)；横幅与复习中心仅做告知。
+   * 存储：hansen_review_patrol_v963 = { slot: {due:'Y-M-D', stage:1|2} } */
+  var K_PATROL = 'hansen_review_patrol_v963';
+  var PATROL_GAPS = { 1: 30, 2: 90 };
+  var PATROL_MAX = 400;
+  function addDaysYmd(n){ var d = new Date(); d.setDate(d.getDate() + (n|0)); return ymd(d); }
+  function patrolMap(){ var m = readJson(K_PATROL); return m || {}; }
+  function schedulePatrol(slot, stage){
+    try{
+      stage = (stage === 2) ? 2 : 1;
+      var m = patrolMap();
+      m[slot] = { due: addDaysYmd(PATROL_GAPS[stage]), stage: stage };
+      var keys = Object.keys(m);
+      if(keys.length > PATROL_MAX){
+        keys.sort(function(x,y){ return dayNum(m[x] && m[x].due) - dayNum(m[y] && m[y].due); });
+        for(var i=0; i<keys.length-PATROL_MAX; i++) delete m[keys[i]];
+      }
+      writeJson(K_PATROL, m);
+    }catch(e){}
+  }
+  function dropPatrol(slot){
+    var m = patrolMap();
+    if(Object.prototype.hasOwnProperty.call(m, slot)){ delete m[slot]; writeJson(K_PATROL, m); }
+  }
+  function patrolEntryDue(rec){
+    return !!(rec && typeof rec === 'object' && dayNum(rec.due) > 0 && dayNum(rec.due) <= dayNum(ymd()));
+  }
+  /* 玩法偶遇巡检词：答对=通过(升段或结业+3金币)；答错=归队(错词机制已自然接管,销档+温柔提示) */
+  function patrolOnAnswer(slot, correct, wordEn){
+    try{
+      var m = patrolMap(), rec = m[slot];
+      if(!rec || typeof rec !== 'object') return;
+      if(!patrolEntryDue(rec)) return;                 // 未到窗：不动(间隔科学)
+      if(correct === true){
+        if(payCoinOnce('rvrw:'+ymd()+':'+slot+':patrol', 3)) bumpDay(0, 3);
+        if((rec.stage|0) >= 2){
+          dropPatrol(slot);
+          floatCoin('👻 巡检全通过 · 记忆封存 🏅 +3');
+        }else{
+          schedulePatrol(slot, 2);
+          floatCoin('👻 30天巡检通过 +3 · 90天后再会');
+        }
+      }else{
+        dropPatrol(slot);
+        toast('👻 「'+(wordEn||'这个词')+'」有点模糊了 · 已温柔归队重新复习');
+      }
+      refreshUI();
+    }catch(e){}
+  }
+  function patrolDueList(){
+    var m = patrolMap(), out = [];
+    Object.keys(m).forEach(function(slot){ if(patrolEntryDue(m[slot])) out.push({ slot: slot, stage: (m[slot].stage|0)||1 }); });
+    return out;
+  }
+  /* 巡检词的本岛可读名：slot='岛id:canonical序' → 当前岛可反解出 en，其它岛计数 */
+  function patrolLocalName(slot){
+    try{
+      var HC = window.HansenCanonical;
+      if(!HC || typeof HC.fromCanonicalIndex !== 'function') return null;
+      var p = String(slot).split(':');
+      if(p.length !== 2) return null;
+      var ref = (typeof HC.currentRef === 'function') ? HC.currentRef() : '';
+      var a = (typeof HC.resolve === 'function') ? HC.resolve(ref) : null;
+      if(!a || a.id !== p[0]) return null;
+      var li = HC.fromCanonicalIndex(ref, Number(p[1]));
+      if(!(li >= 0) || !window.allW || !allW[li]) return null;
+      return String(allW[li].en || '');
+    }catch(e){ return null; }
+  }
+
   /* ---------- UI 反馈 ---------- */
   function floatCoin(text){
     try{
@@ -227,6 +301,7 @@
       });
       out.ok = true;
     }catch(e){}
+    try{ out.patrolDue = patrolDueList().length; }catch(e){ out.patrolDue = 0; }
     return out;
   }
 
@@ -238,6 +313,7 @@
     if(!payCoinOnce(gid, 15)){ clearSince(slot); return false; }
     var st = bumpDay(1, 15);
     floatCoin('+15 毕业金 🎓');
+    schedulePatrol(slot, 1);   /* 🔴刺二：毕业即入30天巡检名单 */
     if(st.grads >= 3 && islandWrongsEmpty()){
       if(payCoinOnce('rvrw:'+ymd()+':clearall', 30)){
         bumpDay(0, 30);
@@ -274,6 +350,11 @@
         if(w1 > w0 && w0 === 0) stampSince(slotOf(idx));
         else if(w1 < w0) onWrongDecreased(idx, slotOf(idx), w1 === 0);
       }catch(e){}
+      /* 🔴刺二：巡检偶遇检测(在纠错/吸收之前后皆安全,账本独立) */
+      try{
+        var _pw = (window.allW && allW[idx] && allW[idx].en) ? String(allW[idx].en) : '';
+        patrolOnAnswer(slotOf(idx), correct === true, _pw);
+      }catch(e){}
       /* 🔴刺一：真实答题喂给 SRS 吸收器(复习模块拥有语义)。到期答对→盒子前进；
        * 升满5盒→毕业(吸收器已删SRS+错词并走canonical链路)，此处补发毕业金并反馈。 */
       try{
@@ -284,6 +365,7 @@
             if(ab.graduated){
               floatCoin('🎓 复习毕业！');
               if(ab.hadWrong) payGraduation(slotOf(idx));
+              else schedulePatrol(slotOf(idx), 1);   /* 🔴刺二：纯SRS收尾毕业同样入巡检 */
               refreshUI();
             }else{
               floatCoin('📦 记忆盒 +1 · '+(ab.gapDays||'?')+'天后再见');
@@ -341,6 +423,15 @@
     }catch(e){}
   }
 
+  /* 🔴刺二：毕业统一事件(hansen_review自评毕业分支调用)——毕业金+巡检调度一站式 */
+  function onGraduated(idx){
+    try{
+      var slot = slotOf(idx);
+      payGraduation(slot);          /* 内部自带隔天资格+幂等收据+巡检调度 */
+      refreshUI();
+    }catch(e){}
+  }
+
   /* ---------- 今日复习完成回调（🔴刺三：改走全局口径） ---------- */
   function onTodayComplete(info){
     try{
@@ -376,14 +467,16 @@
         title:'其它岛还有 '+info.globalDue+' 个词到期',
         sub:'点我去错题总览 · 跨岛清完不断签', fire:fire };
     }
+    var pd = info.patrolDue|0;
+    var pTail = pd > 0 ? (' · 👻巡检 '+pd) : '';
     if(st === 'done'){
       return { st:st, icon:'✅', bg:'linear-gradient(135deg,#10b981,#059669)',
         title:'今日复习已清空',
-        sub:'连击保住了 · 明天见', fire:fire };
+        sub:'连击保住了 · 明天见'+pTail, fire:fire };
     }
     return { st:'calm', icon:'🧠', bg:'linear-gradient(135deg,#334155,#1e293b)',
       title:'今天没有要复习的单词',
-      sub:'大脑正在悄悄记牢它们', fire:fire };
+      sub: pd > 0 ? ('👻 '+pd+' 个毕业词到了巡检期 · 玩任意游戏偶遇即测') : '大脑正在悄悄记牢它们', fire:fire };
   }
   function bannerClick(){
     var m = bannerModel();
@@ -442,8 +535,26 @@
       +   '<span style="color:#94a3b8;font-size:12px">下个里程碑 '+next+' 天</span>'
       + '</div>'
       + '<div style="color:#94a3b8;font-size:12px">今日复习已赚 <b style="color:#fde047">'+d.coins+'</b> 金币 · 毕业 <b style="color:#34d399">'+d.grads+'</b> 词</div>'
-      + '<div style="color:#64748b;font-size:11px">纠错 +2 · 隔天毕业 +15 · 清空错题 +30 · 完成今日复习 +20</div>'
+      + '<div style="color:#64748b;font-size:11px">纠错 +2 · 隔天毕业 +15 · 清空错题 +30 · 完成今日复习 +20 · 巡检 +3</div>'
+      + patrolCardHtml()
       + '</div>';
+  }
+  function patrolCardHtml(){
+    try{
+      var list = patrolDueList();
+      if(!list.length) return '';
+      var names = [], others = 0;
+      for(var i=0;i<list.length;i++){
+        var n = patrolLocalName(list[i].slot);
+        if(n && names.length < 6) names.push(n + (list[i].stage>=2?'²':''));
+        else others++;
+      }
+      var body = names.length ? names.join(' · ') : '';
+      var tail = others > 0 ? ((body?' · ':'')+'另有 '+others+' 个在其它岛') : '';
+      return '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f59e0b44;color:#c4b5fd;font-size:12px;line-height:1.8">'
+        + '👻 <b>毕业巡检期</b>（玩任意游戏答对即通过 +3）<br>'
+        + '<span style="color:#a5b4fc">'+body+tail+'</span></div>';
+    }catch(e){ return ''; }
   }
   function fillCenterSlot(){
     try{
@@ -472,11 +583,14 @@
 
   window.HansenReviewRewardsV963 = {
     onTodayComplete: onTodayComplete,
+    onGraduated: onGraduated,
     fillCenterSlot: fillCenterSlot,
     refresh: refreshUI,
     _debug: { ymd: ymd, dayNum: dayNum, streak: streak, dayState: dayState, sinceMap: sinceMap,
               gradEligible: gradEligible, tickStreak: tickStreak,
               globalDueInfo: globalDueInfo, bannerState: bannerState, bannerModel: bannerModel,
-              checkGlobalClear: checkGlobalClear }
+              checkGlobalClear: checkGlobalClear,
+              patrolMap: patrolMap, schedulePatrol: schedulePatrol, patrolDueList: patrolDueList,
+              patrolOnAnswer: patrolOnAnswer, addDaysYmd: addDaysYmd }
   };
 })();
