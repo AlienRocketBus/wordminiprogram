@@ -43,7 +43,8 @@ globalThis.HansenCoins = mkWallet();
 globalThis.HansenGems  = mkWallet();
 /* 🔴迭代3 mock：横幅在Node中no-op；canonical提供全局到期计算所需最小面 */
 globalThis.document.querySelector = () => null;
-const CAN_STORE = { wrongs:{}, srs:{} };
+const CAN_STORE = { islands: { food: { wrongs:{}, srs:{} } } };
+const FOOD = CAN_STORE.islands.food;
 globalThis.HansenCanonical = {
   TOTAL_WORDS: 952,
   islands: [{id:'food', start:100, words:56},{id:'season', start:712, words:240}],
@@ -111,12 +112,12 @@ ok(C.ledger['rvrw:'+day+':clearall'] === 30, '毕业≥3 且错题清空 → +30
 
 /* T6: 🔴刺三新口径·全局清零时刻 = +20 = 连击打卡（同一时刻·幂等） */
 console.log('T6 全局清零口径与连击');
-CAN_STORE.wrongs = { '105':1 };            // 先有到期(105无SRS→今天到期)
-CAN_STORE.srs = {};
+FOOD.wrongs = { '105':1 };            // 先有到期(105无SRS→今天到期)
+FOOD.srs = {};
 M._debug.checkGlobalClear();               // 记录 hadDue
 ok(!C.hasAward('rvrw:'+day+':todaydone'), '仍有到期 → 不发+20');
 const balBefore = C.bal;
-CAN_STORE.wrongs = {};                     // 全局清零时刻
+FOOD.wrongs = {};                     // 全局清零时刻
 M.onTodayComplete({reviewed:1, graduated:1, total:1});
 ok(C.ledger['rvrw:'+day+':todaydone'] === 20, '清零时刻发 +20');
 M.onTodayComplete({reviewed:1, graduated:1, total:1});
@@ -144,8 +145,9 @@ ok(C.bal === b2, '答错不产生任何金币');
 
 /* T8: 全局/本岛到期统计（canonical口径·Land别名不重复·格式兼容） */
 console.log('T8 全局到期统计');
-CAN_STORE.wrongs = { '105':2, '110':1, '111':1, '120':1, '130':3, '800':1, '5':0 };
-CAN_STORE.srs = {
+FOOD.wrongs = { '105':2, '110':1, '111':1, '120':1, '130':3, '5':0 };
+CAN_STORE.islands.animal = { wrongs: { '88':1 }, srs: {} };   // 跨岛新错未建档=到期
+FOOD.srs = {
   '110': { box:2, due: yest() },            // 到期(昨天)
   '111': { box:0, due: '2000-1-1' },        // 到期(不补零历史格式)
   '120': { box:1, due: '2099-12-31' },      // 未到期
@@ -232,7 +234,8 @@ console.log('T11 幽灵巡检');
   // f) 口径隔离：巡检到窗不计入清零判定,仅计入 patrolDue 告知
   D.schedulePatrol('food:42', 1);
   { const m = D.patrolMap(); m['food:42'].due = yest(); store.set('hansen_review_patrol_v963', JSON.stringify(m)); }
-  CAN_STORE.wrongs = { '41': 1 }; CAN_STORE.srs = {};
+  FOOD.wrongs = { '41': 1 }; FOOD.srs = {};
+  CAN_STORE.islands.animal = { wrongs:{}, srs:{} };   // 清场跨岛残留
   { const info = D.globalDueInfo();
     ok(info.patrolDue === 1, 'patrolDue 独立计数=1');
     ok(info.globalDue === 1, 'globalDue 只算真实错词到期(41),巡检不进清零口径'); }
@@ -277,10 +280,11 @@ console.log('T14 hadDue次序');
   store.set('hansen_review_day_v963', JSON.stringify({day:'2000-01-01'}));   // 造新的一天
   store.set('hansen_review_streak_v963', JSON.stringify({start:'',last:'',count:0}));
   C.ledger['rvrw:'+day+':todaydone'] && delete C.ledger['rvrw:'+day+':todaydone'];
-  CAN_STORE.wrongs = { '105': 1 }; CAN_STORE.srs = {};
+  FOOD.wrongs = { '105': 1 }; FOOD.srs = {};
+  CAN_STORE.islands.animal = { wrongs:{}, srs:{} };
   M.refresh();                                    // = 修复后 boot 的动作
   ok(D.dayState().hadDue === 1, 'boot等价刷新即记录hadDue');
-  CAN_STORE.wrongs = {};                          // 玩家在今日复习里全清
+  FOOD.wrongs = {};                          // 玩家在今日复习里全清
   M.onTodayComplete({reviewed:1, graduated:1, total:1});
   ok(C.hasAward('rvrw:'+day+':todaydone'), '直清场景照发+20');
   ok(JSON.parse(store.get('hansen_review_streak_v963')).count >= 1, '连击照打卡');
