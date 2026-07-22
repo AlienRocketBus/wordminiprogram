@@ -322,6 +322,8 @@
         delete srs[idx];
         if(window.S.wrongs) delete window.S.wrongs[idx];
         graduated = true;
+        /* 🔴v963刺二：毕业统一事件(自评+证据路径)→奖励模块发毕业金并调度幽灵巡检 */
+        try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.onGraduated === 'function') HansenReviewRewardsV963.onGraduated(idx); }catch(_gradEvt){}
       } else {
         e.box = nb; e.due = _addDaysYMD(SRS_GAP[nb]); e.last = _todayYMD();
         srs[idx] = e;
