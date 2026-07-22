@@ -130,6 +130,48 @@
     return s;
   }
 
+  /* ---------- 🔴刺五：错词猎人身份系统 ----------
+   * 数字奖励留不住人,身份留得住。终身战绩(毕业数/巡检通过数)驱动称号阶梯,
+   * 纯荣誉零金币(无刷面);跨级时庆祝一次(终身收据式防重)。 */
+  var K_LIFE = 'hansen_review_lifetime_v963';
+  var HUNTER_TIERS = [
+    { n: 10,  t: '见习猎人 🐣' },
+    { n: 50,  t: '正式猎人 🗡️' },
+    { n: 150, t: '资深猎人 ⚔️' },
+    { n: 400, t: '传说猎人 🏆' },
+    { n: 952, t: '错词歼灭者 👑' }
+  ];
+  function lifeState(){
+    var s = readJson(K_LIFE);
+    if(!s || typeof s !== 'object') s = {};
+    if(typeof s.grads !== 'number' || s.grads < 0) s.grads = 0;
+    if(typeof s.patrols !== 'number' || s.patrols < 0) s.patrols = 0;
+    if(typeof s.tier !== 'number' || s.tier < 0) s.tier = 0;
+    return s;
+  }
+  function hunterTitle(grads){
+    var t = '新手猎人 🌱', next = HUNTER_TIERS[0].n;
+    for(var i = 0; i < HUNTER_TIERS.length; i++){
+      if(grads >= HUNTER_TIERS[i].n){ t = HUNTER_TIERS[i].t; next = (HUNTER_TIERS[i+1] ? HUNTER_TIERS[i+1].n : null); }
+    }
+    return { title: t, next: next };
+  }
+  function bumpLife(field){
+    try{
+      var s = lifeState();
+      s[field] = (s[field]|0) + 1;
+      var reached = 0;
+      for(var i = 0; i < HUNTER_TIERS.length; i++){ if(s.grads >= HUNTER_TIERS[i].n) reached = i + 1; }
+      var promoted = reached > s.tier;
+      if(promoted) s.tier = reached;
+      writeJson(K_LIFE, s);
+      if(promoted){
+        toast('🏅 称号晋升：<b>'+HUNTER_TIERS[reached-1].t+'</b> · 终身歼灭 '+s.grads+' 词');
+      }
+      return s;
+    }catch(e){ return lifeState(); }
+  }
+
   /* ---------- 🔴刺二：幽灵巡检（长程防遗忘） ----------
    * 毕业不是永别：毕业后 +30 天进入第一道巡检窗，通过后 +90 天第二道，两关全过即长期信任。
    * 验证零新题型：任何现有玩法里"偶遇"该词——答对=巡检通过(+3金币回访礼)，
@@ -168,7 +210,7 @@
       if(!rec || typeof rec !== 'object') return;
       if(!patrolEntryDue(rec)) return;                 // 未到窗：不动(间隔科学)
       if(correct === true){
-        if(payCoinOnce('rvrw:'+ymd()+':'+slot+':patrol', 3)) bumpDay(0, 3);
+        if(payCoinOnce('rvrw:'+ymd()+':'+slot+':patrol', 3)){ bumpDay(0, 3); bumpLife('patrols'); }
         if((rec.stage|0) >= 2){
           dropPatrol(slot);
           floatCoin('👻 巡检全通过 · 记忆封存 🏅 +3');
@@ -312,8 +354,22 @@
     var gid = 'rvrw:'+ymd()+':'+slot+':grad';
     if(!payCoinOnce(gid, 15)){ clearSince(slot); return false; }
     var st = bumpDay(1, 15);
-    floatCoin('+15 毕业金 🎓');
-    schedulePatrol(slot, 1);   /* 🔴刺二：毕业即入30天巡检名单 */
+    /* 🔴刺四：旧词重逢——建档≥30天的老大难被歼灭 → 追加+15(毕业金×2)。
+     * 难度定价而非运气定价(不碰赌博红线);30天龄无法人为速成,零刷面。
+     * 历史无建档的老错词(豁免毕业者)不追加:只奖有据可查的坚持。 */
+    var _since = sinceMap()[slot], _old = false;
+    if(typeof _since === 'string' && dayNum(_since) > 0 && (dayNum(ymd()) - 0) >= 0){
+      var _d = new Date(); _d.setDate(_d.getDate() - 30);
+      _old = dayNum(_since) <= dayNum(ymd(_d));
+    }
+    if(_old && payCoinOnce('rvrw:'+ymd()+':'+slot+':oldgrad', 15)){
+      bumpDay(0, 15);
+      floatCoin('🏆 旧词重逢 · 30天老大难歼灭 · 毕业金×2!');
+    }else{
+      floatCoin('+15 毕业金 🎓');
+    }
+    bumpLife('grads');
+    schedulePatrol(slot, 1);
     if(st.grads >= 3 && islandWrongsEmpty()){
       if(payCoinOnce('rvrw:'+ymd()+':clearall', 30)){
         bumpDay(0, 30);
@@ -529,7 +585,13 @@
     var order = [3,7,14,30];
     for(var i=0;i<order.length;i++){ if(s.count < order[i]){ next = order[i]; break; } }
     if(next === null) next = (Math.floor(s.count/30)+1)*30;
+    var lf = lifeState(), ht = hunterTitle(lf.grads);
     return '<div id="hr_rvrw_card" style="background:linear-gradient(135deg,#78350f22,#92400e18);border:1px solid #f59e0b55;border-radius:14px;padding:12px 14px;margin:2px 0 14px;font-size:13px;color:#e2e8f0;line-height:1.9">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
+      +   '<span>🏅 <b style="color:#fbbf24">'+ht.title+'</b> · 终身歼灭 <b style="color:#34d399">'+lf.grads+'</b> 词'
+      +     (ht.next !== null ? ' <span style="color:#64748b;font-size:11px">(下一级 '+ht.next+')</span>' : '')
+      +     (lf.patrols > 0 ? ' · 巡检 '+lf.patrols : '') + '</span>'
+      + '</div>'
       + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
       +   '<span>'+fire+'</span>'
       +   '<span style="color:#94a3b8;font-size:12px">下个里程碑 '+next+' 天</span>'
@@ -591,6 +653,7 @@
               globalDueInfo: globalDueInfo, bannerState: bannerState, bannerModel: bannerModel,
               checkGlobalClear: checkGlobalClear,
               patrolMap: patrolMap, schedulePatrol: schedulePatrol, patrolDueList: patrolDueList,
-              patrolOnAnswer: patrolOnAnswer, addDaysYmd: addDaysYmd }
+              patrolOnAnswer: patrolOnAnswer, addDaysYmd: addDaysYmd,
+              lifeState: lifeState, hunterTitle: hunterTitle }
   };
 })();
