@@ -5,14 +5,14 @@
 
   // KEY remains v942 because it names the persisted journal schema. v960 accepts
   // compatible journals v942-v946 and v950-v960; skipped v947-v949 fail closed.
-  var KEY='hansen_backup_restore_journal_v942',SCHEMA=1,CURRENT_APP_VERSION=960,MIN_JOURNAL_APP_VERSION=942;
+  var KEY='hansen_backup_restore_journal_v942',SCHEMA=1,CURRENT_APP_VERSION=963,MIN_JOURNAL_APP_VERSION=942;
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
   var PREFIXES=['wordIsland','hansen_','hsn_','bs_hall_','hs_showcase_'];
   var DENY=/^(?:hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test)|(?:password|passcode|token|secret|authorization|session)/i;
   var TRANSIENT=/(?:^|[_:\-.])(?:pending|journal|transaction|txn)(?:[_:\-.]|$)|(?:^|_)tmp(?:_|$)/i;
   function transientKey(k){return typeof k==='string'&&/^(?:wordIsland|hansen_|hsn_|bs_hall_|hs_showcase_)/.test(k)&&TRANSIENT.test(k);}
-  function supportedJournalAppVersion(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&((v>=MIN_JOURNAL_APP_VERSION&&v<=946)||(v>=950&&v<=CURRENT_APP_VERSION));}
+  function supportedJournalAppVersion(v){return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v&&((v>=MIN_JOURNAL_APP_VERSION&&v<=946)||(v!==961&&v!==962&&v>=950&&v<=CURRENT_APP_VERSION));}
   function ownedKey(k){
     if(typeof k!=='string'||!k||k.length>160)return false;
     if(DENY.test(k)||transientKey(k))return false;
@@ -89,7 +89,7 @@
       if(!html.parentNode&&doc.appendChild)doc.appendChild(html);
       var exported=false;
       if(exportBtn)exportBtn.onclick=function(){
-        try{var raw=localStorage.getItem(KEY)||'';var blob=new Blob([raw],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='wordminiprogram_v960_restore_journal.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);exported=true;}catch(e){alert('导出失败：'+e.message);}
+        try{var raw=localStorage.getItem(KEY)||'';var blob=new Blob([raw],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='wordminiprogram_v963_restore_journal.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);exported=true;}catch(e){alert('导出失败：'+e.message);}
       };
       if(retry)retry.onclick=function(){location.reload();};
       if(discard)discard.onclick=function(){

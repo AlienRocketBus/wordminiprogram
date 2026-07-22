@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 class Storage{
   constructor(seed){this.d={...seed};this.reset();}
@@ -21,7 +23,7 @@ c.window=c;c.globalThis=c;vm.createContext(c);vm.runInContext(fs.readFileSync(ne
 
 storage.reset();const evidence=c.HansenBackup.buildResetForensic();
 assert.equal(evidence.kind,'diagnostic-only-not-restorable');assert.equal(evidence.schema,'hansen.wordminiprogram.reset-forensic');
-assert.equal(evidence.appVersion,960,'v960 取证导出必须标记当前应用版本');
+assert.equal(evidence.appVersion,Number(__APPV__),'v960 取证导出必须标记当前应用版本');
 assert.deepEqual(JSON.parse(JSON.stringify(evidence.items)),[
   {role:'reset-journal',key:journalKey,value:journal},
   {role:'current-main',key:saveKey,value:main},

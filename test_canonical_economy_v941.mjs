@@ -48,8 +48,9 @@ assert.equal(Object.keys(JSON.parse(storage.getItem('hsn_crystal_season'))).leng
 assert.equal(context.HansenCanonical.isCrystalDone('season',0),true);
 assert.equal(context.HansenCanonical.isCrystalDone('land8',29),true);
 
-// 钱包：初始10 + 段位20+40+80 + 两个 canonical 全岛奖2*50 = 250。
-assert.equal(context.HansenGems.get(),250);
+// 钱包：初始10 + 段位20+40+80 + 两个 canonical 全岛奖2*50 = 250；
+// 🔴v963 逐星迁移合同：307 个历史 done 词各补齐第5星 +1(人人5💎/词) → 250+307=557。
+assert.equal(context.HansenGems.get(),557);
 assert.equal(storage.getItem('hsn_crystal_isldone_action'),'1');
 assert.equal(storage.getItem('hsn_crystal_isldone_season'),'1');
 assert.equal(Number(storage.getItem('hsn_crystal_rank')),3);

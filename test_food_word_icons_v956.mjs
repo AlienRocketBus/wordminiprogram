@@ -2,6 +2,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+/* v963 dyn */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const target={
   vegetable:'🥬',cabbage:'🥦',food:'🍽️',pork:'🐖',yogurt:'🥣',
@@ -58,7 +61,7 @@ for(const [word,oldIcon] of Object.entries(target)){
     assert.ok((icon.match(/<(?:path|rect|circle|ellipse|line)\b/g)||[]).length>=5,
       `${word}: SVG is too sparse to preserve its identifying features at mobile size`);
   }else{
-    assert.match(icon,/<img src='icons\/food-v958\/[a-z]+\.webp\?v=960' alt='' decoding='async' draggable='false'><\/span>$/,
+    assert.match(icon,new RegExp("<img src='icons/food-v958/[a-z]+\\.webp\\?v="+__APPV__+"' alt='' decoding='async' draggable='false'></"+"span>$"),
       `${word}: local optimized WebP contract missing`);
   }
   icons.push(icon);

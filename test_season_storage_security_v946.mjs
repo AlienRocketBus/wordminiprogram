@@ -5,6 +5,8 @@ import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from './playwright_loader.mjs';
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const source=fs.readFileSync(path.join(ROOT,'hansen_season.js'),'utf8');
@@ -105,8 +107,8 @@ try{
   });
   assert.equal(rendered.sentinel,0,'stored season/showcase markup must never execute');
   assert.equal(rendered.evilNodes,0,'stored season/showcase strings must not create HTML, SVG, or script nodes');
-  assert.equal(rendered.panelImg,'bosses/saelya2.webp?v=960','valid formIdx must select the second static form in the season panel');
-  assert.equal(rendered.hallImg,'bosses/saelya2.webp?v=960','valid formIdx must select the second static form in the hall');
+  assert.equal(rendered.panelImg,'bosses/saelya2.webp?v='+__APPV__,'valid formIdx must select the second static form in the season panel');
+  assert.equal(rendered.hallImg,'bosses/saelya2.webp?v='+__APPV__,'valid formIdx must select the second static form in the hall');
   assert(rendered.panelBg.includes('linear-gradient(165deg'),'valid bgIdx must select the fourth static background in the season panel');
   assert(rendered.hallBg.includes('linear-gradient(165deg'),'valid bgIdx must select the fourth static background in the hall');
   assert(!rendered.panelHtml.includes('__seasonSecuritySentinel')&&!rendered.hallHtml.includes('__seasonSecuritySentinel'),'derived stored path/CSS strings must be ignored, not escaped into the DOM');
@@ -134,7 +136,7 @@ try{
       return {src:thumb?.querySelector('img')?.getAttribute('src')||'',style:thumb?.getAttribute('style')||''};
     });
   });
-  assert(invalidPrefs.every(item=>item.src==='bosses/saelya.webp?v=960'),'negative, fractional, oversized, and string form indexes must use static index zero');
+  assert(invalidPrefs.every(item=>item.src==='bosses/saelya.webp?v='+__APPV__),'negative, fractional, oversized, and string form indexes must use static index zero');
   assert(invalidPrefs.every(item=>item.style.includes('radial-gradient(circle at 50% 26%')),'negative, fractional, oversized, and string background indexes must use static index zero');
 
   const unlocks=await page.evaluate(()=>{

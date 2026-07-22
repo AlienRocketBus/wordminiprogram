@@ -21,7 +21,9 @@ import { fileURLToPath } from 'node:url';
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.dirname(SELF);
-const VERSION = '960';
+/* 🔴v963: 资源戳随候选演进 */
+import { readFileSync as __rf } from 'node:fs';
+const VERSION = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const LOCK_FILE = 'hansen_boss_lock.js';
 const PALETTE_FILE = 'hansen_palette.js';

@@ -6,6 +6,9 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from './playwright_loader.mjs';
+/* 🔴v963 合同同步: 版本钉改为动态读 VERSION(资源戳/appVersion随候选演进,合同本体不变) */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const read = name => fs.readFileSync(path.join(ROOT, name), 'utf8');
@@ -18,18 +21,18 @@ const htmlFiles = ['template.html', 'check.html', ...fs.readdirSync(ROOT)
 assert.equal(htmlFiles.length, 29, 'Boss 资源键必须覆盖 template、check 与 27 个岛页');
 for (const name of htmlFiles) {
   const source = read(name);
-  assert.equal((source.match(/hansen_boss_lock\.js\?v=960/g) || []).length, 1,
+  assert.equal((source.match(new RegExp('hansen_boss_lock\\.js\\?v='+__APPV__,'g')) || []).length, 1,
     `${name}: 必须且只能加载一次 v951 Boss 运行时`);
   assert.doesNotMatch(source, /hansen_boss_lock\.js\?v=946-hf2/,
     `${name}: 旧 HF2 Boss 运行时不得复活`);
 }
-assert.equal((workerSource.match(/'\.\/hansen_boss_lock\.js\?v=960'/g) || []).length, 1,
+assert.equal((workerSource.match(new RegExp("'\\./hansen_boss_lock\\.js\\?v="+__APPV__+"'",'g')) || []).length, 1,
   'Service Worker 必须精确缓存一次 v951 Boss 运行时');
 assert.doesNotMatch(workerSource, /'\.\/hansen_boss_lock\.js\?v=946-hf2'/,
   'Service Worker 不得继续精确缓存旧 Boss 运行时');
-assert.match(workerSource, /CACHE_PREFIX \+ 'shell-21'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'pages-19'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'assets-19'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'shell-22'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'pages-20'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'assets-20'/);
 
 // 锁死本次根因：全局减少动态规则仍存在，但功能性计时条的三次 transition 写入必须逐一行内提权。
 assert.match(a11ySource, /transition-duration:\.001ms!important/,
