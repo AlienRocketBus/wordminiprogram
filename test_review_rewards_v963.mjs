@@ -238,6 +238,37 @@ console.log('T11 幽灵巡检');
     ok(info.globalDue === 1, 'globalDue 只算真实错词到期(41),巡检不进清零口径'); }
 }
 
+/* T12: 🔴刺四·旧词重逢（≥30天建档歼灭→毕业金×2·历史豁免词不追加·收据防重） */
+console.log('T12 旧词重逢');
+{
+  const D = M._debug;
+  const old30 = (()=>{ const d=new Date(); d.setDate(d.getDate()-31); return D.ymd(d); })();
+  { const m = JSON.parse(store.get('hansen_review_wrong_since_v963')||'{}');
+    m['food:50']=old30; m['food:51']=yest();
+    store.set('hansen_review_wrong_since_v963', JSON.stringify(m)); }
+  const b0 = C.bal;
+  S.wrongs[50] = 1; markAnswer(50, true);   // 老大难归零
+  ok(C.ledger['rvrw:'+day+':food:50:grad'] === 15 && C.ledger['rvrw:'+day+':food:50:oldgrad'] === 15,
+     '30天老大难歼灭 → 15+15 双收据');
+  ok(uiLog.some(x => /旧词重逢/.test(x)), '重逢庆祝飘字');
+  S.wrongs[51] = 1; markAnswer(51, true);   // 普通隔天词
+  ok(C.ledger['rvrw:'+day+':food:51:grad'] === 15 && !C.hasAward('rvrw:'+day+':food:51:oldgrad'),
+     '普通隔天毕业只有+15,不追加');
+}
+
+/* T13: 🔴刺五·错词猎人称号（阶梯边界·晋升庆祝一次·巡检战绩） */
+console.log('T13 猎人称号');
+{
+  const D = M._debug;
+  ok(D.hunterTitle(0).title.indexOf('新手') === 0 && D.hunterTitle(0).next === 10, '0词=新手,下一级10');
+  ok(D.hunterTitle(10).title.indexOf('见习') === 0, '10词=见习');
+  ok(D.hunterTitle(399).title.indexOf('资深') === 0 && D.hunterTitle(399).next === 400, '399=资深,下级400');
+  ok(D.hunterTitle(952).next === null, '952=满级封顶');
+  const lf = D.lifeState();
+  ok(lf.grads >= 2, '终身歼灭战绩随毕业累计(当前'+lf.grads+')');
+  ok(lf.patrols >= 1, '巡检通过计入终身战绩(当前'+lf.patrols+')');
+}
+
 console.log('');
 if(fails){ console.log('❌ 失败', fails, '项'); process.exit(1); }
 console.log('🎉 v963 复习奖励逻辑回归 全部通过 (钱包终额:', C.bal, '金币 /', G.bal, '钻石)');
