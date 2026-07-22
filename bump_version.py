@@ -41,6 +41,7 @@ RUNTIME_CONSTANT_FILES = {
         ("wordminiprogram_v{old}_restore_journal.json", "wordminiprogram_v{new}_restore_journal.json"),
     ],
     "hansen_sw_upgrade_gate_v944.js": [("version: {old},", "version: {new},")],
+    "./hansen_backup_v944.js": [("_v{old}_重置故障取证_", "_v{new}_重置故障取证_")],
 }
 
 
