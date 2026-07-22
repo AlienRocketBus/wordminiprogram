@@ -5,6 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from './playwright_loader.mjs';
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const fileUrl=name=>pathToFileURL(path.join(ROOT,name)).href;
@@ -24,7 +26,7 @@ async function run(){
   assert.match(perf,/if \(!desktopLike\) return/,'横屏手机必须留在当前游戏页');
   assert.match(template,/@media\(max-width:340px\)/,'极窄屏必须有独立布局');
   assert.match(template,/repeat\(3,minmax\(0,1fr\)\)/,'日常三列必须允许收缩');
-  assert.match(template,/hansen_boss_lock\.js\?v=960/,'Boss 彩虹倒计时、安全区与 v951 特效必须绕过旧运行时缓存');
+  assert.match(template,new RegExp('hansen_boss_lock\\.js\\?v='+__APPV__),'Boss 彩虹倒计时、安全区与 v951 特效必须绕过旧运行时缓存');
   assert.match(bossLock,/\.world-map-btn\{[^}]*env\(safe-area-inset-top/,'后加载的 Boss 样式也必须保留顶部安全区');
   assert.match(bossLock,/\.world-map-btn\{[^}]*env\(safe-area-inset-right/,'后加载的 Boss 样式也必须保留右侧安全区');
   assert.match(bossLock,/\.top-bar\{[^}]*env\(safe-area-inset-top/,'最终 !important 顶栏规则不得覆盖刘海安全区');

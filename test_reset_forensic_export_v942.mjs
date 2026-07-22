@@ -34,7 +34,7 @@ assert.throws(()=>c.HansenBackup.parse(JSON.stringify(evidence)),/备份类型|s
 
 // 未实际导出前不得删除；导出后也只在用户双重确认时删除唯一 journal，主备原样保留。
 assert.equal(c.HansenBackup.discardInvalidResetJournal(),false);assert.equal(storage.getItem(journalKey),journal);
-storage.reset();assert.equal(c.HansenBackup.downloadResetForensic(),true);assert.equal(clicked,1);assert.match(lastAnchor.download,/v960_重置故障取证/);
+storage.reset();assert.equal(c.HansenBackup.downloadResetForensic(),true);assert.equal(clicked,1);assert.match(lastAnchor.download,new RegExp('v'+__APPV__+'_重置故障取证'));
 assert.deepEqual(storage.writes,[]);assert.deepEqual(storage.removes,[]);
 assert.equal(c.HansenBackup.discardInvalidResetJournal(),true);assert.equal(confirms,2);assert.equal(reloads,1);
 assert.equal(storage.getItem(journalKey),null);assert.equal(storage.getItem(saveKey),main);assert.equal(storage.getItem(`${saveKey}_bak`),bak);

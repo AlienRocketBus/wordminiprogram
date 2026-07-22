@@ -49,7 +49,7 @@ for (const name of starSeaPages) {
   assert.equal(count(html, 'onclick="HansenContextGacha.open()"'), 1, `${name} 必须唯一接入上下文抽卡路由`);
   assert.equal(count(html, 'onclick="HansenGacha.open()"'), 0, `${name} 不得绕过路由直接进入普通 20 张卡池`);
   assert.equal(count(html, 'onclick="HansenLandGachaUI.open()"'), 0, `${name} 不得把卡池选择逻辑散落在生成页面`);
-  assert.equal(count(html, 'hansen_land_cards.js?v=${__APPV__}'), 1, `${name} 必须唯一加载 v955 星海卡池引擎`);
+  assert.equal(count(html, 'hansen_land_cards.js?v='+__APPV__), 1, `${name} 必须唯一加载 v955 星海卡池引擎`);
 }
 const template = fs.readFileSync(path.join(ROOT, 'template.html'), 'utf8');
 assert.equal(count(template, 'onclick="HansenContextGacha.open()"'), 1, '印章母版必须唯一接入上下文抽卡路由');
@@ -80,7 +80,7 @@ assert.equal(count(sealed, "cardBackHTML('lgr-front')"), 1, '揭晓前必须创�
 assert.equal(count(sealed, "cardBackHTML('lgr-rear')"), 1, '揭晓前必须创建统一背面卡背');
 assert.match(sealed, /aria-label','正在抽取神秘卡牌'/, '揭晓前可访问名称必须保持中性');
 assert.match(sealed, /preloader=new Image\(\)/, '真卡图必须先在脱离 DOM 的 Image 中预载');
-assert.match(sealed, /preloader\.src=c\.img\+'\?v='+__APPV__/, '预载必须命中 v955 精确资源键');
+assert.match(sealed, new RegExp("preloader\\.src=c\\.img\\+'\\?v="+__APPV__+"'"), '预载必须命中 v955 精确资源键');
 
 for (const leak of [
   /c\.name/,
