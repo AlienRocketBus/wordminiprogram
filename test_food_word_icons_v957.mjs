@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-/* v963 dyn */
+/* v963 dyn · 🔴v967契约演进: 图标加 loading="lazy"(长列表性能),10图字节/映射/入口契约不变 */
 import { readFileSync as __rf } from 'node:fs';
 const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
