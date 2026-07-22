@@ -246,13 +246,22 @@
     }catch(e){ return null; }
   }
 
-  /* ---------- UI 反馈 ---------- */
+  /* ---------- UI 反馈 ----------
+   * 🔴飘字密度打磨：一次答对可能连发多条(+2/毕业/盒子/巡检)。同一爆发窗(1.2s)内
+   * 逐条向下级联错位显示(245/293/341px,最多3档后并档)，金币音效每爆发只响一次——
+   * 奖励瀑布可读又不吵。纯同步时间戳判断,零定时器,行为可测。 */
+  var _fcLastAt = 0, _fcBurst = 0;
   function floatCoin(text){
     try{
+      var now = Date.now();
+      if(now - _fcLastAt > 1200) _fcBurst = 0;
+      var slot = Math.min(_fcBurst, 2);
+      var first = (_fcBurst === 0);
+      _fcBurst++; _fcLastAt = now;
       if(typeof window.floatText === 'function')
-        floatText(window.innerWidth/2, 245, text, '#fbbf24');
+        floatText(window.innerWidth/2, 245 + slot*48, text, '#fbbf24');
+      if(first){ try{ if(typeof window.playCoin === 'function') playCoin(); }catch(e2){} }
     }catch(e){}
-    try{ if(typeof window.playCoin === 'function') playCoin(); }catch(e){}
   }
   function toast(msg){
     try{

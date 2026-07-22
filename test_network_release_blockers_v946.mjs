@@ -7,6 +7,9 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { chromium } from './playwright_loader.mjs';
+/* v963 dyn */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const read=name=>fs.readFileSync(path.join(ROOT,name),'utf8');
@@ -33,7 +36,7 @@ assert.doesNotMatch(preload,/setTimeout\(function\(\)\{\s*pumpTimer\s*=\s*null;\
   '弱网/后台不得永久每秒轮询，应等待可见性或网络 change 事件');
 assert.match(template,/function canBackgroundBossPrefetch\(/,'Boss 引擎预取门禁必须在 template 源');
 assert.match(template,/__hansenBossFXPrefetched/,'Boss 引擎与特效图预取必须单例');
-assert.match(sw,/CACHE_PREFIX \+ 'shell-21'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
+assert.match(sw,/CACHE_PREFIX \+ 'shell-22'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
 assert.match(sw,/await cache\.addAll\(/,'核心 shell 必须整批原子写入');
 assert.doesNotMatch(sw,/Promise\.allSettled\(SHELL/,'半包 shell 不得被激活');
 assert.match(sw,/const NAVIGATION_TIMEOUT_MS = 3000/,'导航网络优先必须有硬超时');
@@ -114,7 +117,7 @@ function workerHarness({installFails=false,cached=null,source=sw,fetchImpl,cache
 }
 {
   const h=workerHarness({cachePutFails:true,fetchImpl:()=>Promise.resolve(new Response('window.fresh=1',{status:200,headers:{'content-type':'text/javascript'}}))});
-  const response=await h.fetch({method:'GET',mode:'cors',url:'https://app.test/hansen_cards.js?v=960'});
+  const response=await h.fetch({method:'GET',mode:'cors',url:'https://app.test/hansen_cards.js?v='+__APPV__});
   assert.equal(response.status,200);assert.equal(await response.text(),'window.fresh=1');
 }
 
@@ -154,7 +157,7 @@ async function browserChecks(){
         response.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});
         response.end('<!doctype html><meta charset="utf-8"><script>window.allW=[{en:"alpha",ex:"Alpha example."}];'+
           'window.SENTENCE_MAP={"Alpha example.":1};window.showScreen=function(){};window.bossVictory=function(){};<\/script>'+
-          '<script src="hansen_preload.js?v=960"><\/script><script src="hansen_cards.js?v=960"><\/script>');
+          '<script src="hansen_preload.js?v="+__APPV__><\/script><script src="hansen_cards.js?v="+__APPV__><\/script>');
         return;
       }
       const rel=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname).replace(/^\/+/,''),file=path.resolve(ROOT,rel);

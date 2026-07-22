@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+/* 🔴v963 合同同步: 版本钉改为动态读 VERSION(资源戳/appVersion随候选演进,合同本体不变) */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const JOURNAL='hansen_backup_restore_journal_v942';
 const CACHE_VERSION=fs.readFileSync(new URL('./VERSION',import.meta.url),'utf8').trim();
@@ -47,8 +50,8 @@ assert.ok(!bootstrapSource.includes('document.write('),'损坏日志安全页禁
 assert.ok(bootstrapSource.includes("html.replaceChildren(head,body)"),'安全页必须用 DOM 原子替换原文档');
 assert.ok(bootstrapSource.includes("n.textContent=text"),'安全页文字必须通过 textContent 写入');
 assert.ok(
-  bootstrapSource.includes("a.download='wordminiprogram_v960_restore_journal.json'"),
-  '损坏恢复日志下载名必须标记当前 v960，不能继续误写旧版本'
+  bootstrapSource.includes(`a.download='wordminiprogram_v${__APPV__}_restore_journal.json'`),
+  '损坏恢复日志下载名必须标记当前版本，不能继续误写旧版本'
 );
 
 // prepared 日志代表上次恢复在交易中途关页：启动第一步必须回到 raw 旧快照。
@@ -75,7 +78,7 @@ assert.equal(c.__hansenBackupBootstrap.journalKey,JOURNAL,'升级不能改名 v9
 assert.equal(JSON.parse(storage.getItem('wordIslandAnimal')).learned[0],1);
 
 // committed 日志只是收尾清理中断：已发布兼容版本应保留目标；跳过的 v947-v949 不得混入。
-for(const appVersion of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960]){
+for(const appVersion of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960,963]){
   storage=new Storage({unrelated:'keep',hansen_wallet_coins:'999',wordIslandAnimal:'{"learned":[]}',[JOURNAL]:journal('committed',before,appVersion)});
   ({c}=runBootstrap(storage));
   assert.equal(storage.getItem('hansen_wallet_coins'),'999');
@@ -85,7 +88,7 @@ for(const appVersion of [942,943,944,945,946,950,951,952,953,954,955,956,957,958
 }
 
 // 完整备份模块自身也必须能接管兼容 journal；键名保持 v942。
-for(const appVersion of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960]){
+for(const appVersion of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960,963]){
   storage=new Storage({unrelated:'keep',hansen_wallet_coins:'999',[JOURNAL]:journal('prepared',before,appVersion)});
   const direct=context(storage);c=direct.c;
   vm.runInContext(fs.readFileSync(new URL('./hansen_backup_v944.js',import.meta.url),'utf8'),c,{filename:'hansen_backup_v944.js'});
@@ -130,7 +133,7 @@ vm.runInContext(fs.readFileSync(new URL('./hansen_backup_v944.js',import.meta.ur
 c.HansenBackup._replaceAll([{key:'hansen_wallet_coins',value:'999'}]);
 const journalWrites=storage.history.filter(x=>x.op==='set').map(x=>JSON.parse(x.value));
 assert.deepEqual(journalWrites.map(x=>x.phase),['prepared','committed']);
-assert.deepEqual(journalWrites.map(x=>x.appVersion),[960,960],'v960 新写 journal 必须标记当前应用版本');
+assert.deepEqual(journalWrites.map(x=>x.appVersion),[Number(__APPV__),Number(__APPV__)],'当前版本新写 journal 必须标记当前应用版本');
 assert.equal(storage.history.at(-1).op,'remove');
 assert.equal(storage.getItem('hansen_wallet_coins'),'999');
 assert.equal(storage.getItem('hansen_old_owned'),null);

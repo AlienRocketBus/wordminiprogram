@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const expected={
@@ -68,7 +70,7 @@ assert.notEqual(wrap.querySelector('svg'),originalSvg,'the recommendation must n
 assert.equal(wrap.attributes['aria-hidden'],'true','decorative icon must be hidden from assistive text');
 
 source=new FakeNode('div');const originalImg=new FakeNode('img');source.appendChild(originalImg);
-button=new FakeNode('button');wrap=renderIcon(button,{index:12,word:{emoji:"<span class='fd-icon'><img src='icons/food-v958/pork.webp?v=960' alt=''></span>"}});
+button=new FakeNode('button');wrap=renderIcon(button,{index:12,word:{emoji:"<span class='fd-icon'><img src='icons/food-v958new RegExp(`pork.webp?v=${__APPV__}' alt=''><`,'span')>"}});
 assert.equal(wrap.querySelector('img')?.tagName,'IMG','markup icon must remain a rendered image node');
 assert.notEqual(wrap.querySelector('img'),originalImg,'the recommendation must clone, not move, the source image');
 

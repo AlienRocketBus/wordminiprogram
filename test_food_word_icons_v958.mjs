@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import vm from 'node:vm';
+/* v963 dyn */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const assets={
   cabbage:{file:'cabbage.webp',width:554,height:554,sha:'ce8ed6cc86804935c0a93989d6cc14d0737b28c88b686527381922141c5199af'},
@@ -57,7 +60,7 @@ for(const word of words){
 
   const rows=[canonical,rendered,globalWords,beeWords].map(list=>list.find(item=>item.en===word));
   assert.ok(rows.every(Boolean),`${word}: missing from a required vocabulary surface`);
-  const expected=`<span class='fd-icon fd-photo fd-photo-${word}' aria-hidden='true'><img src='${asset}?v=960' alt='' decoding='async' draggable='false'></span>`;
+  const expected=`<span class='fd-icon fd-photo fd-photo-${word}' aria-hidden='true'><img src='${asset}?v=${__APPV__}' alt='' decoding='async' draggable='false'></span>`;
   rows.forEach((row,index)=>assert.equal(row.emoji,expected,`${word}: surface ${index+1} does not use the named user icon`));
   assert.doesNotMatch(expected,/\son[a-z]+\s*=|javascript:|https?:|data:/i,`${word}: active or external image markup is forbidden`);
 }

@@ -14,6 +14,9 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from './playwright_loader.mjs';
+/* v963 dyn */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const GATE_FILE = 'hansen_sw_upgrade_gate_v944.js';
@@ -86,37 +89,37 @@ assert.doesNotMatch(workerSource, /["']\.\/hansen_backup_bootstrap\.js["']/,
   'the new worker shell must not cache the v943 bootstrap pathname');
 assert.match(workerSource, /hansen_perf_v944\.js/,
   'the new worker shell must cache the non-pausing performance engine');
-assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-21['"]/,
+assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-22['"]/,
   'v960 must atomically install the current release shell');
-assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-19['"]/,
+assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-20['"]/,
   'v960 must rotate navigation pages to the current wiring');
-assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-19['"]/,
+assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-20['"]/,
   'v960 must rotate code so stale earlier Boss code cannot return');
 for (const exactHotfixKey of [
-  'hansen_canonical_progress.js?v=960',
-  'hansen_season.js?v=960',
-  'hansen_pet_showcase.js?v=960',
-  'hansen_cards.js?v=960',
-  'hansen_gacha.js?v=960',
-  'hansen_land_cards.js?v=960',
-  'hansen_quest_global.js?v=960',
-  'hansen_island_upgrade.js?v=960',
-  'hansen_explore_progress_v945.js?v=960',
-  'hansen_spell_practice.js?v=960',
-  'hansen_review.js?v=960',
-  'hansen_wrong_overview.js?v=960',
-  'hansen_backup_v944.js?v=960',
-  'hansen_accessibility.js?v=960',
-  'hansen_perf_v944.js?v=960',
-  'hansen_boss_lock.js?v=960',
-  'hansen_addiction.js?v=960',
-  'hansen_diamond_shop.js?v=960',
-  'hansen_round_reward.js?v=960',
-  'hansen_round_bar.js?v=960',
-  'hansen_econ_guide.js?v=960',
-  'hansen_mylearning.js?v=960',
-  'hansen_palette.js?v=960',
-  'hansen_boss_theme.js?v=960',
+  'hansen_canonical_progress.js?v='+__APPV__,
+  'hansen_season.js?v='+__APPV__,
+  'hansen_pet_showcase.js?v='+__APPV__,
+  'hansen_cards.js?v='+__APPV__,
+  'hansen_gacha.js?v='+__APPV__,
+  'hansen_land_cards.js?v='+__APPV__,
+  'hansen_quest_global.js?v='+__APPV__,
+  'hansen_island_upgrade.js?v='+__APPV__,
+  'hansen_explore_progress_v945.js?v='+__APPV__,
+  'hansen_spell_practice.js?v='+__APPV__,
+  'hansen_review.js?v='+__APPV__,
+  'hansen_wrong_overview.js?v='+__APPV__,
+  'hansen_backup_v944.js?v='+__APPV__,
+  'hansen_accessibility.js?v='+__APPV__,
+  'hansen_perf_v944.js?v='+__APPV__,
+  'hansen_boss_lock.js?v='+__APPV__,
+  'hansen_addiction.js?v='+__APPV__,
+  'hansen_diamond_shop.js?v='+__APPV__,
+  'hansen_round_reward.js?v='+__APPV__,
+  'hansen_round_bar.js?v='+__APPV__,
+  'hansen_econ_guide.js?v='+__APPV__,
+  'hansen_mylearning.js?v='+__APPV__,
+  'hansen_palette.js?v='+__APPV__,
+  'hansen_boss_theme.js?v='+__APPV__,
 ]) {
   assert.equal(workerSource.includes(`'./${exactHotfixKey}'`), true,
     `the current v951 worker shell must cache the exact ${exactHotfixKey} request`);

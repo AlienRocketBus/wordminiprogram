@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+/* 🔴v963 合同同步: 版本钉改为动态读 VERSION(资源戳/appVersion随候选演进,合同本体不变) */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 class Storage{
   constructor(seed={}){this.d=Object.fromEntries(Object.entries(seed).map(([k,v])=>[k,String(v)]));this.failSetOnce=null;this.failRemoveOnce=null;}
@@ -49,9 +52,9 @@ assert.equal(HB.isOwnedKey('hansen_vocab_wordIslandAnimal'),false,'派生词库�
 const gear=JSON.parse(p.items.find(x=>x.key==='hansen_gear').value);assert.equal('trialUntil' in gear,false);assert.equal('trialWeapon' in gear,false);assert.equal(gear.weaponLvl,2);
 for(const k of ['hansen_wallet_cardbook','hansen_diamond_shop','hansen_share_draw'])assert.equal('pending' in JSON.parse(p.items.find(x=>x.key===k).value),false,`${k} 导出必须剥离 pending`);
 
-assert.equal(p.appVersion,960,'v960 生成的备份必须如实标记当前应用版本');
-assert.equal(HB.parse(JSON.stringify(p)).appVersion,960);
-for(const version of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960])
+assert.equal(p.appVersion,Number(__APPV__),'当前版本生成的备份必须如实标记当前应用版本');
+assert.equal(HB.parse(JSON.stringify(p)).appVersion,Number(__APPV__));
+for(const version of [942,943,944,945,946,950,951,952,953,954,955,956,957,958,959,960,963])
   assert.equal(HB.parse(JSON.stringify({...p,appVersion:version})).appVersion,version,`v960 必须接受 v${version} 备份`);
 for(const version of [947,948,949,961])
   assert.throws(()=>HB.parse(JSON.stringify({...p,appVersion:version})),/不受.*支持/,

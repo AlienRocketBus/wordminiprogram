@@ -6,6 +6,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+/* 🔴v963 合同同步: 版本钉改为动态读 VERSION(资源戳/appVersion随候选演进,合同本体不变) */
+import { readFileSync as __rf } from 'node:fs';
+const __APPV__ = __rf(new URL('./VERSION', import.meta.url), 'utf8').trim();
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const read = name => fs.readFileSync(path.join(ROOT, name), 'utf8');
@@ -58,15 +61,15 @@ assert.match(source, /'夜罗刹·红莲战鬼':\{t:'yecha',sz:1\.0,sp:1\.0,fxi:
 assert.match(source, /\{n:'夜罗刹·红莲战鬼',lv:'岛⑤',mv:'红莲圣域·万瓣天葬',pal:'红莲圣域'/,
   '管理面板动作名或配色名没有同步');
 
-assert.equal((land5.match(/<script src="hansen_boss_lock\.js\?v=960"><\/script>/g) || []).length, 1,
+assert.equal((land5.match(new RegExp('<script src="hansen_boss_lock\\.js\\?v='+__APPV__+'"></'+'script>',"g")) || []).length, 1,
   '岛⑤必须且只能加载一次 v951 Boss 锁运行时');
 assert.match(land5, /s\.src='hansen_boss_attack\.js'\+ver\(\)/,
   'Boss 特效引擎必须继续按需加载并继承当前查询键');
-assert.match(worker, /'\.\/hansen_boss_lock\.js\?v=960'/,
+assert.match(worker, new RegExp("'\\./hansen_boss_lock\\.js\\?v="+__APPV__+"'"),
   'Service Worker 没有缓存 v951 Boss 锁运行时');
-assert.match(worker, /CACHE_PREFIX \+ 'shell-21'/);
-assert.match(worker, /CACHE_PREFIX \+ 'pages-19'/);
-assert.match(worker, /CACHE_PREFIX \+ 'assets-19'/);
+assert.match(worker, /CACHE_PREFIX \+ 'shell-22'/);
+assert.match(worker, /CACHE_PREFIX \+ 'pages-20'/);
+assert.match(worker, /CACHE_PREFIX \+ 'assets-20'/);
 assert.doesNotMatch(land5, /hansen_boss_(?:lock|attack)\.js\?v=950/,
   '岛⑤仍直接引用旧版 Boss 运行时');
 
