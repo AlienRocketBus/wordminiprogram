@@ -524,6 +524,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "965": (("shell-24", "pages-22", "assets-22", "icons-3"), "v=965"),
         "966": (("shell-25", "pages-23", "assets-23", "icons-3"), "v=966"),
         "967": (("shell-26", "pages-24", "assets-24", "icons-3"), "v=967"),
+        "968": (("shell-27", "pages-25", "assets-25", "icons-3"), "v=968"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
@@ -571,6 +572,169 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         raise RuntimeError("HF7 cache/query contract mismatch: " + ", ".join(missing[:16]))
 
 
+
+# ── 🔴v968 部署产物确定性 Minify（源码永远可读，只瘦 deploy 包）────────────
+# 设计铁则：纯函数(两次构建哈希必一致)；存疑不剥；每个产物过 node --check，
+# 失败即 RuntimeError 拒绝出包(fail-closed)。vendor_* 与 JSON 型 script 原样跳过。
+_MINIFY_SKIP_PREFIX = ("vendor_",)
+_RE_BEFORE = set("{}(,=:;!&|?+-*%~^<>[\n")
+_KW_BEFORE = {"return","typeof","case","in","of","new","delete","void","instanceof","do","else","yield","await"}
+
+def _strip_js_comments_safe(src: str) -> str:
+    """带 ${} 配对回弹的完整版：包一层花括号深度跟踪。"""
+    # 用更直接的实现：逐字符+显式深度
+    out, i, n = [], 0, len(src)
+    st = ["code"]; depth = [0]
+    last_sig = "\n"; last_word = ""
+    def can_regex():
+        return last_sig in _RE_BEFORE or last_word in _KW_BEFORE
+    while i < n:
+        c = src[i]; top = st[-1]
+        if top == "code":
+            if c == "/" and src.startswith("//", i):
+                j = src.find("\n", i)
+                if j < 0: i = n; break
+                i = j; continue
+            if c == "/" and src.startswith("/*", i):
+                j = src.find("*/", i+2)
+                if j < 0: out.append(src[i:]); i = n; break
+                seg = src[i:j+2]
+                out.append(seg if seg.startswith("/*!") else ("\n" if "\n" in seg else " "))
+                i = j+2; continue
+            if c == "/" and can_regex():
+                out.append(c); i += 1; incls = False
+                while i < n:
+                    d = src[i]; out.append(d)
+                    if d == "\\" and i+1 < n: out.append(src[i+1]); i += 2; continue
+                    if d == "[": incls = True
+                    elif d == "]": incls = False
+                    elif (d == "/" and not incls) or d == "\n": i += 1; break
+                    i += 1
+                last_sig = "/"; last_word = ""; continue
+            if c in ("'", '"'):
+                out.append(c); i += 1
+                while i < n:
+                    d = src[i]; out.append(d)
+                    if d == "\\" and i+1 < n: out.append(src[i+1]); i += 2; continue
+                    i += 1
+                    if d == c: break
+                last_sig = c; last_word = ""; continue
+            if c == "`":
+                out.append(c); i += 1; st.append("tpl"); continue
+            if c == "{":
+                depth[-1] += 1
+            elif c == "}":
+                if depth[-1] == 0 and len(st) >= 2 and st[-2] == "tpl":
+                    out.append(c); i += 1; st.pop(); continue   # 结束 ${}
+                depth[-1] = max(0, depth[-1]-1)
+            out.append(c)
+            if not c.isspace():
+                last_sig = c
+                last_word = (last_word + c) if (c.isalnum() or c in "_$") else ""
+            i += 1; continue
+        if top == "tpl":
+            if c == "\\" and i+1 < n:
+                out.append(c); out.append(src[i+1]); i += 2; continue
+            if c == "`":
+                out.append(c); i += 1; st.pop(); continue
+            if c == "$" and src.startswith("${", i):
+                out.append("${"); i += 2; st.append("code"); depth.append(0)
+                last_sig = "{"; last_word = ""; continue
+            out.append(c); i += 1; continue
+    return "".join(out)
+
+def _tidy_lines(src: str) -> str:
+    lines = [ln.rstrip() for ln in src.split("\n")]
+    out, blank = [], 0
+    for ln in lines:
+        if ln == "":
+            blank += 1
+            if blank > 1: continue
+        else:
+            blank = 0
+        out.append(ln)
+    return "\n".join(out)
+
+def _node_syntax_ok(code: str, label: str) -> None:
+    import subprocess, tempfile, os
+    node = shutil.which("node")
+    if not node:
+        raise RuntimeError("minify 需要 node 做语法闸门；当前环境未找到 node")
+    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
+        f.write(code); tmp = f.name
+    try:
+        r = subprocess.run([node, "--check", tmp], capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(f"minify 语法闸门失败: {label}: {r.stderr[:300]}")
+    finally:
+        os.unlink(tmp)
+
+_SCRIPT_RE = re.compile(r"(<script\b[^>]*>)(.*?)(</script>)", re.S | re.I)
+_STYLE_RE = re.compile(r"(<style\b[^>]*>)(.*?)(</style>)", re.S | re.I)
+_HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+
+def _strip_css_comments(css: str) -> str:
+    out, i, n = [], 0, len(css)
+    while i < n:
+        c = css[i]
+        if c == "/" and css.startswith("/*", i):
+            j = css.find("*/", i+2)
+            if j < 0: out.append(css[i:]); break
+            i = j+2; continue
+        if c in ("'", '"'):
+            out.append(c); i += 1
+            while i < n:
+                d = css[i]; out.append(d)
+                if d == "\\" and i+1 < n: out.append(css[i+1]); i += 2; continue
+                i += 1
+                if d == c: break
+            continue
+        out.append(c); i += 1
+    return "".join(out)
+
+def _minify_html_deploy(src: str, label: str) -> str:
+    parts, pos = [], 0
+    spans = []
+    for m in _SCRIPT_RE.finditer(src): spans.append((m.start(), m.end(), m, "script"))
+    for m in _STYLE_RE.finditer(src): spans.append((m.start(), m.end(), m, "style"))
+    spans.sort()
+    def outer(seg: str) -> str:
+        seg = _HTML_COMMENT_RE.sub("", seg)
+        return _tidy_lines(seg)
+    for s, e, m, kind in spans:
+        parts.append(outer(src[pos:s]))
+        open_tag, body, close_tag = m.group(1), m.group(2), m.group(3)
+        low = open_tag.lower()
+        if kind == "script":
+            if "json" in low or 'type="module"' in low or "src=" in low:
+                parts.append(open_tag + body + close_tag)      # 外链/JSON/模块 原样
+            else:
+                mb = _tidy_lines(_strip_js_comments_safe(body))
+                _node_syntax_ok(mb, f"{label}<inline-script>")
+                parts.append(open_tag + mb + close_tag)
+        else:
+            parts.append(open_tag + _tidy_lines(_strip_css_comments(body)) + close_tag)
+        pos = e
+    parts.append(outer(src[pos:]))
+    return "".join(parts)
+
+def _minify_entry(arcname: str, data: bytes) -> bytes:
+    name = PurePosixPath(arcname).name
+    suffix = PurePosixPath(arcname).suffix.lower()
+    if any(name.startswith(p) for p in _MINIFY_SKIP_PREFIX):
+        return data
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return data
+    if suffix == ".js":
+        out = _tidy_lines(_strip_js_comments_safe(text))
+        _node_syntax_ok(out, arcname)
+        return out.encode("utf-8")
+    if suffix == ".html":
+        return _minify_html_deploy(text, arcname).encode("utf-8")
+    return data
+
 def _write_zip(target: Path, mode: str) -> tuple[int, int, str]:
     files = list(_iter_files(mode, target.parent))
     if not files:
@@ -578,10 +742,17 @@ def _write_zip(target: Path, mode: str) -> tuple[int, int, str]:
 
     entries: list[tuple[str, bytes]] = []
     total = 0
+    minify_saved = 0
     for path, arcname in files:
         data = path.read_bytes()
+        if mode == "deploy":
+            slim = _minify_entry(arcname, data)
+            minify_saved += len(data) - len(slim)
+            data = slim
         entries.append((arcname, data))
         total += len(data)
+    if mode == "deploy" and minify_saved:
+        print(f"      [minify] 部署产物瘦身 {minify_saved/1048576:.2f} MiB (源码保持可读)")
     entries.sort(key=lambda item: item[0])
     # Scan exactly the immutable byte strings that will be archived.  Reading
     # paths once for scanning and again for ZIP creation leaves a TOCTOU window
