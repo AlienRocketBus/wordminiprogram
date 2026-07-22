@@ -32,7 +32,7 @@ class ReleaseContractFailClosed(unittest.TestCase):
         return entries
 
     def test_retired_and_unknown_versions_are_rejected(self):
-        for bad in (b"961", b"962", b"964", b"999", b"abc", b""):
+        for bad in (b"961", b"962", b"9999", b"abc", b""):  # 探针用永不注册的9999,避免随版本推进移动
             with self.subTest(version=bad):
                 with self.assertRaises(RuntimeError) as ctx:
                     PACKAGE._verify_hf7_runtime_contract(self._entries(bad))
