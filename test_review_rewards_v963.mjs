@@ -269,6 +269,23 @@ console.log('T13 猎人称号');
   ok(lf.patrols >= 1, '巡检通过计入终身战绩(当前'+lf.patrols+')');
 }
 
+/* T14: 🔴v966回归·hadDue次序不变量（开局直进今日复习清完也必须拿到+20/连击） */
+console.log('T14 hadDue次序');
+{
+  const D = M._debug;
+  const tomorrow = (()=>{const d=new Date();d.setDate(d.getDate()+1);return D.ymd(d);})();
+  store.set('hansen_review_day_v963', JSON.stringify({day:'2000-01-01'}));   // 造新的一天
+  store.set('hansen_review_streak_v963', JSON.stringify({start:'',last:'',count:0}));
+  C.ledger['rvrw:'+day+':todaydone'] && delete C.ledger['rvrw:'+day+':todaydone'];
+  CAN_STORE.wrongs = { '105': 1 }; CAN_STORE.srs = {};
+  M.refresh();                                    // = 修复后 boot 的动作
+  ok(D.dayState().hadDue === 1, 'boot等价刷新即记录hadDue');
+  CAN_STORE.wrongs = {};                          // 玩家在今日复习里全清
+  M.onTodayComplete({reviewed:1, graduated:1, total:1});
+  ok(C.hasAward('rvrw:'+day+':todaydone'), '直清场景照发+20');
+  ok(JSON.parse(store.get('hansen_review_streak_v963')).count >= 1, '连击照打卡');
+}
+
 console.log('');
 if(fails){ console.log('❌ 失败', fails, '项'); process.exit(1); }
 console.log('🎉 v963 复习奖励逻辑回归 全部通过 (钱包终额:', C.bal, '金币 /', G.bal, '钻石)');

@@ -362,6 +362,14 @@
         if(wrong <= 0) return null;           // 无错无计划 → 与 SRS 无关
         e = { box: 0, due: t, last: '' };     // 兜底(理论上 _ensureSrs 已种)
       }
+      /* 🔴v966修复：错词已被清零(如答题归零毕业金路径)但计划残留 →
+       * 静默剪除(与 _ensureSrs 一致)，绝不在毕业金后再弹"📦盒子+1"僵尸反馈 */
+      if(wrong <= 0){
+        delete srs[key];
+        try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, null); }catch(_zz){}
+        if(typeof save === 'function'){ try{ save(); }catch(_zz2){} }
+        return null;
+      }
       var box = (typeof e.box === 'number' && e.box >= 0) ? e.box : 0;
       if(box >= SRS_GRAD) return null;
       if(e.last === t) return { advanced:false, reason:'daily-lock' };
