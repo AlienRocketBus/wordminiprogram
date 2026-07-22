@@ -109,7 +109,7 @@
       name: 'cloudbase',
       _app: function(){
         if(_cb) return Promise.resolve(_cb);
-        return import('./vendor_cloudbase_esm_v965.js?v=965').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=966').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -258,20 +258,31 @@
       var host = document.getElementById('hsnBackupSection');
       if(!host) return;
       var el = document.getElementById('hsnCloudCard');
+      /* 🔴v966修复：孩子正在输入恢复密钥时后台同步触发重绘会清空输入框——
+       * 输入框有内容或持焦时只更新状态行，绝不整卡重建 */
+      var _inp0 = document.getElementById('hsnCloudRestoreKey');
+      if(el && _inp0 && (_inp0.value || document.activeElement === _inp0)){
+        var _st0 = document.getElementById('hsnCloudStatus');
+        if(_st0) _st0.innerHTML = statusHtml();
+        return;
+      }
       if(!el){
         el = document.createElement('div');
         el.id = 'hsnCloudCard';
         el.style.cssText = 'margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid #38bdf855;background:linear-gradient(135deg,#0c4a6e33,#07304a33);color:#e2e8f0;font-size:13px;line-height:1.9';
         host.insertBefore(el, host.firstChild);
       }
-      var p = provider(), st = readState(), key = st.key ? prettyKey(st.key) : '';
-      var status;
-      if(!p) status = '<span style="color:#fbbf24">待开通</span> · 按《云存档开通指南》4 步完成后自动点亮';
-      else if(st.lastUpAt) status = '<span style="color:#34d399">已同步</span> · '+new Date(st.lastUpAt).toLocaleString();
-      else status = '<span style="color:#93c5fd">已就绪</span> · 玩一会儿会自动上云';
+      var st = readState(), key = st.key ? prettyKey(st.key) : '';
+      function statusHtml(){
+        var p2 = provider(), s2 = readState();
+        if(!p2) return '<span style="color:#fbbf24">待开通</span> · 按《云存档开通指南》4 步完成后自动点亮';
+        if(s2.lastUpAt) return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
+        return '<span style="color:#93c5fd">已就绪</span> · 玩一会儿会自动上云';
+      }
+      var status = statusHtml();
       el.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'
-        + '<b>☁️ 云存档（换手机不丢档）</b><span style="font-size:12px">'+status+'</span></div>'
+        + '<b>☁️ 云存档（换手机不丢档）</b><span id="hsnCloudStatus" style="font-size:12px">'+status+'</span></div>'
         + '<div style="margin-top:6px;font-size:12px;color:#94a3b8">你的记忆水晶密钥（拍照保存，换手机就靠它）：</div>'
         + '<div id="hsnCloudKey" role="button" tabindex="0" style="margin:4px 0 8px;padding:8px 10px;border-radius:10px;background:#0f172a;border:1px dashed #38bdf866;font-family:monospace;font-size:16px;letter-spacing:1px;cursor:pointer;user-select:all;min-height:24px">'
         + (key ? (_revealed ? key : '••••-••••-••••-•••• （点一下显示）') : '（进入游戏后自动生成）') + '</div>'

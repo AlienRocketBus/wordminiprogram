@@ -643,7 +643,7 @@
       }, 250);
     }
     autoMaintain();
-    renderBanner();
+    refreshUI();   /* 🔴v966修复：boot必须过checkGlobalClear记录hadDue，否则"开局直进今日复习清完"拿不到+20/连击 */
     try{
       window.addEventListener('pageshow', function(){ autoMaintain(); refreshUI(); });
       document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshUI(); });
