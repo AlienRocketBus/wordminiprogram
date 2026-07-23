@@ -17,4 +17,5 @@ window.HANSEN_LAND_SCENES = [
   'land_yinyi.webp',      // Land2 Boss3 银翼·麻烦终结者
   'land_juedou.webp',     // Land2 Boss4 决斗大师·千招之约
   's1_waranvil.webp',     // Land2 守关 武器大师·战争铁砧
+  'timelord.webp',        // Land3 守关 时之君主·克罗诺斯之影（复用星海觉醒五杰现货场景·2026-07-23 融合）
 ];
