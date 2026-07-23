@@ -22,4 +22,5 @@ window.HANSEN_LAND_SCENES = [
   'land_yingshou.webp',   // Land3 Boss2 影守·永夜之壁
   'land_wandian.webp',    // Land3 Boss3 万典之灵·未被写下的故事
   'land_sijilong.webp',   // Land3 Boss4 凋零与新生之龙·四季轮转
+  'abysslord.webp',       // Land4 守关 无光之渊·暗噬君主（复用星海觉醒五杰现货场景·2026-07-23 融合）
 ];
