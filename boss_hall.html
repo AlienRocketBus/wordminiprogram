@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head>
-<script src="hansen_sw_upgrade_gate_v944.js?v=971"></script><script src="hansen_land_cards.js?v=971"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=971"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_sw_upgrade_gate_v944.js?v=972"></script><script src="hansen_land_cards.js?v=972"></script><script src="hansen_land_scene_manifest_v972.js?v=972"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=972"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白。🔴v792 加固: 只重试真正的图片URL·跳过空src/页面URL——否则空src的img报错会被改成?__rt=(指向页面HTML)·还会覆盖刚设的真src·导致角色图永远加载失败只剩背景 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;var cur=(g.getAttribute("src")||"");if(!cur||!/\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(cur)){return;}g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=cur.split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BOSS 殿堂 · 演示</title>
@@ -136,10 +136,10 @@ body.smode .art img{transform:scale(1.16);transform-origin:center bottom}
 }
 
 /* 🔴v971 land殿堂: 全屏底=立绘模糊暗化, 卡窗内=清晰立绘 → 程序化双层背景 */
-.landhall #bgA,.landhall #bgB{filter:blur(18px) brightness(.52) saturate(1.2);transform:scale(1.14)}
+.landblur{filter:blur(18px) brightness(.52) saturate(1.2);transform:scale(1.14)}
 </style></head>
 <body>
-<script src="hansen_perf_v944.js?v=971"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf_v944.js?v=972"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="bgA" class="kb"></div><div id="bgB" class="kb"></div>
 <div class="vign" id="vign"></div>
 <img loading=lazy decoding=async id="soloChar" alt=""><div id="soloGround"></div>
@@ -242,7 +242,7 @@ var BGS=[
  {n:'苍穹',bg:'linear-gradient(180deg,#0b2a52,#0e5180 50%,#062038)',sw:'linear-gradient(160deg,#7dd3fc,#0369a1,#082f49)'}
 ];
 var QS=(function(){try{return new URLSearchParams(location.search);}catch(e){return {get:function(){return null;}};}})();
-var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=971';})();
+var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=972';})();
 var OWN=(function(){var m=QS.get('own');if(!m)return null;var a=[];m.split(',').forEach(function(x){var n=parseInt(x,10);if(n>=1&&n<=20&&a.indexOf(n)<0)a.push(n);});return a.length?a.sort(function(x,y){return x-y;}):null;})();
 function isOwned(lv){return !OWN||OWN.indexOf(lv)>=0;}
 function bgPath(lv){return 'bosses_bg/level'+lv+'.webp'+VV;}
@@ -264,7 +264,13 @@ if(QS.get('land')){
   var __pool=[]; __LCL.forEach(function(c){ if(__lown.indexOf(c.id)>=0) __pool.push(c); });
   if(!__pool.length&&__LCL.length) __pool=[__LCL[0]];
   BOSSES=__pool.map(function(c,i){ return {lv:i+1, id:c.id, n:c.name, r:c.rarity, _art:c.img, _scene:c.img}; });
-  bgPath=function(lv){return BOSSES[lv-1]._scene+VV;};
+  /* 🔴v972: 真实场景优先——bosses_bg/同名文件一经交付即自动点亮; 缺图时 setSceneBg 落回立绘模糊兜底 */
+  window.__landMode=true;
+  /* 🔴v972 单一真源: bgPath 自带清单门禁——已交付→bosses_bg真实场景; 未交付→立绘(卡窗/色板/预载全都零404) */
+  bgPath=function(lv){ var art=BOSSES[lv-1]._art, base=art.split('/').pop();
+    return (((window.HANSEN_LAND_SCENES||[]).indexOf(base)>=0)?('bosses_bg/'+base):art)+VV; };
+  window.__landDelivered=function(lv){ var base=BOSSES[lv-1]._art.split('/').pop();
+    return (window.HANSEN_LAND_SCENES||[]).indexOf(base)>=0; };
   artPath=function(lv){return BOSSES[lv-1]._art+VV;};
   var __cardQ=String(QS.get('card')||'');
   window.__landStartLv=1;
@@ -282,12 +288,29 @@ function savePref(){try{localStorage.setItem('bs_hall_'+BOSSES[cur].lv,JSON.stri
 var bgFlip=false;
 function setSceneBg(lv){
   var on=document.getElementById(bgFlip?'bgB':'bgA'), off=document.getElementById(bgFlip?'bgA':'bgB');
+  off.classList.remove('landblur');
+  function commit(url, blur){
+    off.style.backgroundImage='url("'+url+'")';
+    if(blur) off.classList.add('landblur');
+    off.style.opacity='1'; on.style.opacity='0'; bgFlip=!bgFlip;
+  }
+  function landPick(l){
+    return { url: bgPath(l), blur: !window.__landDelivered(l) };
+  }
+  if(window.__landMode){
+    var pick=landPick(lv), img=new Image();
+    img.onload=function(){ commit(pick.url, pick.blur); };
+    img.onerror=function(){ var alt=BOSSES[lv-1]._art+VV, a2=new Image(); a2.onload=function(){ commit(alt,true); }; a2.src=alt; };
+    img.src=pick.url;
+    [-1,1].forEach(function(d){ var nb=BOSSES[((cur+d)%N+N)%N]; var pk=landPick(nb.lv); var p=new Image(); p.src=pk.url; var pa=new Image(); pa.src=artPath(nb.lv); });
+    return;
+  }
   var url='url("'+bgPath(lv)+'")';
-  var img=new Image();
-  img.onload=function(){ off.style.backgroundImage=url; off.style.opacity='1'; on.style.opacity='0'; bgFlip=!bgFlip; };
-  img.onerror=function(){ off.style.backgroundImage='radial-gradient(900px 600px at 50% 20%,#2a2150,#0a0818)'; off.style.opacity='1'; on.style.opacity='0'; bgFlip=!bgFlip; };
-  img.src=bgPath(lv);
-  [-1,1].forEach(function(d){ var nb=BOSSES[((cur+d)%N+N)%N]; var p=new Image(); p.src=bgPath(nb.lv); var pa=new Image(); pa.src=artPath(nb.lv); });  /* 🔴v792 相邻boss的角色立绘也预加载(小图·切换时已缓存) */
+  var img2=new Image();
+  img2.onload=function(){ off.style.backgroundImage=url; off.style.opacity='1'; on.style.opacity='0'; bgFlip=!bgFlip; };
+  img2.onerror=function(){ off.style.backgroundImage='radial-gradient(900px 600px at 50% 20%,#2a2150,#0a0818)'; off.style.opacity='1'; on.style.opacity='0'; bgFlip=!bgFlip; };
+  img2.src=bgPath(lv);
+  [-1,1].forEach(function(d){ var nb=BOSSES[((cur+d)%N+N)%N]; var p=new Image(); p.src=bgPath(nb.lv); var pa=new Image(); pa.src=artPath(nb.lv); });
 }
 
 /* ════ 稀有度主题应用 ════ */

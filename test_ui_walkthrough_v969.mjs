@@ -221,9 +221,9 @@ async function gotoIsland(page, file='island_animal.html'){
   const hs = await hall.locator('html').evaluate(el=>({
     land: el.classList.contains('landhall'),
     art: (el.ownerDocument.getElementById('artImg')||{}).src||'',
-    blur: getComputedStyle(el.ownerDocument.getElementById('bgA')).filter.includes('blur')
+    blur: el.ownerDocument.getElementById('bgA').classList.contains('landblur') || el.ownerDocument.getElementById('bgB').classList.contains('landblur')   /* v972: 清单空→兜底层带landblur */
   }));
-  ok(hs.land && hs.blur, '殿堂进入land模式且全屏模糊双层生效');
+  ok(hs.land && hs.blur, '殿堂land模式·未交付卡走模糊兜底(清单门禁)');
   ok(/land_jingyuan/.test(hs.art), '起始卡立绘=L13镜渊领主');
   await page.click('#__hsn_landhall div[role=button]');
   await page.waitForTimeout(400);
