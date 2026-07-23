@@ -237,6 +237,43 @@ async function gotoIsland(page, file='island_animal.html'){
   await page.close();
 }
 
+
+/* ════ 场景7 · 🔴v986 大脑五态横幅：岛屿页 calm→安睡真图标 / 种30错词→urgent红色警报 ════ */
+{
+  console.log('S7 大脑五态横幅');
+  const pgA = await freshPage();
+  await pgA.addInitScript(()=>localStorage.clear());
+  await gotoIsland(pgA);
+  await pgA.waitForSelector('#hr_review_banner', { timeout: 15000 });
+  await pgA.waitForTimeout(900);
+  const ca = await pgA.evaluate(()=>{
+    const el=document.getElementById('hr_review_banner');
+    const img=el.querySelector('img');
+    return { img: img?img.getAttribute('src'):null, loaded: img?(img.complete&&img.naturalWidth>0):false };
+  });
+  ok(ca.img && ca.img.includes('brain_rest') && ca.loaded, '安心态=brain_rest真图加载: '+ca.img);
+  await pgA.close();
+  const pgB = await freshPage();
+  await pgB.addInitScript(()=>{
+    localStorage.clear();
+    const wr={}; for(let i=0;i<30;i++) wr[String(i)]=1;
+    localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
+  });
+  await gotoIsland(pgB);
+  await pgB.waitForSelector('#hr_review_banner', { timeout: 15000 });
+  await pgB.waitForTimeout(900);
+  const ur = await pgB.evaluate(()=>{
+    const el=document.getElementById('hr_review_banner');
+    const img=el.querySelector('img');
+    return { bg:(el.style.background||''), title:(el.querySelector('span span')||{}).textContent||'',
+             img: img?img.getAttribute('src'):null, loaded: img?(img.complete&&img.naturalWidth>0):false };
+  });
+  ok(ur.img && ur.img.includes('brain_alarm') && ur.loaded, '紧急态=brain_alarm真图加载');
+  ok(/rgb\(239|ef4444/.test(ur.bg), '紧急态红色警报底色');
+  ok(/积压/.test(ur.title) && /30/.test(ur.title), '紧急文案含积压30: '+ur.title.slice(0,18));
+  await pgB.close();
+}
+
 await browser.close(); srv.close();
 
 console.log('\n══ 全程错误采集 ══');
