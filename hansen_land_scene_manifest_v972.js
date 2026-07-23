@@ -12,4 +12,9 @@ window.HANSEN_LAND_SCENES = [
   'land_jingyuan.webp',   // Land1 Boss3 逆相之影·镜渊领主
   'land_hundun.webp',     // Land1 Boss4 混沌之种·万象侵蚀者
   'land_mohuang.webp',    // Land1 守关 魔皇·小丑至尊
+  'land_bingwang.webp',   // Land2 Boss1 丛林幽灵·兵王（2026-07-23 交付）
+  's1_vanguard.webp',     // Land2 Boss2 暗影先锋·破阵者
+  'land_yinyi.webp',      // Land2 Boss3 银翼·麻烦终结者
+  'land_juedou.webp',     // Land2 Boss4 决斗大师·千招之约
+  's1_waranvil.webp',     // Land2 守关 武器大师·战争铁砧
 ];
