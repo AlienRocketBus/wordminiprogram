@@ -196,6 +196,20 @@
     css+=L+'.settings-stat b{color:#b91c1c!important}\n';
     // ⑲ inline浅灰#cbd5e1通用深化(stats提示条等·此前通用映射只盖了金五色漏了灰系); 深区/boss屏/横幅的还原选择器特异性更高照样赢
     css+=L+'[style*="color:#cbd5e1"]{color:#475569!important}\n';
+    // \U0001f534v987 \u7b2c\u516d\u6279(Hansen\u771f\u673a\u516d\u8fde\xb7\u4eae\u8272\u88c5\u4fee):
+    // \u3251 \u6253\u5361\u4e09\u9762\u677f\u4eae\u5316: \u6df1\u73bb\u7483\u5e95\u2192\u6d45\u73bb\u7483(\u547d\u4e2d\u552f\u4e00\u7b7e\u540drgba(30,41,59,.55)\xb7\u91d1\u5b57\u5df2\u88ab\u2464\u6279\u63a5\u7ba1\u53d8\u5f3a\u8c03\u8272)
+    css+=L+'[style*="background:rgba(30,41,59,.55)"]{background:rgba(255,255,255,.72)!important;border:1px solid rgba(0,0,0,.06)!important}\n';
+    // \u3252 \u5b9d\u7bb1\u89d2\u6807(\u7ea2/\u84dd\u80f6\u56ca\u56fa\u5b9a\u6df1\u5e95): \u5b57\u6c38\u8fdc\u767d\xb7\u53bb\u6655
+    css+=L+'.chest-badge{color:#fff!important;text-shadow:none!important}\n';
+    // \u3254 \u5355\u8bcd\u5927\u9646\u62bd\u5361\u9875(#landGachaBody\xb7\u56fa\u5b9a\u6df1\u7d2b\u5e95): \u5bb9\u5668\u7ea7ink\u91cd\u9489(\u4eff\u2460bossScreen\u65b9\u6848)+\u91d1/\u7eff/\u6d45\u7070\u8fd8\u539f
+    css+=L+'#landGachaBody, '+L+'#landGachaBody *{--pal-ink:#f1f5f9;--pal-ink-hi:#e2e8f0;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8}\n';
+    css+=L+'#landGachaBody [style*="color:#cbd5e1"]{color:#cbd5e1!important}\n';
+    ['#fbbf24','#fde047','#fde68a','#facc15','#fcd34d'].forEach(function(gold){
+      css+=L+'#landGachaBody [style*="color:'+gold+'"]{color:'+gold+'!important}\n';
+    });
+    css+=L+'#landGachaBody [style*="color:#22c55e"]{color:#22c55e!important}\n';
+    // \u3255 \u5361\u518c\u5927\u9646\u62bd\u5361\u6a2a\u6761(.lg-banner\xb7\u56fa\u5b9a\u6df1\u7d2b\u6e10\u53d8\u5e95): \u540c\u6cd5\u91cd\u9489
+    css+=L+'.lg-banner, '+L+'.lg-banner *{--pal-ink:#fff;--pal-ink-hi:#f5f3ff;--pal-ink-2:#ddd6fe;--pal-ink-3:#c4b5fd}\n';
     ['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total'].forEach(function(d){
       css+=L+d+' [style*="color:#cbd5e1"]{color:#cbd5e1!important}\n';
     });
@@ -273,7 +287,9 @@
     css+=_L+'.m-btn.got-it{background:linear-gradient(135deg,#16a34a,#15803d)!important}\n';
     css+=_L+'.game-btn{background:linear-gradient(135deg,#4f46e5,#4338ca)!important}\n';
     // 像素级实测补漏(边缘环取真实底色·非渐变平均): 最后 6 处
-    css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // 白字压在浅蓝boss图上 2.14:1 → 加重描边
+    css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // \u767d\u5b57\u538b\u5728\u56fe\u4e0a\u7684d-label\u901a\u7528\u6655
+    // \U0001f534v987\u3253(\u6539\u5740\u81f3v928\u533a\u672b\xb7\u540e\u6765\u8005\u80dc\u538bL279/L292): \u6311\u6218BOSS\u6807\u7b7e\u5750\u7eaf\u4eae\u9ec4\u5361\u9762\u975eboss\u56fe\u4e0a\u2192\u58a8\u5b57(\u5df2\u7edf\u4e00\u70d9\u8272)\u514d\u6655\u5373\u9510
+    css+=_L+'.d-label.boss-card-label{text-shadow:none!important}\n';  // 白字压在浅蓝boss图上 2.14:1 → 加重描边
     css+=_L+'[style*="color:#e9d5ff"],'+_L+'[style*="color:#a78bfa"],'+_L+'[style*="color:#c4b5fd"],'+_L+'[style*="color:#ddd6fe"]{color:#5b21b6!important}\n'; // 设置页淡紫字 1.36:1 → 深紫
     css+=_L+'.stat-card,'+_L+'.stats-card,'+_L+'.st-card{background:'+_SF+'!important;border:'+_BD+'!important;color:'+_IK+'!important}\n';
     // ⚠️ 不能一刀切改所有金色行内字: 有些金字是【压在深色/饱和卡上的】, 改深了反而更看不清。
