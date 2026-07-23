@@ -44,4 +44,7 @@ window.HANSEN_LAND_SCENES = [
   'land_solaris.webp',    // Land8 Boss2 天启征服者·索拉里斯
   's1_ancientwill.webp',  // Land8 Boss4 活体行星·古老意志
   'land_fushaou.webp',    // Land8 守关 星核帝皇·弗沙欧
+  'land_yuezhi.webp',     // Land7 Boss1 月之引航者·寂静潮汐（2026-07-23 交付·大满贯终批）
+  's1_exileblade.webp',   // Land7 Boss2 星陨武士·流亡之刃
+  'land_xinghe.webp',     // Land7 Boss3 星核泰坦·虚空造物主
 ];
