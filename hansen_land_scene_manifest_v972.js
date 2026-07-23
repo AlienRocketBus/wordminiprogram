@@ -37,4 +37,6 @@ window.HANSEN_LAND_SCENES = [
   'land_priest.webp',     // Land6 Boss3 古埃及大祭司·真理之口的裁决者
   'land_pharaoh.webp',    // Land6 Boss4 法老王·不朽金身
   'land_sphinx.webp',     // Land6 守关 天界守护者·黄金斯芬克斯
+  'lightangel.webp',      // Land7 Boss4 统御天使·圣光之翼（复用星海觉醒五杰现货场景·2026-07-23 融合）
+  'starmaker.webp',       // Land7 守关 铸星者·原初匠人（复用星海觉醒五杰现货场景·2026-07-23 融合）
 ];
