@@ -102,6 +102,9 @@
     return _write(o);
   }
 
+  // 🔴v971 星海大陆殿堂: 向 boss_hall 暴露只读卡数据(独立卡组原则不变,仅读不写)
+  window.HansenLandCards = { list: LAND_CARDS };
+
   window.HansenLandCardbook = {
     all: function(){ return LAND_CARDS.slice(); },
     cardById: cardById,
@@ -215,6 +218,33 @@
 (function(){
   var ISLAND_NAMES = {1:'①迷雾心湖',2:'②风纹草原',3:'③时之钟谷',4:'④铸剑锻炉山',5:'⑤晶石回廊',6:'⑥智慧藏书林',7:'⑦万邦港城',8:'⑧星火火山口'};
   function CB(){ return window.HansenLandCardbook; }
+
+  // 🔴v971 星海大陆殿堂: 已拥有卡点击 → 全屏 BOSS 殿堂(boss_hall land 模式)
+  //   own=已拥有卡id列表(尊重临时全解锁 has()); 背景=立绘程序化场景(殿堂侧模糊双层,零新图)
+  window.__hsnOpenLandHall = function(cardId){
+    try{
+      if(document.getElementById('__hsn_landhall')) return;
+      var cb = CB(); if(!cb || !cb.has(cardId)) return;
+      var own = [];
+      (cb.all()||[]).forEach(function(c){ if(cb.has(c.id)) own.push(c.id); });
+      var mask = document.createElement('div');
+      mask.id = '__hsn_landhall';
+      mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
+      var iframe = document.createElement('iframe');
+      iframe.src = 'boss_hall.html?v=971&land=1&card=' + encodeURIComponent(cardId) + '&lown=' + encodeURIComponent(own.join(','));
+      iframe.setAttribute('title', '星海大陆 BOSS 殿堂');
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
+      mask.appendChild(iframe);
+      var closeBtn = document.createElement('div');
+      closeBtn.textContent = '\u00d7';
+      closeBtn.setAttribute('role','button');
+      closeBtn.setAttribute('aria-label','关闭');
+      closeBtn.style.cssText = 'position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;z-index:5;width:40px;height:40px;border-radius:50%;background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.4);color:#e2e8f0;font-size:24px;line-height:38px;text-align:center;cursor:pointer';
+      closeBtn.addEventListener('click', function(){ if(mask.parentNode) mask.parentNode.removeChild(mask); });
+      mask.appendChild(closeBtn);
+      document.body.appendChild(mask);
+    }catch(e){}
+  };
   function G(){ return window.HansenLandGacha; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -250,13 +280,13 @@
       cards.forEach(function(c){
         var un=cb.has(c.id);
         if(un){
-          h+='<div onclick="window.HansenLandGachaUI&&window.HansenLandGachaUI.detail(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img loading="lazy" decoding="async" src="'+c.img+'?v=970" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+          h+='<div onclick="window.__hsnOpenLandHall&&window.__hsnOpenLandHall(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img loading="lazy" decoding="async" src="'+c.img+'?v=971" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img loading="lazy" decoding="async" src="'+c.img+'?v=970" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img loading="lazy" decoding="async" src="'+c.img+'?v=971" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -440,7 +470,7 @@
     rotor=ov.querySelector('.lgr-rotor');scroll=ov.querySelector('.lgr-scroll');hint=ov.querySelector('.lgr-hint');
     preloader=new Image();var imageReady=false, imageFailed=false;
     preloader.decoding='async'; try{preloader.fetchPriority='high';}catch(e){}
-    preloader.onload=function(){imageReady=true;}; preloader.onerror=function(){imageFailed=true;}; preloader.src=c.img+'?v=970';
+    preloader.onload=function(){imageReady=true;}; preloader.onerror=function(){imageFailed=true;}; preloader.src=c.img+'?v=971';
     hardDeadline=Date.now()+(reduce?1200:3900);
     function later(fn,ms){var n=setTimeout(fn,ms);timers.push(n);return n;}
     function clearAllTimers(){for(var i=0;i<timers.length;i++)clearTimeout(timers[i]);timers=[];if(safetyTimer){clearTimeout(safetyTimer);safetyTimer=0;}}
@@ -504,7 +534,7 @@
         }
         if(!imageFailed)mountImage(preloader);
         else{
-          var retryImage=new Image();retryImage.decoding='async';mountImage(retryImage);retryImage.src=c.img+'?v=970&retry=1';
+          var retryImage=new Image();retryImage.decoding='async';mountImage(retryImage);retryImage.src=c.img+'?v=971&retry=1';
         }
         var meta=document.createElement('div');meta.className='lgr-meta';meta.style.setProperty('--lgr-rc',ri.color);
         var status=result.dup?'重复卡 · 已化为 '+(Number(result.frag)||0)+' 枚'+ri.cn+'碎片':'新卡入册 · 首次获得';
@@ -621,7 +651,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img loading="lazy" decoding="async" src="'+c.img+'?v=970" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img loading="lazy" decoding="async" src="'+c.img+'?v=971" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);
