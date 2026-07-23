@@ -39,4 +39,5 @@ window.HANSEN_LAND_SCENES = [
   'land_sphinx.webp',     // Land6 守关 天界守护者·黄金斯芬克斯
   'lightangel.webp',      // Land7 Boss4 统御天使·圣光之翼（复用星海觉醒五杰现货场景·2026-07-23 融合）
   'starmaker.webp',       // Land7 守关 铸星者·原初匠人（复用星海觉醒五杰现货场景·2026-07-23 融合）
+  'observer.webp',        // Land8 Boss3 终末观测者·边界守夜人（复用星海觉醒五杰现货场景·2026-07-23 融合）
 ];
