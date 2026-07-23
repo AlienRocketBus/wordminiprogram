@@ -198,6 +198,39 @@ async function gotoIsland(page, file='island_animal.html'){
   await page.close();
 }
 
+
+/* ════ 场景6 · 🔴v971 星海大陆殿堂：卡册→点已拥有Land卡→全屏殿堂双层背景 ════ */
+{
+  console.log('S6 星海大陆殿堂');
+  const page = await freshPage();
+  await page.addInitScript(()=>{
+    localStorage.setItem('hansen_land_cardbook', JSON.stringify({owned:{L11:true,L13:true},frags:{},pity:0,totalDraws:0}));
+  });
+  await gotoIsland(page);
+  await page.click('#navCards');
+  await page.waitForTimeout(900);
+  const thumb = page.locator(`div[onclick*="__hsnOpenLandHall('L13')"]`);
+  ok(await thumb.count() === 1, '图鉴中已拥有L13缩略可点');
+  await thumb.scrollIntoViewIfNeeded();
+  await thumb.click();
+  await page.waitForSelector('#__hsn_landhall iframe', { timeout: 8000 });
+  const src = await page.getAttribute('#__hsn_landhall iframe', 'src');
+  ok(/land=1&card=L13/.test(src) && /lown=/.test(src), '殿堂iframe URL合同: '+src.slice(-46));
+  const hall = page.frameLocator('#__hsn_landhall iframe');
+  await hall.locator('#artImg').waitFor({ timeout: 10000 });
+  const hs = await hall.locator('html').evaluate(el=>({
+    land: el.classList.contains('landhall'),
+    art: (el.ownerDocument.getElementById('artImg')||{}).src||'',
+    blur: getComputedStyle(el.ownerDocument.getElementById('bgA')).filter.includes('blur')
+  }));
+  ok(hs.land && hs.blur, '殿堂进入land模式且全屏模糊双层生效');
+  ok(/land_jingyuan/.test(hs.art), '起始卡立绘=L13镜渊领主');
+  await page.click('#__hsn_landhall div[role=button]');
+  await page.waitForTimeout(400);
+  ok(await page.locator('#__hsn_landhall').count() === 0, '× 真点关闭殿堂');
+  await page.close();
+}
+
 await browser.close(); srv.close();
 
 console.log('\n══ 全程错误采集 ══');
