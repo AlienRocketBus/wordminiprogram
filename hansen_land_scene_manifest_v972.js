@@ -18,4 +18,8 @@ window.HANSEN_LAND_SCENES = [
   'land_juedou.webp',     // Land2 Boss4 决斗大师·千招之约
   's1_waranvil.webp',     // Land2 守关 武器大师·战争铁砧
   'timelord.webp',        // Land3 守关 时之君主·克罗诺斯之影（复用星海觉醒五杰现货场景·2026-07-23 融合）
+  'land_huochairen.webp', // Land3 Boss1 火柴人·原初线条（2026-07-23 交付）
+  'land_yingshou.webp',   // Land3 Boss2 影守·永夜之壁
+  'land_wandian.webp',    // Land3 Boss3 万典之灵·未被写下的故事
+  'land_sijilong.webp',   // Land3 Boss4 凋零与新生之龙·四季轮转
 ];
