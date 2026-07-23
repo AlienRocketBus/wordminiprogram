@@ -27,4 +27,9 @@ window.HANSEN_LAND_SCENES = [
   'land_archeon.webp',    // Land4 Boss2 苍穹守卫·阿尔基昂
   'land_omiga.webp',      // Land4 Boss3 万械之神·奥米伽
   'land_argo.webp',       // Land4 Boss4 量子观测者·阿尔戈
+  'land_moyuan.webp',     // Land5 Boss1 画壁判官·墨渊（2026-07-23 交付）
+  'land_yecha.webp',      // Land5 Boss2 夜罗刹·红莲战鬼
+  'land_pohuai.webp',     // Land5 Boss3 破坏神·终焉之相
+  'land_mingwang.webp',   // Land5 Boss4 不动明王·焚天镇狱尊
+  'land_jianshen.webp',   // Land5 守关 剑神·万剑归一
 ];
