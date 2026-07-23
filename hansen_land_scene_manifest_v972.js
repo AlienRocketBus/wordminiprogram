@@ -32,4 +32,9 @@ window.HANSEN_LAND_SCENES = [
   'land_pohuai.webp',     // Land5 Boss3 破坏神·终焉之相
   'land_mingwang.webp',   // Land5 Boss4 不动明王·焚天镇狱尊
   'land_jianshen.webp',   // Land5 守关 剑神·万剑归一
+  'land_bengdai.webp',    // Land6 Boss1 诅咒之躯·绷带亡骸（2026-07-23 交付·绷带之厅版）
+  'land_anubis.webp',     // Land6 Boss2 亡灵咒术师·阿努比斯之影
+  'land_priest.webp',     // Land6 Boss3 古埃及大祭司·真理之口的裁决者
+  'land_pharaoh.webp',    // Land6 Boss4 法老王·不朽金身
+  'land_sphinx.webp',     // Land6 守关 天界守护者·黄金斯芬克斯
 ];
