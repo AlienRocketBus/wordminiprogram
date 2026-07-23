@@ -218,12 +218,18 @@ async function gotoIsland(page, file='island_animal.html'){
   ok(/land=1&card=L13/.test(src) && /lown=/.test(src), '殿堂iframe URL合同: '+src.slice(-46));
   const hall = page.frameLocator('#__hsn_landhall iframe');
   await hall.locator('#artImg').waitFor({ timeout: 10000 });
-  const hs = await hall.locator('html').evaluate(el=>({
-    land: el.classList.contains('landhall'),
-    art: (el.ownerDocument.getElementById('artImg')||{}).src||'',
-    blur: el.ownerDocument.getElementById('bgA').classList.contains('landblur') || el.ownerDocument.getElementById('bgB').classList.contains('landblur')   /* v972: 清单空→兜底层带landblur */
-  }));
-  ok(hs.land && hs.blur, '殿堂land模式·未交付卡走模糊兜底(清单门禁)');
+  const hs = await hall.locator('html').evaluate(el=>{
+    const A=el.ownerDocument.getElementById('bgA'), B=el.ownerDocument.getElementById('bgB');
+    const act=(A.style.opacity==='1')?A:B;
+    return {
+      land: el.classList.contains('landhall'),
+      art: (el.ownerDocument.getElementById('artImg')||{}).src||'',
+      bg: act.style.backgroundImage||'',
+      blur: act.classList.contains('landblur')
+    };
+  });
+  ok(hs.land, '殿堂进入land模式');
+  ok(/bosses_bg\/land_jingyuan/.test(hs.bg) && !hs.blur, '🔴v973 L13真实场景清晰直出(2026-07-23交付)');
   ok(/land_jingyuan/.test(hs.art), '起始卡立绘=L13镜渊领主');
   await page.click('#__hsn_landhall div[role=button]');
   await page.waitForTimeout(400);

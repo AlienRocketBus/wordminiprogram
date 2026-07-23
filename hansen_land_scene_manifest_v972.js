@@ -7,4 +7,9 @@
  * 未列入清单的卡：殿堂自动用立绘模糊兜底，不空窗、不发 404 探测。
  */
 window.HANSEN_LAND_SCENES = [
+  'land_renyi.webp',      // Land1 Boss1 虫群先锋·刃翼领主（2026-07-23 交付）
+  'land_wanxing.webp',    // Land1 Boss2 未成形之神·万形之胚
+  'land_jingyuan.webp',   // Land1 Boss3 逆相之影·镜渊领主
+  'land_hundun.webp',     // Land1 Boss4 混沌之种·万象侵蚀者
+  'land_mohuang.webp',    // Land1 守关 魔皇·小丑至尊
 ];
