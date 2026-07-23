@@ -286,6 +286,32 @@
     css+=_L+'.m-btn.sentence{background:linear-gradient(135deg,#b45309,#92400e)!important}\n';
     css+=_L+'.m-btn.got-it{background:linear-gradient(135deg,#16a34a,#15803d)!important}\n';
     css+=_L+'.game-btn{background:linear-gradient(135deg,#4f46e5,#4338ca)!important}\n';
+    // \U0001f534v988\u3256 \u4e13\u6ce8\u6253\u5b57\u5c4f\u65cf(htm-\xb7\u968f\u8272\u677f\u5e95): \u4eae\u5e95\u6d45\u5b57\u2192\u58a8/\u5f3a\u8c03
+    css+=_L+'.htm-complete{color:#334155!important}\n';
+    css+=_L+'.htm-complete h2{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    css+=_L+'.htm-complete p{color:#475569!important}\n';
+    css+=_L+'.htm-focus-head{color:#0f172a!important;text-shadow:none!important}\n';
+    css+=_L+'.htm-rule{color:#475569!important}\n';
+    css+=_L+'.htm-pause{color:#0f172a!important}\n';
+    css+=_L+'.htm-focus-feedback{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    // \U0001f534v988\u3257 \u6211\u7684\u5b66\u4e60\u9875\u65cf(hsn-ml-\xb7\u968f\u8272\u677f\u5e95)
+    css+=_L+'.hsn-ml-title,'+_L+'.hsn-ml-sec{color:#0f172a!important;text-shadow:none!important}\n';
+    css+=_L+'.hsn-ml-biglbl{color:#475569!important}\n';
+    css+=_L+'.hsn-ml-bignum{color:var(--pal-accent-text,#1e40af)!important}\n';
+    css+=_L+'.hsn-ml-empty{color:#64748b!important}\n';
+    // \U0001f534v988\u3258 \u730e\u4eba\u5956\u52b1\u5361(#hr_rvrw_card): \u73af\u5883\u514d\u75ab\u2014\u2014\u4eae\u677f\u4e0b\u56fa\u5316\u4e3a\u5b9e\u5fc3\u6df1\u7425\u73c0+\u6696\u5149\u58a8\u6c34, \u9875\u9762\u660e\u6697\u7686\u81ea\u6d3d
+    css+=_L+'#hr_rvrw_card{background:linear-gradient(135deg,#78350f,#92400e)!important;border-color:#f59e0b!important;color:#fde68a!important}\n';
+    css+=_L+'#hr_rvrw_card, '+_L+'#hr_rvrw_card *{--pal-ink:#fef3c7;--pal-ink-hi:#fde68a;--pal-ink-2:#fcd34d;--pal-ink-3:#e7cfa0;--pal-accent-text:#fbbf24}\n';
+    ['#fbbf24','#fde047','#fde68a','#facc15','#fcd34d'].forEach(function(gold){
+      css+=_L+'#hr_rvrw_card [style*="color:'+gold+'"]{color:'+gold+'!important}\n';
+    });
+    css+=_L+'#hr_rvrw_card [style*="color:#34d399"]{color:#34d399!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#64748b"]{color:#e7cfa0!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#c4b5fd"]{color:#f3e8ff!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#a5b4fc"]{color:#e0e7ff!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#cbd5e1"]{color:#fde68a!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#e2e8f0"]{color:#fef3c7!important}\n';
+    css+=_L+'#hr_rvrw_card [style*="color:#fff"]{color:#fff!important}\n';
     // 像素级实测补漏(边缘环取真实底色·非渐变平均): 最后 6 处
     css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // \u767d\u5b57\u538b\u5728\u56fe\u4e0a\u7684d-label\u901a\u7528\u6655
     // \U0001f534v987\u3253(\u6539\u5740\u81f3v928\u533a\u672b\xb7\u540e\u6765\u8005\u80dc\u538bL279/L292): \u6311\u6218BOSS\u6807\u7b7e\u5750\u7eaf\u4eae\u9ec4\u5361\u9762\u975eboss\u56fe\u4e0a\u2192\u58a8\u5b57(\u5df2\u7edf\u4e00\u70d9\u8272)\u514d\u6655\u5373\u9510

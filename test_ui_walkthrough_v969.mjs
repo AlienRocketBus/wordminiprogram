@@ -274,6 +274,38 @@ async function gotoIsland(page, file='island_animal.html'){
   await pgB.close();
 }
 
+
+/* ════ 场景8 · 🔴v988 亮色板补装修：专注打字结算/我的学习/猎人卡环境免疫 ════ */
+{
+  console.log('S8 亮色板补装修');
+  const pg = await freshPage();
+  await pg.addInitScript(()=>{ localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud'); });
+  await gotoIsland(pg);
+  const r = await pg.evaluate(()=>{
+    const probe=document.createElement('div');
+    probe.innerHTML='<div class="htm-complete"><h2>T</h2><p>D</p></div><div class="hsn-ml-title">M</div>';
+    document.body.appendChild(probe);
+    const out={ h2:getComputedStyle(probe.querySelector('h2')).color,
+                p:getComputedStyle(probe.querySelector('p')).color,
+                ml:getComputedStyle(probe.querySelector('.hsn-ml-title')).color };
+    probe.remove();
+    try{ if(window.HansenReview&&HansenReview._open) HansenReview._open(); }catch(e){}
+    return out;
+  });
+  ok(/55,\s*48,\s*163|30,\s*64,\s*175/.test(r.h2), '结算标题→强调色: '+r.h2);
+  ok(/71,\s*85,\s*105/.test(r.p), '结算正文→板岩深灰');
+  ok(/15,\s*23,\s*42/.test(r.ml), '我的学习标题→墨字');
+  await pg.waitForTimeout(900);
+  await pg.evaluate(()=>{ try{ document.dispatchEvent(new Event('visibilitychange')); }catch(e){} });
+  await pg.waitForTimeout(700);
+  const hc = await pg.evaluate(()=>{
+    const c=document.getElementById('hr_rvrw_card');
+    return c? { bg:getComputedStyle(c).backgroundImage.slice(0,60), fg:getComputedStyle(c).color } : null;
+  });
+  ok(hc && /120,\s*53,\s*15/.test(hc.bg) && /253,\s*230,\s*138/.test(hc.fg), '猎人卡环境免疫(实心深琥珀+暖金墨)');
+  await pg.close();
+}
+
 await browser.close(); srv.close();
 
 console.log('\n══ 全程错误采集 ══');
