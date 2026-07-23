@@ -498,8 +498,10 @@
   /* ---------- 🔴迭代3：首页"今日复习"触发横幅 ----------
    * 位置：daily-row 三卡正下方整宽注入；不改动 v954 三卡 HTML/几何基线。
    * 状态：本岛有到期 / 仅其它岛有 / 今日已清 / 无到期（安心态）。 */
+  var HR_URGENT_TH = 30; /* 🔴v985 紧急态阈值(可调): 全局到期≥此数触发红色警报 */
   function bannerState(info, s){
     var t = ymd();
+    if(info.globalDue >= HR_URGENT_TH) return 'urgent';
     if(info.globalDue > 0 && info.localDue > 0) return 'local';
     if(info.globalDue > 0) return 'cross';
     return (s.last === t && s.count > 0) ? 'done' : 'calm';
@@ -507,31 +509,43 @@
   function bannerModel(){
     var info = globalDueInfo(), s = streak(), st = bannerState(info, s);
     var fire = s.count > 0 ? ('🔥 '+s.count+' 天') : '';
+    if(st === 'urgent'){
+      /* 🔴v985 紧急态: 提醒不施压——呆萌拉警报, 口吻鼓励 */
+      return { st:st, img:'ui/brain_alarm.webp', icon:'⏰', bg:'linear-gradient(135deg,#ef4444,#b91c1c)',
+        title:'积压 '+info.globalDue+' 个词在排队啦',
+        sub:'一起冲一把 · '+(info.localDue>0?'点我从本岛开打':'点我去错题总览'), fire:fire };
+    }
     if(st === 'local'){
       var extra = info.globalDue - info.localDue;
-      return { st:st, icon:'📬', bg:'linear-gradient(135deg,#f59e0b,#d97706)',
+      return { st:st, img:'ui/brain_mail.webp', icon:'📬', bg:'linear-gradient(135deg,#f59e0b,#d97706)',
         title:'今日复习 · 本岛 '+info.localDue+' 个词到期'+(extra>0?(' · 全部 '+info.globalDue):''),
         sub:'点我开始 · 完成 +20 金币', fire:fire };
     }
     if(st === 'cross'){
-      return { st:st, icon:'🧭', bg:'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+      return { st:st, img:'ui/brain_explorer.webp', icon:'🧭', bg:'linear-gradient(135deg,#8b5cf6,#6d28d9)',
         title:'其它岛还有 '+info.globalDue+' 个词到期',
         sub:'点我去错题总览 · 跨岛清完不断签', fire:fire };
     }
     var pd = info.patrolDue|0;
     var pTail = pd > 0 ? (' · 👻巡检 '+pd) : '';
     if(st === 'done'){
-      return { st:st, icon:'✅', bg:'linear-gradient(135deg,#10b981,#059669)',
+      return { st:st, img:'ui/brain_champion.webp', icon:'✅', bg:'linear-gradient(135deg,#10b981,#059669)',
         title:'今日复习已清空',
         sub:'连击保住了 · 明天见'+pTail, fire:fire };
     }
-    return { st:'calm', icon:'🧠', bg:'linear-gradient(135deg,#334155,#1e293b)',
+    return { st:'calm', img:'ui/brain_rest.webp', icon:'🧠', bg:'linear-gradient(135deg,#334155,#1e293b)',
       title:'今天没有要复习的单词',
       sub: pd > 0 ? ('👻 '+pd+' 个毕业词到了巡检期 · 玩任意游戏偶遇即测') : '大脑正在悄悄记牢它们', fire:fire };
   }
   function bannerClick(){
     var m = bannerModel();
     try{
+      if(m.st === 'urgent'){
+        var gi = globalDueInfo();
+        if(gi.localDue > 0 && window.HansenReview && typeof HansenReview._openToday === 'function'){ HansenReview._openToday(); return; }
+        var UO = window.HansenWrongOverview;
+        if(UO){ if(typeof UO.open === 'function'){ UO.open(); return; } if(typeof UO._open === 'function'){ UO._open(); return; } }
+      }
       if(m.st === 'local' && window.HansenReview && typeof HansenReview._openToday === 'function'){ HansenReview._openToday(); return; }
       if(m.st === 'cross'){
         var O = window.HansenWrongOverview;
@@ -561,8 +575,16 @@
       var m = bannerModel();
       el.style.background = m.bg;
       el.setAttribute('aria-label', m.title+'。'+m.sub);
+      /* 🔴v985 大脑五态真图标: img优先, 加载失败回退emoji */
+      var iconHtml;
+      if(m.img){
+        iconHtml = '<img src="'+m.img+'?v=985" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" '
+          + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:30px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)">';
+      } else {
+        iconHtml = '<span style="font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" aria-hidden="true">'+m.icon+'</span>';
+      }
       el.innerHTML =
-        '<span style="font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" aria-hidden="true">'+m.icon+'</span>'+
+        iconHtml+
         '<span style="flex:1;min-width:0">'+
           '<span style="display:block;font-size:14.5px;font-weight:800;line-height:1.35">'+m.title+'</span>'+
           '<span style="display:block;font-size:11.5px;opacity:.92;line-height:1.4">'+m.sub+'</span>'+

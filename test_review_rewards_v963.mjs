@@ -170,6 +170,10 @@ console.log('T9 横幅状态机');
   ok(M._debug.bannerState({globalDue:0, localDue:0}, {last:'', count:0}) === 'calm',   '无到期未打卡 → calm');
   const mLocal = M._debug.bannerModel();
   ok(/本岛 3/.test(mLocal.title) && /全部 4/.test(mLocal.title), '横幅文案含本岛/全部双数字');
+  /* 🔴v985 紧急态合同: 阈值30(可调)·边界29仍local */
+  ok(M._debug.bannerState({globalDue:30, localDue:5}, {last:'', count:0}) === 'urgent', '积压≥30 → urgent(v985新态)');
+  ok(M._debug.bannerState({globalDue:29, localDue:5}, {last:'', count:0}) === 'local',  '边界29 → 仍local');
+  ok(M._debug.bannerState({globalDue:80, localDue:0}, {last:'', count:0}) === 'urgent', '仅跨岛积压80 → 也urgent');
 }
 
 /* T10: 🔴刺一·SRS吸收器接入（包装层喂真实答题·毕业双路径防双发） */
