@@ -23,4 +23,8 @@ window.HANSEN_LAND_SCENES = [
   'land_wandian.webp',    // Land3 Boss3 万典之灵·未被写下的故事
   'land_sijilong.webp',   // Land3 Boss4 凋零与新生之龙·四季轮转
   'abysslord.webp',       // Land4 守关 无光之渊·暗噬君主（复用星海觉醒五杰现货场景·2026-07-23 融合）
+  's1_assembler.webp',    // Land4 Boss1 机械主教·组装者（2026-07-23 交付）
+  'land_archeon.webp',    // Land4 Boss2 苍穹守卫·阿尔基昂
+  'land_omiga.webp',      // Land4 Boss3 万械之神·奥米伽
+  'land_argo.webp',       // Land4 Boss4 量子观测者·阿尔戈
 ];
