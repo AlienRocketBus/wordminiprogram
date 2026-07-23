@@ -40,4 +40,8 @@ window.HANSEN_LAND_SCENES = [
   'lightangel.webp',      // Land7 Boss4 统御天使·圣光之翼（复用星海觉醒五杰现货场景·2026-07-23 融合）
   'starmaker.webp',       // Land7 守关 铸星者·原初匠人（复用星海觉醒五杰现货场景·2026-07-23 融合）
   'observer.webp',        // Land8 Boss3 终末观测者·边界守夜人（复用星海觉醒五杰现货场景·2026-07-23 融合）
+  'land_poxiao.webp',     // Land8 Boss1 破晓仲裁者·索拉里斯（2026-07-23 交付）
+  'land_solaris.webp',    // Land8 Boss2 天启征服者·索拉里斯
+  's1_ancientwill.webp',  // Land8 Boss4 活体行星·古老意志
+  'land_fushaou.webp',    // Land8 守关 星核帝皇·弗沙欧
 ];
