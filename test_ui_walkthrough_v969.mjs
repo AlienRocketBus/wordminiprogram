@@ -306,6 +306,42 @@ async function gotoIsland(page, file='island_animal.html'){
   await pg.close();
 }
 
+
+/* ════ 场景9 · 🔴v991 浮层真双色调分离：亮色=亮底深字 / 暗色=深底浅字 ════ */
+{
+  console.log('S9 浮层双色调分离');
+  const lum=(c)=>{const m=(c||'').match(/(\d+),\s*(\d+),\s*(\d+)/); return m? (+m[1]*.299+ +m[2]*.587+ +m[3]*.114) : -1;};
+  for(const [pal, wantLightBg] of [['cloud', true], [null, false]]){
+    const pg = await freshPage();
+    await pg.addInitScript(p=>{ localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
+      const wr={}; for(let i=0;i<7;i++) wr[String(i)]=1;
+      localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
+    }, pal);
+    await gotoIsland(pg);
+    await pg.evaluate(()=>{ try{ if(window.HansenSpellPractice) HansenSpellPractice.openSpellByListen(); }catch(e){} });
+    await pg.waitForTimeout(1200);
+    const r = await pg.evaluate(()=>{
+      const m=document.getElementById('hsp_mask'); if(!m) return null;
+      const cs=getComputedStyle(m);
+      const t=[]; const walk=(el)=>{ el.childNodes.forEach(n=>{
+        if(n.nodeType===3&&n.textContent.trim().length>=2) t.push(getComputedStyle(el).color);
+        else if(n.nodeType===1) walk(n); });};
+      walk(m);
+      return { bg:(cs.backgroundImage!=='none'?cs.backgroundImage:cs.backgroundColor), texts:t.slice(0,10) };
+    });
+    const tag = pal ? '亮色板' : '暗色板';
+    ok(!!r, tag+' 拼写层已打开');
+    if(r){
+      const bgLight = /248,\s*250,\s*252|255,\s*255,\s*255/.test(r.bg);
+      ok(bgLight === wantLightBg, tag+' 底色方向正确(亮底='+bgLight+')');
+      const vals = r.texts.filter(c=>lum(c)>=0);
+      const darkRatio = vals.filter(c=>lum(c)<150).length / Math.max(vals.length,1);
+      ok(wantLightBg ? darkRatio>=0.75 : darkRatio<=0.5, tag+' 文字方向正确(暗字占比'+darkRatio.toFixed(2)+')');
+    }
+    await pg.close();
+  }
+}
+
 await browser.close(); srv.close();
 
 console.log('\n══ 全程错误采集 ══');
