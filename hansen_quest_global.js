@@ -17,32 +17,35 @@
     {id:'learn3',icon:'📚',title:'学会 3 个新单词',goal:3,type:'learn',reward:{xp:20}},
     {id:'learn5',icon:'📖',title:'学会 5 个新单词',goal:5,type:'learn',reward:{xp:30}},
     {id:'learn10',icon:'🎓',title:'学会 10 个新单词',goal:10,type:'learn',reward:{xp:60}},
+    {id:'review3',icon:'🔄',title:'复习单词 · 巩固 3 个',goal:3,type:'review',reward:{xp:25}},
+    {id:'review6',icon:'🧠',title:'复习单词 · 巩固 6 个',goal:6,type:'review',reward:{xp:50}},
+    {id:'reviewClear',icon:'✨',title:'复习单词 · 清空今日复习',goal:1,type:'reviewClear',reward:{xp:70}},
     {id:'boss1',icon:'🗡️',title:'击败 1 次挑战',goal:1,type:'boss',reward:{xp:25}},
     {id:'boss3',icon:'🐉',title:'击败 3 次 Boss',goal:3,type:'boss',reward:{xp:70}},
     {id:'correct20',icon:'✅',title:'累计答对 20 题',goal:20,type:'correct',reward:{xp:30}},
     {id:'correct50',icon:'💯',title:'累计答对 50 题',goal:50,type:'correct',reward:{xp:80}},
-    {id:'listen10',icon:'🔊',title:'听音模式答对 10 次',goal:10,type:'listen',reward:{xp:25}},
-    {id:'listen20',icon:'🎧',title:'听音模式答对 20 次',goal:20,type:'listen',reward:{xp:60}},
-    {id:'cloze5',icon:'📝',title:'填空答对 5 题',goal:5,type:'cloze',reward:{xp:25}},
-    {id:'cloze10',icon:'✍️',title:'填空答对 10 题',goal:10,type:'cloze',reward:{xp:55}},
-    {id:'scramble1',icon:'🔤',title:'拼词游戏 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50}},
-    {id:'scramble3',icon:'⭐',title:'拼词大师 · 完成 3 轮',goal:3,type:'scramble',reward:{xp:120}},
-    {id:'scramble5',icon:'🏆',title:'拼词冠军 · 完成 5 轮',goal:5,type:'scramble',reward:{xp:200}},
-    {id:'type5',icon:'⌨️',title:'打字模式完成 5 词',goal:5,type:'type',reward:{xp:30}},
-    {id:'type15',icon:'⚡',title:'打字模式完成 15 词',goal:15,type:'type',reward:{xp:80}},
-    {id:'type30',icon:'🔥',title:'打字飞人 · 完成 30 词',goal:30,type:'type',reward:{xp:160}},
-    {id:'match1',icon:'🃏',title:'完成 1 次翻牌游戏',goal:1,type:'match',reward:{xp:20}},
-    {id:'match3',icon:'🎴',title:'完成 3 次翻牌游戏',goal:3,type:'match',reward:{xp:65}},
+    {id:'listen10',icon:'🔊',title:'听音辨义 · 答对 10 次',goal:10,type:'listen',reward:{xp:25}},
+    {id:'listen20',icon:'🎧',title:'听音辨义 · 答对 20 次',goal:20,type:'listen',reward:{xp:60}},
+    {id:'cloze5',icon:'📝',title:'完形填空 · 答对 5 题',goal:5,type:'cloze',reward:{xp:25}},
+    {id:'cloze10',icon:'✍️',title:'完形填空 · 答对 10 题',goal:10,type:'cloze',reward:{xp:55}},
+    {id:'scramble1',icon:'🔤',title:'字母拼拼乐 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50}},
+    {id:'scramble3',icon:'⭐',title:'字母拼拼乐 · 完成 3 轮',goal:3,type:'scramble',reward:{xp:120}},
+    {id:'scramble5',icon:'🏆',title:'字母拼拼乐 · 完成 5 轮',goal:5,type:'scramble',reward:{xp:200}},
+    {id:'type5',icon:'⌨️',title:'打字大师 · 完成 5 词',goal:5,type:'type',reward:{xp:30}},
+    {id:'type15',icon:'⚡',title:'打字大师 · 完成 15 词',goal:15,type:'type',reward:{xp:80}},
+    {id:'type30',icon:'🔥',title:'打字大师 · 完成 30 词',goal:30,type:'type',reward:{xp:160}},
+    {id:'match1',icon:'🃏',title:'记忆翻牌 · 完成 1 轮',goal:1,type:'match',reward:{xp:20}},
+    {id:'match3',icon:'🎴',title:'记忆翻牌 · 完成 3 轮',goal:3,type:'match',reward:{xp:65}},
     {id:'moles1',icon:'🎯',title:'打地鼠 · 完成 1 轮',goal:1,type:'moles',reward:{xp:30}},
     {id:'moles3',icon:'🎪',title:'打地鼠 · 完成 3 轮',goal:3,type:'moles',reward:{xp:80}},
     {id:'fish1',icon:'🎣',title:'钓鱼 · 完成 1 轮',goal:1,type:'fish',reward:{xp:30}},
     {id:'fish3',icon:'🐟',title:'钓鱼 · 完成 3 轮',goal:3,type:'fish',reward:{xp:80}},
     {id:'eagle1',icon:'👀',title:'火眼金睛 · 完成 1 轮',goal:1,type:'eagle',reward:{xp:30}},
     {id:'eagle3',icon:'🦅',title:'火眼金睛 · 完成 3 轮',goal:3,type:'eagle',reward:{xp:80}},
-    {id:'bubble30',icon:'🫧',title:'泡泡模式得 30 分',goal:30,type:'bubble',reward:{xp:20}},
-    {id:'bubble60',icon:'💧',title:'泡泡模式得 60 分',goal:60,type:'bubble',reward:{xp:60}},
-    {id:'speed200',icon:'⚡',title:'极速模式得 200 分',goal:200,type:'speed',reward:{xp:35}},
-    {id:'speed500',icon:'⚡⚡',title:'极速模式得 500 分',goal:500,type:'speed',reward:{xp:100}}
+    {id:'bubble30',icon:'🫧',title:'泡泡大作战 · 得 30 分',goal:30,type:'bubble',reward:{xp:20}},
+    {id:'bubble60',icon:'💧',title:'泡泡大作战 · 得 60 分',goal:60,type:'bubble',reward:{xp:60}},
+    {id:'speed200',icon:'⚡',title:'极速60秒 · 得 200 分',goal:200,type:'speed',reward:{xp:35}},
+    {id:'speed500',icon:'⚡⚡',title:'极速60秒 · 得 500 分',goal:500,type:'speed',reward:{xp:100}}
   ];
   var BY_ID = {};
   for (var pi = 0; pi < POOL.length; pi++) BY_ID[POOL[pi].id] = POOL[pi];
@@ -108,15 +111,28 @@
       if (!byType[q.type]) byType[q.type] = [];
       byType[q.type].push(q);
     }
-    var types = Object.keys(byType).filter(function (t) { return t !== 'scramble' && t !== 'type'; });
-    shuffle(types, random);
-    types = ['scramble', 'type'].concat(types.slice(0, 5));
-    var list = [];
-    for (var k = 0; k < types.length; k++) {
-      var choices = byType[types[k]];
-      var item = clone(choices[Math.floor(random() * choices.length)]);
-      item.progress = 0; item.claimed = false; list.push(item);
-    }
+    /* 🔴v1000 科学重设: 每天 12 个 = 3 固定基石(学新词+复习+打Boss) + 9 随机, 类型不重复 */
+    var pickType = function(t){ var arr=byType[t]; if(!arr||!arr.length) return null;
+      return clone(arr[Math.floor(random()*arr.length)]); };
+    var used = {}, list = [];
+    var addByType = function(t){ if(used[t]) return false; var it=pickType(t); if(!it) return false;
+      used[t]=1; it.progress=0; it.claimed=false; list.push(it); return true; };
+    var addReview = function(){ if(used['review']||used['reviewClear']) return false;
+      var pool=(byType['review']||[]).concat(byType['reviewClear']||[]); if(!pool.length) return false;
+      var it=clone(pool[Math.floor(random()*pool.length)]); used[it.type]=1;
+      it.progress=0; it.claimed=false; list.push(it); return true; };
+    /* ★ 基石: 学新词 / 复习单词 / 打Boss —— 用户明确要求每天必有 */
+    var _noNew=false; try{ _noNew=(typeof S!=='undefined'&&S.learned&&typeof allW!=='undefined'&&allW&&S.learned.length>=allW.length);}catch(e){}
+    if(!_noNew) addByType('learn');
+    addReview();
+    addByType('boss');
+    /* 拼写重头戏优先各抽 1 */
+    addByType('scramble'); addByType('type');
+    /* 其余按类型不重复随机补至 12 */
+    var rest = Object.keys(byType).filter(function(t){
+      return !used[t] && t!=='reviewClear' && !(_noNew && t==='learn'); });
+    shuffle(rest, random);
+    for(var r=0; r<rest.length && list.length<12; r++) addByType(rest[r]);
     shuffle(list, random);
     return {version:VERSION, day:day, list:list, allDay:''};
   }
@@ -124,7 +140,7 @@
   /* 返回纯净副本；绝不修改、也绝不把不可信对象直接镜像给 UI。 */
   function sanitizeState(raw, expectedDay) {
     if (!raw || (raw.version !== 941 && raw.version !== VERSION) || raw.day !== expectedDay ||
-        !Array.isArray(raw.list) || raw.list.length !== 7) return null;
+        !Array.isArray(raw.list) || raw.list.length < 1 || raw.list.length > 12) return null;/*🔴v1000: 7→≤12*/
     var ids = {}, types = {}, list = [];
     for (var i = 0; i < raw.list.length; i++) {
       var saved = raw.list[i];
