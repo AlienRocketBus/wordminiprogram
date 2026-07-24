@@ -134,14 +134,22 @@ for(const [name, fn, id] of OVERLAYS){
     if(!ov) return {skip:true};
     const bad=[]; const cs0=getComputedStyle(ov);
     const bg=cs0.backgroundImage+' '+cs0.backgroundColor;
+    const L=(c)=>{const q=(c||'').match(/(\d+),\s*(\d+),\s*(\d+)/);return q?(+q[1]*.299+ +q[2]*.587+ +q[3]*.114):-1;};
+    /* 🔴v991 判据升级：按浮层实际底色明暗判方向(浮层已支持双色调分离) */
+    const firstStop=(bg.match(/rgba?\([^)]+\)/)||[])[0];
+    const bgLum=L(firstStop);
+    const wantDarkText = bgLum>170;
     const walk=(el)=>{ el.childNodes.forEach(n=>{
       if(n.nodeType===3 && n.textContent.trim().length>=2){
-        const c=getComputedStyle(el).color;
-        const m=c.match(/(\d+),\s*(\d+),\s*(\d+)/);
-        if(m){ const lum=(+m[1]*.299+ +m[2]*.587+ +m[3]*.114);
-          /* 固定深幕上的字必须够亮(>110)或为金/黑按钮字 */
-          if(lum<110 && !(+m[1]>200&&+m[2]>150) && lum>25) bad.push([n.textContent.trim().slice(0,8), c]);
-        }
+        /* 只审"直接坐在浮层底上"的字：跳过有自身背景的卡片内文字 */
+        let onBase=true, c2=el;
+        while(c2 && c2!==ov){ const s=getComputedStyle(c2);
+          if((s.backgroundImage&&s.backgroundImage!=='none')||!/rgba\(0, 0, 0, 0\)/.test(s.backgroundColor)){ onBase=false; break; }
+          c2=c2.parentElement; }
+        if(!onBase) return;
+        const c=getComputedStyle(el).color; const lv=L(c);
+        if(lv<0) return;
+        if(wantDarkText ? lv>170 : lv<110) bad.push([n.textContent.trim().slice(0,8), c]);
       } else if(n.nodeType===1){ walk(n); }
     });};
     walk(ov);
