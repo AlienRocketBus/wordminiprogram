@@ -318,6 +318,30 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v998: 全局灰底根治合同——半透深底在亮色调下必须翻白玻璃 */
+    const grey = await pg.evaluate(()=>{
+      const probe=document.createElement('div');
+      probe.innerHTML=
+        '<div style="background:rgba(0,0,0,.5);color:#fff;padding:6px" id="G1">金币 +8 <span style="color:#a78bfa">经验 +165</span></div>'+
+        '<div style="background:rgba(15,23,42,.64);color:#cbd5e1;padding:6px" id="G2">总用时</div>'+
+        '<div style="background:rgba(30,41,59,.6);color:#fff;padding:6px" id="G3">状态</div>';
+      document.body.appendChild(probe);
+      const g=(id)=>{const e=document.getElementById(id); const cs=getComputedStyle(e);
+        const sp=e.querySelector('span');
+        return {bg:cs.backgroundColor, fg:cs.color, sub:sp?getComputedStyle(sp).color:null};};
+      const o={g1:g('G1'), g2:g('G2'), g3:g('G3')};
+      probe.remove(); return o;
+    });
+    for(const k of ['g1','g2','g3']){
+      const v=grey[k];
+      if(wantLightBg){
+        ok(lum(v.bg)>200, '亮色板 半透深底→白玻璃('+k+'): 底亮度'+lum(v.bg).toFixed(0));
+        ok(lum(v.fg)<130, '亮色板 卡内文字转墨('+k+')');
+      } else {
+        ok(lum(v.fg)>150, '暗色板 保持浅字('+k+')');
+      }
+    }
+
     /* 🔴v996: 完形填空亮色装修合同(句卡白底+高亮词醒目) */
     await pg.evaluate(()=>{ try{ showScreen('cloze'); if(typeof startClozeLevel==='function') startClozeLevel('hard'); }catch(e){} });
     await pg.waitForTimeout(1600);
