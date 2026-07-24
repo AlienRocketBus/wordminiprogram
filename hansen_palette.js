@@ -295,10 +295,7 @@
     css+=_L+'.htm-pause{color:#0f172a!important}\n';
     css+=_L+'.htm-focus-feedback{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
     // \U0001f534v988\u3257 \u6211\u7684\u5b66\u4e60\u9875\u65cf(hsn-ml-\xb7\u968f\u8272\u677f\u5e95)
-    css+=_L+'.hsn-ml-title,'+_L+'.hsn-ml-sec{color:#0f172a!important;text-shadow:none!important}\n';
-    css+=_L+'.hsn-ml-biglbl{color:#475569!important}\n';
-    css+=_L+'.hsn-ml-bignum{color:var(--pal-accent-text,#1e40af)!important}\n';
-    css+=_L+'.hsn-ml-empty{color:#64748b!important}\n';
+    /* \U0001f534v992: v988\u3257 \u65e7\u89c4(\u4ec5\u6539\u6587\u5b57\u8272)\u5df2\u64a4\u2014\u2014\u6539\u7531\u325d \u6574\u5c42\u53cc\u8272\u8c03\u5206\u79bb\u63a5\u7ba1 */
     // \U0001f534v988\u3258 \u730e\u4eba\u5956\u52b1\u5361(#hr_rvrw_card): \u73af\u5883\u514d\u75ab\u2014\u2014\u4eae\u677f\u4e0b\u56fa\u5316\u4e3a\u5b9e\u5fc3\u6df1\u7425\u73c0+\u6696\u5149\u58a8\u6c34, \u9875\u9762\u660e\u6697\u7686\u81ea\u6d3d
     css+=_L+'#hr_rvrw_card{background:linear-gradient(135deg,#78350f,#92400e)!important;border-color:#f59e0b!important;color:#fde68a!important}\n';
     css+=_L+'#hr_rvrw_card, '+_L+'#hr_rvrw_card *{--pal-ink:#fef3c7;--pal-ink-hi:#fde68a;--pal-ink-2:#fcd34d;--pal-ink-3:#e7cfa0;--pal-accent-text:#fbbf24}\n';
@@ -399,6 +396,27 @@
       css+=_L+ov+' .hr_stat .num{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
       css+=_L+ov+' .hr_stat .lbl{color:#475569!important}\n';
     });
+    // \U0001f534v992\u325d \u6211\u7684\u5b66\u4e60\u9875(#hsn-ml) \u771f\u53cc\u8272\u8c03\u5206\u79bb\u2014\u2014\u540c\u65cf\u6700\u540e\u4e00\u4e2a\u6df1\u5e95\u6d6e\u5c42
+    // v988\u3257 \u66fe\u53ea\u6539\u6587\u5b57\u8272(\u5e95\u4ecd\u6df1\u7d2b) \u2192 \u5c9b\u5c7f\u540d\u6df1\u5b57\u538b\u6df1\u5e95\u5168\u7cca; \u672c\u7248\u6539\u4e3a\u6574\u5c42\u7ffb\u4eae
+    css+=_L+'#hsn-ml{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 55%,#e0e7ff 100%)!important}\n';
+    css+=_L+'#hsn-ml, '+_L+'#hsn-ml *{--pal-ink:#0f172a;--pal-ink-hi:#020617;--pal-ink-2:#334155;--pal-ink-3:#64748b}\n';
+    /* \u5750\u6d45\u5e95\u7684\u5c42\u7ea7\u6587\u5b57 \u2192 \u58a8\u5b57\u7cfb */
+    css+=_L+'#hsn-ml .hsn-ml-title{color:#0f172a!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-sec{color:#334155!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-empty{color:#64748b!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-foot,'+_L+'#hsn-ml .cnt{color:#4338ca!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-back{background:rgba(15,23,42,.08)!important;color:#334155!important}\n';
+    /* \u5c9b\u5c7f\u884c\u5361: \u534a\u900f\u767d\u5757\u2192\u6d45\u73bb\u7483, \u5c9b\u540d\u4e0e\u6570\u636e\u8f6c\u58a8 */
+    css+=_L+'#hsn-ml .hsn-ml-isl{background:rgba(255,255,255,.75)!important;border-color:rgba(15,23,42,.10)!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .nm{color:#0f172a!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .ago{color:#64748b!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .row2,'+_L+'#hsn-ml .hsn-ml-isl .l{color:#475569!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .v{color:#0f172a!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-bar{background:rgba(15,23,42,.12)!important}\n';
+    /* \u5f69\u8272\u5361\u7247(\u6982\u89c8\u7d2b\u5361/\u7eff\u8272\u5b8c\u6210\u6761/\u91d1\u5361)\u5185\u767d\u5b57\u4fdd\u6301 */
+    css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#064e3b,#065f46)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#7c2d12,#9a3412)"] *{color:#fff!important}\n';
+    css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] .hsn-ml-bignum{color:#fde047!important}\n';
+    css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] .hsn-ml-biglbl{color:#cbd5e1!important}\n';
 css+=_L+'#hr_toast, '+_L+'#hr_toast *,'+_L+'#hr_empty_msg, '+_L+'#hr_empty_msg *,'+_L+'#hr_to_sub_mask, '+_L+'#hr_to_sub_mask *{--pal-ink:#f1f5f9;--pal-ink-hi:#fff;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8;--pal-accent-text:#fbbf24}\n';
 
     // \U0001f534v991\u325b \u62fc\u5199\u7ec3\u4e60\u5c42(#hsp_mask) \u771f\u53cc\u8272\u8c03\u5206\u79bb

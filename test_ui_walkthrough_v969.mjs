@@ -283,7 +283,7 @@ async function gotoIsland(page, file='island_animal.html'){
   await gotoIsland(pg);
   const r = await pg.evaluate(()=>{
     const probe=document.createElement('div');
-    probe.innerHTML='<div class="htm-complete"><h2>T</h2><p>D</p></div><div class="hsn-ml-title">M</div>';
+    probe.innerHTML='<div class="htm-complete"><h2>T</h2><p>D</p></div><div id="hsn-ml"><div class="hsn-ml-title">M</div></div>';
     document.body.appendChild(probe);
     const out={ h2:getComputedStyle(probe.querySelector('h2')).color,
                 p:getComputedStyle(probe.querySelector('p')).color,
@@ -294,7 +294,7 @@ async function gotoIsland(page, file='island_animal.html'){
   });
   ok(/55,\s*48,\s*163|30,\s*64,\s*175/.test(r.h2), '结算标题→强调色: '+r.h2);
   ok(/71,\s*85,\s*105/.test(r.p), '结算正文→板岩深灰');
-  ok(/15,\s*23,\s*42/.test(r.ml), '我的学习标题→墨字');
+  ok(/15,\s*23,\s*42/.test(r.ml), '我的学习标题→墨字(v992起由#hsn-ml整层双色调接管)');
   await pg.waitForTimeout(900);
   await pg.evaluate(()=>{ try{ document.dispatchEvent(new Event('visibilitychange')); }catch(e){} });
   await pg.waitForTimeout(700);
@@ -318,6 +318,25 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v992: 我的学习页同族合同 */
+    await pg.evaluate(()=>{ try{ if(window.HansenMyLearning&&HansenMyLearning._open) HansenMyLearning._open(); }catch(e){} });
+    await pg.waitForTimeout(1100);
+    const ml = await pg.evaluate(()=>{
+      const m=document.getElementById('hsn-ml'); if(!m) return null;
+      const cs=getComputedStyle(m);
+      const isl=m.querySelector('.hsn-ml-isl .nm');
+      return { bg:(cs.backgroundImage!=='none'?cs.backgroundImage:cs.backgroundColor), nm: isl? getComputedStyle(isl).color : null };
+    });
+    if(ml){
+      const mlLight = /248,\s*250,\s*252/.test(ml.bg);
+      ok(mlLight === wantLightBg, (pal?'亮色板':'暗色板')+' 我的学习页底色方向正确');
+      if(ml.nm){
+        const nl = lum(ml.nm);
+        ok(wantLightBg ? nl<150 : nl>140, (pal?'亮色板':'暗色板')+' 岛屿名文字方向正确');
+      }
+    }
+    await pg.evaluate(()=>{ try{ if(window.HansenMyLearning&&HansenMyLearning._close) HansenMyLearning._close(); }catch(e){} });
+    await pg.waitForTimeout(500);
     await pg.evaluate(()=>{ try{ if(window.HansenSpellPractice) HansenSpellPractice.openSpellByListen(); }catch(e){} });
     await pg.waitForTimeout(1200);
     const r = await pg.evaluate(()=>{
