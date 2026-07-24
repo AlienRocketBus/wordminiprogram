@@ -312,6 +312,45 @@
     css+=_L+'#hr_rvrw_card [style*="color:#cbd5e1"]{color:#fde68a!important}\n';
     css+=_L+'#hr_rvrw_card [style*="color:#e2e8f0"]{color:#fef3c7!important}\n';
     css+=_L+'#hr_rvrw_card [style*="color:#fff"]{color:#fff!important}\n';
+    // \U0001f534v989\u3259 \u4eae\u8272\u5168\u7ebf\u5ba1\u8ba1\u6839\u6cbb(\u5ba1\u8ba1\u673av3\u5224\u51b3\xb79\u7ec4): \u665a\u4f4d\u538b\u8fc7v928\u65e7\u89c4
+    // A \u6210\u5c31\u603b\u8fdb\u5ea6\u5361: L249\u628a\u5e95\u7ffb\u6d45\u540eL141\u6b8b\u7559\u6d45\u5b57 \u2192 \u7edf\u4e00\u58a8\u5b57+\u91d1\u8fd8\u539f
+    css+=_L+'.ach-total,'+_L+'.ach-total *{color:#334155!important}\n';
+    ['#fbbf24','#fde047','#fde68a','#facc15','#fcd34d'].forEach(function(gold){
+      css+=_L+'.ach-total [style*="color:'+gold+'"]{color:#b45309!important}\n';
+    });
+    // B \u6210\u5c31\u5361\u811a\u6d45\u84dd\u8ba1\u6570
+    css+=_L+'.ach-prog-txt{color:#1d4ed8!important}\n';
+    // C \u5ba0\u7269\u82f1\u96c4\u5361\u5168\u5bb6(\u5e95\u5df2\u7ffb\u6d45\xb7\u5b57\u672a\u8ddf\u4e0a)
+    css+=_L+'#petScreen .psw-nmrow,'+_L+'#petScreen .psw-nmrow *{color:#334155!important}\n';
+    css+=_L+'.psw-hero .sg{color:#b45309!important}\n';
+    css+=_L+'.psw-hero .qt,'+_L+'.psw-barlab{color:#475569!important}\n';
+    css+=_L+'.psw-barlab b{color:#1c2942!important}\n';
+    css+=_L+'.lkk{color:#334155!important}\n';
+    // D \u7edf\u8ba1\u6df1\u84dd\u63d0\u793a\u6761: L274\u665a\u4e8eL218\u7684\u8d8a\u6743\u590d\u4f4d
+    css+=_L+'[style*="background:#1e1b4b"] [style*="color:#cbd5e1"],'+_L+'[style*="background: #1e1b4b"] [style*="color:#cbd5e1"]{color:#e2e8f0!important}\n';
+    // E \u7edf\u8ba1\u6df1\u7ea2\u74e6\u7247\u5185\u91d1\u5b57\u8fd8\u539f
+    css+=_L+'[style*="linear-gradient(135deg,#7f1d1d"] [style*="color:#fde047"],'+_L+'[style*="linear-gradient(135deg,#7f1d1d"] [style*="color:#fbbf24"]{color:#fde047!important}\n';
+    // F Boss\u4e3b\u9898\u9009\u62e9\u5668\u8272\u5757\u6807\u7b7e: \u767d\u5b57+\u62a4\u6655\u4e0d\u5f97\u88ab\u52ab
+    css+=_L+'#hsnBossThemePicker [style*="color:#fff"]{color:#fff!important}\n';
+    // G \u4e3b\u9898\u9884\u89c8\u5361(\u56fa\u5b9a\u6df1\u8272\u5c0f\u7a97)\u5185\u91d1\u5b57\u8fd8\u539f
+    css+=_L+'#themeBox [style*="color:#fbbf24"],'+_L+'#themeBox [style*="color:#fde047"]{color:#fbbf24!important}\n';
+    // D2 \u6df1\u84dd\u74e6\u7247\u6e10\u53d8\u5199\u6cd5\u8865\u9057
+    css+=_L+'[style*="linear-gradient(135deg,#1e1b4b"] [style*="color:#cbd5e1"]{color:#e2e8f0!important}\n';
+    // G2 \u4e3b\u9898\u9884\u89c8\u5361\u767d\u5b57\u8fd8\u539f(\u81ea\u5e26\u62a4\u6655)
+    css+=_L+'#themeBox [style*="color:#fff"]{color:#fff!important}\n';
+    // E2 \u91d1\u4e38\u5976\u6cb9\u5b57\u8f6c\u6df1\u68d5(\u9876\u680f\u4efb\u52a1\u4e38)
+    css+=_L+'[style*="linear-gradient(90deg,#fbbf24"] [style*="color:#fef3c7"]{color:#7c2d12!important}\n';
+    // D3 \u6df1\u84dd\u7edf\u8ba1\u5361\u5185\u5c0f\u74e6\u7247\u56de\u6df1(\u6574\u5361\u5c5e\u56fa\u5b9a\u6df1\u8bbe\u8ba1\xb7\u5185\u74e6\u4e0d\u5f97\u88ab\u901a\u7528\u94a9\u5b50\u7ffb\u4eae)
+    css+=_L+'[style*="linear-gradient(135deg,#1e1b4b"] [style*="background:#0f172a"],'+_L+'[style*="background:#1e1b4b"] [style*="background:#0f172a"]{background:#0f172a!important}\n';
+    css+=_L+'[style*="linear-gradient(135deg,#1e1b4b"] [style*="background:#1e293b"],'+_L+'[style*="background:#1e1b4b"] [style*="background:#1e293b"]{background:#1e293b!important}\n';
+    // E3 \u6df1\u7ea2\u74e6\u5185\u6d45\u7070\u56de\u6d45
+    css+=_L+'[style*="linear-gradient(135deg,#7f1d1d"] [style*="color:#cbd5e1"]{color:#e2e8f0!important}\n';
+    // E2b \u91d1\u6e10\u53d8\u5bb9\u5668\u5976\u6cb9\u5b57\u5bbd\u914d\u8f6c\u6df1\u68d5
+    css+=_L+'[style*="background:linear-gradient"][style*="#fbbf24"] [style*="color:#fef3c7"]{color:#7c2d12!important}\n';
+    // H \u590d\u4e60\u5e95\u90e8\u6df1\u6761\u63d0\u793a
+    css+=_L+'.hr_btm_hint{color:#cbd5e1!important}\n';
+    // I \u5361\u518c\u9501\u5361\u5c0f\u5b57\u52a0\u6df1
+    css+=_L+'#cardsScreen [style*="color:#475569"]{color:#1f2937!important}\n';
     // 像素级实测补漏(边缘环取真实底色·非渐变平均): 最后 6 处
     css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // \u767d\u5b57\u538b\u5728\u56fe\u4e0a\u7684d-label\u901a\u7528\u6655
     // \U0001f534v987\u3253(\u6539\u5740\u81f3v928\u533a\u672b\xb7\u540e\u6765\u8005\u80dc\u538bL279/L292): \u6311\u6218BOSS\u6807\u7b7e\u5750\u7eaf\u4eae\u9ec4\u5361\u9762\u975eboss\u56fe\u4e0a\u2192\u58a8\u5b57(\u5df2\u7edf\u4e00\u70d9\u8272)\u514d\u6655\u5373\u9510
