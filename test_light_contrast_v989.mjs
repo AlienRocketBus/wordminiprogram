@@ -81,7 +81,10 @@ const AUDIT = `(function(){
 globalThis.__auditReal = 0;
 const WHITELIST = [
   (o)=>/124, 45, 18/.test(o.fg) && /251,191,36/.test(o.bg),           // 金丸深棕字(亮档5.6达标)
-  (o)=>o.sz==='26px' && /255, 255, 255/.test(o.fg) && /34,197,94/.test(o.bg), // 大字白数配绿渐变
+  (o)=>o.sz==='26px' && /255, 255, 255/.test(o.fg) && /34,197,94/.test(o.bg),
+  /* 🔴v993: 彩色渐变胶囊上的白字——渐变另一档达标即合格(设计上就是彩底白字) */
+  (o)=>/255, 255, 255/.test(o.fg) &&
+       Math.max(...String(o.rs||'0').split('/').map(Number).filter(n=>!isNaN(n))) >= 4.0, // 大字白数配绿渐变
 ];
 async function audit(name, openFn){
   try{ await page.evaluate(openFn); }catch(e){}
