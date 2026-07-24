@@ -578,7 +578,7 @@
       /* 🔴v985 大脑五态真图标: img优先, 加载失败回退emoji */
       var iconHtml;
       if(m.img){
-        iconHtml = '<img src="'+m.img+'?v=992" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" '
+        iconHtml = '<img src="'+m.img+'?v=993" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" '
           + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:30px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)">';
       } else {
         iconHtml = '<span style="font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" aria-hidden="true">'+m.icon+'</span>';
