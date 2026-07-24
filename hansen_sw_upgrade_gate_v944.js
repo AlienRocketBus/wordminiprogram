@@ -3,7 +3,7 @@
 (function(){
   'use strict';
   var state = window.__hansenSwUpgradeGateV944 = {
-    version: 999,
+    version: 1000,
     ready: false,
     controller: 'checking'
   };
