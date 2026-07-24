@@ -458,6 +458,19 @@
     // \u2464 \u9898\u9762\u63d0\u793a\u6761: \u9ed1\u80f6\u56ca\u2192\u767d\u5361\u6df1\u5b57(\u4e0e\u6d45\u84dd\u6c60\u9762\u6210\u5bf9\u6bd4)
     css+=_LS+'.bubble-prompt{background:rgba(255,255,255,.96)!important;color:#0f172a!important;box-shadow:0 4px 16px rgba(15,23,42,.18)!important}\n';
     css+=_LS+'.bubble-prompt *{color:#0f172a!important}\n';
+    // \U0001f534v999\u3265 \u5b57\u6bcd\u62fc\u62fc\u4e50 \u4eae\u8272\u8c03\u6574\u4f53\u88c5\u4fee(\u7528\u6237\u62a5\u4e09\u75c5)
+    // \u2460 \u5b57\u6bcd\u5757\u9ed1\u5b57: .scramble-letter \u5199 var(--pal-ink) \u2192 \u4eae\u677f\u53d8\u58a8\u538b\u7d2b\u5757
+    css+=_LS+'.scramble-letter{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.35)!important}\n';
+    // \u2461 \u4e2d\u6587\u5757\u8dd1\u5230\u6700\u5de6: inline-block \u65e0\u5c45\u4e2d\u7236\u5bb9\u5668 \u2192 \u81ea\u8eab\u5c45\u4e2d(\u4e0d\u52a8\u6a21\u677f)
+    css+='.scramble-cn{display:block!important;width:fit-content!important;margin-left:auto!important;margin-right:auto!important}\n';
+    // \u540c\u75c5\u540c\u6cbb: \u8fdb\u5ea6\u6761\u4e5f\u662f inline-block
+    css+='.scramble-progress{display:block!important;width:fit-content!important;margin-left:auto!important;margin-right:auto!important}\n';
+    // \u2462 \u4e2d\u6587\u5757\u4eae\u8272\u88c5\u4fee: \u6df1\u5e95\u91d1\u5b57 \u2192 \u767d\u5361\u58a8\u5b57+\u8f6f\u9634\u5f71
+    css+=_LS+'.scramble-cn{background:#ffffff!important;color:#0f172a!important;border:1px solid rgba(15,23,42,.10)!important;box-shadow:0 2px 8px rgba(15,23,42,.10)!important}\n';
+    // \u2463 \u5b57\u6bcd\u69fd(\u865a\u7ebf\u683c): \u6df1\u5e95 \u2192 \u6d45\u5361, \u5df2\u586b\u5b57\u6bcd\u8f6c\u58a8
+    css+=_LS+'.scramble-slot{background:rgba(255,255,255,.85)!important;border-color:#94a3b8!important;color:#1e3a8a!important}\n';
+    // \u2464 \u63d0\u793a\u884c
+    css+=_LS+'.scramble-hint{color:#475569!important}\n';
     // \U0001f534v996\u3262 \u5b8c\u5f62\u586b\u7a7a \u4eae\u8272\u8c03\u6574\u4f53\u88c5\u4fee(\u7528\u6237\u62a5\u4e24\u75c5)
     // \u2460 \u53e5\u5b50\u5361\u7070\u5e95\u6839\u6cbb: rgba(30,41,59,.6) \u534a\u900f\u6df1\u5e95 \u2192 \u767d\u5361\u6df1\u5b57(\u540c\u6ce1\u6ce1\u72b6\u6001\u6761\u75c5\u56e0)
     css+=_LS+'.cloze-sentence{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;color:#0f172a!important;box-shadow:0 3px 10px rgba(15,23,42,.08)!important}\n';

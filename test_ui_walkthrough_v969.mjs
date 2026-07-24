@@ -318,6 +318,30 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v999: 字母拼拼乐合同(字母白字+中文居中+白卡) */
+    await pg.evaluate(()=>{ try{ showScreen('scramble'); if(typeof startScrambleLevel==='function') startScrambleLevel('hard'); }catch(e){} });
+    await pg.waitForTimeout(1500);
+    const scr = await pg.evaluate(()=>{
+      const cn=document.querySelector('.scramble-cn');
+      const lt=document.querySelector('.scramble-letter');
+      const cont=document.getElementById('scrambleContent');
+      if(!cn||!cont) return null;
+      const cr=cn.getBoundingClientRect(), pr=cont.getBoundingClientRect();
+      return { cnBg:getComputedStyle(cn).backgroundColor, cnFg:getComputedStyle(cn).color,
+               ltFg:lt?getComputedStyle(lt).color:null,
+               offset:Math.round(Math.abs((cr.left+cr.width/2)-(pr.left+pr.width/2))) };
+    });
+    if(scr){
+      ok(scr.offset<=3, (pal?'亮色板':'暗色板')+' 中文块水平居中(偏移'+scr.offset+'px)');
+      if(scr.ltFg) ok(lum(scr.ltFg)>200, (pal?'亮色板':'暗色板')+' 字母块恒白字');
+      if(wantLightBg){
+        ok(lum(scr.cnBg)>240, '亮色板 中文块白卡');
+        ok(lum(scr.cnFg)<120, '亮色板 中文块深字');
+      }
+    }
+    try{ await pg.evaluate(()=>{ showScreen('home'); }); }catch(e){}
+    await pg.waitForTimeout(400);
+
     /* 🔴v998: 全局灰底根治合同——半透深底在亮色调下必须翻白玻璃 */
     const grey = await pg.evaluate(()=>{
       const probe=document.createElement('div');
