@@ -168,3 +168,17 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# 🔴v998: README 同步提醒 —— v961~v997 曾整段漏更(37版), 立此纪律
+def _readme_reminder(new_version):
+    try:
+        import pathlib as _p, re as _r
+        rm = _p.Path(__file__).parent / 'README.md'
+        if not rm.exists():
+            return
+        txt = rm.read_text(encoding='utf-8')
+        vs = {int(m[1:]) for m in _r.findall(r'^## (v9\d\d)', txt, _r.M)}
+        if new_version not in vs:
+            print(f'  [!] README.md 尚未记录 v{new_version} —— 发版前请补写该版章节')
+    except Exception:
+        pass
