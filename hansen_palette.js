@@ -351,6 +351,24 @@
     css+=_L+'.hr_btm_hint{color:#cbd5e1!important}\n';
     // I \u5361\u518c\u9501\u5361\u5c0f\u5b57\u52a0\u6df1
     css+=_L+'#cardsScreen [style*="color:#475569"]{color:#1f2937!important}\n';
+    // \U0001f534v990\u325a \u4eca\u65e5\u590d\u4e60\u5168\u5c4f\u8986\u76d6\u5c42(#hr_today)\u73af\u5883\u514d\u75ab
+    // \u7528\u6237\u771f\u673a\u62a5: \u7a7a\u6001\u5c4f\u6df1\u7eff\u5e95+\u91d1\u6807\u9898\u88ab\u94a9\u6210\u6df1\u7d2b\u3001\u6b63\u6587\u6d45\u7070\u88ab\u94a9\u6210\u6df1\u7070 \u2192 \u5168\u7cca
+    // \u6b64\u5c42\u81ea\u5934\u81f3\u5c3e\u5747\u4e3a\u56fa\u5b9a\u6df1\u8272\u8bbe\u8ba1(\u7a7a\u6001\u6df1\u7eff/\u7b54\u9898\u6df1\u68d5/\u53cd\u9988\u6df1\u7eff\u6df1\u7ea2), \u6545\u6574\u5c42\u514d\u75ab
+    css+=_L+'#hr_today, '+_L+'#hr_today *{--pal-ink:#f1f5f9;--pal-ink-hi:#fff;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8;--pal-accent-text:#fbbf24}\n';
+    ['#fbbf24','#fde047','#fde68a','#facc15','#fcd34d'].forEach(function(gold){
+      css+=_L+'#hr_today [style*="color:'+gold+'"]{color:'+gold+'!important}\n';
+    });
+    ['#94a3b8','#cbd5e1','#fff','#34d399'].forEach(function(lt){
+      css+=_L+'#hr_today [style*="color:'+lt+'"]{color:'+lt+'!important}\n';
+    });
+    css+=_L+'#hr_today .ht_prog{color:#fde68a!important}\n';
+    css+=_L+'#hr_today .ht_top{color:#fff!important}\n';
+    css+=_L+'#hr_today .ht_top button{color:#cbd5e1!important}\n';
+    // \u5e95\u8272\u91cd\u9489: \u9632\u901a\u7528\u94a9\u5b50\u628a\u56fa\u5b9a\u6df1\u5e55\u7ffb\u4eae\u540e\u6d45\u5b57\u843d\u6d45\u5e95
+    /* \u5e95\u8272\u4e0d\u91cd\u9489: \u7a7a\u6001\u5e95(\u884c\u5185\u6df1\u7eff)\u4e0e\u7b54\u9898\u5e95(CSS\u6df1\u68d5)\u5747\u672a\u88ab\u94a9\u5b50\u6539\u53d8,
+       \u5f3a\u5199\u53cd\u800c\u4f1a\u8ba9\u4e24\u6001\u4e92\u76f8\u8986\u76d6\u2014\u2014v990\u9996\u8f6e\u5b9e\u6d4b\u5df2\u8bc1(\u7a7a\u6001\u53d8\u6df1\u68d5) */
+    // \u5176\u5b83\u590d\u4e60\u8986\u76d6\u5c42\u540c\u65cf\u514d\u75ab
+    css+=_L+'#hr_toast, '+_L+'#hr_toast *,'+_L+'#hr_empty_msg, '+_L+'#hr_empty_msg *,'+_L+'#hr_to_sub_mask, '+_L+'#hr_to_sub_mask *{--pal-ink:#f1f5f9;--pal-ink-hi:#fff;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8;--pal-accent-text:#fbbf24}\n';
     // 像素级实测补漏(边缘环取真实底色·非渐变平均): 最后 6 处
     css+=_L+'.d-label{color:#fff!important;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 3px rgba(0,0,0,.9)!important}\n';  // \u767d\u5b57\u538b\u5728\u56fe\u4e0a\u7684d-label\u901a\u7528\u6655
     // \U0001f534v987\u3253(\u6539\u5740\u81f3v928\u533a\u672b\xb7\u540e\u6765\u8005\u80dc\u538bL279/L292): \u6311\u6218BOSS\u6807\u7b7e\u5750\u7eaf\u4eae\u9ec4\u5361\u9762\u975eboss\u56fe\u4e0a\u2192\u58a8\u5b57(\u5df2\u7edf\u4e00\u70d9\u8272)\u514d\u6655\u5373\u9510

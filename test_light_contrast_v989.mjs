@@ -16,7 +16,7 @@ await page.waitForTimeout(2600);
 await page.evaluate(()=>{ const w=document.querySelector('.modal .close, .modal button'); if(w) try{w.click();}catch(e){} });
 
 const AUDIT = `(function(){
-  const EXEMPT=['#bossScreen','#landGachaBody','.lg-banner','#hr_rvrw_card','#hsnSeasonBar','#hsnSeasonEntry'];
+  const EXEMPT=['#bossScreen','#landGachaBody','.lg-banner','#hr_rvrw_card','#hsnSeasonBar','#hsnSeasonEntry','#hr_today','#hr_toast','#hr_empty_msg','#hr_to_sub_mask','#__hsn_bosshall','#__hsn_landhall','#__hs_hall_panel','#__hs_showcase'];
   const BASE=[238,242,251];
   function pr(c){const m=(c||'').match(/rgba?\\(([\\d.]+),\\s*([\\d.]+),\\s*([\\d.]+)(?:,\\s*([\\d.]+))?/);return m?[+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]]:null;}
   function lum(r,g,b){const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b);}
@@ -119,6 +119,41 @@ await audit('settings', `showScreen('settings')`);
 await audit('mylearning', `if(window.HansenMyLearning&&HansenMyLearning.open){HansenMyLearning.open()}`);
 await audit('wrongoverview', `if(window.HansenWrongOverview){(HansenWrongOverview.open||HansenWrongOverview._open||function(){}).call(HansenWrongOverview)}`);
 let realTotal = 0;
+
+/* 🔴v990 覆盖层专项: 主屏遍历走不到的全屏浮层(空态屏事故根因) */
+const OVERLAYS = [
+  ['today-empty', `if(window.HansenReview&&HansenReview._openToday) HansenReview._openToday()`, 'hr_today'],
+  ['boss-hall',   `if(window.HansenCards&&HansenCards.openHall) HansenCards.openHall()`, '__hsn_bosshall'],
+  ['land-hall',   `if(window.HansenLandCards&&HansenLandCards.openHall) HansenLandCards.openHall()`, '__hsn_landhall'],
+];
+for(const [name, fn, id] of OVERLAYS){
+  try{ await page.evaluate(fn); }catch(e){}
+  await page.waitForTimeout(1000);
+  const res = await page.evaluate((oid)=>{
+    const ov=document.getElementById(oid);
+    if(!ov) return {skip:true};
+    const bad=[]; const cs0=getComputedStyle(ov);
+    const bg=cs0.backgroundImage+' '+cs0.backgroundColor;
+    const walk=(el)=>{ el.childNodes.forEach(n=>{
+      if(n.nodeType===3 && n.textContent.trim().length>=2){
+        const c=getComputedStyle(el).color;
+        const m=c.match(/(\d+),\s*(\d+),\s*(\d+)/);
+        if(m){ const lum=(+m[1]*.299+ +m[2]*.587+ +m[3]*.114);
+          /* 固定深幕上的字必须够亮(>110)或为金/黑按钮字 */
+          if(lum<110 && !(+m[1]>200&&+m[2]>150) && lum>25) bad.push([n.textContent.trim().slice(0,8), c]);
+        }
+      } else if(n.nodeType===1){ walk(n); }
+    });};
+    walk(ov);
+    return {skip:false, bg:bg.slice(0,50), bad};
+  }, id);
+  if(res.skip){ console.log(`── overlay/${name}: (未触发,跳过)`); continue; }
+  console.log(`── overlay/${name}: ${res.bad.length} 处深幕暗字`);
+  res.bad.forEach(b=>console.log('   ', JSON.stringify(b)));
+  globalThis.__auditReal += res.bad.length;
+  await page.evaluate(()=>{ const b=document.getElementById('hr_today_back')||document.querySelector('#__hsn_bosshall .close,#__hsn_landhall .close'); if(b) try{b.click()}catch(e){} });
+  await page.waitForTimeout(500);
+}
 console.log('ERRORS:', errs.length, errs.slice(0,3).join('|'));
 process.exit(errs.length===0 && globalThis.__auditReal<=2 ? 0 : 1);
 await browser.close(); srv.close();
