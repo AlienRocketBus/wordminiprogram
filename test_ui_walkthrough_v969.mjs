@@ -333,7 +333,7 @@ async function gotoIsland(page, file='island_animal.html'){
       if(wantLightBg){
         ok(lum(clz.sentBg)>240, '亮色板 完形句卡白底(根治灰底)');
         ok(lum(clz.sentFg)<120, '亮色板 完形句卡深字');
-        if(clz.hiFg) ok(/185, 28, 28/.test(clz.hiFg), '亮色板 目标词高亮为醒目洋红: '+clz.hiFg);
+        if(clz.hiFg) ok(/30, 58, 138/.test(clz.hiFg), '亮色板 目标词高亮为靛蓝(禁红规范·对比度8.6:1): '+clz.hiFg);
       } else {
         ok(lum(clz.sentFg)>150, '暗色板 完形句卡浅字');
       }

@@ -193,7 +193,7 @@
     css+=L+'#petScreen .psw-nmrow, '+L+'#petScreen .psw-nmrow *{color:#e2e8f0!important}\n'; // 五批修: 升id级特异性(⑮的#petScreen .nm曾反杀两类版)
     // 🔴v863第五批(终刀·最后3病灶):
     // ⑱ settings-stat 里的警示浅红b(如"3 次")→深红(浅卡可读·警示语义保留)
-    css+=L+'.settings-stat b{color:#b91c1c!important}\n';
+    css+=L+'.settings-stat b{color:#1e3a8a!important}\n';
     // ⑲ inline浅灰#cbd5e1通用深化(stats提示条等·此前通用映射只盖了金五色漏了灰系); 深区/boss屏/横幅的还原选择器特异性更高照样赢
     css+=L+'[style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v987 \u7b2c\u516d\u6279(Hansen\u771f\u673a\u516d\u8fde\xb7\u4eae\u8272\u88c5\u4fee):
@@ -433,7 +433,7 @@
     // \u7b54\u5bf9: \u6d45\u7eff\u5e95 + \u6df1\u7eff\u5b57(\u4fee\u767d\u6846\u4e8b\u6545)
     css+=_L+'.boss-opt.correct{background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;border-color:#16a34a!important;color:#14532d!important}\n';
     // \u7b54\u9519: \u6d45\u7ea2\u5e95 + \u6df1\u7ea2\u5b57
-    css+=_L+'.boss-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;border-color:#dc2626!important;color:#7f1d1d!important}\n';
+    css+=_L+'.boss-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;border-color:#dc2626!important;color:#7f1d1d!important}/*HSN-RED-OK 答错语义*/\n';
     // \u96be\u5ea6\u6807\u7b7e(\u6613/\u4e2d/\u9ad8\u4e09\u8272\u6e10\u53d8\u5e95\u56fa\u5b9a\u6df1) \u2192 \u5b57\u6052\u767d\u514d\u6655
     /* \u96be\u5ea6\u6807\u7b7e\u7b49"\u6e10\u53d8\u5e95+\u884c\u5185\u767d\u5b57"\u5c0f\u80f6\u56ca: \u4e0d\u4f9d\u8d56\u5177\u4f53\u8272\u503c\u7684\u7a33\u5065\u5199\u6cd5
        \u884c\u5185\u540c\u65f6\u5199\u4e86 linear-gradient \u4e0e color:#fff \u7684\u5143\u7d20 = \u8bbe\u8ba1\u4e0a\u5c31\u662f\u5f69\u5e95\u767d\u5b57, \u767d\u5b57\u4e0d\u5f97\u88ab\u94a9\u6df1 */
@@ -463,14 +463,14 @@
     css+=_LS+'.cloze-sentence{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;color:#0f172a!important;box-shadow:0 3px 10px rgba(15,23,42,.08)!important}\n';
     css+=_LS+'.cloze-sentence *{color:#0f172a!important}\n';
     // \u7a7a\u767d\u6a2a\u7ebf\u4fdd\u6301\u9192\u76ee(\u91d1\u2192\u6df1\u6a59, \u4eae\u5e95\u4e0a\u624d\u770b\u5f97\u89c1)
-    css+=_LS+'.cloze-sentence .cloze-blank{color:#be123c!important;border-bottom-color:#f59e0b!important}\n';
+    css+=_LS+'.cloze-sentence .cloze-blank{color:#1e3a8a!important;border-bottom-color:#f59e0b!important}\n';
     // \u2461 \u3010\u529f\u80fd\u6027\u3011\u76ee\u6807\u8bcd\u4e2d\u6587\u9ad8\u4eae: \u91d1\u5b57#fbbf24\u538b\u6d45\u5e95\u51e0\u4e4e\u770b\u4e0d\u89c1
     // \u2192 \u6539\u4e3a\u9c9c\u660e\u6d0b\u7ea2+\u6de1\u9ec4\u5e95\u6807\u8bb0, \u50cf\u8367\u5149\u7b14\u4e00\u6837\u4e00\u773c\u5c31\u770b\u5230"\u8003\u54ea\u4e2a\u8bcd"
     css+=_LS+'.cloze-cn{color:#334155!important}\n';
-    css+=_LS+'.cloze-cn [style*="color:#fbbf24"]{color:#b91c1c!important;background:linear-gradient(180deg,transparent 55%,#fde68a 55%)!important;padding:0 3px!important;border-radius:3px!important;font-weight:900!important}\n';
+    css+=_LS+'.cloze-cn [style*="color:#fbbf24"]{color:#1e3a8a!important;background:linear-gradient(180deg,transparent 52%,#fde68a 52%)!important;padding:0 4px!important;border-radius:3px!important;font-weight:900!important}\n';
     // \u2462 \u9009\u9879\u4e09\u6001(\u5e38\u6001\u5df2\u662f\u6d45\u5361, \u53ea\u4fee\u5bf9/\u9519)
     css+=_LS+'.cloze-opt.correct{background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;border-color:#16a34a!important;color:#14532d!important}\n';
-    css+=_LS+'.cloze-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;border-color:#dc2626!important;color:#7f1d1d!important}\n';
+    css+=_LS+'.cloze-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;border-color:#dc2626!important;color:#7f1d1d!important}/*HSN-RED-OK 答错语义*/\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     /* \u91d1\u5b57\u8f6c\u5f3a\u8c03\u8272: \u5fc5\u987b\u6392\u9664 .cloze-cn \u5185\u7684\u9ad8\u4eae\u8bcd(\u5426\u5219\u8986\u76d6\u2461\u7684\u6d0b\u7ea2\u2014\u2014v996\u9996\u8f6e\u81ea\u6211\u51b2\u7a81\u5df2\u8bc1) */
