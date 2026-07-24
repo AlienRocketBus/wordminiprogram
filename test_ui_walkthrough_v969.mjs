@@ -318,6 +318,19 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v994: 打字大师结算页双色调合同 */
+    const htm = await pg.evaluate(()=>{
+      const host=document.getElementById('typingContent')||document.body;
+      const probe=document.createElement('div');
+      probe.innerHTML='<div class="htm-complete"><h2>T</h2><p>D<b>N</b></p></div>';
+      host.appendChild(probe);
+      const h2=probe.querySelector('h2'), pp=probe.querySelector('p');
+      const o={h2:getComputedStyle(h2).color, p:getComputedStyle(pp).color};
+      probe.remove(); return o;
+    });
+    ok(wantLightBg ? lum(htm.h2)<160 : lum(htm.h2)>150, (pal?'亮色板':'暗色板')+' 结算标题方向正确');
+    ok(wantLightBg ? lum(htm.p)<160 : lum(htm.p)>150, (pal?'亮色板':'暗色板')+' 结算正文方向正确');
+
     /* 🔴v992: 我的学习页同族合同 */
     await pg.evaluate(()=>{ try{ if(window.HansenMyLearning&&HansenMyLearning._open) HansenMyLearning._open(); }catch(e){} });
     await pg.waitForTimeout(1100);
