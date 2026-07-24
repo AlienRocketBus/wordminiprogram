@@ -458,6 +458,23 @@
     // \u2464 \u9898\u9762\u63d0\u793a\u6761: \u9ed1\u80f6\u56ca\u2192\u767d\u5361\u6df1\u5b57(\u4e0e\u6d45\u84dd\u6c60\u9762\u6210\u5bf9\u6bd4)
     css+=_LS+'.bubble-prompt{background:rgba(255,255,255,.96)!important;color:#0f172a!important;box-shadow:0 4px 16px rgba(15,23,42,.18)!important}\n';
     css+=_LS+'.bubble-prompt *{color:#0f172a!important}\n';
+    // \U0001f534v996\u3262 \u5b8c\u5f62\u586b\u7a7a \u4eae\u8272\u8c03\u6574\u4f53\u88c5\u4fee(\u7528\u6237\u62a5\u4e24\u75c5)
+    // \u2460 \u53e5\u5b50\u5361\u7070\u5e95\u6839\u6cbb: rgba(30,41,59,.6) \u534a\u900f\u6df1\u5e95 \u2192 \u767d\u5361\u6df1\u5b57(\u540c\u6ce1\u6ce1\u72b6\u6001\u6761\u75c5\u56e0)
+    css+=_LS+'.cloze-sentence{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;color:#0f172a!important;box-shadow:0 3px 10px rgba(15,23,42,.08)!important}\n';
+    css+=_LS+'.cloze-sentence *{color:#0f172a!important}\n';
+    // \u7a7a\u767d\u6a2a\u7ebf\u4fdd\u6301\u9192\u76ee(\u91d1\u2192\u6df1\u6a59, \u4eae\u5e95\u4e0a\u624d\u770b\u5f97\u89c1)
+    css+=_LS+'.cloze-sentence .cloze-blank{color:#be123c!important;border-bottom-color:#f59e0b!important}\n';
+    // \u2461 \u3010\u529f\u80fd\u6027\u3011\u76ee\u6807\u8bcd\u4e2d\u6587\u9ad8\u4eae: \u91d1\u5b57#fbbf24\u538b\u6d45\u5e95\u51e0\u4e4e\u770b\u4e0d\u89c1
+    // \u2192 \u6539\u4e3a\u9c9c\u660e\u6d0b\u7ea2+\u6de1\u9ec4\u5e95\u6807\u8bb0, \u50cf\u8367\u5149\u7b14\u4e00\u6837\u4e00\u773c\u5c31\u770b\u5230"\u8003\u54ea\u4e2a\u8bcd"
+    css+=_LS+'.cloze-cn{color:#334155!important}\n';
+    css+=_LS+'.cloze-cn [style*="color:#fbbf24"]{color:#b91c1c!important;background:linear-gradient(180deg,transparent 55%,#fde68a 55%)!important;padding:0 3px!important;border-radius:3px!important;font-weight:900!important}\n';
+    // \u2462 \u9009\u9879\u4e09\u6001(\u5e38\u6001\u5df2\u662f\u6d45\u5361, \u53ea\u4fee\u5bf9/\u9519)
+    css+=_LS+'.cloze-opt.correct{background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;border-color:#16a34a!important;color:#14532d!important}\n';
+    css+=_LS+'.cloze-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;border-color:#dc2626!important;color:#7f1d1d!important}\n';
+    // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
+    css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
+    /* \u91d1\u5b57\u8f6c\u5f3a\u8c03\u8272: \u5fc5\u987b\u6392\u9664 .cloze-cn \u5185\u7684\u9ad8\u4eae\u8bcd(\u5426\u5219\u8986\u76d6\u2461\u7684\u6d0b\u7ea2\u2014\u2014v996\u9996\u8f6e\u81ea\u6211\u51b2\u7a81\u5df2\u8bc1) */
+    css+=_LS+'#clozeContent [style*="color:#fbbf24"]:not(.cloze-blank):not(.cloze-cn *){color:var(--pal-accent-text,#1e40af)!important}\n';
 css+=_L+'#hr_toast, '+_L+'#hr_toast *,'+_L+'#hr_empty_msg, '+_L+'#hr_empty_msg *,'+_L+'#hr_to_sub_mask, '+_L+'#hr_to_sub_mask *{--pal-ink:#f1f5f9;--pal-ink-hi:#fff;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8;--pal-accent-text:#fbbf24}\n';
 
     // \U0001f534v991\u325b \u62fc\u5199\u7ec3\u4e60\u5c42(#hsp_mask) \u771f\u53cc\u8272\u8c03\u5206\u79bb

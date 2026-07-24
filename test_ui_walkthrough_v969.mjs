@@ -318,6 +318,29 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v996: 完形填空亮色装修合同(句卡白底+高亮词醒目) */
+    await pg.evaluate(()=>{ try{ showScreen('cloze'); if(typeof startClozeLevel==='function') startClozeLevel('hard'); }catch(e){} });
+    await pg.waitForTimeout(1600);
+    const clz = await pg.evaluate(()=>{
+      const s=document.querySelector('.cloze-sentence');
+      const cn=document.querySelector('.cloze-cn');
+      const hi=cn?cn.querySelector('span'):null;
+      if(!s) return null;
+      const cs=getComputedStyle(s);
+      return { sentBg:cs.backgroundColor, sentFg:cs.color, hiFg:hi?getComputedStyle(hi).color:null };
+    });
+    if(clz){
+      if(wantLightBg){
+        ok(lum(clz.sentBg)>240, '亮色板 完形句卡白底(根治灰底)');
+        ok(lum(clz.sentFg)<120, '亮色板 完形句卡深字');
+        if(clz.hiFg) ok(/185, 28, 28/.test(clz.hiFg), '亮色板 目标词高亮为醒目洋红: '+clz.hiFg);
+      } else {
+        ok(lum(clz.sentFg)>150, '暗色板 完形句卡浅字');
+      }
+    }
+    try{ await pg.evaluate(()=>{ showScreen('home'); }); }catch(e){}
+    await pg.waitForTimeout(400);
+
     /* 🔴v995: 泡泡大作战亮色装修合同 */
     await pg.evaluate(()=>{ try{ showScreen('bubble'); if(typeof startBubbleLevel==='function') startBubbleLevel('hard'); }catch(e){} });
     await pg.waitForTimeout(1500);
