@@ -565,7 +565,7 @@
         el.id = 'hr_review_banner';
         el.setAttribute('role','button');
         el.setAttribute('tabindex','0');
-        el.style.cssText = 'display:flex;align-items:center;gap:10px;margin:8px 0 2px;padding:11px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);cursor:pointer;min-height:48px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:transform .15s';
+        el.style.cssText = 'display:flex;align-items:center;gap:13px;margin:10px 0 4px;padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.18);cursor:pointer;min-height:74px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.16);transition:transform .15s,box-shadow .2s';
         el.addEventListener('click', bannerClick);
         el.addEventListener('keydown', function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); bannerClick(); } });
         el.addEventListener('touchstart', function(){ el.style.transform='scale(.985)'; }, {passive:true});
@@ -578,18 +578,24 @@
       /* 🔴v985 大脑五态真图标: img优先, 加载失败回退emoji */
       var iconHtml;
       if(m.img){
-        iconHtml = '<img src="'+m.img+'?v=999" alt="" aria-hidden="true" style="width:34px;height:34px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" '
-          + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:30px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)">';
+        /* \U0001f534v999 (Hansen): \u56fe\u6807\u653e\u5927\u5230\u63a5\u8fd1\u6a2a\u6761\u9ad8\u5ea6 + \u5782\u76f4\u5c45\u4e2d\u7ad9 C \u4f4d
+           62px \u65b9\u5f62\u5bb9\u5668 + \u67d4\u5149\u5706\u6258, \u4e0a\u4e0b\u5404\u7559 6px \u547c\u5438\u4f59\u91cf(74-62=12) */
+        iconHtml = '<span style="flex:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;'
+          + 'background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),rgba(255,255,255,.06) 62%,transparent 72%);'
+          + 'border-radius:50%" aria-hidden="true">'
+          + '<img src="'+m.img+'?v=999" alt="" style="width:70px;height:70px;object-fit:contain;display:block;'
+          + 'filter:drop-shadow(0 3px 7px rgba(0,0,0,.32))" '
+          + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:46px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)"></span>';
       } else {
-        iconHtml = '<span style="font-size:30px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" aria-hidden="true">'+m.icon+'</span>';
+        iconHtml = '<span style="flex:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;filter:drop-shadow(0 3px 7px rgba(0,0,0,.32))" aria-hidden="true">'+m.icon+'</span>';
       }
       el.innerHTML =
         iconHtml+
         '<span style="flex:1;min-width:0">'+
-          '<span style="display:block;font-size:14.5px;font-weight:800;line-height:1.35">'+m.title+'</span>'+
-          '<span style="display:block;font-size:11.5px;opacity:.92;line-height:1.4">'+m.sub+'</span>'+
+          '<span style="display:block;font-size:15.5px;font-weight:800;line-height:1.35;letter-spacing:.2px">'+m.title+'</span>'+
+          '<span style="display:block;font-size:12px;opacity:.9;line-height:1.5;margin-top:2px">'+m.sub+'</span>'+
         '</span>'+
-        (m.fire ? '<span style="flex:none;font-size:12px;font-weight:800;background:rgba(0,0,0,.28);padding:5px 9px;border-radius:999px;white-space:nowrap">'+m.fire+'</span>' : '');
+        (m.fire ? '<span style="flex:none;font-size:12.5px;font-weight:800;background:rgba(0,0,0,.26);padding:7px 12px;border-radius:999px;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)">'+m.fire+'</span>' : '');
     }catch(e){}
   }
 

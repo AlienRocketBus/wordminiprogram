@@ -252,6 +252,20 @@ async function gotoIsland(page, file='island_animal.html'){
     return { img: img?img.getAttribute('src'):null, loaded: img?(img.complete&&img.naturalWidth>0):false };
   });
   ok(ca.img && ca.img.includes('brain_rest') && ca.loaded, '安心态=brain_rest真图加载: '+ca.img);
+  /* 🔴v999(Hansen): 图标必须放大居中站C位 —— 尺寸/占比/居中三重锁 */
+  const geo = await pgA.evaluate(()=>{
+    const b=document.getElementById('hr_review_banner');
+    const img=b?b.querySelector('img'):null;
+    if(!b||!img) return null;
+    const bR=b.getBoundingClientRect(), iR=img.getBoundingClientRect();
+    return { h:Math.round(iR.height), ratio:+(iR.height/bR.height).toFixed(2),
+             off:Math.round(Math.abs((iR.top+iR.height/2)-(bR.top+bR.height/2))) };
+  });
+  if(geo){
+    ok(geo.h >= 66, '大脑图标尺寸≥66px(实测'+geo.h+')');
+    ok(geo.ratio >= 0.72, '图标占横条≥72%(实测'+geo.ratio+')');
+    ok(geo.off <= 2, '图标垂直居中(偏差'+geo.off+'px)');
+  }
   await pgA.close();
   const pgB = await freshPage();
   await pgB.addInitScript(()=>{
