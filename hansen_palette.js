@@ -443,6 +443,21 @@
     // \u6781\u901f\u5c4f\u9898\u9762\u82f1\u6587\u5927\u5b57(\u884c\u5185#fff) \u2192 \u58a8\u5b57
     /* \u9898\u9762\u82f1\u6587\u5927\u5b57\u8f6c\u58a8: \u4ec5\u9650 #spQ \u5185(\u907f\u514d\u8bef\u4f24\u540c\u5c4f\u5f69\u5e95\u767d\u5b57\u6807\u7b7e\u2014\u2014v993\u9996\u8f6e\u81ea\u6211\u51b2\u7a81\u5df2\u8bc1) */
     css+=_L+'#spQ > [style*="color:#fff"]{color:#0f172a!important}\n';
+    // \U0001f534v995\u3261 \u6ce1\u6ce1\u5927\u4f5c\u6218 \u4eae\u8272\u8c03\u6574\u4f53\u88c5\u4fee(\u7528\u6237\u62a5\u4e09\u75c5)
+    // \u2460 \u6ce1\u6ce1\u5185\u5355\u8bcd\u6062\u590d\u767d\u5b57: .bubble \u5199 var(--pal-ink) \u2192 \u4eae\u677f\u53d8\u58a8\u8272\u538b\u5f69\u8272\u6ce1\u6ce1
+    css+=_LS+'.bubble{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.55),0 0 2px rgba(0,0,0,.4)!important}\n';
+    // \u2461 \u72b6\u6001\u6761\u7070\u767d\u5e95\u6839\u6cbb: \u534a\u900f\u6df1\u5e95 \u2192 \u6e05\u723d\u767d\u5361+\u8f6f\u9634\u5f71(\u7528\u6237\u591a\u6b21\u62a5\u7070\u5e95\u96be\u770b)
+    css+=_LS+'.bubble-stats .bs-item{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;color:#334155!important;box-shadow:0 2px 6px rgba(15,23,42,.08)!important}\n';
+    /* \u5b57\u5728\u5b50\u5143\u7d20\u4e0a(\u9996\u8f6e\u9057\u6f0f\u2192\u767d\u5b57\u538b\u767d\u5e95), \u9700\u9010\u5c42\u63a5\u7ba1; \u5fbd\u7ae0\u9664\u5916 */
+    css+=_LS+'.bubble-stats .bs-item:not(#bbLvlBadge) *{color:#334155!important;text-shadow:none!important}\n';
+    css+=_LS+'.bubble-stats .bs-item b{color:var(--pal-accent-text,#1e40af)!important}\n';
+    // \u2462 \u96be\u5ea6\u5fbd\u7ae0(\u5f69\u5e95)\u4fdd\u767d\u5b57
+    css+=_LS+'#bbLvlBadge{color:#fff!important;border-color:transparent!important;box-shadow:0 2px 8px rgba(220,38,38,.28)!important}\n';
+    // \u2463 \u6ce1\u6ce1\u6c60\u5e95: \u6df1\u9752\u2192\u6e05\u6f88\u6d77\u6c34\u84dd(\u4eae\u677f\u66f4\u8f7b\u76c8), \u4fdd\u7559\u6df1\u5ea6\u611f\u4f7f\u5f69\u8272\u6ce1\u6ce1\u4ecd\u7a81\u51fa
+    css+=_LS+'.bubble-area{background:linear-gradient(180deg,#38bdf8 0%,#0ea5e9 45%,#0284c7 100%)!important;box-shadow:0 6px 20px rgba(2,132,199,.18)!important}\n';
+    // \u2464 \u9898\u9762\u63d0\u793a\u6761: \u9ed1\u80f6\u56ca\u2192\u767d\u5361\u6df1\u5b57(\u4e0e\u6d45\u84dd\u6c60\u9762\u6210\u5bf9\u6bd4)
+    css+=_LS+'.bubble-prompt{background:rgba(255,255,255,.96)!important;color:#0f172a!important;box-shadow:0 4px 16px rgba(15,23,42,.18)!important}\n';
+    css+=_LS+'.bubble-prompt *{color:#0f172a!important}\n';
 css+=_L+'#hr_toast, '+_L+'#hr_toast *,'+_L+'#hr_empty_msg, '+_L+'#hr_empty_msg *,'+_L+'#hr_to_sub_mask, '+_L+'#hr_to_sub_mask *{--pal-ink:#f1f5f9;--pal-ink-hi:#fff;--pal-ink-2:#cbd5e1;--pal-ink-3:#94a3b8;--pal-accent-text:#fbbf24}\n';
 
     // \U0001f534v991\u325b \u62fc\u5199\u7ec3\u4e60\u5c42(#hsp_mask) \u771f\u53cc\u8272\u8c03\u5206\u79bb

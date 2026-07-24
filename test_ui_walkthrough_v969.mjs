@@ -318,6 +318,28 @@ async function gotoIsland(page, file='island_animal.html'){
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);
     await gotoIsland(pg);
+    /* 🔴v995: 泡泡大作战亮色装修合同 */
+    await pg.evaluate(()=>{ try{ showScreen('bubble'); if(typeof startBubbleLevel==='function') startBubbleLevel('hard'); }catch(e){} });
+    await pg.waitForTimeout(1500);
+    const bub = await pg.evaluate(()=>{
+      const b=document.querySelector('.bubble');
+      const it=document.querySelector('.bubble-stats .bs-item:not(#bbLvlBadge)');
+      if(!b||!it) return null;
+      const cs=getComputedStyle(it);
+      return { bubbleFg:getComputedStyle(b).color, itemBg:cs.backgroundColor, itemFg:cs.color };
+    });
+    if(bub){
+      ok(lum(bub.bubbleFg)>200, (pal?'亮色板':'暗色板')+' 泡泡内单词恒白字');
+      if(wantLightBg){
+        ok(lum(bub.itemBg)>240, '亮色板 状态条纯白底(根治灰底)');
+        ok(lum(bub.itemFg)<120, '亮色板 状态条深字');
+      } else {
+        ok(lum(bub.itemFg)>150, '暗色板 状态条浅字');
+      }
+    }
+    try{ await pg.evaluate(()=>{ if(typeof stopBubble==='function') stopBubble(); showScreen('home'); }); }catch(e){}
+    await pg.waitForTimeout(400);
+
     /* 🔴v994: 打字大师结算页双色调合同 */
     const htm = await pg.evaluate(()=>{
       const host=document.getElementById('typingContent')||document.body;
