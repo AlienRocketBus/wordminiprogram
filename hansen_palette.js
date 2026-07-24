@@ -235,6 +235,7 @@
     //       饱和色按钮保留底色但强制白字。#bossScreen 按既有铁律一律不动(打Boss保持电影感)。
     // ══════════════════════════════════════════════════════════════════
     var _L='html.hsn-pal-light ';
+    var _LS='html[class*="hsn-pal-"].hsn-pal-light ';  /* \U0001f534v994: \u9ad8\u7279\u5f02\u6027\u524d\u7f00(\u538b\u8fc7\u901a\u7528\u94a9\u5b50) */
     var _SF='linear-gradient(135deg,#ffffff,var(--pal-surf-2,#eef2f8))';
     var _BD='1px solid rgba(var(--pal-line-rgb,99,102,241),.28)';
     var _SH='0 2px 10px rgba(30,41,59,.07)';
@@ -287,13 +288,21 @@
     css+=_L+'.m-btn.got-it{background:linear-gradient(135deg,#16a34a,#15803d)!important}\n';
     css+=_L+'.game-btn{background:linear-gradient(135deg,#4f46e5,#4338ca)!important}\n';
     // \U0001f534v988\u3256 \u4e13\u6ce8\u6253\u5b57\u5c4f\u65cf(htm-\xb7\u968f\u8272\u677f\u5e95): \u4eae\u5e95\u6d45\u5b57\u2192\u58a8/\u5f3a\u8c03
-    css+=_L+'.htm-complete{color:#334155!important}\n';
-    css+=_L+'.htm-complete h2{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
-    css+=_L+'.htm-complete p{color:#475569!important}\n';
-    css+=_L+'.htm-focus-head{color:#0f172a!important;text-shadow:none!important}\n';
-    css+=_L+'.htm-rule{color:#475569!important}\n';
-    css+=_L+'.htm-pause{color:#0f172a!important}\n';
-    css+=_L+'.htm-focus-feedback{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    // \U0001f534v994\u321f \u4e13\u6ce8\u6253\u5b57\u65cf\u52a0\u56fa: \u63d0\u9ad8\u7279\u5f02\u6027(\u5c5e\u6027\u9009\u62e9\u5668\u524d\u7f00)+\u8986\u76d6\u5b50\u5143\u7d20+\u8865\u5168\u540c\u65cf\u7c7b
+    // v988\u3256 \u5199\u6cd5\u5728\u90e8\u5206\u73af\u5883\u4e0b\u53ef\u80fd\u8f93\u7ed9\u540e\u4f4d\u901a\u7528\u94a9\u5b50, \u672c\u7248\u7edf\u4e00\u7528 _LS \u53cc\u91cd\u524d\u7f00
+    css+=_LS+'.htm-complete,'+_LS+'.htm-complete *{color:#334155!important}\n';
+    css+=_LS+'.htm-complete h2{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    css+=_LS+'.htm-complete p,'+_LS+'.htm-complete p *{color:#475569!important;text-shadow:none!important}\n';
+    css+=_LS+'.htm-complete p b,'+_LS+'.htm-complete p strong{color:#0f172a!important}\n';
+    css+=_LS+'.htm-complete button{color:#fff!important}\n';
+    css+=_LS+'.htm-focus-head{color:#0f172a!important;text-shadow:none!important}\n';
+    css+=_LS+'.htm-rule{color:#475569!important}\n';
+    css+=_LS+'.htm-pause{color:#0f172a!important}\n';
+    css+=_LS+'.htm-focus-feedback{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
+    css+=_LS+'.htm-focus-setup,'+_LS+'.htm-focus-setup *{color:#334155!important}\n';
+    css+=_LS+'#typingContent [style*="color:#fff"]:not([style*="linear-gradient"]){color:#0f172a!important}\n';
+    css+=_LS+'#typingContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
+    css+=_LS+'#typingContent [style*="color:#fde047"],'+_LS+'#typingContent [style*="color:#fde68a"]{color:var(--pal-accent-text,#1e40af)!important}\n';
     // \U0001f534v988\u3257 \u6211\u7684\u5b66\u4e60\u9875\u65cf(hsn-ml-\xb7\u968f\u8272\u677f\u5e95)
     /* \U0001f534v992: v988\u3257 \u65e7\u89c4(\u4ec5\u6539\u6587\u5b57\u8272)\u5df2\u64a4\u2014\u2014\u6539\u7531\u325d \u6574\u5c42\u53cc\u8272\u8c03\u5206\u79bb\u63a5\u7ba1 */
     // \U0001f534v988\u3258 \u730e\u4eba\u5956\u52b1\u5361(#hr_rvrw_card): \u73af\u5883\u514d\u75ab\u2014\u2014\u4eae\u677f\u4e0b\u56fa\u5316\u4e3a\u5b9e\u5fc3\u6df1\u7425\u73c0+\u6696\u5149\u58a8\u6c34, \u9875\u9762\u660e\u6697\u7686\u81ea\u6d3d
