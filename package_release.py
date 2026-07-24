@@ -433,6 +433,17 @@ _FORBIDDEN_TEXT_COLOR = (
     r"113\s*,\s*63\s*,\s*18|180\s*,\s*83\s*,\s*9|161\s*,\s*98\s*,\s*7|"
     r"194\s*,\s*65\s*,\s*12)(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\))"
 )
+# 🔴v997 (Hansen 明确规范): 红色系同样禁止作为文字色。
+# 例外: 语义性"答错/错误"提示可用红 —— 这是通用交互约定, 通过 ALLOW 注释豁免。
+# 用法: 在该行尾加注释  /* HSN-RED-OK: 答错语义 */  即视为已审批。
+_FORBIDDEN_RED_TEXT = (
+    r"(?:#(?:b91c1c|dc2626|ef4444|991b1b|7f1d1d|e11d48|be123c|9f1239|f43f5e|c81e1e)"
+    r"|rgba?\(\s*(?:185\s*,\s*28\s*,\s*28|220\s*,\s*38\s*,\s*38|"
+    r"239\s*,\s*68\s*,\s*68|153\s*,\s*27\s*,\s*27|127\s*,\s*29\s*,\s*29|"
+    r"225\s*,\s*29\s*,\s*72|190\s*,\s*18\s*,\s*60)(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\))"
+)
+_RED_ALLOW_MARK = "HSN-RED-OK"
+
 _FORBIDDEN_TEXT_PATTERNS = (
     # Legacy HTML font attributes paint text; SVG stop-color is a decorative
     # gradient pigment and must not be mistaken for a `color=` attribute.
@@ -481,6 +492,30 @@ def _scan_forbidden_text_colors(entries: list[tuple[str, bytes]]) -> None:
         if any(re.search(_FORBIDDEN_TEXT_COLOR, match.group(1), re.I)
                for match in _TEXT_EFFECT_DECLARATION.finditer(text)):
             failures.append(arcname)
+            continue
+        # 🔴v997: 红色文字禁令 —— 仅约束配色引擎 hansen_palette.js
+        # (装修规则的唯一产地; 游戏本体的红色多为语义色: 答错/时间告警/生命值,
+        #  属通用交互约定, 强行禁用会破坏可用性)
+        red_bad = False
+        if arcname != "hansen_palette.js":
+            continue
+        for match in _TEXT_DECLARATION.finditer(text):
+            value = match.group(1).lstrip()
+            if value.startswith(("'", '"', "`")) and arcname != "hansen_addiction.js":
+                continue
+            # 精度: 只认"紧跟冒号的色值", 避免把选择器内的 [style*="color:#xxx"] 串读进来
+            head = value.split(";")[0].split("}")[0].strip()
+            if not re.match(r"^" + _FORBIDDEN_RED_TEXT + r"\b", head, re.I):
+                continue
+            line_start = text.rfind("\n", 0, match.start()) + 1
+            line_end = text.find("\n", match.start())
+            line = text[line_start:line_end if line_end >= 0 else len(text)]
+            if _RED_ALLOW_MARK in line:
+                continue
+            red_bad = True
+            break
+        if red_bad:
+            failures.append(arcname + " (red-text)")
             continue
         # Gradient-clipped headings are text even though their pigment is in
         # `background`, not `color`. Start from the rare clip declarations and
@@ -553,6 +588,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "994": (("shell-53", "pages-51", "assets-51", "icons-3"), "v=994"),
         "995": (("shell-54", "pages-52", "assets-52", "icons-3"), "v=995"),
         "996": (("shell-55", "pages-53", "assets-53", "icons-3"), "v=996"),
+        "997": (("shell-56", "pages-54", "assets-54", "icons-3"), "v=997"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
