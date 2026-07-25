@@ -20,6 +20,9 @@
     {id:'review3',icon:'🔄',title:'复习单词 · 巩固 3 个',goal:3,type:'review',reward:{xp:25}},
     {id:'review6',icon:'🧠',title:'复习单词 · 巩固 6 个',goal:6,type:'review',reward:{xp:50}},
     {id:'reviewClear',icon:'✨',title:'复习单词 · 清空今日复习',goal:1,type:'reviewClear',reward:{xp:70}},
+    /* 🔴v1001(Hansen): 拼写蜂对决 —— 每日必做基石, 且必须【打赢】才算完成 */
+    {id:'sbWin1',icon:'🐝',title:'拼写蜂对决 · 打赢 1 场',goal:1,type:'sbwin',reward:{xp:80}},
+    {id:'sbWin2',icon:'🏆',title:'拼写蜂对决 · 打赢 2 场',goal:2,type:'sbwin',reward:{xp:150}},
     {id:'boss1',icon:'🗡️',title:'击败 1 次挑战',goal:1,type:'boss',reward:{xp:25}},
     {id:'boss3',icon:'🐉',title:'击败 3 次 Boss',goal:3,type:'boss',reward:{xp:70}},
     {id:'correct20',icon:'✅',title:'累计答对 20 题',goal:20,type:'correct',reward:{xp:30}},
@@ -34,14 +37,14 @@
     {id:'type5',icon:'⌨️',title:'打字大师 · 完成 5 词',goal:5,type:'type',reward:{xp:30}},
     {id:'type15',icon:'⚡',title:'打字大师 · 完成 15 词',goal:15,type:'type',reward:{xp:80}},
     {id:'type30',icon:'🔥',title:'打字大师 · 完成 30 词',goal:30,type:'type',reward:{xp:160}},
-    {id:'match1',icon:'🃏',title:'记忆翻牌 · 完成 1 轮',goal:1,type:'match',reward:{xp:20}},
-    {id:'match3',icon:'🎴',title:'记忆翻牌 · 完成 3 轮',goal:3,type:'match',reward:{xp:65}},
-    {id:'moles1',icon:'🎯',title:'打地鼠 · 完成 1 轮',goal:1,type:'moles',reward:{xp:30}},
-    {id:'moles3',icon:'🎪',title:'打地鼠 · 完成 3 轮',goal:3,type:'moles',reward:{xp:80}},
-    {id:'fish1',icon:'🎣',title:'钓鱼 · 完成 1 轮',goal:1,type:'fish',reward:{xp:30}},
-    {id:'fish3',icon:'🐟',title:'钓鱼 · 完成 3 轮',goal:3,type:'fish',reward:{xp:80}},
-    {id:'eagle1',icon:'👀',title:'火眼金睛 · 完成 1 轮',goal:1,type:'eagle',reward:{xp:30}},
-    {id:'eagle3',icon:'🦅',title:'火眼金睛 · 完成 3 轮',goal:3,type:'eagle',reward:{xp:80}},
+    {id:'match1',icon:'🃏',title:'记忆翻牌 · 配对成功 8 组',goal:8,type:'match',reward:{xp:20}},
+    {id:'match3',icon:'🎴',title:'记忆翻牌 · 配对成功 16 组',goal:16,type:'match',reward:{xp:65}},
+    {id:'moles1',icon:'🎯',title:'打地鼠 · 累计得 30 分',goal:30,type:'moles',reward:{xp:30}},
+    {id:'moles3',icon:'🎪',title:'打地鼠 · 累计得 60 分',goal:60,type:'moles',reward:{xp:80}},
+    {id:'fish1',icon:'🎣',title:'钓鱼大师 · 累计得 30 分',goal:30,type:'fish',reward:{xp:30}},
+    {id:'fish3',icon:'🐟',title:'钓鱼大师 · 累计得 60 分',goal:60,type:'fish',reward:{xp:80}},
+    {id:'eagle1',icon:'👀',title:'火眼金睛 · 累计得 30 分',goal:30,type:'eagle',reward:{xp:30}},
+    {id:'eagle3',icon:'🦅',title:'火眼金睛 · 累计得 60 分',goal:60,type:'eagle',reward:{xp:80}},
     {id:'bubble30',icon:'🫧',title:'泡泡大作战 · 得 30 分',goal:30,type:'bubble',reward:{xp:20}},
     {id:'bubble60',icon:'💧',title:'泡泡大作战 · 得 60 分',goal:60,type:'bubble',reward:{xp:60}},
     {id:'speed200',icon:'⚡',title:'极速60秒 · 得 200 分',goal:200,type:'speed',reward:{xp:35}},
@@ -111,7 +114,7 @@
       if (!byType[q.type]) byType[q.type] = [];
       byType[q.type].push(q);
     }
-    /* 🔴v1000 科学重设: 每天 12 个 = 3 固定基石(学新词+复习+打Boss) + 9 随机, 类型不重复 */
+    /* 🔴v1001 科学重设: 每天 12 个 = 4 固定基石(学新词+复习+打Boss+拼写蜂打赢) + 8 随机, 类型不重复 */
     var pickType = function(t){ var arr=byType[t]; if(!arr||!arr.length) return null;
       return clone(arr[Math.floor(random()*arr.length)]); };
     var used = {}, list = [];
@@ -121,16 +124,18 @@
       var pool=(byType['review']||[]).concat(byType['reviewClear']||[]); if(!pool.length) return false;
       var it=clone(pool[Math.floor(random()*pool.length)]); used[it.type]=1;
       it.progress=0; it.claimed=false; list.push(it); return true; };
-    /* ★ 基石: 学新词 / 复习单词 / 打Boss —— 用户明确要求每天必有 */
+    /* ★ 基石: 学新词 / 复习单词 / 打Boss / 拼写蜂对决打赢 —— 用户明确要求每天必有 */
     var _noNew=false; try{ _noNew=(typeof S!=='undefined'&&S.learned&&typeof allW!=='undefined'&&allW&&S.learned.length>=allW.length);}catch(e){}
     if(!_noNew) addByType('learn');
     addReview();
     addByType('boss');
+    addByType('sbwin');   /* 🔴v1001: 拼写蜂对决(必须打赢) —— 用户明确要求每天必做 */
     /* 拼写重头戏优先各抽 1 */
     addByType('scramble'); addByType('type');
     /* 其余按类型不重复随机补至 12 */
     var rest = Object.keys(byType).filter(function(t){
-      return !used[t] && t!=='reviewClear' && !(_noNew && t==='learn'); });
+      /* 🔴v1001修: review 与 reviewClear 同属复习基石, 补位阶段两者都要排除(否则同日重复出现复习任务) */
+      return !used[t] && t!=='review' && t!=='reviewClear' && !(_noNew && t==='learn'); });
     shuffle(rest, random);
     for(var r=0; r<rest.length && list.length<12; r++) addByType(rest[r]);
     shuffle(list, random);

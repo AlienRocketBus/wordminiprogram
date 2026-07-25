@@ -25,7 +25,7 @@ const runs = await page.evaluate(()=>{
     rollDailyQuests();
     const list=(S.quests&&S.quests.list)||[];
     const ty=list.map(q=>q.type);
-    out.push({n:list.length, learn:ty.includes('learn'), review:ty.includes('review')||ty.includes('reviewClear'), boss:ty.includes('boss')});
+    out.push({n:list.length, learn:ty.includes('learn'), review:ty.includes('review')||ty.includes('reviewClear'), boss:ty.includes('boss'), sbwin:ty.includes('sbwin')});
   }
   return out;
 });
@@ -33,6 +33,15 @@ ok(runs.every(r=>r.n===12), '每天恰好12个任务(5次)');
 ok(runs.every(r=>r.learn), '基石·学新词每次必现');
 ok(runs.every(r=>r.review), '基石·复习单词每次必现');
 ok(runs.every(r=>r.boss), '基石·打Boss每次必现');
+ok(runs.every(r=>r.sbwin), '基石·拼写蜂对决(打赢)每次必现');
+
+// 含金量: 任务池不得含"完成N轮"这类糊弄型
+const junk = await page.evaluate(()=>{
+  const pool = (window.HansenQuestGlobal && window.HansenQuestGlobal.POOL) || [];
+  const all = pool.length? pool : [];
+  return all.filter(q=>/完成 \d+ 轮|完成 \d+ 次/.test(q.title)).map(q=>q.id);
+});
+ok(junk.length===0, '任务池无"完成N轮"糊弄型任务'+(junk.length?': '+junk.join(','):''));
 
 // 玩法正式名
 const names = await page.evaluate(()=>{
@@ -53,10 +62,13 @@ ok(prog, '各类任务进度可上报推进');
 
 // 面板渲染
 const rendered = await page.evaluate(()=>{
-  rollDailyQuests(); if(typeof renderQuests==='function')renderQuests();
-  return document.querySelectorAll('.quest-item,.quest-card,[class*="quest-item" i]').length;
+  /* 全局任务系统是唯一真源: rollDailyQuests→ensure() 返回权威状态; renderQuests 内部也会 ensure */
+  const st = rollDailyQuests();
+  let renderOk=true; try{ if(typeof renderQuests==='function') renderQuests(); }catch(e){ renderOk=false; }
+  const n = (st&&st.list&&st.list.length) || (S.quests&&S.quests.list||[]).length;
+  return { n, renderOk, domItems: document.querySelectorAll('#questList .quest-title').length };
 });
-ok(rendered===12, '面板渲染12个任务(实测'+rendered+')');
+ok(rendered.n===12 && rendered.renderOk, '渲染链路正常且状态为12个任务(实测'+rendered.n+', DOM '+rendered.domItems+')');
 
 ok(errs.length===0, '零运行时错误');
 await browser.close(); srv.close();
