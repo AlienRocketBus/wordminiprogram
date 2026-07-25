@@ -512,6 +512,14 @@
     css+=_LS+'.pk_ava{background:radial-gradient(circle at 50% 42%,rgba(15,23,42,.10),rgba(15,23,42,.04) 65%,transparent 74%)!important}\n';
     // \u5f69\u5e95\u5361\u4e0e\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u6301
     css+=_LS+'.pk_card,'+_LS+'.pk_card *,'+_LS+'.pk_btn,'+_LS+'.pk_join{color:#fff!important}\n';
+    // \U0001f534v1004\u3265 \u767b\u5f55\u9762\u677f\u53cc\u8272\u8c03
+    css+=_LS+'#hsn_auth_panel .au_card{background:#ffffff!important;color:#0f172a!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_t,'+_LS+'#hsn_auth_panel .au_lb{color:#0f172a!important;opacity:1!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_x,'+_LS+'#hsn_auth_panel .au_send{background:rgba(15,23,42,.08)!important;color:#334155!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_tab{background:rgba(15,23,42,.05)!important;color:#475569!important;border-color:rgba(15,23,42,.12)!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_tab.on,'+_LS+'#hsn_auth_panel .au_go{color:#fff!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_in{background:#f8fafc!important;color:#0f172a!important;border-color:rgba(15,23,42,.18)!important}\n';
+    css+=_LS+'#hsn_auth_panel .au_tip{color:#64748b!important;opacity:1!important}\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v998\u3264 \u3010\u5168\u5c40\u6839\u6cbb\u3011\u4eae\u8272\u8c03\u4e0b\u7981\u6b62\u7070\u5e95\u2014\u2014\u7528\u6237\u591a\u6b21\u5f3a\u8c03\u7684\u603b\u89c4\u5219
