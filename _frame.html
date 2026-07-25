@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="zh">
 <head>
-<script src="hansen_sw_upgrade_gate_v944.js?v=1001"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1001"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_sw_upgrade_gate_v944.js?v=1002"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1002"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>单词大冒险</title>
@@ -32,7 +32,7 @@ h1{font-size:30px;letter-spacing:2px;margin-bottom:6px;background:linear-gradien
   var KEY='hsnViewMode';
   /* 只允许当前目录内明确列出的正式游戏页面。不能把 u 当作任意跳转或 iframe 地址。 */
   var ALLOWED_TARGETS = Object.freeze({
-    'index.html':1,'boss_hall.html':1,'land_map.html':1,'season_showcase.html':1,'spelling_bee.html':1,
+    'index.html':1,'boss_hall.html':1,'land_map.html':1,'season_showcase.html':1,'spelling_bee.html':1,'spelling_pk.html':1,
     'island_action.html':1,'island_adjective.html':1,'island_animal.html':1,'island_body.html':1,
     'island_city.html':1,'island_clothes.html':1,'island_color.html':1,'island_family.html':1,
     'island_food.html':1,'island_home.html':1,'island_job.html':1,'island_land1.html':1,
