@@ -85,11 +85,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     <div class="pk_d">系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。</div>
   </button>
 
-  <div class="pk_sec">ℹ️ 关于竞赛 ID</div>
-  <div class="pk_note">
-    每个人都有一个<b>专属竞赛 ID</b>，按注册先后顺序发放：<b>No.001</b>、<b>No.002</b>、<b>No.003</b>……<br>
-    这是身份证式标志——<b>名字随时可以改，号码永远不变</b>。
-  </div>
+  <div class="pk_sec">📊 我的战绩</div>
+  <div id="pkGlance"></div>
 </div>
 
 <!-- ═══ 子屏：公开房间 ═══ -->
@@ -145,7 +142,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     el.innerHTML='<span class="pk_ava">'+(p.avatar||'🐝')+'</span><div style="min-width:0;flex:1">'
       +(p.name?'<div class="pk_nm">'+escapeHtml(p.name)+'</div>':'<div class="pk_nm" style="opacity:.7">点这里设置名字</div>')
       +'<div class="pk_cid">🎫 竞赛 ID <b>No.'+cidTxt+'</b>'
-      +((p.name&&!p.cidLocked)?'<span class="pk_prov">临时号</span>':'')+'</div>'
++'</div>'
       +(tier?'<div class="pk_tier">'+tier.icon+' '+tier.name+(L.placed?' · '+L.rating+' 分':' · 未定级')+'</div>':'')
       +'</div><span class="pk_go">›</span>';
     el.onclick=function(){
@@ -160,6 +157,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   }
   function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+
+  /* 战绩速览：把用户真正想看的三个数放首屏 */
+  function renderGlance(){
+    var box=$('pkGlance'); if(!box) return;
+    var P=window.HansenSbProfile;
+    var s=P?P.collectStats():{bestCpm:0,learned:0,days:0};
+    var L=readLadder();
+    var rate=L.games?Math.round(L.wins/L.games*100):0;
+    box.innerHTML='<div class="pk_grid">'
+      +'<div class="pk_it"><div class="pk_v">'+(s.bestCpm||0)+'</div><div class="pk_l">最快速度(字符/分)</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+(L.games?rate+'%':'—')+'</div><div class="pk_l">对战胜率</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+(s.learned||0)+'</div><div class="pk_l">已掌握单词</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+(s.days||0)+'</div><div class="pk_l">连续学习(天)</div></div>'
+      +'</div>';
+  }
 
   function readLadder(){
     var d={rating:0,placed:false,games:0,wins:0,losses:0,streak:0,bestStreak:0};
@@ -222,10 +234,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       +'</div>';
 
     if(!cloudReady()){
-      h+='<div class="pk_note">☁️ 联网对战还没开通。<br>'
-        +'开通后你会先打 <b>'+(L2?L2.PLACEMENT_GAMES:3)+' 局定级赛</b>；'
-        +'根据你目前的拼写速度，预计起点约 <b>'+est+' 分</b>（'
-        +(L2?L2.tierOf(est).name:'')+'）。</div>';
+      h+='<div class="pk_note">🚧 天梯马上就来。<br>'
+        +'按你现在的拼写速度，预计能从 <b>'+(L2?L2.tierOf(est).name:'')+'</b> 起步。</div>';
     } else {
       h+='<button class="pk_btn" id="pkMatch">开始匹配</button>';
     }
@@ -236,16 +246,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 
   /* ── 绑定 ── */
   function boot(){
-    renderMe();
+    renderMe(); renderGlance();
     var r=$('pkRooms'), l=$('pkLadder');
     if(r) r.onclick=function(){ if(!requireIdentity())return; renderRooms(); show('pkRoomScreen'); };
     if(l) l.onclick=function(){ if(!requireIdentity())return; renderLadder(); show('pkLadderScreen'); };
     var backs=document.querySelectorAll('[data-home]');
-    for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); show('pkHome'); };
+    for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); renderGlance(); show('pkHome'); };
     /* 资料页关闭后刷新身份条(改名/发号会变) */
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) renderMe(); });
     document.addEventListener('hsn-auth-changed', renderMe);
-    setInterval(renderMe, 1500);
+    setInterval(function(){ renderMe(); renderGlance(); }, 1500);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

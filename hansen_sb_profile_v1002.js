@@ -279,8 +279,8 @@
       + '<span class="pf_ava">' + (p.avatar || '🐝') + '</span><div style="min-width:0;flex:1">'
       + (named
         ? '<div class="pf_name">' + esc(p.name) + '</div><div class="pf_cid">🎫 竞赛 ID <b>No.' + fmtCid(p.cid) + '</b>'
-          + (p.cidLocked ? '' : '<span class="pf_prov">临时号</span>') + '</div>'
-        : '<div class="pf_name" style="opacity:.7">还没有天梯名</div>')
+          + '</div>'
+        : '<div class="pf_name" style="opacity:.7">还没起名字</div>')
       + (tier ? '<div class="pf_tier">' + tier.icon + ' ' + tier.name
           + (L.placed ? ' · ' + fmt(L.rating) + ' 分' : ' · 未定级') + '</div>' : '')
       + '</div></div>';
