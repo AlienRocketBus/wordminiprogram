@@ -596,6 +596,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1001": (("shell-60", "pages-58", "assets-58", "icons-3"), "v=1001"),
         "1002": (("shell-61", "pages-59", "assets-59", "icons-3"), "v=1002"),
         "1003": (("shell-62", "pages-60", "assets-60", "icons-3"), "v=1003"),
+        "1004": (("shell-63", "pages-61", "assets-61", "icons-3"), "v=1004"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945

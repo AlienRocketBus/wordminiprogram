@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <title>拼写大PK · 单词大冒险</title>
-<script src="hansen_sw_upgrade_gate_v944.js?v=1002"></script>
-<script src="hansen_backup_bootstrap_v944.js?v=1002"></script>
+<script src="hansen_sw_upgrade_gate_v944.js?v=1004"></script>
+<script src="hansen_backup_bootstrap_v944.js?v=1004"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
@@ -111,9 +111,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <div id="pkLadderBody"></div>
 </div>
 
-<script src="hansen_palette.js?v=1002"></script>
-<script src="hansen_sb_ladder_v1002.js?v=1002"></script>
-<script src="hansen_sb_profile_v1002.js?v=1002"></script>
+<script src="hansen_palette.js?v=1004"></script>
+<script src="hansen_sb_ladder_v1002.js?v=1004"></script>
+<script src="hansen_sb_profile_v1002.js?v=1004"></script>
+<script src="hansen_cloud_config_v965.js?v=1004"></script>
+<script src="hansen_auth_v1004.js?v=1004"></script><!--🔴v1004: 账号系统-->
+<script src="hansen_auth_ui_v1004.js?v=1004"></script>
 <script>
 (function(){
   'use strict';
@@ -145,7 +148,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       +((p.name&&!p.cidLocked)?'<span class="pk_prov">临时号</span>':'')+'</div>'
       +(tier?'<div class="pk_tier">'+tier.icon+' '+tier.name+(L.placed?' · '+L.rating+' 分':' · 未定级')+'</div>':'')
       +'</div><span class="pk_go">›</span>';
-    el.onclick=function(){ try{ if(window.HansenSbProfile) HansenSbProfile._open(); }catch(e){} };
+    el.onclick=function(){
+      try{
+        /*🔴v1004: 没登录先引导登录(登录才有跨设备存档与正式竞赛ID); 已登录则进资料页*/
+        if(window.HansenAuth && HansenAuth.ready() && !HansenAuth.isSignedIn() && window.HansenAuthUI){
+          HansenAuthUI.open(); return;
+        }
+        if(window.HansenSbProfile) HansenSbProfile._open();
+      }catch(e){}
+    };
   }
   function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
@@ -233,6 +244,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); show('pkHome'); };
     /* 资料页关闭后刷新身份条(改名/发号会变) */
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) renderMe(); });
+    document.addEventListener('hsn-auth-changed', renderMe);
     setInterval(renderMe, 1500);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
