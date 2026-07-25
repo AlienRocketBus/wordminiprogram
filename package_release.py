@@ -428,7 +428,11 @@ def _verify_deploy_dependencies(archive: zipfile.ZipFile, names: set[str]) -> No
 # The same pigments remain valid in trees, leather, soil, borders and other SVG
 # illustration shapes, so a raw-token ban would damage legitimate artwork.
 _FORBIDDEN_TEXT_COLOR = (
-    r"(?:#(?:92400e|78350f|7c2d12|9a3412|854d0e|713f12|b45309|a16207|c2410c)"
+    r"(?:#(?:92400e|78350f|7c2d12|9a3412|854d0e|713f12|b45309|a16207|c2410c"
+    # 🔴v1015 运行时彻查补入：这些同属驼/锈色相区(H12-48 S≥30 L18-52)，
+    #        此前不在清单里，金币计数 #f59e0b 就是靠它们漏了很久。
+    #        仅约束**文字类属性**，背景/边框的金色渐变不受影响。
+    r"|f59e0b|d97706|ea580c|ca8a04|cd7f32)"
     r"|rgba?\(\s*(?:146\s*,\s*64\s*,\s*14|120\s*,\s*53\s*,\s*15|"
     r"124\s*,\s*45\s*,\s*18|154\s*,\s*52\s*,\s*18|133\s*,\s*77\s*,\s*14|"
     r"113\s*,\s*63\s*,\s*18|180\s*,\s*83\s*,\s*9|161\s*,\s*98\s*,\s*7|"
@@ -607,6 +611,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1012": (("shell-71", "pages-69", "assets-69", "icons-3"), "v=1012"),
         "1013": (("shell-72", "pages-70", "assets-70", "icons-3"), "v=1013"),
         "1014": (("shell-73", "pages-71", "assets-71", "icons-3"), "v=1014"),
+        "1015": (("shell-74", "pages-72", "assets-72", "icons-3"), "v=1015"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945

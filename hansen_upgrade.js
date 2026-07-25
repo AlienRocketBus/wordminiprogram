@@ -165,7 +165,7 @@
       background:radial-gradient(circle,rgba(251,191,36,.3) 0%,transparent 60%);
       animation:hu_critFlash 1.5s ease-out forwards;
     `;
-    overlay.innerHTML = `<div style="font-size:48px;font-weight:900;color:#fbbf24;text-shadow:0 0 30px #fbbf24,0 0 60px #f59e0b;animation:hu_critScale 1.5s ease-out forwards;text-align:center;line-height:1.2">💥 暴击!<br>${text || '×5 奖励!'}</div>`;
+    overlay.innerHTML = `<div style="font-size:48px;font-weight:900;color:#fbbf24;text-shadow:0 0 30px #fbbf24,0 0 60px #fbbf24;animation:hu_critScale 1.5s ease-out forwards;text-align:center;line-height:1.2">💥 暴击!<br>${text || '×5 奖励!'}</div>`;
     document.body.appendChild(overlay);
     try { if(navigator.vibrate) navigator.vibrate([0,50,30,50,30,100]); } catch(e){}
     setTimeout(() => overlay.remove(), 1500);
