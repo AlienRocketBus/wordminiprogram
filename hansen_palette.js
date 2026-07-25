@@ -562,6 +562,15 @@
     css+=_LS+'.lg-banner{color:#fff!important}\n';
     css+=_LS+'.lg-banner *{color:rgba(255,255,255,.94)!important}\n';
     css+=_LS+'.lg-banner b,'+_LS+'.lg-banner strong{color:#fff!important}\n';
+    // \U0001f534v1014\u3269 Boss \u7ed3\u7b97\u9875\u6807\u9898(\u6218\u8d25/\u80dc\u5229)
+    // \u539f\u4e3a"\u6e10\u53d8\u586b\u5145\u6587\u5b57"(background-clip:text + text-fill-color:transparent),
+    // \u4eae\u8272\u8c03\u4e0b\u586b\u5145\u8272\u88ab\u6539\u6210\u5b9e\u8272\u800c\u91cd\u6655\u8fd8\u5728 \u2192 \u6807\u9898\u80cc\u540e\u4e00\u56e2\u6df1\u8272\u6c61\u8ff9\u3002
+    // \u4eae\u677f\u6539\u4e3a: \u5b9e\u8272\u6df1\u9753\u84dd + \u5f7b\u5e95\u53bb\u6655, \u5e72\u51c0\u53ef\u8bfb\u3002
+    css+=_LS+'.boss-victory h2{background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;-webkit-text-fill-color:#1e3a8a!important;color:#1e3a8a!important;text-shadow:none!important;filter:none!important}\n';
+    css+=_LS+'.boss-victory{color:#334155!important}\n';
+    css+=_LS+'.boss-victory [style*="color:#cbd5e1"]{color:#475569!important}\n';
+    // \u7ed3\u7b97\u9875\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u7559
+    css+=_LS+'.boss-victory .game-btn,'+_LS+'.boss-victory .game-btn *{color:#fff!important}\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v998\u3264 \u3010\u5168\u5c40\u6839\u6cbb\u3011\u4eae\u8272\u8c03\u4e0b\u7981\u6b62\u7070\u5e95\u2014\u2014\u7528\u6237\u591a\u6b21\u5f3a\u8c03\u7684\u603b\u89c4\u5219
