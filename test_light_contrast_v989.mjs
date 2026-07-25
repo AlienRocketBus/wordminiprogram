@@ -52,6 +52,9 @@ const AUDIT = `(function(){
     const hasText=[...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim().length>=2);
     if(!hasText)return;
     const cs=getComputedStyle(el);
+    /* 🔴v1016: 渐变填充文字(background-clip:text)的可见色即其自身背景渐变,
+       与自身背景比对必得 ~1:1 假警报, 跳过。 */
+    if(cs.webkitTextFillColor==='rgba(0, 0, 0, 0)' && cs.backgroundImage && cs.backgroundImage!=='none') return;
     if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity<0.4)return;
     const fg=pr(cs.color); if(!fg)return;
     const rawTxt=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent.trim()).join('');

@@ -571,6 +571,20 @@
     css+=_LS+'.boss-victory [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \u7ed3\u7b97\u9875\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u7559
     css+=_LS+'.boss-victory .game-btn,'+_LS+'.boss-victory .game-btn *{color:#fff!important}\n';
+    // \U0001f534v1016 \u4eae\u8272\u8c03\u53ef\u8bfb\u6027\u5b9e\u6d4b\u6574\u6539(23\u5c4f\u9010\u5b57\u6d4b\u5408\u6210\u540e\u5bf9\u6bd4\u5ea6\u540e\u62d3\u51fa)
+    // \u2460 \u9876\u680f\u300c\u6253\u5361\u5929\u6570\u300d\u6570\u5b57: \u6d45\u91d1 #fcd34d \u538b\u767d\u5e95 = 1.44:1(\u51e0\u4e4e\u9690\u5f62)
+    css+=_LS+'.hsn-streak-inline span{color:var(--pal-accent-text,#1e3a8a)!important}\n';
+    css+=_LS+'.hsn-streak-inline{color:#475569!important}\n';
+    // \u2462 \u64e6\u8fb9\u9879: \u767d\u5b57\u538b\u9753\u84dd\u8fd4\u56de\u952e 4.0:1 \u2192 \u5e95\u8272\u52a0\u6df1\u81f3\u8fbe\u6807
+    css+=_LS+'.back-btn{background:linear-gradient(135deg,#4338ca,#3730a3)!important;color:#fff!important}\n';
+    css+=_LS+'.back-btn *{color:#fff!important}\n';
+    // \u2463 \u5c4f\u5e55\u6807\u9898: \u91d1\u8272\u6e10\u53d8\u6587\u5b57\u538b\u6d45\u5e95 1.6:1(27\u5904) \u2192 \u6539\u6df1\u9753\u84dd\u6e10\u53d8
+    css+=_LS+'.screen-title{background:linear-gradient(90deg,#1e3a8a,#3730a3)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important}\n';
+    // \u2464 \u6de1\u91d1\u5b57\u538b\u91d1\u5e95(\u80f6\u56ca\u5185) \u2192 \u767d\u5b57\u63cf\u8fb9
+    css+=_LS+'[style*="background:#fbbf24"] [style*="color:#fde68a"],'+_LS+'[style*="linear-gradient(135deg,#fbbf24"] [style*="color:#fde68a"]{color:#fff!important;text-shadow:0 1px 2px rgba(15,23,42,.35)!important}\n';
+    // \u2461 \u767d\u5b57\u538b\u6de1\u7c89/\u6de1\u7eff\u5e95(~1.5:1) \u2192 \u8f6c\u6df1\u5b57
+    css+=_LS+'[style*="background:#fee2e2"],'+_LS+'[style*="background:#fecaca"]{color:#7f1d1d!important}/*HSN-RED-OK \u7b54\u9519\u8bed\u4e49*/\n';
+    css+=_LS+'[style*="background:#dcfce7"],'+_LS+'[style*="background:#bbf7d0"]{color:#14532d!important}\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v998\u3264 \u3010\u5168\u5c40\u6839\u6cbb\u3011\u4eae\u8272\u8c03\u4e0b\u7981\u6b62\u7070\u5e95\u2014\u2014\u7528\u6237\u591a\u6b21\u5f3a\u8c03\u7684\u603b\u89c4\u5219
