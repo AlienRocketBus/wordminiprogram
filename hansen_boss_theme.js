@@ -195,7 +195,7 @@
     L + '.boss-q-sub{background:rgba(255,255,255,.92) !important;color:#334155 !important}',
     /* 选项 4 态 */
     L + '.boss-opt{background:linear-gradient(135deg,#ffffff,#eaf1fb) !important;color:#1e293b !important;border-color:#a8bdd9 !important}',
-    L + '.boss-opt:hover{background:linear-gradient(135deg,#e0e7ff,#c7d2fe) !important;color:#312e81 !important;border-color:#6366f1 !important}',
+'@media(hover:hover) and (pointer:fine){' + L + '.boss-opt:hover{background:linear-gradient(135deg,#e0e7ff,#c7d2fe) !important;color:#312e81 !important;border-color:#6366f1 !important}}',
     L + '.boss-opt.correct{background:linear-gradient(135deg,#dcfce7,#bbf7d0) !important;color:#14532d !important;border-color:#22c55e !important}',
     L + '.boss-opt.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca) !important;color:#7f1d1d !important;border-color:#ef4444 !important}',
     'html.hsn-bt-light #bossScreen #bossOpts .boss-opt.correct,html.hsn-bt-light #bossScreen #bossOpts .boss-opt.correct *,' +

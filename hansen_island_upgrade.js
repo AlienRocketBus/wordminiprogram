@@ -324,7 +324,7 @@
     '.ach-total-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:6px;transition:width .4s}'+
     '.ach-pending-tip{margin-top:10px;font-size:12px;font-weight:700;color:#fbbf24;text-align:center;background:rgba(251,191,36,.12);padding:6px;border-radius:8px}'+
     '.ach-bar{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#1e293b,#0f172a);border:1.5px solid #334155;border-radius:12px;padding:12px 16px;margin:8px 0;cursor:pointer;user-select:none}'+
-    '.ach-bar:hover{border-color:#fbbf24}.ach-bar-icon{font-size:24px}.ach-bar-name{font-size:16px;font-weight:800;color:#e2e8f0;flex:1}'+
+    '@media(hover:hover) and (pointer:fine){.ach-bar:hover{border-color:#fbbf24}}.ach-bar-icon{font-size:24px}.ach-bar-name{font-size:16px;font-weight:800;color:#e2e8f0;flex:1}'+
     '.ach-bar-count{font-size:13px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,.12);padding:3px 12px;border-radius:20px}'+
     '.ach-bar-arrow{font-size:12px;color:#94a3b8;width:16px;text-align:center}.ach-bar-dot{font-size:14px}'+
     '.ach-panel{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 14px;padding:2px}'+
