@@ -947,11 +947,12 @@
           position:fixed;inset:0;z-index:9999;
           background:linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%);
           display:flex;flex-direction:column;
-          padding:20px 16px;
+          /* 🔴v1008: 底部按 Home 横条留安全区, 顶部收紧让内容整体上移 */
+          padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);
           
         }
         #hr_flashcard .hr_fc_top{
-          display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:20px;
+          display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:10px;
         }
         #hr_flashcard .hr_fc_top button{
           background:rgba(255,255,255,.08);color:#cbd5e1;border:0;
@@ -963,7 +964,9 @@
           perspective:1200px;
         }
         #hr_flashcard .hr_card_main{
-          width:100%;max-width:340px;height:420px;
+          /* 🔴v1008: 原写死 height:420px, 在 680px 的可用空间里上下各空 130px,
+             卡片显小且整体像被压到下半屏。改为随空间伸缩并设上下限。 */
+          width:100%;max-width:352px;height:100%;max-height:540px;min-height:320px;
           background:linear-gradient(135deg,#6366f1,#4338ca);
           border-radius:24px;padding:30px;text-align:center;color:#fff;
           box-shadow:0 20px 60px rgba(0,0,0,.5);
@@ -982,11 +985,11 @@
         #hr_flashcard .hr_card_excn{font-size:16px;opacity:.85;line-height:1.5;padding:0 6px}
         #hr_flashcard .hr_card_tap_hint{color:rgba(255,255,255,.5);font-size:12px;margin-top:18px}
         #hr_flashcard .hr_fc_btm{
-          display:flex;gap:10px;margin-top:20px;
+          display:flex;gap:10px;margin-top:14px;
         }
         #hr_flashcard .hr_fc_btm button{
           flex:1;background:rgba(255,255,255,.08);color:#fff;border:0;
-          padding:14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;
+          padding:15px 12px;min-height:52px;border-radius:14px;font-size:14.5px;font-weight:800;cursor:pointer;
         }
         #hr_flashcard .hr_fc_btm .next{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
         #hr_flashcard .hr_fc_btm .speak{background:linear-gradient(135deg,#10b981,#059669)}
