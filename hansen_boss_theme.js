@@ -50,7 +50,15 @@
   function cur() {
     try {
       var v = localStorage.getItem(KEY);
-      return (v === 'light' || v === 'cinema') ? v : 'dark';
+      /* 用户明确挑过主题 → 尊重他的选择 */
+      if (v === 'light' || v === 'cinema' || v === 'dark') return v;
+      /* 🔴v1010: 没挑过 → **跟随全局色调**。
+         此前无论全局是亮是暗，Boss 屏一律锁死"暗"主题，
+         导致用户切到亮色调后 Boss 屏仍是近黑背景、且选项白底白字
+         （本主题的选择器特异性高于配色引擎，引擎改不动它）。 */
+      var h = document.documentElement;
+      if (h && h.classList && h.classList.contains('hsn-pal-light')) return 'light';
+      return 'dark';
     } catch (e) { return 'dark'; }
   }
 
@@ -60,7 +68,7 @@
   var C = 'html.hsn-bt-cinema #bossScreen ';
   var CSS = [
     /* ══ 幕布(暗) —— 原样, Hansen 说暗色调不用变 ══ */
-    'html.hsn-bt-dark #bossScreen::before{background:linear-gradient(180deg,#0f1a38 0%,#0a1122 60%,#05070f 100%) !important}',
+    'html.hsn-bt-dark #bossScreen::before{background:linear-gradient(180deg,#243769 0%,#1b2750 60%,#141c3c 100%) !important}',
 
     /* ══ v953: 深空/电影的 Boss 答题语义色 ══
        全局亮色配色和 Boss 主题是两条独立轴。樱花配色会把行内金色改为 #9f1239，

@@ -106,10 +106,9 @@
     css+=S+'[style*="background:#334155"]{background:var(--pal-surf-3)!important}\n';
     css+=S+'[style*="background:#475569"]{background:var(--pal-surf-4)!important}\n';
     // 打Boss区整体还原(电影感原样·任何配色都不碰·防亮色下叠在立绘/暗遮罩上看不清)
-    css+=S+'#bossScreen [style*="color:#fff"]{color:#fff!important}\n';
-    css+=S+'#bossScreen [style*="color:#e2e8f0"]{color:#e2e8f0!important}\n';
-    css+=S+'#bossScreen [style*="color:#cbd5e1"]{color:#cbd5e1!important}\n';
-    css+=S+'#bossScreen [style*="color:#94a3b8"]{color:#94a3b8!important}\n';
+    /* \U0001f534v1010: \u539f\u56db\u6761"\u5168\u5c4f\u514d\u75ab"\u5df2\u64a4\u2014\u2014\u5b83\u4eec\u628a\u4eae\u8272\u8c03\u4e0b\u7684\u6df1\u5b57\u4e5f\u51bb\u6210\u6d45\u5b57,
+       \u9020\u6210\u9009\u9879\u767d\u5e95\u767d\u5b57\u5b8c\u5168\u770b\u4e0d\u89c1\u3002\u6539\u7531\u4e0b\u65b9\u6574\u5c4f\u53cc\u8272\u8c03\u65b9\u6848\u63a5\u7ba1\u3002
+       \u5f69\u5e95\u5143\u7d20(\u8840\u6761/\u76f8\u673a/\u5f69\u724c)\u7684\u767d\u5b57\u5728\u4e0b\u65b9\u5355\u72ec\u4fdd\u7559\u3002 */
     css+=S+'#bossScreen [style*="background:linear-gradient(135deg,#1e293b"]{background:linear-gradient(135deg,#1e293b,#0f172a)!important}\n';
     css+=S+'#bossScreen [style*="background:#0f172a"]{background:#0f172a!important}\n';
     css+=S+'#bossScreen [style*="background:#1e293b"]{background:#1e293b!important}\n';
@@ -533,6 +532,17 @@
     // \u72b6\u6001\u6761\u4e0e\u5f97\u5206
     css+=_LS+'.moles-stats{color:#334155!important}\n';
     css+=_LS+'.moles-stats b{color:var(--pal-accent-text,#1e3a8a)!important}\n';
+    /* \U0001f534v1010\u3267 \u6253Boss \u914d\u8272\u5f52 hansen_boss_theme.js \u5355\u4e00\u7ba1\u8f96\u3002
+       \u672c\u6b21\u66fe\u5728\u5f15\u64ce\u91cc\u53e6\u5199\u4e00\u5957 Boss \u4eae\u8272\u89c4\u5219, \u7ed3\u679c\u4e0e\u4e3b\u9898\u7cfb\u7edf\u91cd\u53e0\u5e76
+       \u7834\u574f\u4e86"\u7528\u6237\u9009\u5b9a\u7684 Boss \u4e3b\u9898\u5e94\u72ec\u7acb\u4e8e\u5168\u5c40\u8272\u8c03"\u8fd9\u4e00\u5951\u7ea6(hf7 \u5f53\u573a\u62d3\u51fa)\u3002
+       \u6b63\u786e\u505a\u6cd5: \u4e3b\u9898\u7cfb\u7edf\u5728\u7528\u6237\u672a\u663e\u5f0f\u9009\u62e9\u65f6\u8ddf\u968f\u5168\u5c40\u8272\u8c03(\u89c1 cur()), \u5f15\u64ce\u4e0d\u518d\u63d2\u624b\u3002 */
+    // \U0001f534v1010: \u6d45\u8584\u8377\u7eff #bbf7d0 \u538b\u767d\u5e95 \u5bf9\u6bd4\u5ea6\u4ec5 1.03(\u7b49\u4e8e\u9690\u5f62)
+    // \u5ba1\u8ba1\u673a\u5728\u8bbe\u7f6e\u9875/\u6211\u7684\u5b66\u4e60/\u9519\u9898\u603b\u89c8\u4e09\u5904\u62d3\u51fa; \u5f69\u5e95\u5361\u5185\u7684\u6d45\u7eff\u4e0d\u53d7\u5f71\u54cd
+    css+=_LS+'[style*="color:#bbf7d0"]:not(.boss-opt):not(.boss-opt *){color:#15803d!important}\n';
+    css+=_LS+'.listen-reveal .lr-pn{color:#15803d!important}\n';
+    /* \u4f46\u5f69\u5e95\u5361\u7247\u5185\u7684\u6d45\u7eff\u8981\u4fdd\u7559\u2014\u2014\u5b83\u672c\u6765\u5c31\u538b\u5728\u7eff\u6e10\u53d8\u4e0a\uff0c
+       \u8f6c\u6df1\u7eff\u53cd\u800c\u53d8\u6210\u7eff\u5e95\u7eff\u5b57(\u5ba1\u8ba1\u673a\u5b9e\u6d4b 1.82)\u3002\u540e\u4f4d\u540e\u4ee3\u9009\u62e9\u5668\u7279\u5f02\u6027\u66f4\u9ad8\uff0c\u53ef\u590d\u4f4d\u3002 */
+    css+=_LS+'[style*="linear-gradient"] [style*="color:#bbf7d0"]{color:#bbf7d0!important}\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v998\u3264 \u3010\u5168\u5c40\u6839\u6cbb\u3011\u4eae\u8272\u8c03\u4e0b\u7981\u6b62\u7070\u5e95\u2014\u2014\u7528\u6237\u591a\u6b21\u5f3a\u8c03\u7684\u603b\u89c4\u5219
