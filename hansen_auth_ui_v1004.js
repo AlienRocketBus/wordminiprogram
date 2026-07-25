@@ -164,7 +164,8 @@
         ? A.loginByPhoneCode((q('auCode') || {}).value || '')
         : A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
       task.then(function (r) {
-        msg('登录成功！' + (r && r.cid ? ' 你的竞赛 ID 是 No.' + pad(r.cid) : ''), 'ok');
+        msg('登录成功！' + (r && r.cid ? ' 你的竞赛 ID 是 No.' + pad(r.cid)
+              : (r && r.pendingId ? ' 竞赛 ID 稍后自动分配。' : '')), 'ok');
         setTimeout(function () { render(); notify(); }, 900);
       }).catch(function (e) {
         msg(A.friendly(e), 'err');
