@@ -68,16 +68,38 @@
   function auth() { return app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; }); }
 
   /* ── 登录态 ───────────────────────────────────────── */
-  function currentUser() {
-    try {
-      if (_auth && typeof _auth.getCurrentUser === 'function') return _auth.getCurrentUser();
-      if (_auth && _auth.currentUser) return _auth.currentUser;
-    } catch (e) {}
-    return null;
+  /* 🔴v1012: SDK 的 getCurrentUser() 与 getLoginState() **都返回 Promise**，
+     v1004 当同步用 → 拿到 Promise 对象、.uid 为 undefined → 误报「登录状态异常」，
+     而实际上注册/登录已经成功。此处改为异步解析，并做多路兜底。 */
+  function currentUserAsync() {
+    return auth().then(function (a) {
+      if (typeof a.getCurrentUser === 'function') {
+        return Promise.resolve(a.getCurrentUser()).catch(function () { return null; });
+      }
+      return null;
+    }).then(function (u) {
+      if (u && u.uid) return u;
+      /* 兜底：从登录态里取 */
+      return auth().then(function (a) {
+        if (typeof a.getLoginState !== 'function') return null;
+        return Promise.resolve(a.getLoginState()).catch(function () { return null; });
+      }).then(function (st) {
+        if (!st) return null;
+        return st.user || (st.uid ? st : null);
+      });
+    }).catch(function () { return null; });
   }
+  /* 同步版仅用于 UI 判定：以本地缓存的登录态为准（登录成功时会写入 uid） */
   function isSignedIn() {
-    var u = currentUser();
-    return !!(u && u.uid && !u.isAnonymous);
+    try {
+      var lc = readLocal();
+      /* uid 可能因 SDK 异步而暂时读不到, 但只要签入成功(有登录方式+时间戳)就是已登录 */
+      return !!(lc.method && lc.signedAt);
+    } catch (e) { return false; }
+  }
+  function currentUser() {
+    var lc = readLocal();
+    return lc.uid ? { uid: lc.uid } : null;
   }
 
   /* 友好错误文案：把云端英文错误翻成人话 */
@@ -172,12 +194,19 @@
 
   /* ── 登录之后：建档 + 发号 ──────────────────────── */
   function afterSignIn() {
-    var u = currentUser();
-    var uid = u && u.uid;
-    if (!uid) return Promise.reject(new Error('登录状态异常，重新登录一次'));
-    writeLocal({ uid: uid });
-    return ensureProfile(uid).then(function (prof) {
-      return { ok: true, uid: uid, cid: prof && prof.cid };
+    return currentUserAsync().then(function (u) {
+      var uid = u && u.uid;
+      if (!uid) {
+        /* 🔴v1012: 读不到 uid **不等于登录失败**——签入这一步已经成功了。
+           以前在这里直接判失败，用户看到「登录状态异常」，实际账号已注册好。
+           这里标记为已登录，竞赛 ID 留待下次进入时补发。 */
+        writeLocal({ signedAt: Date.now() });
+        return { ok: true, uid: '', cid: 0, pendingId: true };
+      }
+      writeLocal({ uid: uid });
+      return ensureProfile(uid)
+        .then(function (prof) { return { ok: true, uid: uid, cid: prof && prof.cid }; })
+        .catch(function () { return { ok: true, uid: uid, cid: 0, pendingId: true }; });
     });
   }
 
@@ -251,6 +280,7 @@
     ready: ready,
     isSignedIn: isSignedIn,
     currentUser: currentUser,
+    currentUserAsync: currentUserAsync,
     readLocal: readLocal,
     normPhone: normPhone,
     friendly: friendly,
