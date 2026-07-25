@@ -520,6 +520,19 @@
     css+=_LS+'#hsn_auth_panel .au_tab.on,'+_LS+'#hsn_auth_panel .au_go{color:#fff!important}\n';
     css+=_LS+'#hsn_auth_panel .au_in{background:#f8fafc!important;color:#0f172a!important;border-color:rgba(15,23,42,.18)!important}\n';
     css+=_LS+'#hsn_auth_panel .au_tip{color:#64748b!important;opacity:1!important}\n';
+    // \U0001f534v1007\u3266 \u6253\u5730\u9f20\u4eae\u8272\u8c03\u6574\u4f53\u91cd\u914d(\u7528\u6237\u62a5"\u9ed1\u4e0d\u9686\u51ac\u4ec0\u4e48\u90fd\u770b\u4e0d\u6e05")
+    // \u539f: \u573a\u5730\u6df1\u58a8\u7eff #365314\u2192#1a2e05 / \u6d1e\u8fd1\u4e4e\u5168\u9ed1 #3f2317\u2192#1c0e05
+    // \u65b0: \u9633\u5149\u8349\u576a + \u6d45\u8272\u571f\u6d1e, \u4fdd\u7559\u6df1\u5ea6\u611f\u4f46\u6574\u4f53\u660e\u4eae
+    css+=_LS+'.moles-grid{background:linear-gradient(180deg,#bbf7d0 0%,#86efac 45%,#4ade80 100%)!important;border-color:#22c55e!important;box-shadow:inset 0 2px 10px rgba(255,255,255,.55),0 6px 18px rgba(22,163,74,.22)!important}\n';
+    // \u6d1e\u53e3: \u6d45\u6c99\u571f\u8272 + \u5185\u9634\u5f71\u505a\u51fa\u51f9\u9677\u611f(\u4e0d\u9760\u53d8\u9ed1)
+    css+=_LS+'.mole-slot{background:radial-gradient(ellipse at center bottom,#fde68a 0%,#fbbf24 58%,#d97706 100%)!important;box-shadow:inset 0 6px 14px rgba(120,53,15,.30),inset 0 -3px 8px rgba(255,255,255,.42)!important;border:2px solid rgba(217,119,6,.42)!important}\n';
+    // \u5730\u9f20\u4e2d\u6587\u540d: \u9ed1\u5e95\u767d\u5b57 \u2192 \u767d\u5e95\u58a8\u5b57(\u6d45\u6d1e\u4e0a\u624d\u770b\u5f97\u6e05)
+    css+=_LS+'.mole-cn{background:rgba(255,255,255,.94)!important;color:#0f172a!important;text-shadow:none!important;box-shadow:0 1px 3px rgba(15,23,42,.18)!important}\n';
+    // emoji \u91cd\u9ed1\u6655 \u2192 \u8f7b\u67d4\u5f71
+    css+=_LS+'.mole-emoji{filter:drop-shadow(0 2px 4px rgba(120,53,15,.34))!important}\n';
+    // \u72b6\u6001\u6761\u4e0e\u5f97\u5206
+    css+=_LS+'.moles-stats{color:#334155!important}\n';
+    css+=_LS+'.moles-stats b{color:var(--pal-accent-text,#1e3a8a)!important}\n';
     // \u2463 \u9898\u5e72\u63d0\u793a\u4e0e\u8ba1\u6570\u884c(\u884c\u5185#cbd5e1)
     css+=_LS+'#clozeContent [style*="color:#cbd5e1"]{color:#475569!important}\n';
     // \U0001f534v998\u3264 \u3010\u5168\u5c40\u6839\u6cbb\u3011\u4eae\u8272\u8c03\u4e0b\u7981\u6b62\u7070\u5e95\u2014\u2014\u7528\u6237\u591a\u6b21\u5f3a\u8c03\u7684\u603b\u89c4\u5219
