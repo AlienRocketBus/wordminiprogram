@@ -43,7 +43,7 @@
       '.hero-sprite.hsn-hero-strike{animation:hsnHero .5s cubic-bezier(.5,-0.4,.4,1.4)}',
       '@keyframes hsnHero{0%{transform:translateY(0) scale(1) rotate(0)}35%{transform:translateY(-36px) scale(1.45) rotate(0deg)}55%{transform:translateY(-32px) scale(1.5) rotate(0deg)}100%{transform:translateY(0) scale(1) rotate(0)}}',
       '.boss-sprite-wrap .hsn-dmg{position:absolute;left:50%;top:2px;transform:translateX(-50%);font-weight:900;font-size:27px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6),0 0 12px rgba(239,68,68,.7);pointer-events:none;z-index:6;white-space:nowrap;animation:hsnDmg .92s ease-out forwards}',
-      '.boss-sprite-wrap .hsn-dmg.crit{font-size:41px;color:#fde047 !important;text-shadow:0 2px 8px rgba(0,0,0,.7),0 0 22px #f59e0b}',
+      '.boss-sprite-wrap .hsn-dmg.crit{font-size:41px;color:#fde047 !important;text-shadow:0 2px 8px rgba(0,0,0,.7),0 0 22px #fbbf24}',
       '@keyframes hsnDmg{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.5)}18%{opacity:1;transform:translateX(-50%) translateY(-8px) scale(1.18)}38%{transform:translateX(-50%) translateY(-20px) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-78px) scale(.92)}}',
       '.boss-sprite-wrap .hsn-spark{position:absolute;left:50%;top:50%;border-radius:50%;pointer-events:none;z-index:4;opacity:1}',
       '.boss-sprite-wrap .hsn-ember{position:absolute;border-radius:50%;pointer-events:none;z-index:1}',
@@ -90,7 +90,7 @@
       /* 🔴 BUG#50 修复 (v470): rage 红色边缘改【静态】—— 原 animation:hsnVignette 让边缘 opacity .42↔.92 持续脉动, 会让 Hansen 晕。保留静态红边氛围(其他特效), 绝不加回脉动动画。hsnVignette 关键帧已弃用。 */
       '@keyframes hsnVignette{0%,100%{opacity:.42}50%{opacity:.92}}',
       /* 连击华彩 / 击败印章 */
-      '.hsn-combo{position:fixed;left:50%;top:25%;transform:translateX(-50%);pointer-events:none;z-index:99991;font-weight:900;font-size:31px;color:#fde047;text-shadow:0 2px 8px rgba(0,0,0,.6),0 0 20px #f59e0b;white-space:nowrap;animation:hsnCombo .92s ease-out forwards}',
+      '.hsn-combo{position:fixed;left:50%;top:25%;transform:translateX(-50%);pointer-events:none;z-index:99991;font-weight:900;font-size:31px;color:#fde047;text-shadow:0 2px 8px rgba(0,0,0,.6),0 0 20px #fbbf24;white-space:nowrap;animation:hsnCombo .92s ease-out forwards}',
       '@keyframes hsnCombo{0%{opacity:0;transform:translateX(-50%) scale(.4) rotate(0deg)}25%{opacity:1;transform:translateX(-50%) scale(1.28) rotate(0deg)}45%{transform:translateX(-50%) scale(1) rotate(0)}100%{opacity:0;transform:translateX(-50%) scale(1.05) translateY(-32px)}}',
       '.hsn-stamp{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);pointer-events:none;z-index:99992;font-weight:900;font-size:56px;color:#fff;text-shadow:0 4px 16px rgba(0,0,0,.7),0 0 32px #ef4444;white-space:nowrap;animation:hsnStamp 1.05s cubic-bezier(.2,1.4,.4,1) forwards}',
       '@keyframes hsnStamp{0%{opacity:0;transform:translate(-50%,-50%) scale(2.5) rotate(0deg)}30%{opacity:1;transform:translate(-50%,-50%) scale(.94) rotate(0deg)}46%{transform:translate(-50%,-50%) scale(1.05) rotate(0)}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}'
