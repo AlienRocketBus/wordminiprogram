@@ -109,7 +109,7 @@
       name: 'cloudbase',
       _app: function(){
         if(_cb) return Promise.resolve(_cb);
-        return import('./vendor_cloudbase_esm_v965.js?v=1002').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1003').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -167,6 +167,12 @@
     opts = opts || {};
     var p = provider();
     if(!p) return Promise.resolve({ ok:false, reason:'not-configured' });
+    /* 🔴v1003: 云存档改为**用户主动开启**才联网。
+       未开启时一个网络请求都不发——既避免在用户不知情时上传存档，
+       也避免 envId 已填但控制台未配完时页面报 net::ERR_FAILED。
+       用户点「立即同步」走 force 分支，成功后自动置 enabled。 */
+    if(!opts.force && !readState().enabled)
+      return Promise.resolve({ ok:false, reason:'not-enabled' });
     if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
     var st = readState();
     if(!opts.force && st.lastUpAt && (Date.now() - st.lastUpAt) < SYNC_MIN_GAP)
@@ -187,7 +193,7 @@
         return p.put(id, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
       });
     }).then(function(){
-      writeState({ lastUpAt: Date.now(), lastHash: h });
+      writeState({ lastUpAt: Date.now(), lastHash: h, enabled: true });  /* 🔴v1003: 首次成功即开启自动同步 */
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){
@@ -219,7 +225,7 @@
       var r;
       try{ r = HansenBackup.restore(parsed); }
       catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名
-      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now() });
+      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(), enabled: true });
       renderCard();
       return { ok:true, result:r };
     });
@@ -277,7 +283,9 @@
         var p2 = provider(), s2 = readState();
         if(!p2) return '<span style="color:#fbbf24">待开通</span> · 按《云存档开通指南》4 步完成后自动点亮';
         if(s2.lastUpAt) return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
-        return '<span style="color:#93c5fd">已就绪</span> · 玩一会儿会自动上云';
+        /* 🔴v1003: 云存档改为主动开启制, 文案必须与行为一致——
+           在用户点过「立即同步」之前不会自动上云, 不能再说"玩一会儿会自动上云" */
+        return '<span style="color:#93c5fd">已就绪</span> · 点「立即同步」开启云存档';
       }
       var status = statusHtml();
       el.innerHTML =
