@@ -84,13 +84,17 @@
   function friendly(err) {
     var m = String((err && (err.message || err.error_description || err.code)) || err || '');
     if (/domain|origin|not.*allow|403/i.test(m)) return '这个网址还没加进安全域名白名单（控制台改完要等约 10 分钟生效）';
-    if (/verification.*code|code.*invalid|验证码/i.test(m)) return '验证码不对或已过期，重新获取一次';
+    /* 🔴v1009: 原正则过宽, 把注册参数错误也误报成"验证码不对", 误导排查。
+       只认真正的验证码错误, 其余保留原文 + 提示可反馈。 */
+    if (/invalid.*(verification[_ ]?code|verify[_ ]?code|sms[_ ]?code)|verification[_ ]?code.*(invalid|expired|incorrect|wrong)|code.*(expired|incorrect)|验证码(错误|不正确|已过期)/i.test(m))
+      return '验证码不对或已过期，重新获取一次';
     if (/frequent|too many|限频|频繁/i.test(m)) return '发得太频繁了，等一会儿再试';
     if (/password/i.test(m)) return '密码不对';
     if (/exist/i.test(m)) return '这个账号已经注册过了，直接登录就行';
     if (/network|fetch|ERR_/i.test(m)) return '连不上服务器，检查一下网络';
     if (/sms|短信/i.test(m)) return '短信服务还没开通或余额不足（控制台看一下）';
-    return m || '操作失败，再试一次';
+    /* 未识别的错误保留原文——宁可显示英文, 也别用错误的中文误导排查 */
+    return m ? ('登录没成功：' + m.slice(0, 90)) : '操作失败，再试一次';
   }
 
   /* ── ① 手机号验证码：发码 ───────────────────────── */
@@ -111,16 +115,31 @@
     if (!st.verificationId) return Promise.reject(new Error('请先获取验证码'));
     var c = String(code == null ? '' : code).trim();
     if (!/^\d{4,8}$/.test(c)) return Promise.reject(new Error('验证码是几位数字，检查一下'));
-    var a2 = null;
+    /* 🔴v1009 关键修正：注册与登录走**不同**的参数形状，此前混用导致
+       "验证码明明输对却报错"——
+         · 新用户注册：signUp({phone_number, verification_code}) 收**原始短信码**，
+           绝不能先调 verify()，否则验证码在那一步已被消耗；
+         · 老用户登录：先 verify() 换 verification_token，再 signIn({username, verification_token})。 */
     return auth().then(function (a) {
-      a2 = a;
-      return a.verify({ verification_id: st.verificationId, verification_code: c });
-    }).then(function (v) {
-      var token = v && v.verification_token;
-      if (!token) throw new Error('验证失败，重新获取验证码');
-      /* 已注册 → 登录；未注册 → 注册（注册后即为登录态） */
-      if (st.isUser) return a2.signIn({ username: st.pendingPhone, verification_token: token });
-      return a2.signUp({ phone_number: st.pendingPhone, verification_token: token });
+      if (!st.isUser) {
+        return a.signUp({ phone_number: st.pendingPhone, verification_code: c })
+          .catch(function (e1) {
+            /* 兜底：若该环境的 signUp 走 token 形状，则补做 verify 再试一次 */
+            return a.verify({ verification_id: st.verificationId, verification_code: c })
+              .then(function (v) {
+                var tk = v && v.verification_token;
+                if (!tk) throw e1;
+                return a.signUp({ phone_number: st.pendingPhone, verification_token: tk });
+              })
+              .catch(function () { throw e1; });   /* 报出第一手错误，别被兜底掩盖 */
+          });
+      }
+      return a.verify({ verification_id: st.verificationId, verification_code: c })
+        .then(function (v) {
+          var token = v && v.verification_token;
+          if (!token) throw new Error('验证失败，重新获取验证码');
+          return a.signIn({ username: st.pendingPhone, verification_token: token });
+        });
     }).then(function () {
       writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
       return afterSignIn();
