@@ -511,6 +511,10 @@
     css+=_LS+'.pk_ava{background:radial-gradient(circle at 50% 42%,rgba(15,23,42,.10),rgba(15,23,42,.04) 65%,transparent 74%)!important}\n';
     // \u5f69\u5e95\u5361\u4e0e\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u6301
     css+=_LS+'.pk_card,'+_LS+'.pk_card *,'+_LS+'.pk_btn,'+_LS+'.pk_join{color:#fff!important}\n';
+    // \U0001f534v1016 \u8d26\u53f7\u533a\u53cc\u8272\u8c03
+    css+=_LS+'.pk_ab{background:rgba(15,23,42,.06)!important;color:#334155!important;border-color:rgba(15,23,42,.14)!important}\n';
+    css+=_LS+'.pk_ab.primary,'+_LS+'.pk_ab.primary *{color:#fff!important}\n';
+    css+=_LS+'.pk_acct_tip{color:#475569!important;opacity:1!important}\n';
     // \U0001f534v1004\u3265 \u767b\u5f55\u9762\u677f\u53cc\u8272\u8c03
     css+=_LS+'#hsn_auth_panel .au_card{background:#ffffff!important;color:#0f172a!important}\n';
     css+=_LS+'#hsn_auth_panel .au_t,'+_LS+'#hsn_auth_panel .au_lb{color:#0f172a!important;opacity:1!important}\n';
