@@ -16,7 +16,7 @@ await page.waitForTimeout(2600);
 await page.evaluate(()=>{ const w=document.querySelector('.modal .close, .modal button'); if(w) try{w.click();}catch(e){} });
 
 const AUDIT = `(function(){
-  const EXEMPT=['#bossScreen','#landGachaBody','.lg-banner','#hr_rvrw_card','#hsnSeasonBar','#hsnSeasonEntry','#hr_today','#hr_toast','#hr_empty_msg','#hr_to_sub_mask','#__hsn_bosshall','#__hsn_landhall','#__hs_hall_panel','#__hs_showcase'];
+  const EXEMPT=['#landGachaBody','.lg-banner','#hr_rvrw_card','#hsnSeasonBar','#hsnSeasonEntry','#hr_today','#hr_toast','#hr_empty_msg','#hr_to_sub_mask','#__hsn_bosshall','#__hsn_landhall','#__hs_hall_panel','#__hs_showcase'];
   const BASE=[238,242,251];
   function pr(c){const m=(c||'').match(/rgba?\\(([\\d.]+),\\s*([\\d.]+),\\s*([\\d.]+)(?:,\\s*([\\d.]+))?/);return m?[+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]]:null;}
   function lum(r,g,b){const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b);}
@@ -150,6 +150,8 @@ for(const [name, fn, id] of OVERLAYS){
           if((s.backgroundImage&&s.backgroundImage!=='none')||!/rgba\(0, 0, 0, 0\)/.test(s.backgroundColor)){ onBase=false; break; }
           c2=c2.parentElement; }
         if(!onBase) return;
+        /* 🔴v1010: emoji 是彩色图形, 自带颜色, 不参与前景/背景对比度判定 */
+        if(/^[\s\u200d\ufe0f\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]+$/u.test(n.textContent.trim())) return;
         const c=getComputedStyle(el).color; const lv=L(c);
         if(lv<0) return;
         if(wantDarkText ? lv>170 : lv<110) bad.push([n.textContent.trim().slice(0,8), c]);
