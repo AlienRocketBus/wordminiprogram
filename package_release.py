@@ -44,6 +44,7 @@ DEPLOY_ALLOWED_EXT = {
 DEPLOY_RUNTIME_HTML = {
     "index.html", "_frame.html", "_sw_upgrade_v944.html", "boss_hall.html", "land_map.html",
     "season_showcase.html", "spelling_bee.html",
+    "spelling_pk.html",   # 🔴v1002: 拼写大PK(真人对战独立页)
 }
 DEPLOY_EXCLUDE_DIRS = {
     ".git", ".github", "__pycache__", ".pytest_cache", ".mypy_cache",
@@ -593,6 +594,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "999": (("shell-58", "pages-56", "assets-56", "icons-3"), "v=999"),
         "1000": (("shell-59", "pages-57", "assets-57", "icons-3"), "v=1000"),
         "1001": (("shell-60", "pages-58", "assets-58", "icons-3"), "v=1001"),
+        "1002": (("shell-61", "pages-59", "assets-59", "icons-3"), "v=1002"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945

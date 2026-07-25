@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>拼写大PK · 单词大冒险</title>
+<script src="hansen_sw_upgrade_gate_v944.js?v=1002"></script>
+<script src="hansen_backup_bootstrap_v944.js?v=1002"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 55%,#312e81 100%);
+  color:#e8eefc;min-height:100vh;padding:14px 12px 40px;overflow-x:hidden}
+.pk_hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.pk_back{background:rgba(255,255,255,.12);color:#e8eefc;border:0;border-radius:11px;
+  padding:9px 13px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}
+.pk_h1{font-size:20px;font-weight:900;letter-spacing:.5px}
+.pk_sub{font-size:12px;opacity:.7;margin-top:2px;font-weight:700}
+
+/* 身份条 —— 竞赛 ID 是身份证式标志, 放在最显眼处 */
+.pk_me{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:13px 14px;margin-bottom:14px;cursor:pointer}
+.pk_ava{width:56px;height:56px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  font-size:34px;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.22),rgba(255,255,255,.05) 65%,transparent 74%)}
+.pk_nm{font-size:17px;font-weight:900;line-height:1.25;word-break:break-all}
+.pk_cid{margin-top:3px;font-size:12.5px;font-weight:800;letter-spacing:.4px;opacity:.9}
+.pk_cid b{font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:1.5px}
+.pk_prov{margin-left:6px;font-size:10.5px;font-weight:800;opacity:.72;
+  background:rgba(255,255,255,.14);padding:2px 6px;border-radius:99px}
+.pk_tier{margin-top:4px;font-size:12.5px;font-weight:800;color:#fde68a}
+.pk_go{margin-left:auto;flex:none;opacity:.55;font-size:20px}
+
+/* 模式卡 */
+.pk_card{border:0;width:100%;text-align:left;border-radius:18px;padding:16px;margin-bottom:12px;
+  color:#fff;font:inherit;cursor:pointer;display:block;box-shadow:0 4px 14px rgba(0,0,0,.24)}
+.pk_c1{background:linear-gradient(135deg,#4f46e5,#4338ca)}
+.pk_c2{background:linear-gradient(135deg,#0ea5e9,#0369a1)}
+.pk_ic{font-size:34px;line-height:1}
+.pk_t{font-size:18px;font-weight:900;margin-top:7px;letter-spacing:.4px}
+.pk_d{font-size:12.5px;opacity:.9;margin-top:5px;line-height:1.6;font-weight:600}
+
+.pk_sec{font-size:13px;font-weight:900;opacity:.82;margin:18px 0 9px;letter-spacing:.4px}
+.pk_note{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  border-radius:14px;padding:13px 14px;font-size:12.5px;line-height:1.7;opacity:.9;font-weight:600}
+.pk_note b{font-weight:900}
+
+/* 子屏 */
+.pk_screen{display:none}
+.pk_screen.on{display:block}
+.pk_row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 13px;margin-bottom:9px}
+.pk_rn{font-size:14.5px;font-weight:900}
+.pk_rm{font-size:11.5px;opacity:.72;margin-top:2px;font-weight:700}
+.pk_join{margin-left:auto;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;
+  border:0;border-radius:11px;padding:9px 15px;font:inherit;font-weight:900;font-size:13px;cursor:pointer}
+.pk_empty{opacity:.68;font-size:13px;line-height:1.8;padding:18px 4px;text-align:center;font-weight:600}
+.pk_btn{width:100%;min-height:48px;border:0;border-radius:13px;color:#fff;font:inherit;
+  font-weight:900;font-size:15px;cursor:pointer;margin-top:6px;background:linear-gradient(135deg,#4f46e5,#4338ca)}
+.pk_grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.pk_it{background:rgba(255,255,255,.07);border-radius:12px;padding:11px 12px}
+.pk_v{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums}
+.pk_l{font-size:11.5px;opacity:.72;margin-top:2px;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ═══ 主屏：模式选择 ═══ -->
+<div class="pk_screen on" id="pkHome">
+  <div class="pk_hd">
+    <a href="index.html" class="pk_back">← 返回</a>
+    <div><div class="pk_h1">⚔️ 拼写大PK</div><div class="pk_sub">和真人比拼写，不是机器人</div></div>
+  </div>
+
+  <div class="pk_me" id="pkMe"></div>
+
+  <button class="pk_card pk_c1" id="pkRooms">
+    <div class="pk_ic">🏠</div>
+    <div class="pk_t">大PK · 公开房间</div>
+    <div class="pk_d">看看谁开了房，点进去直接开打。也可以自己开一间等人来。</div>
+  </button>
+
+  <button class="pk_card pk_c2" id="pkLadder">
+    <div class="pk_ic">🏆</div>
+    <div class="pk_t">天梯排位</div>
+    <div class="pk_d">系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。</div>
+  </button>
+
+  <div class="pk_sec">ℹ️ 关于竞赛 ID</div>
+  <div class="pk_note">
+    每个人都有一个<b>专属竞赛 ID</b>，按注册先后顺序发放：<b>No.001</b>、<b>No.002</b>、<b>No.003</b>……<br>
+    这是身份证式标志——<b>名字随时可以改，号码永远不变</b>。
+  </div>
+</div>
+
+<!-- ═══ 子屏：公开房间 ═══ -->
+<div class="pk_screen" id="pkRoomScreen">
+  <div class="pk_hd">
+    <button class="pk_back" data-home="1">← 返回</button>
+    <div><div class="pk_h1">🏠 公开房间</div><div class="pk_sub">等待中的房间会显示在这里</div></div>
+  </div>
+  <div id="pkRoomList"></div>
+  <button class="pk_btn" id="pkCreate">＋ 开一间房</button>
+</div>
+
+<!-- ═══ 子屏：天梯 ═══ -->
+<div class="pk_screen" id="pkLadderScreen">
+  <div class="pk_hd">
+    <button class="pk_back" data-home="1">← 返回</button>
+    <div><div class="pk_h1">🏆 天梯排位</div><div class="pk_sub">按分数匹配，赢了升段</div></div>
+  </div>
+  <div id="pkLadderBody"></div>
+</div>
+
+<script src="hansen_palette.js?v=1002"></script>
+<script src="hansen_sb_ladder_v1002.js?v=1002"></script>
+<script src="hansen_sb_profile_v1002.js?v=1002"></script>
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+
+  /* 云服务是否就绪：envId 未开通时，联网对战不可用 */
+  function cloudReady(){
+    try{ var c=window.HANSEN_CLOUD_CONFIG; return !!(c&&typeof c==='object'&&c.envId); }catch(e){ return false; }
+  }
+
+  function show(which){
+    ['pkHome','pkRoomScreen','pkLadderScreen'].forEach(function(id){
+      var el=$(id); if(el) el.classList.toggle('on', id===which);
+    });
+    try{ window.scrollTo(0,0); }catch(e){}
+  }
+
+  /* ── 身份条 ── */
+  function renderMe(){
+    var el=$('pkMe'); if(!el) return;
+    var P=window.HansenSbProfile;
+    var p=P?P.readProfile():{name:'',cid:0,cidLocked:false};
+    var L=readLadder();
+    var tier=(window.HansenSbLadder)?HansenSbLadder.tierOf(L.rating||1000):null;
+    var cidTxt=P?P.fmtCid(p.cid):'---';
+    el.innerHTML='<span class="pk_ava">'+(p.avatar||'🐝')+'</span><div style="min-width:0;flex:1">'
+      +(p.name?'<div class="pk_nm">'+escapeHtml(p.name)+'</div>':'<div class="pk_nm" style="opacity:.7">点这里设置名字</div>')
+      +'<div class="pk_cid">🎫 竞赛 ID <b>No.'+cidTxt+'</b>'
+      +((p.name&&!p.cidLocked)?'<span class="pk_prov">临时号</span>':'')+'</div>'
+      +(tier?'<div class="pk_tier">'+tier.icon+' '+tier.name+(L.placed?' · '+L.rating+' 分':' · 未定级')+'</div>':'')
+      +'</div><span class="pk_go">›</span>';
+    el.onclick=function(){ try{ if(window.HansenSbProfile) HansenSbProfile._open(); }catch(e){} };
+  }
+  function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+
+  function readLadder(){
+    var d={rating:0,placed:false,games:0,wins:0,losses:0,streak:0,bestStreak:0};
+    try{ var o=JSON.parse(localStorage.getItem('hansen_sb_ladder_v1002'));
+      if(o&&typeof o==='object'&&!Array.isArray(o)){
+        ['rating','games','wins','losses','streak','bestStreak'].forEach(function(k){
+          var v=+o[k]; if(isFinite(v)&&v>=0) d[k]=Math.floor(v); });
+        d.placed=!!o.placed;
+      }}catch(e){}
+    return d;
+  }
+
+  /* 进任何对战模式前, 必须先有名字与号码 */
+  function requireIdentity(){
+    var P=window.HansenSbProfile; if(!P) return false;
+    var p=P.readProfile();
+    if(!p.name){
+      alert('先给自己起个名字吧——竞赛 ID 会在这时候发给你，之后终身不变。');
+      try{ P._open(); }catch(e){}
+      return false;
+    }
+    P.ensureCid();
+    return true;
+  }
+
+  /* ── 公开房间 ── */
+  function renderRooms(){
+    var box=$('pkRoomList'); if(!box) return;
+    if(!cloudReady()){
+      box.innerHTML='<div class="pk_empty">☁️ 联网对战还没开通<br><br>'
+        +'开通云服务后，这里会显示所有等待中的房间，<br>点一下就能加入别人的对局。</div>';
+      var cb=$('pkCreate'); if(cb) cb.disabled=true, cb.style.opacity='.5';
+      return;
+    }
+    box.innerHTML='<div class="pk_empty">暂时还没有人开房，<br>你可以自己开一间等人来。</div>';
+  }
+
+  /* ── 天梯 ── */
+  function renderLadder(){
+    var box=$('pkLadderBody'); if(!box) return;
+    var L=readLadder();
+    var L2=window.HansenSbLadder;
+    var tier=L2?L2.tierOf(L.rating||1000):null;
+    var P=window.HansenSbProfile;
+    var est=(P&&L2)?L2.placementEstimate((P.collectStats()||{}).bestCpm||0):1000;
+
+    var h='';
+    if(tier){
+      h+='<div class="pk_row" style="display:block;text-align:center;padding:18px 14px">'
+        +'<div style="font-size:44px;line-height:1">'+tier.icon+'</div>'
+        +'<div style="font-size:20px;font-weight:900;margin-top:6px">'+tier.name+'</div>'
+        +'<div style="font-size:13px;opacity:.78;margin-top:4px;font-weight:700">'
+        +(L.placed?(L.rating+' 分'):'尚未定级')+'</div></div>';
+    }
+    h+='<div class="pk_grid">'
+      +'<div class="pk_it"><div class="pk_v">'+L.games+'</div><div class="pk_l">总场次</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+(L.games?Math.round(L.wins/L.games*100):0)+'%</div><div class="pk_l">胜率</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+L.wins+' 胜</div><div class="pk_l">'+L.losses+' 负</div></div>'
+      +'<div class="pk_it"><div class="pk_v">'+L.bestStreak+'</div><div class="pk_l">最长连胜</div></div>'
+      +'</div>';
+
+    if(!cloudReady()){
+      h+='<div class="pk_note">☁️ 联网对战还没开通。<br>'
+        +'开通后你会先打 <b>'+(L2?L2.PLACEMENT_GAMES:3)+' 局定级赛</b>；'
+        +'根据你目前的拼写速度，预计起点约 <b>'+est+' 分</b>（'
+        +(L2?L2.tierOf(est).name:'')+'）。</div>';
+    } else {
+      h+='<button class="pk_btn" id="pkMatch">开始匹配</button>';
+    }
+    box.innerHTML=h;
+    var mb=$('pkMatch');
+    if(mb) mb.onclick=function(){ if(requireIdentity()) alert('正在寻找对手…'); };
+  }
+
+  /* ── 绑定 ── */
+  function boot(){
+    renderMe();
+    var r=$('pkRooms'), l=$('pkLadder');
+    if(r) r.onclick=function(){ if(!requireIdentity())return; renderRooms(); show('pkRoomScreen'); };
+    if(l) l.onclick=function(){ if(!requireIdentity())return; renderLadder(); show('pkLadderScreen'); };
+    var backs=document.querySelectorAll('[data-home]');
+    for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); show('pkHome'); };
+    /* 资料页关闭后刷新身份条(改名/发号会变) */
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) renderMe(); });
+    setInterval(renderMe, 1500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

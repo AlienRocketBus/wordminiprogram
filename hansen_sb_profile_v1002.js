@@ -1,0 +1,447 @@
+/* hansen_sb_profile_v1002.js —— 拼写蜂个人资料页（炫耀面板）
+ *
+ * 设计依据：《拼写蜂在线对战_社交层设计书_v1003》§1–§2
+ * 本模块**纯本地**：所有数据来自 localStorage，不需要 envId、不联网即可完整使用。
+ * 联网后只需在 §战绩 区多渲染几行天梯数据，其余不动。
+ *
+ * 数据源：
+ *   身份      hansen_sb_profile_v1002        （天梯名 / #标签 / 展柜 / 隐私）
+ *   最佳 CPM  sb_best_cpm                    （拼写蜂现有）
+ *   学习战绩  wordIsland*                    （各岛存档，跨岛聚合）
+ *   成就      window.HansenAch               （已解锁成就钱包）
+ */
+(function () {
+  'use strict';
+  if (window.HansenSbProfile) return;
+
+  var PKEY = 'hansen_sb_profile_v1002';
+  var NAME_MIN = 2, NAME_MAX = 12;
+  var RENAME_COOLDOWN_DAYS = 30;
+  var SHOWCASE_MAX = 6;
+
+  /* 显示名过滤：公开展示内容的标准配置 */
+  var BANNED = ['admin', '管理员', '官方', '客服', '系统', 'null', 'undefined'];
+
+  /* ── 存储 ─────────────────────────────────────────────── */
+  function readProfile() {
+    var d = { name: '', cid: 0, cidLocked: false, showcase: [], privacy: 'public', nameChangedAt: 0, avatar: '' };
+    try {
+      var raw = localStorage.getItem(PKEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return d;
+      if (typeof o.name === 'string') d.name = o.name.slice(0, NAME_MAX);
+      if (typeof o.cid === 'number' && isFinite(o.cid) && o.cid > 0) d.cid = Math.floor(o.cid);
+      d.cidLocked = !!o.cidLocked;
+      if (Array.isArray(o.showcase)) d.showcase = o.showcase.filter(function (x) { return typeof x === 'string'; }).slice(0, SHOWCASE_MAX);
+      if (o.privacy === 'public' || o.privacy === 'friends' || o.privacy === 'private') d.privacy = o.privacy;
+      if (typeof o.nameChangedAt === 'number' && isFinite(o.nameChangedAt)) d.nameChangedAt = o.nameChangedAt;
+      if (typeof o.avatar === 'string') d.avatar = o.avatar.slice(0, 40);
+    } catch (e) {}
+    return d;
+  }
+  function writeProfile(p) {
+    try { localStorage.setItem(PKEY, JSON.stringify(p)); return true; } catch (e) { return false; }
+  }
+
+  /* ── 天梯名 ───────────────────────────────────────────── */
+  /* ── 竞赛 ID：按注册先后顺序发号，终身不变 ────────────────
+   * 001 002 003 … 超过 999 自动扩到 4 位。这是身份证式标志：
+   * 名字可以随便改，**号码永远不变**。
+   *
+   * ⚠️ 发号权归云端：真正的"注册顺序"必须由云端原子计数器裁决，
+   *    否则每台设备都会认为自己是 001。当前 envId 未开通，
+   *    先发**临时号**（本地计数），联网后调 claimCloudId() 认领正式号；
+   *    一旦认领成功即写入 cidLocked，此后永不改动。 */
+  var CID_LOCAL_KEY = 'hansen_sb_cid_counter_v1002';
+
+  function nextLocalCid() {
+    var n = 0;
+    try { n = parseInt(localStorage.getItem(CID_LOCAL_KEY), 10) || 0; } catch (e) {}
+    n = n + 1;
+    try { localStorage.setItem(CID_LOCAL_KEY, String(n)); } catch (e) {}
+    return n;
+  }
+  /* 号码格式化：不足 3 位补零 */
+  function fmtCid(n) {
+    var v = Math.max(0, Math.floor(+n || 0));
+    if (!v) return '---';
+    var s = String(v);
+    while (s.length < 3) s = '0' + s;
+    return s;
+  }
+  /* 取得（必要时分配）本人竞赛 ID —— 幂等，已有则原样返回 */
+  function ensureCid() {
+    var p = readProfile();
+    if (p.cid > 0) return p.cid;
+    p.cid = nextLocalCid();
+    p.cidLocked = false;   /* 临时号，等云端认领 */
+    writeProfile(p);
+    return p.cid;
+  }
+  /* 云端认领正式号（envId 到位后调用；当前为预留接口）
+   * 约定：云端 counters/sb_cid 文档做原子自增，返回全局唯一序号。 */
+  function claimCloudId(assignedNumber) {
+    var p = readProfile();
+    if (p.cidLocked) return { ok: true, cid: p.cid, already: true };
+    var n = Math.floor(+assignedNumber || 0);
+    if (n <= 0) return { ok: false, reason: '云端未返回有效号码' };
+    p.cid = n;
+    p.cidLocked = true;    /* 锁死：此后终身不变 */
+    writeProfile(p);
+    return { ok: true, cid: n };
+  }
+  function validateName(name) {
+    var n = String(name == null ? '' : name).trim();
+    if (n.length < NAME_MIN) return { ok: false, reason: '名字至少 ' + NAME_MIN + ' 个字' };
+    if (n.length > NAME_MAX) return { ok: false, reason: '名字最多 ' + NAME_MAX + ' 个字' };
+    if (/[<>"'`\\\/\u0000-\u001f]/.test(n)) return { ok: false, reason: '名字里不能有特殊符号' };
+    var low = n.toLowerCase();
+    for (var i = 0; i < BANNED.length; i++) {
+      if (low.indexOf(BANNED[i]) >= 0) return { ok: false, reason: '这个名字不能用，换一个吧' };
+    }
+    return { ok: true, name: n };
+  }
+  function renameCooldownLeft(p) {
+    if (!p.nameChangedAt) return 0;
+    var passed = Date.now() - p.nameChangedAt;
+    var need = RENAME_COOLDOWN_DAYS * 86400000;
+    return passed >= need ? 0 : Math.ceil((need - passed) / 86400000);
+  }
+  function setName(name) {
+    var p = readProfile();
+    var v = validateName(name);
+    if (!v.ok) return v;
+    if (p.name) {
+      var left = renameCooldownLeft(p);
+      if (left > 0) return { ok: false, reason: '改名冷却中，还有 ' + left + ' 天' };
+    }
+    p.name = v.name;
+    p.nameChangedAt = Date.now();
+    writeProfile(p);
+    var cid = ensureCid();   /* 首次设名时发号 */
+    return { ok: true, name: p.name, cid: cid };
+  }
+  function fullName(p) {
+    p = p || readProfile();
+    return p.name ? (p.name + ' · No.' + fmtCid(p.cid)) : '';
+  }
+
+  /* ── 跨岛战绩聚合 ─────────────────────────────────────── */
+  function eachIslandSave(fn) {
+    var keys = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('wordIsland') === 0 && k.indexOf('_bak') < 0) keys.push(k);
+      }
+    } catch (e) {}
+    for (var j = 0; j < keys.length; j++) {
+      try {
+        var o = JSON.parse(localStorage.getItem(keys[j]));
+        if (o && typeof o === 'object' && !Array.isArray(o)) fn(o, keys[j]);
+      } catch (e) {}
+    }
+  }
+
+  function collectStats() {
+    var out = {
+      islands: 0, learned: 0, days: 0, boss: 0,
+      speedBest: 0, bubbleBest: 0, molesBest: 0, fishBest: 0, eagleBest: 0,
+      maxCombo: 0, typeCount: 0, listenRight: 0, clozeRight: 0,
+      bestCpm: 0, cpm: { easy: 0, mid: 0, hard: 0 }
+    };
+    eachIslandSave(function (S) {
+      var learned = (S.learned && S.learned.length) || 0;
+      if (learned > 0) out.islands++;
+      out.learned += learned;
+      var st = S.stats || {};
+      out.days = Math.max(out.days, +st.daysPlayed || 0);
+      out.boss += (+st.bossBeaten || 0);
+      out.speedBest = Math.max(out.speedBest, +st.speedBest || 0);
+      out.bubbleBest = Math.max(out.bubbleBest, +st.bubbleBest || 0);
+      out.molesBest = Math.max(out.molesBest, +st.molesBest || 0);
+      out.fishBest = Math.max(out.fishBest, +st.fishBest || 0);
+      out.eagleBest = Math.max(out.eagleBest, +st.eagleBest || 0);
+      out.maxCombo = Math.max(out.maxCombo, +st.maxCombo || 0);
+      out.typeCount += (+st.typeCount || 0);
+      out.listenRight += (+st.listenRight || 0);
+      out.clozeRight += (+st.clozeRight || 0);
+    });
+    /* 拼写蜂最佳 CPM */
+    try {
+      var b = JSON.parse(localStorage.getItem('sb_best_cpm'));
+      if (typeof b === 'number' && isFinite(b)) out.bestCpm = Math.max(0, Math.round(b));
+      else if (b && typeof b === 'object') {
+        ['easy', 'mid', 'hard'].forEach(function (k) {
+          var v = +b[k] || 0; out.cpm[k] = Math.round(v);
+          out.bestCpm = Math.max(out.bestCpm, Math.round(v));
+        });
+      }
+    } catch (e) {
+      var n = +localStorage.getItem('sb_best_cpm');
+      if (isFinite(n) && n > 0) out.bestCpm = Math.round(n);
+    }
+    return out;
+  }
+
+  /* ── 天梯战绩（P0：本地记录；联网后由云端同步）─────────── */
+  function readLadder() {
+    var d = { rating: 0, placed: false, games: 0, wins: 0, losses: 0, streak: 0, bestStreak: 0, bestRating: 0 };
+    try {
+      var o = JSON.parse(localStorage.getItem('hansen_sb_ladder_v1002'));
+      if (o && typeof o === 'object' && !Array.isArray(o)) {
+        ['rating', 'games', 'wins', 'losses', 'streak', 'bestStreak', 'bestRating'].forEach(function (k) {
+          var v = +o[k]; if (isFinite(v) && v >= 0) d[k] = Math.floor(v);
+        });
+        d.placed = !!o.placed;
+      }
+    } catch (e) {}
+    return d;
+  }
+
+  /* ── 成就展柜 ─────────────────────────────────────────── */
+  function claimedAch() {
+    try {
+      if (window.HansenAch && typeof HansenAch.getClaimed === 'function') {
+        var c = HansenAch.getClaimed();
+        if (Array.isArray(c)) return c.slice();
+        if (c && typeof c === 'object') return Object.keys(c).filter(function (k) { return c[k]; });
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  /* ── 渲染 ─────────────────────────────────────────────── */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+  function ensureStyle() {
+    if (document.getElementById('hsp_prof_css')) return;
+    var css = [
+      '#hsb_prof{position:fixed;inset:0;z-index:70;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;',
+      '  background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 55%,#312e81 100%);color:#e8eefc;padding:14px 12px 30px}',
+      '#hsb_prof.on{display:block}',
+      '#hsb_prof .pf_top{display:flex;align-items:center;gap:10px;margin-bottom:12px}',
+      '#hsb_prof .pf_back{background:rgba(255,255,255,.12);color:#e8eefc;border:0;border-radius:11px;padding:9px 13px;font:inherit;font-weight:800;cursor:pointer}',
+      '#hsb_prof .pf_ttl{font-size:17px;font-weight:900;letter-spacing:.3px}',
+      '#hsb_prof .pf_card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px;margin-bottom:11px}',
+      '#hsb_prof .pf_id{display:flex;align-items:center;gap:12px}',
+      '#hsb_prof .pf_ava{width:62px;height:62px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:38px;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.22),rgba(255,255,255,.05) 65%,transparent 74%)}',
+      '#hsb_prof .pf_name{font-size:19px;font-weight:900;line-height:1.25;word-break:break-all}',
+      '#hsb_prof .pf_cid{margin-top:4px;font-size:12.5px;font-weight:800;letter-spacing:.4px;opacity:.9}',
+      '#hsb_prof .pf_cid b{font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:1px}',
+      '#hsb_prof .pf_prov{margin-left:6px;font-size:10.5px;font-weight:800;opacity:.7;background:rgba(255,255,255,.14);padding:2px 6px;border-radius:99px}',
+      '#hsb_prof .pf_tier{margin-top:5px;font-size:13.5px;font-weight:800;color:#fde68a}',
+      '#hsb_prof .pf_sec{font-size:13px;font-weight:900;opacity:.82;margin:0 0 9px;letter-spacing:.4px}',
+      '#hsb_prof .pf_grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}',
+      '#hsb_prof .pf_it{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 11px}',
+      '#hsb_prof .pf_v{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.15}',
+      '#hsb_prof .pf_l{font-size:11.5px;opacity:.72;margin-top:2px;font-weight:700}',
+      '#hsb_prof .pf_hero{text-align:center;padding:4px 0 2px}',
+      '#hsb_prof .pf_hero .pf_v{font-size:36px;color:#fde68a}',
+      '#hsb_prof .pf_bar{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;margin-top:9px}',
+      '#hsb_prof .pf_bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#fbbf24,#f59e0b)}',
+      '#hsb_prof .pf_show{display:flex;flex-wrap:wrap;gap:8px}',
+      '#hsb_prof .pf_slot{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.09);border:1px dashed rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}',
+      '#hsb_prof .pf_slot.has{border-style:solid;border-color:rgba(253,224,138,.55);background:rgba(253,224,138,.14)}',
+      '#hsb_prof .pf_btn{width:100%;min-height:46px;border:0;border-radius:13px;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;font:inherit;font-weight:900;font-size:14.5px;cursor:pointer;margin-top:4px}',
+      '#hsb_prof .pf_hint{font-size:11.5px;opacity:.66;margin-top:7px;line-height:1.5}',
+      '#hsb_prof .pf_empty{opacity:.66;font-size:12.5px;padding:6px 0;line-height:1.6}'
+    ].join('\n');
+    var st = document.createElement('style');
+    st.id = 'hsp_prof_css';
+    st.textContent = css;
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function render() {
+    var host = document.getElementById('hsb_prof');
+    if (!host) return;
+    var p = readProfile();
+    var s = collectStats();
+    var L = readLadder();
+    var tier = (window.HansenSbLadder && HansenSbLadder.tierOf) ? HansenSbLadder.tierOf(L.rating || 1000) : null;
+    var named = !!p.name;
+    var winRate = L.games > 0 ? Math.round(L.wins / L.games * 100) : 0;
+    var ach = claimedAch();
+
+    var h = '';
+    h += '<div class="pf_top"><button class="pf_back" id="pfBack">← 返回</button>'
+      + '<span class="pf_ttl">👤 我的资料</span></div>';
+
+    /* 身份卡 */
+    h += '<div class="pf_card"><div class="pf_id">'
+      + '<span class="pf_ava">' + (p.avatar || '🐝') + '</span><div style="min-width:0;flex:1">'
+      + (named
+        ? '<div class="pf_name">' + esc(p.name) + '</div><div class="pf_cid">🎫 竞赛 ID <b>No.' + fmtCid(p.cid) + '</b>'
+          + (p.cidLocked ? '' : '<span class="pf_prov">临时号</span>') + '</div>'
+        : '<div class="pf_name" style="opacity:.7">还没有天梯名</div>')
+      + (tier ? '<div class="pf_tier">' + tier.icon + ' ' + tier.name
+          + (L.placed ? ' · ' + fmt(L.rating) + ' 分' : ' · 未定级') + '</div>' : '')
+      + '</div></div>';
+    if (tier && L.placed && !tier.isTop) {
+      h += '<div class="pf_bar"><i style="width:' + Math.round(tier.progress * 100) + '%"></i></div>'
+        + '<div class="pf_hint">距离 ' + tier.nextName + ' 还差 ' + fmt(Math.max(0, tier.nextAt - L.rating)) + ' 分</div>';
+    }
+    h += '<button class="pf_btn" id="pfName">' + (named ? '修改天梯名' : '设置天梯名') + '</button>';
+    if (named) {
+      var left = renameCooldownLeft(p);
+      h += '<div class="pf_hint">' + (left > 0 ? '改名冷却中，还有 ' + left + ' 天' : '可以改名（改后 ' + RENAME_COOLDOWN_DAYS + ' 天内不能再改）') + '</div>';
+    }
+    h += '</div>';
+
+    /* 速度纪录 —— 拼写蜂核心炫耀点 */
+    h += '<div class="pf_card"><div class="pf_sec">⚡ 速度纪录</div>'
+      + '<div class="pf_hero"><div class="pf_v">' + fmt(s.bestCpm) + '</div>'
+      + '<div class="pf_l">最快拼写速度（字符 / 分钟）</div></div>';
+    if (s.cpm.easy || s.cpm.mid || s.cpm.hard) {
+      h += '<div class="pf_grid" style="margin-top:10px;grid-template-columns:1fr 1fr 1fr">'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(s.cpm.easy) + '</div><div class="pf_l">初级</div></div>'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(s.cpm.mid) + '</div><div class="pf_l">中级</div></div>'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(s.cpm.hard) + '</div><div class="pf_l">高级</div></div></div>';
+    }
+    h += '</div>';
+
+    /* 天梯战绩 */
+    h += '<div class="pf_card"><div class="pf_sec">🏆 天梯战绩</div>';
+    if (L.games > 0) {
+      h += '<div class="pf_grid">'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(L.games) + '</div><div class="pf_l">总场次</div></div>'
+        + '<div class="pf_it"><div class="pf_v">' + winRate + '%</div><div class="pf_l">胜率</div></div>'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(L.wins) + ' 胜</div><div class="pf_l">' + fmt(L.losses) + ' 负</div></div>'
+        + '<div class="pf_it"><div class="pf_v">' + fmt(L.bestStreak) + '</div><div class="pf_l">最长连胜</div></div>'
+        + '</div>';
+    } else {
+      h += '<div class="pf_empty">还没打过天梯。在线对战开通后，你的段位、胜率和连胜纪录都会显示在这里。</div>';
+    }
+    h += '</div>';
+
+    /* 学习成就 */
+    h += '<div class="pf_card"><div class="pf_sec">📚 学习成就</div><div class="pf_grid">'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.learned) + '</div><div class="pf_l">已掌握单词</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.days) + '</div><div class="pf_l">连续学习(天)</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.boss) + '</div><div class="pf_l">击败 Boss</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.islands) + '</div><div class="pf_l">已探索岛屿</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.maxCombo) + '</div><div class="pf_l">最高连击</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.typeCount) + '</div><div class="pf_l">打字大师完成词</div></div>'
+      + '</div></div>';
+
+    /* 各玩法最佳 */
+    h += '<div class="pf_card"><div class="pf_sec">🎮 各玩法最佳</div><div class="pf_grid">'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.speedBest) + '</div><div class="pf_l">极速60秒</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.bubbleBest) + '</div><div class="pf_l">泡泡大作战</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.eagleBest) + '</div><div class="pf_l">火眼金睛</div></div>'
+      + '<div class="pf_it"><div class="pf_v">' + fmt(s.molesBest) + '</div><div class="pf_l">打地鼠</div></div>'
+      + '</div></div>';
+
+    /* 奖杯展柜 */
+    h += '<div class="pf_card"><div class="pf_sec">🏅 奖杯展柜（最多 ' + SHOWCASE_MAX + ' 个）</div><div class="pf_show">';
+    for (var i = 0; i < SHOWCASE_MAX; i++) {
+      var got = p.showcase[i];
+      h += '<span class="pf_slot' + (got ? ' has' : '') + '" data-slot="' + i + '">' + (got ? '🏆' : '＋') + '</span>';
+    }
+    h += '</div><div class="pf_hint">已解锁 ' + ach.length + ' 个成就，点空位挑选想展示的。</div></div>';
+
+    host.innerHTML = h;
+
+    var back = document.getElementById('pfBack');
+    if (back) back.onclick = function () { close(); };
+    var nm = document.getElementById('pfName');
+    if (nm) nm.onclick = function () { promptName(); };
+    var slots = host.querySelectorAll('.pf_slot');
+    for (var k = 0; k < slots.length; k++) {
+      slots[k].onclick = (function (idx) {
+        return function () { pickShowcase(idx); };
+      })(k);
+    }
+  }
+
+  function promptName() {
+    var p = readProfile();
+    if (p.name) {
+      var left = renameCooldownLeft(p);
+      if (left > 0) { toast('改名冷却中，还有 ' + left + ' 天'); return; }
+    }
+    var v = window.prompt('给自己起个天梯名（' + NAME_MIN + '–' + NAME_MAX + ' 个字）', p.name || '');
+    if (v == null) return;
+    var r = setName(v);
+    if (!r.ok) { toast(r.reason); return; }
+    toast('天梯名已设为 ' + r.name + ' · No.' + fmtCid(r.cid));
+    render();
+  }
+
+  function pickShowcase(idx) {
+    var p = readProfile();
+    var ach = claimedAch();
+    if (!ach.length) { toast('还没有已解锁的成就，先去挑战吧'); return; }
+    if (p.showcase[idx]) {
+      p.showcase[idx] = '';
+      p.showcase = p.showcase.filter(function (x) { return !!x; });
+      writeProfile(p); render(); return;
+    }
+    var used = {};
+    p.showcase.forEach(function (x) { used[x] = 1; });
+    var avail = ach.filter(function (a) { return !used[a]; });
+    if (!avail.length) { toast('可展示的成就都已放进展柜了'); return; }
+    p.showcase = p.showcase.filter(function (x) { return !!x; });
+    p.showcase.push(avail[0]);
+    p.showcase = p.showcase.slice(0, SHOWCASE_MAX);
+    writeProfile(p); render();
+  }
+
+  function toast(msg) {
+    try {
+      if (typeof window.showToast === 'function') { window.showToast(msg); return; }
+    } catch (e) {}
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:99;'
+      + 'background:rgba(15,23,42,.94);color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;font-size:13px;max-width:82vw;text-align:center';
+    document.body.appendChild(t);
+    setTimeout(function () { try { t.remove(); } catch (e) {} }, 2000);
+  }
+
+  function ensureHost() {
+    var el = document.getElementById('hsb_prof');
+    if (el) return el;
+    ensureStyle();
+    el = document.createElement('div');
+    el.id = 'hsb_prof';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', '我的资料');
+    (document.body || document.documentElement).appendChild(el);
+    return el;
+  }
+
+  function open() {
+    var el = ensureHost();
+    render();
+    el.classList.add('on');
+    try { el.scrollTop = 0; } catch (e) {}
+  }
+  function close() {
+    var el = document.getElementById('hsb_prof');
+    if (el) el.classList.remove('on');
+  }
+
+  window.HansenSbProfile = {
+    _open: open,
+    _close: close,
+    readProfile: readProfile,
+    setName: setName,
+    validateName: validateName,
+    fullName: fullName,
+    ensureCid: ensureCid,
+    claimCloudId: claimCloudId,
+    fmtCid: fmtCid,
+    collectStats: collectStats,
+    renameCooldownLeft: renameCooldownLeft,
+    RENAME_COOLDOWN_DAYS: RENAME_COOLDOWN_DAYS,
+    SHOWCASE_MAX: SHOWCASE_MAX
+  };
+})();
