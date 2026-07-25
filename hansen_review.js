@@ -526,7 +526,15 @@
     function finish(){
       /* 🔴v963样机: 通知复习奖励模块(今日复习完成+20/连击); 模块不存在或非试点岛时静默跳过 */
       try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:reviewed, graduated:graduated, total:total}); }catch(e){}
-      overlay.style.background = 'linear-gradient(180deg,#064e3b 0%,#0f172a 100%)';
+      /* 🔴v1006 修复「底部绿块」事故：
+         下面紧接着 overlay.innerHTML=... 会把内部那段 <style>（含
+         #hr_today{position:fixed;inset:0;z-index:9999} ）一并冲掉，
+         浮层随即退化为普通块元素、掉到页面最底部（用户在成就页/卡册页
+         都看到一条绿色长条）。这里必须把定位写成**行内样式**，
+         innerHTML 替换不会影响 style 属性，定位才保得住。 */
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;'
+        + 'background:linear-gradient(180deg,#064e3b 0%,#0f172a 100%);'
+        + 'display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch';
       overlay.innerHTML =
         '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px">' +
           '<div style="font-size:72px;margin-bottom:14px">🎉</div>' +
