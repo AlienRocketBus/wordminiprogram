@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1018;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1019;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -15,7 +15,7 @@
   var RESTORE_JOURNAL='hansen_backup_restore_journal_v942',JOURNAL_SCHEMA=1,MIN_JOURNAL_APP_VERSION=942;
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
   var PREFIXES=['wordIsland','hansen_','hsn_','bs_hall_','hs_showcase_'];
-  var DENY=/^(?:hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test)|(?:password|passcode|token|secret|authorization|session)/i;
+  var DENY=/^(?:hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test|hansen_auth_|hansen_cloud_state_)|(?:password|passcode|token|secret|authorization|session)/i;
   var TRANSIENT_KEY=/(?:^|[_:\-.])(?:pending|journal|transaction|txn)(?:[_:\-.]|$)|(?:^|_)tmp(?:_|$)/i;
   var NESTED_TX={hansen_wallet_cardbook:1,hansen_diamond_shop:1,hansen_share_draw:1};
   function transientKey(k){return typeof k==='string'&&/^(?:wordIsland|hansen_|hsn_|bs_hall_|hs_showcase_)/.test(k)&&TRANSIENT_KEY.test(k);}
@@ -33,7 +33,12 @@
     if(EXACT[k])return true;
     if(/^(?:season1_prog|season_boss_perfect|season_word_mastery|season_wrong_words|land[1-8]_prog)$/.test(k))return true;
     for(var i=0;i<PREFIXES.length;i++)if(k.indexOf(PREFIXES[i])===0)return /^[A-Za-z0-9_:\-.]+$/.test(k);
-    return false;
+    /* 🔴v1019「所有东西都跟着账号走」：
+       原先是**白名单**——只有列在前缀/名单里的键才进备份，
+       结果每加一个新功能就可能漏一个键（sb_best_cpm、主题、语音设置等都曾在外）。
+       改为**兜底收录**：凡是合法键名、且没被上面的 DENY/临时/派生规则挡下的，
+       一律纳入备份。以后新增任何数据都自动跟着账号走，不用再记得改这里。 */
+    return /^[A-Za-z0-9_:\-.]+$/.test(k);
   }
   // 值只来自 JSON.parse；这里用 tag 而不是原型恒等，兼容 iframe/测试 VM 的跨 realm JSON。
   function plainObject(o){return !!o&&typeof o==='object'&&!Array.isArray(o)&&Object.prototype.toString.call(o)==='[object Object]';}
@@ -143,21 +148,29 @@
     if(Object.prototype.hasOwnProperty.call(o,'version')&&o.version!==941&&o.version!==942)throw new Error(label+'version 无效');
     if(!Object.prototype.hasOwnProperty.call(o,'day')||!validDayText(o.day))throw new Error(label+'day 必须为空或有效 YYYY-M-D 日期');
     if(Object.prototype.hasOwnProperty.call(o,'allDay')&&!validDayText(o.allDay))throw new Error(label+'allDay 必须为空或有效 YYYY-M-D 日期');
-    if(!Array.isArray(o.list)||o.list.length>7)throw new Error(label+'list 必须是最多 7 项的数组');
+    if(!Array.isArray(o.list)||o.list.length>12)throw new Error(label+'list 必须是最多 12 项的数组');/*🔴v1019: 每日任务 v1000 起为 12 条, 此处仍写死 7 → build() 抛错 → 云备份自 v1000 起一直是坏的*/
     var ids={},types={};
     o.list.forEach(function(q){
       if(!plainObject(q))throw new Error(label+'任务必须是普通对象');
       Object.keys(q).forEach(function(k){if(!/^(?:id|icon|title|goal|type|reward|isSpelling|progress|claimed)$/.test(k))throw new Error(label+'任务含未知字段：'+k);});
-      if(typeof q.id!=='string'||!Object.prototype.hasOwnProperty.call(QUEST_RULES,q.id))throw new Error(label+'含未知任务 id');
-      var r=QUEST_RULES[q.id];if(ids[q.id]||types[r[0]])throw new Error(label+'含重复任务 id/type');ids[q.id]=1;types[r[0]]=1;
-      if(q.type!==r[0]||q.goal!==r[1])throw new Error(label+'任务 '+q.id+' 的 type/goal 与权威配置不符');
+      /* 🔴v1019: 这里原本内嵌了一份**任务权威配置**(QUEST_RULES)并逐条比对 type/goal。
+         但任务定义的真源在 hansen_quest_global.js，两处一旦走散备份就整个抛错——
+         v1000 把每日任务从 7 条改到 12 条、v1001 又调了各任务 goal，
+         这份副本没跟上，导致 build() 直接抛异常，**云备份自 v1000 起一直是坏的**。
+         备份的职责是保全数据，不该校验游戏逻辑细节；改为只做结构性校验。 */
+      if(typeof q.id!=='string'||!q.id)throw new Error(label+'任务 id 非法');
+      if(ids[q.id])throw new Error(label+'含重复任务 id');
+      ids[q.id]=1;
+      if(typeof q.type!=='string'||!q.type)throw new Error(label+'任务 '+q.id+' 缺少 type');
+      if(typeof q.goal!=='number'||!isFinite(q.goal)||q.goal<0)throw new Error(label+'任务 '+q.id+' 的 goal 非法');
       if(!safeQuestText(q.icon,32)||!safeQuestText(q.title,160))throw new Error(label+'任务 '+q.id+' 的 icon/title 含非法文本');
       if(!plainObject(q.reward))throw new Error(label+'任务 '+q.id+' 的 reward 无效');
       Object.keys(q.reward).forEach(function(k){if(k!=='xp'&&k!=='gems')throw new Error(label+'任务 reward 含未知字段');});
-      if(q.reward.xp!==r[2]||(Object.prototype.hasOwnProperty.call(q.reward,'gems')&&q.reward.gems!==r[3]))throw new Error(label+'任务 '+q.id+' 的 reward 与权威配置不符');
-      if(Object.prototype.hasOwnProperty.call(q,'isSpelling')&&(q.isSpelling!==true||!r[4]))throw new Error(label+'任务 '+q.id+' 的 isSpelling 无效');
-      if(!exactInt(q.progress,0,r[1])||typeof q.claimed!=='boolean')throw new Error(label+'任务 '+q.id+' 的 progress/claimed 无效');
-      if(q.claimed&&q.progress!==r[1])throw new Error(label+'任务 '+q.id+' 已领取但未达到目标');
+      /* 🔴v1019: reward/isSpelling 不再比对内嵌副本(版本间必然走散), 只保留结构性校验 */
+      /* 🔴v1019: reward/isSpelling 不再比对内嵌副本(版本间必然走散), 只保留结构性校验 */
+      /* 🔴v1019: 进度上限以**存档自身的 goal** 为准, 不再比对内嵌副本 */
+      if(!exactInt(q.progress,0,q.goal)||typeof q.claimed!=='boolean')throw new Error(label+'任务 '+q.id+' 的 progress/claimed 非法');
+      /* 「已领取必须满进度」不再强制: 任务目标会随版本调整, 旧存档已领奖条目本就可能进度小于新目标(v1018 已在任务侧宽容), 备份不该因此拒绝保存用户数据。 */
     });
     if(o.allDay&&(!o.list.length||!o.list.every(function(q){return q.claimed&&q.progress===q.goal;})))throw new Error(label+'allDay 与任务领取状态不一致');
   }
@@ -166,7 +179,7 @@
     var o;try{o=JSON.parse(v);}catch(e){throw new Error((mode==='import'?'备份含':'当前存档含')+'无效全局任务 JSON');}
     var label=(mode==='import'?'备份含':'当前存档含')+'非法全局任务.';
     validateQuests(o,label);
-    if(o.list.length!==7)throw new Error(label+'list 必须恰好包含 7 项');
+    if(o.list.length>12)throw new Error(label+'list 必须最多 12 项');
     return v;
   }
   var CARD_ISLANDS={action:1,adjective:1,animal:1,body:1,city:1,clothes:1,color:1,family:1,food:1,home:1,job:1,nature:1,question:1,school:1,sports:1,time:1,traffic:1,treasure:1};
@@ -462,7 +475,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1018_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1019_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
