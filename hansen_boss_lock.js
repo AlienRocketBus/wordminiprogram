@@ -36,7 +36,7 @@
 
 // hansen_boss_upgrade.js v152 (双保险覆盖原 cFall/lvlIn keyframes, 防止旧动画名残留)
 // v143v: 顶部立即导出版本号到 window, 不依赖 init() (诊断页面用)
-window.__HBU_VERSION__ = 'v1047';
+window.__HBU_VERSION__ = 'v1048';
 window.__HBU_LOADED_AT__ = Date.now();
 
 // Boss 战升级: 难度递增 (答错伤害 + 倒计时) + 最后 Boss 全词覆盖 + 半血惩罚 + 高奖励
@@ -1962,7 +1962,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     // 🔴 BUG #10 关联: 下面这行 HBU_RUNTIME_VERSION 由 build.py 自动同步, 不要手改!
     // 手改会和 __HBU_VERSION__ / cache buster 形成"版本号打架"(check.html 误报)。
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    window.HBU_RUNTIME_VERSION = 'v1047';
+    window.HBU_RUNTIME_VERSION = 'v1048';
     setTimeout(function(){
       try {
         var versions = new Set();
