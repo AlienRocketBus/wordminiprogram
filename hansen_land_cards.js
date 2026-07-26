@@ -231,7 +231,7 @@
       mask.id = '__hsn_landhall';
       mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
       var iframe = document.createElement('iframe');
-      iframe.src = 'boss_hall.html?v=1017&land=1&card=' + encodeURIComponent(cardId) + '&lown=' + encodeURIComponent(own.join(','));
+      iframe.src = 'boss_hall.html?v=1018&land=1&card=' + encodeURIComponent(cardId) + '&lown=' + encodeURIComponent(own.join(','));
       iframe.setAttribute('title', '星海大陆 BOSS 殿堂');
       iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
       mask.appendChild(iframe);
@@ -281,12 +281,12 @@
         var un=cb.has(c.id);
         if(un){
           h+='<div onclick="window.__hsnOpenLandHall&&window.__hsnOpenLandHall(\''+c.id+'\')" style="cursor:pointer;border:2px solid '+c.frame+';background-color:rgba(30,41,59,.4);border-radius:9px;padding:3px;text-align:center">'+
-             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img loading="lazy" decoding="async" src="'+c.img+'?v=1017" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+             '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1"><img loading="lazy" decoding="async" src="'+c.img+'?v=1018" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
              '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name.split('·').pop())+'</div></div>';
         }else{
           h+='<div style="border:2px dashed #334155;background-color:rgba(15,23,42,.4);border-radius:9px;padding:3px;text-align:center;opacity:.85">'+
              '<div style="background:#0f172a;border-radius:6px;overflow:hidden;aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center">'+
-             '<img loading="lazy" decoding="async" src="'+c.img+'?v=1017" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
+             '<img loading="lazy" decoding="async" src="'+c.img+'?v=1018" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.25) blur(2px);position:absolute;inset:0">'+
              '<div style="position:relative;font-size:20px;color:#475569">🔒</div></div>'+
              '<div style="font-size:8px;font-weight:700;color:#475569;margin-top:2px">???</div></div>';
         }
@@ -470,7 +470,7 @@
     rotor=ov.querySelector('.lgr-rotor');scroll=ov.querySelector('.lgr-scroll');hint=ov.querySelector('.lgr-hint');
     preloader=new Image();var imageReady=false, imageFailed=false;
     preloader.decoding='async'; try{preloader.fetchPriority='high';}catch(e){}
-    preloader.onload=function(){imageReady=true;}; preloader.onerror=function(){imageFailed=true;}; preloader.src=c.img+'?v=1017';
+    preloader.onload=function(){imageReady=true;}; preloader.onerror=function(){imageFailed=true;}; preloader.src=c.img+'?v=1018';
     hardDeadline=Date.now()+(reduce?1200:3900);
     function later(fn,ms){var n=setTimeout(fn,ms);timers.push(n);return n;}
     function clearAllTimers(){for(var i=0;i<timers.length;i++)clearTimeout(timers[i]);timers=[];if(safetyTimer){clearTimeout(safetyTimer);safetyTimer=0;}}
@@ -534,7 +534,7 @@
         }
         if(!imageFailed)mountImage(preloader);
         else{
-          var retryImage=new Image();retryImage.decoding='async';mountImage(retryImage);retryImage.src=c.img+'?v=1017&retry=1';
+          var retryImage=new Image();retryImage.decoding='async';mountImage(retryImage);retryImage.src=c.img+'?v=1018&retry=1';
         }
         var meta=document.createElement('div');meta.className='lgr-meta';meta.style.setProperty('--lgr-rc',ri.color);
         var status=result.dup?'重复卡 · 已化为 '+(Number(result.frag)||0)+' 枚'+ri.cn+'碎片':'新卡入册 · 首次获得';
@@ -651,7 +651,7 @@
       ov.onclick=function(){ ov.remove(); };
       ov.innerHTML='<div style="max-width:340px;width:100%;background:linear-gradient(160deg,#1e293b,#0f172a);border:3px solid '+c.frame+';border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px '+ri.glow+'">'+
         '<div style="font-size:13px;font-weight:900;color:'+ri.color+';margin-bottom:8px">'+(c.rarity==='legendary'?'✨ 至尊 ✨':ri.cn)+'</div>'+
-        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img loading="lazy" decoding="async" src="'+c.img+'?v=1017" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
+        '<div style="background:#0f172a;border-radius:12px;overflow:hidden;margin-bottom:10px"><img loading="lazy" decoding="async" src="'+c.img+'?v=1018" onerror="hansenImgErr&&hansenImgErr(this)" style="width:100%;display:block"></div>'+
         '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:6px">'+esc(c.name)+'</div>'+
         '<div style="font-size:13px;color:#cbd5e1;line-height:1.6">'+esc(c.desc)+'</div></div>';
       document.body.appendChild(ov);
