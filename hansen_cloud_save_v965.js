@@ -211,7 +211,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1036').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1037').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -508,6 +508,46 @@
        否则先匿名初始化、后登录的场景下, 仍会拿着匿名身份读写, 跨设备依旧找不回。 */
     resetApp: function(){ _cb = null; },
     selfTest: selfTest, ensureKey: ensureKey,
+    /* 🔴v1037 往返自检：不再靠推理。
+       在用户设备上一次跑完「写→立刻读回」，把每一步的原始结果都带出来，
+       从而把问题精确定位到**地址 / 身份 / 权限**其中之一：
+         · 写失败            → 权限或会话问题(错误原文会说)
+         · 写成功但读不回     → 归属(_openid)不匹配，即"仅创建者可读写"挡住了
+         · 写成功且读得回     → 通道完全正常，那么真正的存档是"从来没写进去过"
+       这三种情况的修法完全不同，此前六版之所以反复失败，
+       正是因为始终没有办法区分它们。 */
+    roundTrip: function(){
+      var out = { step:'start', envId:'', sessionUid:'', key:'', docId:'',
+                  wrote:null, readBack:null, ownerMatch:null, error:'' };
+      try { out.envId = (window.HANSEN_CLOUD_CONFIG||{}).envId || ''; } catch(e){}
+      var pv = provider();
+      if (!pv) { out.step='no-provider'; out.error='云服务未配置'; return Promise.resolve(out); }
+      var probeKey = normalizeKey(ensureKey()) || ensureKey();
+      out.key = probeKey;
+      var pid = null;
+      /* 探针文档独立于真实存档，绝不覆盖用户数据 */
+      return docIdOf('probe:' + probeKey).then(function(id){
+        pid = id; out.docId = id.slice(0,12) + '…';
+        out.step = 'writing';
+        return pv.put(id, { payload:{ v:1, probe:true, ts:Date.now() }, updatedAt:Date.now(), app:'wordadventure' });
+      }).then(function(){
+        out.wrote = true; out.step = 'reading-back';
+        return pv.get(pid);
+      }).then(function(row){
+        out.readBack = !!(row && row.payload);
+        if (row) {
+          out.ownerMatch = true;
+          try { out.sessionUid = row._openid || row._uid || ''; } catch(e){}
+        }
+        out.step = out.readBack ? 'ok' : 'wrote-but-cannot-read';
+        return out;
+      }).catch(function(e){
+        out.error = String((e && (e.message || e.errMsg || e.code)) || e).slice(0,200);
+        if (out.wrote === null) out.step = 'write-failed';
+        else if (out.readBack === null) out.step = 'read-failed';
+        return out;
+      });
+    },
     accountHasCloudSave: accountHasCloudSave, accountCloudInfo: accountCloudInfo, accountUid: accountUid,
     getKey: function(){ return readState().key || ''; },
     _debug: { genKey: genKey, normalizeKey: normalizeKey, prettyKey: prettyKey,
