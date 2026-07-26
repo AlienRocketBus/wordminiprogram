@@ -211,7 +211,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1038').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1039').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -286,17 +286,37 @@
     catch(e){ return Promise.resolve({ ok:false, reason:'export-failed', error: friendly(e) }); }
     var h = fnv(code);
     /* 内容未变→无条件跳过(force 只绕过冷却,不制造重复流量) */
-    if(st.lastHash === h)
-      return Promise.resolve({ ok:true, skipped:true, reason:'unchanged' });
-    /* 🔴v1033: 写入同样先归一化, 与 fetchWithKey 的读取路径完全对齐 */
+    /* 🔴v1039 关键修复：原判据只看"内容有没有变"，**连 force 也照样跳过**，
+       于是出现最致命的一种假象——
+         早先上传过一次(写到旧地址)并记下内容指纹；
+         此后地址算法或账号变了，用户点「立刻上传」→ 内容没变 → 指纹相同 → 直接跳过
+         → 返回 ok:true，界面显示「上传成功 ✔」，而**新地址上一个字都没写**。
+       前六版反复失败正是因为此：每次改完地址算法，重新上传都被这条跳过，
+       数据从未搬到新地址，读取自然永远找不到。
+       改为：① force 一律真写（这才是 force 的语义）；
+             ② 非 force 时，除内容指纹外还要比对**上次写入的地址**，
+                地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
     _busy = true;
+    return docIdOf(key).then(function(targetId){
+      if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
+        _busy = false;
+        return { ok:true, skipped:true, reason:'unchanged' };
+      }
+      return doUpload(key, code, h, targetId);
+    }).catch(function(e){
+      _busy = false;
+      return { ok:false, reason:'upload-failed', error: friendly(e) };
+    });
+  }
+
+  /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */
+  function doUpload(key, code, h, targetId){
+    var p = provider();
     return sealPayload(key, code).then(function(envelope){
-      return docIdOf(key).then(function(id){
-        return p.put(id, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
-      });
+      return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
     }).then(function(){
-      writeState({ lastUpAt: Date.now(), lastHash: h, enabled: true });  /* 🔴v1003: 首次成功即开启自动同步 */
+      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, enabled: true });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* 🔴v1003: 首次成功即开启自动同步 */
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){
