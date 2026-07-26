@@ -40,7 +40,8 @@ ok(r.n>=9, `逐环自检项 ${r.n} 条`);
 ok(r.hasTest && r.hasPull, '含「立刻上传」「从云端拉取」实测按钮');
 console.log('\n  ── 模拟设备上的自检输出 ──');
 r.rows.slice(0,9).forEach(x=>console.log('   ', x.k, '→', x.v.slice(0,52), x.cls.includes('bad')?'❌':(x.cls.includes('warn')?'⚠️':'✅')));
-ok(r.rows.some(x=>/uid/i.test(x.k) && /UID-DIAG/.test(x.v)), '能读出真实账号 uid');
+ok(r.rows.some(x=>/账号标识|uid/i.test(x.k) && /^p:|^u:|^n:/.test(x.v.trim())),
+   '能读出账号标识(v1047 起以手机号为准, 形如 p:1380000xxxx)');
 ok(r.rows.some(x=>/备份打包/.test(x.k) && /成功/.test(x.v)), '备份打包状态可见');
 ok(errs.length===0, '零脚本错误'+(errs.length?': '+errs[0]:''));
 await browser.close(); srv.close();
