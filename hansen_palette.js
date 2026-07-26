@@ -515,6 +515,17 @@
     css+=_LS+'.pk_ab{background:rgba(15,23,42,.06)!important;color:#334155!important;border-color:rgba(15,23,42,.14)!important}\n';
     css+=_LS+'.pk_ab.primary,'+_LS+'.pk_ab.primary *{color:#fff!important}\n';
     css+=_LS+'.pk_acct_tip{color:#475569!important;opacity:1!important}\n';
+    // \U0001f534v1022 \u62fc\u5199\u5927PK \u9875\u9762\u5185\u5c4f\u53cc\u8272\u8c03
+    css+=_LS+'#hsn_pk_screen{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 55%,#e0e7ff 100%)!important;color:#0f172a!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_h1,'+_LS+'#hsn_pk_screen .k_nm,'+_LS+'#hsn_pk_screen .k_v{color:#0f172a!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_sub,'+_LS+'#hsn_pk_screen .k_l,'+_LS+'#hsn_pk_screen .k_sec,'+_LS+'#hsn_pk_screen .k_cid,'+_LS+'#hsn_pk_screen .k_tip{color:#475569!important;opacity:1!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_back,'+_LS+'#hsn_pk_screen .k_ab{background:rgba(15,23,42,.06)!important;color:#334155!important;border-color:rgba(15,23,42,.14)!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_me,'+_LS+'#hsn_pk_screen .k_note{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;color:#334155!important;box-shadow:0 2px 8px rgba(15,23,42,.06)!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_it{background:rgba(15,23,42,.05)!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_tier{color:var(--pal-accent-text,#1e3a8a)!important}\n';
+    css+=_LS+'#hsn_pk_screen .k_ava{background:radial-gradient(circle at 50% 42%,rgba(15,23,42,.10),rgba(15,23,42,.04) 65%,transparent 74%)!important}\n';
+    // \u5f69\u5e95\u5361\u4e0e\u4e3b\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u7559
+    css+=_LS+'#hsn_pk_screen .k_card,'+_LS+'#hsn_pk_screen .k_card *,'+_LS+'#hsn_pk_screen .k_ab.primary{color:#fff!important}\n';
     // \U0001f534v1004\u3265 \u767b\u5f55\u9762\u677f\u53cc\u8272\u8c03
     css+=_LS+'#hsn_auth_panel .au_card{background:#ffffff!important;color:#0f172a!important}\n';
     css+=_LS+'#hsn_auth_panel .au_t,'+_LS+'#hsn_auth_panel .au_lb{color:#0f172a!important;opacity:1!important}\n';
