@@ -293,7 +293,15 @@
       var hasLocal = localHasProgress();
       if (hasCloud && !hasLocal) {
         return CS.restoreWithKey(CS.ensureKey())
-          .then(function (r) { return { ok: !!(r && r.ok), action: 'restored' }; })
+          .then(function (r) {
+            /* 🔴v1026 关键：恢复只是把数据写回 localStorage，
+               而页面内存里的 S 仍是登录前那份空数据 —— 不刷新的话
+               ① 用户看到"等级没变、什么都没变"；
+               ② 页面下一次存档会用内存里的空数据**覆盖掉刚恢复的进度**。
+               所以恢复成功必须重新加载页面，让新数据真正生效。 */
+            if (r && r.ok) return { ok: true, action: 'restored', needReload: true };
+            return { ok: false, action: 'restore-failed' };
+          })
           .catch(function () { return { ok: false, action: 'restore-failed' }; });
       }
       if (hasCloud && hasLocal) return { ok: true, action: 'conflict' };

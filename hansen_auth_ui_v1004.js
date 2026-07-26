@@ -169,12 +169,18 @@
         var s = r && r.sync;
         var syncTxt = '';
         if (s) {
-          if (s.action === 'restored') syncTxt = ' 已从云端找回你的全部进度。';
+          if (s.action === 'restored') syncTxt = ' 已从云端找回你的全部进度，正在载入…';
           else if (s.action === 'uploaded') syncTxt = ' 进度已存到云端。';
           else if (s.action === 'conflict') syncTxt = ' 云端和本机都有进度，请选择保留哪一份。';
           else if (s.action === 'restore-failed' || s.action === 'upload-failed') syncTxt = ' 进度同步没成功，可稍后手动同步。';
         }
         msg('登录成功！' + idTxt + syncTxt, 'ok');
+        /* 🔴v1026: 恢复成功后必须重新加载页面, 否则内存里仍是旧数据,
+           用户会看到"什么都没变", 且下一次存档会把恢复的进度覆盖掉 */
+        if (s && s.needReload) {
+          setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
+          return;
+        }
         if (s && s.action === 'conflict') {
           setTimeout(function () {
             var keepCloud = confirm('这个账号在云端已有进度，本机也有进度。\n\n' +
@@ -183,7 +189,8 @@
             if (!CS) return;
             if (keepCloud) {
               CS.restoreWithKey(CS.ensureKey())
-                .then(function(){ msg('已恢复云端进度。', 'ok'); })
+                .then(function(){ msg('已恢复云端进度，正在载入…', 'ok');
+                  setTimeout(function(){ try{ location.reload(); }catch(e){} }, 1200); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             } else {
               CS.syncNow({force:true})
