@@ -36,7 +36,7 @@
       '#' + ID + ' .d_row{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);',
       '  border-radius:10px;padding:10px 12px;margin-bottom:8px;word-break:break-all}',
       '#' + ID + ' .d_k{font-weight:800;font-size:12.5px;opacity:.85}',
-      '#' + ID + ' .d_v{margin-top:3px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}',
+      '#' + ID + ' .d_v{white-space:pre-wrap;margin-top:3px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}',
       '#' + ID + ' .ok{color:#86efac}  #' + ID + ' .bad{color:#fca5a5}  #' + ID + ' .warn{color:#fde68a}',
       '#' + ID + ' .d_btn{width:100%;min-height:46px;border:0;border-radius:12px;font:inherit;font-weight:900;',
       '  cursor:pointer;margin-top:10px;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff}',
@@ -131,6 +131,7 @@
     el.innerHTML = out
       + '<button class="d_btn" id="dTest">▶ 实测：立刻上传一次</button>'
       + '<button class="d_btn" id="dPull">⬇ 实测：从云端拉取一次</button>'
+      + '<button class="d_btn" id="dRT" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">🔁 一键往返自检（推荐先点这个）</button>'
       + '<button class="d_btn d_close" id="dClose">关闭</button>'
       + '<div class="d_row" id="dOut" style="margin-top:12px"><div class="d_k">实测结果</div>'
       + '<div class="d_v" id="dOutV">（点上面的按钮）</div></div>';
@@ -140,6 +141,29 @@
       if (v) { v.textContent = t; v.className = 'd_v ' + (cls || ''); }
     };
     document.getElementById('dClose').onclick = close;
+    /* 🔴v1037 往返自检：写→立刻读回，把问题定位到 地址/身份/权限 三者之一 */
+    var rt = document.getElementById('dRT');
+    if (rt) rt.onclick = function () {
+      say('往返测试中…');
+      if (!CS || typeof CS.roundTrip !== 'function') { say('请先更新到 v1037 以上版本', 'bad'); return; }
+      CS.roundTrip().then(function (r) {
+        var lines = [];
+        lines.push('环境: ' + (r.envId || '(空)'));
+        lines.push('密钥: ' + (r.key || '(无)'));
+        lines.push('地址: ' + (r.docId || '(无)'));
+        lines.push('写入: ' + (r.wrote === true ? '成功 ✔' : '失败 ✘'));
+        lines.push('读回: ' + (r.readBack === true ? '成功 ✔' : (r.readBack === false ? '失败 ✘（写进去了但读不回）' : '未执行')));
+        if (r.error) lines.push('原始错误: ' + r.error);
+        var verdict;
+        if (r.step === 'ok') verdict = '【结论】通道完全正常。既然写完能立刻读回，说明你的存档是「从来没被写进去过」，问题不在读取。';
+        else if (r.step === 'wrote-but-cannot-read') verdict = '【结论】写进去了却读不回 —— 是「仅创建者可读写」的归属问题，不是地址问题。';
+        else if (r.step === 'write-failed') verdict = '【结论】连写都失败 —— 是权限或登录会话问题，看上面的原始错误。';
+        else verdict = '【结论】' + r.step;
+        lines.push('');
+        lines.push(verdict);
+        say(lines.join('\n'), r.step === 'ok' ? 'ok' : 'bad');
+      }).catch(function (e) { say('往返测试异常：' + short(e && e.message || e, 200), 'bad'); });
+    };
     document.getElementById('dTest').onclick = function () {
       say('上传中…');
       if (!CS || !CS.syncNow) { say('云存档模块不可用', 'bad'); return; }
