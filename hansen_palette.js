@@ -546,6 +546,20 @@
     // \u6d1e\u5185\u6587\u5b57\u4e0e emoji: \u767d\u5e95\u4e0a\u4e00\u5f8b\u58a8\u9ed1
     css+=_LS+'.mole-slot .mole-cn,'+_LS+'.mole-cn{background:transparent!important;color:#0f172a!important;text-shadow:none!important;box-shadow:none!important;font-weight:800!important}\n';
     css+=_LS+'.mole-slot .mole-emoji,'+_LS+'.mole-emoji{filter:drop-shadow(0 2px 3px rgba(15,23,42,.22))!important}\n';
+    // \U0001f534v1042\u3268 \u6bcf\u65e5\u4efb\u52a1\u5361: \u9886\u53d6/\u5b8c\u6210\u540e\u53d8\u6df1\u7eff\u5e95(#052e16\u2192#14532d),
+    // \u800c\u4eae\u8272\u8c03\u4e0b\u6587\u5b57\u5df2\u8f6c\u6df1\u8272 \u2192 \u6df1\u5e95\u6df1\u5b57, \u5b8c\u5168\u770b\u4e0d\u6e05\u3002
+    css+=_LS+'.quest-card{background:#ffffff!important;border:1px solid rgba(15,23,42,.10)!important;box-shadow:0 2px 8px rgba(15,23,42,.06)!important}\n';
+    css+=_LS+'.quest-card.done{background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;border-color:#22c55e!important}\n';
+    css+=_LS+'.quest-card .quest-title,'+_LS+'.quest-card.done .quest-title{color:#0f172a!important}\n';
+    css+=_LS+'.quest-card .quest-progress-text,'+_LS+'.quest-card.done .quest-progress-text{color:#334155!important}\n';
+    css+=_LS+'.quest-card .quest-desc,'+_LS+'.quest-card.done .quest-desc{color:#475569!important}\n';
+    // \u8fdb\u5ea6\u69fd\u5e95\u8272: \u9ed1\u534a\u900f \u2192 \u6d45\u7070, \u4e0d\u7136\u767d\u5361\u4e0a\u4e00\u6761\u9ed1\u69fd\u5f88\u810f
+    css+=_LS+'.quest-progress-bar{background:rgba(15,23,42,.10)!important}\n';
+    // \u5956\u52b1\u80f6\u56ca: \u91d1\u5b57\u5728\u767d\u5e95\u4e0a\u770b\u4e0d\u6e05 \u2192 \u91d1\u5e95\u767d\u5b57
+    css+=_LS+'.quest-reward{background:linear-gradient(135deg,#fef3c7,#fde68a)!important;color:#0f172a!important;border:1px solid rgba(217,119,6,.35)!important}\n';/*\u91d1\u5e95\u767d\u5b57\u53ea\u6709 2.15:1, \u6539\u6d45\u91d1\u5e95+\u58a8\u5b57*/
+    css+=_LS+'.quest-reward.claimed{background:rgba(15,23,42,.08)!important;color:#475569!important}\n';
+    // \u5f69\u5e95\u6309\u94ae\u5185\u767d\u5b57\u4fdd\u7559
+    css+=_LS+'.quest-card .game-btn,'+_LS+'.quest-card button.claim,'+_LS+'.quest-claim-btn{color:#fff!important}\n';
     // \u5730\u9f20\u4e2d\u6587\u540d: \u9ed1\u5e95\u767d\u5b57 \u2192 \u767d\u5e95\u58a8\u5b57(\u6d45\u6d1e\u4e0a\u624d\u770b\u5f97\u6e05)
     css+=_LS+'.mole-cn{background:rgba(255,255,255,.94)!important;color:#0f172a!important;text-shadow:none!important;box-shadow:0 1px 3px rgba(15,23,42,.18)!important}\n';
     // emoji \u91cd\u9ed1\u6655 \u2192 \u8f7b\u67d4\u5f71
