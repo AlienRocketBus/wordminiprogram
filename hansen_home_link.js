@@ -81,7 +81,7 @@
     }catch(e){}
     /* 🔴v875(Hansen·彻底打通): 大陆子岛独立打开(非壳内)时·返回同样回大陆地图·不回index */
     if(/island_land[1-8]\.html/.test(location.pathname||'')){
-      try{ location.replace('land_map.html'); }catch(e){ try{ location.href='land_map.html'; }catch(e2){} }
+      try{ location.replace('land_map.html'); }catch(e){ try{ (function(){ if(window.HansenRoom){ HansenRoom.open('land'); return; } location.href='land_map.html'; })(); }catch(e2){} }
       return false;
     }
     var fromHome = false;
