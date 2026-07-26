@@ -16,7 +16,7 @@
 -->
 
 <html lang="zh-CN">
-<head><script src="hansen_tts_volume_v1032.js?v=1032"></script><!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
+<head><!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
 <script src="hansen_sw_upgrade_gate_v944.js?v=1032"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
 <script src="hansen_backup_bootstrap_v944.js?v=1032"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <link rel="preload" as="image" href="icons/speaker_3d.webp?v=1032">
@@ -3060,7 +3060,18 @@ const DAILY_QUEST_POOL=[
 {id:'speed200',icon:'⚡',title:'极速60秒 · 得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
 {id:'speed500',icon:'⚡⚡',title:'极速60秒 · 得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
 ];
-function __hsnQuestDefinition(id){return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
+function __hsnQuestDefinition(id){
+  /* 🔴v1032: 任务定义的真源是 hansen_quest_global.js 的 POOL(v1000/v1001 新增了
+     review3/review6/reviewClear/sbWin1/sbWin2 等)。template 自带的表不认识它们，
+     若在此返回 null，下游 __hsnNormalizeQuests 会把**整份任务清空** → 面板显示「暂无任务」。
+     所以先向全局模块问一次。 */
+  try {
+    var _G = window.HansenQuestGlobal;
+    if (_G && typeof _G.definition === 'function') {
+      var _d = _G.definition(id);
+      if (_d) return _d;
+    }
+  } catch (e) {}return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
 function __hsnNormalizeQuests(raw){
   var out={day:'',list:[],allDay:''},valid=true,seen={};
   if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
@@ -3069,7 +3080,7 @@ function __hsnNormalizeQuests(raw){
   if(!Array.isArray(raw.list)||raw.list.length>12)return out;/*\U0001f534v1000: 7\u21924212\u4efb\u52a1*/
   raw.list.forEach(function(saved){
     if(!saved||typeof saved!=='object'||Array.isArray(saved)||typeof saved.id!=='string'||seen[saved.id]){valid=false;return;}
-    var def=__hsnQuestDefinition(saved.id);if(!def){valid=false;return;}seen[saved.id]=1;
+    var def=__hsnQuestDefinition(saved.id);if(!def){return;}/*🔴v1032: 认不出就跳过这一条, 不再 valid=false 清空整份(与 v1018 同型教训)*/seen[saved.id]=1;
     var progress=saved.progress,claimed=saved.claimed;
     if(typeof progress!=='number'||!isFinite(progress)||Math.floor(progress)!==progress||progress<0||progress>def.goal||typeof claimed!=='boolean'||(claimed&&progress<def.goal)){valid=false;return;}
     out.list.push(Object.assign({},def,{reward:Object.assign({},def.reward),progress:progress,claimed:claimed}));
