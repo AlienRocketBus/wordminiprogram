@@ -313,7 +313,17 @@
       {id:'hidComeback',cat:'隐藏',name:'卷土重来',desc:'一个Boss失败后立刻再战并打赢',icon:'🔁',tier:'bronze',reward:{gems:15},hidden:true}
     ];
     // 覆盖全局 ACHIEVEMENTS(旧岛用 const 定义, 无法直接改; 用 window 赋值, 新 renderAch 读 window.ACHIEVEMENTS)
-    try{ window.ACHIEVEMENTS = ACH; }catch(e){}
+    /* 🔴v1034 关键修复：本文件内嵌了一份成就清单副本，并把它覆盖到 window.ACHIEVEMENTS、
+       同时接管了 renderAch —— 于是页面里真正的成就表(v1020/v1034 已扩到 144 条、22 个系列)
+       **完全没被用上**，用户看到的永远是这份陈旧的 36 条。
+       这与 v1019 备份模块的坑同型：同一份定义存在两处，必然走散。
+       改为：优先取页面里的真表，本文件的副本只在取不到时兜底。 */
+    try {
+      var _pageACH = null;
+      try { if (typeof ACHIEVEMENTS !== 'undefined' && ACHIEVEMENTS && ACHIEVEMENTS.length) _pageACH = ACHIEVEMENTS; } catch (e) {}
+      if (_pageACH && _pageACH.length > ACH.length) ACH = _pageACH;
+      window.ACHIEVEMENTS = ACH;
+    } catch(e){ try{ window.ACHIEVEMENTS = ACH; }catch(e2){} }
     window.__hsnACH = ACH; window.__hsnTIERS = TIERS;
 
     // --- 注入新成就页CSS ---
@@ -486,7 +496,13 @@
       var claimedAll=function(){return HA?HA.getClaimed():(S.achievements||[]);};
       var pendCount=function(){return HA?HA.pendingCount():0;};
       if(!window._achOpen)window._achOpen={'背单词':true};
-      var cats=['背单词','打Boss','卡牌收藏','连胜','签到','宠物','游戏模式','里程碑','隐藏'];
+      /* 🔴v1034: 分类不再写死 —— 写死会让新增分类的成就(复习/精通/速度/对决 共 22 个)
+       在页面上完全不显示。改为按既定顺序排列, 并把清单中出现的其它分类自动追加。 */
+      var _ORDER=['背单词','复习','精通','速度','打Boss','对决','游戏模式','连胜','里程碑','签到','卡牌收藏','宠物','隐藏'];
+      var _have={}; ACH.forEach(function(a){ if(a&&a.cat) _have[a.cat]=1; });
+      var cats=_ORDER.filter(function(x){return _have[x];});
+      Object.keys(_have).forEach(function(x){ if(cats.indexOf(x)<0) cats.push(x); });
+      var _unusedCats=[];
       var ci={'背单词':'📖','打Boss':'⚔️','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};
       var ACHL=window.ACHIEVEMENTS||[], T=window.__hsnTIERS;
       var cc=claimedAll().length, tot=ACHL.length, pct=Math.round(cc/tot*100), pc=pendCount();
