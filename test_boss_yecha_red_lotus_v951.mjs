@@ -67,9 +67,9 @@ assert.match(land5, /s\.src='hansen_boss_attack\.js'\+ver\(\)/,
   'Boss 特效引擎必须继续按需加载并继承当前查询键');
 assert.match(worker, new RegExp("'\\./hansen_boss_lock\\.js\\?v="+__APPV__+"'"),
   'Service Worker 没有缓存 v951 Boss 锁运行时');
-assert.match(worker, /CACHE_PREFIX \+ 'shell-86'/);
-assert.match(worker, /CACHE_PREFIX \+ 'pages-84'/);
-assert.match(worker, /CACHE_PREFIX \+ 'assets-84'/);
+assert.match(worker, /CACHE_PREFIX \+ 'shell-87'/);
+assert.match(worker, /CACHE_PREFIX \+ 'pages-85'/);
+assert.match(worker, /CACHE_PREFIX \+ 'assets-85'/);
 assert.doesNotMatch(land5, /hansen_boss_(?:lock|attack)\.js\?v=950/,
   '岛⑤仍直接引用旧版 Boss 运行时');
 

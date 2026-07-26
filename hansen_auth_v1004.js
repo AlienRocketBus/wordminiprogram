@@ -204,6 +204,9 @@
         return { ok: true, uid: '', cid: 0, pendingId: true };
       }
       writeLocal({ uid: uid });
+      /* 🔴v1028: 登录成功后作废云存档已缓存的实例, 让它按账号身份重建, 
+         否则它可能仍拿着登录前的匿名身份读写。 */
+      try { if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp(); } catch (e) {}
       return ensureProfile(uid)
         .catch(function () { return null; })
         .then(function (prof) {
