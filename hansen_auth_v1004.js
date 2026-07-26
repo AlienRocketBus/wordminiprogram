@@ -205,8 +205,13 @@
       }
       writeLocal({ uid: uid });
       return ensureProfile(uid)
-        .then(function (prof) { return { ok: true, uid: uid, cid: prof && prof.cid }; })
-        .catch(function () { return { ok: true, uid: uid, cid: 0, pendingId: true }; });
+        .catch(function () { return null; })
+        .then(function (prof) {
+          return syncOnLogin().then(function (s) {
+            return { ok: true, uid: uid, cid: (prof && prof.cid) || 0,
+                     pendingId: !(prof && prof.cid), sync: s };
+          });
+        });
     });
   }
 
@@ -264,6 +269,41 @@
 
   /* ── 跨设备存档 ─────────────────────────────────── */
   /* 登录后把本地进度推上云 */
+  /* 🔴v1017 登录后自动对账：让「登录 = 找回全部进度」真正成立
+     · 云端有档 + 本机没进度 → 直接恢复（换新设备的典型场景）
+     · 云端有档 + 本机也有进度 → 交给用户选，绝不静默覆盖任何一边
+     · 云端没档 → 把本机进度传上去，这个账号从此有档 */
+  function localHasProgress() {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('wordIsland') === 0) {
+          var o = JSON.parse(localStorage.getItem(k));
+          if (o && ((o.learned && o.learned.length) || (o.stats && Object.keys(o.stats).length))) return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+  function syncOnLogin() {
+    var CS = window.HansenCloudSave;
+    if (!CS || typeof CS.accountHasCloudSave !== 'function')
+      return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
+    return CS.accountHasCloudSave().then(function (hasCloud) {
+      var hasLocal = localHasProgress();
+      if (hasCloud && !hasLocal) {
+        return CS.restoreWithKey(CS.ensureKey())
+          .then(function (r) { return { ok: !!(r && r.ok), action: 'restored' }; })
+          .catch(function () { return { ok: false, action: 'restore-failed' }; });
+      }
+      if (hasCloud && hasLocal) return { ok: true, action: 'conflict' };
+      return CS.syncNow({ force: true })
+        .then(function (r) { return { ok: !!(r && r.ok), action: 'uploaded' }; })
+        .catch(function () { return { ok: false, action: 'upload-failed' }; });
+    }).catch(function () { return { ok: false, reason: 'sync-error' }; });
+  }
+
+
   function pushSave() {
     if (!window.HansenCloudSave || typeof HansenCloudSave.syncNow !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
@@ -290,6 +330,8 @@
     signOut: signOut,
     ensureProfile: ensureProfile,
     pushSave: pushSave,
+    syncOnLogin: syncOnLogin,
+    localHasProgress: localHasProgress,
     pullSave: pullSave,
     _app: app
   };
