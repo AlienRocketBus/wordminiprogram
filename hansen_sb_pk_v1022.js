@@ -132,6 +132,10 @@
       + '<div class="k_it"><div class="k_v">' + (s.days || 0) + '</div><div class="k_l">连续学习(天)</div></div>'
       + '</div>';
 
+    /* 🔴v1027: 云同步自检入口——跨设备存档出问题时, 用户点一下截图即可定位断点 */
+    h += '<div class="k_sec">🩺 遇到问题？</div>'
+      + '<button class="k_ab" id="kDiag" style="width:100%">☁️ 云同步自检（把结果截图发给开发者）</button>';
+
     if (!cloudReady()) {
       h += '<div class="k_sec">🚧 即将开放</div>'
         + '<div class="k_note">大PK 与天梯马上就来。'
@@ -165,6 +169,9 @@
       A.signOut().then(render);
     };
     var soon = function () { alert('这个模式马上就来，敬请期待！'); };
+    if (q('kDiag')) q('kDiag').onclick = function () {
+      try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else alert('自检模块未加载'); } catch (e) {}
+    };
     if (q('kRooms')) q('kRooms').onclick = soon;
     if (q('kLadder')) q('kLadder').onclick = soon;
   }
