@@ -156,7 +156,16 @@
         if (r.error) lines.push('原始错误: ' + r.error);
         var verdict;
         if (r.step === 'ok') verdict = '【结论】通道完全正常。既然写完能立刻读回，说明你的存档是「从来没被写进去过」，问题不在读取。';
-        else if (r.step === 'wrote-but-cannot-read') verdict = '【结论】写进去了却读不回 —— 是「仅创建者可读写」的归属问题，不是地址问题。';
+        else if (r.step === 'wrote-but-cannot-read') verdict =
+            '【结论】写进去了却读不回。\n\n'
+          + '文档确实建出来了，但数据库权限规则判定「这不是你的数据」，\n'
+          + '于是返回空结果（所以不报错，只是读不到）。\n\n'
+          + '【请这样修，一次就好】\n'
+          + '腾讯云控制台 → 文档型数据库 → 集合 hansen_saves\n'
+          + '→ 权限设置 → 改为「读取全部数据，修改本人数据」\n'
+          + '（改完等约 1 分钟生效，再回来点一次本自检）\n\n'
+          + '为什么这样安全：存档内容是加密的，密钥由你的账号推导；\n'
+          + '文档地址也是哈希值。别人即便读到也解不开。';
         else if (r.step === 'write-failed') verdict = '【结论】连写都失败 —— 是权限或登录会话问题，看上面的原始错误。';
         else verdict = '【结论】' + r.step;
         lines.push('');

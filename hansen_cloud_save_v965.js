@@ -211,7 +211,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1040').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1041').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -239,12 +239,35 @@
         });
       },
       get: function(docId){
-        return this._app().then(function(app){
-          return app.database().collection(COLLECTION).doc(docId).get();
-        }).then(function(res){
-          var row = res && res.data;
-          if(Array.isArray(row)) row = row[0];
-          return row || null;
+        /* 🔴v1041 双路读取 + 明确区分「没有」与「读不到」。
+           用户往返自检结果：写入成功、读回失败 —— 说明文档确实建出来了，
+           但 doc().get() 在权限规则下被判定"不是你的数据"，于是返回**空结果而非报错**。
+           这里补两件事：
+             ① doc(id).get() 返回空时，改用 where({_id:id}).get() 再试一次
+                （两种查询在权限规则下的表现有时并不一致）；
+             ② 把"取到了空"与"抛异常"区分开，供诊断面板定位。 */
+        var self = this;
+        return self._app().then(function(app){
+          var col = app.database().collection(COLLECTION);
+          return col.doc(docId).get().then(function(res){
+            var row = res && res.data;
+            if(Array.isArray(row)) row = row[0];
+            if(row) return row;
+            /* 主路取空 → 走 where 兜底 */
+            return col.where({ _id: docId }).limit(1).get().then(function(r2){
+              var rows = r2 && r2.data;
+              var one = Array.isArray(rows) ? rows[0] : rows;
+              return one || null;
+            }).catch(function(){ return null; });
+          }).catch(function(e){
+            /* 主路抛错 → 同样尝试 where，全失败才把原始错误抛出 */
+            return col.where({ _id: docId }).limit(1).get().then(function(r2){
+              var rows = r2 && r2.data;
+              var one = Array.isArray(rows) ? rows[0] : rows;
+              if(one) return one;
+              throw e;
+            }).catch(function(){ throw e; });
+          });
         });
       }
     };
@@ -546,7 +569,13 @@
       out.key = probeKey;
       var pid = null;
       /* 探针文档独立于真实存档，绝不覆盖用户数据 */
-      return docIdOf('probe:' + probeKey).then(function(id){
+      /* 🔴v1041: 探针地址改为**每次随机**。
+         此前用固定地址，若该地址上已躺着「别的身份创建的文档」，
+         `set` 可能看似成功而 `get` 被「仅创建者可读写」挡住 →
+         诊断结论会误报成"通道有问题"。随机地址保证测的是纯净的新建路径。
+         两台手机结果不同（一台绿、一台"写进去读不回"）正是这个原因。 */
+      var probeSalt = 'probe:' + probeKey + ':' + Date.now() + ':' + Math.random().toString(36).slice(2,8);
+      return docIdOf(probeSalt).then(function(id){
         pid = id; out.docId = id.slice(0,12) + '…';
         out.step = 'writing';
         return pv.put(id, { payload:{ v:1, probe:true, ts:Date.now() }, updatedAt:Date.now(), app:'wordadventure' });
@@ -560,6 +589,10 @@
           try { out.sessionUid = row._openid || row._uid || ''; } catch(e){}
         }
         out.step = out.readBack ? 'ok' : 'wrote-but-cannot-read';
+        /* 🔴v1041: 随机地址下仍"写成功却读不回"，只可能是集合权限模型的问题：
+           「仅创建者可读写」会按 _openid 过滤，写入时注入的身份与读取时的会话
+           一旦不同（匿名 ↔ 账号、或会话中途重建），读取就会拿到空结果而非报错。 */
+        if (!out.readBack) out.hint = 'permission-model';
         return out;
       }).catch(function(e){
         out.error = String((e && (e.message || e.errMsg || e.code)) || e).slice(0,200);

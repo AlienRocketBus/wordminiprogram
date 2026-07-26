@@ -14,7 +14,7 @@ const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','
 const dg  = fs.readFileSync('/home/claude/work/repo/hansen_cloud_diag_v1027.js','utf8');
 
 ok(/roundTrip:\s*function/.test(src), 'roundTrip 已提供');
-ok(/docIdOf\('probe:'/.test(src), "探针使用独立地址(probe: 前缀)，不覆盖真实存档");
+ok(/probe:/.test(src) && /probeSalt/.test(src), '探针使用独立且每次随机的地址(probe: 前缀 + 随机盐)，不覆盖真实存档也不受旧文档干扰');
 ok(/wrote-but-cannot-read/.test(src), '能识别"写进去了但读不回"(归属问题)');
 ok(/write-failed/.test(src), '能识别"连写都失败"(权限/会话问题)');
 ok(/out\.error\s*=/.test(src), '带出原始错误(不经翻译)');
