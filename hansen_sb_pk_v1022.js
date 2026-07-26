@@ -109,6 +109,8 @@
     } else if (A.isSignedIn()) {
       var lc = A.readLocal();
       h += '<div class="k_tip">✅ 已登录 ' + esc(lc.phone || lc.username || '') + '　进度已跟随账号，换设备登录即可找回。</div>'
+        /* 🔴v1048: 换设备后最需要的动作, 必须一眼能看见、随时可点 */
+        + '<div class="k_acct"><button class="k_ab primary" id="kPull" style="flex:2">☁️ 从云端恢复进度</button></div>'
         + '<div class="k_acct"><button class="k_ab" id="kSwitch">🔄 切换账号</button>'
         + '<button class="k_ab" id="kOut">🚪 退出登录</button></div>';
     } else {
@@ -156,6 +158,15 @@
         if (A && A.ready() && !A.isSignedIn() && window.HansenAuthUI) { HansenAuthUI.open(); return; }
         if (window.HansenSbProfile) HansenSbProfile._open();
       } catch (e) {}
+    };
+    if (q('kPull')) q('kPull').onclick = function () {
+      var btn = this; btn.disabled = true; btn.textContent = '正在恢复…';
+      try {
+        if (!window.HansenCloudRestore) { alert('恢复模块未加载，请刷新页面'); btn.disabled = false; return; }
+        HansenCloudRestore.now().then(function (r) {
+          if (!r.ok) { alert('恢复没成功：' + (r.reason || '未知原因')); btn.disabled = false; btn.textContent = '☁️ 从云端恢复进度'; }
+        });
+      } catch (e) { btn.disabled = false; }
     };
     if (q('kReg')) q('kReg').onclick = function () {
       try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
