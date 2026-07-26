@@ -52,6 +52,21 @@ ok(dt2<120, `二次打开耗时 ${dt2}ms(<120ms)`);
 let s=false;
 for(let i=0;i<12;i++){ s = await page.evaluate(()=>HansenRoom.isReady('season')); if(s) break; await page.waitForTimeout(700); }
 ok(s, '赛季岛同样已后台预热');
+/* 🔴v1024: 三个「带参数页」的资源预热(它们地址带 lv=/card=/boss=/island= 各不相同,
+   无法预开固定房间, 改为把 HTML 与子资源灌进缓存, 之后带任何参数打开都命中缓存) */
+let pf=[];
+for(let i=0;i<25;i++){
+  pf = await page.evaluate(()=> window.HansenRoom&&HansenRoom.prefetched? HansenRoom.prefetched():[]);
+  if(pf.length>=3) break;
+  await page.waitForTimeout(800);
+}
+ok(pf.length>=3, '三个带参数页的资源已预热进缓存: '+pf.join(', '));
+/* 预热用的隐藏 iframe 加载完应自行移除, 不常驻占内存 */
+await page.waitForTimeout(1200);
+const ghosts = await page.evaluate(()=>
+  [...document.querySelectorAll('iframe')].filter(f=>/warm=1/.test(f.src||'')).length);
+ok(ghosts===0, '预热用的隐藏 iframe 已自行清理(不占内存)');
+
 ok(errs.length===0, '零脚本错误'+(errs.length?': '+errs[0]:''));
 await browser.close(); srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
