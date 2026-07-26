@@ -288,12 +288,41 @@
     } catch (e) {}
     return false;
   }
+  /* 本机进度的规模，用于冲突时给用户看真实数字 */
+  function localProgressSize() {
+    var islands = 0, learned = 0;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('wordIsland') === 0) {
+          var o = JSON.parse(localStorage.getItem(k) || 'null');
+          if (o && o.learned && o.learned.length) { islands++; learned += o.learned.length; }
+        }
+      }
+    } catch (e) {}
+    return { islands: islands, learned: learned };
+  }
+
   function syncOnLogin() {
     var CS = window.HansenCloudSave;
-    if (!CS || typeof CS.accountHasCloudSave !== 'function')
+    if (!CS || typeof CS.accountCloudInfo !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
-    return CS.accountHasCloudSave().then(function (hasCloud) {
+    return CS.accountCloudInfo().then(function (info) {
       var hasLocal = localHasProgress();
+      var local = localProgressSize();
+      /* 🔴v1029 安全红线一：**查不到 ≠ 没有**。
+         网络抖动或权限问题都会让查询失败，此时若当成"云端没有"就去上传，
+         可能用本机(甚至是空的)覆盖掉云端的真实存档。查不到就什么都不做。 */
+      if (info && info.exists === null) {
+        return { ok: false, action: 'cloud-unreachable', reason: info.reason || '' };
+      }
+      var hasCloud = !!(info && info.exists);
+      /* 🔴v1029 安全红线二：**本机是空的就绝不上传**。
+         设备B(全新、无进度)先登录时若上传空档，
+         设备A 之后登录就会看到"云端有档"，一旦选错就全丢了。 */
+      if (!hasCloud && !hasLocal) {
+        return { ok: true, action: 'nothing-to-sync' };
+      }
       if (hasCloud && !hasLocal) {
         return CS.restoreWithKey(CS.ensureKey())
           .then(function (r) {
@@ -307,7 +336,12 @@
           })
           .catch(function () { return { ok: false, action: 'restore-failed' }; });
       }
-      if (hasCloud && hasLocal) return { ok: true, action: 'conflict' };
+      if (hasCloud && hasLocal) {
+        /* 冲突：把双方的真实规模一并带出去，让用户看着数字选，而不是盲选 */
+        return { ok: true, action: 'conflict',
+                 local: local,
+                 cloudUpdatedAt: (info && info.updatedAt) || 0 };
+      }
       return CS.syncNow({ force: true })
         .then(function (r) { return { ok: !!(r && r.ok), action: 'uploaded' }; })
         .catch(function () { return { ok: false, action: 'upload-failed' }; });
@@ -343,6 +377,7 @@
     pushSave: pushSave,
     syncOnLogin: syncOnLogin,
     localHasProgress: localHasProgress,
+    localProgressSize: localProgressSize,
     pullSave: pullSave,
     _app: app
   };

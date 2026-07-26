@@ -36,7 +36,7 @@ assert.doesNotMatch(preload,/setTimeout\(function\(\)\{\s*pumpTimer\s*=\s*null;\
   '弱网/后台不得永久每秒轮询，应等待可见性或网络 change 事件');
 assert.match(template,/function canBackgroundBossPrefetch\(/,'Boss 引擎预取门禁必须在 template 源');
 assert.match(template,/__hansenBossFXPrefetched/,'Boss 引擎与特效图预取必须单例');
-assert.match(sw,/CACHE_PREFIX \+ 'shell-87'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
+assert.match(sw,/CACHE_PREFIX \+ 'shell-88'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
 assert.match(sw,/await cache\.addAll\(/,'核心 shell 必须整批原子写入');
 assert.doesNotMatch(sw,/Promise\.allSettled\(SHELL/,'半包 shell 不得被激活');
 assert.match(sw,/const NAVIGATION_TIMEOUT_MS = 3000/,'导航网络优先必须有硬超时');

@@ -172,6 +172,8 @@
           if (s.action === 'restored') syncTxt = ' 已从云端找回你的全部进度，正在载入…';
           else if (s.action === 'uploaded') syncTxt = ' 进度已存到云端。';
           else if (s.action === 'conflict') syncTxt = ' 云端和本机都有进度，请选择保留哪一份。';
+          else if (s.action === 'nothing-to-sync') syncTxt = ' 本机还没有进度，玩一会儿就会自动存到云端。';
+          else if (s.action === 'cloud-unreachable') syncTxt = ' 暂时读不到云端，进度先留在本机，稍后会自动重试。';
           else if (s.action === 'restore-failed' || s.action === 'upload-failed') syncTxt = ' 进度同步没成功，可稍后手动同步。';
         }
         msg('登录成功！' + idTxt + syncTxt, 'ok');
@@ -183,8 +185,16 @@
         }
         if (s && s.action === 'conflict') {
           setTimeout(function () {
-            var keepCloud = confirm('这个账号在云端已有进度，本机也有进度。\n\n' +
-              '点「确定」= 用云端进度覆盖本机\n点「取消」= 用本机进度覆盖云端\n\n（无论选哪个，另一份都会被替换，请想清楚）');
+            /* 🔴v1029: 把双方真实规模摆出来, 让用户看着数字选, 而不是盲选 */
+            var L = (s.local || {});
+            var cloudWhen = s.cloudUpdatedAt ? new Date(s.cloudUpdatedAt).toLocaleString() : '时间未知';
+            var keepCloud = confirm(
+              '这个账号在云端已有进度，本机也有进度，需要你选一份保留：\n\n' +
+              '【本机】' + (L.islands || 0) + ' 个岛 · 已学 ' + (L.learned || 0) + ' 个单词\n' +
+              '【云端】最后保存于 ' + cloudWhen + '\n\n' +
+              '点「确定」= 用云端覆盖本机\n' +
+              '点「取消」= 用本机覆盖云端\n\n' +
+              '（另一份会被替换，请对照上面的数字想清楚）');
             var CS = window.HansenCloudSave;
             if (!CS) return;
             if (keepCloud) {
