@@ -151,16 +151,25 @@
       var saved = raw.list[i];
       if (!saved || typeof saved !== 'object' || Array.isArray(saved) || typeof saved.id !== 'string') return null;
       var def = BY_ID[saved.id];
-      if (!def || ids[def.id] || types[def.type]) return null;
+      /* 🔴v1018: 任务定义可能在版本间变化(改名/改目标/下架)。
+         过去只要有一条对不上就 return null → **整天任务被判废清空**，
+         用户看到「暂无任务」。v1001 把「完成1轮」改成「配对成功8组」(goal 1→8)
+         正是踩了这条: 老存档里已领取的任务变成 claimed=true 而 progress<goal。
+         改为**逐条宽容**: 认不出的跳过, 目标变了的按新目标夹取, 已领取的一律尊重。 */
+      if (!def || ids[def.id] || types[def.type]) continue;   /* 跳过这条, 不牵连整天 */
       ids[def.id] = 1; types[def.type] = 1;
       var item = clone(def);
-      if (typeof saved.progress !== 'number' || !isFinite(saved.progress) ||
-          Math.floor(saved.progress) !== saved.progress || saved.progress < 0 || saved.progress > item.goal ||
-          typeof saved.claimed !== 'boolean' || (saved.claimed && saved.progress !== item.goal)) return null;
-      item.progress = saved.progress;
+      if (typeof saved.progress !== 'number' || !isFinite(saved.progress) || saved.progress < 0) {
+        item.progress = 0;
+      } else {
+        item.progress = Math.min(Math.floor(saved.progress), item.goal);   /* 目标缩小也不越界 */
+      }
       item.claimed = saved.claimed === true;
+      /* 已领过的奖励不能因为目标变了就被收回 —— 直接按满进度记 */
+      if (item.claimed) item.progress = item.goal;
       list.push(item);
     }
+    if (!list.length) return null;   /* 一条都没留下 → 判为无效, 交给 makeDay 重新生成当天任务 */
     var allDone = list.every(function (item) { return item.claimed && item.progress === item.goal; });
     if (raw.allDay === expectedDay && !allDone) return null;
     return {
