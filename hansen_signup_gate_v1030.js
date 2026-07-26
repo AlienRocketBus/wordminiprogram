@@ -1,0 +1,149 @@
+/* hansen_signup_gate_v1030.js —— 升到 Lv.3 强制注册
+ *
+ * 产品决策（用户定）：前两级自由玩，让人先看到价值；
+ * 升到 **Lv.3（250 XP）** 后必须注册才能继续——注册即把本机全部进度存到云端，
+ * 此后任何设备登录同一账号都能恢复。
+ *
+ * 为什么卡在 Lv.3 而不是一进来就卡：
+ *   在用户看到价值之前要求注册会损失一批只是想试试的人，而这个损失不可逆；
+ *   到了 Lv.3 他已经有实实在在的进度可丢，注册意愿完全不同，
+ *   同时也正是"进度值得保护"的时点。
+ */
+(function () {
+  'use strict';
+  if (window.HansenSignupGate) return;
+
+  var GATE_LV = 3;
+  var GATE_XP = 250;      /* 与 ADVENTURE_LEVELS 的 Lv.3 门槛一致 */
+  var ID = 'hsn_gate';
+  var timer = null;
+
+  function xp() {
+    try {
+      var v = +localStorage.getItem('hansen_wallet_charxp');
+      if (isFinite(v) && v >= 0) return v;
+    } catch (e) {}
+    try { if (typeof window.S !== 'undefined' && S && +S.charXP >= 0) return +S.charXP; } catch (e) {}
+    return 0;
+  }
+  function level() { return xp() >= GATE_XP ? GATE_LV : 1; }
+
+  function signedIn() {
+    try {
+      var A = window.HansenAuth;
+      return !!(A && typeof A.isSignedIn === 'function' && A.isSignedIn());
+    } catch (e) { return false; }
+  }
+  function cloudReady() {
+    try { var c = window.HANSEN_CLOUD_CONFIG; return !!(c && c.envId); } catch (e) { return false; }
+  }
+  /* 需要拦截：达到门槛 + 未登录 + 云服务可用（云没开通就别把人堵死） */
+  function shouldGate() { return xp() >= GATE_XP && !signedIn() && cloudReady(); }
+
+  function progressLine() {
+    var islands = 0, learned = 0;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('wordIsland') === 0) {
+          var o = JSON.parse(localStorage.getItem(k) || 'null');
+          if (o && o.learned && o.learned.length) { islands++; learned += o.learned.length; }
+        }
+      }
+    } catch (e) {}
+    return { islands: islands, learned: learned };
+  }
+
+  function style() {
+    if (document.getElementById('hsn_gate_css')) return;
+    var st = document.createElement('style');
+    st.id = 'hsn_gate_css';
+    st.textContent = [
+      '#' + ID + '{position:fixed;inset:0;z-index:2147483640;display:none;align-items:center;justify-content:center;',
+      '  background:rgba(2,6,23,.88);padding:20px}',
+      '#' + ID + '.on{display:flex}',
+      '#' + ID + ' .g_card{width:100%;max-width:400px;background:linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%);',
+      '  color:#e8eefc;border-radius:20px;padding:24px 20px;box-shadow:0 12px 40px rgba(0,0,0,.5);text-align:center}',
+      '#' + ID + ' .g_ic{font-size:52px;line-height:1}',
+      '#' + ID + ' .g_t{font-size:20px;font-weight:900;margin-top:10px;letter-spacing:.4px}',
+      '#' + ID + ' .g_p{font-size:13.5px;line-height:1.75;opacity:.9;margin-top:10px;font-weight:600}',
+      '#' + ID + ' .g_box{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:14px;',
+      '  padding:12px 14px;margin-top:14px;font-size:13px;font-weight:800;line-height:1.7}',
+      '#' + ID + ' .g_go{width:100%;min-height:52px;border:0;border-radius:14px;margin-top:18px;cursor:pointer;',
+      '  background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;font:inherit;font-weight:900;font-size:16px}',
+      '#' + ID + ' .g_tip{font-size:11.5px;opacity:.62;line-height:1.6;margin-top:12px;font-weight:600}'
+    ].join('\n');
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function host() {
+    var el = document.getElementById(ID);
+    if (el) return el;
+    style();
+    el = document.createElement('div');
+    el.id = ID;
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', '需要注册');
+    /* 刻意不做点击遮罩关闭、不做 ✕ ——这是硬门槛 */
+    (document.body || document.documentElement).appendChild(el);
+    return el;
+  }
+
+  function render() {
+    var el = host();
+    var p = progressLine();
+    el.innerHTML = '<div class="g_card">'
+      + '<div class="g_ic">🎉</div>'
+      + '<div class="g_t">恭喜升到 Lv.' + GATE_LV + '！</div>'
+      + '<div class="g_p">你已经玩出真东西了。<br>现在注册一个账号，把进度存到云端——'
+      + '换手机、清缓存都不会丢。</div>'
+      + '<div class="g_box">📦 待保存的进度<br>'
+      + '已探索 ' + p.islands + ' 个岛 · 已学 ' + p.learned + ' 个单词</div>'
+      + '<button class="g_go" id="gGo">🔐 手机号注册 / 登录</button>'
+      + '<div class="g_tip">注册后本机进度会自动上传，之后在任何设备登录同一账号即可恢复。<br>'
+      + '这一步是必须的，完成后就能继续玩了。</div>'
+      + '</div>';
+    var b = document.getElementById('gGo');
+    if (b) b.onclick = function () {
+      try {
+        if (window.HansenAuthUI) HansenAuthUI.open();
+        else alert('登录模块未加载，请刷新页面重试。');
+      } catch (e) {}
+    };
+  }
+
+  function show() {
+    var el = host();
+    if (el.classList.contains('on')) return;
+    render();
+    el.classList.add('on');
+    try { document.documentElement.style.overflow = 'hidden'; } catch (e) {}
+  }
+  function hide() {
+    var el = document.getElementById(ID);
+    if (el) el.classList.remove('on');
+    try { document.documentElement.style.overflow = ''; } catch (e) {}
+  }
+
+  /* 持续巡检：升级、登录、登出都会即时反映 */
+  function check() {
+    if (shouldGate()) show(); else hide();
+  }
+  function start() {
+    check();
+    if (timer) clearInterval(timer);
+    timer = setInterval(check, 1500);
+    try { document.addEventListener('hsn-auth-changed', check); } catch (e) {}
+    try { window.addEventListener('focus', check); } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+
+  window.HansenSignupGate = {
+    GATE_LV: GATE_LV, GATE_XP: GATE_XP,
+    shouldGate: shouldGate, check: check, show: show, hide: hide,
+    _xp: xp, _level: level
+  };
+})();
