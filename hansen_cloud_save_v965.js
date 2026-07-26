@@ -160,7 +160,23 @@
       name: 'cloudbase',
       _app: function(){
         if(_cb) return Promise.resolve(_cb);
-        return import('./vendor_cloudbase_esm_v965.js?v=1027').then(function(m){
+        /* 🔴v1028 关键修复：已登录时**复用账号会话**，绝不再另开匿名身份。
+           原逻辑无论是否登录都自建实例并 signInAnonymously()，
+           而 hansen_saves 权限是「仅创建者可读写」——
+           设备A(匿名身份X)写的存档，设备B(匿名身份Y)根本读不到，
+           于是出现「刚上传成功、立刻拉取却说云端没有这把密钥对应的存档」。
+           手机号账号从头到尾没被用上，这才是跨设备找不回进度的真正原因。 */
+        try {
+          var A = window.HansenAuth;
+          if (A && typeof A.isSignedIn === 'function' && A.isSignedIn() && typeof A._app === 'function') {
+            return Promise.resolve(A._app()).then(function (app) {
+              if (!app) throw new Error('账号会话不可用');
+              _cb = app;      /* 与账号同一个实例、同一个身份 */
+              return app;
+            });
+          }
+        } catch (e) {}
+        return import('./vendor_cloudbase_esm_v965.js?v=1028').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -396,8 +412,17 @@
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
+  try {
+    document.addEventListener('hsn-auth-changed', function () {
+      _cb = null;   /* 🔴v1028: 账号变了, 云端身份也必须跟着变 */
+    });
+  } catch (e) {}
+
   window.HansenCloudSave = {
     syncNow: syncNow, restoreWithKey: restoreWithKey, fetchWithKey: fetchWithKey,
+    /* 🔴v1028: 登录/登出后必须作废已缓存的实例——
+       否则先匿名初始化、后登录的场景下, 仍会拿着匿名身份读写, 跨设备依旧找不回。 */
+    resetApp: function(){ _cb = null; },
     selfTest: selfTest, ensureKey: ensureKey,
     accountHasCloudSave: accountHasCloudSave, accountUid: accountUid,
     getKey: function(){ return readState().key || ''; },
