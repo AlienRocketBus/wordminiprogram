@@ -539,7 +539,13 @@
     // \u65b0: \u9633\u5149\u8349\u576a + \u6d45\u8272\u571f\u6d1e, \u4fdd\u7559\u6df1\u5ea6\u611f\u4f46\u6574\u4f53\u660e\u4eae
     css+=_LS+'.moles-grid{background:linear-gradient(180deg,#bbf7d0 0%,#86efac 45%,#4ade80 100%)!important;border-color:#22c55e!important;box-shadow:inset 0 2px 10px rgba(255,255,255,.55),0 6px 18px rgba(22,163,74,.22)!important}\n';
     // \u6d1e\u53e3: \u6d45\u6c99\u571f\u8272 + \u5185\u9634\u5f71\u505a\u51fa\u51f9\u9677\u611f(\u4e0d\u9760\u53d8\u9ed1)
-    css+=_LS+'.mole-slot{background:radial-gradient(ellipse at center bottom,#fde68a 0%,#fbbf24 58%,#d97706 100%)!important;box-shadow:inset 0 6px 14px rgba(120,53,15,.30),inset 0 -3px 8px rgba(255,255,255,.42)!important;border:2px solid rgba(217,119,6,.42)!important}\n';
+    // \U0001f534v1040 \u5730\u9f20\u6d1e\u6539\u767d\u5e95\u9ed1\u5b57
+    // v1010 \u4e3a\u4e86"\u51f9\u9677\u7acb\u4f53\u611f"\u7528\u4e86\u91d1\u9ec4\u6e10\u53d8, \u4f46\u91d1\u5e95\u672c\u8eab\u4e0d\u5229\u4e8e\u770b\u6e05\u5185\u5bb9\u3002
+    // \u6539\u4e3a\u767d\u5e95 + \u8f7b\u5185\u9634\u5f71 + \u6de1\u8fb9\u6846: \u7acb\u4f53\u611f\u9760\u9634\u5f71\u800c\u975e\u9760\u989c\u8272, \u5185\u5bb9\u6700\u6e05\u695a\u3002
+    css+=_LS+'.mole-slot{background:radial-gradient(ellipse at center bottom,#ffffff 0%,#f8fafc 62%,#eef2f7 100%)!important;box-shadow:inset 0 5px 12px rgba(15,23,42,.14),inset 0 -2px 6px rgba(255,255,255,.9),0 2px 6px rgba(15,23,42,.08)!important;border:2px solid rgba(15,23,42,.14)!important}\n';
+    // \u6d1e\u5185\u6587\u5b57\u4e0e emoji: \u767d\u5e95\u4e0a\u4e00\u5f8b\u58a8\u9ed1
+    css+=_LS+'.mole-slot .mole-cn,'+_LS+'.mole-cn{background:transparent!important;color:#0f172a!important;text-shadow:none!important;box-shadow:none!important;font-weight:800!important}\n';
+    css+=_LS+'.mole-slot .mole-emoji,'+_LS+'.mole-emoji{filter:drop-shadow(0 2px 3px rgba(15,23,42,.22))!important}\n';
     // \u5730\u9f20\u4e2d\u6587\u540d: \u9ed1\u5e95\u767d\u5b57 \u2192 \u767d\u5e95\u58a8\u5b57(\u6d45\u6d1e\u4e0a\u624d\u770b\u5f97\u6e05)
     css+=_LS+'.mole-cn{background:rgba(255,255,255,.94)!important;color:#0f172a!important;text-shadow:none!important;box-shadow:0 1px 3px rgba(15,23,42,.18)!important}\n';
     // emoji \u91cd\u9ed1\u6655 \u2192 \u8f7b\u67d4\u5f71
