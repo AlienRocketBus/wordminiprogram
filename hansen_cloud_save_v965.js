@@ -84,6 +84,24 @@
     return '';
   }
   /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
+  /* 🔴v1036: v1033 之前 keyFromUid 用的字符集含 L/U，会算出另一把钥匙。
+     兼容读取时需要能重算那把旧钥匙，才能把旧地址上的存档取回来。 */
+  function legacyKeyFromUid(uid){
+    var CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var h1 = 0x811c9dc5, h2 = 0x01000193;
+    var s = ACCT_PREFIX + ':' + uid;
+    for (var i = 0; i < s.length; i++) {
+      h1 = ((h1 ^ s.charCodeAt(i)) >>> 0) * 16777619 >>> 0;
+      h2 = ((h2 + s.charCodeAt(i) * (i + 7)) >>> 0) * 2654435761 >>> 0;
+    }
+    var out = '';
+    for (var j = 0; j < 16; j++) {
+      h1 = (h1 * 1664525 + 1013904223) >>> 0;
+      h2 = (h2 ^ (h1 >>> 13)) >>> 0;
+      out += CH.charAt(((h1 ^ h2) >>> 0) % CH.length);
+    }
+    return out.slice(0,4)+'-'+out.slice(4,8)+'-'+out.slice(8,12)+'-'+out.slice(12,16);
+  }
   function keyFromUid(uid){
     /* 🔴v1033 决定性修复：这里原本用的字符集含 L 和 U，
        而 normalizeKey 会把 U→V、L→1、I→1、O→0 做归一化。
@@ -193,7 +211,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1035').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1036').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -291,12 +309,60 @@
     if(!key) return Promise.reject(new Error('密钥格式不对：应为 16 位字母数字（可带横线）'));
     var p = provider();
     if(!p) return Promise.reject(new Error('云端尚未开通配置'));
-    return docIdOf(key).then(function(id){ return p.get(id); }).then(function(row){
-      if(!row || !row.payload) throw new Error('云端没有这把密钥对应的存档');
-      return openPayload(key, row.payload).then(function(code){
-        return { key: key, code: code, updatedAt: row.updatedAt || (row.payload && row.payload.ts) || 0 };
+    /* 🔴v1036 兼容读取：历史上存档地址算法变过两代，
+       旧版本上传的存档躺在**旧地址**，新代码只查新地址就会报
+       「云端没有这把密钥对应的存档」——数据其实还在，只是找错了门。
+       这里把历史地址依次试一遍，任一命中即可；命中旧地址后**顺手搬到新地址**，
+       此后不再依赖兼容路径。
+       候选地址（按可能性排序）：
+         ① 归一化密钥（v1033 起的写入方式，也是当前标准）
+         ② 原始密钥（含连字符，v1033 之前的写入方式）
+         ③ 旧字符集推导的账号密钥（v1033 之前 keyFromUid 含 L/U，会算出另一把钥匙） */
+    var cands = [key];
+    var raw = String(inputKey || '');
+    if (raw && raw !== key) cands.push(raw);
+    try {
+      var uid = accountUid();
+      if (uid) {
+        var legacy = legacyKeyFromUid(uid);
+        if (legacy && cands.indexOf(legacy) < 0) cands.push(legacy);
+        var legacyN = normalizeKey(legacy);
+        if (legacyN && cands.indexOf(legacyN) < 0) cands.push(legacyN);
+      }
+    } catch (e) {}
+
+    var tried = [];
+    function attempt(i) {
+      if (i >= cands.length) {
+        throw new Error('云端没有这把密钥对应的存档（已尝试 ' + tried.length + ' 个历史地址）');
+      }
+      var cand = cands[i];
+      return docIdOf(cand).then(function (id) {
+        tried.push(id.slice(0, 8));
+        return p.get(id);
+      }).then(function (row) {
+        if (!row || !row.payload) return attempt(i + 1);
+        /* 解密要用写入时的那把钥匙，与地址一一对应 */
+        return openPayload(cand, row.payload).then(function (code) {
+          if (i > 0) {
+            /* 命中旧地址 → 迁移到新地址，之后就走标准路径 */
+            try {
+              sealPayload(key, code).then(function (env) {
+                return docIdOf(key).then(function (nid) {
+                  return p.put(nid, { payload: env, updatedAt: Date.now(), app: 'wordadventure' });
+                });
+              }).catch(function () {});
+            } catch (e) {}
+          }
+          return { key: cand, code: code, updatedAt: row.updatedAt || (row.payload && row.payload.ts) || 0,
+                   migratedFrom: i > 0 ? i : 0 };
+        }).catch(function () { return attempt(i + 1); });
+      }).catch(function (e) {
+        if (i + 1 < cands.length) return attempt(i + 1);
+        throw e;
       });
-    });
+    }
+    return attempt(0);
   }
   function restoreWithKey(inputKey){
     return fetchWithKey(inputKey).then(function(got){
