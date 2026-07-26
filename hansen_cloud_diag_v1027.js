@@ -128,6 +128,32 @@
       st.lastUpAt ? 'ok' : 'bad');
     out += row('⑨ 自动同步开关', st.enabled ? '已开启' : '未开启（不会自动上传）', st.enabled ? 'ok' : 'warn');
 
+    /* 🔴v1043 最关键的一项：直接问云端"你那儿到底有没有我的存档"。
+       此前面板只显示 ⑧「上次上传」——那是**本机记录**，
+       在 v1039 之前"跳过写入却返回成功"的情况下，本机会记下时间而云端其实空空。
+       所以必须真去云端查一次，这一项才是判断"该上传还是该拉取"的唯一依据。 */
+    out += '<div class="d_row"><div class="d_k">⑩ 云端是否已有你的存档（真查）</div>'
+      + '<div class="d_v warn" id="dCloud">查询中…</div></div>';
+    setTimeout(function () {
+      var v = document.getElementById('dCloud');
+      if (!v) return;
+      if (!CS || typeof CS.accountCloudInfo !== 'function') { v.textContent = '(旧版本，无此查询)'; return; }
+      CS.accountCloudInfo().then(function (i) {
+        if (!i) { v.textContent = '查询无结果'; v.className = 'd_v bad'; return; }
+        if (i.exists === true) {
+          var t = i.updatedAt ? new Date(i.updatedAt).toLocaleString() : '时间未知';
+          v.textContent = '✅ 有存档，最后保存于 ' + t + '\n → 在新设备上点「⬇ 从云端拉取一次」即可恢复';
+          v.className = 'd_v ok';
+        } else if (i.exists === false) {
+          v.textContent = '❌ 云端还没有你的存档\n → 请到**有进度的那台设备**上点「▶ 立刻上传一次」\n   （在空设备上拉取永远不会成功，因为云端确实是空的）';
+          v.className = 'd_v bad';
+        } else {
+          v.textContent = '⚠️ 查不到（网络或权限）：' + (i.reason || '');
+          v.className = 'd_v warn';
+        }
+      }).catch(function (e) { v.textContent = '查询出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
+    }, 120);
+
     el.innerHTML = out
       + '<button class="d_btn" id="dTest">▶ 实测：立刻上传一次</button>'
       + '<button class="d_btn" id="dPull">⬇ 实测：从云端拉取一次</button>'
