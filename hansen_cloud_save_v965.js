@@ -111,14 +111,25 @@
   }
   /* 供登录流程调用：账号是否已有云端存档 */
   function accountHasCloudSave(){
+    return accountCloudInfo().then(function(i){ return !!(i && i.exists); });
+  }
+  /* 🔴v1029 取云端存档的**元信息**，用于让用户看着真实数字做取舍，
+     而不是面对一句干巴巴的「两边都有进度」盲选。
+     返回 {exists, updatedAt, appVersion}；出错时 exists=null 表示**查不到**，
+     调用方必须把"查不到"与"确认没有"区别对待——绝不能把查不到当成没有而覆盖云端。 */
+  function accountCloudInfo(){
     var uid = accountUid();
-    if (!uid) return Promise.resolve(false);
+    if (!uid) return Promise.resolve({ exists:false, reason:'not-signed-in' });
     var p = provider();
-    if (!p) return Promise.resolve(false);
+    if (!p) return Promise.resolve({ exists:null, reason:'not-configured' });
     return docIdOf(keyFromUid(uid))
       .then(function(id){ return p.get(id); })
-      .then(function(row){ return !!(row && row.payload); })
-      .catch(function(){ return false; });
+      .then(function(row){
+        if (!row || !row.payload) return { exists:false };
+        var pl = row.payload || {};
+        return { exists:true, updatedAt: row.updatedAt || pl.ts || 0, appVersion: pl.appVersion || '' };
+      })
+      .catch(function(e){ return { exists:null, reason:String(e && e.message || e) }; });
   }
 
   /* ---------- 加密信封（零知识） ---------- */
@@ -176,7 +187,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1028').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1029').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -424,7 +435,7 @@
        否则先匿名初始化、后登录的场景下, 仍会拿着匿名身份读写, 跨设备依旧找不回。 */
     resetApp: function(){ _cb = null; },
     selfTest: selfTest, ensureKey: ensureKey,
-    accountHasCloudSave: accountHasCloudSave, accountUid: accountUid,
+    accountHasCloudSave: accountHasCloudSave, accountCloudInfo: accountCloudInfo, accountUid: accountUid,
     getKey: function(){ return readState().key || ''; },
     _debug: { genKey: genKey, normalizeKey: normalizeKey, prettyKey: prettyKey,
               docIdOf: docIdOf, sealPayload: sealPayload, openPayload: openPayload,

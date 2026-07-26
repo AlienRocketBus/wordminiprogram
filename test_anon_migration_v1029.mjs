@@ -1,0 +1,67 @@
+/* test_anon_migration_v1029.mjs —— 匿名 → 账号 存档迁移的**安全红线**回归
+ * 背景：决定保留"先玩后注册"，那么匿名期的进度必须能安全带进账号。
+ *   关键认识：进度一直在本机 localStorage，迁移 = 登录后把本机传到账号名下，
+ *   不需要搬云端旧档（旧档挂在匿名身份下，账号本就无权读）。
+ * 但有两个会**丢数据**的坑必须堵死：
+ *   ① 查不到 ≠ 没有：网络抖动导致查询失败时若当成"云端没有"就上传，
+ *      可能用本机覆盖掉云端真实存档；
+ *   ② 空档覆盖：全新设备(无进度)先登录若上传空档，
+ *      老设备之后登录会看到"云端有档"，选错就全丢。
+ * 合同：查不到→什么都不做；本机空且云端空→什么都不做；
+ *       两边都有→冲突且必须带上双方真实规模供用户判断。 */
+import vm from 'node:vm'; import fs from 'node:fs';
+let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
+console.log('匿名→账号 迁移安全红线 v1029');
+const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
+const ui  = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js','utf8');
+const store = { _d:{}, getItem(k){return this._d[k]||null;}, setItem(k,v){this._d[k]=String(v);},
+  removeItem(k){delete this._d[k];}, get length(){return Object.keys(this._d).length;}, key(i){return Object.keys(this._d)[i]||null;} };
+const win = { HANSEN_CLOUD_CONFIG:{envId:'e'}, localStorage:store,
+  document:{ addEventListener(){}, dispatchEvent(){}, documentElement:{classList:{contains:()=>false}}, getElementById:()=>null, querySelector:()=>null },
+  addEventListener(){}, setTimeout:(f)=>{f&&f();return 0;}, setInterval:()=>0 };
+win.window = win; const ctx = { ...win, window: win }; vm.createContext(ctx);
+try { vm.runInContext(src, ctx); } catch(e){ console.log('load:', String(e.message).slice(0,70)); }
+const A = win.HansenAuth;
+ok(!!A, '账号模块已加载');
+
+function setCloud(info){ win.HansenCloudSave = {
+  accountCloudInfo: ()=>Promise.resolve(info),
+  accountHasCloudSave: ()=>Promise.resolve(!!(info&&info.exists)),
+  ensureKey: ()=>'K', restoreWithKey: ()=>Promise.resolve({ok:true}),
+  syncNow: ()=>{ uploaded=true; return Promise.resolve({ok:true}); } }; }
+let uploaded=false;
+
+/* ① 查不到云端 → 绝不上传 */
+store._d = {}; store._d['wordIslandAnimal']=JSON.stringify({learned:[1,2,3]});
+uploaded=false; setCloud({exists:null, reason:'network'});
+let r = await A.syncOnLogin();
+ok(r.action==='cloud-unreachable', '查不到云端 → action=cloud-unreachable');
+ok(uploaded===false, '**查不到时绝不上传**(避免覆盖云端真实存档)');
+
+/* ② 本机空 + 云端空 → 什么都不做 */
+store._d = {}; uploaded=false; setCloud({exists:false});
+r = await A.syncOnLogin();
+ok(r.action==='nothing-to-sync', '两边都空 → nothing-to-sync');
+ok(uploaded===false, '**本机是空的就绝不上传**(避免空档日后覆盖老设备)');
+
+/* ③ 本机有 + 云端无 → 上传(这就是匿名期进度的迁移路径) */
+store._d = {}; store._d['wordIslandFood']=JSON.stringify({learned:[1,2,3,4,5]});
+uploaded=false; setCloud({exists:false});
+r = await A.syncOnLogin();
+ok(r.action==='uploaded' && uploaded===true, '本机有进度+云端无 → 上传(匿名期进度完成迁移)');
+
+/* ④ 两边都有 → 冲突, 且必须带真实规模 */
+store._d = {}; store._d['wordIslandAnimal']=JSON.stringify({learned:[1,2,3]});
+store._d['wordIslandFood']=JSON.stringify({learned:[1,2]});
+uploaded=false; setCloud({exists:true, updatedAt: 1700000000000});
+r = await A.syncOnLogin();
+ok(r.action==='conflict', '两边都有 → conflict');
+ok(uploaded===false, '冲突时不擅自上传');
+ok(r.local && r.local.islands===2 && r.local.learned===5, `冲突带本机真实规模(${r.local&&r.local.islands}岛/${r.local&&r.local.learned}词)`);
+ok(r.cloudUpdatedAt===1700000000000, '冲突带云端最后保存时间');
+
+/* ⑤ UI 必须把数字摆给用户看 */
+ok(/本机】/.test(ui) && /云端】/.test(ui), '冲突弹窗列出【本机】【云端】两侧');
+ok(/learned/.test(ui) && /cloudUpdatedAt|cloudWhen/.test(ui), '弹窗使用真实词数与云端时间');
+console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
+process.exit(fail===0?0:1);

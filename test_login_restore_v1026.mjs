@@ -13,9 +13,10 @@ const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8'
 const ui  = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js','utf8');
 
 /* ① 逻辑层：恢复成功必须带 needReload */
+const store = { _d:{}, getItem(k){return this._d[k]||null;}, setItem(k,v){this._d[k]=String(v);},
+  removeItem(k){delete this._d[k];}, get length(){return Object.keys(this._d).length;}, key(i){return Object.keys(this._d)[i]||null;} };
 const win = { HANSEN_CLOUD_CONFIG:{envId:'x'},
-  localStorage:{ _d:{}, getItem(k){return this._d[k]||null;}, setItem(k,v){this._d[k]=String(v);},
-    removeItem(k){delete this._d[k];}, get length(){return Object.keys(this._d).length;}, key(i){return Object.keys(this._d)[i]||null;} },
+  localStorage:store,
   document:{ addEventListener(){}, dispatchEvent(){}, documentElement:{classList:{contains:()=>false}}, getElementById:()=>null, querySelector:()=>null },
   addEventListener(){}, setTimeout:(f)=>{f&&f();return 0;}, setInterval:()=>0 };
 win.window = win;
@@ -28,6 +29,8 @@ ok(!!A && typeof A.syncOnLogin==='function', 'syncOnLogin 已导出');
 /* 模拟：云端有档、本机为空 → 应走恢复并要求刷新 */
 let restoreCalled=false;
 win.HansenCloudSave = {
+  /* 🔴v1029: syncOnLogin 改用带元信息的 accountCloudInfo, 桩同步更新 */
+  accountCloudInfo: ()=>Promise.resolve({exists:true, updatedAt:1700000000000}),
   accountHasCloudSave: ()=>Promise.resolve(true),
   ensureKey: ()=>'AAAA-BBBB-CCCC-DDDD',
   restoreWithKey: ()=>{ restoreCalled=true; return Promise.resolve({ok:true}); },
@@ -39,7 +42,10 @@ ok(r1 && r1.action==='restored', '返回 action=restored');
 ok(r1 && r1.needReload===true, '**恢复成功必须要求刷新页面**(否则内存仍是旧数据)');
 
 /* 云端无档 → 应上传, 且不要求刷新 */
+win.HansenCloudSave.accountCloudInfo = ()=>Promise.resolve({exists:false});
 win.HansenCloudSave.accountHasCloudSave = ()=>Promise.resolve(false);
+/* 云端无档时必须本机有进度才会上传(v1029 新增的空档保护) */
+store._d['wordIslandAnimal']=JSON.stringify({learned:[1,2,3]});
 const r2 = await A.syncOnLogin();
 ok(r2 && r2.action==='uploaded' && !r2.needReload, '云端无档 → 上传, 不刷新');
 
