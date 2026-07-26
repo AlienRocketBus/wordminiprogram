@@ -211,7 +211,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1037').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1038').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
