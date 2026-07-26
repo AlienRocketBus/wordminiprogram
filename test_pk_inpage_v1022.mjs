@@ -19,7 +19,10 @@ for(const [tag,pal] of [['亮','cloud'],['暗',null]]){
   const page=await browser.newPage({viewport:{width:390,height:900}});
   page.on('pageerror',e=>errs.push(tag+':'+String(e.message).slice(0,70)));
   const nav=[];
-  page.on('request',r=>{ if(r.resourceType()==='document' && !r.url().includes('island_animal')) nav.push(r.url()); });
+  /* 🔴v1023: 排除后台预热的房间(land_map/island_season 等) —— 那是有意为之的预加载，
+     与本测试关心的"PK 自己是否还走网页"无关。 */
+  const WARM=/land_map|island_season|boss_hall|season_showcase|spelling_bee/;
+  page.on('request',r=>{ if(r.resourceType()==='document' && !r.url().includes('island_animal') && !WARM.test(r.url())) nav.push(r.url()); });
   await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2600);

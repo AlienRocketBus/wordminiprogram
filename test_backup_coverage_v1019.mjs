@@ -21,8 +21,10 @@ const MUST = ['sb_best_cpm','theme','ttsProvider','voiceName','clickSoundEnabled
 const MUST_NOT = ['hansen_auth_v1004','hansen_cloud_state_v965','hsn_debug_flag','hansen_admin_panel'];
 const page=await browser.newPage({viewport:{width:390,height:844}});
 await page.addInitScript(({m,n})=>{ localStorage.clear();
-  m.forEach(k=>localStorage.setItem(k, JSON.stringify({v:1})));
-  n.forEach(k=>localStorage.setItem(k, JSON.stringify({v:1})));
+  /* 🔴v1023: 部分键有严格结构校验(如 canonical progress), 通用假数据会被判非法 —— 单独给合法形状 */
+  const SHAPE={ 'hansen_canonical_progress_v941': {version:941, islands:{}} };
+  m.forEach(k=>localStorage.setItem(k, JSON.stringify(SHAPE[k] || {v:1})));
+  n.forEach(k=>localStorage.setItem(k, JSON.stringify(SHAPE[k] || {v:1})));
 }, {m:MUST, n:MUST_NOT});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2600);
