@@ -106,6 +106,32 @@
     return !!(r && r.wrap && r.wrap.style.display === 'block');
   }
 
+  /* ── 资源预热：给「带参数打开」的页面用 ──────────────────
+     Boss 殿堂 / 赛季展柜 / 拼写蜂 每次打开的地址都带不同参数
+     （lv= / card= / boss= / island=），无法像固定房间那样预开一扇门。
+     但它们的**脚本与样式是同一批**，所以空闲时先用基础地址加载一次，
+     把 HTML 与全部子资源灌进浏览器缓存；之后无论带什么参数打开，
+     子资源全部命中缓存，加载时间大幅缩短。 */
+  var prefetched = {};
+  function prefetch(url) {
+    if (!url || prefetched[url]) return;
+    prefetched[url] = 1;
+    try {
+      var v = ver();
+      var full = url + (v ? ('?v=' + v + '&warm=1') : '?warm=1');
+      var ifr = document.createElement('iframe');
+      ifr.setAttribute('aria-hidden', 'true');
+      ifr.tabIndex = -1;
+      ifr.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px';
+      ifr.src = full;
+      /* 加载完即移除：资源已进缓存，DOM 不必常驻，省内存 */
+      ifr.addEventListener('load', function () {
+        setTimeout(function () { try { ifr.remove(); } catch (e) {} }, 600);
+      });
+      (document.body || document.documentElement).appendChild(ifr);
+    } catch (e) {}
+  }
+
   /* 空闲时预热（不与首屏抢资源） */
   function scheduleWarm() {
     var keys = Object.keys({ land: 1, season: 1 }).filter(function (k) {
@@ -118,10 +144,21 @@
       /* 逐个预热，间隔开，避免同时抢带宽 */
       setTimeout(next, 1200);
     }
+    /* 常驻房间预热完后, 再顺带把三个「带参数页」的资源灌进缓存 */
+    var PREFETCH = ['boss_hall.html', 'season_showcase.html', 'spelling_bee.html'];
+    function warmAssets() {
+      var j = 0;
+      (function step() {
+        if (j >= PREFETCH.length) return;
+        prefetch(PREFETCH[j++]);
+        setTimeout(step, 1500);
+      })();
+    }
+    function chain() { next(); setTimeout(warmAssets, keys.length * 1300 + 800); }
     if (typeof window.requestIdleCallback === 'function') {
-      requestIdleCallback(function () { next(); }, { timeout: 4000 });
+      requestIdleCallback(function () { chain(); }, { timeout: 4000 });
     } else {
-      setTimeout(next, 2500);
+      setTimeout(chain, 2500);
     }
   }
 
@@ -129,7 +166,8 @@
   else window.addEventListener('load', scheduleWarm);
 
   window.HansenRoom = {
-    open: open, close: close, warm: warm,
+    open: open, close: close, warm: warm, prefetch: prefetch,
+    prefetched: function(){ return Object.keys(prefetched); },
     isReady: isReady, isOpen: isOpen,
     _rooms: function () { return Object.keys(rooms); }
   };
