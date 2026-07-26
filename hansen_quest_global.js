@@ -617,6 +617,10 @@
   if (oldRender) window.renderQuests = function () { ensure(); return oldRender.apply(this, arguments); };
 
   window.HansenQuestGlobal = {
+    /* 🔴v1032: 对外暴露任务定义查表。POOL 是任务定义的**唯一真源**，
+       template 自带的表不含 v1000/v1001 新增项(reviewClear/sbWin1 等)，
+       必须能向这里问，否则渲染前的规整会把整份任务判废 → 面板「暂无任务」。 */
+    definition:function (id) { var d = BY_ID[id]; return d ? clone(d) : null; },
     ensure:ensure,
     progress:function (type, amount) { return progress(type, amount, false); },
     set:function (type, value) { return progress(type, value, true); },
