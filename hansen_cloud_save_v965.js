@@ -71,18 +71,35 @@
      说明：uid 推导的密钥并非"秘密"，真正的隔离靠 hansen_saves 集合的
      「仅创建者可读写」权限；此处加密是纵深防御。 */
   var ACCT_PREFIX = 'HSNACCT';
-  function accountUid(){
+  /* 🔴v1047 决定性修正：改用**手机号**作为账号标识，uid 仅作兜底。
+     两台设备登录同一账号却算出不同密钥 —— 因为密钥原本由 uid 推导，
+     而 uid 存在各自的 localStorage 里：
+       · 一台可能存着登录前匿名会话留下的旧 uid；
+       · 云端会话重建时 uid 也可能与上次不同。
+     结果就是手机A ⑩ 显示"有存档"、手机B 却"没有" —— 两台各开各的柜子。
+     手机号是这个账号**唯一在所有设备上都相同、且永不变**的标识，
+     用它推导密钥，两台设备必然算出同一把钥匙。
+     兜底顺序：手机号 → 用户名 → uid（老账号或异常情况仍可工作）。 */
+  function accountIdent(){
     try {
-      var A = window.HansenAuth;   /* 统一走 window.，避免裸标识符在非浏览器宿主下解析失败 */
-      if (A && typeof A.isSignedIn === 'function' && A.isSignedIn()) {
-        var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
-        if (u && u.uid) return String(u.uid);
-        var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
-        if (lc && lc.uid) return String(lc.uid);
+      var A = window.HansenAuth;
+      if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return '';
+      var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
+      /* 手机号归一：去掉空格与 +86 等前缀差异，保证两端拼出的字符串完全一致 */
+      if (lc && lc.phone) {
+        var ph = String(lc.phone).replace(/[\s\-()]/g, '');
+        ph = ph.replace(/^\+?86/, '');
+        if (/^\d{6,15}$/.test(ph)) return 'p:' + ph;
       }
+      if (lc && lc.username) return 'n:' + String(lc.username).trim().toLowerCase();
+      var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
+      if (u && u.uid) return 'u:' + String(u.uid);
+      if (lc && lc.uid) return 'u:' + String(lc.uid);
     } catch (e) {}
     return '';
   }
+  /* 保留原名供外部与自检面板使用；语义已变为"账号标识" */
+  function accountUid(){ return accountIdent(); }
   /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
   /* 🔴v1036: v1033 之前 keyFromUid 用的字符集含 L/U，会算出另一把钥匙。
      兼容读取时需要能重算那把旧钥匙，才能把旧地址上的存档取回来。 */
@@ -220,7 +237,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1046').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1047').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -376,6 +393,20 @@
     try {
       var uid = accountUid();
       if (uid) {
+        /* 🔴v1047: v1047 之前用 uid 推导密钥, 存档可能落在那个地址上;
+           把 uid 形态的候选也加进来, 老存档才不至于丢。 */
+        try {
+          var A2 = window.HansenAuth;
+          var lc2 = (A2 && typeof A2.readLocal === 'function') ? A2.readLocal() : null;
+          var rawUid = (lc2 && lc2.uid) ? String(lc2.uid) : '';
+          if (rawUid) {
+            [keyFromUid(rawUid), legacyKeyFromUid(rawUid)].forEach(function(k){
+              if (k && cands.indexOf(k) < 0) cands.push(k);
+              var nk2 = normalizeKey(k);
+              if (nk2 && cands.indexOf(nk2) < 0) cands.push(nk2);
+            });
+          }
+        } catch (e) {}
         var legacy = legacyKeyFromUid(uid);
         if (legacy && cands.indexOf(legacy) < 0) cands.push(legacy);
         var legacyN = normalizeKey(legacy);

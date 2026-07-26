@@ -91,7 +91,9 @@
     var uid = '', key = '';
     try { uid = CS && CS.accountUid ? CS.accountUid() : ''; } catch (e) {}
     try { key = CS && CS.ensureKey ? CS.ensureKey() : ''; } catch (e) {}
-    out += row('④ 账号 uid', uid || '(读不到——存档不会跟着账号走)', uid ? 'ok' : 'bad');
+    /* 🔴v1047: 标识已改为以手机号为准(p:号码)，uid 仅兜底(u:xxx)。
+       两台设备上这一行**必须完全相同**，不同就说明会各开各的柜子。 */
+    out += row('④ 账号标识（两台设备必须一致）', uid || '(读不到——存档不会跟着账号走)', uid ? 'ok' : 'bad');
     out += row('⑤ 存档密钥', key || '(无)', uid ? 'ok' : 'warn');
 
     /* 🔴v1031: 本地标记 ≠ 云端会话仍在 —— 这一项专门戳破"以为登录着其实没有" */
