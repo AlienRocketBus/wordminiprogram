@@ -52,6 +52,8 @@ DEPLOY_EXCLUDE_DIRS = {
     "evolution_reports", ".evolution_backups", "map8", "newboss",
 }
 DEPLOY_EXCLUDE_FILES = {"evolution_dashboard.html", "_viewer_js.js"}
+# 🔴v1045: 随部署包交付的辅助文件（非运行时资源，但用户部署时需要）
+DEPLOY_EXTRA_FILES = {"cloudbaserc.json", "部署说明_解决打开变下载.md"}
 
 SOURCE_EXCLUDE_DIRS = {
     ".git", ".evolution_backups", "__pycache__", ".pytest_cache",
@@ -228,6 +230,13 @@ def _deploy_allowed(rel: PurePosixPath) -> bool:
             and rel.name not in {"_frame.html", "_sw_upgrade_v944.html"}):
         return False
     if rel.as_posix() == "VERSION":
+        return True
+    # 🔴v1045: 这两个文件必须随部署包一起交付——
+    #   cloudbaserc.json 让用户能用 `tcb hosting deploy` 一键上传
+    #   （命令行会按扩展名自动贴对 Content-Type，从根上避免"打开变下载"）；
+    #   部署说明写清了三种上传方式与判断方法。
+    #   它们不是 .html/.js 等运行时资源，故不在 DEPLOY_ALLOWED_EXT 里，需显式放行。
+    if rel.as_posix() in DEPLOY_EXTRA_FILES:
         return True
     suffix = rel.suffix.lower()
     if suffix not in DEPLOY_ALLOWED_EXT:
@@ -641,6 +650,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1042": (("shell-101", "pages-99", "assets-99", "icons-3"), "v=1042"),
         "1043": (("shell-102", "pages-100", "assets-100", "icons-3"), "v=1043"),
         "1044": (("shell-103", "pages-101", "assets-101", "icons-3"), "v=1044"),
+        "1045": (("shell-104", "pages-102", "assets-102", "icons-3"), "v=1045"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
