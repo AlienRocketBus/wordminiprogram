@@ -7,20 +7,20 @@
 const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
-// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-102。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-102';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-100';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-100';
+// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-103。
+const SHELL_CACHE = CACHE_PREFIX + 'shell-103';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-101';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-101';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1043', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1043', './hansen_onboarding.js?v=1043', './hansen_theme_shop.js',
-  './hansen_season.js?v=1043', './hansen_cinema_themes.js?v=1043', './hansen_diamond_shop.js?v=1043', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1043', './hansen_crystal.js', './hansen_cards.js?v=1043', './hansen_gacha.js?v=1043', './hansen_land_cards.js?v=1043', './hansen_round_reward.js?v=1043', './hansen_round_bar.js?v=1043', './hansen_pet_showcase.js?v=1043', './hansen_quest_global.js?v=1043', './hansen_island_upgrade.js?v=1043', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1043', './hansen_spell_practice.js?v=1043', './hansen_review.js?v=1043', './hansen_wrong_overview.js?v=1043', './hansen_backup_v944.js?v=1043', './hansen_accessibility.js?v=1043',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1043', './hansen_mylearning.js?v=1043', './hansen_palette.js?v=1043', './hansen_boss_theme.js?v=1043', './hansen_econ_guide.js?v=1043', './hansen_perf_v944.js?v=1043'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1044', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1044', './hansen_onboarding.js?v=1044', './hansen_theme_shop.js',
+  './hansen_season.js?v=1044', './hansen_cinema_themes.js?v=1044', './hansen_diamond_shop.js?v=1044', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1044', './hansen_crystal.js', './hansen_cards.js?v=1044', './hansen_gacha.js?v=1044', './hansen_land_cards.js?v=1044', './hansen_round_reward.js?v=1044', './hansen_round_bar.js?v=1044', './hansen_pet_showcase.js?v=1044', './hansen_quest_global.js?v=1044', './hansen_island_upgrade.js?v=1044', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1044', './hansen_spell_practice.js?v=1044', './hansen_review.js?v=1044', './hansen_wrong_overview.js?v=1044', './hansen_backup_v944.js?v=1044', './hansen_accessibility.js?v=1044',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1044', './hansen_mylearning.js?v=1044', './hansen_palette.js?v=1044', './hansen_boss_theme.js?v=1044', './hansen_econ_guide.js?v=1044', './hansen_perf_v944.js?v=1044'
 ];
 
 async function trim(cacheName, maxEntries) {
@@ -142,6 +142,25 @@ self.addEventListener('activate', event => {
   })());
 });
 
+/* 🔴v1044: 把被误标类型的 HTML 响应改回 text/html。
+   只在"确实是 HTML 文档请求"且"类型明显不对"时才动，绝不误伤其它资源。 */
+async function fixHtmlType(response) {
+  try {
+    if (!response || !response.ok) return response;
+    const ct = (response.headers.get('content-type') || '').toLowerCase();
+    if (ct.includes('text/html')) return response;
+    /* 读一小段确认它真是 HTML，避免把二进制误判成网页 */
+    const clone = response.clone();
+    const head = (await clone.text()).slice(0, 200).toLowerCase();
+    if (!/^\s*(<!doctype html|<html)/.test(head)) return response;
+    const body = await response.blob();
+    const headers = new Headers(response.headers);
+    headers.set('content-type', 'text/html; charset=utf-8');
+    headers.delete('content-disposition');   /* 若被标成附件，一并去掉 */
+    return new Response(body, { status: response.status, statusText: response.statusText, headers: headers });
+  } catch (e) { return response; }
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -173,7 +192,12 @@ self.addEventListener('fetch', event => {
     // Cache Storage 是旁路优化：无论 put/trim 成败，都不能改变已取得的网络响应。
     event.waitUntil(navigation.then(result => result.fresh && result.cacheable ?
       putIfReasonable(PAGE_CACHE, request, result.fresh, 12) : false).catch(() => false));
-    event.respondWith(navigation.then(result => result.response));
+    /* 🔴v1044 兜住"网页变成下载"：
+       静态托管若把 .html 发成 application/octet-stream（或缺 Content-Type），
+       浏览器不会渲染而是直接下载——用户打开网址就变成下载文件。
+       这属服务端配置问题，但我们可以在 SW 里把响应头改回 text/html，
+       让已装过 SW 的用户立刻恢复正常（首次访问仍需服务端配置正确）。 */
+    event.respondWith(navigation.then(result => fixHtmlType(result.response)));
     return;
   }
 
@@ -190,7 +214,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1043 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1044 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     event.respondWith((async () => {
