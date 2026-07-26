@@ -13,7 +13,7 @@
 (function(){
   if(window.__hansenGearLoaded){ return; } window.__hansenGearLoaded = true;
 
-  var KEY = 'hansen_gear';   // { weaponLvl:0-6, hpLvl:0-10, armorLvl:0-8 }
+  var KEY = 'hansen_gear';   // { weaponLvl:0-6, hpLvl:0-16, armorLvl:0-8 }
   var PENDING_KEY = 'hansen_gear_purchase_pending_v942';
   var PROOF_KEY = 'hansen_gear_purchase_transaction_v942';
 
@@ -28,23 +28,33 @@
     { name:'光子炮', min:80, max:100, price:330, glow:'#a855f7' }    // 6
   ];
   var HP_BASE = 100, HP_STEP = 40;                                   // 100→500
-  var HP_PRICES   = [20,30,45,60,80,105,135,170,210,265];            // 升到 Lv1..Lv10
+  /* 🔴v1035 血量上限 500 → 1000。
+     旧公式为 100 + hpLvl*40，10 级封顶 500。改为查表：
+     **前 11 项(Lv0..Lv10)与旧公式逐项相同**，老存档的血量不会有任何变化；
+     Lv11 起继续抬升，最终 Lv16 = 1000。 */
+  var HP_VALUES   = [100,140,180,220,260,300,340,380,420,460,500,560,630,710,800,900,1000]; // Lv0..Lv16
+  var HP_PRICES   = [20,30,45,60,80,105,135,170,210,265,330,410,510,640,800,1000];          // 升到 Lv1..Lv10
   var ARMOR_PCTS  = [0,6,12,18,24,30,37,44,50];                      // Lv0..Lv8 减伤%
   var ARMOR_PRICES= [30,45,65,95,130,175,225,290];                   // 升到 Lv1..Lv8
 
   // ===== 存档 =====
   function readState(){
-    try{ var raw=localStorage.getItem(KEY);if(raw===null)return {ok:true,value:{ weaponLvl:0, hpLvl:0, armorLvl:0 }};var o=JSON.parse(raw); if(o&&typeof o==='object'&&!Array.isArray(o)){
+    try{ var raw=localStorage.getItem(KEY);if(raw===null)return {ok:true,value:{ weaponLvl:0, hpLvl:0, armorLvl:0, weaponMax:0, hpMax:0, armorMax:0 }};var o=JSON.parse(raw); if(o&&typeof o==='object'&&!Array.isArray(o)){
       if(o.weaponLvl!=null&&(!Number.isInteger(Number(o.weaponLvl))||Number(o.weaponLvl)<0||Number(o.weaponLvl)>6))return {ok:false,value:null};
-      if(o.hpLvl!=null&&(!Number.isInteger(Number(o.hpLvl))||Number(o.hpLvl)<0||Number(o.hpLvl)>10))return {ok:false,value:null};
+      if(o.hpLvl!=null&&(!Number.isInteger(Number(o.hpLvl))||Number(o.hpLvl)<0||Number(o.hpLvl)>16))return {ok:false,value:null};
       if(o.armorLvl!=null&&(!Number.isInteger(Number(o.armorLvl))||Number(o.armorLvl)<0||Number(o.armorLvl)>8))return {ok:false,value:null};
       o.weaponLvl=o.weaponLvl==null?0:Number(o.weaponLvl);
       o.hpLvl=o.hpLvl==null?0:Number(o.hpLvl);
       o.armorLvl=o.armorLvl==null?0:Number(o.armorLvl);
+      /* v1035: 老存档只有 xxxLvl(既是拥有也是装备)。迁移为 xxxMax=已拥有最高级、xxxLvl=当前装备，从此买过的都能自由换回。 */
+      ['weapon','hp','armor'].forEach(function(k){
+        var lv=Number(o[k+'Lvl'])||0, mx=Number(o[k+'Max']);
+        if(!Number.isInteger(mx)||mx<lv) o[k+'Max']=lv;
+      });
       return {ok:true,value:o};
     }return {ok:false,value:null};}catch(e){return {ok:false,value:null};}
   }
-  function read(){var r=readState();return r.ok?r.value:{ weaponLvl:0, hpLvl:0, armorLvl:0 };}
+  function read(){var r=readState();return r.ok?r.value:{ weaponLvl:0, hpLvl:0, armorLvl:0, weaponMax:0, hpMax:0, armorMax:0 };}
   function write(o){ try{var raw=JSON.stringify(o);localStorage.setItem(KEY,raw);return localStorage.getItem(KEY)===raw;}catch(e){return false;} }
 
   //🔴v853 武器试用功能完全移除(Hansen·"武器完全没有任何试用功能"): 有效武器等级=真实拥有的武器·不再有试玩临时武器。
@@ -52,13 +62,40 @@
 
   // ===== 对外接口(供 Boss 战集成调用) =====
   window.HansenGear = {
+    /* v1035: 在"已拥有"范围内自由切换装备。
+       此前只有 xxxLvl 一个字段，买新的直接把旧的顶掉，用户换不回去；
+       现在 xxxMax 记录已拥有的最高级，xxxLvl 是当前装备，两者分离。 */
+    equip: function(kind, level){
+      var map = { weapon:['weaponLvl','weaponMax'], hp:['hpLvl','hpMax'], armor:['armorLvl','armorMax'] };
+      var pair = map[kind];
+      if (!pair) return { ok:false, reason:'unknown-kind' };
+      var r = readState(); if (!r.ok) return { ok:false, reason:'storage' };
+      var g = r.value, lv = Number(level), mx = Number(g[pair[1]]) || 0;
+      if (!Number.isInteger(lv) || lv < 0 || lv > mx)
+        return { ok:false, reason:'not-owned', owned:mx };
+      g[pair[0]] = lv;
+      if (!write(g)) return { ok:false, reason:'write-failed' };
+      return { ok:true, kind:kind, level:lv, owned:mx };
+    },
+    owned: function(kind){
+      var map = { weapon:'weaponMax', hp:'hpMax', armor:'armorMax' };
+      if (!map[kind]) return 0;
+      return Number(read()[map[kind]]) || 0;
+    },
+    equipped: function(kind){
+      var map = { weapon:'weaponLvl', hp:'hpLvl', armor:'armorLvl' };
+      if (!map[kind]) return 0;
+      return Number(read()[map[kind]]) || 0;
+    },
+    hpValues: function(){ return HP_VALUES.slice(); },
+    weaponList: function(){ return WEAPONS.map(function(w,i){ return { lvl:i, name:w.name, min:w.min, max:w.max, price:w.price }; }); },
     getWeaponLvl: function(){ return effWeaponLvl(); },
     getWeaponIcon:function(){ return (WICON[effWeaponLvl()]||WICON[0]); },  // 当前武器图标(<img>) · 勇者血条左侧武器框 + 攻击特效起点用
     getWeaponName:function(){ return WEAPONS[effWeaponLvl()].name; },
     //🔴v853 武器皮肤化(Hansen·"武器只作为皮肤·只增加攻击特效·原来的攻击一模一样·加大伤害完全没必要"): 攻击伤害固定=基础弓箭(所有武器一样·武器只换攻击特效不加战力·新玩家本来就是弓箭伤害·Boss血量早按此调好)。
     getWeaponAtk: function(){ var w=WEAPONS[0]; return w.min + Math.floor(Math.random()*(w.max-w.min+1)); },
     getWeaponRange:function(){ return [WEAPONS[0].min, WEAPONS[0].max]; },
-    getMaxHP:     function(){ return HP_BASE + read().hpLvl*HP_STEP; },
+    getMaxHP:     function(){ var l=read().hpLvl; return HP_VALUES[Math.max(0,Math.min(HP_VALUES.length-1,l))]; },
     getArmorPct:  function(){ return 0; },   //🔴v853 护甲删除(Hansen·"护甲没什么必要"): 恒0减伤·Boss战护甲项自然失效·商店护甲页签已删。
     open: openShop,
     buy: purchaseGear,
@@ -68,13 +105,13 @@
 
   // ===== 武器图标 =====
   var WICON = {
-    0:'<img src="weapons/bow.webp?v=1034" alt="">',
-    1:'<img src="weapons/pistol.webp?v=1034" alt="">',
-    2:'<img src="weapons/machinegun.webp?v=1034" alt="">',
-    3:'<img src="weapons/sniper.webp?v=1034" alt="">',
-    4:'<img src="weapons/gatling.webp?v=1034" alt="">',
-    5:'<img src="weapons/cannon.webp?v=1034" alt="">',
-    6:'<img src="weapons/photon.webp?v=1034" alt="">'
+    0:'<img src="weapons/bow.webp?v=1035" alt="">',
+    1:'<img src="weapons/pistol.webp?v=1035" alt="">',
+    2:'<img src="weapons/machinegun.webp?v=1035" alt="">',
+    3:'<img src="weapons/sniper.webp?v=1035" alt="">',
+    4:'<img src="weapons/gatling.webp?v=1035" alt="">',
+    5:'<img src="weapons/cannon.webp?v=1035" alt="">',
+    6:'<img src="weapons/photon.webp?v=1035" alt="">'
   };
 
   // ===== 🎨 配色皮肤(12 变量/套) =====
@@ -131,6 +168,7 @@
     + '.hg-lvbadge{font-size:11px;font-weight:800;color:var(--hg-sub2);background:var(--hg-chip);border-radius:6px;padding:2px 7px;margin-right:6px}'
     + '.hg-act{flex:none}'
     + '.hg-btn{border:0;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}'
+    + '.hg-btn.swap{background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff}'
     + '.hg-btn.buy{background:linear-gradient(180deg,var(--hg-ac),var(--hg-ac2));color:var(--hg-bt);box-shadow:0 6px 14px -7px rgba(0,0,0,.5)}'
     + '.hg-btn.poor{background:var(--hg-mute);color:var(--hg-sub2);cursor:not-allowed}'
     + '.hg-tag{font-size:12px;font-weight:800;padding:6px 10px;border-radius:8px}'
@@ -169,8 +207,8 @@
   function clearOrphanProof(){try{var raw=localStorage.getItem(PROOF_KEY);if(raw===null)return true;var x=JSON.parse(raw),level=Math.floor(Number(x&&x.level)),price=x&&priceFor(x.kind,level),before=Number(x&&x.before);if(!x||x.version!==942||!price||x.price!==price||!isFinite(before)||Math.floor(before)!==before||before<price||x.after!==before-price||(x.state!=='prepared'&&x.state!=='paid')||!/^gear-[a-z0-9-]{8,160}$/i.test(String(x.txid||'')))return false;localStorage.removeItem(PROOF_KEY);return localStorage.getItem(PROOF_KEY)===null;}catch(e){return false;}}
   function assetLevel(p){var r=readState();return r.ok?{ok:true,value:p.kind==='weapon'?r.value.weaponLvl:r.value.hpLvl}:{ok:false,value:0};}
   function deliver(p){
-    var r=readState();if(!r.ok)return false;var g=r.value,prop=p.kind==='weapon'?'weaponLvl':'hpLvl',cur=g[prop];if(cur>=p.level)return true;
-    var gs=gemsState(),pf=readProof(p);if(cur!==p.level-1||!gs.ok||gs.value!==p.after||!pf.ok||!pf.value||pf.value.state!=='paid')return false;g[prop]=p.level;if(!write(g))return false;var check=readState();return check.ok&&check.value[prop]>=p.level;
+    var r=readState();if(!r.ok)return false;var g=r.value,mprop=p.kind==='weapon'?'weaponMax':'hpMax',prop=p.kind==='weapon'?'weaponLvl':'hpLvl',cur=g[mprop]|0;if(cur>=p.level)return true;
+    var gs=gemsState(),pf=readProof(p);if(cur!==p.level-1||!gs.ok||gs.value!==p.after||!pf.ok||!pf.value||pf.value.state!=='paid')return false;g[mprop]=p.level;g[prop]=p.level;if(!write(g))return false;var check=readState();return check.ok&&check.value[prop]>=p.level;
   }
   function recoverPurchase(){
     var pr=readPending();if(!pr.ok)return {status:'pending',reason:'storage'};var p=pr.value;if(!p)return {status:clearOrphanProof()?'none':'pending',reason:'proof'};
@@ -183,7 +221,7 @@
   }
   function purchaseGear(kind){
     var prior=recoverPurchase();if(prior.status==='pending'||prior.status==='committed')return prior;
-    var gr=readState(),gs=gemsState();if(!gr.ok||!gs.ok)return {status:'rejected',kind:kind};var g=gr.value,level=kind==='weapon'?g.weaponLvl+1:(kind==='hp'?g.hpLvl+1:0),price=priceFor(kind,level),before=gs.value;
+    var gr=readState(),gs=gemsState();if(!gr.ok||!gs.ok)return {status:'rejected',kind:kind};var g=gr.value,level=kind==='weapon'?(g.weaponMax|0)+1:(kind==='hp'?(g.hpMax|0)+1:0),price=priceFor(kind,level),before=gs.value;
     if(!price||before<price)return {status:'rejected',kind:kind};
     var p={version:942,txid:'gear-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),kind:kind,level:level,price:price,before:before,after:before-price,stage:'prepared'};
     if(!writePending(p))return {status:'rejected',kind:kind};
@@ -250,11 +288,13 @@
     }
     else if(curTab==='hp'){
       h+='<div class="hg-hint">血量上限，能扛更多次答错（全部 Boss 都有效，血越厚扛得越久）。</div>';
-      for(var L=0;L<=10;L++){
-        var hp=HP_BASE+L*HP_STEP, cls2='hg-row', act2='', price2=HP_PRICES[L-1];
-        if(L < g.hpLvl){ act2='<span class="hg-tag owned">已升级</span>'; }
-        else if(L === g.hpLvl){ cls2+=' cur'; act2 = (L===10)?'<span class="hg-tag max">已满级</span>':'<span class="hg-tag cur">当前</span>'; }
-        else if(L === g.hpLvl+1){ act2 = gems()>=price2
+      var hMax = g.hpMax|0, TOP = HP_VALUES.length-1;
+      for(var L=0;L<=TOP;L++){
+        var hp=HP_VALUES[L], cls2='hg-row', act2='', price2=HP_PRICES[L-1];
+        /* v1035: 血量同样支持自由切换——可以换更高，也可以换回更低 */
+        if(L !== g.hpLvl && L <= hMax){ act2='<button class="hg-btn swap" data-act="eqHP" data-lv="'+L+'">装备</button>'; }
+        else if(L === g.hpLvl){ cls2+=' cur'; act2 = (L===TOP)?'<span class="hg-tag max">已满级</span>':'<span class="hg-tag cur">当前</span>'; }
+        else if(L === hMax+1){ act2 = gems()>=price2
             ? '<button class="hg-btn buy" data-act="buyHP">升级 '+price2+' 💎</button>'
             : '<button class="hg-btn poor">需 '+price2+' 💎</button>'; }
         else { cls2+=' locked'; act2='<span class="hg-tag max">未解锁</span>'; }
@@ -279,7 +319,19 @@
     });
     // 绑定购买
     body.querySelectorAll('[data-act]').forEach(function(btn){
-      btn.addEventListener('click', function(){ buy(btn.getAttribute('data-act'), btn.getAttribute('data-wi')); });
+      btn.addEventListener('click', function(){
+        var act = btn.getAttribute('data-act');
+        /* v1035: 装备切换与购买走不同分支——切换不花钱、不走交易流程 */
+        if (act === 'eqW' || act === 'eqHP') {
+          var kind = (act === 'eqW') ? 'weapon' : 'hp';
+          var lv = parseInt(btn.getAttribute('data-lv'), 10);
+          var r = window.HansenGear && window.HansenGear.equip ? window.HansenGear.equip(kind, lv) : null;
+          if (r && r.ok) { try{ if(window.HansenToast) HansenToast('已换上'); }catch(e){} render(); }
+          else { try{ alert('切换失败：' + ((r && r.reason) || '未知')); }catch(e){} }
+          return;
+        }
+        buy(act, btn.getAttribute('data-wi'));
+      });
     });
   }
 
