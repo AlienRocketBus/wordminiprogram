@@ -94,6 +94,19 @@
     out += row('④ 账号 uid', uid || '(读不到——存档不会跟着账号走)', uid ? 'ok' : 'bad');
     out += row('⑤ 存档密钥', key || '(无)', uid ? 'ok' : 'warn');
 
+    /* 🔴v1031: 本地标记 ≠ 云端会话仍在 —— 这一项专门戳破"以为登录着其实没有" */
+    out += '<div class="d_row"><div class="d_k">③b 云端会话(真实探测)</div>'
+      + '<div class="d_v warn" id="dSess">检测中…</div></div>';
+    setTimeout(function () {
+      var v = document.getElementById('dSess');
+      if (!v) return;
+      if (!A || typeof A.verifySession !== 'function') { v.textContent = '(旧版本，无此探测)'; return; }
+      A.verifySession().then(function (s) {
+        v.textContent = s.ok ? ('有效 uid=' + s.uid) : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请退出后重新登录');
+        v.className = 'd_v ' + (s.ok ? 'ok' : 'bad');
+      }).catch(function (e) { v.textContent = '探测出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
+    }, 60);
+
     /* 5 本机进度 */
     var lp = localProgressSummary();
     out += row('⑥ 本机进度', '岛屿 ' + lp.islands + ' 个 · 已学 ' + lp.learned + ' 词 · 存储键 ' + lp.keys + ' 个',

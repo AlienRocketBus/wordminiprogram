@@ -61,7 +61,13 @@
       var init = cb && (cb.init || (cb.default && cb.default.init));
       if (typeof init !== 'function') throw new Error('云 SDK 加载失败');
       _app = init.call(cb, c.region ? { env: c.envId, region: c.region } : { env: c.envId });
-      _auth = _app.auth ? _app.auth() : null;
+      /* 🔴v1031 关键修复：必须显式声明 persistence:'local'。
+         默认持久化只在当前会话内有效——页面一刷新/新开标签，
+         CloudBase 的登录会话就没了，而本地标记仍写着"已登录"。
+         于是云存档拿着一个**未认证**的实例去读账号名下的文档，
+         永远读不到，报「云端没有这把密钥对应的存档」。
+         云存档模块本来就用的是 {persistence:'local'}，两处必须一致。 */
+      _auth = _app.auth ? _app.auth({ persistence: 'local' }) : null;
       return _app;
     });
   }
@@ -361,11 +367,23 @@
     return HansenCloudSave.restoreWithKey(key);
   }
 
+  /* 🔴v1031: 本地标记 ≠ 云端会话仍在。提供真实探测，避免"以为登录着其实没有"。 */
+  function verifySession() {
+    return auth().then(function (a) {
+      if (typeof a.getLoginState !== 'function') return { ok: false, reason: 'no-api' };
+      return Promise.resolve(a.getLoginState()).then(function (st) {
+        var uid = st && (st.uid || (st.user && st.user.uid)) || '';
+        return { ok: !!uid, uid: uid };
+      });
+    }).catch(function (e) { return { ok: false, reason: String(e && e.message || e) }; });
+  }
+
   window.HansenAuth = {
     ready: ready,
     isSignedIn: isSignedIn,
     currentUser: currentUser,
     currentUserAsync: currentUserAsync,
+    verifySession: verifySession,
     readLocal: readLocal,
     normPhone: normPhone,
     friendly: friendly,
