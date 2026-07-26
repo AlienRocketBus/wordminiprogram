@@ -146,7 +146,16 @@
     if (!uid) return Promise.resolve({ exists:false, reason:'not-signed-in' });
     var p = provider();
     if (!p) return Promise.resolve({ exists:null, reason:'not-configured' });
-    return docIdOf(keyFromUid(uid))
+    /* 🔴v1046 决定性修复：这里原本用 keyFromUid(uid) 直接算地址——
+       那是**带连字符**的原始密钥；而上传与拉取都用 normalizeKey() 去掉连字符后再算。
+       三处只有这一处没归一化，于是查的是另一个地址：
+         · 自检 ⑩ 谎报"云端还没有你的存档"（其实有）；
+         · 更致命的是 syncOnLogin 以它为依据 →
+           判定"云端是空的" → 走上传分支 → **从来没执行过恢复**
+           → 新设备登录后等级永远停在 Lv.1。
+       这也解释了为什么"上传成功、拉取成功、往返自检成功"却唯独 ⑩ 说没有。 */
+    var accKey = normalizeKey(keyFromUid(uid)) || keyFromUid(uid);
+    return docIdOf(accKey)
       .then(function(id){ return p.get(id); })
       .then(function(row){
         if (!row || !row.payload) return { exists:false };
@@ -211,7 +220,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1045').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1046').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
