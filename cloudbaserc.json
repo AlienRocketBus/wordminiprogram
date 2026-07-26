@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.cloudbase.net/cloudbase-framework/schema.json",
+  "envId": "ambitious-d0g1d26xm740dc3d6",
+  "version": "2.0",
+  "region": "ap-shanghai",
+  "framework": {
+    "name": "word-adventure",
+    "plugins": {
+      "site": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "./",
+          "cloudPath": "/",
+          "ignore": [
+            ".git/**",
+            ".github/**",
+            "node_modules/**",
+            "release-assets/**",
+            "test_*.mjs",
+            "*.py",
+            "SHA256SUMS",
+            "CHANGELOG.md",
+            "README.md"
+          ]
+        }
+      }
+    }
+  }
+}
