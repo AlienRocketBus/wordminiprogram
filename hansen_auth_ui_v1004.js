@@ -164,8 +164,34 @@
         ? A.loginByPhoneCode((q('auCode') || {}).value || '')
         : A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
       task.then(function (r) {
-        msg('登录成功！' + (r && r.cid ? ' 你的竞赛 ID 是 No.' + pad(r.cid)
-              : (r && r.pendingId ? ' 竞赛 ID 稍后自动分配。' : '')), 'ok');
+        /* 🔴v1017: 把"进度对账"的结果如实说给用户, 冲突时让他自己选 */
+        var idTxt = (r && r.cid) ? ' 竞赛 ID No.' + pad(r.cid) : (r && r.pendingId ? ' 竞赛 ID 稍后分配。' : '');
+        var s = r && r.sync;
+        var syncTxt = '';
+        if (s) {
+          if (s.action === 'restored') syncTxt = ' 已从云端找回你的全部进度。';
+          else if (s.action === 'uploaded') syncTxt = ' 进度已存到云端。';
+          else if (s.action === 'conflict') syncTxt = ' 云端和本机都有进度，请选择保留哪一份。';
+          else if (s.action === 'restore-failed' || s.action === 'upload-failed') syncTxt = ' 进度同步没成功，可稍后手动同步。';
+        }
+        msg('登录成功！' + idTxt + syncTxt, 'ok');
+        if (s && s.action === 'conflict') {
+          setTimeout(function () {
+            var keepCloud = confirm('这个账号在云端已有进度，本机也有进度。\n\n' +
+              '点「确定」= 用云端进度覆盖本机\n点「取消」= 用本机进度覆盖云端\n\n（无论选哪个，另一份都会被替换，请想清楚）');
+            var CS = window.HansenCloudSave;
+            if (!CS) return;
+            if (keepCloud) {
+              CS.restoreWithKey(CS.ensureKey())
+                .then(function(){ msg('已恢复云端进度。', 'ok'); })
+                .catch(function(e){ msg(A.friendly(e), 'err'); });
+            } else {
+              CS.syncNow({force:true})
+                .then(function(){ msg('已用本机进度覆盖云端。', 'ok'); })
+                .catch(function(e){ msg(A.friendly(e), 'err'); });
+            }
+          }, 700);
+        }
         setTimeout(function () { render(); notify(); }, 900);
       }).catch(function (e) {
         msg(A.friendly(e), 'err');

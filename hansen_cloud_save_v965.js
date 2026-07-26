@@ -62,12 +62,63 @@
     return s;
   }
   function prettyKey(k){ return k ? (k.slice(0,4)+'-'+k.slice(4,8)+'-'+k.slice(8,12)+'-'+k.slice(12,16)) : ''; }
+  /* 🔴v1017 账号即存档：
+     原先密钥是**每台设备本地随机生成**的，既决定存档位置(docId)又决定加解密。
+     结果换设备即便登录同一账号也找不回来——这是"登录了却没用"的根因。
+     改为：已登录时用**账号 uid 确定性推导**出同一把密钥，
+     任何设备登录同一账号 → 同一 docId + 同一解密钥 → 进度自然跟着账号走。
+     未登录时仍用本机密钥，行为不变。
+     说明：uid 推导的密钥并非"秘密"，真正的隔离靠 hansen_saves 集合的
+     「仅创建者可读写」权限；此处加密是纵深防御。 */
+  var ACCT_PREFIX = 'HSNACCT';
+  function accountUid(){
+    try {
+      var A = window.HansenAuth;   /* 统一走 window.，避免裸标识符在非浏览器宿主下解析失败 */
+      if (A && typeof A.isSignedIn === 'function' && A.isSignedIn()) {
+        var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
+        if (u && u.uid) return String(u.uid);
+        var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
+        if (lc && lc.uid) return String(lc.uid);
+      }
+    } catch (e) {}
+    return '';
+  }
+  /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
+  function keyFromUid(uid){
+    var CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var h1 = 0x811c9dc5, h2 = 0x01000193;
+    var s = ACCT_PREFIX + ':' + uid;
+    for (var i = 0; i < s.length; i++) {
+      h1 = ((h1 ^ s.charCodeAt(i)) >>> 0) * 16777619 >>> 0;
+      h2 = ((h2 + s.charCodeAt(i) * (i + 7)) >>> 0) * 2654435761 >>> 0;
+    }
+    var out = '';
+    for (var j = 0; j < 16; j++) {
+      h1 = (h1 * 1664525 + 1013904223) >>> 0;
+      h2 = (h2 ^ (h1 >>> 13)) >>> 0;
+      out += CH.charAt(((h1 ^ h2) >>> 0) % CH.length);   /* >>>0 保证非负, 否则 charAt(负数) 返回空串导致密钥变短 */
+    }
+    return out.slice(0,4)+'-'+out.slice(4,8)+'-'+out.slice(8,12)+'-'+out.slice(12,16);
+  }
   function ensureKey(){
+    var uid = accountUid();
+    if (uid) return keyFromUid(uid);      /* 已登录 → 账号密钥 */
     var s = readState();
     if(s.key && normalizeKey(s.key)) return s.key;
     var k = genKey();
     writeState({ key: k, createdAt: Date.now() });
     return k;
+  }
+  /* 供登录流程调用：账号是否已有云端存档 */
+  function accountHasCloudSave(){
+    var uid = accountUid();
+    if (!uid) return Promise.resolve(false);
+    var p = provider();
+    if (!p) return Promise.resolve(false);
+    return docIdOf(keyFromUid(uid))
+      .then(function(id){ return p.get(id); })
+      .then(function(row){ return !!(row && row.payload); })
+      .catch(function(){ return false; });
   }
 
   /* ---------- 加密信封（零知识） ---------- */
@@ -109,7 +160,7 @@
       name: 'cloudbase',
       _app: function(){
         if(_cb) return Promise.resolve(_cb);
-        return import('./vendor_cloudbase_esm_v965.js?v=1016').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1017').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -348,6 +399,7 @@
   window.HansenCloudSave = {
     syncNow: syncNow, restoreWithKey: restoreWithKey, fetchWithKey: fetchWithKey,
     selfTest: selfTest, ensureKey: ensureKey,
+    accountHasCloudSave: accountHasCloudSave, accountUid: accountUid,
     getKey: function(){ return readState().key || ''; },
     _debug: { genKey: genKey, normalizeKey: normalizeKey, prettyKey: prettyKey,
               docIdOf: docIdOf, sealPayload: sealPayload, openPayload: openPayload,
