@@ -85,7 +85,13 @@
   }
   /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
   function keyFromUid(uid){
-    var CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    /* 🔴v1033 决定性修复：这里原本用的字符集含 L 和 U，
+       而 normalizeKey 会把 U→V、L→1、I→1、O→0 做归一化。
+       于是写入用原始密钥算 docId、读取用归一化密钥算 docId，
+       两者指向**不同的文档地址** ——
+       表现就是"上传显示成功，拉取却说云端没有这把密钥对应的存档"。
+       改为直接复用 ALPHABET，从源头保证生成的密钥不会被归一化改写。 */
+    var CH = ALPHABET;
     var h1 = 0x811c9dc5, h2 = 0x01000193;
     var s = ACCT_PREFIX + ':' + uid;
     for (var i = 0; i < s.length; i++) {
@@ -187,7 +193,7 @@
             });
           }
         } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1032').then(function(m){
+        return import('./vendor_cloudbase_esm_v965.js?v=1033').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -264,7 +270,8 @@
     /* 内容未变→无条件跳过(force 只绕过冷却,不制造重复流量) */
     if(st.lastHash === h)
       return Promise.resolve({ ok:true, skipped:true, reason:'unchanged' });
-    var key = ensureKey();
+    /* 🔴v1033: 写入同样先归一化, 与 fetchWithKey 的读取路径完全对齐 */
+    var key = normalizeKey(ensureKey()) || ensureKey();
     _busy = true;
     return sealPayload(key, code).then(function(envelope){
       return docIdOf(key).then(function(id){
