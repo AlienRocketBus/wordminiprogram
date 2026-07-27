@@ -49,24 +49,10 @@ jobs:
 
           # 🔴v1051 只保留最新 5 个 Release，其余连同 tag 一并删除。
           # 每个发布包约 80MB，不清理会持续累积占用仓库空间。
-          KEEP=5
-          echo "Pruning old releases, keeping newest $KEEP ..."
-          # 🔴v1053 改用 API 取 tag，不依赖 `gh release list` 的列输出格式
-          #（v1051/v1052 两次都没删成：新版 gh 的首列未必是 tag_name，
-          #  awk '{print $1}' 取到的可能是标题，grep '^v[0-9]+$' 全部落空，
-          #  于是循环体一次都没执行，而管道整体退出码为 0，日志看不出异常）。
-          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-            --jq '.[].tag_name' > /tmp/all_tags.txt || true
-          echo "  found $(wc -l < /tmp/all_tags.txt) releases"
-          grep -E '^v[0-9]+$' /tmp/all_tags.txt \
-            | sed 's/^v//' | sort -rn | tail -n +$((KEEP + 1)) > /tmp/drop_tags.txt || true
-          echo "  to delete: $(wc -l < /tmp/drop_tags.txt)"
-          while read -r OLD; do
-            [ -z "$OLD" ] && continue
-            echo "  deleting v$OLD"
-            gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag \
-              || gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes \
-              || true
-          done < /tmp/drop_tags.txt
-          echo "Prune done. Remaining:"
-          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name' | head -10
+          # 🔴v1056 第四次修，这次改为调用独立脚本 .github/scripts/prune_releases.py。
+          # 前三次（v1051/v1053/v1055）都失败于"环境假设"而非逻辑：
+          #   依赖 gh 列输出格式 → 依赖 gh --jq 内建组件 → 均静默返回空，
+          #   表现为"CI success、日志无异常、但什么都没删"。
+          # 独立脚本只用 Python 标准库，且**已在本地实测真实删除成功**，
+          # 并带 gh CLI 与纯 API 双通道，任一可用即可完成。
+          KEEP_RELEASES=5 python3 .github/scripts/prune_releases.py || true
