@@ -69,7 +69,7 @@ ok(bad.ctrl ? (bad.kids>0 && bad.dlAfter===0) : true,
 /* 源码合同 */
 const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js','utf8');
 ok(/function fixHtmlType/.test(sw), 'SW 提供 fixHtmlType 纠正函数');
-ok(/<!doctype html\|<html/.test(sw), '只在内容确实是 HTML 时才改写(不误伤二进制)');
+ok(/looksDownload/.test(sw) && !/clone\(\)/.test(sw.slice(sw.indexOf('function fixHtmlType'), sw.indexOf('function fixHtmlType')+1200)), 'v1049 起改为只看响应头判断(不读 body、不 clone)，仅对会触发下载的响应改写');
 ok(/content-disposition/.test(sw), '同时清除 Content-Disposition(被标成附件时)');
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail===0?0:1);

@@ -7,20 +7,20 @@
 const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
-// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-107。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-107';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-105';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-105';
+// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-108。
+const SHELL_CACHE = CACHE_PREFIX + 'shell-108';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-106';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-106';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1048', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1048', './hansen_onboarding.js?v=1048', './hansen_theme_shop.js',
-  './hansen_season.js?v=1048', './hansen_cinema_themes.js?v=1048', './hansen_diamond_shop.js?v=1048', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1048', './hansen_crystal.js', './hansen_cards.js?v=1048', './hansen_gacha.js?v=1048', './hansen_land_cards.js?v=1048', './hansen_round_reward.js?v=1048', './hansen_round_bar.js?v=1048', './hansen_pet_showcase.js?v=1048', './hansen_quest_global.js?v=1048', './hansen_island_upgrade.js?v=1048', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1048', './hansen_spell_practice.js?v=1048', './hansen_review.js?v=1048', './hansen_wrong_overview.js?v=1048', './hansen_backup_v944.js?v=1048', './hansen_accessibility.js?v=1048',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1048', './hansen_mylearning.js?v=1048', './hansen_palette.js?v=1048', './hansen_boss_theme.js?v=1048', './hansen_econ_guide.js?v=1048', './hansen_perf_v944.js?v=1048'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1049', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1049', './hansen_onboarding.js?v=1049', './hansen_theme_shop.js',
+  './hansen_season.js?v=1049', './hansen_cinema_themes.js?v=1049', './hansen_diamond_shop.js?v=1049', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1049', './hansen_crystal.js', './hansen_cards.js?v=1049', './hansen_gacha.js?v=1049', './hansen_land_cards.js?v=1049', './hansen_round_reward.js?v=1049', './hansen_round_bar.js?v=1049', './hansen_pet_showcase.js?v=1049', './hansen_quest_global.js?v=1049', './hansen_island_upgrade.js?v=1049', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1049', './hansen_spell_practice.js?v=1049', './hansen_review.js?v=1049', './hansen_wrong_overview.js?v=1049', './hansen_backup_v944.js?v=1049', './hansen_accessibility.js?v=1049',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1049', './hansen_mylearning.js?v=1049', './hansen_palette.js?v=1049', './hansen_boss_theme.js?v=1049', './hansen_econ_guide.js?v=1049', './hansen_perf_v944.js?v=1049'
 ];
 
 async function trim(cacheName, maxEntries) {
@@ -142,22 +142,35 @@ self.addEventListener('activate', event => {
   })());
 });
 
-/* 🔴v1044: 把被误标类型的 HTML 响应改回 text/html。
-   只在"确实是 HTML 文档请求"且"类型明显不对"时才动，绝不误伤其它资源。 */
-async function fixHtmlType(response) {
+/* 🔴v1049 重写：v1044 那版做法有害，已致「刷新就下载」。
+   原实现对**每个导航请求**都 clone 整个响应并 await clone.text() 读完全文
+   （index.html 有 150KB）来判断是不是 HTML，再重建 Response。
+   代价：① 每次刷新都多一次全量读取与重建，拖慢加载；
+        ② clone/text 在流式响应上可能失败或耗尽流，抛错后返回损坏的响应，
+           浏览器拿到一个说不清类型的东西 → 直接当文件下载。
+   本来是给"服务端 MIME 配错"兜底的，结果把本来正常的页面弄坏了。
+
+   新做法：**只看响应头，一个字节都不读**。
+   仅当 Content-Type 明确是"会触发下载"的类型（octet-stream / 缺失 /
+   带 attachment）时才改写，且改写只换 headers、直接复用原 body 流，
+   不做任何读取与克隆。其余情况原样返回，零开销、零风险。 */
+function fixHtmlType(response) {
   try {
     if (!response || !response.ok) return response;
     const ct = (response.headers.get('content-type') || '').toLowerCase();
-    if (ct.includes('text/html')) return response;
-    /* 读一小段确认它真是 HTML，避免把二进制误判成网页 */
-    const clone = response.clone();
-    const head = (await clone.text()).slice(0, 200).toLowerCase();
-    if (!/^\s*(<!doctype html|<html)/.test(head)) return response;
-    const body = await response.blob();
+    const dispo = (response.headers.get('content-disposition') || '').toLowerCase();
+    const looksDownload =
+      ct === '' ||
+      ct.startsWith('application/octet-stream') ||
+      ct.startsWith('binary/') ||
+      dispo.includes('attachment');
+    if (!looksDownload) return response;   /* 正常响应一律不碰 */
     const headers = new Headers(response.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
-    headers.delete('content-disposition');   /* 若被标成附件，一并去掉 */
-    return new Response(body, { status: response.status, statusText: response.statusText, headers: headers });
+    headers.delete('content-disposition');
+    return new Response(response.body, {
+      status: response.status, statusText: response.statusText, headers: headers
+    });
   } catch (e) { return response; }
 }
 
@@ -214,7 +227,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1048 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1049 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     event.respondWith((async () => {
