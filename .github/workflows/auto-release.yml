@@ -51,17 +51,22 @@ jobs:
           # 每个发布包约 80MB，不清理会持续累积占用仓库空间。
           KEEP=5
           echo "Pruning old releases, keeping newest $KEEP ..."
-          # 按版本号数值倒序（而非发布时间），跳过前 KEEP 个，其余删除
-          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 \
-            | awk '{print $1}' \
-            | grep -E '^v[0-9]+$' \
-            | sed 's/^v//' \
-            | sort -rn \
-            | tail -n +$((KEEP + 1)) \
-            | while read -r OLD; do
-                echo "  deleting v$OLD"
-                gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || \
-                  gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes || true
-              done
+          # 🔴v1053 改用 API 取 tag，不依赖 `gh release list` 的列输出格式
+          #（v1051/v1052 两次都没删成：新版 gh 的首列未必是 tag_name，
+          #  awk '{print $1}' 取到的可能是标题，grep '^v[0-9]+$' 全部落空，
+          #  于是循环体一次都没执行，而管道整体退出码为 0，日志看不出异常）。
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[].tag_name' > /tmp/all_tags.txt || true
+          echo "  found $(wc -l < /tmp/all_tags.txt) releases"
+          grep -E '^v[0-9]+$' /tmp/all_tags.txt \
+            | sed 's/^v//' | sort -rn | tail -n +$((KEEP + 1)) > /tmp/drop_tags.txt || true
+          echo "  to delete: $(wc -l < /tmp/drop_tags.txt)"
+          while read -r OLD; do
+            [ -z "$OLD" ] && continue
+            echo "  deleting v$OLD"
+            gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag \
+              || gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes \
+              || true
+          done < /tmp/drop_tags.txt
           echo "Prune done. Remaining:"
-          gh release list --repo "$GITHUB_REPOSITORY" --limit 20 | head -10
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name' | head -10

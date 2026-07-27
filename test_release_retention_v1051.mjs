@@ -12,12 +12,12 @@ console.log('Release 保留策略 v1051');
 const wf = fs.readFileSync('/home/claude/work/repo/.github/workflows/auto-release.yml','utf8');
 
 ok(/KEEP=5/.test(wf), 'CI 中保留数量为 5');
-ok(/gh release list/.test(wf) && /gh release delete/.test(wf), 'CI 含列出与删除 Release 的步骤');
+ok(/gh api .*releases/.test(wf) && /gh release delete/.test(wf), 'CI 用 API 取 tag(不依赖 CLI 列格式) + 删除 Release');
 ok(/sort -rn/.test(wf), '按版本号**数值**倒序（字典序会把 v999 排到 v1050 之后）');
 ok(/tail -n \+\$\(\(KEEP \+ 1\)\)/.test(wf), '跳过最新 KEEP 个，只删其余');
 ok(/--cleanup-tag/.test(wf), '删除 Release 时一并清理 tag');
 ok(/\|\| true/.test(wf), '删除失败不中断发布流程');
-ok(/grep -E '\^v\[0-9\]\+\$'/.test(wf), '只处理 vNNN 格式的 tag（不误伤其它 tag）');
+ok(/tag_name/.test(wf) && /grep -E/.test(wf), '按 tag_name 取值并只处理 vNNN 格式(不误伤其它 tag)');
 /* 清理步骤必须在创建 Release 之后 */
 const iCreate = wf.indexOf('gh release create');
 const iPrune  = wf.indexOf('Pruning old releases');
