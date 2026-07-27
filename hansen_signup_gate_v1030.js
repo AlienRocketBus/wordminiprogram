@@ -106,10 +106,20 @@
       + '</div>';
     var b = document.getElementById('gGo');
     if (b) b.onclick = function () {
+      /* 🔴v1054 修复"点注册没反应"：
+         登录面板 z-index 原为 2147483500，而本门槛是 2147483640 ——
+         面板确实打开了，却被门槛整个盖住；而门槛刻意不可关闭，
+         于是用户彻底卡死在这一屏。
+         除了把面板层级提到门槛之上（已在 auth_ui 侧修正），
+         这里再加一层保险：打开登录面板时先把门槛隐藏，
+         登录成功或用户关掉面板后由巡检自动决定是否重新拦截。 */
       try {
-        if (window.HansenAuthUI) HansenAuthUI.open();
-        else alert('登录模块未加载，请刷新页面重试。');
-      } catch (e) {}
+        if (!window.HansenAuthUI) { alert('登录模块未加载，请刷新页面重试。'); return; }
+        hide();
+        HansenAuthUI.open();
+      } catch (e) {
+        try { alert('打开登录界面失败，请刷新页面重试。'); } catch (e2) {}
+      }
     };
   }
 
@@ -128,6 +138,13 @@
 
   /* 持续巡检：升级、登录、登出都会即时反映 */
   function check() {
+    /* 🔴v1054: 登录面板开着的时候绝不重新弹出门槛 ——
+       巡检每 1.5s 跑一次，若不让路就会把刚隐藏的门槛又弹回来盖住面板，
+       用户依旧填不了手机号。面板关闭后本巡检会自然恢复拦截。 */
+    try {
+      var panel = document.getElementById('hsn_auth_panel');
+      if (panel && panel.classList.contains('on')) { hide(); return; }
+    } catch (e) {}
     if (shouldGate()) show(); else hide();
   }
   function start() {

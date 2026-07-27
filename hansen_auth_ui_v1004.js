@@ -17,7 +17,7 @@
   function style() {
     if (document.getElementById('hsn_auth_css')) return;
     var css = [
-      '#' + ID + '{position:fixed;inset:0;z-index:2147483500;display:none;align-items:flex-end;justify-content:center;background:rgba(2,6,23,.62)}',
+      '#' + ID + '{position:fixed;inset:0;z-index:2147483645;display:none;align-items:flex-end;justify-content:center;background:rgba(2,6,23,.62)}',
       '#' + ID + '.on{display:flex}',
       '#' + ID + ' .au_card{width:100%;max-width:460px;background:linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%);',
       '  color:#e8eefc;border-radius:22px 22px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));',
