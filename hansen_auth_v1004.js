@@ -131,7 +131,9 @@
       return '验证码不对或已过期，重新获取一次';
     if (/frequent|too many|限频|频繁/i.test(m)) return '发得太频繁了，等一会儿再试';
     if (/password/i.test(m)) return '密码不对';
-    if (/exist/i.test(m)) return '这个账号已经注册过了，直接登录就行';
+    if (/exist|already/i.test(m)) return '这个用户名已经有人用了，换一个吧（或点下面切到登录）';
+    if (/weak|password.*(short|length)/i.test(m)) return '密码太简单了，换一个长一点的';
+    if (/user.*not.*found|no.*such.*user/i.test(m)) return '没找到这个用户名，检查一下拼写，或点下面去注册';
     if (/network|fetch|ERR_/i.test(m)) return '连不上服务器，检查一下网络';
     if (/sms|短信/i.test(m)) return '短信服务还没开通或余额不足（控制台看一下）';
     /* 未识别的错误保留原文——宁可显示英文, 也别用错误的中文误导排查 */
@@ -194,9 +196,71 @@
     if (u.length < 2) return Promise.reject(new Error('用户名太短'));
     if (p.length < 6) return Promise.reject(new Error('密码至少 6 位'));
     return auth().then(function (a) {
-      return a.signIn({ username: u, password: p });
+      /* 🔴v1058: 先用用户名登录；失败再用"用户名映射出的内部邮箱"重试。
+         这样无论账号是用哪种方式建的，用户都只需记住用户名。 */
+      return Promise.resolve(a.signIn({ username: u, password: p }))
+        .catch(function (e1) {
+          var mail = mailOfUsername(u);
+          return Promise.resolve(a.signIn({ username: mail, password: p }))
+            .catch(function () { throw e1; });
+        });
     }).then(function () {
       writeLocal({ method: 'password', username: u, signedAt: Date.now() });
+      return afterSignIn();
+    });
+  }
+
+  /* ── ②b 用户名 + 密码「注册」 ────────────────────────
+     背景：CloudBase 的注册只支持 email+password 或 phone+验证码，
+     **没有"纯用户名+密码"这种注册方式**。
+     做法：把用户名确定性地映射成一个内部邮箱（用户完全看不到），
+     用它完成注册，随后再把真正的用户名设上去。
+     这样用户体验上就是"用户名+密码注册"，而底层走的是官方支持的路径。 */
+  var INNER_MAIL_DOMAIN = 'u.wordadventure.local';
+
+  function normUsername(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (s.length < 3) return { ok: false, reason: '用户名至少 3 个字' };
+    if (s.length > 20) return { ok: false, reason: '用户名最多 20 个字' };
+    if (/[\s<>"'`\\/@]/.test(s)) return { ok: false, reason: '用户名不能有空格或 @ < > / 等符号' };
+    return { ok: true, name: s };
+  }
+  /* 用户名 → 内部邮箱：只用 [a-z0-9_] 与十六进制哈希，保证任何字符集都能落到合法邮箱 */
+  function mailOfUsername(name) {
+    var key = String(name).toLowerCase();
+    var h1 = 0x811c9dc5, h2 = 0x01000193;
+    for (var i = 0; i < key.length; i++) {
+      h1 = ((h1 ^ key.charCodeAt(i)) >>> 0) * 16777619 >>> 0;
+      h2 = ((h2 + key.charCodeAt(i) * (i + 7)) >>> 0) * 2654435761 >>> 0;
+    }
+    var safe = key.replace(/[^a-z0-9_]/g, '').slice(0, 16) || 'u';
+    return safe + '_' + ((h1 >>> 0).toString(16)) + ((h2 >>> 0).toString(16)) + '@' + INNER_MAIL_DOMAIN;
+  }
+
+  function registerByPassword(username, password, password2) {
+    var v = normUsername(username);
+    if (!v.ok) return Promise.reject(new Error(v.reason));
+    var pw = String(password == null ? '' : password);
+    if (pw.length < 6) return Promise.reject(new Error('密码至少 6 位'));
+    if (password2 !== undefined && String(password2) !== pw)
+      return Promise.reject(new Error('两次输入的密码不一样'));
+    var mail = mailOfUsername(v.name);
+    return auth().then(function (a) {
+      var fn = a.signUpWithEmailAndPassword || a.signUp;
+      if (typeof fn !== 'function') throw new Error('当前环境不支持用户名注册');
+      /* 两种调用签名都兼容：新版是 (email, password)，旧版是 ({email, password}) */
+      var p1;
+      try { p1 = a.signUpWithEmailAndPassword ? a.signUpWithEmailAndPassword(mail, pw)
+                                              : a.signUp({ email: mail, password: pw }); }
+      catch (e) { p1 = Promise.reject(e); }
+      return Promise.resolve(p1).then(function () {
+        /* 注册成功后把真正的用户名设上，便于以后直接用它登录 */
+        return Promise.resolve(
+          (typeof a.updateUsername === 'function') ? a.updateUsername(v.name) : null
+        ).catch(function () { return null; });
+      });
+    }).then(function () {
+      writeLocal({ method: 'password', username: v.name, signedAt: Date.now() });
       return afterSignIn();
     });
   }
@@ -403,6 +467,9 @@
     sendPhoneCode: sendPhoneCode,
     loginByPhoneCode: loginByPhoneCode,
     loginByPassword: loginByPassword,
+    registerByPassword: registerByPassword,
+    normUsername: normUsername,
+    mailOfUsername: mailOfUsername,
     signOut: signOut,
     ensureProfile: ensureProfile,
     pushSave: pushSave,

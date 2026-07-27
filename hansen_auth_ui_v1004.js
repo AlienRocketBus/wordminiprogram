@@ -54,6 +54,7 @@
   }
 
   var mode = 'phone';   /* phone | password */
+  var _pwReg = false;   /* 🔴v1058: 用户名密码页签内的「登录/注册」开关 */
 
   function html() {
     var A = window.HansenAuth;
@@ -84,12 +85,21 @@
         + '<button class="au_go" id="auGo">登录 / 注册</button>'
         + '<div class="au_tip">第一次用这个手机号 = 自动注册，不用另外填表。</div>';
     } else {
+      /* 🔴v1058: 用户名密码支持**直接注册**（此前只能登录，必须先用手机号注册过）。
+         登录/注册用一个开关切换，注册时多一个确认密码框。 */
+      var reg = (mode === 'password' && _pwReg);
       h += '<div class="au_row"><div class="au_lb">用户名</div>'
-        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="你的用户名"></div>'
+        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="3-20 个字，不含空格"></div>'
         + '<div class="au_row"><div class="au_lb">密码</div>'
-        + '<input class="au_in" id="auPwd" type="password" autocomplete="current-password" placeholder="至少 6 位"></div>'
-        + '<button class="au_go" id="auGo">登录</button>'
-        + '<div class="au_tip">用户名密码方式需要先在手机号那边注册过。</div>';
+        + '<input class="au_in" id="auPwd" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="至少 6 位"></div>'
+        + (reg ? ('<div class="au_row"><div class="au_lb">确认密码</div>'
+            + '<input class="au_in" id="auPwd2" type="password" autocomplete="new-password" placeholder="再输一次"></div>') : '')
+        + '<button class="au_go" id="auGo">' + (reg ? '注册并登录' : '登录') + '</button>'
+        + '<button class="au_skip" id="auPwToggle" style="color:#a5b4fc">'
+        + (reg ? '已有账号？去登录' : '还没有账号？点这里注册') + '</button>'
+        + '<div class="au_tip">' + (reg
+            ? '用户名 3-20 个字，密码至少 6 位。注册后进度会存到云端，换设备用同一账号即可找回。'
+            : '没有账号可以点上面直接注册，不需要手机号。') + '</div>';
     }
     h += '<button class="au_skip" id="auSkip">先不登录，直接玩</button>'
       + '<div class="au_msg" id="auMsg"></div></div>';
@@ -155,14 +165,24 @@
       });
     };
 
+    /* 用户名密码：登录 ↔ 注册 切换 */
+    if (q('auPwToggle')) q('auPwToggle').onclick = function () { _pwReg = !_pwReg; render(); };
+
     /* 登录 / 注册 */
     if (q('auGo')) q('auGo').onclick = function () {
       var btn = this;
       btn.disabled = true;
       msg('处理中…');
-      var task = (mode === 'phone')
-        ? A.loginByPhoneCode((q('auCode') || {}).value || '')
-        : A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
+      var task;
+      if (mode === 'phone') {
+        task = A.loginByPhoneCode((q('auCode') || {}).value || '');
+      } else if (_pwReg) {
+        task = A.registerByPassword((q('auUser') || {}).value || '',
+                                    (q('auPwd') || {}).value || '',
+                                    (q('auPwd2') || {}).value || '');
+      } else {
+        task = A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
+      }
       task.then(function (r) {
         /* 🔴v1017: 把"进度对账"的结果如实说给用户, 冲突时让他自己选 */
         var idTxt = (r && r.cid) ? ' 竞赛 ID No.' + pad(r.cid) : (r && r.pendingId ? ' 竞赛 ID 稍后分配。' : '');

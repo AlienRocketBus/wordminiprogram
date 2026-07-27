@@ -11,7 +11,7 @@ console.log('登录错误翻译 v1009');
 [['verification code invalid','验证码'],['invalid verification_code','验证码'],
  ['verification_code expired','验证码'],['origin not allowed 403','安全域名'],
  ['sms service not enabled','短信'],['too many requests','频繁'],
- ['user already exist','注册过'],['password incorrect','密码']
+ ['user already exist','有人用了'],['password incorrect','密码']
 ].forEach(([inp,want])=>ok(f(new Error(inp)).includes(want), inp+' → 含「'+want+'」'));
 /* 未识别错误必须原样透出 */
 const raw='BACKEND_PARAM_MISMATCH_XYZ';
