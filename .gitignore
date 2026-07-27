@@ -2,3 +2,14 @@ __pycache__/
 *.pyc
 nohup.out
 .DS_Store
+
+# 🔴v1052 发布产物不再进 git 历史。
+# 教训：此前每个版本都把约 160MB 的 zip 提交进历史，
+# 累积到 129 个、10.19GB 松散对象，最终导致容器磁盘反复占满、
+# 测试崩溃与打包失败，只能靠重写历史（filter-repo）才清掉。
+# 产物由 CI 用 package_release.py 生成并挂到 GitHub Release，
+# 不需要、也不应该保存在版本库里。
+release-assets/*.zip
+!release-assets/README.md
+releases/
+*.zip
