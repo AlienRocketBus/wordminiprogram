@@ -46,3 +46,22 @@ jobs:
             --notes "自动发布 v${V}（commit ${GITHUB_SHA}）。附件为可直接部署包：解压后把全部文件原样上传到静态网站根目录即可（不要再套一层目录）。" \
             --target "$GITHUB_SHA"
           echo "Release $TAG created with deploy package."
+
+          # 🔴v1051 只保留最新 5 个 Release，其余连同 tag 一并删除。
+          # 每个发布包约 80MB，不清理会持续累积占用仓库空间。
+          KEEP=5
+          echo "Pruning old releases, keeping newest $KEEP ..."
+          # 按版本号数值倒序（而非发布时间），跳过前 KEEP 个，其余删除
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 \
+            | awk '{print $1}' \
+            | grep -E '^v[0-9]+$' \
+            | sed 's/^v//' \
+            | sort -rn \
+            | tail -n +$((KEEP + 1)) \
+            | while read -r OLD; do
+                echo "  deleting v$OLD"
+                gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || \
+                  gh release delete "v$OLD" --repo "$GITHUB_REPOSITORY" --yes || true
+              done
+          echo "Prune done. Remaining:"
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 20 | head -10

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head>
-<script src="hansen_sw_upgrade_gate_v944.js?v=1050"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1050"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_sw_upgrade_gate_v944.js?v=1051"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1051"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=(g.src||"").split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>神秘殿堂</title>
@@ -144,7 +144,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
 }
 </style></head>
 <body>
-<script src="hansen_perf_v944.js?v=1050"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf_v944.js?v=1051"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="sky"></div><canvas id="galaxy"></canvas>
 <div class="vign"></div>
 <button type="button" class="close" id="closePg" aria-label="关闭神秘殿堂">×</button>
@@ -162,7 +162,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
         <div class="wstars" id="wstars"></div>
         <div class="maintag" id="maintag">★ 主形象</div>
         <div class="foil"></div><div class="glare"></div>
-        <div class="art"><img loading=lazy decoding=async src="bosses/saelya_hd.webp?v=1050" onerror="this.onerror=null;this.src='bosses/saelya.webp?v=1050'" alt="星海女帝赛尔娅"></div>
+        <div class="art"><img loading=lazy decoding=async src="bosses/saelya_hd.webp?v=1051" onerror="this.onerror=null;this.src='bosses/saelya.webp?v=1051'" alt="星海女帝赛尔娅"></div>
         <div class="wvig"></div>
         <div class="lockmask" id="lockmask"><div class="q">❔</div><div class="lt">尚未解锁</div><div class="bar"><i></i></div><div class="bt">集满 1000 赛季积分解锁（640 / 1000）</div></div>
       </div>
@@ -275,13 +275,13 @@ var CARDS={
 var CARD=CARDS[SID]||CARDS['S1'];
 var FORMS=CARD.forms;
 // 🔴v844: boss 专属"本命"背景场景图 → unshift 为 BGS[0](默认选中·角色立绘叠在专属场景前)。赛尔娅无scene·保持原8渐变可切换。
-if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=1050") center/cover',sw:'url("'+CARD.scene+'?v=1050") center/cover',light:false}); }
+if(CARD.scene){ BGS.unshift({n:'本命',bg:'url("'+CARD.scene+'?v=1051") center/cover',sw:'url("'+CARD.scene+'?v=1051") center/cover',light:false}); }
 // 🔴v844: 名字+典藏台词从CARD动态填充(赛尔娅/boss通用。稀有度"传说限定"+赛季"第一赛季·星海觉醒"对全S1卡一致故保持不改)
 (function(){var _nm=document.querySelector('.nm');if(_nm)_nm.textContent=CARD.nm;var _fl=document.querySelector('.flavor');if(_fl)_fl.innerHTML='<span class="qm">「</span>'+CARD.fl+'<span class="qm">」</span>';
   // 🔴v844: 单形态boss隐藏形态切换UI(箭头/圆点/形象序号/设为主形象)·赛尔娅3形态保留
   if(FORMS.length<=1){var _fs=document.querySelector('.fswitch');if(_fs)_fs.style.display='none';var _sm=document.getElementById('setMainBtn');if(_sm)_sm.style.display='none';var _fn=document.getElementById('fname');if(_fn)_fn.style.display='none';}
 })();
-var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=1050';}catch(e){return '?v=1050';}})();
+var VV=(function(){try{var m=(new URLSearchParams(location.search)).get('v');return m?('?v='+m):'?v=1051';}catch(e){return '?v=1051';}})();
 function loadPref(){try{var p=JSON.parse(localStorage.getItem('hs_showcase_'+SID)||'null');return (p&&typeof p==='object')?p:{};}catch(e){return {};}}
 function savePref(){try{var f=FORMS[mainFormIdx]||FORMS[0],b=BGS[curBg]||BGS[0];localStorage.setItem('hs_showcase_'+SID,JSON.stringify({formIdx:mainFormIdx,formImg:f.img,formPng:f.webp,bgIdx:curBg,bgCss:b.bg}));}catch(e){}}
 var mainFormIdx=0,curForm=0;
