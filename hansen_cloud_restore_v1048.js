@@ -29,6 +29,43 @@
   }
   function CS() { return window.HansenCloudSave; }
 
+  /* 🔴v1059: 错误文本统一出口，绝不再吐 [object Object]。 */
+  function EText(e) {
+    try { if (window.HBErrText) return window.HBErrText(e); } catch (_) {}
+    if (e == null) return '';
+    if (typeof e === 'string') return e;
+    var v = e.error_description || e.errMsg || e.message || e.error || e.reason;
+    if (v != null && typeof v !== 'object') return String(v);
+    try { var j = JSON.stringify(e); if (j && j !== '{}') return j; } catch (_) {}
+    return '(无法解析的错误对象)';
+  }
+
+  /* 🔴v1059: 恢复失败时不再是一句 alert 死路。
+     用户遇到的真实情况是「云端登录已过期」——这是**能自己修好**的，
+     只要重新登录一次。可原来的弹窗只说「恢复没成功：[object Object]」，
+     既看不懂、也没有任何下一步，只能干瞪眼。
+     现在：会话过期 → 直接问要不要重新登录，答应就把登录面板打开。 */
+  function reportFail(r) {
+    var expired = !!(r && (r.expired || r.sessionDead))
+      || /过期|unauthenticated|credentials|not-signed-in/i.test(String((r && r.reason) || ''));
+    if (expired) {
+      var go = false;
+      try {
+        go = confirm('云端登录已经过期了，所以拿不到你的存档。\n\n'
+                   + '重新登录一次就能恢复（进度不会丢，还在云端）。\n\n'
+                   + '现在去登录吗？');
+      } catch (e) {}
+      if (go) {
+        try {
+          if (window.HansenAuthUI && typeof HansenAuthUI.open === 'function') { HansenAuthUI.open(); return; }
+        } catch (e) {}
+        try { alert('请到「拼写大PK」页面顶部点账号区，重新登录一次。'); } catch (e) {}
+      }
+      return;
+    }
+    try { alert('恢复没成功：' + (EText(r && r.reason) || '未知原因')); } catch (e) {}
+  }
+
   function localProgress() {
     var islands = 0, learned = 0, xp = 0;
     try {
@@ -79,7 +116,10 @@
       }
       return { ok: false, reason: (r && r.reason) || 'restore-failed' };
     }).catch(function (e) {
-      return { ok: false, reason: String((e && e.message) || e).slice(0, 160) };
+      /* 🔴v1059: 原来是 String(e.message || e) —— CloudBase 抛的普通对象
+         没有 .message，于是整句退化成 '[object Object]'，用户截图里就是它。 */
+      return { ok: false, expired: !!(e && e.expired), sessionDead: !!(e && e.sessionDead),
+               reason: EText(e).slice(0, 200) };
     });
   }
 
@@ -110,10 +150,10 @@
       try { yes = confirm(msg); } catch (e) {}
       if (!yes) return { skip: 'user-declined' };
       return now({ silent: true }).then(function (r) {
-        if (!r.ok) { try { alert('恢复没成功：' + (r.reason || '未知原因')); } catch (e) {} }
+        if (!r.ok) reportFail(r);
         return r;
       });
-    }).catch(function (e) { return { skip: 'error', reason: String((e && e.message) || e).slice(0, 120) }; });
+    }).catch(function (e) { return { skip: 'error', reason: EText(e).slice(0, 200) }; });
   }
 
   function boot() {
@@ -126,5 +166,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  window.HansenCloudRestore = { check: check, now: now, _localProgress: localProgress };
+  window.HansenCloudRestore = { check: check, now: now, reportFail: reportFail,
+                                errText: EText, _localProgress: localProgress };
 })();

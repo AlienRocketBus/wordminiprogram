@@ -220,24 +220,48 @@
     return {
       name: 'cloudbase',
       _app: function(){
+        /* 🔴v1059：签入路径**每次都必须复验会话**，不能吃缓存。
+           原来第一行就是 `if(_cb) return Promise.resolve(_cb)`——
+           一旦成功缓存过，后面会话死了也永远不再检查，
+           于是用户看到的是「一直显示已登录，但每次读写都失败」。
+           现在：已登录路径先过 ensureSession()；未登录的匿名兜底路径才吃缓存。 */
+        var A = window.HansenAuth;
+        if (A && typeof A.ensureSession === 'function'
+               && typeof A.isSignedIn === 'function' && A.isSignedIn()
+               && typeof A._app === 'function') {
+          return A.ensureSession().then(function (s) {
+            if (!s || !s.ok) {
+              var msg = (s && s.expired)
+                ? '云端登录已过期，请重新登录后再同步'
+                : ('云端会话不可用：' + ((s && s.reason) || '未知'));
+              var err = new Error(msg);
+              err.sessionDead = true;
+              err.expired = !!(s && s.expired);
+              throw err;
+            }
+            return A._app();
+          }).then(function (app) {
+            if (!app) throw new Error('账号会话不可用');
+            _cb = app;              /* 只有会话确认有效才缓存 */
+            return app;
+          });
+        }
         if(_cb) return Promise.resolve(_cb);
-        /* 🔴v1028 关键修复：已登录时**复用账号会话**，绝不再另开匿名身份。
-           原逻辑无论是否登录都自建实例并 signInAnonymously()，
-           而 hansen_saves 权限是「仅创建者可读写」——
-           设备A(匿名身份X)写的存档，设备B(匿名身份Y)根本读不到，
-           于是出现「刚上传成功、立刻拉取却说云端没有这把密钥对应的存档」。
-           手机号账号从头到尾没被用上，这才是跨设备找不回进度的真正原因。 */
-        try {
-          var A = window.HansenAuth;
-          if (A && typeof A.isSignedIn === 'function' && A.isSignedIn() && typeof A._app === 'function') {
-            return Promise.resolve(A._app()).then(function (app) {
-              if (!app) throw new Error('账号会话不可用');
-              _cb = app;      /* 与账号同一个实例、同一个身份 */
-              return app;
-            });
-          }
-        } catch (e) {}
-        return import('./vendor_cloudbase_esm_v965.js?v=1058').then(function(m){
+        /* v1028 的「复用账号会话」逻辑已上移到本函数开头，并加了会话复验。
+           这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
+
+           🔴v1059：下面这行原本是
+               import('./vendor_cloudbase_esm_v965.js?v=1058')
+           而 hansen_auth_v1004.js 里是不带查询串的裸路径。
+           **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
+           多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
+           各有各的 app 注册表和凭证缓存：账号在 A 份里登录，
+           云存档拿 B 份去查，B 份从没登录过 → credentials not found。
+           而 `?v=` 是 bump_version.py 自动盖的资源戳，
+           所以**每升一次版就会重新制造一次这个分裂**。
+           这里去掉查询串（bump_version 只替换已有的 ?v=，不会补新的），
+           两处从此保证是同一个模块实例。 */
+        return import('./vendor_cloudbase_esm_v965.js').then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);

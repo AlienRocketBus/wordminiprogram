@@ -23,6 +23,22 @@
     return s.length > (n || 90) ? s.slice(0, n || 90) + '…' : s;
   }
 
+  /* 🔴v1059：诊断面板里凡是要显示错误的地方，一律走这里。
+     此前 `'…：' + (i.reason || '')` 这种直接拼接，遇到 CloudBase 抛出的
+     普通对象就变成 '[object Object]'——用户截图上看到的全是这个，
+     真正的 {"error":"unauthenticated","error_description":"credentials not found"}
+     被挡了 40 版。诊断面板存在的意义就是把现场显示出来，
+     它自己却把最关键的一句吃掉了。 */
+  function E(e) {
+    try { if (window.HBErrText) return window.HBErrText(e); } catch (_) {}
+    if (e == null) return '';
+    if (typeof e === 'string') return e;
+    var v = e.error_description || e.errMsg || e.message || e.error || e.reason;
+    if (v != null && typeof v !== 'object') return String(v);
+    try { var j = JSON.stringify(e); if (j && j !== '{}') return j; } catch (_) {}
+    return '(无法解析的错误对象)';
+  }
+
   function style() {
     if (document.getElementById('hsn_diag_css')) return;
     var st = document.createElement('style');
@@ -150,10 +166,10 @@
           v.textContent = '❌ 云端还没有你的存档\n → 请到**有进度的那台设备**上点「▶ 立刻上传一次」\n   （在空设备上拉取永远不会成功，因为云端确实是空的）';
           v.className = 'd_v bad';
         } else {
-          v.textContent = '⚠️ 查不到（网络或权限）：' + (i.reason || '');
+          v.textContent = '⚠️ 查不到（网络或权限）：' + (E(i.reason) || '(无错误信息)');
           v.className = 'd_v warn';
         }
-      }).catch(function (e) { v.textContent = '查询出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
+      }).catch(function (e) { v.textContent = '查询出错：' + short(E(e), 160); v.className = 'd_v bad'; });
     }, 120);
 
     el.innerHTML = out
@@ -181,7 +197,7 @@
         lines.push('地址: ' + (r.docId || '(无)'));
         lines.push('写入: ' + (r.wrote === true ? '成功 ✔' : '失败 ✘'));
         lines.push('读回: ' + (r.readBack === true ? '成功 ✔' : (r.readBack === false ? '失败 ✘（写进去了但读不回）' : '未执行')));
-        if (r.error) lines.push('原始错误: ' + r.error);
+        if (r.error) lines.push('原始错误: ' + E(r.error));
         var verdict;
         if (r.step === 'ok') verdict = '【结论】通道完全正常。既然写完能立刻读回，说明你的存档是「从来没被写进去过」，问题不在读取。';
         else if (r.step === 'wrote-but-cannot-read') verdict =

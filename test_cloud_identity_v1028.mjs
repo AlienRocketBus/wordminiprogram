@@ -11,10 +11,12 @@ import vm from 'node:vm'; import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('云存档身份一致性 v1028');
 const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+/* v1059: 结构断言必须只看代码——注释里引用了旧代码原文，会让断言对着散文下结论 */
+const code = src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/^\s*\/\/.*$/gm,'');
 const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
 
 /* ① 源码层合同：已登录必须走账号会话，且不得再匿名 */
-const appFn = src.slice(src.indexOf('_app: function()'), src.indexOf('_app: function()')+1400);
+const appFn = code.slice(code.indexOf('_app: function()'), code.indexOf('_app: function()')+1800);
 ok(/HansenAuth/.test(appFn) && /isSignedIn/.test(appFn), '已登录时会去取账号会话');
 ok(/A\._app\(\)/.test(appFn) || /A\._app/.test(appFn), '复用账号的 CloudBase 实例(而非另建)');
 /* 账号分支必须在"另建实例"之前就 return —— 登录时根本走不到匿名那段 */
@@ -22,6 +24,10 @@ const importIdx = appFn.indexOf("import('./vendor_cloudbase");
 const acctIdx = appFn.indexOf('isSignedIn');
 ok(acctIdx >= 0 && importIdx > acctIdx, '账号分支先于另建实例(登录时走不到匿名)');
 ok(/signInAnonymously|anonymousAuthProvider/.test(appFn), '未登录仍保留匿名回退');
+/* 🔴v1059 加严：光"已登录"不够——isSignedIn() 只读 localStorage，
+   会话早死了它还返回 true。复用账号实例前必须先过真实会话探测。 */
+ok(/ensureSession/.test(appFn), 'v1059: 复用账号实例前先过 ensureSession(真实会话探测)');
+ok(appFn.indexOf('ensureSession') < appFn.indexOf('A._app()'), 'v1059: 会话探测排在取实例之前');
 
 /* ② 缓存作废 */
 ok(/resetApp/.test(src), '导出 resetApp 供作废缓存');
@@ -44,9 +50,29 @@ const CS = win.HansenCloudSave;
 ok(!!CS && typeof CS.resetApp==='function', 'resetApp 运行时可用');
 let usedAccountApp = false;
 win.HansenAuth = { isSignedIn:()=>true, currentUser:()=>({uid:'U1'}), readLocal:()=>({uid:'U1'}),
+  /* v1059: 云存档现在要求这个真实会话探测通过才肯复用账号实例 */
+  ensureSession: ()=>Promise.resolve({ ok:true, uid:'U1' }),
   _app: ()=>{ usedAccountApp = true; return Promise.resolve({ database:()=>({}), auth:()=>({}) }); } };
 /* provider()._app 是内部的，通过 accountHasCloudSave 间接触发 */
 await CS.accountHasCloudSave().catch(()=>{});
 ok(usedAccountApp, '已登录时确实调用了账号的 _app()(未另开匿名实例)');
+/* 🔴v1059 新增合同：会话失效时必须**明确失败**，绝不许偷偷退回匿名身份。
+   若退回匿名，就会用一个跨设备读不到的身份去写档——正是 v1028 那场事故。 */
+{
+  const w2 = { ...win }; w2.window = w2;
+  const c2 = { ...w2, window: w2 }; vm.createContext(c2);
+  try { vm.runInContext(src, c2); } catch(e){}
+  const CS2 = w2.HansenCloudSave;
+  let usedAcct = false, wentAnon = false;
+  w2.HansenAuth = { isSignedIn:()=>true, currentUser:()=>({uid:'U1'}), readLocal:()=>({uid:'U1'}),
+    ensureSession: ()=>Promise.resolve({ ok:false, expired:true, reason:'云端会话已失效' }),
+    _app: ()=>{ usedAcct = true; return Promise.resolve({ database:()=>({}), auth:()=>({}) }); } };
+  let err = null;
+  await CS2.accountHasCloudSave().catch(e=>{ err = e; });
+  ok(!usedAcct, 'v1059: 会话失效时不去取账号实例');
+  ok(!wentAnon, 'v1059: ★ 会话失效时绝不偷偷退回匿名身份(那正是 v1028 事故的成因)');
+  ok(err === null || !/\[object Object\]/.test(String(err && (err.message||err))),
+     'v1059: 失败原因可读,不是 [object Object]');
+}
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail===0?0:1);

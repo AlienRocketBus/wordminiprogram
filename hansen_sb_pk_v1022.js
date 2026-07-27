@@ -164,7 +164,15 @@
       try {
         if (!window.HansenCloudRestore) { alert('恢复模块未加载，请刷新页面'); btn.disabled = false; return; }
         HansenCloudRestore.now().then(function (r) {
-          if (!r.ok) { alert('恢复没成功：' + (r.reason || '未知原因')); btn.disabled = false; btn.textContent = '☁️ 从云端恢复进度'; }
+          /* 🔴v1059: 复用恢复模块的统一报错（会话过期时会引导重新登录），
+             不再直接 alert 一个 [object Object] 的死路。 */
+          if (!r.ok) {
+            try {
+              if (typeof HansenCloudRestore.reportFail === 'function') HansenCloudRestore.reportFail(r);
+              else alert('恢复没成功：' + ((window.HBErrText ? HBErrText(r.reason) : r.reason) || '未知原因'));
+            } catch (e) {}
+            btn.disabled = false; btn.textContent = '☁️ 从云端恢复进度';
+          }
         });
       } catch (e) { btn.disabled = false; }
     };

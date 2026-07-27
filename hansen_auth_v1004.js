@@ -39,6 +39,38 @@
     return o;
   }
 
+  /* 🔴v1059 关键修复：把云端错误变成人能读的字。
+     整整 40 个版本里，每一条诊断都只显示 `[object Object]`——
+     因为 CloudBase 抛出的是一个**普通对象**：
+       {"error":"unauthenticated","error_description":"credentials not found"}
+     它既不是 Error 实例、也没有 .message，于是 String(e) 退化成 '[object Object]'。
+     真正的错因（credentials not found）被这层遮罩挡了 40 版，
+     导致每一轮排查都只能靠推理，改对了六七个真 bug 却始终没碰到真凶。
+     本函数按优先级逐层挖字段，最后兜底 JSON.stringify，
+     **保证今后任何地方都不会再吐出 [object Object]**。 */
+  function errText(e) {
+    if (e == null) return '';
+    if (typeof e === 'string') return e;
+    var parts = [];
+    var pick = ['error_description', 'errMsg', 'message', 'error', 'code', 'errCode', 'reason'];
+    for (var i = 0; i < pick.length; i++) {
+      var v = e[pick[i]];
+      if (v != null && typeof v !== 'object') {
+        var s = String(v);
+        if (s && parts.indexOf(s) < 0) parts.push(s);
+      }
+    }
+    if (parts.length) return parts.join(' | ');
+    try { var j = JSON.stringify(e); if (j && j !== '{}' && j !== 'null') return j; } catch (_) {}
+    try {
+      var t = Object.prototype.toString.call(e);
+      if (t !== '[object Object]') return t;
+    } catch (_) {}
+    return '(无法解析的错误对象)';
+  }
+  /* 立刻挂全局：云存档/恢复/诊断都可能先于本模块用到，取不到时各自有兜底 */
+  try { window.HBErrText = errText; } catch (e) {}
+
   /* 归一手机号：11 位国内号 → +86 前缀 */
   function normPhone(raw) {
     var s = String(raw == null ? '' : raw).replace(/[\s\-()]/g, '');
@@ -455,9 +487,67 @@
     }).catch(function (e) { return { ok: false, reason: String(e && e.message || e) }; });
   }
 
+  /* 🔴v1059 核心修复：云端读写的**唯一通行证**。
+
+     此前所有云端路径（云存档 8 处调用）都拿 isSignedIn() 放行，而它长这样：
+         return !!(lc.method && lc.signedAt);     // 只翻 localStorage
+     ——「我登录过」被当成了「我现在还登录着」。
+
+     verifySession()（真正去问云端的那个）v1031 就写好了，
+     却**只接在诊断面板上显示给用户看，从没被任何一处决定采用**。
+     于是会话过期后：面板正确地打出「❌ 云端会话已失效」，
+     而同一个页面的 isSignedIn() 照样返回 true，
+     界面继续显示「已登录 +86 186xxxx」，云存档拿着一个没有凭证的
+     实例去读数据库，只拿回 credentials not found。
+     这是本项目第四次「同一件事两处真源，而关键路径用了假的那个」。
+
+     ensureSession() 把真源收敛成一处，并在**确认**会话已死时
+     清掉那个撒谎的本地标记，让界面立刻说实话、让用户能重新登录。
+
+     ⚠️ 只在「确定」时才清标记：getLoginState() 正常返回但无 uid（SDK 自己
+     说没会话），或错误明确是鉴权类。断网等不确定情况**绝不动本地标记**，
+     否则一次地铁进隧道就把用户登出了。 */
+  function ensureSession() {
+    if (!isSignedIn()) return Promise.resolve({ ok: false, reason: 'not-signed-in' });
+    return auth().then(function (a) {
+      if (typeof a.getLoginState !== 'function')
+        return { ok: false, definite: false, reason: 'no-api' };
+      return Promise.resolve(a.getLoginState()).then(function (st) {
+        var uid = (st && (st.uid || (st.user && st.user.uid))) || '';
+        if (uid) return { ok: true, uid: uid };
+        /* ⚠️ 拿到空的登录态 → **拦住云端操作，但不动本地标记**。
+           理由：SDK 恢复持久化会话是异步的，问得太早也会得到空；
+           网络不通时某些版本同样返回空而不是抛错。
+           据此就把人登出，等于「进一次隧道 / 开机快一点」就退出登录——
+           那比原来的 bug 更糟。所以这里只拒绝操作、提示重新登录，
+           清标记留给下面那条**确凿的鉴权错误**。 */
+        return { ok: false, expired: true, definite: false, reason: '云端会话已失效或尚未就绪' };
+      }, function (e) {
+        var t = errText(e);
+        /* 只有云端明确说「你没通过鉴权」才算确凿 —— 用户截图里
+           那句 credentials not found 正属此类。 */
+        var authErr = /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
+        return { ok: false, expired: authErr, definite: authErr, reason: t };
+      });
+    }).catch(function (e) {
+      return { ok: false, definite: false, reason: errText(e) };
+    }).then(function (r) {
+      if (!r.ok && r.definite) {
+        writeLocal({ method: '', signedAt: 0, uid: '' });
+        /* 清了标记还必须广播出去，否则界面上那句「已登录 +86 186xxxx」
+           会一直挂到下次刷新——这正是本轮 bug 最刺眼的表象：
+           界面说登录着，每一次读写却都失败。 */
+        try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e) {}
+      }
+      return r;
+    });
+  }
+
   window.HansenAuth = {
     ready: ready,
     isSignedIn: isSignedIn,
+    ensureSession: ensureSession,
+    errText: errText,
     currentUser: currentUser,
     currentUserAsync: currentUserAsync,
     verifySession: verifySession,
