@@ -54,9 +54,14 @@
     if (_app) return Promise.resolve(_app);
     var c = cfg();
     if (!c) return Promise.reject(new Error('云服务未配置'));
-    return import('./vendor_cloudbase_esm_v1004.js').catch(function () {
-      return import('./vendor_cloudbase_esm_v965.js');
-    }).then(function (mod) {
+    /* 🔴v1057 关键修复：这里原本先 import 一个**根本不存在的文件**
+       `vendor_cloudbase_esm_v1004.js`（仓库里只有 v965 那一个），
+       指望 404 时靠 .catch 退回。但动态 import 的 404 在部分浏览器
+       （含微信内置浏览器）不会走 catch 分支，于是整个 SDK 加载失败，
+       用户点「获取验证码」只看到"连不上服务器"——手机注册从 v1004
+       起就一直是坏的，而这只是一个写错的文件名。
+       现在直接 import 真实存在的文件，不再赌 fallback。 */
+    return import('./vendor_cloudbase_esm_v965.js').then(function (mod) {
       var cb = mod && (mod.default || mod);
       var init = cb && (cb.init || (cb.default && cb.default.init));
       if (typeof init !== 'function') throw new Error('云 SDK 加载失败');
@@ -71,7 +76,15 @@
       return _app;
     });
   }
-  function auth() { return app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; }); }
+  /* 🔴v1057: 允许注入替身鉴权对象。
+     此前这条"发码→验码→注册→写登录态"的链路**无法在没有真实云端时验证**，
+     导致 v1004 那个写错的 SDK 文件名一直没被任何测试发现。
+     有了注入口，回归测试就能用假 SDK 跑完整条链，不必依赖网络。 */
+  var _authOverride = null;
+  function auth() {
+    if (_authOverride) return Promise.resolve(_authOverride);
+    return app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; });
+  }
 
   /* ── 登录态 ───────────────────────────────────────── */
   /* 🔴v1012: SDK 的 getCurrentUser() 与 getLoginState() **都返回 Promise**，
@@ -397,6 +410,7 @@
     localHasProgress: localHasProgress,
     localProgressSize: localProgressSize,
     pullSave: pullSave,
+    _setAuthForTest: function (a) { _authOverride = a; },
     _app: app
   };
 })();
