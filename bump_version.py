@@ -163,10 +163,16 @@ def main() -> None:
 
     # ── 6) 校验 ──
     if not dry:
-        stray = [
-            p.name for p in list(ROOT.glob("*.html")) + list(ROOT.glob("*.js")) + [ROOT / "island_data.json"]
-            if stamp_old in read(p)
-        ]
+        # 🔴v1064: 原来只查「上一版的戳」是否残留，所以像 spelling_pk.html
+        #   那种停在 v1004 的落后戳，这道校验根本看不见（漏了几十版）。
+        #   改为查**任何不等于当前版本的戳**；测试文件里常引用旧代码原文，故排除。
+        stray = []
+        for p in list(ROOT.glob("*.html")) + list(ROOT.glob("*.js")) + [ROOT / "island_data.json"]:
+            if not p.exists() or p.name.startswith("test_"):
+                continue
+            behind = {m.group(0) for m in stamp_re.finditer(read(p)) if m.group(0) != stamp_new}
+            if behind:
+                stray.append(f"{p.name}{sorted(behind)}")
         if stray:
             fail(f"旧戳残留: {stray[:8]}")
         for cur, _ in gens.values():

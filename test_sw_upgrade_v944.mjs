@@ -89,11 +89,11 @@ assert.doesNotMatch(workerSource, /["']\.\/hansen_backup_bootstrap\.js["']/,
   'the new worker shell must not cache the v943 bootstrap pathname');
 assert.match(workerSource, /hansen_perf_v944\.js/,
   'the new worker shell must cache the non-pausing performance engine');
-assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-122['"]/,
+assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-123['"]/,
   'v960 must atomically install the current release shell');
-assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-120['"]/,
+assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-121['"]/,
   'v960 must rotate navigation pages to the current wiring');
-assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-120['"]/,
+assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-121['"]/,
   'v960 must rotate code so stale earlier Boss code cannot return');
 for (const exactHotfixKey of [
   'hansen_canonical_progress.js?v='+__APPV__,
@@ -390,6 +390,16 @@ async function runScenario(entry) {
       try { controllerPath = new URL(controller.scriptURL).pathname; } catch (_error) {}
       return controllerPath === `/${worker}` && location.pathname === expectedPath;
     }, { worker: WORKER_FILE, expectedPath: `/${entry}`, currentVersion: CURRENT_VERSION });
+
+    /* 🔴v1063 修复测试竞态：此前只等到 controller 与 pathname 就位就抓状态，
+       但 hansen_backup_bootstrap_v944.js 可能**还没执行完**，于是
+       window.__hansenBackupBootstrap 为 undefined，
+       断言 bootstrapResult?.recovered 随机失败——该测试时红时绿的根因。
+       实测证据：稍后再探测同一页面，obj 已为 true、loaded 已为 true。
+       产品代码无问题，是台架少等了一步。 */
+    await page.waitForFunction(() => !!(window.__hansenBackupBootstrap
+                                        && window.__hansenBackupBootstrap.result),
+                               null, { timeout: 20000 }).catch(() => {});
 
     const finalState = await page.evaluate(async ({ journalKey, backupCount, perfCount }) => {
       const registration = await navigator.serviceWorker.getRegistration('./');

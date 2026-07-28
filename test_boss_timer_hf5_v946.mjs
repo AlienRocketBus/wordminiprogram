@@ -30,9 +30,9 @@ assert.equal((workerSource.match(new RegExp("'\\./hansen_boss_lock\\.js\\?v="+__
   'Service Worker 必须精确缓存一次 v951 Boss 运行时');
 assert.doesNotMatch(workerSource, /'\.\/hansen_boss_lock\.js\?v=946-hf2'/,
   'Service Worker 不得继续精确缓存旧 Boss 运行时');
-assert.match(workerSource, /CACHE_PREFIX \+ 'shell-122'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'pages-120'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'assets-120'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'shell-123'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'pages-121'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'assets-121'/);
 
 // 锁死本次根因：全局减少动态规则仍存在，但功能性计时条的三次 transition 写入必须逐一行内提权。
 assert.match(a11ySource, /transition-duration:\.001ms!important/,
@@ -177,12 +177,43 @@ async function run() {
       const { context, page, errors } = await preparePage(reducedMotion, theme);
       assert.equal(await page.evaluate(() => matchMedia('(prefers-reduced-motion:reduce)').matches),
         reducedMotion === 'reduce', `${label}: 浏览器动效档位不正确`);
+      /* 🔴v1063：先等倒计时**确实跑起来**再采样。
+         原来一到就取样，常常撞上「transition 尚未启动」的窗口——
+         此时 scaleX 还是 1，两次采样都得 ratio=1，于是断言随机失败。
+         实测证据：同一测试不同次跑，读到的 transitionDuration 会在 8s / 60s 之间变，
+         说明抓到的根本不是同一轮计时。 */
+      await page.waitForFunction(() => {
+        const tr = document.getElementById('bossTimerEl');
+        const fl = document.getElementById('bossTimerFill');
+        if (!tr || !fl) return false;
+        const d = Number.parseFloat(getComputedStyle(fl).transitionDuration) || 0;
+        if (d <= 0) return false;
+        const t = tr.getBoundingClientRect(), f = fl.getBoundingClientRect();
+        return t.width > 0 && (f.width / t.width) < 0.995;   /* 已开始收缩 */
+      }, null, { timeout: 20000 }).catch(() => {});
+
       const first = await sampleTimer(page);
       assertVisible(first, `${label}/初始`);
+      const t0 = Date.now();
       await page.waitForTimeout(500);
       const second = await sampleTimer(page);
+      const elapsed = (Date.now() - t0) / 1000;
       assertVisible(second, `${label}/500ms`);
-      assert(first.ratio - second.ratio >= 0.035, `${label}: 彩虹条没有持续缩短 ${first.ratio}→${second.ratio}`);
+      /* 🔴v1063：原来写死「500ms 内至少缩短 0.035」，等价于假设倒计时总长 ≤14.3 秒。
+         而 Lv.1 Boss 的 timeLimit 是 **60 秒**（hansen_boss_lock.js 的 BOSS_CFG），
+         500ms 只该缩短约 0.83% —— 于是这条断言长期红着，报的却是产品没有的问题。
+         写死的常量必然随配置漂移（本轮已在任务数、账号标识、force 语义上踩过同一件事）。
+         改为**从实际 transition 时长推导**：条子是 scaleX(1)→scaleX(0) 的线性过渡，
+         所以任意时间窗内的缩短量必然 ≈ 经过时间 / 总时长。这样倒计时怎么调都不会失配，
+         而且比原来更严：不只要求"在缩短"，还要求**速率对得上配置**。 */
+      const shrink = first.ratio - second.ratio;
+      const dur = second.transitionDuration || first.transitionDuration;
+      assert(dur > 0, `${label}: 读不到彩虹条的过渡时长(${dur})`);
+      const expected = elapsed / dur;
+      assert(shrink > 0, `${label}: 彩虹条没有在缩短 ${first.ratio}→${second.ratio}`);
+      assert(shrink >= expected * 0.4 && shrink <= expected * 2.5,
+        `${label}: 彩虹条缩短速率与配置不符 —— 实测 ${shrink.toFixed(4)}，`
+        + `按 ${dur}s 总时长、经过 ${elapsed.toFixed(3)}s 应约 ${expected.toFixed(4)}`);
       assert.equal(second.bossHpText, first.bossHpText, `${label}: 只计时却改了 Boss HP`);
       assert.equal(second.heroHpText, first.heroHpText, `${label}: 只计时却改了勇者 HP`);
       assert(Math.abs(second.bossHpWidth - first.bossHpWidth) < 0.5, `${label}: 计时误改 Boss 血条`);
