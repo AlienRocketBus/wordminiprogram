@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1059;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1060;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -162,12 +162,28 @@
       if(ids[q.id])throw new Error(label+'含重复任务 id');
       ids[q.id]=1;
       if(typeof q.type!=='string'||!q.type)throw new Error(label+'任务 '+q.id+' 缺少 type');
-      if(typeof q.goal!=='number'||!isFinite(q.goal)||q.goal<0)throw new Error(label+'任务 '+q.id+' 的 goal 非法');
+      /* v1060: 结构性上限——与任务配置无关，只挡离谱值 */
+      var REWARD_MAX = 100000, GOAL_MAX = 100000;
+      /* 🔴v1060 收紧：原判据是「是数字 && 有限 && >=0」，太松——
+         `goal:0` 能通过，而 progress 0 >= goal 0 就是**立即可领取**，
+         与 progress 越界那个漏洞同类；`goal:3.5` 这种小数也放行。
+         v1019 删掉「与内嵌任务配置逐条比对」是对的（副本走散把云备份整个搞坏过），
+         但结构性边界不该跟着一起删。这里只加与配置无关的约束：正整数 + 上限。 */
+      if(!exactInt(q.goal,1,GOAL_MAX))throw new Error(label+'任务 '+q.id+' 的 goal 非法');
       if(!safeQuestText(q.icon,32)||!safeQuestText(q.title,160))throw new Error(label+'任务 '+q.id+' 的 icon/title 含非法文本');
       if(!plainObject(q.reward))throw new Error(label+'任务 '+q.id+' 的 reward 无效');
       Object.keys(q.reward).forEach(function(k){if(k!=='xp'&&k!=='gems')throw new Error(label+'任务 reward 含未知字段');});
-      /* 🔴v1019: reward/isSpelling 不再比对内嵌副本(版本间必然走散), 只保留结构性校验 */
-      /* 🔴v1019: reward/isSpelling 不再比对内嵌副本(版本间必然走散), 只保留结构性校验 */
+      /* 🔴v1019: reward/isSpelling 不再比对内嵌副本(版本间必然走散), 只保留结构性校验
+         🔴v1060 补齐 v1019 漏下的一半：当时只校验了 reward 的**字段名**，
+         没校验**值**。于是伪造备份可以塞 {xp:'<img onerror=1>'} 或 {xp:1000001}，
+         `test_backup_v942` 一直红着在报这件事。
+         这里**不重新内嵌任务配置**（那正是 v1019 要摆脱的"两处真源"），
+         只加与配置无关的结构性边界：必须是非负整数且不得离谱。 */
+      ['xp','gems'].forEach(function(k){
+        if(!(k in q.reward))return;
+        if(!exactInt(q.reward[k],0,REWARD_MAX))
+          throw new Error(label+'任务 '+q.id+' 的 reward.'+k+' 超出合法范围');
+      });
       /* 🔴v1019: 进度上限以**存档自身的 goal** 为准, 不再比对内嵌副本 */
       if(!exactInt(q.progress,0,q.goal)||typeof q.claimed!=='boolean')throw new Error(label+'任务 '+q.id+' 的 progress/claimed 非法');
       /* 「已领取必须满进度」不再强制: 任务目标会随版本调整, 旧存档已领奖条目本就可能进度小于新目标(v1018 已在任务侧宽容), 备份不该因此拒绝保存用户数据。 */
@@ -475,7 +491,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1059_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1060_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}

@@ -161,8 +161,24 @@
       var item = clone(def);
       if (typeof saved.progress !== 'number' || !isFinite(saved.progress) || saved.progress < 0) {
         item.progress = 0;
+      } else if (saved.progress > item.goal) {
+        /* 🔴v1060 安全修复：**越界进度一律归零，绝不夹到 goal**。
+           原来是 Math.min(saved.progress, item.goal)——看着像"防越界"，
+           实际是把任何离谱值都**顶满**成 progress === goal，
+           而 goal 常常只有 3。于是打开开发者工具把 progress 改成 999999、
+           刷新一下，任务就直接变成"可领取"，白拿 XP 和金币。
+           `test_quest_transactions_v942` 一直红着在报这件事
+           （断言原文：「越界 progress 必须拒绝整份状态，不能夹到 goal 后变成可领奖」），
+           却被带着红灯提交了几十个版本 —— 红灯说的是真话。
+
+           归零只影响**这一条**任务，不牵连整天，仍然满足 v1018
+           「逐条宽容、绝不整天清空」的初衷。
+           代价：若某版把 goal 调小且用户尚未领取，这条会从头再来；
+           但越界值无法与篡改区分，宁可让用户多做一次，不能让奖励白送。
+           已领取的（claimed===true，严格布尔）在下面照旧按满进度尊重，不受影响。 */
+        item.progress = 0;
       } else {
-        item.progress = Math.min(Math.floor(saved.progress), item.goal);   /* 目标缩小也不越界 */
+        item.progress = Math.floor(saved.progress);
       }
       item.claimed = saved.claimed === true;
       /* 已领过的奖励不能因为目标变了就被收回 —— 直接按满进度记 */

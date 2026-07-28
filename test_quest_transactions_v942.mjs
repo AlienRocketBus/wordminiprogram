@@ -141,7 +141,12 @@ function retryUntilClaimed(storage, controls, index, max = 5) {
     assert.equal(safe.list[i].reward.xp, clean.list[i].reward.xp);
     assert.equal(safe.list[i].claimed, false, '只有布尔 true 才能恢复 claimed');
   }
-  assert.equal(safe.list[0].progress, 0, '越界 progress 必须拒绝整份状态，不能夹到 goal 后变成可领奖');
+  assert.equal(safe.list[0].progress, 0, '越界 progress 必须归零，不能夹到 goal 后变成可领奖');
+  /* v1060 加严：直接断言"不可领取"这条真正要守的性质。
+     此前 Math.min(progress, goal) 把 999999 顶满成 progress===goal(goal 常只有 3)，
+     改一下 localStorage 就能白领奖励；这条红灯被带着提交了几十版。 */
+  assert.ok(safe.list[0].progress < safe.list[0].goal, '★ 篡改后的任务绝不能处于可领取状态');
+  assert.ok(safe.list.every(q => q.progress < q.goal || q.claimed === true), '★ 无任何任务因迁移而白白变成可领取');
   assert.equal(safe.list[1].progress, 0);
   assert.equal(JSON.stringify(run.context.S.quests).includes('<img'), false);
   assert.equal(JSON.stringify(readObject(storage, QUEST_KEY)).includes('<img'), false, '启动即覆写纯净 schema');
@@ -235,8 +240,10 @@ for (const fault of allFaults) {
     if (d2.day === '2026-7-15') break;
   }
   assert.equal(d2.day, '2026-7-15', JSON.stringify({notices:run.notices, data:storage.data}, null, 2));
-  assert.equal(d2.list.length, 7);
-  assert.equal(d2.list.every(q => q.claimed === false), true, 'D2 必须生成 7 个未领取任务');
+  /* v1060: 每日任务由 7 条扩充为 12 条（POOL 现有 12 个类型，模块内守卫为 length<12/>12）。
+     本测试的 7 是扩充前的旧值，一直红着没人改。 */
+  assert.equal(d2.list.length, 12);
+  assert.equal(d2.list.every(q => q.claimed === false), true, 'D2 必须生成 12 个未领取任务');
   assert.equal(storage.getItem(TX_KEY), null, 'D1 事务应在换日前先完成并清理');
   assert.equal(coinTotal(storage), rewardCoins, 'D1 金币恰好补发一次');
   assert.equal(Number(storage.getItem(ISLAND_XP) || 0), rewardXP, 'D1 XP 恰好补发一次');

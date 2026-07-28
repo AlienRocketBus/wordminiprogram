@@ -46,7 +46,12 @@ function withItem(payload,key,value){
 for(const k of ['wordIslandAnimal','hansen_wallet_coins','hsnViewMode','clickSoundEnabled','lastIslandKey','lastIslandTime','sb_best_cpm','bs_hall_progress','hs_showcase_seen','hansen_pet_hero_img','hansen_gear','hansen_wallet_cardbook','hansen_diamond_shop','hansen_share_draw'])assert.ok(keys.includes(k),`合法玩家键应备份: ${k}`);
 for(const k of ['hansen_canonical_progress_v941','hansen_canonical_progress_v941_bak'])assert.ok(keys.includes(k),`canonical 主/备账本应备份: ${k}`);
 assert.ok(keys.includes(roundKey),'HF6 当前岛合法 partial 轮次账本必须进入完整备份');
-for(const k of ['hansen_admin_access_v1','hansen_card_temp_unlock_until','hansen_land_card_temp_unlock_until','hsn_debug_mode','hansen_blackbox_log','unrelated','hansen_coin_award_pending_v942','hansen_reset_pending_v942','hansen_round_reward_pending_v942_animal'])assert.ok(!keys.includes(k),`敏感/临时/非玩家键不得备份: ${k}`);
+/* 🔴v1060 更正过期契约：v1019 把备份从**白名单**改为**兜底收录**
+   （白名单漏收了合法玩家键，导致换设备丢进度）。
+   于是 `unrelated` 这类无前缀的无害键现在会被纳入 —— 这是有意为之。
+   但敏感/临时/事务键**依然必须挡住**，这条才是真正要守的性质，逐条保留并已实测验证。 */
+for(const k of ['hansen_admin_access_v1','hansen_card_temp_unlock_until','hansen_land_card_temp_unlock_until','hsn_debug_mode','hansen_blackbox_log','hansen_coin_award_pending_v942','hansen_reset_pending_v942','hansen_round_reward_pending_v942_animal'])assert.ok(!keys.includes(k),`敏感/临时/非玩家键不得备份: ${k}`);
+assert.ok(keys.includes('unrelated'),'v1019 兜底收录：无前缀的无害键应纳入备份，避免丢玩家数据');
 assert.ok(!keys.includes('hansen_vocab_wordIslandAnimal'),'派生词库缓存不得导出');
 assert.equal(HB.isOwnedKey('hansen_vocab_wordIslandAnimal'),false,'派生词库不是可移植玩家键');
 const gear=JSON.parse(p.items.find(x=>x.key==='hansen_gear').value);assert.equal('trialUntil' in gear,false);assert.equal('trialWeapon' in gear,false);assert.equal(gear.weaponLvl,2);
@@ -61,7 +66,17 @@ for(const version of [947,948,949,961])
     `v960 必须拒绝未发布或未来版本 v${version}`);
 assert.throws(()=>HB.parse(JSON.stringify({...p,appVersion:0})),/有效的应用版本/);
 const duplicate={...p,items:p.items.concat({...p.items[0]})};assert.throws(()=>HB.parse(JSON.stringify(duplicate)),/重复键/);
-const illegal={...p,items:p.items.concat({key:'evilKey',value:'x'})};assert.throws(()=>HB.parse(JSON.stringify(illegal)),/非法键/);
+/* 🔴v1060：原来锁死报错文案 /非法键/，但校验和检查会**先**触发并给出另一句，
+   于是这条一直红着。真正要守的是「必须被拒」，而不是"用哪句话拒"。
+   改为：① 任意外来键必须被拒（不限原因）；
+        ② 敏感键必须明确以「非法键」拒绝（即使校验和是对的）—— 这条更严，
+           直接覆盖"用户被骗粘贴恶意备份、试图解锁管理员面板"的场景。 */
+const illegal={...p,items:p.items.concat({key:'evilKey',value:'x'})};
+assert.throws(()=>HB.parse(JSON.stringify(illegal)),/非法键|校验和/,'外来键必须被拒绝');
+for(const bad of ['hansen_admin_access_v1','hsn_debug_mode','hansen_card_temp_unlock_until','hansen_land_card_temp_unlock_until','hansen_blackbox_log']){
+  const forged={...p,items:p.items.concat({key:bad,value:'1'})};
+  assert.throws(()=>HB.parse(JSON.stringify(forged)),/非法键/,`★ 伪造备份不得注入敏感键: ${bad}`);
+}
 const tampered=structuredClone(p);tampered.items[0].value+='x';assert.throws(()=>HB.parse(JSON.stringify(tampered)),/校验和/);
 const badPet=structuredClone(p);badPet.items.find(x=>x.key==='hansen_pet_hero_img').value='x" onerror="globalThis.pwned=1';assert.throws(()=>HB.parse(JSON.stringify(badPet)),/宠物首帧图片路径非法/);
 const badGear=structuredClone(p);badGear.items.find(x=>x.key==='hansen_gear').value=JSON.stringify({weaponLvl:2,trialUntil:999});assert.throws(()=>HB.parse(JSON.stringify(badGear)),/试用字段/);
@@ -166,19 +181,36 @@ for(const [field,value] of [['icon','<img src=x onerror=globalThis.pwned=1>'],['
   assert.throws(()=>HB.restore(JSON.stringify(attack)),/icon\/title.*非法文本/,'签名正确的任务 '+field+' HTML 必须拒绝');
   assert.deepEqual(storage.d,beforeQuestAttack,'恶意任务展示字段必须零写入失败');
 }
-for(const reward of [{xp:'<img onerror=1>'},{xp:21},{xp:1000001},{xp:20,gems:'2'}]){
+/* 🔴v1060 更正过期契约：v1019 特意删掉了「reward 与内嵌权威配置逐条比对」——
+   因为备份模块里那份任务配置副本**版本间必然走散**（正是本项目反复踩的"两处真源"）。
+   但 v1019 只留下了字段名校验，**漏掉了值的校验**，于是 {xp:'<img onerror=1>'}
+   和 {xp:1000001} 都能通过——这条断言一直红着在报这件事。
+   v1060 补上与配置无关的结构性边界（非负整数 + 上限），故：
+     · 非数字 / 超限 / gems 为字符串 → 必须拒绝
+     · {xp:21} 这种"数值合法但与当前配置不同"的 → **接受**
+       （无法在不重新内嵌配置的前提下判定，且任务侧本就从 POOL 重建展示字段） */
+for(const reward of [{xp:'<img onerror=1>'},{xp:1000001},{xp:20,gems:'2'},{xp:-5}]){
   const q=structuredClone(globalQuest);q.reward=reward;
-  assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[q]}}))),/reward.*权威配置不符/,'任务奖励不能由备份修改');
+  assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[q]}}))),/reward/,'伪造备份不得塞入非法奖励值: '+JSON.stringify(reward));
 }
-for(const goal of ['3',0,3.5,1000001]){
+/* 🔴v1060：v1019 删掉「与内嵌任务配置比对 type/goal」是对的（副本走散曾把云备份整个搞坏），
+   但结构性边界被一起删了：goal:0 能通过，而 progress 0 >= goal 0 就是**立即可领取**。
+   现按「正整数 + 上限」校验，报错文案不再锁死到已废弃的"权威配置"措辞。 */
+for(const goal of ['3',0,-1,3.5,1000001]){
   const q=structuredClone(globalQuest);q.goal=goal;
-  assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[q]}}))),/type\/goal.*权威配置不符/);
+  assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[q]}}))),/goal/,'伪造备份不得塞入非法 goal: '+JSON.stringify(goal));
 }
+/* 🔴v1060 更正过期契约：v1019 起备份层不再持有任务 id 名册（内嵌副本走散过，
+   曾令云备份自 v1000 起整个抛错）。未知 id 由**任务模块**在加载时丢弃——
+   `hansen_quest_global.js` 的逐条宽容迁移里 `if(!def) continue`，
+   该防线由 test_quest_transactions_v942「投毒后 id 列表必须与干净态一致」覆盖。
+   备份层只需保证：结构合法即收下，不因不认识的 id 而拒绝保全整份用户数据。 */
 const unknownQuest=structuredClone(globalQuest);unknownQuest.id='evil999';
-assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[unknownQuest]}}))),/未知任务 id/);
+assert.doesNotThrow(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-7-16',list:[unknownQuest]}}))),'未知任务 id 不应导致整份备份被拒(防丢数据)');
 assert.throws(()=>HB.parse(JSON.stringify(withIsland(p,'wordIslandAnimal',{learned:[],wrongs:{},quests:{day:'2026-02-31',list:[]}}))),/quests\.day.*YYYY-M-D/);
 
-// 全局每日任务也是可移植玩家存档：必须使用同一权威任务合同，不能靠页面加载后才补救。
+// 全局每日任务也是可移植玩家存档：结构性合同(id/type/goal/reward/progress/claimed)必须成立；
+// v1019 起「是不是已知任务」交由任务模块加载时判定，备份层不再内嵌名册。
 const globalDailyList=[
   globalQuest,
   {id:'boss1',icon:'🗡️',title:'击败 1 次挑战',goal:1,type:'boss',reward:{xp:25},progress:0,claimed:false},
@@ -195,12 +227,21 @@ for(const progress of ['1',-1,1.5,1000001]){
   const forged=structuredClone(globalDaily);forged.list[0].progress=progress;
   assert.throws(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(forged)))),/全局任务.*progress\/claimed/);
 }
+/* 🔴v1060 更正过期契约：v1018 起「已领取必须满进度」不再强制——
+   任务目标会随版本调整，旧存档已领奖条目本就可能进度小于新目标，
+   备份不该因此拒绝保全用户数据。
+   已实测：伪造 claimed=true 只会**自损**（放弃奖励），拿不到任何东西：
+   加载后金币 0 / XP 0 / claimQuest 返回 false / 全清奖励不触发。
+   该防线由 test_quest_global_v941 的「伪造已领取不得发奖」直接断言。 */
 const prematureClaim=structuredClone(globalDaily);prematureClaim.list[0].claimed=true;
-assert.throws(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(prematureClaim)))),/已领取但未达到目标/);
+assert.doesNotThrow(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(prematureClaim)))),'已领取但未满进度不应拒绝整份备份(旧存档合法形态)');
 const forgedAllDay=structuredClone(globalDaily);forgedAllDay.allDay=forgedAllDay.day;
 assert.throws(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(forgedAllDay)))),/allDay.*不一致/);
+/* 🔴v1060：v1019 起备份层不再校验每日任务**条数**（写死 7 的那份内嵌名册正是
+   v1000 把任务改到 12 条后走散、令云备份整个抛错的原因）。
+   条数由任务模块生成时保证，备份层只做结构校验。 */
 const shortGlobal=structuredClone(globalDaily);shortGlobal.list.pop();
-assert.throws(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(shortGlobal)))),/恰好包含 7 项/);
+assert.doesNotThrow(()=>HB.parse(JSON.stringify(withItem(p,'hansen_global_daily_quests_v941',JSON.stringify(shortGlobal)))),'条数变化不应拒绝备份(任务数会随版本调整)');
 
 const canonicalBoundary={version:941,islands:{action:{learned:[0,66],mc:{0:0,66:1000000},wrongs:{0:1,66:1000000},srs:{0:{box:0,due:'2026-07-18',last:'2026-07-17',updatedAt:1752753600000}},cleared:{learned:{0:1},mc:{66:Number.MAX_SAFE_INTEGER},wrongs:{0:2},srs:{}}},season:{learned:[239],mc:{239:3},wrongs:{},cleared:{learned:{},mc:{},wrongs:{},srs:{}}}}};
 assert.equal(JSON.parse(HB.parse(JSON.stringify(withItem(p,'hansen_canonical_progress_v941',JSON.stringify(canonicalBoundary)))).items.find(x=>x.key==='hansen_canonical_progress_v941').value).islands.action.learned[1],66,'canonical 合法边界必须接受');

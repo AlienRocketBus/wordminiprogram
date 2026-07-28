@@ -29,8 +29,13 @@ for (const page_url of ['island_animal.html','spelling_pk.html']) {
   });
   ok(r.auth && r.cloud && r.backup, `[${page_url}] 账号/云存档/备份 三模块同页齐备`);
   ok(r.signedIn, `[${page_url}] 能读到登录态`);
-  ok(r.uid==='UID-TEST-777', `[${page_url}] 云存档能读到账号 uid: ${r.uid||'(空)'}`);
-  ok(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(r.key), `[${page_url}] 密钥格式合法: ${r.key}`);
+  /* 🔴v1060 更正过期契约：v1047 特意把账号标识从 uid 改为**手机号**——
+     uid 是会话产物，两台设备上并不相同，用它推导密钥导致换设备读不回存档。
+     密钥格式也已改为 16 位无横线（与用户真机截图的 BENBH0C67SYSSYPR 一致）。 */
+  ok(/^p:\d{6,}$/.test(r.uid), `[${page_url}] 账号标识为手机号派生(v1047): ${r.uid||'(空)'}`);
+  /* 存储形态是 4-4-4-4 带横线；诊断面板显示时会去掉横线（用户截图里的
+     BENBH0C67SYSSYPR 即为去横线形态）。两种都算合法，不过拟合任一种。 */
+  ok(/^([A-Z0-9]{4}-){3}[A-Z0-9]{4}$|^[A-Z0-9]{16}$/.test(r.key), `[${page_url}] 密钥格式合法: ${r.key}`);
   await page.close();
 }
 /* 两页在同一账号下必须推出同一把密钥 —— 这是"换设备能找回"的根本 */
@@ -45,6 +50,31 @@ for (const u of ['island_animal.html','spelling_pk.html']) {
   await page.close();
 }
 ok(keys[0] && keys[0]===keys[1], `同账号在不同页面推出同一密钥: ${keys[0]} / ${keys[1]}`);
+/* ═══ 🔴v1060 新增：同手机号 + 不同 uid → 必须得到同一把密钥 ═══
+   这正是 v1047 存在的理由（uid 跨设备会变），也是"换手机进度没了"的直接成因。
+   test_stable_ident_v1047 在模块层覆盖过，这里在**真实页面**上再守一道，
+   因为本轮反复出现"模块层对、页面上接线不对"的情况。 */
+{
+  const keys = [];
+  for (const fakeUid of ['UID-DEVICE-A', 'UID-DEVICE-B']) {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.addInitScript((u) => {
+      localStorage.clear();
+      localStorage.setItem('hansen_auth_v1004', JSON.stringify({
+        method: 'phone', phone: '+8613800138000', signedAt: Date.now(), uid: u }));
+    }, fakeUid);
+    await page.goto(`http://127.0.0.1:${port}/spelling_pk.html`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2600);
+    keys.push(await page.evaluate(() => {
+      const CS = window.HansenCloudSave;
+      return { uid: CS && CS.accountUid ? CS.accountUid() : '', key: CS && CS.ensureKey ? CS.ensureKey() : '' };
+    }));
+    await page.close();
+  }
+  ok(keys[0].uid === keys[1].uid, `★ 同手机号不同 uid → 标识一致: ${keys[0].uid} / ${keys[1].uid}`);
+  ok(!!keys[0].key && keys[0].key === keys[1].key, `★ 同手机号不同 uid → 密钥一致(换设备能读回): ${keys[0].key} / ${keys[1].key}`);
+}
+
 await browser.close(); srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail===0?0:1);

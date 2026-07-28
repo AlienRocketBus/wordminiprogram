@@ -69,8 +69,16 @@ console.log('T3 同步');
   const id = await D.docIdOf(k);
   const row = cloud.get(id);
   ok(!!row && row.payload && row.payload.ct && !JSON.stringify(row).includes(exportBody), '云端仅存密文(零知识)');
+  /* 🔴v1060 更正过期契约：v1039 特意规定 **force 一律真写**。
+     原因是原逻辑"内容指纹未变就跳过，连 force 也跳"——
+     地址算法或账号变更后，用户点「立刻上传」看到成功、实际一字未写。
+     所以这里 force 第二次必须**不跳过**；而"内容未变才跳过"只适用于非 force。 */
   const r2 = await M.syncNow({ force: true });
-  ok(r2.ok === true && r2.skipped === true, '内容未变→跳过上传');
+  ok(r2.ok === true && r2.skipped !== true, 'force 必须真写，绝不因指纹未变而跳过(v1039)');
+  /* v1039 的原话是「force 只绕过冷却，不制造重复流量」。
+     紧跟一次 force 之后的非 force 同步应当被**冷却**挡下 —— 这才是防刷流量的那道闸。 */
+  const rSkip = await M.syncNow({});
+  ok(rSkip.ok === false && rSkip.reason === 'cooldown', '非 force 同步受冷却保护，不制造重复流量');
   exportBody = 'BACKUP-CODE-v965-B';
   const r3 = await M.syncNow({});
   ok(r3.ok === false && r3.reason === 'cooldown', '45s 冷却生效(非强制)');

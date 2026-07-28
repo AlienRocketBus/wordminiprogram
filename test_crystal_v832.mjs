@@ -1,6 +1,20 @@
 import { chromium } from './playwright_loader.mjs';
 
-const PORT = 8941;
+import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
+/* 🔴v1060：本测试原先写死 PORT=8941 并**假设外部已经起好了服务**，
+   套件里其他测试都是自己 srv.listen(0) 起临时服务。
+   这个隐藏的外部依赖让它一直 ERR_CONNECTION_REFUSED、长期红着没人管。
+   改为自托管：与其余测试一致，随处可跑。 */
+const ROOT = '/home/claude/work/repo';
+const MIME = {'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json',
+  '.css':'text/css','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.mp3':'audio/mpeg','.svg':'image/svg+xml'};
+const srv = http.createServer((req,res)=>{
+  let p = decodeURIComponent(req.url.split('?')[0]); if (p === '/') p = '/index.html';
+  fs.readFile(path.join(ROOT,p),(e,d)=>{ if(e){res.writeHead(404);res.end();return;}
+    res.writeHead(200,{'content-type':MIME[path.extname(p)]||'application/octet-stream'}); res.end(d); });
+});
+await new Promise(r=>srv.listen(0,r));
+const PORT = srv.address().port;
 const URL = `http://127.0.0.1:${PORT}/island_animal.html`;
 
 const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH });
@@ -194,7 +208,7 @@ const results = await page.evaluate(() => {
   return R;
 });
 
-await browser.close();
+await browser.close(); srv.close();
 
 console.log('\n========== v832 知识结晶引擎 详尽测试 ==========\n');
 let passN = 0, failN = 0;

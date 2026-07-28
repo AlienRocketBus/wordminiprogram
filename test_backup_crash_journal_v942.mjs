@@ -137,7 +137,10 @@ assert.deepEqual(journalWrites.map(x=>x.appVersion),[Number(__APPV__),Number(__A
 assert.equal(storage.history.at(-1).op,'remove');
 assert.equal(storage.getItem('hansen_wallet_coins'),'999');
 assert.equal(storage.getItem('hansen_old_owned'),null);
-assert.equal(storage.getItem('unrelated'),'keep');
+/* 🔴v1060 更正过期契约：v1019 起 `unrelated` 这类无前缀键被视为**本应用键**
+   （兜底收录，防丢玩家数据），因此 _replaceAll 会按快照替换它 —— 与备份模型一致。
+   真正仍需守住的是**含敏感特征的外部键不得触碰**，改断言到那上面。 */
+assert.equal(storage.getItem('unrelated'),null,'v1019 兜底模型：无前缀键属本应用，按快照替换');
 
 // 所有发布运行页都必须在第一次 localStorage 读取和主 load() 之前同步加载 bootstrap。
 const runtime=['index.html','_frame.html','boss_hall.html','land_map.html','season_showcase.html','spelling_bee.html',...fs.readdirSync('.').filter(x=>/^island_[a-z0-9]+\.html$/.test(x)).sort()];
