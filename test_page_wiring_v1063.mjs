@@ -54,6 +54,9 @@ for (const n of pages) {
     restore: has('hansen_cloud_restore'),
     gate: has('hansen_signup_gate'),
     vol: has('hansen_tts_volume'),
+    pkEntry: has('hansen_sb_pk_v1022') || /id="pkRooms"/.test(code),
+    pkRoom: has('hansen_pk_room_v1065'),
+    pkRoomUi: has('hansen_pk_room_ui_v1065'),
     volDeferred: /<script[^>]*\bdefer\b[^>]*hansen_tts_volume|<script[^>]*hansen_tts_volume[^>]*\bdefer\b/.test(code)
   };
 }
@@ -98,6 +101,18 @@ for (const n of pages) {
     const bad = pages.filter(n => /^island_land[1-8]\.html$/.test(n) && info[n][key] !== ref[key]);
     ok(bad.length === 0, `★ 8 个 Land 页与常规岛的 ${key} 一致${bad.length ? ' —— 不一致: ' + bad.join(', ') : ''}`);
   }
+}
+
+/* ═══ ④b 有 PK 入口 → 必须有房间模块（v1065）═══
+   「公开房间」按钮点了没反应，就是因为页面没带上房间服务/界面。
+   这条同样自动枚举，新增页面不改测试也会被覆盖。 */
+{
+  const withEntry = pages.filter(n => info[n].pkEntry);
+  ok(withEntry.length >= 20, `有 PK 入口的页面共 ${withEntry.length} 个`);
+  const noSvc = withEntry.filter(n => !info[n].pkRoom);
+  const noUi = withEntry.filter(n => !info[n].pkRoomUi);
+  ok(noSvc.length === 0, `★ 有 PK 入口的页面都带房间服务${noSvc.length ? ' —— 缺: ' + noSvc.join(', ') : ''}`);
+  ok(noUi.length === 0, `★ 有 PK 入口的页面都带房间界面${noUi.length ? ' —— 缺: ' + noUi.join(', ') : ''}`);
 }
 
 /* ═══ ⑤ 资源戳必须全仓统一（v1063）═══

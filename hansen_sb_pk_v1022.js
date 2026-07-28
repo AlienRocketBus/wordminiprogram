@@ -191,7 +191,21 @@
     if (q('kDiag')) q('kDiag').onclick = function () {
       try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else alert('自检模块未加载'); } catch (e) {}
     };
-    if (q('kRooms')) q('kRooms').onclick = soon;
+    /* 🔴v1065: 公开房间不再是「敬请期待」——接到真正的房间匹配上。
+       天梯排位仍在做，保留 soon()。 */
+    if (q('kRooms')) q('kRooms').onclick = function () {
+      if (!window.HansenPkRoomUI) { alert('房间模块未加载，请刷新页面再试'); return; }
+      if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return; }
+      try {
+        var A = window.HansenAuth;
+        if (!A || !A.isSignedIn || !A.isSignedIn()) {
+          alert('联机需要先登录，登录后进度和战绩都会跟着账号走。');
+          if (window.HansenAuthUI) HansenAuthUI.open();
+          return;
+        }
+      } catch (e) {}
+      HansenPkRoomUI.open();
+    };
     if (q('kLadder')) q('kLadder').onclick = soon;
   }
 
