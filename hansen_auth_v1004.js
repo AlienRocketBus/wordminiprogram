@@ -533,6 +533,19 @@
       return { ok: false, definite: false, reason: errText(e) };
     }).then(function (r) {
       if (!r.ok && r.definite) {
+        /* 🔴v1063 竞态防线：刚登录完的一小段时间内**绝不清本地标记**。
+           场景：登录成功写下 signedAt → 后台的开机恢复几乎同时调 ensureSession()
+           → 此刻 SDK 会话可能还没落定，getLoginState() 给出鉴权类错误
+           → 按"确凿失效"处理就会把**刚刚建立的登录态**抹掉，
+              用户看到的是"明明刚登录成功，一转眼又退出了"。
+           test_phone_signup_v1057 三跑一红的抖动，正是撞上这条竞态。
+           60 秒新鲜期内只拒绝本次操作、不动标记；真过期了下次自然会再判。 */
+        var fresh = false;
+        try {
+          var lc0 = readLocal();
+          fresh = !!(lc0 && lc0.signedAt && (Date.now() - lc0.signedAt) < 60000);
+        } catch (e0) {}
+        if (fresh) return r;
         writeLocal({ method: '', signedAt: 0, uid: '' });
         /* 清了标记还必须广播出去，否则界面上那句「已登录 +86 186xxxx」
            会一直挂到下次刷新——这正是本轮 bug 最刺眼的表象：

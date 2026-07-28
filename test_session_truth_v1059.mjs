@@ -125,7 +125,9 @@ function mkAuth() {
   const { win, store } = mkAuth();
   const A = win.HansenAuth;
   const LK = 'hansen_auth_v1004';
-  store.setItem(LK, JSON.stringify({ method: 'phone', signedAt: Date.now(), uid: 'U1' }));
+  /* v1063: signedAt 取 10 分钟前——刚登录的 60 秒新鲜期内**故意不清标记**
+     （防「刚登录成功一转眼又退出」的竞态），这里要测的是过期后的行为。 */
+  store.setItem(LK, JSON.stringify({ method: 'phone', signedAt: Date.now() - 600000, uid: 'U1' }));
   A._setAuthForTest({
     getLoginState: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' })
   });
@@ -140,7 +142,7 @@ function mkAuth() {
 {
   const { win, store, events } = mkAuth();
   const A = win.HansenAuth;
-  store.setItem('hansen_auth_v1004', JSON.stringify({ method: 'phone', phone: '+86 18661320035', signedAt: Date.now(), uid: 'U1' }));
+  store.setItem('hansen_auth_v1004', JSON.stringify({ method: 'phone', phone: '+86 18661320035', signedAt: Date.now() - 600000, uid: 'U1' }));
   A._setAuthForTest({
     getLoginState: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' })
   });
@@ -230,6 +232,23 @@ function mkAuth() {
   ok(/EText/.test(codeOnly(rest)) && /reportFail/.test(codeOnly(rest)), '恢复模块提供 EText + reportFail');
   ok(/HansenAuthUI/.test(codeOnly(rest)), '★ 会话过期时能把用户引到登录面板（不再是死路弹窗）');
   ok(/reportFail/.test(codeOnly(pk)), 'PK 页复用统一报错出口');
+}
+
+/* ═══ 🔴v1063 新增：刚登录的 60 秒内绝不因一次探测失败就登出 ═══
+   真机场景：登录成功写下 signedAt → 开机恢复几乎同时调 ensureSession()
+   → SDK 会话尚未落定，getLoginState() 给出鉴权类错误
+   → 若按"确凿失效"清标记，用户看到的是"刚登录成功，一转眼又退出了"。 */
+{
+  const { win, store, events } = mkAuth();
+  const A = win.HansenAuth;
+  store.setItem('hansen_auth_v1004', JSON.stringify({ method: 'phone', signedAt: Date.now(), uid: 'U1' }));
+  A._setAuthForTest({
+    getLoginState: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' })
+  });
+  const r = await A.ensureSession();
+  ok(r.ok === false, '新鲜期内依然拒绝本次云端操作');
+  ok(A.isSignedIn() === true, '★ 刚登录的 60 秒内绝不清标记（防"刚登录就被登出"）');
+  ok(!events.some(e => e.type === 'hsn-auth-changed'), '★ 新鲜期内不发登出广播');
 }
 
 console.log(`\n通过 ${pass} / 失败 ${fail}`);

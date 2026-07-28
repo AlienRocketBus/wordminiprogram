@@ -25,10 +25,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 BANNED = {961, 962}
 
-STANDALONE_HTML = [
-    "template.html", "index.html", "_frame.html", "boss_hall.html", "check.html",
-    "land_map.html", "season_showcase.html", "spelling_bee.html",
-] + [f"island_land{i}.html" for i in range(1, 9)]
+# 🔴v1061: 原先是**手工维护的清单**，而 spelling_pk.html 从来就没被登记进来——
+#   于是它的 10 个脚本资源戳自 v1004/v1021 起再没被更新过。浏览器与 Service Worker
+#   按完整 URL 缓存，URL 永不变就一直供着当年缓存的旧文件内容：
+#   同一份 hansen_auth 在岛屿页是最新版、在 PK 页却可能还停在 v1004 时代，且毫无报错。
+#   手工清单必然走散（本项目已反复踩到），改为**自动枚举**：
+#   除 19 个由 generate.py 从 template 重盖的常规岛外，其余 HTML 全部纳入。
+#   8 个 Land 页是手工维护、不由 generate 生成，因此必须留在这里。
+def _standalone_html() -> list[str]:
+    out = []
+    for p in sorted(ROOT.glob("*.html")):
+        n = p.name
+        if n.startswith("island_") and not n.startswith("island_land"):
+            continue          # 由 generate.py 从 template 重新盖章生成
+        out.append(n)
+    return out
 
 RUNTIME_CONSTANT_FILES = {
     "hansen_boss_lock.js": [
@@ -75,15 +86,26 @@ def main() -> None:
         return updated
 
     # ── 1) 资源戳：根目录全部 html/js/json（测试与生成岛除外；岛由 generate 重盖）──
-    stamp_old, stamp_new = f"?v={old}", f"?v={new}"
-    stamp_files = [ROOT / n for n in STANDALONE_HTML] + [ROOT / "island_data.json"]
+    # 🔴v1061: 原先只做 "?v=<上一版> → ?v=<新版>" 的字面替换，**替不到落后多版的戳**。
+    #   后果：spelling_pk.html 的 10 个脚本自 v1004/v1021 起再没被更新过。
+    #   浏览器与 Service Worker 按**完整 URL** 缓存——URL 永不变，就一直供着
+    #   当年缓存的旧文件内容。于是同一份 hansen_auth 在岛屿页是最新版、
+    #   在 PK 页却可能还停在 v1004 时代，且不会有任何报错提示。
+    #   （与 v1059 "多一个 ?v= 让 SDK 分裂成两份" 属同一类问题。）
+    #   改为**正则归一**：任何 ?v=<数字> 一律拉到当前版本，落后多少版都追得上。
+    stamp_re = re.compile(r"\?v=\d+")
+    stamp_new = f"?v={new}"
+    stamp_files = [ROOT / n for n in _standalone_html()] + [ROOT / "island_data.json"]
     stamp_files += [p for p in ROOT.glob("*.js") if not p.name.startswith("test_")]
     for p in stamp_files:
         if not p.exists():
             continue
         raw = read(p)
-        if stamp_old in raw:
-            apply(p, raw, raw.replace(stamp_old, stamp_new), f"资源戳 ×{raw.count(stamp_old)}")
+        stale = [m.group(0) for m in stamp_re.finditer(raw) if m.group(0) != stamp_new]
+        if stale:
+            behind = sorted({s for s in stale if s != f"?v={old}"})
+            note = f"资源戳 ×{len(stale)}" + (f"（追回落后戳 {behind}）" if behind else "")
+            apply(p, raw, stamp_re.sub(stamp_new, raw), note)
 
     # ── 2) SW 代际轮换 + 测试同步 ──
     sw_path = ROOT / "sw_v944.js"
