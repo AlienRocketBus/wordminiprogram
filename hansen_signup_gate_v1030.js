@@ -37,8 +37,20 @@
   function cloudReady() {
     try { var c = window.HANSEN_CLOUD_CONFIG; return !!(c && c.envId); } catch (e) { return false; }
   }
-  /* 需要拦截：达到门槛 + 未登录 + 云服务可用（云没开通就别把人堵死） */
-  function shouldGate() { return xp() >= GATE_XP && !signedIn() && cloudReady(); }
+  /* 🔴v1069：**强制注册门槛已按产品决定关闭。**
+     原设计：升到 Lv.3 就弹出不可关闭的硬门槛，必须注册才能继续玩。
+     关闭原因：它把"先玩后注册"的体验切断在最有兴致的那一刻，
+     而账号的真正价值（跨设备找回进度）应该靠**提示**去吸引，不该靠**堵路**去逼迫。
+
+     代码整套保留、模块照常加载，只是不再触发——
+     想恢复只需把下面这行改成 true，其余逻辑（面板、z-index 修正、
+     登录后放行、云未开通不堵人）都还在，且回归测试仍在守着它们。
+     直接删模块的话，未来想开回来要重写一遍，还会连带破坏
+     test_page_wiring 的"有云存档的页面都要带门槛模块"这条接线合同。 */
+  var GATE_ENABLED = false;
+
+  /* 需要拦截：门槛开启 + 达到等级 + 未登录 + 云服务可用（云没开通就别把人堵死） */
+  function shouldGate() { return GATE_ENABLED && xp() >= GATE_XP && !signedIn() && cloudReady(); }
 
   function progressLine() {
     var islands = 0, learned = 0;
@@ -159,6 +171,11 @@
   else start();
 
   window.HansenSignupGate = {
+    _enabled: function () { return GATE_ENABLED; },
+    /* v1069 测试注入口：门槛虽已关闭，但面板逻辑（硬门槛不可关、文案、
+       进度明细、z-index 高于登录面板）必须继续被回归守着——
+       否则将来想开回来时，这些早就悄悄坏掉了。 */
+    _setEnabledForTest: function (v) { GATE_ENABLED = !!v; },
     GATE_LV: GATE_LV, GATE_XP: GATE_XP,
     shouldGate: shouldGate, check: check, show: show, hide: hide,
     _xp: xp, _level: level

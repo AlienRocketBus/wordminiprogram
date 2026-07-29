@@ -22,6 +22,15 @@ await page.addInitScript(()=>{ localStorage.clear();
 });
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(3200);
+/* 🔴v1069：门槛已按产品决定关闭（GATE_ENABLED=false），默认不再弹出。
+   但本测试守的是 v1054 那个事故——「点门槛里的注册按钮没反应」
+   （登录面板 z-index 2147483500 被门槛 2147483640 整个盖住，且门槛不可关，
+    加上每 1.5s 巡检把面板顶掉，用户彻底卡死）。
+   这条防线绝不能因为门槛暂时关闭就丢掉：一旦将来把 GATE_ENABLED 改回 true，
+   z-index 压反随时可能复发。故强制开启后再验。 */
+await page.evaluate(()=>{ window.HansenSignupGate._setEnabledForTest(true);
+  window.dispatchEvent(new Event('storage')); });
+await page.waitForTimeout(1600);
 await page.evaluate(()=>{ document.getElementById('gGo').click(); });
 await page.waitForTimeout(1200);
 /* 关键：模拟真实用户点击输入框并打字 */
