@@ -476,6 +476,59 @@ def guard_land_generated():
                 bad('Land 印章', ln.strip()[:150])
 
 
+
+def guard_jarvis_not_stale():
+    """贾维斯必须跟着版本走 —— 它得能自己发现「我落后了」。
+
+    背景：贾维斯的老知识库记到 BUG #110、版本停在 v999 之前，
+    而项目当时已到 v1068 —— **落后近七十版，而没有任何机制会说一声**。
+    「随时更新、随时进化」如果靠人记得，一定会丢（v1059~v1069 连丢十一版就是证据）。
+
+    所以让它自查三件事：
+      ① 事故登记册必须覆盖到最近的版本（不能停在很久以前）
+      ② 知识库必须记录了当前这一代的教训
+      ③ 新增的运行时模块不能没有任何守卫/测试提到它（无人看守的新代码）
+    """
+    ver = _appv()
+    try:
+        cur = int(str(ver))
+    except Exception:
+        return
+
+    # ① 登记册的最新版本不能落后当前版本太多
+    reg = _read('hansen_bug_registry.py')
+    if not reg:
+        bad('贾维斯落后', '缺少事故登记册 —— 没有任何机制保证「每个修复都有守卫」')
+    else:
+        vs = [int(m) for m in re.findall(r"\('v(\d+)'", reg)]
+        if vs and cur - max(vs) > 3:
+            bad('贾维斯落后',
+                '事故登记册最新记到 v%d，当前已 v%d —— 落后 %d 版，近期修复可能无人看守'
+                % (max(vs), cur, cur - max(vs)))
+
+    # ② 知识库要跟得上
+    kb = _read('贾维斯_知识库.md')
+    if kb:
+        vs = [int(m) for m in re.findall(r'v(\d{3,4})', kb)]
+        if vs and cur - max(vs) > 10:
+            bad('贾维斯落后',
+                '知识库最新提到 v%d，当前已 v%d —— 落后 %d 版' % (max(vs), cur, cur - max(vs)))
+
+    # ③ 新模块不能无人看守
+    watched = _read('hansen_guards_v1068.py') + reg
+    for f in sorted(glob.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        base = os.path.basename(f)
+        m = re.search(r'_v(\d{4})\.js$', base)
+        if not m:
+            continue
+        born = int(m.group(1))
+        if born < 1059 or cur - born > 12:
+            continue          # 太老的不追溯；太新的给几版缓冲
+        stem = base[:-3]
+        if stem not in watched and not glob.glob(os.path.join(ROOT, 'test_*%s*' % stem.split("_v")[0][7:])):
+            bad('贾维斯落后', '%s 是近期新增模块，却没有任何守卫或测试提到它' % base)
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -494,6 +547,8 @@ GUARDS = [
     ('Land 内容一致',  guard_land_content_parity),
     # 🔴v1073 治本
     ('Land 印章生成',  guard_land_generated),
+    # 🔴v1074 自我察觉
+    ('贾维斯不落后',   guard_jarvis_not_stale),
 ]
 
 

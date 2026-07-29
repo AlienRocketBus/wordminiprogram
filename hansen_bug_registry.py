@@ -76,6 +76,12 @@ REGISTRY = [
      'guard_land_content_parity'),
     ('v1073', '治本：Land 页手工维护导致同一件事被漏六次，改为从母版盖章生成',
      'guard_land_generated'),
+    ('v1074', '母版未纳入盖戳清单，generate_land 用旧戳母版把刚盖好的戳冲回去',
+     'guard_stamp_uniform'),
+    ('v1074', '守卫自己坏了会永远显示绿灯，而它该守的 bug 可大摇大摆复发',
+     'jarvis_selftest.py'),
+    ('v1074', '贾维斯知识库曾落后近七十版而无人察觉',
+     'guard_jarvis_not_stale'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

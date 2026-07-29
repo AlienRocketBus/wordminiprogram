@@ -53,7 +53,8 @@ def _guards_fingerprint():
     """守卫文件指纹 —— 守卫改了却没重跑，旧凭证必须作废，
     否则会出现「用旧体检结论给新守卫背书」。"""
     h = ''
-    for f in ('hansen_guards_v1068.py', 'check_resources.py', 'hansen_bug_registry.py'):
+    for f in ('hansen_guards_v1068.py', 'check_resources.py', 'hansen_bug_registry.py',
+                  'jarvis_selftest.py'):
         p = os.path.join(ROOT, f)
         if os.path.exists(p):
             h += hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
@@ -116,6 +117,21 @@ def main():
             return 1
     else:
         print('\n  ⚠️ 缺少 hansen_bug_registry.py —— 无人保证「每个修复都有守卫」。')
+
+    # ── 第一档三分之二：守卫自证 ──
+    #   「守卫全绿 ≠ 没 bug」的后半句：一道守卫如果自己坏了，
+    #   它会安安静静地永远显示 ✅，而它本该守着的 bug 可以大摇大摆地复发。
+    #   所以每次发版前，让每道守卫都咬一次故障样本证明自己还活着。
+    st = os.path.join(ROOT, 'jarvis_selftest.py')
+    if os.path.exists(st):
+        print('\n▶ 第一档⅔：守卫自证（每道守卫必须真的会咬人）\n')
+        if subprocess.run([sys.executable, st], cwd=ROOT).returncode != 0:
+            if os.path.exists(PASS_FILE):
+                os.remove(PASS_FILE)
+            print('\n🚫 有守卫已失灵 —— 已作废发布凭证。')
+            return 1
+    else:
+        print('\n  ⚠️ 缺少 jarvis_selftest.py —— 没人证明守卫还会咬人。')
 
     # ── 第二档：既有问题不许变多 ──
     print('\n▶ 第二档：既有问题总数（不许比基线多）\n')

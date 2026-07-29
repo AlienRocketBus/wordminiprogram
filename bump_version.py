@@ -36,6 +36,8 @@ def _standalone_html() -> list[str]:
     out = []
     for p in sorted(ROOT.glob("*.html")):
         n = p.name
+        if n == "land_template.html":
+            continue          # 母版：由上面单列盖戳，不作为发布页
         if n.startswith("island_") and not n.startswith("island_land"):
             continue          # 由 generate.py 从 template 重新盖章生成
         out.append(n)
@@ -95,7 +97,13 @@ def main() -> None:
     #   改为**正则归一**：任何 ?v=<数字> 一律拉到当前版本，落后多少版都追得上。
     stamp_re = re.compile(r"\?v=\d+")
     stamp_new = f"?v={new}"
+    # 🔴v1074：land_template.html / land_data.json 必须一并盖戳。
+    #   v1073 把 Land 页改成从母版生成后出现的新顺序问题：
+    #   先给 island_land*.html 盖了新戳，随后 generate_land 拿**旧戳的母版**
+    #   重新盖章，等于把刚盖好的戳又冲回去 —— bump 自检当场报「旧戳残留」。
+    #   印章体系下，母版和数据才是真源，戳必须盖在真源上。
     stamp_files = [ROOT / n for n in _standalone_html()] + [ROOT / "island_data.json"]
+    stamp_files += [ROOT / "land_template.html", ROOT / "land_data.json"]
     stamp_files += [p for p in ROOT.glob("*.js") if not p.name.startswith("test_")]
     # 🔴v1067: 守卫脚本也必须纳入资源戳迁移。
     #   check_resources.py 里写死了 **68 处 `?v=960`**，是 v960 那会儿写的，之后再没更新——

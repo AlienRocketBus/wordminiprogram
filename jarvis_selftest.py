@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+jarvis_selftest.py —— 贾维斯 · 守卫自证（v1074）
+
+要解决的问题
+============
+本项目已经写进知识库的一条元教训是：
+
+    **守卫报红 ≠ 有 bug；守卫全绿 ≠ 没 bug。**
+
+前半句 v1069 已经验证过（抽查 4 条红灯，3 条是虚报）。
+**后半句才是更危险的那一半**：一道守卫如果自己坏了（正则失效、
+判据钉在早已改写的代码上、文件路径变了），它会安安静静地永远显示 ✅，
+而它本该守着的那个 bug 可以大摇大摆地复发。
+
+这不是假想 —— v1069「星海觉醒进不去」那两道守卫恰恰相反地证明了同一件事：
+判据钉在具体代码形态上，代码一变，守卫就与现实脱节。
+
+做法：给每道守卫准备一份「故障样本」，逐一注入 → 跑守卫 → 必须变红 → 还原。
+**变不红的守卫 = 已经失灵的守卫**，和没有一样，必须当场报出来。
+
+这也是「贾维斯随时进化」真正的落点：
+不是每次加几条规则，而是让它**能自己发现哪条规则已经不管用了**。
+"""
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+GUARDS = os.path.join(ROOT, 'hansen_guards_v1068.py')
+
+# (守卫显示名, 目标文件, 注入函数)
+#   注入函数：拿到原文，返回「坏掉的」新文本；返回 None 表示跳过。
+def _inj_session(s):
+    """守卫判据：云存档 _app() 里 A.ensureSession() 必须在 A._app() 之前被调用。
+       故样本要打在**云存档的调用顺序**上，而不是改 auth 的函数名。"""
+    return s.replace('return A.ensureSession().then(function (s) {',
+                     'return Promise.resolve(A._app()).then(function (s) {', 1)
+
+def _inj_errvis(s):
+    """守卫判据是子串 `'errText' not in auth` —— 所以改名成 errText_GONE 没用
+       （仍含 errText 子串，这一点是自证机制自己发现的）。
+       必须把**所有** errText 出现处全部改掉才算真的"没有这个能力"。"""
+    return s.replace('errText', 'errTXT_GONE')
+
+def _inj_sdk(s):
+    return s.replace("import('./vendor_cloudbase_esm_v965.js')",
+                     "import('./vendor_cloudbase_esm_v965.js?v=999')", 1)
+
+def _inj_wiring(s):
+    return re.sub(r'<script defer src="hansen_auth_v1004\.js\?v=\d+"></script>', '', s, count=1)
+
+def _inj_stamp(s):
+    return re.sub(r'\?v=(\d+)', lambda m: '?v=1004', s, count=1)
+
+def _inj_freereward(s):
+    """守卫判据：不得出现 progress = Math.min(Math.floor(saved.progress), item.goal)。
+       故样本要精确还原那句被 v1060 干掉的写法。"""
+    return s.replace('item.progress = 0;\n      } else {\n        item.progress = Math.floor(saved.progress);',
+                     'item.progress = Math.min(Math.floor(saved.progress), item.goal);\n      } else {\n        item.progress = Math.floor(saved.progress);', 1)
+
+def _inj_room(s):
+    """守卫判据：joinRoom 里不得出现 read(...) 后紧跟 patch(...) 的"先读再写"形态。
+       故样本要在 joinRoom 内真的写成那种形态。"""
+    return s.replace("    return T().claim(roomId, { status: 'open', guestId: '' }, {",
+                     "    return T().read(roomId).then(function(){ return T().patch(roomId, {status:'playing'}); }).then(function(){ return {updated:1}; });\n    return T().claim(roomId, { status: 'open', guestId: '' }, {", 1)
+
+def _inj_dead_assert(s):
+    return s + "\nok(true, '这条永远不会跑');\n"
+
+def _inj_onclick(s):
+    return s.replace('bar.onclick = function () {',
+                     'bar.setAttribute(\'onclick\', "window.(function(){})()");\n      bar.onclick = function () {', 1)
+
+def _inj_clobber(s):
+    return s.replace("if(/anonymous|ANONYMOUS|signInAnonymously|匿名/i.test(m))",
+                     "if(/anonymous|登录|匿名/i.test(m))", 1)
+
+def _inj_land_parity(s):
+    m = re.search(r'<div class="mode-card"[^>]*onclick="openSpellPK\(\)"[^>]*>.*?</div>\s*</div>', s, re.S)
+    return s[:m.start()] + s[m.end():] if m else None
+
+def _inj_land_stamp(s):
+    return s.replace('<title>', '<title>手改痕迹', 1)
+
+
+CASES = [
+    ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
+    ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
+    ('SDK 单实例',      'hansen_cloud_save_v965.js',  _inj_sdk),
+    ('页面模块接线',    'island_animal.html',         _inj_wiring),
+    ('资源戳统一',      'spelling_pk.html',           _inj_stamp),
+    ('白领奖励',        'hansen_quest_global.js',     _inj_freereward),
+    ('抢房原子性',      'hansen_pk_room_v1065.js',    _inj_room),
+    ('假绿断言',        'test_page_wiring_v1063.mjs', _inj_dead_assert),
+    ('onclick 语法',    'hansen_season.js',           _inj_onclick),
+    ('文案不被改写',    'hansen_cloud_save_v965.js',  _inj_clobber),
+    ('Land 内容一致',   'island_land6.html',          _inj_land_parity),
+    ('Land 印章生成',   'island_land4.html',          _inj_land_stamp),
+]
+
+
+def _run_guards():
+    """跑一次守卫，返回 {守卫名: 是否报红}。"""
+    r = subprocess.run([sys.executable, GUARDS], cwd=ROOT,
+                       capture_output=True, timeout=600)
+    out = (r.stdout or b'').decode('utf-8', 'replace')
+    red = set()
+    for m in re.finditer(r'^  ❌ (.+?)(?: —— |\s*$)', out, re.M):
+        red.add(m.group(1).strip())
+    return red
+
+
+def main():
+    print('=' * 62)
+    print('🧪 贾维斯 · 守卫自证（每道守卫必须真的会咬人）')
+    print('=' * 62)
+    print('  原理：注入一份故障样本 → 守卫必须变红 → 还原。')
+    print('       变不红 = 这道守卫已经失灵，和没有一样。\n')
+
+    base_red = _run_guards()
+    if base_red:
+        print('  ⚠️ 注入前就有守卫报红，先修好再自证：%s\n' % ', '.join(sorted(base_red)))
+
+    dead = []
+    for name, target, inject in CASES:
+        path = os.path.join(ROOT, target)
+        if not os.path.exists(path):
+            print('  ⏭  %-16s 目标文件不存在(%s)，跳过' % (name, target))
+            continue
+        orig = open(path, encoding='utf-8').read()
+        hurt = inject(orig)
+        if hurt is None or hurt == orig:
+            print('  ⏭  %-16s 注入样本不适用，跳过（需更新样本）' % name)
+            continue
+        bak = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8', suffix='.bak')
+        bak.write(orig); bak.close()
+        try:
+            open(path, 'w', encoding='utf-8').write(hurt)
+            red = _run_guards()
+            bit = name in red
+            print('  %s %-16s %s' % ('✅' if bit else '❌', name,
+                                     '注入后正确报红' if bit else '注入后**依然全绿** —— 已失灵'))
+            if not bit:
+                dead.append(name)
+        finally:
+            shutil.copyfile(bak.name, path)
+            os.unlink(bak.name)
+
+    if dead:
+        print('\n❌ %d 道守卫已失灵（注入故障后仍不报红）:' % len(dead))
+        for d in dead:
+            print('   - ' + d)
+        print('\n   一道不咬人的守卫比没有守卫更危险 —— 它让人误以为有防线。')
+        return 1
+    print('\n✅ 全部守卫自证通过 —— 每一道都确实会咬人')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
