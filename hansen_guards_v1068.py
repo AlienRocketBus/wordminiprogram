@@ -269,6 +269,129 @@ def guard_no_hardcoded_pins():
         bad('守卫自省', 'bump_version 未把守卫脚本纳入资源戳迁移，写死的钉子会再次漂移')
 
 
+# ══════════════════════════════════════════════════════════════════
+# 🔴v1070 新增四道 —— v1066 / v1068 / v1069 的教训
+#
+# 这四条和前八条一样，只盯**模式**不盯某一行：
+# 问的是「有没有又犯同一种病」，而不是「这行代码是不是长成那样」。
+# ══════════════════════════════════════════════════════════════════
+
+def guard_no_dead_assertions():
+    """假绿：断言写在 process.exit() / browser.close() 之后 —— 永远不会执行。
+
+    事故（v1060）：给 test_account_wiring 加了两条断言，测试报 9/0 全过，
+    而那两条**根本没跑** —— 它们在 process.exit() 后面。
+    这类"假绿"比红灯危险得多：红灯至少在喊，假绿让人以为有防线。
+    同一轮里还栽过第二次（v1066 改 explore_ui 的断言，
+    故意停掉焦点归还它照样通过）—— 所以此后每写一个测试都先故意弄红一次。
+    """
+    for f in sorted(glob.glob(os.path.join(ROOT, 'test_*.mjs'))):
+        src = _read(os.path.basename(f))
+        if not src:
+            continue
+        stop = max(src.rfind('process.exit('), src.rfind('browser.close()'))
+        if stop < 0:
+            continue
+        nl = src.find('\n', stop)
+        if nl < 0:
+            continue
+        tail = _code_only(src[nl + 1:])
+        if re.search(r'^\s*(ok\(|assert\.)', tail, re.M):
+            bad('假绿断言',
+                os.path.basename(f) + '：process.exit()/browser.close() 之后仍有断言，永远不会执行')
+
+
+def guard_inline_onclick_syntax():
+    """写进 onclick 字符串的代码必须是合法 JS —— 语法错误只在点下去那一刻才炸。
+
+    事故（v1069）：hansen_season.js 里
+        bar.setAttribute('onclick', "…:(window.(function(){…})())")
+    `window.` 后面直接跟 `(` 是非法语法。加载时完全不暴露，
+    只在用户真的点「星海觉醒」那一刻抛错 —— 于是"点了没反应"藏了很久，
+    而两道守卫恰好把那行坏代码当成判据，一直红着没人看。
+
+    教训：能绑函数就别写 onclick 字符串（函数体的语法错误加载阶段就会暴露）。
+    """
+    bad_call = re.compile(r'setAttribute\(\s*[\'"]onclick[\'"]\s*,\s*([\'"])(.*?)\1', re.S)
+    files = sorted(glob.glob(os.path.join(ROOT, '*.js')) + glob.glob(os.path.join(ROOT, '*.html')))
+    for f in files:
+        base = os.path.basename(f)
+        if base.startswith('test_') or base.startswith('_'):
+            continue
+        src = _code_only(_read(base) or '')
+        for m in bad_call.finditer(src):
+            body = m.group(2)
+            if re.search(r'\w\.\s*\(', body):
+                bad('onclick 语法',
+                    base + '：onclick 字符串含 `X.(` 非法语法（只在点击时才炸）→ ' + body[:70])
+
+
+def guard_no_message_clobber():
+    """报错文案不得被二次改写 —— 已经是人话的错误必须原样透出。
+
+    事故（v1068）：friendly() 里有一条
+        if(/anonymous|ANONYMOUS|登录|auth/i.test(m)) return '云端匿名登录未开通…'
+    正则含「登录」两字通配，把 v1059 写好的准确原文
+    「云端登录已过期，请重新登录后再同步」整个改写成一个不相干的结论，
+    差点把人引去开通一个根本不需要的配置。
+    更糟的是上传路径经过 friendly()、拉取路径不经过 ——
+    **同一时刻同一个错误，界面上两种互相矛盾的说法。**
+
+    报错是唯一能看见现场的通道。本项目已在这条通道上堆过三层会撒谎的东西：
+      v1059 [object Object] 盖住真错误（40 版靠猜）
+      v1063 界面说"已登录"、面板说"已失效"
+      v1068 准确文案被老规则改写
+    """
+    src = _code_only(_read('hansen_cloud_save_v965.js') or '')
+    i = src.find('function friendly')
+    if i < 0:
+        return
+    seg = src[i:i + 2000]
+    for m in re.finditer(r'/([^/\n]{2,120})/i?\.test\(m\)', seg):
+        alts = [a.strip() for a in m.group(1).split('|')]
+        for a in alts:
+            if a in ('登录', '错误', '失败', '异常'):
+                bad('文案改写',
+                    'friendly() 用了会吞掉一切准确文案的两字通配: /' + m.group(1)[:60] + '/')
+                break
+    if not re.search(r'\.friendly|\.sessionDead', seg):
+        bad('文案改写', 'friendly() 未放行自己产生的错误（应检查 err.friendly / err.sessionDead）')
+    if ('云端登录已过期' not in seg) and ('会话已失效' not in seg):
+        bad('文案改写', 'friendly() 未把已是人话的会话类文案直接透出')
+
+
+def guard_behavior_not_literal():
+    """守卫自身不得把「某一行代码长什么样」当判据。
+
+    事故（v1069）：check_resources 有两道守卫查字面量
+        "window.location.href='land_map.html'"
+    而那串**正是被改坏的那一行**，于是它们从改坏那天起一直红着。
+
+    更普遍的问题 —— 抽查 4 条守卫，3 条是虚报：
+      · 「\\U 转义会让 JS 乱码」 → 32 处全在注释里，node --check 通过
+      · 「血量购买被误删」     → v1035 有意把公式改成查表（上限 500→1000）
+      · 「SW 缺 shell-21」     → 实际 shell-128，一直在正常轮换
+      · 「成就数量异常」       → 运行时 144 条正常，守卫写死 !=36
+    共同毛病：**查形不查实**。后续版本有意改了写法，守卫就一直红着。
+
+    结论要写进贾维斯的记忆里：
+      **守卫报红 ≠ 有 bug；守卫全绿 ≠ 没 bug。看到红灯第一步是验证，不是照着改。**
+
+    本守卫只做一件能自动化的事：拦住「把一整条赋值语句当判据」这种最脆的写法。
+    """
+    src = _read('check_resources.py') or ''
+    # ⚠️ 第一版写得太宽，把 id="x" / class="y" 这类**合法的 DOM 存在性检查**
+    #    也报了出来 —— 我自己当场犯了"守卫误报"这个毛病。
+    #    真正脆的只有一种：钉死一整条**带点号路径的 JS 赋值语句**
+    #    （如 window.location.href='land_map.html'），
+    #    因为等价改写（换成 IIFE、换成函数绑定、换成 location.replace）随时会让它失效，
+    #    而功能其实好好的。HTML 属性没有等价改写空间，钉死它是合理的。
+    pat = re.compile(r'''[\'"]([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+\s*=\s*[\'"][^\'"\n]{3,}[\'"])[\'"]\s+not\s+in''')
+    for m in pat.finditer(src):
+        bad('守卫查形不查实',
+            'check_resources 把整条 JS 赋值语句当判据，等价改写即误报 → ' + m.group(1)[:70])
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -278,7 +401,13 @@ GUARDS = [
     ('白领奖励',       guard_no_free_reward),
     ('抢房原子性',     guard_atomic_room_claim),
     ('守卫自省',       guard_no_hardcoded_pins),
+    # 🔴v1070 —— v1066 / v1068 / v1069 的教训
+    ('假绿断言',       guard_no_dead_assertions),
+    ('onclick 语法',   guard_inline_onclick_syntax),
+    ('文案不被改写',   guard_no_message_clobber),
+    ('守卫查行为',     guard_behavior_not_literal),
 ]
+
 
 
 def main():

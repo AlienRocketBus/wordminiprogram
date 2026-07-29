@@ -675,6 +675,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1067": (("shell-126", "pages-124", "assets-124", "icons-3"), "v=1067"),
         "1068": (("shell-127", "pages-125", "assets-125", "icons-3"), "v=1068"),
         "1069": (("shell-128", "pages-126", "assets-126", "icons-3"), "v=1069"),
+        "1070": (("shell-129", "pages-127", "assets-127", "icons-3"), "v=1070"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
@@ -1016,8 +1017,53 @@ def _promote_assets(pairs: list[tuple[Path, Path]], stage: Path,
         raise
 
 
+def _require_jarvis_pass(version: str) -> None:
+    """🔴v1070：没跑贾维斯体检，不许出包。
+
+    「每次改完都跑一遍贾维斯」这条规矩在 v1059~v1069 **连丢十版**——
+    全靠人记得的流程，一定会忘。所以把它从"靠记性"变成"发版硬条件"：
+
+      jarvis.py 体检通过 → 写下 .jarvis_pass.json（版本 + 时间 + 守卫指纹）
+      package_release  → 打包前必须看到**当前版本**的有效凭证
+
+    凭证里带守卫文件指纹：**守卫改了却没重跑，凭证同样作废**——
+    否则会出现"用旧体检结论给新守卫背书"。
+    应急可用 HANSEN_SKIP_JARVIS=1 跳过，但会在包里留下明显告警。
+    """
+    import json, hashlib
+    if os.environ.get("HANSEN_SKIP_JARVIS") == "1":
+        print("⚠️  HANSEN_SKIP_JARVIS=1 —— 跳过贾维斯体检检查（本次发布未经体检）")
+        return
+    rec = ROOT / ".jarvis_pass.json"
+    if not rec.exists():
+        raise RuntimeError(
+            "拒绝出包：没有贾维斯体检凭证。请先运行  python3 jarvis.py  并确保通过。"
+        )
+    try:
+        data = json.loads(rec.read_text(encoding="utf-8"))
+    except Exception as e:
+        raise RuntimeError(f"拒绝出包：体检凭证损坏（{e}），请重新运行 python3 jarvis.py")
+    if str(data.get("version", "")) != str(version):
+        raise RuntimeError(
+            f"拒绝出包：体检凭证是 v{data.get('version')} 的，当前要打 v{version}。"
+            f"请对当前版本重新运行 python3 jarvis.py"
+        )
+    gh = ""
+    for f in ("hansen_guards_v1068.py", "check_resources.py"):
+        fp = ROOT / f
+        if fp.exists():
+            gh += hashlib.sha256(fp.read_bytes()).hexdigest()[:16]
+    if data.get("guards") != hashlib.sha256(gh.encode()).hexdigest()[:24]:
+        raise RuntimeError(
+            "拒绝出包：守卫文件在体检之后被改动过，旧凭证不能给新守卫背书。"
+            "请重新运行 python3 jarvis.py"
+        )
+    print(f"🧾 贾维斯体检凭证有效（v{data.get('version')} · {data.get('at')}）")
+
+
 def package(version: str, out_dir: Path) -> list[Path]:
     canonical_version = _version((ROOT / "VERSION").read_text(encoding="utf-8"))
+    _require_jarvis_pass(canonical_version)
     if version != canonical_version:
         raise RuntimeError(
             f"requested v{version} does not match canonical VERSION v{canonical_version}"

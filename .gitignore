@@ -13,3 +13,5 @@ release-assets/*.zip
 !release-assets/README.md
 releases/
 *.zip
+# v1070: 体检凭证是本地状态，不入库（否则别人拉到就等于白拿背书）
+.jarvis_pass.json

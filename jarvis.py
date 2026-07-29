@@ -111,6 +111,14 @@ def _disposal(ai, apply_safe):
         print("     ⚠️ 你加了 --ai 但未设 ANTHROPIC_API_KEY → AI 层会优雅跳过(仍跑全部确定性守卫)。")
 
 
+def _appv_str():
+    """当前 VERSION，用于体检凭证。"""
+    try:
+        return open(os.path.join(ROOT, 'VERSION'), encoding='utf-8').read().strip()
+    except Exception:
+        return '?'
+
+
 def main():
     raw_args = sys.argv[1:]
     static_only = "--static-only" in raw_args
@@ -155,6 +163,18 @@ def main():
     # 新时代守卫任一不过 → 整体不过（与老守卫同等硬度）
     if _mg_rc:
         rc = rc or _mg_rc
+
+    # 🔴v1070：发版凭证交给 jarvis_gate.py 单独判定。
+    #   放在这里的原因：主流程(hansen_evolve 全量巡检)动辄十几分钟，
+    #   一旦超时中断就永远拿不到凭证，规矩又会变成一句空话。
+    #   闸门只跑两档 —— 新时代守卫必须全绿 + 既有问题不许变多 —— 分钟级可完成。
+    _gate = os.path.join(ROOT, 'jarvis_gate.py')
+    if os.path.exists(_gate):
+        print('\n  ▶ 发版闸门…\n')
+        _grc = subprocess.run([sys.executable, _gate], cwd=ROOT).returncode
+        rc = rc or _grc
+    else:
+        print('\n  ⚠️ 缺少 jarvis_gate.py —— 发版凭证无人签发。')
 
     # 🔴 v941: 经济系统属于跨页面共享状态，单页看起来正常仍可能出现
     # "这个岛发奖、另一个岛不发"或重复领取。把独立经济守卫并入 Jarvis
