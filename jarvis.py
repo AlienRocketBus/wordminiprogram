@@ -124,6 +124,19 @@ def main():
     _learn()
     _disposal(ai, apply_safe)
 
+    # 🔴v1068: 先跑「新时代守卫」——贾维斯的知识库记到 BUG #110、版本停在 v999 之前，
+    #   而项目已到 v1068。近期真正吃掉最多时间的 bug（跨设备存档空转 40 版、
+    #   白领奖励漏洞、Land 页被漏 4 次、SDK 被查询串劈成两份）它一道守卫都没有。
+    #   这一档只盯**模式**不盯某一行：有没有又出现两处真源、
+    #   有没有又写死一个会漂移的常量。八道守卫均已用故障注入验证过会红。
+    _mg = os.path.join(ROOT, "hansen_guards_v1068.py")
+    _mg_rc = 0
+    if os.path.exists(_mg):
+        print("\n  ▶ 新时代守卫(v1000+ 教训)…\n")
+        _mg_rc = subprocess.run([sys.executable, _mg], cwd=ROOT).returncode
+    else:
+        print("\n  ⚠️ 缺少 hansen_guards_v1068.py —— v1000+ 的教训将无人看守。\n")
+
     engine = os.path.join(ROOT, "hansen_evolve.py")
     cr = os.path.join(ROOT, "check_resources.py")
     extra = (" + Claude深度分析" if ai else "") + (" + 自动修安全类" if apply_safe else "")
@@ -138,6 +151,10 @@ def main():
     else:
         print("\n  ❌ 既无引擎也无 check_resources.py, 无法巡检。")
         rc = 1
+
+    # 新时代守卫任一不过 → 整体不过（与老守卫同等硬度）
+    if _mg_rc:
+        rc = rc or _mg_rc
 
     # 🔴 v941: 经济系统属于跨页面共享状态，单页看起来正常仍可能出现
     # "这个岛发奖、另一个岛不发"或重复领取。把独立经济守卫并入 Jarvis

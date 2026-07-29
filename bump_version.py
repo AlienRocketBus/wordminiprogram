@@ -97,6 +97,16 @@ def main() -> None:
     stamp_new = f"?v={new}"
     stamp_files = [ROOT / n for n in _standalone_html()] + [ROOT / "island_data.json"]
     stamp_files += [p for p in ROOT.glob("*.js") if not p.name.startswith("test_")]
+    # 🔴v1067: 守卫脚本也必须纳入资源戳迁移。
+    #   check_resources.py 里写死了 **68 处 `?v=960`**，是 v960 那会儿写的，之后再没更新——
+    #   于是从 v961 起，贾维斯每一版都在报同一批假警（VERSION 未锁定为 960、
+    #   未唯一加载 xxx.js?v=960 …），整整 106 个版本。
+    #   后果比"少一道守卫"更糟：**守卫天天喊狼来了，真问题就被淹没了**，
+    #   本轮 17 个报告里绝大多数都是它自己过期，不是产品坏了。
+    #   病根还是那句老话——写死的常量必然漂移。纳入迁移后升版即自动同步。
+    stamp_files += [ROOT / n for n in ("check_resources.py", "economy_guard.py",
+                                       "hansen_evolve.py", "jarvis_scan.py",
+                                       "hansen_health_check.py")]
     for p in stamp_files:
         if not p.exists():
             continue

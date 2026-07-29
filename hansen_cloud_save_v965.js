@@ -236,6 +236,7 @@
                 : ('云端会话不可用：' + ((s && s.reason) || '未知'));
               var err = new Error(msg);
               err.sessionDead = true;
+              err.friendly = true;   /* v1068: 已是人话，friendly() 不得再改写 */
               err.expired = !!(s && s.expired);
               throw err;
             }
@@ -251,7 +252,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1066')
+               import('./vendor_cloudbase_esm_v965.js?v=1068')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -327,10 +328,27 @@
     return cloudbaseProvider();
   }
   function friendly(err){
-    var m = String(err && err.message || err || '');
+    /* 🔴v1068：这个函数把**我们自己已经写好的人话**又改写了一遍，造成严重误导。
+       实测现场：用户会话过期，v1059 给出的准确原文是
+         「云端登录已过期，请重新登录后再同步」
+       而下面那条规则的正则里含 `登录` 两字，于是把它改写成
+         「云端匿名登录未开通（见开通指南第2步）」——
+       一个完全不相干、且会把人引去改错配置的结论。
+       更糟的是：上传路径经过 friendly()、拉取路径不经过，
+       于是**同一时刻同一个错误，界面上出现两种互相矛盾的说法**。
+       两条修正：
+         ① 我们自己产生的错误（带 friendly/sessionDead 标记）**原样透出，绝不改写**；
+         ② `登录` 这种两字通配从匿名登录规则里去掉，只认真正的匿名登录特征词。 */
+    if(err && (err.friendly || err.sessionDead)) return String(err.message || err);
+    /* v1068: CloudBase 抛的是普通对象，String() 会退化成 [object Object]——
+       整整 40 版的排查就是被这层遮罩挡住的。一律先走 HBErrText。 */
+    var m = '';
+    try{ m = (window.HBErrText ? window.HBErrText(err) : '') || ''; }catch(e){}
+    if(!m) m = String(err && err.message || err || '');
+    if(/云端登录已过期|会话已失效|请重新登录/.test(m)) return m;   /* 已是人话，直接透出 */
     if(/env|Env|ENV_ID|invalid env/i.test(m)) return '云环境 ID 无效，请核对配置';
     if(/domain|origin|refer|非法来源|whitelist/i.test(m)) return '当前网址还没加进云端安全域名（见开通指南第3步）';
-    if(/anonymous|ANONYMOUS|登录|auth/i.test(m)) return '云端匿名登录未开通（见开通指南第2步）';
+    if(/anonymous|ANONYMOUS|signInAnonymously|匿名/i.test(m)) return '云端匿名登录未开通（见开通指南第2步）';
     if(/permission|denied|security|规则/i.test(m)) return '数据库安全规则未放行（见开通指南第4步）';
     if(/network|fetch|timeout|Failed to fetch/i.test(m)) return '网络不通，稍后再试';
     return m.slice(0, 120) || '未知错误';
