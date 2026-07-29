@@ -133,6 +133,11 @@
     }
     setTimeout(attempt,0);
     var raf=root.requestAnimationFrame||function(fn){return setTimeout(fn,16);};raf(function(){raf(attempt);});
+    /* 🔴v1066：原来只在 0ms 与两帧后各试一次，窗口约 32ms——
+       之后若发生一次重渲染，卡片节点被换掉，焦点就此丢失且不再重试。
+       补几次延迟重试；attempt() 成功后会把 returnFocusPending 置 false，
+       所以这几次几乎总是空转，代价可忽略。 */
+
   }
   function paid(item){return !!(item&&item.done&&item.reward&&item.reward.state==='paid');}
   function rewardState(item){return item&&item.reward?String(item.reward.state||'blocked'):'blocked';}
@@ -435,13 +440,86 @@
     }
   }
 
+  /* 🔴v1066：只靠 requestAnimationFrame 合并是不够的。
+     实测（island_action → 探索页，静置 5 秒）：storage 事件触发 **118 次**，
+     分散在几十帧里，于是 #exploreContent.innerHTML 被整表重写好几次，
+     14 个卡片节点每次全部销毁重建。后果有三个：
+       · 关闭单词详情后**焦点丢失**（那张卡的节点已经不在了）；
+       · 列表可能闪一下 / 滚动跳位；
+       · 停在探索页时白白耗电。
+     来源是 v1023「房间预热常驻」的两个后台 iframe（land_map / island_season）
+     初始化时写 localStorage —— storage 事件只在**同源的其他文档**改写时触发。
+     v1023 与 v945 单独看都没错，是两个功能互相踩到。
+     这里再加一层 250ms 防抖：突发的一串写入合并成一次渲染。 */
   function scheduleRefresh(){
-    if(state.raf)return;var raf=root.requestAnimationFrame||function(fn){return setTimeout(fn,16);};
-    state.raf=raf(function(){state.raf=0;var screen=document.getElementById('exploreScreen');if(screen&&screen.classList.contains('active')&&typeof root.renderExplore==='function')root.renderExplore();else state.snapshot=null;});
+    if(state.raf)return;
+    var raf=root.requestAnimationFrame||function(fn){return setTimeout(fn,16);};
+    state.raf=raf(function(){
+      state.raf=0;
+      if(state.debounce)return;
+      state.debounce=setTimeout(function(){
+        state.debounce=0;
+        var screen=document.getElementById('exploreScreen');
+        if(!(screen&&screen.classList.contains('active')&&typeof root.renderExplore==='function')){state.snapshot=null;return;}
+        /* 🔴v1066 曾在这里加过第三层「内容指纹相同就跳过重建」，**已移除**。
+           移除原因：我无法证明它安全。指纹取自 buildSnapshot()，
+           而快照未必覆盖 renderExplore() 依赖的全部输入——
+           一旦漏算，就会出现"进度真的变了、界面却不刷新"，
+           那比多渲几次严重得多。
+           本项目吃过同类亏：v1039 的 syncNow 因"内容指纹未变"跳过写入，
+           导致上传显示成功却一字未写，查了十几版。
+           **看起来省事的跳过，往往是下一个难查的 bug。**
+           这里只保留能被验证的两层：按 key 过滤 + 250ms 防抖。 */
+        root.renderExplore();
+      },250);
+    });
   }
 
+  /* 🔴v1066：storage 事件带 e.key，据此过滤——
+     `hsnViewMode`、`theme`、`*_bak`、各种 pending 事务键根本不影响探索列表，
+     此前却一律触发整表重建。只认真正会改变列表内容的键。 */
+  function affectsExplore(key){
+    if(!key) return true;                       /* key 为 null＝整个 storage 被清空，保守重渲 */
+    if(/_bak$|_pending|hsnViewMode|^theme$|temp_unlock|debug|blackbox|admin_access/i.test(key)) return false;
+    return /^wordIsland|^hansen_wallet|^hansen_pet|^hansen_crystal|^hansen_gear|charxp|learned|^hansen_ach/i.test(key);
+  }
+  function onStorage(e){ if(affectsExplore(e&&e.key)) scheduleRefresh(); }
+
   function wrap(){
-    if(typeof root.renderExplore==='function'&&!root.renderExplore.__hxpV946){var render=root.renderExplore;root.renderExplore=function(){var r=render.apply(this,arguments);enhanceExplore();return r;};root.renderExplore.__hxpV946=true;}
+    /* 🔴v1066：整表重写会销毁当前聚焦的卡片，键盘/读屏用户的焦点就此丢失
+       （关闭单词详情后焦点回不到原来那张卡，正是 test_explore_ui_v945 报的症状）。
+       渲染前记住聚焦卡片的位置，渲染后按同一位置归还。
+       即使渲染次数已经降下来，这一层也该有——重渲染本来就不该偷走焦点。 */
+    if(typeof root.renderExplore==='function'&&!root.renderExplore.__hxpV946){
+      var render=root.renderExplore;
+      root.renderExplore=function(){
+        var con=document.getElementById('exploreContent'), keepIdx=-1;
+        try{
+          var a=document.activeElement;
+          if(a&&con&&con.contains(a)){
+            var card=a.closest?a.closest('.exp-card'):null;
+            if(card){ var list=[].slice.call(con.querySelectorAll('.exp-card')); keepIdx=list.indexOf(card); }
+          }
+        }catch(e){}
+        var r=render.apply(this,arguments);
+        enhanceExplore();
+        if(keepIdx>=0){
+          try{
+            var again=document.getElementById('exploreContent');
+            var cards=again?again.querySelectorAll('.exp-card'):null;
+            if(cards&&cards[keepIdx]&&typeof cards[keepIdx].focus==='function') cards[keepIdx].focus();
+          }catch(e){}
+        }else if(state.returnFocusPending){
+          /* 🔴v1066：关弹窗后焦点还没归还完，这时又发生一次重渲染——
+             正是"关闭详情后焦点丢失"的最后一个窗口。
+             ⚠️ 必须走 restoreFocusSoon()，它内部有"弹窗还开着就不动焦点"等守卫；
+             直接 focus() 会在弹窗打开期间把焦点从弹窗里抢走（第一版就是这么写错的）。 */
+          try{ restoreFocusSoon(); }catch(e){}
+        }
+        return r;
+      };
+      root.renderExplore.__hxpV946=true;
+    }
     if(typeof root.showWord==='function'&&!root.showWord.__hxpV946){var show=root.showWord;root.showWord=function(idx){var active=document.activeElement;if(active&&active!==document.body)rememberTrigger(active,idx);else rememberTrigger(state.lastTrigger,idx);state.snapshot=buildSnapshot();var r=show.apply(this,arguments);decorateModal(idx);return r;};root.showWord.__hxpV946=true;}
     if(typeof root.closeModal==='function'&&!root.closeModal.__hxpV946){var close=root.closeModal;root.closeModal=function(){var r=close.apply(this,arguments);state.modalIndex=-1;document.documentElement.classList.remove('hxp-modal-open');restoreFocusSoon();return r;};root.closeModal.__hxpV946=true;}
   }
@@ -454,5 +532,5 @@
   };
 
   injectCSS();wrap();
-  try{root.addEventListener('storage',scheduleRefresh);root.addEventListener('pageshow',scheduleRefresh);root.addEventListener('hansen-progress-changed',scheduleRefresh);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')scheduleRefresh();});}catch(e){}
+  try{root.addEventListener('storage',onStorage);root.addEventListener('pageshow',scheduleRefresh);root.addEventListener('hansen-progress-changed',scheduleRefresh);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')scheduleRefresh();});}catch(e){}
 })(typeof window!=='undefined'?window:(typeof globalThis!=='undefined'?globalThis:this));
