@@ -74,6 +74,8 @@ REGISTRY = [
      'guard_land_content_parity'),
     ('v1072', '星海觉醒 8 岛与外面 19 岛没打通：Land 页整套拼写大PK 缺失，玩法少一个',
      'guard_land_content_parity'),
+    ('v1073', '治本：Land 页手工维护导致同一件事被漏六次，改为从母版盖章生成',
+     'guard_land_generated'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

@@ -170,6 +170,12 @@ def main() -> None:
     apply(ROOT / "VERSION", read(ROOT / "VERSION"), f"{new}\n", f"VERSION {old}→{new}")
     if not dry:
         subprocess.run([sys.executable, "generate.py"], cwd=ROOT, check=True)
+        # 🔴v1073 治本：单词大陆 8 岛也纳入印章体系。
+        #   在此之前 island_land1~8.html 手工维护，同一件事被漏了**六次**
+        #   (v1021 账号 / v1030 门槛 / v1034 成就 / v1038 音量 / v1048 云恢复 / v1072 拼写大PK)。
+        #   现在改一次母版，27 个岛全部跟上。
+        if (ROOT / "generate_land.py").exists():
+            subprocess.run([sys.executable, "generate_land.py"], cwd=ROOT, check=True)
 
     # ── 6) 校验 ──
     if not dry:

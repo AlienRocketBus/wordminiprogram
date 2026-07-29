@@ -445,6 +445,37 @@ def guard_land_content_parity():
                     '%s 比常规岛少了 %d 个模块: %s' % (fn, len(miss), ', '.join(sorted(miss)[:5])))
 
 
+
+def guard_land_generated():
+    """单词大陆 8 岛必须由母版盖章生成 —— 不许再手工改（v1073 治本）。
+
+    在此之前 island_land1~8.html 手工维护，同一件事被漏了**六次**：
+      v1021 账号 / v1030 门槛 / v1034 成就 / v1038 音量 / v1048 云恢复 / v1072 拼写大PK
+
+    guard_land_content_parity 是**事后拦截**（漏了会被抓到），
+    这一道才是**治本**（从母版生成，压根不会漏）。
+
+    判据：跑 generate_land.py --verify，8 页必须与母版盖章结果逐字一致。
+    有人手改了某一页而没同步回母版 → 立刻报红。
+    """
+    gen = os.path.join(ROOT, 'generate_land.py')
+    if not os.path.exists(gen):
+        bad('Land 印章', '缺少 generate_land.py —— Land 页又回到手工维护，六次遗漏的根子还在')
+        return
+    for f in ('land_template.html', 'land_data.json'):
+        if not os.path.exists(os.path.join(ROOT, f)):
+            bad('Land 印章', '缺少 %s' % f)
+            return
+    import subprocess
+    r = subprocess.run([sys.executable, gen, '--verify'], cwd=ROOT,
+                       capture_output=True, timeout=300)
+    if r.returncode != 0:
+        out = (r.stdout or b'').decode('utf-8', 'replace')
+        for ln in out.split('\n'):
+            if '❌' in ln:
+                bad('Land 印章', ln.strip()[:150])
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -461,6 +492,8 @@ GUARDS = [
     ('守卫查行为',     guard_behavior_not_literal),
     # 🔴v1071
     ('Land 内容一致',  guard_land_content_parity),
+    # 🔴v1073 治本
+    ('Land 印章生成',  guard_land_generated),
 ]
 
 
