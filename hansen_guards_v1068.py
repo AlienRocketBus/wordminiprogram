@@ -392,6 +392,41 @@ def guard_behavior_not_literal():
             'check_resources 把整条 JS 赋值语句当判据，等价改写即误报 → ' + m.group(1)[:70])
 
 
+
+def guard_land_content_parity():
+    """8 个 Land 页的**内容**必须与常规岛一致 —— 不只是模块接线。
+
+    事故（v1071）：v1034 把成就从 36 扩到 144 时**又漏了 8 个 Land 页**，
+    于是同一个账号在常规岛看到 144 条、进 Land 页只剩 36 条。
+
+    这是 Land 页**第五次**被漏：
+      v1021 账号接线 / v1030 Lv.3 门槛 / v1038 全站音量 /
+      v1048 开机云端恢复 / v1034 成就扩充
+
+    根子：island_land1~8.html **手工维护、不由 generate.py 从 template 分发**。
+    guard_page_wiring 只查「模块在不在」，查不出「内容有没有跟上」——
+    所以再加这一道，直接与常规岛逐项比数量。
+    """
+    def _count(fn, pat):
+        return len(re.findall(pat, _read(fn) or ''))
+
+    ref = 'island_animal.html'
+    checks = [
+        ("成就条数", r"\{id:'[^']+',cat:'[^']+'"),
+    ]
+    for label, pat in checks:
+        want = _count(ref, pat)
+        if want <= 0:
+            continue
+        for i in range(1, 9):
+            fn = 'island_land%d.html' % i
+            got = _count(fn, pat)
+            if got != want:
+                bad('Land 内容一致性',
+                    '%s 的%s为 %d，常规岛(%s)为 %d —— Land 页又被漏了'
+                    % (fn, label, got, ref, want))
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -406,6 +441,8 @@ GUARDS = [
     ('onclick 语法',   guard_inline_onclick_syntax),
     ('文案不被改写',   guard_no_message_clobber),
     ('守卫查行为',     guard_behavior_not_literal),
+    # 🔴v1071
+    ('Land 内容一致',  guard_land_content_parity),
 ]
 
 

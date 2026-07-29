@@ -676,6 +676,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1068": (("shell-127", "pages-125", "assets-125", "icons-3"), "v=1068"),
         "1069": (("shell-128", "pages-126", "assets-126", "icons-3"), "v=1069"),
         "1070": (("shell-129", "pages-127", "assets-127", "icons-3"), "v=1070"),
+        "1071": (("shell-130", "pages-128", "assets-128", "icons-3"), "v=1071"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
@@ -1049,7 +1050,7 @@ def _require_jarvis_pass(version: str) -> None:
             f"请对当前版本重新运行 python3 jarvis.py"
         )
     gh = ""
-    for f in ("hansen_guards_v1068.py", "check_resources.py"):
+    for f in ("hansen_guards_v1068.py", "check_resources.py", "hansen_bug_registry.py"):
         fp = ROOT / f
         if fp.exists():
             gh += hashlib.sha256(fp.read_bytes()).hexdigest()[:16]

@@ -53,7 +53,7 @@ def _guards_fingerprint():
     """守卫文件指纹 —— 守卫改了却没重跑，旧凭证必须作废，
     否则会出现「用旧体检结论给新守卫背书」。"""
     h = ''
-    for f in ('hansen_guards_v1068.py', 'check_resources.py'):
+    for f in ('hansen_guards_v1068.py', 'check_resources.py', 'hansen_bug_registry.py'):
         p = os.path.join(ROOT, f)
         if os.path.exists(p):
             h += hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
@@ -99,6 +99,23 @@ def main():
             os.remove(PASS_FILE)
         print('\n🚫 新时代守卫未通过 —— 已作废发布凭证，package_release 将拒绝出包。')
         return 1
+
+    # ── 第一档半：事故登记册 ──
+    #   产品负责人的要求是「每个版本修出来的 bug 都要有贾维斯守着」。
+    #   但「记得给每个修复配一道守卫」本身就是靠记性的事 ——
+    #   本项目已经证明过七次：手工维护的东西必然走散。
+    #   所以把它变成可校验的合同：CHANGELOG 里带 🔴 的版本必须在册，
+    #   且登记的守卫/测试必须真实存在。漏登 → 拒绝发版。
+    reg = os.path.join(ROOT, 'hansen_bug_registry.py')
+    if os.path.exists(reg):
+        print('\n▶ 第一档半：事故登记册（每个修复都要有看守者）\n')
+        if subprocess.run([sys.executable, reg], cwd=ROOT).returncode != 0:
+            if os.path.exists(PASS_FILE):
+                os.remove(PASS_FILE)
+            print('\n🚫 有修复没登记看守者 —— 已作废发布凭证。')
+            return 1
+    else:
+        print('\n  ⚠️ 缺少 hansen_bug_registry.py —— 无人保证「每个修复都有守卫」。')
 
     # ── 第二档：既有问题不许变多 ──
     print('\n▶ 第二档：既有问题总数（不许比基线多）\n')
