@@ -411,8 +411,14 @@ def guard_land_content_parity():
         return len(re.findall(pat, _read(fn) or ''))
 
     ref = 'island_animal.html'
+    # 🔴v1072：产品定调 ——「星海觉醒 8 岛与外面 19 岛完全打通、没有隔阂」。
+    #   所以比的不只是成就条数，而是**玩法与模块是否一模一样**。
+    #   v1072 之前 Land 页少一个玩法（拼写大PK 整套缺失），
+    #   等于两边根本不是同一个游戏。
     checks = [
-        ("成就条数", r"\{id:'[^']+',cat:'[^']+'"),
+        ("成就条数",   r"\{id:'[^']+',cat:'[^']+'"),
+        ("玩法卡数",   r'class="mode-card"'),
+        ("拼写PK入口", r'onclick="openSpellPK\(\)"'),
     ]
     for label, pat in checks:
         want = _count(ref, pat)
@@ -425,6 +431,18 @@ def guard_land_content_parity():
                 bad('Land 内容一致性',
                     '%s 的%s为 %d，常规岛(%s)为 %d —— Land 页又被漏了'
                     % (fn, label, got, ref, want))
+
+    # 模块清单必须一致 —— 少一个模块就是少一块功能
+    def _mods(fn):
+        return set(re.findall(r'src="([a-z_0-9]+)\.js', _read(fn) or ''))
+    want_m = _mods(ref)
+    if want_m:
+        for i in range(1, 9):
+            fn = 'island_land%d.html' % i
+            miss = want_m - _mods(fn)
+            if miss:
+                bad('Land 内容一致性',
+                    '%s 比常规岛少了 %d 个模块: %s' % (fn, len(miss), ', '.join(sorted(miss)[:5])))
 
 
 GUARDS = [

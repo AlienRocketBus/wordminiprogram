@@ -72,6 +72,8 @@ REGISTRY = [
      'jarvis_gate.py'),
     ('v1071', 'v1034 成就扩到 144 时又漏了 8 个 Land 页 → 同账号两套成就清单',
      'guard_land_content_parity'),
+    ('v1072', '星海觉醒 8 岛与外面 19 岛没打通：Land 页整套拼写大PK 缺失，玩法少一个',
+     'guard_land_content_parity'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
