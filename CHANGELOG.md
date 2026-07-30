@@ -1,5 +1,57 @@
 # 版本记录
 
+## v1075 — 注册/登录闭环重构 + 发布链失效保护（2026-07-29，候选）
+
+### 背景与根因
+
+v1074 的注册与登录不是单点报错，而是协议和状态管理同时失真：伪造 `.local` 邮箱冒充
+“纯用户名注册”；本地 `signedAt` marker 冒充真实 CloudBase session；认证 API 成功后没有
+证明 session 属于同一个 UID；前端超时会丢弃仍在执行的注册 Promise；登录后又自动进入云档
+恢复/上传，使身份确认和数据覆盖绑成一步。结果是界面可能说成功，刷新、同步或再次登录却失败。
+
+### 实现
+
+- 新手机号固定走 CloudBase v2 `getVerification → verify → signUp`，用户名和密码作为同一次
+  手机注册事务的字段；已有手机号固定走 `verify → signIn`；密码页只走
+  `signInWithPassword`，彻底移除虚假的无手机号创建路径。
+- 认证结果 UID 与随后 `getSession()` UID 必须精确一致且非匿名；缺失、冲突、匿名、网络未知
+  均不写登录成功 marker。状态统一为 checking / confirmed / signed_out / unknown /
+  mismatch / legacy_reauth / outcome_unknown。
+- 短信 pending 只存 sessionStorage，且不含密码、验证码和 token；重发成功后才替换旧事务。
+  倒计时使用绝对 resendAt，关闭/重开面板继续；20 秒只提示“仍在处理”，不取消或重复认证。
+- 登出失败不清本地身份；登录后只读检查云档。保留云端、保留本机必须显式点击；稍后、关闭、
+  取消严格零写入。云档新地址统一用稳定 UID，手机号/用户名只作为旧地址迁移候选。
+- 新增/重写认证合同、真实 bundle API 形状、390×844 DOM 点击、session 真源和错误回归。
+
+### 兼容
+
+不清除 27 岛学习进度、钱包、宠物、任务、成就、错词或本地备份。旧 marker 有 UID 时需重新
+向 SDK 确认；无 UID 时进入 legacy_reauth。旧手机号/用户名云档不会直接废弃，但只能在同一
+已确认 UID 下读取并由用户明确迁移。匿名玩家继续可玩，匿名 session 不能冒充正式账号。
+
+### 测试
+
+新增 `test_auth_contract_v1075.mjs`、`test_auth_vendor_v1075.mjs`、
+`test_auth_ui_v1075.mjs` 与 `test_release_docs_v1075.py`；更新手机号、错误和 session 真源
+回归，清除测试中的绝对工作区路径。正式 CI 自动枚举全部 `test_*v*.mjs` 和 `test_*v*.py`，
+验证两套生成器、27 岛接线、经济/资源/Jarvis/浏览器守卫、最终源码树指纹与双包可复现性。
+
+这些测试不发送生产短信：VM 证明状态机，真实 Chromium 证明 DOM，仓库锁定 SDK 只证明方法
+存在。控制台 provider、短信签名/模板/额度、安全域名和生产 session 必须真机冒烟，不能用 mock
+全绿替代。
+
+### 发布与部署
+
+- 版本链唯一为 GitHub main v1074 `f090e88…` → 分支 `agent/fix-auth-v1075` → 草稿 PR。
+- README/CHANGELOG 现在是升级前硬门禁；章节不完整或发布 README 不一致时 bump 在第一次写入前失败。
+- Jarvis 凭证新增完整源码树指纹；守卫超时、基线缺失/变化都 fail closed，`.jarvis_pass.json`
+  不再跟踪也不会进入源码 ZIP。
+- 停用旧 main push 单 ZIP 发布者；正式三文件工作流用 ASCII 物理名、中文 label、上传后哈希回读，
+  失败仅清理当前提交自己的孤儿 tag。
+- GitHub Release 不等于 CloudBase 部署。合并后仍须上传部署包，并按
+  `云存档_开通指南_v965.md` 完成真实新手机号、已有手机号、密码登录、刷新、登出和两设备存档验收。
+
+
 ## v1074 — 贾维斯获得自我察觉：守卫自证 + 落后检测（2026-07-29）
 
 ### 要解决的是元教训的后半句
