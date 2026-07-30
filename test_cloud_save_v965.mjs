@@ -115,6 +115,11 @@ console.log('T3b 身份切换');
     ok: expectedUid === 'U-ACCOUNT-2',
     uid: 'U-ACCOUNT-2'
   });
+  const sameAccountRestore = await M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-2' });
+  ok(sameAccountRestore.ok === true && restoredWith,
+     '原始 UID 与 u:地址身份分离：同账号恢复不能被误判成切号');
+
+  restoredWith = null;
   let lateRestore = '';
   try{ await M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-1' }); }
   catch(e){ lateRestore = String(e && e.message || e); }
