@@ -273,45 +273,17 @@
 
     // --- 新成就配置(替换旧的) ---
     var TIERS={bronze:{name:'铜',color:'#cd7f32',bg:'rgba(205,127,50,.15)'},silver:{name:'银',color:'#cbd5e1',bg:'rgba(203,213,225,.15)'},gold:{name:'金',color:'#fbbf24',bg:'rgba(251,191,36,.15)'},diamond:{name:'钻',color:'#22d3ee',bg:'rgba(34,211,238,.18)'}};
-    var ACH=[
-      {id:'w1',cat:'背单词',name:'启程',desc:'认识并加入第 1 个单词，万里长征第一步！',icon:'🌱',tier:'bronze',reward:{gems:5}},
-      {id:'w10',cat:'背单词',name:'十词成军',desc:'累计认识 10 个单词',icon:'📚',tier:'bronze',reward:{gems:15}},
-      {id:'w50',cat:'背单词',name:'小有积累',desc:'累计认识 50 个单词',icon:'📗',tier:'bronze',reward:{gems:20}},
-      {id:'w100',cat:'背单词',name:'词汇新星',desc:'累计认识 100 个单词',icon:'📘',tier:'silver',reward:{gems:40}},
-      {id:'w300',cat:'背单词',name:'词汇达人',desc:'累计认识 300 个单词',icon:'📙',tier:'gold',reward:{gems:80}},
-      {id:'wAll',cat:'背单词',name:'全岛已认识',desc:'把这个岛的全部单词加入学习！',icon:'🎓',tier:'diamond',reward:{gems:200}},
-      {id:'wrongClear',cat:'背单词',name:'错词清零',desc:'把错题本里的错词全部攻克',icon:'✅',tier:'silver',reward:{gems:50}},
-      {id:'boss1',cat:'打Boss',name:'初战告捷',desc:'第一次打赢 Boss',icon:'⚔️',tier:'bronze',reward:{gems:10}},
-      {id:'bossCh1',cat:'打Boss',name:'过五关',desc:'打通第 1 章（前 4 个 Boss）',icon:'🗡️',tier:'bronze',reward:{gems:30}},
-      {id:'bossCh3',cat:'打Boss',name:'斩将',desc:'打通到第 3 章（累计 12 个 Boss）',icon:'🛡️',tier:'silver',reward:{gems:60}},
-      {id:'boss20',cat:'打Boss',name:'屠龙勇者',desc:'通关全部 20 个 Boss！传奇征服者',icon:'👑',tier:'gold',reward:{gems:150}},
-      {id:'card1',cat:'卡牌收藏',name:'初识收藏',desc:'获得第 1 张 Boss 收藏卡',icon:'🎴',tier:'bronze',reward:{gems:10}},
-      {id:'cardCh1',cat:'卡牌收藏',name:'小有收藏',desc:'集齐第 1 章的 4 张卡',icon:'🃏',tier:'silver',reward:{gems:30}},
-      {id:'cardUlt',cat:'卡牌收藏',name:'稀世珍藏',desc:'集齐 1 张至尊卡（0.5% 超稀有）',icon:'💎',tier:'gold',reward:{gems:50}},
-      {id:'cardAll',cat:'卡牌收藏',name:'卡牌大师',desc:'集齐全部 20 张卡！收藏家的荣耀',icon:'👑',tier:'diamond',reward:{gems:300}},
-      {id:'combo10',cat:'连胜',name:'小试牛刀',desc:'答题连续答对 10 次不出错',icon:'🔥',tier:'bronze',reward:{gems:10}},
-      {id:'combo30',cat:'连胜',name:'势不可挡',desc:'答题连续答对 30 次不出错',icon:'🔥',tier:'silver',reward:{gems:30}},
-      {id:'combo50',cat:'连胜',name:'神乎其技',desc:'答题连续答对 50 次不出错',icon:'🔥',tier:'gold',reward:{gems:60}},
-      {id:'combo100',cat:'连胜',name:'百战不殆',desc:'答题连续答对 100 次不出错！',icon:'⚡',tier:'gold',reward:{gems:120}},
-      {id:'s3',cat:'签到',name:'三天打卡',desc:'连续签到 3 天',icon:'📅',tier:'bronze',reward:{gems:10}},
-      {id:'s7',cat:'签到',name:'一周不断',desc:'连续签到 7 天',icon:'📅',tier:'bronze',reward:{gems:20}},
-      {id:'s14',cat:'签到',name:'半月坚持',desc:'连续签到 14 天',icon:'💎',tier:'silver',reward:{gems:50}},
-      {id:'s100',cat:'签到',name:'百日传奇',desc:'连续签到 100 天！毅力惊人',icon:'👑',tier:'diamond',reward:{gems:200}},
-      {id:'petHatch',cat:'宠物',name:'新生命',desc:'孵化你的第一只宠物',icon:'🐣',tier:'bronze',reward:{gems:10}},
-      {id:'petFinal',cat:'宠物',name:'宠物大师',desc:'把宠物养到最终进化形态',icon:'🐲',tier:'gold',reward:{gems:88}},
-      {id:'mode1',cat:'游戏模式',name:'初露锋芒',desc:'玩过任意一个小游戏模式',icon:'🎮',tier:'bronze',reward:{gems:10}},
-      {id:'allModes',cat:'游戏模式',name:'样样精通',desc:'玩过全部小游戏模式',icon:'🎮',tier:'silver',reward:{gems:30}},
-      {id:'modeHigh',cat:'游戏模式',name:'游戏高手',desc:'任意一种小游戏累计完成 10 局',icon:'🏆',tier:'silver',reward:{gems:30}},
-      {id:'coin1000',cat:'里程碑',name:'小富翁',desc:'累计获得 1000 金币（花掉也计入）',icon:'💰',tier:'bronze',reward:{gems:20}},
-      {id:'gem1',cat:'里程碑',name:'钻石新贵',desc:'获得人生第 1 颗钻石',icon:'💎',tier:'bronze',reward:{gems:20}},
-      {id:'lv5',cat:'里程碑',name:'小有所成',desc:'冒险等级达到 Lv.5',icon:'⭐',tier:'bronze',reward:{gems:10}},
-      {id:'lv10',cat:'里程碑',name:'老将',desc:'冒险等级达到 Lv.10',icon:'🌟',tier:'silver',reward:{gems:25}},
-      // HF2: 保留旧 id 是为了不让已解锁/待领取的老存档变成孤儿；规则已从“深夜学习”改为健康时段学习。
-      {id:'hidNight',cat:'隐藏',name:'健康学习家',desc:'在合适的时间专心学习，也记得按时休息',icon:'☀️',tier:'silver',reward:{gems:30},hidden:true},
-      {id:'hidPerfectDay',cat:'隐藏',name:'完美的一天',desc:'一天内打Boss、背新词、签到都做到了',icon:'🎂',tier:'silver',reward:{gems:40},hidden:true},
-      {id:'hidLucky',cat:'隐藏',name:'欧皇附体',desc:'抽卡第一发就抽到至尊卡！天选之子',icon:'🍀',tier:'diamond',reward:{gems:200},hidden:true},
-      {id:'hidComeback',cat:'隐藏',name:'卷土重来',desc:'一个Boss失败后立刻再战并打赢',icon:'🔁',tier:'bronze',reward:{gems:15},hidden:true}
-    ];
+    /* 🔴v1075 彻底拆掉「两处真源」：
+       此处原本内嵌一份 36 条的成就清单副本。
+       v1034 只是加了「谁长用谁」的兜底（_pageACH.length > ACH.length 才采用页面表），
+       副本本身留着 —— 这是**绕过去，不是拆掉**：
+       只要哪天某个页面的表短了，用户又会看到陈旧的 36 条。
+       v1071 正是这么发现「Land 页 36 条 vs 常规岛 144 条」的。
+
+       实测确认可安全移除：**27 个加载本模块的页面全部自带 144 条清单，一个不缺。**
+       故改为直接采用页面表；页面若真的没有表，宁可空着并在控制台明说，
+       也不要拿一份陈旧副本冒充 —— 后者会让人以为功能正常。 */
+    var ACH = [];
     // 覆盖全局 ACHIEVEMENTS(旧岛用 const 定义, 无法直接改; 用 window 赋值, 新 renderAch 读 window.ACHIEVEMENTS)
     /* 🔴v1034 关键修复：本文件内嵌了一份成就清单副本，并把它覆盖到 window.ACHIEVEMENTS、
        同时接管了 renderAch —— 于是页面里真正的成就表(v1020/v1034 已扩到 144 条、22 个系列)
@@ -321,7 +293,8 @@
     try {
       var _pageACH = null;
       try { if (typeof ACHIEVEMENTS !== 'undefined' && ACHIEVEMENTS && ACHIEVEMENTS.length) _pageACH = ACHIEVEMENTS; } catch (e) {}
-      if (_pageACH && _pageACH.length > ACH.length) ACH = _pageACH;
+      if (_pageACH && _pageACH.length) ACH = _pageACH;
+      else { try{ console.warn('[v1075] 本页没有成就清单(ACHIEVEMENTS)，成就墙将为空 —— 这是真实状态，不用陈旧副本冒充'); }catch(e){} }
       window.ACHIEVEMENTS = ACH;
     } catch(e){ try{ window.ACHIEVEMENTS = ACH; }catch(e2){} }
     window.__hsnACH = ACH; window.__hsnTIERS = TIERS;

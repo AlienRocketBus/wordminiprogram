@@ -88,6 +88,47 @@ def _inj_land_stamp(s):
     return s.replace('<title>', '<title>手改痕迹', 1)
 
 
+
+def _inj_ref_missing(s):
+    """v1057 类别：引用一个不存在的文件。"""
+    return s.replace("import('./vendor_cloudbase_esm_v965.js')",
+                     "import('./vendor_cloudbase_esm_v9999.js')", 1)
+
+def _inj_js_syntax(s):
+    """整份文件语法坏掉。用无条件追加，保证一定生效。"""
+    return s + '\n(function(){ if(( }\n'  # 故意的语法错误
+
+def _inj_data_no_cloud(s):
+    """写玩家数据却没有云存档模块。"""
+    import re as _r
+    return _r.sub(r'<script defer src="hansen_cloud_save_v965\.js\?v=\d+"></script>', '', s, count=1)
+
+def _inj_divergent(s):
+    """守卫比的是**相对最长的那一份**，所以砍短基准页没用
+       （它自己变成最短的，但"最全的一份"也跟着变）——这一点是自证机制自己发现的。
+       真实事故的形态是：**某个 JS 模块里内嵌了一份更短的副本**
+       （v1034/v1071 的 hansen_island_upgrade.js 就是 36 条 vs 144 条）。
+       所以样本改成：往模块里塞一份 30 条的短副本。"""
+    items = ','.join("{id:'fake%d',cat:'x',name:'n',desc:'d'}" % k for k in range(30))
+    return s + '\n/* selftest */ var __FAKE_ACH=[' + items + '];\n'
+
+def _inj_divergent_OLD(s):
+    """(旧样本，留档说明为什么不行)"""
+    import re as _r
+    m = _r.search(r'(?:const|var|let)\s+ACHIEVEMENTS\s*=\s*\[', s)
+    if not m: return None
+    i = m.end() - 1; d = 0
+    for j in range(i, len(s)):
+        if s[j] == '[': d += 1
+        elif s[j] == ']':
+            d -= 1
+            if d == 0: break
+    inner = s[i+1:j]
+    parts = _r.findall(r"\{id:'.*?\}(?=,\{id:'|$)", inner)
+    if len(parts) < 40: return None
+    return s[:i+1] + ','.join(parts[:30]) + s[j:]
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -101,6 +142,11 @@ CASES = [
     ('文案不被改写',    'hansen_cloud_save_v965.js',  _inj_clobber),
     ('Land 内容一致',   'island_land6.html',          _inj_land_parity),
     ('Land 印章生成',   'island_land4.html',          _inj_land_stamp),
+    # 🔴v1075
+    ('引用不存在',      'hansen_auth_v1004.js',       _inj_ref_missing),
+    ('JS 语法',         'hansen_gear.js',             _inj_js_syntax),
+    ('数据跟账号',      'template.html',              _inj_data_no_cloud),
+    ('两处真源',        'hansen_gear.js',             _inj_divergent),
 ]
 
 

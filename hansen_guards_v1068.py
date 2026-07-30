@@ -35,7 +35,7 @@ hansen_guards_v1068.py —— 贾维斯 · 新时代守卫（v1000+ 教训）
 
 退出码：0 = 全通过；1 = 有问题（贾维斯据此拦下打包）。
 """
-import os, re, sys, glob
+import os, re, sys, glob, shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -529,6 +529,139 @@ def guard_jarvis_not_stale():
             bad('贾维斯落后', '%s 是近期新增模块，却没有任何守卫或测试提到它' % base)
 
 
+
+# ══════════════════════════════════════════════════════════════════
+# 🔴v1075 再加四道 —— 补上今天真实发生过、却还没人看守的 bug 类别
+#
+# 「没有任何 bug」做不到。能做到的是：**每一类踩过的坑都变成一道会咬人的守卫。**
+# 这四道对应的都是本轮真实事故，不是假想。
+# ══════════════════════════════════════════════════════════════════
+
+def _static_refs(text):
+    """抽出静态本地引用。运行时拼接的路径（含 + ' " $ { } \\ `）判不了，必须滤掉，
+    否则会像 v1070 那样造出一道满屏误报的守卫。"""
+    refs = set(re.findall(r'(?:src|href)="(?!https?:|//|data:|#|mailto:|javascript:)([^"?#]+)', text))
+    refs |= set(re.findall(r"import\(\s*['\"]\./([^'\"?]+)", text))
+    out = set()
+    for r in refs:
+        r = r.lstrip('./')
+        if not r:
+            continue
+        if any(c in r for c in "+'\"${}\\`"):
+            continue
+        # 正则字面量里的 src="([^…]+)" 之类会被误当成引用 —— 这类必须滤掉，
+        # 否则又造出一道会误报的守卫（v1070 已经栽过一次）。
+        if any(c in r for c in "([)]*|^"):
+            continue
+        if '⟦' in r:          # 母版占位符
+            continue
+        out.add(r)
+    return out
+
+
+def guard_refs_exist():
+    """引用的本地文件必须真实存在 —— v1057 那个真凶的类别。
+
+    事故（v1057）：`hansen_auth` 里 import 了 `vendor_cloudbase_esm_v1004.js`，
+    而仓库里只有 `v965`。原代码指望 404 时靠 `.catch` 退回，
+    但**动态 import 的 404 在部分浏览器（含微信内置浏览器）不走 catch**，
+    于是整个云端 SDK 加载失败 → 用户点「获取验证码」只看到"连不上服务器"。
+    **手机注册从 v1004 起一直是坏的，而这只是一个写错的文件名。**
+
+    这类错误的共同点：**静态可查，却要等真实用户点下去才暴露。**
+    """
+    for f in sorted(glob.glob(os.path.join(ROOT, '*.html')) + glob.glob(os.path.join(ROOT, '*.js'))):
+        base = os.path.basename(f)
+        if base.startswith(('_', 'test_')) or base in ('land_template.html',):
+            continue
+        for r in _static_refs(_read(base) or ''):
+            if not os.path.exists(os.path.join(ROOT, r)):
+                bad('引用不存在', '%s 引用了不存在的文件: %s' % (base, r))
+
+
+def guard_js_syntax():
+    """所有运行时 JS 必须能通过语法检查 —— 语法错误不该等用户发现。
+
+    事故（v1069）：`hansen_season.js` 的 onclick 字符串里 `window.(function…`
+    是非法语法，**加载时完全不暴露，只在用户点「星海觉醒」那一刻才炸**，
+    藏了很久。那一条已由 guard_inline_onclick_syntax 专门看守；
+    这一道是更基础的一层：**文件本身必须是合法 JS**。
+    """
+    import subprocess
+    node = shutil.which('node')
+    if not node:
+        return
+    for f in sorted(glob.glob(os.path.join(ROOT, 'hansen_*.js'))
+                    + glob.glob(os.path.join(ROOT, 'sw_*.js'))
+                    + glob.glob(os.path.join(ROOT, 'jarvis*.js'))):
+        r = subprocess.run([node, '--check', f], capture_output=True, timeout=60)
+        if r.returncode != 0:
+            first = (r.stderr or b'').decode('utf-8', 'replace').strip().split('\n')
+            msg = next((x for x in first if 'Error' in x), first[0] if first else '?')
+            bad('JS 语法', '%s 语法检查失败: %s' % (os.path.basename(f), msg[:110]))
+
+
+def guard_data_writer_has_cloud():
+    """写玩家数据的页面，必须齐备账号 + 云存档 + 备份。
+
+    v1075 审计发现：把「统一」理解成「每个页面都挂全套模块」是**错的** ——
+    给一个只看图鉴的页面挂上每日任务和成就系统，除了拖慢加载没有意义，
+    还可能让注册门槛在导航页上弹出来。
+
+    真正该盯死的是这一条：**数据会不会跟着账号走。**
+    判据自动从代码得出（有没有写玩家数据键），
+    **不需要手工维护「哪个页面属于哪一档」的清单** ——
+    手工清单在本项目已经走散过八次。
+    """
+    WRITE = re.compile(
+        r"setItem\(\s*['\"](?:wordIsland|hansen_wallet|hansen_gear|hansen_pet|hansen_ach|hansen_global)")
+    DYN = re.compile(r"setItem\(\s*(?:__hsnSaveKey)\b")
+    for f in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
+        base = os.path.basename(f)
+        if base.startswith(('_', '武器')) or base == 'land_template.html':
+            continue
+        code = _code_only(_read(base) or '')
+        if not (WRITE.search(code) or DYN.search(code)):
+            continue                      # 不写玩家数据 → 本守卫不管
+        for need, label in (('hansen_auth_v1004', '账号'),
+                            ('hansen_cloud_save', '云存档'),
+                            ('hansen_backup_v944', '备份')):
+            if need not in code:
+                bad('数据不跟账号',
+                    '%s 会写玩家数据，却缺%s模块 —— 这些数据不会跟着账号走' % (base, label))
+
+
+def guard_no_divergent_config():
+    """同一份配置不许在两处各有一份且内容不同 —— 「两处真源」类别。
+
+    本项目已踩到**八次**：
+      ① 备份内嵌任务配置副本(v1019)   ② 成就清单两份(v1034/v1071)
+      ③ 发音音量各处各设(v1038)       ④ 存档地址算法三处各写(v1046)
+      ⑤ 页面模块接线手工维护(v1063)   ⑥ bump 的文件清单(v1063)
+      ⑦ 流程本身靠记性(v1070)         ⑧ Land 页整体手工维护(v1073)
+
+    这一道盯的是最典型的一种：**同一个清单在多个文件里各定义一份，条数还不一样。**
+    v1071 就是这么发现「Land 页 36 条成就 vs 常规岛 144 条」的。
+    """
+    PAT = re.compile(r"\{id:'[^']+',cat:'[^']+'")
+    counts = {}
+    for f in sorted(glob.glob(os.path.join(ROOT, '*.html')) + glob.glob(os.path.join(ROOT, '*.js'))):
+        base = os.path.basename(f)
+        if base.startswith(('_', 'test_', '武器')) or base == 'land_template.html':
+            continue
+        n = len(PAT.findall(_read(base) or ''))
+        if n >= 20:                       # 20 条以上才算"一份清单"
+            counts[base] = n
+    if not counts:
+        return
+    top = max(counts.values())
+    for base, n in sorted(counts.items()):
+        if n != top:
+            bad('两处真源',
+                '%s 的成就清单只有 %d 条，而全站最全的一份是 %d 条 —— 两份真源已走散'
+                % (base, n, top))
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -549,6 +682,11 @@ GUARDS = [
     ('Land 印章生成',  guard_land_generated),
     # 🔴v1074 自我察觉
     ('贾维斯不落后',   guard_jarvis_not_stale),
+    # 🔴v1075 补上还没人看守的 bug 类别
+    ('引用不存在',     guard_refs_exist),
+    ('JS 语法',        guard_js_syntax),
+    ('数据跟账号',     guard_data_writer_has_cloud),
+    ('两处真源',       guard_no_divergent_config),
 ]
 
 

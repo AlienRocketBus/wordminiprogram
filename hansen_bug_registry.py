@@ -82,6 +82,14 @@ REGISTRY = [
      'jarvis_selftest.py'),
     ('v1074', '贾维斯知识库曾落后近七十版而无人察觉',
      'guard_jarvis_not_stale'),
+    ('v1075', 'v1057 真凶类别：import 了不存在的文件，静态可查却要用户点下去才暴露',
+     'guard_refs_exist'),
+    ('v1075', '整份 JS 语法错误不该等用户发现',
+     'guard_js_syntax'),
+    ('v1075', '写玩家数据的页面若缺账号/云存档/备份，数据不会跟着账号走',
+     'guard_data_writer_has_cloud'),
+    ('v1075', 'hansen_island_upgrade 内嵌 36 条成就旧副本（第八次两处真源），已彻底拆除',
+     'guard_no_divergent_config'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
