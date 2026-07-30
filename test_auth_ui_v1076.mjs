@@ -19,7 +19,7 @@ ok(await page.evaluate(()=>window.HansenAuth.isSignedIn()&&window.HansenAuth.rea
 /* 用可控 Promise 验证：一旦选择覆盖方向，旧 DOM 引用也不能重复提交、改选、稍后或关闭。 */
 await page.evaluate(()=>{
   const state={
-    signed:false,session:'signed_out',op:'idle',opBusy:false,
+    signed:false,session:'signed_out',op:'idle',opBusy:false,cleanupPending:false,
     choiceCalls:0,signOutCalls:0,resolveChoice:null
   };
   window.__authUiRace=state;
@@ -48,8 +48,9 @@ await page.evaluate(()=>{
     },
     signOut:()=>{
       state.signOutCalls++;
-      state.signed=false;state.session='signed_out';state.op='idle';state.opBusy=false;
-      return Promise.resolve({ok:true});
+      state.signed=false;state.session=state.cleanupPending?'unknown':'signed_out';
+      state.op='idle';state.opBusy=false;
+      return Promise.resolve({ok:true,cleanupPending:state.cleanupPending,requiresReload:state.cleanupPending});
     }
   };
   window.confirm=()=>true;
@@ -119,10 +120,24 @@ for(const cfg of[
   },cfg);
   ok(visible,cfg.label+' 状态始终提供可用的安全退出并清理会话');
 }
+await page.evaluate(()=>{window.__authUiRace.cleanupPending=true;});
 await page.click('#auSafeOut');
 await page.waitForFunction(()=>window.__authUiRace.signOutCalls===1);
+await page.waitForFunction(()=>document.body.textContent.includes('旧登录请求仍可能晚到'));
+ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===1),
+   'outcome_unknown 即使认证请求标为 busy 也能调用唯一安全清理 signOut');
+ok(await page.evaluate(()=>document.body.textContent.includes('不要重新登录')),
+   'signOut 返回 cleanupPending 时不谎称清理完成，明确要求重新载入和复验');
+await page.evaluate(()=>{
+  window.__authUiRace.cleanupPending=false;
+  window.__authUiRace.session='unknown';
+  window.HansenAuthUI._render();
+});
+await page.click('#auSafeOut');
+await page.waitForFunction(()=>window.__authUiRace.signOutCalls===2);
 await page.waitForFunction(()=>document.body.textContent.includes('会话已安全清理，可以重新登录'));
-ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===1),'outcome_unknown 即使认证请求标为 busy 也能调用唯一安全清理 signOut');
+ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===2),
+   '再次确认 session 已清空后，界面才允许重新登录');
 
 ok(errs.length===0,'全部真实 DOM 流程零 pageerror'+(errs.length?': '+errs[0]:''));
 await browser.close();srv.close();console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);process.exit(fail===0?0:1);
