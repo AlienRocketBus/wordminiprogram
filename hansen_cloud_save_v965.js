@@ -122,21 +122,35 @@
     e.friendly = true;
     return e;
   }
+  function anonymousBoundaryAllowed(){
+    var A = window.HansenAuth;
+    if(!A) return true;  /* 兼容独立匿名工具页；有认证模块时必须严格失败关闭 */
+    if(typeof A.sessionStatus !== 'function' || typeof A.operationStatus !== 'function')
+      return false;
+    var st = A.sessionStatus() || {};
+    var op = A.operationStatus() || {};
+    return st.state === 'signed_out' && !op.requiresCleanup;
+  }
   function captureOperation(expectedUid){
     var uid = expectedUid == null ? rawAccountUid() : String(expectedUid || '');
-    return { generation: _generation, uid: uid };
+    return { generation: _generation, uid: uid, mode: uid ? 'account' : 'anonymous' };
   }
   function operationCurrent(op){
     if(!op || op.generation !== _generation) return false;
     var now = rawAccountUid();
-    return op.uid ? now === op.uid : !now;
+    if(op.mode === 'account' || op.uid) return !!op.uid && now === op.uid;
+    return !now && anonymousBoundaryAllowed();
   }
   function isStaleOperation(e){
     return !!(e && (e.stale || e.code === 'CLOUD_OPERATION_STALE'));
   }
   function verifyOperation(op){
     if(!operationCurrent(op)) return Promise.reject(staleOperation());
-    if(!op.uid) return Promise.resolve({ ok:true, anonymous:true });
+    if(!op.uid) {
+      if(!anonymousBoundaryAllowed())
+        return Promise.reject(staleOperation('认证会话尚未明确退出，匿名云操作已停止'));
+      return Promise.resolve({ ok:true, anonymous:true });
+    }
     var A = window.HansenAuth;
     if(!(A && typeof A.ensureSession === 'function'))
       return Promise.reject(staleOperation('无法复验当前账号，已停止本次云存档操作'));
@@ -426,7 +440,16 @@
   }
 
   /* ---------- 上云 / 回档 ---------- */
-  var _busy = false;
+  var _busyToken = null, _busySeq = 0;
+  function takeBusy(op){
+    if(_busyToken && _busyToken.generation === _generation) return null;
+    var token = { id: ++_busySeq, generation: op && op.generation };
+    _busyToken = token;
+    return token;
+  }
+  function releaseBusy(token){
+    if(_busyToken === token) _busyToken = null;
+  }
   function syncNow(opts){
     opts = opts || {};
     var op = captureOperation();
@@ -439,7 +462,8 @@
     var st = readState();
     if(!opts.force && !automaticSyncEnabled(st))
       return Promise.resolve({ ok:false, reason:'not-enabled-for-current-identity' });
-    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
+    if(_busyToken && _busyToken.generation === _generation)
+      return Promise.resolve({ ok:false, reason:'busy' });
     if(!opts.force && st.lastUpAt && (Date.now() - st.lastUpAt) < SYNC_MIN_GAP)
       return Promise.resolve({ ok:false, reason:'cooldown' });
     if(!(window.HansenBackup && typeof HansenBackup.exportCode === 'function'))
@@ -461,22 +485,25 @@
                 地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
     var identity = syncIdentity(key);
-    _busy = true;
+    var busyToken = takeBusy(op);
+    if(!busyToken) return Promise.resolve({ ok:false, reason:'busy' });
     return docIdOf(key).then(function(targetId){
-      if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
-        _busy = false;
-        return { ok:true, skipped:true, reason:'unchanged' };
-      }
-      return doUpload(key, code, h, targetId, identity, op);
+      return verifyOperation(op).then(function(){
+        if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
+          releaseBusy(busyToken);
+          return { ok:true, skipped:true, reason:'unchanged' };
+        }
+        return doUpload(key, code, h, targetId, identity, op, busyToken);
+      });
     }).catch(function(e){
-      _busy = false;
+      releaseBusy(busyToken);
       return { ok:false, reason:isStaleOperation(e)?'stale-account':'upload-failed', error: friendly(e) };
     });
   }
 
   /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写）。
      put 前和本地 writeState 前各复验一次：任何迟到的 U1 Promise 都不能落到 U2。 */
-  function doUpload(key, code, h, targetId, identity, op){
+  function doUpload(key, code, h, targetId, identity, op, busyToken){
     var p = provider();
     return sealPayload(key, code).then(function(envelope){
       return verifyOperation(op).then(function(){
@@ -488,10 +515,10 @@
       if(!operationCurrent(op)) throw staleOperation();
       writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId,
                    enabled: true, enabledIdentity: identity || syncIdentity(key) });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* v1076: 许可绑定身份 */
-      _busy = false; renderCard();
+      releaseBusy(busyToken); renderCard();
       return { ok:true, bytes: code.length };
     }).catch(function(err){
-      _busy = false; renderCard();
+      releaseBusy(busyToken); renderCard();
       return { ok:false, reason:isStaleOperation(err)?'stale-account':'upload-failed', error: friendly(err) };
     });
   }
