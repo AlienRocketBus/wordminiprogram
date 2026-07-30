@@ -259,6 +259,7 @@
   }
   function clearFence() {
     _fenceRevision++;
+    _probeId++;  /* 清理也是身份边界变化：旧 refresh/ensure 立即失去落地资格 */
     _fenceMemory = null;
     try { sessionStorage.removeItem(FKEY); } catch (e) {}
     try { localStorage.removeItem(FBKEY); } catch (e2) {}
@@ -618,6 +619,8 @@
   }
 
   function refreshSessionTruth() {
+    if (_operation.state === 'signing_out')
+      return Promise.resolve(sessionStatus());
     var marker = readLocal();
     var generation = _authGeneration;
     var probe = ++_probeId;
@@ -1036,6 +1039,7 @@
 
   function signOut() {
     if (_cloudBusy) return Promise.reject(new Error('云存档操作正在进行，请完成后再退出'));
+    readFence();  /* 先载入持久 revision，再建立本次退出的线性化边界 */
     _authEpoch++;
     var hadPriorSessionMutation = _activeSessionMutations > 0;
     var token = invalidateAuthWork('用户已请求安全退出');
@@ -1068,6 +1072,7 @@
         });
     }).then(function () {
       assertAuthToken(token);
+      _probeId++;  /* signOut 的 session=null 结论击败此前和同代的全部只读探测 */
       _pendingMemory = null;
       try { sessionStorage.removeItem(PKEY); } catch (_) {}
       writeLocal({
@@ -1369,6 +1374,9 @@
   }
 
   function ensureSession(expectedUid) {
+    if (_operation.state === 'signing_out')
+      return Promise.resolve({ ok: false, stale: true, definite: false,
+                               reason: 'sign-out-in-progress' });
     var marker = readLocal();
     var wanted = String(expectedUid || marker.uid || '');
     if (!wanted) return Promise.resolve({ ok: false, reason: 'not-signed-in', definite: true });
