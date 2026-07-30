@@ -691,6 +691,8 @@ def guard_auth_real_session():
         bad('认证真实会话', '自动同步授权没有绑定当前正式账号身份')
     if 'not-enabled-for-current-identity' not in cloud:
         bad('认证真实会话', '切换账号后后台同步没有失败关闭')
+    if 'verifyExpectedAccount' not in cloud or 'expectedUid' not in cloud:
+        bad('认证真实会话', '云端恢复覆盖本机前没有复验当前账号 UID')
     if 'postLogin' not in ui:
         bad('认证真实会话', '登录 UI 仍可能被云同步阻塞')
 
