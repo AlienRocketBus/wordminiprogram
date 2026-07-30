@@ -69,7 +69,8 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   后 claim 者使旧操作下一次主动检查得到 `AUTH_CROSS_TAB_SUPERSEDED`，不依赖 storage event。
 - 每次 session-changing SDK 调用前先写本操作唯一
   `hansen_auth_boundary_receipt_v1076:<id>` active 回执，Promise 真正结算后才标
-  returned/rejected/unknown。写入读回失败时 SDK 调用次数必须为 0。
+  returned/rejected/unknown。写入读回失败时 SDK 调用次数必须为 0。永久悬挂回执生产默认
+  保留 120 秒；到期也只允许下一次显式 signOut 在重新确认 session=null 后清理，不会自动重登。
 - 登录 marker 绑定 `authCommitId + authBoundaryId + authBoundaryState`；先清 PKEY，再让出任务
   边界并做真实 ensureSession、boundary/marker/fence 最终复验。
 - 失败路径不清 marker。localStorage 没有 CAS，“先看 commitId 再清”会擦掉另一标签；现在只建立
@@ -128,7 +129,7 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   mismatch 持久化、只读 null 不清 fence、mutation 永久悬挂、SDK init 永久悬挂、跨标签
   fence 强度与恢复所有权、两个独立 context 共享 localStorage 的在途登录/退出、boundary 写回
   失败前 SDK 零调用、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照 compare-delete、
-  profile 零写入及竞赛 ID 安全降级。
+  永久悬挂回执 TTL 后二次退出、profile 零写入及竞赛 ID 安全降级。
 - `test_cloud_save_v965.mjs`：Node/WebCrypto 动态 **43/43**。覆盖同 UID 上传/恢复、授权不跨身份、
   unknown/mismatch/cleanup 匿名零读写、U1→U2 的 put/迁移/restore/accountCloudInfo/fetch 迟到、
   本地 writeState 零污染和 generation busy token。
