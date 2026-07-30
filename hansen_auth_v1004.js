@@ -130,8 +130,14 @@
      有了注入口，回归测试就能用假 SDK 跑完整条链，不必依赖网络。 */
   var _authOverride = null;
   function auth() {
-    if (_authOverride) return Promise.resolve(_authOverride);
-    return app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; });
+    var source = _authOverride
+      ? Promise.resolve(_authOverride)
+      : app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; });
+    var ms = Math.max(1, Number(window.__HANSEN_AUTH_INIT_TIMEOUT_MS__ || 12000));
+    return withTimeout(source, ms, '认证服务初始化超时').catch(function (e) {
+      if (e && e.code === 'AUTH_SESSION_CHECK_TIMEOUT') e.code = 'AUTH_INIT_TIMEOUT';
+      throw e;
+    });
   }
 
   /* ── 登录态：SDK session 是唯一真源，本地 marker 只做显示缓存 ── */
@@ -204,38 +210,82 @@
   var _outcomeRecovery = null;
   var FKEY = 'hansen_auth_fence_v1076';
   var FBKEY = 'hansen_auth_fence_backup_v1076';
+  var FSTORE_KEYS = [
+    FBKEY,
+    FBKEY + ':outcome_unknown',
+    FBKEY + ':stale_mutation',
+    FBKEY + ':mismatch'
+  ];
   var _fenceMemory = null;
   var _fenceRevision = 0;
 
-  /* mismatch / outcome_unknown 只保存非敏感身份边界；密码、短信码、token 永不落盘。 */
-  function readFence() {
-    var o = null;
+  function fenceRank(kind) {
+    return ({ outcome_unknown: 1, stale_mutation: 2, mismatch: 3 })[String(kind || '')] || 0;
+  }
+  function parseFence(raw) {
+    if (!raw) return null;
     try {
-      var raw = sessionStorage.getItem(FKEY);
-      if (raw) o = JSON.parse(raw);
+      var o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return (o && typeof o === 'object' && !Array.isArray(o) && o.kind) ? o : null;
+    } catch (e) { return null; }
+  }
+  function fenceNewer(a, b) {
+    if (!a) return b || null;
+    if (!b) return a;
+    var ar = fenceRank(a.kind), br = fenceRank(b.kind);
+    if (ar !== br) return ar > br ? a : b;
+    var av = Number(a.revision || 0), bv = Number(b.revision || 0);
+    if (av !== bv) return av > bv ? a : b;
+    var ag = Number(a.generation || 0), bg = Number(b.generation || 0);
+    if (ag !== bg) return ag > bg ? a : b;
+    var at = Number(a.at || 0), bt = Number(b.at || 0);
+    if (at !== bt) return at > bt ? a : b;
+    return String(a.fenceId || '') >= String(b.fenceId || '') ? a : b;
+  }
+  function newFenceId(kind) {
+    var rnd = '';
+    try {
+      var bytes = new Uint32Array(2);
+      crypto.getRandomValues(bytes);
+      rnd = bytes[0].toString(36) + bytes[1].toString(36);
+    } catch (e) {
+      rnd = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    }
+    return String(kind || 'fence') + '-' + Date.now().toString(36) + '-' + rnd;
+  }
+  function readFence() {
+    var candidates = [], i, raw, item;
+    if (_fenceMemory) candidates.push(_fenceMemory);
+    try {
+      item = parseFence(sessionStorage.getItem(FKEY));
+      if (item) candidates.push(item);
     } catch (e) {}
-    if (!o || typeof o !== 'object' || Array.isArray(o)) {
+    for (i = 0; i < FSTORE_KEYS.length; i++) {
       try {
-        var backup = localStorage.getItem(FBKEY);
-        if (backup) o = JSON.parse(backup);
+        raw = localStorage.getItem(FSTORE_KEYS[i]);
+        item = parseFence(raw);
+        if (item) candidates.push(item);
       } catch (e2) {}
     }
-    if (!o || typeof o !== 'object' || Array.isArray(o)) o = _fenceMemory;
-    if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
-    _fenceRevision = Math.max(_fenceRevision, Number(o.revision || 0));
-    _fenceMemory = o;
-    return o;
+    var best = null, maxRevision = _fenceRevision;
+    for (i = 0; i < candidates.length; i++) {
+      maxRevision = Math.max(maxRevision, Number(candidates[i].revision || 0));
+      best = fenceNewer(best, candidates[i]);
+    }
+    _fenceRevision = maxRevision;
+    _fenceMemory = best || null;
+    return best || {};
   }
   function writeFence(kind, expectedUid, observedUid, reason) {
     kind = String(kind || 'outcome_unknown');
     var current = readFence();
-    var rank = { outcome_unknown: 1, stale_mutation: 2, mismatch: 3 };
-    if (current.kind && (rank[current.kind] || 0) > (rank[kind] || 0))
-      return current;  /* 低优先级迟到结果绝不能冲掉 mismatch/stale 边界 */
+    if (current.kind && fenceRank(current.kind) > fenceRank(kind))
+      return current;  /* 迟到的弱结果绝不能冲掉 mismatch/stale 边界 */
     _fenceRevision++;
     _probeId++;  /* fence 一旦出现，所有尚未落地的只读探测立即失去写状态权 */
     var o = {
       schema: 1076,
+      fenceId: newFenceId(kind),
       kind: kind,
       expectedUid: String(expectedUid || ''),
       observedUid: String(observedUid || ''),
@@ -251,18 +301,39 @@
       persisted = sessionStorage.getItem(FKEY) === encoded;
     } catch (e) {}
     try {
-      localStorage.setItem(FBKEY, encoded);
-      persisted = persisted || localStorage.getItem(FBKEY) === encoded;
+      localStorage.setItem(FBKEY, encoded);  /* 兼容已经发布过的单备份键 */
+      localStorage.setItem(FBKEY + ':' + kind, encoded);
+      persisted = persisted || localStorage.getItem(FBKEY + ':' + kind) === encoded;
     } catch (e2) {}
     if (!persisted) _storageWarning = 'auth-fence-not-persistent';
-    return o;
+    return readFence();  /* 合并其他标签页同时写入的更强记录 */
   }
-  function clearFence() {
+  function sameFence(a, b) {
+    if (!a || !b || !a.kind || !b.kind) return false;
+    if (a.fenceId && b.fenceId) return String(a.fenceId) === String(b.fenceId);
+    return String(a.kind) === String(b.kind) &&
+      Number(a.revision || 0) === Number(b.revision || 0) &&
+      Number(a.at || 0) === Number(b.at || 0) &&
+      String(a.expectedUid || '') === String(b.expectedUid || '') &&
+      String(a.observedUid || '') === String(b.observedUid || '');
+  }
+  function clearFence(owned) {
     _fenceRevision++;
     _probeId++;  /* 清理也是身份边界变化：旧 refresh/ensure 立即失去落地资格 */
-    _fenceMemory = null;
-    try { sessionStorage.removeItem(FKEY); } catch (e) {}
-    try { localStorage.removeItem(FBKEY); } catch (e2) {}
+    function clearOne(storage, key) {
+      try {
+        if (!owned) {
+          storage.removeItem(key);
+          return;
+        }
+        var current = parseFence(storage.getItem(key));
+        if (sameFence(current, owned)) storage.removeItem(key);
+      } catch (e) {}
+    }
+    clearOne(sessionStorage, FKEY);
+    for (var i = 0; i < FSTORE_KEYS.length; i++) clearOne(localStorage, FSTORE_KEYS[i]);
+    if (!owned || sameFence(_fenceMemory, owned)) _fenceMemory = null;
+    return !readFence().kind;
   }
   function staleError(reason) {
     var e = new Error(reason || '这次认证结果已经过期，已拒绝写入');
@@ -919,8 +990,12 @@
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('mismatch', e.observedUid || '', errText(e));
       } else if (/AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE/.test(code)) {
-        _outcomeRecovery = opIdentity
-          ? { auth: aRef, identity: identity, operation: opIdentity }
+        var ownedFence = readFence();
+        _outcomeRecovery = (opIdentity && ownedFence.kind === 'outcome_unknown' &&
+                            ownedFence.fenceId &&
+                            String(ownedFence.expectedUid || '') === String(opIdentity.uid))
+          ? { auth: aRef, identity: identity, operation: opIdentity,
+              fenceId: ownedFence.fenceId, fenceGeneration: ownedFence.generation }
           : null;
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('unknown', '', errText(e));
@@ -990,8 +1065,12 @@
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('mismatch', e.observedUid || '', errText(e));
       } else if (/AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE/.test(code)) {
-        _outcomeRecovery = opIdentity
-          ? { auth: aRef, identity: identity, operation: opIdentity }
+        var ownedFence = readFence();
+        _outcomeRecovery = (opIdentity && ownedFence.kind === 'outcome_unknown' &&
+                            ownedFence.fenceId &&
+                            String(ownedFence.expectedUid || '') === String(opIdentity.uid))
+          ? { auth: aRef, identity: identity, operation: opIdentity,
+              fenceId: ownedFence.fenceId, fenceGeneration: ownedFence.generation }
           : null;
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('unknown', '', errText(e));
@@ -1010,17 +1089,22 @@
   function recoverAuthOutcome() {
     var r = _outcomeRecovery;
     var fence = readFence();
-    if (fence.kind === 'mismatch' || fence.kind === 'stale_mutation')
-      return Promise.reject(new Error('账号边界不一致，不能自动接管；请安全退出并清理会话'));
-    if (!r || !r.auth || !r.operation || !r.operation.uid)
-      return Promise.reject(new Error('没有可安全重新确认的登录结果；请安全退出并清理会话'));
-    var ownedFenceRevision = Number(fence.revision || 0);
+    if (!r || !r.auth || !r.operation || !r.operation.uid ||
+        fence.kind !== 'outcome_unknown' || !fence.fenceId ||
+        String(r.fenceId || '') !== String(fence.fenceId) ||
+        String(fence.expectedUid || '') !== String(r.operation.uid)) {
+      return Promise.reject(new Error(
+        fence.kind === 'mismatch' || fence.kind === 'stale_mutation'
+          ? '账号边界不一致，不能自动接管；请安全退出并清理会话'
+          : '没有可安全重新确认的登录结果；请安全退出并清理会话'));
+    }
+    var ownedFence = fence;
     var token;
     try { token = beginRecovery(); }
     catch (e0) { return Promise.reject(e0); }
     return confirmSession(r.auth, r.operation.uid, token).then(function (snap) {
       assertAuthToken(token);
-      return commitSignedIn(r.identity, r.operation, snap, token, ownedFenceRevision);
+      return commitSignedIn(r.identity, r.operation, snap, token, ownedFence);
     }).then(function (v) {
       _outcomeRecovery = null;
       finishSubmit(token);
@@ -1082,6 +1166,7 @@
       try {
         if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
       } catch (e0) {}
+      readFence();  /* 合并其他标签页在退出期间写入的 fence，再决定能否宣布干净退出 */
       if (hadPriorSessionMutation || _activeSessionMutations > 0 ||
           _fenceRevision !== signOutFenceRevision) {
         writeFence('stale_mutation', '', '',
@@ -1095,7 +1180,18 @@
           requiresReload: true
         };
       }
-      clearFence();
+      if (!clearFence()) {
+        writeFence('stale_mutation', '', '',
+          '另一个标签页在清理期间改变了认证边界；请刷新并再次核对');
+        setOperation('idle', '认证边界仍在变化，请刷新页面后再次核对');
+        setSessionTruth('unknown', '', '跨标签页认证边界尚未稳定');
+        return {
+          ok: true,
+          serverRevoked: true,
+          cleanupPending: true,
+          requiresReload: true
+        };
+      }
       setOperation('idle');
       setSessionTruth('signed_out', '', '');
       return { ok: true, serverRevoked: true, cleanupPending: false };
@@ -1111,12 +1207,13 @@
     });
   }
 
-  function commitSignedIn(inputIdentity, opIdentity, snap, token, ownedFenceRevision) {
+  function commitSignedIn(inputIdentity, opIdentity, snap, token, ownedFence) {
     assertAuthToken(token);
     var existingFence = readFence();
     if (existingFence.kind &&
-        !(existingFence.kind === 'outcome_unknown' &&
-          Number(existingFence.revision || 0) === Number(ownedFenceRevision || -1))) {
+        !(existingFence.kind === 'outcome_unknown' && ownedFence &&
+          sameFence(existingFence, ownedFence) &&
+          String(existingFence.expectedUid || '') === String((opIdentity && opIdentity.uid) || ''))) {
       var blocked = new Error('认证期间出现了更高优先级的账号隔离，拒绝提交登录结果');
       blocked.code = 'AUTH_FENCED_SESSION';
       blocked.observedUid = String(existingFence.observedUid || '');
@@ -1137,7 +1234,14 @@
     var phone = serverIdentity.phone || opIdentity.phone || inputIdentity.phone || '';
     var username = serverIdentity.username || opIdentity.username || inputIdentity.username || '';
     assertAuthToken(token);
-    if (existingFence.kind) clearFence();  /* 只清本次 recovery 精确拥有的 outcome fence */
+    if (existingFence.kind) {
+      if (!clearFence(existingFence) || readFence().kind) {
+        var concurrent = new Error('另一个标签页改变了认证隔离，拒绝提交登录结果');
+        concurrent.code = 'AUTH_FENCED_SESSION';
+        concurrent.observedUid = String((readFence() || {}).observedUid || '');
+        throw concurrent;
+      }
+    }
     writeLocal({
       schema: 1076,
       method: inputIdentity.method,
