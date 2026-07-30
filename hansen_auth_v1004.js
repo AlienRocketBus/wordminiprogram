@@ -144,6 +144,8 @@
 
   var _sessionTruth = { state: 'checking', uid: '', reason: '', checkedAt: 0 };
   var _authEpoch = 0;
+  var _authGeneration = 0;   /* 每次认证/退出递增：旧异步结果绝不能跨代落地 */
+  var _probeId = 0;          /* 只读 session 探测序号：后发探测拥有写状态权 */
   var _cloudBusy = false;
 
   function emitSessionState() {
@@ -175,7 +177,8 @@
   function isSignedIn() {
     var lc = readLocal();
     return !!(_sessionTruth.state === 'confirmed' && _sessionTruth.uid &&
-              lc.uid && String(lc.uid) === String(_sessionTruth.uid));
+              !readFence().kind && lc.uid &&
+              String(lc.uid) === String(_sessionTruth.uid));
   }
   function currentUser() {
     return isSignedIn() ? { uid: _sessionTruth.uid } : null;
@@ -192,8 +195,69 @@
   var _pendingMemory = null;
   var _attemptId = 0;
   var _submitBusy = false;
+  var _submitToken = 0;
+  var _activeMutationTasks = 0;
+  var _activeSessionMutations = 0;
+  var _mutationWaiters = [];
   var _operation = { state: 'idle', slow: false, reason: '' };
   var _outcomeRecovery = null;
+  var FKEY = 'hansen_auth_fence_v1076';
+  var _fenceMemory = null;
+
+  /* mismatch / outcome_unknown 只保存非敏感身份边界；密码、短信码、token 永不落盘。 */
+  function readFence() {
+    var o = null;
+    try {
+      var raw = sessionStorage.getItem(FKEY);
+      if (raw) o = JSON.parse(raw);
+    } catch (e) {}
+    if (!o || typeof o !== 'object' || Array.isArray(o)) o = _fenceMemory;
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
+    _fenceMemory = o;
+    return o;
+  }
+  function writeFence(kind, expectedUid, observedUid, reason) {
+    var o = {
+      schema: 1076,
+      kind: String(kind || 'outcome_unknown'),
+      expectedUid: String(expectedUid || ''),
+      observedUid: String(observedUid || ''),
+      reason: String(reason || ''),
+      at: Date.now()
+    };
+    _fenceMemory = o;
+    try { sessionStorage.setItem(FKEY, JSON.stringify(o)); } catch (e) {}
+    return o;
+  }
+  function clearFence() {
+    _fenceMemory = null;
+    try { sessionStorage.removeItem(FKEY); } catch (e) {}
+  }
+  function staleError(reason) {
+    var e = new Error(reason || '这次认证结果已经过期，已拒绝写入');
+    e.code = 'AUTH_STALE_OPERATION';
+    return e;
+  }
+  function isStaleError(e) {
+    return !!(e && e.code === 'AUTH_STALE_OPERATION');
+  }
+  function invalidateAuthWork(reason) {
+    _authGeneration++;
+    _probeId++;
+    _attemptId++;
+    var waiters = _mutationWaiters.slice();
+    _mutationWaiters.length = 0;
+    for (var i = 0; i < waiters.length; i++) {
+      try { waiters[i](reason || '认证状态已经变化'); } catch (e) {}
+    }
+    return _authGeneration;
+  }
+  function assertAuthToken(token) {
+    if (token !== _authGeneration) throw staleError();
+  }
+  function probeCurrent(probe, generation) {
+    return probe === _probeId && generation === _authGeneration;
+  }
 
   function setOperation(state, reason) {
     _operation = { state: state, slow: false, reason: String(reason || '') };
@@ -204,6 +268,7 @@
     } catch (e) {}
   }
   function operationStatus() {
+    var fence = readFence();
     return {
       state: _operation.state,
       slow: !!_operation.slow,
@@ -211,10 +276,12 @@
       busy: !!(_submitBusy || _operation.state === 'requesting' ||
                 _operation.state === 'verifying' ||
                 _operation.state === 'confirming' ||
-                _operation.state === 'outcome_unknown' ||
-                _operation.state === 'signing_out')
+                _operation.state === 'signing_out'),
+      requiresCleanup: !!fence.kind,
+      fence: String(fence.kind || '')
     };
   }
+
   function readPending() {
     var o = null;
     try {
@@ -242,36 +309,111 @@
   }
   function clearPending() {
     if (_submitBusy) return false;
-    _attemptId++;
+    invalidateAuthWork('验证码事务已清理');
     _pendingMemory = null;
     try { sessionStorage.removeItem(PKEY); } catch (e) {}
-    setOperation('idle');
+    if (readFence().kind) setOperation('outcome_unknown', readFence().reason || '请先安全清理未知会话');
+    else setOperation('idle');
     return true;
   }
+
   function delay(ms) {
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
-  /* 认证 mutation 不能用 Promise.race 假装取消。超过 20 秒只改变可见状态，
-     底层 Promise 仍由同一次 attempt 串行等待，期间禁止任何第二次认证。 */
-  function awaitAuthMutation(task, label) {
-    var timer = setTimeout(function () {
-      _operation.slow = true;
-      _operation.reason = label || '服务器仍在处理';
-      try {
-        document.dispatchEvent(new CustomEvent('hsn-auth-operation', {
-          detail: operationStatus()
-        }));
-      } catch (e) {}
-    }, 20000);
-    return Promise.resolve(task).then(function (v) {
-      clearTimeout(timer);
-      return unwrapAuthResult(v);
-    }, function (e) {
-      clearTimeout(timer);
-      throw e;
+  /* 底层认证 Promise 无法真正取消：20 秒只提示慢；60 秒后释放提交锁，
+     但写入持久 fence 并禁止重试。旧 Promise 若稍后返回，只能加固 fence，
+     永远没有资格提交 marker。安全退出会递增 generation 并立即作废等待者。 */
+  function awaitAuthMutation(task, label, token, mayChangeSession) {
+    token = token == null ? _authGeneration : token;
+    var sessionMutation = mayChangeSession !== false;
+    var slowMs = Number(window.__HANSEN_AUTH_SLOW_MS__ || 20000);
+    var hardMs = Number(window.__HANSEN_AUTH_MUTATION_TIMEOUT_MS__ || 60000);
+    _activeMutationTasks++;
+    if (sessionMutation) _activeSessionMutations++;
+
+    return new Promise(function (resolve, reject) {
+      var wrapperDone = false, underlyingDone = false;
+      function finishUnderlying() {
+        if (underlyingDone) return;
+        underlyingDone = true;
+        _activeMutationTasks = Math.max(0, _activeMutationTasks - 1);
+        if (sessionMutation) _activeSessionMutations = Math.max(0, _activeSessionMutations - 1);
+      }
+      function removeWaiter(cancel) {
+        var i = _mutationWaiters.indexOf(cancel);
+        if (i >= 0) _mutationWaiters.splice(i, 1);
+      }
+      function quarantine(reason) {
+        if (!sessionMutation) return;
+        writeFence('stale_mutation', '', '', reason || '旧认证请求在状态变化后才返回');
+      }
+      var slowTimer = setTimeout(function () {
+        if (wrapperDone || token !== _authGeneration) return;
+        _operation.slow = true;
+        _operation.reason = label || '服务器仍在处理';
+        try {
+          document.dispatchEvent(new CustomEvent('hsn-auth-operation', {
+            detail: operationStatus()
+          }));
+        } catch (e) {}
+      }, Math.max(1, slowMs));
+      var hardTimer = setTimeout(function () {
+        if (wrapperDone) return;
+        wrapperDone = true;
+        removeWaiter(cancel);
+        clearTimeout(slowTimer);
+        if (sessionMutation) {
+          writeFence('outcome_unknown', '', '', label || '认证请求超时，结果未知');
+        }
+        var e = new Error('服务器长时间没有返回；本次结果未知，禁止重复提交，请先安全退出并清理会话');
+        e.code = 'AUTH_MUTATION_INDETERMINATE';
+        reject(e);
+      }, Math.max(slowMs + 1, hardMs));
+      var cancel = function (reason) {
+        if (wrapperDone) return;
+        wrapperDone = true;
+        clearTimeout(slowTimer);
+        clearTimeout(hardTimer);
+        quarantine(reason || '旧认证请求已被退出操作作废');
+        reject(staleError(reason));
+      };
+      _mutationWaiters.push(cancel);
+
+      Promise.resolve(task).then(function (v) {
+        finishUnderlying();
+        clearTimeout(slowTimer);
+        clearTimeout(hardTimer);
+        removeWaiter(cancel);
+        if (wrapperDone) {
+          quarantine('旧认证请求在界面停止等待后才成功返回');
+          return;
+        }
+        wrapperDone = true;
+        if (token !== _authGeneration) {
+          quarantine('旧认证请求跨代返回');
+          reject(staleError());
+          return;
+        }
+        try { resolve(unwrapAuthResult(v)); }
+        catch (e) { reject(e); }
+      }, function (e) {
+        finishUnderlying();
+        clearTimeout(slowTimer);
+        clearTimeout(hardTimer);
+        removeWaiter(cancel);
+        if (wrapperDone) return;
+        wrapperDone = true;
+        if (token !== _authGeneration) {
+          reject(staleError());
+          return;
+        }
+        reject(e);
+      });
     });
   }
+
+  
 
   /* 只读 session 探测可以超时；超时代表 unknown，不能清 marker 或宣布退出。 */
   function withTimeout(task, ms, label) {
@@ -399,43 +541,76 @@
           });
       });
   }
-  function confirmSession(a, expectedUid, n, lastReason) {
+  function confirmSession(a, expectedUid, token, n, lastReason) {
     n = n || 0;
+    assertAuthToken(token);
     return sessionSnapshot(a).then(function (snap) {
-      if (snap && snap.session && snap.user && snap.uid === expectedUid && !snap.anonymous && !snap.indeterminate) return snap;
+      assertAuthToken(token);
+      if (snap && snap.session && snap.user &&
+          String(snap.uid) === String(expectedUid) &&
+          !snap.anonymous && !snap.indeterminate) return snap;
       var why = snap && snap.indeterminate
         ? (snap.reason || '云端凭证存在，但用户身份尚未刷新')
         : (snap && snap.uid
           ? ('云端当前 UID 与本次认证 UID 不一致：' + snap.uid)
           : '云端会话尚未建立');
       if (n >= 7) {
+        var mismatch = !!(snap && snap.uid && String(snap.uid) !== String(expectedUid));
+        writeFence(mismatch ? 'mismatch' : 'outcome_unknown',
+                   expectedUid, snap && snap.uid, why);
         var e = new Error(why + '；结果仍在确认，不能重复登录');
-        e.code = snap && snap.uid ? 'AUTH_SESSION_UID_MISMATCH' : 'AUTH_OUTCOME_UNKNOWN';
+        e.code = mismatch ? 'AUTH_SESSION_UID_MISMATCH' : 'AUTH_OUTCOME_UNKNOWN';
+        e.expectedUid = String(expectedUid || '');
+        e.observedUid = String((snap && snap.uid) || '');
         throw e;
       }
       var wait = window.__HANSEN_AUTH_TEST_FAST__ ? 0 : 350 * (n + 1);
       return delay(wait).then(function () {
-        return confirmSession(a, expectedUid, n + 1, why);
+        assertAuthToken(token);
+        return confirmSession(a, expectedUid, token, n + 1, why);
       });
     }, function (err) {
+      assertAuthToken(token);
       if (n >= 7) {
-        var e = new Error('暂时无法确认云端会话：' + errText(err));
+        var why = '暂时无法确认云端会话：' + errText(err);
+        writeFence('outcome_unknown', expectedUid, '', why);
+        var e = new Error(why);
         e.code = 'AUTH_OUTCOME_UNKNOWN';
+        e.expectedUid = String(expectedUid || '');
         throw e;
       }
       var wait = window.__HANSEN_AUTH_TEST_FAST__ ? 0 : 350 * (n + 1);
       return delay(wait).then(function () {
-        return confirmSession(a, expectedUid, n + 1, errText(err));
+        assertAuthToken(token);
+        return confirmSession(a, expectedUid, token, n + 1, errText(err));
       });
     });
   }
 
   function refreshSessionTruth() {
     var marker = readLocal();
-    setSessionTruth('checking', '', '');
+    var generation = _authGeneration;
+    var probe = ++_probeId;
+    var startingFence = readFence();
+    setSessionTruth(startingFence.kind === 'mismatch' ? 'mismatch' : 'checking',
+                    startingFence.observedUid || '',
+                    startingFence.reason || '');
     return auth().then(function (a) {
       return sessionSnapshot(a);
     }).then(function (snap) {
+      if (!probeCurrent(probe, generation)) return sessionStatus();
+      marker = readLocal();
+      var fence = readFence();
+      if (fence.kind) {
+        if (!snap.session && _activeSessionMutations === 0) {
+          clearFence();
+          fence = {};
+        } else {
+          return setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
+                                 snap.uid || fence.observedUid || '',
+                                 fence.reason || '存在未清理的认证结果，请先安全退出');
+        }
+      }
       if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
         return setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
       }
@@ -449,8 +624,10 @@
       }
       if (marker.method && marker.signedAt && !marker.uid)
         return setSessionTruth('legacy_reauth', '', '旧 marker 不能绑定现有会话');
-      if (marker.uid && String(marker.uid) !== String(snap.uid))
+      if (marker.uid && String(marker.uid) !== String(snap.uid)) {
+        writeFence('mismatch', marker.uid, snap.uid, '本地账号与 SDK 会话不一致');
         return setSessionTruth('mismatch', snap.uid, '本地账号与 SDK 会话不一致');
+      }
       if (!marker.uid) {
         writeLocal({
           schema: 1076,
@@ -463,6 +640,7 @@
       }
       return setSessionTruth('confirmed', snap.uid, '');
     }).catch(function (e) {
+      if (!probeCurrent(probe, generation) || isStaleError(e)) return sessionStatus();
       return setSessionTruth('unknown', '', errText(e));
     });
   }
@@ -490,8 +668,10 @@
       return '没有找到这个账号；新用户请先用手机号注册';
     if (/AUTH_SESSION_UID_MISMATCH|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
       return '本次登录账号与当前云端会话不一致，已安全停止；请重新确认或退出后再试';
-    if (/AUTH_OUTCOME_UNKNOWN|暂时无法确认云端会话|结果仍在确认/i.test(m))
-      return '服务器可能已经处理本次请求，结果仍在确认；请勿重复注册，点“重新确认会话”';
+    if (/AUTH_SESSION_UID_MISMATCH|AUTH_STALE_MUTATION|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
+      return '检测到两个不同账号或旧请求晚到，已隔离；请点“安全退出并清理会话”后再登录';
+    if (/AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
+      return '服务器可能已处理本次请求，不能重复提交；请点“安全退出并清理会话”';
     if (/AUTH_OPERATION_UID_MISSING|没有返回本次操作的用户 UID/i.test(m))
       return '服务器没有返回可核对的账号 UID，本次不能算登录成功';
     if (/AUTH_SIGNOUT_INCOMPLETE|退出没有完成|云端会话仍然存在/i.test(m))
@@ -532,21 +712,27 @@
   function sendPhoneCode(phoneRaw) {
     var phone = normPhone(phoneRaw);
     if (!phone) return Promise.reject(new Error('手机号格式不对，请填写 11 位手机号'));
-    if (_submitBusy || operationStatus().busy)
-      return Promise.reject(new Error('上一项认证操作仍在进行，请等待结果'));
+    if (readFence().kind)
+      return Promise.reject(new Error('存在未清理的认证结果，请先安全退出并清理会话'));
+    if (_submitBusy || operationStatus().busy || _operation.state === 'outcome_unknown')
+      return Promise.reject(new Error('上一项认证操作仍在进行或结果未知，请先处理'));
     var previous = readPending();
     if (previous.verificationId && previous.phone !== phone)
       return Promise.reject(new Error('请先点“更换手机号”结束当前验证码事务'));
     if (previous.verificationId && previous.resendAt && Date.now() < previous.resendAt)
       return Promise.reject(new Error('请等待倒计时结束后再重新获取验证码'));
 
-    var attempt = ++_attemptId;
+    var token = invalidateAuthWork('开始新的短信事务');
+    var attempt = _attemptId;
     setOperation('requesting');
     return auth().then(function (a) {
+      assertAuthToken(token);
       if (typeof a.getVerification !== 'function') throw new Error('当前环境不支持短信验证码');
-      return awaitAuthMutation(a.getVerification({ phone_number: phone }), '短信正在发送，请勿重复点击');
+      return awaitAuthMutation(a.getVerification({ phone_number: phone }),
+                               '短信正在发送，请勿重复点击', token, false);
     }).then(function (res) {
-      if (attempt !== _attemptId) throw new Error('这次发码已被新的操作替代');
+      assertAuthToken(token);
+      if (attempt !== _attemptId) throw staleError('这次发码已被新的操作替代');
       if (!res || !res.verification_id) throw new Error('服务器没有返回验证码事务，请重试');
       var pending = {
         attemptId: attempt,
@@ -562,6 +748,7 @@
       setOperation('code_sent');
       return { ok: true, isUser: pending.isUser, phone: phone, resendAt: pending.resendAt };
     }).catch(function (e) {
+      if (isStaleError(e) || token !== _authGeneration) throw e;
       if (previous && previous.verificationId) {
         writePending(previous);
         setOperation('code_sent', errText(e));
@@ -573,20 +760,43 @@
   }
 
   function beginSubmit(state) {
+    var fence = readFence();
+    if (fence.kind)
+      throw new Error('存在未清理的认证结果，请先安全退出并清理会话');
+    if (_cloudBusy) throw new Error('云存档操作正在进行，请完成后再登录');
     if (_submitBusy || _operation.state === 'requesting' ||
         _operation.state === 'verifying' || _operation.state === 'confirming' ||
         _operation.state === 'outcome_unknown' || _operation.state === 'signing_out')
       throw new Error(_operation.state === 'outcome_unknown'
-        ? '上一次登录结果仍在确认，请点“重新确认会话”'
+        ? '上一次登录结果未知，请先安全退出并清理会话'
         : '操作正在进行，请不要重复提交');
+    var token = invalidateAuthWork('开始新的认证操作');
     _submitBusy = true;
+    _submitToken = token;
     setOperation(state || 'verifying');
     setSessionTruth('checking', '', '正在核对本次认证');
+    return token;
   }
 
-  function finishSubmit() {
-    _submitBusy = false;
+  function beginRecovery() {
+    if (_submitBusy || _operation.state === 'signing_out')
+      throw new Error('会话确认正在进行');
+    var token = invalidateAuthWork('重新确认认证结果');
+    _submitBusy = true;
+    _submitToken = token;
+    setOperation('confirming');
+    setSessionTruth('checking', '', '正在重新核对本次认证');
+    return token;
   }
+
+  function finishSubmit(token) {
+    if (token === _submitToken) {
+      _submitBusy = false;
+      _submitToken = 0;
+    }
+  }
+
+  
 
   /* 同一验证码事务完成真实登录/注册；operation UID 与 session UID 必须一致。 */
   function loginByPhoneCode(code, username, password, password2) {
