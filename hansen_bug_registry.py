@@ -114,6 +114,12 @@ REGISTRY = [
      'test_auth_ui_v1076.mjs'),
     ('v1076', '旧账号云请求悬挂后用全局 busy 永久阻塞新账号，迟到结算还会释放新锁',
      'test_cloud_save_v965.mjs'),
+    ('v1076', 'CloudBase SDK import/init 在 mutation 计时器启动前悬挂，登录界面永久 busy',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '跨标签 session fence 遮住 local backup 的更强 mismatch，旧 recovery 误清冲突',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', 'U1 云档元信息或 fetch 读取迟到后把旧账号结果返回给 U2',
+     'test_cloud_save_v965.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
