@@ -667,8 +667,6 @@
       return '用户名或密码不正确';
     if (/user.*not.*found|no.*such.*user|USER_NOT_FOUND|not_found|用户不存在/i.test(m))
       return '没有找到这个账号；新用户请先用手机号注册';
-    if (/AUTH_SESSION_UID_MISMATCH|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
-      return '本次登录账号与当前云端会话不一致，已安全停止；请重新确认或退出后再试';
     if (/AUTH_SESSION_UID_MISMATCH|AUTH_STALE_MUTATION|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
       return '检测到两个不同账号或旧请求晚到，已隔离；请点“安全退出并清理会话”后再登录';
     if (/AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
@@ -993,17 +991,23 @@
     return auth().then(function (a) {
       assertAuthToken(token);
       if (typeof a.signOut !== 'function') throw new Error('当前 SDK 不支持退出登录');
+      var revokeError = null;
       return awaitAuthMutation(a.signOut(), '正在安全退出，请勿关闭页面', token, true)
-        .then(function () {
+        .catch(function (e0) {
+          if (isStaleError(e0) || token !== _authGeneration) throw e0;
+          revokeError = e0;
+        }).then(function () {
           assertAuthToken(token);
           return sessionSnapshot(a);
         }).then(function (snap) {
           assertAuthToken(token);
           if (snap.session) {
-            var e = new Error('云端会话或凭证仍然存在，退出没有完成');
-            e.code = 'AUTH_SIGNOUT_INCOMPLETE';
+            var e = revokeError ||
+              new Error('云端会话或凭证仍然存在，退出没有完成');
+            if (!e.code) e.code = 'AUTH_SIGNOUT_INCOMPLETE';
             throw e;
           }
+          /* SDK signOut 即使报错，只要随后已确认 session=null，退出仍可安全完成。 */
         });
     }).then(function () {
       _pendingMemory = null;
