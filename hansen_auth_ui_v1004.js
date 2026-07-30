@@ -244,13 +244,16 @@
   function finishPostLogin(base, post) {
     var auth = A();
     var marker = auth.readLocal ? auth.readLocal() : {};
-    if (!base || !base.uid || marker.uid !== base.uid || (post && post.stale)) return;
+    if (!base || !base.uid || marker.uid !== base.uid ||
+        !auth.isSignedIn || !auth.isSignedIn() || (post && post.stale)) return;
     var sync = (post && post.sync) || { action: 'deferred' };
     _syncState = {};
     for (var k in sync) if (Object.prototype.hasOwnProperty.call(sync, k)) _syncState[k] = sync[k];
     _syncState.uid = base.uid;
     var idTxt = post && post.cid ? ' 竞赛 ID No.' + pad(post.cid)
-      : (post && post.pendingId ? ' 竞赛 ID 稍后分配。' : '');
+      : (post && post.competitionIdUnavailable
+        ? ' 云端竞赛 ID 尚未启用，不影响登录和本机游戏。'
+        : (post && post.pendingId ? ' 竞赛 ID 等待服务端配置。' : ''));
     render();
     if (sync.action === 'conflict')
       setMessage('登录成功！' + idTxt + ' 云端和本机都有进度；默认不覆盖，请明确选择。', 'ok');
@@ -265,15 +268,30 @@
   }
 
   function acceptAuthResult(r) {
+    var auth = A();
+    var marker = auth.readLocal ? auth.readLocal() : {};
+    if (!r || !r.ok || !r.uid || !auth.isSignedIn || !auth.isSignedIn() ||
+        String(marker.uid || '') !== String(r.uid)) {
+      _syncState = null;
+      notify();
+      render();
+      setMessage('认证边界在成功展示前发生变化；本次不算登录成功，请安全退出并重新核对。', 'err');
+      return false;
+    }
     _syncState = { action: 'checking', uid: r.uid };
     notify();
     render();
-    setMessage('真实 session UID 已确认，登录成功。正在只读检查云存档；不会自动覆盖。', 'ok');
-    if (r && r.postLogin && typeof r.postLogin.then === 'function') {
+    setMessage('真实 session UID 与共享认证边界均已确认，登录成功。正在只读检查云存档；不会自动覆盖。', 'ok');
+    if (r.postLogin && typeof r.postLogin.then === 'function') {
       r.postLogin.then(function (post) { finishPostLogin(r, post); }, function () {
-        finishPostLogin(r, { pendingId: true, sync: { action: 'deferred' } });
+        finishPostLogin(r, {
+          pendingId: false,
+          competitionIdUnavailable: true,
+          sync: { action: 'deferred' }
+        });
       });
     }
+    return true;
   }
 
   function chooseCloud(choice, uid) {
@@ -299,7 +317,8 @@
     function sameAccount(){
       try {
         var auth = A(), marker = auth.readLocal ? auth.readLocal() : {};
-        return !!(marker && marker.uid === uid);
+        return !!(auth.isSignedIn && auth.isSignedIn() &&
+          marker && String(marker.uid || '') === String(uid));
       } catch (e) { return false; }
     }
     function restoreChoices(){
