@@ -57,6 +57,8 @@
   var mode = 'phone';   /* phone | password */
   var _syncState = null;
   var _cloudChoiceBusy = null;  /* {choice,uid,previous}：破坏性选择一次只允许一个 Promise */
+  var _renderEpoch = 0;          /* 每次重绘/关闭作废所有旧 DOM 事件闭包 */
+  var _cleanupReloadRequired = false;
   var _message = { text: '', kind: '' };
 
   function A() { return window.HansenAuth; }
@@ -153,15 +155,18 @@
     var wait = known && pending.resendAt ? Math.max(0, Math.ceil((pending.resendAt - Date.now()) / 1000)) : 0;
     _left = wait;
     var op = auth && auth.operationStatus ? auth.operationStatus() : { busy: false, state: 'idle' };
-    var busy = !!op.busy;
+    var busy = !!(op.busy || op.requiresCleanup || _cleanupReloadRequired);
     var banner = sessionBanner(st, marker);
 
     var h = '<div class="au_card"><div class="au_hd"><span class="au_t">🔐 登录 / 注册</span>'
       + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>' + banner
       + (st.state === 'unknown' || st.state === 'mismatch'
           ? '<button class="au_skip" id="auRetrySession" style="color:#fde68a">重新确认旧会话</button>' : '')
-      + (st.state === 'unknown' || st.state === 'mismatch' || op.state === 'outcome_unknown'
+      + (st.state === 'unknown' || st.state === 'mismatch' || st.state === 'legacy_reauth' ||
+          op.state === 'outcome_unknown' || op.requiresCleanup || _cleanupReloadRequired
           ? '<button class="au_go" id="auSafeOut" style="background:linear-gradient(135deg,#991b1b,#dc2626)">安全退出并清理会话</button>' : '')
+      + (_cleanupReloadRequired
+          ? '<button class="au_skip" id="auReloadCleanup" style="color:#fde68a">重新载入并再次核对服务器 session</button>' : '')
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone"' + (busy ? ' disabled' : '') + '>手机号继续</button>'
       + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password"' + (busy ? ' disabled' : '') + '>账号密码登录</button>'
@@ -336,29 +341,51 @@
     });
   }
 
-  function bind() {
+  function bind(epoch) {
     var el = document.getElementById(ID);
     if (!el) return;
     var auth = A();
     var q = function (id) { return document.getElementById(id); };
-    if (q('auX')) q('auX').onclick = close;
-    if (q('auSkip')) q('auSkip').onclick = close;
-    if (q('auUsePhone')) q('auUsePhone').onclick = function () { mode = 'phone'; render(); };
-    if (q('auRetrySession')) q('auRetrySession').onclick = function () {
+    function on(id, handler) {
+      var node = q(id);
+      if (!node) return;
+      node.onclick = function (ev) {
+        if (epoch !== _renderEpoch || node !== document.getElementById(id)) return;
+        if (_cloudChoiceBusy) {
+          setMessage('云存档选择正在处理中，完成前不能切换账号、关闭或执行其他操作。');
+          return;
+        }
+        return handler.call(node, ev);
+      };
+    }
+    function stillLive(id, node) {
+      return epoch === _renderEpoch && node === document.getElementById(id);
+    }
+
+    on('auX', close);
+    on('auSkip', close);
+    on('auUsePhone', function () { mode = 'phone'; render(); });
+    on('auRetrySession', function () {
+      var node = this;
       setMessage('正在重新确认会话…');
-      auth.refreshSession().then(function () { render(); });
-    };
-    if (q('auSafeOut')) q('auSafeOut').onclick = function () {
+      auth.refreshSession().then(function () {
+        if (stillLive('auRetrySession', node)) render();
+      });
+    });
+    on('auSafeOut', function () {
+      if (_cloudChoiceBusy) {
+        setMessage('云存档选择正在处理中，不能清理会话。');
+        return;
+      }
       if (!confirm('确认安全退出并清理当前服务器会话吗？本机学习进度会保留。')) return;
-      var button = this;
-      button.disabled = true;
-      _cloudChoiceBusy = null;
+      this.disabled = true;
       _syncState = null;
       setMessage('正在安全退出并清理服务器会话…');
       auth.signOut().then(function (r) {
+        _cleanupReloadRequired = !!(r && r.cleanupPending);
         render();
         notify();
-        if (r && r.cleanupPending)
+        if (_cleanupReloadRequired)
           setMessage('本机已退出，但旧登录请求仍可能晚到。请重新载入页面，系统会再次核对服务器 session；完成前不要重新登录。', 'err');
         else
           setMessage('会话已安全清理，可以重新登录。', 'ok');
@@ -366,84 +393,89 @@
         render();
         setMessage('安全清理没有完成：' + auth.friendly(e), 'err');
       });
-    };
-    if (q('auRecover')) q('auRecover').onclick = function () {
+    });
+    on('auReloadCleanup', function () { location.reload(); });
+    on('auRecover', function () {
+      var node = this;
       setMessage('正在确认刚才的结果；不会重复注册或登录…');
-      auth.recoverAuthOutcome().then(acceptAuthResult).catch(function (e) { setMessage(auth.friendly(e), 'err'); });
-    };
-    if (q('auChangePhone')) q('auChangePhone').onclick = function () {
-      if (auth.clearPending()) { _left = 0; render(); setMessage('已结束旧验证码事务，可以输入新的手机号。'); }
-    };
+      auth.recoverAuthOutcome().then(function (r) {
+        if (stillLive('auRecover', node)) acceptAuthResult(r);
+      }).catch(function (e) {
+        if (stillLive('auRecover', node)) setMessage(auth.friendly(e), 'err');
+      });
+    });
+    on('auChangePhone', function () {
+      if (auth.clearPending()) {
+        _left = 0; render();
+        setMessage('已结束旧验证码事务，可以输入新的手机号。');
+      }
+    });
 
     var tabs = el.querySelectorAll('.au_tab');
     for (var i = 0; i < tabs.length; i++) {
-      tabs[i].onclick = (function (m) { return function () { mode = m; render(); }; })(tabs[i].getAttribute('data-m'));
+      (function (node, m) {
+        node.onclick = function () {
+          if (epoch !== _renderEpoch || node !== document.querySelector('[data-m="' + m + '"]') ||
+              _cloudChoiceBusy) return;
+          mode = m; render();
+        };
+      })(tabs[i], tabs[i].getAttribute('data-m'));
     }
 
-    if (q('auSend')) q('auSend').onclick = function () {
+    on('auSend', function () {
+      var node = this;
       var phone = (q('auPhone') || {}).value || '';
       setMessage('正在发送验证码…');
-      this.disabled = true;
+      node.disabled = true;
       auth.sendPhoneCode(phone).then(function (r) {
+        if (!stillLive('auSend', node)) return;
         render();
         setMessage(r.isUser
           ? '验证码已发送。这个手机号已有账号，本次只登录。'
           : '验证码已发送。这是新手机号，请设置用户名和密码。', 'ok');
       }).catch(function (e) {
+        if (!stillLive('auSend', node)) return;
         render();
         setMessage(auth.friendly(e), 'err');
       });
-    };
+    });
 
-    if (q('auGo')) q('auGo').onclick = function () {
-      this.disabled = true;
+    on('auGo', function () {
+      var node = this;
+      node.disabled = true;
       setMessage(mode === 'phone' ? '正在验证并确认同一 UID 的云端会话…' : '正在登录并确认同一 UID 的云端会话…');
       var task = mode === 'phone'
         ? auth.loginByPhoneCode((q('auCode') || {}).value || '', (q('auNewUser') || {}).value || '',
             (q('auNewPwd') || {}).value || '', (q('auNewPwd2') || {}).value || '')
         : auth.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
-      task.then(acceptAuthResult).catch(function (e) {
+      task.then(function (r) {
+        if (stillLive('auGo', node)) acceptAuthResult(r);
+      }).catch(function (e) {
+        if (!stillLive('auGo', node)) return;
         render();
         setMessage(auth.friendly(e), 'err');
       });
-    };
+    });
 
-    if (q('auKeepCloud')) q('auKeepCloud').onclick = function () { chooseCloud('cloud', auth.readLocal().uid); };
-    if (q('auKeepLocal')) q('auKeepLocal').onclick = function () { chooseCloud('local', auth.readLocal().uid); };
-    if (q('auDefer')) q('auDefer').onclick = function () {
-      if (_cloudChoiceBusy) {
-        setMessage('云存档选择正在处理中，完成前不能改为“稍后”。');
-        return;
-      }
+    on('auKeepCloud', function () { chooseCloud('cloud', auth.readLocal().uid); });
+    on('auKeepLocal', function () { chooseCloud('local', auth.readLocal().uid); });
+    on('auDefer', function () {
       _syncState = { action: 'deferred-by-user', uid: auth.readLocal().uid };
       render();
       setMessage('已选择稍后处理；本机和云端都没有被改动。', 'ok');
-    };
-    if (q('auReload')) q('auReload').onclick = function () { location.reload(); };
+    });
+    on('auReload', function () { location.reload(); });
 
-    if (q('auPush')) q('auPush').onclick = function () {
-      if (_cloudChoiceBusy) {
-        setMessage('云存档选择正在处理中，请等待本次操作完成。');
-        return;
-      }
-      var uid = auth.readLocal().uid;
-      if (!confirm('确认把本机当前进度上传到这个账号的云端存档吗？')) return;
-      setMessage('正在上传…');
-      auth.resolveCloudChoice('local', uid).then(function (r) {
-        setMessage(r && r.ok ? '已存到云端。' : ('上传没成功：' + ((r && r.reason) || '未知原因')), r && r.ok ? 'ok' : 'err');
-      }).catch(function (e) { setMessage(auth.friendly(e), 'err'); });
-    };
-    if (q('auOut')) q('auOut').onclick = function () {
-      if (_cloudChoiceBusy) {
-        setMessage('云存档选择正在处理中，完成前不能退出。');
-        return;
-      }
+    /* 手动上传也复用同一个 applying 锁和 UID 复验，不能成为旁路。 */
+    on('auPush', function () { chooseCloud('local', auth.readLocal().uid); });
+    on('auOut', function () {
       setMessage('正在安全退出并核对服务器会话…');
       auth.signOut().then(function (r) {
         _syncState = null;
+        _cleanupReloadRequired = !!(r && r.cleanupPending);
         render();
         notify();
-        if (r && r.cleanupPending)
+        if (_cleanupReloadRequired)
           setMessage('本机已退出，但旧登录请求仍在收尾。请重新载入后再次核对，再进行新的登录。', 'err');
         else
           setMessage('已安全退出。游戏本地进度仍保留。', 'ok');
@@ -451,13 +483,14 @@
         render();
         setMessage('退出没有完成：' + auth.friendly(e), 'err');
       });
-    };
+    });
   }
 
   function render() {
     var el = host();
+    var epoch = ++_renderEpoch;
     el.innerHTML = html();
-    bind();
+    bind(epoch);
     armTimer();
     if (_message.text) setMessage(_message.text, _message.kind);
   }
@@ -481,6 +514,7 @@
     }
     var el = document.getElementById(ID);
     if (el) el.classList.remove('on');
+    _renderEpoch++;  /* 即使 DOM 尚未销毁，关闭也立即作废全部旧引用 */
     if (_tick) { clearInterval(_tick); _tick = null; }
   }
 
