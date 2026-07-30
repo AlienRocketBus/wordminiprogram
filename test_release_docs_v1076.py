@@ -27,6 +27,9 @@ class ReleaseDocumentationV1076Tests(unittest.TestCase):
         package_json = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         package_lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
         self.assertEqual(package_json["version"], "1076.0.0")
+        self.assertIn("v1076", package_json.get("description", ""))
+        self.assertIn("注册", package_json.get("description", ""))
+        self.assertIn("登录", package_json.get("description", ""))
         self.assertEqual(package_lock["version"], "1076.0.0")
         self.assertEqual(package_lock["packages"][""]["version"], "1076.0.0")
 
