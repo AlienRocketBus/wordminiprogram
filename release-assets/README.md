@@ -1,14 +1,172 @@
 # 单词大冒险
 
-> 当前正式版本：**v1074**  
-> 基线与交付：v960 以已核验并保存到 ChatGPT Library 的正式 **v959 完整源码**为唯一基线；未使用 GitHub
-> 拉取或上传，也不创建 commit、tag 或 Release。
-> 正式交付仍为可直接部署 ZIP、含贾维斯完整源码 ZIP 和 README.md，三项保存到 ChatGPT Library
-> 并提供下载链接。
+> 当前代码版本：**v1075**  
+> 权威仓库：`AlienRocketBus/wordminiprogram`。v1075 直接基于 `main` 的 v1074
+> 提交 `f090e88f103edd7cbf2c155ffc477b4a7bc65052` 开发；候选分支为
+> `agent/fix-auth-v1075`，合并前不得冒充已上线版本。  
+> 发布合同：每个版本必须同时更新 `VERSION`、运行时代码、缓存代际、CHANGELOG、
+> 本 README、`release-assets/README.md`、测试与打包合同。GitHub Release 只代表
+> 代码资产发布，**不等于** CloudBase 静态网站、认证方式、短信模板或数据库权限已经部署完成。
 
-单词大冒险是一套纯静态网页记单词游戏，包含 18 个常规主题岛、8 个单词大陆 Land
-入口、星海女帝篇、Boss、Spelling Bee、36 阶宠物、金币、钻石、任务和成就系统。
-部署包不需要数据库或构建服务器，解压后把根目录整体上传到静态网站即可。
+单词大冒险是一套静态网页英语学习游戏。当前由同一套共享模块、两套受控母版和生成器维护
+19 个普通/星海岛页与 8 个 Land 岛页，共 27 个岛；另含 Boss、Spelling Bee、拼写大 PK、
+36 阶宠物、金币、钻石、任务、成就、本地备份、账号与可选 CloudBase 云存档。游戏主体仍可
+离线和不登录游玩；账号的价值是用一个经过 SDK 确认的稳定 UID 连接跨设备能力，而不是强制门槛。
+
+## v1075 — 注册与登录闭环重构（从 v1074 直接修复）
+
+### 背景与根因
+
+用户现场的核心症状是：手机号可以输入、界面也可能显示“处理中”或“已登录”，但注册无法
+可靠完成，刷新或同步时又被当成未登录。全面沿调用链核对后，问题不是一个输入格式错误，而是
+五组会互相放大的状态错误：
+
+1. **曾经存在一条伪造的“纯用户名注册”旁路。** v1058 把用户名确定性映射成 `.local`
+   邮箱，再假定后端会把它当作真实邮箱注册。这既不是可交付的真实邮箱身份，也把“用户名登录”
+   与“账号创建”混成两套协议。v1075 删除这条旁路：新账号只通过 CloudBase v2 的手机验证码
+   注册事务创建；用户名和密码作为同一次 `signUp` 的可选字段写入。用户名/密码页只登录已经
+   存在的账号，不再承诺无手机号直接注册。
+2. **登录状态曾有两个真源。** `localStorage` 中的 `{method,signedAt}` 只是旧界面标记，
+   却长期被当成有效云端会话；SDK 的真实 session 只在诊断面板里查询。结果是界面说“已登录”，
+   云端却返回 `unauthenticated / credentials not found`。v1075 明确：只有 SDK session 的
+   非匿名 UID 与本地 marker UID 精确相等，`isSignedIn()` 才能返回 true。
+3. **认证动作与会话落定没有绑定。** 注册/登录 API 返回成功，不代表随后读取到的持久 session
+   一定属于同一个用户。旧代码可能接受“某个旧会话仍存在”，把本次新账号与旧账号混在一起。
+   v1075 同时提取本次认证结果 UID 和随后 `getSession()` 的 UID；缺失、匿名或不一致一律
+   fail closed，不写“成功”标记，也不碰云存档。
+4. **前端超时曾把未知结果误当成失败并允许重试。** 网络慢时，后端注册可能仍在执行；前端若
+   20 秒后丢弃原 Promise，用户再次点击可能重复注册或重复登录。v1075 的 20 秒只改变提示为
+   “仍在处理”，原动作继续串行等待；如果最终结果仍无法确认，进入 `outcome_unknown`，
+   只允许重新查询 session，绝不自动重放注册动作。
+5. **登录后的云存档同步曾阻塞并可能替用户做选择。** 账号刚建立就自动恢复/上传，会让一次
+   认证同时承担身份、覆盖本机和覆盖云端三种风险。v1075 登录后只做只读元数据检查；发现两边
+   都有进度时必须明确选择“保留云端”“保留本机”或“稍后处理”。关闭、取消、稍后都严格零写入。
+
+官方接口依据：
+
+- [CloudBase Web v2 手机注册](https://docs.cloudbase.net/authentication-v2/method/signup)
+  明确给出 `getVerification → verify → signUp`，且手机注册可在同一事务传
+  `phone_number`、`verification_code`、`verification_token`、`username` 与 `password`。
+- [CloudBase 用户名/密码登录](https://docs.cloudbase.net/en/authentication/method/username-login)
+  用于已存在账号的登录，不被本项目曲解为无验证的纯用户名创建。
+- [CloudBase Web v3 认证 API 索引](https://docs.cloudbase.net/api-reference/webv3/authentication)
+  用于核对锁定 SDK 的认证方法形状；实际生产环境仍以当前控制台开启能力为准。
+
+### 实现
+
+#### 1. 唯一认证状态机
+
+| 状态 | 含义 | 允许的行为 |
+|---|---|---|
+| `checking` | 正在读取 SDK session | 禁止云端写入，界面显示核对中 |
+| `confirmed` | SDK UID 与 marker UID 精确一致且非匿名 | 允许账号云操作 |
+| `signed_out` | SDK 明确没有正式账号 session | 显示登录/注册入口 |
+| `unknown` | 网络、SDK 或查询超时导致无法判断 | 保留 marker 和本地进度，但拒绝云操作 |
+| `mismatch` | SDK UID 与 marker UID 不同 | 拒绝一切账号云操作，要求安全退出后重登 |
+| `legacy_reauth` | 旧 marker 有时间/方式但没有可信 UID | 保留本地学习进度，必须重新认证 |
+| `outcome_unknown` | 认证请求可能已完成但 session 尚不能确认 | 只允许“重新确认结果”，禁止重复提交 |
+
+`localStorage` 只保存非敏感显示缓存：schema、UID、手机号/用户名显示值、登录方式与时间。
+短信事务保存在当前标签页的 `sessionStorage`，只含手机号、verification ID、新老用户标志、
+发码时间和 `resendAt`；密码、短信码、verification token 从不持久化，也不得进入日志。
+
+#### 2. 手机新用户
+
+1. 规范化为 `+86 11 位号码`，调用 `getVerification({phone_number})`。
+2. 只有发码成功后才原子替换 pending 事务；重发失败保留旧的仍可用事务。
+3. 用户提交验证码、用户名与两次一致的密码。
+4. 调用 `verify({verification_id, verification_code})` 获取 token。
+5. 调用一次 `signUp({phone_number, verification_code, verification_token, username, password})`。
+6. 从 signUp 结果取得本次 UID，再轮询 `getSession()`；必须得到同一非匿名 UID。
+7. 仅在 UID 精确一致后写 marker、广播账号变化，并启动只读云存档检查。
+
+#### 3. 已有手机号与用户名密码
+
+已有手机号固定走 `verify → signIn`，不会误入 `signUp`。用户名密码固定走
+`signInWithPassword`，不再把“账号不存在”转换成虚假的注册成功。两条路径都遵守相同的
+operation UID / session UID 一致性合同，并由单一提交锁防止快速连点和重复请求。
+
+#### 4. UI 与恢复
+
+发码后手机号锁定，避免验证码事务和输入号码错配；“更换手机号”会明确结束旧事务。
+倒计时以绝对 `resendAt` 计算，因此关闭再打开面板、切后台或短暂休眠后仍能正确恢复。
+登出只有在 SDK 真正撤销 session 或复查确认已无 session 时才清 marker；服务器登出失败时
+不谎报成功。错误对象统一展开为可读文本，不再退化成 `[object Object]`。
+
+#### 5. 云存档身份与覆盖边界
+
+新写入统一使用 `u:<stable CloudBase UID>` 派生的账号密钥。手机号和用户名只作为历史地址
+候选，用于发现旧档和迁移；它们不再决定新档身份，避免同一账号通过两种登录方式得到两把钥匙。
+所有恢复/上传动作都携带预期 UID 与页面 epoch；用户切换账号、退出或旧异步动作迟到时立即停止。
+登录完成本身不会自动恢复、不会自动上传、不会刷新覆盖页面内存。
+
+#### 6. 主要修改面
+
+- `hansen_auth_v1004.js`：认证状态机、v2 手机注册、UID 双确认、事务与登出语义。
+- `hansen_auth_ui_v1004.js`：真实注册界面、绝对倒计时、未知结果恢复、显式云存档选择。
+- `hansen_cloud_save_v965.js`：稳定 UID 新命名空间、历史候选迁移、每次操作复验 session。
+- `test_auth_contract_v1075.mjs`：认证状态机、异常、重发、UID 错配、退出和零写入合同。
+- `test_auth_vendor_v1075.mjs`：真实 Chromium 导入仓库锁定 SDK，核对七个 API 方法形状。
+- `test_auth_ui_v1075.mjs`：390×844 真实 DOM 点击发码、新用户注册、关闭重开倒计时。
+- `test_session_truth_v1059.mjs`、`test_phone_signup_v1057.mjs` 与错误专项：
+  用新的 SDK session 真源语义替换已经失效的旧断言。
+- `jarvis_gate.py`、`package_release.py` 和正式 GitHub Actions：
+  把源码树、文档、测试、生成页和三文件发布绑定到同一不可变候选。
+
+### 兼容
+
+- 不删除或重置任何岛屿、本地钱包、宠物、任务、成就、错词或备份数据。
+- 旧版有 UID 的 marker 必须由 SDK session 重新确认；没有 UID 的 marker 进入
+  `legacy_reauth`，不会被静默升级成“已登录”。
+- 已存在的手机号账号仍用短信登录；已设置用户名/密码的账号仍可走密码登录。
+- 旧手机号/用户名云档只读探测并在用户明确选择后迁移到 UID 主地址；找不到旧档不代表可覆盖。
+- 匿名/恢复码模式仍可服务未注册玩家，但匿名 session 不能冒充正式账号 session。
+- 19 个普通岛和 8 个 Land 岛都从母版/数据生成，账号修复必须通过全 27 岛接线校验；
+  禁止直接手改某一个生成页来制造局部“修好”。
+- v961 与 v962 仍是历史淘汰版本号，打包器继续拒绝复用；本次版本链只认 GitHub v1074→v1075。
+
+### 测试
+
+v1075 的最低回归矩阵如下；任何一项跳过都不能写成“通过”：
+
+| 层级 | 证明内容 | 不能证明的内容 |
+|---|---|---|
+| VM/状态机 | 分支选择、pending、UID 一致性、错误分类、零写入、退出 | 生产短信是否送达 |
+| 锁定 SDK + Chromium | 仓库内真实 bundle 可导入，所需方法真实存在 | 控制台是否已开通对应 provider |
+| 390×844 DOM 点击 | 发码后界面、倒计时、关闭重开、注册提交与登录态展示 | 真实手机号、运营商、短信模板 |
+| 生成与接线 | 19+8 页面都加载同一账号模块与资源戳 | 已部署 CDN 是否仍缓存旧 HTML |
+| 全库回归 | 旧经济、存档、Boss、Bee、性能、安全行为未回退 | 任意未来浏览器或所有并发时序 |
+| 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后逐字节一致 | 静态站和 CloudBase 控制台已部署 |
+
+特别说明：`test_auth_contract_v1075` 使用可注入假认证对象；`test_auth_vendor_v1075` 使用
+真实仓库 SDK 但不调用生产 CloudBase；`test_auth_ui_v1075` 走真实浏览器 DOM 但仍使用测试
+认证实现。三者能消除大量“正则全绿”的假安全感，却**不能替代一台真实手机、真实短信、真实
+CloudBase 环境的最终冒烟**。生产验收步骤完整写在 `云存档_开通指南_v965.md`。
+
+正式 CI 还必须：
+
+1. 拒绝任何版本化测试中的 `/home/claude/work/repo` 硬编码路径。
+2. 运行 `generate.py` 与 `generate_land.py --verify` 后确认工作树无差异。
+3. 运行所有 `test_*v*.mjs` 与 `test_*v*.py`，不是只跑 v942 Python。
+4. 运行经济、资源、导航、深度 Jarvis 与浏览器守卫。
+5. 在最终源码树上签发一次 Jarvis 凭证；源码再变一字，凭证立即失效。
+6. 两次独立打包并比较摘要，确认源码 ZIP 不含临时 `.jarvis_pass.json`。
+
+### 发布与部署
+
+1. v1075 必须先在 `agent/fix-auth-v1075` 形成草稿 PR，审查和 CI 通过后才允许合并 main。
+2. `VERSION`、`package.json`/lock、Service Worker 的 shell/pages/assets 三代缓存、
+   所有运行资源 `?v=1075`、打包合同和 README 必须一次性升级，不能只改文件名。
+3. 正式发布工作流只产出三个资产：ASCII 物理名的部署 ZIP、源码/Jarvis ZIP 和 README；
+   GitHub 页面用中文标签显示。旧的一文件自动发布工作流不再监听 main。
+4. 发布失败会删除未完成草稿；只有当孤儿 tag 精确指向当前 `GITHUB_SHA` 时才删除该 tag，
+   不会误删历史标签，也不会覆盖已存在 Release。
+5. GitHub Release 发布后仍需按 `部署说明_解决打开变下载.md` 上传部署 ZIP，并按
+   `云存档_开通指南_v965.md` 核对环境、认证方式、短信、安全域名、集合与权限。
+6. 未完成生产手机号冒烟前，只能表述为“代码与 CI 候选通过”；不得宣称真实注册已经在生产完成。
+7. 每个后续版本继续执行同一文档硬门禁：README 与 CHANGELOG 的当前版本章节都必须包含
+   “背景与根因 / 实现 / 兼容 / 测试 / 发布与部署”，且 README 发布副本必须逐字一致。
+
 
 ## v1032 的目标
 
@@ -4670,96 +4828,115 @@ python3 -m http.server 8000
 
 ## 源码结构
 
-- `template.html`：19 个常规/星海岛页面的母版。
-- `island_data.json`：各岛词表、Boss 与主题数据。
-- `generate.py`：从母版生成 19 个岛页面。
-- `island_land1.html`～`island_land8.html`：单词大陆八个入口。
-- `sync_land_v942.py`：把母版公共壳变更以三方校验方式同步到 8 个手工数据 Land 页，拒绝词表、
-  Boss 数值或页面身份漂移。
-- `hansen_canonical_progress.js`：canonical 单词与错词权威账本。
-- `hansen_coin_wallet.js` / `hansen_gem_system.js`：全局金币和钻石钱包。
-- `hansen_pet_showcase.js`：宠物全局经验、进化和展示。
-- `jarvis.py` / `hansen_evolve.py` / `jarvis_scan.py`：确定性守卫编排与报告。
-- `package_release.py`：唯一正式发布打包实现。
+- `template.html` + `island_data.json` + `generate.py`：19 个普通/星海岛页的唯一真源。
+- `land_template.html` + `land_data.json` + `generate_land.py`：8 个 Land 岛页的唯一真源；
+  `generate_land.py --verify` 用于证明生成产物逐字一致。
+- `island_*.html`：生成产物。公共改动必须回到对应母版或共享模块，禁止把生成页当第二真源。
+- `sync_land_v942.py`：历史同步工具，仅供旧版本审计；v1073 以后 Land 正式路径是
+  `land_template.html / land_data.json / generate_land.py`。
+- `hansen_auth_v1004.js` / `hansen_auth_ui_v1004.js`：当前账号协议与 UI；
+  文件名保留历史后缀是兼容边界，不表示逻辑仍停在 v1004。
+- `hansen_cloud_save_v965.js` / `hansen_cloud_config_v965.js`：云档协议和环境配置；
+  新账号写入以稳定 UID 为主地址。
+- `hansen_canonical_progress.js`、`hansen_coin_wallet.js`、`hansen_gem_system.js`、
+  `hansen_pet_showcase.js`：学习、经济和宠物权威账本。
+- `jarvis.py`、`jarvis_gate.py`、`hansen_guards_v1068.py`、`jarvis_selftest.py`：
+  深度审计、最终闸门、现代事故守卫和守卫自证。
+- `package_release.py`：唯一正式三文件打包入口；`.github/workflows/jarvis-three-file-release.yml`
+  是唯一允许从 main 发布 GitHub Release 的工作流。
 
-生成岛页：
+生成与校验：
 
 ```bash
 python3 generate.py
-python3 sync_land_v942.py --base-template /path/to/v941/template.html
-python3 sync_land_v942.py --base-template /path/to/v941/template.html --check
+python3 generate_land.py
+python3 generate_land.py --verify
+git diff --exit-code
 ```
-
-生成后的页面不能作为另一份手工维护的真相。需要改公共逻辑时应修改模板或共享模块，再重新
-生成并运行跨岛一致性守卫。
 
 ## 开发与验证
 
-审计依赖固定在 `requirements-audit.txt` 和 `package.json`。安装后再安装 Chromium：
+审计依赖锁在 `requirements-audit.txt`、`package.json` 与 `package-lock.json`：
 
 ```bash
 python3 -m pip install -r requirements-audit.txt
-npm ci
+npm ci --ignore-scripts
 npx playwright install chromium
 ```
 
-基本验证顺序：
+建议顺序与 CI 一致：
 
 ```bash
+python3 generate.py
+python3 generate_land.py --verify
+git diff --exit-code
 python3 -m py_compile ./*.py
 for file in ./*.js; do node --check "$file"; done
+for test_file in ./test_*v*.mjs; do node "$test_file"; done
+for test_file in ./test_*v*.py; do python3 "$test_file"; done
 python3 economy_guard.py
 python3 check_resources.py
+python3 hansen_nav_guard.py
 python3 jarvis.py --deep
+python3 fx_guard.py
+python3 light_guard.py
+python3 perf_guard.py
+python3 img_guard.py
+python3 font_guard.py
+python3 e2e_guard.py
+python3 impact_guard.py
+python3 pet_guard.py
+python3 sb_guard.py
 python3 release_guard.py
+python3 jarvis_gate.py
 ```
 
-此外必须动态运行全部 `test_*v*.mjs` 和 `test_*v942.py`，不能通过写死版本列表漏掉新回归。
-v959 新增 Boss 产品名锁、运行 HTML／JS 禁词扫描、转义／实体／拼接规避检测，以及逐轮进度、结算、
-设置速查正向文案专项；
-v958 新增用户 PNG 原始摘要／尺寸、文件名映射、`pig`→`pork`、四入口一致、光学缩放、运行时
-`img` 克隆、`icons/` 子目录离线缓存与其余 46 词不变专项；
-v957 新增 10 个重新绘制的 96×96 食物 SVG、四处数据同步、46px/72px 亮暗背景显示、无答案泄漏、
-无外链和其余 46 词不变专项；v956 的旧版食物图标专项继续作为兼容回归运行；
-v955 新增星海卡牌揭晓前零泄漏、卡背立体减速旋转、最终揭晓、幂等收尾、切后台恢复与减少动效专项；
-v954 新增三张日常入口卡底线、透明边界、自适应宽度、两种宝箱状态、Boss 基准不动与 28 页一致性
-专项；v953 新增 Boss 管理入口 fresh-session 可达性、弱网重试、快速连点单开、密码／永久锁保持、
-360 关公开入口、弗沙欧调参卡和铸星默认值专项；v952 新增 Boss 八题型答案高对比、真实子节点、
-三种 Boss 主题隔离与 28 页接线专项；
-v951 新增夜罗刹“红莲圣域·万瓣天葬”身份、四幕分镜、试片时间映射、默认速度命中时序、裁剪、
-性能上限和安全兜底专项；v946 新增探索拼写
-通道隔离、focused 打字连续性和 focused Bee 结晶三类专项；v945 的探索双进度 API、账本语义、
-27 页接线和真实移动端 UI 基线继续保留，v944 的滑动期间主题连续性与原子升级专项、v943 的主题动效
-与主题运行时专项，以及 v942 的专门回归继续覆盖：
-备份限制与崩溃日志、损坏重置日志与取证导出、canonical/结晶部分主档恢复、金币迁移、钱包奖励
-恢复、签到/防沉迷授权、购买、任务/每局奖励、跨午夜任务恢复、跨岛经验来源、Spelling Bee receipt、
-跨页钱包、预载策略、安全与可访问性、696 键词库、精确版本告警、27 页手机视口行为、Land 同步
-及不可变打包。随后还要通过资源、经济、导航、宠物、图片、字体、性能、
-Boss、Bee 和发布守卫。任何测试因为缺浏览器、服务未启动或断言未执行而跳过，都不能算作通过。
+浏览器、服务、SDK 或依赖缺失导致的跳过不算通过。Jarvis 深度运行可能生成诊断文件；
+正式工作流会恢复受控基线、移除报告，再在精确最终源码树上重新签发一次瞬时凭证。
 
-## Library 交付纪律
+每个新版本应先完整写 README/CHANGELOG，再运行 `python3 bump_version.py <新版本>`。
+升级工具会在任何源码写入之前检查当前版本章节的五个必备小节、最小详细度以及
+`README.md == release-assets/README.md`；文档缺失时原子失败，不留下半次版本升级。
 
-1. 开工前先从当前 Library 基线核对完整源码与版本；不能把临时残片或旧部署包冒充最新源码。
-2. 构建在隔离的临时工作目录完成，失败不能污染源码树，也不能替换上一份可下载文件。
-3. `VERSION` 必须递增；当前交付文件名、包内版本、资源戳和 README 必须一致为 v959。
-4. 发布资产由同一次已验证构建产生；两个 ZIP 内各有覆盖其内容的 `SHA256SUMS`，打包器同时
-   输出两个 ZIP 自身的 SHA-256，供交付记录或外部校验使用。
-5. 同一份输入应进行两次确定性打包并比较摘要；测试、秘密扫描或摘要比较失败时不得保存为正式
-   Library 交付物。
-6. v959 的交付合同是恰好两个 ZIP 和独立 README.md。三项保存到 ChatGPT Library 并提供下载
-   链接，不创建 GitHub commit、tag 或 Release。
+## GitHub 与 CloudBase 发布纪律
+
+1. 只从 main 的不可变提交发布；开发必须走分支和 PR，不直接在 main 上试错。
+2. `VERSION` 必须严格递增；现有 tag 或 Release 不允许移动、覆盖或 `--clobber`。
+3. `jarvis-three-file-release.yml` 是唯一发布者；旧 `auto-release.yml` 仅保留手动说明，
+   不监听 main、不持有写权限。
+4. 最终 Jarvis 凭证绑定版本、守卫指纹、既有问题精确基线和将进入源码 ZIP 的完整输入树。
+   凭证是瞬时本地证据，不提交 Git，也不进入源码 ZIP。
+5. 同一输入打包两次，部署 ZIP 与源码 ZIP 的 SHA-256 必须分别相同；每个 ZIP 内还有
+   覆盖成员的 `SHA256SUMS`。README 是第三个独立资产，必须与仓库根 README 逐字一致。
+6. GitHub Release 的底层附件使用 ASCII 文件名，避免平台清洗中文物理名；中文用途通过
+   Release asset label 展示。发布后重新下载三个附件并逐字节比较。
+7. GitHub Release **不是部署**。仍需把部署 ZIP 的根层文件上传到 CloudBase 静态网站，
+   确认 MIME、CDN、Service Worker 与 `?v=当前版本`，并另外核验认证与数据库控制台。
+8. 任何凭据、短信码、verification token、密码、PAT、私钥或 `.env` 均不得进入源码、
+   命令行 URL、日志、测试快照、README、ZIP 或 Release。
 
 ## 已知边界
 
-- 本项目仍是纯前端、单机 `localStorage` 应用。用户可以用开发者工具修改自己浏览器内的数据；
-  本地 receipt 与账本用于防崩溃、重放和重复结算，不是服务端签名，也不能提供付费级防作弊。
-- 多标签页依赖浏览器存储事件与幂等恢复，没有服务端事务或真正的 compare-and-swap。回归测试覆盖
-  已知中断点和重载次序，但不能证明所有并发调度都等价于串行执行。
-- 换域名、清除站点数据或设备损坏仍会失去未导出的本地存档。排行榜、付费、跨设备同步或具有
-  现实价值的资产必须迁移到经过认证的服务端权威账本。
+- 游戏主进度和经济仍以浏览器本地账本为主；CloudBase 账号/云档是可选跨设备层，不是付费级、
+  服务端签名的防作弊账本。开发者工具仍能修改本机数据。
+- v1075 对注册协议、状态机和 UI 做了真实代码/浏览器回归，但 CI 不持有生产手机号，也不应发送
+  真实短信。因此生产环境是否开通短信 provider、签名/模板/额度、安全域名与数据库权限，必须
+  按开通指南做真机冒烟后才能确认。
+- 网络未知时系统选择“拒绝云操作但保留本地数据”；这会暂时影响同步可用性，但避免一次断网
+  被误判为登出或把另一账号数据写入当前账号。
+- 多标签页仍依赖浏览器存储事件和幂等恢复，不能等同数据库事务；跨设备冲突必须由用户明确选边。
+- GitHub CI 证明的是指定提交与锁定依赖下的行为，不证明 CDN 已刷新、旧 Service Worker 已退出，
+  也不证明所有未来浏览器、运营商和 CloudBase 控制台变化。
+- 音频、字体与图片经过完整性/存在性守卫，但仓库现有素材没有在本版重新建立外部授权链；
+  商业发布前仍应由权利人完成素材许可复核。
 
 ## 质量承诺的正确表述
 
-测试可以证明指定行为在指定环境下通过，但不能数学上证明未来永远没有任何 Bug。v959 不作
-“绝对零 Bug”保证；它的目标是让失败可见、数据问题可恢复、发布历史不可改写，并让本轮每个
-已发现问题都有长期回归防线。
+v1075 的目标不是宣称“绝对没有 Bug”，而是让注册/登录的每一个结论都有可验证证据：
+认证动作有 UID、SDK session 有 UID、两者必须一致；未知就明确未知，冲突就停止，用户未选择就
+不覆盖存档。测试通过可以证明本仓候选在指定环境下满足这些合同；只有真实部署完成新手机号注册、
+退出、再次登录、刷新保持和两设备存档选择的生产冒烟后，才能说“生产注册登录已验证可用”。
+
+后续任何版本仍必须提供同等详细的 README 与 CHANGELOG，写清背景/根因、实现、兼容、测试、
+发布/部署和未验证边界。用“很多测试全绿”代替真实用户流程，或用本地 marker 代替 SDK session，
+都属于本项目已经明确禁止复发的做法。
