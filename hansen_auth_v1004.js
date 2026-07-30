@@ -313,19 +313,29 @@
     if (!user && d.uid) user = d;
     var uid = uidOf(user) || uidOf(session) || uidOf(d);
     var providers = (user && (user.providers || user.identities)) || [];
+    var createdFrom = String((user && (user.createdFrom || user.created_from)) || '');
     var anonymous = !!(user && (user.is_anonymous || user.isAnonymous ||
-                    user.provider === 'anonymous' || user.provider_id === 'anonymous'));
-    if (!anonymous && Array.isArray(providers) && providers.length === 1) {
-      var p0 = providers[0] || {};
-      anonymous = /anonymous/i.test(String(p0.provider || p0.provider_id || p0.type || ''));
+                    user.provider === 'anonymous' || user.provider_id === 'anonymous' ||
+                    String(user.name || '').toLowerCase() === 'anonymous' ||
+                    createdFrom.toLowerCase() === 'anonymous'));
+    if (!anonymous && Array.isArray(providers)) {
+      anonymous = providers.some(function (p0) {
+        p0 = p0 || {};
+        return /anonymous/i.test(String(
+          p0.id || p0.provider || p0.provider_id || p0.type || ''
+        ));
+      });
     }
+    var metadata = (user && (user.user_metadata || user.userMetadata)) || {};
     return {
       uid: uid,
       user: user,
       session: session,
       anonymous: anonymous,
-      phone: String((user && (user.phone_number || user.phone || user.phoneNumber)) || ''),
-      username: String((user && (user.username || user.user_name)) || '')
+      phone: String((user && (user.phone_number || user.phone || user.phoneNumber)) ||
+                    metadata.phone_number || metadata.phone || ''),
+      username: String((user && (user.username || user.user_name)) ||
+                       metadata.username || metadata.user_name || '')
     };
   }
   function requireOperationIdentity(result) {
@@ -348,26 +358,56 @@
       noApi.code = 'AUTH_SESSION_API_MISSING';
       return Promise.reject(noApi);
     }
+    function build(d, userError) {
+      d = d || {};
+      var id = identityOf(d);
+      var snap = {
+        session: d.session || id.session || null,
+        user: id.user,
+        uid: id.uid,
+        anonymous: id.anonymous,
+        indeterminate: false,
+        reason: userError || ''
+      };
+      if (snap.session && (!snap.user || !snap.uid)) {
+        snap.indeterminate = true;
+        if (!snap.reason) snap.reason = '云端凭证仍存在，但用户身份暂时不可用';
+      }
+      return snap;
+    }
     return withTimeout(Promise.resolve(a.getSession()), 4000, '确认云端登录会话超时')
       .then(unwrapAuthResult)
       .then(function (d) {
-        d = d || {};
-        var id = identityOf(d);
-        return {
-          session: d.session || id.session || null,
-          user: id.user,
-          uid: id.uid,
-          anonymous: id.anonymous
-        };
+        var snap = build(d);
+        if (!snap.indeterminate || typeof a.getCurrentUser !== 'function') return snap;
+        /* 锁定 SDK 的 getSession 会吞掉 getUser(false).error，可能返回
+           session 非空但 user:null。此时必须远程刷新用户，不能当成已退出。 */
+        return withTimeout(Promise.resolve(a.getCurrentUser(true)), 4000, '刷新云端用户身份超时')
+          .then(unwrapAuthResult)
+          .then(function (fresh) {
+            var user = fresh && fresh.user ? fresh.user : fresh;
+            if (!user) return snap;
+            var merged = {
+              session: snap.session,
+              user: user
+            };
+            return build(merged);
+          }, function (e) {
+            snap.indeterminate = true;
+            snap.reason = errText(e);
+            return snap;
+          });
       });
   }
   function confirmSession(a, expectedUid, n, lastReason) {
     n = n || 0;
     return sessionSnapshot(a).then(function (snap) {
-      if (snap && snap.session && snap.uid === expectedUid && !snap.anonymous) return snap;
-      var why = snap && snap.uid
-        ? ('云端当前 UID 与本次认证 UID 不一致：' + snap.uid)
-        : '云端会话尚未建立';
+      if (snap && snap.session && snap.user && snap.uid === expectedUid && !snap.anonymous && !snap.indeterminate) return snap;
+      var why = snap && snap.indeterminate
+        ? (snap.reason || '云端凭证存在，但用户身份尚未刷新')
+        : (snap && snap.uid
+          ? ('云端当前 UID 与本次认证 UID 不一致：' + snap.uid)
+          : '云端会话尚未建立');
       if (n >= 7) {
         var e = new Error(why + '；结果仍在确认，不能重复登录');
         e.code = snap && snap.uid ? 'AUTH_SESSION_UID_MISMATCH' : 'AUTH_OUTCOME_UNKNOWN';
@@ -396,7 +436,10 @@
     return auth().then(function (a) {
       return sessionSnapshot(a);
     }).then(function (snap) {
-      if (!snap.session || !snap.uid || snap.anonymous) {
+      if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
+        return setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
+      }
+      if (!snap.session || snap.anonymous) {
         if (marker.method && marker.signedAt && !marker.uid)
           return setSessionTruth('legacy_reauth', '', '旧 marker 没有真实 UID');
         if (marker.uid) {
@@ -700,8 +743,8 @@
       return awaitAuthMutation(a.signOut(), '正在安全退出，请勿关闭页面').then(function () {
         return sessionSnapshot(a);
       }).then(function (snap) {
-        if (snap.session && snap.uid) {
-          var e = new Error('云端会话仍然存在，退出没有完成');
+        if (snap.session) {
+          var e = new Error('云端会话或凭证仍然存在，退出没有完成');
           e.code = 'AUTH_SIGNOUT_INCOMPLETE';
           throw e;
         }
@@ -975,7 +1018,12 @@
     return auth().then(function (a) {
       return sessionSnapshot(a);
     }).then(function (snap) {
-      if (!snap.session || !snap.uid || snap.anonymous) {
+      if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
+        setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
+        return { ok: false, expired: false, definite: false,
+                 reason: snap.reason || '云端用户身份暂时无法确认' };
+      }
+      if (!snap.session || snap.anonymous) {
         setSessionTruth('signed_out', '', snap.anonymous ? 'anonymous-session' : 'no-session');
         return { ok: false, expired: true, definite: true, reason: '云端没有正式账号会话' };
       }
