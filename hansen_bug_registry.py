@@ -120,6 +120,10 @@ REGISTRY = [
      'test_auth_contract_v1076.mjs'),
     ('v1076', 'U1 云档元信息或 fetch 读取迟到后把旧账号结果返回给 U2',
      'test_cloud_save_v965.mjs'),
+    ('v1076', '登录写 marker 的提交窗口出现并发 mismatch，仍返回成功并启动 U1 竞赛档案写入',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '安全退出无所有权清理 fence，在逐键删除中擦掉另一标签刚写入的 mismatch',
+     'test_auth_contract_v1076.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
