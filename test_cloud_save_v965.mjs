@@ -86,46 +86,133 @@ console.log('T3 同步');
   ok(r4.ok === true && !r4.skipped, '内容变化+强制→重新上云');
 }
 
-/* T3b 自动同步许可绑定身份 */
-console.log('T3b 身份切换');
+/* T3b 自动同步许可 + UID/generation 竞态 */
+console.log('T3b 身份切换与迟到写保护');
 {
-  globalThis.HansenAuth = {
-    isSignedIn: () => true,
-    readLocal: () => ({ uid: 'U-ACCOUNT-1', phone: '+86 15550836896' }),
-    currentUser: () => ({ uid: 'U-ACCOUNT-1' })
+  let currentUid = 'U-ACCOUNT-1';
+  const auth = {
+    isSignedIn: () => !!currentUid,
+    readLocal: () => currentUid ? ({ uid: currentUid, phone: '+86 15550836896' }) : ({}),
+    currentUser: () => currentUid ? ({ uid: currentUid }) : null,
+    ensureSession: async expectedUid => ({
+      ok: !!currentUid && expectedUid === currentUid,
+      uid: currentUid
+    })
   };
+  globalThis.HansenAuth = auth;
+  M.resetApp();
+
   const blocked = await M.syncNow({});
   ok(blocked.ok === false && blocked.reason === 'not-enabled-for-current-identity',
      '旧恢复码自动同步许可不能继承给正式账号');
   const explicit = await M.syncNow({ force: true });
   ok(explicit.ok === true && /^account:u:U-ACCOUNT-1$/.test(D.readState().enabledIdentity || ''),
-     '用户明确上传后只为当前 UID 开启自动同步');
+     '同一账号 UID 复验成功后允许明确上传');
 
-  globalThis.HansenAuth = {
-    isSignedIn: () => true,
-    readLocal: () => ({ uid: 'U-ACCOUNT-2' }),
-    currentUser: () => ({ uid: 'U-ACCOUNT-2' })
-  };
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
   const switched = await M.syncNow({});
   ok(switched.ok === false && switched.reason === 'not-enabled-for-current-identity',
      '切换账号后旧 UID 许可立即失效，后台钩子零写入');
 
   restoredWith = null;
-  globalThis.HansenAuth.ensureSession = async expectedUid => ({
-    ok: expectedUid === 'U-ACCOUNT-2',
-    uid: 'U-ACCOUNT-2'
-  });
   const sameAccountRestore = await M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-2' });
   ok(sameAccountRestore.ok === true && restoredWith,
-     '原始 UID 与 u:地址身份分离：同账号恢复不能被误判成切号');
+     '同账号 UID+generation 一致时允许真实恢复');
 
   restoredWith = null;
-  let lateRestore = '';
+  let wrongAccountRestore = '';
   try{ await M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-1' }); }
-  catch(e){ lateRestore = String(e && e.message || e); }
-  ok(/账号|会话/.test(lateRestore) && restoredWith === null,
-     'U1 发起后切到 U2：迟到恢复在覆盖本机前失败关闭');
+  catch(e){ wrongAccountRestore = String(e && e.message || e); }
+  ok(/账号|会话/.test(wrongAccountRestore) && restoredWith === null,
+     '当前已是 U2 时，U1 恢复在读取/覆盖前失败关闭');
+
+  const providerMock = globalThis.__HSN_CLOUD_MOCK_PROVIDER;
+  const originalPut = providerMock.put;
+  const originalGet = providerMock.get;
+  let putCalls = 0;
+  providerMock.put = async (id, data) => {
+    putCalls++;
+    return originalPut(id, data);
+  };
+
+  /* U1 上传在加密/算地址期间迟到；切 U2 + reset generation 后不得调用 put。 */
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  const putsBeforeLateUpload = putCalls;
+  const lateUploadPromise = M.syncNow({ force: true });
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  const lateUpload = await lateUploadPromise;
+  ok(lateUpload.ok === false && lateUpload.reason === 'stale-account'
+       && putCalls === putsBeforeLateUpload,
+     'U1→U2：迟到上传在 put 前失败关闭且零写');
+
+  /* 让读取真正悬挂到切号之后；二次 UID/generation 复验必须挡住 restore。 */
+  function deferred(){ let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
+  const primaryId = await D.docIdOf(k);
+  const primaryRow = cloud.get(primaryId);
+  const restoreGate = deferred();
+  let restoreReadStarted;
+  const restoreReadSeen = new Promise(r => { restoreReadStarted = r; });
+  providerMock.get = async id => {
+    if (id === primaryId) {
+      restoreReadStarted();
+      return restoreGate.promise;
+    }
+    return originalGet(id);
+  };
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  restoredWith = null;
+  const lateRestorePromise = M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-1' });
+  await restoreReadSeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  restoreGate.resolve(JSON.parse(JSON.stringify(primaryRow)));
+  let lateRestoreError = '';
+  try{ await lateRestorePromise; }catch(e){ lateRestoreError = String(e && e.message || e); }
+  ok(/账号|会话/.test(lateRestoreError) && restoredWith === null,
+     'U1→U2：迟到读取不能执行 HansenBackup.restore');
+
+  /* 命中旧地址后，迁移 put 必须 await 并再次复验；切号时 canonical 地址零写。 */
+  providerMock.get = originalGet;
+  const migrationKey = D.genKey();
+  const migrationRaw = D.prettyKey(migrationKey);
+  const migrationOldId = await D.docIdOf(migrationRaw);
+  const migrationNewId = await D.docIdOf(migrationKey);
+  const migrationEnvelope = await D.sealPayload(migrationRaw, 'LEGACY-MIGRATION-CODE');
+  const migrationRow = { payload: migrationEnvelope, updatedAt: Date.now(), app:'wordadventure' };
+  cloud.set(migrationOldId, JSON.parse(JSON.stringify(migrationRow)));
+  cloud.delete(migrationNewId);
+  const migrationGate = deferred();
+  let migrationReadStarted;
+  const migrationReadSeen = new Promise(r => { migrationReadStarted = r; });
+  providerMock.get = async id => {
+    if (id === migrationOldId) {
+      migrationReadStarted();
+      return migrationGate.promise;
+    }
+    return originalGet(id);
+  };
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  const putsBeforeMigration = putCalls;
+  const migrationPromise = M.fetchWithKey(migrationRaw);
+  await migrationReadSeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  migrationGate.resolve(JSON.parse(JSON.stringify(migrationRow)));
+  let migrationError = '';
+  try{ await migrationPromise; }catch(e){ migrationError = String(e && e.message || e); }
+  ok(/账号|会话/.test(migrationError)
+       && putCalls === putsBeforeMigration && !cloud.has(migrationNewId),
+     'U1→U2：历史地址迁移不 fire-and-forget，迟到迁移 put 零写');
+
+  providerMock.put = originalPut;
+  providerMock.get = originalGet;
   delete globalThis.HansenAuth;
+  M.resetApp();
 }
 
 /* T4 换机回档 */
