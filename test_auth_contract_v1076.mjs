@@ -87,6 +87,42 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
 }
 {
   const b=boot();
+  b.A._setAuthForTest({signInWithPassword(){return Promise.resolve({user:{uid:'ANON-RAW',name:'anonymous',providers:[{id:'anonymous'}]}});},getSession(){throw new Error('不应读取');}});
+  let rejected=false;try{await b.A.loginByPassword('player_1','pw');}catch(e){rejected=true;}
+  ok(rejected&&!b.A.readLocal().uid,'真实 LoginState 的 name/providers.id 匿名形状不能冒充正式账号');
+}
+{
+  const b=boot();
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({schema:1076,method:'phone',signedAt:Date.now(),uid:'U-CACHED'}));
+  b.A._setSessionForTest('confirmed','U-CACHED');
+  b.A._setAuthForTest({getSession(){return Promise.resolve({data:{session:{access_token:'still-present',user:null},user:null},error:null});}});
+  const st=await b.A.refreshSession();
+  ok(st.state==='unknown'&&b.A.readLocal().uid==='U-CACHED',
+     'session 非空但 user:null 属 unknown，绝不清 marker 或谎报退出');
+}
+{
+  const b=boot();
+  b.A._setAuthForTest({
+    getSession(){return Promise.resolve({data:{session:{access_token:'still-present',user:null},user:null},error:null});},
+    getCurrentUser(){return Promise.resolve({uid:'U-REFRESH',user_metadata:{username:'restored_name'}});}
+  });
+  const st=await b.A.refreshSession();
+  ok(st.state==='confirmed'&&b.A.readLocal().uid==='U-REFRESH'&&b.A.readLocal().username==='restored_name',
+     'getSession 空用户时用 getCurrentUser(true) 刷新并恢复 metadata 用户名');
+}
+{
+  const b=boot();
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({schema:1076,method:'phone',signedAt:Date.now(),uid:'U-OUT'}));
+  b.A._setSessionForTest('confirmed','U-OUT');
+  b.A._setAuthForTest({
+    signOut(){return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve({data:{session:{refresh_token:'still-present',user:null},user:null},error:null});}
+  });
+  let rejected=false;try{await b.A.signOut();}catch(e){rejected=true;}
+  ok(rejected&&b.A.readLocal().uid==='U-OUT','只要 session/凭证仍存在就不能宣布退出成功');
+}
+{
+  const b=boot();
   b.local.setItem('hansen_auth_v1004',JSON.stringify({schema:1076,method:'phone',signedAt:Date.now(),uid:'U1'}));
   b.A._setSessionForTest('confirmed','U1');
   b.A._setAuthForTest({signOut(){return Promise.resolve({error:{message:'revoke failed'}});},getSession(){return Promise.resolve(sessionResult('U1'));}});
