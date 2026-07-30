@@ -109,6 +109,17 @@ console.log('T3b 身份切换');
   const switched = await M.syncNow({});
   ok(switched.ok === false && switched.reason === 'not-enabled-for-current-identity',
      '切换账号后旧 UID 许可立即失效，后台钩子零写入');
+
+  restoredWith = null;
+  globalThis.HansenAuth.ensureSession = async expectedUid => ({
+    ok: expectedUid === 'U-ACCOUNT-2',
+    uid: 'U-ACCOUNT-2'
+  });
+  let lateRestore = '';
+  try{ await M.restoreWithKey(k, { expectedUid: 'U-ACCOUNT-1' }); }
+  catch(e){ lateRestore = String(e && e.message || e); }
+  ok(/账号|会话/.test(lateRestore) && restoredWith === null,
+     'U1 发起后切到 U2：迟到恢复在覆盖本机前失败关闭');
   delete globalThis.HansenAuth;
 }
 
