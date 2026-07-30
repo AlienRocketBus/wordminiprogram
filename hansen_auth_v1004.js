@@ -204,6 +204,7 @@
   var _outcomeRecovery = null;
   var FKEY = 'hansen_auth_fence_v1076';
   var _fenceMemory = null;
+  var _fenceRevision = 0;
 
   /* mismatch / outcome_unknown 只保存非敏感身份边界；密码、短信码、token 永不落盘。 */
   function readFence() {
@@ -214,16 +215,21 @@
     } catch (e) {}
     if (!o || typeof o !== 'object' || Array.isArray(o)) o = _fenceMemory;
     if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
+    _fenceRevision = Math.max(_fenceRevision, Number(o.revision || 0));
     _fenceMemory = o;
     return o;
   }
   function writeFence(kind, expectedUid, observedUid, reason) {
+    _fenceRevision++;
+    _probeId++;  /* fence 一旦出现，所有尚未落地的只读探测立即失去写状态权 */
     var o = {
       schema: 1076,
       kind: String(kind || 'outcome_unknown'),
       expectedUid: String(expectedUid || ''),
       observedUid: String(observedUid || ''),
       reason: String(reason || ''),
+      generation: _authGeneration,
+      revision: _fenceRevision,
       at: Date.now()
     };
     _fenceMemory = o;
@@ -231,6 +237,7 @@
     return o;
   }
   function clearFence() {
+    _fenceRevision++;
     _fenceMemory = null;
     try { sessionStorage.removeItem(FKEY); } catch (e) {}
   }
@@ -603,14 +610,11 @@
       marker = readLocal();
       var fence = readFence();
       if (fence.kind) {
-        if (!snap.session && _activeSessionMutations === 0) {
-          clearFence();
-          fence = {};
-        } else {
-          return setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
-                                 snap.uid || fence.observedUid || '',
-                                 fence.reason || '存在未清理的认证结果，请先安全退出');
-        }
+        /* 只读 refresh 永远无权清 fence。即使这一刻 session=null，也可能有旧
+           mutation 随后建立 session；只有显式 signOut 的屏障可以解除隔离。 */
+        return setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
+                               snap.uid || fence.observedUid || '',
+                               fence.reason || '存在未清理的认证结果，请先安全退出');
       }
       if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
         return setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
@@ -669,7 +673,7 @@
       return '没有找到这个账号；新用户请先用手机号注册';
     if (/AUTH_SESSION_UID_MISMATCH|AUTH_STALE_MUTATION|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
       return '检测到两个不同账号或旧请求晚到，已隔离；请点“安全退出并清理会话”后再登录';
-    if (/AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
+    if (/AUTH_FENCED_SESSION|AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
       return '服务器可能已处理本次请求，不能重复提交；请点“安全退出并清理会话”';
     if (/AUTH_OPERATION_UID_MISSING|没有返回本次操作的用户 UID/i.test(m))
       return '服务器没有返回可核对的账号 UID，本次不能算登录成功';
@@ -820,6 +824,7 @@
     catch (e0) { return Promise.reject(e0); }
     var verificationConsumed = false;
     var aRef = null, opIdentity = null;
+    var sessionMutationResolved = false;
     var identity = { method: 'phone', phone: st.phone, username: uname };
     var work = auth().then(function (a) {
       assertAuthToken(token);
@@ -853,6 +858,7 @@
           token, true);
       }).then(function (result) {
         assertAuthToken(token);
+        sessionMutationResolved = true;
         opIdentity = requireOperationIdentity(result);
         return confirmSession(a, opIdentity.uid, token);
       }).then(function (snap) {
@@ -871,7 +877,19 @@
         try { sessionStorage.removeItem(PKEY); } catch (_) {}
       }
       var code = String(e && e.code || '');
-      if (code === 'AUTH_SESSION_UID_MISMATCH') {
+      if (code === 'AUTH_FENCED_SESSION') {
+        _outcomeRecovery = null;
+        setOperation('outcome_unknown', errText(e));
+        setSessionTruth(readFence().kind === 'mismatch' ? 'mismatch' : 'unknown',
+                        readFence().observedUid || '', errText(e));
+      } else if (sessionMutationResolved &&
+                 !/AUTH_OUTCOME_UNKNOWN|AUTH_SESSION_UID_MISMATCH|AUTH_MUTATION_INDETERMINATE/.test(code)) {
+        writeFence('outcome_unknown', opIdentity && opIdentity.uid, '',
+                   '认证请求已经返回，但结果身份无法安全提交：' + errText(e));
+        _outcomeRecovery = null;
+        setOperation('outcome_unknown', errText(e));
+        setSessionTruth('unknown', '', errText(e));
+      } else if (code === 'AUTH_SESSION_UID_MISMATCH') {
         _outcomeRecovery = null;
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('mismatch', e.observedUid || '', errText(e));
@@ -900,6 +918,7 @@
     catch (e0) { return Promise.reject(e0); }
 
     var aRef = null, opIdentity = null;
+    var sessionMutationResolved = false;
     var identity = { method: 'password', phone: '', username: u };
     var work = auth().then(function (a) {
       assertAuthToken(token);
@@ -915,6 +934,7 @@
       return awaitAuthMutation(req, '用户名密码登录仍在处理，请勿重试', token, true);
     }).then(function (result) {
       assertAuthToken(token);
+      sessionMutationResolved = true;
       opIdentity = requireOperationIdentity(result);
       return confirmSession(aRef, opIdentity.uid, token);
     }).then(function (snap) {
@@ -928,7 +948,19 @@
       finishSubmit(token);
       if (isStaleError(e) || token !== _authGeneration) throw e;
       var code = String(e && e.code || '');
-      if (code === 'AUTH_SESSION_UID_MISMATCH') {
+      if (code === 'AUTH_FENCED_SESSION') {
+        _outcomeRecovery = null;
+        setOperation('outcome_unknown', errText(e));
+        setSessionTruth(readFence().kind === 'mismatch' ? 'mismatch' : 'unknown',
+                        readFence().observedUid || '', errText(e));
+      } else if (sessionMutationResolved &&
+                 !/AUTH_OUTCOME_UNKNOWN|AUTH_SESSION_UID_MISMATCH|AUTH_MUTATION_INDETERMINATE/.test(code)) {
+        writeFence('outcome_unknown', opIdentity && opIdentity.uid, '',
+                   '认证请求已经返回，但结果身份无法安全提交：' + errText(e));
+        _outcomeRecovery = null;
+        setOperation('outcome_unknown', errText(e));
+        setSessionTruth('unknown', '', errText(e));
+      } else if (code === 'AUTH_SESSION_UID_MISMATCH') {
         _outcomeRecovery = null;
         setOperation('outcome_unknown', errText(e));
         setSessionTruth('mismatch', e.observedUid || '', errText(e));
@@ -957,12 +989,13 @@
       return Promise.reject(new Error('账号边界不一致，不能自动接管；请安全退出并清理会话'));
     if (!r || !r.auth || !r.operation || !r.operation.uid)
       return Promise.reject(new Error('没有可安全重新确认的登录结果；请安全退出并清理会话'));
+    var ownedFenceRevision = Number(fence.revision || 0);
     var token;
     try { token = beginRecovery(); }
     catch (e0) { return Promise.reject(e0); }
     return confirmSession(r.auth, r.operation.uid, token).then(function (snap) {
       assertAuthToken(token);
-      return commitSignedIn(r.identity, r.operation, snap, token);
+      return commitSignedIn(r.identity, r.operation, snap, token, ownedFenceRevision);
     }).then(function (v) {
       _outcomeRecovery = null;
       finishSubmit(token);
@@ -982,7 +1015,9 @@
   function signOut() {
     if (_cloudBusy) return Promise.reject(new Error('云存档操作正在进行，请完成后再退出'));
     _authEpoch++;
+    var hadPriorSessionMutation = _activeSessionMutations > 0;
     var token = invalidateAuthWork('用户已请求安全退出');
+    var signOutFenceRevision = _fenceRevision;
     _submitBusy = false;
     _submitToken = 0;
     _outcomeRecovery = null;
@@ -1019,7 +1054,8 @@
       try {
         if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
       } catch (e0) {}
-      if (_activeSessionMutations > 0) {
+      if (hadPriorSessionMutation || _activeSessionMutations > 0 ||
+          _fenceRevision !== signOutFenceRevision) {
         writeFence('stale_mutation', '', '',
           '旧登录请求仍可能晚到；本机已退出，请刷新页面后再次核对');
         setOperation('idle', '本机已退出；旧请求仍在收尾，请刷新页面后再次核对');
@@ -1047,8 +1083,17 @@
     });
   }
 
-  function commitSignedIn(inputIdentity, opIdentity, snap, token) {
+  function commitSignedIn(inputIdentity, opIdentity, snap, token, ownedFenceRevision) {
     assertAuthToken(token);
+    var existingFence = readFence();
+    if (existingFence.kind &&
+        !(existingFence.kind === 'outcome_unknown' &&
+          Number(existingFence.revision || 0) === Number(ownedFenceRevision || -1))) {
+      var blocked = new Error('认证期间出现了更高优先级的账号隔离，拒绝提交登录结果');
+      blocked.code = 'AUTH_FENCED_SESSION';
+      blocked.observedUid = String(existingFence.observedUid || '');
+      throw blocked;
+    }
     if (!opIdentity || !opIdentity.uid || !snap || !snap.uid ||
         String(opIdentity.uid) !== String(snap.uid)) {
       writeFence('mismatch', opIdentity && opIdentity.uid, snap && snap.uid,
@@ -1064,7 +1109,7 @@
     var phone = serverIdentity.phone || opIdentity.phone || inputIdentity.phone || '';
     var username = serverIdentity.username || opIdentity.username || inputIdentity.username || '';
     assertAuthToken(token);
-    clearFence();
+    if (existingFence.kind) clearFence();  /* 只清本次 recovery 精确拥有的 outcome fence */
     writeLocal({
       schema: 1076,
       method: inputIdentity.method,
@@ -1314,15 +1359,12 @@
       marker = readLocal();
       var fence = readFence();
       if (fence.kind) {
-        if (!snap.session && _activeSessionMutations === 0) {
-          clearFence();
-        } else {
-          setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
-                          snap.uid || fence.observedUid || '',
-                          fence.reason || '存在未清理的认证结果');
-          return { ok: false, fenced: true, definite: false, uid: snap.uid || '',
-                   reason: fence.reason || '存在未清理的认证结果' };
-        }
+        /* ensureSession 是只读门卫，只能拒绝；任何 fence 都必须由显式 signOut 清。 */
+        setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
+                        snap.uid || fence.observedUid || '',
+                        fence.reason || '存在未清理的认证结果');
+        return { ok: false, fenced: true, definite: false, uid: snap.uid || '',
+                 reason: fence.reason || '存在未清理的认证结果' };
       }
       if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
         setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
