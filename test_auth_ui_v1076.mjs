@@ -15,6 +15,9 @@ ok((await page.textContent('#auSend')).includes('秒后重发'),'关闭再打开
 await page.fill('#auCode','123456');await page.fill('#auNewUser','ui_player');await page.fill('#auNewPwd','pw');await page.fill('#auNewPwd2','pw');await page.click('#auGo');
 await page.waitForFunction(()=>document.body.textContent.includes('CloudBase session UID 与本地 UID 已精确一致'));
 ok(await page.evaluate(()=>window.HansenAuth.isSignedIn()&&window.HansenAuth.readLocal().uid==='UI-U'),'真实点击链完成并提交 UI-U');
+await page.waitForFunction(()=>document.body.textContent.includes('云端竞赛 ID 尚未启用'));
+ok((await page.textContent('body')).includes('不影响登录和本机游戏'),
+   'profile 服务端规则未落地时明确显示全局竞赛 ID 未启用，但登录与本机游戏不受阻');
 
 /* 用可控 Promise 验证：一旦选择覆盖方向，旧 DOM 引用也不能重复提交、改选、稍后或关闭。 */
 await page.evaluate(()=>{
