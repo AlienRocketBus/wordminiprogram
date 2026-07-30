@@ -20,12 +20,12 @@ globalThis.btoa = s => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = s => Buffer.from(s, 'base64').toString('binary');
 // Node 22 自带 globalThis.crypto(webcrypto) ✓
 
-let restoredWith = null, exportCounter = 0, exportBody = 'BACKUP-CODE-v965-A';
+let restoredWith = null, restoreCounter = 0, exportCounter = 0, exportBody = 'BACKUP-CODE-v965-A';
 globalThis.HansenBackup = {
   build: () => ({ appVersion: 965 }),
   exportCode: () => { exportCounter++; return exportBody; },
   parse: (code) => ({ appVersion: 965, __code: code }),
-  restore: (parsed) => { restoredWith = parsed; return { ok: true }; },
+  restore: (parsed) => { restoreCounter++; restoredWith = parsed; return { ok: true }; },
 };
 const cloud = new Map();
 globalThis.__HSN_CLOUD_MOCK_PROVIDER = {
@@ -90,6 +90,7 @@ console.log('T3 同步');
 console.log('T3b 身份切换与迟到写保护');
 {
   let currentUid = 'U-ACCOUNT-1';
+  let sessionState = 'signed_in', requiresCleanup = false;
   const auth = {
     isSignedIn: () => !!currentUid,
     readLocal: () => currentUid ? ({ uid: currentUid, phone: '+86 15550836896' }) : ({}),
@@ -97,7 +98,9 @@ console.log('T3b 身份切换与迟到写保护');
     ensureSession: async expectedUid => ({
       ok: !!currentUid && expectedUid === currentUid,
       uid: currentUid
-    })
+    }),
+    sessionStatus: () => ({ state: sessionState }),
+    operationStatus: () => ({ requiresCleanup })
   };
   globalThis.HansenAuth = auth;
   M.resetApp();
@@ -130,11 +133,55 @@ console.log('T3b 身份切换与迟到写保护');
   const providerMock = globalThis.__HSN_CLOUD_MOCK_PROVIDER;
   const originalPut = providerMock.put;
   const originalGet = providerMock.get;
-  let putCalls = 0;
-  providerMock.put = async (id, data) => {
+  let putCalls = 0, getCalls = 0;
+  const countedPut = async (id, data) => {
     putCalls++;
     return originalPut(id, data);
   };
+  providerMock.put = countedPut;
+  providerMock.get = async id => {
+    getCalls++;
+    return originalGet(id);
+  };
+  function deferred(){ let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
+
+  /* 认证模块存在时，匿名路径只能在“明确 signed_out 且无 cleanup”边界运行。
+     unknown / mismatch / cleanup 任一状态都必须失败关闭：不 put、不 get、
+     不调用 HansenBackup.restore，也不能悄悄改本地同步账本。 */
+  const anonymousFenceCases = [
+    { name:'unknown', state:'unknown', cleanup:false },
+    { name:'mismatch', state:'mismatch', cleanup:false },
+    { name:'cleanup', state:'signed_out', cleanup:true }
+  ];
+  for (const c of anonymousFenceCases) {
+    currentUid = '';
+    sessionState = c.state;
+    requiresCleanup = c.cleanup;
+    M.resetApp();
+    restoredWith = null;
+    const puts0 = putCalls, gets0 = getCalls, restores0 = restoreCounter;
+    const local0 = JSON.stringify(D.readState());
+
+    const fencedSync = await M.syncNow({ force:true });
+    const fencedSelf = await M.selfTest();
+    const fencedRound = await M.roundTrip();
+    let fencedFetchError = '', fencedRestoreError = '';
+    try{ await M.fetchWithKey(k); }catch(e){ fencedFetchError = String(e && e.message || e); }
+    try{ await M.restoreWithKey(k); }catch(e){ fencedRestoreError = String(e && e.message || e); }
+
+    ok(fencedSync.ok === false && fencedSync.reason === 'stale-account'
+         && fencedSelf.ok === false && fencedRound.step === 'write-failed'
+         && /账号|会话|认证/.test(fencedFetchError)
+         && /账号|会话|认证/.test(fencedRestoreError),
+       '匿名边界 '+c.name+'：同步/自检/往返/读取/恢复全部失败关闭');
+    ok(putCalls === puts0 && getCalls === gets0 && restoreCounter === restores0
+         && restoredWith === null && JSON.stringify(D.readState()) === local0,
+       '匿名边界 '+c.name+'：云端零读写、本地零恢复且同步账本零改写');
+  }
+  currentUid = 'U-ACCOUNT-1';
+  sessionState = 'signed_in';
+  requiresCleanup = false;
+  M.resetApp();
 
   /* U1 上传在加密/算地址期间迟到；切 U2 + reset generation 后不得调用 put。 */
   currentUid = 'U-ACCOUNT-1';
@@ -148,8 +195,87 @@ console.log('T3b 身份切换与迟到写保护');
        && putCalls === putsBeforeLateUpload,
      'U1→U2：迟到上传在 put 前失败关闭且零写');
 
+  /* U1 的 put 已经发出才切到 U2：网络请求无法撤回，但迟到完成绝不能
+     把 U1 的 lastUpAt/lastHash/lastDocId/enabledIdentity 写进当前本地账本。 */
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  exportBody = 'BACKUP-CODE-v1076-PUT-ISSUED';
+  const issuedGate = deferred();
+  let issuedPutStarted;
+  const issuedPutSeen = new Promise(r => { issuedPutStarted = r; });
+  providerMock.put = (id, data) => {
+    putCalls++;
+    issuedPutStarted();
+    return issuedGate.promise.then(() => originalPut(id, data));
+  };
+  const issuedU1Promise = M.syncNow({ force:true });
+  await issuedPutSeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  const localAfterSwitch = JSON.stringify(D.readState());
+  issuedGate.resolve();
+  const issuedU1 = await issuedU1Promise;
+  ok(issuedU1.ok === false && issuedU1.reason === 'stale-account'
+       && JSON.stringify(D.readState()) === localAfterSwitch,
+     'U1 put 已发后切 U2：U1 迟到完成不写本地同步状态');
+  providerMock.put = countedPut;
+
+  /* 代际忙锁：U1 put 永久悬挂不能卡死 U2；U1 随后迟到 settle 也不能释放
+     正在进行的 U2 token，因此第三个 U2 同步在 U2 settle 前必须返回 busy。 */
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  const u1BusyKey = D.normalizeKey(M.ensureKey()) || M.ensureKey();
+  const u1BusyId = await D.docIdOf(u1BusyKey);
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  const u2BusyKey = D.normalizeKey(M.ensureKey()) || M.ensureKey();
+  const u2BusyId = await D.docIdOf(u2BusyKey);
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+
+  const u1BusyGate = deferred(), u2BusyGate = deferred();
+  let u1BusyStarted, u2BusyStarted;
+  const u1BusySeen = new Promise(r => { u1BusyStarted = r; });
+  const u2BusySeen = new Promise(r => { u2BusyStarted = r; });
+  providerMock.put = (id, data) => {
+    putCalls++;
+    if(id === u1BusyId) {
+      u1BusyStarted();
+      return u1BusyGate.promise.then(() => originalPut(id, data));
+    }
+    if(id === u2BusyId) {
+      u2BusyStarted();
+      return u2BusyGate.promise.then(() => originalPut(id, data));
+    }
+    return originalPut(id, data);
+  };
+
+  exportBody = 'BACKUP-CODE-v1076-U1-HANG';
+  const u1BusyPromise = M.syncNow({ force:true });
+  await u1BusySeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  exportBody = 'BACKUP-CODE-v1076-U2-INFLIGHT';
+  const u2BusyPromise = M.syncNow({ force:true });
+  await u2BusySeen;
+  const localWhileBothPending = JSON.stringify(D.readState());
+
+  u1BusyGate.resolve();
+  const u1BusyResult = await u1BusyPromise;
+  const thirdU2 = await M.syncNow({ force:true });
+  ok(u1BusyResult.ok === false && u1BusyResult.reason === 'stale-account'
+       && thirdU2.ok === false && thirdU2.reason === 'busy'
+       && JSON.stringify(D.readState()) === localWhileBothPending,
+     'U1 悬挂不阻塞 U2；U1 迟到 settle 不能清除 U2 busy token');
+
+  u2BusyGate.resolve();
+  const u2BusyResult = await u2BusyPromise;
+  ok(u2BusyResult.ok === true
+       && D.readState().enabledIdentity === 'account:u:U-ACCOUNT-2',
+     'U2 settle 后只提交 U2 本地同步状态并释放自身 busy token');
+  providerMock.put = countedPut;
+
   /* 让读取真正悬挂到切号之后；二次 UID/generation 复验必须挡住 restore。 */
-  function deferred(){ let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
   const primaryId = await D.docIdOf(k);
   const primaryRow = cloud.get(primaryId);
   const restoreGate = deferred();
