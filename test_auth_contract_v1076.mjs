@@ -34,6 +34,12 @@ ok(!/@u\.wordadventure\.local/.test(authSrc),'不再生成不可收件的 .local
 ok(!/signUpWithEmailAndPassword\s*\(/.test(authSrc),'业务注册不再走邮箱第一步');
 ok(/phone_number[\s\S]*verification_code[\s\S]*verification_token[\s\S]*username[\s\S]*password/.test(authSrc),'手机号 v2 signUp 使用 phone/code/token/username/password');
 ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.test(uiSrc),'冲突取消不再覆盖云端');
+ok(/hansen_auth_boundary_v1076/.test(authSrc)&&/authBoundaryId/.test(authSrc),
+   '跨标签认证使用持久 boundary ID，并把成功 marker 绑定到同一边界');
+ok(!/docRef\.(?:set|update)\s*\(/.test(authSrc)&&!/assignCid\s*\(/.test(authSrc)&&
+   !/claimCloudId/.test(authSrc),'认证链路不再从浏览器写 sb_profile 或发放全局竞赛 ID');
+ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiSrc),
+   'UI 展示成功前再次核对 isSignedIn 与同 UID marker');
 
 {
   const b=boot(),gate=deferred(),calls=[];
@@ -308,9 +314,9 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   const during=await b.A.refreshSession();
   outGate.resolve({data:{},error:null});
   await out;
-  ok(during.state==='checking'&&!b.A.readLocal().uid&&
-     b.A.sessionStatus().state==='signed_out',
-     'signOut 进行中拒绝同代 refresh，退出结论不会被旧探测反写');
+  ok(during.state==='unknown'&&!b.A.isSignedIn()&&
+     b.A.sessionStatus().state==='signed_out'&&!b.A.readLocal().uid,
+     'signOut 共享边界未落地时 refresh 只能看到 unknown，最终退出结论不会被旧探测反写');
 }
 {
   const shared={local:storage(),session:storage()};
@@ -416,9 +422,10 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
     getSession(){return Promise.resolve(sessionResult('U-COMMIT'));}
   });
   const err=await b.A.loginByPassword('commit_race','pw').then(()=>null,e=>e);
-  ok(err&&err.code==='AUTH_FENCED_SESSION'&&!b.A.readLocal().uid&&
-     b.A._readFenceForTest().fenceId==='COMMIT-RACE-MISMATCH'&&!b.A.isSignedIn(),
-     'marker 写入窗口出现跨标签 mismatch 时，最终线性化复验回滚自己的 marker 并拒绝假成功');
+  ok(err&&err.code==='AUTH_FENCED_SESSION'&&b.A.readLocal().uid==='U-COMMIT'&&
+     b.A._readFenceForTest().fenceId==='COMMIT-RACE-MISMATCH'&&!b.A.isSignedIn()&&
+     b.A.sessionStatus().state==='mismatch',
+     'marker 写入窗口出现 mismatch 时保留显示缓存但建立 fence，绝不返回假成功或跨标签清 marker');
   ok(cloudResets===0,
      '登录提交最终复验失败时不启动 CloudSave reset、竞赛档案或登录后云任务');
 }
@@ -458,8 +465,8 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   ok(out.ok&&out.cleanupPending&&out.requiresReload&&
      b.A._readFenceForTest().fenceId==='SIGNOUT-RACE-MISMATCH',
      'signOut 按清理前逐键快照 compare-delete，清理窗口中新出现的 mismatch 不会被擦除');
-  ok(b.A.sessionStatus().state==='unknown'&&!b.A.readLocal().uid,
-     '退出清理遇到并发 fence 时本机 marker 已清，但不会谎报 signed_out 或允许立即重登');
+  ok(b.A.sessionStatus().state==='mismatch'&&!b.A.readLocal().uid&&!b.A.isSignedIn(),
+     '退出清理遇到并发 mismatch 时本机 marker 已清，但不会谎报 signed_out 或允许立即重登');
 }
 {
   const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
@@ -488,9 +495,126 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   const fencedState=await reload.A.refreshSession();
   ok(fencedState.state==='unknown'&&reload.A._readFenceForTest().kind,
      '刷新后的只读探测仍不能自行解除悬挂隔离');
+  never.resolve({user:{uid:'U-HUNG-LATE'}});
+  await flush();
   await reload.A.signOut();
-  ok(reload.A.sessionStatus().state==='signed_out'&&!reload.A._readFenceForTest().kind,
-     '刷新后仍需显式安全退出并确认无 session，才能最终解除隔离');
+  ok(reload.A.sessionStatus().state==='signed_out'&&!reload.A._readFenceForTest().kind&&
+     reload.A._activeReceiptsForTest().length===0,
+     '底层悬挂 mutation 真正结算后，再次显式退出确认 session=null 才能最终解除隔离');
+}
+
+
+{
+  const sharedLocal=storage();
+  const tabA=boot({local:sharedLocal,session:storage()});
+  const tabB=boot({local:sharedLocal,session:storage()});
+  const loginGate=deferred();
+  let serverUid='';
+  tabA.A._setAuthForTest({
+    signInWithPassword(){
+      return loginGate.promise.then(function (r) { serverUid='U-CROSS-LATE'; return r; });
+    },
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
+  });
+  tabB.A._setAuthForTest({
+    signOut(){serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
+  });
+  const login=tabA.A.loginByPassword('cross_tab_user','pw').then(()=>null,e=>e);
+  await flush();
+  const firstOut=await tabB.A.signOut();
+  ok(firstOut.ok&&firstOut.cleanupPending&&firstOut.requiresReload,
+     '标签 B 能看见标签 A 的共享 active mutation，不能把第一次退出谎报为干净');
+  loginGate.resolve({user:{uid:'U-CROSS-LATE'}});
+  const stale=await login; await flush();
+  ok(stale&&/AUTH_CROSS_TAB_SUPERSEDED|AUTH_STALE_OPERATION/.test(String(stale.code||''))&&
+     tabA.A.readLocal().uid!=='U-CROSS-LATE'&&!tabA.A.isSignedIn()&&
+     tabA.A._readFenceForTest().kind==='stale_mutation',
+     '标签 A 的晚到登录失去 boundary 所有权，不能复活 marker 或返回成功');
+  const secondOut=await tabB.A.signOut();
+  ok(secondOut.ok&&!secondOut.cleanupPending&&!tabB.A._readFenceForTest().kind&&
+     tabB.A.sessionStatus().state==='signed_out',
+     '晚到 mutation 已结算后第二次安全退出重新撤销真实 session 并清理隔离');
+}
+{
+  const badLocal=storage();
+  const rawSet=badLocal.setItem.bind(badLocal);
+  let sdkCalls=0;
+  badLocal.setItem=function(k,v){
+    if(k==='hansen_auth_boundary_v1076') return;
+    rawSet(k,v);
+  };
+  const b=boot({local:badLocal,session:storage()});
+  b.A._setAuthForTest({
+    signInWithPassword(){sdkCalls++;return Promise.resolve({user:{uid:'SHOULD-NOT-RUN'}});},
+    getSession(){return Promise.resolve(sessionResult('SHOULD-NOT-RUN'));}
+  });
+  const err=await b.A.loginByPassword('storage_fail','pw').then(()=>null,e=>e);
+  ok(err&&err.code==='AUTH_BOUNDARY_NOT_PERSISTED'&&sdkCalls===0&&!b.A.readLocal().uid,
+     '共享 boundary 无法写入并读回时，在调用任何 session-changing SDK 前失败关闭');
+}
+{
+  const b=boot();let injected=false;
+  const rawRemove=b.session.removeItem.bind(b.session);
+  b.session.removeItem=function(k){
+    rawRemove(k);
+    if(k==='hansen_auth_pending_v1076'&&!injected){
+      injected=true;
+      const mismatch={
+        schema:1076,fenceId:'FINAL-RETURN-MISMATCH',kind:'mismatch',
+        expectedUid:'U-FINAL',observedUid:'U-OTHER',
+        generation:91,revision:91,at:Date.now()+1
+      };
+      const encoded=JSON.stringify(mismatch);
+      b.local.setItem('hansen_auth_fence_backup_v1076',encoded);
+      b.local.setItem('hansen_auth_fence_backup_v1076:mismatch',encoded);
+    }
+  };
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-FINAL'}});},
+    getSession(){return Promise.resolve(sessionResult('U-FINAL'));}
+  });
+  const err=await b.A.loginByPassword('final_window','pw').then(()=>null,e=>e);
+  ok(err&&err.code==='AUTH_FENCED_SESSION'&&!b.A.isSignedIn()&&
+     b.A.sessionStatus().state==='mismatch'&&
+     b.A._readFenceForTest().fenceId==='FINAL-RETURN-MISMATCH',
+     'PKEY 清理窗口出现新 mismatch 时，最终复验拦截并且不能返回假成功');
+}
+{
+  const b=boot();let sessions=0;
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-ROLLBACK-A'}});},
+    getSession(){
+      sessions++;
+      if(sessions===1)return Promise.resolve(sessionResult('U-ROLLBACK-A'));
+      const otherBoundary={
+        schema:1076,boundaryId:'BOUNDARY-B',kind:'session_mutation',
+        parentBoundaryId:'',generation:77,startedAt:Date.now()+1
+      };
+      b.local.setItem('hansen_auth_boundary_v1076',JSON.stringify(otherBoundary));
+      b.local.setItem('hansen_auth_v1004',JSON.stringify({
+        schema:1076,method:'password',uid:'U-ROLLBACK-B',signedAt:Date.now(),
+        authCommitId:'COMMIT-B',authBoundaryId:'BOUNDARY-B',authBoundaryState:'signed_in'
+      }));
+      return Promise.resolve(sessionResult(''));
+    }
+  });
+  const err=await b.A.loginByPassword('rollback_a','pw').then(()=>null,e=>e);
+  ok(err&&isFinite(sessions)&&b.A.readLocal().uid==='U-ROLLBACK-B'&&
+     b.A.readLocal().authCommitId==='COMMIT-B'&&!b.A.isSignedIn(),
+     '提交失败不再 compare-delete marker；另一标签刚写入的 B marker 不会被 A 回滚擦除');
+}
+{
+  const b=boot();let claims=0;
+  b.win.HansenSbProfile={claimCloudId(){claims++;}};
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-NO-PROFILE'}});},
+    getSession(){return Promise.resolve(sessionResult('U-NO-PROFILE'));}
+  });
+  const r=await b.A.loginByPassword('no_profile_write','pw');
+  const post=await r.postLogin;
+  ok(r.ok&&r.competitionIdUnavailable===true&&post.competitionIdUnavailable===true&&claims===0,
+     '登录成功不依赖 sb_profile；全局竞赛 ID 明确未启用且不自动锁定本机编号');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
