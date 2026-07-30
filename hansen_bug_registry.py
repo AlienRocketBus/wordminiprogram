@@ -90,6 +90,18 @@ REGISTRY = [
      'guard_data_writer_has_cloud'),
     ('v1075', 'hansen_island_upgrade 内嵌 36 条成就旧副本（第八次两处真源），已彻底拆除',
      'guard_no_divergent_config'),
+    ('v1076', '不可收件的 .local 邮箱只发验证却被当成注册成功',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '没有真实 session/uid 仍写 signedAt 并显示登录成功',
+     'guard_auth_real_session'),
+    ('v1076', '认证 operation UID 与 SDK session UID 未绑定，可能把旧/匿名会话贴到新账号',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '登录后云档冲突取消会覆盖云端，迟到恢复可能覆盖新进度',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '手机号与用户名登录同一 UID 却推导出两把云存档密钥',
+     'guard_auth_real_session'),
+    ('v1076', '匿名/旧账号自动同步授权跨身份继承，登录后可能未选择就上传',
+     'test_cloud_save_v965.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
