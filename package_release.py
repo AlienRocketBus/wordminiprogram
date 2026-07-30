@@ -83,7 +83,8 @@ SOURCE_EXCLUDE_EXT = {".zip", ".pyc"}
 FORBIDDEN_RUNTIME_FILES = {"hansen_backup_bootstrap.js", "hansen_backup.js", "sw.js"}
 SOURCE_REQUIRED_FILES = {
     ".github/workflows/jarvis-three-file-release.yml",
-    "README.md", "CHANGELOG.md", "VERSION", "sw_v944.js", "manifest.webmanifest",
+    "README.md", "CHANGELOG.md", "云存档_开通指南_v965.md",
+    "部署说明_解决打开变下载.md", "VERSION", "sw_v944.js", "manifest.webmanifest",
     "_sw_upgrade_v944.html", "hansen_sw_upgrade_gate_v944.js", "hansen_perf_v944.js",
     "build.py", "generate.py", "sync_land_v942.py", "sync_guard.py", "package_release.py",
     "jarvis.py", "jarvis_scan.py", "hansen_evolve.py", "hansen_health_check.py",
@@ -704,6 +705,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1072": (("shell-131", "pages-129", "assets-129", "icons-3"), "v=1072"),
         "1073": (("shell-132", "pages-130", "assets-130", "icons-3"), "v=1073"),
         "1074": (("shell-133", "pages-131", "assets-131", "icons-3"), "v=1074"),
+        "1075": (("shell-134", "pages-132", "assets-132", "icons-3"), "v=1075"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
