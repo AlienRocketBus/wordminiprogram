@@ -17,162 +17,224 @@
 
 ### 背景与根因
 
-用户现场的核心症状是：手机号可以输入、界面也可能显示“处理中”或“已登录”，但注册无法
-可靠完成，刷新或同步时又被当成未登录。全面沿调用链核对后，问题不是一个输入格式错误，而是
-五组会互相放大的状态错误：
+用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
+CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十条
+互相叠加的真实故障链：
 
-1. **曾经存在一条伪造的“纯用户名注册”旁路。** v1058 把用户名确定性映射成 `.local`
-   邮箱，再假定后端会把它当作真实邮箱注册。这既不是可交付的真实邮箱身份，也把“用户名登录”
-   与“账号创建”混成两套协议。v1076 删除这条旁路：新账号只通过 CloudBase v2 的手机验证码
-   注册事务创建；用户名和密码作为同一次 `signUp` 的可选字段写入。用户名/密码页只登录已经
-   存在的账号，不再承诺无手机号直接注册。
-2. **登录状态曾有两个真源。** `localStorage` 中的 `{method,signedAt}` 只是旧界面标记，
-   却长期被当成有效云端会话；SDK 的真实 session 只在诊断面板里查询。结果是界面说“已登录”，
-   云端却返回 `unauthenticated / credentials not found`。v1076 明确：只有 SDK session 的
-   非匿名 UID 与本地 marker UID 精确相等，`isSignedIn()` 才能返回 true。
-3. **认证动作与会话落定没有绑定。** 注册/登录 API 返回成功，不代表随后读取到的持久 session
-   一定属于同一个用户。旧代码可能接受“某个旧会话仍存在”，把本次新账号与旧账号混在一起。
-   v1076 同时提取本次认证结果 UID 和随后 `getSession()` 的 UID；缺失、匿名或不一致一律
-   fail closed，不写“成功”标记，也不碰云存档。
-4. **前端超时曾把未知结果误当成失败并允许重试。** 网络慢时，后端注册可能仍在执行；前端若
-   20 秒后丢弃原 Promise，用户再次点击可能重复注册或重复登录。v1076 的 20 秒只改变提示为
-   “仍在处理”，原动作继续串行等待；如果最终结果仍无法确认，进入 `outcome_unknown`，
-   只允许重新查询 session，绝不自动重放注册动作。
-5. **登录后的云存档同步曾阻塞并可能替用户做选择。** 账号刚建立就自动恢复/上传，会让一次
-   认证同时承担身份、覆盖本机和覆盖云端三种风险。v1076 登录后只做只读元数据检查；发现两边
-   都有进度时必须明确选择“保留云端”“保留本机”或“稍后处理”。关闭、取消、稍后都严格零写入。
-6. **后台自动同步授权曾没有绑定当前身份。** 旧匿名/恢复码玩家一旦开启自动同步，之后正式
-   登录时全局 `enabled` 仍为 true，`pagehide` 或心跳可能在用户尚未选择云端/本机之前，把旧授权
-   用到新 UID。v1076 把授权写成 `enabledIdentity`：正式账号必须精确匹配 `account:u:<UID>`；
-   匿名/恢复码授权不能继承给账号，U1 的授权也不能继承给 U2，身份不符时后台同步失败关闭且零写入。
+1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
+   `.local` 假邮箱，然后把发起邮箱验证当作账号创建。v1076 删除这条旁路；CloudBase
+   不允许前端无验证地直接创建用户名账号，新账号必须先完成手机验证码注册。
+2. **本地 marker 曾冒充真实登录态。** `localStorage` 的 `method/signedAt` 只能用于
+   展示，不能证明服务器仍有 session。现在只有非匿名 SDK session UID 与 marker UID
+   完全相等，`isSignedIn()` 才为 true。
+3. **锁定 SDK 有一个必须按真实形状处理的边界。** SDK 的 `getSession()` 可能返回
+   “access/refresh 凭证非空，但 `user:null`，且顶层 `error:null`”。这不是明确退出；
+   旧逻辑却会清 marker，或者让注册在确认阶段一直转圈。v1076 将其标为
+   `indeterminate`，先调用 `getCurrentUser(true)` 远程刷新；仍取不到 UID 时保留 marker、
+   暂停云操作并显示安全恢复出口。
+4. **认证返回与最终 session 曾没有强绑定。** `signUp/signIn` 返回成功，不等于随后读到的
+   session 就属于本次用户。现在 operation UID、session UID、本地 marker 三者必须一致；
+   原始 LoginState 的 `name:"anonymous"`、`createdFrom:"anonymous"`、
+   `providers[].id:"anonymous"` 也会被识别并拒绝。
+5. **旧只读探测可能晚到覆盖新登录。** 打开面板触发的旧 `refreshSession` 或云操作触发的
+   旧 `ensureSession`，可能在新账号已经确认后才返回，把新 UID 清掉或改回旧 UID。
+   v1076 为每个探测绑定 `probeId + authGeneration`；失去当前代次的探测只能返回
+   `stale`，没有任何写 marker 或写状态的资格。
+6. **退出不能真正取消已经发到服务器的登录请求。** 用户点退出后，旧 `signIn/signUp`
+   仍可能晚到并建立 session。现在退出先递增认证代次、作废所有等待者，并写入非敏感
+   sessionStorage fence；晚到结果永远不能提交 marker。若旧请求仍在收尾，界面明确要求
+   重新载入并再次核对，绝不谎称“可以重新登录”。
+7. **永久不返回的 Promise 会让界面永久 busy。** 20 秒仍只显示慢请求提示，不自动重放；
+   60 秒硬上限后停止等待并进入 `outcome_unknown` fence，释放永久 spinner，但继续禁止
+   任何第二次注册/登录。唯一安全出口是核对原结果，或“安全退出并清理会话”。
+8. **登录后的附加任务曾串行阻塞。** 竞赛档案可能写 `sb_profile`，云存档对账只读；
+   这两项现在并行、各自有 8 秒上限，任何失败或悬挂都不能把已经确认的登录重新变成失败。
+   文档不再把竞赛档案写入误称为“登录后绝对零写入”。
+9. **云存档旧异步动作曾可能跨账号落地。** v1076 不只在操作开始/结束核对 UID，而是给每次
+   上传、历史迁移、恢复和本地同步状态写入绑定“原始 UID + CloudSave generation”；
+   每次 `put`、迁移 `put`、`HansenBackup.restore` 和 `writeState` 前重新核对。
+   U1 切到 U2 后，U1 的迟到任务必须停止；新写地址仍由稳定 `u:<UID>` 派生。
+10. **云端/本机选择曾可被重复点击或旧 DOM 绕过。** 一旦选择“保留云端”或“保留本机”，
+    UI 立即进入 `applying-*`，锁住改选、稍后、关闭、手动上传和普通退出；Promise 结算后
+    才恢复。取消和稍后始终零写入。
 
 官方接口依据：
 
-- [CloudBase Web v2 手机注册](https://docs.cloudbase.net/authentication-v2/method/signup)
-  明确给出 `getVerification → verify → signUp`，且手机注册可在同一事务传
-  `phone_number`、`verification_code`、`verification_token`、`username` 与 `password`。
-- [CloudBase 用户名/密码登录](https://docs.cloudbase.net/en/authentication/method/username-login)
-  用于已存在账号的登录，不被本项目曲解为无验证的纯用户名创建。
-- [CloudBase Web v3 认证 API 索引](https://docs.cloudbase.net/api-reference/webv3/authentication)
-  用于核对锁定 SDK 的认证方法形状；实际生产环境仍以当前控制台开启能力为准。
+- [CloudBase Web v2 手机注册](https://docs.cloudbase.net/authentication-v2/method/signup)：
+  新手机号使用 `getVerification → verify → signUp`，同一注册事务可携带
+  `phone_number`、`verification_code`、`verification_token`、`username` 和
+  `password`。
+- [CloudBase 用户名/密码登录](https://docs.cloudbase.net/en/authentication/method/username-login)：
+  只用于登录已经存在并设置了密码的账号，不能被曲解为无验证的纯用户名创建。
+- [CloudBase Web 认证 API](https://docs.cloudbase.net/api-reference/webv3/authentication)：
+  用来核对锁定 SDK 的 session、用户与退出方法。生产能力仍取决于 CloudBase 控制台。
+
+当前仓库环境固定为 `ambitious-d0g1d26xm740dc3d6`、地域 `ap-shanghai`；
+`hansen_cloud_config_v965.js` 与 `cloudbaserc.json` 必须一致。CloudBase 手机短信当前
+要求上海地域；代码一致不代表短信签名、模板、额度、provider 和安全域名已在控制台开通。
 
 ### 实现
 
 #### 1. 唯一认证状态机
 
-| 状态 | 含义 | 允许的行为 |
+| 状态 | 精确定义 | 允许行为 |
 |---|---|---|
-| `checking` | 正在读取 SDK session | 禁止云端写入，界面显示核对中 |
-| `confirmed` | SDK UID 与 marker UID 精确一致且非匿名 | 允许账号云操作 |
-| `signed_out` | SDK 明确没有正式账号 session | 显示登录/注册入口 |
-| `unknown` | 网络、SDK 或查询超时导致无法判断 | 保留 marker 和本地进度，但拒绝云操作 |
-| `mismatch` | SDK UID 与 marker UID 不同 | 拒绝一切账号云操作，要求安全退出后重登 |
-| `legacy_reauth` | 旧 marker 有时间/方式但没有可信 UID | 保留本地学习进度，必须重新认证 |
-| `outcome_unknown` | 认证请求可能已完成但 session 尚不能确认 | 只允许“重新确认结果”，禁止重复提交 |
+| `checking` | 当前代次正在读取 SDK session | 禁止云写，等待结果 |
+| `confirmed` | session 存在，用户与 UID 完整、非匿名，且与 marker 相同 | 允许该 UID 的账号云操作 |
+| `signed_out` | 已明确确认 `session === null` | 可开始新的登录/注册 |
+| `unknown` | 网络错误、凭证存在但用户为空、退出未确认或旧请求仍可能晚到 | 保留本地数据；只允许复查或安全清理 |
+| `mismatch` | operation/marker/session 中出现两个不同 UID | 持久隔离；不得自动收养隐藏 SDK UID |
+| `legacy_reauth` | 旧 marker 有时间/方式但没有可信 UID | 保留进度，重新认证 |
+| `outcome_unknown` | mutation 可能已在服务器完成，但客户端无法确认 | 不重放；有可信 operation UID 才可复查，否则必须安全退出 |
 
-`localStorage` 只保存非敏感显示缓存：schema、UID、手机号/用户名显示值、登录方式与时间。
-短信事务保存在当前标签页的 `sessionStorage`，只含手机号、verification ID、新老用户标志、
-发码时间和 `resendAt`；密码、短信码、verification token 从不持久化，也不得进入日志。
+`localStorage` 只保存 schema、真实 UID、显示用手机号/用户名、方式和时间。
+短信 pending 只保存在当前标签页 `sessionStorage`，字段限定为手机号、verification ID、
+新老用户标志、发码时间与绝对 `resendAt`。密码、短信码和 verification token 从不落盘。
+`hansen_auth_fence_v1076` 也只保存 fence 类型、预期/观察 UID、原因和时间，不含任何凭据。
 
-#### 2. 手机新用户
+#### 2. 手机注册和手机登录
+
+新手机号的唯一流程：
 
 1. 规范化为 `+86 11 位号码`，调用 `getVerification({phone_number})`。
-2. 只有发码成功后才原子替换 pending 事务；重发失败保留旧的仍可用事务。
-3. 用户提交验证码、用户名与两次一致的密码。
-4. 调用 `verify({verification_id, verification_code})` 获取 token。
-5. 调用一次 `signUp({phone_number, verification_code, verification_token, username, password})`。
-6. 从 signUp 结果取得本次 UID，再轮询 `getSession()`；必须得到同一非匿名 UID。
-7. 仅在 UID 精确一致后写 marker、广播账号变化，并启动只读云存档检查。
+2. 发码成功后才原子替换 pending；失败保留仍有效的旧事务。
+3. `verify({verification_id, verification_code})` 换取 verification token。
+4. 同一次 `signUp` 传 phone/code/token/username/password。
+5. 从 LoginState 提取 operation UID，并拒绝匿名形状。
+6. 最多八次查询 session；必要时用 `getCurrentUser(true)` 重建用户缓存。
+7. 只有相同非匿名 UID 落定后，才提交 marker 并显示成功。
 
-#### 3. 已有手机号与用户名密码
+已有手机号固定走 `verify → signIn`，绝不误进 `signUp`。发码后手机号锁定；
+“更换手机号”明确结束旧事务。倒计时基于绝对 `resendAt`，关闭面板、切后台或短暂休眠后
+不会永久冻结，也不会把旧验证码配到新手机号。
 
-已有手机号固定走 `verify → signIn`，不会误入 `signUp`。用户名密码固定走
-`signInWithPassword`，不再把“账号不存在”转换成虚假的注册成功。两条路径都遵守相同的
-operation UID / session UID 一致性合同，并由单一提交锁防止快速连点和重复请求。
+#### 3. 用户名密码登录
 
-#### 4. UI 与恢复
+用户名密码页只调用 `signInWithPassword`（兼容 SDK 时才退到同义 `signIn`），
+不再提供“纯用户名注册”。账号不存在、密码错误、未设置密码都按服务端结果失败关闭。
+同样必须通过 operation UID / session UID / 非匿名三重合同后才成功。
 
-发码后手机号锁定，避免验证码事务和输入号码错配；“更换手机号”会明确结束旧事务。
-倒计时以绝对 `resendAt` 计算，因此关闭再打开面板、切后台或短暂休眠后仍能正确恢复。
-登出只有在 SDK 真正撤销 session 或复查确认已无 session 时才清 marker；服务器登出失败时
-不谎报成功。错误对象统一展开为可读文本，不再退化成 `[object Object]`。
+#### 4. 异步代次、fence 与安全退出
 
-#### 5. 云存档身份与覆盖边界
+- 每个认证 mutation 捕获 `authGeneration`；开始新认证和退出都会推进代次。
+- 每个只读探测再捕获独立 `probeId`；旧探测即使成功也不能写任何状态。
+- 20 秒只显示“服务器仍在处理”；60 秒后产生 `AUTH_MUTATION_INDETERMINATE`，
+  UI 停止永久等待，但 fence 继续阻止重试。
+- UID 不一致写 `mismatch` fence；刷新页面后仍存在，不能把隐藏 session 自动写成 marker。
+- 退出无论 SDK `signOut` 返回成功还是报错，都会再查 session；只有
+  `session === null` 才能清理。
+- 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。本机 marker 已清，
+  但界面必须提示重新载入并再核对；旧请求晚到后仍只能加固 fence，不能恢复登录。
+- fence 只有在服务端明确无 session 且没有本页活跃 session mutation 时才清除。
 
-新写入统一使用 `u:<stable CloudBase UID>` 派生的账号密钥。手机号和用户名只作为历史地址
-候选，用于发现旧档和迁移；它们不再决定新档身份，避免同一账号通过两种登录方式得到两把钥匙。
-所有恢复/上传动作都携带预期 UID 与页面 epoch；用户切换账号、退出或旧异步动作迟到时立即停止。
-登录完成本身不会自动恢复、不会自动上传、不会刷新覆盖页面内存。
-自动同步是否允许不再只看全局布尔值，而要同时核对 `enabledIdentity`；只有用户在当前身份下
-明确完成一次上传/恢复授权后，后台心跳和页面离开同步才可继续。账号切换立即使旧授权失效。
+#### 5. 登录后附加任务
 
-#### 6. 主要修改面
+认证成功对象立即返回 `{ok, uid, postLogin}`。随后两项并行：
 
-- `hansen_auth_v1004.js`：认证状态机、v2 手机注册、UID 双确认、事务与登出语义。
-- `hansen_auth_ui_v1004.js`：真实注册界面、绝对倒计时、未知结果恢复、显式云存档选择。
-- `hansen_cloud_save_v965.js`：稳定 UID 新命名空间、历史候选迁移、每次操作复验 session，且自动同步授权绑定当前身份。
-- `test_auth_contract_v1076.mjs`：认证状态机、异常、重发、UID 错配、退出和零写入合同。
-- `test_auth_vendor_v1076.mjs`：真实 Chromium 导入仓库锁定 SDK，核对七个 API 方法形状。
-- `test_auth_ui_v1076.mjs`：390×844 真实 DOM 点击发码、新用户注册、关闭重开倒计时。
-- `test_session_truth_v1059.mjs`、`test_phone_signup_v1057.mjs` 与错误专项：
-  用新的 SDK session 真源语义替换已经失效的旧断言；`test_cloud_save_v965.mjs` 另验证匿名→账号及 U1→U2 时旧自动同步授权不能跨身份继承。
-- `jarvis_gate.py`、`package_release.py` 和正式 GitHub Actions：
-  把源码树、文档、测试、生成页和三文件发布绑定到同一不可变候选。
+- `ensureProfile(uid)`：读取或按需要写入竞赛档案 `sb_profile`、分配竞赛 ID；失败不阻断登录，
+  晚到结果只有当前同一 UID 仍 confirmed 时才允许写入本机竞赛 ID。
+- `syncOnLogin(uid, epoch)`：只读检查账号云档是否存在，返回
+  `nothing-to-sync / restore-available / conflict / upload-available / deferred`；
+  它不会自动恢复或上传玩家进度。
+
+两项各自超时后只降级其自身结果。不能把进度只读检查的零写入边界扩大成对竞赛档案的虚假承诺。
+
+#### 6. 云存档与跨账号边界
+
+- 会话比较使用原始 SDK UID；文档地址使用 `u:<UID>` 命名空间，两者不得混算。
+- 手机号/用户名地址只作为历史候选读取；新写入只使用稳定 UID 派生地址。
+- 自动同步授权同时要求 `enabled` 与 `enabledIdentity` 精确匹配当前身份。
+- `resetApp`、登录/退出事件都推进 CloudSave generation，使旧 provider Promise 失效。
+- 上传在真正 `put` 前和本地 `writeState` 前复验。
+- 历史迁移从后台裸写改为 await；迁移 `put` 前后都复验。
+- 恢复在下载后、同步调用 `HansenBackup.restore` 前复验；恢复返回后再次复验，
+  才记录本地同步状态。
+- 云端有档/本机有档时必须明确选择；关闭、取消、稍后严格零写入。
+- 选择进入 applying 后，旧 DOM 引用、重复点击、改选、关闭、手动上传和普通退出全部失效。
+
+#### 7. 主要修改文件
+
+- `hansen_auth_v1004.js`：真实注册协议、session 形状兼容、generation/probe/fence、
+  bounded mutation、安全退出和登录后并行任务。
+- `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
+- `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
+- `test_auth_contract_v1076.mjs`：39 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+  原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch 与永久悬挂。
+- `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
+  核对七个认证 API 的实际返回形状。
+- `test_auth_ui_v1076.mjs`：390×844 点击流程、绝对倒计时、云选择互斥、
+  unknown/mismatch/outcome_unknown 安全清理及 cleanupPending 文案。
+- `test_cloud_save_v965.mjs`：同 UID 上传/恢复成功，U1→U2 的上传、迁移、恢复零本地落地，
+  并验证自动同步许可不跨身份继承。
+- `hansen_guards_v1068.py`、`hansen_bug_registry.py`：把本次每类事故变成静态守卫和登记项。
+- 发布、版本、Service Worker、生成页、Jarvis 与双包脚本：全部统一到 v1076。
 
 ### 兼容
 
 - 不删除或重置任何岛屿、本地钱包、宠物、任务、成就、错词或备份数据。
-- 旧版有 UID 的 marker 必须由 SDK session 重新确认；没有 UID 的 marker 进入
-  `legacy_reauth`，不会被静默升级成“已登录”。
-- 已存在的手机号账号仍用短信登录；已设置用户名/密码的账号仍可走密码登录。
-- 旧手机号/用户名云档只读探测并在用户明确选择后迁移到 UID 主地址；找不到旧档不代表可覆盖。
-- 匿名/恢复码模式仍可服务未注册玩家，但匿名 session 不能冒充正式账号 session。
-- 19 个普通岛和 8 个 Land 岛都从母版/数据生成，账号修复必须通过全 27 岛接线校验；
-  禁止直接手改某一个生成页来制造局部“修好”。
-- v961 与 v962 仍是历史淘汰版本号，打包器继续拒绝复用；本次版本链以 GitHub v1075 提交 `c9ca5b08d068466f87c853aa3f65e61d25eddab3` 为基线，升级为 v1076。
+- 旧版有 UID 的 marker 必须由 SDK session 重新确认；无 UID 的 marker 进入
+  `legacy_reauth`，不会被静默升级。
+- 已有手机号账号仍用短信登录；已设置用户名/密码的账号仍可用密码登录。
+- 旧手机号/用户名云档只作历史候选；找不到旧档不等于允许覆盖。
+- 匿名/恢复码仍可服务未注册玩家，但匿名 session 不能冒充正式账号，也不能把同步授权带入账号。
+- `session 非空 + user:null` 保留 marker 并进入 unknown；只有 `session === null` 才是确定退出。
+- v1076 fence 使用 sessionStorage：同一标签页刷新后保留；明确无 session 后自动清除。
+- 19 个普通/星海岛与 8 个 Land 岛必须由母版和生成器统一分发，禁止只修一页。
+- v961、v962 仍为永久淘汰的历史版本号；本次代码基线是 GitHub v1075
+  `c9ca5b08d068466f87c853aa3f65e61d25eddab3`，不是失败版源码。
 
 ### 测试
 
-v1076 的最低回归矩阵如下；任何一项跳过都不能写成“通过”：
+最低回归矩阵：
 
-| 层级 | 证明内容 | 不能证明的内容 |
+| 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| VM/状态机 | 分支选择、pending、UID 一致性、错误分类、零写入、退出 | 生产短信是否送达 |
-| 锁定 SDK + Chromium | 仓库内真实 bundle 可导入，所需方法真实存在 | 控制台是否已开通对应 provider |
-| 390×844 DOM 点击 | 发码后界面、倒计时、关闭重开、注册提交与登录态展示 | 真实手机号、运营商、短信模板 |
-| 生成与接线 | 19+8 页面都加载同一账号模块与资源戳 | 已部署 CDN 是否仍缓存旧 HTML |
-| 全库回归 | 旧经济、存档、Boss、Bee、性能、安全行为未回退 | 任意未来浏览器或所有并发时序 |
-| 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后逐字节一致 | 静态站和 CloudBase 控制台已部署 |
+| 认证 VM/模拟 SDK | 39 条状态机合同：协议分支、UID、匿名、空用户 session、stale、fence、退出、硬超时 | 真实短信送达 |
+| CloudSave 动态模拟 | 同 UID 成功；U1→U2 上传/迁移/恢复迟到时停止；授权不跨身份 | 生产数据库规则 |
+| 轻量 DOM/真实事件 | applying 锁、旧 DOM 重复点击、三种安全清理状态和 cleanupPending | 具体手机浏览器渲染 |
+| Chromium 390×844 | 完整发码/注册点击、倒计时、SDK 导入与页面错误 | 控制台 provider/短信模板 |
+| 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |
+| 全库回归 | 经济、存档、Boss、Bee、性能、安全、Jarvis 没有回退 | 所有未来浏览器/网络时序 |
+| 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后回读一致 | 静态站与 CloudBase 已部署 |
 
-特别说明：`test_auth_contract_v1076` 使用可注入假认证对象；`test_auth_vendor_v1076` 使用
-真实仓库 SDK 但不调用生产 CloudBase；`test_auth_ui_v1076` 走真实浏览器 DOM 但仍使用测试
-认证实现。三者能消除大量“正则全绿”的假安全感，却**不能替代一台真实手机、真实短信、真实
-CloudBase 环境的最终冒烟**。生产验收步骤完整写在 `云存档_开通指南_v965.md`。
+本次开发过程已经完成的专项证据：认证合同 **39/39**；CloudSave 动态专项全部通过；
+轻量 DOM 专项 **14/14**；认证与 UI 文件语法解析通过。最终 PR 仍必须在 GitHub Actions
+重新执行真实 Chromium、所有版本化 Node/Python 测试、生成器、经济/资源/浏览器/Jarvis 和
+双包可复现性。若 Actions 尚未产生或未全绿，README 与最终答复都不得把它写成“CI 已通过”。
 
-正式 CI 还必须：
+正式 CI 必须：
 
-1. 拒绝任何版本化测试中的 `/home/claude/work/repo` 硬编码路径。
-2. 运行 `generate.py` 与 `generate_land.py --verify` 后确认工作树无差异。
-3. 运行所有 `test_*v*.mjs` 与 `test_*v*.py`，不是只跑 v942 Python。
-4. 运行经济、资源、导航、深度 Jarvis 与浏览器守卫。
-5. 在最终源码树上签发一次 Jarvis 凭证；源码再变一字，凭证立即失效。
-6. 两次独立打包并比较摘要，确认源码 ZIP 不含临时 `.jarvis_pass.json`。
+1. 拒绝版本化测试中的固定本机路径。
+2. 运行 `generate.py` 与 `generate_land.py --verify`，随后工作树必须无差异。
+3. 运行全部 `test_*v*.mjs` 与 `test_*v*.py`。
+4. 运行经济、资源、导航、20 道新时代守卫、事故登记、深度 Jarvis 和浏览器墙。
+5. 在最终源码树签发一次 Jarvis 凭证；之后源码变一字，凭证立即失效。
+6. 两次独立打包并比较摘要；源码 ZIP 不得包含临时 `.jarvis_pass.json`。
+7. 验证根 README 与 `release-assets/README.md` 逐字相同，且当前版本五个必需章节齐全。
+
+生产真机冒烟必须另外执行，完整步骤见 `云存档_开通指南_v965.md`。至少覆盖：
+新手机号收码并注册、已有手机号登录、用户名密码登录、刷新保持、退出后 session 清空、
+错误验证码、弱密码、限频、安全域名错误、两台设备同 UID、U1→U2 切换、云/本机冲突三出口。
+CI 没有真实手机号，不能替代这些验证。
 
 ### 发布与部署
 
-1. v1076 必须先在 `agent/fix-auth-v1076` 形成草稿 PR，审查和 CI 通过后才允许合并 main。
-2. `VERSION`、`package.json`/lock、Service Worker 的 shell/pages/assets 三代缓存、
-   所有运行资源 `?v=1075`、打包合同和 README 必须一次性升级，不能只改文件名。
-3. 正式发布工作流只产出三个资产：ASCII 物理名的部署 ZIP、源码/Jarvis ZIP 和 README；
-   GitHub 页面用中文标签显示。旧的一文件自动发布工作流不再监听 main。
-4. 发布失败会删除未完成草稿；只有当孤儿 tag 精确指向当前 `GITHUB_SHA` 时才删除该 tag，
-   不会误删历史标签，也不会覆盖已存在 Release。
-5. GitHub Release 发布后仍需按 `部署说明_解决打开变下载.md` 上传部署 ZIP，并按
-   `云存档_开通指南_v965.md` 核对环境、认证方式、短信、安全域名、集合与权限。
-6. 未完成生产手机号冒烟前，只能表述为“代码与 CI 候选通过”；不得宣称真实注册已经在生产完成。
-7. 每个后续版本继续执行同一文档硬门禁：README 与 CHANGELOG 的当前版本章节都必须包含
-   “背景与根因 / 实现 / 兼容 / 测试 / 发布与部署”，且 README 发布副本必须逐字一致。
-
+1. v1076 只在 `agent/fix-auth-v1076` 草稿 PR 中审查；全量 Actions 和人工审查通过前不合并。
+2. `VERSION=1076`、package/lock=`1076.0.0`、全部运行资源查询戳 `?v=1076`、
+   Service Worker `shell-135/pages-133/assets-133/icons-3`、打包合同和文档必须一致。
+3. PR 只验证，不发布。只有合并 main 后，正式工作流才允许生成三个资产：
+   ASCII 物理名部署 ZIP、含 Jarvis 完整源码 ZIP、README。
+4. 发布凭证绑定最终完整源码树；源码、测试或文档再变一字，旧凭证立即失效。
+5. 源码 ZIP 排除临时 `.jarvis_pass.json`；两次打包摘要必须相同。
+6. 发布失败删除未完成草稿；只有孤儿 tag 精确指向当前 `GITHUB_SHA` 才可删除，
+   不覆盖已有 Release、不误删历史 tag。
+7. GitHub Release 不等于生产部署。仍需上传部署 ZIP、刷新 CDN/Service Worker，
+   并在 CloudBase 控制台核对环境、上海地域、手机/密码 provider、短信签名模板与额度、
+   安全域名、`sb_profile` 和云存档集合权限。
+8. 未完成真实手机号和两设备冒烟前，只能表述为“代码候选和自动化验证通过”，
+   不得宣称生产注册已完成。
+9. 后续每个版本必须继续极其详细更新 README 和 CHANGELOG：至少说明背景与根因、实现、
+   兼容、测试、发布与部署；根 README 与发布副本必须逐字一致。
 
 
 ## v1075 的目标
