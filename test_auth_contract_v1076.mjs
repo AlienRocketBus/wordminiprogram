@@ -178,6 +178,55 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
      '旧 ensureSession 晚到只返回 stale，不能改写新账号');
 }
 {
+  const b=boot();
+  b.A._setAuthForTest({
+    signInWithPassword(){
+      return Promise.resolve({
+        data:{session:{access_token:'accepted-but-user-missing',user:null},user:null},
+        error:null
+      });
+    },
+    getSession(){return Promise.resolve(sessionResult('U-HIDDEN'));}
+  });
+  const err=await b.A.loginByPassword('missing_uid','pw').then(()=>null,e=>e);
+  ok(err&&err.code==='AUTH_OPERATION_UID_MISSING'&&!b.A.readLocal().uid&&
+     b.A._readFenceForTest().kind==='outcome_unknown',
+     'session-changing API 已 resolve 但 operation UID 缺失时写 fence，不能按普通失败处理');
+  const refreshed=await b.A.refreshSession();
+  ok(refreshed.state==='unknown'&&!b.A.readLocal().uid&&!b.A.isSignedIn(),
+     '结果缺 UID 后即使隐藏 SDK 用户恢复，也不能自动收养为登录账号');
+}
+{
+  const b=boot(),confirmGate=deferred();
+  let calls=0,confirmStarted;
+  const seen=new Promise(r=>{confirmStarted=r;});
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({
+    schema:1076,method:'password',signedAt:Date.now(),uid:'U-A'
+  }));
+  b.A._setSessionForTest('confirmed','U-A');
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-B'}});},
+    getSession(){
+      calls++;
+      if(calls===1){confirmStarted();return confirmGate.promise;}
+      if(calls===2)return Promise.resolve(sessionResult('U-C'));
+      return Promise.resolve(sessionResult(''));
+    }
+  });
+  const login=b.A.loginByPassword('user_b','pw').then(()=>null,e=>e);
+  await seen;
+  const mismatch=await b.A.ensureSession('U-A');
+  ok(mismatch.mismatch&&b.A._readFenceForTest().kind==='mismatch',
+     '并发 ensureSession 发现 A/C 不一致后写最高优先级 mismatch');
+  confirmGate.resolve(sessionResult(''));
+  await login;
+  let recoveryRejected=false;
+  try{await b.A.recoverAuthOutcome();}catch(e){recoveryRejected=true;}
+  ok(recoveryRejected&&b.A._readFenceForTest().kind==='mismatch'&&
+     b.A.readLocal().uid==='U-A',
+     '后到 outcome_unknown 不能降级覆盖 mismatch，也不能自动恢复成 B');
+}
+{
   const b=boot(),sendGate=deferred();
   b.A._setAuthForTest({
     getVerification(){return sendGate.promise;},
@@ -216,6 +265,53 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
      '旧登录请求晚到后再次安全退出，确认 session=null 才清隔离');
 }
 {
+  const b=boot(),loginGate=deferred(),snapshotGate=deferred();
+  let serverUid='',signingOut=false,snapshotCalls=0;
+  b.A._setAuthForTest({
+    signInWithPassword(){
+      return loginGate.promise.then(r=>{serverUid='U-REVIVED';return r;});
+    },
+    signOut(){signingOut=true;serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){
+      if(signingOut&&snapshotCalls++===0)return snapshotGate.promise;
+      return Promise.resolve(sessionResult(serverUid));
+    }
+  });
+  const login=b.A.loginByPassword('revive_user','pw').then(()=>null,e=>e);
+  await flush();
+  const outPromise=b.A.signOut();
+  await flush();
+  snapshotGate.resolve(sessionResult(''));
+  loginGate.resolve({user:{uid:'U-REVIVED'}});
+  const out=await outPromise; await login; await flush();
+  ok(out.cleanupPending&&b.A._readFenceForTest().kind==='stale_mutation',
+     '退出曾有旧 session mutation 时，即使其在清理回调前结算也必须保留 fence');
+  const probe=await b.A.refreshSession();
+  ok(probe.state==='unknown'&&!b.A.readLocal().uid,
+     '退出快照为 null 后旧 signIn 复活 session，也不能被 refresh 自动收养');
+  await b.A.signOut();
+  ok(!b.A._readFenceForTest().kind&&b.A.sessionStatus().state==='signed_out',
+     '再次显式退出并确认 session=null 后才解除复活隔离');
+}
+{
+  const b=boot(),outGate=deferred();
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({
+    schema:1076,method:'password',signedAt:Date.now(),uid:'U-SIGNOUT'
+  }));
+  b.A._setSessionForTest('confirmed','U-SIGNOUT');
+  b.A._setAuthForTest({
+    signOut(){return outGate.promise;},
+    getSession(){return Promise.resolve(sessionResult(''));}
+  });
+  const out=b.A.signOut(); await flush();
+  const during=await b.A.refreshSession();
+  outGate.resolve({data:{},error:null});
+  await out;
+  ok(during.state==='checking'&&!b.A.readLocal().uid&&
+     b.A.sessionStatus().state==='signed_out',
+     'signOut 进行中拒绝同代 refresh，退出结论不会被旧探测反写');
+}
+{
   const shared={local:storage(),session:storage()};
   const b1=boot(shared);
   b1.A._setAuthForTest({
@@ -236,9 +332,12 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
     getSession(){return Promise.resolve(sessionResult(''));},
     signOut(){return Promise.resolve({data:{},error:null});}
   });
+  const noSessionProbe=await b2.A.refreshSession();
+  ok(noSessionProbe.state==='mismatch'&&b2.A._readFenceForTest().kind==='mismatch',
+     '一次只读 session=null 也无权清 mismatch fence');
   await b2.A.signOut();
   ok(!b2.A._readFenceForTest().kind&&b2.A.sessionStatus().state==='signed_out',
-     '只有服务端 session=null 的安全退出能清 mismatch 隔离');
+     '只有服务端 session=null 的显式安全退出能清 mismatch 隔离');
 }
 {
   const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
@@ -260,10 +359,16 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   ok(out.ok&&out.cleanupPending&&!b.A.readLocal().uid&&!b.A.operationStatus().busy,
      '悬挂请求期间仍可安全退出，本地不再永久卡死');
   const reload=boot({local:shared.local,session:shared.session});
-  reload.A._setAuthForTest({getSession(){return Promise.resolve(sessionResult(''));}});
-  const finalState=await reload.A.refreshSession();
-  ok(finalState.state==='signed_out'&&!reload.A._readFenceForTest().kind,
-     '刷新后确认服务端无 session，才能最终解除悬挂隔离');
+  reload.A._setAuthForTest({
+    getSession(){return Promise.resolve(sessionResult(''));},
+    signOut(){return Promise.resolve({data:{},error:null});}
+  });
+  const fencedState=await reload.A.refreshSession();
+  ok(fencedState.state==='unknown'&&reload.A._readFenceForTest().kind,
+     '刷新后的只读探测仍不能自行解除悬挂隔离');
+  await reload.A.signOut();
+  ok(reload.A.sessionStatus().state==='signed_out'&&!reload.A._readFenceForTest().kind,
+     '刷新后仍需显式安全退出并确认无 session，才能最终解除隔离');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
