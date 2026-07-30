@@ -139,10 +139,11 @@ console.log('T3b 身份切换与迟到写保护');
     return originalPut(id, data);
   };
   providerMock.put = countedPut;
-  providerMock.get = async id => {
+  const countedGet = async id => {
     getCalls++;
     return originalGet(id);
   };
+  providerMock.get = countedGet;
   function deferred(){ let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
 
   /* 认证模块存在时，匿名路径只能在“明确 signed_out 且无 cleanup”边界运行。
@@ -162,6 +163,7 @@ console.log('T3b 身份切换与迟到写保护');
     const puts0 = putCalls, gets0 = getCalls, restores0 = restoreCounter;
     const local0 = JSON.stringify(D.readState());
 
+    const fencedInfo = await M.accountCloudInfo();
     const fencedSync = await M.syncNow({ force:true });
     const fencedSelf = await M.selfTest();
     const fencedRound = await M.roundTrip();
@@ -169,11 +171,12 @@ console.log('T3b 身份切换与迟到写保护');
     try{ await M.fetchWithKey(k); }catch(e){ fencedFetchError = String(e && e.message || e); }
     try{ await M.restoreWithKey(k); }catch(e){ fencedRestoreError = String(e && e.message || e); }
 
-    ok(fencedSync.ok === false && fencedSync.reason === 'stale-account'
+    ok(fencedInfo && fencedInfo.exists === null
+         && fencedSync.ok === false && fencedSync.reason === 'stale-account'
          && fencedSelf.ok === false && fencedRound.step === 'write-failed'
          && /账号|会话|认证/.test(fencedFetchError)
          && /账号|会话|认证/.test(fencedRestoreError),
-       '匿名边界 '+c.name+'：同步/自检/往返/读取/恢复全部失败关闭');
+       '匿名边界 '+c.name+'：元信息/同步/自检/往返/读取/恢复全部失败关闭');
     ok(putCalls === puts0 && getCalls === gets0 && restoreCounter === restores0
          && restoredWith === null && JSON.stringify(D.readState()) === local0,
        '匿名边界 '+c.name+'：云端零读写、本地零恢复且同步账本零改写');
@@ -181,6 +184,28 @@ console.log('T3b 身份切换与迟到写保护');
   currentUid = 'U-ACCOUNT-1';
   sessionState = 'signed_in';
   requiresCleanup = false;
+  M.resetApp();
+
+  /* U1 元信息 get 已发后切 U2：模块自身必须返回 exists:null，
+     不能只依赖认证 UI 的 epoch 在最后一层丢弃旧结果。 */
+  const infoGate = deferred();
+  let infoReadStarted;
+  const infoReadSeen = new Promise(r => { infoReadStarted = r; });
+  providerMock.get = async id => {
+    getCalls++;
+    infoReadStarted(id);
+    return infoGate.promise;
+  };
+  const u1InfoPromise = M.accountCloudInfo();
+  await infoReadSeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  infoGate.resolve({ payload:{ v:1, ts:1700000000000 }, updatedAt:1700000000000 });
+  const u1InfoLate = await u1InfoPromise;
+  ok(u1InfoLate && u1InfoLate.exists === null && !u1InfoLate.updatedAt,
+     'U1→U2：迟到账号元信息不能作为 U2 的 exists/updatedAt 返回');
+  providerMock.get = countedGet;
+  currentUid = 'U-ACCOUNT-1';
   M.resetApp();
 
   /* U1 上传在加密/算地址期间迟到；切 U2 + reset generation 后不得调用 put。 */
@@ -278,6 +303,33 @@ console.log('T3b 身份切换与迟到写保护');
   /* 让读取真正悬挂到切号之后；二次 UID/generation 复验必须挡住 restore。 */
   const primaryId = await D.docIdOf(k);
   const primaryRow = cloud.get(primaryId);
+
+  /* fetchWithKey 公开直调也必须在 get 后复验；不能只靠 restoreWithKey
+     在真正覆盖本机前兜底。 */
+  const directFetchGate = deferred();
+  let directFetchStarted;
+  const directFetchSeen = new Promise(r => { directFetchStarted = r; });
+  providerMock.get = async id => {
+    getCalls++;
+    if(id === primaryId) {
+      directFetchStarted();
+      return directFetchGate.promise;
+    }
+    return originalGet(id);
+  };
+  currentUid = 'U-ACCOUNT-1';
+  M.resetApp();
+  const directFetchPromise = M.fetchWithKey(k);
+  await directFetchSeen;
+  currentUid = 'U-ACCOUNT-2';
+  M.resetApp();
+  directFetchGate.resolve(JSON.parse(JSON.stringify(primaryRow)));
+  let directFetchError = '';
+  try{ await directFetchPromise; }catch(e){ directFetchError = String(e && e.message || e); }
+  ok(/账号|会话/.test(directFetchError),
+     'U1→U2：fetchWithKey 直调的迟到明文结果失败关闭');
+  providerMock.get = countedGet;
+
   const restoreGate = deferred();
   let restoreReadStarted;
   const restoreReadSeen = new Promise(r => { restoreReadStarted = r; });
