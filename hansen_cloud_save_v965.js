@@ -80,26 +80,51 @@
      手机号是这个账号**唯一在所有设备上都相同、且永不变**的标识，
      用它推导密钥，两台设备必然算出同一把钥匙。
      兜底顺序：手机号 → 用户名 → uid（老账号或异常情况仍可工作）。 */
-  function accountIdent(){
+  /* v1076：真实 CloudBase UID 是账号命名空间唯一真源。
+     phone/username 只作为 v1047-v1074 历史地址候选，绝不再决定新写入地址。 */
+  function accountIdents(){
+    var out = [];
     try {
       var A = window.HansenAuth;
-      if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return '';
+      if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return out;
       var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
-      /* 手机号归一：去掉空格与 +86 等前缀差异，保证两端拼出的字符串完全一致 */
-      if (lc && lc.phone) {
-        var ph = String(lc.phone).replace(/[\s\-()]/g, '');
-        ph = ph.replace(/^\+?86/, '');
-        if (/^\d{6,15}$/.test(ph)) return 'p:' + ph;
-      }
-      if (lc && lc.username) return 'n:' + String(lc.username).trim().toLowerCase();
       var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
-      if (u && u.uid) return 'u:' + String(u.uid);
-      if (lc && lc.uid) return 'u:' + String(lc.uid);
+      var uid = (u && u.uid) || (lc && lc.uid) || '';
+      if (uid) out.push('u:' + String(uid));
+      if (lc && lc.phone) {
+        var ph = String(lc.phone).replace(/[\s\-()]/g, '').replace(/^\+?86/, '');
+        if (/^\d{6,15}$/.test(ph)) out.push('p:' + ph);
+      }
+      if (lc && lc.username) out.push('n:' + String(lc.username).trim().toLowerCase());
     } catch (e) {}
-    return '';
+    return out.filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+  }
+  function accountIdent(){
+    var ids = accountIdents();
+    return ids.length ? ids[0] : '';
   }
   /* 保留原名供外部与自检面板使用；语义已变为"账号标识" */
   function accountUid(){ return accountIdent(); }
+
+  /* 自动同步许可必须绑定到当前身份。
+     旧匿名恢复码的 enabled 不能在正式账号登录后自动继承，否则 pagehide/心跳
+     会绕过冲突选择，把本机档直接写到新 UID 地址。 */
+  function syncIdentity(keyHint){
+    var account = accountIdent();
+    if (account) return 'account:' + account;
+    var st = readState();
+    var key = normalizeKey(keyHint || st.key || '');
+    return key ? ('recovery:' + key) : '';
+  }
+  function automaticSyncEnabled(st){
+    st = st || readState();
+    var current = syncIdentity();
+    if (!st.enabled || !current) return false;
+    if (st.enabledIdentity) return st.enabledIdentity === current;
+    /* v1074 及更早没有 enabledIdentity：只兼容未登录恢复码身份，
+       永远不把这份旧许可带进正式账号。 */
+    return !accountIdent();
+  }
   /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
   /* 🔴v1036: v1033 之前 keyFromUid 用的字符集含 L/U，会算出另一把钥匙。
      兼容读取时需要能重算那把旧钥匙，才能把旧地址上的存档取回来。 */
@@ -159,27 +184,28 @@
      返回 {exists, updatedAt, appVersion}；出错时 exists=null 表示**查不到**，
      调用方必须把"查不到"与"确认没有"区别对待——绝不能把查不到当成没有而覆盖云端。 */
   function accountCloudInfo(){
-    var uid = accountUid();
-    if (!uid) return Promise.resolve({ exists:false, reason:'not-signed-in' });
+    var ids = accountIdents();
+    if (!ids.length) return Promise.resolve({ exists:false, reason:'not-signed-in' });
     var p = provider();
     if (!p) return Promise.resolve({ exists:null, reason:'not-configured' });
-    /* 🔴v1046 决定性修复：这里原本用 keyFromUid(uid) 直接算地址——
-       那是**带连字符**的原始密钥；而上传与拉取都用 normalizeKey() 去掉连字符后再算。
-       三处只有这一处没归一化，于是查的是另一个地址：
-         · 自检 ⑩ 谎报"云端还没有你的存档"（其实有）；
-         · 更致命的是 syncOnLogin 以它为依据 →
-           判定"云端是空的" → 走上传分支 → **从来没执行过恢复**
-           → 新设备登录后等级永远停在 Lv.1。
-       这也解释了为什么"上传成功、拉取成功、往返自检成功"却唯独 ⑩ 说没有。 */
-    var accKey = normalizeKey(keyFromUid(uid)) || keyFromUid(uid);
-    return docIdOf(accKey)
-      .then(function(id){ return p.get(id); })
-      .then(function(row){
-        if (!row || !row.payload) return { exists:false };
+    function attempt(i) {
+      if (i >= ids.length) return Promise.resolve({ exists:false });
+      var rawKey = keyFromUid(ids[i]);
+      var accKey = normalizeKey(rawKey) || rawKey;
+      return docIdOf(accKey).then(function(id){ return p.get(id); }).then(function(row){
+        if (!row || !row.payload) return attempt(i + 1);
         var pl = row.payload || {};
-        return { exists:true, updatedAt: row.updatedAt || pl.ts || 0, appVersion: pl.appVersion || '' };
-      })
-      .catch(function(e){ return { exists:null, reason:String(e && e.message || e) }; });
+        return {
+          exists:true,
+          updatedAt: row.updatedAt || pl.ts || 0,
+          appVersion: pl.appVersion || '',
+          legacyIdentity: i > 0 ? ids[i] : ''
+        };
+      });
+    }
+    return attempt(0).catch(function(e){
+      return { exists:null, reason:String(e && e.message || e) };
+    });
   }
 
   /* ---------- 加密信封（零知识） ---------- */
@@ -252,7 +278,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1075')
+               import('./vendor_cloudbase_esm_v965.js?v=1076')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -364,10 +390,10 @@
        未开启时一个网络请求都不发——既避免在用户不知情时上传存档，
        也避免 envId 已填但控制台未配完时页面报 net::ERR_FAILED。
        用户点「立即同步」走 force 分支，成功后自动置 enabled。 */
-    if(!opts.force && !readState().enabled)
-      return Promise.resolve({ ok:false, reason:'not-enabled' });
-    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
     var st = readState();
+    if(!opts.force && !automaticSyncEnabled(st))
+      return Promise.resolve({ ok:false, reason:'not-enabled-for-current-identity' });
+    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
     if(!opts.force && st.lastUpAt && (Date.now() - st.lastUpAt) < SYNC_MIN_GAP)
       return Promise.resolve({ ok:false, reason:'cooldown' });
     if(!(window.HansenBackup && typeof HansenBackup.exportCode === 'function'))
@@ -388,13 +414,14 @@
              ② 非 force 时，除内容指纹外还要比对**上次写入的地址**，
                 地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
+    var identity = syncIdentity(key);
     _busy = true;
     return docIdOf(key).then(function(targetId){
       if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
         _busy = false;
         return { ok:true, skipped:true, reason:'unchanged' };
       }
-      return doUpload(key, code, h, targetId);
+      return doUpload(key, code, h, targetId, identity);
     }).catch(function(e){
       _busy = false;
       return { ok:false, reason:'upload-failed', error: friendly(e) };
@@ -402,12 +429,13 @@
   }
 
   /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */
-  function doUpload(key, code, h, targetId){
+  function doUpload(key, code, h, targetId, identity){
     var p = provider();
     return sealPayload(key, code).then(function(envelope){
       return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
     }).then(function(){
-      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, enabled: true });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* 🔴v1003: 首次成功即开启自动同步 */
+      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId,
+                   enabled: true, enabledIdentity: identity || syncIdentity(key) });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* v1076: 许可绑定身份 */
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){
@@ -433,27 +461,18 @@
     var raw = String(inputKey || '');
     if (raw && raw !== key) cands.push(raw);
     try {
-      var uid = accountUid();
-      if (uid) {
-        /* 🔴v1047: v1047 之前用 uid 推导密钥, 存档可能落在那个地址上;
-           把 uid 形态的候选也加进来, 老存档才不至于丢。 */
-        try {
-          var A2 = window.HansenAuth;
-          var lc2 = (A2 && typeof A2.readLocal === 'function') ? A2.readLocal() : null;
-          var rawUid = (lc2 && lc2.uid) ? String(lc2.uid) : '';
-          if (rawUid) {
-            [keyFromUid(rawUid), legacyKeyFromUid(rawUid)].forEach(function(k){
-              if (k && cands.indexOf(k) < 0) cands.push(k);
-              var nk2 = normalizeKey(k);
-              if (nk2 && cands.indexOf(nk2) < 0) cands.push(nk2);
-            });
-          }
-        } catch (e) {}
-        var legacy = legacyKeyFromUid(uid);
-        if (legacy && cands.indexOf(legacy) < 0) cands.push(legacy);
-        var legacyN = normalizeKey(legacy);
-        if (legacyN && cands.indexOf(legacyN) < 0) cands.push(legacyN);
-      }
+      var ids = accountIdents();
+      var A2 = window.HansenAuth;
+      var lc2 = (A2 && typeof A2.readLocal === 'function') ? A2.readLocal() : null;
+      var rawUid = (lc2 && lc2.uid) ? String(lc2.uid) : '';
+      if (rawUid && ids.indexOf(rawUid) < 0) ids.push(rawUid);
+      ids.forEach(function (ident) {
+        [keyFromUid(ident), legacyKeyFromUid(ident)].forEach(function (k) {
+          if (k && cands.indexOf(k) < 0) cands.push(k);
+          var nk = normalizeKey(k);
+          if (nk && cands.indexOf(nk) < 0) cands.push(nk);
+        });
+      });
     } catch (e) {}
 
     var tried = [];
@@ -501,7 +520,8 @@
       var r;
       try{ r = HansenBackup.restore(parsed); }
       catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名
-      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(), enabled: true });
+      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
+                   enabled: true, enabledIdentity: syncIdentity(got.key) });
       renderCard();
       return { ok:true, result:r };
     });
@@ -558,7 +578,10 @@
       function statusHtml(){
         var p2 = provider(), s2 = readState();
         if(!p2) return '<span style="color:#fbbf24">待开通</span> · 按《云存档开通指南》4 步完成后自动点亮';
-        if(s2.lastUpAt) return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
+        if(s2.lastUpAt && automaticSyncEnabled(s2))
+          return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
+        if(s2.lastUpAt && s2.enabled && !automaticSyncEnabled(s2))
+          return '<span style="color:#fbbf24">待选择</span> · 当前身份尚未开启自动同步';
         /* 🔴v1003: 云存档改为主动开启制, 文案必须与行为一致——
            在用户点过「立即同步」之前不会自动上云, 不能再说"玩一会儿会自动上云" */
         return '<span style="color:#93c5fd">已就绪</span> · 点「立即同步」开启云存档';
