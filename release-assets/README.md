@@ -18,8 +18,8 @@
 ### 背景与根因
 
 用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
-CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十条
-互相叠加的十五条真实故障链：
+CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十九条
+互相叠加、其中多条只会在跨标签或迟到 Promise 时出现的真实故障链：
 
 1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
    `.local` 假邮箱，然后把发起邮箱验证当作账号创建。v1076 删除这条旁路；CloudBase
@@ -47,9 +47,11 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 7. **永久不返回的 Promise 会让界面永久 busy。** 20 秒仍只显示慢请求提示，不自动重放；
    60 秒硬上限后停止等待并进入 `outcome_unknown` fence，释放永久 spinner，但继续禁止
    任何第二次注册/登录。唯一安全出口是核对原结果，或“安全退出并清理会话”。
-8. **登录后的附加任务曾串行阻塞。** 竞赛档案可能写 `sb_profile`，云存档对账只读；
-   这两项现在并行、各自有 8 秒上限，任何失败或悬挂都不能把已经确认的登录重新变成失败。
-   文档不再把竞赛档案写入误称为“登录后绝对零写入”。
+8. **登录曾被不必要的竞赛档案写入拖住。** 注册/登录成功后，旧代码会自动创建或更新
+   `sb_profile`、全集合 `count()` 并写竞赛 ID。profile 集合没开权限、请求悬挂或安全规则
+   不完整时，用户看到的就是“登录一直完不成”。v1076 现在把认证链路与竞赛档案彻底解耦：
+   登录后只启动云存档**只读**检查，浏览器端对 `sb_profile` 严格零 get/set/update/count；
+   全局竞赛 ID 显式标为“服务端未启用”，不影响登录和本机游戏。
 9. **云存档旧异步动作曾可能跨账号落地。** v1076 不只在操作开始/结束核对 UID，而是给每次
    上传、历史迁移、恢复和本地同步状态写入绑定“原始 UID + CloudSave generation”；
    每次 `put`、迁移 `put`、`HansenBackup.restore` 和 `writeState` 前重新核对。
@@ -72,17 +74,33 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
     同样捕获原始 UID + CloudSave generation，并在每一次 provider get 前后复验；认证
     unknown/mismatch/cleanupPending 时返回失败关闭。跨代 busy 改为 operation token，旧 U1
     结算无权清除 U2 正在使用的锁。
-14. **登录提交本身仍有极短的 TOCTOU 窗口。** 初次 readFence 为空后，本标签写 U1 marker 的
-    同一瞬间，另一标签可能写入 U1→U2 mismatch；旧代码仍会返回 `ok:true` 并启动
-    `ensureProfile(U1)`。现在 marker 带唯一 `authCommitId`，写入后让出一个任务边界，再执行
-    真实 `ensureSession(uid)` 与 marker/fence 双重复核；失败只回滚自己拥有的 commit，绝不覆盖
-    另一标签的新 marker，也不启动竞赛档案或云存档附加任务。
+14. **登录提交本身有极短的 TOCTOU 窗口。** 初次 readFence 为空后，本标签写 U1 marker 的
+    同一瞬间，另一标签可能写入 U1→U2 mismatch；旧代码仍会返回 `ok:true`。现在 marker 同时
+    绑定唯一 `authCommitId + authBoundaryId`，清 pending 后让出一个任务边界，再执行真实
+    `ensureSession(uid)`、boundary/marker/fence 复验；失败建立持久 fence，不启动任何附加写入。
 15. **安全退出的“检查后全删”也有竞态。** 最终 readFence 为空不代表逐键 remove 时仍为空；
     另一标签刚写入的 mismatch 曾可能被无所有权 `clearFence()` 顺手删除。现在 signOut 先保存
     每个 session/local fence key 的原始值快照，只在当前值仍逐字等于快照时删除；快照后新增或
     变化的记录保留，并返回 `cleanupPending/requiresReload`，不会谎报 signed_out。
+16. **跨标签页过去没有共享的认证代次。** `authGeneration`、`activeSessionMutations` 和
+    waiter 都只存在于各自 window。标签 A 正在等待登录时，标签 B 完全看不见，可能先确认
+    session=null 并宣布“干净退出”；随后 A 晚到又重建 session 和 marker。v1076 新增
+    `hansen_auth_boundary_v1076`：每次顶层登录/恢复/退出先持久 claim 唯一 boundary ID，
+    所有关键点主动重读；后建立的边界使旧操作永久失去提交资格。
+17. **仅有 boundary 仍看不见底层 Promise 是否会晚到。** 每次 session-changing SDK 调用前，
+    先写唯一 `hansen_auth_boundary_receipt_v1076:<id>` active 回执；底层 Promise 真正结算后
+    才改为 returned/rejected/unknown。退出看到 active/unknown 时只能返回 cleanupPending，
+    不能因为自己这一刻读到 session=null 就假装旧请求不会在下一刻复活。
+18. **“只回滚自己的 authCommitId”不是原子操作。** localStorage 没有 CAS；先读到 commit A、
+    再调用合并写清空，中间若标签 B 写入 commit B，A 仍可能把 B 擦掉。v1076 失败路径不再清
+    marker：marker 只作显示缓存，fence/boundary 令其不可登录；唯一统一清理者是显式 signOut。
+19. **客户端 profile 写前/写后复验不能替代服务端权限。** U1 最后一次校验通过后、真正
+    `doc(U1).set/update` 发出前，SDK session 仍可能切成 U2；请求已经发出，事后检测无法撤销。
+    仓库当前也没有可部署的数据库 owner 规则或服务端原子发号函数。因此 v1076 物理移除认证
+    模块的 profile 创建、更新、count 与本机锁号；未来只有“由认证上下文派生 UID、服务端时间、
+    幂等建档、原子计数、CID 不可由客户端修改”全部落地并通过双账号越权测试后才能恢复。
 
-官方接口依据：
+官方接口与安全边界依据：
 
 - [CloudBase Web v2 手机注册](https://docs.cloudbase.net/authentication-v2/method/signup)：
   新手机号使用 `getVerification → verify → signUp`，同一注册事务可携带
@@ -92,6 +110,8 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
   只用于登录已经存在并设置了密码的账号，不能被曲解为无验证的纯用户名创建。
 - [CloudBase Web 认证 API](https://docs.cloudbase.net/api-reference/webv3/authentication)：
   用来核对锁定 SDK 的 session、用户与退出方法。生产能力仍取决于 CloudBase 控制台。
+- [CloudBase 数据库安全规则](https://docs.cloudbase.net/en/database/security-rules)：
+  profile 文档身份与不可修改字段必须由服务端规则/函数保证；客户端前后复验不是权限边界。
 
 当前仓库环境固定为 `ambitious-d0g1d26xm740dc3d6`、地域 `ap-shanghai`；
 `hansen_cloud_config_v965.js` 与 `cloudbaserc.json` 必须一致。CloudBase 手机短信当前
@@ -117,6 +137,17 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 `hansen_auth_fence_v1076` 会写入当前标签页 sessionStorage；localStorage 同时保存兼容备份
 和按 fence 类型分开的跨标签备份。每条只含 `fenceId`、类型、预期/观察 UID、generation、
 revision、原因和时间，不含任何凭据。
+
+跨标签线性化另有两类非敏感记录：
+
+- `hansen_auth_boundary_v1076`：当前顶层 `session_mutation/signout` 的唯一
+  `boundaryId`、父 boundary、generation 与开始时间。成功 marker 必须携带相同
+  `authBoundaryId` 以及 `signed_in/signed_out` 状态才算落地。
+- `hansen_auth_boundary_receipt_v1076:<boundaryId>`：只描述底层 session mutation 是
+  `active/returned/rejected/unknown`；不包含用户名、密码、验证码、verification token 或
+  SDK 凭证。boundary 写入或读回失败时，在调用 session-changing SDK **之前**失败关闭。
+- boundary 是“最新操作令牌”，不做跨 owner compare-delete；新边界故意让旧边界失权。
+  receipt 采用每操作唯一 key，因此一个标签不能覆盖另一个标签的在途证据。
 
 #### 2. 手机注册和手机登录
 
@@ -157,25 +188,54 @@ revision、原因和时间，不含任何凭据。
   `session === null` 才能清理。
 - 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。本机 marker 已清，
   但界面必须提示重新载入并再核对；旧请求晚到后仍只能加固 fence，不能恢复登录。
-- 登录 marker 带本次唯一 `authCommitId`；写后让出任务边界，再执行
-  `ensureSession(uid) + marker/fence` 最终线性化复验。失败只回滚相同 commitId，且附加云任务
-  尚未启动。
-- 任何只读 refresh/ensure 都无权清 fence；显式安全退出先抓取每个 fence key 的原值快照，只
-  compare-delete 未变化的旧记录。只有服务端明确无 session、没有本页活跃 mutation，且最终
-  跨标签边界仍稳定时才宣布 signed_out。
+- 每次顶层登录/结果恢复/退出先 claim 共享 `boundaryId`；每次 token 复验同时核对本标签
+  generation 和共享 boundary。两个标签真正同时开始时，后写 boundary 者取得全局资格，前者
+  下一次主动检查即进入 `AUTH_CROSS_TAB_SUPERSEDED`，不能依赖可能丢失的 storage event。
+- session-changing SDK 调用前必须先持久写 active receipt，写入/读回失败则 SDK 调用次数为 0。
+  Promise resolved、业务 error、网络 reject 和硬超时分别留下可区分状态；只有 active/unknown
+  表示仍可能晚到，安全退出必须保守返回 cleanupPending。
+- 登录 marker 带唯一 `authCommitId + authBoundaryId + authBoundaryState`；先清 pending，
+  再让出任务边界并执行 `ensureSession(uid) + boundary/marker/fence` 最终复验。
+- 失败路径**不回滚 marker**。localStorage 没有原子 compare-delete，任何“先确认 commitId 再清”
+  都可能擦掉另一标签的新账号；失败只建立 fence 并让 `isSignedIn/sessionStatus` 失败关闭。
+- 任何只读 refresh/ensure 都无权清 fence 或接管未落地 boundary；显式安全退出先抓取每个
+  fence key 原值快照，只 compare-delete 未变化的旧记录。只有服务端明确无 session、没有
+  跨标签 active/unknown receipt，且最终边界稳定时才宣布 signed_out。
 
-#### 5. 登录后附加任务
+#### 5. 登录后附加任务与竞赛 ID 安全降级
 
-认证成功对象立即返回 `{ok, uid, postLogin}`。随后两项并行：
+认证成功对象立即返回
+`{ok, uid, competitionIdUnavailable: true, postLogin}`。浏览器登录链路随后只运行：
 
-- `ensureProfile(uid)`：读取或按需要写入竞赛档案 `sb_profile`、分配竞赛 ID；只在登录最终
-  commit 复验成功后启动，并在每次 profile get/set/update 前后调用 `verifyProfileIdentity(uid)`。
-  失败不阻断登录，晚到结果只有当前同一 UID 仍 confirmed 时才允许写入本机竞赛 ID。
-- `syncOnLogin(uid, epoch)`：只读检查账号云档是否存在，返回
+- `syncOnLogin(uid, epoch)`：账号云档**只读**检查，返回
   `nothing-to-sync / restore-available / conflict / upload-available / deferred`；
-  它不会自动恢复或上传玩家进度。
+  它不会自动恢复、上传或覆盖玩家进度。
+- 每次只读结果落 UI 前仍要求同一 auth epoch、`isSignedIn()===true`、marker UID 与返回 UID
+  完全相同；切号或新 fence 出现时结果作废。
+- UI 展示成功前再次同步核对 `isSignedIn + marker.uid`。即使认证函数刚返回 `ok:true`，
+  boundary/fence 在展示窗口发生变化也只显示失败关闭，不显示“登录成功”。
 
-两项各自超时后只降级其自身结果。不能把进度只读检查的零写入边界扩大成对竞赛档案的虚假承诺。
+v1076 明确禁止认证模块自动访问 `sb_profile`：
+
+| 行为 | v1076 浏览器端 | 原因 |
+|---|---|---|
+| 新建 profile 文档 | 禁止 | 客户端不能证明请求发出瞬间仍是同一 auth UID |
+| 更新 profile/CID | 禁止 | owner 规则也不能自动保证 CID 不可改与全局唯一 |
+| 全集合 `count()` 排名 | 禁止 | `count + update` 不是原子发号，并发会重复 |
+| 自动把云端 CID 锁入本机 | 禁止 | 当前 CID 没有服务端权威保证 |
+| 本机临时编号 | 保留 | 只作本机展示，不宣称全局唯一，不影响学习和登录 |
+
+因此 profile 集合不存在、权限拒绝或永久悬挂都不再影响注册/登录。UI 会明确显示
+“云端竞赛 ID 尚未启用，不影响登录和本机游戏”，不会承诺“稍后自动补发”。
+
+未来恢复全局竞赛 ID 的最低门槛：
+
+1. 仓库内存在可部署、可审计的数据库规则和部署步骤；
+2. 云函数从认证上下文读取 UID，忽略客户端传入 UID；
+3. 服务端时间、幂等建档、不可由客户端修改的 UID/CID 字段；
+4. 原子事务或原子计数器发号，重复调用返回同一 ID；
+5. U1/U2 双账号越权、并发注册、重放与失败恢复测试全部通过；
+6. 完成这些条件前，任何“为了跑通”而放宽集合权限的做法都属于发布阻断项。
 
 #### 6. 云存档与跨账号边界
 
@@ -197,17 +257,20 @@ revision、原因和时间，不含任何凭据。
 #### 7. 主要修改文件
 
 - `hansen_auth_v1004.js`：真实注册协议、session 形状兼容、generation/probe/fence、
-  bounded mutation、安全退出和登录后并行任务。
+  跨标签 boundary + 每 mutation 唯一 receipt、无 CAS 的失败关闭、安全退出，以及登录后
+  profile 零访问/云存档只读检查。
 - `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
 - `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
-- `test_auth_contract_v1076.mjs`：59 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+- `test_auth_contract_v1076.mjs`：69 条业务状态机合同，覆盖正常注册/登录、空用户 session、
   原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
-  SDK 初始化悬挂、跨标签 fence 强度/所有权、marker 提交 TOCTOU、signOut 快照清理与附加任务
-  启动边界。
+  SDK 初始化悬挂、跨标签 fence 强度/所有权、两个独立 JS context 共享 localStorage 的
+  登录/退出复活、boundary 持久化失败、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照清理、
+  profile 零写入与竞赛 ID 安全降级。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
-- `test_auth_ui_v1076.mjs`：18 条 390×844 点击断言，覆盖绝对倒计时、云选择互斥、
-  旧 safeOut/send/go DOM 失效、手动上传 applying 锁、unknown/mismatch/outcome_unknown
+- `test_auth_ui_v1076.mjs`：19 条 390×844 点击断言，覆盖绝对倒计时、完整手机注册、
+  成功展示前 boundary/session/marker 复验、竞赛 ID 未启用提示、云选择互斥、旧
+  safeOut/send/go DOM 失效、手动上传 applying 锁、unknown/mismatch/outcome_unknown
   安全清理、cleanupPending 刷新按钮与登录禁用。
 - `test_cloud_save_v965.mjs`：43 条 Node/WebCrypto 动态断言，覆盖同 UID 上传/恢复、
   U1→U2 上传/迁移/恢复/元信息/公开 fetch 迟到、匿名 fence 零读写、generation busy token，
@@ -226,6 +289,12 @@ revision、原因和时间，不含任何凭据。
 - `session 非空 + user:null` 保留 marker 并进入 unknown；只有 `session === null` 才是确定退出。
 - v1076 fence 使用 sessionStorage 主记录与 localStorage 跨标签备份；只读探测不会自动清除，
   必须由显式安全退出确认 session 为空并稳定合并所有记录后清理。
+- v1075 及更早的 marker 没有 boundary 时按“待 SDK 真实 session 复核”的兼容路径读取；第一次
+  v1076 登录/退出会写入 boundary 绑定。不会删除岛屿进度，也不会把旧 marker 直接当成新凭据。
+- active/unknown mutation receipt 表示旧 SDK 请求仍可能晚到；这种情况下第一次安全退出只会
+  清本机显示 marker 并要求继续核对。底层 Promise 结算后再显式退出，才允许宣布干净。
+- 原有本机竞赛临时号继续保留，但 v1076 不把它升级为全局号；历史 profile 文档也不会被
+  浏览器自动修改。恢复服务端权威发号前，登录成功与否完全不依赖这些数据。
 - 19 个普通/星海岛与 8 个 Land 岛必须由母版和生成器统一分发，禁止只修一页。
 - v961、v962 仍为永久淘汰的历史版本号；本次代码基线是 GitHub v1075
   `c9ca5b08d068466f87c853aa3f65e61d25eddab3`，不是失败版源码。
@@ -236,15 +305,15 @@ revision、原因和时间，不含任何凭据。
 
 | 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| 认证 VM/模拟 SDK | 59 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、跨标签 fence、退出复活 | 真实短信送达 |
+| 认证 VM/模拟 SDK | 69 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、双 context boundary/receipt、退出复活、PKEY/marker TOCTOU、profile 零写入 | 真实短信送达 |
 | CloudSave Node/WebCrypto | 43 条动态断言：同 UID 成功；U1→U2 上传/迁移/恢复/读取迟到停止；匿名 fence 零读写；授权和 busy token 不跨身份 | 生产数据库规则 |
-| Chromium 390×844 | 18 条真实 DOM 点击断言：完整注册、绝对倒计时、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
+| Chromium 390×844 | 19 条真实 DOM 点击断言：完整注册、绝对倒计时、成功前复验、竞赛 ID 降级提示、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
 | 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |
 | 全库回归 | 经济、存档、Boss、Bee、性能、安全、Jarvis 没有回退 | 所有未来浏览器/网络时序 |
 | 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后回读一致 | 静态站与 CloudBase 已部署 |
 
-本次开发过程已经完成的专项证据：认证合同 **59/59**；CloudSave Node/WebCrypto
-**43/43**；认证、UI、CloudSave 与三个专项测试文件均完成语法解析。UI 的 18 条 Chromium
+本次开发过程已经完成的专项证据：认证合同 **69/69**；CloudSave Node/WebCrypto
+**43/43**；认证、UI、CloudSave 与专项测试文件均完成语法解析。UI 的 19 条 Chromium
 断言已经补齐，但最终仍必须由 GitHub Actions 在真实 Chromium 中执行，不能把“测试代码存在”
 写成“浏览器已通过”。最终 PR 仍必须在 GitHub Actions
 重新执行真实 Chromium、所有版本化 Node/Python 测试、生成器、经济/资源/浏览器/Jarvis 和
@@ -262,8 +331,9 @@ revision、原因和时间，不含任何凭据。
 
 生产真机冒烟必须另外执行，完整步骤见 `云存档_开通指南_v965.md`。至少覆盖：
 新手机号收码并注册、已有手机号登录、用户名密码登录、刷新保持、退出后 session 清空、
-错误验证码、弱密码、限频、安全域名错误、两台设备同 UID、U1→U2 切换、云/本机冲突三出口。
-CI 没有真实手机号，不能替代这些验证。
+错误验证码、弱密码、限频、安全域名错误、两个标签同时登录/退出、两台设备同 UID、
+U1→U2 切换、云/本机冲突三出口，并确认 profile 集合未配置时登录仍成功且不会产生
+`sb_profile` 请求。CI 没有真实手机号，不能替代这些验证。
 
 ### 发布与部署
 
@@ -278,7 +348,8 @@ CI 没有真实手机号，不能替代这些验证。
    不覆盖已有 Release、不误删历史 tag。
 7. GitHub Release 不等于生产部署。仍需上传部署 ZIP、刷新 CDN/Service Worker，
    并在 CloudBase 控制台核对环境、上海地域、手机/密码 provider、短信签名模板与额度、
-   安全域名、`sb_profile` 和云存档集合权限。
+   安全域名与云存档集合权限。**不要**为“让登录跑通”而放宽 `sb_profile`：v1076
+   浏览器认证链路不会访问它，全局竞赛 ID 当前明确停用。
 8. 未完成真实手机号和两设备冒烟前，只能表述为“代码候选和自动化验证通过”，
    不得宣称生产注册已完成。
 9. 后续每个版本必须继续极其详细更新 README 和 CHANGELOG：至少说明背景与根因、实现、
@@ -2885,9 +2956,12 @@ v1004 却当同步函数用——拿到的是 Promise 对象，`.uid` 自然是 
 
 1. **异步正确读取**：新增 `currentUserAsync()`，先 `await getCurrentUser()`，
    拿不到再退回 `await getLoginState()` 取 `user`，全程带 catch 不炸。
-2. **读不到 uid 不等于登录失败**——这是更重要的一条。签入已成功就应视为登录成功，
-   竞赛 ID 留待下次进入时自动补发，界面提示「登录成功！竞赛 ID 稍后自动分配。」
-   `isSignedIn()` 的判据也从依赖 uid 改为依赖"登录方式 + 签入时间戳"。
+2. **v1012 当时采用的降级**：读不到 UID 时仍按时间戳显示成功，并承诺竞赛 ID 稍后补发。
+
+> **v1076 安全复核已推翻第 2 条。** session-changing API 没返回 operation UID 时，无法证明
+> 当前 SDK session 就属于本次输入账号，必须进入 `AUTH_OPERATION_UID_MISSING` 失败关闭；
+> `method + signedAt` 只能作显示缓存，绝不能再成为 `isSignedIn()` 的判据。竞赛 ID 也不会
+> 由浏览器自动补发。此处保留 v1012 的历史故障背景，不代表当前实现。
 
 ### 教训
 
@@ -3176,13 +3250,17 @@ emoji 与中文名压在这样的底上，自然什么都看不清。
 - **不登录也能玩**：面板有「先不登录，直接玩」，不强制。
 - 登录后可一键「把进度存到云端」，换设备登录同一账号即可找回。
 
-### 竞赛 ID 发号改用「注册时间排名」
+### 竞赛 ID（v1004 历史方案，v1076 已正式停用）
 
-- 原计划用 `counters` 计数器，但该集合权限为 ADMINONLY（防止玩家自己改成 No.001），
-  **客户端写不了**，走计数器就必须部署云函数、增加用户操作负担。
-- 改用更简单且同样可信的方案：`sb_profile` 的 `createdAt` 由**服务端**写入
-  （客户端伪造不了），**竞赛 ID = 比我早注册的人数 + 1**，一次算定即锁死。
-- 好处：零云函数、零额外部署；发号失败也不阻断登录（下次登录自动补发）。
+- v1004 曾因为 `counters` 为 ADMINONLY，改用浏览器创建 `sb_profile` 后按
+  `createdAt` 全集合 count，再由客户端 update CID，并称其“同样可信、零云函数”。
+- v1076 对真实竞态和仓库配置复核后确认这项结论不成立：
+  `db.serverDate()` 不是“客户端无法伪造 payload”的权限规则；`count + update` 不是原子
+  发号；写前/写后 `ensureSession` 也关不掉“最后一次校验后切号、请求已发出”的 TOCTOU。
+- 当前 `cloudbaserc.json` 只部署静态网站，没有数据库规则或权威发号函数。因此 v1076
+  认证模块对 `sb_profile` 零访问，UI 明确显示全局竞赛 ID 未启用；本机临时号只作本机展示。
+- 未来恢复必须使用服务端认证上下文 UID、幂等建档、服务端时间、原子计数/事务与 CID
+  不可客户端修改规则，并提交双账号越权及并发测试。历史文字保留用于说明方案为什么被淘汰。
 
 ### 错误提示说人话
 
