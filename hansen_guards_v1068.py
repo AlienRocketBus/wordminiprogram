@@ -529,7 +529,28 @@ def guard_jarvis_not_stale():
             bad('贾维斯落后', '%s 是近期新增模块，却没有任何守卫或测试提到它' % base)
 
 
+def guard_auth_real_session():
+    """v1075：只有真实 CloudBase session + uid 才能提交登录成功。"""
+    auth = _code_only(_read('hansen_auth_v1004.js'))
+    ui = _code_only(_read('hansen_auth_ui_v1004.js'))
+    if not auth:
+        return
+    if 'u.wordadventure.local' in auth or 'signUpWithEmailAndPassword(' in auth:
+        bad('认证真实会话', '仍存在 v1058 不可收件邮箱伪注册路径')
+    if re.search(r'return\s+!!\(lc\.method\s*&&\s*lc\.signedAt\s*\)', auth):
+        bad('认证真实会话', 'isSignedIn 仍只看 method+signedAt，没有要求真实 uid')
+    if 'confirmSession' not in auth or 'AUTH_SESSION_NOT_ESTABLISHED' not in auth:
+        bad('认证真实会话', '登录成功前没有统一 session+uid 确认门禁')
+    if not re.search(r'snap\s*&&\s*snap\.uid', auth):
+        bad('认证真实会话', 'afterSignIn 没有从已确认会话读取 uid')
+    if 'registerByPassword(' in ui or '不需要手机号' in ui:
+        bad('认证真实会话', 'UI 仍暴露无需验证的用户名直接注册承诺')
+    if 'postLogin' not in ui:
+        bad('认证真实会话', '登录 UI 仍可能把云同步绑在认证按钮上')
+
+
 GUARDS = [
+    ('认证真实会话',   guard_auth_real_session),
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
     ('SDK 单实例',     guard_single_sdk_instance),

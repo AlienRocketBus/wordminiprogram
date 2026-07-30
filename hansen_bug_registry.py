@@ -82,6 +82,10 @@ REGISTRY = [
      'jarvis_selftest.py'),
     ('v1074', '贾维斯知识库曾落后近七十版而无人察觉',
      'guard_jarvis_not_stale'),
+    ('v1075', '不可收件的 .local 邮箱只发验证却被当成注册成功',
+     'test_auth_contract_v1075.mjs'),
+    ('v1075', '没有真实 session/uid 仍写 signedAt 并显示登录成功',
+     'guard_auth_real_session'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

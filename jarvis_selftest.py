@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-jarvis_selftest.py —— 贾维斯 · 守卫自证（v1074）
+jarvis_selftest.py —— 贾维斯 · 守卫自证（v1075）
 
 要解决的问题
 ============
@@ -87,8 +87,13 @@ def _inj_land_parity(s):
 def _inj_land_stamp(s):
     return s.replace('<title>', '<title>手改痕迹', 1)
 
+def _inj_auth_session(s):
+    return s.replace('return !!(lc.method && lc.signedAt && lc.uid);',
+                     'return !!(lc.method && lc.signedAt);', 1)
+
 
 CASES = [
+    ('认证真实会话',    'hansen_auth_v1004.js',       _inj_auth_session),
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
     ('SDK 单实例',      'hansen_cloud_save_v965.js',  _inj_sdk),

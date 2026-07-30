@@ -2,7 +2,7 @@
  *
  * 登录方式（对应控制台已开通的三种）：
  *   ① 手机号 + 短信验证码   —— 主力，注册与登录合一（is_user 判断走 signUp 还是 signIn）
- *   ② 用户名 + 密码         —— 备用
+ *   ② 用户名 + 密码         —— 只登录已由手机号真实创建并绑定凭据的账号
  *   ③ 匿名                  —— 不注册也能玩，之后可升级为正式账号
  *
  * 竞赛 ID 发号方案（不依赖云函数）：
@@ -140,12 +140,12 @@
       });
     }).catch(function () { return null; });
   }
-  /* 同步版仅用于 UI 判定：以本地缓存的登录态为准（登录成功时会写入 uid） */
+  /* 🔴v1075：本地 marker 只有在真实 CloudBase 会话已给出 uid 后才算已登录。
+     v1074 以前的 method+signedAt 只代表“曾发起过登录”，不能再充当认证证据。 */
   function isSignedIn() {
     try {
       var lc = readLocal();
-      /* uid 可能因 SDK 异步而暂时读不到, 但只要签入成功(有登录方式+时间戳)就是已登录 */
-      return !!(lc.method && lc.signedAt);
+      return !!(lc.method && lc.signedAt && lc.uid);
     } catch (e) { return false; }
   }
   function currentUser() {
@@ -153,183 +153,376 @@
     return lc.uid ? { uid: lc.uid } : null;
   }
 
+  /* 🔴v1075：验证码事务只放 sessionStorage；密码、短信码、token 永不落盘。 */
+  var PKEY = 'hansen_auth_pending_v1075';
+  var _attemptId = 0;
+  var _submitBusy = false;
+  var _authEpoch = 0;
+
+  function readPending() {
+    try {
+      var o = JSON.parse(sessionStorage.getItem(PKEY));
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
+      if (!o.issuedAt || Date.now() - o.issuedAt > 15 * 60 * 1000) {
+        sessionStorage.removeItem(PKEY);
+        return {};
+      }
+      return o;
+    } catch (e) { return {}; }
+  }
+  function writePending(o) {
+    try { sessionStorage.setItem(PKEY, JSON.stringify(o || {})); } catch (e) {}
+    return o || {};
+  }
+  function clearPending() {
+    _attemptId++;
+    try { sessionStorage.removeItem(PKEY); } catch (e) {}
+  }
+  function needsReauth() {
+    var lc = readLocal();
+    return !!(lc.method && lc.signedAt && !lc.uid);
+  }
+  function delay(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+  function withTimeout(task, ms, label) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        var e = new Error(label || '操作超时，请检查网络后重试');
+        e.code = 'AUTH_TIMEOUT';
+        reject(e);
+      }, ms);
+      Promise.resolve(task).then(function (v) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        resolve(v);
+      }, function (e) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        reject(e);
+      });
+    });
+  }
+  function resolveWithin(task, ms, fallback) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        resolve(fallback);
+      }, ms);
+      Promise.resolve(task).then(function (v) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        resolve(v);
+      }, function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        resolve(fallback);
+      });
+    });
+  }
+  function unwrapAuthResult(res) {
+    if (res && res.error) throw res.error;
+    return (res && Object.prototype.hasOwnProperty.call(res, 'data')) ? res.data : res;
+  }
+  function uidOf(o) {
+    if (!o || typeof o !== 'object') return '';
+    return String(o.uid || o.id || o.user_id || o.sub || '');
+  }
+  function sessionSnapshot(a) {
+    if (a && typeof a.getSession === 'function') {
+      return withTimeout(Promise.resolve(a.getSession()), 2500, '确认云端登录会话超时')
+        .then(unwrapAuthResult)
+        .then(function (d) {
+          d = d || {};
+          var session = d.session || null;
+          var user = d.user || (session && session.user) || null;
+          var uid = uidOf(user) || uidOf(session);
+          return { session: session, user: user, uid: uid };
+        });
+    }
+    return currentUserAsync().then(function (u) {
+      return { session: u ? { user: u } : null, user: u, uid: uidOf(u) };
+    });
+  }
+  function confirmSession(a, n) {
+    n = n || 0;
+    return sessionSnapshot(a).then(function (snap) {
+      if (snap && snap.session && snap.uid) return snap;
+      if (n >= 3) {
+        var e = new Error('云端没有建立有效登录会话，请重新登录');
+        e.code = 'AUTH_SESSION_NOT_ESTABLISHED';
+        throw e;
+      }
+      return delay(250 * (n + 1)).then(function () { return confirmSession(a, n + 1); });
+    });
+  }
+
   /* 友好错误文案：把云端英文错误翻成人话 */
   function friendly(err) {
-    var m = String((err && (err.message || err.error_description || err.code)) || err || '');
-    if (/domain|origin|not.*allow|403/i.test(m)) return '这个网址还没加进安全域名白名单（控制台改完要等约 10 分钟生效）';
-    /* 🔴v1009: 原正则过宽, 把注册参数错误也误报成"验证码不对", 误导排查。
-       只认真正的验证码错误, 其余保留原文 + 提示可反馈。 */
-    if (/invalid.*(verification[_ ]?code|verify[_ ]?code|sms[_ ]?code)|verification[_ ]?code.*(invalid|expired|incorrect|wrong)|code.*(expired|incorrect)|验证码(错误|不正确|已过期)/i.test(m))
-      return '验证码不对或已过期，重新获取一次';
-    if (/frequent|too many|限频|频繁/i.test(m)) return '发得太频繁了，等一会儿再试';
-    if (/password/i.test(m)) return '密码不对';
-    if (/exist|already/i.test(m)) return '这个用户名已经有人用了，换一个吧（或点下面切到登录）';
-    if (/weak|password.*(short|length)/i.test(m)) return '密码太简单了，换一个长一点的';
-    if (/user.*not.*found|no.*such.*user/i.test(m)) return '没找到这个用户名，检查一下拼写，或点下面去注册';
-    if (/network|fetch|ERR_/i.test(m)) return '连不上服务器，检查一下网络';
-    if (/sms|短信/i.test(m)) return '短信服务还没开通或余额不足（控制台看一下）';
-    /* 未识别的错误保留原文——宁可显示英文, 也别用错误的中文误导排查 */
-    return m ? ('登录没成功：' + m.slice(0, 90)) : '操作失败，再试一次';
+    var m = errText(err);
+    if (/domain|origin|not.*allow|安全域名|403/i.test(m))
+      return '当前网址还没加入 CloudBase 安全域名，请管理员检查控制台配置';
+    if (/provider.*not.*enabled|登录方式未开启|PROVIDER_NOT_ENABLED/i.test(m))
+      return '当前登录方式尚未开通，请管理员在 CloudBase 控制台开启';
+    if (/invalid.*(verification[_ ]?code|verify[_ ]?code|sms[_ ]?code)|verification[_ ]?code.*(invalid|expired|incorrect|wrong)|VERIFICATION_FAILED|验证码(错误|不正确|已过期)/i.test(m))
+      return '验证码不正确或已过期，请重新获取';
+    if (/frequent|too many|resource_exhausted|RATE_LIMITED|限频|频繁/i.test(m))
+      return '验证码发送太频繁，请稍后再试';
+    if (/password_not_set|PASSWORD_NOT_SET/i.test(m))
+      return '这个账号还没有设置密码，请改用短信验证码登录';
+    if (/weak|password.*(short|length)|密码.*(短|简单)/i.test(m))
+      return '密码太简单了，请至少输入 6 位';
+    if (/already.*exist|already.*registered|username.*exist|ALREADY_EXISTS|用户名.*占用/i.test(m))
+      return '这个用户名已经有人用了，请更换用户名并重新获取验证码';
+    if (/invalid.*password|wrong.*password|INVALID_CREDENTIALS|凭据验证失败|密码不正确/i.test(m))
+      return '用户名或密码不正确';
+    if (/user.*not.*found|no.*such.*user|USER_NOT_FOUND|用户不存在/i.test(m))
+      return '没有找到这个账号；新用户请先用手机号注册';
+    if (/AUTH_SESSION_NOT_ESTABLISHED|没有建立有效登录会话/i.test(m))
+      return '登录请求已完成，但云端没有建立有效会话，请重新登录';
+    if (/network|fetch|ERR_|unreachable|timeout|AUTH_TIMEOUT/i.test(m))
+      return '网络连接失败，本次操作尚未完成，请重试';
+    if (/sms|短信/i.test(m))
+      return '短信登录暂不可用，请管理员检查短信服务、额度和地域配置';
+    return m ? ('操作没成功：' + m.slice(0, 140)) : '操作失败，请重试';
   }
 
   /* ── ① 手机号验证码：发码 ───────────────────────── */
-  function sendPhoneCode(phoneRaw) {
-    var phone = normPhone(phoneRaw);
-    if (!phone) return Promise.reject(new Error('手机号格式不对，填 11 位就行'));
-    return auth().then(function (a) {
-      return a.getVerification({ phone_number: phone });
-    }).then(function (res) {
-      writeLocal({ pendingPhone: phone, verificationId: res && res.verification_id, isUser: !!(res && res.is_user) });
-      return { ok: true, isUser: !!(res && res.is_user), phone: phone };
-    });
-  }
-
-  /* ── ① 手机号验证码：验码并登录/注册 ────────────── */
-  function loginByPhoneCode(code) {
-    var st = readLocal();
-    if (!st.verificationId) return Promise.reject(new Error('请先获取验证码'));
-    var c = String(code == null ? '' : code).trim();
-    if (!/^\d{4,8}$/.test(c)) return Promise.reject(new Error('验证码是几位数字，检查一下'));
-    /* 🔴v1009 关键修正：注册与登录走**不同**的参数形状，此前混用导致
-       "验证码明明输对却报错"——
-         · 新用户注册：signUp({phone_number, verification_code}) 收**原始短信码**，
-           绝不能先调 verify()，否则验证码在那一步已被消耗；
-         · 老用户登录：先 verify() 换 verification_token，再 signIn({username, verification_token})。 */
-    return auth().then(function (a) {
-      if (!st.isUser) {
-        return a.signUp({ phone_number: st.pendingPhone, verification_code: c })
-          .catch(function (e1) {
-            /* 兜底：若该环境的 signUp 走 token 形状，则补做 verify 再试一次 */
-            return a.verify({ verification_id: st.verificationId, verification_code: c })
-              .then(function (v) {
-                var tk = v && v.verification_token;
-                if (!tk) throw e1;
-                return a.signUp({ phone_number: st.pendingPhone, verification_token: tk });
-              })
-              .catch(function () { throw e1; });   /* 报出第一手错误，别被兜底掩盖 */
-          });
-      }
-      return a.verify({ verification_id: st.verificationId, verification_code: c })
-        .then(function (v) {
-          var token = v && v.verification_token;
-          if (!token) throw new Error('验证失败，重新获取验证码');
-          return a.signIn({ username: st.pendingPhone, verification_token: token });
-        });
-    }).then(function () {
-      writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
-      return afterSignIn();
-    });
-  }
-
-  /* ── ② 用户名 + 密码 ─────────────────────────────── */
-  function loginByPassword(username, password) {
-    var u = String(username == null ? '' : username).trim();
-    var p = String(password == null ? '' : password);
-    if (u.length < 2) return Promise.reject(new Error('用户名太短'));
-    if (p.length < 6) return Promise.reject(new Error('密码至少 6 位'));
-    return auth().then(function (a) {
-      /* 🔴v1058: 先用用户名登录；失败再用"用户名映射出的内部邮箱"重试。
-         这样无论账号是用哪种方式建的，用户都只需记住用户名。 */
-      return Promise.resolve(a.signIn({ username: u, password: p }))
-        .catch(function (e1) {
-          var mail = mailOfUsername(u);
-          return Promise.resolve(a.signIn({ username: mail, password: p }))
-            .catch(function () { throw e1; });
-        });
-    }).then(function () {
-      writeLocal({ method: 'password', username: u, signedAt: Date.now() });
-      return afterSignIn();
-    });
-  }
-
-  /* ── ②b 用户名 + 密码「注册」 ────────────────────────
-     背景：CloudBase 的注册只支持 email+password 或 phone+验证码，
-     **没有"纯用户名+密码"这种注册方式**。
-     做法：把用户名确定性地映射成一个内部邮箱（用户完全看不到），
-     用它完成注册，随后再把真正的用户名设上去。
-     这样用户体验上就是"用户名+密码注册"，而底层走的是官方支持的路径。 */
-  var INNER_MAIL_DOMAIN = 'u.wordadventure.local';
-
   function normUsername(raw) {
     var s = String(raw == null ? '' : raw).trim();
-    if (s.length < 3) return { ok: false, reason: '用户名至少 3 个字' };
-    if (s.length > 20) return { ok: false, reason: '用户名最多 20 个字' };
-    if (/[\s<>"'`\\/@]/.test(s)) return { ok: false, reason: '用户名不能有空格或 @ < > / 等符号' };
+    if (s.length < 1 || s.length > 32)
+      return { ok: false, reason: '用户名长度需要 1-32 位' };
+    if (/^\d+$/.test(s))
+      return { ok: false, reason: '用户名不能全是数字' };
+    var legal = (s.length === 1)
+      ? /^[A-Za-z]$/.test(s)
+      : /^[A-Za-z0-9][A-Za-z0-9_-]*[A-Za-z0-9]$/.test(s);
+    if (!legal)
+      return { ok: false, reason: '用户名只允许字母、数字、-、_，且符号不能放在开头或结尾' };
     return { ok: true, name: s };
   }
-  /* 用户名 → 内部邮箱：只用 [a-z0-9_] 与十六进制哈希，保证任何字符集都能落到合法邮箱 */
-  function mailOfUsername(name) {
-    var key = String(name).toLowerCase();
-    var h1 = 0x811c9dc5, h2 = 0x01000193;
-    for (var i = 0; i < key.length; i++) {
-      h1 = ((h1 ^ key.charCodeAt(i)) >>> 0) * 16777619 >>> 0;
-      h2 = ((h2 + key.charCodeAt(i) * (i + 7)) >>> 0) * 2654435761 >>> 0;
-    }
-    var safe = key.replace(/[^a-z0-9_]/g, '').slice(0, 16) || 'u';
-    return safe + '_' + ((h1 >>> 0).toString(16)) + ((h2 >>> 0).toString(16)) + '@' + INNER_MAIL_DOMAIN;
+  function passwordInput(password, password2) {
+    var pw = String(password == null ? '' : password);
+    if (pw.length < 6) throw new Error('密码至少 6 位');
+    if (pw.length > 64) throw new Error('密码最多 64 位');
+    if (password2 !== undefined && String(password2) !== pw)
+      throw new Error('两次输入的密码不一样');
+    return pw;
   }
 
-  function registerByPassword(username, password, password2) {
-    var v = normUsername(username);
-    if (!v.ok) return Promise.reject(new Error(v.reason));
-    var pw = String(password == null ? '' : password);
-    if (pw.length < 6) return Promise.reject(new Error('密码至少 6 位'));
-    if (password2 !== undefined && String(password2) !== pw)
-      return Promise.reject(new Error('两次输入的密码不一样'));
-    var mail = mailOfUsername(v.name);
+  /* ── ① 手机号验证码：只发一次，并保存可恢复的 verification_id ── */
+  function sendPhoneCode(phoneRaw) {
+    var phone = normPhone(phoneRaw);
+    if (!phone) return Promise.reject(new Error('手机号格式不对，请填写 11 位手机号'));
+    var attempt = ++_attemptId;
+    try { sessionStorage.removeItem(PKEY); } catch (e) {}
     return auth().then(function (a) {
-      var fn = a.signUpWithEmailAndPassword || a.signUp;
-      if (typeof fn !== 'function') throw new Error('当前环境不支持用户名注册');
-      /* 两种调用签名都兼容：新版是 (email, password)，旧版是 ({email, password}) */
-      var p1;
-      try { p1 = a.signUpWithEmailAndPassword ? a.signUpWithEmailAndPassword(mail, pw)
-                                              : a.signUp({ email: mail, password: pw }); }
-      catch (e) { p1 = Promise.reject(e); }
-      return Promise.resolve(p1).then(function () {
-        /* 注册成功后把真正的用户名设上，便于以后直接用它登录 */
-        return Promise.resolve(
-          (typeof a.updateUsername === 'function') ? a.updateUsername(v.name) : null
-        ).catch(function () { return null; });
-      });
-    }).then(function () {
-      writeLocal({ method: 'password', username: v.name, signedAt: Date.now() });
-      return afterSignIn();
+      if (typeof a.getVerification !== 'function') throw new Error('当前环境不支持短信验证码');
+      return withTimeout(a.getVerification({ phone_number: phone }), 20000, '发送验证码超时');
+    }).then(unwrapAuthResult).then(function (res) {
+      if (attempt !== _attemptId) throw new Error('这次发码已被新的操作替代');
+      if (!res || !res.verification_id) throw new Error('服务器没有返回验证码事务，请重试');
+      var pending = {
+        attemptId: attempt,
+        phone: phone,
+        verificationId: res.verification_id,
+        isUser: !!res.is_user,
+        issuedAt: Date.now(),
+        mode: res.is_user ? 'login' : 'signup'
+      };
+      writePending(pending);
+      writeLocal({ pendingPhone: '', verificationId: '', isUser: false });
+      return { ok: true, isUser: pending.isUser, phone: phone };
     });
+  }
+
+  /* ── ① 手机号验证码：同一验证码事务内完成真实登录或注册 ── */
+  function loginByPhoneCode(code, username, password, password2) {
+    if (_submitBusy) return Promise.reject(new Error('操作正在进行，请不要重复提交'));
+    var st = readPending();
+    if (!st.verificationId || !st.phone)
+      return Promise.reject(new Error('请先获取验证码'));
+    var c = String(code == null ? '' : code).trim();
+    if (!/^\d{4,8}$/.test(c))
+      return Promise.reject(new Error('验证码格式不对，请检查后重试'));
+
+    var uname = '', pw = '';
+    if (!st.isUser) {
+      var nu = normUsername(username);
+      if (!nu.ok) return Promise.reject(new Error(nu.reason));
+      try { pw = passwordInput(password, password2); }
+      catch (e) { return Promise.reject(e); }
+      uname = nu.name;
+    }
+
+    var verificationConsumed = false;
+    _submitBusy = true;
+    var work = auth().then(function (a) {
+      if (typeof a.verify !== 'function') throw new Error('当前环境不支持验证码校验');
+      return withTimeout(a.verify({
+        verification_id: st.verificationId,
+        verification_code: c
+      }), 20000, '验证验证码超时').then(unwrapAuthResult).then(function (verified) {
+        var token = verified && verified.verification_token;
+        if (!token) throw new Error('验证码没有换到有效凭证，请重新获取');
+        verificationConsumed = true;
+        if (st.isUser) {
+          if (typeof a.signIn !== 'function') throw new Error('当前环境不支持短信登录');
+          return withTimeout(a.signIn({
+            username: st.phone,
+            verification_token: token
+          }), 20000, '短信登录超时').then(unwrapAuthResult).then(function () {
+            return afterSignIn({ method: 'phone', phone: st.phone, username: '' }, a);
+          });
+        }
+        if (typeof a.signUp !== 'function') throw new Error('当前环境不支持手机号注册');
+        return withTimeout(a.signUp({
+          phone_number: st.phone,
+          verification_code: c,
+          verification_token: token,
+          username: uname,
+          password: pw
+        }), 20000, '手机号注册超时').then(unwrapAuthResult).then(function () {
+          return afterSignIn({ method: 'phone', phone: st.phone, username: uname }, a);
+        });
+      });
+    });
+    return work.then(function (r) {
+      _submitBusy = false;
+      return r;
+    }, function (e) {
+      _submitBusy = false;
+      if (verificationConsumed) clearPending();
+      throw e;
+    });
+  }
+
+  /* ── ② 用户名 + 密码：只登录已经真实创建并绑定的账号 ── */
+  function loginByPassword(username, password) {
+    if (_submitBusy) return Promise.reject(new Error('操作正在进行，请不要重复提交'));
+    var u = String(username == null ? '' : username).trim();
+    var p = String(password == null ? '' : password);
+    if (!u) return Promise.reject(new Error('请输入用户名'));
+    if (p.length < 6) return Promise.reject(new Error('密码至少 6 位'));
+    _submitBusy = true;
+    var work = auth().then(function (a) {
+      var req;
+      if (typeof a.signInWithPassword === 'function') {
+        req = a.signInWithPassword({ username: u, password: p });
+      } else if (typeof a.signIn === 'function') {
+        req = a.signIn({ username: u, password: p });
+      } else {
+        throw new Error('当前环境不支持用户名密码登录');
+      }
+      return withTimeout(req, 20000, '用户名密码登录超时')
+        .then(unwrapAuthResult)
+        .then(function () {
+          return afterSignIn({ method: 'password', phone: '', username: u }, a);
+        });
+    });
+    return work.then(function (r) {
+      _submitBusy = false;
+      return r;
+    }, function (e) {
+      _submitBusy = false;
+      throw e;
+    });
+  }
+
+  /* v1058 的虚拟邮箱直接注册从未完成真实验证，v1075 永久停用。
+     保留函数名只为让旧调用得到清晰错误，不再产生任何伪账号请求。 */
+  function registerByPassword() {
+    return Promise.reject(new Error('CloudBase 不支持直接用用户名注册；请先在手机号页完成真实注册'));
   }
 
   /* ── ③ 登出 ─────────────────────────────────────── */
   function signOut() {
+    _authEpoch++;
+    clearPending();
     return auth().then(function (a) {
-      return a.signOut ? a.signOut() : null;
+      return a.signOut ? Promise.resolve(a.signOut()).then(unwrapAuthResult) : null;
     }).catch(function () { return null; }).then(function () {
-      writeLocal({ method: '', signedAt: 0, uid: '' });
+      writeLocal({
+        schema: 1075,
+        method: '',
+        signedAt: 0,
+        uid: '',
+        phone: '',
+        username: '',
+        pendingPhone: '',
+        verificationId: '',
+        isUser: false
+      });
       return { ok: true };
     });
   }
 
   /* ── 登录之后：建档 + 发号 ──────────────────────── */
-  function afterSignIn() {
-    return currentUserAsync().then(function (u) {
-      var uid = u && u.uid;
+  function afterSignIn(identity, a) {
+    return confirmSession(a).then(function (snap) {
+      var uid = snap && snap.uid;
       if (!uid) {
-        /* 🔴v1012: 读不到 uid **不等于登录失败**——签入这一步已经成功了。
-           以前在这里直接判失败，用户看到「登录状态异常」，实际账号已注册好。
-           这里标记为已登录，竞赛 ID 留待下次进入时补发。 */
-        writeLocal({ signedAt: Date.now() });
-        return { ok: true, uid: '', cid: 0, pendingId: true };
+        var e = new Error('云端没有建立有效登录会话，请重新登录');
+        e.code = 'AUTH_SESSION_NOT_ESTABLISHED';
+        throw e;
       }
-      writeLocal({ uid: uid });
-      /* 🔴v1028: 登录成功后作废云存档已缓存的实例, 让它按账号身份重建, 
-         否则它可能仍拿着登录前的匿名身份读写。 */
-      try { if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp(); } catch (e) {}
-      return ensureProfile(uid)
-        .catch(function () { return null; })
-        .then(function (prof) {
-          return syncOnLogin().then(function (s) {
-            return { ok: true, uid: uid, cid: (prof && prof.cid) || 0,
-                     pendingId: !(prof && prof.cid), sync: s };
-          });
+      writeLocal({
+        schema: 1075,
+        method: identity.method,
+        phone: identity.phone || '',
+        username: identity.username || '',
+        uid: uid,
+        signedAt: Date.now(),
+        pendingPhone: '',
+        verificationId: '',
+        isUser: false
+      });
+      clearPending();
+      var epoch = ++_authEpoch;
+      try {
+        if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
+      } catch (e0) {}
+
+      var job = ensureProfile(uid).catch(function () { return null; }).then(function (prof) {
+        if (epoch !== _authEpoch || readLocal().uid !== uid)
+          return { stale: true };
+        return syncOnLogin().then(function (s) {
+          if (epoch !== _authEpoch || readLocal().uid !== uid)
+            return { stale: true };
+          return {
+            cid: (prof && prof.cid) || 0,
+            pendingId: !(prof && prof.cid),
+            sync: s
+          };
         });
+      }).catch(function (e1) {
+        return {
+          cid: 0,
+          pendingId: true,
+          sync: { ok: false, action: 'deferred', reason: errText(e1) }
+        };
+      });
+      var fallback = {
+        cid: 0,
+        pendingId: true,
+        sync: { ok: false, action: 'deferred', reason: 'timeout' }
+      };
+      return {
+        ok: true,
+        uid: uid,
+        cid: 0,
+        pendingId: true,
+        postLogin: resolveWithin(job, 10000, fallback)
+      };
     });
   }
 
@@ -565,6 +758,9 @@
     currentUserAsync: currentUserAsync,
     verifySession: verifySession,
     readLocal: readLocal,
+    readPending: readPending,
+    clearPending: clearPending,
+    needsReauth: needsReauth,
     normPhone: normPhone,
     friendly: friendly,
     sendPhoneCode: sendPhoneCode,
@@ -572,7 +768,6 @@
     loginByPassword: loginByPassword,
     registerByPassword: registerByPassword,
     normUsername: normUsername,
-    mailOfUsername: mailOfUsername,
     signOut: signOut,
     ensureProfile: ensureProfile,
     pushSave: pushSave,
