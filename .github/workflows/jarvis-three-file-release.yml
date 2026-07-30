@@ -9,7 +9,6 @@ on:
 
 concurrency:
   group: jarvis-${{ github.workflow }}-${{ github.ref }}
-  # Do not interrupt an upload and strand a half-created release/tag.
   cancel-in-progress: false
 
 jobs:
@@ -62,7 +61,20 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps chromium
 
-      - name: Syntax and versioned regression tests
+      - name: Verify generated pages and portable tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nF '/home/claude/work/repo' \
+              --include='test_*v*.mjs' --include='test_*v*.py' .; then
+            echo "Versioned tests must resolve the repository from their own file path." >&2
+            exit 1
+          fi
+          python generate.py
+          python generate_land.py --verify
+          git diff --exit-code
+
+      - name: Syntax and every versioned regression test
         shell: bash
         run: |
           set -euo pipefail
@@ -75,23 +87,25 @@ jobs:
           trap 'kill "$server_8941" "$server_8946" 2>/dev/null || true' EXIT
           shopt -s nullglob
           node_tests=(./test_*v*.mjs)
-          python_tests=(./test_*v942.py)
-          if (( ${#node_tests[@]} == 0 )); then
-            echo "No versioned Node regression tests found" >&2
+          python_tests=(./test_*v*.py)
+          if (( ${#node_tests[@]} == 0 || ${#python_tests[@]} == 0 )); then
+            echo "No versioned Node or Python regression tests found" >&2
             exit 1
           fi
           for test_file in "${node_tests[@]}"; do node "$test_file"; done
           for test_file in "${python_tests[@]}"; do python "$test_file"; done
 
-      - name: Static, economy, and fail-closed Jarvis guards
+      - name: Static, economy, and deep Jarvis guards
+        shell: bash
         run: |
+          set -euo pipefail
           python economy_guard.py
           python check_resources.py
           python hansen_nav_guard.py
           python jarvis.py --deep
-          # Jarvis reports are diagnostics, not release source mutations.
-          git restore -- evolution_dashboard.html hansen_evolve_kb.json hansen_evolve_backlog.json
-          rm -f hansen_inspector_report.md
+          git restore -- .jarvis_baseline.json evolution_dashboard.html hansen_evolve_kb.json hansen_evolve_backlog.json
+          rm -f hansen_inspector_report.md .jarvis_pass.json
+          git diff --exit-code
 
       - name: Browser regression wall
         run: |
@@ -105,6 +119,25 @@ jobs:
           python pet_guard.py
           python sb_guard.py
           python release_guard.py
+
+      - name: Attest the final exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          dirty="$(git status --porcelain --untracked-files=all | grep -v '^?? .jarvis_pass.json$' || true)"
+          if [[ -n "$dirty" ]]; then
+            echo "Unexpected files before final Jarvis attestation:" >&2
+            echo "$dirty" >&2
+            exit 1
+          fi
+          python jarvis_gate.py
+          dirty="$(git status --porcelain --untracked-files=all | grep -v '^?? .jarvis_pass.json$' || true)"
+          if [[ -n "$dirty" ]]; then
+            echo "Jarvis changed files other than its transient pass:" >&2
+            echo "$dirty" >&2
+            exit 1
+          fi
 
       - name: Build twice and prove reproducible release assets
         shell: bash
@@ -122,6 +155,11 @@ jobs:
               python -m zipfile -t "$archive"
               unzip -p "$archive" SHA256SUMS >/dev/null
             done
+            source_zip="$dir/单词大冒险_v${version}_含贾维斯完整源码.zip"
+            if unzip -Z1 "$source_zip" | grep -Fx '.jarvis_pass.json'; then
+              echo "Transient Jarvis pass leaked into source ZIP" >&2
+              exit 1
+            fi
           done
           for name in "单词大冒险_v${version}_可直接部署.zip" "单词大冒险_v${version}_含贾维斯完整源码.zip"; do
             test "$(sha256sum "release-assets/$name" | cut -d' ' -f1)" = \
@@ -169,9 +207,21 @@ jobs:
             echo "Refusing to rewrite immutable release ${tag}; increment VERSION." >&2
             exit 1
           fi
-          assets=(release-assets/*.zip release-assets/README.md)
-          test "${#assets[@]}" -eq 3
-          notes="v${version} passed fail-closed Jarvis, economy, security, packaging, and browser regression walls. Assets: deploy ZIP, complete Jarvis source ZIP, and README.md."
+
+          deploy_src="release-assets/单词大冒险_v${version}_可直接部署.zip"
+          source_src="release-assets/单词大冒险_v${version}_含贾维斯完整源码.zip"
+          readme_src="release-assets/README.md"
+          deploy_ascii="release-assets/wordminiprogram_v${version}_deploy.zip"
+          source_ascii="release-assets/wordminiprogram_v${version}_source_jarvis.zip"
+          cp "$deploy_src" "$deploy_ascii"
+          cp "$source_src" "$source_ascii"
+          assets=("$deploy_ascii" "$source_ascii" "$readme_src")
+          upload_specs=(
+            "$deploy_ascii#单词大冒险 v${version} 可直接部署 ZIP"
+            "$source_ascii#单词大冒险 v${version} 含贾维斯完整源码 ZIP"
+            "$readme_src#单词大冒险 v${version} 超详细 README"
+          )
+          notes="v${version} passed fail-closed Jarvis, economy, security, packaging, browser and authentication regression walls. GitHub Release is not a CloudBase deployment."
 
           release_id=""
           cleanup_draft() {
@@ -182,9 +232,14 @@ jobs:
             if [[ -n "$release_id" ]]; then
               gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/${release_id}" >/dev/null 2>&1 || true
             fi
+            tag_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${tag}" --jq '.object.sha' 2>/dev/null || true)"
+            if [[ "$tag_sha" == "$GITHUB_SHA" ]]; then
+              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/${tag}" >/dev/null 2>&1 || true
+            fi
           }
           trap cleanup_draft ERR INT TERM
-          gh release create "$tag" "${assets[@]}" \
+
+          gh release create "$tag" "${upload_specs[@]}" \
             --draft \
             --target "$GITHUB_SHA" \
             --title "单词大冒险 v${version}" \
@@ -195,11 +250,15 @@ jobs:
 
           expected_assets="$(printf '%s\n' \
             "README.md" \
-            "单词大冒险_v${version}_可直接部署.zip" \
-            "单词大冒险_v${version}_含贾维斯完整源码.zip" | sort)"
+            "wordminiprogram_v${version}_deploy.zip" \
+            "wordminiprogram_v${version}_source_jarvis.zip" | sort)"
           actual_assets="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '.assets[].name' | sort)"
           test "$actual_assets" = "$expected_assets"
           test "$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '.assets | length')" -eq 3
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq ".assets[] | select(.name == \"wordminiprogram_v${version}_deploy.zip\") | .label")" = \
+               "单词大冒险 v${version} 可直接部署 ZIP"
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq ".assets[] | select(.name == \"wordminiprogram_v${version}_source_jarvis.zip\") | .label")" = \
+               "单词大冒险 v${version} 含贾维斯完整源码 ZIP"
 
           mkdir uploaded-assets
           while IFS=$'\t' read -r asset_id asset_name; do
