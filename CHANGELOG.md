@@ -27,7 +27,10 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
    返回旧元信息/明文；全局 `_busy` 还会让 U1 悬挂永久阻塞 U2，或由 U1 迟到结算误释放 U2 锁。
 10. 🔴 云端/本机覆盖选择可以被重复点击，旧 DOM 引用、手动上传、普通退出或关闭可以绕过 applying。
 11. 🔴 登录后竞赛档案写入与云档只读检查曾串行阻塞；附加任务失败不应推翻已经确认的真实登录。
-12. 🔴 README 发布副本、资源戳、Service Worker、Jarvis 凭证和双包发布若走散，会让代码已修、
+12. 🔴 登录提交第一次 readFence 后到写 marker 之间仍有窗口；并发 mismatch 时可能返回假成功，
+    并在最终身份未线性化前启动 U1 的竞赛档案写入。
+13. 🔴 signOut 最终检查后若无所有权删除全部 fence key，会擦掉逐键清理期间另一标签刚写的 mismatch。
+14. 🔴 README 发布副本、资源戳、Service Worker、Jarvis 凭证和双包发布若走散，会让代码已修、
     线上仍加载旧 v1074/v1075，现场看起来像“修复完全没有发生”。
 
 ### 实现
@@ -56,9 +59,13 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   `mismatch > stale_mutation > outcome_unknown`，再比较 revision/generation/时间。
 - 每条 fence 有唯一 `fenceId`。恢复必须精确拥有同一 `fenceId + expectedUid`；
   清理是 compare-and-delete，任何别的记录仍存在就拒绝提交 marker。
-- 只读 refresh/ensure 永远不能清 fence。显式安全退出会作废等待者、再查服务器 session；
-  只有明确 `session === null`、无本页活跃 mutation 且最终跨标签边界稳定时才宣布 signed_out。
-  旧请求仍可能晚到时返回 `cleanupPending/requiresReload`，UI 禁止新登录并要求刷新复核。
+- 登录 marker 记录唯一 `authCommitId`；写后让出任务边界，再做真实 ensureSession 与
+  marker/fence 最终复验。失败只回滚相同 commitId，另一标签的新 marker 不会被覆盖，附加任务
+  也尚未启动。
+- 只读 refresh/ensure 永远不能清 fence。显式安全退出会作废等待者、再查服务器 session，并抓取
+  每个 fence key 的清理前快照；只 compare-delete 未变化的旧值。只有明确 `session === null`、
+  无本页活跃 mutation 且最终跨标签边界稳定时才宣布 signed_out。旧请求或新 fence 出现时返回
+  `cleanupPending/requiresReload`，UI 禁止新登录并要求刷新复核。
 
 云存档和 UI：
 
@@ -69,8 +76,9 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 - anonymous 分支只有在认证模块明确报告 `signed_out` 且 `requiresCleanup=false` 时可用；
   unknown、mismatch、legacy、outcome 和 cleanupPending 全部失败关闭。
 - 全局 busy 改为 generation-scoped operation token；旧 U1 settle 不能清 U2 的锁。
-- 登录后 `ensureProfile` 与 `syncOnLogin` 并行、各自 8 秒上限。进度检查只读；
-  竞赛档案可能按需写 `sb_profile`，文档明确区分两者。
+- 登录最终 commit 复验成功后才启动 `ensureProfile` 与 `syncOnLogin`；两者并行、各自 8 秒
+  上限。进度检查只读；竞赛档案每次 get/set/update 前后调用 `verifyProfileIdentity(uid)`，
+  避免当前凭据已切 U2 时仍写 U1 的 `sb_profile`。
 - UI 每次重绘推进 `renderEpoch`，所有处理器核对 epoch 和当前节点；覆盖选择与手动上传共享
   `applying-*` 锁。cleanupPending 显示刷新按钮，禁用登录、方式切换和破坏性操作。
 
@@ -99,10 +107,11 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 
 已在开发环境实际执行：
 
-- `test_auth_contract_v1076.mjs`：**55/55**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
+- `test_auth_contract_v1076.mjs`：**59/59**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
   operation/session UID、`session+user:null`、旧 refresh/ensure、迟到发码/登录、signOut 复活、
   mismatch 持久化、只读 null 不清 fence、mutation 永久悬挂、SDK init 永久悬挂、跨标签
-  session/local fence 强度与恢复所有权。
+  session/local fence 强度与恢复所有权、marker 提交 TOCTOU、signOut 快照 compare-delete、
+  以及最终复验失败时零附加任务。
 - `test_cloud_save_v965.mjs`：Node/WebCrypto 动态 **43/43**。覆盖同 UID 上传/恢复、授权不跨身份、
   unknown/mismatch/cleanup 匿名零读写、U1→U2 的 put/迁移/restore/accountCloudInfo/fetch 迟到、
   本地 writeState 零污染和 generation busy token。
