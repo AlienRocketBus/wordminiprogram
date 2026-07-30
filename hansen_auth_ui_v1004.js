@@ -25,6 +25,7 @@
       '#' + ID + ' .au_hd{display:flex;align-items:center;margin-bottom:14px}',
       '#' + ID + ' .au_t{font-size:19px;font-weight:900;letter-spacing:.4px}',
       '#' + ID + ' .au_x{margin-left:auto;background:rgba(255,255,255,.12);color:#e8eefc;border:0;border-radius:50%;width:34px;height:34px;font-size:17px;font-weight:900;cursor:pointer}',
+      '#' + ID + ' .au_x:disabled{opacity:.45;cursor:default}',
       '#' + ID + ' .au_tabs{display:flex;gap:8px;margin-bottom:14px}',
       '#' + ID + ' .au_tab{flex:1;background:rgba(255,255,255,.08);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);',
       '  border-radius:12px;padding:10px 8px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}',
@@ -55,6 +56,7 @@
 
   var mode = 'phone';   /* phone | password */
   var _syncState = null;
+  var _cloudChoiceBusy = null;  /* {choice,uid,previous}：破坏性选择一次只允许一个 Promise */
   var _message = { text: '', kind: '' };
 
   function A() { return window.HansenAuth; }
@@ -96,6 +98,10 @@
     if (!s || s.uid !== uid) return '';
     if (s.action === 'checking')
       return '<div class="au_tip" style="opacity:.9;color:#fde68a">正在只读检查云端是否有存档，不会自动覆盖任何一边。</div>';
+    if (s.action === 'applying-cloud' || s.action === 'applying-local')
+      return '<div class="au_tip" style="opacity:1;color:#fde68a">'
+        + (s.action === 'applying-cloud' ? '正在恢复云端进度并复验当前账号…' : '正在上传本机进度并复验当前账号…')
+        + '<br>操作完成前不能改选、稍后处理、关闭或退出。</div>';
     if (s.action === 'restored-awaiting-reload')
       return '<div class="au_tip" style="opacity:1;color:#86efac">云端进度已恢复到本机。请重新载入后再继续，避免旧页面内存覆盖新数据。</div>'
         + '<button class="au_go" id="auReload">重新载入并使用云端进度</button>';
@@ -118,17 +124,19 @@
 
   function signedHtml(marker) {
     var st = A().sessionStatus ? A().sessionStatus() : {};
+    var applying = !!_cloudChoiceBusy;
+    var disabled = applying ? ' disabled' : '';
     var storage = st.storageWarning
       ? '<br><span style="color:#fde68a">浏览器未能持久保存账号显示信息；当前 session 有效，刷新后会重新核对。</span>'
       : '';
     return '<div class="au_card"><div class="au_hd"><span class="au_t">👤 已登录</span>'
-      + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
+      + '<button class="au_x" id="auX" aria-label="关闭"' + disabled + '>✕</button></div>'
       + '<div class="au_tip" style="opacity:.9;font-size:13px">'
       + (marker.phone ? '手机号：' + esc(marker.phone) : (marker.username ? '用户名：' + esc(marker.username) : '账号 UID 已确认'))
       + '<br>CloudBase session UID 与本地 UID 已精确一致。' + storage + '</div>'
       + syncChoices(marker.uid)
-      + '<button class="au_go" id="auPush" style="margin-top:14px">☁️ 明确上传本机进度</button>'
-      + '<button class="au_skip" id="auOut">安全退出登录</button>'
+      + '<button class="au_go" id="auPush" style="margin-top:14px"' + disabled + '>☁️ 明确上传本机进度</button>'
+      + '<button class="au_skip" id="auOut"' + disabled + '>安全退出登录</button>'
       + '<div class="au_msg" id="auMsg"></div></div>';
   }
 
@@ -152,6 +160,8 @@
       + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>' + banner
       + (st.state === 'unknown' || st.state === 'mismatch'
           ? '<button class="au_skip" id="auRetrySession" style="color:#fde68a">重新确认旧会话</button>' : '')
+      + (st.state === 'unknown' || st.state === 'mismatch' || op.state === 'outcome_unknown'
+          ? '<button class="au_go" id="auSafeOut" style="background:linear-gradient(135deg,#991b1b,#dc2626)">安全退出并清理会话</button>' : '')
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone"' + (busy ? ' disabled' : '') + '>手机号继续</button>'
       + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password"' + (busy ? ' disabled' : '') + '>账号密码登录</button>'
@@ -202,7 +212,9 @@
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-label', '登录注册');
     (document.body || document.documentElement).appendChild(el);
-    el.addEventListener('click', function (ev) { if (ev.target === el) close(); });
+    el.addEventListener('click', function (ev) {
+      if (ev.target === el) close();
+    });
     return el;
   }
 
@@ -260,15 +272,50 @@
   }
 
   function chooseCloud(choice, uid) {
+    if (_cloudChoiceBusy) {
+      setMessage('云存档选择正在处理中，完成前不能重复提交或改成“稍后”。');
+      return;
+    }
     var label = choice === 'cloud' ? '云端进度将覆盖本机当前进度。' : '本机进度将覆盖云端当前存档。';
     if (!confirm(label + '\n\n这是不可自动撤销的操作。确定继续吗？')) {
       setMessage('已取消，双方数据都没有改动。', '');
       return;
     }
-    setMessage(choice === 'cloud' ? '正在恢复云端进度…' : '正在上传本机进度…');
-    A().resolveCloudChoice(choice, uid).then(function (r) {
+    var previous = _syncState;
+    var token = { choice: choice, uid: uid, previous: previous };
+    _cloudChoiceBusy = token;
+    _syncState = { action: choice === 'cloud' ? 'applying-cloud' : 'applying-local', uid: uid };
+    render();
+    setMessage(choice === 'cloud' ? '正在恢复云端进度并复验账号…' : '正在上传本机进度并复验账号…');
+
+    function sameRequest(){
+      return _cloudChoiceBusy === token;
+    }
+    function sameAccount(){
+      try {
+        var auth = A(), marker = auth.readLocal ? auth.readLocal() : {};
+        return !!(marker && marker.uid === uid);
+      } catch (e) { return false; }
+    }
+    function restoreChoices(){
+      _syncState = sameAccount() ? previous : null;
+    }
+
+    return Promise.resolve().then(function(){
+      return A().resolveCloudChoice(choice, uid);
+    }).then(function (r) {
+      if (!sameRequest()) return;
+      _cloudChoiceBusy = null;
       if (!r || !r.ok) {
+        restoreChoices();
+        render();
         setMessage(r && r.stale ? '账号会话已变化，本次结果不再采用。' : ('操作没有完成：' + ((r && r.reason) || '未知原因')), 'err');
+        return;
+      }
+      if (!sameAccount()) {
+        _syncState = null;
+        render();
+        setMessage('账号会话已变化，本次界面结果不再采用。', 'err');
         return;
       }
       if (r.needReload) {
@@ -280,7 +327,13 @@
         render();
         setMessage('本机进度已明确上传到云端。', 'ok');
       }
-    }).catch(function (e) { setMessage(A().friendly(e), 'err'); });
+    }).catch(function (e) {
+      if (!sameRequest()) return;
+      _cloudChoiceBusy = null;
+      restoreChoices();
+      render();
+      setMessage(A().friendly(e), 'err');
+    });
   }
 
   function bind() {
@@ -294,6 +347,22 @@
     if (q('auRetrySession')) q('auRetrySession').onclick = function () {
       setMessage('正在重新确认会话…');
       auth.refreshSession().then(function () { render(); });
+    };
+    if (q('auSafeOut')) q('auSafeOut').onclick = function () {
+      if (!confirm('确认安全退出并清理当前服务器会话吗？本机学习进度会保留。')) return;
+      var button = this;
+      button.disabled = true;
+      _cloudChoiceBusy = null;
+      _syncState = null;
+      setMessage('正在安全退出并清理服务器会话…');
+      auth.signOut().then(function () {
+        render();
+        notify();
+        setMessage('会话已安全清理，可以重新登录。', 'ok');
+      }).catch(function (e) {
+        render();
+        setMessage('安全清理没有完成：' + auth.friendly(e), 'err');
+      });
     };
     if (q('auRecover')) q('auRecover').onclick = function () {
       setMessage('正在确认刚才的结果；不会重复注册或登录…');
@@ -339,6 +408,10 @@
     if (q('auKeepCloud')) q('auKeepCloud').onclick = function () { chooseCloud('cloud', auth.readLocal().uid); };
     if (q('auKeepLocal')) q('auKeepLocal').onclick = function () { chooseCloud('local', auth.readLocal().uid); };
     if (q('auDefer')) q('auDefer').onclick = function () {
+      if (_cloudChoiceBusy) {
+        setMessage('云存档选择正在处理中，完成前不能改为“稍后”。');
+        return;
+      }
       _syncState = { action: 'deferred-by-user', uid: auth.readLocal().uid };
       render();
       setMessage('已选择稍后处理；本机和云端都没有被改动。', 'ok');
@@ -346,6 +419,10 @@
     if (q('auReload')) q('auReload').onclick = function () { location.reload(); };
 
     if (q('auPush')) q('auPush').onclick = function () {
+      if (_cloudChoiceBusy) {
+        setMessage('云存档选择正在处理中，请等待本次操作完成。');
+        return;
+      }
       var uid = auth.readLocal().uid;
       if (!confirm('确认把本机当前进度上传到这个账号的云端存档吗？')) return;
       setMessage('正在上传…');
@@ -354,6 +431,10 @@
       }).catch(function (e) { setMessage(auth.friendly(e), 'err'); });
     };
     if (q('auOut')) q('auOut').onclick = function () {
+      if (_cloudChoiceBusy) {
+        setMessage('云存档选择正在处理中，完成前不能退出。');
+        return;
+      }
       setMessage('正在安全退出并核对服务器会话…');
       auth.signOut().then(function () {
         _syncState = null;
@@ -388,6 +469,10 @@
     });
   }
   function close() {
+    if (_cloudChoiceBusy) {
+      setMessage('云存档选择正在处理中，完成前不能关闭。');
+      return;
+    }
     var el = document.getElementById(ID);
     if (el) el.classList.remove('on');
     if (_tick) { clearInterval(_tick); _tick = null; }
