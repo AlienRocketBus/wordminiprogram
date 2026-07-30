@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-hansen_bug_registry.py —— 贾维斯 · 事故登记册（v1071）
+hansen_bug_registry.py —— 贾维斯 · 事故登记册（v1076）
 
 为什么需要这个
 ==============
@@ -101,6 +101,18 @@ REGISTRY = [
     ('v1076', '手机号与用户名登录同一 UID 却推导出两把云存档密钥',
      'guard_auth_real_session'),
     ('v1076', '匿名/旧账号自动同步授权跨身份继承，登录后可能未选择就上传',
+     'test_cloud_save_v965.mjs'),
+    ('v1076', 'getSession 仍有凭证但 user:null 被误判为已退出，登录刚完成就丢失',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '旧 refresh/ensure 或迟到 signIn 在退出后把旧 UID 和 marker 复活',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', 'UID mismatch 被低优先级结果覆盖，或被一次只读 session=null 擅自清除',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '隐藏正式 CloudBase session 在认证不确定态跌入匿名云存档分支并写错位置',
+     'test_cloud_save_v965.mjs'),
+    ('v1076', '旧 render 的登录/退出按钮绕过云存档 applying 锁，造成并发身份切换',
+     'test_auth_ui_v1076.mjs'),
+    ('v1076', '旧账号云请求悬挂后用全局 busy 永久阻塞新账号，迟到结算还会释放新锁',
      'test_cloud_save_v965.mjs'),
 ]
 
