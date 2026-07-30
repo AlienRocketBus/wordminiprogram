@@ -19,7 +19,7 @@
 
 用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
 CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十条
-互相叠加的真实故障链：
+互相叠加的十三条真实故障链：
 
 1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
    `.local` 假邮箱，然后把发起邮箱验证当作账号创建。v1076 删除这条旁路；CloudBase
@@ -55,8 +55,23 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
    每次 `put`、迁移 `put`、`HansenBackup.restore` 和 `writeState` 前重新核对。
    U1 切到 U2 后，U1 的迟到任务必须停止；新写地址仍由稳定 `u:<UID>` 派生。
 10. **云端/本机选择曾可被重复点击或旧 DOM 绕过。** 一旦选择“保留云端”或“保留本机”，
-    UI 立即进入 `applying-*`，锁住改选、稍后、关闭、手动上传和普通退出；Promise 结算后
-    才恢复。取消和稍后始终零写入。
+    UI 立即进入 `applying-*`，锁住改选、稍后、关闭、手动上传和普通退出；每次重绘推进
+    `renderEpoch`，旧节点引用没有执行资格。Promise 结算后才恢复；取消和稍后始终零写入。
+11. **SDK 初始化可能在认证计时器启动前永久悬挂。** 旧的 60 秒上限只包住
+    `signIn/signUp`，若动态 import、CloudBase init 或 auth 实例本身不返回，界面仍会永久
+    busy。v1076 为认证服务初始化单独设置 12 秒上限；此时 mutation 尚未发出，所以只释放
+    busy 并报告初始化超时，不伪造“服务器可能已经注册”的 fence，服务恢复后允许重新尝试。
+12. **同一 fence 的两份存储曾可能互相遮挡。** 标签 A 的 sessionStorage 中若保留较弱
+    `outcome_unknown`，会看不到标签 B 写入 localStorage 的更强 `mismatch`，旧恢复动作甚至
+    可能误清冲突。现在每次同时合并内存、session 主记录、local 通用备份和三个按类型隔离的
+    备份；先按 `mismatch > stale_mutation > outcome_unknown` 选强度，再按 revision、
+    generation、时间排序。每条记录有唯一 `fenceId`，恢复只能 compare-and-delete 自己拥有的
+    outcome 记录；任何别的记录仍存在就拒绝写 marker。
+13. **只读云端结果也可能跨账号迟到。** `accountCloudInfo` 和公开 `fetchWithKey` 过去虽不
+    直接覆盖本机，却可能把 U1 的 exists/更新时间或明文返回给已经切到 U2 的调用者。现在它们
+    同样捕获原始 UID + CloudSave generation，并在每一次 provider get 前后复验；认证
+    unknown/mismatch/cleanupPending 时返回失败关闭。跨代 busy 改为 operation token，旧 U1
+    结算无权清除 U2 正在使用的锁。
 
 官方接口依据：
 
@@ -90,7 +105,9 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 `localStorage` 只保存 schema、真实 UID、显示用手机号/用户名、方式和时间。
 短信 pending 只保存在当前标签页 `sessionStorage`，字段限定为手机号、verification ID、
 新老用户标志、发码时间与绝对 `resendAt`。密码、短信码和 verification token 从不落盘。
-`hansen_auth_fence_v1076` 也只保存 fence 类型、预期/观察 UID、原因和时间，不含任何凭据。
+`hansen_auth_fence_v1076` 会写入当前标签页 sessionStorage；localStorage 同时保存兼容备份
+和按 fence 类型分开的跨标签备份。每条只含 `fenceId`、类型、预期/观察 UID、generation、
+revision、原因和时间，不含任何凭据。
 
 #### 2. 手机注册和手机登录
 
@@ -116,16 +133,23 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 
 #### 4. 异步代次、fence 与安全退出
 
+- CloudBase SDK import/init/auth 实例获取有独立 12 秒上限；它发生在 mutation 前，超时不写
+  outcome fence，只释放 busy 并允许服务恢复后重试。
 - 每个认证 mutation 捕获 `authGeneration`；开始新认证和退出都会推进代次。
 - 每个只读探测再捕获独立 `probeId`；旧探测即使成功也不能写任何状态。
 - 20 秒只显示“服务器仍在处理”；60 秒后产生 `AUTH_MUTATION_INDETERMINATE`，
   UI 停止永久等待，但 fence 继续阻止重试。
 - UID 不一致写 `mismatch` fence；刷新页面后仍存在，不能把隐藏 session 自动写成 marker。
+- canonical fence 同时合并内存、session 与 local 备份，优先级固定为
+  `mismatch > stale_mutation > outcome_unknown`；同优先级再比较 revision/generation/时间。
+- outcome recovery 必须同时拥有相同 `fenceId + expectedUid`；清理采用精确 compare-and-delete，
+  跨标签出现更强或更新记录时立即失败关闭。
 - 退出无论 SDK `signOut` 返回成功还是报错，都会再查 session；只有
   `session === null` 才能清理。
 - 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。本机 marker 已清，
   但界面必须提示重新载入并再核对；旧请求晚到后仍只能加固 fence，不能恢复登录。
-- fence 只有在服务端明确无 session 且没有本页活跃 session mutation 时才清除。
+- 任何只读 refresh/ensure 都无权清 fence；只有服务端明确无 session、没有本页活跃 session
+  mutation，且最终重新合并跨标签记录后边界仍稳定，显式安全退出才会清除。
 
 #### 5. 登录后附加任务
 
@@ -149,6 +173,10 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 - 历史迁移从后台裸写改为 await；迁移 `put` 前后都复验。
 - 恢复在下载后、同步调用 `HansenBackup.restore` 前复验；恢复返回后再次复验，
   才记录本地同步状态。
+- `accountCloudInfo` 与 `fetchWithKey` 也绑定原始 UID/generation，并在每个 provider get
+  前后复验；U1 的迟到元信息或明文不能返回给 U2。
+- generation-scoped `busyToken` 只允许拥有它的操作释放；U1 悬挂不永久阻塞 U2，U1 迟到也
+  不能释放 U2 的锁。
 - 云端有档/本机有档时必须明确选择；关闭、取消、稍后严格零写入。
 - 选择进入 applying 后，旧 DOM 引用、重复点击、改选、关闭、手动上传和普通退出全部失效。
 
@@ -158,13 +186,16 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
   bounded mutation、安全退出和登录后并行任务。
 - `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
 - `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
-- `test_auth_contract_v1076.mjs`：39 条业务状态机合同，覆盖正常注册/登录、空用户 session、
-  原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch 与永久悬挂。
+- `test_auth_contract_v1076.mjs`：55 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+  原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
+  SDK 初始化悬挂和跨标签 fence 强度/所有权。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
-- `test_auth_ui_v1076.mjs`：390×844 点击流程、绝对倒计时、云选择互斥、
-  unknown/mismatch/outcome_unknown 安全清理及 cleanupPending 文案。
-- `test_cloud_save_v965.mjs`：同 UID 上传/恢复成功，U1→U2 的上传、迁移、恢复零本地落地，
+- `test_auth_ui_v1076.mjs`：18 条 390×844 点击断言，覆盖绝对倒计时、云选择互斥、
+  旧 safeOut/send/go DOM 失效、手动上传 applying 锁、unknown/mismatch/outcome_unknown
+  安全清理、cleanupPending 刷新按钮与登录禁用。
+- `test_cloud_save_v965.mjs`：43 条 Node/WebCrypto 动态断言，覆盖同 UID 上传/恢复、
+  U1→U2 上传/迁移/恢复/元信息/公开 fetch 迟到、匿名 fence 零读写、generation busy token，
   并验证自动同步许可不跨身份继承。
 - `hansen_guards_v1068.py`、`hansen_bug_registry.py`：把本次每类事故变成静态守卫和登记项。
 - 发布、版本、Service Worker、生成页、Jarvis 与双包脚本：全部统一到 v1076。
@@ -178,7 +209,8 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 - 旧手机号/用户名云档只作历史候选；找不到旧档不等于允许覆盖。
 - 匿名/恢复码仍可服务未注册玩家，但匿名 session 不能冒充正式账号，也不能把同步授权带入账号。
 - `session 非空 + user:null` 保留 marker 并进入 unknown；只有 `session === null` 才是确定退出。
-- v1076 fence 使用 sessionStorage：同一标签页刷新后保留；明确无 session 后自动清除。
+- v1076 fence 使用 sessionStorage 主记录与 localStorage 跨标签备份；只读探测不会自动清除，
+  必须由显式安全退出确认 session 为空并稳定合并所有记录后清理。
 - 19 个普通/星海岛与 8 个 Land 岛必须由母版和生成器统一分发，禁止只修一页。
 - v961、v962 仍为永久淘汰的历史版本号；本次代码基线是 GitHub v1075
   `c9ca5b08d068466f87c853aa3f65e61d25eddab3`，不是失败版源码。
@@ -189,16 +221,17 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 
 | 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| 认证 VM/模拟 SDK | 39 条状态机合同：协议分支、UID、匿名、空用户 session、stale、fence、退出、硬超时 | 真实短信送达 |
-| CloudSave 动态模拟 | 同 UID 成功；U1→U2 上传/迁移/恢复迟到时停止；授权不跨身份 | 生产数据库规则 |
-| 轻量 DOM/真实事件 | applying 锁、旧 DOM 重复点击、三种安全清理状态和 cleanupPending | 具体手机浏览器渲染 |
-| Chromium 390×844 | 完整发码/注册点击、倒计时、SDK 导入与页面错误 | 控制台 provider/短信模板 |
+| 认证 VM/模拟 SDK | 55 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、跨标签 fence、退出复活 | 真实短信送达 |
+| CloudSave Node/WebCrypto | 43 条动态断言：同 UID 成功；U1→U2 上传/迁移/恢复/读取迟到停止；匿名 fence 零读写；授权和 busy token 不跨身份 | 生产数据库规则 |
+| Chromium 390×844 | 18 条真实 DOM 点击断言：完整注册、绝对倒计时、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
 | 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |
 | 全库回归 | 经济、存档、Boss、Bee、性能、安全、Jarvis 没有回退 | 所有未来浏览器/网络时序 |
 | 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后回读一致 | 静态站与 CloudBase 已部署 |
 
-本次开发过程已经完成的专项证据：认证合同 **39/39**；CloudSave 动态专项全部通过；
-轻量 DOM 专项 **14/14**；认证与 UI 文件语法解析通过。最终 PR 仍必须在 GitHub Actions
+本次开发过程已经完成的专项证据：认证合同 **55/55**；CloudSave Node/WebCrypto
+**43/43**；认证、UI、CloudSave 与三个专项测试文件均完成语法解析。UI 的 18 条 Chromium
+断言已经补齐，但最终仍必须由 GitHub Actions 在真实 Chromium 中执行，不能把“测试代码存在”
+写成“浏览器已通过”。最终 PR 仍必须在 GitHub Actions
 重新执行真实 Chromium、所有版本化 Node/Python 测试、生成器、经济/资源/浏览器/Jarvis 和
 双包可复现性。若 Actions 尚未产生或未全绿，README 与最终答复都不得把它写成“CI 已通过”。
 
