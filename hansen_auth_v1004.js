@@ -317,22 +317,42 @@
       String(a.expectedUid || '') === String(b.expectedUid || '') &&
       String(a.observedUid || '') === String(b.observedUid || '');
   }
-  function clearFence(owned) {
+  function fenceSourceSnapshot() {
+    var out = [], i;
+    function take(storage, key) {
+      try { out.push({ storage: storage, key: key, raw: storage.getItem(key) }); }
+      catch (e) { out.push({ storage: storage, key: key, raw: null, unavailable: true }); }
+    }
+    take(sessionStorage, FKEY);
+    for (i = 0; i < FSTORE_KEYS.length; i++) take(localStorage, FSTORE_KEYS[i]);
+    return out;
+  }
+  function clearFence(owned, snapshot) {
     _fenceRevision++;
     _probeId++;  /* 清理也是身份边界变化：旧 refresh/ensure 立即失去落地资格 */
-    function clearOne(storage, key) {
+    function clearOne(storage, key, expectedRaw, unavailable) {
       try {
-        if (!owned) {
-          storage.removeItem(key);
+        if (owned) {
+          var current = parseFence(storage.getItem(key));
+          if (sameFence(current, owned)) storage.removeItem(key);
           return;
         }
-        var current = parseFence(storage.getItem(key));
-        if (sameFence(current, owned)) storage.removeItem(key);
+        /* 显式 signOut 只能删除“清理快照里亲眼见过”的原值。
+           快照后出现/变化的跨标签 fence 必须保留，让调用方返回 cleanupPending。 */
+        if (unavailable || expectedRaw == null) return;
+        if (storage.getItem(key) === expectedRaw) storage.removeItem(key);
       } catch (e) {}
     }
-    clearOne(sessionStorage, FKEY);
-    for (var i = 0; i < FSTORE_KEYS.length; i++) clearOne(localStorage, FSTORE_KEYS[i]);
-    if (!owned || sameFence(_fenceMemory, owned)) _fenceMemory = null;
+    if (owned) {
+      clearOne(sessionStorage, FKEY);
+      for (var i = 0; i < FSTORE_KEYS.length; i++) clearOne(localStorage, FSTORE_KEYS[i]);
+      if (sameFence(_fenceMemory, owned)) _fenceMemory = null;
+    } else {
+      snapshot = snapshot || fenceSourceSnapshot();
+      for (var j = 0; j < snapshot.length; j++)
+        clearOne(snapshot[j].storage, snapshot[j].key, snapshot[j].raw, snapshot[j].unavailable);
+      _fenceMemory = null;
+    }
     return !readFence().kind;
   }
   function staleError(reason) {
@@ -719,7 +739,7 @@
         if (marker.method && marker.signedAt && !marker.uid)
           return setSessionTruth('legacy_reauth', '', '旧 marker 没有真实 UID');
         if (marker.uid) {
-          writeLocal({ method: '', signedAt: 0, uid: '', phone: '', username: '' });
+          writeLocal({ method: '', signedAt: 0, uid: '', phone: '', username: '', authCommitId: '' });
         }
         return setSessionTruth('signed_out', '', snap.anonymous ? 'anonymous-session' : 'no-session');
       }
@@ -1160,7 +1180,7 @@
       _pendingMemory = null;
       try { sessionStorage.removeItem(PKEY); } catch (_) {}
       writeLocal({
-        schema: 1076, method: '', signedAt: 0, uid: '', phone: '', username: '',
+        schema: 1076, method: '', signedAt: 0, uid: '', phone: '', username: '', authCommitId: '',
         pendingPhone: '', verificationId: '', isUser: false
       });
       try {
@@ -1180,7 +1200,8 @@
           requiresReload: true
         };
       }
-      if (!clearFence()) {
+      var clearSnapshot = fenceSourceSnapshot();
+      if (!clearFence(null, clearSnapshot)) {
         writeFence('stale_mutation', '', '',
           '另一个标签页在清理期间改变了认证边界；请刷新并再次核对');
         setOperation('idle', '认证边界仍在变化，请刷新页面后再次核对');
@@ -1233,6 +1254,7 @@
     var serverIdentity = identityOf({ user: snap.user });
     var phone = serverIdentity.phone || opIdentity.phone || inputIdentity.phone || '';
     var username = serverIdentity.username || opIdentity.username || inputIdentity.username || '';
+    var commitId = newFenceId('commit');
     assertAuthToken(token);
     if (existingFence.kind) {
       if (!clearFence(existingFence) || readFence().kind) {
@@ -1249,76 +1271,137 @@
       username: username,
       uid: uid,
       signedAt: Date.now(),
+      authCommitId: commitId,
       pendingPhone: '',
       verificationId: '',
       isUser: false
     });
-    _pendingMemory = null;
-    try { sessionStorage.removeItem(PKEY); } catch (_) {}
-    _outcomeRecovery = null;
-    _probeId++;
-    var epoch = ++_authEpoch;
-    setOperation('idle');
-    setSessionTruth('confirmed', uid, '');
-    try {
-      if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
-    } catch (e0) {}
 
-    /* 登录成功先立即返回。竞赛档案可能写 sb_profile；进度对账只读。
-       两项并行且各自有上限，任何一项失败/悬挂都不能卡住另一项或认证结果。 */
-    var profileJob = withTimeout(ensureProfile(uid), 8000, '竞赛档案处理超时')
-      .catch(function () { return null; });
-    var syncJob = withTimeout(syncOnLogin(uid, epoch), 8000, '云存档检查超时')
-      .catch(function (e1) {
-        return { ok: false, action: 'deferred', reason: errText(e1) };
+    function failCommitBoundary(reason) {
+      var current = readLocal();
+      /* 只回滚本标签本次写入的 commit；若另一标签已经提交了新 marker，绝不覆盖它。 */
+      if (String(current.authCommitId || '') === commitId) {
+        writeLocal({
+          schema: 1076, method: '', signedAt: 0, uid: '', phone: '', username: '',
+          authCommitId: '', pendingPhone: '', verificationId: '', isUser: false
+        });
+      }
+      var fence = readFence();
+      setOperation('outcome_unknown', reason || '登录提交边界发生变化');
+      setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
+                      fence.observedUid || '', reason || fence.reason || '登录提交边界发生变化');
+      var err = new Error(reason || '登录提交期间账号边界发生变化');
+      err.code = fence.kind ? 'AUTH_FENCED_SESSION' : 'AUTH_COMMIT_REVALIDATION_FAILED';
+      err.observedUid = String(fence.observedUid || '');
+      throw err;
+    }
+    function markerAndFenceCurrent() {
+      var fence = readFence(), marker = readLocal();
+      return !fence.kind && String(marker.uid || '') === uid &&
+        String(marker.authCommitId || '') === commitId;
+    }
+
+    /* 让跨标签 storage 写入获得一个任务边界，然后重新读取真实 SDK session。
+       只有这一步完成后才允许启动 ensureProfile 或任何云存档附加任务。 */
+    return delay(0).then(function () {
+      assertAuthToken(token);
+      if (!markerAndFenceCurrent())
+        return failCommitBoundary('另一个标签页在登录提交期间改变了账号隔离');
+      return ensureSession(uid);
+    }).then(function (truth) {
+      assertAuthToken(token);
+      if (!truth || !truth.ok || String(truth.uid || '') !== uid || !markerAndFenceCurrent())
+        return failCommitBoundary((truth && truth.reason) || '最终云端 session 复验失败');
+      _pendingMemory = null;
+      try { sessionStorage.removeItem(PKEY); } catch (_) {}
+      _outcomeRecovery = null;
+      _probeId++;
+      var epoch = ++_authEpoch;
+      setOperation('idle');
+      setSessionTruth('confirmed', uid, '');
+      try {
+        if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
+      } catch (e0) {}
+
+      /* 最终线性化成功后才启动附加任务。竞赛档案可能写 sb_profile；进度对账只读。
+         两项并行且各自有上限，任何一项失败/悬挂都不能推翻真实登录。 */
+      var profileJob = withTimeout(ensureProfile(uid), 8000, '竞赛档案处理超时')
+        .catch(function () { return null; });
+      var syncJob = withTimeout(syncOnLogin(uid, epoch), 8000, '云存档检查超时')
+        .catch(function (e1) {
+          return { ok: false, action: 'deferred', reason: errText(e1) };
+        });
+      var job = Promise.all([profileJob, syncJob]).then(function (items) {
+        var prof = items[0], sync = items[1];
+        if (epoch !== _authEpoch || !isSignedIn() || readLocal().uid !== uid)
+          return { stale: true };
+        return {
+          cid: (prof && prof.cid) || 0,
+          pendingId: !(prof && prof.cid),
+          sync: sync,
+          uid: uid,
+          epoch: epoch
+        };
+      }).catch(function (e1) {
+        return {
+          cid: 0,
+          pendingId: true,
+          uid: uid,
+          epoch: epoch,
+          sync: { ok: false, action: 'deferred', reason: errText(e1) }
+        };
       });
-    var job = Promise.all([profileJob, syncJob]).then(function (items) {
-      var prof = items[0], sync = items[1];
-      if (epoch !== _authEpoch || !isSignedIn() || readLocal().uid !== uid)
-        return { stale: true };
-      return {
-        cid: (prof && prof.cid) || 0,
-        pendingId: !(prof && prof.cid),
-        sync: sync,
-        uid: uid,
-        epoch: epoch
-      };
-    }).catch(function (e1) {
-      return {
-        cid: 0,
-        pendingId: true,
-        uid: uid,
-        epoch: epoch,
-        sync: { ok: false, action: 'deferred', reason: errText(e1) }
-      };
+      return { ok: true, uid: uid, cid: 0, pendingId: true, epoch: epoch, postLogin: job };
     });
-    return { ok: true, uid: uid, cid: 0, pendingId: true, epoch: epoch, postLogin: job };
+  }
+  /* 建立/读取云端档案，并分配竞赛 ID */
+  function verifyProfileIdentity(uid) {
+    return ensureSession(uid).then(function (truth) {
+      var marker = readLocal(), fence = readFence();
+      if (!truth || !truth.ok || String(truth.uid || '') !== String(uid) ||
+          fence.kind || !isSignedIn() || String(marker.uid || '') !== String(uid))
+        throw staleError('竞赛档案操作期间账号会话已经变化');
+      return truth;
+    });
   }
 
-  /* 建立/读取云端档案，并分配竞赛 ID */
+  /* 建立/读取云端档案，并分配竞赛 ID。每次云读写前后都重新验证 UID。 */
   function ensureProfile(uid) {
     var db = null, docRef = null;
-    return app().then(function (a) {
+    function readProfile() {
+      return verifyProfileIdentity(uid).then(function () {
+        return docRef.get();
+      }).then(function (res) {
+        return verifyProfileIdentity(uid).then(function () { return res; });
+      });
+    }
+    return verifyProfileIdentity(uid).then(function () {
+      return app();
+    }).then(function (a) {
       db = a.database();
       docRef = db.collection(COL_PROFILE).doc(uid);
-      return docRef.get();
+      return readProfile();
     }).then(function (res) {
       var row = res && res.data && res.data[0];
-      if (row && row.cid > 0) return row;                 /* 已有号码 → 直接用 */
-      if (row) return assignCid(db, docRef, row.createdAt);
-      /* 首次：建档，createdAt 用服务端时间（客户端伪造不了 → 排名可信） */
-      return docRef.set({
-        uid: uid,
-        name: (localProfileName() || ''),
-        cid: 0,
-        createdAt: db.serverDate(),
-        updatedAt: db.serverDate()
-      }).then(function () { return docRef.get(); }).then(function (r2) {
+      if (row && row.cid > 0) return row;
+      if (row) return assignCid(db, docRef, row.createdAt, uid);
+      return verifyProfileIdentity(uid).then(function () {
+        return docRef.set({
+          uid: uid,
+          name: (localProfileName() || ''),
+          cid: 0,
+          createdAt: db.serverDate(),
+          updatedAt: db.serverDate()
+        });
+      }).then(function () {
+        return readProfile();
+      }).then(function (r2) {
         var row2 = r2 && r2.data && r2.data[0];
-        return assignCid(db, docRef, row2 && row2.createdAt);
+        return assignCid(db, docRef, row2 && row2.createdAt, uid);
       });
     }).then(function (prof) {
-      if (prof && prof.cid > 0 && isSignedIn() && String(readLocal().uid || '') === String(uid)) {
+      if (prof && prof.cid > 0 && isSignedIn() &&
+          !readFence().kind && String(readLocal().uid || '') === String(uid)) {
         try {
           if (window.HansenSbProfile && HansenSbProfile.claimCloudId) HansenSbProfile.claimCloudId(prof.cid);
         } catch (e) {}
@@ -1327,17 +1410,21 @@
     });
   }
 
-  /* 竞赛 ID = 比我早注册的人数 + 1，一次算定后写回并锁死 */
-  function assignCid(db, docRef, createdAt) {
+  /* 竞赛 ID = 比我早注册的人数 + 1；真正 update 前再次复验当前 UID。 */
+  function assignCid(db, docRef, createdAt, uid) {
     if (!createdAt) return Promise.resolve(null);
-    return db.collection(COL_PROFILE).where({ createdAt: db.command.lt(createdAt) }).count()
-      .then(function (r) {
-        var cid = ((r && r.total) || 0) + 1;
-        return docRef.update({ cid: cid, updatedAt: db.serverDate() }).then(function () {
-          return { cid: cid };
-        });
-      })
-      .catch(function () { return null; });   /* 发号失败不阻断登录，下次登录再补 */
+    return verifyProfileIdentity(uid).then(function () {
+      return db.collection(COL_PROFILE).where({ createdAt: db.command.lt(createdAt) }).count();
+    }).then(function (r) {
+      var cid = ((r && r.total) || 0) + 1;
+      return verifyProfileIdentity(uid).then(function () {
+        return docRef.update({ cid: cid, updatedAt: db.serverDate() });
+      }).then(function () {
+        return verifyProfileIdentity(uid);
+      }).then(function () {
+        return { cid: cid };
+      });
+    }).catch(function () { return null; });
   }
 
   function localProfileName() {
