@@ -105,6 +105,26 @@
   }
   /* 保留原名供外部与自检面板使用；语义已变为"账号标识" */
   function accountUid(){ return accountIdent(); }
+
+  /* 自动同步许可必须绑定到当前身份。
+     旧匿名恢复码的 enabled 不能在正式账号登录后自动继承，否则 pagehide/心跳
+     会绕过冲突选择，把本机档直接写到新 UID 地址。 */
+  function syncIdentity(keyHint){
+    var account = accountIdent();
+    if (account) return 'account:' + account;
+    var st = readState();
+    var key = normalizeKey(keyHint || st.key || '');
+    return key ? ('recovery:' + key) : '';
+  }
+  function automaticSyncEnabled(st){
+    st = st || readState();
+    var current = syncIdentity();
+    if (!st.enabled || !current) return false;
+    if (st.enabledIdentity) return st.enabledIdentity === current;
+    /* v1074 及更早没有 enabledIdentity：只兼容未登录恢复码身份，
+       永远不把这份旧许可带进正式账号。 */
+    return !accountIdent();
+  }
   /* 由 uid 推出 16 位大写密钥(与本机密钥同格式, 复用全部加解密与 docId 管线) */
   /* 🔴v1036: v1033 之前 keyFromUid 用的字符集含 L/U，会算出另一把钥匙。
      兼容读取时需要能重算那把旧钥匙，才能把旧地址上的存档取回来。 */
@@ -258,7 +278,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1074')
+               import('./vendor_cloudbase_esm_v965.js?v=1075')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -370,10 +390,10 @@
        未开启时一个网络请求都不发——既避免在用户不知情时上传存档，
        也避免 envId 已填但控制台未配完时页面报 net::ERR_FAILED。
        用户点「立即同步」走 force 分支，成功后自动置 enabled。 */
-    if(!opts.force && !readState().enabled)
-      return Promise.resolve({ ok:false, reason:'not-enabled' });
-    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
     var st = readState();
+    if(!opts.force && !automaticSyncEnabled(st))
+      return Promise.resolve({ ok:false, reason:'not-enabled-for-current-identity' });
+    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
     if(!opts.force && st.lastUpAt && (Date.now() - st.lastUpAt) < SYNC_MIN_GAP)
       return Promise.resolve({ ok:false, reason:'cooldown' });
     if(!(window.HansenBackup && typeof HansenBackup.exportCode === 'function'))
@@ -394,13 +414,14 @@
              ② 非 force 时，除内容指纹外还要比对**上次写入的地址**，
                 地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
+    var identity = syncIdentity(key);
     _busy = true;
     return docIdOf(key).then(function(targetId){
       if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
         _busy = false;
         return { ok:true, skipped:true, reason:'unchanged' };
       }
-      return doUpload(key, code, h, targetId);
+      return doUpload(key, code, h, targetId, identity);
     }).catch(function(e){
       _busy = false;
       return { ok:false, reason:'upload-failed', error: friendly(e) };
@@ -408,12 +429,13 @@
   }
 
   /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */
-  function doUpload(key, code, h, targetId){
+  function doUpload(key, code, h, targetId, identity){
     var p = provider();
     return sealPayload(key, code).then(function(envelope){
       return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
     }).then(function(){
-      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, enabled: true });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* 🔴v1003: 首次成功即开启自动同步 */
+      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId,
+                   enabled: true, enabledIdentity: identity || syncIdentity(key) });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* v1075: 许可绑定身份 */
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){
@@ -498,7 +520,8 @@
       var r;
       try{ r = HansenBackup.restore(parsed); }
       catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名
-      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(), enabled: true });
+      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
+                   enabled: true, enabledIdentity: syncIdentity(got.key) });
       renderCard();
       return { ok:true, result:r };
     });
@@ -555,7 +578,10 @@
       function statusHtml(){
         var p2 = provider(), s2 = readState();
         if(!p2) return '<span style="color:#fbbf24">待开通</span> · 按《云存档开通指南》4 步完成后自动点亮';
-        if(s2.lastUpAt) return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
+        if(s2.lastUpAt && automaticSyncEnabled(s2))
+          return '<span style="color:#34d399">已同步</span> · '+new Date(s2.lastUpAt).toLocaleString();
+        if(s2.lastUpAt && s2.enabled && !automaticSyncEnabled(s2))
+          return '<span style="color:#fbbf24">待选择</span> · 当前身份尚未开启自动同步';
         /* 🔴v1003: 云存档改为主动开启制, 文案必须与行为一致——
            在用户点过「立即同步」之前不会自动上云, 不能再说"玩一会儿会自动上云" */
         return '<span style="color:#93c5fd">已就绪</span> · 点「立即同步」开启云存档';
