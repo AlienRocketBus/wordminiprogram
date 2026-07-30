@@ -663,7 +663,7 @@ def guard_no_divergent_config():
 
 
 def guard_auth_real_session():
-    """v1076：认证 UID、SDK session、本地 marker、自动同步授权与云存档动作必须同源。"""
+    """v1076：认证、持久隔离、界面互斥与云存档跨代写入必须共享同一身份边界。"""
     auth = _code_only(_read('hansen_auth_v1004.js'))
     ui = _code_only(_read('hansen_auth_ui_v1004.js'))
     cloud = _code_only(_read('hansen_cloud_save_v965.js'))
@@ -677,24 +677,42 @@ def guard_auth_real_session():
         bad('认证真实会话', '本次认证 UID 没有与 getSession UID 强一致')
     if 'AUTH_OPERATION_UID_MISSING' not in auth or 'AUTH_ANONYMOUS_RESULT' not in auth:
         bad('认证真实会话', '缺少 operation UID/匿名会话失败关闭')
-    if 'AUTH_OUTCOME_UNKNOWN' not in auth or 'awaitAuthMutation' not in auth:
-        bad('认证真实会话', '认证 mutation 超时仍可能被当作已取消')
+    if 'getCurrentUser(true)' not in auth or 'snap.indeterminate' not in auth:
+        bad('认证真实会话', 'getSession 有凭证但 user 为空时没有进入不确定态并强制刷新用户')
+    if 'AUTH_MUTATION_INDETERMINATE' not in auth or 'awaitAuthMutation' not in auth:
+        bad('认证真实会话', '认证 mutation 没有硬上限与结果未知隔离')
+    if 'probeCurrent' not in auth or '_authGeneration' not in auth or '_probeId' not in auth:
+        bad('认证真实会话', '迟到 refresh/ensure 仍可能跨认证代写回旧身份')
+    fence_markers = (
+        'hansen_auth_fence_v1076', 'hansen_auth_fence_backup_v1076',
+        'outcome_unknown: 1', 'stale_mutation: 2', 'mismatch: 3',
+        'AUTH_FENCED_SESSION', 'ownedFenceRevision', 'hadPriorSessionMutation')
+    if any(marker not in auth for marker in fence_markers):
+        bad('认证真实会话', '持久 fence、优先级、所有权或退出后迟到 mutation 防线不完整')
     if 'refreshSessionTruth' not in auth or 'sessionStatus' not in auth:
         bad('认证真实会话', '启动/打开面板没有真实 session 状态机')
     if 'resolveCloudChoice' not in ui or 'HansenCloudSave' in ui:
         bad('认证真实会话', 'UI 仍绕过 expected UID 直接操作云存档')
     if '稍后处理（现在零写入）' not in ui:
         bad('认证真实会话', '云存档冲突没有默认零写入出口')
+    if '_renderEpoch' not in ui or '_cleanupReloadRequired' not in ui:
+        bad('认证真实会话', '旧 DOM 事件或 cleanupPending 仍可能绕过界面身份边界')
+    if 'applying-cloud' not in ui or 'applying-local' not in ui or 'sameRequest' not in ui:
+        bad('认证真实会话', '云存档破坏性选择没有统一 applying 锁和请求所有权')
     if "out.push('u:' + String(uid))" not in cloud:
         bad('认证真实会话', '云存档新地址仍未以稳定 UID 为唯一真源')
     if 'automaticSyncEnabled' not in cloud or 'enabledIdentity' not in cloud:
         bad('认证真实会话', '自动同步授权没有绑定当前正式账号身份')
     if 'not-enabled-for-current-identity' not in cloud:
         bad('认证真实会话', '切换账号后后台同步没有失败关闭')
-    if 'verifyExpectedAccount' not in cloud or 'expectedUid' not in cloud:
-        bad('认证真实会话', '云端恢复覆盖本机前没有复验当前账号 UID')
+    if 'verifyExpectedAccount' not in cloud or 'verifyOperation' not in cloud:
+        bad('认证真实会话', '云端读写/恢复覆盖前没有逐次复验账号与操作代')
     if 'rawAccountUid' not in cloud:
         bad('认证真实会话', '会话原始 UID 与 u:文档身份仍被混为同一个值')
+    if 'anonymousBoundaryAllowed' not in cloud:
+        bad('认证真实会话', '认证未知/隔离态仍可能跌入匿名云存档分支')
+    if '_busyToken' not in cloud or '_generation' not in cloud:
+        bad('认证真实会话', '旧账号悬挂同步仍可能阻塞或释放新账号的同步锁')
     if 'postLogin' not in ui:
         bad('认证真实会话', '登录 UI 仍可能被云同步阻塞')
 
