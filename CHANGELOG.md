@@ -45,6 +45,11 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
     把 receipt 从 active 改成 returned，两个瞬时扫描都为空却已经复活 session。
 22. 🔴 active receipt 写成功后、SDK 调用前若被 B boundary 取代，旧代码虽能拦 SDK，却留下永远
     active 的假回执；现在必须在调用次数为 0 时转 rejected。
+23. 🔴 BKEY/current outcome 的 `getItem` 抛错或非空 JSON/shape 损坏曾被当成不存在；
+    same-boundary 的早期 legacy marker 可掩盖权威读取失败并继续 confirmed。显式损坏的
+    FKEY/FBKEY 也可能被当成无 fence。
+24. 🔴 append-only outcome 与 terminal receipt 在重复登录/退出和 pre-SDK 失权失败下无界增长，
+    会逐步消耗 localStorage 配额；但粗暴清理又会删除 active/unknown 或并发 owner 的证据。
 
 ### 实现
 
@@ -89,7 +94,15 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   再查服务器 session，并抓取 fence 快照；只有 session=null、无 active/unknown、无重叠 receipt、
   BKEY/outcome/fence 最终稳定时才宣布 signed_out。
 - 本轮不把未验证的 Web Locks 当作恢复保证。旧页崩溃且 active 永不结算时严格失败关闭；UI
-  明示关闭所有相关标签、清除该站点认证/站点数据、重新打开登录，绝不靠 TTL 静默放行。
+  明示先导出本机备份、关闭所有相关标签、优先仅清除认证相关数据后重登；若浏览器只能清除全部站点数据，必须警告它会删除本机学习进度并要求先确认备份。系统绝不靠 TTL 静默放行。
+- 权威 BKEY/current outcome/FKEY/FBKEY 的 read throw、非空 malformed 与 shape 损坏全部产生
+  `readFailed/unavailable` sentinel；readLocal、isSignedIn、sessionStatus、needsReauth、
+  operationStatus、claim 和 assert 全部返回 unknown/cleanup，legacy marker 不能兜底。
+- 每次新 boundary 落地后执行有界 GC：保护 current/parent，另保留最近 24 条 outcome 与 terminal
+  receipt 审计历史；只 exact-raw 删除明确终结项，并在每次删除前后逐字复验 BKEY。
+  active/unknown 永不删除，BKEY 一变立即停止并在 session-changing SDK 前失败关闭。
+- cleanupPending 只返回 `serverRevoked:false, serverRevocationObserved:true`；因为本次 signOut
+  之后仍可能被 ABA 登录复活。只有最终稳定 clean 路径才返回 serverRevoked=true。
 
 云存档和 UI：
 
@@ -136,12 +149,13 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 
 已在开发环境实际执行：
 
-- `test_auth_contract_v1076.mjs`：**73/73**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
+- `test_auth_contract_v1076.mjs`：**76/76**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
   operation/session UID、`session+user:null`、旧 refresh/ensure、迟到发码/登录、signOut 复活、
   mismatch 持久化、只读 null 不清 fence、mutation 永久悬挂、SDK init 永久悬挂、跨标签
   fence 强度与恢复所有权、两个独立 context 共享 localStorage 的在途登录/退出、boundary 写回
   失败前 SDK 零调用、PKEY 清理窗口、append-only outcome、登录/退出 supersede、
-  signOut receipt ABA、TTL 过期 active 不删除、profile 零写入及竞赛 ID 安全降级。
+  signOut receipt ABA、TTL 过期 active 不删除、BKEY/current outcome thrown+malformed fail-closed、
+  显式 corrupt fence、40 次正常循环 + 40 次 pre-SDK rejected 有界 GC、profile 零写入与竞赛 ID 降级。
 - `test_cloud_save_v965.mjs`：Node/WebCrypto 动态 **43/43**。覆盖同 UID 上传/恢复、授权不跨身份、
   unknown/mismatch/cleanup 匿名零读写、U1→U2 的 put/迁移/restore/accountCloudInfo/fetch 迟到、
   本地 writeState 零污染和 generation busy token。
@@ -150,6 +164,8 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   绝对 resendAt、成功展示前 session/boundary/marker 复验、竞赛 ID 未启用提示、
   旧 safeOut/send/go DOM 失效、冲突选择/手动上传 applying、三类安全清理、cleanupPending
   刷新按钮和登录禁用。它必须由 GitHub Actions 的真实 Chromium 执行后才能记为通过。
+- 当前环境缺少 Playwright Chromium 可执行文件，因此这 19 条浏览器断言尚未实际运行。
+  截至当前候选 head，GitHub Actions 运行记录为 0；生产真实设备冒烟也未执行。
 
 正式 CI 还必须自动枚举全部 `test_*v*.mjs` / `test_*v*.py`，运行两套生成器、27 岛接线、
 经济/资源/导航/安全、20 道新时代守卫、事故登记、Jarvis 自证、浏览器墙、最终源码指纹和两次

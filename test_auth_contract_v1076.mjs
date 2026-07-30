@@ -752,12 +752,171 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
     }
   });
   const first=await b.A.signOut();
-  ok(sdkCalls===1&&first.ok&&first.cleanupPending&&first.requiresReload,
-     '初扫后出现、session=null 快照后转 returned 的重叠 receipt 不能从 active 快照间隙漏过');
+  ok(sdkCalls===1&&first.ok&&first.cleanupPending&&first.requiresReload&&
+     first.serverRevoked===false&&first.serverRevocationObserved===true,
+     '初扫后出现、session=null 快照后转 returned 的重叠 receipt 不能从 active 快照间隙漏过，且不能把已被 ABA 复活的服务端会话谎报为仍已撤销');
   await new Promise(r=>setTimeout(r,2));
   const second=await b.A.signOut();
   ok(second.ok&&!second.cleanupPending&&serverUid===''&&b.A.sessionStatus().state==='signed_out',
      '重叠 receipt 已在上次退出前结算后，下一次显式 signOut 重新撤销复活 session 才能 clean');
+}
+
+{
+  function confirmedLegacyBoot() {
+    const b=boot();
+    b.local.setItem('hansen_auth_v1004',JSON.stringify({
+      schema:1076,method:'password',signedAt:Date.now(),uid:'U-IO'
+    }));
+    b.A._setSessionForTest('confirmed','U-IO');
+    return b;
+  }
+  const thrown=confirmedLegacyBoot();
+  const thrownGet=thrown.local.getItem.bind(thrown.local);
+  thrown.local.getItem=function(k){
+    if(k==='hansen_auth_boundary_v1076')throw new Error('BKEY unavailable');
+    return thrownGet(k);
+  };
+  const malformed=confirmedLegacyBoot();
+  malformed.local.setItem('hansen_auth_boundary_v1076','{"boundaryId":');
+  const corruptFence=confirmedLegacyBoot();
+  corruptFence.session.setItem('hansen_auth_fence_v1076','{"kind":');
+  ok(!thrown.A.isSignedIn()&&thrown.A.sessionStatus().state==='unknown'&&
+     thrown.A.needsReauth()&&thrown.A.operationStatus().requiresCleanup&&
+     !thrown.A.readLocal().uid&&
+     !malformed.A.isSignedIn()&&malformed.A.sessionStatus().state==='unknown'&&
+     malformed.A.needsReauth()&&malformed.A.operationStatus().requiresCleanup&&
+     !malformed.A.readLocal().uid&&
+     !corruptFence.A.isSignedIn()&&corruptFence.A.sessionStatus().state==='unknown'&&
+     corruptFence.A.needsReauth()&&corruptFence.A.operationStatus().requiresCleanup,
+     'BKEY getItem 抛错、非空 malformed BKEY 与显式损坏 fence 都返回 readFailed/unknown，旧 marker 不能 fail-open');
+}
+{
+  function boundaryBoot(outcomeMode) {
+    const b=boot(),boundary={
+      schema:1076,boundaryId:'IO-OUTCOME',kind:'session_mutation',
+      parentBoundaryId:'',generation:1,startedAt:Date.now()
+    };
+    b.local.setItem('hansen_auth_boundary_v1076',JSON.stringify(boundary));
+    b.local.setItem('hansen_auth_v1004',JSON.stringify({
+      schema:1076,method:'password',signedAt:Date.now(),uid:'U-EARLY',
+      authBoundaryId:'IO-OUTCOME',authBoundaryState:'signed_in'
+    }));
+    if(outcomeMode==='malformed')
+      b.local.setItem('hansen_auth_boundary_outcome_v1076:IO-OUTCOME','{"state":');
+    else {
+      b.local.setItem('hansen_auth_boundary_outcome_v1076:IO-OUTCOME',JSON.stringify({
+        schema:1076,boundaryId:'IO-OUTCOME',kind:'session_mutation',
+        state:'signed_in',method:'password',uid:'U-EARLY',
+        signedAt:Date.now(),authCommitId:'IO-COMMIT',writtenAt:Date.now()
+      }));
+      const get=b.local.getItem.bind(b.local);
+      b.local.getItem=function(k){
+        if(k==='hansen_auth_boundary_outcome_v1076:IO-OUTCOME')
+          throw new Error('outcome unavailable');
+        return get(k);
+      };
+    }
+    b.A._setSessionForTest('confirmed','U-EARLY');
+    return b;
+  }
+  const thrown=boundaryBoot('throw'),malformed=boundaryBoot('malformed');
+  ok(!thrown.A.isSignedIn()&&thrown.A.sessionStatus().state==='unknown'&&
+     thrown.A.needsReauth()&&thrown.A.operationStatus().requiresCleanup&&
+     !thrown.A.readLocal().uid&&
+     !malformed.A.isSignedIn()&&malformed.A.sessionStatus().state==='unknown'&&
+     malformed.A.needsReauth()&&malformed.A.operationStatus().requiresCleanup&&
+     !malformed.A.readLocal().uid,
+     'current outcome getItem 抛错或非空 malformed 时失败关闭，same-boundary 早期 legacy marker 不能掩盖 I/O/shape 错误');
+}
+{
+  const normalLocal=storage(),normal=boot({local:normalLocal,session:storage()});
+  let serverUid='';
+  normal.A._setAuthForTest({
+    signInWithPassword(){serverUid='U-GC';return Promise.resolve({user:{uid:'U-GC'}});},
+    signOut(){serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
+  });
+  for(let i=0;i<40;i++){
+    await normal.A.loginByPassword('gc_user','pw');
+    const out=await normal.A.signOut();
+    if(!out.ok||out.cleanupPending)throw new Error('GC cycle signOut was not clean');
+  }
+  const current=JSON.parse(normalLocal.getItem('hansen_auth_boundary_v1076')||'{}');
+  const currentOutcomeKey='hansen_auth_boundary_outcome_v1076:'+current.boundaryId;
+  const parentOutcomeKey='hansen_auth_boundary_outcome_v1076:'+current.parentBoundaryId;
+  const now=Date.now();
+  normalLocal.setItem('hansen_auth_boundary_receipt_v1076:KEEP-ACTIVE',JSON.stringify({
+    schema:1076,boundaryId:'KEEP-ACTIVE',kind:'session_mutation',state:'active',
+    startedAt:now-100000,updatedAt:now-100000,expiresAt:now-1
+  }));
+  normalLocal.setItem('hansen_auth_boundary_receipt_v1076:KEEP-UNKNOWN',JSON.stringify({
+    schema:1076,boundaryId:'KEEP-UNKNOWN',kind:'session_mutation',state:'unknown',
+    startedAt:now-100000,updatedAt:now-100000,expiresAt:now-1
+  }));
+  for(let i=0;i<50;i++){
+    const id='GC-SEED-'+i;
+    normalLocal.setItem('hansen_auth_boundary_outcome_v1076:'+id,JSON.stringify({
+      schema:1076,boundaryId:id,kind:'session_mutation',state:'signed_out',
+      method:'',uid:'',phone:'',username:'',signedAt:0,authCommitId:'',
+      writtenAt:now-10000+i
+    }));
+    normalLocal.setItem('hansen_auth_boundary_receipt_v1076:'+id,JSON.stringify({
+      schema:1076,boundaryId:id,kind:'session_mutation',state:'rejected',
+      startedAt:now-10000+i,updatedAt:now-10000+i,expiresAt:now-1
+    }));
+  }
+  const pruned=normal.A._pruneAuthHistoryForTest(current);
+  const normalOutcomeKeys=Object.keys(normalLocal.d)
+    .filter(k=>k.indexOf('hansen_auth_boundary_outcome_v1076:')===0);
+  const normalReceiptKeys=Object.keys(normalLocal.d)
+    .filter(k=>k.indexOf('hansen_auth_boundary_receipt_v1076:')===0);
+  const preservedAudit=!!normalLocal.getItem(currentOutcomeKey)&&
+    !!normalLocal.getItem(parentOutcomeKey)&&
+    !!normalLocal.getItem('hansen_auth_boundary_receipt_v1076:KEEP-ACTIVE')&&
+    !!normalLocal.getItem('hansen_auth_boundary_receipt_v1076:KEEP-UNKNOWN');
+
+  const failedLocal=storage(),baseSet=failedLocal.setItem;
+  let sdkCalls=0;
+  for(let i=0;i<40;i++){
+    let injected=false;
+    failedLocal.setItem=function(k,v){
+      baseSet.call(failedLocal,k,v);
+      let receipt=null;try{receipt=JSON.parse(String(v));}catch(_){}
+      if(!injected&&k.indexOf('hansen_auth_boundary_receipt_v1076:')===0&&
+         receipt&&receipt.state==='active'){
+        injected=true;
+        const id='GC-SUPERSEDE-'+i;
+        const boundary={schema:1076,boundaryId:id,kind:'signout',
+          parentBoundaryId:receipt.boundaryId,generation:100+i,startedAt:Date.now()};
+        const outcome={schema:1076,boundaryId:id,kind:'signout',state:'signed_out',
+          method:'',uid:'',phone:'',username:'',signedAt:0,authCommitId:'',
+          writtenAt:Date.now()};
+        baseSet.call(failedLocal,'hansen_auth_boundary_v1076',JSON.stringify(boundary));
+        baseSet.call(failedLocal,'hansen_auth_boundary_outcome_v1076:'+id,JSON.stringify(outcome));
+      }
+    };
+    const attempt=boot({local:failedLocal,session:storage()});
+    attempt.A._setAuthForTest({
+      signInWithPassword(){sdkCalls++;return Promise.resolve({user:{uid:'NEVER'}});},
+      getSession(){return Promise.resolve(sessionResult('NEVER'));}
+    });
+    const err=await attempt.A.loginByPassword('gc_fail','pw').then(()=>null,e=>e);
+    if(!err||!injected)throw new Error('expected pre-SDK supersede');
+    failedLocal.setItem=baseSet;
+    for(const key of Object.keys(failedLocal.d))
+      if(key.indexOf('hansen_auth_fence_')===0)delete failedLocal.d[key];
+  }
+  failedLocal.setItem=baseSet;
+  const failedOutcomeKeys=Object.keys(failedLocal.d)
+    .filter(k=>k.indexOf('hansen_auth_boundary_outcome_v1076:')===0);
+  const failedReceiptKeys=Object.keys(failedLocal.d)
+    .filter(k=>k.indexOf('hansen_auth_boundary_receipt_v1076:')===0);
+  const failedCurrent=JSON.parse(failedLocal.getItem('hansen_auth_boundary_v1076')||'{}');
+  ok(pruned&&normalOutcomeKeys.length<=26&&normalReceiptKeys.length<=28&&
+     preservedAudit&&sdkCalls===0&&failedOutcomeKeys.length<=26&&
+     failedReceiptKeys.length<=26&&
+     !!failedLocal.getItem('hansen_auth_boundary_outcome_v1076:'+failedCurrent.boundaryId),
+     '40 次正常登录/退出与 40 次 pre-SDK rejected 循环保持有界；GC 保留 current/parent outcome 与 active/unknown receipt');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

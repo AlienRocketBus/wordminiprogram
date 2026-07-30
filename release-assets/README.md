@@ -18,7 +18,7 @@
 ### 背景与根因
 
 用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
-CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下二十二条
+CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下二十四条
 互相叠加、其中多条只会在跨标签或迟到 Promise 时出现的真实故障链：
 
 1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
@@ -112,7 +112,19 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
     新出现或变化的其他 mutation 一律视为重叠并返回 cleanupPending，不能宣称 clean。
 22. **失败关闭也必须有可操作恢复路径。** 浏览器不支持可靠取消底层认证 Promise；本轮没有把
     未验证的 Web Locks 当作安全保证。若旧页崩溃导致 active 永不结算，系统持续阻止登录并显示：
-    关闭本小程序所有标签页，清除该站点认证/站点数据，再重新打开登录。它绝不会用 TTL 静默放行。
+    先导出本机备份并关闭本小程序所有标签页，优先仅清除该站点的认证相关数据，再重新打开登录。若浏览器只能“清除全部站点数据”，该操作会删除本机学习进度，必须确认备份后再继续；系统绝不会用 TTL 静默放行。
+23. **权威认证存储读取失败曾会回退旧 marker。** BKEY 或当前 outcome 的 `getItem` 抛错，
+    以及非空 JSON/shape 损坏，过去会被当作“记录不存在”，same-boundary 的早期 LKEY 加上
+    内存 confirmed 就可能显示已登录。现在权威 boundary/outcome/fence 都返回显式
+    `readFailed/unavailable` sentinel；`readLocal/isSignedIn/sessionStatus/needsReauth/`
+    `operationStatus/claim/assert` 全部失败关闭为 unknown + cleanup，绝不让 legacy marker 掩盖
+    I/O 或损坏。显式非空但损坏的 FKEY/FBKEY 同样不能被当作“没有 fence”。
+24. **append-only outcome/terminal receipt 会无界增长。** 连续登录/退出或 SDK 前失权失败
+    会不断增加 localStorage key，最终可能挤爆配额。现在每次新 boundary 落地后执行有界 GC：
+    保留 current、parent 与最近 24 条审计记录，只删除明确 `signed_in/signed_out` outcome
+    或 `returned/rejected` terminal receipt；`active/unknown` 无论 TTL 多久都永久跳过。
+    每个删除都要求目标值 exact-raw 相等，并在删除前后逐字复验 BKEY 仍属于本次新 boundary；
+    BKEY 一旦变化立即停止并在 SDK 调用前失败关闭。
 
 官方接口与安全边界依据：
 
@@ -164,6 +176,10 @@ revision、原因和时间，不含任何凭据。
   SDK 凭证。boundary 写入或读回失败时，在调用 session-changing SDK **之前**失败关闭。
 - boundary 是“最新操作令牌”，不做跨 owner compare-delete；新边界故意让旧边界失权。
   receipt 采用每操作唯一 key，因此一个标签不能覆盖另一个标签的在途证据。
+- BKEY/current outcome/FKEY/FBKEY 的读取异常或非空损坏不是“缺省值”，而是权威存储不可用；
+  所有登录判定必须返回 unknown/cleanup，旧 LKEY 不得兜底冒充 confirmed。
+- outcome 与 terminal receipt 只保留 current、parent 和最近 24 条小型审计历史。GC 只删
+  exact-raw 未变化的旧 terminal 项，并在每个删除前后复验 BKEY；active/unknown 永不参与 GC。
 
 #### 2. 手机注册和手机登录
 
@@ -204,7 +220,7 @@ revision、原因和时间，不含任何凭据。
   `session === null` 才能清理。
 - 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。当前 signOut 只写自己的
   signed_out outcome；界面必须提示重新载入并再次安全退出。active/unknown 即使超过诊断 TTL
-  也不会消失。若旧页崩溃导致永不结算，关闭全部相关标签并清除该站点认证/站点数据后重登。
+  也不会消失。若旧页崩溃导致永不结算，先导出本机备份并关闭全部相关标签，优先仅清除认证相关数据后重登；若只能清除全部站点数据，它会删除本机学习进度，必须先确认备份。
 - 每次顶层登录/结果恢复/退出先 claim 共享 `boundaryId`；每次 token 复验同时核对本标签
   generation 和共享 boundary。两个标签真正同时开始时，后写 boundary 者取得全局资格，前者
   下一次主动检查即进入 `AUTH_CROSS_TAB_SUPERSEDED`，不能依赖可能丢失的 storage event。
@@ -220,6 +236,9 @@ revision、原因和时间，不含任何凭据。
 - 任何只读 refresh/ensure 都无权清 fence 或接管未落地 boundary；显式安全退出先抓取每个
   fence key 原值快照，只 compare-delete 未变化的旧记录。只有服务端明确无 session、没有
   跨标签 active/unknown receipt，且最终边界稳定时才宣布 signed_out。
+- cleanupPending 只能说明“本次 signOut 曾观察到服务端撤销”，不能证明随后没有 ABA 复活；
+  因此返回 `serverRevoked:false, serverRevocationObserved:true`。只有 clean 路径在最终稳定
+  复验后才允许 `serverRevoked:true`。
 
 #### 5. 登录后附加任务与竞赛 ID 安全降级
 
@@ -280,12 +299,13 @@ v1076 明确禁止认证模块自动访问 `sb_profile`：
   profile 零访问/云存档只读检查。
 - `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
 - `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
-- `test_auth_contract_v1076.mjs`：73 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+- `test_auth_contract_v1076.mjs`：76 条业务状态机合同，覆盖正常注册/登录、空用户 session、
   原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
   SDK 初始化悬挂、跨标签 fence 强度/所有权、两个独立 JS context 共享 localStorage 的
   登录/退出复活、boundary 持久化失败、PKEY 清理窗口、append-only outcome、登录/退出 marker
-  supersede、SDK 前失权零调用、signOut receipt ABA、TTL 过期 active 不删除、profile 零写入与
-  竞赛 ID 安全降级。
+  supersede、SDK 前失权零调用、signOut receipt ABA、TTL 过期 active 不删除、BKEY/current
+  outcome 的 thrown/malformed fail-closed、显式 corrupt fence、40+40 次有界 GC 压力循环、
+  profile 零写入与竞赛 ID 安全降级。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
 - `test_auth_ui_v1076.mjs`：19 条 390×844 点击断言，覆盖绝对倒计时、完整手机注册、
@@ -325,19 +345,21 @@ v1076 明确禁止认证模块自动访问 `sb_profile`：
 
 | 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| 认证 VM/模拟 SDK | 73 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、双 context boundary/receipt、退出复活、PKEY/marker TOCTOU、profile 零写入 | 真实短信送达 |
+| 认证 VM/模拟 SDK | 76 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、双 context boundary/receipt、退出复活、PKEY/marker TOCTOU、权威存储 fail-closed、有界 GC、profile 零写入 | 真实短信送达 |
 | CloudSave Node/WebCrypto | 43 条动态断言：同 UID 成功；U1→U2 上传/迁移/恢复/读取迟到停止；匿名 fence 零读写；授权和 busy token 不跨身份 | 生产数据库规则 |
 | Chromium 390×844 | 19 条真实 DOM 点击断言：完整注册、绝对倒计时、成功前复验、竞赛 ID 降级提示、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
 | 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |
 | 全库回归 | 经济、存档、Boss、Bee、性能、安全、Jarvis 没有回退 | 所有未来浏览器/网络时序 |
 | 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后回读一致 | 静态站与 CloudBase 已部署 |
 
-本次开发过程已经完成的专项证据：认证合同 **69/69**；CloudSave Node/WebCrypto
+本次开发过程已经完成的专项证据：认证合同 **76/76**；CloudSave Node/WebCrypto
 **43/43**；认证、UI、CloudSave 与专项测试文件均完成语法解析。UI 的 19 条 Chromium
-断言已经补齐，但最终仍必须由 GitHub Actions 在真实 Chromium 中执行，不能把“测试代码存在”
-写成“浏览器已通过”。最终 PR 仍必须在 GitHub Actions
-重新执行真实 Chromium、所有版本化 Node/Python 测试、生成器、经济/资源/浏览器/Jarvis 和
-双包可复现性。若 Actions 尚未产生或未全绿，README 与最终答复都不得把它写成“CI 已通过”。
+断言已经补齐，但当前环境缺少 Playwright Chromium 可执行文件，尚未实际运行这些浏览器断言。
+截至本候选分支当前 head，**GitHub Actions 运行记录为 0，生产真实设备冒烟也未执行**；
+不能把“测试代码存在”写成“浏览器已通过”，也不能把本地合同通过写成“CI 已通过”。
+最终 PR 仍必须在 GitHub Actions 重新执行真实 Chromium、所有版本化 Node/Python 测试、
+生成器、经济/资源/浏览器/Jarvis 和双包可复现性。若 Actions 尚未产生或未全绿，README 与
+最终答复都不得把它写成“CI 已通过”。
 
 正式 CI 必须：
 

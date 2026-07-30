@@ -38,8 +38,20 @@
           return o;
         }
       }
-    } catch (e) { _storageWarning = 'localStorage-unavailable'; }
-    return (_localMemory && typeof _localMemory === 'object') ? _localMemory : {};
+    } catch (e) {
+      _storageWarning = 'localStorage-unavailable';
+      return { authStorageUnavailable: true, authStorageReason: 'legacy-marker-read-failed' };
+    }
+    return {};
+  }
+  function unavailableLocalMarker(reason) {
+    return {
+      schema: 1076,
+      method: '', phone: '', username: '', uid: '', signedAt: 0,
+      authCommitId: '', authBoundaryId: '', authBoundaryState: '',
+      authStorageUnavailable: true,
+      authStorageReason: String(reason || 'auth-storage-read-failed')
+    };
   }
   function markerFromOutcome(outcome, legacy) {
     var o = {}, k;
@@ -59,21 +71,35 @@
     o.pendingPhone = '';
     o.verificationId = '';
     o.isUser = false;
+    delete o.authStorageUnavailable;
+    delete o.authStorageReason;
     return o;
   }
   function readLocal() {
     var legacy = readLegacyLocal();
     var boundary = readAuthBoundary();
-    if (!boundary.boundaryId) return legacy;
+    if (boundary.unavailable)
+      return unavailableLocalMarker(boundary.reason || 'auth-boundary-read-failed');
+    if (!boundary.boundaryId)
+      return legacy.authStorageUnavailable
+        ? unavailableLocalMarker(legacy.authStorageReason)
+        : legacy;
     var outcome = readBoundaryOutcome(boundary.boundaryId);
+    if (outcome.unavailable)
+      return unavailableLocalMarker(outcome.reason || 'auth-boundary-outcome-read-failed');
     if (outcome.boundaryId) return markerFromOutcome(outcome, legacy);
     /* 边界正在执行时只把父边界 outcome 当显示缓存；它绝不让 isSignedIn
        绕过当前 pending boundary。 */
     if (boundary.parentBoundaryId) {
       var parent = readBoundaryOutcome(boundary.parentBoundaryId);
+      if (parent.unavailable)
+        return unavailableLocalMarker(parent.reason || 'auth-parent-outcome-read-failed');
       if (parent.boundaryId) return markerFromOutcome(parent, legacy);
     }
-    /* 兼容已经写入 LKEY 的早期 v1076 marker；新登录/退出绝不再改它。 */
+    if (legacy.authStorageUnavailable)
+      return unavailableLocalMarker(legacy.authStorageReason);
+    /* 兼容已经写入 LKEY 的早期 v1076 marker；只有 outcome key 明确“缺失”
+       时允许；I/O error 已在上方失败关闭，绝不由 legacy 掩盖。 */
     if (String(legacy.authBoundaryId || '') === String(boundary.boundaryId) ||
         (boundary.parentBoundaryId &&
          String(legacy.authBoundaryId || '') === String(boundary.parentBoundaryId)))
@@ -216,12 +242,15 @@
     var fence = readFence();
     var marker = readLocal();
     var boundary = readAuthBoundary();
-    var boundaryPending = !!(boundary.boundaryId && !boundarySettled(boundary));
-    if (fence.kind || boundaryPending) {
+    var storageFailed = !!(boundary.unavailable || marker.authStorageUnavailable);
+    var boundaryPending = !!(boundary.unavailable ||
+      (boundary.boundaryId && !boundarySettled(boundary)));
+    if (fence.kind || boundaryPending || storageFailed) {
       return {
         state: fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
         uid: String((fence && fence.observedUid) || ''),
         reason: String((fence && fence.reason) ||
+          (storageFailed ? '浏览器认证边界或结论读取失败，不能使用旧 marker 冒充已登录' : '') ||
           (boundaryPending ? '另一个标签页的认证边界尚未完成，请先安全退出并核对会话' : '') ||
           _sessionTruth.reason || ''),
         checkedAt: _sessionTruth.checkedAt,
@@ -239,10 +268,11 @@
   function isSignedIn() {
     var lc = readLocal();
     var boundary = readAuthBoundary();
-    var boundaryOk = !boundary.boundaryId ||
-      (boundary.kind === 'session_mutation' &&
-       String(lc.authBoundaryId || '') === String(boundary.boundaryId) &&
-       String(lc.authBoundaryState || '') === 'signed_in');
+    var boundaryOk = !boundary.unavailable && !lc.authStorageUnavailable &&
+      (!boundary.boundaryId ||
+       (boundary.kind === 'session_mutation' &&
+        String(lc.authBoundaryId || '') === String(boundary.boundaryId) &&
+        String(lc.authBoundaryState || '') === 'signed_in'));
     return !!(_sessionTruth.state === 'confirmed' && _sessionTruth.uid &&
               !readFence().kind && boundaryOk && lc.uid &&
               String(lc.uid) === String(_sessionTruth.uid));
@@ -252,7 +282,7 @@
   }
   function needsReauth() {
     var lc = readLocal();
-    return !!(readFence().kind || authBoundaryPending() ||
+    return !!(lc.authStorageUnavailable || readFence().kind || authBoundaryPending() ||
               activeMutationReceipts().length ||
               (lc.method && lc.signedAt && !lc.uid) ||
               _sessionTruth.state === 'mismatch' ||
@@ -280,12 +310,15 @@
   ];
   var BKEY = 'hansen_auth_boundary_v1076';
   var RKEY_PREFIX = 'hansen_auth_boundary_receipt_v1076:';
+  var AUTH_OUTCOME_HISTORY_LIMIT = 24;
+  var AUTH_RECEIPT_HISTORY_LIMIT = 24;
   var _authBoundaries = {};
   var _fenceMemory = null;
   var _fenceRevision = 0;
 
   function fenceRank(kind) {
-    return ({ outcome_unknown: 1, stale_mutation: 2, mismatch: 3 })[String(kind || '')] || 0;
+    return ({ outcome_unknown: 1, stale_mutation: 2, mismatch: 3,
+              storage_unavailable: 4 })[String(kind || '')] || 0;
   }
   function parseFence(raw) {
     if (!raw) return null;
@@ -326,11 +359,17 @@
               o.boundaryId && o.kind) ? o : null;
     } catch (e) { return null; }
   }
+  function authStorageUnavailable(reason) {
+    return { unavailable: true, readFailed: true, reason: String(reason || 'auth-storage-read-failed') };
+  }
   function readAuthBoundary() {
-    try { return parseAuthBoundary(localStorage.getItem(BKEY)) || {}; }
-    catch (e) {
+    try {
+      var raw = localStorage.getItem(BKEY);
+      if (!raw) return {};
+      return parseAuthBoundary(raw) || authStorageUnavailable('auth-boundary-invalid');
+    } catch (e) {
       _storageWarning = 'auth-boundary-read-failed';
-      return {};
+      return authStorageUnavailable('auth-boundary-read-failed');
     }
   }
   function sameAuthBoundary(a, b) {
@@ -350,10 +389,13 @@
   function readBoundaryOutcome(boundaryId) {
     if (!boundaryId) return {};
     try {
-      return parseBoundaryOutcome(localStorage.getItem(OKEY_PREFIX + boundaryId)) || {};
+      var raw = localStorage.getItem(OKEY_PREFIX + boundaryId);
+      if (!raw) return {};
+      return parseBoundaryOutcome(raw) ||
+        authStorageUnavailable('auth-boundary-outcome-invalid');
     } catch (e) {
       _storageWarning = 'auth-boundary-outcome-read-failed';
-      return {};
+      return authStorageUnavailable('auth-boundary-outcome-read-failed');
     }
   }
   function writeBoundaryOutcome(boundary, patch) {
@@ -423,8 +465,10 @@
     } catch (e) { return {}; }
   }
   function boundarySettled(boundary) {
+    if (boundary && boundary.unavailable) return false;
     if (!boundary || !boundary.boundaryId) return true;  /* v1075/旧 marker 兼容 */
     var outcome = readBoundaryOutcome(boundary.boundaryId);
+    if (outcome.unavailable) return false;
     if (String(outcome.boundaryId || '') === String(boundary.boundaryId)) {
       if (outcome.state === 'signed_in') return !!outcome.uid;
       if (outcome.state === 'signed_out') return !outcome.uid && !Number(outcome.signedAt || 0);
@@ -441,7 +485,8 @@
   }
   function authBoundaryPending() {
     var boundary = readAuthBoundary();
-    return !!(boundary.boundaryId && !boundarySettled(boundary));
+    return !!(boundary.unavailable ||
+      (boundary.boundaryId && !boundarySettled(boundary)));
   }
   function writeBoundaryReceipt(owned, state) {
     if (!owned || !owned.boundaryId) return null;
@@ -551,8 +596,76 @@
       }
     } catch (e) { _storageWarning = 'auth-boundary-receipt-cleanup-failed'; }
   }
+
+  /* 只裁剪“已经终结且不是 current/parent”的旧审计记录。
+     BKEY 在每次 exact-raw 删除前后都必须仍逐字属于本次新 boundary；一旦变化，
+     立即停止并失败关闭。active/unknown receipt 无论 TTL 多久都绝不删除。 */
+  function pruneAuthHistory(owned) {
+    if (!owned || !owned.boundaryId) return false;
+    var ownedRaw = '', outcomes = [], receipts = [], i, key, raw, value, state, bid;
+    try {
+      ownedRaw = localStorage.getItem(BKEY);
+      if (!ownedRaw || !sameAuthBoundary(parseAuthBoundary(ownedRaw), owned))
+        return false;
+      for (i = 0; i < localStorage.length; i++) {
+        key = localStorage.key(i);
+        if (!key ||
+            (key.indexOf(OKEY_PREFIX) !== 0 && key.indexOf(RKEY_PREFIX) !== 0))
+          continue;
+        raw = localStorage.getItem(key);
+        if (key.indexOf(OKEY_PREFIX) === 0) {
+          value = parseBoundaryOutcome(raw);
+          if (!value) continue; /* 损坏/未知条目保留，不能猜测后删除 */
+          bid = String(value.boundaryId || '');
+          if (bid === String(owned.boundaryId) ||
+              bid === String(owned.parentBoundaryId || '')) continue;
+          outcomes.push({
+            key: key, raw: raw,
+            at: Number(value.writtenAt || 0)
+          });
+          continue;
+        }
+        try { value = raw ? JSON.parse(raw) : null; }
+        catch (_) { value = null; }
+        if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+        state = String(value.state || 'unknown');
+        if (state !== 'returned' && state !== 'rejected') continue;
+        bid = String(value.boundaryId || '');
+        if (bid === String(owned.boundaryId) ||
+            bid === String(owned.parentBoundaryId || '')) continue;
+        receipts.push({
+          key: key, raw: raw,
+          at: Number(value.updatedAt || value.startedAt || 0)
+        });
+      }
+      if (localStorage.getItem(BKEY) !== ownedRaw) return false;
+      function newestFirst(a, b) {
+        if (b.at !== a.at) return b.at - a.at;
+        return String(a.key) < String(b.key) ? -1 : 1;
+      }
+      outcomes.sort(newestFirst);
+      receipts.sort(newestFirst);
+      var removable = outcomes.slice(AUTH_OUTCOME_HISTORY_LIMIT)
+        .concat(receipts.slice(AUTH_RECEIPT_HISTORY_LIMIT));
+      for (i = 0; i < removable.length; i++) {
+        if (localStorage.getItem(BKEY) !== ownedRaw) return false;
+        if (localStorage.getItem(removable[i].key) === removable[i].raw)
+          localStorage.removeItem(removable[i].key);
+        if (localStorage.getItem(BKEY) !== ownedRaw) return false;
+      }
+      return localStorage.getItem(BKEY) === ownedRaw;
+    } catch (e) {
+      _storageWarning = 'auth-boundary-history-prune-failed';
+      return false;
+    }
+  }
   function claimAuthBoundary(kind, token, allowPending) {
     var current = readAuthBoundary();
+    if (current.unavailable) {
+      var unreadable = new Error('无法读取共享认证边界，已失败关闭');
+      unreadable.code = 'AUTH_BOUNDARY_READ_FAILED';
+      throw unreadable;
+    }
     if (!allowPending && current.boundaryId &&
         !boundarySettled(current)) {
       var pending = new Error('另一个标签页的认证或退出操作尚未完成，请先安全退出并核对会话');
@@ -578,15 +691,29 @@
       err.code = 'AUTH_BOUNDARY_NOT_PERSISTED';
       throw err;
     }
-    /* returned/rejected receipt 只由一次后续、已复验干净的显式 signOut 清理；
-       claim 期间删除会制造“初扫后出现又结算”的 ABA 漏洞。 */
     _authBoundaries[String(token)] = o;
+    if (!pruneAuthHistory(o)) {
+      delete _authBoundaries[String(token)];
+      _storageWarning = 'auth-boundary-history-unavailable';
+      var historyError = new Error(
+        '认证审计记录无法在稳定 boundary 下安全裁剪，已在调用登录服务前停止');
+      historyError.code = 'AUTH_BOUNDARY_HISTORY_UNAVAILABLE';
+      throw historyError;
+    }
     return o;
   }
   function assertSharedBoundary(token) {
     var owned = _authBoundaries[String(token)];
     if (!owned) return true;
     var current = readAuthBoundary();
+    if (current.unavailable) {
+      writeFence('outcome_unknown', '', '',
+        '共享认证边界读取失败；当前请求已失败关闭');
+      var unreadable = staleError('共享认证边界不可读取，当前结果已作废');
+      unreadable.code = 'AUTH_BOUNDARY_READ_FAILED';
+      unreadable.stale = true;
+      throw unreadable;
+    }
     if (sameAuthBoundary(current, owned)) return true;
     writeFence('stale_mutation', '', '',
       '另一个标签页建立了新的认证/退出边界；旧请求已失去提交资格');
@@ -632,19 +759,46 @@
       delete _authBoundaries[String(token)];
   }
 
+  function fenceStorageUnavailable(reason) {
+    return {
+      schema: 1076,
+      fenceId: 'AUTH-FENCE-STORAGE-UNAVAILABLE',
+      kind: 'storage_unavailable',
+      unavailable: true,
+      readFailed: true,
+      reason: String(reason || '认证隔离记录不可读取或已损坏'),
+      generation: _authGeneration,
+      revision: 0,
+      at: Date.now()
+    };
+  }
   function readFence() {
-    var candidates = [], i, raw, item;
-    if (_fenceMemory) candidates.push(_fenceMemory);
+    var candidates = [], i, raw, item, unavailable = null;
+    if (_fenceMemory && !_fenceMemory.unavailable) candidates.push(_fenceMemory);
     try {
-      item = parseFence(sessionStorage.getItem(FKEY));
+      raw = sessionStorage.getItem(FKEY);
+      item = parseFence(raw);
       if (item) candidates.push(item);
-    } catch (e) {}
+      else if (raw != null) unavailable =
+        fenceStorageUnavailable('认证隔离记录已损坏，不能按“无隔离”继续');
+    } catch (e) {
+      unavailable = fenceStorageUnavailable('认证隔离记录读取失败，不能按“无隔离”继续');
+    }
     for (i = 0; i < FSTORE_KEYS.length; i++) {
       try {
         raw = localStorage.getItem(FSTORE_KEYS[i]);
         item = parseFence(raw);
         if (item) candidates.push(item);
-      } catch (e2) {}
+        else if (raw != null) unavailable =
+          fenceStorageUnavailable('认证隔离备份已损坏，不能按“无隔离”继续');
+      } catch (e2) {
+        unavailable =
+          fenceStorageUnavailable('认证隔离备份读取失败，不能按“无隔离”继续');
+      }
+    }
+    if (unavailable) {
+      _storageWarning = 'auth-fence-read-failed';
+      candidates.push(unavailable);
     }
     var best = null, maxRevision = _fenceRevision;
     for (i = 0; i < candidates.length; i++) {
@@ -652,7 +806,7 @@
       best = fenceNewer(best, candidates[i]);
     }
     _fenceRevision = maxRevision;
-    _fenceMemory = best || null;
+    _fenceMemory = best && !best.unavailable ? best : null;
     return best || {};
   }
   function writeFence(kind, expectedUid, observedUid, reason) {
@@ -772,6 +926,7 @@
   }
   function operationStatus() {
     var fence = readFence();
+    var marker = readLocal();
     return {
       state: _operation.state,
       slow: !!_operation.slow,
@@ -780,7 +935,8 @@
                 _operation.state === 'verifying' ||
                 _operation.state === 'confirming' ||
                 _operation.state === 'signing_out'),
-      requiresCleanup: !!(fence.kind || authBoundaryPending() || activeMutationReceipts().length),
+      requiresCleanup: !!(marker.authStorageUnavailable || fence.kind ||
+                          authBoundaryPending() || activeMutationReceipts().length),
       fence: String(fence.kind || '')
     };
   }
@@ -1130,7 +1286,8 @@
                                snap.uid || fence.observedUid || '',
                                fence.reason || '存在未清理的认证结果，请先安全退出');
       }
-      if (boundary.boundaryId && !boundarySettled(boundary)) {
+      if (boundary.unavailable ||
+          (boundary.boundaryId && !boundarySettled(boundary))) {
         return setSessionTruth('unknown', '',
           '共享认证边界尚未完成；只读刷新无权自动接管或清理');
       }
@@ -1618,17 +1775,18 @@
 
     function cleanupPending(reason) {
       reason = reason ||
-        '旧认证请求仍可能晚到；请关闭本小程序的所有标签页并清除该站点认证数据后重新登录';
+        '旧认证请求仍可能晚到；请先导出本机备份，关闭所有标签页并优先仅清除该站点认证相关数据。若只能清除全部站点数据，会删除本机学习进度，确认备份后再重新登录';
       writeFence('stale_mutation', '', '', reason);
       setOperation('idle', reason);
       setSessionTruth('unknown', '', reason);
       releaseAuthBoundaryToken(token);
       return {
         ok: true,
-        serverRevoked: true,
+        serverRevoked: false,
+        serverRevocationObserved: true,
         cleanupPending: true,
         requiresReload: true,
-        recovery: '关闭所有相关标签页，清除该站点认证/站点数据，重新打开后登录'
+        recovery: '先导出本机备份并关闭所有标签；优先仅清除认证相关数据。清除全部站点数据会删除本机学习进度'
       };
     }
 
@@ -1681,7 +1839,7 @@
           _fenceRevision !== signOutFenceRevision) {
         return cleanupPending(
           expiredMutationReceipts().length
-            ? '仍有已超过诊断 TTL 但底层未结算的认证请求；TTL 不会删除它。请关闭所有标签并清除该站点认证数据后重新登录'
+            ? '仍有已超过诊断 TTL 但底层未结算的认证请求；TTL 不会删除它。请先导出本机备份并关闭所有标签，优先仅清认证相关数据；清除全部站点数据会删除本机学习进度'
             : '旧登录请求与本次退出发生重叠；必须再次显式安全退出并复验 session=null');
       }
 
@@ -2054,7 +2212,8 @@
         return { ok: false, mismatch: true, definite: true, uid: snap.uid,
                  reason: '本地账号与云端会话不是同一用户' };
       }
-      if (boundary.boundaryId && !boundarySettled(boundary)) {
+      if (boundary.unavailable ||
+          (boundary.boundaryId && !boundarySettled(boundary))) {
         setSessionTruth('unknown', '', '共享认证边界尚未完成');
         return { ok: false, fenced: true, definite: false, uid: snap.uid || '',
                  reason: '共享认证边界尚未完成' };
@@ -2108,6 +2267,7 @@
     _readFenceForTest: readFence,
     _readBoundaryForTest: readAuthBoundary,
     _activeReceiptsForTest: activeMutationReceipts,
+    _pruneAuthHistoryForTest: pruneAuthHistory,
     _app: app
   };
   if (!window.__HANSEN_AUTH_NO_BOOT__) {

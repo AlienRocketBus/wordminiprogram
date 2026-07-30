@@ -701,14 +701,36 @@ def guard_auth_real_session():
         bad('认证真实会话', '持久 fence、共享 boundary、mutation 回执或退出迟到防线不完整')
     if 'clearExpiredMutationReceipts' in auth:
         bad('认证真实会话', 'active receipt 仍会被 TTL/过期清理，旧 SDK Promise 可在假 clean 后复活')
+    storage_fail_closed_markers = (
+        'authStorageUnavailable', 'readFailed: true', 'AUTH_BOUNDARY_READ_FAILED',
+        'auth-boundary-outcome-read-failed', 'storage_unavailable',
+        'auth-fence-read-failed')
+    if any(marker not in auth for marker in storage_fail_closed_markers):
+        bad('认证真实会话', 'BKEY/current outcome/fence 读取失败或损坏仍可能回退 legacy marker')
+    history_gc_markers = (
+        'AUTH_OUTCOME_HISTORY_LIMIT = 24', 'AUTH_RECEIPT_HISTORY_LIMIT = 24',
+        'pruneAuthHistory', 'AUTH_BOUNDARY_HISTORY_UNAVAILABLE',
+        'outcomes.slice(AUTH_OUTCOME_HISTORY_LIMIT)',
+        'receipts.slice(AUTH_RECEIPT_HISTORY_LIMIT)',
+        'localStorage.getItem(BKEY) !== ownedRaw')
+    if any(marker not in auth for marker in history_gc_markers):
+        bad('认证真实会话', 'outcome/terminal receipt 没有在稳定 BKEY 下执行有界 exact-raw GC')
     signout_src = auth[auth.find('function signOut()'):auth.find('function commitSignedIn(')]
     commit_src = auth[auth.find('function commitSignedIn('):auth.find('function localHasProgress(')]
     if 'writeLocal(' in signout_src or 'writeLocal(' in commit_src:
         bad('认证真实会话', '登录/退出仍覆盖共享 LKEY marker；localStorage 无 CAS 会擦掉另一标签')
     if 'state === \'active\' || state === \'unknown\'' not in auth:
         bad('认证真实会话', 'active/unknown receipt 没有失败关闭，TTL 到期可能被误当作已结算')
-    if '清除该站点' not in ui or '所有标签页' not in ui:
-        bad('认证真实会话', '不支持可靠取消/Web Locks 时没有提供可操作的人工恢复路径')
+    cleanup_part = signout_src[signout_src.find('function cleanupPending'):
+                               signout_src.find('return auth().then')]
+    if 'serverRevoked: false' not in cleanup_part or \
+       'serverRevocationObserved: true' not in cleanup_part or \
+       'serverRevoked: true' in cleanup_part:
+        bad('认证真实会话', 'cleanupPending 仍谎称服务端持续已撤销，忽略 ABA 登录可能复活会话')
+    recovery_markers = ('所有标签页', '优先仅清除', '先导出本机备份',
+                        '清除全部站点数据', '删除本机学习进度')
+    if any(marker not in ui for marker in recovery_markers):
+        bad('认证真实会话', '失败关闭没有可操作的人工恢复，或未警告清站点数据会删除本机进度')
     if re.search(r'\bdocRef\.(?:set|update)\s*\(', auth) or \
        re.search(r'\bassignCid\s*\(', auth) or 'claimCloudId' in auth:
         bad('认证真实会话', '浏览器认证链路仍会写 sb_profile/发号；客户端复验不能替代服务端 UID 权限')

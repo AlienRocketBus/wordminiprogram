@@ -140,6 +140,10 @@ REGISTRY = [
      'test_auth_contract_v1076.mjs'),
     ('v1076', 'active receipt 写后失去 boundary，SDK 零调用却遗留永久 active 假回执',
      'test_auth_contract_v1076.mjs'),
+    ('v1076', 'BKEY/current outcome/fence 读取抛错或损坏时回退 legacy marker 并 fail-open',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', 'append-only outcome 与 terminal receipt 重复操作后无界增长并耗尽 localStorage',
+     'test_auth_contract_v1076.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

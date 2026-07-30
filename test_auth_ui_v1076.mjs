@@ -165,7 +165,10 @@ ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===1),
    'outcome_unknown 即使认证请求标为 busy 也能调用唯一安全清理 signOut');
 ok(await page.evaluate(()=>document.body.textContent.includes('不要重新登录')&&
    document.body.textContent.includes('关闭本小程序的所有标签页')&&
-   document.body.textContent.includes('清除该站点')),
+   document.body.textContent.includes('优先仅清除')&&
+   document.body.textContent.includes('清除全部站点数据')&&
+   document.body.textContent.includes('删除本机学习进度')&&
+   document.body.textContent.includes('先导出本机备份')),
    'signOut 返回 cleanupPending 时不谎称清理完成，并明确永不结算时的人工恢复步骤');
 ok(await page.evaluate(()=>{
   const reload=document.getElementById('auReloadCleanup'),go=document.getElementById('auGo');
