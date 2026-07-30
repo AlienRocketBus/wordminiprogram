@@ -2,7 +2,7 @@
   "name": "wordminiprogram-audit",
   "version": "1074.0.0",
   "private": true,
-  "description": "Pinned browser-audit dependencies for Word Adventure v960",
+  "description": "Pinned browser-audit dependencies for Word Adventure v1075",
   "devDependencies": {
     "playwright": "1.61.1"
   }
