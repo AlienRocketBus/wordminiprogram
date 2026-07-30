@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """v1075 release documentation and pipeline contract."""
 
+import json
 from pathlib import Path
 import re
 import unittest
@@ -21,6 +22,23 @@ def section(text: str, version: str) -> str:
 
 
 class ReleaseDocumentationV1075Tests(unittest.TestCase):
+    def test_version_and_packaging_contract_are_v1075(self) -> None:
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1075")
+        package_json = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        package_lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
+        self.assertEqual(package_json["version"], "1075.0.0")
+        self.assertEqual(package_lock["version"], "1075.0.0")
+        self.assertEqual(package_lock["packages"][""]["version"], "1075.0.0")
+
+        package = (ROOT / "package_release.py").read_text(encoding="utf-8")
+        self.assertIn(
+            '"1075": (("shell-134", "pages-132", "assets-132", "icons-3"), "v=1075"),',
+            package,
+        )
+        source_required = package.split("SOURCE_REQUIRED_FILES = {", 1)[1].split("}", 1)[0]
+        for required in ("云存档_开通指南_v965.md", "部署说明_解决打开变下载.md"):
+            self.assertIn(f'"{required}"', source_required)
+
     def test_readme_and_release_asset_are_identical_and_detailed(self) -> None:
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
