@@ -691,12 +691,24 @@ def guard_auth_real_session():
         'FSTORE_KEYS', 'fenceId', 'sameFence', 'fenceSourceSnapshot',
         'authCommitId', 'markerAndFenceCurrent',
         'hansen_auth_boundary_v1076', 'hansen_auth_boundary_receipt_v1076:',
-        'authBoundaryId', 'authBoundaryState', 'claimAuthBoundary',
-        'assertSharedBoundary', 'boundarySettled', 'activeMutationReceipts',
-        'AUTH_BOUNDARY_NOT_PERSISTED', 'AUTH_CROSS_TAB_SUPERSEDED',
-        'AUTH_FENCED_SESSION', 'ownedFence', 'hadPriorSessionMutation')
+        'hansen_auth_boundary_outcome_v1076:', 'writeBoundaryOutcome',
+        'claimAuthBoundary', 'assertSharedBoundary', 'boundarySettled',
+        'mutationReceiptSnapshot', 'activeMutationReceipts',
+        'overlappingMutationReceipts', 'AUTH_BOUNDARY_NOT_PERSISTED',
+        'AUTH_CROSS_TAB_SUPERSEDED', 'AUTH_FENCED_SESSION', 'ownedFence',
+        'hadPriorSessionMutation')
     if any(marker not in auth for marker in fence_markers):
         bad('认证真实会话', '持久 fence、共享 boundary、mutation 回执或退出迟到防线不完整')
+    if 'clearExpiredMutationReceipts' in auth:
+        bad('认证真实会话', 'active receipt 仍会被 TTL/过期清理，旧 SDK Promise 可在假 clean 后复活')
+    signout_src = auth[auth.find('function signOut()'):auth.find('function commitSignedIn(')]
+    commit_src = auth[auth.find('function commitSignedIn('):auth.find('function localHasProgress(')]
+    if 'writeLocal(' in signout_src or 'writeLocal(' in commit_src:
+        bad('认证真实会话', '登录/退出仍覆盖共享 LKEY marker；localStorage 无 CAS 会擦掉另一标签')
+    if 'state === \'active\' || state === \'unknown\'' not in auth:
+        bad('认证真实会话', 'active/unknown receipt 没有失败关闭，TTL 到期可能被误当作已结算')
+    if '清除该站点' not in ui or '所有标签页' not in ui:
+        bad('认证真实会话', '不支持可靠取消/Web Locks 时没有提供可操作的人工恢复路径')
     if re.search(r'\bdocRef\.(?:set|update)\s*\(', auth) or \
        re.search(r'\bassignCid\s*\(', auth) or 'claimCloudId' in auth:
         bad('认证真实会话', '浏览器认证链路仍会写 sb_profile/发号；客户端复验不能替代服务端 UID 权限')

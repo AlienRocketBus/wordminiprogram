@@ -37,6 +37,14 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
     `count + update` 也不是原子发号。
 18. 🔴 README 发布副本、资源戳、Service Worker、Jarvis 凭证和双包发布若走散，会让代码已修、
     线上仍加载旧 v1074/v1075，现场看起来像“修复完全没有发生”。
+19. 🔴 active receipt 的 TTL 到期后曾从 active 扫描消失并被 signOut 删除；不可取消的旧登录
+    Promise 随后 resolve，会在“干净退出”之后重新建立真实 session。
+20. 🔴 登录/退出最后一次 boundary 复验与写共享 LKEY marker 之间没有 CAS；B 新建
+    boundary+marker 后，A 仍可把 B marker 覆盖并返回假成功/假 clean。
+21. 🔴 signOut 只比较初始 active 与最终 active；A 可在初扫后出现、在 session=null 快照后
+    把 receipt 从 active 改成 returned，两个瞬时扫描都为空却已经复活 session。
+22. 🔴 active receipt 写成功后、SDK 调用前若被 B boundary 取代，旧代码虽能拦 SDK，却留下永远
+    active 的假回执；现在必须在调用次数为 0 时转 rejected。
 
 ### 实现
 
@@ -68,16 +76,20 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   `hansen_auth_boundary_v1076`。numeric generation 仍管本标签；共享 boundary 管所有标签。
   后 claim 者使旧操作下一次主动检查得到 `AUTH_CROSS_TAB_SUPERSEDED`，不依赖 storage event。
 - 每次 session-changing SDK 调用前先写本操作唯一
-  `hansen_auth_boundary_receipt_v1076:<id>` active 回执，Promise 真正结算后才标
-  returned/rejected/unknown。写入读回失败时 SDK 调用次数必须为 0。永久悬挂回执生产默认
-  保留 120 秒；到期也只允许下一次显式 signOut 在重新确认 session=null 后清理，不会自动重登。
-- 登录 marker 绑定 `authCommitId + authBoundaryId + authBoundaryState`；先清 PKEY，再让出任务
-  边界并做真实 ensureSession、boundary/marker/fence 最终复验。
-- 失败路径不清 marker。localStorage 没有 CAS，“先看 commitId 再清”会擦掉另一标签；现在只建立
-  fence，让 marker 保持显示缓存但 `isSignedIn/sessionStatus` 失败关闭。
+  `hansen_auth_boundary_receipt_v1076:<id>` active 回执并立即复验 BKEY。写入/读回或复验失败时
+  SDK 调用次数为 0；复验失权会把未调用 receipt 定格为 rejected。
+- active/unknown receipt 永不因 `expiresAt`/TTL 删除；TTL 只是疑似孤儿诊断。只有底层明确
+  returned/rejected 后，再执行一次显式 signOut 并确认 session=null，才允许 clean。
+- 登录/退出不再覆盖共享 LKEY 身份 marker，而是各写自己的 write-once
+  `hansen_auth_boundary_outcome_v1076:<boundaryId>`。BKEY 只作当前指针；A 失权后留下的 A
+  outcome 不影响 B，且 A 不能 compare-delete B。
+- signOut 保存初始全部 receipt 原始值，并在 session=null 快照后逐 key 比较；初扫后新出现或
+  变化的其他 mutation 即使最终 returned，也返回 cleanupPending，要求再次显式退出。
 - 只读 refresh/ensure 永远不能清 fence 或接管未落地 boundary。显式安全退出会作废等待者、
-  再查服务器 session，并抓取每个 fence key 清理前快照；只有明确 `session === null`、
-  跨标签无 active/unknown receipt 且最终边界稳定时才宣布 signed_out。
+  再查服务器 session，并抓取 fence 快照；只有 session=null、无 active/unknown、无重叠 receipt、
+  BKEY/outcome/fence 最终稳定时才宣布 signed_out。
+- 本轮不把未验证的 Web Locks 当作恢复保证。旧页崩溃且 active 永不结算时严格失败关闭；UI
+  明示关闭所有相关标签、清除该站点认证/站点数据、重新打开登录，绝不靠 TTL 静默放行。
 
 云存档和 UI：
 
@@ -124,12 +136,12 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 
 已在开发环境实际执行：
 
-- `test_auth_contract_v1076.mjs`：**69/69**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
+- `test_auth_contract_v1076.mjs`：**73/73**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
   operation/session UID、`session+user:null`、旧 refresh/ensure、迟到发码/登录、signOut 复活、
   mismatch 持久化、只读 null 不清 fence、mutation 永久悬挂、SDK init 永久悬挂、跨标签
   fence 强度与恢复所有权、两个独立 context 共享 localStorage 的在途登录/退出、boundary 写回
-  失败前 SDK 零调用、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照 compare-delete、
-  永久悬挂回执 TTL 后二次退出、profile 零写入及竞赛 ID 安全降级。
+  失败前 SDK 零调用、PKEY 清理窗口、append-only outcome、登录/退出 supersede、
+  signOut receipt ABA、TTL 过期 active 不删除、profile 零写入及竞赛 ID 安全降级。
 - `test_cloud_save_v965.mjs`：Node/WebCrypto 动态 **43/43**。覆盖同 UID 上传/恢复、授权不跨身份、
   unknown/mismatch/cleanup 匿名零读写、U1→U2 的 put/迁移/restore/accountCloudInfo/fetch 迟到、
   本地 writeState 零污染和 generation busy token。

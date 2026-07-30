@@ -163,8 +163,10 @@ await page.waitForFunction(()=>window.__authUiRace.signOutCalls===1);
 await page.waitForFunction(()=>document.body.textContent.includes('旧登录请求仍可能晚到'));
 ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===1),
    'outcome_unknown 即使认证请求标为 busy 也能调用唯一安全清理 signOut');
-ok(await page.evaluate(()=>document.body.textContent.includes('不要重新登录')),
-   'signOut 返回 cleanupPending 时不谎称清理完成，明确要求重新载入和复验');
+ok(await page.evaluate(()=>document.body.textContent.includes('不要重新登录')&&
+   document.body.textContent.includes('关闭本小程序的所有标签页')&&
+   document.body.textContent.includes('清除该站点')),
+   'signOut 返回 cleanupPending 时不谎称清理完成，并明确永不结算时的人工恢复步骤');
 ok(await page.evaluate(()=>{
   const reload=document.getElementById('auReloadCleanup'),go=document.getElementById('auGo');
   const tabs=[...document.querySelectorAll('.au_tab')];

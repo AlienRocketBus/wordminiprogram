@@ -166,7 +166,8 @@
           op.state === 'outcome_unknown' || op.requiresCleanup || _cleanupReloadRequired
           ? '<button class="au_go" id="auSafeOut" style="background:linear-gradient(135deg,#991b1b,#dc2626)">安全退出并清理会话</button>' : '')
       + (_cleanupReloadRequired
-          ? '<button class="au_skip" id="auReloadCleanup" style="color:#fde68a">重新载入并再次核对服务器 session</button>' : '')
+          ? '<button class="au_skip" id="auReloadCleanup" style="color:#fde68a">重新载入并再次核对服务器 session</button>'
+            + '<div class="au_tip" style="color:#fecaca">若旧请求始终不结算：关闭本小程序的所有标签页，清除该站点的认证/站点数据，再重新打开登录。系统不会靠 TTL 自动放行。</div>' : '')
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone"' + (busy ? ' disabled' : '') + '>手机号继续</button>'
       + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password"' + (busy ? ' disabled' : '') + '>账号密码登录</button>'
@@ -405,7 +406,7 @@
         render();
         notify();
         if (_cleanupReloadRequired)
-          setMessage('本机已退出，但旧登录请求仍可能晚到。请重新载入页面，系统会再次核对服务器 session；完成前不要重新登录。', 'err');
+          setMessage('本机已退出，但旧登录请求仍可能晚到。请重新载入并再次安全退出；若仍无法清理，请关闭所有相关标签页、清除该站点认证/站点数据后重新打开。完成前不要重新登录。', 'err');
         else
           setMessage('会话已安全清理，可以重新登录。', 'ok');
       }).catch(function (e) {
@@ -495,7 +496,7 @@
         render();
         notify();
         if (_cleanupReloadRequired)
-          setMessage('本机已退出，但旧登录请求仍在收尾。请重新载入后再次核对，再进行新的登录。', 'err');
+          setMessage('本机已退出，但旧登录请求仍在收尾。请重新载入并再次安全退出；若仍未结算，请关闭所有相关标签页、清除该站点认证/站点数据后重新打开。', 'err');
         else
           setMessage('已安全退出。游戏本地进度仍保留。', 'ok');
       }).catch(function (e) {

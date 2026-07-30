@@ -18,7 +18,7 @@
 ### 背景与根因
 
 用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
-CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十九条
+CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下二十二条
 互相叠加、其中多条只会在跨标签或迟到 Promise 时出现的真实故障链：
 
 1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
@@ -74,10 +74,11 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
     同样捕获原始 UID + CloudSave generation，并在每一次 provider get 前后复验；认证
     unknown/mismatch/cleanupPending 时返回失败关闭。跨代 busy 改为 operation token，旧 U1
     结算无权清除 U2 正在使用的锁。
-14. **登录提交本身有极短的 TOCTOU 窗口。** 初次 readFence 为空后，本标签写 U1 marker 的
-    同一瞬间，另一标签可能写入 U1→U2 mismatch；旧代码仍会返回 `ok:true`。现在 marker 同时
-    绑定唯一 `authCommitId + authBoundaryId`，清 pending 后让出一个任务边界，再执行真实
-    `ensureSession(uid)`、boundary/marker/fence 复验；失败建立持久 fence，不启动任何附加写入。
+14. **登录提交本身有极短的 TOCTOU 窗口。** localStorage 没有 CAS；A 最后一次确认 BKEY
+    后、写共享 LKEY 前，B 可以建立新 boundary 和新 marker，A 随后把 B 覆盖。v1076 现在把
+    身份结论改为每 boundary 独立的 write-once key：
+    `hansen_auth_boundary_outcome_v1076:<boundaryId>`。A 永远只写 A 的 outcome；
+    B 若取代 BKEY，A 的最终复验失败，但 B 的 outcome 不会被覆盖或 compare-delete。
 15. **安全退出的“检查后全删”也有竞态。** 最终 readFence 为空不代表逐键 remove 时仍为空；
     另一标签刚写入的 mismatch 曾可能被无所有权 `clearFence()` 顺手删除。现在 signOut 先保存
     每个 session/local fence key 的原始值快照，只在当前值仍逐字等于快照时删除；快照后新增或
@@ -91,16 +92,27 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
     先写唯一 `hansen_auth_boundary_receipt_v1076:<id>` active 回执；底层 Promise 真正结算后
     才改为 returned/rejected/unknown。退出看到 active/unknown 时只能返回 cleanupPending，
     不能因为自己这一刻读到 session=null 就假装旧请求不会在下一刻复活。若旧页面已销毁、Promise
-    永久不结算，回执至少保留到 mutation 硬上限之后的保守 TTL（生产默认总计 120 秒）；TTL 到期
-    也不会自动登录或自动清理，仍要求第二次显式 signOut 再向服务器确认 session=null。
+    永久不结算，`expiresAt` 只标记“疑似孤儿”的诊断时间（生产默认总计 120 秒）；TTL 到期
+    **绝不删除 active/unknown intent**，也绝不让 signOut 宣称 clean。只有底层回执已经明确
+    returned/rejected，随后又执行一次显式 signOut 并确认 session=null，才允许清理。
 18. **“只回滚自己的 authCommitId”不是原子操作。** localStorage 没有 CAS；先读到 commit A、
-    再调用合并写清空，中间若标签 B 写入 commit B，A 仍可能把 B 擦掉。v1076 失败路径不再清
-    marker：marker 只作显示缓存，fence/boundary 令其不可登录；唯一统一清理者是显式 signOut。
+    再调用合并写清空，中间若标签 B 写入 commit B，A 仍可能把 B 擦掉。登录和退出现在都不再
+    改共享 LKEY 身份 marker，只写自己的 append-only outcome；LKEY 仅保留旧版迁移/显示兼容。
 19. **客户端 profile 写前/写后复验不能替代服务端权限。** U1 最后一次校验通过后、真正
     `doc(U1).set/update` 发出前，SDK session 仍可能切成 U2；请求已经发出，事后检测无法撤销。
     仓库当前也没有可部署的数据库 owner 规则或服务端原子发号函数。因此 v1076 物理移除认证
     模块的 profile 创建、更新、count 与本机锁号；未来只有“由认证上下文派生 UID、服务端时间、
     幂等建档、原子计数、CID 不可由客户端修改”全部落地并通过双账号越权测试后才能恢复。
+20. **active receipt 写入与 SDK 调用之间仍可被取代。** A 写 active 后，B 可建立新 boundary；
+    如果 A 不立即复验就会在失权后仍调用 SDK。现在 `markSessionMutation` 写回读成功后立刻
+    复验 BKEY；失权则在 SDK 调用次数仍为 0 时把自己的 receipt 定格为 rejected。
+21. **“初始 active 或最终 active”有 ABA 漏洞。** B 初扫时 A 尚未写 receipt；随后 A 调用 SDK，
+    B 再 claim signOut。A 可在 B 的 session=null 快照后返回并把 receipt 改成 returned，于是
+    两次 active 快照都为空。现在 signOut 保存初始全部 receipt 的原始值，最终逐 key 比较；
+    新出现或变化的其他 mutation 一律视为重叠并返回 cleanupPending，不能宣称 clean。
+22. **失败关闭也必须有可操作恢复路径。** 浏览器不支持可靠取消底层认证 Promise；本轮没有把
+    未验证的 Web Locks 当作安全保证。若旧页崩溃导致 active 永不结算，系统持续阻止登录并显示：
+    关闭本小程序所有标签页，清除该站点认证/站点数据，再重新打开登录。它绝不会用 TTL 静默放行。
 
 官方接口与安全边界依据：
 
@@ -143,8 +155,10 @@ revision、原因和时间，不含任何凭据。
 跨标签线性化另有两类非敏感记录：
 
 - `hansen_auth_boundary_v1076`：当前顶层 `session_mutation/signout` 的唯一
-  `boundaryId`、父 boundary、generation 与开始时间。成功 marker 必须携带相同
-  `authBoundaryId` 以及 `signed_in/signed_out` 状态才算落地。
+  `boundaryId`、父 boundary、generation 与开始时间；它只作当前指针。
+- `hansen_auth_boundary_outcome_v1076:<boundaryId>`：每个 boundary 独立、write-once 的
+  `signed_in/signed_out` 结论。登录/退出只写自己的 key，绝不覆盖或 compare-delete
+  另一个 boundary 的结论；`readLocal()` 只把当前 BKEY 指向的 outcome 映射成显示 marker。
 - `hansen_auth_boundary_receipt_v1076:<boundaryId>`：只描述底层 session mutation 是
   `active/returned/rejected/unknown`；不包含用户名、密码、验证码、verification token 或
   SDK 凭证。boundary 写入或读回失败时，在调用 session-changing SDK **之前**失败关闭。
@@ -188,19 +202,21 @@ revision、原因和时间，不含任何凭据。
   跨标签出现更强或更新记录时立即失败关闭。
 - 退出无论 SDK `signOut` 返回成功还是报错，都会再查 session；只有
   `session === null` 才能清理。
-- 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。本机 marker 已清，
-  但界面必须提示重新载入并再核对；旧请求晚到后仍只能加固 fence，不能恢复登录。
+- 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。当前 signOut 只写自己的
+  signed_out outcome；界面必须提示重新载入并再次安全退出。active/unknown 即使超过诊断 TTL
+  也不会消失。若旧页崩溃导致永不结算，关闭全部相关标签并清除该站点认证/站点数据后重登。
 - 每次顶层登录/结果恢复/退出先 claim 共享 `boundaryId`；每次 token 复验同时核对本标签
   generation 和共享 boundary。两个标签真正同时开始时，后写 boundary 者取得全局资格，前者
   下一次主动检查即进入 `AUTH_CROSS_TAB_SUPERSEDED`，不能依赖可能丢失的 storage event。
-- session-changing SDK 调用前必须先持久写 active receipt，写入/读回失败则 SDK 调用次数为 0。
-  Promise resolved、业务 error、网络 reject 和硬超时分别留下可区分状态；只有 active/unknown
-  表示仍可能晚到，安全退出必须保守返回 cleanupPending。永久悬挂回执生产默认 120 秒后才允许
-  被下一次显式 signOut 当作过期证据清理，而且该 signOut 仍必须重新确认真实 session=null。
-- 登录 marker 带唯一 `authCommitId + authBoundaryId + authBoundaryState`；先清 pending，
-  再让出任务边界并执行 `ensureSession(uid) + boundary/marker/fence` 最终复验。
-- 失败路径**不回滚 marker**。localStorage 没有原子 compare-delete，任何“先确认 commitId 再清”
-  都可能擦掉另一标签的新账号；失败只建立 fence 并让 `isSignedIn/sessionStatus` 失败关闭。
+- session-changing SDK 调用前必须先持久写 active receipt，写入/读回或随后 boundary 复验失败，
+  SDK 调用次数为 0；已写 active 会转 rejected。Promise resolved、业务 error、网络 reject 和硬
+  超时留下可区分状态；active/unknown 不受 TTL 清理，安全退出必须保守返回 cleanupPending。
+- signOut 对全部 receipt 做“初始原始值快照 + 最终逐 key 对比”。初扫后新出现或状态变化的其他
+  mutation，即使最终已经 returned，也属于与本次退出重叠，必须再次显式退出复验。
+- 登录/退出结论使用每 boundary 独立 outcome；登录先清 pending，再让出任务边界并执行
+  `ensureSession(uid) + BKEY/outcome/fence` 最终复验。
+- 失败路径**不回滚 outcome**。每个 owner 只写自己的 key；B 的新 boundary/outcome 永远不会被
+  A 的失败回调擦除。
 - 任何只读 refresh/ensure 都无权清 fence 或接管未落地 boundary；显式安全退出先抓取每个
   fence key 原值快照，只 compare-delete 未变化的旧记录。只有服务端明确无 session、没有
   跨标签 active/unknown receipt，且最终边界稳定时才宣布 signed_out。
@@ -264,11 +280,12 @@ v1076 明确禁止认证模块自动访问 `sb_profile`：
   profile 零访问/云存档只读检查。
 - `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
 - `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
-- `test_auth_contract_v1076.mjs`：69 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+- `test_auth_contract_v1076.mjs`：73 条业务状态机合同，覆盖正常注册/登录、空用户 session、
   原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
   SDK 初始化悬挂、跨标签 fence 强度/所有权、两个独立 JS context 共享 localStorage 的
-  登录/退出复活、boundary 持久化失败、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照清理、
-  永久悬挂回执 TTL 后二次安全退出、profile 零写入与竞赛 ID 安全降级。
+  登录/退出复活、boundary 持久化失败、PKEY 清理窗口、append-only outcome、登录/退出 marker
+  supersede、SDK 前失权零调用、signOut receipt ABA、TTL 过期 active 不删除、profile 零写入与
+  竞赛 ID 安全降级。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
 - `test_auth_ui_v1076.mjs`：19 条 390×844 点击断言，覆盖绝对倒计时、完整手机注册、
@@ -308,7 +325,7 @@ v1076 明确禁止认证模块自动访问 `sb_profile`：
 
 | 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| 认证 VM/模拟 SDK | 69 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、双 context boundary/receipt、退出复活、PKEY/marker TOCTOU、profile 零写入 | 真实短信送达 |
+| 认证 VM/模拟 SDK | 73 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、双 context boundary/receipt、退出复活、PKEY/marker TOCTOU、profile 零写入 | 真实短信送达 |
 | CloudSave Node/WebCrypto | 43 条动态断言：同 UID 成功；U1→U2 上传/迁移/恢复/读取迟到停止；匿名 fence 零读写；授权和 busy token 不跨身份 | 生产数据库规则 |
 | Chromium 390×844 | 19 条真实 DOM 点击断言：完整注册、绝对倒计时、成功前复验、竞赛 ID 降级提示、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
 | 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |

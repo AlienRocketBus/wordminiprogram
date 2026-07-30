@@ -403,9 +403,9 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
   b.setCloudSave({resetApp(){cloudResets++;}});
   b.local.setItem=function(k,v){
     originalSet(k,v);
-    if(k==='hansen_auth_v1004'&&!injected){
+    if(k.indexOf('hansen_auth_boundary_outcome_v1076:')===0&&!injected){
       let marker=null;try{marker=JSON.parse(String(v));}catch(_){}
-      if(marker&&marker.authCommitId){
+      if(marker&&marker.state==='signed_in'&&marker.authCommitId){
         injected=true;
         const mismatch={
           schema:1076,fenceId:'COMMIT-RACE-MISMATCH',kind:'mismatch',
@@ -470,37 +470,38 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
      '退出清理遇到并发 mismatch 时本机 marker 已清，但不会谎报 signed_out 或允许立即重登');
 }
 {
-  const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25,receiptTtlMs:40};
-  const never=deferred(),b=boot(shared);
-  b.A._setAuthForTest({
-    signInWithPassword(){return never.promise;},
-    signOut(){return Promise.resolve({data:{},error:null});},
-    getSession(){return Promise.resolve(sessionResult(''));}
+  const sharedLocal=storage(),loginSession=storage();
+  const loginGate=deferred();
+  let serverUid='';
+  const tabA=boot({local:sharedLocal,session:loginSession,slowMs:2,mutationTimeoutMs:8,receiptTtlMs:9});
+  tabA.A._setAuthForTest({
+    signInWithPassword(){
+      return loginGate.promise.then(function (r) { serverUid='U-TTL-LATE'; return r; });
+    },
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
   });
-  const err=await b.A.loginByPassword('hung_user','pw').then(()=>null,e=>e);
-  const op=b.A.operationStatus();
-  ok(err&&err.code==='AUTH_MUTATION_INDETERMINATE'&&!op.busy&&
-     op.requiresCleanup&&op.state==='outcome_unknown',
-     '永久悬挂认证在硬上限后释放提交 spinner，但保留不可重试隔离');
-  let retryRejected=false;
-  try{await b.A.loginByPassword('hung_user','pw');}catch(e){retryRejected=true;}
-  ok(retryRejected,'结果未知 fence 阻止重复认证 mutation');
-  const out=await b.A.signOut();
-  ok(out.ok&&out.cleanupPending&&!b.A.readLocal().uid&&!b.A.operationStatus().busy,
-     '悬挂请求期间仍可安全退出，本地不再永久卡死');
-  const reload=boot({local:shared.local,session:shared.session});
-  reload.A._setAuthForTest({
-    getSession(){return Promise.resolve(sessionResult(''));},
-    signOut(){return Promise.resolve({data:{},error:null});}
+  const timedOut=await tabA.A.loginByPassword('ttl_late','pw').then(()=>null,e=>e);
+  ok(timedOut&&timedOut.code==='AUTH_MUTATION_INDETERMINATE',
+     'TTL 合同先让不可取消登录达到硬超时，底层 Promise 仍保持 active');
+  await new Promise(r=>setTimeout(r,18));
+  const tabB=boot({local:sharedLocal,session:storage(),slowMs:2,mutationTimeoutMs:8,receiptTtlMs:9});
+  tabB.A._setAuthForTest({
+    signOut(){serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
   });
-  const fencedState=await reload.A.refreshSession();
-  ok(fencedState.state==='unknown'&&reload.A._readFenceForTest().kind,
-     '刷新后的只读探测仍不能自行解除悬挂隔离');
-  await new Promise(r=>setTimeout(r,55));
-  await reload.A.signOut();
-  ok(reload.A.sessionStatus().state==='signed_out'&&!reload.A._readFenceForTest().kind&&
-     reload.A._activeReceiptsForTest().length===0,
-     '永久不结算的旧页面回执超过保守 TTL 后，第二次显式退出复验 session=null 才解除隔离');
+  const firstOut=await tabB.A.signOut();
+  ok(firstOut.ok&&firstOut.cleanupPending&&firstOut.requiresReload&&
+     tabB.A._activeReceiptsForTest().some(x=>x.value&&x.value.state==='active'),
+     'active receipt 即使 TTL 已过也不能消失，第一次 signOut 不能谎报 clean');
+  loginGate.resolve({user:{uid:'U-TTL-LATE'}});
+  await flush();
+  ok(serverUid==='U-TTL-LATE',
+     '不可取消的旧 SDK Promise 在第一次退出后仍可能复活真实 session');
+  await new Promise(r=>setTimeout(r,2));
+  const secondOut=await tabB.A.signOut();
+  ok(secondOut.ok&&!secondOut.cleanupPending&&serverUid===''&&
+     tabB.A.sessionStatus().state==='signed_out',
+     '旧 receipt 明确 returned 后，必须再显式 signOut 并复验 session=null 才能 clean');
 }
 
 
@@ -615,6 +616,148 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
   const post=await r.postLogin;
   ok(r.ok&&r.competitionIdUnavailable===true&&post.competitionIdUnavailable===true&&claims===0,
      '登录成功不依赖 sb_profile；全局竞赛 ID 明确未启用且不自动锁定本机编号');
+}
+
+
+{
+  const b=boot();let serverUid='U-OUT-A',injected=false,bOutcomeRaw='';
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({
+    schema:1076,method:'password',signedAt:Date.now(),uid:'U-OUT-A'
+  }));
+  const legacyRaw=b.local.getItem('hansen_auth_v1004');
+  b.A._setSessionForTest('confirmed','U-OUT-A');
+  const rawSet=b.local.setItem.bind(b.local);
+  b.local.setItem=function(k,v){
+    rawSet(k,v);
+    let o=null;try{o=JSON.parse(String(v));}catch(_){}
+    if(!injected&&k.indexOf('hansen_auth_boundary_outcome_v1076:')===0&&
+       o&&o.state==='signed_out'){
+      injected=true;
+      const boundary={schema:1076,boundaryId:'B-SIGNOUT-RACE',kind:'session_mutation',
+        parentBoundaryId:o.boundaryId,generation:90,startedAt:Date.now()+1};
+      const outcome={schema:1076,boundaryId:boundary.boundaryId,kind:boundary.kind,
+        state:'signed_in',method:'password',uid:'U-BOUNDARY-B',phone:'',username:'b',
+        signedAt:Date.now(),authCommitId:'COMMIT-B',writtenAt:Date.now()};
+      bOutcomeRaw=JSON.stringify(outcome);
+      rawSet('hansen_auth_boundary_v1076',JSON.stringify(boundary));
+      rawSet('hansen_auth_boundary_outcome_v1076:'+boundary.boundaryId,bOutcomeRaw);
+    }
+  };
+  b.A._setAuthForTest({
+    signOut(){serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(serverUid));}
+  });
+  const out=await b.A.signOut().then(v=>v,e=>e);
+  ok(injected&&!(out&&out.ok&&!out.cleanupPending)&&
+     b.local.getItem('hansen_auth_boundary_outcome_v1076:B-SIGNOUT-RACE')===bOutcomeRaw&&
+     b.local.getItem('hansen_auth_v1004')===legacyRaw&&
+     b.A.readLocal().uid==='U-BOUNDARY-B',
+     'signOut 写自己 outcome 时被 B supersede：绝不覆盖 B outcome，也绝不返回 clean');
+}
+{
+  const b=boot();let injected=false,bOutcomeRaw='';
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({legacySentinel:'KEEP'}));
+  const legacyRaw=b.local.getItem('hansen_auth_v1004');
+  const rawSet=b.local.setItem.bind(b.local);
+  b.local.setItem=function(k,v){
+    rawSet(k,v);
+    let o=null;try{o=JSON.parse(String(v));}catch(_){}
+    if(!injected&&k.indexOf('hansen_auth_boundary_outcome_v1076:')===0&&
+       o&&o.state==='signed_in'&&o.uid==='U-COMMIT-A'){
+      injected=true;
+      const boundary={schema:1076,boundaryId:'B-LOGIN-RACE',kind:'session_mutation',
+        parentBoundaryId:o.boundaryId,generation:91,startedAt:Date.now()+1};
+      const outcome={schema:1076,boundaryId:boundary.boundaryId,kind:boundary.kind,
+        state:'signed_in',method:'password',uid:'U-COMMIT-B',phone:'',username:'b',
+        signedAt:Date.now(),authCommitId:'COMMIT-B',writtenAt:Date.now()};
+      bOutcomeRaw=JSON.stringify(outcome);
+      rawSet('hansen_auth_boundary_v1076',JSON.stringify(boundary));
+      rawSet('hansen_auth_boundary_outcome_v1076:'+boundary.boundaryId,bOutcomeRaw);
+    }
+  };
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-COMMIT-A'}});},
+    getSession(){return Promise.resolve(sessionResult('U-COMMIT-A'));}
+  });
+  const err=await b.A.loginByPassword('commit_a','pw').then(()=>null,e=>e);
+  ok(injected&&err&&
+     b.local.getItem('hansen_auth_boundary_outcome_v1076:B-LOGIN-RACE')===bOutcomeRaw&&
+     b.local.getItem('hansen_auth_v1004')===legacyRaw&&
+     b.A.readLocal().uid==='U-COMMIT-B'&&!b.A.isSignedIn(),
+     '登录 commit 写自己 outcome 时被 B supersede：A 失败关闭且 B outcome 原样保留');
+}
+{
+  const b=boot();let sdkCalls=0,injected=false,ownedReceiptKey='';
+  const rawSet=b.local.setItem.bind(b.local);
+  b.local.setItem=function(k,v){
+    rawSet(k,v);
+    let o=null;try{o=JSON.parse(String(v));}catch(_){}
+    if(!injected&&k.indexOf('hansen_auth_boundary_receipt_v1076:')===0&&
+       o&&o.state==='active'&&o.kind==='session_mutation'){
+      injected=true;ownedReceiptKey=k;
+      const boundary={schema:1076,boundaryId:'B-BEFORE-SDK',kind:'signout',
+        parentBoundaryId:o.boundaryId,generation:92,startedAt:Date.now()+1};
+      const outcome={schema:1076,boundaryId:boundary.boundaryId,kind:boundary.kind,
+        state:'signed_out',method:'',uid:'',phone:'',username:'',signedAt:0,
+        authCommitId:'',writtenAt:Date.now()};
+      rawSet('hansen_auth_boundary_v1076',JSON.stringify(boundary));
+      rawSet('hansen_auth_boundary_outcome_v1076:'+boundary.boundaryId,JSON.stringify(outcome));
+    }
+  };
+  b.A._setAuthForTest({
+    signInWithPassword(){sdkCalls++;return Promise.resolve({user:{uid:'NEVER'}});},
+    getSession(){return Promise.resolve(sessionResult('NEVER'));}
+  });
+  const err=await b.A.loginByPassword('pre_sdk','pw').then(()=>null,e=>e);
+  const receipt=JSON.parse(b.local.getItem(ownedReceiptKey)||'{}');
+  ok(injected&&err&&sdkCalls===0&&receipt.state==='rejected'&&
+     b.A._activeReceiptsForTest().every(x=>x.key!==ownedReceiptKey),
+     'active receipt 写入后 boundary 被 supersede：调用 SDK 前失败并把未调用 receipt 定格为 rejected');
+}
+{
+  const sharedLocal=storage(),b=boot({local:sharedLocal,session:storage()});
+  const rawSet=sharedLocal.setItem.bind(sharedLocal);
+  let injected=false,sdkCalls=0,aReceiptKey='',serverUid='',returnedOnce=false;
+  const originalLength=Object.getOwnPropertyDescriptor(sharedLocal,'length');
+  Object.defineProperty(sharedLocal,'length',{configurable:true,get(){
+    if(!injected){
+      injected=true;sdkCalls++;
+      const now=Date.now();
+      const boundary={schema:1076,boundaryId:'A-INVISIBLE-OVERLAP',kind:'session_mutation',
+        parentBoundaryId:'',generation:12,startedAt:now-10};
+      const receipt={schema:1076,boundaryId:boundary.boundaryId,kind:boundary.kind,
+        state:'active',startedAt:now-10,updatedAt:now,expiresAt:now+60000};
+      aReceiptKey='hansen_auth_boundary_receipt_v1076:'+boundary.boundaryId;
+      rawSet('hansen_auth_boundary_v1076',JSON.stringify(boundary));
+      rawSet(aReceiptKey,JSON.stringify(receipt));
+      return 0;
+    }
+    return originalLength.get.call(sharedLocal);
+  }});
+  b.A._setAuthForTest({
+    signOut(){serverUid='';return Promise.resolve({data:{},error:null});},
+    getSession(){
+      const snap=sessionResult(serverUid);
+      return Promise.resolve().then(function(){
+        const raw=sharedLocal.getItem(aReceiptKey);
+        if(raw&&!returnedOnce){
+          returnedOnce=true;
+          const r=JSON.parse(raw);
+          r.state='returned';r.updatedAt=Date.now();
+          rawSet(aReceiptKey,JSON.stringify(r));
+          serverUid='U-ABA-REVIVED';
+        }
+        return snap;
+      });
+    }
+  });
+  const first=await b.A.signOut();
+  ok(sdkCalls===1&&first.ok&&first.cleanupPending&&first.requiresReload,
+     '初扫后出现、session=null 快照后转 returned 的重叠 receipt 不能从 active 快照间隙漏过');
+  await new Promise(r=>setTimeout(r,2));
+  const second=await b.A.signOut();
+  ok(second.ok&&!second.cleanupPending&&serverUid===''&&b.A.sessionStatus().state==='signed_out',
+     '重叠 receipt 已在上次退出前结算后，下一次显式 signOut 重新撤销复活 session 才能 clean');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

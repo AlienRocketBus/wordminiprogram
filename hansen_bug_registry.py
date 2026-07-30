@@ -132,6 +132,14 @@ REGISTRY = [
      'test_auth_contract_v1076.mjs'),
     ('v1076', '浏览器 sb_profile 写前复验仍有切号 TOCTOU，且仓库没有可部署 owner 规则/原子发号',
      'guard_auth_real_session'),
+    ('v1076', 'active receipt 到 TTL 后被删除，旧不可取消登录晚到可在假 clean 后复活 session',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '登录/退出写共享 LKEY 没有 CAS，A 可覆盖 B 的新 boundary marker',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', 'signOut 初扫和终扫都无 active，但中间 mutation returned 后已复活 session',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', 'active receipt 写后失去 boundary，SDK 零调用却遗留永久 active 假回执',
+     'test_auth_contract_v1076.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

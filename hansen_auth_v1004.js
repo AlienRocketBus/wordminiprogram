@@ -14,7 +14,8 @@
   'use strict';
   if (window.HansenAuth) return;
 
-  var LKEY = 'hansen_auth_v1004';      /* 本地登录态缓存 */
+  var LKEY = 'hansen_auth_v1004';      /* v1075 及更早显示缓存：仅兼容读取/非身份辅助字段 */
+  var OKEY_PREFIX = 'hansen_auth_boundary_outcome_v1076:'; /* 每个 boundary 的 write-once 结论 */
 
   /* ── 基础 ─────────────────────────────────────────── */
   function cfg() {
@@ -27,7 +28,7 @@
 
   var _localMemory = null;
   var _storageWarning = '';
-  function readLocal() {
+  function readLegacyLocal() {
     try {
       var raw = localStorage.getItem(LKEY);
       if (raw) {
@@ -40,8 +41,49 @@
     } catch (e) { _storageWarning = 'localStorage-unavailable'; }
     return (_localMemory && typeof _localMemory === 'object') ? _localMemory : {};
   }
+  function markerFromOutcome(outcome, legacy) {
+    var o = {}, k;
+    legacy = legacy || {};
+    for (k in legacy) if (Object.prototype.hasOwnProperty.call(legacy, k)) o[k] = legacy[k];
+    if (!outcome || !outcome.boundaryId) return o;
+    var signedIn = String(outcome.state || '') === 'signed_in';
+    o.schema = 1076;
+    o.method = signedIn ? String(outcome.method || 'session') : '';
+    o.phone = signedIn ? String(outcome.phone || '') : '';
+    o.username = signedIn ? String(outcome.username || '') : '';
+    o.uid = signedIn ? String(outcome.uid || '') : '';
+    o.signedAt = signedIn ? Number(outcome.signedAt || 0) : 0;
+    o.authCommitId = signedIn ? String(outcome.authCommitId || '') : '';
+    o.authBoundaryId = String(outcome.boundaryId || '');
+    o.authBoundaryState = String(outcome.state || '');
+    o.pendingPhone = '';
+    o.verificationId = '';
+    o.isUser = false;
+    return o;
+  }
+  function readLocal() {
+    var legacy = readLegacyLocal();
+    var boundary = readAuthBoundary();
+    if (!boundary.boundaryId) return legacy;
+    var outcome = readBoundaryOutcome(boundary.boundaryId);
+    if (outcome.boundaryId) return markerFromOutcome(outcome, legacy);
+    /* 边界正在执行时只把父边界 outcome 当显示缓存；它绝不让 isSignedIn
+       绕过当前 pending boundary。 */
+    if (boundary.parentBoundaryId) {
+      var parent = readBoundaryOutcome(boundary.parentBoundaryId);
+      if (parent.boundaryId) return markerFromOutcome(parent, legacy);
+    }
+    /* 兼容已经写入 LKEY 的早期 v1076 marker；新登录/退出绝不再改它。 */
+    if (String(legacy.authBoundaryId || '') === String(boundary.boundaryId) ||
+        (boundary.parentBoundaryId &&
+         String(legacy.authBoundaryId || '') === String(boundary.parentBoundaryId)))
+      return legacy;
+    return legacy;
+  }
   function writeLocal(patch) {
-    var base = readLocal(), o = {}, k;
+    /* 仅保留 legacy migration / 非身份辅助字段；认证 commit 与 signOut 必须
+       使用 writeBoundaryOutcome，绝不能覆盖另一个标签的共享 LKEY marker。 */
+    var base = readLegacyLocal(), o = {}, k;
     for (k in base) if (Object.prototype.hasOwnProperty.call(base, k)) o[k] = base[k];
     for (k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) o[k] = patch[k];
     _localMemory = o;
@@ -174,7 +216,7 @@
     var fence = readFence();
     var marker = readLocal();
     var boundary = readAuthBoundary();
-    var boundaryPending = !!(boundary.boundaryId && !boundarySettled(boundary, marker));
+    var boundaryPending = !!(boundary.boundaryId && !boundarySettled(boundary));
     if (fence.kind || boundaryPending) {
       return {
         state: fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
@@ -296,6 +338,82 @@
       String(a.boundaryId) === String(b.boundaryId) &&
       String(a.kind) === String(b.kind));
   }
+  function parseBoundaryOutcome(raw) {
+    if (!raw) return null;
+    try {
+      var o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return (o && typeof o === 'object' && !Array.isArray(o) &&
+              o.boundaryId && (o.state === 'signed_in' || o.state === 'signed_out'))
+        ? o : null;
+    } catch (e) { return null; }
+  }
+  function readBoundaryOutcome(boundaryId) {
+    if (!boundaryId) return {};
+    try {
+      return parseBoundaryOutcome(localStorage.getItem(OKEY_PREFIX + boundaryId)) || {};
+    } catch (e) {
+      _storageWarning = 'auth-boundary-outcome-read-failed';
+      return {};
+    }
+  }
+  function writeBoundaryOutcome(boundary, patch) {
+    if (!boundary || !boundary.boundaryId) {
+      var missing = new Error('认证结论缺少 boundary 所有权');
+      missing.code = 'AUTH_BOUNDARY_MISSING';
+      throw missing;
+    }
+    patch = patch || {};
+    var state = String(patch.state || '');
+    if (state !== 'signed_in' && state !== 'signed_out') {
+      var invalid = new Error('认证结论状态无效');
+      invalid.code = 'AUTH_BOUNDARY_OUTCOME_INVALID';
+      throw invalid;
+    }
+    var key = OKEY_PREFIX + boundary.boundaryId;
+    var o = {
+      schema: 1076,
+      boundaryId: String(boundary.boundaryId),
+      kind: String(boundary.kind || ''),
+      state: state,
+      method: state === 'signed_in' ? String(patch.method || 'session') : '',
+      phone: state === 'signed_in' ? String(patch.phone || '') : '',
+      username: state === 'signed_in' ? String(patch.username || '') : '',
+      uid: state === 'signed_in' ? String(patch.uid || '') : '',
+      signedAt: state === 'signed_in' ? Number(patch.signedAt || Date.now()) : 0,
+      authCommitId: state === 'signed_in' ? String(patch.authCommitId || '') : '',
+      writtenAt: Date.now()
+    };
+    if (state === 'signed_in' && !o.uid) {
+      var noUid = new Error('signed_in 结论缺少 UID');
+      noUid.code = 'AUTH_BOUNDARY_OUTCOME_INVALID';
+      throw noUid;
+    }
+    var encoded = JSON.stringify(o);
+    try {
+      var existingRaw = localStorage.getItem(key);
+      if (existingRaw) {
+        var existing = parseBoundaryOutcome(existingRaw);
+        if (existing && String(existing.boundaryId) === o.boundaryId &&
+            String(existing.state) === o.state &&
+            String(existing.uid || '') === String(o.uid || '') &&
+            String(existing.authCommitId || '') === String(o.authCommitId || ''))
+          return existing;
+        var conflict = new Error('同一认证 boundary 已有不同结论，拒绝覆盖');
+        conflict.code = 'AUTH_BOUNDARY_OUTCOME_CONFLICT';
+        throw conflict;
+      }
+      localStorage.setItem(key, encoded);
+      if (localStorage.getItem(key) !== encoded)
+        throw new Error('认证结论写入后无法原样读回');
+    } catch (e) {
+      if (e && e.code === 'AUTH_BOUNDARY_OUTCOME_CONFLICT') throw e;
+      _storageWarning = 'auth-boundary-outcome-not-persistent';
+      var failed = new Error('浏览器无法保存认证结论，已失败关闭');
+      failed.code = 'AUTH_BOUNDARY_NOT_PERSISTED';
+      throw failed;
+    }
+    return o;
+  }
   function readBoundaryReceipt(boundaryId) {
     if (!boundaryId) return {};
     try {
@@ -304,13 +422,18 @@
       return (o && typeof o === 'object' && o.boundaryId) ? o : {};
     } catch (e) { return {}; }
   }
-  function boundarySettled(boundary, marker) {
+  function boundarySettled(boundary) {
     if (!boundary || !boundary.boundaryId) return true;  /* v1075/旧 marker 兼容 */
-    marker = marker || {};
-    if (String(marker.authBoundaryId || '') === String(boundary.boundaryId)) {
-      var state = String(marker.authBoundaryState || '');
-      if (state === 'signed_in') return !!marker.uid;
-      if (state === 'signed_out') return !marker.uid && !Number(marker.signedAt || 0);
+    var outcome = readBoundaryOutcome(boundary.boundaryId);
+    if (String(outcome.boundaryId || '') === String(boundary.boundaryId)) {
+      if (outcome.state === 'signed_in') return !!outcome.uid;
+      if (outcome.state === 'signed_out') return !outcome.uid && !Number(outcome.signedAt || 0);
+    }
+    var legacy = readLegacyLocal();
+    if (String(legacy.authBoundaryId || '') === String(boundary.boundaryId)) {
+      var legacyState = String(legacy.authBoundaryState || '');
+      if (legacyState === 'signed_in') return !!legacy.uid;
+      if (legacyState === 'signed_out') return !legacy.uid && !Number(legacy.signedAt || 0);
     }
     var receipt = readBoundaryReceipt(boundary.boundaryId);
     return String(receipt.boundaryId || '') === String(boundary.boundaryId) &&
@@ -318,7 +441,7 @@
   }
   function authBoundaryPending() {
     var boundary = readAuthBoundary();
-    return !!(boundary.boundaryId && !boundarySettled(boundary, readLocal()));
+    return !!(boundary.boundaryId && !boundarySettled(boundary));
   }
   function writeBoundaryReceipt(owned, state) {
     if (!owned || !owned.boundaryId) return null;
@@ -330,6 +453,7 @@
       var ttl = configuredTtl > 0
         ? Math.max(hardMs + 1, configuredTtl)
         : Math.max(120000, hardMs + 60000);
+      /* expiresAt 只用于诊断“疑似孤儿请求”；绝不能据此删除 active intent。 */
       owned.receiptExpiresAt = Date.now() + ttl;
     }
     var o = {
@@ -357,18 +481,15 @@
     owned.receiptState = o.state;
     return o;
   }
-  function activeMutationReceipts() {
-    var out = [], now = Date.now();
+  function mutationReceiptSnapshot() {
+    var out = [];
     try {
       for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
         if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
         var raw = localStorage.getItem(key), o = null;
         try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
-        if (!o || o.state === 'unknown' ||
-            (o.state === 'active' && (!Number(o.expiresAt || 0) ||
-                                      Number(o.expiresAt || 0) > now)))
-          out.push({ key: key, raw: raw, value: o || {} });
+        out.push({ key: key, raw: raw, value: o || { state: 'unknown' } });
       }
     } catch (e) {
       _storageWarning = 'auth-boundary-receipt-read-failed';
@@ -376,54 +497,64 @@
     }
     return out;
   }
-  function expiredMutationReceipts() {
-    var out = [], now = Date.now();
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
-        var raw = localStorage.getItem(key), o = null;
-        try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
-        if (o && o.state === 'active' && Number(o.expiresAt || 0) > 0 &&
-            Number(o.expiresAt || 0) <= now)
-          out.push({ key: key, raw: raw, value: o });
-      }
-    } catch (e) { _storageWarning = 'auth-boundary-receipt-read-failed'; }
+  function activeMutationReceipts(items) {
+    items = items || mutationReceiptSnapshot();
+    var out = [];
+    for (var i = 0; i < items.length; i++) {
+      var state = String((items[i].value && items[i].value.state) || 'unknown');
+      if (state === 'active' || state === 'unknown') out.push(items[i]);
+    }
     return out;
   }
-  function clearExpiredMutationReceipts() {
-    var items = expiredMutationReceipts();
-    try {
-      for (var i = 0; i < items.length; i++) {
-        if (localStorage.getItem(items[i].key) === items[i].raw)
-          localStorage.removeItem(items[i].key);
+  function overlappingMutationReceipts(signoutBoundary, initialItems) {
+    var initial = {}, out = [], i;
+    initialItems = initialItems || [];
+    for (i = 0; i < initialItems.length; i++) initial[initialItems[i].key] = initialItems[i].raw;
+    var finalItems = mutationReceiptSnapshot();
+    for (i = 0; i < finalItems.length; i++) {
+      var item = finalItems[i], value = item.value || {};
+      if (String(value.boundaryId || '') === String(signoutBoundary.boundaryId || '')) continue;
+      var state = String(value.state || 'unknown');
+      if (state === 'active' || state === 'unknown') {
+        out.push(item);
+        continue;
       }
-    } catch (e) { _storageWarning = 'auth-boundary-receipt-cleanup-failed'; }
-    return items.length;
+      /* 新出现或在 signOut 初扫后发生状态变化的其他 mutation，即使此刻
+         已经 returned，也可能刚在 session=null 快照之后复活会话。 */
+      if (!Object.prototype.hasOwnProperty.call(initial, item.key) ||
+          initial[item.key] !== item.raw)
+        out.push(item);
+    }
+    return out;
   }
-  function clearNonActiveReceipts() {
+  function expiredMutationReceipts() {
+    var out = [], now = Date.now(), items = mutationReceiptSnapshot();
+    for (var i = 0; i < items.length; i++) {
+      var o = items[i].value || {};
+      if (o.state === 'active' && Number(o.expiresAt || 0) > 0 &&
+          Number(o.expiresAt || 0) <= now) out.push(items[i]);
+    }
+    return out;
+  }
+  function clearNonActiveReceipts(snapshot) {
+    /* 只能清 signOut 初始快照里已经 terminal 且至今逐字未变的回执。
+       绝不能在最终扫描后重新枚举并删除“刚刚 returned”的重叠 mutation。 */
     try {
-      var items = [];
-      for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
-        var raw = localStorage.getItem(key), o = null;
-        try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
-        if (o && o.state !== 'active' && o.state !== 'unknown')
-          items.push({ key: key, raw: raw });
-        else if (o && o.state === 'unknown')
-          items.push({ key: key, raw: raw });
+      var items = snapshot || [], removable = [];
+      for (var i = 0; i < items.length; i++) {
+        var state = String((items[i].value && items[i].value.state) || 'unknown');
+        if (state === 'returned' || state === 'rejected') removable.push(items[i]);
       }
-      for (var j = 0; j < items.length; j++) {
-        if (localStorage.getItem(items[j].key) === items[j].raw)
-          localStorage.removeItem(items[j].key);
+      for (var j = 0; j < removable.length; j++) {
+        if (localStorage.getItem(removable[j].key) === removable[j].raw)
+          localStorage.removeItem(removable[j].key);
       }
     } catch (e) { _storageWarning = 'auth-boundary-receipt-cleanup-failed'; }
   }
   function claimAuthBoundary(kind, token, allowPending) {
     var current = readAuthBoundary();
     if (!allowPending && current.boundaryId &&
-        !boundarySettled(current, readLocal())) {
+        !boundarySettled(current)) {
       var pending = new Error('另一个标签页的认证或退出操作尚未完成，请先安全退出并核对会话');
       pending.code = 'AUTH_CROSS_TAB_OPERATION_PENDING';
       throw pending;
@@ -447,7 +578,8 @@
       err.code = 'AUTH_BOUNDARY_NOT_PERSISTED';
       throw err;
     }
-    clearNonActiveReceipts();
+    /* returned/rejected receipt 只由一次后续、已复验干净的显式 signOut 清理；
+       claim 期间删除会制造“初扫后出现又结算”的 ABA 漏洞。 */
     _authBoundaries[String(token)] = o;
     return o;
   }
@@ -472,7 +604,14 @@
       throw e;
     }
     writeBoundaryReceipt(owned, 'active');
-    assertSharedBoundary(token);
+    try {
+      assertSharedBoundary(token);
+    } catch (e) {
+      /* boundary 在 active receipt 持久化后、SDK 调用前被取代：底层请求尚未
+         发出，因此把本 receipt 明确定格为 rejected，不能留下假 active。 */
+      finishSessionMutation(token, 'rejected');
+      throw e;
+    }
   }
   function finishSessionMutation(token, outcome) {
     var owned = _authBoundaries[String(token)];
@@ -991,7 +1130,7 @@
                                snap.uid || fence.observedUid || '',
                                fence.reason || '存在未清理的认证结果，请先安全退出');
       }
-      if (boundary.boundaryId && !boundarySettled(boundary, marker)) {
+      if (boundary.boundaryId && !boundarySettled(boundary)) {
         return setSessionTruth('unknown', '',
           '共享认证边界尚未完成；只读刷新无权自动接管或清理');
       }
@@ -1449,17 +1588,15 @@
   function signOut() {
     if (_cloudBusy) return Promise.reject(new Error('云存档操作正在进行，请完成后再退出'));
     readFence();
-    var priorBoundary = readAuthBoundary();
-    var priorMarker = readLocal();
-    var priorReceipts = activeMutationReceipts();
+    /* 单次全量快照同时承担初始 active 判断与 ABA 对比。不能先扫 active、
+       再靠最终 active 瞬时值推断“期间从未有 mutation”。 */
+    var receiptSnapshotBefore = mutationReceiptSnapshot();
+    var priorReceipts = activeMutationReceipts(receiptSnapshotBefore);
     var hadPriorSessionMutation = _activeSessionMutations > 0 ||
       priorReceipts.length > 0;
-    /* 未结算 boundary 本身不等于“底层 SDK 仍会晚到”：
-       receipt=returned/rejected 表示网络调用已经结束；只有 active/unknown 回执
-       或本标签内存计数才要求 cleanupPending。 */
 
     /* 先把 signout 边界写进共享 localStorage，再作废本标签 waiter。
-       这样另一个标签页即使正在等待 SDK，也会在下一次主动复验时失去提交资格。 */
+       另一个标签旧请求只能写自己的 receipt/outcome，不能覆盖本边界结论。 */
     var token = _authGeneration + 1;
     var signoutBoundary;
     try {
@@ -1478,6 +1615,22 @@
     _outcomeRecovery = null;
     setOperation('signing_out');
     setSessionTruth('checking', '', '正在退出');
+
+    function cleanupPending(reason) {
+      reason = reason ||
+        '旧认证请求仍可能晚到；请关闭本小程序的所有标签页并清除该站点认证数据后重新登录';
+      writeFence('stale_mutation', '', '', reason);
+      setOperation('idle', reason);
+      setSessionTruth('unknown', '', reason);
+      releaseAuthBoundaryToken(token);
+      return {
+        ok: true,
+        serverRevoked: true,
+        cleanupPending: true,
+        requiresReload: true,
+        recovery: '关闭所有相关标签页，清除该站点认证/站点数据，重新打开后登录'
+      };
+    }
 
     return auth().then(function (a) {
       assertAuthToken(token);
@@ -1510,57 +1663,46 @@
       _probeId++;
       _pendingMemory = null;
       try { sessionStorage.removeItem(PKEY); } catch (_) {}
-      writeLocal({
-        schema: 1076,
-        method: '',
-        signedAt: 0,
-        uid: '',
-        phone: '',
-        username: '',
-        authCommitId: '',
-        authBoundaryId: signoutBoundary.boundaryId,
-        authBoundaryState: 'signed_out',
-        pendingPhone: '',
-        verificationId: '',
-        isUser: false
-      });
-      try {
-        if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
-      } catch (e0) {}
 
+      /* localStorage 没有 CAS：这里只写 A 自己的 append-only outcome key。
+         即使 B 在下一条语句前取得 BKEY，A 也没有任何共享 marker 可覆盖。 */
+      assertSharedBoundary(token);
+      writeBoundaryOutcome(signoutBoundary, { state: 'signed_out' });
+
+      /* 跨一个 task 边界，让 outcome 写入钩子/其他标签的 BKEY、fence 与 receipt
+         变化在宣布 clean 前可见。 */
+      return delay(0);
+    }).then(function () {
+      assertAuthToken(token);
+      var finalActive = activeMutationReceipts();
+      var overlaps = overlappingMutationReceipts(signoutBoundary, receiptSnapshotBefore);
       readFence();
-      clearExpiredMutationReceipts();
-      clearNonActiveReceipts();
-      if (hadPriorSessionMutation || activeMutationReceipts().length > 0 ||
+      if (hadPriorSessionMutation || finalActive.length > 0 || overlaps.length > 0 ||
           _fenceRevision !== signOutFenceRevision) {
-        writeFence('stale_mutation', '', '',
-          '旧登录请求仍可能晚到；本机已退出，请刷新页面后再次核对');
-        setOperation('idle', '本机已退出；旧请求仍在收尾，请刷新页面后再次核对');
-        setSessionTruth('unknown', '', '旧登录请求仍可能晚到，已禁止自动接管');
-        releaseAuthBoundaryToken(token);
-        return {
-          ok: true,
-          serverRevoked: true,
-          cleanupPending: true,
-          requiresReload: true
-        };
+        return cleanupPending(
+          expiredMutationReceipts().length
+            ? '仍有已超过诊断 TTL 但底层未结算的认证请求；TTL 不会删除它。请关闭所有标签并清除该站点认证数据后重新登录'
+            : '旧登录请求与本次退出发生重叠；必须再次显式安全退出并复验 session=null');
       }
 
       var clearSnapshot = fenceSourceSnapshot();
       if (!clearFence(null, clearSnapshot)) {
-        writeFence('stale_mutation', '', '',
-          '另一个标签页在清理期间改变了认证边界；请刷新并再次核对');
-        setOperation('idle', '认证边界仍在变化，请刷新页面后再次核对');
-        setSessionTruth('unknown', '', '跨标签页认证边界尚未稳定');
-        releaseAuthBoundaryToken(token);
-        return {
-          ok: true,
-          serverRevoked: true,
-          cleanupPending: true,
-          requiresReload: true
-        };
+        return cleanupPending('另一个标签页在清理期间改变了认证隔离；请刷新并再次核对');
       }
 
+      /* 只在已经证明没有重叠 mutation 后回收 returned/rejected。active/unknown
+         永不删除。清理本身之后还要重读 BKEY/outcome/fence。 */
+      clearNonActiveReceipts(receiptSnapshotBefore);
+      var currentBoundary = readAuthBoundary();
+      var ownOutcome = readBoundaryOutcome(signoutBoundary.boundaryId);
+      if (!sameAuthBoundary(currentBoundary, signoutBoundary) ||
+          ownOutcome.state !== 'signed_out' || readFence().kind) {
+        return cleanupPending('另一个标签页在退出最终提交期间建立了新边界；当前退出不能宣称 clean');
+      }
+
+      try {
+        if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
+      } catch (e0) {}
       setOperation('idle');
       setSessionTruth('signed_out', '', '');
       releaseAuthBoundaryToken(token);
@@ -1627,25 +1769,23 @@
       assertAuthToken(token);
     }
 
-    writeLocal({
-      schema: 1076,
+    /* append-only：A 只写 A 的 outcome。B 若在此窗口取得 BKEY，
+       A 的后续复验会失败，但 B 的 outcome 永远不会被 A 覆盖或 compare-delete。 */
+    assertSharedBoundary(token);
+    writeBoundaryOutcome(authBoundary, {
+      state: 'signed_in',
       method: inputIdentity.method,
       phone: phone,
       username: username,
       uid: uid,
       signedAt: Date.now(),
-      authCommitId: commitId,
-      authBoundaryId: authBoundary.boundaryId,
-      authBoundaryState: 'signed_in',
-      pendingPhone: '',
-      verificationId: '',
-      isUser: false
+      authCommitId: commitId
     });
+    assertSharedBoundary(token);
 
     function failCommitBoundary(reason) {
-      /* localStorage 没有 CAS。失败路径绝不再“先读自己的 commitId、再清 marker”，
-         因为另一标签可能在两步之间写入新账号。保留显示缓存并建立 fence，
-         isSignedIn/sessionStatus 会失败关闭；只有显式 signOut 能统一清理。 */
+      /* outcome 是每 boundary 独立键；失败路径只建立 fence，绝不修改任何
+         其他 boundary 的结论。isSignedIn/sessionStatus 必须失败关闭。 */
       var before = readFence();
       var hadFence = !!before.kind;
       var fence = before;
@@ -1662,16 +1802,17 @@
       throw err;
     }
     function markerAndFenceCurrent() {
-      var fence = readFence(), marker = readLocal(), currentBoundary = readAuthBoundary();
+      var fence = readFence(), outcome = readBoundaryOutcome(authBoundary.boundaryId);
+      var currentBoundary = readAuthBoundary();
       return !fence.kind && sameAuthBoundary(currentBoundary, authBoundary) &&
-        String(marker.uid || '') === uid &&
-        String(marker.authCommitId || '') === commitId &&
-        String(marker.authBoundaryId || '') === String(authBoundary.boundaryId) &&
-        String(marker.authBoundaryState || '') === 'signed_in';
+        String(outcome.uid || '') === uid &&
+        String(outcome.authCommitId || '') === commitId &&
+        String(outcome.boundaryId || '') === String(authBoundary.boundaryId) &&
+        String(outcome.state || '') === 'signed_in';
     }
 
     /* 先清本标签验证码事务，再跨一个 task 边界复验。即使清理回调触发了
-       另一个标签页的 fence/boundary，下面也只能失败关闭，不能返回假成功。 */
+       另一个标签页的 fence/boundary，A 也只留下自己的孤立 outcome，不能覆盖 B。 */
     _pendingMemory = null;
     try { sessionStorage.removeItem(PKEY); } catch (_) {}
     _outcomeRecovery = null;
@@ -1913,7 +2054,7 @@
         return { ok: false, mismatch: true, definite: true, uid: snap.uid,
                  reason: '本地账号与云端会话不是同一用户' };
       }
-      if (boundary.boundaryId && !boundarySettled(boundary, marker)) {
+      if (boundary.boundaryId && !boundarySettled(boundary)) {
         setSessionTruth('unknown', '', '共享认证边界尚未完成');
         return { ok: false, fenced: true, definite: false, uid: snap.uid || '',
                  reason: '共享认证边界尚未完成' };
