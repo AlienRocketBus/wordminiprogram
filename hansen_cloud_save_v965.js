@@ -508,22 +508,41 @@
     }
     return attempt(0);
   }
-  function restoreWithKey(inputKey){
+  function restoreWithKey(inputKey, opts){
+    opts = opts || {};
+    var expectedUid = String(opts.expectedUid || accountUid() || '');
+    function verifyExpectedAccount(){
+      if(!expectedUid) return Promise.resolve({ ok:true });
+      var A = window.HansenAuth;
+      if(!(A && typeof A.ensureSession === 'function'))
+        return Promise.reject(new Error('无法复验当前账号，已停止恢复'));
+      return A.ensureSession(expectedUid).then(function(truth){
+        if(!truth || !truth.ok || String(truth.uid || '') !== expectedUid)
+          throw new Error('账号会话已经变化，已停止本次恢复');
+        if(String(accountUid() || '') !== expectedUid)
+          throw new Error('当前账号已切换，已停止本次恢复');
+        return truth;
+      });
+    }
     return fetchWithKey(inputKey).then(function(got){
       if(!(window.HansenBackup && typeof HansenBackup.parse === 'function'))
         throw new Error('备份模块不可用');
       var parsed = HansenBackup.parse(got.code);
       var when = got.updatedAt ? new Date(got.updatedAt).toLocaleString() : '未知时间';
-      var msg = '找到云端存档（上传于 '+when+'，版本 v'+(parsed && parsed.appVersion || '?')+'）。\n\n'
-              + '恢复会用它覆盖本机当前进度，确定吗？';
-      if(!window.confirm(msg)) return { ok:false, reason:'cancelled' };
-      var r;
-      try{ r = HansenBackup.restore(parsed); }
-      catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名
-      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
-                   enabled: true, enabledIdentity: syncIdentity(got.key) });
-      renderCard();
-      return { ok:true, result:r };
+      var prompt = '找到云端存档（上传于 '+when+'，版本 v'+(parsed && parsed.appVersion || '?')+'）。\n\n'
+                 + '恢复会用它覆盖本机当前进度，确定吗？';
+      if(!window.confirm(prompt)) return { ok:false, reason:'cancelled' };
+      /* v1076：网络读取完成后、真正覆盖本机前再验一次 UID。
+         只在操作前后检查会留下“U1 发起→切到 U2→迟到恢复已覆盖”的窗口。 */
+      return verifyExpectedAccount().then(function(){
+        var result;
+        try{ result = HansenBackup.restore(parsed); }
+        catch(e1){ result = HansenBackup.restore(got.code); }   // 兼容字符串签名
+        writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
+                     enabled: true, enabledIdentity: syncIdentity(got.key) });
+        renderCard();
+        return { ok:true, result:result };
+      });
     });
   }
   function selfTest(){
