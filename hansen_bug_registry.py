@@ -124,6 +124,14 @@ REGISTRY = [
      'test_auth_contract_v1076.mjs'),
     ('v1076', '安全退出无所有权清理 fence，在逐键删除中擦掉另一标签刚写入的 mismatch',
      'test_auth_contract_v1076.mjs'),
+    ('v1076', '跨标签 A 在途登录对 B 不可见：B 先报干净退出，A 晚到后又复活 session/marker',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '提交失败用先读后清回滚 authCommitId，可在 TOCTOU 窗口擦掉另一标签的新 marker',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '最终 session 复验后、清 PKEY 时新 fence 插入，代码仍返回 ok 假成功',
+     'test_auth_contract_v1076.mjs'),
+    ('v1076', '浏览器 sb_profile 写前复验仍有切号 TOCTOU，且仓库没有可部署 owner 规则/原子发号',
+     'guard_auth_real_session'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
