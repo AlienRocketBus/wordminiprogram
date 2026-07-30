@@ -85,7 +85,7 @@
     if (st.state === 'checking')
       return '<div class="au_tip" style="color:#fde68a;opacity:1;margin:0 0 12px">正在向 CloudBase 核对真实会话，请稍候…</div>';
     if (st.state === 'unknown')
-      return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">当前网络下无法确认旧会话，云端操作已暂停。可重试确认或重新登录；本地学习进度不会删除。</div>';
+      return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">当前无法确认旧会话，云端操作已暂停。可重试确认；若仍显示安全清理，请先退出未知会话再登录。本地学习进度不会删除。</div>';
     if (st.state === 'mismatch')
       return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">本地账号与 SDK 会话不是同一用户，已禁止云端读写。请退出隐藏会话后重新登录。</div>';
     if (st.state === 'legacy_reauth' || (marker && marker.method && marker.signedAt && !marker.uid))
@@ -355,10 +355,13 @@
       _cloudChoiceBusy = null;
       _syncState = null;
       setMessage('正在安全退出并清理服务器会话…');
-      auth.signOut().then(function () {
+      auth.signOut().then(function (r) {
         render();
         notify();
-        setMessage('会话已安全清理，可以重新登录。', 'ok');
+        if (r && r.cleanupPending)
+          setMessage('本机已退出，但旧登录请求仍可能晚到。请重新载入页面，系统会再次核对服务器 session；完成前不要重新登录。', 'err');
+        else
+          setMessage('会话已安全清理，可以重新登录。', 'ok');
       }).catch(function (e) {
         render();
         setMessage('安全清理没有完成：' + auth.friendly(e), 'err');
@@ -436,11 +439,14 @@
         return;
       }
       setMessage('正在安全退出并核对服务器会话…');
-      auth.signOut().then(function () {
+      auth.signOut().then(function (r) {
         _syncState = null;
         render();
         notify();
-        setMessage('已安全退出。游戏本地进度仍保留。', 'ok');
+        if (r && r.cleanupPending)
+          setMessage('本机已退出，但旧登录请求仍在收尾。请重新载入后再次核对，再进行新的登录。', 'err');
+        else
+          setMessage('已安全退出。游戏本地进度仍保留。', 'ok');
       }).catch(function (e) {
         render();
         setMessage('退出没有完成：' + auth.friendly(e), 'err');
