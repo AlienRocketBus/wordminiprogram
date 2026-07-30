@@ -86,6 +86,12 @@ REGISTRY = [
      'test_auth_contract_v1075.mjs'),
     ('v1075', '没有真实 session/uid 仍写 signedAt 并显示登录成功',
      'guard_auth_real_session'),
+    ('v1075', '认证 operation UID 与 SDK session UID 未绑定，可能把旧/匿名会话贴到新账号',
+     'test_auth_contract_v1075.mjs'),
+    ('v1075', '登录后云档冲突取消会覆盖云端，迟到恢复可能覆盖新进度',
+     'test_auth_contract_v1075.mjs'),
+    ('v1075', '手机号与用户名登录同一 UID 却推导出两把云存档密钥',
+     'guard_auth_real_session'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

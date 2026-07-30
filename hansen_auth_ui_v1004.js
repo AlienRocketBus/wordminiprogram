@@ -54,182 +54,143 @@
   }
 
   var mode = 'phone';   /* phone | password */
-  var _phoneState = null;
+  var _syncState = null;
+  var _message = { text: '', kind: '' };
+
+  function A() { return window.HansenAuth; }
+  function panelOpen() {
+    var el = document.getElementById(ID);
+    return !!(el && el.classList && el.classList.contains('on'));
+  }
+  function notify() {
+    try { document.dispatchEvent(new CustomEvent('hsn-auth-changed')); } catch (e) {}
+  }
+  function pad(n) { var s = String(n); while (s.length < 3) s = '0' + s; return s; }
+  function setMessage(text, kind) {
+    _message = { text: text || '', kind: kind || '' };
+    var el = document.getElementById('auMsg');
+    if (el) {
+      el.textContent = _message.text;
+      el.className = 'au_msg' + (_message.kind ? ' ' + _message.kind : '');
+    }
+  }
+  function pendingState() {
+    var p = A() && A().readPending ? A().readPending() : {};
+    return (p && p.verificationId) ? p : {};
+  }
+  function sessionBanner(st, marker) {
+    if (!st) return '';
+    if (st.state === 'checking')
+      return '<div class="au_tip" style="color:#fde68a;opacity:1;margin:0 0 12px">正在向 CloudBase 核对真实会话，请稍候…</div>';
+    if (st.state === 'unknown')
+      return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">当前网络下无法确认旧会话，云端操作已暂停。可重试确认或重新登录；本地学习进度不会删除。</div>';
+    if (st.state === 'mismatch')
+      return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">本地账号与 SDK 会话不是同一用户，已禁止云端读写。请退出隐藏会话后重新登录。</div>';
+    if (st.state === 'legacy_reauth' || (marker && marker.method && marker.signedAt && !marker.uid))
+      return '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">旧版本没有留下可验证 UID。你的本地学习进度仍在，但账号必须重新验证。</div>';
+    return '';
+  }
+
+  function syncChoices(uid) {
+    var s = _syncState;
+    if (!s || s.uid !== uid) return '';
+    if (s.action === 'checking')
+      return '<div class="au_tip" style="opacity:.9;color:#fde68a">正在只读检查云端是否有存档，不会自动覆盖任何一边。</div>';
+    if (s.action === 'restored-awaiting-reload')
+      return '<div class="au_tip" style="opacity:1;color:#86efac">云端进度已恢复到本机。请重新载入后再继续，避免旧页面内存覆盖新数据。</div>'
+        + '<button class="au_go" id="auReload">重新载入并使用云端进度</button>';
+    if (s.action === 'conflict' || s.action === 'restore-available' || s.action === 'upload-available') {
+      var h = '<div class="au_tip" style="opacity:1;color:#fde68a">云存档需要你的明确选择。关闭、取消或点“稍后”都不会写入任何数据。</div>';
+      if (s.action === 'conflict') {
+        var l = s.local || {};
+        h += '<div class="au_tip" style="opacity:.9">本机：' + (l.islands || 0) + ' 个岛，已学 ' + (l.learned || 0)
+          + ' 个词；云端最后保存：' + esc(s.cloudUpdatedAt ? new Date(s.cloudUpdatedAt).toLocaleString() : '时间未知') + '。</div>';
+      }
+      if (s.action === 'conflict' || s.action === 'restore-available')
+        h += '<button class="au_go" id="auKeepCloud" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">保留云端（将覆盖本机）</button>';
+      if (s.action === 'conflict' || s.action === 'upload-available')
+        h += '<button class="au_go" id="auKeepLocal" style="background:linear-gradient(135deg,#a16207,#f59e0b)">保留本机（将覆盖云端）</button>';
+      h += '<button class="au_skip" id="auDefer">稍后处理（现在零写入）</button>';
+      return h;
+    }
+    return '';
+  }
+
+  function signedHtml(marker) {
+    var st = A().sessionStatus ? A().sessionStatus() : {};
+    var storage = st.storageWarning
+      ? '<br><span style="color:#fde68a">浏览器未能持久保存账号显示信息；当前 session 有效，刷新后会重新核对。</span>'
+      : '';
+    return '<div class="au_card"><div class="au_hd"><span class="au_t">👤 已登录</span>'
+      + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
+      + '<div class="au_tip" style="opacity:.9;font-size:13px">'
+      + (marker.phone ? '手机号：' + esc(marker.phone) : (marker.username ? '用户名：' + esc(marker.username) : '账号 UID 已确认'))
+      + '<br>CloudBase session UID 与本地 UID 已精确一致。' + storage + '</div>'
+      + syncChoices(marker.uid)
+      + '<button class="au_go" id="auPush" style="margin-top:14px">☁️ 明确上传本机进度</button>'
+      + '<button class="au_skip" id="auOut">安全退出登录</button>'
+      + '<div class="au_msg" id="auMsg"></div></div>';
+  }
 
   function html() {
-    var A = window.HansenAuth;
-    var signed = A && A.isSignedIn && A.isSignedIn();
-    if (signed) {
-      var lc = A.readLocal();
-      return '<div class="au_card"><div class="au_hd"><span class="au_t">👤 已登录</span>'
-        + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
-        + '<div class="au_tip" style="opacity:.9;font-size:13px">'
-        + (lc.phone ? '手机号：' + esc(lc.phone) : (lc.username ? '用户名：' + esc(lc.username) : '账号已登录'))
-        + '<br>真实云端会话已确认。学习进度会在后台同步，失败时本机进度仍保留。</div>'
-        + '<button class="au_go" id="auPush" style="margin-top:14px">☁️ 立即把进度存到云端</button>'
-        + '<button class="au_skip" id="auOut">退出登录</button>'
-        + '<div class="au_msg" id="auMsg"></div></div>';
-    }
+    var auth = A();
+    var marker = auth && auth.readLocal ? auth.readLocal() : {};
+    var st = auth && auth.sessionStatus ? auth.sessionStatus() : { state: 'signed_out' };
+    if (auth && auth.isSignedIn && auth.isSignedIn()) return signedHtml(marker);
 
-    var pending = (A && A.readPending) ? A.readPending() : {};
-    if (pending && pending.verificationId) _phoneState = pending;
-    var known = !!(_phoneState && _phoneState.verificationId);
-    var isNew = known && _phoneState.isUser === false;
-    var rawPhone = (known && _phoneState.phone) ? String(_phoneState.phone).replace(/^\+86\s*/, '') : '';
-    var legacy = A && A.needsReauth && A.needsReauth();
+    var pending = pendingState();
+    var known = !!pending.verificationId;
+    var isNew = known && pending.isUser === false;
+    var phoneValue = known && pending.phone ? String(pending.phone).replace(/^\+86\s*/, '') : '';
+    var wait = known && pending.resendAt ? Math.max(0, Math.ceil((pending.resendAt - Date.now()) / 1000)) : 0;
+    _left = wait;
+    var op = auth && auth.operationStatus ? auth.operationStatus() : { busy: false, state: 'idle' };
+    var busy = !!op.busy;
+    var banner = sessionBanner(st, marker);
 
     var h = '<div class="au_card"><div class="au_hd"><span class="au_t">🔐 登录 / 注册</span>'
-      + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
-      + (legacy
-          ? '<div class="au_tip" style="color:#fca5a5;opacity:1;margin:0 0 12px">旧版本没有完成真实云端登录。你的本地学习进度仍在，请重新登录或用手机号创建真实账号。</div>'
-          : '')
+      + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>' + banner
+      + (st.state === 'unknown' || st.state === 'mismatch'
+          ? '<button class="au_skip" id="auRetrySession" style="color:#fde68a">重新确认旧会话</button>' : '')
       + '<div class="au_tabs">'
-      + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone">手机号继续</button>'
-      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">账号密码登录</button>'
+      + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone"' + (busy ? ' disabled' : '') + '>手机号继续</button>'
+      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password"' + (busy ? ' disabled' : '') + '>账号密码登录</button>'
       + '</div>';
 
     if (mode === 'phone') {
       h += '<div class="au_row"><div class="au_lb">手机号</div>'
-        + '<input class="au_in" id="auPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="11 位手机号" maxlength="14" value="' + esc(rawPhone) + '"></div>'
-        + '<div class="au_row"><div class="au_lb">验证码</div><div class="au_code">'
-        + '<input class="au_in" id="auCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="收到的数字" maxlength="8">'
-        + '<button class="au_send" id="auSend"' + (_left > 0 ? ' disabled' : '') + '>'
-        + (_left > 0 ? (_left + ' 秒后重发') : (known ? '重新获取' : '获取验证码')) + '</button></div></div>';
+        + '<input class="au_in" id="auPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="11 位手机号" maxlength="14" value="' + esc(phoneValue) + '"' + (known || busy ? ' readonly' : '') + '></div>';
+      if (known && !busy)
+        h += '<button class="au_skip" id="auChangePhone" style="margin-top:-6px">更换手机号（结束当前验证码事务）</button>';
+      h += '<div class="au_row"><div class="au_lb">验证码</div><div class="au_code">'
+        + '<input class="au_in" id="auCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="收到的数字" maxlength="8"' + (!known || busy ? ' disabled' : '') + '>'
+        + '<button class="au_send" id="auSend"' + (wait > 0 || busy ? ' disabled' : '') + '>'
+        + (wait > 0 ? (wait + ' 秒后重发') : (known ? '重新获取' : '获取验证码')) + '</button></div></div>';
 
       if (isNew) {
-        h += '<div class="au_tip" style="opacity:.95;color:#fde68a;margin:2px 0 10px">这是新手机号。请创建用户名和密码；注册成功后可以用手机号或用户名登录同一个账号。</div>'
-          + '<div class="au_row"><div class="au_lb">创建用户名</div>'
-          + '<input class="au_in" id="auNewUser" type="text" autocomplete="username" placeholder="字母/数字/-/_，1-32 位"></div>'
-          + '<div class="au_row"><div class="au_lb">创建密码</div>'
-          + '<input class="au_in" id="auNewPwd" type="password" autocomplete="new-password" placeholder="至少 6 位"></div>'
-          + '<div class="au_row"><div class="au_lb">确认密码</div>'
-          + '<input class="au_in" id="auNewPwd2" type="password" autocomplete="new-password" placeholder="再输一次"></div>';
+        h += '<div class="au_tip" style="opacity:.95;color:#fde68a;margin:2px 0 10px">这是新手机号。用户名和密码会在同一个 CloudBase v2 注册事务中设置。</div>'
+          + '<div class="au_row"><div class="au_lb">创建用户名</div><input class="au_in" id="auNewUser" type="text" autocomplete="username" placeholder="字母/数字/-/_，1-32 位"' + (busy ? ' disabled' : '') + '></div>'
+          + '<div class="au_row"><div class="au_lb">创建密码</div><input class="au_in" id="auNewPwd" type="password" autocomplete="new-password" placeholder="按云端密码策略设置"' + (busy ? ' disabled' : '') + '></div>'
+          + '<div class="au_row"><div class="au_lb">确认密码</div><input class="au_in" id="auNewPwd2" type="password" autocomplete="new-password" placeholder="再输一次"' + (busy ? ' disabled' : '') + '></div>';
       }
 
-      h += '<button class="au_go" id="auGo">'
-        + (isNew ? '验证并注册' : (known ? '验证并登录' : '请先获取验证码')) + '</button>'
-        + '<div class="au_tip">'
-        + (isNew
-            ? '验证码、密码和验证凭证都不会写入本地存储。'
-            : (known
-                ? '这个手机号已有账号；本次只登录，不会重复注册。'
-                : '第一次使用会在收到验证码后显示创建账号信息；已有账号直接验证登录。'))
-        + '</div>';
+      h += '<button class="au_go" id="auGo"' + (!known || busy ? ' disabled' : '') + '>'
+        + (op.state === 'outcome_unknown' ? '登录结果待确认' : (isNew ? '验证并注册' : (known ? '验证并登录' : '请先获取验证码'))) + '</button>'
+        + (op.state === 'outcome_unknown'
+          ? '<button class="au_skip" id="auRecover" style="color:#fde68a">重新确认刚才的登录结果（不重复注册）</button>' : '')
+        + '<div class="au_tip">sessionStorage 只暂存手机号、事务 ID、新老用户标志和时间；密码、短信码、verification token 永不落盘。</div>';
     } else {
-      h += '<div class="au_row"><div class="au_lb">用户名</div>'
-        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="已绑定的用户名"></div>'
-        + '<div class="au_row"><div class="au_lb">密码</div>'
-        + '<input class="au_in" id="auPwd" type="password" autocomplete="current-password" placeholder="至少 6 位"></div>'
-        + '<button class="au_go" id="auGo">登录</button>'
+      h += '<div class="au_row"><div class="au_lb">用户名</div><input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="已存在的用户名"' + (busy ? ' disabled' : '') + '></div>'
+        + '<div class="au_row"><div class="au_lb">密码</div><input class="au_in" id="auPwd" type="password" autocomplete="current-password" placeholder="账号密码"' + (busy ? ' disabled' : '') + '></div>'
+        + '<button class="au_go" id="auGo"' + (busy ? ' disabled' : '') + '>' + (op.state === 'outcome_unknown' ? '登录结果待确认' : '登录') + '</button>'
+        + (op.state === 'outcome_unknown'
+          ? '<button class="au_skip" id="auRecover" style="color:#fde68a">重新确认刚才的登录结果（不重复登录）</button>' : '')
         + '<button class="au_skip" id="auUsePhone" style="color:#a5b4fc">第一次使用？请用手机号创建账号</button>'
-        + '<div class="au_tip">CloudBase 不支持直接用用户名注册。这里仅登录已经通过手机号真实创建并设置过用户名、密码的账号。</div>';
+        + '<div class="au_tip">这里仅登录已经通过受支持方式创建的账号，不提供虚假“无手机号直接注册”。</div>';
     }
     h += '<button class="au_skip" id="auSkip">先不登录，直接玩</button>'
       + '<div class="au_msg" id="auMsg"></div></div>';
     return h;
-  }
-
-  function msg(text, kind) {
-    var el = document.getElementById('auMsg');
-    if (!el) return;
-    el.textContent = text || '';
-    el.className = 'au_msg' + (kind ? ' ' + kind : '');
-  }
-
-  function mergeResult(a, b) {
-    var out = {}, k;
-    for (k in (a || {})) if (Object.prototype.hasOwnProperty.call(a, k) && k !== 'postLogin') out[k] = a[k];
-    for (k in (b || {})) if (Object.prototype.hasOwnProperty.call(b, k)) out[k] = b[k];
-    return out;
-  }
-
-  function finishPostLogin(base, post) {
-    var r = mergeResult(base, post);
-    if (r.stale) return;
-    var A = window.HansenAuth;
-    var idTxt = r.cid ? ' 竞赛 ID No.' + pad(r.cid) : (r.pendingId ? ' 竞赛 ID 稍后分配。' : '');
-    var s = r.sync;
-    var syncTxt = '';
-    if (s) {
-      if (s.action === 'restored') syncTxt = ' 已从云端找回全部进度，正在载入…';
-      else if (s.action === 'uploaded') syncTxt = ' 进度已存到云端。';
-      else if (s.action === 'conflict') syncTxt = ' 云端和本机都有进度，请选择保留哪一份。';
-      else if (s.action === 'nothing-to-sync') syncTxt = ' 本机还没有进度，之后会自动同步。';
-      else if (s.action === 'cloud-unreachable' || s.action === 'deferred')
-        syncTxt = ' 已登录；云存档暂未同步，本地进度仍然安全。';
-      else if (s.action === 'restore-failed' || s.action === 'upload-failed')
-        syncTxt = ' 已登录；进度同步没成功，可稍后手动重试。';
-    }
-    msg('登录成功！' + idTxt + syncTxt, 'ok');
-
-    if (s && s.needReload) {
-      setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
-      return;
-    }
-    if (s && s.action === 'conflict') {
-      setTimeout(function () {
-        var L = s.local || {};
-        var cloudWhen = s.cloudUpdatedAt ? new Date(s.cloudUpdatedAt).toLocaleString() : '时间未知';
-        var keepCloud = confirm(
-          '这个账号在云端已有进度，本机也有进度，需要你选一份保留：\n\n' +
-          '【本机】' + (L.islands || 0) + ' 个岛 · 已学 ' + (L.learned || 0) + ' 个单词\n' +
-          '【云端】最后保存于 ' + cloudWhen + '\n\n' +
-          '点「确定」= 用云端覆盖本机\n' +
-          '点「取消」= 用本机覆盖云端\n\n' +
-          '（另一份会被替换，请对照上面的数字想清楚）');
-        var CS = window.HansenCloudSave;
-        if (!CS) return;
-        if (keepCloud) {
-          CS.restoreWithKey(CS.ensureKey())
-            .then(function () {
-              msg('已恢复云端进度，正在载入…', 'ok');
-              setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
-            })
-            .catch(function (e) { msg(A.friendly(e), 'err'); });
-        } else {
-          CS.syncNow({ force: true })
-            .then(function () { msg('已用本机进度覆盖云端。', 'ok'); })
-            .catch(function (e) { msg(A.friendly(e), 'err'); });
-        }
-      }, 300);
-    }
-  }
-
-  function acceptAuthResult(r) {
-    notify();
-    msg('登录成功！正在后台检查云存档；你现在已经可以继续游戏。', 'ok');
-    setTimeout(function () { render(); }, 500);
-    if (r && r.postLogin && typeof r.postLogin.then === 'function') {
-      r.postLogin.then(function (post) {
-        finishPostLogin(r, post);
-      }, function () {
-        finishPostLogin(r, {
-          sync: { ok: false, action: 'deferred' },
-          pendingId: true
-        });
-      });
-    } else {
-      finishPostLogin(r || {}, {});
-    }
-  }
-
-  function startSendTimer() {
-    _left = 60;
-    if (_tick) clearInterval(_tick);
-    _tick = setInterval(function () {
-      _left--;
-      var b = document.getElementById('auSend');
-      if (!b) return;
-      if (_left <= 0) {
-        clearInterval(_tick);
-        _tick = null;
-        b.disabled = false;
-        b.textContent = '重新获取';
-        return;
-      }
-      b.disabled = true;
-      b.textContent = _left + ' 秒后重发';
-    }, 1000);
   }
 
   function host() {
@@ -245,108 +206,173 @@
     return el;
   }
 
+  function armTimer() {
+    if (_tick) { clearInterval(_tick); _tick = null; }
+    function step() {
+      var p = pendingState();
+      var left = p.resendAt ? Math.max(0, Math.ceil((p.resendAt - Date.now()) / 1000)) : 0;
+      _left = left;
+      var b = document.getElementById('auSend');
+      if (b) {
+        var busy = A() && A().operationStatus && A().operationStatus().busy;
+        b.disabled = left > 0 || !!busy;
+        b.textContent = left > 0 ? (left + ' 秒后重发') : (p.verificationId ? '重新获取' : '获取验证码');
+      }
+      if (left <= 0 && _tick) { clearInterval(_tick); _tick = null; }
+    }
+    step();
+    if (_left > 0) _tick = setInterval(step, 1000);
+  }
+
+  function finishPostLogin(base, post) {
+    var auth = A();
+    var marker = auth.readLocal ? auth.readLocal() : {};
+    if (!base || !base.uid || marker.uid !== base.uid || (post && post.stale)) return;
+    var sync = (post && post.sync) || { action: 'deferred' };
+    _syncState = {};
+    for (var k in sync) if (Object.prototype.hasOwnProperty.call(sync, k)) _syncState[k] = sync[k];
+    _syncState.uid = base.uid;
+    var idTxt = post && post.cid ? ' 竞赛 ID No.' + pad(post.cid)
+      : (post && post.pendingId ? ' 竞赛 ID 稍后分配。' : '');
+    render();
+    if (sync.action === 'conflict')
+      setMessage('登录成功！' + idTxt + ' 云端和本机都有进度；默认不覆盖，请明确选择。', 'ok');
+    else if (sync.action === 'restore-available')
+      setMessage('登录成功！' + idTxt + ' 云端有存档；需要你明确选择是否恢复。', 'ok');
+    else if (sync.action === 'upload-available')
+      setMessage('登录成功！' + idTxt + ' 本机有进度；需要你明确选择是否上传。', 'ok');
+    else if (sync.action === 'nothing-to-sync')
+      setMessage('登录成功！' + idTxt + ' 当前没有需要同步的进度。', 'ok');
+    else
+      setMessage('登录成功！' + idTxt + ' 云存档暂未处理，本地进度仍然安全。', 'ok');
+  }
+
+  function acceptAuthResult(r) {
+    _syncState = { action: 'checking', uid: r.uid };
+    notify();
+    render();
+    setMessage('真实 session UID 已确认，登录成功。正在只读检查云存档；不会自动覆盖。', 'ok');
+    if (r && r.postLogin && typeof r.postLogin.then === 'function') {
+      r.postLogin.then(function (post) { finishPostLogin(r, post); }, function () {
+        finishPostLogin(r, { pendingId: true, sync: { action: 'deferred' } });
+      });
+    }
+  }
+
+  function chooseCloud(choice, uid) {
+    var label = choice === 'cloud' ? '云端进度将覆盖本机当前进度。' : '本机进度将覆盖云端当前存档。';
+    if (!confirm(label + '\n\n这是不可自动撤销的操作。确定继续吗？')) {
+      setMessage('已取消，双方数据都没有改动。', '');
+      return;
+    }
+    setMessage(choice === 'cloud' ? '正在恢复云端进度…' : '正在上传本机进度…');
+    A().resolveCloudChoice(choice, uid).then(function (r) {
+      if (!r || !r.ok) {
+        setMessage(r && r.stale ? '账号会话已变化，本次结果不再采用。' : ('操作没有完成：' + ((r && r.reason) || '未知原因')), 'err');
+        return;
+      }
+      if (r.needReload) {
+        _syncState = { action: 'restored-awaiting-reload', uid: uid };
+        render();
+        setMessage('云端进度已安全恢复；请重新载入后继续。', 'ok');
+      } else {
+        _syncState = { action: 'done', uid: uid };
+        render();
+        setMessage('本机进度已明确上传到云端。', 'ok');
+      }
+    }).catch(function (e) { setMessage(A().friendly(e), 'err'); });
+  }
+
   function bind() {
     var el = document.getElementById(ID);
     if (!el) return;
-    var A = window.HansenAuth;
+    var auth = A();
     var q = function (id) { return document.getElementById(id); };
-
     if (q('auX')) q('auX').onclick = close;
     if (q('auSkip')) q('auSkip').onclick = close;
     if (q('auUsePhone')) q('auUsePhone').onclick = function () { mode = 'phone'; render(); };
+    if (q('auRetrySession')) q('auRetrySession').onclick = function () {
+      setMessage('正在重新确认会话…');
+      auth.refreshSession().then(function () { render(); });
+    };
+    if (q('auRecover')) q('auRecover').onclick = function () {
+      setMessage('正在确认刚才的结果；不会重复注册或登录…');
+      auth.recoverAuthOutcome().then(acceptAuthResult).catch(function (e) { setMessage(auth.friendly(e), 'err'); });
+    };
+    if (q('auChangePhone')) q('auChangePhone').onclick = function () {
+      if (auth.clearPending()) { _left = 0; render(); setMessage('已结束旧验证码事务，可以输入新的手机号。'); }
+    };
 
     var tabs = el.querySelectorAll('.au_tab');
     for (var i = 0; i < tabs.length; i++) {
-      tabs[i].onclick = (function (m) {
-        return function () { mode = m; render(); };
-      })(tabs[i].getAttribute('data-m'));
+      tabs[i].onclick = (function (m) { return function () { mode = m; render(); }; })(tabs[i].getAttribute('data-m'));
     }
 
     if (q('auSend')) q('auSend').onclick = function () {
-      var btn = this;
       var phone = (q('auPhone') || {}).value || '';
-      msg('正在发送验证码…');
-      btn.disabled = true;
-      A.sendPhoneCode(phone).then(function (r) {
-        _phoneState = A.readPending ? A.readPending() : {
-          verificationId: 'sent',
-          phone: r.phone,
-          isUser: r.isUser
-        };
-        startSendTimer();
+      setMessage('正在发送验证码…');
+      this.disabled = true;
+      auth.sendPhoneCode(phone).then(function (r) {
         render();
-        msg(r.isUser
-          ? '验证码已发送。这个手机号已有账号，输入后登录。'
-          : '验证码已发送。这是新手机号，请同时创建用户名和密码。', 'ok');
+        setMessage(r.isUser
+          ? '验证码已发送。这个手机号已有账号，本次只登录。'
+          : '验证码已发送。这是新手机号，请设置用户名和密码。', 'ok');
       }).catch(function (e) {
-        msg(A.friendly(e), 'err');
-        btn.disabled = false;
+        render();
+        setMessage(auth.friendly(e), 'err');
       });
     };
 
     if (q('auGo')) q('auGo').onclick = function () {
-      var btn = this;
-      btn.disabled = true;
-      msg(mode === 'phone' ? '正在验证并确认云端会话…' : '正在登录并确认云端会话…');
-      var task;
-      if (mode === 'phone') {
-        task = A.loginByPhoneCode(
-          (q('auCode') || {}).value || '',
-          (q('auNewUser') || {}).value || '',
-          (q('auNewPwd') || {}).value || '',
-          (q('auNewPwd2') || {}).value || ''
-        );
-      } else {
-        task = A.loginByPassword(
-          (q('auUser') || {}).value || '',
-          (q('auPwd') || {}).value || ''
-        );
-      }
+      this.disabled = true;
+      setMessage(mode === 'phone' ? '正在验证并确认同一 UID 的云端会话…' : '正在登录并确认同一 UID 的云端会话…');
+      var task = mode === 'phone'
+        ? auth.loginByPhoneCode((q('auCode') || {}).value || '', (q('auNewUser') || {}).value || '',
+            (q('auNewPwd') || {}).value || '', (q('auNewPwd2') || {}).value || '')
+        : auth.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
       task.then(acceptAuthResult).catch(function (e) {
-        var text = A.friendly(e);
-        var p = A.readPending ? A.readPending() : {};
-        if (mode === 'phone' && (!p || !p.verificationId)) {
-          _phoneState = null;
-          render();
-        }
-        msg(text, 'err');
-        var live = q('auGo');
-        if (live) live.disabled = false;
+        render();
+        setMessage(auth.friendly(e), 'err');
       });
     };
+
+    if (q('auKeepCloud')) q('auKeepCloud').onclick = function () { chooseCloud('cloud', auth.readLocal().uid); };
+    if (q('auKeepLocal')) q('auKeepLocal').onclick = function () { chooseCloud('local', auth.readLocal().uid); };
+    if (q('auDefer')) q('auDefer').onclick = function () {
+      _syncState = { action: 'deferred-by-user', uid: auth.readLocal().uid };
+      render();
+      setMessage('已选择稍后处理；本机和云端都没有被改动。', 'ok');
+    };
+    if (q('auReload')) q('auReload').onclick = function () { location.reload(); };
 
     if (q('auPush')) q('auPush').onclick = function () {
-      var btn = this;
-      btn.disabled = true;
-      msg('正在上传…');
-      A.pushSave().then(function (r) {
-        if (r && r.ok) msg('已存到云端。换设备登录同一账号即可找回。', 'ok');
-        else msg('上传没成功：' + ((r && r.reason) || '未知原因'), 'err');
-        btn.disabled = false;
-      }).catch(function (e) {
-        msg(A.friendly(e), 'err');
-        btn.disabled = false;
-      });
+      var uid = auth.readLocal().uid;
+      if (!confirm('确认把本机当前进度上传到这个账号的云端存档吗？')) return;
+      setMessage('正在上传…');
+      auth.resolveCloudChoice('local', uid).then(function (r) {
+        setMessage(r && r.ok ? '已存到云端。' : ('上传没成功：' + ((r && r.reason) || '未知原因')), r && r.ok ? 'ok' : 'err');
+      }).catch(function (e) { setMessage(auth.friendly(e), 'err'); });
     };
     if (q('auOut')) q('auOut').onclick = function () {
-      A.signOut().then(function () {
-        _phoneState = null;
+      setMessage('正在安全退出并核对服务器会话…');
+      auth.signOut().then(function () {
+        _syncState = null;
         render();
         notify();
+        setMessage('已安全退出。游戏本地进度仍保留。', 'ok');
+      }).catch(function (e) {
+        render();
+        setMessage('退出没有完成：' + auth.friendly(e), 'err');
       });
     };
-  }
-
-  function pad(n) { var s = String(n); while (s.length < 3) s = '0' + s; return s; }
-
-  function notify() {
-    try { document.dispatchEvent(new CustomEvent('hsn-auth-changed')); } catch (e) {}
   }
 
   function render() {
     var el = host();
     el.innerHTML = html();
     bind();
+    armTimer();
+    if (_message.text) setMessage(_message.text, _message.kind);
   }
 
   function open() {
@@ -356,12 +382,26 @@
     }
     render();
     host().classList.add('on');
+    setMessage('正在核对真实云端会话…');
+    HansenAuth.refreshSession().then(function () {
+      if (panelOpen()) render();
+    });
   }
   function close() {
     var el = document.getElementById(ID);
     if (el) el.classList.remove('on');
     if (_tick) { clearInterval(_tick); _tick = null; }
   }
+
+  try {
+    document.addEventListener('hsn-auth-session', function () {
+      if (panelOpen()) render();
+    });
+    document.addEventListener('hsn-auth-operation', function (ev) {
+      if (panelOpen() && ev && ev.detail && ev.detail.slow)
+        setMessage('服务器仍在处理本次认证，请勿重复提交或切换账号。');
+    });
+  } catch (e) {}
 
   window.HansenAuthUI = { open: open, close: close, _render: render };
 })();

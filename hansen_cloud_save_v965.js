@@ -80,23 +80,28 @@
      手机号是这个账号**唯一在所有设备上都相同、且永不变**的标识，
      用它推导密钥，两台设备必然算出同一把钥匙。
      兜底顺序：手机号 → 用户名 → uid（老账号或异常情况仍可工作）。 */
-  function accountIdent(){
+  /* v1075：真实 CloudBase UID 是账号命名空间唯一真源。
+     phone/username 只作为 v1047-v1074 历史地址候选，绝不再决定新写入地址。 */
+  function accountIdents(){
+    var out = [];
     try {
       var A = window.HansenAuth;
-      if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return '';
+      if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return out;
       var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
-      /* 手机号归一：去掉空格与 +86 等前缀差异，保证两端拼出的字符串完全一致 */
-      if (lc && lc.phone) {
-        var ph = String(lc.phone).replace(/[\s\-()]/g, '');
-        ph = ph.replace(/^\+?86/, '');
-        if (/^\d{6,15}$/.test(ph)) return 'p:' + ph;
-      }
-      if (lc && lc.username) return 'n:' + String(lc.username).trim().toLowerCase();
       var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
-      if (u && u.uid) return 'u:' + String(u.uid);
-      if (lc && lc.uid) return 'u:' + String(lc.uid);
+      var uid = (u && u.uid) || (lc && lc.uid) || '';
+      if (uid) out.push('u:' + String(uid));
+      if (lc && lc.phone) {
+        var ph = String(lc.phone).replace(/[\s\-()]/g, '').replace(/^\+?86/, '');
+        if (/^\d{6,15}$/.test(ph)) out.push('p:' + ph);
+      }
+      if (lc && lc.username) out.push('n:' + String(lc.username).trim().toLowerCase());
     } catch (e) {}
-    return '';
+    return out.filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+  }
+  function accountIdent(){
+    var ids = accountIdents();
+    return ids.length ? ids[0] : '';
   }
   /* 保留原名供外部与自检面板使用；语义已变为"账号标识" */
   function accountUid(){ return accountIdent(); }
@@ -159,27 +164,28 @@
      返回 {exists, updatedAt, appVersion}；出错时 exists=null 表示**查不到**，
      调用方必须把"查不到"与"确认没有"区别对待——绝不能把查不到当成没有而覆盖云端。 */
   function accountCloudInfo(){
-    var uid = accountUid();
-    if (!uid) return Promise.resolve({ exists:false, reason:'not-signed-in' });
+    var ids = accountIdents();
+    if (!ids.length) return Promise.resolve({ exists:false, reason:'not-signed-in' });
     var p = provider();
     if (!p) return Promise.resolve({ exists:null, reason:'not-configured' });
-    /* 🔴v1046 决定性修复：这里原本用 keyFromUid(uid) 直接算地址——
-       那是**带连字符**的原始密钥；而上传与拉取都用 normalizeKey() 去掉连字符后再算。
-       三处只有这一处没归一化，于是查的是另一个地址：
-         · 自检 ⑩ 谎报"云端还没有你的存档"（其实有）；
-         · 更致命的是 syncOnLogin 以它为依据 →
-           判定"云端是空的" → 走上传分支 → **从来没执行过恢复**
-           → 新设备登录后等级永远停在 Lv.1。
-       这也解释了为什么"上传成功、拉取成功、往返自检成功"却唯独 ⑩ 说没有。 */
-    var accKey = normalizeKey(keyFromUid(uid)) || keyFromUid(uid);
-    return docIdOf(accKey)
-      .then(function(id){ return p.get(id); })
-      .then(function(row){
-        if (!row || !row.payload) return { exists:false };
+    function attempt(i) {
+      if (i >= ids.length) return Promise.resolve({ exists:false });
+      var rawKey = keyFromUid(ids[i]);
+      var accKey = normalizeKey(rawKey) || rawKey;
+      return docIdOf(accKey).then(function(id){ return p.get(id); }).then(function(row){
+        if (!row || !row.payload) return attempt(i + 1);
         var pl = row.payload || {};
-        return { exists:true, updatedAt: row.updatedAt || pl.ts || 0, appVersion: pl.appVersion || '' };
-      })
-      .catch(function(e){ return { exists:null, reason:String(e && e.message || e) }; });
+        return {
+          exists:true,
+          updatedAt: row.updatedAt || pl.ts || 0,
+          appVersion: pl.appVersion || '',
+          legacyIdentity: i > 0 ? ids[i] : ''
+        };
+      });
+    }
+    return attempt(0).catch(function(e){
+      return { exists:null, reason:String(e && e.message || e) };
+    });
   }
 
   /* ---------- 加密信封（零知识） ---------- */
@@ -433,27 +439,18 @@
     var raw = String(inputKey || '');
     if (raw && raw !== key) cands.push(raw);
     try {
-      var uid = accountUid();
-      if (uid) {
-        /* 🔴v1047: v1047 之前用 uid 推导密钥, 存档可能落在那个地址上;
-           把 uid 形态的候选也加进来, 老存档才不至于丢。 */
-        try {
-          var A2 = window.HansenAuth;
-          var lc2 = (A2 && typeof A2.readLocal === 'function') ? A2.readLocal() : null;
-          var rawUid = (lc2 && lc2.uid) ? String(lc2.uid) : '';
-          if (rawUid) {
-            [keyFromUid(rawUid), legacyKeyFromUid(rawUid)].forEach(function(k){
-              if (k && cands.indexOf(k) < 0) cands.push(k);
-              var nk2 = normalizeKey(k);
-              if (nk2 && cands.indexOf(nk2) < 0) cands.push(nk2);
-            });
-          }
-        } catch (e) {}
-        var legacy = legacyKeyFromUid(uid);
-        if (legacy && cands.indexOf(legacy) < 0) cands.push(legacy);
-        var legacyN = normalizeKey(legacy);
-        if (legacyN && cands.indexOf(legacyN) < 0) cands.push(legacyN);
-      }
+      var ids = accountIdents();
+      var A2 = window.HansenAuth;
+      var lc2 = (A2 && typeof A2.readLocal === 'function') ? A2.readLocal() : null;
+      var rawUid = (lc2 && lc2.uid) ? String(lc2.uid) : '';
+      if (rawUid && ids.indexOf(rawUid) < 0) ids.push(rawUid);
+      ids.forEach(function (ident) {
+        [keyFromUid(ident), legacyKeyFromUid(ident)].forEach(function (k) {
+          if (k && cands.indexOf(k) < 0) cands.push(k);
+          var nk = normalizeKey(k);
+          if (nk && cands.indexOf(nk) < 0) cands.push(nk);
+        });
+      });
     } catch (e) {}
 
     var tried = [];

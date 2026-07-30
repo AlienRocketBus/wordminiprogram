@@ -88,8 +88,9 @@ def _inj_land_stamp(s):
     return s.replace('<title>', '<title>手改痕迹', 1)
 
 def _inj_auth_session(s):
-    return s.replace('return !!(lc.method && lc.signedAt && lc.uid);',
-                     'return !!(lc.method && lc.signedAt);', 1)
+    """破坏 operation UID 与 session UID 的强一致；守卫必须立刻报红。"""
+    return s.replace('String(opIdentity.uid) !== String(snap.uid)',
+                     'false /* injected: skip uid equality */', 1)
 
 
 CASES = [

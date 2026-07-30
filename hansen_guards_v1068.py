@@ -530,23 +530,32 @@ def guard_jarvis_not_stale():
 
 
 def guard_auth_real_session():
-    """v1075：只有真实 CloudBase session + uid 才能提交登录成功。"""
+    """v1075：认证 UID、SDK session、本地 marker 与云存档动作必须同源。"""
     auth = _code_only(_read('hansen_auth_v1004.js'))
     ui = _code_only(_read('hansen_auth_ui_v1004.js'))
+    cloud = _code_only(_read('hansen_cloud_save_v965.js'))
     if not auth:
         return
     if 'u.wordadventure.local' in auth or 'signUpWithEmailAndPassword(' in auth:
-        bad('认证真实会话', '仍存在 v1058 不可收件邮箱伪注册路径')
-    if re.search(r'return\s+!!\(lc\.method\s*&&\s*lc\.signedAt\s*\)', auth):
-        bad('认证真实会话', 'isSignedIn 仍只看 method+signedAt，没有要求真实 uid')
-    if 'confirmSession' not in auth or 'AUTH_SESSION_NOT_ESTABLISHED' not in auth:
-        bad('认证真实会话', '登录成功前没有统一 session+uid 确认门禁')
-    if not re.search(r'snap\s*&&\s*snap\.uid', auth):
-        bad('认证真实会话', 'afterSignIn 没有从已确认会话读取 uid')
-    if 'registerByPassword(' in ui or '不需要手机号' in ui:
-        bad('认证真实会话', 'UI 仍暴露无需验证的用户名直接注册承诺')
+        bad('认证真实会话', '仍存在不可收件邮箱伪注册路径')
+    if "_sessionTruth.state === 'confirmed'" not in auth:
+        bad('认证真实会话', 'isSignedIn 没有要求 SDK session 已确认')
+    if 'String(opIdentity.uid) !== String(snap.uid)' not in auth:
+        bad('认证真实会话', '本次认证 UID 没有与 getSession UID 强一致')
+    if 'AUTH_OPERATION_UID_MISSING' not in auth or 'AUTH_ANONYMOUS_RESULT' not in auth:
+        bad('认证真实会话', '缺少 operation UID/匿名会话失败关闭')
+    if 'AUTH_OUTCOME_UNKNOWN' not in auth or 'awaitAuthMutation' not in auth:
+        bad('认证真实会话', '认证 mutation 超时仍可能被当作已取消')
+    if 'refreshSessionTruth' not in auth or 'sessionStatus' not in auth:
+        bad('认证真实会话', '启动/打开面板没有真实 session 状态机')
+    if 'resolveCloudChoice' not in ui or 'HansenCloudSave' in ui:
+        bad('认证真实会话', 'UI 仍绕过 expected UID 直接操作云存档')
+    if '稍后处理（现在零写入）' not in ui:
+        bad('认证真实会话', '云存档冲突没有默认零写入出口')
+    if "out.push('u:' + String(uid))" not in cloud:
+        bad('认证真实会话', '云存档新地址仍未以稳定 UID 为唯一真源')
     if 'postLogin' not in ui:
-        bad('认证真实会话', '登录 UI 仍可能把云同步绑在认证按钮上')
+        bad('认证真实会话', '登录 UI 仍可能被云同步阻塞')
 
 
 GUARDS = [
