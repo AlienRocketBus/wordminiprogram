@@ -681,12 +681,15 @@ def guard_auth_real_session():
         bad('认证真实会话', 'getSession 有凭证但 user 为空时没有进入不确定态并强制刷新用户')
     if 'AUTH_MUTATION_INDETERMINATE' not in auth or 'awaitAuthMutation' not in auth:
         bad('认证真实会话', '认证 mutation 没有硬上限与结果未知隔离')
+    if 'AUTH_INIT_TIMEOUT' not in auth or '__HANSEN_AUTH_INIT_TIMEOUT_MS__' not in auth:
+        bad('认证真实会话', 'SDK import/init 悬挂仍可能发生在 mutation 计时器启动之前')
     if 'probeCurrent' not in auth or '_authGeneration' not in auth or '_probeId' not in auth:
         bad('认证真实会话', '迟到 refresh/ensure 仍可能跨认证代写回旧身份')
     fence_markers = (
         'hansen_auth_fence_v1076', 'hansen_auth_fence_backup_v1076',
         'outcome_unknown: 1', 'stale_mutation: 2', 'mismatch: 3',
-        'AUTH_FENCED_SESSION', 'ownedFenceRevision', 'hadPriorSessionMutation')
+        'FSTORE_KEYS', 'fenceId', 'sameFence',
+        'AUTH_FENCED_SESSION', 'ownedFence', 'hadPriorSessionMutation')
     if any(marker not in auth for marker in fence_markers):
         bad('认证真实会话', '持久 fence、优先级、所有权或退出后迟到 mutation 防线不完整')
     if 'refreshSessionTruth' not in auth or 'sessionStatus' not in auth:
@@ -711,6 +714,8 @@ def guard_auth_real_session():
         bad('认证真实会话', '会话原始 UID 与 u:文档身份仍被混为同一个值')
     if 'anonymousBoundaryAllowed' not in cloud:
         bad('认证真实会话', '认证未知/隔离态仍可能跌入匿名云存档分支')
+    if 'session-not-confirmed' not in cloud or 'identity-not-confirmed' not in cloud:
+        bad('认证真实会话', '账号元信息读取在认证未知或切号时仍可能返回旧账号结果')
     if '_busyToken' not in cloud or '_generation' not in cloud:
         bad('认证真实会话', '旧账号悬挂同步仍可能阻塞或释放新账号的同步锁')
     if 'postLogin' not in ui:
