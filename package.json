@@ -2,7 +2,7 @@
   "name": "wordminiprogram-audit",
   "version": "1076.0.0",
   "private": true,
-  "description": "Pinned browser-audit dependencies for Word Adventure v960",
+  "description": "单词大冒险 v1076：修复 CloudBase 手机注册/登录闭环、真实 session UID 一致性、显式云存档选择与跨账号同步隔离",
   "devDependencies": {
     "playwright": "1.61.1"
   }
