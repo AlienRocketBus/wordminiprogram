@@ -662,7 +662,41 @@ def guard_no_divergent_config():
                 % (base, n, top))
 
 
+def guard_auth_real_session():
+    """v1076：认证 UID、SDK session、本地 marker、自动同步授权与云存档动作必须同源。"""
+    auth = _code_only(_read('hansen_auth_v1004.js'))
+    ui = _code_only(_read('hansen_auth_ui_v1004.js'))
+    cloud = _code_only(_read('hansen_cloud_save_v965.js'))
+    if not auth:
+        return
+    if 'u.wordadventure.local' in auth or 'signUpWithEmailAndPassword(' in auth:
+        bad('认证真实会话', '仍存在不可收件邮箱伪注册路径')
+    if "_sessionTruth.state === 'confirmed'" not in auth:
+        bad('认证真实会话', 'isSignedIn 没有要求 SDK session 已确认')
+    if 'String(opIdentity.uid) !== String(snap.uid)' not in auth:
+        bad('认证真实会话', '本次认证 UID 没有与 getSession UID 强一致')
+    if 'AUTH_OPERATION_UID_MISSING' not in auth or 'AUTH_ANONYMOUS_RESULT' not in auth:
+        bad('认证真实会话', '缺少 operation UID/匿名会话失败关闭')
+    if 'AUTH_OUTCOME_UNKNOWN' not in auth or 'awaitAuthMutation' not in auth:
+        bad('认证真实会话', '认证 mutation 超时仍可能被当作已取消')
+    if 'refreshSessionTruth' not in auth or 'sessionStatus' not in auth:
+        bad('认证真实会话', '启动/打开面板没有真实 session 状态机')
+    if 'resolveCloudChoice' not in ui or 'HansenCloudSave' in ui:
+        bad('认证真实会话', 'UI 仍绕过 expected UID 直接操作云存档')
+    if '稍后处理（现在零写入）' not in ui:
+        bad('认证真实会话', '云存档冲突没有默认零写入出口')
+    if "out.push('u:' + String(uid))" not in cloud:
+        bad('认证真实会话', '云存档新地址仍未以稳定 UID 为唯一真源')
+    if 'automaticSyncEnabled' not in cloud or 'enabledIdentity' not in cloud:
+        bad('认证真实会话', '自动同步授权没有绑定当前正式账号身份')
+    if 'not-enabled-for-current-identity' not in cloud:
+        bad('认证真实会话', '切换账号后后台同步没有失败关闭')
+    if 'postLogin' not in ui:
+        bad('认证真实会话', '登录 UI 仍可能被云同步阻塞')
+
+
 GUARDS = [
+    ('认证真实会话',   guard_auth_real_session),
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
     ('SDK 单实例',     guard_single_sdk_instance),
