@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import importlib.util
 import os
 from pathlib import Path
@@ -36,6 +37,8 @@ class PackageReleaseTests(unittest.TestCase):
         self.root = self.base / "source"
         self.root.mkdir()
         self.original_root = PACKAGE.ROOT
+        self.original_skip_jarvis = os.environ.get("HANSEN_SKIP_JARVIS")
+        os.environ["HANSEN_SKIP_JARVIS"] = "1"
         PACKAGE.ROOT = self.root
 
         # Create the complete required source surface with harmless contents.
@@ -46,6 +49,7 @@ class PackageReleaseTests(unittest.TestCase):
                 path.write_text("placeholder\n", encoding="utf-8")
         (self.root / "VERSION").write_text("942\n", encoding="utf-8")
         (self.root / "README.md").write_text("# v942 test\n", encoding="utf-8")
+        (self.root / ".jarvis_pass.json").write_text("{}\n", encoding="utf-8")
         # A restored source release legitimately contains its previous archive
         # manifest.  Repackaging must replace it, never emit two same-name
         # SHA256SUMS members.
@@ -92,6 +96,10 @@ class PackageReleaseTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         PACKAGE.ROOT = self.original_root
+        if self.original_skip_jarvis is None:
+            os.environ.pop("HANSEN_SKIP_JARVIS", None)
+        else:
+            os.environ["HANSEN_SKIP_JARVIS"] = self.original_skip_jarvis
         self.temp.cleanup()
 
     @staticmethod
@@ -145,6 +153,29 @@ class PackageReleaseTests(unittest.TestCase):
             self.assertNotIn("evolution_dashboard.html", names)
             self.assertNotIn("_wshot4.jpg", names)
             self.assertNotIn("_wtest4.html", names)
+            self.assertNotIn(".jarvis_pass.json", names)
+
+    def test_jarvis_pass_is_bound_to_exact_source_tree(self) -> None:
+        os.environ.pop("HANSEN_SKIP_JARVIS", None)
+        guard_material = ""
+        for name in ("hansen_guards_v1068.py", "check_resources.py",
+                     "hansen_bug_registry.py", "jarvis_selftest.py"):
+            path = self.root / name
+            if path.exists():
+                guard_material += hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+        guards = hashlib.sha256(guard_material.encode()).hexdigest()[:24]
+        record = {
+            "version": "942", "at": "fixture", "legacy": 0,
+            "guards": guards,
+            "source": PACKAGE._source_input_fingerprint(),
+        }
+        (self.root / ".jarvis_pass.json").write_text(
+            json.dumps(record), encoding="utf-8"
+        )
+        PACKAGE._require_jarvis_pass("942")
+        (self.root / "app.js").write_text("window.changed = true;\n", encoding="utf-8")
+        with self.assertRaisesRegex(RuntimeError, "源码树在贾维斯体检之后"):
+            PACKAGE._require_jarvis_pass("942")
 
     def test_secret_failure_preserves_previous_three_assets(self) -> None:
         out = self.base / "stable-output"
