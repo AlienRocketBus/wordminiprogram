@@ -86,6 +86,32 @@ console.log('T3 同步');
   ok(r4.ok === true && !r4.skipped, '内容变化+强制→重新上云');
 }
 
+/* T3b 自动同步许可绑定身份 */
+console.log('T3b 身份切换');
+{
+  globalThis.HansenAuth = {
+    isSignedIn: () => true,
+    readLocal: () => ({ uid: 'U-ACCOUNT-1', phone: '+86 15550836896' }),
+    currentUser: () => ({ uid: 'U-ACCOUNT-1' })
+  };
+  const blocked = await M.syncNow({});
+  ok(blocked.ok === false && blocked.reason === 'not-enabled-for-current-identity',
+     '旧恢复码自动同步许可不能继承给正式账号');
+  const explicit = await M.syncNow({ force: true });
+  ok(explicit.ok === true && /^account:u:U-ACCOUNT-1$/.test(D.readState().enabledIdentity || ''),
+     '用户明确上传后只为当前 UID 开启自动同步');
+
+  globalThis.HansenAuth = {
+    isSignedIn: () => true,
+    readLocal: () => ({ uid: 'U-ACCOUNT-2' }),
+    currentUser: () => ({ uid: 'U-ACCOUNT-2' })
+  };
+  const switched = await M.syncNow({});
+  ok(switched.ok === false && switched.reason === 'not-enabled-for-current-identity',
+     '切换账号后旧 UID 许可立即失效，后台钩子零写入');
+  delete globalThis.HansenAuth;
+}
+
 /* T4 换机回档 */
 console.log('T4 回档');
 {
