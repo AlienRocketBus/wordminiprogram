@@ -22,8 +22,9 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = path.dirname(fileURLToPath(import.meta.url));
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('页面模块接线合同 v1063');
