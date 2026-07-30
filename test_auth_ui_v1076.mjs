@@ -19,8 +19,8 @@ ok(await page.evaluate(()=>window.HansenAuth.isSignedIn()&&window.HansenAuth.rea
 /* 用可控 Promise 验证：一旦选择覆盖方向，旧 DOM 引用也不能重复提交、改选、稍后或关闭。 */
 await page.evaluate(()=>{
   const state={
-    signed:false,session:'signed_out',op:'idle',opBusy:false,cleanupPending:false,
-    choiceCalls:0,signOutCalls:0,resolveChoice:null
+    signed:false,session:'signed_out',op:'idle',opBusy:false,requiresCleanup:false,cleanupPending:false,
+    choiceCalls:0,signOutCalls:0,sendCalls:0,loginCalls:0,resolveChoice:null
   };
   window.__authUiRace=state;
   window.HansenAuth={
@@ -28,12 +28,14 @@ await page.evaluate(()=>{
     isSignedIn:()=>state.signed,
     readLocal:()=>state.signed?{uid:'UI-CLOUD',username:'cloud_user'}:{},
     sessionStatus:()=>({state:state.session}),
-    operationStatus:()=>({busy:state.opBusy,state:state.op}),
+    operationStatus:()=>({busy:state.opBusy,state:state.op,requiresCleanup:state.requiresCleanup}),
     readPending:()=>({}),
     refreshSession:()=>Promise.resolve({state:state.session}),
     friendly:e=>String(e&&e.message||e||'未知错误'),
+    sendPhoneCode:()=>{state.sendCalls++;return Promise.resolve({isUser:true});},
+    loginByPhoneCode:()=>{state.loginCalls++;return Promise.reject(new Error('stale phone login should not run'));},
     loginByPassword:()=>{
-      state.signed=true;state.session='confirmed';
+      state.loginCalls++;state.signed=true;state.session='confirmed';
       return Promise.resolve({
         ok:true,uid:'UI-CLOUD',
         postLogin:Promise.resolve({
@@ -57,7 +59,15 @@ await page.evaluate(()=>{
   window.HansenAuthUI.close();
   window.HansenAuthUI.open();
 });
+/* 先保留 unknown/phone 旧节点，再重绘到 password；这些离屏 DOM 以后都必须失效。 */
+await page.evaluate(()=>{
+  const s=window.__authUiRace;
+  s.session='unknown';window.HansenAuthUI._render();
+  window.__oldAuthDom={safeOut:document.getElementById('auSafeOut'),send:document.getElementById('auSend')};
+  s.session='signed_out';window.HansenAuthUI._render();
+});
 await page.click('[data-m="password"]');
+await page.evaluate(()=>{window.__oldAuthDom.go=document.getElementById('auGo');});
 await page.fill('#auUser','cloud_user');
 await page.fill('#auPwd','pw');
 await page.click('#auGo');
@@ -79,6 +89,10 @@ await page.evaluate(()=>{
   old.push.click();
   old.out.click();
   old.close.click();
+  /* 旧 render 的认证/清理按钮即使被脚本保留，也不能绕过 applying 锁。 */
+  window.__oldAuthDom.safeOut.click();
+  window.__oldAuthDom.send.click();
+  window.__oldAuthDom.go.click();
 });
 await page.waitForFunction(()=>window.__authUiRace.choiceCalls===1);
 const applying=await page.evaluate(()=>({
@@ -88,13 +102,18 @@ const applying=await page.evaluate(()=>({
   choices:['auKeepLocal','auKeepCloud','auDefer'].some(id=>!!document.getElementById(id)),
   closeDisabled:document.getElementById('auX').disabled,
   pushDisabled:document.getElementById('auPush').disabled,
-  outDisabled:document.getElementById('auOut').disabled
+  outDisabled:document.getElementById('auOut').disabled,
+  signOutCalls:window.__authUiRace.signOutCalls,
+  sendCalls:window.__authUiRace.sendCalls,
+  loginCalls:window.__authUiRace.loginCalls
 }));
 ok(applying.calls===1,'云/本机选择 Promise 只启动一次，旧按钮引用不能重复提交或改选');
 ok(applying.open&&!applying.choices,'应用选择期间面板保持打开且选择/稍后按钮不可操作');
 ok(applying.text.includes('正在上传本机进度并复验当前账号'),'应用选择后立即呈现 applying 状态');
 ok(!applying.text.includes('双方都没有被改动'),'Promise 活跃时“稍后”不会谎称双方零写入');
 ok(applying.closeDisabled&&applying.pushDisabled&&applying.outDisabled,'应用选择期间关闭、手动上传和普通退出全部禁用');
+ok(applying.signOutCalls===0&&applying.sendCalls===0&&applying.loginCalls===1,
+   '旧 safeOut/send/go DOM 引用在重绘与 applying 后全部失效，零额外认证或退出调用');
 
 await page.evaluate(()=>window.__authUiRace.resolveChoice({ok:true,action:'uploaded'}));
 await page.waitForFunction(()=>document.body.textContent.includes('本机进度已明确上传到云端'));
@@ -104,6 +123,21 @@ const settled=await page.evaluate(()=>({
   outDisabled:document.getElementById('auOut').disabled
 }));
 ok(!settled.closeDisabled&&!settled.pushDisabled&&!settled.outDisabled,'选择 Promise 结算后恢复关闭、上传和退出控件');
+
+/* 手动上传必须复用同一 applying 状态，而不是成为可关闭、可切号的旁路。 */
+await page.click('#auPush');
+await page.waitForFunction(()=>window.__authUiRace.choiceCalls===2);
+const manualApplying=await page.evaluate(()=>({
+  text:document.body.textContent,
+  closeDisabled:document.getElementById('auX').disabled,
+  pushDisabled:document.getElementById('auPush').disabled,
+  outDisabled:document.getElementById('auOut').disabled
+}));
+ok(manualApplying.text.includes('正在上传本机进度并复验当前账号')&&
+   manualApplying.closeDisabled&&manualApplying.pushDisabled&&manualApplying.outDisabled,
+   '手动上传进入与冲突选择相同的 applying 锁，期间不能关闭、重复上传或退出');
+await page.evaluate(()=>window.__authUiRace.resolveChoice({ok:true,action:'uploaded'}));
+await page.waitForFunction(()=>document.getElementById('auPush')&&!document.getElementById('auPush').disabled);
 
 /* mismatch / unknown / outcome_unknown 三种状态都必须给出不依赖 confirmed 的安全退出清理。 */
 for(const cfg of[
@@ -128,6 +162,11 @@ ok(await page.evaluate(()=>window.__authUiRace.signOutCalls===1),
    'outcome_unknown 即使认证请求标为 busy 也能调用唯一安全清理 signOut');
 ok(await page.evaluate(()=>document.body.textContent.includes('不要重新登录')),
    'signOut 返回 cleanupPending 时不谎称清理完成，明确要求重新载入和复验');
+ok(await page.evaluate(()=>{
+  const reload=document.getElementById('auReloadCleanup'),go=document.getElementById('auGo');
+  const tabs=[...document.querySelectorAll('.au_tab')];
+  return !!reload&&reload.textContent.includes('重新载入')&&!!go&&go.disabled&&tabs.length===2&&tabs.every(x=>x.disabled);
+}), 'cleanupPending 明确提供重新载入按钮，并禁用登录按钮与方式切换');
 await page.evaluate(()=>{
   window.__authUiRace.cleanupPending=false;
   window.__authUiRace.session='unknown';
