@@ -243,15 +243,36 @@
      返回 {exists, updatedAt, appVersion}；出错时 exists=null 表示**查不到**，
      调用方必须把"查不到"与"确认没有"区别对待——绝不能把查不到当成没有而覆盖云端。 */
   function accountCloudInfo(){
+    var A = window.HansenAuth;
+    var expectedUid = rawAccountUid();
+    /* 明确登出仍是“没有账号”；但认证 unknown/mismatch/cleanup 绝不能伪装成
+       exists:false，否则上层会把“无法确认 U1”误当成“U2 云端确实没存档”。 */
+    if (!expectedUid) {
+      if (A && !anonymousBoundaryAllowed())
+        return Promise.resolve({ exists:null, reason:'session-not-confirmed' });
+      return Promise.resolve({ exists:false, reason:'not-signed-in' });
+    }
+    var op = captureOperation(expectedUid);
     var ids = accountIdents();
-    if (!ids.length) return Promise.resolve({ exists:false, reason:'not-signed-in' });
+    if (!ids.length || ids.indexOf('u:' + expectedUid) < 0)
+      return Promise.resolve({ exists:null, reason:'identity-not-confirmed' });
     var p = provider();
     if (!p) return Promise.resolve({ exists:null, reason:'not-configured' });
+
+    /* 元信息虽然只读，也必须在每次 get 前后复验 UID+generation。
+       否则 U1 请求在切到 U2 后迟到，仍可能把 U1 的 updatedAt/exists 返回给 U2 界面。 */
+    function checkedGet(id) {
+      return verifyOperation(op).then(function(){
+        return p.get(id);
+      }).then(function(row){
+        return verifyOperation(op).then(function(){ return row; });
+      });
+    }
     function attempt(i) {
       if (i >= ids.length) return Promise.resolve({ exists:false });
       var rawKey = keyFromUid(ids[i]);
       var accKey = normalizeKey(rawKey) || rawKey;
-      return docIdOf(accKey).then(function(id){ return p.get(id); }).then(function(row){
+      return docIdOf(accKey).then(checkedGet).then(function(row){
         if (!row || !row.payload) return attempt(i + 1);
         var pl = row.payload || {};
         return {
@@ -262,7 +283,9 @@
         };
       });
     }
-    return attempt(0).catch(function(e){
+    return verifyOperation(op).then(function(){
+      return attempt(0);
+    }).catch(function(e){
       return { exists:null, reason:String(e && e.message || e) };
     });
   }
@@ -571,7 +594,11 @@
       var cand = cands[i];
       return docIdOf(cand).then(function (id) {
         tried.push(id.slice(0, 8));
-        return p.get(id);
+        return verifyOperation(op).then(function(){ return p.get(id); });
+      }).then(function (row) {
+        /* fetchWithKey 是公开 API；即使不经 restoreWithKey，上层也不能收到
+           已切号的 U1 迟到明文。 */
+        return verifyOperation(op).then(function(){ return row; });
       }).then(function (row) {
         if (!row || !row.payload) return attempt(i + 1);
         /* 解密要用写入时的那把钥匙，与地址一一对应 */
