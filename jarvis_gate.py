@@ -35,6 +35,8 @@ import subprocess
 import sys
 import time
 
+import package_release
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PASS_FILE = os.path.join(ROOT, '.jarvis_pass.json')
 BASE_FILE = os.path.join(ROOT, '.jarvis_baseline.json')
@@ -62,7 +64,7 @@ def _guards_fingerprint():
 
 
 def _legacy_count():
-    """跑既有守卫，取问题总数。跑不动就返回 None（不阻塞，但会明说）。"""
+    """跑既有守卫，取问题总数。跑不动返回 None，并由主闸门拒绝发版。"""
     if not os.path.exists(LEGACY):
         return None
     try:
@@ -138,29 +140,41 @@ def main():
     n = _legacy_count()
     base = _read_baseline()
     if n is None:
-        print('  ⚠️ check_resources 未能给出问题总数（超时或异常）——')
-        print('     本档跳过，但请人工确认。')
-    else:
-        if base is None:
-            base = n
-            print('  首次记录基线：%d 个既有问题' % n)
-        elif n > base:
-            if os.path.exists(PASS_FILE):
-                os.remove(PASS_FILE)
-            print('  ❌ 既有问题从 %d 涨到 %d —— 本版让情况变差了，拒绝发版。' % (base, n))
-            print('     （请先定位新增的那几条：与上一版的问题清单逐条比对）')
-            return 1
-        elif n < base:
-            print('  ✅ 既有问题从 %d 降到 %d —— 基线自动收紧，永远回不去。' % (base, n))
-            base = n
-        else:
-            print('  ✅ 既有问题维持 %d 个，未变差。' % n)
-        json.dump({'legacy': base, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
-                   'version': ver},
-                  open(BASE_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('  ❌ check_resources 未能给出可信问题总数（超时、异常或输出不完整）。')
+        print('     这一档不能跳过；请先修复守卫运行环境。')
+        return 1
+    if base is None:
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('  ❌ 缺少或无法读取 .jarvis_baseline.json，拒绝现场生成基线。')
+        print('     请人工审核问题清单，并把明确基线作为独立提交纳入版本控制。')
+        return 1
+    if n > base:
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('  ❌ 既有问题从 %d 涨到 %d —— 本版让情况变差了，拒绝发版。' % (base, n))
+        print('     （请先定位新增的那几条：与上一版的问题清单逐条比对）')
+        return 1
+    if n < base:
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('  ❌ 既有问题从 %d 降到 %d，但闸门不会在发版时改写受控基线。' % (base, n))
+        print('     请审核减少原因，单独更新并提交 .jarvis_baseline.json 后再运行。')
+        return 1
+    print('  ✅ 既有问题维持 %d 个，精确等于受控基线。' % n)
 
+    try:
+        source_fingerprint = package_release._source_input_fingerprint()
+    except Exception as exc:
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('\n❌ 无法为将要打包的精确源码树生成指纹：%s' % exc)
+        return 1
     json.dump({'version': ver, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
-               'guards': _guards_fingerprint(), 'legacy': n},
+               'guards': _guards_fingerprint(), 'legacy': n,
+               'source': source_fingerprint},
               open(PASS_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('\n🧾 已记下体检凭证 —— v%s 可以打包发布。' % ver)
     print('   ⚠️ 提醒：守卫报红 ≠ 有 bug；守卫全绿 ≠ 没 bug。')
