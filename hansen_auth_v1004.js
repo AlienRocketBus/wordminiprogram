@@ -322,14 +322,24 @@
   }
   function writeBoundaryReceipt(owned, state) {
     if (!owned || !owned.boundaryId) return null;
+    state = String(state || 'active');
     var key = RKEY_PREFIX + owned.boundaryId;
+    if (state === 'active' && !owned.receiptExpiresAt) {
+      var hardMs = Number(window.__HANSEN_AUTH_MUTATION_TIMEOUT_MS__ || 60000);
+      var configuredTtl = Number(window.__HANSEN_AUTH_RECEIPT_TTL_MS__ || 0);
+      var ttl = configuredTtl > 0
+        ? Math.max(hardMs + 1, configuredTtl)
+        : Math.max(120000, hardMs + 60000);
+      owned.receiptExpiresAt = Date.now() + ttl;
+    }
     var o = {
       schema: 1076,
       boundaryId: owned.boundaryId,
       kind: owned.kind,
-      state: String(state || 'active'),
+      state: state,
       startedAt: Number(owned.startedAt || Date.now()),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      expiresAt: Number(owned.receiptExpiresAt || 0)
     };
     var encoded = JSON.stringify(o);
     try {
@@ -348,14 +358,16 @@
     return o;
   }
   function activeMutationReceipts() {
-    var out = [];
+    var out = [], now = Date.now();
     try {
       for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
         if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
         var raw = localStorage.getItem(key), o = null;
         try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
-        if (!o || o.state === 'active' || o.state === 'unknown')
+        if (!o || o.state === 'unknown' ||
+            (o.state === 'active' && (!Number(o.expiresAt || 0) ||
+                                      Number(o.expiresAt || 0) > now)))
           out.push({ key: key, raw: raw, value: o || {} });
       }
     } catch (e) {
@@ -363,6 +375,31 @@
       out.push({ key: '', raw: '', value: { state: 'unknown' } });
     }
     return out;
+  }
+  function expiredMutationReceipts() {
+    var out = [], now = Date.now();
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
+        var raw = localStorage.getItem(key), o = null;
+        try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
+        if (o && o.state === 'active' && Number(o.expiresAt || 0) > 0 &&
+            Number(o.expiresAt || 0) <= now)
+          out.push({ key: key, raw: raw, value: o });
+      }
+    } catch (e) { _storageWarning = 'auth-boundary-receipt-read-failed'; }
+    return out;
+  }
+  function clearExpiredMutationReceipts() {
+    var items = expiredMutationReceipts();
+    try {
+      for (var i = 0; i < items.length; i++) {
+        if (localStorage.getItem(items[i].key) === items[i].raw)
+          localStorage.removeItem(items[i].key);
+      }
+    } catch (e) { _storageWarning = 'auth-boundary-receipt-cleanup-failed'; }
+    return items.length;
   }
   function clearNonActiveReceipts() {
     try {
@@ -1492,6 +1529,7 @@
       } catch (e0) {}
 
       readFence();
+      clearExpiredMutationReceipts();
       clearNonActiveReceipts();
       if (hadPriorSessionMutation || activeMutationReceipts().length > 0 ||
           _fenceRevision !== signOutFenceRevision) {
