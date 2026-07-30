@@ -914,7 +914,7 @@
       if (choice === 'cloud') {
         if (typeof CS.restoreWithKey !== 'function' || typeof CS.ensureKey !== 'function')
           throw new Error('云端恢复功能不可用');
-        return CS.restoreWithKey(CS.ensureKey()).then(function (r) {
+        return CS.restoreWithKey(CS.ensureKey(), { expectedUid: expectedUid }).then(function (r) {
           return { result: r, action: 'restored' };
         });
       }
@@ -953,9 +953,11 @@
     var CS = window.HansenCloudSave;
     if (!CS || typeof CS.restoreWithKey !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
-    return ensureSession(readLocal().uid).then(function (truth) {
-      if (!truth.ok) throw new Error('账号会话不可用，不能恢复');
-      return CS.restoreWithKey(key);
+    var expectedUid = String(readLocal().uid || '');
+    return ensureSession(expectedUid).then(function (truth) {
+      if (!truth.ok || String(truth.uid || '') !== expectedUid)
+        throw new Error('账号会话不可用，不能恢复');
+      return CS.restoreWithKey(key, { expectedUid: expectedUid });
     });
   }
 
