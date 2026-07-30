@@ -111,6 +111,46 @@
     return ident.indexOf('u:') === 0 ? ident.slice(2) : '';
   }
 
+  /* v1076：所有异步云操作绑定“发起时的原始 UID + 本模块代际”。
+     登录、登出或 resetApp 会推进代际；旧 Promise 即使迟到，也不能再 put、
+     restore 或改写本地同步状态。匿名恢复码没有账号 UID，但同样受代际保护。 */
+  var _generation = 0;
+  function staleOperation(reason){
+    var e = new Error(reason || '账号会话已经变化，已停止本次云存档操作');
+    e.code = 'CLOUD_OPERATION_STALE';
+    e.stale = true;
+    e.friendly = true;
+    return e;
+  }
+  function captureOperation(expectedUid){
+    var uid = expectedUid == null ? rawAccountUid() : String(expectedUid || '');
+    return { generation: _generation, uid: uid };
+  }
+  function operationCurrent(op){
+    if(!op || op.generation !== _generation) return false;
+    var now = rawAccountUid();
+    return op.uid ? now === op.uid : !now;
+  }
+  function isStaleOperation(e){
+    return !!(e && (e.stale || e.code === 'CLOUD_OPERATION_STALE'));
+  }
+  function verifyOperation(op){
+    if(!operationCurrent(op)) return Promise.reject(staleOperation());
+    if(!op.uid) return Promise.resolve({ ok:true, anonymous:true });
+    var A = window.HansenAuth;
+    if(!(A && typeof A.ensureSession === 'function'))
+      return Promise.reject(staleOperation('无法复验当前账号，已停止本次云存档操作'));
+    return A.ensureSession(op.uid).then(function(truth){
+      if(!operationCurrent(op) || !truth || !truth.ok || String(truth.uid || '') !== op.uid)
+        throw staleOperation();
+      return truth;
+    });
+  }
+  function bumpGeneration(){
+    _generation++;
+    return _generation;
+  }
+
   /* 自动同步许可必须绑定到当前身份。
      旧匿名恢复码的 enabled 不能在正式账号登录后自动继承，否则 pagehide/心跳
      会绕过冲突选择，把本机档直接写到新 UID 地址。 */
@@ -389,6 +429,7 @@
   var _busy = false;
   function syncNow(opts){
     opts = opts || {};
+    var op = captureOperation();
     var p = provider();
     if(!p) return Promise.resolve({ ok:false, reason:'not-configured' });
     /* 🔴v1003: 云存档改为**用户主动开启**才联网。
@@ -426,42 +467,45 @@
         _busy = false;
         return { ok:true, skipped:true, reason:'unchanged' };
       }
-      return doUpload(key, code, h, targetId, identity);
+      return doUpload(key, code, h, targetId, identity, op);
     }).catch(function(e){
       _busy = false;
-      return { ok:false, reason:'upload-failed', error: friendly(e) };
+      return { ok:false, reason:isStaleOperation(e)?'stale-account':'upload-failed', error: friendly(e) };
     });
   }
 
-  /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */
-  function doUpload(key, code, h, targetId, identity){
+  /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写）。
+     put 前和本地 writeState 前各复验一次：任何迟到的 U1 Promise 都不能落到 U2。 */
+  function doUpload(key, code, h, targetId, identity, op){
     var p = provider();
     return sealPayload(key, code).then(function(envelope){
-      return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
+      return verifyOperation(op).then(function(){
+        return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
+      });
     }).then(function(){
+      return verifyOperation(op);
+    }).then(function(){
+      if(!operationCurrent(op)) throw staleOperation();
       writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId,
                    enabled: true, enabledIdentity: identity || syncIdentity(key) });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* v1076: 许可绑定身份 */
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
-    }, function(err){
+    }).catch(function(err){
       _busy = false; renderCard();
-      return { ok:false, reason:'upload-failed', error: friendly(err) };
+      return { ok:false, reason:isStaleOperation(err)?'stale-account':'upload-failed', error: friendly(err) };
     });
   }
-  function fetchWithKey(inputKey){
+  function fetchWithKey(inputKey, op){
     var key = normalizeKey(inputKey);
     if(!key) return Promise.reject(new Error('密钥格式不对：应为 16 位字母数字（可带横线）'));
     var p = provider();
     if(!p) return Promise.reject(new Error('云端尚未开通配置'));
+    op = op || captureOperation();
     /* 🔴v1036 兼容读取：历史上存档地址算法变过两代，
        旧版本上传的存档躺在**旧地址**，新代码只查新地址就会报
        「云端没有这把密钥对应的存档」——数据其实还在，只是找错了门。
-       这里把历史地址依次试一遍，任一命中即可；命中旧地址后**顺手搬到新地址**，
-       此后不再依赖兼容路径。
-       候选地址（按可能性排序）：
-         ① 归一化密钥（v1033 起的写入方式，也是当前标准）
-         ② 原始密钥（含连字符，v1033 之前的写入方式）
-         ③ 旧字符集推导的账号密钥（v1033 之前 keyFromUid 含 L/U，会算出另一把钥匙） */
+       这里把历史地址依次试一遍，任一命中即可；命中旧地址后迁到新地址。
+       v1076 起迁移必须 await，并在 put 前后复验 UID+generation，绝不后台裸写。 */
     var cands = [key];
     var raw = String(inputKey || '');
     if (raw && raw !== key) cands.push(raw);
@@ -480,6 +524,18 @@
       });
     } catch (e) {}
 
+    function migrateLegacy(code){
+      return sealPayload(key, code).then(function(env){
+        return docIdOf(key).then(function(nid){
+          return verifyOperation(op).then(function(){
+            return p.put(nid, { payload: env, updatedAt: Date.now(), app: 'wordadventure' });
+          });
+        });
+      }).then(function(){
+        return verifyOperation(op);
+      });
+    }
+
     var tried = [];
     function attempt(i) {
       if (i >= cands.length) {
@@ -493,43 +549,39 @@
         if (!row || !row.payload) return attempt(i + 1);
         /* 解密要用写入时的那把钥匙，与地址一一对应 */
         return openPayload(cand, row.payload).then(function (code) {
-          if (i > 0) {
-            /* 命中旧地址 → 迁移到新地址，之后就走标准路径 */
-            try {
-              sealPayload(key, code).then(function (env) {
-                return docIdOf(key).then(function (nid) {
-                  return p.put(nid, { payload: env, updatedAt: Date.now(), app: 'wordadventure' });
-                });
-              }).catch(function () {});
-            } catch (e) {}
-          }
-          return { key: cand, code: code, updatedAt: row.updatedAt || (row.payload && row.payload.ts) || 0,
-                   migratedFrom: i > 0 ? i : 0 };
-        }).catch(function () { return attempt(i + 1); });
+          var got = { key: cand, code: code,
+                      updatedAt: row.updatedAt || (row.payload && row.payload.ts) || 0,
+                      migratedFrom: i > 0 ? i : 0 };
+          if (i <= 0) return got;
+          return migrateLegacy(code).then(function(){
+            return got;
+          }).catch(function(e){
+            if (isStaleOperation(e)) throw e;
+            got.migrationError = friendly(e);
+            return got;
+          });
+        }).catch(function (e) {
+          if (isStaleOperation(e)) throw e;
+          return attempt(i + 1);
+        });
       }).catch(function (e) {
+        if (isStaleOperation(e)) throw e;
         if (i + 1 < cands.length) return attempt(i + 1);
         throw e;
       });
     }
-    return attempt(0);
+    return verifyOperation(op).then(function(){ return attempt(0); });
   }
   function restoreWithKey(inputKey, opts){
     opts = opts || {};
     var expectedUid = String(opts.expectedUid || rawAccountUid() || '');
+    var op = captureOperation(expectedUid);
     function verifyExpectedAccount(){
-      if(!expectedUid) return Promise.resolve({ ok:true });
-      var A = window.HansenAuth;
-      if(!(A && typeof A.ensureSession === 'function'))
-        return Promise.reject(new Error('无法复验当前账号，已停止恢复'));
-      return A.ensureSession(expectedUid).then(function(truth){
-        if(!truth || !truth.ok || String(truth.uid || '') !== expectedUid)
-          throw new Error('账号会话已经变化，已停止本次恢复');
-        if(String(rawAccountUid() || '') !== expectedUid)
-          throw new Error('当前账号已切换，已停止本次恢复');
-        return truth;
-      });
+      return verifyOperation(op);
     }
-    return fetchWithKey(inputKey).then(function(got){
+    return verifyExpectedAccount().then(function(){
+      return fetchWithKey(inputKey, op);
+    }).then(function(got){
       if(!(window.HansenBackup && typeof HansenBackup.parse === 'function'))
         throw new Error('备份模块不可用');
       var parsed = HansenBackup.parse(got.code);
@@ -537,31 +589,41 @@
       var prompt = '找到云端存档（上传于 '+when+'，版本 v'+(parsed && parsed.appVersion || '?')+'）。\n\n'
                  + '恢复会用它覆盖本机当前进度，确定吗？';
       if(!window.confirm(prompt)) return { ok:false, reason:'cancelled' };
-      /* v1076：网络读取完成后、真正覆盖本机前再验一次 UID。
-         只在操作前后检查会留下“U1 发起→切到 U2→迟到恢复已覆盖”的窗口。 */
+      /* 网络读取完成后、真正覆盖本机前再验一次 UID+generation。 */
       return verifyExpectedAccount().then(function(){
         var result;
         try{ result = HansenBackup.restore(parsed); }
         catch(e1){ result = HansenBackup.restore(got.code); }   // 兼容字符串签名
-        writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
-                     enabled: true, enabledIdentity: syncIdentity(got.key) });
-        renderCard();
-        return { ok:true, result:result };
+        /* restore 是同步原子步骤；它返回后再复验一次，才允许记录本地同步状态。 */
+        return verifyExpectedAccount().then(function(){
+          if(!operationCurrent(op)) throw staleOperation();
+          writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(),
+                       enabled: true, enabledIdentity: syncIdentity(got.key) });
+          renderCard();
+          return { ok:true, result:result };
+        });
       });
     });
   }
   function selfTest(){
     var p = provider();
     if(!p) return Promise.resolve({ ok:false, msg:'未配置：请按《云存档开通指南》完成 4 步后填入 envId' });
+    var op = captureOperation();
+    var key = ensureKey();
     var probe = 'probe-'+Date.now();
-    return sealPayload(ensureKey(), probe).then(function(env0){
-      return docIdOf(ensureKey()+':selftest').then(function(id){
-        return p.put(id, { payload: env0, updatedAt: Date.now(), app:'selftest' })
-          .then(function(){ return p.get(id); })
-          .then(function(row){ return openPayload(ensureKey(), row.payload); })
-          .then(function(txt){
-            return { ok: txt === probe, msg: txt === probe ? '云端读写与加解密全部正常 ✅' : '回读不一致' };
-          });
+    return sealPayload(key, probe).then(function(env0){
+      return docIdOf(key+':selftest').then(function(id){
+        return verifyOperation(op).then(function(){
+          return p.put(id, { payload: env0, updatedAt: Date.now(), app:'selftest' });
+        }).then(function(){
+          return verifyOperation(op);
+        }).then(function(){
+          return p.get(id);
+        }).then(function(row){
+          return verifyOperation(op).then(function(){ return openPayload(key, row.payload); });
+        }).then(function(txt){
+          return { ok: txt === probe, msg: txt === probe ? '云端读写与加解密全部正常 ✅' : '回读不一致' };
+        });
       });
     }).catch(function(err){ return { ok:false, msg: friendly(err) }; });
   }
@@ -671,6 +733,7 @@
   try {
     document.addEventListener('hsn-auth-changed', function () {
       _cb = null;   /* 🔴v1028: 账号变了, 云端身份也必须跟着变 */
+      bumpGeneration();  /* v1076: 使所有旧账号的迟到 Promise 立即失效 */
     });
   } catch (e) {}
 
@@ -678,7 +741,7 @@
     syncNow: syncNow, restoreWithKey: restoreWithKey, fetchWithKey: fetchWithKey,
     /* 🔴v1028: 登录/登出后必须作废已缓存的实例——
        否则先匿名初始化、后登录的场景下, 仍会拿着匿名身份读写, 跨设备依旧找不回。 */
-    resetApp: function(){ _cb = null; },
+    resetApp: function(){ _cb = null; bumpGeneration(); },
     selfTest: selfTest, ensureKey: ensureKey,
     /* 🔴v1037 往返自检：不再靠推理。
        在用户设备上一次跑完「写→立刻读回」，把每一步的原始结果都带出来，
@@ -694,23 +757,25 @@
       try { out.envId = (window.HANSEN_CLOUD_CONFIG||{}).envId || ''; } catch(e){}
       var pv = provider();
       if (!pv) { out.step='no-provider'; out.error='云服务未配置'; return Promise.resolve(out); }
+      var op = captureOperation();
       var probeKey = normalizeKey(ensureKey()) || ensureKey();
       out.key = probeKey;
       var pid = null;
-      /* 探针文档独立于真实存档，绝不覆盖用户数据 */
-      /* 🔴v1041: 探针地址改为**每次随机**。
-         此前用固定地址，若该地址上已躺着「别的身份创建的文档」，
-         `set` 可能看似成功而 `get` 被「仅创建者可读写」挡住 →
-         诊断结论会误报成"通道有问题"。随机地址保证测的是纯净的新建路径。
-         两台手机结果不同（一台绿、一台"写进去读不回"）正是这个原因。 */
+      /* 探针文档独立于真实存档，绝不覆盖用户数据；put 前后仍绑定同一身份代际。 */
       var probeSalt = 'probe:' + probeKey + ':' + Date.now() + ':' + Math.random().toString(36).slice(2,8);
       return docIdOf(probeSalt).then(function(id){
         pid = id; out.docId = id.slice(0,12) + '…';
         out.step = 'writing';
-        return pv.put(id, { payload:{ v:1, probe:true, ts:Date.now() }, updatedAt:Date.now(), app:'wordadventure' });
+        return verifyOperation(op).then(function(){
+          return pv.put(id, { payload:{ v:1, probe:true, ts:Date.now() }, updatedAt:Date.now(), app:'wordadventure' });
+        });
+      }).then(function(){
+        return verifyOperation(op);
       }).then(function(){
         out.wrote = true; out.step = 'reading-back';
         return pv.get(pid);
+      }).then(function(row){
+        return verifyOperation(op).then(function(){ return row; });
       }).then(function(row){
         out.readBack = !!(row && row.payload);
         if (row) {
@@ -718,9 +783,6 @@
           try { out.sessionUid = row._openid || row._uid || ''; } catch(e){}
         }
         out.step = out.readBack ? 'ok' : 'wrote-but-cannot-read';
-        /* 🔴v1041: 随机地址下仍"写成功却读不回"，只可能是集合权限模型的问题：
-           「仅创建者可读写」会按 _openid 过滤，写入时注入的身份与读取时的会话
-           一旦不同（匿名 ↔ 账号、或会话中途重建），读取就会拿到空结果而非报错。 */
         if (!out.readBack) out.hint = 'permission-model';
         return out;
       }).catch(function(e){
