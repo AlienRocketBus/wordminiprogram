@@ -5,16 +5,15 @@
  *   ② 用户名 + 密码         —— 只登录已由手机号真实创建并绑定凭据的账号
  *   ③ 匿名                  —— 不注册也能玩，之后可升级为正式账号
  *
- * 竞赛 ID 发号方案（不依赖云函数）：
- *   counters 集合设为 ADMINONLY，客户端写不了，所以**不走计数器**。
- *   改用「注册时间排名」：sb_profile 里 createdAt 由**服务端**写入（客户端伪造不了），
- *   竞赛 ID = 比我早注册的人数 + 1。一次算定后锁死，此后终身不变。
+ * 竞赛档案安全边界：
+ *   v1076 浏览器端不再创建、修改或发放 sb_profile / 全局竞赛 ID。
+ *   登录成功只做真实 session 确认与云存档只读检查；本机临时编号不受影响。
+ *   全局 ID 只有在仓库具备可部署的 owner 规则、服务端 UID 派生和原子计数后才能恢复。
  */
 (function () {
   'use strict';
   if (window.HansenAuth) return;
 
-  var COL_PROFILE = 'sb_profile';
   var LKEY = 'hansen_auth_v1004';      /* 本地登录态缓存 */
 
   /* ── 基础 ─────────────────────────────────────────── */
@@ -172,6 +171,21 @@
     return sessionStatus();
   }
   function sessionStatus() {
+    var fence = readFence();
+    var marker = readLocal();
+    var boundary = readAuthBoundary();
+    var boundaryPending = !!(boundary.boundaryId && !boundarySettled(boundary, marker));
+    if (fence.kind || boundaryPending) {
+      return {
+        state: fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
+        uid: String((fence && fence.observedUid) || ''),
+        reason: String((fence && fence.reason) ||
+          (boundaryPending ? '另一个标签页的认证边界尚未完成，请先安全退出并核对会话' : '') ||
+          _sessionTruth.reason || ''),
+        checkedAt: _sessionTruth.checkedAt,
+        storageWarning: _storageWarning
+      };
+    }
     return {
       state: _sessionTruth.state,
       uid: _sessionTruth.uid,
@@ -182,8 +196,13 @@
   }
   function isSignedIn() {
     var lc = readLocal();
+    var boundary = readAuthBoundary();
+    var boundaryOk = !boundary.boundaryId ||
+      (boundary.kind === 'session_mutation' &&
+       String(lc.authBoundaryId || '') === String(boundary.boundaryId) &&
+       String(lc.authBoundaryState || '') === 'signed_in');
     return !!(_sessionTruth.state === 'confirmed' && _sessionTruth.uid &&
-              !readFence().kind && lc.uid &&
+              !readFence().kind && boundaryOk && lc.uid &&
               String(lc.uid) === String(_sessionTruth.uid));
   }
   function currentUser() {
@@ -191,7 +210,8 @@
   }
   function needsReauth() {
     var lc = readLocal();
-    return !!(readFence().kind ||
+    return !!(readFence().kind || authBoundaryPending() ||
+              activeMutationReceipts().length ||
               (lc.method && lc.signedAt && !lc.uid) ||
               _sessionTruth.state === 'mismatch' ||
               _sessionTruth.state === 'legacy_reauth');
@@ -216,6 +236,9 @@
     FBKEY + ':stale_mutation',
     FBKEY + ':mismatch'
   ];
+  var BKEY = 'hansen_auth_boundary_v1076';
+  var RKEY_PREFIX = 'hansen_auth_boundary_receipt_v1076:';
+  var _authBoundaries = {};
   var _fenceMemory = null;
   var _fenceRevision = 0;
 
@@ -253,6 +276,186 @@
     }
     return String(kind || 'fence') + '-' + Date.now().toString(36) + '-' + rnd;
   }
+  function parseAuthBoundary(raw) {
+    if (!raw) return null;
+    try {
+      var o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return (o && typeof o === 'object' && !Array.isArray(o) &&
+              o.boundaryId && o.kind) ? o : null;
+    } catch (e) { return null; }
+  }
+  function readAuthBoundary() {
+    try { return parseAuthBoundary(localStorage.getItem(BKEY)) || {}; }
+    catch (e) {
+      _storageWarning = 'auth-boundary-read-failed';
+      return {};
+    }
+  }
+  function sameAuthBoundary(a, b) {
+    return !!(a && b && a.boundaryId && b.boundaryId &&
+      String(a.boundaryId) === String(b.boundaryId) &&
+      String(a.kind) === String(b.kind));
+  }
+  function readBoundaryReceipt(boundaryId) {
+    if (!boundaryId) return {};
+    try {
+      var raw = localStorage.getItem(RKEY_PREFIX + boundaryId);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object' && o.boundaryId) ? o : {};
+    } catch (e) { return {}; }
+  }
+  function boundarySettled(boundary, marker) {
+    if (!boundary || !boundary.boundaryId) return true;  /* v1075/旧 marker 兼容 */
+    marker = marker || {};
+    if (String(marker.authBoundaryId || '') === String(boundary.boundaryId)) {
+      var state = String(marker.authBoundaryState || '');
+      if (state === 'signed_in') return !!marker.uid;
+      if (state === 'signed_out') return !marker.uid && !Number(marker.signedAt || 0);
+    }
+    var receipt = readBoundaryReceipt(boundary.boundaryId);
+    return String(receipt.boundaryId || '') === String(boundary.boundaryId) &&
+      String(receipt.state || '') === 'rejected';
+  }
+  function authBoundaryPending() {
+    var boundary = readAuthBoundary();
+    return !!(boundary.boundaryId && !boundarySettled(boundary, readLocal()));
+  }
+  function writeBoundaryReceipt(owned, state) {
+    if (!owned || !owned.boundaryId) return null;
+    var key = RKEY_PREFIX + owned.boundaryId;
+    var o = {
+      schema: 1076,
+      boundaryId: owned.boundaryId,
+      kind: owned.kind,
+      state: String(state || 'active'),
+      startedAt: Number(owned.startedAt || Date.now()),
+      updatedAt: Date.now()
+    };
+    var encoded = JSON.stringify(o);
+    try {
+      localStorage.setItem(key, encoded);
+      if (localStorage.getItem(key) !== encoded)
+        throw new Error('认证 mutation 回执无法持久保存');
+    } catch (e) {
+      _storageWarning = 'auth-boundary-receipt-not-persistent';
+      var err = new Error('浏览器无法保存认证安全回执，已在调用登录服务前停止');
+      err.code = 'AUTH_BOUNDARY_NOT_PERSISTED';
+      throw err;
+    }
+    owned.receiptKey = key;
+    owned.receiptRaw = encoded;
+    owned.receiptState = o.state;
+    return o;
+  }
+  function activeMutationReceipts() {
+    var out = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
+        var raw = localStorage.getItem(key), o = null;
+        try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
+        if (!o || o.state === 'active' || o.state === 'unknown')
+          out.push({ key: key, raw: raw, value: o || {} });
+      }
+    } catch (e) {
+      _storageWarning = 'auth-boundary-receipt-read-failed';
+      out.push({ key: '', raw: '', value: { state: 'unknown' } });
+    }
+    return out;
+  }
+  function clearNonActiveReceipts() {
+    try {
+      var items = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf(RKEY_PREFIX) !== 0) continue;
+        var raw = localStorage.getItem(key), o = null;
+        try { o = raw ? JSON.parse(raw) : null; } catch (_) {}
+        if (o && o.state !== 'active' && o.state !== 'unknown')
+          items.push({ key: key, raw: raw });
+        else if (o && o.state === 'unknown')
+          items.push({ key: key, raw: raw });
+      }
+      for (var j = 0; j < items.length; j++) {
+        if (localStorage.getItem(items[j].key) === items[j].raw)
+          localStorage.removeItem(items[j].key);
+      }
+    } catch (e) { _storageWarning = 'auth-boundary-receipt-cleanup-failed'; }
+  }
+  function claimAuthBoundary(kind, token, allowPending) {
+    var current = readAuthBoundary();
+    if (!allowPending && current.boundaryId &&
+        !boundarySettled(current, readLocal())) {
+      var pending = new Error('另一个标签页的认证或退出操作尚未完成，请先安全退出并核对会话');
+      pending.code = 'AUTH_CROSS_TAB_OPERATION_PENDING';
+      throw pending;
+    }
+    var o = {
+      schema: 1076,
+      boundaryId: newFenceId(kind || 'auth-boundary'),
+      kind: String(kind || 'session_mutation'),
+      parentBoundaryId: String(current.boundaryId || ''),
+      generation: Number(token || 0),
+      startedAt: Date.now()
+    };
+    var encoded = JSON.stringify(o);
+    try {
+      localStorage.setItem(BKEY, encoded);
+      if (localStorage.getItem(BKEY) !== encoded)
+        throw new Error('认证边界写入后无法读回');
+    } catch (e) {
+      _storageWarning = 'auth-boundary-not-persistent';
+      var err = new Error('浏览器无法保存跨标签认证边界，已在调用登录服务前停止');
+      err.code = 'AUTH_BOUNDARY_NOT_PERSISTED';
+      throw err;
+    }
+    clearNonActiveReceipts();
+    _authBoundaries[String(token)] = o;
+    return o;
+  }
+  function assertSharedBoundary(token) {
+    var owned = _authBoundaries[String(token)];
+    if (!owned) return true;
+    var current = readAuthBoundary();
+    if (sameAuthBoundary(current, owned)) return true;
+    writeFence('stale_mutation', '', '',
+      '另一个标签页建立了新的认证/退出边界；旧请求已失去提交资格');
+    var e = staleError('另一个标签页已经开始新的认证或安全退出，当前结果已作废');
+    e.code = 'AUTH_CROSS_TAB_SUPERSEDED';
+    e.stale = true;
+    throw e;
+  }
+  function markSessionMutation(token) {
+    assertAuthToken(token);
+    var owned = _authBoundaries[String(token)];
+    if (!owned) {
+      var e = new Error('认证请求缺少可验证的共享边界');
+      e.code = 'AUTH_BOUNDARY_MISSING';
+      throw e;
+    }
+    writeBoundaryReceipt(owned, 'active');
+    assertSharedBoundary(token);
+  }
+  function finishSessionMutation(token, outcome) {
+    var owned = _authBoundaries[String(token)];
+    if (!owned || !owned.receiptKey) return;
+    try {
+      writeBoundaryReceipt(owned, outcome || 'returned');
+    } catch (e) {
+      writeFence('outcome_unknown', '', '', errText(e));
+    }
+    if (owned.released && owned.receiptState !== 'active')
+      delete _authBoundaries[String(token)];
+  }
+  function releaseAuthBoundaryToken(token) {
+    var owned = _authBoundaries[String(token)];
+    if (!owned) return;
+    owned.released = true;
+    if (owned.receiptState !== 'active')
+      delete _authBoundaries[String(token)];
+  }
+
   function readFence() {
     var candidates = [], i, raw, item;
     if (_fenceMemory) candidates.push(_fenceMemory);
@@ -361,7 +564,8 @@
     return e;
   }
   function isStaleError(e) {
-    return !!(e && e.code === 'AUTH_STALE_OPERATION');
+    return !!(e && (e.stale || e.code === 'AUTH_STALE_OPERATION' ||
+                    e.code === 'AUTH_CROSS_TAB_SUPERSEDED'));
   }
   function invalidateAuthWork(reason) {
     _authGeneration++;
@@ -376,6 +580,7 @@
   }
   function assertAuthToken(token) {
     if (token !== _authGeneration) throw staleError();
+    assertSharedBoundary(token);
   }
   function probeCurrent(probe, generation) {
     return probe === _probeId && generation === _authGeneration;
@@ -399,7 +604,7 @@
                 _operation.state === 'verifying' ||
                 _operation.state === 'confirming' ||
                 _operation.state === 'signing_out'),
-      requiresCleanup: !!fence.kind,
+      requiresCleanup: !!(fence.kind || authBoundaryPending() || activeMutationReceipts().length),
       fence: String(fence.kind || '')
     };
   }
@@ -456,11 +661,14 @@
 
     return new Promise(function (resolve, reject) {
       var wrapperDone = false, underlyingDone = false;
-      function finishUnderlying() {
+      function finishUnderlying(outcome) {
         if (underlyingDone) return;
         underlyingDone = true;
         _activeMutationTasks = Math.max(0, _activeMutationTasks - 1);
-        if (sessionMutation) _activeSessionMutations = Math.max(0, _activeSessionMutations - 1);
+        if (sessionMutation) {
+          _activeSessionMutations = Math.max(0, _activeSessionMutations - 1);
+          finishSessionMutation(token, outcome || 'returned');
+        }
       }
       function removeWaiter(cancel) {
         var i = _mutationWaiters.indexOf(cancel);
@@ -503,10 +711,21 @@
       _mutationWaiters.push(cancel);
 
       Promise.resolve(task).then(function (v) {
-        finishUnderlying();
         clearTimeout(slowTimer);
         clearTimeout(hardTimer);
         removeWaiter(cancel);
+        var unwrapped;
+        try {
+          unwrapped = unwrapAuthResult(v);
+          finishUnderlying('returned');
+        } catch (e0) {
+          finishUnderlying('rejected');
+          if (!wrapperDone) {
+            wrapperDone = true;
+            reject(e0);
+          }
+          return;
+        }
         if (wrapperDone) {
           quarantine('旧认证请求在界面停止等待后才成功返回');
           return;
@@ -517,10 +736,14 @@
           reject(staleError());
           return;
         }
-        try { resolve(unwrapAuthResult(v)); }
-        catch (e) { reject(e); }
+        try {
+          assertSharedBoundary(token);
+          resolve(unwrapped);
+        } catch (e1) { reject(e1); }
       }, function (e) {
-        finishUnderlying();
+        finishUnderlying('unknown');
+        if (sessionMutation)
+          writeFence('outcome_unknown', '', '', '认证请求被网络层拒绝，服务端结果无法确认');
         clearTimeout(slowTimer);
         clearTimeout(hardTimer);
         removeWaiter(cancel);
@@ -534,8 +757,6 @@
       });
     });
   }
-
-  
 
   /* 只读 session 探测可以超时；超时代表 unknown，不能清 marker 或宣布退出。 */
   function withTimeout(task, ms, label) {
@@ -725,6 +946,7 @@
       if (!probeCurrent(probe, generation)) return sessionStatus();
       marker = readLocal();
       var fence = readFence();
+      var boundary = readAuthBoundary();
       if (fence.kind) {
         /* 只读 refresh 永远无权清 fence。即使这一刻 session=null，也可能有旧
            mutation 随后建立 session；只有显式 signOut 的屏障可以解除隔离。 */
@@ -732,15 +954,21 @@
                                snap.uid || fence.observedUid || '',
                                fence.reason || '存在未清理的认证结果，请先安全退出');
       }
+      if (boundary.boundaryId && !boundarySettled(boundary, marker)) {
+        return setSessionTruth('unknown', '',
+          '共享认证边界尚未完成；只读刷新无权自动接管或清理');
+      }
       if (snap.indeterminate || (snap.session && (!snap.user || !snap.uid))) {
         return setSessionTruth('unknown', '', snap.reason || '凭证存在但用户身份无法确认');
       }
       if (!snap.session || snap.anonymous) {
         if (marker.method && marker.signedAt && !marker.uid)
           return setSessionTruth('legacy_reauth', '', '旧 marker 没有真实 UID');
-        if (marker.uid) {
-          writeLocal({ method: '', signedAt: 0, uid: '', phone: '', username: '', authCommitId: '' });
-        }
+        writeLocal({
+          method: '', signedAt: 0, uid: '', phone: '', username: '', authCommitId: '',
+          authBoundaryId: String(boundary.boundaryId || marker.authBoundaryId || ''),
+          authBoundaryState: 'signed_out'
+        });
         return setSessionTruth('signed_out', '', snap.anonymous ? 'anonymous-session' : 'no-session');
       }
       if (marker.method && marker.signedAt && !marker.uid)
@@ -749,14 +977,18 @@
         writeFence('mismatch', marker.uid, snap.uid, '本地账号与 SDK 会话不一致');
         return setSessionTruth('mismatch', snap.uid, '本地账号与 SDK 会话不一致');
       }
-      if (!marker.uid) {
+      if (!marker.uid || (boundary.boundaryId &&
+          (String(marker.authBoundaryId || '') !== String(boundary.boundaryId) ||
+           String(marker.authBoundaryState || '') !== 'signed_in'))) {
         writeLocal({
           schema: 1076,
-          method: 'session',
+          method: marker.method || 'session',
           uid: snap.uid,
-          phone: identityOf({ user: snap.user }).phone,
-          username: identityOf({ user: snap.user }).username,
-          signedAt: Date.now()
+          phone: identityOf({ user: snap.user }).phone || marker.phone || '',
+          username: identityOf({ user: snap.user }).username || marker.username || '',
+          signedAt: marker.signedAt || Date.now(),
+          authBoundaryId: String(boundary.boundaryId || marker.authBoundaryId || ''),
+          authBoundaryState: 'signed_in'
         });
       }
       return setSessionTruth('confirmed', snap.uid, '');
@@ -787,9 +1019,9 @@
       return '用户名或密码不正确';
     if (/user.*not.*found|no.*such.*user|USER_NOT_FOUND|not_found|用户不存在/i.test(m))
       return '没有找到这个账号；新用户请先用手机号注册';
-    if (/AUTH_SESSION_UID_MISMATCH|AUTH_STALE_MUTATION|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
+    if (/AUTH_SESSION_UID_MISMATCH|AUTH_STALE_MUTATION|AUTH_CROSS_TAB_SUPERSEDED|本次认证账号与云端会话不一致|不是同一用户/i.test(m))
       return '检测到两个不同账号或旧请求晚到，已隔离；请点“安全退出并清理会话”后再登录';
-    if (/AUTH_FENCED_SESSION|AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
+    if (/AUTH_FENCED_SESSION|AUTH_OUTCOME_UNKNOWN|AUTH_MUTATION_INDETERMINATE|AUTH_CROSS_TAB_OPERATION_PENDING|AUTH_BOUNDARY_NOT_PERSISTED|AUTH_LATE_MUTATION_PENDING|暂时无法确认云端会话|结果仍在确认/i.test(m))
       return '服务器可能已处理本次请求，不能重复提交；请点“安全退出并清理会话”';
     if (/AUTH_OPERATION_UID_MISSING|没有返回本次操作的用户 UID/i.test(m))
       return '服务器没有返回可核对的账号 UID，本次不能算登录成功';
@@ -831,8 +1063,8 @@
   function sendPhoneCode(phoneRaw) {
     var phone = normPhone(phoneRaw);
     if (!phone) return Promise.reject(new Error('手机号格式不对，请填写 11 位手机号'));
-    if (readFence().kind)
-      return Promise.reject(new Error('存在未清理的认证结果，请先安全退出并清理会话'));
+    if (readFence().kind || authBoundaryPending() || activeMutationReceipts().length)
+      return Promise.reject(new Error('存在未清理的认证结果或跨标签请求，请先安全退出并清理会话'));
     if (_submitBusy || operationStatus().busy || _operation.state === 'outcome_unknown')
       return Promise.reject(new Error('上一项认证操作仍在进行或结果未知，请先处理'));
     var previous = readPending();
@@ -890,6 +1122,13 @@
         ? '上一次登录结果未知，请先安全退出并清理会话'
         : '操作正在进行，请不要重复提交');
     var token = invalidateAuthWork('开始新的认证操作');
+    try {
+      claimAuthBoundary('session_mutation', token, false);
+    } catch (e0) {
+      setOperation('idle', errText(e0));
+      setSessionTruth('unknown', '', errText(e0));
+      throw e0;
+    }
     _submitBusy = true;
     _submitToken = token;
     setOperation(state || 'verifying');
@@ -901,6 +1140,14 @@
     if (_submitBusy || _operation.state === 'signing_out')
       throw new Error('会话确认正在进行');
     var token = invalidateAuthWork('重新确认认证结果');
+    try {
+      /* recoverAuthOutcome 已先验证唯一 fence 所有权，允许它显式取代未完成边界。 */
+      claimAuthBoundary('session_mutation', token, true);
+    } catch (e0) {
+      setOperation('outcome_unknown', errText(e0));
+      setSessionTruth('unknown', '', errText(e0));
+      throw e0;
+    }
     _submitBusy = true;
     _submitToken = token;
     setOperation('confirming');
@@ -908,11 +1155,20 @@
     return token;
   }
 
-  function finishSubmit(token) {
+  function finishSubmit(token, succeeded) {
+    var owned = _authBoundaries[String(token)];
+    /* 非 session 步骤（例如验证码 verify 或 SDK 初始化）确定失败时，
+       用本操作唯一 receipt 标记 rejected；不改共享 marker，也不做跨 owner 清理。 */
+    if (!succeeded && owned && !owned.receiptKey && !readFence().kind &&
+        sameAuthBoundary(readAuthBoundary(), owned)) {
+      try { writeBoundaryReceipt(owned, 'rejected'); }
+      catch (e0) { writeFence('outcome_unknown', '', '', errText(e0)); }
+    }
     if (token === _submitToken) {
       _submitBusy = false;
       _submitToken = 0;
     }
+    releaseAuthBoundaryToken(token);
   }
 
   
@@ -955,18 +1211,24 @@
         if (!verificationToken) throw new Error('验证码没有换到有效凭证，请重新获取');
         verificationConsumed = true;
         var req;
-        if (st.isUser) {
-          if (typeof a.signIn !== 'function') throw new Error('当前环境不支持短信登录');
-          req = a.signIn({ username: st.phone, verification_token: verificationToken });
-        } else {
-          if (typeof a.signUp !== 'function') throw new Error('当前环境不支持手机号注册');
-          req = a.signUp({
-            phone_number: st.phone,
-            verification_code: c,
-            verification_token: verificationToken,
-            username: uname,
-            password: pw
-          });
+        markSessionMutation(token);
+        try {
+          if (st.isUser) {
+            if (typeof a.signIn !== 'function') throw new Error('当前环境不支持短信登录');
+            req = a.signIn({ username: st.phone, verification_token: verificationToken });
+          } else {
+            if (typeof a.signUp !== 'function') throw new Error('当前环境不支持手机号注册');
+            req = a.signUp({
+              phone_number: st.phone,
+              verification_code: c,
+              verification_token: verificationToken,
+              username: uname,
+              password: pw
+            });
+          }
+        } catch (e0) {
+          finishSessionMutation(token, 'rejected');
+          throw e0;
         }
         setOperation('confirming');
         return awaitAuthMutation(req,
@@ -983,10 +1245,10 @@
       });
     });
     return work.then(function (r) {
-      finishSubmit(token);
+      finishSubmit(token, true);
       return r;
     }, function (e) {
-      finishSubmit(token);
+      finishSubmit(token, false);
       if (isStaleError(e) || token !== _authGeneration) throw e;
       if (verificationConsumed) {
         _pendingMemory = null;
@@ -1044,12 +1306,18 @@
       assertAuthToken(token);
       aRef = a;
       var req;
-      if (typeof a.signInWithPassword === 'function')
-        req = a.signInWithPassword({ username: u, password: p });
-      else if (typeof a.signIn === 'function')
-        req = a.signIn({ username: u, password: p });
-      else
-        throw new Error('当前环境不支持用户名密码登录');
+      markSessionMutation(token);
+      try {
+        if (typeof a.signInWithPassword === 'function')
+          req = a.signInWithPassword({ username: u, password: p });
+        else if (typeof a.signIn === 'function')
+          req = a.signIn({ username: u, password: p });
+        else
+          throw new Error('当前环境不支持用户名密码登录');
+      } catch (e0) {
+        finishSessionMutation(token, 'rejected');
+        throw e0;
+      }
       setOperation('confirming');
       return awaitAuthMutation(req, '用户名密码登录仍在处理，请勿重试', token, true);
     }).then(function (result) {
@@ -1062,10 +1330,10 @@
       return commitSignedIn(identity, opIdentity, snap, token);
     });
     return work.then(function (r) {
-      finishSubmit(token);
+      finishSubmit(token, true);
       return r;
     }, function (e) {
-      finishSubmit(token);
+      finishSubmit(token, false);
       if (isStaleError(e) || token !== _authGeneration) throw e;
       var code = String(e && e.code || '');
       if (code === 'AUTH_FENCED_SESSION') {
@@ -1127,10 +1395,10 @@
       return commitSignedIn(r.identity, r.operation, snap, token, ownedFence);
     }).then(function (v) {
       _outcomeRecovery = null;
-      finishSubmit(token);
+      finishSubmit(token, true);
       return v;
     }, function (e) {
-      finishSubmit(token);
+      finishSubmit(token, false);
       if (isStaleError(e) || token !== _authGeneration) throw e;
       if (e && e.code === 'AUTH_SESSION_UID_MISMATCH') {
         _outcomeRecovery = null;
@@ -1143,56 +1411,95 @@
 
   function signOut() {
     if (_cloudBusy) return Promise.reject(new Error('云存档操作正在进行，请完成后再退出'));
-    readFence();  /* 先载入持久 revision，再建立本次退出的线性化边界 */
+    readFence();
+    var priorBoundary = readAuthBoundary();
+    var priorMarker = readLocal();
+    var priorReceipts = activeMutationReceipts();
+    var hadPriorSessionMutation = _activeSessionMutations > 0 ||
+      priorReceipts.length > 0;
+    /* 未结算 boundary 本身不等于“底层 SDK 仍会晚到”：
+       receipt=returned/rejected 表示网络调用已经结束；只有 active/unknown 回执
+       或本标签内存计数才要求 cleanupPending。 */
+
+    /* 先把 signout 边界写进共享 localStorage，再作废本标签 waiter。
+       这样另一个标签页即使正在等待 SDK，也会在下一次主动复验时失去提交资格。 */
+    var token = _authGeneration + 1;
+    var signoutBoundary;
+    try {
+      signoutBoundary = claimAuthBoundary('signout', token, true);
+    } catch (e0) {
+      setOperation('idle', errText(e0));
+      setSessionTruth('unknown', '', errText(e0));
+      return Promise.reject(e0);
+    }
+
     _authEpoch++;
-    var hadPriorSessionMutation = _activeSessionMutations > 0;
-    var token = invalidateAuthWork('用户已请求安全退出');
+    token = invalidateAuthWork('用户已请求安全退出');
     var signOutFenceRevision = _fenceRevision;
     _submitBusy = false;
     _submitToken = 0;
     _outcomeRecovery = null;
     setOperation('signing_out');
     setSessionTruth('checking', '', '正在退出');
+
     return auth().then(function (a) {
       assertAuthToken(token);
       if (typeof a.signOut !== 'function') throw new Error('当前 SDK 不支持退出登录');
-      var revokeError = null;
-      return awaitAuthMutation(a.signOut(), '正在安全退出，请勿关闭页面', token, true)
-        .catch(function (e0) {
-          if (isStaleError(e0) || token !== _authGeneration) throw e0;
-          revokeError = e0;
+      var revokeError = null, request;
+      markSessionMutation(token);
+      try { request = a.signOut(); }
+      catch (e0) {
+        finishSessionMutation(token, 'rejected');
+        throw e0;
+      }
+      return awaitAuthMutation(request, '正在安全退出，请勿关闭页面', token, true)
+        .catch(function (e1) {
+          if (isStaleError(e1) || token !== _authGeneration) throw e1;
+          revokeError = e1;
         }).then(function () {
           assertAuthToken(token);
           return sessionSnapshot(a);
         }).then(function (snap) {
           assertAuthToken(token);
           if (snap.session) {
-            var e = revokeError ||
-              new Error('云端会话或凭证仍然存在，退出没有完成');
+            var e = revokeError || new Error('云端会话或凭证仍然存在，退出没有完成');
             if (!e.code) e.code = 'AUTH_SIGNOUT_INCOMPLETE';
             throw e;
           }
-          /* SDK signOut 即使报错，只要随后已确认 session=null，退出仍可安全完成。 */
+          /* SDK signOut 即使返回业务错误，也只有复验 session=null 后才能继续。 */
         });
     }).then(function () {
       assertAuthToken(token);
-      _probeId++;  /* signOut 的 session=null 结论击败此前和同代的全部只读探测 */
+      _probeId++;
       _pendingMemory = null;
       try { sessionStorage.removeItem(PKEY); } catch (_) {}
       writeLocal({
-        schema: 1076, method: '', signedAt: 0, uid: '', phone: '', username: '', authCommitId: '',
-        pendingPhone: '', verificationId: '', isUser: false
+        schema: 1076,
+        method: '',
+        signedAt: 0,
+        uid: '',
+        phone: '',
+        username: '',
+        authCommitId: '',
+        authBoundaryId: signoutBoundary.boundaryId,
+        authBoundaryState: 'signed_out',
+        pendingPhone: '',
+        verificationId: '',
+        isUser: false
       });
       try {
         if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
       } catch (e0) {}
-      readFence();  /* 合并其他标签页在退出期间写入的 fence，再决定能否宣布干净退出 */
-      if (hadPriorSessionMutation || _activeSessionMutations > 0 ||
+
+      readFence();
+      clearNonActiveReceipts();
+      if (hadPriorSessionMutation || activeMutationReceipts().length > 0 ||
           _fenceRevision !== signOutFenceRevision) {
         writeFence('stale_mutation', '', '',
           '旧登录请求仍可能晚到；本机已退出，请刷新页面后再次核对');
         setOperation('idle', '本机已退出；旧请求仍在收尾，请刷新页面后再次核对');
         setSessionTruth('unknown', '', '旧登录请求仍可能晚到，已禁止自动接管');
+        releaseAuthBoundaryToken(token);
         return {
           ok: true,
           serverRevoked: true,
@@ -1200,12 +1507,14 @@
           requiresReload: true
         };
       }
+
       var clearSnapshot = fenceSourceSnapshot();
       if (!clearFence(null, clearSnapshot)) {
         writeFence('stale_mutation', '', '',
           '另一个标签页在清理期间改变了认证边界；请刷新并再次核对');
         setOperation('idle', '认证边界仍在变化，请刷新页面后再次核对');
         setSessionTruth('unknown', '', '跨标签页认证边界尚未稳定');
+        releaseAuthBoundaryToken(token);
         return {
           ok: true,
           serverRevoked: true,
@@ -1213,13 +1522,20 @@
           requiresReload: true
         };
       }
+
       setOperation('idle');
       setSessionTruth('signed_out', '', '');
+      releaseAuthBoundaryToken(token);
       return { ok: true, serverRevoked: true, cleanupPending: false };
     }).catch(function (e) {
-      if (isStaleError(e) || token !== _authGeneration) throw e;
+      releaseAuthBoundaryToken(token);
       _submitBusy = false;
       _submitToken = 0;
+      if (isStaleError(e) || token !== _authGeneration) {
+        setOperation('idle', errText(e));
+        setSessionTruth('unknown', '', errText(e));
+        throw e;
+      }
       if (!readFence().kind)
         writeFence('outcome_unknown', '', '', '退出结果未确认：' + errText(e));
       setOperation('idle', errText(e));
@@ -1230,6 +1546,12 @@
 
   function commitSignedIn(inputIdentity, opIdentity, snap, token, ownedFence) {
     assertAuthToken(token);
+    var authBoundary = _authBoundaries[String(token)];
+    if (!authBoundary || authBoundary.kind !== 'session_mutation') {
+      var noBoundary = new Error('本次认证没有可验证的共享提交边界');
+      noBoundary.code = 'AUTH_BOUNDARY_MISSING';
+      throw noBoundary;
+    }
     var existingFence = readFence();
     if (existingFence.kind &&
         !(existingFence.kind === 'outcome_unknown' && ownedFence &&
@@ -1250,6 +1572,7 @@
       e.observedUid = String((snap && snap.uid) || '');
       throw e;
     }
+
     var uid = String(snap.uid);
     var serverIdentity = identityOf({ user: snap.user });
     var phone = serverIdentity.phone || opIdentity.phone || inputIdentity.phone || '';
@@ -1263,7 +1586,9 @@
         concurrent.observedUid = String((readFence() || {}).observedUid || '');
         throw concurrent;
       }
+      assertAuthToken(token);
     }
+
     writeLocal({
       schema: 1076,
       method: inputIdentity.method,
@@ -1272,37 +1597,47 @@
       uid: uid,
       signedAt: Date.now(),
       authCommitId: commitId,
+      authBoundaryId: authBoundary.boundaryId,
+      authBoundaryState: 'signed_in',
       pendingPhone: '',
       verificationId: '',
       isUser: false
     });
 
     function failCommitBoundary(reason) {
-      var current = readLocal();
-      /* 只回滚本标签本次写入的 commit；若另一标签已经提交了新 marker，绝不覆盖它。 */
-      if (String(current.authCommitId || '') === commitId) {
-        writeLocal({
-          schema: 1076, method: '', signedAt: 0, uid: '', phone: '', username: '',
-          authCommitId: '', pendingPhone: '', verificationId: '', isUser: false
-        });
+      /* localStorage 没有 CAS。失败路径绝不再“先读自己的 commitId、再清 marker”，
+         因为另一标签可能在两步之间写入新账号。保留显示缓存并建立 fence，
+         isSignedIn/sessionStatus 会失败关闭；只有显式 signOut 能统一清理。 */
+      var before = readFence();
+      var hadFence = !!before.kind;
+      var fence = before;
+      if (!fence.kind) {
+        fence = writeFence('outcome_unknown', uid, '',
+          reason || '登录提交边界发生变化');
       }
-      var fence = readFence();
       setOperation('outcome_unknown', reason || '登录提交边界发生变化');
       setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
                       fence.observedUid || '', reason || fence.reason || '登录提交边界发生变化');
       var err = new Error(reason || '登录提交期间账号边界发生变化');
-      err.code = fence.kind ? 'AUTH_FENCED_SESSION' : 'AUTH_COMMIT_REVALIDATION_FAILED';
+      err.code = hadFence ? 'AUTH_FENCED_SESSION' : 'AUTH_COMMIT_REVALIDATION_FAILED';
       err.observedUid = String(fence.observedUid || '');
       throw err;
     }
     function markerAndFenceCurrent() {
-      var fence = readFence(), marker = readLocal();
-      return !fence.kind && String(marker.uid || '') === uid &&
-        String(marker.authCommitId || '') === commitId;
+      var fence = readFence(), marker = readLocal(), currentBoundary = readAuthBoundary();
+      return !fence.kind && sameAuthBoundary(currentBoundary, authBoundary) &&
+        String(marker.uid || '') === uid &&
+        String(marker.authCommitId || '') === commitId &&
+        String(marker.authBoundaryId || '') === String(authBoundary.boundaryId) &&
+        String(marker.authBoundaryState || '') === 'signed_in';
     }
 
-    /* 让跨标签 storage 写入获得一个任务边界，然后重新读取真实 SDK session。
-       只有这一步完成后才允许启动 ensureProfile 或任何云存档附加任务。 */
+    /* 先清本标签验证码事务，再跨一个 task 边界复验。即使清理回调触发了
+       另一个标签页的 fence/boundary，下面也只能失败关闭，不能返回假成功。 */
+    _pendingMemory = null;
+    try { sessionStorage.removeItem(PKEY); } catch (_) {}
+    _outcomeRecovery = null;
+
     return delay(0).then(function () {
       assertAuthToken(token);
       if (!markerAndFenceCurrent())
@@ -1312,9 +1647,7 @@
       assertAuthToken(token);
       if (!truth || !truth.ok || String(truth.uid || '') !== uid || !markerAndFenceCurrent())
         return failCommitBoundary((truth && truth.reason) || '最终云端 session 复验失败');
-      _pendingMemory = null;
-      try { sessionStorage.removeItem(PKEY); } catch (_) {}
-      _outcomeRecovery = null;
+
       _probeId++;
       var epoch = ++_authEpoch;
       setOperation('idle');
@@ -1323,116 +1656,54 @@
         if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp();
       } catch (e0) {}
 
-      /* 最终线性化成功后才启动附加任务。竞赛档案可能写 sb_profile；进度对账只读。
-         两项并行且各自有上限，任何一项失败/悬挂都不能推翻真实登录。 */
-      var profileJob = withTimeout(ensureProfile(uid), 8000, '竞赛档案处理超时')
-        .catch(function () { return null; });
-      var syncJob = withTimeout(syncOnLogin(uid, epoch), 8000, '云存档检查超时')
+      /* 最终返回前再次主动读共享 boundary、marker 与 fence。
+         UI 还会在展示成功前独立调用 isSignedIn() 复核。 */
+      assertAuthToken(token);
+      if (!markerAndFenceCurrent() || !isSignedIn())
+        return failCommitBoundary('登录成功展示前认证边界再次发生变化');
+
+      /* v1076 登录后只执行云存档只读检查。浏览器端不访问 sb_profile，
+         不创建档案、不 count、不 set/update，也不会把未获服务端保证的编号锁入本机。 */
+      var job = withTimeout(syncOnLogin(uid, epoch), 8000, '云存档检查超时')
         .catch(function (e1) {
           return { ok: false, action: 'deferred', reason: errText(e1) };
+        }).then(function (sync) {
+          if (epoch !== _authEpoch || !isSignedIn() ||
+              String(readLocal().uid || '') !== uid)
+            return { stale: true };
+          return {
+            cid: 0,
+            pendingId: false,
+            competitionIdUnavailable: true,
+            sync: sync,
+            uid: uid,
+            epoch: epoch
+          };
+        }).catch(function (e2) {
+          return {
+            cid: 0,
+            pendingId: false,
+            competitionIdUnavailable: true,
+            uid: uid,
+            epoch: epoch,
+            sync: { ok: false, action: 'deferred', reason: errText(e2) }
+          };
         });
-      var job = Promise.all([profileJob, syncJob]).then(function (items) {
-        var prof = items[0], sync = items[1];
-        if (epoch !== _authEpoch || !isSignedIn() || readLocal().uid !== uid)
-          return { stale: true };
-        return {
-          cid: (prof && prof.cid) || 0,
-          pendingId: !(prof && prof.cid),
-          sync: sync,
-          uid: uid,
-          epoch: epoch
-        };
-      }).catch(function (e1) {
-        return {
-          cid: 0,
-          pendingId: true,
-          uid: uid,
-          epoch: epoch,
-          sync: { ok: false, action: 'deferred', reason: errText(e1) }
-        };
-      });
-      return { ok: true, uid: uid, cid: 0, pendingId: true, epoch: epoch, postLogin: job };
-    });
-  }
-  /* 建立/读取云端档案，并分配竞赛 ID */
-  function verifyProfileIdentity(uid) {
-    return ensureSession(uid).then(function (truth) {
-      var marker = readLocal(), fence = readFence();
-      if (!truth || !truth.ok || String(truth.uid || '') !== String(uid) ||
-          fence.kind || !isSignedIn() || String(marker.uid || '') !== String(uid))
-        throw staleError('竞赛档案操作期间账号会话已经变化');
-      return truth;
+
+      return {
+        ok: true,
+        uid: uid,
+        cid: 0,
+        pendingId: false,
+        competitionIdUnavailable: true,
+        epoch: epoch,
+        postLogin: job
+      };
     });
   }
 
-  /* 建立/读取云端档案，并分配竞赛 ID。每次云读写前后都重新验证 UID。 */
-  function ensureProfile(uid) {
-    var db = null, docRef = null;
-    function readProfile() {
-      return verifyProfileIdentity(uid).then(function () {
-        return docRef.get();
-      }).then(function (res) {
-        return verifyProfileIdentity(uid).then(function () { return res; });
-      });
-    }
-    return verifyProfileIdentity(uid).then(function () {
-      return app();
-    }).then(function (a) {
-      db = a.database();
-      docRef = db.collection(COL_PROFILE).doc(uid);
-      return readProfile();
-    }).then(function (res) {
-      var row = res && res.data && res.data[0];
-      if (row && row.cid > 0) return row;
-      if (row) return assignCid(db, docRef, row.createdAt, uid);
-      return verifyProfileIdentity(uid).then(function () {
-        return docRef.set({
-          uid: uid,
-          name: (localProfileName() || ''),
-          cid: 0,
-          createdAt: db.serverDate(),
-          updatedAt: db.serverDate()
-        });
-      }).then(function () {
-        return readProfile();
-      }).then(function (r2) {
-        var row2 = r2 && r2.data && r2.data[0];
-        return assignCid(db, docRef, row2 && row2.createdAt, uid);
-      });
-    }).then(function (prof) {
-      if (prof && prof.cid > 0 && isSignedIn() &&
-          !readFence().kind && String(readLocal().uid || '') === String(uid)) {
-        try {
-          if (window.HansenSbProfile && HansenSbProfile.claimCloudId) HansenSbProfile.claimCloudId(prof.cid);
-        } catch (e) {}
-      }
-      return prof;
-    });
-  }
-
-  /* 竞赛 ID = 比我早注册的人数 + 1；真正 update 前再次复验当前 UID。 */
-  function assignCid(db, docRef, createdAt, uid) {
-    if (!createdAt) return Promise.resolve(null);
-    return verifyProfileIdentity(uid).then(function () {
-      return db.collection(COL_PROFILE).where({ createdAt: db.command.lt(createdAt) }).count();
-    }).then(function (r) {
-      var cid = ((r && r.total) || 0) + 1;
-      return verifyProfileIdentity(uid).then(function () {
-        return docRef.update({ cid: cid, updatedAt: db.serverDate() });
-      }).then(function () {
-        return verifyProfileIdentity(uid);
-      }).then(function () {
-        return { cid: cid };
-      });
-    }).catch(function () { return null; });
-  }
-
-  function localProfileName() {
-    try {
-      if (window.HansenSbProfile) return (HansenSbProfile.readProfile() || {}).name || '';
-    } catch (e) {}
-    return '';
-  }
+  /* v1076 安全边界：浏览器认证模块不访问 sb_profile。
+     全局竞赛 ID 必须由服务端 UID 派生 + 原子事务实现；当前仅保留本机临时编号。 */
 
   /* ── 跨设备存档 ─────────────────────────────────── */
   /* 登录后把本地进度推上云 */
@@ -1580,6 +1851,7 @@
         return { ok: false, stale: true, definite: false, reason: 'session-probe-stale' };
       marker = readLocal();
       var fence = readFence();
+      var boundary = readAuthBoundary();
       if (fence.kind) {
         /* ensureSession 是只读门卫，只能拒绝；任何 fence 都必须由显式 signOut 清。 */
         setSessionTruth(fence.kind === 'mismatch' ? 'mismatch' : 'unknown',
@@ -1593,16 +1865,24 @@
         return { ok: false, expired: false, definite: false,
                  reason: snap.reason || '云端用户身份暂时无法确认' };
       }
-      if (!snap.session || snap.anonymous) {
-        setSessionTruth('signed_out', '', snap.anonymous ? 'anonymous-session' : 'no-session');
-        return { ok: false, expired: true, definite: true, reason: '云端没有正式账号会话' };
-      }
-      if (String(snap.uid) !== wanted ||
-          (marker.uid && String(marker.uid) !== String(snap.uid))) {
+      /* boundary 未结算时仍允许识别“当前 SDK UID 明确不是 wanted”；
+         发现不同账号必须升级为 mismatch，不能被一般 pending 状态遮住。 */
+      if (snap.session && !snap.anonymous &&
+          (String(snap.uid) !== wanted ||
+           (marker.uid && String(marker.uid) !== String(snap.uid)))) {
         writeFence('mismatch', wanted, snap.uid, 'marker/session UID mismatch');
         setSessionTruth('mismatch', snap.uid, 'marker/session UID mismatch');
         return { ok: false, mismatch: true, definite: true, uid: snap.uid,
                  reason: '本地账号与云端会话不是同一用户' };
+      }
+      if (boundary.boundaryId && !boundarySettled(boundary, marker)) {
+        setSessionTruth('unknown', '', '共享认证边界尚未完成');
+        return { ok: false, fenced: true, definite: false, uid: snap.uid || '',
+                 reason: '共享认证边界尚未完成' };
+      }
+      if (!snap.session || snap.anonymous) {
+        setSessionTruth('signed_out', '', snap.anonymous ? 'anonymous-session' : 'no-session');
+        return { ok: false, expired: true, definite: true, reason: '云端没有正式账号会话' };
       }
       setSessionTruth('confirmed', snap.uid, '');
       return { ok: true, uid: snap.uid, definite: true };
@@ -1639,7 +1919,6 @@
     registerByPassword: registerByPassword,
     normUsername: normUsername,
     signOut: signOut,
-    ensureProfile: ensureProfile,
     pushSave: pushSave,
     syncOnLogin: syncOnLogin,
     localHasProgress: localHasProgress,
@@ -1648,6 +1927,8 @@
     _setAuthForTest: function (a) { _authOverride = a; },
     _setSessionForTest: function (state, uid) { setSessionTruth(state, uid || '', 'test'); },
     _readFenceForTest: readFence,
+    _readBoundaryForTest: readAuthBoundary,
+    _activeReceiptsForTest: activeMutationReceipts,
     _app: app
   };
   if (!window.__HANSEN_AUTH_NO_BOOT__) {
