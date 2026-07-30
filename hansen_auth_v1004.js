@@ -203,6 +203,7 @@
   var _operation = { state: 'idle', slow: false, reason: '' };
   var _outcomeRecovery = null;
   var FKEY = 'hansen_auth_fence_v1076';
+  var FBKEY = 'hansen_auth_fence_backup_v1076';
   var _fenceMemory = null;
   var _fenceRevision = 0;
 
@@ -213,6 +214,12 @@
       var raw = sessionStorage.getItem(FKEY);
       if (raw) o = JSON.parse(raw);
     } catch (e) {}
+    if (!o || typeof o !== 'object' || Array.isArray(o)) {
+      try {
+        var backup = localStorage.getItem(FBKEY);
+        if (backup) o = JSON.parse(backup);
+      } catch (e2) {}
+    }
     if (!o || typeof o !== 'object' || Array.isArray(o)) o = _fenceMemory;
     if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
     _fenceRevision = Math.max(_fenceRevision, Number(o.revision || 0));
@@ -220,11 +227,16 @@
     return o;
   }
   function writeFence(kind, expectedUid, observedUid, reason) {
+    kind = String(kind || 'outcome_unknown');
+    var current = readFence();
+    var rank = { outcome_unknown: 1, stale_mutation: 2, mismatch: 3 };
+    if (current.kind && (rank[current.kind] || 0) > (rank[kind] || 0))
+      return current;  /* 低优先级迟到结果绝不能冲掉 mismatch/stale 边界 */
     _fenceRevision++;
     _probeId++;  /* fence 一旦出现，所有尚未落地的只读探测立即失去写状态权 */
     var o = {
       schema: 1076,
-      kind: String(kind || 'outcome_unknown'),
+      kind: kind,
       expectedUid: String(expectedUid || ''),
       observedUid: String(observedUid || ''),
       reason: String(reason || ''),
@@ -233,13 +245,23 @@
       at: Date.now()
     };
     _fenceMemory = o;
-    try { sessionStorage.setItem(FKEY, JSON.stringify(o)); } catch (e) {}
+    var encoded = JSON.stringify(o), persisted = false;
+    try {
+      sessionStorage.setItem(FKEY, encoded);
+      persisted = sessionStorage.getItem(FKEY) === encoded;
+    } catch (e) {}
+    try {
+      localStorage.setItem(FBKEY, encoded);
+      persisted = persisted || localStorage.getItem(FBKEY) === encoded;
+    } catch (e2) {}
+    if (!persisted) _storageWarning = 'auth-fence-not-persistent';
     return o;
   }
   function clearFence() {
     _fenceRevision++;
     _fenceMemory = null;
     try { sessionStorage.removeItem(FKEY); } catch (e) {}
+    try { localStorage.removeItem(FBKEY); } catch (e2) {}
   }
   function staleError(reason) {
     var e = new Error(reason || '这次认证结果已经过期，已拒绝写入');
@@ -1045,6 +1067,7 @@
           /* SDK signOut 即使报错，只要随后已确认 session=null，退出仍可安全完成。 */
         });
     }).then(function () {
+      assertAuthToken(token);
       _pendingMemory = null;
       try { sessionStorage.removeItem(PKEY); } catch (_) {}
       writeLocal({
