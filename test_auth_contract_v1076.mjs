@@ -19,6 +19,7 @@ function boot(shared={}){
   const win={__HANSEN_AUTH_NO_BOOT__:true,__HANSEN_AUTH_TEST_FAST__:true,
     __HANSEN_AUTH_SLOW_MS__:shared.slowMs,
     __HANSEN_AUTH_MUTATION_TIMEOUT_MS__:shared.mutationTimeoutMs,
+    __HANSEN_AUTH_RECEIPT_TTL_MS__:shared.receiptTtlMs,
     __HANSEN_AUTH_INIT_TIMEOUT_MS__:shared.initTimeoutMs,
     HANSEN_CLOUD_CONFIG:{envId:'test',region:'ap-shanghai'},localStorage:local,sessionStorage:session,document:doc,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=(opts||{}).detail;}},setTimeout,clearTimeout,setInterval,clearInterval,TextEncoder,TextDecoder,console};
   win.window=win; const ctx={...win,window:win,globalThis:win}; vm.createContext(ctx); vm.runInContext(authSrc,ctx);
@@ -469,7 +470,7 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
      '退出清理遇到并发 mismatch 时本机 marker 已清，但不会谎报 signed_out 或允许立即重登');
 }
 {
-  const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
+  const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25,receiptTtlMs:40};
   const never=deferred(),b=boot(shared);
   b.A._setAuthForTest({
     signInWithPassword(){return never.promise;},
@@ -495,12 +496,11 @@ ok(/auth\.isSignedIn\(\)/.test(uiSrc)&&/认证边界在成功展示前/.test(uiS
   const fencedState=await reload.A.refreshSession();
   ok(fencedState.state==='unknown'&&reload.A._readFenceForTest().kind,
      '刷新后的只读探测仍不能自行解除悬挂隔离');
-  never.resolve({user:{uid:'U-HUNG-LATE'}});
-  await flush();
+  await new Promise(r=>setTimeout(r,55));
   await reload.A.signOut();
   ok(reload.A.sessionStatus().state==='signed_out'&&!reload.A._readFenceForTest().kind&&
      reload.A._activeReceiptsForTest().length===0,
-     '底层悬挂 mutation 真正结算后，再次显式退出确认 session=null 才能最终解除隔离');
+     '永久不结算的旧页面回执超过保守 TTL 后，第二次显式退出复验 session=null 才解除隔离');
 }
 
 
