@@ -89,6 +89,12 @@ def _inj_land_stamp(s):
 
 
 
+def _inj_auth_real_session(s):
+    """v1076：删掉“session 已确认”这一关键合同，认证守卫必须报红。"""
+    return s.replace("_sessionTruth.state === 'confirmed'",
+                     "_sessionTruth.state === 'unchecked'", 1)
+
+
 def _inj_ref_missing(s):
     """v1057 类别：引用一个不存在的文件。"""
     return s.replace("import('./vendor_cloudbase_esm_v965.js')",
@@ -130,6 +136,7 @@ def _inj_divergent_OLD(s):
 
 
 CASES = [
+    ('认证真实会话',    'hansen_auth_v1004.js',       _inj_auth_real_session),
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
     ('SDK 单实例',      'hansen_cloud_save_v965.js',  _inj_sdk),
