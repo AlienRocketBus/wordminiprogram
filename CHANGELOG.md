@@ -26,11 +26,16 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 9. 🔴 U1 的上传、迁移、恢复、元信息读取或公开 fetch 在切到 U2 后迟到，可能写本地同步账本、
    返回旧元信息/明文；全局 `_busy` 还会让 U1 悬挂永久阻塞 U2，或由 U1 迟到结算误释放 U2 锁。
 10. 🔴 云端/本机覆盖选择可以被重复点击，旧 DOM 引用、手动上传、普通退出或关闭可以绕过 applying。
-11. 🔴 登录后竞赛档案写入与云档只读检查曾串行阻塞；附加任务失败不应推翻已经确认的真实登录。
-12. 🔴 登录提交第一次 readFence 后到写 marker 之间仍有窗口；并发 mismatch 时可能返回假成功，
-    并在最终身份未线性化前启动 U1 的竞赛档案写入。
+11. 🔴 登录后自动创建/更新 `sb_profile`、count 并发竞赛 ID；权限缺失或悬挂会把真实登录拖住。
+12. 🔴 登录提交第一次 readFence 后到写 marker 之间仍有窗口；并发 mismatch 时可能返回假成功。
 13. 🔴 signOut 最终检查后若无所有权删除全部 fence key，会擦掉逐键清理期间另一标签刚写的 mismatch。
-14. 🔴 README 发布副本、资源戳、Service Worker、Jarvis 凭证和双包发布若走散，会让代码已修、
+14. 🔴 标签 A/B 的 generation、active mutation 和 waiter 都是各自内存；B 看不见 A 在途登录，
+    可先谎报干净退出，A 晚到再复活 session/marker。
+15. 🔴 最终 ensureSession 复验通过后，清 PKEY 的回调仍可插入新 mismatch；旧代码继续返回 ok。
+16. 🔴 “只回滚相同 authCommitId”仍是先读后写；localStorage 无 CAS，A 可擦掉窗口中 B 的新 marker。
+17. 🔴 客户端 profile 写前后复验不能撤销已经发出的错 UID 请求；仓库没有可部署 owner 规则，
+    `count + update` 也不是原子发号。
+18. 🔴 README 发布副本、资源戳、Service Worker、Jarvis 凭证和双包发布若走散，会让代码已修、
     线上仍加载旧 v1074/v1075，现场看起来像“修复完全没有发生”。
 
 ### 实现
@@ -59,13 +64,19 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   `mismatch > stale_mutation > outcome_unknown`，再比较 revision/generation/时间。
 - 每条 fence 有唯一 `fenceId`。恢复必须精确拥有同一 `fenceId + expectedUid`；
   清理是 compare-and-delete，任何别的记录仍存在就拒绝提交 marker。
-- 登录 marker 记录唯一 `authCommitId`；写后让出任务边界，再做真实 ensureSession 与
-  marker/fence 最终复验。失败只回滚相同 commitId，另一标签的新 marker 不会被覆盖，附加任务
-  也尚未启动。
-- 只读 refresh/ensure 永远不能清 fence。显式安全退出会作废等待者、再查服务器 session，并抓取
-  每个 fence key 的清理前快照；只 compare-delete 未变化的旧值。只有明确 `session === null`、
-  无本页活跃 mutation 且最终跨标签边界稳定时才宣布 signed_out。旧请求或新 fence 出现时返回
-  `cleanupPending/requiresReload`，UI 禁止新登录并要求刷新复核。
+- 每次顶层登录、结果恢复和退出先持久 claim 唯一
+  `hansen_auth_boundary_v1076`。numeric generation 仍管本标签；共享 boundary 管所有标签。
+  后 claim 者使旧操作下一次主动检查得到 `AUTH_CROSS_TAB_SUPERSEDED`，不依赖 storage event。
+- 每次 session-changing SDK 调用前先写本操作唯一
+  `hansen_auth_boundary_receipt_v1076:<id>` active 回执，Promise 真正结算后才标
+  returned/rejected/unknown。写入读回失败时 SDK 调用次数必须为 0。
+- 登录 marker 绑定 `authCommitId + authBoundaryId + authBoundaryState`；先清 PKEY，再让出任务
+  边界并做真实 ensureSession、boundary/marker/fence 最终复验。
+- 失败路径不清 marker。localStorage 没有 CAS，“先看 commitId 再清”会擦掉另一标签；现在只建立
+  fence，让 marker 保持显示缓存但 `isSignedIn/sessionStatus` 失败关闭。
+- 只读 refresh/ensure 永远不能清 fence 或接管未落地 boundary。显式安全退出会作废等待者、
+  再查服务器 session，并抓取每个 fence key 清理前快照；只有明确 `session === null`、
+  跨标签无 active/unknown receipt 且最终边界稳定时才宣布 signed_out。
 
 云存档和 UI：
 
@@ -76,9 +87,11 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 - anonymous 分支只有在认证模块明确报告 `signed_out` 且 `requiresCleanup=false` 时可用；
   unknown、mismatch、legacy、outcome 和 cleanupPending 全部失败关闭。
 - 全局 busy 改为 generation-scoped operation token；旧 U1 settle 不能清 U2 的锁。
-- 登录最终 commit 复验成功后才启动 `ensureProfile` 与 `syncOnLogin`；两者并行、各自 8 秒
-  上限。进度检查只读；竞赛档案每次 get/set/update 前后调用 `verifyProfileIdentity(uid)`，
-  避免当前凭据已切 U2 时仍写 U1 的 `sb_profile`。
+- 登录最终 commit 复验成功后只启动 `syncOnLogin` 云档只读检查。认证模块不再包含
+  profile set/update/count、自动建档、客户端发号或本机锁号；`sb_profile` 不存在、拒绝权限
+  或永久悬挂都不会影响登录。
+- UI 明确显示“云端竞赛 ID 尚未启用，不影响登录和本机游戏”；展示登录成功前再次核对
+  `isSignedIn() + marker.uid`，刚返回 ok 也不能绕过新 boundary/fence。
 - UI 每次重绘推进 `renderEpoch`，所有处理器核对 epoch 和当前节点；覆盖选择与手动上传共享
   `applying-*` 锁。cleanupPending 显示刷新按钮，禁用登录、方式切换和破坏性操作。
 
@@ -99,7 +112,10 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 - 已有手机号和已设置用户名/密码的账号继续登录同一 UID；匿名玩家仍可不登录游玩。
 - 旧手机号/用户名云档只作历史读取/迁移候选；找不到旧档不等于可以覆盖云端。
 - v1076 fence 只保存非敏感边界，不保存密码、短信码、verification token 或 access/refresh token。
-- 浏览器不支持 localStorage 时保留内存状态并显示持久化告警；不能以本地存储失败冒充登录失败。
+- 旧 marker 没有共享 boundary 时仍可由真实 SDK session 复核；第一次 v1076 登录/退出会绑定新
+  boundary。浏览器若不能持久写入并读回 boundary/receipt，会在调用 session-changing SDK
+  **之前**失败关闭，避免跨标签安全证据丢失后仍创建会话。
+- 本机竞赛临时号与学习数据保留，但浏览器不再把它认领为全局 ID，也不修改已有 profile 文档。
 - v961、v962 继续是永久淘汰的历史版本；本次候选直接基于 GitHub main v1075
   `c9ca5b08d068466f87c853aa3f65e61d25eddab3`，没有继承失败版实现。
 
@@ -107,18 +123,20 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 
 已在开发环境实际执行：
 
-- `test_auth_contract_v1076.mjs`：**59/59**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
+- `test_auth_contract_v1076.mjs`：**69/69**。覆盖新/旧手机号、密码登录、错误返回、匿名形状、
   operation/session UID、`session+user:null`、旧 refresh/ensure、迟到发码/登录、signOut 复活、
   mismatch 持久化、只读 null 不清 fence、mutation 永久悬挂、SDK init 永久悬挂、跨标签
-  session/local fence 强度与恢复所有权、marker 提交 TOCTOU、signOut 快照 compare-delete、
-  以及最终复验失败时零附加任务。
+  fence 强度与恢复所有权、两个独立 context 共享 localStorage 的在途登录/退出、boundary 写回
+  失败前 SDK 零调用、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照 compare-delete、
+  profile 零写入及竞赛 ID 安全降级。
 - `test_cloud_save_v965.mjs`：Node/WebCrypto 动态 **43/43**。覆盖同 UID 上传/恢复、授权不跨身份、
   unknown/mismatch/cleanup 匿名零读写、U1→U2 的 put/迁移/restore/accountCloudInfo/fetch 迟到、
   本地 writeState 零污染和 generation busy token。
 - 认证、UI、CloudSave 实现与三个专项测试文件已完成语法解析。
-- `test_auth_ui_v1076.mjs` 已补齐 **18 条** 390×844 Chromium 点击断言：真实注册点击、
-  绝对 resendAt、旧 safeOut/send/go DOM 失效、冲突选择/手动上传 applying、三类安全清理、
-  cleanupPending 刷新按钮和登录禁用。它必须由 GitHub Actions 的真实 Chromium 执行后才能记为通过。
+- `test_auth_ui_v1076.mjs` 已补齐 **19 条** 390×844 Chromium 点击断言：真实注册点击、
+  绝对 resendAt、成功展示前 session/boundary/marker 复验、竞赛 ID 未启用提示、
+  旧 safeOut/send/go DOM 失效、冲突选择/手动上传 applying、三类安全清理、cleanupPending
+  刷新按钮和登录禁用。它必须由 GitHub Actions 的真实 Chromium 执行后才能记为通过。
 
 正式 CI 还必须自动枚举全部 `test_*v*.mjs` / `test_*v*.py`，运行两套生成器、27 岛接线、
 经济/资源/导航/安全、20 道新时代守卫、事故登记、Jarvis 自证、浏览器墙、最终源码指纹和两次
@@ -126,8 +144,9 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
 
 自动化不发送生产短信，也不能证明 CloudBase 控制台已正确配置。以下项目必须在正式 HTTPS 站点
 真机执行：全新手机号真实收码并注册、已有手机号登录、用户名密码登录、刷新保持、退出后 session
-清空、错误/过期验证码、弱密码、重复用户名、限频、安全域名、两台设备同 UID、U1→U2 切号及
-云/本机/稍后三种冲突出口。
+清空、错误/过期验证码、弱密码、重复用户名、限频、安全域名、两个标签并发登录/退出、
+两台设备同 UID、U1→U2 切号、云/本机/稍后三种冲突出口，并确认 profile 集合未配置时登录仍
+成功且没有 `sb_profile` 请求。
 
 ### 发布与部署
 
@@ -139,7 +158,8 @@ Service Worker、测试、Jarvis 和发布工作流，确认至少有以下互�
   上传后必须重新下载并做 SHA-256/CRC/内容白名单回读。
 - GitHub Release 不等于 CloudBase 部署。合并后仍需把部署包上传到环境
   `ambitious-d0g1d26xm740dc3d6` / `ap-shanghai`，刷新 CDN/Service Worker，并核对手机号与
-  密码 provider、短信签名/模板/额度、安全域名、`hansen_saves`、`sb_profile` 权限。
+  密码 provider、短信签名/模板/额度、安全域名与 `hansen_saves` 权限。v1076 不访问
+  `sb_profile`；不得为了“跑通登录”而放宽它，全局竞赛 ID 当前明确停用。
 - 生产真机矩阵未完成前，只能写“v1076 代码候选和自动化验证通过”；不得宣称生产注册已经修复。
 - 后续每个版本继续强制极其详细更新 README 和 CHANGELOG，至少包含背景与根因、实现、兼容、
   测试、发布与部署；发布 README 必须与根 README 逐字一致。
