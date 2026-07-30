@@ -391,6 +391,77 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
      '显式安全退出确认 session=null 后才统一清理跨标签 fence');
 }
 {
+  const b=boot();let cloudResets=0,injected=false;
+  const originalSet=b.local.setItem.bind(b.local);
+  b.setCloudSave({resetApp(){cloudResets++;}});
+  b.local.setItem=function(k,v){
+    originalSet(k,v);
+    if(k==='hansen_auth_v1004'&&!injected){
+      let marker=null;try{marker=JSON.parse(String(v));}catch(_){}
+      if(marker&&marker.authCommitId){
+        injected=true;
+        const mismatch={
+          schema:1076,fenceId:'COMMIT-RACE-MISMATCH',kind:'mismatch',
+          expectedUid:'U-COMMIT',observedUid:'U-OTHER',
+          generation:99,revision:99,at:Date.now()+1
+        };
+        const encoded=JSON.stringify(mismatch);
+        originalSet('hansen_auth_fence_backup_v1076',encoded);
+        originalSet('hansen_auth_fence_backup_v1076:mismatch',encoded);
+      }
+    }
+  };
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-COMMIT'}});},
+    getSession(){return Promise.resolve(sessionResult('U-COMMIT'));}
+  });
+  const err=await b.A.loginByPassword('commit_race','pw').then(()=>null,e=>e);
+  ok(err&&err.code==='AUTH_FENCED_SESSION'&&!b.A.readLocal().uid&&
+     b.A._readFenceForTest().fenceId==='COMMIT-RACE-MISMATCH'&&!b.A.isSignedIn(),
+     'marker 写入窗口出现跨标签 mismatch 时，最终线性化复验回滚自己的 marker 并拒绝假成功');
+  ok(cloudResets===0,
+     '登录提交最终复验失败时不启动 CloudSave reset、竞赛档案或登录后云任务');
+}
+{
+  const b=boot();
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({
+    schema:1076,method:'password',signedAt:Date.now(),uid:'U-OUT-RACE'
+  }));
+  b.A._setSessionForTest('confirmed','U-OUT-RACE');
+  const oldFence={
+    schema:1076,fenceId:'OLD-OUTCOME',kind:'outcome_unknown',
+    expectedUid:'U-OUT-RACE',observedUid:'',generation:0,revision:1,at:Date.now()
+  };
+  b.session.setItem('hansen_auth_fence_v1076',JSON.stringify(oldFence));
+  b.A._readFenceForTest();
+  const originalSessionRemove=b.session.removeItem.bind(b.session);
+  let injected=false;
+  b.session.removeItem=function(k){
+    originalSessionRemove(k);
+    if(k==='hansen_auth_fence_v1076'&&!injected){
+      injected=true;
+      const mismatch={
+        schema:1076,fenceId:'SIGNOUT-RACE-MISMATCH',kind:'mismatch',
+        expectedUid:'U-OTHER',observedUid:'U-THIRD',
+        generation:8,revision:8,at:Date.now()+1
+      };
+      const encoded=JSON.stringify(mismatch);
+      b.local.setItem('hansen_auth_fence_backup_v1076',encoded);
+      b.local.setItem('hansen_auth_fence_backup_v1076:mismatch',encoded);
+    }
+  };
+  b.A._setAuthForTest({
+    signOut(){return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(''));}
+  });
+  const out=await b.A.signOut();
+  ok(out.ok&&out.cleanupPending&&out.requiresReload&&
+     b.A._readFenceForTest().fenceId==='SIGNOUT-RACE-MISMATCH',
+     'signOut 按清理前逐键快照 compare-delete，清理窗口中新出现的 mismatch 不会被擦除');
+  ok(b.A.sessionStatus().state==='unknown'&&!b.A.readLocal().uid,
+     '退出清理遇到并发 fence 时本机 marker 已清，但不会谎报 signed_out 或允许立即重登');
+}
+{
   const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
   const never=deferred(),b=boot(shared);
   b.A._setAuthForTest({
