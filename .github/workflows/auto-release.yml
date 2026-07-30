@@ -1,58 +1,16 @@
-name: Auto Release on Push
+name: Legacy auto release disabled
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Read VERSION file
-        id: version
+      - name: Explain canonical publisher
         run: |
-          VERSION=$(cat VERSION | tr -d '[:space:]')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Release version: v$VERSION"
-
-      - name: Build deploy package and create release (skip if exists)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          V="${{ steps.version.outputs.version }}"
-          TAG="v${V}"
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "Release $TAG already exists, skipping."
-            exit 0
-          fi
-          # 用唯一正式打包器构建（未登记版本会失败关闭，防误发 v961/v962 等）
-          python3 package_release.py "$V" --out release-assets
-          DEPLOY="release-assets/单词大冒险_v${V}_可直接部署.zip"
-          test -f "$DEPLOY"
-          # GitHub 会清洗附件文件名中的非ASCII字符：底层用ASCII文件名，界面用中文标签
-          ASCII_DEPLOY="release-assets/wordminiprogram_v${V}_deploy.zip"
-          cp "$DEPLOY" "$ASCII_DEPLOY"
-          # 按用户要求：Release 只附可直接部署包
-          gh release create "$TAG" "${ASCII_DEPLOY}#单词大冒险_v${V}_可直接部署.zip" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "Release $TAG" \
-            --notes "自动发布 v${V}（commit ${GITHUB_SHA}）。附件为可直接部署包：解压后把全部文件原样上传到静态网站根目录即可（不要再套一层目录）。" \
-            --target "$GITHUB_SHA"
-          echo "Release $TAG created with deploy package."
-
-          # 🔴v1051 只保留最新 5 个 Release，其余连同 tag 一并删除。
-          # 每个发布包约 80MB，不清理会持续累积占用仓库空间。
-          # 🔴v1056 第四次修，这次改为调用独立脚本 .github/scripts/prune_releases.py。
-          # 前三次（v1051/v1053/v1055）都失败于"环境假设"而非逻辑：
-          #   依赖 gh 列输出格式 → 依赖 gh --jq 内建组件 → 均静默返回空，
-          #   表现为"CI success、日志无异常、但什么都没删"。
-          # 独立脚本只用 Python 标准库，且**已在本地实测真实删除成功**，
-          # 并带 gh CLI 与纯 API 双通道，任一可用即可完成。
-          KEEP_RELEASES=5 python3 .github/scripts/prune_releases.py || true
+          echo "This legacy one-file publisher is intentionally disabled."
+          echo "Use jarvis-three-file-release.yml; it is the only workflow allowed to publish from main."
