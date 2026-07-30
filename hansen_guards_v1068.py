@@ -663,7 +663,7 @@ def guard_no_divergent_config():
 
 
 def guard_auth_real_session():
-    """v1076：认证、持久隔离、界面互斥与云存档跨代写入必须共享同一身份边界。"""
+    """v1076：真实 session、跨标签 boundary、profile 零写入与云存档跨代必须同一身份边界。"""
     auth = _code_only(_read('hansen_auth_v1004.js'))
     ui = _code_only(_read('hansen_auth_ui_v1004.js'))
     cloud = _code_only(_read('hansen_cloud_save_v965.js'))
@@ -689,10 +689,19 @@ def guard_auth_real_session():
         'hansen_auth_fence_v1076', 'hansen_auth_fence_backup_v1076',
         'outcome_unknown: 1', 'stale_mutation: 2', 'mismatch: 3',
         'FSTORE_KEYS', 'fenceId', 'sameFence', 'fenceSourceSnapshot',
-        'authCommitId', 'markerAndFenceCurrent', 'verifyProfileIdentity',
+        'authCommitId', 'markerAndFenceCurrent',
+        'hansen_auth_boundary_v1076', 'hansen_auth_boundary_receipt_v1076:',
+        'authBoundaryId', 'authBoundaryState', 'claimAuthBoundary',
+        'assertSharedBoundary', 'boundarySettled', 'activeMutationReceipts',
+        'AUTH_BOUNDARY_NOT_PERSISTED', 'AUTH_CROSS_TAB_SUPERSEDED',
         'AUTH_FENCED_SESSION', 'ownedFence', 'hadPriorSessionMutation')
     if any(marker not in auth for marker in fence_markers):
-        bad('认证真实会话', '持久 fence、优先级、所有权或退出后迟到 mutation 防线不完整')
+        bad('认证真实会话', '持久 fence、共享 boundary、mutation 回执或退出迟到防线不完整')
+    if re.search(r'\bdocRef\.(?:set|update)\s*\(', auth) or \
+       re.search(r'\bassignCid\s*\(', auth) or 'claimCloudId' in auth:
+        bad('认证真实会话', '浏览器认证链路仍会写 sb_profile/发号；客户端复验不能替代服务端 UID 权限')
+    if 'ensureProfile' in auth or 'competitionIdUnavailable' not in auth:
+        bad('认证真实会话', '登录仍依赖客户端 profile 建档，或没有明确声明全局竞赛 ID 未启用')
     if 'refreshSessionTruth' not in auth or 'sessionStatus' not in auth:
         bad('认证真实会话', '启动/打开面板没有真实 session 状态机')
     if 'resolveCloudChoice' not in ui or 'HansenCloudSave' in ui:
@@ -721,6 +730,10 @@ def guard_auth_real_session():
         bad('认证真实会话', '旧账号悬挂同步仍可能阻塞或释放新账号的同步锁')
     if 'postLogin' not in ui:
         bad('认证真实会话', '登录 UI 仍可能被云同步阻塞')
+    if 'auth.isSignedIn()' not in ui or '认证边界在成功展示前' not in ui:
+        bad('认证真实会话', 'UI 在展示登录成功前没有重新核对 boundary/marker/session')
+    if '云端竞赛 ID 尚未启用' not in ui:
+        bad('认证真实会话', 'UI 仍暗示浏览器会自动补发未经服务端保证的全局竞赛 ID')
 
 
 GUARDS = [
