@@ -688,7 +688,8 @@ def guard_auth_real_session():
     fence_markers = (
         'hansen_auth_fence_v1076', 'hansen_auth_fence_backup_v1076',
         'outcome_unknown: 1', 'stale_mutation: 2', 'mismatch: 3',
-        'FSTORE_KEYS', 'fenceId', 'sameFence',
+        'FSTORE_KEYS', 'fenceId', 'sameFence', 'fenceSourceSnapshot',
+        'authCommitId', 'markerAndFenceCurrent', 'verifyProfileIdentity',
         'AUTH_FENCED_SESSION', 'ownedFence', 'hadPriorSessionMutation')
     if any(marker not in auth for marker in fence_markers):
         bad('认证真实会话', '持久 fence、优先级、所有权或退出后迟到 mutation 防线不完整')
