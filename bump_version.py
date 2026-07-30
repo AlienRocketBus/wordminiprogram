@@ -67,6 +67,42 @@ def read(p: Path) -> str:
     return p.read_text(encoding="utf-8")
 
 
+def _version_section(text: str, version: int) -> str:
+    """Return one detailed vN release section, excluding later history."""
+    match = re.search(rf"^##\s+v{version}\b.*$", text, re.MULTILINE)
+    if not match:
+        return ""
+    following = re.search(r"^##\s+v\d+\b.*$", text[match.end():], re.MULTILINE)
+    end = match.end() + following.start() if following else len(text)
+    return text[match.start():end].strip()
+
+
+def _require_release_docs(version: int) -> None:
+    """Fail before the first write unless this version has complete release docs."""
+    readme_path = ROOT / "README.md"
+    asset_path = ROOT / "release-assets" / "README.md"
+    changelog_path = ROOT / "CHANGELOG.md"
+    for path in (readme_path, asset_path, changelog_path):
+        if not path.is_file():
+            fail(f"缺少发版文档：{path.relative_to(ROOT)}")
+    readme = read(readme_path)
+    if f"> 当前代码版本：**v{version}**" not in readme:
+        fail(f"README 顶部没有声明当前代码版本 v{version}")
+    if readme.encode("utf-8") != read(asset_path).encode("utf-8"):
+        fail("README.md 与 release-assets/README.md 不一致")
+    required = ("### 背景与根因", "### 实现", "### 兼容", "### 测试", "### 发布与部署")
+    for label, text, minimum in (
+        ("README", readme, 1200),
+        ("CHANGELOG", read(changelog_path), 800),
+    ):
+        section = _version_section(text, version)
+        if len(section) < minimum:
+            fail(f"{label} 的 v{version} 章节过短或不存在（至少 {minimum} 字符）")
+        missing = [heading for heading in required if heading not in section]
+        if missing:
+            fail(f"{label} 的 v{version} 章节缺少：{missing}")
+
+
 def main() -> None:
     if len(sys.argv) < 2 or not sys.argv[1].isdigit():
         fail("用法: python3 bump_version.py <新版本号> [--dry-run]")
@@ -77,6 +113,8 @@ def main() -> None:
         fail(f"v{new} 已被用户永久淘汰（v961/v962 墓碑），拒绝使用")
     if new <= old:
         fail(f"新版本 {new} 必须大于当前 {old}")
+    # 文档是版本的一部分；必须在任何源码写入前完整准备好。
+    _require_release_docs(new)
 
     changes: list[str] = []
 
@@ -220,17 +258,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# 🔴v998: README 同步提醒 —— v961~v997 曾整段漏更(37版), 立此纪律
-def _readme_reminder(new_version):
-    try:
-        import pathlib as _p, re as _r
-        rm = _p.Path(__file__).parent / 'README.md'
-        if not rm.exists():
-            return
-        txt = rm.read_text(encoding='utf-8')
-        vs = {int(m[1:]) for m in _r.findall(r'^## (v9\d\d)', txt, _r.M)}
-        if new_version not in vs:
-            print(f'  [!] README.md 尚未记录 v{new_version} —— 发版前请补写该版章节')
-    except Exception:
-        pass
