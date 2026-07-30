@@ -13,10 +13,13 @@ const vendorSrc=fs.readFileSync(path.join(ROOT,'vendor_cloudbase_esm_v965.js'),'
 let pass=0,fail=0;
 const ok=(c,m)=>{if(c){pass++;console.log('  OK  '+m);}else{fail++;console.log('  XX  '+m);}};
 function storage(){return{d:{},get length(){return Object.keys(this.d).length;},key(i){return Object.keys(this.d)[i]||null;},getItem(k){return Object.prototype.hasOwnProperty.call(this.d,k)?this.d[k]:null;},setItem(k,v){this.d[k]=String(v);},removeItem(k){delete this.d[k];},clear(){this.d={};}};}
-function boot(){
-  const local=storage(),session=storage(),events=[];
+function boot(shared={}){
+  const local=shared.local||storage(),session=shared.session||storage(),events=[];
   const doc={addEventListener(){},removeEventListener(){},dispatchEvent(e){events.push(e);return true;},getElementById(){return null;},querySelector(){return null;},querySelectorAll(){return[];},documentElement:{classList:{contains(){return false;}}},body:null};
-  const win={__HANSEN_AUTH_NO_BOOT__:true,__HANSEN_AUTH_TEST_FAST__:true,HANSEN_CLOUD_CONFIG:{envId:'test',region:'ap-shanghai'},localStorage:local,sessionStorage:session,document:doc,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=(opts||{}).detail;}},setTimeout,clearTimeout,setInterval,clearInterval,TextEncoder,TextDecoder,console};
+  const win={__HANSEN_AUTH_NO_BOOT__:true,__HANSEN_AUTH_TEST_FAST__:true,
+    __HANSEN_AUTH_SLOW_MS__:shared.slowMs,
+    __HANSEN_AUTH_MUTATION_TIMEOUT_MS__:shared.mutationTimeoutMs,
+    HANSEN_CLOUD_CONFIG:{envId:'test',region:'ap-shanghai'},localStorage:local,sessionStorage:session,document:doc,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=(opts||{}).detail;}},setTimeout,clearTimeout,setInterval,clearInterval,TextEncoder,TextDecoder,console};
   win.window=win; const ctx={...win,window:win,globalThis:win}; vm.createContext(ctx); vm.runInContext(authSrc,ctx);
   return{A:win.HansenAuth,local,session,events,win,ctx,setCloudSave(v){win.HansenCloudSave=v;ctx.HansenCloudSave=v;}};
 }
@@ -77,7 +80,9 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   b.A._setAuthForTest({signInWithPassword(){return Promise.resolve({user:{uid:'NEW'}});},getSession(){return Promise.resolve(sessionResult('OLD'));}});
   let rejected=false;try{await b.A.loginByPassword('player_1','pw');}catch(e){rejected=/不一致|确认/.test(String(e.message));}
   ok(rejected&&!b.A.readLocal().uid&&!b.A.isSignedIn(),'operation UID≠session UID 时失败关闭');
-  ok(b.A.operationStatus().state==='outcome_unknown','UID 不一致进入结果未知态');
+  ok(b.A.operationStatus().state==='outcome_unknown'&&
+     b.A.sessionStatus().state==='mismatch'&&b.A._readFenceForTest().kind==='mismatch',
+     'UID 不一致进入持久隔离态，不能自动接管隐藏会话');
 }
 {
   const b=boot();
@@ -138,5 +143,128 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   await b.A.resolveCloudChoice('later','U-SYNC');
   ok(writes===0&&restores===0,'稍后处理严格零写入');
 }
+
+{
+  const b=boot(),oldProbeGate=deferred();
+  b.A._setAuthForTest({getSession(){return oldProbeGate.promise;}});
+  const oldProbe=b.A.refreshSession(); await flush();
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-NEW'}});},
+    getSession(){return Promise.resolve(sessionResult('U-NEW'));}
+  });
+  await b.A.loginByPassword('new_user','pw');
+  oldProbeGate.resolve(sessionResult('U-OLD'));
+  await oldProbe;
+  ok(b.A.readLocal().uid==='U-NEW'&&b.A.sessionStatus().uid==='U-NEW'&&
+     b.A.sessionStatus().state==='confirmed',
+     '旧 refresh 探测晚到不能覆盖新登录的 marker/session');
+}
+{
+  const b=boot(),oldEnsureGate=deferred();
+  b.local.setItem('hansen_auth_v1004',JSON.stringify({
+    schema:1076,method:'password',signedAt:Date.now(),uid:'U-A'
+  }));
+  b.A._setSessionForTest('confirmed','U-A');
+  b.A._setAuthForTest({getSession(){return oldEnsureGate.promise;}});
+  const oldEnsure=b.A.ensureSession('U-A'); await flush();
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-B'}});},
+    getSession(){return Promise.resolve(sessionResult('U-B'));}
+  });
+  await b.A.loginByPassword('user_b','pw');
+  oldEnsureGate.resolve(sessionResult('U-A'));
+  const stale=await oldEnsure;
+  ok(stale.stale===true&&b.A.readLocal().uid==='U-B'&&b.A.sessionStatus().uid==='U-B',
+     '旧 ensureSession 晚到只返回 stale，不能改写新账号');
+}
+{
+  const b=boot(),sendGate=deferred();
+  b.A._setAuthForTest({
+    getVerification(){return sendGate.promise;},
+    signOut(){return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(''));}
+  });
+  const sending=b.A.sendPhoneCode('15550836896').then(()=>null,e=>e);
+  await flush();
+  const out=await b.A.signOut();
+  sendGate.resolve({verification_id:'TOO-LATE',is_user:false});
+  const late=await sending; await flush();
+  ok(out.ok&&!out.cleanupPending&&late&&late.code==='AUTH_STALE_OPERATION'&&
+     Object.keys(b.A.readPending()).length===0&&!b.A.readLocal().uid,
+     '退出会立即作废晚到的发码结果，不能复活验证码事务');
+}
+{
+  const b=boot(),loginGate=deferred();
+  b.A._setAuthForTest({
+    signInWithPassword(){return loginGate.promise;},
+    signOut(){return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(''));}
+  });
+  const login=b.A.loginByPassword('late_user','pw').then(()=>null,e=>e);
+  await flush();
+  const firstOut=await b.A.signOut();
+  const stale=await login;
+  ok(firstOut.ok&&firstOut.cleanupPending&&firstOut.requiresReload&&
+     stale&&stale.code==='AUTH_STALE_OPERATION'&&!b.A.readLocal().uid&&
+     b.A._readFenceForTest().kind==='stale_mutation',
+     '登录请求悬挂时退出：本地立即退出，旧请求被隔离且要求再次核对');
+  loginGate.resolve({user:{uid:'U-LATE'}});
+  await flush();
+  const secondOut=await b.A.signOut();
+  ok(secondOut.ok&&!secondOut.cleanupPending&&!b.A._readFenceForTest().kind&&
+     b.A.sessionStatus().state==='signed_out',
+     '旧登录请求晚到后再次安全退出，确认 session=null 才清隔离');
+}
+{
+  const shared={local:storage(),session:storage()};
+  const b1=boot(shared);
+  b1.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-EXPECTED'}});},
+    getSession(){return Promise.resolve(sessionResult('U-OBSERVED'));}
+  });
+  await b1.A.loginByPassword('mismatch_user','pw').then(()=>null,e=>e);
+  ok(b1.A._readFenceForTest().kind==='mismatch','UID mismatch 写入 sessionStorage 隔离');
+  const b2=boot(shared);
+  b2.A._setAuthForTest({
+    getSession(){return Promise.resolve(sessionResult('U-OBSERVED'));},
+    signOut(){return Promise.resolve({data:{},error:null});}
+  });
+  const reloaded=await b2.A.refreshSession();
+  ok(reloaded.state==='mismatch'&&!b2.A.readLocal().uid,
+     '模拟刷新后 mismatch 仍在，隐藏 SDK UID 不能被自动收养');
+  b2.A._setAuthForTest({
+    getSession(){return Promise.resolve(sessionResult(''));},
+    signOut(){return Promise.resolve({data:{},error:null});}
+  });
+  await b2.A.signOut();
+  ok(!b2.A._readFenceForTest().kind&&b2.A.sessionStatus().state==='signed_out',
+     '只有服务端 session=null 的安全退出能清 mismatch 隔离');
+}
+{
+  const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
+  const never=deferred(),b=boot(shared);
+  b.A._setAuthForTest({
+    signInWithPassword(){return never.promise;},
+    signOut(){return Promise.resolve({data:{},error:null});},
+    getSession(){return Promise.resolve(sessionResult(''));}
+  });
+  const err=await b.A.loginByPassword('hung_user','pw').then(()=>null,e=>e);
+  const op=b.A.operationStatus();
+  ok(err&&err.code==='AUTH_MUTATION_INDETERMINATE'&&!op.busy&&
+     op.requiresCleanup&&op.state==='outcome_unknown',
+     '永久悬挂认证在硬上限后释放提交 spinner，但保留不可重试隔离');
+  let retryRejected=false;
+  try{await b.A.loginByPassword('hung_user','pw');}catch(e){retryRejected=true;}
+  ok(retryRejected,'结果未知 fence 阻止重复认证 mutation');
+  const out=await b.A.signOut();
+  ok(out.ok&&out.cleanupPending&&!b.A.readLocal().uid&&!b.A.operationStatus().busy,
+     '悬挂请求期间仍可安全退出，本地不再永久卡死');
+  const reload=boot({local:shared.local,session:shared.session});
+  reload.A._setAuthForTest({getSession(){return Promise.resolve(sessionResult(''));}});
+  const finalState=await reload.A.refreshSession();
+  ok(finalState.state==='signed_out'&&!reload.A._readFenceForTest().kind,
+     '刷新后确认服务端无 session，才能最终解除悬挂隔离');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail===0?0:1);
