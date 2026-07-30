@@ -103,8 +103,13 @@
     var ids = accountIdents();
     return ids.length ? ids[0] : '';
   }
-  /* 保留原名供外部与自检面板使用；语义已变为"账号标识" */
+  /* 保留原名供外部与自检面板使用；语义是带命名空间的"账号标识"。 */
   function accountUid(){ return accountIdent(); }
+  /* 会话比较必须使用原始 SDK UID；绝不能拿地址标识 u:<UID> 与 <UID> 比较。 */
+  function rawAccountUid(){
+    var ident = accountIdent();
+    return ident.indexOf('u:') === 0 ? ident.slice(2) : '';
+  }
 
   /* 自动同步许可必须绑定到当前身份。
      旧匿名恢复码的 enabled 不能在正式账号登录后自动继承，否则 pagehide/心跳
@@ -510,7 +515,7 @@
   }
   function restoreWithKey(inputKey, opts){
     opts = opts || {};
-    var expectedUid = String(opts.expectedUid || accountUid() || '');
+    var expectedUid = String(opts.expectedUid || rawAccountUid() || '');
     function verifyExpectedAccount(){
       if(!expectedUid) return Promise.resolve({ ok:true });
       var A = window.HansenAuth;
@@ -519,7 +524,7 @@
       return A.ensureSession(expectedUid).then(function(truth){
         if(!truth || !truth.ok || String(truth.uid || '') !== expectedUid)
           throw new Error('账号会话已经变化，已停止本次恢复');
-        if(String(accountUid() || '') !== expectedUid)
+        if(String(rawAccountUid() || '') !== expectedUid)
           throw new Error('当前账号已切换，已停止本次恢复');
         return truth;
       });
