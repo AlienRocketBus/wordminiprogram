@@ -90,7 +90,9 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
 17. **仅有 boundary 仍看不见底层 Promise 是否会晚到。** 每次 session-changing SDK 调用前，
     先写唯一 `hansen_auth_boundary_receipt_v1076:<id>` active 回执；底层 Promise 真正结算后
     才改为 returned/rejected/unknown。退出看到 active/unknown 时只能返回 cleanupPending，
-    不能因为自己这一刻读到 session=null 就假装旧请求不会在下一刻复活。
+    不能因为自己这一刻读到 session=null 就假装旧请求不会在下一刻复活。若旧页面已销毁、Promise
+    永久不结算，回执至少保留到 mutation 硬上限之后的保守 TTL（生产默认总计 120 秒）；TTL 到期
+    也不会自动登录或自动清理，仍要求第二次显式 signOut 再向服务器确认 session=null。
 18. **“只回滚自己的 authCommitId”不是原子操作。** localStorage 没有 CAS；先读到 commit A、
     再调用合并写清空，中间若标签 B 写入 commit B，A 仍可能把 B 擦掉。v1076 失败路径不再清
     marker：marker 只作显示缓存，fence/boundary 令其不可登录；唯一统一清理者是显式 signOut。
@@ -193,7 +195,8 @@ revision、原因和时间，不含任何凭据。
   下一次主动检查即进入 `AUTH_CROSS_TAB_SUPERSEDED`，不能依赖可能丢失的 storage event。
 - session-changing SDK 调用前必须先持久写 active receipt，写入/读回失败则 SDK 调用次数为 0。
   Promise resolved、业务 error、网络 reject 和硬超时分别留下可区分状态；只有 active/unknown
-  表示仍可能晚到，安全退出必须保守返回 cleanupPending。
+  表示仍可能晚到，安全退出必须保守返回 cleanupPending。永久悬挂回执生产默认 120 秒后才允许
+  被下一次显式 signOut 当作过期证据清理，而且该 signOut 仍必须重新确认真实 session=null。
 - 登录 marker 带唯一 `authCommitId + authBoundaryId + authBoundaryState`；先清 pending，
   再让出任务边界并执行 `ensureSession(uid) + boundary/marker/fence` 最终复验。
 - 失败路径**不回滚 marker**。localStorage 没有原子 compare-delete，任何“先确认 commitId 再清”
@@ -265,7 +268,7 @@ v1076 明确禁止认证模块自动访问 `sb_profile`：
   原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
   SDK 初始化悬挂、跨标签 fence 强度/所有权、两个独立 JS context 共享 localStorage 的
   登录/退出复活、boundary 持久化失败、PKEY 清理窗口、marker 回滚 TOCTOU、signOut 快照清理、
-  profile 零写入与竞赛 ID 安全降级。
+  永久悬挂回执 TTL 后二次安全退出、profile 零写入与竞赛 ID 安全降级。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
 - `test_auth_ui_v1076.mjs`：19 条 390×844 点击断言，覆盖绝对倒计时、完整手机注册、
