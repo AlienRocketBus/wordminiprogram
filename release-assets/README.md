@@ -19,7 +19,7 @@
 
 用户现场的症状是“注册和登录一直无法完成”。全面核对页面、账号模块、仓库锁定的
 CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入框或按钮问题，而是以下十条
-互相叠加的十三条真实故障链：
+互相叠加的十五条真实故障链：
 
 1. **旧“纯用户名注册”不是可交付的注册协议。** 旧代码把用户名映射成不可收件的
    `.local` 假邮箱，然后把发起邮箱验证当作账号创建。v1076 删除这条旁路；CloudBase
@@ -72,6 +72,15 @@ CloudBase SDK、云存档、测试和发布链后，确认它不是一个输入�
     同样捕获原始 UID + CloudSave generation，并在每一次 provider get 前后复验；认证
     unknown/mismatch/cleanupPending 时返回失败关闭。跨代 busy 改为 operation token，旧 U1
     结算无权清除 U2 正在使用的锁。
+14. **登录提交本身仍有极短的 TOCTOU 窗口。** 初次 readFence 为空后，本标签写 U1 marker 的
+    同一瞬间，另一标签可能写入 U1→U2 mismatch；旧代码仍会返回 `ok:true` 并启动
+    `ensureProfile(U1)`。现在 marker 带唯一 `authCommitId`，写入后让出一个任务边界，再执行
+    真实 `ensureSession(uid)` 与 marker/fence 双重复核；失败只回滚自己拥有的 commit，绝不覆盖
+    另一标签的新 marker，也不启动竞赛档案或云存档附加任务。
+15. **安全退出的“检查后全删”也有竞态。** 最终 readFence 为空不代表逐键 remove 时仍为空；
+    另一标签刚写入的 mismatch 曾可能被无所有权 `clearFence()` 顺手删除。现在 signOut 先保存
+    每个 session/local fence key 的原始值快照，只在当前值仍逐字等于快照时删除；快照后新增或
+    变化的记录保留，并返回 `cleanupPending/requiresReload`，不会谎报 signed_out。
 
 官方接口依据：
 
@@ -148,15 +157,20 @@ revision、原因和时间，不含任何凭据。
   `session === null` 才能清理。
 - 若退出时旧登录请求仍未结算，返回 `cleanupPending/requiresReload`。本机 marker 已清，
   但界面必须提示重新载入并再核对；旧请求晚到后仍只能加固 fence，不能恢复登录。
-- 任何只读 refresh/ensure 都无权清 fence；只有服务端明确无 session、没有本页活跃 session
-  mutation，且最终重新合并跨标签记录后边界仍稳定，显式安全退出才会清除。
+- 登录 marker 带本次唯一 `authCommitId`；写后让出任务边界，再执行
+  `ensureSession(uid) + marker/fence` 最终线性化复验。失败只回滚相同 commitId，且附加云任务
+  尚未启动。
+- 任何只读 refresh/ensure 都无权清 fence；显式安全退出先抓取每个 fence key 的原值快照，只
+  compare-delete 未变化的旧记录。只有服务端明确无 session、没有本页活跃 mutation，且最终
+  跨标签边界仍稳定时才宣布 signed_out。
 
 #### 5. 登录后附加任务
 
 认证成功对象立即返回 `{ok, uid, postLogin}`。随后两项并行：
 
-- `ensureProfile(uid)`：读取或按需要写入竞赛档案 `sb_profile`、分配竞赛 ID；失败不阻断登录，
-  晚到结果只有当前同一 UID 仍 confirmed 时才允许写入本机竞赛 ID。
+- `ensureProfile(uid)`：读取或按需要写入竞赛档案 `sb_profile`、分配竞赛 ID；只在登录最终
+  commit 复验成功后启动，并在每次 profile get/set/update 前后调用 `verifyProfileIdentity(uid)`。
+  失败不阻断登录，晚到结果只有当前同一 UID 仍 confirmed 时才允许写入本机竞赛 ID。
 - `syncOnLogin(uid, epoch)`：只读检查账号云档是否存在，返回
   `nothing-to-sync / restore-available / conflict / upload-available / deferred`；
   它不会自动恢复或上传玩家进度。
@@ -186,9 +200,10 @@ revision、原因和时间，不含任何凭据。
   bounded mutation、安全退出和登录后并行任务。
 - `hansen_auth_ui_v1004.js`：真实手机注册、状态提示、安全清理、云选择 applying 锁。
 - `hansen_cloud_save_v965.js`：原始 UID、操作 generation、逐写复验、await 迁移和恢复边界。
-- `test_auth_contract_v1076.mjs`：55 条业务状态机合同，覆盖正常注册/登录、空用户 session、
+- `test_auth_contract_v1076.mjs`：59 条业务状态机合同，覆盖正常注册/登录、空用户 session、
   原始匿名 LoginState、旧探测晚到、退出后旧请求晚到、刷新后 mismatch、永久悬挂、
-  SDK 初始化悬挂和跨标签 fence 强度/所有权。
+  SDK 初始化悬挂、跨标签 fence 强度/所有权、marker 提交 TOCTOU、signOut 快照清理与附加任务
+  启动边界。
 - `test_auth_vendor_v1076.mjs`：在真实浏览器导入仓库锁定的 CloudBase SDK 2.30.0，
   核对七个认证 API 的实际返回形状。
 - `test_auth_ui_v1076.mjs`：18 条 390×844 点击断言，覆盖绝对倒计时、云选择互斥、
@@ -221,14 +236,14 @@ revision、原因和时间，不含任何凭据。
 
 | 层级 | 已覆盖的证明 | 明确不能证明 |
 |---|---|---|
-| 认证 VM/模拟 SDK | 55 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、跨标签 fence、退出复活 | 真实短信送达 |
+| 认证 VM/模拟 SDK | 59 条状态机合同：协议、UID、匿名、空用户 session、stale、init/mutation 硬超时、跨标签 fence、退出复活 | 真实短信送达 |
 | CloudSave Node/WebCrypto | 43 条动态断言：同 UID 成功；U1→U2 上传/迁移/恢复/读取迟到停止；匿名 fence 零读写；授权和 busy token 不跨身份 | 生产数据库规则 |
 | Chromium 390×844 | 18 条真实 DOM 点击断言：完整注册、绝对倒计时、render epoch、applying、手动上传、cleanupPending | 控制台 provider/短信模板 |
 | 生成与接线 | 19+8 页加载同一认证与云模块，资源戳一致 | 已部署 CDN 是否仍缓存旧 HTML |
 | 全库回归 | 经济、存档、Boss、Bee、性能、安全、Jarvis 没有回退 | 所有未来浏览器/网络时序 |
 | 发布回读 | 两 ZIP+README 可复现、CRC/SHA、上传后回读一致 | 静态站与 CloudBase 已部署 |
 
-本次开发过程已经完成的专项证据：认证合同 **55/55**；CloudSave Node/WebCrypto
+本次开发过程已经完成的专项证据：认证合同 **59/59**；CloudSave Node/WebCrypto
 **43/43**；认证、UI、CloudSave 与三个专项测试文件均完成语法解析。UI 的 18 条 Chromium
 断言已经补齐，但最终仍必须由 GitHub Actions 在真实 Chromium 中执行，不能把“测试代码存在”
 写成“浏览器已通过”。最终 PR 仍必须在 GitHub Actions
