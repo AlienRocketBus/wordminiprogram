@@ -19,6 +19,7 @@ function boot(shared={}){
   const win={__HANSEN_AUTH_NO_BOOT__:true,__HANSEN_AUTH_TEST_FAST__:true,
     __HANSEN_AUTH_SLOW_MS__:shared.slowMs,
     __HANSEN_AUTH_MUTATION_TIMEOUT_MS__:shared.mutationTimeoutMs,
+    __HANSEN_AUTH_INIT_TIMEOUT_MS__:shared.initTimeoutMs,
     HANSEN_CLOUD_CONFIG:{envId:'test',region:'ap-shanghai'},localStorage:local,sessionStorage:session,document:doc,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=(opts||{}).detail;}},setTimeout,clearTimeout,setInterval,clearInterval,TextEncoder,TextDecoder,console};
   win.window=win; const ctx={...win,window:win,globalThis:win}; vm.createContext(ctx); vm.runInContext(authSrc,ctx);
   return{A:win.HansenAuth,local,session,events,win,ctx,setCloudSave(v){win.HansenCloudSave=v;ctx.HansenCloudSave=v;}};
@@ -338,6 +339,56 @@ ok(/resolveCloudChoice/.test(uiSrc)&&!/点「取消」= 用本机覆盖云端/.t
   await b2.A.signOut();
   ok(!b2.A._readFenceForTest().kind&&b2.A.sessionStatus().state==='signed_out',
      '只有服务端 session=null 的显式安全退出能清 mismatch 隔离');
+}
+{
+  const b=boot({initTimeoutMs:5});
+  /* SDK import/init 若永久不返回，必须由初始化层自己的 timeout 释放 busy；
+     mutation API 尚未被调用，因此不能伪造 outcome_unknown fence。 */
+  b.A._setAuthForTest({then(){}});
+  const initErr=await b.A.loginByPassword('init_hang','pw').then(()=>null,e=>e);
+  ok(initErr&&initErr.code==='AUTH_INIT_TIMEOUT'&&!b.A.operationStatus().busy&&
+     !b.A._readFenceForTest().kind&&!b.A.readLocal().uid,
+     'SDK 初始化永久悬挂有独立硬上限，释放 busy 且不误写 session-mutation fence');
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-INIT-RECOVER'}});},
+    getSession(){return Promise.resolve(sessionResult('U-INIT-RECOVER'));}
+  });
+  const retried=await b.A.loginByPassword('init_recover','pw');
+  ok(retried.ok&&retried.uid==='U-INIT-RECOVER'&&b.A.isSignedIn(),
+     '初始化超时后可在服务恢复时重新尝试，旧初始化结果不能覆盖新登录');
+}
+{
+  const b=boot();
+  b.A._setAuthForTest({
+    signInWithPassword(){return Promise.resolve({user:{uid:'U-TAB-A'}});},
+    getSession(){return Promise.resolve(sessionResult(''));},
+    signOut(){return Promise.resolve({data:{},error:null});}
+  });
+  await b.A.loginByPassword('tab_a','pw').then(()=>null,e=>e);
+  const weak=b.A._readFenceForTest();
+  ok(weak.kind==='outcome_unknown'&&!!weak.fenceId,
+     '标签 A 的可恢复结果未知 fence 带唯一所有权 ID');
+  const stronger={
+    schema:1076,fenceId:'TAB-B-MISMATCH',kind:'mismatch',
+    expectedUid:'U-TAB-B',observedUid:'U-OTHER',
+    generation:Number(weak.generation||0)+1,
+    revision:Number(weak.revision||0)+1,at:Date.now()+1
+  };
+  const encoded=JSON.stringify(stronger);
+  b.local.setItem('hansen_auth_fence_backup_v1076',encoded);
+  b.local.setItem('hansen_auth_fence_backup_v1076:mismatch',encoded);
+  const visible=b.A._readFenceForTest();
+  ok(visible.kind==='mismatch'&&visible.fenceId==='TAB-B-MISMATCH',
+     '跨标签读取同时合并 session 与 local backup，较强 mismatch 永远可见');
+  const recovered=await b.A.recoverAuthOutcome().then(()=>null,e=>e);
+  ok(recovered&&!b.A.readLocal().uid&&
+     b.A._readFenceForTest().fenceId==='TAB-B-MISMATCH'&&
+     b.local.getItem('hansen_auth_fence_backup_v1076:mismatch')===encoded,
+     '标签 A 旧 recovery 不能清除或绕过标签 B 的更强 mismatch');
+  const out=await b.A.signOut();
+  ok(out.ok&&!out.cleanupPending&&!b.A._readFenceForTest().kind&&
+     b.A.sessionStatus().state==='signed_out',
+     '显式安全退出确认 session=null 后才统一清理跨标签 fence');
 }
 {
   const shared={local:storage(),session:storage(),slowMs:5,mutationTimeoutMs:25};
