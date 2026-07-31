@@ -796,6 +796,45 @@ def guard_single_instance_when_signed_in():
         bad('单实例', '已登录分支里仍有 cloudbase.init')
 
 
+
+def guard_backup_excludes_credentials():
+    """备份绝不能收录/写回云端凭证 —— 那会把当前有效会话打掉。
+
+    用户真机凭证生死簿抓到的完整现场（确凿证据）：
+        1:05:59  🔑 登录成功  凭证已就位            ← SDK 写入新凭证 1340 字节
+        1:06:04  写入 credentials_…  1314 字节
+                 hansen_backup_v944.js:410      ← **我们自己的备份恢复写的**
+        1:06:06  ❗删除 credentials_…
+                 → HTTP 400 invalid_grant | invalid refresh token.
+                             for it may be has been refreshed by
+
+    备份恢复把**旧的**凭证快照盖回去 → SDK 拿过期 refresh_token 刷新
+    → 服务端回 invalid_grant → SDK 把整个凭证删掉 → 用户彻底登不上。
+
+    成因：v1019 把白名单改成**兜底收录**（初衷是"所有东西都跟着账号走"，方向对），
+    但没想到 SDK 自己的凭证也躺在同一个 localStorage 里。
+
+    凭证是**会话态**不是玩家数据：跨设备搬毫无意义，搬回来还会打掉当前会话。
+    """
+    code = _code_only(_read('hansen_backup_v944.js') or '')
+    if not code:
+        return
+    if 'function credentialKey' not in code:
+        bad('备份碰凭证', '备份模块没有 credentialKey 判据 —— 凭证会被当成玩家存档收进备份')
+        return
+    oi = code.find('function ownedKey')
+    if oi >= 0:
+        seg = code[oi:oi + 300]
+        if 'credentialKey' not in seg:
+            bad('备份碰凭证', 'ownedKey 未排除凭证 —— 收录侧漏了')
+    ri = code.find('function rawEntryAllowed')
+    if ri >= 0:
+        seg = code[ri:ri + 320]
+        if 'credentialKey' not in seg:
+            bad('备份碰凭证',
+                'rawEntryAllowed 未排除凭证 —— 恢复/回滚会把旧凭证写回去，重演事故')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -827,6 +866,8 @@ GUARDS = [
     ('登录后不抢跑',   guard_no_rush_after_login),
     # 🔴v1088 并发刷新撞掉凭证
     ('单实例',         guard_single_instance_when_signed_in),
+    # 🔴v1090 备份把旧凭证盖回去，打掉当前会话
+    ('备份不碰凭证',   guard_backup_excludes_credentials),
 ]
 
 

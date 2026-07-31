@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1088;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1090;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -26,8 +26,41 @@
   // 写入失败时则随 raw snapshot 原样回滚，避免把用户留在半恢复状态。
   function derivedKey(k){return typeof k==='string'&&k.length<=160&&/^hansen_vocab_[A-Za-z0-9_:\-.]*$/.test(k);}
 
+  /* 🔴v1090 决定性修复：**云端凭证绝不是玩家存档，绝不能进备份、更不能被恢复盖回去。**
+
+     用户真机凭证生死簿抓到的完整现场（确凿证据，不是推测）：
+
+         1:05:59  🔑 登录成功  凭证已就位              ← SDK 写入新凭证 1340 字节
+         1:06:04  写入 credentials_ambitious-…  1314 字节
+                  hansen_backup_v944.js:410        ← **是我们自己的备份恢复写的**
+                  applyTarget / replaceAll
+         1:06:06  ❗删除 credentials_ambitious-…  原有 1314 字节
+                  → HTTP 400 invalid_grant | invalid refresh token.
+                              for it may be has been refreshed by
+
+     链条：备份恢复把一份**旧的**凭证快照盖回 localStorage
+        → SDK 拿着这个**过期的 refresh_token** 去刷新
+        → 服务端说"这个 token 已经被刷新过了"(invalid_grant)
+        → SDK 拦截器判鉴权失败 → **把整个凭证删掉**
+        → 此后 getLoginState() 永远 null，用户彻底登不上
+
+     为什么会被收进备份：v1019 把白名单改成了**兜底收录**
+     （凡是合法键名且没被 DENY 挡下的一律纳入），
+     初衷是"所有东西都跟着账号走、以后新增数据不用记得改这里" —— 方向是对的，
+     但**没想到 SDK 自己的凭证也躺在同一个 localStorage 里**。
+
+     凭证是**会话态**，不是玩家数据：
+       · 它跟设备、跟这次登录绑定，跨设备搬过去毫无意义
+       · 更糟的是**搬回来会把当前有效会话打掉**（就是本次事故）
+     所以必须显式排除，且这条排除要放在最前面，先于一切收录规则。 */
+  function credentialKey(k){
+    return typeof k === 'string' &&
+      /^(?:credentials|access_token|refresh_token)|^tcb[_-]|cloudbase.*(?:token|cred)/i.test(k);
+  }
+
   function ownedKey(k){
     if(typeof k!=='string'||!k||k.length>160)return false;
+    if(credentialKey(k))return false;      /* v1090: 云端凭证一律不进备份 */
     if(derivedKey(k))return false;
     if(DENY.test(k)||transientKey(k))return false;
     if(EXACT[k])return true;
@@ -366,7 +399,15 @@
     if(o.checksum!==checksum(stableItems(items)))throw new Error('校验和不匹配，备份可能不完整或被改动');
     return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:o.checksum};
   }
-  function rawEntryAllowed(k){return k!==RESTORE_JOURNAL&&(ownedKey(k)||transientKey(k)||derivedKey(k));}
+  /* 🔴v1090 双保险：恢复/回滚同样不许碰凭证。
+     ownedKey 已经排除了，但 transientKey/derivedKey 是另外两条通路，
+     而**旧备份里可能已经存着凭证**（v1019~v1089 期间产生的都可能有）。
+     一旦被写回去，就会重演本次事故：旧 refresh_token → invalid_grant → 凭证被删。
+     所以在最外层再拦一次，任何路径都别想把凭证写回去。 */
+  function rawEntryAllowed(k){
+    if(credentialKey(k))return false;
+    return k!==RESTORE_JOURNAL&&(ownedKey(k)||transientKey(k)||derivedKey(k));
+  }
   function validateRawSnapshot(list){
     if(!Array.isArray(list)||list.length>MAX_ITEMS*2)throw new Error('恢复日志快照数量无效');
     var seen={},total=0,out=[];
@@ -491,7 +532,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1088_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1090_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}

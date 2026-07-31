@@ -114,8 +114,12 @@ REGISTRY = [
      'guard_no_rush_after_login'),
     ('v1087', '生死簿只记本次会话，页面一重载记录全丢 → 用户截图显示"没人动过凭证"，实为工具漏了',
      'test_cred_trap_v1085.mjs'),
-    ('v1088', '🎯真凶：多个 CloudBase 实例并发刷新同一 refresh_token → invalid_grant → SDK 删掉整个凭证',
+    ('v1088', '多个 CloudBase 实例并发刷新同一 refresh_token → invalid_grant → SDK 删掉整个凭证',
      'guard_single_instance_when_signed_in'),
+    ('v1089', 'v1088 只堵了云存档，账号模块在子框里照样建实例 —— 口子没堵死',
+     'guard_single_instance_when_signed_in'),
+    ('v1090', '🎯真凶：备份恢复把旧凭证快照盖回 localStorage → 过期 refresh_token → invalid_grant → SDK 删掉整个凭证',
+     'guard_backup_excludes_credentials'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

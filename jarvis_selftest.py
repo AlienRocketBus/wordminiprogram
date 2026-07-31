@@ -151,6 +151,12 @@ def _inj_multi_instance(s):
                      '  function _selftestExtra(){ return cloudbase.init({ env: \'x\' }); }\n  function friendly(err){', 1)
 
 
+
+def _inj_backup_takes_creds(s):
+    """把凭证排除拆掉 —— 那正是 v1090 之前的状态，凭证会被备份并写回。"""
+    return s.replace('    if(credentialKey(k))return false;      /* v1090', '    /* 已拆除 /* v1090', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -175,6 +181,8 @@ CASES = [
     ('登录后不抢跑',    'hansen_cloud_restore_v1048.js', _inj_rush_after_login),
     # 🔴v1088
     ('单实例',          'hansen_cloud_save_v965.js',  _inj_multi_instance),
+    # 🔴v1090
+    ('备份不碰凭证',    'hansen_backup_v944.js',      _inj_backup_takes_creds),
 ]
 
 

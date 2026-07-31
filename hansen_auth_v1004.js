@@ -93,6 +93,33 @@
        用户点「获取验证码」只看到"连不上服务器"——手机注册从 v1004
        起就一直是坏的，而这只是一个写错的文件名。
        现在直接 import 真实存在的文件，不再赌 fallback。 */
+    /* 🔴v1089 补上 v1088 漏掉的一半：**子框内绝不创建云端实例。**
+
+       v1088 已把云存档的多实例堵住，但**账号模块自己没堵** ——
+       实测（真实浏览器，加载 5 个预热子页）：
+           frame                   HansenAuth   顶层
+           index.html                 ✅          是
+           island_season.html         ✅          否   ← 子框里也建了实例
+           island_season.html         ✅          否   ← 又一个
+       子框中加载账号模块的数量：**2** —— 并发刷新的口子根本没堵死。
+
+       为什么这件事致命（v1088 已用凭证生死簿抓到现行）：
+           HTTP 400 /auth/v1/token
+           invalid_grant | invalid refresh token. for it may be has been refreshed by
+           → SDK 拦截器判鉴权失败 → **把整个凭证删掉** → 此后永远 null
+       每个实例有各自内存态却共用同一个 localStorage 凭证槽位，
+       A 刷新成功写入新 token，B 手里还是旧的 → 撞车。
+       **实例数就是撞车概率。**
+
+       子框只负责显示，云端的事交给顶层窗口。 */
+    var _inFrame = false;
+    try { _inFrame = (window.top !== window.self); } catch (e) { _inFrame = true; }
+    if (_inFrame) {
+      var eF = new Error('子页面不创建云端实例（由主窗口统一处理）');
+      eF.friendly = true; eF.notReady = true; eF.inFrame = true;
+      return Promise.reject(eF);
+    }
+
     return import('./vendor_cloudbase_esm_v965.js').then(function (mod) {
       var cb = mod && (mod.default || mod);
       var init = cb && (cb.init || (cb.default && cb.default.init));

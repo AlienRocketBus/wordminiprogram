@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1088"></script>
-<script src="hansen_sw_upgrade_gate_v944.js?v=1088"></script><script src="hansen_land_cards.js?v=1088"></script><script src="hansen_land_scene_manifest_v972.js?v=1088"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1088"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<html lang="zh-CN"><head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1090"></script>
+<script src="hansen_sw_upgrade_gate_v944.js?v=1090"></script><script src="hansen_land_cards.js?v=1090"></script><script src="hansen_land_scene_manifest_v972.js?v=1090"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1090"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白。🔴v792 加固: 只重试真正的图片URL·跳过空src/页面URL——否则空src的img报错会被改成?__rt=(指向页面HTML)·还会覆盖刚设的真src·导致角色图永远加载失败只剩背景 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;var cur=(g.getAttribute("src")||"");if(!cur||!/\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(cur)){return;}g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=cur.split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BOSS 殿堂 · 演示</title>
@@ -139,7 +139,7 @@ body.smode .art img{transform:scale(1.16);transform-origin:center bottom}
 .landblur{filter:blur(18px) brightness(.52) saturate(1.2);transform:scale(1.14)}
 </style></head>
 <body>
-<script src="hansen_perf_v944.js?v=1088"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1088"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf_v944.js?v=1090"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1090"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="bgA" class="kb"></div><div id="bgB" class="kb"></div>
 <div class="vign" id="vign"></div>
 <img loading=lazy decoding=async id="soloChar" alt=""><div id="soloGround"></div>
@@ -242,7 +242,7 @@ var BGS=[
  {n:'苍穹',bg:'linear-gradient(180deg,#0b2a52,#0e5180 50%,#062038)',sw:'linear-gradient(160deg,#7dd3fc,#0369a1,#082f49)'}
 ];
 var QS=(function(){try{return new URLSearchParams(location.search);}catch(e){return {get:function(){return null;}};}})();
-var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=1088';})();
+var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=1090';})();
 var OWN=(function(){var m=QS.get('own');if(!m)return null;var a=[];m.split(',').forEach(function(x){var n=parseInt(x,10);if(n>=1&&n<=20&&a.indexOf(n)<0)a.push(n);});return a.length?a.sort(function(x,y){return x-y;}):null;})();
 function isOwned(lv){return !OWN||OWN.indexOf(lv)>=0;}
 function bgPath(lv){return 'bosses_bg/level'+lv+'.webp'+VV;}
