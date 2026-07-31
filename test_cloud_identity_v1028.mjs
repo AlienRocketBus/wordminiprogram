@@ -16,7 +16,13 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/^\s*\/\/.*$/gm,'');
 const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
 
 /* ① 源码层合同：已登录必须走账号会话，且不得再匿名 */
-const appFn = code.slice(code.indexOf('_app: function()'), code.indexOf('_app: function()')+1800);
+/* 🔴v1076：原来写死截取 1800 字符，v1076 在这一段里加了「已登录禁止匿名」防线后，
+   匿名兜底被推到窗口之外，导致「未登录仍保留匿名回退」误报为失败。
+   写死的取样长度会随代码增长失效 —— 与 v1069「守卫钉死一整条语句」同类。
+   改为截到下一个方法（put:）为止，长度自适应。 */
+const _appStart = code.indexOf('_app: function()');
+const _appEnd = code.indexOf('put: function(docId', _appStart);
+const appFn = code.slice(_appStart, _appEnd > 0 ? _appEnd : _appStart + 4000);
 ok(/HansenAuth/.test(appFn) && /isSignedIn/.test(appFn), '已登录时会去取账号会话');
 ok(/A\._app\(\)/.test(appFn) || /A\._app/.test(appFn), '复用账号的 CloudBase 实例(而非另建)');
 /* 账号分支必须在"另建实例"之前就 return —— 登录时根本走不到匿名那段 */
@@ -24,6 +30,21 @@ const importIdx = appFn.indexOf("import('./vendor_cloudbase");
 const acctIdx = appFn.indexOf('isSignedIn');
 ok(acctIdx >= 0 && importIdx > acctIdx, '账号分支先于另建实例(登录时走不到匿名)');
 ok(/signInAnonymously|anonymousAuthProvider/.test(appFn), '未登录仍保留匿名回退');
+
+/* 🔴v1076 新增：已有账号登录时，绝不允许再发起匿名登录。
+   账号会话与匿名会话共用同一个凭证槽位（同 envId → 同存储键），
+   匿名登录不论成败都可能把账号凭证冲掉 →
+   用户看到「刚登录成功，一转眼又失效」。 */
+const anonIdx = Math.min(...['signInAnonymously','anonymousAuthProvider']
+  .map(k => { const x = appFn.indexOf(k); return x < 0 ? Infinity : x; }));
+const acctGuardIdx = appFn.indexOf('hansen_auth_v1004');
+ok(acctGuardIdx >= 0, '★ 另建实例前会读本地账号记录');
+ok(acctGuardIdx < anonIdx, '★ 账号判断在任何匿名登录调用之前');
+const guardSeg = appFn.slice(acctGuardIdx, anonIdx === Infinity ? undefined : anonIdx);
+ok(/if\s*\(\s*hasAccount\s*\)/.test(guardSeg) && /return\s/.test(guardSeg),
+   '★ 有账号时直接 return，走不到匿名分支');
+ok(!/signInAnonymously|anonymousAuthProvider/.test(guardSeg),
+   '★ hasAccount 分支内完全没有匿名登录调用');
 /* 🔴v1059 加严：光"已登录"不够——isSignedIn() 只读 localStorage，
    会话早死了它还返回 true。复用账号实例前必须先过真实会话探测。 */
 ok(/ensureSession/.test(appFn), 'v1059: 复用账号实例前先过 ensureSession(真实会话探测)');

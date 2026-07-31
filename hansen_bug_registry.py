@@ -90,6 +90,8 @@ REGISTRY = [
      'guard_data_writer_has_cloud'),
     ('v1075', 'hansen_island_upgrade 内嵌 36 条成就旧副本（第八次两处真源），已彻底拆除',
      'guard_no_divergent_config'),
+    ('v1076', '已登录时仍无条件发起匿名登录，冲掉账号凭证 → 刚登录成功一转眼就失效',
+     'test_no_anon_clobber_v1076.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

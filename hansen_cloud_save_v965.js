@@ -252,7 +252,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1075')
+               import('./vendor_cloudbase_esm_v965.js?v=1076')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -269,6 +269,51 @@
           var app = cloudbase.init(initOpt);
           var auth = app.auth({ persistence: 'local' });
           var signed;
+
+          /* 🔴v1076 关键防线：**已有账号登录时，绝不再发起匿名登录。**
+
+             为什么这条必须存在：
+               账号会话与匿名会话**共用同一个凭证槽位**（同 envId → 同存储键）。
+               这里原本无条件调 signInAnonymously()，完全不看有没有账号登录。
+               一旦它在用户已登录后被触发：
+                 · 匿名登录若成功 → 账号凭证被匿名凭证顶掉，
+                   用户名下的存档从此读不到（这正是 v1028 那次事故的形态）；
+                 · 匿名登录若失败（控制台未开通匿名登录）→ 失败过程中
+                   仍可能把已有凭证冲掉 → getLoginState() 返回 null
+                   → ensureSession() 判「已过期」
+                   → 用户看到的就是「刚登录成功，一转眼又失效」。
+
+             用户真机现象与后者完全吻合：
+               ③ 已登录 +86 186xxxxxxxx（本地标记为真，登录确实成功）
+               ③b 云端会话已失效（几秒后就没了）
+               实测写入失败：云端登录已过期
+             且更早一张截图里出现过「云端匿名登录未开通」。
+
+             判据只看**本地账号记录**，不依赖 HansenAuth 是否已加载 ——
+             脚本加载顺序不确定，正是这条路径被误触发的原因。 */
+          var hasAccount = false;
+          try {
+            var lc = JSON.parse(localStorage.getItem('hansen_auth_v1004') || 'null');
+            hasAccount = !!(lc && lc.method && lc.signedAt);
+          } catch (e) {}
+
+          if (hasAccount) {
+            /* 有账号登录 → 只探测、绝不写入凭证。
+               探到就用；探不到就明确报「会话已失效」，
+               让用户去重新登录，而不是偷偷降级成匿名身份
+               （降级会让他读不到自己名下的存档，比报错更糟）。 */
+            return Promise.resolve(
+              (auth && typeof auth.getLoginState === 'function') ? auth.getLoginState() : null
+            ).catch(function(){ return null; }).then(function(st){
+              if (!st) {
+                var e2 = new Error('云端登录已过期，请重新登录后再同步');
+                e2.sessionDead = true; e2.friendly = true; e2.expired = true;
+                throw e2;
+              }
+              _cb = app; return app;
+            });
+          }
+
           try{
             if(auth && typeof auth.anonymousAuthProvider === 'function')
               signed = auth.anonymousAuthProvider().signIn();
