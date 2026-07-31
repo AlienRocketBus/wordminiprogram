@@ -161,7 +161,39 @@
     if (typeof window.requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 6000 });
     else setTimeout(run, 3500);
     /* 登录状态变化后再查一次（刚登录的设备也能立刻收到提示） */
-    try { document.addEventListener('hsn-auth-changed', function () { setTimeout(run, 1200); }); } catch (e) {}
+    /* 🔴v1086：登录后**不要急着打云端**。
+
+       读 SDK 源码确认的机制：请求拦截器里有这么一段 ——
+           if (withCredentials && resp.error === UNAUTHENTICATED) setCredentials(null)
+       **任何一个带凭证的请求，只要服务端回一次 UNAUTHENTICATED，
+         SDK 就把整个凭证删掉。** 一次失败的数据库读取，毁掉整个登录会话。
+
+       而这里原本在登录后 **1.2 秒**就发起数据库读取 —— 正好撞上
+       用户现场「登录成功 → 凭证 1314 字节 → 约 2 秒后凭证消失」那一幕。
+       服务端此刻可能还没完全就绪（新注册用户尤其如此），
+       一旦回了 UNAUTHENTICATED，用户的登录就被自己人打掉了。
+
+       改为 4 秒，并且**先确认会话真的可用再读库**：
+       ensureSession 本身带重试，探到有效 uid 才继续；
+       探不到就安静跳过，等下次时机 —— **宁可晚点提示恢复，
+       也不能因为抢跑把人家的登录搞没**。 */
+    try {
+      document.addEventListener('hsn-auth-changed', function () {
+        setTimeout(function () {
+          try {
+            var A = window.HansenAuth;
+            if (A && typeof A.ensureSession === 'function') {
+              A.ensureSession().then(function (st) {
+                if (st && st.ok) run();
+                else try { console.info('[开机恢复] 会话尚未就绪，本次不读库（避免请求被拒导致凭证被清）'); } catch (e) {}
+              })['catch'](function () {});
+              return;
+            }
+          } catch (e) {}
+          run();
+        }, 4000);
+      });
+    } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

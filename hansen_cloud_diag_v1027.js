@@ -230,7 +230,11 @@
         var A = window.HansenAuth;
         if (el && A && typeof A._trace === 'function') el.textContent = A._trace();
         var tp = document.getElementById('dTrap');
-        if (tp && window.HansenCredTrap) tp.textContent = HansenCredTrap.text();
+        if (tp && window.HansenCredTrap) {
+          tp.textContent = HansenCredTrap.text()
+            + '\n\n── 失败的云端请求（谁触发了清除）──\n'
+            + (HansenCredTrap.netText ? HansenCredTrap.netText() : '(无)');
+        }
       } catch (e) {}
     };
     var say = function (t, cls) {

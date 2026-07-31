@@ -110,6 +110,8 @@ REGISTRY = [
      'guard_version_watch_everywhere'),
     ('v1085', '云端凭证登录后约 2 秒被删且不知是谁删的，已连猜三次未果 → 装凭证生死簿抓现行',
      'test_cred_trap_v1085.mjs'),
+    ('v1086', 'SDK 拦截器：任何带凭证的请求回一次 UNAUTHENTICATED 就删掉整个凭证；而开机恢复在登录后 1.2 秒就读库',
+     'guard_no_rush_after_login'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

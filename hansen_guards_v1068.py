@@ -722,6 +722,42 @@ def guard_version_watch_everywhere():
         bad('版本守望', 'VERSION 未列入发布清单 —— 线上取不到就等于没装守望者')
 
 
+
+def guard_no_rush_after_login():
+    """登录后不得立刻打云端 —— 一次被拒的请求会毁掉整个登录会话。
+
+    这是读 CloudBase SDK 源码确认的机制（不是推测）。请求拦截器里有：
+
+        if (withCredentials && resp.error === UNAUTHENTICATED)
+            setCredentials(null)        // ← 把整个凭证删掉
+
+    **任何一个带凭证的请求，只要服务端回一次 UNAUTHENTICATED，
+      SDK 就把凭证整个抹掉**，此后 getLoginState() 永远返回 null。
+
+    用户现场完全吻合：登录成功 → 凭证 1314 字节 → **约 2 秒后消失** →
+    之后所有云端读写被拦在门外。而开机恢复原本正是在登录后 **1.2 秒**读库。
+
+    合同：
+      · 监听 hsn-auth-changed 后不得在 3 秒内发起云端读写；
+      · 且必须先 ensureSession 确认会话可用再动手 ——
+        宁可晚点提示恢复，也不能因为抢跑把用户的登录搞没。
+    """
+    src = _code_only(_read('hansen_cloud_restore_v1048.js') or '')
+    if not src:
+        return
+    i = src.find("hsn-auth-changed")
+    if i < 0:
+        return
+    seg = src[i:i + 1200]
+    m = re.search(r'setTimeout\([^,]+,\s*(\d+)\s*\)', seg)
+    if m and int(m.group(1)) < 3000:
+        bad('登录后抢跑',
+            '登录后 %sms 就发起云端读写 —— 一次被拒会让 SDK 清掉凭证，'
+            '用户登录当场作废' % m.group(1))
+    if 'ensureSession' not in seg:
+        bad('登录后抢跑', '登录后未先确认会话可用就读库 —— 请求被拒即毁掉整个登录')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -749,6 +785,8 @@ GUARDS = [
     ('两处真源',       guard_no_divergent_config),
     # 🔴v1083 「做出来的东西不显示」
     ('版本守望',       guard_version_watch_everywhere),
+    # 🔴v1086 一次被拒的请求会毁掉整个登录
+    ('登录后不抢跑',   guard_no_rush_after_login),
 ]
 
 

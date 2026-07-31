@@ -85,6 +85,90 @@
     try { console.warn('[凭证监视] 无法安装：' + (e && e.message)); } catch (e2) {}
   }
 
+
+  /* 🔴v1086：抓「是哪个请求把凭证弄没的」。
+
+     读 SDK 源码找到的确凿机制（不是推测）——请求拦截器里有这么一段：
+
+         return n.withCredentials && d && d.error === UNAUTHENTICATED
+              ? [4, this.setCredentials(null)]     // ← 删掉凭证！
+              : [3, 17];
+
+     **任何一个带凭证的请求，只要服务端回一次 UNAUTHENTICATED，
+       SDK 就把整个凭证删掉。** 一次失败的数据库读取，毁掉整个登录会话。
+
+     这完全对上现场：登录成功 → 凭证 1314 字节 →
+     约 2 秒后（开机云端恢复正好在登录后 1.2 秒发起数据库读取）→
+     那次请求被拒 → 凭证被 SDK 自己抹掉 → 之后永远 null。
+
+     所以这里再劫持 fetch/XHR：凡是发往腾讯云的请求，
+     记下地址与返回里的 error 字段。下一张截图就能看到
+     **是哪个接口、哪张表、什么错误码**触发了这场清除。 */
+  var NET = [];
+  function netNote(url, status, body) {
+    try {
+      var short = String(url).replace(/^https?:\/\/[^/]+/, '').slice(0, 70);
+      var err = '';
+      try {
+        var j = typeof body === 'string' ? JSON.parse(body) : body;
+        err = (j && (j.error || j.code || j.errCode)) || '';
+        if (j && j.error_description) err += ' | ' + String(j.error_description).slice(0, 60);
+      } catch (e) { err = String(body || '').slice(0, 70); }
+      if (!err && status >= 200 && status < 300) return;   /* 成功且无错误码 → 不记 */
+      NET.push({ dt: Date.now() - T0, url: short, status: status, err: String(err).slice(0, 90) });
+      if (NET.length > 20) NET.shift();
+      if (/unauthenticated/i.test(String(err)))
+        note('❗❗ 该请求会导致 SDK 清除凭证', short, 'error=' + err);
+    } catch (e) {}
+  }
+
+  try {
+    if (typeof fetch === 'function') {
+      var rawFetch = fetch;
+      window.fetch = function (input, init) {
+        var u = (typeof input === 'string') ? input : (input && input.url) || '';
+        var p = rawFetch.apply(this, arguments);
+        try {
+          if (/tcb|cloudbase|tencentcloudapi/i.test(String(u))) {
+            p.then(function (r) {
+              try {
+                r.clone().text().then(function (t) { netNote(u, r.status, t); })['catch'](function () {});
+              } catch (e) {}
+              return r;
+            })['catch'](function () {});
+          }
+        } catch (e) {}
+        return p;
+      };
+    }
+  } catch (e) {}
+
+  try {
+    var RawXHR = window.XMLHttpRequest;
+    if (RawXHR) {
+      var rawOpen = RawXHR.prototype.open, rawSend = RawXHR.prototype.send;
+      RawXHR.prototype.open = function (m, u) { this.__hsnUrl = u; return rawOpen.apply(this, arguments); };
+      RawXHR.prototype.send = function () {
+        var self = this;
+        try {
+          if (/tcb|cloudbase|tencentcloudapi/i.test(String(self.__hsnUrl || ''))) {
+            self.addEventListener('load', function () {
+              netNote(self.__hsnUrl, self.status, self.responseText);
+            });
+          }
+        } catch (e) {}
+        return rawSend.apply(this, arguments);
+      };
+    }
+  } catch (e) {}
+
+  function netText() {
+    if (!NET.length) return '(没有捕获到失败的云端请求)';
+    return NET.map(function (h) {
+      return '+' + String(h.dt).padStart(6) + 'ms  HTTP ' + h.status + '  ' + h.url + '\n      错误: ' + h.err;
+    }).join('\n');
+  }
+
   function text() {
     if (!HITS.length) return '(本次会话中没有任何模块动过凭证)';
     return HITS.map(function (h) {
@@ -94,5 +178,7 @@
     }).join('\n');
   }
 
-  window.HansenCredTrap = { text: text, hits: function () { return HITS.slice(); } };
+  window.HansenCredTrap = { text: text, netText: netText,
+                            hits: function () { return HITS.slice(); },
+                            net: function () { return NET.slice(); } };
 })();

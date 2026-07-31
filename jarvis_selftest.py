@@ -136,6 +136,12 @@ def _inj_no_version_watch(s):
     return _r.sub(r'<script defer src="hansen_version_watch_v1083\.js\?v=\d+"></script>', '', s, count=1)
 
 
+
+def _inj_rush_after_login(s):
+    """把登录后的等待改回 1.2 秒 —— 那正是会毁掉登录会话的抢跑。"""
+    return s.replace('}, 4000);', '}, 1200);', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -156,6 +162,8 @@ CASES = [
     ('两处真源',        'hansen_gear.js',             _inj_divergent),
     # 🔴v1083
     ('版本守望',        'island_land3.html',          _inj_no_version_watch),
+    # 🔴v1086
+    ('登录后不抢跑',    'hansen_cloud_restore_v1048.js', _inj_rush_after_login),
 ]
 
 
