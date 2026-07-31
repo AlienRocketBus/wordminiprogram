@@ -662,6 +662,55 @@ def guard_no_divergent_config():
                 % (base, n, top))
 
 
+
+def guard_version_watch_everywhere():
+    """每个页面都必须装「版本守望者」—— 不装就可能一直跑旧代码而无人知晓。
+
+    事故（产品负责人多次反馈，明确说"之前出现过，给我带来很大困扰"）：
+      「你做出来的东西有可能根本就没显示出来，你做完了但可能还是上个版本。」
+
+    机制：SW 对导航是网络优先，但**有缓存时只等几秒**，
+    用户在微信内置浏览器信号一波动就超时 → 拿到缓存里的旧 HTML；
+    而 HTML 文件名不带版本戳，旧页面被一直复用，里面引用的又全是旧版 JS。
+    结果：开发端连改六版，用户手机上跑的仍是旧代码，**而双方都看不出来** ——
+    云端登录那条线因此空转了二十多版，每次诊断都建立在过期证据上。
+
+    注意「面板显示模块版本 vs 页面版本」**检测不出这件事**：
+    SW 给的是整套旧文件，两个数字会一致地都是旧的。
+    唯一可靠的判据是**去服务器问最新版本**（缓存管不着的地方）。
+
+    本守卫盯三件事：
+      ① 每个运行时页面都装了 hansen_version_watch
+      ② 该模块确实用 no-store 去取 VERSION（而不是可能被缓存的普通 fetch）
+      ③ VERSION 文件在发布清单里（取不到就等于没装）
+    """
+    mod = 'hansen_version_watch_v1083'
+    miss = []
+    for f in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
+        base = os.path.basename(f)
+        if base.startswith(('_', '武器')) or base == 'land_template.html':
+            continue
+        if mod not in (_read(base) or ''):
+            miss.append(base)
+    if miss:
+        bad('版本守望', '%d 个页面没装版本守望者: %s' % (len(miss), ', '.join(miss[:6])))
+
+    src = _code_only(_read(mod + '.js') or '')
+    if not src:
+        bad('版本守望', '缺少 %s.js —— 用户可能一直跑旧代码而无人知晓' % mod)
+        return
+    if 'no-store' not in src:
+        bad('版本守望', '取版本时未用 no-store —— 请求本身可能被缓存，等于白查')
+    if not re.search(r"['\"]VERSION", src):
+        bad('版本守望', '未去取 VERSION 文件 —— 无法与服务器比对')
+    if 'caches.delete' not in src or 'unregister' not in src:
+        bad('版本守望', '发现落后却不清缓存/注销 SW —— 查出来也修不掉')
+
+    rel = _read('package_release.py') or ''
+    if '"VERSION"' not in rel and "'VERSION'" not in rel:
+        bad('版本守望', 'VERSION 未列入发布清单 —— 线上取不到就等于没装守望者')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -687,6 +736,8 @@ GUARDS = [
     ('JS 语法',        guard_js_syntax),
     ('数据跟账号',     guard_data_writer_has_cloud),
     ('两处真源',       guard_no_divergent_config),
+    # 🔴v1083 「做出来的东西不显示」
+    ('版本守望',       guard_version_watch_everywhere),
 ]
 
 

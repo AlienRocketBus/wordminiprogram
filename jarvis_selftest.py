@@ -129,6 +129,13 @@ def _inj_divergent_OLD(s):
     return s[:i+1] + ','.join(parts[:30]) + s[j:]
 
 
+
+def _inj_no_version_watch(s):
+    """把某个页面的版本守望者拆掉 —— 那一页就可能永远跑旧代码。"""
+    import re as _r
+    return _r.sub(r'<script defer src="hansen_version_watch_v1083\.js\?v=\d+"></script>', '', s, count=1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -147,6 +154,8 @@ CASES = [
     ('JS 语法',         'hansen_gear.js',             _inj_js_syntax),
     ('数据跟账号',      'template.html',              _inj_data_no_cloud),
     ('两处真源',        'hansen_gear.js',             _inj_divergent),
+    # 🔴v1083
+    ('版本守望',        'island_land3.html',          _inj_no_version_watch),
 ]
 
 

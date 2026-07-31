@@ -104,6 +104,8 @@ REGISTRY = [
      'test_cloud_diag_v1027.mjs'),
     ('v1082', 'SW 导航超时仅 3 秒，手机网络稍慢就退回旧缓存；HTML 无版本戳被一直复用 → 用户连着几版跑旧代码而双方不知情',
      'test_sw_upgrade_v944.mjs'),
+    ('v1083', '「做出来的东西不显示」治本：全站装版本守望者，去服务器比对版本，落后即自动清缓存硬重载',
+     'guard_version_watch_everywhere'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
