@@ -213,6 +213,14 @@
          此前几版都在"猜哪一步坏了"。这里把每一步原样列出来 ——
          探测了几次、每次拿到什么形状的对象、最终结论、原始错误，
          用户截一张图即可直接读出真相，不必再猜。 */
+      /* 🔴v1085：凭证生死簿。
+         现场事实：登录那一刻 credentials_ 存在 1314 字节，约 2 秒后消失，
+         此后 getLoginState() 永远返回 null。
+         我为此已猜错三次（匿名冲凭证 / 异步未落定 / 响应缺 expires_in），
+         所以改为**抓现行**：劫持 localStorage 写入与删除，
+         一旦有人动了凭证就记下调用栈。截图即可看到是哪一行删的。 */
+      + '<div class="d_row" style="margin-top:12px;border:1px solid #f87171"><div class="d_k">🪤 凭证生死簿（最关键，务必截这块）</div>'
+      + '<div class="d_v" id="dTrap" style="white-space:pre-wrap;font-size:10px;line-height:1.45">（做一次登录或云端操作后出现）</div></div>'
       + '<div class="d_row" style="margin-top:12px"><div class="d_k">🔬 会话探测轨迹（把这块也截给开发者）</div>'
       + '<div class="d_v" id="dTrace" style="white-space:pre-wrap;font-size:11px;line-height:1.5">（做一次云端操作后自动出现）</div></div>';
 
@@ -221,6 +229,8 @@
         var el = document.getElementById('dTrace');
         var A = window.HansenAuth;
         if (el && A && typeof A._trace === 'function') el.textContent = A._trace();
+        var tp = document.getElementById('dTrap');
+        if (tp && window.HansenCredTrap) tp.textContent = HansenCredTrap.text();
       } catch (e) {}
     };
     var say = function (t, cls) {

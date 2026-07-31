@@ -108,6 +108,8 @@ REGISTRY = [
      'guard_version_watch_everywhere'),
     ('v1084', '守望者在 iframe 里重载只重载子框、外壳仍旧版；相对路径解析错；老内核无 fetch 则完全不工作',
      'guard_version_watch_everywhere'),
+    ('v1085', '云端凭证登录后约 2 秒被删且不知是谁删的，已连猜三次未果 → 装凭证生死簿抓现行',
+     'test_cred_trap_v1085.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
