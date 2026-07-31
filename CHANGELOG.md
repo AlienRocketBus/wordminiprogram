@@ -1,5 +1,74 @@
 # 版本记录
 
+## v1088 — 🎯 抓到真凶：多实例并发刷新把凭证撞没了（2026-08-01）
+
+### 凭证生死簿抓到的现行
+
+```
+12:44:29 AM  HTTP 400  /auth/v1/token?client_id=ambitious-d0g1d26xm740dc3d6
+             invalid_grant | invalid refresh token.
+                             for it may be has been refreshed by
+
+12:44:29 AM  ❗删除  credentials_ambitious-…  原有 1314 字节
+             t.<anonymous> (vendor_cloudbase_esm_v965.js)   ← SDK 自己删的
+```
+
+**「refresh token 无效 —— 因为它可能已经被别人刷新过了」**
+
+### 🎯 根因
+
+**多个 CloudBase 实例在并发刷新同一个 `refresh_token`。**
+
+每个实例有各自的内存态，却共用同一个 localStorage 凭证槽位：
+
+```
+实例 A 刷新成功 → 写入新的 refresh_token
+实例 B 手里还是旧的 → 服务端回 invalid_grant
+   → SDK 拦截器判定鉴权失败 → 把整个凭证删掉
+   → 此后 getLoginState() 永远 null，用户被彻底挡在门外
+```
+
+而用户轨迹里正好有一串预热 iframe 连续加载：
+`island_season` → `land_map` → `boss_hall` → `season_showcase` → `spelling_bee`，
+**每个都在加载完整模块、各自可能去读写凭证 —— 每多一个实例就多一次撞车机会。**
+
+### 🔴 v1076 想拦这件事，但防线放错了位置
+
+v1076 已经写了「已登录时不发起匿名登录」的判断，
+**但它在 `cloudbase.init()` 与 `app.auth()` 之后才检查** ——
+实例照样被创建、凭证照样被读取和刷新。
+
+实测确认：`cloudbase.init` 在第 12128 字符，`hasAccount` 判断在 13028 —— **晚了 900 字符**。
+
+### 修复两处
+
+1. **判断提到 `cloudbase.init` 之前**：已登录 → 直接复用账号实例，**一行都不多跑**；
+   账号模块没就绪就明确失败，**绝不另起实例去抢刷新**
+2. **iframe 内一律不碰云端凭证**：子框只负责显示，云端读写交给顶层窗口
+
+**实测**：已登录状态下额外创建的 CloudBase 实例数 = **0**，零脚本错误。
+
+### 测试与守卫
+
+- 新增 `test_single_instance_v1088.mjs`（12 断言全绿）：
+  账号判断必须在 init 之前 / 该分支内不得有 init / iframe 判断同样在前 /
+  全仓只允许一处 `cloudbase.init`
+- 新增 `guard_single_instance_when_signed_in`，**故障注入验证会红**
+  （注入一处多余的 `cloudbase.init` → 立刻报警）
+
+### 这条线的完整脉络（供以后回看）
+
+| 版本 | 我的判断 | 结果 |
+|---|---|---|
+| v1076 | 匿名登录冲掉凭证 | 方向对，**防线位置错了**（本版才修对） |
+| v1077 | 凭证异步未落定 | 错，轨迹显示 62 秒后仍空 |
+| v1080 | 响应缺 `expires_in` | 有源码依据，非本例成因 |
+| v1086 | 一次被拒的请求毁掉会话 | **机制对了**，但当时不知道是谁触发的 |
+| v1087 | 生死簿只记内存，一重载全丢 | 修好工具 |
+| **v1088** | **多实例并发刷新** | **生死簿抓到现行，证据确凿** |
+
+**没有 v1087 那次"把工具修对"，就永远抓不到 v1088 这个真凶。**
+
 ## v1087 — 生死簿只记本次会话，等于什么都没抓到（2026-07-31）
 
 ### 用户截图推翻了 v1086 的结论

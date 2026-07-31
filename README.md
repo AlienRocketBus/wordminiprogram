@@ -1,6 +1,6 @@
 # 单词大冒险
 
-> 当前正式版本：**v1087**  
+> 当前正式版本：**v1088**  
 > 基线与交付：v960 以已核验并保存到 ChatGPT Library 的正式 **v959 完整源码**为唯一基线；未使用 GitHub
 > 拉取或上传，也不创建 commit、tag 或 Release。
 > 正式交付仍为可直接部署 ZIP、含贾维斯完整源码 ZIP 和 README.md，三项保存到 ChatGPT Library
@@ -117,6 +117,29 @@ iOS 解锁探针保持原样、语音合成与 Audio **都被接管**（设 1 �
 3. **补记忆**：知识库新增 BUG #111–#118 + 三条方法论，
    显式写下这一时代的共同病根：**本项目已在七个地方踩到「手工维护的东西必然走散」**。
 4. **接入启动流程**：任一新守卫不过则整体不过。
+
+## v1088 的目标
+
+### 🎯 抓到真凶：多实例并发刷新把凭证撞没了
+
+凭证生死簿抓到现行：
+
+```
+HTTP 400  /auth/v1/token
+invalid_grant | invalid refresh token. for it may be has been refreshed by
+❗删除 credentials_ambitious-…  原有 1314 字节   ← SDK 自己删的
+```
+
+**多个 CloudBase 实例并发刷新同一个 `refresh_token`**：
+A 刷新成功写入新 token，B 手里还是旧的 → `invalid_grant`
+→ SDK 把整个凭证删掉 → 此后永远 null。
+
+而预热 iframe 有 5 个，每个都加载完整模块 —— **每多一个实例就多一次撞车机会**。
+
+**v1076 想拦这件事，但防线放在了 `cloudbase.init()` 之后**（晚了 900 字符），
+实例照样被创建。本版把判断提到最前面，并禁止 iframe 碰云端凭证。
+
+**实测：已登录时额外实例数 = 0。**
 
 ## v1087 的目标
 

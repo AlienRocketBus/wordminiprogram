@@ -758,6 +758,44 @@ def guard_no_rush_after_login():
         bad('登录后抢跑', '登录后未先确认会话可用就读库 —— 请求被拒即毁掉整个登录')
 
 
+
+def guard_single_instance_when_signed_in():
+    """已登录时绝不创建第二个 CloudBase 实例 —— 并发刷新会把凭证撞没。
+
+    用户真机凭证生死簿抓到的现行（确凿证据）：
+        HTTP 400  /auth/v1/token
+        invalid_grant | invalid refresh token. for it may be has been refreshed by
+        ❗删除 credentials_ambitious-…  原有 1314 字节  ← SDK 自己删的
+
+    「refresh token 无效 —— 因为它可能已经被别人刷新过了」
+
+    **多个实例并发刷新同一个 refresh_token**：各有各的内存态，
+    却共用同一个 localStorage 槽位。A 刷新成功写入新 token，
+    B 手里还是旧的 → 服务端回 invalid_grant → SDK 把整个凭证删掉。
+
+    v1076 想拦这件事，但**防线放在了 cloudbase.init() 之后** ——
+    实例照样被创建、凭证照样被读取和刷新。这一道盯死顺序。
+    """
+    code = _code_only(_read('hansen_cloud_save_v965.js') or '')
+    if not code:
+        return
+    init_at = code.find('cloudbase.init(')
+    if init_at < 0:
+        return
+    n = len(re.findall(r'cloudbase\.init\s*\(', code))
+    if n > 1:
+        bad('单实例', '云存档里有 %d 处 cloudbase.init —— 多实例必然并发刷新撞掉凭证' % n)
+    acct_at = code.find('_hasAcct')
+    if acct_at < 0 or acct_at > init_at:
+        bad('单实例', '已登录判断不在 cloudbase.init 之前 —— 实例照样被创建（v1076 就错在这）')
+    frame_at = code.find('_inFrame')
+    if frame_at < 0 or frame_at > init_at:
+        bad('单实例', 'iframe 判断不在 cloudbase.init 之前 —— 预热子框会各自建实例')
+    seg = code[acct_at:init_at] if acct_at >= 0 else ''
+    if seg and 'cloudbase.init' in seg:
+        bad('单实例', '已登录分支里仍有 cloudbase.init')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -787,6 +825,8 @@ GUARDS = [
     ('版本守望',       guard_version_watch_everywhere),
     # 🔴v1086 一次被拒的请求会毁掉整个登录
     ('登录后不抢跑',   guard_no_rush_after_login),
+    # 🔴v1088 并发刷新撞掉凭证
+    ('单实例',         guard_single_instance_when_signed_in),
 ]
 
 

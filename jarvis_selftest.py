@@ -142,6 +142,15 @@ def _inj_rush_after_login(s):
     return s.replace('}, 4000);', '}, 1200);', 1)
 
 
+
+def _inj_multi_instance(s):
+    """守卫用 find('_hasAcct') 定位，改名成 _hasAcctMOVED 仍含该子串 —— 打不中
+       （这一点是自证机制自己发现的）。真实故障形态是**多一处 cloudbase.init**，
+       那正是并发刷新撞掉凭证的根源。"""
+    return s.replace('  function friendly(err){',
+                     '  function _selftestExtra(){ return cloudbase.init({ env: \'x\' }); }\n  function friendly(err){', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -164,6 +173,8 @@ CASES = [
     ('版本守望',        'island_land3.html',          _inj_no_version_watch),
     # 🔴v1086
     ('登录后不抢跑',    'hansen_cloud_restore_v1048.js', _inj_rush_after_login),
+    # 🔴v1088
+    ('单实例',          'hansen_cloud_save_v965.js',  _inj_multi_instance),
 ]
 
 

@@ -264,7 +264,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1087')
+               import('./vendor_cloudbase_esm_v965.js?v=1088')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -278,6 +278,74 @@
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
+          /* 🔴v1088 决定性修复：**已登录时绝不创建第二个 CloudBase 实例。**
+
+             用户真机凭证生死簿抓到的现行（这是确凿证据，不是推测）：
+                 12:44:29  HTTP 400  /auth/v1/token?client_id=ambitious-…
+                           invalid_grant | invalid refresh token.
+                                           for it may be has been refreshed by
+                 12:44:29  ❗删除 credentials_ambitious-…  原有 1314 字节
+                           t.<anonymous> (vendor_cloudbase_esm_v965.js) ← SDK 自己删的
+
+             「refresh token 无效 —— 因为它可能已经被别人刷新过了」
+
+             根因：**多个 CloudBase 实例并发刷新同一个 refresh_token**。
+             每个实例有各自的内存态，却共用同一个 localStorage 凭证槽位：
+               实例 A 刷新成功 → 写入新的 refresh_token
+               实例 B 手里还是旧的 → 服务端回 invalid_grant
+               → SDK 拦截器判定鉴权失败 → **把整个凭证删掉**
+             此后 getLoginState() 永远返回 null，用户被彻底挡在门外。
+
+             v1076 已经想拦这件事，但**防线放错了位置** ——
+             它在 `cloudbase.init()` 与 `app.auth()` **之后**才检查，
+             实例照样被创建、凭证照样被读取和刷新。
+             这次把判断提到最前面：**已登录 → 直接复用账号实例，一行都不多跑。**
+
+             另：预热 iframe（land_map / island_season / boss_hall / season_showcase /
+             spelling_bee）每个都会加载完整模块，用户轨迹里能看到它们连续加载 ——
+             每多一个实例就多一次并发刷新的机会，这条防线因此格外要紧。 */
+          /* 🔴v1088 第二道：**iframe 内一律不碰云端凭证。**
+             用户轨迹里能看到预热 iframe 连续加载：
+               land_map / island_season / boss_hall / season_showcase / spelling_bee
+             它们各自加载完整模块、各自可能去读写凭证 ——
+             **每多一个实例，就多一次并发刷新、多一次把凭证撞没的机会**。
+             云端读写交给顶层窗口即可；子框只负责显示。 */
+          var _inFrame = false;
+          try { _inFrame = (window.top !== window.self); } catch (e) { _inFrame = true; }
+          if (_inFrame) {
+            var eF = new Error('子页面不直接访问云端（由主窗口统一处理）');
+            eF.friendly = true; eF.notReady = true;
+            return Promise.reject(eF);
+          }
+
+          var _hasAcct = false;
+          try {
+            var _lc = JSON.parse(localStorage.getItem('hansen_auth_v1004') || 'null');
+            _hasAcct = !!(_lc && _lc.method && _lc.signedAt);
+          } catch (e) {}
+          if (_hasAcct) {
+            var _A = window.HansenAuth;
+            if (_A && typeof _A.ensureSession === 'function' && typeof _A._app === 'function') {
+              return _A.ensureSession().then(function (st) {
+                if (!st || !st.ok) {
+                  var e1 = new Error(st && st.notReady
+                    ? (st.reason || '云端会话尚未就绪，请稍候再试')
+                    : '云端登录已过期，请重新登录后再同步');
+                  e1.sessionDead = true; e1.friendly = true;
+                  e1.expired = !!(st && st.expired); e1.notReady = !!(st && st.notReady);
+                  throw e1;
+                }
+                var a2 = _A._app();
+                if (!a2) throw new Error('云端实例不可用');
+                _cb = a2; return a2;
+              });
+            }
+            /* 账号模块还没加载好 —— 宁可这次不做，也不能另起实例去抢刷新 */
+            var e2 = new Error('账号模块尚未就绪，请稍候再试');
+            e2.friendly = true; e2.notReady = true;
+            return Promise.reject(e2);
+          }
+
           var app = cloudbase.init(initOpt);
           var auth = app.auth({ persistence: 'local' });
           var signed;
