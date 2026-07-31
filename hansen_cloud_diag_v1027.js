@@ -181,6 +181,15 @@
       + '<button class="d_btn" id="dPull">⬇ 实测：从云端拉取一次</button>'
       + '<button class="d_btn" id="dRT" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">🔁 一键往返自检（推荐先点这个）</button>'
       + '<button class="d_btn d_close" id="dClose">关闭</button>'
+      /* 🔴v1081：**把版本号摆在最显眼处。**
+         此前面板不显示版本，于是开发端无法确认用户手机上跑的到底是哪一版 ——
+         v1076~v1080 连改五版，每次都不知道用户是否真的部署了。
+         这是个巨大的盲区：修了却看不出有没有生效，等于白修。 */
+      + '<div class="d_row" style="border:1px solid #34d399"><div class="d_k">⓪ 当前版本（先确认这个）</div>'
+      + '<div class="d_v" style="color:#34d399;font-size:16px;font-weight:700">v'
+      + (function(){ try{ return (window.HansenBackup && HansenBackup.appVersion && HansenBackup.appVersion())
+                       || window.__HSN_APP_VERSION || '未知'; }catch(e){ return '未知'; } })()
+      + '</div></div>'
       + '<div class="d_row" id="dOut" style="margin-top:12px"><div class="d_k">实测结果</div>'
       + '<div class="d_v" id="dOutV">（点上面的按钮）</div></div>'
       /* 🔴v1078：完整轨迹。开发端连不上腾讯云，云端这条链只能靠用户截图来看，

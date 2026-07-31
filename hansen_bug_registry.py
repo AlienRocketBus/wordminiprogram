@@ -100,6 +100,8 @@ REGISTRY = [
      'test_session_retry_v1077.mjs'),
     ('v1080', 'SDK 的 setCredentials 在响应缺 expires_in 时会删掉已存凭证且仍 resolve → 登录"成功"但会话不存在',
      'test_phone_signup_v1057.mjs'),
+    ('v1081', '面板不显示版本号 → 连改五版都无法确认用户手机上跑的是哪一版，修了等于白修',
+     'test_cloud_diag_v1027.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

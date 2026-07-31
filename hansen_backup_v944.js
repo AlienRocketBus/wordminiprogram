@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1080;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1081;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -491,7 +491,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1080_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1081_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
@@ -538,6 +538,6 @@
   }
 
   var startupRecovery=null;try{startupRecovery=recoverRestoreJournal();}catch(recoveryErr){startupRecovery={recovered:false,error:recoveryErr.message};root.__hansenBackupRecoveryError=recoveryErr.message;}
-  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL};
+  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,/* v1081: 面板要显示版本号——此前无法确认用户手机上跑的是哪一版，改了五版都不知有没有生效 */appVersion:function(){return CURRENT_APP_VERSION;},build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hookSettings);else hookSettings();
 })(typeof window!=='undefined'?window:this);
