@@ -106,6 +106,8 @@ REGISTRY = [
      'test_sw_upgrade_v944.mjs'),
     ('v1083', '「做出来的东西不显示」治本：全站装版本守望者，去服务器比对版本，落后即自动清缓存硬重载',
      'guard_version_watch_everywhere'),
+    ('v1084', '守望者在 iframe 里重载只重载子框、外壳仍旧版；相对路径解析错；老内核无 fetch 则完全不工作',
+     'guard_version_watch_everywhere'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

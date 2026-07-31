@@ -705,6 +705,17 @@ def guard_version_watch_everywhere():
         bad('版本守望', '未去取 VERSION 文件 —— 无法与服务器比对')
     if 'caches.delete' not in src or 'unregister' not in src:
         bad('版本守望', '发现落后却不清缓存/注销 SW —— 查出来也修不掉')
+    # 🔴v1084：子页都在 index.html 的 iframe 壳里跑（openIsland 换装 + v1023 预热）。
+    #   iframe 里 location.replace 只重载 iframe 自己，**外壳仍是旧版**（外壳才注册 SW），
+    #   而且多个 iframe 会各查各的、各重载各的，互相打架、隐藏框还看不见。
+    if 'window.top' not in src:
+        bad('版本守望', '未区分顶层与 iframe —— 在子框里重载等于白修，还会多框互相打架')
+    # XHR 兜底：微信内置浏览器版本参差，没有兜底就等于在用户所在环境不工作
+    if 'XMLHttpRequest' not in src:
+        bad('版本守望', '无 XHR 兜底 —— 老内核没有 fetch 时守望者完全不工作')
+    # 绝对路径：相对路径在 iframe/子路径下会解析到错误地址 → 永远取不到 → 形同虚设
+    if 'location.origin' not in src:
+        bad('版本守望', '用相对路径取 VERSION —— iframe 或子路径下会取错地址')
 
     rel = _read('package_release.py') or ''
     if '"VERSION"' not in rel and "'VERSION'" not in rel:

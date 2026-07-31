@@ -49,15 +49,75 @@
 
   /* 去服务器问最新版本 —— 必须绕开所有缓存层 */
   function fetchServerVersion() {
-    var url = 'VERSION?_vw=' + Date.now();
-    return fetch(url, { cache: 'no-store', credentials: 'same-origin' })
-      .then(function (r) { return r.ok ? r.text() : ''; })
-      .then(function (t) { return Number(String(t || '').trim()) || 0; })
-      .catch(function () { return 0; });   /* 断网/取不到 → 当作"无法判断"，绝不误报 */
+    /* 🔴v1084 两处加固：
+       ① **用绝对路径**。原来写相对的 'VERSION?...'，在 iframe 或子路径下
+          会相对于当前文档解析，可能取到不存在的地址 → 永远返回 0 → 守望者形同虚设。
+          改为按站点根目录拼绝对地址。
+       ② **补 XHR 兜底**。微信内置浏览器版本参差，个别老内核没有 fetch；
+          没有兜底就等于在那些设备上守望者根本不工作，而这恰恰是用户所在的环境。 */
+    var base;
+    try { base = location.origin + '/'; } catch (e) { base = '/'; }
+    var url = base + 'VERSION?_vw=' + Date.now();
+
+    function viaXhr() {
+      return new Promise(function (res) {
+        try {
+          var x = new XMLHttpRequest();
+          x.open('GET', url, true);
+          try { x.setRequestHeader('Cache-Control', 'no-cache'); } catch (e) {}
+          x.onreadystatechange = function () {
+            if (x.readyState !== 4) return;
+            res(x.status >= 200 && x.status < 300 ? String(x.responseText || '') : '');
+          };
+          x.onerror = function () { res(''); };
+          x.send();
+        } catch (e) { res(''); }
+      });
+    }
+
+    var got;
+    if (typeof fetch === 'function') {
+      got = fetch(url, { cache: 'no-store', credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .catch(function () { return viaXhr(); });   /* fetch 失败也退回 XHR */
+    } else {
+      got = viaXhr();
+    }
+    return got.then(function (t) { return Number(String(t || '').trim()) || 0; })
+              .catch(function () { return 0; });    /* 取不到 → "无法判断"，绝不误报 */
+  }
+
+  /* 🔴v1084：**只有顶层窗口才做检查与重载。**
+
+     实测确认：本应用的子页（岛屿、单词大陆、赛季岛）都在 index.html 的
+     iframe 壳里跑（`openIsland` 换装、v1023 还常驻两个预热 iframe）。
+     在 iframe 里：
+       · `location.replace` 只重载 iframe 自己，**外壳仍是旧版** ——
+         而外壳才是注册 SW、决定整体版本的那个，等于白修；
+       · 三四个 iframe 各查一次、各弹一次横幅、各重载一次，互相打架；
+       · 预热 iframe 是隐藏的，用户什么都看不到却在反复重载。
+
+     所以：iframe 内**只上报、不动手**，把重载交给顶层窗口。
+     同源时直接调顶层的方法；跨源拿不到就安静跳过（绝不误伤）。 */
+  function isTop() {
+    try { return window.top === window.self; } catch (e) { return false; }
+  }
+  function delegateToTop() {
+    try {
+      if (window.top && window.top !== window.self &&
+          window.top.HansenVersionWatch &&
+          typeof window.top.HansenVersionWatch.check === 'function') {
+        log('在 iframe 内 → 交由顶层窗口处理');
+        return window.top.HansenVersionWatch.check();
+      }
+    } catch (e) {}
+    log('在 iframe 内且拿不到顶层 → 跳过（不在子框里重载）');
+    return Promise.resolve(state);
   }
 
   /* 清缓存并硬重载 */
   function forceRefresh() {
+    if (!isTop()) return delegateToTop();
     var jobs = [];
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
@@ -92,6 +152,8 @@
 
   function check(opts) {
     opts = opts || {};
+    /* iframe 内不自行检查 —— 交给顶层，避免多框各查各的、各重载各的 */
+    if (!isTop() && !(opts && opts.fromTop)) return delegateToTop();
     return fetchServerVersion().then(function (sv) {
       state.server = sv;
       state.checkedAt = Date.now();
