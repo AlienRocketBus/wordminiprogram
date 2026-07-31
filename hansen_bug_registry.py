@@ -96,6 +96,8 @@ REGISTRY = [
      'test_session_retry_v1077.mjs'),
     ('v1078', '云端链路只能靠用户截图观察，此前几版都在猜哪一步坏了；改为面板输出完整探测轨迹',
      'test_session_retry_v1077.mjs'),
+    ('v1079', '登录成功后不校验 SDK 返回值就写本地标记 → 界面说已登录、云端其实没会话',
+     'test_session_retry_v1077.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

@@ -215,7 +215,23 @@
           if (!token) throw new Error('验证失败，重新获取验证码');
           return a.signIn({ username: st.pendingPhone, verification_token: token });
         });
-    }).then(function () {
+    }).then(function (res) {
+      /* 🔴v1079：登录成功那一刻的现场也记进轨迹。
+         此前这里**完全不看 signUp/signIn 返回了什么**就直接写本地标记 ——
+         于是"界面显示已登录"与"云端真的有会话"之间没有任何校验。
+         v1078 的轨迹已证明：登录 62 秒后凭证仍为空。
+         把返回值形状与写入后的凭证键数一并记下，即可分辨
+         "SDK 压根没给凭证" 还是 "给了但没落盘"。 */
+      try {
+        T('登录返回', res == null ? '返回 null/undefined'
+          : ('类型=' + (typeof res) + ' 键=[' + Object.keys(res).slice(0, 8).join(',') + ']'));
+        var _c = 0;
+        for (var _i = 0; _i < localStorage.length; _i++) {
+          var _k = localStorage.key(_i) || '';
+          if (/cloudbase|tcb|credential|access_token|refresh_token/i.test(_k)) _c++;
+        }
+        T('登录后凭证键', _c ? (_c + ' 个') : '❗0 个 —— SDK 没有把凭证写进本地存储');
+      } catch (e) {}
       writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
       return afterSignIn();
     });
@@ -569,6 +585,29 @@
       var _lc = readLocal();
       T('本地登录记录', 'method=' + (_lc.method || '无') +
         ' 距登录=' + (_lc.signedAt ? Math.round((Date.now() - _lc.signedAt) / 1000) + '秒' : '未知'));
+    } catch (e) {}
+
+    /* 🔴v1079：把**SDK 自己的凭证键**也列出来。
+
+       v1078 的轨迹已证明：登录 62 秒后 getLoginState() 仍连续 5 次返回 null。
+       这不是"还没落定"（v1077 的假设被推翻），是**凭证根本不在**。
+       只剩两种可能，必须分辨清楚，否则又是在猜：
+         · SDK 压根没把凭证写进 localStorage（登录其实没真正完成 / 持久化没生效）
+         · 写进去了但被谁清掉了
+       列出实际存在的相关键即可一眼看穿。 */
+    try {
+      var _ks = [], _n = 0;
+      for (var _i = 0; _i < localStorage.length; _i++) {
+        var _k = localStorage.key(_i) || '';
+        if (/cloudbase|tcb|credential|access_token|refresh_token|auth/i.test(_k)) {
+          _n++;
+          var _val = '';
+          try { _val = String(localStorage.getItem(_k) || ''); } catch (e2) {}
+          _ks.push(_k.slice(0, 46) + '(' + _val.length + '字节)');
+        }
+      }
+      T('SDK 凭证键', _n ? (_n + ' 个 → ' + _ks.slice(0, 4).join('  ')) :
+        '❗一个都没有 —— SDK 从未把凭证写进本地存储');
     } catch (e) {}
 
     var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒，足够 SDK 落定 */
