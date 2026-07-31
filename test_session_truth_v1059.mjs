@@ -59,7 +59,12 @@ function mkAuth() {
       documentElement: { classList: { contains: () => false } }, body: null
     },
     CustomEvent: class { constructor(t, o) { this.type = t; this.detail = (o || {}).detail; } },
-    addEventListener() {}, setTimeout: (f) => { return 0; }, setInterval: () => 0,
+    addEventListener() {},
+    /* 🔴v1077：原桩是 (f)=>0 —— **从不执行回调**。
+       v1077 给 ensureSession 加了"空登录态重试"（用 setTimeout 排队），
+       于是重试永远等不到，await 悬死 → Node 报 unsettled top-level await。
+       桩必须真的执行回调，只是把延时压到最小以免拖慢测试。 */
+    setTimeout: (f, ms) => setTimeout(f, Math.min(ms || 0, 5)), setInterval: () => 0,
     clearTimeout() {}, clearInterval() {}, TextEncoder, TextDecoder,
     btoa: s => Buffer.from(s, 'binary').toString('base64'),
     atob: s => Buffer.from(s, 'base64').toString('binary'),
@@ -110,7 +115,16 @@ function mkAuth() {
 
   const r = await A.ensureSession();
   ok(r.ok === false, 'ensureSession 拦住了云端操作');
-  ok(r.expired === true, '标记为 expired（会话不可用）');
+  /* 🔴v1077 契约变更：空登录态**不再**算"确凿过期"。
+     v1059 把它标成 expired:true，同时又标 definite:false —— 自相矛盾，
+     而下游只看 expired，于是把"SDK 还没落定"讲成"登录已过期"，
+     用户照提示重新登录，登录成功后又被同样的时序拦住 → 死循环。
+     现在：重试若干次仍空 → notReady:true / expired:false，
+     文案是"稍候再试"而不是"重新登录"。 */
+  ok(r.expired === false, '★ 空登录态不再误标 expired（那会把人推去反复重新登录）');
+  ok(r.notReady === true, '★ 改标 notReady（尚未就绪）');
+  ok(/尚未就绪/.test(r.reason || ''), '★ 文案指向"稍候重试"而非"重新登录"：' + r.reason);
+  ok((r.tries || 1) > 1, '★ 下结论前确实重试过（tries=' + r.tries + '）');
   /* ★ 关键安全边界：空登录态**不足以**把人登出。
      SDK 恢复持久化会话是异步的，问得太早同样是空；
      网络不通时某些版本也返回空而非抛错。

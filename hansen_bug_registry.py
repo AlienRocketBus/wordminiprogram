@@ -92,6 +92,8 @@ REGISTRY = [
      'guard_no_divergent_config'),
     ('v1076', '已登录时仍无条件发起匿名登录，冲掉账号凭证 → 刚登录成功一转眼就失效',
      'test_no_anon_clobber_v1076.mjs'),
+    ('v1077', '空登录态问一次就判"已过期"且无重试 → 用户陷入"登录成功→被告知过期→重登"死循环',
+     'test_session_retry_v1077.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

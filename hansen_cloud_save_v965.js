@@ -231,13 +231,25 @@
                && typeof A._app === 'function') {
           return A.ensureSession().then(function (s) {
             if (!s || !s.ok) {
-              var msg = (s && s.expired)
-                ? '云端登录已过期，请重新登录后再同步'
-                : ('云端会话不可用：' + ((s && s.reason) || '未知'));
+              /* 🔴v1077：把「尚未就绪」和「确凿过期」分开说。
+                 之前两者共用一句「云端登录已过期，请重新登录」——
+                 而 SDK 异步落定凭证的那几百毫秒里拿到的空登录态属于前者，
+                 用户照着提示去"重新登录"，登录成功后又被同样的时序问题拦住，
+                 于是陷入死循环：**每次登录都真的成功，每次都被告知已过期。**
+                 现在：尚未就绪 → 让他稍候重试；确凿过期 → 才让他重新登录。 */
+              var msg;
+              if (s && s.notReady) {
+                msg = (s.reason || '云端会话尚未就绪，请稍候再试');
+              } else if (s && s.expired) {
+                msg = '云端登录已过期，请重新登录后再同步';
+              } else {
+                msg = '云端会话不可用：' + ((s && s.reason) || '未知');
+              }
               var err = new Error(msg);
               err.sessionDead = true;
               err.friendly = true;   /* v1068: 已是人话，friendly() 不得再改写 */
               err.expired = !!(s && s.expired);
+              err.notReady = !!(s && s.notReady);
               throw err;
             }
             return A._app();
@@ -252,7 +264,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1076')
+               import('./vendor_cloudbase_esm_v965.js?v=1077')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，

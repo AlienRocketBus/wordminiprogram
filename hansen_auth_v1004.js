@@ -477,14 +477,23 @@
   }
 
   /* 🔴v1031: 本地标记 ≠ 云端会话仍在。提供真实探测，避免"以为登录着其实没有"。 */
+  /* 🔴v1077：面板 ③b 的数据来源就是这里。
+     它原本也是**问一次就下结论**，于是与 ensureSession 犯同一个错：
+     SDK 异步落定凭证的那几百毫秒里拿到空，就报「云端会话已失效」。
+     用户看到的正是这一幕 —— ③ 显示已登录、③b 却说已失效。
+     现在直接复用 ensureSession（带重试 + 区分尚未就绪/确凿过期），
+     **两处不再各写一套判据**（本项目已因"同一件事两处真源"栽过八次）。 */
   function verifySession() {
-    return auth().then(function (a) {
-      if (typeof a.getLoginState !== 'function') return { ok: false, reason: 'no-api' };
-      return Promise.resolve(a.getLoginState()).then(function (st) {
-        var uid = st && (st.uid || (st.user && st.user.uid)) || '';
-        return { ok: !!uid, uid: uid };
-      });
-    }).catch(function (e) { return { ok: false, reason: String(e && e.message || e) }; });
+    return ensureSession().then(function (r) {
+      return {
+        ok: !!r.ok,
+        uid: r.uid || '',
+        notReady: !!r.notReady,
+        expired: !!r.expired,
+        tries: r.tries || 1,
+        reason: r.reason || ''
+      };
+    }).catch(function (e) { return { ok: false, reason: errText(e) }; });
   }
 
   /* 🔴v1059 核心修复：云端读写的**唯一通行证**。
@@ -507,38 +516,68 @@
      ⚠️ 只在「确定」时才清标记：getLoginState() 正常返回但无 uid（SDK 自己
      说没会话），或错误明确是鉴权类。断网等不确定情况**绝不动本地标记**，
      否则一次地铁进隧道就把用户登出了。 */
+  /* 🔴v1077 关键修复：**空登录态要重试，不能问一次就下结论；
+     而且「尚未就绪」与「确凿过期」必须分开说。**
+
+     用户真机现场：明确确认「刚退出登录、重新用手机号登录成功了」，
+     面板却同时显示 ③ 已登录 / ③b 云端会话已失效、写入失败「云端登录已过期」。
+
+     根因链：
+       登录成功 → SDK 正在**异步**把凭证写进本地存储（还没落定）
+         ↓ 这几百毫秒内
+       开机恢复 / 面板 / 上传 去问 getLoginState() → 返回空
+         ↓ 空 = "还没好"，v1059 却把它标成 expired:true（"确凿过期"）
+       吐出「云端登录已过期，请重新登录」→ 用户退出重登 → 循环重演
+
+     用户因此被困在死循环里：每次登录都真的成功，
+     但每次都在凭证落定前被问了一次，然后被告知"已过期"。
+
+     v1059 那行 `{ ok:false, expired:true, definite:false }` 本身就自相矛盾：
+     既说"说不准"(definite:false)，又说"确凿过期"(expired:true)。
+     下游只看 expired，于是把"还没好"讲成了"已过期"。 */
   function ensureSession() {
     if (!isSignedIn()) return Promise.resolve({ ok: false, reason: 'not-signed-in' });
+
+    var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒，足够 SDK 落定 */
+
+    function onErr(e) {
+      var t = errText(e);
+      /* 只有云端明确说「你没通过鉴权」才算确凿 ——
+         用户截图里那句 credentials not found 正属此类。 */
+      var authErr = /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
+      return { ok: false, expired: authErr, definite: authErr, reason: t };
+    }
+
     return auth().then(function (a) {
       if (typeof a.getLoginState !== 'function')
         return { ok: false, definite: false, reason: 'no-api' };
-      return Promise.resolve(a.getLoginState()).then(function (st) {
-        var uid = (st && (st.uid || (st.user && st.user.uid))) || '';
-        if (uid) return { ok: true, uid: uid };
-        /* ⚠️ 拿到空的登录态 → **拦住云端操作，但不动本地标记**。
-           理由：SDK 恢复持久化会话是异步的，问得太早也会得到空；
-           网络不通时某些版本同样返回空而不是抛错。
-           据此就把人登出，等于「进一次隧道 / 开机快一点」就退出登录——
-           那比原来的 bug 更糟。所以这里只拒绝操作、提示重新登录，
-           清标记留给下面那条**确凿的鉴权错误**。 */
-        return { ok: false, expired: true, definite: false, reason: '云端会话已失效或尚未就绪' };
-      }, function (e) {
-        var t = errText(e);
-        /* 只有云端明确说「你没通过鉴权」才算确凿 —— 用户截图里
-           那句 credentials not found 正属此类。 */
-        var authErr = /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
-        return { ok: false, expired: authErr, definite: authErr, reason: t };
-      });
+
+      function probe(i) {
+        return Promise.resolve(a.getLoginState()).then(function (st) {
+          var uid = (st && (st.uid || (st.user && st.user.uid))) || '';
+          if (uid) return { ok: true, uid: uid, tries: i + 1 };
+          if (i < RETRY_DELAYS.length) {
+            return new Promise(function (res) { setTimeout(res, RETRY_DELAYS[i]); })
+              .then(function () { return probe(i + 1); });
+          }
+          /* 重试到底仍是空 —— 仍**不能**断言"已过期"：
+             断网、SDK 版本差异同样会给空。
+             只说"尚未就绪"，并明确下一步是**稍候重试**而非重新登录。 */
+          return {
+            ok: false, notReady: true, expired: false, definite: false, tries: i + 1,
+            reason: '云端会话尚未就绪（已重试 ' + (i + 1) + ' 次），请稍候再试'
+          };
+        }, onErr);
+      }
+      return probe(0);
     }).catch(function (e) {
       return { ok: false, definite: false, reason: errText(e) };
     }).then(function (r) {
       if (!r.ok && r.definite) {
-        /* 🔴v1063 竞态防线：刚登录完的一小段时间内**绝不清本地标记**。
-           场景：登录成功写下 signedAt → 后台的开机恢复几乎同时调 ensureSession()
-           → 此刻 SDK 会话可能还没落定，getLoginState() 给出鉴权类错误
-           → 按"确凿失效"处理就会把**刚刚建立的登录态**抹掉，
-              用户看到的是"明明刚登录成功，一转眼又退出了"。
-           test_phone_signup_v1057 三跑一红的抖动，正是撞上这条竞态。
+        /* 🔴v1063 竞态防线（保留）：刚登录完的一小段时间内**绝不清本地标记**。
+           登录成功写下 signedAt → 后台开机恢复几乎同时调 ensureSession()
+           → 此刻 SDK 会话可能还没落定 → 按"确凿失效"处理会把
+              **刚刚建立的登录态**抹掉，用户看到"刚登录成功一转眼又退出"。
            60 秒新鲜期内只拒绝本次操作、不动标记；真过期了下次自然会再判。 */
         var fresh = false;
         try {
@@ -547,10 +586,9 @@
         } catch (e0) {}
         if (fresh) return r;
         writeLocal({ method: '', signedAt: 0, uid: '' });
-        /* 清了标记还必须广播出去，否则界面上那句「已登录 +86 186xxxx」
-           会一直挂到下次刷新——这正是本轮 bug 最刺眼的表象：
-           界面说登录着，每一次读写却都失败。 */
-        try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e) {}
+        /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」
+           会一直挂到下次刷新 —— 界面说登录着、每次读写却都失败。 */
+        try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e1) {}
       }
       return r;
     });

@@ -120,7 +120,11 @@
       if (!v) return;
       if (!A || typeof A.verifySession !== 'function') { v.textContent = '(旧版本，无此探测)'; return; }
       A.verifySession().then(function (s) {
-        v.textContent = s.ok ? ('有效 uid=' + s.uid) : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请退出后重新登录');
+        v.textContent = s.ok
+          ? ('✅ 有效 uid=' + s.uid + (s.tries > 1 ? '（重试 ' + s.tries + ' 次后就绪）' : ''))
+          : (s.notReady
+              ? ('⏳ ' + (s.reason || '云端会话尚未就绪') + ' —— 请稍候再试，不必重新登录')
+              : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请退出后重新登录'));
         v.className = 'd_v ' + (s.ok ? 'ok' : 'bad');
       }).catch(function (e) { v.textContent = '探测出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
     }, 60);
