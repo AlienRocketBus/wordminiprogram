@@ -94,6 +94,8 @@ REGISTRY = [
      'test_no_anon_clobber_v1076.mjs'),
     ('v1077', '空登录态问一次就判"已过期"且无重试 → 用户陷入"登录成功→被告知过期→重登"死循环',
      'test_session_retry_v1077.mjs'),
+    ('v1078', '云端链路只能靠用户截图观察，此前几版都在猜哪一步坏了；改为面板输出完整探测轨迹',
+     'test_session_retry_v1077.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

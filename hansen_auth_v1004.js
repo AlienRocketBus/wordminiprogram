@@ -535,8 +535,41 @@
      v1059 那行 `{ ok:false, expired:true, definite:false }` 本身就自相矛盾：
      既说"说不准"(definite:false)，又说"确凿过期"(expired:true)。
      下游只看 expired，于是把"还没好"讲成了"已过期"。 */
+  /* 🔴v1078：把每一步都记下来。
+
+     开发容器连不上腾讯云，云端这条链**只能靠用户截图来看**。
+     而前几版我一直在"猜哪一步坏了"——v1076 猜匿名冲凭证、
+     v1077 猜凭证未落定，每次都只能等下一张截图来证伪。
+     这一整轮最大的教训本来就是「看不见现场就别动手，先造能看见的工具」，
+     我在云端登录这件事上又犯了同一个毛病。
+
+     所以这里留下完整轨迹：每次探测问了几次、每次拿到什么形状、
+     最终结论是什么、原始错误是什么。用户截一张图，我就能直接读出真相，
+     不必再猜。 */
+  var _trace = [];
+  function T(step, detail) {
+    try {
+      _trace.push({ t: Date.now(), step: step, detail: detail });
+      if (_trace.length > 40) _trace.shift();
+    } catch (e) {}
+  }
+  function traceText() {
+    if (!_trace.length) return '(尚无记录，请先做一次云端操作)';
+    var t0 = _trace[0].t;
+    return _trace.map(function (x) {
+      return '+' + String(x.t - t0).padStart(5) + 'ms  ' + x.step +
+             (x.detail ? ('  ' + x.detail) : '');
+    }).join('\n');
+  }
+
   function ensureSession() {
+    T('ensureSession 开始', 'isSignedIn=' + isSignedIn());
     if (!isSignedIn()) return Promise.resolve({ ok: false, reason: 'not-signed-in' });
+    try {
+      var _lc = readLocal();
+      T('本地登录记录', 'method=' + (_lc.method || '无') +
+        ' 距登录=' + (_lc.signedAt ? Math.round((Date.now() - _lc.signedAt) / 1000) + '秒' : '未知'));
+    } catch (e) {}
 
     var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒，足够 SDK 落定 */
 
@@ -545,6 +578,7 @@
       /* 只有云端明确说「你没通过鉴权」才算确凿 ——
          用户截图里那句 credentials not found 正属此类。 */
       var authErr = /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
+      T('探测抛错', (authErr ? '确凿鉴权错误：' : '非鉴权错误：') + t.slice(0, 90));
       return { ok: false, expired: authErr, definite: authErr, reason: t };
     }
 
@@ -555,7 +589,11 @@
       function probe(i) {
         return Promise.resolve(a.getLoginState()).then(function (st) {
           var uid = (st && (st.uid || (st.user && st.user.uid))) || '';
-          if (uid) return { ok: true, uid: uid, tries: i + 1 };
+          T('探测#' + (i + 1),
+            st == null ? '返回 null' :
+            ('类型=' + (typeof st) + ' 键=[' + Object.keys(st).slice(0, 6).join(',') + ']' +
+             ' uid=' + (uid || '(无)')));
+          if (uid) { T('结论', '✅ 有效 uid=' + uid + '（第 ' + (i + 1) + ' 次探到）'); return { ok: true, uid: uid, tries: i + 1 }; }
           if (i < RETRY_DELAYS.length) {
             return new Promise(function (res) { setTimeout(res, RETRY_DELAYS[i]); })
               .then(function () { return probe(i + 1); });
@@ -563,6 +601,7 @@
           /* 重试到底仍是空 —— 仍**不能**断言"已过期"：
              断网、SDK 版本差异同样会给空。
              只说"尚未就绪"，并明确下一步是**稍候重试**而非重新登录。 */
+          T('结论', '⏳ 重试 ' + (i + 1) + ' 次仍为空 → 尚未就绪（不判过期）');
           return {
             ok: false, notReady: true, expired: false, definite: false, tries: i + 1,
             reason: '云端会话尚未就绪（已重试 ' + (i + 1) + ' 次），请稍候再试'
@@ -612,6 +651,7 @@
     normUsername: normUsername,
     mailOfUsername: mailOfUsername,
     signOut: signOut,
+    _trace: traceText,   /* v1078: 面板读它来展示完整轨迹 */
     ensureProfile: ensureProfile,
     pushSave: pushSave,
     syncOnLogin: syncOnLogin,

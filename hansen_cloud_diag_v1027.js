@@ -182,11 +182,25 @@
       + '<button class="d_btn" id="dRT" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">🔁 一键往返自检（推荐先点这个）</button>'
       + '<button class="d_btn d_close" id="dClose">关闭</button>'
       + '<div class="d_row" id="dOut" style="margin-top:12px"><div class="d_k">实测结果</div>'
-      + '<div class="d_v" id="dOutV">（点上面的按钮）</div></div>';
+      + '<div class="d_v" id="dOutV">（点上面的按钮）</div></div>'
+      /* 🔴v1078：完整轨迹。开发端连不上腾讯云，云端这条链只能靠用户截图来看，
+         此前几版都在"猜哪一步坏了"。这里把每一步原样列出来 ——
+         探测了几次、每次拿到什么形状的对象、最终结论、原始错误，
+         用户截一张图即可直接读出真相，不必再猜。 */
+      + '<div class="d_row" style="margin-top:12px"><div class="d_k">🔬 会话探测轨迹（把这块也截给开发者）</div>'
+      + '<div class="d_v" id="dTrace" style="white-space:pre-wrap;font-size:11px;line-height:1.5">（做一次云端操作后自动出现）</div></div>';
 
+    var refreshTrace = function () {
+      try {
+        var el = document.getElementById('dTrace');
+        var A = window.HansenAuth;
+        if (el && A && typeof A._trace === 'function') el.textContent = A._trace();
+      } catch (e) {}
+    };
     var say = function (t, cls) {
       var v = document.getElementById('dOutV');
       if (v) { v.textContent = t; v.className = 'd_v ' + (cls || ''); }
+      refreshTrace();   /* v1078: 每次出结果都把轨迹一并刷新 */
     };
     document.getElementById('dClose').onclick = close;
     /* 🔴v1037 往返自检：写→立刻读回，把问题定位到 地址/身份/权限 三者之一 */
