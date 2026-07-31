@@ -98,6 +98,8 @@ REGISTRY = [
      'test_session_retry_v1077.mjs'),
     ('v1079', '登录成功后不校验 SDK 返回值就写本地标记 → 界面说已登录、云端其实没会话',
      'test_session_retry_v1077.mjs'),
+    ('v1080', 'SDK 的 setCredentials 在响应缺 expires_in 时会删掉已存凭证且仍 resolve → 登录"成功"但会话不存在',
+     'test_phone_signup_v1057.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

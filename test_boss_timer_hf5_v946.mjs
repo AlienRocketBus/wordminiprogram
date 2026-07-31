@@ -30,9 +30,9 @@ assert.equal((workerSource.match(new RegExp("'\\./hansen_boss_lock\\.js\\?v="+__
   'Service Worker 必须精确缓存一次 v951 Boss 运行时');
 assert.doesNotMatch(workerSource, /'\.\/hansen_boss_lock\.js\?v=946-hf2'/,
   'Service Worker 不得继续精确缓存旧 Boss 运行时');
-assert.match(workerSource, /CACHE_PREFIX \+ 'shell-138'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'pages-136'/);
-assert.match(workerSource, /CACHE_PREFIX \+ 'assets-136'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'shell-139'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'pages-137'/);
+assert.match(workerSource, /CACHE_PREFIX \+ 'assets-137'/);
 
 // 锁死本次根因：全局减少动态规则仍存在，但功能性计时条的三次 transition 写入必须逐一行内提权。
 assert.match(a11ySource, /transition-duration:\.001ms!important/,

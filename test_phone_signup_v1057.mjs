@@ -41,7 +41,12 @@ const newUser = await page.evaluate(async ()=>{
   A._setAuthForTest({
     getVerification:o=>{calls.push('getVerification');return Promise.resolve({verification_id:'VID',is_user:false});},
     verify:o=>{calls.push('verify');return Promise.resolve({verification_token:'TK'});},
-    signUp:o=>{calls.push('signUp:'+JSON.stringify(o));return Promise.resolve({user:{uid:'U1'}});},
+    signUp:o=>{calls.push('signUp:'+JSON.stringify(o));
+      /* 模拟真实 SDK：成功响应含 expires_in，并据此写下凭证键 */
+      try{ localStorage.setItem('credentials_ambitious-test', JSON.stringify({
+        access_token:'AT', refresh_token:'RT', expires_in:7200,
+        expires_at:new Date(Date.now()+7200000).toISOString() })); }catch(e){}
+      return Promise.resolve({user:{uid:'U1'},access_token:'AT',expires_in:7200});},
     signIn:o=>{calls.push('signIn');return Promise.resolve({user:{uid:'U1'}});},
     getCurrentUser:()=>Promise.resolve({uid:'U1'}),
     getLoginState:()=>Promise.resolve({uid:'U1',user:{uid:'U1'}})
@@ -67,7 +72,11 @@ const oldUser = await page.evaluate(async ()=>{
     getVerification:o=>{calls.push('getVerification');return Promise.resolve({verification_id:'VID2',is_user:true});},
     verify:o=>{calls.push('verify');return Promise.resolve({verification_token:'TK2'});},
     signUp:o=>{calls.push('signUp');return Promise.resolve({user:{uid:'U2'}});},
-    signIn:o=>{calls.push('signIn:'+JSON.stringify(o));return Promise.resolve({user:{uid:'U2'}});},
+    signIn:o=>{calls.push('signIn:'+JSON.stringify(o));
+      try{ localStorage.setItem('credentials_ambitious-test', JSON.stringify({
+        access_token:'AT', refresh_token:'RT', expires_in:7200,
+        expires_at:new Date(Date.now()+7200000).toISOString() })); }catch(e){}
+      return Promise.resolve({user:{uid:'U2'},access_token:'AT',expires_in:7200});},
     getCurrentUser:()=>Promise.resolve({uid:'U2'}),
     getLoginState:()=>Promise.resolve({uid:'U2',user:{uid:'U2'}})
   });
@@ -80,6 +89,31 @@ ok(oldUser.calls.some(c=>c.startsWith('signIn')), '老用户走登录(signIn)分
 ok(oldUser.calls.includes('verify'), '老用户先 verify 换 token');
 ok(oldUser.ok===true, '老用户登录成功'+(oldUser.err?'：'+oldUser.err:''));
 ok(errs.length===0, '零脚本错误'+(errs.length?': '+errs[0]:''));
+/* 🔴v1080：SDK 没下发凭证时，绝不能写"已登录"。
+   用户真机现场：+1ms 凭证 1314 字节还在，+2143ms 就被删了，之后探测全是 null，
+   而界面一直显示"已登录" —— 根源是这一步只看 Promise 有没有 reject。
+   SDK 的 setCredentials 在响应缺 expires_in 时会**删掉已存凭证**且依然 resolve，
+   所以"没报错"根本不等于"登录成功"。 */
+const noCred = await page.evaluate(async ()=>{
+  localStorage.clear();
+  const A=window.HansenAuth;
+  A._setAuthForTest({
+    getVerification:()=>Promise.resolve({verification_id:'VID',is_user:false}),
+    verify:()=>Promise.resolve({verification_token:'TK'}),
+    /* 这就是坏掉的那种响应：resolve 了，但既无 expires_in、也不写凭证键 */
+    signUp:()=>Promise.resolve({user:{uid:'U9'}}),
+    signIn:()=>Promise.resolve({user:{uid:'U9'}})
+  });
+  await A.sendPhoneCode('+8613800138000').catch(()=>{});
+  let err='';
+  try{ await A.loginByPhoneCode('123456'); }catch(e){ err=String(e.message||e); }
+  return { err, local:A.readLocal(), signedIn:A.isSignedIn() };
+});
+ok(/未真正完成|没有下发有效凭证/.test(noCred.err),
+   `★ 云端没下发凭证 → 明确报错而非假装成功：${noCred.err.slice(0,50)}`);
+ok(!noCred.local.method, '★ 此时**不得**写入本地登录态（否则界面会说"已登录"而实际没会话）');
+ok(noCred.signedIn === false, '★ isSignedIn() 保持 false');
+
 await browser.close(); srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail===0?0:1);

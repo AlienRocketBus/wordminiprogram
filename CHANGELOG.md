@@ -1,5 +1,78 @@
 # 版本记录
 
+## v1080 — 找到根因：凭证被 SDK 自己删掉了（2026-07-31）
+
+### 用户轨迹给出的决定性证据
+
+```
++    1ms  SDK 凭证键  2 个 → credentials_ambitious-...(1314字节)  hansen_auth_v1004(164字节)
++ 1130ms  探测#1  返回 null
++ 2143ms  SDK 凭证键  1 个 → hansen_auth_v1004(164字节)        ← 凭证没了
++ 2143ms  探测#1  返回 null   （之后一直是 null）
+```
+
+**凭证一开始是存在的（1314 字节），2 秒后被删掉了。**
+不是"没写进去"，也不是"还没落定"（v1077 的假设已被 v1079 推翻），
+是**写进去了又被删**。
+
+### 🔴 根因（读 SDK 本体确认，不是推测）
+
+```js
+setCredentials(t) {
+  if (t?.expires_in) {                       // 有 expires_in → 正常存
+     t.expires_at = new Date(Date.now() + 1000*(t.expires_in - 30));
+     storage.setItem(tokenSectionName, JSON.stringify(t));
+  } else {                                   // 没有 expires_in →
+     storage.removeItem(tokenSectionName);   //    直接删掉已存凭证！
+     this.credentials = null;
+  }
+}
+```
+
+而 SDK 的 `signUp` / `signIn` 结尾是：
+
+```js
+signUp(t) { ... request(SIGN_UP_URL, {body:t}).then(e => credentialsClient.setCredentials(e)) }
+```
+
+**它把服务端返回值原样丢给 `setCredentials`。**
+只要那次响应缺 `expires_in`，凭证就被整个删掉 ——
+**而 `signUp` 的 Promise 依然 resolve**，我们的代码看到"没报错"就写下"已登录"。
+
+这完整解释了「③ 已登录 / ③b 会话失效」这个自相矛盾的显示。
+
+### 修复两处
+
+**① 登录后必须确认凭证真的在，否则不许写"已登录"**
+
+直接查 localStorage 里 SDK 自己的 `credentials_<env>` 键 ——
+那是唯一能证明会话真的建立起来的东西。
+不在就**如实报错**：「登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）」，
+而不是假装成功、再把人推去反复重新登录。
+
+**② 轨迹记录 `expires_in` / `access_token` 是否存在**
+
+下一张截图即可直接确认服务端到底回了什么。
+
+### 测试
+
+`test_phone_signup_v1057` 扩到 **14 条**：
+
+- 假 SDK 原本返回 `{user:{uid}}` 且不写任何键 ——
+  **那恰好就是坏掉的那种响应**，所以被新防线正确拦下。
+  已补上"成功时写凭证键"的副作用（假 SDK 要模拟真实 SDK 的**副作用**，不只是返回值）。
+- 新增 3 条断言锁死防线：没凭证 → 明确报错 / 不写本地登录态 / `isSignedIn()` 保持 false。
+
+**⚠️ 插入断言时我一度把它写在了 `browser.close()` 之后** ——
+正是自己那道 `guard_no_dead_assertions` 防的错，已移到前面。
+
+### ⚠️ 仍待真机确认
+
+本版修的是**确定存在的缺陷**（登录不校验凭证就标记成功）。
+但「服务端为什么不回 `expires_in`」还需下一张轨迹图确认 ——
+可能是控制台配置（用户刚把匿名登录关掉），也可能是该手机号的账号状态。
+**这一次不猜，等图。**
+
 ## v1079 — 轨迹推翻了 v1077 的假设：凭证不是"没落定"，是根本不存在（2026-07-31）
 
 ### v1078 的轨迹带回了决定性信息

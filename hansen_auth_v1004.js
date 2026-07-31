@@ -223,8 +223,19 @@
          把返回值形状与写入后的凭证键数一并记下，即可分辨
          "SDK 压根没给凭证" 还是 "给了但没落盘"。 */
       try {
-        T('登录返回', res == null ? '返回 null/undefined'
-          : ('类型=' + (typeof res) + ' 键=[' + Object.keys(res).slice(0, 8).join(',') + ']'));
+        /* 🔴v1080：重点看返回值里**有没有 expires_in**。
+           SDK 的 setCredentials 是这么写的：
+             if (t?.expires_in) { 存起来 }
+             else { storage.removeItem(...); credentials = null }   ← 直接删！
+           而 signUp/signIn 把服务端返回值**原样**丢给 setCredentials。
+           所以只要那次响应缺 expires_in，已存的凭证就被整个删掉，
+           而 Promise 依然 resolve —— 我们看到"没报错"就写下"已登录"。
+           用户现场正是如此：+1ms 凭证 1314 字节还在，+2143ms 就没了。 */
+        var _has = res && typeof res === 'object';
+        T('登录返回', res == null ? '❗返回 null/undefined（SDK 会据此删除凭证）'
+          : ('类型=' + (typeof res) + ' 键=[' + Object.keys(res).slice(0, 8).join(',') + ']'
+             + ' expires_in=' + (_has && res.expires_in != null ? res.expires_in : '❗无')
+             + ' access_token=' + (_has && res.access_token ? '有' : '❗无')));
         var _c = 0;
         for (var _i = 0; _i < localStorage.length; _i++) {
           var _k = localStorage.key(_i) || '';
@@ -232,6 +243,35 @@
         }
         T('登录后凭证键', _c ? (_c + ' 个') : '❗0 个 —— SDK 没有把凭证写进本地存储');
       } catch (e) {}
+      /* 🔴v1080 防线：**登录后必须确认云端凭证真的在**，否则不许写"已登录"。
+
+         此前这一步只要 Promise 没 reject 就标记成功，于是出现
+         「③ 已登录 / ③b 会话失效」这种自相矛盾的显示 ——
+         界面说登录着，每一次云端读写却都失败，用户被反复推去重新登录。
+
+         SDK 的 setCredentials 在返回值缺 expires_in 时会**删掉已存凭证**，
+         而 signUp/signIn 依然 resolve。所以"没报错"根本不等于"登录成功"。
+         这里直接查 localStorage 里 SDK 自己的凭证键还在不在 ——
+         那是唯一能证明会话真的建立起来的东西。 */
+      var _credOk = false;
+      try {
+        for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
+          var _k2 = localStorage.key(_i2) || '';
+          if (/^credentials/i.test(_k2) && String(localStorage.getItem(_k2) || '').length > 50) {
+            _credOk = true; break;
+          }
+        }
+      } catch (e3) { _credOk = true; }   /* 读不到就别拦人，保守放行 */
+
+      if (!_credOk) {
+        T('登录判定', '❗云端凭证不存在 → 不写"已登录"，如实报错');
+        var eNoCred = new Error(
+          '登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）。'
+          + '请把自检面板的「会话探测轨迹」截图给开发者。');
+        eNoCred.friendly = true; eNoCred.noCredentials = true;
+        throw eNoCred;
+      }
+      T('登录判定', '✅ 云端凭证已就位，写入本地登录态');
       writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
       return afterSignIn();
     });
