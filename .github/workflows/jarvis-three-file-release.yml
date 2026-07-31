@@ -111,6 +111,12 @@ jobs:
         run: |
           set -euo pipefail
           version="$(tr -d '[:space:]' < VERSION)"
+          # 🔴v1081: CI 上必须自己跑发版闸门。
+          #   .jarvis_pass.json 是本地状态、已 gitignore（否则别人拉到就等于白拿背书），
+          #   所以 CI 环境永远没有这枚凭证 → package_release 必然拒绝出包。
+          #   这是 v1070 加发版硬条件时埋下的：本地打好包提交时看不出来，
+          #   一旦 CI 自己打包就必然失败。闸门本身很快（分钟级），CI 上照跑。
+          python3 jarvis_gate.py
           python package_release.py "$version" --out release-assets
           python package_release.py "$version" --out release-assets-repro
           for dir in release-assets release-assets-repro; do
