@@ -7,20 +7,20 @@
 const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
-// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-140。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-140';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-138';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-138';
+// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-141。
+const SHELL_CACHE = CACHE_PREFIX + 'shell-141';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-139';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-139';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1081', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1081', './hansen_onboarding.js?v=1081', './hansen_theme_shop.js',
-  './hansen_season.js?v=1081', './hansen_cinema_themes.js?v=1081', './hansen_diamond_shop.js?v=1081', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1081', './hansen_crystal.js', './hansen_cards.js?v=1081', './hansen_gacha.js?v=1081', './hansen_land_cards.js?v=1081', './hansen_round_reward.js?v=1081', './hansen_round_bar.js?v=1081', './hansen_pet_showcase.js?v=1081', './hansen_quest_global.js?v=1081', './hansen_island_upgrade.js?v=1081', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1081', './hansen_spell_practice.js?v=1081', './hansen_review.js?v=1081', './hansen_wrong_overview.js?v=1081', './hansen_backup_v944.js?v=1081', './hansen_accessibility.js?v=1081',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1081', './hansen_mylearning.js?v=1081', './hansen_palette.js?v=1081', './hansen_boss_theme.js?v=1081', './hansen_econ_guide.js?v=1081', './hansen_perf_v944.js?v=1081'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1082', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1082', './hansen_onboarding.js?v=1082', './hansen_theme_shop.js',
+  './hansen_season.js?v=1082', './hansen_cinema_themes.js?v=1082', './hansen_diamond_shop.js?v=1082', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1082', './hansen_crystal.js', './hansen_cards.js?v=1082', './hansen_gacha.js?v=1082', './hansen_land_cards.js?v=1082', './hansen_round_reward.js?v=1082', './hansen_round_bar.js?v=1082', './hansen_pet_showcase.js?v=1082', './hansen_quest_global.js?v=1082', './hansen_island_upgrade.js?v=1082', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1082', './hansen_spell_practice.js?v=1082', './hansen_review.js?v=1082', './hansen_wrong_overview.js?v=1082', './hansen_backup_v944.js?v=1082', './hansen_accessibility.js?v=1082',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1082', './hansen_mylearning.js?v=1082', './hansen_palette.js?v=1082', './hansen_boss_theme.js?v=1082', './hansen_econ_guide.js?v=1082', './hansen_perf_v944.js?v=1082'
 ];
 
 async function trim(cacheName, maxEntries) {
@@ -44,7 +44,16 @@ async function putIfReasonable(cacheName, request, response, maxEntries) {
   }
 }
 
-const NAVIGATION_TIMEOUT_MS = 3000;
+/* 🔴v1082：3 秒太短了。
+   用户反馈「你做的东西可能根本没显示出来」—— 查证属实：
+   导航虽是网络优先，但**有缓存时只等 3 秒**，手机在微信里、信号波动，
+   稍慢就退回旧缓存；而 HTML 文件名不带版本戳，旧页面会被一直复用，
+   里面引用的又全是旧版 JS。
+   结果：开发端连改六版，用户手机上跑的仍是旧代码，而**双方都看不出来** ——
+   据此做的每一次诊断都建立在过期证据上，白白消耗了很多轮。
+   放宽到 8 秒：仍能在真断网时快速兜底，但不会因为"慢一点"就把人钉在旧版本上。
+   同时自检面板已提供「强制更新」按钮作为明确出口。 */
+const NAVIGATION_TIMEOUT_MS = 8000;
 const COLD_NAVIGATION_TIMEOUT_MS = 12000;
 
 async function bufferedNavigationResponse(response) {
@@ -246,7 +255,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1081 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1082 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     event.respondWith((async () => {

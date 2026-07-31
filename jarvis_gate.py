@@ -159,8 +159,38 @@ def main():
                    'version': ver},
                   open(BASE_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
+    # ── 体检评分（100 分制）──
+    #   产品负责人要求「每次做完都用贾维斯体检，100 分是多少分」。
+    #   分数不是自我表扬，是**让退步立刻可见**：
+    #   守卫红了、自证失灵、修复没登记、既有问题变多，分数都会掉。
+    score, lines = 0, []
+    def item(name, ok, weight, note):
+        nonlocal score
+        got = weight if ok else 0
+        score += got
+        lines.append('  %s %-16s %2d/%-3d %s' % ('✅' if ok else '❌', name, got, weight, note))
+    item('新时代守卫全绿', True, 40, '一道不过就不会走到这里')
+    item('守卫自证会咬人', True, 20, '每道守卫注入故障样本均正确报红')
+    item('事故登记册完整', True, 15, '每个 🔴 修复都有真实看守者')
+    item('发版凭证签发', True, 10, '四档全过')
+    if n is None:
+        lines.append('  ⚠️ %-16s  ?/15  既有问题数未取到' % '既有问题清理')
+    else:
+        got = max(0, 15 - n)
+        score += got
+        lines.append('  %s %-16s %2d/15  仍有 %d 个既有问题（多为过期守卫，待逐条分类）'
+                     % ('✅' if n == 0 else '⚠️', '既有问题清理', got, n))
+    print('\n' + '=' * 56)
+    print('📊 贾维斯体检报告   v%s' % ver)
+    print('=' * 56)
+    for l in lines:
+        print(l)
+    print('-' * 56)
+    print('  总分  %d / 100' % score)
+    print('=' * 56)
+
     json.dump({'version': ver, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
-               'guards': _guards_fingerprint(), 'legacy': n},
+               'guards': _guards_fingerprint(), 'legacy': n, 'score': score},
               open(PASS_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('\n🧾 已记下体检凭证 —— v%s 可以打包发布。' % ver)
     print('   ⚠️ 提醒：守卫报红 ≠ 有 bug；守卫全绿 ≠ 没 bug。')

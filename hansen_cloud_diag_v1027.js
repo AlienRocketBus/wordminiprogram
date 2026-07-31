@@ -185,11 +185,28 @@
          此前面板不显示版本，于是开发端无法确认用户手机上跑的到底是哪一版 ——
          v1076~v1080 连改五版，每次都不知道用户是否真的部署了。
          这是个巨大的盲区：修了却看不出有没有生效，等于白修。 */
+      /* 🔴v1082：把「页面版本」与「模块版本」分开显示。
+         用户反馈「你做的东西可能根本没显示出来」—— 查证属实：
+         SW 对导航请求是网络优先、但**有缓存时只等 3 秒**（NAVIGATION_TIMEOUT_MS=3000），
+         手机网络稍慢就退回旧缓存；而 HTML 文件名不带版本戳，
+         旧 HTML 会被一直复用，里面引用的又全是旧版 JS。
+         结果：开发端改了六版，用户手机上跑的仍是旧代码，
+         而**双方都看不出来** —— 我据此做的每一次诊断都建立在过期证据上。
+         所以这里同时显示两个版本号：不一致就说明缓存卡住了。 */
       + '<div class="d_row" style="border:1px solid #34d399"><div class="d_k">⓪ 当前版本（先确认这个）</div>'
       + '<div class="d_v" style="color:#34d399;font-size:16px;font-weight:700">v'
       + (function(){ try{ return (window.HansenBackup && HansenBackup.appVersion && HansenBackup.appVersion())
                        || window.__HSN_APP_VERSION || '未知'; }catch(e){ return '未知'; } })()
-      + '</div></div>'
+      + '  ·  页面 v' + (function(){ try{
+            var m = String(document.documentElement.innerHTML).match(/\?v=(\d+)/);
+            return m ? m[1] : '未知';
+          }catch(e){ return '未知'; } })()
+      + '</div>'
+      + '<div class="d_v" style="font-size:12px;color:#94a3b8">'
+      + '两个数字不一致 = 浏览器缓存住了旧页面，点下面的按钮强制更新'
+      + '</div>'
+      + '<button class="d_btn" id="dForce" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin-top:8px">🔄 强制更新到最新版（清缓存并重载）</button>'
+      + '</div>'
       + '<div class="d_row" id="dOut" style="margin-top:12px"><div class="d_k">实测结果</div>'
       + '<div class="d_v" id="dOutV">（点上面的按钮）</div></div>'
       /* 🔴v1078：完整轨迹。开发端连不上腾讯云，云端这条链只能靠用户截图来看，
@@ -213,6 +230,33 @@
     };
     document.getElementById('dClose').onclick = close;
     /* 🔴v1037 往返自检：写→立刻读回，把问题定位到 地址/身份/权限 三者之一 */
+      /* 🔴v1082 强制更新：注销 SW + 清空全部缓存 + 硬重载。
+         SW 对导航是网络优先但只等 3 秒，手机网络稍慢就退回旧缓存；
+         而 HTML 不带版本戳，旧页面会被一直复用。
+         用户因此可能连着几版都在跑旧代码而双方都不知情 ——
+         给一个明确的出口，比让人反复"强刷"可靠。 */
+      var fb = document.getElementById('dForce');
+      if (fb) fb.onclick = function () {
+        fb.disabled = true; fb.textContent = '正在清理…';
+        var jobs = [];
+        try {
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+            jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+              return Promise.all(rs.map(function (r) { return r.unregister(); }));
+            }));
+        } catch (e) {}
+        try {
+          if (window.caches && caches.keys)
+            jobs.push(caches.keys().then(function (ks) {
+              return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+            }));
+        } catch (e) {}
+        Promise.all(jobs)['catch'](function () {}).then(function () {
+          /* 加时间戳绕过 HTTP 缓存，确保这一次一定从服务器取 */
+          try { location.replace(location.pathname + '?_fresh=' + Date.now()); }
+          catch (e) { location.reload(); }
+        });
+      };
     var rt = document.getElementById('dRT');
     if (rt) rt.onclick = function () {
       say('往返测试中…');
