@@ -112,6 +112,8 @@ REGISTRY = [
      'test_cred_trap_v1085.mjs'),
     ('v1086', 'SDK 拦截器：任何带凭证的请求回一次 UNAUTHENTICATED 就删掉整个凭证；而开机恢复在登录后 1.2 秒就读库',
      'guard_no_rush_after_login'),
+    ('v1087', '生死簿只记本次会话，页面一重载记录全丢 → 用户截图显示"没人动过凭证"，实为工具漏了',
+     'test_cred_trap_v1085.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

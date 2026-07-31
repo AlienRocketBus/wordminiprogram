@@ -265,6 +265,10 @@
 
       if (!_credOk) {
         T('登录判定', '❗云端凭证不存在 → 不写"已登录"，如实报错');
+        try {
+          if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
+            HansenCredTrap.mark('❗登录后凭证不存在', '拒绝写入登录态');
+        } catch (e) {}
         var eNoCred = new Error(
           '登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）。'
           + '请把自检面板的「会话探测轨迹」截图给开发者。');
@@ -272,6 +276,15 @@
         throw eNoCred;
       }
       T('登录判定', '✅ 云端凭证已就位，写入本地登录态');
+      /* 🔴v1087：把登录这一刻也写进**持久**日志。
+         轨迹是内存态、一重载就没；而用户现场恰恰是
+         「凭证生死簿说本次会话没人动过凭证，但登录记录显示 49 秒前登录过」——
+         说明登录与凭证消失都发生在上一次页面会话里。
+         只有持久记录才串得起完整时间线。 */
+      try {
+        if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
+          HansenCredTrap.mark('🔑 登录成功', '凭证已就位');
+      } catch (e) {}
       writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
       return afterSignIn();
     });

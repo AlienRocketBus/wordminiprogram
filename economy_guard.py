@@ -159,7 +159,7 @@ def check_canonical() -> None:
             compact_names(bad_order))
     template = read("template.html")
     require(category, "生成模板锁定 v960 资源戳与 canonical 装载",
-            len(script_positions(template, script)) == 1 and "hansen_canonical_progress.js?v=1086" in template,
+            len(script_positions(template, script)) == 1 and "hansen_canonical_progress.js?v=1087" in template,
             f"template count={len(script_positions(template, script))}")
 
     focus_script = "hansen_focused_typing_v946.js"
@@ -183,8 +183,8 @@ def check_canonical() -> None:
     bad_hf1 = []
     for page in focus_pages:
         html = read(page)
-        for tag in ("hansen_pet_showcase.js?v=1086", "hansen_cards.js?v=1086",
-                    "hansen_quest_global.js?v=1086", "hansen_island_upgrade.js?v=1086"):
+        for tag in ("hansen_pet_showcase.js?v=1087", "hansen_cards.js?v=1087",
+                    "hansen_quest_global.js?v=1087", "hansen_island_upgrade.js?v=1087"):
             if html.count(tag) != 1:
                 bad_hf1.append(f"{page}:{tag}")
     require(category, "宠物与Boss卡牌存档自愈脚本使用当前精确资源戳",
@@ -714,7 +714,7 @@ def check_guide() -> None:
                     "html.hsn-pal-light .hsn-eg-get"),
             "亮色可读性规则不完整")
 
-    guide_tag = 'src="hansen_econ_guide.js?v=1086"'
+    guide_tag = 'src="hansen_econ_guide.js?v=1087"'
     guide_pages = ("template.html",) + PLAYABLE_PAGES
     wiring_bad = [name for name in guide_pages if read(name).count(guide_tag) != 1]
     require(category, "模板与27页唯一接入HF7高对比逐轮规则速查", not wiring_bad,
@@ -795,9 +795,9 @@ def check_release_contract() -> None:
         "index.html", "_frame.html", "boss_hall.html", "season_showcase.html",
         "spelling_bee.html", "land_map.html",
     ] + [page.name for page in sorted(ROOT.glob("island_*.html"))]
-    bootstrap_tag = '<script src="hansen_backup_bootstrap_v944.js?v=1086"></script>'
-    gate_open = '<script src="hansen_sw_upgrade_gate_v944.js?v=1086">'
-    runtime_tag = '<script src="hansen_backup_v944.js?v=1086"></script>'
+    bootstrap_tag = '<script src="hansen_backup_bootstrap_v944.js?v=1087"></script>'
+    gate_open = '<script src="hansen_sw_upgrade_gate_v944.js?v=1087">'
+    runtime_tag = '<script src="hansen_backup_v944.js?v=1087"></script>'
     bad_boot: list[str] = []
     old_refs: list[str] = []
     for page in entries:
@@ -831,27 +831,27 @@ def check_release_contract() -> None:
             has_all(sw_shell, "CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
                     "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
                     "/\\/icons\\/(?:[^/]+\\/)*[^/]+\\.(?:webp|png|svg)$/i",
-                    "'./hansen_addiction.js?v=1086'", "'./hansen_econ_guide.js?v=1086'",
-                    "'./hansen_gacha.js?v=1086'", "'./hansen_land_cards.js?v=1086'",
-                    "'./hansen_round_reward.js?v=1086'",
-                    "'./hansen_round_bar.js?v=1086'",
-                    "'./hansen_backup_v944.js?v=1086'",
-                    "'./hansen_boss_lock.js?v=1086'",
-                    "'./hansen_diamond_shop.js?v=1086'",
-                    "'./hansen_mylearning.js?v=1086'",
-                    "'./hansen_palette.js?v=1086'",
-                    "'./hansen_boss_theme.js?v=1086'")
-            and 'src="hansen_addiction.js?v=1086"' in read("template.html")
-            and 'src="hansen_diamond_shop.js?v=1086"' in read("template.html")
-            and 'src="hansen_diamond_shop.js?v=1086"' in read("index.html")
-            and 'src="hansen_mylearning.js?v=1086"' in read("template.html")
-            and 'src="hansen_palette.js?v=1086"' in read("template.html")
-            and 'src="hansen_boss_theme.js?v=1086"' in read("template.html")
-            and 'src="hansen_econ_guide.js?v=1086"' in read("template.html")
-            and 'src="hansen_round_reward.js?v=1086"' in read("template.html")
-            and 'src="hansen_round_bar.js?v=1086"' in read("template.html")
-            and 'src="hansen_backup_v944.js?v=1086"' in read("template.html")
-            and 'src="hansen_boss_lock.js?v=1086"' in read("template.html"),
+                    "'./hansen_addiction.js?v=1087'", "'./hansen_econ_guide.js?v=1087'",
+                    "'./hansen_gacha.js?v=1087'", "'./hansen_land_cards.js?v=1087'",
+                    "'./hansen_round_reward.js?v=1087'",
+                    "'./hansen_round_bar.js?v=1087'",
+                    "'./hansen_backup_v944.js?v=1087'",
+                    "'./hansen_boss_lock.js?v=1087'",
+                    "'./hansen_diamond_shop.js?v=1087'",
+                    "'./hansen_mylearning.js?v=1087'",
+                    "'./hansen_palette.js?v=1087'",
+                    "'./hansen_boss_theme.js?v=1087'")
+            and 'src="hansen_addiction.js?v=1087"' in read("template.html")
+            and 'src="hansen_diamond_shop.js?v=1087"' in read("template.html")
+            and 'src="hansen_diamond_shop.js?v=1087"' in read("index.html")
+            and 'src="hansen_mylearning.js?v=1087"' in read("template.html")
+            and 'src="hansen_palette.js?v=1087"' in read("template.html")
+            and 'src="hansen_boss_theme.js?v=1087"' in read("template.html")
+            and 'src="hansen_econ_guide.js?v=1087"' in read("template.html")
+            and 'src="hansen_round_reward.js?v=1087"' in read("template.html")
+            and 'src="hansen_round_bar.js?v=1087"' in read("template.html")
+            and 'src="hansen_backup_v944.js?v=1087"' in read("template.html")
+            and 'src="hansen_boss_lock.js?v=1087"' in read("template.html"),
             "shell/pages/assets/icons 代际、图标子目录规则或v960精确资源键不一致")
     gate = read("hansen_sw_upgrade_gate_v944.js")
     upgrade = read("_sw_upgrade_v944.html")
