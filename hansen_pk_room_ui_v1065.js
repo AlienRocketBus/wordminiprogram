@@ -186,34 +186,113 @@
     });
   }
 
-  /* ── 屏 3：对战 ── */
+  /* ── 屏 3：对战（v1099 起改用真正的拼写蜂）── */
+
+  /* 🔴v1099：**对战玩法 = 拼写蜂，只是对手换成真人。**
+
+     v1065 的对战屏是个自制的简陋版：一个纯文本输入框，
+     没有发音、没有字母块、没有提示、没有连击、没有动画 ——
+     而拼写蜂那套玩法用户已经玩熟了，凭空再造一个既不好玩也不一致。
+
+     复用路径（读 spelling_bee.html 源码确认，**不改动那个文件**）：
+       · 它在 embed 模式下从 `parent.allW` 读词表
+       · 于是这里把房间的确定性词表挂到 window.allW，
+         再用 iframe 打开 spelling_bee.html?embed=1&from=pk
+       · 双方拿到的是同一颗种子生成的同一批词（wordsFromSeed），
+         所以比的是"同一套题谁答得好"，公平
+
+     结果回传：拼写蜂结束时会往 localStorage 写本局战果，
+     这里轮询读取；同时留一条 postMessage 通道做快路径。 */
+
+  var PK_RESULT_KEY = 'hansen_pk_bee_result';
+  var _beeGiveUp = null;
+
   function startMatch() {
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
-    _state.idx = 0; _state.correct = 0; _state.startAt = Date.now();
-    askNext();
-  }
-
-  function askNext() {
     var st = _state;
     if (!st) return;
-    if (st.idx >= st.words.length) { finish(); return; }
-    var w = st.words[st.idx];
-    paint('<div class="pr_top"><div class="pr_h">⚔️ 对战中</div></div>'
-      + '<div class="pr_cn">' + esc(w.cn || '') + '</div>'
-      + '<div class="pr_word">' + esc((w.en || '').charAt(0)) + '·'.repeat(Math.max(0, (w.en || '').length - 1)) + '</div>'
-      + '<input class="pr_in" id="prIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="拼出这个词">'
-      + '<div class="pr_pg">第 ' + (st.idx + 1) + ' / ' + st.words.length + ' 个 · 已对 ' + st.correct + ' 个</div>');
-    var input = q('prIn');
-    if (input) {
-      input.focus();
-      input.onkeydown = function (ev) {
-        if (ev.key !== 'Enter') return;
-        var val = String(input.value || '').trim().toLowerCase();
-        if (val === String(w.en || '').toLowerCase()) st.correct++;
-        st.idx++;
-        askNext();
-      };
+    st.startAt = Date.now();
+
+    /* 把本局词表交给拼写蜂 —— 它在 embed 模式下正是从 parent.allW 取词 */
+    try {
+      window.allW = (st.words || []).map(function (w) {
+        return { en: w.en, cn: w.cn || '', pn: w.pn || '', emoji: '⚔️', isl: 'pk' };
+      });
+    } catch (e) {}
+
+    /* 清掉上一局可能残留的战果，避免读到旧数据当成本局 */
+    try { localStorage.removeItem(PK_RESULT_KEY); } catch (e) {}
+
+    paint('<div class="pr_top"><div class="pr_h">⚔️ 对战中</div>'
+      + '<div class="pr_sub">和 ' + esc(st.oppName || '对手') + ' 比同一套题 · '
+      + '<span id="prBeeProg">已掌握 0 / ' + (st.words || []).length + '</span></div></div>'
+      + '<div id="prBeeBox" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index:2147483000;background:#0b1020"></div>');
+
+    var box = q('prBeeBox');
+    if (!box) { finishWith(0, 0); return; }
+    var ifr = document.createElement('iframe');
+    ifr.id = 'prBeeFrame';
+    ifr.src = 'spelling_bee.html?embed=1&from=pk&island=pk&v=' + (window.__HSN_V || Date.now());
+    ifr.style.cssText = 'width:100%;height:100%;border:0;display:block';
+    ifr.setAttribute('allow', 'autoplay');
+    box.appendChild(ifr);
+
+    watchBeeResult();
+  }
+
+  /* 轮询拼写蜂写下的战果；同时接受 postMessage 快路径 */
+  function watchBeeResult() {
+    var done = false;
+    function take(r) {
+      if (done || !r) return;
+      done = true;
+      try { window.removeEventListener('message', onMsg); } catch (e) {}
+      clearInterval(timer);
+      var box = q('prBeeBox');
+      if (box) box.innerHTML = '';
+      finishWith(Number(r.correct) || 0, Number(r.total) || (_state ? _state.words.length : 0));
     }
+    /* 🔴v1099：**不改 spelling_bee.html**（那是铁律），改为监听它已有的消息。
+
+       实测源码确认它每掌握一个词就往父页发：
+           postMessage({ type:'hsn_sb_mastery', word, index, ... })
+       所以这里按 word 去重计数即可 —— 既拿到实时进度，
+       又完全不需要动那个文件。 */
+    var got = {};
+    function onMsg(ev) {
+      var d = ev && ev.data;
+      if (!d) return;
+      if (d.type === 'hsn-pk-bee-done') { take(d); return; }
+      if (d.type === 'hsn_sb_mastery' && d.word && !got[d.word]) {
+        got[d.word] = 1;
+        var n = Object.keys(got).length;
+        var total = (_state && _state.words) ? _state.words.length : 0;
+        var bar = q('prBeeProg');
+        if (bar) bar.textContent = '已掌握 ' + n + ' / ' + total;
+        /* 全部掌握 → 本局结束 */
+        if (total && n >= total) take({ correct: n, total: total });
+      }
+    }
+    /* 用户中途退出也要交卷，否则对手会一直等 */
+    _beeGiveUp = function () { take({ correct: Object.keys(got).length,
+                                      total: (_state && _state.words) ? _state.words.length : 0 }); };
+    try { window.addEventListener('message', onMsg); } catch (e) {}
+    var timer = setInterval(function () {
+      try {
+        var raw = localStorage.getItem(PK_RESULT_KEY);
+        if (raw) take(JSON.parse(raw));
+      } catch (e) {}
+    }, 700);
+    /* 兜底：拼写蜂若因任何原因没回报，10 分钟后按 0 分交卷，不把人卡死 */
+    setTimeout(function () { if (!done) take({ correct: 0, total: 0 }); }, 10 * 60 * 1000);
+  }
+
+  function finishWith(correct, total) {
+    var st = _state;
+    if (!st) return;
+    st.correct = correct;
+    if (total) st.total = total;
+    finish();
   }
 
   function finish() {
@@ -252,5 +331,14 @@
     if (q('prBack2')) q('prBack2').onclick = lobby;
   }
 
-  window.HansenPkRoomUI = { open: function () { lobby(); }, close: close };
+  window.HansenPkRoomUI = {
+    /* 🔴v1099 测试注入口：直接进对战屏，不必真的匹配一个对手。
+       没有这个口子，"对战屏到底能不能用"就只能靠两台真机去试 ——
+       而那正是本项目最贵的教训（看不见现场就只能猜）。 */
+    _startMatchForTest: function (words, oppName) {
+      _state = { roomId: 'test', words: words || [], oppName: oppName || '测试对手',
+                 idx: 0, correct: 0, startAt: Date.now() };
+      startMatch();
+      return true;
+    }, open: function () { lobby(); }, close: close };
 })();

@@ -138,6 +138,8 @@ REGISTRY = [
      'guard_every_guard_has_selftest'),
     ('v1098', '🔴挑刺：闸门从不跑测试(153 个全靠人手动)；4 处恒真断言 ok(true,…) 等于没测',
      'guard_no_always_true_assert'),
+    ('v1099', '🔴拼写大PK 的对战屏是自制简陋版(纯输入框)，不是用户熟悉的拼写蜂玩法',
+     'test_pk_uses_spellbee_v1099.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
