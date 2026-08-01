@@ -118,7 +118,7 @@
       listOpen: function (nowTs) {
         return db().then(function (d) {
           return d.collection(COLLECTION)
-                  .where({ status: 'open' })
+                  .where({ status: 'open', isPrivate: false })   /* v1105: 私密房不进公开列表 */
                   .orderBy('createdAt', 'desc').limit(30).get()
                   .then(function (r) {
                     var rows = (r && r.data) || [];
@@ -182,6 +182,51 @@
   }
 
   /* ── 开房 ── */
+  /* ── 🔴v1105 房间码：邀请朋友来打 ──────────────────────────
+
+     产品需求：「可以邀请自己的好友到房间里面来进行对战。」
+
+     我没有做「加好友」那一套（好友列表 / 申请 / 通过）——
+     **对现在的用户量太重了**，而且解决不了核心问题：
+     你想跟谁打，通常是身边的人（同学、家人），
+     微信里发一句话比在 App 里加好友快得多。
+
+     所以做的是**房间码**：
+       开房 → 拿到 4 位码「7K2M」→ 微信发给朋友 → 他输码直接进
+     整个过程不需要任何账号关系，也不需要对方先注册好友。
+
+     私密房（带码的房）**不出现在公开列表里** ——
+     否则"邀请"就没意义了，随便谁都能进。
+
+     码用不易混淆的字符集：去掉 0/O、1/I/L 这些看错就进错房的。 */
+  var CODE_CHARS = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+
+  function makeCode() {
+    var c = '';
+    for (var i = 0; i < 4; i++) {
+      c += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
+    }
+    return c;
+  }
+
+  /* 按房间码找房 —— 朋友输码进房走这里 */
+  function findByCode(code) {
+    var c = String(code || '').trim().toUpperCase();
+    if (!/^[0-9A-Z]{4}$/.test(c)) {
+      return Promise.resolve({ ok: false, reason: '房间码是 4 位，检查一下' });
+    }
+    var nowTs = Date.now();
+    return T().list({ code: c, status: 'open' }).then(function (rows) {
+      var alive = (rows || []).filter(function (x) {
+        return (nowTs - (x.heartbeatAt || 0)) < STALE_MS;
+      });
+      if (!alive.length) {
+        return { ok: false, reason: '没找到这间房，可能已经关了或码输错了' };
+      }
+      return { ok: true, room: alive[0], roomId: alive[0]._id };
+    }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
+  }
+
   function createRoom(opts) {
     opts = opts || {};
     var u = me();
@@ -190,6 +235,9 @@
     var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
     var doc = {
       status: 'open',
+      /* v1105: 私密房带 4 位码，不出现在公开列表；公开房 code 为空 */
+      code: opts.private ? makeCode() : '',
+      isPrivate: !!opts.private,
       hostId: u.id, hostName: u.name,
       hostTier: opts.tier || '',
       guestId: '', guestName: '',
@@ -557,6 +605,9 @@
     roundState: roundState,
     markReady: markReady,
     /* v1104 对手掉线 */
+    /* v1105 房间码 */
+    findByCode: findByCode,
+    makeCode: makeCode,
     opponentGone: opponentGone,
     claimAbandonWin: claimAbandonWin,
     ABANDON_MS: ABANDON_MS,

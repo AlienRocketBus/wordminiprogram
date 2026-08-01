@@ -112,15 +112,37 @@
       '<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
       + '<div class="pr_h">🏠 大PK · 公开房间</div></div>'
       + (err ? errBlock(err) : '')
-      + '<button class="pr_btn" id="prNew">➕ 自己开一间，等人来打</button>'
+      /* 🔴v1105 邀请朋友：房间码。
+         没做「加好友」那一套（列表/申请/通过）—— 对现在的用户量太重，
+         而且解决不了核心问题：你想跟谁打通常是身边的人，
+         微信发一句话比在 App 里加好友快得多。 */
+      + '<div style="display:flex;gap:8px;margin:10px 0">'
+      +   '<input id="prCode" maxlength="4" placeholder="输入好友的房间码"'
+      +     ' autocapitalize="characters" autocomplete="off"'
+      +     ' style="flex:1;min-width:0;text-align:center;letter-spacing:6px;font-size:20px;'
+      +     'text-transform:uppercase;background:#111827;border:1px solid #334155;'
+      +     'border-radius:12px;color:#e2e8f0;padding:10px">'
+      +   '<button class="pr_btn" id="prJoinCode" style="flex:0 0 92px;margin:0">进房</button>'
+      + '</div>'
+      + '<button class="pr_btn" id="prNew">➕ 开一间公开房，等人来打</button>'
+      + '<button class="pr_btn pr_btn2" id="prPriv">🔒 开私密房，邀请好友来打</button>'
       + '<button class="pr_btn pr_btn2" id="prRef">🔄 刷新房间列表</button>'
       + '<div id="prList"><div class="pr_empty">正在找房间…</div></div>');
     wireErr();
     if (q('prBack')) q('prBack').onclick = close;
     /* v1100：先选玩法再开房 —— 三种规则差别很大，不能默默替房主决定 */
     if (q('prNew')) q('prNew').onclick = function () {
-      chooseMode(function (mode) { _pickedMode = mode; doCreate(); });
+      chooseMode(function (mode) { _pickedMode = mode; _wantPrivate = false; doCreate(); });
     };
+    if (q('prPriv')) q('prPriv').onclick = function () {
+      chooseMode(function (mode) { _pickedMode = mode; _wantPrivate = true; doCreate(); });
+    };
+    var ci = q('prCode');
+    if (ci) {
+      ci.oninput = function () { ci.value = String(ci.value || '').toUpperCase(); };
+      ci.onkeydown = function (ev) { if (ev.key === 'Enter') joinByCode(); };
+    }
+    if (q('prJoinCode')) q('prJoinCode').onclick = joinByCode;
     if (q('prRef')) q('prRef').onclick = refresh;
     refresh();
   }
@@ -152,6 +174,22 @@
     /* 🔴v1100 开房前先选模式 —— 三种玩法规则差别很大，必须让房主明白选的是什么。
      说明文案直接读 HansenPkRoom.MODES，**不在这里另抄一份** ——
      本项目已因"同一件事两处真源"栽过八次。 */
+  var _wantPrivate = false;
+
+  /* 输房间码进房 */
+  function joinByCode() {
+    var ci = q('prCode');
+    var btn = q('prJoinCode');
+    var code = String((ci && ci.value) || '').trim().toUpperCase();
+    if (!code) { alert('先输入好友给你的 4 位房间码'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '找房中…'; }
+    var restore = function () { if (btn) { btn.disabled = false; btn.textContent = '进房'; } };
+    S().findByCode(code).then(function (r) {
+      if (!r.ok) { restore(); alert(r.reason || '没找到这间房'); return; }
+      doJoin(r.roomId, btn);
+    })['catch'](function (e) { restore(); alert(String((e && e.message) || e)); });
+  }
+
   function chooseMode(onPick) {
     var MODES = (S() && S().MODES) || {};
     var cards = ['A', 'B', 'C'].map(function (k) {
@@ -211,19 +249,69 @@ function doCreate() {
     var tier = '';
     try { var L = window.HansenSbLadder, P = window.HansenSbProfile;
           if (L && P) tier = L.tierOf(P.status().rating || 0).name; } catch (e) {}
-    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode }).then(function (r) {
+    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
       _state = { roomId: r.roomId, words: r.words, isHost: true };
-      waiting(r.roomId);
+      waiting(r.roomId, (r.room && r.room.code) || '');
     });
   }
 
-  function waiting(roomId) {
+  function waiting(roomId, code) {
+    /* 🔴v1105：私密房把**房间码大大地显示出来**，并给一键复制。
+       邀请朋友的整个流程就靠这四个字符：
+         开房 → 看到码 → 复制 → 微信发过去 → 朋友输码进来
+       所以它必须是这一屏最显眼的东西，而不是藏在角落的小字。 */
+    var codeBox = code
+      ? '<div style="margin:18px 0;text-align:center">'
+        + '<div style="font-size:13px;color:#94a3b8;margin-bottom:6px">把这个码发给好友</div>'
+        + '<div id="prCodeBig" style="font-size:44px;font-weight:900;letter-spacing:12px;'
+        +   'color:#a5b4fc;background:#111827;border:1px dashed #4f46e5;border-radius:16px;'
+        +   'padding:14px 10px;cursor:pointer">' + esc(code) + '</div>'
+        + '<button class="pr_btn" id="prCopy" style="margin-top:10px">📋 复制房间码</button>'
+        + '<div style="font-size:12px;color:#64748b;margin-top:6px">'
+        +   '私密房不出现在公开列表，只有拿到码的人能进</div>'
+        + '</div>'
+      : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
+        + '等人进来就自动开打。</div>';
+
     paint('<div class="pr_top"><button class="pr_back" id="prBack">← 关掉房间</button>'
       + '<div class="pr_h">⏳ 等对手进来</div></div>'
-      + '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
-      + '等人进来就自动开打。<br><br>（关掉这一页，房间也会一起关掉）</div>');
+      + codeBox
+      + '<div class="pr_empty" style="font-size:12.5px;margin-top:10px">'
+      + '（关掉这一页，房间也会一起关掉）</div>');
     if (q('prBack')) q('prBack').onclick = close;
+
+    if (code) {
+      var doCopy = function () {
+        var okMsg = function () {
+          var b = q('prCopy');
+          if (b) { b.textContent = '✅ 已复制，去微信发给好友'; 
+                   setTimeout(function () { if (b) b.textContent = '📋 复制房间码'; }, 2200); }
+        };
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code).then(okMsg)['catch'](function () { fallback(); });
+            return;
+          }
+        } catch (e) {}
+        fallback();
+        function fallback() {
+          /* 微信内置浏览器有时拿不到 clipboard 权限 —— 退回选中文本让用户长按复制，
+             而不是弹一句"复制失败"就没了。 */
+          try {
+            var el = q('prCodeBig');
+            if (el && window.getSelection && document.createRange) {
+              var r = document.createRange(); r.selectNodeContents(el);
+              var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+            }
+            var b = q('prCopy');
+            if (b) b.textContent = '长按上面的码复制';
+          } catch (e) {}
+        }
+      };
+      if (q('prCopy')) q('prCopy').onclick = doCopy;
+      if (q('prCodeBig')) q('prCodeBig').onclick = doCopy;
+    }
     _cancelWait = S().waitForOpponent(roomId, function (ev) {
       if (ev.joined) { startMatch(); return; }
       if (ev.gone) { lobby({ reason: '房间已经不在了' }); return; }
