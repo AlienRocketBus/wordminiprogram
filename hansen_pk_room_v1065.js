@@ -196,6 +196,7 @@
       seed: seed,
       wordCount: opts.wordCount || WORDS_PER_ROUND,
       createdAt: now, heartbeatAt: now,
+      hostBeat: now, guestBeat: 0,      /* v1104: 双方各自的心跳，用于掉线判定 */
       hostScore: null, guestScore: null,
 
       /* 🔴v1100 回合制对战：**同一个词，两个人同时拼，谁先拼对谁得分。**
@@ -257,20 +258,82 @@
       return T().read(roomId).then(function (room) {
         if (!room) return { ok: false, reason: '房间已不存在' };
         _myRoomId = roomId;
+        /* 🔴v1104：客人也要发心跳 —— 否则房主检测不到客人掉线，
+           会一直干等。原来只有房主发，这是个明显的不对称。 */
+        startHeartbeat(roomId);
         return { ok: true, roomId: roomId, room: room,
                  words: wordsFromSeed(room.seed, room.wordCount || WORDS_PER_ROUND) };
       });
     }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
   }
 
-  /* ── 心跳：房主定期续命，30 秒不续就不再被列出 ── */
+  /* ── 心跳 ──────────────────────────────────────────────────
+
+     🔴v1104：**双方各发各的心跳。**
+
+     原来只有房主发 `heartbeatAt` —— 那客人掉线就完全检测不到，
+     房主会一直干等（现在只有 10 分钟兜底，太长了）。
+
+     改为各自写自己那一侧：
+       房主 → hostBeat     客人 → guestBeat
+     对战中任一方超过 ABANDON_MS 没动静，另一方即可判他离场获胜。
+
+     产品定的阈值：**1 分钟没回来就判负**。
+     选 1 分钟而不是更短，是因为手机切到后台、接个电话、
+     网络抖一下都很常见 —— 太敏感会把正常玩家误判成逃跑。 */
+  var ABANDON_MS = 60000;
+
   function startHeartbeat(roomId) {
     stopHeartbeat();
+    var u = me();
     _hb = setInterval(function () {
-      T().patch(roomId, { heartbeatAt: Date.now() }).catch(function () {});
+      T().read(roomId).then(function (room) {
+        if (!room) return;
+        var patch = { heartbeatAt: Date.now() };   /* 房间存活（列表用） */
+        patch[(room.hostId === u.id) ? 'hostBeat' : 'guestBeat'] = Date.now();
+        return T().patch(roomId, patch);
+      }).catch(function () {});
     }, HEARTBEAT_MS);
   }
   function stopHeartbeat() { if (_hb) { clearInterval(_hb); _hb = null; } }
+
+  /* ── 🔴v1104 对手离场判定 ──────────────────────────────────
+
+     对手强退 / 掉线 / 关掉页面，都会停止写自己那侧的心跳。
+     超过 1 分钟没动静 → 判他离场，本局你胜。
+
+     **为什么不是立刻判**：手机切后台、接电话、网络抖一下都很常见，
+     太敏感会把正常玩家误判成逃跑，那比等一分钟糟得多。 */
+  function opponentGone(roomId) {
+    var u = me();
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: true, gone: true, reason: '房间已不存在' };
+      var isHost = (room.hostId === u.id);
+      var oppBeat = isHost ? (room.guestBeat || 0) : (room.hostBeat || 0);
+      /* 对手还没发过任何心跳 —— 用房间创建/加入时间兜底，
+         否则刚开局那几秒会被误判成"对手从没来过" */
+      if (!oppBeat) oppBeat = room.roundAt || room.createdAt || Date.now();
+      var idle = Date.now() - oppBeat;
+      return { ok: true, gone: idle > ABANDON_MS,
+               idleSecs: Math.round(idle / 1000),
+               limitSecs: Math.round(ABANDON_MS / 1000) };
+    }).catch(function (e) { return { ok: false, reason: E(e) }; });
+  }
+
+  /* 对手离场 → 直接结算本局为我方胜 */
+  function claimAbandonWin(roomId) {
+    var u = me();
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: false, reason: '房间已不存在' };
+      var isHost = (room.hostId === u.id);
+      var patch = { status: 'done', endedBy: 'abandon', endedAt: Date.now() };
+      patch[isHost ? 'hostScore' : 'guestScore'] = 1;
+      patch[isHost ? 'guestScore' : 'hostScore'] = 0;
+      return T().patch(roomId, patch).then(function () {
+        return { ok: true, result: 'win', byAbandon: true };
+      });
+    }).catch(function (e) { return { ok: false, reason: E(e) }; });
+  }
 
   /* ── 离房：房主关房，客人退出 ── */
   function leaveRoom(roomId) {
@@ -493,6 +556,10 @@
     claimRound: claimRound,
     roundState: roundState,
     markReady: markReady,
+    /* v1104 对手掉线 */
+    opponentGone: opponentGone,
+    claimAbandonWin: claimAbandonWin,
+    ABANDON_MS: ABANDON_MS,
     waitForOpponent: waitForOpponent,
     wordsFromSeed: wordsFromSeed,
     stopHeartbeat: stopHeartbeat,

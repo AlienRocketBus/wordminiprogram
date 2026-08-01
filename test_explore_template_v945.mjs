@@ -94,7 +94,7 @@ assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_diamond_shop\\.js\\?v=$
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_econ_guide\\.js\\?v=${__APPV__}`),'HF7 settings-guide color fix must be an exact offline-shell key');
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_round_reward\\.js\\?v=${__APPV__}`),'HF6 Boss round ledger must be an exact offline-shell key');
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_round_bar\\.js\\?v=${__APPV__}`),'HF7 Boss round-card color fix must be an exact offline-shell key');
-assert.match(read('sw_v944.js'),/PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'pages-160'/,'v960 must use the current offline page cache');
-assert.match(read('sw_v944.js'),/ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'assets-160'/,'v960 must use the current runtime asset cache');
+assert.match(read('sw_v944.js'),/PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'pages-161'/,'v960 must use the current offline page cache');
+assert.match(read('sw_v944.js'),/ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'assets-161'/,'v960 must use the current runtime asset cache');
 
 console.log('explore template v945/v946: 27-page wiring + spelling-only routes + isolated progress contract ✅');

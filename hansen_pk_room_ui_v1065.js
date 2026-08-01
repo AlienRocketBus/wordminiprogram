@@ -406,10 +406,48 @@ function doCreate() {
     }, 1000);
   }
 
+  /* 🔴v1104 对手掉线：**1 分钟没动静就判他负。**
+
+     强退、掉线、关页面都会停掉他那侧的心跳。
+     不立刻判，是因为手机切后台、接电话、网络抖一下都很常见 ——
+     太敏感会把正常玩家误判成逃跑，那比等一分钟糟得多。
+
+     用户看得见倒计时：「对手掉线了…45s 后判他负」，
+     而不是干等着不知道发生了什么。 */
+  var _goneChecked = 0;
+
+  function checkOpponentAlive(idx) {
+    var st = _state;
+    if (!st || !st.roomId || st.roomId === 'test') return;
+    if (Date.now() - _goneChecked < 4000) return;    /* 4 秒查一次，别刷爆数据库 */
+    _goneChecked = Date.now();
+    S().opponentGone(st.roomId).then(function (g) {
+      if (!g || !g.ok || !_rt || _rt.idx !== idx) return;
+      var el = q('prOppSt');
+      if (g.gone) {
+        if (el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = '#34d399'; }
+        stopPoll();
+        S().claimAbandonWin(st.roomId).then(function () {
+          showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
+        })['catch'](function () {
+          showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
+        });
+        return;
+      }
+      /* 快到阈值了就提醒 —— 让人知道"不是卡住了，是对手没动" */
+      var left = (g.limitSecs || 60) - (g.idleSecs || 0);
+      if (el && g.idleSecs > 12 && left > 0) {
+        el.textContent = '对手掉线了…' + left + 's 后判他负';
+        el.style.color = '#fbbf24';
+      }
+    })['catch'](function () {});
+  }
+
   /* 看对手抢到没有 —— 这是"对战感"的来源 */
   function pollOpponent(idx) {
     var st = _state;
     if (!st) return;
+    checkOpponentAlive(idx);
     S().roundState(st.roomId).then(function (r) {
       if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
       var w = (r.winners || [])[idx];
@@ -483,7 +521,9 @@ function doCreate() {
   }
 
   function showResult(r) {
-    var txt = r.result === 'win' ? '🎉 你赢了！' : (r.result === 'lose' ? '💪 这局输了' : '🤝 打平');
+    /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
+    var txt = r.byAbandon ? '🏆 对手离场，本局你胜'
+            : (r.result === 'win' ? '🎉 你赢了！' : (r.result === 'lose' ? '💪 这局输了' : '🤝 打平'));
 
     /* 🔴v1103：**打完必须留下痕迹** —— 赢了没记录，那为什么要打？
        只有 A 抢答赛动天梯分（v1100 定的规矩：排位就该纯竞技），
@@ -541,7 +581,9 @@ function doCreate() {
     _startMatchForTest: function (words, oppName, askMode, mode) {
       if (askMode) _askMode = askMode;
       if (mode) _pickedMode = mode;
-      _state = { roomId: 'test', words: words || [], oppName: oppName || '测试对手',
+      /* v1104: roomId 可指定 —— 'test' 会跳过掉线检查，
+         要验掉线就得传一个真实 id */
+      _state = { roomId: (arguments[4] || 'test'), words: words || [], oppName: oppName || '测试对手',
                  askMode: askMode || _askMode, mode: mode || _pickedMode,
                  idx: 0, correct: 0, startAt: Date.now() };
       startMatch();
