@@ -124,6 +124,8 @@ REGISTRY = [
      'guard_single_instance_when_signed_in'),
     ('v1091', '🔴我造成的事故：v1090 把子框一律拦死，拼写大PK 在 iframe 里跑，用户连登录都点不了',
      'test_iframe_login_v1091.mjs'),
+    ('v1092', 'SDK 源码确认：手机号会话刷新失败无兜底直接删凭证（匿名会话才有 anonymousLogin）→ 加影子备份+跨页刷新锁+失败救回',
+     'test_cred_guard_v1092.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
