@@ -120,6 +120,10 @@ REGISTRY = [
      'guard_single_instance_when_signed_in'),
     ('v1090', '🎯真凶：备份恢复把旧凭证快照盖回 localStorage → 过期 refresh_token → invalid_grant → SDK 删掉整个凭证',
      'guard_backup_excludes_credentials'),
+    ('v1090', 'v1088 只堵云存档没堵账号模块；子框内 hansen_auth 照样建实例',
+     'guard_single_instance_when_signed_in'),
+    ('v1091', '🔴我造成的事故：v1090 把子框一律拦死，拼写大PK 在 iframe 里跑，用户连登录都点不了',
+     'test_iframe_login_v1091.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
