@@ -86,7 +86,7 @@
       'html .ld_wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}' +
       'html .ld_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}' +
       'html .ld_h{font-size:20px;font-weight:900;color:var(--hpk-txt)!important;flex:1}' +
-      'html .ld_x{background:none;border:0;color:var(--hpk-dim);font-size:26px;cursor:pointer;padding:0 6px}' +
+      'html .ld_x{background:none;border:0;color:var(--hpk-dim);font-size:26px;cursor:pointer;padding:0 6px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}' +
       'html .ld_card{background:var(--hpk-card);border:1px solid var(--hpk-line);border-radius:16px;padding:16px 14px;margin-bottom:12px}' +
       'html .ld_tier{text-align:center;padding:22px 14px}' +
       'html .ld_te{font-size:52px;line-height:1}' +

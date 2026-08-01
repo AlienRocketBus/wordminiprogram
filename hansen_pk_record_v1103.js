@@ -62,7 +62,27 @@
       if (!raw) return blank();
       var d = JSON.parse(raw);
       var b = blank();
-      Object.keys(b).forEach(function (k) { if (d[k] != null) b[k] = d[k]; });
+      /* 🔴v1112：**数值字段必须强制转数字。**
+         原来是 `if (d[k] != null) b[k] = d[k]` —— 存档被写坏时
+         （比如 `{"wins":"很多"}`）会原样吃进来，
+         界面上就变成「胜 很多 负 0」，胜率计算也跟着崩。
+         实测确认过这个问题。存档是用户数据、会跨设备同步，
+         **必须假设它可能是任何东西**。 */
+      Object.keys(b).forEach(function (k) {
+        if (d[k] == null) return;
+        if (k === 'history') { b[k] = Array.isArray(d[k]) ? d[k] : []; return; }
+        if (typeof b[k] === 'number') {
+          var n = Number(d[k]);
+          if (!isFinite(n) || n < 0) return;                 /* 非数/负数 → 保留默认 */
+          /* 🔴v1112：**还要封顶。** 实测 `{"rating":1e99}` 能通过 isFinite 检查，
+             界面上会显示「1e+99 分」，段位计算也会失控。
+             天梯分按 ELO 的合理区间封顶，其余计数类给个够大但有限的上限。 */
+          var CAP = (k === 'rating' || k === 'peakRating') ? 4000 : 1e7;
+          b[k] = Math.min(Math.floor(n), CAP);
+          return;
+        }
+        b[k] = d[k];
+      });
       if (!Array.isArray(b.history)) b.history = [];
       return b;
     } catch (e) { return blank(); }

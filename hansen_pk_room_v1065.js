@@ -227,10 +227,18 @@
     }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
   }
 
+  var _creating = null;   /* v1112: 开房中的 Promise，防连点开出僵尸房 */
+
   function createRoom(opts) {
     opts = opts || {};
     var u = me();
     if (!u.id) return Promise.reject(new Error('请先登录再开房'));
+    /* 🔴v1112：**防连点。**
+       实测连点三次会真的创建三个房间 —— 多出来的两个成了僵尸房，
+       占着公开列表、别人点进去发现房主根本不在那间。
+       网络慢的时候用户很自然会多点几下，这不是他的错。
+       同一次开房进行中就复用同一个 Promise。 */
+    if (_creating) return _creating;
     var now = Date.now();
     var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
     var doc = {
@@ -268,11 +276,16 @@
       winners: [],
       hostReady: false, guestReady: false
     };
-    return T().add(doc).then(function (r) {
+    _creating = T().add(doc).then(function (r) {
       _myRoomId = r.id;
       startHeartbeat(r.id);
       return { ok: true, roomId: r.id, room: doc, words: wordsFromSeed(seed, doc.wordCount) };
     }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
+    /* 无论成败都要解锁，否则一次失败就再也开不了房 */
+    _creating['finally'] ? _creating['finally'](function () { _creating = null; })
+                         : _creating.then(function () { _creating = null; },
+                                          function () { _creating = null; });
+    return _creating;
   }
 
   /* ── 列房：只列还活着的公开房，且不列自己开的 ── */
