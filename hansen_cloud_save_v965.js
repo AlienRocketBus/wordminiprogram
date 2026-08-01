@@ -264,7 +264,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1106')
+               import('./vendor_cloudbase_esm_v965.js?v=1107')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
