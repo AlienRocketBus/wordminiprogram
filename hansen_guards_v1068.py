@@ -1132,6 +1132,49 @@ def guard_no_always_true_assert():
             '%s 有 %d 条 ok(true,…) —— 那些分支永远不会失败，等于没测' % (name, n))
 
 
+
+def guard_theme_fg_follows_bg():
+    """背景跟主题走的元素，前景色必须一起跟 —— 否则换主题就白底白字。
+
+    事故（v1111，用户挑刺时我自己扫出来的）：
+        .fr_st div.sel{background:var(--hpk-sel-bg);color:#fff}
+    暗色下选中态是深紫底白字，看着没问题；
+    **亮色下背景变成 #e8ecff（很浅），白字对比度 1.0，完全看不见。**
+
+    这是主题化最容易漏的一类：**只把背景变量化了，前景忘了**。
+    单看代码不明显，只有在另一个主题下才暴露。
+
+    判据：一条规则里如果 background 用了主题变量，
+    而 color 是写死的浅色（#fff / #f?f?f? 之类），就报红。
+    """
+    import glob as _g
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*_ui_*.js'))
+                    + _g.glob(os.path.join(ROOT, 'hansen_pk_room_ui*.js'))):
+        src = _code_only(_read(os.path.basename(f)) or '')
+        if not src:
+            continue
+        for m in re.finditer(r"'[^']*\{[^']*\}'", src):
+            rule = m.group(0)
+            if 'background:var(--' not in rule:
+                continue
+            cm = re.search(r'color:\s*(#[0-9a-fA-F]{3,6})', rule)
+            if not cm:
+                continue
+            hexv = cm.group(1)
+            if len(hexv) == 4:
+                hexv = '#' + ''.join(c * 2 for c in hexv[1:])
+            try:
+                lum = (int(hexv[1:3], 16) * .299 + int(hexv[3:5], 16) * .587
+                       + int(hexv[5:7], 16) * .114)
+            except Exception:
+                continue
+            if lum > 200:
+                bad('主题前景',
+                    '%s 里有规则 background 用主题变量、color 却写死浅色 %s —— '
+                    '换到亮色主题会白底白字：%s'
+                    % (os.path.basename(f), hexv, rule[:70]))
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1177,6 +1220,8 @@ GUARDS = [
     ('守卫都有自证',   guard_every_guard_has_selftest),
     # v1098 恒真断言
     ('恒真断言',     guard_no_always_true_assert),
+    # v1111 主题前景
+    ('主题前景',     guard_theme_fg_follows_bg),
 ]
 
 

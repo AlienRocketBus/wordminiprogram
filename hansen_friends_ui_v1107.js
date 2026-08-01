@@ -64,6 +64,12 @@
       '--hpk-sel-bg:#e8ecff;--hpk-ok:#047857;--hpk-bad:#b91c1c' +
     '}';
 
+      /* 🔴v1111：**背景用主题变量，文字就不能写死。**
+         `.fr_st div.sel` 原来是 `background:var(--hpk-sel-bg);color:#fff` ——
+         暗色下选中态是深紫底白字没问题，亮色下背景变成 #e8ecff（很浅），
+         白字就完全看不见了（实测对比度 1.0）。
+         凡是背景跟主题走的元素，前景色必须一起跟。
+
       /* 🔴v1110：这几条必须 !important。
          全站 palette 在亮色系下有一批 `color:#fff!important` 的规则
          （为了让深色卡片上的白字在任何配色下都可读）。
@@ -107,7 +113,7 @@
       'html .fr_st{display:flex;gap:8px}' +
       'html .fr_st div{flex:1;text-align:center;border:1px solid var(--hpk-in-line);border-radius:10px;' +
         'padding:9px 4px;cursor:pointer;font-size:14px;color:var(--hpk-btn2-txt)}' +
-      'html .fr_st div.sel{border-color:#4f46e5;background:var(--hpk-sel-bg);color:#fff;font-weight:700}';
+      'html .fr_st div.sel{border-color:var(--hpk-accent);background:var(--hpk-sel-bg);color:var(--hpk-txt)!important;font-weight:700}';
     document.head.appendChild(st);
   }
 

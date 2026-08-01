@@ -237,6 +237,14 @@ def _inj_always_true(s):
     return s + "\nok(true, 'selftest injected always-true');\n"
 
 
+
+def _inj_theme_fg(s):
+    """把选中态的文字色写死成白 —— 亮色主题下就是白底白字。"""
+    old = 'background:var(--hpk-sel-bg);color:var(--hpk-txt)!important'
+    if old not in s: return None
+    return s.replace(old, 'background:var(--hpk-sel-bg);color:#fff', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -274,6 +282,7 @@ CASES = [
     ('诊断键污染',      'hansen_backup_v944.js',      _inj_diag_pollute),
     ('守卫都有自证',    'jarvis_selftest.py',         _inj_selftest_gap),
     ('恒真断言',      'test_backup_v942.mjs',       _inj_always_true),
+    ('主题前景',      'hansen_friends_ui_v1107.js', _inj_theme_fg),
 ]
 
 
