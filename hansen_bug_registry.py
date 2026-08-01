@@ -136,6 +136,8 @@ REGISTRY = [
      'guard_campaign_notes_present'),
     ('v1097', '🔴挑刺发现三处漏洞：凭证分数可伪造/笔记写死数字会过时/7 道守卫无人验证',
      'guard_every_guard_has_selftest'),
+    ('v1098', '🔴挑刺：闸门从不跑测试(153 个全靠人手动)；4 处恒真断言 ok(true,…) 等于没测',
+     'guard_no_always_true_assert'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

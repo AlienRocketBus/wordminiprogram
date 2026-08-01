@@ -139,7 +139,10 @@ async function gotoIsland(page, file='island_animal.html'){
   await calm(page);
   await page.click('.util-card:has-text("设置")');
   await page.waitForSelector('#hsnCloudCard', { timeout: 8000 });
-  ok(true, '设置页注入 ☁️ 云卡片');
+  /* 🔴v1098：原来是 ok(true,…) —— 恒真断言。
+     虽然上一行 waitForSelector 失败会直接抛错，但那样报的是超时、
+     而不是"云卡片没注入"，读日志的人看不出真因。改为显式断言。 */
+  ok(await page.locator('#hsnCloudCard').count() > 0, '设置页注入 ☁️ 云卡片');
   const st = await page.locator('#hsnCloudStatus').innerText();
   /* 🔴v1003: envId 已回填, 断言改为"状态文案有效"——两种状态都要能正确显示,
      而不是写死"待开通"(那是 envId 为空时代的合同) */

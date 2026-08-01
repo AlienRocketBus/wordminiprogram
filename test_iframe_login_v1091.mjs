@@ -46,7 +46,10 @@ for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_
     ok(/_bgOnly|后台/.test(before),
        `★ ${label}：拒绝路径只针对后台任务，不针对所有子框`);
   } else {
-    ok(true, `★ ${label}：子框内完全不拒绝（更保险）`);
+    /* 🔴v1098：原来是 ok(true,…) —— 恒真断言。
+       "没有 reject"这件事本身也要验证，不能白给一个通过。 */
+    ok(!/reject|throw/.test(seg),
+       `★ ${label}：子框段内确实一处拒绝都没有（更保险）`);
   }
 }
 

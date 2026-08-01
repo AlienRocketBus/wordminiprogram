@@ -15,3 +15,5 @@ releases/
 *.zip
 # v1070: 体检凭证是本地状态，不入库（否则别人拉到就等于白拿背书）
 .jarvis_pass.json
+# v1098: 慢测试名单是本机性能相关的状态，不同机器不一样，不入库
+.jarvis_slow.json

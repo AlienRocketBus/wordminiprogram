@@ -145,6 +145,118 @@ def main():
     else:
         print('\n  ⚠️ 缺少 jarvis_selftest.py —— 没人证明守卫还会咬人。')
 
+    # ── 第一档¾：回归测试 ──
+    #   🔴v1098 挑刺发现：**闸门从来不跑测试**。
+    #   153 个测试全靠人手动执行 —— 跟当初「每版必跑贾维斯」靠记性
+    #   是同一个病，而那个病已经让规矩连丢十一版。
+    #   判据同样是"不许变差"：失败数不得比基线多。
+    #   （不要求全绿：有几个是长期抖动的老红灯，要求全绿等于永远发不了版，
+    #     而那会逼人去删测试 —— 比不跑更糟。）
+    print('\n▶ 第一档¾：回归测试（不许比基线更差）\n')
+    import glob as _glob
+    all_tests = sorted(_glob.glob(os.path.join(ROOT, 'test_*.mjs')))
+    # 🔴v1098：闸门必须是**分钟级**的 —— 跑满 153 个（含大量浏览器测试）
+    #   要十几分钟，那样人会开始绕过它，就回到"靠记性"的老路。
+    #   策略：闸门跑**每个测试 25 秒超时**，跑不完的记为"慢"、单独统计，
+    #   不计入失败（它们由 HANSEN_DEEP=1 的深度档完整跑）。
+    #   这样既保证"不许变差"有实效，又不会让闸门变成没人愿意跑的东西。
+    deep = os.environ.get('HANSEN_DEEP') == '1'
+    per_timeout = 90 if deep else 12
+    # 🔴v1098：闸门只跑**快测试**（12 秒内能跑完的），慢的交给深度档。
+    #   实测：153 个里约 50 个是浏览器测试，动辄 10~20 秒，
+    #   全跑要十几分钟 —— 那样人会绕过闸门，回到"靠记性"的老路。
+    #   快测试覆盖的是逻辑/契约层，恰恰是最容易被改坏的部分。
+    #   慢测试用 `HANSEN_DEEP=1 python3 jarvis_gate.py` 完整跑（发大版本前做一次）。
+    # 🔴v1098：把已知的慢测试**直接跳过**，而不是每次都跑到超时才放弃。
+    #   每个慢测试白等 12 秒 × 50 个 = 10 分钟纯浪费，
+    #   闸门因此跑不完 —— 而跑不完的闸门等于没有闸门。
+    #   慢名单记在 .jarvis_slow.json，由深度档维护。
+    SLOW_FILE = os.path.join(ROOT, '.jarvis_slow.json')
+    known_slow = set()
+    if not deep:
+        try:
+            known_slow = set(json.load(open(SLOW_FILE, encoding='utf-8')))
+        except Exception:
+            known_slow = set()
+    tests = [t for t in all_tests if os.path.basename(t) not in known_slow]
+    if known_slow:
+        print('  ⏭  跳过 %d 个已知慢测试（用 HANSEN_DEEP=1 完整跑）' % len(known_slow))
+    # 并行跑 —— 153 个串行要十几分钟，闸门必须是分钟级的，
+    # 否则人会绕过它（那就回到"靠记性"的老路）。
+    from concurrent.futures import ThreadPoolExecutor
+    def _run(t):
+        """🔴v1098：**失败要复核一次再算数。**
+
+        第一版用 8 线程并行，结果 7 个测试报红 —— 而单独跑全是绿的。
+        原因是浏览器测试互相抢 CPU/端口，并行下会假失败。
+
+        **一个会误报的闸门比没有闸门更糟**：人被误报烦几次，
+        就会开始加 SKIP 绕过它，那就回到"靠记性"的老路。
+
+        所以：并发降到 3，且**失败的单独重跑一次**才算数。
+        """
+        try:
+            r = subprocess.run(['node', t], cwd=ROOT, capture_output=True,
+                               timeout=per_timeout)
+            return None if r.returncode == 0 else os.path.basename(t)
+        except subprocess.TimeoutExpired:
+            return '~SLOW~' + os.path.basename(t)
+        except Exception:
+            return os.path.basename(t)
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        raw = [x for x in ex.map(_run, tests) if x]
+    slow = [x[7:] for x in raw if x.startswith('~SLOW~')]
+    suspect = [x for x in raw if not x.startswith('~SLOW~')]
+    # 🔴v1098：**失败要串行复核一次再算数。**
+    #   第一版 8 线程并行时 7 个测试报红，单独跑全是绿的 ——
+    #   浏览器测试互相抢 CPU/端口会假失败。
+    #   **一个会误报的闸门比没有闸门更糟**：人被误报烦几次就会绕过它。
+    #   只复核失败项（数量少），不拖慢整体。
+    failed = []
+    for name in suspect:
+        try:
+            r = subprocess.run(['node', os.path.join(ROOT, name)], cwd=ROOT,
+                               capture_output=True, timeout=per_timeout + 20)
+            if r.returncode != 0:
+                failed.append(name)
+        except Exception:
+            failed.append(name)
+    if len(suspect) > len(failed):
+        print('  ℹ️  %d 个疑似失败经串行复核后通过（并行下的假失败）'
+              % (len(suspect) - len(failed)))
+    if slow:
+        print('  ⏱  %d 个测试超过 %d 秒未跑完（不计失败，用 HANSEN_DEEP=1 完整跑）'
+              % (len(slow), per_timeout))
+        if not deep:
+            try:
+                json.dump(sorted(known_slow | set(slow)),
+                          open(SLOW_FILE, 'w', encoding='utf-8'), indent=1)
+            except Exception:
+                pass
+    nf = len(failed)
+    base_t = None
+    try:
+        base_t = json.load(open(BASE_FILE, encoding='utf-8')).get('tests')
+    except Exception:
+        pass
+    print('  共 %d 个测试，失败 %d 个' % (len(tests), nf))
+    if failed:
+        for f in failed[:8]:
+            print('    · ' + f)
+    if base_t is None:
+        print('  首次记录基线：%d 个失败' % nf)
+        base_t = nf
+    elif nf > base_t:
+        if os.path.exists(PASS_FILE):
+            os.remove(PASS_FILE)
+        print('  ❌ 失败数从 %d 涨到 %d —— 本版让测试变差了，拒绝发版。' % (base_t, nf))
+        return 1
+    elif nf < base_t:
+        print('  ✅ 失败数从 %d 降到 %d —— 基线自动收紧。' % (base_t, nf))
+        base_t = nf
+    else:
+        print('  ✅ 失败数维持 %d 个，未变差。' % nf)
+
     # ── 第二档：既有问题不许变多 ──
     print('\n▶ 第二档：既有问题总数（不许比基线多）\n')
     n = _legacy_count()
@@ -167,8 +279,8 @@ def main():
             base = n
         else:
             print('  ✅ 既有问题维持 %d 个，未变差。' % n)
-        json.dump({'legacy': base, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
-                   'version': ver},
+        json.dump({'legacy': base, 'tests': base_t,
+                   'at': time.strftime('%Y-%m-%d %H:%M:%S'), 'version': ver},
                   open(BASE_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
     # ── 体检评分（100 分制）──

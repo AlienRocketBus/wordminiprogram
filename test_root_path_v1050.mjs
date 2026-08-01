@@ -71,7 +71,12 @@ console.log(`  （模拟索引文档未配置：SW接管=${broken.ctrl} 子元�
    代价远大于收益：刷新是每天都在走的路，不能为一个可在控制台一次性修好的
    配置问题去冒险。故此处如实断言"服务端问题需服务端修"。 */
 ok(broken.ctrl, '模拟场景下 SW 仍能上岗（兜底不破坏 SW 生命周期）');
-ok(true, '注：HTTP 200 + attachment 属服务端配置问题，需在控制台设置索引文档修复');
+/* 🔴v1098：这里原本是 ok(true, '注：…') —— **拿断言当注释用**。
+   恒真断言会正常打印 OK，看起来像"测过了"，实际什么都没验。
+   纯说明就该写成注释。
+   （HTTP 200 + attachment 属服务端配置问题，需在控制台设置索引文档修复。
+     首版曾把兜底插在主路径上试图覆盖此场景，结果导致导航超时、刷新失败 ——
+     刷新是每天都走的路，不能为一个控制台一次性可修的配置去冒险。） */
 const sw=fs.readFileSync('/home/claude/work/repo/sw_v944.js','utf8');
 ok(/url\.pathname === '\/' \|\| url\.pathname === ''/.test(sw), '源码含裸根路径判定(在 fallback 阶段)');
 ok(/new URL\('index\.html'/.test(sw), '根路径改取 index.html');

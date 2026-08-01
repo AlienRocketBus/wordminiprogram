@@ -80,7 +80,13 @@ function mk(seed) {
   if (items) {
     ok(!items.some(x => / /.test(x.key)), '★ 含空格的键名仍被拦住（不是无脑放行）');
   } else {
-    ok(true, '★ 含空格的键名导致拒绝（同样算拦住）');
+    /* 🔴v1098：原来这里是 ok(true,…) —— **恒真断言，等于没测**。
+       build() 抛异常有两种可能：真的因为空格键被拒（对），
+       或者因为别的原因崩了（那是 bug）。必须区分。 */
+    let why = '';
+    try { B.build(); } catch (e) { why = String(e.message || e); }
+    ok(/非法键|illegal|invalid/i.test(why),
+       `★ 含空格的键名被明确拒绝（而非其它原因崩溃）：${why.slice(0, 40)}`);
   }
 }
 

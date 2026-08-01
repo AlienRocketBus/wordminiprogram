@@ -230,6 +230,13 @@ def _inj_selftest_gap(s):
     return s[:m.start()] + '\n' + s[m.end():]
 
 
+
+def _inj_always_true(s):
+    """往测试里塞一条恒真断言 —— 那条分支永远不会失败，等于没测。"""
+    if 'ok(true,' in s: return None
+    return s + "\nok(true, 'selftest injected always-true');\n"
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -266,6 +273,7 @@ CASES = [
     ('app/auth 同步',   'hansen_auth_v1004.js',       _inj_auth_desync),
     ('诊断键污染',      'hansen_backup_v944.js',      _inj_diag_pollute),
     ('守卫都有自证',    'jarvis_selftest.py',         _inj_selftest_gap),
+    ('恒真断言',      'test_backup_v942.mjs',       _inj_always_true),
 ]
 
 

@@ -1103,6 +1103,35 @@ def guard_every_guard_has_selftest():
             % (len(missing), ', '.join(missing[:6])))
 
 
+
+def guard_no_always_true_assert():
+    """测试里不许有恒真断言 —— ok(true, ...) 等于那一条根本没测。
+
+    挑刺时发现 4 处，全都出现在 else 分支里：
+        if (可以精确验证) { ok(真正的判据, ...); }
+        else              { ok(true, '同样算通过'); }   ← 敷衍
+
+    这比"假绿断言"（写在 process.exit 之后）更难发现：
+    假绿至少还有 guard_no_dead_assertions 盯着，
+    而恒真断言**会正常执行、正常打印 OK**，看起来完全正常。
+
+    它的危害：那条分支覆盖的情况**永远不会被验证**，
+    而报告上却显示"通过" —— 又一次"看起来在工作、其实没在看"。
+    """
+    import glob as _g
+    bad_files = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'test_*.mjs'))):
+        src = _read(os.path.basename(f)) or ''
+        code = re.sub(r'/\*[\s\S]*?\*/', '', src)
+        code = re.sub(r'^\s*//.*$', '', code, flags=re.M)
+        hits = re.findall(r'\bok\(\s*(?:true|1|!!1)\s*,', code)
+        if hits:
+            bad_files.append((os.path.basename(f), len(hits)))
+    for name, n in bad_files:
+        bad('恒真断言',
+            '%s 有 %d 条 ok(true,…) —— 那些分支永远不会失败，等于没测' % (name, n))
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1146,6 +1175,8 @@ GUARDS = [
     ('攻坚笔记在册',   guard_campaign_notes_present),
     # v1097 meta-guard
     ('守卫都有自证',   guard_every_guard_has_selftest),
+    # v1098 恒真断言
+    ('恒真断言',     guard_no_always_true_assert),
 ]
 
 
