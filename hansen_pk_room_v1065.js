@@ -165,7 +165,10 @@
     return _transport;
   }
 
+  var _meOverride = null;   /* v1100 测试注入：不必真登录就能验抢答 */
+
   function me() {
+    if (_meOverride) return _meOverride;
     var A = window.HansenAuth;
     var lc = {};
     try { lc = (A && A.readLocal && A.readLocal()) || {}; } catch (e) {}
@@ -193,7 +196,26 @@
       seed: seed,
       wordCount: opts.wordCount || WORDS_PER_ROUND,
       createdAt: now, heartbeatAt: now,
-      hostScore: null, guestScore: null
+      hostScore: null, guestScore: null,
+
+      /* 🔴v1100 回合制对战：**同一个词，两个人同时拼，谁先拼对谁得分。**
+
+         v1099 做错了：发一整套题让两人各自埋头做完再比分数 ——
+         那不叫对战，那是"两个人各考各的"。
+         真正的对战是回合制：出一个词 → 双方同时拼 → 谁先对谁得分
+         → 一起进下一个词。乐趣正来自"他抢在我前面了"这一下。
+
+         字段含义：
+           round      当前第几个词（0 起）
+           roundAt    本回合开始时间（用于超时判负、防挂机）
+           winners    每回合的赢家 ['host','guest',...]，长度即已完成回合数
+           hostReady/guestReady  双方是否都进入了对战屏（都就绪才开始第 1 回合）
+      */
+      mode: modeOf(opts.mode).key,     /* v1100: A 抢答 / B 回合 / C 同步 */
+      round: 0,
+      roundAt: 0,
+      winners: [],
+      hostReady: false, guestReady: false
     };
     return T().add(doc).then(function (r) {
       _myRoomId = r.id;
@@ -265,6 +287,158 @@
   }
 
   /* ── 交卷：各自写自己那一栏，两边都齐了才算完 ── */
+  /* ── 🔴v1100 回合制抢答 ────────────────────────────────────
+
+     核心难点：**"谁先拼对"必须原子**，否则两个人几乎同时提交时
+     会双双判赢，比分就乱了（这和 v1065 抢房那个坑是同一类，
+     那次实测过"先读再写"能让两人进同一间房）。
+
+     做法：用条件更新 —— 只有当 `winners` 长度**恰好等于当前回合号**时
+     才允许追加。慢的那个条件不成立、影响行数为 0，明确知道自己输了这回合。
+     绝不用"先读再写"。 */
+
+  /* ── 🔴v1100 三种对战模式 ────────────────────────────────────
+
+     房主开房时选一种。**规则定义放在这里做单一真源** ——
+     界面上的玩法说明也从这里读，避免"说明写的和实际跑的不一样"
+     （本项目已因"同一件事两处真源"栽过八次）。
+
+     A 抢答赛（天梯排位专用）
+       出一个词 → 双方同时拼 → **谁先拼对谁得分，慢的一方 0 分**
+       → 立刻进下一词。
+       最刺激，也最残酷：手速慢的可能一局 0 分。
+       **只有这个模式计入天梯排位** —— 排位就该是纯竞技。
+
+     B 回合赛
+       出一个词 → 双方各有 15 秒 → **都答完（或超时）才进下一词**
+       → 拼对的都得分，先拼对的多拿一点。
+       节奏最慢但最公平，适合水平差距大的两个人。
+
+     C 同步赛（推荐给孩子）
+       出一个词 → 双方同时拼 → **先拼对 +100，后拼对 +60，没拼对 0**
+       → 两人都答完 或 15 秒到，就进下一词。
+       既保留抢先的紧张感，又让"拼对"始终有价值 ——
+       弱的一方输的是差距，不是全部，所以还愿意打第二局。 */
+
+  var MODES = {
+    A: {
+      key: 'A', name: '抢答赛', emoji: '⚡',
+      tagline: '谁先拼对谁得分',
+      rules: [
+        '同一个词，两个人同时拼',
+        '**先拼对的拿 100 分，慢的一方 0 分**',
+        '有人拼对就立刻进下一个词，不等',
+        '⭐ 只有这个模式计入天梯排位'
+      ],
+      firstScore: 100, secondScore: 0,
+      waitAll: false,          /* 有人答对就推进，不等另一个 */
+      perWordSecs: 20,
+      ranked: true
+    },
+    B: {
+      key: 'B', name: '回合赛', emoji: '🎯',
+      tagline: '各拼各的，都答完再翻篇',
+      rules: [
+        '同一个词，两个人各有 15 秒',
+        '**两个人都答完（或超时）才进下一个词**',
+        '拼对的都得分：先拼对 100 分，后拼对 80 分',
+        '节奏最稳，适合水平差得多的两个人'
+      ],
+      firstScore: 100, secondScore: 80,
+      waitAll: true,           /* 必须两人都结束才推进 */
+      perWordSecs: 15,
+      ranked: false
+    },
+    C: {
+      key: 'C', name: '同步赛', emoji: '🔥',
+      tagline: '抢先有加成，拼对就有分',
+      rules: [
+        '同一个词，两个人同时拼',
+        '**先拼对 100 分，后拼对 60 分，没拼对 0 分**',
+        '两人都答完、或 15 秒到，就进下一个词',
+        '既有抢先的紧张感，拼对又始终有价值'
+      ],
+      firstScore: 100, secondScore: 60,
+      waitAll: true,
+      perWordSecs: 15,
+      ranked: false
+    }
+  };
+  var DEFAULT_MODE = 'C';
+
+  function modeOf(k) { return MODES[String(k || '').toUpperCase()] || MODES[DEFAULT_MODE]; }
+
+  function claimRound(roomId, roundIdx) {
+    var u = me();
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: false, reason: '房间已不存在' };
+      var winners = room.winners || [];
+      var M = modeOf(room.mode);
+      /* 🔴v1100：**慢了不等于没分。**
+         A 抢答赛：慢的 0 分（残酷但纯竞技，天梯用它）
+         B/C：慢的照样拿 secondScore —— 弱的一方输的是差距不是全部，
+              这样他才愿意打第二局。 */
+      if (winners.length > roundIdx) {
+        return { ok: true, won: false, first: false,
+                 score: M.secondScore,
+                 winner: winners[roundIdx],
+                 round: winners.length, winners: winners, mode: M.key };
+      }
+      var side = (room.hostId === u.id) ? 'host' : 'guest';
+      var next = winners.concat([side]);
+      /* 条件更新：winners 长度必须仍是 roundIdx，否则说明对手刚抢走 */
+      /* ⚠️ guard 必须是**数据库里真实存在的字段** ——
+         我第一版写了 `winnersLen`（虚构字段），条件永远不成立、
+         抢答永远失败。改用 `round`：只有当它仍等于本回合号时才允许写入。 */
+      return T().claim(roomId,
+        { round: roundIdx },                     /* 期望：还没人推进本回合 */
+        { winners: next, round: roundIdx + 1, roundAt: Date.now() }
+      ).then(function (r) {
+        var okWrite = r && (r.updated != null ? r.updated : (r.stats && r.stats.updated));
+        if (!okWrite) {
+          /* 没抢到 —— 重读一次拿到真实结果，不猜 */
+          return T().read(roomId).then(function (r2) {
+            var w2 = (r2 && r2.winners) || [];
+            return { ok: true, won: false, first: false,
+                     score: M.secondScore, winner: w2[roundIdx] || '',
+                     round: w2.length, winners: w2, mode: M.key };
+          });
+        }
+        return { ok: true, won: true, first: true,
+                 score: M.firstScore, winner: side,
+                 round: roundIdx + 1, winners: next, mode: M.key };
+      });
+    }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
+  }
+
+  /* 轮询本回合状态：对手抢到了没有 / 现在该第几个词 */
+  function roundState(roomId) {
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: false, reason: '房间已不存在' };
+      var winners = room.winners || [];
+      return { ok: true, mode: modeOf(room.mode).key,
+               round: winners.length, winners: winners,
+               roundAt: room.roundAt || 0,
+               hostReady: !!room.hostReady, guestReady: !!room.guestReady,
+               heartbeatAt: room.heartbeatAt || 0,
+               wordCount: room.wordCount || WORDS_PER_ROUND };
+    }).catch(function (e) { return { ok: false, reason: E(e) }; });
+  }
+
+  /* 进入对战屏时报到 —— 双方都就绪才开打，避免一方还在加载就被抢完 */
+  function markReady(roomId) {
+    var u = me();
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: false, reason: '房间已不存在' };
+      var patch = {};
+      patch[(room.hostId === u.id) ? 'hostReady' : 'guestReady'] = true;
+      if (!room.roundAt) patch.roundAt = Date.now();
+      return T().patch(roomId, patch).then(function () {
+        return { ok: true };
+      });
+    }).catch(function (e) { return { ok: false, reason: E(e) }; });
+  }
+
   function reportResult(roomId, score) {
     var u = me();
     return T().read(roomId).then(function (room) {
@@ -310,6 +484,14 @@
     joinRoom: joinRoom,
     leaveRoom: leaveRoom,
     reportResult: reportResult,
+    /* v1100 回合制对战 */
+    MODES: MODES,
+    /* v1100: 测试注入身份 —— 抢答原子性是本功能命门，必须能自动验 */
+    _setMeForTest: function (u) { _meOverride = u; },
+    modeOf: modeOf,
+    claimRound: claimRound,
+    roundState: roundState,
+    markReady: markReady,
     waitForOpponent: waitForOpponent,
     wordsFromSeed: wordsFromSeed,
     stopHeartbeat: stopHeartbeat,

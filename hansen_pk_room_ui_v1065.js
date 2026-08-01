@@ -117,7 +117,10 @@
       + '<div id="prList"><div class="pr_empty">正在找房间…</div></div>');
     wireErr();
     if (q('prBack')) q('prBack').onclick = close;
-    if (q('prNew')) q('prNew').onclick = doCreate;
+    /* v1100：先选玩法再开房 —— 三种规则差别很大，不能默默替房主决定 */
+    if (q('prNew')) q('prNew').onclick = function () {
+      chooseMode(function (mode) { _pickedMode = mode; doCreate(); });
+    };
     if (q('prRef')) q('prRef').onclick = refresh;
     refresh();
   }
@@ -146,13 +149,51 @@
   }
 
   /* ── 开房 → 屏 2：等待对手 ── */
-  function doCreate() {
+    /* 🔴v1100 开房前先选模式 —— 三种玩法规则差别很大，必须让房主明白选的是什么。
+     说明文案直接读 HansenPkRoom.MODES，**不在这里另抄一份** ——
+     本项目已因"同一件事两处真源"栽过八次。 */
+  function chooseMode(onPick) {
+    var MODES = (S() && S().MODES) || {};
+    var cards = ['A', 'B', 'C'].map(function (k) {
+      var m = MODES[k];
+      if (!m) return '';
+      return '<div class="pr_mode" data-mode="' + k + '" style="border:1px solid #334155;'
+        + 'border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;background:#111827">'
+        + '<div style="font-size:17px;font-weight:800;color:#e2e8f0">'
+        + m.emoji + ' ' + esc(m.name)
+        + (m.ranked ? '<span style="font-size:12px;color:#fbbf24;margin-left:8px">⭐ 计天梯</span>' : '')
+        + '</div>'
+        + '<div style="font-size:13px;color:#94a3b8;margin:4px 0 8px">' + esc(m.tagline) + '</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.75;color:#cbd5e1">'
+        + (m.rules || []).map(function (r) {
+            return '<li>' + esc(r).replace(/\*\*(.+?)\*\*/g,
+                     '<b style="color:#fff">$1</b>') + '</li>';
+          }).join('')
+        + '</ul></div>';
+    }).join('');
+
+    paint('<div class="pr_top"><div class="pr_h">选个玩法</div>'
+      + '<div class="pr_sub">三种规则差别很大，选你喜欢的</div></div>'
+      + cards
+      + '<button class="pr_btn pr_ghost" id="prBack">← 返回</button>');
+
+    var host = document.getElementById('hsn_pkroom_screen');
+    if (host) {
+      host.querySelectorAll('.pr_mode').forEach(function (el) {
+        el.onclick = function () { onPick(el.getAttribute('data-mode')); };
+      });
+    }
+    var b = q('prBack');
+    if (b) b.onclick = function () { lobby(); };
+  }
+
+function doCreate() {
     var btn = q('prNew');
     if (btn) { btn.disabled = true; btn.textContent = '正在开房…'; }
     var tier = '';
     try { var L = window.HansenSbLadder, P = window.HansenSbProfile;
           if (L && P) tier = L.tierOf(P.status().rating || 0).name; } catch (e) {}
-    S().createRoom({ tier: tier }).then(function (r) {
+    S().createRoom({ tier: tier, mode: _pickedMode }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
       _state = { roomId: r.roomId, words: r.words, isHost: true };
       waiting(r.roomId);
@@ -206,6 +247,7 @@
 
   var PK_RESULT_KEY = 'hansen_pk_bee_result';
   var _beeGiveUp = null;
+  var _pickedMode = 'C';   /* v1100: 房主选的玩法，默认同步赛 */
 
   function startMatch() {
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }

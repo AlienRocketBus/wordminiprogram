@@ -1,6 +1,6 @@
 {
   "name": "wordminiprogram-audit",
-  "version": "1099.0.0",
+  "version": "1100.0.0",
   "private": true,
   "description": "Pinned browser-audit dependencies for Word Adventure v960",
   "devDependencies": {

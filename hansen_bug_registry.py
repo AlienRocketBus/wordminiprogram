@@ -140,6 +140,8 @@ REGISTRY = [
      'guard_no_always_true_assert'),
     ('v1099', '🔴拼写大PK 的对战屏是自制简陋版(纯输入框)，不是用户熟悉的拼写蜂玩法',
      'test_pk_uses_spellbee_v1099.mjs'),
+    ('v1100', '🔴对战做成了"各自做完一整套题再比分"，而真正的对战是同一个词两人同时拼',
+     'test_pk_modes_v1100.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
