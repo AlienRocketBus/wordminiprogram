@@ -963,7 +963,10 @@ def guard_login_path_not_blocked():
                 '%s：子框判断未尝试借用顶层实例 —— 会把用户主动操作一并拦死' % label)
         # 有 reject 的话，前面必须有"仅限后台"的限定
         ri = seg.find('Promise.reject')
-        if ri >= 0 and not re.search(r'_bgOnly|后台', seg[:ri]):
+        # v1097：判据只认 `_bgOnly` 这个具名开关，**不认"后台"二字** ——
+        #   "后台"会出现在错误文案里，把限定删掉后仍能匹配上，
+        #   于是守卫永远绿灯（自证机制抓到了这一点）。
+        if ri >= 0 and '_bgOnly' not in seg[:ri]:
             bad('登录被拦死',
                 '%s：子框内无条件拒绝 —— v1090 就是这样让用户连登录都点不了' % label)
 
@@ -1048,6 +1051,57 @@ def guard_campaign_notes_present():
         if key not in txt:
             bad('攻坚笔记', '笔记缺少核心结论：%s' % key)
 
+    # 🔴v1097：**笔记里不许写死会漂移的数字。**
+    #   挑刺时发现笔记写「23 道守卫」，而实际已 30 道 ——
+    #   笔记会随版本漂移而无人盯着，这正是笔记自己批判的那类问题。
+    for m in re.finditer(r'(\d+)\s*道守卫', txt):
+        bad('攻坚笔记',
+            '笔记写死了「%s 道守卫」—— 数字必然过时，应改为"以 jarvis_gate 输出为准"'
+            % m.group(1))
+    for m in re.finditer(r'(\d+)\s*条事故登记', txt):
+        bad('攻坚笔记', '笔记写死了「%s 条事故登记」—— 同上' % m.group(1))
+
+
+
+def guard_every_guard_has_selftest():
+    """每一道守卫都必须有自证样本 —— 没样本＝没人证明它会咬人。
+
+    挑刺时发现：30 道守卫里有 7 道没有自证样本。
+    它们一直显示绿灯，但从来没被验证过是否真的会报红。
+
+    这比"守卫失灵"更隐蔽：
+      · 守卫失灵至少还有 jarvis_selftest 能发现
+      · 而根本没有样本的守卫，连自证机制都不知道它存在
+
+    知识库那条「守卫全绿 != 没 bug」，正是因为守卫自己可能就是坏的。
+    没样本的守卫，连"是不是坏的"都无从判断。
+
+    允许少量例外，但必须显式豁免并注明理由，不能默认放过。
+    """
+    EXEMPT = {
+        # 这两道盯的是"守卫自身的写法"，注入样本会与它们自己的判据自指
+        '守卫自省': 'self-referential',
+        '守卫查行为': 'self-referential',
+        # 这道注入需篡改登记册/知识库，会连带影响其它判定
+        '贾维斯不落后': 'injection affects other guards',
+    }
+    g = _read('hansen_guards_v1068.py') or ''
+    i = g.find('GUARDS = [')
+    if i < 0:
+        return
+    names = [m.group(1) for m in re.finditer(r"\('([^']+)',\s*guard_\w+\)", g[i:])]
+    st = _read('jarvis_selftest.py') or ''
+    j = st.find('CASES = [')
+    if j < 0:
+        bad('守卫无自证', 'jarvis_selftest missing CASES')
+        return
+    covered = set(m.group(1) for m in re.finditer(r"\('([^']+)',", st[j:]))
+    missing = [n for n in names if n not in covered and n not in EXEMPT]
+    if missing:
+        bad('守卫无自证',
+            '%d guards have no self-test sample: %s'
+            % (len(missing), ', '.join(missing[:6])))
+
 
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
@@ -1090,6 +1144,8 @@ GUARDS = [
     ('app/auth 同步',  guard_app_and_auth_in_sync),
     ('诊断键污染',     guard_diag_tools_not_in_user_data),
     ('攻坚笔记在册',   guard_campaign_notes_present),
+    # v1097 meta-guard
+    ('守卫都有自证',   guard_every_guard_has_selftest),
 ]
 
 

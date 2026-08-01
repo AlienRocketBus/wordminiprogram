@@ -183,6 +183,53 @@ def _inj_notes_gone(s):
     return s.replace('先修', '（已删）', 1)
 
 
+
+def _inj_no_cred_check(s):
+    """去掉登录后的凭证校验 —— 又会出现"界面说已登录、云端没会话"。"""
+    i = s.find('function loginByPhoneCode')
+    if i < 0: return None
+    seg = s[i:i+4000]
+    if 'credentials' not in seg: return None
+    return s[:i] + seg.replace('credentials', 'credGONE') + s[i+4000:]
+
+
+def _inj_block_login(s):
+    """子框内无条件拒绝 —— v1090 就是这样让用户连登录都点不了。"""
+    i = s.find('_inFrame')
+    if i < 0: return None
+    seg = s[i:i+900]
+    if '_bgOnly' not in seg: return None
+    # 守卫查的是「reject 之前有没有"仅限后台"的限定」——
+    # 把限定删掉即模拟 v1090 那种"无条件拒绝"。
+    return s[:i] + seg.replace('_bgOnly', 'alwaysBlock') + s[i+900:]
+
+
+def _inj_auth_desync(s):
+    """auth() 不接住 app() 返回的实例 —— 子框借用实例时报「鉴权不可用」。"""
+    i = s.find('function auth()')
+    if i < 0: return None
+    seg = s[i:i+900]
+    return s[:i] + seg.replace('app().then(function (a)', 'app().then(function ()') + s[i+900:]
+
+
+def _inj_diag_pollute(s):
+    """删掉 DIAG_KEY_RE —— 诊断键会污染用户备份。"""
+    i = s.find('var DIAG_KEY_RE')
+    if i < 0: return None
+    j = s.find('\n', i)
+    return s[:i] + 'var DIAG_KEY_RE=/^__none__$/;' + s[j:]
+
+
+def _inj_selftest_gap(s):
+    """从 CASES 里删掉一条 —— 制造"有守卫没人验证"的状态。"""
+    # 守卫从 CASES 段落里提取已覆盖的守卫名。
+    # 删掉一整条即制造"有守卫没人验证"。注意 SDK 单实例那条要连行首缩进一起删。
+    import re as _r
+    m = _r.search(r"\n\s*\('SDK 单实例',[^\n]*\n", s)
+    if not m: return None
+    return s[:m.start()] + '\n' + s[m.end():]
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -213,6 +260,12 @@ CASES = [
     ('中文键备份',      'hansen_backup_v944.js',      _inj_cjk_off),
     ('三态不分',        'hansen_auth_v1004.js',       _inj_notready_off),
     ('攻坚笔记在册',    '攻坚笔记/跨设备存档攻坚全记录_v1017-v1095.md', _inj_notes_gone),
+    # v1097 补齐无样本的守卫
+    ('无凭据即成功',    'hansen_auth_v1004.js',       _inj_no_cred_check),
+    ('登录被拦死',      'hansen_auth_v1004.js',       _inj_block_login),
+    ('app/auth 同步',   'hansen_auth_v1004.js',       _inj_auth_desync),
+    ('诊断键污染',      'hansen_backup_v944.js',      _inj_diag_pollute),
+    ('守卫都有自证',    'jarvis_selftest.py',         _inj_selftest_gap),
 ]
 
 

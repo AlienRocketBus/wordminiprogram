@@ -134,6 +134,8 @@ REGISTRY = [
      'test_cjk_key_backup_v1095.mjs'),
     ('v1096', '攻坚笔记入库并转化为 7 道守卫，防止六个真凶任何一个重演',
      'guard_campaign_notes_present'),
+    ('v1097', '🔴挑刺发现三处漏洞：凭证分数可伪造/笔记写死数字会过时/7 道守卫无人验证',
+     'guard_every_guard_has_selftest'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

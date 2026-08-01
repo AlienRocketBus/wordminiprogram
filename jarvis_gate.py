@@ -49,6 +49,18 @@ def _version():
         return '?'
 
 
+def _sign(d):
+    """🔴v1097：凭证内容签名。
+
+    不是防恶意攻击（本地文件谁都能改），而是防**无意的自欺** ——
+    比如手动调一下 legacy 想让闸门放行、或调试时改了没改回来。
+    签名把 version/guards/legacy/score 绑在一起：改任何一个都对不上。
+    """
+    import hashlib as _h
+    base = '|'.join(str(d.get(k, '')) for k in ('version', 'guards', 'legacy', 'score'))
+    return _h.sha256(('hansen-jarvis-v1097|' + base).encode()).hexdigest()[:32]
+
+
 def _guards_fingerprint():
     """守卫文件指纹 —— 守卫改了却没重跑，旧凭证必须作废，
     否则会出现「用旧体检结论给新守卫背书」。"""
@@ -189,9 +201,16 @@ def main():
     print('  总分  %d / 100' % score)
     print('=' * 56)
 
-    json.dump({'version': ver, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
-               'guards': _guards_fingerprint(), 'legacy': n, 'score': score},
-              open(PASS_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    # 🔴v1097：**给凭证内容签名。**
+    #   挑刺时发现：凭证原本只校验「版本号」和「守卫指纹」，
+    #   **不校验 score / legacy** —— 手改一下 .jarvis_pass.json 把
+    #   legacy 改成 0、score 改成 100，「既有问题不许变多」这一档就形同虚设。
+    #   实测确认可以骗过：伪造 score=100 legacy=0 → 打包直接通过。
+    #   现在把内容一起签进指纹：任何字段被改，凭证立刻作废。
+    payload = {'version': ver, 'at': time.strftime('%Y-%m-%d %H:%M:%S'),
+               'guards': _guards_fingerprint(), 'legacy': n, 'score': score}
+    payload['sig'] = _sign(payload)
+    json.dump(payload, open(PASS_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('\n🧾 已记下体检凭证 —— v%s 可以打包发布。' % ver)
     print('   ⚠️ 提醒：守卫报红 ≠ 有 bug；守卫全绿 ≠ 没 bug。')
     print('      看到红灯第一步是**验证**，不是照着改代码。')

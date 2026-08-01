@@ -702,6 +702,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1094": (("shell-153", "pages-151", "assets-151", "icons-3"), "v=1094"),
         "1095": (("shell-154", "pages-152", "assets-152", "icons-3"), "v=1095"),
         "1096": (("shell-155", "pages-153", "assets-153", "icons-3"), "v=1096"),
+        "1097": (("shell-156", "pages-154", "assets-154", "icons-3"), "v=1097"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
@@ -1085,7 +1086,18 @@ def _require_jarvis_pass(version: str) -> None:
             "拒绝出包：守卫文件在体检之后被改动过，旧凭证不能给新守卫背书。"
             "请重新运行 python3 jarvis.py"
         )
-    print(f"🧾 贾维斯体检凭证有效（v{data.get('version')} · {data.get('at')}）")
+    # 🔴v1097：校验凭证签名 —— 防止有人（或未来的我）手改 score/legacy
+    #   把「既有问题不许变多」这一档架空。实测确认过：改之前伪造 score=100
+    #   legacy=0 能直接打包通过。
+    import hashlib as _h
+    _base = '|'.join(str(data.get(k, '')) for k in ('version', 'guards', 'legacy', 'score'))
+    _want = _h.sha256(('hansen-jarvis-v1097|' + _base).encode()).hexdigest()[:32]
+    if data.get('sig') != _want:
+        raise RuntimeError(
+            "拒绝出包：体检凭证内容与签名不符（可能被手工改过）。"
+            "请重新运行 python3 jarvis_gate.py")
+    print(f"🧾 贾维斯体检凭证有效（v{data.get('version')} · {data.get('at')}"
+          f" · 体检 {data.get('score','?')}/100）")
 
 
 def package(version: str, out_dir: Path) -> list[Path]:
