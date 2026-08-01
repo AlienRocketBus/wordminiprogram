@@ -172,13 +172,31 @@
         + '</ul></div>';
     }).join('');
 
+    /* v1102：出题形式也让房主选 —— 听发音才是拼写比赛的本来面目，
+       但刚入门的孩子看中文更容易上手，所以两种都留着。 */
+    var askCards = ['cn', 'tts'].map(function (k) {
+      var a = ASK_MODES[k];
+      var on = (_askMode === k);
+      return '<div class="pr_ask" data-ask="' + k + '" style="flex:1;text-align:center;'
+        + 'border:1px solid ' + (on ? '#6366f1' : '#334155') + ';border-radius:12px;'
+        + 'padding:10px 6px;cursor:pointer;background:' + (on ? '#1e1b4b' : '#111827') + '">'
+        + '<div style="font-size:22px">' + a.emoji + '</div>'
+        + '<div style="font-size:14px;font-weight:700;color:#e2e8f0">' + esc(a.name) + '</div>'
+        + '<div style="font-size:11.5px;color:#94a3b8;margin-top:2px">' + esc(a.tip) + '</div></div>';
+    }).join('');
+
     paint('<div class="pr_top"><div class="pr_h">选个玩法</div>'
       + '<div class="pr_sub">三种规则差别很大，选你喜欢的</div></div>'
+      + '<div style="font-size:13px;color:#94a3b8;margin:6px 0 4px">怎么出题</div>'
+      + '<div style="display:flex;gap:10px;margin-bottom:6px">' + askCards + '</div>'
       + cards
       + '<button class="pr_btn pr_ghost" id="prBack">← 返回</button>');
 
     var host = document.getElementById('hsn_pkroom_screen');
     if (host) {
+      host.querySelectorAll('.pr_ask').forEach(function (el) {
+        el.onclick = function () { _askMode = el.getAttribute('data-ask'); chooseMode(onPick); };
+      });
       host.querySelectorAll('.pr_mode').forEach(function (el) {
         el.onclick = function () { onPick(el.getAttribute('data-mode')); };
       });
@@ -193,7 +211,7 @@ function doCreate() {
     var tier = '';
     try { var L = window.HansenSbLadder, P = window.HansenSbProfile;
           if (L && P) tier = L.tierOf(P.status().rating || 0).name; } catch (e) {}
-    S().createRoom({ tier: tier, mode: _pickedMode }).then(function (r) {
+    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
       _state = { roomId: r.roomId, words: r.words, isHost: true };
       waiting(r.roomId);
@@ -227,114 +245,218 @@ function doCreate() {
     });
   }
 
-  /* ── 屏 3：对战（v1099 起改用真正的拼写蜂）── */
+  /* ── 屏 3：对战（v1101 回合制）──────────────────────────────
 
-  /* 🔴v1099：**对战玩法 = 拼写蜂，只是对手换成真人。**
+     🔴v1101 把对战屏重写成**一次一个词**。
 
-     v1065 的对战屏是个自制的简陋版：一个纯文本输入框，
-     没有发音、没有字母块、没有提示、没有连击、没有动画 ——
-     而拼写蜂那套玩法用户已经玩熟了，凭空再造一个既不好玩也不一致。
+     v1099 的做法是把整套词交给拼写蜂，两人各自做完再比分 ——
+     用户点破："对战肯定是两个人同时拼一个单词，一个单词一个单词地拼，
+     不可能给他所有单词大家在那儿各拼各的。"
 
-     复用路径（读 spelling_bee.html 源码确认，**不改动那个文件**）：
-       · 它在 embed 模式下从 `parent.allW` 读词表
-       · 于是这里把房间的确定性词表挂到 window.allW，
-         再用 iframe 打开 spelling_bee.html?embed=1&from=pk
-       · 双方拿到的是同一颗种子生成的同一批词（wordsFromSeed），
-         所以比的是"同一套题谁答得好"，公平
+     现在的一回合长这样：
+       ┌──────────────────────────────┐
+       │  你 320          对手 260     │   ← 实时比分
+       │  第 3 / 12 词      ⏱ 12s      │
+       │                              │
+       │        🍎  苹果               │
+       │      a _ _ _ _               │   ← 首字母提示，和拼写蜂一致
+       │      [ 输入框 ]               │
+       │                              │
+       │  对手：正在拼…                 │   ← 实时状态，这是对战感的来源
+       └──────────────────────────────┘
 
-     结果回传：拼写蜂结束时会往 localStorage 写本局战果，
-     这里轮询读取；同时留一条 postMessage 通道做快路径。 */
+     判分完全交给 claimRound()（已验证过抢答原子性），
+     这里只负责显示和推进。 */
 
-  var PK_RESULT_KEY = 'hansen_pk_bee_result';
-  var _beeGiveUp = null;
+  /* ── 🔴v1102 发音 + 两种出题形式 ────────────────────────────
+
+     用户点破："拼写对战本来不就是发音吗？听发音之后再拼单词。"
+     —— 说得对。拼写比赛（spelling bee）的本质就是**听音拼词**，
+     我 v1101 只显示中文，等于把这个功能的核心丢了。
+
+     两种出题形式，玩家自己选：
+       看中文 —— 屏幕显示「苹果」，看着拼（简单，适合刚入门）
+       听发音 —— **只放读音，屏幕上不给词**，听着拼（这才是真正的拼写比赛）
+
+     发音参数与拼写蜂完全一致（en-US / rate .82 / 优先英文音色），
+     并走全站统一音量（HansenTTSVolume），
+     否则同一个 App 里两处发音一大一小 —— v1038 修过这个毛病。 */
+
+  var ASK_MODES = {
+    cn:  { key: 'cn',  name: '看中文', emoji: '📖', tip: '屏幕显示中文，看着拼' },
+    tts: { key: 'tts', name: '听发音', emoji: '🔊', tip: '只放读音，不给词，听着拼' }
+  };
+  var _askMode = 'cn';        /* 默认看中文；房主开房时可改 */
+
+  function speak(text) {
+    try {
+      if (!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(String(text).replace(/[^a-zA-Z \-]/g, ''));
+      u.lang = 'en-US'; u.rate = 0.82; u.pitch = 1;
+      /* 走全站音量归一 —— 不然 PK 的发音会比岛屿里大一截 */
+      try {
+        var V = window.HansenTTSVolume;
+        if (V && typeof V.gain === 'function') u.volume = V.gain();
+      } catch (e) {}
+      var vs = speechSynthesis.getVoices();
+      var ev = vs.filter(function (v) { return /^en(-|_)/i.test(v.lang); })[0];
+      if (ev) u.voice = ev;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
   var _pickedMode = 'C';   /* v1100: 房主选的玩法，默认同步赛 */
+  var _rt = null;          /* 本回合的运行时状态 */
+  var _pollTimer = null;
+
+  function stopPoll() {
+    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+  }
 
   function startMatch() {
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
     var st = _state;
     if (!st) return;
     st.startAt = Date.now();
-
-    /* 把本局词表交给拼写蜂 —— 它在 embed 模式下正是从 parent.allW 取词 */
-    try {
-      window.allW = (st.words || []).map(function (w) {
-        return { en: w.en, cn: w.cn || '', pn: w.pn || '', emoji: '⚔️', isl: 'pk' };
-      });
-    } catch (e) {}
-
-    /* 清掉上一局可能残留的战果，避免读到旧数据当成本局 */
-    try { localStorage.removeItem(PK_RESULT_KEY); } catch (e) {}
-
-    paint('<div class="pr_top"><div class="pr_h">⚔️ 对战中</div>'
-      + '<div class="pr_sub">和 ' + esc(st.oppName || '对手') + ' 比同一套题 · '
-      + '<span id="prBeeProg">已掌握 0 / ' + (st.words || []).length + '</span></div></div>'
-      + '<div id="prBeeBox" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index:2147483000;background:#0b1020"></div>');
-
-    var box = q('prBeeBox');
-    if (!box) { finishWith(0, 0); return; }
-    var ifr = document.createElement('iframe');
-    ifr.id = 'prBeeFrame';
-    ifr.src = 'spelling_bee.html?embed=1&from=pk&island=pk&v=' + (window.__HSN_V || Date.now());
-    ifr.style.cssText = 'width:100%;height:100%;border:0;display:block';
-    ifr.setAttribute('allow', 'autoplay');
-    box.appendChild(ifr);
-
-    watchBeeResult();
+    st.myScore = 0; st.oppScore = 0;
+    st.mode = st.mode || _pickedMode || 'C';
+    /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完 */
+    try { S().markReady(st.roomId); } catch (e) {}
+    askRound(0);
   }
 
-  /* 轮询拼写蜂写下的战果；同时接受 postMessage 快路径 */
-  function watchBeeResult() {
-    var done = false;
-    function take(r) {
-      if (done || !r) return;
-      done = true;
-      try { window.removeEventListener('message', onMsg); } catch (e) {}
-      clearInterval(timer);
-      var box = q('prBeeBox');
-      if (box) box.innerHTML = '';
-      finishWith(Number(r.correct) || 0, Number(r.total) || (_state ? _state.words.length : 0));
-    }
-    /* 🔴v1099：**不改 spelling_bee.html**（那是铁律），改为监听它已有的消息。
-
-       实测源码确认它每掌握一个词就往父页发：
-           postMessage({ type:'hsn_sb_mastery', word, index, ... })
-       所以这里按 word 去重计数即可 —— 既拿到实时进度，
-       又完全不需要动那个文件。 */
-    var got = {};
-    function onMsg(ev) {
-      var d = ev && ev.data;
-      if (!d) return;
-      if (d.type === 'hsn-pk-bee-done') { take(d); return; }
-      if (d.type === 'hsn_sb_mastery' && d.word && !got[d.word]) {
-        got[d.word] = 1;
-        var n = Object.keys(got).length;
-        var total = (_state && _state.words) ? _state.words.length : 0;
-        var bar = q('prBeeProg');
-        if (bar) bar.textContent = '已掌握 ' + n + ' / ' + total;
-        /* 全部掌握 → 本局结束 */
-        if (total && n >= total) take({ correct: n, total: total });
-      }
-    }
-    /* 用户中途退出也要交卷，否则对手会一直等 */
-    _beeGiveUp = function () { take({ correct: Object.keys(got).length,
-                                      total: (_state && _state.words) ? _state.words.length : 0 }); };
-    try { window.addEventListener('message', onMsg); } catch (e) {}
-    var timer = setInterval(function () {
-      try {
-        var raw = localStorage.getItem(PK_RESULT_KEY);
-        if (raw) take(JSON.parse(raw));
-      } catch (e) {}
-    }, 700);
-    /* 兜底：拼写蜂若因任何原因没回报，10 分钟后按 0 分交卷，不把人卡死 */
-    setTimeout(function () { if (!done) take({ correct: 0, total: 0 }); }, 10 * 60 * 1000);
-  }
-
-  function finishWith(correct, total) {
+  function askRound(idx) {
+    stopPoll();
     var st = _state;
     if (!st) return;
-    st.correct = correct;
-    if (total) st.total = total;
-    finish();
+    var words = st.words || [];
+    if (idx >= words.length) { finish(); return; }
+
+    var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { perWordSecs: 15, name: '' };
+    var w = words[idx];
+    var en = String(w.en || '');
+    var askIsTts = (st.askMode || _askMode) === 'tts';
+    _rt = { idx: idx, answered: false, t0: Date.now(),
+            deadline: Date.now() + (M.perWordSecs || 15) * 1000 };
+
+    paint('<div class="pr_top">'
+      + '<div class="pr_h" style="display:flex;justify-content:space-between;align-items:center">'
+      +   '<span>你 <b id="prMy">' + st.myScore + '</b></span>'
+      +   '<span style="font-size:13px;color:#94a3b8">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
+      +   '<span><b id="prOpp">' + st.oppScore + '</b> ' + esc(st.oppName || '对手') + '</span>'
+      + '</div>'
+      + '<div class="pr_sub">第 ' + (idx + 1) + ' / ' + words.length + ' 词'
+      +   ' · <span id="prClock">⏱ ' + (M.perWordSecs || 15) + 's</span></div></div>'
+
+      /* 🔴v1102 两种出题形式：
+           看中文 —— 显示中文 + 首字母提示
+           听发音 —— **只给喇叭，屏幕上不出现这个词的任何线索**
+                     （连首字母都不给，否则"听音拼词"就名存实亡） */
+      + (askIsTts
+          ? '<div style="margin:26px 0 10px;text-align:center">'
+            + '<button id="prSpk" style="font-size:44px;background:none;border:0;cursor:pointer">🔊</button>'
+            + '<div style="font-size:13px;color:#94a3b8;margin-top:6px">点喇叭再听一次</div></div>'
+          : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(w.cn || '') + '</div>'
+            + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:#93c5fd">'
+            + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
+      + '<input class="pr_in" id="prIn" autocomplete="off" autocapitalize="off" '
+      +   'autocorrect="off" spellcheck="false" placeholder="拼出这个词" '
+      +   'style="font-size:20px;letter-spacing:2px;text-align:center">'
+      + '<div id="prHint" style="min-height:24px;margin-top:10px;font-size:14px;color:#94a3b8">'
+      +   '对手：<span id="prOppSt">正在拼…</span></div>');
+
+    /* 听发音模式：一进来就读一遍，点喇叭可重听 */
+    if (askIsTts) {
+      setTimeout(function () { speak(en); }, 220);
+      var spk = q('prSpk');
+      if (spk) spk.onclick = function () { speak(en); };
+    }
+
+    var input = q('prIn');
+    if (input) {
+      try { input.focus(); } catch (e) {}
+      input.oninput = function () {
+        /* 拼对即提交 —— 不用按回车，抢答讲的就是这一下 */
+        var v = String(input.value || '').trim().toLowerCase();
+        if (!_rt.answered && v === en.toLowerCase()) submitRound(idx, true);
+      };
+      input.onkeydown = function (ev) {
+        if (ev.key !== 'Enter' || _rt.answered) return;
+        var v = String(input.value || '').trim().toLowerCase();
+        if (v === en.toLowerCase()) submitRound(idx, true);
+        else {
+          input.value = '';
+          var h = q('prHint');
+          if (h) { h.style.color = '#f87171'; h.textContent = '不对，再试试'; 
+                   setTimeout(function () { if (h) { h.style.color = '#94a3b8';
+                     h.innerHTML = '对手：<span id="prOppSt">正在拼…</span>'; } }, 900); }
+        }
+      };
+    }
+
+    /* 倒计时 + 轮询对手 */
+    _pollTimer = setInterval(function () {
+      if (!_rt || _rt.idx !== idx) return;
+      var left = Math.max(0, Math.ceil((_rt.deadline - Date.now()) / 1000));
+      var c = q('prClock');
+      if (c) c.textContent = '⏱ ' + left + 's';
+      if (left <= 0 && !_rt.answered) { submitRound(idx, false); return; }
+      pollOpponent(idx);
+    }, 1000);
+  }
+
+  /* 看对手抢到没有 —— 这是"对战感"的来源 */
+  function pollOpponent(idx) {
+    var st = _state;
+    if (!st) return;
+    S().roundState(st.roomId).then(function (r) {
+      if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
+      var w = (r.winners || [])[idx];
+      if (!w) return;
+      var mySide = st.isHost ? 'host' : 'guest';
+      var oppGot = (w !== mySide);
+      var el = q('prOppSt');
+      if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = '#fbbf24'; }
+      var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { waitAll: true };
+      /* A 模式：对手抢到就立刻翻篇，不等我 */
+      if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); }
+    })['catch'](function () {});
+  }
+
+  function submitRound(idx, correct, forced) {
+    if (!_rt || _rt.answered) return;
+    _rt.answered = true;
+    stopPoll();
+    var st = _state;
+    var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { firstScore: 100, secondScore: 60, waitAll: true };
+
+    var after = function (gain, first) {
+      st.myScore += gain;
+      var my = q('prMy'); if (my) my.textContent = st.myScore;
+      /* 本回合小结：让人看见"我快了多少" —— 这是正反馈 */
+      var secs = ((Date.now() - _rt.t0) / 1000).toFixed(1);
+      var h = q('prHint');
+      if (h) {
+        h.style.color = gain ? (first ? '#fbbf24' : '#34d399') : '#94a3b8';
+        var word = ((_state.words || [])[idx] || {});
+        /* 🔴v1102：本回合结束一定把答案亮出来 ——
+           听发音模式下如果不显示，孩子拼错了都不知道正确答案是什么，
+           那就失去了学习意义（这个 App 首先是用来学英语的）。 */
+        var answer = ' 〔' + (word.en || '') + (word.cn ? ' ' + word.cn : '') + '〕';
+        h.textContent = (gain
+          ? ((first ? '🔥 你抢先拼对！' : '✅ 拼对了') + ' +' + gain + ' 分 · ' + secs + 's')
+          : (forced ? '对手抢先了' : '⏱ 超时了')) + answer;
+      }
+      setTimeout(function () { askRound(idx + 1); }, 1400);
+    };
+
+    if (!correct) { after(0, false); return; }
+
+    S().claimRound(st.roomId, idx).then(function (r) {
+      if (!r || !r.ok) { after(0, false); return; }
+      after(Number(r.score) || 0, !!r.first);
+    })['catch'](function () { after(0, false); });
   }
 
   function finish() {
@@ -377,8 +499,11 @@ function doCreate() {
     /* 🔴v1099 测试注入口：直接进对战屏，不必真的匹配一个对手。
        没有这个口子，"对战屏到底能不能用"就只能靠两台真机去试 ——
        而那正是本项目最贵的教训（看不见现场就只能猜）。 */
-    _startMatchForTest: function (words, oppName) {
+    _startMatchForTest: function (words, oppName, askMode, mode) {
+      if (askMode) _askMode = askMode;
+      if (mode) _pickedMode = mode;
       _state = { roomId: 'test', words: words || [], oppName: oppName || '测试对手',
+                 askMode: askMode || _askMode, mode: mode || _pickedMode,
                  idx: 0, correct: 0, startAt: Date.now() };
       startMatch();
       return true;

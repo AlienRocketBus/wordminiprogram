@@ -212,6 +212,7 @@
            hostReady/guestReady  双方是否都进入了对战屏（都就绪才开始第 1 回合）
       */
       mode: modeOf(opts.mode).key,     /* v1100: A 抢答 / B 回合 / C 同步 */
+      askMode: (opts.askMode === 'tts') ? 'tts' : 'cn',   /* v1102: 看中文 / 听发音 */
       round: 0,
       roundAt: 0,
       winners: [],

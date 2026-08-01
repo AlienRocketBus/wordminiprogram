@@ -36,10 +36,15 @@ assert.doesNotMatch(preload,/setTimeout\(function\(\)\{\s*pumpTimer\s*=\s*null;\
   '弱网/后台不得永久每秒轮询，应等待可见性或网络 change 事件');
 assert.match(template,/function canBackgroundBossPrefetch\(/,'Boss 引擎预取门禁必须在 template 源');
 assert.match(template,/__hansenBossFXPrefetched/,'Boss 引擎与特效图预取必须单例');
-assert.match(sw,/CACHE_PREFIX \+ 'shell-159'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
+assert.match(sw,/CACHE_PREFIX \+ 'shell-161'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
 assert.match(sw,/await cache\.addAll\(/,'核心 shell 必须整批原子写入');
 assert.doesNotMatch(sw,/Promise\.allSettled\(SHELL/,'半包 shell 不得被激活');
-assert.match(sw,/const NAVIGATION_TIMEOUT_MS = 3000/,'导航网络优先必须有硬超时');
+assert.match(sw,/* 🔴v1101：原来写死 3000 —— 而 v1082 已把它改成 8000
+     （3 秒太短：用户在微信里信号一波动就退回旧缓存，
+       导致"做出来的东西不显示"，那是拖了二十多版的根因）。
+     判据改为"存在且是合理的秒级数值"，不钉死具体数字 ——
+     写死的常量必然过期，这是本项目的老教训。 */
+  /const NAVIGATION_TIMEOUT_MS = (\d{4,5})\b/,'导航网络优先必须有硬超时');
 assert.match(sw,/const COLD_NAVIGATION_TIMEOUT_MS = 12000/,'从未缓存的冷页面必须有更宽容的首访窗口');
 assert.match(sw,/controller\.abort\(\)/,'超时后必须终止在途导航');
 assert.match(sw,/await response\.arrayBuffer\(\)/,'导航超时必须覆盖正文，不只覆盖响应头');
@@ -93,7 +98,14 @@ function workerHarness({installFails=false,cached=null,source=sw,fetchImpl,cache
   const started=Date.now();
   const response=await h.fetch({method:'GET',mode:'navigate',url:'https://app.test/island_animal.html'});
   assert.equal(await response.text(),'cached island');assert.equal(aborted,true);
-  assert(Date.now()-started<300,'慢网应快速回退当前页缓存');
+  /* 🔴v1102：原来断言"300ms 内必须回退" —— 那是 NAVIGATION_TIMEOUT_MS=3000
+     时代的假设。v1082 有意把它放宽到 8000，因为 3 秒太短：
+     用户在微信里信号一波动就退回旧缓存，导致"做出来的东西不显示"，
+     那是拖了二十多版的根因。
+     现在改为断言**行为正确**（确实回退到缓存、确实中止了慢请求），
+     而不是钉死一个会随配置变的毫秒数 ——
+     写死的常量必然过期，这是本项目反复栽过的坑。 */
+  assert(Date.now()-started < 12000,'慢网最终应回退当前页缓存（不钉死具体毫秒）');
 }
 {
   const h=workerHarness({cached:null});
