@@ -89,11 +89,11 @@ assert.doesNotMatch(workerSource, /["']\.\/hansen_backup_bootstrap\.js["']/,
   'the new worker shell must not cache the v943 bootstrap pathname');
 assert.match(workerSource, /hansen_perf_v944\.js/,
   'the new worker shell must cache the non-pausing performance engine');
-assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-171['"]/,
+assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-172['"]/,
   'v960 must atomically install the current release shell');
-assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-169['"]/,
+assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-170['"]/,
   'v960 must rotate navigation pages to the current wiring');
-assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-169['"]/,
+assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-170['"]/,
   'v960 must rotate code so stale earlier Boss code cannot return');
 for (const exactHotfixKey of [
   'hansen_canonical_progress.js?v='+__APPV__,

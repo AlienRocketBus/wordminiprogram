@@ -188,11 +188,31 @@
         var now = Date.now();
         /* 双向各写一条 —— 加了就是互为好友，不做"申请/通过"那一套：
            这是给孩子用的，多一步确认只会让人加不上。 */
-        return T().add({ kind: 'friend', owner: u.cid, friend: target, name: nm, at: now })
-          .then(function () {
-            return T().add({ kind: 'friend', owner: target, friend: u.cid, name: u.name, at: now });
-          })
-          .then(function () { return { ok: true, cid: target, name: nm }; });
+        /* 🔴v1113：**写之前再查一次，防并发重复。**
+
+           实测：A 加 B 的同时 B 也在加 A → 双方各写两条 →
+           好友列表里同一个人出现两次。
+           上面那次「已经是好友了」的检查是在**读的那一刻**做的，
+           两边同时读到"还不是好友"，就都写了。
+
+           这是典型的"先读再写"竞态 —— 本项目在抢房那里踩过一次
+           （两人进同一间房），当时的结论是"绝不先读再写"。
+           好友这里没有条件更新可用（是 add 不是 update），
+           所以改为**写之前贴着写再查一次**，把窗口压到最小；
+           并在读取列表时**按 friend 去重**做最终兜底。 */
+        return T().list({ kind: 'friend', owner: u.cid, friend: target })
+          .then(function (dup) {
+            if (dup && dup.length) return { ok: true, cid: target, name: nm, already: true };
+            return T().add({ kind: 'friend', owner: u.cid, friend: target, name: nm, at: now })
+              .then(function () {
+                return T().list({ kind: 'friend', owner: target, friend: u.cid });
+              })
+              .then(function (dup2) {
+                if (dup2 && dup2.length) return null;   /* 对方已经写过了，不重复写 */
+                return T().add({ kind: 'friend', owner: target, friend: u.cid, name: u.name, at: now });
+              })
+              .then(function () { return { ok: true, cid: target, name: nm }; });
+          });
       });
     })['catch'](function (e) { return { ok: false, reason: String((e && e.message) || e) }; });
   }
@@ -217,7 +237,16 @@
     var u = me();
     if (!u.cid) return Promise.resolve({ ok: false, reason: '先登录', friends: [] });
     return T().list({ kind: 'friend', owner: u.cid }).then(function (rows) {
-      var cids = (rows || []).map(function (r) { return r.friend; });
+      /* 🔴v1113：**按 friend 去重**。
+         并发写入、历史脏数据都可能让同一个人出现多条，
+         而用户看到好友列表里同一个人出现两次，会觉得这个 App 不可靠。
+         去重放在读取侧，是因为它对任何来源的重复都有效。 */
+      var seen = {};
+      rows = (rows || []).filter(function (r) {
+        if (!r || !r.friend || seen[r.friend]) return false;
+        seen[r.friend] = 1; return true;
+      });
+      var cids = rows.map(function (r) { return r.friend; });
       if (!cids.length) return { ok: true, friends: [] };
       /* 逐个查在线（云开发的 in 查询限制多，好友数上限 50，逐个查可接受） */
       return Promise.all(cids.map(function (c) {

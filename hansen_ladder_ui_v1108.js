@@ -130,7 +130,28 @@
   }
 
   /* ── 主屏 ─────────────────────────────────────────────── */
+
+  /* 🔴v1113：**打开自己之前先关掉同级的另一屏。**
+
+     实测：天梯页和好友页能同时开着，而且 z-index 一模一样
+     （都是 2147482000）—— 谁盖在上面全看 DOM 插入顺序，
+     用户会看到两屏叠在一起、点击穿透到下面那屏。
+
+     这类"全屏浮层"必须互斥：打开一个就关掉另一个。
+     不靠调 z-index 谁高谁低 —— 那只是把问题藏起来，
+     下面那屏仍然存在、仍在跑它的轮询定时器。 */
+  function closePeers() {
+    var peers = ['HansenFriendsUI', 'HansenLadderUI', 'HansenPkRoomUI'];
+    peers.forEach(function (n) {
+      try {
+        var m = window[n];
+        if (m && m !== window.HansenLadderUI && typeof m.close === 'function') m.close();
+      } catch (e) {}
+    });
+  }
+
   function open() {
+    closePeers();
     var sm = R() ? R().summary() : null;
     if (!sm) { alert('战绩模块还没就绪，稍等一下'); return; }
 

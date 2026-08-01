@@ -167,6 +167,8 @@ REGISTRY = [
      'guard_theme_fg_follows_bg'),
     ('v1112', '🔴挑刺三处：关闭按钮 27px 手指点不准；连点开三个僵尸房；战绩存档被写坏会显示"胜 很多"',
      'test_pk_record_v1103.mjs'),
+    ('v1113', '🔴并发挑刺两处：两人同时互加好友会各写两条造成重复；天梯页与好友页能同时开着且 z-index 相同',
+     'test_friends_v1106.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
