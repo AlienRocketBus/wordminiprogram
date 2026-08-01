@@ -484,8 +484,47 @@ function doCreate() {
 
   function showResult(r) {
     var txt = r.result === 'win' ? '🎉 你赢了！' : (r.result === 'lose' ? '💪 这局输了' : '🤝 打平');
+
+    /* 🔴v1103：**打完必须留下痕迹** —— 赢了没记录，那为什么要打？
+       只有 A 抢答赛动天梯分（v1100 定的规矩：排位就该纯竞技），
+       B/C 只记战绩。 */
+    var rec = null;
+    try {
+      var R = window.HansenPkRecord;
+      if (R) {
+        rec = R.record({
+          result: r.result,
+          mode: (_state && _state.mode) || _pickedMode,
+          oppName: (_state && _state.oppName) || '对手',
+          myScore: r.mine, oppScore: r.theirs
+        });
+      }
+    } catch (e) {}
+
+    var extra = '';
+    if (rec) {
+      var sm = window.HansenPkRecord.summary();
+      var dTxt = '';
+      if (rec.ranked && rec.delta) {
+        dTxt = '<div style="font-size:20px;font-weight:800;margin:6px 0;color:'
+             + (rec.delta > 0 ? '#34d399' : '#f87171') + '">'
+             + (rec.delta > 0 ? '+' : '') + rec.delta + ' 天梯分</div>';
+      } else if (!rec.ranked) {
+        dTxt = '<div style="font-size:12.5px;color:#94a3b8;margin:4px 0">'
+             + '本局不计天梯（只有 ⚡ 抢答赛计分）</div>';
+      }
+      extra = dTxt
+        + '<div style="font-size:13px;color:#cbd5e1;margin-top:8px">'
+        +   rec.tier.emoji + ' ' + esc(rec.tier.name) + ' · ' + esc(rec.tier.sub) + '<br>'
+        +   '总战绩 ' + sm.wins + ' 胜 ' + sm.losses + ' 负'
+        +   (sm.total ? ' · 胜率 ' + sm.winRate + '%' : '')
+        +   (sm.streak >= 2 ? ' · 🔥 ' + sm.streak + ' 连胜' : '')
+        + '</div>';
+    }
+
     paint('<div class="pr_res">' + txt + '</div>'
       + '<div class="pr_empty">你 ' + r.mine + ' 分 · 对手 ' + r.theirs + ' 分</div>'
+      + extra
       + '<button class="pr_btn" id="prAgain">再来一局</button>'
       + '<button class="pr_btn pr_btn2" id="prBack2">← 回到房间列表</button>');
     var rid = _state && _state.roomId;
