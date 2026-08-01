@@ -128,6 +128,8 @@ REGISTRY = [
      'test_cred_guard_v1092.mjs'),
     ('v1093', '🔴v1091 只改了 app() 没改 auth()，子框里 _auth 仍为 null → 报「鉴权不可用」，登录照样点不动',
      'test_iframe_login_v1091.mjs'),
+    ('v1094', '🔴我加的诊断/守护键以 hansen_ 开头被备份收录 → 「备份含非法键或非字符串值」，存云端失败',
+     'test_backup_v942.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

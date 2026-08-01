@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1093;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1094;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -14,6 +14,7 @@
   // Skipped v947-v949 and future journals fail closed; the v942 key remains the schema identity.
   var RESTORE_JOURNAL='hansen_backup_restore_journal_v942',JOURNAL_SCHEMA=1,MIN_JOURNAL_APP_VERSION=942;
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
+  var DIAG_KEY_RE=/^hansen_(?:credtrap_|cred_shadow|cred_rescue|cred_refresh|vw_autofixed)/i;
   var PREFIXES=['wordIsland','hansen_','hsn_','bs_hall_','hs_showcase_'];
   var DENY=/^(?:hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test|hansen_auth_|hansen_cloud_state_)|(?:password|passcode|token|secret|authorization|session)/i;
   var TRANSIENT_KEY=/(?:^|[_:\-.])(?:pending|journal|transaction|txn)(?:[_:\-.]|$)|(?:^|_)tmp(?:_|$)/i;
@@ -54,6 +55,12 @@
        · 更糟的是**搬回来会把当前有效会话打掉**（就是本次事故）
      所以必须显式排除，且这条排除要放在最前面，先于一切收录规则。 */
   function credentialKey(k){
+    /* 🔴v1094：诊断/守护类的内部键一律不进备份。
+       用户现场：登录成功后点「立即把进度存到云端」，报「备份含非法键或非字符串值」。
+       原因是 v1085/v1092 新增的内部键都以 hansen_ 开头，正好落进备份收录前缀 ——
+       它们是本机诊断状态，既非玩家进度、也不该跨设备同步，
+       更不该因为格式不符就让整个备份失败。**我加的工具污染了用户的备份。** */
+    if (typeof k === 'string' && DIAG_KEY_RE.test(k)) return true;
     return typeof k === 'string' &&
       /^(?:credentials|access_token|refresh_token)|^tcb[_-]|cloudbase.*(?:token|cred)/i.test(k);
   }
@@ -532,7 +539,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1093_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1094_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
