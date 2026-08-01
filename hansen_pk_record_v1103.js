@@ -39,7 +39,17 @@
       wins: 0, losses: 0, draws: 0,
       streak: 0, bestStreak: 0,
       rating: 1000,
+      peakRating: 1000,       /* v1108: 历史最高分 —— 掉下来了也看得见自己曾经到过哪 */
       placementGames: 0,      /* 定级赛已打局数（只算 A 模式） */
+
+      /* 🔴v1108 实力数据：光有胜负说明不了问题，
+         要能回答"我到底强在哪、弱在哪"。 */
+      words: 0,               /* 累计答过多少个词 */
+      correct: 0,             /* 答对多少个 */
+      totalMs: 0,             /* 答对那些词一共花了多少毫秒 */
+      fastestMs: 0,           /* 最快一次拼对用了多久 */
+      firstWins: 0,           /* 抢先拼对多少次 —— 这才是"手速"的真实体现 */
+
       bestCpm: 0,
       history: [],
       updatedAt: 0
@@ -103,6 +113,14 @@
     if (d.streak > d.bestStreak) d.bestStreak = d.streak;
     if (opts.cpm && opts.cpm > d.bestCpm) d.bestCpm = opts.cpm;
 
+    /* v1108 累计实力数据 */
+    d.words += Math.max(0, Number(opts.words) || 0);
+    d.correct += Math.max(0, Number(opts.correct) || 0);
+    d.totalMs += Math.max(0, Number(opts.totalMs) || 0);
+    d.firstWins += Math.max(0, Number(opts.firstWins) || 0);
+    var fm = Number(opts.fastestMs) || 0;
+    if (fm > 0 && (!d.fastestMs || fm < d.fastestMs)) d.fastestMs = fm;
+
     var delta = 0;
     if (isRanked && res !== 'draw' && L() && L().nextRating) {
       /* 定级赛期间也照常算分，只是段位先不显示 —— 打满局数才亮出来 */
@@ -116,6 +134,7 @@
       var newRating = (r && (r.rating != null ? r.rating : r)) || d.rating;
       delta = Math.round(newRating - d.rating);
       d.rating = Math.round(newRating);
+      if (d.rating > d.peakRating) d.peakRating = d.rating;
     }
 
     d.history.unshift({
@@ -140,7 +159,19 @@
       rating: d.rating, placed: placed(d),
       placementGames: d.placementGames,
       tier: tier(d),
-      history: d.history.slice()
+      history: d.history.slice(),
+
+      /* 🔴v1108 实力画像 —— 这些才是"我强在哪"的答案 */
+      peakRating: d.peakRating,
+      words: d.words,
+      correct: d.correct,
+      accuracy: d.words ? Math.round(d.correct * 100 / d.words) : 0,
+      avgMs: d.correct ? Math.round(d.totalMs / d.correct) : 0,
+      avgSecs: d.correct ? (d.totalMs / d.correct / 1000).toFixed(1) : '0.0',
+      fastestSecs: d.fastestMs ? (d.fastestMs / 1000).toFixed(1) : '—',
+      firstWins: d.firstWins,
+      /* 抢先率：答对的词里有多少是抢在对手前面的 —— 手速的直接指标 */
+      firstRate: d.correct ? Math.round(d.firstWins * 100 / d.correct) : 0
     };
   }
 

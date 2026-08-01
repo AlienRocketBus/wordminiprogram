@@ -156,6 +156,9 @@ REGISTRY = [
      'test_friends_v1106.mjs'),
     ('v1107', '🔴v1106 只做了好友底层没有界面——功能调不到等于没做',
      'test_friends_ui_v1107.mjs'),
+    ('v1108', '🔴天梯功能 v1103 就做好了，按钮却一直是「敬请期待」——做了功能没入口等于没做'
+              '（新增 hansen_ladder_ui_v1108.js：实力匹配 + 战绩页）',
+     'test_ladder_v1108.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

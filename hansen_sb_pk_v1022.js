@@ -187,7 +187,13 @@
       if (!confirm('退出后本机进度仍在，但不再同步到云端。确定退出？')) return;
       A.signOut().then(render);
     };
+    /* 🔴v1108: 天梯排位不再是「敬请期待」—— v1103 已把分数/段位/定级赛做出来，
+       v1108 补上实力匹配与战绩页。做了功能没入口等于没做。 */
     var soon = function () { alert('这个模式马上就来，敬请期待！'); };
+    var openLadder = function () {
+      if (!window.HansenLadderUI) { alert('天梯模块未加载，请刷新页面再试'); return; }
+      HansenLadderUI.open();
+    };
     if (q('kDiag')) q('kDiag').onclick = function () {
       try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else alert('自检模块未加载'); } catch (e) {}
     };
@@ -206,7 +212,7 @@
       } catch (e) {}
       HansenPkRoomUI.open();
     };
-    if (q('kLadder')) q('kLadder').onclick = soon;
+    if (q('kLadder')) q('kLadder').onclick = openLadder;
   }
 
   function host() {

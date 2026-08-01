@@ -237,6 +237,7 @@
       status: 'open',
       /* v1105: 私密房带 4 位码，不出现在公开列表；公开房 code 为空 */
       code: opts.private ? makeCode() : '',
+      hostRating: Math.floor(Number(opts.hostRating) || 0),   /* v1108: 供天梯按实力匹配 */
       isPrivate: !!opts.private,
       hostId: u.id, hostName: u.name,
       hostTier: opts.tier || '',

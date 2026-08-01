@@ -175,6 +175,7 @@
      说明文案直接读 HansenPkRoom.MODES，**不在这里另抄一份** ——
      本项目已因"同一件事两处真源"栽过八次。 */
   var _wantPrivate = false;
+  var _ladderRating = 0;   /* v1108: 开排位房时把自己的分写进房间，供匹配用 */
 
   /* 输房间码进房 */
   function joinByCode() {
@@ -249,7 +250,8 @@ function doCreate() {
     var tier = '';
     try { var L = window.HansenSbLadder, P = window.HansenSbProfile;
           if (L && P) tier = L.tierOf(P.status().rating || 0).name; } catch (e) {}
-    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate }).then(function (r) {
+    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate,
+                     hostRating: _ladderRating }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
       _state = { roomId: r.roomId, words: r.words, isHost: true };
       waiting(r.roomId, (r.room && r.room.code) || '');
@@ -559,6 +561,17 @@ function doCreate() {
 
     var after = function (gain, first) {
       st.myScore += gain;
+      /* 🔴v1108 累计本局明细，结算时一起报给战绩 ——
+         光有胜负说明不了"我强在哪"，得有速度和正确率。 */
+      st.st = st.st || { words: 0, correct: 0, totalMs: 0, firstWins: 0, fastestMs: 0 };
+      st.st.words++;
+      if (gain > 0) {
+        var ms = Date.now() - _rt.t0;
+        st.st.correct++;
+        st.st.totalMs += ms;
+        if (first) st.st.firstWins++;
+        if (!st.st.fastestMs || ms < st.st.fastestMs) st.st.fastestMs = ms;
+      }
       var my = q('prMy'); if (my) my.textContent = st.myScore;
       /* 本回合小结：让人看见"我快了多少" —— 这是正反馈 */
       var secs = ((Date.now() - _rt.t0) / 1000).toFixed(1);
@@ -624,7 +637,12 @@ function doCreate() {
           result: r.result,
           mode: (_state && _state.mode) || _pickedMode,
           oppName: (_state && _state.oppName) || '对手',
-          myScore: r.mine, oppScore: r.theirs
+          myScore: r.mine, oppScore: r.theirs,
+          words: ((_state && _state.st) || {}).words || 0,
+          correct: ((_state && _state.st) || {}).correct || 0,
+          totalMs: ((_state && _state.st) || {}).totalMs || 0,
+          firstWins: ((_state && _state.st) || {}).firstWins || 0,
+          fastestMs: ((_state && _state.st) || {}).fastestMs || 0
         });
       }
     } catch (e) {}
@@ -662,7 +680,21 @@ function doCreate() {
     if (q('prBack2')) q('prBack2').onclick = lobby;
   }
 
+  /* 🔴v1108 天梯专用入口：排位固定用 A 抢答赛，玩家不能选模式。
+     这是 v1100 定下的规矩 —— 排位就该是纯竞技。 */
+  function _createForLadder(rating) {
+    _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
+    _ladderRating = Number(rating) || 1000;
+    doCreate();
+  }
+  function _joinForLadder(roomId) {
+    _pickedMode = 'A';
+    doJoin(roomId, null);
+  }
+
   window.HansenPkRoomUI = {
+    _createForLadder: _createForLadder,
+    _joinForLadder: _joinForLadder,
     /* 🔴v1099 测试注入口：直接进对战屏，不必真的匹配一个对手。
        没有这个口子，"对战屏到底能不能用"就只能靠两台真机去试 ——
        而那正是本项目最贵的教训（看不见现场就只能猜）。 */
