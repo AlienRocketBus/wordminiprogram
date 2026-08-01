@@ -130,6 +130,8 @@ REGISTRY = [
      'test_iframe_login_v1091.mjs'),
     ('v1094', '🔴我加的诊断/守护键以 hansen_ 开头被备份收录 → 「备份含非法键或非字符串值」，存云端失败',
      'test_backup_v942.mjs'),
+    ('v1095', '🎯真凶：hsn_progress:<中文岛名> 键名含中文，备份字符集只许英数 → 「备份含非法键」，存云端永远失败',
+     'test_cjk_key_backup_v1095.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

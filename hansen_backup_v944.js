@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1094;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1095;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -25,6 +25,25 @@
   // hansen_vocab_* 是从页面自带词库重建出来的派生缓存，不是玩家存档。
   // 它不能进入可移植备份，但恢复/回滚必须认识它：成功恢复时清除旧缓存，
   // 写入失败时则随 raw snapshot 原样回滚，避免把用户留在半恢复状态。
+  /* 🔴v1095 真凶：**键名允许中文**。
+
+     用户现场：登录成功后点「立即把进度存到云端」，一直报
+         「备份含非法键或非字符串值」
+     v1094 我以为是自己加的诊断键污染了备份 —— **那只对了一半**。
+
+     实测扫描用户真实键名后找到真凶：
+         hsn_progress:动物大冒险        ← 键名里有中文！
+     这是 hansen_mylearning.js 写的「我的学习」跨岛聚合数据，
+     键名格式是 `hsn_progress:<岛标题>`，而岛标题本来就是中文。
+
+     而备份的键名校验是 /^[A-Za-z0-9_:\-.]+$/ —— **只允许英文数字**，
+     中文一律判为非法 → 整个备份失败 → 用户永远存不上云端。
+
+     这是**真实的玩家学习数据**，必须能备份，所以修的是校验规则而不是排除它。
+     放行中日韩字符（\u4e00-\u9fff 汉字、\u3040-\u30ff 日文假名、
+     \uac00-\ud7af 韩文），键名长度上限仍受 ownedKey 的 160 字符限制。 */
+  var KEY_CHARSET = /^[A-Za-z0-9_:\-.\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]+$/;
+
   function derivedKey(k){return typeof k==='string'&&k.length<=160&&/^hansen_vocab_[A-Za-z0-9_:\-.]*$/.test(k);}
 
   /* 🔴v1090 决定性修复：**云端凭证绝不是玩家存档，绝不能进备份、更不能被恢复盖回去。**
@@ -72,13 +91,13 @@
     if(DENY.test(k)||transientKey(k))return false;
     if(EXACT[k])return true;
     if(/^(?:season1_prog|season_boss_perfect|season_word_mastery|season_wrong_words|land[1-8]_prog)$/.test(k))return true;
-    for(var i=0;i<PREFIXES.length;i++)if(k.indexOf(PREFIXES[i])===0)return /^[A-Za-z0-9_:\-.]+$/.test(k);
+    for(var i=0;i<PREFIXES.length;i++)if(k.indexOf(PREFIXES[i])===0)return KEY_CHARSET.test(k);
     /* 🔴v1019「所有东西都跟着账号走」：
        原先是**白名单**——只有列在前缀/名单里的键才进备份，
        结果每加一个新功能就可能漏一个键（sb_best_cpm、主题、语音设置等都曾在外）。
        改为**兜底收录**：凡是合法键名、且没被上面的 DENY/临时/派生规则挡下的，
        一律纳入备份。以后新增任何数据都自动跟着账号走，不用再记得改这里。 */
-    return /^[A-Za-z0-9_:\-.]+$/.test(k);
+    return KEY_CHARSET.test(k);
   }
   // 值只来自 JSON.parse；这里用 tag 而不是原型恒等，兼容 iframe/测试 VM 的跨 realm JSON。
   function plainObject(o){return !!o&&typeof o==='object'&&!Array.isArray(o)&&Object.prototype.toString.call(o)==='[object Object]';}
@@ -539,7 +558,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1094_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1095_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
