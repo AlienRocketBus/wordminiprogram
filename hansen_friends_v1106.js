@@ -107,6 +107,20 @@
     };
   }
 
+  /* 数据库给每条记录注入的 _openid 是唯一可信身份。
+     这里读一条自己写过的记录拿到它 —— 拿不到就返回空，
+     那种情况下不做冒充校验（宁可不校验，也不能误判正常消息为可疑）。 */
+  var _myOpenid = '';
+  function myOpenid() { return _myOpenid; }
+  function learnOpenid() {
+    var u = me();
+    if (!u.cid || _myOpenid) return Promise.resolve('');
+    return T().list({ kind: 'presence', cid: u.cid }).then(function (rows) {
+      if (rows && rows[0] && rows[0]._openid) _myOpenid = rows[0]._openid;
+      return _myOpenid;
+    })['catch'](function () { return ''; });
+  }
+
   function me() {
     var P = window.HansenSbProfile;
     var cid = 0, name = '';
@@ -142,7 +156,10 @@
     if (!u.cid) return Promise.resolve();
     return T().list({ kind: 'presence', cid: u.cid }).then(function (rows) {
       var now = Date.now();
-      if (rows && rows.length) return T().patch(rows[0]._id, { at: now, name: u.name });
+      if (rows && rows.length) {
+        if (rows[0]._openid) _myOpenid = rows[0]._openid;   /* 顺便学到自己的可信身份 */
+        return T().patch(rows[0]._id, { at: now, name: u.name });
+      }
       return T().add({ kind: 'presence', cid: u.cid, name: u.name, at: now });
     })['catch'](function () {});
   }
@@ -203,13 +220,40 @@
         return T().list({ kind: 'friend', owner: u.cid, friend: target })
           .then(function (dup) {
             if (dup && dup.length) return { ok: true, cid: target, name: nm, already: true };
-            return T().add({ kind: 'friend', owner: u.cid, friend: target, name: nm, at: now })
+            /* 🔴v1114：**不再单方面写进对方的好友表。**
+
+               实测：我加 B，代码会直接往 B 的好友表里塞一条 ——
+               **陌生人单方面就能进孩子的好友列表**，这对儿童产品不能接受。
+
+               改为：只写我这边（标记 pending），
+               同时给对方发一条"请求"记录；
+               **对方也加我时**，双方自动变成 accepted。
+               这既保留了"不用手动通过"的简单（v1106 的初衷），
+               又杜绝了"被陌生人单方面加上"。 */
+            return T().add({ kind: 'friend', owner: u.cid, friend: target,
+                             name: nm, at: now, state: 'pending' })
               .then(function () {
+                /* 对方是否已经加过我？加过就双方转 accepted */
                 return T().list({ kind: 'friend', owner: target, friend: u.cid });
               })
-              .then(function (dup2) {
-                if (dup2 && dup2.length) return null;   /* 对方已经写过了，不重复写 */
-                return T().add({ kind: 'friend', owner: target, friend: u.cid, name: u.name, at: now });
+              .then(function (theirs) {
+                if (!theirs || !theirs.length) {
+                  /* 对方还没加我 —— 留一条请求，等他也加我时自动成立 */
+                  return T().add({ kind: 'request', from: u.cid, to: target,
+                                   name: u.name, at: now });
+                }
+                /* 对方加过我 → 双方都转 accepted */
+                return T().list({ kind: 'friend', owner: u.cid, friend: target })
+                  .then(function (mineRows) {
+                    var jobs = [];
+                    (mineRows || []).forEach(function (r) {
+                      jobs.push(T().patch(r._id, { state: 'accepted' }));
+                    });
+                    theirs.forEach(function (r) {
+                      jobs.push(T().patch(r._id, { state: 'accepted' }));
+                    });
+                    return Promise.all(jobs);
+                  });
               })
               .then(function () { return { ok: true, cid: target, name: nm }; });
           });
@@ -246,6 +290,10 @@
         if (!r || !r.friend || seen[r.friend]) return false;
         seen[r.friend] = 1; return true;
       });
+      /* 🔴v1114：pending 的单独标出来，不混在正式好友里。
+         「我加了他但他还没加我」和「互为好友」是两回事，
+         界面上要能分清，否则用户以为加上了、发消息却石沉大海。 */
+      rows.forEach(function (r) { r._pending = (r.state === 'pending'); });
       var cids = rows.map(function (r) { return r.friend; });
       if (!cids.length) return { ok: true, friends: [] };
       /* 逐个查在线（云开发的 in 查询限制多，好友数上限 50，逐个查可接受） */
@@ -266,10 +314,18 @@
             lastSeen: at,
             /* 隐身的人 at 会被抹成 0 —— 对我们来说和离线完全一样，
                看不出他是隐身还是真的关了页面，这正是隐身该有的效果 */
-            sub: online ? '刚才还在' : (at ? agoText(now - at) : '不在线')
+            pending: !!r._pending,
+            sub: r._pending
+              ? '等他也加你为好友'
+              : (online ? '刚才还在' : (at ? agoText(now - at) : '不在线'))
           };
         });
-        friends.sort(function (a, b) { return (b.online ? 1 : 0) - (a.online ? 1 : 0) || b.lastSeen - a.lastSeen; });
+        friends.sort(function (a, b) {
+          /* 正式好友 > 待对方确认；同类里在线的在前 */
+          return (a.pending ? 1 : 0) - (b.pending ? 1 : 0)
+              || (b.online ? 1 : 0) - (a.online ? 1 : 0)
+              || b.lastSeen - a.lastSeen;
+        });
         return { ok: true, friends: friends };
       });
     })['catch'](function (e) { return { ok: false, reason: String((e && e.message) || e), friends: [] }; });
@@ -297,8 +353,11 @@
     /* 只存 id，不存文本 —— 展示时再查表。
        这样即使数据库被写入奇怪的值，界面也只会显示"(未知消息)"，
        而不会把任意文本渲染出来。 */
+    /* fromOpenid 记录"客户端声称的身份"，与数据库注入的 _openid 比对。
+       两者一致才可信 —— 冒充者填不出别人的 _openid。 */
     return T().addMsg({ from: u.cid, fromName: u.name, to: target,
-                        qid: item.id, at: Date.now(), read: false })
+                        fromOpenid: myOpenid(), qid: item.id,
+                        at: Date.now(), read: false })
       .then(function () { return { ok: true, sent: item }; })
       ['catch'](function (e) { return { ok: false, reason: String((e && e.message) || e) }; });
   }
@@ -307,7 +366,23 @@
     var u = me();
     if (!u.cid) return Promise.resolve({ ok: false, msgs: [] });
     return T().listMsg({ to: u.cid }).then(function (rows) {
+      /* 🔴v1114：**用 _openid 校验发件人，防冒充。**
+
+         实测：消息里的 `from` 是客户端自己填的 ——
+         改一下就能冒充别人给孩子发消息。
+
+         数据库会给每条记录自动注入 `_openid`（**服务端写的，客户端改不了**），
+         那是唯一可信的身份。做法：
+           · 每条消息同时存 `fromOpenid`（客户端声称的）
+           · 读取时与 `_openid`（服务端注入的）比对，**对不上就标为可疑**
+         对不上的一律显示为「(来源不明的消息)」并不显示发件人名字，
+         而不是默默丢掉 —— 让人知道有这么一条，但不被它欺骗。 */
       var msgs = (rows || []).map(function (r) {
+        var trusted = !r._openid || !r.fromOpenid || (r._openid === r.fromOpenid);
+        if (!trusted) {
+          return { id: r._id, from: 0, fromName: '(来源不明)', at: r.at || 0,
+                   read: !!r.read, emoji: '⚠️', text: '(来源不明的消息)', suspicious: true };
+        }
         var item = QUICK.filter(function (x) { return x.id === r.qid; })[0];
         return {
           id: r._id, from: r.from, fromName: r.fromName || ('No.' + r.from),
@@ -336,6 +411,7 @@
     ONLINE_MS: ONLINE_MS,
     MAX_FRIENDS: MAX_FRIENDS,
     myStatus: myStatus, setStatus: setStatus,
+    _learnOpenid: learnOpenid, _myOpenid: myOpenid,
     addFriend: addFriend, removeFriend: removeFriend, listFriends: listFriends,
     sendQuick: sendQuick, inbox: inbox,
     _beat: beat, _startBeat: startBeat, _stopBeat: stopBeat,

@@ -245,7 +245,9 @@
       status: 'open',
       /* v1105: 私密房带 4 位码，不出现在公开列表；公开房 code 为空 */
       code: opts.private ? makeCode() : '',
-      hostRating: Math.floor(Number(opts.hostRating) || 0),   /* v1108: 供天梯按实力匹配 */
+      /* v1114: 夹到合理区间 —— 客户端填什么都不能超出 ELO 的可能范围。
+         拦不住有人改代码，但能让"填 1e99"这种没有意义。 */
+      hostRating: Math.max(0, Math.min(4000, Math.floor(Number(opts.hostRating) || 0))),
       isPrivate: !!opts.private,
       hostId: u.id, hostName: u.name,
       hostTier: opts.tier || '',

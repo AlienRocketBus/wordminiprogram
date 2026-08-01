@@ -77,9 +77,17 @@ function boot(shared) {
   await A.F._beat();
   s.rows.push({ _id: 'P2', kind: 'presence', cid: 2, name: '小红', at: Date.now() });
   await A.F.addFriend(2);
+  /* 🔴v1114 契约变更：**不再单方面写进对方的好友表**。
+     实测发现陌生人单方面就能进孩子的好友列表 —— 对儿童产品不能接受。
+     改为：只写我这边(state=pending) + 给对方留一条 request；
+     对方也加我时双方自动转 accepted（仍然不用手动点通过）。 */
   const mine = s.rows.filter(x => x.kind === 'friend' && x.owner === 1);
   const theirs = s.rows.filter(x => x.kind === 'friend' && x.owner === 2);
-  ok(mine.length === 1 && theirs.length === 1, '★ 双向各写一条关系');
+  ok(mine.length === 1, '★ 只写自己这边一条');
+  ok(theirs.length === 0, '★ **不往对方好友表里塞** —— 陌生人不能单方面进孩子的列表');
+  ok(mine[0].state === 'pending', '★ 标记为 pending，等对方也加我');
+  ok(s.rows.some(x => x.kind === 'request' && x.from === 1 && x.to === 2),
+     '★ 给对方留了一条请求记录');
   await A.F.removeFriend(2);
   const left = s.rows.filter(x => x.kind === 'friend');
   ok(left.length === 0, '★ 删好友两边都删（单向残留会让对方以为还是好友）');

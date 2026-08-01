@@ -311,10 +311,26 @@
       S().listRooms().then(function (lr) {
         if (stop) return;
         var rooms = (lr && lr.rooms) || lr || [];
+        /* 🔴v1114：**hostRating 是客户端填的，不能全信。**
+
+           实测：`createRoom({hostRating: 3999})` 传什么就存什么 ——
+           改一下前端，新手就能把自己标成 3999 分的高手，
+           别的新手匹配过来会被吊打。
+
+           纯前端应用拦不住"有人改代码"，但可以让**收益变得很小**：
+             · 分数被夹到合理区间（0~4000），填 1e99 没用
+             · **超出自己带宽两倍的房间直接跳过** ——
+               一个 1000 分的新手看到"3999 分"的房，本来也不该匹配上；
+               谎报得越离谱，越会被自动过滤掉
+           而谎报一个"接近真实"的分数，对匹配结果几乎没影响，也就没有作弊动机。 */
         var fit = rooms.filter(function (r) {
           if (r.mode !== 'A') return false;
-          var rr = Number(r.hostRating) || 1000;
-          return Math.abs(rr - sm.rating) <= band;
+          var raw = Number(r.hostRating);
+          if (!isFinite(raw)) raw = 1000;
+          var rr = Math.max(0, Math.min(4000, raw));      /* 夹到合理区间 */
+          var gap = Math.abs(rr - sm.rating);
+          if (gap > band * 2) return false;               /* 差太远：谎报也没用 */
+          return gap <= band;
         });
         if (fit.length) {
           stop = true;

@@ -79,7 +79,11 @@ function mkRecord() {
 {
   const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');  /* hansen_ladder_ui_v1108 */
   ok(/matchBand\(waited\)/.test(ld), '★ 用 matchBand 按等待时间算范围');
-  ok(/Math\.abs\(rr - sm\.rating\) <= band/.test(ld), '★ 只匹配范围内的房间');
+  ok(/gap <= band/.test(ld), '★ 只匹配范围内的房间');
+  /* 🔴v1114：hostRating 是客户端填的，不能全信 */
+  ok(/Math\.min\(4000,/.test(ld), '★ 对方分数夹到合理区间（填 1e99 没用）');
+  ok(/gap > band \* 2/.test(ld),
+     '★ 差太远的房直接跳过 —— 谎报得越离谱越会被自动过滤，也就没有作弊动机');
   ok(/waited >= 20/.test(ld), '★ 等满 20 秒还没找到就自己开一间（不让人永远空等）');
   const svc = fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8');
   const m = svc.match(/function matchBand[\s\S]{0,220}/);
