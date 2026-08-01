@@ -82,6 +82,8 @@
 
   /* ── CloudBase 应用与鉴权 ─────────────────────────── */
   var _app = null, _auth = null;
+  var _bgOnly = false;   /* v1091: 仅后台自动行为置为 true */
+
   function app() {
     if (_app) return Promise.resolve(_app);
     var c = cfg();
@@ -112,12 +114,38 @@
        **实例数就是撞车概率。**
 
        子框只负责显示，云端的事交给顶层窗口。 */
+    /* 🔴v1091 紧急修正：v1090 把子框**一律**拦死，结果连登录都点不了。
+
+       用户现场：拼写大PK 页面本身就在 index.html 的 iframe 壳里跑，
+       登录面板就在那个子框内 —— 一拦，用户看到的是
+       「登录没成功：子页面不创建云端实例（由主窗口统一处理）」。
+       **我把用户主动发起的登录，和后台自动的会话刷新，当成同一件事拦了。**
+
+       正确的界线：
+         · 后台自动行为（开机恢复、自动同步、会话探测）→ 子框内不该建实例，
+           因为那正是多实例并发刷新 refresh_token、把凭证撞没的来源；
+         · **用户主动操作（登录、注册、手动同步）→ 必须放行**，
+           否则功能直接不可用 —— 那比凭证偶尔被撞掉严重得多。
+
+       改为：默认放行；只有**明确标记为后台**的调用才在子框内拒绝。
+       另外优先复用顶层已有的实例（同源时），这样即便在子框里操作，
+       用的仍是同一个实例，照样不会产生并发刷新。 */
     var _inFrame = false;
     try { _inFrame = (window.top !== window.self); } catch (e) { _inFrame = true; }
     if (_inFrame) {
-      var eF = new Error('子页面不创建云端实例（由主窗口统一处理）');
-      eF.friendly = true; eF.notReady = true; eF.inFrame = true;
-      return Promise.reject(eF);
+      /* 同源时直接借用顶层的实例 —— 一个实例，不会并发刷新 */
+      try {
+        var topA = window.top && window.top.HansenAuth;
+        if (topA && typeof topA._app === 'function' && topA !== window.HansenAuth) {
+          return topA._app();
+        }
+      } catch (e) {}
+      /* 借不到（跨源/顶层还没加载好）：只拒绝后台行为，用户主动操作一律放行 */
+      if (_bgOnly) {
+        var eF = new Error('后台任务不在子页面建实例（由主窗口统一处理）');
+        eF.friendly = true; eF.notReady = true; eF.inFrame = true;
+        return Promise.reject(eF);
+      }
     }
 
     return import('./vendor_cloudbase_esm_v965.js').then(function (mod) {

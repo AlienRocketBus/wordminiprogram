@@ -264,7 +264,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1090')
+               import('./vendor_cloudbase_esm_v965.js?v=1091')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -310,12 +310,23 @@
              它们各自加载完整模块、各自可能去读写凭证 ——
              **每多一个实例，就多一次并发刷新、多一次把凭证撞没的机会**。
              云端读写交给顶层窗口即可；子框只负责显示。 */
+          /* 🔴v1091 同 hansen_auth 的修正：v1090 把子框一律拦死，
+             结果拼写大PK（本身就在 iframe 壳里）连登录都点不了。
+             正确的界线是「后台自动行为」而不是「所有子框行为」：
+               后台刷新在子框里跑 → 多实例并发 → 凭证被撞没（要拦）
+               用户主动登录/同步 → 功能本身（必须放行）
+             同源时优先借用顶层实例：仍然只有一个实例，照样不会并发刷新。 */
           var _inFrame = false;
           try { _inFrame = (window.top !== window.self); } catch (e) { _inFrame = true; }
           if (_inFrame) {
-            var eF = new Error('子页面不直接访问云端（由主窗口统一处理）');
-            eF.friendly = true; eF.notReady = true;
-            return Promise.reject(eF);
+            try {
+              var topCS = window.top && window.top.HansenCloudSave;
+              if (topCS && typeof topCS._app === 'function' && topCS !== window.HansenCloudSave) {
+                return topCS._app();
+              }
+            } catch (e) {}
+            /* 借不到就继续往下走（下面已有"已登录则复用账号实例"的防线），
+               不再无条件拒绝 —— 拒绝会让子框里的功能整个不可用。 */
           }
 
           var _hasAcct = false;
