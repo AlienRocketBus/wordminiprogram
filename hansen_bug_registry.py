@@ -126,6 +126,8 @@ REGISTRY = [
      'test_iframe_login_v1091.mjs'),
     ('v1092', 'SDK 源码确认：手机号会话刷新失败无兜底直接删凭证（匿名会话才有 anonymousLogin）→ 加影子备份+跨页刷新锁+失败救回',
      'test_cred_guard_v1092.mjs'),
+    ('v1093', '🔴v1091 只改了 app() 没改 auth()，子框里 _auth 仍为 null → 报「鉴权不可用」，登录照样点不动',
+     'test_iframe_login_v1091.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

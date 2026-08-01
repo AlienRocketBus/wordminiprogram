@@ -58,5 +58,29 @@ for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_
      '★ 「子页面不创建云端实例」不再出现在用户可见的登录路径上');
 }
 
+/* 🔴v1093：auth() 也必须跟着 app() 走 —— 这是 v1091 漏掉的一半。
+   v1091 让子框借用顶层实例，app() 返回顶层那个 app 对象，
+   **但 _auth 是本模块局部变量、在子框里永远是 null** →
+   auth() 直接抛「鉴权不可用」→ 登录照样点不动。
+   用户真机报的正是这句。 */
+{
+  const a = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = a.replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = code.indexOf('function auth()');
+  const seg = code.slice(i, i + 900);
+  ok(/app\(\)\.then\(function\s*\(\s*a\s*\)/.test(seg),
+     '★ auth() 接住 app() 返回的实例（不是只看本地 _auth）');
+  ok(/a\.auth\s*\(/.test(seg), '★ 用那个实例现取 auth');
+  ok(/_authObj/.test(code), '★ 顶层暴露 _authObj 供子框借用');
+}
+
+/* 🔴v1093：用户可见入口不得吐 [object Object] */
+{
+  const a = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  ok(/_readable\(sendPhoneCode\)/.test(a), '★ sendPhoneCode 包了可读错误');
+  ok(/_readable\(loginByPhoneCode\)/.test(a), '★ loginByPhoneCode 包了可读错误');
+  ok(/errText\(e\)\s*\|\|\s*'操作失败'/.test(a), '★ 错误一律经 errText 转人话');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

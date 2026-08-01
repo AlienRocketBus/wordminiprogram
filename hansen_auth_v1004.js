@@ -170,7 +170,35 @@
   var _authOverride = null;
   function auth() {
     if (_authOverride) return Promise.resolve(_authOverride);
-    return app().then(function () { if (!_auth) throw new Error('鉴权不可用'); return _auth; });
+    /* 🔴v1093：**用 app() 返回的那个实例去取 auth，而不是本地的 _auth。**
+
+       用户现场报的是「登录没成功：鉴权不可用」—— 这是 v1091 引入的新问题：
+       v1091 让子框「借用顶层实例」，`app()` 于是返回顶层那个 app 对象，
+       **但 `_auth` 是本模块的局部变量、在子框里永远是 null** ——
+       于是这里直接抛「鉴权不可用」，登录照样点不动。
+
+       我上一版只改了 app()，没跟着改 auth() —— 同一个疏漏的两半。
+
+       改为：拿 app() 实际给回的实例现取 auth；
+       本地 _auth 只作为顶层自己的缓存。 */
+    return app().then(function (a) {
+      if (_auth) return _auth;
+      if (a && typeof a.auth === 'function') {
+        try {
+          var got = a.auth({ persistence: 'local' });
+          if (got) return got;
+        } catch (e) {}
+      }
+      /* 最后再试一次顶层已经建好的（同源时可直接借用） */
+      try {
+        var topA = window.top && window.top.HansenAuth;
+        if (topA && topA !== window.HansenAuth && typeof topA._authObj === 'function') {
+          var t = topA._authObj();
+          if (t) return t;
+        }
+      } catch (e) {}
+      throw new Error('鉴权不可用');
+    });
   }
 
   /* ── 登录态 ───────────────────────────────────────── */
@@ -780,6 +808,32 @@
     });
   }
 
+  /* 🔴v1093：**用户可见的入口一律包一层可读错误。**
+     实测子框里走真实 SDK 路径时，抛出来的是 CloudBase 的普通对象，
+     界面直接显示成 `[object Object]` —— 正是本轮反复强调不许再出现的东西
+     （v1059 那次它盖住真错误盖了 40 版）。
+     这里对 sendPhoneCode / loginByPhoneCode / 用户名登录注册统一兜住：
+     错误一律经 errText 转成人话再抛出。 */
+  function _readable(fn) {
+    return function () {
+      var args = arguments, self = this;
+      try {
+        return Promise.resolve(fn.apply(self, args))['catch'](function (e) {
+          if (e && e.friendly) throw e;          /* 已经是人话，原样透出 */
+          var t = errText(e) || '操作失败';
+          var e2 = new Error(t);
+          e2.friendly = true;
+          if (e) { e2.expired = !!e.expired; e2.sessionDead = !!e.sessionDead; e2.notReady = !!e.notReady; }
+          throw e2;
+        });
+      } catch (e) {
+        var t2 = errText(e) || '操作失败';
+        var e3 = new Error(t2); e3.friendly = true;
+        return Promise.reject(e3);
+      }
+    };
+  }
+
   window.HansenAuth = {
     ready: ready,
     isSignedIn: isSignedIn,
@@ -791,8 +845,8 @@
     readLocal: readLocal,
     normPhone: normPhone,
     friendly: friendly,
-    sendPhoneCode: sendPhoneCode,
-    loginByPhoneCode: loginByPhoneCode,
+    sendPhoneCode: _readable(sendPhoneCode),
+    loginByPhoneCode: _readable(loginByPhoneCode),
     loginByPassword: loginByPassword,
     registerByPassword: registerByPassword,
     normUsername: normUsername,
@@ -806,6 +860,8 @@
     localProgressSize: localProgressSize,
     pullSave: pullSave,
     _setAuthForTest: function (a) { _authOverride = a; },
-    _app: app
+    _app: app,
+    /* v1093: 供子框借用顶层已建好的 auth 对象 */
+    _authObj: function () { return _auth; }
   };
 })();
