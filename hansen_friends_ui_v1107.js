@@ -105,7 +105,7 @@
     _timer = setInterval(refresh, 15000);
   }
 
-  function render(friends, loading) {
+  function render(friends, loading, notice) {
     var st = F() ? F().myStatus() : 'online';
     var on = friends.filter(function (f) { return f.online; }).length;
 
@@ -144,7 +144,10 @@
       + '<div class="fr_card">'
       +   '<div class="fr_lbl">好友 ' + (friends.length ? '· ' + on + ' 人刚才还在' : '') + '</div>'
       +   '<div id="frList">'
-      +     (loading ? '<div class="fr_empty">正在读取…</div>' : listHtml(friends))
+      +     (loading ? '<div class="fr_empty">正在读取…</div>'
+              : (notice
+                  ? '<div class="fr_empty">' + esc(notice) + '</div>'
+                  : listHtml(friends)))
       +   '</div>'
       + '</div>'
     );
@@ -190,8 +193,18 @@
     if (!F()) return;
     F().listFriends().then(function (r) {
       if (!q(ID) || !q(ID).classList.contains('on')) return;
+      /* 🔴v1109：**没登录要明说**。
+         原来只在列表处显示"还没有好友"，用户根本不知道是因为没登录，
+         会以为功能坏了 —— 这就是"界面说谎"的一种。 */
+      if (r && !r.ok && /登录/.test(r.reason || '')) {
+        render([], false, '先登录才能加好友');
+        return;
+      }
       render((r && r.friends) || [], false);
-    })['catch'](function () {});
+    })['catch'](function (e) {
+      if (!q(ID) || !q(ID).classList.contains('on')) return;
+      render([], false, '连不上云端：' + String((e && e.message) || e).slice(0, 40));
+    });
   }
 
   function doAdd() {

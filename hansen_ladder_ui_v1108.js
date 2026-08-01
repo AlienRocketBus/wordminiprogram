@@ -122,10 +122,27 @@
       +   '排位固定用「抢答赛」：谁先拼对谁得分<br>只有这个模式会加减天梯分'
       + '</div>'
 
-      /* 实力画像 */
-      + '<div class="ld_card">'
-      +   '<div class="ld_lbl">我的实力</div>'
-      +   '<div class="ld_grid">'
+      /* 🔴v1109 实力画像：**一局都没打过时不显示一屏 0%**。
+         全新用户看到"胜率 0% · 抢先率 0% · 正确率 0%"是很打击人的，
+         而且那不是他的实力，只是"还没开始"。
+         改成一句鼓励 + 说明这些指标是干嘛的，让他知道打完能看到什么。 */
+      + (sm.total === 0
+          ? '<div class="ld_card">'
+            + '<div class="ld_lbl">我的实力</div>'
+            + '<div style="text-align:center;padding:16px 8px">'
+            +   '<div style="font-size:34px">🎯</div>'
+            +   '<div style="font-size:15px;color:#e2e8f0;margin-top:8px">还没打过排位</div>'
+            +   '<div style="font-size:12.5px;color:#94a3b8;margin-top:8px;line-height:1.9">'
+            +     '打完第一局就能看到：<br>'
+            +     '⚡ 抢先率 —— 你有多少次抢在对手前面<br>'
+            +     '⏱ 平均用时 —— 每个词你要想多久<br>'
+            +     '🎯 正确率 —— 拼对了多少<br>'
+            +     '🏅 最快一次 —— 你的巅峰手速'
+            +   '</div>'
+            + '</div></div>'
+          : '<div class="ld_card">'
+            + '<div class="ld_lbl">我的实力</div>'
+            + '<div class="ld_grid">'
       +     kv('胜率', sm.winRate + '<span class="ld_vs">%</span>',
                 sm.wins + ' 胜 ' + sm.losses + ' 负' + (sm.draws ? ' ' + sm.draws + ' 平' : ''))
       +     kv('抢先率', sm.firstRate + '<span class="ld_vs">%</span>',
@@ -136,8 +153,7 @@
                 sm.correct + ' / ' + sm.words + ' 个词')
       +     kv('最高连胜', sm.bestStreak + '<span class="ld_vs">连</span>',
                 sm.streak >= 2 ? ('当前 🔥 ' + sm.streak + ' 连胜') : '当前无连胜')
-      +   '</div>'
-      + '</div>'
+      +   '</div></div>')
 
       /* 最近对局 */
       + '<div class="ld_card">'
@@ -191,6 +207,19 @@
      既保证一开始尽量公平，又保证不会永远空等。 */
   function startMatching() {
     if (!S()) { alert('对战模块还没就绪'); return; }
+    /* 🔴v1109：**没登录就先拦住。**
+       原来会一路走到"请先登录再开房"才报错 —— 用户已经白等了 20 秒。
+       在排队之前就检查，是对时间的尊重。 */
+    var A = window.HansenAuth;
+    var signed = false;
+    try { signed = !!(A && A.isSignedIn && A.isSignedIn()); } catch (e) {}
+    if (!signed) {
+      if (window.confirm('排位要先登录（进度和段位才能跟着账号走）。现在去登录吗？')) {
+        close();
+        try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
+      }
+      return;
+    }
     var sm = R().summary();
     var t0 = Date.now();
     var stop = false;

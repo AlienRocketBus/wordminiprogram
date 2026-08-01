@@ -466,6 +466,15 @@ function doCreate() {
     var input = q('prIn');
     if (input) {
       try { input.focus(); } catch (e) {}
+      /* 🔴v1109：手机上软键盘弹出会占掉半屏，输入框可能被顶到看不见。
+         聚焦后滚到可见位置 —— 对战是分秒必争的，看不见自己打了什么很致命。 */
+      try {
+        input.addEventListener('focus', function () {
+          setTimeout(function () {
+            try { input.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+          }, 260);
+        });
+      } catch (e) {}
       input.oninput = function () {
         /* 拼对即提交 —— 不用按回车，抢答讲的就是这一下 */
         var v = String(input.value || '').trim().toLowerCase();
