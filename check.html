@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1105"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1105"></script>
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1106"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1106"></script>
 <meta charset="UTF-8"><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>云端版本诊断</title>
@@ -46,7 +46,7 @@
   <table id="cfg-table"><thead><tr><th>Lv</th><th>秒</th><th>Lv</th><th>秒</th></tr></thead><tbody></tbody></table>
 </div>
 
-<script src="hansen_boss_lock.js?v=1105"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1105"></script>
+<script src="hansen_boss_lock.js?v=1106"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1106"></script>
 <script>
 setTimeout(function(){
   var vEl = document.getElementById('version');
