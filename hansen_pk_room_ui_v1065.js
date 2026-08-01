@@ -36,32 +36,43 @@
     var s = document.createElement('style');
     s.id = 'hsn_pkroom_css';
     s.textContent =
-      '#' + ID + '{position:fixed;inset:0;z-index:2147483600;background:#0f172a;color:#e2e8f0;'
+      /* 🔴v1110 亮色/暗色：与好友页、天梯页用同一组变量。
+         全站选亮色系时 <html> 会加 hsn-pal-light —— 这里整组换掉，
+         而不是给每个元素单独写覆盖（那会越堆越乱）。 */
+      'html:root{--pk-bg:#0f172a;--pk-card:#111827;--pk-line:#1f2937;' +
+        '--pk-txt:#e8eefc;--pk-dim:#a9b4c7;--pk-faint:#7c879b;' +
+        '--pk-in-bg:#0b1020;--pk-in-line:#334155;--pk-btn2:#1f2937;' +
+        '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd}' +
+      'html.hsn-pal-light:root, html.hsn-pal-light{--pk-bg:#f4f6fb;--pk-card:#ffffff;--pk-line:#e3e7ee;' +
+        '--pk-txt:#0f172a;--pk-dim:#4b5563;--pk-faint:#6b7280;' +
+        '--pk-in-bg:#f9fafb;--pk-in-line:#cbd5e1;--pk-btn2:#eef1f6;' +
+        '--pk-ok:#047857;--pk-bad:#b91c1c;--pk-warn:#b45309;--pk-hint:#1d4ed8}' +
+      '#' + ID + '{position:fixed;inset:0;z-index:2147483600;background:var(--pk-bg);color:var(--pk-txt);'
       + 'overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;font-family:system-ui,-apple-system,sans-serif}'
       + '#' + ID + '.on{display:block}'
       + '#' + ID + ' .pr_wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}'
       + '#' + ID + ' .pr_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}'
-      + '#' + ID + ' .pr_back{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:10px;'
+      + '#' + ID + ' .pr_back{background:#1e293b;border:1px solid var(--pk-in-line);color:var(--pk-txt);border-radius:10px;'
       + 'padding:8px 14px;font-size:15px;cursor:pointer}'
       + '#' + ID + ' .pr_h{font-size:19px;font-weight:700}'
       + '#' + ID + ' .pr_btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;'
       + 'color:#fff;background:linear-gradient(135deg,#4f46e5,#6366f1);cursor:pointer;margin-bottom:12px}'
       + '#' + ID + ' .pr_btn2{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}'
-      + '#' + ID + ' .pr_room{display:flex;align-items:center;gap:10px;background:#1e293b;border:1px solid #334155;'
+      + '#' + ID + ' .pr_room{display:flex;align-items:center;gap:10px;background:#1e293b;border:1px solid var(--pk-in-line);'
       + 'border-radius:12px;padding:12px;margin-bottom:10px}'
       + '#' + ID + ' .pr_room .n{flex:1;min-width:0}'
       + '#' + ID + ' .pr_room .n b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
-      + '#' + ID + ' .pr_room .n span{font-size:12px;color:#94a3b8}'
+      + '#' + ID + ' .pr_room .n span{font-size:12px;color:var(--pk-dim)}'
       + '#' + ID + ' .pr_room button{background:#4f46e5;border:0;color:#fff;border-radius:10px;padding:9px 16px;'
       + 'font-size:14px;font-weight:700;cursor:pointer}'
-      + '#' + ID + ' .pr_empty{color:#94a3b8;text-align:center;padding:26px 10px;font-size:14px;line-height:1.7}'
+      + '#' + ID + ' .pr_empty{color:var(--pk-dim);text-align:center;padding:26px 10px;font-size:14px;line-height:1.7}'
       + '#' + ID + ' .pr_err{background:#7f1d1d;border:1px solid #b91c1c;color:#fecaca;border-radius:12px;'
       + 'padding:12px;font-size:14px;line-height:1.6;margin-bottom:12px;word-break:break-all}'
       + '#' + ID + ' .pr_word{font-size:34px;font-weight:800;text-align:center;letter-spacing:2px;margin:22px 0 6px}'
-      + '#' + ID + ' .pr_cn{text-align:center;color:#94a3b8;margin-bottom:18px}'
+      + '#' + ID + ' .pr_cn{text-align:center;color:var(--pk-dim);margin-bottom:18px}'
       + '#' + ID + ' .pr_in{width:100%;box-sizing:border-box;padding:14px;font-size:19px;border-radius:12px;'
-      + 'border:2px solid #334155;background:#0b1220;color:#e2e8f0;text-align:center;letter-spacing:2px}'
-      + '#' + ID + ' .pr_pg{text-align:center;color:#94a3b8;font-size:13px;margin-top:12px}'
+      + 'border:2px solid var(--pk-in-line);background:#0b1220;color:var(--pk-txt);text-align:center;letter-spacing:2px}'
+      + '#' + ID + ' .pr_pg{text-align:center;color:var(--pk-dim);font-size:13px;margin-top:12px}'
       + '#' + ID + ' .pr_res{text-align:center;font-size:26px;font-weight:800;margin:26px 0 10px}';
     document.head.appendChild(s);
   }
@@ -120,8 +131,8 @@
       +   '<input id="prCode" maxlength="4" placeholder="输入好友的房间码"'
       +     ' autocapitalize="characters" autocomplete="off"'
       +     ' style="flex:1;min-width:0;text-align:center;letter-spacing:6px;font-size:20px;'
-      +     'text-transform:uppercase;background:#111827;border:1px solid #334155;'
-      +     'border-radius:12px;color:#e2e8f0;padding:10px">'
+      +     'text-transform:uppercase;background:var(--pk-card);border:1px solid var(--pk-in-line);'
+      +     'border-radius:12px;color:var(--pk-txt);padding:10px">'
       +   '<button class="pr_btn" id="prJoinCode" style="flex:0 0 92px;margin:0">进房</button>'
       + '</div>'
       + '<button class="pr_btn" id="prNew">➕ 开一间公开房，等人来打</button>'
@@ -196,14 +207,14 @@
     var cards = ['A', 'B', 'C'].map(function (k) {
       var m = MODES[k];
       if (!m) return '';
-      return '<div class="pr_mode" data-mode="' + k + '" style="border:1px solid #334155;'
-        + 'border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;background:#111827">'
-        + '<div style="font-size:17px;font-weight:800;color:#e2e8f0">'
+      return '<div class="pr_mode" data-mode="' + k + '" style="border:1px solid var(--pk-in-line);'
+        + 'border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;background:var(--pk-card)">'
+        + '<div style="font-size:17px;font-weight:800;color:var(--pk-txt)">'
         + m.emoji + ' ' + esc(m.name)
-        + (m.ranked ? '<span style="font-size:12px;color:#fbbf24;margin-left:8px">⭐ 计天梯</span>' : '')
+        + (m.ranked ? '<span style="font-size:12px;color:var(--pk-warn);margin-left:8px">⭐ 计天梯</span>' : '')
         + '</div>'
-        + '<div style="font-size:13px;color:#94a3b8;margin:4px 0 8px">' + esc(m.tagline) + '</div>'
-        + '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.75;color:#cbd5e1">'
+        + '<div style="font-size:13px;color:var(--pk-dim);margin:4px 0 8px">' + esc(m.tagline) + '</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.75;color:var(--pk-txt)">'
         + (m.rules || []).map(function (r) {
             return '<li>' + esc(r).replace(/\*\*(.+?)\*\*/g,
                      '<b style="color:#fff">$1</b>') + '</li>';
@@ -217,16 +228,16 @@
       var a = ASK_MODES[k];
       var on = (_askMode === k);
       return '<div class="pr_ask" data-ask="' + k + '" style="flex:1;text-align:center;'
-        + 'border:1px solid ' + (on ? '#6366f1' : '#334155') + ';border-radius:12px;'
-        + 'padding:10px 6px;cursor:pointer;background:' + (on ? '#1e1b4b' : '#111827') + '">'
+        + 'border:1px solid ' + (on ? '#6366f1' : 'var(--pk-in-line)') + ';border-radius:12px;'
+        + 'padding:10px 6px;cursor:pointer;background:' + (on ? '#1e1b4b' : 'var(--pk-card)') + '">'
         + '<div style="font-size:22px">' + a.emoji + '</div>'
-        + '<div style="font-size:14px;font-weight:700;color:#e2e8f0">' + esc(a.name) + '</div>'
-        + '<div style="font-size:11.5px;color:#94a3b8;margin-top:2px">' + esc(a.tip) + '</div></div>';
+        + '<div style="font-size:14px;font-weight:700;color:var(--pk-txt)">' + esc(a.name) + '</div>'
+        + '<div style="font-size:11.5px;color:var(--pk-dim);margin-top:2px">' + esc(a.tip) + '</div></div>';
     }).join('');
 
     paint('<div class="pr_top"><div class="pr_h">选个玩法</div>'
       + '<div class="pr_sub">三种规则差别很大，选你喜欢的</div></div>'
-      + '<div style="font-size:13px;color:#94a3b8;margin:6px 0 4px">怎么出题</div>'
+      + '<div style="font-size:13px;color:var(--pk-dim);margin:6px 0 4px">怎么出题</div>'
       + '<div style="display:flex;gap:10px;margin-bottom:6px">' + askCards + '</div>'
       + cards
       + '<button class="pr_btn pr_ghost" id="prBack">← 返回</button>');
@@ -265,12 +276,12 @@ function doCreate() {
        所以它必须是这一屏最显眼的东西，而不是藏在角落的小字。 */
     var codeBox = code
       ? '<div style="margin:18px 0;text-align:center">'
-        + '<div style="font-size:13px;color:#94a3b8;margin-bottom:6px">把这个码发给好友</div>'
+        + '<div style="font-size:13px;color:var(--pk-dim);margin-bottom:6px">把这个码发给好友</div>'
         + '<div id="prCodeBig" style="font-size:44px;font-weight:900;letter-spacing:12px;'
-        +   'color:#a5b4fc;background:#111827;border:1px dashed #4f46e5;border-radius:16px;'
+        +   'color:#a5b4fc;background:var(--pk-card);border:1px dashed #4f46e5;border-radius:16px;'
         +   'padding:14px 10px;cursor:pointer">' + esc(code) + '</div>'
         + '<button class="pr_btn" id="prCopy" style="margin-top:10px">📋 复制房间码</button>'
-        + '<div style="font-size:12px;color:#64748b;margin-top:6px">'
+        + '<div style="font-size:12px;color:var(--pk-faint);margin-top:6px">'
         +   '私密房不出现在公开列表，只有拿到码的人能进</div>'
         + '</div>'
       : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
@@ -433,7 +444,7 @@ function doCreate() {
     paint('<div class="pr_top">'
       + '<div class="pr_h" style="display:flex;justify-content:space-between;align-items:center">'
       +   '<span>你 <b id="prMy">' + st.myScore + '</b></span>'
-      +   '<span style="font-size:13px;color:#94a3b8">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
+      +   '<span style="font-size:13px;color:var(--pk-dim)">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
       +   '<span><b id="prOpp">' + st.oppScore + '</b> ' + esc(st.oppName || '对手') + '</span>'
       + '</div>'
       + '<div class="pr_sub">第 ' + (idx + 1) + ' / ' + words.length + ' 词'
@@ -446,14 +457,14 @@ function doCreate() {
       + (askIsTts
           ? '<div style="margin:26px 0 10px;text-align:center">'
             + '<button id="prSpk" style="font-size:44px;background:none;border:0;cursor:pointer">🔊</button>'
-            + '<div style="font-size:13px;color:#94a3b8;margin-top:6px">点喇叭再听一次</div></div>'
+            + '<div style="font-size:13px;color:var(--pk-dim);margin-top:6px">点喇叭再听一次</div></div>'
           : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(w.cn || '') + '</div>'
-            + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:#93c5fd">'
+            + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:var(--pk-hint)">'
             + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
       + '<input class="pr_in" id="prIn" autocomplete="off" autocapitalize="off" '
       +   'autocorrect="off" spellcheck="false" placeholder="拼出这个词" '
       +   'style="font-size:20px;letter-spacing:2px;text-align:center">'
-      + '<div id="prHint" style="min-height:24px;margin-top:10px;font-size:14px;color:#94a3b8">'
+      + '<div id="prHint" style="min-height:24px;margin-top:10px;font-size:14px;color:var(--pk-dim)">'
       +   '对手：<span id="prOppSt">正在拼…</span></div>');
 
     /* 听发音模式：一进来就读一遍，点喇叭可重听 */
@@ -487,8 +498,8 @@ function doCreate() {
         else {
           input.value = '';
           var h = q('prHint');
-          if (h) { h.style.color = '#f87171'; h.textContent = '不对，再试试'; 
-                   setTimeout(function () { if (h) { h.style.color = '#94a3b8';
+          if (h) { h.style.color = 'var(--pk-bad)'; h.textContent = '不对，再试试'; 
+                   setTimeout(function () { if (h) { h.style.color = 'var(--pk-dim)';
                      h.innerHTML = '对手：<span id="prOppSt">正在拼…</span>'; } }, 900); }
         }
       };
@@ -524,7 +535,7 @@ function doCreate() {
       if (!g || !g.ok || !_rt || _rt.idx !== idx) return;
       var el = q('prOppSt');
       if (g.gone) {
-        if (el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = '#34d399'; }
+        if (el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = 'var(--pk-ok)'; }
         stopPoll();
         S().claimAbandonWin(st.roomId).then(function () {
           showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
@@ -537,7 +548,7 @@ function doCreate() {
       var left = (g.limitSecs || 60) - (g.idleSecs || 0);
       if (el && g.idleSecs > 12 && left > 0) {
         el.textContent = '对手掉线了…' + left + 's 后判他负';
-        el.style.color = '#fbbf24';
+        el.style.color = 'var(--pk-warn)';
       }
     })['catch'](function () {});
   }
@@ -554,7 +565,7 @@ function doCreate() {
       var mySide = st.isHost ? 'host' : 'guest';
       var oppGot = (w !== mySide);
       var el = q('prOppSt');
-      if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = '#fbbf24'; }
+      if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = 'var(--pk-warn)'; }
       var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { waitAll: true };
       /* A 模式：对手抢到就立刻翻篇，不等我 */
       if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); }
@@ -586,7 +597,7 @@ function doCreate() {
       var secs = ((Date.now() - _rt.t0) / 1000).toFixed(1);
       var h = q('prHint');
       if (h) {
-        h.style.color = gain ? (first ? '#fbbf24' : '#34d399') : '#94a3b8';
+        h.style.color = gain ? (first ? 'var(--pk-warn)' : 'var(--pk-ok)') : 'var(--pk-dim)';
         var word = ((_state.words || [])[idx] || {});
         /* 🔴v1102：本回合结束一定把答案亮出来 ——
            听发音模式下如果不显示，孩子拼错了都不知道正确答案是什么，
@@ -662,14 +673,14 @@ function doCreate() {
       var dTxt = '';
       if (rec.ranked && rec.delta) {
         dTxt = '<div style="font-size:20px;font-weight:800;margin:6px 0;color:'
-             + (rec.delta > 0 ? '#34d399' : '#f87171') + '">'
+             + (rec.delta > 0 ? 'var(--pk-ok)' : 'var(--pk-bad)') + '">'
              + (rec.delta > 0 ? '+' : '') + rec.delta + ' 天梯分</div>';
       } else if (!rec.ranked) {
-        dTxt = '<div style="font-size:12.5px;color:#94a3b8;margin:4px 0">'
+        dTxt = '<div style="font-size:12.5px;color:var(--pk-dim);margin:4px 0">'
              + '本局不计天梯（只有 ⚡ 抢答赛计分）</div>';
       }
       extra = dTxt
-        + '<div style="font-size:13px;color:#cbd5e1;margin-top:8px">'
+        + '<div style="font-size:13px;color:var(--pk-txt);margin-top:8px">'
         +   rec.tier.emoji + ' ' + esc(rec.tier.name) + ' · ' + esc(rec.tier.sub) + '<br>'
         +   '总战绩 ' + sm.wins + ' 胜 ' + sm.losses + ' 负'
         +   (sm.total ? ' · 胜率 ' + sm.winRate + '%' : '')

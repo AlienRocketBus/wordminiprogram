@@ -36,38 +36,77 @@
   }
   function q(id) { return document.getElementById(id); }
 
+
+  /* ── 🔴v1110 亮色/暗色主题 ──────────────────────────────────
+
+     全站早就有配色系统（`hansen_palette.js`）：选亮色系时
+     `<html>` 会加上 `hsn-pal-light` 类。
+     但我 v1107/v1108 新做的界面**全是写死的深色十六进制**，
+     在亮色模式下会是一块突兀的黑 —— 用户切了主题却有几屏不跟着变。
+
+     ⚠️ 变量名必须带独有前缀：第一版我用了 `--fr-txt`，
+        而**全站 palette 已经在用这个名字**（亮色下它是 #ffffff），
+        于是我的标题在亮色模式下变成白底白字、对比度 1.0 完全看不见。
+        改用 `--hpk-*` 前缀，与任何既有变量都不重名。
+
+     改法：把颜色收进一组变量，亮色系下整组换掉。
+     **不是给每个元素单独写 !important 覆盖**（那会越堆越乱），
+     而是让所有样式都只引用变量，主题只负责改变量。 */
+  var THEME_VARS =
+    'html:root{' +
+      '--hpk-bg:#0b1020;--hpk-card:#111827;--hpk-line:#1f2937;' +
+      '--hpk-txt:#e8eefc;--hpk-dim:#a9b4c7;--hpk-faint:#7c879b;' +
+      '--hpk-in-bg:#0b1020;--hpk-in-line:#334155;' +
+      '--hpk-btn2:#1f2937;--hpk-btn2-txt:#cbd5e1;' +
+      '--hpk-av:#1e293b;--hpk-av-on:#312e81;--hpk-accent:#4f46e5;' +
+      '--hpk-sel-bg:#1e1b4b;--hpk-ok:#34d399;--hpk-bad:#f87171' +
+    '}' +
+    'html.hsn-pal-light:root, html.hsn-pal-light{' +
+      '--hpk-bg:#f4f6fb;--hpk-card:#ffffff;--hpk-line:#e3e7ee;' +
+      '--hpk-txt:#0f172a;--hpk-dim:#4b5563;--hpk-faint:#6b7280;' +
+      '--hpk-in-bg:#f9fafb;--hpk-in-line:#cbd5e1;' +
+      '--hpk-btn2:#eef1f6;--hpk-btn2-txt:#1f2937;' +
+      '--hpk-av:#e8ecf5;--hpk-av-on:#dbe1ff;--hpk-accent:#4338ca;' +
+      '--hpk-sel-bg:#e8ecff;--hpk-ok:#047857;--hpk-bad:#b91c1c' +
+    '}';
+
+      /* 🔴v1110：这几条必须 !important。
+         全站 palette 在亮色系下有一批 `color:#fff!important` 的规则
+         （为了让深色卡片上的白字在任何配色下都可读）。
+         我们这几屏是**自己的深/浅底**，被那批规则波及会变成白底白字。
+         只给"标题/数值"这类关键文字加，不滥用 —— 其余仍走变量级联。 */
   function css() {
     if (q('hsn_ld_css')) return;
     var st = document.createElement('style');
     st.id = 'hsn_ld_css';
-    st.textContent =
-      '#' + ID + '{position:fixed;inset:0;z-index:2147482000;background:#0b1020;display:none;' +
+    st.textContent = THEME_VARS +
+      '#' + ID + '{position:fixed;inset:0;z-index:2147482000;background:var(--hpk-bg);display:none;' +
         'overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:system-ui,-apple-system,"PingFang SC",sans-serif}' +
       '#' + ID + '.on{display:block}' +
-      '.ld_wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}' +
-      '.ld_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}' +
-      '.ld_h{font-size:20px;font-weight:900;color:#e2e8f0;flex:1}' +
-      '.ld_x{background:none;border:0;color:#94a3b8;font-size:26px;cursor:pointer;padding:0 6px}' +
-      '.ld_card{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:16px 14px;margin-bottom:12px}' +
-      '.ld_tier{text-align:center;padding:22px 14px}' +
-      '.ld_te{font-size:52px;line-height:1}' +
-      '.ld_tn{font-size:24px;font-weight:900;color:#e2e8f0;margin-top:6px}' +
-      '.ld_ts{font-size:14px;color:#94a3b8;margin-top:4px}' +
-      '.ld_grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
-      '.ld_kv{background:#0b1020;border:1px solid #1f2937;border-radius:12px;padding:11px 12px}' +
-      '.ld_k{font-size:11.5px;color:#94a3b8}' +
-      '.ld_v{font-size:20px;font-weight:800;color:#e2e8f0;margin-top:3px}' +
-      '.ld_vs{font-size:12px;color:#64748b;font-weight:400;margin-left:3px}' +
-      '.ld_btn{width:100%;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;border:0;' +
+      'html .ld_wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}' +
+      'html .ld_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}' +
+      'html .ld_h{font-size:20px;font-weight:900;color:var(--hpk-txt)!important;flex:1}' +
+      'html .ld_x{background:none;border:0;color:var(--hpk-dim);font-size:26px;cursor:pointer;padding:0 6px}' +
+      'html .ld_card{background:var(--hpk-card);border:1px solid var(--hpk-line);border-radius:16px;padding:16px 14px;margin-bottom:12px}' +
+      'html .ld_tier{text-align:center;padding:22px 14px}' +
+      'html .ld_te{font-size:52px;line-height:1}' +
+      'html .ld_tn{font-size:24px;font-weight:900;color:var(--hpk-txt)!important;margin-top:6px}' +
+      'html .ld_ts{font-size:14px;color:var(--hpk-dim)!important;margin-top:4px}' +
+      'html .ld_grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+      'html .ld_kv{background:var(--hpk-bg);border:1px solid var(--hpk-line);border-radius:12px;padding:11px 12px}' +
+      'html .ld_k{font-size:11.5px;color:var(--hpk-dim)!important}' +
+      'html .ld_v{font-size:20px;font-weight:800;color:var(--hpk-txt)!important;margin-top:3px}' +
+      'html .ld_vs{font-size:12px;color:var(--hpk-faint);font-weight:400;margin-left:3px}' +
+      'html .ld_btn{width:100%;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;border:0;' +
         'border-radius:14px;padding:15px;font-size:17px;font-weight:800;cursor:pointer;margin-bottom:10px}' +
-      '.ld_btn2{background:#1f2937;color:#cbd5e1;font-size:15px;padding:12px}' +
-      '.ld_lbl{font-size:12.5px;color:#94a3b8;margin-bottom:9px}' +
-      '.ld_hi{display:flex;justify-content:space-between;align-items:center;padding:9px 2px;' +
-        'border-bottom:1px solid #1f2937;font-size:13.5px}' +
-      '.ld_hi:last-child{border-bottom:0}' +
-      '.ld_w{color:#34d399;font-weight:700}.ld_l{color:#f87171;font-weight:700}' +
-      '.ld_bar{height:7px;background:#1f2937;border-radius:99px;overflow:hidden;margin-top:6px}' +
-      '.ld_bar i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#22d3ee)}';
+      'html .ld_btn2{background:var(--hpk-line);color:var(--hpk-btn2-txt);font-size:15px;padding:12px}' +
+      'html .ld_lbl{font-size:12.5px;color:var(--hpk-dim)!important;margin-bottom:9px}' +
+      'html .ld_hi{display:flex;justify-content:space-between;align-items:center;padding:9px 2px;' +
+        'border-bottom:1px solid var(--hpk-line);font-size:13.5px}' +
+      'html .ld_hi:last-child{border-bottom:0}' +
+      'html .ld_w{color:var(--hpk-ok);font-weight:700}.ld_l{color:var(--hpk-bad);font-weight:700}' +
+      'html .ld_bar{height:7px;background:var(--hpk-line);border-radius:99px;overflow:hidden;margin-top:6px}' +
+      'html .ld_bar i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#22d3ee)}';
     document.head.appendChild(st);
   }
 
@@ -108,17 +147,17 @@
       +   '<div class="ld_tn">' + esc(t.name) + '</div>'
       +   '<div class="ld_ts">' + esc(t.sub) + '</div>'
       +   (sm.placed && sm.peakRating > sm.rating
-            ? '<div style="font-size:12px;color:#64748b;margin-top:6px">'
+            ? '<div style="font-size:12px;color:var(--hpk-faint);margin-top:6px">'
               + '历史最高 ' + sm.peakRating + ' 分</div>' : '')
       +   (!sm.placed
             ? '<div class="ld_bar" style="margin:12px 20px 0"><i style="width:'
               + Math.min(100, Math.round(sm.placementGames * 100 / need)) + '%"></i></div>'
-              + '<div style="font-size:12px;color:#94a3b8;margin-top:6px">'
+              + '<div style="font-size:12px;color:var(--hpk-dim);margin-top:6px">'
               + '定级赛 ' + sm.placementGames + ' / ' + need + '</div>' : '')
       + '</div>'
 
       + '<button class="ld_btn" id="ldGo">⚡ 开始排位（找实力差不多的对手）</button>'
-      + '<div style="font-size:11.5px;color:#64748b;text-align:center;margin:-4px 0 14px;line-height:1.6">'
+      + '<div style="font-size:11.5px;color:var(--hpk-faint);text-align:center;margin:-4px 0 14px;line-height:1.6">'
       +   '排位固定用「抢答赛」：谁先拼对谁得分<br>只有这个模式会加减天梯分'
       + '</div>'
 
@@ -131,8 +170,8 @@
             + '<div class="ld_lbl">我的实力</div>'
             + '<div style="text-align:center;padding:16px 8px">'
             +   '<div style="font-size:34px">🎯</div>'
-            +   '<div style="font-size:15px;color:#e2e8f0;margin-top:8px">还没打过排位</div>'
-            +   '<div style="font-size:12.5px;color:#94a3b8;margin-top:8px;line-height:1.9">'
+            +   '<div style="font-size:15px;color:var(--hpk-txt);margin-top:8px">还没打过排位</div>'
+            +   '<div style="font-size:12.5px;color:var(--hpk-dim);margin-top:8px;line-height:1.9">'
             +     '打完第一局就能看到：<br>'
             +     '⚡ 抢先率 —— 你有多少次抢在对手前面<br>'
             +     '⏱ 平均用时 —— 每个词你要想多久<br>'
@@ -159,7 +198,7 @@
       + '<div class="ld_card">'
       +   '<div class="ld_lbl">最近对局</div>'
       +   (sm.history.length ? sm.history.slice(0, 8).map(hiRow).join('')
-           : '<div style="color:#94a3b8;font-size:13.5px;text-align:center;padding:14px">'
+           : '<div style="color:var(--hpk-dim);font-size:13.5px;text-align:center;padding:14px">'
              + '还没打过。点上面的按钮开始第一局。</div>')
       + '</div>'
     );
@@ -171,7 +210,7 @@
   function kv(k, v, sub) {
     return '<div class="ld_kv"><div class="ld_k">' + esc(k) + '</div>'
       + '<div class="ld_v">' + v + '</div>'
-      + (sub ? '<div style="font-size:11px;color:#64748b;margin-top:2px">' + esc(sub) + '</div>' : '')
+      + (sub ? '<div style="font-size:11px;color:var(--hpk-faint);margin-top:2px">' + esc(sub) + '</div>' : '')
       + '</div>';
   }
 
@@ -181,14 +220,14 @@
     return '<div class="ld_hi">'
       + '<span class="' + (w ? 'ld_w' : (d ? '' : 'ld_l')) + '">'
       +   (w ? '胜' : (d ? '平' : '负')) + '</span>'
-      + '<span style="flex:1;margin:0 10px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+      + '<span style="flex:1;margin:0 10px;color:var(--hpk-btn2-txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
       +   esc(h.opp || '对手') + '</span>'
-      + '<span style="color:#64748b;font-size:12px;margin-right:8px">' + h.my + ':' + h.oc + '</span>'
+      + '<span style="color:var(--hpk-faint);font-size:12px;margin-right:8px">' + h.my + ':' + h.oc + '</span>'
       + (h.ranked && h.delta
-          ? '<span style="color:' + (h.delta > 0 ? '#34d399' : '#f87171') + ';font-size:12.5px;width:42px;text-align:right">'
+          ? '<span style="color:' + (h.delta > 0 ? 'var(--hpk-ok)' : 'var(--hpk-bad)') + ';font-size:12.5px;width:42px;text-align:right">'
             + (h.delta > 0 ? '+' : '') + h.delta + '</span>'
-          : '<span style="color:#475569;font-size:11.5px;width:42px;text-align:right">不计分</span>')
-      + '<span style="color:#475569;font-size:11px;width:52px;text-align:right">' + ago + '</span>'
+          : '<span style="color:var(--hpk-faint);font-size:11.5px;width:42px;text-align:right">不计分</span>')
+      + '<span style="color:var(--hpk-faint);font-size:11px;width:52px;text-align:right">' + ago + '</span>'
       + '</div>';
   }
 
@@ -234,11 +273,11 @@
         + '<div class="ld_h">⚡ 正在找对手…</div></div>'
         + '<div class="ld_card" style="text-align:center;padding:30px 14px">'
         +   '<div style="font-size:44px">🔍</div>'
-        +   '<div style="font-size:16px;color:#e2e8f0;margin-top:10px">'
+        +   '<div style="font-size:16px;color:var(--hpk-txt);margin-top:10px">'
         +     '正在找 ' + Math.max(0, sm.rating - band) + ' ~ ' + (sm.rating + band) + ' 分的对手</div>'
-        +   '<div style="font-size:13px;color:#94a3b8;margin-top:8px">'
+        +   '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px">'
         +     '已等 ' + waited + ' 秒 · 等得越久范围放得越宽</div>'
-        +   '<div style="font-size:11.5px;color:#64748b;margin-top:14px;line-height:1.7">'
+        +   '<div style="font-size:11.5px;color:var(--hpk-faint);margin-top:14px;line-height:1.7">'
         +     '没人的时候会自动开一间等着<br>有人进来就立刻开打</div>'
         + '</div>'
         + '<button class="ld_btn ld_btn2" id="ldCancel2">取消，回天梯</button>');

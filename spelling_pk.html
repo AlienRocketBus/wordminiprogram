@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1109"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1109"></script>
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1110"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1110"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <title>拼写大PK · 单词大冒险</title>
 <!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
-<script src="hansen_sw_upgrade_gate_v944.js?v=1109"></script>
-<script src="hansen_backup_bootstrap_v944.js?v=1109"></script>
+<script src="hansen_sw_upgrade_gate_v944.js?v=1110"></script>
+<script src="hansen_backup_bootstrap_v944.js?v=1110"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
@@ -123,13 +123,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <div id="pkLadderBody"></div>
 </div>
 
-<script src="hansen_palette.js?v=1109"></script>
-<script src="hansen_sb_ladder_v1002.js?v=1109"></script><!--🔴v1103 对战战绩与天梯分：打完要留下痕迹，否则赢了没意义。ELO 算法 v1002 就写好了，缺的一直是"存状态"这一层。--><script defer src="hansen_pk_record_v1103.js?v=1109"></script><!--🔴v1108 天梯排位：实力匹配 + 战绩页（抢先率/平均用时/正确率/最高分）--><script defer src="hansen_ladder_ui_v1108.js?v=1109"></script>
-<script src="hansen_sb_profile_v1002.js?v=1109"></script><!--🔴v1106 好友/在线状态/隐身/快捷语。只能发固定快捷语不能打字 —— 这是给孩子用的产品，自由输入意味着陌生人能发任意内容，需要敏感词/举报/审核那一整套，而孩子想聊天本来就有微信。--><script defer src="hansen_friends_v1106.js?v=1109"></script><!--🔴v1107 好友界面：在线头像亮+绿点/离线整体变灰、加好友、快捷语（无输入框）、隐身开关--><script defer src="hansen_friends_ui_v1107.js?v=1109"></script>
-<script src="hansen_cloud_config_v965.js?v=1109"></script>
-<script src="hansen_backup_v944.js?v=1109"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1109"></script><!--🔴v1063: 本页自身调用 HansenCloudRestore（「☁️ 从云端恢复进度」按钮），却从未加载该模块——直接打开本页时按钮只会提示"恢复模块未加载"。同时补 Lv.3 门槛，避免本页成为门槛的又一个后门。--><script defer src="hansen_signup_gate_v1030.js?v=1109"></script><script defer src="hansen_cloud_restore_v1048.js?v=1109"></script><!--v1065: 在线对战·公开房间。本页原有 renderRooms() 是写死的占位("暂时还没有人开房")，与页面内屏那套是两处真源。改为共用同一真实实现。--><script defer src="hansen_pk_room_v1065.js?v=1109"></script><script defer src="hansen_pk_room_ui_v1065.js?v=1109"></script><script src="hansen_cloud_save_v965.js?v=1109"></script><!--🔴v1021: 登录后要能立刻上传进度-->
-<script src="hansen_auth_v1004.js?v=1109"></script><!--🔴v1004: 账号系统-->
-<script src="hansen_auth_ui_v1004.js?v=1109"></script>
+<script src="hansen_palette.js?v=1110"></script>
+<script src="hansen_sb_ladder_v1002.js?v=1110"></script><!--🔴v1103 对战战绩与天梯分：打完要留下痕迹，否则赢了没意义。ELO 算法 v1002 就写好了，缺的一直是"存状态"这一层。--><script defer src="hansen_pk_record_v1103.js?v=1110"></script><!--🔴v1108 天梯排位：实力匹配 + 战绩页（抢先率/平均用时/正确率/最高分）--><script defer src="hansen_ladder_ui_v1108.js?v=1110"></script>
+<script src="hansen_sb_profile_v1002.js?v=1110"></script><!--🔴v1106 好友/在线状态/隐身/快捷语。只能发固定快捷语不能打字 —— 这是给孩子用的产品，自由输入意味着陌生人能发任意内容，需要敏感词/举报/审核那一整套，而孩子想聊天本来就有微信。--><script defer src="hansen_friends_v1106.js?v=1110"></script><!--🔴v1107 好友界面：在线头像亮+绿点/离线整体变灰、加好友、快捷语（无输入框）、隐身开关--><script defer src="hansen_friends_ui_v1107.js?v=1110"></script>
+<script src="hansen_cloud_config_v965.js?v=1110"></script>
+<script src="hansen_backup_v944.js?v=1110"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1110"></script><!--🔴v1063: 本页自身调用 HansenCloudRestore（「☁️ 从云端恢复进度」按钮），却从未加载该模块——直接打开本页时按钮只会提示"恢复模块未加载"。同时补 Lv.3 门槛，避免本页成为门槛的又一个后门。--><script defer src="hansen_signup_gate_v1030.js?v=1110"></script><script defer src="hansen_cloud_restore_v1048.js?v=1110"></script><!--v1065: 在线对战·公开房间。本页原有 renderRooms() 是写死的占位("暂时还没有人开房")，与页面内屏那套是两处真源。改为共用同一真实实现。--><script defer src="hansen_pk_room_v1065.js?v=1110"></script><script defer src="hansen_pk_room_ui_v1065.js?v=1110"></script><script src="hansen_cloud_save_v965.js?v=1110"></script><!--🔴v1021: 登录后要能立刻上传进度-->
+<script src="hansen_auth_v1004.js?v=1110"></script><!--🔴v1004: 账号系统-->
+<script src="hansen_auth_ui_v1004.js?v=1110"></script>
 <script>
 (function(){
   'use strict';

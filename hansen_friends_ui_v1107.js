@@ -30,45 +30,84 @@
   }
   function q(id) { return document.getElementById(id); }
 
+
+  /* ── 🔴v1110 亮色/暗色主题 ──────────────────────────────────
+
+     全站早就有配色系统（`hansen_palette.js`）：选亮色系时
+     `<html>` 会加上 `hsn-pal-light` 类。
+     但我 v1107/v1108 新做的界面**全是写死的深色十六进制**，
+     在亮色模式下会是一块突兀的黑 —— 用户切了主题却有几屏不跟着变。
+
+     ⚠️ 变量名必须带独有前缀：第一版我用了 `--fr-txt`，
+        而**全站 palette 已经在用这个名字**（亮色下它是 #ffffff），
+        于是我的标题在亮色模式下变成白底白字、对比度 1.0 完全看不见。
+        改用 `--hpk-*` 前缀，与任何既有变量都不重名。
+
+     改法：把颜色收进一组变量，亮色系下整组换掉。
+     **不是给每个元素单独写 !important 覆盖**（那会越堆越乱），
+     而是让所有样式都只引用变量，主题只负责改变量。 */
+  var THEME_VARS =
+    'html:root{' +
+      '--hpk-bg:#0b1020;--hpk-card:#111827;--hpk-line:#1f2937;' +
+      '--hpk-txt:#e8eefc;--hpk-dim:#a9b4c7;--hpk-faint:#7c879b;' +
+      '--hpk-in-bg:#0b1020;--hpk-in-line:#334155;' +
+      '--hpk-btn2:#1f2937;--hpk-btn2-txt:#cbd5e1;' +
+      '--hpk-av:#1e293b;--hpk-av-on:#312e81;--hpk-accent:#4f46e5;' +
+      '--hpk-sel-bg:#1e1b4b;--hpk-ok:#34d399;--hpk-bad:#f87171' +
+    '}' +
+    'html.hsn-pal-light:root, html.hsn-pal-light{' +
+      '--hpk-bg:#f4f6fb;--hpk-card:#ffffff;--hpk-line:#e3e7ee;' +
+      '--hpk-txt:#0f172a;--hpk-dim:#4b5563;--hpk-faint:#6b7280;' +
+      '--hpk-in-bg:#f9fafb;--hpk-in-line:#cbd5e1;' +
+      '--hpk-btn2:#eef1f6;--hpk-btn2-txt:#1f2937;' +
+      '--hpk-av:#e8ecf5;--hpk-av-on:#dbe1ff;--hpk-accent:#4338ca;' +
+      '--hpk-sel-bg:#e8ecff;--hpk-ok:#047857;--hpk-bad:#b91c1c' +
+    '}';
+
+      /* 🔴v1110：这几条必须 !important。
+         全站 palette 在亮色系下有一批 `color:#fff!important` 的规则
+         （为了让深色卡片上的白字在任何配色下都可读）。
+         我们这几屏是**自己的深/浅底**，被那批规则波及会变成白底白字。
+         只给"标题/数值"这类关键文字加，不滥用 —— 其余仍走变量级联。 */
   function css() {
     if (q('hsn_fr_css')) return;
     var st = document.createElement('style');
     st.id = 'hsn_fr_css';
-    st.textContent =
-      '#' + ID + '{position:fixed;inset:0;z-index:2147482000;background:#0b1020;' +
+    st.textContent = THEME_VARS +
+      '#' + ID + '{position:fixed;inset:0;z-index:2147482000;background:var(--hpk-bg);' +
         'display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;' +
         'font-family:system-ui,-apple-system,"PingFang SC",sans-serif}' +
       '#' + ID + '.on{display:block}' +
-      '.fr_wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}' +
-      '.fr_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}' +
-      '.fr_h{font-size:20px;font-weight:900;color:#e2e8f0;flex:1}' +
-      '.fr_x{background:none;border:0;color:#94a3b8;font-size:26px;cursor:pointer;padding:0 6px}' +
-      '.fr_card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:12px 14px;margin-bottom:12px}' +
-      '.fr_lbl{font-size:12.5px;color:#94a3b8;margin-bottom:8px}' +
-      '.fr_row{display:flex;gap:8px}' +
-      '.fr_in{flex:1;min-width:0;background:#0b1020;border:1px solid #334155;border-radius:10px;' +
-        'color:#e2e8f0;padding:10px;font-size:16px;text-align:center;letter-spacing:2px}' +
-      '.fr_btn{background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;border:0;' +
+      'html .fr_wrap{max-width:520px;margin:0 auto;padding:16px 14px 40px}' +
+      'html .fr_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}' +
+      'html .fr_h{font-size:20px;font-weight:900;color:var(--hpk-txt)!important;flex:1}' +
+      'html .fr_x{background:none;border:0;color:var(--hpk-dim);font-size:26px;cursor:pointer;padding:0 6px}' +
+      'html .fr_card{background:var(--hpk-card);border:1px solid var(--hpk-line);border-radius:14px;padding:12px 14px;margin-bottom:12px}' +
+      'html .fr_lbl{font-size:12.5px;color:var(--hpk-dim)!important;margin-bottom:8px}' +
+      'html .fr_row{display:flex;gap:8px}' +
+      'html .fr_in{flex:1;min-width:0;background:var(--hpk-bg);border:1px solid var(--hpk-in-line);border-radius:10px;' +
+        'color:var(--hpk-txt);padding:10px;font-size:16px;text-align:center;letter-spacing:2px}' +
+      'html .fr_btn{background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;border:0;' +
         'border-radius:10px;padding:10px 14px;font-size:15px;font-weight:700;cursor:pointer}' +
-      '.fr_btn2{background:#1f2937;color:#cbd5e1}' +
-      '.fr_item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid #1f2937;cursor:pointer}' +
-      '.fr_item:last-child{border-bottom:0}' +
+      'html .fr_btn2{background:var(--hpk-line);color:var(--hpk-btn2-txt)}' +
+      'html .fr_item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--hpk-line);cursor:pointer}' +
+      'html .fr_item:last-child{border-bottom:0}' +
       /* 🔴 离线整体变灰 —— 不是只去掉绿点，要一眼扫出谁能约 */
-      '.fr_item.off{opacity:.45}' +
-      '.fr_av{position:relative;width:44px;height:44px;border-radius:50%;background:#1e293b;' +
+      'html .fr_item.off{opacity:.45}' +
+      'html .fr_av{position:relative;width:44px;height:44px;border-radius:50%;background:var(--hpk-av);' +
         'display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 44px}' +
-      '.fr_item.on2 .fr_av{background:#312e81;box-shadow:0 0 0 2px #4f46e5}' +
-      '.fr_dot{position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;' +
-        'background:#22c55e;border:2px solid #0b1020}' +
-      '.fr_nm{font-size:16px;font-weight:700;color:#e2e8f0}' +
-      '.fr_sub{font-size:12px;color:#94a3b8;margin-top:2px}' +
-      '.fr_q{display:inline-block;background:#1f2937;border:1px solid #334155;border-radius:999px;' +
-        'padding:9px 13px;margin:5px 5px 0 0;font-size:14px;color:#e2e8f0;cursor:pointer}' +
-      '.fr_empty{color:#94a3b8;font-size:14px;text-align:center;padding:22px 8px;line-height:1.8}' +
-      '.fr_st{display:flex;gap:8px}' +
-      '.fr_st div{flex:1;text-align:center;border:1px solid #334155;border-radius:10px;' +
-        'padding:9px 4px;cursor:pointer;font-size:14px;color:#cbd5e1}' +
-      '.fr_st div.sel{border-color:#4f46e5;background:#1e1b4b;color:#fff;font-weight:700}';
+      'html .fr_item.on2 .fr_av{background:var(--hpk-av-on);box-shadow:0 0 0 2px #4f46e5}' +
+      'html .fr_dot{position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border-radius:50%;' +
+        'background:#22c55e;border:2px solid var(--hpk-bg)}' +
+      'html .fr_nm{font-size:16px;font-weight:700;color:var(--hpk-txt)!important}' +
+      'html .fr_sub{font-size:12px;color:var(--hpk-dim);margin-top:2px}' +
+      'html .fr_q{display:inline-block;background:var(--hpk-line);border:1px solid var(--hpk-in-line);border-radius:999px;' +
+        'padding:9px 13px;margin:5px 5px 0 0;font-size:14px;color:var(--hpk-txt);cursor:pointer}' +
+      'html .fr_empty{color:var(--hpk-dim);font-size:14px;text-align:center;padding:22px 8px;line-height:1.8}' +
+      'html .fr_st{display:flex;gap:8px}' +
+      'html .fr_st div{flex:1;text-align:center;border:1px solid var(--hpk-in-line);border-radius:10px;' +
+        'padding:9px 4px;cursor:pointer;font-size:14px;color:var(--hpk-btn2-txt)}' +
+      'html .fr_st div.sel{border-color:#4f46e5;background:var(--hpk-sel-bg);color:#fff;font-weight:700}';
     document.head.appendChild(st);
   }
 
@@ -120,7 +159,7 @@
       +     '<div id="frOn" class="' + (st === 'online' ? 'sel' : '') + '">🟢 在线</div>'
       +     '<div id="frHide" class="' + (st === 'hidden' ? 'sel' : '') + '">🌙 隐身</div>'
       +   '</div>'
-      +   '<div style="font-size:11.5px;color:#64748b;margin-top:7px;line-height:1.6">'
+      +   '<div style="font-size:11.5px;color:var(--hpk-faint);margin-top:7px;line-height:1.6">'
       +     (st === 'hidden'
           ? '隐身时好友看到的你和「不在线」一模一样，看不出差别。'
           : '好友能看到你「刚才还在」。<br>'
@@ -135,7 +174,7 @@
       +     '<input class="fr_in" id="frCid" inputmode="numeric" placeholder="例如 2" autocomplete="off">'
       +     '<button class="fr_btn" id="frAdd">加好友</button>'
       +   '</div>'
-      +   '<div style="font-size:11.5px;color:#64748b;margin-top:7px">'
+      +   '<div style="font-size:11.5px;color:var(--hpk-faint);margin-top:7px">'
       +     '竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001'
       +   '</div>'
       + '</div>'
@@ -173,7 +212,7 @@
         +   '<div class="fr_nm">' + esc(f.name) + '</div>'
         +   '<div class="fr_sub">No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
         + '</div>'
-        + '<div style="font-size:18px;color:#64748b">›</div>'
+        + '<div style="font-size:18px;color:var(--hpk-faint)">›</div>'
         + '</div>';
     }).join('');
   }
@@ -236,11 +275,11 @@
 
       + '<div class="fr_card" style="text-align:center">'
       +   '<div class="fr_av" style="margin:0 auto 10px;width:64px;height:64px;font-size:32px;'
-      +     (f.online ? 'background:#312e81;box-shadow:0 0 0 3px #4f46e5' : 'opacity:.5') + '">🐝'
+      +     (f.online ? 'background:var(--hpk-av-on);box-shadow:0 0 0 3px #4f46e5' : 'opacity:.5') + '">🐝'
       +     (f.online ? '<span class="fr_dot" style="width:16px;height:16px"></span>' : '')
       +   '</div>'
-      +   '<div style="font-size:18px;font-weight:800;color:#e2e8f0">' + esc(f.name) + '</div>'
-      +   '<div style="font-size:13px;color:' + (f.online ? '#22c55e' : '#64748b') + ';margin-top:4px">'
+      +   '<div style="font-size:18px;font-weight:800;color:var(--hpk-txt)">' + esc(f.name) + '</div>'
+      +   '<div style="font-size:13px;color:' + (f.online ? '#22c55e' : 'var(--hpk-faint)') + ';margin-top:4px">'
       +     'No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
       + '</div>'
 
@@ -250,7 +289,7 @@
               return '<span class="fr_q" data-q="' + esc(x.id) + '">'
                 + x.emoji + ' ' + esc(x.text) + '</span>';
             }).join('') + '</div>'
-      +   '<div id="frSent" style="font-size:13px;color:#34d399;min-height:20px;margin-top:10px"></div>'
+      +   '<div id="frSent" style="font-size:13px;color:var(--hpk-ok);min-height:20px;margin-top:10px"></div>'
       + '</div>'
 
       + '<button class="fr_btn" id="frPk" style="width:100%;margin-bottom:10px">'
@@ -268,7 +307,7 @@
           box.textContent = r.ok
             ? ('已发出：' + r.sent.emoji + ' ' + r.sent.text)
             : ('没发出去：' + (r.reason || '未知'));
-          box.style.color = r.ok ? '#34d399' : '#f87171';
+          box.style.color = r.ok ? 'var(--hpk-ok)' : 'var(--hpk-bad)';
         });
       };
     });
