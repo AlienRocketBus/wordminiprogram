@@ -157,6 +157,32 @@ def _inj_backup_takes_creds(s):
     return s.replace('    if(credentialKey(k))return false;      /* v1090', '    /* 已拆除 /* v1090', 1)
 
 
+
+def _inj_cjk_off(s):
+    """取消中文键放行 —— 用户的「我的学习」数据会让整个备份失败。
+       注意：`u4e00` 在说明注释里也出现，简单 replace 会打在注释上（打不中真代码）。
+       必须整行替换 KEY_CHARSET 的定义本身。"""
+    import re as _r
+    i = s.find('var KEY_CHARSET')
+    if i < 0: return None
+    j = s.find('\n', i)
+    return s[:i] + 'var KEY_CHARSET = /^[A-Za-z0-9_:\\-.]+$/;' + s[j:]
+
+def _inj_notready_off(s):
+    """把 notReady 去掉 —— 「尚未就绪」又会被说成「已过期」。
+       同理：notReady 在注释里也出现，只替换 ensureSession 函数体内的那一处。"""
+    i = s.find('function ensureSession')
+    if i < 0: return None
+    seg = s[i:i+3000]
+    if 'notReady' not in seg: return None
+    # 函数体内所有 notReady 一并改掉 —— 守卫查的是"这个函数体里有没有这个概念"
+    return s[:i] + seg.replace('notReady', 'nrGONE') + s[i+3000:]
+
+def _inj_notes_gone(s):
+    """笔记核心结论被删 —— 近 80 版换来的经验会丢。"""
+    return s.replace('先修', '（已删）', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -183,6 +209,10 @@ CASES = [
     ('单实例',          'hansen_cloud_save_v965.js',  _inj_multi_instance),
     # 🔴v1090
     ('备份不碰凭证',    'hansen_backup_v944.js',      _inj_backup_takes_creds),
+    # 🔴v1096 攻坚笔记转化的守卫
+    ('中文键备份',      'hansen_backup_v944.js',      _inj_cjk_off),
+    ('三态不分',        'hansen_auth_v1004.js',       _inj_notready_off),
+    ('攻坚笔记在册',    '攻坚笔记/跨设备存档攻坚全记录_v1017-v1095.md', _inj_notes_gone),
 ]
 
 

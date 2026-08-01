@@ -835,6 +835,220 @@ def guard_backup_excludes_credentials():
                 'rawEntryAllowed 未排除凭证 —— 恢复/回滚会把旧凭证写回去，重演事故')
 
 
+
+# ══════════════════════════════════════════════════════════════════
+# 🔴v1096 攻坚笔记转化的守卫
+#
+# 来源：《跨设备存档攻坚全记录 v1017-v1095》（攻坚笔记/ 目录）
+# 那次攻坚花了近 80 个版本，根子是**六个 bug 叠在一起**，
+# 其中三个属于"让人看不见真相"那一类。
+#
+# 这几道守卫把笔记里最贵的几条教训变成**可执行的拦截**，
+# 而不是只写在文档里等人去读。
+# ══════════════════════════════════════════════════════════════════
+
+def guard_cjk_keys_backupable():
+    """备份必须放行中文键名 —— 卡了用户好几个版本的最后一根稻草。
+
+    事故（v1095）：登录成功后点「立即把进度存到云端」，一直报
+        「备份含非法键或非字符串值」
+
+    真凶（扫描用户真实 localStorage 才找到）：
+        hsn_progress:动物大冒险      ← 键名里有中文
+    这是 hansen_mylearning.js 写的「我的学习」跨岛聚合数据，
+    键名格式就是 `hsn_progress:<岛屿标题>` —— 而岛屿标题本来就是中文。
+
+    而备份的键名校验只允许 [A-Za-z0-9_:\\-.] —— 中文一律判为非法
+    → 整个备份失败 → 用户永远存不上云端。
+
+    ⚠️ v1094 我曾以为是自己加的诊断键污染了备份 —— **那只对了一半**。
+    教训：**先扫真实数据，再下结论。**
+    """
+    bk = _code_only(_read('hansen_backup_v944.js') or '')
+    if not bk:
+        return
+    m = re.search(r'KEY_CHARSET\s*=\s*/([^/]+)/', bk)
+    if not m:
+        bad('中文键备份', 'hansen_backup 缺 KEY_CHARSET —— 中文键名会让整个备份失败')
+        return
+    charset = m.group(1)
+    if 'u4e00' not in charset or 'u9fff' not in charset:
+        bad('中文键备份',
+            'KEY_CHARSET 未放行汉字区间 —— hsn_progress:<中文岛名> 会让备份整个失败')
+    # 同时不能无脑放行：空格等真正非法的字符仍要拦
+    if ' ' in charset.replace('\\ ', ''):
+        bad('中文键备份', 'KEY_CHARSET 放行了空格 —— 放得太宽')
+
+
+def guard_no_success_without_evidence():
+    """「没报错」不等于「成功」—— 关键操作必须留下可验证的痕迹。
+
+    事故（v1080）：登录链路原本是
+        }).then(function () { writeLocal({ method:'phone', signedAt: Date.now() }); })
+    **只要 Promise 没 reject 就标记成功**，完全不看云端返回了什么。
+    于是出现「③ 已登录 / ③b 会话失效」这种自相矛盾的显示 ——
+    界面说登录着，每一次云端读写却都失败，用户被反复推去重新登录。
+
+    规则：登录成功后必须确认 SDK 自己的凭证键真的存在，才写本地登录态。
+    """
+    src = _code_only(_read('hansen_auth_v1004.js') or '')
+    if not src:
+        return
+    i = src.find('function loginByPhoneCode')
+    if i < 0:
+        return
+    seg = src[i:i + 4000]
+    if 'credentials' not in seg:
+        bad('无凭据即成功',
+            'loginByPhoneCode 未校验云端凭证就写"已登录" —— '
+            '会出现「界面说已登录、云端其实没会话」')
+
+
+def guard_notready_vs_expired():
+    """「尚未就绪」与「确凿过期」必须分开说 —— 混为一谈会把人推进死循环。
+
+    事故（v1077）：v1059 那行返回值自相矛盾 ——
+        { ok:false, expired:true, definite:false }
+                    ↑"确凿过期"    ↑又说"说不准"
+    而下游**只看 expired**，于是把「SDK 凭证还没落定」讲成「登录已过期」。
+    用户按提示重新登录 → 又成功 → 又被告知过期 → **循环重演**。
+
+    规则：探测拿不到会话时必须区分 notReady（稍候重试）与 expired（重新登录），
+    且空登录态必须重试若干次才下结论。
+    """
+    src = _code_only(_read('hansen_auth_v1004.js') or '')
+    if not src:
+        return
+    i = src.find('function ensureSession')
+    if i < 0:
+        return
+    seg = src[i:i + 3000]
+    if 'notReady' not in seg:
+        bad('三态不分',
+            'ensureSession 未区分「尚未就绪」与「已过期」 —— '
+            '会把人推去反复重新登录（v1077 死循环）')
+    if 'RETRY' not in seg and 'retry' not in seg.lower():
+        bad('三态不分',
+            'ensureSession 拿到空登录态未重试就下结论 —— '
+            'SDK 凭证是异步落定的，问一次不算数')
+
+
+def guard_login_path_not_blocked():
+    """用户主动操作的路径不许被"后台优化"拦死。
+
+    事故（v1090）：为堵「多实例并发刷新」，我加了
+    「iframe 内**一律**不创建云端实例」——
+    **而拼写大PK 本身就在 index.html 的 iframe 壳里跑**，
+    登录面板正在那个子框内，于是用户连登录都点不了。
+
+    我把两件性质完全不同的事混为一谈：
+      · 后台自动行为（开机恢复/自动同步/会话探测）在子框里跑 → **该拦**
+      · 用户主动操作（登录/注册/手动同步）→ **必须放行**
+        （拦了比凭证偶尔被撞掉严重得多）
+
+    正确做法：同源时**借用顶层已有的实例** ——
+    既只有一个实例（不并发刷新），子框里的功能又照常可用。
+    """
+    for f, label in (('hansen_auth_v1004.js', '账号'),
+                     ('hansen_cloud_save_v965.js', '云存档')):
+        src = _code_only(_read(f) or '')
+        if not src:
+            continue
+        i = src.find('_inFrame')
+        if i < 0:
+            continue
+        seg = src[i:i + 900]
+        if 'window.top' not in seg:
+            bad('登录被拦死',
+                '%s：子框判断未尝试借用顶层实例 —— 会把用户主动操作一并拦死' % label)
+        # 有 reject 的话，前面必须有"仅限后台"的限定
+        ri = seg.find('Promise.reject')
+        if ri >= 0 and not re.search(r'_bgOnly|后台', seg[:ri]):
+            bad('登录被拦死',
+                '%s：子框内无条件拒绝 —— v1090 就是这样让用户连登录都点不了' % label)
+
+
+def guard_app_and_auth_in_sync():
+    """`app()` 与 `auth()` 必须一起改 —— 同一疏漏的两半。
+
+    事故（v1093）：v1091 让子框借用顶层实例，改的是 `app()`：
+        function auth() {
+          return app().then(function () {
+            if (!_auth) throw new Error('鉴权不可用');   // ← 这里没改
+            return _auth;
+          });
+        }
+    `app()` 返回的是顶层借来的实例，**但 `_auth` 是本模块的局部变量、
+    在子框里永远是 null** → 直接抛「鉴权不可用」，登录照样点不动。
+
+    **我上一版只改了 app()，没跟着改 auth()。**
+    """
+    src = _code_only(_read('hansen_auth_v1004.js') or '')
+    if not src:
+        return
+    i = src.find('function auth()')
+    if i < 0:
+        return
+    seg = src[i:i + 900]
+    if not re.search(r'app\(\)\.then\(\s*function\s*\(\s*\w+\s*\)', seg):
+        bad('app/auth 不同步',
+            'auth() 没接住 app() 返回的实例 —— 子框借用实例时会报「鉴权不可用」')
+
+
+def guard_diag_tools_not_in_user_data():
+    """诊断/守护类模块写的内部键，不许混进用户数据。
+
+    事故（v1094）：v1085/v1092 我加的内部键都以 `hansen_` 开头，
+    正好落进备份的收录前缀：
+        hansen_credtrap_log / hansen_cred_shadow / hansen_vw_autofixed …
+    它们是**本机诊断状态**，既不是玩家进度、也不该跨设备同步，
+    更不该因为格式不符就让整个备份失败。
+
+    **我为了诊断加的东西，反过来把用户的存档功能弄坏了。**
+    """
+    bk = _code_only(_read('hansen_backup_v944.js') or '')
+    if not bk:
+        return
+    m = re.search(r'DIAG_KEY_RE\s*=\s*/([^/]+)/', bk)
+    if not m:
+        bad('诊断键污染', 'hansen_backup 缺 DIAG_KEY_RE —— 诊断键会污染用户备份')
+        return
+    rule = m.group(1)
+    for token in ('credtrap', 'cred_shadow', 'cred_rescue', 'cred_refresh', 'vw_autofixed'):
+        if token not in rule:
+            bad('诊断键污染', 'DIAG_KEY_RE 未覆盖 %s 类内部键' % token)
+
+
+def guard_campaign_notes_present():
+    """攻坚笔记必须留在仓库里 —— 那是近 80 个版本换来的东西。
+
+    《跨设备存档攻坚全记录 v1017-v1095》记录了每一版失败的具体内容、
+    当时的判断依据、被什么推翻、以及最终真凶。
+    它最核心的一句话是：
+
+        **先修「看得见」，再修「修得好」。**
+
+    因为那次的六个 bug 里，有三个属于"让人看不见真相"那一类
+    （[object Object] 遮住错误 / 文案被改写 / SW 缓存住旧代码）——
+    它们不直接导致失败，**但让每一次诊断都建立在错误信息上**。
+    """
+    import glob as _g
+    hits = _g.glob(os.path.join(ROOT, '攻坚笔记', '*.md'))
+    if not hits:
+        bad('攻坚笔记', '攻坚笔记/ 目录不存在或为空 —— 近 80 版换来的经验会丢失')
+        return
+    main = os.path.join(ROOT, '攻坚笔记', '跨设备存档攻坚全记录_v1017-v1095.md')
+    if not os.path.exists(main):
+        bad('攻坚笔记', '缺《跨设备存档攻坚全记录 v1017-v1095》')
+        return
+    txt = open(main, encoding='utf-8', errors='replace').read()
+    # 判据只认稳定的核心词，不钉死标点/引号形态 ——
+    # 第一版把全角引号写进判据，笔记里换了个写法就误报（守卫查形不查实的老毛病）。
+    for key in ('先修', '看得见', '属性正确', '先扫真实数据'):
+        if key not in txt:
+            bad('攻坚笔记', '笔记缺少核心结论：%s' % key)
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -868,6 +1082,14 @@ GUARDS = [
     ('单实例',         guard_single_instance_when_signed_in),
     # 🔴v1090 备份把旧凭证盖回去，打掉当前会话
     ('备份不碰凭证',   guard_backup_excludes_credentials),
+    # 🔴v1096 攻坚笔记转化的守卫（《跨设备存档攻坚全记录 v1017-v1095》）
+    ('中文键备份',     guard_cjk_keys_backupable),
+    ('无凭据即成功',   guard_no_success_without_evidence),
+    ('三态不分',       guard_notready_vs_expired),
+    ('登录被拦死',     guard_login_path_not_blocked),
+    ('app/auth 同步',  guard_app_and_auth_in_sync),
+    ('诊断键污染',     guard_diag_tools_not_in_user_data),
+    ('攻坚笔记在册',   guard_campaign_notes_present),
 ]
 
 

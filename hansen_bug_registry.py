@@ -132,6 +132,8 @@ REGISTRY = [
      'test_backup_v942.mjs'),
     ('v1095', '🎯真凶：hsn_progress:<中文岛名> 键名含中文，备份字符集只许英数 → 「备份含非法键」，存云端永远失败',
      'test_cjk_key_backup_v1095.mjs'),
+    ('v1096', '攻坚笔记入库并转化为 7 道守卫，防止六个真凶任何一个重演',
+     'guard_campaign_notes_present'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
