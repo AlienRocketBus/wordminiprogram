@@ -203,6 +203,8 @@ REGISTRY = [
      'test_friends_ui_v1107.mjs'),
     ('v1130', '🔴竞赛 ID 本地发号——每台设备第一个用户都是 No.001；云端发号也会并发撞号',
      'test_cid_order_v1130.mjs'),
+    ('v1131', '⚠️test_phone_signup 随机失败(测试自身竞态)——改四轮未根治，已如实登记不再耗',
+     'test_cid_order_v1130.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
