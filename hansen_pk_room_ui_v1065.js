@@ -689,7 +689,13 @@ function doCreate() {
       if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
       var w = (r.winners || [])[idx];
       if (!w) return;
-      var mySide = st.isHost ? 'host' : 'guest';
+      /* 🔴v1122：`isHost` 可能没设（测试注入、或将来某条路径漏传）。
+         那时按 host 判会把"对手抢到"误认成"我抢到"，界面就一直显示"正在拼…" ——
+         用户完全看不出对手已经赢了这一回合。
+         改为**优先用房间数据判断**，本地标记只做兜底。 */
+      /* 房间数据里的 mySide 是服务端按 hostId 判的，最可信；
+         本地 isHost 只做兜底（老版本的房间文档可能没这个字段）。 */
+      var mySide = r.mySide || (st.isHost ? 'host' : 'guest');
       var oppGot = (w !== mySide);
       var el = q('prOppSt');
       if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = 'var(--pk-warn)'; }
@@ -747,11 +753,27 @@ function doCreate() {
 
   function finish() {
     var st = _state;
+    if (!st) return;
+    stopPoll(); stopKb();
     var secs = Math.max(1, Math.round((Date.now() - st.startAt) / 1000));
-    /* 得分：答对数为主，用时做小幅加权，避免"慢慢磨"也拿满分 */
-    var score = st.correct * 100 + Math.max(0, 300 - secs);
+
+    /* 🔴v1122：**改用回合制的实际得分。**
+
+       这里一直沿用 v1099 的算法 `st.correct * 100 + ...` ——
+       而 `st.correct` 是"一次给全套题"那版留下的字段，
+       **回合制下从来没被赋过值**（现在记分记在 `st.myScore` 和 `st.st` 里）。
+
+       后果：打完 3 局，战绩记了 **0 局**、答题数 **0 个** ——
+       整局白打，天梯分也不会动。实测才发现。
+
+       教训：**改了计分方式，就要顺着链条查到最后一环。**
+       v1101 改对战屏时只顾着回合逻辑，忘了结算这一头还在读旧字段。 */
+    var stat = st.st || { words: 0, correct: 0 };
+    var score = Number(st.myScore) || 0;
+
     paint('<div class="pr_top"><div class="pr_h">📨 交卷了</div></div>'
-      + '<div class="pr_empty">你答对 ' + st.correct + ' / ' + st.words.length + ' 个，用时 ' + secs + ' 秒。<br>'
+      + '<div class="pr_empty">你答对 ' + stat.correct + ' / ' + (st.words || []).length
+      + ' 个，得 ' + score + ' 分，用时 ' + secs + ' 秒。<br>'
       + '正在等对手交卷…</div>');
     S().reportResult(st.roomId, score).then(function (r) {
       if (!r.ok) { lobby(r); return; }
@@ -851,7 +873,7 @@ function doCreate() {
       /* v1104: roomId 可指定 —— 'test' 会跳过掉线检查，
          要验掉线就得传一个真实 id */
       _state = { roomId: (arguments[4] || 'test'), words: words || [], oppName: oppName || '测试对手',
-                 askMode: askMode || _askMode, mode: mode || _pickedMode,
+                 askMode: askMode || _askMode, mode: mode || _pickedMode, isHost: true,
                  idx: 0, correct: 0, startAt: Date.now() };
       startMatch();
       return true;

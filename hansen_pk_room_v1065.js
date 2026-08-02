@@ -620,7 +620,11 @@
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: false, reason: '房间已不存在' };
       var winners = room.winners || [];
+      /* v1122: 回传"我是哪一方" —— 房间文档里本来就知道，
+         不该让前端靠本地标记猜（猜错了对手状态就永远不更新）。 */
+      var u2 = me();
       return { ok: true, mode: modeOf(room.mode).key,
+               mySide: (room.hostId === u2.id) ? 'host' : 'guest',
                round: winners.length, winners: winners,
                roundAt: room.roundAt || 0,
                hostReady: !!room.hostReady, guestReady: !!room.guestReady,

@@ -185,6 +185,8 @@ REGISTRY = [
      'test_tap_targets_v1120.mjs'),
     ('v1121', '🔴好友列表逐个查在线：50 个好友 = 51 次数据库读，每 15 秒刷一次，挂一小时烧 12000 次',
      'test_friends_v1106.mjs'),
+    ('v1122', '🔴结算还在读 v1099 的旧字段 st.correct（回合制下从没赋值）→ 打完 3 局战绩记 0 局',
+     'test_pk_record_v1103.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
