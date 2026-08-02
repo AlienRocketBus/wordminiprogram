@@ -199,6 +199,8 @@ REGISTRY = [
      'test_pk_battle_ui_v1101.mjs'),
     ('v1128', '🔴输家看不到任何天梯分说明——段位保护住了他但界面一声不吭，用户以为记分坏了',
      'test_pk_record_v1103.mjs'),
+    ('v1129', '🔴未登录时竞赛 ID 显示「No.---」，而好友页却让人去那里找 ID——两头都卡住',
+     'test_friends_ui_v1107.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

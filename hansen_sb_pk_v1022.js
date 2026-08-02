@@ -98,7 +98,15 @@
     h += '<div class="k_me" id="kMe"><span class="k_ava">' + (p.avatar || '🐝') + '</span><div style="min-width:0;flex:1">'
       + (p.name ? '<div class="k_nm">' + esc(p.name) + '</div>'
                 : '<div class="k_nm" style="opacity:.7">点这里设置名字</div>')
-      + '<div class="k_cid">🎫 竞赛 ID <b>No.' + (P ? P.fmtCid(p.cid) : '---') + '</b></div>'
+      /* 🔴v1129：**没有竞赛 ID 时不要显示「No.---」。**
+         破折号什么也没说 —— 用户不知道是"还没加载好"还是"我没有"，
+         而好友页还写着"竞赛 ID 在拼写大PK页面顶部"，
+         他跑过来一看是 `No.---`，就彻底卡住了。
+         没登录就直说"登录后自动分配"，让他知道下一步该做什么。 */
+      + '<div class="k_cid">🎫 竞赛 ID <b>'
+      +   ((P && p.cid) ? ('No.' + P.fmtCid(p.cid))
+                        : '<span style="font-weight:400;font-size:13px;opacity:.85">登录后自动分配</span>')
+      + '</b></div>'
       + (tier ? '<div class="k_tier">' + tier.icon + ' ' + tier.name
           + (L.placed ? ' · ' + L.rating + ' 分' : ' · 未定级') + '</div>' : '')
       + '</div><span class="k_go">›</span></div>';

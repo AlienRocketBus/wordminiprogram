@@ -232,11 +232,34 @@
 
   function render(friends, loading, notice) {
     var st = F() ? F().myStatus() : 'online';
+    /* 🔴v1129：**没登录就把整屏说清楚，别让人白填。**
+
+       实测未登录进好友页：「我的状态」能点、「加好友」输入框能填，
+       只有列表处一行小字写着"先登录才能加好友" ——
+       用户很可能填完 ID 点了按钮才发现不行。
+
+       而且这一屏还写着"竞赛 ID 在拼写大PK页面顶部"，
+       他跑过去一看是 `No.---`（v1129 一并修了）——**两头都卡住**。
+
+       改为：没登录时顶部直接给一句话 + 一个去登录的按钮，
+       下面的输入框禁用。**不要让人做注定失败的操作。** */
+    var noLogin = /登录/.test(notice || '');
     var on = friends.filter(function (f) { return f.online; }).length;
 
     paint(
       '<div class="fr_top"><div class="fr_h">👥 我的好友</div>'
       + '<button aria-label="关闭好友" class="fr_x" id="frX">×</button></div>'
+
+      + (noLogin
+          ? '<div class="fr_card" style="text-align:center;padding:20px 14px">'
+            + '<div style="font-size:34px">🔐</div>'
+            + '<div style="font-size:15px;color:var(--hpk-txt)!important;margin-top:8px">'
+            +   '登录后才能加好友</div>'
+            + '<div style="font-size:12.5px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
+            +   '好友要靠「竞赛 ID」互加，<br>而竞赛 ID 是登录时自动分配的。</div>'
+            + '<button class="fr_btn" id="frGoLogin" style="margin-top:14px">去登录</button>'
+            + '</div>'
+          : '')
 
       /* 我的状态 */
       + '<div class="fr_card">'
@@ -258,8 +281,10 @@
       +   '<div class="fr_lbl">加好友（输对方的竞赛 ID 数字）</div>'
       +   '<div class="fr_row">'
       +     '<input class="fr_in" id="frCid" inputmode="numeric" placeholder="例如 2"'
+      +     (noLogin ? ' disabled style="opacity:.5"' : '')
       +     ' aria-label="输入好友的竞赛 ID 数字" autocomplete="off">'
-      +     '<button class="fr_btn" id="frAdd">加好友</button>'
+      +     '<button class="fr_btn" id="frAdd"' + (noLogin ? ' disabled style="opacity:.5"' : '')
+      +     '>加好友</button>'
       +   '</div>'
       +   '<div style="font-size:11.5px;color:var(--hpk-faint);margin-top:7px">'
       +     '竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001'
@@ -282,6 +307,10 @@
     if (q('frOn')) q('frOn').onclick = function () { F().setStatus('online'); refresh(); };
     if (q('frHide')) q('frHide').onclick = function () { F().setStatus('hidden'); refresh(); };
     if (q('frAdd')) q('frAdd').onclick = doAdd;
+    if (q('frGoLogin')) q('frGoLogin').onclick = function () {
+      close();
+      try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
+    };
     var ci = q('frCid');
     if (ci) ci.onkeydown = function (ev) { if (ev.key === 'Enter') doAdd(); };
     bindList(friends);
