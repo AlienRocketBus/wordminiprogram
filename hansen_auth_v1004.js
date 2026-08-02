@@ -517,14 +517,36 @@
     });
   }
 
-  /* 竞赛 ID = 比我早注册的人数 + 1，一次算定后写回并锁死 */
-  function assignCid(db, docRef, createdAt) {
+  /* ── 竞赛 ID = 比我早注册的人数 + 1 ──────────────────────────
+
+     产品定义：**完全按注册人数的顺序分配**。
+     所以不用计数器（`counters` 集合是 ADMINONLY，客户端也写不了），
+     而是**数一下有多少人比我先注册** —— 这个语义天然就是"注册顺序"，
+     而且不依赖任何额外的状态，重算一次结果还是一样。
+
+     🔴v1130 **但要防撞号**：
+       两人几乎同时注册 → 两边都数到"3 个人比我早" → 都拿 No.4。
+       实测模拟确认会撞。
+
+     做法：发号后**验一次有没有别人已经占了这个号**，
+     撞了就往后挪一位，最多重试 5 次。
+     并发注册在这个用户量下极少见，5 次足够；
+     真撞满 5 次也不阻断登录 —— 下次登录会再补一次。 */
+  function assignCid(db, docRef, createdAt, attempt) {
     if (!createdAt) return Promise.resolve(null);
+    var tries = attempt || 0;
     return db.collection(COL_PROFILE).where({ createdAt: db.command.lt(createdAt) }).count()
       .then(function (r) {
-        var cid = ((r && r.total) || 0) + 1;
-        return docRef.update({ cid: cid, updatedAt: db.serverDate() }).then(function () {
-          return { cid: cid };
+        var cid = ((r && r.total) || 0) + 1 + tries;
+        /* 校验这个号有没有被占 —— 只有确实空着才写 */
+        return db.collection(COL_PROFILE).where({ cid: cid }).count().then(function (c) {
+          if ((c && c.total) > 0) {
+            if (tries >= 5) return null;          /* 让下次登录再补，不阻断本次 */
+            return assignCid(db, docRef, createdAt, tries + 1);
+          }
+          return docRef.update({ cid: cid, updatedAt: db.serverDate() }).then(function () {
+            return { cid: cid };
+          });
         });
       })
       .catch(function () { return null; });   /* 发号失败不阻断登录，下次登录再补 */

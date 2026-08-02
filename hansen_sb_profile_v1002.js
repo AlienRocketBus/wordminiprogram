@@ -71,13 +71,22 @@
     return s;
   }
   /* 取得（必要时分配）本人竞赛 ID —— 幂等，已有则原样返回 */
+  /* 🔴v1130：**不再发本地临时号。**
+
+     产品定义：竞赛 ID **完全按注册人数的顺序分配** ——
+     那是个**全局**的东西，本机自己编不出来。
+
+     旧做法用 `nextLocalCid()` 从 1 开始本地计数，
+     结果**每台设备的第一个用户都是 No.001** ——
+     两个人一对号才发现"我们怎么都是 001"。
+     而好友功能正是靠竞赛 ID 互加的，撞号会直接加错人。
+
+     现在：没登录就是没有号（界面显示"登录后自动分配"，v1129 已改），
+     登录时由云端按 `createdAt` 排序发正式号。
+     **宁可没有，也不能给一个假的。** */
   function ensureCid() {
     var p = readProfile();
-    if (p.cid > 0) return p.cid;
-    p.cid = nextLocalCid();
-    p.cidLocked = false;   /* 临时号，等云端认领 */
-    writeProfile(p);
-    return p.cid;
+    return p.cid > 0 ? p.cid : 0;
   }
   /* 云端认领正式号（envId 到位后调用；当前为预留接口）
    * 约定：云端 counters/sb_cid 文档做原子自增，返回全局唯一序号。 */
@@ -119,7 +128,7 @@
     p.name = v.name;
     p.nameChangedAt = Date.now();
     writeProfile(p);
-    var cid = ensureCid();   /* 首次设名时发号 */
+    var cid = ensureCid();   /* v1130: 只读现有号；没有就是 0，等登录时云端发 */
     return { ok: true, name: p.name, cid: cid };
   }
   function fullName(p) {
