@@ -142,6 +142,7 @@
     if (fm > 0 && (!d.fastestMs || fm < d.fastestMs)) d.fastestMs = fm;
 
     var delta = 0;
+    var floorSaved = false;
     if (isRanked && res !== 'draw' && L() && L().nextRating) {
       /* 定级赛期间也照常算分，只是段位先不显示 —— 打满局数才亮出来 */
       d.placementGames++;
@@ -153,6 +154,11 @@
       });
       var newRating = (r && (r.rating != null ? r.rating : r)) || d.rating;
       delta = Math.round(newRating - d.rating);
+      /* 🔴v1128：把"段位地板保住了"这个信息带出去。
+         实测：B 在 1000 分输了一局，分数纹丝不动、界面也什么都不显示 ——
+         用户会以为记分坏了。而实际上是**段位地板保护**（输分不得跌破段位下限），
+         那是好事，但**必须说出来**，不然好意变成了 bug。 */
+      floorSaved = !!(r && r.floorSaved);
       d.rating = Math.round(newRating);
       if (d.rating > d.peakRating) d.peakRating = d.rating;
     }
@@ -166,7 +172,8 @@
     while (d.history.length > MAX_HISTORY) d.history.pop();
 
     write(d);
-    return { ok: true, record: d, delta: delta, ranked: isRanked, tier: tier(d) };
+    return { ok: true, record: d, delta: delta, floorSaved: floorSaved,
+             ranked: isRanked, tier: tier(d) };
   }
 
   function summary() {

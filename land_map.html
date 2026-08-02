@@ -7,9 +7,9 @@
 ============================================================
 -->
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1127"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1127"></script>
-<script src="hansen_sw_upgrade_gate_v944.js?v=1127"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1127"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1127"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1128"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1128"></script>
+<script src="hansen_sw_upgrade_gate_v944.js?v=1128"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1128"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1128"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">

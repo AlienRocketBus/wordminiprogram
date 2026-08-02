@@ -921,6 +921,14 @@ function doCreate() {
         dTxt = '<div style="font-size:20px;font-weight:800;margin:6px 0;color:'
              + (rec.delta > 0 ? 'var(--pk-ok)' : 'var(--pk-bad)') + '">'
              + (rec.delta > 0 ? '+' : '') + rec.delta + ' 天梯分</div>';
+      } else if (rec.ranked && rec.floorSaved) {
+        /* 🔴v1128：**输了但没掉分，要说明白为什么。**
+           段位地板保护住了他 —— 那是好事，
+           但界面一声不吭的话，用户只会以为记分坏了。 */
+        dTxt = '<div style="font-size:15px;font-weight:700;margin:6px 0;color:var(--pk-warn)">'
+             + '🛡 段位保护：这局没掉分</div>';
+      } else if (rec.ranked) {
+        dTxt = '<div style="font-size:13px;color:var(--pk-dim);margin:4px 0">天梯分没有变化</div>';
       } else if (!rec.ranked) {
         dTxt = '<div style="font-size:12.5px;color:var(--pk-dim);margin:4px 0">'
              + '本局不计天梯（只有 ⚡ 抢答赛计分）</div>';
