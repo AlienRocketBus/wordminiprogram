@@ -259,6 +259,57 @@ def _inj_panel_drift(s):
     return s.replace(old, 'opacity:.85">登录后分配</span>', 1)
 
 
+
+def _inj_live_ls(s):
+    """把快照取值改回 localStorage.key(i) —— 就是"边遍历边读"。
+       注意：守卫查的是"循环体里用 localStorage.key 且不只收集键名"，
+       所以要同时把循环头也改回实时长度，否则形不成那个模式。"""
+    if '_lsk2[i]' not in s: return None
+    s2 = s.replace('for(var i=0;i<_lsk2.length;i++)', 'for(var i=0;i<localStorage.length;i++)', 1)
+    return s2.replace('var k=_lsk2[i];', 'var k=localStorage.key(i);', 1)
+
+
+def _inj_orphan_field(s):
+    """读一个从没赋值的字段 —— 模拟"改了一半"的残留。"""
+    i = s.find('function finish() {')
+    if i < 0: return None
+    return s[:i] + 'function finish() {\n    var _z = _state.neverAssignedField;\n' + s[i+len('function finish() {'):]
+
+
+def _inj_n_plus_one(s):
+    """在 map 回调里查库 —— N+1。"""
+    i = s.find('function listFriends')
+    if i < 0: return None
+    return s[:i] + ('function listFriends() {\n'
+                    '    [1,2].map(function (c) { return T().list({ cid: c }); });\n') \
+           + s[i+len('function listFriends() {'):]
+
+
+def _inj_load_order(s):
+    """引入"必须先加载别的模块"的依赖。"""
+    i = s.find('function beat()')
+    if i < 0: return None
+    return s[:i] + ('function beat() {\n'
+                    '    var _x = window.HansenLsKeys ? window.HansenLsKeys() : [];\n') \
+           + s[i+len('function beat()'):]
+
+
+def _inj_no_skip_round(s):
+    """删掉 skipRound 的函数定义 —— 两人都没拼对时房间状态会停住。"""
+    if 'function skipRound' not in s: return None
+    return s.replace('function skipRound', 'function skipGONE')
+
+
+def _inj_guess_side(s):
+    """去掉 roundState 返回体里的 mySide —— 让前端靠本地标记猜。
+       注意：mySide 在注释里也出现，必须改**返回体里**那一处。"""
+    i = s.find('function roundState')
+    if i < 0: return None
+    seg = s[i:i+900]
+    if 'mySide:' not in seg: return None
+    return s[:i] + seg.replace('mySide:', 'mySideGONE:', 1) + s[i+900:]
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -298,6 +349,13 @@ CASES = [
     ('恒真断言',      'test_backup_v942.mjs',       _inj_always_true),
     ('主题前景',      'hansen_friends_ui_v1107.js', _inj_theme_fg),
     ('两套身份条',  'hansen_sb_pk_v1022.js',      _inj_panel_drift),
+    # 🔴v1134 六个新守卫
+    ('边遍历LS',     'hansen_backup_v944.js',       _inj_live_ls),
+    ('孤儿字段',     'hansen_pk_room_ui_v1065.js',  _inj_orphan_field),
+    ('循环查库',     'hansen_friends_v1106.js',     _inj_n_plus_one),
+    ('加载顺序依赖','hansen_friends_v1106.js',    _inj_load_order),
+    ('回合不推进',   'hansen_pk_room_v1065.js',     _inj_no_skip_round),
+    ('前端瞎猜',     'hansen_pk_room_v1065.js',     _inj_guess_side),
 ]
 
 

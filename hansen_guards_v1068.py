@@ -1252,6 +1252,145 @@ def guard_no_parallel_pk_panel():
                 % (what, ina, inb))
 
 
+
+def guard_no_live_ls_iteration():
+    """不许边遍历边读 localStorage —— 会漏键。
+
+    事故（v1132/v1133）：`localStorage.key(i)` 按索引取键，
+    而页面上同时跑着凭证守护、心跳、版本守望者，**它们随时写/删键**。
+    集合一变动索引就错位，**正好跳过某一格**。
+
+    后果：登录成功却扫不到凭证（界面显示未登录）、
+    **备份漏键 = 用户丢一个岛的进度**。
+    跑得快没事、跑得慢就错 —— 表现为"随机"，最难查的那种。
+    全站曾有 17 处这种写法。
+    """
+    import glob as _g
+    hits = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        src = _code_only(_read(os.path.basename(f)) or '')
+        if not src:
+            continue
+        for m in re.finditer(r'for\s*\([^)]*localStorage\.length[^)]*\)\s*\{[\s\S]{0,300}?\}', src):
+            L = m.group(0)
+            if 'localStorage.key(' not in L:
+                continue
+            if re.search(r'push\(\s*\w+\s*\)', L) and 'getItem' not in L:
+                continue        # 只收集键名 = 取快照本身，合法
+            hits.append(os.path.basename(f))
+    if hits:
+        bad('边遍历LS',
+            '%d 处边遍历边读 localStorage（%s）—— 集合被别的模块改动时会漏键'
+            % (len(hits), '、'.join(sorted(set(hits))[:4])))
+
+
+def guard_no_orphan_state_fields():
+    """状态字段读了就必须有人写 —— 否则是"改了一半"的残留。
+
+    事故（v1122）：对战改回合制后记分挪到 `st.myScore`，
+    **而结算还在读 v1099 的 `st.correct`** —— 那字段从此没被赋过值。
+    后果：**打完 3 局战绩记 0 局**，天梯分也不动。而它**不报错**。
+    """
+    for f in ('hansen_pk_room_ui_v1065.js', 'hansen_friends_ui_v1107.js',
+              'hansen_ladder_ui_v1108.js'):
+        src = _code_only(_read(f) or '')
+        if not src:
+            continue
+        writes = set(re.findall(r'\b(?:st|_state)\.(\w+)\s*=(?!=)', src))
+        for m in re.finditer(r'_state\s*=\s*\{([^}]*)\}', src, re.S):
+            writes |= set(re.findall(r'(\w+)\s*:', m.group(1)))
+        reads = set(re.findall(r'\b(?:st|_state)\.(\w+)\b(?!\s*=(?!=))', src))
+        orphan = sorted(reads - writes)
+        if orphan:
+            bad('孤儿字段',
+                '%s 读了但从没赋值: %s —— 多半是"改了一半"的残留' % (f, orphan[:4]))
+
+
+def guard_no_n_plus_one_query():
+    """不许在循环里逐条查数据库 —— 按次计费的东西会真的产生费用。
+
+    事故（v1121）：好友列表逐个查在线状态 → 50 个好友 = **51 次读**，
+    而好友页每 15 秒刷一次 —— **挂一小时 12000 次读**。
+    **这不是"慢"，是会真的产生费用。**
+    """
+    import glob as _g
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        base = os.path.basename(f)
+        src = _code_only(_read(base) or '')
+        if not src:
+            continue
+        for m in re.finditer(r'\.(map|forEach)\(\s*function[^{]*\{([^}]{0,400})', src):
+            body = m.group(2)
+            if not re.search(r'T\(\)\.\w+|db\(\)\.|\.collection\(', body):
+                continue
+            # 条数固定的循环不算 N+1：删除清理、以及"把双方两条记录改状态"这类。
+            # 判据看**读**：N+1 的害处是读次数随人数线性涨（云开发按读计费），
+            # 而 patch/update/remove 是写，且这些场景条数天然是 1~2。
+            if re.search(r'remove|delete|清理|\.patch\(|\.update\(', body):
+                continue
+            bad('循环查库',
+                '%s 在 %s 回调里查数据库 —— 条数随用户增长会变成 N+1'
+                % (base, m.group(1)))
+
+
+def guard_no_load_order_helper():
+    """公用助手不许引入"必须早于谁加载"的约束。
+
+    事故（v1133）：抽了个公用助手给十个模块调，
+    **备份直接收录 0 键** —— 助手没先加载，兜底成了空数组。
+    **加载顺序正是这个项目栽过最多次的地方。**
+    """
+    import glob as _g
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        base = os.path.basename(f)
+        src = _code_only(_read(base) or '')
+        if not src:
+            continue
+        for m in re.finditer(r'window\.(Hansen\w+)\s*\?\s*window\.\1\s*\(\)', src):
+            name = m.group(1)
+            if re.search(r'UI$|Panel$|Diag$', name):
+                continue        # 界面类互调是正常的
+            bad('加载顺序依赖',
+                '%s 依赖 window.%s 先加载 —— 顺序错了会静默兜底成空值'
+                % (base, name))
+
+
+def guard_round_advance_covers_noone_wins():
+    """回合推进不能只挂在"有人赢"上 —— "谁都没赢"同样是回合的结束。
+
+    事故（v1124）：两人都没拼对时 `round` 不动 → 下一词写不进去
+    → **一方白拼、对手看不到、双方彻底脱节**。
+    """
+    room = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    ui = _code_only(_read('hansen_pk_room_ui_v1065.js') or '')
+    if not room or not ui:
+        return
+    if 'function skipRound' not in room:
+        bad('回合不推进', '对战模块缺 skipRound —— 两人都没拼对时房间状态会停住')
+    if 'skipRound' not in ui:
+        bad('回合不推进', '对战屏没在"没拼对"时推进回合')
+
+
+def guard_server_known_facts_not_guessed():
+    """服务端已知的事实，前端不许靠本地标记猜。
+
+    事故（v1122）：判断"我是 host 还是 guest"用本地标记，
+    它为空时按 host 判 → **把"对手抢到"误认成"我抢到"**，
+    界面一直显示"正在拼…"。房间文档里本来就有 hostId。
+    """
+    room = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    ui = _code_only(_read('hansen_pk_room_ui_v1065.js') or '')
+    if not room or not ui:
+        return
+    # 判据要落在**返回体**上：mySide 在注释里也会出现，
+    # 只查文件里有没有这个词，改坏了也照样绿（守卫查形不查实的老毛病）。
+    i = room.find('function roundState')
+    seg = room[i:i + 900] if i >= 0 else ''
+    if not re.search(r'mySide\s*:', seg):
+        bad('前端瞎猜', 'roundState 的返回体里没有 mySide —— 让前端猜自己是哪一方')
+    if not re.search(r'r\.mySide\s*\|\|', ui):
+        bad('前端瞎猜', '对战屏没有优先采用服务端回传的 mySide')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1303,6 +1442,13 @@ GUARDS = [
     ('图标过大',     guard_favicon_small),
     # v1131 两套实现
     ('两套身份条', guard_no_parallel_pk_panel),
+    # 🔴v1134 v1122~v1133 挖出的六个坑
+    ('边遍历LS',     guard_no_live_ls_iteration),
+    ('孤儿字段',     guard_no_orphan_state_fields),
+    ('循环查库',     guard_no_n_plus_one_query),
+    ('加载顺序依赖', guard_no_load_order_helper),
+    ('回合不推进',   guard_round_advance_covers_noone_wins),
+    ('前端瞎猜',     guard_server_known_facts_not_guessed),
 ]
 
 
