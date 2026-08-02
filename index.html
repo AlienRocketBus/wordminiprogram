@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1131"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1131"></script>
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1132"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1132"></script>
 <!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
-<script src="hansen_sw_upgrade_gate_v944.js?v=1131"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1131"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
-<script src="hansen_coin_wallet.js?v=1131"></script><!-- v942: 首页任何金币显示/消费前同步恢复跨页奖励事务 -->
+<script src="hansen_sw_upgrade_gate_v944.js?v=1132"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1132"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_coin_wallet.js?v=1132"></script><!-- v942: 首页任何金币显示/消费前同步恢复跨页奖励事务 -->
 <meta charset="utf-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=(g.src||"").split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="theme-color" content="#0c1538">
@@ -4252,25 +4252,25 @@ document.querySelectorAll('.island').forEach(el=>{
 </script>
 
 
-<script src="perf_boost.js?v=1131"></script>
-<script src="hansen_preload.js?v=1131"></script>
-<script src="copy_protect.js?v=1131"></script>
-<script src="click_sound.js?v=1131"></script>
-<script src="click_setting.js?v=1131"></script>
-<script src="vocab_all.js?v=1131"></script>
-<script src="hansen_upgrade.js?v=1131"></script>
-<script src="hansen_onboarding.js?v=1131"></script>
-<script src="hansen_theme_shop.js?v=1131"></script>
-<script src="hansen_season.js?v=1131"></script>
-<script src="hansen_cinema_themes.js?v=1131"></script>
-<script src="hansen_diamond_shop.js?v=1131"></script>
-<script src="hansen_gem_system.js?v=1131"></script>
-<script src="hansen_stability.js?v=1131"></script>
-<script src="hansen_home_link.js?v=1131"></script>
-<script src="hansen_palette.js?v=1131"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1131"></script>
-<script defer src="hansen_island_prefetch_v1025.js?v=1131"></script>
-<script defer src="hansen_cloud_config_v965.js?v=1131"></script><script defer src="hansen_auth_v1004.js?v=1131"></script><script defer src="hansen_auth_ui_v1004.js?v=1131"></script><script defer src="hansen_signup_gate_v1030.js?v=1131"></script><!--🔴v1025: 主页→岛屿页 触碰即预取-->
-<script src="hansen_perf_v944.js?v=1131"></script><!-- v944 性能引擎: 图片卫生·滚动不暂停主题·新路径跨越旧SW缓存 -->
+<script src="perf_boost.js?v=1132"></script>
+<script src="hansen_preload.js?v=1132"></script>
+<script src="copy_protect.js?v=1132"></script>
+<script src="click_sound.js?v=1132"></script>
+<script src="click_setting.js?v=1132"></script>
+<script src="vocab_all.js?v=1132"></script>
+<script src="hansen_upgrade.js?v=1132"></script>
+<script src="hansen_onboarding.js?v=1132"></script>
+<script src="hansen_theme_shop.js?v=1132"></script>
+<script src="hansen_season.js?v=1132"></script>
+<script src="hansen_cinema_themes.js?v=1132"></script>
+<script src="hansen_diamond_shop.js?v=1132"></script>
+<script src="hansen_gem_system.js?v=1132"></script>
+<script src="hansen_stability.js?v=1132"></script>
+<script src="hansen_home_link.js?v=1132"></script>
+<script src="hansen_palette.js?v=1132"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1132"></script>
+<script defer src="hansen_island_prefetch_v1025.js?v=1132"></script>
+<script defer src="hansen_cloud_config_v965.js?v=1132"></script><script defer src="hansen_auth_v1004.js?v=1132"></script><script defer src="hansen_auth_ui_v1004.js?v=1132"></script><script defer src="hansen_signup_gate_v1030.js?v=1132"></script><!--🔴v1025: 主页→岛屿页 触碰即预取-->
+<script src="hansen_perf_v944.js?v=1132"></script><!-- v944 性能引擎: 图片卫生·滚动不暂停主题·新路径跨越旧SW缓存 -->
 <script>/* 🔴 v733(Hansen): 版本水印取值——从已加载脚本的 ?v= 戳读当前构建号(build.py 每次构建自动维护·永远=真实部署版本·无需手改)。若加载到的是旧缓存 index.html·这里读到的就是旧版号→Hansen 一眼就知道没刷新到新代码。 */
 (function(){try{var el=document.getElementById('hsnVerStamp');if(!el)return;var s=document.querySelector('script[src*="?v="]');var m=s&&s.src.match(/[?&]v=(\d+)/);el.textContent=m?('v'+m[1]):'';}catch(e){}})();</script>
 

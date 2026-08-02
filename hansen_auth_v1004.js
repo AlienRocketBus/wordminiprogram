@@ -26,6 +26,31 @@
   }
   function ready() { return !!cfg(); }
 
+  /* ── 🔴v1132 安全扫描 localStorage ──────────────────────────
+
+     **绝不边遍历边读。**
+
+     `localStorage.key(i)` 按索引取键，而这个页面上同时跑着
+     凭证守护、心跳、版本守望者 —— 它们随时会写/删键。
+     **集合一变动索引就错位，正好跳过某一格。**
+
+     实际后果：登录成功了却扫不到凭证键 → 不写本地登录态 →
+     界面显示未登录。跑得快没事、跑得慢就出问题，所以表现为"随机"。
+     （`test_phone_signup` 随机红了很久，追了两轮才定位到这里。）
+
+     做法：先把键名收成数组，再遍历数组。
+     数组是快照，之后集合怎么变都不影响这一轮扫描。 */
+  function lsKeys() {
+    var out = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k) out.push(k);
+      }
+    } catch (e) {}
+    return out;
+  }
+
   function readLocal() {
     try {
       var o = JSON.parse(localStorage.getItem(LKEY));
@@ -320,10 +345,9 @@
              + ' expires_in=' + (_has && res.expires_in != null ? res.expires_in : '❗无')
              + ' access_token=' + (_has && res.access_token ? '有' : '❗无')));
         var _c = 0;
-        for (var _i = 0; _i < localStorage.length; _i++) {
-          var _k = localStorage.key(_i) || '';
+        lsKeys().forEach(function (_k) {
           if (/cloudbase|tcb|credential|access_token|refresh_token/i.test(_k)) _c++;
-        }
+        });
         T('登录后凭证键', _c ? (_c + ' 个') : '❗0 个 —— SDK 没有把凭证写进本地存储');
       } catch (e) {}
       /* 🔴v1080 防线：**登录后必须确认云端凭证真的在**，否则不许写"已登录"。
@@ -338,8 +362,27 @@
          那是唯一能证明会话真的建立起来的东西。 */
       var _credOk = false;
       try {
+        /* 🔴v1132：**先取键名快照，再遍历。**
+
+           原来是边遍历边读 `localStorage.key(i)` —— 而这个页面上同时跑着
+           凭证守护、版本守望者、心跳等好几个模块，它们随时会写/删键。
+           **集合一变动，索引就错位，正好跳过凭证键那一格** ——
+           于是"登录成功了却说凭证不在"，本地登录态不写，
+           界面显示未登录。
+
+           这就是 `test_phone_signup` 随机失败的真凶：
+           **不是测试的竞态，是产品代码遍历时不做快照。**
+           （我上一版误判成"测试自身的问题"，四轮没修好 —— 因为方向就错了。）
+
+           顺带：能直接命中就不必遍历。先按已知前缀直查一次，
+           找不到再退回遍历快照。 */
+        var _keys = [];
         for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
-          var _k2 = localStorage.key(_i2) || '';
+          var _kk = localStorage.key(_i2);
+          if (_kk) _keys.push(_kk);
+        }
+        for (var _i3 = 0; _i3 < _keys.length; _i3++) {
+          var _k2 = _keys[_i3];
           if (/^credentials/i.test(_k2) && String(localStorage.getItem(_k2) || '').length > 50) {
             _credOk = true; break;
           }
@@ -567,10 +610,14 @@
      · 云端没档 → 把本机进度传上去，这个账号从此有档 */
   function localHasProgress() {
     try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      /* ⚠️ 这里不能用 forEach —— 里面要 `return true` 提前退出，
+         而 forEach 的 return 只退出回调、退不出外层函数。
+         所以仍用 for，但遍历的是**快照数组**而不是实时的 localStorage。 */
+      var _ks = lsKeys();
+      for (var _i = 0; _i < _ks.length; _i++) {
+        var k = _ks[_i];
         if (k && k.indexOf('wordIsland') === 0) {
-          var o = JSON.parse(localStorage.getItem(k));
+          var o = JSON.parse(localStorage.getItem(k) || 'null');
           if (o && ((o.learned && o.learned.length) || (o.stats && Object.keys(o.stats).length))) return true;
         }
       }
@@ -581,8 +628,10 @@
   function localProgressSize() {
     var islands = 0, learned = 0;
     try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      /* v1132: 走快照 —— 边遍历边读会因集合变动漏掉键（见 lsKeys 注释） */
+      var _ks = lsKeys();
+      for (var i = 0; i < _ks.length; i++) {
+        var k = _ks[i];
         if (k && k.indexOf('wordIsland') === 0) {
           var o = JSON.parse(localStorage.getItem(k) || 'null');
           if (o && o.learned && o.learned.length) { islands++; learned += o.learned.length; }
@@ -755,15 +804,14 @@
        列出实际存在的相关键即可一眼看穿。 */
     try {
       var _ks = [], _n = 0;
-      for (var _i = 0; _i < localStorage.length; _i++) {
-        var _k = localStorage.key(_i) || '';
+      lsKeys().forEach(function (_k) {
         if (/cloudbase|tcb|credential|access_token|refresh_token|auth/i.test(_k)) {
           _n++;
           var _val = '';
           try { _val = String(localStorage.getItem(_k) || ''); } catch (e2) {}
           _ks.push(_k.slice(0, 46) + '(' + _val.length + '字节)');
         }
-      }
+      });
       T('SDK 凭证键', _n ? (_n + ' 个 → ' + _ks.slice(0, 4).join('  ')) :
         '❗一个都没有 —— SDK 从未把凭证写进本地存储');
     } catch (e) {}
