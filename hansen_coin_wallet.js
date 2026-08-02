@@ -175,7 +175,7 @@
   function buildMigrationJournal(){
     var bases={},entries=[],amount=0;window.__hansenCoinMigrationPrepareFailed=false;
     try{
-      for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&/^wordIsland[A-Za-z0-9]{1,80}(?:_bak)?$/.test(k))bases[k.replace(/_bak$/,'')]=1;}
+      /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){var k=_lsk1[i];if(k&&/^wordIsland[A-Za-z0-9]{1,80}(?:_bak)?$/.test(k))bases[k.replace(/_bak$/,'')]=1;}
       Object.keys(bases).sort().forEach(function(base){
         var mainRaw=localStorage.getItem(base),bakRaw=localStorage.getItem(base+'_bak');
         var main=mainRaw===null?null:migrationSave(mainRaw),bak=bakRaw===null?null:migrationSave(bakRaw);

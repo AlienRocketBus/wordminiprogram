@@ -74,8 +74,8 @@
       if (last) picked.push('island_' + String(last).replace(/[^a-z0-9]/gi, '') + '.html');
     } catch (e) {}
     try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
+        var k = _lsk1[i];
         if (k && k.indexOf('wordIsland') === 0) {
           var name = k.slice('wordIsland'.length).toLowerCase();
           if (name) picked.push('island_' + name + '.html');

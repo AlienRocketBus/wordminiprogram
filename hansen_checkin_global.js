@@ -176,8 +176,8 @@
     var t=todayStr(), y=yestStr(), best=0, bestDay='', claimed=false;
     var resetAt=0;try{resetAt=Math.max(0,Number(gi(RESET_AT_KEY))||0);}catch(e){}
     try{
-      for(var i=0;i<localStorage.length;i++){
-        var key=localStorage.key(i); if(!key||!/^wordIsland/.test(key)||/_tmp$/i.test(key))continue;
+      /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
+        var key=_lsk1[i]; if(!key||!/^wordIsland/.test(key)||/_tmp$/i.test(key))continue;
         var s; try{s=JSON.parse(localStorage.getItem(key)||'null');}catch(e){continue;}
         if(!s||typeof s!=='object')continue;
         var day=String(s.lastDay||s.lastSign||'');
@@ -283,7 +283,7 @@
       var ts=Date.now(),oldStreak=null,oldDay=null,oldReset=null,entries=[];
       try{
         oldStreak=localStorage.getItem(STREAK_KEY);oldDay=localStorage.getItem(SDAY_KEY);oldReset=localStorage.getItem(RESET_AT_KEY);
-        var keys=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&/^wordIsland/.test(k)&&!/_tmp$/i.test(k))keys.push(k);}
+        var keys=[];/* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk2=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk2.length;i++){var k=_lsk2[i];if(k&&/^wordIsland/.test(k)&&!/_tmp$/i.test(k))keys.push(k);}
         keys.forEach(function(k){try{var raw=localStorage.getItem(k),s=JSON.parse(raw||'null');if(!s||typeof s!=='object')return;s.streak=0;s.lastDay='';s.lastSign='';s.lastSaveTime=Math.max(Number(s.lastSaveTime)||0,ts);entries.push([k,raw,JSON.stringify(s)]);}catch(e){}});
         entries.forEach(function(x){localStorage.setItem(x[0],x[2]);if(localStorage.getItem(x[0])!==x[2])throw new Error('岛屿连签清除失败');});
         localStorage.setItem(STREAK_KEY,'0');localStorage.setItem(SDAY_KEY,todayStr());

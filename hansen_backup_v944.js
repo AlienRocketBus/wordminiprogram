@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1132;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1133;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -360,12 +360,12 @@
     var items=[];
     // 任何非空 pending/journal/transaction 都可能是扣款与交付之间唯一的续做证据。
     // 导出时绝不静默剥离；先让所属模块恢复/回滚完整，再生成 committed 备份。
-    for(var ti=0;ti<localStorage.length;ti++){
-      var tk=localStorage.key(ti);if(!transientKey(tk))continue;
+    /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var ti=0;ti<_lsk1.length;ti++){
+      var tk=_lsk1[ti];if(!transientKey(tk))continue;
       var tv=localStorage.getItem(tk);if(hasTransientWork(tk,tv))throw new Error('存在未完成事务 '+tk+'；请重新打开相关页完成安全恢复后再备份');
     }
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);if(!ownedKey(k))continue;
+    /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk2=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk2.length;i++){
+      var k=_lsk2[i];if(!ownedKey(k))continue;
       var v=localStorage.getItem(k);if(typeof v==='string'){
         // 免费试用只存在运行期，不能随完整备份复制；真实装备等级/皮肤仍保留。
         if(k==='hansen_gear'){try{var g=JSON.parse(v);if(g&&typeof g==='object'){delete g.trialUntil;delete g.trialWeapon;v=JSON.stringify(g);}}catch(e){continue;}}
@@ -448,8 +448,8 @@
   }
   function snapshotRaw(){
     var out=[];
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);if(!rawEntryAllowed(k))continue;
+    /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk3=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk3.length;i++){
+      var k=_lsk3[i];if(!rawEntryAllowed(k))continue;
       var v=localStorage.getItem(k);if(typeof v!=='string')throw new Error('无法读取恢复前快照：'+k);
       out.push({key:k,value:v});
     }
@@ -469,7 +469,7 @@
   function restoreRaw(list){
     list=validateRawSnapshot(list);
     var remove=[];
-    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(rawEntryAllowed(k))remove.push(k);}
+    /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk4=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk4.length;i++){var k=_lsk4[i];if(rawEntryAllowed(k))remove.push(k);}
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('原始玩家快照清理失败：'+k);});
     list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
@@ -496,8 +496,8 @@
   function applyTarget(list){
     var keep={};list.forEach(function(x){keep[x.key]=1;});
     var remove=[];
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);if(k===RESTORE_JOURNAL)continue;
+    /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk5=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk5.length;i++){
+      var k=_lsk5[i];if(k===RESTORE_JOURNAL)continue;
       if((ownedKey(k)&&!keep[k])||transientKey(k)||derivedKey(k))remove.push(k);
     }
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('删除校验失败：'+k);});
@@ -558,7 +558,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1132_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1133_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}

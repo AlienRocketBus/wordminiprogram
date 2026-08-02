@@ -33,8 +33,8 @@
       // 方法2(可靠): 扫描 localStorage, 找当前岛在用的 wordIsland* key。
       //   当前岛的存档对象里有 learned 字段且和内存 S 的特征一致。优先匹配 learned 长度一致的。
       var candidates=[];
-      for(var i=0;i<localStorage.length;i++){
-        var k=localStorage.key(i);
+      /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
+        var k=_lsk1[i];
         if(/^wordIsland[A-Za-z0-9]+$/.test(k)){ candidates.push(k); }  // 排除 _bak 后缀
       }
       if(candidates.length===1){ _islandKeyCache=candidates[0]; return _islandKeyCache; }
@@ -151,8 +151,8 @@
       try{var old=JSON.parse(localStorage.getItem('hansen_answer_coin_words_v941')||'null');if(old&&old.day===t&&old.words)Object.keys(old.words).forEach(function(k){ledger.words[k]=Math.max(+ledger.words[k]||0,+old.words[k]||0);});}catch(e){}
       // 升级当天扫描所有旧物理页，按 canonical slot 取 max，换 Season/Land 入口也不能再领 3 次。
       try{
-        for(var i=0;i<localStorage.length;i++){
-          var key=localStorage.key(i);if(!key||!/^wordIsland/.test(key)||/_bak$|_backup$|_tmp$/i.test(key))continue;
+        /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk2=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk2.length;i++){
+          var key=_lsk2[i];if(!key||!/^wordIsland/.test(key)||/_bak$|_backup$|_tmp$/i.test(key))continue;
           var s;try{s=JSON.parse(localStorage.getItem(key)||'null');}catch(e){continue;}
           if(!s||s.coinDay!==t||!s.coinWordCount||typeof s.coinWordCount!=='object')continue;
           Object.keys(s.coinWordCount).forEach(function(idx){
@@ -342,7 +342,7 @@
     function globalModes(){
       var played={},counts={},current=detectIslandKey();
       function take(s){if(!s||typeof s!=='object')return;var st=s.stats||{};(Array.isArray(st.modesPlayed)?st.modesPlayed:[]).forEach(function(x){if(typeof x==='string')played[x]=1;});var gc=st.gameCounts||{};Object.keys(gc).forEach(function(k){var n=Number(gc[k]);if(isFinite(n)&&n>0)counts[k]=(counts[k]||0)+Math.floor(n);});}
-      try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!k||!/^wordIsland/.test(k)||/_bak$|_backup$|_tmp$/i.test(k)||k===current)continue;try{take(JSON.parse(localStorage.getItem(k)||'null'));}catch(e){}}}catch(e){}
+      try{/* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk3=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk3.length;i++){var k=_lsk3[i];if(!k||!/^wordIsland/.test(k)||/_bak$|_backup$|_tmp$/i.test(k)||k===current)continue;try{take(JSON.parse(localStorage.getItem(k)||'null'));}catch(e){}}}catch(e){}
       take(S);var max=0;Object.keys(counts).forEach(function(k){max=Math.max(max,counts[k]);});return {played:Object.keys(played),counts:counts,max:max};
     }
     function wrongTotal(HC){var n=0;try{if(HC){var st=HC.read();HC.islands.forEach(function(i){var w=st.islands[i.id].wrongs||{};Object.keys(w).forEach(function(k){n+=Math.max(0,Number(w[k])||0);});});}else n=Object.keys(S.wrongs||{}).length;}catch(e){}if(n>0)try{localStorage.setItem('hansen_wrong_seen_v942','1');}catch(e){}return n;}

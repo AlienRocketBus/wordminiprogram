@@ -70,8 +70,8 @@
     var islands = 0, learned = 0, xp = 0;
     try {
       xp = +localStorage.getItem('hansen_wallet_charxp') || 0;
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
+        var k = _lsk1[i];
         if (k && k.indexOf('wordIsland') === 0) {
           var o = JSON.parse(localStorage.getItem(k) || 'null');
           if (o && o.learned && o.learned.length) { islands++; learned += o.learned.length; }

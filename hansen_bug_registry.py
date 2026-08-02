@@ -209,6 +209,8 @@ REGISTRY = [
      'guard_no_parallel_pk_panel'),
     ('v1132', '🔴边遍历边读 localStorage：集合被别的模块改动时索引错位，登录成功却扫不到凭证',
      'test_cred_scan_v1132.mjs'),
+    ('v1133', '🔴全站还有 13 处"边遍历边读 localStorage"——备份漏键会丢用户数据、凭证守护漏键救不回登录',
+     'test_cred_scan_v1132.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

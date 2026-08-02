@@ -99,5 +99,37 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   ok(found === true, '★ 仍能找到还在的那个');
 }
 
+
+/* ── v1133 追加：全站范围 ────────────────────────────────
+   v1132 只修了账号模块，一扫发现同样的写法**全站还有 13 处**，
+   分布在 10 个模块 —— 其中备份漏键会丢用户数据、凭证守护漏键会救不回登录。
+   本轮全部改为快照遍历，并抽出公用助手 hansen_lskeys_v1133.js。 */
+{
+  const glob = fs.readdirSync('/home/claude/work/repo')
+    .filter(f => /^hansen_.*\.js$/.test(f));
+  let bad = [];
+  for (const f of glob) {
+    const c = fs.readFileSync('/home/claude/work/repo/' + f, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const loops = c.match(/for\s*\([^)]*localStorage\.length[^)]*\)\s*\{[\s\S]{0,300}?\}/g) || [];
+    for (const L of loops) {
+      if (!/localStorage\.key\(/.test(L)) continue;
+      const onlyCollect = /push\(\s*\w+\s*\)/.test(L) && !/getItem/.test(L);
+      if (!onlyCollect) bad.push(f);
+    }
+  }
+  ok(bad.length === 0,
+     `★ 全站没有"边遍历边读"的循环（实得 ${bad.length} 处：${[...new Set(bad)].slice(0,4)}）`);
+  /* ⚠️ v1133 起改为**模块内联**而不是外部助手文件：
+     外部助手要求"必须早于所有用它的模块加载" —— 一旦顺序错了就是空数组，
+     实测里备份直接收录 0 键（`合法玩家键应备份` 当场变红）。
+     而这些模块本来就各自独立，内联一小段取快照的代码不算重复，
+     **换来的是不依赖加载顺序、测试环境也能跑**。 */
+  const inlined = glob.filter(f => /_o\.push\(_kq\)/.test(
+    fs.readFileSync('/home/claude/work/repo/' + f, 'utf8')));
+  ok(inlined.length >= 8,
+     `★ 快照取键已内联到各模块（${inlined.length} 个），不依赖加载顺序`);
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
