@@ -349,7 +349,7 @@
     var doc = {
       status: 'open',
       /* v1105: 私密房带 4 位码，不出现在公开列表；公开房 code 为空 */
-      code: opts.private ? makeCode() : '',
+      code: '',      /* v1136: 私密房的码在下面异步查重后再写，不在这里直接生成 */
       /* v1114: 夹到合理区间 —— 客户端填什么都不能超出 ELO 的可能范围。
          拦不住有人改代码，但能让"填 1e99"这种没有意义。 */
       hostRating: Math.max(0, Math.min(4000, Math.floor(Number(opts.hostRating) || 0))),
@@ -383,7 +383,23 @@
       winners: [],
       hostReady: false, guestReady: false
     };
-    _creating = T().add(doc).then(function (r) {
+    /* 🔴v1136：**房间码要查重。**
+       实测：`makeCode()` 只是随机生成，不看已有的码。
+       字符集 31^4 ≈ 92 万，看着够用 —— 但**同时只有几间私密房时也可能撞**，
+       撞了的后果很具体：朋友输了码，进的却是**另一个陌生人的房**。
+       做法：生成后查一次，撞了重来，最多 5 次。 */
+    var _prep = opts.private
+      ? (function pickCode(tries) {
+          var c = makeCode();
+          return T().list({ code: c, status: 'open' }).then(function (rows) {
+            if (rows && rows.length && tries < 5) return pickCode(tries + 1);
+            doc.code = c;
+            return doc;
+          })['catch'](function () { doc.code = c; return doc; });
+        })(0)
+      : Promise.resolve(doc);
+
+    _creating = _prep.then(function () { return T().add(doc); }).then(function (r) {
       _myRoomId = r.id;
       startHeartbeat(r.id);
       return { ok: true, roomId: r.id, room: doc, words: wordsFromSeed(seed, doc.wordCount) };
@@ -476,6 +492,18 @@
          列表里已经滤掉了死房，但用房间码进房、或列表刚好过期时仍会撞上。 */
       if ((Date.now() - (room.heartbeatAt || 0)) > STALE_MS) {
         return { ok: false, reason: '房主已经离开了，换一间吧' };
+      }
+      /* 🔴v1136：**进别人的房之前，先关掉自己开的那间。**
+
+         实测：A 开了房，又去列表点了别人的房 —— 进去了，
+         **而自己那间还开着**。别人从列表点进 A 那间时，
+         A 根本不在那儿（他正在别人房里打），对方只能干等到掉线判定。
+
+         v1135 只处理了"连开两次"，漏了"开完又去进别人的"这条路。
+         孤房的成因不止一种，**只要离开自己的房就该关掉它**。 */
+      if (_myRoomId && _myRoomId !== roomId) {
+        try { T().remove(_myRoomId)['catch'](function () {}); } catch (e) {}
+        _myRoomId = '';
       }
         _myRoomId = roomId;
         /* 🔴v1104：客人也要发心跳 —— 否则房主检测不到客人掉线，

@@ -117,5 +117,44 @@ const now = Date.now();
   ok((await S.joinRoom('R1')).ok === true, '★ 正常的房仍然能进（没有误伤）');
 }
 
+
+/* ── v1136 追加 ────────────────────────────────────────── */
+
+/* ⑦ 进别人的房之前要关掉自己开的那间 */
+{
+  const rooms = [{ _id:'R0', status:'open', isPrivate:false, hostId:'X', guestId:'',
+                   heartbeatAt: now, seed:1, wordCount:3, mode:'C' }];
+  const S = boot(rooms); S._setMeForTest({ id:'A', name:'甲' });
+  await S.createRoom({ mode:'C' });
+  await new Promise(z => setTimeout(z, 60));
+  await S.joinRoom('R0');
+  await new Promise(z => setTimeout(z, 60));
+  const mine = rooms.filter(r => r.hostId === 'A');
+  ok(mine.length === 0,
+     `★ 开房后又进别人的房 → 自己那间要关掉（实得剩 ${mine.length} 间）—— ` +
+     `否则别人从列表点进来，房主正在别人房里打，只能干等到掉线判定`);
+}
+
+/* ⑧ 房间码要查重 */
+{
+  const rooms = ['AB12','CD34','EF56'].map((c,i) =>
+    ({ _id:'E'+i, status:'open', isPrivate:true, code:c, hostId:'X', heartbeatAt: now }));
+  const S = boot(rooms); S._setMeForTest({ id:'A', name:'甲' });
+  const r = await S.createRoom({ mode:'C', private:true });
+  const code = r.room && r.room.code;
+  ok(/^[0-9A-Z]{4}$/.test(code || ''), `★ 私密房有 4 位码（${code}）`);
+  ok(!['AB12','CD34','EF56'].includes(code),
+     '★ 不与已有的码重复 —— 撞了的后果是"朋友输了码，进的却是陌生人的房"');
+  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  ok(/pickCode/.test(src), '★ 生成后查一次重，撞了重来');
+}
+
+/* ⑨ 公开房不该有码 */
+{
+  const rooms = []; const S = boot(rooms); S._setMeForTest({ id:'A', name:'甲' });
+  const r = await S.createRoom({ mode:'C' });
+  ok(!r.room.code, '★ 公开房没有码');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
