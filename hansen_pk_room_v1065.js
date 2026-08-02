@@ -137,13 +137,37 @@
       },
       listOpen: function (nowTs) {
         return db().then(function (d) {
+          /* 🔴v1135：**先按心跳筛，再取前 N 条 —— 不能反过来。**
+
+             旧写法是 `orderBy(createdAt desc).limit(30)` 之后
+             才在本地过滤心跳。房主直接关页面时房间不会被删（来不及），
+             这些死房会一直留在数据库里、而且 createdAt 更新 ——
+             **僵尸房攒到 30 个，活房间就彻底排不进那 30 条，用户什么都看不到。**
+
+             实测模拟：50 个死房 + 2 个活房 → 用户看到 **0 间**。
+             公开房间等于完全不可用。
+
+             改法：查询条件里直接带上 `heartbeatAt` 下限，
+             让数据库先把死房滤掉，再按最近开的排序取 20 条。 */
+          var _alive = Date.now() - STALE_MS;
           return d.collection(COLLECTION)
-                  .where({ status: 'open', isPrivate: false })   /* v1105: 私密房不进公开列表 */
-                  .orderBy('createdAt', 'desc').limit(30).get()
+                  /* 🔴v1135：**排除自己的房和已满员的房。**
+                     实测：自己开的房会出现在自己的列表里（点进去毫无意义），
+                     已经有客人的房也照样列出来（点进去必然失败"这间房刚被别人占了"）。
+                     两种都是"看得见但点了没用"，比不显示更糟。 */
+                  .where({ status: 'open', isPrivate: false, guestId: '',
+                           heartbeatAt: d.command.gt(_alive) })
+                  .orderBy('heartbeatAt', 'desc').limit(20).get()
                   .then(function (r) {
                     var rows = (r && r.data) || [];
-                    /* 心跳过期的房间不展示——房主可能直接关了页面，来不及删房 */
-                    return rows.filter(function (x) { return (nowTs - (x.heartbeatAt || 0)) < STALE_MS; });
+                    /* 再兜一层：查询和本地时钟可能有偏差 */
+                    var myId = '';
+                    try { myId = me().id || ''; } catch (e) {}
+                    return rows.filter(function (x) {
+                      if (myId && x.hostId === myId) return false;   /* 不列自己的房 */
+                      if (x.guestId) return false;                   /* 不列满员的房 */
+                      return (nowTs - (x.heartbeatAt || 0)) < STALE_MS;
+                    });
                   });
         });
       },
@@ -315,6 +339,11 @@
        网络慢的时候用户很自然会多点几下，这不是他的错。
        同一次开房进行中就复用同一个 Promise。 */
     if (_creating) return _creating;
+    /* 🔴v1135：**开新房前先关掉自己已有的房。**
+       实测连开两次会在数据库里留下两间自己的房 —— 前一间成了孤房，
+       别人点进去时房主根本不在那间。 */
+    var _prev = _myRoomId;
+    if (_prev) { try { T().remove(_prev)['catch'](function () {}); } catch (e) {} _myRoomId = ''; }
     var now = Date.now();
     var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
     var doc = {
@@ -366,10 +395,54 @@
     return _creating;
   }
 
+  /* ── 🔴v1135 顺手清死房 ────────────────────────────────────
+
+     死房只是"不展示"，**记录会永久留在数据库里**：
+     房主直接关页面 → 来不及删房 → 这条记录永远躺着。
+     每开一次房就多一条，而云开发按存储和读次数计费。
+
+     没有服务端定时任务可用（`counters` 那类都是 ADMINONLY），
+     所以让**每个来列房的客户端顺手清几条** ——
+     反正它已经查过一次了，删两条是很小的额外成本。
+
+     只删**自己创建的**死房（权限规则是"仅创建者可写"，
+     别人的本来也删不掉）—— 于是每个人清理自己留下的垃圾，
+     整体上就干净了。
+
+     每次最多删 3 条：清理不该拖慢列房这个高频操作。 */
+  function sweepMyDeadRooms() {
+    var u = me();
+    if (!u.id) return Promise.resolve(0);
+    var dead = Date.now() - STALE_MS * 4;   /* 保守：2 分钟以上没心跳才动 */
+    return T().list({ hostId: u.id }).then(function (rows) {
+      var kill = (rows || []).filter(function (r) {
+        return r && r._id && (r.heartbeatAt || 0) < dead && r._id !== _myRoomId;
+      }).slice(0, 3);
+      if (!kill.length) return 0;
+      return Promise.all(kill.map(function (r) {
+        return T().remove(r._id)['catch'](function () {});
+      })).then(function () { return kill.length; });
+    })['catch'](function () { return 0; });
+  }
+
   /* ── 列房：只列还活着的公开房，且不列自己开的 ── */
   function listRooms() {
     var u = me();
+    /* 列房时顺手清掉自己留下的死房（不阻塞列表返回） */
+    try { setTimeout(function () { sweepMyDeadRooms(); }, 1500); } catch (e) {}
     return T().listOpen(Date.now()).then(function (rows) {
+      /* 🔴v1135：**排除自己的房和已满员的房 —— 放在这里而不是传输层。**
+         传输层的 where 只对真实云端有效，测试注入的假实现绕不过去；
+         而这条规则是**业务规则**，不该依赖某一种传输实现。
+         （第一版我写在 listOpen 里，测试一验就发现自己的房还在列表里。） */
+      var _me = '';
+      try { _me = me().id || ''; } catch (e) {}
+      rows = (rows || []).filter(function (x) {
+        if (!x) return false;
+        if (_me && x.hostId === _me) return false;   /* 自己的房点进去毫无意义 */
+        if (x.guestId) return false;                 /* 满员的点进去必然失败 */
+        return true;
+      });
       return {
         ok: true,
         rooms: (rows || []).map(function (x) {
@@ -397,6 +470,13 @@
       if (!r || !r.updated) return { ok: false, taken: true, reason: '这间房刚被别人占了，换一间吧' };
       return T().read(roomId).then(function (room) {
         if (!room) return { ok: false, reason: '房间已不存在' };
+      /* 🔴v1135：**房主已经跑了就别让人进。**
+         实测：房主关页面两分钟后，客人仍能"成功"进房 ——
+         进去之后对着空房间干等，直到 60 秒掉线判定才结束。
+         列表里已经滤掉了死房，但用房间码进房、或列表刚好过期时仍会撞上。 */
+      if ((Date.now() - (room.heartbeatAt || 0)) > STALE_MS) {
+        return { ok: false, reason: '房主已经离开了，换一间吧' };
+      }
         _myRoomId = roomId;
         /* 🔴v1104：客人也要发心跳 —— 否则房主检测不到客人掉线，
            会一直干等。原来只有房主发，这是个明显的不对称。 */
@@ -752,6 +832,7 @@
     markReady: markReady,
     /* v1104 对手掉线 */
     /* v1105 房间码 */
+    sweepMyDeadRooms: sweepMyDeadRooms,
     findByCode: findByCode,
     makeCode: makeCode,
     opponentGone: opponentGone,
