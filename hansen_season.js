@@ -505,7 +505,7 @@
           '<div'+(hasThisCard?' id="__hs_curcard" data-season="'+season.id+'"':'')+' style="background:linear-gradient(135deg,'+r.glow+',rgba(12,21,56,.3));border:2px solid '+r.color+';border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 0 20px '+r.glow+';'+(hasThisCard?'cursor:pointer':'')+'">'+
             '<div style="font-size:11px;color:'+r.color+';font-weight:800;letter-spacing:1px;margin-bottom:6px">★ '+r.name+'限定卡 ★</div>'+
             (hasThisCard
-              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=1115" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1115\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
+              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=1116" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1116\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
               : '<div style="font-size:46px;margin-bottom:6px">❓</div>')+
             '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:4px">'+(hasThisCard?season.card.name:'？？？')+'</div>'+
             '<div style="font-size:12px;color:#cbd5e1;line-height:1.5">'+(hasThisCard?'✨ 已收入囊中 · 点击进入全屏观赏':season.card.desc)+'</div>'+
@@ -573,7 +573,7 @@
     var pref = readCardPref(id); if(!pref) return;
     function apply(img, box){
       // 🔴v847(Hansen): 换形象后缩略图保持【透明立绘+底对齐】(用 formPng·不回退 HD 卡面图), 与神秘殿堂初始渲染统一
-      if(img){ var _sp=(pref.formPng||'bosses/saelya.webp'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.webp?v=1115';}; img.src = _sp + '?v=1115'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
+      if(img){ var _sp=(pref.formPng||'bosses/saelya.webp'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.webp?v=1116';}; img.src = _sp + '?v=1116'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
       if(box && pref.bgCss){ box.style.background = pref.bgCss; }
     }
     var hall = document.getElementById('__hs_hall_panel');
@@ -606,7 +606,7 @@
         _saelyaH +=
           '<div class="__hs_gcard" data-season="'+s.id+'" style="background:linear-gradient(160deg,'+r.glow+',rgba(12,21,56,.35));border:2px solid '+r.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+r.glow+';cursor:pointer">'+
             '<div class="__hs_thumb_box" style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+tBg+';margin-bottom:8px">'+/* 🔴v847: 框改正方形·立绘底对齐 */
-              '<img src="'+tImg+'?v=1115" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1115\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+              '<img src="'+tImg+'?v=1116" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1116\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
             '</div>'+
             '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+s.card.name+'</div>'+
             '<div style="font-size:10px;color:'+r.color+';font-weight:800;margin-top:3px">★ '+r.name+'限定</div>'+
@@ -644,11 +644,11 @@
           var bcOwned = tempUnlockAll() || d.unlockedCards.indexOf(bc.id) >= 0;
           if(bcOwned){
             ownedTotal++;
-            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=1115") center/cover') : bc.bg;
+            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=1116") center/cover') : bc.bg;
             cardsHtml +=
               '<div class="__hs_bcard" data-bc="'+bc.id+'" style="background:linear-gradient(160deg,'+br2.glow+',rgba(12,21,56,.35));border:2px solid '+br2.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+br2.glow+';cursor:pointer">'+
                 '<div style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+bcBg+';margin-bottom:8px">'+/* 🔴v847(Hansen): 1200x1200正方形立绘配正方形框·零顶部留白·人物最大化·零裁切 */
-                  '<img src="'+bc.img+'?v=1115" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+                  '<img src="'+bc.img+'?v=1116" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
                 '</div>'+
                 '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+bc.name+'</div>'+
                 '<div style="font-size:10px;color:'+br2.color+';font-weight:800;margin-top:3px">★ '+br2.name+'限定</div>'+
@@ -703,7 +703,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'season_showcase.html?v=1115&boss=' + encodeURIComponent(seasonId || '');
+    iframe.src = 'season_showcase.html?v=1116&boss=' + encodeURIComponent(seasonId || '');
     iframe.setAttribute('title', '神秘殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -725,7 +725,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'boss_hall.html?v=1115&season=1&lv=' + lv;
+    iframe.src = 'boss_hall.html?v=1116&season=1&lv=' + lv;
     iframe.setAttribute('title', 'BOSS 殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -742,14 +742,14 @@
   function openBossCardView(card){
     if(!card || document.getElementById('__hs_bcv')) return;
     var r = RARITY_STYLE[card.rarity] || RARITY_STYLE.legend;
-    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=1115") center/cover') : card.bg;
+    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=1116") center/cover') : card.bg;
     var mask = document.createElement('div');
     mask.id = '__hs_bcv';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(8,8,18,.92);display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
     mask.innerHTML =
       '<div style="width:100%;max-width:330px">'+
         '<div style="position:relative;width:100%;aspect-ratio:3/4;border-radius:20px;overflow:hidden;border:3px solid '+r.color+';box-shadow:0 0 34px '+r.glow+',0 18px 50px rgba(0,0,0,.6);background:'+bgStyle+'">'+
-          '<img src="'+card.img+'?v=1115" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
+          '<img src="'+card.img+'?v=1116" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
           '<div style="position:absolute;top:11px;left:11px;background:'+r.color+';color:#1a1226;font-size:11px;font-weight:900;padding:3px 11px;border-radius:8px">★ '+r.name+'</div>'+
           '<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 15px 17px;background:linear-gradient(to top,rgba(8,8,18,.94),rgba(8,8,18,.55),transparent)">'+
             '<div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)">'+card.name+'</div>'+

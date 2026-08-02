@@ -173,6 +173,8 @@ REGISTRY = [
      'test_friends_v1106.mjs'),
     ('v1115', '🔴弱网挑刺：请求卡住永不超时界面一直转圈；断网显示 Failed to fetch；超时文案露出内部方法名',
      'test_pk_room_v1065.mjs'),
+    ('v1116', '🔴无障碍挑刺五处：图标按钮无文字说明、Esc 关不掉、Tab 跑到浮层后面、背景能滚、焦点不进浮层',
+     'test_friends_ui_v1107.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

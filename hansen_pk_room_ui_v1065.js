@@ -129,6 +129,7 @@
          微信发一句话比在 App 里加好友快得多。 */
       + '<div style="display:flex;gap:8px;margin:10px 0">'
       +   '<input id="prCode" maxlength="4" placeholder="输入好友的房间码"'
+      +     ' aria-label="输入好友给你的四位房间码"'
       +     ' autocapitalize="characters" autocomplete="off"'
       +     ' style="flex:1;min-width:0;text-align:center;letter-spacing:6px;font-size:20px;'
       +     'text-transform:uppercase;background:var(--pk-card);border:1px solid var(--pk-in-line);'
@@ -461,7 +462,8 @@ function doCreate() {
           : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(w.cn || '') + '</div>'
             + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:var(--pk-hint)">'
             + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
-      + '<input class="pr_in" id="prIn" autocomplete="off" autocapitalize="off" '
+      + '<input class="pr_in" id="prIn" aria-label="在这里拼出这个单词" '
+      +   'autocomplete="off" autocapitalize="off" '
       +   'autocorrect="off" spellcheck="false" placeholder="拼出这个词" '
       +   'style="font-size:20px;letter-spacing:2px;text-align:center">'
       + '<div id="prHint" style="min-height:24px;margin-top:10px;font-size:14px;color:var(--pk-dim)">'

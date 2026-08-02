@@ -110,6 +110,63 @@
     document.head.appendChild(st);
   }
 
+
+  /* ── 🔴v1116 浮层无障碍：Esc 关闭 / 焦点收拢 / 锁背景滚动 ──
+
+     实测挑出四处：
+       · **Esc 关不掉** —— 键盘用户只能用鼠标去点那个「×」
+       · **Tab 会跑到浮层后面** —— 焦点逃到被遮住的按钮上，
+         读屏用户会完全迷路（他看不见浮层，只听到在念背景里的东西）
+       · **背景能跟着滚** —— 手指滑动时底下的页面也在动
+       · **打开时焦点还在原来的按钮上** —— 读屏不会播报"弹出了新界面"
+
+     这四条对看得见的人只是"有点别扭"，
+     **对视障用户是"根本用不了"**。 */
+  var _a11y = null;
+
+  function a11yOn(rootEl, onEsc) {
+    a11yOff();
+    if (!rootEl) return;
+    var prevFocus = document.activeElement;
+    var prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';          /* 锁背景滚动 */
+    rootEl.setAttribute('aria-modal', 'true');
+
+    function focusables() {
+      return [].slice.call(rootEl.querySelectorAll(
+        'button,a[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
+      )).filter(function (e) { return e.offsetParent !== null && !e.disabled; });
+    }
+    function onKey(ev) {
+      if (ev.key === 'Escape') { ev.preventDefault(); if (onEsc) onEsc(); return; }
+      if (ev.key !== 'Tab') return;
+      var list = focusables();
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      /* 焦点收拢：Tab 到尾就回到头，Shift+Tab 到头就回到尾 —— 出不去 */
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      else if (!rootEl.contains(document.activeElement)) { ev.preventDefault(); first.focus(); }
+    }
+    document.addEventListener('keydown', onKey, true);
+
+    /* 打开后把焦点放进来 —— 读屏才会播报这是个新界面 */
+    setTimeout(function () {
+      var list = focusables();
+      if (list.length) { try { list[0].focus(); } catch (e) {} }
+    }, 60);
+
+    _a11y = function () {
+      document.removeEventListener('keydown', onKey, true);
+      document.body.style.overflow = prevOverflow;
+      try { rootEl.removeAttribute('aria-modal'); } catch (e) {}
+      /* 关掉后焦点还给原来那个按钮 —— 否则读屏用户会"掉"到页面开头 */
+      try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+    };
+  }
+
+  function a11yOff() { if (_a11y) { try { _a11y(); } catch (e) {} _a11y = null; } }
+
   function host() {
     var el = q(ID);
     if (el) return el;
@@ -123,8 +180,10 @@
     var el = host();
     el.innerHTML = '<div class="ld_wrap">' + inner + '</div>';
     el.classList.add('on');
+    a11yOn(el, close);
   }
   function close() {
+    a11yOff();
     if (_cancel) { try { _cancel(); } catch (e) {} _cancel = null; }
     var el = q(ID); if (el) el.classList.remove('on');
   }
@@ -160,7 +219,7 @@
 
     paint(
       '<div class="ld_top"><div class="ld_h">🏆 天梯排位</div>'
-      + '<button class="ld_x" id="ldX">×</button></div>'
+      + '<button aria-label="关闭天梯排位" class="ld_x" id="ldX">×</button></div>'
 
       /* 段位 */
       + '<div class="ld_card ld_tier">'
@@ -290,7 +349,7 @@
       var waited = Math.round((Date.now() - t0) / 1000);
       var band = (L() && L().matchBand) ? L().matchBand(waited) : 200;
 
-      paint('<div class="ld_top"><button class="ld_x" id="ldCancel">×</button>'
+      paint('<div class="ld_top"><button aria-label="取消匹配" class="ld_x" id="ldCancel">×</button>'
         + '<div class="ld_h">⚡ 正在找对手…</div></div>'
         + '<div class="ld_card" style="text-align:center;padding:30px 14px">'
         +   '<div style="font-size:44px">🔍</div>'
