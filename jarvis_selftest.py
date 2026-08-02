@@ -310,6 +310,13 @@ def _inj_guess_side(s):
     return s[:i] + seg.replace('mySide:', 'mySideGONE:', 1) + s[i+900:]
 
 
+
+def _inj_notify_proto(s):
+    """改回挂原型 —— 生死簿在实例上覆盖了 setItem，挂原型一次都不会触发。"""
+    if 'ls.setItem' not in s: return None
+    return s.replace('ls.setItem', 'Storage.prototype.setItem')
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -356,6 +363,7 @@ CASES = [
     ('加载顺序依赖','hansen_friends_v1106.js',    _inj_load_order),
     ('回合不推进',   'hansen_pk_room_v1065.js',     _inj_no_skip_round),
     ('前端瞎猜',     'hansen_pk_room_v1065.js',     _inj_guess_side),
+    ('变更通知',      'hansen_change_notify_v1134.js', _inj_notify_proto),
 ]
 
 

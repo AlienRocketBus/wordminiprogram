@@ -666,6 +666,32 @@
       });
       window.addEventListener('pagehide', function(){ syncNow({}); });
       setInterval(function(){ syncNow({}); }, 5 * 60 * 1000);
+
+      /* ── 🔴v1134 数据一变就排队上传 ──────────────────────────
+
+         查覆盖时发现：备份**内容**是全的（15 个玩法模块 100% 覆盖），
+         但**同步时机**只有三个：切后台 / 关页面 / 每 5 分钟。
+
+         也就是说：孩子打完一局、拿了奖励、开了张卡，
+         **如果这时候直接杀掉微信或断网，这 5 分钟内的进度就丢了。**
+         而"打完一局就切出去"恰恰是最常见的用法。
+
+         做法：任何模块改完数据，派发一个 `hsn-data-changed` 事件，
+         这里收到就**延迟 8 秒**上传（延迟是为了把连续几次改动合并成一次，
+         否则连开五个宝箱就要传五次，白烧云开发的写次数）。
+
+         为什么是 8 秒而不是立刻：
+           · 连续操作很常见（连答十题、连开宝箱），合并能省一大截写入
+           · 8 秒足够短 —— 用户很难在 8 秒内做完事就杀进程
+           · 而切后台/关页面本来就会立刻触发一次，两条路互补 */
+      var _pending = null;
+      document.addEventListener('hsn-data-changed', function () {
+        if (_pending) clearTimeout(_pending);
+        _pending = setTimeout(function () {
+          _pending = null;
+          syncNow({});
+        }, 8000);
+      });
     }catch(e){}
   }
 
@@ -764,6 +790,10 @@
   } catch (e) {}
 
   window.HansenCloudSave = {
+    /* v1134: 各模块改完数据调一下这个，同步就会排队 —— 比各自派发事件更不容易写错 */
+    notifyChanged: function () {
+      try { document.dispatchEvent(new CustomEvent('hsn-data-changed')); } catch (e) {}
+    },
     syncNow: syncNow, restoreWithKey: restoreWithKey, fetchWithKey: fetchWithKey,
     /* 🔴v1028: 登录/登出后必须作废已缓存的实例——
        否则先匿名初始化、后登录的场景下, 仍会拿着匿名身份读写, 跨设备依旧找不回。 */

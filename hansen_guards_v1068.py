@@ -1391,6 +1391,30 @@ def guard_server_known_facts_not_guessed():
     if not re.search(r'r\.mySide\s*\|\|', ui):
         bad('前端瞎猜', '对战屏没有优先采用服务端回传的 mySide')
 
+
+def guard_change_notify_hooks_instance():
+    """变更通知必须挂 localStorage **实例**，不能只挂原型。
+
+    事故（v1134）：第一版挂在 `Storage.prototype` 上 —— **一次都没触发**。
+    因为 `hansen_cred_trap_v1085`（凭证生死簿）
+    **直接在 localStorage 实例上覆盖了 setItem**，
+    而**实例属性优先于原型**，调用时根本走不到原型那一层。
+
+    这个项目里有多个模块在劫持 localStorage —— 谁挂原型谁失效。
+    """
+    src = _code_only(_read('hansen_change_notify_v1134.js') or '')
+    if not src:
+        bad('变更通知', 'hansen_change_notify_v1134.js 不存在 —— 数据变了不会触发同步')
+        return
+    if 'ls.setItem' not in src:
+        bad('变更通知', '没有挂到 localStorage 实例上（只挂原型无效）')
+    if 'worthSync' not in src:
+        bad('变更通知', '缺少"只对备份会收的键发信号"的判断')
+    cs = _code_only(_read('hansen_cloud_save_v965.js') or '')
+    if cs and 'hsn-data-changed' not in cs:
+        bad('变更通知', '云存档没有监听 hsn-data-changed —— 发了信号也没人接')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1449,6 +1473,8 @@ GUARDS = [
     ('加载顺序依赖', guard_no_load_order_helper),
     ('回合不推进',   guard_round_advance_covers_noone_wins),
     ('前端瞎猜',     guard_server_known_facts_not_guessed),
+    # v1134
+    ('变更通知',     guard_change_notify_hooks_instance),
 ]
 
 

@@ -213,6 +213,9 @@ REGISTRY = [
      'test_cred_scan_v1132.mjs'),
     ('v1134', '🔴v1122~v1133 挖出的六个坑一个守卫都没有——全部补上并自证会咬人',
      'guard_no_live_ls_iteration'),
+    ('v1134', '🔴同步只有三个时机(切后台/关页面/每5分钟)——打完一局直接杀微信，这5分钟的进度就丢了'
+              '（新增 hansen_change_notify_v1134.js：数据一变就排队上传）',
+     'test_cred_scan_v1132.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
