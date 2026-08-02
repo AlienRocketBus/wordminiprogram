@@ -450,6 +450,7 @@ function doCreate() {
 
   function stopPoll() {
     if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+    if (_rt && _rt.offVis) { try { _rt.offVis(); } catch (e) {} _rt.offVis = null; }
   }
 
   function startMatch() {
@@ -605,8 +606,34 @@ function doCreate() {
       };
     }
 
+    /* 🔴v1120：**切后台时暂停倒计时。**
+
+       实测：切到后台 2.5 秒再回来，倒计时从 14s 变成 11s ——
+       **后台那段时间照样在扣。**
+       用户接个微信消息回来，可能发现这词已经超时了，
+       而他根本没机会答 —— 这不是他的错。
+
+       手机上"打到一半被打断"是常态：来电话、微信消息、切出去查个词。
+       做法：隐藏时记下剩余时间，回来时按剩余时间重设截止点。
+       （对手那边的心跳照常，所以不影响掉线判定的公平性。） */
+    var onVis = function () {
+      if (!_rt || _rt.idx !== idx || _rt.answered) return;
+      if (document.visibilityState === 'hidden') {
+        _rt.pausedLeft = Math.max(0, _rt.deadline - Date.now());
+      } else if (_rt.pausedLeft != null) {
+        _rt.deadline = Date.now() + _rt.pausedLeft;
+        _rt.pausedLeft = null;
+      }
+    };
+    try { document.addEventListener('visibilitychange', onVis); } catch (e) {}
+    _rt.offVis = function () {
+      try { document.removeEventListener('visibilitychange', onVis); } catch (e) {}
+    };
+
     /* 倒计时 + 轮询对手 */
     _pollTimer = setInterval(function () {
+      /* 后台期间不推进倒计时也不轮询 —— 省电，且时间不该白扣 */
+      if (document.visibilityState === 'hidden') return;
       if (!_rt || _rt.idx !== idx) return;
       var left = Math.max(0, Math.ceil((_rt.deadline - Date.now()) / 1000));
       var c = q('prClock');

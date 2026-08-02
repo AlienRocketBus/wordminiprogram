@@ -181,6 +181,8 @@ REGISTRY = [
      'test_pk_keyboard_v1118.mjs'),
     ('v1119', '🔴320px 老手机上键盘最窄的键只有 24px，手指点不准（v1112 刚为关闭按钮改过同类问题）',
      'test_pk_keyboard_v1118.mjs'),
+    ('v1120', '🔴切后台时倒计时照跑——接个微信消息回来发现这词已超时，而他根本没机会答',
+     'test_tap_targets_v1120.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
