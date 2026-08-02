@@ -615,6 +615,39 @@
     }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
   }
 
+  /* ── 🔴v1124 超时推进 ──────────────────────────────────────
+
+     实测双人对战发现：**两人都没拼对时，房间的 `round` 不会动。**
+
+       第1词超时 → 两边界面都跳到第2词，但房间还停在 round=0
+       → A 在第2词拼对时 claim 用 roundIdx=1，
+         而 guard 要求 `round === 1` —— 房间是 0，条件不成立
+       → **写不进去，A 白拼一次，B 也看不到，双方彻底脱节**
+
+     根因：推进 `round` 这件事只挂在"有人抢到"上，
+     **而"谁都没抢到"同样是一个回合的结束**。
+
+     做法：超时时也走一次条件更新，往 winners 里记一个空串
+     （表示"这一词没人拿下"），round 照样 +1。
+     用同样的条件更新保证两边同时超时也只推进一次。 */
+  function skipRound(roomId, roundIdx) {
+    return T().read(roomId).then(function (room) {
+      if (!room) return { ok: false, reason: '房间已不存在' };
+      var winners = room.winners || [];
+      if (winners.length > roundIdx) {
+        /* 已经被推进过了（对手抢到了，或对手先超时推的）—— 不重复 */
+        return { ok: true, skipped: false, round: winners.length, winners: winners };
+      }
+      return T().claim(roomId,
+        { round: roundIdx },
+        { winners: winners.concat(['']), round: roundIdx + 1, roundAt: Date.now() }
+      ).then(function (r) {
+        var okWrite = r && (r.updated != null ? r.updated : (r.stats && r.stats.updated));
+        return { ok: true, skipped: !!okWrite, round: roundIdx + 1 };
+      });
+    }).catch(function (e) { return { ok: false, reason: E(e) }; });
+  }
+
   /* 轮询本回合状态：对手抢到了没有 / 现在该第几个词 */
   function roundState(roomId) {
     return T().read(roomId).then(function (room) {
@@ -714,6 +747,7 @@
     _setMeForTest: function (u) { _meOverride = u; },
     modeOf: modeOf,
     claimRound: claimRound,
+    skipRound: skipRound,
     roundState: roundState,
     markReady: markReady,
     /* v1104 对手掉线 */

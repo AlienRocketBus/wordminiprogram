@@ -688,6 +688,8 @@ function doCreate() {
     S().roundState(st.roomId).then(function (r) {
       if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
       var w = (r.winners || [])[idx];
+      /* v1124: 空串表示"这一词谁都没拿下"(超时推进写的)，
+         不能当成对手抢到 —— 否则会误报"⚡ 抢先拼对了！" */
       if (!w) return;
       /* 🔴v1122：`isHost` 可能没设（测试注入、或将来某条路径漏传）。
          那时按 host 判会把"对手抢到"误认成"我抢到"，界面就一直显示"正在拼…" ——
@@ -765,7 +767,18 @@ function doCreate() {
       setTimeout(function () { askRound(idx + 1); }, 1400);
     };
 
-    if (!correct) { after(0, false); return; }
+    if (!correct) {
+      /* 🔴v1124：**没拼对也要推进房间的 round**，否则下一词写不进去。
+         实测：两人都超时 → 房间还停在上一回合 → 下一词的 claim 条件不成立
+         → 白拼一次、对手也看不到、双方脱节。
+         "谁都没抢到"同样是一个回合的结束，房间状态要跟上。 */
+      try {
+        if (st && st.roomId && st.roomId !== 'test' && S().skipRound) {
+          S().skipRound(st.roomId, idx)['catch'](function () {});
+        }
+      } catch (e) {}
+      after(0, false); return;
+    }
 
     S().claimRound(st.roomId, idx).then(function (r) {
       if (!r || !r.ok) { after(0, false); return; }

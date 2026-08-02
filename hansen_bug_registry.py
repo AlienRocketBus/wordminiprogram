@@ -189,6 +189,8 @@ REGISTRY = [
      'test_pk_record_v1103.mjs'),
     ('v1123', '🔴两人真实对战根本跑不通：对手被误判掉线、落后一方永远卡在上一词分数恒为 0',
      'test_pk_battle_ui_v1101.mjs'),
+    ('v1124', '🔴两人都超时时房间 round 不推进 → 下一词 claim 条件不成立 → 白拼一次、双方彻底脱节',
+     'test_pk_modes_v1100.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
