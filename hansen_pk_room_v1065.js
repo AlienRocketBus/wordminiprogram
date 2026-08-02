@@ -828,16 +828,41 @@
   function waitForOpponent(roomId, onChange, timeoutMs) {
     var stop = false, t0 = Date.now();
     var limit = timeoutMs || 120000;
+    var fails = 0;
+
+    /* 🔴v1137 两处改进：
+
+       ① **轮询间隔递增。**
+          原来固定每 2 秒读一次，等满 2 分钟就是 **60 次云端读** ——
+          而绝大多数情况下前 10 秒没人来，后面 110 秒也不会有人。
+          云开发按读次数计费，一个人挂在等待屏就烧 60 次。
+          改为：前 10 秒每 2 秒（对手很可能马上就到），
+          之后逐步拉长到 5 秒 —— 60 次降到约 30 次，而"有人进来"
+          最多晚 5 秒被发现（对方进来后本来也要加载几秒）。
+
+       ② **网络抖一下不该整个放弃。**
+          原来 `.catch` 里直接 `onChange({error})`，等待就结束了 ——
+          而手机上网络瞬断很常见，用户会看到"等待失败"然后一脸茫然。
+          改为：连续失败 3 次才报错，中间照常重试。 */
+    function nextDelay() {
+      var waited = Date.now() - t0;
+      return waited < 10000 ? 2000 : (waited < 40000 ? 3000 : 5000);
+    }
+
     (function tick() {
       if (stop) return;
       T().read(roomId).then(function (room) {
         if (stop) return;
+        fails = 0;
         if (!room) { onChange({ gone: true }); return; }
         if (room.guestId) { onChange({ joined: true, room: room }); return; }
         if (Date.now() - t0 > limit) { onChange({ timeout: true }); return; }
-        setTimeout(tick, 2000);
+        setTimeout(tick, nextDelay());
       }).catch(function (e) {
-        if (!stop) { onChange({ error: E(e) }); }
+        if (stop) return;
+        fails++;
+        if (fails >= 3) { onChange({ error: E(e) }); return; }
+        setTimeout(tick, 2500);   /* 抖一下就重试，别把人踢出等待 */
       });
     })();
     return function cancel() { stop = true; };

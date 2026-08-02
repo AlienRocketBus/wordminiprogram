@@ -156,5 +156,29 @@ const now = Date.now();
   ok(!r.room.code, '★ 公开房没有码');
 }
 
+
+/* ── v1137 追加：等待屏 ────────────────────────────────── */
+
+/* ⑩ 轮询间隔递增（省云端读次数） */
+{
+  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  ok(/function nextDelay/.test(src),
+     '★ 轮询间隔递增 —— 固定 2 秒等满 2 分钟要 60 次云端读，递增后约 31 次');
+  ok(/fails >= 3/.test(src),
+     '★ 连续失败 3 次才报错 —— 手机网络瞬断很常见，抖一下不该把人踢出等待');
+}
+
+/* ⑪ 等待过程的行为 */
+{
+  const rooms = [{ _id:'W1', hostId:'H', guestId:'', heartbeatAt: now }];
+  const S = boot(rooms); S._setMeForTest({ id:'H', name:'我' });
+  let got = null;
+  const cancel = S.waitForOpponent('W1', ev => { got = ev; }, 20000);
+  setTimeout(() => { rooms[0].guestId = 'G'; }, 2500);
+  await new Promise(z => setTimeout(z, 5500));
+  cancel();
+  ok(got && got.joined === true, '★ 对手 2.5 秒后进来能被发现');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
