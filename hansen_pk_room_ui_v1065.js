@@ -460,9 +460,22 @@ function doCreate() {
     st.startAt = Date.now();
     st.myScore = 0; st.oppScore = 0;
     st.mode = st.mode || _pickedMode || 'C';
-    /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完 */
-    try { S().markReady(st.roomId); } catch (e) {}
-    askRound(0);
+    /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完。
+       🔴v1126：**先把房间的 roundAt 拿到手再开第一回合。**
+       否则首回合各按各的本地时间起算 —— 实测两人开局差 6 秒，
+       后进来的那个凭空多出半个回合的时间。 */
+    var go = function () { askRound(0); };
+    try {
+      S().markReady(st.roomId);
+      if (st.roomId && st.roomId !== 'test' && S().roundState) {
+        S().roundState(st.roomId).then(function (r) {
+          if (r && r.ok && r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
+          go();
+        })['catch'](go);
+        return;
+      }
+    } catch (e) {}
+    go();
   }
 
   /* 🔴v1118 内置 QWERTY 键盘 —— 与拼写蜂同一套布局与手感 */
@@ -521,8 +534,11 @@ function doCreate() {
     var w = words[idx];
     var en = String(w.en || '');
     var askIsTts = (st.askMode || _askMode) === 'tts';
-    _rt = { idx: idx, answered: false, t0: Date.now(),
-            deadline: Date.now() + (M.perWordSecs || 15) * 1000 };
+    /* 截止时间以房间共享的 roundAt 为准 —— 两边算出来一样，才谈得上公平。
+       拿不到 roundAt（首回合、或读取失败）时退回本地计时。 */
+    var span = (M.perWordSecs || 15) * 1000;
+    var base = (st.roundAt && idx === st.roundIdxOfRoundAt) ? st.roundAt : Date.now();
+    _rt = { idx: idx, answered: false, t0: Date.now(), deadline: base + span };
 
     paint('<div class="pr_top">'
       + '<div class="pr_h" style="display:flex;justify-content:space-between;align-items:center">'
@@ -616,13 +632,30 @@ function doCreate() {
        手机上"打到一半被打断"是常态：来电话、微信消息、切出去查个词。
        做法：隐藏时记下剩余时间，回来时按剩余时间重设截止点。
        （对手那边的心跳照常，所以不影响掉线判定的公平性。） */
+    /* 🔴v1126：**暂停只能给"宽限"，不能真的把时间还回去。**
+
+       v1120 为了"切后台不该白扣时间"，做成了回来时按剩余时间续上。
+       双人环境一验就发现问题：**A 切出去 30 秒回来还有 9 秒可答，
+       而 B 那边早就超时了** —— 等于给切后台的人加时间，对手吃亏。
+
+       改法：截止时间以**房间共享的 roundAt** 为准（两边一致），
+       本地暂停只给一次**有限的宽限**（最多 3 秒），
+       用来吸收"切回来那一下的操作延迟"，而不是补偿整段离开时间。
+
+       这样：接个消息马上回来 → 几乎不吃亏；
+             切出去很久 → 该超时还是超时，对手不吃亏。 */
+    var GRACE_MS = 3000;
     var onVis = function () {
       if (!_rt || _rt.idx !== idx || _rt.answered) return;
       if (document.visibilityState === 'hidden') {
-        _rt.pausedLeft = Math.max(0, _rt.deadline - Date.now());
-      } else if (_rt.pausedLeft != null) {
-        _rt.deadline = Date.now() + _rt.pausedLeft;
-        _rt.pausedLeft = null;
+        _rt.hidAt = Date.now();
+      } else if (_rt.hidAt) {
+        var away = Date.now() - _rt.hidAt;
+        _rt.hidAt = null;
+        if (!_rt.graced) {
+          _rt.graced = true;
+          _rt.deadline += Math.min(away, GRACE_MS);   /* 宽限封顶 3 秒，且只给一次 */
+        }
       }
     };
     try { document.addEventListener('visibilitychange', onVis); } catch (e) {}
@@ -687,6 +720,8 @@ function doCreate() {
     checkOpponentAlive(idx);
     S().roundState(st.roomId).then(function (r) {
       if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
+      /* v1126: 记下房间共享的回合开始时间，供下一回合算截止点 */
+      if (r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
       var w = (r.winners || [])[idx];
       /* v1124: 空串表示"这一词谁都没拿下"(超时推进写的)，
          不能当成对手抢到 —— 否则会误报"⚡ 抢先拼对了！" */
