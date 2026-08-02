@@ -721,10 +721,19 @@ function doCreate() {
          条件不成立，B 永远跟不上（实测卡在第 1 词、分数一直 0）。
          正确判据：`winners[idx]` 已经有人 = 这一词已定胜负，我该跟上。 */
       if (oppGot && !_rt.answered) {
-        /* 给一点时间让人看到"对手抢先了"，再翻篇 */
-        setTimeout(function () {
-          if (_rt && _rt.idx === idx && !_rt.answered) submitRound(idx, false, true);
-        }, 700);
+        /* 🔴v1125：**立刻标记本回合已结束，再走结算。**
+
+           实测 A 模式：A 抢到后 B 那边输入框被清空、
+           却只显示「对手：正在拼…」—— B 完全不知道刚才发生了什么。
+
+           原因是这里等了 0.7 秒才调 submitRound，
+           而那 0.7 秒里 B 可能还在敲键盘、轮询也可能再次触发，
+           结果"对手抢先了"这句话没机会显示出来就被下一回合盖掉。
+
+           改为**马上结算**（submitRound 内部本来就有 1.4 秒的小结停留，
+           足够看清"对手抢先了 〔apple 苹果〕"）——
+           不需要在外面再加一层延迟。 */
+        submitRound(idx, false, true);
       }
     })['catch'](function () {});
   }
