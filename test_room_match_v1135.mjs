@@ -180,5 +180,17 @@ const now = Date.now();
   ok(got && got.joined === true, '★ 对手 2.5 秒后进来能被发现');
 }
 
+
+/* ── v1138 追加：关页面时收房 ──────────────────────────── */
+{
+  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  ok(/pagehide/.test(ui),
+     '★ 监听 pagehide —— 直接关标签页/切走时也要把房收掉，否则就是僵尸房的源头');
+  ok(/visibilityState !== 'hidden'/.test(ui) && /30000/.test(ui),
+     '★ 切后台超过 30 秒才收房 —— 只是切出去看一眼不该把房关了');
+  ok(!/beforeunload/.test(ui) || /pagehide/.test(ui),
+     '★ 用 pagehide 而不是只用 beforeunload（iOS Safari 上后者常常不触发）');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

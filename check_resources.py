@@ -2104,7 +2104,7 @@ else: ok('v564 疑问岛 17 图标根治重做[v565 手已换画师图] (Hansen 
 # 🔴 v565(Hansen: 我画的手指太难看, 直接给画师图——所有用手指指东西的地方全换这张, 缩放+调方向): 疑问岛 9 处指向手全部换画师图。
 #   素材: icons/hand_point.webp(画师黄色卡通指向手, 原图 1254² bbox 紧裁缩至 256×178, 35KB, 默认指向右, 指尖在 0.996W/0.346H)。
 #   hand() 图片版几何完全兼容 v564: 指尖落 (cx+20*scale, cy), 外层 rotate(rot cx cy) 原样——this/which 等所有对位自动继承; |rot|>90 用镜像基底 translate(2cx) scale(-1 1) + rotate(rot-180) 防手上下颠倒(these rot=128 唯一镜像)。
-#   引用 href+xlink:href 双写带 ?v=1137 戳(build.py 精确匹配旧戳自动刷新), SVG <image> 外部引用走浏览器缓存 9 处一次下载。9 处: which/this/that/these/those/there/they/you/their。
+#   引用 href+xlink:href 双写带 ?v=1138 戳(build.py 精确匹配旧戳自动刷新), SVG <image> 外部引用走浏览器缓存 9 处一次下载。9 处: which/this/that/these/those/there/they/you/their。
 _qp65=open('island_question.html',encoding='utf-8').read()
 _s65=[]
 _di=_qp65.find('const DATA=[')
@@ -3454,7 +3454,7 @@ if _miss646: _v646.append('极速60秒未换3D图标的岛:'+str(_miss646[:6]))
 if _isl646 and not any('icons/speed_3d.webp' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('无岛引用speed_3d.webp')
 if _isl646 and not any('\U0001f534v646' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('缺🔴v646标记')
 if _v646: fail('v646 极速60秒3D图标: '+str(_v646[:6]))
-else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.webp·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.webp(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=1137/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
+else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.webp·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.webp(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=1138/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
 
 # ---- v647 火眼金睛 新3D金眼图标 ----
 _v647=[]
@@ -8356,7 +8356,7 @@ try:
 except Exception as _e887:
     _l887.append('守卫自身异常:'+str(_e887)[:80])
 if _l887: fail('v887 剑神图替换: '+str(_l887[:8]))
-else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归一(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归一HP940·0报错。build会bump缓存戳?v=1137让新图生效。')
+else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归一(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归一HP940·0报错。build会bump缓存戳?v=1138让新图生效。')
 
 
 # 🔴 v888(Hansen: 剑神"万剑归一"新特效做得非常棒·融入游戏成为剑神攻击特效): 新fxJianshen替换旧版。
@@ -9323,7 +9323,7 @@ try:
     _sw944 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
     if "const CACHE_PREFIX = 'hansen-v944-';" not in _sw944:
         _b941_release.append('sw_v944.js 缓存命名空间未升级到 v944')
-    if "'./hansen_perf_v944.js?v=1137'" not in _sw944 or "'./hansen_perf.js'" in _sw944:
+    if "'./hansen_perf_v944.js?v=1138'" not in _sw944 or "'./hansen_perf.js'" in _sw944:
         _b941_release.append('sw_v944.js 未只缓存 v944 新性能脚本路径')
     if "'./hansen_backup_bootstrap_v944.js'" not in _sw944 or "'./hansen_backup_bootstrap.js'" in _sw944:
         _b941_release.append('sw_v944.js 未只缓存 v944 新备份引导路径')
@@ -9332,33 +9332,33 @@ try:
             _b941_release.append('v944 SW升级依赖缺失或未入Shell: %s' % _upgrade_dep944)
     if "'./hansen_focused_typing_v946.js'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未缓存 v946 定向打字大师')
-    if "'./hansen_boss_lock.js?v=1137'" not in _sw944:
+    if "'./hansen_boss_lock.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF5 精确键缓存 Boss 彩虹倒计时修复')
-    if "'./hansen_explore_progress_v945.js?v=1137'" not in _sw944:
+    if "'./hansen_explore_progress_v945.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存探索渲染修复')
-    if "'./hansen_review.js?v=1137'" not in _sw944:
+    if "'./hansen_review.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Land 复习修复')
-    if "'./hansen_wrong_overview.js?v=1137'" not in _sw944:
+    if "'./hansen_wrong_overview.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存跨岛错题净化修复')
-    if "'./hansen_backup_v944.js?v=1137'" not in _sw944:
+    if "'./hansen_backup_v944.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF6 精确键缓存Boss逐轮备份语义校验')
-    if "'./hansen_canonical_progress.js?v=1137'" not in _sw944:
+    if "'./hansen_canonical_progress.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存权威进度输入校验修复')
-    if "'./hansen_season.js?v=1137'" not in _sw944:
+    if "'./hansen_season.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存赛季网络/存档修复')
-    if "'./hansen_pet_showcase.js?v=1137'" not in _sw944:
+    if "'./hansen_pet_showcase.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存宠物名自愈修复')
-    if "'./hansen_cards.js?v=1137'" not in _sw944:
+    if "'./hansen_cards.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Boss 卡牌网络/存档修复')
-    if "'./hansen_gacha.js?v=1137'" not in _sw944:
+    if "'./hansen_gacha.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存通用抽卡基础引擎')
-    if "'./hansen_land_cards.js?v=1137'" not in _sw944:
+    if "'./hansen_land_cards.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存星海卡牌揭晓引擎')
-    if "'./hansen_quest_global.js?v=1137'" not in _sw944:
+    if "'./hansen_quest_global.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存每日任务账本修复')
-    if "'./hansen_island_upgrade.js?v=1137'" not in _sw944:
+    if "'./hansen_island_upgrade.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存每词金币上限修复')
-    if "'./hansen_diamond_shop.js?v=1137'" not in _sw944:
+    if "'./hansen_diamond_shop.js?v=1138'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF7 精确键缓存禁色主题商店修复')
     if ("CACHE_PREFIX + 'shell-21'" not in _sw944 or "CACHE_PREFIX + 'pages-19'" not in _sw944
             or "CACHE_PREFIX + 'assets-19'" not in _sw944 or "CACHE_PREFIX + 'icons-3'" not in _sw944):
@@ -9366,12 +9366,12 @@ try:
     if r'/\/icons\/(?:[^/]+\/)*[^/]+\.(?:webp|png|svg)$/i' not in _sw944:
         _b941_release.append('sw_v944.js 未允许受控 icons/ 子目录进入小图标离线缓存')
     for _hf6_shell944, _hf6_label944 in (
-            ("'./hansen_round_reward.js?v=1137'", 'Boss逐轮结算'),
-            ("'./hansen_round_bar.js?v=1137'", 'Boss逐轮进度卡禁色'),
-            ("'./hansen_econ_guide.js?v=1137'", '四份中文速查禁色'),
-            ("'./hansen_mylearning.js?v=1137'", '我的学习禁色'),
-            ("'./hansen_palette.js?v=1137'", '全局配色禁色'),
-            ("'./hansen_boss_theme.js?v=1137'", 'Boss三主题禁色')):
+            ("'./hansen_round_reward.js?v=1138'", 'Boss逐轮结算'),
+            ("'./hansen_round_bar.js?v=1138'", 'Boss逐轮进度卡禁色'),
+            ("'./hansen_econ_guide.js?v=1138'", '四份中文速查禁色'),
+            ("'./hansen_mylearning.js?v=1138'", '我的学习禁色'),
+            ("'./hansen_palette.js?v=1138'", '全局配色禁色'),
+            ("'./hansen_boss_theme.js?v=1138'", 'Boss三主题禁色')):
         if _hf6_shell944 not in _sw944:
             _b941_release.append('sw_v944.js Shell 未用HF6精确键缓存%s' % _hf6_label944)
     _preload944 = open('hansen_preload.js', encoding='utf-8', errors='replace').read()
@@ -9386,9 +9386,9 @@ try:
     _backup_entries944 = ['index.html', '_frame.html', 'boss_hall.html',
                           'season_showcase.html', 'spelling_bee.html', 'land_map.html'] \
                          + sorted(glob.glob('island_*.html'))
-    _backup_boot_tag944 = '<script src="hansen_backup_bootstrap_v944.js?v=1137"></script>'
-    _sw_gate_open944 = '<script src="hansen_sw_upgrade_gate_v944.js?v=1137">'
-    _backup_runtime_tag944 = '<script src="hansen_backup_v944.js?v=1137"></script>'
+    _backup_boot_tag944 = '<script src="hansen_backup_bootstrap_v944.js?v=1138"></script>'
+    _sw_gate_open944 = '<script src="hansen_sw_upgrade_gate_v944.js?v=1138">'
+    _backup_runtime_tag944 = '<script src="hansen_backup_v944.js?v=1138"></script>'
     for _backup_page944 in _backup_entries944:
         _backup_html944 = open(_backup_page944, encoding='utf-8', errors='replace').read()
         _backup_at944 = _backup_html944.find(_backup_boot_tag944)
@@ -9409,55 +9409,55 @@ try:
         _b941_release.append('v946 定向打字大师接线页数不是 28')
     for _focus_page946 in _focus_pages946:
         _focus_html946 = open(_focus_page946, encoding='utf-8', errors='replace').read()
-        _focus_tag946 = 'src="hansen_focused_typing_v946.js?v=1137"'
+        _focus_tag946 = 'src="hansen_focused_typing_v946.js?v=1138"'
         if _focus_html946.count(_focus_tag946) != 1:
             _b941_release.append('%s 未唯一接入 v946 定向打字大师' % _focus_page946)
             continue
-        _pet_at946 = _focus_html946.find('src="hansen_pet_showcase.js?v=1137"')
+        _pet_at946 = _focus_html946.find('src="hansen_pet_showcase.js?v=1138"')
         _focus_at946 = _focus_html946.find(_focus_tag946)
-        _explore_at946 = _focus_html946.find('src="hansen_explore_progress_v945.js?v=1137"')
+        _explore_at946 = _focus_html946.find('src="hansen_explore_progress_v945.js?v=1138"')
         if not (0 <= _pet_at946 < _focus_at946 < _explore_at946):
             _b941_release.append('%s 的宠物→定向打字→探索脚本顺序错误' % _focus_page946)
-        if _focus_html946.count('src="hansen_review.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_review.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 复习修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_wrong_overview.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_wrong_overview.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 跨岛错题净化修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_backup_v944.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_backup_v944.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF6 Boss逐轮备份语义校验' % _focus_page946)
-        if _focus_html946.count('src="hansen_round_reward.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_round_reward.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF6 Boss逐轮结算' % _focus_page946)
-        if _focus_html946.count('src="hansen_round_bar.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_round_bar.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 Boss逐轮进度卡禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_econ_guide.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_econ_guide.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 当前奖励速查禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_mylearning.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_mylearning.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 我的学习禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_palette.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_palette.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 全局配色禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_boss_theme.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_boss_theme.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 Boss三主题禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_canonical_progress.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_canonical_progress.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 权威进度输入校验修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_season.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_season.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 赛季网络/存档修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_pet_showcase.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_pet_showcase.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 宠物名自愈修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_cards.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_cards.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 Boss 卡牌网络/存档修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_quest_global.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_quest_global.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 每日任务账本修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_island_upgrade.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_island_upgrade.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 每词金币上限修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_diamond_shop.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_diamond_shop.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 亮色主题商店禁色修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_boss_lock.js?v=1137"') != 1:
+        if _focus_html946.count('src="hansen_boss_lock.js?v=1138"') != 1:
             _b941_release.append('%s 未唯一接入 HF5 Boss 彩虹倒计时修复' % _focus_page946)
     _index946 = open('index.html', encoding='utf-8', errors='replace').read()
-    if _index946.count('src="hansen_season.js?v=1137"') != 1:
+    if _index946.count('src="hansen_season.js?v=1138"') != 1:
         _b941_release.append('index.html 未唯一接入 HF2 赛季网络/存档修复')
-    if _index946.count('src="hansen_diamond_shop.js?v=1137"') != 1:
+    if _index946.count('src="hansen_diamond_shop.js?v=1138"') != 1:
         _b941_release.append('index.html 未唯一接入 HF7 亮色主题商店禁色修复')
-    if _index946.count('src="hansen_palette.js?v=1137"') != 1:
+    if _index946.count('src="hansen_palette.js?v=1138"') != 1:
         _b941_release.append('index.html 未唯一接入 HF7 全局配色禁色修复')
     for _safety_test946 in (
             'test_native_wrong_safety_v946.mjs',
@@ -9634,9 +9634,9 @@ try:
             _b946_hf7.append('palette缺HF7主题文字变量: %s' % _token_hf7)
     _pages_hf7 = ['template.html'] + sorted(_g861.glob('island_*.html'))
     _tags_hf7 = (
-        'hansen_addiction.js?v=1137', 'hansen_mylearning.js?v=1137', 'hansen_diamond_shop.js?v=1137',
-        'hansen_palette.js?v=1137', 'hansen_boss_theme.js?v=1137',
-        'hansen_econ_guide.js?v=1137', 'hansen_round_bar.js?v=1137')
+        'hansen_addiction.js?v=1138', 'hansen_mylearning.js?v=1138', 'hansen_diamond_shop.js?v=1138',
+        'hansen_palette.js?v=1138', 'hansen_boss_theme.js?v=1138',
+        'hansen_econ_guide.js?v=1138', 'hansen_round_bar.js?v=1138')
     for _page_hf7 in _pages_hf7:
         _html_hf7 = open(_page_hf7, encoding='utf-8', errors='replace').read()
         for _tag_hf7 in _tags_hf7:
@@ -9644,16 +9644,16 @@ try:
                 _b946_hf7.append('%s 未唯一加载 %s' % (_page_hf7, _tag_hf7))
                 break
     _index_hf7 = open('index.html', encoding='utf-8', errors='replace').read()
-    for _tag_hf7 in ('hansen_diamond_shop.js?v=1137', 'hansen_palette.js?v=1137'):
+    for _tag_hf7 in ('hansen_diamond_shop.js?v=1138', 'hansen_palette.js?v=1138'):
         if _index_hf7.count(_tag_hf7) != 1:
             _b946_hf7.append('index未唯一加载%s' % _tag_hf7)
     _sw_hf7 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
     for _token_hf7 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
                        "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
-                       "'./hansen_addiction.js?v=1137'", "'./hansen_mylearning.js?v=1137'",
-                       "'./hansen_diamond_shop.js?v=1137'", "'./hansen_palette.js?v=1137'",
-                       "'./hansen_boss_theme.js?v=1137'", "'./hansen_econ_guide.js?v=1137'",
-                       "'./hansen_round_bar.js?v=1137'"):
+                       "'./hansen_addiction.js?v=1138'", "'./hansen_mylearning.js?v=1138'",
+                       "'./hansen_diamond_shop.js?v=1138'", "'./hansen_palette.js?v=1138'",
+                       "'./hansen_boss_theme.js?v=1138'", "'./hansen_econ_guide.js?v=1138'",
+                       "'./hansen_round_bar.js?v=1138'"):
         if _token_hf7 not in _sw_hf7:
             _b946_hf7.append('SW缺HF7原子资源键: %s' % _token_hf7)
     if not __import__('os').path.exists('test_camel_color_ban_hf7_v946.mjs'):
@@ -9713,7 +9713,7 @@ try:
         if _direct_attack953.search(_html953):
             _b953_admin.append('%s 又同步加载重型 attack，引入首屏回退' % _page953)
             continue
-        for _token953 in ('hansen_boss_lock.js?v=1137', 'window.__hansenBossFXReady=function()',
+        for _token953 in ('hansen_boss_lock.js?v=1138', 'window.__hansenBossFXReady=function()',
                           's.onerror=function(){ P=null; res(); };'):
             if _token953 not in _html953:
                 _b953_admin.append('%s 缺可重试懒加载合同 %s' % (_page953, _token953))
@@ -9801,8 +9801,8 @@ try:
         _b955_land_gacha.append('完整源码发布合同未强制携带 v955 抽卡专项回归')
     for _token955 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
                       "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
-                      "'./hansen_gacha.js?v=1137'",
-                      "'./hansen_land_cards.js?v=1137'"):
+                      "'./hansen_gacha.js?v=1138'",
+                      "'./hansen_land_cards.js?v=1138'"):
         if _sw955.count(_token955) != 1:
             _b955_land_gacha.append('SW 缺少或重复 v955 星海抽卡原子键: %s' % _token955)
     _pages955 = ['template.html'] + sorted(glob.glob('island_*.html'))
@@ -9810,7 +9810,7 @@ try:
         _b955_land_gacha.append('应为 template + 27 岛，实际 %d 页' % len(_pages955))
     for _page955 in _pages955:
         _html955 = open(_page955, encoding='utf-8', errors='replace').read()
-        for _tag955 in ('hansen_gacha.js?v=1137', 'hansen_land_cards.js?v=1137'):
+        for _tag955 in ('hansen_gacha.js?v=1138', 'hansen_land_cards.js?v=1138'):
             if _html955.count(_tag955) != 1:
                 _b955_land_gacha.append('%s 未唯一加载 %s' % (_page955, _tag955))
                 break

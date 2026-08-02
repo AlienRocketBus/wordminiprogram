@@ -966,6 +966,48 @@ function doCreate() {
     doJoin(roomId, null);
   }
 
+  /* ── 🔴v1138 关页面时尽量把房间收掉 ────────────────────────
+
+     点「关掉房间」按钮会走 `leaveRoom`，房间被删得干干净净。
+     **但直接关标签页、切走、或手机上划掉微信就不会** ——
+     房间留在数据库里，靠心跳过期（30 秒）才不再展示，
+     记录则永远躺着。这正是僵尸房的源头。
+
+     浏览器在页面关闭时只给很短的时间，普通异步请求来不及发出去。
+     `sendBeacon` 是专门为这种场景设计的：**浏览器保证把它发出去**，
+     不管页面是不是已经关了。
+
+     ⚠️ 但 TCB 的删除接口不是一个能用 sendBeacon 直接打的 URL，
+     所以这里退而求其次：**在 pagehide 时同步发一次 leaveRoom**，
+     能发出去就赚到（切走时通常能成功），发不出去也没损失 ——
+     v1135 的"列房时顺手清死房"是这条路的兜底。
+
+     两条路合起来：**大多数情况下当场就清掉，剩下的下次列房时清。** */
+  function bindUnloadCleanup() {
+    if (window.__hsnPkUnloadBound) return;
+    window.__hsnPkUnloadBound = 1;
+    var bye = function () {
+      try {
+        var rid = _state && _state.roomId;
+        if (rid && rid !== 'test' && S() && S().leaveRoom) S().leaveRoom(rid);
+      } catch (e) {}
+    };
+    try {
+      /* pagehide 比 beforeunload 可靠：iOS Safari 上 beforeunload 常常不触发 */
+      window.addEventListener('pagehide', bye);
+      /* 切到后台超过一会儿也算离开 —— 手机上"划掉 App"往往只触发 visibilitychange */
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'hidden') return;
+        setTimeout(function () {
+          /* 30 秒后还没回来才收房 —— 只是切出去看一眼不该把房关了 */
+          if (document.visibilityState === 'hidden') bye();
+        }, 30000);
+      });
+    } catch (e) {}
+  }
+
+  bindUnloadCleanup();
+
   window.HansenPkRoomUI = {
     _createForLadder: _createForLadder,
     _joinForLadder: _joinForLadder,
