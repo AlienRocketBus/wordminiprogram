@@ -332,12 +332,23 @@
       rows.forEach(function (r) { r._pending = (r.state === 'pending'); });
       var cids = rows.map(function (r) { return r.friend; });
       if (!cids.length) return { ok: true, friends: [] };
-      /* 逐个查在线（云开发的 in 查询限制多，好友数上限 50，逐个查可接受） */
-      return Promise.all(cids.map(function (c) {
-        return T().list({ kind: 'presence', cid: c })
-          .then(function (p) { return (p && p[0]) || null; })
-          ['catch'](function () { return null; });
-      })).then(function (ps) {
+      /* 🔴v1121：**一次查回所有在线状态，不要逐个查。**
+
+         实测：50 个好友 → **51 次数据库查询**。
+         云开发按读次数计费，而好友页每 15 秒自动刷新一次 ——
+         一个用户挂着好友页一小时，就是 51 × 240 = 12000 次读。
+         这不是"慢"的问题，是**会真的产生费用**。
+
+         改为一次拉回所有 presence 记录，在内存里按 cid 配对。
+         presence 表本身很小（每人一条），全量拉回完全可接受。 */
+      return T().list({ kind: 'presence' }).then(function (all) {
+        var byCid = {};
+        (all || []).forEach(function (r) { if (r && r.cid) byCid[r.cid] = r; });
+        var ps = cids.map(function (c) { return byCid[c] || null; });
+        return ps;
+      })['catch'](function () {
+        return cids.map(function () { return null; });
+      }).then(function (ps) {
         var now = Date.now();
         var friends = (rows || []).map(function (r, i) {
           var p = ps[i];
@@ -428,7 +439,12 @@
         };
       });
       msgs.sort(function (a, b) { return b.at - a.at; });
-      return { ok: true, msgs: msgs, unread: msgs.filter(function (m) { return !m.read; }).length };
+      /* 🔴v1121：**只给最近 30 条。**
+         实测 500 条会全量返回 —— 界面拉出很长一串，
+         而快捷语就那 10 句，翻到第 300 条毫无意义。
+         未读数仍按全部算（那是"有多少条没看"，不该被截断）。 */
+      var unread = msgs.filter(function (m) { return !m.read; }).length;
+      return { ok: true, msgs: msgs.slice(0, 30), unread: unread, total: msgs.length };
     })['catch'](function (e) { return { ok: false, reason: String((e && e.message) || e), msgs: [] }; });
   }
 
