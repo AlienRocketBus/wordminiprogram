@@ -701,7 +701,29 @@ function doCreate() {
       if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = 'var(--pk-warn)'; }
       var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { waitAll: true };
       /* A 模式：对手抢到就立刻翻篇，不等我 */
-      if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); }
+      if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); return; }
+
+      /* 🔴v1123：**对手已经跑到下一词了，我不能还停在上一词。**
+
+         实测两人对战：A 抢到第 1 词后推进到第 2 词，
+         B 那边只显示"对手抢先拼对了"，**却一直卡在第 1 词** ——
+         因为 C 模式是"等两人都答完"，而 B 没答就只能干等 15 秒超时。
+         结果 B 全程慢一拍，后面每一词都对不上，分数永远是 0。
+
+         判据：房间的 `round` 已经超过我当前这一词 ——
+         说明这一词的胜负已定、对手也走了，我该跟上。
+         仍按 `secondScore` 记分（B/C 模式下"慢了但还是拼对了"有分），
+         没拼对就是 0 分。 */
+      /* ⚠️ 判据要看**这一词有没有人抢到**，不是看 round 跑多远。
+         第一版写成 `r.round > idx + 1` —— 而第 0 词被抢后 round 正好是 1，
+         条件不成立，B 永远跟不上（实测卡在第 1 词、分数一直 0）。
+         正确判据：`winners[idx]` 已经有人 = 这一词已定胜负，我该跟上。 */
+      if (oppGot && !_rt.answered) {
+        /* 给一点时间让人看到"对手抢先了"，再翻篇 */
+        setTimeout(function () {
+          if (_rt && _rt.idx === idx && !_rt.answered) submitRound(idx, false, true);
+        }, 700);
+      }
     })['catch'](function () {});
   }
 

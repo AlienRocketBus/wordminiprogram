@@ -639,8 +639,24 @@
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: false, reason: '房间已不存在' };
       var patch = {};
-      patch[(room.hostId === u.id) ? 'hostReady' : 'guestReady'] = true;
+      var isHost = (room.hostId === u.id);
+      patch[isHost ? 'hostReady' : 'guestReady'] = true;
+      /* 🔴v1123：**进对战屏就要开始发心跳。**
+
+         实测两人对战时发现：A 打了一回合后，界面显示
+         「对手掉线了…44s 后判他负」—— 而 B 明明就在对面正常玩。
+
+         原因：心跳只在 `createRoom` / `joinRoom` 时启动，
+         而客人那侧的 `guestBeat` 初值是 0 ——
+         只要有任何一条路径直接进了对战屏（重连、测试注入、
+         或将来加的"再来一局"），心跳就是空的，
+         对方立刻把他当成掉线。
+
+         **把心跳绑在"进对战屏"这个动作上**，而不是绑在开房/进房上 ——
+         因为真正需要心跳的是对战过程，不是进房那一下。 */
+      patch[isHost ? 'hostBeat' : 'guestBeat'] = Date.now();
       if (!room.roundAt) patch.roundAt = Date.now();
+      startHeartbeat(roomId);
       return T().patch(roomId, patch).then(function () {
         return { ok: true };
       });

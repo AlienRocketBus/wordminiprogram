@@ -187,6 +187,8 @@ REGISTRY = [
      'test_friends_v1106.mjs'),
     ('v1122', '🔴结算还在读 v1099 的旧字段 st.correct（回合制下从没赋值）→ 打完 3 局战绩记 0 局',
      'test_pk_record_v1103.mjs'),
+    ('v1123', '🔴两人真实对战根本跑不通：对手被误判掉线、落后一方永远卡在上一词分数恒为 0',
+     'test_pk_battle_ui_v1101.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
