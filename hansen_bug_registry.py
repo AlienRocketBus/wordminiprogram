@@ -175,6 +175,8 @@ REGISTRY = [
      'test_pk_room_v1065.mjs'),
     ('v1116', '🔴无障碍挑刺五处：图标按钮无文字说明、Esc 关不掉、Tab 跑到浮层后面、背景能滚、焦点不进浮层',
      'test_friends_ui_v1107.mjs'),
+    ('v1117', '🔴性能挑刺：favicon.ico 是 384×384 的 PNG 共 215KB，被每页自动请求两次 = 白费 430KB',
+     'guard_favicon_small'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

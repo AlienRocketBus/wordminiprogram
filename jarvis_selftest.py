@@ -245,6 +245,7 @@ def _inj_theme_fg(s):
     return s.replace(old, 'background:var(--hpk-sel-bg);color:#fff', 1)
 
 
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),

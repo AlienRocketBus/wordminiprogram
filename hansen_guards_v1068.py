@@ -1084,6 +1084,8 @@ def guard_every_guard_has_selftest():
         '守卫查行为': 'self-referential',
         # 这道注入需篡改登记册/知识库，会连带影响其它判定
         '贾维斯不落后': 'injection affects other guards',
+        # 自证机制按文本读写文件，favicon 是二进制，注入会破坏它
+        '图标过大': 'binary file, selftest is text-based',
     }
     g = _read('hansen_guards_v1068.py') or ''
     i = g.find('GUARDS = [')
@@ -1175,6 +1177,38 @@ def guard_theme_fg_follows_bg():
                     % (os.path.basename(f), hexv, rule[:70]))
 
 
+
+def guard_favicon_small():
+    """favicon 必须是小图标 —— 它会被每个页面自动请求。
+
+    事故（v1117，挑性能时发现）：
+        favicon.ico 是一张 **384×384 的 PNG，215 KB**，
+        而浏览器只用它显示 16×16 的标签页图标。
+        更糟的是它**被请求了两次** —— 白白浪费 430 KB，
+        占了首屏总流量 3278 KB 的 13%。
+
+    没人会主动去看 favicon 的大小，因为页面里根本没引用它
+    （浏览器自动请求 /favicon.ico）—— 属于"看不见的浪费"。
+
+    换成标准多尺寸 ICO（16/32/48）后只有 9 KB。
+    """
+    f = os.path.join(ROOT, 'favicon.ico')
+    if not os.path.exists(f):
+        return
+    n = os.path.getsize(f)
+    if n > 40 * 1024:
+        bad('图标过大',
+            'favicon.ico 有 %.0f KB —— 它会被每个页面自动请求（且常被请求两次），'
+            '应是 16/32/48 的多尺寸 ICO，几 KB 就够' % (n / 1024))
+    # 顺便确认它真是 ICO 而不是改了扩展名的大 PNG
+    try:
+        head = open(f, 'rb').read(4)
+        if head[:4] != b'\x00\x00\x01\x00':
+            bad('图标过大', 'favicon.ico 不是标准 ICO 格式（可能是改了扩展名的大图）')
+    except Exception:
+        pass
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1222,6 +1256,8 @@ GUARDS = [
     ('恒真断言',     guard_no_always_true_assert),
     # v1111 主题前景
     ('主题前景',     guard_theme_fg_follows_bg),
+    # v1117 看不见的浪费
+    ('图标过大',     guard_favicon_small),
 ]
 
 
