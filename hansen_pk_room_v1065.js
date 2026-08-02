@@ -43,13 +43,33 @@
 
   /* ── 错误文本统一出口（v1059 起全仓不得再吐 [object Object]）── */
   function E(e) {
-    try { if (window.HBErrText) return window.HBErrText(e); } catch (_) {}
-    if (e == null) return '';
-    if (typeof e === 'string') return e;
-    var v = e.error_description || e.errMsg || e.message || e.error || e.reason;
-    if (v != null && typeof v !== 'object') return String(v);
-    try { var j = JSON.stringify(e); if (j && j !== '{}') return j; } catch (_) {}
-    return '(无法解析的错误对象)';
+    /* 🔴v1115：**断网时不能把 "Failed to fetch" 原样丢给用户**。
+       那是浏览器的英文内部错误，孩子看不懂，家长也只会以为 App 坏了。
+       常见的网络类错误统一转成人话；其余仍走 errText 保留细节
+       （报错链路上不许堆会撒谎的东西 —— 这是本项目的老规矩，
+         "转人话"和"盖住真错误"是两回事：这里只翻译已知的几种）。 */
+    /* ⚠️ 不能只靠 window.HBErrText —— 它可能还没加载（或在测试环境里没有），
+       那时 String(对象) 会退化成 "[object Object]"，
+       又回到 v1059 那个"错误被盖住盖了 40 版"的老坑。
+       所以这里自带一份解析逻辑做兜底。 */
+    var t = '';
+    try {
+      var H = window.HBErrText;
+      if (typeof H === 'function') t = String(H(e) || '');
+    } catch (x) {}
+    if (!t) {
+      if (e == null) t = '';
+      else if (typeof e === 'string') t = e;
+      else {
+        var v = e.error_description || e.errMsg || e.message || e.error || e.reason;
+        if (v != null && typeof v !== 'object') t = String(v);
+        else { try { var j = JSON.stringify(e); if (j && j !== '{}') t = j; } catch (_) {} }
+      }
+    }
+    if (/failed to fetch|networkerror|network request failed|load failed/i.test(t))
+      return '连不上网络，检查一下 Wi-Fi 或数据再试';
+    if (/timeout|timed out/i.test(t)) return '网络太慢，这次没连上，稍后再试';
+    return t || '操作失败';
   }
 
   /* ── 确定性随机：同一个种子在任何设备上都给出同一串数 ──
@@ -159,9 +179,65 @@
     };
   }
 
+  /* ── 🔴v1115 统一超时 ──────────────────────────────────────
+
+     实测：把传输层换成"永远不返回"的假实现后，
+     `listRooms` / `createRoom` / `claimRound` **8 秒仍无响应** ——
+     界面会一直转圈，用户只能杀掉页面重来。
+
+     这在手机上很常见：**弱信号下 TCP 连着但不返回**，
+     既不成功也不失败，比直接断网更折磨人。
+
+     做法：在传输层统一包一层超时 —— 一处修，所有调用都受益。
+     超时后抛的是**可读文案**（"网络太慢…"），而不是让上层拿到
+     一个 undefined 自己去猜。
+
+     对战相关的操作给 8 秒（抢答讲时效，等久了这局也没意义了），
+     其余给 12 秒。 */
+  var NET_TIMEOUT_MS = 12000;
+  var NET_TIMEOUT_FAST_MS = 8000;
+
+  function withTimeout(promise, ms, what) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (done) return;
+        done = true;
+        /* 🔴v1115：**文案里不许露内部方法名**。
+           第一版写成"网络太慢，云端listOpen没能完成" —— 用户看不懂 listOpen 是什么，
+           只会觉得这个 App 在说胡话。报错是给人看的，不是给开发者看的。 */
+        var e = new Error('网络太慢，这次没连上，检查一下网络再试');
+        e.friendly = true; e.timeout = true;
+        reject(e);
+      }, ms || NET_TIMEOUT_MS);
+      Promise.resolve(promise).then(function (v) {
+        if (done) return; done = true; clearTimeout(t); resolve(v);
+      }, function (err) {
+        if (done) return; done = true; clearTimeout(t); reject(err);
+      });
+    });
+  }
+
+  /* 给传输层的每个方法套上超时 —— 包括测试注入的假实现，
+     这样"卡住"这种情况在测试里也能复现。 */
+  function wrapTimeout(tx) {
+    if (!tx || tx.__wrapped) return tx;
+    var FAST = { claim: 1, read: 1, patch: 1 };
+    var out = { __wrapped: true };
+    Object.keys(tx).forEach(function (k) {
+      var fn = tx[k];
+      if (typeof fn !== 'function') { out[k] = fn; return; }
+      out[k] = function () {
+        return withTimeout(fn.apply(tx, arguments),
+          FAST[k] ? NET_TIMEOUT_FAST_MS : NET_TIMEOUT_MS);
+      };
+    });
+    return out;
+  }
+
   function T() {
     if (_transport) return _transport;
-    _transport = realTransport();
+    _transport = wrapTimeout(realTransport());
     return _transport;
   }
 
@@ -633,7 +709,7 @@
     _collection: COLLECTION,
     _staleMs: STALE_MS,
     /* 测试注入口：换成假传输层即可在本地跑完整链路（含抢房竞态） */
-    _setTransportForTest: function (t) { _transport = t; },
+    _setTransportForTest: function (t) { _transport = wrapTimeout(t); },
     _currentRoomId: function () { return _myRoomId; }
   };
 })();

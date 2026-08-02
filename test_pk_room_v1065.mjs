@@ -63,7 +63,7 @@ function mkCtx(who) {
     },
     HansenAuth: { readLocal: () => ({ phone: who }), ensureSession: () => Promise.resolve({ ok: true }), _app: () => ({}) },
     HansenSbProfile: { status: () => ({ name: who + '的名字' }) },
-    setInterval: () => 0, clearInterval() {}, setTimeout: (f, ms) => setTimeout(f, Math.min(ms || 0, 5)),
+    setInterval: () => 0, clearInterval() {}, setTimeout: (f, ms) => setTimeout(f, Math.min(ms || 0, 5)), clearTimeout,
     console, Date, Math, JSON, Object, Promise, Error, String, Number, Array
   };
   win.window = win;

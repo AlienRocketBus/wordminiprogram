@@ -64,9 +64,45 @@
   }
 
   /* 传输层单独一层，便于测试注入（与 pk_room 同样的做法） */
+  /* 🔴v1115 统一超时（同 hansen_pk_room 的做法）。
+     弱信号下请求会卡住不返回 —— 既不成功也不失败，
+     界面一直转圈，比断网更折磨人。 */
+  var NET_TIMEOUT_MS = 12000;
+
+  function withTimeout(promise, ms, what) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (done) return; done = true;
+        /* 🔴v1115：**文案里不许露内部方法名**。
+           第一版写成"网络太慢，云端listOpen没能完成" —— 用户看不懂 listOpen 是什么，
+           只会觉得这个 App 在说胡话。报错是给人看的，不是给开发者看的。 */
+        var e = new Error('网络太慢，这次没连上，检查一下网络再试');
+        e.friendly = true; e.timeout = true;
+        reject(e);
+      }, ms || NET_TIMEOUT_MS);
+      Promise.resolve(promise).then(function (v) {
+        if (done) return; done = true; clearTimeout(t); resolve(v);
+      }, function (err) { if (done) return; done = true; clearTimeout(t); reject(err); });
+    });
+  }
+
+  function wrapTimeout(tx) {
+    if (!tx || tx.__wrapped) return tx;
+    var out = { __wrapped: true };
+    Object.keys(tx).forEach(function (k) {
+      var fn = tx[k];
+      if (typeof fn !== 'function') { out[k] = fn; return; }
+      out[k] = function () { return withTimeout(fn.apply(tx, arguments), NET_TIMEOUT_MS); };
+    });
+    return out;
+  }
+
   function T() {
     if (_tx) return _tx;
-    return {
+    /* 真实传输层也要包超时 */
+    _tx = null;
+    return wrapTimeout({
       read: function (id) {
         return db().then(function (d) {
           return d.collection(COLLECTION).doc(id).get().then(function (r) {
@@ -104,7 +140,7 @@
             .then(function (r) { return (r && r.data) || []; });
         });
       }
-    };
+    });
   }
 
   /* 数据库给每条记录注入的 _openid 是唯一可信身份。
@@ -415,7 +451,7 @@
     addFriend: addFriend, removeFriend: removeFriend, listFriends: listFriends,
     sendQuick: sendQuick, inbox: inbox,
     _beat: beat, _startBeat: startBeat, _stopBeat: stopBeat,
-    _setTransportForTest: function (t) { _tx = t; },
+    _setTransportForTest: function (t) { _tx = wrapTimeout(t); },
     _setMeForTest: function (u) { me = function () { return u; }; }
   };
 })();
