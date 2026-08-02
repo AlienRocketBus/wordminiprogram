@@ -195,6 +195,8 @@ REGISTRY = [
      'test_pk_modes_v1100.mjs'),
     ('v1126', '🔴切后台暂停倒计时对对手不公平（A 回来还有 9 秒，B 早超时）；且两人开局计时差 6 秒',
      'test_pk_modes_v1100.mjs'),
+    ('v1127', '🔴v1126 的共享计时用了陈旧的 roundAt——房间等 2 分钟后一进对战倒计时直接 0 秒',
+     'test_pk_battle_ui_v1101.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

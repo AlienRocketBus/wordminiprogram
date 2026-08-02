@@ -464,10 +464,16 @@ function doCreate() {
        🔴v1126：**先把房间的 roundAt 拿到手再开第一回合。**
        否则首回合各按各的本地时间起算 —— 实测两人开局差 6 秒，
        后进来的那个凭空多出半个回合的时间。 */
-    var go = function () { askRound(0); };
+    /* 🔴v1127：**取共享时间不能拖慢开局。**
+       实测网络慢 3 秒时，开局要等 7.5 秒 —— 用户会以为卡死了。
+       改为：**最多等 1.2 秒**，超过就先开局（首回合用本地计时，
+       差个一两秒可以接受），拿到 roundAt 后下一回合自然就同步了。 */
+    var started = false;
+    var go = function () { if (started) return; started = true; askRound(0); };
     try {
       S().markReady(st.roomId);
       if (st.roomId && st.roomId !== 'test' && S().roundState) {
+        setTimeout(go, 1200);            /* 兜底：等太久就先开 */
         S().roundState(st.roomId).then(function (r) {
           if (r && r.ok && r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
           go();
@@ -537,7 +543,19 @@ function doCreate() {
     /* 截止时间以房间共享的 roundAt 为准 —— 两边算出来一样，才谈得上公平。
        拿不到 roundAt（首回合、或读取失败）时退回本地计时。 */
     var span = (M.perWordSecs || 15) * 1000;
-    var base = (st.roundAt && idx === st.roundIdxOfRoundAt) ? st.roundAt : Date.now();
+    /* 🔴v1127：**过期的 roundAt 不能用。**
+
+       实测：房间开着等对手来，等了 2 分钟 —— 房间的 `roundAt` 还是
+       "刚开房那一刻"，于是一进对战屏倒计时直接是 **0 秒**，
+       用户**根本没机会答第一个词**。
+
+       v1126 为了公平改用共享 roundAt，但漏了这一条：
+       它只有在"这一回合刚刚开始"时才代表本回合的起点。
+       超出一个回合时长就说明它是陈旧的（对手还没来、或刚推进还没同步到），
+       这时退回本地计时 —— **宁可两边差一两秒，也不能让人一进来就 0 秒**。 */
+    var shared = (st.roundAt && idx === st.roundIdxOfRoundAt) ? st.roundAt : 0;
+    var fresh = shared && (Date.now() - shared) < span;
+    var base = fresh ? shared : Date.now();
     _rt = { idx: idx, answered: false, t0: Date.now(), deadline: base + span };
 
     paint('<div class="pr_top">'
