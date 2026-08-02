@@ -177,6 +177,8 @@ REGISTRY = [
      'test_friends_ui_v1107.mjs'),
     ('v1117', '🔴性能挑刺：favicon.ico 是 384×384 的 PNG 共 215KB，被每页自动请求两次 = 白费 430KB',
      'guard_favicon_small'),
+    ('v1118', '🔴对战用系统输入法：中文输入法要先切英文、键盘占半屏挡住对手状态、联想会替玩家拼好单词',
+     'test_pk_keyboard_v1118.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

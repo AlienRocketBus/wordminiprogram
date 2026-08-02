@@ -42,13 +42,28 @@
       'html:root{--pk-bg:#0f172a;--pk-card:#111827;--pk-line:#1f2937;' +
         '--pk-txt:#e8eefc;--pk-dim:#a9b4c7;--pk-faint:#7c879b;' +
         '--pk-in-bg:#0b1020;--pk-in-line:#334155;--pk-btn2:#1f2937;' +
-        '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd}' +
+        '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd;' +
+        '--pk-kb-bg:#1e293b;--pk-key-bg:#334155;--pk-key-fg:#f1f5f9;' +
+        '--pk-key-act:#475569;--pk-key-alt:#1e293b}' +
       'html.hsn-pal-light:root, html.hsn-pal-light{--pk-bg:#f4f6fb;--pk-card:#ffffff;--pk-line:#e3e7ee;' +
         '--pk-txt:#0f172a;--pk-dim:#4b5563;--pk-faint:#6b7280;' +
         '--pk-in-bg:#f9fafb;--pk-in-line:#cbd5e1;--pk-btn2:#eef1f6;' +
-        '--pk-ok:#047857;--pk-bad:#b91c1c;--pk-warn:#b45309;--pk-hint:#1d4ed8}' +
+        '--pk-ok:#047857;--pk-bad:#b91c1c;--pk-warn:#b45309;--pk-hint:#1d4ed8;' +
+        '--pk-kb-bg:#d1d5db;--pk-key-bg:#ffffff;--pk-key-fg:#111827;' +
+        '--pk-key-act:#e5e7eb;--pk-key-alt:#aeb3bd}' +
       '#' + ID + '{position:fixed;inset:0;z-index:2147483600;background:var(--pk-bg);color:var(--pk-txt);'
       + 'overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;font-family:system-ui,-apple-system,sans-serif}'
+      /* 🔴v1118 内置键盘样式 —— 与拼写蜂同一手感，颜色跟主题走 */
+      + 'html .pr_kb{margin-top:14px;padding:8px 4px 10px;background:var(--pk-kb-bg);'
+      +   'border-radius:12px;user-select:none;-webkit-user-select:none}'
+      + 'html .pr_kbrow{display:flex;gap:5px;justify-content:center;margin-bottom:6px}'
+      + 'html .pr_kbrow.pr_indent{padding:0 16px}'
+      + 'html .pr_key{flex:1 1 0;min-width:0;max-width:38px;height:46px;border:0;border-radius:6px;'
+      +   'background:var(--pk-key-bg);color:var(--pk-key-fg)!important;font-size:19px;'
+      +   'font-weight:600;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.25)}'
+      + 'html .pr_key:active{transform:scale(.94);background:var(--pk-key-act)}'
+      + 'html .pr_key.pr_del{flex:0 0 auto;max-width:none;width:56px;'
+      +   'background:var(--pk-key-alt);font-size:20px}'
       + '#' + ID + '.on{display:block}'
       + '#' + ID + ' .pr_wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}'
       + '#' + ID + ' .pr_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}'
@@ -96,6 +111,7 @@
   }
 
   function close() {
+    stopKb();
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
     try { if (S()) S().stopHeartbeat(); } catch (e) {}
     if (_state && _state.roomId) { try { S().leaveRoom(_state.roomId); } catch (e) {} }
@@ -409,8 +425,13 @@ function doCreate() {
   }
 
   var _pickedMode = 'C';   /* v1100: 房主选的玩法，默认同步赛 */
-  var _rt = null;          /* 本回合的运行时状态 */
+  var _rt = null;
+  var _kbKeyHandler = null;          /* 本回合的运行时状态 */
   var _pollTimer = null;
+
+  function stopKb() {
+    if (_kbKeyHandler) { try { document.removeEventListener('keydown', _kbKeyHandler); } catch (e) {} _kbKeyHandler = null; }
+  }
 
   function stopPoll() {
     if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
@@ -426,6 +447,51 @@ function doCreate() {
     /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完 */
     try { S().markReady(st.roomId); } catch (e) {}
     askRound(0);
+  }
+
+  /* 🔴v1118 内置 QWERTY 键盘 —— 与拼写蜂同一套布局与手感 */
+  function pkKeyboard() {
+    var rows = [['q','w','e','r','t','y','u','i','o','p'],
+                ['a','s','d','f','g','h','j','k','l'],
+                ['z','x','c','v','b','n','m']];
+    var h = '<div class="pr_kb" id="prKb">';
+    h += '<div class="pr_kbrow">' + rows[0].map(kbBtn).join('') + '</div>';
+    h += '<div class="pr_kbrow pr_indent">' + rows[1].map(kbBtn).join('') + '</div>';
+    h += '<div class="pr_kbrow">' + rows[2].map(kbBtn).join('')
+       + '<button class="pr_key pr_del" data-k="\u232b" aria-label="删除一个字母">\u232b</button>'
+       + '</div>';
+    return h + '</div>';
+  }
+  function kbBtn(l) {
+    return '<button class="pr_key" data-k="' + l + '" aria-label="字母 ' + l + '">' + l + '</button>';
+  }
+
+  function bindKeyboard(en, idx) {
+    var kb = q('prKb'), input = q('prIn');
+    if (!kb || !input) return;
+    kb.querySelectorAll('.pr_key').forEach(function (b) {
+      b.onclick = function (ev) {
+        ev.preventDefault();
+        if (!_rt || _rt.idx !== idx || _rt.answered) return;
+        var k = b.getAttribute('data-k');
+        if (k === '\u232b') input.value = String(input.value || '').slice(0, -1);
+        else if (String(input.value || '').length < 24) input.value += k;
+        /* 拼对即提交 —— 和输入框的 oninput 走同一条路 */
+        if (String(input.value || '').trim().toLowerCase() === en.toLowerCase())
+          submitRound(idx, true);
+      };
+    });
+    /* 电脑上仍可用实体键盘 —— 手机没有实体键盘，这条不影响它 */
+    _kbKeyHandler = function (ev) {
+      if (!_rt || _rt.idx !== idx || _rt.answered) return;
+      if (ev.key === 'Backspace') { ev.preventDefault(); input.value = String(input.value||'').slice(0,-1); return; }
+      if (!/^[a-zA-Z]$/.test(ev.key)) return;
+      ev.preventDefault();
+      if (String(input.value || '').length < 24) input.value += ev.key.toLowerCase();
+      if (String(input.value || '').trim().toLowerCase() === en.toLowerCase())
+        submitRound(idx, true);
+    };
+    try { document.addEventListener('keydown', _kbKeyHandler); } catch (e) {}
   }
 
   function askRound(idx) {
@@ -462,12 +528,29 @@ function doCreate() {
           : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(w.cn || '') + '</div>'
             + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:var(--pk-hint)">'
             + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
+      /* 🔴v1118：**不弹系统输入法。**
+
+         这是拼写游戏 —— 用系统键盘有三个问题：
+           · 中文输入法要先切英文，慢一拍，抢答就输了
+           · 键盘占掉半屏，对手状态和倒计时都看不见
+           · 各家输入法的联想/自动纠错会替玩家"拼好"单词，那还练什么
+
+         拼写蜂本来就用自己的 QWERTY 键盘（`.keyboard`/`.key` 那套），
+         PK 照做 —— 玩法一致，手感也一致。
+
+         `readonly` + `inputmode=none` 是让系统键盘不弹的可靠组合：
+         单靠 readonly 在部分安卓输入法上仍会弹。 */
       + '<input class="pr_in" id="prIn" aria-label="在这里拼出这个单词" '
+      +   'readonly inputmode="none" '
       +   'autocomplete="off" autocapitalize="off" '
       +   'autocorrect="off" spellcheck="false" placeholder="拼出这个词" '
       +   'style="font-size:20px;letter-spacing:2px;text-align:center">'
       + '<div id="prHint" style="min-height:24px;margin-top:10px;font-size:14px;color:var(--pk-dim)">'
-      +   '对手：<span id="prOppSt">正在拼…</span></div>');
+      +   '对手：<span id="prOppSt">正在拼…</span></div>'
+      + pkKeyboard());
+
+    if (_kbKeyHandler) { try { document.removeEventListener('keydown', _kbKeyHandler); } catch (e) {} _kbKeyHandler = null; }
+    bindKeyboard(en, idx);
 
     /* 听发音模式：一进来就读一遍，点喇叭可重听 */
     if (askIsTts) {
