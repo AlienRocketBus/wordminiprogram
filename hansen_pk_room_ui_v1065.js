@@ -56,9 +56,24 @@
       /* 🔴v1118 内置键盘样式 —— 与拼写蜂同一手感，颜色跟主题走 */
       + 'html .pr_kb{margin-top:14px;padding:8px 4px 10px;background:var(--pk-kb-bg);'
       +   'border-radius:12px;user-select:none;-webkit-user-select:none}'
-      + 'html .pr_kbrow{display:flex;gap:5px;justify-content:center;margin-bottom:6px}'
-      + 'html .pr_kbrow.pr_indent{padding:0 16px}'
-      + 'html .pr_key{flex:1 1 0;min-width:0;max-width:38px;height:46px;border:0;border-radius:6px;'
+      /* 🔴v1119：**小屏上键不能太窄**。
+         实测 320px 老手机上最窄的键只有 24px —— 手指点不准，
+         而苹果/谷歌的可点击标准都是 44px（我 v1112 刚为关闭按钮改过这个）。
+         原因：`gap:5px` + `.pr_indent` 左右各留 16px，
+         10 个键要挤进 320-32-45=243px。
+
+         改法：小屏下收紧间距与缩进、去掉 max-width 让键自然占满，
+         并给 min-width 兜底。**宁可键盘略宽，也不能点不准** ——
+         抢答时点错一个字母就输了。 */
+      + 'html .pr_kbrow{display:flex;gap:4px;justify-content:center;margin-bottom:6px}'
+      + 'html .pr_kbrow.pr_indent{padding:0 14px}'
+      + '@media (max-width:360px){'
+      +   'html .pr_kbrow{gap:3px}'
+      +   'html .pr_kbrow.pr_indent{padding:0 8px}'
+      +   'html .pr_key{max-width:none!important;font-size:17px}'
+      +   'html .pr_kb{padding:8px 2px 10px}'
+      + '}'
+      + 'html .pr_key{flex:1 1 0;min-width:27px;max-width:38px;height:46px;border:0;border-radius:6px;'
       +   'background:var(--pk-key-bg);color:var(--pk-key-fg)!important;font-size:19px;'
       +   'font-weight:600;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.25)}'
       + 'html .pr_key:active{transform:scale(.94);background:var(--pk-key-act)}'

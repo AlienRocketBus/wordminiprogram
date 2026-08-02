@@ -7,20 +7,20 @@
 const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
-// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-177。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-177';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-175';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-175';
+// 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-178。
+const SHELL_CACHE = CACHE_PREFIX + 'shell-178';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-176';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-176';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1118', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1118', './hansen_onboarding.js?v=1118', './hansen_theme_shop.js',
-  './hansen_season.js?v=1118', './hansen_cinema_themes.js?v=1118', './hansen_diamond_shop.js?v=1118', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1118', './hansen_crystal.js', './hansen_cards.js?v=1118', './hansen_gacha.js?v=1118', './hansen_land_cards.js?v=1118', './hansen_round_reward.js?v=1118', './hansen_round_bar.js?v=1118', './hansen_pet_showcase.js?v=1118', './hansen_quest_global.js?v=1118', './hansen_island_upgrade.js?v=1118', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1118', './hansen_spell_practice.js?v=1118', './hansen_review.js?v=1118', './hansen_wrong_overview.js?v=1118', './hansen_backup_v944.js?v=1118', './hansen_accessibility.js?v=1118',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1118', './hansen_mylearning.js?v=1118', './hansen_palette.js?v=1118', './hansen_boss_theme.js?v=1118', './hansen_econ_guide.js?v=1118', './hansen_perf_v944.js?v=1118'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1119', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1119', './hansen_onboarding.js?v=1119', './hansen_theme_shop.js',
+  './hansen_season.js?v=1119', './hansen_cinema_themes.js?v=1119', './hansen_diamond_shop.js?v=1119', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1119', './hansen_crystal.js', './hansen_cards.js?v=1119', './hansen_gacha.js?v=1119', './hansen_land_cards.js?v=1119', './hansen_round_reward.js?v=1119', './hansen_round_bar.js?v=1119', './hansen_pet_showcase.js?v=1119', './hansen_quest_global.js?v=1119', './hansen_island_upgrade.js?v=1119', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1119', './hansen_spell_practice.js?v=1119', './hansen_review.js?v=1119', './hansen_wrong_overview.js?v=1119', './hansen_backup_v944.js?v=1119', './hansen_accessibility.js?v=1119',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1119', './hansen_mylearning.js?v=1119', './hansen_palette.js?v=1119', './hansen_boss_theme.js?v=1119', './hansen_econ_guide.js?v=1119', './hansen_perf_v944.js?v=1119'
 ];
 
 async function trim(cacheName, maxEntries) {
@@ -255,7 +255,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1118 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1119 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     event.respondWith((async () => {
