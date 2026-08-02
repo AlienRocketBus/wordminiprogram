@@ -1209,6 +1209,49 @@ def guard_favicon_small():
         pass
 
 
+
+def guard_no_parallel_pk_panel():
+    """同一块界面不许有两套并存的实现。
+
+    v1129 我改「竞赛 ID 显示 No.---」时改错了文件 —— 因为**同一个身份条
+    有两套代码在渲染**：
+
+        29 个岛屿页  → hansen_sb_pk_v1022.js 里的 HansenSbPK 面板（.k_cid）
+        spelling_pk.html → 自己内联的一套（.pk_cid）
+
+    用户从岛屿进和从 PK 页进，看到的是**两份不同代码渲染的同一个界面**。
+    改一处、另一处不动 —— 而两条路都通向同一个功能，用户根本不知道
+    自己看到的是哪一份。
+
+    这是本项目最贵的那类问题的变种：**同一件事两处真源**
+    （云端登录那次栽过八次）。
+
+    判据：两处的关键文案必须一致。**不强行合并**（合并风险大于收益，
+    两套都在跑且都稳定），但**不许它们说不一样的话**。
+    """
+    pairs = [
+        ('登录后自动分配', '未登录时的竞赛 ID 文案'),
+        ('未定级', '未定级的段位文案'),
+    ]
+    # ⚠️ 必须剥掉注释再比：注释里往往也写着同一句文案
+    #    （本守卫第一版就栽在这 —— 注入把代码里那份改掉了，
+    #     注释里还留着一份，条件照样成立，守卫不咬人）。
+    a = _code_only(_read('hansen_sb_pk_v1022.js') or '')
+    b = _read('spelling_pk.html') or ''
+    b = re.sub(r'<!--[\s\S]*?-->', '', b)
+    b = _code_only(b)
+    if not a or not b:
+        return
+    for token, what in pairs:
+        ina, inb = (token in a), (token in b)
+        if not (ina and inb):
+            # 两边都必须有 —— 少一边就说明改漏了 
+            bad('两套身份条',
+                '%s 缺失（模块=%s / PK 页=%s）—— '
+                '同一个身份条有两套实现，改一处会漏另一处'
+                % (what, ina, inb))
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1258,6 +1301,8 @@ GUARDS = [
     ('主题前景',     guard_theme_fg_follows_bg),
     # v1117 看不见的浪费
     ('图标过大',     guard_favicon_small),
+    # v1131 两套实现
+    ('两套身份条', guard_no_parallel_pk_panel),
 ]
 
 

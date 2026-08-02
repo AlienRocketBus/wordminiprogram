@@ -205,6 +205,8 @@ REGISTRY = [
      'test_cid_order_v1130.mjs'),
     ('v1131', '⚠️test_phone_signup 随机失败(测试自身竞态)——改四轮未根治，已如实登记不再耗',
      'test_cid_order_v1130.mjs'),
+    ('v1131', '🔴同一个身份条有两套并存实现（29 个岛屿页用模块、PK 页用内联），改一处会漏另一处',
+     'guard_no_parallel_pk_panel'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

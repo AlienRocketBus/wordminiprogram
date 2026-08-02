@@ -246,6 +246,19 @@ def _inj_theme_fg(s):
 
 
 
+
+def _inj_panel_drift(s):
+    """把其中一套的文案改掉 —— 模拟"改一处漏另一处"。
+
+    ⚠️ 必须打在**代码里那份**，不能打在注释上：
+       这句文案在模块里出现两次（注释一次、代码一次），
+       简单 replace 会改到注释那份，守卫照样绿灯 ——
+       "守卫查形不查实"的老毛病，这次是样本犯的。"""
+    old = 'opacity:.85">登录后自动分配</span>'
+    if old not in s: return None
+    return s.replace(old, 'opacity:.85">登录后分配</span>', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -284,6 +297,7 @@ CASES = [
     ('守卫都有自证',    'jarvis_selftest.py',         _inj_selftest_gap),
     ('恒真断言',      'test_backup_v942.mjs',       _inj_always_true),
     ('主题前景',      'hansen_friends_ui_v1107.js', _inj_theme_fg),
+    ('两套身份条',  'hansen_sb_pk_v1022.js',      _inj_panel_drift),
 ]
 
 
