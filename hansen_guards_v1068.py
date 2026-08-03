@@ -1539,6 +1539,55 @@ def guard_window_assert_strips_comments():
             '给产品代码加几行注释就会把要找的东西挤出窗口，断言假红'
             % (len(bad_files), ', '.join(bad_files[:3])))
 
+
+def guard_no_comment_only_assert():
+    """断言不许只匹配注释里的话 —— 那是在验"文档写了没"，不是"代码做了没"。
+
+    事故（v1149 发现一处、v1150 又扫出三处）：
+
+        ok(/退不出去比丢一点进度更糟/.test(auth), '...');
+
+    这句话只存在于注释里。这种断言：
+      · 把**注释改个说法**它就红 —— 假警报
+      · 把**代码改坏**它却不红 —— 真问题漏掉
+    **完全是反的。**
+
+    而且它会让人不敢改注释，久了注释就僵死在那儿。
+
+    判据：测试里 `ok(/中文/.test(x))` 形式的断言，
+    如果那段中文在**所有产品文件里都只出现在注释中**，就报红。
+    """
+    import glob as _g
+    srcs = {}
+    for f in (_g.glob(os.path.join(ROOT, 'hansen_*.js'))
+              + _g.glob(os.path.join(ROOT, 'sw_*.js'))
+              + _g.glob(os.path.join(ROOT, '*.html'))):
+        name = os.path.basename(f)
+        txt = _read(name)
+        if txt:
+            srcs[name] = txt
+    fake = []
+    for tf in sorted(_g.glob(os.path.join(ROOT, 'test_*.mjs'))):
+        tname = os.path.basename(tf)
+        t = _read(tname) or ''
+        for m in re.finditer(r'ok\(/([^/\n]{4,40}?)/\.test\(', t):
+            pat = m.group(1)
+            if not re.search(r'[\u4e00-\u9fa5]', pat):
+                continue
+            only_comment = None
+            for name, txt in srcs.items():
+                if pat in txt:
+                    only_comment = (pat not in _code_only(txt))
+                    if not only_comment:
+                        break
+            if only_comment:
+                fake.append((tname, pat))
+    if fake:
+        bad('假断言',
+            '%d 处断言只匹配注释里的话（如 %s 查 "%s"）—— '
+            '注释改个说法就假红、代码改坏却不红，完全是反的'
+            % (len(fake), fake[0][0], fake[0][1][:20]))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1603,6 +1652,8 @@ GUARDS = [
     ('打开变下载',   guard_html_never_downloads),
     # v1149
     ('窗口断言',     guard_window_assert_strips_comments),
+    # v1150
+    ('假断言',       guard_no_comment_only_assert),
 ]
 
 

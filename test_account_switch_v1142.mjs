@@ -207,10 +207,17 @@ function boot(init) {
 /* ③ 这条原则本身 */
 {
   const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
-  ok(/漏一处只是少标一次/.test(auth) || /不能拿来换正确性/.test(auth),
-     '★ 代码里写清了取舍：' +
-     '"分支多容易漏"不能拿来换正确性 —— ' +
-     '漏标只是少标一次（下次登录会补），早标一次会把别人的进度算成你的');
+  /* 🔴v1150：**原来查的是注释里的一句话**，不是代码行为。
+     这种断言只能证明"我写了这句注释"，
+     把注释改个说法它就红，把代码改坏它却不红 —— 完全是反的。 */
+  {
+    const c = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+    const si = c.indexOf('function syncOnLogin');
+    const head = c.slice(si, si + 700);
+    ok(!/markLocalOwner/.test(head),
+       '★ 对账**入口**没有打标记 —— ' +
+       '标记只在成功分支打（早标一次会把别人的进度算成你的）');
+  }
 }
 
 
@@ -297,8 +304,17 @@ function boot(init) {
   ok(/Promise\.race\(\[/.test(code) && /setTimeout\(r, 6000\)/.test(code),
      '★ **退出时的上传有 6 秒超时** —— ' +
      '云端卡住不返回时，原来 signOut 永远不执行，用户退不出去');
-  ok(/退不出去比丢一点进度更糟/.test(auth),
-     '★ 代码里写清了取舍：退不出去比丢一点进度更糟');
+  /* 🔴v1150：**原来查的是注释里的一句话**，不是代码行为。
+     这种断言只能证明"我写了这句注释"，
+     把注释改个说法它就红，把代码改坏它却不红 —— 完全是反的。 */
+  {
+    const c = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+    const si = c.indexOf('function signOut');
+    const seg2 = c.slice(si, si + 900);
+    ok(/Promise\.race\(/.test(seg2) && /setTimeout\([^)]*6000\)/.test(seg2),
+       '★ 上传用 Promise.race 加了 6 秒上限 —— ' +
+       '超时就放弃上传继续退出（退不出去比丢一点进度更糟）');
+  }
 }
 
 /* 三种情况的行为 */
@@ -347,10 +363,21 @@ function boot(init) {
      '★ 两种情况文案分开 —— 换账号和退出登录，用户要知道是哪种');
   ok(/继续玩会把进度记到错的账号上/.test(auth),
      '★ 说清楚为什么要刷新，而不是干巴巴一句"请刷新"');
-  ok(/不自作主张改数据，只提示用户刷新/.test(auth),
-     '★ **不自动帮用户处理** —— ' +
-     '这个标签页此刻的内存状态（正在进行的一局、未保存的输入）' +
-     '没法安全迁移到新账号名下，让用户自己决定什么时候刷新');
+  /* 🔴v1150：**原来查的是注释里的一句话**，不是代码行为。
+     这种断言只能证明"我写了这句注释"，
+     把注释改个说法它就红，把代码改坏它却不红 —— 完全是反的。 */
+  {
+    const c = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+    const ni = c.indexOf('function notifyTabStale');
+    const seg3 = c.slice(ni, ni + 2200);
+    /* 刷新必须是**用户点按钮**触发的，不能自动跑 */
+    ok(/onclick = function \(\) \{ try \{ location\.reload\(\); \}/.test(seg3),
+       '★ 刷新绑在按钮的 onclick 上 —— 用户自己点');
+    ok(!/setTimeout\([^)]*location\.reload/.test(seg3),
+       '★ **不自动刷新** —— 这个标签页此刻的内存状态' +
+       '（正在进行的一局、未提交的输入）没法安全迁移，' +
+       '让用户自己决定什么时候刷新');
+  }
 }
 
 

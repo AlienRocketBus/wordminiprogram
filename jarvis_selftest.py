@@ -333,6 +333,18 @@ def _inj_window_assert(s):
     return s.replace(marker, "slice(0)")
 
 
+
+def _inj_fake_assert(s):
+    """塞一条只匹配注释的断言 —— 它验的是"文档写了没"，不是"代码做了没"。"""
+    marker = "console.log(`\\n\u7ed3\u679c:"
+    if marker not in s:
+        return None
+    inject = ("ok(/\u9000\u4e0d\u51fa\u53bb\u6bd4\u4e22\u4e00\u70b9\u8fdb\u5ea6\u66f4\u7cdf/"
+              ".test(fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8')), "
+              "'\u6ce8\u91ca\u65ad\u8a00');\n")
+    return s.replace(marker, inject + marker, 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -382,6 +394,7 @@ CASES = [
     ('变更通知',      'hansen_change_notify_v1134.js', _inj_notify_proto),
     ('打开变下载',   'cloudbaserc.json',           _inj_index_path),
     ('窗口断言',     'test_cid_order_v1130.mjs',     _inj_window_assert),
+    ('假断言',       'test_cid_order_v1130.mjs',     _inj_fake_assert),
 ]
 
 

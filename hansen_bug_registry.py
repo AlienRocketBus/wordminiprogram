@@ -247,6 +247,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1149', '🔴窗口式断言不剥注释——给产品代码加几行注释就假红（v1146/v1148 各撞一次）',
      'test_cid_order_v1130.mjs'),
+    ('v1150', '🔴三处断言只匹配注释里的话——注释改个说法就假红、代码改坏却不红，完全是反的',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
