@@ -123,8 +123,13 @@ function boot(init) {
   ok(/var foreign = localBelongsToOther\(uidNow\)/.test(code) &&
      /if \(foreign\) \{ hasLocal = false; \}/.test(code),
      '★ 是别人的就当"本机没有"来对账 —— 走"云端有档直接恢复"，不让用户选');
-  ok(/if \(uidNow\) markLocalOwner\(uidNow\)/.test(code),
-     '★ 对账入口统一打标记（分支有五六条，逐个加必然会漏）');
+  /* 🔴v1144 推翻了 v1143 的这条：
+     v1143 图省事"在入口统一打标记，不管走哪条分支"，
+     实测挑出问题 —— **对账失败时 A 的进度被标成了 B 的**，
+     下次登录会被当成"B 自己的"直接上传。
+     现在改为**只在成功分支打**（下面 v1144 段有逐条验证）。 */
+  ok(/markLocalOwner\(uidNow\)/.test(code),
+     '★ 有打标记的调用（时机见下方 v1144 段的逐分支验证）');
 
   /* 退出时**不能**清归属 —— 清了下一个人会被误判成"自己的" */
   const i = code.indexOf('function signOut');
@@ -145,6 +150,62 @@ function boot(init) {
   ok(belongs('A', 'B') === true, '★ 上一个账号 A 留下的 → 算别人的');
   ok(belongs('B', 'B') === false, '★ 自己重新登录 → 还是自己的');
   ok(belongs('A', '') === false, '★ 没登录时不做判定');
+}
+
+
+/* ── 🔴v1144 追加：归属标记的两个致命细节 ────────────────── */
+
+/* ① 标记绝不能进备份 */
+{
+  const bk = fs.readFileSync('/home/claude/work/repo/hansen_backup_v944.js', 'utf8');
+  ok(/hansen_local_progress_owner_/.test(bk) &&
+     /DENY=\/\^\(\?:hansen_local_progress_owner_/.test(bk.replace(/\s/g,'')),
+     '★ 归属标记在备份的 DENY 名单里 —— ' +
+     'A 把备份码给 B，B 恢复后本机会多出 owner=A，' +
+     '**B 自己的进度会被判成"别人的"，下次登录被云端覆盖掉**');
+}
+
+/* ② 标记只能在对账**成功**之后打 */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const i = auth.indexOf('function syncOnLogin');
+  const seg = auth.slice(i, i + 4000);
+
+  /* 入口处不能有裸的标记调用 —— v1143 就是这么写的，实测有问题 */
+  const head = seg.slice(0, seg.indexOf('accountCloudInfo') + 400);
+  ok(!/^\s*if \(uidNow\) markLocalOwner\(uidNow\);/m.test(head),
+     '★ 入口处**不**打标记 —— ' +
+     'v1143 图省事放在入口"不管走哪条分支都打"，' +
+     '结果对账失败时 A 的进度被标成 B 的，' +
+     '下次登录会被当成"B 自己的"直接上传');
+
+  /* 成功分支要打 */
+  ok(/action: 'nothing-to-sync'/.test(seg) &&
+     seg.slice(0, seg.indexOf("action: 'nothing-to-sync'")).includes('markLocalOwner'),
+     '★ nothing-to-sync（云端没档）这条成功分支会打标记');
+  ok(/markLocalOwner\(uidNow\);\s*\/\* v1144: 恢复成功/.test(seg),
+     '★ restored（从云端恢复成功）会打标记');
+  ok(/markLocalOwner\(uidNow\);[\s\S]{0,200}action: 'conflict'/.test(seg),
+     '★ conflict（两边都有让用户选）会打标记 —— ' +
+     '能走到这里说明本机这份不是别人的');
+
+  /* 失败分支不能打 */
+  const failIdx = seg.indexOf("action: 'cloud-unreachable'");
+  const beforeFail = seg.slice(Math.max(0, failIdx - 300), failIdx);
+  ok(!/markLocalOwner/.test(beforeFail),
+     '★ cloud-unreachable（连不上云端）**不**打标记 —— ' +
+     '这时什么都没对上，本机这份还是上一个人的');
+  ok(/恢复失败 —— \*\*不标记\*\*/.test(auth),
+     '★ 恢复失败明确不标记，且写清了理由');
+}
+
+/* ③ 这条原则本身 */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  ok(/漏一处只是少标一次/.test(auth) || /不能拿来换正确性/.test(auth),
+     '★ 代码里写清了取舍：' +
+     '"分支多容易漏"不能拿来换正确性 —— ' +
+     '漏标只是少标一次（下次登录会补），早标一次会把别人的进度算成你的');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

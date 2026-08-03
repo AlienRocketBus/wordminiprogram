@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1143;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1144;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -16,7 +16,19 @@
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
   var DIAG_KEY_RE=/^hansen_(?:credtrap_|cred_shadow|cred_rescue|cred_refresh|vw_autofixed)/i;
   var PREFIXES=['wordIsland','hansen_','hsn_','bs_hall_','hs_showcase_'];
-  var DENY=/^(?:hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test|hansen_auth_|hansen_cloud_state_)|(?:password|passcode|token|secret|authorization|session)/i;
+  /* 🔴v1144：`hansen_local_progress_owner_*` 必须**不进备份**。
+
+     它记的是"本机这份进度属于谁"，是**这台设备的本地事实**，
+     不是玩家数据。
+
+     被备份带走的后果很具体：
+       A 把备份码给 B → B 恢复后，本机多出一个 owner=A 的标记
+       → **B 自己的进度被判成"别人的"**
+       → 下次登录时被云端直接覆盖，B 的进度就没了。
+
+     同类的还有 freepass（限时试用）、card_temp_unlock（临时解锁）——
+     都是"这台机器此刻的状态"，跨设备复制没有意义甚至有害。 */
+  var DENY=/^(?:hansen_local_progress_owner_|hansen_admin_|hansen_(?:land_)?card_temp_unlock_until$|hansen_autoOpen|hansen_bossfx_override$|hansen_snapshot_|hansen_freepass|hansen_blackbox|hsn_debug|hsn_test|hansen_auth_|hansen_cloud_state_)|(?:password|passcode|token|secret|authorization|session)/i;
   var TRANSIENT_KEY=/(?:^|[_:\-.])(?:pending|journal|transaction|txn)(?:[_:\-.]|$)|(?:^|_)tmp(?:_|$)/i;
   var NESTED_TX={hansen_wallet_cardbook:1,hansen_diamond_shop:1,hansen_share_draw:1};
   function transientKey(k){return typeof k==='string'&&/^(?:wordIsland|hansen_|hsn_|bs_hall_|hs_showcase_)/.test(k)&&TRANSIENT_KEY.test(k);}
@@ -558,7 +570,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1143_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1144_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}

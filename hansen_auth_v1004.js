@@ -718,10 +718,20 @@
       try { uidNow = (readLocal() || {}).uid || ''; } catch (e) {}
       var foreign = localBelongsToOther(uidNow);
       if (foreign) { hasLocal = false; }
-      /* 对账开始就把归属记成当前这个人 —— 不管下面走哪条分支，
-         从这一刻起本机这份进度就是他的了。
-         （放在这里而不是各个分支末尾：分支有五六条，逐个加必然会漏。） */
-      if (uidNow) markLocalOwner(uidNow);
+      /* 🔴v1144：**标记不能在这里打。**
+
+         v1143 图省事放在入口"不管走哪条分支都打" —— 实测挑出问题：
+         对账**失败**时（云端连不上、恢复失败），
+         A 的进度已经被标成 B 的了，
+         → B 看到的还是 A 的进度，
+         → **下次登录会被当成"B 自己的"直接上传到 B 的账号**。
+
+         正确做法：**只在对账真正成功之后才打标记** ——
+         也就是"本机这份进度确实已经是他的了"这件事成立之后。
+         下面每条成功分支各打一次。虽然要多写几处，
+         但"分支多容易漏"这个理由**不能拿来换正确性**：
+         漏一处只是少标一次（下次登录会补），
+         而早标一次会把别人的进度算成你的。 */
       /* 🔴v1029 安全红线一：**查不到 ≠ 没有**。
          网络抖动或权限问题都会让查询失败，此时若当成"云端没有"就去上传，
          可能用本机(甚至是空的)覆盖掉云端的真实存档。查不到就什么都不做。 */
@@ -733,6 +743,7 @@
          设备B(全新、无进度)先登录时若上传空档，
          设备A 之后登录就会看到"云端有档"，一旦选错就全丢了。 */
       if (!hasCloud && !hasLocal) {
+        markLocalOwner(uidNow);   /* v1144: 对账完成才算归他 */
         return { ok: true, action: 'nothing-to-sync' };
       }
       if (hasCloud && !hasLocal) {
@@ -743,13 +754,22 @@
                ① 用户看到"等级没变、什么都没变"；
                ② 页面下一次存档会用内存里的空数据**覆盖掉刚恢复的进度**。
                所以恢复成功必须重新加载页面，让新数据真正生效。 */
-            if (r && r.ok) return { ok: true, action: 'restored', needReload: true };
+            if (r && r.ok) {
+              markLocalOwner(uidNow);   /* v1144: 恢复成功，本机这份确实是他的了 */
+              return { ok: true, action: 'restored', needReload: true };
+            }
+            /* 恢复失败 —— **不标记**。本机这份还是上一个人的，
+               标了的话下次登录会被当成他自己的传上去。 */
             return { ok: false, action: 'restore-failed' };
           })
           .catch(function () { return { ok: false, action: 'restore-failed' }; });
       }
       if (hasCloud && hasLocal) {
         /* 冲突：把双方的真实规模一并带出去，让用户看着数字选，而不是盲选 */
+        /* v1144: 走到冲突分支说明本机这份**不是别人的**（是别人的话上面已经把 hasLocal 置 false 了），
+           所以它确实归当前这个人 —— 标记。
+           至于两份怎么合并，那是用户选的事，不影响归属。 */
+        markLocalOwner(uidNow);
         return { ok: true, action: 'conflict',
                  local: local,
                  cloudUpdatedAt: (info && info.updatedAt) || 0 };
