@@ -78,5 +78,67 @@ const D = ctx.window.HansenDownloadFix;
   ok(/hansen_download_fix_v1140/.test(idx), '★ 首页加载了自查模块');
 }
 
+
+/* ── 🔒 v1141 四道锁 ─────────────────────────────────────
+ *
+ * 「打开变下载」这个问题必须**从四个方向同时锁死**，缺一处都可能复发：
+ *   ① 部署配置里声明 indexPath —— 不依赖有没有人记得去控制台点那一项
+ *   ② Service Worker 兜底 —— 对已装好 SW 的用户
+ *   ③ 页面内联自救 —— 万一还是被下载了，用户双击打开时能被送回线上
+ *   ④ 自查模块 —— 一键看出是哪一项配错
+ */
+
+/* 🔒① 部署配置 */
+{
+  const cb = JSON.parse(fs.readFileSync('/home/claude/work/repo/cloudbaserc.json', 'utf8'));
+  const site = ((cb.framework || {}).plugins || {}).site || {};
+  ok((site.inputs || {}).indexPath === 'index.html',
+     '★🔒 cloudbaserc.json 里 indexPath = index.html —— ' +
+     '部署时就把索引文档带上去，不靠人记得去控制台点');
+}
+
+/* 🔒③ 页面内联自救（必须内联，不能是外部脚本） */
+{
+  const pages = fs.readdirSync('/home/claude/work/repo')
+    /* 排除开发用的演示页（与守卫的规则一致）——
+       它们不是用户入口，不会被当成网站首页下发。 */
+    .filter(f => f.endsWith('.html') && !f.startsWith('_') && !f.startsWith('武器'));
+  let missing = [], external = [];
+  for (const f of pages) {
+    const html = fs.readFileSync('/home/claude/work/repo/' + f, 'utf8');
+    if (!/hsnSelfRescue/.test(html)) { missing.push(f); continue; }
+    let inline = false;
+    const re = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g;
+    let m;
+    while ((m = re.exec(html))) {
+      if (/hsnSelfRescue/.test(m[1])) { inline = true; break; }
+    }
+    if (!inline) external.push(f);
+  }
+  ok(missing.length === 0,
+     `★🔒 所有页面都有 file:// 自救代码（缺 ${missing.length} 个${missing.length?': '+missing.slice(0,3):''}）`);
+  ok(external.length === 0,
+     `★🔒 自救代码是**内联**的（${external.length} 个写成了外部脚本）—— ` +
+     `file:// 下外部脚本根本加载不出来，写成外部等于没写`);
+}
+
+/* 🔒③ 自救只在 file:// 下触发，不能误伤正常访问 */
+{
+  const idx = fs.readFileSync('/home/claude/work/repo/index.html', 'utf8');
+  ok(/location\.protocol!=='file:'/.test(idx.replace(/\s/g, '')),
+     "★🔒 判据是 location.protocol === 'file:' —— 极其确定，正常访问永远是 http/https");
+  ok(/setTimeout\(function\(\)\{shown=false;show\(\);\}/.test(idx.replace(/\s/g, '')) ||
+     /shown=false;show\(\)/.test(idx.replace(/\s/g, '')),
+     '★🔒 主逻辑可能重绘整个 body，所以补一次 —— 第一版就是被重绘冲掉了');
+}
+
+/* 🔒 守卫在守着 */
+{
+  const g = fs.readFileSync('/home/claude/work/repo/hansen_guards_v1068.py', 'utf8');
+  ok(/guard_html_never_downloads/.test(g), '★🔒 有守卫盯死这四处');
+  ok(/indexPath/.test(g) && /fixHtmlType/.test(g) && /file:/.test(g),
+     '★🔒 守卫同时检查：部署配置 + SW 兜底 + 页面内联自救');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

@@ -317,6 +317,13 @@ def _inj_notify_proto(s):
     return s.replace('ls.setItem', 'Storage.prototype.setItem')
 
 
+
+def _inj_index_path(s):
+    """把 indexPath 改掉 —— 部署时不带索引文档，根路径就会被当成文件下发。"""
+    if '"indexPath": "index.html"' not in s: return None
+    return s.replace('"indexPath": "index.html"', '"indexPath": ""')
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -364,6 +371,7 @@ CASES = [
     ('回合不推进',   'hansen_pk_room_v1065.js',     _inj_no_skip_round),
     ('前端瞎猜',     'hansen_pk_room_v1065.js',     _inj_guess_side),
     ('变更通知',      'hansen_change_notify_v1134.js', _inj_notify_proto),
+    ('打开变下载',   'cloudbaserc.json',           _inj_index_path),
 ]
 
 

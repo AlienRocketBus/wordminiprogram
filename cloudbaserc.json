@@ -21,7 +21,9 @@
             "SHA256SUMS",
             "CHANGELOG.md",
             "README.md"
-          ]
+          ],
+          "indexPath": "index.html",
+          "errorPath": "index.html"
         }
       }
     }

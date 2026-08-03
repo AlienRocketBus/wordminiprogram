@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1140"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1140"></script>
+<head><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
+if(location.protocol!=='file:')return;
+var SITE='https://superwords-ambitious-d0g1d26xm740dc3d6.webapps.tcloudbase.com/';
+var shown=false;
+function show(){
+  if(shown)return; shown=true;
+  try{
+    var d=document.createElement('div');
+    d.id='hsnSelfRescue';
+    d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:#0b1020;color:#e8eefc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,-apple-system,"PingFang SC",sans-serif');
+    d.innerHTML='<div style="font-size:46px">\ud83d\udcc4</div>'
+      +'<div style="font-size:19px;font-weight:800;margin-top:12px">\u8fd9\u662f\u4e0b\u8f7d\u4e0b\u6765\u7684\u6587\u4ef6</div>'
+      +'<div style="font-size:14px;color:#a9b4c7;margin-top:10px;line-height:1.8;max-width:340px">\u4f60\u73b0\u5728\u6253\u5f00\u7684\u662f\u4e00\u4e2a\u5b58\u5728\u624b\u673a\u91cc\u7684\u6587\u4ef6\uff0c<br>\u4e0d\u662f\u7f51\u7ad9\u672c\u8eab \u2014\u2014 \u6240\u4ee5\u8fdb\u5ea6\u3001\u767b\u5f55\u90fd\u7528\u4e0d\u4e86\u3002<br>\u70b9\u4e0b\u9762\u7684\u6309\u94ae\u56de\u5230\u771f\u6b63\u7684\u7f51\u7ad9\u3002</div>'
+      +'<a href="'+SITE+'" style="margin-top:20px;display:inline-block;background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;text-decoration:none;padding:14px 26px;border-radius:14px;font-size:16px;font-weight:800">\ud83c\udf10 \u6253\u5f00\u771f\u6b63\u7684\u7f51\u7ad9</a>'
+      +'<div style="font-size:11.5px;color:#7c879b;margin-top:16px;word-break:break-all;max-width:340px">'+SITE+'</div>'
+      +'<div style="font-size:11.5px;color:#7c879b;margin-top:14px;line-height:1.7;max-width:340px">\uff08\u8fdb\u53bb\u4e4b\u540e\u53ef\u4ee5\u628a\u8fd9\u4e2a\u4e0b\u8f7d\u7684\u6587\u4ef6\u5220\u6389\uff09</div>';
+    (document.body||document.documentElement).appendChild(d);
+  }catch(e){}
+}
+/* 不依赖任何一个时机 —— 三条路都试，谁先到算谁的 */
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',show);}
+else{show();}
+window.addEventListener('load',show);
+/* 主逻辑可能在就绪后重绘整个 body，所以再补一次 */
+setTimeout(function(){shown=false;show();},1200);
+})();</script><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><script src="hansen_cred_trap_v1085.js?v=1141"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1141"></script>
 <meta charset="UTF-8"><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>云端版本诊断</title>
@@ -22,7 +47,7 @@
   td{color:#cbd5e1}
   .lv1-row{background:rgba(251,191,36,0.15);font-weight:700}
 </style>
-<!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1140"></script></head>
+<!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1141"></script></head>
 <body>
 <h1>🔍 单词大冒险 · 云端版本诊断</h1>
 
@@ -46,7 +71,7 @@
   <table id="cfg-table"><thead><tr><th>Lv</th><th>秒</th><th>Lv</th><th>秒</th></tr></thead><tbody></tbody></table>
 </div>
 
-<script src="hansen_boss_lock.js?v=1140"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1140"></script>
+<script src="hansen_boss_lock.js?v=1141"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1141"></script>
 <script>
 setTimeout(function(){
   var vEl = document.getElementById('version');

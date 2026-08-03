@@ -1415,6 +1415,84 @@ def guard_change_notify_hooks_instance():
         bad('变更通知', '云存档没有监听 hsn-data-changed —— 发了信号也没人接')
 
 
+
+def guard_html_never_downloads():
+    """🔒 网页永远不许变成"下载 HTML" —— 四处一起守。
+
+    用户反馈：从浏览器打开网站，弹出下载一个 .html 文件。
+    根因是**服务端把 HTML 当附件下发**（Content-Type 是 octet-stream，
+    或带 Content-Disposition: attachment）。
+
+    这个问题**必须从四个方向同时锁死**，缺一处都可能复发：
+
+      ① `cloudbaserc.json` 里声明 indexPath —— 部署时就把索引文档带上去，
+         不依赖有没有人记得去控制台点那一项
+      ② Service Worker 的 `fixHtmlType()` —— 对已装好 SW 的用户兜底
+      ③ 页面里**内联**的自救代码 —— 万一还是被下载了，
+         用户双击打开时（file:// 协议）能把他送回线上
+      ④ 自查模块 —— 一键看出是哪一项配错了
+
+    ③ 之所以强调"内联"：file:// 下相对路径的外部脚本根本加载不出来，
+    而那正是要救的场景。**写成外部脚本等于没写。**
+    """
+    # ① 部署配置
+    import json as _json
+    try:
+        cb = _json.loads(_read('cloudbaserc.json') or '{}')
+        site = cb.get('framework', {}).get('plugins', {}).get('site', {}).get('inputs', {})
+        if site.get('indexPath') != 'index.html':
+            bad('打开变下载',
+                'cloudbaserc.json 里 indexPath 不是 index.html —— '
+                '部署时不带索引文档，根路径就会被当成文件下发')
+    except Exception:
+        bad('打开变下载', 'cloudbaserc.json 读不出来或格式坏了')
+
+    # ② Service Worker 兜底
+    sw = _code_only(_read('sw_v944.js') or '')
+    if sw:
+        if 'fixHtmlType' not in sw:
+            bad('打开变下载', 'sw_v944.js 里没有 fixHtmlType —— 已装 SW 的用户失去兜底')
+        if "attachment" not in sw:
+            bad('打开变下载', 'SW 兜底没有认 Content-Disposition: attachment')
+        if "headers.delete('content-disposition')" not in sw:
+            bad('打开变下载', 'SW 兜底没有去掉 content-disposition 头')
+
+    # ③ 页面里的自救必须是内联的
+    import glob as _g
+    pages = [os.path.basename(f) for f in _g.glob(os.path.join(ROOT, '*.html'))
+             if not os.path.basename(f).startswith(('_', '\u6b66\u5668'))]
+    miss = []
+    external = []
+    for name in pages:
+        html = _read(name) or ''
+        # 用 id 作标记，不用代码片段 —— 代码会被压缩，空格有无都可能变 
+        if 'hsnSelfRescue' not in html:
+            miss.append(name)
+            continue
+        # 确认它在 <script> 而不是 <script src=> 里
+        import re as _re
+        inline_ok = False
+        for m in _re.finditer(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html):
+            if 'hsnSelfRescue' in m.group(1):
+                inline_ok = True
+                break
+        if not inline_ok:
+            external.append(name)
+    if miss:
+        bad('打开变下载',
+            '%d 个页面没有 file:// 自救代码（如 %s）—— '
+            '被下载后双击打开会是白屏，用户只会以为 App 坏了'
+            % (len(miss), ', '.join(miss[:3])))
+    if external:
+        bad('打开变下载',
+            '%d 个页面的自救代码写成了外部脚本（如 %s）—— '
+            'file:// 下外部脚本根本加载不出来，等于没写'
+            % (len(external), ', '.join(external[:3])))
+
+    # ④ 自查模块
+    if not (_read('hansen_download_fix_v1140.js') or ''):
+        bad('打开变下载', '自查模块 hansen_download_fix_v1140.js 不见了 —— 出问题时查不出是哪一项')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1475,6 +1553,8 @@ GUARDS = [
     ('前端瞎猜',     guard_server_known_facts_not_guessed),
     # v1134
     ('变更通知',     guard_change_notify_hooks_instance),
+    # v1141 🔒 打开变下载
+    ('打开变下载',   guard_html_never_downloads),
 ]
 
 
