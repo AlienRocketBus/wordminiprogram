@@ -511,6 +511,11 @@
         HansenSbProfile.resetForAccountSwitch();
       }
     } catch (e) {}
+    /* 🔴v1143：**不清归属标记。**
+       退出后本机这份进度**仍然是刚才那个人的** ——
+       清了的话，下一个人登录时会被当成"我自己没登录时玩的"，
+       于是把别人的进度传到自己账号上。
+       标记只在**新的人登录并完成对账**时才更新。 */
 
     return auth().then(function (a) {
       return a.signOut ? a.signOut() : null;
@@ -659,6 +664,45 @@
     return { islands: islands, learned: learned };
   }
 
+  /* ── 🔴v1143 本机进度的归属标记 ──────────────────────────
+
+     问题：换账号登录时，系统**不知道本机这份进度是谁的**。
+     于是无法区分两种完全不同的情况：
+
+       · 「我自己没登录时玩的」   → 该保留、该上传到我的账号
+       · 「上一个账号留下的」     → 不该算成我的
+
+     真机现场就撞上了后者：退出 A 号登 B 号，
+     B 看到的是 A 的名字和号（v1142 修了资料这一层），
+     **而进度、战绩、钱包这些同样还是 A 的**。
+
+     修法：登录成功时记下「这份本机进度属于谁」。
+     换账号登录时一比对就知道 —— 不一样就说明本机这份是别人的。
+
+     ⚠️ **绝不直接删。** 没登录时玩的进度也在同一批键里，
+     删了就是删用户数据 —— 这条红线比什么都硬。
+     所以只做一件事：**告诉对账逻辑"本机这份不是你的"**，
+     让它走「云端有档 → 直接恢复」那条路，而不是
+     「云端有档 + 本机也有 → 让用户选」（用户根本不知道该选哪个）。 */
+  var OWNER_KEY = 'hansen_local_progress_owner_v1143';
+
+  function localOwner() {
+    try { return localStorage.getItem(OWNER_KEY) || ''; } catch (e) { return ''; }
+  }
+  function markLocalOwner(uid) {
+    try {
+      if (uid) localStorage.setItem(OWNER_KEY, String(uid));
+      else localStorage.removeItem(OWNER_KEY);
+    } catch (e) {}
+  }
+  /* 本机这份进度是不是「别人的」——
+     有主人、且不是当前这个人，才算别人的。
+     没主人（从没登录过就玩的）不算别人的，那是用户自己的东西。 */
+  function localBelongsToOther(uid) {
+    var o = localOwner();
+    return !!(o && uid && o !== uid);
+  }
+
   function syncOnLogin() {
     var CS = window.HansenCloudSave;
     if (!CS || typeof CS.accountCloudInfo !== 'function')
@@ -666,6 +710,18 @@
     return CS.accountCloudInfo().then(function (info) {
       var hasLocal = localHasProgress();
       var local = localProgressSize();
+      /* 🔴v1143：本机这份是上一个账号的 → 当成"本机没有"来对账。
+         这样走的是「云端有档 → 直接恢复」，而不是
+         「两边都有 → 让用户选」—— 后者用户根本不知道该选哪个，
+         而且很容易把别人的进度传到自己账号上。 */
+      var uidNow = '';
+      try { uidNow = (readLocal() || {}).uid || ''; } catch (e) {}
+      var foreign = localBelongsToOther(uidNow);
+      if (foreign) { hasLocal = false; }
+      /* 对账开始就把归属记成当前这个人 —— 不管下面走哪条分支，
+         从这一刻起本机这份进度就是他的了。
+         （放在这里而不是各个分支末尾：分支有五六条，逐个加必然会漏。） */
+      if (uidNow) markLocalOwner(uidNow);
       /* 🔴v1029 安全红线一：**查不到 ≠ 没有**。
          网络抖动或权限问题都会让查询失败，此时若当成"云端没有"就去上传，
          可能用本机(甚至是空的)覆盖掉云端的真实存档。查不到就什么都不做。 */

@@ -95,5 +95,57 @@ function boot(init) {
      '★ 延一拍再画 —— 派发事件时资料可能刚落盘，立刻读会读到旧值');
 }
 
+
+/* ── 🔴v1143 追加：进度归属 ──────────────────────────────
+ *
+ * v1142 修的是**资料**（名字、竞赛 ID）跟着账号走。
+ * 但换账号后，**进度、战绩、钱包、好友这些同样还是上一个人的** ——
+ * 退出登录时一个都不清。
+ *
+ * ⚠️ **绝不能直接删。** 没登录时玩的进度也在同一批键里，
+ * 删了就是删用户数据 —— 这条红线比什么都硬。
+ *
+ * 所以做法是**给本机进度打上归属标记**，让对账逻辑能区分：
+ *   · 「我自己没登录时玩的」→ 保留、参与对账（两边都有就让用户选）
+ *   · 「上一个账号留下的」  → 当成"本机没有"，直接从云端恢复
+ *
+ * 后者尤其重要：如果让用户选，他根本不知道该选哪个，
+ * 而且很容易把**别人的进度传到自己账号上**。
+ */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/OWNER_KEY\s*=\s*'hansen_local_progress_owner_v1143'/.test(code),
+     '★ 有独立的归属标记键');
+  ok(/function localBelongsToOther/.test(code),
+     '★ 能判断"本机这份是不是别人的"');
+  ok(/var foreign = localBelongsToOther\(uidNow\)/.test(code) &&
+     /if \(foreign\) \{ hasLocal = false; \}/.test(code),
+     '★ 是别人的就当"本机没有"来对账 —— 走"云端有档直接恢复"，不让用户选');
+  ok(/if \(uidNow\) markLocalOwner\(uidNow\)/.test(code),
+     '★ 对账入口统一打标记（分支有五六条，逐个加必然会漏）');
+
+  /* 退出时**不能**清归属 —— 清了下一个人会被误判成"自己的" */
+  const i = code.indexOf('function signOut');
+  const seg = code.slice(i, i + 1500);
+  ok(!/markLocalOwner\(\s*''\s*\)|removeItem\(OWNER_KEY\)/.test(seg),
+     '★ 退出登录时**不清**归属标记 —— 退出后这份仍是刚才那人的，' +
+     '清了的话下一个人登录会把别人的进度传到自己账号上');
+
+  /* 绝不能出现直接删进度的代码 */
+  ok(!/wordIsland[\s\S]{0,80}removeItem/.test(code),
+     '★ 绝不直接删本机进度 —— 没登录时玩的也在同一批键里，删了就是删用户数据');
+}
+
+/* 归属判定的四种情况 */
+{
+  const belongs = (owner, uid) => !!(owner && uid && owner !== uid);
+  ok(belongs('', 'B') === false, '★ 从没登录过就玩的 → 算自己的（要保留）');
+  ok(belongs('A', 'B') === true, '★ 上一个账号 A 留下的 → 算别人的');
+  ok(belongs('B', 'B') === false, '★ 自己重新登录 → 还是自己的');
+  ok(belongs('A', '') === false, '★ 没登录时不做判定');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
