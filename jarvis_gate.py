@@ -189,6 +189,26 @@ def main():
             except Exception:
                 known_slow = set()
         tests = [t for t in all_tests if os.path.basename(t) not in known_slow]
+
+        # 🔴v1151：**慢的先跑（最长作业优先）。**
+        #
+        #   `ex.map` 是按提交顺序调度的 —— 如果最慢的那个排在最后，
+        #   4 个线程会全部空转等它一个，整体时间被"长尾"拖住。
+        #
+        #   实测：40 个测试合计 169 秒，而**前 3 个就占 88 秒（52%）**。
+        #   把它们放到最前面，其余的能填满剩下三条线程的空档。
+        #
+        #   耗时记在 .jarvis_time.json（每次跑完更新，第一次跑没有就按原序）。
+        #   这只是**调度顺序**的优化 —— 一个测试都不会被跳过，
+        #   结果完全一样，只是更快。
+        TIME_FILE = os.path.join(ROOT, '.jarvis_time.json')
+        _hist = {}
+        try:
+            _hist = json.load(open(TIME_FILE, encoding='utf-8'))
+        except Exception:
+            _hist = {}
+        if _hist:
+            tests.sort(key=lambda t: -_hist.get(os.path.basename(t), 0))
         if known_slow:
             print('  ⏭  跳过 %d 个已知慢测试（用 HANSEN_DEEP=1 完整跑）' % len(known_slow))
         # 并行跑 —— 153 个串行要十几分钟，闸门必须是分钟级的，
@@ -205,16 +225,25 @@ def main():
 
             所以：并发降到 3，且**失败的单独重跑一次**才算数。
             """
+            _t0 = time.time()
             try:
                 r = subprocess.run(['node', t], cwd=ROOT, capture_output=True,
                                    timeout=per_timeout)
+                _spent[os.path.basename(t)] = round(time.time() - _t0, 1)
                 return None if r.returncode == 0 else os.path.basename(t)
             except subprocess.TimeoutExpired:
                 return '~SLOW~' + os.path.basename(t)
             except Exception:
                 return os.path.basename(t)
+        _spent = {}
         with ThreadPoolExecutor(max_workers=4) as ex:
             raw = [x for x in ex.map(_run, tests) if x]
+        # v1151: 记下这一轮的耗时，供下次排序用
+        try:
+            _hist.update(_spent)
+            json.dump(_hist, open(TIME_FILE, 'w', encoding='utf-8'))
+        except Exception:
+            pass
         slow = [x[7:] for x in raw if x.startswith('~SLOW~')]
         suspect = [x for x in raw if not x.startswith('~SLOW~')]
         # 🔴v1098：**失败要串行复核一次再算数。**
