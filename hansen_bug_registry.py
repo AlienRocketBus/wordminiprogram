@@ -245,6 +245,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1148', '🔴跨标签页提示盖上了，但对战还在后台跑——对手干等 60 秒才知道人不在了',
      'test_account_switch_v1142.mjs'),
+    ('v1149', '🔴窗口式断言不剥注释——给产品代码加几行注释就假红（v1146/v1148 各撞一次）',
+     'test_cid_order_v1130.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

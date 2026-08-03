@@ -204,8 +204,13 @@ function assertStaticContracts() {
     '中央轻量桥必须有 v953 全局单例标记');
   assert.match(lockSource, /window\.HansenBossAdminBridge\s*=/,
     '轻量桥必须暴露不含凭据的测试接口');
-  const apiAt = lockSource.indexOf('window.HansenBossAdminBridge');
-  const api = lockSource.slice(apiAt, apiAt + 900);
+    /* 🔴v1149：**先剥注释，再定位和截窗口。**
+     否则给产品代码加几行注释，就会把要找的东西挤出窗口 ——
+     v1146、v1148 各撞了一次这种假红。
+     剥注释和定位必须用**同一份文本**，否则偏移量对不上。 */
+  const lockSourceCode = lockSource.replace(/\/\*[\s\S]*?\*\//g, '');
+const apiAt = lockSourceCode.indexOf('window.HansenBossAdminBridge');
+  const api = lockSourceCode.slice(apiAt, apiAt + 900);
   for (const method of ['ensureLoaded', 'open', 'refresh']) {
     assert.match(api, new RegExp('\\b' + method + '\\b'),
       `HansenBossAdminBridge 缺 ${method} 方法`);
@@ -216,8 +221,8 @@ function assertStaticContracts() {
   assert.match(attackSource, /window\.__hsnEnsureBossFxSettingsEntry\s*=\s*ensureEntry/,
     '重型文件必须导出公开设置入口刷新函数');
 
-  const bridgeAt = lockSource.indexOf('window.__hansenBossAdminBridgeV953');
-  const bridge = lockSource.slice(bridgeAt);
+  const bridgeAt = lockSourceCode.indexOf('window.__hansenBossAdminBridgeV953');
+  const bridge = lockSourceCode.slice(bridgeAt);
   assert.match(bridge, /__hansenBossFXReady/,
     '轻桥必须经正式 Boss FX loader 加载重文件');
   assert.match(bridge, /__hsnOpenBossAdminGate/,

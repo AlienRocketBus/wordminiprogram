@@ -1493,6 +1493,52 @@ def guard_html_never_downloads():
     if not (_read('hansen_download_fix_v1140.js') or ''):
         bad('打开变下载', '自查模块 hansen_download_fix_v1140.js 不见了 —— 出问题时查不出是哪一项')
 
+
+def guard_window_assert_strips_comments():
+    """窗口式断言必须先剥注释再截 —— 否则加几行注释就会假红。
+
+    事故（v1146、v1148 各撞一次）：
+    测试里常这么写 ——
+
+        const i = src.indexOf('function xxx');
+        const seg = src.slice(i, i + 900);
+        ok(/某段代码/.test(seg), '...');
+
+    **给产品代码加几行说明注释，要找的东西就被挤出窗口了**，
+    断言莫名其妙变红。
+
+    这类假红比不测更糟：
+    它让人误以为改坏了东西，进而**不敢写注释** ——
+    而这个项目正是靠注释把"为什么这么改"传下去的。
+
+    判据：用 `indexOf` 定位代码位置、且窗口 ≥100 字符的地方，
+    被截的那份文本必须是**剥掉注释后**的。
+    （窗口 <100 的多半是取几个字符做格式校验，不算这类。）
+    """
+    import glob as _g
+    bad_files = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'test_*.mjs'))):
+        name = os.path.basename(f)
+        src = _read(name) or ''
+        if not src:
+            continue
+        stripped = ('replace(/\\/\\*[\\s\\S]*?\\*\\//g' in src
+                    or "replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')" in src
+                    or '_code_only' in src
+                    or 'stripComments' in src)
+        risky = False
+        for m in re.finditer(r"indexOf\('[^']+'\)[\s\S]{0,200}?\.slice\(\s*\w+\s*,\s*\w+\s*\+\s*(\d+)\s*\)", src):
+            if int(m.group(1)) >= 100:
+                risky = True
+                break
+        if risky and not stripped:
+            bad_files.append(name)
+    if bad_files:
+        bad('窗口断言',
+            '%d 个测试用"截固定字符数"定位代码却没先剥注释（如 %s）—— '
+            '给产品代码加几行注释就会把要找的东西挤出窗口，断言假红'
+            % (len(bad_files), ', '.join(bad_files[:3])))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1555,6 +1601,8 @@ GUARDS = [
     ('变更通知',     guard_change_notify_hooks_instance),
     # v1141 🔒 打开变下载
     ('打开变下载',   guard_html_never_downloads),
+    # v1149
+    ('窗口断言',     guard_window_assert_strips_comments),
 ]
 
 

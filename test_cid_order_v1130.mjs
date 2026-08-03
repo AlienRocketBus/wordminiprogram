@@ -73,7 +73,12 @@ function boot() {
 
 /* ④ 发号算法 = 注册顺序 */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+/* 🔴v1149：**窗口式断言必须先剥注释再截。**
+   否则给产品代码加几行说明注释，就会把要找的东西挤出窗口，
+   断言莫名其妙变红 —— v1146、v1148 各撞了一次。
+   这类假红比不测更糟：它让人误以为改坏了东西，进而不敢写注释。 */
+  const authRaw = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = authRaw.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = auth.indexOf('function assignCid');
   const seg = auth.slice(i, i + 1600);
   ok(/createdAt:\s*db\.command\.lt\(createdAt\)/.test(seg),
@@ -85,7 +90,12 @@ function boot() {
 
 /* ⑤ 防撞号 */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+/* 🔴v1149：**窗口式断言必须先剥注释再截。**
+   否则给产品代码加几行说明注释，就会把要找的东西挤出窗口，
+   断言莫名其妙变红 —— v1146、v1148 各撞了一次。
+   这类假红比不测更糟：它让人误以为改坏了东西，进而不敢写注释。 */
+  const authRaw = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = authRaw.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = auth.indexOf('function assignCid');
   const seg = auth.slice(i, i + 1600);
   ok(/where\(\{ cid: cid \}\)\.count\(\)/.test(seg),
@@ -93,7 +103,12 @@ function boot() {
   ok(/assignCid\(db, docRef, createdAt, tries \+ 1\)/.test(seg),
      '★ 撞了就往后挪一位');
   ok(/tries >= 5/.test(seg), '★ 重试封顶，不会死循环');
-  ok(/发号失败不阻断登录/.test(auth), '★ 发号失败不阻断登录（下次登录再补）');
+  /* 🔴v1149：原来查的是**注释里的那句话** ——
+     剥掉注释后立刻暴露：这条断言在验"文档写了没"，而不是"代码做了没"。
+     改为查真行为：assignCid 末尾要有 catch 兜底并返回 null，
+     这样发号失败也不会把整个登录流程带崩。 */
+  ok(/\.catch\(function \(\) \{ return null; \}\)/.test(auth),
+     '★ 发号失败有 catch 兜底、返回 null —— 不阻断登录，下次登录再补');
 
   /* 模拟三人并发 */
   let rows = [{ cid: 1 }, { cid: 2 }, { cid: 3 }];

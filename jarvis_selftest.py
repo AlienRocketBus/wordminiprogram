@@ -324,6 +324,15 @@ def _inj_index_path(s):
     return s.replace('"indexPath": "index.html"', '"indexPath": ""')
 
 
+
+def _inj_window_assert(s):
+    """把剥注释那一步去掉 —— 加几行注释就会把断言挤出窗口。"""
+    marker = "replace(/\\/\\*[\\s\\S]*?\\*\\//g, '')"
+    if marker not in s:
+        return None
+    return s.replace(marker, "slice(0)")
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -372,6 +381,7 @@ CASES = [
     ('前端瞎猜',     'hansen_pk_room_v1065.js',     _inj_guess_side),
     ('变更通知',      'hansen_change_notify_v1134.js', _inj_notify_proto),
     ('打开变下载',   'cloudbaserc.json',           _inj_index_path),
+    ('窗口断言',     'test_cid_order_v1130.mjs',     _inj_window_assert),
 ]
 
 
