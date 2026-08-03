@@ -241,6 +241,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1146', '🔴退出前的强制上传有两条会白做：正在同步时被 busy 挡掉；云端卡住时退不出去',
      'test_account_switch_v1142.mjs'),
+    ('v1147', '🔴账号变更不跨标签页——旧标签继续写上一个人的进度，被算成新账号的传上去',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

@@ -1036,6 +1036,76 @@
     };
   }
 
+  /* ── 🔴v1147 跨标签页的账号变更 ──────────────────────────
+
+     推演：用户开着两个标签页。
+       标签A：登着张三，正在玩
+       标签B：在这里点了退出，登了李四
+
+     → **标签A 完全不知道账号变了**，继续往 localStorage 写张三的进度
+     → 而归属标记已经是李四了
+     → **张三的新进度被算成李四的，下次同步传到李四账号**
+
+     手机上不常开多标签，但电脑上很常见；
+     而且"一个标签停在旧页面没关"这件事本身就很普遍。
+
+     `storage` 事件专门为此设计：**别的标签页改了 localStorage，
+     本标签页会收到通知**（自己改的不会触发，正合适）。
+
+     收到账号变更后做什么：**不自作主张改数据，只提示用户刷新。**
+     因为这个标签页此刻的内存状态（正在进行的一局、未保存的输入）
+     没法安全迁移到新账号名下 —— 让用户自己决定什么时候刷新最稳妥。 */
+  function watchCrossTabAuth() {
+    if (window.__hsnAuthTabWatch) return;
+    window.__hsnAuthTabWatch = 1;
+    var mine = '';
+    try { mine = (readLocal() || {}).uid || ''; } catch (e) {}
+    try {
+      window.addEventListener('storage', function (ev) {
+        if (!ev || ev.key !== LKEY) return;
+        var now = '';
+        try { now = (JSON.parse(ev.newValue || '{}') || {}).uid || ''; } catch (e) {}
+        if (now === mine) return;              /* 没变 */
+        var was = mine;
+        mine = now;
+        try {
+          document.dispatchEvent(new CustomEvent('hsn-auth-changed-elsewhere',
+            { detail: { from: was, to: now } }));
+        } catch (e) {}
+        notifyTabStale(was, now);
+      });
+    } catch (e) {}
+  }
+
+  /* 提示这个标签页已经过期 —— 盖一层，别让人继续在这里玩 */
+  function notifyTabStale(was, now) {
+    try {
+      if (document.getElementById('hsnTabStale')) return;
+      var d = document.createElement('div');
+      d.id = 'hsnTabStale';
+      d.setAttribute('style',
+        'position:fixed;inset:0;z-index:2147483646;background:rgba(11,16,32,.96);' +
+        'color:#e8eefc;display:flex;flex-direction:column;align-items:center;' +
+        'justify-content:center;padding:24px;text-align:center;' +
+        'font-family:system-ui,-apple-system,"PingFang SC",sans-serif');
+      var what = now ? '别的窗口登录了另一个账号' : '别的窗口退出了登录';
+      d.innerHTML =
+        '<div style="font-size:44px">\ud83d\udd04</div>' +
+        '<div style="font-size:18px;font-weight:800;margin-top:12px">' + what + '</div>' +
+        '<div style="font-size:13.5px;color:#a9b4c7;margin-top:10px;line-height:1.8;max-width:330px">' +
+          '这个窗口还停在上一个账号，<br>继续玩会把进度记到错的账号上。<br>刷新一下就好。' +
+        '</div>' +
+        '<button id="hsnTabStaleBtn" style="margin-top:20px;background:linear-gradient(135deg,#4f46e5,#4338ca);' +
+          'color:#fff;border:0;padding:14px 26px;border-radius:14px;font-size:16px;font-weight:800;' +
+          'cursor:pointer">刷新这个窗口</button>';
+      (document.body || document.documentElement).appendChild(d);
+      var btn = document.getElementById('hsnTabStaleBtn');
+      if (btn) btn.onclick = function () { try { location.reload(); } catch (e) {} };
+    } catch (e) {}
+  }
+
+  try { watchCrossTabAuth(); } catch (e) {}
+
   window.HansenAuth = {
     ready: ready,
     isSignedIn: isSignedIn,

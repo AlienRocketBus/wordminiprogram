@@ -314,5 +314,44 @@ function boot(init) {
   ok(behave(true, false, true) === 'skip', '★ 例行同步遇 busy → 跳过（正确）');
 }
 
+
+/* ── 🔴v1147 追加：跨标签页的账号变更 ──────────────────────
+ *
+ * 推演：用户开着两个标签页。
+ *   标签A：登着张三，正在玩
+ *   标签B：在这里点了退出，登了李四
+ *
+ * → **标签A 完全不知道账号变了**，继续往 localStorage 写张三的进度
+ * → 而归属标记已经是李四了
+ * → **张三的新进度被算成李四的，下次同步传到李四账号**
+ *
+ * 手机上不常开多标签，但电脑上很常见；
+ * 而且"一个标签停在旧页面没关"这件事本身就很普遍。
+ */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/addEventListener\('storage'/.test(code),
+     '★ 监听 storage 事件 —— 别的标签页改了 localStorage 会通知本页' +
+     '（自己改的不触发，正合适）');
+  ok(/ev\.key !== LKEY/.test(code),
+     '★ 只关心登录态那个键的变化');
+  ok(/if \(now === mine\) return;/.test(code),
+     '★ uid 没变就不提示 —— 不能因为写了一次同样的值就误报');
+  ok(/function notifyTabStale/.test(code),
+     '★ 有过期提示');
+  ok(/location\.reload/.test(code),
+     '★ 提示里给刷新按钮');
+  ok(/别的窗口登录了另一个账号/.test(auth) && /别的窗口退出了登录/.test(auth),
+     '★ 两种情况文案分开 —— 换账号和退出登录，用户要知道是哪种');
+  ok(/继续玩会把进度记到错的账号上/.test(auth),
+     '★ 说清楚为什么要刷新，而不是干巴巴一句"请刷新"');
+  ok(/不自作主张改数据，只提示用户刷新/.test(auth),
+     '★ **不自动帮用户处理** —— ' +
+     '这个标签页此刻的内存状态（正在进行的一局、未保存的输入）' +
+     '没法安全迁移到新账号名下，让用户自己决定什么时候刷新');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
