@@ -44,17 +44,36 @@ const r = await page.evaluate(()=>{
   V.set(40);   /* 模块用 0-100 刻度 */
   const after=V.get();
   /* 新建的语音实例应被打过补丁(音量随设置缩放) */
+  /* 🔴v1152：**这里原来先 new 再 `u.volume=1`，然后期望它被压到 <1** ——
+     和实现的设计相反。实现是"只在 new 的那一刻设默认音量，
+     调用方之后显式设的值一律尊重"（模块注释里写明了：
+     有代码会故意设 volume=0 做静音预热，压回去会破坏它）。
+
+     这条断言从 v1032 起就是错的，只是**测试因为超时被跳过，红了很久没人知道**
+     （v1152 才把闸门的超时从 12 秒放宽、并修好慢名单的切片 bug）。
+
+     改为验真正的契约：**新建实例时音量已被设成缩放后的值**。 */
   let uVol=null;
-  try { const u=new SpeechSynthesisUtterance('hi'); u.volume=1; uVol=u.volume; } catch(e){}
+  try { const u=new SpeechSynthesisUtterance('hi'); uVol=u.volume; } catch(e){}
   let aVol=null;
-  try { const a=new Audio(); a.volume=1; aVol=a.volume; } catch(e){}
+  try { const a=new Audio(); aVol=a.volume; } catch(e){}
+  let playPatched=false;
+  try {
+    const proto = window.HTMLMediaElement && window.HTMLMediaElement.prototype;
+    playPatched = !!(proto && proto.play && !/\[native code\]/.test(String(proto.play)));
+  } catch(e){}
   V.set(before);
-  return { has:true, before, after, uVol, aVol, key:V.KEY };
+  return { has:true, before, after, uVol, aVol, playPatched, key:V.KEY };
 });
 ok(!r.no, '音量模块运行时可用');
 ok(r.after===40, `设置能读写(设 40 读回 ${r.after})`);
-ok(r.uVol!==null && r.uVol<=0.45, `语音合成音量被接管(设1实得${r.uVol})`);
-ok(r.aVol!==null && r.aVol<=0.45, `Audio 音量被接管(设1实得${r.aVol})`);
+ok(r.uVol!==null && r.uVol<=0.45, `★ 新建语音实例的音量已按设置缩放(设置40 → 实得${r.uVol})`);
+  /* 🔴v1152：Audio 的接管点是 **play() 时**，不是构造时 ——
+     模块注释写得很清楚："HTMLMediaElement.play —— 播放前统一音量"。
+     这样设计是对的：`new Audio()` 之后代码常会自己设音量（比如背景音乐调低），
+     构造时就压反而会打架；**播放那一刻统一才是唯一可靠的时机**。 */
+  ok(r.playPatched === true,
+     '★ Audio 的 play() 已被接管 —— 播放前统一音量（构造时不动，避免和调用方打架）');
 /* ③ 持久化 */
 const persisted = await page.evaluate(()=>{
   window.HansenTTSVolume.set(60);

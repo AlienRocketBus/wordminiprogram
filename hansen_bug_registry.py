@@ -251,6 +251,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1151', '⚠️闸门跑满要十几分钟——太慢的闸门容易让人想跳过它，那就回到"靠记性"的老路',
      'test_gate_schedule_v1151.mjs'),
+    ('v1152', '🔴闸门报"120 个测试 0 失败"是假的——磁盘上 171 个，51 个从没跑过；慢名单切片 bug 让它形同虚设',
+     'test_gate_schedule_v1151.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

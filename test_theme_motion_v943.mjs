@@ -54,7 +54,21 @@ try {
       }, theme);
       await page.waitForTimeout(120);
       const first = await sample();
-      await page.waitForTimeout(420);
+      /* 🔴v1152：**采样间隔从 420ms 拉长到 1200ms。**
+
+         这个测试在闸门里长期红着（而它被超时跳过，没人知道）。
+         查下来**产品没问题，是采样窗口不够**：
+
+         主题动画周期是 14~36 秒，420ms 只走完 1.2% 的行程。
+         如果所有元素恰好都处在轨迹的"折返点"附近（速度接近 0），
+         位移就会小于 0.2px 的阈值 —— 判定"没动"。
+
+         实测每次红的主题都不一样（pink / rainbow / peach 轮着来），
+         这正是**随机撞上慢速段**的特征，不是某个主题坏了。
+
+         拉长到 1200ms（走完约 3.5%），再叠加"多元素不同周期"，
+         同时全部落在慢速段的概率可以忽略。 */
+      await page.waitForTimeout(1200);
       const second = await sample();
       assert.equal(first.length, count, `${reducedMotion}/${theme}: actor count changed`);
       const collapsed = first.filter(actor => Math.abs(actor.x) < 1 && Math.abs(actor.y) < 1);

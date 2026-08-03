@@ -171,7 +171,19 @@ def main():
         #   不计入失败（它们由 HANSEN_DEEP=1 的深度档完整跑）。
         #   这样既保证"不许变差"有实效，又不会让闸门变成没人愿意跑的东西。
         deep = os.environ.get('HANSEN_DEEP') == '1'
-        per_timeout = 90 if deep else 12
+        # 🔴v1152：**12 秒太短了。**
+        #
+        #   实测有测试要跑 38 秒（浏览器测试尤其慢）——
+        #   它们每次都被判「超时」丢进慢名单，**从来没被真正验证过**。
+        #   而闸门显示"共 120 个测试，失败 0 个"，看起来一切正常。
+        #
+        #   **一个会悄悄少跑 30% 测试的闸门，比没有闸门更危险** ——
+        #   它给的是虚假的安全感。
+        #
+        #   现在：普通档 45 秒（覆盖实测最慢的 38 秒还有余量），
+        #   深度档 120 秒。v1151 的"最长作业优先"已经把总时长压下来了，
+        #   放宽单个超时不会让整体变慢多少。
+        per_timeout = 120 if deep else 45
         # 🔴v1098：闸门只跑**快测试**（12 秒内能跑完的），慢的交给深度档。
         #   实测：153 个里约 50 个是浏览器测试，动辄 10~20 秒，
         #   全跑要十几分钟 —— 那样人会绕过闸门，回到"靠记性"的老路。
@@ -211,10 +223,13 @@ def main():
             tests.sort(key=lambda t: -_hist.get(os.path.basename(t), 0))
         if known_slow:
             print('  ⏭  跳过 %d 个已知慢测试（用 HANSEN_DEEP=1 完整跑）' % len(known_slow))
+        # v1152: 把"实际会跑多少"打出来 —— 之前只报"共 N 个测试"，
+        #        而那个 N 已经是扣掉慢名单之后的数，看不出漏了多少。
+        print('  📋 磁盘上 %d 个测试，本轮实跑 %d 个' % (len(all_tests), len(tests)))
         # 并行跑 —— 153 个串行要十几分钟，闸门必须是分钟级的，
         # 否则人会绕过它（那就回到"靠记性"的老路）。
         from concurrent.futures import ThreadPoolExecutor
-        def _run(t):
+        def _run(t, heavy=False):
             """🔴v1098：**失败要复核一次再算数。**
 
             第一版用 8 线程并行，结果 7 个测试报红 —— 而单独跑全是绿的。
@@ -228,7 +243,7 @@ def main():
             _t0 = time.time()
             try:
                 r = subprocess.run(['node', t], cwd=ROOT, capture_output=True,
-                                   timeout=per_timeout)
+                                   timeout=(per_timeout * 3 if heavy else per_timeout))
                 _spent[os.path.basename(t)] = round(time.time() - _t0, 1)
                 return None if r.returncode == 0 else os.path.basename(t)
             except subprocess.TimeoutExpired:
@@ -236,15 +251,46 @@ def main():
             except Exception:
                 return os.path.basename(t)
         _spent = {}
+
+        # 🔴v1152：**已知的慢测试串行跑，不参与并行。**
+        #
+        #   实测发现一个更深的问题：
+        #   `test_camel_runtime` 单独跑 56 秒，`test_boss_timer` 51 秒 ——
+        #   **它们不是"慢测试"，是被并行拖慢的**。
+        #   4 个浏览器测试同时抢 CPU 时，单个耗时会翻倍甚至更多。
+        #
+        #   而闸门给 45 秒超时 → 判"跑不完" → 不计失败 → **悄悄放过**。
+        #   这是"看起来 0 失败"的第二层原因
+        #   （第一层是慢名单切片 bug + 12 秒超时，本版已修）。
+        #
+        #   做法：耗时排前几名的**单独串行跑**（不抢资源，用真实耗时就够），
+        #   其余的照常并行。总时长几乎不变，但**它们真的被验证了**。
+        _heavy = []
+        if _hist:
+            _ranked = sorted(tests, key=lambda t: -_hist.get(os.path.basename(t), 0))
+            _heavy = [t for t in _ranked[:6] if _hist.get(os.path.basename(t), 0) >= 20]
+        _light = [t for t in tests if t not in _heavy]
+        if _heavy:
+            print('  🐢 %d 个重测试串行跑（并行会互相抢 CPU，导致假超时）' % len(_heavy))
+
+        raw = []
         with ThreadPoolExecutor(max_workers=4) as ex:
-            raw = [x for x in ex.map(_run, tests) if x]
+            raw += [x for x in ex.map(_run, _light) if x]
+        for t in _heavy:                       # 串行，给足时间
+            x = _run(t, heavy=True)
+            if x:
+                raw.append(x)
         # v1151: 记下这一轮的耗时，供下次排序用
         try:
             _hist.update(_spent)
             json.dump(_hist, open(TIME_FILE, 'w', encoding='utf-8'))
         except Exception:
             pass
-        slow = [x[7:] for x in raw if x.startswith('~SLOW~')]
+        # 🔴v1152：**这里原来写的是 x[7:]，而 '~SLOW~' 只有 6 个字符** ——
+        #   切 7 位把文件名的首字母也削掉了，慢名单里全是 `est_xxx.mjs`，
+        #   **永远匹配不上任何真实文件名**。
+        #   于是慢名单形同虚设，而且没人发现 —— 因为它"看起来在工作"。
+        slow = [x[len('~SLOW~'):] for x in raw if x.startswith('~SLOW~')]
         suspect = [x for x in raw if not x.startswith('~SLOW~')]
         # 🔴v1098：**失败要串行复核一次再算数。**
         #   第一版 8 线程并行时 7 个测试报红，单独跑全是绿的 ——
