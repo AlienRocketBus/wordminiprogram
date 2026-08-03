@@ -237,6 +237,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1144', '🔴归属标记会被备份带走(B 恢复 A 的码后自己进度被判成别人的)；且标记打得太早(对账失败也标)',
      'test_account_switch_v1142.mjs'),
+    ('v1145', '🔴退出登录前不上传——A 玩完退出、B 登录覆盖本机，A 那段进度直接丢了',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

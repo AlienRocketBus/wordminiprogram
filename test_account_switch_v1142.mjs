@@ -208,5 +208,62 @@ function boot(init) {
      '漏标只是少标一次（下次登录会补），早标一次会把别人的进度算成你的');
 }
 
+
+/* ── 🔴v1145 追加：退出前必须先上传 ──────────────────────
+ *
+ * 推演 A→B→A 来回换（多人共用一台手机时很常见，孩子轮流玩）：
+ *
+ *   ① A 登录 → 从云端恢复 A 档
+ *   ② A 玩了一会儿        → 本机 = A档 + 新进度
+ *   ③ 退出
+ *   ④ B 登录 → 本机被 B 档覆盖
+ *   → **A 在②玩的那段进度，没上传就没了。**
+ *
+ * v1134 的"数据一变就同步"有 8 秒合并延迟 ——
+ * **打完一局立刻退出登录，那 8 秒内的进度必丢。**
+ */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = code.indexOf('function signOut');
+  const seg = code.slice(i, i + 1800);
+
+  ok(/_bye = CS\.syncNow\(\{ force: true \}\)/.test(seg),
+     '★ 退出登录前先强制上传一次 —— 否则最后那段进度会丢');
+  ok(/_bye\.then\(function \(\) \{ return auth\(\); \}\)/.test(seg),
+     '★ **等上传完再真正退出** —— 否则清了登录态，上传就没凭证了');
+  ok(/syncNow\(\{ force: true \}\)\['catch'\]/.test(seg),
+     '★ 上传失败也照常退出 —— 不能把人卡在登录态里');
+
+  const iUp = seg.indexOf('_bye = CS.syncNow');
+  const iOut = seg.indexOf('_bye.then(function () { return auth(); })');
+  ok(iUp >= 0 && iOut > iUp, '★ 顺序正确：先上传，后退出');
+}
+
+/* A→B→A 的完整推演 */
+{
+  function sim(uploadOnSignOut) {
+    let owner = '', cloud = { A: 'A档v1', B: 'B档v1' }, local = '空';
+    function login(uid) {
+      const foreign = !!(owner && uid && owner !== uid);
+      const hasLocal = (local !== '空') && !foreign;
+      const hasCloud = !!cloud[uid];
+      if (hasCloud && !hasLocal) local = cloud[uid];
+      else if (!hasCloud && hasLocal) cloud[uid] = local;
+      owner = uid;
+    }
+    const play = (w, t) => { local = w + '档' + t; };
+    const logout = () => { if (uploadOnSignOut && owner) cloud[owner] = local; };
+    login('A'); play('A', 'v2'); logout();
+    login('B'); play('B', 'v2'); logout();
+    login('A');
+    return local;
+  }
+  ok(sim(false) === 'A档v1',
+     '★ 复现旧 bug：不上传就退出 → A 回来只剩 v1，中间玩的丢了');
+  ok(sim(true) === 'A档v2',
+     '★ 修复后：A→B→A 来回换，A 玩的进度还在');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

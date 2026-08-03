@@ -494,6 +494,30 @@
 
   /* ── ③ 登出 ─────────────────────────────────────── */
   function signOut() {
+    /* 🔴v1145：**退出登录前先把进度传上去。**
+
+       推演 A→B→A 来回换时发现的：
+         ① A 登录、玩了一会儿
+         ② 退出
+         ③ B 登录 → 本机被 B 的存档覆盖
+         → **A 在①玩的那段进度，没上传就没了。**
+
+       v1134 的"数据一变就同步"有 8 秒合并延迟 ——
+       打完一局立刻退出登录，那 8 秒内的进度必丢。
+       而"打完就退出换号"在多人共用一台手机时很常见（孩子轮流玩）。
+
+       所以这里**同步等一次上传**再继续退出。
+       上传失败也照常退出（不能把人卡在登录态里），
+       但至少尽力了 —— 而且失败时归属标记还是旧的，
+       下次那个人登录时对账会再救一次。 */
+    var _bye = Promise.resolve();
+    try {
+      var CS = window.HansenCloudSave;
+      if (CS && typeof CS.syncNow === 'function') {
+        _bye = CS.syncNow({ force: true })['catch'](function () {});
+      }
+    } catch (e) {}
+
     /* 🔴v1142：**退出登录时把本地资料也清掉。**
 
        用户现场：退出 A 号、登 B 号（B 的竞赛 ID 是 003），
@@ -517,7 +541,9 @@
        于是把别人的进度传到自己账号上。
        标记只在**新的人登录并完成对账**时才更新。 */
 
-    return auth().then(function (a) {
+    /* v1145: 等上传完再真正退出 —— 否则清了登录态，上传就没凭证了。
+       上传失败也继续退出（不能把人卡在登录态里）。 */
+    return _bye.then(function () { return auth(); }).then(function (a) {
       return a.signOut ? a.signOut() : null;
     }).catch(function () { return null; }).then(function () {
       writeLocal({ method: '', signedAt: 0, uid: '' });
