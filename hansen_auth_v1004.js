@@ -514,7 +514,19 @@
     try {
       var CS = window.HansenCloudSave;
       if (CS && typeof CS.syncNow === 'function') {
-        _bye = CS.syncNow({ force: true })['catch'](function () {});
+        /* 🔴v1146：**上传要有超时。**
+           实测推演：云端卡住不返回时 `_bye` 永不 resolve，
+           后面的 signOut 就永远不执行 —— **用户点了退出，退不出去**。
+           手机上网络卡住（连着但不返回）比断网还常见。
+
+           给 6 秒：够一次正常上传（实测通常 1~2 秒），
+           又不至于让人对着转圈干等。超时就放弃上传继续退出 ——
+           **退不出去比丢一点进度更糟**，而且归属标记还是旧的，
+           下次那个人登录时对账会再救一次。 */
+        _bye = Promise.race([
+          CS.syncNow({ force: true })['catch'](function () {}),
+          new Promise(function (r) { setTimeout(r, 6000); })
+        ]);
       }
     } catch (e) {}
 

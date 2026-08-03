@@ -264,7 +264,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1145')
+               import('./vendor_cloudbase_esm_v965.js?v=1146')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -492,6 +492,7 @@
 
   /* ---------- 上云 / 回档 ---------- */
   var _busy = false;
+  var _busyTail = null;   /* v1146: 进行中的那次同步，force 要能排在它后面 */
   function syncNow(opts){
     opts = opts || {};
     var p = provider();
@@ -502,7 +503,20 @@
        用户点「立即同步」走 force 分支，成功后自动置 enabled。 */
     if(!opts.force && !readState().enabled)
       return Promise.resolve({ ok:false, reason:'not-enabled' });
-    if(_busy) return Promise.resolve({ ok:false, reason:'busy' });
+    /* 🔴v1146：**force 要能等前一次同步完，而不是直接放弃。**
+
+       原来只要 `_busy` 就返回 busy —— 连 force 也挡。
+       实测推演：v1145 加的"退出登录前强制上传"，
+       如果这时 v1134 的自动同步刚好在跑（数据一变 8 秒后触发），
+       **强制上传就被 busy 挡掉了，等于没上传** ——
+       用户以为退出前保存了，其实那段进度还是丢。
+
+       改为：force 时**排队等前一次做完再做自己这次**；
+       非 force 仍然直接跳过（那只是例行同步，晚一轮没关系）。 */
+    if(_busy) {
+      if(!opts.force) return Promise.resolve({ ok:false, reason:'busy' });
+      if(_busyTail) return _busyTail.then(function(){ return syncNow(opts); });
+    }
     var st = readState();
     if(!opts.force && st.lastUpAt && (Date.now() - st.lastUpAt) < SYNC_MIN_GAP)
       return Promise.resolve({ ok:false, reason:'cooldown' });
@@ -525,7 +539,8 @@
                 地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
     _busy = true;
-    return docIdOf(key).then(function(targetId){
+    /* v1146: 把这一次记下来，force 的调用方要能排在它后面 */
+    var run = docIdOf(key).then(function(targetId){
       if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
         _busy = false;
         return { ok:true, skipped:true, reason:'unchanged' };
@@ -535,6 +550,9 @@
       _busy = false;
       return { ok:false, reason:'upload-failed', error: friendly(e) };
     });
+    _busyTail = run.then(function(){ _busyTail = null; },
+                         function(){ _busyTail = null; });
+    return run;
   }
 
   /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */

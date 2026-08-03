@@ -239,6 +239,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1145', '🔴退出登录前不上传——A 玩完退出、B 登录覆盖本机，A 那段进度直接丢了',
      'test_account_switch_v1142.mjs'),
+    ('v1146', '🔴退出前的强制上传有两条会白做：正在同步时被 busy 挡掉；云端卡住时退不出去',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

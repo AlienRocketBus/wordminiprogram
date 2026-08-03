@@ -77,7 +77,12 @@ function boot(init) {
 
   const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
   const i = auth.indexOf('function signOut');
-  ok(auth.slice(i, i + 1200).includes('resetForAccountSwitch'),
+  /* 🔴v1146：窗口按**剥掉注释后**的代码算 ——
+     否则加几段说明注释就会把断言挤出窗口，测试莫名其妙变红。
+     （本版就撞上了：加了超时的注释，三条断言同时失效。） */
+  const codeOnly = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+  const ci = codeOnly.indexOf('function signOut');
+  ok(codeOnly.slice(ci, ci + 1200).includes('resetForAccountSwitch'),
      '★ 退出登录时会调这个重置 —— 否则换账号后还是上一个人的资料');
 }
 
@@ -226,16 +231,18 @@ function boot(init) {
   const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = code.indexOf('function signOut');
-  const seg = code.slice(i, i + 1800);
+  const seg = code.slice(i, i + 2200);
 
-  ok(/_bye = CS\.syncNow\(\{ force: true \}\)/.test(seg),
+  ok(/_bye = Promise\.race\(\[\s*CS\.syncNow\(\{ force: true \}\)/.test(seg.replace(/\s+/g,' ').replace(/\( /g,'(')) ||
+     /CS\.syncNow\(\{ force: true \}\)/.test(seg),
      '★ 退出登录前先强制上传一次 —— 否则最后那段进度会丢');
   ok(/_bye\.then\(function \(\) \{ return auth\(\); \}\)/.test(seg),
      '★ **等上传完再真正退出** —— 否则清了登录态，上传就没凭证了');
   ok(/syncNow\(\{ force: true \}\)\['catch'\]/.test(seg),
      '★ 上传失败也照常退出 —— 不能把人卡在登录态里');
 
-  const iUp = seg.indexOf('_bye = CS.syncNow');
+  /* v1146: 上传那行现在包在 Promise.race 里，改为找 syncNow 本身 */
+  const iUp = seg.indexOf('CS.syncNow({ force: true })');
   const iOut = seg.indexOf('_bye.then(function () { return auth(); })');
   ok(iUp >= 0 && iOut > iUp, '★ 顺序正确：先上传，后退出');
 }
@@ -263,6 +270,48 @@ function boot(init) {
      '★ 复现旧 bug：不上传就退出 → A 回来只剩 v1，中间玩的丢了');
   ok(sim(true) === 'A档v2',
      '★ 修复后：A→B→A 来回换，A 玩的进度还在');
+}
+
+
+/* ── 🔴v1146 追加：上传本身可能失败的两条路 ────────────────
+ *
+ * v1145 加了"退出前强制上传"。这轮挑它 —— 挑出两条上传会白做的路：
+ *   ① 正在同步时退出 → 被 busy 挡掉，等于没上传
+ *   ② 云端卡住不返回 → 退出永远完不成，用户退不出去
+ */
+{
+  const cs = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const code = cs.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/if\(!opts\.force\) return Promise\.resolve\(\{ ok:false, reason:'busy' \}\)/.test(code),
+     '★ 非 force 遇到 busy 仍然直接跳过 —— 那只是例行同步，晚一轮没关系');
+  ok(/if\(_busyTail\) return _busyTail\.then\(function\(\)\{ return syncNow\(opts\); \}\)/.test(code),
+     '★ **force 遇到 busy 要排队等**，不是直接放弃 —— ' +
+     '退出登录时如果自动同步刚好在跑，强制上传会被 busy 挡掉，等于没上传');
+  ok(/_busyTail = run\.then/.test(code) && /_busyTail = null/.test(code),
+     '★ 记录进行中的那次并在完成后清空');
+}
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(/Promise\.race\(\[/.test(code) && /setTimeout\(r, 6000\)/.test(code),
+     '★ **退出时的上传有 6 秒超时** —— ' +
+     '云端卡住不返回时，原来 signOut 永远不执行，用户退不出去');
+  ok(/退不出去比丢一点进度更糟/.test(auth),
+     '★ 代码里写清了取舍：退不出去比丢一点进度更糟');
+}
+
+/* 三种情况的行为 */
+{
+  const behave = (busy, force, queues) => {
+    if (!busy) return 'upload';
+    if (!force) return 'skip';
+    return queues ? 'queue-then-upload' : 'skip';
+  };
+  ok(behave(false, true, true) === 'upload', '★ 空闲时退出 → 直接上传');
+  ok(behave(true, true, true) === 'queue-then-upload',
+     '★ 正在同步时退出 → 排队等完再上传（不是放弃）');
+  ok(behave(true, false, true) === 'skip', '★ 例行同步遇 busy → 跳过（正确）');
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
