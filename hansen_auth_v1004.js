@@ -1081,6 +1081,26 @@
   function notifyTabStale(was, now) {
     try {
       if (document.getElementById('hsnTabStale')) return;
+
+      /* 🔴v1148：**先把正在进行的对战收掉，再盖提示。**
+
+         实测：提示盖上了，但**对战的定时器还在后台跑** ——
+         心跳继续发、回合继续推进，
+         → **对手那边看不出任何异常，一直等着一个已经不该在这儿的人**
+         → 直到 60 秒掉线判定才结束，白白浪费对方一分钟
+
+         而且这个人此刻用的还是上一个账号的身份，
+         打完这局的战绩记到谁头上都不对。
+
+         所以：**盖提示之前先退出房间**。
+         对手会立刻收到"对手离场"，比干等一分钟好得多。 */
+      try {
+        if (window.HansenPkRoomUI && HansenPkRoomUI.close) HansenPkRoomUI.close();
+      } catch (e) {}
+      try {
+        if (window.HansenFriendsUI && HansenFriendsUI.close) HansenFriendsUI.close();
+        if (window.HansenLadderUI && HansenLadderUI.close) HansenLadderUI.close();
+      } catch (e) {}
       var d = document.createElement('div');
       d.id = 'hsnTabStale';
       d.setAttribute('style',

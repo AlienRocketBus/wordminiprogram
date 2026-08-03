@@ -243,6 +243,8 @@ REGISTRY = [
      'test_account_switch_v1142.mjs'),
     ('v1147', '🔴账号变更不跨标签页——旧标签继续写上一个人的进度，被算成新账号的传上去',
      'test_account_switch_v1142.mjs'),
+    ('v1148', '🔴跨标签页提示盖上了，但对战还在后台跑——对手干等 60 秒才知道人不在了',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

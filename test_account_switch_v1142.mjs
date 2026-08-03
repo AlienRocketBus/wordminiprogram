@@ -353,5 +353,48 @@ function boot(init) {
      '没法安全迁移到新账号名下，让用户自己决定什么时候刷新');
 }
 
+
+/* ── 🔴v1148 追加：过期标签页里正在进行的对战 ──────────────
+ *
+ * v1147 加了跨标签页提示。这轮挑它 —— **提示盖上了，但对战还在后台跑**：
+ *   · 心跳继续发、回合继续推进
+ *   · **对手那边看不出任何异常，一直等着一个已经不该在这儿的人**
+ *   · 直到 60 秒掉线判定才结束，白白浪费对方一分钟
+ *
+ * 而且这个人此刻用的还是上一个账号的身份，
+ * **打完这局的战绩记到谁头上都不对。**
+ */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = code.indexOf('function notifyTabStale');
+  /* 窗口要够长 —— 提示层的 HTML 拼接本身就有几百字符。
+     窗口开太小会让"顺序"这类断言莫名其妙红掉（本版就撞上了）。 */
+  const seg = code.slice(i, i + 2200);
+
+  ok(/HansenPkRoomUI\.close\(\)/.test(seg),
+     '★ **盖提示之前先关掉对战** —— ' +
+     '否则心跳和回合继续跑，对手要干等 60 秒才知道人不在了');
+  ok(/HansenFriendsUI\.close\(\)/.test(seg) && /HansenLadderUI\.close\(\)/.test(seg),
+     '★ 好友页、天梯页也一并收掉 —— 它们同样在轮询云端');
+
+  /* 顺序：先关，后盖 */
+  const iClose = seg.indexOf('HansenPkRoomUI.close()');
+  const iShow = seg.indexOf('appendChild');
+  ok(iClose >= 0 && iShow > iClose,
+     '★ 顺序正确：先收对战，再盖提示');
+}
+
+/* 提示层本身的几条 */
+{
+  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
+  ok(/if \(document\.getElementById\('hsnTabStale'\)\) return;/.test(code),
+     '★ 提示层不会重复叠加（连换两次账号也只有一层）');
+  ok(/z-index:2147483646/.test(code),
+     '★ z-index 在对战屏(2147483600)之上、file:// 自救层(2147483647)之下 —— ' +
+     '位置合理：能盖住对战，但不会挡住"这是下载的文件"那个更根本的提示');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);
