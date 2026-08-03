@@ -92,13 +92,37 @@
    * 约定：云端 counters/sb_cid 文档做原子自增，返回全局唯一序号。 */
   function claimCloudId(assignedNumber) {
     var p = readProfile();
-    if (p.cidLocked) return { ok: true, cid: p.cid, already: true };
     var n = Math.floor(+assignedNumber || 0);
     if (n <= 0) return { ok: false, reason: '云端未返回有效号码' };
+
+    /* 🔴v1142：**云端说的号和本地锁着的号不一样 → 以云端为准。**
+
+       原来只要 `cidLocked` 为真就直接返回，云端说什么都不听。
+       用户现场：退出 A 号（No.002）登 B 号（No.003），
+       云端明明回了 003，本地却因为锁着而一直显示 002。
+
+       "锁死终身不变"这条规矩没错 —— 但它的意思是
+       **同一个账号的号不变**，不是"这台手机上第一次拿到的号不变"。
+       换了账号，号当然要换。
+
+       云端的 cid 是按注册顺序算出来的，**它才是唯一权威**。
+       本地这份只是缓存。缓存和权威不一致时，永远以权威为准。 */
+    if (p.cidLocked && p.cid === n) return { ok: true, cid: n, already: true };
+    var changed = (p.cidLocked && p.cid !== n);
+
     p.cid = n;
-    p.cidLocked = true;    /* 锁死：此后终身不变 */
+    p.cidLocked = true;
+    if (changed) {
+      /* 换账号了 —— 名字和改名冷却也是上一个账号的，一并清掉。
+         否则新账号会顶着旧名字，而且点改名被告知"冷却中"。 */
+      p.name = '';
+      p.nameChangedAt = 0;
+    }
     writeProfile(p);
-    return { ok: true, cid: n };
+    if (changed) {
+      try { document.dispatchEvent(new CustomEvent('hsn-profile-reset')); } catch (e) {}
+    }
+    return { ok: true, cid: n, switched: changed };
   }
   function validateName(name) {
     var n = String(name == null ? '' : name).trim();
@@ -438,7 +462,37 @@
     if (el) el.classList.remove('on');
   }
 
+  /* ── 🔴v1142 换账号时清掉上一个人的资料 ──────────────────
+
+     用户现场：手机上退出 A 号、登了 B 号（B 的竞赛 ID 是 003），
+     **页面上还显示 A 的名字和 No.002**，而且点了也改不了名字。
+
+     两个症状，一个根子：**退出登录时完全不动本地资料。**
+       · 名字和 cid 还是上一个账号的
+       · `cidLocked` 是锁死的 → B 的 003 写不进去
+       · `nameChangedAt` 是 A 留下的 → B 点改名被告知"冷却中"
+
+     这违反了本项目最核心的一条：**所有数据必须跟着账号走。**
+     资料（名字、竞赛 ID、头像）当然也是数据。
+
+     做法：退出登录时把资料重置为空白。
+     不是"删掉这个键"——那样别的模块读到 null 可能出别的问题；
+     而是**写回一份干净的初始资料**，语义明确、行为可预期。 */
+  function resetForAccountSwitch() {
+    try {
+      var blank = {
+        name: '', cid: 0, cidLocked: false,
+        avatar: '\ud83d\udc1d', showcase: [], privacy: 'public',
+        nameChangedAt: 0    /* 冷却也要清 —— 那是上一个账号的记录 */
+      };
+      localStorage.setItem(PKEY, JSON.stringify(blank));
+      try { document.dispatchEvent(new CustomEvent('hsn-profile-reset')); } catch (e) {}
+      return { ok: true };
+    } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
+  }
+
   window.HansenSbProfile = {
+    resetForAccountSwitch: resetForAccountSwitch,
     _open: open,
     _close: close,
     readProfile: readProfile,

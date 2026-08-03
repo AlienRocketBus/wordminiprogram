@@ -53,8 +53,21 @@ function boot() {
   const r = P.claimCloudId(7);
   ok(r.ok && r.cid === 7, '★ 云端发号生效');
   ok(P.readProfile().cidLocked === true, '★ 发号后锁死');
-  const again = P.claimCloudId(99);
-  ok(again.already === true && P.readProfile().cid === 7, '★ 终身不变，再发也不改');
+  /* 🔴v1142 契约细化：「终身不变」指的是**同一个账号**的号不变，
+     不是"这台手机上第一次拿到的号不变"。
+
+     真机现场暴露了区别：退出 A 号登 B 号，云端明明回了 B 的号，
+     本地却因为锁着而一直显示 A 的 —— 而且名字也改不了。
+
+     所以现在：**云端说什么就是什么**。
+     同一个号重复认领 → already，什么都不动；
+     号不一样 → 认定是换了账号，号跟上、名字和改名冷却一并清掉。 */
+  const again = P.claimCloudId(7);
+  ok(again.already === true && P.readProfile().cid === 7,
+     '★ 同一个号重复认领 → 不动（already）');
+  const switched = P.claimCloudId(99);
+  ok(switched.switched === true && P.readProfile().cid === 99,
+     '★ 云端换了号 → 以云端为准（换账号时必须跟上，否则新号顶着旧号）');
   ok(P.fmtCid(7) === '007', '★ 格式化补零 No.007');
 }
 

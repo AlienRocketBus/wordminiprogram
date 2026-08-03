@@ -494,6 +494,24 @@
 
   /* ── ③ 登出 ─────────────────────────────────────── */
   function signOut() {
+    /* 🔴v1142：**退出登录时把本地资料也清掉。**
+
+       用户现场：退出 A 号、登 B 号（B 的竞赛 ID 是 003），
+       页面上还显示 A 的名字和 No.002，而且点了也改不了名字。
+
+       根子是这里什么都没清：
+         · 名字和 cid 还是 A 的
+         · `cidLocked` 锁死 → B 的 003 写不进去
+         · `nameChangedAt` 是 A 留下的 → B 改名被告知"冷却中"
+
+       这违反了本项目最核心的一条：**所有数据必须跟着账号走。**
+       资料（名字、竞赛 ID）当然也是数据。 */
+    try {
+      if (window.HansenSbProfile && HansenSbProfile.resetForAccountSwitch) {
+        HansenSbProfile.resetForAccountSwitch();
+      }
+    } catch (e) {}
+
     return auth().then(function (a) {
       return a.signOut ? a.signOut() : null;
     }).catch(function () { return null; }).then(function () {

@@ -231,6 +231,8 @@ REGISTRY = [
     ('v1141', '🔒给「打开变下载」上四道锁：部署配置写死 indexPath、SW 兜底、'
               '页面内联自救（hansen_selfrescue_v1141.js）、守卫盯死',
      'test_download_fix_v1140.mjs'),
+    ('v1142', '🔴换账号后还显示上一个人的名字和竞赛 ID，且点了改不了名字（冷却是上个账号留下的）',
+     'test_account_switch_v1142.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
