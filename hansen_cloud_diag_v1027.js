@@ -85,7 +85,13 @@
   function run() {
     var el = document.getElementById(ID);
     if (!el) return;
-    var out = '<h3>☁️ 云同步自检</h3><div class="d_sub">把这一屏截图发给开发者即可定位问题</div>';
+    /* 🔴v1140：**「打开变下载」的自查放在最上面。**
+       这个问题会让人**根本进不来**，所以比任何云同步项都更该先看到。
+       探测是异步的，先占个位，结果回来再填。 */
+    var out = '<div id="dlFix" style="margin:8px 0;padding:10px 12px;border-radius:10px;'
+            + 'background:rgba(255,255,255,.06);font-size:12.5px;white-space:pre-wrap;'
+            + 'line-height:1.7">正在检查「网页会不会被当成文件下载」…</div>'
+            + '<h3>☁️ 云同步自检</h3><div class="d_sub">把这一屏截图发给开发者即可定位问题</div>';
     var A = window.HansenAuth, CS = window.HansenCloudSave, B = window.HansenBackup;
 
     /* 1 模块是否到场 */
@@ -199,6 +205,19 @@
                        || window.__HSN_APP_VERSION || '未知'; }catch(e){ return '未知'; } })()
       + '  ·  页面 v' + (function(){ try{
             var m = String(document.documentElement.innerHTML).match(/\?v=(\d+)/);
+
+    /* 🔴v1140 填入「打开变下载」自查结果（异步，占位先渲染） */
+    try {
+      if (window.HansenDownloadFix) {
+        HansenDownloadFix.report().then(function (txt) {
+          var box = document.getElementById('dlFix');
+          if (box) box.textContent = txt;
+        })['catch'](function (e) {
+          var box = document.getElementById('dlFix');
+          if (box) box.textContent = '检查失败：' + String((e && e.message) || e).slice(0, 60);
+        });
+      }
+    } catch (e) {}
             return m ? m[1] : '未知';
           }catch(e){ return '未知'; } })()
       + '</div>'

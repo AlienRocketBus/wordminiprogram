@@ -226,6 +226,8 @@ REGISTRY = [
      'test_room_match_v1135.mjs'),
     ('v1139', '🔴SW 升级门被挤到第二位（"做出来的东西不显示"会复发）；另有一条过期断言长期红着',
      'test_sw_upgrade_v944.mjs'),
+    ('v1140', '🔴网页从浏览器打开变成下载 HTML —— 服务端把 HTML 当附件下发，而 SW 兜不住第一次访问',
+     'test_download_fix_v1140.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
