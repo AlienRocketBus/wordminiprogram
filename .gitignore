@@ -18,3 +18,6 @@ releases/
 # v1098: 慢测试名单是本机性能相关的状态，不同机器不一样，不入库
 .jarvis_slow.json
 .jarvis_time.json
+.jarvis_resume.json
+.jarvis_selftest_ok.json
+.jarvis_resume.json.tmp

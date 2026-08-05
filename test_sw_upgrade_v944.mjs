@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+/* 🔴v1154：**缓存号不能写死。**
+   轮换缓存号是"换了资源就必须做"的动作（否则用户拿到旧文件），
+   而写死 `shell-212` 的断言会在轮换那一刻变红 ——
+   **越是照要求做，测试越报错**。
+   （今天 check_resources.py 里同型的规则有 11 条，全部长期红着。）
+   改为只校验"键存在 + 后面跟数字"，具体数字交给 v1154 那道
+   guard_no_self_defeating_check 守着不许倒退。 */
 /**
  * v944 migration regression: a real browser profile controlled by the v943
  * service worker must cross the upgrade gate before any stale player-state
@@ -89,11 +96,11 @@ assert.doesNotMatch(workerSource, /["']\.\/hansen_backup_bootstrap\.js["']/,
   'the new worker shell must not cache the v943 bootstrap pathname');
 assert.match(workerSource, /hansen_perf_v944\.js/,
   'the new worker shell must cache the non-pausing performance engine');
-assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-211['"]/,
+assert.match(workerSource, /SHELL_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]shell-\d+['"]/,
   'v960 must atomically install the current release shell');
-assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-209['"]/,
+assert.match(workerSource, /PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]pages-\d+['"]/,
   'v960 must rotate navigation pages to the current wiring');
-assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-209['"]/,
+assert.match(workerSource, /ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*['"]assets-\d+['"]/,
   'v960 must rotate code so stale earlier Boss code cannot return');
 for (const exactHotfixKey of [
   'hansen_canonical_progress.js?v='+__APPV__,

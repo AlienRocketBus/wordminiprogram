@@ -80,9 +80,27 @@ async function run(){
   await page.evaluate(()=>{const original=window.showWord;window.__hxpOpenCount=0;window.showWord=function(){window.__hxpOpenCount++;return original.apply(this,arguments);};});
   await first.focus();await page.keyboard.press('Enter');await page.waitForSelector('#wordModal.show');
   assert.equal(await page.evaluate(()=>window.__hxpOpenCount),1,'Enter must open one detail, not trigger duplicate accessibility handlers');
+  /* 🔴v1153：**等焦点进入浮层再取快照。**
+     浮层打开后，焦点收拢也是异步的（等淡入动画结束才 focus）——
+     立刻取快照会读到 `active: false`，实测就撞上过。
+     这个测试一共 3 处焦点断言，**每一处都要等** ——
+     只加固一处的话，红的位置只是换个地方出现。 */
+  await page.waitForFunction(
+    () => { const m = document.getElementById('modalInner');
+            return m && m.contains(document.activeElement); },
+    { timeout: 2000 }).catch(()=>{});
   const dialog=await page.evaluate(()=>{const m=document.getElementById('modalInner'),s=m.querySelector('.hxp-modal-scroll'),x=m.querySelector('.close');s.scrollTop=s.scrollHeight;const xr=x.getBoundingClientRect();return {role:m.getAttribute('role'),modal:m.getAttribute('aria-modal'),scrollable:s.scrollHeight>=s.clientHeight,closeVisible:xr.top>=0&&xr.bottom<=innerHeight,active:document.activeElement===x,nestedButtons:document.querySelectorAll('#exploreContent .exp-card button').length};});
   assert.equal(dialog.role,'dialog');assert.equal(dialog.modal,'true');assert.equal(dialog.scrollable,true);assert.equal(dialog.closeVisible,true);assert.equal(dialog.active,true);assert.equal(dialog.nestedButtons,0,'a word card must remain the only tap target');
   await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.getElementById('wordModal').classList.contains('show'));await page.waitForTimeout(20);
+  /* 🔴v1153：**等焦点真的还回去再断言。**
+     实测这条断言 5 次红 2 次，而且每次红的位置不一样 ——
+     典型的时序问题：Escape 关闭浮层后，焦点归还是异步的
+     （浮层有淡出动画，归还发生在动画回调里），
+     `waitForFunction` 只等到了 class 变化，没等到焦点落位。
+     改为轮询等焦点，最多 2 秒。 */
+  await page.waitForFunction(
+    () => document.activeElement === document.querySelector('#exploreContent .exp-card'),
+    { timeout: 2000 }).catch(()=>{});
   assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('#exploreContent .exp-card')),true,'closing the modal must return focus to its card');
 
   // A generic quiz answer still updates ordinary bookkeeping, but can no longer

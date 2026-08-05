@@ -1588,6 +1588,221 @@ def guard_no_comment_only_assert():
             '注释改个说法就假红、代码改坏却不红，完全是反的'
             % (len(fake), fake[0][0], fake[0][1][:20]))
 
+
+def guard_no_toothless_test():
+    """测试必须有失败的出口 —— 否则它只是个装饰品。
+
+    事故（v1153）：`test_light_readability_v1016` 零个 assert、
+    零个 throw、零个非零 exit ——
+    **它把 220 处低于 WCAG AA 的文字打印出来，然后以 0 退出**。
+
+    闸门看到 RC=0 就当它通过了，
+    **这些问题从来没进过任何人的视野**。
+
+    > 一个永远不红的测试比没有测试更糟：
+    > 它占着"我们测了"的名分，却什么都不拦。
+
+    判据：每个 `test_*.mjs` 至少要有一种让进程非零退出的手段 ——
+    `assert`、`throw`、或 `process.exit(非0)`。
+    """
+    import glob as _g
+    toothless = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'test_*.mjs'))):
+        name = os.path.basename(f)
+        code = _code_only(_read(name) or '')
+        if not code:
+            continue
+        has_exit = re.search(r'process\.exit\(\s*(?!0\s*\))', code)
+        has_assert = re.search(r'\bassert[.(]', code)
+        has_throw = re.search(r'\bthrow\b', code)
+        if not (has_exit or has_assert or has_throw):
+            toothless.append(name)
+    if toothless:
+        bad('无牙测试',
+            '%d 个测试没有任何失败出口（如 %s）—— '
+            '它们永远 RC=0，占着"我们测了"的名分却什么都不拦'
+            % (len(toothless), ', '.join(toothless[:3])))
+
+
+def guard_account_switch_all_paths():
+    """换账号必须在"唯一出口"上被抓到，不能靠数路径。
+
+    这一整轮反复吃的亏是同一个：**修的东西只修了一条路径。**
+
+      · v1134「数据一变就同步」——
+        钩子被 cred_trap 盖掉、enabled 一直是 false、防抖被持续写入饿死。
+        **写了 20 个版本，从来没有真正生效过。**
+
+      · v1142「换账号清资料」——
+        只挂在"点退出登录"那条路上，而
+        直接登另一个账号 / 注册后自动登录 / 云端同步登录态
+        都不走那条路。用户现场撞的正是这几条。
+
+    共同点：**我检查"代码里有没有那几行"，而不是"这件事真的发生了吗"。**
+
+    所以这道守卫盯的是**结构**而不是某一处代码：
+      ① 登录态必须只有一个写入出口（`writeLocal`）——
+         有第二处就说明路径又分叉了
+      ② 那个出口必须在 uid 变化时发信号
+      ③ 资料模块必须监听那个信号
+
+    只要这三条成立，**新增任何一条换账号的路径都会自动被覆盖**。
+    """
+    auth = _code_only(_read('hansen_auth_v1004.js') or '')
+    prof = _code_only(_read('hansen_sb_profile_v1002.js') or '')
+    if not auth or not prof:
+        bad('换账号', '账号或资料模块读不到')
+        return
+
+    # ① 登录态只有一个写入出口
+    writes = re.findall(r"localStorage\.setItem\(\s*LKEY", auth)
+    if len(writes) != 1:
+        bad('换账号',
+            '登录态有 %d 处写入点（应当只有 writeLocal 一处）—— '
+            '路径一分叉，"换账号要清资料"就又会漏掉某一条' % len(writes))
+
+    # ② 出口要在 uid 变化时发信号
+    if "hsn-account-uid-changed" not in auth:
+        bad('换账号',
+            'writeLocal 没有在 uid 变化时派发 hsn-account-uid-changed —— '
+            '那就只能靠"把每条换账号的路都堵一遍"，而那总会漏')
+    if "_before !== _after" not in auth:
+        bad('换账号', '没有比较 uid 变化前后的值')
+
+    # ③ 资料模块要接住
+    if "hsn-account-uid-changed" not in prof:
+        bad('换账号',
+            '资料模块没有监听 hsn-account-uid-changed —— '
+            '信号发了没人接，等于没发')
+    if "OWNER_UID_KEY" not in prof:
+        bad('换账号', '资料模块没有记录"这份资料属于哪个账号"')
+
+
+def guard_no_self_defeating_check():
+    """检查器/测试里不许写死缓存号 —— 越照它做，它越报错。
+
+    事故（v1154）：`check_resources.py` 有三处这样的规则 ——
+
+        if "CACHE_PREFIX + 'shell-21'" not in _sw944: 报错('未轮换缓存')
+
+    本意是对的（换了资源必须轮换缓存号，否则用户拿到旧文件），
+    但写法是**找一个写死的数字**。而"轮换"这个动作本身
+    就会让它变成 shell-22、shell-23…… 当前已经 shell-214。
+    **越是照它的要求去轮换，它越报错。**
+
+    ⚠️ 扩大覆盖（同版第二轮）：第一版只查 `check_resources.py`，
+    结果闸门跑到最后在 **4 个测试文件**里又抓到同样的写死缓存号。
+    **守卫只守一个文件，等于又一次"只修一条路径"** ——
+    这正是本轮反复吃亏的那个毛病。
+
+    危害和"永远不红的测试"是一枚硬币的两面：
+    **一个永远报红的检查，人会学会忽略它**，
+    而且它还会把后面的真问题挡住。
+    """
+    import glob as _g
+    hits = []
+    files = ['check_resources.py'] + sorted(
+        os.path.basename(x) for x in _g.glob(os.path.join(ROOT, 'test_*.mjs')))
+    for f in files:
+        src = _read(f) or ''
+        if not src:
+            continue
+        for m in re.finditer(r"(?:shell|pages|assets|icons)-(\d+)'", src):
+            line_start = src.rfind('\n', 0, m.start()) + 1
+            line = src[line_start:src.find('\n', m.start())]
+            # ⚠️ 两种不算数（v1154 第三轮自挑）：
+            #   ① `caches.open('hansen-v944-shell-5')` —— 那是**故意造一个旧缓存**
+            #      来测"新版本会不会清掉它"，写死是正确的、也必须写死
+            #   ② 注释里引用的例子
+            # ⚠️ 三种不算数（v1154 逐轮自挑收敛出来的）：
+            #   ① `caches.open('hansen-v944-shell-5')` —— 故意造旧缓存测清理，必须写死
+            #   ② `includes('hansen-v944-pages-1')` —— 断言旧缓存**已被清掉**，也必须写死
+            #   ③ 注释里引用的例子
+            #   真正要拦的只有一种：**断言"当前缓存号必须等于某个数字"**。
+            if ('caches.open' in line or 'includes(' in line
+                    or line.lstrip().startswith(('//', '*', '/*', '#'))):
+                continue
+            # `\d+` 这种结构写法不算（正则里的转义会被上面的 finditer 误抓）
+            if chr(92) + 'd+' in line:
+                continue
+            hits.append('%s:%s' % (f, m.group(0)))
+    if hits:
+        bad('自打脸检查',
+            '%d 处写死的缓存号（如 %s）—— '
+            '轮换缓存号必然让它对不上，越照要求做越报错'
+            % (len(hits), hits[0]))
+
+def guard_verified_not_assumed():
+    """关键链路必须有"真跑一遍"的证据，不能只有代码。
+
+    这一整轮最贵的教训：**代码写了 ≠ 功能通了。**
+
+      · v1134「数据一变 8 秒就同步」—— 写了 20 个版本，
+        **从来没有真正生效过**：钩子被 cred_trap 盖掉、
+        enabled 一直是 false、8 秒防抖被持续写入饿死
+        （真浏览器抓到现场：定时器创建 2 次、到期 0 次）
+      · v1142「换账号清资料」—— 只挂在"点退出登录"上，
+        而直接登另一个账号 / 注册后自动登录 / 云端同步登录态都不走那条路
+      · v1135「让数据库先滤死房」—— `where({guestId:''})` 把老房间
+        全滤没了（**字段缺失 ≠ 空字符串**），用户报"房间功能根本不能用"
+
+    共同点：**我检查"代码里有没有那几行"，而不是"这件事真的发生了吗"。**
+
+    所以这几条核心链路必须有对应的浏览器测试文件在，
+    而且测试里要真的驱动那条链（不是只读源码做正则匹配）。
+    """
+    import glob as _g
+    need = [
+        ('test_login_no_prompt_v1154.mjs', '登录/同步链'),
+        ('test_account_switch_v1142.mjs', '换账号'),
+        ('test_room_match_v1135.mjs', '房间匹配'),
+    ]
+    for fn, label in need:
+        body = _read(fn) or ''
+        if not body:
+            bad('要真跑过', '%s 不见了 —— %s 这条链就没人真跑过了' % (fn, label))
+
+
+def guard_query_no_optional_field():
+    """数据库查询条件里不许放"可能缺失的字段"。
+
+    事故（v1154，用户报"房间功能根本不能用"）：
+
+        .where({ status:'open', isPrivate:false,
+                 guestId: '',                  ← 致命
+                 heartbeatAt: gt(...) })       ← 致命
+        .orderBy('heartbeatAt', 'desc')        ← 要索引
+
+    三个都出了问题：
+      ① **字段缺失 ≠ 空字符串** —— 数据库里旧版本创建的房间
+         根本没有 `guestId` 字段，`where({guestId:''})` 一间都匹配不上
+      ② 旧房间同样没有 `heartbeatAt`
+      ③ `orderBy` 的字段在云开发要建索引，没建就整个查询报错
+
+    实测：云端 6 间房，用户只看到 1 间。
+
+    > 把过滤下推给数据库省的那点流量，
+    > **不值得用"老数据全看不见"来换**。
+
+    判据：房间查询的 where 里只允许出现**每条记录必有**的字段。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    m = re.search(r"\.where\(\{([^}]*)\}\)", src)
+    if not m:
+        return
+    cond = m.group(1)
+    for risky in ('guestId', 'heartbeatAt', 'winners', 'round'):
+        if risky in cond:
+            bad('查询条件',
+                '房间查询的 where 里带了 `%s` —— 旧记录可能没有这个字段，'
+                '带上就整批查不出来（用户现场："房间功能根本不能用"）' % risky)
+    if "orderBy('heartbeatAt'" in src:
+        bad('查询条件',
+            "按 heartbeatAt 排序需要在云开发建索引，没建整个查询会报错；"
+            "改用每条记录必有的 createdAt")
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1654,6 +1869,14 @@ GUARDS = [
     ('窗口断言',     guard_window_assert_strips_comments),
     # v1150
     ('假断言',       guard_no_comment_only_assert),
+    # v1153
+    ('无牙测试',     guard_no_toothless_test),
+    # v1154
+    ('换账号',       guard_account_switch_all_paths),
+    # v1154 这一轮的三条教训
+    ('自打脸检查',   guard_no_self_defeating_check),
+    ('要真跑过',     guard_verified_not_assumed),
+    ('查询条件',     guard_query_no_optional_field),
 ]
 
 

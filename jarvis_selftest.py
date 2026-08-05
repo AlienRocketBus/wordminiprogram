@@ -345,6 +345,55 @@ def _inj_fake_assert(s):
     return s.replace(marker, inject + marker, 1)
 
 
+
+def _inj_toothless(s):
+    """把失败出口拆掉 —— 测试就变成只会打印的装饰品。
+
+    ⚠️ 只动**这个测试文件自己**的退出语句，
+    不做任何全局替换 —— v1153 第一版写成 `s.replace('assert', ...)`，
+    结果把无关内容也改了，**连产品文件都被污染**（当场从 git 恢复）。
+    自证注入必须是**外科手术式**的：改一处、改得准。
+    """
+    if 'process.exit(fail === 0 ? 0 : 1)' not in s:
+        return None
+    return s.replace('process.exit(fail === 0 ? 0 : 1)', 'process.exit(0)', 1)
+
+
+
+def _inj_acct_switch(s):
+    """拆掉 uid 变化信号 —— 换账号就只能靠"把每条路都堵一遍"了。"""
+    m = "hsn-account-uid-changed"
+    if m not in s:
+        return None
+    return s.replace(m, "hsn-nobody-listens", 1)
+
+
+
+def _inj_self_defeating(s):
+    """把写死的缓存号塞回去 —— 越照它要求轮换，它越报错。"""
+    m = "_cache_keys = {}"
+    if m not in s:
+        return None
+    return s.replace(m, "if \"CACHE_PREFIX + 'shell-21'\" not in _sw944:\n"
+                        "        _b941_release.append('x')\n    " + m, 1)
+
+
+def _inj_no_browser_test(s):
+    """把浏览器测试的驱动部分拆掉 —— 只剩读源码做正则，等于没真跑。"""
+    m = "chromium.launch"
+    if m not in s:
+        return None
+    return s.replace(m, "__no_browser_launch", 1)
+
+
+def _inj_query_optional_field(s):
+    """把可能缺失的字段塞回查询条件 —— 旧记录会整批查不出来。"""
+    m = ".where({ status: 'open', isPrivate: false })"
+    if m not in s:
+        return None
+    return s.replace(m, ".where({ status: 'open', isPrivate: false, guestId: '' })", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -395,6 +444,11 @@ CASES = [
     ('打开变下载',   'cloudbaserc.json',           _inj_index_path),
     ('窗口断言',     'test_cid_order_v1130.mjs',     _inj_window_assert),
     ('假断言',       'test_cid_order_v1130.mjs',     _inj_fake_assert),
+    ('无牙测试',     'test_cid_order_v1130.mjs',     _inj_toothless),
+    ('换账号',       'hansen_auth_v1004.js',        _inj_acct_switch),
+    ('自打脸检查',   'check_resources.py',          _inj_self_defeating),
+    ('要真跑过',     'test_login_no_prompt_v1154.mjs', _inj_no_browser_test),
+    ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_optional_field),
 ]
 
 

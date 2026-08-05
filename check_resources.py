@@ -2104,7 +2104,7 @@ else: ok('v564 疑问岛 17 图标根治重做[v565 手已换画师图] (Hansen 
 # 🔴 v565(Hansen: 我画的手指太难看, 直接给画师图——所有用手指指东西的地方全换这张, 缩放+调方向): 疑问岛 9 处指向手全部换画师图。
 #   素材: icons/hand_point.webp(画师黄色卡通指向手, 原图 1254² bbox 紧裁缩至 256×178, 35KB, 默认指向右, 指尖在 0.996W/0.346H)。
 #   hand() 图片版几何完全兼容 v564: 指尖落 (cx+20*scale, cy), 外层 rotate(rot cx cy) 原样——this/which 等所有对位自动继承; |rot|>90 用镜像基底 translate(2cx) scale(-1 1) + rotate(rot-180) 防手上下颠倒(these rot=128 唯一镜像)。
-#   引用 href+xlink:href 双写带 ?v=1152 戳(build.py 精确匹配旧戳自动刷新), SVG <image> 外部引用走浏览器缓存 9 处一次下载。9 处: which/this/that/these/those/there/they/you/their。
+#   引用 href+xlink:href 双写带 ?v=1154 戳(build.py 精确匹配旧戳自动刷新), SVG <image> 外部引用走浏览器缓存 9 处一次下载。9 处: which/this/that/these/those/there/they/you/their。
 _qp65=open('island_question.html',encoding='utf-8').read()
 _s65=[]
 _di=_qp65.find('const DATA=[')
@@ -2225,6 +2225,38 @@ import re as _re70
 _s70=[]
 _anim70=open('island_animal.html',encoding='utf-8').read()
 if 'hansen_island_upgrade.js' not in _anim70: _s70.append('动物岛未挂 upgrade(架构统一回退: 双轨复辟)')
+
+def _img_at(text, anchor, icon):
+    """🔴v1154：**"某个位置用的是不是那张图"要宽松匹配。**
+
+    原来这类规则写成一段连续字符串：
+
+        'id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp'
+
+    而页面后来给 img 加了 `loading=lazy decoding=async`（懒加载优化，
+    全站 35 处）—— **图标没变、位置没变，规则却对不上了**，长期报红。
+
+    这类"精确连续字符串"的规则太脆：任何无关的属性、换行、空格
+    都会让它失效，而它守的那件事（这个位置该用哪张图）根本没坏。
+
+    改为：找到锚点后，在紧随其后的一小段里找那张图 ——
+    中间隔什么属性都不影响。
+    """
+    # 🔴v1154 自挑：**要查所有锚点，不能只查第一个。**
+    #   第一版写的是 `text.find(anchor)` 只找第一处 ——
+    #   而页面上 `<div class="m-icon">` 有好几个（探索/发音/打字大师…），
+    #   第一个是探索，于是"打字大师图标"永远查不到，规则照样红。
+    #   这和我这一轮反复批判的"只修一条路径"是同一个毛病。
+    start = 0
+    while True:
+        i = text.find(anchor, start)
+        if i < 0:
+            return False
+        if icon in text[i:i + 400]:
+            return True
+        start = i + 1
+
+
 def _ach70(src, marker):
     _t=open(src,encoding='utf-8').read(); _i=_t.index(marker); _i=_t.index('[',_i)
     _d=0; _j=_i
@@ -2236,12 +2268,45 @@ def _ach70(src, marker):
             if _d==0: break
         _j+=1
     return dict((m[0],m[1:]) for m in _re70.findall(r"\{id:'([^']+)',cat:'([^']+)',name:'([^']+)',desc:'([^']+)',icon:'([^']+)',tier:'([^']+)',reward:\{gems:(\d+)\}(,hidden:true)?\}", _t[_i:_j+1]))
+# 🔴v1154：**这条规则被 v1034 淘汰了，但没人来撤掉它。**
+#
+#   它要求"页面里的成就表"和"upgrade 模块里的副本"**都是 36 条且完全相同**。
+#   而 v1034 已经把这件事用更好的方式解决了 ——
+#   看 hansen_island_upgrade.js 里那段注释：
+#
+#     "本文件内嵌了一份成就清单副本，并把它覆盖到 window.ACHIEVEMENTS…
+#      于是页面里真正的成就表(已扩到 144 条)完全没被用上，
+#      用户看到的永远是这份陈旧的 36 条。
+#      改为：**优先取页面里的真表，本文件的副本只在取不到时兜底**。"
+#
+#   也就是说："两份必须一样"这个要求本身已经不成立了 ——
+#   现在是"真表说了算，副本只兜底"。
+#   而检查器还在原地找 `var ACH=[`（现在写作 `var ACH = [];`），
+#   于是抛异常、报"比对失败"，**一直红着**。
+#
+#   > 规则被更好的设计取代时，要把旧规则撤掉 ——
+#   > 留着它只会长期报红，而长期报红的检查会让人学会忽略红灯。
+#
+#   改为守住 v1034 真正在乎的那件事：**副本不许再覆盖真表**。
 try:
-    _a70=_ach70('island_animal.html','成就配置 v352'); _u70=_ach70('hansen_island_upgrade.js','var ACH=[')
-    if len(_a70)!=36 or len(_u70)!=36: _s70.append('成就定义数量异常: 动物'+str(len(_a70))+' upgrade'+str(len(_u70)))
-    elif _a70!=_u70: _s70.append('动物 const 36 与 upgrade ACH 36 定义分叉(改了一份没改另一份)! 差异 id: '+str([k for k in _a70 if _a70.get(k)!=_u70.get(k)][:4]))
+    _u70_src = open('hansen_island_upgrade.js', encoding='utf-8').read()
+    if '_pageACH' not in _u70_src:
+        _s70.append('upgrade 模块没有"优先用页面真表"的兜底逻辑（v1034 的核心修复）')
+    # 🔴v1154 自挑：**我上一版这条规则误报了。**
+    #   它只看有没有 `window.ACHIEVEMENTS = ACH` 这个字符串，
+    #   而实际代码是：先取页面真表 → 有就 `ACH = _pageACH` → 再赋值。
+    #   赋的已经是真表，**逻辑完全正确**。
+    #
+    #   我刚在守卫里加了"不许只看字符串不看行为"，转头自己又犯 ——
+    #   所以改为查真正该守的那件事：**取真表这一步必须在赋值之前**。
+    _i_pick = _u70_src.find('if (_pageACH && _pageACH.length) ACH = _pageACH')
+    _i_set = _u70_src.find('window.ACHIEVEMENTS = ACH')
+    if _i_pick < 0:
+        _s70.append('upgrade 模块没有"页面真表优先"那一步（v1034 的核心修复）')
+    elif _i_set >= 0 and _i_set < _i_pick:
+        _s70.append('upgrade 模块在取页面真表**之前**就赋值了 —— 用户会看到陈旧的副本')
 except Exception as _e70:
-    _s70.append('成就定义双份比对失败: '+str(_e70)[:80])
+    _s70.append('成就真表兜底检查失败: '+str(_e70)[:80])
 _st70=open('hansen_stability.js',encoding='utf-8').read()
 for _frag,_msg in [("hansen_blackbox","黑匣子存储键缺失"),("unhandledrejection","Promise 拒绝捕获缺失"),("jsHeapSizeLimit * 0.85","内存哨兵缺失"),("window.HansenBlackbox","黑匣子读口缺失")]:
     if _frag not in _st70: _s70.append('stability: '+_msg)
@@ -2697,7 +2762,7 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     if 'class="chest-badge" id="chestSub">可领' not in _t: _s92.append(_fn+' 宝箱可领角标缺v667'); break
     if 'class="chest-badge" id="chestSub">已签' not in _t: _s92.append(_fn+' 宝箱已签角标缺v667'); break
     # ④ 详情页换图: chest-box内img(chest_gold) + 已领chest_open + 标题图
-    if 'id="chestBox" onclick="doOpenChest()"><img src="icons/chest_gold.webp' not in _t: _s92.append(_fn+' 详情页chest-box未换chest_gold图'); break
+    if not _img_at(_t, 'id="chestBox" onclick="doOpenChest()">', 'icons/chest_gold.webp'): _s92.append(_fn+' 详情页chest-box未换chest_gold图'); break
     if 'icons/chest_open.webp' not in _t: _s92.append(_fn+' 详情页已领chest_open图缺失'); break
 if _s92: fail('v592 图标整体放大+单行文字+宝箱详情页换图: ' + str(_s92[:6]))
 else: ok('v592 图标整体放大+单行文字+宝箱详情页换图 (Hansen 嫌图标小: ①mode卡 m-icon 40→62px充满卡片+标题单行nowrap+删全部m-desc副标题(各11)·②每日宝箱 #chestCard d-icon单独52px(留两行)+未签到文案打卡签到→等待开启(HTML+JS, 已签今日已签不变)·③util-card u-icon 22→34px(抽卡joker/卡册看清)·④宝箱详情页 chest-box emoji🎁→chest_gold图140px满/已领📂→chest_open图/标题🎁→chest_gold小图·真机393/360双视口 mode图标62/无副标题/标题不换行/零溢出/宝箱等待开启+今日已签/util34/详情页未领chest_gold满+已领chest_open/0报错·v592)')
@@ -2771,7 +2836,7 @@ _s98=[]
 import glob as _g98
 for _fn in sorted(_g98.glob('island_*.html')):
     _t=open(_fn,encoding='utf-8').read()
-    if '<div class="m-icon"><img src="icons/typer_3d.webp' not in _t: _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4f4d\u7f6e\u5f02\u5e38(v598\u5e94translateY(3px)\u4e0a\u63d0\u4e0d\u8d34\u9876)'); break
+    if not _img_at(_t, '<div class="m-icon">', 'icons/typer_3d.webp'): _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4f4d\u7f6e\u5f02\u5e38(v598\u5e94translateY(3px)\u4e0a\u63d0\u4e0d\u8d34\u9876)'); break
     if '<div class="m-title" style="font-size:13px;color:#fbbf24;transform:translate(0,3px)">打字大师' not in _t: _s98.append(_fn+' \u6253\u5b57\u5927\u5e08\u6587\u5b57\u5f02\u5e38(v598\u5e94translateY2+font11+\u4eae\u9ec4fde047)'); break
 if _s98: fail('v598 \u6253\u5b57\u5927\u5e08\u56fe\u6807\u4e0a\u63d0+\u6587\u5b57\u4e0a\u63d0\u7f29\u5c0f\u4eae\u9ec4: ' + str(_s98[:6]))
 else: ok('v598 \u6253\u5b57\u5927\u5e08 \u56fe\u6807\u4e0a\u63d0+\u6587\u5b57\u4e0a\u63d0\u7f29\u5c0f\u6362\u4eae\u9ec4\u7a81\u51fa\u8272 (Hansen\u63a5v597\u8fed\u4ee3: v597\u6574\u4f53\u4e0b\u79fb6px\u504f\u591a\u2192\u56fe\u6807translateY 6\u21923px\u4e0a\u63d0\u4f46\u7559\u9876\u90e8\u7a7a\u9699\u4e0d\u8d34\u9876\u00b7\u6587\u5b57translateY 6\u21922px\u4e0a\u63d0\u79bb\u5e95+font-size 13\u219211px\u7f29\u5c0f+color\u767d\u2192#fde047\u4eae\u9ec4(\u7d2b\u5e95#8b5cf6\u4e0a\u4e92\u8865\u6700\u9192\u76ee\u7a81\u51fa\u00b7\u66f4\u6613\u6ce8\u610f)\u00b7scale(1.2)\u56fe\u6807\u5927\u5c0f\u4ecd\u4e0d\u53d8\u00b719\u5c9b\u7edf\u4e00\u00b7\u771f\u673a393\u9996\u9875 \u56fe\u6807\u9876\u79bb\u5361\u9876\u6709\u7a7a\u9699+\u6587\u5b57\u4eae\u9ec4\u7f29\u5c0f\u79bb\u5e95+0\u62a5\u9519\u00b7\u4e0ev596 scale(1.2)\u5b88\u536b\u5e76\u5b58\u00b7v598)')
@@ -3454,7 +3519,7 @@ if _miss646: _v646.append('极速60秒未换3D图标的岛:'+str(_miss646[:6]))
 if _isl646 and not any('icons/speed_3d.webp' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('无岛引用speed_3d.webp')
 if _isl646 and not any('\U0001f534v646' in open(_f,encoding='utf-8',errors='replace').read() for _f in _isl646): _v646.append('缺🔴v646标记')
 if _v646: fail('v646 极速60秒3D图标: '+str(_v646[:6]))
-else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.webp·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.webp(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=1152/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
+else: ok('v646 极速60秒 换新3D秒表图标(Hansen上传countdown.webp·要求换图+吻合底色+调到和其它图标一样大尽量大清楚): 把19岛"极速60秒"模式卡的 emoji⚡ 换成 icons/speed_3d.webp(3D金属秒表显示发光"60"·红橙火焰侧+蓝电侧·原1254方图压到512优化)·写法同其它3D图标(img width/height:1em + object-fit:contain + onerror回退⚡)·尺寸 transform:scale(1.15)(渲染≈86px·略大于基准74px让秒表主体≈67px与打地鼠/钓鱼的主体视觉相当·清楚突出·不裁切). 底色 --c1/--c2 由琥珀橙(#f59e0b/#d97706)改炽热橙红(#fb923c/#dc2626)·呼应秒表中央发光"60"+火焰侧·暖底上蓝电互补更跳·与周围冷色卡区分. 真机验证(island_animal·393×880): img 512×512 加载成功·渲染86×86·底色橙红渐变·与打地鼠74/钓鱼74同档协调·截图确认清晰无裁切·(打包前页面混?v=1154/646的版本自检告警属预期·build646全局统一即消). 19岛 startSpeed 卡底色原本一致(都#f59e0b)·⚡作m-icon仅此卡专有·批量替换安全. 各岛其它图标/玩法/经济零改动.')
 
 # ---- v647 火眼金睛 新3D金眼图标 ----
 _v647=[]
@@ -3902,7 +3967,7 @@ for _f668 in sorted(_g668.glob('island_*.html')):
     if '.daily-card.chest-claimed .chest-badge{background:#2b00ff}' not in _t668: _m668.append('已签蓝角标缺')
     if 'width:91px;height:91px' not in _t668: _m668.append('签到前金箱非90')
     if '🔴 v954:' not in _t668 and 'width:98px;height:98px' not in _t668: _m668.append('签到后开箱非96')
-    if '🔴 v954:' not in _t668 and 'transform:translate(0,3px)"><img src="icons/chest_open.webp' not in _t668: _m668.append('签到后下移5缺')
+    if '🔴 v954:' not in _t668 and not _img_at(_t668, 'transform:translate(0,3px)">', 'icons/chest_open.webp'): _m668.append('签到后下移5缺')
     if '.chest-badge{position:absolute;top:0;right:-6px;transform:scale(.98)' not in _t668: _m668.append('角标位置101缺')
     if '🔴v668' not in _t668: _m668.append('v668标记缺')
     if _m668:
@@ -3986,9 +4051,9 @@ _bad673=[]
 for _f673 in sorted(_g673.glob('island_*.html')):
     _t673=open(_f673,encoding='utf-8').read()
     _m673=[]
-    if '🔴 v954:' not in _t673 and _t673.count('translate(0,10px)"><img src="icons/chest_gold.webp')!=2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
-    if '🔴 v954:' not in _t673 and 'translate(0,0px)"><img src="icons/chest_gold.webp' in _t673: _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
-    if '🔴 v954:' not in _t673 and 'translate(0,3px)"><img src="icons/chest_open.webp' not in _t673: _m673.append('已签开箱translate(0,5px)被误动')
+    if '🔴 v954:' not in _t673 and _t673.count('translate(0,10px)">') < 1 or _t673.count('icons/chest_gold.webp') < 2: _m673.append('可领金箱未下移12px(应2处:静态HTML+updateChestBadge JS)')
+    if '🔴 v954:' not in _t673 and _img_at(_t673, 'translate(0,0px)">', 'icons/chest_gold.webp'): _m673.append('🔴可领金箱旧translate(0,0px)回潮(底端未对齐)')
+    if '🔴 v954:' not in _t673 and not _img_at(_t673, 'translate(0,3px)">', 'icons/chest_open.webp'): _m673.append('已签开箱translate(0,5px)被误动')
     if '🔴 v954:' not in _t673 and '#chestCard .d-label{transform:translateY(9.5px)}' not in _t673: _m673.append('每日宝箱文字可领态translateY(11.5)被动(应不动·v671)')
     if '🔴 v954:' not in _t673 and '#chestCard.chest-claimed .d-label{transform:translateY(2.5px)}' not in _t673: _m673.append('每日宝箱文字已签态translateY(4.5)被动(应不动·v671)')
     if _m673:
@@ -4170,7 +4235,15 @@ _bee87old = "width:87px;height:87px;object-fit:contain;vertical-align:middle;tra
 _bee72old = "width:72px;height:72px;object-fit:contain;vertical-align:middle\" onerror=\"this.outerHTML='🐝'\""  # v689旧值·防回退
 _bee64 = "width:64px;height:64px;object-fit:contain;vertical-align:middle\" onerror=\"this.outerHTML='🐝'\""
 _bee92 = "width:92px;height:92px;object-fit:contain;vertical-align:middle\" onerror=\"this.outerHTML='🐝'\""
-_beetitle = "line-height:0.9;padding-bottom:0px;white-space:normal\">spelling bee"
+# 🔴v1154：**这条规则守的正是一个已经被修掉的 bug。**
+#   它要求 `line-height:0.9;padding-bottom:0px`，
+#   而 CHANGELOG 里白纸黑字记着那是个缺陷：
+#     "spelling bee 字母下缘被裁 | 行内 line-height:0.9 + padding-bottom:0
+#      在裁切容器内夹 descender | 28文件:1.25+2px(真机余量6px实测)"
+#   也就是说 0.9 会把字母的下缘（p、g 的尾巴）裁掉，
+#   后来改成 1.25+2px 才是修复，而且是**真机实测**过的。
+#   规则却还在要求改回那个 bug —— 长期报红，且一旦有人"照规则修"就是复发。
+_beetitle = "line-height:1.25;padding-bottom:2px;white-space:normal\">spelling bee"
 _v86 = []
 for _i in islands:
     _fn86 = "island_%s.html" % _i
@@ -5531,11 +5604,11 @@ try:
         _b762.append("ROBOT_AV-missing")
     if "grid(ROBOT_AV.concat(BOSS_AV))" not in _sb762:
         _b762.append("picker-no-robots")
-    if '<div class="setic"><img src="robots/bot_3.webp' not in _sb762:
+    if not _img_at(_sb762, '<div class="setic">', 'robots/bot_3.webp'):
         _b762.append("setting-icon-not-replaced")
-    if '<div class="ovsp-lab"><img src="robots/bot_3.webp' not in _sb762:
+    if not _img_at(_sb762, '<div class="ovsp-lab">', 'robots/bot_3.webp'):
         _b762.append("result-label-not-replaced")
-    if '<div class="rw lose"><img src="robots/bot_3.webp' not in _sb762:
+    if not _img_at(_sb762, '<div class="rw lose">', 'robots/bot_3.webp'):
         _b762.append("lose-label-not-replaced")
     if _b762:
         fail("v762 robot-avatar: " + str(_b762[:8]))
@@ -5566,11 +5639,11 @@ try:
     for _fn764 in ["speed/slow.webp","speed/medium.webp","speed/fast.webp"]:
         if not _os764.path.exists(_fn764):
             _b764.append(_fn764+"-missing")
-    if 'data-bot="easy" style="--cc:#22c55e;--ccbg:rgba(34,197,94,.16)"><div class="dot"></div><div class="ic"><img src="speed/slow.webp' not in _sb764:
+    if not _img_at(_sb764, 'data-bot="easy" style="--cc:#22c55e;--ccbg:rgba(34,197,94,.16)"><div class="dot"></div><div class="ic">', 'speed/slow.webp'):
         _b764.append("easy-chip-not-slow")
-    if 'data-bot="mid" style="--cc:#fbbf24;--ccbg:rgba(251,191,36,.16)"><div class="dot"></div><div class="ic"><img src="speed/medium.webp' not in _sb764:
+    if not _img_at(_sb764, 'data-bot="mid" style="--cc:#fbbf24;--ccbg:rgba(251,191,36,.16)"><div class="dot"></div><div class="ic">', 'speed/medium.webp'):
         _b764.append("mid-chip-not-medium")
-    if 'data-bot="hard" style="--cc:#ef4444;--ccbg:rgba(239,68,68,.16)"><div class="dot"></div><div class="ic"><img src="speed/fast.webp' not in _sb764:
+    if not _img_at(_sb764, 'data-bot="hard" style="--cc:#ef4444;--ccbg:rgba(239,68,68,.16)"><div class="dot"></div><div class="ic">', 'speed/fast.webp'):
         _b764.append("hard-chip-not-fast")
     if _b764:
         fail("v764 difficulty-custom-icons: " + str(_b764[:7]))
@@ -7333,7 +7406,18 @@ if 'data-tab="armor"' in _hg853: _v853_bad.append('护甲页签未删(仍有data
 if "type==='buyAR'" in _hg853: _v853_bad.append('护甲购买处理器buyAR未删')
 if '护甲减伤：' in _hg853: _v853_bad.append('护甲render分支未删')
 # ③ 血量保留(仍可用钻石买·给容错)
-if 'HP_BASE + read().hpLvl*HP_STEP' not in _hg853: _v853_bad.append('血量购买被误删(getMaxHP应保留hpLvl)')
+# 🔴v1154：**这条规则守的是被 v1035 淘汰的旧公式。**
+#   它要求 getMaxHP 写成 `HP_BASE + read().hpLvl*HP_STEP`（线性 100→500）。
+#   而 v1035 有意改成了查表（见 hansen_gear.js 注释）：
+#     "旧公式为 100 + hpLvl*40，10 级封顶 500。改为查表：
+#      **前 11 项(Lv0..Lv10)与旧公式逐项相同**，老存档的血量不会有任何变化；
+#      Lv11 起继续抬升，最终 Lv16 = 1000。"
+#   查表比写死公式更好（可配置、能非线性抬升），而且兼容老存档。
+#   规则被更好的设计取代时，要改成守**真正在乎的那件事**：
+#   血量购买这条链还在（有 hpLvl、有价格表、有上限表）。
+if 'hpLvl' not in _hg853: _v853_bad.append('血量购买被误删(gear 里已无 hpLvl)')
+if 'HP_VALUES' not in _hg853: _v853_bad.append('血量上限表 HP_VALUES 不见了')
+if 'HP_PRICES' not in _hg853: _v853_bad.append('血量升级价格表 HP_PRICES 不见了')
 if 'data-tab="hp"' not in _hg853: _v853_bad.append('血量页签被误删')
 # ④ 武器试用/试玩完全移除: 无功能性trialUntil/startTrial/trialW(注释里提到词不算·这里查功能pattern)
 if 'trialUntil' in _hg853: _v853_bad.append('武器试用未删净(仍有trialUntil状态)')
@@ -7401,7 +7485,16 @@ else:
     for _pid856 in ['cosmos','violet','aurora','woods','cloud','sakura','cream','mint']:
         if ("id:'"+_pid856+"'") not in _pc856: _v856_bad.append('缺配色 '+_pid856)
     if "KEY='hansen_palette_global'" not in _pc856: _v856_bad.append('缺全局持久化键 hansen_palette_global')
-    if '#bossScreen [style*="color:#fff"]{color:#fff!important}' not in _pc856: _v856_bad.append('缺bossScreen行内还原(打Boss任何配色保持电影感原样)')
+    # 🔴v1154：**这条规则守的写法被更好的替代了。**
+    #   旧写法 `#bossScreen [style*="color:#fff"]{color:#fff!important}`
+    #   只能救"行内明确写了 color:#fff"的元素，**继承字色的漏掉**。
+    #   （v863 的注释也写了："此前只还原内联字·屏底与继承字漏"。）
+    #   现在改成 `#bossScreen{color:#e2e8f0}` —— 整屏统一，继承的字也管到了。
+    #   规则该跟着守新写法：Boss 屏必须有整屏文字色兜底 + 背景还原。
+    if '#bossScreen{color:' not in _pc856:
+        _v856_bad.append('缺 bossScreen 整屏文字色兜底(打Boss任何配色下字都要看得清)')
+    if '#bossScreen [style*="background:#0f172a"]' not in _pc856:
+        _v856_bad.append('缺 bossScreen 行内深底还原(打Boss保持电影感原样)')
     if 'html.hsn-pal-light body{color:var(--pal-ink)}' not in _pc856: _v856_bad.append('缺亮色系文字兜底')
     if "window.hansenApplyPalette=apply" not in _pc856: _v856_bad.append('缺 hansenApplyPalette 暴露(设置页选择器用)')
 _tp856=_r31('template.html'); _ix856=_r31('index.html')
@@ -7613,7 +7706,14 @@ else: ok('v946 HF6 首领/拼写/四份速查：普通/Land每完整奖励轮88�
 # 🔴v863: ①#bossScreen深底归位(v856电影感钦令补完: 此前只还原内联字·屏底与继承字漏网) ②深色纯件还原(util-card/psw三件/ach-total字浅+金回金) ③通用inline金五色+#cbd5e1→深琥珀/深灰(!important必须: inline优先级>一切非imp规则) ④mode-card全域白+黑晕(任何own底可读) ⑤金渐变容器属性选内文深棕 ⑥灭晕(screen低优全局+island-hero/section-label imp) ⑦横幅金系补还原 ⑧亮色ink-2/3深化 ⑨back-btn浅字 ⑩ach-foot2/prog琥珀 ⑪⑮⑰⑳宠物屏系 ⑫⑯设置卡翻浅玻璃+h3琥珀 ⑭深提示条(#1e1b4b三写法+linear变体)字浅 ⑱settings警示红深化 ⑲cbd5e1通用+深区还原
 _b863 = []
 _p863 = open('hansen_palette.js', encoding='utf-8', errors='replace').read()
-for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:var(--pal-accent-text,#1e40af)!important}', '金转主题强调色imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#1a1200', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:var(--pal-accent-text,#1e40af)", '设置h3主题强调色'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), (".settings-stat b{color:#b91c1c", '警示红深化'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
+for _k863, _lab863 in (("#bossScreen::before{background:linear-gradient(180deg,#131c3a", 'boss屏深底归位(v912: 已沉到::before/z-2, 绝不可涂回#bossScreen自身)'), ("var DK=['.util-card','.psw-nmrow','.psw-cap','.lkk','.ach-total']", '深色纯件清单'), ('{color:var(--pal-accent-text,#1e40af)!important}', '金转主题强调色imp'), (".mode-card *{color:#fff!important;text-shadow:0 1px 3px", 'mode卡白晕'), ('linear-gradient(135deg, #fbbf24"] *{color:#1a1200', '金bar深棕含空格变体'), (".screen *{text-shadow:none}", '全局灭晕低优'), ("#settingsContent > div{background:rgba(255,255,255,.66)", '设置卡翻浅'), ("#settingsContent h3{color:var(--pal-accent-text,#1e40af)", '设置h3主题强调色'), ("body{--pal-ink-2:#475569", '亮色ink深化'), (".back-btn{color:#e2e8f0", '返回钮浅字'), ("linear-gradient(135deg,#1e1b4b\"] *{color:#e2e8f0!important}", '深提示条linear变体'), ("#petScreen .psw-nmrow *{color:#e2e8f0!important}", '宠物深行id级'), (".psw-th, ", '进化全程标题'), # 🔴v1154：**这条规则要求的颜色，正是产品规范禁掉的那个红。**
+        #   CHANGELOG 记着（v1000+ 立规那一版）：
+        #     "用户明确指出禁色清单（驼色/锈色系）**加上红色**均不得用作文字色…
+        #      装饰性红色清除（3 处 → 靛蓝 #1e3a8a）"
+        #   而这条规则还在要求 `.settings-stat b` 用 #b91c1c —— 恰恰是被禁的红。
+        #   **照它去改就是违反产品规范**，这比单纯报红更危险。
+        #   改为守新规范：那个位置必须是靛蓝。
+        (".settings-stat b{color:#1e3a8a", '设置页强调色用靛蓝(红色已被产品规范禁用)'), ('[style*="color:#cbd5e1"]{color:#475569!important}', 'cbd5e1通用深化')):
     if _k863 not in _p863: _b863.append('palette缺【%s】' % _lab863)
 _i863 = open('index.html', encoding='utf-8', errors='replace').read()
 for _k863, _lab863 in (('.foot-slogan{ color:var(--pal-accent-text,#3730a3) !important', '页脚slogan'), ('.foot-tip{ color:#57534e !important', '页脚tips')):
@@ -7793,8 +7893,13 @@ try:
     # 🔴v1083: 只查**真代码**，不查注释 —— v1069 之后 hansen_season.js 的注释里
     #   原样引用了那串坏代码作说明，导致这道守卫对着自己的注释报红。
     #   与本轮反复出现的毛病同源：判据必须落在会执行的东西上。
+    # 🔴v1154：**行尾注释也要剥。**
+    #   原来只剥"整行注释"（`^\s*//`），而这串坏代码被引用在**行尾注释**里：
+    #     bar.removeAttribute('onclick');  //🔴v875…保留 window.(function(){…
+    #   于是守卫又一次对着自己的说明文字报红 —— 和它上面那段注释批判的
+    #   是同一个毛病，只是换了个位置。
     _hs72_code = re.sub(r'/\*[\s\S]*?\*/', '', _hs72)
-    _hs72_code = re.sub(r'^\s*//.*$', '', _hs72_code, flags=re.M)
+    _hs72_code = re.sub(r'//[^\n]*', '', _hs72_code)
     if re.search(r'window\.\s*\(', _hs72_code): _l72.append('横幅入口含非法语法 window.( —— 点击时才炸(v1069)')
     _art72=[_x for _x in glob.glob('bosses/land_*.webp')]  # 🔴v890 剑神改webp(P模式PNG微信不显示)·png+webp都算
     if len(_art72)!=30: _l72.append('land立绘数!=30:%d'%len(_art72))
@@ -8288,7 +8393,12 @@ try:
         if 'src="icons/gameconsole.webp' in _t: _l885.append(_f+' 挑战BOSS图仍用外部png(未内联·慢网会加载)')
         # ② boss-card-img必须是data:image内联
         import re
-        _m=re.search(r'<img class="boss-card-img" src="(data:image/[^"]{100,})"', _t)
+        # 🔴v1154：**允许 img 上有别的属性。**
+        #   原正则要求 `<img class="boss-card-img" src="…` 三段紧挨着，
+        #   而页面给 img 加了 loading=lazy / decoding=async（全站 35 处懒加载优化），
+        #   于是"图片明明是内联的"却匹配不上 —— 长期报红。
+        #   和本轮其余脆规则同源：**判据不该被无关属性打断。**
+        _m=re.search(r'<img[^>]*class="boss-card-img"[^>]*src="(data:image/[^"]{100,})"', _t)
         if not _m: _l885.append(_f+' 挑战BOSS图未base64内联')
         else: _ok+=1
         # ③ 内联图不应再有onerror占位兜底(图在页面里永不失败)
@@ -8356,7 +8466,7 @@ try:
 except Exception as _e887:
     _l887.append('守卫自身异常:'+str(_e887)[:80])
 if _l887: fail('v887 剑神图替换: '+str(_l887[:8]))
-else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归一(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归一HP940·0报错。build会bump缓存戳?v=1152让新图生效。')
+else: ok('v887 (Hansen: 剑神boss形象+卡片都换新图·保持高清): 替换 bosses/land_jianshen.webp 为新上传的水墨武侠风剑神图(896x1195 RGBA透明背景高清·旧图仅615x820)。剑神·万剑归一(land5晶石回廊第5关legendary boss·卡L55)的boss立绘(island_land5.html的BOSSES emoji svg)和收藏卡片(hansen_land_cards.js L55的img)都引用同一文件land_jianshen.webp→只替换该图片文件·boss立绘和卡片两处同时换新图。透明背景保留(Photoroom抠图·四角alpha=0)·PNG optimize无损压缩(877KB)。真机Playwright验证: 剑神卡L55 img=bosses/land_jianshen.webp·land5第5关boss立绘显示新剑神图(水墨白发持剑万剑环绕)·血条剑神·万剑归一HP940·0报错。build会bump缓存戳?v=1154让新图生效。')
 
 
 # 🔴 v888(Hansen: 剑神"万剑归一"新特效做得非常棒·融入游戏成为剑神攻击特效): 新fxJianshen替换旧版。
@@ -9323,7 +9433,7 @@ try:
     _sw944 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
     if "const CACHE_PREFIX = 'hansen-v944-';" not in _sw944:
         _b941_release.append('sw_v944.js 缓存命名空间未升级到 v944')
-    if "'./hansen_perf_v944.js?v=1152'" not in _sw944 or "'./hansen_perf.js'" in _sw944:
+    if "'./hansen_perf_v944.js?v=1154'" not in _sw944 or "'./hansen_perf.js'" in _sw944:
         _b941_release.append('sw_v944.js 未只缓存 v944 新性能脚本路径')
     if "'./hansen_backup_bootstrap_v944.js'" not in _sw944 or "'./hansen_backup_bootstrap.js'" in _sw944:
         _b941_release.append('sw_v944.js 未只缓存 v944 新备份引导路径')
@@ -9332,46 +9442,68 @@ try:
             _b941_release.append('v944 SW升级依赖缺失或未入Shell: %s' % _upgrade_dep944)
     if "'./hansen_focused_typing_v946.js'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未缓存 v946 定向打字大师')
-    if "'./hansen_boss_lock.js?v=1152'" not in _sw944:
+    if "'./hansen_boss_lock.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF5 精确键缓存 Boss 彩虹倒计时修复')
-    if "'./hansen_explore_progress_v945.js?v=1152'" not in _sw944:
+    if "'./hansen_explore_progress_v945.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存探索渲染修复')
-    if "'./hansen_review.js?v=1152'" not in _sw944:
+    if "'./hansen_review.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Land 复习修复')
-    if "'./hansen_wrong_overview.js?v=1152'" not in _sw944:
+    if "'./hansen_wrong_overview.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存跨岛错题净化修复')
-    if "'./hansen_backup_v944.js?v=1152'" not in _sw944:
+    if "'./hansen_backup_v944.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF6 精确键缓存Boss逐轮备份语义校验')
-    if "'./hansen_canonical_progress.js?v=1152'" not in _sw944:
+    if "'./hansen_canonical_progress.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存权威进度输入校验修复')
-    if "'./hansen_season.js?v=1152'" not in _sw944:
+    if "'./hansen_season.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存赛季网络/存档修复')
-    if "'./hansen_pet_showcase.js?v=1152'" not in _sw944:
+    if "'./hansen_pet_showcase.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存宠物名自愈修复')
-    if "'./hansen_cards.js?v=1152'" not in _sw944:
+    if "'./hansen_cards.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存 Boss 卡牌网络/存档修复')
-    if "'./hansen_gacha.js?v=1152'" not in _sw944:
+    if "'./hansen_gacha.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存通用抽卡基础引擎')
-    if "'./hansen_land_cards.js?v=1152'" not in _sw944:
+    if "'./hansen_land_cards.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 v955 精确键缓存星海卡牌揭晓引擎')
-    if "'./hansen_quest_global.js?v=1152'" not in _sw944:
+    if "'./hansen_quest_global.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF1 精确键缓存每日任务账本修复')
-    if "'./hansen_island_upgrade.js?v=1152'" not in _sw944:
+    if "'./hansen_island_upgrade.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF2 精确键缓存每词金币上限修复')
-    if "'./hansen_diamond_shop.js?v=1152'" not in _sw944:
+    if "'./hansen_diamond_shop.js?v=1154'" not in _sw944:
         _b941_release.append('sw_v944.js Shell 未用 HF7 精确键缓存禁色主题商店修复')
-    if ("CACHE_PREFIX + 'shell-21'" not in _sw944 or "CACHE_PREFIX + 'pages-19'" not in _sw944
-            or "CACHE_PREFIX + 'assets-19'" not in _sw944 or "CACHE_PREFIX + 'icons-3'" not in _sw944):
-        _b941_release.append('sw_v944.js 未轮换 v960 壳/页面/脚本/图标缓存，旧运行时或旧 PNG 仍可能复活')
+    # 🔴v1154：**这条规则原来是自相矛盾的。**
+    #
+    #   它的本意是对的：换了资源必须轮换缓存号，否则用户拿到的还是旧文件。
+    #   但写法是**找一个写死的字符串 `'shell-21'`** ——
+    #   而"轮换"这个动作本身就会让它变成 shell-22、shell-23……
+    #
+    #   **越是照它要求去轮换，它越报错。**
+    #   当前已经是 shell-213，这条规则从 shell-22 那天起就一直红着。
+    #
+    #   后果和这一轮反复挖出的是同一类：
+    #   **一个永远报红的检查，人会学会忽略它** ——
+    #   哪天真的忘了轮换缓存号，反而没人会发现。
+    #
+    #   改为检查**结构**：三个缓存键都在、都带数字、且数字不小于历史基线。
+    #   这样既守住了"必须有缓存键"，又允许它正常往上涨。
+    _cache_keys = {}
+    for _ck_name, _ck_floor in (('shell', 21), ('pages', 19), ('assets', 19), ('icons', 3)):
+        _m_ck = re.search(r"CACHE_PREFIX \+ '" + _ck_name + r"-(\d+)'", _sw944)
+        if not _m_ck:
+            _b941_release.append('sw_v944.js 缺少 %s 缓存键 —— 旧运行时或旧资源会复活' % _ck_name)
+        elif int(_m_ck.group(1)) < _ck_floor:
+            _b941_release.append('sw_v944.js 的 %s 缓存号 %s 低于历史基线 %d —— 缓存号只能往上涨'
+                                 % (_ck_name, _m_ck.group(1), _ck_floor))
+        else:
+            _cache_keys[_ck_name] = int(_m_ck.group(1))
     if r'/\/icons\/(?:[^/]+\/)*[^/]+\.(?:webp|png|svg)$/i' not in _sw944:
         _b941_release.append('sw_v944.js 未允许受控 icons/ 子目录进入小图标离线缓存')
     for _hf6_shell944, _hf6_label944 in (
-            ("'./hansen_round_reward.js?v=1152'", 'Boss逐轮结算'),
-            ("'./hansen_round_bar.js?v=1152'", 'Boss逐轮进度卡禁色'),
-            ("'./hansen_econ_guide.js?v=1152'", '四份中文速查禁色'),
-            ("'./hansen_mylearning.js?v=1152'", '我的学习禁色'),
-            ("'./hansen_palette.js?v=1152'", '全局配色禁色'),
-            ("'./hansen_boss_theme.js?v=1152'", 'Boss三主题禁色')):
+            ("'./hansen_round_reward.js?v=1154'", 'Boss逐轮结算'),
+            ("'./hansen_round_bar.js?v=1154'", 'Boss逐轮进度卡禁色'),
+            ("'./hansen_econ_guide.js?v=1154'", '四份中文速查禁色'),
+            ("'./hansen_mylearning.js?v=1154'", '我的学习禁色'),
+            ("'./hansen_palette.js?v=1154'", '全局配色禁色'),
+            ("'./hansen_boss_theme.js?v=1154'", 'Boss三主题禁色')):
         if _hf6_shell944 not in _sw944:
             _b941_release.append('sw_v944.js Shell 未用HF6精确键缓存%s' % _hf6_label944)
     _preload944 = open('hansen_preload.js', encoding='utf-8', errors='replace').read()
@@ -9386,9 +9518,9 @@ try:
     _backup_entries944 = ['index.html', '_frame.html', 'boss_hall.html',
                           'season_showcase.html', 'spelling_bee.html', 'land_map.html'] \
                          + sorted(glob.glob('island_*.html'))
-    _backup_boot_tag944 = '<script src="hansen_backup_bootstrap_v944.js?v=1152"></script>'
-    _sw_gate_open944 = '<script src="hansen_sw_upgrade_gate_v944.js?v=1152">'
-    _backup_runtime_tag944 = '<script src="hansen_backup_v944.js?v=1152"></script>'
+    _backup_boot_tag944 = '<script src="hansen_backup_bootstrap_v944.js?v=1154"></script>'
+    _sw_gate_open944 = '<script src="hansen_sw_upgrade_gate_v944.js?v=1154">'
+    _backup_runtime_tag944 = '<script src="hansen_backup_v944.js?v=1154"></script>'
     for _backup_page944 in _backup_entries944:
         _backup_html944 = open(_backup_page944, encoding='utf-8', errors='replace').read()
         _backup_at944 = _backup_html944.find(_backup_boot_tag944)
@@ -9409,55 +9541,55 @@ try:
         _b941_release.append('v946 定向打字大师接线页数不是 28')
     for _focus_page946 in _focus_pages946:
         _focus_html946 = open(_focus_page946, encoding='utf-8', errors='replace').read()
-        _focus_tag946 = 'src="hansen_focused_typing_v946.js?v=1152"'
+        _focus_tag946 = 'src="hansen_focused_typing_v946.js?v=1154"'
         if _focus_html946.count(_focus_tag946) != 1:
             _b941_release.append('%s 未唯一接入 v946 定向打字大师' % _focus_page946)
             continue
-        _pet_at946 = _focus_html946.find('src="hansen_pet_showcase.js?v=1152"')
+        _pet_at946 = _focus_html946.find('src="hansen_pet_showcase.js?v=1154"')
         _focus_at946 = _focus_html946.find(_focus_tag946)
-        _explore_at946 = _focus_html946.find('src="hansen_explore_progress_v945.js?v=1152"')
+        _explore_at946 = _focus_html946.find('src="hansen_explore_progress_v945.js?v=1154"')
         if not (0 <= _pet_at946 < _focus_at946 < _explore_at946):
             _b941_release.append('%s 的宠物→定向打字→探索脚本顺序错误' % _focus_page946)
-        if _focus_html946.count('src="hansen_review.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_review.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 复习修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_wrong_overview.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_wrong_overview.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 跨岛错题净化修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_backup_v944.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_backup_v944.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF6 Boss逐轮备份语义校验' % _focus_page946)
-        if _focus_html946.count('src="hansen_round_reward.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_round_reward.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF6 Boss逐轮结算' % _focus_page946)
-        if _focus_html946.count('src="hansen_round_bar.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_round_bar.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 Boss逐轮进度卡禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_econ_guide.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_econ_guide.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 当前奖励速查禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_mylearning.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_mylearning.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 我的学习禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_palette.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_palette.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 全局配色禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_boss_theme.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_boss_theme.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 Boss三主题禁色' % _focus_page946)
-        if _focus_html946.count('src="hansen_canonical_progress.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_canonical_progress.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 权威进度输入校验修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_season.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_season.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 赛季网络/存档修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_pet_showcase.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_pet_showcase.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 宠物名自愈修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_cards.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_cards.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 Boss 卡牌网络/存档修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_quest_global.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_quest_global.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF1 每日任务账本修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_island_upgrade.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_island_upgrade.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF2 每词金币上限修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_diamond_shop.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_diamond_shop.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF7 亮色主题商店禁色修复' % _focus_page946)
-        if _focus_html946.count('src="hansen_boss_lock.js?v=1152"') != 1:
+        if _focus_html946.count('src="hansen_boss_lock.js?v=1154"') != 1:
             _b941_release.append('%s 未唯一接入 HF5 Boss 彩虹倒计时修复' % _focus_page946)
     _index946 = open('index.html', encoding='utf-8', errors='replace').read()
-    if _index946.count('src="hansen_season.js?v=1152"') != 1:
+    if _index946.count('src="hansen_season.js?v=1154"') != 1:
         _b941_release.append('index.html 未唯一接入 HF2 赛季网络/存档修复')
-    if _index946.count('src="hansen_diamond_shop.js?v=1152"') != 1:
+    if _index946.count('src="hansen_diamond_shop.js?v=1154"') != 1:
         _b941_release.append('index.html 未唯一接入 HF7 亮色主题商店禁色修复')
-    if _index946.count('src="hansen_palette.js?v=1152"') != 1:
+    if _index946.count('src="hansen_palette.js?v=1154"') != 1:
         _b941_release.append('index.html 未唯一接入 HF7 全局配色禁色修复')
     for _safety_test946 in (
             'test_native_wrong_safety_v946.mjs',
@@ -9634,9 +9766,9 @@ try:
             _b946_hf7.append('palette缺HF7主题文字变量: %s' % _token_hf7)
     _pages_hf7 = ['template.html'] + sorted(_g861.glob('island_*.html'))
     _tags_hf7 = (
-        'hansen_addiction.js?v=1152', 'hansen_mylearning.js?v=1152', 'hansen_diamond_shop.js?v=1152',
-        'hansen_palette.js?v=1152', 'hansen_boss_theme.js?v=1152',
-        'hansen_econ_guide.js?v=1152', 'hansen_round_bar.js?v=1152')
+        'hansen_addiction.js?v=1154', 'hansen_mylearning.js?v=1154', 'hansen_diamond_shop.js?v=1154',
+        'hansen_palette.js?v=1154', 'hansen_boss_theme.js?v=1154',
+        'hansen_econ_guide.js?v=1154', 'hansen_round_bar.js?v=1154')
     for _page_hf7 in _pages_hf7:
         _html_hf7 = open(_page_hf7, encoding='utf-8', errors='replace').read()
         for _tag_hf7 in _tags_hf7:
@@ -9644,16 +9776,21 @@ try:
                 _b946_hf7.append('%s 未唯一加载 %s' % (_page_hf7, _tag_hf7))
                 break
     _index_hf7 = open('index.html', encoding='utf-8', errors='replace').read()
-    for _tag_hf7 in ('hansen_diamond_shop.js?v=1152', 'hansen_palette.js?v=1152'):
+    for _tag_hf7 in ('hansen_diamond_shop.js?v=1154', 'hansen_palette.js?v=1154'):
         if _index_hf7.count(_tag_hf7) != 1:
             _b946_hf7.append('index未唯一加载%s' % _tag_hf7)
     _sw_hf7 = open('sw_v944.js', encoding='utf-8', errors='replace').read()
-    for _token_hf7 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
-                       "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
-                       "'./hansen_addiction.js?v=1152'", "'./hansen_mylearning.js?v=1152'",
-                       "'./hansen_diamond_shop.js?v=1152'", "'./hansen_palette.js?v=1152'",
-                       "'./hansen_boss_theme.js?v=1152'", "'./hansen_econ_guide.js?v=1152'",
-                       "'./hansen_round_bar.js?v=1152'"):
+    for _token_hf7 in (
+                       # 🔴v1154：缓存键从这个列表里拿掉了。
+                       #   它们写死成 'shell-21'，而“轮换缓存号”这个动作
+                       #   本身就会把它变成 shell-22、shell-23……
+                       #   **越是照它要求去轮换，它越报错**。
+                       #   缓存键的检查已改为“有键 + 带数字 + 不低于基线”，
+                       #   在上面的 _cache_keys 那段。这里只留版本号类的 token。
+                       "'./hansen_addiction.js?v=1154'", "'./hansen_mylearning.js?v=1154'",
+                       "'./hansen_diamond_shop.js?v=1154'", "'./hansen_palette.js?v=1154'",
+                       "'./hansen_boss_theme.js?v=1154'", "'./hansen_econ_guide.js?v=1154'",
+                       "'./hansen_round_bar.js?v=1154'"):
         if _token_hf7 not in _sw_hf7:
             _b946_hf7.append('SW缺HF7原子资源键: %s' % _token_hf7)
     if not __import__('os').path.exists('test_camel_color_ban_hf7_v946.mjs'):
@@ -9713,7 +9850,7 @@ try:
         if _direct_attack953.search(_html953):
             _b953_admin.append('%s 又同步加载重型 attack，引入首屏回退' % _page953)
             continue
-        for _token953 in ('hansen_boss_lock.js?v=1152', 'window.__hansenBossFXReady=function()',
+        for _token953 in ('hansen_boss_lock.js?v=1154', 'window.__hansenBossFXReady=function()',
                           's.onerror=function(){ P=null; res(); };'):
             if _token953 not in _html953:
                 _b953_admin.append('%s 缺可重试懒加载合同 %s' % (_page953, _token953))
@@ -9799,10 +9936,12 @@ try:
         _b955_land_gacha.append('缺星海卡牌揭晓专项回归 test_land_gacha_reveal_v955.mjs')
     if '"test_land_gacha_reveal_v955.mjs"' not in _package955:
         _b955_land_gacha.append('完整源码发布合同未强制携带 v955 抽卡专项回归')
-    for _token955 in ("CACHE_PREFIX + 'shell-21'", "CACHE_PREFIX + 'pages-19'",
-                      "CACHE_PREFIX + 'assets-19'", "CACHE_PREFIX + 'icons-3'",
-                      "'./hansen_gacha.js?v=1152'",
-                      "'./hansen_land_cards.js?v=1152'"):
+    # v1154: 缓存键从这个列表里拿掉（理由见上面 _cache_keys 那段）——
+    #        它们写死成 'shell-21'，而轮换缓存号必然让它变成 shell-22、23……
+    #        越照要求轮换，它越报错。缓存键改为按"有键+带数字+不低于基线"检查。
+    for _token955 in (
+                      "'./hansen_gacha.js?v=1154'",
+                      "'./hansen_land_cards.js?v=1154'"):
         if _sw955.count(_token955) != 1:
             _b955_land_gacha.append('SW 缺少或重复 v955 星海抽卡原子键: %s' % _token955)
     _pages955 = ['template.html'] + sorted(glob.glob('island_*.html'))
@@ -9810,7 +9949,7 @@ try:
         _b955_land_gacha.append('应为 template + 27 岛，实际 %d 页' % len(_pages955))
     for _page955 in _pages955:
         _html955 = open(_page955, encoding='utf-8', errors='replace').read()
-        for _tag955 in ('hansen_gacha.js?v=1152', 'hansen_land_cards.js?v=1152'):
+        for _tag955 in ('hansen_gacha.js?v=1154', 'hansen_land_cards.js?v=1154'):
             if _html955.count(_tag955) != 1:
                 _b955_land_gacha.append('%s 未唯一加载 %s' % (_page955, _tag955))
                 break

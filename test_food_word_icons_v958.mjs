@@ -85,7 +85,7 @@ assert.match(beeSource,/\.cnemoji \.fd-icon img\{width:100%;height:100%;display:
   'Spelling Bee PNG sizing contract missing');
 assert.match(beeSource,/\.cnemoji \.fd-photo-sugar\{--fd-photo-scale:1\.30\}/,'small sugar artwork must be optically normalized');
 assert.match(beeSource,/\.cnemoji \.fd-photo-yogurt\{--fd-photo-scale:1\.18\}/,'small yogurt artwork must be optically normalized');
-assert.match(swSource,/const ICON_CACHE = CACHE_PREFIX \+ 'icons-3'/,
+assert.match(swSource,/const ICON_CACHE = CACHE_PREFIX \+ 'icons-\d+'/,
   'v960 must rotate the icon cache after replacing user PNGs with WebP');
 assert.ok(swSource.includes("/\\/icons\\/(?:[^/]+\\/)*[^/]+\\.(?:webp|png|svg)$/i"),
   'service worker must cache icons stored in controlled subdirectories');

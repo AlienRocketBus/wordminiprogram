@@ -155,9 +155,19 @@
                      实测：自己开的房会出现在自己的列表里（点进去毫无意义），
                      已经有客人的房也照样列出来（点进去必然失败"这间房刚被别人占了"）。
                      两种都是"看得见但点了没用"，比不显示更糟。 */
-                  .where({ status: 'open', isPrivate: false, guestId: '',
-                           heartbeatAt: d.command.gt(_alive) })
-                  .orderBy('heartbeatAt', 'desc').limit(20).get()
+                  /* 🔴v1154：**查询条件加多了，把房间全滤没了。**
+                     用户现场：「房间功能到现在根本就不能用。」
+                     v1135 我往 where 里塞了三个条件，三个都有问题：
+                       ① guestId:'' —— **字段缺失 ≠ 空字符串**，
+                          数据库里我改之前建的房间根本没这个字段，一间都匹配不上
+                       ② heartbeatAt 同理，老房间没这个字段
+                       ③ orderBy 的字段在云开发要建索引，没建就整个查询报错
+                     实测：云端 3 间房 → 用户只看到 1 间。
+                     改为：**查询只留最稳的条件**（status + isPrivate 每间房都有），
+                     其余判断放到本地 —— 把过滤下推给数据库省的那点流量，
+                     **不值得用“老数据全看不见”来换**。 */
+                  .where({ status: 'open', isPrivate: false })
+                  .orderBy('createdAt', 'desc').limit(40).get()
                   .then(function (r) {
                     var rows = (r && r.data) || [];
                     /* 再兜一层：查询和本地时钟可能有偏差 */
@@ -453,10 +463,20 @@
          （第一版我写在 listOpen 里，测试一验就发现自己的房还在列表里。） */
       var _me = '';
       try { _me = me().id || ''; } catch (e) {}
+      var _now = Date.now();
       rows = (rows || []).filter(function (x) {
         if (!x) return false;
         if (_me && x.hostId === _me) return false;   /* 自己的房点进去毫无意义 */
         if (x.guestId) return false;                 /* 满员的点进去必然失败 */
+        /* 🔴v1154：**心跳过滤也放到这里。**
+           v1135 把它写在传输层的 where 里，结果两件事一起坏了：
+             · 老房间没有 heartbeatAt 字段 → 被数据库直接滤掉，一间都看不见
+             · 而传输层被测试替换时，这道过滤就完全不生效
+           这条是**业务规则**（"房主还在不在"），
+           不该依赖某一种传输实现 —— 和 v1135 学到的教训是同一条。
+           老房间没有 heartbeatAt 时退回用 createdAt，别让它们凭空消失。 */
+        var beat = x.heartbeatAt || x.createdAt || 0;
+        if ((_now - beat) >= STALE_MS) return false;
         return true;
       });
       return {

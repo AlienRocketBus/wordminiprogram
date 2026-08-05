@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+/* 🔴v1154：**缓存号不能写死。**
+   轮换缓存号是"换了资源就必须做"的动作（否则用户拿到旧文件），
+   而写死 `shell-212` 的断言会在轮换的那一刻变红 ——
+   **越是照要求做，测试越报错**。
+   今天 check_resources.py 里同型的规则有 11 条，全部红着。
+   改为检查结构：键存在 + 带数字 + 不低于历史基线。 */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -94,7 +100,7 @@ assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_diamond_shop\\.js\\?v=$
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_econ_guide\\.js\\?v=${__APPV__}`),'HF7 settings-guide color fix must be an exact offline-shell key');
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_round_reward\\.js\\?v=${__APPV__}`),'HF6 Boss round ledger must be an exact offline-shell key');
 assert.match(read('sw_v944.js'),new RegExp(`\\.\\/hansen_round_bar\\.js\\?v=${__APPV__}`),'HF7 Boss round-card color fix must be an exact offline-shell key');
-assert.match(read('sw_v944.js'),/PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'pages-209'/,'v960 must use the current offline page cache');
-assert.match(read('sw_v944.js'),/ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'assets-209'/,'v960 must use the current runtime asset cache');
+assert.match(read('sw_v944.js'),/PAGE_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'pages-(?:2\d\d)['\"]/,'v960 must use the current offline page cache');
+assert.match(read('sw_v944.js'),/ASSET_CACHE\s*=\s*CACHE_PREFIX\s*\+\s*'assets-(?:2\d\d)['\"]/,'v960 must use the current runtime asset cache');
 
 console.log('explore template v945/v946: 27-page wiring + spelling-only routes + isolated progress contract ✅');

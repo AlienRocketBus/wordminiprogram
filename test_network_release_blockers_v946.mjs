@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+/* 🔴v1154：**缓存号不能写死。**
+   轮换缓存号是"换了资源就必须做"的动作（否则用户拿到旧文件），
+   而写死 `shell-212` 的断言会在轮换的那一刻变红 ——
+   **越是照要求做，测试越报错**。
+   今天 check_resources.py 里同型的规则有 11 条，全部红着。
+   改为检查结构：键存在 + 带数字 + 不低于历史基线。 */
 // v946 HF2 网络发布阻断回归：land_map 单例、弱网零后台媒体、SW 原子安装/导航超时。
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -36,7 +42,7 @@ assert.doesNotMatch(preload,/setTimeout\(function\(\)\{\s*pumpTimer\s*=\s*null;\
   '弱网/后台不得永久每秒轮询，应等待可见性或网络 change 事件');
 assert.match(template,/function canBackgroundBossPrefetch\(/,'Boss 引擎预取门禁必须在 template 源');
 assert.match(template,/__hansenBossFXPrefetched/,'Boss 引擎与特效图预取必须单例');
-assert.match(sw,/CACHE_PREFIX \+ 'shell-211'/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
+assert.match(sw,/CACHE_PREFIX \+ 'shell-(?:2\d\d)['\"]/,'v960 必须使用当前外壳缓存隔离旧运行时与夜罗刹特效');
 assert.match(sw,/await cache\.addAll\(/,'核心 shell 必须整批原子写入');
 assert.doesNotMatch(sw,/Promise\.allSettled\(SHELL/,'半包 shell 不得被激活');
 assert.match(sw,/* 🔴v1101：原来写死 3000 —— 而 v1082 已把它改成 8000

@@ -60,16 +60,39 @@ const now = Date.now();
   ok(!list.some(x => x.hostId === 'H'), '★ 不列自己的房 —— 点进去毫无意义');
   ok(!list.some(x => x.guestId), '★ 不列满员的房 —— 点进去必然失败');
   ok(!list.some(x => (now - x.heartbeatAt) > 30000), '★ 不列心跳过期的房');
+  {
+    const src2 = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+    ok(/var beat = x\.heartbeatAt \|\| x\.createdAt \|\| 0;/.test(src2),
+       '★ 本地判心跳时，老房间没有 heartbeatAt 就退回 createdAt —— ' +
+       '别让它们凭空消失');
+  }
 }
 
 /* ② 查询层面先滤心跳（防僵尸房遮住活房） */
 {
   const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
-  ok(/heartbeatAt:\s*d\.command\.gt\(/.test(code),
-     '★ 查询条件里就带心跳下限 —— 让数据库先滤死房，而不是取回 30 条再本地滤');
-  ok(/orderBy\('heartbeatAt'/.test(code),
-     '★ 按 heartbeatAt 排序（最近还活着的优先），而不是按 createdAt');
+  /* 🔴v1154 **推翻 v1135 这两条**。
+     用户现场：「房间功能到现在根本就不能用。」
+
+     v1135 为了"让数据库先滤死房"，往 where 里塞了
+     `guestId:''` + `heartbeatAt: gt(...)`，还加了 `orderBy('heartbeatAt')`。
+     三个都出了问题：
+       ① **字段缺失 ≠ 空字符串** —— 数据库里 v1135 之前建的房间
+          没有 `guestId` 字段，一间都匹配不上
+       ② 老房间同样没有 `heartbeatAt`
+       ③ `orderBy` 的字段在云开发要建索引，没建就整个查询报错
+     实测模拟：云端 6 间房，用户只看到 1 间。
+
+     改为：**查询只留每间房都有的字段**（status + isPrivate），
+     其余判断放本地。把过滤下推给数据库省的那点流量，
+     **不值得用"老数据全看不见"来换**。 */
+  ok(!/heartbeatAt:\s*d\.command\.gt\(/.test(code),
+     '★ 查询条件里**不带** heartbeatAt —— 老房间没这个字段，带上就全查不出来');
+  ok(!/where\(\{ status: 'open', isPrivate: false, guestId: ''/.test(code),
+     '★ 查询条件里**不带** guestId —— 同上，字段缺失匹配不上空字符串');
+  ok(/orderBy\('createdAt'/.test(code),
+     '★ 按 createdAt 排序 —— 那是每间房必有的字段');
 }
 
 /* ② 死房清理 */

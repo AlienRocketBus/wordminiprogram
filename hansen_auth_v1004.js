@@ -57,10 +57,33 @@
       return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
     } catch (e) { return {}; }
   }
+  /* 🔴v1154：**登录态只有这一个出口 —— 把"账号变了"的信号挂在这里。**
+
+     这一整轮反复吃的亏是同一个：**我修的东西只修了一条路径。**
+       · v1134「数据一变就同步」—— 钩子被盖、开关是关的、防抖被饿死，
+         写了 20 版从没真正生效
+       · v1142「换账号清资料」—— 只挂在"点退出登录"上，
+         而直接登另一个账号、注册后自动登录、云端同步登录态都不走那条路
+
+     用户现场就是后面这几条：「同一设备换账号，ID 还是原来那个，也改不了名」。
+
+     所以这次不去数"有几条路径"，而是**盯住唯一的那个出口**：
+     `writeLocal` 是全站改登录态的独苗（全站搜过，没有第二处）。
+     只要 uid 变了就在这里发信号，**不管调用方是谁、走的哪条路**。
+
+     > 与其把每条路都堵一遍（总会漏），不如守住必经之地。 */
   function writeLocal(patch) {
     var o = readLocal();
+    var _before = o.uid || '';
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) o[k] = patch[k];
     try { localStorage.setItem(LKEY, JSON.stringify(o)); } catch (e) {}
+    var _after = o.uid || '';
+    if (_before !== _after) {
+      try {
+        document.dispatchEvent(new CustomEvent('hsn-account-uid-changed',
+          { detail: { from: _before, to: _after } }));
+      } catch (e) {}
+    }
     return o;
   }
 
@@ -679,7 +702,18 @@
         var k = _ks[_i];
         if (k && k.indexOf('wordIsland') === 0) {
           var o = JSON.parse(localStorage.getItem(k) || 'null');
-          if (o && ((o.learned && o.learned.length) || (o.stats && Object.keys(o.stats).length))) return true;
+          /* 🔴v1154：**"有进度"要按真正学过的东西算，不能算答题统计。**
+
+             用户现场（截图）：对话框写着
+               【本机】0 个岛 · 已学 0 个单词
+             却还在问"需要你选一份保留" —— **本机什么都没有，有什么好选的？**
+
+             根因就在这一行：原来 `stats` 里有任何键就算"有进度"，
+             而 `stats` 只是答题统计（点开一个岛看一眼就会有），
+             **一个单词没学也会被判成"本机有进度"**，于是每次登录都弹框。
+
+             改为只认 `learned`（真正学会的单词）—— 那才是会丢的东西。 */
+          if (o && o.learned && o.learned.length) return true;
         }
       }
     } catch (e) {}
@@ -801,6 +835,35 @@
             return { ok: false, action: 'restore-failed' };
           })
           .catch(function () { return { ok: false, action: 'restore-failed' }; });
+      }
+      /* 🔴v1154：**本机明显比云端少 → 直接用云端，不问。**
+
+         用户原话：「每次还得点个 ok，不需要每次出这种对话框，
+         它会自动就覆盖现在的记录。」
+
+         这个诉求是对的 —— 弹框的意义只在于"两边都有真东西、
+         选错会丢"。而绝大多数登录场景根本不是那样：
+         换了台手机、清了缓存、重装了浏览器 —— **本机本来就该被云端填满**。
+
+         判据：本机学过的单词数 **少于云端的一半**（或本机干脆是 0）
+         → 用云端覆盖是明显更优的选择，自动做掉。
+
+         保留弹框的只剩一种情况：**两边都有相当规模的进度且互不包含** ——
+         那时确实只有用户自己知道该留哪份。 */
+      if (hasCloud && hasLocal) {
+        var _lw = (local && local.learned) || 0;
+        var _cw = (info && info.learned) || 0;
+        if (_cw > 0 && _lw * 2 < _cw) {
+          return CS.restoreWithKey(CS.ensureKey())
+            .then(function (r) {
+              if (r && r.ok) {
+                markLocalOwner(uidNow);
+                return { ok: true, action: 'restored', needReload: true,
+                         autoPicked: 'cloud', localWords: _lw, cloudWords: _cw };
+              }
+              return { ok: false, action: 'restore-failed' };
+            })['catch'](function () { return { ok: false, action: 'restore-failed' }; });
+        }
       }
       if (hasCloud && hasLocal) {
         /* 冲突：把双方的真实规模一并带出去，让用户看着数字选，而不是盲选 */

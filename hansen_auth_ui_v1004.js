@@ -196,6 +196,12 @@
           else if (s.action === 'cloud-unreachable') syncTxt = ' 暂时读不到云端，进度先留在本机，稍后会自动重试。';
           else if (s.action === 'restore-failed' || s.action === 'upload-failed') syncTxt = ' 进度同步没成功，可稍后手动同步。';
         }
+        /* 🔴v1154：**自动用了云端要说一声，但不拦人。**
+           用户不想每次点确定，但也不该"进度突然变了却不知道为什么"。
+           所以：照常自动恢复、页面照常刷新，只是在提示条里带一句。 */
+        if (s && s.autoPicked === 'cloud') {
+          syncTxt = '，已自动取回云端进度（' + (s.cloudWords || 0) + ' 个单词）';
+        }
         msg('登录成功！' + idTxt + syncTxt, 'ok');
         /* 🔴v1026: 恢复成功后必须重新加载页面, 否则内存里仍是旧数据,
            用户会看到"什么都没变", 且下一次存档会把恢复的进度覆盖掉 */

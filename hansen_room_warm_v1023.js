@@ -124,10 +124,29 @@
       ifr.tabIndex = -1;
       ifr.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px';
       ifr.src = full;
-      /* 加载完即移除：资源已进缓存，DOM 不必常驻，省内存 */
-      ifr.addEventListener('load', function () {
-        setTimeout(function () { try { ifr.remove(); } catch (e) {} }, 600);
-      });
+      /* 🔴v1154：**清理不能只挂在 load 上。**
+
+         原来只在 `load` 成功时才移除 —— 而 iframe 有三种收不到 load 的情况：
+           · 加载失败（404 / 网络断了）
+           · 加载卡住（弱网下永远转圈）
+           · 被浏览器策略拦下
+         这几种下**隐藏 iframe 就永久留在 DOM 里**，一次预热多个页面
+         就是多个常驻 iframe —— 每个都持有一份完整的页面上下文，很吃内存。
+
+         而这个模块的用途是"提前把资源灌进缓存"，
+         **灌没灌进去都不该让 iframe 留着**。
+
+         改为三条腿：load 成功后移除 / error 也移除 /
+         **兜底一个硬超时**（8 秒，不管发生什么都清掉）。 */
+      var _gone = false;
+      var _kill = function () {
+        if (_gone) return;
+        _gone = true;
+        try { ifr.remove(); } catch (e) {}
+      };
+      ifr.addEventListener('load', function () { setTimeout(_kill, 600); });
+      ifr.addEventListener('error', _kill);
+      setTimeout(_kill, 8000);        /* 兜底：卡住/被拦也一定清掉 */
       (document.body || document.documentElement).appendChild(ifr);
     } catch (e) {}
   }

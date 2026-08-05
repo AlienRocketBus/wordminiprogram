@@ -491,8 +491,78 @@
     } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
   }
 
+  /* ── 🔴v1154 账号一变就清资料 —— 不管走哪条路 ──────────────
+
+     用户现场：「我用相同的设备换账号，换不了。注册了新账号登录，
+     那个 ID 依然还是原来那个，而且点击也没法编辑。」
+
+     v1142 我做过一次修复，但**只挂在"点退出登录"那条路上** ——
+     而换账号根本不一定走那条路：
+       · 直接在登录页登另一个账号（不先退出）
+       · 注册新账号后自动登录
+       · 换设备后云端把登录态同步过来
+     这几条路上 `signOut` 都不会被调用，于是资料原封不动。
+
+     真浏览器复现确认：换 uid 后名字还是「小明」、ID 还是 No.002、
+     点改名被告知「冷却中，还有 30 天」—— 和用户描述一字不差。
+
+     正确的做法是**盯住"当前账号是谁"这件事本身**：
+     记下资料属于哪个 uid，一旦对不上就清。
+     这样不管从哪条路换的账号，都会被抓到。 */
+  var OWNER_UID_KEY = 'hansen_sb_profile_owner_v1154';
+
+  function currentUid() {
+    try {
+      var raw = localStorage.getItem('hansen_auth_v1004');
+      return (JSON.parse(raw || '{}') || {}).uid || '';
+    } catch (e) { return ''; }
+  }
+
+  function syncOwner() {
+    try {
+      var uid = currentUid();
+      var was = localStorage.getItem(OWNER_UID_KEY) || '';
+      if (!uid) return;                    /* 没登录时不动 —— 匿名玩的资料是他自己的 */
+      if (was === uid) return;             /* 还是同一个人 */
+      if (was && was !== uid) {
+        /* 换人了 —— 上一个账号的名字、竞赛 ID、改名冷却全部作废 */
+        resetForAccountSwitch();
+      }
+      localStorage.setItem(OWNER_UID_KEY, uid);
+    } catch (e) {}
+  }
+
+  /* 三条触发路径，覆盖所有换账号的方式 */
+  try {
+    document.addEventListener('hsn-auth-changed', function () {
+      setTimeout(syncOwner, 60);
+    });
+    /* v1154: 登录态的唯一出口发出的信号 —— 不管走哪条路换的账号都会到这儿 */
+    document.addEventListener('hsn-account-uid-changed', function () {
+      syncOwner();
+    });
+    /* 别的标签页换了账号（v1147 已有跨标签页提示，这里同步资料） */
+    window.addEventListener('storage', function (ev) {
+      if (ev && ev.key === 'hansen_auth_v1004') setTimeout(syncOwner, 60);
+    });
+    /* 🔴v1154：**立刻同步一次，不能等。**
+
+       第一版写的是 `setTimeout(syncOwner, 1200)`，想着"等账号模块就绪"。
+       实测（路径②：换账号后直接刷新页面）**没通** ——
+       因为身份条早在那 1.2 秒之前就画完了，界面还是旧名字旧 ID；
+       而且 `setName` 的冷却检查读的是当时的资料，照样被挡。
+
+       而 `currentUid()` 只是读 localStorage，**根本不需要等任何模块** ——
+       第一版那个延迟是我想当然加的。
+
+       改为：模块加载时立刻同步，再补一次延迟的（防某些页面加载顺序特殊）。 */
+    syncOwner();
+    setTimeout(syncOwner, 1200);
+  } catch (e) {}
+
   window.HansenSbProfile = {
     resetForAccountSwitch: resetForAccountSwitch,
+    _syncOwner: syncOwner,
     _open: open,
     _close: close,
     readProfile: readProfile,

@@ -112,5 +112,82 @@ for (const [name, code] of SCREENS) {
     bad.slice(0,6).forEach(b=>console.log(`      「${b.t}」 ${b.ratio}:1 (需${b.need}) 字${b.fg} 底${b.bg} ${b.sz}px ${b.cls}`)); }
   else console.log(`  ✓ ${name}`);
 }
-console.log(`\n合计 ${all.reduce((n,x)=>n+x[1].length,0)} 处低于 WCAG AA / ${all.length} 屏`);
+const total = all.reduce((n,x)=>n+x[1].length,0);
+console.log(`\n合计 ${total} 处低于 WCAG AA / ${all.length} 屏`);
 await browser.close(); srv.close();
+
+/* 🔴v1153：**这个测试原来永远不会失败。**
+
+   它零个 assert、零个 throw、零个 process.exit ——
+   把 220 处低对比度打印出来，然后**以 0 退出**。
+   闸门看到 RC=0 就当它通过了，**这些问题从来没进过任何人的视野**。
+
+   > 一个永远不红的测试比没有测试更糟：
+   > 它占着"我们测了"的名分，却什么都不拦。
+
+   但也不能一上来就红 —— 220 处是历史积累，
+   全堵上要改很多屏的配色，而卡住发版对谁都没好处。
+
+   所以用**基线机制**（和闸门的失败数基线同一个思路）：
+   记下当前值，**只要不比基线更差就放行；变多了就红**。
+   基线存在 .readability_baseline.json（gitignore，本机状态）。
+   想收紧就手动把基线调小 —— 每次改好几屏就降一次。 */
+const fsx = await import('node:fs');
+const BASE_FILE = new URL('./.readability_baseline.json', import.meta.url).pathname;
+let baseline = null;
+try { baseline = JSON.parse(fsx.readFileSync(BASE_FILE, 'utf8')).total; } catch (_) {}
+if (baseline == null) {
+  /* 🔴v1153 自挑：**没有基线时不能默默通过。**
+
+     第一版我把基线文件放进了 .gitignore ——
+     CI 容器每次都是全新的，基线文件永远不存在，
+     于是每次都走"首次记录"分支、每次都 RC=0
+     → **这个测试在 CI 里永远不会红**，等于我给它留了个后门。
+
+     基线不是"本机性能状态"（那才该 gitignore），
+     它是**团队对当前水位的共识** —— 必须进版本库、必须跟着代码走。
+
+     现在：基线文件缺失直接判失败，逼人显式补上一份。 */
+  console.log(`\n❌ 找不到基线文件 —— 请把当前值 ${total} 写进 .readability_baseline.json 并提交`);
+  fsx.writeFileSync(BASE_FILE, JSON.stringify({ total, note: '请提交这个文件；只许降不许升' }));
+  process.exit(1);
+} else {
+  /* 🔴v1153 自挑：**这个数字本身会抖。**
+
+     连跑三次实测：243 / 239 / 239 —— 差了 4 处。
+     原因很实在：页面上有动画（元素位置在动、渐变在变），
+     探测那一刻的截面每次都略有不同。
+
+     所以基线不能卡死在一个精确值上，否则**每次跑都可能假红** ——
+     而假红会让人开始忽略这个测试，那就白做了（v1149/v1150 的教训）。
+
+     容忍带宽 5%（当前约 12 处）：
+       · 超出带宽 → 真的变差了，报红
+       · 明显低于基线 → 收紧基线（记的是**观测到的最好值**，
+         这样改进会被锁住，不会因为下次抖回去就白改）
+       · 带宽内 → 通过，不动基线 */
+  const band = Math.max(5, Math.round(baseline * 0.05));
+  if (total > baseline + band) {
+    console.log(`\n❌ 低对比度从 ${baseline} 处涨到 ${total} 处（容忍带宽 ±${band}）—— 本版让可读性变差了`);
+    process.exit(1);
+  } else if (total < baseline - band) {
+    /* 🔴v1153 自挑（第二轮）：**自动收紧太激进了。**
+
+       第一版是"低于基线就立刻收紧到这个值" ——
+       结果某次抖到 222（偏低的一端），基线就被钉死在 222，
+       而正常水位是 239 左右，**之后每次都红**。
+
+       实测就撞上了：闸门连续两轮因为这个假红被拦下。
+
+       改为**收紧到"新值 + 半个带宽"**：
+       既锁住了改进（不会退回旧水位），
+       又给正常波动留了余地。
+       想彻底收紧就手动改这个文件 —— 那才是"确认改好了"的动作。 */
+    const tightened = total + Math.round(band / 2);
+    fsx.writeFileSync(BASE_FILE, JSON.stringify({
+      total: tightened, note: '观测到更好的值，收紧到 ' + total + '+半带宽' }));
+    console.log(`  ✅ 从 ${baseline} 处降到 ${total} 处 —— 基线收紧到 ${tightened}`);
+  } else {
+    console.log(`  ✅ ${total} 处，在基线 ${baseline} ±${band} 之内，未变差`);
+  }
+}

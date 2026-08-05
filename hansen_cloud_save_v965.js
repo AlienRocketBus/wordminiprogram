@@ -177,7 +177,23 @@
       .then(function(row){
         if (!row || !row.payload) return { exists:false };
         var pl = row.payload || {};
-        return { exists:true, updatedAt: row.updatedAt || pl.ts || 0, appVersion: pl.appVersion || '' };
+        /* 🔴v1154：**把云端学过多少词也报出来。**
+           登录对账要拿它和本机比 —— 本机明显更少就直接用云端、不弹框。
+           以前只返回"有没有档"，于是没法判断哪边更值钱，
+           只能把选择推给用户（用户原话：「每次还得点个 ok」）。 */
+        var _cw = 0, _ci = 0;
+        try {
+          var _items = (pl.items || pl.data || {});
+          for (var _k in _items) {
+            if (!Object.prototype.hasOwnProperty.call(_items, _k)) continue;
+            if (_k.indexOf('wordIsland') !== 0) continue;
+            var _o = null;
+            try { _o = JSON.parse(_items[_k]); } catch (e) { _o = null; }
+            if (_o && _o.learned && _o.learned.length) { _ci++; _cw += _o.learned.length; }
+          }
+        } catch (e) {}
+        return { exists:true, updatedAt: row.updatedAt || pl.ts || 0,
+                 appVersion: pl.appVersion || '', learned: _cw, islands: _ci };
       })
       .catch(function(e){ return { exists:null, reason:String(e && e.message || e) }; });
   }
@@ -264,7 +280,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1152')
+               import('./vendor_cloudbase_esm_v965.js?v=1154')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -493,6 +509,36 @@
   /* ---------- 上云 / 回档 ---------- */
   var _busy = false;
   var _busyTail = null;   /* v1146: 进行中的那次同步，force 要能排在它后面 */
+  /* v1154: 本机到底有没有"学过的东西" —— 判据和登录对账保持一致：
+     只认 learned（真正学会的单词），不认 stats（点开看一眼就会有）。 */
+  /* 🔴v1154：**恢复期间禁止任何上传。**
+
+     比"本机是空的"更隐蔽的一种：登录后云端正在往本机写数据的那几秒，
+     本机处于**半份状态**（一部分是云端的、一部分还是旧的）。
+     这时如果 v1134 的"数据一变 8 秒就同步"被触发，
+     就会把这份**半成品**传回云端 —— 云端那份好档就被搅坏了。
+
+     而"恢复时会大量写 localStorage"这件事本身必然触发变更通知，
+     所以这条路一定会被走到。
+
+     做法：恢复开始就上闸，结束（无论成败）才放开。 */
+  var _restoring = false;
+
+  function localHasAnyProgress(){
+    try{
+      var ks = [];
+      for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k) ks.push(k); }
+      for(var j=0;j<ks.length;j++){
+        var k2 = ks[j];
+        if(k2.indexOf('wordIsland') !== 0) continue;
+        var o = null;
+        try{ o = JSON.parse(localStorage.getItem(k2) || 'null'); }catch(e){ o = null; }
+        if(o && o.learned && o.learned.length) return true;
+      }
+    }catch(e){}
+    return false;
+  }
+
   function syncNow(opts){
     opts = opts || {};
     var p = provider();
@@ -525,6 +571,36 @@
     var code;
     try{ code = HansenBackup.exportCode(); }
     catch(e){ return Promise.resolve({ ok:false, reason:'export-failed', error: friendly(e) }); }
+
+    /* 🔴v1154：**本机是空的就绝不上传 —— 这道红线以前只在登录对账里。**
+
+       用户现场原话：「我在这个账号里面的进度乱七八糟，
+       所有的东西它会自动不停地上传到云端，退出的时候也会自动上传。」
+
+       查下来是我自己造成的：
+         · v1029 立过红线"本机是空的就绝不上传"，但它**只写在 `syncOnLogin` 里**
+         · 而我 v1134 加的"数据一变 8 秒就同步"直接调 `syncNow`
+         · v1145 加的"退出前强制上传"也直接调 `syncNow`
+       **两条新路都绕过了那道红线。**
+
+       后果非常具体：在一台本机空白的手机上登录，
+       云端恢复还没跑完，任何一次写入（签到、钱包初始化、写个名字）
+       就触发同步 → **把空白盖到云端** → 用户几百个词的进度没了。
+
+       这就是"进度乱七八糟"的来源。
+
+       现在：上传前先看本机到底有没有学过的东西。
+       一个词都没有就**拒绝上传**（不是报错，是安静地跳过 ——
+       本来也没什么可传的）。
+
+       ⚠️ 例外：`allowEmpty` 只给"用户明确要求清空云端"这种操作用，
+       自动路径永远不带它。 */
+    if (_restoring) {
+      return Promise.resolve({ ok:false, reason:'restoring-refuse-upload' });
+    }
+    if (!opts.allowEmpty && !localHasAnyProgress()) {
+      return Promise.resolve({ ok:false, reason:'local-empty-refuse-upload' });
+    }
     var h = fnv(code);
     /* 内容未变→无条件跳过(force 只绕过冷却,不制造重复流量) */
     /* 🔴v1039 关键修复：原判据只看"内容有没有变"，**连 force 也照样跳过**，
@@ -644,6 +720,9 @@
     return attempt(0);
   }
   function restoreWithKey(inputKey){
+    _restoring = true;                    /* v1154: 上闸 —— 恢复期间禁止上传 */
+    var _done = function (r) { _restoring = false; return r; };
+    var _fail = function (e) { _restoring = false; throw e; };
     return fetchWithKey(inputKey).then(function(got){
       if(!(window.HansenBackup && typeof HansenBackup.parse === 'function'))
         throw new Error('备份模块不可用');
@@ -658,7 +737,7 @@
       writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(), enabled: true });
       renderCard();
       return { ok:true, result:r };
-    });
+    }).then(_done, _fail);
   }
   function selfTest(){
     var p = provider();
@@ -680,9 +759,22 @@
   function autoHooks(){
     try{
       document.addEventListener('visibilitychange', function(){
-        if(document.hidden) syncNow({});
+        /* 🔴v1154：**离开这一刻必须 force —— 冷却不能挡住"最后一次"。**
+
+           用户要的很明确：「我突然要退出，下次登录拿到的
+           就是我退出那一刻的最新数据。」
+
+           而原来这里是 `syncNow({})`（不带 force），会被两道东西挡住：
+             · 45 秒冷却 —— 玩一会儿刚同步过，30 秒后关掉 App 就被拒
+             · `_busy` —— 正好有一次同步在跑，这次直接放弃
+
+           结果就是**最后那段进度丢了**，而用户以为存上了。
+
+           例行同步（每 5 分钟那次）晚一轮没关系，所以不带 force；
+           **但"人要走了"这一刻只有一次机会，必须 force。** */
+        if(document.hidden) syncNow({force:true});
       });
-      window.addEventListener('pagehide', function(){ syncNow({}); });
+      window.addEventListener('pagehide', function(){ syncNow({force:true}); });
       setInterval(function(){ syncNow({}); }, 5 * 60 * 1000);
 
       /* ── 🔴v1134 数据一变就排队上传 ──────────────────────────
@@ -702,14 +794,74 @@
            · 连续操作很常见（连答十题、连开宝箱），合并能省一大截写入
            · 8 秒足够短 —— 用户很难在 8 秒内做完事就杀进程
            · 而切后台/关页面本来就会立刻触发一次，两条路互补 */
-      var _pending = null;
+      /* 🔴v1154：**这个防抖会被"持续写入"饿死。**
+
+         原来的写法是每次变更都 `clearTimeout` 重新计时 ——
+         经典的 debounce。但页面上有模块在**持续写 localStorage**
+         （心跳、状态刷新、进度记录），于是定时器**被无限重置，
+         永远等不到 8 秒**。
+
+         真浏览器实测抓到现场：
+           8 秒定时器创建 2 次，**到期 0 次**。
+
+         也就是说 v1134 承诺的"数据一变 8 秒就同步"，
+         **从写下那天起就没有真正生效过** —— 玩的过程中根本不存云端，
+         全靠切后台/关页面那两条路兜着。
+
+         改法：加一条**最长等待上限**（`_firstAt` 记下第一次变更的时刻）——
+         合并可以，但**最多合并 8 秒**，到点必须传，
+         不管中间又变了多少次。这叫 throttle 而不是 debounce。 */
+      var _pending = null, _firstAt = 0;
       document.addEventListener('hsn-data-changed', function () {
+        var now = Date.now();
+        if (!_firstAt) _firstAt = now;
+        /* 已经攒够 8 秒 → 立刻传，不再往后推 */
+        if (now - _firstAt >= 8000) {
+          if (_pending) { clearTimeout(_pending); _pending = null; }
+          _firstAt = 0;
+          syncNow({force:true});
+          return;
+        }
         if (_pending) clearTimeout(_pending);
         _pending = setTimeout(function () {
           _pending = null;
-          syncNow({});
-        }, 8000);
+          _firstAt = 0;
+          /* 🔴v1154：**这里要 force —— 否则被 45 秒冷却挡掉。**
+
+             实测（真浏览器）：改数据后等满 9 秒，**上传一次都没发生**。
+             追下去是 `SYNC_MIN_GAP = 45 秒` 把它拒了 ——
+             页面加载时刚同步过，8 秒后这次正好落在冷却窗口内。
+
+             后果很实在：**你玩的过程中数据一直在变，
+             但最快也要 45 秒才可能存一次云端** ——
+             而"数据一变 8 秒就同步"这个承诺就是空的。
+
+             冷却本来是防"连续改动疯狂上传"的，
+             **而 8 秒合并延迟已经做了这件事**（连开五个宝箱只传一次）。
+             两道防抖叠在一起，等于把功能关掉了。
+
+             所以这里带 force（绕过冷却），
+             靠 8 秒合并 + "内容没变就跳过"来控制真实频率。 */
+          syncNow({force:true});
+        }, Math.max(500, 8000 - (now - _firstAt)));
       });
+      /* 🔴v1154：**人要走了，8 秒定时器立刻兑现，不能等。**
+
+         这个合并延迟本身是对的（连开五个宝箱不该传五次），
+         但它留了个缺口：**在这 8 秒之内关掉 App，那笔改动就没了。**
+         而"拿到奖励顺手就切出去"恰恰是最常见的动作。
+
+         所以离开时不只是"再同步一次"，还要**把挂着的那次立刻兑现**。 */
+      var _flushPending = function () {
+        if (_pending) { clearTimeout(_pending); _pending = null; }
+        syncNow({force:true});
+      };
+      try {
+        window.addEventListener('pagehide', _flushPending);
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) _flushPending();
+        });
+      } catch (e) {}
     }catch(e){}
   }
 
@@ -797,13 +949,51 @@
     renderCard();
   }
 
-  function boot(){ ensureKey(); autoHooks(); watchSettings(); }
+  function boot(){
+    ensureKey(); autoHooks(); watchSettings();
+    /* 🔴v1154：**启动时也补一次"已登录就开同步"。**
+       只挂 `hsn-auth-changed` 不够 —— 用户上次已经登录、这次直接打开页面，
+       那个事件根本不会再发一次，`enabled` 就一直是 false。
+       延迟一点执行：等账号模块把登录态读出来。 */
+    setTimeout(function () {
+      try {
+        if (window.HansenAuth && HansenAuth.isSignedIn && HansenAuth.isSignedIn()
+            && !readState().enabled) {
+          writeState({ enabled: true });
+        }
+      } catch (e) {}
+    }, 1500);
+  }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
   try {
     document.addEventListener('hsn-auth-changed', function () {
       _cb = null;   /* 🔴v1028: 账号变了, 云端身份也必须跟着变 */
+
+      /* 🔴v1154：**登录了就自动开启云同步 —— 不该等用户去设置页点一下。**
+
+         用户原话：「我玩的过程中所有数据都会及时存云端，
+         不需要我特意手动去做这件事。」
+
+         而实测下来这条链是断的：`enabled` 只在
+         "一次上传成功"或"一次恢复成功"之后才会变 true。
+         登录后如果云端没档、本机也没人主动点过「立即同步」，
+         **`enabled` 永远是 false**，于是"数据一变就同步"每次都被
+         `not-enabled` 拒绝 —— 玩的过程中根本不存云端。
+
+         真相是：**登录这个动作本身就表示"我要云端存档"**。
+         所以登录成功就置 enabled；退出登录时不动它
+         （下次登录还是同一个人的意愿）。 */
+      try {
+        var _signedIn = false;
+        try {
+          _signedIn = !!(window.HansenAuth && HansenAuth.isSignedIn && HansenAuth.isSignedIn());
+        } catch (e) {}
+        if (_signedIn && !readState().enabled) {
+          writeState({ enabled: true });
+        }
+      } catch (e) {}
     });
   } catch (e) {}
 

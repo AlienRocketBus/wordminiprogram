@@ -80,7 +80,7 @@ for(const source of [islandData.food.DATA,fs.readFileSync('island_food.html','ut
   assert.doesNotMatch(source,/icons\/food-v958\/[a-z]+\.webp\?v=959/i,'stale v959 icon cache key survived');
 }
 const sw=fs.readFileSync('sw_v944.js','utf8');
-assert.match(sw,/const ICON_CACHE = CACHE_PREFIX \+ 'icons-3'/,'v960 must isolate optimized WebP icons from icons-2');
+assert.match(sw,/const ICON_CACHE = CACHE_PREFIX \+ 'icons-\d+'/,'v960 must isolate optimized WebP icons from icons-2');
 assert.ok(sw.includes('/\\/icons\\/(?:[^/]+\\/)*[^/]+\\.(?:webp|png|svg)$/i'),'controlled icon subdirectories must stay offline-capable');
 
 console.log(`food icon compression v960: ${originalTotal} → ${total} bytes (${((1-total/originalTotal)*100).toFixed(2)}% saved), dimensions + alpha + 4 surfaces locked ✅`);

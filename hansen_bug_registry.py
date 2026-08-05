@@ -253,6 +253,18 @@ REGISTRY = [
      'test_gate_schedule_v1151.mjs'),
     ('v1152', '🔴闸门报"120 个测试 0 失败"是假的——磁盘上 171 个，51 个从没跑过；慢名单切片 bug 让它形同虚设',
      'test_gate_schedule_v1151.mjs'),
+    ('v1153', '🔴还有 23 个测试"超时不计失败"被放过——实测它们只要 5~24 秒，全是被并行拖慢的',
+     'test_gate_schedule_v1151.mjs'),
+    ('v1154', '🔴登录必弹框(本机0词也问你选哪份)；自动上传绕过"本机空不上传"红线，把空白盖到云端',
+     'test_login_no_prompt_v1154.mjs'),
+    ('v1154b', '🔴"数据一变8秒就同步"从v1134起从未生效：钩子被盖/enabled一直false/防抖被持续写入饿死',
+     'test_login_no_prompt_v1154.mjs'),
+    ('v1154c', '🔴换账号只覆盖"点退出登录"一条路，直接登新号/刷新/别的标签页都不清资料',
+     'test_account_switch_v1142.mjs'),
+    ('v1154d', '🔴房间查询带了 guestId/heartbeatAt——字段缺失≠空字符串，老房间全查不出来',
+     'test_room_match_v1135.mjs'),
+    ('v1154e', '🔴check_resources 11条长期报红：写死缓存号/精确字符串太脆/守着已被淘汰的设计',
+     'test_room_match_v1135.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

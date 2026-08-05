@@ -11,6 +11,14 @@ globalThis.localStorage = {
   getItem: k => store.has(k) ? store.get(k) : null,
   setItem: (k, v) => store.set(k, String(v)),
   removeItem: k => store.delete(k),
+  /* 🔴v1154：**假 localStorage 必须有 length / key()。**
+     真的 localStorage 是有的，而模块里靠它们遍历键 ——
+     mock 缺了这两个，模块看到的就是"一个键都没有"。
+     v1154 加的红线"本机没学过的词就不上传"因此被误触发，
+     这个测试当场变红。
+     **mock 缺一个接口，测的就不是真实行为。** */
+  get length(){ return store.size; },
+  key(i){ return Array.from(store.keys())[i] ?? null; },
 };
 globalThis.window = globalThis;
 globalThis.document = { readyState:'complete', addEventListener(){}, getElementById(){ return null; }, body:{} };
@@ -64,6 +72,17 @@ console.log('T2 加密');
 /* T3 同步：上云/去重/冷却 */
 console.log('T3 同步');
 {
+  /* 🔴v1154：**先造一份本机进度再测上传。**
+     v1154 给 syncNow 补了红线"本机没有学过的词就拒绝上传"
+     （v1029 立过这条，但只写在登录对账里，
+       而 v1134 的自动同步、v1145 的退出前上传都绕过了它，
+       结果空白本机会把云端好档覆盖掉 —— 用户报的"进度乱七八糟"）。
+
+     这个测试原来直接调 syncNow 而不造任何本机数据 ——
+     **正好被新红线挡住**。补上数据后测的才是真实场景：
+     有进度的设备把进度传上去。 */
+  localStorage.setItem('wordIslandAnimal',
+    JSON.stringify({ learned: [0, 1, 2], stats: {} }));
   const r1 = await M.syncNow({ force: true });
   ok(r1.ok === true, '首次上云成功');
   const id = await D.docIdOf(k);

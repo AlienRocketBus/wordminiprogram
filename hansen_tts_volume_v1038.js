@@ -103,7 +103,28 @@
       }
     } catch (e) {}
   }
-  hijack();
+  /* 🔴v1153：**劫持要等 DOM 就绪，不能在页面初始化中途插进去。**
+
+     实测事故：v1152 把这个模块从 `defer` 改成同步加载（为了赶在
+     任何人 `new SpeechSynthesisUtterance` 之前完成劫持），
+     结果 `test_explore_ui_v945` 变红 —— 弹窗打开时**焦点没落进去**
+     （`active: false`），无障碍的焦点收拢失效了。
+
+     没有任何页面报错，所以不是异常中断；
+     而是包装了 `SpeechSynthesisUtterance` 之后，
+     页面初始化那一刻的执行时序变了。
+
+     取舍：**音量归一晚几百毫秒生效完全可以接受**
+     （用户点发音总在页面加载之后），
+     **而焦点收拢关系到用不用得了** —— 后者优先。
+
+     所以：脚本仍然同步加载（保证模块本身就位），
+     但**劫持推迟到 DOM 就绪**，不掺和页面初始化。 */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hijack);
+  } else {
+    hijack();
+  }
 
   /* 试听：设置页调节时给即时反馈 */
   function preview(word) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1152"></script><!--🔴v1152 全站发音音量归一 —— 位置紧跟 SW 升级门之后，且**不能用 defer**：它要在任何人 new SpeechSynthesisUtterance 之前完成劫持，defer 会推迟到文档解析完，那时早就有脚本用过语音了。此前散落在各处、有的页面干脆没有，而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1152"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
+<html lang="zh-CN"><head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1154"></script><!--🔴v1152 全站发音音量归一 —— 位置紧跟 SW 升级门之后，且**不能用 defer**：它要在任何人 new SpeechSynthesisUtterance 之前完成劫持，defer 会推迟到文档解析完，那时早就有脚本用过语音了。此前散落在各处、有的页面干脆没有，而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1154"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
 if(location.protocol!=='file:')return;/* 🔴v1152：**只在真的像"用户下载了文件"时才救。**
    实测踩到：file:// 不只出现在"下载后双击打开"这一种情况 ——
    本地开发、自动化测试也是直接用 file:// 打开页面的。
@@ -33,9 +33,9 @@ else{show();}
 window.addEventListener('load',show);
 /* 主逻辑可能在就绪后重绘整个 body，所以再补一次 */
 setTimeout(function(){shown=false;show();},1200);
-})();</script><script src="hansen_cred_trap_v1085.js?v=1152"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1152"></script>
-<script src="hansen_land_cards.js?v=1152"></script><script src="hansen_land_scene_manifest_v972.js?v=1152"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1152"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+})();</script><script src="hansen_cred_trap_v1085.js?v=1154"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1154"></script>
+<script src="hansen_land_cards.js?v=1154"></script><script src="hansen_land_scene_manifest_v972.js?v=1154"></script><!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1154"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白。🔴v792 加固: 只重试真正的图片URL·跳过空src/页面URL——否则空src的img报错会被改成?__rt=(指向页面HTML)·还会覆盖刚设的真src·导致角色图永远加载失败只剩背景 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;var cur=(g.getAttribute("src")||"");if(!cur||!/\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(cur)){return;}g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=cur.split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BOSS 殿堂 · 演示</title>
@@ -171,9 +171,9 @@ body.smode .art img{transform:scale(1.16);transform-origin:center bottom}
 
 /* 🔴v971 land殿堂: 全屏底=立绘模糊暗化, 卡窗内=清晰立绘 → 程序化双层背景 */
 .landblur{filter:blur(18px) brightness(.52) saturate(1.2);transform:scale(1.14)}
-</style><!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1152"></script></head>
+</style><!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1154"></script></head>
 <body>
-<script src="hansen_perf_v944.js?v=1152"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1152"></script><!-- v859: 性能引擎接入卫星页 -->
+<script src="hansen_perf_v944.js?v=1154"></script><!--🔴v1083 版本守望者：去服务器问最新版本，发现本机落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1154"></script><!-- v859: 性能引擎接入卫星页 -->
 <div id="bgA" class="kb"></div><div id="bgB" class="kb"></div>
 <div class="vign" id="vign"></div>
 <img loading=lazy decoding=async id="soloChar" alt=""><div id="soloGround"></div>
@@ -276,7 +276,7 @@ var BGS=[
  {n:'苍穹',bg:'linear-gradient(180deg,#0b2a52,#0e5180 50%,#062038)',sw:'linear-gradient(160deg,#7dd3fc,#0369a1,#082f49)'}
 ];
 var QS=(function(){try{return new URLSearchParams(location.search);}catch(e){return {get:function(){return null;}};}})();
-var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=1152';})();
+var VV=(function(){var m=QS.get('v');return m?('?v='+m):'?v=1154';})();
 var OWN=(function(){var m=QS.get('own');if(!m)return null;var a=[];m.split(',').forEach(function(x){var n=parseInt(x,10);if(n>=1&&n<=20&&a.indexOf(n)<0)a.push(n);});return a.length?a.sort(function(x,y){return x-y;}):null;})();
 function isOwned(lv){return !OWN||OWN.indexOf(lv)>=0;}
 function bgPath(lv){return 'bosses_bg/level'+lv+'.webp'+VV;}

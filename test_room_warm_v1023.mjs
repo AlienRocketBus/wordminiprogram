@@ -62,7 +62,19 @@ for(let i=0;i<25;i++){
 }
 ok(pf.length>=3, '三个带参数页的资源已预热进缓存: '+pf.join(', '));
 /* 预热用的隐藏 iframe 加载完应自行移除, 不常驻占内存 */
-await page.waitForTimeout(1200);
+/* 🔴v1154：**要等预热全部跑完再检查。**
+
+   原来只等 1200ms，而预热本身就是"每 1200ms 起一个新的" ——
+   检查那一刻**必然有一个正在预热中的 iframe**，于是永远红。
+
+   这条测试守的是"预热完不留常驻 iframe"（内存），
+   不是"任何时刻都不许有 iframe"（那样预热根本没法做）。
+   等 6 秒：三个页面预热完 + 最后一个的 600ms 移除延迟，绰绰有余。
+
+   （顺带：产品侧 v1154 也补了三条腿的清理 ——
+     load 成功移除 / error 移除 / 8 秒硬超时兜底，
+     原来只挂 load，加载失败或卡住时 iframe 会永久留在 DOM 里。） */
+await page.waitForTimeout(6000);
 const ghosts = await page.evaluate(()=>
   [...document.querySelectorAll('iframe')].filter(f=>/warm=1/.test(f.src||'')).length);
 ok(ghosts===0, '预热用的隐藏 iframe 已自行清理(不占内存)');

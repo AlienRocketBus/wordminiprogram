@@ -137,7 +137,42 @@ def main():
     st = os.path.join(ROOT, 'jarvis_selftest.py')
     if os.path.exists(st):
         print('\n▶ 第一档⅔：守卫自证（每道守卫必须真的会咬人）\n')
-        if subprocess.run([sys.executable, st], cwd=ROOT).returncode != 0:
+        # 🔴v1153：**自证结果按"守卫文件指纹"缓存。**
+        #
+        #   自证要让 39 道守卫各咬一次故障样本，这一档就要跑十几分钟。
+        #   而它验的是"守卫本身还灵不灵" —— **只和守卫文件有关**，
+        #   业务代码改了不影响结论。
+        #
+        #   所以：守卫文件（hansen_guards_*.py / jarvis_selftest.py）
+        #   一个字节没变，就复用上次的结论；**变了立刻重跑**。
+        #   这不是少做事，是**不做重复的事**。
+        import hashlib as _h2
+        import glob as _g2
+        _gh = _h2.sha256()
+        for _f in sorted(_g2.glob(os.path.join(ROOT, 'hansen_guards_*.py'))
+                         + [st]):
+            try:
+                _gh.update(open(_f, 'rb').read())
+            except Exception:
+                pass
+        _gfp = _gh.hexdigest()[:16]
+        _SELF_CACHE = os.path.join(ROOT, '.jarvis_selftest_ok.json')
+        _cached = None
+        try:
+            _cached = json.load(open(_SELF_CACHE, encoding='utf-8')).get('fp')
+        except Exception:
+            _cached = None
+        if _cached == _gfp:
+            print('  ⏩ 守卫文件未变动，复用上次的自证结论（全绿）')
+            _selftest_rc = 0
+        else:
+            _selftest_rc = subprocess.run([sys.executable, st], cwd=ROOT).returncode
+            if _selftest_rc == 0:
+                try:
+                    json.dump({'fp': _gfp}, open(_SELF_CACHE, 'w', encoding='utf-8'))
+                except Exception:
+                    pass
+        if _selftest_rc != 0:
             if os.path.exists(PASS_FILE):
                 os.remove(PASS_FILE)
             print('\n🚫 有守卫已失灵 —— 已作废发布凭证。')
@@ -226,9 +261,117 @@ def main():
         # v1152: 把"实际会跑多少"打出来 —— 之前只报"共 N 个测试"，
         #        而那个 N 已经是扣掉慢名单之后的数，看不出漏了多少。
         print('  📋 磁盘上 %d 个测试，本轮实跑 %d 个' % (len(all_tests), len(tests)))
+        # 🔴v1153：**每个阶段都打点。**
+        #   实测撞上：闸门被 timeout 杀掉后，输出停在半路，
+        #   **看起来就像"还在跑"** —— 我等了半小时才发现进程早没了。
+        #   现在每一步都留痕，一看输出就知道走到哪、是正常结束还是被掐断。
+        import time as _t
+        _phase_t0 = _t.time()
+        def _phase(msg):
+            print('  ⏱ [%5.0fs] %s' % (_t.time() - _phase_t0, msg), flush=True)
+        _phase('并行段开始')
         # 并行跑 —— 153 个串行要十几分钟，闸门必须是分钟级的，
         # 否则人会绕过它（那就回到"靠记性"的老路）。
         from concurrent.futures import ThreadPoolExecutor
+        # 🔴v1153：**断点续跑 —— 中断后接着跑，不用从头来。**
+        #
+        #   实测撞上的现实约束：这一轮的运行环境单次最多跑 14 分钟，
+        #   而完整闸门要 25~30 分钟 —— **永远跑不完，也就永远出不了包**。
+        #
+        #   而"跑不完就绕过闸门"正是这几版一直在批判的事
+        #   （v1152 那个"120 个测试 0 失败"就是这么来的）。
+        #
+        #   正确解法不是降低标准，是**让闸门能在受限环境里跑完**：
+        #   每跑完一个测试就把结果存盘，下次启动时跳过已通过的，
+        #   接着跑剩下的。存盘文件带**代码指纹**，
+        #   任何源文件一改动，进度立刻作废、从头再来 ——
+        #   **绝不会出现"用旧结果给新代码背书"**。
+        import hashlib as _hl
+        RESUME_FILE = os.path.join(ROOT, '.jarvis_resume.json')
+        def _fingerprint():
+            h = _hl.sha256()
+            # 🔴v1153 自挑（第二轮）：**读全部 361 个文件要 18 秒**，
+            #   每次续跑都要付这个成本。
+            #   而 HTML 是 `generate.py` 的生成产物 —— 内容由
+            #   `template.html` + 各模块决定，源头没变它就不会变。
+            #   只哈希**源文件**（304 个）只要 0.03 秒。
+            #
+            #   ⚠️ 但 HTML 仍要防"有人手改了生成产物却没改源头"：
+            #   所以额外把每个 HTML 的**大小**算进去 ——
+            #   读大小是元数据操作，几乎不花时间，
+            #   而手改内容几乎必然改变大小。
+            _srcs = []
+            for _pat in ('hansen_*.js', 'sw_*.js', 'test_*.mjs', 'template.html', '*.py'):
+                _srcs += _glob.glob(os.path.join(ROOT, _pat))
+            for f in sorted(set(_srcs)):
+                try:
+                    # 🔴v1153 自挑：**必须读内容，不能只看 mtime。**
+                    #   第一版用 `getmtime` 图快 —— 但有工具会保留 mtime 改内容
+                    #   （rsync -t、某些编辑器、git 的部分操作），
+                    #   那时指纹不变 → **用旧结果给新代码背书**。
+                    #   而"绝不会用旧结果背书新代码"正是这个机制的立身之本，
+                    #   在它上面省时间等于把地基抽了。
+                    h.update(os.path.basename(f).encode())
+                    h.update(open(f, 'rb').read())
+                except Exception:
+                    pass
+            # HTML 只算大小（防手改，但不付读全文的成本）
+            for f in sorted(_glob.glob(os.path.join(ROOT, '*.html'))):
+                try:
+                    h.update(os.path.basename(f).encode())
+                    h.update(str(os.path.getsize(f)).encode())
+                except Exception:
+                    pass
+            return h.hexdigest()[:16]
+        _fp = _fingerprint()
+        _done = {}
+        try:
+            _r = json.load(open(RESUME_FILE, encoding='utf-8'))
+            if _r.get('fp') == _fp:
+                _done = _r.get('done', {})
+        except Exception:
+            _done = {}
+        if _done:
+            print('  ⏩ 续跑：已有 %d 个测试的结果（代码未变动）' % len(_done))
+            _pending = [t for t in tests if os.path.basename(t) not in _done]
+            # v1153: 已完成的失败项先攒着，等 raw 初始化后再并入
+            # 🔴v1153：**续跑时，之前存盘的失败也要重新跑一次。**
+            #   闸门本来就有"失败串行复核"机制（并行下的假失败很常见），
+            #   但续跑时那些失败是从文件读回来的、绕过了复核 ——
+            #   于是一次偶然的并行抖动会被**永久记进进度文件**，
+            #   之后每次续跑都带着它，闸门再也过不去。
+            #   做法：**只把通过的结果算数**，失败的重新排进本轮再跑一遍。
+            _resumed_fail = []
+            _refail = [k for k, v in _done.items() if v]
+            if _refail:
+                print('  ↻ %d 个之前失败的重新跑（不直接采信旧结果）' % len(_refail))
+                for k in _refail:
+                    _done.pop(k, None)
+            _pending = [t for t in tests if os.path.basename(t) not in _done]
+            tests = _pending
+            # _heavy / _light 在后面基于新的 tests 重新计算，这里不用动
+            print('  ⏩ 本轮还需跑 %d 个' % len(tests))
+
+        # 🔴v1153 自挑：**进度文件是 4 个线程同时写的。**
+        #   不加锁的后果不只是"后写覆盖先写"（那还好，内容是累积的），
+        #   而是**两个线程同时写会写出截断的 JSON** ——
+        #   下次读取直接报错、整个进度作废，
+        #   于是"中断了不用重跑"这件事又白做了。
+        #
+        #   加锁 + 写临时文件再改名（原子替换）：
+        #   即使写到一半被杀，原文件也还是完整的旧版本。
+        import threading as _th
+        _save_lock = _th.Lock()
+        def _save_progress():
+            with _save_lock:
+                try:
+                    _tmp = RESUME_FILE + '.tmp'
+                    with open(_tmp, 'w', encoding='utf-8') as _fh:
+                        json.dump({'fp': _fp, 'done': dict(_done)}, _fh)
+                    os.replace(_tmp, RESUME_FILE)
+                except Exception:
+                    pass
+
         def _run(t, heavy=False):
             """🔴v1098：**失败要复核一次再算数。**
 
@@ -245,12 +388,22 @@ def main():
                 r = subprocess.run(['node', t], cwd=ROOT, capture_output=True,
                                    timeout=(per_timeout * 3 if heavy else per_timeout))
                 _spent[os.path.basename(t)] = round(time.time() - _t0, 1)
-                return None if r.returncode == 0 else os.path.basename(t)
+                _res = None if r.returncode == 0 else os.path.basename(t)
+                _done[os.path.basename(t)] = _res      # v1153: 存盘供续跑
+                _save_progress()
+                return _res
             except subprocess.TimeoutExpired:
+                # 🔴v1153：**超时也要记耗时，否则会形成死循环。**
+                #   原来超时就直接返回，不写 `_spent` ——
+                #   下次排序时这个测试没有历史记录，被当成"0 秒"排到最后，
+                #   于是**又被并行拖慢、又超时**，永远进不了重测试串行段。
+                #   记成"至少用了这么久"，让它下次能排到前面去。
+                _spent[os.path.basename(t)] = round(time.time() - _t0, 1)
                 return '~SLOW~' + os.path.basename(t)
             except Exception:
                 return os.path.basename(t)
         _spent = {}
+
 
         # 🔴v1152：**已知的慢测试串行跑，不参与并行。**
         #
@@ -265,21 +418,90 @@ def main():
         #
         #   做法：耗时排前几名的**单独串行跑**（不抢资源，用真实耗时就够），
         #   其余的照常并行。总时长几乎不变，但**它们真的被验证了**。
+        # 🔴v1153：**判定阈值从"前 6 名且 ≥20 秒"放宽。**
+        #
+        #   v1152 只让前 6 名串行，结果仍有 **23 个测试超时**。
+        #   一个个串行单跑验证：它们只要 5~24 秒，**远低于 45 秒超时** ——
+        #   也就是说**它们全是被并行拖慢的，没有一个是真的慢**。
+        #
+        #   4 个浏览器测试同时抢 CPU 时，单个耗时会翻两三倍。
+        #   而"超时不计失败"意味着**这 23 个仍然没被验证** ——
+        #   v1152 修好了"少跑 51 个"，却还剩这一层。
+        #
+        #   试过"≥8 秒全部串行"，但那要 951 秒（16 分钟）——
+        #   **又回到了"闸门太慢"的老路**。
+        #
+        #   最终方案是两条一起：
+        #     ① 前 12 名且 ≥12 秒的串行（覆盖真正的重头）
+        #     ② **超时的那些，最后串行补跑一次**（见下面 `_retry_slow`）
+        #   第②条才是关键 —— **"超时"不该被当成"通过"**。
         _heavy = []
         if _hist:
             _ranked = sorted(tests, key=lambda t: -_hist.get(os.path.basename(t), 0))
-            _heavy = [t for t in _ranked[:6] if _hist.get(os.path.basename(t), 0) >= 20]
+            _heavy = [t for t in _ranked[:12] if _hist.get(os.path.basename(t), 0) >= 12]
         _light = [t for t in tests if t not in _heavy]
         if _heavy:
             print('  🐢 %d 个重测试串行跑（并行会互相抢 CPU，导致假超时）' % len(_heavy))
 
-        raw = []
+        raw = list(_resumed_fail) if '_resumed_fail' in locals() else []
         with ThreadPoolExecutor(max_workers=4) as ex:
             raw += [x for x in ex.map(_run, _light) if x]
-        for t in _heavy:                       # 串行，给足时间
-            x = _run(t, heavy=True)
-            if x:
-                raw.append(x)
+        # 🔴v1153：**闸门太慢这件事，我没解决。**
+        #
+        #   实测：整轮 171 个测试要跑 30 分钟以上。
+        #   我试过四个方向 —— 最长作业优先、重测试串行、
+        #   重测试 2 线程、按 git 改动筛选 —— **都没压到可接受范围**。
+        #
+        #   按改动筛选那次失败得最明白：这轮改了 35 个源文件，
+        #   几乎所有重测试都被判“相关”，一个都没省下来。
+        #
+        #   根本原因不在调度：**171 个测试里有大量浏览器测试**，
+        #   每个都要启动 Chromium、加载页面。这是物理下限。
+        #
+        #   真正该做的是**改测试本身**（多个测试共用一个浏览器实例）
+        #   —— 那是独立课题，不该在这一版顺手做半截。
+        #
+        #   **所以这里不留半成品**：宁可诚实地慢，
+        #   也不要一个“看起来快了、其实只是少跑了”的闸门 ——
+        #   那正是 v1152 刚修掉的病。
+
+        # **重测试用 2 线程跑，不是纯串行。**
+        #
+        #   实测这段是整个闸门的瓶颈：12 个重测试纯串行要 507 秒（8.5 分钟），
+        #   整轮闸门因此跑了 40 多分钟 —— 我自己等到不得不中断它。
+        #
+        #   而"必须串行"这个结论下得太狠：真正的问题是
+        #   **重测试和一堆轻测试挤在 4 线程里**，不是"重测试之间不能并行"。
+        #   2 线程时互相拖慢很轻（约 15%），却能把 507 秒压到约 290 秒。
+        #
+        #   一个要跑 40 分钟的闸门等于没有闸门 —— 人会绕过它，
+        #   或者像我这样中途掐掉。
+        if _heavy:
+            _phase('重测试段开始（%d 个，2 线程）' % len(_heavy))
+            with ThreadPoolExecutor(max_workers=2) as ex2:
+                raw += [x for x in ex2.map(lambda t: _run(t, heavy=True), _heavy) if x]
+            _phase('重测试段结束')
+
+        # 🔴v1153：**超时的测试要串行补跑一次，不能当成"通过"。**
+        #
+        #   v1152 修好了"少跑 51 个"，但还剩一层：
+        #   仍有 23 个测试并行下超时，而闸门"不计失败"就放过了。
+        #
+        #   实测把它们一个个串行单跑：**只要 5~24 秒，远低于 45 秒** ——
+        #   也就是说**它们全是被并行拖慢的，没有一个是真的慢**。
+        #   而"超时不计失败"意味着这 23 个仍然没被验证。
+        #
+        #   做法：并行阶段超时的，最后**串行补跑一次**（给 3 倍时间）。
+        #   补跑还超时才真的算"跑不完"，那时才记进慢名单。
+        _timeouts = [x[len('~SLOW~'):] for x in raw if x.startswith('~SLOW~')]
+        if _timeouts:
+            _phase('补跑段开始（%d 个）' % len(_timeouts))
+            print('  🔁 %d 个并行超时，串行补跑一次（超时≠通过）' % len(_timeouts))
+            raw = [x for x in raw if not x.startswith('~SLOW~')]
+            for name in _timeouts:
+                x = _run(os.path.join(ROOT, name), heavy=True)
+                if x:
+                    raw.append(x)
         # v1151: 记下这一轮的耗时，供下次排序用
         try:
             _hist.update(_spent)
