@@ -370,6 +370,33 @@ function doCreate() {
     if (btn) { btn.disabled = true; btn.textContent = '进入中…'; }
     S().joinRoom(rid).then(function (r) {
       if (!r.ok) {
+        /* 🔴v1154：**排位进不去房要说人话，不能默默甩回列表。**
+
+           实测（"进房那一刻被别人抢走"场景）：抢不到时直接 `lobby(r)`，
+           用户从"正在找对手"一下子跳到「🏠 大PK · 公开房间」列表，
+           **完全不知道刚才发生了什么** —— 以为天梯坏了。
+
+           而"房刚好被别人抢走"在排位里很常见：
+           大家都在抢同一批空房，慢一步就没了。这不是故障，是正常竞争。 */
+        if (_fromLadder) {
+          _fromLadder = false;
+          paint('<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
+            + '<div class="pr_h">⚡ 排位</div></div>'
+            + '<div style="text-align:center;padding:26px 12px">'
+            + '<div style="font-size:40px">\ud83d\udca8</div>'
+            + '<div style="font-size:16px;font-weight:800;margin-top:10px">这间房刚被别人抢走了</div>'
+            + '<div style="font-size:13px;color:var(--pk-dim);margin-top:8px;line-height:1.8">'
+            +   '排位时大家都在抢空房，慢一步就没了。<br>再找一次就好。</div>'
+            + '<button class="pr_btn" id="prReMatch" style="margin-top:16px">\u26a1 再找一次对手</button>'
+            + '</div>');
+          var _rb = document.getElementById('prReMatch');
+          if (_rb) _rb.onclick = function () {
+            try { close(); if (window.HansenLadderUI) HansenLadderUI.open(); } catch (e) {}
+          };
+          var _bk = document.getElementById('prBack');
+          if (_bk) _bk.onclick = close;
+          return;
+        }
         if (r.taken) { refresh(); alert(E(r)); if (btn) { btn.disabled = false; btn.textContent = '进去打'; } return; }
         lobby(r); return;
       }
@@ -443,6 +470,8 @@ function doCreate() {
   var _rt = null;
   var _kbKeyHandler = null;          /* 本回合的运行时状态 */
   var _pollTimer = null;
+  var _netMiss = 0;   /* v1154: 连续拿不到房间状态的次数 */
+  var _waitResult = 0; /* v1154: 等对手交卷的轮询次数，防止无限等待 */
 
   function stopKb() {
     if (_kbKeyHandler) { try { document.removeEventListener('keydown', _kbKeyHandler); } catch (e) {} _kbKeyHandler = null; }
@@ -737,7 +766,96 @@ function doCreate() {
     if (!st) return;
     checkOpponentAlive(idx);
     S().roundState(st.roomId).then(function (r) {
-      if (!r || !r.ok || !_rt || _rt.idx !== idx) return;
+      /* 🔴v1154：**打到一半断网时，要让人知道。**
+
+         实测：对战中断网，界面就一直停在"第 1/2 词 · ⏱ 10s"，
+         倒计时照走、答了没反应，**用户完全不知道是网断了** ——
+         这正是"突然就卡住"那种体验。
+
+         而这里原来只是 `if (!r.ok) return;` 静静跳过，
+         连续失败多少次都没人管。
+
+         改为：连续 5 次拿不到房间状态（约 5 秒）就在顶上挂一条提醒，
+         恢复了自动撤掉。**不打断对局** —— 网可能马上就回来，
+         这时候把人踢出去比卡着更糟。 */
+      if (!r || !r.ok) {
+        _netMiss = (_netMiss || 0) + 1;
+        if (_netMiss === 5) {
+          try {
+            var bar = document.getElementById('prNetWarn');
+            if (!bar) {
+              bar = document.createElement('div');
+              bar.id = 'prNetWarn';
+              bar.setAttribute('style',
+                'position:absolute;left:0;right:0;top:0;z-index:9;padding:7px 10px;'
+                + 'background:#b45309;color:#fff;font-size:12.5px;text-align:center;'
+                + 'font-weight:700');
+              bar.textContent = '\ud83d\udcf6 网络不稳，正在重连…（进度不会丢）';
+              var wrap = document.querySelector('.pr_wrap');
+              if (wrap) { wrap.style.position = 'relative'; wrap.appendChild(bar); }
+            }
+          } catch (e) {}
+        }
+        return;
+      }
+      /* 🔴v1154：**读到过期数据时，进度不能往回跳。**
+
+         实测（云端返回旧文档：round 从 1 倒退回 0、winners 变空）：
+         界面**倒回第 1 词**，已经答过的词又出现一遍。
+
+         这在真网络下很常见：请求重传、CDN 缓存、多节点还没同步完，
+         都会让某一次读取拿到旧快照。用户看到的是"打着打着退回去了"，
+         比卡住还让人恼火 —— 因为他会以为刚才的分白拿了。
+
+         做法：记下见过的最大回合号，**比它旧的整份丢弃**。
+         对局进度天然只增不减，这条守得住。 */
+      try {
+        var _rd = Number((r.room && r.room.round) != null ? r.room.round : r.round);
+        if (isFinite(_rd)) {
+          if (_rd < (st.maxRound || 0)) return;      /* 旧快照：直接忽略 */
+          st.maxRound = _rd;
+        }
+      } catch (e) {}
+
+      if (_netMiss) {                       /* 通了：撤掉提醒 */
+        _netMiss = 0;
+        try { var ok0 = document.getElementById('prNetWarn'); if (ok0) ok0.remove(); } catch (e) {}
+      }
+
+      /* 🔴v1154：**对手的分从来没更新过 —— 永远显示 0。**
+
+         两人真机对打实测抓到：
+           A 答对第一词 → A 看到"你 100 | 0 对手" ✅
+                        → B 看到"你 0 | 0 对手"  ❌（应该是对手 100）
+         而房间里 `winners: ["host"]` 已经写对了，**只是没人拿它去算分**。
+
+         查下来 `st.oppScore` 只在开局时被设成 0，**之后一次都没被赋值** ——
+         也就是说"实时比分"这个功能从来只有一半：自己的分对，对手的永远是 0。
+
+         比分是对战最核心的反馈，看不到对手分等于不知道自己是赢是输。
+
+         修法：每次轮询时根据房间的 `winners` 重算对手得分 ——
+         `winners[i]` 记的是第 i 词谁先拼对（'host'/'guest'），
+         按当前模式的首答分/次答分折算。 */
+      try {
+        var _mm = (S() && S().modeOf) ? S().modeOf(st.mode)
+                                      : { firstScore: 100, secondScore: 60 };
+        var _ws = (r.room && r.room.winners) || r.winners || [];
+        var _meIsHost = !!(r.mySide ? r.mySide === "host" : st.isHost);
+        var _opp = 0;
+        for (var _i = 0; _i < _ws.length; _i++) {
+          var _who = _ws[_i];
+          if (!_who) continue;
+          var _oppWon = _meIsHost ? (_who === 'guest') : (_who === 'host');
+          if (_oppWon) _opp += (_mm.firstScore || 100);
+        }
+        if (_opp !== st.oppScore) {
+          st.oppScore = _opp;
+          var _ob = q('prOpp');
+          if (_ob) _ob.textContent = String(_opp);
+        }
+      } catch (e) {}
+      if (!_rt || _rt.idx !== idx) return;
       /* v1126: 记下房间共享的回合开始时间，供下一回合算截止点 */
       if (r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
       var w = (r.winners || [])[idx];
@@ -882,8 +1000,39 @@ function doCreate() {
   function pollResult(roomId, score) {
     S().reportResult(roomId, score).then(function (r) {
       if (!r.ok) { lobby(r); return; }
-      if (r.waiting) { setTimeout(function () { pollResult(roomId, score); }, 2000); return; }
+      if (r.waiting) {
+        /* 🔴v1154：**等对手交卷不能没有上限。**
+
+           两人真机对打实测抓到：A 已经看到"🤝 打平"的结算屏了，
+           **B 还卡在"正在等对手交卷…"** —— 而且会一直卡下去。
+
+           原来这里只是每 2 秒重试一次，**没有任何超时**：
+           对手中途关掉页面、网断了、或者结算写入丢了一次，
+           这一边就**永远停在等待屏**，只能自己退出去 ——
+           而退出去这一局的战绩和天梯分就都没了。
+
+           给 45 秒上限：正常情况下对手交卷只要几秒，
+           45 秒还没等到，多半是他不会再交了。
+           超时按"对手离场"结算 —— 和 v1104 对手掉线的处理一致，
+           **让这一局有个交代，而不是把人吊在那儿**。 */
+        _waitResult = (_waitResult || 0) + 1;
+        if (_waitResult > 22) {                 /* 22 次 × 2 秒 ≈ 45 秒 */
+          _waitResult = 0;
+          showResult({ ok: true, result: 'win', byAbandon: true,
+                       mine: score, theirs: 0 });
+          return;
+        }
+        setTimeout(function () { pollResult(roomId, score); }, 2000);
+        return;
+      }
+      _waitResult = 0;
       showResult(r);
+    })['catch'](function () {
+      /* 网络抖动也算一次等待，别让异常把这条链断掉 */
+      _waitResult = (_waitResult || 0) + 1;
+      if (_waitResult > 22) { _waitResult = 0;
+        showResult({ ok: true, result: 'win', byAbandon: true, mine: score, theirs: 0 }); return; }
+      setTimeout(function () { pollResult(roomId, score); }, 2500);
     });
   }
 
@@ -956,13 +1105,36 @@ function doCreate() {
 
   /* 🔴v1108 天梯专用入口：排位固定用 A 抢答赛，玩家不能选模式。
      这是 v1100 定下的规矩 —— 排位就该是纯竞技。 */
+  /* 🔴v1154：**先把对战界面打开，再建房。**
+
+     用户现场：「天梯功能根本用不了。」
+
+     真跑一遍抓到的：点「开始排位」→ 等 20 秒没找到对手 →
+     天梯层 `close()` 掉、`_createForLadder` 建了房（数据库里确实多了一间），
+     **但屏幕一片空白** —— 因为 `doCreate()` 只负责建房，
+     渲染「正在等对手」那一屏依赖 UI 已经打开，
+     而这条路上从来没人调用过 `open()`。
+
+     更糟的是外层包着 `try/catch`，**报错被吞掉了** ——
+     所以控制台干干净净，只有用户看到白屏。
+     （这也是为什么它能一直坏着没被发现。）
+
+     `_joinForLadder` 同理：直接 `doJoin` 而界面没开，
+     进去了也看不见。
+
+     修法：两条路都先 `open()` 再动作。 */
+  var _fromLadder = false;
+
   function _createForLadder(rating) {
     _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
     _ladderRating = Number(rating) || 1000;
+    try { lobby(); } catch (e) {}
     doCreate();
   }
   function _joinForLadder(roomId) {
     _pickedMode = 'A';
+    _fromLadder = true;      /* v1154: 记住这次是排位来的，进不去时好说人话 */
+    try { lobby(); } catch (e) {}
     doJoin(roomId, null);
   }
 

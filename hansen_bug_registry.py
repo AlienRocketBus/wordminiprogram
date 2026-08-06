@@ -265,6 +265,8 @@ REGISTRY = [
      'test_room_match_v1135.mjs'),
     ('v1154e', '🔴check_resources 11条长期报红：写死缓存号/精确字符串太脆/守着已被淘汰的设计',
      'test_room_match_v1135.mjs'),
+    ('v1155', '🔴天梯根本用不了：找不到对手/开房后白屏/对手比分永远0/等交卷无超时/过期数据倒退',
+     'test_ladder_v1108.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

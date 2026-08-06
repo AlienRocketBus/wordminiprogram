@@ -110,5 +110,103 @@ function mkRecord() {
   ok(/HansenLadderUI/.test(pk), '★ spelling_pk 页的天梯入口也接上了');
 }
 
+
+/* ── 🔴v1154 追加：天梯"自动开房"这条路的界面必须打开 ──────
+ *
+ * 用户现场：「天梯功能根本用不了。」
+ *
+ * 真跑一遍抓到的：
+ *   点「开始排位」→ 正常显示"正在找 900~1100 分的对手" ✅
+ *   等 8/16 秒 → 范围正常放宽 ✅
+ *   等 20 秒 → 天梯层 close()、建了房（数据库确实多了一间）
+ *            → **屏幕一片空白** ❌
+ *
+ * 根因：`_createForLadder` 只调了建房，**没先打开对战界面** ——
+ * 房建好了，却没有任何界面在等它。
+ *
+ * 而外层包着 try/catch，**报错被吞掉了**：
+ *   控制台零错误 ✅ / 用户看到白屏 ❌
+ * 所以从代码看、从日志看都正常，**只有真的点一遍才会发现**。
+ */
+{
+  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const iCreate = code.indexOf('function _createForLadder');
+  const segCreate = code.slice(iCreate, iCreate + 400);
+  ok(/lobby\(\)/.test(segCreate) && segCreate.indexOf('lobby()') < segCreate.indexOf('doCreate()'),
+     '★ _createForLadder **先打开界面再建房** —— ' +
+     '否则房建好了没有界面在等它，用户看到白屏');
+
+  const iJoin = code.indexOf('function _joinForLadder');
+  const segJoin = code.slice(iJoin, iJoin + 300);
+  ok(/lobby\(\)/.test(segJoin) && segJoin.indexOf('lobby()') < segJoin.indexOf('doJoin('),
+     '★ _joinForLadder 同样先打开界面 —— 进去了也得看得见');
+
+  /* 建房成功后必须画等待屏 */
+  ok(/waiting\(r\.roomId/.test(code),
+     '★ 建房成功后调 waiting() 画「等对手进来」那一屏');
+}
+
+/* 天梯 UI 调的那两个方法必须真的存在 */
+{
+  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');
+  for (const m of ['_createForLadder', '_joinForLadder']) {
+    ok(new RegExp(m + '\\s*:').test(ui),
+       `★ HansenPkRoomUI 导出了 ${m}（天梯 UI 靠它开房/进房）`);
+  }
+  ok(/HansenPkRoomUI\._createForLadder|HansenPkRoomUI &&[\s\S]{0,80}_createForLadder/.test(ld),
+     '★ 天梯 UI 确实调用了 _createForLadder');
+}
+
+
+/* ── 🔴v1154 追加：对战中的两个真问题 ────────────────────── */
+{
+  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  /* ① 对手比分从来没更新过 */
+  ok(/st\.oppScore = _opp/.test(code),
+     '★ **对手比分要跟着 winners 更新** —— ' +
+     '两人真机对打实测：A 答对后 B 那边仍显示"对手 0"。' +
+     'oppScore 只在开局被设成 0，之后一次都没被赋值 —— ' +
+     '"实时比分"这个功能从来只有一半');
+  ok(/_ob\.textContent = String\(_opp\)/.test(code),
+     '★ 算出来要写回界面');
+
+  /* ② 等对手交卷不能没有上限 */
+  ok(/_waitResult > 22/.test(code),
+     '★ **等对手交卷有 45 秒上限** —— ' +
+     '原来只是每 2 秒重试、没有任何超时：' +
+     '对手关掉页面/网断了/结算写入丢一次，这边就永远停在等待屏');
+  ok(/byAbandon: true[\s\S]{0,60}mine: score/.test(code),
+     '★ 超时按"对手离场"结算 —— 让这一局有个交代，而不是把人吊在那儿');
+  ok(/\)\['catch'\]\(function \(\) \{[\s\S]{0,200}_waitResult/.test(code),
+     '★ 网络异常也算一次等待 —— 别让异常把这条链断掉');
+
+  /* ③ 对战中断网要提示 */
+  ok(/prNetWarn/.test(code) && /_netMiss === 5/.test(code),
+     '★ 对战中连续 5 次拿不到房间状态就提示"网络不稳，正在重连" —— ' +
+     '不打断对局（网可能马上回来，把人踢出去比卡着更糟）');
+  ok(/_netMiss = 0;[\s\S]{0,160}prNetWarn[\s\S]{0,40}remove\(\)/.test(code),
+     '★ 网络恢复后提示自动撤掉');
+}
+
+/* 天梯的防重入 */
+{
+  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');
+  const c2 = ld.replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = c2.indexOf('function startMatching');
+  ok(/if \(_cancel\) \{ try \{ _cancel\(\); \}/.test(c2.slice(i, i + 400)),
+     '★ **开始排位要防重入** —— ' +
+     'stop 是局部变量而 _cancel 是共享的，连点两下会让几个循环互相踩');
+  ok(/lr && lr\.ok === false/.test(c2),
+     '★ **断网判据看返回值** —— listRooms 失败时返回 {ok:false} 而不抛异常，' +
+     '只挂 .catch 永远进不去，界面会一直转圈');
+  ok(/function showOffline/.test(c2),
+     '★ 连不上时有专门的一屏（📡 连不上网络 + 重新找对手）');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

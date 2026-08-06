@@ -486,7 +486,25 @@
             id: x._id || x.id, hostName: x.hostName || '无名蜂', hostTier: x.hostTier || '',
             wordCount: x.wordCount || WORDS_PER_ROUND,
             mine: !!(u.id && x.hostId === u.id),
-            ageSec: Math.max(0, Math.round((Date.now() - (x.createdAt || 0)) / 1000))
+            ageSec: Math.max(0, Math.round((Date.now() - (x.createdAt || 0)) / 1000)),
+            /* 🔴v1154：**这两个字段以前被丢掉了 —— 天梯因此完全没法用。**
+
+               用户现场：「天梯功能根本用不了。」
+
+               天梯匹配靠这两个字段挑房：
+                 if (r.mode !== 'A') return false;      ← undefined，全被滤掉
+                 var raw = Number(r.hostRating);         ← 也没有
+
+               而这个映射只挑了展示用的几项，**把它们漏了** ——
+               于是"找实力接近的对手"这条路**永远找不到任何房**，
+               每次都只能等满 20 秒、自己开一间。
+               大多数时候明明有人在等，却匹配不上。
+
+               `_id` 也一起带出去：天梯拿 `fit[0]._id` 去进房，
+               而这里只给了 `id`，属于同一个疏漏。 */
+            _id: x._id || x.id,
+            mode: x.mode || 'C',
+            hostRating: x.hostRating
           };
         })
       };

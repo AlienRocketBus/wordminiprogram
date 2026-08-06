@@ -53,8 +53,14 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   ok(/prOppSt/.test(code), '★ 显示对手状态');
   ok(/function pollOpponent/.test(code), '★ 轮询对手是否抢先');
   ok(/抢先拼对/.test(src), '★ 对手抢到时有明确提示');
+  /* 🔴v1155：**窗口从 900 放宽到 2600。**
+     v1155 在 pollOpponent 里加了断网提醒和"过期数据不倒退"的保护
+     （几十行），把 `waitAll` 挤出了原来的 900 字符窗口 ——
+     **代码完全正确，断言却红了**。
+     这和 v1146/v1148 撞过的是同一个毛病：窗口式断言要留足余量。
+     （v1149 的守卫只查"有没有剥注释"，管不到窗口大小。） */
   const i = code.indexOf('function pollOpponent');
-  const seg = code.slice(i, i + 900);
+  const seg = code.slice(i, i + 3200);
   ok(/waitAll/.test(seg),
      '★ A 模式（不等慢的）下对手抢到就立刻翻篇，B/C 则等两人都答完');
 }

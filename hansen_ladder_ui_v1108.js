@@ -209,6 +209,8 @@
     });
   }
 
+  var _netFail = 0;
+
   function open() {
     closePeers();
     var sm = R() ? R().summary() : null;
@@ -326,6 +328,23 @@
      既保证一开始尽量公平，又保证不会永远空等。 */
   function startMatching() {
     if (!S()) { alert('对战模块还没就绪'); return; }
+
+    /* 🔴v1154：**防重入 —— 手快点两下会把排位彻底废掉。**
+
+       实测（连点三次「开始排位」）：**匹配根本没启动**，
+       界面一直停在天梯首页，24 秒内一间房都没开。
+
+       原因：`stop` 是每次调用的局部变量，而 `_cancel` 是模块级的共享变量。
+       第二次点击时 `_cancel` 被覆盖成新的那份，
+       **但第一次的循环还在跑**；接着第三次点击又覆盖一遍……
+       几个循环互相踩，最后谁都没跑起来。
+
+       用户手快点两下是极正常的事（尤其按钮没有即时反馈时），
+       **不该因此整个功能失灵**。
+
+       修法：进来先把上一次的循环停掉，再开新的。 */
+    if (_cancel) { try { _cancel(); } catch (e) {} _cancel = null; }
+
     /* 🔴v1109：**没登录就先拦住。**
        原来会一路走到"请先登录再开房"才报错 —— 用户已经白等了 20 秒。
        在排队之前就检查，是对时间的尊重。 */
@@ -369,6 +388,22 @@
       /* 找现成的排位房：模式必须是 A，且分数在带宽内 */
       S().listRooms().then(function (lr) {
         if (stop) return;
+
+        /* 🔴v1154：**listRooms 失败时不抛异常，而是返回 `{ok:false, rooms:[]}`。**
+
+           所以下面那个 `.catch()` 永远进不去 —— **连不上网被当成"没有房间"**，
+           于是界面永远停在"⚡ 正在找对手…"，用户一直等下去，
+           **不知道是网断了**。实测断网 16 秒仍在转圈就是这么来的。
+
+           判据要落在返回值上，不能只指望异常。 */
+        if (lr && lr.ok === false) {
+          _netFail = (_netFail || 0) + 1;
+          if (_netFail >= 4) { showOffline(); return; }
+          setTimeout(tick, 3000);
+          return;
+        }
+        _netFail = 0;                       /* 通了就清零 */
+
         var rooms = (lr && lr.rooms) || lr || [];
         /* 🔴v1114：**hostRating 是客户端填的，不能全信。**
 
@@ -413,8 +448,45 @@
           return;
         }
         setTimeout(tick, 2500);
-      })['catch'](function () { if (!stop) setTimeout(tick, 3000); });
+      })['catch'](function (e) {
+        /* 🔴v1154：**一直连不上时要说出来，不能永远转圈。**
+
+           实测（断网场景）：网一直不通时，界面永远停在
+           "⚡ 正在找对手…"，用户会一直等下去，**不知道是网断了**。
+           而排位是个"等着就好"的界面，本来就没有别的信号提示他。
+
+           改为：连续失败 4 次（约 12 秒）就明说连不上，
+           并给一个"再试一次"的按钮 —— 让人知道发生了什么、下一步做什么。 */
+        if (stop) return;
+        _netFail = (_netFail || 0) + 1;
+        if (_netFail >= 4) {
+          showOffline();
+          return;
+        }
+        setTimeout(tick, 3000);
+      });
     };
+
+    /* v1154: 连不上时的那一屏 —— 让人知道发生了什么、下一步做什么 */
+    function showOffline() {
+      stop = true;
+      try {
+            paint('<div class="ld_top"><button aria-label="关闭" class="ld_x" id="ldCancel">×</button>'
+              + '<div class="ld_h">🏆 天梯排位</div></div>'
+              + '<div style="text-align:center;padding:24px 12px">'
+              + '<div style="font-size:40px">📡</div>'
+              + '<div style="font-size:16px;font-weight:800;margin-top:10px">连不上网络</div>'
+              + '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
+              +   '排位需要联网找对手。<br>检查一下 Wi-Fi 或数据再试。</div>'
+              + '<button class="ld_btn" id="ldRetry" style="margin-top:16px">重新找对手</button>'
+              + '</div>');
+            var rb = document.getElementById('ldRetry');
+            if (rb) rb.onclick = function () { _netFail = 0; stop = false; tick(); };
+        var cx = document.getElementById('ldCancel');
+        if (cx) cx.onclick = close;
+      } catch (e2) {}
+    }
+
     tick();
   }
 
