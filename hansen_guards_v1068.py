@@ -2260,6 +2260,20 @@ def guard_storage_unavailable():
         bad('存储不可用', 'hansen_backup_bootstrap_v944.js 不见了')
         return
     code = _code_only(src)
+    # 🔴v1156 第五轮：**同一个文件里有三处会因"存储用不了"拦停整个应用。**
+    #   readJournal 修了不够，removeJournal 和 restoreRaw 一样会抛：
+    #     · removeItem 抛 → "恢复日志清理失败"
+    #     · localStorage.length 抛 → 一路冒到外层被当成"存档损坏"
+    #   任何一处没包住，用户在隐私模式下就会看到那个拦停界面。
+    for frag, why in (
+        ('try { localStorage.removeItem(KEY); }',
+         'removeJournal 没包 try —— 删不掉会被当成"清理失败"而拦停'),
+        ('try { n = localStorage.length; }',
+         'restoreRaw 读 length 没包 try —— 隐私模式下连读长度都会抛'),
+    ):
+        if frag not in code:
+            bad('存储不可用', why)
+
     if 'try { raw = localStorage.getItem(KEY); }' not in code:
         bad('存储不可用',
             '恢复日志的读取没有包在 try 里 —— '

@@ -37,12 +37,35 @@
     return out;
   }
   function removeJournal(){
-    localStorage.removeItem(KEY);
-    if(localStorage.getItem(KEY)!==null)throw new Error('恢复日志清理失败');
+    /* 🔴v1156：**存储用不了的时候，"清理失败"不该拦停用户。**
+
+       和上面 readJournal 同源：隐私模式下 removeItem 抛 SecurityError，
+       原来会被当成"清理失败"→ 拦停整个应用。
+
+       但"删不掉一条日志"和"存档正在被破坏"是两回事：
+         · 存储压根用不了 → 本来也没写进去过，没什么可清的
+         · 存储能用但删不掉 → 那才是真异常，该拦
+
+       所以先探一下存储能不能用，能用才把删不掉当成问题。 */
+    try { localStorage.removeItem(KEY); }
+    catch(e){ return; }              /* 存储用不了：本来也没存进去，无需清理 */
+    var still;
+    try { still = localStorage.getItem(KEY); }
+    catch(e){ return; }
+    if(still!==null)throw new Error('恢复日志清理失败');
   }
   function restoreRaw(list){
+    /* 🔴v1156：**连 `localStorage.length` 都会抛。**
+       隐私模式下读长度、`key(i)`、`removeItem`、`setItem` 全部抛 SecurityError，
+       任何一处没包住，都会一路冒到外层被当成"存档损坏"→ 拦停整个应用。
+
+       而"恢复存档"这件事在存储不可用时**本来就做不成，也不需要做** ——
+       没有存储就没有旧存档要恢复。安静返回即可。 */
     list=validateSnapshot(list);var remove=[];
-    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(allowed(k))remove.push(k);}
+    var n;
+    try { n = localStorage.length; }
+    catch(e){ return; }              /* 存储用不了：没有旧存档要恢复 */
+    for(var i=0;i<n;i++){var k=localStorage.key(i);if(allowed(k))remove.push(k);}
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('原始玩家快照清理失败：'+k);});
     list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
