@@ -132,10 +132,59 @@ def check_sw():
              '服务端回 text/plain 时浏览器就下载或显示满屏源代码。'
              '这是「打开网站变下载」最直接的一条路')
 
-    if len(re.findall(r'fixHtmlType\(', code)) < 3:
-        fail('F SW',
-             '读缓存的路径没有全部过一遍 fixHtmlType —— '
-             '导航请求修了不够，普通资源请求走的是另一条')
+    # 🔴v1156 第八轮：**改成"逐条验"，不再数总数。**
+    #
+    #   前七轮我一直写成 `fixHtmlType 出现次数 >= 3` —— 这是个假判据：
+    #   它只保证"用了三次"，**不保证每条路径都用了**。
+    #   实际上 SW 里有三条 `respondWith`，第三条一直漏着，
+    #   而总数早就超过 3，守卫从来没报过。
+    #
+    #   > **数个数守不住结构。** 要守就守"每一条出口都过了这道关"。
+    #
+    #   现在：把每条 respondWith 的整段代码抠出来，逐条查。
+    #   将来谁新加一条出口忘了修 Content-Type，这里会立刻报红 ——
+    #   **这才是"绝对防御"：不依赖我记得有几条。**
+    for m in re.finditer(r'event\.respondWith\(', code):
+        # 抠出这条 respondWith 的完整实参（配对括号）
+        i = m.end() - 1
+        d = 0
+        j = i
+        while j < len(code):
+            if code[j] == '(':
+                d += 1
+            elif code[j] == ')':
+                d -= 1
+                if d == 0:
+                    break
+            j += 1
+        seg = code[i:j + 1]
+        ln = code[:m.start()].count('\n') + 1
+        # 这条出口有没有过 Content-Type 修正？
+        # fixHtmlType 或 fixedHeaders（导航那条用的是后者）都算
+        # ⚠️ 不能只看"这段里有没有 fixHtmlType" ——
+        #   一条出口可能有好几个 return，修了一个漏了另一个。
+        #   要逐个 return 看：**每个返回缓存/网络响应的 return 都得过修正**。
+        leaks = []
+        for rm in re.finditer(r'return\s+([^;]+);', seg):
+            expr = rm.group(1)
+            if 'fixHtmlType' in expr or 'fixedHeaders' in expr:
+                continue
+            if re.search(r"new Response\(''", expr):   # 504 空响应，无所谓
+                continue
+            # 返回的是缓存命中/网络响应 → 必须修
+            if re.search(r'\b(cached|exact|fresh\w*|bare|fallback|response)\b', expr):
+                leaks.append(expr.strip()[:40])
+        if leaks:
+            fail('F SW',
+                 'sw_v944.js:%d 的 respondWith 里有 return 没过 Content-Type 修正'
+                 '（如 `return %s`）—— '
+                 '这条出口会把坏头原样交给浏览器' % (ln, leaks[0]))
+        elif 'fixHtmlType' not in seg and 'fixedHeaders' not in seg:
+            if not re.search(r"new Response\(''", seg) or 'caches.match' in seg:
+                fail('F SW',
+                     'sw_v944.js:%d 的 respondWith 没有过 Content-Type 修正 —— '
+                     '这条出口会把服务端/缓存里的坏头原样交给浏览器。'
+                     '**凡是能把响应交给浏览器的地方，一条都不能漏**' % ln)
     if 'if (!looksDownload) return response;' not in code:
         fail('F SW', '没有「正常响应一律不碰」这道闸')
 

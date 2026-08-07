@@ -350,8 +350,22 @@ self.addEventListener('fetch', event => {
         new Response('', { status: 504 });
     })());
   } else {
+    /* 🔴v1156 第八轮：**这条路径也漏了 fixHtmlType。**
+
+       SW 里一共三条 `respondWith`，前两条前几轮都修了，
+       **这条第三条一直没人管** —— 它是资源请求的兜底路径，
+       页面被当成普通资源（比如带 ?v= 版本号）时就走这里。
+
+       缓存里如果存着一份 text/plain 的 HTML，这条会原样发出去。
+
+       > 查了七轮才把三条路径凑齐 —— 这正说明
+       > **"改一处就以为修好了"是这类问题最大的陷阱**。
+       > 凡是"能把响应交给浏览器"的地方，一条都不能漏。 */
     event.respondWith(caches.match(request, { ignoreSearch: true }).then(async cached => {
-      return cached || (await refresh) || new Response('', { status: 504 });
+      if (cached) return fixHtmlType(cached);
+      const fresh2 = await refresh;
+      if (fresh2) return fixHtmlType(fresh2);
+      return new Response('', { status: 504 });
     }));
   }
 });
