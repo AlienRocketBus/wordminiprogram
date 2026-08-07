@@ -47,7 +47,26 @@
     list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
   function readJournal(){
-    var raw=localStorage.getItem(KEY);if(raw===null)return null;
+    /* 🔴v1156：**读不到 ≠ 数据坏了。**
+
+       实测（隐私模式：localStorage 所有操作抛 SecurityError）：
+       这里的 `getItem` 抛错 → 被外层当成"恢复日志无法通过校验"
+       → 触发「🛡️ 已停止加载，避免扩大存档损坏」
+       → **整个应用停在那儿，金币/升级/账号全是 undefined，只剩 3 个按钮**
+
+       但用户只是在无痕窗口/微信隐私模式下打开而已，**存档一点没坏**。
+       这道保护本身是对的（存档校验读不了就停下，防止把坏数据扩散），
+       **错在把"存储用不了"和"存储里的数据坏了"当成了一回事**。
+
+       前者应该：安静降级，当作没有历史存档，照常玩（只是存不下来）。
+       后者才应该：停住并告警。
+
+       > **一个保护机制如果分不清"读不到"和"读到的是坏的"，
+       > 它拦住的多半是好人。** */
+    var raw;
+    try { raw = localStorage.getItem(KEY); }
+    catch(e){ return null; }        /* 存储用不了：当作没有历史日志，照常往下走 */
+    if(raw===null)return null;
     var o;try{o=JSON.parse(raw);}catch(e){throw new Error('恢复日志 JSON 损坏');}
     if(!o||typeof o!=='object'||Array.isArray(o)||o.schema!==SCHEMA||!supportedJournalAppVersion(o.appVersion)||(o.phase!=='prepared'&&o.phase!=='committed'))throw new Error('恢复日志结构无效');
     var beforeRaw=validateSnapshot(o.beforeRaw);

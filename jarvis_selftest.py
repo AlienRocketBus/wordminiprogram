@@ -504,6 +504,15 @@ def _inj_boot_check(s):
     return s.replace(m, "['HansenNotExist', '不存在'],\n    " + m, 1)
 
 
+
+def _inj_storage(s):
+    """把 try 拆掉 —— 隐私模式下整个应用又会被拦停。"""
+    m = "try { raw = localStorage.getItem(KEY); }"
+    if m not in s:
+        return None
+    return s.replace(m, "raw = localStorage.getItem(KEY);", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -565,6 +574,7 @@ CASES = [
     ('当前进度',     '当前进度.md',            _inj_progress),
     ('缓存投毒',     'sw_v944.js',                  _inj_poisoned_cache),
     ('启动自检',     'hansen_boot_check_v1156.js',  _inj_boot_check),
+    ('存储不可用',   'hansen_backup_bootstrap_v944.js', _inj_storage),
 ]
 
 

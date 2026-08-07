@@ -2230,6 +2230,46 @@ def guard_boot_check():
         bad('启动自检',
             '没有延迟就查 —— defer/异步加载的模块还没到，必然误报')
 
+
+def guard_storage_unavailable():
+    """「存储用不了」不能被当成「存档坏了」。
+
+    事故（v1156 第四轮深查）：
+    实测隐私模式（localStorage 所有操作抛 SecurityError）——
+
+      恢复日志的 getItem 抛错
+        → 被外层当成"恢复日志无法通过校验"
+        → 触发「🛡️ 已停止加载，避免扩大存档损坏」
+        → **整个应用停在那儿：金币/升级/账号全 undefined，只剩 3 个按钮**
+
+    而用户只是在无痕窗口 / 微信隐私模式下打开而已，**存档一点没坏**。
+
+    这道保护本身是对的（存档校验读不了就停下，防止把坏数据扩散），
+    **错在把"存储用不了"和"存储里的数据坏了"当成了一回事**：
+
+      · 存储用不了 → 安静降级：当作没有历史存档，照常玩（只是存不下来）
+      · 数据坏了   → 停住并告警
+
+    > **一个保护机制如果分不清"读不到"和"读到的是坏的"，
+    > 它拦住的多半是好人。**
+
+    判据：恢复日志的读取必须包在 try 里，且 catch 分支是"当作没有"而不是抛错。
+    """
+    src = _read('hansen_backup_bootstrap_v944.js') or ''
+    if not src:
+        bad('存储不可用', 'hansen_backup_bootstrap_v944.js 不见了')
+        return
+    code = _code_only(src)
+    if 'try { raw = localStorage.getItem(KEY); }' not in code:
+        bad('存储不可用',
+            '恢复日志的读取没有包在 try 里 —— '
+            '隐私模式下 getItem 抛错会被当成"存档损坏"，'
+            '整个应用会被拦停，而用户其实什么都没坏')
+    m = re.search(r'try \{ raw = localStorage\.getItem\(KEY\); \}\s*catch\(e\)\{([^}]*)\}', code)
+    if m and 'throw' in m.group(1):
+        bad('存储不可用',
+            '读不到时还是抛错了 —— 应该"当作没有历史日志，照常往下走"')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2313,6 +2353,7 @@ GUARDS = [
     # v1156
     ('缓存投毒',     guard_no_poisoned_cache),
     ('启动自检',     guard_boot_check),
+    ('存储不可用',   guard_storage_unavailable),
 ]
 
 
