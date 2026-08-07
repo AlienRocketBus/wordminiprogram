@@ -1,0 +1,150 @@
+# « 线上哨兵 · 每小时探一次「打开会不会变下载」
+#
+#   ═══ 为什么需要它 ═══
+#
+#   用户问：「这种情况以后还会不会再次出现？我要坚决不会再次出现。」
+#
+#   诚实的答案分两半：
+#
+#     ✅ **用户成功打开过一次之后 —— 不会再出现了。**
+#        SW 装上后，三条 respondWith + 导航响应 + 进缓存前，
+#        全部会把坏的 Content-Type 修成 text/html。
+#        服务端再怎么抽风，他都不会再看到下载。
+#
+#     ❌ **第一次访问 —— 客户端在定义上就无能为力。**
+#        用户第一次点链接 → SW 还没装上 → 服务端回 text/plain
+#        → 浏览器直接下载，**页面一行 JS 都不会执行**。
+#        我们所有的兜底代码都没机会跑。
+#
+#   所以这个洞只能靠**别的东西**去堵：不是修好它，
+#   而是**在用户之前发现它**。
+#
+#   ═══ 这个哨兵做什么 ═══
+#
+#   每小时真的去请求线上 8 个入口，看响应头。
+#   一旦发现「会被浏览器下载」的响应，立刻开一个 issue 报警。
+#
+#   它把这件事从
+#       「坏了几天没人知道，直到用户来说」
+#   变成
+#       「几分钟内自动知道，还告诉你去哪里刷缓存」。
+#
+#   ⚠️ 这不是"修好了"，是"再也不会悄悄坏着"。
+#      两者的差别很实在：CDN 缓存投毒这种事本来就会自己发生，
+#      重要的不是它永不发生，而是它发生时我们立刻知道。
+#
+
+name: 线上哨兵 · 打开会不会变下载
+
+on:
+  schedule:
+    # 每小时的第 17 分跑 —— 避开整点，那时候大家的定时任务都在挤
+    - cron: '17 * * * *'
+  workflow_dispatch:        # 也可以手动点一下
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 探测线上响应头
+        id: probe
+        run: |
+          set +e
+          python3 发版前_线上体检.py > /tmp/out.txt 2>&1
+          echo "rc=$?" >> "$GITHUB_OUTPUT"
+          cat /tmp/out.txt
+          {
+            echo 'report<<REPORT_EOF'
+            cat /tmp/out.txt
+            echo 'REPORT_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 坏了就开 issue 报警
+        if: steps.probe.outputs.rc != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = `${{ steps.probe.outputs.report }}`;
+            const title = '🚨 线上有入口会被浏览器当成文件下载';
+
+            // 已经开着同样的 issue 就不重复开 —— 每小时一个会把人淹死
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'download-alert'
+            });
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body: '仍未恢复（' + new Date().toISOString() + '）\n\n```\n' + report + '\n```'
+              });
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              labels: ['download-alert'],
+              body: [
+                '## 线上探测到「打开会变下载」',
+                '',
+                '```',
+                report,
+                '```',
+                '',
+                '### 这意味着什么',
+                '',
+                '用户**第一次访问**时会看到下载框，或者满屏源代码。',
+                '这时候页面一行 JS 都不会执行 —— 我们所有的兜底代码都没机会跑。',
+                '（已经成功打开过一次的老用户不受影响，他们的 SW 会把响应修回来。）',
+                '',
+                '### 怎么修',
+                '',
+                '1. 腾讯云控制台 → 静态网站托管 → 刷新缓存',
+                '   **单独刷「/」这个地址** —— 它和 `/index.html` 在 CDN 眼里是两个缓存键，',
+                '   只刷后者不管用',
+                '2. 确认「默认索引节点 = index.html」',
+                '3. 在修好之前，分享链接用 `/index.html` 结尾的那个（那个键是好的）',
+                '',
+                '### 怎么确认修好了',
+                '',
+                '手机上用**无痕窗口**打开根地址（避开本机缓存）。',
+                '或者等下一次哨兵（每小时第 17 分）自动复检 —— 好了它会自己关掉这个 issue。'
+              ].join('\n')
+            });
+
+      - name: 好了就关掉报警 issue
+        if: steps.probe.outputs.rc == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'download-alert'
+            });
+            for (const it of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: it.number,
+                body: '✅ 已恢复正常（' + new Date().toISOString() + '），自动关闭。'
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: it.number,
+                state: 'closed'
+              });
+            }

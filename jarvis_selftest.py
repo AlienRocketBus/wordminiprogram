@@ -533,6 +533,14 @@ def _inj_dlmaster(s):
     return s.replace(m, "    return 0\n", 1)
 
 
+
+def _inj_sentinel(s):
+    """把定时触发拆掉 —— 哨兵就只能手动点，等于没有。"""
+    if 'schedule:' not in s:
+        return None
+    return s.replace('schedule:', 'schedule_disabled:', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -597,6 +605,7 @@ CASES = [
     ('存储不可用',   'hansen_backup_bootstrap_v944.js', _inj_storage),
     ('自动下载',     'hansen_backup_v944.js',       _inj_auto_dl),
     ('防下载总闸', '防下载总闸.py',            _inj_dlmaster),
+    ('线上哨兵',     '.github/workflows/download-sentinel.yml', _inj_sentinel),
 ]
 
 

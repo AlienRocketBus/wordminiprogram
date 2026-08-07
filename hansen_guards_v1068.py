@@ -2394,6 +2394,51 @@ def guard_download_master():
         bad('防下载总闸',
             '闸门里没有跑它 —— 写了不跑等于没写')
 
+
+def guard_download_sentinel():
+    """线上哨兵必须在 —— 那个洞只能靠它盯着。
+
+    用户问：「这种情况以后还会不会再次出现？」
+
+    诚实的答案分两半：
+
+      ✅ **用户成功打开过一次之后 —— 不会再出现了。**
+         SW 装上后，三条 respondWith + 导航响应 + 进缓存前，
+         全部会把坏的 Content-Type 修成 text/html。
+
+      ❌ **第一次访问 —— 客户端在定义上就无能为力。**
+         SW 还没装上，服务端回 text/plain，浏览器直接下载，
+         **页面一行 JS 都不会执行**。
+
+    所以这个洞不是"修好"，是"在用户之前发现"：
+    哨兵每小时真的去请求线上入口，坏了立刻开 issue 报警。
+
+    > 这把事情从「坏了几天没人知道，直到用户来说」
+    > 变成「几分钟内自动知道，还告诉你去哪里刷缓存」。
+    >
+    > 差别很实在：CDN 缓存投毒这种事本来就会自己发生，
+    > 重要的不是它永不发生，而是**它发生时我们立刻知道**。
+    """
+    wf = os.path.join(ROOT, '.github', 'workflows', 'download-sentinel.yml')
+    if not os.path.exists(wf):
+        bad('线上哨兵',
+            '.github/workflows/download-sentinel.yml 不见了 —— '
+            '「第一次访问就下载」这个洞就再也没人盯了')
+        return
+    try:
+        body = open(wf, encoding='utf-8', errors='replace').read()
+    except Exception:
+        bad('线上哨兵', '哨兵配置读不了')
+        return
+    if 'schedule' not in body or 'cron' not in body:
+        bad('线上哨兵', '哨兵没有定时触发 —— 只能手动点就等于没有')
+    if '发版前_线上体检.py' not in body:
+        bad('线上哨兵', '哨兵没有跑线上体检 —— 它靠那个才知道线上是好是坏')
+    if 'issues: write' not in body or 'issues.create' not in body:
+        bad('线上哨兵',
+            '哨兵发现问题不会开 issue —— '
+            '一个只在日志里默默失败的检查，等于没有检查')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2480,6 +2525,7 @@ GUARDS = [
     ('存储不可用',   guard_storage_unavailable),
     ('自动下载',     guard_no_auto_download),
     ('防下载总闸', guard_download_master),
+    ('线上哨兵',     guard_download_sentinel),
 ]
 
 
