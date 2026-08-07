@@ -2284,6 +2284,79 @@ def guard_storage_unavailable():
         bad('存储不可用',
             '读不到时还是抛错了 —— 应该"当作没有历史日志，照常往下走"')
 
+
+def guard_no_auto_download():
+    """页面绝不许在用户没点之前自己触发下载。
+
+    ═══ 背景 ═══
+
+    用户反复报「打开网站变成下载网页」。前几轮查的都是**服务端**原因
+    （Content-Type 错、CDN 缓存投毒），都修了。
+    这一轮穷举**客户端**能导致下载的所有路径：
+
+      A. Content-Type 是 octet-stream / binary / text/plain / 空   ← 已修
+      B. Content-Disposition: attachment                          ← 已修
+      C. HTML 里有 <a download>，点了就下载
+      D. 代码里主动 a.click() 触发下载                             ← 本守卫
+      E. location = blob:/data: URL
+      F. Service Worker 回了带坏头的 Response                     ← 已修
+      G. manifest 配置错误
+
+    实测（六个关键页面各放 12 秒）：**一次自动下载都没有** ✅
+    但代码里确实有三处 `a.download=... a.click()`（备份导出功能），
+    它们目前都挂在 `onclick` 上，需要**焊死这一点** ——
+    哪天有人把它挪进 `setTimeout` 或 `load` 回调，
+    用户一打开页面就会莫名其妙下载一个文件，
+    而这正是「打开网站变下载」最难查的一种成因：
+    **服务端一切正常，是我们自己弹的。**
+
+    ═══ 判据 ═══
+
+    每一处 `a.download = ...` 之后的 `.click()`，
+    往前 400 字符内必须能看到 `onclick` 或 `addEventListener('click'`，
+    且不能处在 `setTimeout` / `setInterval` / `load` 回调里。
+    """
+    import glob as _g
+    risky = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        name = os.path.basename(f)
+        try:
+            src = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        code = _code_only(src)
+        # 只看"设了 download 属性再 click"的那种 —— 那才是真下载
+        for m in re.finditer(r'\.download\s*=', code):
+            tail = code[m.end():m.end() + 500]
+            if '.click()' not in tail:
+                continue
+            head = code[max(0, m.start() - 500):m.start()]
+            # ⚠️ 判据要看**整个文件**有没有把这个函数挂到 onclick 上，
+            #   而不是只看这一处往前 500 字符。
+            #   第一版就这么写的，结果把两个正经的导出功能误判成"自动下载"
+            #   （它们在文件末尾用 `xxx.onclick = download` 挂着，离得很远），
+            #   我照着删了，直接把用户的备份导出功能删掉了 —— 两个测试当场变红。
+            #   **误判成"有害"而删掉功能，比漏判更糟。**
+            _fm = re.findall(r'function\s+(\w+)\s*\(', head)
+            _fname = _fm[-1] if _fm else None
+            _hooked = False
+            if _fname:
+                _hooked = bool(re.search(r'onclick\s*=\s*' + _fname + r'\b', code) or
+                               re.search(r'click[\'\"]\s*,\s*' + _fname + r'\b', code))
+            by_user = _hooked or re.search(r"onclick|addEventListener\(['\"]click", head)
+            auto = re.search(r"setTimeout|setInterval|addEventListener\(['\"](?:load|DOMContentLoaded)",
+                             head[-260:])
+            if (not by_user) or auto:
+                ln = code[:m.start()].count('\n') + 1
+                risky.append('%s:%d' % (name, ln))
+    if risky:
+        bad('自动下载',
+            '%d 处下载不是由用户点击触发（如 %s）—— '
+            '用户一打开页面就会莫名其妙下载一个文件。'
+            '这是「打开网站变下载」最难查的一种成因：'
+            '**服务端一切正常，是我们自己弹的**'
+            % (len(risky), risky[0]))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2368,6 +2441,7 @@ GUARDS = [
     ('缓存投毒',     guard_no_poisoned_cache),
     ('启动自检',     guard_boot_check),
     ('存储不可用',   guard_storage_unavailable),
+    ('自动下载',     guard_no_auto_download),
 ]
 
 

@@ -513,6 +513,17 @@ def _inj_storage(s):
     return s.replace(m, "raw = localStorage.getItem(KEY);", 1)
 
 
+
+def _inj_auto_dl(s):
+    """塞一个"打开就下载"的函数进去 —— 用户一进页面就莫名其妙下东西。"""
+    m = "  function build(){"
+    if m not in s:
+        return None
+    inj = ("  setTimeout(function(){var a=document.createElement('a');"
+           "a.download='x.json';a.href='#';a.click();},100);\n")
+    return s.replace(m, inj + m, 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -575,6 +586,7 @@ CASES = [
     ('缓存投毒',     'sw_v944.js',                  _inj_poisoned_cache),
     ('启动自检',     'hansen_boot_check_v1156.js',  _inj_boot_check),
     ('存储不可用',   'hansen_backup_bootstrap_v944.js', _inj_storage),
+    ('自动下载',     'hansen_backup_v944.js',       _inj_auto_dl),
 ]
 
 
