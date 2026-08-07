@@ -2189,6 +2189,47 @@ def guard_no_poisoned_cache():
             'fixHtmlType 没有"正常响应一律不碰"这道闸 —— '
             '乱改正常响应的害处比它挡住的更大')
 
+
+def guard_boot_check():
+    """启动自检只能守"这个页面确实会加载"的模块。
+
+    事故（v1156 第三轮深查，我自己犯的）：
+    第一版把 `HansenBackup` 写进核心清单，
+    **而首页压根不加载它** —— 于是正常情况下也天天报警。
+
+    > **误报比不报更糟**：用户看两次就学会无视，真出事时也不会看了。
+    > 一个天天喊狼来了的警报，等于没有警报。
+
+    判据：清单里的每个全局名，必须至少有一个 `hansen_*.js`
+    真的 `window.X =` 定义它。
+    """
+    src = _read('hansen_boot_check_v1156.js') or ''
+    if not src:
+        bad('启动自检', 'hansen_boot_check_v1156.js 不见了')
+        return
+    names = re.findall(r"\['(Hansen\w+)',", src)
+    if not names:
+        bad('启动自检', '核心清单是空的 —— 那它什么都守不住')
+        return
+    import glob as _g
+    defined = set()
+    for f in _g.glob(os.path.join(ROOT, 'hansen_*.js')):
+        try:
+            body = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        for m in re.finditer(r'window\.(Hansen\w+)\s*=', body):
+            defined.add(m.group(1))
+    for n in names:
+        if n not in defined:
+            bad('启动自检',
+                '核心清单里的 `%s` 没有任何模块定义它 —— '
+                '会导致**正常情况下也报警**，而误报比不报更糟：'
+                '用户看两次就学会无视了' % n)
+    if 'CHECK_AT' not in src or 'setTimeout(check' not in src:
+        bad('启动自检',
+            '没有延迟就查 —— defer/异步加载的模块还没到，必然误报')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2271,6 +2312,7 @@ GUARDS = [
     ('当前进度',     guard_progress_file_fresh),
     # v1156
     ('缓存投毒',     guard_no_poisoned_cache),
+    ('启动自检',     guard_boot_check),
 ]
 
 

@@ -495,6 +495,15 @@ def _inj_poisoned_cache(s):
     return s.replace(m, "", 1)
 
 
+
+def _inj_boot_check(s):
+    """往核心清单里塞一个不存在的模块 —— 正常情况下就会天天误报。"""
+    m = "['HansenCoins', '金币'],"
+    if m not in s:
+        return None
+    return s.replace(m, "['HansenNotExist', '不存在'],\n    " + m, 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -555,6 +564,7 @@ CASES = [
     ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
     ('当前进度',     '当前进度.md',            _inj_progress),
     ('缓存投毒',     'sw_v944.js',                  _inj_poisoned_cache),
+    ('启动自检',     'hansen_boot_check_v1156.js',  _inj_boot_check),
 ]
 
 
