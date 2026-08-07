@@ -436,6 +436,28 @@ def _recover_last_run():
     if not os.path.exists(pend):
         return
     try:
+        # 🔴v1155：**PENDING 只记一个文件是不够的。**
+        #   自证一轮会注入几十个文件，被强杀时可能有好几个没恢复，
+        #   而 PENDING 只留了最后那个 —— 其余的没人管。
+        #   实测：修好一个，下一轮闸门又被另一个卡住，
+        #   我一轮一轮地手工修，每次都以为是新问题。
+        #   改为：**把 .bak 目录里所有备份都修回去**，
+        #   PENDING 只作为"上次没跑完"的信号。
+        import glob as _gb
+        for _b in _gb.glob(os.path.join(bakdir, '*.bak')):
+            _n = os.path.basename(_b)[:-4]
+            try:
+                _sh.copyfile(_b, os.path.join(ROOT, _n))
+                print('  \u267b\ufe0f  上次注入没恢复干净，已自动修回：%s' % _n)
+                os.unlink(_b)
+            except Exception:
+                pass
+        try:
+            os.unlink(pend)
+        except Exception:
+            pass
+        return
+
         name = open(pend, encoding='utf-8').read().strip()
         bak = os.path.join(bakdir, name + '.bak')
         # ⚠️ PENDING 在、备份不在也要能收场（实测撞到：
