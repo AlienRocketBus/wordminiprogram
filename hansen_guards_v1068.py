@@ -35,7 +35,8 @@ hansen_guards_v1068.py —— 贾维斯 · 新时代守卫（v1000+ 教训）
 
 退出码：0 = 全通过；1 = 有问题（贾维斯据此拦下打包）。
 """
-import os, re, sys, glob, shutil
+import os
+import time, re, sys, glob, shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -2000,8 +2001,22 @@ def _recover_inject():
     #   守卫把自证刚注入的坏代码"修"回去，
     #   于是注入等于没发生，**48 道里 22 道被误判成"已失灵"**。
     #   自证跑之前会放一个 RUNNING 标记，看到它就别动。
-    if os.path.exists(os.path.join(bakdir, 'RUNNING')):
-        return
+    # 🔴v1155：**RUNNING 标记要有时效。**
+    #   自证跑的时候放这个标记让自修复避让 —— 本意是对的。
+    #   但自证被 `timeout` 强杀时**标记也撤不掉**，
+    #   于是自修复从此永远避让，**残局再也没人修** ——
+    #   实测：一处 `guestId` 残留就这样卡了好几轮闸门。
+    #
+    #   自证整轮最多十几分钟，超过 30 分钟的标记必然是死的。
+    _run = os.path.join(bakdir, 'RUNNING')
+    if os.path.exists(_run):
+        try:
+            if (time.time() - os.path.getmtime(_run)) < 1800:
+                return                      # 确实在跑，避让
+            os.unlink(_run)                 # 过期了：那是被强杀留下的
+            print('  \u267b\ufe0f  发现过期的 RUNNING 标记（自证被中断），已清除')
+        except Exception:
+            return
     try:
         name = open(pend, encoding='utf-8').read().strip()
         bak = os.path.join(bakdir, name + '.bak')
