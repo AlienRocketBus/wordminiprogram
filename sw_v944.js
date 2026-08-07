@@ -82,10 +82,33 @@ async function bufferedNavigationResponse(response) {
   // fetch() 在响应头到达时就会 resolve；必须把正文也读完，超时才真正覆盖“头到了但页面一直白屏”。
   const bytes = await response.arrayBuffer();
   const noBody = response.status === 204 || response.status === 205 || response.status === 304;
+
+  /* 🔴v1156：**这里也要修 Content-Type。**
+
+     这个函数专门处理**导航请求** —— 也就是"用户打开一个页面"。
+     原来它直接沿用 `response.headers`：服务端回什么就传什么。
+     于是服务端一次抽风（回 text/plain），
+     **浏览器就直接下载或显示满屏源代码** ——
+     而这正是用户反复报的那个「打开网站变成下载」。
+
+     它比缓存那条路更靠前：**缓存还没轮到，这里就已经把坏头交出去了。**
+     之前查了六轮都盯着缓存，漏了这条真正的主路。 */
+  const fixedHeaders = new Headers(response.headers);
+  const ct0 = (fixedHeaders.get('content-type') || '').toLowerCase();
+  const dispo0 = (fixedHeaders.get('content-disposition') || '').toLowerCase();
+  if (ct0 === '' ||
+      ct0.startsWith('application/octet-stream') ||
+      ct0.startsWith('binary/') ||
+      ct0.startsWith('text/plain') ||
+      dispo0.includes('attachment')) {
+    fixedHeaders.set('content-type', 'text/html; charset=utf-8');
+    fixedHeaders.delete('content-disposition');
+  }
+
   return new Response(noBody ? null : bytes, {
     status: response.status,
     statusText: response.statusText,
-    headers: response.headers
+    headers: fixedHeaders
   });
 }
 

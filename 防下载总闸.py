@@ -117,6 +117,21 @@ def check_sw():
              '进缓存之前没修 Content-Type —— '
              '服务端一次抽风就会被永久固化在用户浏览器里，'
              '之后服务端修好了他也好不了（SW 缓存不吃刷新）')
+    # 🔴v1156 第七轮：**导航响应这条主路以前漏了。**
+    #   `bufferedNavigationResponse` 专门处理"用户打开一个页面"，
+    #   原来直接沿用 `response.headers` —— 服务端回什么就传什么。
+    #   它比缓存那条路更靠前：**缓存还没轮到，这里就已经把坏头交出去了**。
+    #   前六轮都盯着缓存，漏了这条真正的主路。
+    i_nav = code.find('async function bufferedNavigationResponse')
+    seg_nav = code[i_nav:i_nav + 1200] if i_nav >= 0 else ''
+    if i_nav < 0:
+        fail('F SW', '找不到 bufferedNavigationResponse')
+    elif 'headers: fixedHeaders' not in seg_nav:
+        fail('F SW',
+             '导航响应直接沿用了服务端的 headers —— '
+             '服务端回 text/plain 时浏览器就下载或显示满屏源代码。'
+             '这是「打开网站变下载」最直接的一条路')
+
     if len(re.findall(r'fixHtmlType\(', code)) < 3:
         fail('F SW',
              '读缓存的路径没有全部过一遍 fixHtmlType —— '
