@@ -155,8 +155,27 @@ function offlineNavigationResponse() {
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
-    // Cache.addAll 的写入是整批成功或整批失败。任何一个核心文件 404/断网都会
-    // 让 install 失败，因此不会 skipWaiting，更不会激活只下到一半的应用外壳。
+    /* 🔴v1156：**这里保留 addAll —— 试过换掉，代价太大。**
+
+       `addAll` 的问题是真的：它把服务端回的响应原样塞进缓存，
+       如果那次回的是 `text/plain`（线上实测到的正是这个），
+       坏响应就被固化在用户浏览器里。
+
+       我改成过"逐个 fetch → fixHtmlType → put"，
+       但 **SW 安装直接超时**（48 个文件，无论全量并发还是分批都不行）。
+       而安装超时的后果比 Content-Type 错更严重：
+       **整个应用外壳装不上，离线完全用不了。**
+
+       > 一个"修 A"的改动如果把 B 弄坏，那就不是修复。
+
+       所以这里退回 addAll，把防线放在另外两处（都已生效）：
+         · `putIfReasonable` 进缓存前修 —— 覆盖运行时抓到的所有页面
+         · `fixHtmlType` 取出时修 —— 覆盖缓存里已经存了坏数据的情况
+       两处合起来，用户实际拿到的响应一定是好的。
+
+       ⚠️ 保留 addAll 还有一个可贵性质：**整批成功或整批失败**。
+       任何一个核心文件 404/断网都会让 install 失败，
+       于是不会 skipWaiting、更不会激活一个只下到一半的应用外壳。 */
     await cache.addAll(SHELL.map(url => new Request(url, { cache: 'reload' })));
     await self.skipWaiting();
   })());
@@ -289,12 +308,22 @@ self.addEventListener('fetch', event => {
     // ignoreSearch:true could answer ?v=1156 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
+    /* 🔴v1156：**这条路径以前漏了 fixHtmlType。**
+       导航请求那条（上面 `navigation.then(...)`）修了，
+       但**页面被当成普通资源请求时走的是这条** ——
+       比如从缓存里取 `index.html`、或者 `?v=` 带版本号的页面。
+       缓存里如果存着一份 `text/plain` 的 index.html，
+       这条路径会原样发出去，**浏览器照样下载**。
+
+       三处读缓存的地方现在都过一遍 fixHtmlType：
+       导航 / 精确命中 / 离线兜底。 */
     event.respondWith((async () => {
       const exact = await caches.match(request);
-      if (exact) return exact;
+      if (exact) return fixHtmlType(exact);
       const fresh = await refresh;
-      if (fresh) return fresh;
-      return (await caches.match(new Request(url.origin + url.pathname))) ||
+      if (fresh) return fixHtmlType(fresh);
+      const bare = await caches.match(new Request(url.origin + url.pathname));
+      return (bare ? fixHtmlType(bare) : null) ||
         new Response('', { status: 504 });
     })());
   } else {
