@@ -2019,6 +2019,52 @@ def _recover_inject():
 
 _recover_inject()
 
+
+def guard_progress_file_fresh():
+    """《当前进度.md》必须是最新的 —— 它是跨对话的唯一真源。
+
+    BAT MAN 明确要求（v1155）：
+
+      「沙盒时不时就会被删除文件，很可能根本就不是最新的。
+        所以 GitHub 将会是这个对话的最新进度 ——
+        下次对话时，你能通过读 GitHub 上的文件就知道
+        我们进行到什么地方、下一步要做什么。」
+
+    这个要求是对的：今天沙盒重置过好几次，`/tmp`、后台进程都没了。
+    **本地文件随时可能是旧的，只有 GitHub 可信。**
+
+    但一个"进度文件"最容易的失败方式是**慢慢过期**：
+    版本一路往前走，它还停在几十版之前，
+    于是下次读它的人被带到错误的地方 —— **比没有更糟**。
+
+    所以这道守卫盯两件事：
+      ① 文件在
+      ② 里面写的版本号不能落后当前版本太多（超过 3 版就该更新了）
+    """
+    body = _read('当前进度.md') or ''
+    if not body:
+        bad('当前进度',
+            '缺《当前进度.md》—— 下次对话就没法从 GitHub 知道进行到哪了'
+            '（沙盒会被清空，本地文件不可信）')
+        return
+    cur = 0
+    try:
+        cur = int((_read('VERSION') or '0').strip())
+    except Exception:
+        cur = 0
+    m = re.findall(r'v(\d{4})', body)
+    newest = max((int(x) for x in m), default=0)
+    if cur and newest and (cur - newest) > 3:
+        bad('当前进度',
+            '《当前进度.md》里最新只提到 v%d，而当前已 v%d —— '
+            '落后 %d 版。进度文件一旦过期，'
+            '下次读它的人会被带到错误的地方，比没有更糟'
+            % (newest, cur, cur - newest))
+    for key in ('下一步', '已经完成'):
+        if key not in body:
+            bad('当前进度', '《当前进度.md》缺少「%s」那一节 —— '
+                '光有"做了什么"不够，还得说清"接着做什么"' % key)
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2097,6 +2143,8 @@ GUARDS = [
     ('天梯E2E',      guard_ladder_has_e2e),
     ('对战看门狗',   guard_pk_watchdog),
     ('注入残留',     guard_no_inject_residue),
+    # v1155
+    ('当前进度',     guard_progress_file_fresh),
 ]
 
 

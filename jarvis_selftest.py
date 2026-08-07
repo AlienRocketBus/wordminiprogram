@@ -452,6 +452,14 @@ def _recover_last_run():
 
 _recover_last_run()
 
+
+def _inj_progress(s):
+    """把进度文件里的版本号改老 —— 模拟"它慢慢过期了"。"""
+    import re as _re
+    out = _re.sub(r'v11\d\d', 'v1050', s)
+    return out if out != s else None
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -510,6 +518,7 @@ CASES = [
     ('天梯E2E',      'test_ladder_e2e_v1155.mjs',   _inj_ladder_e2e),
     ('对战看门狗',   'hansen_pk_watchdog_v1155.js', _inj_watchdog),
     ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
+    ('当前进度',     '当前进度.md',            _inj_progress),
 ]
 
 
