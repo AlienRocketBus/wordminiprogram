@@ -140,5 +140,58 @@ const D = ctx.window.HansenDownloadFix;
      '★🔒 守卫同时检查：部署配置 + SW 兜底 + 页面内联自救');
 }
 
+
+/* ── 🔴v1156 追加：别让服务端的一次抽风被我们永久固化 ──────
+ *
+ * 用户现场：「跟地址就是跟地址，所有的浏览器打开都会出现这种情况。」
+ * 而控制台里索引文档已经配好了。
+ *
+ * 查代码时发现 SW 这边有两个洞，**它们会让问题从"偶尔"变成"永远"**：
+ */
+{
+  const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js', 'utf8');
+  const code = sw.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  /* ① text/plain 以前直接放过去了 */
+  ok(/ct\.startsWith\('text\/plain'\)/.test(code),
+     '★🔒 **`text/plain` 也算"会被下载"** —— ' +
+     '线上探测到的响应正是 text/plain，' +
+     '而之前的判据只认 octet-stream / binary / attachment，' +
+     '**这道兜底形同虚设**。' +
+     '（浏览器对 text/plain 的处理不统一：有的显示成纯文本、有的直接下载，' +
+     '无论哪种对一个网页来说都是坏的。）');
+
+  /* ② 坏响应会被原样存进缓存 */
+  const iPut = code.indexOf('async function putIfReasonable');
+  const segPut = code.slice(iPut, iPut + 700);
+  ok(/fixHtmlType\(response\)/.test(segPut),
+     '★🔒 **进缓存之前就修 Content-Type** —— ' +
+     '原来是"缓存时原样存、取出时才修"，这留了个大洞：' +
+     '服务端某次回了坏响应就被**原样存进 Cache Storage**，' +
+     '之后即使服务端修好了、CDN 缓存也刷了，' +
+     '**这个用户的浏览器里还留着那份坏的**，怎么刷新都没用（SW 缓存不吃刷新）。' +
+     '也就是说：**服务端的一次抽风，会被我们自己永久固化下来。**');
+  ok(/_isPage/.test(segPut),
+     '★🔒 只对页面类请求做这个修正 —— 图片/音频的 Content-Type 不能乱改');
+
+  /* ③ 取出时的兜底要保留 —— 老用户缓存里可能已经有坏数据 */
+  ok(/fixHtmlType\(result\.response\)/.test(code),
+     '★🔒 取出时的 fixHtmlType 保留 —— ' +
+     '给"缓存里已经存了坏数据"的老用户兜底');
+}
+
+/* 判据本身：坏的都要修，好的一个都不能碰 */
+{
+  const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js', 'utf8');
+  const m = sw.match(/const looksDownload =[\s\S]*?;/);
+  const body = m ? m[0] : '';
+  for (const bad of ['octet-stream', 'binary/', 'text/plain', 'attachment']) {
+    ok(body.includes(bad), `★ 判据里含「${bad}」`);
+  }
+  ok(/if \(!looksDownload\) return response;/.test(sw),
+     '★ **正常响应一律不碰** —— ' +
+     '一个"修 Content-Type"的兜底如果乱改正常响应，害处比它挡住的更大');
+}
+
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail === 0 ? 0 : 1);

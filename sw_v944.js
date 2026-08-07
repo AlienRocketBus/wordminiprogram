@@ -31,6 +31,28 @@ async function trim(cacheName, maxEntries) {
 
 async function putIfReasonable(cacheName, request, response, maxEntries) {
   if (!response || !response.ok || response.type === 'opaque') return false;
+
+  /* 🔴v1156：**进缓存之前就把坏的 Content-Type 修掉。**
+
+     原来是"缓存时原样存、取出时才 fixHtmlType" —— 这留了一个大洞：
+
+       服务端某次回了一份坏响应（text/plain / octet-stream）
+       → **原样存进 Cache Storage**
+       → 之后即使服务端修好了、CDN 缓存也刷了，
+         **这个用户的浏览器里还留着那份坏的**
+       → 他会一直下载，而且怎么刷新都没用（SW 缓存不吃刷新）
+
+     也就是说：**服务端的一次抽风，会被我们自己永久固化下来。**
+
+     所以在这里就修 —— 存进去的必须已经是好的。
+     取出时的 fixHtmlType 保留，作为老用户缓存里已有坏数据的兜底。 */
+  try {
+    const _u = new URL(request.url, self.location.origin);
+    const _isPage = /\.html?$/i.test(_u.pathname) || _u.pathname === '/' ||
+                    _u.pathname.endsWith('/');
+    if (_isPage) response = fixHtmlType(response);
+  } catch (error) {}
+
   const length = Number(response.headers.get('content-length') || 0);
   if (length && length > 1572864) return false;
   try {
@@ -168,10 +190,19 @@ function fixHtmlType(response) {
     if (!response || !response.ok) return response;
     const ct = (response.headers.get('content-type') || '').toLowerCase();
     const dispo = (response.headers.get('content-disposition') || '').toLowerCase();
+    /* 🔴v1156：**`text/plain` 也要算。**
+       用户现场：「根地址在所有浏览器里都会变成下载。」
+       而线上探测到的响应正是 `content-type: text/plain` ——
+       这一版之前的判据只认 octet-stream / binary / attachment，
+       **text/plain 直接放过去了**，于是这道兜底形同虚设。
+
+       浏览器对 `text/plain` 的处理不统一：有的显示成纯文本、
+       有的直接下载 —— 无论哪种，**对一个网页来说都是坏的**。 */
     const looksDownload =
       ct === '' ||
       ct.startsWith('application/octet-stream') ||
       ct.startsWith('binary/') ||
+      ct.startsWith('text/plain') ||
       dispo.includes('attachment');
     if (!looksDownload) return response;   /* 正常响应一律不碰 */
     const headers = new Headers(response.headers);
