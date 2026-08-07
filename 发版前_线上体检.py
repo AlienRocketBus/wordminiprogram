@@ -56,7 +56,26 @@ import urllib.error
 DEFAULT_SITE = 'https://superwords-ambitious-d0g1d26xm740dc3d6.webapps.tcloudbase.com'
 
 # 必须挨个测的入口。根路径单独列 —— 它和 /index.html 是两个缓存键。
-PATHS = ['/', '/index.html', '/spelling_pk.html', '/island_animal.html']
+#
+# 🔴v1156 第二轮深查：**不能只测 HTML。**
+#   实测（本地模拟服务端把 JS 回成 text/plain）：
+#     · 页面能打开，但所有模块加载失败
+#     · 控制台：The script has an unsupported MIME type
+#     · window.HansenBackup === undefined —— 整个应用等于废了
+#   而用户看到的是「页面打开了但什么都点不动」，比白屏更让人困惑。
+#
+#   同理 CSS 错了满屏没样式、manifest 错了装不了桌面图标。
+#   **凡是浏览器会按 Content-Type 决定「怎么用」的资源，都要测。**
+PATHS = [
+    ('/',                               'text/html',  '根路径（和 /index.html 是两个缓存键）'),
+    ('/index.html',                     'text/html',  '首页'),
+    ('/spelling_pk.html',               'text/html',  '对战页'),
+    ('/island_animal.html',             'text/html',  '岛屿页'),
+    ('/sw_v944.js',                     'javascript', 'Service Worker（MIME 错就注册不上）'),
+    ('/hansen_sw_upgrade_gate_v944.js', 'javascript', '首屏脚本（MIME 错整站废）'),
+    ('/vocab_all.js',                   'javascript', '词库'),
+    ('/manifest.webmanifest',           'manifest',   'PWA 清单'),
+]
 
 
 def probe(url):
@@ -79,42 +98,61 @@ def probe(url):
         return (False, '', '', str(e)[:60])
 
 
-def verdict(ct, dispo):
-    """这个响应会被浏览器下载吗"""
+def verdict(ct, dispo, want):
+    '''这个响应浏览器会怎么用 —— 按资源类型分别判断'''
     if 'attachment' in dispo:
         return False, 'Content-Disposition 是 attachment —— 铁定下载'
     if not ct:
         return False, '没有 Content-Type —— 由浏览器猜，不可控'
-    if ct.startswith('text/html'):
-        return True, ''
-    if ct.startswith('application/octet-stream'):
-        return False, 'Content-Type 是 octet-stream —— 弹下载框'
-    if ct.startswith('text/plain'):
-        return False, 'Content-Type 是 text/plain —— 多半会下载（v1156 现场就是它）'
-    if ct.startswith('binary/'):
-        return False, 'Content-Type 是 binary/* —— 弹下载框'
-    return False, 'Content-Type 是 %s —— 不是 text/html' % ct
+    short = ct.split(';')[0]
+
+    if want == 'text/html':
+        if ct.startswith('text/html'):
+            return True, ''
+        if ct.startswith('text/plain'):
+            return False, ('是 text/plain —— 浏览器要么下载、要么把整页 HTML '
+                           '当纯文本显示（满屏源代码）。两种都等于打不开，'
+                           '而且 JS 不执行、SW 装不上，客户端 100% 救不了')
+        if ct.startswith(('application/octet-stream', 'binary/')):
+            return False, '是 %s —— 弹下载框' % short
+        return False, '是 %s —— 不是 text/html' % short
+
+    if want == 'javascript':
+        # 浏览器只接受 JavaScript 类 MIME，别的一律拒绝执行
+        if ('javascript' in ct) or ct.startswith('application/ecmascript'):
+            return True, ''
+        return False, ('是 %s —— 浏览器会拒绝执行这个脚本'
+                       '（The script has an unsupported MIME type），'
+                       '所有模块加载失败，整站等于废了' % short)
+
+    if want == 'manifest':
+        if 'json' in ct or 'manifest' in ct:
+            return True, ''
+        return False, '是 %s —— PWA 清单读不了，装不了桌面图标' % short
+
+    return True, ''
 
 
 def main():
     site = (sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SITE).rstrip('/')
-    print('▶ 发版前线上体检：网页会不会被当成文件下发')
+    print('▶ 发版前线上体检：浏览器拿到的东西能不能正常用')
     print('  站点：%s\n' % site)
 
     unreachable = 0
     bad = []
-    for path in PATHS:
+    for path, want, label in PATHS:
         url = site + path
         ok, ct, dispo, why = probe(url)
         if not ok:
             unreachable += 1
-            print('  ⏭  %-22s 请求不通（%s）' % (path, why))
+            print('  ⏭  %-34s 请求不通（%s）' % (path, why))
             continue
-        good, reason = verdict(ct, dispo)
+        good, reason = verdict(ct, dispo, want)
         if good:
-            print('  ✅ %-22s %s' % (path, ct))
+            print('  ✅ %-34s %s' % (path, ct.split(';')[0]))
         else:
-            print('  ❌ %-22s %s' % (path, reason))
+            print('  ❌ %-34s %s' % (path, label))
+            print('      %s' % reason)
             bad.append((path, reason))
 
     print()
