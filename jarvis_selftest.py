@@ -541,6 +541,24 @@ def _inj_sentinel(s):
     return s.replace('schedule:', 'schedule_disabled:', 1)
 
 
+
+def _inj_probe(s):
+    """把浏览器头拆掉 —— 探测就又变回"不像人"，会误报一堆不存在的问题。"""
+    m = "req.add_header('Sec-Fetch-Mode', 'navigate')"
+    if m not in s:
+        return None
+    return s.replace(m, "pass  # removed", 1)
+
+
+
+def _inj_checklist(s):
+    """把"测量工具准不准"那条删掉 —— 清单就漏掉了 v1156 最贵的那一课。"""
+    m = "我的测量工具，测得准吗"
+    if m not in s:
+        return None
+    return s.replace(m, "（已删）", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -606,6 +624,8 @@ CASES = [
     ('自动下载',     'hansen_backup_v944.js',       _inj_auto_dl),
     ('防下载总闸', '防下载总闸.py',            _inj_dlmaster),
     ('线上哨兵',     '.github/workflows/download-sentinel.yml', _inj_sentinel),
+    ('探测要像人', '发版前_线上体检.py',      _inj_probe),
+    ('下结论清单', '下结论之前.md',            _inj_checklist),
 ]
 
 
