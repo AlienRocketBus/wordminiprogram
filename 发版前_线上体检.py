@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""发版前实测：线上会不会把网页当成文件下发
+
+═══ 为什么要有这一档 ═══
+
+v1156 用户现场：「跟地址就是跟地址，所有的浏览器打开都会出现这种情况。」
+
+而当时：
+  · 腾讯云控制台里索引文档**已经配好了**
+  · 代码里的守卫**全绿**
+  · 测试**全部通过**
+
+**没有任何一处能提前告诉我们线上是坏的。**
+
+因为这类问题的三个特征凑在一起，极难被发现：
+  · **偶发** —— 只有命中坏节点/坏缓存的用户才遇到
+  · **无声** —— 代码看正常、控制台零错误
+  · **自我延续** —— 一旦发生就永久化，用户自己怎么弄都好不了
+
+守卫查的是"代码写对了没"，**而这件事的真相只在服务器的响应头里**。
+所以必须**真的去请求一次，看它到底回了什么**。
+
+═══ 判据 ═══
+
+浏览器决定「渲染」还是「下载」，只看 `Content-Type`：
+
+    text/html                  → 渲染成网页  ✅
+    application/octet-stream   → 弹下载框    ❌
+    text/plain                 → 多半也是下载 ❌（v1156 线上实测到的就是它）
+    没有这个头                  → 由浏览器猜，不可控 ❌
+    Content-Disposition: attachment → 铁定下载 ❌
+
+═══ 特别注意根路径 ═══
+
+`/` 和 `/index.html` 在 CDN 眼里是**两个不同的缓存键**。
+索引文档配置管的是「`/` 该取哪个文件」，
+但 `/` 这个键上可能缓存着一份坏响应 —— 这解释了
+「为什么只有根地址出事，`/index.html` 是好的」。
+
+**所以这两个必须分开测。**
+
+═══ 用法 ═══
+
+    python3 发版前_线上体检.py                  # 用默认站点
+    python3 发版前_线上体检.py https://xxx.com  # 指定站点
+
+网络不通时**不报错、不拦发版** —— 只说清楚"没测到"，
+因为拿不到结果和"结果是坏的"是两回事，
+把前者当后者会让人开始忽略这道检查。
+"""
+import sys
+import urllib.request
+import urllib.error
+
+DEFAULT_SITE = 'https://superwords-ambitious-d0g1d26xm740dc3d6.webapps.tcloudbase.com'
+
+# 必须挨个测的入口。根路径单独列 —— 它和 /index.html 是两个缓存键。
+PATHS = ['/', '/index.html', '/spelling_pk.html', '/island_animal.html']
+
+
+def probe(url):
+    """拿到响应头。返回 (ok, content_type, disposition, 说明)"""
+    req = urllib.request.Request(url, method='GET')
+    req.add_header('Cache-Control', 'no-store')
+    # 带上真实浏览器的 UA —— 有些 CDN 会按 UA 返回不同的头
+    req.add_header('User-Agent',
+                   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
+                   'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148')
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return (True,
+                    (r.headers.get('Content-Type') or '').lower(),
+                    (r.headers.get('Content-Disposition') or '').lower(),
+                    '')
+    except urllib.error.HTTPError as e:
+        return (False, '', '', 'HTTP %s' % e.code)
+    except Exception as e:
+        return (False, '', '', str(e)[:60])
+
+
+def verdict(ct, dispo):
+    """这个响应会被浏览器下载吗"""
+    if 'attachment' in dispo:
+        return False, 'Content-Disposition 是 attachment —— 铁定下载'
+    if not ct:
+        return False, '没有 Content-Type —— 由浏览器猜，不可控'
+    if ct.startswith('text/html'):
+        return True, ''
+    if ct.startswith('application/octet-stream'):
+        return False, 'Content-Type 是 octet-stream —— 弹下载框'
+    if ct.startswith('text/plain'):
+        return False, 'Content-Type 是 text/plain —— 多半会下载（v1156 现场就是它）'
+    if ct.startswith('binary/'):
+        return False, 'Content-Type 是 binary/* —— 弹下载框'
+    return False, 'Content-Type 是 %s —— 不是 text/html' % ct
+
+
+def main():
+    site = (sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SITE).rstrip('/')
+    print('▶ 发版前线上体检：网页会不会被当成文件下发')
+    print('  站点：%s\n' % site)
+
+    unreachable = 0
+    bad = []
+    for path in PATHS:
+        url = site + path
+        ok, ct, dispo, why = probe(url)
+        if not ok:
+            unreachable += 1
+            print('  ⏭  %-22s 请求不通（%s）' % (path, why))
+            continue
+        good, reason = verdict(ct, dispo)
+        if good:
+            print('  ✅ %-22s %s' % (path, ct))
+        else:
+            print('  ❌ %-22s %s' % (path, reason))
+            bad.append((path, reason))
+
+    print()
+    if unreachable == len(PATHS):
+        # 拿不到结果 ≠ 结果是坏的。把前者当后者，会让人开始忽略这道检查。
+        print('  ⏭  一个入口都没请求通 —— 这里的网络到不了线上，跳过。')
+        print('     （在能上网的机器上跑一次，或者用手机无痕窗口打开根地址看看。）')
+        return 0
+
+    if bad:
+        print('  🚫 %d 个入口会被当成文件下载：' % len(bad))
+        for path, reason in bad:
+            print('     · %s —— %s' % (path, reason))
+        print()
+        print('  怎么修：')
+        print('    1. 腾讯云控制台 → 静态网站托管 → 刷新缓存')
+        print('       **单独刷「/」这个地址**（只刷 /index.html 不管用，')
+        print('       它俩在 CDN 眼里是两个缓存键）')
+        print('    2. 确认「默认索引节点 = index.html」')
+        print('    3. 在那之前，分享链接用 /index.html 结尾的那个')
+        return 1
+
+    print('  ✅ 所有入口都回 text/html —— 不会被当成文件下载。')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

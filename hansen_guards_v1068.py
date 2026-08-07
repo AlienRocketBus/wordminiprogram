@@ -2102,6 +2102,93 @@ def guard_progress_file_fresh():
             bad('当前进度', '《当前进度.md》缺少「%s」那一节 —— '
                 '光有"做了什么"不够，还得说清"接着做什么"' % key)
 
+
+def guard_no_poisoned_cache():
+    """缓存里绝不许存下"会被浏览器下载"的响应。
+
+    ═══ 事故（v1156，用户现场）═══
+
+    「跟地址就是跟地址，所有的浏览器打开都会出现这种情况。」
+    而腾讯云控制台里「默认索引节点 = index.html」**已经配好了**。
+
+    查下来根因不在配置，在 Service Worker：
+
+      服务端某次回了 `Content-Type: text/plain`（线上实测到的就是它）
+        ↓
+      SW 把这份响应**原样存进 Cache Storage**
+        ↓
+      之后即使服务端修好了、CDN 缓存也刷了，
+      **这个用户的浏览器里还留着那份坏的**
+        ↓
+      他会一直下载，而且**怎么刷新都没用**（SW 缓存不吃刷新）
+
+    > **服务端的一次抽风，被我们自己永久固化了下来。**
+    > 这就是「偶尔」变成「一直」的机制。
+
+    而且当时的 `fixHtmlType` 判据只认 octet-stream / binary / attachment，
+    **`text/plain` 直接放过去了** —— 这道兜底形同虚设。
+
+    ═══ 这道守卫盯四件事 ═══
+
+      ① 判据要认全：空 / octet-stream / binary / **text/plain** / attachment
+      ② 进缓存**之前**就修（`putIfReasonable` 里）——
+         不能等取出时才修，因为坏数据一旦存下就跟着用户走
+      ③ 所有读缓存的路径都要过一遍修正 ——
+         导航请求那条修了不够，页面被当成普通资源请求时走的是另一条
+      ④ 正常响应一律不碰 ——
+         一个"修 Content-Type"的兜底如果乱改正常响应，
+         害处比它挡住的更大
+
+    ═══ 为什么值得设一道专门的守卫 ═══
+
+    这类 bug 有三个特征，凑一起就极难被发现：
+      · **偶发** —— 只有命中坏节点/坏缓存的用户才遇到
+      · **无声** —— 代码看正常、控制台零错误
+      · **自我延续** —— 一旦发生就永久化，用户自己怎么弄都好不了
+    """
+    sw = _read('sw_v944.js') or ''
+    if not sw:
+        bad('缓存投毒', '读不到 sw_v944.js')
+        return
+    code = _code_only(sw)
+
+    # ① 判据要认全
+    m = re.search(r'const looksDownload =[\s\S]*?;', code)
+    cond = m.group(0) if m else ''
+    for frag, label in (("ct === ''", '空 Content-Type'),
+                        ('octet-stream', 'octet-stream'),
+                        ("startsWith('binary/')", 'binary/'),
+                        ("startsWith('text/plain')", 'text/plain'),
+                        ('attachment', 'Content-Disposition: attachment')):
+        if frag not in cond:
+            bad('缓存投毒',
+                '`looksDownload` 判据里没有「%s」—— '
+                '这种响应会被浏览器下载，而兜底放它过去了' % label)
+
+    # ② 进缓存之前就修
+    i_put = code.find('async function putIfReasonable')
+    seg_put = code[i_put:i_put + 900] if i_put >= 0 else ''
+    if 'fixHtmlType(response)' not in seg_put:
+        bad('缓存投毒',
+            'putIfReasonable 没有在存之前修 Content-Type —— '
+            '服务端一次抽风就会被永久固化在用户浏览器里，'
+            '之后服务端修好了他也好不了（SW 缓存不吃刷新）')
+
+    # ③ 所有读缓存的路径都要修
+    reads = len(re.findall(r'caches\.match\(', code))
+    fixes = len(re.findall(r'fixHtmlType\(', code))
+    if reads and fixes < 3:
+        bad('缓存投毒',
+            '读缓存有 %d 处，而 fixHtmlType 只用了 %d 次 —— '
+            '导航请求修了不够：页面被当成普通资源请求时走的是另一条路径，'
+            '缓存里的坏 index.html 会原样发出去' % (reads, fixes))
+
+    # ④ 正常响应不许碰
+    if 'if (!looksDownload) return response;' not in code:
+        bad('缓存投毒',
+            'fixHtmlType 没有"正常响应一律不碰"这道闸 —— '
+            '乱改正常响应的害处比它挡住的更大')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2182,6 +2269,8 @@ GUARDS = [
     ('注入残留',     guard_no_inject_residue),
     # v1155
     ('当前进度',     guard_progress_file_fresh),
+    # v1156
+    ('缓存投毒',     guard_no_poisoned_cache),
 ]
 
 

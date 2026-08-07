@@ -482,6 +482,19 @@ def _inj_progress(s):
     return out if out != s else None
 
 
+
+def _inj_poisoned_cache(s):
+    """把 text/plain 从判据里拿掉 —— 兜底就又形同虚设了。
+
+    这正是 v1156 事故的原样：判据只认 octet-stream / binary / attachment，
+    而线上真实回的是 text/plain，于是它大摇大摆地进了缓存。
+    """
+    m = "ct.startsWith('text/plain') ||"
+    if m not in s:
+        return None
+    return s.replace(m, "", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -541,6 +554,7 @@ CASES = [
     ('对战看门狗',   'hansen_pk_watchdog_v1155.js', _inj_watchdog),
     ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
     ('当前进度',     '当前进度.md',            _inj_progress),
+    ('缓存投毒',     'sw_v944.js',                  _inj_poisoned_cache),
 ]
 
 
