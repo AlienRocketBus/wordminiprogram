@@ -84,7 +84,10 @@ function mkRecord() {
   ok(/Math\.min\(4000,/.test(ld), '★ 对方分数夹到合理区间（填 1e99 没用）');
   ok(/gap > band \* 2/.test(ld),
      '★ 差太远的房直接跳过 —— 谎报得越离谱越会被自动过滤，也就没有作弊动机');
-  ok(/waited >= 20/.test(ld), '★ 等满 20 秒还没找到就自己开一间（不让人永远空等）');
+  /* 🔴v1155：门槛做成可配置了（测试里调到 2 秒，E2E 从 135 秒降下来）——
+     产品默认仍是 20 秒。断言改为查"有这个默认值"而不是查写死的 20。 */
+  ok(/waited >= \(window\.__hsnLadderWaitSec \|\| 20\)/.test(ld),
+     '★ 等满 20 秒还没找到就自己开一间（不让人永远空等）· 门槛可配置但默认 20');
   const svc = fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8');
   const m = svc.match(/function matchBand[\s\S]{0,220}/);
   ok(m && /Math\.floor\(s \/ 5\) \* 50/.test(m[0]), '★ 每等 5 秒放宽 50 分');
