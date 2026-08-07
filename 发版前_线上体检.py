@@ -81,17 +81,37 @@ PATHS = [
 def probe(url):
     """拿到响应头。返回 (ok, content_type, disposition, 说明)"""
     req = urllib.request.Request(url, method='GET')
+    # 🔴v1156：**必须带全浏览器的请求头。**
+    #
+    #   第一版只带了 User-Agent，结果哨兵报"所有入口都 attachment"——
+    #   而用户说网站平时是能用的，这说不通。
+    #
+    #   原因：很多云厂商的防盗链/反爬会看
+    #   `Sec-Fetch-Mode` / `Accept` 这些头 ——
+    #   像浏览器就正常返回，不像就强制下载或拒绝。
+    #   **只带 UA 的请求在它眼里根本不是浏览器。**
+    #
+    #   一个"模拟用户"的探测如果模拟得不像，
+    #   **它报的问题可能根本不存在，而真问题照样漏掉**。
     req.add_header('Cache-Control', 'no-store')
-    # 带上真实浏览器的 UA —— 有些 CDN 会按 UA 返回不同的头
     req.add_header('User-Agent',
                    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
-                   'AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148')
+                   'AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                   'Version/17.0 Mobile/15E148 Safari/604.1')
+    req.add_header('Accept',
+                   'text/html,application/xhtml+xml,application/xml;q=0.9,'
+                   'image/avif,image/webp,*/*;q=0.8')
+    req.add_header('Accept-Language', 'zh-CN,zh;q=0.9')
+    req.add_header('Sec-Fetch-Mode', 'navigate')
+    req.add_header('Sec-Fetch-Dest', 'document')
+    req.add_header('Sec-Fetch-Site', 'none')
+    req.add_header('Upgrade-Insecure-Requests', '1')
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
             return (True,
                     (r.headers.get('Content-Type') or '').lower(),
                     (r.headers.get('Content-Disposition') or '').lower(),
-                    '')
+                    list(r.headers.items()))
     except urllib.error.HTTPError as e:
         return (False, '', '', 'HTTP %s' % e.code)
     except Exception as e:
@@ -142,7 +162,9 @@ def main():
     bad = []
     for path, want, label in PATHS:
         url = site + path
-        ok, ct, dispo, why = probe(url)
+        ok, ct, dispo, extra = probe(url)
+        raw_headers = extra if ok else None
+        why = '' if ok else extra
         if not ok:
             unreachable += 1
             print('  ⏭  %-34s 请求不通（%s）' % (path, why))
@@ -153,6 +175,12 @@ def main():
         else:
             print('  ❌ %-34s %s' % (path, label))
             print('      %s' % reason)
+            # v1156: 坏的时候把整套响应头打出来 ——
+            # 光看两个头判断不了"为什么坏"，而那才是能不能修的关键
+            if raw_headers:
+                print('      ── 完整响应头 ──')
+                for k, v in raw_headers:
+                    print('         %s: %s' % (k, str(v)[:90]))
             bad.append((path, reason))
 
     print()
