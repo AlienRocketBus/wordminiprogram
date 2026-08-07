@@ -25,7 +25,7 @@
   'use strict';
   if (location.protocol !== 'file:') return;
 
-  var SITE = 'https://superwords-ambitious-d0g1d26xm740dc3d6.webapps.tcloudbase.com/';
+  var SITE = 'https://superwords-ambitious-d0g1d26xm740dc3d6.webapps.tcloudbase.com/index.html';
 
   function show() {
     try {

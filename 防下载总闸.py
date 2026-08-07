@@ -231,6 +231,40 @@ def check_deploy():
              '先删掉再发版' % (len(junk), junk[0]))
 
 
+# ── J：分享出去的链接不许用根路径 ────────────────────────
+def check_share_url():
+    """🔴v1156 第十轮：**分享链接绕开根路径。**
+
+    根路径 `/` 和 `/index.html` 在 CDN 眼里是两个缓存键，
+    而出问题的一直是 `/` 那个。
+
+    这是唯一一处**能真正降低新用户遇到概率**的做法：
+    我们自己发出去的每一个链接都带上 `index.html`，
+    走那个从没出过问题的键。
+
+    （用户手动输域名还是会走根路径 —— 那个只能靠哨兵盯着。
+      但绝大多数人是点分享链接进来的。）
+    """
+    import glob as _g
+    bare = []
+    for f in _g.glob(os.path.join(ROOT, 'hansen_*.js')) + _g.glob(os.path.join(ROOT, '*.html')):
+        name = os.path.basename(f)
+        if name.startswith('_'):
+            continue
+        try:
+            body = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        for m in re.finditer(r"webapps\.tcloudbase\.com/(?=['\"])", body):
+            ln = body[:m.start()].count('\n') + 1
+            bare.append('%s:%d' % (name, ln))
+    if bare:
+        fail('J 分享链接',
+             '%d 处分享地址用的是根路径（如 %s）—— '
+             '根路径的 CDN 缓存键正是出问题的那个，'
+             '改成 /index.html 走那个从没出过问题的键' % (len(bare), bare[0]))
+
+
 # ── 兜底层必须在 ────────────────────────────────────────
 def check_fallbacks():
     for f, why in (
@@ -249,12 +283,13 @@ def main():
     check_sw()
     check_pages()
     check_deploy()
+    check_share_url()
     check_fallbacks()
 
     if not bad:
         print('\n  ✅ 七条路径全部堵死：')
         print('     E 自动下载 · F SW缓存 · G 写死下载 · H 危险跳转 ·')
-        print('     I 部署杂物 · 兜底层齐全')
+        print('     I 部署杂物 · J 分享链接 · 兜底层齐全')
         print('\n  ⚠️ 服务端那四条（Content-Type / Disposition / CDN缓存 / 无扩展名）')
         print('     由「发版前_线上体检.py」实测 —— 那个必须联网才有意义。')
         return 0
