@@ -185,6 +185,8 @@
   function close() {
     a11yOff();
     if (_cancel) { try { _cancel(); } catch (e) {} _cancel = null; }
+    /* v1155: 上哨 —— 接下来这一串如果哪一步废了，看门狗会把人救出来 */
+    try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('排位'); } catch (e) {}
     var el = q(ID); if (el) el.classList.remove('on');
   }
 
@@ -437,7 +439,12 @@
           return;
         }
         /* 等满 20 秒还没找到 → 自己开一间排位房等人 */
-        if (waited >= 20) {
+        /* v1155: 这个门槛做成可调 —— 测试里调到 2 秒，
+           整条 E2E 从 135 秒降到十几秒。
+           **跑得慢的测试等于没有测试**：它会被排到"重测试"里，
+           在受限环境下反复超时、反复补跑，最后谁都不愿意跑全量。
+           产品默认仍是 20 秒，只有测试会去改它。 */
+        if (waited >= (window.__hsnLadderWaitSec || 20)) {
           stop = true;
           close();
           try {

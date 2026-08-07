@@ -1126,12 +1126,14 @@ function doCreate() {
   var _fromLadder = false;
 
   function _createForLadder(rating) {
+    try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('开排位房'); } catch (e) {}
     _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
     _ladderRating = Number(rating) || 1000;
     try { lobby(); } catch (e) {}
     doCreate();
   }
   function _joinForLadder(roomId) {
+    try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('进排位房'); } catch (e) {}
     _pickedMode = 'A';
     _fromLadder = true;      /* v1154: 记住这次是排位来的，进不去时好说人话 */
     try { lobby(); } catch (e) {}

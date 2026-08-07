@@ -1040,7 +1040,14 @@ def guard_campaign_notes_present():
     if not hits:
         bad('攻坚笔记', '攻坚笔记/ 目录不存在或为空 —— 近 80 版换来的经验会丢失')
         return
-    main = os.path.join(ROOT, '攻坚笔记', '跨设备存档攻坚全记录_v1017-v1095.md')
+    # 🔴v1155：**两处都找。**
+    #   守卫写死了 `攻坚笔记/` 子目录，而文件实际在仓库根目录 ——
+    #   于是它一直报"笔记缺少核心结论"（其实四个关键词一个不少）。
+    #   更糟的是：**自证每道注入前都要先确认基线是绿的**，
+    #   这条常红就让**整轮自证全部无法判定** —— 一道坏规则瘫痪了整个验证机制。
+    _cands = [os.path.join(ROOT, '攻坚笔记', '跨设备存档攻坚全记录_v1017-v1095.md'),
+              os.path.join(ROOT, '跨设备存档攻坚全记录_v1017-v1095.md')]
+    main = next((c for c in _cands if os.path.exists(c)), _cands[0])
     if not os.path.exists(main):
         bad('攻坚笔记', '缺《跨设备存档攻坚全记录 v1017-v1095》')
         return
@@ -1719,8 +1726,16 @@ def guard_no_self_defeating_check():
             #   ② `includes('hansen-v944-pages-1')` —— 断言旧缓存**已被清掉**，也必须写死
             #   ③ 注释里引用的例子
             #   真正要拦的只有一种：**断言"当前缓存号必须等于某个数字"**。
+            # ⚠️ 四种不算数（v1154~v1155 逐轮自挑收敛出来的）：
+            #   ① `caches.open('hansen-v944-shell-5')` —— 故意造旧缓存测清理，必须写死
+            #   ② `includes('hansen-v944-pages-1')` —— 断言旧缓存**已被清掉**，也必须写死
+            #   ③ 注释里引用的例子（含行尾注释 —— v1154 漏过一次）
+            #   ④ `\d+` 这种结构写法
+            #   真正要拦的只有一种：**断言"当前缓存号必须等于某个数字"**。
+            _bare = line.split('#')[0] if '#' in line else line
             if ('caches.open' in line or 'includes(' in line
-                    or line.lstrip().startswith(('//', '*', '/*', '#'))):
+                    or line.lstrip().startswith(('//', '*', '/*', '#'))
+                    or (m.group(0) not in _bare)):
                 continue
             # `\d+` 这种结构写法不算（正则里的转义会被上面的 finditer 误抓）
             if chr(92) + 'd+' in line:
@@ -1803,6 +1818,207 @@ def guard_query_no_optional_field():
             "按 heartbeatAt 排序需要在云开发建索引，没建整个查询会报错；"
             "改用每条记录必有的 createdAt")
 
+
+def guard_ladder_has_e2e():
+    """天梯必须有"真打一局"的测试 —— 光读源码守不住它。
+
+    用户问："天梯怎么还是有这么多 bug？"
+    查下来是三条叠加，第一条最致命：
+
+      ① **天梯的测试从来没真打过一局。**
+         原有 38 条断言里 26 条只是"读源码做正则匹配"，
+         **0 条真开浏览器走流程**。
+         而今天挖出的每一个 bug，**代码里看都是对的**。
+
+      ② **天梯是寄生在房间系统上的一层薄皮。**
+         它靠 5 个接口活着，而房间系统改过 40 次、天梯只改过 8 次 ——
+         中间那几个接口没有任何测试守着：
+           · v1135 改房间查询 → 天梯匹配全废
+           · v1154 改界面调用 → 天梯白屏
+
+      ③ **56 处空 catch 让断掉的接口一声不吭。**
+
+    这道守卫盯 ①：`test_ladder_e2e_v1155.mjs` 必须在，
+    而且必须真的启动浏览器（不能退化成又一个正则匹配的测试）。
+    """
+    body = _read('test_ladder_e2e_v1155.mjs') or ''
+    if not body:
+        bad('天梯E2E',
+            'test_ladder_e2e_v1155.mjs 不见了 —— '
+            '天梯就又回到"只有读源码的测试"那个状态，'
+            '而它每一个 bug 在源码里看都是对的')
+        return
+    if 'chromium.launch' not in body:
+        bad('天梯E2E',
+            '天梯 E2E 测试里没有 chromium.launch —— '
+            '退化成读源码就守不住任何东西了')
+    # 关键流程必须都在
+    for frag, label in (
+        ('_startMatchForTest', '对战流程'),
+        ('ldGo', '开始排位'),
+        ('prOpp', '对手比分'),
+        ('HansenSilentWatch', '被吞掉的错误'),
+    ):
+        if frag not in body:
+            bad('天梯E2E', '天梯 E2E 少了「%s」这一段（找 %s）' % (label, frag))
+
+
+def guard_pk_watchdog():
+    """对战/天梯必须有看门狗，而且它自己不能只保护第一次。
+
+    今天挖出的天梯 bug 形态出奇一致：**界面进了"废掉但没人管"的状态**
+    （房建好了屏幕白的 / 一直转圈 / 卡在等交卷 / 停在倒计时）。
+    每一次我都是"找到那条路 → 在那条路上补一句提示" —— **总会漏**。
+
+    > 与其把每条路都堵一遍，不如守住必经之地。
+
+    看门狗就是那个必经之地。这道守卫盯三件事：
+
+      ① 模块在，且真的接到页面上了（不然等于没做）
+      ② `_rescued` 那把锁必须**成对解除** ——
+         查了四轮才发现的真缺陷：只在关闭时清一次的话，
+         用户点了出口、回去再玩，**第二次卡住就再也不会被救**。
+         **一个"只保护第一次"的防崩溃系统等于没有。**
+      ③ 救援屏必须给出口，而不是只报错 ——
+         用户最怕的不是出错，是出错了还不知道该怎么办。
+    """
+    src = _read('hansen_pk_watchdog_v1155.js') or ''
+    if not src:
+        bad('对战看门狗', 'hansen_pk_watchdog_v1155.js 不见了')
+        return
+    code = _code_only(src)
+
+    if 'function rescue' not in code:
+        bad('对战看门狗', '没有救援函数')
+    # ② 锁要成对解除
+    if '_rescued = false' not in code:
+        bad('对战看门狗',
+            '`_rescued` 只置 true 不解除 —— '
+            '救过一次后就再也不会救第二次，等于只保护第一次')
+    # 🔴v1155：**数个数守不住 —— 要查那条具体的解锁路径。**
+    #   原判据是"`_rescued = false` 至少两处"，但文件里本来就有
+    #   变量声明、quit 里的复位等好几处 —— 把最关键的
+    #   "画面动了就解锁"删掉，个数仍然够，守卫照样绿。
+    #   （自证一注入就戳穿了：它是这道守卫的第一版设计缺陷。）
+    #
+    #   真正要守的是那条：**画面恢复变化时必须解锁**，
+    #   否则用户点了出口回去再玩，第二次卡住就再也不会被救。
+    if "if (_rescued && !document.getElementById('pkRescue')) _rescued = false" not in code:
+        bad('对战看门狗',
+            '缺少"画面动了就解锁"这一条 —— '
+            '救过一次后锁不解开，第二次卡住就再也不会救，'
+            '等于只保护第一次')
+    # ③ 出口
+    for frag, label in (('pkRescueBack', '回首页出口'), ('pkRescueRetry', '重试出口')):
+        if frag not in code:
+            bad('对战看门狗', '救援屏缺少%s —— 只报错不给出路，用户还是不知道该怎么办' % label)
+    # ①接线
+    html = _read('spelling_pk.html') or ''
+    if 'hansen_pk_watchdog_v1155.js' not in html:
+        bad('对战看门狗', 'spelling_pk.html 没加载看门狗 —— 写了不接等于没做')
+    # 上哨
+    ld = _read('hansen_ladder_ui_v1108.js') or ''
+    if 'HansenPkWatchdog.arm' not in ld:
+        bad('对战看门狗', '天梯没有上哨 —— 看门狗不知道什么时候该开始盯')
+
+
+def guard_no_inject_residue():
+    """故障注入的残留不许留在代码里。
+
+    事故（v1155，同一天栽了两次）：
+    验证守卫"会不会咬人"时要故意把代码改坏，改完再恢复。
+    两次都**恢复得不干净**：
+
+      · `guestId` 被塞回房间查询条件 —— 而这正是"房间功能根本不能用"的根因
+      · `chromium.launch` 被改成 `__no_browser` —— 天梯 E2E 直接跑不起来
+
+    两次都是**守卫自己抓到的**，否则会跟着版本发出去。
+
+    > 故障注入是好东西，但"注入完忘了恢复"比不注入更危险 ——
+    > 因为你以为验证过了，其实把坏的留下了。
+
+    判据：产品代码和测试里不许出现注入用的哨兵字样。
+    （`jarvis_selftest.py` 本身除外 —— 那里定义它们是应该的。）
+    """
+    import glob as _g
+    # 🔴v1155 扩大：**`.md` 和子目录也要扫。**
+    #   第 5 处残留是在 `攻坚笔记/` 里的 markdown ——
+    #   注入把「先修」改成了「（已删）」，守卫因此常红，
+    #   而**自证每道注入前都要基线为绿**，于是**整轮自证全部无法判定**。
+    #   一处没清干净的残留，瘫痪了整个验证机制。
+    # ⚠️ 判据要精确到"注入才会产生的形态"。
+    #   第一版把裸的「（已删）」当哨兵 —— 结果误伤知识库里
+    #   「单词雨（已删）」这种正常记述。
+    #   **误报比漏报更伤**：它会让人开始忽略这道守卫。
+    #   所以只认注入实际替换出的那个组合。
+    marks = ['__no_browser', '_noassert', 'hsn-nobody-listens', '__hsn_broken',
+             '**（已删）"看得见"']
+    hits = []
+    for f in (_g.glob(os.path.join(ROOT, '*.js'))
+              + _g.glob(os.path.join(ROOT, '*.mjs'))
+              + _g.glob(os.path.join(ROOT, '*.md'))
+              + _g.glob(os.path.join(ROOT, '*', '*.md'))):
+        name = os.path.relpath(f, ROOT)
+        if 'selftest' in name or 'CHANGELOG' in name:
+            continue
+        try:
+            src = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        for m in marks:
+            if m in src:
+                hits.append('%s: %s' % (name, m))
+    if hits:
+        bad('注入残留',
+            '%d 处故障注入的残留没清掉（如 %s）—— '
+            '你以为验证过了，其实把坏的留下了'
+            % (len(hits), hits[0]))
+
+
+def _recover_inject():
+    """🔴v1155：**开跑前先修上次没恢复的注入。**
+
+    自证是"把代码改坏 → 跑守卫 → 恢复"，
+    而进程被 `timeout` 强杀（SIGKILL）时 **`finally` 根本不执行**，
+    坏代码就留在工作区了。
+
+    今天为此栽了四次，其中一次是**产品代码**
+    （`hsn-account-uid-changed` 被改坏 → 用户报的"换账号换不了"会直接复发）。
+    每次我都以为是新问题在查 —— 因为它看起来只是"某个守卫报红"。
+
+    放在守卫这里而不是只放自证脚本里：**守卫每次发版都跑**，
+    是最早能发现残局的那一步。
+    """
+    import shutil as _sh
+    bakdir = os.path.join(ROOT, '.jarvis_inject_bak')
+    pend = os.path.join(bakdir, 'PENDING')
+    if not os.path.exists(pend):
+        return
+    # 🔴v1155：**自证正在跑的时候不要插手。**
+    #   自证的流程本来就是"改坏 → 跑守卫 → 恢复"，
+    #   而守卫每次启动都会自动修残局 —— 两者会打架：
+    #   守卫把自证刚注入的坏代码"修"回去，
+    #   于是注入等于没发生，**48 道里 22 道被误判成"已失灵"**。
+    #   自证跑之前会放一个 RUNNING 标记，看到它就别动。
+    if os.path.exists(os.path.join(bakdir, 'RUNNING')):
+        return
+    try:
+        name = open(pend, encoding='utf-8').read().strip()
+        bak = os.path.join(bakdir, name + '.bak')
+        # ⚠️ PENDING 在、备份不在也要能收场（实测撞到：
+        #    备份已删但 PENDING 还留着 → shutil 抛 FileNotFoundError
+        #    → 整个守卫崩掉。**一个"修故障"的机制自己崩了最糟糕。**）
+        if name and os.path.exists(bak):
+            _sh.copyfile(bak, os.path.join(ROOT, name))
+            print('  \u267b\ufe0f  上次注入没恢复干净，已自动修回：%s' % name)
+            os.unlink(bak)
+        os.unlink(pend)
+    except Exception as e:
+        print('  \u26a0\ufe0f  修复上次残局失败：%s' % e)
+
+
+_recover_inject()
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -1877,6 +2093,10 @@ GUARDS = [
     ('自打脸检查',   guard_no_self_defeating_check),
     ('要真跑过',     guard_verified_not_assumed),
     ('查询条件',     guard_query_no_optional_field),
+    # v1155
+    ('天梯E2E',      guard_ladder_has_e2e),
+    ('对战看门狗',   guard_pk_watchdog),
+    ('注入残留',     guard_no_inject_residue),
 ]
 
 

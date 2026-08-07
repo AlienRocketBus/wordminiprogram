@@ -21,3 +21,6 @@ releases/
 .jarvis_resume.json
 .jarvis_selftest_ok.json
 .jarvis_resume.json.tmp
+.jarvis_inject_bak/
+.jarvis_selftest_progress.json
+.jarvis_selftest_progress.json

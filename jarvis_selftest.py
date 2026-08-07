@@ -394,6 +394,64 @@ def _inj_query_optional_field(s):
     return s.replace(m, ".where({ status: 'open', isPrivate: false, guestId: '' })", 1)
 
 
+
+def _inj_ladder_e2e(s):
+    """把浏览器启动拆掉 —— E2E 就退化成又一个读源码的测试。"""
+    m = "chromium.launch"
+    if m not in s:
+        return None
+    return s.replace(m, "__no_browser", 1)
+
+
+
+def _inj_watchdog(s):
+    """把"画面动了就解锁"那条拆掉 —— 看门狗就只保护第一次了。"""
+    m = "if (_rescued && !document.getElementById('pkRescue')) _rescued = false;"
+    if m not in s:
+        return None
+    return s.replace(m, "/* removed */", 1)
+
+
+
+def _inj_residue(s):
+    """塞一个注入哨兵进去 —— 模拟"注入完忘了恢复"。"""
+    if 'chromium.launch' not in s:
+        return None
+    return s.replace('chromium.launch', '__no_browser', 1)
+
+
+
+def _recover_last_run():
+    """🔴v1155：**上次注入没恢复的，开跑前先修回来。**
+
+    自证是"把代码改坏 → 跑守卫 → 恢复"。
+    如果进程在中间被杀（超时、断电、Ctrl-C 的某些情况），
+    **坏代码就留在工作区了** —— 而且你不会知道，
+    因为下一次跑的时候它看起来只是"某个守卫报红"。
+
+    今天为此栽了四次，其中一次是产品代码。
+    """
+    bakdir = os.path.join(ROOT, '.jarvis_inject_bak')
+    pend = os.path.join(bakdir, 'PENDING')
+    if not os.path.exists(pend):
+        return
+    try:
+        name = open(pend, encoding='utf-8').read().strip()
+        bak = os.path.join(bakdir, name + '.bak')
+        # ⚠️ PENDING 在、备份不在也要能收场（实测撞到：
+        #    备份已删但 PENDING 还留着 → shutil 抛 FileNotFoundError
+        #    → 整个守卫崩掉。**一个"修故障"的机制自己崩了最糟糕。**）
+        if name and os.path.exists(bak):
+            shutil.copyfile(bak, os.path.join(ROOT, name))
+            print('  \u267b\ufe0f  上次注入没恢复干净，已修回：%s' % name)
+            os.unlink(bak)
+        os.unlink(pend)
+    except Exception as e:
+        print('  \u26a0\ufe0f  修复上次残局失败：%s' % e)
+
+
+_recover_last_run()
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -449,6 +507,9 @@ CASES = [
     ('自打脸检查',   'check_resources.py',          _inj_self_defeating),
     ('要真跑过',     'test_login_no_prompt_v1154.mjs', _inj_no_browser_test),
     ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_optional_field),
+    ('天梯E2E',      'test_ladder_e2e_v1155.mjs',   _inj_ladder_e2e),
+    ('对战看门狗',   'hansen_pk_watchdog_v1155.js', _inj_watchdog),
+    ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
 ]
 
 
@@ -475,18 +536,118 @@ def main():
         print('  ⚠️ 注入前就有守卫报红，先修好再自证：%s\n' % ', '.join(sorted(base_red)))
 
     dead = []
+
+    skipped = []   # v1155: 基线就红、无法判定的
+    # 🔴v1155：**自证也要能断点续跑。**
+    #
+    #   自证要让 47 道守卫各咬一次故障样本，整轮十几分钟。
+    #   在受限环境里跑不完 —— 而每次被强杀都会留下"注入到一半"的残局，
+    #   **下一次跑的时候文件已经是坏的，后面的守卫全被带偏**
+    #   （实测：两道好守卫被误报成"已失灵"，我差点去改本来正确的守卫）。
+    #
+    #   和闸门同样的思路：跑过的记下来，下次接着跑。
+    #   指纹用守卫文件 + 自证脚本本身 —— 它们一变，结论就作废。
+    import hashlib as _hl, glob as _g2
+    _STDONE = os.path.join(ROOT, '.jarvis_selftest_progress.json')
+    _fp = _hl.sha256()
+    for _f in sorted(_g2.glob(os.path.join(ROOT, 'hansen_guards_*.py'))):
+        try: _fp.update(open(_f, 'rb').read())
+        except Exception: pass
+    try: _fp.update(open(os.path.join(ROOT, 'jarvis_selftest.py'), 'rb').read())
+    except Exception: pass
+    _fpv = _fp.hexdigest()[:16]
+    _done_names = set()
+    try:
+        _d = json.load(open(_STDONE, encoding='utf-8'))
+        if _d.get('fp') == _fpv:
+            _done_names = set(_d.get('ok', []))
+            if _done_names:
+                print('  \u23e9 \u7eed\u8dd1\uff1a\u5df2\u9a8c\u8fc7 %d \u9053' % len(_done_names))
+    except Exception:
+        _done_names = set()
+
+    def _mark_ok(nm):
+        _done_names.add(nm)
+        try:
+            json.dump({'fp': _fpv, 'ok': sorted(_done_names)},
+                      open(_STDONE, 'w', encoding='utf-8'))
+        except Exception:
+            pass
+
+    # v1155: 告诉守卫"我正在跑"，别把我注入的坏代码修回去
+    _bakdir0 = os.path.join(ROOT, '.jarvis_inject_bak')
+    os.makedirs(_bakdir0, exist_ok=True)
+    open(os.path.join(_bakdir0, 'RUNNING'), 'w').write('1')
+
+    # v1155: 开跑前验一次基线（只此一次）
+    _b0 = subprocess.run([sys.executable, GUARDS], cwd=ROOT,
+                         capture_output=True, text=True, timeout=280)
+    _base_bad = (_b0.returncode != 0)
+    if _base_bad:
+        _w = [l.strip() for l in (_b0.stdout or '').split('\n') if l.strip().startswith('- [')]
+        print('  \u26a0\ufe0f  \u57fa\u7ebf\u5c31\u662f\u7ea2\u7684\uff0c\u5148\u4fee\u5b83\u518d\u8dd1\u81ea\u8bc1\uff1a%s'
+              % (_w[0][:70] if _w else '(\u672a\u77e5)'))
+        return 1
+    _first_case = True
+
     for name, target, inject in CASES:
+        if name in _done_names:
+            continue
         path = os.path.join(ROOT, target)
         if not os.path.exists(path):
             print('  ⏭  %-16s 目标文件不存在(%s)，跳过' % (name, target))
             continue
         orig = open(path, encoding='utf-8').read()
+
+        # 🔴v1155：**注入前先确认基线是干净的。**
+        #
+        #   自证是"改坏 → 跑守卫 → 恢复"。如果**改坏之前守卫就已经报红**
+        #   （上一道的残局没清、或者代码本来就有问题），
+        #   那么"注入后仍然红"这个结果**说明不了任何事** ——
+        #   而脚本会把它读成"注入生效了"，或者反过来把好守卫判成失灵。
+        #
+        #   今天实测撞到：两道本来完好的守卫被误报成"已失灵"，
+        #   我差点去改它们 —— 而它们手动一验就正确报红。
+        #
+        #   所以每道注入前先跑一次：**基线必须绿**，不绿就跳过并说明白，
+        #   而不是拿一个说明不了问题的结果去下结论。
+        # 🔴v1155：**基线只在最开头验一次，不是每道都验。**
+        #
+        #   第一版写成"每道注入前都跑一次守卫"，结果：
+        #     · 每道多花 7 秒 × 48 道 = 白等 5 分多钟
+        #     · 更糟的是**第一道注入的是攻坚笔记**，
+        #       它改完之后（哪怕已经恢复）某些时序下基线仍显示红，
+        #       于是**后面 47 道全部"无法判定"**
+        #
+        #   基线该验的是"开跑前工作区是不是干净的"，
+        #   那是一次性的事实，不需要反复确认。
+
         hurt = inject(orig)
         if hurt is None or hurt == orig:
             print('  ⏭  %-16s 注入样本不适用，跳过（需更新样本）' % name)
             continue
-        bak = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8', suffix='.bak')
-        bak.write(orig); bak.close()
+        # 🔴v1155：**备份放在固定位置，并留一份"正在注入"的标记。**
+        #
+        #   原来备份用的是临时文件、靠 `finally` 恢复 ——
+        #   而进程被 `timeout` 直接杀掉（SIGKILL）时，
+        #   **`finally` 根本不会执行**，坏代码就留在了工作区。
+        #
+        #   今天为此栽了四次：guestId 塞回房间查询、chromium.launch 被改坏、
+        #   hsn-account-uid-changed 被改坏、check_resources 里的注入语句 ——
+        #   其中一处是**产品代码**，会让用户报的"换账号换不了"直接复发。
+        #
+        #   现在：备份写到 `.jarvis_inject_bak/`，同时记一份清单。
+        #   下次启动时先看清单，**上次没恢复的先恢复掉**。
+        _bakdir = os.path.join(ROOT, '.jarvis_inject_bak')
+        os.makedirs(_bakdir, exist_ok=True)
+        _bakpath = os.path.join(_bakdir, os.path.basename(path) + '.bak')
+        open(_bakpath, 'w', encoding='utf-8').write(orig)
+        open(os.path.join(_bakdir, 'PENDING'), 'w', encoding='utf-8').write(
+            os.path.basename(path))
+
+        class _Bak:
+            name = _bakpath
+        bak = _Bak()
         try:
             open(path, 'w', encoding='utf-8').write(hurt)
             red = _run_guards()
@@ -495,9 +656,27 @@ def main():
                                      '注入后正确报红' if bit else '注入后**依然全绿** —— 已失灵'))
             if not bit:
                 dead.append(name)
+            else:
+                _mark_ok(name)
         finally:
-            shutil.copyfile(bak.name, path)
-            os.unlink(bak.name)
+            # ⚠️ 备份可能已经被上一轮的"自动修残局"删掉了 ——
+            #    那时这里会抛 FileNotFoundError，把整个自证带崩。
+            #    **一个"验证守卫会不会咬人"的脚本自己崩掉，比守卫失灵更糟**：
+            #    它会让人以为守卫坏了，去改本来正确的守卫。
+            if os.path.exists(bak.name):
+                shutil.copyfile(bak.name, path)
+            try:
+                if os.path.exists(bak.name): os.unlink(bak.name)
+                _pend = os.path.join(os.path.dirname(bak.name), 'PENDING')
+                if os.path.exists(_pend):
+                    os.unlink(_pend)
+            except Exception:
+                pass
+
+    try:
+        os.unlink(os.path.join(ROOT, '.jarvis_inject_bak', 'RUNNING'))
+    except Exception:
+        pass
 
     if dead:
         print('\n❌ %d 道守卫已失灵（注入故障后仍不报红）:' % len(dead))
