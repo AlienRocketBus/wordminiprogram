@@ -524,6 +524,15 @@ def _inj_auto_dl(s):
     return s.replace(m, inj + m, 1)
 
 
+
+def _inj_dlmaster(s):
+    """把总闸的失败返回拆掉 —— 它就再也拦不住任何东西了。"""
+    m = "    return 1\n"
+    if m not in s:
+        return None
+    return s.replace(m, "    return 0\n", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -587,6 +596,7 @@ CASES = [
     ('启动自检',     'hansen_boot_check_v1156.js',  _inj_boot_check),
     ('存储不可用',   'hansen_backup_bootstrap_v944.js', _inj_storage),
     ('自动下载',     'hansen_backup_v944.js',       _inj_auto_dl),
+    ('防下载总闸', '防下载总闸.py',            _inj_dlmaster),
 ]
 
 

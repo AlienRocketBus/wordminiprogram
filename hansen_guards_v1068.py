@@ -2357,6 +2357,43 @@ def guard_no_auto_download():
             '**服务端一切正常，是我们自己弹的**'
             % (len(risky), risky[0]))
 
+
+def guard_download_master():
+    """防下载总闸必须在，且必须真的查那七条路径。
+
+    用户反复强调这件事：「坚决防止这种情况再次出现，
+    设立一个机制，防止这种情况以后再次出现。」
+
+    `防下载总闸.py` 就是那个机制。这道守卫保证它不会
+    某天被删掉、或者悄悄退化成一个只打印 OK 的空壳。
+
+    > **「打开变下载」是所有 bug 里最致命的一种：
+    > 用户连页面都进不去，我们所有的兜底代码一行都执行不了。**
+    > 所以只能靠"发出去之前就拦住"，不能指望"在页面里补救"。
+    """
+    src = _read('防下载总闸.py') or ''
+    if not src:
+        bad('防下载总闸',
+            '防下载总闸.py 不见了 —— '
+            '那七条能导致"打开变下载"的路径就没人盯了')
+        return
+    for fn, what in (
+        ('check_auto_download', '代码里不点就下载'),
+        ('check_sw', 'SW 把坏响应存下来或发出去'),
+        ('check_pages', '页面里写死 <a download> 或跳 blob:'),
+        ('check_deploy', '部署把杂物/无扩展名文件传上去'),
+        ('check_fallbacks', '兜底层还在不在'),
+    ):
+        if 'def %s(' % fn not in src:
+            bad('防下载总闸', '少了「%s」这一项检查' % what)
+    if 'return 1' not in src:
+        bad('防下载总闸',
+            '总闸从不返回失败 —— 那它拦不住任何东西，等于摆设')
+    gate = _read('jarvis_gate.py') or ''
+    if '防下载总闸.py' not in gate:
+        bad('防下载总闸',
+            '闸门里没有跑它 —— 写了不跑等于没写')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2442,6 +2479,7 @@ GUARDS = [
     ('启动自检',     guard_boot_check),
     ('存储不可用',   guard_storage_unavailable),
     ('自动下载',     guard_no_auto_download),
+    ('防下载总闸', guard_download_master),
 ]
 
 
