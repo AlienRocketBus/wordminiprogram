@@ -304,6 +304,35 @@ console.log('天梯全流程 E2E v1155（真开浏览器）\n');
   await ctx.close();
 }
 
+
+/* ── 🔴v1156：排位开房时不许闪过"房间已经不在了" ────────
+ *
+ * v1155 为了修"自动开房后白屏"，在 `_createForLadder` 里调了 `lobby()`。
+ * 白屏是治好了，但引入了新毛病：
+ * **lobby() 会去拉房间列表，而那一刻我们的房还没建好**，
+ * 于是它先画出一个「房间已经不在了」的错误列表，
+ * 几百毫秒后才被等待屏盖掉。
+ *
+ * 用户等满 20 秒之后看到的第一眼是一句报错 —— 比白屏好不了多少。
+ *
+ * > 修一个问题时引入的新问题，往往比原问题更难发现，
+ * > 因为注意力都在"原来那个治好了没有"上。
+ */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const fn of ['_createForLadder', '_joinForLadder']) {
+    const i = code.indexOf('function ' + fn);
+    const seg = code.slice(i, i + 700);
+    ok(!/\blobby\(\)/.test(seg),
+       `★ ${fn} 不调 lobby() —— ` +
+       '那会先画出一个「房间已经不在了」的错误列表，' +
+       '而用户等满 20 秒后看到的第一眼不该是报错');
+    ok(/classList\.add\('on'\)/.test(seg),
+       `★ ${fn} 只把容器打开 —— 真正需要的只是"让等待屏有地方可画"`);
+  }
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

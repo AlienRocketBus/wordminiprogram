@@ -51,22 +51,52 @@
        HansenCoins   金币（钱没了游戏就没法玩）
        HansenUpgrade 升级（岛屿进度的核心）
        HansenAuth    账号（登录/云存档的入口） */
-  var CORE = [
-    ['HansenCoins', '金币'],
-    ['HansenUpgrade', '升级'],
-    ['HansenAuth', '账号']
+  /* 🔴v1156 第二次修：**不同页面该守的模块不一样。**
+
+     第一版列了 HansenCoins / HansenUpgrade / HansenAuth 一刀切，
+     结果在**对战页**上报「金币、升级 缺失」——
+     而对战页本来就不加载这两个，那是首页的模块。
+
+     这是这道自检第二次误报了（第一次是列了首页没有的 HansenBackup）。
+     两次都是同一个错：**我按"想当然哪些重要"列清单，
+     而不是按"这个页面实际加载了什么"**。
+
+     > 一个天天喊狼来了的警报，等于没有警报。
+
+     改法：**只守"这个页面确实引用了对应脚本"的模块** ——
+     页面加载了 hansen_coin_wallet.js 才要求 HansenCoins 在。
+     没加载就不该要求，这是常识。 */
+  var CORE_MAP = [
+    ['HansenCoins',   '金币', 'hansen_coin_wallet'],
+    ['HansenUpgrade', '升级', 'hansen_upgrade'],
+    ['HansenAuth',    '账号', 'hansen_auth_v1004']
   ];
+
+  /* 这个页面到底加载了哪些脚本 —— 只认它自己引的 */
+  function CORE() {
+    var out = [];
+    try {
+      var srcs = '';
+      var tags = document.getElementsByTagName('script');
+      for (var i = 0; i < tags.length; i++) srcs += (tags[i].getAttribute('src') || '') + ' ';
+      for (var j = 0; j < CORE_MAP.length; j++) {
+        if (srcs.indexOf(CORE_MAP[j][2]) >= 0) out.push(CORE_MAP[j]);
+      }
+    } catch (e) {}
+    return out;
+  }
 
   var CHECK_AT = 6000;   /* 等页面稳定 —— 查太早会误报 defer 模块 */
   var shown = false;
 
   function missing() {
     var out = [];
-    for (var i = 0; i < CORE.length; i++) {
+    var list = CORE();
+    for (var i = 0; i < list.length; i++) {
       try {
-        if (typeof window[CORE[i][0]] === 'undefined') out.push(CORE[i][1]);
+        if (typeof window[list[i][0]] === 'undefined') out.push(list[i][1]);
       } catch (e) {
-        out.push(CORE[i][1]);
+        out.push(list[i][1]);
       }
     }
     return out;

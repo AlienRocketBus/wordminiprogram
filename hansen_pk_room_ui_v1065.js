@@ -1259,14 +1259,58 @@ function doCreate() {
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('开排位房'); } catch (e) {}
     _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
     _ladderRating = Number(rating) || 1000;
-    try { lobby(); } catch (e) {}
+    /* 🔴v1156：**只让容器可见，不画房间列表。**
+
+       v1155 为了修"自动开房后白屏"，这里调了 `lobby()` ——
+       白屏是治好了，但引入了新毛病：
+       **lobby() 会去拉房间列表，而那一刻我们的房还没建好，
+       于是它先画出一个「房间已经不在了」的错误列表**，
+       几百毫秒后才被等待屏盖掉。
+
+       用户在等满 20 秒之后看到的第一眼是一句报错 ——
+       比白屏好不了多少。
+
+       真正需要的只是"把容器打开"，让后面 doCreate 画的
+       等待屏有地方可画。 */
+    try {
+      var _h = host();
+      if (_h) {
+        _h.classList.add('on');
+        if (!_h.querySelector('.pr_wrap')) {
+          _h.innerHTML = '<div class="pr_wrap">'
+            + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
+        }
+      }
+    } catch (e) {}
     doCreate();
   }
   function _joinForLadder(roomId) {
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('进排位房'); } catch (e) {}
     _pickedMode = 'A';
     _fromLadder = true;      /* v1154: 记住这次是排位来的，进不去时好说人话 */
-    try { lobby(); } catch (e) {}
+    /* 🔴v1156：**只让容器可见，不画房间列表。**
+
+       v1155 为了修"自动开房后白屏"，这里调了 `lobby()` ——
+       白屏是治好了，但引入了新毛病：
+       **lobby() 会去拉房间列表，而那一刻我们的房还没建好，
+       于是它先画出一个「房间已经不在了」的错误列表**，
+       几百毫秒后才被等待屏盖掉。
+
+       用户在等满 20 秒之后看到的第一眼是一句报错 ——
+       比白屏好不了多少。
+
+       真正需要的只是"把容器打开"，让后面 doCreate 画的
+       等待屏有地方可画。 */
+    try {
+      var _h = host();
+      if (_h) {
+        _h.classList.add('on');
+        if (!_h.querySelector('.pr_wrap')) {
+          _h.innerHTML = '<div class="pr_wrap">'
+            + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
+        }
+      }
+    } catch (e) {}
     doJoin(roomId, null);
   }
 
