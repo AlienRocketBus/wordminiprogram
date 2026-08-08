@@ -1048,6 +1048,17 @@ function doCreate() {
     try {
       var R = window.HansenPkRecord;
       if (R) {
+        /* v1156: 打完排位把分数传上榜。
+           只在这里传，不主动轮询 —— 没必要给云端加负担。
+           传失败不影响任何事：榜上暂时是旧分而已。 */
+        try {
+          setTimeout(function () {
+            try {
+              if (window.HansenLadderBoard && HansenLadderBoard.push) HansenLadderBoard.push();
+            } catch (e) {}
+          }, 300);
+        } catch (e) {}
+
         rec = R.record({
           result: r.result,
           mode: (_state && _state.mode) || _pickedMode,

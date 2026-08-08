@@ -278,6 +278,19 @@
                 sm.streak >= 2 ? ('当前 🔥 ' + sm.streak + ' 连胜') : '当前无连胜')
       +   '</div></div>')
 
+      /* 🔴v1156 排行榜。
+         原来天梯页只显示"我 1062 分"，**看不到自己排第几** ——
+         而天梯的核心动力恰恰是"我比别人强多少"。
+
+         先画一个占位，数据异步拉回来再填 ——
+         **不让榜单拖慢天梯页的打开**：
+         用户点进来是要打排位的，不是来等榜的。 */
+      + '<div class="ld_card" id="ldBoardCard">'
+      +   '<div class="ld_lbl">🏅 排行榜</div>'
+      +   '<div id="ldBoard" style="color:var(--hpk-dim);font-size:13px;'
+      +     'text-align:center;padding:14px">正在看看大家打得怎么样…</div>'
+      + '</div>'
+
       /* 最近对局 */
       + '<div class="ld_card">'
       +   '<div class="ld_lbl">最近对局</div>'
@@ -286,6 +299,9 @@
              + '还没打过。点上面的按钮开始第一局。</div>')
       + '</div>'
     );
+
+    /* v1156: 异步把榜填上 —— 拿不到就安静降级，天梯照常能用 */
+    renderBoard();
 
     if (q('ldX')) q('ldX').onclick = close;
     if (q('ldGo')) q('ldGo').onclick = startMatching;
@@ -328,6 +344,89 @@
      先找分数接近的现成房；找不到就自己开一间等 ——
      等的过程中**逐步放宽分差**（matchBand），
      既保证一开始尽量公平，又保证不会永远空等。 */
+  /* ── 🔴v1156 排行榜渲染 ────────────────────────────────
+
+     几条刻意的克制：
+
+     · **异步填，不挡住天梯页**
+       用户点进来是要打排位的，不是来等榜的。
+
+     · **拿不到就安静降级**
+       没网 / 没登录 / 云端抽风时，只是这一块显示"暂时看不到"，
+       其余功能照常。**排行榜是锦上添花，
+       不能因为它拿不到就让人打不了排位。**
+
+     · **自己那一行高亮**
+       榜的意义是"我在哪儿"，一眼找不到自己就白做了。
+
+     · **不在前 20 时，单独去数一次名次**
+       只数"比我分高的有几个"，一次 count 比拉全表便宜得多。
+       没有这一步的话，第 21 名看到的就是一个和自己无关的榜。 */
+  function renderBoard() {
+    var box = q('ldBoard');
+    if (!box) return;
+    var B = window.HansenLadderBoard;
+    if (!B) { box.textContent = '排行榜还没就绪'; return; }
+
+    B.fetchTop().then(function (r) {
+      var box2 = q('ldBoard');
+      if (!box2) return;                     /* 用户已经关掉了 */
+      if (!r || !r.ok || !r.list || !r.list.length) {
+        box2.innerHTML = '<div>暂时看不到排行榜</div>'
+          + '<div style="font-size:12px;margin-top:5px;opacity:.75">'
+          + (r && r.reason === 'not-signed-in' ? '登录之后就能看到大家的排名'
+                                               : '可能是网络不太顺，等会儿再看看')
+          + '</div>';
+        return;
+      }
+
+      var me = '';
+      try { me = (JSON.parse(localStorage.getItem('hansen_auth_v1004') || '{}') || {}).uid || ''; }
+      catch (e) {}
+
+      var rows = r.list.map(function (x) {
+        var mine = (x.uid === me);
+        /* 前三名给个牌子 —— 纯数字的榜看着没劲 */
+        var badge = x.rank === 1 ? '🥇' : x.rank === 2 ? '🥈' : x.rank === 3 ? '🥉'
+                  : ('<span style="opacity:.6">' + x.rank + '</span>');
+        return '<div style="display:flex;align-items:center;gap:9px;padding:7px 9px;'
+          + 'border-radius:10px;font-size:13.5px;'
+          + (mine ? 'background:rgba(99,102,241,.18);font-weight:800' : '') + '">'
+          +   '<span style="width:26px;text-align:center;flex:none">' + badge + '</span>'
+          +   '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+          +     esc(x.name) + (mine ? ' <span style="opacity:.8">(你)</span>' : '')
+          +   '</span>'
+          +   '<span style="flex:none;font-variant-numeric:tabular-nums">' + x.rating + '</span>'
+          + '</div>';
+      }).join('');
+
+      box2.style.color = '';
+      box2.style.padding = '2px';
+      box2.style.textAlign = 'left';
+      box2.innerHTML = rows;
+
+      /* 不在前 20 → 单独数一次自己的名次，
+         否则第 21 名看到的是一个和自己无关的榜 */
+      if (!r.myRank && B.myRoughRank) {
+        B.myRoughRank().then(function (m) {
+          var box3 = q('ldBoard');
+          if (!box3 || !m || !m.ok) return;
+          var tip = document.createElement('div');
+          tip.setAttribute('style',
+            'margin-top:9px;padding:8px 9px;border-radius:10px;'
+            + 'background:rgba(99,102,241,.18);font-size:13.5px;font-weight:800;'
+            + 'display:flex;align-items:center;gap:9px');
+          tip.innerHTML = '<span style="width:26px;text-align:center;flex:none;opacity:.6">'
+            + m.rank + '</span><span style="flex:1">你</span>';
+          box3.appendChild(tip);
+        })['catch'](function () {});
+      }
+    })['catch'](function () {
+      var box4 = q('ldBoard');
+      if (box4) box4.textContent = '暂时看不到排行榜';
+    });
+  }
+
   function startMatching() {
     if (!S()) { alert('对战模块还没就绪'); return; }
 
