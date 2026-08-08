@@ -164,7 +164,13 @@ const D = ctx.window.HansenDownloadFix;
   /* ② 坏响应会被原样存进缓存 */
   const iPut = code.indexOf('async function putIfReasonable');
   const segPut = code.slice(iPut, iPut + 700);
-  ok(/fixHtmlType\(response\)/.test(segPut),
+  /* 🔴v1156 更新：**改成只修副本了。**
+     第一版写成 `response = fixHtmlType(response)` —— 把整个变量换掉，
+     而调用方后面还要用这个 response 返回给浏览器，
+     于是缓存写失败时导航直接落到离线兜底页（503），
+     **那时候网络明明是通的、页面明明已经拿到了。**
+     现在只克隆一份、在副本上修、只把副本存进去。 */
+  ok(/fixHtmlType\(response\.clone\(\)\)/.test(segPut),
      '★🔒 **进缓存之前就修 Content-Type** —— ' +
      '原来是"缓存时原样存、取出时才修"，这留了个大洞：' +
      '服务端某次回了坏响应就被**原样存进 Cache Storage**，' +
@@ -173,6 +179,10 @@ const D = ctx.window.HansenDownloadFix;
      '也就是说：**服务端的一次抽风，会被我们自己永久固化下来。**');
   ok(/_isPage/.test(segPut),
      '★🔒 只对页面类请求做这个修正 —— 图片/音频的 Content-Type 不能乱改');
+  ok(/if \(!_toStore\) _toStore = response\.clone\(\);/.test(segPut),
+     '★🔒 **修不成就存原样** —— ' +
+     '存一份 Content-Type 不对的，也好过因为修的过程出错而整个存不进去：' +
+     '取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了');
 
   /* ③ 取出时的兜底要保留 —— 老用户缓存里可能已经有坏数据 */
   ok(/fixHtmlType\(result\.response\)/.test(code),

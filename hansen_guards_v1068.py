@@ -2174,8 +2174,15 @@ def guard_no_poisoned_cache():
 
     # ② 进缓存之前就修
     i_put = code.find('async function putIfReasonable')
+    # 🔴v1156 更新：**改成只修副本了。**
+    #   第一版写成 `response = fixHtmlType(response)` —— 把整个变量换掉，
+    #   而调用方后面还要用这个 response 返回给浏览器，
+    #   于是缓存写失败时导航直接落到离线兜底页（503）——
+    #   **那时候网络明明是通的、页面明明已经拿到了。**
+    #   现在只克隆一份、在副本上修、只把副本存进去。
+
     seg_put = code[i_put:i_put + 900] if i_put >= 0 else ''
-    if 'fixHtmlType(response)' not in seg_put:
+    if 'fixHtmlType(response.clone())' not in seg_put:
         bad('缓存投毒',
             'putIfReasonable 没有在存之前修 Content-Type —— '
             '服务端一次抽风就会被永久固化在用户浏览器里，'

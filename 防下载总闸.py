@@ -111,8 +111,15 @@ def check_sw():
                         ('attachment', 'attachment')):
         if frag not in cond:
             fail('F SW', '判据里没有「%s」—— 这种响应会被浏览器下载' % label)
+    # 🔴v1156 更新：**改成只修副本了。**
+    #   第一版写成 `response = fixHtmlType(response)` —— 把整个变量换掉，
+    #   而调用方后面还要用这个 response 返回给浏览器，
+    #   于是缓存写失败时导航直接落到离线兜底页（503）——
+    #   **那时候网络明明是通的、页面明明已经拿到了。**
+    #   现在只克隆一份、在副本上修、只把副本存进去。
+
     i = code.find('async function putIfReasonable')
-    if i < 0 or 'fixHtmlType(response)' not in code[i:i + 900]:
+    if i < 0 or 'fixHtmlType(response.clone())' not in code[i:i + 900]:
         fail('F SW',
              '进缓存之前没修 Content-Type —— '
              '服务端一次抽风就会被永久固化在用户浏览器里，'

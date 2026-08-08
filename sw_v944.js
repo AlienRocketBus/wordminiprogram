@@ -46,18 +46,35 @@ async function putIfReasonable(cacheName, request, response, maxEntries) {
 
      所以在这里就修 —— 存进去的必须已经是好的。
      取出时的 fixHtmlType 保留，作为老用户缓存里已有坏数据的兜底。 */
-  try {
-    const _u = new URL(request.url, self.location.origin);
-    const _isPage = /\.html?$/i.test(_u.pathname) || _u.pathname === '/' ||
-                    _u.pathname.endsWith('/');
-    if (_isPage) response = fixHtmlType(response);
-  } catch (error) {}
-
   const length = Number(response.headers.get('content-length') || 0);
   if (length && length > 1572864) return false;
   try {
+    /* 🔴v1156：**只在"要存进去的那一份"上修 Content-Type，
+       不动传进来的 response 本身。**
+
+       第一版写成 `response = fixHtmlType(response)` —— 把整个变量换掉了。
+       而调用方后面还要用这个 response 返回给浏览器，
+       于是 body 归属乱掉，**缓存写失败时导航直接落到离线兜底页（503）**，
+       而那时候网络明明是通的、页面明明已经拿到了。
+
+       > 一个"顺手修一下"的动作，如果改了调用方还要用的对象，
+       > 就不再是顺手 —— 它成了副作用。
+
+       改为：克隆一份、在副本上修、只把副本存进去。 */
+    let _toStore = null;
+    try {
+      const _u = new URL(request.url, self.location.origin);
+      const _isPage = /\.html?$/i.test(_u.pathname) || _u.pathname === '/' ||
+                      _u.pathname.endsWith('/');
+      if (_isPage) _toStore = fixHtmlType(response.clone());
+    } catch (error) { _toStore = null; }
+    /* ⚠️ 修不成就存原样 —— **存一份 Content-Type 不对的，
+       也好过因为修的过程出错而整个存不进去**：
+       取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了。 */
+    if (!_toStore) _toStore = response.clone();
+
     const cache = await caches.open(cacheName);
-    await cache.put(request, response.clone());
+    await cache.put(request, _toStore);
     await trim(cacheName, maxEntries);
     return true;
   } catch (error) {
@@ -93,17 +110,29 @@ async function bufferedNavigationResponse(response) {
 
      它比缓存那条路更靠前：**缓存还没轮到，这里就已经把坏头交出去了。**
      之前查了六轮都盯着缓存，漏了这条真正的主路。 */
-  const fixedHeaders = new Headers(response.headers);
-  const ct0 = (fixedHeaders.get('content-type') || '').toLowerCase();
-  const dispo0 = (fixedHeaders.get('content-disposition') || '').toLowerCase();
-  if (ct0 === '' ||
-      ct0.startsWith('application/octet-stream') ||
-      ct0.startsWith('binary/') ||
-      ct0.startsWith('text/plain') ||
-      dispo0.includes('attachment')) {
-    fixedHeaders.set('content-type', 'text/html; charset=utf-8');
-    fixedHeaders.delete('content-disposition');
-  }
+  /* ⚠️ 整段包在 try 里：**修 Content-Type 是锦上添花，
+     它自己出错绝不能把"页面已经拿到了"这件事搞砸。**
+
+     实测踩到过：某些环境里 `new Headers` 不可用，
+     这里一抛错，导航就落到离线兜底页（503）——
+     **而那时候网络明明是通的、页面明明已经下载完了。**
+
+     > 一个"顺手改善"的动作，出错时必须能安静退回原样。 */
+  let fixedHeaders = response.headers;
+  try {
+    const h2 = new Headers(response.headers);
+    const ct0 = (h2.get('content-type') || '').toLowerCase();
+    const dispo0 = (h2.get('content-disposition') || '').toLowerCase();
+    if (ct0 === '' ||
+        ct0.startsWith('application/octet-stream') ||
+        ct0.startsWith('binary/') ||
+        ct0.startsWith('text/plain') ||
+        dispo0.includes('attachment')) {
+      h2.set('content-type', 'text/html; charset=utf-8');
+      h2.delete('content-disposition');
+    }
+    fixedHeaders = h2;
+  } catch (error) {}
 
   return new Response(noBody ? null : bytes, {
     status: response.status,
