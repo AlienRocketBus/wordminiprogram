@@ -717,7 +717,24 @@ function doCreate() {
       if (!_rt || _rt.idx !== idx) return;
       var left = Math.max(0, Math.ceil((_rt.deadline - Date.now()) / 1000));
       var c = q('prClock');
-      if (c) c.textContent = '⏱ ' + left + 's';
+      if (c) {
+        c.textContent = '⏱ ' + left + 's';
+        /* 🔴v1156：**最后 5 秒要看得出来。**
+           原来 19 秒和 2 秒长得一模一样，只有数字在变 ——
+           而抢答赛里"还剩几秒"恰恰是最该让人有感觉的东西。
+           红 + 轻微放大，不加动画帧（省电，也不抢注意力）。 */
+        if (left <= 5 && left > 0) {
+          c.style.color = '#f87171';
+          c.style.fontWeight = '900';
+          c.style.transform = 'scale(1.12)';
+          c.style.display = 'inline-block';
+          c.style.transition = 'transform .18s ease';
+        } else {
+          c.style.color = '';
+          c.style.fontWeight = '';
+          c.style.transform = '';
+        }
+      }
       if (left <= 0 && !_rt.answered) { submitRound(idx, false); return; }
       pollOpponent(idx);
     }, 1000);
@@ -850,9 +867,27 @@ function doCreate() {
           if (_oppWon) _opp += (_mm.firstScore || 100);
         }
         if (_opp !== st.oppScore) {
+          var _gained = _opp > st.oppScore;
           st.oppScore = _opp;
           var _ob = q('prOpp');
-          if (_ob) _ob.textContent = String(_opp);
+          if (_ob) {
+            _ob.textContent = String(_opp);
+            /* 🔴v1156：**对手得分也要跳一下。**
+               不然被反超了都没感觉 —— 而"对手追上来了"
+               恰恰是最该让人紧张的信号。
+               用橙色（不是绿色）：那是对手的分，不是好消息。 */
+            if (_gained) {
+              try {
+                _ob.style.display = 'inline-block';
+                _ob.style.transition = 'transform .16s ease, color .16s ease';
+                _ob.style.transform = 'scale(1.35)';
+                _ob.style.color = '#fb923c';
+                setTimeout(function () {
+                  try { _ob.style.transform = 'scale(1)'; _ob.style.color = ''; } catch (e) {}
+                }, 260);
+              } catch (e) {}
+            }
+          }
         }
       } catch (e) {}
       if (!_rt || _rt.idx !== idx) return;
@@ -918,6 +953,22 @@ function doCreate() {
 
     var after = function (gain, first) {
       st.myScore += gain;
+      /* 🔴v1156：**得分要跳一下。**
+         原来 +100 分是悄悄换个数字，抢答赛里手快抢到那一下
+         是最有成就感的瞬间，不该一点动静都没有。
+         只放大再回弹，不飘字 —— 飘字会挡住下一题。 */
+      try {
+        var _mb = q('prMy');
+        if (_mb && gain > 0) {
+          _mb.style.display = 'inline-block';
+          _mb.style.transition = 'transform .16s ease, color .16s ease';
+          _mb.style.transform = 'scale(1.45)';
+          _mb.style.color = '#4ade80';
+          setTimeout(function () {
+            try { _mb.style.transform = 'scale(1)'; _mb.style.color = ''; } catch (e) {}
+          }, 260);
+        }
+      } catch (e) {}
       /* 🔴v1108 累计本局明细，结算时一起报给战绩 ——
          光有胜负说明不了"我强在哪"，得有速度和正确率。 */
       st.st = st.st || { words: 0, correct: 0, totalMs: 0, firstWins: 0, fastestMs: 0 };
