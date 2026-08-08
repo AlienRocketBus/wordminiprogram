@@ -136,7 +136,59 @@
     } catch (e) {}
   }
 
+  /* 🔴v1156 说清楚后果的确认框 —— 替代 confirm。
+     `confirm` 的两个按钮永远叫"确定/取消"，
+     **而用户真正需要知道的是"点了之后会怎样"**。
+     这里让每个按钮自己说明白要干什么。
+
+     ask({ title, body, yes, no, danger, onYes })
+       yes/no  按钮上写什么（不是"确定/取消"）
+       danger  确认键标红（不可逆的操作用）
+     不选任何默认 —— 破坏性的事不该有默认答案。 */
+  function ask(o) {
+    o = o || {};
+    var done = false;
+    var esc = function (t) {
+      return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c];
+      });
+    };
+    var d = document.createElement('div');
+    d.setAttribute('style',
+      'position:fixed;inset:0;z-index:2147483647;background:rgba(8,12,24,.94);' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'padding:22px;color:#e8eefc;overflow:auto;' +
+      'font-family:system-ui,-apple-system,"PingFang SC",sans-serif');
+    d.innerHTML =
+      '<div style="font-size:18px;font-weight:900;text-align:center">'
+        + esc(o.title || '确认一下') + '</div>' +
+      (o.body ? '<div style="font-size:13.5px;color:#a9b4c7;margin-top:10px;'
+        + 'text-align:center;max-width:320px;line-height:1.85">' + o.body + '</div>' : '') +
+      '<button id="hsnAskYes" style="margin-top:18px;width:100%;max-width:300px;'
+        + 'background:' + (o.danger ? '#991b1b' : 'linear-gradient(135deg,#4f46e5,#4338ca)')
+        + ';color:#fff;border:0;padding:13px 20px;border-radius:13px;'
+        + 'font-size:15px;font-weight:800;cursor:pointer">'
+        + esc(o.yes || '继续') + '</button>' +
+      '<button id="hsnAskNo" style="margin-top:10px;width:100%;max-width:300px;'
+        + 'background:transparent;color:#cbd5e1;border:1px solid #3a4560;'
+        + 'padding:12px 20px;border-radius:13px;font-size:14.5px;cursor:pointer">'
+        + esc(o.no || '先不了') + '</button>';
+    (document.body || document.documentElement).appendChild(d);
+    var fin = function (v) {
+      if (done) return;
+      done = true;
+      try { d.remove(); } catch (e) {}
+      if (v && typeof o.onYes === 'function') { try { o.onYes(); } catch (e) {} }
+      if (!v && typeof o.onNo === 'function') { try { o.onNo(); } catch (e) {} }
+    };
+    var y = document.getElementById('hsnAskYes');
+    var n2 = document.getElementById('hsnAskNo');
+    if (y) y.onclick = function () { fin(true); };
+    if (n2) n2.onclick = function () { fin(false); };
+  }
+
   window.HansenToast = {
+    ask: ask,
     say: function (m, ms) { show(m, '', ms); },
     bad: function (m, ms) { show(m, 'bad', ms); },
     good: function (m, ms) { show(m, 'good', ms); },

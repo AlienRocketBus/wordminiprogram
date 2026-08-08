@@ -201,12 +201,43 @@
       try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
     };
     if (q('kSwitch')) q('kSwitch').onclick = function () {
-      if (!confirm('切换账号会先退出当前账号，确定吗？')) return;
-      A.signOut().then(function () { render(); try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {} });
+      /* 🔴v1156：**孩子最怕的是"我的进度会不会没"，而原文一个字没提。**
+         原来只说"切换账号会先退出当前账号，确定吗？"——
+         没说进度去哪了，也没说能不能换回来。
+         而且 confirm 的按钮永远叫"确定/取消"，
+         点之前根本不知道点了会发生什么。 */
+      var _doSwitch = function () {
+        A.signOut().then(function () { render(); try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {} });
+      };
+      if (window.HansenToast && HansenToast.ask) {
+        HansenToast.ask({
+          title: '换一个账号登录？',
+          body: '这台手机上的进度<b>不会丢</b> —— 已经同步到云端的部分，'
+              + '用原来的账号登回来还在。<br><br>换号之后看到的是新账号的进度。',
+          yes: '好，去登另一个账号',
+          no: '算了，不换了',
+          onYes: _doSwitch
+        });
+      } else if (confirm('换账号？本机进度不会丢，登回原账号还能看到。')) {
+        _doSwitch();
+      }
     };
     if (q('kOut')) q('kOut').onclick = function () {
-      if (!confirm('退出后本机进度仍在，但不再同步到云端。确定退出？')) return;
-      A.signOut().then(render);
+      /* v1156: 同上 —— 说清楚"退出之后我的东西还在不在" */
+      var _doOut = function () { A.signOut().then(render); };
+      if (window.HansenToast && HansenToast.ask) {
+        HansenToast.ask({
+          title: '退出登录？',
+          body: '这台手机上玩到哪儿了<b>都还在</b>，可以接着玩。<br>'
+              + '只是不再往云端同步 —— 换手机就看不到了。<br><br>'
+              + '想找回来，随时用原来的账号登回去就行。',
+          yes: '退出登录',
+          no: '先不退',
+          onYes: _doOut
+        });
+      } else if (confirm('退出后本机进度仍在，但不再同步到云端。确定退出？')) {
+        _doOut();
+      }
     };
     /* 🔴v1108: 天梯排位不再是「敬请期待」—— v1103 已把分数/段位/定级赛做出来，
        v1108 补上实力匹配与战绩页。做了功能没入口等于没做。 */

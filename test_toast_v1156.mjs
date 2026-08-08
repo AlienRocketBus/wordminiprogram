@@ -111,6 +111,41 @@ console.log('页内提示 v1156\n');
   await ctx.close();
 }
 
+
+/* ── 🔴v1156 ask()：说清楚后果的确认框 ──────────────── */
+{
+  const t = fs.readFileSync(ROOT + '/hansen_toast_v1156.js', 'utf8');
+  ok(/function ask\(o\)/.test(t), '★ 有 ask() 替代 confirm');
+  ok(/esc\(o\.yes \|\| '继续'\)/.test(t),
+     '★ **按钮上写要干什么，不是「确定/取消」** —— ' +
+     'confirm 的两个按钮永远叫确定和取消，' +
+     '而用户真正需要知道的是"点了之后会怎样"');
+  ok(/o\.danger \? '#991b1b'/.test(t),
+     '★ 不可逆的操作把确认键标红');
+
+  const k = fs.readFileSync(ROOT + '/hansen_sb_pk_v1022.js', 'utf8');
+  const code = k.replace(/\/\*[\s\S]*?\*\//g, '');
+  const body = (key) => {
+    const i = code.indexOf(key);
+    if (i < 0) return '';
+    let d = 0, j = code.indexOf('{', i), m = j;
+    while (m < code.length) {
+      if (code[m] === '{') d++;
+      else if (code[m] === '}') { d--; if (d === 0) break; }
+      m++;
+    }
+    return code.slice(i, m + 1);
+  };
+  for (const key of ["q('kSwitch').onclick", "q('kOut').onclick"]) {
+    ok(/HansenToast\.ask/.test(body(key)), `★ ${key} 用 ask() 而不是裸 confirm`);
+  }
+  ok(/不会丢/.test(k) && /都还在/.test(k),
+     '★ **说清楚"我的进度会不会没"** —— ' +
+     '孩子最怕的就是这个，而原文一个字没提：' +
+     '只说"切换账号会先退出当前账号，确定吗？"，' +
+     '没说进度去哪了，也没说能不能换回来');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
