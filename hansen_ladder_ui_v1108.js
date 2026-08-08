@@ -436,10 +436,25 @@
       try { me = (JSON.parse(localStorage.getItem('hansen_auth_v1004') || '{}') || {}).uid || ''; }
       catch (e) {}
 
-      var rows = r.list.map(function (x) {
+      /* 🔴v1156：**同分要并列，不能假装有高下。**
+         三个人都 1200 分时，谁前谁后其实是数据库返回顺序决定的 ——
+         给他们分 🥇🥈🥉 是在编造一个不存在的差距。
+         按分数重算名次：同分同名次，下一个跳号（1,1,1,4）。 */
+      var ranked = [], lastRating = null, lastRank = 0;
+      r.list.forEach(function (x, i) {
+        if (x.rating === lastRating) x.rank = lastRank;      /* 同分同名次 */
+        else { x.rank = i + 1; lastRating = x.rating; lastRank = x.rank; }
+        ranked.push(x);
+      });
+
+      var rows = ranked.map(function (x) {
         var mine = (x.uid === me);
-        /* 前三名给个牌子 —— 纯数字的榜看着没劲 */
-        var badge = x.rank === 1 ? '🥇' : x.rank === 2 ? '🥈' : x.rank === 3 ? '🥉'
+        /* 前三名给个牌子 —— 纯数字的榜看着没劲。
+           但**同分并列时不发牌子**：三个"第一名"戴三块金牌很怪，
+           改成显示名次数字，一眼能看出是并列。 */
+        var tied = ranked.filter(function (y) { return y.rank === x.rank; }).length > 1;
+        var badge = tied ? ('<span style="opacity:.7">' + x.rank + '</span>')
+                  : x.rank === 1 ? '🥇' : x.rank === 2 ? '🥈' : x.rank === 3 ? '🥉'
                   : ('<span style="opacity:.6">' + x.rank + '</span>');
         return '<div style="display:flex;align-items:center;gap:9px;padding:7px 9px;'
           + 'border-radius:10px;font-size:13.5px;'
@@ -455,7 +470,14 @@
       box2.style.color = '';
       box2.style.padding = '2px';
       box2.style.textAlign = 'left';
-      box2.innerHTML = rows;
+      /* 🔴v1156：**榜上只有自己时，"第一名"没有意义。**
+         给一个人发金牌有点尴尬 —— 说实话更好，
+         而且"你是第一个"本身就是个不错的说法。 */
+      box2.innerHTML = rows
+        + (ranked.length === 1
+            ? '<div style="font-size:12px;color:var(--hpk-dim);text-align:center;'
+              + 'padding:8px 4px 4px">还没什么人上榜，你是第一个 🎈</div>'
+            : '');
 
       /* 不在前 20 → 单独数一次自己的名次，
          否则第 21 名看到的是一个和自己无关的榜 */
@@ -463,9 +485,19 @@
         B.myRoughRank().then(function (m) {
           var box3 = q('ldBoard');
           if (!box3 || !m || !m.ok) return;
+          /* 🔴v1156：**和上面的榜之间要有分隔。**
+             不然「第 2 名」紧接着「第 88 名」，
+             看着像是名次连着的，而中间其实隔了八十几个人。 */
+          var gap = document.createElement('div');
+          gap.setAttribute('style',
+            'text-align:center;color:var(--hpk-dim);font-size:15px;'
+            + 'letter-spacing:3px;padding:3px 0 1px;opacity:.55');
+          gap.textContent = '···';
+          box3.appendChild(gap);
+
           var tip = document.createElement('div');
           tip.setAttribute('style',
-            'margin-top:9px;padding:8px 9px;border-radius:10px;'
+            'margin-top:2px;padding:8px 9px;border-radius:10px;'
             + 'background:rgba(99,102,241,.18);font-size:13.5px;font-weight:800;'
             + 'display:flex;align-items:center;gap:9px');
           tip.innerHTML = '<span style="width:26px;text-align:center;flex:none;opacity:.6">'

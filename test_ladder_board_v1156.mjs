@@ -225,6 +225,27 @@ async function open(seedBoard) {
      '而且不给反馈的话，被反超了都没感觉');
 }
 
+
+/* ── 🔴v1156 排行榜的四个边界 ──────────────────────── */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_ladder_ui_v1108.js', 'utf8');
+
+  ok(/if \(x\.rating === lastRating\) x\.rank = lastRank/.test(ui),
+     '★ **同分并列** —— 三个人都 1200 分时谁前谁后' +
+     '其实是数据库返回顺序决定的，给他们分 🥇🥈🥉 ' +
+     '是在编造一个不存在的差距');
+  ok(/var tied = /.test(ui),
+     '★ **同分时不发牌子，改显示名次数字** —— ' +
+     '三个「第一名」戴三块金牌很怪，数字一眼能看出是并列');
+  ok(/ranked\.length === 1/.test(ui) && /你是第一个/.test(ui),
+     '★ **榜上只有自己时说实话** —— ' +
+     '给一个人发金牌有点尴尬，「你是第一个」本身就是个不错的说法');
+  ok(/gap\.textContent = '···'/.test(ui),
+     '★ **不在前 20 时要有分隔** —— ' +
+     '不然「第 2 名」紧接着「第 88 名」，' +
+     '看着像名次连着的，而中间其实隔了八十几个人');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
