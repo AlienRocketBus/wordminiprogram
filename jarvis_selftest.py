@@ -559,6 +559,15 @@ def _inj_checklist(s):
     return s.replace(m, "（已删）", 1)
 
 
+
+def _inj_v1156(s):
+    """把"不可逆"那条删掉 —— 复盘就漏掉了最贵的那一课。"""
+    m = "不可逆"
+    if m not in s:
+        return None
+    return s.replace(m, "（已删）", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -626,6 +635,7 @@ CASES = [
     ('线上哨兵',     '.github/workflows/download-sentinel.yml', _inj_sentinel),
     ('探测要像人', '发版前_线上体检.py',      _inj_probe),
     ('下结论清单', '下结论之前.md',            _inj_checklist),
+    ('v1156复盘',    '事故复盘_v1156_猜错四次.md', _inj_v1156),
 ]
 
 

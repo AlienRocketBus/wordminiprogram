@@ -2524,6 +2524,39 @@ def guard_conclusion_checklist():
         if key not in body:
             bad('下结论清单', '清单里缺少「%s」那一条' % key)
 
+
+def guard_incident_v1156():
+    """v1156 那份事故复盘必须在，且必须指出错在哪。
+
+    那次我连着给出四个错误结论，**差一步就让用户去买一个不需要的域名**。
+    根因是我的探测工具只带了 User-Agent，
+    被腾讯云反爬当成爬虫，才回的 `Content-Disposition: attachment`。
+
+    这份复盘记的不是"那个 bug 怎么修"，
+    而是**"我下结论的方式错在哪"** —— 后者才会重复发生。
+
+    > 我的错误是可逆的，用户的代价往往不可逆。
+    > 所以在让用户动手之前，该比平时更确定一点。
+    """
+    body = _read('事故复盘_v1156_猜错四次.md') or ''
+    if not body:
+        bad('v1156复盘',
+            '事故复盘_v1156_猜错四次.md 不见了 —— '
+            '那是"连着猜错四次、差点让用户花冤枉钱"换来的')
+        return
+    for key, why in (
+        ('怀疑自己的工具', '第一条：探测工具本身也是被测对象'),
+        ('不可逆', '第三条：建议不可逆的代价时要提高证据标准'),
+        ('推断说成了事实', '第四条：分清实测/判断/猜测'),
+    ):
+        if key not in body:
+            bad('v1156复盘', '复盘里缺少「%s」—— %s' % (key, why))
+    prog = _read('当前进度.md') or ''
+    if '事故复盘_v1156' not in prog:
+        bad('v1156复盘',
+            '当前进度.md 里没有指向这份复盘 —— '
+            '下一次对话第一眼看不到，等于没写')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2614,6 +2647,7 @@ GUARDS = [
     # v1156
     ('探测要像人', guard_probe_looks_real),
     ('下结论清单', guard_conclusion_checklist),
+    ('v1156复盘',    guard_incident_v1156),
 ]
 
 
