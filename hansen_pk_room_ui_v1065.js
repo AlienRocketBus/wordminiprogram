@@ -251,13 +251,54 @@
     var ci = q('prCode');
     var btn = q('prJoinCode');
     var code = String((ci && ci.value) || '').trim().toUpperCase();
-    if (!code) { alert('先输入好友给你的 4 位房间码'); return; }
+
+    /* 🔴v1156：**房间码输错了不该用 alert 报。**
+
+       原来三处都是 `alert(...)`，在手机上有几个实在的毛病：
+         · 微信/Safari 里样式各不相同，和 App 完全脱节
+         · 会打断输入焦点 —— 用户关掉弹窗还得再点一次输入框重输
+         · 连续弹几次后，有些浏览器会给"阻止此页面再弹窗"的选项，
+           **用户一旦勾了，之后所有错误提示他都看不到了**
+
+       而这个提示恰恰该紧贴着输入框 —— 那才是他要改的地方。
+       改为在输入框下面显示一行红字，重新输入时自动消失。 */
+    var say = function (msg) {
+      try {
+        var box = q('prCodeTip');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'prCodeTip';
+          box.setAttribute('style',
+            'color:#f87171;font-size:12.5px;margin:6px 2px 0;line-height:1.6');
+          if (ci && ci.parentNode) ci.parentNode.parentNode.insertBefore(
+            box, ci.parentNode.nextSibling);
+        }
+        box.textContent = msg;
+        /* 一改就把提示撤掉 —— 留着旧错误会让人以为改了也没用 */
+        if (ci && !ci._tipBound) {
+          ci._tipBound = 1;
+          ci.addEventListener('input', function () {
+            var t = q('prCodeTip'); if (t) t.textContent = '';
+          });
+        }
+      } catch (e) {}
+    };
+
+    if (!code) { say('先输入好友给你的 4 位房间码'); if (ci) ci.focus(); return; }
     if (btn) { btn.disabled = true; btn.textContent = '找房中…'; }
     var restore = function () { if (btn) { btn.disabled = false; btn.textContent = '进房'; } };
     S().findByCode(code).then(function (r) {
-      if (!r.ok) { restore(); alert(r.reason || '没找到这间房'); return; }
+      if (!r.ok) {
+        restore();
+        say(r.reason || '没找到这间房 —— 房间码可能过期了，让朋友再发一次');
+        if (ci) { ci.focus(); try { ci.select(); } catch (e) {} }
+        return;
+      }
       doJoin(r.roomId, btn);
-    })['catch'](function (e) { restore(); alert(String((e && e.message) || e)); });
+    })['catch'](function (e) {
+      restore();
+      say(String((e && e.message) || e) || '网络不太顺，再试一次');
+    });
   }
 
   function chooseMode(onPick) {
