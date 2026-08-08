@@ -137,14 +137,27 @@ function mkRecord() {
 
   const iCreate = code.indexOf('function _createForLadder');
   const segCreate = code.slice(iCreate, iCreate + 400);
-  ok(/lobby\(\)/.test(segCreate) && segCreate.indexOf('lobby()') < segCreate.indexOf('doCreate()'),
-     '★ _createForLadder **先打开界面再建房** —— ' +
-     '否则房建好了没有界面在等它，用户看到白屏');
+  /* 🔴v1156 更新：**从"调 lobby()"改成"只把容器打开"。**
+
+     v1155 这条断言要求先调 `lobby()` —— 那时是为了修白屏。
+     但 v1156 实测发现：`lobby()` 会去拉房间列表，
+     而那一刻我们的房还没建好，
+     **于是它先画出一个「房间已经不在了」的错误列表**，
+     几百毫秒后才被等待屏盖掉。
+
+     用户等满 20 秒之后看到的第一眼是一句报错 —— 比白屏好不了多少。
+
+     真正需要的只是"把容器打开"，让后面 doCreate 画的等待屏有地方可画。 */
+  ok(/classList\.add\('on'\)/.test(segCreate),
+     '★ _createForLadder **只把容器打开，不调 lobby()** —— ' +
+     'lobby() 会先画出「房间已经不在了」的错误列表');
+  ok(!/\blobby\(\)/.test(segCreate),
+     '★ 而且确实不再调 lobby()');
 
   const iJoin = code.indexOf('function _joinForLadder');
   const segJoin = code.slice(iJoin, iJoin + 300);
-  ok(/lobby\(\)/.test(segJoin) && segJoin.indexOf('lobby()') < segJoin.indexOf('doJoin('),
-     '★ _joinForLadder 同样先打开界面 —— 进去了也得看得见');
+  ok(/classList\.add\('on'\)/.test(segJoin),
+     '★ _joinForLadder 同样只把容器打开 —— 进去了也得看得见，但别画错误列表');
 
   /* 建房成功后必须画等待屏 */
   ok(/waiting\(r\.roomId/.test(code),
