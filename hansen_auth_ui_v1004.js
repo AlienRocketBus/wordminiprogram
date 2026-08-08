@@ -214,15 +214,22 @@
             /* 🔴v1029: 把双方真实规模摆出来, 让用户看着数字选, 而不是盲选 */
             var L = (s.local || {});
             var cloudWhen = s.cloudUpdatedAt ? new Date(s.cloudUpdatedAt).toLocaleString() : '时间未知';
-            var keepCloud = confirm(
-              '这个账号在云端已有进度，本机也有进度，需要你选一份保留：\n\n' +
-              '【本机】' + (L.islands || 0) + ' 个岛 · 已学 ' + (L.learned || 0) + ' 个单词\n' +
-              '【云端】最后保存于 ' + cloudWhen + '\n\n' +
-              '点「确定」= 用云端覆盖本机\n' +
-              '点「取消」= 用本机覆盖云端\n\n' +
-              '（另一份会被替换，请对照上面的数字想清楚）');
+            /* 🔴v1156：**这是全项目最危险的一个对话框，不该用 confirm。**
+
+               原来写成：
+                 点「确定」= 用云端覆盖本机
+                 点「取消」= 用本机覆盖云端
+
+               `confirm` 只有两个按钮，而且**「取消」这个词的意思是
+               "我不要做这件事"** —— 用户下意识点它想退出，
+               结果触发的是"用本机覆盖云端"，**云端存档当场没了**。
+
+               这类"两个都是破坏性操作"的选择，
+               **必须给两个写清楚的按钮，外加一个真正的退出**。 */
             var CS = window.HansenCloudSave;
             if (!CS) return;
+            pickProgress(L, cloudWhen, function (keepCloud) {
+              if (keepCloud === null) return;          /* 用户选了"先不弄" */
             if (keepCloud) {
               CS.restoreWithKey(CS.ensureKey())
                 .then(function(){ msg('已恢复云端进度，正在载入…', 'ok');
@@ -233,6 +240,7 @@
                 .then(function(){ msg('已用本机进度覆盖云端。', 'ok'); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             }
+            });
           }, 700);
         }
         setTimeout(function () { render(); notify(); }, 900);
@@ -261,6 +269,75 @@
   function notify() {
     try { document.dispatchEvent(new CustomEvent('hsn-auth-changed')); } catch (e) {}
   }
+
+  /* 🔴v1156 选保留哪份进度 —— 两个都是破坏性操作，必须写清楚。
+
+     原来用的是 `confirm`：确定=用云端覆盖本机，取消=用本机覆盖云端。
+     **「取消」这个词的意思是"我不要做这件事"** ——
+     用户下意识点它想退出，结果触发的是覆盖云端，存档当场没了。
+
+     现在：两个按钮各自写明白"保留哪份、另一份会没",
+     外加一个真正的"先不弄"。
+     默认不预选任何一个 —— 这种事不该有默认答案。 */
+  function pickProgress(local, cloudWhen, cb) {
+    var done = false;
+    var finish = function (v) {
+      if (done) return;
+      done = true;
+      try { d.remove(); } catch (e) {}
+      try { cb(v); } catch (e) {}
+    };
+    var esc2 = function (t) {
+      return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c];
+      });
+    };
+    var d = document.createElement('div');
+    d.setAttribute('style',
+      'position:fixed;inset:0;z-index:2147483647;background:rgba(8,12,24,.95);' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'padding:22px;color:#e8eefc;overflow:auto;' +
+      'font-family:system-ui,-apple-system,"PingFang SC",sans-serif');
+    d.innerHTML =
+      '<div style="font-size:19px;font-weight:900;text-align:center">两边都有进度</div>' +
+      '<div style="font-size:13.5px;color:#a9b4c7;margin-top:9px;text-align:center;' +
+        'max-width:330px;line-height:1.8">' +
+        '你要留下哪一份？<b style="color:#fca5a5">另一份会被覆盖掉，没法找回。</b></div>' +
+
+      '<button id="hsnKeepLocal" style="margin-top:18px;width:100%;max-width:330px;' +
+        'background:#1e293b;color:#fff;border:2px solid #4f46e5;border-radius:14px;' +
+        'padding:14px 16px;text-align:left;cursor:pointer">' +
+        '<div style="font-size:15px;font-weight:800">📱 留这台手机上的</div>' +
+        '<div style="font-size:12.5px;color:#a9b4c7;margin-top:5px;line-height:1.7">' +
+          esc2(local && local.islands || 0) + ' 个岛 · 已学 ' +
+          esc2(local && local.learned || 0) + ' 个单词<br>' +
+          '<span style="color:#fca5a5">云端那份会被覆盖</span></div>' +
+      '</button>' +
+
+      '<button id="hsnKeepCloud" style="margin-top:11px;width:100%;max-width:330px;' +
+        'background:#1e293b;color:#fff;border:2px solid #4f46e5;border-radius:14px;' +
+        'padding:14px 16px;text-align:left;cursor:pointer">' +
+        '<div style="font-size:15px;font-weight:800">☁️ 留云端的</div>' +
+        '<div style="font-size:12.5px;color:#a9b4c7;margin-top:5px;line-height:1.7">' +
+          '最后保存于 ' + esc2(cloudWhen || '未知时间') + '<br>' +
+          '<span style="color:#fca5a5">这台手机上的会被覆盖</span></div>' +
+      '</button>' +
+
+      '<button id="hsnKeepNone" style="margin-top:15px;background:transparent;color:#a9b4c7;' +
+        'border:1px solid #3a4560;padding:10px 22px;border-radius:12px;' +
+        'font-size:13.5px;cursor:pointer">先不弄，我再想想</button>' +
+      '<div style="font-size:11.5px;color:#7c8798;margin-top:9px;text-align:center;' +
+        'max-width:320px;line-height:1.7">不选也没关系，两份都还在，' +
+        '下次登录还会问你。</div>';
+    (document.body || document.documentElement).appendChild(d);
+    var bl = document.getElementById('hsnKeepLocal');
+    var bc = document.getElementById('hsnKeepCloud');
+    var bn = document.getElementById('hsnKeepNone');
+    if (bl) bl.onclick = function () { finish(false); };   /* 留本机 */
+    if (bc) bc.onclick = function () { finish(true); };    /* 留云端 */
+    if (bn) bn.onclick = function () { finish(null); };    /* 先不弄 */
+  }
+
 
   function render() {
     var el = host();
