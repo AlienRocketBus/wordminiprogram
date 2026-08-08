@@ -274,9 +274,24 @@
       +     kv('最快一次', sm.fastestSecs + '<span class="ld_vs">秒</span>', '你的巅峰手速')
       +     kv('正确率', sm.accuracy + '<span class="ld_vs">%</span>',
                 sm.correct + ' / ' + sm.words + ' 个词')
-      +     kv('最高连胜', sm.bestStreak + '<span class="ld_vs">连</span>',
-                sm.streak >= 2 ? ('当前 🔥 ' + sm.streak + ' 连胜') : '当前无连胜')
+      /* 🔴v1156：这一格原来把"最高连胜"和"当前连胜"两个数字挤在一起，
+         同一件事说了两遍，占一整格却没多给信息。
+         改为：**正在连胜时就报当前的**（那是此刻最有意思的数字），
+         没在连胜时才退回报历史最高。 */
+      +     (sm.streak >= 2
+              ? kv('当前连胜', '🔥 ' + sm.streak + '<span class="ld_vs">连</span>',
+                   '历史最高 ' + sm.bestStreak + ' 连')
+              : kv('最高连胜', sm.bestStreak + '<span class="ld_vs">连</span>',
+                   sm.bestStreak > 0 ? '再赢 2 局重新点燃 🔥' : '还没连胜过'))
       +   '</div></div>')
+
+      /* 🔴v1156 升段进度。
+         原来只显示"工蜂 1062 分" —— 一个孤零零的数字，
+         **不知道离下一段还差多远，也就没有"再打两局就能升"的推力**。
+         段位的意义不只是贴个标签，是给一个**看得见的下一步**。
+
+         已经是最高段就不画 —— 一个永远填不满的条只会让人困惑。 */
+      + nextTierBlock(sm)
 
       /* 🔴v1156 排行榜。
          原来天梯页只显示"我 1062 分"，**看不到自己排第几** ——
@@ -362,6 +377,42 @@
      · **不在前 20 时，单独去数一次名次**
        只数"比我分高的有几个"，一次 count 比拉全表便宜得多。
        没有这一步的话，第 21 名看到的就是一个和自己无关的榜。 */
+  /* ── 🔴v1156 升段进度条 ──────────────────────────── */
+  function nextTierBlock(sm) {
+    try {
+      if (!sm || !sm.placed) return '';          /* 没定级不谈升段 */
+      var L = window.HansenSbLadder;
+      if (!L || !L.nextTierOf) return '';
+      var nx = L.nextTierOf(sm.rating);
+      if (!nx) {
+        /* 已经封顶 —— 说句实话，别画一个永远满不了的条 */
+        return '<div class="ld_card" style="text-align:center;padding:13px">'
+          + '<div style="font-size:14px;font-weight:800">🌟 已经是最高段位</div>'
+          + '<div style="font-size:12.5px;color:var(--hpk-dim);margin-top:4px">'
+          + '接下来就是守住它了</div></div>';
+      }
+      var pct = Math.round(nx.progress * 100);
+      return '<div class="ld_card" style="padding:13px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;'
+        +   'font-size:13.5px;margin-bottom:8px">'
+        +   '<span>距离 <b>' + nx.icon + ' ' + esc(nx.name) + '</b></span>'
+        +   '<span style="font-weight:800">还差 ' + nx.need + ' 分</span>'
+        + '</div>'
+        + '<div style="height:9px;border-radius:99px;background:rgba(255,255,255,.14);'
+        +   'overflow:hidden">'
+        +   '<div style="height:100%;width:' + pct + '%;border-radius:99px;'
+        +     'background:linear-gradient(90deg,#6366f1,#a855f7);'
+        +     'transition:width .5s ease"></div>'
+        + '</div>'
+        /* 给一句"还要打几局" —— 比"还差 138 分"更好懂。
+           一局赢大约 +18 分，取整往上算，不夸大。 */
+        + '<div style="font-size:12.5px;color:var(--hpk-dim);margin-top:7px;text-align:center">'
+        +   '大约再赢 ' + Math.max(1, Math.ceil(nx.need / 18)) + ' 局'
+        + '</div>'
+        + '</div>';
+    } catch (e) { return ''; }
+  }
+
   function renderBoard() {
     var box = q('ldBoard');
     if (!box) return;

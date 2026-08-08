@@ -32,6 +32,35 @@
   function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
   /* 段位查询：返回段位对象 + 段内进度 */
+  /* 🔴v1156：**下一段还差多少。**
+
+     天梯页原来只显示"工蜂 1062 分" —— 一个孤零零的数字，
+     **不知道离下一段还差多远，也就没有"再打两局就能升"的推力**。
+
+     段位的意义不只是给你贴个标签，是给你一个**看得见的下一步**。
+
+     返回 null 表示已经是最高段（那时候不该再画进度条 ——
+     一个永远填不满的条只会让人困惑）。 */
+  function nextTierOf(rating) {
+    var r = Number(rating) || 0;
+    for (var i = 0; i < TIERS.length; i++) {
+      if (r < TIERS[i].min) {
+        var prev = TIERS[i - 1] || TIERS[0];
+        var span = TIERS[i].min - prev.min;
+        return {
+          name: TIERS[i].name,
+          icon: TIERS[i].icon,
+          need: TIERS[i].min - r,                     /* 还差多少分 */
+          from: prev.min,
+          to: TIERS[i].min,
+          /* 这一段走了多少 —— 0~1，给进度条用 */
+          progress: span > 0 ? Math.max(0, Math.min(1, (r - prev.min) / span)) : 0
+        };
+      }
+    }
+    return null;                                       /* 已经是最高段 */
+  }
+
   function tierOf(rating) {
     var r = clamp(num(rating, 1000), RATING_MIN, RATING_MAX);
     var idx = 0;
@@ -123,6 +152,7 @@
   }
 
   window.HansenSbLadder = {
+    nextTierOf: nextTierOf,
     TIERS: TIERS.slice(),
     PLACEMENT_GAMES: PLACEMENT_GAMES,
     LOSS_DAMPING: LOSS_DAMPING,

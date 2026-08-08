@@ -145,6 +145,37 @@ async function open(seedBoard) {
   await ctx.close();
 }
 
+
+/* ── 🔴v1156 另外两处改进 ────────────────────────────── */
+{
+  const L = fs.readFileSync(ROOT + '/hansen_sb_ladder_v1002.js', 'utf8');
+  const ui = fs.readFileSync(ROOT + '/hansen_ladder_ui_v1108.js', 'utf8');
+
+  /* ① 升段进度 */
+  ok(/function nextTierOf/.test(L),
+     '★ 段位模块能算「离下一段还差多少」');
+  ok(/nextTierOf: nextTierOf/.test(L),
+     '★ 而且导出了 —— 算了不导出等于没算');
+  ok(/return null;\s*\/\* 已经是最高段|return null;/.test(L),
+     '★ **最高段返回 null** —— 一个永远填不满的进度条只会让人困惑');
+  ok(/function nextTierBlock/.test(ui),
+     '★ 天梯页画了升段进度条');
+  ok(/大约再赢 /.test(ui),
+     '★ **给一句「还要打几局」** —— 比「还差 138 分」更好懂');
+  ok(/已经是最高段位/.test(ui),
+     '★ 封顶时说实话，不画假进度');
+
+  /* ② 连胜那一格不再重复 */
+  ok(/sm\.streak >= 2\s*\?\s*kv\('当前连胜'/.test(ui),
+     '★ **正在连胜时报当前的** —— 那是此刻最有意思的数字');
+  ok(/kv\('最高连胜'/.test(ui),
+     '★ 没在连胜时才退回报历史最高');
+  ok(/重新点燃/.test(ui),
+     '★ 断了连胜时给一句「再赢 2 局重新点燃」—— ' +
+     '原来那一格把两个数字挤在一起，同一件事说了两遍，' +
+     '占一整格却没多给信息');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
