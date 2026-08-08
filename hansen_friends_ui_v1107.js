@@ -366,17 +366,49 @@
     var ci = q('frCid');
     var btn = q('frAdd');
     var cid = String((ci && ci.value) || '').trim();
-    if (!cid) { alert('先输入对方的竞赛 ID 数字'); return; }
+
+    /* 🔴v1156：**加好友失败不该用 alert 报。**
+
+       和房间码那处同型。alert 在手机上的毛病：
+         · 会打断输入焦点 —— 关掉弹窗还得再点一次输入框重输
+         · 微信/Safari 里样式各不相同，和 App 完全脱节
+         · 连续弹几次后，有些浏览器会给"阻止此页面再弹窗"的选项，
+           **用户一旦勾了，之后所有错误提示他都看不到了**
+
+       提示该紧贴着输入框 —— 那才是他要改的地方。 */
+    var say = function (msg, good) {
+      try {
+        var box = q('frCidTip');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'frCidTip';
+          box.setAttribute('style', 'font-size:12.5px;margin:6px 2px 0;line-height:1.6');
+          if (ci && ci.parentNode) ci.parentNode.parentNode.insertBefore(
+            box, ci.parentNode.nextSibling);
+        }
+        box.style.color = good ? '#4ade80' : '#f87171';
+        box.textContent = msg;
+        if (ci && !ci._tipBound) {
+          ci._tipBound = 1;
+          ci.addEventListener('input', function () {
+            var t = q('frCidTip'); if (t) t.textContent = '';
+          });
+        }
+      } catch (e) {}
+    };
+
+    if (!cid) { say('先输入对方的竞赛 ID 数字'); if (ci) ci.focus(); return; }
     if (btn) { btn.disabled = true; btn.textContent = '添加中…'; }
     F().addFriend(cid).then(function (r) {
       if (btn) { btn.disabled = false; btn.textContent = '加好友'; }
-      if (!r.ok) { alert(r.reason || '加不上'); return; }
+      if (!r.ok) { say(r.reason || '加不上 —— 检查一下竞赛 ID 对不对');
+        if (ci) { ci.focus(); try { ci.select(); } catch (e) {} } return; }
       if (ci) ci.value = '';
-      alert('已加 ' + r.name + ' 为好友');
+      say('✅ 已加 ' + r.name + ' 为好友', true);
       refresh();
     })['catch'](function (e) {
       if (btn) { btn.disabled = false; btn.textContent = '加好友'; }
-      alert(String((e && e.message) || e));
+      say(String((e && e.message) || e) || '网络不太顺，再试一次');
     });
   }
 

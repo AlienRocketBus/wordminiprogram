@@ -217,7 +217,26 @@
   function open() {
     closePeers();
     var sm = R() ? R().summary() : null;
-    if (!sm) { alert('战绩模块还没就绪，稍等一下'); return; }
+    /* 🔴v1156：**"模块还没就绪"用 alert 报最没道理。**
+       这种情况用户什么也做不了，弹个窗让他点"确定"毫无意义 ——
+       他只会更困惑："确定什么？"
+       改成在页面上说清楚，并给一个真能解决问题的动作。 */
+    if (!sm) {
+      paint('<div class="ld_top"><button aria-label="关闭" class="ld_x" id="ldX">×</button>'
+        + '<div class="ld_h">🏆 天梯排位</div></div>'
+        + '<div style="text-align:center;padding:26px 12px">'
+        +   '<div style="font-size:40px">⏳</div>'
+        +   '<div style="font-size:15px;font-weight:800;margin-top:10px">还在准备中</div>'
+        +   '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
+        +     '战绩还没读出来，多半是刚打开页面。<br>等一两秒再点一次就好。</div>'
+        +   '<button class="ld_btn" id="ldRetryOpen" style="margin-top:16px">再试一次</button>'
+        + '</div>');
+      var _rb = q('ldRetryOpen');
+      if (_rb) _rb.onclick = function () { setTimeout(open, 300); };
+      var _cx = q('ldX');
+      if (_cx) _cx.onclick = close;
+      return;
+    }
 
     var t = sm.tier;
     var need = (L() && L().PLACEMENT_GAMES) || 5;
@@ -512,7 +531,19 @@
   }
 
   function startMatching() {
-    if (!S()) { alert('对战模块还没就绪'); return; }
+    /* v1156: 同上 —— 说清楚 + 给个能点的，比弹窗强 */
+    if (!S()) {
+      var _b = q('ldGo');
+      if (_b) {
+        _b.disabled = true;
+        _b.textContent = '对战模块还在加载…';
+        setTimeout(function () {
+          try { _b.disabled = false; _b.textContent = '⚡ 开始排位（找实力差不多的对手）'; }
+          catch (e) {}
+        }, 2500);
+      }
+      return;
+    }
 
     /* 🔴v1154：**防重入 —— 手快点两下会把排位彻底废掉。**
 
