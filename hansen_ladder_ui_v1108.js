@@ -183,6 +183,7 @@
     a11yOn(el, close);
   }
   function close() {
+    try { setTimeout(refreshEntry, 60); } catch (e) {}
     a11yOff();
     if (_cancel) { try { _cancel(); } catch (e) {} _cancel = null; }
     /* v1155: 上哨 —— 接下来这一串如果哪一步废了，看门狗会把人救出来 */
@@ -647,5 +648,46 @@
     tick();
   }
 
-  window.HansenLadderUI = { open: open, close: close };
+  /* ── 🔴v1156 入口卡片显示"我现在什么水平" ──────────────
+
+     天梯入口原来是一段写死的 HTML：
+     「系统按分数匹配对手，赢了涨分升段。
+       幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。」
+
+     第一次看有用，**第二次之后就是一堆占位的字** ——
+     而一个已经打过的人站在入口前，最想知道的是
+     **"我现在什么水平"**，不是"这个玩法怎么算分"。
+
+     所以：没打过 → 留着规则；打过了 → 换成成绩。
+     只改描述那一行，标题和图标不动（那是入口的身份）。 */
+  function refreshEntry() {
+    try {
+      var card = document.getElementById('pkLadder');
+      if (!card) return;
+      var d = card.querySelector('.pk_d');
+      if (!d) return;
+      var R = window.HansenPkRecord;
+      if (!R || !R.summary) return;
+      var sm = R.summary();
+      if (!sm || !sm.total) return;            /* 没打过：规则原样留着 */
+
+      if (!sm.placed) {
+        var left = Math.max(1, 3 - (sm.placementGames || 0));
+        d.textContent = '定级赛还差 ' + left + ' 局，打完就知道你在什么段位。';
+        return;
+      }
+      var t = sm.tier || {};
+      var line = (t.emoji || '🐝') + ' ' + (t.name || '工蜂') + ' · ' + sm.rating + ' 分';
+      if (sm.streak >= 2) line += ' · 🔥 ' + sm.streak + ' 连胜';
+      d.textContent = line + '　已打 ' + sm.total + ' 局 · 胜率 ' + sm.winRate + '%';
+    } catch (e) {}
+  }
+
+  try {
+    /* 页面稳定后刷一次；关掉天梯页回来时再刷一次（分数可能变了） */
+    if (document.readyState === 'complete') setTimeout(refreshEntry, 800);
+    else window.addEventListener('load', function () { setTimeout(refreshEntry, 800); });
+  } catch (e) {}
+
+  window.HansenLadderUI = { open: open, close: close, _refreshEntryForTest: refreshEntry };
 })();
