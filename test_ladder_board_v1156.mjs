@@ -268,6 +268,32 @@ async function open(seedBoard) {
      '他点这个按钮就是这个意思');
 }
 
+
+/* ── 🔴v1156 房间列表：房主水平 ─────────────────────── */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/function tierText/.test(code),
+     '★ **排位房不能全显示「未定级」** —— ' +
+     '列表读的是 hostTier（开房时手填的），' +
+     '而天梯自动开的房传的是 hostRating（一个分数），' +
+     '于是所有排位房都掉进 `|| 未定级` 那个兜底里。' +
+     '用户在列表里看到一排「未定级」，判断不出该进谁的房 —— ' +
+     '而"对手大概什么水平"正是他点进去之前最想知道的');
+  ok(/hostTier\) return x\.hostTier/.test(code),
+     '★ 有 hostTier 优先用它（自由房手填的那种）');
+  ok(/L\.tierOf\(r\)/.test(code),
+     '★ 只有分数时按分数算段位');
+  ok(/return '未定级'/.test(code),
+     '★ 两个都没有才说未定级');
+
+  ok(/「➕ 开一间公开房」/.test(ui),
+     '★ **空列表的提示要和按钮名字对上** —— ' +
+     '原来写「点上面的「自己开一间」」，而按钮实际叫「➕ 开一间公开房」，' +
+     '新用户会照着字去找一个不存在的按钮');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

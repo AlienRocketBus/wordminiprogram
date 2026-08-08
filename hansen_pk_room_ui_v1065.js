@@ -149,6 +149,23 @@
   }
 
   /* ── 屏 1：房间列表 ── */
+  /* v1156: 房主水平怎么显示 —— 先看段位名，再看分数，都没有才说未定级 */
+  function tierText(x) {
+    try {
+      if (x && x.hostTier) return x.hostTier;
+      var r = Number(x && x.hostRating);
+      if (isFinite(r) && r > 0) {
+        var L = window.HansenSbLadder;
+        if (L && L.tierOf) {
+          var t = L.tierOf(r);
+          if (t && t.name) return (t.icon || '') + ' ' + t.name + ' · ' + Math.round(r) + ' 分';
+        }
+        return Math.round(r) + ' 分';
+      }
+    } catch (e) {}
+    return '未定级';
+  }
+
   function lobby(err) {
     paint(
       '<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
@@ -198,12 +215,21 @@
       if (!r.ok) { box.innerHTML = errBlock(r); wireErr(); return; }
       var rooms = (r.rooms || []).filter(function (x) { return !x.mine; });
       if (!rooms.length) {
-        box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「自己开一间」，等别人来打。</div>';
+        box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间公开房」，等别人来打。</div>';
         return;
       }
       box.innerHTML = rooms.map(function (x) {
         return '<div class="pr_room"><div class="n"><b>' + esc(x.hostName) + '</b>'
-          + '<span>' + esc(x.hostTier || '未定级') + ' · ' + x.wordCount + ' 个词 · '
+          /* 🔴v1156：**排位房全显示「未定级」是错的。**
+             列表读的是 `hostTier`（开房时手填的），
+             而天梯自动开的房传的是 `hostRating`（一个分数）——
+             于是所有排位房都掉进 `|| '未定级'` 那个兜底里。
+
+             用户在列表里看到一排「未定级」，**判断不出该进谁的房** ——
+             而"对手大概什么水平"正是他点进去之前最想知道的。
+
+             有分数就按分数算段位；两个都没有才说未定级。 */
+          + '<span>' + esc(tierText(x)) + ' · ' + x.wordCount + ' 个词 · '
           + (x.ageSec < 60 ? x.ageSec + ' 秒前开' : Math.round(x.ageSec / 60) + ' 分钟前开') + '</span></div>'
           + '<button data-rid="' + esc(x.id) + '">进去打</button></div>';
       }).join('');
