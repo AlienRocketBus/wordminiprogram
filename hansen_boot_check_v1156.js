@@ -111,7 +111,7 @@
       d.id = 'hsnBootBad';
       d.setAttribute('style',
         'position:fixed;left:0;right:0;bottom:0;z-index:2147483644;' +
-        'background:#7c2d12;color:#fff;padding:13px 14px;' +
+        'background:#334155;color:#fff;padding:13px 14px;' +
         'font-size:13.5px;line-height:1.7;text-align:center;' +
         'font-family:system-ui,-apple-system,"PingFang SC",sans-serif;' +
         'box-shadow:0 -4px 18px rgba(0,0,0,.35)');
@@ -120,7 +120,7 @@
         '<div style="opacity:.9">' + lost.join('、') +
         ' 没能加载完 —— 多半是网络不稳。<br>' +
         '你的进度都在，重新加载一下就好。</div>' +
-        '<button id="hsnBootReload" style="margin-top:9px;background:#fff;color:#7c2d12;' +
+        '<button id="hsnBootReload" style="margin-top:9px;background:#fff;color:#334155;' +
           'border:0;padding:9px 20px;border-radius:11px;font-size:14px;' +
           'font-weight:800;cursor:pointer">重新加载</button>';
       (document.body || document.documentElement).appendChild(d);

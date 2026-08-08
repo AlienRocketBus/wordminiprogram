@@ -41,6 +41,9 @@
          而不是给每个元素单独写覆盖（那会越堆越乱）。 */
       'html:root{--pk-bg:#0f172a;--pk-card:#111827;--pk-line:#1f2937;' +
         '--pk-txt:#e8eefc;--pk-dim:#a9b4c7;--pk-faint:#7c879b;' +
+        /* 🔴v1156 语义色 —— 别在代码里写死颜色：
+           换主题时写死的那几个会突兀地留在原地。 */
+        '--pk-good:#4ade80;--pk-warn:#fb923c;--pk-bad:#f87171;' +
         '--pk-in-bg:#0b1020;--pk-in-line:#334155;--pk-btn2:#1f2937;' +
         '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd;' +
         '--pk-kb-bg:#1e293b;--pk-key-bg:#334155;--pk-key-fg:#f1f5f9;' +
@@ -269,7 +272,7 @@
           box = document.createElement('div');
           box.id = 'prCodeTip';
           box.setAttribute('style',
-            'color:#f87171;font-size:12.5px;margin:6px 2px 0;line-height:1.6');
+            'color:var(--pk-bad,#f87171);font-size:12.5px;margin:6px 2px 0;line-height:1.6');
           if (ci && ci.parentNode) ci.parentNode.parentNode.insertBefore(
             box, ci.parentNode.nextSibling);
         }
@@ -814,7 +817,7 @@ function doCreate() {
            而抢答赛里"还剩几秒"恰恰是最该让人有感觉的东西。
            红 + 轻微放大，不加动画帧（省电，也不抢注意力）。 */
         if (left <= 5 && left > 0) {
-          c.style.color = '#f87171';
+          c.style.color = 'var(--pk-bad)';
           c.style.fontWeight = '900';
           c.style.transform = 'scale(1.12)';
           c.style.display = 'inline-block';
@@ -971,7 +974,7 @@ function doCreate() {
                 _ob.style.display = 'inline-block';
                 _ob.style.transition = 'transform .16s ease, color .16s ease';
                 _ob.style.transform = 'scale(1.35)';
-                _ob.style.color = '#fb923c';
+                _ob.style.color = 'var(--pk-warn)';
                 setTimeout(function () {
                   try { _ob.style.transform = 'scale(1)'; _ob.style.color = ''; } catch (e) {}
                 }, 260);
@@ -1053,7 +1056,7 @@ function doCreate() {
           _mb.style.display = 'inline-block';
           _mb.style.transition = 'transform .16s ease, color .16s ease';
           _mb.style.transform = 'scale(1.45)';
-          _mb.style.color = '#4ade80';
+          _mb.style.color = 'var(--pk-good)';
           setTimeout(function () {
             try { _mb.style.transform = 'scale(1)'; _mb.style.color = ''; } catch (e) {}
           }, 260);
