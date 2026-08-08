@@ -10,6 +10,19 @@
  *   同时也正是"进度值得保护"的时点。
  */
 (function () {
+
+  /* 🔴v1156：**「XX 模块未加载，请刷新页面」这句话对孩子毫无意义。**
+     他不知道什么是"模块"，不知道为什么刷新能解决，也不一定知道怎么刷新。
+     换成说人话 + 给一个能点的重试。 */
+  function notReadyOr(what) {
+    try {
+      if (window.HansenToast && HansenToast.notReady) {
+        HansenToast.notReady(what, function () { try { location.reload(); } catch (e) {} });
+        return;
+      }
+    } catch (e) {}
+    try { alert(what + '还在准备中，等一两秒再点一次'); } catch (e) {}
+  }
   'use strict';
   if (window.HansenSignupGate) return;
 
@@ -126,11 +139,11 @@
          这里再加一层保险：打开登录面板时先把门槛隐藏，
          登录成功或用户关掉面板后由巡检自动决定是否重新拦截。 */
       try {
-        if (!window.HansenAuthUI) { alert('登录模块未加载，请刷新页面重试。'); return; }
+        if (!window.HansenAuthUI) { notReadyOr('登录'); return; }
         hide();
         HansenAuthUI.open();
       } catch (e) {
-        try { alert('打开登录界面失败，请刷新页面重试。'); } catch (e2) {}
+        try { notReadyOr('登录'); } catch (e2) {}
       }
     };
   }

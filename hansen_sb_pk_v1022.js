@@ -7,6 +7,19 @@
  * 依赖（均已随岛屿页加载）：HansenSbProfile / HansenSbLadder / HansenAuth / HansenAuthUI
  */
 (function () {
+
+  /* 🔴v1156：**「XX 模块未加载，请刷新页面」这句话对孩子毫无意义。**
+     他不知道什么是"模块"，不知道为什么刷新能解决，也不一定知道怎么刷新。
+     换成说人话 + 给一个能点的重试。 */
+  function notReadyOr(what) {
+    try {
+      if (window.HansenToast && HansenToast.notReady) {
+        HansenToast.notReady(what, function () { try { location.reload(); } catch (e) {} });
+        return;
+      }
+    } catch (e) {}
+    try { alert(what + '还在准备中，等一两秒再点一次'); } catch (e) {}
+  }
   'use strict';
   if (window.HansenSbPK) return;
 
@@ -170,7 +183,7 @@
     if (q('kPull')) q('kPull').onclick = function () {
       var btn = this; btn.disabled = true; btn.textContent = '正在恢复…';
       try {
-        if (!window.HansenCloudRestore) { alert('恢复模块未加载，请刷新页面'); btn.disabled = false; return; }
+        if (!window.HansenCloudRestore) { notReadyOr('云端恢复'); btn.disabled = false; return; }
         HansenCloudRestore.now().then(function (r) {
           /* 🔴v1059: 复用恢复模块的统一报错（会话过期时会引导重新登录），
              不再直接 alert 一个 [object Object] 的死路。 */
@@ -197,18 +210,18 @@
     };
     /* 🔴v1108: 天梯排位不再是「敬请期待」—— v1103 已把分数/段位/定级赛做出来，
        v1108 补上实力匹配与战绩页。做了功能没入口等于没做。 */
-    var soon = function () { alert('这个模式马上就来，敬请期待！'); };
+    var soon = function () { if (window.HansenToast) HansenToast.say('这个玩法还在做，先玩别的吧 🙂'); };
     var openLadder = function () {
-      if (!window.HansenLadderUI) { alert('天梯模块未加载，请刷新页面再试'); return; }
+      if (!window.HansenLadderUI) { notReadyOr('天梯'); return; }
       HansenLadderUI.open();
     };
     if (q('kDiag')) q('kDiag').onclick = function () {
-      try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else alert('自检模块未加载'); } catch (e) {}
+      try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else notReadyOr('自检'); } catch (e) {}
     };
     /* 🔴v1065: 公开房间不再是「敬请期待」——接到真正的房间匹配上。
        天梯排位仍在做，保留 soon()。 */
     if (q('kRooms')) q('kRooms').onclick = function () {
-      if (!window.HansenPkRoomUI) { alert('房间模块未加载，请刷新页面再试'); return; }
+      if (!window.HansenPkRoomUI) { notReadyOr('对战房间'); return; }
       if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return; }
       try {
         var A = window.HansenAuth;
