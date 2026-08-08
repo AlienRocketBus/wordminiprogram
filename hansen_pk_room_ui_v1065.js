@@ -470,6 +470,7 @@ function doCreate() {
   var _rt = null;
   var _kbKeyHandler = null;          /* 本回合的运行时状态 */
   var _pollTimer = null;
+  var _lastStats = null;   /* v1156: 结算屏要用的本局统计 —— _state 那时已被清空 */
   var _netMiss = 0;   /* v1154: 连续拿不到房间状态的次数 */
   var _waitResult = 0; /* v1154: 等对手交卷的轮询次数，防止无限等待 */
 
@@ -1087,6 +1088,70 @@ function doCreate() {
     });
   }
 
+  /* ── 🔴v1156 结算屏：本局打得怎么样 ────────────────
+
+     原来结算屏只说"你赢了 / 200 : 100 / +15 天梯分"，
+     **对刚才那一局本身一个字都没有** ——
+     答对几个、多快、抢先几次，数据全在 `st` 里躺着，就是不给人看。
+
+     而"刚打完那一刻"恰恰是最想知道自己表现的时候：
+     赢了想知道赢在哪，输了想知道差在哪。
+     等回到天梯页看的是"总战绩"，那已经把这一局稀释掉了。 */
+  function thisGameBlock() {
+    try {
+      var st = (_lastStats || {});
+      var w = Number(st.words) || 0;
+      if (!w) return '';                       /* 没数据就不画空壳 */
+      var c = Number(st.correct) || 0;
+      var ms = Number(st.totalMs) || 0;
+      var fw = Number(st.firstWins) || 0;
+      var fast = Number(st.fastestMs) || 0;
+      var avg = c > 0 ? (ms / c / 1000) : 0;
+
+      var cell = function (label, val, tip) {
+        return '<div style="flex:1;min-width:0;text-align:center;padding:7px 4px">'
+          + '<div style="font-size:11px;color:var(--pk-dim);white-space:nowrap">' + label + '</div>'
+          + '<div style="font-size:17px;font-weight:900;margin-top:2px">' + val + '</div>'
+          + (tip ? '<div style="font-size:10.5px;color:var(--pk-dim);margin-top:1px;'
+                   + 'white-space:nowrap">' + tip + '</div>' : '')
+          + '</div>';
+      };
+      return '<div style="margin:10px 0;padding:4px;border-radius:13px;'
+        +   'background:rgba(255,255,255,.06)">'
+        +   '<div style="font-size:11.5px;color:var(--pk-dim);text-align:center;'
+        +     'padding:5px 0 1px">这一局</div>'
+        +   '<div style="display:flex">'
+        +     cell('答对', c + '<span style="font-size:12px;opacity:.7">/' + w + '</span>',
+                   Math.round(c / w * 100) + '%')
+        +     cell('抢先', fw + '<span style="font-size:12px;opacity:.7">次</span>',
+                   c > 0 ? Math.round(fw / c * 100) + '%' : '—')
+        +     cell('平均', avg > 0 ? avg.toFixed(1) + '<span style="font-size:12px;opacity:.7">秒</span>' : '—',
+                   '每个词')
+        +     cell('最快', fast > 0 ? (fast / 1000).toFixed(1) + '<span style="font-size:12px;opacity:.7">秒</span>' : '—',
+                   '这局最快')
+        +   '</div>'
+        + '</div>';
+    } catch (e) { return ''; }
+  }
+
+  /* 🔴v1156：结算屏也给一句"离升段还差多少"。
+     天梯页有，这里没有 —— 而**刚赢完恰恰是最想知道这个的时刻**，
+     那是"再来一局"最强的理由。 */
+  function nextTierLine() {
+    try {
+      var R = window.HansenPkRecord, L = window.HansenSbLadder;
+      if (!R || !L || !L.nextTierOf) return '';
+      var sm = R.summary();
+      if (!sm || !sm.placed) return '';
+      var nx = L.nextTierOf(sm.rating);
+      if (!nx) return '';
+      return '<div style="text-align:center;font-size:12.5px;color:var(--pk-dim);'
+        + 'margin:2px 0 10px">距离 ' + nx.icon + ' ' + esc(nx.name)
+        + ' 还差 <b style="color:inherit">' + nx.need + '</b> 分'
+        + '（大约 ' + Math.max(1, Math.ceil(nx.need / 18)) + ' 局）</div>';
+    } catch (e) { return ''; }
+  }
+
   function showResult(r) {
     /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
     var txt = r.byAbandon ? '🏆 对手离场，本局你胜'
@@ -1110,6 +1175,7 @@ function doCreate() {
           }, 300);
         } catch (e) {}
 
+        try { _lastStats = Object.assign({}, (_state && _state.st) || {}); } catch (e) {}
         rec = R.record({
           result: r.result,
           mode: (_state && _state.mode) || _pickedMode,
@@ -1155,7 +1221,9 @@ function doCreate() {
 
     paint('<div class="pr_res">' + txt + '</div>'
       + '<div class="pr_empty">你 ' + r.mine + ' 分 · 对手 ' + r.theirs + ' 分</div>'
+      + thisGameBlock()
       + extra
+      + nextTierLine()
       + '<button class="pr_btn" id="prAgain">再来一局</button>'
       + '<button class="pr_btn pr_btn2" id="prBack2">← 回到房间列表</button>');
     var rid = _state && _state.roomId;

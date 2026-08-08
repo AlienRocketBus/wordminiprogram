@@ -1305,6 +1305,13 @@ def guard_no_orphan_state_fields():
         if not src:
             continue
         writes = set(re.findall(r'\b(?:st|_state)\.(\w+)\s*=(?!=)', src))
+        # 🔴v1156：**`st.st.xxx++` 和 `+=` 这种也是赋值。**
+        #   判据原来只认 `xxx =` 这一种形态，
+        #   于是 `st.st.firstWins++` / `st.st.totalMs += ms` 被当成
+        #   "读了但从没赋值"，报了个误报。
+        #   **误报比漏报更伤** —— 它会让人开始忽略这道守卫，
+        #   等真出事的时候也不会看了。
+        writes |= set(re.findall(r'\.(\w+)\s*(?:\+\+|--|\+=|-=)', src))
         for m in re.finditer(r'_state\s*=\s*\{([^}]*)\}', src, re.S):
             writes |= set(re.findall(r'(\w+)\s*:', m.group(1)))
         reads = set(re.findall(r'\b(?:st|_state)\.(\w+)\b(?!\s*=(?!=))', src))

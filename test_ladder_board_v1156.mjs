@@ -176,6 +176,55 @@ async function open(seedBoard) {
      '占一整格却没多给信息');
 }
 
+
+/* ── 🔴v1156 结算屏：本局表现 + 升段进度 ────────────── */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+
+  ok(/function thisGameBlock/.test(ui),
+     '★ **结算屏显示这一局打得怎么样** —— ' +
+     '原来只说"你赢了 / 200:100 / +15 分"，对刚才那局本身一个字都没有；' +
+     '而刚打完那一刻恰恰是最想知道自己表现的时候：' +
+     '赢了想知道赢在哪，输了想知道差在哪');
+
+  ok(/_lastStats/.test(ui),
+     '★ **本局统计要提前存下来** —— ' +
+     'showResult 跑的时候 _state 已经被清空了，现取取不到');
+  const iRec = ui.indexOf('_lastStats = Object.assign');
+  /* ⚠️ 不能用 indexOf('_state = null;') —— 文件开头那个是**变量声明**
+     （var _state = null），不是清空。第一版就这么写的，
+     于是存在清空之前永远判成假。
+     要找的是 showResult 里那次真正的清空。 */
+  const iShow = ui.indexOf('function showResult');
+  const iClear = ui.indexOf('_state = null;', iShow);
+  ok(iRec > 0 && iRec < iClear,
+     '★ 存的时机在清空之前');
+
+  ok(/if \(!w\) return '';/.test(ui),
+     '★ 没数据就不画空壳 —— 一排「—」比不画更糟');
+
+  ok(/function nextTierLine/.test(ui),
+     '★ **结算屏也给一句「离升段还差多少」** —— ' +
+     '天梯页有、这里没有，而刚赢完恰恰是最想知道这个的时刻，' +
+     '那是「再来一局」最强的理由');
+  ok(/if \(!sm \|\| !sm\.placed\) return '';/.test(ui),
+     '★ 没定级不谈升段');
+}
+
+/* 对战中的即时反馈 */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  ok(/left <= 5 && left > 0/.test(ui),
+     '★ **倒计时最后 5 秒变红** —— ' +
+     '原来 19 秒和 2 秒长得一模一样，' +
+     '而抢答赛里「还剩几秒」恰恰是最该让人有感觉的东西');
+  ok(/scale\(1\.45\)/.test(ui),
+     '★ 自己得分时跳一下 —— 手快抢到那一下是最有成就感的瞬间');
+  ok(/#fb923c/.test(ui),
+     '★ **对手得分用橙色，不是绿色** —— 那是对手的分，不是好消息；' +
+     '而且不给反馈的话，被反超了都没感觉');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
