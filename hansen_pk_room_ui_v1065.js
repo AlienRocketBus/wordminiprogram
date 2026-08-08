@@ -1229,8 +1229,41 @@ function doCreate() {
     var rid = _state && _state.roomId;
     _state = null;
     if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
-    if (q('prAgain')) q('prAgain').onclick = lobby;
-    if (q('prBack2')) q('prBack2').onclick = lobby;
+    /* 🔴v1156：**两个 bug 一起修。**
+
+       ① `onclick = lobby` 会把**点击事件对象**当成 `err` 传进去，
+          于是 `errBlock(event)` 把 `{"isTrusted":false}` 画到屏上 ——
+          用户打完一局，看到的是一串乱码。
+          这类"把处理函数直接当 onclick"的写法，只要那个函数有参数，
+          就一定会中招。**必须包一层。**
+
+       ② 排位打完点「再来一局」，跳到的是「公开房间列表」——
+          而他刚才是从天梯来的，想要的是**再排一局**，
+          不是自己去房间列表里挑。
+          排位和自由房是两条路，回哪条该看他是从哪来的。 */
+    if (q('prAgain')) {
+      q('prAgain').onclick = function () {
+        if (_cameFromLadder) {
+          _cameFromLadder = false;
+          try {
+            close();
+            if (window.HansenLadderUI && HansenLadderUI.open) {
+              HansenLadderUI.open();
+              /* 直接开始找下一个对手 —— 他点「再来一局」就是这个意思 */
+              setTimeout(function () {
+                try {
+                  var go = document.getElementById('ldGo');
+                  if (go) go.click();
+                } catch (e) {}
+              }, 260);
+            }
+            return;
+          } catch (e) {}
+        }
+        lobby();                       /* 自由房来的：回房间列表 */
+      };
+    }
+    if (q('prBack2')) q('prBack2').onclick = function () { lobby(); };
   }
 
   /* 🔴v1108 天梯专用入口：排位固定用 A 抢答赛，玩家不能选模式。
@@ -1254,8 +1287,10 @@ function doCreate() {
 
      修法：两条路都先 `open()` 再动作。 */
   var _fromLadder = false;
+  var _cameFromLadder = false;   /* v1156: 打完后「再来一局」该回哪 */
 
   function _createForLadder(rating) {
+    _cameFromLadder = true;
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('开排位房'); } catch (e) {}
     _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
     _ladderRating = Number(rating) || 1000;
@@ -1285,6 +1320,7 @@ function doCreate() {
     doCreate();
   }
   function _joinForLadder(roomId) {
+    _cameFromLadder = true;
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('进排位房'); } catch (e) {}
     _pickedMode = 'A';
     _fromLadder = true;      /* v1154: 记住这次是排位来的，进不去时好说人话 */

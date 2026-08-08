@@ -246,6 +246,28 @@ async function open(seedBoard) {
      '看着像名次连着的，而中间其实隔了八十几个人');
 }
 
+
+/* ── 🔴v1156「再来一局」两个 bug ───────────────────── */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(!/\.onclick\s*=\s*lobby\s*;/.test(code),
+     '★ **不许把 lobby 直接当 onclick** —— ' +
+     '浏览器会把点击事件对象当成 err 传进去，' +
+     '于是 errBlock(event) 把 `{"isTrusted":false}` 画到屏上，' +
+     '用户打完一局看到一串乱码。' +
+     '这类写法只要那个函数有参数就一定中招，必须包一层');
+
+  ok(/_cameFromLadder/.test(code),
+     '★ **记住是从哪来的** —— ' +
+     '排位打完点「再来一局」原来跳到「公开房间列表」，' +
+     '而他刚才是从天梯来的，想要的是再排一局，不是自己去列表里挑');
+  ok(/HansenLadderUI\.open\(\)[\s\S]{0,300}ldGo/.test(code),
+     '★ 从天梯来的「再来一局」直接开始找下一个对手 —— ' +
+     '他点这个按钮就是这个意思');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
