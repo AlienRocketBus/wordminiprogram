@@ -739,8 +739,30 @@ function doCreate() {
 
     /* 倒计时 + 轮询对手 */
     _pollTimer = setInterval(function () {
-      /* 后台期间不推进倒计时也不轮询 —— 省电，且时间不该白扣 */
-      if (document.visibilityState === 'hidden') return;
+      /* 🔴v1156：**注释说"时间不该白扣"，而实际是白扣了、只是不给你看。**
+
+         原来只是 `return` 掉不更新显示，
+         而 `_rt.deadline` 是一个绝对时刻 —— 它照样在走。
+         实测：切走 8 秒再回来，倒计时从 19s 变成 13s，
+         **实实在在少了 6 秒**。
+
+         手机上切出去太常见了（来个消息、看一眼时间），
+         回来发现时间被吃掉一大截，人是会恼的 ——
+         尤其抢答赛本来就只有 20 秒。
+
+         做法：切走时记下"还剩多少"，回来时把 deadline 顺延回去。
+         对手那边不受影响（他的时间照常走），
+         但至少我们不惩罚一个只是切出去看了眼消息的人。 */
+      if (document.visibilityState === 'hidden') {
+        if (_rt && _rt.idx === idx && !_rt.bgLeft) {
+          _rt.bgLeft = Math.max(0, _rt.deadline - Date.now());
+        }
+        return;
+      }
+      if (_rt && _rt.idx === idx && _rt.bgLeft) {
+        _rt.deadline = Date.now() + _rt.bgLeft;   /* 回来了：把时间还回去 */
+        _rt.bgLeft = 0;
+      }
       if (!_rt || _rt.idx !== idx) return;
       var left = Math.max(0, Math.ceil((_rt.deadline - Date.now()) / 1000));
       var c = q('prClock');

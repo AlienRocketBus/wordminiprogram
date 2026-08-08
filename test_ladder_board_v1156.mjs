@@ -294,6 +294,24 @@ async function open(seedBoard) {
      '新用户会照着字去找一个不存在的按钮');
 }
 
+
+/* ── 🔴v1156 切走再回来，倒计时不该白扣 ──────────────── */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/_rt\.bgLeft = Math\.max\(0, _rt\.deadline - Date\.now\(\)\)/.test(code),
+     '★ **切到后台时记下"还剩多少"** —— ' +
+     '原来的注释写着"时间不该白扣"，而实际做的是"白扣了但不给你看"：' +
+     '只 return 掉不更新显示，而 deadline 是绝对时刻，照样在走。' +
+     '实测切走 8 秒回来少了 6 秒');
+  ok(/_rt\.deadline = Date\.now\(\) \+ _rt\.bgLeft/.test(code),
+     '★ **回来时把时间还回去** —— ' +
+     '手机上切出去太常见了（来个消息、看一眼时间），' +
+     '回来发现时间被吃掉一大截，人是会恼的 —— ' +
+     '尤其抢答赛本来就只有 20 秒');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
