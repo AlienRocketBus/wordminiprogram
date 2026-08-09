@@ -675,7 +675,7 @@ function doCreate() {
           ? '<div style="margin:26px 0 10px;text-align:center">'
             + '<button id="prSpk" style="font-size:44px;background:none;border:0;cursor:pointer">🔊</button>'
             + '<div style="font-size:13px;color:var(--pk-dim);margin-top:6px">点喇叭再听一次</div></div>'
-          : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(w.cn || '') + '</div>'
+          : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(txtOf(w.cn)) + '</div>'
             + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:var(--pk-hint)">'
             + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
       /* 🔴v1118：**不弹系统输入法。**
@@ -1270,6 +1270,23 @@ function doCreate() {
   }
 
   /* v1156: 把可能不是数字的东西变成一个能看的数字 */
+  /* 🔴v1156：**题目文字也要防非字符串。**
+
+     实测（词表里 cn 是一个对象、en 是数字）：
+     题目直接显示成 `[object Object]`。
+
+     词表来自云端和本地缓存，两边都可能因为版本不一致、
+     迁移写坏而带进奇怪的值 —— **界面不该假设它一定是字符串**。
+
+     对象/数组一律当空（显示不出来总好过显示 [object Object]），
+     数字转成字符串（那至少还是个能看的东西）。 */
+  function txtOf(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' && isFinite(v)) return String(v);
+    return '';
+  }
+
   function numOr0(v) {
     var n = Number(v);
     if (!isFinite(n) || n < 0) return 0;
