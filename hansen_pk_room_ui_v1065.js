@@ -45,7 +45,7 @@
            换主题时写死的那几个会突兀地留在原地。 */
         '--pk-good:#4ade80;--pk-warn:#fb923c;--pk-bad:#f87171;' +
         /* v1156: 升段提示用的强调紫 —— 别写死在代码里 */
-        '--pk-accent:#c4b5fd;' +
+        '--pk-accent:#c4b5fd;--pk-chip:#3730a3;--pk-chip-txt:#e8eefc;' +
         '--pk-in-bg:#0b1020;--pk-in-line:#334155;--pk-btn2:#1f2937;' +
         '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd;' +
         '--pk-kb-bg:#1e293b;--pk-key-bg:#334155;--pk-key-fg:#f1f5f9;' +
@@ -760,7 +760,7 @@ function doCreate() {
          灰字配几乎透明的底，等于没写。
          底色加深、字改回正常文字色。 */
       +   '<span style="flex:0 1 auto;min-width:0;overflow:hidden;font-size:11.5px;'
-      +     'color:#e8eefc;background:#3730a3;'
+      +     'color:var(--pk-chip-txt);background:var(--pk-chip);'
       +     'padding:3px 9px;border-radius:99px;white-space:nowrap;'
       +     'text-overflow:ellipsis">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
       +   '<span style="flex:1 0 auto;min-width:0;display:flex;align-items:baseline;'
