@@ -102,7 +102,24 @@ const MAKE_BATTLE = `
   const h=document.createElement('div');h.className='on';
   const w=document.createElement('div');w.className='pr_wrap';
   w.innerText='你 0 ⚡抢答赛 0 对手 第 1 / 3 词 · ⏱ 8s';
-  h.appendChild(w);document.body.appendChild(h);`;
+  h.appendChild(w);document.body.appendChild(h);
+  /* 🔴v1156：**塞进 DOM 之后要逼浏览器排版一次。**
+
+     刚 appendChild 完，浏览器还没排版，offsetParent 还是 null ——
+     而看门狗判断"屏幕画出来没有"正是看它。
+     于是第一次 tick 把这屏当成"没画"直接跳过，
+     后面 _agePaintForTest 推的是个空基准，救不出来。
+
+     随机性正来自这里：机器快的时候排版赶上了，慢的时候没赶上，
+     这条断言因此跑六次红两三次。
+     **随机红比稳定红更危险 —— 它会让人以为是偶发而忽略掉。**
+
+     读一下 offsetHeight 就会强制同步排版（reflow），
+     一行解决，不用等帧。
+
+     > 往 DOM 里塞东西和"它真的被排版出来"之间有一拍。
+     > 凡是紧接着读布局信息的代码，都要先过这一拍。 */
+  void w.offsetHeight;`;
 
 /* ① 对战屏僵住 → 救 */
 {

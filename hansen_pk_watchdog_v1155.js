@@ -57,9 +57,25 @@
     try {
       var w = document.querySelector('.pr_wrap') || document.querySelector('.ld_wrap');
       if (!w) return '';
-      var host = w.parentElement;
-      if (host && host.classList && !host.classList.contains('on')) return '';
-      return (w.innerText || '').replace(/\s+/g, ' ').trim();
+      /* 🔴v1156：**别只认父元素的 `.on` 类。**
+
+         原来写成"父元素没有 on 就当没画" —— 判据太依赖具体的 DOM 结构：
+         对战屏挂在哪一层、外面包了几层，改版时随时会变，
+         而看门狗一旦看不见屏幕，**它就什么都不救了** ——
+         比没有看门狗更糟，因为你以为有防线。
+
+         改为看"它到底显示出来没有"：
+         优先用 offsetParent（最直接的"在页面上可见"判据），
+         拿不到再退回看 .on 类。 */
+      var visible = true;
+      try {
+        if (w.offsetParent === null) {
+          var host = w.parentElement;
+          visible = !!(host && host.classList && host.classList.contains('on'));
+        }
+      } catch (e) { visible = true; }
+      if (!visible) return '';
+      return ((w.innerText || w.textContent || '')).replace(/\s+/g, ' ').trim();
     } catch (e) { return ''; }
   }
 
