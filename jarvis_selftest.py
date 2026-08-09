@@ -28,6 +28,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import tempfile
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -706,15 +707,29 @@ def main():
         try:
             json.dump({'fp': _fpv, 'ok': sorted(_done_names)},
                       open(_STDONE, 'w', encoding='utf-8'))
-        except Exception:
-            pass
+        except Exception as _e:
+            print('  ⚠️ 进度存不下来：%s' % str(_e)[:70])
 
-    # v1155: 告诉守卫"我正在跑"，别把我注入的坏代码修回去
+    # 🔴v1156：**顺序反了会死锁 —— 必须先验基线，再立 RUNNING。**
+    #
+    #   原来是先写 RUNNING、再跑基线检查。
+    #   而守卫看到 RUNNING 就会**跳过残留检查和自动修残局** ——
+    #   于是上一轮被强杀留下的残留永远没人修，
+    #   基线永远红，自证永远跑不起来，**卡成死循环**。
+    #
+    #   实测：为此耽误了好几轮，我一直在重试而没看出是顺序问题。
+    #
+    #   > 一个"跑的时候别打扰我"的标记，如果在"检查环境是否干净"之前立起来，
+    #   > 它挡住的恰恰是那个能让环境变干净的机制。
     _bakdir0 = os.path.join(ROOT, '.jarvis_inject_bak')
-    os.makedirs(_bakdir0, exist_ok=True)
-    open(os.path.join(_bakdir0, 'RUNNING'), 'w').write('1')
+    _run0 = os.path.join(_bakdir0, 'RUNNING')
+    try:
+        if os.path.exists(_run0):
+            os.unlink(_run0)          # 上一轮的死标记，先清掉
+    except Exception:
+        pass
 
-    # v1155: 开跑前验一次基线（只此一次）
+    # 先验基线（这时守卫能正常自修残局）
     _b0 = subprocess.run([sys.executable, GUARDS], cwd=ROOT,
                          capture_output=True, text=True, timeout=280)
     _base_bad = (_b0.returncode != 0)
@@ -723,11 +738,39 @@ def main():
         print('  \u26a0\ufe0f  \u57fa\u7ebf\u5c31\u662f\u7ea2\u7684\uff0c\u5148\u4fee\u5b83\u518d\u8dd1\u81ea\u8bc1\uff1a%s'
               % (_w[0][:70] if _w else '(\u672a\u77e5)'))
         return 1
+
+    # 基线是干净的，现在才告诉守卫"我要开始改坏代码了，别插手"
+    os.makedirs(_bakdir0, exist_ok=True)
+    open(_run0, 'w').write('1')
     _first_case = True
+
+    # 🔴v1156：**加一个"这轮只跑多少秒"的预算。**
+    #
+    #   自证要让 58 道守卫各咬一次样本，每道都要跑一次守卫全套（约 7 秒），
+    #   合计 400 秒开外 —— 而受限环境里单次跑不完，
+    #   每次被强杀都白费，还留下注入残骸。
+    #
+    #   给它一个预算：到点就停、存好进度、下次接着跑。
+    #   `JARVIS_SELFTEST_BUDGET=300 python3 jarvis_selftest.py` 跑五分钟就收。
+    #   不设就跑到底（在没有时间限制的机器上就该跑到底）。
+    _budget = 0
+    try:
+        _budget = int(os.environ.get('JARVIS_SELFTEST_BUDGET', '0') or 0)
+    except Exception:
+        _budget = 0
+    _t_start = time.time()
 
     for name, target, inject in CASES:
         if name in _done_names:
             continue
+        if _budget and (time.time() - _t_start) > _budget:
+            print('  \u23f8  \u5df2\u8dd1 %d \u9053\uff0c\u672c\u8f6e\u9884\u7b97\u7528\u5b8c\uff0c\u4e0b\u6b21\u63a5\u7740\u8dd1'
+                  % len(_done_names))
+            try:
+                os.unlink(_run0)
+            except Exception:
+                pass
+            return 2                      # 2 = 没跑完但也没失败
         path = os.path.join(ROOT, target)
         if not os.path.exists(path):
             print('  ⏭  %-16s 目标文件不存在(%s)，跳过' % (name, target))
