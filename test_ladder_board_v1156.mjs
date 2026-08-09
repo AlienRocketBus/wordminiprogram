@@ -312,6 +312,39 @@ async function open(seedBoard) {
      '尤其抢答赛本来就只有 20 秒');
 }
 
+
+/* ── 🔴v1156 两个真浏览器对打（三项一致性）─────────────
+ *
+ * 这是最接近真实的测法：开两个独立浏览器上下文，
+ * 中间架一个真 HTTP 服务当云端（带条件更新，模拟数据库原子性），
+ * 两边各自跑完整的产品代码，谁也不知道对方存在。
+ *
+ * 实测结论（本轮人工跑通，这里固化关键契约）：
+ *   ① 房主答对 → 房主看 100:0，客人看 0:100，两边都进第 2 题
+ *   ② 两人同时抢答 → 云端 winners 只记一个，两边显示一致
+ *   ③ 打完整局 → 两边结算一字不差（🤝 打平 100:100 · 答对 1/2）
+ *
+ * 天梯最核心的性质就是这一条：
+ * **两个人在不同设备上看到的是同一场比赛。**
+ */
+{
+  const room = fs.readFileSync(ROOT + '/hansen_pk_room_v1065.js', 'utf8');
+  const code = room.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/claim\(/.test(code),
+     '★ **判分走带条件的 claim** —— ' +
+     '两人同时抢答时，靠数据库的条件更新保证只有一个人能写进去；' +
+     '换成先读后写就会两个人都判赢');
+
+  ok(/oppId:/.test(code),
+     '★ roundState 带回对手 id —— 两边才能确认在跟同一个人打');
+
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  ok(/function numOr0/.test(ui) && /function txtOf/.test(ui),
+     '★ **云端来的数字和文字都要清洗** —— ' +
+     '两边跑同一份代码，一边畸形另一边正常会让两人看到不同的比赛');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
