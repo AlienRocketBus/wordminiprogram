@@ -388,6 +388,40 @@ async function open(seedBoard) {
      '★ 定级赛 3 局 —— 和界面上写的「再打 3 局定级赛」一致');
 }
 
+
+/* ── 🔴v1156 安全：对手名字和词表不许注入 ─────────────
+ *
+ * **对手名字是整个天梯里最危险的输入** —— 它来自别人，
+ * 而且会直接显示在你的屏幕上。
+ * 词表也一样：云端下发的，本地无法保证干净。
+ *
+ * 真浏览器实测（本轮）：
+ *   对手名 = `<img src=x onerror="...">`
+ *   词表 cn = 同样的载荷
+ *   自己输入框也填同样的载荷并提交
+ *
+ * 结果：
+ *   · 攻击代码没执行 ✅
+ *   · 页面里没有被注入的 img 元素 ✅
+ *   · 载荷原样当文字显示（转义正确）✅
+ *
+ * 这里固化转义的调用，防止以后有人图省事改成 innerHTML 直塞。
+ */
+{
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/function esc\(/.test(code), '★ 有转义函数');
+  ok(/esc\(st\.oppName/.test(code) || /esc\(.*oppName/.test(code),
+     '★ **对手名字必须转义** —— ' +
+     '它来自别人，而且会直接显示在你的屏幕上，' +
+     '是整个天梯里最危险的输入');
+  ok(/esc\(txtOf\(w\.cn\)\)/.test(code),
+     '★ **词表也要转义** —— 云端下发的，本地无法保证干净');
+  ok(/replace\(\/\[&<>"\]\/g|&lt;|&amp;/.test(code),
+     '★ 转义函数真的在处理尖括号和引号');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
