@@ -802,7 +802,12 @@
       /* v1122: 回传"我是哪一方" —— 房间文档里本来就知道，
          不该让前端靠本地标记猜（猜错了对手状态就永远不更新）。 */
       var u2 = me();
+      /* 🔴v1156：**把对手是谁也带回去。**
+         原来只返回回合和比分，UI 层无从知道对面还是不是同一个人 ——
+         实测：房主换了个 guest 进来，界面毫无察觉，
+         还在跟原来那个人的名字打，而比分和判定已经是新人的了。 */
       return { ok: true, mode: modeOf(room.mode).key,
+               oppId: (room.hostId === u2.id) ? (room.guestId || '') : (room.hostId || ''),
                mySide: (room.hostId === u2.id) ? 'host' : 'guest',
                round: winners.length, winners: winners,
                roundAt: room.roundAt || 0,

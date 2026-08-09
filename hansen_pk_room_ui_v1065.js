@@ -876,6 +876,31 @@ function doCreate() {
     if (!st) return;
     checkOpponentAlive(idx);
     S().roundState(st.roomId).then(function (r) {
+
+      /* 🔴v1156：**对面换人了要说一声。**
+
+         实测：房主把原来的 guest 踢掉、换另一个人进来，
+         界面**毫无察觉** —— 还显示着原来那人的名字，
+         而比分和输赢判定已经是新人的了。
+
+         对战里"我在跟谁打"是最基本的信息，
+         悄悄换掉比什么都不显示更糟：
+         用户会以为是自己看错了，或者以为对手在作弊。
+
+         记下第一次看到的对手 id，之后一变就明说。 */
+      try {
+        if (r && r.ok && typeof r.oppId === 'string') {
+          if (!st._oppId && r.oppId) st._oppId = r.oppId;
+          else if (st._oppId && r.oppId && r.oppId !== st._oppId && !st._oppSwapped) {
+            st._oppSwapped = true;
+            try {
+              var _h = q('prHint');
+              if (_h) _h.textContent = '👥 对手换人了 —— 这一局的比分是和新对手算的';
+              if (window.HansenToast) HansenToast.say('👥 对手换人了');
+            } catch (e2) {}
+          }
+        }
+      } catch (e) {}
       /* 🔴v1154：**打到一半断网时，要让人知道。**
 
          实测：对战中断网，界面就一直停在"第 1/2 词 · ⏱ 10s"，
