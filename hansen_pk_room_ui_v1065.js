@@ -756,8 +756,11 @@ function doCreate() {
       /* ⚠️ 模式徽章要能被挤掉，名字不能。
          宽度不够时优先保证「和谁打、多少分」——
          模式名是次要信息，用户点进来之前就选过了。 */
+      /* 🔴v1156：**这个徽章太淡了。** 实测对比度 2.1（需 4.5）——
+         灰字配几乎透明的底，等于没写。
+         底色加深、字改回正常文字色。 */
       +   '<span style="flex:0 1 auto;min-width:0;overflow:hidden;font-size:11.5px;'
-      +     'color:var(--pk-dim);background:rgba(255,255,255,.07);'
+      +     'color:#e8eefc;background:#3730a3;'
       +     'padding:3px 9px;border-radius:99px;white-space:nowrap;'
       +     'text-overflow:ellipsis">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
       +   '<span style="flex:1 0 auto;min-width:0;display:flex;align-items:baseline;'

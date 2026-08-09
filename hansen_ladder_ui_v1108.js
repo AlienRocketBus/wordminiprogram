@@ -491,7 +491,12 @@
            一个 24px 的等宽格子 + 居中，两种内容都落在同一条线上。 */
         return '<div style="display:flex;align-items:center;gap:9px;padding:7px 9px;'
           + 'border-radius:10px;font-size:13.5px;'
-          + (mine ? 'background:rgba(99,102,241,.18);font-weight:800' : '') + '">'
+          /* 🔴v1156：**高亮那行反而更看不清。**
+             实测对比度 3.8（需 4.5）—— 半透明紫底把背景提亮了，
+             而文字颜色没跟着变，结果自己那行成了整个榜上最难读的一行。
+             **恰恰是最该看清的那一行。**
+             底色加深、文字改成接近纯白。 */
+          + (mine ? 'background:rgba(79,70,229,.42);font-weight:800;color:#f5f7ff' : '') + '">'
           +   '<span style="width:26px;flex:none;text-align:center;'
           +     'font-variant-numeric:tabular-nums;font-size:15px;line-height:1">'
           +     badge + '</span>'
