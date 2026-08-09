@@ -2893,6 +2893,48 @@ def guard_fallback_matches():
                     % (os.path.basename(f), name, fb, sorted(real)))
                 return
 
+
+def guard_ladder_one_source():
+    """读天梯数据的地方必须接新存档。
+
+    ═══ 同一个问题在同一个文件里出现三次（v1156）═══
+
+    天梯战绩从 v1103 起搬到了 HansenPkRecord，
+    而 spelling_pk.html 里有**五处**读 `readLadder()`（v1002 的旧存档）：
+
+      · 用户卡片    → 显示「🐝 工蜂 · 未定级」（自相矛盾）
+      · 战绩速览    → 「对战胜率」永远显示「—」
+      · 天梯页正文  → 同样读的旧数据
+
+    我修了第一处，隔了几轮才发现第二处，又隔一轮才发现第三处。
+
+    > **一个数据换了家，读它的地方往往不止一两处。**
+    > 靠"我记得还有哪几处"是不行的，得全站搜一遍。
+
+    而用户看到的是：**同一屏上两个地方说的话不一样**，
+    或者一个永远不动的数字 —— 后者比没有更糟，
+    他会以为自己白打了。
+
+    判据：每个 `readLadder()` 调用点往后 25 行内，
+    必须出现 HansenPkRecord（即接上了新存档）。
+    """
+    src = _read('spelling_pk.html') or ''
+    if not src:
+        return
+    lines = src.split('\n')
+    miss = 0
+    for i, l in enumerate(lines):
+        if 'readLadder()' not in l or 'function readLadder' in l:
+            continue
+        seg = '\n'.join(lines[i:i + 25])
+        if 'HansenPkRecord' not in seg:
+            miss += 1
+    if miss:
+        bad('天梯一个来源',
+            'spelling_pk.html 里还有 %d 处读旧存档没接新的 —— '
+            '用户会看到同一屏上两个地方说的话不一样，'
+            '或者一个永远不动的数字' % miss)
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2991,6 +3033,7 @@ GUARDS = [
     ('战绩跟账号', guard_record_follows_account),
     ('数字要合理', guard_sane_numbers),
     ('兜底要对',   guard_fallback_matches),
+    ('天梯一个来源', guard_ladder_one_source),
 ]
 
 

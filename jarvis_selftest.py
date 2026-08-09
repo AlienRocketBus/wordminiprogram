@@ -645,6 +645,15 @@ def _inj_fallback(s):
     return s.replace(m, "PLACEMENT_GAMES) || 5", 1)
 
 
+
+def _inj_ladder_source(s):
+    """把一处新存档接线拆掉 —— 那处又会显示旧数据。"""
+    m = "var _R3 = window.HansenPkRecord;"
+    if m not in s:
+        return None
+    return s.replace(m, "var _R3 = null;", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -720,6 +729,7 @@ CASES = [
     ('战绩跟账号', 'hansen_pk_record_v1103.js',   _inj_record_owner),
     ('数字要合理', 'hansen_pk_record_v1103.js',   _inj_sane_num),
     ('兜底要对',   'hansen_pk_record_v1103.js',   _inj_fallback),
+    ('天梯一个来源', 'spelling_pk.html',            _inj_ladder_source),
 ]
 
 

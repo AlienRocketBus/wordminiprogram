@@ -363,6 +363,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   function renderLadder(){
     var box=$('pkLadderBody'); if(!box) return;
     var L=readLadder();
+    /* 🔴v1156：**第三处读旧存档的地方。**
+
+       前两处（用户卡片、战绩速览）已经改了，这处又漏了 ——
+       同一个文件里同一个问题出现了三次。
+
+       > 一个数据换了家，读它的地方往往不止一两处。
+       > **靠"我记得还有哪几处"是不行的，得全站搜一遍。** */
+    try {
+      var _R3 = window.HansenPkRecord;
+      if (_R3 && _R3.summary) {
+        var _s3 = _R3.summary();
+        if (_s3 && _s3.total) {
+          L = { rating: _s3.rating, placed: !!_s3.placed,
+                games: _s3.total, wins: _s3.wins, losses: _s3.losses,
+                streak: _s3.streak };
+        }
+      }
+    } catch (e) {}
     var L2=window.HansenSbLadder;
     var tier=L2?L2.tierOf(L.rating||1000):null;
     var P=window.HansenSbProfile;
