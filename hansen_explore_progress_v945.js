@@ -417,7 +417,15 @@
     openWord(idx);
   }
 
-  function toast(text){try{if(typeof root.showToast==='function')root.showToast(text);}catch(e){}}
+  function toast(text){
+    /* v1156: 先交给统一的提示（见其他模块的同名注释）。
+       这个模块的参数叫 text。 */
+    try {
+      if (window.HansenToast && HansenToast.say) {
+        HansenToast.say(text); return;
+      }
+    } catch (e) {}
+try{if(typeof root.showToast==='function')root.showToast(text);}catch(e){}}
   function launchGame(mode,idx){
     idx=Math.floor(Number(idx));state.snapshot=buildSnapshot();var item=itemAt(idx,state.snapshot);
     if(!item)return;

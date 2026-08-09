@@ -2715,6 +2715,49 @@ def guard_copy_consistent():
             '秒数用了裸的英文 s（「45s 后判他负」）—— '
             '前后全是中文，孩子看到会愣一下')
 
+
+def guard_toast_unified():
+    """各模块自己的 toast 必须先转发给统一实现。
+
+    ═══ 事故（v1156）═══
+
+    全站有 **9 个模块各写了一份 `toast()`**，共 49 处调用。
+    实测它们长得并不一样：
+
+      · land_cards / sb_profile —— 从**底部**弹，底色 rgba(15,23,42,.95)
+      · theme_lock / theme_shop —— 从**顶部**弹，底色 rgba(26,38,96,.95)
+
+    于是用户在同一个 App 里会看到两种完全不同的提示样式。
+
+    > **同一件事在不同页面上长得不一样，人会以为是两回事。**
+
+    把 49 处调用全改掉风险太大（都埋在各自模块的逻辑里），
+    所以改成**转发**：有统一实现就用它，没有才走本地那份。
+    样式立刻统一，而每个模块的调用一行都不用动。
+
+    这道守卫保证以后新写的 toast 也走这条路。
+    """
+    import glob as _g
+    missing = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        name = os.path.basename(f)
+        if name.startswith('hansen_toast'):
+            continue
+        try:
+            src = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        if not re.search(r'function toast\s*\(', src):
+            continue
+        if 'HansenToast' not in src:
+            missing.append(name)
+    if missing:
+        bad('提示要统一',
+            '%d 个模块自己的 toast 没有转发给统一实现（如 %s）—— '
+            '用户会在同一个 App 里看到两种提示样式，'
+            '同一件事长得不一样，人会以为是两回事'
+            % (len(missing), missing[0]))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2809,6 +2852,7 @@ GUARDS = [
     ('语法坏掉',   guard_no_broken_syntax),
     ('提示对按钮', guard_tip_matches_button),
     ('文案一致',   guard_copy_consistent),
+    ('提示要统一', guard_toast_unified),
 ]
 
 

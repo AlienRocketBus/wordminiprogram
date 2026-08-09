@@ -233,6 +233,23 @@
   }
 
   function toast(msg){
+    /* 🔴v1156：**先交给统一的提示，拿不到再用本地这份。**
+
+       全站有 9 个模块各写了一份 `toast()`，共 49 处调用。
+       实测它们长得并不一样：
+         · land_cards / sb_profile —— 从**底部**弹，底色 rgba(15,23,42,.95)
+         · theme_lock / theme_shop —— 从**顶部**弹，底色 rgba(26,38,96,.95)
+
+       于是用户在同一个 App 里会看到两种完全不同的提示样式，
+       **同一件事在不同页面上长得不一样，人会以为是两回事**。
+
+       把 49 处调用全改掉风险太大（都在各自模块的逻辑里），
+       所以改成**转发**：有统一实现就用它，没有才走本地这份。
+       这样样式立刻统一，而每个模块的调用一行都不用动。 */
+    try {
+      if (window.HansenToast && HansenToast.say) { HansenToast.say(msg); return; }
+    } catch (e) {}
+
     var t=document.createElement('div'); t.className='hg-toast'; t.textContent=msg; document.body.appendChild(t);
     setTimeout(function(){ try{ t.style.transition='opacity .3s'; t.style.opacity='0'; }catch(e){} }, 1400);
     setTimeout(function(){ try{ t.remove(); }catch(e){} }, 1750);

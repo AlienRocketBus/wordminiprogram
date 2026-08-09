@@ -606,6 +606,15 @@ def _inj_copy(s):
     return s.replace(m, "'\U0001f3c6 \u5bf9\u624b\u79bb\u573a\uff0c\u672c\u5c40\u4f60\u80dc'", 1)
 
 
+
+def _inj_toast_split(s):
+    """把转发那句拆掉 —— 提示样式就又分叉了。"""
+    m = "if (window.HansenToast && HansenToast.say) { HansenToast.say(msg); return; }"
+    if m not in s:
+        return None
+    return s.replace(m, "/* removed */", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -677,6 +686,7 @@ CASES = [
     ('语法坏掉',   'hansen_toast_v1156.js',       _inj_syntax),
     ('提示对按钮', 'hansen_pk_room_ui_v1065.js',  _inj_tip_button),
     ('文案一致',   'hansen_pk_room_ui_v1065.js',  _inj_copy),
+    ('提示要统一', 'hansen_land_cards.js',        _inj_toast_split),
 ]
 
 

@@ -635,6 +635,15 @@
   }
   var _toastT=null;
   function toast(msg, isGem){
+    /* v1156: 先交给统一的提示（见其他模块的同名注释）。
+       crystal 这个多一个 isGem 参数，但那只影响图标，
+       用统一提示时把它拼进文字里。 */
+    try {
+      if (window.HansenToast && HansenToast.say) {
+        HansenToast.say(msg); return;
+      }
+    } catch (e) {}
+
     ensureCSS();
     var old=document.getElementById('hsnCrystalToast'); if(old&&old.parentNode)old.parentNode.removeChild(old);
     var t=document.createElement('div'); t.id='hsnCrystalToast'; t.className='hcr-toast'+(isGem?' gem':''); t.textContent=msg;
