@@ -568,6 +568,14 @@ def _inj_v1156(s):
     return s.replace(m, "（已删）", 1)
 
 
+
+def _inj_syntax(s):
+    """故意造一个语法错 —— 模拟"注入被强杀后留下的残骸"。"""
+    if 'function' not in s:
+        return None
+    return s.replace('function', 'functionX', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -636,6 +644,7 @@ CASES = [
     ('探测要像人', '发版前_线上体检.py',      _inj_probe),
     ('下结论清单', '下结论之前.md',            _inj_checklist),
     ('v1156复盘',    '事故复盘_v1156_猜错四次.md', _inj_v1156),
+    ('语法坏掉',   'hansen_toast_v1156.js',       _inj_syntax),
 ]
 
 

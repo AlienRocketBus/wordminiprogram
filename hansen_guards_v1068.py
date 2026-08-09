@@ -2015,6 +2015,11 @@ def _recover_inject():
     #   实测：一处 `guestId` 残留就这样卡了好几轮闸门。
     #
     #   自证整轮最多十几分钟，超过 30 分钟的标记必然是死的。
+    # 🔴v1156：**先看工作区有没有语法坏掉的文件。**
+    #   自证被 timeout 强杀时，注入的坏代码留在工作区 ——
+    #   如果那处注入恰好造成语法错误，**整个文件就废了**，
+    #   而下一轮跑到很后面才会发现（实测：耽误了两轮）。
+    #   备份就在手边，能修就先修。
     _run = os.path.join(bakdir, 'RUNNING')
     if os.path.exists(_run):
         try:
@@ -2571,6 +2576,37 @@ def guard_incident_v1156():
             '当前进度.md 里没有指向这份复盘 —— '
             '下一次对话第一眼看不到，等于没写')
 
+
+def guard_no_broken_syntax():
+    """工作区里不许有语法坏掉的 JS。
+
+    事故（v1156）：自证被 `timeout` 强杀时，注入的坏代码留在工作区。
+    如果那处注入**恰好造成语法错误**，整个文件就废了 ——
+    而这次是跑到自证的基线检查才发现，**耽误了两轮**。
+
+    语法错是所有问题里最该被最先发现的一种：
+    它一定是错的，查起来又极快（node --check 一个文件几十毫秒）。
+
+    > 便宜又确定的检查，就该放在最前面。
+    """
+    import glob as _g
+    import subprocess as _sp
+    broken = []
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))
+                    + _g.glob(os.path.join(ROOT, 'sw_*.js'))):
+        try:
+            r = _sp.run(['node', '--check', f], capture_output=True, timeout=20)
+            if r.returncode != 0:
+                broken.append(os.path.basename(f))
+        except Exception:
+            pass
+    if broken:
+        bad('语法坏掉',
+            '%d 个文件语法不通过（如 %s）—— '
+            '多半是自证注入被强杀后留下的残骸，'
+            '**这种文件一加载整个模块就没了**'
+            % (len(broken), broken[0]))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2662,6 +2698,7 @@ GUARDS = [
     ('探测要像人', guard_probe_looks_real),
     ('下结论清单', guard_conclusion_checklist),
     ('v1156复盘',    guard_incident_v1156),
+    ('语法坏掉',   guard_no_broken_syntax),
 ]
 
 
