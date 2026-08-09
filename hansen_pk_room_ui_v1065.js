@@ -88,7 +88,7 @@
       + '#' + ID + ' .pr_wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}'
       + '#' + ID + ' .pr_top{display:flex;align-items:center;gap:10px;margin-bottom:14px}'
       + '#' + ID + ' .pr_back{background:#1e293b;border:1px solid var(--pk-in-line);color:var(--pk-txt);border-radius:10px;'
-      + 'padding:8px 14px;font-size:15px;cursor:pointer}'
+      + 'padding:11px 14px;min-height:44px;font-size:15px;cursor:pointer}'
       + '#' + ID + ' .pr_h{font-size:19px;font-weight:700}'
       + '#' + ID + ' .pr_btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;'
       + 'color:#fff;background:linear-gradient(135deg,#4f46e5,#6366f1);cursor:pointer;margin-bottom:12px}'
@@ -98,7 +98,12 @@
       + '#' + ID + ' .pr_room .n{flex:1;min-width:0}'
       + '#' + ID + ' .pr_room .n b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
       + '#' + ID + ' .pr_room .n span{font-size:12px;color:var(--pk-dim)}'
-      + '#' + ID + ' .pr_room button{background:#4f46e5;border:0;color:#fff;border-radius:10px;padding:9px 16px;'
+      + '#' + ID + ' .pr_room button{background:#4f46e5;border:0;color:#fff;border-radius:10px;'
+      /* 🔴v1156：**触控目标要够 44px。**
+         实测「进去打」只有 74x38 —— 苹果和谷歌都建议触控目标至少 44x44。
+         小按钮在手机上最容易点偏，尤其孩子的手指定位没那么准，
+         而这个按钮点偏了就是"点了没反应"。 */
+      + 'padding:12px 16px;min-height:44px;'
       + 'font-size:14px;font-weight:700;cursor:pointer}'
       + '#' + ID + ' .pr_empty{color:var(--pk-dim);text-align:center;padding:26px 10px;font-size:14px;line-height:1.7}'
       + '#' + ID + ' .pr_err{background:#7f1d1d;border:1px solid #b91c1c;color:#fecaca;border-radius:12px;'
