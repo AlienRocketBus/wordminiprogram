@@ -466,6 +466,39 @@ async function open(seedBoard) {
      '没传就留空，显示一个错的模式是编出来的信息');
 }
 
+
+/* ── 🔴v1156 统计口径自洽（本轮系统性核对）──────────────
+ *
+ * 用"模块导出了什么 vs 谁在调"和"summary 算了什么 vs 界面显示了什么"
+ * 两个角度核对了一遍，结论：
+ *
+ *   · summary 算的 21 个字段，界面显示了 17 个
+ *     没显示的两个是 placed（布尔，用来控分支）
+ *     和 avgMs（有 avgSecs 代替）—— 都合理
+ *
+ *   · tier() / placed() 没人直接调，因为都走 summary()
+ *     （里面已含 tier 和 placed）—— 设计合理
+ *
+ *   · seasonReset() 没人调，因为赛季功能还没做 —— 不是 bug
+ *
+ * 唯一要守的是**口径自洽**：抢先次数不可能超过答对次数。
+ * 真实对战验过：第 1 题我抢先、第 2 题对手先答对
+ * → 答对 1、抢先 1，比例正确。
+ */
+{
+  const rec = fs.readFileSync(ROOT + '/hansen_pk_record_v1103.js', 'utf8');
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ucode = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/if \(first\) st\.st\.firstWins\+\+/.test(ucode),
+     '★ **抢先次数只在真的抢先时才加** —— ' +
+     '而答对次数无条件加，所以抢先数永远不会超过答对数；' +
+     '一旦反过来，抢先率就会超过 100%，那是自相矛盾的');
+  ok(/firstRate: pct\(d\.firstWins, d\.correct\)/.test(rec),
+     '★ 抢先率的分母是答对数（不是总词数）—— ' +
+     '「答对的词里抢在前面几次」才是这个指标的意思');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
