@@ -90,7 +90,7 @@
       + '#' + ID + ' .pr_h{font-size:19px;font-weight:700}'
       + '#' + ID + ' .pr_btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;'
       + 'color:#fff;background:linear-gradient(135deg,#4f46e5,#6366f1);cursor:pointer;margin-bottom:12px}'
-      + '#' + ID + ' .pr_btn2{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}'
+      + '#' + ID + ' .pr_btn2{background:transparent;border:1px solid rgba(255,255,255,.22);color:var(--pk-dim);font-weight:600}/* v1156: 次要动作不该比主要动作更亮 —— 原来是亮蓝渐变，比「再来一局」还抢眼，用户一眼先看到的是「离开」而不是「再玩一局」 */'
       + '#' + ID + ' .pr_room{display:flex;align-items:center;gap:10px;background:#1e293b;border:1px solid var(--pk-in-line);'
       + 'border-radius:12px;padding:12px;margin-bottom:10px}'
       + '#' + ID + ' .pr_room .n{flex:1;min-width:0}'
@@ -1325,10 +1325,24 @@ function doCreate() {
       if (!sm || !sm.placed) return '';
       var nx = L.nextTierOf(sm.rating);
       if (!nx) return '';
-      return '<div style="text-align:center;font-size:12.5px;color:var(--pk-dim);'
-        + 'margin:2px 0 10px">距离 ' + nx.icon + ' ' + esc(nx.name)
-        + ' 还差 <b style="color:inherit">' + nx.need + '</b> 分'
-        + '（大约 ' + Math.max(1, Math.ceil(nx.need / 18)) + ' 局）</div>';
+      /* 🔴v1156：**「下一步」要和「结果」分层。**
+
+         原来这行和上面的"总战绩"字号一样、颜色一样，
+         用户分不出哪个是"刚才发生了什么"、哪个是"接下来能做什么"。
+
+         而"还差 95 分就升段"是这一屏最有行动力的一句话 ——
+         它该被看见，而不是混在战绩里。
+
+         给它一个浅色胶囊底，和上面的灰字拉开层次。 */
+      return '<div style="text-align:center;margin:10px 0 12px">'
+        + '<span style="display:inline-block;font-size:13px;'
+        +   'background:rgba(99,102,241,.16);border:1px solid rgba(139,92,246,.3);'
+        +   'padding:7px 14px;border-radius:99px;line-height:1.5">'
+        +   '距离 ' + nx.icon + ' ' + esc(nx.name)
+        +   ' 还差 <b style="color:#c4b5fd">' + nx.need + '</b> 分'
+        +   ' <span style="opacity:.75">· 约 ' + Math.max(1, Math.ceil(nx.need / 18))
+        +   ' 局</span>'
+        + '</span></div>';
     } catch (e) { return ''; }
   }
 
@@ -1399,7 +1413,7 @@ function doCreate() {
       var sm = window.HansenPkRecord.summary();
       var dTxt = '';
       if (rec.ranked && rec.delta) {
-        dTxt = '<div style="font-size:20px;font-weight:800;margin:6px 0;color:'
+        dTxt = '<div style="font-size:20px;font-weight:800;margin:8px 0 2px;text-align:center;color:'
              + (rec.delta > 0 ? 'var(--pk-ok)' : 'var(--pk-bad)') + '">'
              + (rec.delta > 0 ? '+' : '') + rec.delta + ' 天梯分</div>';
       } else if (rec.ranked && rec.floorSaved) {
