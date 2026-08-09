@@ -239,7 +239,7 @@
     }
 
     var t = sm.tier;
-    var need = (L() && L().PLACEMENT_GAMES) || 5;
+    var need = (L() && L().PLACEMENT_GAMES) || 3;
 
     paint(
       '<div class="ld_top"><div class="ld_h">🏆 天梯排位</div>'

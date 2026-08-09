@@ -636,6 +636,15 @@ def _inj_sane_num(s):
         1)
 
 
+
+def _inj_fallback(s):
+    """把兜底值改回错的 —— 降级模式又会按另一套规则运行。"""
+    m = "PLACEMENT_GAMES) || 3"
+    if m not in s:
+        return None
+    return s.replace(m, "PLACEMENT_GAMES) || 5", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -710,6 +719,7 @@ CASES = [
     ('提示要统一', 'hansen_land_cards.js',        _inj_toast_split),
     ('战绩跟账号', 'hansen_pk_record_v1103.js',   _inj_record_owner),
     ('数字要合理', 'hansen_pk_record_v1103.js',   _inj_sane_num),
+    ('兜底要对',   'hansen_pk_record_v1103.js',   _inj_fallback),
 ]
 
 

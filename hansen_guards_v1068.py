@@ -2843,6 +2843,56 @@ def guard_sane_numbers():
             '战绩模块没有 secsOrDash() —— '
             '秒数不设上限就会显示「平均 2000 秒」这种荒谬数字')
 
+
+def guard_fallback_matches():
+    """兜底值必须和真值一样。
+
+    ═══ 事故（v1156）═══
+
+    `(L() && L().PLACEMENT_GAMES) || 5` —— 兜底写的是 5，
+    而段位表里真实值是 **3**。
+
+    实测（让段位表脚本 404）：
+    界面显示「再打 **5** 局定级赛 / 定级赛 0 / 5」，
+    而正常时是 3 局。
+    **同一个 App 在两种情况下告诉用户不同的规则。**
+
+    用户不会知道自己碰上的是降级模式，
+    只会觉得这游戏说话不算数。
+
+    > **兜底值不是随便填的默认数，它是"依赖挂了的时候的真相"。**
+    > 填错了，就等于准备了一个假的真相。
+
+    判据：所有 `X.CONST || 数字` 的兜底数字，
+    必须等于某个文件里 `var CONST = 数字` 的真值。
+    """
+    import glob as _g
+    consts = {}
+    files = sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js')))
+    for f in files:
+        try:
+            c = _code_only(open(f, encoding='utf-8', errors='replace').read())
+        except Exception:
+            continue
+        for m in re.finditer(r'var ([A-Z_]{4,30})\s*=\s*(\d+)\s*;', c):
+            consts.setdefault(m.group(1), set()).add(int(m.group(2)))
+    for f in files:
+        try:
+            c = _code_only(open(f, encoding='utf-8', errors='replace').read())
+        except Exception:
+            continue
+        for m in re.finditer(r'\.([A-Z_]{4,30})\)?\s*\|\|\s*(\d+)', c):
+            name, fb = m.group(1), int(m.group(2))
+            real = consts.get(name)
+            if real and fb not in real:
+                bad('兜底要对',
+                    '%s 里 %s 的兜底值是 %d，而真值是 %s —— '
+                    '依赖没加载时会按另一套规则运行，'
+                    '用户不知道自己碰上了降级模式，'
+                    '只会觉得这游戏说话不算数'
+                    % (os.path.basename(f), name, fb, sorted(real)))
+                return
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2940,6 +2990,7 @@ GUARDS = [
     ('提示要统一', guard_toast_unified),
     ('战绩跟账号', guard_record_follows_account),
     ('数字要合理', guard_sane_numbers),
+    ('兜底要对',   guard_fallback_matches),
 ]
 
 

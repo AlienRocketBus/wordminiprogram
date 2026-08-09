@@ -99,8 +99,22 @@
   }
 
   /* 是否已完成定级赛 */
+  /* 🔴v1156：**兜底值要和真值一样。**
+
+     `(L() && L().PLACEMENT_GAMES) || 5` —— 兜底写的是 5，
+     而段位表里真实值是 3。
+
+     实测（让段位表脚本 404）：界面显示「再打 5 局定级赛 / 定级赛 0 / 5」，
+     而正常时是 3 局。**同一个 App 在两种情况下告诉用户不同的规则。**
+
+     兜底值存在的意义是"依赖没加载时也能大致工作"，
+     **但它一旦和真值不同，就成了另一套规则** ——
+     用户不会知道自己碰上的是降级模式，只会觉得这游戏说话不算数。
+
+     > 兜底值不是随便填的默认数，它是"依赖挂了的时候的真相"。
+     > 填错了，就等于准备了一个假的真相。 */
   function placed(d) {
-    var need = (L() && L().PLACEMENT_GAMES) || 5;
+    var need = (L() && L().PLACEMENT_GAMES) || 3;
     return (d || read()).placementGames >= need;
   }
 
@@ -108,7 +122,7 @@
   function tier(d) {
     d = d || read();
     if (!placed(d)) {
-      var need = (L() && L().PLACEMENT_GAMES) || 5;
+      var need = (L() && L().PLACEMENT_GAMES) || 3;
       return { name: '未定级', emoji: '🐝',
                sub: '再打 ' + Math.max(0, need - d.placementGames) + ' 局定级赛',
                placed: false };
