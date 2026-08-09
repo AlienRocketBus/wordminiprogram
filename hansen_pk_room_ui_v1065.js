@@ -1004,6 +1004,8 @@ function doCreate() {
       try {
         if (r && r.ok && typeof r.oppId === 'string') {
           if (!st._oppId && r.oppId) st._oppId = r.oppId;
+          /* v1156: 记下对手分数，结算时算加减分要用 */
+          if (!st._oppRating && Number(r.oppRating) > 0) st._oppRating = Number(r.oppRating);
           else if (st._oppId && r.oppId && r.oppId !== st._oppId && !st._oppSwapped) {
             st._oppSwapped = true;
             try {
@@ -1468,6 +1470,14 @@ function doCreate() {
           result: r.result,
           mode: (_state && _state.mode) || _pickedMode,
           oppName: (_state && _state.oppName) || '对手',
+          /* 🔴v1156：**把对手分数传给战绩，别让它默认成 1000。**
+             实测：这里原来一个字都没传，于是战绩模块每次都按
+             `opts.oppRating || 1000` 算 —— 打赢 1400 分的高手
+             和打赢新手加一样的分。
+             **排位的意义有一半在于"赢强的人涨得多"**，
+             这个字段没传就等于那一半没了。
+             拿不到时仍然回落到 1000（比不算好）。 */
+          oppRating: (_state && _state._oppRating) || 0,
           myScore: r.mine, oppScore: r.theirs,
           words: ((_state && _state.st) || {}).words || 0,
           correct: ((_state && _state.st) || {}).correct || 0,

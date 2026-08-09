@@ -178,7 +178,15 @@
     }
 
     d.history.unshift({
-      at: Date.now(), result: res, mode: opts.mode || 'C',
+      /* 🔴v1156：**没传模式就别猜一个。**
+
+         原来默认成 'C'（接力赛）—— 而这条记录可能是任何模式的，
+         历史里就会显示成"接力赛"，那是编出来的信息。
+
+         判"算不算排位"用的是 `opts.mode || ''`（空串，不会误判成 A），
+         这里也该一致：不知道就留空，界面上不显示模式，
+         **比显示一个错的模式诚实**。 */
+      at: Date.now(), result: res, mode: String(opts.mode || ''),
       opp: String(opts.oppName || '对手').slice(0, 16),
       my: Number(opts.myScore) || 0, oc: Number(opts.oppScore) || 0,
       delta: delta, ranked: isRanked

@@ -808,6 +808,13 @@
          还在跟原来那个人的名字打，而比分和判定已经是新人的了。 */
       return { ok: true, mode: modeOf(room.mode).key,
                oppId: (room.hostId === u2.id) ? (room.guestId || '') : (room.hostId || ''),
+               /* 🔴v1156：**把对手的天梯分也带回去。**
+                  没有它，加减分就只能按"对手 1000 分"算 ——
+                  打赢一个 1400 分的高手和打赢新手加一样的分，
+                  **排位的意义有一半在于"赢强的人涨得多"**。
+                  只有房主的分是可信的（v1114 做过防谎报），
+                  所以客人视角能拿到，房主视角拿不到（返回 0，由调用方兜底）。 */
+               oppRating: (room.hostId === u2.id) ? 0 : (Number(room.hostRating) || 0),
                mySide: (room.hostId === u2.id) ? 'host' : 'guest',
                round: winners.length, winners: winners,
                roundAt: room.roundAt || 0,
