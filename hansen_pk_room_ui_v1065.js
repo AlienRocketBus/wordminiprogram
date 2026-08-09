@@ -101,7 +101,7 @@
       + '#' + ID + ' .pr_empty{color:var(--pk-dim);text-align:center;padding:26px 10px;font-size:14px;line-height:1.7}'
       + '#' + ID + ' .pr_err{background:#7f1d1d;border:1px solid #b91c1c;color:#fecaca;border-radius:12px;'
       + 'padding:12px;font-size:14px;line-height:1.6;margin-bottom:12px;word-break:break-all}'
-      + '#' + ID + ' .pr_word{font-size:34px;font-weight:800;text-align:center;letter-spacing:2px;margin:22px 0 6px}'
+      + '#' + ID + ' .pr_word{font-size:34px;font-weight:800;text-align:center;letter-spacing:2px;margin:22px 0 18px}'
       + '#' + ID + ' .pr_cn{text-align:center;color:var(--pk-dim);margin-bottom:18px}'
       + '#' + ID + ' .pr_in{width:100%;box-sizing:border-box;padding:14px;font-size:19px;border-radius:12px;'
       + 'border:2px solid var(--pk-in-line);background:#0b1220;color:var(--pk-txt);text-align:center;letter-spacing:2px}'
@@ -669,10 +669,43 @@ function doCreate() {
     _rt = { idx: idx, answered: false, t0: Date.now(), deadline: base + span };
 
     paint('<div class="pr_top">'
-      + '<div class="pr_h" style="display:flex;justify-content:space-between;align-items:center">'
-      +   '<span>你 <b id="prMy">' + st.myScore + '</b></span>'
-      +   '<span style="font-size:13px;color:var(--pk-dim)">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
-      +   '<span><b id="prOpp">' + st.oppScore + '</b> ' + esc(st.oppName || '对手') + '</span>'
+      /* 🔴v1156：**比分行原来挤成一坨。**
+
+         截图看到的是：「你 0⚡抢答赛0 小明」——
+         我的分和模式名贴在一起，对手的分和名字也贴着，
+         **完全看不出"谁 vs 谁、多少比多少"**。
+
+         而这一行是对战屏最该一眼看懂的东西。
+
+         改法：
+           · 我方左、对手右，中间放模式徽章，三段之间给足间距
+           · 比分数字放大到 22px 并用等宽数字（跳动时不会左右晃）
+           · 名字压小压淡 —— 重点是分数不是名字
+           · 名字过长时省略，不许把比分挤走 */
+      /* ⚠️ 这一行不能继承 .pr_h 的 19px —— 那会把三段撑开，
+         对手名字被挤成「小...」。这里字号由各段自己定。 */
+      + '<div class="pr_h" style="display:flex;justify-content:space-between;'
+      +   'align-items:center;gap:8px;font-size:14px;font-weight:600">'
+      +   '<span style="flex:1;min-width:0;display:flex;align-items:baseline;gap:5px">'
+      +     '<span style="font-size:12.5px;color:var(--pk-dim);flex:none">你</span>'
+      +     '<b id="prMy" style="font-size:22px;font-variant-numeric:tabular-nums;'
+      +       'display:inline-block">' + st.myScore + '</b>'
+      +   '</span>'
+      /* ⚠️ 模式徽章要能被挤掉，名字不能。
+         宽度不够时优先保证「和谁打、多少分」——
+         模式名是次要信息，用户点进来之前就选过了。 */
+      +   '<span style="flex:0 1 auto;min-width:0;overflow:hidden;font-size:11.5px;'
+      +     'color:var(--pk-dim);background:rgba(255,255,255,.07);'
+      +     'padding:3px 9px;border-radius:99px;white-space:nowrap;'
+      +     'text-overflow:ellipsis">' + esc(M.emoji || '') + esc(M.name || '') + '</span>'
+      +   '<span style="flex:1 0 auto;min-width:0;display:flex;align-items:baseline;'
+      +     'gap:5px;justify-content:flex-end">'
+      +     '<b id="prOpp" style="font-size:22px;font-variant-numeric:tabular-nums;'
+      +       'display:inline-block">' + st.oppScore + '</b>'
+      +     '<span style="font-size:12.5px;color:var(--pk-dim);overflow:hidden;'
+      +       'text-overflow:ellipsis;white-space:nowrap">'
+      +       esc(st.oppName || '对手') + '</span>'
+      +   '</span>'
       + '</div>'
       + '<div class="pr_sub">第 ' + (idx + 1) + ' / ' + words.length + ' 词'
       +   ' · <span id="prClock">⏱ ' + (M.perWordSecs || 15) + 's</span></div></div>'
@@ -685,7 +718,7 @@ function doCreate() {
           ? '<div style="margin:26px 0 10px;text-align:center">'
             + '<button id="prSpk" style="font-size:44px;background:none;border:0;cursor:pointer">🔊</button>'
             + '<div style="font-size:13px;color:var(--pk-dim);margin-top:6px">点喇叭再听一次</div></div>'
-          : '<div class="pr_cn" style="font-size:26px;margin:18px 0 6px">' + esc(txtOf(w.cn)) + '</div>'
+          : '<div class="pr_cn" style="font-size:34px;font-weight:800;color:var(--pk-txt);margin:22px 0 14px;line-height:1.25">' + esc(txtOf(w.cn)) + '</div>'
             + '<div class="pr_word" style="letter-spacing:6px;font-size:22px;color:var(--pk-hint)">'
             + esc(en.charAt(0)) + ' ' + '_ '.repeat(Math.max(0, en.length - 1)) + '</div>')
       /* 🔴v1118：**不弹系统输入法。**
