@@ -265,7 +265,7 @@
       if (!r.ok) { box.innerHTML = errBlock(r); wireErr(); return; }
       var rooms = (r.rooms || []).filter(function (x) { return !x.mine; });
       if (!rooms.length) {
-        box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间公开房」，等别人来打。</div>';
+        box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间」，等别人来打。</div>';
         return;
       }
       box.innerHTML = rooms.map(function (x) {

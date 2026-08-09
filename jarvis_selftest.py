@@ -588,6 +588,15 @@ def _inj_syntax(s):
     return s.replace(m, "function ask(o) {{", 1)
 
 
+
+def _inj_tip_button(s):
+    """把提示里引用的按钮名改掉 —— 用户就会去找一个不存在的按钮。"""
+    m = "点上面的「➕ 开一间」"
+    if m not in s:
+        return None
+    return s.replace(m, "点上面的「开始一局新的对战」", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -657,6 +666,7 @@ CASES = [
     ('下结论清单', '下结论之前.md',            _inj_checklist),
     ('v1156复盘',    '事故复盘_v1156_猜错四次.md', _inj_v1156),
     ('语法坏掉',   'hansen_toast_v1156.js',       _inj_syntax),
+    ('提示对按钮', 'hansen_pk_room_ui_v1065.js',  _inj_tip_button),
 ]
 
 

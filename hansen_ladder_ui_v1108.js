@@ -600,10 +600,22 @@
       var waited = Math.round((Date.now() - t0) / 1000);
       var band = (L() && L().matchBand) ? L().matchBand(waited) : 200;
 
-      paint('<div class="ld_top"><button aria-label="取消匹配" class="ld_x" id="ldCancel">×</button>'
+      /* v1156: 标题和关闭键之间给点距离 —— 原来贴在一起像挤住了 */
+      paint('<div class="ld_top" style="gap:12px">'
+        + '<button aria-label="取消匹配" class="ld_x" id="ldCancel">×</button>'
         + '<div class="ld_h">⚡ 正在找对手…</div></div>'
         + '<div class="ld_card" style="text-align:center;padding:30px 14px">'
-        +   '<div style="font-size:44px">🔍</div>'
+        /* 🔴v1156：**等待屏最需要的信号是"它还活着"。**
+           原来放大镜是静止的 emoji ——
+           用户等了十几秒看到画面一动不动，
+           第一反应是"卡了吧"，然后就退出去了。
+
+           轻微的左右摆动（像在四处找人），
+           不用动画帧、不耗电，但一眼能看出系统在动。 */
+        +   '<style>@keyframes hsnLdSeek{0%,100%{transform:rotate(-14deg) translateX(-6px)}'
+        +     '50%{transform:rotate(14deg) translateX(6px)}}</style>'
+        +   '<div style="font-size:44px;display:inline-block;'
+        +     'animation:hsnLdSeek 1.8s ease-in-out infinite">🔍</div>'
         +   '<div style="font-size:16px;color:var(--hpk-txt);margin-top:10px">'
         +     '正在找 ' + Math.max(0, sm.rating - band) + ' ~ ' + (sm.rating + band) + ' 分的对手</div>'
         +   '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px">'

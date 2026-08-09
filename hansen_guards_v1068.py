@@ -2635,6 +2635,40 @@ def guard_no_broken_syntax():
             '**这种文件一加载整个模块就没了**'
             % (len(broken), broken[0]))
 
+
+def guard_tip_matches_button():
+    """提示里引用的按钮名，必须和按钮上真正写的字一样。
+
+    ═══ 同一个错犯了两次（v1156）═══
+
+    第一次：空房间列表提示写「点上面的『自己开一间』」，
+            而按钮实际叫「➕ 开一间公开房」。
+    第二次：我把按钮改短成「➕ 开一间」，**忘了改提示** ——
+            提示还写着「➕ 开一间公开房」。
+
+    > **改按钮文字的时候，很容易忘掉别处正在引用它。**
+    > 新用户会照着提示里的字去找一个不存在的按钮。
+
+    判据：`点上面的「X」` 里的 X，必须能在同一个文件里
+    找到一个按钮的文本包含它。
+    """
+    src = _read('hansen_pk_room_ui_v1065.js') or ''
+    if not src:
+        return
+    for m in re.finditer(r'点上面的「([^」]{2,20})」', src):
+        want = m.group(1).strip()
+        # 找按钮文本：>...按钮文字...</button>
+        found = False
+        for b in re.finditer(r'>([^<>]{2,30})</button>', src):
+            if want in b.group(1):
+                found = True
+                break
+        if not found:
+            bad('提示对按钮',
+                '提示里说「%s」，但找不到这个按钮 —— '
+                '多半是按钮文字改了而提示没跟着改，'
+                '新用户会照着字去找一个不存在的按钮' % want)
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2727,6 +2761,7 @@ GUARDS = [
     ('下结论清单', guard_conclusion_checklist),
     ('v1156复盘',    guard_incident_v1156),
     ('语法坏掉',   guard_no_broken_syntax),
+    ('提示对按钮', guard_tip_matches_button),
 ]
 
 
