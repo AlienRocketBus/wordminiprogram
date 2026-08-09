@@ -177,6 +177,13 @@
   }
 
   /* v1156: 毫秒转秒 —— 太离谱的一律显示「—」 */
+  /* v1156: 算百分比 —— 一律夹在 0~100，分母为 0 就是 0 */
+  function pct(part, whole) {
+    var a = Number(part), b = Number(whole);
+    if (!isFinite(a) || !isFinite(b) || b <= 0) return 0;
+    return Math.max(0, Math.min(100, Math.round(a * 100 / b)));
+  }
+
   var SANE_MAX_MS = 5 * 60 * 1000;     /* 一个词想超过 5 分钟就不是真的了 */
   function secsOrDash(ms) {
     var n = Number(ms);
@@ -189,7 +196,7 @@
     var total = d.wins + d.losses + d.draws;
     return {
       wins: d.wins, losses: d.losses, draws: d.draws, total: total,
-      winRate: total ? Math.round(d.wins * 100 / total) : 0,
+      winRate: pct(d.wins, total),
       streak: d.streak, bestStreak: d.bestStreak,
       rating: d.rating, placed: placed(d),
       placementGames: d.placementGames,
@@ -200,7 +207,19 @@
       peakRating: d.peakRating,
       words: d.words,
       correct: d.correct,
-      accuracy: d.words ? Math.round(d.correct * 100 / d.words) : 0,
+      /* 🔴v1156：**百分比必须夹在 0~100。**
+
+         实测（存档被写坏时：firstWins=1e12、correct=99999）：
+         抢先率算出 **10000%**。
+
+         而百分比超过 100 是自相矛盾的 ——
+         「答对的词里抢在前面 10000%」这句话本身就不成立，
+         用户看到只会觉得这个统计是坏的。
+
+         存档会被写坏的原因很多：迁移中断、版本不一致、
+         别的模块误写、用户手动改。
+         **统计不该假设输入一定是干净的。** */
+      accuracy: pct(d.correct, d.words),
       avgMs: d.correct ? Math.round(d.totalMs / d.correct) : 0,
       /* 🔴v1156：**大到没意义的秒数就别报数字了。**
 
@@ -217,7 +236,7 @@
       fastestSecs: secsOrDash(d.fastestMs),
       firstWins: d.firstWins,
       /* 抢先率：答对的词里有多少是抢在对手前面的 —— 手速的直接指标 */
-      firstRate: d.correct ? Math.round(d.firstWins * 100 / d.correct) : 0
+      firstRate: pct(d.firstWins, d.correct),
     };
   }
 
