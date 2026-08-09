@@ -192,19 +192,52 @@
          没做「加好友」那一套（列表/申请/通过）—— 对现在的用户量太重，
          而且解决不了核心问题：你想跟谁打通常是身边的人，
          微信发一句话比在 App 里加好友快得多。 */
+      /* 🔴v1156：**这一屏原来的顺序反了。**
+
+         改前从上到下是：
+           输入房间码 + 进房
+           开一间公开房（整行）
+           开私密房（整行）
+           刷新房间列表（整行）
+           ── 房间列表 ──   ← 挤到半屏以下
+
+         而绝大多数人点进这一屏是来**找房打**的，
+         输房间码是少数人（约好了的）才做的事。
+         最主要的内容（有谁在等着打）被三行按钮压到了下面。
+
+         > 一屏的顺序应该按"多少人要用"排，不是按"实现的先后"排。
+
+         改后：
+           [➕ 开一间] [🔒 私密] [🔄 刷新]   ← 一行三个，紧凑
+           ── 房间列表 ──                    ← 直接可见
+           有朋友的房间码？（折叠）           ← 需要的人自己点开 */
       + '<div style="display:flex;gap:8px;margin:10px 0">'
-      +   '<input id="prCode" maxlength="4" placeholder="输入好友的房间码"'
-      +     ' aria-label="输入好友给你的四位房间码"'
-      +     ' autocapitalize="characters" autocomplete="off"'
-      +     ' style="flex:1;min-width:0;text-align:center;letter-spacing:6px;font-size:20px;'
-      +     'text-transform:uppercase;background:var(--pk-card);border:1px solid var(--pk-in-line);'
-      +     'border-radius:12px;color:var(--pk-txt);padding:10px">'
-      +   '<button class="pr_btn" id="prJoinCode" style="flex:0 0 92px;margin:0">进房</button>'
+      +   '<button class="pr_btn" id="prNew" style="flex:1;margin:0;font-size:14px;'
+      +     'padding:11px 6px">➕ 开一间</button>'
+      +   '<button class="pr_btn pr_btn2" id="prPriv" style="flex:1;margin:0;font-size:14px;'
+      +     'padding:11px 6px">🔒 私密房</button>'
+      +   '<button class="pr_btn pr_btn2" id="prRef" style="flex:0 0 82px;margin:0;'
+      +     'font-size:14px;padding:11px 6px">🔄 刷新</button>'
       + '</div>'
-      + '<button class="pr_btn" id="prNew">➕ 开一间公开房，等人来打</button>'
-      + '<button class="pr_btn pr_btn2" id="prPriv">🔒 开私密房，邀请好友来打</button>'
-      + '<button class="pr_btn pr_btn2" id="prRef">🔄 刷新房间列表</button>'
-      + '<div id="prList"><div class="pr_empty">正在找房间…</div></div>');
+
+      + '<div id="prList"><div class="pr_empty">正在找房间…</div></div>'
+
+      /* 房间码收到最下面：约好了的人自己点开，不占首屏。
+         v1105 当初把它放在最上是因为"邀请朋友"是新功能想让人看见 ——
+         但新功能不等于高频功能。 */
+      + '<details style="margin-top:16px">'
+      +   '<summary style="cursor:pointer;color:var(--pk-dim);font-size:13.5px;'
+      +     'padding:8px 2px;list-style:none">🔑 有朋友给的房间码？点这里输入</summary>'
+      +   '<div style="display:flex;gap:8px;margin:8px 0 0">'
+      +     '<input id="prCode" maxlength="4" placeholder="四位房间码"'
+      +       ' aria-label="输入好友给你的四位房间码"'
+      +       ' autocapitalize="characters" autocomplete="off"'
+      +       ' style="flex:1;min-width:0;text-align:center;letter-spacing:6px;font-size:20px;'
+      +       'text-transform:uppercase;background:var(--pk-card);border:1px solid var(--pk-in-line);'
+      +       'border-radius:12px;color:var(--pk-txt);padding:10px">'
+      +     '<button class="pr_btn" id="prJoinCode" style="flex:0 0 92px;margin:0">进房</button>'
+      +   '</div>'
+      + '</details>');
     wireErr();
     if (q('prBack')) q('prBack').onclick = close;
     /* v1100：先选玩法再开房 —— 三种规则差别很大，不能默默替房主决定 */
@@ -255,7 +288,9 @@
 
              加一个玩法徽章放在最前面，和段位、词数并列。 */
           + '<span>' + modeBadge(x.mode) + esc(tierText(x)) + ' · ' + x.wordCount + ' 个词 · '
-          + (x.ageSec < 60 ? x.ageSec + ' 秒前开' : Math.round(x.ageSec / 60) + ' 分钟前开') + '</span></div>'
+          /* v1156: 文案缩短 —— 有段位分时这一行会挤到换行，
+             而「秒前开/分钟前开」里的"开"字并不增加信息。 */
+          + (x.ageSec < 60 ? x.ageSec + '秒前' : Math.round(x.ageSec / 60) + '分钟前') + '</span></div>'
           + '<button data-rid="' + esc(x.id) + '">进去打</button></div>';
       }).join('');
       [].slice.call(box.querySelectorAll('button[data-rid]')).forEach(function (b) {
