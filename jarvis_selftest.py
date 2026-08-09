@@ -27,6 +27,7 @@ import os
 import re
 import shutil
 import subprocess
+import json          # v1156: 进度存盘要用 —— 之前漏了，而 except:pass 把错误吞了
 import sys
 import time
 import tempfile
@@ -562,8 +563,12 @@ def _inj_checklist(s):
 
 
 def _inj_v1156(s):
-    """把"不可逆"那条删掉 —— 复盘就漏掉了最贵的那一课。"""
-    m = "不可逆"
+    """把"怀疑自己的工具"那条删掉 —— 复盘就漏掉了最贵的那一课。
+
+    ⚠️ 第一版删的是"不可逆"，而那三个字在文中出现好几处，
+       删一处剩下的还在，守卫照样绿。
+       样本要打在**只出现一次的关键句**上。"""
+    m = "怀疑自己的工具"
     if m not in s:
         return None
     return s.replace(m, "（已删）", 1)
@@ -571,10 +576,16 @@ def _inj_v1156(s):
 
 
 def _inj_syntax(s):
-    """故意造一个语法错 —— 模拟"注入被强杀后留下的残骸"。"""
-    if 'function' not in s:
+    """造一个括号不配平的语法错。
+
+    ⚠️ 第一版把 `function` 改成 `functionX` —— 那确实是语法错，
+       但**括号仍然配平**，而守卫为了提速先做括号粗查，
+       粗查过了就不起 node，于是抓不到。
+       样本要打在守卫真正会看的那个特征上。"""
+    m = "function ask(o) {"
+    if m not in s:
         return None
-    return s.replace('function', 'functionX', 1)
+    return s.replace(m, "function ask(o) {{", 1)
 
 
 CASES = [

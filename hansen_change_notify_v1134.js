@@ -60,8 +60,8 @@
   try {
     var ls = window.localStorage;
     if (!ls) return;
-    if (ls.setItem && ls.setItem.__hsnMine) return;   /* 已经是最外层，不用重装 */
-    var rawSet = ls.setItem.bind(ls);
+    if (Storage.prototype.setItem && Storage.prototype.setItem.__hsnMine) return;   /* 已经是最外层，不用重装 */
+    var rawSet = Storage.prototype.setItem.bind(ls);
     var rawRemove = ls.removeItem.bind(ls);
     var timer = null;
 
@@ -86,7 +86,7 @@
       return r;
     };
     try {
-      ls.setItem.__hsnMine = 1;      /* 标记"这层是我的"，供重装时判断 */
+      Storage.prototype.setItem.__hsnMine = 1;      /* 标记"这层是我的"，供重装时判断 */
       ls.removeItem.__hsnMine = 1;
       Object.defineProperty(ls, '__hsnHooked', { value: 1, enumerable: false });
     } catch (e) { ls.__hsnHooked = 1; }

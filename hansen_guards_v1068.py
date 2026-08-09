@@ -2449,7 +2449,11 @@ def guard_download_sentinel():
     except Exception:
         bad('线上哨兵', '哨兵配置读不了')
         return
-    if 'schedule' not in body or 'cron' not in body:
+    # ⚠️ **子串匹配太松。** 把 `schedule:` 改名成 `schedule_disabled:`
+    #    照样含"schedule"这几个字，守卫就放过去了 ——
+    #    而那时候哨兵已经不会自动跑了。
+    #    要查的是 YAML 里那个**真正的键**。
+    if not re.search(r'^\s*schedule:\s*$', body, re.M) or 'cron' not in body:
         bad('线上哨兵', '哨兵没有定时触发 —— 只能手动点就等于没有')
     if '发版前_线上体检.py' not in body:
         bad('线上哨兵', '哨兵没有跑线上体检 —— 它靠那个才知道线上是好是坏')
