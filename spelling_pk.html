@@ -289,6 +289,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     var P=window.HansenSbProfile;
     var s=P?P.collectStats():{bestCpm:0,learned:0,days:0};
     var L=readLadder();
+    /* 🔴v1156：**速览的「对战胜率」读的是旧存档，永远显示「—」。**
+
+       实测：打了 5 局天梯（5 胜 0 负），
+       速览里「对战胜率」还是「—」。
+
+       根因和用户卡片那处一模一样：
+       速览读 readLadder()（v1002 的旧存档），
+       而天梯战绩在 HansenPkRecord（v1103 起的新存档）。
+
+       > **同一个数据换了存放位置，所有读它的地方都要跟着改。**
+       > 改漏一处，用户就会看到一个永远不动的数字 ——
+       > 而永远不动的数字比没有更糟：他会以为自己白打了。
+
+       （几轮前修用户卡片时改了一处，这处又漏了 ——
+         同一个问题在同一个文件里出现两次。） */
+    try {
+      var _R2 = window.HansenPkRecord;
+      if (_R2 && _R2.summary) {
+        var _s2 = _R2.summary();
+        if (_s2 && _s2.total) {
+          L = { games: _s2.total, wins: _s2.wins,
+                rating: _s2.rating, placed: !!_s2.placed };
+        }
+      }
+    } catch (e) {}
     var rate=L.games?Math.round(L.wins/L.games*100):0;
     box.innerHTML='<div class="pk_grid">'
       +'<div class="pk_it"><div class="pk_v">'+(s.bestCpm||0)+'</div><div class="pk_l">最快速度(字符/分)</div></div>'
