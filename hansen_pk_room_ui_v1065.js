@@ -630,6 +630,16 @@ function doCreate() {
   }
 
   function askRound(idx) {
+    /* v1156: 上一题提交时把输入框禁用、键盘调暗了，这里要恢复 ——
+       **禁用状态如果留下来，下一题就打不了字了**，
+       而那种"看着能玩但敲不进去"的坏法最难被发现。 */
+    try {
+      var _in1 = q('prIn');
+      if (_in1) _in1.disabled = false;
+      var _kb1 = q('prKb');
+      if (_kb1) _kb1.style.opacity = '';
+    } catch (e) {}
+
     stopPoll();
     var st = _state;
     if (!st) return;
@@ -1065,6 +1075,26 @@ function doCreate() {
   function submitRound(idx, correct, forced) {
     if (!_rt || _rt.answered) return;
     _rt.answered = true;
+
+    /* 🔴v1156：**提交之后要立刻给个反馈，别干等网络。**
+
+       实测（每次请求延迟 3 秒的慢网络）：
+       拼对了点提交，**6 秒里屏幕一点变化都没有** ——
+       倒计时还停在 18s、提示还是"对手：正在拼…"。
+
+       用户会以为按钮坏了，然后反复点。
+       而抢答赛里这几秒恰恰是最紧张的时候。
+
+       > 一个动作的反馈时间，不该取决于网络有多快。
+       > 先告诉他"收到了"，结果慢慢来。 */
+    try {
+      var _h0 = q('prHint');
+      if (_h0) _h0.textContent = '📨 已提交，正在和对手比…';
+      var _in0 = q('prIn');
+      if (_in0) _in0.disabled = true;
+      var _kb0 = q('prKb');
+      if (_kb0) _kb0.style.opacity = '.45';
+    } catch (e) {}
     stopPoll();
     var st = _state;
     var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { firstScore: 100, secondScore: 60, waitAll: true };
