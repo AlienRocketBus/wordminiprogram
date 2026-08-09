@@ -422,6 +422,50 @@ async function open(seedBoard) {
      '★ 转义函数真的在处理尖括号和引号');
 }
 
+
+/* ── 🔴v1156 加减分要看对手水平 ────────────────────────
+ *
+ * **这是天梯最核心的一条，而它一直是坏的。**
+ *
+ * 战绩模块算加减分时读 `opts.oppRating || 1000`，
+ * 而对战 UI 调 record() 时**根本没传这个字段** ——
+ * 于是每一局都按"对手 1000 分"算：
+ * 打赢一个 1400 分的高手，和打赢一个新手，加一样的分。
+ *
+ * > **排位的意义有一半在于"赢强的人涨得多"。**
+ * > 这个字段没传，那一半就没了。
+ *
+ * 而算法本身是对的（v1002 就写好了），只是数据没送到 ——
+ * 又一次"算好的东西没送到眼前"。
+ *
+ * 修完实测（我 1057 分时）：
+ *   打赢 800 分  → +7
+ *   打赢 1000 分 → +17
+ *   打赢 1400 分 → +35     ← 五倍差距
+ *   打赢 1800 分 → +39
+ */
+{
+  const room = fs.readFileSync(ROOT + '/hansen_pk_room_v1065.js', 'utf8');
+  const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
+  const rcode = room.replace(/\/\*[\s\S]*?\*\//g, '');
+  const ucode = ui.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/oppRating:/.test(rcode),
+     '★ **roundState 要带回对手的天梯分** —— ' +
+     '没有它，加减分只能按"对手 1000 分"算');
+  ok(/hostRating/.test(rcode),
+     '★ 取的是房主的分（只有房主的分可信，v1114 做过防谎报）');
+  ok(/_oppRating/.test(ucode),
+     '★ 对战 UI 轮询时记下对手分数');
+  ok(/oppRating: \(_state && _state\._oppRating\)/.test(ucode),
+     '★ **结算时把它传给 record()** —— ' +
+     '这一步漏了，前面全白做（算法早就写好了，只是数据没送到）');
+  ok(!/mode: opts\.mode \|\| 'C'/.test(
+       fs.readFileSync(ROOT + '/hansen_pk_record_v1103.js', 'utf8')),
+     '★ 历史记录的模式不许默认成 C —— ' +
+     '没传就留空，显示一个错的模式是编出来的信息');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
