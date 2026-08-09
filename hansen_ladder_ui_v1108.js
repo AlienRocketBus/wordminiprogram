@@ -452,6 +452,23 @@
     B.fetchTop().then(function (r) {
       var box2 = q('ldBoard');
       if (!box2) return;                     /* 用户已经关掉了 */
+      /* 🔴v1156：**"没人上榜"和"拿不到榜"是两回事。**
+
+         原来这两种情况共用一个分支，于是榜确实拉到了、
+         但一个人都还没上（新服务、或者大家都没打满定级赛）时，
+         界面说的是「暂时看不到排行榜 / 可能是网络不太顺」——
+         **让人以为是坏了，其实一切正常。**
+
+         > 空和错要分开说。
+         > 把"什么都没有"说成"出问题了"，
+         > 用户会去修一个根本不存在的问题（重启、换网、卸载重装）。 */
+      if (r && r.ok && r.list && r.list.length === 0) {
+        box2.innerHTML =
+          '<div style="padding:6px 0">🌱 还没有人上榜</div>'
+          + '<div style="font-size:12px;margin-top:5px;opacity:.75">'
+          + '打满 3 局定级赛就能上榜，你可能是第一个</div>';
+        return;
+      }
       if (!r || !r.ok || !r.list || !r.list.length) {
         box2.innerHTML = '<div>暂时看不到排行榜</div>'
           + '<div style="font-size:12px;margin-top:5px;opacity:.75">'
