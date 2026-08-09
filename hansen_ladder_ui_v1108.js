@@ -469,8 +469,23 @@
          三个人都 1200 分时，谁前谁后其实是数据库返回顺序决定的 ——
          给他们分 🥇🥈🥉 是在编造一个不存在的差距。
          按分数重算名次：同分同名次，下一个跳号（1,1,1,4）。 */
+      /* 🔴v1156：**UI 层也要截断，不能信数据层一定给 20 条。**
+
+         模块里写着 TOP_N = 20，但那是**请求时的意图**，
+         不是渲染时的保证 —— 数据层换个实现、云端多返回一批、
+         或者别的地方直接调 fetchTop，UI 就会老老实实画 200 行。
+
+         实测：塞 200 条进去，界面真画了 200 行，渲染耗时 1.6 秒。
+         手机上滚不到底，而且**一屏塞两百个人对用户毫无意义** ——
+         他只关心前几名和自己在哪。
+
+         > 每一层都该对自己画出来的东西负责，
+         > 而不是假设上一层已经把关了。 */
+      var MAX_ROWS = 20;
+      var list = (r.list || []).slice(0, MAX_ROWS);
+
       var ranked = [], lastRating = null, lastRank = 0;
-      r.list.forEach(function (x, i) {
+      list.forEach(function (x, i) {
         if (x.rating === lastRating) x.rank = lastRank;      /* 同分同名次 */
         else { x.rank = i + 1; lastRating = x.rating; lastRank = x.rank; }
         ranked.push(x);
