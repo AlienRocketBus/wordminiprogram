@@ -1269,6 +1269,13 @@ function doCreate() {
     } catch (e) { return ''; }
   }
 
+  /* v1156: 把可能不是数字的东西变成一个能看的数字 */
+  function numOr0(v) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.round(n);
+  }
+
   function showResult(r) {
     /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
     var txt = r.byAbandon ? '🏆 对手离场，本局你胜'
@@ -1337,7 +1344,20 @@ function doCreate() {
     }
 
     paint('<div class="pr_res">' + txt + '</div>'
-      + '<div class="pr_empty">你 ' + r.mine + ' 分 · 对手 ' + r.theirs + ' 分</div>'
+      /* 🔴v1156：**云端来的比分要清洗，不能直接拼进页面。**
+
+         实测（云端返回畸形数据：hostScore 是 undefined、guestScore 是字符串"一百"）：
+         结算屏显示成「你 分 · 对手 一百 分」——
+         我方那个数字位置**整个空掉**，而对方把字符串原样印了出来。
+
+         用户看到这种东西只会觉得"这游戏坏了"。
+         而云端数据本来就可能因为版本不一致、迁移中断、别人写坏而畸形 ——
+         **界面不该假设它一定是数字。**
+
+         > 凡是从别处拿来、要直接显示给用户的数字，
+         > 都要问一句：它要是不是数字怎么办？ */
+      + '<div class="pr_empty">你 ' + numOr0(r.mine) + ' 分 · 对手 '
+      +   numOr0(r.theirs) + ' 分</div>'
       + thisGameBlock()
       + extra
       + nextTierLine()
