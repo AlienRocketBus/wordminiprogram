@@ -44,6 +44,8 @@
         /* 🔴v1156 语义色 —— 别在代码里写死颜色：
            换主题时写死的那几个会突兀地留在原地。 */
         '--pk-good:#4ade80;--pk-warn:#fb923c;--pk-bad:#f87171;' +
+        /* v1156: 升段提示用的强调紫 —— 别写死在代码里 */
+        '--pk-accent:#c4b5fd;' +
         '--pk-in-bg:#0b1020;--pk-in-line:#334155;--pk-btn2:#1f2937;' +
         '--pk-ok:#34d399;--pk-bad:#f87171;--pk-warn:#fbbf24;--pk-hint:#93c5fd;' +
         '--pk-kb-bg:#1e293b;--pk-key-bg:#334155;--pk-key-fg:#f1f5f9;' +
@@ -1339,7 +1341,7 @@ function doCreate() {
         +   'background:rgba(99,102,241,.16);border:1px solid rgba(139,92,246,.3);'
         +   'padding:7px 14px;border-radius:99px;line-height:1.5">'
         +   '距离 ' + nx.icon + ' ' + esc(nx.name)
-        +   ' 还差 <b style="color:#c4b5fd">' + nx.need + '</b> 分'
+        +   ' 还差 <b style="color:var(--pk-accent)">' + nx.need + '</b> 分'
         +   ' <span style="opacity:.75">· 约 ' + Math.max(1, Math.ceil(nx.need / 18))
         +   ' 局</span>'
         + '</span></div>';
