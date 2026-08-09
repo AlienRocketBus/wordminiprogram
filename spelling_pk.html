@@ -203,6 +203,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     var P=window.HansenSbProfile;
     var p=P?P.readProfile():{name:'',cid:0,cidLocked:false};
     var L=readLadder();
+    /* 🔴v1156：**用户卡片和天梯页读的不是同一份数据。**
+
+       截图看到卡片写「🐝 工蜂 · 未定级」—— 自相矛盾（有段位却说未定级），
+       而同一屏下面的天梯入口写着「工蜂 · 1078 分 · 🔥 3 连胜」。
+
+       原因：卡片读的是 readLadder()（v1002 的旧存档），
+       而天梯战绩在 HansenPkRecord（v1103 起的新存档）。
+       两个数据源各说各话，用户不知道该信哪个。
+
+       > 同一件事在两个地方显示，就一定要问：它们读的是同一份数据吗？ */
+    try {
+      var _R = window.HansenPkRecord;
+      if (_R && _R.summary) {
+        var _sm = _R.summary();
+        if (_sm && _sm.total) { L = { rating: _sm.rating, placed: !!_sm.placed }; }
+      }
+    } catch (e) {}
     var tier=(window.HansenSbLadder)?HansenSbLadder.tierOf(L.rating||1000):null;
     /* 🔴v1129：**没有竞赛 ID 时不要显示「No.---」。**
        破折号什么也没说 —— 用户不知道是"还没加载好"还是"我没有"。
@@ -238,8 +255,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     }
     if(A.isSignedIn()){
       var lc=A.readLocal();
-      var who=lc.phone||lc.username||'已登录';
-      box.innerHTML='<div class="pk_acct_tip">✅ 已登录 '+escapeHtml(who)+'　进度已跟随账号，换设备登录即可找回。</div>'
+      /* 🔴v1156：**兜底成「已登录」会拼出「✅ 已登录 已登录」。**
+         截图看到的就是这个 —— 同一个词说了两遍，像是程序出错了。
+         拿不到手机号/用户名时干脆不带 ——「✅ 已登录」本身已经说清楚了。 */
+      var who=lc.phone||lc.username||'';
+      box.innerHTML='<div class="pk_acct_tip">✅ 已登录'+(who?' '+escapeHtml(who):'')+'　进度已跟随账号，换设备登录即可找回。</div>'
         +'<div class="pk_acct"><button class="pk_ab" id="pkSwitch">🔄 切换账号</button>'
         +'<button class="pk_ab" id="pkOut">🚪 退出登录</button></div>';
       var sw=$('pkSwitch'), out=$('pkOut');
