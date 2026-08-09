@@ -202,7 +202,57 @@
     };
   }
 
+  /* 🔴v1156：**换账号要把天梯战绩清掉。**
+
+     实测：用 U1 打了 6 局到「工蜂 1105 分」，换成 U2 之后
+     战绩**原封不动还在** —— 新账号一进来就看到别人的段位和分数。
+
+     家里两个孩子共用一台手机时，这个问题很实在：
+     **弟弟登录后看到的是哥哥的段位**，
+     打第一局就发现"我怎么已经工蜂了"。
+     而天梯分是要跟人走的，不是跟设备走的。
+
+     v1142 修「换账号」时清了资料（名字/竞赛 ID），
+     但天梯战绩是 v1103 之后才有的，那次没覆盖到 ——
+     **又一次"新加的东西没接进已有的清理链路"**。
+
+     做法：听 `hsn-account-uid-changed`（v1154 建立的唯一信号），
+     记下战绩属于哪个 uid，一变就清空重来。 */
+  var OWNER_KEY = 'hansen_pk_record_owner_v1156';
+
+  function currentUid() {
+    try {
+      return (JSON.parse(localStorage.getItem('hansen_auth_v1004') || '{}') || {}).uid || '';
+    } catch (e) { return ''; }
+  }
+
+  function syncOwner() {
+    try {
+      var now = currentUid();
+      var was = localStorage.getItem(OWNER_KEY);
+      if (was === null) {                     /* 第一次：认领当前战绩 */
+        localStorage.setItem(OWNER_KEY, now);
+        return;
+      }
+      if (was === now) return;                /* 同一个人，什么都不做 */
+      /* 换人了：清空战绩，别让新账号看到别人的段位 */
+      localStorage.removeItem(KEY);
+      localStorage.setItem(OWNER_KEY, now);
+      try { document.dispatchEvent(new CustomEvent('hsn-pk-record-changed')); } catch (e) {}
+    } catch (e) {}
+  }
+
+  try {
+    syncOwner();
+    document.addEventListener('hsn-account-uid-changed', syncOwner);
+    /* 别的标签页换了账号也要跟上 */
+    window.addEventListener('storage', function (ev) {
+      if (ev && ev.key === 'hansen_auth_v1004') setTimeout(syncOwner, 60);
+    });
+  } catch (e) {}
+
   window.HansenPkRecord = {
+    _syncOwnerForTest: syncOwner,
     read: read, record: record, summary: summary, tier: tier, placed: placed,
     _reset: function () { try { localStorage.removeItem(KEY); } catch (e) {} }
   };

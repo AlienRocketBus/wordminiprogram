@@ -2758,6 +2758,46 @@ def guard_toast_unified():
             '同一件事长得不一样，人会以为是两回事'
             % (len(missing), missing[0]))
 
+
+def guard_record_follows_account():
+    """换账号必须把天梯战绩也清掉。
+
+    ═══ 事故（v1156）═══
+
+    实测：用 U1 打了 6 局到「工蜂 1105 分」，换成 U2 之后
+    战绩**原封不动还在** —— 新账号一进来就看到别人的段位和分数。
+
+    家里两个孩子共用一台手机时这个问题很实在：
+    **弟弟登录后看到的是哥哥的段位**，
+    打第一局就发现"我怎么已经工蜂了"。
+
+    v1142 修「换账号」时清了资料（名字/竞赛 ID），
+    但天梯战绩是 v1103 之后才有的，那次没覆盖到 ——
+    **又一次"新加的东西没接进已有的清理链路"**。
+
+    > 每加一样"跟着人走"的数据，都要问一句：
+    > 换账号的时候谁来清它？
+
+    判据：战绩模块必须听 `hsn-account-uid-changed`，
+    并且在 uid 变化时删掉存档。
+    """
+    src = _code_only(_read('hansen_pk_record_v1103.js') or '')
+    if not src:
+        bad('战绩跟账号', 'hansen_pk_record_v1103.js 不见了')
+        return
+    if 'hsn-account-uid-changed' not in src:
+        bad('战绩跟账号',
+            '天梯战绩没有听换账号信号 —— '
+            '换个账号登录会看到上一个人的段位和分数，'
+            '家里两个孩子共用一台手机时一定会撞到')
+    if 'localStorage.removeItem(KEY)' not in src:
+        bad('战绩跟账号',
+            '换账号时没有删掉战绩存档 —— 听了信号却什么都不做')
+    if 'was === now' not in src:
+        bad('战绩跟账号',
+            '没有"同一个账号就不清"的判断 —— '
+            '会把自己的战绩误清掉，那比不清更糟')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2853,6 +2893,7 @@ GUARDS = [
     ('提示对按钮', guard_tip_matches_button),
     ('文案一致',   guard_copy_consistent),
     ('提示要统一', guard_toast_unified),
+    ('战绩跟账号', guard_record_follows_account),
 ]
 
 

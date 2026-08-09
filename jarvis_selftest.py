@@ -615,6 +615,15 @@ def _inj_toast_split(s):
     return s.replace(m, "/* removed */", 1)
 
 
+
+def _inj_record_owner(s):
+    """把换账号清战绩那句拆掉 —— 新账号又会看到别人的段位。"""
+    m = "localStorage.removeItem(KEY);"
+    if m not in s:
+        return None
+    return s.replace(m, "/* removed */", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -687,6 +696,7 @@ CASES = [
     ('提示对按钮', 'hansen_pk_room_ui_v1065.js',  _inj_tip_button),
     ('文案一致',   'hansen_pk_room_ui_v1065.js',  _inj_copy),
     ('提示要统一', 'hansen_land_cards.js',        _inj_toast_split),
+    ('战绩跟账号', 'hansen_pk_record_v1103.js',   _inj_record_owner),
 ]
 
 
