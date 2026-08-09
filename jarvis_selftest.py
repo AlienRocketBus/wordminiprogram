@@ -624,6 +624,18 @@ def _inj_record_owner(s):
     return s.replace(m, "/* removed */", 1)
 
 
+
+def _inj_sane_num(s):
+    """把一个百分比改回不封顶的算法 —— 存档一坏就会显示 10000%。"""
+    m = "firstRate: pct(d.firstWins, d.correct),"
+    if m not in s:
+        return None
+    return s.replace(
+        m,
+        "firstRate: d.correct ? Math.round(d.firstWins * 100 / d.correct) : 0,",
+        1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -697,6 +709,7 @@ CASES = [
     ('文案一致',   'hansen_pk_room_ui_v1065.js',  _inj_copy),
     ('提示要统一', 'hansen_land_cards.js',        _inj_toast_split),
     ('战绩跟账号', 'hansen_pk_record_v1103.js',   _inj_record_owner),
+    ('数字要合理', 'hansen_pk_record_v1103.js',   _inj_sane_num),
 ]
 
 

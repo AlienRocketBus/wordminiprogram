@@ -2798,6 +2798,51 @@ def guard_record_follows_account():
             '没有"同一个账号就不清"的判断 —— '
             '会把自己的战绩误清掉，那比不清更糟')
 
+
+def guard_sane_numbers():
+    """给用户看的数字必须是合理的。
+
+    ═══ 两轮各抓到一个（v1156）═══
+
+    ① 「平均 2000.0 秒」「最快 10000.0 秒」
+       一个词想 33 分钟显然不是真的 ——
+       多半是切到后台很久、或者存档被写坏了。
+
+    ② 「抢先率 10000%」
+       存档被写坏时（firstWins=1e12、correct=99999）算出来的。
+       **百分比超过 100 是自相矛盾的** ——
+       「答对的词里抢在前面 10000%」这句话本身就不成立。
+
+    > **报一个荒谬的精确数字，比报「—」更糟** ——
+    > 用户会当真，然后觉得这个统计是坏的。
+    >
+    > 而存档被写坏的原因很多：迁移中断、版本不一致、
+    > 别的模块误写、用户手动改。
+    > **统计不该假设输入一定是干净的。**
+
+    判据：战绩模块必须有 pct()（百分比夹 0~100）
+    和 secsOrDash()（秒数超上限显示「—」），
+    且三个百分比都要走 pct()。
+    """
+    src = _code_only(_read('hansen_pk_record_v1103.js') or '')
+    if not src:
+        return
+    if 'function pct(' not in src:
+        bad('数字要合理',
+            '战绩模块没有 pct() —— '
+            '百分比不夹在 0~100，存档一坏就会显示「抢先率 10000%」')
+    else:
+        for k in ('winRate', 'firstRate', 'accuracy'):
+            m = re.search(k + r':\s*([^,\n]+)', src)
+            if m and 'pct(' not in m.group(1):
+                bad('数字要合理',
+                    '%s 没有走 pct() —— 三个百分比要一起封顶，'
+                    '漏一个就等于没做' % k)
+    if 'function secsOrDash(' not in src:
+        bad('数字要合理',
+            '战绩模块没有 secsOrDash() —— '
+            '秒数不设上限就会显示「平均 2000 秒」这种荒谬数字')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2894,6 +2939,7 @@ GUARDS = [
     ('文案一致',   guard_copy_consistent),
     ('提示要统一', guard_toast_unified),
     ('战绩跟账号', guard_record_follows_account),
+    ('数字要合理', guard_sane_numbers),
 ]
 
 
