@@ -774,7 +774,17 @@ def main():
     for name, target, inject in CASES:
         if name in _done_names:
             continue
-        if _budget and (time.time() - _t_start) > _budget:
+        # 🔴v1156：**预算要在"下一道会不会超时"之前判，不是之后。**
+        #
+        #   原来是"跑完一道再看超没超" —— 而每道要 7 秒，
+        #   于是最后那道经常跑到一半被外部强杀，
+        #   **注入的坏代码就留在工作区**，下一轮基线红、又白跑一轮。
+        #   实测这个循环卡了我三轮。
+        #
+        #   > 一个"到点就停"的机制，如果判断时机在动作之后，
+        #   > 它保证不了任何事 —— 真正该问的是"还来得及做完下一件吗"。
+        _elapsed = time.time() - _t_start
+        if _budget and (_elapsed + 12) > _budget:
             print('  \u23f8  \u5df2\u8dd1 %d \u9053\uff0c\u672c\u8f6e\u9884\u7b97\u7528\u5b8c\uff0c\u4e0b\u6b21\u63a5\u7740\u8dd1'
                   % len(_done_names))
             try:
