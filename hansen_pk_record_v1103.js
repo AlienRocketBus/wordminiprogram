@@ -176,6 +176,14 @@
              ranked: isRanked, tier: tier(d) };
   }
 
+  /* v1156: 毫秒转秒 —— 太离谱的一律显示「—」 */
+  var SANE_MAX_MS = 5 * 60 * 1000;     /* 一个词想超过 5 分钟就不是真的了 */
+  function secsOrDash(ms) {
+    var n = Number(ms);
+    if (!isFinite(n) || n <= 0 || n > SANE_MAX_MS) return '—';
+    return (n / 1000).toFixed(1);
+  }
+
   function summary() {
     var d = read();
     var total = d.wins + d.losses + d.draws;
@@ -194,8 +202,19 @@
       correct: d.correct,
       accuracy: d.words ? Math.round(d.correct * 100 / d.words) : 0,
       avgMs: d.correct ? Math.round(d.totalMs / d.correct) : 0,
-      avgSecs: d.correct ? (d.totalMs / d.correct / 1000).toFixed(1) : '0.0',
-      fastestSecs: d.fastestMs ? (d.fastestMs / 1000).toFixed(1) : '—',
+      /* 🔴v1156：**大到没意义的秒数就别报数字了。**
+
+         实测（totalMs 是个超大值时）：
+         界面显示「平均 2000.0 秒」「最快 10000.0 秒」——
+         一个词想 33 分钟显然不是真的，
+         多半是切到后台很久、或者存档被写坏了。
+
+         **报一个荒谬的精确数字，比报"—"更糟** ——
+         用户会当真，然后觉得这个统计是坏的。
+
+         超过 5 分钟一律当作"没法统计"，显示「—」。 */
+      avgSecs: secsOrDash(d.correct ? d.totalMs / d.correct : 0),
+      fastestSecs: secsOrDash(d.fastestMs),
       firstWins: d.firstWins,
       /* 抢先率：答对的词里有多少是抢在对手前面的 —— 手速的直接指标 */
       firstRate: d.correct ? Math.round(d.firstWins * 100 / d.correct) : 0
