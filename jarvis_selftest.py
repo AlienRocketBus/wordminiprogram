@@ -597,6 +597,15 @@ def _inj_tip_button(s):
     return s.replace(m, "点上面的「开始一局新的对战」", 1)
 
 
+
+def _inj_copy(s):
+    """把一处文案改成另一种说法 —— 同一件事就有两种讲法了。"""
+    m = "'\U0001f3c6 \u5bf9\u624b\u5df2\u79bb\u573a\uff0c\u672c\u5c40\u4f60\u80dc'"
+    if m not in s:
+        return None
+    return s.replace(m, "'\U0001f3c6 \u5bf9\u624b\u79bb\u573a\uff0c\u672c\u5c40\u4f60\u80dc'", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -667,6 +676,7 @@ CASES = [
     ('v1156复盘',    '事故复盘_v1156_猜错四次.md', _inj_v1156),
     ('语法坏掉',   'hansen_toast_v1156.js',       _inj_syntax),
     ('提示对按钮', 'hansen_pk_room_ui_v1065.js',  _inj_tip_button),
+    ('文案一致',   'hansen_pk_room_ui_v1065.js',  _inj_copy),
 ]
 
 

@@ -964,7 +964,7 @@ function doCreate() {
       /* 快到阈值了就提醒 —— 让人知道"不是卡住了，是对手没动" */
       var left = (g.limitSecs || 60) - (g.idleSecs || 0);
       if (el && g.idleSecs > 12 && left > 0) {
-        el.textContent = '对手掉线了…' + left + 's 后判他负';
+        el.textContent = '对手掉线了…' + left + ' 秒后判他负';
         el.style.color = 'var(--pk-warn)';
       }
     })['catch'](function () {});
@@ -1124,7 +1124,7 @@ function doCreate() {
       var mySide = r.mySide || (st.isHost ? 'host' : 'guest');
       var oppGot = (w !== mySide);
       var el = q('prOppSt');
-      if (oppGot && el) { el.textContent = '⚡ 抢先拼对了！'; el.style.color = 'var(--pk-warn)'; }
+      if (oppGot && el) { el.textContent = '🔥 你抢先拼对！'; el.style.color = 'var(--pk-warn)'; }
       var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { waitAll: true };
       /* A 模式：对手抢到就立刻翻篇，不等我 */
       if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); return; }
@@ -1429,7 +1429,7 @@ function doCreate() {
 
   function showResult(r) {
     /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
-    var txt = r.byAbandon ? '🏆 对手离场，本局你胜'
+    var txt = r.byAbandon ? '🏆 对手已离场，本局你胜'
             : (r.result === 'win' ? '🎉 你赢了！' : (r.result === 'lose' ? '💪 这局输了' : '🤝 打平'));
 
     /* 🔴v1103：**打完必须留下痕迹** —— 赢了没记录，那为什么要打？

@@ -2669,6 +2669,52 @@ def guard_tip_matches_button():
                 '多半是按钮文字改了而提示没跟着改，'
                 '新用户会照着字去找一个不存在的按钮' % want)
 
+
+def guard_copy_consistent():
+    """同一件事不许有两种说法。
+
+    ═══ 通读文案时挖到的（v1156）═══
+
+    对战模块里同一个事件有两套说法：
+
+      「🏆 对手已离场，本局你胜」 / 「🏆 对手离场，本局你胜」
+        —— 差一个「已」字，是复制粘贴时改了一处漏了一处
+
+      「⚡ 抢先拼对了！」 / 「🔥 你抢先拼对！」
+        —— 同一个事件两种说法，连 emoji 都不一样
+
+    单看每一条都没错，但**用户会觉得这个应用不像一个人做的** ——
+    上一局说「抢先拼对了」，下一局说「你抢先拼对」，
+    他会怀疑是不是两种不同的情况。
+
+    ═══ 还有一条：单位要用中文 ═══
+
+    「对手掉线了…45s 后判他负」——
+    前后全是中文，中间冒出一个英文 s。
+    **孩子看到会愣一下**：这个 s 是什么？
+
+    判据：几组已知的同义说法，各自只许出现一种写法；
+    面向用户的秒数不许用裸 's'。
+    """
+    src = _code_only(_read('hansen_pk_room_ui_v1065.js') or '')
+    if not src:
+        return
+    groups = [
+        (['对手已离场，本局你胜', '对手离场，本局你胜'], '对手离场'),
+        (['🔥 你抢先拼对！', '⚡ 抢先拼对了！'], '抢先拼对'),
+    ]
+    for variants, what in groups:
+        used = [v for v in variants if v in src]
+        if len(used) > 1:
+            bad('文案一致',
+                '「%s」有 %d 种说法（%s）—— '
+                '同一件事两种说法，用户会怀疑是不是两种不同的情况'
+                % (what, len(used), ' / '.join(x[:12] for x in used)))
+    if re.search(r"\+ 's 后判", src) or "'s 后判他负'" in src:
+        bad('文案一致',
+            '秒数用了裸的英文 s（「45s 后判他负」）—— '
+            '前后全是中文，孩子看到会愣一下')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -2762,6 +2808,7 @@ GUARDS = [
     ('v1156复盘',    guard_incident_v1156),
     ('语法坏掉',   guard_no_broken_syntax),
     ('提示对按钮', guard_tip_matches_button),
+    ('文案一致',   guard_copy_consistent),
 ]
 
 
