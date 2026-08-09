@@ -146,9 +146,54 @@
   }
 
   /* 错误块：会话过期时给出「重新登录」这条出路，而不是让人干瞪眼 */
+  /* 🔴v1156：**技术错误不能原样印给孩子看。**
+
+     实测四种真实的云端错误，全部原样出现在屏幕上：
+
+       [ResourceUnauthorized] permission denied for collection sb_profile
+       net::ERR_CONNECTION_TIMED_OUT
+       [QuotaExceeded] daily read limit reached: 50000/50000
+       Cannot read properties of undefined (reading 'collection')
+
+     孩子看到这些**完全不知道发生了什么**，
+     也不知道该怎么办 —— 只会觉得"坏了"然后关掉。
+
+     > **错误提示要回答两件事：出了什么事、我能做什么。**
+     > 原始错误信息一件都答不了。
+
+     翻译成人话，并且尽量给一个能做的动作。
+     实在认不出的，说"出了点问题"总比说一串英文强 ——
+     而原文仍然会进悄悄报错观察者，排查时查得到。 */
+  function sayHuman(raw) {
+    var t = String(raw || '');
+    if (!t) return '出了点问题，再试一次吧';
+    /* ⚠️ 原文不能丢 —— 翻译是给用户看的，排查时要的是原话。
+       走 console.warn：真机上连电脑调试时看得到，
+       而且不会像 console.error 那样被当成新故障统计。
+       （第一版写的是 HansenSilentWatch.note()，
+         而那个模块只导出了 recent —— 又一次凭印象调接口。） */
+    try { console.warn('[对战] 原始错误：' + t.slice(0, 160)); } catch (e) {}
+    if (/unauthorized|permission|denied|unauthenticated|credential|登录/i.test(t)) {
+      return '云端登录过期了，重新登录一次就能继续';
+    }
+    if (/timed?[_ ]?out|ERR_|network|offline|failed to fetch|断网/i.test(t)) {
+      return '网络好像不太顺，检查一下再试试';
+    }
+    if (/quota|limit|too many|rate/i.test(t)) {
+      return '现在用的人有点多，等一小会儿再试';
+    }
+    if (/undefined|null|not a function|properties of/i.test(t)) {
+      return '有个部件没加载好，刷新一下页面就好了';
+    }
+    if (/not found|不存在|已经不在/i.test(t)) {
+      return '这个房间已经不在了，回列表再挑一间吧';
+    }
+    return '出了点问题，再试一次吧';
+  }
+
   function errBlock(r) {
     var expired = !!(r && r.expired) || /过期|unauthenticated|credentials|登录/i.test(E(r));
-    return '<div class="pr_err">' + esc(E(r) || '未知错误')
+    return '<div class="pr_err">' + esc(sayHuman(E(r)))
       + (expired ? '<br><br>云端登录已过期，重新登录一次就能继续。' : '') + '</div>'
       + (expired ? '<button class="pr_btn pr_btn2" id="prLogin">🔑 重新登录</button>' : '');
   }
