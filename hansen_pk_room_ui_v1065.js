@@ -166,7 +166,12 @@
       var MODES = (S() && S().MODES) || {};
       var d = MODES[m || 'A'];
       if (!d) return '';
-      return '<span style="display:inline-block;background:rgba(99,102,241,.2);'
+      /* 🔴v1156：**房间列表这个徽章也要够对比度。**
+         对战屏那个改了，这个漏了 —— 实测 2.1（需 4.5）。
+         **同一种视觉元素出现在两处，改一处很容易漏另一处。**
+         这次是自动化的对比度测试当场抓到的。 */
+      return '<span style="display:inline-block;background:var(--pk-chip);'
+        + 'color:var(--pk-chip-txt);'
         + 'padding:1px 7px;border-radius:99px;margin-right:6px;font-size:11.5px">'
         + esc(d.emoji || '') + esc(d.name || '') + '</span>';
     } catch (e) { return ''; }
