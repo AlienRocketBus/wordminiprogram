@@ -418,11 +418,21 @@
         +   '<span>距离 <b>' + nx.icon + ' ' + esc(nx.name) + '</b></span>'
         +   '<span style="font-weight:800">还差 ' + nx.need + ' 分</span>'
         + '</div>'
-        + '<div style="height:9px;border-radius:99px;background:rgba(255,255,255,.14);'
-        +   'overflow:hidden">'
-        +   '<div style="height:100%;width:' + pct + '%;border-radius:99px;'
+        /* 🔴v1156：**进度条要看得清。**
+           原来 9px 高、纯色 —— 而它是这一页最重要的行动指引
+           （"还差多少就能升段"是继续打下去最直接的理由）。
+           加到 13px，并在进度末端点一个圆点标出"我在这儿"。 */
+        + '<div style="position:relative;height:13px;border-radius:99px;'
+        +   'background:rgba(255,255,255,.12);box-shadow:inset 0 1px 3px rgba(0,0,0,.35)">'
+        +   '<div style="position:absolute;inset:0;width:' + pct + '%;border-radius:99px;'
         +     'background:linear-gradient(90deg,#6366f1,#a855f7);'
-        +     'transition:width .5s ease"></div>'
+        +     'box-shadow:0 0 10px rgba(139,92,246,.5);transition:width .5s ease"></div>'
+        +   (pct > 3 && pct < 97
+              ? '<div style="position:absolute;top:50%;left:' + pct + '%;'
+                + 'width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;'
+                + 'background:#fff;box-shadow:0 0 0 2px #a855f7,0 1px 4px rgba(0,0,0,.5)">'
+                + '</div>'
+              : '')
         + '</div>'
         /* 给一句"还要打几局" —— 比"还差 138 分"更好懂。
            一局赢大约 +18 分，取整往上算，不夸大。 */
@@ -475,10 +485,16 @@
         var badge = tied ? ('<span style="opacity:.7">' + x.rank + '</span>')
                   : x.rank === 1 ? '🥇' : x.rank === 2 ? '🥈' : x.rank === 3 ? '🥉'
                   : ('<span style="opacity:.6">' + x.rank + '</span>');
+        /* 🔴v1156：**奖牌和名次数字要对齐。**
+           奖牌是 emoji（字宽），名次是数字（字窄），
+           左边缘对不齐时整列看着是歪的 ——
+           一个 24px 的等宽格子 + 居中，两种内容都落在同一条线上。 */
         return '<div style="display:flex;align-items:center;gap:9px;padding:7px 9px;'
           + 'border-radius:10px;font-size:13.5px;'
           + (mine ? 'background:rgba(99,102,241,.18);font-weight:800' : '') + '">'
-          +   '<span style="width:26px;text-align:center;flex:none">' + badge + '</span>'
+          +   '<span style="width:26px;flex:none;text-align:center;'
+          +     'font-variant-numeric:tabular-nums;font-size:15px;line-height:1">'
+          +     badge + '</span>'
           +   '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
           +     esc(x.name) + (mine ? ' <span style="opacity:.8">(你)</span>' : '')
           +   '</span>'
