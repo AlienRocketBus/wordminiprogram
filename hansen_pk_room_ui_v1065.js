@@ -155,6 +155,18 @@
 
   /* ── 屏 1：房间列表 ── */
   /* v1156: 房主水平怎么显示 —— 先看段位名，再看分数，都没有才说未定级 */
+  /* v1156: 玩法徽章 —— 用模式表里的 emoji + 名字，和对战屏一致 */
+  function modeBadge(m) {
+    try {
+      var MODES = (S() && S().MODES) || {};
+      var d = MODES[m || 'A'];
+      if (!d) return '';
+      return '<span style="display:inline-block;background:rgba(99,102,241,.2);'
+        + 'padding:1px 7px;border-radius:99px;margin-right:6px;font-size:11.5px">'
+        + esc(d.emoji || '') + esc(d.name || '') + '</span>';
+    } catch (e) { return ''; }
+  }
+
   function tierText(x) {
     try {
       if (x && x.hostTier) return x.hostTier;
@@ -234,7 +246,15 @@
              而"对手大概什么水平"正是他点进去之前最想知道的。
 
              有分数就按分数算段位；两个都没有才说未定级。 */
-          + '<span>' + esc(tierText(x)) + ' · ' + x.wordCount + ' 个词 · '
+          /* 🔴v1156：**房间卡片不说这是什么玩法。**
+
+             三种玩法（抢答赛/一起答/接力赛）规则差别很大，
+             而列表里一个字都没提 —— 用户点进去才知道。
+             **"进去之前想知道什么"里，玩法排第一位**：
+             他可能就是不想打抢答赛。
+
+             加一个玩法徽章放在最前面，和段位、词数并列。 */
+          + '<span>' + modeBadge(x.mode) + esc(tierText(x)) + ' · ' + x.wordCount + ' 个词 · '
           + (x.ageSec < 60 ? x.ageSec + ' 秒前开' : Math.round(x.ageSec / 60) + ' 分钟前开') + '</span></div>'
           + '<button data-rid="' + esc(x.id) + '">进去打</button></div>';
       }).join('');
