@@ -2935,6 +2935,41 @@ def guard_ladder_one_source():
             '用户会看到同一屏上两个地方说的话不一样，'
             '或者一个永远不动的数字' % miss)
 
+
+def guard_list_capped():
+    """渲染外部给的列表必须截断。
+
+    ═══ 同一个问题三处（v1156）═══
+
+    · 排行榜：塞 200 条就画 200 行（TOP_N=20 只是请求时的意图）
+    · 房间列表：热门时段几百间房会全画出来
+    · 好友列表：班里几十个同学互相加，列表会很长
+
+    > **每一层都该对自己画出来的东西负责，
+    > 而不是假设上一层已经把关了。**
+
+    数据层换个实现、云端多返回一批、或者别处直接调 ——
+    UI 就会老老实实全画。手机上会卡、滚不到底，
+    而**多出来的那些对用户毫无意义**：
+    他只关心前几名 / 前几间房 / 谁刚才还在。
+
+    判据：几处已知的列表渲染必须先 slice。
+    """
+    checks = [
+        ('hansen_ladder_ui_v1108.js', 'MAX_ROWS', '排行榜'),
+        ('hansen_pk_room_ui_v1065.js', 'MAX_ROOMS', '房间列表'),
+        ('hansen_friends_ui_v1107.js', 'MAX_FRIENDS', '好友列表'),
+    ]
+    for f, token, what in checks:
+        src = _code_only(_read(f) or '')
+        if not src:
+            continue
+        if token not in src or '.slice(0, ' + token not in src:
+            bad('列表要截断',
+                '%s 没有截断（缺 %s）—— '
+                '数据多的时候会全画出来，手机上会卡、滚不到底，'
+                '而多出来的那些对用户毫无意义' % (what, token))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3034,6 +3069,7 @@ GUARDS = [
     ('数字要合理', guard_sane_numbers),
     ('兜底要对',   guard_fallback_matches),
     ('天梯一个来源', guard_ladder_one_source),
+    ('列表要截断', guard_list_capped),
 ]
 
 

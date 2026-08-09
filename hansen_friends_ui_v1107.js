@@ -321,7 +321,17 @@
       return '<div class="fr_empty">还没有好友。<br>'
         + '让同学告诉你他的竞赛 ID，输在上面就能加。</div>';
     }
-    return friends.map(function (f, i) {
+    /* 🔴v1156：**好友列表也要截断**（和房间列表、排行榜同一个问题）。
+       班里几十个同学互相加，列表会很长，
+       而**用户找的是"谁刚才还在"，不是把所有人看一遍**。
+       画前 50 个，多的给一句说明。 */
+    var MAX_FRIENDS = 50;
+    var moreN = Math.max(0, friends.length - MAX_FRIENDS);
+    var tail = moreN > 0
+      ? '<div class="fr_empty" style="padding:10px 8px;font-size:13px">'
+        + '还有 ' + moreN + ' 个好友没显示</div>'
+      : '';
+    return friends.slice(0, MAX_FRIENDS).map(function (f, i) {
       return '<div class="fr_item ' + (f.online ? 'on2' : 'off') + '" data-i="' + i + '">'
         + '<div class="fr_av">🐝' + (f.online ? '<span class="fr_dot"></span>' : '') + '</div>'
         + '<div style="flex:1;min-width:0">'
@@ -330,7 +340,7 @@
         + '</div>'
         + '<div style="font-size:18px;color:var(--hpk-faint)">›</div>'
         + '</div>';
-    }).join('');
+    }).join('') + tail;
   }
 
   function bindList(friends) {

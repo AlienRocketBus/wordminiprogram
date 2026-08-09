@@ -654,6 +654,15 @@ def _inj_ladder_source(s):
     return s.replace(m, "var _R3 = null;", 1)
 
 
+
+def _inj_list_cap(s):
+    """把房间列表的截断拆掉 —— 几百间房会全画出来。"""
+    m = "rooms.slice(0, MAX_ROOMS).map"
+    if m not in s:
+        return None
+    return s.replace(m, "rooms.map", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -730,6 +739,7 @@ CASES = [
     ('数字要合理', 'hansen_pk_record_v1103.js',   _inj_sane_num),
     ('兜底要对',   'hansen_pk_record_v1103.js',   _inj_fallback),
     ('天梯一个来源', 'spelling_pk.html',            _inj_ladder_source),
+    ('列表要截断', 'hansen_pk_room_ui_v1065.js',  _inj_list_cap),
 ]
 
 

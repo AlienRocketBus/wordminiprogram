@@ -278,7 +278,19 @@
         box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间」，等别人来打。</div>';
         return;
       }
-      box.innerHTML = rooms.map(function (x) {
+      /* 🔴v1156：**房间列表也要截断。**
+
+         和排行榜同一个问题：这里直接画 listRooms 返回的全部房间。
+         热门时段真的可能有几百间房 ——
+         界面会卡、手机滚不到底，而**用户只会点前几间**：
+         列表是按新旧排的，第 80 间房和第 3 间房对他没区别。
+
+         > 每一层都该对自己画出来的东西负责。
+
+         画前 30 间，多的告诉他"还有很多"并给刷新的理由。 */
+      var MAX_ROOMS = 30;
+      var more = Math.max(0, rooms.length - MAX_ROOMS);
+      box.innerHTML = rooms.slice(0, MAX_ROOMS).map(function (x) {
         return '<div class="pr_room"><div class="n"><b>' + esc(x.hostName) + '</b>'
           /* 🔴v1156：**排位房全显示「未定级」是错的。**
              列表读的是 `hostTier`（开房时手填的），
@@ -303,6 +315,10 @@
           + (x.ageSec < 60 ? x.ageSec + '秒前' : Math.round(x.ageSec / 60) + '分钟前') + '</span></div>'
           + '<button data-rid="' + esc(x.id) + '">进去打</button></div>';
       }).join('');
+      if (more > 0) {
+        box.innerHTML += '<div class="pr_empty" style="padding:12px 8px;font-size:13px">'
+          + '还有 ' + more + ' 间房没显示 —— 先从上面这些挑一间打吧</div>';
+      }
       [].slice.call(box.querySelectorAll('button[data-rid]')).forEach(function (b) {
         b.onclick = function () { doJoin(b.getAttribute('data-rid'), b); };
       });
