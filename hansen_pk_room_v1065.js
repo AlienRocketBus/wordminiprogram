@@ -31,6 +31,7 @@
 (function () {
   'use strict';
   if (window.HansenPkRoom) return;
+  var _dbOverride = null;   /* v1157: 测试用，替换云端 db */
 
   var COLLECTION   = 'hansen_pk_rooms';
   var HEARTBEAT_MS = 8000;      /* 房主每 8 秒续一次命 */
@@ -112,6 +113,9 @@
   /* ── 真实传输层：一律复用账号会话，绝不自建实例 ── */
   function realTransport() {
     function db() {
+      /* v1157: 测试要能验"云端缺索引时会不会降级" ——
+         没有这个口子就只能读代码，而读代码看不出运行时行为。 */
+      if (_dbOverride) return Promise.resolve(_dbOverride);
       var A = window.HansenAuth;
       if (!A || typeof A.ensureSession !== 'function' || typeof A._app !== 'function')
         return Promise.reject(new Error('账号模块未加载，无法联机'));
@@ -168,6 +172,33 @@
                      **不值得用“老数据全看不见”来换**。 */
                   .where({ status: 'open', isPrivate: false })
                   .orderBy('createdAt', 'desc').limit(40).get()
+                  /* 🔴v1157（真机报的「连不上网络」）：**orderBy 需要索引，没建就整个查询报错。**
+
+                     用户截图：天梯排位 → 📡 连不上网络 / 检查 Wi-Fi ——
+                     而他登录了、网也是好的。
+
+                     v1154 的注释白纸黑字写过这个坑：
+                     「orderBy 的字段在云开发要建索引，没建就整个查询报错」，
+                     而这行 orderBy 一直留着。
+
+                     索引要在云开发控制台手动建 —— **而一个功能不该依赖
+                     某个人记得去后台点一下**。配置丢了、换环境、新建数据库，
+                     都会让天梯直接不能用，而界面只会说"检查网络"。
+
+                     > **能在代码里兜住的事，不要押在运维配置上。**
+
+                     失败就降级成不带 orderBy 的查询（不需要任何索引），
+                     排序放本地做。 */
+                  ['catch'](function (indexErr) {
+                    try {
+                      console.warn('[房间] orderBy 失败，降级为不排序查询'
+                        + '（多半是云端没建 createdAt 索引）：'
+                        + String((indexErr && indexErr.message) || indexErr).slice(0, 120));
+                    } catch (e) {}
+                    return d.collection(COLLECTION)
+                      .where({ status: 'open', isPrivate: false })
+                      .limit(40).get();
+                  })
                   .then(function (r) {
                     var rows = (r && r.data) || [];
                     /* 再兜一层：查询和本地时钟可能有偏差 */
@@ -177,7 +208,12 @@
                       if (myId && x.hostId === myId) return false;   /* 不列自己的房 */
                       if (x.guestId) return false;                   /* 不列满员的房 */
                       return (nowTs - (x.heartbeatAt || 0)) < STALE_MS;
-                    });
+                    }).sort(function (a, b) {
+            /* v1157: 本地兜一次排序 —— 降级路径没有 orderBy，
+               而"最近开的排前面"是用户真正在意的顺序。
+               40 条数据排一下毫无压力。 */
+            return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+          });
                   });
         });
       },
@@ -919,6 +955,7 @@
   }
 
   window.HansenPkRoom = {
+    _setDbForTest: function (d) { _dbOverride = d; },
     createRoom: createRoom,
     listRooms: listRooms,
     joinRoom: joinRoom,

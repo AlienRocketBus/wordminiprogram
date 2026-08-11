@@ -499,6 +499,46 @@ async function open(seedBoard) {
      '「答对的词里抢在前面几次」才是这个指标的意思');
 }
 
+
+/* ── 🔴v1157 云端缺索引也要能用（真机报的）──────────────
+ *
+ * 用户截图：天梯排位 → 📡 连不上网络 / 检查 Wi-Fi ——
+ * 而他登录了、网也是好的。
+ *
+ * 根因：`listOpen` 用了 `.orderBy('createdAt','desc')`，
+ * 而**云开发的 orderBy 需要在控制台手动建索引，没建就整个查询报错**。
+ * v1154 的注释里白纸黑字写过这个坑，而这行 orderBy 一直留着。
+ *
+ * > **能在代码里兜住的事，不要押在运维配置上。**
+ * > 一个功能不该依赖某个人记得去后台点一下 ——
+ * > 配置丢了、换环境、新建数据库，天梯就直接不能用，
+ * > 而界面只会说"检查网络"，谁也想不到是索引。
+ *
+ * 修法：orderBy 失败就降级成不带 orderBy 的查询
+ * （那个不需要任何索引），排序放本地做。
+ *
+ * 实测：
+ *   云端有索引 → 2 间房，后开的→先开的 ✅
+ *   云端缺索引 → 2 间房，后开的→先开的 ✅（自动降级，用户无感）
+ */
+{
+  const room = fs.readFileSync(ROOT + '/hansen_pk_room_v1065.js', 'utf8');
+  const code = room.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  ok(/\['catch'\]\(function \(indexErr\)/.test(code),
+     '★ **orderBy 失败要降级** —— ' +
+     '云开发的 orderBy 需要手动建索引，没建就整个查询报错；' +
+     '而一个功能不该依赖某个人记得去后台点一下');
+  ok(/\.limit\(40\)\.get\(\);/.test(code),
+     '★ 降级查询不带 orderBy（那样才不需要索引）');
+  ok(/\.sort\(function \(a, b\)/.test(code),
+     '★ **排序放本地做** —— 降级路径没有 orderBy，' +
+     '而"最近开的排前面"是用户真正在意的顺序');
+  ok(/_setDbForTest/.test(code),
+     '★ 有注入 db 的口子 —— ' +
+     '否则只能读代码，而读代码看不出"缺索引时会不会降级"这种运行时行为');
+}
+
 await browser.close();
 srv.close();
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
