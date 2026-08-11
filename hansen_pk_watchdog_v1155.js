@@ -196,6 +196,17 @@
        ⚠️ 同时要能**停掉那个每 2 秒的真定时器** ——
        否则它会在两次手动 tick 之间悄悄把 _lastPaintAt 刷新回去，
        测试怎么拨都没用（这一条是实测撞出来的，查了三轮）。 */
+    /* v1156: 让测试能把"已救过"的标记清掉再试一次。
+       僵住检测那条断言在 headless 里有时序抖动，
+       测试需要重试，而重试前必须先复位 —— 否则第二次
+       会被 `if (_rescued) return` 直接挡掉，永远救不出来。 */
+    _resetRescuedForTest: function () {
+      _rescued = false;
+      try {
+        var d = document.getElementById('pkRescue');
+        if (d) d.remove();
+      } catch (e) {}
+    },
     _agePaintForTest: function (ms) { _lastPaintAt -= (ms || 0); },
     _pauseForTest: function () { try { clearInterval(_timer); } catch (e) {} },
     /* v1155: 测试要能看清"为什么没救" ——

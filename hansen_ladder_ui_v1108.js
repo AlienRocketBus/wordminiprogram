@@ -213,6 +213,7 @@
   }
 
   var _netFail = 0;
+  var _lastReason = '';   /* v1156: 失败原因，显示在断网屏上供排查 */
 
   function open() {
     closePeers();
@@ -678,7 +679,29 @@
 
            判据要落在返回值上，不能只指望异常。 */
         if (lr && lr.ok === false) {
+          /* 🔴v1156（真机报的）：**失败原因带回来了，界面却没看。**
+
+             `listRooms` 失败时返回 `{ok:false, reason:'...'}`，
+             而这里一律当成"断网"，四次之后弹「连不上网络 / 检查 Wi-Fi」。
+
+             但 ok:false 最常见的原因根本不是断网 ——
+             是 **`ensureSession()` 没过**：没登录、云端会话过期、
+             或者账号模块还没加载完。
+
+             用户拿着满格 Wi-Fi 看到「检查一下 Wi-Fi 或数据再试」，
+             **只会一遍遍去重连 Wi-Fi，而问题在别处**。
+
+             > 我们把原因查出来了、也传回来了，却在最后一步扔掉了它。
+             > 这是这个项目里最常见的一类错：算好的东西没送到眼前。
+
+             按 reason 分流：登录问题就说登录问题。 */
           _netFail = (_netFail || 0) + 1;
+          var _why = String((lr && lr.reason) || '');
+          _lastReason = _why;
+          if (lr.expired || /登录|会话|session|unauthenticated|credential|未加载/i.test(_why)) {
+            showNeedLogin(_why);
+            return;
+          }
           if (_netFail >= 4) { showOffline(); return; }
           setTimeout(tick, 3000);
           return;
@@ -754,7 +777,44 @@
     };
 
     /* v1154: 连不上时的那一屏 —— 让人知道发生了什么、下一步做什么 */
-    function showOffline() {
+    /* 🔴v1156：**登录问题要说登录问题，不能混进"连不上网络"。**
+     排位要联机，而联机的前提是云端会话 ——
+     没登录时说"检查 Wi-Fi"，用户永远修不好。 */
+  function showNeedLogin(why) {
+    stop = true;
+    try {
+      var expired = /过期|expired/i.test(String(why || ''));
+      paint('<div class="ld_top"><button aria-label="关闭" class="ld_x" id="ldCancel">×</button>'
+        + '<div class="ld_h">🏆 天梯排位</div></div>'
+        + '<div style="text-align:center;padding:24px 12px">'
+        +   '<div style="font-size:40px">🔑</div>'
+        +   '<div style="font-size:16px;font-weight:800;margin-top:10px">'
+        +     (expired ? '云端登录过期了' : '排位要先登录') + '</div>'
+        +   '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
+        +     (expired
+                ? '重新登录一次就能继续，<br>你的段位和战绩都还在。'
+                : '排位要跟别人比，<br>所以得先有个账号记住你的分数。')
+        +   '</div>'
+        +   '<button class="ld_btn" id="ldGoLogin" style="margin-top:16px">'
+        +     (expired ? '重新登录' : '去登录') + '</button>'
+        +   '<button class="ld_btn2" id="ldLater" style="margin-top:10px;background:transparent;'
+        +     'border:1px solid rgba(255,255,255,.22);color:var(--hpk-dim)">先不弄</button>'
+        + '</div>');
+      var gb = document.getElementById('ldGoLogin');
+      if (gb) gb.onclick = function () {
+        try {
+          close();
+          if (window.HansenAuthUI && HansenAuthUI.open) HansenAuthUI.open();
+        } catch (e) {}
+      };
+      var lb = document.getElementById('ldLater');
+      if (lb) lb.onclick = close;
+      var cx2 = document.getElementById('ldCancel');
+      if (cx2) cx2.onclick = close;
+    } catch (e) {}
+  }
+
+  function showOffline() {
       stop = true;
       try {
             paint('<div class="ld_top"><button aria-label="关闭" class="ld_x" id="ldCancel">×</button>'
@@ -765,6 +825,24 @@
               + '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
               +   '排位需要联网找对手。<br>检查一下 Wi-Fi 或数据再试。</div>'
               + '<button class="ld_btn" id="ldRetry" style="margin-top:16px">重新找对手</button>'
+        /* 🔴v1156（真机报的）：**把真实原因显示出来。**
+
+           用户报「天梯匹配不行」，界面只说「连不上网络，检查 Wi-Fi」——
+           而他登录了、网也是好的。
+
+           追链路时发现：失败原因（reason）明明拿到了，
+           界面却一个字都不显示，于是**谁也没法判断到底是什么问题**：
+           没登录？会话过期？数据库缺索引？还是真断网？
+
+           > 上一次「打开变下载」我猜错了四次，教训是**先怀疑自己的测量工具**。
+           > 而这里连测量工具都没有 —— 只有一句放之四海皆准的"检查网络"。
+
+           把原话放出来（小字、灰色、不吓人），截个图就知道是哪一类。 */
+        + (_lastReason
+            ? '<div style="margin-top:14px;font-size:11px;color:var(--hpk-faint);'
+              + 'line-height:1.6;word-break:break-all;opacity:.85">'
+              + '技术信息：' + esc(String(_lastReason).slice(0, 130)) + '</div>'
+            : '')
               + '</div>');
             var rb = document.getElementById('ldRetry');
             if (rb) rb.onclick = function () { _netFail = 0; stop = false; tick(); };
