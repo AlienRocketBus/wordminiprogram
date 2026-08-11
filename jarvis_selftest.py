@@ -617,11 +617,22 @@ def _inj_toast_split(s):
 
 
 def _inj_record_owner(s):
-    """把换账号清战绩那句拆掉 —— 新账号又会看到别人的段位。"""
-    m = "localStorage.removeItem(KEY);"
+    """把换账号清战绩那句拆掉 —— 新账号又会看到别人的段位。
+
+    ⚠️ 第一版打的是 `localStorage.removeItem(KEY);`，
+       而那句在文件里有**两处**（syncOwner 一处、_reset 测试钩子一处），
+       replace(..., 1) 只换掉第一处，第二处还在，守卫照样绿。
+
+       **样本要打在只出现一次的特征上** ——
+       今天这个错犯了两次（上次是复盘文件里的"不可逆"三个字）。
+
+       改成打 syncOwner 独有的那行注释 + 语句。"""
+    m = "\u6362\u4eba\u4e86\uff1a\u6e05\u7a7a\u6218\u7ee9"   # 「换人了：清空战绩」
     if m not in s:
         return None
-    return s.replace(m, "/* removed */", 1)
+    i = s.index(m)
+    j = s.index("localStorage.removeItem(KEY);", i)
+    return s[:j] + "/* removed */" + s[j + len("localStorage.removeItem(KEY);"):]
 
 
 
