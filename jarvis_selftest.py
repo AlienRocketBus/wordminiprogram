@@ -688,6 +688,15 @@ def _inj_backlog(s):
     return s.replace(m, "if n > -1:", 1)
 
 
+
+def _inj_atlas(s):
+    """从图鉴里删掉命中率最高的那种模式 —— 归纳不全等于没归纳。"""
+    m = "\u7b97\u597d\u7684\u4e1c\u897f\u6ca1\u9001\u5230\u773c\u524d"
+    if m not in s:
+        return None
+    return s.replace(m, "（\u5df2\u5220）", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -766,6 +775,7 @@ CASES = [
     ('天梯一个来源', 'spelling_pk.html',            _inj_ladder_source),
     ('列表要截断', 'hansen_pk_room_ui_v1065.js',  _inj_list_cap),
     ('别攒着不发', 'hansen_guards_v1068.py',      _inj_backlog),
+    ('BUG图鉴',     'BUG图鉴_v1156.md',           _inj_atlas),
 ]
 
 

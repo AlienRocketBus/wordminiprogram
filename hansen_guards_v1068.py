@@ -3053,6 +3053,48 @@ def guard_release_backlog():
             '**不发布用户就没法在真机上测到新功能**，'
             '做了跟没做一样；而且攒得越多发版越难' % (last, n))
 
+
+def guard_bug_atlas():
+    """BUG 图鉴必须在，且「当前进度」必须指向它。
+
+    ═══ 为什么（v1156）═══
+
+    这一轮挖出 28 个 bug，归下来只有 **7 种模式**，
+    而其中「算好的东西没送到眼前」一种就占了 8 个。
+
+    > **单个 bug 修完就过去了，但同一个模式会反复出现。**
+
+    实例：「读旧存档」这一个模式，在**同一个文件里出现了三次** ——
+    我修了第一处，隔几轮才发现第二处，又隔一轮才发现第三处。
+    如果当时手边有这份图鉴，第一次就该全站搜一遍。
+
+    图鉴末尾有「按命中率排序的找 bug 顺序」，
+    下次找 bug 从那里开始，比从头瞎试快得多。
+
+    判据：文件在，且列全了 7 种模式，
+    且「当前进度.md」（下一次对话的第一入口）指向它。
+    """
+    atlas = _read('BUG图鉴_v1156.md') or ''
+    if not atlas:
+        bad('BUG图鉴',
+            'BUG图鉴_v1156.md 不见了 —— '
+            '28 个 bug 归纳出的 7 种模式没了，'
+            '下次只能从头瞎试')
+        return
+    need = ['算好的东西没送到眼前', '改 A 的时候不知道 B 在引用 A',
+            '新加的东西没接进已有的链路', '注释说了什么',
+            '不信任外部输入', '空和错混在一起', '我自己的工具坏了']
+    miss = [x for x in need if x not in atlas]
+    if miss:
+        bad('BUG图鉴',
+            '图鉴少了 %d 种模式（如「%s」）—— '
+            '归纳不全等于没归纳' % (len(miss), miss[0]))
+    prog = _read('当前进度.md') or ''
+    if 'BUG图鉴' not in prog:
+        bad('BUG图鉴',
+            '「当前进度.md」没有指向 BUG 图鉴 —— '
+            '那是下一次对话的第一入口，不指过去等于图鉴不存在')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3154,6 +3196,7 @@ GUARDS = [
     ('天梯一个来源', guard_ladder_one_source),
     ('列表要截断', guard_list_capped),
     ('别攒着不发', guard_release_backlog),
+    ('BUG图鉴',     guard_bug_atlas),
 ]
 
 
