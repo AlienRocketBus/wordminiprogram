@@ -24,3 +24,7 @@ releases/
 .jarvis_inject_bak/
 .jarvis_selftest_progress.json
 .jarvis_selftest_progress.json
+# v1156: 调试用的临时脚本不进仓库也不上线
+_*.py
+_*.mjs
+_*.log

@@ -29,7 +29,8 @@
             "攻坚笔记/**",
             "当前进度.md",
             "贾维斯_知识库.md",
-            "playwright_loader.mjs"
+            "playwright_loader.mjs",
+            "_*.py"
           ],
           "indexPath": "index.html",
           "errorPath": "index.html"
