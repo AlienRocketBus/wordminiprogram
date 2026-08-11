@@ -674,6 +674,20 @@ def _inj_list_cap(s):
     return s.replace(m, "rooms.map", 1)
 
 
+
+def _inj_backlog(s):
+    """把积压门槛改小到 0 —— 只要有一个提交没发就该报红。
+
+    这道守卫查的是 git 状态而不是代码内容，
+    所以样本改的是**门槛本身**：把 25 改成 -1，
+    那么"积压 0 个"也会超过门槛，守卫必须报红。
+    改不动就说明判据根本没在比较。"""
+    m = "if n > 25:"
+    if m not in s:
+        return None
+    return s.replace(m, "if n > -1:", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -751,6 +765,7 @@ CASES = [
     ('兜底要对',   'hansen_pk_record_v1103.js',   _inj_fallback),
     ('天梯一个来源', 'spelling_pk.html',            _inj_ladder_source),
     ('列表要截断', 'hansen_pk_room_ui_v1065.js',  _inj_list_cap),
+    ('别攒着不发', 'hansen_guards_v1068.py',      _inj_backlog),
 ]
 
 

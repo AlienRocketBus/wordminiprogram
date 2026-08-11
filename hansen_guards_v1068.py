@@ -2998,6 +2998,50 @@ def guard_list_capped():
                 '数据多的时候会全画出来，手机上会卡、滚不到底，'
                 '而多出来的那些对用户毫无意义' % (what, token))
 
+
+def guard_release_backlog():
+    """改动别攒着不发。
+
+    ═══ BAT MAN 的明确要求（v1156）═══
+
+    「一定要记得之后要及时发布 release」。
+
+    v1156 这次攒了 **68 个提交**才发，后果：
+
+      · 用户等了一整天才拿到修好的东西 ——
+        而「加减分不看对手水平」这种核心 bug 早在第 20 个提交就修好了
+      · 发版时一口气要跑 177 个测试 + 71 道自证，
+        中途被打断好几次，还得处理注入残留、并行假失败、契约过期
+        —— **攒得越多，发版越难**
+      · 真机反馈来得太晚：用户报问题时我已经改了几十处，
+        万一是我改出来的，得从 68 个提交里找而不是 3 个里找
+
+    > **做完一件事就走完整条路，不要攒一堆最后一起发。**
+
+    判据：距离最近一个 v#### 标签超过 25 个提交就提醒。
+    （不是硬性失败 —— 有时确实需要连着改几处才能发，
+      但超过这个数就该停下来问一句「现在能不能先发一版」。）
+    """
+    import subprocess as _sp
+    try:
+        tag = _sp.run(['git', 'describe', '--tags', '--abbrev=0', '--match', 'v*'],
+                      cwd=ROOT, capture_output=True, text=True, timeout=20)
+        if tag.returncode != 0:
+            return
+        last = (tag.stdout or '').strip()
+        if not last:
+            return
+        cnt = _sp.run(['git', 'rev-list', '--count', last + '..HEAD'],
+                      cwd=ROOT, capture_output=True, text=True, timeout=20)
+        n = int((cnt.stdout or '0').strip() or 0)
+    except Exception:
+        return
+    if n > 25:
+        bad('别攒着不发',
+            '距离 %s 已经积了 %d 个提交没发布 —— '
+            '攒得越多发版越难（要跑的测试、要处理的残留、要更新的契约都变多），'
+            '而且用户要等更久才拿到已经修好的东西' % (last, n))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3098,6 +3142,7 @@ GUARDS = [
     ('兜底要对',   guard_fallback_matches),
     ('天梯一个来源', guard_ladder_one_source),
     ('列表要截断', guard_list_capped),
+    ('别攒着不发', guard_release_backlog),
 ]
 
 
