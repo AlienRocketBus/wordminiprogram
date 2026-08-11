@@ -2790,10 +2790,38 @@ def guard_record_follows_account():
             '天梯战绩没有听换账号信号 —— '
             '换个账号登录会看到上一个人的段位和分数，'
             '家里两个孩子共用一台手机时一定会撞到')
-    if 'localStorage.removeItem(KEY)' not in src:
+    # ⚠️ **判据要看 syncOwner 函数体内部，不能只看"文件里有没有这句"。**
+    #
+    #   `localStorage.removeItem(KEY)` 在这个文件里有两处：
+    #   syncOwner 里一处（换账号清战绩），_reset 测试钩子里一处。
+    #
+    #   自证注入把 syncOwner 那处拆掉时，_reset 那处还在，
+    #   于是守卫**看不出任何变化**，自证报"这道守卫失灵"。
+    #
+    #   > 判据写成"文件里有没有 X"，就等于说"只要哪儿有一处就算数"。
+    #   > 而我们要守的是**特定那一处**。
+    i = src.find('function syncOwner')
+    body = ''
+    if i >= 0:
+        d = 0
+        j = src.find('{', i)
+        k = j
+        while k < len(src):
+            if src[k] == '{':
+                d += 1
+            elif src[k] == '}':
+                d -= 1
+                if d == 0:
+                    break
+            k += 1
+        body = src[i:k + 1]
+    if not body:
+        bad('战绩跟账号', '找不到 syncOwner —— 换账号清战绩的逻辑不见了')
+        return
+    if 'localStorage.removeItem(KEY)' not in body:
         bad('战绩跟账号',
             '换账号时没有删掉战绩存档 —— 听了信号却什么都不做')
-    if 'was === now' not in src:
+    if 'was === now' not in body:
         bad('战绩跟账号',
             '没有"同一个账号就不清"的判断 —— '
             '会把自己的战绩误清掉，那比不清更糟')
