@@ -109,7 +109,12 @@ const now = Date.now();
   const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
   ok(/checkOpponentAlive/.test(ui), '★ 对战屏定期检查对手是否还在');
   ok(/掉线了…/.test(ui), '★ 有倒计时提示（不让人干等着不知道发生了什么）');
-  ok(/对手离场，本局你胜/.test(ui), '★ 结算文案说清是"对手离场"赢的，不冒充实打实赢');
+  /* 🔴v1156 更新：文案统一成「对手已离场」了。
+     原来同一件事有两种说法（差一个「已」字），
+     是复制粘贴时改了一处漏了一处；
+     现在由守卫「文案一致」保证只有一种写法。 */
+  ok(/对手已离场，本局你胜/.test(ui),
+     '★ 结算文案说清是"对手已离场"赢的，不冒充实打实赢');
   ok(/_goneChecked/.test(ui), '★ 检查有节流（不刷爆数据库）');
 }
 

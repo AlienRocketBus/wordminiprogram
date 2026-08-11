@@ -34,9 +34,24 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ② 听发音不许泄露任何线索 —— 本测试最关键的一条 */
 {
+  /* 🔴v1156：**又一个"往后数 N 个字符"的窗口断言。**
+
+     v1156 把题目文字放大加重（26px→34px 并加了样式），
+     askIsTts 到喇叭按钮的距离从 1200 内涨到了 2013 ——
+     **代码完全正确，断言却红了**。
+
+     这个文件里的窗口是 1200，而 test_pk_battle_ui 里同类的
+     已经被撑大过三次（900→2600→3200）。
+
+     > 凡是"往后数 N 个字符"的断言，
+     > 都是在赌那段代码不会长大。而它一定会长大。
+
+     改为：从 askIsTts 一直取到这个渲染函数结束
+     （下一个 `function ` 出现之前），多长都覆盖得到。 */
   const i = code.indexOf('askIsTts');
   ok(i > 0, '对战屏按出题形式分支');
-  const seg = code.slice(i, i + 1200);
+  const _next = code.indexOf('\n  function ', i);
+  const seg = code.slice(i, _next > i ? _next : i + 4000);
   const ttsBranch = seg.slice(seg.indexOf('askIsTts'), seg.indexOf(': ') > 0 ? seg.indexOf("'<div class=\"pr_cn\"") : seg.length);
   ok(/prSpk/.test(seg), '★ 听发音模式显示喇叭按钮');
   ok(!/w\.cn[\s\S]{0,120}prSpk/.test(seg),
