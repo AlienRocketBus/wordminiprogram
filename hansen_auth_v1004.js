@@ -850,30 +850,50 @@
 
          保留弹框的只剩一种情况：**两边都有相当规模的进度且互不包含** ——
          那时确实只有用户自己知道该留哪份。 */
+      /* 🔴v1158（BAT MAN 定的规则）：**登录一律以云端为准，不再问。**
+
+         规则原话：
+           「玩到 3 级必须要注册，而且只在这次会上传到云端，
+             之后都是登录直接覆盖」
+
+         也就是说：
+           · 注册那一刻 —— 本机进度上传，这是**唯一一次**本机往云端走
+           · 之后每次登录 —— 云端**直接覆盖**本机
+
+         为什么这样是安全的（三条一起才成立，缺一不可）：
+
+           ① 3 级之前不能注册，所以匿名玩的进度一定在"注册上传"那次带上去了
+           ② 退出登录前会**同步等一次上传**（v1134 做的），
+              打完一局立刻退出也不会丢
+           ③ 玩的过程中数据一变就自动同步（8 秒合并延迟）
+
+         所以云端永远是最新的 —— 本机比云端新的情况不该存在。
+         既然如此，弹「留本机还是留云端」就是在问一个
+         **用户没有信息可以判断的问题**：
+         他不知道两边差多少，只能瞎选，选错了就丢进度。
+
+         > 与其让用户在没有依据的情况下做不可逆的选择，
+         > 不如让规则本身保证一边永远是对的。
+
+         ⚠️ 唯一保留的例外：**云端读不到**（网断了、权限出错）——
+         那种情况在前面 `info.exists === null` 就返回了，
+         走不到这里。不会出现"云端是空的却把本机清了"。 */
       if (hasCloud && hasLocal) {
-        var _lw = (local && local.learned) || 0;
-        var _cw = (info && info.learned) || 0;
-        if (_cw > 0 && _lw * 2 < _cw) {
-          return CS.restoreWithKey(CS.ensureKey())
-            .then(function (r) {
-              if (r && r.ok) {
-                markLocalOwner(uidNow);
-                return { ok: true, action: 'restored', needReload: true,
-                         autoPicked: 'cloud', localWords: _lw, cloudWords: _cw };
-              }
-              return { ok: false, action: 'restore-failed' };
-            })['catch'](function () { return { ok: false, action: 'restore-failed' }; });
-        }
-      }
-      if (hasCloud && hasLocal) {
-        /* 冲突：把双方的真实规模一并带出去，让用户看着数字选，而不是盲选 */
-        /* v1144: 走到冲突分支说明本机这份**不是别人的**（是别人的话上面已经把 hasLocal 置 false 了），
-           所以它确实归当前这个人 —— 标记。
-           至于两份怎么合并，那是用户选的事，不影响归属。 */
-        markLocalOwner(uidNow);
-        return { ok: true, action: 'conflict',
-                 local: local,
-                 cloudUpdatedAt: (info && info.updatedAt) || 0 };
+        return CS.restoreWithKey(CS.ensureKey())
+          .then(function (r) {
+            if (r && r.ok) {
+              markLocalOwner(uidNow);
+              return { ok: true, action: 'restored', needReload: true,
+                       autoPicked: 'cloud',
+                       localWords: (local && local.learned) || 0,
+                       cloudWords: (info && info.learned) || 0 };
+            }
+            /* 恢复失败：**什么都不动**，本机原样留着。
+               宁可这次没同步上，也不能把人的进度清成半截。 */
+            return { ok: false, action: 'restore-failed' };
+          })['catch'](function () {
+            return { ok: false, action: 'restore-failed' };
+          });
       }
       return CS.syncNow({ force: true })
         .then(function (r) { return { ok: !!(r && r.ok), action: 'uploaded' }; })
@@ -1190,6 +1210,9 @@
   try { watchCrossTabAuth(); } catch (e) {}
 
   window.HansenAuth = {
+    /* v1158: 让测试能直接验「登录同步」的分支走向 ——
+       这条规则会删本机数据，必须能自动验证，不能只靠人工点。 */
+    _syncOnLoginForTest: syncOnLogin,
     ready: ready,
     isSignedIn: isSignedIn,
     ensureSession: ensureSession,

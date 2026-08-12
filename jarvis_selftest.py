@@ -725,6 +725,15 @@ def _inj_transport(s):
     return s[:i] + s[j:]
 
 
+
+def _inj_cloud_wins(s):
+    """把「云端读不到」的保护拆掉 —— 会把读不到当成云端是空的，清掉本机。"""
+    m = "action: 'cloud-unreachable'"
+    if m not in s:
+        return None
+    return s.replace(m, "action: 'x-removed'", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -805,6 +814,7 @@ CASES = [
     ('别攒着不发', 'hansen_guards_v1068.py',      _inj_backlog),
     ('BUG图鉴',     'BUG图鉴_v1156.md',           _inj_atlas),
     ('传输层完整', 'hansen_pk_room_v1065.js',     _inj_transport),
+    ('登录以云端为准', 'hansen_auth_v1004.js',        _inj_cloud_wins),
 ]
 
 

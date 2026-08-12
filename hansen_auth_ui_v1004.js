@@ -209,7 +209,19 @@
           setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
           return;
         }
-        if (s && s.action === 'conflict') {
+        /* 🔴v1158：**这个选择框已经不该出现了。**
+
+       BAT MAN 定的规则：注册那一次上传，之后登录一律云端覆盖本机。
+       后端 `syncOnLogin` 从 v1158 起不再返回 'conflict' ——
+       两边都有数据时直接恢复云端。
+
+       这段代码留着当**兜底**：万一以后有人改回去、
+       或者装了旧版的 auth 模块，用户至少还有得选，
+       不会因为拿到一个没人处理的 action 而卡住。
+
+       > 删掉一条分支和让它永远不触发，风险不一样。
+       > 前者是"以后一定不会有"，后者是"现在不会有，将来有也不怕"。 */
+    if (s && s.action === 'conflict') {
           setTimeout(function () {
             /* 🔴v1029: 把双方真实规模摆出来, 让用户看着数字选, 而不是盲选 */
             var L = (s.local || {});

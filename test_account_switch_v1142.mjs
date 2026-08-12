@@ -190,9 +190,21 @@ function boot(init) {
      '★ nothing-to-sync（云端没档）这条成功分支会打标记');
   ok(/markLocalOwner\(uidNow\);\s*\/\* v1144: 恢复成功/.test(seg),
      '★ restored（从云端恢复成功）会打标记');
-  ok(/markLocalOwner\(uidNow\);[\s\S]{0,200}action: 'conflict'/.test(seg),
-     '★ conflict（两边都有让用户选）会打标记 —— ' +
-     '能走到这里说明本机这份不是别人的');
+  /* 🔴v1158 更新：**不再有 conflict 分支了。**
+
+     BAT MAN 定的规则：注册那一次上传，之后登录一律云端覆盖本机。
+     所以「两边都有 → 让用户选」这条路整个去掉了 ——
+     现在两边都有时直接恢复云端（走 restored 分支，上面那条断言已经覆盖）。
+
+     为什么不再问用户：他不知道两边差多少，只能瞎选，
+     而选错是不可逆的。规则本身保证云端永远最新，就不该把这个
+     没有依据的选择丢给他。
+
+     这里改成断言**反过来**：conflict 分支必须已经消失。
+     如果哪天有人改回去，这条会红。 */
+  ok(!/action: 'conflict'/.test(seg),
+     '★ **不再有 conflict 分支** —— 登录一律以云端为准，' +
+     '不把「留本机还是留云端」这种没依据的选择丢给用户');
 
   /* 失败分支不能打 */
   const failIdx = seg.indexOf("action: 'cloud-unreachable'");

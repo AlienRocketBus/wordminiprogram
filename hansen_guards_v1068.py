@@ -3172,6 +3172,54 @@ def guard_transport_complete():
             '而测试桩里有这个方法所以测不出来（桩把真货的缺口盖住了）'
             % ('、T().'.join(miss)))
 
+
+def guard_login_cloud_wins():
+    """登录一律以云端为准，不许再弹「留本机还是留云端」。
+
+    ═══ BAT MAN 定的规则（v1158）═══
+
+      「玩到 3 级必须要注册，而且只在这次会上传到云端，
+        之后都是登录直接覆盖」
+
+    也就是：
+      · 注册那一刻 —— 本机进度上传，**唯一一次**本机往云端走
+      · 之后每次登录 —— 云端**直接覆盖**本机
+
+    为什么安全（三条一起才成立）：
+      ① 3 级之前不能注册，匿名进度一定在"注册上传"那次带上去了
+      ② 退出登录前同步等一次上传（v1134）
+      ③ 玩的过程中数据一变就自动同步
+
+    所以云端永远最新，本机比云端新的情况不该存在。
+    既然如此，弹选择框就是在问一个**用户没有信息可以判断的问题** ——
+    他不知道两边差多少，只能瞎选，选错了进度就没了。
+
+    > 与其让用户在没有依据的情况下做不可逆的选择，
+    > 不如让规则本身保证一边永远是对的。
+
+    ⚠️ 两个必须保留的保护（丢数据的风险都在这）：
+      · 云端读不到 → cloud-unreachable，**不动本机**
+      · 恢复失败   → restore-failed，**不动本机**
+      宁可这次没同步上，也不能把进度清成半截。
+    """
+    src = _code_only(_read('hansen_auth_v1004.js') or '')
+    if not src:
+        bad('登录以云端为准', 'hansen_auth_v1004.js 不见了')
+        return
+    if "action: 'conflict'" in src:
+        bad('登录以云端为准',
+            'syncOnLogin 还会返回 conflict —— '
+            '那会弹「留本机还是留云端」，'
+            '而用户没有信息判断该选哪个，选错就丢进度')
+    if "action: 'cloud-unreachable'" not in src:
+        bad('登录以云端为准',
+            '云端读不到时没有单独的分支 —— '
+            '会把"读不到"当成"云端是空的"，然后清掉本机')
+    if "action: 'restore-failed'" not in src:
+        bad('登录以云端为准',
+            '恢复失败时没有单独的分支 —— '
+            '可能把本机清成半截')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3275,6 +3323,7 @@ GUARDS = [
     ('别攒着不发', guard_release_backlog),
     ('BUG图鉴',     guard_bug_atlas),
     ('传输层完整', guard_transport_complete),
+    ('登录以云端为准', guard_login_cloud_wins),
 ]
 
 
