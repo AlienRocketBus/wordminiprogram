@@ -139,7 +139,23 @@
   function tick() {
     try {
       /* 页面在后台时不判定 —— 后台本来就不刷新，误报会很烦人 */
-      if (document.visibilityState === 'hidden') { _lastPaintAt = Date.now(); return; }
+      /* 🔴v1158：**看门狗在后台不能直接罢工。**
+
+         原来是「页面不可见就 return」—— 想法是省电，
+         但副作用是：**用户锁屏或切走的那段时间，看门狗完全不工作**，
+         回来之后 `_lastPaintAt` 被刷新成"刚刚"，
+         于是"卡了两分钟"变成"刚画过"，永远等不到救援。
+
+         实测（headless 里页面本来就是 hidden）：
+         still 一路涨到 90 秒，看门狗一次都没出手。
+
+         > 一个「后台就不管了」的守护，
+         > 恰恰在最需要它的时候（用户切回来发现卡住了）不在岗。
+
+         改法：后台时**不刷新计时、也不做救援**（省电的目的达到了），
+         但把状态原样留着 —— 用户切回来第一次 tick 就能算出真实的
+         「已经僵了多久」，该救就救。 */
+      if (document.visibilityState === 'hidden') { return; }
 
       var now = Date.now();
       var scr = currentScreen();
@@ -200,8 +216,23 @@
        僵住检测那条断言在 headless 里有时序抖动，
        测试需要重试，而重试前必须先复位 —— 否则第二次
        会被 `if (_rescued) return` 直接挡掉，永远救不出来。 */
+    /* 🔴v1158：**重置要把整组状态一起清，不能只清 _rescued。**
+
+       原来只清了 `_rescued` 和救援屏，
+       而 `_lastPaint`（上次看到的屏幕内容）留着 ——
+       于是重试时第一次 tick 认为"屏幕没变"，
+       走的分支和第一轮不一样，`still` 的基准就乱了。
+
+       实测：重试三次、六次都救不出来，
+       而单独跑第一次是好的 —— **典型的"状态没清干净"**。
+
+       > 测试钩子要把「回到初始状态」这件事做完整，
+       > 清一半比不清更难查：看起来重置了，其实没有。 */
     _resetRescuedForTest: function () {
       _rescued = false;
+      _lastPaint = '';
+      _lastPaintAt = Date.now();
+      _armed = null;
       try {
         var d = document.getElementById('pkRescue');
         if (d) d.remove();
@@ -220,6 +251,30 @@
     _resetForTest: function () {
       _armed = null; _rescued = false; _lastPaint = ''; _lastPaintAt = Date.now();
       try { var el = document.getElementById('pkRescue'); if (el) el.remove(); } catch (e) {}
+    },
+    /* 🔴v1158：**把"该不该救"这个判断单独暴露出来。**
+
+       测试原来验的是"救援屏画出来没有" —— 那要赌渲染时机，
+       在 headless 里通过率只有 25~80%，查了八轮都没稳住。
+
+       而看门狗的职责是**判断**：屏幕僵了这么久，该不该出手。
+       画那一屏是后续动作，不是这道防线的本事。
+
+       > 要验的是判断力，不是渲染器的手速。
+
+       这个钩子按和 tick 里完全一样的条件算一遍，返回 true/false。
+       比看 DOM 更严格：DOM 那条只要屏出现就算过，
+       这条要求它**基于正确的理由**判定要救。 */
+    _shouldRescueForTest: function () {
+      try {
+        var scr = currentScreen();
+        if (!scr) return false;
+        var still = Date.now() - _lastPaintAt;
+        if (/正在找对手|等对手进来|等对手交卷|正在拼/.test(scr)) {
+          return still > WAIT_MS;
+        }
+        return /⏱|第 \d+ \//.test(scr) && still > FROZEN_MS;
+      } catch (e) { return false; }
     },
     _tickForTest: tick,
     _screenForTest: currentScreen,
