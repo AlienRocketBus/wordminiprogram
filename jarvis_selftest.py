@@ -713,6 +713,18 @@ def _inj_atlas(s):
     return None
 
 
+
+def _inj_transport(s):
+    """把默认传输层的 list 方法删掉 —— 真机上建房会当场失败。"""
+    i = s.find('      list: function (cond) {')
+    if i < 0:
+        return None
+    j = s.find('      listOpen: function', i)
+    if j < 0:
+        return None
+    return s[:i] + s[j:]
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -792,6 +804,7 @@ CASES = [
     ('列表要截断', 'hansen_pk_room_ui_v1065.js',  _inj_list_cap),
     ('别攒着不发', 'hansen_guards_v1068.py',      _inj_backlog),
     ('BUG图鉴',     'BUG图鉴_v1156.md',           _inj_atlas),
+    ('传输层完整', 'hansen_pk_room_v1065.js',     _inj_transport),
 ]
 
 

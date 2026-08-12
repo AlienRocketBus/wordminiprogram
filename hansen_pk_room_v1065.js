@@ -139,6 +139,41 @@
           });
         });
       },
+      /* 🔴v1158（真机报的）：**默认传输层从来就没有 list，而三处在调它。**
+
+         用户报「房间匹配根本没办法建房」。查下来：
+         `T().list(...)` 被调用 **3 处**，
+         而默认传输层只提供了 add / listOpen / claim / patch / remove / read
+         —— **一个 list 都没有**。
+
+           · 行 440：开房前查房间码是否重复 ← **建房必经之路**
+           · 行 365：按房间码找房（好友进房）
+           · 行 479：清理自己的僵尸房
+
+         `T().list` 是 `undefined`，调用直接抛
+         `T(...).list is not a function` —— 建房当场失败。
+
+         为什么之前没暴露：所有测试都用 `_setTransportForTest` 注入了
+         一个**带 list 的假传输层**，
+         于是「测试全绿、真机不能用」。
+
+         > **测试桩比真货多一个方法，等于把真货的缺口盖住了。**
+         > 桩要照着真货的能力做，不能照着"我需要什么"做。
+
+         按 condition 查询，返回原始行 —— 调用方自己做本地过滤
+         （v1154 的教训：where 里字段多了会把结果全滤没，
+           所以这里只做最直白的等值匹配）。 */
+      list: function (cond) {
+        return db().then(function (d) {
+          var q = d.collection(COLLECTION);
+          try {
+            if (cond && typeof cond === 'object') q = q.where(cond);
+          } catch (e) {}
+          return q.limit(50).get().then(function (r) {
+            return (r && r.data) || [];
+          });
+        });
+      },
       listOpen: function (nowTs) {
         return db().then(function (d) {
           /* 🔴v1135：**先按心跳筛，再取前 N 条 —— 不能反过来。**

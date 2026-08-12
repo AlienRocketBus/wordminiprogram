@@ -3109,6 +3109,69 @@ def guard_bug_atlas():
             '「当前进度.md」没有指向 BUG 图鉴 —— '
             '那是下一次对话的第一入口，不指过去等于图鉴不存在')
 
+
+def guard_transport_complete():
+    """代码调了什么传输方法，默认传输层就得提供什么。
+
+    ═══ 事故（v1158，真机报的）═══
+
+    用户报「房间匹配根本没办法建房」。查下来：
+    `T().list(...)` 被调用 **3 处**，
+    而默认传输层只提供 add / listOpen / claim / patch / remove / read
+    —— **一个 list 都没有**。
+
+      · 开房前查房间码是否重复 ← **建房必经之路**
+      · 按房间码找房（好友进房）
+      · 清理自己的僵尸房
+
+    `T().list` 是 undefined，调用直接抛
+    `T(...).list is not a function` —— 建房当场失败。
+
+    ═══ 为什么测试全绿却真机不能用 ═══
+
+    所有测试都用 `_setTransportForTest` 注入了一个
+    **带 list 的假传输层** —— 桩比真货多一个方法。
+
+    > **测试桩比真货多一个方法，等于把真货的缺口盖住了。**
+    > 桩要照着真货的能力做，不能照着"我需要什么"做。
+
+    判据：所有 `T().xxx(` 调用的方法名，
+    都必须在默认传输层里有对应的 `xxx: function`。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    called = set(re.findall(r'T\(\)\.(\w+)\s*\(', src))
+    # ⚠️ **真正的方法在 realTransport() 里，不在 T() 里。**
+    #   T() 只是「取一次、包个超时、缓存起来」的壳，
+    #   第一版判据抠的是 T() 的函数体 —— 那里面一个方法都没有，
+    #   于是把所有方法都报成缺失（连正常的 add/read 也报）。
+    #   > 判据要落在真正定义东西的那个函数上。
+    i = src.find('function realTransport()')
+    if i < 0:
+        bad('传输层完整', '找不到 realTransport()')
+        return
+    d = 0
+    j = src.find('{', i)
+    k = j
+    while k < len(src):
+        if src[k] == '{':
+            d += 1
+        elif src[k] == '}':
+            d -= 1
+            if d == 0:
+                break
+        k += 1
+    body = src[i:k + 1]
+    provided = set(re.findall(r'(\w+):\s*function', body))
+    miss = sorted(called - provided)
+    if miss:
+        bad('传输层完整',
+            '代码调了 T().%s 但默认传输层没提供 —— '
+            '真机上会抛 "is not a function"，'
+            '而测试桩里有这个方法所以测不出来（桩把真货的缺口盖住了）'
+            % ('、T().'.join(miss)))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3211,6 +3274,7 @@ GUARDS = [
     ('列表要截断', guard_list_capped),
     ('别攒着不发', guard_release_backlog),
     ('BUG图鉴',     guard_bug_atlas),
+    ('传输层完整', guard_transport_complete),
 ]
 
 
