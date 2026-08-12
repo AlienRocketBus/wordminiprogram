@@ -137,6 +137,15 @@
 
   function close() {
     stopKb();
+    /* v1158: 等待屏的「已等 N 秒」计时器 —— 离开这屏必须停掉。
+       不停的话它会一直每秒查一次 DOM，
+       而且下次进等待屏会有两个计时器同时刷同一个元素。 */
+    try {
+      if (_state && _state._waitTimer) {
+        clearInterval(_state._waitTimer);
+        _state._waitTimer = null;
+      }
+    } catch (e) {}
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
     try { if (S()) S().stopHeartbeat(); } catch (e) {}
     if (_state && _state.roomId) { try { S().leaveRoom(_state.roomId); } catch (e) {} }
@@ -437,7 +446,22 @@
     var cards = ['A', 'B', 'C'].map(function (k) {
       var m = MODES[k];
       if (!m) return '';
-      return '<div class="pr_mode" data-mode="' + k + '" style="border:1px solid var(--pk-in-line);'
+      /* 🔴v1158：**选玩法的卡片必须是真正可聚焦、可读的控件。**
+
+         原来是纯 `<div>` —— 没有 role、没有 tabindex、
+         屏幕阅读器读不出这是能点的东西，键盘也 Tab 不到。
+
+         而这一屏是**建房的必经之路**：不选玩法就开不了房。
+         也就是说，只用键盘或用读屏软件的孩子，**根本建不了房**。
+
+         > 看起来能点 ≠ 真的能操作。
+         > 一个必经步骤上的控件，比装饰性元素更不能省这一步。
+
+         加 role="button" + tabindex="0" + aria-label，
+         并在下面补键盘事件（回车/空格触发）。 */
+      return '<div class="pr_mode" role="button" tabindex="0"'
+        + ' aria-label="选择玩法：' + esc(m.name || k) + '"'
+        + ' data-mode="' + k + '" style="border:1px solid var(--pk-in-line);'
         + 'border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;background:var(--pk-card)">'
         + '<div style="font-size:17px;font-weight:800;color:var(--pk-txt)">'
         + m.emoji + ' ' + esc(m.name)
@@ -478,7 +502,17 @@
         el.onclick = function () { _askMode = el.getAttribute('data-ask'); chooseMode(onPick); };
       });
       host.querySelectorAll('.pr_mode').forEach(function (el) {
-        el.onclick = function () { onPick(el.getAttribute('data-mode')); };
+        var pick = function () { onPick(el.getAttribute('data-mode')); };
+        el.onclick = pick;
+        /* v1158: 键盘也要能选 —— 回车和空格，和原生 button 的行为一致。
+           空格要 preventDefault，否则页面会往下滚一屏。 */
+        el.onkeydown = function (ev) {
+          if (!ev) return;
+          if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+            try { ev.preventDefault(); } catch (e) {}
+            pick();
+          }
+        };
       });
     }
     var b = q('prBack');
@@ -494,7 +528,10 @@ function doCreate() {
     S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate,
                      hostRating: _ladderRating }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
-      _state = { roomId: r.roomId, words: r.words, isHost: true };
+      /* v1158: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」，
+         而 waiting() 只收 (roomId, code)，不存这里就拿不到。 */
+      _state = { roomId: r.roomId, words: r.words, isHost: true,
+                 mode: (r.room && r.room.mode) || mode };
       waiting(r.roomId, (r.room && r.room.code) || '');
     });
   }
@@ -517,11 +554,72 @@ function doCreate() {
       : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
         + '等人进来就自动开打。</div>';
 
-    paint('<div class="pr_top"><button class="pr_back" id="prBack">← 关掉房间</button>'
+    /* 🔴v1158：**等待屏原来一动不动，也不说等了多久。**
+
+       截图看到的就是一句静态的「房间已经开好了」——
+       等 3 秒和等 3 分钟长得一模一样，屏幕上没有任何东西在动。
+
+       用户会开始怀疑：是不是卡了？是不是没开成功？
+       而天梯的等待屏早就有转动的放大镜和「已等 N 秒」，
+       **同样是等待，这一屏什么都没有**。
+
+       > 让人等，就得让他看见时间在走。
+       > 一个不动的等待画面，和一个死掉的界面没有区别。
+
+       补三样：
+         · 转动的沙漏（CSS 动画，不耗电）
+         · 「已等 N 秒」，每秒刷新
+         · 「开的是什么房」—— 玩法和词数，他才知道自己开对没有 */
+    /* ⚠️ waiting() 只收 (roomId, code)，拿不到 mode ——
+       第一版直接写 S().modeOf(mode)，那个 mode 是 undefined，
+       于是整块房间信息静默消失（不报错，就是不显示）。
+       改从 _state 里取 —— 那是刚建房时存下来的（roomId/words/isHost）。 */
+    var _modeName = '';
+    var _wc = 0;
+    try {
+      var _pd = _state || {};
+      _wc = (_pd.words && _pd.words.length) || 0;
+      var _mk = _pd.mode || (_pd.room && _pd.room.mode) || '';
+      var _M = (_mk && S() && S().modeOf) ? S().modeOf(_mk) : null;
+      if (_M) _modeName = (_M.emoji || '') + (_M.name || '');
+    } catch (e) {}
+    var _roomInfo = (_modeName || _wc)
+      ? '<div style="text-align:center;font-size:12.5px;color:var(--pk-dim);margin-top:6px">'
+        + '你开的是 ' + (_modeName ? esc(_modeName) + ' · ' : '')
+        + (_wc || 5) + ' 个词</div>'
+      : '';
+
+    paint('<style>@keyframes hsnWaitSpin{0%,100%{transform:rotate(0deg)}'
+      + '45%{transform:rotate(175deg)}50%{transform:rotate(180deg)}'
+      + '95%{transform:rotate(355deg)}}</style>'
+      + '<div class="pr_top"><button class="pr_back" id="prBack">← 关掉房间</button>'
       + '<div class="pr_h">⏳ 等对手进来</div></div>'
+      + '<div style="text-align:center;font-size:38px;margin:14px 0 4px;'
+      +   'display:inline-block;width:100%">'
+      +   '<span style="display:inline-block;'
+      +     'animation:hsnWaitSpin 2.4s ease-in-out infinite">⏳</span></div>'
+      + '<div id="prWaited" style="text-align:center;font-size:13px;'
+      +   'color:var(--pk-dim);margin-bottom:10px">已等 0 秒</div>'
       + codeBox
+      + _roomInfo
       + '<div class="pr_empty" style="font-size:12.5px;margin-top:10px">'
       + '（关掉这一页，房间也会一起关掉）</div>');
+
+    /* 每秒把「已等多久」刷一次 —— 只改一个文本节点，几乎不耗性能。
+       计时器挂在 _state 上，关房时统一清掉（见 close()）。 */
+    try {
+      var _t0 = Date.now();
+      if (_state && _state._waitTimer) clearInterval(_state._waitTimer);
+      var _wt = setInterval(function () {
+        var el = q('prWaited');
+        if (!el) { clearInterval(_wt); return; }
+        var sec = Math.round((Date.now() - _t0) / 1000);
+        el.textContent = sec < 60
+          ? ('已等 ' + sec + ' 秒')
+          : ('已等 ' + Math.floor(sec / 60) + ' 分 ' + (sec % 60) + ' 秒');
+      }, 1000);
+      if (_state) _state._waitTimer = _wt;
+    } catch (e) {}
     if (q('prBack')) q('prBack').onclick = close;
 
     if (code) {
