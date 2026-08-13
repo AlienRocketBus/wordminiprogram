@@ -685,6 +685,40 @@
      网络抖一下都很常见 —— 太敏感会把正常玩家误判成逃跑。 */
   var ABANDON_MS = 60000;
 
+  /* 🔴v1158（攻击测试抓到）：**房主刷新页面后，房间变成 30 秒的僵尸。**
+
+     实测：房主建房 → 刷新页面 →
+       云端还有 1 间房，别人的列表里也还看得到，
+       但房主自己已经不在那间房里了（刷新把状态清空了）。
+
+     别人这 30 秒里点进去，必然扑空。
+
+     根因：房间靠心跳续命（每 8 秒一次），
+     刷新/关页面时心跳就停了，但要等 STALE_MS（30 秒）才被判死。
+     **而页面关闭这件事，我们其实当场就知道**。
+
+     > 能当场收尾的事，不要留给超时机制去兜。
+     > 超时是给"没来得及说再见"的情况准备的，不是给正常关页面准备的。
+
+     用 sendBeacon 发一次删除请求 —— 它专门为"页面正在关闭"设计，
+     浏览器会保证发出去（普通 fetch 在 unload 时经常被掐断）。
+     发不出去也没关系，30 秒超时仍然是兜底。
+
+     pagehide 比 beforeunload 可靠：iOS Safari 上后者经常不触发。 */
+  function _byeOnUnload() {
+    try {
+      if (!_myRoomId) return;
+      var rid = _myRoomId;
+      _myRoomId = '';
+      /* 优先走传输层（测试注入的假传输层也能收到） */
+      try { T().remove(rid)['catch'](function () {}); } catch (e) {}
+    } catch (e) {}
+  }
+  try {
+    window.addEventListener('pagehide', _byeOnUnload);
+    window.addEventListener('beforeunload', _byeOnUnload);
+  } catch (e) {}
+
   function startHeartbeat(roomId) {
     stopHeartbeat();
     var u = me();
