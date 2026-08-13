@@ -523,6 +523,29 @@
   }
 
   /* ── 列房：只列还活着的公开房，且不列自己开的 ── */
+  /* v1158: 房间列表字段清洗 —— 见 listRooms 里的说明 */
+  function sText(v, max) {
+    if (typeof v !== 'string') {
+      if (typeof v === 'number' && isFinite(v)) v = String(v);
+      else return '';
+    }
+    v = v.replace(/[\u0000-\u001f]/g, '');      /* 控制字符去掉 */
+    return v.length > max ? v.slice(0, max) : v;
+  }
+  function sNum(v, lo, hi, dflt) {
+    var n = Number(v);
+    if (!isFinite(n)) return dflt;
+    return Math.max(lo, Math.min(hi, Math.round(n)));
+  }
+  function sAge(ts) {
+    var t = Number(ts);
+    var now = Date.now();
+    /* 不是数字、在未来、或者早于 2020 年 —— 都当"刚刚"，
+       总比显示"29777281 分钟前"强 */
+    if (!isFinite(t) || t > now + 60000 || t < 1577808000000) return 0;
+    return Math.max(0, Math.round((now - t) / 1000));
+  }
+
   function listRooms() {
     var u = me();
     /* 列房时顺手清掉自己留下的死房（不阻塞列表返回） */
@@ -554,10 +577,30 @@
         ok: true,
         rooms: (rows || []).map(function (x) {
           return {
-            id: x._id || x.id, hostName: x.hostName || '无名蜂', hostTier: x.hostTier || '',
-            wordCount: x.wordCount || WORDS_PER_ROUND,
+            /* 🔴v1158（攻击测试抓到）：**云端返回什么就画什么，会印出 [object Object]。**
+
+               实测（让云端返回畸形行）：房间列表显示
+                 「[object Object] 未定级 · 很多 个词 · 29777281分钟前」
+
+               根因：`x.hostName || '无名蜂'` —— **对象也是真值**，
+               所以一个 `{a:1}` 会原样透传，模板拼进去就成了 [object Object]。
+               `wordCount` 拿到字符串"很多"、`createdAt` 是 NaN 时同理。
+
+               房间数据来自别的客户端（对方那台手机写进云端的），
+               **本地无法保证它一定干净** —— 老版本客户端、
+               写了一半断网、甚至有人手动改，都会让字段变成意外的类型。
+
+               > 从别人那里拿来、要显示给用户的东西，
+               > 每一个字段都要问一句：它要是不对怎么办？
+
+               三个清洗函数：文字只认字符串、数字要落在合理区间、
+               时间戳不合理就当"刚刚"（而不是算出 2977 万分钟）。 */
+            id: sText(x._id || x.id, 40),
+            hostName: sText(x.hostName, 16) || '无名蜂',
+            hostTier: sText(x.hostTier, 12),
+            wordCount: sNum(x.wordCount, 1, 50, WORDS_PER_ROUND),
             mine: !!(u.id && x.hostId === u.id),
-            ageSec: Math.max(0, Math.round((Date.now() - (x.createdAt || 0)) / 1000)),
+            ageSec: sAge(x.createdAt),
             /* 🔴v1154：**这两个字段以前被丢掉了 —— 天梯因此完全没法用。**
 
                用户现场：「天梯功能根本用不了。」
@@ -573,9 +616,11 @@
 
                `_id` 也一起带出去：天梯拿 `fit[0]._id` 去进房，
                而这里只给了 `id`，属于同一个疏漏。 */
-            _id: x._id || x.id,
-            mode: x.mode || 'C',
-            hostRating: x.hostRating
+            _id: sText(x._id || x.id, 40),
+            /* 玩法只认已知的三个 —— 云端给个 99 或 null 都当默认 */
+            mode: (x.mode === 'A' || x.mode === 'B' || x.mode === 'C') ? x.mode : 'C',
+            /* 天梯分夹在真实区间，负数和天文数字都不认 */
+            hostRating: sNum(x.hostRating, 0, 4000, 0)
           };
         })
       };

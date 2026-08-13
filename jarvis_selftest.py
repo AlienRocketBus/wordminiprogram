@@ -743,6 +743,15 @@ def _inj_pk_vocab(s):
     return s.replace(m, '<!-- removed -->', 1)
 
 
+
+def _inj_room_sanitize(s):
+    """把房间名的清洗去掉 —— 云端给个对象就会印出 [object Object]。"""
+    m = "hostName: sText(x.hostName, 16) || '\u65e0\u540d\u8702',"
+    if m not in s:
+        return None
+    return s.replace(m, "hostName: x.hostName || '\u65e0\u540d\u8702',", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -825,6 +834,7 @@ CASES = [
     ('传输层完整', 'hansen_pk_room_v1065.js',     _inj_transport),
     ('登录以云端为准', 'hansen_auth_v1004.js',        _inj_cloud_wins),
     ('对战页要有词库', 'spelling_pk.html',            _inj_pk_vocab),
+    ('房间列表要清洗', 'hansen_pk_room_v1065.js',     _inj_room_sanitize),
 ]
 
 

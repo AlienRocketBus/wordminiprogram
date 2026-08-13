@@ -3261,6 +3261,45 @@ def guard_pk_page_has_vocab():
             'vocab_all.js 排在 hansen_pk_room 之后 —— '
             '后者建词表时前者还没加载')
 
+
+def guard_room_list_sanitized():
+    """房间列表的每个字段都要清洗。
+
+    ═══ 攻击测试抓到（v1158）═══
+
+    让云端返回一行畸形数据，房间列表显示：
+      「[object Object] 未定级 · 很多 个词 · 29777281分钟前」
+
+    根因：`x.hostName || '无名蜂'` —— **对象也是真值**，
+    所以 `{a:1}` 原样透传，拼进模板就成了 [object Object]。
+
+    房间数据来自**别的客户端**（对方那台手机写进云端的），
+    本地无法保证它干净 —— 老版本客户端、写了一半断网、
+    甚至有人手动改，都会让字段变成意外的类型。
+
+    > 从别人那里拿来、要显示给用户的东西，
+    > 每一个字段都要问一句：它要是不对怎么办？
+
+    判据：listRooms 的字段映射必须走清洗函数。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    for fn in ('function sText', 'function sNum', 'function sAge'):
+        if fn not in src:
+            bad('房间列表要清洗',
+                '缺少清洗函数 %s —— 云端给什么就画什么，'
+                '一个对象字段就会印出 [object Object]' % fn.split()[-1])
+            return
+    i = src.find('rooms: (rows || [])')
+    if i < 0:
+        return
+    seg = src[i:i + 700]
+    if 'x.hostName ||' in seg or 'x.wordCount ||' in seg:
+        bad('房间列表要清洗',
+            '还有字段裸透传（如 x.hostName ||）—— '
+            '对象也是真值，会原样印到界面上')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3366,6 +3405,7 @@ GUARDS = [
     ('传输层完整', guard_transport_complete),
     ('登录以云端为准', guard_login_cloud_wins),
     ('对战页要有词库', guard_pk_page_has_vocab),
+    ('房间列表要清洗', guard_room_list_sanitized),
 ]
 
 
