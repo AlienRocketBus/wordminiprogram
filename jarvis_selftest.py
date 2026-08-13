@@ -752,6 +752,15 @@ def _inj_room_sanitize(s):
     return s.replace(m, "hostName: x.hostName || '\u65e0\u540d\u8702',", 1)
 
 
+
+def _inj_no_words(s):
+    """把建房前的词表探测拆掉 —— 没词也能建房，一开打就秒结束。"""
+    m = "var _probe = wordsFromSeed(1, 3);"
+    if m not in s:
+        return None
+    return s.replace(m, "var _probe = [1, 2, 3];", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -835,6 +844,7 @@ CASES = [
     ('登录以云端为准', 'hansen_auth_v1004.js',        _inj_cloud_wins),
     ('对战页要有词库', 'spelling_pk.html',            _inj_pk_vocab),
     ('房间列表要清洗', 'hansen_pk_room_v1065.js',     _inj_room_sanitize),
+    ('没词不许建房', 'hansen_pk_room_v1065.js',     _inj_no_words),
 ]
 
 

@@ -3300,6 +3300,44 @@ def guard_room_list_sanitized():
             '还有字段裸透传（如 x.hostName ||）—— '
             '对象也是真值，会原样印到界面上')
 
+
+def guard_no_room_without_words():
+    """词库没加载好就不许建房。
+
+    ═══ 「建房不行」那条线的另一半（v1158）═══
+
+    v1158 修好了"对战页没引 vocab_all.js"，但如果因为别的原因
+    （网慢、脚本 404、缓存坏了）词库还是没到位，
+    原来的代码照样让人把房开出来 —— 然后等来一个对手，
+    **两个人一进对战就双双跳到结算屏**。
+
+    > 一个注定失败的操作，**在开始之前就该拦住**。
+    > 让人先建房、等人、再一起失败，比当场说"还没准备好"糟糕得多 ——
+    > 后者他刷新一下就好了，前者浪费两个人的时间还留下一间僵尸房。
+
+    判据：createRoom 里必须先探一次词表，取不到就拒绝，
+    并且提示要说清是词库问题（否则被 sayHuman 兜成"出了点问题"，
+    用户不知道该刷新页面）。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    i = src.find('function createRoom')
+    if i < 0:
+        return
+    seg = src[i:i + 1400]
+    if 'wordsFromSeed' not in seg:
+        bad('没词不许建房',
+            'createRoom 建房前不探词表 —— '
+            '词库没加载好也能把房开出来，'
+            '等来对手后两个人一进对战就双双跳结算屏')
+        return
+    ui = _code_only(_read('hansen_pk_room_ui_v1065.js') or '')
+    if ui and '/词库/.test(t)' not in ui:
+        bad('没词不许建房',
+            '词库的提示会被 sayHuman 兜成"出了点问题" —— '
+            '用户就不知道该刷新页面了')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3406,6 +3444,7 @@ GUARDS = [
     ('登录以云端为准', guard_login_cloud_wins),
     ('对战页要有词库', guard_pk_page_has_vocab),
     ('房间列表要清洗', guard_room_list_sanitized),
+    ('没词不许建房', guard_no_room_without_words),
 ]
 
 

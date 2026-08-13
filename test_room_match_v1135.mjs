@@ -26,6 +26,17 @@ function boot(rooms) {
     Promise, Error, String, Number, Array, Object, setTimeout, clearTimeout,
     setInterval: () => 0, clearInterval() {},
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
+  /* 🔴v1158：**沙箱里也要有词库。**
+     v1158 起 createRoom 会先探一次词表，取不到就拒绝建房
+     （防止"房建起来了、一开打就秒结束"——那正是用户报的 bug）。
+     沙箱环境没有 vocab_all.js，所以这里手动放几个词进去，
+     否则这些测试会因为"没词不许建房"而红，
+     而那不是它们要测的东西。 */
+  ctx.HANSEN_VOCAB_ALL = { t: [
+    { en: 'cat', cn: '猫' }, { en: 'dog', cn: '狗' }, { en: 'sun', cn: '太阳' },
+    { en: 'red', cn: '红色' }, { en: 'run', cn: '跑' }, { en: 'big', cn: '大的' },
+    { en: 'eye', cn: '眼睛' }, { en: 'cup', cn: '杯子' }, { en: 'box', cn: '盒子' },
+    { en: 'map', cn: '地图' }, { en: 'sky', cn: '天空' }, { en: 'egg', cn: '鸡蛋' }] };
   ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8'), ctx);
   const S = ctx.window.HansenPkRoom;
