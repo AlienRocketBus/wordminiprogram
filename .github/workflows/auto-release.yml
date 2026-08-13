@@ -28,9 +28,29 @@ jobs:
         run: |
           V="${{ steps.version.outputs.version }}"
           TAG="v${V}"
+          # 🔴v1158：**"已存在就跳过"会让包永远停在第一次打的那一版。**
+          #
+          #   用户发现的：v1157 的标签用 push -f 挪到了最新提交，
+          #   但 Release 上挂的 zip 还是几小时前打的那个 ——
+          #   中间所有改动一个都不在包里。
+          #
+          #   他下载到的是"标着最新版本号的旧包"，**比明确报错更糟**：
+          #   他会以为自己在测新功能，测不出效果还以为是功能没做好。
+          #
+          #   > 一个包该不该重打，看的是"代码有没有往前走"，
+          #   > 不是"这个名字用过没有"。
+          #
+          #   改法：Release 已存在时，比对 body 里记的 commit 是不是当前的。
+          #   不是就删掉重建；是就跳过（避免每次 push 都白打一次包）。
+          SHA_NOW="$(git rev-parse HEAD)"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "Release $TAG already exists, skipping."
-            exit 0
+            BODY="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body -q .body 2>/dev/null || echo '')"
+            if echo "$BODY" | grep -q "$SHA_NOW"; then
+              echo "Release $TAG already built from $SHA_NOW, skipping."
+              exit 0
+            fi
+            echo "Release $TAG exists but was built from an older commit - rebuilding."
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes || true
           fi
           # 用唯一正式打包器构建（未登记版本会失败关闭，防误发 v961/v962 等）
           # 🔴v1081: CI 上必须自己跑发版闸门。
