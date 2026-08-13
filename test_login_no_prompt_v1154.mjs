@@ -63,8 +63,8 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 
 /* ③ 本机明显更少就自动用云端 */
 {
-  ok(/_lw \* 2 < _cw/.test(code),
-     '★ 本机不足云端一半 → **自动用云端，不弹框**');
+  ok(/action: 'restored'/.test(code) && !/action: 'conflict'/.test(code),
+     '★ **两边都有也直接用云端，不弹框**（v1158 规则）—— 原来是「本机不足云端一半才自动选」，现在一律以云端为准：注册那次上传过，之后云端永远最新');
   ok(/autoPicked: 'cloud'/.test(code),
      '★ 自动选择时打上标记，供界面提示');
   ok(/markLocalOwner\(uidNow\)[\s\S]{0,200}autoPicked/.test(code) ||

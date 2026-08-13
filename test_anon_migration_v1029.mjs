@@ -50,15 +50,19 @@ uploaded=false; setCloud({exists:false});
 r = await A.syncOnLogin();
 ok(r.action==='uploaded' && uploaded===true, '本机有进度+云端无 → 上传(匿名期进度完成迁移)');
 
-/* ④ 两边都有 → 冲突, 且必须带真实规模 */
+  /* ④ 两边都有 → **直接恢复云端**（v1158 规则变了）
+
+     BAT MAN 定的规则：注册那一次上传，之后登录一律云端覆盖本机。
+     用户不知道两边差多少，只能瞎选，而选错不可逆；
+     而规则本身保证云端永远最新，就不该把这个没依据的选择丢给他。 */
 store._d = {}; store._d['wordIslandAnimal']=JSON.stringify({learned:[1,2,3]});
 store._d['wordIslandFood']=JSON.stringify({learned:[1,2]});
 uploaded=false; setCloud({exists:true, updatedAt: 1700000000000});
 r = await A.syncOnLogin();
-ok(r.action==='conflict', '两边都有 → conflict');
+  ok(r.action==='restored', '两边都有 → 直接恢复云端，不再问用户');
 ok(uploaded===false, '冲突时不擅自上传');
-ok(r.local && r.local.islands===2 && r.local.learned===5, `冲突带本机真实规模(${r.local&&r.local.islands}岛/${r.local&&r.local.learned}词)`);
-ok(r.cloudUpdatedAt===1700000000000, '冲突带云端最后保存时间');
+  ok(r.autoPicked==='cloud', '标明是自动选的云端（不是用户选的）');
+  /* v1158: cloudUpdatedAt 只在 conflict 时才有，这条随规则一起去掉 */
 
 /* ⑤ UI 必须把数字摆给用户看 */
 /* 🔴v1156 更新：**从 confirm 换成了两个写清楚的按钮。**
