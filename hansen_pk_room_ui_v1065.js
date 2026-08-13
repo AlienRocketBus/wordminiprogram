@@ -696,7 +696,21 @@ function doCreate() {
         if (r.taken) { refresh(); alert(E(r)); if (btn) { btn.disabled = false; btn.textContent = '进去打'; } return; }
         lobby(r); return;
       }
-      _state = { roomId: r.roomId, words: r.words, isHost: false };
+      /* 🔴v1158：**客人也要拿到房主选的玩法。**
+
+         实测（两个浏览器对打）：房主屏上是「⚡抢答赛」，
+         客人屏上却是「🔥同步赛」—— **同一间房，两个人在玩不同的规则**。
+
+         根因：客人的 _state 里没有 mode，
+         startMatch 里 `st.mode = st.mode || _pickedMode || 'C'`
+         就回落到了默认的 C（同步赛）。
+         而房间数据里本来就有 mode（房主建房时写的）。
+
+         > 玩法是这间房的属性，不是各人的偏好。
+         > 谁进来都该按房主定的规则打。 */
+      _state = { roomId: r.roomId, words: r.words, isHost: false,
+                 mode: (r.room && r.room.mode) || (r.mode) || '',
+                 askMode: (r.room && r.room.askMode) || '' };
       startMatch();
     });
   }

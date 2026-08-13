@@ -3220,6 +3220,47 @@ def guard_login_cloud_wins():
             '恢复失败时没有单独的分支 —— '
             '可能把本机清成半截')
 
+
+def guard_pk_page_has_vocab():
+    """对战页必须加载词库。
+
+    ═══ 事故（v1158，真机报「建房根本不行」）═══
+
+    用户反复说建房不行。两个浏览器实测复现：
+      建房成功 → 客人 claim 成功 → 房主立刻进结算屏「打平 0:0」→ 删房
+      → 客人再读房间是 null → 界面报「这个房间已经不在了」
+
+    追了四层才到根因：
+      `wordsFromSeed()` 从 window.HANSEN_VOCAB_ALL 取词，取不到返回 []；
+      `askRound` 第一行判 `idx >= words.length` ——
+      **空词表意味着第 0 题就直接 finish**，
+      一局在开始的同一瞬间结束，房间随即被清掉。
+
+    而 spelling_pk.html **从来没引过 vocab_all.js**（所有岛屿页都引了）。
+
+    > 这个 bug 表现出来的样子（「房间已经不在了」）
+    > 和真正的原因（词库没加载）隔了四层，
+    > 所以看多少遍进房逻辑都找不出来。
+    > **顺着"谁删了房"一路往回追，才追到最末端那一行。**
+
+    判据：对战页必须引 vocab_all.js，且排在 hansen_pk_room 之前。
+    """
+    src = _read('spelling_pk.html') or ''
+    if not src:
+        return
+    if 'vocab_all' not in src:
+        bad('对战页要有词库',
+            'spelling_pk.html 没有引 vocab_all.js —— '
+            '词表会是空的，对战一开始就结束、房间当场被删，'
+            '用户看到的是「这个房间已经不在了」')
+        return
+    iv = src.find('vocab_all')
+    ir = src.find('hansen_pk_room_v1065')
+    if ir >= 0 and iv > ir:
+        bad('对战页要有词库',
+            'vocab_all.js 排在 hansen_pk_room 之后 —— '
+            '后者建词表时前者还没加载')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3324,6 +3365,7 @@ GUARDS = [
     ('BUG图鉴',     guard_bug_atlas),
     ('传输层完整', guard_transport_complete),
     ('登录以云端为准', guard_login_cloud_wins),
+    ('对战页要有词库', guard_pk_page_has_vocab),
 ]
 
 

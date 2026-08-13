@@ -666,10 +666,37 @@
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: true, gone: true, reason: '房间已不存在' };
       var isHost = (room.hostId === u.id);
+      /* 🔴v1158（真机报「建房根本不行」，两个浏览器实测复现）：
+         **房主等久了会把刚进来的客人误判成"跑了"，然后把房间删掉。**
+
+         云端操作日志一条条看出来的：
+           add R1              建房成功
+           claim R1 OK         客人抢到房了 ✅
+           leaveRoom(R1)       ← 房主这边调的
+           REMOVE R1           ← 房间被删
+         客人再 read 就是 null → 界面报「这个房间已经不在了」。
+
+         根因就在下面这两行：对手没心跳时回落到 createdAt，
+         而房主开着房等人的整段时间里 guestBeat 根本不存在，
+         于是 idle = 已经等了多久。等满 60 秒（ABANDON_MS），
+         房主就认定"对手离场" → claimAbandonWin → showResult → 删房。
+
+         **而客人可能正好那一秒点了进去打。**
+
+         > 「对手离场」的前提是**对手曾经在过**。
+         > 拿建房时间当对手的心跳，等于说"你一开房，对手就在跑了"。
+
+         改法三条：
+           · 客人还没进来（没 guestId）→ 直接返回"没跑"，
+             这时候根本没有对手，谈何离场
+           · 有对手但还没心跳 → 用 startedAt（客人进房那一刻）作基准
+           · createdAt 不再当基准 —— 那是房间的生日，不是对手的 */
+      var guestIn = !!(room.guestId && String(room.guestId).length);
+      if (isHost && !guestIn) {
+        return { ok: true, gone: false, waitingForGuest: true };
+      }
       var oppBeat = isHost ? (room.guestBeat || 0) : (room.hostBeat || 0);
-      /* 对手还没发过任何心跳 —— 用房间创建/加入时间兜底，
-         否则刚开局那几秒会被误判成"对手从没来过" */
-      if (!oppBeat) oppBeat = room.roundAt || room.createdAt || Date.now();
+      if (!oppBeat) oppBeat = room.startedAt || room.roundAt || Date.now();
       var idle = Date.now() - oppBeat;
       return { ok: true, gone: idle > ABANDON_MS,
                idleSecs: Math.round(idle / 1000),

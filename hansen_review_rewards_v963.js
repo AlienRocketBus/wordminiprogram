@@ -600,7 +600,7 @@
         iconHtml = '<span style="flex:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;'
           + 'background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),rgba(255,255,255,.06) 62%,transparent 72%);'
           + 'border-radius:50%" aria-hidden="true">'
-          + '<img src="'+m.img+'?v=1157" alt="" style="width:70px;height:70px;object-fit:contain;display:block;'
+          + '<img src="'+m.img+'?v=1158" alt="" style="width:70px;height:70px;object-fit:contain;display:block;'
           + 'filter:drop-shadow(0 3px 7px rgba(0,0,0,.32))" '
           + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:46px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)"></span>';
       } else {

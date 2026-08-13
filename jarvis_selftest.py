@@ -734,6 +734,15 @@ def _inj_cloud_wins(s):
     return s.replace(m, "action: 'x-removed'", 1)
 
 
+
+def _inj_pk_vocab(s):
+    """把对战页的词库引用去掉 —— 对战一开始就结束、房间当场被删。"""
+    m = '<script defer src="vocab_all.js?v=1158"></script>'
+    if m not in s:
+        return None
+    return s.replace(m, '<!-- removed -->', 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -815,6 +824,7 @@ CASES = [
     ('BUG图鉴',     'BUG图鉴_v1156.md',           _inj_atlas),
     ('传输层完整', 'hansen_pk_room_v1065.js',     _inj_transport),
     ('登录以云端为准', 'hansen_auth_v1004.js',        _inj_cloud_wins),
+    ('对战页要有词库', 'spelling_pk.html',            _inj_pk_vocab),
 ]
 
 
