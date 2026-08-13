@@ -215,6 +215,19 @@
   /* ── 屏 1：房间列表 ── */
   /* v1156: 房主水平怎么显示 —— 先看段位名，再看分数，都没有才说未定级 */
   /* v1156: 玩法徽章 —— 用模式表里的 emoji + 名字，和对战屏一致 */
+  /* 🔴v1158（压力测试抓到）：**房间关掉后轮询回调还在跑，st 已经是 null。**
+
+     实测报错：`Cannot read properties of null (reading 'mode')`
+     场景：客人中途退出 / 房主关房时，`_state` 被清空，
+     而正在飞的那次轮询回调还会读 `st.mode`。
+
+     单次报错不影响这一局（回调本来就该结束了），
+     但**错误会进"悄悄报错观察者"，把真问题淹掉** ——
+     而且下一版有人顺着这个错去查，会浪费一轮。
+
+     > 拿到的东西可能已经过期了 —— 异步回调里的每一个引用都要当"可能没了"来写。
+
+     三处 `modeOf(st.mode)` 统一改成 `modeOf(st && st.mode)`。 */
   function modeBadge(m) {
     try {
       var MODES = (S() && S().MODES) || {};
@@ -815,6 +828,7 @@ function doCreate() {
       if (st.roomId && st.roomId !== 'test' && S().roundState) {
         setTimeout(go, 1200);            /* 兜底：等太久就先开 */
         S().roundState(st.roomId).then(function (r) {
+      if (!stillLive(st)) return;
           if (r && r.ok && r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
           go();
         })['catch'](go);
@@ -886,7 +900,7 @@ function doCreate() {
     var words = st.words || [];
     if (idx >= words.length) { finish(); return; }
 
-    var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { perWordSecs: 15, name: '' };
+    var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { perWordSecs: 15, name: '' };
     var w = words[idx];
     var en = String(w.en || '');
     var askIsTts = (st.askMode || _askMode) === 'tts';
@@ -1135,12 +1149,14 @@ function doCreate() {
     if (Date.now() - _goneChecked < 4000) return;    /* 4 秒查一次，别刷爆数据库 */
     _goneChecked = Date.now();
     S().opponentGone(st.roomId).then(function (g) {
+      if (!stillLive(st)) return;
       if (!g || !g.ok || !_rt || _rt.idx !== idx) return;
       var el = q('prOppSt');
       if (g.gone) {
         if (el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = 'var(--pk-ok)'; }
         stopPoll();
         S().claimAbandonWin(st.roomId).then(function () {
+      if (!stillLive(st)) return;
           showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
         })['catch'](function () {
           showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
@@ -1162,6 +1178,7 @@ function doCreate() {
     if (!st) return;
     checkOpponentAlive(idx);
     S().roundState(st.roomId).then(function (r) {
+      if (!stillLive(st)) return;
 
       /* 🔴v1156：**对面换人了要说一声。**
 
@@ -1261,7 +1278,7 @@ function doCreate() {
          `winners[i]` 记的是第 i 词谁先拼对（'host'/'guest'），
          按当前模式的首答分/次答分折算。 */
       try {
-        var _mm = (S() && S().modeOf) ? S().modeOf(st.mode)
+        var _mm = (S() && S().modeOf) ? S().modeOf(st && st.mode)
                                       : { firstScore: 100, secondScore: 60 };
         var _ws = (r.room && r.room.winners) || r.winners || [];
         var _meIsHost = !!(r.mySide ? r.mySide === "host" : st.isHost);
@@ -1289,6 +1306,7 @@ function doCreate() {
                 _ob.style.transform = 'scale(1.35)';
                 _ob.style.color = 'var(--pk-warn)';
                 setTimeout(function () {
+      if (!stillLive(st)) return;
                   try { _ob.style.transform = 'scale(1)'; _ob.style.color = ''; } catch (e) {}
                 }, 260);
               } catch (e) {}
@@ -1313,7 +1331,7 @@ function doCreate() {
       var oppGot = (w !== mySide);
       var el = q('prOppSt');
       if (oppGot && el) { el.textContent = '🔥 你抢先拼对！'; el.style.color = 'var(--pk-warn)'; }
-      var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { waitAll: true };
+      var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { waitAll: true };
       /* A 模式：对手抢到就立刻翻篇，不等我 */
       if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); return; }
 
@@ -1350,6 +1368,35 @@ function doCreate() {
     })['catch'](function () {});
   }
 
+  /* 🔴v1158（压力测试抓到，彻底修）：**这一局还在不在？**
+
+     实测两条报错：
+       Cannot read properties of null (reading 'mode')
+       Cannot read properties of null (reading 'myScore')
+
+     场景：客人中途退出、房主关房时 `_state` 被置空，
+     而**已经飞出去的异步回调还会读它** ——
+     `.then()` 和 `setTimeout()` 里捕获的 `st` 是那一刻的引用，
+     等回调真正执行时，这一局可能早就结束了。
+
+     全文扫下来这类地方有二十多处，逐个加 `if (!st)` 风险大（容易漏、容易改错）。
+     所以给一个统一的判断：**回调开头问一句"这一局还是那一局吗"**。
+
+     它比单纯的 `if (!st)` 严格一点 —— 还会比对 roomId：
+     如果用户已经退出又开了新的一局，旧回调也不该再往界面上写东西
+     （否则会出现"上一局的分数跳到这一局"这种鬼影）。
+
+     > 拿到的东西可能已经过期了 ——
+     > 异步回调里的每一个引用都要当"可能没了"来写。 */
+  function stillLive(st) {
+    if (!st || !_state) return false;
+    if (st !== _state) {
+      /* 不是同一个对象了：只有房间号也一致才认（换过局就不认） */
+      if (!st.roomId || st.roomId !== _state.roomId) return false;
+    }
+    return true;
+  }
+
   function submitRound(idx, correct, forced) {
     if (!_rt || _rt.answered) return;
     _rt.answered = true;
@@ -1375,7 +1422,18 @@ function doCreate() {
     } catch (e) {}
     stopPoll();
     var st = _state;
-    var M = (S() && S().modeOf) ? S().modeOf(st.mode) : { firstScore: 100, secondScore: 60, waitAll: true };
+    /* 🔴v1158（压力测试抓到）：**房间关了 _state 就没了，而这个回调还在飞。**
+
+       实测报错：`Cannot read properties of null (reading 'myScore')`
+       场景：客人中途退出、房主关房时，`_state` 被清空，
+       但正在进行的提交/轮询回调还会读它。
+
+       > 拿到的东西可能已经过期了 ——
+       > 异步回调里的每一个引用都要当"可能没了"来写。
+
+       这一局已经结束了，回调什么都不用做，直接退出。 */
+    if (!st) return;
+    var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { firstScore: 100, secondScore: 60, waitAll: true };
 
     var after = function (gain, first) {
       st.myScore += gain;
@@ -1391,6 +1449,7 @@ function doCreate() {
           _mb.style.transform = 'scale(1.45)';
           _mb.style.color = 'var(--pk-good)';
           setTimeout(function () {
+      if (!stillLive(st)) return;
             try { _mb.style.transform = 'scale(1)'; _mb.style.color = ''; } catch (e) {}
           }, 260);
         }
@@ -1421,7 +1480,8 @@ function doCreate() {
           ? ((first ? '🔥 你抢先拼对！' : '✅ 拼对了') + ' +' + gain + ' 分 · ' + secs + 's')
           : (forced ? '对手抢先了' : '⏱ 超时了')) + answer;
       }
-      setTimeout(function () { askRound(idx + 1); }, 1400);
+      setTimeout(function () {
+      if (!stillLive(st)) return; askRound(idx + 1); }, 1400);
     };
 
     if (!correct) {
@@ -1438,6 +1498,7 @@ function doCreate() {
     }
 
     S().claimRound(st.roomId, idx).then(function (r) {
+      if (!stillLive(st)) return;
       if (!r || !r.ok) { after(0, false); return; }
       after(Number(r.score) || 0, !!r.first);
     })['catch'](function () { after(0, false); });
@@ -1468,8 +1529,10 @@ function doCreate() {
       + ' 个，得 ' + score + ' 分，用时 ' + secs + ' 秒。<br>'
       + '正在等对手交卷…</div>');
     S().reportResult(st.roomId, score).then(function (r) {
+      if (!stillLive(st)) return;
       if (!r.ok) { lobby(r); return; }
-      if (r.waiting) { setTimeout(function () { pollResult(st.roomId, score); }, 2000); return; }
+      if (r.waiting) { setTimeout(function () {
+      if (!stillLive(st)) return; pollResult(st.roomId, score); }, 2000); return; }
       showResult(r);
     });
   }
@@ -1509,7 +1572,8 @@ function doCreate() {
       _waitResult = (_waitResult || 0) + 1;
       if (_waitResult > 22) { _waitResult = 0;
         showResult({ ok: true, result: 'win', byAbandon: true, mine: score, theirs: 0 }); return; }
-      setTimeout(function () { pollResult(roomId, score); }, 2500);
+      setTimeout(function () {
+      if (!stillLive(st)) return; pollResult(roomId, score); }, 2500);
     });
   }
 
