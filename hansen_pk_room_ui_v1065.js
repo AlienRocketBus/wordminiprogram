@@ -1877,6 +1877,17 @@ function doCreate() {
   bindUnloadCleanup();
 
   window.HansenPkRoomUI = {
+    /* 🔴v1158：**端到端测试要能拿到当前题目的答案。**
+
+       之前验"建房能不能真打完一局"时，只能从屏幕上抠中文再反查词库 ——
+       遇到「和/并且」这种带斜杠的词就抠不出来，
+       于是测试以为"已经进结算了"，实际上第 1 题都没答完。
+
+       > 测试抠屏幕等于用户的眼睛，能验"显示对不对"；
+       > 但要验"流程能不能走完"，得能拿到内部状态。
+       > 两者都要有，缺了后者就只能靠猜。 */
+    _stateForTest: function () { return _state; },
+    _rtForTest: function () { return _rt; },
     _createForLadder: _createForLadder,
     _joinForLadder: _joinForLadder,
     /* 🔴v1099 测试注入口：直接进对战屏，不必真的匹配一个对手。
