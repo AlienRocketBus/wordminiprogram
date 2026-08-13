@@ -333,9 +333,38 @@
       var fn = tx[k];
       if (typeof fn !== 'function') { out[k] = fn; return; }
       out[k] = function () {
-        return withTimeout(fn.apply(tx, arguments),
-          FAST[k] ? NET_TIMEOUT_FAST_MS : NET_TIMEOUT_MS);
+        /* 🔴v1158（模拟真机恶劣网络抓到）：**一次请求失败就直接放弃。**
+
+           实测（抖动 0~1.5 秒 + 20% 请求失败）：
+           房主点「开一间」→「出了点问题，再试一次吧」，
+           客人的房间列表直接空的。
+
+           而 20% 丢包在真机上很常见 —— 地铁、电梯、信号弱的房间。
+           用户不会知道是网的问题，**只会觉得"这游戏根本用不了"**。
+
+           > 网络请求失败不等于操作失败 —— 大多数时候只是这一次没走通。
+           > 该做的是替他再试一次，而不是把一次抖动当成结论。
+
+           读类操作（read/list/listOpen）重试两次，间隔 300ms/700ms：
+           它们没有副作用，重试是安全的。
+
+           ⚠️ 写类操作（add/claim/patch/remove）**不重试** ——
+           claim 是抢房，重试可能把别人已经占到的房再抢一次；
+           add 重试会开出两间房。宁可让他自己点第二次。 */
+        var args = arguments;
+        var READ_ONLY = { read: 1, list: 1, listOpen: 1 };
+        var once = function () {
+          return withTimeout(fn.apply(tx, args),
+            FAST[k] ? NET_TIMEOUT_FAST_MS : NET_TIMEOUT_MS);
+        };
+        if (!READ_ONLY[k]) return once();
+        return once()['catch'](function () {
+          return new Promise(function (res) { setTimeout(res, 300); }).then(once);
+        })['catch'](function () {
+          return new Promise(function (res) { setTimeout(res, 700); }).then(once);
+        });
       };
+
     });
     return out;
   }
@@ -540,6 +569,20 @@
   function sweepMyDeadRooms() {
     var u = me();
     if (!u.id) return Promise.resolve(0);
+    /* 🔴v1158：**这个函数是延迟 1.5 秒跑的，那时传输层可能已经换了。**
+
+       实测（测试里换桩后）：`T(...).list is not a function`。
+       真实场景同理 —— 用户退出登录、换账号、或者页面正在卸载时，
+       传输层会被换掉或清空，而这个延迟任务还在队列里。
+
+       它只是"顺手清理僵尸房"，**不是关键路径** ——
+       拿不到 list 就安静跳过，下次再清。
+
+       > 延迟执行的收尾任务，要假设它跑起来时世界已经变了。 */
+    try {
+      var _t = T();
+      if (!_t || typeof _t.list !== 'function') return Promise.resolve(0);
+    } catch (e) { return Promise.resolve(0); }
     var dead = Date.now() - STALE_MS * 4;   /* 保守：2 分钟以上没心跳才动 */
     return T().list({ hostId: u.id }).then(function (rows) {
       var kill = (rows || []).filter(function (r) {

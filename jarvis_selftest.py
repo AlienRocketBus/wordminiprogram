@@ -761,6 +761,24 @@ def _inj_no_words(s):
     return s.replace(m, "var _probe = [1, 2, 3];", 1)
 
 
+
+def _inj_read_retry(s):
+    """把读类重试拆掉 —— 真机上一次丢包就报"出了点问题"。"""
+    m = "var READ_ONLY = { read: 1, list: 1, listOpen: 1 };"
+    if m not in s:
+        return None
+    return s.replace(m, "var READ_ONLY = {};", 1)
+
+
+
+def _inj_app_version(s):
+    """把写死的版本号改回旧值 —— 整个 App 会陷入无限刷新。"""
+    m = "CURRENT_APP_VERSION=1158"
+    if m not in s:
+        return None
+    return s.replace(m, "CURRENT_APP_VERSION=1157", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -845,6 +863,8 @@ CASES = [
     ('对战页要有词库', 'spelling_pk.html',            _inj_pk_vocab),
     ('房间列表要清洗', 'hansen_pk_room_v1065.js',     _inj_room_sanitize),
     ('没词不许建房', 'hansen_pk_room_v1065.js',     _inj_no_words),
+    ('读要重试',   'hansen_pk_room_v1065.js',     _inj_read_retry),
+    ('版本号要一致', 'hansen_backup_v944.js',       _inj_app_version),
 ]
 
 

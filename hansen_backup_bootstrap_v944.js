@@ -5,7 +5,7 @@
 
   // KEY remains v942 because it names the persisted journal schema. v960 accepts
   // compatible journals v942-v946 and v950-v960; skipped v947-v949 fail closed.
-  var KEY='hansen_backup_restore_journal_v942',SCHEMA=1,CURRENT_APP_VERSION=1157,MIN_JOURNAL_APP_VERSION=942;
+  var KEY='hansen_backup_restore_journal_v942',SCHEMA=1,CURRENT_APP_VERSION=1158,MIN_JOURNAL_APP_VERSION=942;
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var EXACT={ttsProvider:1,voiceName:1,theme:1,themeName:1,clickSoundEnabled:1,lastIslandKey:1,lastIslandTime:1,sb_best_cpm:1,hsnViewMode:1};
   var PREFIXES=['wordIsland','hansen_','hsn_','bs_hall_','hs_showcase_'];

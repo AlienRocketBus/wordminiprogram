@@ -19,12 +19,33 @@ page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
 await page.addInitScript(()=>{localStorage.clear();});
 const startUrl = `http://127.0.0.1:${port}/island_animal.html`;
 await page.goto(startUrl,{waitUntil:'domcontentloaded'});
-await page.waitForTimeout(2600);
+  /* 🔴v1158：**固定等 2600ms 不够 —— 岛屿页有 89 个 script。**
+
+     这个测试一直是红的（我这轮排查其他问题时才发现），
+     报 `ReferenceError: HansenRoom is not defined`。
+     实测那个页面 6 秒后模块是在的 —— 只是 2.6 秒时还没到。
+
+     > 固定等待时间是在赌机器有多快。
+     > 页面越大赌得越输，而页面只会越来越大。
+
+     改成轮询等就绪：最多等 15 秒，到了就走，不浪费时间。 */
+  for (let w = 0; w < 30; w++) {
+    if (await page.evaluate(() => !!window.HansenRoom)) break;
+    await page.waitForTimeout(500);
+  }
 ok(await page.evaluate(()=>!!window.HansenRoom), '预热模块已加载');
 /* 等待空闲预热完成 */
 let ready=false;
 for(let i=0;i<20;i++){
-  ready = await page.evaluate(()=> window.HansenRoom? HansenRoom.isReady('land'):false);
+    /* ⚠️ 岛屿页在启动阶段可能自己跳转（登录门、版本升级门等），
+       正在飞的 evaluate 会被打断报 "Execution context was destroyed"。
+       那不是产品问题 —— 等它跳完再问一次就行。 */
+    try {
+      ready = await page.evaluate(()=> window.HansenRoom? HansenRoom.isReady('land'):false);
+    } catch (e) {
+      await page.waitForTimeout(600);
+      ready = false;
+    }
   if(ready) break;
   await page.waitForTimeout(700);
 }

@@ -3338,6 +3338,92 @@ def guard_no_room_without_words():
             '词库的提示会被 sayHuman 兜成"出了点问题" —— '
             '用户就不知道该刷新页面了')
 
+
+def guard_read_retry():
+    """读类网络请求要自动重试。
+
+    ═══ 模拟真机恶劣网络抓到（v1158）═══
+
+    实测（抖动 0~1.5 秒 + 20% 请求失败）：
+      房主点「开一间」→「出了点问题，再试一次吧」
+      客人的房间列表 → 空的
+
+    而 20% 丢包在真机上很常见 —— 地铁、电梯、信号弱的房间。
+    用户不会知道是网的问题，**只会觉得"这游戏根本用不了"**。
+
+    > 网络请求失败不等于操作失败 —— 大多数时候只是这一次没走通。
+    > 该做的是替他再试一次，而不是把一次抖动当成结论。
+
+    ⚠️ 只有**读类**（read/list/listOpen）能重试 ——
+    它们没有副作用。写类（add/claim/patch/remove）**不许重试**：
+    claim 是抢房，重试可能把别人已经占到的房再抢一次；
+    add 重试会开出两间房。
+
+    判据：wrapTimeout 里要有 READ_ONLY 白名单和重试逻辑。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    i = src.find('function wrapTimeout')
+    if i < 0:
+        return
+    seg = src[i:i + 1600]
+    if 'READ_ONLY' not in seg:
+        bad('读要重试',
+            'wrapTimeout 里没有读类重试 —— '
+            '真机上一次丢包就让人以为"这游戏根本用不了"')
+        return
+    if 'claim' in seg[seg.find('READ_ONLY'):seg.find('READ_ONLY') + 160]:
+        bad('读要重试',
+            'claim 被放进了可重试白名单 —— '
+            '抢房重试可能把别人已经占到的房再抢一次')
+
+
+def guard_app_version_matches():
+    """写死的 CURRENT_APP_VERSION 必须等于 VERSION 文件。
+
+    ═══ 事故（v1158，差点让整个 App 打不开）═══
+
+    排查房间测试时意外发现：**岛屿页每 2 秒自己刷新一次，停不下来**。
+
+      island_animal.html
+        → ?_fresh=1786639906639
+        → ?_fresh=1786639908905   ← 2.3 秒后
+        → ?_fresh=1786639911109   ← 又 2.2 秒
+             无限循环
+
+    根因：`hansen_version_watch` 会比对
+      服务器 /VERSION（1158）vs 本机 HansenBackup.appVersion()（1157）
+    不一致就判定"缓存卡住了旧版本"→ 清缓存 → 强制刷新。
+    **而刷新之后本机版本还是 1157，于是再判定、再刷新。**
+
+    而 1157 是写死在 hansen_backup 里的常量 ——
+    我批量替换 `?v=1157` → `?v=1158` 时漏了它（它不带 `?v=`）。
+
+    > 一个"版本号"散落在两处，就一定会有对不上的那天。
+    > 而这次对不上的后果是**整个 App 打不开** ——
+    > 比任何单个功能的 bug 都严重。
+
+    判据：所有 `CURRENT_APP_VERSION = 数字` 必须等于 VERSION 文件里的值。
+    """
+    ver = (_read('VERSION') or '').strip()
+    if not ver.isdigit():
+        return
+    import glob as _g
+    for f in sorted(_g.glob(os.path.join(ROOT, '*.js'))):
+        try:
+            src = open(f, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        for m in re.finditer(r'CURRENT_APP_VERSION\s*=\s*(\d+)', src):
+            if m.group(1) != ver:
+                bad('版本号要一致',
+                    '%s 里 CURRENT_APP_VERSION=%s，而 VERSION 是 %s —— '
+                    '版本监视会判定"缓存卡住了"并强制刷新，'
+                    '刷新后还是不一致 → **整个 App 陷入无限刷新**'
+                    % (os.path.basename(f), m.group(1), ver))
+                return
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3445,6 +3531,8 @@ GUARDS = [
     ('对战页要有词库', guard_pk_page_has_vocab),
     ('房间列表要清洗', guard_room_list_sanitized),
     ('没词不许建房', guard_no_room_without_words),
+    ('读要重试',   guard_read_retry),
+    ('版本号要一致', guard_app_version_matches),
 ]
 
 
