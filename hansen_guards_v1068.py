@@ -3415,10 +3415,16 @@ def guard_app_version_matches():
             src = open(f, encoding='utf-8', errors='replace').read()
         except Exception:
             continue
-        for m in re.finditer(r'CURRENT_APP_VERSION\s*=\s*(\d+)', src):
+        # v1158: 不只查 CURRENT_APP_VERSION —— SW 升级门里也记着一个
+        #   版本号（虽然只是排查标记、不参与比较），
+        #   留着旧值会在查问题时把人带偏。
+        pats = [r'CURRENT_APP_VERSION\s*=\s*(\d+)',
+                r'__hansenSwUpgradeGateV944[\s\S]{0,120}?version:\s*(\d+)']
+        for pat in pats:
+          for m in re.finditer(pat, src):
             if m.group(1) != ver:
                 bad('版本号要一致',
-                    '%s 里 CURRENT_APP_VERSION=%s，而 VERSION 是 %s —— '
+                    '%s 里写着版本号 %s，而 VERSION 是 %s —— '
                     '版本监视会判定"缓存卡住了"并强制刷新，'
                     '刷新后还是不一致 → **整个 App 陷入无限刷新**'
                     % (os.path.basename(f), m.group(1), ver))
