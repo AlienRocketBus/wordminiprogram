@@ -1126,6 +1126,7 @@
 
   /* 轮询等待对手（TCB 的 watch 在部分环境不稳，先用轮询，语义更好把控） */
   function waitForOpponent(roomId, onChange, timeoutMs) {
+    var missCount = 0;   /* v1158: 连续读不到房间的次数 —— 见下面的说明 */
     var stop = false, t0 = Date.now();
     var limit = timeoutMs || 120000;
     var fails = 0;
@@ -1154,7 +1155,29 @@
       T().read(roomId).then(function (room) {
         if (stop) return;
         fails = 0;
-        if (!room) { onChange({ gone: true }); return; }
+        /* 🔴v1158（真实点击测试抓到）：**读一次读不到就宣布"房间没了"，太急了。**
+
+           实测：房主刚建完房，第一次轮询读回 null，
+           界面立刻跳「这个房间已经不在了」—— 而房其实好好地在那儿。
+
+           云开发是最终一致的：写进去的文档，**紧接着读未必读得到**
+           （主从同步有延迟，通常几百毫秒）。
+           而这个轮询在建房后 1 秒就开始跑了。
+
+           > "读不到"和"不存在"是两回事。
+           > 前者可能只是还没同步过来，后者才是真没了。
+           > 把前者当后者，用户会看到一个刚建好的房被宣布消失。
+
+           改成连续三次读不到才认（间隔 2 秒 = 6 秒宽限）——
+           房主真把房关了的话，6 秒后照样会判出来，
+           而正常的同步延迟远小于这个数。 */
+        if (!room) {
+          missCount = (missCount || 0) + 1;
+          if (missCount < 3) return;      /* 再等等，可能只是还没同步过来 */
+          onChange({ gone: true });
+          return;
+        }
+        missCount = 0;
         if (room.guestId) { onChange({ joined: true, room: room }); return; }
         if (Date.now() - t0 > limit) { onChange({ timeout: true }); return; }
         setTimeout(tick, nextDelay());

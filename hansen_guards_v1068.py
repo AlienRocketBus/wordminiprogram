@@ -3430,6 +3430,38 @@ def guard_app_version_matches():
                     % (os.path.basename(f), m.group(1), ver))
                 return
 
+
+def guard_read_miss_grace():
+    """读不到房间要给宽限，不能一次就宣布"房间没了"。
+
+    ═══ 真实点击测试抓到（v1158）═══
+
+    实测：房主刚建完房，第一次轮询读回 null，
+    界面立刻跳「这个房间已经不在了」—— 而房其实好好地在那儿。
+
+    云开发是**最终一致**的：写进去的文档，紧接着读未必读得到
+    （主从同步有延迟，通常几百毫秒）。
+    而这个轮询在建房后 1 秒就开始跑了。
+
+    > **"读不到"和"不存在"是两回事。**
+    > 前者可能只是还没同步过来，后者才是真没了。
+    > 把前者当后者，用户会看到一个刚建好的房被宣布消失。
+
+    判据：waitForOpponent 里 `!room` 分支必须有计数宽限。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    i = src.find('function waitForOpponent')
+    if i < 0:
+        return
+    seg = src[i:i + 1200]
+    if 'missCount' not in seg:
+        bad('读不到要宽限',
+            'waitForOpponent 里读不到房间就直接判"没了" —— '
+            '云端最终一致，刚建好的房第一次读常常读不到，'
+            '用户会看到房间刚建好就被宣布消失')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3539,6 +3571,7 @@ GUARDS = [
     ('没词不许建房', guard_no_room_without_words),
     ('读要重试',   guard_read_retry),
     ('版本号要一致', guard_app_version_matches),
+    ('读不到要宽限', guard_read_miss_grace),
 ]
 
 

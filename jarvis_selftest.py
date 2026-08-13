@@ -779,6 +779,15 @@ def _inj_app_version(s):
     return s.replace(m, "CURRENT_APP_VERSION=1157", 1)
 
 
+
+def _inj_miss_grace(s):
+    """把读不到房间的宽限拆掉 —— 刚建好的房会被宣布消失。"""
+    m = "if (missCount < 3) return;"
+    if m not in s:
+        return None
+    return s.replace(m, "/* removed */", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -865,6 +874,7 @@ CASES = [
     ('没词不许建房', 'hansen_pk_room_v1065.js',     _inj_no_words),
     ('读要重试',   'hansen_pk_room_v1065.js',     _inj_read_retry),
     ('版本号要一致', 'hansen_backup_v944.js',       _inj_app_version),
+    ('读不到要宽限', 'hansen_pk_room_v1065.js',     _inj_miss_grace),
 ]
 
 
