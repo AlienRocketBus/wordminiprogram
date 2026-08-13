@@ -42,7 +42,11 @@ jobs:
           #
           #   改法：Release 已存在时，比对 body 里记的 commit 是不是当前的。
           #   不是就删掉重建；是就跳过（避免每次 push 都白打一次包）。
-          SHA_NOW="$(git rev-parse HEAD)"
+          # ⚠️ 用 GITHUB_SHA 而不是 git rev-parse ——
+          #    CI 里 checkout 可能是浅克隆，rev-parse 未必可靠，
+          #    而 GITHUB_SHA 是 Actions 保证给的当前提交。
+          #    （第一版写 git rev-parse，CI 直接失败。）
+          SHA_NOW="${GITHUB_SHA}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             BODY="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body -q .body 2>/dev/null || echo '')"
             if echo "$BODY" | grep -q "$SHA_NOW"; then
