@@ -1284,7 +1284,27 @@ function doCreate() {
       try {
         var _mm = (S() && S().modeOf) ? S().modeOf(st && st.mode)
                                       : { firstScore: 100, secondScore: 60 };
+        /* 🔴v1159（加固扫描抓到，第二处）：**这里绕过了传输层的清洗。**
+
+           上一轮我在 `roundState` 入口给 winners 加了三重清洗
+           （不是数组当空、截到本局词数、每项只认 host/guest），
+           但实测往云端写 `winners: new Array(9999).fill('host')` 之后，
+           对手比分**仍然是 999900**。
+
+           原因就在这一行：UI 层直接读 `r.room.winners` ——
+           那是**原始房间数据**，根本没经过 roundState 的清洗。
+           一个数据有两条路进来，我只堵了其中一条。
+
+           > **在一个地方做了校验，不等于这个值是干净的。**
+           > 要问的是：这个值还有没有别的入口？
+           > 而最容易漏的入口，是"顺手直接读原始对象"那一条。
+
+           这里重做一遍同样的清洗 —— 宁可重复，也不能有一条路是敞开的。 */
         var _ws = (r.room && r.room.winners) || r.winners || [];
+        if (!Array.isArray(_ws)) _ws = [];
+        var _wcap = (st && st.words && st.words.length) || 30;
+        _wcap = Math.max(1, Math.min(30, _wcap));
+        if (_ws.length > _wcap) _ws = _ws.slice(0, _wcap);
         var _meIsHost = !!(r.mySide ? r.mySide === "host" : st.isHost);
         var _opp = 0;
         for (var _i = 0; _i < _ws.length; _i++) {

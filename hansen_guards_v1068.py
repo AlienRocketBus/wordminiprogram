@@ -3543,6 +3543,40 @@ def guard_heartbeat_stops():
             '每 8 秒白读一次云端直到关页面，'
             '烧的是读配额（耗尽后所有人都用不了）')
 
+
+def guard_score_capped():
+    """比分不许超过这一局的理论上限。
+
+    ═══ 加固扫描抓到（v1159）═══
+
+    往云端房间写 `winners: new Array(9999).fill('host')`，
+    对战屏上对手的分立刻变成 **999900**。
+
+    ⚠️ 这个 bug 我修了两轮才修对：
+
+    第一轮在 `roundState`（传输层）入口加了三重清洗，
+    实测却发现比分**还是 999900** —— 因为 UI 层
+    直接读 `r.room.winners`（原始房间数据），
+    **一个数据有两条路进来，我只堵了其中一条**。
+
+    > **在一个地方做了校验，不等于这个值是干净的。**
+    > 要问的是：这个值还有没有别的入口？
+    > 而最容易漏的入口，是"顺手直接读原始对象"那一条。
+
+    判据：UI 层累加比分之前必须先截断 winners。
+    """
+    ui = _code_only(_read('hansen_pk_room_ui_v1065.js') or '')
+    if not ui:
+        return
+    i = ui.find('r.room.winners')
+    if i < 0:
+        return
+    seg = ui[i:i + 500]
+    if 'Array.isArray' not in seg or 'slice' not in seg:
+        bad('比分要封顶',
+            'UI 层直接用 r.room.winners 累加比分，没有截断 —— '
+            '云端塞 9999 条就能把对手分刷到 999900')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3655,6 +3689,7 @@ GUARDS = [
     ('读不到要宽限', guard_read_miss_grace),
     ('房间号要有效', guard_room_id_valid),
     ('心跳要会停', guard_heartbeat_stops),
+    ('比分要封顶', guard_score_capped),
 ]
 
 

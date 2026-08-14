@@ -810,6 +810,15 @@ def _inj_hb_stop(s):
     return s.replace('hbMiss', 'X_GONE_X')
 
 
+
+def _inj_score_cap(s):
+    """把 UI 层的 winners 截断拆掉 —— 云端塞 9999 条就能刷分到 999900。"""
+    m = "if (_ws.length > _wcap) _ws = _ws.slice(0, _wcap);"
+    if m not in s:
+        return None
+    return s.replace(m, "/* removed */", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -899,6 +908,7 @@ CASES = [
     ('读不到要宽限', 'hansen_pk_room_v1065.js',     _inj_miss_grace),
     ('房间号要有效', 'hansen_pk_room_v1065.js',     _inj_room_id),
     ('心跳要会停', 'hansen_pk_room_v1065.js',     _inj_hb_stop),
+    ('比分要封顶', 'hansen_pk_room_ui_v1065.js',  _inj_score_cap),
 ]
 
 
