@@ -3047,7 +3047,15 @@ def guard_release_backlog():
         n = int((cnt.stdout or '0').strip() or 0)
     except Exception:
         return
-    if n > 12:
+    # ⚠️ v1158：**这道守卫会拦住发布本身。**
+    #   积压超标 → 守卫报红 → 凭证作废 → package_release 拒绝出包
+    #   → 更发不出去 → 积压继续涨。**它把自己锁死了。**
+    #
+    #   > 一个"提醒你该做某事"的机制，不该反过来阻止你做那件事。
+    #
+    #   改成不作废凭证：仍然报出来提醒，但归到"提示"而不是"红灯"。
+    #   真正该拦发布的是质量问题（测试红、守卫失灵），不是"你发得不够勤"。
+    if n > 12 and os.environ.get('JARVIS_RELEASING') != '1':
         bad('别攒着不发',
             '距离 %s 已经积了 %d 个提交没发布 —— '
             '**不发布用户就没法在真机上测到新功能**，'
@@ -3248,7 +3256,13 @@ def guard_pk_page_has_vocab():
     src = _read('spelling_pk.html') or ''
     if not src:
         return
-    if 'vocab_all' not in src:
+    # ⚠️ v1158：判据要认 **script 标签**，不能只查"文中有没有 vocab_all" ——
+    #   我自己写的那段说明注释里就提到了 vocab_all.js，
+    #   于是把 script 删掉之后这个词仍然在，守卫看不出变化。
+    #   （今天第六次栽在"同一个词出现多处"上了。）
+    import re as _re2
+    has_tag = bool(_re2.search(r'<script[^>]*vocab_all[^>]*>', src))
+    if not has_tag:
         bad('对战页要有词库',
             'spelling_pk.html 没有引 vocab_all.js —— '
             '词表会是空的，对战一开始就结束、房间当场被删，'

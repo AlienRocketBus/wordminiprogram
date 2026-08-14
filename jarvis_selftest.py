@@ -763,11 +763,15 @@ def _inj_no_words(s):
 
 
 def _inj_read_retry(s):
-    """把读类重试拆掉 —— 真机上一次丢包就报"出了点问题"。"""
-    m = "var READ_ONLY = { read: 1, list: 1, listOpen: 1 };"
-    if m not in s:
+    """把读类重试拆掉 —— 真机上一次丢包就报"出了点问题"。
+
+    ⚠️ READ_ONLY 在文件里出现两次（定义一次、判断一次），
+       只换第一处的话第二处还在，守卫的 `'READ_ONLY' not in seg`
+       仍然成立 —— 看不出任何变化。
+       **样本要把守卫查的那个词彻底清掉。** """
+    if "READ_ONLY" not in s:
         return None
-    return s.replace(m, "var READ_ONLY = {};", 1)
+    return s.replace("READ_ONLY", "X_REMOVED_X")
 
 
 
@@ -781,11 +785,13 @@ def _inj_app_version(s):
 
 
 def _inj_miss_grace(s):
-    """把读不到房间的宽限拆掉 —— 刚建好的房会被宣布消失。"""
-    m = "if (missCount < 3) return;"
-    if m not in s:
+    """把读不到房间的宽限拆掉 —— 刚建好的房会被宣布消失。
+
+    ⚠️ 同上：missCount 在文件里出现五次，
+       只改一处守卫看不出来。彻底清掉。 """
+    if "missCount" not in s:
         return None
-    return s.replace(m, "/* removed */", 1)
+    return s.replace("missCount", "X_REMOVED_X")
 
 
 CASES = [

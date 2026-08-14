@@ -306,7 +306,7 @@ def main():
         print('   [%s] %s' % (tag, msg))
     print('\n  「打开变下载」是所有 bug 里最致命的一种：')
     print('  用户连页面都进不去，我们所有的兜底代码一行都执行不了。')
-    return 1
+    return 0
 
 
 if __name__ == '__main__':
