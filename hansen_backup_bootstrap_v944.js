@@ -131,7 +131,7 @@
       if(!html.parentNode&&doc.appendChild)doc.appendChild(html);
       var exported=false;
       if(exportBtn)exportBtn.onclick=function(){
-        try{var raw=localStorage.getItem(KEY)||'';var blob=new Blob([raw],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='wordminiprogram_v1157_restore_journal.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);exported=true;}catch(e){alert('导出失败：'+e.message);}
+        try{var raw=localStorage.getItem(KEY)||'';var blob=new Blob([raw],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='wordminiprogram_v1158_restore_journal.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);exported=true;}catch(e){alert('导出失败：'+e.message);}
       };
       if(retry)retry.onclick=function(){location.reload();};
       if(discard)discard.onclick=function(){
