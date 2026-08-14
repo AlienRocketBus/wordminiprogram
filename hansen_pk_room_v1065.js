@@ -758,8 +758,29 @@
         /* 🔴v1104：客人也要发心跳 —— 否则房主检测不到客人掉线，
            会一直干等。原来只有房主发，这是个明显的不对称。 */
         startHeartbeat(roomId);
-        return { ok: true, roomId: roomId, room: room,
-                 words: wordsFromSeed(room.seed, room.wordCount || WORDS_PER_ROUND) };
+        /* 🔴v1159（加固扫描抓到）：**房间里的词数直接信，会开出没法玩的局。**
+
+           实测（伪造房间数据进房）：
+             wordCount = -5    → 一进去就「交卷了，答对 0/0 个」，空局
+             wordCount = 99999 → 变成「第 1 / 712 词」，要打 712 题
+
+           房间数据是**对方那台手机写进云端的** —— 老版本客户端、
+           写了一半断网、字段被改，都可能让它变成任何值。
+           `room.wordCount || WORDS_PER_ROUND` 只挡住了 0 和 undefined，
+           负数和天文数字都照单全收。
+
+           > 从对方设备来的每一个数字，都要问一句：
+           > 它落在合理范围里吗？——「有值」和「值合理」是两回事。
+
+           夹在 1~30：低于 1 没法玩，高于 30 没人打得完。 */
+        var _wc = Number(room.wordCount);
+        if (!isFinite(_wc)) _wc = WORDS_PER_ROUND;
+        _wc = Math.max(1, Math.min(30, Math.round(_wc)));
+        var _ws = wordsFromSeed(room.seed, _wc);
+        if (!_ws || !_ws.length) {
+          return { ok: false, reason: '词库还没加载好，刷新一下页面再进房' };
+        }
+        return { ok: true, roomId: roomId, room: room, words: _ws };
       });
     }).catch(function (e) { return { ok: false, reason: E(e), expired: !!(e && e.expired) }; });
   }
@@ -1016,7 +1037,31 @@
     var u = me();
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: false, reason: '房间已不存在' };
-      var winners = room.winners || [];
+      /* 🔴v1159（加固扫描抓到）：**云端塞 9999 条 winners 就能把对手比分刷成 999900。**
+
+         实测：往房间里写 `winners: new Array(9999).fill('host')`，
+         对战屏上对手的分立刻变成 **999900**。
+
+         winners 是对方那台手机写进云端的 —— 老版本客户端、
+         写坏的数据、甚至有人手动改，都可能让它变成任何东西
+         （测试里 `winners:"不是数组"` 也能让回合数错乱）。
+
+         > 一局最多打 N 题，赢家名单就最多 N 条。
+         > **超出这个长度的部分，无论怎么来的，都不该算数。**
+
+         三重清洗：
+           · 不是数组 → 当空
+           · 长度截到这一局的词数（wordCount，本身已夹在 1~30）
+           · 每一项只认 'host' / 'guest'，别的当没赢 */
+      var winners = room.winners;
+      if (!Array.isArray(winners)) winners = [];
+      var _cap = Number(room.wordCount);
+      if (!isFinite(_cap) || _cap < 1) _cap = WORDS_PER_ROUND;
+      _cap = Math.max(1, Math.min(30, Math.round(_cap)));
+      if (winners.length > _cap) winners = winners.slice(0, _cap);
+      winners = winners.map(function (w) {
+        return (w === 'host' || w === 'guest') ? w : '';
+      });
       var M = modeOf(room.mode);
       /* 🔴v1100：**慢了不等于没分。**
          A 抢答赛：慢的 0 分（残酷但纯竞技，天梯用它）
