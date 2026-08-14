@@ -209,10 +209,10 @@
           setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
           return;
         }
-        /* 🔴v1158：**这个选择框已经不该出现了。**
+        /* 🔴v1159：**这个选择框已经不该出现了。**
 
        BAT MAN 定的规则：注册那一次上传，之后登录一律云端覆盖本机。
-       后端 `syncOnLogin` 从 v1158 起不再返回 'conflict' ——
+       后端 `syncOnLogin` 从 v1159 起不再返回 'conflict' ——
        两边都有数据时直接恢复云端。
 
        这段代码留着当**兜底**：万一以后有人改回去、
