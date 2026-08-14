@@ -3476,6 +3476,73 @@ def guard_read_miss_grace():
             '云端最终一致，刚建好的房第一次读常常读不到，'
             '用户会看到房间刚建好就被宣布消失')
 
+
+def guard_room_id_valid():
+    """建房必须拿到有效房间号才算成功。
+
+    ═══ 加固扫描抓到（v1159）═══
+
+    让云端 add 返回六种异常：null、{}、{id:''}、{id:12345}、{id:{a:1}}、"ok"
+    —— **五种都让用户看到「⏳ 等对手进来 · 房间已经开好了」**，
+    而根本没有房间。他会一直等下去，别人也永远看不到他。
+
+    > 「调用没抛错」不等于「事情办成了」。
+    > 云端返回什么样都算成功，等于把判断责任丢给了运气。
+
+    房间号必须是非空字符串：
+      · 不是字符串 → 后续所有 read/patch 都会用错的键
+      · 空字符串 → 心跳、轮询、清理全都对不上任何一间房
+      （数字 id 可以救：转成字符串，有些后端返回自增 id）
+
+    判据：createRoom 拿到 add 的返回后必须校验 id 类型。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    i = src.find('function createRoom')
+    if i < 0:
+        return
+    seg = src[i:i + 2600]
+    if "typeof _rid !== 'string'" not in seg:
+        bad('房间号要有效',
+            'createRoom 不校验云端返回的房间号 —— '
+            '返回 {} 或 {id:""} 时界面照样说"房间已经开好了"，'
+            '用户会一直等一个不存在的房间')
+
+
+def guard_heartbeat_stops():
+    """房间没了，心跳要自己停。
+
+    ═══ 加固扫描抓到（v1159）═══
+
+    原来 `if (!room) return;` 只是跳过这一次 ——
+    房间已经被删（房主关了、被清理了、或者根本没建成），
+    心跳仍然每 8 秒读一次云端，**直到用户关掉页面**。
+
+    后果不是崩溃，是安静地浪费：流量、电，
+    以及云开发的读次数配额 —— 那是要花钱的，
+    而且配额耗尽会让**所有人**都用不了。
+
+    > 一个「维持某样东西存活」的机制，
+    > 在那样东西已经不存在之后，就该自己停下来。
+
+    实测：删房后 30 秒内从 4 次读降到 1 次。
+
+    判据：startHeartbeat 里必须有连续读不到就停的计数。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    i = src.find('function startHeartbeat')
+    if i < 0:
+        return
+    seg = src[i:i + 900]
+    if 'hbMiss' not in seg:
+        bad('心跳要会停',
+            '房间没了心跳还在空转 —— '
+            '每 8 秒白读一次云端直到关页面，'
+            '烧的是读配额（耗尽后所有人都用不了）')
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3586,6 +3653,8 @@ GUARDS = [
     ('读要重试',   guard_read_retry),
     ('版本号要一致', guard_app_version_matches),
     ('读不到要宽限', guard_read_miss_grace),
+    ('房间号要有效', guard_room_id_valid),
+    ('心跳要会停', guard_heartbeat_stops),
 ]
 
 

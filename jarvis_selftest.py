@@ -794,6 +794,22 @@ def _inj_miss_grace(s):
     return s.replace("missCount", "X_REMOVED_X")
 
 
+
+def _inj_room_id(s):
+    """把房间号校验拆掉 —— 云端返回 {} 也会说"房间开好了"。"""
+    if "typeof _rid !== 'string'" not in s:
+        return None
+    return s.replace("typeof _rid !== 'string'", "false")
+
+
+
+def _inj_hb_stop(s):
+    """把心跳的停止计数拆掉 —— 房间没了还会一直空转烧配额。"""
+    if 'hbMiss' not in s:
+        return None
+    return s.replace('hbMiss', 'X_GONE_X')
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -881,6 +897,8 @@ CASES = [
     ('读要重试',   'hansen_pk_room_v1065.js',     _inj_read_retry),
     ('版本号要一致', 'hansen_backup_v944.js',       _inj_app_version),
     ('读不到要宽限', 'hansen_pk_room_v1065.js',     _inj_miss_grace),
+    ('房间号要有效', 'hansen_pk_room_v1065.js',     _inj_room_id),
+    ('心跳要会停', 'hansen_pk_room_v1065.js',     _inj_hb_stop),
 ]
 
 

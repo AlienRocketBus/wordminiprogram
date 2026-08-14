@@ -540,6 +540,28 @@
       : Promise.resolve(doc);
 
     _creating = _prep.then(function () { return T().add(doc); }).then(function (r) {
+      /* 🔴v1159（加固扫描抓到）：**拿不到有效房间号，界面照样说"房间已经开好了"。**
+
+         实测让云端 add 返回六种异常：
+           {}、{id:''}、{id:12345}、{id:{a:1}}、"ok"
+         五种都让用户看到「⏳ 等对手进来 · 房间已经开好了」——
+         **而根本没有房间**，他会一直等下去，别人也永远看不到他。
+
+         > 「调用没抛错」不等于「事情办成了」。
+         > 云端返回什么样都算成功，等于把判断责任丢给了运气。
+
+         房间号必须是**非空字符串**才算建成：
+           · 不是字符串（数字/对象）→ 后续所有 read/patch 都会用错的键
+           · 空字符串 → 心跳、轮询、清理全都对不上任何一间房
+
+         数字 id 是唯一可以救的：转成字符串就能用（有些后端返回自增 id）。 */
+      var _rid = r && r.id;
+      if (typeof _rid === 'number' && isFinite(_rid)) _rid = String(_rid);
+      if (typeof _rid !== 'string' || !_rid) {
+        return { ok: false,
+                 reason: '云端没有返回房间号，房没开成 —— 再试一次吧' };
+      }
+      r = { id: _rid };
       _myRoomId = r.id;
       startHeartbeat(r.id);
       return { ok: true, roomId: r.id, room: doc, words: wordsFromSeed(seed, doc.wordCount) };
@@ -795,9 +817,31 @@
   function startHeartbeat(roomId) {
     stopHeartbeat();
     var u = me();
+    /* 🔴v1159（加固扫描抓到）：**房间没了心跳还在空转。**
+
+       原来 `if (!room) return;` 只是跳过这一次 ——
+       房间已经被删（房主关了、被清理了、或者根本没建成），
+       心跳仍然每 8 秒读一次云端，直到用户关掉页面。
+
+       后果不是崩溃，是**安静地浪费**：流量、电，
+       以及云开发的读次数配额 —— 那是要花钱的，
+       而且配额耗尽会让所有人都用不了。
+
+       > 一个「维持某样东西存活」的机制，
+       > 在那样东西已经不存在之后，就该自己停下来。
+
+       连续三次读回 null 才停（和 waitForOpponent 一样的宽限，
+       因为云端最终一致，一两次读不到很正常）。
+       网络报错不计数 —— 那是"没读到"，不是"不存在"。 */
+    var hbMiss = 0;
     _hb = setInterval(function () {
       T().read(roomId).then(function (room) {
-        if (!room) return;
+        if (!room) {
+          hbMiss++;
+          if (hbMiss >= 3) stopHeartbeat();
+          return;
+        }
+        hbMiss = 0;
         var patch = { heartbeatAt: Date.now() };   /* 房间存活（列表用） */
         patch[(room.hostId === u.id) ? 'hostBeat' : 'guestBeat'] = Date.now();
         return T().patch(roomId, patch);
