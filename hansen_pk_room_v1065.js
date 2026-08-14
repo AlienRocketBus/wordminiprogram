@@ -352,7 +352,24 @@
            claim 是抢房，重试可能把别人已经占到的房再抢一次；
            add 重试会开出两间房。宁可让他自己点第二次。 */
         var args = arguments;
-        var READ_ONLY = { read: 1, list: 1, listOpen: 1 };
+        /* 🔴v1159（延迟 + 丢包组合测出来的）：**建房也要能重试。**
+
+           单独测 20% 丢包时是过的（读类会重试），
+           但加上云端延迟之后，**建房直接失败** ——
+           因为 `add` 不在重试名单里，一次 503 就宣告失败。
+
+           当初把写类全排除是有道理的：claim 重试会抢别人已占的房，
+           patch/remove 重试会重复执行。**但 add 不一样** ——
+           它带着 `_id`（建房时就生成好的固定值），
+           重试写的是同一个文档，云端会覆盖而不是新建。
+
+           > 「写操作不能重试」是个太粗的规矩。
+           > 真正决定能不能重试的是**幂等性**：
+           > 同一个请求发两次，结果一样吗？
+           > add 带固定 _id 时是幂等的，claim 不是。
+
+           所以 add 加入可重试，claim/patch/remove 仍然排除。 */
+        var READ_ONLY = { read: 1, list: 1, listOpen: 1, add: 1 };
         var once = function () {
           return withTimeout(fn.apply(tx, args),
             FAST[k] ? NET_TIMEOUT_FAST_MS : NET_TIMEOUT_MS);
@@ -486,7 +503,24 @@
     if (_prev) { try { T().remove(_prev)['catch'](function () {}); } catch (e) {} _myRoomId = ''; }
     var now = Date.now();
     var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
+    /* 🔴v1159：**建房文档要带自己生成的 _id，否则重试会开出两间房。**
+
+       上一步把 add 加进了可重试名单（延迟+丢包组合下建房会失败），
+       理由是"add 带 _id 时是幂等的"。
+       结果一查：**这个文档根本没有 _id** —— 云端每次都会新建一条。
+
+       > 差点把「一次建房失败」换成「一次点击开出两间房」。
+       > 幂等不是写操作自带的属性，是**要自己保证的**：
+       > 没有固定主键的写入，重试一次就多一条。
+
+       所以先给它一个客户端生成的 _id：
+       时间戳 + 随机串，重复概率可以忽略，
+       而且重试时写的一定是同一条文档（云端 add 遇到同 _id 会报错或覆盖，
+       两种都比新建一条强 —— 前者被 catch 住，后者本来就是我们要的）。 */
+    var _newId = 'r' + Date.now().toString(36)
+                 + Math.random().toString(36).slice(2, 8);
     var doc = {
+      _id: _newId,
       status: 'open',
       /* v1105: 私密房带 4 位码，不出现在公开列表；公开房 code 为空 */
       code: '',      /* v1136: 私密房的码在下面异步查重后再写，不在这里直接生成 */
