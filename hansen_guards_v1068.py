@@ -3690,12 +3690,29 @@ def guard_audio_lock_intact():
     except Exception:
         bad('音频清单完整', 'hansen_audio_lock.json 不是合法 JSON —— 多半被批量替换弄坏了')
         return
-    ver = (_read('VERSION') or '').strip()
-    if ver and ver in _j.dumps(d):
-        bad('音频清单完整',
-            '音频哈希清单里出现了当前版本号 %s —— '
-            '多半是升版时批量替换误伤了哈希串，'
-            '会让 check_resources 误报"音频被改过"' % ver)
+    # ⚠️ v1162：**第一版判据是"清单里出现了当前版本号就报红" —— 会误报。**
+    #
+    #   哈希是十六进制串，里面天然可能含有任意四位数字。
+    #   实测 v1162 时清单里有两处哈希恰好含 "1162"，
+    #   文件一个字节都没被改，守卫却报红拦住了发布。
+    #
+    #   > 用"内容里有没有某几个字符"去判断"文件有没有被改"，
+    #   > 在内容本身是随机串的时候一定会误伤。
+    #   > **判断"有没有被改"，就该去问真正知道的那个人 —— 版本控制。**
+    #
+    #   改成：问 git 这个文件在本次改动里动没动。
+    #   动了才报（升版本号不该动它）。
+    import subprocess as _sp
+    try:
+        r = _sp.run(['git', 'diff', '--name-only', 'HEAD', '--', 'hansen_audio_lock.json'],
+                    cwd=ROOT, capture_output=True, text=True, timeout=20)
+        if r.returncode == 0 and 'hansen_audio_lock.json' in (r.stdout or ''):
+            bad('音频清单完整',
+                '音频哈希清单被改动了 —— 升版本号不该动它，'
+                '多半是批量替换误伤了哈希串，'
+                '会让 check_resources 误报"音频被改过"')
+    except Exception:
+        pass
 
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),

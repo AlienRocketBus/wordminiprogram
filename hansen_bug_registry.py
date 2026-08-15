@@ -284,6 +284,16 @@ REGISTRY = [
     ('v1162c', '🔴比分能被刷到999900：传输层加了清洗但UI层直接读原始 room.winners——'
                '一个数据有两条路进来，只堵一条等于没堵',
      'test_pk_battle_ui_v1101.mjs'),
+    ('v1160', '🔴app.database is not a function：_app() 返回 Promise 却被三个模块当同步用。'
+              '几十轮测试全绿是因为都注入了 _setTransportForTest——'
+              '测试桩替换掉的那一段，就是永远不会被验证的那一段',
+     'test_pk_room_v1065.mjs'),
+    ('v1161', '🔴点天梯完全没反应：pkLadder 被绑了两次 onclick，后绑的覆盖先绑的，'
+              '上一版的身份检查修复根本没生效——我改的是那个已经失效的绑定',
+     'test_page_wiring_v1063.mjs'),
+    ('v1162', '🔴真实原因被「连不上网络」盖住：failed-to-fetch 那条翻译规则太贪，'
+              '把「云端会话尚未就绪」也改写了。翻译可以对用户友好，但不能把原话弄丢',
+     'test_pk_room_v1065.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）
