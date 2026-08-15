@@ -126,9 +126,35 @@
           err.sessionDead = true; err.expired = !!(s && s.expired);
           throw err;
         }
-        var app = A._app();
-        if (!app) throw new Error('云端实例不可用');
-        return app.database();
+        /* 🔴v1160（真机截图报的）：**`app.database is not a function`。**
+
+           用户截图：房间界面出来了、按钮都在，但每次操作都红着这一句，
+           点「开一间公开房」什么都不发生。
+
+           根因：`A._app()` **是异步的，返回的是 Promise** ——
+           它内部要 `import('./vendor_cloudbase_esm_v965.js')` 动态加载 SDK。
+           而这里当成同步用了：
+
+               var app = A._app();     ← 拿到的是 Promise
+               return app.database();  ← Promise 上没有 database()
+
+           云存档模块（hansen_cloud_save）一直是对的写法：
+               return A._app();
+             }).then(function (app) { ... app.database() ... })
+
+           **同一个 API，两个模块一个用对一个用错，而错的那个从来没被测出来** ——
+           因为所有房间测试都注入了 `_setTransportForTest`，
+           **把整个真实的 db() 路径绕过去了**。
+
+           > 测试桩替换掉的那一段，就是永远不会被验证的那一段。
+           > 桩用得越顺手，真实路径越容易烂在那里没人知道。
+
+           这也解释了为什么我前面几十轮怎么测都是好的 ——
+           我测的从来不是用户走的那条路。 */
+        return A._app().then(function (app) {
+          if (!app) throw new Error('云端实例不可用');
+          return app.database();
+        });
       });
     }
     return {

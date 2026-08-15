@@ -362,9 +362,13 @@
                   e1.expired = !!(st && st.expired); e1.notReady = !!(st && st.notReady);
                   throw e1;
                 }
-                var a2 = _A._app();
-                if (!a2) throw new Error('云端实例不可用');
-                _cb = a2; return a2;
+                /* v1160: _app() 是异步的 —— 同 hansen_pk_room 那处的修复。
+                   这个文件里另外两处用的是 .then()，唯独这里是同步取，
+                   一个模块内两种写法，错的那个迟早会跑到。 */
+                return _A._app().then(function (a2) {
+                  if (!a2) throw new Error('云端实例不可用');
+                  _cb = a2; return a2;
+                });
               });
             }
             /* 账号模块还没加载好 —— 宁可这次不做，也不能另起实例去抢刷新 */

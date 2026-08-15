@@ -50,8 +50,22 @@
     try {
       var A = window.HansenAuth;
       if (!A || typeof A._app !== 'function') return null;
-      var app = A._app();
-      return app && app.database ? app.database() : null;
+      /* 🔴v1160：**`A._app()` 是异步的，返回 Promise。**
+
+         原来 `app.database ? ... : null` —— Promise 上没有 database，
+         于是**静默返回 null**，天梯什么都读不到。
+         用户的说法是「天梯根本匹配不到对方」——
+         不是匹配算法的问题，是**根本没连上云端**。
+
+         比对战房那处更隐蔽：那边至少抛出
+         `app.database is not a function` 显示在屏上，
+         这里连报错都没有，只是安静地什么都没有。
+
+         > 「拿不到就返回 null」看起来稳妥，其实是把故障藏起来。
+         > 而藏起来的故障，表现出来就是「这功能好像用不了」。 */
+      return A._app().then(function (app) {
+        return (app && app.database) ? app.database() : null;
+      })['catch'](function () { return null; });
     } catch (e) { return null; }
   }
 

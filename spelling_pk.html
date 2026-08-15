@@ -357,15 +357,91 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   }
 
   /* 进任何对战模式前, 必须先有名字与号码 */
-  function requireIdentity(){
-    var P=window.HansenSbProfile; if(!P) return false;
-    var p=P.readProfile();
-    if(!p.name){
-      alert('先给自己起个名字吧——竞赛 ID 会在这时候发给你，之后终身不变。');
-      try{ P._open(); }catch(e){}
+  /* 🔴v1160（真机报的）：**登录了却「连个建房按钮都没有」。**
+
+     用户原话：「登录了，点击建房后，根本没有下一个可以开启房间的按钮」。
+
+     复现出来了：**登录了但档案里没名字**时——
+       ① alert 一句「先给自己起个名字吧」
+       ② 调 `P._open()` 想打开起名界面
+       ③ **而 _open() 实测根本打不开任何东西**（调用没抛错，界面没出现）
+       ④ return false，房间界面不打开
+
+     用户看到的就是：点建房 → 弹个提示 → 划掉 → 什么都没有。
+     而手机上 alert 经常被顺手划掉，甚至被浏览器折叠，
+     于是就成了**「点了完全没反应」**。
+
+     > 一个把人挡在门外的检查，必须同时给出**进门的路**。
+     > 只说"你还不能进"而不说怎么办，等于门是坏的。
+
+     两处改动：
+       · 不再依赖 `P._open()`（它坏了，而且坏了没人知道）——
+         自己画一个页面内的起名屏，用同一套 pk_screen 样式
+       · 起完名字自动回到刚才想去的地方（房间/天梯），
+         而不是让人再点一次
+
+     ⚠️ 保留 alert 作为兜底：万一这个屏也画不出来，
+     至少还有一句话，比彻底静默强。 */
+  function askName(after){
+    var P=window.HansenSbProfile;
+    var host=document.getElementById('pkNameAsk');
+    if(!host){
+      host=document.createElement('div');
+      host.id='pkNameAsk';
+      host.className='pk_screen';
+      document.body.appendChild(host);
+    }
+    host.innerHTML=
+      '<div class="pk_hd">'
+      + '<button class="pk_back" id="pkNameBack">← 返回</button>'
+      + '<div><div class="pk_h1">✏️ 先起个名字</div>'
+      + '<div class="pk_sub">对手会看到这个名字</div></div></div>'
+      + '<div style="padding:18px 16px">'
+      + '<input id="pkNameIn" type="text" maxlength="12" placeholder="比如：小明"'
+      + ' style="width:100%;box-sizing:border-box;padding:14px 12px;font-size:17px;'
+      + 'border-radius:12px;border:1px solid rgba(255,255,255,.22);'
+      + 'background:rgba(255,255,255,.06);color:#fff">'
+      + '<div style="font-size:12.5px;color:var(--hpk-dim,#9aa);margin-top:10px;line-height:1.7">'
+      + '起好名字就会拿到一个竞赛 ID，之后终身不变。</div>'
+      + '<button id="pkNameOk" class="pk_card" style="width:100%;margin-top:16px;'
+      + 'text-align:center;padding:14px">开始吧</button>'
+      + '<div id="pkNameErr" style="font-size:13px;color:#fca5a5;margin-top:10px"></div>'
+      + '</div>';
+    document.querySelectorAll('.pk_screen').forEach(function(e){
+      e.style.display = (e===host) ? 'block' : 'none';
+    });
+    host.style.display='block';
+    var back=document.getElementById('pkNameBack');
+    if(back) back.onclick=function(){ location.reload(); };
+    var inp=document.getElementById('pkNameIn');
+    if(inp) setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 120);
+    var ok=document.getElementById('pkNameOk');
+    if(ok) ok.onclick=function(){
+      var v=(inp&&inp.value||'').trim();
+      var err=document.getElementById('pkNameErr');
+      if(!v){ if(err) err.textContent='名字不能是空的'; return; }
+      try{
+        P.saveProfile ? P.saveProfile({name:v}) : P.setName && P.setName(v);
+        P.ensureCid && P.ensureCid();
+      }catch(e){ if(err) err.textContent='存不下来，刷新一下再试'; return; }
+      host.style.display='none';
+      if(typeof after==='function') { try{ after(); }catch(e){} }
+    };
+  }
+
+  function requireIdentity(after){
+    var P=window.HansenSbProfile;
+    if(!P){
+      alert('账号模块还没加载好，刷新一下页面再试。');
       return false;
     }
-    P.ensureCid();
+    var p={};
+    try{ p=P.readProfile()||{}; }catch(e){ p={}; }
+    if(!p.name){
+      askName(after);          /* 画一个真的能用的起名屏 */
+      return false;
+    }
+    try{ P.ensureCid(); }catch(e){}
     return true;
   }
 
@@ -440,11 +516,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     var r=$('pkRooms'), l=$('pkLadder');
     /* v1065: 原来打开的是写死的占位屏，现改为真实房间匹配（与页面内屏共用同一实现）。 */
     if(r) r.onclick=function(){
-      if(!requireIdentity())return;
-      if(window.HansenPkRoomUI){ HansenPkRoomUI.open(); return; }
-      renderRooms(); show('pkRoomScreen');   /* 模块没加载时退回原占位屏，不至于点了没反应 */
+      /* v1160: 把「起完名字要去哪」作为回调传进去 ——
+         用户点的是"进房间"，起完名字就该到房间，
+         而不是回到首页让他再点一次。 */
+      var go=function(){
+        if(window.HansenPkRoomUI){ HansenPkRoomUI.open(); return; }
+        renderRooms(); show('pkRoomScreen');   /* 模块没加载时退回原占位屏 */
+      };
+      if(!requireIdentity(go))return;
+      go();
     };
-    if(l) l.onclick=function(){ if(!requireIdentity())return; renderLadder(); show('pkLadderScreen'); };
+    if(l) l.onclick=function(){
+      var go=function(){ renderLadder(); show('pkLadderScreen'); };
+      if(!requireIdentity(go))return;
+      go();
+    };
     var backs=document.querySelectorAll('[data-home]');
     for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); renderGlance(); show('pkHome'); };
     /* 资料页关闭后刷新身份条(改名/发号会变) */

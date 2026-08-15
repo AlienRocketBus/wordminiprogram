@@ -3577,6 +3577,53 @@ def guard_score_capped():
             'UI 层直接用 r.room.winners 累加比分，没有截断 —— '
             '云端塞 9999 条就能把对手分刷到 999900')
 
+
+def guard_app_is_async():
+    """_app() 是异步的，不许当同步用。
+
+    ═══ 真机截图报的（v1160）═══
+
+    用户截图上红着一行：**`app.database is not a function`**，
+    房间界面出来了、按钮都在，但点「开一间公开房」什么都不发生。
+
+    根因：`HansenAuth._app()` 内部要 `import()` 动态加载 SDK，
+    **返回的是 Promise**。而三个模块把它当同步用：
+
+        var app = A._app();      ← 拿到 Promise
+        return app.database();   ← Promise 上没有 database()
+
+    · hansen_pk_room  → 抛错，红字显示在屏上（还算有提示）
+    · hansen_ladder_board → **静默返回 null**，天梯什么都读不到
+      用户的说法是「天梯根本匹配不到对方」——
+      不是匹配算法的问题，是根本没连上云端
+    · hansen_cloud_save → 同一个文件里另外两处是对的，唯独这处错
+
+    ═══ 为什么几十轮测试都没发现 ═══
+
+    所有房间测试都注入了 `_setTransportForTest`，
+    **把整个真实的 db() 路径绕过去了**。
+
+    > **测试桩替换掉的那一段，就是永远不会被验证的那一段。**
+    > 桩用得越顺手，真实路径越容易烂在那里没人知道。
+
+    判据：不许出现 `var x = ..._app();` 这种同步取法。
+    """
+    import glob as _g
+    for f in sorted(_g.glob(os.path.join(ROOT, 'hansen_*.js'))):
+        try:
+            src = _code_only(open(f, encoding='utf-8', errors='replace').read())
+        except Exception:
+            continue
+        m = re.search(r'var\s+\w+\s*=\s*\w+\._app\(\)\s*;', src)
+        if m:
+            bad('_app 是异步的',
+                '%s 把 _app() 当同步用（%s）—— '
+                '它返回 Promise，接着调 .database() 会报 '
+                '"app.database is not a function"，'
+                '或者静默返回 null 让功能看起来"用不了"'
+                % (os.path.basename(f), m.group(0)[:34]))
+            return
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3690,6 +3737,7 @@ GUARDS = [
     ('房间号要有效', guard_room_id_valid),
     ('心跳要会停', guard_heartbeat_stops),
     ('比分要封顶', guard_score_capped),
+    ('_app 是异步的', guard_app_is_async),
 ]
 
 

@@ -819,6 +819,15 @@ def _inj_score_cap(s):
     return s.replace(m, "/* removed */", 1)
 
 
+
+def _inj_app_sync(s):
+    """把 _app() 改回同步取法 —— 真机上会报 app.database is not a function。"""
+    m = "return A._app().then(function (app) {"
+    if m not in s:
+        return None
+    return s.replace(m, "var app = A._app();\n        if (0) (function (app) {", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -909,6 +918,7 @@ CASES = [
     ('房间号要有效', 'hansen_pk_room_v1065.js',     _inj_room_id),
     ('心跳要会停', 'hansen_pk_room_v1065.js',     _inj_hb_stop),
     ('比分要封顶', 'hansen_pk_room_ui_v1065.js',  _inj_score_cap),
+    ('_app 是异步的', 'hansen_pk_room_v1065.js',     _inj_app_sync),
 ]
 
 
