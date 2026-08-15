@@ -43,6 +43,24 @@ const port = srv.address().port;
 const b = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
 /* 320px：还在用的最小主流屏幕。大屏上没问题不代表小屏上没问题 —— v1119 就栽在这 */
 const page = await (await b.newContext({ viewport: { width: 320, height: 568 } })).newPage();
+
+/* 🔴v1161：**先给自己起个名字，否则三个入口都会被身份检查拦住。**
+
+   v1161 起，大PK / 天梯 / 好友三个入口在没名字时会弹起名屏
+   （之前是彻底静默，用户报「点了完全没反应」）。
+   这个测试量的是**触控目标尺寸**，不是身份流程 ——
+   被起名屏挡住就点不到那些按钮，报 30 秒超时。
+
+   > 一个测试被别的功能挡住时，要么把前置条件补上，
+   > 要么就是在测两件事 —— 这里选前者。 */
+await page.addInitScript(() => {
+  try {
+    localStorage.setItem('hansen_auth_v1004',
+      JSON.stringify({ uid: 'U1', method: 'phone', signedAt: Date.now() }));
+    localStorage.setItem('hansen_sb_profile_v1002',
+      JSON.stringify({ name: '小明', cid: 'C0001' }));
+  } catch (e) {}
+});
 await page.goto(`http://127.0.0.1:${port}/spelling_pk.html`, { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(4500);
 

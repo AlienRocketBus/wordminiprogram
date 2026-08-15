@@ -46,13 +46,13 @@
   var _cache = null;           /* { at, list, myRank } */
   var CACHE_MS = 60000;        /* 一分钟内不重复拉 —— 榜单不需要实时 */
 
-  var _dbCache = null, _warming = false;   /* v1160: 预热的云端实例 */
+  var _dbCache = null, _warming = false;   /* v1161: 预热的云端实例 */
 
   function db() {
     try {
       var A = window.HansenAuth;
       if (!A || typeof A._app !== 'function') return null;
-      /* 🔴v1160：**`A._app()` 是异步的，返回 Promise。**
+      /* 🔴v1161：**`A._app()` 是异步的，返回 Promise。**
 
          原来 `app.database ? ... : null` —— Promise 上没有 database，
          于是**静默返回 null**，天梯什么都读不到。
@@ -65,7 +65,7 @@
 
          > 「拿不到就返回 null」看起来稳妥，其实是把故障藏起来。
          > 而藏起来的故障，表现出来就是「这功能好像用不了」。 */
-      /* 🔴v1160 修正：**db() 的三个调用方都当同步用，不能直接返回 Promise。**
+      /* 🔴v1161 修正：**db() 的三个调用方都当同步用，不能直接返回 Promise。**
 
          第一版我把它改成 `A._app().then(...)` —— 修对了「_app 是异步的」，
          却让 `var d = db(); if (!d) ...` 这三处全部拿到一个 Promise，

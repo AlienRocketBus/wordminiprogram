@@ -737,7 +737,7 @@ def _inj_cloud_wins(s):
 
 def _inj_pk_vocab(s):
     """把对战页的词库引用去掉 —— 对战一开始就结束、房间当场被删。"""
-    m = '<script defer src="vocab_all.js?v=1160"></script>'
+    m = '<script defer src="vocab_all.js?v=1161"></script>'
     if m not in s:
         return None
     return s.replace(m, '<!-- removed -->', 1)
@@ -777,7 +777,7 @@ def _inj_read_retry(s):
 
 def _inj_app_version(s):
     """把写死的版本号改回旧值 —— 整个 App 会陷入无限刷新。"""
-    m = "CURRENT_APP_VERSION=1160"
+    m = "CURRENT_APP_VERSION=1161"
     if m not in s:
         return None
     return s.replace(m, "CURRENT_APP_VERSION=1157", 1)
@@ -836,6 +836,20 @@ def _inj_double_bind(s):
         return None
     return s.replace(m, "  var _lb = document.getElementById('pkLadder');\n"
                         "  if (_lb) _lb.onclick = function () { HansenLadderUI.open(); };", 1)
+
+
+
+def _inj_audio_lock(s):
+    """往音频哈希清单里塞当前版本号 —— 模拟批量替换误伤。"""
+    ver = ''
+    try:
+        ver = open(os.path.join(ROOT, 'VERSION'), encoding='utf-8').read().strip()
+    except Exception:
+        return None
+    if not ver or '"' not in s:
+        return None
+    i = s.find('"')
+    return s[:i + 1] + ver + s[i + 1:]
 
 
 CASES = [
@@ -930,6 +944,7 @@ CASES = [
     ('比分要封顶', 'hansen_pk_room_ui_v1065.js',  _inj_score_cap),
     ('_app 是异步的', 'hansen_pk_room_v1065.js',     _inj_app_sync),
     ('别绑两次', 'spelling_pk.html',            _inj_double_bind),
+    ('音频清单完整', 'hansen_audio_lock.json',      _inj_audio_lock),
 ]
 
 

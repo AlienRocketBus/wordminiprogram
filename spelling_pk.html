@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1160"></script><!--🔴v1152 全站发音音量归一 —— 位置紧跟 SW 升级门之后，且**不能用 defer**：它要在任何人 new SpeechSynthesisUtterance 之前完成劫持，defer 会推迟到文档解析完，那时早就有脚本用过语音了。此前散落在各处、有的页面干脆没有，而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1160"></script><!--🔴v1155 悄悄报错观察者：对战/天梯模块有 56 处空 catch，真出错时没有任何痕迹（今天两个"根本用不了"就是这么藏住的）。这个模块把 error 和 unhandledrejection 记进环形缓冲区，云端自检面板能看到最近 30 条。--><script defer src="hansen_silent_watch_v1155.js?v=1160"></script><!--🔴v1155 对战看门狗：今天的天梯 bug 形态出奇一致 ——"界面进了废掉但没人管的状态"。与其把每条路都堵一遍（总会漏），不如守住必经之地：不管因为什么原因废掉，用户被卡住超时就把人救出来。--><script defer src="hansen_pk_watchdog_v1155.js?v=1160"></script><!--🔴v1156 启动自检：实测三种服务端故障（词库404 / JS全504 / JS被截断），三种下页面都照常渲染、按钮都能点，但核心模块 undefined、且零脚本错误 ——用户看到一个能点却什么都不工作的空壳，还不知道为什么。这个模块等页面稳定后点一次名，缺了就明说是网络问题。--><script defer src="hansen_boot_check_v1156.js?v=1160"></script><!--🔴v1156 页内提示：全站 39 处 alert 在手机上会打断输入焦点、样式和 App 脱节，连续弹几次后浏览器还会给"阻止此页面再弹窗"的选项 ——用户一旦勾了，之后所有错误提示他都看不到了。-->
-<script defer src="hansen_toast_v1156.js?v=1160"></script><!--🔴v1156 天梯排行榜：原来只显示"我 1062 分"，看不到自己排第几，而天梯的核心动力恰恰是"我比别人强多少"。复用已有的 sb_profile 集合，不新建集合。拿不到榜就安静降级 —— 排行榜是锦上添花，不能因为它拿不到就让人打不了排位。--><script defer src="hansen_ladder_board_v1156.js?v=1160"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1161"></script><!--🔴v1152 全站发音音量归一 —— 位置紧跟 SW 升级门之后，且**不能用 defer**：它要在任何人 new SpeechSynthesisUtterance 之前完成劫持，defer 会推迟到文档解析完，那时早就有脚本用过语音了。此前散落在各处、有的页面干脆没有，而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1161"></script><!--🔴v1155 悄悄报错观察者：对战/天梯模块有 56 处空 catch，真出错时没有任何痕迹（今天两个"根本用不了"就是这么藏住的）。这个模块把 error 和 unhandledrejection 记进环形缓冲区，云端自检面板能看到最近 30 条。--><script defer src="hansen_silent_watch_v1155.js?v=1161"></script><!--🔴v1155 对战看门狗：今天的天梯 bug 形态出奇一致 ——"界面进了废掉但没人管的状态"。与其把每条路都堵一遍（总会漏），不如守住必经之地：不管因为什么原因废掉，用户被卡住超时就把人救出来。--><script defer src="hansen_pk_watchdog_v1155.js?v=1161"></script><!--🔴v1156 启动自检：实测三种服务端故障（词库404 / JS全504 / JS被截断），三种下页面都照常渲染、按钮都能点，但核心模块 undefined、且零脚本错误 ——用户看到一个能点却什么都不工作的空壳，还不知道为什么。这个模块等页面稳定后点一次名，缺了就明说是网络问题。--><script defer src="hansen_boot_check_v1156.js?v=1161"></script><!--🔴v1156 页内提示：全站 39 处 alert 在手机上会打断输入焦点、样式和 App 脱节，连续弹几次后浏览器还会给"阻止此页面再弹窗"的选项 ——用户一旦勾了，之后所有错误提示他都看不到了。-->
+<script defer src="hansen_toast_v1156.js?v=1161"></script><!--🔴v1156 天梯排行榜：原来只显示"我 1062 分"，看不到自己排第几，而天梯的核心动力恰恰是"我比别人强多少"。复用已有的 sb_profile 集合，不新建集合。拿不到榜就安静降级 —— 排行榜是锦上添花，不能因为它拿不到就让人打不了排位。--><script defer src="hansen_ladder_board_v1156.js?v=1161"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
 if(location.protocol!=='file:')return;/* 🔴v1152：**只在真的像"用户下载了文件"时才救。**
    实测踩到：file:// 不只出现在"下载后双击打开"这一种情况 ——
    本地开发、自动化测试也是直接用 file:// 打开页面的。
@@ -35,13 +35,13 @@ else{show();}
 window.addEventListener('load',show);
 /* 主逻辑可能在就绪后重绘整个 body，所以再补一次 */
 setTimeout(function(){shown=false;show();},1200);
-})();</script><script src="hansen_cred_trap_v1085.js?v=1160"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1160"></script>
+})();</script><script src="hansen_cred_trap_v1085.js?v=1161"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1161"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <title>拼写大PK · 单词大冒险</title>
 <!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
 
-<script src="hansen_backup_bootstrap_v944.js?v=1160"></script>
+<script src="hansen_backup_bootstrap_v944.js?v=1161"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
@@ -158,11 +158,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <div id="pkLadderBody"></div>
 </div>
 
-<script src="hansen_palette.js?v=1160"></script>
-<script src="hansen_sb_ladder_v1002.js?v=1160"></script><!--🔴v1103 对战战绩与天梯分：打完要留下痕迹，否则赢了没意义。ELO 算法 v1002 就写好了，缺的一直是"存状态"这一层。--><script defer src="hansen_pk_record_v1103.js?v=1160"></script><!--🔴v1108 天梯排位：实力匹配 + 战绩页（抢先率/平均用时/正确率/最高分）--><script defer src="hansen_ladder_ui_v1108.js?v=1160"></script>
-<script src="hansen_sb_profile_v1002.js?v=1160"></script><!--🔴v1106 好友/在线状态/隐身/快捷语。只能发固定快捷语不能打字 —— 这是给孩子用的产品，自由输入意味着陌生人能发任意内容，需要敏感词/举报/审核那一整套，而孩子想聊天本来就有微信。--><script defer src="hansen_friends_v1106.js?v=1160"></script><!--🔴v1107 好友界面：在线头像亮+绿点/离线整体变灰、加好友、快捷语（无输入框）、隐身开关--><script defer src="hansen_friends_ui_v1107.js?v=1160"></script>
-<script src="hansen_cloud_config_v965.js?v=1160"></script>
-<script src="hansen_backup_v944.js?v=1160"></script><!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1160"></script><!--🔴v1134 数据一变就通知云存档排队上传：原来只有切后台/关页面/每5分钟三个时机，中间杀进程会丢进度--><script src="hansen_change_notify_v1134.js?v=1160"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1160"></script><!--🔴v1063: 本页自身调用 HansenCloudRestore（「☁️ 从云端恢复进度」按钮），却从未加载该模块——直接打开本页时按钮只会提示"恢复模块未加载"。同时补 Lv.3 门槛，避免本页成为门槛的又一个后门。--><script defer src="hansen_signup_gate_v1030.js?v=1160"></script><script defer src="hansen_cloud_restore_v1048.js?v=1160"></script><!--v1065: 在线对战·公开房间。本页原有 renderRooms() 是写死的占位("暂时还没有人开房")，与页面内屏那套是两处真源。改为共用同一真实实现。--><!-- 🔴v1160（真机报「建房根本不行」，两个浏览器实测追到）：
+<script src="hansen_palette.js?v=1161"></script>
+<script src="hansen_sb_ladder_v1002.js?v=1161"></script><!--🔴v1103 对战战绩与天梯分：打完要留下痕迹，否则赢了没意义。ELO 算法 v1002 就写好了，缺的一直是"存状态"这一层。--><script defer src="hansen_pk_record_v1103.js?v=1161"></script><!--🔴v1108 天梯排位：实力匹配 + 战绩页（抢先率/平均用时/正确率/最高分）--><script defer src="hansen_ladder_ui_v1108.js?v=1161"></script>
+<script src="hansen_sb_profile_v1002.js?v=1161"></script><!--🔴v1106 好友/在线状态/隐身/快捷语。只能发固定快捷语不能打字 —— 这是给孩子用的产品，自由输入意味着陌生人能发任意内容，需要敏感词/举报/审核那一整套，而孩子想聊天本来就有微信。--><script defer src="hansen_friends_v1106.js?v=1161"></script><!--🔴v1107 好友界面：在线头像亮+绿点/离线整体变灰、加好友、快捷语（无输入框）、隐身开关--><script defer src="hansen_friends_ui_v1107.js?v=1161"></script>
+<script src="hansen_cloud_config_v965.js?v=1161"></script>
+<script src="hansen_backup_v944.js?v=1161"></script><!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1161"></script><!--🔴v1134 数据一变就通知云存档排队上传：原来只有切后台/关页面/每5分钟三个时机，中间杀进程会丢进度--><script src="hansen_change_notify_v1134.js?v=1161"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1161"></script><!--🔴v1063: 本页自身调用 HansenCloudRestore（「☁️ 从云端恢复进度」按钮），却从未加载该模块——直接打开本页时按钮只会提示"恢复模块未加载"。同时补 Lv.3 门槛，避免本页成为门槛的又一个后门。--><script defer src="hansen_signup_gate_v1030.js?v=1161"></script><script defer src="hansen_cloud_restore_v1048.js?v=1161"></script><!--v1065: 在线对战·公开房间。本页原有 renderRooms() 是写死的占位("暂时还没有人开房")，与页面内屏那套是两处真源。改为共用同一真实实现。--><!-- 🔴v1161（真机报「建房根本不行」，两个浏览器实测追到）：
      **这一页从来没加载过词库，所以每次对战一开始就结束。**
 
      事故链条（云端日志 + 调用栈一步步追出来的）：
@@ -183,10 +183,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
      > **顺着"谁删了房"一路往回追，才追到最末端这一行。**
 
      必须排在 hansen_pk_room 之前 —— 后者要用它建词表。 -->
-<script defer src="vocab_all.js?v=1160"></script>
-<script defer src="hansen_pk_room_v1065.js?v=1160"></script><script defer src="hansen_pk_room_ui_v1065.js?v=1160"></script><script src="hansen_cloud_save_v965.js?v=1160"></script><!--🔴v1021: 登录后要能立刻上传进度-->
-<script src="hansen_auth_v1004.js?v=1160"></script><!--🔴v1004: 账号系统-->
-<script src="hansen_auth_ui_v1004.js?v=1160"></script>
+<script defer src="vocab_all.js?v=1161"></script>
+<script defer src="hansen_pk_room_v1065.js?v=1161"></script><script defer src="hansen_pk_room_ui_v1065.js?v=1161"></script><script src="hansen_cloud_save_v965.js?v=1161"></script><!--🔴v1021: 登录后要能立刻上传进度-->
+<script src="hansen_auth_v1004.js?v=1161"></script><!--🔴v1004: 账号系统-->
+<script src="hansen_auth_ui_v1004.js?v=1161"></script>
 <script>
 (function(){
   'use strict';
@@ -357,7 +357,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   }
 
   /* 进任何对战模式前, 必须先有名字与号码 */
-  /* 🔴v1160（真机报的）：**登录了却「连个建房按钮都没有」。**
+  /* 🔴v1161（真机报的）：**登录了却「连个建房按钮都没有」。**
 
      用户原话：「登录了，点击建房后，根本没有下一个可以开启房间的按钮」。
 
@@ -516,7 +516,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     var r=$('pkRooms'), l=$('pkLadder');
     /* v1065: 原来打开的是写死的占位屏，现改为真实房间匹配（与页面内屏共用同一实现）。 */
     if(r) r.onclick=function(){
-      /* v1160: 把「起完名字要去哪」作为回调传进去 ——
+      /* v1161: 把「起完名字要去哪」作为回调传进去 ——
          用户点的是"进房间"，起完名字就该到房间，
          而不是回到首页让他再点一次。 */
       var go=function(){
@@ -539,7 +539,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
      用户截图上写着「点这里设置名字」—— 他还没起名字。
 
      根因是**同一个按钮被绑了两次**：
-       前面那处：带 requireIdentity 检查（v1160 我刚修好的）
+       前面那处：带 requireIdentity 检查（v1161 我刚修好的）
        这里：直接调 HansenLadderUI.open()，**不检查身份**
 
      后绑的覆盖先绑的，所以我上一版的修复**根本没生效** ——

@@ -280,7 +280,7 @@
            这里往下**只剩未登录时的匿名兜底**（先玩后注册的场景）。
 
            🔴v1059：下面这行原本是
-               import('./vendor_cloudbase_esm_v965.js?v=1160')
+               import('./vendor_cloudbase_esm_v965.js?v=1161')
            而 hansen_auth_v1004.js 里是不带查询串的裸路径。
            **浏览器的 ES module 缓存按完整 URL（含 ? 之后）算**——
            多这一个问号，就等于加载了两份互不相干的腾讯云 SDK，
@@ -362,7 +362,7 @@
                   e1.expired = !!(st && st.expired); e1.notReady = !!(st && st.notReady);
                   throw e1;
                 }
-                /* v1160: _app() 是异步的 —— 同 hansen_pk_room 那处的修复。
+                /* v1161: _app() 是异步的 —— 同 hansen_pk_room 那处的修复。
                    这个文件里另外两处用的是 .then()，唯独这里是同步取，
                    一个模块内两种写法，错的那个迟早会跑到。 */
                 return _A._app().then(function (a2) {
