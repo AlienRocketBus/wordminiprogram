@@ -46,6 +46,8 @@
   var _cache = null;           /* { at, list, myRank } */
   var CACHE_MS = 60000;        /* 一分钟内不重复拉 —— 榜单不需要实时 */
 
+  var _dbCache = null, _warming = false;   /* v1160: 预热的云端实例 */
+
   function db() {
     try {
       var A = window.HansenAuth;
@@ -63,9 +65,28 @@
 
          > 「拿不到就返回 null」看起来稳妥，其实是把故障藏起来。
          > 而藏起来的故障，表现出来就是「这功能好像用不了」。 */
-      return A._app().then(function (app) {
-        return (app && app.database) ? app.database() : null;
-      })['catch'](function () { return null; });
+      /* 🔴v1160 修正：**db() 的三个调用方都当同步用，不能直接返回 Promise。**
+
+         第一版我把它改成 `A._app().then(...)` —— 修对了「_app 是异步的」，
+         却让 `var d = db(); if (!d) ...` 这三处全部拿到一个 Promise，
+         紧接着 `d.collection(...)` 就报 `d.collection is not a function`。
+
+         > 改一个函数的返回类型，等于改了它所有调用方的契约。
+         > 「这里改对了」和「整条链还成立」是两回事 ——
+         > 今天第二次栽在这上面（上次是轮询 return 断链）。
+
+         改法：后台**预热**一次实例并缓存，db() 仍然同步返回。
+         拿不到就返回 null（调用方本来就处理这种情况），
+         下次调用时预热大概率已经完成。 */
+      if (_dbCache) return _dbCache;
+      if (!_warming) {
+        _warming = true;
+        A._app().then(function (app) {
+          if (app && app.database) _dbCache = app.database();
+        })['catch'](function () {})
+         .then(function () { _warming = false; });
+      }
+      return null;
     } catch (e) { return null; }
   }
 
