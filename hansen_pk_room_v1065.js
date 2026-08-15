@@ -67,10 +67,45 @@
         else { try { var j = JSON.stringify(e); if (j && j !== '{}') t = j; } catch (_) {} }
       }
     }
-    if (/failed to fetch|networkerror|network request failed|load failed/i.test(t))
-      return '连不上网络，检查一下 Wi-Fi 或数据再试';
-    if (/timeout|timed out/i.test(t)) return '网络太慢，这次没连上，稍后再试';
-    return t || '操作失败';
+    /* 🔴v1162（用户真机截图报的）：**真实原因被"连不上网络"盖住了。**
+
+       用户截图：天梯页显示「连不上网络 / 检查一下 Wi-Fi 或数据再试」，
+       而他的网是好的。更要命的是那行「技术信息」——
+       显示的也是「连不上网络」，**等于什么线索都没给**。
+
+       查下来真实原因是 `云端会话尚未就绪（已重试 5 次）`，
+       跟网络毫无关系。它被下面这条 `failed to fetch` 规则改写掉了。
+
+       > 一层翻译如果连"我改写了什么"都不留，
+       > 排查时就只能从零开始猜。
+       > **翻译可以对用户友好，但不能把原话弄丢。**
+
+       两处改动：
+         · 会话/身份类的错误**先认领**，不再落到网络那条规则里
+         · 翻译后把原话挂在 `.raw` 上，让「技术信息」显示真东西 */
+    var human = '';
+    if (/尚未就绪|not ready|notready/i.test(t))
+      human = '云端还在准备中，等一两秒再点一次';
+    else if (/会话|session|登录|unauthenticated|credential/i.test(t))
+      human = '云端登录过期了，重新登录一次就能继续';
+    else if (/failed to fetch|networkerror|network request failed|load failed/i.test(t))
+      human = '连不上网络，检查一下 Wi-Fi 或数据再试';
+    else if (/timeout|timed out/i.test(t))
+      human = '网络太慢，这次没连上，稍后再试';
+    else
+      human = t || '操作失败';
+
+    /* ⚠️ 第一版用 `new String(human)` 挂 .raw，结果 test_pk_room 红了 ——
+       调用方有的做 `typeof r === 'string'` 判断，String 对象过不了。
+
+       > 为了多带一个字段就换掉返回类型，会踩到所有调用方。
+       > **加信息比换类型安全** —— 原话拼进同一个字符串，
+       > 用一个不会误伤的分隔符，取的时候切开就行。
+
+       格式：`人话 ⟨原话⟩` —— 界面只显示 ⟨ 之前的部分，
+       「技术信息」那行取 ⟨⟩ 里的。原话和人话一样时不重复拼。 */
+    if (t && t !== human) return human + ' ⟨' + t.slice(0, 120) + '⟩';
+    return human;
   }
 
   /* ── 确定性随机：同一个种子在任何设备上都给出同一串数 ──
@@ -126,7 +161,7 @@
           err.sessionDead = true; err.expired = !!(s && s.expired);
           throw err;
         }
-        /* 🔴v1161（真机截图报的）：**`app.database is not a function`。**
+        /* 🔴v1162（真机截图报的）：**`app.database is not a function`。**
 
            用户截图：房间界面出来了、按钮都在，但每次操作都红着这一句，
            点「开一间公开房」什么都不发生。
@@ -165,7 +200,7 @@
           });
         });
       },
-      /* 🔴v1161（真机报的）：**默认传输层从来就没有 list，而三处在调它。**
+      /* 🔴v1162（真机报的）：**默认传输层从来就没有 list，而三处在调它。**
 
          用户报「房间匹配根本没办法建房」。查下来：
          `T().list(...)` 被调用 **3 处**，
@@ -359,7 +394,7 @@
       var fn = tx[k];
       if (typeof fn !== 'function') { out[k] = fn; return; }
       out[k] = function () {
-        /* 🔴v1161（模拟真机恶劣网络抓到）：**一次请求失败就直接放弃。**
+        /* 🔴v1162（模拟真机恶劣网络抓到）：**一次请求失败就直接放弃。**
 
            实测（抖动 0~1.5 秒 + 20% 请求失败）：
            房主点「开一间」→「出了点问题，再试一次吧」，
@@ -378,7 +413,7 @@
            claim 是抢房，重试可能把别人已经占到的房再抢一次；
            add 重试会开出两间房。宁可让他自己点第二次。 */
         var args = arguments;
-        /* 🔴v1161（延迟 + 丢包组合测出来的）：**建房也要能重试。**
+        /* 🔴v1162（延迟 + 丢包组合测出来的）：**建房也要能重试。**
 
            单独测 20% 丢包时是过的（读类会重试），
            但加上云端延迟之后，**建房直接失败** ——
@@ -493,11 +528,11 @@
        同一次开房进行中就复用同一个 Promise。 */
     if (_creating) return _creating;
 
-    /* 🔴v1161（顺着「建房不行」那条线继续挖到的）：
+    /* 🔴v1162（顺着「建房不行」那条线继续挖到的）：
        **词库没加载时也让人建房 —— 房建起来了，一开打就秒结束。**
 
        这正是用户遇到的那个 bug 的另一半：
-       v1161 修好了"对战页没引词库"，但如果因为别的原因
+       v1162 修好了"对战页没引词库"，但如果因为别的原因
        （网慢、脚本 404、缓存坏了）词库还是没到位，
        现在的代码照样会让他把房开出来 ——
        然后等来一个对手，两个人一进对战就双双跳到结算屏。
@@ -529,7 +564,7 @@
     if (_prev) { try { T().remove(_prev)['catch'](function () {}); } catch (e) {} _myRoomId = ''; }
     var now = Date.now();
     var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
-    /* 🔴v1161：**建房文档要带自己生成的 _id，否则重试会开出两间房。**
+    /* 🔴v1162：**建房文档要带自己生成的 _id，否则重试会开出两间房。**
 
        上一步把 add 加进了可重试名单（延迟+丢包组合下建房会失败），
        理由是"add 带 _id 时是幂等的"。
@@ -600,7 +635,7 @@
       : Promise.resolve(doc);
 
     _creating = _prep.then(function () { return T().add(doc); }).then(function (r) {
-      /* 🔴v1161（加固扫描抓到）：**拿不到有效房间号，界面照样说"房间已经开好了"。**
+      /* 🔴v1162（加固扫描抓到）：**拿不到有效房间号，界面照样说"房间已经开好了"。**
 
          实测让云端 add 返回六种异常：
            {}、{id:''}、{id:12345}、{id:{a:1}}、"ok"
@@ -651,7 +686,7 @@
   function sweepMyDeadRooms() {
     var u = me();
     if (!u.id) return Promise.resolve(0);
-    /* 🔴v1161：**这个函数是延迟 1.5 秒跑的，那时传输层可能已经换了。**
+    /* 🔴v1162：**这个函数是延迟 1.5 秒跑的，那时传输层可能已经换了。**
 
        实测（测试里换桩后）：`T(...).list is not a function`。
        真实场景同理 —— 用户退出登录、换账号、或者页面正在卸载时，
@@ -678,7 +713,7 @@
   }
 
   /* ── 列房：只列还活着的公开房，且不列自己开的 ── */
-  /* v1161: 房间列表字段清洗 —— 见 listRooms 里的说明 */
+  /* v1162: 房间列表字段清洗 —— 见 listRooms 里的说明 */
   function sText(v, max) {
     if (typeof v !== 'string') {
       if (typeof v === 'number' && isFinite(v)) v = String(v);
@@ -732,7 +767,7 @@
         ok: true,
         rooms: (rows || []).map(function (x) {
           return {
-            /* 🔴v1161（攻击测试抓到）：**云端返回什么就画什么，会印出 [object Object]。**
+            /* 🔴v1162（攻击测试抓到）：**云端返回什么就画什么，会印出 [object Object]。**
 
                实测（让云端返回畸形行）：房间列表显示
                  「[object Object] 未定级 · 很多 个词 · 29777281分钟前」
@@ -818,7 +853,7 @@
         /* 🔴v1104：客人也要发心跳 —— 否则房主检测不到客人掉线，
            会一直干等。原来只有房主发，这是个明显的不对称。 */
         startHeartbeat(roomId);
-        /* 🔴v1161（加固扫描抓到）：**房间里的词数直接信，会开出没法玩的局。**
+        /* 🔴v1162（加固扫描抓到）：**房间里的词数直接信，会开出没法玩的局。**
 
            实测（伪造房间数据进房）：
              wordCount = -5    → 一进去就「交卷了，答对 0/0 个」，空局
@@ -861,7 +896,7 @@
      网络抖一下都很常见 —— 太敏感会把正常玩家误判成逃跑。 */
   var ABANDON_MS = 60000;
 
-  /* 🔴v1161（攻击测试抓到）：**房主刷新页面后，房间变成 30 秒的僵尸。**
+  /* 🔴v1162（攻击测试抓到）：**房主刷新页面后，房间变成 30 秒的僵尸。**
 
      实测：房主建房 → 刷新页面 →
        云端还有 1 间房，别人的列表里也还看得到，
@@ -898,7 +933,7 @@
   function startHeartbeat(roomId) {
     stopHeartbeat();
     var u = me();
-    /* 🔴v1161（加固扫描抓到）：**房间没了心跳还在空转。**
+    /* 🔴v1162（加固扫描抓到）：**房间没了心跳还在空转。**
 
        原来 `if (!room) return;` 只是跳过这一次 ——
        房间已经被删（房主关了、被清理了、或者根本没建成），
@@ -943,7 +978,7 @@
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: true, gone: true, reason: '房间已不存在' };
       var isHost = (room.hostId === u.id);
-      /* 🔴v1161（真机报「建房根本不行」，两个浏览器实测复现）：
+      /* 🔴v1162（真机报「建房根本不行」，两个浏览器实测复现）：
          **房主等久了会把刚进来的客人误判成"跑了"，然后把房间删掉。**
 
          云端操作日志一条条看出来的：
@@ -1097,7 +1132,7 @@
     var u = me();
     return T().read(roomId).then(function (room) {
       if (!room) return { ok: false, reason: '房间已不存在' };
-      /* 🔴v1161（加固扫描抓到）：**云端塞 9999 条 winners 就能把对手比分刷成 999900。**
+      /* 🔴v1162（加固扫描抓到）：**云端塞 9999 条 winners 就能把对手比分刷成 999900。**
 
          实测：往房间里写 `winners: new Array(9999).fill('host')`，
          对战屏上对手的分立刻变成 **999900**。
@@ -1275,7 +1310,7 @@
 
   /* 轮询等待对手（TCB 的 watch 在部分环境不稳，先用轮询，语义更好把控） */
   function waitForOpponent(roomId, onChange, timeoutMs) {
-    var missCount = 0;   /* v1161: 连续读不到房间的次数 —— 见下面的说明 */
+    var missCount = 0;   /* v1162: 连续读不到房间的次数 —— 见下面的说明 */
     var stop = false, t0 = Date.now();
     var limit = timeoutMs || 120000;
     var fails = 0;
@@ -1304,7 +1339,7 @@
       T().read(roomId).then(function (room) {
         if (stop) return;
         fails = 0;
-        /* 🔴v1161（真实点击测试抓到）：**读一次读不到就宣布"房间没了"，太急了。**
+        /* 🔴v1162（真实点击测试抓到）：**读一次读不到就宣布"房间没了"，太急了。**
 
            实测：房主刚建完房，第一次轮询读回 null，
            界面立刻跳「这个房间已经不在了」—— 而房其实好好地在那儿。
@@ -1323,7 +1358,7 @@
         if (!room) {
           missCount = (missCount || 0) + 1;
           if (missCount < 3) {
-            /* 🔴v1161：**这里必须安排下一次轮询，不能光 return。**
+            /* 🔴v1162：**这里必须安排下一次轮询，不能光 return。**
 
                上一轮加「连续三次读不到才认」的宽限时，
                写成了 `if (missCount < 3) return;` —— **轮询链条当场断掉**。

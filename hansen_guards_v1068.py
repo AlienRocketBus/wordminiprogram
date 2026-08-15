@@ -3047,7 +3047,7 @@ def guard_release_backlog():
         n = int((cnt.stdout or '0').strip() or 0)
     except Exception:
         return
-    # ⚠️ v1161：**这道守卫会拦住发布本身。**
+    # ⚠️ v1162：**这道守卫会拦住发布本身。**
     #   积压超标 → 守卫报红 → 凭证作废 → package_release 拒绝出包
     #   → 更发不出去 → 积压继续涨。**它把自己锁死了。**
     #
@@ -3121,7 +3121,7 @@ def guard_bug_atlas():
 def guard_transport_complete():
     """代码调了什么传输方法，默认传输层就得提供什么。
 
-    ═══ 事故（v1161，真机报的）═══
+    ═══ 事故（v1162，真机报的）═══
 
     用户报「房间匹配根本没办法建房」。查下来：
     `T().list(...)` 被调用 **3 处**，
@@ -3184,7 +3184,7 @@ def guard_transport_complete():
 def guard_login_cloud_wins():
     """登录一律以云端为准，不许再弹「留本机还是留云端」。
 
-    ═══ BAT MAN 定的规则（v1161）═══
+    ═══ BAT MAN 定的规则（v1162）═══
 
       「玩到 3 级必须要注册，而且只在这次会上传到云端，
         之后都是登录直接覆盖」
@@ -3232,7 +3232,7 @@ def guard_login_cloud_wins():
 def guard_pk_page_has_vocab():
     """对战页必须加载词库。
 
-    ═══ 事故（v1161，真机报「建房根本不行」）═══
+    ═══ 事故（v1162，真机报「建房根本不行」）═══
 
     用户反复说建房不行。两个浏览器实测复现：
       建房成功 → 客人 claim 成功 → 房主立刻进结算屏「打平 0:0」→ 删房
@@ -3256,7 +3256,7 @@ def guard_pk_page_has_vocab():
     src = _read('spelling_pk.html') or ''
     if not src:
         return
-    # ⚠️ v1161：判据要认 **script 标签**，不能只查"文中有没有 vocab_all" ——
+    # ⚠️ v1162：判据要认 **script 标签**，不能只查"文中有没有 vocab_all" ——
     #   我自己写的那段说明注释里就提到了 vocab_all.js，
     #   于是把 script 删掉之后这个词仍然在，守卫看不出变化。
     #   （今天第六次栽在"同一个词出现多处"上了。）
@@ -3279,7 +3279,7 @@ def guard_pk_page_has_vocab():
 def guard_room_list_sanitized():
     """房间列表的每个字段都要清洗。
 
-    ═══ 攻击测试抓到（v1161）═══
+    ═══ 攻击测试抓到（v1162）═══
 
     让云端返回一行畸形数据，房间列表显示：
       「[object Object] 未定级 · 很多 个词 · 29777281分钟前」
@@ -3318,9 +3318,9 @@ def guard_room_list_sanitized():
 def guard_no_room_without_words():
     """词库没加载好就不许建房。
 
-    ═══ 「建房不行」那条线的另一半（v1161）═══
+    ═══ 「建房不行」那条线的另一半（v1162）═══
 
-    v1161 修好了"对战页没引 vocab_all.js"，但如果因为别的原因
+    v1162 修好了"对战页没引 vocab_all.js"，但如果因为别的原因
     （网慢、脚本 404、缓存坏了）词库还是没到位，
     原来的代码照样让人把房开出来 —— 然后等来一个对手，
     **两个人一进对战就双双跳到结算屏**。
@@ -3356,7 +3356,7 @@ def guard_no_room_without_words():
 def guard_read_retry():
     """读类网络请求要自动重试。
 
-    ═══ 模拟真机恶劣网络抓到（v1161）═══
+    ═══ 模拟真机恶劣网络抓到（v1162）═══
 
     实测（抖动 0~1.5 秒 + 20% 请求失败）：
       房主点「开一间」→「出了点问题，再试一次吧」
@@ -3396,7 +3396,7 @@ def guard_read_retry():
 def guard_app_version_matches():
     """写死的 CURRENT_APP_VERSION 必须等于 VERSION 文件。
 
-    ═══ 事故（v1161，差点让整个 App 打不开）═══
+    ═══ 事故（v1162，差点让整个 App 打不开）═══
 
     排查房间测试时意外发现：**岛屿页每 2 秒自己刷新一次，停不下来**。
 
@@ -3407,12 +3407,12 @@ def guard_app_version_matches():
              无限循环
 
     根因：`hansen_version_watch` 会比对
-      服务器 /VERSION（1161）vs 本机 HansenBackup.appVersion()（1157）
+      服务器 /VERSION（1162）vs 本机 HansenBackup.appVersion()（1157）
     不一致就判定"缓存卡住了旧版本"→ 清缓存 → 强制刷新。
     **而刷新之后本机版本还是 1157，于是再判定、再刷新。**
 
     而 1157 是写死在 hansen_backup 里的常量 ——
-    我批量替换 `?v=1157` → `?v=1161` 时漏了它（它不带 `?v=`）。
+    我批量替换 `?v=1157` → `?v=1162` 时漏了它（它不带 `?v=`）。
 
     > 一个"版本号"散落在两处，就一定会有对不上的那天。
     > 而这次对不上的后果是**整个 App 打不开** ——
@@ -3429,7 +3429,7 @@ def guard_app_version_matches():
             src = open(f, encoding='utf-8', errors='replace').read()
         except Exception:
             continue
-        # v1161: 不只查 CURRENT_APP_VERSION —— SW 升级门里也记着一个
+        # v1162: 不只查 CURRENT_APP_VERSION —— SW 升级门里也记着一个
         #   版本号（虽然只是排查标记、不参与比较），
         #   留着旧值会在查问题时把人带偏。
         pats = [r'CURRENT_APP_VERSION\s*=\s*(\d+)',
@@ -3448,7 +3448,7 @@ def guard_app_version_matches():
 def guard_read_miss_grace():
     """读不到房间要给宽限，不能一次就宣布"房间没了"。
 
-    ═══ 真实点击测试抓到（v1161）═══
+    ═══ 真实点击测试抓到（v1162）═══
 
     实测：房主刚建完房，第一次轮询读回 null，
     界面立刻跳「这个房间已经不在了」—— 而房其实好好地在那儿。
@@ -3480,7 +3480,7 @@ def guard_read_miss_grace():
 def guard_room_id_valid():
     """建房必须拿到有效房间号才算成功。
 
-    ═══ 加固扫描抓到（v1161）═══
+    ═══ 加固扫描抓到（v1162）═══
 
     让云端 add 返回六种异常：null、{}、{id:''}、{id:12345}、{id:{a:1}}、"ok"
     —— **五种都让用户看到「⏳ 等对手进来 · 房间已经开好了」**，
@@ -3513,7 +3513,7 @@ def guard_room_id_valid():
 def guard_heartbeat_stops():
     """房间没了，心跳要自己停。
 
-    ═══ 加固扫描抓到（v1161）═══
+    ═══ 加固扫描抓到（v1162）═══
 
     原来 `if (!room) return;` 只是跳过这一次 ——
     房间已经被删（房主关了、被清理了、或者根本没建成），
@@ -3547,7 +3547,7 @@ def guard_heartbeat_stops():
 def guard_score_capped():
     """比分不许超过这一局的理论上限。
 
-    ═══ 加固扫描抓到（v1161）═══
+    ═══ 加固扫描抓到（v1162）═══
 
     往云端房间写 `winners: new Array(9999).fill('host')`，
     对战屏上对手的分立刻变成 **999900**。
@@ -3581,7 +3581,7 @@ def guard_score_capped():
 def guard_app_is_async():
     """_app() 是异步的，不许当同步用。
 
-    ═══ 真机截图报的（v1161）═══
+    ═══ 真机截图报的（v1162）═══
 
     用户截图上红着一行：**`app.database is not a function`**，
     房间界面出来了、按钮都在，但点「开一间公开房」什么都不发生。
@@ -3628,22 +3628,22 @@ def guard_app_is_async():
 def guard_no_double_binding():
     """同一个按钮不许绑两次 onclick。
 
-    ═══ 用户真机报的（v1161）═══
+    ═══ 用户真机报的（v1162）═══
 
     「点天梯排位完全没反应」。
 
     根因：`pkLadder` 被绑了**两次** onclick ——
-      前一处带 requireIdentity 检查（v1161 刚修好的）
+      前一处带 requireIdentity 检查（v1162 刚修好的）
       后一处直接调 HansenLadderUI.open()，不检查身份
 
-    **后绑的覆盖先绑的，所以 v1161 的修复根本没生效。**
+    **后绑的覆盖先绑的，所以 v1162 的修复根本没生效。**
     而天梯 UI 拿不到名字就什么都不做，于是彻底静默。
 
     > **一个元素被绑两次事件，先绑的那次等于不存在。**
     > 而两处代码隔了十几行、中间夹着别的逻辑，
     > 看代码时很容易以为它们各管各的。
 
-    这也是 v1161「修好了房间没修好天梯」的真正原因 ——
+    这也是 v1162「修好了房间没修好天梯」的真正原因 ——
     我改的是那个已经失效的绑定。
 
     判据：同一个元素变量不许出现两次 `.onclick =`。
@@ -3664,9 +3664,9 @@ def guard_no_double_binding():
 def guard_audio_lock_intact():
     """音频哈希清单不许被版本号替换误伤。
 
-    ═══ v1161 升版时踩到的 ═══
+    ═══ v1162 升版时踩到的 ═══
 
-    升级版本号要把 1160 全站换成 1161，我用了一句批量替换 ——
+    升级版本号要把 1160 全站换成 1162，我用了一句批量替换 ——
     **结果把 `hansen_audio_lock.json` 里的哈希也改了**
     （哈希是十六进制串，里面恰好含 "1160" 这四个字符）。
 

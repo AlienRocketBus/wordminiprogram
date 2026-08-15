@@ -137,7 +137,7 @@
 
   function close() {
     stopKb();
-    /* v1161: 等待屏的「已等 N 秒」计时器 —— 离开这屏必须停掉。
+    /* v1162: 等待屏的「已等 N 秒」计时器 —— 离开这屏必须停掉。
        不停的话它会一直每秒查一次 DOM，
        而且下次进等待屏会有两个计时器同时刷同一个元素。 */
     try {
@@ -175,6 +175,15 @@
      而原文仍然会进悄悄报错观察者，排查时查得到。 */
   function sayHuman(raw) {
     var t = String(raw || '');
+    /* v1162: E() 现在返回 `人话 ⟨原话⟩`。
+       给用户看的只要人话那半截，原话进 console 供排查。 */
+    var _m = /^([^⟨]*)⟨([^⟩]*)⟩\s*$/.exec(t);
+    if (_m) {
+      try { console.warn('[对战] 原始错误：' + _m[2]); } catch (e) {}
+      var _h = _m[1].trim();
+      if (_h) return _h;
+      t = _m[2];
+    }
     if (!t) return '出了点问题，再试一次吧';
     /* ⚠️ 原文不能丢 —— 翻译是给用户看的，排查时要的是原话。
        走 console.warn：真机上连电脑调试时看得到，
@@ -197,7 +206,7 @@
     if (/not found|不存在|已经不在/i.test(t)) {
       return '这个房间已经不在了，回列表再挑一间吧';
     }
-    /* v1161: 词库没加载好 —— 这条要原样透出去，
+    /* v1162: 词库没加载好 —— 这条要原样透出去，
        因为它已经写成人话了，而且带着"刷新一下页面"这个能做的动作。
        被 sayHuman 兜成"出了点问题"反而丢了信息。 */
     if (/词库/.test(t)) return t;
@@ -219,7 +228,7 @@
   /* ── 屏 1：房间列表 ── */
   /* v1156: 房主水平怎么显示 —— 先看段位名，再看分数，都没有才说未定级 */
   /* v1156: 玩法徽章 —— 用模式表里的 emoji + 名字，和对战屏一致 */
-  /* 🔴v1161（压力测试抓到）：**房间关掉后轮询回调还在跑，st 已经是 null。**
+  /* 🔴v1162（压力测试抓到）：**房间关掉后轮询回调还在跑，st 已经是 null。**
 
      实测报错：`Cannot read properties of null (reading 'mode')`
      场景：客人中途退出 / 房主关房时，`_state` 被清空，
@@ -463,7 +472,7 @@
     var cards = ['A', 'B', 'C'].map(function (k) {
       var m = MODES[k];
       if (!m) return '';
-      /* 🔴v1161：**选玩法的卡片必须是真正可聚焦、可读的控件。**
+      /* 🔴v1162：**选玩法的卡片必须是真正可聚焦、可读的控件。**
 
          原来是纯 `<div>` —— 没有 role、没有 tabindex、
          屏幕阅读器读不出这是能点的东西，键盘也 Tab 不到。
@@ -521,7 +530,7 @@
       host.querySelectorAll('.pr_mode').forEach(function (el) {
         var pick = function () { onPick(el.getAttribute('data-mode')); };
         el.onclick = pick;
-        /* v1161: 键盘也要能选 —— 回车和空格，和原生 button 的行为一致。
+        /* v1162: 键盘也要能选 —— 回车和空格，和原生 button 的行为一致。
            空格要 preventDefault，否则页面会往下滚一屏。 */
         el.onkeydown = function (ev) {
           if (!ev) return;
@@ -545,7 +554,7 @@ function doCreate() {
     S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate,
                      hostRating: _ladderRating }).then(function (r) {
       if (!r.ok) { lobby(r); return; }
-      /* v1161: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」，
+      /* v1162: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」，
          而 waiting() 只收 (roomId, code)，不存这里就拿不到。 */
       _state = { roomId: r.roomId, words: r.words, isHost: true,
                  mode: (r.room && r.room.mode) || mode };
@@ -571,7 +580,7 @@ function doCreate() {
       : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
         + '等人进来就自动开打。</div>';
 
-    /* 🔴v1161：**等待屏原来一动不动，也不说等了多久。**
+    /* 🔴v1162：**等待屏原来一动不动，也不说等了多久。**
 
        截图看到的就是一句静态的「房间已经开好了」——
        等 3 秒和等 3 分钟长得一模一样，屏幕上没有任何东西在动。
@@ -713,7 +722,7 @@ function doCreate() {
         if (r.taken) { refresh(); alert(E(r)); if (btn) { btn.disabled = false; btn.textContent = '进去打'; } return; }
         lobby(r); return;
       }
-      /* 🔴v1161：**客人也要拿到房主选的玩法。**
+      /* 🔴v1162：**客人也要拿到房主选的玩法。**
 
          实测（两个浏览器对打）：房主屏上是「⚡抢答赛」，
          客人屏上却是「🔥同步赛」—— **同一间房，两个人在玩不同的规则**。
@@ -1284,7 +1293,7 @@ function doCreate() {
       try {
         var _mm = (S() && S().modeOf) ? S().modeOf(st && st.mode)
                                       : { firstScore: 100, secondScore: 60 };
-        /* 🔴v1161（加固扫描抓到，第二处）：**这里绕过了传输层的清洗。**
+        /* 🔴v1162（加固扫描抓到，第二处）：**这里绕过了传输层的清洗。**
 
            上一轮我在 `roundState` 入口给 winners 加了三重清洗
            （不是数组当空、截到本局词数、每项只认 host/guest），
@@ -1392,7 +1401,7 @@ function doCreate() {
     })['catch'](function () {});
   }
 
-  /* 🔴v1161（压力测试抓到，彻底修）：**这一局还在不在？**
+  /* 🔴v1162（压力测试抓到，彻底修）：**这一局还在不在？**
 
      实测两条报错：
        Cannot read properties of null (reading 'mode')
@@ -1446,7 +1455,7 @@ function doCreate() {
     } catch (e) {}
     stopPoll();
     var st = _state;
-    /* 🔴v1161（压力测试抓到）：**房间关了 _state 就没了，而这个回调还在飞。**
+    /* 🔴v1162（压力测试抓到）：**房间关了 _state 就没了，而这个回调还在飞。**
 
        实测报错：`Cannot read properties of null (reading 'myScore')`
        场景：客人中途退出、房主关房时，`_state` 被清空，
@@ -1965,7 +1974,7 @@ function doCreate() {
   bindUnloadCleanup();
 
   window.HansenPkRoomUI = {
-    /* 🔴v1161：**端到端测试要能拿到当前题目的答案。**
+    /* 🔴v1162：**端到端测试要能拿到当前题目的答案。**
 
        之前验"建房能不能真打完一局"时，只能从屏幕上抠中文再反查词库 ——
        遇到「和/并且」这种带斜杠的词就抠不出来，

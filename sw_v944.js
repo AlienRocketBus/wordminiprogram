@@ -16,11 +16,11 @@ const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1161', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1161', './hansen_onboarding.js?v=1161', './hansen_theme_shop.js',
-  './hansen_season.js?v=1161', './hansen_cinema_themes.js?v=1161', './hansen_diamond_shop.js?v=1161', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1161', './hansen_crystal.js', './hansen_cards.js?v=1161', './hansen_gacha.js?v=1161', './hansen_land_cards.js?v=1161', './hansen_round_reward.js?v=1161', './hansen_round_bar.js?v=1161', './hansen_pet_showcase.js?v=1161', './hansen_quest_global.js?v=1161', './hansen_island_upgrade.js?v=1161', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1161', './hansen_spell_practice.js?v=1161', './hansen_review.js?v=1161', './hansen_wrong_overview.js?v=1161', './hansen_backup_v944.js?v=1161', './hansen_accessibility.js?v=1161',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1161', './hansen_mylearning.js?v=1161', './hansen_palette.js?v=1161', './hansen_boss_theme.js?v=1161', './hansen_econ_guide.js?v=1161', './hansen_perf_v944.js?v=1161'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1162', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1162', './hansen_onboarding.js?v=1162', './hansen_theme_shop.js',
+  './hansen_season.js?v=1162', './hansen_cinema_themes.js?v=1162', './hansen_diamond_shop.js?v=1162', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1162', './hansen_crystal.js', './hansen_cards.js?v=1162', './hansen_gacha.js?v=1162', './hansen_land_cards.js?v=1162', './hansen_round_reward.js?v=1162', './hansen_round_bar.js?v=1162', './hansen_pet_showcase.js?v=1162', './hansen_quest_global.js?v=1162', './hansen_island_upgrade.js?v=1162', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1162', './hansen_spell_practice.js?v=1162', './hansen_review.js?v=1162', './hansen_wrong_overview.js?v=1162', './hansen_backup_v944.js?v=1162', './hansen_accessibility.js?v=1162',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1162', './hansen_mylearning.js?v=1162', './hansen_palette.js?v=1162', './hansen_boss_theme.js?v=1162', './hansen_econ_guide.js?v=1162', './hansen_perf_v944.js?v=1162'
 ];
 
 async function trim(cacheName, maxEntries) {
@@ -357,7 +357,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1161 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1162 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     /* 🔴v1156：**这条路径以前漏了 fixHtmlType。**
