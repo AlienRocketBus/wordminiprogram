@@ -526,28 +526,56 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       if(!requireIdentity(go))return;
       go();
     };
-    if(l) l.onclick=function(){
-      var go=function(){ renderLadder(); show('pkLadderScreen'); };
-      if(!requireIdentity(go))return;
-      go();
-    };
+    /* v1161: 天梯的点击绑定统一放到下面 _lb 那一处 ——
+       原来这里也绑了一次，被后面覆盖，改这里等于白改。 */
     var backs=document.querySelectorAll('[data-home]');
     for(var i=0;i<backs.length;i++) backs[i].onclick=function(){ renderMe(); renderGlance(); show('pkHome'); };
     /* 资料页关闭后刷新身份条(改名/发号会变) */
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) renderMe(); });
   /* 🔴v1108 天梯入口：v1103 做了分数/段位/定级赛，v1108 补实力匹配与战绩页。
      在这之前它一直是「敬请期待」—— 做了功能没入口等于没做。 */
+  /* 🔴v1161（用户真机报的）：**点「天梯排位」完全没反应。**
+
+     用户截图上写着「点这里设置名字」—— 他还没起名字。
+
+     根因是**同一个按钮被绑了两次**：
+       前面那处：带 requireIdentity 检查（v1160 我刚修好的）
+       这里：直接调 HansenLadderUI.open()，**不检查身份**
+
+     后绑的覆盖先绑的，所以我上一版的修复**根本没生效** ——
+     而天梯 UI 内部拿不到名字就什么都不做，于是彻底静默。
+
+     > **一个元素被绑两次事件，先绑的那次等于不存在。**
+     > 而两处代码隔了十几行、中间夹着别的逻辑，
+     > 看代码时很容易以为它们各管各的。
+     >
+     > 这也是我上一版「修好了房间没修好天梯」的真正原因 ——
+     > 我改的是那个已经失效的绑定。
+
+     合并成一处：先过身份检查，起完名字自动进天梯。 */
   var _lb = document.getElementById('pkLadder');
   if (_lb) _lb.onclick = function () {
-    if (window.HansenLadderUI) { HansenLadderUI.open(); return; }
-    alert('天梯模块正在加载，稍等一下再点');
+    var go = function () {
+      if (window.HansenLadderUI) { HansenLadderUI.open(); return; }
+      renderLadder(); show('pkLadderScreen');
+    };
+    if (!requireIdentity(go)) return;
+    go();
   };
 
   /* v1107 好友入口 */
   var _fb = document.getElementById('pkFriends');
+  /* v1161: 好友入口同样要过身份检查 ——
+     实测没名字时点它也是彻底静默（好友 UI 拿不到身份就不动）。
+     > 三个入口共用一套身份前提，就该共用一套检查 ——
+     > 漏掉任何一个，用户看到的都是「这个按钮是坏的」。 */
   if (_fb) _fb.onclick = function () {
-    if (window.HansenFriendsUI) { HansenFriendsUI.open(); return; }
-    alert('好友功能正在加载，稍等一下再点');
+    var go = function () {
+      if (window.HansenFriendsUI) { HansenFriendsUI.open(); return; }
+      alert('好友功能正在加载，稍等一下再点');
+    };
+    if (!requireIdentity(go)) return;
+    go();
   };
     document.addEventListener('hsn-auth-changed', function(){ renderMe(); renderAcct(); });
     setInterval(function(){ renderMe(); renderGlance(); renderAcct(); }, 1500);

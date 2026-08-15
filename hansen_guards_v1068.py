@@ -3624,6 +3624,42 @@ def guard_app_is_async():
                 % (os.path.basename(f), m.group(0)[:34]))
             return
 
+
+def guard_no_double_binding():
+    """同一个按钮不许绑两次 onclick。
+
+    ═══ 用户真机报的（v1161）═══
+
+    「点天梯排位完全没反应」。
+
+    根因：`pkLadder` 被绑了**两次** onclick ——
+      前一处带 requireIdentity 检查（v1160 刚修好的）
+      后一处直接调 HansenLadderUI.open()，不检查身份
+
+    **后绑的覆盖先绑的，所以 v1160 的修复根本没生效。**
+    而天梯 UI 拿不到名字就什么都不做，于是彻底静默。
+
+    > **一个元素被绑两次事件，先绑的那次等于不存在。**
+    > 而两处代码隔了十几行、中间夹着别的逻辑，
+    > 看代码时很容易以为它们各管各的。
+
+    这也是 v1160「修好了房间没修好天梯」的真正原因 ——
+    我改的是那个已经失效的绑定。
+
+    判据：同一个元素变量不许出现两次 `.onclick =`。
+    """
+    src = _read('spelling_pk.html') or ''
+    if not src:
+        return
+    import collections
+    names = re.findall(r'(\w+)\s*\)?\.onclick\s*=', src)
+    dup = [k for k, v in collections.Counter(names).items() if v > 1 and k not in ('b', 'btn', 'el')]
+    if dup:
+        bad('别绑两次',
+            'spelling_pk.html 里 %s 被绑了多次 onclick —— '
+            '后绑的会覆盖先绑的，改错那一处等于白改'
+            % '、'.join(dup[:3]))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3738,6 +3774,7 @@ GUARDS = [
     ('心跳要会停', guard_heartbeat_stops),
     ('比分要封顶', guard_score_capped),
     ('_app 是异步的', guard_app_is_async),
+    ('别绑两次', guard_no_double_binding),
 ]
 
 

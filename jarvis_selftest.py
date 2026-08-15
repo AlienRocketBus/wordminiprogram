@@ -828,6 +828,16 @@ def _inj_app_sync(s):
     return s.replace(m, "var app = A._app();\n        if (0) (function (app) {", 1)
 
 
+
+def _inj_double_bind(s):
+    """给天梯按钮再绑一次 onclick —— 后绑的会覆盖先绑的，身份检查失效。"""
+    m = "  var _lb = document.getElementById('pkLadder');"
+    if m not in s:
+        return None
+    return s.replace(m, "  var _lb = document.getElementById('pkLadder');\n"
+                        "  if (_lb) _lb.onclick = function () { HansenLadderUI.open(); };", 1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -919,6 +929,7 @@ CASES = [
     ('心跳要会停', 'hansen_pk_room_v1065.js',     _inj_hb_stop),
     ('比分要封顶', 'hansen_pk_room_ui_v1065.js',  _inj_score_cap),
     ('_app 是异步的', 'hansen_pk_room_v1065.js',     _inj_app_sync),
+    ('别绑两次', 'spelling_pk.html',            _inj_double_bind),
 ]
 
 
