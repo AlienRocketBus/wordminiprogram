@@ -819,7 +819,7 @@
         return { ok: true, action: 'nothing-to-sync' };
       }
       if (hasCloud && !hasLocal) {
-        return CS.restoreWithKey(CS.ensureKey())
+        return CS.restoreWithKey(CS.ensureKey(), true)
           .then(function (r) {
             /* 🔴v1026 关键：恢复只是把数据写回 localStorage，
                而页面内存里的 S 仍是登录前那份空数据 —— 不刷新的话
@@ -879,7 +879,7 @@
          那种情况在前面 `info.exists === null` 就返回了，
          走不到这里。不会出现"云端是空的却把本机清了"。 */
       if (hasCloud && hasLocal) {
-        return CS.restoreWithKey(CS.ensureKey())
+        return CS.restoreWithKey(CS.ensureKey(), true)
           .then(function (r) {
             if (r && r.ok) {
               markLocalOwner(uidNow);
@@ -911,7 +911,7 @@
   function pullSave(key) {
     if (!window.HansenCloudSave || typeof HansenCloudSave.restoreWithKey !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
-    return HansenCloudSave.restoreWithKey(key);
+    return HansenCloudSave.restoreWithKey(key, true);
   }
 
   /* 🔴v1031: 本地标记 ≠ 云端会话仍在。提供真实探测，避免"以为登录着其实没有"。 */
@@ -1048,7 +1048,43 @@
 
       function probe(i) {
         return Promise.resolve(a.getLoginState()).then(function (st) {
-          var uid = (st && (st.uid || (st.user && st.user.uid))) || '';
+          /* 🔴v1163（用户真机反复报"天梯用不了"）：**uid 取法太窄。**
+
+             会话探测只认两种位置：`st.uid` 和 `st.user.uid`。
+             而 CloudBase 的 `getLoginState()` 在不同 SDK 版本 /
+             不同登录方式（手机号、匿名、自定义登录）下，
+             uid 可能落在 `credential.uid`、`userInfo.uid`、
+             `user.userId`、`loginState.uid` 等好几个位置。
+
+             取不到就判「尚未就绪」，重试五次后放弃 ——
+             用户看到的是「连不上网络」，而其实**已经登录了**，
+             只是我们没在对的地方找。
+
+             > 从别人的 SDK 里取一个字段，
+             > **它可能在几个位置之一** —— 只认一种写法，
+             > 等于把"这个版本恰好这么放"当成了永久契约。
+
+             改成挨个位置找，并把实际拿到的结构记进日志 ——
+             万一还是取不到，用户截个图就知道它到底长什么样。 */
+          var uid = '';
+          try {
+            var cands = [
+              st && st.uid,
+              st && st.user && st.user.uid,
+              st && st.user && st.user.userId,
+              st && st.credential && st.credential.uid,
+              st && st.userInfo && st.userInfo.uid,
+              st && st.loginState && st.loginState.uid,
+              st && st.data && st.data.uid
+            ];
+            for (var _c = 0; _c < cands.length; _c++) {
+              if (cands[_c] && typeof cands[_c] === 'string') { uid = cands[_c]; break; }
+            }
+            /* 还是没有？把顶层键名记下来 —— 这是排查时唯一的线索 */
+            if (!uid && st && typeof st === 'object') {
+              T('结构', '拿不到 uid，顶层键=[' + Object.keys(st).join(',').slice(0, 120) + ']');
+            }
+          } catch (e) {}
           T('探测#' + (i + 1),
             st == null ? '返回 null' :
             ('类型=' + (typeof st) + ' 键=[' + Object.keys(st).slice(0, 6).join(',') + ']' +

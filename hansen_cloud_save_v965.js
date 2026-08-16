@@ -723,7 +723,9 @@
     }
     return attempt(0);
   }
-  function restoreWithKey(inputKey){
+  function restoreWithKey(inputKey, silent){
+    /* v1163: silent=true 时不弹「要不要覆盖」的确认框。
+       登录后的自动同步走这条 —— 见下面 confirm 那里的说明。 */
     _restoring = true;                    /* v1154: 上闸 —— 恢复期间禁止上传 */
     var _done = function (r) { _restoring = false; return r; };
     var _fail = function (e) { _restoring = false; throw e; };
@@ -732,9 +734,29 @@
         throw new Error('备份模块不可用');
       var parsed = HansenBackup.parse(got.code);
       var when = got.updatedAt ? new Date(got.updatedAt).toLocaleString() : '未知时间';
-      var msg = '找到云端存档（上传于 '+when+'，版本 v'+(parsed && parsed.appVersion || '?')+'）。\n\n'
-              + '恢复会用它覆盖本机当前进度，确定吗？';
-      if(!window.confirm(msg)) return { ok:false, reason:'cancelled' };
+      /* 🔴v1163（BAT MAN 明确要求）：**登录后不许再问，直接用云端覆盖本机。**
+
+         他的原话：「每次我登录后 不要再显示这个画面 直接云端的内容 覆盖本地」。
+
+         而这个确认框会在**两条路**上弹出来：
+           · 用户主动点「从云端恢复进度」—— 这时问一句是合理的
+           · **登录后的自动同步** —— 这时问就是骚扰
+
+         v1158 我改过 syncOnLogin 让它自动选云端，
+         但那一层最终还是调到这里，**又被这个 confirm 拦住了** ——
+         所以用户每次登录还是看到这个框。
+
+         > 一个"要不要覆盖"的确认，
+         > **只该在用户自己发起时问**。
+         > 系统按规则自动做的事，问了他也没有别的选择。
+
+         加 silent 参数：自动路径传 true，跳过确认。
+         主动点按钮那条路不传，行为不变。 */
+      if (!silent) {
+        var msg = '找到云端存档（上传于 '+when+'，版本 v'+(parsed && parsed.appVersion || '?')+'）。\n\n'
+                + '恢复会用它覆盖本机当前进度，确定吗？';
+        if(!window.confirm(msg)) return { ok:false, reason:'cancelled' };
+      }
       var r;
       try{ r = HansenBackup.restore(parsed); }
       catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名

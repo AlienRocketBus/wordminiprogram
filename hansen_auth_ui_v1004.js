@@ -243,7 +243,10 @@
             pickProgress(L, cloudWhen, function (keepCloud) {
               if (keepCloud === null) return;          /* 用户选了"先不弄" */
             if (keepCloud) {
-              CS.restoreWithKey(CS.ensureKey())
+              /* v1163: 用户在上一步已经选了「留云端」——
+                 这里再弹一次「确定覆盖吗」就是问第二遍。
+                 > 同一件事不该问两次；第二次只会让人以为出了什么问题。 */
+              CS.restoreWithKey(CS.ensureKey(), true)
                 .then(function(){ msg('已恢复云端进度，正在载入…', 'ok');
                   setTimeout(function(){ try{ location.reload(); }catch(e){} }, 1200); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });

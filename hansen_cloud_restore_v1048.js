@@ -104,7 +104,7 @@
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
     if (!signedIn())
       return Promise.resolve({ ok: false, reason: 'not-signed-in' });
-    return cs.restoreWithKey(cs.ensureKey()).then(function (r) {
+    return cs.restoreWithKey(cs.ensureKey(), true).then(function (r) {
       if (r && r.ok) {
         if (opts.silent !== true) {
           try { alert('已从云端找回你的进度，页面即将重新载入。'); } catch (e) {}
