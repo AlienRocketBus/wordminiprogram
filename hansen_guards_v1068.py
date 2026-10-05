@@ -3714,6 +3714,39 @@ def guard_audio_lock_intact():
     except Exception:
         pass
 
+
+def guard_handoff_current():
+    """交接文件必须跟上当前版本。
+
+    ═══ 为什么有这道守卫（v1163 后加）═══
+
+    仓库里原来的交接文件 `对话交接_CLAUDE_HANDOFF.md` **停在 v909** ——
+    而项目已经到了 v1163，**落后 250 多版**，没有任何机制提醒。
+    新对话的 Claude 读到它，会以为环境 ID、版本号、规矩都还是老的。
+
+    > 一份「给下一个人看」的文件，如果没人逼着更新，一定会烂。
+
+    `交接_必读_给下一个对话.md` 第 1 行有一个机器可读的交接版本标记。
+    判据：标记必须存在，且不能落后当前 VERSION 超过 3 版。
+    """
+    doc = _read('交接_必读_给下一个对话.md') or ''
+    if not doc:
+        bad('交接文件要跟上', '缺少 交接_必读_给下一个对话.md —— 下一个对话将无从接手')
+        return
+    m = re.search(r'<!--\s*交接版本:\s*(\d+)\s*-->', doc)
+    if not m:
+        bad('交接文件要跟上', '交接文件第 1 行的交接版本标记丢了 —— 没法判断它是不是过时了')
+        return
+    try:
+        cur = int((_read('VERSION') or '0').strip())
+    except Exception:
+        return
+    if cur - int(m.group(1)) > 3:
+        bad('交接文件要跟上',
+            '交接文件停在 v%s，当前已 v%d —— 落后 %d 版。'
+            '发布新版时要更新它的第 1 行和「当前状态」那一节'
+            % (m.group(1), cur, cur - int(m.group(1))))
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -3830,6 +3863,7 @@ GUARDS = [
     ('_app 是异步的', guard_app_is_async),
     ('别绑两次', guard_no_double_binding),
     ('音频清单完整', guard_audio_lock_intact),
+    ('交接文件要跟上', guard_handoff_current),
 ]
 
 

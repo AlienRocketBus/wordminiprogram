@@ -852,6 +852,15 @@ def _inj_audio_lock(s):
     return s[:i + 1] + ver + s[i + 1:]
 
 
+
+def _inj_handoff_stale(s):
+    """把交接文件的版本标记改成很老的版本 —— 模拟交接文件烂在 v909 那种情况。"""
+    import re as _re
+    if not _re.search(r'<!--\s*交接版本:\s*\d+\s*-->', s):
+        return None
+    return _re.sub(r'(<!--\s*交接版本:\s*)\d+', r'\g<1>1000', s, count=1)
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -945,6 +954,7 @@ CASES = [
     ('_app 是异步的', 'hansen_pk_room_v1065.js',     _inj_app_sync),
     ('别绑两次', 'spelling_pk.html',            _inj_double_bind),
     ('音频清单完整', 'hansen_audio_lock.json',      _inj_audio_lock),
+    ('交接文件要跟上', '交接_必读_给下一个对话.md', _inj_handoff_stale),
 ]
 
 
