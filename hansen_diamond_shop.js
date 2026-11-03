@@ -284,7 +284,10 @@
     var data=_read();
     var h='';
     h+='<div class="dia-bal">💎 我的钻石：<b>'+gems+'</b></div>';
-    h+='<div class="dia-tip">钻石来自 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。</div>';
+    /* v1165: 孩子看得懂的话；精确的来源清单收进「规则」里给家长看（以前满屏 focused Bee / gem1 / 旧新词位） */
+    h+='<div class="dia-tip">💎 钻石怎么来：在拼写蜂里认真拼对单词（点亮知识结晶）、打败 Boss、完成成就。'+
+       '<details class="dia-rules" style="margin-top:4px"><summary style="cursor:pointer;opacity:.85">规则</summary>'+
+       '钻石只来自：聚焦拼写蜂把单词练到 5 颗星、全岛和段位奖励、Boss 大满贯、星海女帝终战、「第一颗钻石」成就。普通拼写蜂的旧里程碑已经停用，每日签到不直接给钻石。</details></div>';
     /* 🎬 v540: 两个系列分开陈列, IMAX 史诗系列置顶(镇店之宝) */
     h+='<div class="dia-cat">🎬 IMAX 史诗主题 · 影院级动态大场面</div>';
     h+='<div class="dia-imax-tip">每款都有一个周期上演的「招牌大场面」：梦境流星雨 / 火山糖果喷发 / 闪电劈落 / 流星雨 / 花吹雪 / 鱼群巡游 / 数据光波 / 金环冲击。建议先点「试用」亲眼看 60 秒。</div>';
@@ -478,7 +481,7 @@
     var store=_readState();if(!store.ok){shopToast('主题存档暂时无法核验，本次未扣钻石');return;}if(store.value.owned[id]){window.__hsnDiaEquip(id);return;}
     var beforeState=_walletState({type:'diamond'}),before=beforeState.ok?beforeState.value:NaN;
     if(!beforeState.ok){shopToast('钻石余额暂时无法核验，本次未扣钻石');return;}
-    if(before < it.price){ shopToast('钻石不够啦！可通过 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就获得；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。'); return; }
+    if(before < it.price){ shopToast('钻石不够啦！在拼写蜂里认真拼对单词、打败 Boss、完成成就，都能得到钻石。'); return; }
     // 确认
     if(!confirm('用 '+it.price+' 颗钻石购买「'+it.name+'」主题？')) return;
     var txid=_beginPurchase('diamond',id,it.price,before);
