@@ -333,7 +333,7 @@
     try{
       var HC = window.HansenCanonical;
       if(!HC || typeof HC.read !== 'function') return out;
-      var st = HC.read();
+      var st = (typeof HC.readRO === 'function') ? HC.readRO() : HC.read();   // v1165 只读，不复制整份账本
       var islands = (st && st.islands && typeof st.islands === 'object') ? st.islands : {};
       var today = dayNum(ymd());
       var curId = '';

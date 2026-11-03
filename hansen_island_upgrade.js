@@ -339,13 +339,23 @@
       if(!o||o.day!==day)o={day:day,learned:false,boss:false,healthy:false};return o;
     }
     function noteDaily(field){var o=readDaily();o[field]=true;try{localStorage.setItem('hansen_ach_daily_v942',JSON.stringify(o));}catch(e){}return o;}
+    /* v1165: 每答一题 checkAch 都要把 27 个岛存档各解析一遍（以前还解析两遍）。存档原文没变就用上次解析的结果
+       （浏览器 getItem 对没改过的值给同一个字符串，比对瞬间完成）；只读，绝不改它。 */
+    var _saveParse=Object.create(null);
+    function parsedSave(k){
+      var raw=localStorage.getItem(k);if(raw===null){delete _saveParse[k];return null;}
+      var c=_saveParse[k];if(c&&c.raw===raw)return c.val;
+      var v=null;try{v=JSON.parse(raw);}catch(e){v=null;}
+      _saveParse[k]={raw:raw,val:v};return v;
+    }
+    window.__hsnParsedSave=parsedSave;
     function globalModes(){
       var played={},counts={},current=detectIslandKey();
       function take(s){if(!s||typeof s!=='object')return;var st=s.stats||{};(Array.isArray(st.modesPlayed)?st.modesPlayed:[]).forEach(function(x){if(typeof x==='string')played[x]=1;});var gc=st.gameCounts||{};Object.keys(gc).forEach(function(k){var n=Number(gc[k]);if(isFinite(n)&&n>0)counts[k]=(counts[k]||0)+Math.floor(n);});}
-      try{/* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk3=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk3.length;i++){var k=_lsk3[i];if(!k||!/^wordIsland/.test(k)||/_bak$|_backup$|_tmp$/i.test(k)||k===current)continue;try{take(JSON.parse(localStorage.getItem(k)||'null'));}catch(e){}}}catch(e){}
+      try{/* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk3=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk3.length;i++){var k=_lsk3[i];if(!k||!/^wordIsland/.test(k)||/_bak$|_backup$|_tmp$/i.test(k)||k===current)continue;try{take(parsedSave(k));}catch(e){}}}catch(e){}
       take(S);var max=0;Object.keys(counts).forEach(function(k){max=Math.max(max,counts[k]);});return {played:Object.keys(played),counts:counts,max:max};
     }
-    function wrongTotal(HC){var n=0;try{if(HC){var st=HC.read();HC.islands.forEach(function(i){var w=st.islands[i.id].wrongs||{};Object.keys(w).forEach(function(k){n+=Math.max(0,Number(w[k])||0);});});}else n=Object.keys(S.wrongs||{}).length;}catch(e){}if(n>0)try{localStorage.setItem('hansen_wrong_seen_v942','1');}catch(e){}return n;}
+    function wrongTotal(HC){var n=0;try{if(HC){var st=HC.readRO?HC.readRO():HC.read();/* v1165 只读 */HC.islands.forEach(function(i){var w=st.islands[i.id].wrongs||{};Object.keys(w).forEach(function(k){n+=Math.max(0,Number(w[k])||0);});});}else n=Object.keys(S.wrongs||{}).length;}catch(e){}if(n>0)try{localStorage.setItem('hansen_wrong_seen_v942','1');}catch(e){}return n;}
     function maxGameCount(){return globalModes().max;}
     function allWordsTotal(HC){var t=HC&&HC.TOTAL_WORDS;return (typeof t==='number'&&t>600)?t:952;}
 
@@ -378,7 +388,7 @@
         var gemNow=(window.HansenGems&&HansenGems.get())||0; if(gemNow>=1)unlockAch('gem1');
         if(S.pet&&S.pet.picked)unlockAch('petHatch');
         var gm=globalModes(),mp=gm.played;if(mp.length>=1)unlockAch('mode1'); if(mp.length>=11)unlockAch('allModes');
-        if(maxGameCount()>=10)unlockAch('modeHigh');
+        if(gm.max>=10)unlockAch('modeHigh');   // v1165 同一次判定不再把所有岛存档再解析一遍
         try{if(typeof getPetStage==='function'&&window.PET_STAGES&&getPetStage()>=PET_STAGES.length-1)unlockAch('petFinal');}catch(e){}
         if(window.HansenCardbook){
           var ownedC=HansenCardbook.ownedCount();
