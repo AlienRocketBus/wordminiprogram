@@ -3979,6 +3979,7 @@ document.querySelectorAll('.island').forEach(el=>{
     'wordIslandLand7':    {file:'island_land7.html', emoji:'⛵', short:'万邦港城'},
     'wordIslandLand8':    {file:'island_land8.html', emoji:'🌋', short:'星火火山口'}
   };
+  window.HSN_ISLAND_META = ISLAND_META;   /* 🔴v1165 预取「最近玩过的岛」按这张表找文件名（以前按存档名拼，8 个岛全是 404） */
   
   // 决定最近学习的岛: 优先用 lastIslandKey, 否则扫描各岛 localStorage 找最后活动时间
   function findRecentIsland(){
@@ -4106,6 +4107,11 @@ document.querySelectorAll('.island').forEach(el=>{
   function _docStamp(doc){
     try{ var s = doc.querySelector('script[src*="hansen_version_watch"]') || doc.querySelector('script[src*="?v="]'); var m = s && s.getAttribute('src').match(/[?&]v=(\d+)/); return m ? m[1] : ''; }catch(e){ return ''; }
   }
+  /* 🔴v1165 岛框打开的地址和预取/预热的地址一字不差（都带 ?v=版本号）：以前预取下的是 island_x.html?v=…、
+     岛框打开的是 island_x.html，两个地址，预取的那份永远用不上，每次进岛都白多下一份岛页 */
+  var HSN_BUILD = _docStamp(document);
+  window.HSN_BUILD = HSN_BUILD;
+  function _islandUrl(file){ return HSN_BUILD ? (file + '?v=' + HSN_BUILD) : file; }
   function openIsland(file, fromHistory){
     if(!_validIslandFile(file)) return;
     try{ for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ localStorage.setItem('lastIslandKey', k); localStorage.setItem('lastIslandTime', String(Date.now())); break; } } }catch(e){}
@@ -4195,12 +4201,12 @@ document.querySelectorAll('.island').forEach(el=>{
         _nf.name = 'hsnIsland_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
         _nf.style.transition = 'none'; _nf.style.opacity = '0';
         _nf.onload = function(){ _nf.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
-        _nf.src = file;
+        _nf.src = _islandUrl(file);
         frame.parentNode.replaceChild(_nf, frame);
         frame = _nf;
       }catch(e){
         frame.onload = function(){ frame.onload = null; _revealIsland(); };
-        try{ frame.contentWindow.location.replace(file); }catch(e1){ try{ frame.src = file; }catch(e2){} }
+        try{ frame.contentWindow.location.replace(_islandUrl(file)); }catch(e1){ try{ frame.src = _islandUrl(file); }catch(e2){} }
       }
       setTimeout(_pollReady, 40);
       setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */

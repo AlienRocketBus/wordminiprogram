@@ -368,7 +368,8 @@
       if(!userIntent && !landMapLikely()) return null;
       if(navigator.onLine===false || document.visibilityState==='hidden' || document.visibilityState==='prerender' || document.hidden) return null;
       window.__hansenLandMapWarmAttempted=true;  // 发请求前先上锁：失败也不在轮询中狂重试
-      var p=fetch('land_map.html',{cache:'force-cache',credentials:'same-origin'}).catch(function(){ return null; });
+      /* v1165 和首页外壳打开大陆地图的地址一字不差（带 ?v=），预热的那份进地图时才用得上 */
+      var p=fetch('land_map.html'+'?v=1163',{cache:'force-cache',credentials:'same-origin'}).catch(function(){ return null; });
       window.__hansenLandMapWarmPromise=p;
       return p;
     }catch(e){ return null; }
