@@ -50,16 +50,25 @@ try {
       await page.goto(BASE + file, { waitUntil: 'load' });
       await sleep(1200);
       const r = await page.evaluate(() => {
-        const x = document.getElementById('closePg'), b = document.getElementById('hsnBackHome');
-        const xr = x && x.getBoundingClientRect(), br = b && b.getBoundingClientRect();
+        const x = document.getElementById('closePg'), b = document.getElementById('hsnBackHome'), h = document.querySelector('header h1');
+        const xr = x && x.getBoundingClientRect(), br = b && b.getBoundingClientRect(), hr = h && h.getBoundingClientRect();
+        const hit = (p, q) => !!(p && q && p.width && q.width && p.left < q.right && q.left < p.right && p.top < q.bottom && q.top < p.bottom);
         return { sw: document.documentElement.scrollWidth, iw: innerWidth, vv: window.visualViewport ? Math.round(visualViewport.width) : innerWidth,
-          x: xr ? { l: xr.left, r: xr.right } : null, back: br && br.width ? { t: b.textContent, l: br.left, r: br.right, h: br.height, x: br.left + br.width / 2, y: br.top + br.height / 2 } : null };
+          x: xr ? { l: xr.left, r: xr.right } : null, back: br && br.width ? { t: b.textContent, l: br.left, r: br.right, h: br.height, x: br.left + br.width / 2, y: br.top + br.height / 2 } : null,
+          covers: hit(br, hr) || hit(br, document.getElementById('viewBtn') && document.getElementById('viewBtn').getBoundingClientRect()) };
       });
       /* 内容比屏幕宽时手机浏览器会把整页缩小（布局宽度变成内容宽度），所以要看布局宽度是不是还等于手机宽 */
       ok(r.iw === W && r.sw <= W, `页面不比屏幕宽（手机 ${W}px，布局 ${r.iw}px，内容 ${r.sw}px）`);
       if (file === 'season_showcase.html') ok(r.x && r.x.l >= 0 && r.x.r <= W, `× 完整露出来（${r.x && Math.round(r.x.l)}~${r.x && Math.round(r.x.r)}）`);
       ok(r.back && /回地图/.test(r.back.t) && r.back.l >= 0 && r.back.r <= W && r.back.h >= 40, `左上有「‹ 回地图」（${r.back && r.back.t}）`);
+      ok(r.back && !r.covers, '「‹ 回地图」不盖住标题和 👁 按钮');
       if (r.back) {
+        /* 👁 切到截图模式（标题藏起来）：「‹ 回地图」也藏起来；再切回来又出现 */
+        const vis = () => page.evaluate(() => { const b = document.getElementById('hsnBackHome'); return !!b && getComputedStyle(b).display !== 'none'; });
+        await page.click('#viewBtn'); await sleep(200);
+        const hidden = !(await vis());
+        await page.click('#viewBtn'); await sleep(150); await page.click('#viewBtn'); await sleep(200);
+        ok(hidden && await vis(), '切到只看人物（截图当壁纸）时「‹ 回地图」藏起来，切回来又出现');
         await page.touchscreen.tap(r.back.x, r.back.y);
         await page.waitForURL(/index\.html/, { timeout: 8000 }).catch(() => {});
         ok(/index\.html/.test(page.url()), `点了回到首页（${page.url().replace(BASE, '')}）`);
