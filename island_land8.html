@@ -3163,35 +3163,39 @@ const DAILY_QUEST_POOL=[
 {id:'learn3',icon:'📚',title:'学会 3 个新单词',goal:3,type:'learn',reward:{xp:20,gems:2}},
 {id:'learn5',icon:'📖',title:'学会 5 个新单词',goal:5,type:'learn',reward:{xp:30,gems:3}},
 {id:'learn10',icon:'🎓',title:'学会 10 个新单词',goal:10,type:'learn',reward:{xp:60,gems:6}},
+// ==== 复习单词 (3) ====
+{id:'review3',icon:'🔄',title:'复习单词 · 巩固 3 个',goal:3,type:'review',reward:{xp:25,gems:3}},
+{id:'review6',icon:'🧠',title:'复习单词 · 巩固 6 个',goal:6,type:'review',reward:{xp:50,gems:6}},
+{id:'reviewClear',icon:'✨',title:'复习单词 · 清空今日复习',goal:1,type:'reviewClear',reward:{xp:70,gems:9}},
 // ==== Boss & 综合 (4) ====
 {id:'boss1',icon:'🗡️',title:'击败 1 次挑战',goal:1,type:'boss',reward:{xp:25,gems:3}},
 {id:'boss3',icon:'🐉',title:'击败 3 次 Boss',goal:3,type:'boss',reward:{xp:70,gems:8}},
 {id:'correct20',icon:'✅',title:'累计答对 20 题',goal:20,type:'correct',reward:{xp:30,gems:3}},
 {id:'correct50',icon:'💯',title:'累计答对 50 题',goal:50,type:'correct',reward:{xp:80,gems:8}},
 // ==== 听音 (3) ====
-{id:'listen10',icon:'🔊',title:'听音模式答对 10 次',goal:10,type:'listen',reward:{xp:25,gems:3}},
-{id:'listen20',icon:'🎧',title:'听音模式答对 20 次',goal:20,type:'listen',reward:{xp:60,gems:6}},
-{id:'listen40',icon:'📻',title:'听音模式答对 40 次',goal:40,type:'listen',reward:{xp:130,gems:14}},
+{id:'listen10',icon:'🔊',title:'听音辨义 · 答对 10 次',goal:10,type:'listen',reward:{xp:25,gems:3}},
+{id:'listen20',icon:'🎧',title:'听音辨义 · 答对 20 次',goal:20,type:'listen',reward:{xp:60,gems:6}},
+{id:'listen40',icon:'📻',title:'听音辨义 · 答对 40 次',goal:40,type:'listen',reward:{xp:130,gems:14}},
 // ==== 完形填空 (3) ====
-{id:'cloze5',icon:'📝',title:'填空答对 5 题',goal:5,type:'cloze',reward:{xp:25,gems:3}},
-{id:'cloze10',icon:'✍️',title:'填空答对 10 题',goal:10,type:'cloze',reward:{xp:55,gems:6}},
-{id:'cloze20',icon:'📋',title:'填空答对 20 题',goal:20,type:'cloze',reward:{xp:120,gems:13}},
+{id:'cloze5',icon:'📝',title:'完形填空 · 答对 5 题',goal:5,type:'cloze',reward:{xp:25,gems:3}},
+{id:'cloze10',icon:'✍️',title:'完形填空 · 答对 10 题',goal:10,type:'cloze',reward:{xp:55,gems:6}},
+{id:'cloze20',icon:'📋',title:'完形填空 · 答对 20 题',goal:20,type:'cloze',reward:{xp:120,gems:13}},
 // ==== 🌟🌟🌟 拼词 (重头戏, 7 档梯度) ====
-{id:'scramble1',icon:'🔤',title:'🌟 拼词游戏 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50,gems:6},isSpelling:true},
-{id:'scramble2',icon:'⭐',title:'🌟 拼词游戏 · 完成 2 轮',goal:2,type:'scramble',reward:{xp:90,gems:11},isSpelling:true},
+{id:'scramble1',icon:'🔤',title:'🌟 字母拼拼乐 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50,gems:6},isSpelling:true},
+{id:'scramble2',icon:'⭐',title:'🌟 字母拼拼乐 · 完成 2 轮',goal:2,type:'scramble',reward:{xp:90,gems:11},isSpelling:true},
 {id:'scramble3',icon:'⭐',title:'🌟🌟 拼词大师 · 完成 3 轮',goal:3,type:'scramble',reward:{xp:120,gems:15},isSpelling:true},
 {id:'scramble5',icon:'🏆',title:'🌟🌟🌟 拼词冠军 · 完成 5 轮',goal:5,type:'scramble',reward:{xp:200,gems:25},isSpelling:true},
 {id:'scramble7',icon:'👑',title:'🌟🌟🌟🌟 拼词之王 · 完成 7 轮',goal:7,type:'scramble',reward:{xp:300,gems:38},isSpelling:true},
 {id:'scramble10',icon:'💎',title:'🌟🌟🌟🌟🌟 拼词传奇 · 完成 10 轮',goal:10,type:'scramble',reward:{xp:450,gems:55},isSpelling:true},
 {id:'scramble15',icon:'🌌',title:'🚀 拼词宇宙 · 完成 15 轮',goal:15,type:'scramble',reward:{xp:700,gems:90},isSpelling:true},
 // ==== ⌨️ 打字 (4 档梯度, 拼写类) ====
-{id:'type5',icon:'⌨️',title:'⌨️ 打字模式完成 5 词',goal:5,type:'type',reward:{xp:30,gems:3},isSpelling:true},
-{id:'type15',icon:'⚡',title:'⌨️ 打字模式完成 15 词',goal:15,type:'type',reward:{xp:80,gems:9},isSpelling:true},
+{id:'type5',icon:'⌨️',title:'⌨️ 打字大师 · 完成 5 词',goal:5,type:'type',reward:{xp:30,gems:3},isSpelling:true},
+{id:'type15',icon:'⚡',title:'⌨️ 打字大师 · 完成 15 词',goal:15,type:'type',reward:{xp:80,gems:9},isSpelling:true},
 {id:'type30',icon:'🔥',title:'⌨️⌨️ 打字飞人 · 完成 30 词',goal:30,type:'type',reward:{xp:160,gems:20},isSpelling:true},
 {id:'type50',icon:'💨',title:'⌨️⌨️⌨️ 打字闪电 · 完成 50 词',goal:50,type:'type',reward:{xp:280,gems:36},isSpelling:true},
 // ==== 翻牌 (2) ====
-{id:'match1',icon:'🃏',title:'完成 1 次翻牌游戏',goal:1,type:'match',reward:{xp:20,gems:2}},
-{id:'match3',icon:'🎴',title:'完成 3 次翻牌游戏',goal:3,type:'match',reward:{xp:65,gems:7}},
+{id:'match1',icon:'🃏',title:'记忆翻牌 · 完成 1 轮',goal:1,type:'match',reward:{xp:20,gems:2}},
+{id:'match3',icon:'🎴',title:'记忆翻牌 · 完成 3 轮',goal:3,type:'match',reward:{xp:65,gems:7}},
 // ==== 打地鼠 (3) ====
 {id:'moles1',icon:'🎯',title:'打地鼠 · 完成 1 轮',goal:1,type:'moles',reward:{xp:30,gems:4}},
 {id:'moles3',icon:'🎪',title:'打地鼠 · 完成 3 轮',goal:3,type:'moles',reward:{xp:80,gems:10}},
@@ -3205,23 +3209,34 @@ const DAILY_QUEST_POOL=[
 {id:'eagle3',icon:'🦅',title:'火眼金睛 · 完成 3 轮',goal:3,type:'eagle',reward:{xp:80,gems:10}},
 {id:'eagle5',icon:'🪶',title:'火眼金睛 · 完成 5 轮',goal:5,type:'eagle',reward:{xp:150,gems:18}},
 // ==== 泡泡 (3) ====
-{id:'bubble30',icon:'🫧',title:'泡泡模式得 30 分',goal:30,type:'bubble',reward:{xp:20,gems:2}},
-{id:'bubble60',icon:'💧',title:'泡泡模式得 60 分',goal:60,type:'bubble',reward:{xp:60,gems:7}},
-{id:'bubble100',icon:'🌊',title:'泡泡模式得 100 分',goal:100,type:'bubble',reward:{xp:120,gems:14}},
+{id:'bubble30',icon:'🫧',title:'泡泡大作战 · 得 30 分',goal:30,type:'bubble',reward:{xp:20,gems:2}},
+{id:'bubble60',icon:'💧',title:'泡泡大作战 · 得 60 分',goal:60,type:'bubble',reward:{xp:60,gems:7}},
+{id:'bubble100',icon:'🌊',title:'泡泡大作战 · 得 100 分',goal:100,type:'bubble',reward:{xp:120,gems:14}},
 // ==== 极速 (2) ====
-{id:'speed200',icon:'⚡',title:'极速模式得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
-{id:'speed500',icon:'⚡⚡',title:'极速模式得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
+{id:'speed200',icon:'⚡',title:'极速60秒 · 得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
+{id:'speed500',icon:'⚡⚡',title:'极速60秒 · 得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
 ];
-function __hsnQuestDefinition(id){return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
+function __hsnQuestDefinition(id){
+  /* 🔴v1032: 任务定义的真源是 hansen_quest_global.js 的 POOL(v1000/v1001 新增了
+     review3/review6/reviewClear/sbWin1/sbWin2 等)。template 自带的表不认识它们，
+     若在此返回 null，下游 __hsnNormalizeQuests 会把**整份任务清空** → 面板显示「暂无任务」。
+     所以先向全局模块问一次。 */
+  try {
+    var _G = window.HansenQuestGlobal;
+    if (_G && typeof _G.definition === 'function') {
+      var _d = _G.definition(id);
+      if (_d) return _d;
+    }
+  } catch (e) {}return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
 function __hsnNormalizeQuests(raw){
   var out={day:'',list:[],allDay:''},valid=true,seen={};
   if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
   if(typeof raw.day==='string'&&/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(raw.day))out.day=raw.day;
   if(typeof raw.allDay==='string'&&/^(?:|\d{4}-\d{1,2}-\d{1,2})$/.test(raw.allDay))out.allDay=raw.allDay;
-  if(!Array.isArray(raw.list)||raw.list.length>7)return out;
+  if(!Array.isArray(raw.list)||raw.list.length>12)return out;/*\U0001f534v1000: 7\u21924212\u4efb\u52a1*/
   raw.list.forEach(function(saved){
     if(!saved||typeof saved!=='object'||Array.isArray(saved)||typeof saved.id!=='string'||seen[saved.id]){valid=false;return;}
-    var def=__hsnQuestDefinition(saved.id);if(!def){valid=false;return;}seen[saved.id]=1;
+    var def=__hsnQuestDefinition(saved.id);if(!def){return;}/*🔴v1032: 认不出就跳过这一条, 不再 valid=false 清空整份(与 v1018 同型教训)*/seen[saved.id]=1;
     var progress=saved.progress,claimed=saved.claimed;
     if(typeof progress!=='number'||!isFinite(progress)||Math.floor(progress)!==progress||progress<0||progress>def.goal||typeof claimed!=='boolean'||(claimed&&progress<def.goal)){valid=false;return;}
     out.list.push(Object.assign({},def,{reward:Object.assign({},def.reward),progress:progress,claimed:claimed}));
@@ -3231,15 +3246,24 @@ function __hsnNormalizeQuests(raw){
 }
 function rollDailyQuests(){const t=today();S.quests=__hsnNormalizeQuests(S.quests);if(S.quests.day===t&&S.quests.list.length)return;
 const pool=DAILY_QUEST_POOL;
-// 抽取策略: 每天 7 个任务, 类型不重复(7 种不同活动, 更不腻/覆盖更多玩法), 拼写重头戏含 1 拼词+1 打字
+// \U0001f534v1000 \u79d1\u5b66\u91cd\u8bbe: \u6bcf\u5929 12 \u4e2a\u4efb\u52a1 = 3 \u56fa\u5b9a\u57fa\u77f3 + 9 \u968f\u673a
+// \u57fa\u77f3: \u5b66\u65b0\u8bcd + \u590d\u4e60\u5355\u8bcd + \u6253Boss (\u7528\u6237\u660e\u786e\u8981\u6c42\u6bcf\u5929\u5fc5\u6709)
 const _noNew=(S.learned&&allW&&S.learned.length>=allW.length);
 const usedTypes=new Set();const picked=[];
 const byType=(ty)=>pool.filter(q=>q.type===ty).slice().sort(()=>Math.random()-.5);
-const pickOne=(arr)=>{for(const q of arr){if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);return;}}};
-pickOne(byType('scramble'));pickOne(byType('type'));
+const pickFrom=(types)=>{for(const ty of types){const arr=byType(ty);for(const q of arr){if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);return true;}}}return false;};
+// \u2605 \u57fa\u77f3 1: \u5b66\u65b0\u8bcd(\u5df2\u5b66\u5b8c\u5219\u8df3\u8fc7\uff0c\u6539\u7531\u968f\u673a\u8865\u4f4d)
+if(!_noNew)pickFrom(['learn']);
+// \u2605 \u57fa\u77f3 2: \u590d\u4e60\u5355\u8bcd(review \u4e0e reviewClear \u5747\u5c5e\u590d\u4e60\uff0c\u4efb\u9009\u4e00\u6863)
+{const rv=pool.filter(q=>q.type==='review'||q.type==='reviewClear').slice().sort(()=>Math.random()-.5)[0];
+ if(rv&&!usedTypes.has(rv.type)){usedTypes.add(rv.type);picked.push(rv);}}
+// \u2605 \u57fa\u77f3 3: \u6253Boss(\u4ece\u5934\u5230\u5c3e\u6253\u4e00\u8f6e)
+pickFrom(['boss']);
+// \u5176\u4f59 9 \u4e2a: \u7c7b\u578b\u4e0d\u91cd\u590d\u968f\u673a\uff0c\u62fc\u5199\u91cd\u5934\u620f\u4f18\u5148\u5404\u62bd 1
+pickFrom(['scramble']);pickFrom(['type']);
 const others=pool.filter(q=>!usedTypes.has(q.type)&&!(_noNew&&q.type==='learn')).slice().sort(()=>Math.random()-.5);
-for(const q of others){if(picked.length>=7)break;if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);}}
-S.quests.list=picked.slice(0,7).sort(()=>Math.random()-.5).map(q=>({...q,progress:0,claimed:false}));
+for(const q of others){if(picked.length>=12)break;if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);}}
+S.quests.list=picked.slice(0,12).sort(()=>Math.random()-.5).map(q=>({...q,progress:0,claimed:false}));
 S.quests.day=t;save()}
 
 function progressQuest(type,amount){S.quests=__hsnNormalizeQuests(S.quests);S.quests.list.forEach(q=>{if(q.type===type&&!q.claimed){q.progress=Math.min(q.goal,q.progress+(amount||1))}});save();updateQuestBadge()}
@@ -5250,6 +5274,7 @@ function molesClick(i){
     if(molesLives>0){__hmlLesson('moles',allW.indexOf(molesTarget),__hsnLater('moles','molesScreen',startMolesWave),900);}
     if(molesLives<=0){
       molesActive=false;__hmlLesson('moles',allW.indexOf(molesTarget),function(){});__hmlAttach('moles','molesContent');
+      if(molesScore>0)progressQuest('moles',molesScore);  /* 🔴v1165 命用完那一局的得分也算任务 */
       if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
       var molesPrevBestF=molesBestGet(molesLevel);
       var molesIsNewRecordF=molesBestSet(molesLevel,molesScore);
@@ -5292,7 +5317,7 @@ function molesComplete(){
   if(molesScore>=50)unlockAch('moles50');
   const L=MOLES_LEVELS[molesLevel]||MOLES_LEVELS.easy;
   addXP(L.gemBonus);bigConfetti();
-  progressQuest('moles',1);if(!S.stats.molesCleared)S.stats.molesCleared=0;S.stats.molesCleared++;
+  progressQuest('moles',(typeof molesScore==='number'?molesScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.molesCleared)S.stats.molesCleared=0;S.stats.molesCleared++;
   if(S.stats.molesCleared>=10)unlockAch('molesMaster');
   petTaskComplete('🎯 打地鼠 '+L.name,L.petXp,'moles');
   save();
@@ -5679,6 +5704,7 @@ function spawnFishLoop(){
 
 function fishGameOver(){
   fishActive=false;__hmlAttach('fish','fishContent');
+  if(fishScore>0)progressQuest('fish',fishScore);  /* 🔴v1165 命用完那一局的得分也算任务 */
   if(fishSpawnTimer){clearTimeout(fishSpawnTimer);fishSpawnTimer=null}
   // 清掉池塘里剩余的鱼
   var pond=document.getElementById('fishPond');
@@ -5734,7 +5760,7 @@ function fishComplete(){
   if(fishScore>=50)unlockAch('fish50');
   const L=FISH_LEVELS[fishLevel]||FISH_LEVELS.easy;
   addXP(L.gemBonus);bigConfetti();
-  progressQuest('fish',1);if(!S.stats.fishCleared)S.stats.fishCleared=0;S.stats.fishCleared++;
+  progressQuest('fish',(typeof fishScore==='number'?fishScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.fishCleared)S.stats.fishCleared=0;S.stats.fishCleared++;
   if(S.stats.fishCleared>=10)unlockAch('fishMaster');
   petTaskComplete('🎣 钓鱼大师 '+L.name,L.petXp,'fish');
   save();
@@ -6574,7 +6600,7 @@ function matchComplete(){let msg='🎉 完成！';let bonus=0;if(matchMistakes==
 else if(matchMistakes<=3){msg='🌟 极佳记忆！';bonus=10;unlockAch('match0')}
 else if(matchMistakes<=12){msg='👍 很棒！';bonus=5;unlockAch('match0')}else{bonus=3}
 bumpGameCount('match');
-addXP(bonus);progressQuest('match',1);save();
+addXP(bonus);progressQuest('match',(matchMatched|0)||1);/*🔴v1001 含金量: 按配对成功组数（🔴v1165 matchPairs 是牌的数组，组数是 matchMatched）*/save();
 document.getElementById('matchContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:80px">🃏</div><div style="font-size:26px;font-weight:800;color:#fbbf24;margin:12px 0">'+msg+'</div><div style="font-size:14px;color:#cbd5e1">步数：'+matchMoves+' · 失误：'+matchMistakes+'</div><div style="font-size:16px;margin:10px 0;font-weight:700"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#22c55e">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span></div><button class="game-btn green" onclick="startMatch()" style="margin-top:12px">🔄 再来一轮</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 回主页</button></div>';
 bigConfetti()}
 
@@ -7359,6 +7385,11 @@ if(newGraduationCount>0)S.stats.reviewToday=Math.min(__HSN_MAX_STAT_COUNT,__hsnS
 if(correctCount>0)try{if(typeof bumpGameCount==='function')bumpGameCount('review')}catch(e){}
 reviewState.settled=true;reviewState.settling=false;
 save();
+/* \U0001f534v1000: \u590d\u4e60\u4efb\u52a1\u4e0a\u62a5 \u2014\u2014 \u672c\u8f6e\u590d\u4e60\u8bcd\u6570\u8ba1\u5165 review; \u82e5\u4eca\u65e5\u590d\u4e60\u5df2\u6e05\u7a7a\u5219\u89e6\u53d1 reviewClear */
+try{ if(typeof progressQuest==='function'&&totalCount>0){progressQuest('review',correctCount);/*🔴v1001 含金量: 只计答对数, 答错不算*/
+     /* \u672c\u8f6e\u5168\u90e8\u7b54\u5bf9 = \u628a\u8fd9\u6279\u5230\u671f\u8bcd\u6e05\u5149\uff0c\u89c6\u4e3a\u5b8c\u6210"\u6e05\u7a7a\u4eca\u65e5\u590d\u4e60" */
+     if(correctCount>0&&correctCount===totalCount&&typeof setQuest==='function')setQuest('reviewClear',1);}
+}catch(e){}
 let h='<div style="text-align:center;padding:20px">';
 h+='<div style="font-size:80px;margin:10px 0;animation:petFloat 1.5s ease-in-out infinite">🎉</div>';
 h+='<div style="font-size:24px;font-weight:900;color:#fbbf24;margin:10px 0">救援任务完成!</div>';
@@ -8181,7 +8212,7 @@ function eagleComplete(){
   var eaglePrevBest=eagleBestGet(eagleLevel);
   var eagleIsNewRecord=eagleBestSet(eagleLevel,eagleScore);
   addXP(L.gemBonus);bigConfetti();
-  progressQuest('eagle',1);if(!S.stats.eagleCleared)S.stats.eagleCleared=0;S.stats.eagleCleared++;
+  progressQuest('eagle',(typeof eagleScore==='number'?eagleScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.eagleCleared)S.stats.eagleCleared=0;S.stats.eagleCleared++;
   if(S.stats.eagleCleared>=10)unlockAch('eagleMaster');
   petTaskComplete('👀 火眼金睛 '+L.name,L.petXp,'eagle');
   save();

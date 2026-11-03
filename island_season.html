@@ -5675,6 +5675,7 @@ function molesClick(i){
     if(molesLives>0){__hmlLesson('moles',allW.indexOf(molesTarget),__hsnLater('moles','molesScreen',startMolesWave),900);}
     if(molesLives<=0){
       molesActive=false;__hmlLesson('moles',allW.indexOf(molesTarget),function(){});__hmlAttach('moles','molesContent');
+      if(molesScore>0)progressQuest('moles',molesScore);  /* 🔴v1165 命用完那一局的得分也算任务 */
       if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
       var molesPrevBestF=molesBestGet(molesLevel);
       var molesIsNewRecordF=molesBestSet(molesLevel,molesScore);
@@ -6104,6 +6105,7 @@ function spawnFishLoop(){
 
 function fishGameOver(){
   fishActive=false;__hmlAttach('fish','fishContent');
+  if(fishScore>0)progressQuest('fish',fishScore);  /* 🔴v1165 命用完那一局的得分也算任务 */
   if(fishSpawnTimer){clearTimeout(fishSpawnTimer);fishSpawnTimer=null}
   // 清掉池塘里剩余的鱼
   var pond=document.getElementById('fishPond');
@@ -7001,7 +7003,7 @@ function matchComplete(){let msg='🎉 完成！';let bonus=0;if(matchMistakes==
 else if(matchMistakes<=3){msg='🌟 极佳记忆！';bonus=10;unlockAch('match0')}
 else if(matchMistakes<=12){msg='👍 很棒！';bonus=5;unlockAch('match0')}else{bonus=3}
 bumpGameCount('match');
-addXP(bonus);progressQuest('match',(typeof matchPairs==='number'?matchPairs:1));/*🔴v1001 含金量: 按配对成功组数*/save();
+addXP(bonus);progressQuest('match',(matchMatched|0)||1);/*🔴v1001 含金量: 按配对成功组数（🔴v1165 matchPairs 是牌的数组，组数是 matchMatched）*/save();
 document.getElementById('matchContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:80px">🃏</div><div style="font-size:26px;font-weight:800;color:#fbbf24;margin:12px 0">'+msg+'</div><div style="font-size:14px;color:#cbd5e1">步数：'+matchMoves+' · 失误：'+matchMistakes+'</div><div style="font-size:16px;margin:10px 0;font-weight:700"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#22c55e">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span></div><button class="game-btn green" onclick="startMatch()" style="margin-top:12px">🔄 再来一轮</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 回主页</button></div>';
 bigConfetti()}
 
