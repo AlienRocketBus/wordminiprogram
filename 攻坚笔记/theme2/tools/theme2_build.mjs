@@ -61,6 +61,11 @@ export function buildCSS(R) {
     });
     out.push(`[data-t2-theme="${t.id}"]{${body.join(';')}}`);
   }
+  // 画廊照片场景：只有装备了这个主题（<html data-t2-scene>）才会去下载这张图
+  for (const t of R.THEMES) {
+    if (!t.scene || t.scene.kind !== 'photo') continue;
+    out.push(`[data-t2-scene="${t.scene.id}"] .t2-scene{background-image:url('${t.scene.img}')}`);
+  }
   return out.join('\n') + '\n';
 }
 
