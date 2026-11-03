@@ -250,7 +250,8 @@ try {
     const { page: p3, errs: e3 } = await openIsland(ctx3, 'island_animal.html');
     const q = await p3.evaluate(async () => {
       startCloze(); startClozeLevel('easy');
-      const fits = i => { const w = allW[i]; return !!(w && w.ex && new RegExp('\\b' + w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(w.ex)); };
+      /* v1165：完形现在也会挖例句里的变形（Pigs / Cows），「出不了题」以页面自己的找空函数为准 */
+      const fits = i => { const w = allW[i]; if (typeof window.__hsnClozeMatch === 'function') return !!window.__hsnClozeMatch(w); return !!(w && w.ex && new RegExp('\\b' + w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(w.ex)); };
       let bad = CLOZE_LEVEL_IDX.easy.filter(i => i !== clozeQ.idx && !fits(i));
       let real = bad.length > 0;
       if (!real) { const j = CLOZE_LEVEL_IDX.easy.find(i => i !== clozeQ.idx); allW[j].ex = ''; bad = [j]; }   // 数据哪天改好了：造一个同样的情况

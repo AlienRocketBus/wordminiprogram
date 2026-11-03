@@ -4861,9 +4861,8 @@ function nextBossQ(){if(!bossActive)return;
       var tryIdx = bossPool.pop();
       var tryW = allW[tryIdx];
       if(tryW.ex && tryW.ex.length > 6){
-        // 验证例句确实包含目标词
-        var re = new RegExp('\\b' + tryW.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b', 'i');
-        if(re.test(tryW.ex)){
+        // 验证例句确实包含目标词（原词或变形，🔴v1165 同一个找空函数）
+        if(__hsnClozeMatch(tryW)){
           w = tryW; idx = tryIdx;
           break;
         }
@@ -4905,12 +4904,11 @@ function nextBossQ(){if(!bossActive)return;
     getOptText = function(o){return o.en};
   } else if(qType==='cloze'){
     qTypeLabel = '📝 完形填空';
-    // 挖空例句中的目标词
-    var re = new RegExp('\\b' + w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b', 'i');
-    var match = w.ex.match(re);
-    var isAtStart = match && match.index === 0;
+    // 挖空例句中的目标词（原词或变形）
+    var _cm = __hsnClozeMatch(w) || {index:0,text:''};
+    var isAtStart = _cm.index === 0;
     // 单根横线 (用 nbsp 撑宽度, border-bottom 画线)
-    prompt = w.ex.replace(re, '<span style="display:inline-block;min-width:60px;padding:0 8px;border-bottom:3px solid #fbbf24;color:#fbbf24;font-weight:900">&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    prompt = w.ex.slice(0,_cm.index) + '<span style="display:inline-block;min-width:60px;padding:0 8px;border-bottom:3px solid #fbbf24;color:#fbbf24;font-weight:900">&nbsp;&nbsp;&nbsp;&nbsp;</span>' + w.ex.slice(_cm.index+_cm.text.length);
     // sub 显示中文翻译, 让玩家理解句意 (空白处对应的中文用红色高亮)
     var cnHi = w.exCn ? window.smartHighlight(w.cn, w.exCn, w.en) : '';
     sub = cnHi ? '<span style="color:#cbd5e1;font-size:13px">' + cnHi + '</span>' : '选出填空处正确的英语单词';
@@ -4995,16 +4993,14 @@ function bossAnswer(i){const opts=document.getElementById('bossOpts');if(!opts||
     var bossQEl = document.getElementById('bossQ');
     if(bossQEl){
       var w = window._bossWord;
-      var re = new RegExp('\\b' + w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b', 'i');
-      var match = w.ex.match(re);
-      var isAtStart = match && match.index === 0;
-      var displayWord = isAtStart ? (w.en.charAt(0).toUpperCase() + w.en.slice(1)) : w.en;
+      var _cm2 = __hsnClozeMatch(w) || {index:0,text:''};
+      var displayWord = _cm2.text || w.en;   /* 🔴v1165 填回句子自己的写法（大小写、变形都不变） */
       // 颜色: 对=绿色 #22c55e, 错=红色 #ef4444
       var isCorrect = (i === correctIdx);
       var wordColor = isCorrect ? '#22c55e' : '#ef4444';
       var wordBg = isCorrect ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)';
       // 把横线 span 替换成显示单词的高亮 span
-      bossQEl.innerHTML = w.ex.replace(re, '<span style="display:inline-block;padding:0 8px;border-bottom:3px solid ' + wordColor + ';color:' + wordColor + ';background:' + wordBg + ';font-weight:900;border-radius:4px">' + displayWord + '</span>');
+      bossQEl.innerHTML = w.ex.slice(0,_cm2.index) + '<span style="display:inline-block;padding:0 8px;border-bottom:3px solid ' + wordColor + ';color:' + wordColor + ';background:' + wordBg + ';font-weight:900;border-radius:4px">' + displayWord + '</span>' + w.ex.slice(_cm2.index+_cm2.text.length);
     }
   }
   
@@ -7076,8 +7072,40 @@ const CLOZE_LEVELS={
 };
 // 把英文单词预映射成 allW 索引
 const CLOZE_LEVEL_IDX={};
+/* 🔴v1165 完形填空找空：例句里常写的是变形（eyes / cooks / tomatoes / strawberries / started / flown…）。
+   以前只认原词：这些词永远出不了题，却照样算进总数（身体岛初级全对也只显示 60%）。
+   现在先找原词，找不到再找常见变形；返回 {index,text}：句子里那个词本来的写法（大小写不变，答完原样填回）。 */
+var __HSN_CLOZE_IRREG={fly:['flew','flown','flies'],draw:['drew','drawn'],get:['got','gotten'],go:['went','gone','goes'],do:['did','done','does'],be:['is','am','are','was','were','been'],have:['has','had'],eat:['ate','eaten'],see:['saw','seen'],run:['ran'],swim:['swam','swum'],sing:['sang','sung'],write:['wrote','written'],ride:['rode','ridden'],drive:['drove','driven'],take:['took','taken'],give:['gave','given'],make:['made'],buy:['bought'],bring:['brought'],think:['thought'],catch:['caught'],teach:['taught'],sleep:['slept'],feel:['felt'],keep:['kept'],find:['found'],tell:['told'],say:['said'],sit:['sat'],stand:['stood'],speak:['spoke','spoken'],break:['broke','broken'],choose:['chose','chosen'],forget:['forgot','forgotten'],begin:['began','begun'],come:['came'],become:['became'],know:['knew','known'],grow:['grew','grown'],throw:['threw','thrown'],wear:['wore','worn'],win:['won'],lose:['lost'],leave:['left'],meet:['met'],child:['children'],man:['men'],woman:['women'],foot:['feet'],tooth:['teeth'],mouse:['mice'],person:['people'],leaf:['leaves'],knife:['knives'],wife:['wives'],life:['lives'],half:['halves'],wolf:['wolves'],shelf:['shelves']};
+function __hsnClozeForms(en){
+  var w=String(en||''),lw=w.toLowerCase(),out=[w];
+  if(!/^[a-z]+$/i.test(w))return out;            /* 词组、带符号的词只认原样 */
+  var irr=__HSN_CLOZE_IRREG[lw];if(irr)out=out.concat(irr);
+  if(w.length<3)return out;                       /* he / my / it 这种短词不猜变形，免得认错别的词 */
+  var last=lw.slice(-1);
+  out.push(w+'s',w+'es');
+  if(last==='y'&&/[^aeiou]/.test(lw.charAt(lw.length-2)))out.push(w.slice(0,-1)+'ies',w.slice(0,-1)+'ied');
+  if(last==='e'){if(lw.slice(-2)!=='ee')out.push(w+'d');out.push(w.slice(0,-1)+'ing');}else{out.push(w+'ed',w+'ing');}
+  if(/[^aeiou][aeiou][bdgklmnprt]$/.test(lw))out.push(w+last+'ed',w+last+'ing');   /* stop→stopped / swim→swimming */
+  if(last==='f')out.push(w.slice(0,-1)+'ves');
+  if(lw.slice(-2)==='fe')out.push(w.slice(0,-2)+'ves');
+  return out;
+}
+function __hsnClozeMatch(w){
+  try{
+    var ex=String(w&&w.ex||'');if(!ex)return null;
+    var forms=__hsnClozeForms(w&&w.en);
+    for(var i=0;i<forms.length;i++){
+      var f=forms[i];if(!f)continue;
+      var m=new RegExp('\\b'+f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').exec(ex);
+      if(m)return {index:m.index,text:m[0]};
+    }
+  }catch(e){}
+  return null;
+}
+window.__hsnClozeMatch=__hsnClozeMatch;
 for(const k in CLOZE_LEVELS){
-  CLOZE_LEVEL_IDX[k]=CLOZE_LEVELS[k].words.map(en=>allW.findIndex(w=>w.en===en)).filter(i=>i>=0);
+  /* 🔴v1165 只收真能出题的词：卡片上的题数、进度和「答对 x / y」都用同一批 */
+  CLOZE_LEVEL_IDX[k]=CLOZE_LEVELS[k].words.map(en=>allW.findIndex(w=>w.en===en)).filter(i=>i>=0&&!!__hsnClozeMatch(allW[i]));
 }
 
 let clozeActive=false,clozeQ=null,clozeDone=0,clozeLevel='easy',clozePool=[],clozeTotal=0;
@@ -7124,31 +7152,26 @@ function nextClozeQ(){if(!clozeActive)return;
 // 池空了 → 完成本档 (一轮 = 一次任务)
 if(clozePool.length===0&&!__hmlRequeue('cloze',clozePool)){clozeComplete();return}
 // 找出下一个有效题目 (理论上都有 ex, 但保险起见)
-let idx,w;
+let idx,w,cm=null;
 while(clozePool.length>0){
   const tryIdx=clozePool.pop();
   const tryW=allW[tryIdx];
-  if(!tryW.ex){continue}
-  const re=new RegExp('\\b'+tryW.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
-  if(re.test(tryW.ex)){idx=tryIdx;w=tryW;break}
+  const m=__hsnClozeMatch(tryW);
+  if(m){idx=tryIdx;w=tryW;cm=m;break}
 }
 /* v1165: 池里剩下的都是例句对不上的词(比如例句写的是复数 Pigs)时，也要先把错词再考一次，不能直接结算 */
 if(!w){if(__hmlRequeue('cloze',clozePool)){nextClozeQ();return}clozeComplete();return}
-// 构建挖空句子
-const re=new RegExp('\\b'+w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
-// 检测目标词是否在句首 (需要大写显示)
-const matchM=w.ex.match(re);
-const isAtStart=matchM&&matchM.index===0;
-const blankAttr=isAtStart?' data-cap="1"':'';
-const sentence=w.ex.replace(re,'<span class="cloze-blank" id="clozeBlank"'+blankAttr+'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
-if(!sentence.includes('clozeBlank')){setTimeout(nextClozeQ,10);return}
+// 构建挖空句子：挖掉例句里那个词本来的写法（可能是 eyes / cooks 这样的变形）
+// 目标词在句首时选项首字母大写显示
+const isAtStart=cm.index===0;
+const sentence=w.ex.slice(0,cm.index)+'<span class="cloze-blank" id="clozeBlank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'+w.ex.slice(cm.index+cm.text.length);
 // 干扰项优先从同档单词抽 (难度更一致), 不够再从全集补
 const opts=[w];
 const sameLvl=CLOZE_LEVEL_IDX[clozeLevel].filter(i=>i!==idx).sort(()=>Math.random()-.5);
 for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>o.en===c.en))opts.push(c)}
 /*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
-clozeQ={word:w,opts:opts,idx:idx};
+clozeQ={word:w,opts:opts,idx:idx,fill:cm.text};
 const L=CLOZE_LEVELS[clozeLevel];
 const doneNum=clozeTotal-clozePool.length; // 含当前题
 const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">每题 +'+L.xpPerQ+' 经验</span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+doneNum+' / '+clozeTotal+'</span><span onclick="startCloze()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
@@ -7157,7 +7180,7 @@ document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-are
 function clozeAnswer(i){if(!clozeActive||!clozeQ)return;const opts=document.querySelectorAll('#clozeScreen .cloze-opt');if(opts.length===0||opts[0].dataset.done)return;opts.forEach(o=>o.dataset.done='1');
 const blank=document.getElementById('clozeBlank');
 const L=CLOZE_LEVELS[clozeLevel]||CLOZE_LEVELS.easy;
-if(clozeQ.opts[i].en===clozeQ.word.en){opts[i].classList.add('correct');blank.textContent=(blank.dataset.cap==='1'?(clozeQ.word.en.charAt(0).toUpperCase()+clozeQ.word.en.slice(1)):clozeQ.word.en);blank.classList.add('filled');
+if(clozeQ.opts[i].en===clozeQ.word.en){opts[i].classList.add('correct');blank.textContent=clozeQ.fill||clozeQ.word.en;blank.classList.add('filled');
 const __rtC=__hmlIsRetry('cloze',clozeQ.idx);playCorrect();if(!__rtC){addXP(L.xpPerQ);clozeDone++;S.stats.clozeRight++;progressQuest('cloze',1);}__hmlMark(clozeQ.idx,true,__rtC);
 if(S.stats.clozeRight>=20)unlockAch('cloze20');save();
 const rect=opts[i].getBoundingClientRect();confetti(rect.left,rect.top,10);
@@ -7167,12 +7190,12 @@ function goNext(){if(!advanced){advanced=true;nextClozeQ()}}
 try{speak(clozeQ.word.ex,1,function(){setTimeout(goNext,800)})}catch(e){goNext()}
 // 兜底: 8 秒强制切下一题 (例句最长 ~3 秒)
 setTimeout(goNext,8000)
-}else{opts[i].classList.add('wrong');opts.forEach(o=>{var displayEn=(blank.dataset.cap==='1'?(clozeQ.word.en.charAt(0).toUpperCase()+clozeQ.word.en.slice(1)):clozeQ.word.en);if(o.textContent===displayEn)o.classList.add('correct')});
-blank.textContent=(blank.dataset.cap==='1'?(clozeQ.word.en.charAt(0).toUpperCase()+clozeQ.word.en.slice(1)):clozeQ.word.en);blank.classList.add('wrong');
+}else{opts[i].classList.add('wrong');opts.forEach((o,j)=>{if(clozeQ.opts[j]&&clozeQ.opts[j].en===clozeQ.word.en)o.classList.add('correct')});
+blank.textContent=clozeQ.fill||clozeQ.word.en;blank.classList.add('wrong');
 playWrong();markAnswer(clozeQ.idx,false);save();
 /* 🔴v1165 答错小课：揭晓卡上带着这句例句（正确的词标亮），和以前一样把整句例句读一遍（教学价值高），
    读完再停一下才出下一题；点一下也能跳过。模块没加载时照旧读整句、读完进下一题 */
-__hmlLesson('cloze',clozeQ.idx,nextClozeQ,1600,{say:clozeQ.word.ex||clozeQ.word.en,ex:clozeQ.word.ex,exCn:clozeQ.word.exCn,waitSpeech:true})}}
+__hmlLesson('cloze',clozeQ.idx,nextClozeQ,1600,{say:clozeQ.word.ex||clozeQ.word.en,ex:clozeQ.word.ex,exCn:clozeQ.word.exCn,waitSpeech:true,hl:clozeQ.fill})}}
 
 function clozeComplete(){
 clozeActive=false;__hmlAttach('cloze','clozeContent');
