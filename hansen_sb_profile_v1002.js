@@ -160,6 +160,31 @@
     return p.name ? (p.name + ' · No.' + fmtCid(p.cid)) : '';
   }
 
+  /* 🔴v1164：给对战房间 / 好友 / 排行榜用的「显示名」——只有这一个出口。
+     以前房间层去调一个不存在的 status()，于是人人都叫「无名蜂」。
+     返回：起过的名字（去掉首尾空格和控制字符，最多 NAME_MAX 字）；没起名就返回 ''，
+     由调用方决定兜底（例如「无名蜂」）。不联网、不抛错。 */
+  function displayName() {
+    try {
+      var n = String(readProfile().name || '').replace(/[\u0000-\u001f<>]/g, '').trim();
+      return n.slice(0, NAME_MAX);
+    } catch (e) { return ''; }
+  }
+
+  /* 🔴v1164：status() 早被几处调用（建房时取段位），但从来没有实现过 ——
+     调用一直抛错被吞掉。补上：名字 / 竞赛 ID / 天梯分（以对战战绩为准，和天梯页同一份）。 */
+  function status() {
+    var p = readProfile();
+    var out = { name: displayName(), cid: p.cid || 0, rating: 0, placed: false, games: 0 };
+    try {
+      var R = window.HansenPkRecord;
+      var s = R && typeof R.summary === 'function' ? R.summary() : null;
+      if (s) { out.rating = Number(s.rating) || 0; out.placed = !!s.placed; out.games = Number(s.total) || 0; }
+      else { var L = readLadder(); out.rating = L.rating; out.placed = L.placed; out.games = L.games; }
+    } catch (e) {}
+    return out;
+  }
+
   /* ── 跨岛战绩聚合 ─────────────────────────────────────── */
   function eachIslandSave(fn) {
     var keys = [];
@@ -586,6 +611,8 @@
     setName: setName,
     validateName: validateName,
     fullName: fullName,
+    displayName: displayName,
+    status: status,
     ensureCid: ensureCid,
     claimCloudId: claimCloudId,
     fmtCid: fmtCid,
