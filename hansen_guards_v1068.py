@@ -4228,7 +4228,7 @@ def guard_home_polls_gated():
 
     事故（v1165 SS-6）：首页每 2 秒重画「最近探险」、每 1.5 秒重算主题，每次都把所有岛存档解析一遍；
     岛开着时它们照样跑，和岛共用一个主线程 —— 20 秒里算了 30 次和 13 次，岛里周期性卡一下。
-    判据（index.html）：每个 setInterval 的间隔都 ≥ 5 秒；重画「最近探险」/主题的轮询先看岛开没开着。
+    判据（index.html）：重画「最近探险」/主题的轮询先看岛开没开着；其他不看岛开没开着的轮询间隔都 ≥ 5 秒。
     """
     src = _code_only(_read('index.html') or '')
     if not src:
@@ -4244,9 +4244,10 @@ def guard_home_polls_gated():
         if not re.fullmatch(r'\d+', period):
             bad('首页不轮询', 'index.html 有间隔不是写定数字的轮询（%s）—— 没法判断' % period[:30])
             continue
-        if int(period) < 5000:
-            bad('首页不轮询', 'index.html 有每 %s 毫秒一次的轮询（%s…）—— 岛开着时也在抢主线程' % (period, cb[:40].replace('\n', ' ')))
-        if re.search(r'renderRecent|applyTheme', cb) and not re.search(r'_islandShown\(\)|_shown\(\)|__hsnIslandShown', cb):
+        gated = bool(re.search(r'_islandShown\(\)|_shown\(\)|__hsnIslandShown', cb))
+        if int(period) < 5000 and not gated:
+            bad('首页不轮询', 'index.html 有每 %s 毫秒一次、不看岛开没开着的轮询（%s…）—— 岛开着时也在抢主线程' % (period, cb[:40].replace('\n', ' ')))
+        if re.search(r'renderRecent|applyTheme', cb) and not gated:
             bad('首页不轮询', 'index.html 重画「最近探险」/主题的轮询不先看岛开没开着（%s…）' % cb[:40].replace('\n', ' '))
     if not n:
         bad('首页不轮询', 'index.html 一个 setInterval 都没找到 —— 没法判断（慢兜底轮询应该在）')
