@@ -8005,6 +8005,14 @@ updatePetHero();
 try{ if(/island_season\.html/.test(location.pathname||'')){ var _hsHome=document.getElementById('homeScreen'), _hsBoss=document.getElementById('bossScreen'); if(_hsHome&&_hsBoss){ _hsHome.classList.remove('active'); _hsBoss.classList.add('active'); } } }catch(e){}
 
 // Show a welcome message if first time
+/* 🔴v1165 大欢迎弹窗只在这台设备第一次进岛时出现一次；以后每到一个没玩过的新岛，只用一句话打招呼
+   （以前每个新岛都弹一遍全套「欢迎来到…」，像换了一个 App）。藏在后台的预热页不算「进岛」，不占用这一次。 */
+function __hsnIntroOnScreen(){
+  try{if(/[?&]warm=1(?:&|$)/.test(location.search||''))return false;}catch(e){}
+  try{var fe=window.frameElement;if(fe){if(fe.getAttribute&&fe.getAttribute('aria-hidden')==='true')return false;var r=fe.getBoundingClientRect();if(!r.width||!r.height)return false;}}catch(e){}
+  return true;
+}
+function __hsnIntroFirst(){var seen=false;try{seen=localStorage.getItem('hansen_island_intro_seen_v1165')==='1';}catch(e){}if(!seen){try{localStorage.setItem('hansen_island_intro_seen_v1165','1');}catch(e){}}return !seen;}
 ⟦⟦LAND_SLOT_12⟧⟧
 
 

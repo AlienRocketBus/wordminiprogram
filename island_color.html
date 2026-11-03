@@ -8214,7 +8214,15 @@ updatePetHero();
 try{ if(/island_season\.html/.test(location.pathname||'')){ var _hsHome=document.getElementById('homeScreen'), _hsBoss=document.getElementById('bossScreen'); if(_hsHome&&_hsBoss){ _hsHome.classList.remove('active'); _hsBoss.classList.add('active'); } } }catch(e){}
 
 // Show a welcome message if first time
-if(S.totalAnswers===0&&S.learned.length===0){setTimeout(()=>{const d=document.getElementById('alertInner');if(!d)return;d.innerHTML='<div style="font-size:64px">🎮</div><div style="font-size:22px;font-weight:800;color:#fbbf24;margin:10px 0">欢迎来到色彩数字大冒险！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.7;margin:10px 0">🗺️ '+DATA.length+' 个颜色 / 数字小组等你探索<br>📚 '+allW.length+' 个英语单词随你学<br>🎮 '+(function(){var n=document.querySelectorAll('.mode-card').length;return n>1?n+' 种':'好多种'})()+'超酷玩法等你来<br>🐉 36 阶进化宠物<br>🎁 每日宝箱 + 签到奖励<br>🏆 '+ACHIEVEMENTS.length+' 个成就等你解锁</div><div style="font-size:13px;color:#cbd5e1;margin:12px 0">🎒 小冒险家秘籍：<br>每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟</div><button class="game-btn gold" onclick="closeAlert()">开始冒险！</button>';document.getElementById('alertModal').classList.add('show')},300)}
+/* 🔴v1165 大欢迎弹窗只在这台设备第一次进岛时出现一次；以后每到一个没玩过的新岛，只用一句话打招呼
+   （以前每个新岛都弹一遍全套「欢迎来到…」，像换了一个 App）。藏在后台的预热页不算「进岛」，不占用这一次。 */
+function __hsnIntroOnScreen(){
+  try{if(/[?&]warm=1(?:&|$)/.test(location.search||''))return false;}catch(e){}
+  try{var fe=window.frameElement;if(fe){if(fe.getAttribute&&fe.getAttribute('aria-hidden')==='true')return false;var r=fe.getBoundingClientRect();if(!r.width||!r.height)return false;}}catch(e){}
+  return true;
+}
+function __hsnIntroFirst(){var seen=false;try{seen=localStorage.getItem('hansen_island_intro_seen_v1165')==='1';}catch(e){}if(!seen){try{localStorage.setItem('hansen_island_intro_seen_v1165','1');}catch(e){}}return !seen;}
+if(S.totalAnswers===0&&S.learned.length===0&&__hsnIntroOnScreen()){if(__hsnIntroFirst()){setTimeout(()=>{const d=document.getElementById('alertInner');if(!d)return;d.innerHTML='<div style="font-size:64px">🎮</div><div style="font-size:22px;font-weight:800;color:#fbbf24;margin:10px 0">欢迎来到色彩数字大冒险！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.7;margin:10px 0">🗺️ '+DATA.length+' 个颜色 / 数字小组等你探索<br>📚 '+allW.length+' 个英语单词随你学<br>🎮 '+(function(){var n=document.querySelectorAll('.mode-card').length;return n>1?n+' 种':'好多种'})()+'超酷玩法等你来<br>🐉 36 阶进化宠物<br>🎁 每日宝箱 + 签到奖励<br>🏆 '+ACHIEVEMENTS.length+' 个成就等你解锁</div><div style="font-size:13px;color:#cbd5e1;margin:12px 0">🎒 小冒险家秘籍：<br>每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟</div><button class="game-btn gold" onclick="closeAlert()">开始冒险！</button>';document.getElementById('alertModal').classList.add('show')},300)}else{setTimeout(function(){try{showToast('👋 欢迎来到'+'色彩数字大冒险'+'！这里有 '+allW.length+' 个单词');}catch(e){}},600);}}
 
 
 // ============================================================
