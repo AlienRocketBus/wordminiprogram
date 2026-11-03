@@ -359,8 +359,104 @@
     function maxGameCount(){return globalModes().max;}
     function allWordsTotal(HC){var t=HC&&HC.TOTAL_WORDS;return (typeof t==='number'&&t>600)?t:952;}
 
+    /* ── v1165「阶梯系列」成就（复习/精通/速度/对决/各玩法/毅力/探索，共 100 多个）──────────────
+       以前这些规则只写在模板那份 checkAch 里，而它被上面的 window.checkAch 整个替换掉了 → 144 个成就里 107 个
+       永远解锁不了。这里只搬「规则」，不照抄模板（模板那份有两个潜伏 bug：错词清零第一个词就解锁；
+       各玩法最高分是 {easy,medium,hard} 对象却拿来和数字比）。数字一律来自真实记录：
+         · 各岛存档 S.stats：答对/打字/完美/宝箱/打 Boss 数按岛相加（跳过 _bak），最高分和学习天数取各岛最大
+         · 复习：hansen_review_lifetime_v963（终身毕业 + 巡检通过 = 复习过的词）、hansen_review_streak_v963（连续完成
+           当日复习的天数）、hansen_review_day_v963（今天到期的全清了）
+         · 攻克错词：hansen_wrong_fixed_total 或终身毕业数（错词隔天答对 = 真攻克）—— 绝不拿「学会的词」顶替
+         · 大满贯轮次：hansen_boss_round_count_<岛>；拼写蜂胜场：hansen_sb_ladder_v1002；速度：sb_best_cpm
+         · 点亮岛屿：权威账本里学过词的岛（单词大陆 8 岛算星海 1 个），最多 19 */
+    function nOr0(v){v=Number(v);return isFinite(v)&&v>0?v:0;}
+    function bestOf(v){
+      try{if(typeof window.__hsnBestStatValue==='function')return nOr0(window.__hsnBestStatValue(v));}catch(e){}
+      if(v&&typeof v==='object')return Math.max(nOr0(v.easy),nOr0(v.medium),nOr0(v.hard));
+      return nOr0(v);
+    }
+    function readJSONKey(k){try{var raw=localStorage.getItem(k);return raw===null?null:JSON.parse(raw);}catch(e){return null;}}
+    function localYmd(){var d=new Date(),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;}
+    var SUM_STATS=['clozeRight','listenRight','typeCount','scrPerfectTotal','matchPerfect','chestClaimed','bossBeaten'];
+    var BEST_STATS=['speedBest','bubbleBest','eagleBest','molesBest','fishBest'];
+    var REGULAR_ROUND=/^(action|adjective|animal|body|city|clothes|color|family|food|home|job|nature|question|school|sports|time|traffic|treasure)$/;
+    function achFacts(HC){
+      var f={},current=detectIslandKey(),keys=[];
+      SUM_STATS.concat(BEST_STATS).forEach(function(k){f[k]=0;});f.daysPlayed=0;
+      try{for(var q=0;q<localStorage.length;q++){var kq=localStorage.key(q);if(kq)keys.push(kq);}}catch(e){}
+      function take(s){
+        if(!s||typeof s!=='object')return;var st=s.stats||{};
+        SUM_STATS.forEach(function(k){f[k]+=nOr0(st[k]);});
+        BEST_STATS.forEach(function(k){f[k]=Math.max(f[k],bestOf(st[k]));});
+        f.daysPlayed=Math.max(f.daysPlayed,nOr0(st.daysPlayed));
+      }
+      keys.forEach(function(k){if(/^wordIsland/.test(k)&&!/_bak$|_backup$|_tmp$/i.test(k)&&k!==current)take(parsedSave(k));});
+      take(S);   // 本岛用内存里最新的（存盘可能有防抖）
+      var life=readJSONKey('hansen_review_lifetime_v963')||{},grads=nOr0(life.grads),patrols=nOr0(life.patrols);
+      var streak=readJSONKey('hansen_review_streak_v963')||{},day=readJSONKey('hansen_review_day_v963')||{};
+      f.reviewTotal=grads+patrols;
+      f.reviewStreak=nOr0(streak.count);
+      f.reviewAny=Math.max(f.reviewTotal,f.reviewStreak);
+      f.reviewClearedToday=(day.cleared===1&&day.day===localYmd())?1:0;
+      var fixed=readJSONKey('hansen_wrong_fixed_total');
+      f.wrongFixed=Math.max(nOr0(fixed&&typeof fixed==='object'?fixed.total:fixed),grads);
+      f.slamRounds=0;f.slamRegular=0;
+      keys.forEach(function(k){
+        var m=k.match(/^hansen_boss_round_(?:count_|state_v946_)([a-z0-9]+)$/);if(!m||m[1]==='season')return;
+        var v=/count_/.test(k)?nOr0(localStorage.getItem(k)):nOr0((readJSONKey(k)||{}).completedCount);
+        f['_r_'+m[1]]=Math.max(f['_r_'+m[1]]||0,v);
+      });
+      Object.keys(f).forEach(function(k){if(k.indexOf('_r_')!==0)return;var id=k.slice(3);f.slamRounds+=f[k];if(REGULAR_ROUND.test(id))f.slamRegular+=f[k];delete f[k];});
+      var ladder=readJSONKey('hansen_sb_ladder_v1002');f.sbWins=nOr0(ladder&&ladder.wins);
+      var cpm=0;try{var b=JSON.parse(localStorage.getItem('sb_best_cpm'));if(typeof b==='number')cpm=b;else if(b&&typeof b==='object')['easy','mid','medium','hard'].forEach(function(k){cpm=Math.max(cpm,nOr0(b[k]));});}catch(e){cpm=nOr0(localStorage.getItem('sb_best_cpm'));}
+      f.cpm=nOr0(cpm);
+      f.islands=0;try{if(HC&&HC.counts){var c=HC.counts();Object.keys(c).forEach(function(k){if(c[k]&&c[k].learned>0)f.islands++;});}}catch(e){}
+      f.islandsAll=(HC&&HC.islands&&HC.islands.length)||19;
+      f.modes=globalModes().played.length;
+      f.mc=(function(){var HT=window.HansenTotals;return HT?Math.max(HT.maxCombo(),(S.stats&&S.stats.maxCombo)||0):((S.stats&&S.stats.maxCombo)||0);})();
+      return f;
+    }
+    /* [成就 id, 用哪个数, 要多少] —— 和 ACHIEVEMENTS 里写的目标一一对应 */
+    var SERIES=[
+      ['rv1','reviewAny',1],['rv7','reviewStreak',7],['rv30','reviewStreak',30],['rvdayS90','reviewStreak',90],['rvdayS180','reviewStreak',180],
+      ['rvClear','reviewClearedToday',1],['reviewS20','reviewTotal',20],['rv100','reviewTotal',100],['rv500','reviewTotal',500],['reviewS2000','reviewTotal',2000],
+      ['wrongS10','wrongFixed',10],['wrongS50','wrongFixed',50],['wrongS200','wrongFixed',200],['wrongS500','wrongFixed',500],
+      ['clozeS10','clozeRight',10],['clz50','clozeRight',50],['clz200','clozeRight',200],['clozeS800','clozeRight',800],['clozeS2000','clozeRight',2000],
+      ['listenS10','listenRight',10],['lsn50','listenRight',50],['lsn200','listenRight',200],['listenS800','listenRight',800],['listenS2000','listenRight',2000],
+      ['typingS20','typeCount',20],['typ100','typeCount',100],['typ500','typeCount',500],['typingS2000','typeCount',2000],['typingS5000','typeCount',5000],
+      ['scrperfS1','scrPerfectTotal',1],['perfScr3','scrPerfectTotal',3],['perfScr10','scrPerfectTotal',10],['scrperfS60','scrPerfectTotal',60],['scrperfS150','scrPerfectTotal',150],
+      ['perfMatch','matchPerfect',1],['matchpS5','matchPerfect',5],['matchpS20','matchPerfect',20],['matchpS60','matchPerfect',60],
+      ['cpmS30','cpm',30],['cpm40','cpm',40],['cpm60','cpm',60],['cpm80','cpm',80],['cpm100','cpm',100],['cpmS120','cpm',120],
+      ['speedS200','speedBest',200],['spd500','speedBest',500],['spd1000','speedBest',1000],['speedS1800','speedBest',1800],['speedS3000','speedBest',3000],
+      ['bubbleS50','bubbleBest',50],['bub100','bubbleBest',100],['bubbleS200','bubbleBest',200],['bubbleS400','bubbleBest',400],['bubbleS800','bubbleBest',800],
+      ['eagleS50','eagleBest',50],['eag100','eagleBest',100],['eagleS200','eagleBest',200],['eagleS400','eagleBest',400],['eagleS800','eagleBest',800],
+      ['molesS50','molesBest',50],['mol100','molesBest',100],['molesS200','molesBest',200],['molesS400','molesBest',400],['molesS800','molesBest',800],
+      ['fishS50','fishBest',50],['fsh100','fishBest',100],['fishS200','fishBest',200],['fishS400','fishBest',400],['fishS800','fishBest',800],
+      ['allMode','modes',10],
+      ['bossNS10','bossBeaten',10],['bossWin20','bossBeaten',20],['bossNS30','bossBeaten',30],['boss50','bossBeaten',50],['bossNS120','bossBeaten',120],['bossNS300','bossBeaten',300],
+      ['bossSlam','slamRegular',1],['slamS3','slamRounds',3],['slamS10','slamRounds',10],['slamS30','slamRounds',30],
+      ['comboNS150','mc',150],['combo200','mc',200],['comboNS300','mc',300],
+      ['sbWin1','sbWins',1],['sbWin10','sbWins',10],['sbWin50','sbWins',50],['sbwinS150','sbWins',150],['sbwinS500','sbWins',500],
+      ['isl3','islands',3],['islNS5','islands',5],['isl10','islands',10],['islNS15','islands',15],['islAll','islands','islandsAll'],
+      ['dayNS3','daysPlayed',3],['dayNS15','daysPlayed',15],['day30','daysPlayed',30],['dayNS60','daysPlayed',60],['day100','daysPlayed',100],['dayNS180','daysPlayed',180],['day365','daysPlayed',365],['dayNS500','daysPlayed',500],
+      ['chestS5','chestClaimed',5],['chest30','chestClaimed',30],['chestS100','chestClaimed',100],['chestS300','chestClaimed',300],['chestS1000','chestClaimed',1000]
+    ];
+    var SERIES_BY_ID={};SERIES.forEach(function(r){SERIES_BY_ID[r[0]]=r;});
+    function seriesNeed(r,f){return typeof r[2]==='string'?(f[r[2]]||1):r[2];}
+    window.__hsnAchSeries=SERIES;   // 测试/排查用：哪些成就由这里判定
+
     // --- 成就判定(累计型) ---
     window.checkAch = function(){
+      /* v1165: 一次判定里解锁的先攒着；超过 2 个只弹一次总提示、只存一次盘（老玩家第一次进新版会一下子解锁一大串） */
+      var batch=window.__hsnAchBatch=[];
+      try{ achJudge(); }catch(e){}
+      window.__hsnAchBatch=null;
+      if(!batch.length)return;
+      if(batch.length>2){ try{ if(typeof showAchPopup==='function')showAchPopup({icon:'🏆',name:'一下子解锁了 '+batch.length+' 个成就，去成就墙领奖励吧'}); }catch(e){} }
+      else batch.forEach(function(a){ try{ if(typeof showAchPopup==='function')showAchPopup(a); }catch(e){} });
+      try{ if(typeof save==='function')save(); }catch(e){}
+    };
+    function achJudge(){
       try{
         try{ reportTotals(); }catch(e){}  // 先上报当前岛学习数据到全局汇总
         // 跨岛汇总: 学词数/连胜/等级 用全局汇总值(18岛加起来), 没有则回退单岛
@@ -402,8 +498,15 @@
         if(daily.healthy)unlockAch('hidNight');
         var checked=false;try{checked=!!(window.HansenCheckin&&HansenCheckin.claimedToday&&HansenCheckin.claimedToday());}catch(e){}
         if(daily.learned&&daily.boss&&checked)unlockAch('hidPerfectDay');
+        // v1165 阶梯系列（见 SERIES）：已经拿到的跳过，不重复算
+        var HA=window.HansenAch,facts=achFacts(HC),have={};
+        try{ if(HA){ (HA.getClaimed()||[]).concat(HA.getPending()||[]).forEach(function(x){have[x]=1;}); } }catch(e){}   // 钱包只读一次
+        SERIES.forEach(function(r){
+          if(have[r[0]])return;
+          if(nOr0(facts[r[1]])>=seriesNeed(r,facts))unlockAch(r[0]);
+        });
       }catch(e){}
-    };
+    }
 
     // --- 成就进度 ---
     window.getAchProgress = function(id){
@@ -424,6 +527,7 @@
           s3:{cur:S.streak||0,need:3},s7:{cur:S.streak||0,need:7},s14:{cur:S.streak||0,need:14},s100:{cur:S.streak||0,need:100},
           lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11},modeHigh:{cur:gm.max,need:10},
           vocabS600:{cur:lw,need:600},vocabS1500:{cur:lw,need:allWordsTotal(HC)}}[id];
+        if(!m&&SERIES_BY_ID[id]){var r=SERIES_BY_ID[id],f=achFacts(HC);m={cur:nOr0(f[r[1]]),need:seriesNeed(r,f)};}   // v1165 阶梯系列也有进度条
         if(!m)return null; return {cur:Math.min(m.cur,m.need),need:m.need};
       }catch(e){return null;}
     };
@@ -432,7 +536,10 @@
     window.unlockAch = function(id){
       var ach=(window.ACHIEVEMENTS||[]).find(function(a){return a.id===id;}); if(!ach)return;
       if(window.HansenAch){
-        if(HansenAch.unlock(id)){ if(typeof showAchPopup==='function')showAchPopup(ach); if(typeof save==='function')save(); }
+        if(HansenAch.unlock(id)){
+          if(Array.isArray(window.__hsnAchBatch)){ window.__hsnAchBatch.push(ach); return; }   // v1165 判定中：攒着，判完统一提示、存一次
+          if(typeof showAchPopup==='function')showAchPopup(ach); if(typeof save==='function')save();
+        }
       }
     };
     // --- claimAch: 领取 ---
@@ -491,7 +598,7 @@
       var cats=_ORDER.filter(function(x){return _have[x];});
       Object.keys(_have).forEach(function(x){ if(cats.indexOf(x)<0) cats.push(x); });
       var _unusedCats=[];
-      var ci={'背单词':'📖','打Boss':'⚔️','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};
+      var ci={'背单词':'📖','复习':'🔄','精通':'🎯','速度':'⚡','打Boss':'⚔️','对决':'🐝','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};   // v1165 补上复习/精通/速度/对决（以前显示 undefined）
       var ACHL=window.ACHIEVEMENTS||[], T=window.__hsnTIERS;
       var cc=claimedAll().length, tot=ACHL.length, pct=Math.round(cc/tot*100), pc=pendCount();
       var h='<div class="ach-total"><div class="ach-total-row"><span>🏆 成就总进度（全部岛屿汇总）</span><span>'+cc+' / '+tot+'（'+pct+'%）</span></div>'+
@@ -502,7 +609,7 @@
         var cin=list.filter(function(a){return isClaimed(a.id);}).length;
         var pin=list.filter(function(a){return isPending(a.id);}).length;
         var open=!!window._achOpen[cat];
-        h+='<div class="ach-bar" onclick="toggleAchCat(\''+cat+'\')"><span class="ach-bar-icon">'+ci[cat]+'</span>'+
+        h+='<div class="ach-bar" onclick="toggleAchCat(\''+cat+'\')"><span class="ach-bar-icon">'+(ci[cat]||'🏅')+'</span>'+
            '<span class="ach-bar-name">'+cat+(pin>0?' <span class="ach-bar-dot">🎁</span>':'')+'</span>'+
            '<span class="ach-bar-count">'+cin+'/'+list.length+'</span><span class="ach-bar-arrow">'+(open?'▼':'▶')+'</span></div>';
         if(open){
