@@ -212,7 +212,7 @@ details.fold>summary::-webkit-details-marker{display:none}
 
 /* 房间码 */
 .code{display:flex;justify-content:center;gap:10px;margin-top:8px}
-.code span{width:60px;height:72px;border-radius:var(--r-md);display:grid;place-items:center;font:800 40px/1 var(--font-latin);background:var(--surface-1);color:var(--ink-1);border:2px solid var(--line-strong);box-shadow:var(--e-1)}
+.code span{width:60px;height:72px;border-radius:var(--r-md);display:grid;place-items:center;font:800 44px/1 var(--font-latin);background:var(--surface-1);color:var(--ink-1);border:2px solid var(--line-strong);box-shadow:var(--e-1)}
 .code.in span{width:56px;height:64px;font-size:34px}
 .code.in span.cur{border-color:var(--focus);box-shadow:0 0 0 3px var(--focus)}
 .code.in span.bad{border-color:var(--bad)}
@@ -226,7 +226,9 @@ details.fold>summary::-webkit-details-marker{display:none}
 .rooms{display:flex;flex-direction:column;gap:10px}
 .room{display:flex;align-items:center;gap:12px;min-height:78px;padding:10px 12px}
 .room .t{flex:1;min-width:0}
-.room .nm{font:900 17px/1.2 var(--font-display);color:var(--ink-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room .nmrow{display:flex;align-items:center;gap:6px;min-width:0}
+.room .nmrow .vs-tag{flex:none;margin:0}
+.room .nm{min-width:0;font:900 17px/1.2 var(--font-display);color:var(--ink-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .room .mt{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:14px;font-weight:700;color:var(--ink-2);white-space:nowrap;overflow:hidden}
 .room .mt .m{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--line);color:var(--ink-1);font-weight:800;font-size:13px;flex:none}
 .room .mt .lv{overflow:hidden;text-overflow:ellipsis}
@@ -248,8 +250,9 @@ details.fold>summary::-webkit-details-marker{display:none}
 .ch .e img{width:46px;height:46px;display:block}
 .ch .t{flex:1;min-width:0}
 .ch b{display:block;font:900 18px/1.2 var(--font-display);color:var(--ink-1)}
-.ch span{display:block;font-size:14px;font-weight:700;color:var(--ink-2);margin-top:3px;line-height:1.35}
-.ch .tag{position:absolute;top:-10px;left:12px;font-size:12px}
+.ch .t>span{display:block;font-size:14px;font-weight:700;color:var(--ink-2);margin-top:3px;line-height:1.35}
+.ch .e{display:block}
+.ch .tag{display:inline-flex;vertical-align:3px;margin-left:6px;font:800 12px/1.2 var(--font-body);padding:3px 8px;white-space:nowrap}
 .ch .ck{width:30px;height:30px;border-radius:50%;flex:none;border:2px solid var(--line-strong);display:grid;place-items:center;color:transparent}
 .ch .ck svg{width:18px;height:18px}
 .ch.on{border-color:var(--accent-2);background:var(--surface-2);box-shadow:0 0 0 3px var(--accent-1),var(--e-1)}
@@ -437,3 +440,7 @@ details.fold>summary::-webkit-details-marker{display:none}
   .kb .k{height:48px}.kb .r{margin-bottom:6px}.slots span{height:48px}.radar{width:176px;height:176px}.radar .av{--s:80px}
   .rs-hero img{width:88px;height:88px}.seat .av{--s:80px}.block .ill{width:88px;height:88px}
 }
+
+/* 选玩法等长页：主按钮贴底，永远看得见 */
+.dockcta{position:sticky;bottom:0;z-index:5;margin:18px -16px 0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--chrome);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.14)}
+.bapp:has(.dockcta){padding-bottom:0}

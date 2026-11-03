@@ -79,7 +79,9 @@ for (const [W, H] of SIZES) {
     const name = `${k}_${theme}`, shot = path.join(dir, name + '.png');
     if (!process.env.NOSHOT) await pg.screenshot({ path: shot });
     const geom = await pg.evaluate(GEOM);
-    const fonts = await pg.evaluate(() => { const ok = new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/["']/g, ''))); return ['CartoonBlack', 'Baloo2'].map(f => ok.has(f)); });
+    const fonts = await pg.evaluate(() => { const ok = new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/["']/g, '')));
+      const used = new Set(); for (const el of document.querySelectorAll('body *')) { if (!el.childNodes.length || ![...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim())) continue; const f = getComputedStyle(el).fontFamily.split(',')[0].replace(/["']/g, '').trim(); used.add(f); }
+      return ['CartoonBlack', 'Baloo2'].map(f => !used.has(f) || ok.has(f)); });  // 用到了这个字体就必须真的加载成功
     const m = { geom, errs, fonts };
     if (W !== 320) {
       const els = await pg.evaluate(COLLECT);

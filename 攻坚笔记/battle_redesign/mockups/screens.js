@@ -25,13 +25,13 @@
   }
   function kb(off) {
     var rows = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
-    return '<div class="kb' + (off ? ' off' : '') + '" role="group" aria-label="字母键盘">' + rows.map(function (r, i) {
-      return '<div class="r">' + r.split('').map(function (c) { return '<button class="k" data-k="' + c + '" aria-label="字母 ' + c + '">' + c + '</button>'; }).join('')
-        + (i === 2 ? '<button class="k del" data-k="⌫" aria-label="删除一个字母">' + SVG.del + '</button>' : '') + '</div>';
+    return '<div class="kb pr_kb' + (off ? ' off' : '') + '" id="prKb" role="group" aria-label="字母键盘">' + rows.map(function (r, i) {
+      return '<div class="r pr_kbrow">' + r.split('').map(function (c) { return '<button class="k pr_key" data-k="' + c + '" aria-label="字母 ' + c + '">' + c + '</button>'; }).join('')
+        + (i === 2 ? '<button class="k del pr_key pr_del" data-k="⌫" aria-label="删除一个字母">' + SVG.del + '</button>' : '') + '</div>';
     }).join('') + '</div>';
   }
   function dots(arr) { return '<div class="dots" aria-hidden="true">' + arr.split('').map(function (c) { return '<i class="' + ({ w: 'w', l: 'l', c: 'c' }[c] || '') + '"></i>'; }).join('') + '</div>'; }
-  function timer(sec, p, cls) { return '<div class="timer ' + (cls || '') + '" role="timer" aria-label="还剩 ' + sec + ' 秒" style="--p:' + p + '"><span class="num">' + sec + '</span><small>秒</small><i class="tl"></i></div>'; }
+  function timer(sec, p, cls) { return '<div class="timer ' + (cls || '') + '" id="prClock" role="timer" aria-label="还剩 ' + sec + ' 秒" style="--p:' + p + '"><span class="num">' + sec + '</span><small>秒</small><i class="tl"></i></div>'; }
   function tbar(no, of, d, t) {
     return '<header class="bhead">' + '<button class="back ic" id="bQuit" aria-label="退出对战">' + SVG.x + '</button>'
       + '<div class="tb-mid"><span class="wordno">第 ' + no + ' / ' + of + ' 词</span>' + dots(d) + '</div>' + t + '</header>';
@@ -41,10 +41,10 @@
     /* 两行：上面 头像·名字·分数 VS 分数·名字·头像；下面 两边各自的状态小牌（对手状态就挂在对手那一侧） */
     return '<div class="vsbar" id="bVs"><div class="vsrow">'
       + '<div class="sd' + (o.lead === 'me' ? ' lead' : '') + '">' + av(ME.av, 'me') + '<div class="nmx"><div class="nm">你' + (o.myPlus ? '<span class="plus">+' + o.myPlus + '</span>' : '') + '</div>'
-      + '<div class="sc num" id="bMyScore">' + o.my + '</div></div></div>'
+      + '<div class="sc num" id="prMy">' + o.my + '</div></div></div>'
       + '<span class="vs">VS</span>'
       + '<div class="sd r' + (o.lead === 'op' ? ' lead' : '') + '">' + av(OP.av, 'op' + (o.opOff ? ' off' : '')) + '<div class="nmx"><div class="nm">' + (o.opPlus ? '<span class="plus op">+' + o.opPlus + '</span>' : '') + OP.n + '</div>'
-      + '<div class="sc num" id="bOppScore">' + o.op + '</div></div></div>'
+      + '<div class="sc num" id="prOpp">' + o.op + '</div></div></div>'
       + '</div><div class="vsst"><span>' + (o.mySt || st('', '拼写中')) + '</span><span id="prOppSt">' + (o.opSt || st('', '✍️ 正在拼')) + '</span></div></div>';
   }
   function slots(word, typed, cls, hintFirst) {
@@ -58,12 +58,12 @@
       else if (i === typed.length) k = 'cur';
       out += '<span class="' + k + '">' + c + '</span>';
     }
-    return '<div class="slots' + (cls ? ' lock' : '') + '" id="bSlots" aria-label="已拼 ' + typed + '">' + out + '</div>';
+    return '<input id="prIn" class="pr_in sr" readonly inputmode="none" aria-label="在这里拼出这个单词" value="' + typed + '"><div class="slots' + (cls ? ' lock' : '') + '" id="bSlots" aria-hidden="true">' + out + '</div>';
   }
-  function prompt(kick, zh) { return '<div class="prompt" id="bPrompt"><div class="kick">' + kick + '</div><div class="zh">' + zh + '</div></div>'; }
-  function promptTts(kick) { return '<div class="prompt" id="bPrompt"><div class="kick">' + kick + '</div><button class="spk2" id="bSpk" aria-label="再听一次">' + img('icons/speaker_3d.webp') + '</button><button class="btn btn-brand again">🔁 再听一次</button></div>'; }
+  function prompt(kick, zh) { return '<div class="prompt" id="bPrompt"><div class="kick">' + kick + '</div><div class="zh pr_cn">' + zh + '</div></div>'; }
+  function promptTts(kick) { return '<div class="prompt" id="bPrompt"><div class="kick">' + kick + '</div><button class="spk2" id="prSpk" aria-label="再听一次">' + img('icons/speaker_3d.webp') + '</button><button class="btn btn-brand again">🔁 再听一次</button></div>'; }
   function reveal(o) {
-    return '<div class="reveal2 ' + (o.good ? 'good' : '') + '" id="bReveal" role="status"><div class="rmsg">' + o.msg + '</div><span class="en">' + o.en + '</span><span class="zh2">' + o.zh + '</span><span class="say">' + SVG.speaker + '正在读</span></div>';
+    return '<div class="reveal2 ' + (o.good ? 'good' : '') + '" id="bReveal" role="status"><div class="rmsg">' + o.msg + '</div><span class="sr">正确答案 〔' + o.en + ' ' + o.zh + '〕</span><span class="en">' + o.en + '</span><span class="zh2">' + o.zh + '</span><span class="say">' + SVG.speaker + '正在读</span></div>';
   }
   function block(o) {
     return '<main class="block">' + (o.ill ? (o.ill.indexOf('.') > 0 ? img(o.ill, 'ill') : '<div class="ill em" aria-hidden="true">' + o.ill + '</div>') : '')
@@ -88,7 +88,7 @@
       ? '<div class="panel me-strip">' + av('01', '', 56) + '<div class="who"><div class="nm">还没登录</div><div class="meta">登录后会给你一个竞赛 ID，同学用它加你</div></div></div>'
         + '<button class="btn btn-gold btn-xl btn-block" id="kReg" style="margin-top:10px">🔑 登录，和同学比一比</button>'
       : '<div class="panel me-strip" id="kMe">' + av('01', 'me', 56) + '<div class="who"><div class="nm">小明</div><div class="meta"><span class="cid">No.007</span> · 竞赛 ID</div></div><span class="tier">🐝 工蜂 <span class="num">1108</span></span></div>';
-    return '<div class="bapp">' + head({ back: o.standalone ? '首页' : '返回', id: 'kBack', title: '⚔️ 拼写大PK' })
+    return '<div class="bapp">' + head({ back: o.standalone ? '首页' : '返回', id: o.standalone ? 'pkBack' : 'kBack', title: '<span class="k_h1">⚔️ 拼写大PK</span>' })
       + me
       + '<div class="feat" style="margin-top:14px">'
       + '<button class="ft wide t-indigo" id="kLadder">' + img('icons/spelling_bee.webp', 'art') + '<div class="plate"><b>🏆 天梯排位</b><span>' + (o.out ? '赢了升段，越打越强' : '工蜂 · 还差 92 分升段') + '</span></div></button>'
@@ -100,7 +100,7 @@
       + '</div>'
       + (o.toast ? '<div class="toast" role="status">' + av('05', 'op', 40) + '<div class="t">小红：⚔️ 来一局？<small>房间码 45XF · 刚刚</small></div><button class="btn btn-gold">去应战</button></div>' : '')
       + (o.acct ? sheet('<h3>账号</h3><p class="p">已登录 小明 · No.007</p><div class="stack" style="margin-top:14px">'
-        + '<button class="btn btn-brand btn-block" id="kPull">☁️ 从云端找回进度</button>'
+        + '<button class="btn btn-brand btn-block" id="kPull">☁️ 从云端恢复进度</button>'
         + '<button class="btn btn-ghost btn-block" id="kSwitch">🔄 换个账号</button>'
         + '<button class="btn btn-ghost btn-block" id="kOut">🚪 退出登录</button>'
         + '<button class="btn-text dim" id="kDiag">🩺 云同步自检（给老师看）</button></div>') : '');
@@ -115,7 +115,7 @@
     if (kind === 'config') return '<div class="panel inline-err" id="ldBoard">' + img('ui/brain_rest.webp') + '<div class="t"><b>排行榜还没准备好</b><span>云端设置还差一步，老师弄好就能看</span></div></div>';
     var rows = [['🥇', '乐乐', '蜂王', 1652], ['🥈', '阿杰', '守卫蜂', 1480], ['🥉', '甜甜', '守卫蜂', 1455], ['4', '小雨', '侦察蜂', 1260], ['5', '豆豆', '侦察蜂', 1201]];
     return '<div class="panel board" id="ldBoard">' + rows.map(function (r) { return '<div class="br"><span class="rk">' + r[0] + '</span><span class="nm">' + r[1] + '</span><span class="tg">' + r[2] + '</span><span class="sc">' + r[3] + '</span></div>'; }).join('')
-      + '<div class="br gap">· · ·</div><div class="br me"><span class="rk">23</span><span class="nm">你 · 小明</span><span class="tg">工蜂</span><span class="sc">1108</span></div></div>';
+      + '<div class="br gap">···</div><div class="br me"><span class="rk">23</span><span class="nm">小明 (你)</span><span class="tg">工蜂</span><span class="sc">1108</span></div></div>';
   }
   function ladder(o) {
     o = o || {};
@@ -128,7 +128,8 @@
       + '<p class="cap center" style="margin-top:8px">排位都是「⚡ 抢答赛」：谁先拼对谁得分</p>'
       + '<div class="lbl">🏅 排行榜 <small>每天更新</small></div>' + board(o.board || 'ranked')
       + (o.unranked ? '' : '<div class="lbl">我的战绩</div><div class="stats3"><div class="st"><b>12</b><span>赢了几局</span></div><div class="st"><b>🔥3</b><span>连胜</span></div><div class="st"><b>0.7<small style="font-size:15px">秒</small></b><span>最快拼对</span></div></div>'
-        + '<details class="fold panel" style="margin-top:12px;padding:0"><summary class="hist" style="min-height:56px"><span class="t">最近 5 局<small>赢 3 · 输 2</small></span><span class="d" aria-hidden="true">›</span></summary></details>')
+        + '<details class="fold panel" style="margin-top:12px;padding:0"><summary class="hist" style="min-height:56px"><span class="t">最近对局<small>最近 5 局：赢 3 · 输 2</small></span><span class="d" aria-hidden="true">›</span></summary></details>'
+        + '<details class="fold panel" style="margin-top:10px;padding:0"><summary class="hist" style="min-height:56px"><span class="t">📊 详细数据<small>胜率、抢先率、平均用时…给老师和家长看</small></span><span class="d" aria-hidden="true">›</span></summary></details>')
       + '</div>';
   }
 
@@ -158,13 +159,13 @@
 
   /* ------------------------------------------------------------------ 大厅 */
   function room(av_, nm, tag, mode, lv, gold) {
-    return '<div class="panel room">' + av(av_, 'op') + '<div class="t"><div class="nm">' + nm + '</div><div class="mt"><span class="m">' + mode + '</span><span class="lv">' + lv + '</span>' + tag + '</div></div>'
+    return '<div class="panel room">' + av(av_, 'op') + '<div class="t"><div class="nmrow"><span class="nm">' + nm + '</span>' + tag + '</div><div class="mt"><span class="m">' + mode + '</span><span class="lv">' + lv + '</span></div></div>'
       + '<button class="btn ' + (gold ? 'btn-gold' : 'btn-brand') + ' go" data-rid="r">开打 ›</button></div>';
   }
   function lobby(o) {
     o = o || {};
     var list;
-    if (o.k === 'empty') list = '<div class="panel empty">' + img('ui/brain_explorer.webp') + '<b>现在还没有人开房</b><p>点上面的「开一间房」，<br>等同学来和你打</p></div>';
+    if (o.k === 'empty') list = '<div class="panel empty">' + img('ui/brain_explorer.webp') + '<b>现在还没有人开房</b><p>点上面的「➕ 开一间」，<br>等同学来和你打</p></div>';
     else if (o.k === 'error') list = '<div class="panel inline-err">' + img('ui/brain_alarm.webp') + '<div class="t"><b>看不到房间列表</b><span>网络不太顺，连上再试</span></div><button class="btn btn-brand" id="prRetry">再试一次</button></div>';
     else if (o.k === 'loading') list = '<div class="rooms" aria-busy="true">' + [1, 2, 3].map(function () { return '<div class="panel room"><div class="av empty">?</div><div class="t"><div class="skel" style="width:60%"></div><div class="skel" style="width:85%;margin-top:10px"></div></div></div>'; }).join('') + '</div><p class="upd">正在找房间…</p>';
     else list = '<div class="rooms" id="prList">'
@@ -174,7 +175,7 @@
       + '</div><p class="upd">刚刚更新 · 每 5 秒自动刷新</p>';
     return '<div class="bapp">' + head({ title: '🏠 公开房间', slot: o.k === 'error' ? '' : '<span class="live"><i></i>' + (o.k === 'empty' ? '0' : o.k === 'loading' ? '…' : '3') + ' 间</span>' })
       + '<div class="hero2">'
-      + (o.k === 'error' ? '<button class="btn btn-gold" id="prNew" disabled>➕ 开一间房<span class="sub">连上网才能开</span></button>' : '<button class="btn btn-gold" id="prNew">➕ 开一间房<span class="sub">自己当房主</span></button>')
+      + (o.k === 'error' ? '<button class="btn btn-gold" id="prNew" disabled>➕ 开一间<span class="sub">连上网才能开</span></button>' : '<button class="btn btn-gold" id="prNew">➕ 开一间<span class="sub">自己当房主</span></button>')
       + '<button class="btn btn-brand" id="prCodeOpen">🔑 输入房间码<span class="sub">朋友给的码</span></button></div>'
       + '<div class="lbl">正在等人的房间</div>' + list + '</div>'
       + (o.code ? sheet('<h3>输入房间码</h3><p class="p">朋友给你的 4 位码，字母数字都行</p>'
@@ -187,19 +188,19 @@
   function chooser(o) {
     o = o || {};
     var ask = o.ask || 'zh', m = o.m || 'C', who = o.who || 'pub';
-    function ch(on, e, b, s, id, extra) { return '<button class="ch' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" id="' + id + '">' + (extra || '') + '<span class="e" aria-hidden="true">' + e + '</span><span class="t"><b>' + b + '</b><span>' + s + '</span></span><span class="ck">' + SVG.check + '</span></button>'; }
+    function ch(on, e, b, s, id, extra) { return '<button class="ch' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" id="' + id + '"><span class="e" aria-hidden="true">' + e + '</span><span class="t"><b>' + b + (extra || '') + '</b><span>' + s + '</span></span><span class="ck">' + SVG.check + '</span></button>'; }
     var names = { A: '⚡ 抢答赛', B: '🎯 回合赛', C: '🔥 同步赛' };
     return '<div class="bapp">' + head({ title: '开一间房', id: 'prBack' })
       + '<div class="step"><i>1</i>怎么出题</div><div class="choices two" role="radiogroup">'
       + ch(ask === 'zh', img('icons/spell_3d.webp'), '看中文', '看着中文拼', 'prAskZh') + ch(ask === 'tts', img('icons/speaker_3d.webp'), '听发音', '听读音来拼', 'prAskTts') + '</div>'
       + '<div class="step"><i>2</i>玩法</div><div class="choices" role="radiogroup">'
-      + ch(m === 'A', '⚡', '抢答赛', '谁先拼对谁得分 · 每词 20 秒', 'prModeA', '<span class="tag pill pill-gold">⭐ 计天梯</span>')
+      + ch(m === 'A', '⚡', '抢答赛', '谁先拼对谁得分 · 每词 20 秒', 'prModeA', ' <span class="tag pill pill-gold">⭐ 计天梯</span>')
       + ch(m === 'B', '🎯', '回合赛', '各拼各的，两人都拼完再下一个', 'prModeB')
-      + ch(m === 'C', '🔥', '同步赛', '拼对就有分，先拼对拿得多', 'prModeC', '<span class="tag pill pill-good">推荐</span>') + '</div>'
+      + ch(m === 'C', '🔥', '同步赛', '拼对就有分，先拼对拿得多', 'prModeC', ' <span class="tag pill pill-good">推荐</span>') + '</div>'
       + '<div class="rulelink"><button class="btn-text" id="prRules">ⓘ 看看三种玩法的规则</button></div>'
       + '<div class="step"><i>3</i>谁能进</div><div class="choices two" role="radiogroup">'
       + ch(who === 'pub', '🌍', '大家都能进', '出现在公开列表', 'prPub') + ch(who === 'pri', '🔒', '只给好友', '发房间码给好友', 'prPri') + '</div>'
-      + '<button class="btn btn-gold btn-xl btn-block btn-col" id="prCreate" style="margin-top:18px">开房！<span class="sub">' + names[m] + ' · ' + (ask === 'zh' ? '看中文' : '听发音') + ' · 10 个词</span></button>'
+      + '<div class="dockcta"><button class="btn btn-gold btn-xl btn-block btn-col" id="prCreate">开房！<span class="sub">' + names[m] + ' · ' + (ask === 'zh' ? '看中文' : '听发音') + ' · 10 个词</span></button></div>'
       + '</div>'
       + (o.rules ? sheet('<h3>三种玩法怎么算分</h3><ul class="sheet-rules" style="margin-top:8px">'
         + '<li><b>⚡ 抢答赛</b>：同一个词一起拼，<b>先拼对的拿 100 分</b>，另一个人这词 0 分。有人拼对就马上下一个词。只有它计天梯分。</li>'
@@ -214,11 +215,11 @@
     var friend = o.friend;
     var seat2 = friend ? '<div class="seat">' + av(OP.av, 'op off') + '<div class="nm">' + OP.n + '</div><div class="tg">已邀请，等她进来</div></div>'
       : '<div class="seat"><div class="av empty">?</div><div class="nm">等对手</div><div class="tg">谁会来呢？</div></div>';
-    var code = o.pri ? '<div class="panel" style="margin-top:16px;text-align:center"><div class="cap">把房间码发给好友</div><div class="code" id="prCodeShow" aria-label="房间码 4 5 X F"><span>4</span><span>5</span><span>X</span><span>F</span></div>'
+    var code = o.pri ? '<div class="panel" style="margin-top:16px;text-align:center"><div class="cap">把房间码发给好友</div><div class="code" id="prCodeBig" aria-label="房间码 4 5 X F"><span>4</span><span>5</span><span>X</span><span>F</span></div>'
       + (o.copied ? '<div class="copied" role="status">✅ 已复制！去微信粘贴给好友</div><p class="cap" style="margin-top:6px">复制不了？长按上面的码也行</p>' : '')
       + '<div class="row" style="margin-top:12px"><button class="btn btn-gold" id="prCopy">📋 复制邀请</button><button class="btn btn-brand" id="prSendFr">👥 发给好友</button></div></div>' : '';
-    return '<div class="bapp">' + head({ back: '不等了', id: 'prBack', title: friend ? '等 ' + OP.n + ' 进来' : o.pri ? '🔒 私密房' : '等对手进来' })
-      + '<div class="center"><span class="pill pill-gold" style="font-size:14px;padding:6px 12px">🔥 同步赛 · 看中文 · 10 个词</span></div>'
+    return '<div class="bapp">' + head({ back: '不等了', id: 'prBack', title: '等对手进来' })
+      + '<div class="center"><span class="pill pill-gold" style="font-size:14px;padding:6px 12px">' + (o.pri ? '🔒 私密房 · ' : friend ? '👥 已邀请 ' + OP.n + ' · ' : '') + '🔥 同步赛 · 看中文 · 10 个词</span></div>'
       + '<div class="seats" id="prSeats">' + '<div class="seat">' + av(ME.av, 'me') + '<div class="nm">你</div><div class="tg">🐝 工蜂 · 房主</div></div><span class="vsb">VS</span>' + seat2 + '</div>'
       + '<div class="center" style="margin-top:14px"><div class="bigcount num" style="font-size:36px"><small>还会等你</small> ' + counter(102, 'mmss') + '</div>'
       + '<p class="cap" style="margin-top:6px">已等 ' + counter(18) + ' 秒 · ' + (friend ? OP.n + '点开邀请就自动开打' : '有人进来就自动开打') + '</p></div>'
@@ -256,7 +257,7 @@
     body += slots(o.word || 'apple', o.typed != null ? o.typed : 'ap', o.slotCls, o.hint !== false);
     if (o.reveal) body += reveal(o.reveal);
     else if (o.fb) body += o.fb;
-    else body += '<div class="feedback" aria-live="polite"></div>';
+    else body += '<div class="feedback" id="prHint" aria-live="polite"></div>';
     body += '</div>';
     return '<div class="bapp dock bt">' + tbar(o.no || 3, 10, o.dots || 'wwlcxxxxxx', timer(t, (t / secs).toFixed(2), tcls)) + body + kb(o.kbOff) + '</div>'
       + (o.quit ? sheet('<h3>现在退出就算输哦</h3><p class="p">这一局会记成输，天梯分也会扣。</p><div class="row" style="margin-top:16px"><button class="btn btn-ghost" id="bQuitYes">退出</button><button class="btn btn-gold" id="bQuitNo">接着打</button></div>') : '');
@@ -268,7 +269,7 @@
     return '<div class="bapp bt">' + tbar(10, 10, 'wwlwwlwwwc', timer('–', 0, 'frozen'))
       + vsbar({ my: 700, op: 400, mySt: st('ok', '✅ 答完了'), opSt: st('', '✍️ 最后一个词') })
       + '<div class="panel wait-card" id="prWaitResult">' + img('ui/brain_explorer.webp', '', '').replace('<img', '<img style="width:88px;height:88px"')
-      + '<h2 class="h-l" style="margin-top:6px">你答完了！</h2><p class="p" style="margin-top:4px">等 ' + OP.n + ' 拼完最后一个词…</p>'
+      + '<h2 class="h-l" style="margin-top:6px">你答完了！</h2><p class="p" style="margin-top:4px">正在等对手交卷… ' + OP.n + ' 还在拼最后一个词</p>'
       + '<div class="bigcount num" style="margin-top:10px"><small>已等</small> ' + counter(12) + '<small>秒</small></div>'
       + '<p class="cap" style="margin-top:4px">最多等 45 秒，她不交卷就按规则算</p></div>'
       + '<div class="stack" style="margin-top:14px"><button class="btn btn-brand btn-block" id="prMine">先看我的成绩</button><button class="btn-text dim" id="prGiveUp">不等了，回房间列表</button></div></div>';
@@ -277,13 +278,13 @@
   /* ------------------------------------------------------------------ 结算 */
   function result(o) {
     var words = [['apple', '苹果', 1], ['banana', '香蕉', 1], ['orange', '橙子', 0], ['grape', '葡萄', 1], ['pear', '梨', 1], ['peach', '桃子', 1], ['lemon', '柠檬', 0], ['melon', '瓜', 1], ['cherry', '樱桃', 1], ['mango', '芒果', 1]];
-    var hero = { win: ['ui/brain_champion.webp', '你赢了！', '快了 0.4 秒，太厉害了'], lose: ['ui/brain_rest.webp', '差一点点！', '你拼对了 6 个词，最快 0.9 秒'], draw: ['ui/brain_explorer.webp', '打平啦！', '两个人一样厉害 🤝'], forfeit: ['ui/brain_champion.webp', '这局算你赢', OP.n + ' 一直没交卷，按规则算你赢'] }[o.k];
+    var hero = { win: ['ui/brain_champion.webp', '你赢了！', '快了 0.4 秒，太厉害了'], lose: ['ui/brain_rest.webp', '差一点点！', '你拼对了 6 个词，最快 0.9 秒'], draw: ['ui/brain_explorer.webp', '打平啦！', '两个人一样厉害 🤝'], forfeit: ['ui/brain_champion.webp', '🏆 对手已离场，本局你胜', OP.n + ' 一直没交卷，按规则算你赢'] }[o.k];
     var my = { win: 700, lose: 500, draw: 600, forfeit: 700 }[o.k], op = { win: 400, lose: 600, draw: 600, forfeit: 300 }[o.k];
     var reward = o.ranked
       ? (o.k === 'lose'
         ? '<div class="panel reward"><span class="delta down num">-13</span><div class="t"><b>天梯分 1095</b><span>🛡 段位保护：再输 2 局也不会掉段</span></div></div>'
         : '<div class="panel reward"><span class="delta up num">+20</span><div class="t"><b>天梯分 1128 · 🐝 工蜂</b><span>还差 72 分 → 🔍 侦察蜂 · 约赢 4 局</span><div class="prog" style="--p:.64"><i></i></div></div></div>')
-      : '<div class="panel reward"><span class="delta zero num">±0</span><div class="t"><b>这局不计天梯分</b><span>只有 ⚡ 抢答赛 计天梯 · 总战绩 6 胜 1 平 3 负</span></div></div>';
+      : '<div class="panel reward"><span class="delta zero num">±0</span><div class="t"><b>本局不计天梯</b><span>只有 ⚡ 抢答赛计分 · 总战绩 6 胜 1 平 3 负</span></div></div>';
     var acts = o.ranked
       ? '<div class="row" style="margin-top:14px"><button class="btn btn-gold btn-xl" id="prAgain">⚡ 再来一局</button></div><div class="center"><button class="btn-text" id="prHome">回到岛屿 ›</button></div>'
       : '<div class="row" style="margin-top:14px"><button class="btn btn-gold" id="prAgain">和 ' + OP.n + ' 再来</button><button class="btn btn-brand" id="prBack2">回房间列表</button></div><div class="center"><button class="btn-text" id="prHome">回到岛屿 ›</button></div>';
@@ -320,21 +321,22 @@
       + '<div class="msg">' + av('12', 'op', 40) + '<div class="t"><b>阿杰：👍 打得好！</b><small>10 分钟前</small></div><button class="btn btn-ghost">回一句</button></div>'
       + '<div class="msg">' + av('20', 'op', 40) + '<div class="t"><b>甜甜：👋 你好呀</b><small>昨天</small></div></div></div>' : '';
     return '<div class="bapp">' + head({ title: '👥 我的好友', id: 'frX' })
-      + '<div class="row" style="justify-content:space-between"><span class="cap">我的状态</span><div class="seg" role="radiogroup" aria-label="我的状态"><button class="on" role="radio" aria-checked="true">🟢 在线</button><button role="radio" aria-checked="false">🌙 隐身</button></div></div>'
+      + '<div class="row" style="justify-content:space-between"><button class="btn-text dim" id="frStInfo" style="padding:0 6px">我的状态 ⓘ</button><div class="seg" role="radiogroup" aria-label="我的状态"><button class="on" id="frOn" role="radio" aria-checked="true">🟢 在线</button><button id="frHide" role="radio" aria-checked="false">🌙 隐身</button></div></div>'
       + req + inbox
       + '<div class="lbl">好友 <small>' + (o.empty ? '0' : '2 人在线') + '</small></div>' + list
       + '<div class="panel myid" style="margin-top:14px"><div class="t">你的竞赛 ID<b>No.007</b></div><button class="btn btn-ghost">📋 复制</button><button class="btn btn-brand" id="frAddOpen">＋ 加好友</button></div>'
       + '</div>'
       + (o.add ? sheet('<h3>加好友</h3><p class="p">输入同学的竞赛 ID 数字</p><div style="margin-top:12px"><input class="input focus" id="frCid" inputmode="numeric" value="' + (o.add === 'err' ? '12' : '') + '" placeholder="例如 31" aria-label="同学的竞赛 ID 数字"></div>'
         + (o.add === 'err' ? '<div class="field-err" role="alert">😕 加不上 —— 看看竞赛 ID 对不对</div>' : '<p class="cap center" style="margin-top:8px">竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001</p>')
-        + '<button class="btn btn-gold btn-xl btn-block" id="frAdd" style="margin-top:14px">加好友</button>') : '');
+        + '<button class="btn btn-gold btn-xl btn-block" id="frAdd" style="margin-top:14px">加好友</button>') : '')
+      + (o.stinfo ? sheet('<h3>在线和隐身</h3><ul class="sheet-rules" style="margin-top:8px"><li><b>🟢 在线</b>：好友能看到你「刚才还在」。网页不能像 App 那样一直挂着，所以这只表示你最近开着页面。</li><li><b>🌙 隐身</b>：隐身时好友看到的你和「不在线」一模一样，看不出差别。</li></ul><button class="btn btn-gold btn-block" style="margin-top:16px">知道了</button>') : '');
   }
   function friendDetail(o) {
     o = o || {};
     return '<div class="bapp">' + head({ title: OP.n, id: 'frBack', slot: '<button class="back ic" aria-label="更多">⋯</button>' })
       + '<div class="center" style="margin-top:6px"><div class="avwrap" style="display:inline-block">' + av(OP.av, 'op', 104) + '<i class="dot"></i></div><div class="h-l" style="margin-top:10px">' + OP.n + '</div><p class="cap">🟢 在线 · 🐝 工蜂 · 你们打过 5 局（你赢 3）</p></div>'
       + '<button class="btn btn-gold btn-xl btn-block" id="frPk" style="margin-top:16px">⚔️ 约她打一局</button>'
-      + '<div class="lbl">打个招呼 <small>只能发这几句</small></div><div class="qm">'
+      + '<div class="lbl">打个招呼 <small>只能发这几句，不能打字</small></div><div class="qm">'
       + ['⚔️ 来一局？', '👍 打得好！', '😄 再来！', '👋 你好呀'].map(function (t, i) { return '<button class="btn btn-ghost' + (o.sent && i === 0 ? '" aria-pressed="true" style="border-color:var(--good)' : '') + '">' + t + '</button>'; }).join('') + '</div>'
       + (o.sent ? '<div class="copied" role="status" style="display:flex;justify-content:center">✅ 已发给 ' + OP.n + '：⚔️ 来一局？</div>' : '')
       + '</div>'
@@ -403,8 +405,8 @@
     /* 对战 */
     bt_A_mid: { g: '对战', n: 'A 抢答赛 · 拼到一半', f: function () { return battle({}); } },
     bt_A_opp: { g: '对战', n: 'A · 对手抢先拼对', f: function () { return battle({ t: 9, tcls: 'frozen', vs: { my: 200, op: 200, opPlus: 100, opSt: st('ok', '✅ 拼对了') }, typed: 'app', kbOff: 1, reveal: { msg: OP.n + ' 抢先拼对了！', en: 'apple', zh: '苹果' }, slotCls: 'rv' }); } },
-    bt_A_mine: { g: '对战', n: 'A · 我抢先拼对', f: function () { return battle({ t: 11, tcls: 'frozen', vs: { my: 300, op: 100, myPlus: 100, lead: 'me', mySt: st('ok', '✅ 0.7 秒') }, slotCls: 'ok', kbOff: 1, reveal: { good: 1, msg: '🎉 你抢先拼对！+100', en: 'apple', zh: '苹果' } }); } },
-    bt_wrong: { g: '对战', n: '拼错了（还能改）', f: function () { return battle({ t: 12, typed: 'appel', slotCls: 'bad', fb: '<div class="feedback bad" role="alert">不对哦，删掉再试试</div>' }); } },
+    bt_A_mine: { g: '对战', n: 'A · 我抢先拼对', f: function () { return battle({ t: 11, tcls: 'frozen', vs: { my: 300, op: 100, myPlus: 100, lead: 'me', mySt: st('ok', '✅ 0.7 秒') }, slotCls: 'ok', kbOff: 1, reveal: { good: 1, msg: '🔥 你抢先拼对！+100 · 0.7 秒', en: 'apple', zh: '苹果' } }); } },
+    bt_wrong: { g: '对战', n: '拼错了（还能改）', f: function () { return battle({ t: 12, typed: 'appel', slotCls: 'bad', fb: '<div class="feedback bad" id="prHint" role="alert">不对，再试试 · 删掉改一改</div>' }); } },
     bt_timeout: { g: '对战', n: '时间到 · 看答案', f: function () { return battle({ t: 0, tcls: 'frozen', vs: { my: 200, op: 100, mySt: st('miss', '⏱ 没拼完'), opSt: st('miss', '⏱ 没拼完') }, slotCls: 'rv', kbOff: 1, reveal: { msg: '时间到！正确答案是', en: 'apple', zh: '苹果' } }); } },
     bt_last5: { g: '对战', n: '最后 5 秒', f: function () { return battle({ t: 4, typed: 'appl' }); } },
     bt_B_waitopp: { g: '对战', n: 'B 回合赛 · 我拼对了，等对手', f: function () { return battle({ mode: 'B', t: 9, vs: { my: 300, op: 180, myPlus: 100, mySt: st('ok', '✅ 拼对了'), lead: 'me' }, slotCls: 'ok', kbOff: 1, notice: notice('good', '✅', '你拼对了 +100！等 ' + OP.n + ' 拼完', 9) }); } },
@@ -412,8 +414,8 @@
     bt_C_opp: { g: '对战', n: 'C 同步赛 · 对手先拼对，我还能拿 60', f: function () { return battle({ mode: 'C', t: 7, vs: { my: 160, op: 300, opPlus: 100, opSt: st('ok', '✅ 拼对了'), lead: 'op' }, typed: 'app', notice: notice('', '⏳', OP.n + ' 先拼对了！你拼对还能拿 <b class="num">60</b> 分', 7) }); } },
     bt_C_waitopp: { g: '对战', n: 'C · 我也拼对了，等时间到/对手', f: function () { return battle({ mode: 'C', t: 6, vs: { my: 220, op: 300, myPlus: 60, mySt: st('ok', '✅ +60'), lead: 'op' }, slotCls: 'ok', kbOff: 1, notice: notice('good', '✅', '你也拼对了 +60！等 ' + OP.n + ' 拼完', 6) }); } },
     bt_tts: { g: '对战', n: '听发音出题', f: function () { return battle({ tts: 1, typed: 'a', hint: false }); } },
-    bt_net: { g: '对战', n: '网络不稳（提示在 VS 条下面）', f: function () { return battle({ notice: notice('warn', '📶', '网络有点慢，正在重连…别关页面') }); } },
-    bt_idle: { g: '对战', n: '对手没动静（倒数）', f: function () { return battle({ vs: { my: 200, op: 100, opOff: 1, opSt: st('idle', '💤 没动静') }, notice: notice('warn', '💤', OP.n + ' 好像掉线了，不回来就算你赢', 26) }); } },
+    bt_net: { g: '对战', n: '网络不稳（提示在 VS 条下面）', f: function () { return battle({ notice: notice('warn', '📶', '网络有点慢，正在重连…别关页面').replace('class="notice', 'id="prNetWarn" class="notice') }); } },
+    bt_idle: { g: '对战', n: '对手没动静（倒数）', f: function () { return battle({ vs: { my: 200, op: 100, opOff: 1, opSt: st('idle', '💤 没动静') }, notice: notice('warn', '💤', OP.n + ' 掉线了…不回来就算你赢', 26) }); } },
     bt_quit: { g: '对战', n: '点 ✕ 退出（确认）', f: function () { return battle({ quit: 1 }); } },
     bt_longname: { g: '对战', n: '对手名字很长（320 宽检查）', f: function () { OP.n = '王小红同学的超长名字'; return battle({ vs: { my: 1200, op: 1100 } }); } },
     /* 交卷后 */
@@ -432,6 +434,7 @@
     fr_inbox: { g: '好友', n: '收到的招呼', f: function () { return friends({ inbox: 1 }); } },
     fr_detail: { g: '好友', n: '好友详情 · 快捷招呼已发', f: function () { return friendDetail({ sent: 1 }); } },
     fr_invite: { g: '好友', n: '约战 · 开私密房邀请', f: function () { return friendDetail({ invite: 1 }); } },
+    fr_status: { g: '好友', n: '在线/隐身说明（ⓘ）', f: function () { return friends({ stinfo: 1 }); } },
     fr_loggedout: { g: '好友', n: '没登录', f: function () { return friends({ out: 1 }); } }
   };
   window.SCREENS = S;
