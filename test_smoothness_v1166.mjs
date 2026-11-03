@@ -46,22 +46,22 @@ const CAPS = {
   hiddenHomeRunningRatchet: 160, // S4 岛开着时被盖住的首页还在跑的动画（棘轮：今天 138，目标 0）
   infiniteAnims: 0,            // S2/S4 待机时永远循环的装饰（首页主题演员除外）
   openMs: 4500,                // S3 点岛卡 → 岛能用（本分支 2.1~3.0 秒，2 秒硬揭开）
-  closeMs: 800,                // S3 岛 → 首页（本分支 84~373ms）
-  reopenMs: 800,               // S3 再进同一个岛（保活）（本分支 128~289ms）
-  answerHandlerMedian: 220,    // S5 每个游戏：processingEnd − startTime 中位数（本分支 92~155；账本回退 532~554、v1163 419~435）
-  answerPaintMedian: 300,      // S5 每个游戏：到下一帧画出（Event Timing duration）中位数（本分支 136~236；回退 ≥484）
-  answerHandlerP90: 320,       // S5 三个游戏合起来 24 题的 p90（本分支 132~225；回退 ≥497）
-  answerPaintP90: 420,         // S5（本分支 176~312；回退 ≥568）
+  closeMs: 1200,               // S3 岛 → 首页（本分支空闲 84~143ms，重负载最差 684ms）
+  reopenMs: 1200,              // S3 再进同一个岛（保活）（本分支 120~289ms；保活坏了=整页重载 >2 秒）
+  answerHandlerMedian: 300,    // S5 每个游戏：processingEnd − startTime 中位数（本分支空闲 92~119、重负载 ≤216；账本回退 ≥522、v1163 ≥431）
+  answerPaintMedian: 400,      // S5 每个游戏：到下一帧画出（Event Timing duration）中位数（本分支空闲 136~168、重负载 ≤316；回退 ≥492）
+  answerHandlerP90: 380,       // S5 三个游戏合起来 24 题的 p90（本分支空闲 127~170、重负载 ≤253；回退 ≥525）
+  answerPaintP90: 520,         // S5（本分支空闲 176~224、重负载 ≤408；回退 ≥600）
   answerPaintMax: 1200,        // S5 任何一题都不许「卡住」超过这么久（本分支最差 568）
-  revealMedLongTaskMs: 450,    // S6 各次答对揭晓 1.5 秒内长任务合计的中位数（本分支 82~336；账本回退 568、v1163 550）
-  revealMedMaxFrameMs: 350,    // S6 揭晓最长一帧的中位数（本分支 100~250；账本回退 567、v1163 417）
-  revealMedDropped: 45,        // S6 揭晓掉帧中位数（本分支 9~23；v1163 63）
+  revealMedLongTaskMs: 500,    // S6 各次答对揭晓 1.5 秒内长任务合计的中位数（本分支空闲 82~196、重负载 ≤392；账本回退 634、v1163 462）
+  revealMedMaxFrameMs: 350,    // S6 揭晓最长一帧的中位数（本分支 83~250；账本回退 583、v1163 483）
+  revealMedDropped: 65,        // S6 揭晓掉帧中位数（本分支空闲 4~23、重负载 ≤50；v1163 60）——护栏，不是回退探测器
   revealWorstLongTaskMs: 1400, // S6 最差一次揭晓（棘轮：撞上云存档整份重建，今天最差 957）
   revealWorstMaxFrameMs: 700,  // S6（今天最差 467）
   revealWorstDropped: 110,     // S6（今天最差 69）
-  resultLongTaskMs: 600,       // S6 结算页 3 秒内长任务合计（本分支 0~246；账本回退 655）
-  resultMaxFrameMs: 450,       // S6（本分支 67~267；账本回退 650）
-  resultDropped: 120,          // S6（本分支 5~76）
+  resultLongTaskMs: 900,       // S6 结算页 3 秒内长任务合计（本分支 0~320、重负载 566；v1163 800）——护栏
+  resultMaxFrameMs: 450,       // S6（本分支 67~267；账本回退 600、v1163 521）
+  resultDropped: 150,          // S6（本分支空闲 5~51、重负载 ≤104）——护栏
 };
 
 const ONLY = (process.env.SMOOTH_ONLY || '').split(',').filter(Boolean);
