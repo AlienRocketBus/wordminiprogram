@@ -4147,8 +4147,27 @@ document.querySelectorAll('.island').forEach(el=>{
         }
         setTimeout(_pollReady, 40);
       }
-      frame.onload = function(){ frame.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
-      try{ frame.contentWindow.location.replace(file); }catch(e){ try{ frame.src = file; }catch(e2){} }
+      /* 🔴v1165 换岛 = 换一个新的、名字唯一的 iframe（以前在同一个 iframe 里 location.replace）。
+         同一个 iframe 换页时，下面的 pushState 比 iframe 换页先生效，联合会话历史里上一条还记着「上一个岛」；
+         孩子点 🗺️（history.back）回首页时，藏着的 iframe 会被浏览器自己导回上一个岛（保活失效、后台重跑、再进又整页重载）。
+         新 iframe 名字不同，旧历史条目找不到它，就不会再被导回去。内存里仍然只有一个岛。 */
+      frame.onload = null;
+      try{
+        var _nf = document.createElement('iframe');
+        for(var _ai = 0; _ai < frame.attributes.length; _ai++){
+          var _at = frame.attributes[_ai];
+          if(_at.name !== 'src' && _at.name !== 'name') _nf.setAttribute(_at.name, _at.value);
+        }
+        _nf.name = 'hsnIsland_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        _nf.style.transition = 'none'; _nf.style.opacity = '0';
+        _nf.onload = function(){ _nf.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
+        _nf.src = file;
+        frame.parentNode.replaceChild(_nf, frame);
+        frame = _nf;
+      }catch(e){
+        frame.onload = function(){ frame.onload = null; _revealIsland(); };
+        try{ frame.contentWindow.location.replace(file); }catch(e1){ try{ frame.src = file; }catch(e2){} }
+      }
       setTimeout(_pollReady, 40);
       setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */
     }
@@ -4180,14 +4199,38 @@ document.querySelectorAll('.island').forEach(el=>{
   /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
      岛内 spelling bee 等覆盖层有自己的历史条目, 返回键会先关覆盖层再关岛(嵌套返回); 覆盖层开着时 goHome 按钮被
      盖住点不到, 所以 closeIsland 触发时岛内绝不残留打开的覆盖层。 */
+  /* 🔴v1165 点一下 🗺️ 就一定回到首页：先当场关掉（不等异步的 history.back），再把岛那条历史弹掉。
+     以前只调 history.back()：岛页自己有历史条目时（比如老的「重新加载」带 _r 跳转），弹掉的是岛页那条，
+     顶层没动 → 岛还开着，孩子得再点一次。现在弹完看一眼：岛页那边动了、顶层没动，就再弹一次（最多 3 次）；
+     顶层动了（popstate）就停。两边都没动静（极慢的手机）就不再弹 —— 宁可留一条历史，也不能一下子退出整个游戏。 */
+  function _popIslandEntry(tries){
+    try{ if(!(history.state && history.state.hsnIsland) || tries >= 3) return; }catch(e){ return; }
+    var f = document.getElementById('islandFrame'), w = null, settled = false, timer = 0;
+    /* 只在岛页已经加载完时才看「岛页那边动没动」：还在加载的岛自己会触发 load，不能当成「弹掉了岛页条目」 */
+    try{ w = (f && f.contentDocument && f.contentDocument.readyState === 'complete') ? f.contentWindow : null; }catch(e){ w = null; }
+    if(!w) f = null;
+    function finish(again){
+      if(settled) return; settled = true;
+      clearTimeout(timer);
+      window.removeEventListener('popstate', onTop);
+      try{ if(w){ w.removeEventListener('popstate', onInner); w.removeEventListener('pagehide', onInner); } }catch(e){}
+      try{ if(f) f.removeEventListener('load', onInner); }catch(e){}
+      if(again) setTimeout(function(){ _popIslandEntry(tries + 1); }, 0);
+    }
+    function onTop(){ finish(false); }
+    function onInner(){ finish(true); }   /* 弹掉的是岛页自己的条目 → 再弹一次 */
+    window.addEventListener('popstate', onTop);
+    try{ if(w){ w.addEventListener('popstate', onInner); w.addEventListener('pagehide', onInner); } }catch(e){}
+    try{ if(f) f.addEventListener('load', onInner); }catch(e){}
+    timer = setTimeout(function(){ finish(false); }, 2500);
+    try{ history.back(); }catch(e){ finish(false); }
+  }
   function closeIsland(){
     _islandPending = null;
     var wrap = document.getElementById('islandFrameWrap');
     if(wrap && wrap.style.display !== 'none'){
-      if(history.state && history.state.hsnIsland){
-        try{ history.back(); return; }catch(e){}
-      }
       _closeIslandNow();
+      _popIslandEntry(0);
     }
   }
   window.openIsland = openIsland;

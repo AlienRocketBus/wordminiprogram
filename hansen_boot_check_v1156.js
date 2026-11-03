@@ -129,9 +129,12 @@
         b.onclick = function () {
           /* 不自动刷新 —— 遇到持续故障会变成无限重启，比不刷新更糟。
              这里用户主动点了，才带上时间戳绕过缓存重来一次。 */
+          /* v1165：用 replace、而且 _r 只换不加 —— 以前 location.href 追加 _r，在首页外壳的岛里会多出一条历史，
+             孩子点 🗺️ 回首页要点两下；连点几次「重新加载」地址后面还会越拖越长。 */
           try {
-            var u = location.href.split('#')[0];
-            location.href = u + (u.indexOf('?') >= 0 ? '&' : '?') + '_r=' + Date.now();
+            var url = new URL(location.href);
+            url.searchParams.set('_r', String(Date.now()));
+            location.replace(url.href);
           } catch (e) {
             try { location.reload(); } catch (e2) {}
           }
