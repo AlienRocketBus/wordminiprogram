@@ -60,6 +60,14 @@ const led = () => page.evaluate(() => { const p = HansenCanonical.read().islands
 const fS = () => frame().evaluate(() => ({ w: S.wrongs[0] || 0, box: S.srs[0] ? S.srs[0].box : null }));
 const rc = () => page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('hansen_coin_awards_v942') || '{}')).filter(k => /^rvrw/.test(k)).sort());
 
+// 另一个标签页里也开着食物岛（不是 iframe，复习 2.0 调不到它，只能靠 storage 事件）
+const tab2 = await ctx.newPage();
+tab2.on('pageerror', e => errs.push('tab2: ' + String(e.stack || e.message).slice(0, 200)));
+await tab2.goto(BASE + 'island_food.html', { waitUntil: 'domcontentloaded' });
+await tab2.waitForFunction(() => window.HansenCanonical && window.S && typeof window.markAnswer === 'function' && document.readyState !== 'loading', null, { timeout: 30000 });
+for (const f of ['hansen_review2_words_v1166.js', 'hansen_review2_v1166.js', 'hansen_review2_ui_v1166.js']) await tab2.addScriptTag({ url: BASE + f + '?v=' + VERSION });
+await tab2.waitForTimeout(800);
+
 console.log('\n▶ 外壳里复习，iframe 里的岛页同步');
 ok((await fS()).w === 2 && (await fS()).box === 1, '开始：岛页内存 apple 错 2 次、盒1');
 await page.evaluate(() => HansenReview2UI.mountEntry(document.getElementById('entry')));
@@ -77,6 +85,12 @@ const w1 = await page.evaluate(() => HansenCoins.get());
 ok(w1 - w0 === 22, '外壳里答对：+2 纠错金（错题 2→1，没有毕业金）+20 全部清零（外壳里没有 v963，复习 2.0 按同一张收据自己发）(' + (w1 - w0) + ')');
 ok(JSON.stringify(await led()) === JSON.stringify({ w: 1, box: 2 }), '账本：错 1 次、盒2 ' + JSON.stringify(await led()));
 ok(JSON.stringify(await fS()) === JSON.stringify({ w: 1, box: 2 }), 'iframe 岛页内存 S 也同步成错 1 次、盒2 ' + JSON.stringify(await fS()));
+const t2 = await tab2.waitForFunction(() => (S.wrongs[0] || 0) === 1 && S.srs[0] && S.srs[0].box === 2, null, { timeout: 5000 }).then(() => true, () => false);
+ok(t2, '另一个标签页里的食物岛：收到 storage 事件，内存 S 也同步成错 1 次、盒2');
+await tab2.evaluate(() => { (window.save || window.__hsnSaveNow)(); window.__hsnSaveNow(); });
+await page.evaluate(() => HansenCanonical._dropCache());
+ok(JSON.stringify(await led()) === JSON.stringify({ w: 1, box: 2 }), '那个标签页之后存盘：账本没被冲回 ' + JSON.stringify(await led()));
+await tab2.close();
 
 console.log('\n▶ 岛页之后照常存盘、玩游戏，不会把复习结果冲掉，也不会重复给钱');
 await frame().evaluate(() => { (window.save || window.__hsnSaveNow)(); window.__hsnSaveNow(); HansenCanonical.absorbCurrent(); });

@@ -424,6 +424,7 @@
     var ok=false;try{ok=h.write(store,true)===true;}catch(e){ok=false;}
     if(!ok)return false;
     syncSaves(touched);
+    set(KEY+'_bump',String(ts));   // 告诉别的标签页：账本被复习改过（界面模块监听它，重新同步岛页内存）
     return true;
   }
 

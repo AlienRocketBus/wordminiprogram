@@ -380,9 +380,10 @@
     act.timer=setInterval(tick,15000);
     try{root.addEventListener('pagehide',function(){clearInterval(act.timer);act.on=false;});}catch(e){}
   }
-  // 别的标签页里做了复习：本页如果是岛页，把内存里的进度从账本重新同步一下（免得下次 save 冲掉复习结果）
+  try{root.addEventListener('pageshow',startActivity);}catch(e){}   // 从返回缓存回来：重新开始数
+  // 别的标签页里做了复习（核心每次改完账本写一下 _bump）：本页如果是岛页，把内存里的进度从账本重新同步（免得下次 save 冲掉复习结果）
   try{root.addEventListener('storage',function(e){
-    try{if(!e||e.key!=='hansen_review2_v1166')return;var h=root.HansenCanonical;if(h&&root.S&&typeof h.syncCurrent==='function')h.syncCurrent();}catch(_e){}
+    try{if(!e||e.key!=='hansen_review2_v1166_bump')return;var h=root.HansenCanonical;if(h&&root.S&&typeof h.syncCurrent==='function')h.syncCurrent();}catch(_e){}
   });}catch(e){}
   if(doc.readyState==='loading')doc.addEventListener('DOMContentLoaded',startActivity);else startActivity();
 
