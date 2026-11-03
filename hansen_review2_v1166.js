@@ -523,7 +523,10 @@
       }else if(graduated)schedulePatrol((v.primary||v.facts[0]).slot,t);
     }
     if(q.kind==='patrol'&&v.patrolDue){
-      var r=v963();try{if(r&&typeof r._debug.patrolOnAnswer==='function')r._debug.patrolOnAnswer(v.patrolDue,correct,q.en);}catch(e){}
+      // 巡检的 +3 由 v963 自己发（同一张收据），这里只把到账的数记进本轮结果
+      var r=v963(),pid='rvrw:'+t+':'+v.patrolDue+':patrol',had=hasAward(pid);
+      try{if(r&&typeof r._debug.patrolOnAnswer==='function')r._debug.patrolOnAnswer(v.patrolDue,correct,q.en);}catch(e){}
+      if(!had&&hasAward(pid))coins+=3;
     }
     logAnswer(q.key,t,correct,correct&&q.mode==='spell'&&!hinted,graduated);
     var ctx2=context(),v2=ctx2.ok&&ctx2.cat.byKey[q.key]?view(ctx2.cat.byKey[q.key],ctx2):v;

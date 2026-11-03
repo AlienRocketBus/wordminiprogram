@@ -63,6 +63,8 @@ await ctx.addInitScript(() => {
     save('wordIslandLand3', { learned: [0], wrongs: { 0: 1 } });
     localStorage.setItem('hsn_crystal_food', JSON.stringify({ 1: { lv: 5, p: 0, d: ymd(-3), done: 1 } }));
     localStorage.setItem('hansen_review_wrong_since_v963', JSON.stringify({ 'food:0': Y, 'food:2': Y, 'color:5': Y, 'season:60': Y }));
+    // banana 早就毕业了，昨天到了 v963 的 30 天巡检期
+    localStorage.setItem('hansen_review_patrol_v963', JSON.stringify({ 'food:1': { due: Y, stage: 1 } }));
   } catch (e) {}
 });
 
@@ -138,14 +140,14 @@ console.log('\n▶ 食物岛：今天复习（第一题故意答错）');
 const T = H.today();
 let page = await openIsland('island_food.html');
 const before = await page.evaluate(() => ({ wallet: HansenCoins.get(), ov: HansenReview2.overview() }));
-ok(before.ov.ok && before.ov.dueCount === 4 && before.ov.sessionSize === 4, 'A 账本开机合并了各岛存档：4 个到期词 ' + JSON.stringify(before.ov));
+ok(before.ov.ok && before.ov.dueCount === 4 && before.ov.patrolCount === 1 && before.ov.sessionSize === 5, 'A 账本开机合并了各岛存档：4 个到期词 + 1 个巡检词 ' + JSON.stringify(before.ov));
 const r0 = await receipts(page);
 ok(Object.keys(r0).length === 0, '开始前没有任何复习收据');
 await page.evaluate(() => HansenReview2UI.open());
 await page.waitForSelector('#hr2_root .hr2-opt, #hr2_root .hr2-tile');
 const order = await page.evaluate(() => HansenReview2UI._state().session.queue.map(q => q.key));
 const land3first = await page.evaluate(() => HansenReview2._debug.catalog().items.find(i => i.members.some(m => m.slot === 'season:60')).key);
-ok(JSON.stringify(order) === JSON.stringify(['orange', land3first, 'apple', 'fish']), 'A 一轮 4 个词、orange 只出现一次、错得多的排前面：' + order.join(','));
+ok(JSON.stringify(order) === JSON.stringify(['orange', land3first, 'apple', 'fish', 'banana']), 'A 一轮 4 个到期词 + 巡检词排最后、orange 只出现一次、错得多的排前面：' + order.join(','));
 await contrast(page, 'G 暗色（默认深空蓝）');
 
 const seen = [];
@@ -167,7 +169,7 @@ while (q && guard++ < 12) {
     await page.tap('#hr2_main [data-act="next"]');
     await page.waitForFunction(() => document.querySelector('#hr2_main .hr2-opt, #hr2_main .hr2-tile'));
     const s1 = await page.evaluate(() => { const s = HansenReview2UI._state().session; return { total: s.total, last: s.queue[s.queue.length - 1] }; });
-    ok(s1.total === 5 && s1.last.key === 'orange' && s1.last.retry === true, 'B 本轮最后再考一次 orange');
+    ok(s1.total === 6 && s1.last.key === 'orange' && s1.last.retry === true, 'B 本轮最后再考一次 orange');
     // 答错当场就写进账本，而且食物岛内存里的 S 也同步了
     const o = await ledgerSlot(page, 'food', 2), c = await ledgerSlot(page, 'color', 5);
     const s = await page.evaluate(() => ({ w: S.wrongs[2], srs: S.srs[2] ? { box: S.srs[2].box, due: S.srs[2].due } : null }));
@@ -177,22 +179,23 @@ while (q && guard++ < 12) {
   q = await qNow(page);
 }
 await page.waitForSelector('#hr2_main .hr2-stats');
-ok(seen.length === 5 && seen[4].startsWith('orange:') && seen[4].includes(':retry'), 'B 做了 5 题（4 个词 + 1 题再考）：' + seen.join(' '));
+ok(seen.length === 6 && seen[5].startsWith('orange:') && seen[5].includes(':retry'), 'B 做了 6 题（5 个词 + 1 题再考）：' + seen.join(' '));
 const result = await page.evaluate(() => ({ text: document.getElementById('hr2_main').innerText, wallet: HansenCoins.get() }));
 ok(/今天的复习完成/.test(result.text) && /答错的 1 个词今天要再试一次/.test(result.text), '结果页出来了，告诉孩子答错的词今天还要再试一次');
 await checkTargets(page, 'B 结果页');
 await shot(page, '3_result');
 const r1 = await receipts(page);
-const expect1 = { [`rvrw:${T}:season:60:c1`]: 2, [`rvrw:${T}:season:60:grad`]: 15, [`rvrw:${T}:food:0:c1`]: 2, [`rvrw:${T}:food:0:grad`]: 15 };
-ok(JSON.stringify(Object.keys(r1).sort()) === JSON.stringify(Object.keys(expect1).sort()) && Object.keys(expect1).every(k => r1[k] === expect1[k]), 'E 只发了这 4 张收据 ' + JSON.stringify(r1));
-ok(result.wallet - before.wallet === 34, 'E 钱包正好涨 34（2+15+2+15） 实际 ' + (result.wallet - before.wallet));
-ok(/\+34/.test(result.text), 'E 结果页写着 +34 金币');
+const expect1 = { [`rvrw:${T}:season:60:c1`]: 2, [`rvrw:${T}:season:60:grad`]: 15, [`rvrw:${T}:food:0:c1`]: 2, [`rvrw:${T}:food:0:grad`]: 15, [`rvrw:${T}:food:1:patrol`]: 3 };
+ok(JSON.stringify(Object.keys(r1).sort()) === JSON.stringify(Object.keys(expect1).sort()) && Object.keys(expect1).every(k => r1[k] === expect1[k]), 'E 只发了这 5 张收据（巡检 +3 是 v963 自己发的）' + JSON.stringify(r1));
+ok(result.wallet - before.wallet === 37, 'E 钱包正好涨 37（2+15+2+15+3） 实际 ' + (result.wallet - before.wallet));
+ok(/\+37/.test(result.text), 'E 结果页写着 +37 金币（和钱包涨的一样，含 v963 发的巡检 +3）');
 const apple = await ledgerSlot(page, 'food', 0), fish = await ledgerSlot(page, 'animal', 4), sea = await ledgerSlot(page, 'season', 60);
 ok(apple.wrongs === 0 && apple.srs && apple.srs.box === 2 && apple.srs.last === T, 'C apple：错题清零、升到盒2 ' + JSON.stringify(apple));
 ok(!fish.srs && fish.tombSrs > 0 && fish.wrongs === 0, 'C fish：盒4 到期答对 → 毕业，计划删掉、立墓碑 ' + JSON.stringify(fish));
 ok(sea.wrongs === 0 && sea.srs && sea.srs.box === 1, 'C 星海词（单词大陆③第 1 个）：错题清零、进计划盒1 ' + JSON.stringify(sea));
 const patrol = await page.evaluate(() => JSON.parse(localStorage.getItem('hansen_review_patrol_v963') || '{}'));
 ok(patrol['animal:4'] && patrol['animal:4'].stage === 1, 'F fish 交给 v963 排了 30 天巡检 ' + JSON.stringify(patrol['animal:4']));
+ok(patrol['food:1'] && patrol['food:1'].stage === 2 && patrol['food:1'].due > T, 'F banana 巡检通过：v963 排到第二道（90 天）' + JSON.stringify(patrol['food:1']));
 const fishStars = await page.evaluate(() => HansenReview2.wordStars('fish'));
 ok(fishStars.stars === 4, 'fish 毕业 + 宠物爪 2 → 4 星「记得牢」 (' + fishStars.stars + ')');
 const ov1 = await page.evaluate(() => HansenReview2.overview());
@@ -224,7 +227,7 @@ await tapAnswer(page, q, true);
 await waitNext(page, q.id);
 await page.waitForSelector('#hr2_main .hr2-stats');
 const r2 = await receipts(page), wallet3 = await page.evaluate(() => HansenCoins.get());
-ok(r2[`rvrw:${T}:todaydone`] === 20 && Object.keys(r2).length === 5, 'E 今天的词都答对过一次：v963 发了 +20 清零奖励（收据 5 张）' + JSON.stringify(Object.keys(r2)));
+ok(r2[`rvrw:${T}:todaydone`] === 20 && Object.keys(r2).length === 6, 'E 今天的词都答对过一次：v963 发了 +20 清零奖励（收据 6 张）' + JSON.stringify(Object.keys(r2)));
 ok(wallet3 - wallet2 === 20, 'E 重新记住 orange 不给钱，只有 +20 (' + (wallet3 - wallet2) + ')');
 const col2 = await ledgerSlot(page, 'color', 5), fo2 = await ledgerSlot(page, 'food', 2);
 ok(col2.srs && fo2.srs && col2.srs.box === 0 && JSON.stringify(col2.srs) === JSON.stringify(fo2.srs) && col2.srs.due > T, 'C 重新记住：盒子不动、明天再见，两个槽位一致 ' + JSON.stringify(col2.srs));
@@ -246,7 +249,7 @@ while (q && guard++ < 10) { await tapAnswer(page, q, true); await waitNext(page,
 await page.waitForSelector('#hr2_main .hr2-stats');
 await page.evaluate(() => { HansenReviewRewardsV963.refresh(); });
 const wallet5 = await page.evaluate(() => HansenCoins.get()), r3 = await receipts(page);
-ok(wallet5 === wallet4 && Object.keys(r3).length === 5, 'E 练一练 + 再刷新 v963：一分钱都没多给 (' + (wallet5 - wallet4) + ')');
+ok(wallet5 === wallet4 && Object.keys(r3).length === 6, 'E 练一练 + 再刷新 v963：一分钱都没多给 (' + (wallet5 - wallet4) + ')');
 // 家长面板 + 报告图
 await page.tap('#hr2_main [data-act="parent"]');
 await page.waitForSelector('#hr2_root .hr2-dist');
