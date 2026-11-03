@@ -21,16 +21,18 @@ def cr(a, b): la, lb = sorted([L(a), L(b)], reverse=True); return (la + .05) / (
 PAIRS = [  # (说明, 前景, 背景, 需要)
     ('字母格边框 line-strong / surface-2', 'line-strong', 'surface-2', 3), ('字母格边框 line-strong / surface-1', 'line-strong', 'surface-1', 3),
     ('当前格金框 focus / surface-1', 'focus', 'surface-1', 3), ('拼对格边 good / good-surface', 'good', 'good-surface', 3), ('拼错格边 bad / bad-surface', 'bad', 'bad-surface', 3),
-    ('计时金边 accent-1 / bg-2', 'accent-1', 'bg-2', 3), ('最后5秒 bad 边 / bad-surface', 'bad', 'bad-surface', 3),
-    ('键 surface-1 / 托盘 surface-3', 'surface-1', 'surface-3', 1.2), ('键字 ink-1 / 键 surface-1', 'ink-1', 'surface-1', 4.5), ('删除键 on-brand / brand-2', 'on-brand', 'brand-2', 4.5),
-    ('进度条 xp-1 / 底槽 surface-3', 'xp-1', 'surface-3', 3), ('进度点 good / surface-3', 'good', 'surface-3', 3), ('在线绿点 good / surface-1', 'good', 'surface-1', 3),
-    ('选中卡金框 accent-1 / surface-2', 'accent-2', 'surface-2', 3), ('ghost 按钮边 line-strong / surface-2', 'line-strong', 'surface-2', 3),
+    ('计时边/进度环 b-edge / bg-2', 'EDGE', 'bg-2', 3), ('最后5秒 bad 边 / bad-surface', 'bad', 'bad-surface', 3),
+    ('键 b-key / 托盘 surface-3（键另有底部阴影）', 'KEY', 'surface-3', 1.2), ('键字 ink-1 / 键 b-key', 'ink-1', 'KEY', 4.5), ('删除键 on-brand / brand-2', 'on-brand', 'brand-2', 4.5),
+    ('进度条 b-fill / 底槽 surface-3', 'FILL', 'surface-3', 3), ('进度点 good / surface-3', 'good', 'surface-3', 3), ('在线绿点 good / surface-1', 'good', 'surface-1', 3),
+    ('选中卡/赢方框 b-sel / surface-2', 'SEL', 'surface-2', 3), ('ghost 按钮边 line-strong / surface-2', 'line-strong', 'surface-2', 3),
     ('我（排行榜）on-brand / brand-2', 'on-brand', 'brand-2', 4.5), ('金按钮字 on-accent / accent-2', 'on-accent', 'accent-2', 4.5), ('靛蓝按钮字 on-brand / brand-1', 'on-brand', 'brand-1', 4.5),
     ('卡片底板 on-plate / plate·最亮卡色', 'on-plate', 'plate@f-yellow-a', 4.5), ('角标 on-badge / badge-bg', 'on-badge', 'badge-bg', 4.5),
 ]
 out = ['# 测量汇总（自动生成：scripts/summarize.py）', '']
 for th in ('cosmos', 'cloud'):
-    v = theme_vars(th)
+    v = theme_vars(th); dark = th == 'cosmos'
+    v['EDGE'] = v['accent-1'] if dark else v['focus']; v['SEL'] = v['accent-2'] if dark else v['focus']
+    v['FILL'] = v['xp-1'] if dark else v['good']; v['KEY'] = v['surface-2'] if dark else v['surface-1']
     out += [f'## 非文字对比度 · {th}', '', '| 元素 | 比值 | 需要 | |', '|---|---:|---:|---|']
     for lab, f, b, need in PAIRS:
         if b.startswith('plate@'):

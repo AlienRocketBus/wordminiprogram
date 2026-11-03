@@ -40,10 +40,10 @@
   function vsbar(o) {
     /* 两行：上面 头像·名字·分数 VS 分数·名字·头像；下面 两边各自的状态小牌（对手状态就挂在对手那一侧） */
     return '<div class="vsbar" id="bVs"><div class="vsrow">'
-      + '<div class="sd' + (o.lead === 'me' ? ' lead' : '') + '">' + av(ME.av, 'me') + '<div class="nmx"><div class="nm">你' + (o.myPlus ? '<span class="plus">+' + o.myPlus + '</span>' : '') + '</div>'
+      + '<div class="sd' + (o.lead === 'me' ? ' lead' : '') + '">' + av(ME.av, 'me') + (o.myPlus ? '<span class="plus">+' + o.myPlus + '</span>' : '') + '<div class="nmx"><div class="nm">你</div>'
       + '<div class="sc num" id="prMy">' + o.my + '</div></div></div>'
       + '<span class="vs">VS</span>'
-      + '<div class="sd r' + (o.lead === 'op' ? ' lead' : '') + '">' + av(OP.av, 'op' + (o.opOff ? ' off' : '')) + '<div class="nmx"><div class="nm">' + (o.opPlus ? '<span class="plus op">+' + o.opPlus + '</span>' : '') + OP.n + '</div>'
+      + '<div class="sd r' + (o.lead === 'op' ? ' lead' : '') + '">' + av(OP.av, 'op' + (o.opOff ? ' off' : '')) + (o.opPlus ? '<span class="plus op">+' + o.opPlus + '</span>' : '') + '<div class="nmx"><div class="nm">' + OP.n + '</div>'
       + '<div class="sc num" id="prOpp">' + o.op + '</div></div></div>'
       + '</div><div class="vsst"><span>' + (o.mySt || st('', '拼写中')) + '</span><span id="prOppSt">' + (o.opSt || st('', '✍️ 正在拼')) + '</span></div></div>';
   }
@@ -410,13 +410,13 @@
     bt_timeout: { g: '对战', n: '时间到 · 看答案', f: function () { return battle({ t: 0, tcls: 'frozen', vs: { my: 200, op: 100, mySt: st('miss', '⏱ 没拼完'), opSt: st('miss', '⏱ 没拼完') }, slotCls: 'rv', kbOff: 1, reveal: { msg: '时间到！正确答案是', en: 'apple', zh: '苹果' } }); } },
     bt_last5: { g: '对战', n: '最后 5 秒', f: function () { return battle({ t: 4, typed: 'appl' }); } },
     bt_B_waitopp: { g: '对战', n: 'B 回合赛 · 我拼对了，等对手', f: function () { return battle({ mode: 'B', t: 9, vs: { my: 300, op: 180, myPlus: 100, mySt: st('ok', '✅ 拼对了'), lead: 'me' }, slotCls: 'ok', kbOff: 1, notice: notice('good', '✅', '你拼对了 +100！等 ' + OP.n + ' 拼完', 9) }); } },
-    bt_B_opp: { g: '对战', n: 'B · 对手先拼对，我还能拿 80', f: function () { return battle({ mode: 'B', t: 9, vs: { my: 180, op: 300, opPlus: 100, opSt: st('ok', '✅ 拼对了'), lead: 'op' }, typed: 'ap', notice: notice('', '⏳', OP.n + ' 拼对了！你拼对还能拿 <b class="num">80</b> 分', 9) }); } },
-    bt_C_opp: { g: '对战', n: 'C 同步赛 · 对手先拼对，我还能拿 60', f: function () { return battle({ mode: 'C', t: 7, vs: { my: 160, op: 300, opPlus: 100, opSt: st('ok', '✅ 拼对了'), lead: 'op' }, typed: 'app', notice: notice('', '⏳', OP.n + ' 先拼对了！你拼对还能拿 <b class="num">60</b> 分', 7) }); } },
+    bt_B_opp: { g: '对战', n: 'B · 对手先拼对，我还能拿 80', f: function () { return battle({ mode: 'B', t: 9, vs: { my: 180, op: 300, opPlus: 100, opSt: st('ok', '✅ 拼对了'), lead: 'op' }, typed: 'ap', notice: notice('', '⏳', OP.n + ' 拼对了！<span style="white-space:nowrap">你拼对还能拿 <b class="num">80</b> 分</span>', 9) }); } },
+    bt_C_opp: { g: '对战', n: 'C 同步赛 · 对手先拼对，我还能拿 60', f: function () { return battle({ mode: 'C', t: 7, vs: { my: 160, op: 300, opPlus: 100, opSt: st('ok', '✅ 拼对了'), lead: 'op' }, typed: 'app', notice: notice('', '⏳', OP.n + ' 先拼对了！<span style="white-space:nowrap">你拼对还能拿 <b class="num">60</b> 分</span>', 7) }); } },
     bt_C_waitopp: { g: '对战', n: 'C · 我也拼对了，等时间到/对手', f: function () { return battle({ mode: 'C', t: 6, vs: { my: 220, op: 300, myPlus: 60, mySt: st('ok', '✅ +60'), lead: 'op' }, slotCls: 'ok', kbOff: 1, notice: notice('good', '✅', '你也拼对了 +60！等 ' + OP.n + ' 拼完', 6) }); } },
     bt_tts: { g: '对战', n: '听发音出题', f: function () { return battle({ tts: 1, typed: 'a', hint: false }); } },
     bt_net: { g: '对战', n: '网络不稳（提示在 VS 条下面）', f: function () { return battle({ notice: notice('warn', '📶', '网络有点慢，正在重连…别关页面').replace('class="notice', 'id="prNetWarn" class="notice') }); } },
     bt_idle: { g: '对战', n: '对手没动静（倒数）', f: function () { return battle({ vs: { my: 200, op: 100, opOff: 1, opSt: st('idle', '💤 没动静') }, notice: notice('warn', '💤', OP.n + ' 掉线了…不回来就算你赢', 26) }); } },
-    bt_quit: { g: '对战', n: '点 ✕ 退出（确认）', f: function () { return battle({ quit: 1 }); } },
+    bt_quit: { g: '对战', n: '点 × 退出（确认）', f: function () { return battle({ quit: 1 }); } },
     bt_longname: { g: '对战', n: '对手名字很长（320 宽检查）', f: function () { OP.n = '王小红同学的超长名字'; return battle({ vs: { my: 1200, op: 1100 } }); } },
     /* 交卷后 */
     sub_wait: { g: '交卷', n: '我交卷了，等对手（有出口）', f: submitted },
