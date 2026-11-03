@@ -11,15 +11,15 @@
 | 当前格金框 focus / surface-1 | 10.49 | 3 | ✅ |
 | 拼对格边 good / good-surface | 5.33 | 3 | ✅ |
 | 拼错格边 bad / bad-surface | 5.43 | 3 | ✅ |
-| 计时金边 accent-1 / bg-2 | 10.10 | 3 | ✅ |
+| 计时边/进度环 b-edge / bg-2 | 10.10 | 3 | ✅ |
 | 最后5秒 bad 边 / bad-surface | 5.43 | 3 | ✅ |
-| 键 surface-1 / 托盘 surface-3 | 1.18 | 1.2 | ❌ |
-| 键字 ink-1 / 键 surface-1 | 13.98 | 4.5 | ✅ |
+| 键 b-key / 托盘 surface-3（键另有底部阴影） | 1.40 | 1.2 | ✅ |
+| 键字 ink-1 / 键 b-key | 11.82 | 4.5 | ✅ |
 | 删除键 on-brand / brand-2 | 6.73 | 4.5 | ✅ |
-| 进度条 xp-1 / 底槽 surface-3 | 9.10 | 3 | ✅ |
+| 进度条 b-fill / 底槽 surface-3 | 9.10 | 3 | ✅ |
 | 进度点 good / surface-3 | 9.10 | 3 | ✅ |
 | 在线绿点 good / surface-1 | 7.70 | 3 | ✅ |
-| 选中卡金框 accent-1 / surface-2 | 6.63 | 3 | ✅ |
+| 选中卡/赢方框 b-sel / surface-2 | 6.63 | 3 | ✅ |
 | ghost 按钮边 line-strong / surface-2 | 3.85 | 3 | ✅ |
 | 我（排行榜）on-brand / brand-2 | 6.73 | 4.5 | ✅ |
 | 金按钮字 on-accent / accent-2 | 7.94 | 4.5 | ✅ |
@@ -36,15 +36,15 @@
 | 当前格金框 focus / surface-1 | 7.90 | 3 | ✅ |
 | 拼对格边 good / good-surface | 4.57 | 3 | ✅ |
 | 拼错格边 bad / bad-surface | 3.91 | 3 | ✅ |
-| 计时金边 accent-1 / bg-2 | 1.35 | 3 | ❌ |
+| 计时边/进度环 b-edge / bg-2 | 7.55 | 3 | ✅ |
 | 最后5秒 bad 边 / bad-surface | 3.91 | 3 | ✅ |
-| 键 surface-1 / 托盘 surface-3 | 1.22 | 1.2 | ✅ |
-| 键字 ink-1 / 键 surface-1 | 16.99 | 4.5 | ✅ |
+| 键 b-key / 托盘 surface-3（键另有底部阴影） | 1.22 | 1.2 | ✅ |
+| 键字 ink-1 / 键 b-key | 16.99 | 4.5 | ✅ |
 | 删除键 on-brand / brand-2 | 7.90 | 4.5 | ✅ |
-| 进度条 xp-1 / 底槽 surface-3 | 2.70 | 3 | ❌ |
+| 进度条 b-fill / 底槽 surface-3 | 4.12 | 3 | ✅ |
 | 进度点 good / surface-3 | 4.12 | 3 | ✅ |
 | 在线绿点 good / surface-1 | 5.02 | 3 | ✅ |
-| 选中卡金框 accent-1 / surface-2 | 1.69 | 3 | ❌ |
+| 选中卡/赢方框 b-sel / surface-2 | 7.31 | 3 | ✅ |
 | ghost 按钮边 line-strong / surface-2 | 3.24 | 3 | ✅ |
 | 我（排行榜）on-brand / brand-2 | 7.90 | 4.5 | ✅ |
 | 金按钮字 on-accent / accent-2 | 8.20 | 4.5 | ✅ |
@@ -494,3 +494,36 @@
 | 320x568 | wt_public_cosmos | – | – | – | – | 0 | 0 |  |  |  | 0 |
 | 320x568 | wt_timeout_cloud | – | – | – | – | 0 | 0 |  |  |  | 0 |
 | 320x568 | wt_timeout_cosmos | – | – | – | – | 0 | 0 |  |  |  | 0 |
+
+## 待机（加载 2.5 秒后再看 1 秒）
+
+- 状态 × 主题：146；仍在运行的动画最多 **0** 个；样式表里 `infinite` 规则 **0** 条；rAF 每秒最多 **0** 次；残留特效层 **0** 个；计时器最多 1 个（每秒 1 次，只改文字）
+
+| 画面_主题 | 主线程忙(%) CPU×4 | 脚本(%) | 布局(%) |
+|---|---:|---:|---:|
+| hub_island_cosmos | 0.05 | 0 | 0 |
+| hub_island_cloud | 0.03 | 0 | 0 |
+| ld_ranked_cosmos | 0.07 | 0 | 0 |
+| ld_ranked_cloud | 0.05 | 0 | 0 |
+| mt_search_cosmos | 0.91 | 0.09 | 0.17 |
+| mt_search_cloud | 0.9 | 0.08 | 0.18 |
+| mt_host_cosmos | 1.16 | 0.09 | 0.26 |
+| mt_host_cloud | 0.85 | 0.07 | 0.22 |
+| lb_rooms_cosmos | 0.04 | 0 | 0 |
+| lb_rooms_cloud | 0.08 | 0 | 0 |
+| ch_default_cosmos | 0.05 | 0 | 0 |
+| ch_default_cloud | 0.03 | 0 | 0 |
+| wt_private_cosmos | 0.87 | 0.09 | 0.22 |
+| wt_private_cloud | 0.95 | 0.08 | 0.21 |
+| jn_wait_cosmos | 0.79 | 0.1 | 0.18 |
+| jn_wait_cloud | 0.76 | 0.09 | 0.17 |
+| bt_A_mid_cosmos | 0.05 | 0 | 0 |
+| bt_A_mid_cloud | 0.04 | 0 | 0 |
+| bt_idle_cosmos | 0.06 | 0 | 0 |
+| bt_idle_cloud | 0.04 | 0 | 0 |
+| sub_wait_cosmos | 0.72 | 0.06 | 0.12 |
+| sub_wait_cloud | 0.94 | 0.09 | 0.17 |
+| rs_win_cosmos | 0.02 | 0 | 0 |
+| rs_win_cloud | 0.05 | 0 | 0 |
+| fr_list_cosmos | 0.07 | 0 | 0 |
+| fr_list_cloud | 0.04 | 0 | 0 |

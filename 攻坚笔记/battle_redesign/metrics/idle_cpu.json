@@ -1,0 +1,1450 @@
+{
+ "animations": {
+  "hub_island_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_standalone_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_loggedout_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_account_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_invite_toast_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_unranked_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_ranked_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_loading_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_empty_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_error_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_config_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "mt_search_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "mt_host_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "mt_found_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "mt_timeout_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_network_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_slow_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_session_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_expired_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_config_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_gone_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_taken_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_self_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_loading_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "need_login_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "need_name_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_rooms_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_loading_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_empty_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_error_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_code_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_code_err_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_default_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_tts_A_private_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_rules_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "wt_public_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_private_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_private_copied_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_friend_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_leave_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_timeout_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "jn_wait_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "jn_slow_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "bt_A_mid_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_A_opp_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_A_mine_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_wrong_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_timeout_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_last5_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_B_waitopp_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_B_opp_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_C_opp_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_C_waitopp_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_tts_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_net_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_idle_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_quit_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_longname_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "sub_wait_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "rs_win_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_lose_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_draw_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_forfeit_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_list_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_empty_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_add_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_add_err_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_request_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_inbox_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_detail_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_invite_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_status_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_loggedout_cosmos": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_island_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_standalone_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_loggedout_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_account_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "hub_invite_toast_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_unranked_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_ranked_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_loading_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_empty_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_error_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ld_board_config_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "mt_search_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "mt_host_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "mt_found_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "mt_timeout_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_network_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_slow_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_session_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_expired_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_config_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_gone_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_taken_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_self_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "err_loading_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "need_login_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "need_name_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_rooms_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_loading_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_empty_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_error_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_code_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "lb_code_err_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_default_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_tts_A_private_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "ch_rules_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "wt_public_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_private_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_private_copied_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_friend_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_leave_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "wt_timeout_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "jn_wait_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "jn_slow_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "bt_A_mid_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_A_opp_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_A_mine_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_wrong_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_timeout_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_last5_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_B_waitopp_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_B_opp_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_C_opp_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_C_waitopp_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_tts_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_net_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_idle_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_quit_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "bt_longname_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "sub_wait_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 1,
+   "intervalMs": 1000,
+   "fxLayer": false
+  },
+  "rs_win_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_lose_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_draw_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "rs_forfeit_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_list_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_empty_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_add_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_add_err_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_request_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_inbox_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_detail_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_invite_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_status_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  },
+  "fr_loggedout_cloud": {
+   "running": 0,
+   "total": 0,
+   "infiniteCss": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "intervalMs": null,
+   "fxLayer": false
+  }
+ },
+ "cpu": {
+  "hub_island_cosmos": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "hub_island_cloud": {
+   "busyPct": 0.03,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ld_ranked_cosmos": {
+   "busyPct": 0.07,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ld_ranked_cloud": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "mt_search_cosmos": {
+   "busyPct": 0.91,
+   "scriptPct": 0.09,
+   "layoutPct": 0.17
+  },
+  "mt_search_cloud": {
+   "busyPct": 0.9,
+   "scriptPct": 0.08,
+   "layoutPct": 0.18
+  },
+  "mt_host_cosmos": {
+   "busyPct": 1.16,
+   "scriptPct": 0.09,
+   "layoutPct": 0.26
+  },
+  "mt_host_cloud": {
+   "busyPct": 0.85,
+   "scriptPct": 0.07,
+   "layoutPct": 0.22
+  },
+  "lb_rooms_cosmos": {
+   "busyPct": 0.04,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "lb_rooms_cloud": {
+   "busyPct": 0.08,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ch_default_cosmos": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ch_default_cloud": {
+   "busyPct": 0.03,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "wt_private_cosmos": {
+   "busyPct": 0.87,
+   "scriptPct": 0.09,
+   "layoutPct": 0.22
+  },
+  "wt_private_cloud": {
+   "busyPct": 0.95,
+   "scriptPct": 0.08,
+   "layoutPct": 0.21
+  },
+  "jn_wait_cosmos": {
+   "busyPct": 0.79,
+   "scriptPct": 0.1,
+   "layoutPct": 0.18
+  },
+  "jn_wait_cloud": {
+   "busyPct": 0.76,
+   "scriptPct": 0.09,
+   "layoutPct": 0.17
+  },
+  "bt_A_mid_cosmos": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "bt_A_mid_cloud": {
+   "busyPct": 0.04,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "bt_idle_cosmos": {
+   "busyPct": 0.06,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "bt_idle_cloud": {
+   "busyPct": 0.04,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "sub_wait_cosmos": {
+   "busyPct": 0.72,
+   "scriptPct": 0.06,
+   "layoutPct": 0.12
+  },
+  "sub_wait_cloud": {
+   "busyPct": 0.94,
+   "scriptPct": 0.09,
+   "layoutPct": 0.17
+  },
+  "rs_win_cosmos": {
+   "busyPct": 0.02,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "rs_win_cloud": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "fr_list_cosmos": {
+   "busyPct": 0.07,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "fr_list_cloud": {
+   "busyPct": 0.04,
+   "scriptPct": 0,
+   "layoutPct": 0
+  }
+ }
+}
