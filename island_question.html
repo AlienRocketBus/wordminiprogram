@@ -4627,10 +4627,24 @@ function getBestCombo(){
   return S.bestCombo || 0;
 }
 
-function showToast(msg){floatText(window.innerWidth/2,window.innerHeight/2-60,msg,'#fbbf24')}
+/* 🔴v1165 提示条：以前借飘字显示（左边缘从屏幕正中开始、长句被右边截掉、1.2 秒就没了）。
+   现在交给页内提示（底部居中、自动换行、约 3 秒）；它还没加载时自己画一个居中的提示框。不闪、不抖、不转。 */
+function showToast(msg){
+  msg=String(msg==null?'':msg);if(!msg)return;
+  var ms=msg.length>8?3000:2000;
+  try{if(window.HansenToast&&typeof HansenToast.say==='function'){HansenToast.say(msg,ms);return;}}catch(e){}
+  try{
+    var d=document.createElement('div');d.className='hsn-island-toast';d.textContent=msg;
+    d.style.cssText='position:fixed;left:50%;top:42%;transform:translateX(-50%);max-width:88vw;width:max-content;box-sizing:border-box;white-space:normal;word-break:break-word;text-align:center;z-index:99990;pointer-events:none;background:rgba(15,23,42,.94);color:#fde047;font-size:15px;font-weight:800;line-height:1.6;padding:10px 16px;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.4)';
+    (document.body||document.documentElement).appendChild(d);
+    setTimeout(function(){try{d.remove();}catch(e){}},ms);
+  }catch(e){}
+}
 /* 🔴v1165 小游戏「这一局」的编号：开局、换难度、停下时都 +1。延时出下一题的回调只认自己那一局——
    编号变了、或者游戏屏已经不在前台，就什么都不做。以前打字大师答完马上返回，0.9 秒后又锁住屏幕、在主页读词；
    换难度后新一局的第一题被旧局的「下一题」顶掉；字母拼拼乐离开后还在主页读词。 */
+/* 🔴v1165 均匀洗牌（Fisher–Yates）。sort(()=>Math.random()-.5) 洗得很不匀：短词常常一出来就是正确顺序 */
+function __hsnShuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 var __hsnRuns={};
 function __hsnRunNew(g){__hsnRuns[g]=(__hsnRuns[g]||0)+1;return __hsnRuns[g];}
 function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hsnRuns[g]||0)!==tok)return;if(scr){var el=document.getElementById(scr);if(!el||!el.classList.contains('active'))return;}return fn.apply(this,arguments);};}
@@ -4670,8 +4684,11 @@ try{document.body.classList.toggle('hsn-boss-battle', id==='boss' && window.boss
 try{if(id!=='typing')document.body.classList.remove('type-lock');}catch(e){}
 document.querySelectorAll('.bottom-nav .nav-item').forEach(n=>n.classList.remove('active'));
 const navMap={home:'navHome',explore:'navExplore',review:'navReview',cards:'navCards'}; /* 🔴 v576: 底栏改 复习/卡册, 高亮联动同步 */
-if(navMap[id])document.getElementById(navMap[id]).classList.add('active');
+/* 🔴v1165 底栏的「探索」格已被错题总览改成「错题」：进探索单词时不能把它点亮 */
+if(navMap[id]&&id!=='explore')document.getElementById(navMap[id]).classList.add('active');
 else document.getElementById('navHome').classList.remove('active');
+/* 🔴v1165 连胜小条「🎯3 · 🪙满」只在答题的屏上显示；回主页、去抽卡/卡册等就收起来（连胜数照留，下次答对接着算） */
+if(['listen','match','typing','cloze','scramble','moles','fish','bubble','speed','eagle','boss','review'].indexOf(id)<0){try{hideComboUI();}catch(e){}}
 /*🔴BUG#94 返回首页恢复滚动位置·其他屏回顶*/
 if(id==='home'){try{var _hy=window._homeScrollY||0;window.scrollTo(0,_hy);if(_hy>0)requestAnimationFrame(function(){try{window.scrollTo(0,_hy);}catch(e){}});}catch(e){window.scrollTo(0,0);}}else{window.scrollTo(0,0);}
 if(id==='explore')renderExplore();
@@ -4726,7 +4743,9 @@ function __hmlResult(m){var M=__hml();return M?M.resultHtml(m):''}
 /* 🔴v1165 题目要孩子自己想出/拼出英文时，配图不能印着答案（身体岛「脚趾」的图上写着 TOE）。
    去掉图里带英文字母的 <text> 标签；去掉后图太空(少于 3 个图形)就不放图，只看中文。
    认词类玩法（单词卡、答对揭晓卡、打地鼠英文题面）照旧显示原图。 */
-function __hsnQuizPic(w){var e=String((w&&w.emoji)||'');if(e.indexOf('<svg')<0)return e;
+/* 🔴v1165 有几张位图自己印着这个词（酸奶杯上写着 YOGURT），拼写类题目里也不放 */
+var __HSN_WORDY_PICS=/icons\/food-v958\/yogurt\.webp/i;
+function __hsnQuizPic(w){var e=String((w&&w.emoji)||'');if(__HSN_WORDY_PICS.test(e))return '';if(e.indexOf('<svg')<0)return e;
   var out=e.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,function(t){return /[A-Za-z]/.test(t.replace(/<[^>]*>/g,''))?'':t});
   return (out.match(/<(circle|rect|path|ellipse|line|polygon|polyline)\b/g)||[]).length>=3?out:''}
 window.__hsnQuizPic=__hsnQuizPic;
@@ -5528,7 +5547,7 @@ function molesComplete(){
     '<div style="text-align:center;padding:30px">'+
       '<div style="font-size:80px">🎯</div>'+
       '<div style="font-size:24px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 完成！</div>'+
-      '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">打中全部 '+molesTotal+' 个</div>'+
+      '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">'+(molesHit>=molesTotal?'打中全部 '+molesTotal+' 个':'打中 '+molesHit+' / '+molesTotal+' 个')+((L.lives-molesLives)>0?' · 打错 '+(L.lives-molesLives)+' 次':'')+'</div>'+  /* 🔴v1165 漏了就照实写，全中才说「全部」 */
       // 🆕 本局得分 vs 历史最高(该难度) + 破纪录提示
       '<div style="background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(21,128,61,.1));border:1px solid rgba(74,222,128,.35);border-radius:16px;padding:10px 16px;margin:0 auto 8px;max-width:300px">'+
         '<div style="display:flex;justify-content:center;gap:22px;align-items:flex-end">'+
@@ -5972,7 +5991,7 @@ function fishComplete(){
     '<div style="text-align:center;padding:30px">'+
       '<div style="font-size:80px">🎣</div>'+
       '<div style="font-size:24px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 完成！</div>'+
-      '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">钓上全部 '+fishTotal+' 条</div>'+
+      '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">'+(fishCaught>=fishTotal?'钓上全部 '+fishTotal+' 条':'钓上 '+fishCaught+' / '+fishTotal+' 条')+((L.lives-fishLives)>0?' · 钓错 '+(L.lives-fishLives)+' 次':'')+'</div>'+  /* 🔴v1165 漏了就照实写，全中才说「全部」 */
       '<div style="background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(21,128,61,.1));border:1px solid rgba(74,222,128,.35);border-radius:16px;padding:10px 16px;margin:0 auto 8px;max-width:300px">'+
         '<div style="display:flex;justify-content:center;gap:22px;align-items:flex-end">'+
           '<div><div style="font-size:12px;color:#94a3b8;font-weight:700">本局得分</div><div style="font-size:38px;font-weight:900;color:#fff;line-height:1.1">'+fishScore+'</div></div>'+
@@ -6388,7 +6407,9 @@ function nextScramble(){
   if(!scrActive)return;
   if(scrIdx>=scrPool.length&&!__hmlRequeue('scramble',scrPool)){scrComplete();return}
   const w=allW[scrPool[scrIdx]];scrWord=w;scrSlots=[];
-  const letters=w.en.split('').sort(()=>Math.random()-.5);
+  const letters=__hsnShuffle(w.en.split(''));
+  /* 🔴v1165 洗出来正好拼成答案就再洗（最多 20 次；全是同一个字母的词怎么洗都一样，就不洗了） */
+  {const ans=w.en.replace(/ /g,'');if(new Set(ans.split('')).size>1){let g=0;while(g++<20&&letters.filter(l=>l!==' ').join('')===ans)__hsnShuffle(letters);}}
   const L=SCRAMBLE_LEVELS[scrLevel]||SCRAMBLE_LEVELS.easy;
   const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">每词 +'+L.xpPerWord+' 经验</span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+Math.min(scrIdx+1,scrTotal)+' / '+scrTotal+'</span><span onclick="startScramble()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
   // 单词若含空格, 把空格当成预填的死字母 (这样 Mr. / pen pal 等也能拼)
@@ -6815,7 +6836,7 @@ bigConfetti()}
 // TYPING MASTER (打字大师)  ——  支持 初级 / 中级 / 高级 三档
 // ============================================================
 let typeWord=null,typePool=[],typeIdx=0,typeInput='',typeActive=false,typeDone=0;
-let typeWordTimes=[],typeWordStart=0,typeRoundStart=0,typeErrors=0,typeTimerInt=null,typeWrongWords=[];
+let typeWordTimes=[],typeWordStart=0,typeRoundStart=0,typeErrors=0,typeTimerInt=null,typeWrongWords=[],typeTimeouts=0;
 let typeRound=1; // 1=初级(3-4字母), 2=中级(5-6字母), 3=高级(7+字母)
 
 // 三档配置
@@ -6838,7 +6859,7 @@ function startTyping(round){markMode('typing');showScreen('typing');__hsnRunNew(
 typeRound=round||1;
 const L=TYPING_LEVELS[typeRound]||TYPING_LEVELS[1];
 typePool=[...Array(allW.length).keys()].filter(L.filter).sort(()=>Math.random()-.5);
-typeIdx=0;typeWordTimes=[];typeErrors=0;typeWrongWords=[];typeRoundStart=Date.now();__hmlStart('typing');startTypeTimer();nextTypeQ()}
+typeIdx=0;typeWordTimes=[];typeErrors=0;typeTimeouts=0;typeWrongWords=[];typeRoundStart=Date.now();__hmlStart('typing');startTypeTimer();nextTypeQ()}
 
 function showTypingMenu(){markMode('typing');showScreen('typing');__hsnRunNew('type');typeActive=false;
 try{document.body.classList.remove('type-lock');}catch(e){}
@@ -6885,6 +6906,7 @@ function typeTimeout(){
   // 30秒没打完: 自动跳到下一个词 (不计入速度, 没打不算). 到最后一个词会自动结束.
   if(!typeActive||!typeWord)return;
   typeWordStart=0; // 防止本tick内重复触发
+  if(!__hmlIsRetry('typing',typePool[typeIdx]))typeTimeouts++;  /* 🔴v1165 超时没拼出来也算一次没拼对 */
   typeIdx++;
   nextTypeQ();
 }
@@ -7031,7 +7053,8 @@ typeWordTimes.forEach(function(w){
 var cpm=(fairMs>0&&fairLetters>0)?Math.round(fairLetters*60000/fairMs):0;
 var totalMs=typeWordTimes.reduce(function(a,b){return a+(b.ms||0)},0);
 var totalLetters=typeWordTimes.reduce(function(a,b){return a+(b.letters||0)},0);
-var accuracy=(totalLetters+typeErrors>0)?Math.round(totalLetters/(totalLetters+typeErrors)*100):100;
+/* 🔴v1165 「拼对率」按词算：拼对的词 /（拼对 + 拼错 + 超时）。以前把字母数和错词数混在一起（6 对 2 错显示 92%） */
+var accuracy=(typeDone+typeErrors+typeTimeouts>0)?Math.round(typeDone/(typeDone+typeErrors+typeTimeouts)*100):100;
 var medal={1:'🥉',2:'🥈',3:'🥇'}[typeRound]||'🏅';
 var medalName={1:'铜牌',2:'银牌',3:'金牌'}[typeRound]||'奖牌';
 // 🆕 打字速度评级: 把 CPM 换成中学生看得懂的评价(分5档)
@@ -7088,7 +7111,7 @@ document.getElementById('typingContent').innerHTML='<div style="text-align:cente
   +'<div style="font-size:12px;color:#a5b4fc;font-weight:700;letter-spacing:1px">打字速度</div>'
   +'<div style="font-size:50px;font-weight:900;color:#fff;font-family:ui-monospace,monospace;line-height:1.05;text-shadow:0 2px 8px rgba(0,0,0,.4)">'+cpm+'<span style="font-size:14px;color:#94a3b8;font-weight:600"> 字母/分钟</span></div>'
   +'<div style="font-size:16px;font-weight:800;color:'+speedRating.color+';margin-top:2px">'+speedRating.label+'</div>'
-  +'<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:14px;color:#94a3b8;flex-wrap:wrap"><span>总用时 <b style="color:#fff;font-variant-numeric:tabular-nums">'+fmtTypeTime(totalMs)+'</b></span><span>准确率 <b style="color:'+(accuracy>=95?'#22c55e':'#fbbf24')+'">'+accuracy+'%</b></span><span>最快 <b style="color:#fbbf24">'+bestCpm+'</b></span></div>'
+  +'<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:14px;color:#94a3b8;flex-wrap:wrap"><span>总用时 <b style="color:#fff;font-variant-numeric:tabular-nums">'+fmtTypeTime(totalMs)+'</b></span><span>拼对率 <b style="color:'+(accuracy>=95?'#22c55e':'#fbbf24')+'">'+accuracy+'%</b></span><span>最快 <b style="color:#fbbf24">'+bestCpm+'</b></span></div>'
 +'</div>'
 +recordBanner+wrongReview+perWord
 +'<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.5);color:#fff;padding:8px 16px;border-radius:10px;display:inline-block;margin:9px 0 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'
@@ -8203,7 +8226,10 @@ function makeFakeSpelling(word){
     'b':['p','d'],'d':['b','t'],'p':['b','q'],'q':['p','g'],'g':['q','j'],
     'm':['n'],'n':['m','h'],'s':['z','c'],'z':['s'],'c':['k','s'],'k':['c','q'],
     'f':['v'],'v':['f','b'],'r':['l'],'l':['r'],'t':['d','c'],'h':['n'],'w':['v']};
+  /* 🔴v1165 空格的位置一律不动：只多一个空格/挪一下空格，看起来和正确答案一模一样，选对的孩子会被判错 */
+  const sp=i=>word[i]===' ';
   for(let i=0;i<len;i++){
+    if(sp(i))continue;
     const ch=word[i].toLowerCase();
     const subs=subMap[ch]||[];
     subs.forEach(s=>{
@@ -8213,23 +8239,27 @@ function makeFakeSpelling(word){
   }
   // 2. 多写一个字母 (重复)
   for(let i=0;i<len;i++){
+    if(sp(i))continue;
     ops.push(word.slice(0,i+1)+word[i]+word.slice(i+1));
   }
   // 3. 漏一个字母 (单词太短就跳过)
   if(len>3){
     for(let i=0;i<len;i++){
+      if(sp(i))continue;
       ops.push(word.slice(0,i)+word.slice(i+1));
     }
   }
   // 4. 交换相邻字母
   for(let i=0;i<len-1;i++){
+    if(sp(i)||sp(i+1))continue;
     if(word[i]!==word[i+1])ops.push(word.slice(0,i)+word[i+1]+word[i]+word.slice(i+2));
   }
   // 去重 + 排除等于原词的
-  const uniq=[];const seen=new Set([word.toLowerCase()]);
+  const norm=s=>String(s).replace(/\s+/g,' ').trim().toLowerCase();   /* 比较时不看空格多少、不看大小写 */
+  const uniq=[];const seen=new Set([norm(word)]);
   ops.forEach(o=>{
     if(!o)return;
-    const lo=o.toLowerCase();
+    const lo=norm(o);
     if(!seen.has(lo)){seen.add(lo);uniq.push(o)}
   });
   return uniq;
