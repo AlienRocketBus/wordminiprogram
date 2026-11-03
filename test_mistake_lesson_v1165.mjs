@@ -144,8 +144,11 @@ const DRIVERS = {
     scrPool.length = 2; scrTotal = 2;
     const miss = scrWord;
     const letters = [...document.querySelectorAll('.scramble-letter')];
-    // 故意倒着点（单词字母各不相同时一定拼错；全相同的词极少，换一个也行）
-    letters.slice().reverse().forEach(l => l.click());
+    // 故意拼错：先点一个不是首字母的字母，其余照摆放顺序点。
+    // （以前「倒着点」：字母正好倒着摆时反而拼对了 —— dog 摆成 g·o·d，倒着点就是 dog，测试五六次里假红一次）
+    const first = miss.en.replace(/ /g, '')[0];
+    const wrongFirst = letters.findIndex(l => l.textContent !== first);
+    (wrongFirst >= 0 ? [letters[wrongFirst], ...letters.filter((_, i) => i !== wrongFirst)] : letters).forEach(l => l.click());
     const card = await __w(__card, 2000); __tapCard();
     const seen = [];
     for (let k = 0; k < 6 && scrIdx < scrPool.length; k++) {

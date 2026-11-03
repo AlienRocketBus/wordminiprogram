@@ -184,8 +184,9 @@ const D = ctx.window.HansenDownloadFix;
      '存一份 Content-Type 不对的，也好过因为修的过程出错而整个存不进去：' +
      '取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了');
 
-  /* ③ 取出时的兜底要保留 —— 老用户缓存里可能已经有坏数据 */
-  ok(/fixHtmlType\(result\.response\)/.test(code),
+  /* ③ 取出时的兜底要保留 —— 老用户缓存里可能已经有坏数据
+     （v1165 F065：fixHtmlType 多了第二个参数「这个请求的地址」，好按文件类型给对 MIME；仍然必须经过它） */
+  ok(/fixHtmlType\(result\.response(?:\s*,\s*\w+)?\)/.test(code),
      '★🔒 取出时的 fixHtmlType 保留 —— ' +
      '给"缓存里已经存了坏数据"的老用户兜底');
 }
