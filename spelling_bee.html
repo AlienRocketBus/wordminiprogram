@@ -476,7 +476,7 @@ body.sb-focused .over .ovreward{display:none}
     </div>
 
     <div class="sec sb-standard-only">
-      <div class="sec-t"><span class="no">2</span>单词难度<span class="tip">动物大冒险词库</span></div>
+      <div class="sec-t"><span class="no">2</span>单词难度<span class="tip" id="sbWordTip">全部词库</span></div>
       <div class="chips" id="diffBox">
         <div class="chip sel" data-diff="beginner" style="--cc:#22c55e;--ccbg:rgba(34,197,94,.16)"><div class="dot"></div><div class="ic">🌱</div><div class="tx"><div class="nm">初级</div><div class="ds">3–4 字母短词</div></div></div>
         <div class="chip" data-diff="inter" style="--cc:#fbbf24;--ccbg:rgba(251,191,36,.16)"><div class="dot"></div><div class="ic">⭐</div><div class="tx"><div class="nm">中级</div><div class="ds">5–6 字母</div></div></div>
@@ -2336,6 +2336,8 @@ $('startBtn').onclick=function(){_unlockSbAudio();startMatch();};
     });
   }
   if(!_sbFocus&&_sbIsland&&ISLAND_CN[_sbIsland]){var sub=document.querySelector('.sub');if(sub)sub.textContent='【'+ISLAND_CN[_sbIsland]+'岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分';}
+  /* v1165 「单词难度」旁的小字以前写死「动物大冒险词库」，在哪个岛都这么写；改成本岛（独立打开写「全部词库」） */
+  try{ var _tip=document.getElementById('sbWordTip'); if(_tip) _tip.textContent=(_sbIsland&&ISLAND_CN[_sbIsland])?(ISLAND_CN[_sbIsland]+'岛词库'):'全部词库'; }catch(_te){}
 })();
 $('exitBtn').onclick=function(){if(!raceOver){paused=true;pausedAt=Date.now();clearTimeout(botTimer);stopTimer();}$('exitConfirm').classList.add('on');};
 $('exitNo').onclick=function(){$('exitConfirm').classList.remove('on');if(paused){paused=false;started+=Date.now()-pausedAt;startTimer();botTimer=setTimeout(function(){botStep(curMs);},curMs);}};
