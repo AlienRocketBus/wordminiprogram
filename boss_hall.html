@@ -298,7 +298,7 @@ if(QS.get('land')){
   var __LCL=(window.HansenLandCards&&window.HansenLandCards.list)||[];
   var __pool=[]; __LCL.forEach(function(c){ if(__lown.indexOf(c.id)>=0) __pool.push(c); });
   if(!__pool.length&&__LCL.length) __pool=[__LCL[0]];
-  BOSSES=__pool.map(function(c,i){ return {lv:i+1, id:c.id, n:c.name, r:c.rarity, _art:c.img, _scene:c.img}; });
+  BOSSES=__pool.map(function(c,i){ return {lv:i+1, id:c.id, n:c.name, r:c.rarity, d:c.desc||'', _art:c.img, _scene:c.img}; });   /* v1165 带上卡片台词（以前没有 d，卡下写着 undefined） */
   /* 🔴v972: 真实场景优先——bosses_bg/同名文件一经交付即自动点亮; 缺图时 setSceneBg 落回立绘模糊兜底 */
   window.__landMode=true;
   /* 🔴v972 单一真源: bgPath 自带清单门禁——已交付→bosses_bg真实场景; 未交付→立绘(卡窗/色板/预载全都零404) */
@@ -381,7 +381,9 @@ function renderBoss(i,dir){
   var rr=RAR[b.r];
   document.getElementById('prar').innerHTML='<span class="g">◆</span><span class="g">◆</span> '+rr.t.replace(/ /g,'')+' <span class="g">◆</span><span class="g">◆</span>';
   document.getElementById('rarline').textContent='Lv.'+b.lv+' · '+rr.t;
-  document.getElementById('flavor').innerHTML='<span class="qm">「</span>'+b.d+'<span class="qm">」</span>';
+  /* v1165 没有台词就整行不显示，绝不写出 undefined */
+  var _fl=document.getElementById('flavor');
+  if(b.d){ _fl.innerHTML='<span class="qm">「</span>'+b.d+'<span class="qm">」</span>'; _fl.style.display=''; } else { _fl.innerHTML=''; _fl.style.display='none'; }
   document.getElementById('fname').innerHTML='<span class="lvb">Lv.'+b.lv+'</span>'+b.n;
   var p=pref(); curBg=(typeof p.bgIdx==='number'&&p.bgIdx>=0&&p.bgIdx<BGS.length)?p.bgIdx:0;
   applyBg(card);
