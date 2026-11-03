@@ -326,7 +326,8 @@
     else{
       var opts=[it].concat(distractors(v,ctx.cat,r,mode));
       opts=shuffle(opts,r);
-      q.options=opts.map(function(o){return {key:o.key,label:mode==='listen'?o.cn:o.en};});
+      // 听音题每个选项只写一个意思（orange 若写「橙色 / 橙子」，只有它带斜杠 = 送答案）
+      q.options=opts.map(function(o){return {key:o.key,label:mode==='listen'?(o.meanings[Math.floor(r()*o.meanings.length)]||o.cn):o.en};});
       q.answerIndex=opts.indexOf(it);
     }
     return q;
@@ -338,8 +339,11 @@
     var views=allViews(ctx),due=views.filter(function(v){return v.due;}).sort(byPriority);
     var patrol=v963()?views.filter(function(v){return !v.due&&!v.inPlan&&v.wrongs===0&&v.patrolDue;}):[];
     var size=Math.min(SESSION_MAX,due.length)+Math.min(PATROL_IN_SESSION,patrol.length,Math.max(0,SESSION_MAX-due.length));
-    return {ok:true,today:ctx.today,dueCount:due.length,patrolCount:patrol.length,sessionSize:size,
-      more:Math.max(0,due.length-SESSION_MAX),due:due,patrol:patrol,views:views,ctx:ctx};
+    // 练一练：学过、没到期、还没满星、今天还没答对过的词，星星少的先练
+    var practice=views.filter(function(v){return v.seen&&!v.due&&v.stars<5&&!(v.log&&v.log.c.indexOf(ctx.today)>=0);})
+      .sort(function(a,b){return (a.stars-b.stars)||(b.wrongs-a.wrongs)||(a.key<b.key?-1:1);});
+    return {ok:true,today:ctx.today,dueCount:due.length,patrolCount:patrol.length,sessionSize:size,practiceCount:Math.min(PRACTICE_MAX,practice.length),
+      more:Math.max(0,due.length-SESSION_MAX),due:due,patrol:patrol,practice:practice,views:views,ctx:ctx};
   }
   function buildSession(opts){
     opts=opts||{};
@@ -349,9 +353,7 @@
       ov.due.slice(0,SESSION_MAX).forEach(function(v){v.kind='due';picked.push(v);});
       ov.patrol.slice(0,Math.max(0,Math.min(PATROL_IN_SESSION,SESSION_MAX-picked.length))).forEach(function(v){v.kind='patrol';picked.push(v);});
     }else{
-      ov.views.filter(function(v){return v.seen&&!v.due&&v.stars<5&&!(v.log&&v.log.c.indexOf(ctx.today)>=0);})
-        .sort(function(a,b){return (a.stars-b.stars)||(b.wrongs-a.wrongs)||(a.key<b.key?-1:1);})
-        .slice(0,PRACTICE_MAX).forEach(function(v){v.kind='practice';picked.push(v);});
+      ov.practice.slice(0,PRACTICE_MAX).forEach(function(v){v.kind='practice';picked.push(v);});
     }
     var hist={modes:[],spell:0},queue=picked.map(function(v){
       var r=rng(ctx.today+'|'+v.key+'|mode'),mode=chooseMode(v,hist,r,picked.length);
@@ -596,7 +598,7 @@
 
   root.HansenReview2={
     VERSION:VERSION,KEY:KEY,GAP:GAP.slice(),SESSION_MAX:SESSION_MAX,STAR_NAMES:STAR_NAMES.slice(),ISLAND_NAMES:ISLAND_NAMES,
-    today:today,overview:function(){var o=overview();if(!o.ok)return o;return {ok:true,today:o.today,dueCount:o.dueCount,patrolCount:o.patrolCount,sessionSize:o.sessionSize,more:o.more};},
+    today:today,overview:function(){var o=overview();if(!o.ok)return o;return {ok:true,today:o.today,dueCount:o.dueCount,patrolCount:o.patrolCount,sessionSize:o.sessionSize,practiceCount:o.practiceCount,more:o.more};},
     buildSession:buildSession,current:current,answer:answer,finishSession:finishSession,
     wordStars:wordStars,parentReport:parentReport,noteActive:noteActive,
     quizPic:quizPic,safeMarkup:safeMarkup,

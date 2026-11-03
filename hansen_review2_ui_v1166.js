@@ -44,16 +44,17 @@
       '#hr2_root .hr2-bar{height:8px;margin:0 14px 8px;border-radius:8px;background:var(--hr2-card2);overflow:hidden}',
       '#hr2_root .hr2-bar>i{display:block;height:100%;width:0;background:#22c55e;border-radius:8px}',
       '#hr2_root .hr2-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 16px max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center}',
+      '#hr2_root .hr2-main>*{flex-shrink:0}',   /* 长页面（家长面板）里条形图不能被压成 0 高 */
       '#hr2_root .hr2-card{width:100%;max-width:440px;background:var(--hr2-card);border:1px solid var(--hr2-line);border-radius:22px;padding:18px 16px;text-align:center;margin:4px 0 14px}',
       '#hr2_root .hr2-ask{font-size:16px;color:var(--hr2-ink2);font-weight:700;margin-bottom:10px}',
       '#hr2_root .hr2-cn{font-size:28px;font-weight:900;line-height:1.3;margin:6px 0}',
       '#hr2_root .hr2-en{font-size:36px;font-weight:900;letter-spacing:.5px;margin:4px 0;word-break:break-word}',
-      '#hr2_root .hr2-pn{font-size:16px;color:var(--hr2-ink3)}',
+      '#hr2_root .hr2-pn{font-size:16px;color:var(--hr2-ink2)}',
       '#hr2_root .hr2-pic{display:inline-block;font-size:56px;line-height:1.1}',
       '#hr2_root .hr2-pic.big{font-size:84px}',
       '#hr2_root .hr2-pic svg,#hr2_root .hr2-pic img{width:1.4em;height:1.4em;vertical-align:middle}',
       '#hr2_root .hr2-speak{width:112px;height:112px;border-radius:50%;border:0;background:#2563eb;color:#ffffff;font-size:44px;box-shadow:0 6px 18px rgba(0,0,0,.25)}',
-      '#hr2_root .hr2-hint{font-size:14px;color:var(--hr2-ink3);margin-top:8px}',
+      '#hr2_root .hr2-hint{font-size:14px;color:var(--hr2-ink2);margin-top:8px}',
       '#hr2_root .hr2-opts{width:100%;max-width:440px;display:grid;grid-template-columns:1fr 1fr;gap:10px}',
       '#hr2_root .hr2-opts.one{grid-template-columns:1fr}',
       '#hr2_root .hr2-opt{min-height:64px;padding:10px 12px;border-radius:16px;border:2px solid var(--hr2-line);background:var(--hr2-card);font-size:20px;font-weight:800;line-height:1.25;word-break:break-word}',
@@ -71,7 +72,7 @@
       '#hr2_root .hr2-btn.big{min-height:64px;font-size:20px}',
       '#hr2_root .hr2-msg{min-height:28px;font-size:18px;font-weight:800;margin:8px 0}',
       '#hr2_root .hr2-lesson{border-width:2px;border-style:dashed}',
-      '#hr2_root .hr2-tiny{font-size:13px;color:var(--hr2-ink3);margin-top:6px}',
+      '#hr2_root .hr2-tiny{font-size:14px;color:var(--hr2-ink2);margin-top:6px}',
       '#hr2_root .hr2-stats{width:100%;max-width:440px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}',
       '#hr2_root .hr2-stat{background:var(--hr2-card);border:1px solid var(--hr2-line);border-radius:16px;padding:12px 6px;text-align:center}',
       '#hr2_root .hr2-stat b{display:block;font-size:28px;font-weight:900}',
@@ -88,7 +89,7 @@
       '#hr2_root .hr2-legend{width:100%;max-width:440px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:14px;color:var(--hr2-ink2);margin-bottom:10px}',
       '#hr2_root .hr2-legend em{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}',
       '#hr2_root .hr2-days{width:100%;max-width:440px;display:flex;align-items:flex-end;gap:6px;height:110px;margin:4px 0 12px}',
-      '#hr2_root .hr2-days div{flex:1;text-align:center;font-size:12px;color:var(--hr2-ink3)}',
+      '#hr2_root .hr2-days div{flex:1;text-align:center;font-size:12px;color:var(--hr2-ink2)}',
       '#hr2_root .hr2-days i{display:block;margin:0 auto 4px;width:70%;min-height:3px;border-radius:6px 6px 2px 2px;background:#3b82f6}',
       '#hr2_root .hr2-input{width:100%;max-width:440px;min-height:48px;border-radius:14px;border:1px solid var(--hr2-line);background:var(--hr2-card);color:var(--hr2-ink);font-size:17px;padding:8px 12px;margin-bottom:10px}',
       '#hr2_root .hr2-report{width:100%;max-width:440px;border-radius:14px;border:1px solid var(--hr2-line);margin:8px 0}',
@@ -108,6 +109,7 @@
     el.innerHTML='<div class="hr2-top"><button class="hr2-x" data-act="close" aria-label="关闭">✕</button><div class="hr2-title">'+esc(title)+'</div><div class="hr2-prog" id="hr2_prog"></div></div>'
       +'<div class="hr2-bar"><i id="hr2_fill"></i></div><div class="hr2-main" id="hr2_main"></div>';
     el.onclick=onClick;
+    var bar=el.querySelector('.hr2-bar');if(bar)bar.style.visibility=state.view==='quiz'?'visible':'hidden';
     return doc.getElementById('hr2_main');
   }
   function close(){
@@ -124,10 +126,10 @@
     opts=opts||{};
     var ov=r.overview();
     if(!ov.ok){renderError(ov.reason);return false;}
-    if(!opts.practice&&ov.sessionSize===0){renderEmpty();return true;}
+    if(!opts.practice&&ov.sessionSize===0){renderEmpty(ov.practiceCount);return true;}
     var s=r.buildSession({practice:!!opts.practice});
     if(!s.ok){renderError(s.reason);return false;}
-    if(!s.total){renderEmpty();return true;}
+    if(!s.total){renderEmpty(0);return true;}
     state.session=s;state.view='quiz';
     shell(s.kind==='practice'?'练一练':'今天复习 '+s.dueTotal+' 个词');
     renderQuestion();
@@ -228,7 +230,7 @@
     say(q.en);
     main.innerHTML='<div class="hr2-card hr2-lesson"><div class="hr2-ask">没关系，记住它：</div>'+picHtml(q.emoji,true)
       +'<div class="hr2-en">'+esc(q.en)+'</div>'+(q.pn?'<div class="hr2-pn">'+esc(q.pn)+'</div>':'')+'<div class="hr2-cn">'+esc(q.cn)+'</div>'
-      +(q.retry?'':'<div class="hr2-tiny">这一轮最后还会再考一次 · 明天也会再见到它</div>')
+      +(q.retry?'':'<div class="hr2-tiny">这一轮最后还会再考一次</div>')
       +(res&&!res.ok&&!q.retry?'<div class="hr2-tiny">（这题没记上，不影响继续）</div>':'')+'</div>'
       +'<div class="hr2-row"><button class="hr2-btn" data-act="say" data-en="'+esc(q.en)+'">🔊 再听一次</button><button class="hr2-btn go" data-act="next">知道了 →</button></div>';
     state.busy=false;
@@ -242,7 +244,7 @@
     var byKey={};s.queue.forEach(function(q){byKey[q.key]=q;});
     var ups=s.results.filter(function(x){return !x.retry&&x.starsAfter>x.starsBefore;});
     var h='<div class="hr2-card"><div class="hr2-pic big" aria-hidden="true">🎉</div><div class="hr2-cn">'+(s.kind==='practice'?'练完啦！':'今天的复习完成！')+'</div>'
-      +(sum.more>0?'<div class="hr2-tiny">还有 '+sum.more+' 个词，明天继续（也可以再点一次「今天复习」）</div>':'<div class="hr2-tiny">大脑会在睡觉时悄悄记牢它们</div>')+'</div>'
+      +moreText(sum)+'</div>'
       +'<div class="hr2-stats"><div class="hr2-stat"><b>'+sum.reviewed+'</b><span>复习的词</span></div><div class="hr2-stat"><b>'+sum.correct+'</b><span>一次答对</span></div>'
       +'<div class="hr2-stat"><b>+'+sum.coins+'</b><span>金币</span></div></div>';
     if(ups.length){
@@ -257,16 +259,25 @@
     state.session=null;
     try{root.dispatchEvent(new CustomEvent('hansen-review2-finished',{detail:sum}));}catch(e){}
   }
-  function renderEmpty(){
-    var main=shell('今天复习');state.view='empty';
+  // 答错的词今天还要再试一次；超过 12 个的明天继续
+  function moreText(sum){
+    var w=s0(sum.wrong.length),back=Math.max(0,s0(sum.more)-w),out=[];
+    if(w)out.push('答错的 '+w+' 个词今天要再试一次，等会儿再点「今天复习」');
+    if(back)out.push('还有 '+back+' 个词明天继续');
+    return '<div class="hr2-tiny">'+(out.length?out.join('；'):'大脑会在睡觉时悄悄记牢它们')+'</div>';
+  }
+  function s0(n){n=Number(n);return isFinite(n)&&n>0?Math.floor(n):0;}
+  function renderEmpty(practiceCount){
+    state.view='empty';var main=shell('今天复习');
     main.innerHTML='<div class="hr2-card"><div class="hr2-pic big" aria-hidden="true">🌈</div><div class="hr2-cn">今天没有要复习的词</div>'
       +'<div class="hr2-tiny">到了该复习的日子会再叫你</div></div>'
-      +'<div class="hr2-row"><button class="hr2-btn go big" data-act="practice">练练最弱的几个词</button></div>'
-      +'<div class="hr2-tiny">练一练不给金币，但能让星星长得更快</div>'
+      +(practiceCount>0?'<div class="hr2-row"><button class="hr2-btn go big" data-act="practice">练练最弱的 '+practiceCount+' 个词</button></div>'
+        +'<div class="hr2-tiny">练一练不给金币，但能让星星长得更快</div>'
+        :'<div class="hr2-tiny">学过的词今天都练过了，去岛上学点新词吧</div>')
       +'<div class="hr2-row"><button class="hr2-btn" data-act="parent">给家长看</button><button class="hr2-btn" data-act="close">关闭</button></div>';
   }
   function renderError(reason){
-    var main=shell('今天复习');state.view='error';
+    state.view='error';var main=shell('今天复习');
     main.innerHTML='<div class="hr2-card"><div class="hr2-pic big" aria-hidden="true">🧭</div><div class="hr2-cn">进度暂时读不到</div>'
       +'<div class="hr2-tiny">先去岛上玩一会儿，再回来试试（'+esc(reason||'')+'）</div></div>'
       +'<div class="hr2-row"><button class="hr2-btn go big" data-act="close">好的</button></div>';
@@ -277,7 +288,7 @@
   function openParent(){
     var r=R();if(!r)return false;
     var rep=r.parentReport();
-    var main=shell('给家长和老师');state.session=null;state.view='parent';
+    state.session=null;state.view='parent';var main=shell('给家长和老师');
     if(!rep.ok){main.innerHTML='<div class="hr2-card"><div class="hr2-cn">进度暂时读不到</div></div>';return false;}
     var total=rep.totalWords,names=r.STAR_NAMES;
     var h='<div class="hr2-stats"><div class="hr2-stat"><b>'+rep.mastered+'</b><span>掌握了</span></div><div class="hr2-stat"><b>'+rep.strong+'</b><span>会拼(≥3星)</span></div>'
@@ -318,9 +329,9 @@
     var x0=40,bw=W-80,acc=0;rect(x0,366,bw,34,17,'rgba(255,255,255,.12)');
     rep.counts.forEach(function(n,i){if(!n)return;var w=n/rep.totalWords*bw;g.fillStyle=STAR_COLORS[i];g.fillRect(x0+acc,366,Math.max(2,w),34);acc+=w;});
     rep.counts.forEach(function(n,i){var x=40+(i%3)*228,y=440+Math.floor(i/3)*40;rect(x,y-20,20,20,4,STAR_COLORS[i]);txt(i+'星 '+n,x+30,y-2,22,'#e2e8f0','700');});
-    rect(40,530,325,120,22,'rgba(255,255,255,.10)');rect(385,530,325,120,22,'rgba(255,255,255,.10)');
-    txt(rep.streak.review+' 天',202,600,48,'#fde68a','900','center');txt('连续复习',202,634,22,'#e2e8f0','700','center');
-    txt(rep.week.m+' 分钟',547,600,48,'#fde68a','900','center');txt('这 7 天学习',547,634,22,'#e2e8f0','700','center');
+    rect(40,520,325,140,22,'rgba(255,255,255,.10)');rect(385,520,325,140,22,'rgba(255,255,255,.10)');
+    txt(rep.streak.review+' 天',202,588,46,'#fde68a','900','center');txt('连续复习',202,636,22,'#e2e8f0','700','center');
+    txt(rep.week.m+' 分钟',547,588,46,'#fde68a','900','center');txt('这 7 天学习',547,636,22,'#e2e8f0','700','center');
     txt('每天学习分钟',40,700,26,'#ffffff','800');
     var maxM=Math.max(1,Math.max.apply(null,rep.days.map(function(d){return d.m;})));
     rep.days.forEach(function(d,i){var x=60+i*96,h=Math.round(d.m/maxM*110);rect(x,830-h,56,Math.max(4,h),8,'#3b82f6');txt(d.m,x+28,822-h,20,'#e2e8f0','700','center');txt(d.day.slice(5),x+28,862,20,'#bfdbfe','700','center');});
