@@ -110,7 +110,7 @@
       '.hml-result .hml-r-word small{font-size:13px;font-weight:700;color:#cbd5e1}',
       '.hml-result .hml-r-go{margin-top:10px;min-height:44px;font-size:15px;font-weight:900;color:#0f172a;background:linear-gradient(135deg,#fde047,#f59e0b);border:0;border-radius:12px;padding:9px 18px;cursor:pointer}',
       'html.hsn-pal-light .hml-result{background:rgba(255,255,255,.85);border-color:rgba(15,23,42,.14)}',
-      'html.hsn-pal-light .hml-result .hml-r-title{color:#92400e}',
+      'html.hsn-pal-light .hml-result .hml-r-title{color:var(--pal-accent-text,#1e40af)}',   // 亮色主题用全站统一的强调字色（棕橙色族是禁色）
       'html.hsn-pal-light .hml-result .hml-r-word{color:#0f172a;background:#fff;border-color:rgba(15,23,42,.16)}',
       'html.hsn-pal-light .hml-result .hml-r-word small{color:#475569}',
       'html.hsn-pal-light #hml_lesson{background:rgba(15,23,42,.18)}'
@@ -130,11 +130,17 @@
     }catch(e){}
   }
 
-  /* 例句里把正确的词标亮：先拆成三段再各自转义，句子里的字一律当文字 */
-  function exHtml(ex, en){
+  /* 例句里把正确的词标亮：先拆成三段再各自转义，句子里的字一律当文字。
+     hl = 句子里真正出现的那个词形（完形填空传 clozeQ.fill，如 eyes / cooks / flown）；找不到再用原词 */
+  function exHtml(ex, en, hl){
     ex = String(ex || ''); en = String(en || '');
     var m = null;
-    try{ if(en) m = new RegExp('\\b' + en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').exec(ex); }catch(e){ m = null; }
+    function find(t){
+      t = String(t || '').trim();
+      if(!t) return null;
+      try{ return new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').exec(ex); }catch(e){ return null; }
+    }
+    m = find(hl) || find(en);
     if(!m) return esc(ex);
     return esc(ex.slice(0, m.index)) + '<b>' + esc(m[0]) + '</b>' + esc(ex.slice(m.index + m[0].length));
   }
@@ -186,7 +192,7 @@
         + '<div class="lr-en">' + esc(w.en) + '</div>'
         + (w.pn ? '<div class="lr-pn">' + esc(w.pn) + '</div>' : '')
         + '<div class="lr-cn">' + esc(w.cn) + '</div>'
-        + (opts.ex ? '<div class="hml-ex">' + exHtml(opts.ex, w.en) + '</div>'
+        + (opts.ex ? '<div class="hml-ex">' + exHtml(opts.ex, w.en, opts.hl) + '</div>'
             + (opts.exCn ? '<div class="hml-excn">' + esc(opts.exCn) + '</div>' : '') : '')
         + '<div class="hml-tap">点一下继续</div>'
         + '</div>';
