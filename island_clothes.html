@@ -1995,7 +1995,7 @@ const ACH_TIERS={bronze:{name:'铜',color:'#cd7f32',bg:'rgba(205,127,50,.15)'},s
 const ACHIEVEMENTS=[
 // ═══ 🔴v1034 阶梯系列：每条线 入门→进阶→精通→大师→传奇 ═══
 {id:'vocabS600',cat:'背单词',series:'vocab',seriesName:'词汇量',step:1,name:'词汇宗师',desc:'词汇量达到 600 个单词',icon:'📖',tier:'bronze',reward:{gems:15}},
-{id:'vocabS1500',cat:'背单词',series:'vocab',seriesName:'词汇量',step:2,name:'万词王者',desc:'词汇量达到 1500 个单词',icon:'📖',tier:'silver',reward:{gems:50}},
+{id:'vocabS1500',cat:'背单词',series:'vocab',seriesName:'词汇量',step:2,name:'全词王者',desc:'把所有岛屿的单词都认识一遍',icon:'📖',tier:'silver',reward:{gems:50}},
 {id:'reviewS20',cat:'复习',series:'review',seriesName:'复习次数',step:1,name:'复习熟手',desc:'复习次数达到 20 次复习',icon:'🔄',tier:'bronze',reward:{gems:15}},
 {id:'reviewS2000',cat:'复习',series:'review',seriesName:'复习次数',step:2,name:'记忆传奇',desc:'复习次数达到 2000 次复习',icon:'🔄',tier:'silver',reward:{gems:50}},
 {id:'rvdayS90',cat:'复习',series:'rvday',seriesName:'复习连续天数',step:1,name:'季度不辍',desc:'复习连续天数达到 90 天不间断',icon:'📅',tier:'bronze',reward:{gems:15}},
@@ -3682,7 +3682,8 @@ function checkAch(){
       sbWins = _n(_sl && _sl.wins);
     } catch (e) {}
     if(lw>=600)unlockAch('vocabS600');
-    if(lw>=1500)unlockAch('vocabS1500');
+    /* v1165: 以前要 1500 词，全游戏才 952 个，永远拿不到；改成「全部单词」，数字从账本算 */
+    if(lw>=(function(){var t=window.HansenCanonical&&HansenCanonical.TOTAL_WORDS;return (typeof t==='number'&&t>600)?t:952})())unlockAch('vocabS1500');
     if(rvTot>=20)unlockAch('reviewS20');
     if(rvTot>=2000)unlockAch('reviewS2000');
     if(rvDay>=90)unlockAch('rvdayS90');
@@ -4085,7 +4086,7 @@ function checkAlmostQuest(){
         if(window._lastAlmost[key]) continue;
         window._lastAlmost[key] = Date.now();
         
-        showAlmostBanner('🎯 还差 1 个! ' + q.text + ' (' + q.progress + '/' + q.goal + ')');
+        showAlmostBanner('🎯 还差 1 个! ' + (q.title || q.text || '') + ' (' + q.progress + '/' + q.goal + ')');  /* v1165: 全局任务用 title */
         return;
       }
     }
@@ -8052,7 +8053,7 @@ updatePetHero();
 try{ if(/island_season\.html/.test(location.pathname||'')){ var _hsHome=document.getElementById('homeScreen'), _hsBoss=document.getElementById('bossScreen'); if(_hsHome&&_hsBoss){ _hsHome.classList.remove('active'); _hsBoss.classList.add('active'); } } }catch(e){}
 
 // Show a welcome message if first time
-if(S.totalAnswers===0&&S.learned.length===0){setTimeout(()=>{const d=document.getElementById('alertInner');if(!d)return;d.innerHTML='<div style="font-size:64px">🎮</div><div style="font-size:22px;font-weight:800;color:#fbbf24;margin:10px 0">欢迎来到服装大冒险！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.7;margin:10px 0">🗺️ '+DATA.length+' 大衣物岛屿等你探索<br>📚 '+allW.length+' 个英语单词随你学<br>🎮 12 种超酷玩法等你来<br>🐉 36 阶进化宠物<br>🎁 每日宝箱 + 签到奖励<br>🏆 '+ACHIEVEMENTS.length+' 个成就等你解锁</div><div style="font-size:13px;color:#cbd5e1;margin:12px 0">🎒 小冒险家秘籍：<br>每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟</div><button class="game-btn gold" onclick="closeAlert()">开始冒险！</button>';document.getElementById('alertModal').classList.add('show')},300)}
+if(S.totalAnswers===0&&S.learned.length===0){setTimeout(()=>{const d=document.getElementById('alertInner');if(!d)return;d.innerHTML='<div style="font-size:64px">🎮</div><div style="font-size:22px;font-weight:800;color:#fbbf24;margin:10px 0">欢迎来到服装大冒险！</div><div style="font-size:14px;color:#cbd5e1;line-height:1.7;margin:10px 0">🗺️ '+DATA.length+' 个衣物小组等你探索<br>📚 '+allW.length+' 个英语单词随你学<br>🎮 '+(function(){var n=document.querySelectorAll('.mode-card').length;return n>1?n+' 种':'好多种'})()+'超酷玩法等你来<br>🐉 36 阶进化宠物<br>🎁 每日宝箱 + 签到奖励<br>🏆 '+ACHIEVEMENTS.length+' 个成就等你解锁</div><div style="font-size:13px;color:#cbd5e1;margin:12px 0">🎒 小冒险家秘籍：<br>每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟</div><button class="game-btn gold" onclick="closeAlert()">开始冒险！</button>';document.getElementById('alertModal').classList.add('show')},300)}
 
 
 // ============================================================

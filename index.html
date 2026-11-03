@@ -54,9 +54,9 @@ setTimeout(function(){shown=false;show();},1200);
 <meta name="x5-fullscreen" content="true">
 <meta name="screen-orientation" content="portrait">
 <meta name="x5-orientation" content="portrait">
-<title>单词大冒险 · 单词大冒险</title>
+<title>单词大冒险</title>
 <script>/* 🔴v856 配色防闪: 首帧前同步把配色类加到<html>(v855教训:同步加不闪·亮色系加hsn-pal-light) */try{var _hp=localStorage.getItem("hansen_palette_global");if(_hp&&_hp!=="cosmos"&&/^[a-z]+$/.test(_hp)){var _hl={cloud:1,sakura:1,cream:1,mint:1};document.documentElement.className+=" hsn-pal-"+_hp+(_hl[_hp]?" hsn-pal-light":"");}}catch(e){}</script>
-<meta name="description" content="27 座英语单词冒险岛 · 多种学习挑战 · 36 阶进化宠物">
+<meta name="description" content="英语单词冒险岛 · 十几种学习挑战 · 36 阶进化宠物">
 <!--
   ============================================================
   📁 部署说明
@@ -3349,8 +3349,8 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
       <div class="subtitle">Word Adventures</div>
       <p class="intro">
         🦸 Hey 勇敢的小冒险家, 欢迎加入！<br>
-        快穿越 <b>18 关神奇大冒险</b>, 收集 <b>711+ 单词宝藏</b>, <br>
-        玩转 <b>12 种超酷挑战</b>, 还能孵化你专属的 <b>36 阶进化宠物</b> 🐣！
+        快穿越 <b><span data-hsn-count="islands">18</span> 座单词岛</b>, 收集 <b><span data-hsn-count="words">712</span> 个单词宝藏</b>, <br>
+        玩转 <b>十几种超酷挑战</b>, 还能孵化你专属的 <b>36 阶进化宠物</b> 🐣！
       </p>
     </div>
 
@@ -3758,7 +3758,7 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
       <div class="how-step">
         <span class="num">02</span>
         <span class="icon">🎮</span>
-        <div class="title">12 种玩法</div>
+        <div class="title">十几种玩法</div>
         <div class="desc">打地鼠 · 钓鱼 · 拼词 · 打字 · 完形填空…</div>
       </div>
       <div class="how-step">
@@ -4293,6 +4293,7 @@ document.querySelectorAll('.island').forEach(el=>{
 <script src="click_sound.js?v=1163"></script>
 <script src="click_setting.js?v=1163"></script>
 <script src="vocab_all.js?v=1163"></script>
+<script>/* v1165: 首页岛屿数/单词数从词库现算，不再写死（以前写 711+） */try{(function(){var v=window.HANSEN_VOCAB_ALL||{},k=Object.keys(v),n=0;k.forEach(function(x){n+=(v[x]||[]).length});if(k.length&&n){document.querySelectorAll("[data-hsn-count=islands]").forEach(function(e){e.textContent=k.length});document.querySelectorAll("[data-hsn-count=words]").forEach(function(e){e.textContent=n})}})()}catch(e){}</script>
 <script src="hansen_upgrade.js?v=1163"></script>
 <script src="hansen_onboarding.js?v=1163"></script>
 <script src="hansen_theme_shop.js?v=1163"></script>

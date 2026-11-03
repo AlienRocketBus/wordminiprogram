@@ -347,6 +347,7 @@
     }
     function wrongTotal(HC){var n=0;try{if(HC){var st=HC.read();HC.islands.forEach(function(i){var w=st.islands[i.id].wrongs||{};Object.keys(w).forEach(function(k){n+=Math.max(0,Number(w[k])||0);});});}else n=Object.keys(S.wrongs||{}).length;}catch(e){}if(n>0)try{localStorage.setItem('hansen_wrong_seen_v942','1');}catch(e){}return n;}
     function maxGameCount(){return globalModes().max;}
+    function allWordsTotal(HC){var t=HC&&HC.TOTAL_WORDS;return (typeof t==='number'&&t>600)?t:952;}
 
     // --- 成就判定(累计型) ---
     window.checkAch = function(){
@@ -360,6 +361,9 @@
         var lvl = HT ? Math.max(HT.maxLevel(), S.level||1) : (S.level||1);
         if(lw>=1)unlockAch('w1'); if(lw>=10)unlockAch('w10'); if(lw>=50)unlockAch('w50');
         if(lw>=100)unlockAch('w100'); if(lw>=300)unlockAch('w300');
+        /* v1165:「词汇量」阶梯以前只写在模板那份 checkAch 里，而它被这里整个替换掉了，从没判定过；
+           顶级目标改成「全部单词」，数字从账本现算（以前写 1500，全游戏才 952 个，永远拿不到） */
+        if(lw>=600)unlockAch('vocabS600'); if(lw>=allWordsTotal(HC))unlockAch('vocabS1500');
         if(typeof allW!=='undefined'&&allW.length&&(S.learned||[]).length>=allW.length)unlockAch('wAll');
         if(lw>0&&wrongTotal(HC)===0&&localStorage.getItem('hansen_wrong_seen_v942')==='1')unlockAch('wrongClear');
         if(mc>=10)unlockAch('combo10'); if(mc>=30)unlockAch('combo30'); if(mc>=50)unlockAch('combo50'); if(mc>=100)unlockAch('combo100');
@@ -408,7 +412,8 @@
           combo10:{cur:mc,need:10},combo30:{cur:mc,need:30},combo50:{cur:mc,need:50},combo100:{cur:mc,need:100},
           boss1:{cur:bw.length,need:1},bossCh1:{cur:bwc(4),need:4},bossCh3:{cur:bwc(12),need:12},boss20:{cur:bwc(20),need:20},
           s3:{cur:S.streak||0,need:3},s7:{cur:S.streak||0,need:7},s14:{cur:S.streak||0,need:14},s100:{cur:S.streak||0,need:100},
-          lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11},modeHigh:{cur:gm.max,need:10}}[id];
+          lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11},modeHigh:{cur:gm.max,need:10},
+          vocabS600:{cur:lw,need:600},vocabS1500:{cur:lw,need:allWordsTotal(HC)}}[id];
         if(!m)return null; return {cur:Math.min(m.cur,m.need),need:m.need};
       }catch(e){return null;}
     };

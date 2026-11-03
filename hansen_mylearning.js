@@ -21,7 +21,8 @@
   if(window.__hsnMyLearning) return;
   window.__hsnMyLearning = true;
 
-  var TOTAL_ISLANDS = 19;
+  // v1165: 常规 18 岛 + 星海 + 单词大陆 8 页，各页都会记一份快照；从账本现算，算不出来用 27
+  var TOTAL_ISLANDS = (function(){ try { var HC = window.HansenCanonical; if(HC && HC.islands && typeof HC.resolve === 'function'){ var n = HC.islands.length; for(var i = 1; i <= 50 && HC.resolve('land' + i); i++) n++; return n; } } catch(e){} return 27; })();
   var PFX = 'hsn_progress:';
 
   // ── 工具 ──

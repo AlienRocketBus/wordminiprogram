@@ -1925,7 +1925,7 @@ const ACH_TIERS={bronze:{name:'铜',color:'#cd7f32',bg:'rgba(205,127,50,.15)'},s
 const ACHIEVEMENTS=[
 // ═══ 🔴v1034 阶梯系列：每条线 入门→进阶→精通→大师→传奇 ═══
 {id:'vocabS600',cat:'背单词',series:'vocab',seriesName:'词汇量',step:1,name:'词汇宗师',desc:'词汇量达到 600 个单词',icon:'📖',tier:'bronze',reward:{gems:15}},
-{id:'vocabS1500',cat:'背单词',series:'vocab',seriesName:'词汇量',step:2,name:'万词王者',desc:'词汇量达到 1500 个单词',icon:'📖',tier:'silver',reward:{gems:50}},
+{id:'vocabS1500',cat:'背单词',series:'vocab',seriesName:'词汇量',step:2,name:'全词王者',desc:'把所有岛屿的单词都认识一遍',icon:'📖',tier:'silver',reward:{gems:50}},
 {id:'reviewS20',cat:'复习',series:'review',seriesName:'复习次数',step:1,name:'复习熟手',desc:'复习次数达到 20 次复习',icon:'🔄',tier:'bronze',reward:{gems:15}},
 {id:'reviewS2000',cat:'复习',series:'review',seriesName:'复习次数',step:2,name:'记忆传奇',desc:'复习次数达到 2000 次复习',icon:'🔄',tier:'silver',reward:{gems:50}},
 {id:'rvdayS90',cat:'复习',series:'rvday',seriesName:'复习连续天数',step:1,name:'季度不辍',desc:'复习连续天数达到 90 天不间断',icon:'📅',tier:'bronze',reward:{gems:15}},
@@ -3808,7 +3808,7 @@ function checkAlmostQuest(){
         if(window._lastAlmost[key]) continue;
         window._lastAlmost[key] = Date.now();
         
-        showAlmostBanner('🎯 还差 1 个! ' + q.text + ' (' + q.progress + '/' + q.goal + ')');
+        showAlmostBanner('🎯 还差 1 个! ' + (q.title || q.text || '') + ' (' + q.progress + '/' + q.goal + ')');  /* v1165: 全局任务用 title */
         return;
       }
     }
