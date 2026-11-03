@@ -26,7 +26,10 @@
   var PFX = 'hsn_progress:';
 
   // ── 工具 ──
-  function islandTitle(){ try { return ((document.title || '').split('·')[0] || '').trim() || (document.title || '岛屿'); } catch(e){ return '岛屿'; } }
+  /* v1165: 按「 · 」（带空格）切岛名。以前按「·」切，单词大陆 8 个岛的标题「单词大陆·①迷雾心湖 · …」都切成「单词大陆」，
+     8 个岛记成同一个岛。常规岛「动物大冒险 · Animal…」切出来还是「动物大冒险」，老快照照样认得。 */
+  function islandTitle(){ try { var t = document.title || ''; return (t.split(' · ')[0] || '').trim() || t || '岛屿'; } catch(e){ return '岛屿'; } }
+  var LEGACY_MERGED = PFX + '单词大陆';   // 旧版把 8 个大陆岛并成的那一行：不再显示（各岛下次打开会各记各的）
   function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : 0; }
   function pct(a, b){ return b > 0 ? Math.round(a / b * 100) : 0; }
   function getStreak(){ try { if(window.HansenCheckin && typeof HansenCheckin.getStreak === 'function') return num(HansenCheckin.getStreak()); } catch(e){} return 0; }
@@ -73,7 +76,7 @@
     try {
       /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
         var k = _lsk1[i];
-        if(!k || k.indexOf(PFX) !== 0) continue;
+        if(!k || k.indexOf(PFX) !== 0 || k === LEGACY_MERGED) continue;
         var o;
         try { o = JSON.parse(localStorage.getItem(k)); } catch(e){ continue; }
         if(!o || typeof o !== 'object') continue;
@@ -196,7 +199,8 @@
     } catch(e){}
   }
 
-  window.HansenMyLearning = { _open: openPanel, _close: closePanel, _goReview: goReview };
+  /* v1165: 补上 open/close 别名（亮色对比度测试等外部调用写的是 open()，以前只有 _open，调了等于没调） */
+  window.HansenMyLearning = { open: openPanel, close: closePanel, _open: openPanel, _close: closePanel, _goReview: goReview };
 
   // ── 注入主页入口卡片(.util-row) ──
   function injectEntry(){

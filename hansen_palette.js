@@ -356,6 +356,8 @@
     css+=_L+'.hr_btm_hint{color:#cbd5e1!important}\n';
     // I \u5361\u518c\u9501\u5361\u5c0f\u5b57\u52a0\u6df1
     css+=_L+'#cardsScreen [style*="color:#475569"]{color:#1f2937!important}\n';
+    /* v1165: 卡册「✨ 全部集齐 · 卡牌大师」是深底用的浅绿 #86efac，亮色底上 1.3:1 看不清（体验期卡册全开时就会出现） */
+    css+=_L+'#cardsScreen [style*="color:#86efac"]{color:#15803d!important}\n';
     // \U0001f534v991\u325a(\u91cd\u5199) \u4eca\u65e5\u590d\u4e60\u5c42(#hr_today) \u6539\u4e3a\u771f\u53cc\u8272\u8c03\u5206\u79bb
     // v990 \u66fe\u7528"\u51bb\u4f4f\u6df1\u5e95"\u4fdd\u62a4\u6587\u5b57; \u7528\u6237\u660e\u786e\u8981\u6c42\u4eae\u8272\u8c03\u5c31\u8be5\u4eae\u5e95\u9ed1\u5b57, \u6545\u6539\u4e3a\u6574\u5c42\u7ffb\u8f6c
     css+=_L+'#hr_today{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 60%,#e0e7ff 100%)!important}\n';
@@ -435,6 +437,9 @@
     css+=_L+'#hsn-ml .hsn-ml-isl .row2,'+_L+'#hsn-ml .hsn-ml-isl .l{color:#475569!important}\n';
     css+=_L+'#hsn-ml .hsn-ml-isl .v{color:#0f172a!important}\n';
     css+=_L+'#hsn-ml .hsn-ml-bar{background:rgba(15,23,42,.12)!important}\n';
+    /* v1165: 「你的成长足迹」小字和每岛「0 / 42」数字以前还是深底用的浅紫/浅灰（亮色底上 1.4~1.8:1 看不清） */
+    css+=_L+'#hsn-ml .hsn-ml-title small{color:#4338ca!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .row2 b{color:#0f172a!important}\n';
     /* \u5f69\u8272\u5361\u7247(\u6982\u89c8\u7d2b\u5361/\u7eff\u8272\u5b8c\u6210\u6761/\u91d1\u5361)\u5185\u767d\u5b57\u4fdd\u6301 */
     css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#064e3b,#065f46)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#7c2d12,#9a3412)"] *{color:#fff!important}\n';
     css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] .hsn-ml-bignum{color:#fde047!important}\n';
