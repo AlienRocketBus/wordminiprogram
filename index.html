@@ -4189,8 +4189,9 @@ document.querySelectorAll('.island').forEach(el=>{
     }
   }
   /* 纯显示关闭: 只隐藏外壳 + 刷新首页(幂等)。🔴 保活岛——【不卸载岛】(不 replace about:blank), 只隐藏 →
-     再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。岛无后台音乐(只按需单词发音),
-     隐藏时不会响; 切到别的岛时 openIsland 会 replace 覆盖掉旧岛(内存恒 1 岛)。 */
+     再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。切到别的岛时 openIsland 换一个新 iframe(内存恒 1 岛)。
+     🔴v1165 藏起来的岛并不会自己安静：打地鼠会每 5 秒在首页念一个词、极速 60 秒还在倒数。
+     所以藏起来时告诉岛一声（岛页的 __hsnIslandHidden：停掉正在玩的游戏和声音，回到本岛主页）。 */
   function _closeIslandNow(){
     _islandPending = null;  /* 取消任何"换岛加载途中待显示"的岛(用户在新岛就绪前就返回了) */
     _hideIslandLoading();
@@ -4198,6 +4199,10 @@ document.querySelectorAll('.island').forEach(el=>{
     if(!wrap || wrap.style.display === 'none') return;
     wrap.style.display = 'none';
     try{ document.body.style.overflow = ''; }catch(e){}
+    try{
+      var _f = document.getElementById('islandFrame'), _w = _f && _f.contentWindow;
+      if(_w && typeof _w.__hsnIslandHidden === 'function') _w.__hsnIslandHidden();
+    }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
   }
   /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
