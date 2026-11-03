@@ -12,6 +12,9 @@
  *     nextClozeQ 直接结算，错词根本没再考（v1165 自己的测试因此时过时不过）。
  *   M 一键静音开着时点小课卡片继续：下一题立刻出、立刻自动读词，正好落在 hansen_mute「点了就算想听」的
  *     120ms 放行窗口里 → 静音漏声。
+ *   A 单词大陆③和星海是同一批词的两个入口：在星海清掉的错词、升过的复习盒，回到单词大陆③又被它自己的旧存档
+ *     冲回来（错题本 1、盒0）。原因：开机先 save() 一次、hansen_upgrade 又把存档时间改成「现在」，账本把旧数据当新的；
+ *     宠物模块还在账本开机同步之前就「以本页为准」并入了一次。
  *   G 同一个词发两次 +15 毕业金：错题本隔天清零那天发一次；复习计划后来在「今日复习」自评毕业又发一次。
  */
 import { chromium } from './playwright_loader.mjs';
@@ -263,6 +266,34 @@ try {
     ok(q.active && q.q === q.miss && q.retry, `完形：剩下的「${q.badWord}」出不了题时，先把错词「${q.miss}」再考一次（${q.real ? '真实数据' : '造的数据'}）` + JSON.stringify(q));
     ok(e3.length === 0, '页面无报错 ' + e3.join(' | '));
     await ctx3.close();
+  }
+
+  /* ── A：同一批词的两个入口（单词大陆③ = 星海第 61~90 词）：一边改了，另一边回来看到同一个状态 ── */
+  console.log('\n▶ A 单词大陆③答错 → 星海答对 → 回到单词大陆③：错题本和复习计划都跟星海一致');
+  {
+    const ctx4 = await newCtx();
+    const page4 = await ctx4.newPage();
+    const k = 5;
+    await openIsland(ctx4, 'island_land3.html', page4);
+    const a = await page4.evaluate(k => { markAnswer(k, false); return { ci: HansenCanonical.toCanonicalIndex(HansenCanonical.currentRef(), k), en: allW[k].en }; }, k);
+    await openIsland(ctx4, 'island_season.html', page4);
+    const b = await page4.evaluate(({ ci, en }) => {
+      const li = HansenCanonical.fromCanonicalIndex(HansenCanonical.currentRef(), ci);
+      const seen = { same: !!allW[li] && allW[li].en === en, wrong: S.wrongs[li] || 0, box: S.srs[li] ? S.srs[li].box : null };
+      markAnswer(li, true);
+      return { li, seen, after: { wrong: S.wrongs[li] || 0, box: S.srs[li] ? S.srs[li].box : null } };
+    }, a);
+    await page4.waitForTimeout(1200);
+    await openIsland(ctx4, 'island_land3.html', page4);
+    const c = await page4.evaluate(k => ({ wrong: S.wrongs[k] || 0, box: S.srs[k] ? S.srs[k].box : null }), k);
+    await openIsland(ctx4, 'island_season.html', page4);
+    const d = await page4.evaluate(li => ({ wrong: S.wrongs[li] || 0, box: S.srs[li] ? S.srs[li].box : null }), b.li);
+    ok(b.seen.same && b.seen.wrong === 1 && b.seen.box === 0, '星海看得到在单词大陆③答错的词（错题本 1、计划盒0） ' + JSON.stringify(b.seen));
+    ok(b.after.wrong === 0 && b.after.box === 1, '星海答对：错题本清零、计划升到盒1 ' + JSON.stringify(b.after));
+    ok(c.wrong === 0 && c.box === 1, '回到单词大陆③：错词没被它自己的旧存档冲回来，计划还是盒1（以前错题 1、盒0） ' + JSON.stringify(c));
+    ok(d.wrong === 0 && d.box === 1, '再回星海：仍是错题本 0、盒1（没被单词大陆③带坏） ' + JSON.stringify(d));
+    ok(page4.__errs.length === 0, '页面无报错 ' + page4.__errs.join(' | '));
+    await ctx4.close();
   }
 
   /* ── G：一个词只发一次毕业金（时间真的往后走：整页 Date 一起拨） ── */

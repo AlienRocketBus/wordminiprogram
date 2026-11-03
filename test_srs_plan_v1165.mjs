@@ -110,7 +110,10 @@ async function scenario(file, label) {
   ok(c.dueToday && c.count >= 1, 'C 到期那天今日复习照样数到它 (count=' + c.count + ')');
   ok(c.localDue >= 1, 'C 首页横幅口径（canonical 全局到期）也数到它 (localDue=' + c.localDue + ')');
   // C2：横幅点过去的「错题总览」也要看得到这个岛（否则横幅说有、总览说没有）
-  const c2 = await page.evaluate(() => {
+  const c2 = await page.evaluate(async () => {
+    /* 总览靠 hansen_upgrade 开机 1.5 秒后写的本岛词表缓存(hansen_vocab_*)认词；刚刷新完就打开会看不到这个岛
+       （复查实测：修改前后的代码都在单词大陆这一场时过时不过）。等缓存写好再开，断言不变 */
+    for (let t = 0; t < 40 && !localStorage.getItem('hansen_vocab_' + window.__hsnSaveKey); t++) await new Promise(r => setTimeout(r, 100));
     if (window.__hsnSaveNow) __hsnSaveNow();
     HansenWrongOverview.open ? HansenWrongOverview.open() : HansenWrongOverview._open();
     const el = document.getElementById('hwo_overlay');

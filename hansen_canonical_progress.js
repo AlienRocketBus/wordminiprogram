@@ -330,11 +330,11 @@
       return false;
     }
   }
-  function mergeState(store, ref, state, authoritative){
+  function mergeState(store, ref, state, authoritative, stampOverride){
     var a=resolve(ref);
     if(!a || !state || typeof state!=='object') return false;
     var p=store.islands[a.id], changed=false, learned={};
-    var stampRaw=Number(state.lastSaveTime),stamp=isFinite(stampRaw)?Math.max(0,Math.floor(stampRaw)):0;
+    var stampRaw=(typeof stampOverride==='number')?stampOverride:Number(state.lastSaveTime),stamp=isFinite(stampRaw)?Math.max(0,Math.floor(stampRaw)):0;
     function allowed(field,i){
       var cleared=Number(p.cleared&&p.cleared[field]&&p.cleared[field][i])||0;
       return !!authoritative || !cleared || stamp>cleared;
@@ -390,9 +390,15 @@
     return changed;
   }
 
+  /* v1165: 本页存档「这次打开时」的真实时间（模板 load() 记下）。岛页一打开就先 save() 一次，hansen_upgrade 还会把
+     lastSaveTime 改成现在 —— 数据还是上次的，时间却是新的。单词大陆③和星海共用同一批词：在星海清掉的错词、升过的
+     复习盒，回到单词大陆③时会被这份「看起来很新」的旧存档冲回去（错题又回来、盒子掉回 0）。开机合并本页时用真实时间。 */
+  var synced=false;   // 本页 S 已经从账本回填过（开机那次 syncCurrent，或别的模块显式调了 syncCurrent）
+  function loadedStamp(){var t=Number(root.__hsnLoadedSaveTime);return isFinite(t)&&t>=0?Math.floor(t):undefined;}
   // 每次启动都做并集合并；因此即使旧迁移标记存在，后来新增的 Land 存档也不会漏掉。
   function migrate(){
     var store=readStore(), changed=false,keys=storageKeys();
+    var curKey=String(root.__hsnSaveKey||''),early=synced?undefined:loadedStamp();
     if(!store||!keys)return {changed:false,store:null,error:'storage-read'};
     keys.forEach(function(key){
       if(/_bak$|_backup$|_tmp$/i.test(key)) return;
@@ -404,12 +410,12 @@
       var a=resolve(key);
       if(a){
         var state=safeParse(root.localStorage.getItem(key),null);
-        if(mergeState(store,key,state)) changed=true;
+        if(mergeState(store,key,state,false,(early!==undefined&&key===curKey)?early:undefined)) changed=true;
         return;
       }
     });
     // 当前内存可能比 perf_boost 延迟写盘的新；始终优先并入。
-    try{ if(root.S && mergeState(store,currentRef(),root.S)) changed=true; }catch(e){}
+    try{ if(root.S && mergeState(store,currentRef(),root.S,false,early)) changed=true; }catch(e){}
     if(!writeStore(store))return {changed:false,store:null,error:'storage-write'};
     try{ root.localStorage.setItem('hansen_canonical_migrated_v941','1'); }catch(e){}
     return {changed:changed,store:store};
@@ -459,6 +465,10 @@
   function absorbCurrent(){
     try{
       if(!root.S) return false;
+      /* v1165: 账本开机同步之前，本页 S 只是刚读出来的存档（可能比账本旧，见 loadedStamp）。这时「以本页为准」并入，
+         会把别的入口刚清掉的错词、升过的复习盒冲回去（宠物模块在开机前就会调到这里）。开机那次 migrate 会按真实时间并入本页；
+         回填过（syncCurrent）之后 S 就和账本一致了，再「以本页为准」并入才安全。 */
+      if(!synced&&loadedStamp()!==undefined) return false;   // 只在「S 是从旧存档读出来的」时才拦；新孩子/没有存档时照旧并入
       var store=readStore();if(!store)return false;var changed=mergeState(store,currentRef(),root.S,true);
       if(changed&&!writeStore(store))return false;
       return changed;
@@ -489,7 +499,7 @@
     }catch(e){return false;}
   }
   function syncCurrent(){
-    try{ return root.S ? syncState(currentRef(),root.S,true) : false; }
+    try{ if(!root.S) return false; var r=syncState(currentRef(),root.S,true); synced=true; return r; }
     catch(e){ return false; }
   }
 

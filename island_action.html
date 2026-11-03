@@ -2407,6 +2407,7 @@ function load(){
     // 不把 JSON 中的特殊属性交给 Object.assign，防止 __proto__ 等污染状态对象原型。
     var safeLoaded={};Object.keys(loaded).forEach(function(k){if(k!=='__proto__'&&k!=='prototype'&&k!=='constructor')safeLoaded[k]=loaded[k];});
     Object.assign(S,safeLoaded);
+    window.__hsnLoadedSaveTime=Number(safeLoaded.lastSaveTime)||0;  /* v1165 存档真实时间：开机 save()/hansen_upgrade 会把 lastSaveTime 改成现在，账本合并本页时要用这个（见 hansen_canonical_progress loadedStamp） */
     if(typeof S.xp!=='number'||!isFinite(S.xp))S.xp=0;if(typeof S.level!=='number'||!isFinite(S.level))S.level=1;
     if(typeof S.stars!=='number'||!isFinite(S.stars))S.stars=0;if(typeof S.gems!=='number'||!isFinite(S.gems))S.gems=0;
     if(typeof S.coins!=='number'||!isFinite(S.coins))S.coins=0;if(typeof S.streak!=='number'||!isFinite(S.streak))S.streak=0;
