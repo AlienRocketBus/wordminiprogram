@@ -89,6 +89,7 @@
   function open(key) {
     var r = rooms[key] || build(key);
     if (!r) return false;
+    markOpened(key);   /* v1165：孩子真的打开过 → 以后才值得后台预热它 */
     r.wrap.style.display = 'block';
     try { document.documentElement.style.overflow = 'hidden'; } catch (e) {}
     return true;
@@ -151,14 +152,73 @@
     } catch (e) {}
   }
 
+  /* ── v1165：预热要守三条规矩 ─────────────────────────────
+     实测（4G + 4 倍慢 CPU）：旧版每开一个岛，后台多下约 6MB、多跑约 1 秒脚本、多 4~5 个页面，
+     而岛本身并没有更快可用。原因有三：
+       ① 套娃：星海岛自己也是岛页，也装着本模块 → 在预热框里又去预热星海地图和星海岛……
+       ② 不看网络：弱网 / 省流量 / 网络未知（iOS）也照下不误，和 Boss 预取用的 HansenPreloadPolicy 不一致；
+       ③ 不看孩子：从没去过星海的孩子也每次都被预热，而且被预热的星海页会写存档 ——
+          「我的学习」因此说他去过星海，星海的开场故事也被标成「已看过」。
+     现在：在预热框里绝不再预热；网络策略不允许就不预热；星海页只给真的打开过它的孩子预热
+     （没打开过的，首页手指碰到星海入口时 hansen_season.js 会抢先预取）。
+     三个「带参数页」的资源预热也一样：不套娃、看网络，而且要孩子至少玩过一局。 */
+  function policy() { return window.HansenPreloadPolicy || null; }
+  function inWarmContext() {
+    try { if (/[?&]warm=1(?:&|$)/.test(location.search || '')) return true; } catch (e) {}
+    try {
+      var fe = window.frameElement;
+      if (!fe) return false;
+      if (fe.getAttribute && fe.getAttribute('aria-hidden') === 'true') return true;   /* prefetch() 的隐藏框 */
+      if (fe.closest && fe.closest('[id^="hsn_room_"]')) return true;                 /* 常驻房间里 */
+      return false;
+    } catch (e) {
+      return window.top !== window.self;   /* 读不到父页面就当作在别人的框里，宁可不预热 */
+    }
+  }
+  function canBackground() {
+    try {
+      var p = policy();
+      if (p && typeof p.canBackgroundDownload === 'function') return !!p.canBackgroundDownload();
+    } catch (e) {}
+    return false;
+  }
+  function mustYield() {
+    try { var p = policy(); return !!(p && typeof p.shouldYield === 'function' && p.shouldYield()); }
+    catch (e) { return true; }
+  }
+  function wasOpened(key) {
+    try { var p = policy(); return !!(p && typeof p.roomOpened === 'function' && p.roomOpened(key)); }
+    catch (e) { return false; }
+  }
+  function markOpened(key) {
+    try { var p = policy(); if (p && typeof p.markRoomOpened === 'function') p.markRoomOpened(key); } catch (e) {}
+  }
+  function kidHasPlayed() {
+    try { var p = policy(); return !!(p && typeof p.kidHasPlayed === 'function' && p.kidHasPlayed()); }
+    catch (e) { return false; }
+  }
+  /* 本页自己就是星海页、而且不是藏在预热框里 → 孩子正在看它，记下来 */
+  function markSelfIfStarSea() {
+    if (inWarmContext()) return;
+    var path = '';
+    try { path = location.pathname || ''; } catch (e) {}
+    if (/island_season\.html$/i.test(path)) markOpened('season');
+    else if (/island_land\d+\.html$/i.test(path)) markOpened('land');   /* 单词大陆的岛只能从地图进 */
+  }
+  markSelfIfStarSea();
+
   /* 空闲时预热（不与首屏抢资源） */
   function scheduleWarm() {
+    if (inWarmContext()) return;   /* ① 绝不套娃 */
     var keys = Object.keys({ land: 1, season: 1 }).filter(function (k) {
-      var c = cfgOf(k); return c && c.warm;
+      var c = cfgOf(k); return c && c.warm && wasOpened(k);   /* ③ 只预热孩子真的打开过的房间 */
     });
+    var assetsOk = kidHasPlayed();
     var i = 0;
     function next() {
       if (i >= keys.length) return;
+      if (!canBackground()) return;                          /* ② 网络变差 / 页面转后台：这轮不再预热 */
+      if (mustYield()) { setTimeout(next, 600); return; }    /* 孩子正在点 / 正在放音：先让路 */
       warm(keys[i++]);
       /* 逐个预热，间隔开，避免同时抢带宽 */
       setTimeout(next, 1200);
@@ -166,14 +226,21 @@
     /* 常驻房间预热完后, 再顺带把三个「带参数页」的资源灌进缓存 */
     var PREFETCH = ['boss_hall.html', 'season_showcase.html', 'spelling_bee.html'];
     function warmAssets() {
+      if (!assetsOk) return;
       var j = 0;
       (function step() {
         if (j >= PREFETCH.length) return;
+        if (!canBackground()) return;
+        if (mustYield()) { setTimeout(step, 600); return; }
         prefetch(PREFETCH[j++]);
         setTimeout(step, 1500);
       })();
     }
-    function chain() { next(); setTimeout(warmAssets, keys.length * 1300 + 800); }
+    function chain() {
+      if (!canBackground()) return;   /* ② 与 Boss 预取同一个网络策略：明确 4G、非省流量、页面可见 */
+      next(); setTimeout(warmAssets, keys.length * 1300 + 800);
+    }
+    if (!keys.length && !assetsOk) return;
     if (typeof window.requestIdleCallback === 'function') {
       requestIdleCallback(function () { chain(); }, { timeout: 4000 });
     } else {

@@ -103,7 +103,17 @@
 
   function boot() {
     bindEager();                       /* 触碰预取立刻生效 */
-    var run = function () { prefetchRecent(); setTimeout(prefetchVisible, 1500); };
+    /* v1165 首访流量预算：空闲预取要守和其他后台下载同一个网络策略（明确 4G、非省流量、页面可见）；
+       还没玩过的新孩子不猜他去哪个岛 —— 推荐的第一个岛已由 hansen_preload.js 预热，
+       旧版在这里再空闲预取 6 个岛（实测新孩子首页 12 秒内约 1MB）。手指碰到卡片时照样立刻预取。 */
+    var run = function () {
+      var p = window.HansenPreloadPolicy;
+      try {
+        if (!p || typeof p.canBackgroundDownload !== 'function' || !p.canBackgroundDownload()) return;
+        if (typeof p.kidHasPlayed !== 'function' || !p.kidHasPlayed()) return;
+      } catch (e) { return; }
+      prefetchRecent(); setTimeout(prefetchVisible, 1500);
+    };
     if (typeof window.requestIdleCallback === 'function') {
       requestIdleCallback(function () { run(); }, { timeout: 4000 });
     } else {

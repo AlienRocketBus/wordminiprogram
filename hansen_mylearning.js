@@ -34,9 +34,22 @@
   function daysAgo(ts){ if(!ts) return ''; var d = Math.floor((Date.now() - ts) / 86400000); return d <= 0 ? '今天' : d === 1 ? '昨天' : d + ' 天前'; }
   function esc(s){ return (s == null ? '' : String(s)).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
 
+  // v1165: 本页藏在后台预热框里(孩子看不见)时不写快照 —— 否则「我的学习」会说他去过一个从没打开的岛。
+  //   预热房间被孩子点开(display:block)之后, 下一次定时快照照常写。
+  function hiddenWarmFrame(){
+    try {
+      if(/[?&]warm=1(?:&|$)/.test(location.search || '')) return true;
+      var fe = window.frameElement; if(!fe) return false;
+      if(fe.getAttribute && fe.getAttribute('aria-hidden') === 'true') return true;
+      var room = fe.closest && fe.closest('[id^="hsn_room_"]');
+      return !!(room && room.style.display !== 'block');
+    } catch(e){ return false; }
+  }
+
   // ── 快照: 把本岛真实学习数据写进全局命名空间 ──
   function writeSnapshot(){
     try {
+      if(hiddenWarmFrame()) return;
       var S = window.S; if(!S) return;
       var allW = window.allW;
       var snap = {

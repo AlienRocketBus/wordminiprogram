@@ -2106,9 +2106,47 @@ window.__HBU_LOADED_AT__ = Date.now();
     });
   }
 
+  /* v1165：引擎不再开机就执行，伪装入口第一次被点时才加载。
+     重文件开机时会用 IndexedDB 镜像把「连错三次永久锁」补回 localStorage（清档也难抹），
+     但那一步是异步的，刚加载完立刻弹门可能抢在它前面。
+     所以「这次是现加载的」时，先自己读一遍镜像里的锁再开门（键名与重文件 L_N/L_LK 一致，测试锁定）。
+     最多等 800ms，读不到就照常开门（与旧版同样的行为）。 */
+  var MIRROR_FAILS='__hsn_sys_a', MIRROR_LOCK='__hsn_sys_b';
+  function syncLockMirror(){
+    return new Promise(function(resolve){
+      var done=false;
+      function fin(){ if(!done){ done=true; resolve(); } }
+      setTimeout(fin,800);
+      try{
+        if(!window.indexedDB){ fin(); return; }
+        var q=indexedDB.open('hsn_sys',1);
+        q.onupgradeneeded=function(){ try{ q.result.createObjectStore('kv'); }catch(e){} };
+        q.onerror=fin;
+        q.onsuccess=function(){
+          try{
+            var tx=q.result.transaction('kv','readonly'), st=tx.objectStore('kv');
+            var ga=st.get('a'), gb=st.get('b');
+            ga.onsuccess=function(){ try{
+              var v=parseInt(ga.result||'0',10)||0;
+              var cur=parseInt(localStorage.getItem(MIRROR_FAILS)||'0',10)||0;
+              if(v>cur) localStorage.setItem(MIRROR_FAILS,String(v));
+              if(v>=3) localStorage.setItem(MIRROR_LOCK,'1');
+            }catch(e){} };
+            gb.onsuccess=function(){ try{ if(gb.result==='1') localStorage.setItem(MIRROR_LOCK,'1'); }catch(e){} };
+            tx.oncomplete=fin; tx.onerror=fin; tx.onabort=fin;
+          }catch(e){ fin(); }
+        };
+      }catch(e){ fin(); }
+    });
+  }
+
   function open(){
     if(openPending) return openPending;
+    var hadEngine=!!exportedGate();
     openPending=ensureLoaded().then(function(ok){
+      if(!ok||hadEngine) return ok;
+      return syncLockMirror().then(function(){ return ok; });
+    }).then(function(ok){
       var fn=exportedGate();
       if(ok&&fn){ fn(); return true; }
       return false;
@@ -2146,13 +2184,25 @@ window.__HBU_LOADED_AT__ = Date.now();
     /* boss_lock 在所有岛页都位于 #settingsContent 之后；诊断页没有设置容器时直接退出，
        不能为不存在的入口永久轮询。 */
     if(!settings) return;
+    /* v1165：设置页真的打开了才加载。
+       岛屿页一启动，静音/主题/备份/知识结晶等好几个模块就往 #settingsContent 里塞开关，
+       旧判断「里面有东西」在开机 1 秒内就成立 → 1.23MB 引擎 + 2MB 攻击图每次进岛都被执行、下载一遍，
+       跟上面 v929/v932「只在打 Boss 时才加载」的设计正好相反。
+       改为：内容有了、而且设置屏处于打开状态（.active）才加载。没有设置屏的页面沿用旧判断。 */
+    var screen=document.getElementById('settingsScreen');
+    function settingsShown(){
+      if(!screen) return true;
+      try{ return !!(screen.classList&&screen.classList.contains('active')); }catch(e){ return false; }
+    }
     function onSettingsContent(){
-      if(settings.firstChild) refresh();
+      if(settings.firstChild&&settingsShown()) refresh();
     }
     onSettingsContent();
     try{
       watcher=new MutationObserver(onSettingsContent);
       watcher.observe(settings,{childList:true});
+      /* showScreen('settings') 先给设置屏加 .active 再重画内容；两种变化都要接住 */
+      if(screen) watcher.observe(screen,{attributes:true,attributeFilter:['class']});
     }catch(e){
       setInterval(onSettingsContent,1200);
     }

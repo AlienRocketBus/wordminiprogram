@@ -699,6 +699,8 @@
     if(/^land[1-8]$/.test(__ik)){ renderSeasonZoneBossPicker(__ik); return; }  //🔴v873 单词大陆8岛(land1-8)同用星域选关网格(各岛自己的5 boss·landN_prog顺序解锁)  //🔴v871 星域子岛(season1-5)显示自己的BOSSES(非20通用卡)
     var box = document.getElementById('bossContent');
     if(!box) return;
+    /* v1165：记一笔「打开过选关墙」，之后进岛才值得预下 Boss 头像（见 preloadBossImages） */
+    try { if(window.HansenPreloadPolicy && HansenPreloadPolicy.markBossWallSeen) HansenPreloadPolicy.markBossWallSeen(); } catch(e){}
     var d = loadData(true);
     var maxLv = getMaxChallengeLv();
     
@@ -1216,9 +1218,16 @@
     if(window.__hansenBossImgPreloaded) return;
     window.__hansenBossImgPreloaded = true;
     
+    /* v1165：以前每进一个岛都把 20 张 Boss 头像（≈2.9MB）全下一遍。
+       选关墙上没解锁的关只显示 🔒，根本用不到图；从没打开过选关墙的孩子更用不到。
+       改为：打开过一次选关墙之后，才预下「已解锁的 + 下一关」；星海/单词大陆用自己的 Boss 图，不下。 */
+    var pol = window.HansenPreloadPolicy;
+    if(!pol || typeof pol.bossWallSeen !== 'function' || !pol.bossWallSeen()) return;
+    try { if(/^(?:season\d*|land\d+)$/.test(getCurrentIslandKey())) return; } catch(e){}
     var imgs = [];
     try {
-      imgs = BOSS_CARDS.map(function(b){ return b.img; }).filter(Boolean);
+      var cap = Math.min(20, getMaxChallengeLv() + 1);
+      imgs = BOSS_CARDS.slice(0, cap).map(function(b){ return b.img; }).filter(Boolean);
     } catch(e){ return; }
     if(!imgs.length) return;
     

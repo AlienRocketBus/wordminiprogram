@@ -336,10 +336,20 @@
         (!document.visibilityState || document.visibilityState==='visible') && !document.hidden;
     }catch(e){ return false; }
   }
+  /* v1165 首访流量预算：星海地图约 0.5MB（整张背景图内嵌在页面里）。
+     还没去过星海、也还没学完一个普通岛的孩子，空闲时不替他下；手指碰到入口时照样抢先预取。 */
+  function landMapLikely(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(!p) return false;
+      return !!((p.roomOpened && p.roomOpened('land')) || (p.basicIslandDone && p.basicIslandDone()));
+    }catch(e){ return false; }
+  }
   function warmLandMap(userIntent){
     try{
       if(window.__hansenLandMapWarmAttempted) return window.__hansenLandMapWarmPromise||null;
       if(!userIntent && !canAutoWarmLandMap()) return null;
+      if(!userIntent && !landMapLikely()) return null;
       if(navigator.onLine===false || document.visibilityState==='hidden' || document.visibilityState==='prerender' || document.hidden) return null;
       window.__hansenLandMapWarmAttempted=true;  // 发请求前先上锁：失败也不在轮询中狂重试
       var p=fetch('land_map.html',{cache:'force-cache',credentials:'same-origin'}).catch(function(){ return null; });
@@ -434,6 +444,8 @@
          **正是 v1069 想根治的那个"点了没反应"**。
          守卫 `onclick 语法` 这次咬住了它 —— 而它已经躺了 84 个版本。 */
       bar.onclick = function () {
+        /* v1165：记下「真的去过星海」，之后进岛才值得后台预热星海页 */
+        try { if (window.HansenPreloadPolicy && HansenPreloadPolicy.markRoomOpened) HansenPreloadPolicy.markRoomOpened('land'); } catch (e) {}
         try {
           if (typeof openIsland === 'function') { openIsland('land_map.html'); return; }
           if (window.HansenRoom && typeof HansenRoom.open === 'function') { HansenRoom.open('land'); return; }

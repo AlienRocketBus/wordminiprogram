@@ -8504,6 +8504,13 @@ window.addEventListener('storage', function(e){
         window.__hansenBossFXReady().then(function(){ orig.apply(self, args); });
         return;
       }
+      /* v1165：孩子自己点开 Boss 选关墙（有真实点按）→ 后台先把引擎准备好，选完 Boss 就能直接开打。
+         开机时自动落到选关墙（赛季岛）、或藏在后台预热框里，都没有真实点按，不会触发；真开打时一定触发。 */
+      if(id==='boss' && !window.__hansenBossFXLoaded){
+        /* bossActive 是页面里的 let 变量，不在 window 上（上面那个 window.bossActive 判断其实永远不成立），这里按名字读 */
+        var _fight=false; try{ _fight=(typeof bossActive!=='undefined' && bossActive===true); }catch(e){}
+        try{ if(_fight || (navigator.userActivation && navigator.userActivation.isActive)) window.__hansenBossFXReady(); }catch(e){}
+      }
       return orig.apply(this, arguments);
     };
   })();
