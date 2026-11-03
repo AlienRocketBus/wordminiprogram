@@ -39,10 +39,11 @@ setTimeout(function(){shown=false;show();},1200);
 <script src="hansen_backup_bootstrap_v944.js?v=1163"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
 <meta charset="UTF-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白。🔴v792 加固: 只重试真正的图片URL·跳过空src/页面URL——否则空src的img报错会被改成?__rt=(指向页面HTML)·还会覆盖刚设的真src·导致角色图永远加载失败只剩背景 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;var cur=(g.getAttribute("src")||"");if(!cur||!/\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(cur)){return;}g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=cur.split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>BOSS 殿堂 · 演示</title>
+<title>BOSS 殿堂</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
+html{overflow-x:hidden}/* 🔴v1165 窄屏手机上不能左右拖（背景光圈以前写死 430px 宽） */
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#04040c;color:#fff;overflow-x:hidden;min-height:100vh;position:relative;display:flex;flex-direction:column;align-items:center}
 
 /* ── 全屏本命背景(每个 boss 一张, Ken Burns 缓动) ── */
@@ -65,7 +66,7 @@ h1{font-size:25px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
 .sub{margin-top:8px;font-size:11px;letter-spacing:5px;color:#cfc4ee;opacity:.85;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 
 .stage{position:relative;z-index:3;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px 16px 0;perspective:1300px}
-.spot{position:absolute;top:46%;left:50%;width:430px;height:430px;transform:translate(-50%,-50%);pointer-events:none;z-index:1;background:radial-gradient(circle,var(--spot,rgba(251,191,36,.14)),rgba(20,16,40,.06) 46%,transparent 66%);animation:breathe 6s ease-in-out infinite}
+.spot{position:absolute;top:46%;left:50%;width:min(430px,100vw);height:min(430px,100vw);transform:translate(-50%,-50%);pointer-events:none;z-index:1;background:radial-gradient(circle,var(--spot,rgba(251,191,36,.14)),rgba(20,16,40,.06) 46%,transparent 66%);animation:breathe 6s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:.92}50%{opacity:.92}}/* 🔴v785 禁闪烁:呼吸脉动改恒定不变 */
 #motes{position:absolute;inset:0;pointer-events:none;z-index:3}
 .mote{position:absolute;bottom:22%;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#fff2c0,rgba(251,191,36,.2));box-shadow:0 0 6px 1px var(--moteglow,rgba(251,191,36,.7));opacity:0;animation:rise linear infinite}
@@ -485,4 +486,10 @@ renderBoss(startLv-1); refreshSceneSwatch();
 /* 🔴v792 启动后延迟预加载【全部20个】boss角色立绘(每张仅19-46KB·共~600KB·弱网下提前下好缓存·根治"点开boss卡只剩背景没角色立绘"——立绘下好后切到任意boss都能立即显示)。延迟1.2s避免和当前卡的立绘/场景抢带宽。 */
 setTimeout(function(){ try{ for(var _pi=0;_pi<BOSSES.length;_pi++){ var _im=new Image(); _im.src=artPath(BOSSES[_pi].lv); } }catch(_e){} }, 1200);
 </script>
+<script>/* 🔴v1165 被单独打开时（不在岛里的弹层中）给一个回首页的路；在弹层里不显示（弹层自己有关闭） */
+(function(){try{if(window.top!==window)return;var a=document.createElement('a');a.id='hsnBackHome';a.href='index.html';a.textContent='‹ 回地图';
+a.setAttribute('aria-label','回到首页地图');
+a.style.cssText='position:fixed;top:max(14px,env(safe-area-inset-top,0px));left:calc(max(16px,env(safe-area-inset-left,0px)) + 54px);z-index:70;height:44px;line-height:44px;padding:0 14px;border-radius:22px;border:1px solid rgba(251,191,36,.45);background:rgba(10,10,28,.82);color:#fcd34d;font-size:15px;font-weight:800;text-decoration:none;white-space:nowrap;font-family:inherit';
+a.onclick=function(e){e.preventDefault();try{location.replace('index.html');}catch(_){location.href='index.html';}};
+document.body.appendChild(a);}catch(e){}})();</script>
 </body></html>

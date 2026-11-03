@@ -43,6 +43,7 @@ setTimeout(function(){shown=false;show();},1200);
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
+html{overflow-x:hidden}/* 🔴v1165 窄屏手机上不能左右拖（背景光圈以前写死 420px 宽） */
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#04040c;color:#fff;overflow-x:hidden;min-height:100vh;position:relative;display:flex;flex-direction:column;align-items:center}
 #sky{position:fixed;inset:0;z-index:0;overflow:hidden;background:
   radial-gradient(1100px 660px at 50% -6%,rgba(110,82,190,.32),transparent 60%),
@@ -73,7 +74,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:7px;padding-left:7px;white-spac
   background:linear-gradient(to bottom,rgba(255,242,205,.13),rgba(255,242,205,.045) 52%,transparent);
   clip-path:polygon(39% 0%,61% 0%,84% 100%,16% 100%)}/* 🔴v846 禁脉动:shaftBreath→静态 */
 @keyframes shaftBreath{0%,100%{opacity:.7}50%{opacity:.92}}
-.spot{position:absolute;top:46%;left:50%;width:420px;height:420px;transform:translate(-50%,-50%);pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(251,191,36,.14),rgba(124,92,200,.06) 46%,transparent 66%);opacity:.9}/* 🔴v846 禁脉动:breathe→静态 */
+.spot{position:absolute;top:46%;left:50%;width:min(420px,100vw);height:min(420px,100vw);transform:translate(-50%,-50%);pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(251,191,36,.14),rgba(124,92,200,.06) 46%,transparent 66%);opacity:.9}/* 🔴v846 禁脉动:breathe→静态 */
 @keyframes breathe{0%,100%{opacity:.8}50%{opacity:1}}
 #motes{position:absolute;inset:0;pointer-events:none;z-index:3}
 .mote{position:absolute;bottom:22%;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#fff2c0,rgba(251,191,36,.2));box-shadow:0 0 6px 1px rgba(251,191,36,.7);opacity:0;animation:rise linear infinite}
@@ -455,4 +456,10 @@ function setForm(i){
 })();
 
 </script>
+<script>/* 🔴v1165 被单独打开时（不在岛里的弹层中）给一个回首页的路；在弹层里不显示（弹层自己有关闭） */
+(function(){try{if(window.top!==window)return;var a=document.createElement('a');a.id='hsnBackHome';a.href='index.html';a.textContent='‹ 回地图';
+a.setAttribute('aria-label','回到首页地图');
+a.style.cssText='position:fixed;top:max(14px,env(safe-area-inset-top,0px));left:calc(max(16px,env(safe-area-inset-left,0px)) + 54px);z-index:70;height:44px;line-height:44px;padding:0 14px;border-radius:22px;border:1px solid rgba(251,191,36,.45);background:rgba(10,10,28,.82);color:#fcd34d;font-size:15px;font-weight:800;text-decoration:none;white-space:nowrap;font-family:inherit';
+a.onclick=function(e){e.preventDefault();try{location.replace('index.html');}catch(_){location.href='index.html';}};
+document.body.appendChild(a);}catch(e){}})();</script>
 </body></html>
