@@ -2920,6 +2920,8 @@ const ADVENTURE_LEVELS = [
   {lv:29, name:'传说英雄',   emoji:'🏆', xp:46900, desc:'传说级英雄, 不朽传奇'},
   {lv:30, name:'冒险之王',   emoji:'👑', xp:52200, desc:'冒险之巅, 王者归来'}
 ];
+/* 🔴v1055: 导出给后台面板用（等级调节需要读阈值表）。const 不会自动挂到 window。🔴v1165 单词大陆也要（以前后台说「没有等级表」） */
+try{ window.ADVENTURE_LEVELS = ADVENTURE_LEVELS; }catch(e){}
 
 
 // ============================================================
@@ -7734,11 +7736,40 @@ function _doResetStat(key, label){
 }
 
 function renderSettings(){
+  /*🔴v1032: 发音音量滑杆绑定(渲染后执行)*/
+  setTimeout(function(){
+    var sl=document.getElementById('ttsVolSlider'), num=document.getElementById('ttsVolNum');
+    if(!sl||!window.HansenTTSVolume) return;
+    sl.oninput=function(){ if(num) num.textContent=sl.value+'%'; };
+    var commit=function(){
+      HansenTTSVolume.set(+sl.value||0);   /* 模块用 0-100 刻度 */
+      try{ HansenTTSVolume.preview('hello'); }catch(e){}
+    };
+    sl.onchange=commit;
+    sl.addEventListener('touchend', commit, {passive:true});
+  }, 0);
+
   const totalWords=allW.length;
   const learnedCount=(S.learned||[]).length;
   const achCount=(window.HansenAch&&HansenAch.getClaimed)?HansenAch.getClaimed().length:(S.achievements||[]).length;
   const bossCount=S.stats?(S.stats.bossBeaten||0):0;
   document.getElementById('settingsContent').innerHTML=
+    /*🔴v1032: 发音音量调节——全站统一，滑动即生效并试听*/
+    '<div class="settings-section">'+
+      '<h3>🔊 发音音量</h3>'+
+      '<div style="padding:6px 2px 2px">'+
+        '<input type="range" id="ttsVolSlider" min="0" max="100" step="5" value="'+
+          (window.HansenTTSVolume? HansenTTSVolume.get() : 100)+
+          '" style="width:100%;height:34px" aria-label="发音音量">'+
+        '<div style="display:flex;justify-content:space-between;font-size:11.5px;opacity:.7;font-weight:700;margin-top:2px">'+
+          '<span>轻</span><span id="ttsVolNum">'+
+          (window.HansenTTSVolume? HansenTTSVolume.get() : 100)+'%</span><span>响</span>'+
+        '</div>'+
+        '<div style="font-size:11.5px;opacity:.66;line-height:1.6;margin-top:8px;font-weight:600">'+
+          '这个音量对所有玩法的单词发音都生效（拼写蜂、听音辨义、闪卡等全部统一）。松手会试听一次。'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
     '<div class="settings-section">'+
       '<h3>📊 当前进度概览</h3>'+
       '<div class="settings-stat"><span>等级</span><span>'+getAdvLevel().emoji+' Lv.'+S.level+' '+getAdvLevel().name+'</span></div>'+'<div class="settings-stat"><span>总经验</span><span>🎓 '+(S.charXP||0)+' 经验</span></div>'+
