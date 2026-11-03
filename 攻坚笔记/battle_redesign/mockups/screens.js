@@ -295,8 +295,8 @@
       + '<span class="colon">:</span>'
       + '<div class="sd' + (op > my ? ' win' : '') + '">' + av(OP.av, 'op') + '<div class="nm">' + OP.n + '</div><div class="n">' + op + '</div>' + (op > my ? '<span class="crown">👑 赢</span>' : '') + '</div></div>'
       + reward
-      + '<div class="best"><div class="st"><b>' + (o.k === 'lose' ? 6 : 8) + '<small style="font-size:15px">/10</small></b><span>拼对</span></div><div class="st"><b>' + (o.k === 'lose' ? 3 : 6) + '</b><span>抢先</span></div><div class="st"><b>0.7<small style="font-size:15px">秒</small></b><span>最快</span></div></div>'
-      + '<div class="panel" style="margin-top:10px"><div class="h-m">这一局的词 <small class="cap">点一下再听</small></div>' + wchips(words) + '</div>'
+      + '<div class="best"><div class="st"><b>' + (o.k === 'lose' ? 6 : 8) + '<small style="font-size:15px">/10</small></b><span>拼对</span></div><div class="st"><b>' + (o.k === 'lose' ? 3 : 6) + '</b><span>抢先</span></div><div class="st"><b>' + (o.k === 'lose' ? '0.9' : '0.7') + '<small style="font-size:15px">秒</small></b><span>最快</span></div></div>'
+      + '<div class="panel" style="margin-top:10px"><div class="h-m">这一局的词 <small class="cap">点一下再听</small></div>' + wchips(o.k === 'lose' ? words.map(function (w, i) { return i === 3 || i === 8 ? [w[0], w[1], 0] : w; }) : words) + '</div>'
       + acts + '</div>';
   }
 

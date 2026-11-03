@@ -1,0 +1,1 @@
+{"states":146,"maxRunningAnimations":0,"infiniteCssRules":0,"maxRafPerSec":0,"maxIntervals":1,"fxLeft":0,"maxBusyPct":1.05,"meanBusyPct":0.33}

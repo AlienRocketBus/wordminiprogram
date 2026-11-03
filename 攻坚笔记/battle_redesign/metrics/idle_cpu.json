@@ -1327,7 +1327,7 @@
    "layoutPct": 0
   },
   "ld_ranked_cosmos": {
-   "busyPct": 0.07,
+   "busyPct": 0.04,
    "scriptPct": 0,
    "layoutPct": 0
   },
@@ -1337,67 +1337,67 @@
    "layoutPct": 0
   },
   "mt_search_cosmos": {
-   "busyPct": 0.91,
-   "scriptPct": 0.09,
-   "layoutPct": 0.17
-  },
-  "mt_search_cloud": {
-   "busyPct": 0.9,
-   "scriptPct": 0.08,
+   "busyPct": 1.05,
+   "scriptPct": 0.11,
    "layoutPct": 0.18
   },
+  "mt_search_cloud": {
+   "busyPct": 0.78,
+   "scriptPct": 0.11,
+   "layoutPct": 0.15
+  },
   "mt_host_cosmos": {
-   "busyPct": 1.16,
-   "scriptPct": 0.09,
-   "layoutPct": 0.26
+   "busyPct": 0.8,
+   "scriptPct": 0.08,
+   "layoutPct": 0.21
   },
   "mt_host_cloud": {
-   "busyPct": 0.85,
-   "scriptPct": 0.07,
-   "layoutPct": 0.22
+   "busyPct": 0.81,
+   "scriptPct": 0.06,
+   "layoutPct": 0.19
   },
   "lb_rooms_cosmos": {
-   "busyPct": 0.04,
-   "scriptPct": 0,
-   "layoutPct": 0
-  },
-  "lb_rooms_cloud": {
-   "busyPct": 0.08,
-   "scriptPct": 0,
-   "layoutPct": 0
-  },
-  "ch_default_cosmos": {
-   "busyPct": 0.05,
-   "scriptPct": 0,
-   "layoutPct": 0
-  },
-  "ch_default_cloud": {
    "busyPct": 0.03,
    "scriptPct": 0,
    "layoutPct": 0
   },
+  "lb_rooms_cloud": {
+   "busyPct": 0.03,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ch_default_cosmos": {
+   "busyPct": 0.03,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
+  "ch_default_cloud": {
+   "busyPct": 0.05,
+   "scriptPct": 0,
+   "layoutPct": 0
+  },
   "wt_private_cosmos": {
-   "busyPct": 0.87,
-   "scriptPct": 0.09,
-   "layoutPct": 0.22
+   "busyPct": 0.84,
+   "scriptPct": 0.04,
+   "layoutPct": 0.23
   },
   "wt_private_cloud": {
-   "busyPct": 0.95,
-   "scriptPct": 0.08,
-   "layoutPct": 0.21
+   "busyPct": 0.7,
+   "scriptPct": 0.07,
+   "layoutPct": 0.16
   },
   "jn_wait_cosmos": {
-   "busyPct": 0.79,
-   "scriptPct": 0.1,
-   "layoutPct": 0.18
-  },
-  "jn_wait_cloud": {
    "busyPct": 0.76,
-   "scriptPct": 0.09,
+   "scriptPct": 0.04,
    "layoutPct": 0.17
   },
+  "jn_wait_cloud": {
+   "busyPct": 0.68,
+   "scriptPct": 0.06,
+   "layoutPct": 0.13
+  },
   "bt_A_mid_cosmos": {
-   "busyPct": 0.05,
+   "busyPct": 0.04,
    "scriptPct": 0,
    "layoutPct": 0
   },
@@ -1417,32 +1417,32 @@
    "layoutPct": 0
   },
   "sub_wait_cosmos": {
-   "busyPct": 0.72,
-   "scriptPct": 0.06,
+   "busyPct": 0.68,
+   "scriptPct": 0.08,
    "layoutPct": 0.12
   },
   "sub_wait_cloud": {
-   "busyPct": 0.94,
-   "scriptPct": 0.09,
-   "layoutPct": 0.17
+   "busyPct": 0.79,
+   "scriptPct": 0.06,
+   "layoutPct": 0.16
   },
   "rs_win_cosmos": {
-   "busyPct": 0.02,
+   "busyPct": 0.03,
    "scriptPct": 0,
    "layoutPct": 0
   },
   "rs_win_cloud": {
-   "busyPct": 0.05,
+   "busyPct": 0.04,
    "scriptPct": 0,
    "layoutPct": 0
   },
   "fr_list_cosmos": {
-   "busyPct": 0.07,
+   "busyPct": 0.03,
    "scriptPct": 0,
    "layoutPct": 0
   },
   "fr_list_cloud": {
-   "busyPct": 0.04,
+   "busyPct": 0.13,
    "scriptPct": 0,
    "layoutPct": 0
   }

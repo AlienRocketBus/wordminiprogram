@@ -62,12 +62,12 @@
 | 390x844 | bt_A_mine_cosmos | 46 | 8.43 | 8.43 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_A_opp_cloud | 46 | 8.3 | 8.64 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_A_opp_cosmos | 46 | 8.43 | 8.43 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
-| 390x844 | bt_B_opp_cloud | 42 | 8.3 | 9.93 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
-| 390x844 | bt_B_opp_cosmos | 42 | 8.43 | 10.49 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
+| 390x844 | bt_B_opp_cloud | 43 | 8.3 | 9.93 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
+| 390x844 | bt_B_opp_cosmos | 43 | 8.43 | 10.49 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_B_waitopp_cloud | 44 | 8.3 | 8.3 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_B_waitopp_cosmos | 44 | 8.43 | 8.43 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
-| 390x844 | bt_C_opp_cloud | 43 | 8.3 | 9.93 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
-| 390x844 | bt_C_opp_cosmos | 43 | 8.43 | 10.49 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
+| 390x844 | bt_C_opp_cloud | 44 | 8.3 | 9.93 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
+| 390x844 | bt_C_opp_cosmos | 44 | 8.43 | 10.49 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_C_waitopp_cloud | 44 | 8.3 | 8.3 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_C_waitopp_cosmos | 44 | 8.43 | 8.43 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
 | 390x844 | bt_idle_cloud | 40 | 8.64 | 15.7 | 0 | 0 | 0 | 33.7 | 52 |  | 0 |
@@ -208,12 +208,12 @@
 | 360x640 | bt_A_mine_cosmos | 46 | 8.43 | 8.43 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_A_opp_cloud | 46 | 8.3 | 8.64 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_A_opp_cosmos | 46 | 8.43 | 8.43 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
-| 360x640 | bt_B_opp_cloud | 42 | 8.3 | 9.93 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
-| 360x640 | bt_B_opp_cosmos | 42 | 8.43 | 10.49 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
+| 360x640 | bt_B_opp_cloud | 43 | 8.3 | 9.93 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
+| 360x640 | bt_B_opp_cosmos | 43 | 8.43 | 10.49 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_B_waitopp_cloud | 44 | 8.3 | 8.3 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_B_waitopp_cosmos | 44 | 8.43 | 8.43 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
-| 360x640 | bt_C_opp_cloud | 43 | 8.3 | 9.93 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
-| 360x640 | bt_C_opp_cosmos | 43 | 8.43 | 10.49 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
+| 360x640 | bt_C_opp_cloud | 44 | 8.3 | 9.93 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
+| 360x640 | bt_C_opp_cosmos | 44 | 8.43 | 10.49 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_C_waitopp_cloud | 44 | 8.3 | 8.3 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_C_waitopp_cosmos | 44 | 8.43 | 8.43 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
 | 360x640 | bt_idle_cloud | 40 | 8.64 | 15.7 | 0 | 0 | 0 | 30.7 | 48 |  | 0 |
@@ -503,27 +503,27 @@
 |---|---:|---:|---:|
 | hub_island_cosmos | 0.05 | 0 | 0 |
 | hub_island_cloud | 0.03 | 0 | 0 |
-| ld_ranked_cosmos | 0.07 | 0 | 0 |
+| ld_ranked_cosmos | 0.04 | 0 | 0 |
 | ld_ranked_cloud | 0.05 | 0 | 0 |
-| mt_search_cosmos | 0.91 | 0.09 | 0.17 |
-| mt_search_cloud | 0.9 | 0.08 | 0.18 |
-| mt_host_cosmos | 1.16 | 0.09 | 0.26 |
-| mt_host_cloud | 0.85 | 0.07 | 0.22 |
-| lb_rooms_cosmos | 0.04 | 0 | 0 |
-| lb_rooms_cloud | 0.08 | 0 | 0 |
-| ch_default_cosmos | 0.05 | 0 | 0 |
-| ch_default_cloud | 0.03 | 0 | 0 |
-| wt_private_cosmos | 0.87 | 0.09 | 0.22 |
-| wt_private_cloud | 0.95 | 0.08 | 0.21 |
-| jn_wait_cosmos | 0.79 | 0.1 | 0.18 |
-| jn_wait_cloud | 0.76 | 0.09 | 0.17 |
-| bt_A_mid_cosmos | 0.05 | 0 | 0 |
+| mt_search_cosmos | 1.05 | 0.11 | 0.18 |
+| mt_search_cloud | 0.78 | 0.11 | 0.15 |
+| mt_host_cosmos | 0.8 | 0.08 | 0.21 |
+| mt_host_cloud | 0.81 | 0.06 | 0.19 |
+| lb_rooms_cosmos | 0.03 | 0 | 0 |
+| lb_rooms_cloud | 0.03 | 0 | 0 |
+| ch_default_cosmos | 0.03 | 0 | 0 |
+| ch_default_cloud | 0.05 | 0 | 0 |
+| wt_private_cosmos | 0.84 | 0.04 | 0.23 |
+| wt_private_cloud | 0.7 | 0.07 | 0.16 |
+| jn_wait_cosmos | 0.76 | 0.04 | 0.17 |
+| jn_wait_cloud | 0.68 | 0.06 | 0.13 |
+| bt_A_mid_cosmos | 0.04 | 0 | 0 |
 | bt_A_mid_cloud | 0.04 | 0 | 0 |
 | bt_idle_cosmos | 0.06 | 0 | 0 |
 | bt_idle_cloud | 0.04 | 0 | 0 |
-| sub_wait_cosmos | 0.72 | 0.06 | 0.12 |
-| sub_wait_cloud | 0.94 | 0.09 | 0.17 |
-| rs_win_cosmos | 0.02 | 0 | 0 |
-| rs_win_cloud | 0.05 | 0 | 0 |
-| fr_list_cosmos | 0.07 | 0 | 0 |
-| fr_list_cloud | 0.04 | 0 | 0 |
+| sub_wait_cosmos | 0.68 | 0.08 | 0.12 |
+| sub_wait_cloud | 0.79 | 0.06 | 0.16 |
+| rs_win_cosmos | 0.03 | 0 | 0 |
+| rs_win_cloud | 0.04 | 0 | 0 |
+| fr_list_cosmos | 0.03 | 0 | 0 |
+| fr_list_cloud | 0.13 | 0 | 0 |
