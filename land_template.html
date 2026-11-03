@@ -4394,6 +4394,8 @@ var __hsnRuns={};
 function __hsnRunNew(g){__hsnRuns[g]=(__hsnRuns[g]||0)+1;return __hsnRuns[g];}
 function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hsnRuns[g]||0)!==tok)return;if(scr){var el=document.getElementById(scr);if(!el||!el.classList.contains('active'))return;}return fn.apply(this,arguments);};}
 /* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
+/* 🔴v1165 难度卡上的例词：本档真实的前 3 个词 */
+function __hsnLevelExample(filter){var out=[];for(var i=0;i<allW.length&&out.length<3;i++){try{if(filter(i))out.push(allW[i].en);}catch(e){}}return out.join(' · ');}
 function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
 function closeAlert(){document.getElementById('alertModal').classList.remove('show')}
 
@@ -5022,20 +5024,42 @@ function bossDefeat(){bossActive=false;try{document.body.classList.remove('hsn-b
 // 5秒超时换位置, 答对换目标
 // ============================================================
 // 打地鼠三档配置
+/* 🔴v1165 单词大陆的 30 个词都偏长（大多 6–12 个字母）。按「≤4 / 5–6 / ≥7 个字母」分档时，初级只有 0–2 个词、高级挤了 20 多个。
+   这里按本岛自己的词长挑两个分界，让三档尽量一样多（每档都有好几个词）；打地鼠、钓鱼、泡泡、字母拼拼乐、火眼金睛共用。 */
+var __HSN_LAND_TIER=(function(){
+  function len(w){return String((w&&w.en)||'').replace(/[^a-z]/gi,'').length;}
+  var lens=allW.map(len),ls=lens.slice().sort(function(a,b){return a-b}).filter(function(v,i,a){return i===0||v!==a[i-1];});
+  var best=null;
+  for(var i=0;i<ls.length;i++)for(var j=i+1;j<ls.length;j++){
+    var c1=ls[i],c2=ls[j],a=0,b=0,c=0;
+    lens.forEach(function(l){if(l<=c1)a++;else if(l<=c2)b++;else c++;});
+    if(!c)continue;var mn=Math.min(a,b,c),mx=Math.max(a,b,c);
+    if(!best||mn>best.mn||(mn===best.mn&&mx<best.mx))best={c1:c1,c2:c2,mn:mn,mx:mx};
+  }
+  if(!best)best={c1:4,c2:6};
+  var lo=ls.length?ls[0]:1;
+  function rng(a,b){return a>=b?b+' 个字母':a+'–'+b+' 个字母';}
+  return {
+    easy:function(i){return len(allW[i])<=best.c1;},
+    medium:function(i){var l=len(allW[i]);return l>best.c1&&l<=best.c2;},
+    hard:function(i){return len(allW[i])>best.c2;},
+    desc:{easy:rng(lo,best.c1),medium:rng(best.c1+1,best.c2),hard:(best.c2+1)+' 个字母以上'}
+  };
+})();
 const MOLES_LEVELS={
   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',
     desc:'简单短词',detail:'❤️ 5 命 · 5 秒洗一次牌',
-    filter:i=>allW[i].en.length<=4,
+    filter:__HSN_LAND_TIER.easy,
     lives:5,reshuffleMs:5500,
     xpPerHit:5,gemBonus:15,petXp:30},
   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',
     desc:'中等词',detail:'❤️ 4 命 · 4 秒洗一次牌',
-    filter:i=>allW[i].en.length>=5&&allW[i].en.length<=6,
+    filter:__HSN_LAND_TIER.medium,
     lives:4,reshuffleMs:4000,
     xpPerHit:8,gemBonus:25,petXp:45},
   hard:{name:'高级',icon:'🔥',c1:'#dc2626',c2:'#7f1d1d',
     desc:'长词挑战',detail:'❤️ 3 命 · 3 秒洗一次牌',
-    filter:i=>allW[i].en.length>=7,
+    filter:__HSN_LAND_TIER.hard,
     lives:3,reshuffleMs:3000,
     xpPerHit:14,gemBonus:45,petXp:65}
 };
@@ -5086,6 +5110,7 @@ function openSpellPK(){
   for(const k of ['easy','medium','hard']){
     const L=MOLES_LEVELS[k];
     const cnt=[...Array(allW.length).keys()].filter(L.filter).length;
+    if(!cnt){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startMolesLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:38px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
@@ -5394,6 +5419,7 @@ function startFish(){
   for(const k of ['easy','medium','hard']){
     const L=FISH_LEVELS[k];
     const cnt=[...Array(allW.length).keys()].filter(L.filter).length;
+    if(!cnt){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startFishLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:38px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
@@ -5416,17 +5442,17 @@ function startFish(){
 const FISH_LEVELS={
   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',
     desc:'简单短词',detail:'❤️ 5 条命 · 海底生物悠游',
-    filter:i=>allW[i].en.length<=4,
+    filter:__HSN_LAND_TIER.easy,
     lives:5,fishCount:5,minSpawn:900,maxSpawn:1400,minDur:9,maxDur:13,
     xpPerCatch:5,gemBonus:15,petXp:30},
   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',
     desc:'中等词',detail:'❤️ 4 条命 · 速度稍快',
-    filter:i=>allW[i].en.length>=5&&allW[i].en.length<=6,
+    filter:__HSN_LAND_TIER.medium,
     lives:4,fishCount:6,minSpawn:750,maxSpawn:1200,minDur:8,maxDur:11,
     xpPerCatch:8,gemBonus:25,petXp:45},
   hard:{name:'高级',icon:'🔥',c1:'#dc2626',c2:'#7f1d1d',
     desc:'长词挑战',detail:'❤️ 3 条命 · 满海大场面',
-    filter:i=>allW[i].en.length>=7,
+    filter:__HSN_LAND_TIER.hard,
     lives:3,fishCount:7,minSpawn:600,maxSpawn:1000,minDur:7,maxDur:10,
     xpPerCatch:14,gemBonus:45,petXp:65}
 };
@@ -5760,15 +5786,15 @@ function fishComplete(){
 const BUBBLE_LEVELS={
   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',
     desc:'简单常见词',
-    filter:i=>allW[i].en.length<=4,
+    filter:__HSN_LAND_TIER.easy,
     xpPerHit:3,gemBonus:15,petXp:30},
   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',
     desc:'中等难度词',
-    filter:i=>allW[i].en.length>=5&&allW[i].en.length<=6,
+    filter:__HSN_LAND_TIER.medium,
     xpPerHit:5,gemBonus:25,petXp:45},
   hard:{name:'高级',icon:'🔥',c1:'#dc2626',c2:'#7f1d1d',
     desc:'长词 / 复杂词',
-    filter:i=>allW[i].en.length>=7,
+    filter:__HSN_LAND_TIER.hard,
     xpPerHit:8,gemBonus:40,petXp:65}
 };
 let bubbleActive=false,bubbleScore=0,bubbleCombo=0,bubbleLives=5,bubbleTarget=null;
@@ -5796,6 +5822,7 @@ function startBubble(){
   for(const k of ['easy','medium','hard']){
     const L=BUBBLE_LEVELS[k];
     const cnt=[...Array(allW.length).keys()].filter(L.filter).length;
+    if(!cnt){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startBubbleLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:38px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
@@ -5809,7 +5836,7 @@ function startBubble(){
   document.getElementById('bubbleContent').innerHTML=
     '<div style="padding:14px 8px">'+
       '<div style="text-align:center;font-size:14px;color:#cbd5e1;margin-bottom:6px">🫧 选择难度开始</div>'+
-      '<div style="text-align:center;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:18px">每档大约 20 词左右, 顺序随机, 完成即结束</div>'+
+      '<div style="text-align:center;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:18px">每个词只出一次，顺序随机，答完这一档就结束</div>'+
       cards+
     '</div>';
 }
@@ -6099,16 +6126,16 @@ function bubbleComplete(){
 // ============================================================
 const SCRAMBLE_LEVELS={
   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',
-    desc:'3-4 字母短词',example:'man · cat · cow',
-    filter:i=>{const en=allW[i].en;return en.length<=4 && !/[.\-]/.test(en)},
+    desc:__HSN_LAND_TIER.desc.easy,
+    filter:i=>__HSN_LAND_TIER.easy(i) && !/[.\-]/.test(allW[i].en),
     xpPerWord:5,gemBonus:15,petXp:25},
   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',
-    desc:'5-6 字母中等词',example:'tiger · friend · old',
-    filter:i=>{const en=allW[i].en;return en.length>=5&&en.length<=6 && !/[.\-]/.test(en)},
+    desc:__HSN_LAND_TIER.desc.medium,
+    filter:i=>__HSN_LAND_TIER.medium(i) && !/[.\-]/.test(allW[i].en),
     xpPerWord:10,gemBonus:25,petXp:40},
   hard:{name:'高级',icon:'🔥',c1:'#dc2626',c2:'#7f1d1d',
-    desc:'7+ 字母长词',example:'children · gentleman',
-    filter:i=>{const en=allW[i].en;return en.length>=7 && !/[.\-]/.test(en)},
+    desc:__HSN_LAND_TIER.desc.hard,
+    filter:i=>__HSN_LAND_TIER.hard(i) && !/[.\-]/.test(allW[i].en),
     xpPerWord:18,gemBonus:50,petXp:65}
 };
 let scrPool=[],scrIdx=0,scrWord=null,scrSlots=[],scrLevel='easy',scrTotal=0,scrCorrect=0,scrActive=false;
@@ -6122,11 +6149,12 @@ function startScramble(){
   for(const k of ['easy','medium','hard']){
     const L=SCRAMBLE_LEVELS[k];
     const cnt=[...Array(allW.length).keys()].filter(L.filter).length;
+    if(!cnt){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startScrambleLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:38px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
-        '<div style="font-size:13px;font-weight:600;opacity:.85;margin-bottom:6px;font-style:italic">'+L.example+'</div>'+
+        '<div style="font-size:13px;font-weight:600;opacity:.85;margin-bottom:6px;font-style:italic">'+__hsnLevelExample(L.filter)+'</div>'+
         '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerWord*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
@@ -6623,6 +6651,7 @@ let recRows='';
 const recordsBlock='<div style="margin:0 auto 12px"><div style="font-size:12px;color:#fbbf24;font-weight:800;margin-bottom:7px;text-align:center">🏆 我的最快记录</div><div style="display:flex;gap:7px">'+recRows+'</div></div>';
 for(const k of [1,2,3]){
   const L=TYPING_LEVELS[k];
+  if(!counts[k]){cards+=__hsnLockedLevelCard(L);continue;}
   cards+='<div onclick="startTyping('+k+')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');padding:12px 14px;border-radius:14px;cursor:pointer;border:2px solid '+L.cb+';box-shadow:0 4px 12px '+L.c1+'55;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
     '<div style="display:flex;align-items:center;gap:11px"><div style="font-size:30px">'+L.icon+'</div><div style="flex:1;text-align:left"><div style="font-size:16px;font-weight:900;color:#fff">'+L.name+' · '+L.desc+'</div><div style="font-size:11px;color:'+L.ct+';margin-top:2px">'+counts[k]+' 词 · 🎓经验 +'+(L.xpPerWord*counts[k]+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+counts[k]+'</div></div><div style="font-size:18px;color:'+L.cb+';opacity:.75">▶</div></div>'+
   '</div>';
@@ -6929,6 +6958,7 @@ function startCloze(){
   let cards='';
   for(const k of ['easy','medium','hard']){
     const L=CLOZE_LEVELS[k];const cnt=CLOZE_LEVEL_IDX[k].length;
+    if(!cnt){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startClozeLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:40px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
@@ -8003,17 +8033,17 @@ const EAGLE_LEVELS={
   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',
     desc:'4 选 1 · 12 秒 · 简单单词',
     optCount:4,gridCols:2,timeBase:12,
-    filter:i=>allW[i].en.length<=4,
+    filter:__HSN_LAND_TIER.easy,
     xpPerQ:5,gemBonus:15,petXp:30},
   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',
     desc:'6 选 1 · 9 秒 · 中等单词',
     optCount:6,gridCols:3,timeBase:9,
-    filter:i=>allW[i].en.length>=5&&allW[i].en.length<=6,
+    filter:__HSN_LAND_TIER.medium,
     xpPerQ:10,gemBonus:30,petXp:50},
   hard:{name:'高级',icon:'🔥',c1:'#dc2626',c2:'#7f1d1d',
     desc:'9 选 1 · 7 秒 · 长词挑战',
     optCount:9,gridCols:3,timeBase:7,
-    filter:i=>allW[i].en.length>=7,
+    filter:__HSN_LAND_TIER.hard,
     xpPerQ:18,gemBonus:55,petXp:75}
 };
 let eagleLevel='easy',eaglePool=[],eagleTotal=0;
@@ -8038,7 +8068,7 @@ function startEagle(){
   for(const k of ['easy','medium','hard']){
     const L=EAGLE_LEVELS[k];
     const cnt=[...Array(allW.length).keys()].filter(L.filter).length;
-    if(cnt===0){cards+='<div style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';continue;}
+    if(cnt===0){cards+=__hsnLockedLevelCard(L);continue;}
     cards+='<div onclick="startEagleLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px '+L.c1+'55;display:flex;align-items:center;gap:12px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
       '<div style="font-size:38px;flex-shrink:0">'+L.icon+'</div>'+
       '<div style="flex:1;min-width:0;color:#fff">'+
