@@ -178,6 +178,17 @@
     }
     return null;  // 当前没有进行中的赛季(空窗期)
   }
+  // v1165: 番外篇无时间限制(v865)，以后加新赛季再加 S2。
+  //   过了 S1 的 end 日期，入口/面板/殿堂继续用「最近开始的那个赛季」，不能让首页唯一的单词大陆入口消失。
+  //   孩子把手机时间调到 S1 开始之前也照样显示第一个赛季。
+  function latestSeason(){
+    var t = todayStr(), best = null;
+    for(var i=0;i<SEASONS.length;i++){
+      if(SEASONS[i].start <= t) best = SEASONS[i];
+    }
+    return best || SEASONS[0] || null;
+  }
+  function activeSeason(){ return getCurrentSeason() || latestSeason(); }
   function getSeasonById(id){
     return (typeof id === 'string' && SEASON_BY_ID[id]) ? SEASON_BY_ID[id] : null;
   }
@@ -188,9 +199,10 @@
     var t = todayStr();
     var d = loadData();
     var out = [];
+    var serving = activeSeason();   // v1165: 还在当「当前赛季」用的那个不算绝版
     for(var i=0;i<SEASONS.length;i++){
       var s = SEASONS[i];
-      if(t > s.end){   // 赛季已结束
+      if(t > s.end && s !== serving){   // 赛季已结束
         out.push({
           id: s.id,
           name: s.name,
@@ -201,15 +213,16 @@
     }
     return out;
   }
-  // 赛季剩余天数
+  // 赛季剩余天数。v1165: 过了 end 日期返回 null(面板就不显示倒计时)，不再显示「还剩 0 天」。
   function daysLeft(season){
-    if(!season) return 0;
+    if(!season) return null;
     try {
+      if(todayStr() > season.end) return null;
       var end = new Date(season.end + 'T23:59:59');
       var now = new Date();
       var diff = Math.ceil((end - now) / 86400000);
-      return diff > 0 ? diff : 0;
-    } catch(e){ return 0; }
+      return diff > 0 ? diff : null;
+    } catch(e){ return null; }
   }
 
   // ---- 旧赛季积分入口（v941 永久只读）----
@@ -276,9 +289,9 @@
 
   // ---- 对外接口 (供赛季面板 UI / 抽卡系统调用) ----
   window.HansenSeason = {
-    current: getCurrentSeason,
-    daysLeft: function(){ return daysLeft(getCurrentSeason()); },
-    getPoints: function(){ var s=getCurrentSeason(); return s ? (loadData().points[s.id]||0) : 0; },
+    current: activeSeason,
+    daysLeft: function(){ return daysLeft(activeSeason()); },
+    getPoints: function(){ var s=activeSeason(); return s ? (loadData().points[s.id]||0) : 0; },
     hasCard: hasCard,
     unlockCard: unlockCard,
     allSeasons: function(){ return SEASONS.slice(); },
@@ -377,7 +390,7 @@
   // 首页(index.html)锚点是 .islands(岛屿区), 插在其上方最显眼处; 点击进度条即开面板。
   function buildProgressBar(){
     try{
-      var season=getCurrentSeason(); if(!season) return;
+      var season=activeSeason(); if(!season) return;   // v1165: 过了赛季日期也照样建(首页唯一的单词大陆入口)
       var anchor=document.querySelector('.islands'); if(!anchor||!anchor.parentElement) return;
       var d=loadData();
       var hasCard=(d.unlockedCards||[]).indexOf(season.id)>=0;
@@ -465,7 +478,7 @@
   window.__hsnOpenHall = openHall;
 
   function openPanel(){
-    var season = getCurrentSeason();
+    var season = activeSeason();
     var d = loadData();
 
     // 星海学习岛入口(进赛季后才出现, 不在18岛列表里)
@@ -520,7 +533,7 @@
             '<div style="font-size:19px;font-weight:900;color:#fff">'+season.name+'</div>'+
             '<div id="__hs_close" style="font-size:22px;color:#64748b;cursor:pointer;line-height:1;padding:0 4px">×</div>'+
           '</div>'+
-          '<div style="font-size:13px;color:#fbbf24;font-weight:700;margin-bottom:16px">⏳ 本赛季还剩 '+dl+' 天</div>'+
+          (dl ? '<div style="font-size:13px;color:#fbbf24;font-weight:700;margin-bottom:16px">⏳ 本赛季还剩 '+dl+' 天</div>' : '<div style="height:12px"></div>')+
           islandBtn+
           '<div'+(hasThisCard?' id="__hs_curcard" data-season="'+season.id+'"':'')+' style="background:linear-gradient(135deg,'+r.glow+',rgba(12,21,56,.3));border:2px solid '+r.color+';border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 0 20px '+r.glow+';'+(hasThisCard?'cursor:pointer':'')+'">'+
             '<div style="font-size:11px;color:'+r.color+';font-weight:800;letter-spacing:1px;margin-bottom:6px">★ '+r.name+'限定卡 ★</div>'+
@@ -615,8 +628,9 @@
     SEASONS.forEach(function(s){
       var r = RARITY_STYLE[s.card.rarity] || RARITY_STYLE.rare;
       var owned = tempUnlockAll() || d.unlockedCards.indexOf(s.id) >= 0;
-      var ended = t > s.end;
-      var notStarted = t < s.start;
+      var serving = (s === activeSeason());   // v1165: 番外篇无时间限制，在用的赛季不算绝版/未开启
+      var ended = t > s.end && !serving;
+      var notStarted = t < s.start && !serving;
       if(owned){
         ownedTotal++;
         var pref = readCardPref(s.id);
