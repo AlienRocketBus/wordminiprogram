@@ -85,6 +85,20 @@
        · 它跟设备、跟这次登录绑定，跨设备搬过去毫无意义
        · 更糟的是**搬回来会把当前有效会话打掉**（就是本次事故）
      所以必须显式排除，且这条排除要放在最前面，先于一切收录规则。 */
+  /* 🔴v1164：**云端 SDK 自己的键一律不进备份、不被恢复。**
+     v1019 的兜底收录把 SDK 的 user_info_<env>、device_id、lang_<env>、x-tcb-trace_<env> 也收了进去。
+     恢复时（登录后自动从云端取回就会走这里）再按快照删/写这些键 ——
+     快照里没有 user_info 的（老快照、或缓存已丢后上传的），**每次登录都把本机 uid 缓存删掉**，
+     之后会话探测拿不到 uid，天梯一直「云端会话尚未就绪」。
+     它们和凭证一样是"这台设备、这次登录"的状态，不是玩家数据。 */
+  var SDK_KEY_RE=/^(?:credentials|user_info|lang|access_token(?:_expire)?|refresh_token|login_type|anonymous_uuid|token_type|device_id|x-tcb-|x_tcb_|tcb[_-]|cloudbase)/i;
+  function sdkKey(k){
+    if(typeof k!=='string'||!k)return false;
+    if(SDK_KEY_RE.test(k))return true;
+    /* 带着环境 ID 的键都是 SDK 的（credentials_<env>、user_info_<env>、lang_<env>…） */
+    var env='';try{var c=root.HANSEN_CLOUD_CONFIG;env=(c&&c.envId)?String(c.envId):'';}catch(e){}
+    return !!(env&&k.indexOf(env)>=0);
+  }
   function credentialKey(k){
     /* 🔴v1094：诊断/守护类的内部键一律不进备份。
        用户现场：登录成功后点「立即把进度存到云端」，报「备份含非法键或非字符串值」。
@@ -92,6 +106,7 @@
        它们是本机诊断状态，既非玩家进度、也不该跨设备同步，
        更不该因为格式不符就让整个备份失败。**我加的工具污染了用户的备份。** */
     if (typeof k === 'string' && DIAG_KEY_RE.test(k)) return true;
+    if (sdkKey(k)) return true;   /* v1164：SDK 的 user_info / device_id / lang / x-tcb-* 同理 */
     return typeof k === 'string' &&
       /^(?:credentials|access_token|refresh_token)|^tcb[_-]|cloudbase.*(?:token|cred)/i.test(k);
   }
@@ -417,8 +432,15 @@
     var appVersion=Number(o.appVersion);if(!isFinite(appVersion)||appVersion<=0||Math.floor(appVersion)!==appVersion)throw new Error('备份缺少有效的应用版本');
     if(!supportedJournalAppVersion(appVersion))throw new Error('备份版本 v'+appVersion+' 不受当前 v'+CURRENT_APP_VERSION+' 支持');
     if(!Array.isArray(o.items)||o.items.length>MAX_ITEMS)throw new Error('备份条目数量超限');
-    var seen={},total=0,items=[];
+    var seen={},total=0,items=[],sumItems=[];
     o.items.forEach(function(x){
+      /* v1164：v1019~v1163 上传的云端快照里带着 SDK 的键（user_info_/device_id/凭证…）。
+         校验和照算（快照是完整的），但这些键**一个都不恢复**，静默丢掉 ——
+         拒收会让所有老快照都恢复不了，写回去又会打掉当前会话。 */
+      if(x&&typeof x==='object'&&typeof x.value==='string'&&credentialKey(x.key)){
+        if(seen[x.key])throw new Error('备份含重复键：'+x.key);seen[x.key]=1;
+        sumItems.push({key:x.key,value:x.value});return;
+      }
       if(!x||typeof x!=='object'||!ownedKey(x.key)||typeof x.value!=='string')throw new Error('备份含非法键或非字符串值');
       var committed=committedValue(x.key,x.value,'import');if(committed!==x.value)throw new Error('备份含运行期 pending 字段：'+x.key);
       wordIslandValue(x.key,x.value,'import');
@@ -431,10 +453,11 @@
       if(seen[x.key])throw new Error('备份含重复键：'+x.key);seen[x.key]=1;
       var bytes=x.value.length*2;if(bytes>MAX_VALUE)throw new Error('单项数据过大：'+x.key);total+=bytes;
       if(total>MAX_TOTAL)throw new Error('备份总体积超过 12MB');
-      items.push({key:x.key,value:x.value});
+      items.push({key:x.key,value:x.value});sumItems.push({key:x.key,value:x.value});
     });
     items.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
-    if(o.checksum!==checksum(stableItems(items)))throw new Error('校验和不匹配，备份可能不完整或被改动');
+    sumItems.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
+    if(o.checksum!==checksum(stableItems(sumItems)))throw new Error('校验和不匹配，备份可能不完整或被改动');
     return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:o.checksum};
   }
   /* 🔴v1090 双保险：恢复/回滚同样不许碰凭证。

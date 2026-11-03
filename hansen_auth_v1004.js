@@ -417,8 +417,9 @@
 
   /* 友好错误文案：把云端英文错误翻成人话 */
   function friendly(err) {
-    /* v1164：已经是人话的错误（friendly）原样给人看，别再截断或改写 */
-    if (err && err.friendly && err.message) return String(err.message);
+    /* v1164：我们自己写的中文提示（friendly 且含汉字）原样给人看，别再截断或改写；
+       _readable 包过的英文原话仍往下翻译 */
+    if (err && err.friendly && /[一-鿿]/.test(String(err.message || ''))) return String(err.message);
     var m = String((err && (err.message || err.error_description || err.code)) || err || '');
     if (/domain|origin|not.*allow|403/i.test(m)) return '这个网址还没加进安全域名白名单（控制台改完要等约 10 分钟生效）';
     /* 🔴v1009: 原正则过宽, 把注册参数错误也误报成"验证码不对", 误导排查。
@@ -646,7 +647,7 @@
          否则它可能仍拿着登录前的匿名身份读写。 */
       try { if (window.HansenCloudSave && HansenCloudSave.resetApp) HansenCloudSave.resetApp(); } catch (e) {}
       return ensureProfile(uid)
-        .catch(function () { return null; })
+        .catch(function (e) { T('建档/发号', '没成功（不影响登录，下次登录再补）：' + errText(e).slice(0, 90)); return null; })
         .then(function (prof) {
           return syncOnLogin().then(function (s) {
             return { ok: true, uid: uid, cid: (prof && prof.cid) || 0,
@@ -654,6 +655,16 @@
           });
         });
     });
+  }
+
+  /* 🔴v1164：数据库出错时 SDK **不抛错**，而是照常返回 {code, message}
+     （权限不够、集合没建都是这样）。以前把它当成"没有档案"去建档、
+     把 count 的错误当成"0 个人比我早"发出 No.1。必须自己查 code。 */
+  function dbFail(r, what) {
+    if (!r || !r.code) return null;
+    var e = new Error(what + '失败 ⟨' + r.code + (r.message ? ' ' + String(r.message).slice(0, 80) : '') + '⟩');
+    e.code = r.code; e.cloud = true;
+    return e;
   }
 
   /* 建立/读取云端档案，并分配竞赛 ID */
@@ -664,6 +675,8 @@
       docRef = db.collection(COL_PROFILE).doc(uid);
       return docRef.get();
     }).then(function (res) {
+      var bad = dbFail(res, '读取资料 sb_profile');
+      if (bad) throw bad;
       var row = res && res.data && res.data[0];
       if (row && row.cid > 0) return row;                 /* 已有号码 → 直接用 */
       if (row) return assignCid(db, docRef, row.createdAt);
@@ -674,7 +687,13 @@
         cid: 0,
         createdAt: db.serverDate(),
         updatedAt: db.serverDate()
-      }).then(function () { return docRef.get(); }).then(function (r2) {
+      }).then(function (w) {
+        var bad2 = dbFail(w, '建立资料 sb_profile');
+        if (bad2) throw bad2;
+        return docRef.get();
+      }).then(function (r2) {
+        var bad3 = dbFail(r2, '读取资料 sb_profile');
+        if (bad3) throw bad3;
         var row2 = r2 && r2.data && r2.data[0];
         return assignCid(db, docRef, row2 && row2.createdAt);
       });
@@ -695,28 +714,27 @@
      而是**数一下有多少人比我先注册** —— 这个语义天然就是"注册顺序"，
      而且不依赖任何额外的状态，重算一次结果还是一样。
 
-     🔴v1130 **但要防撞号**：
-       两人几乎同时注册 → 两边都数到"3 个人比我早" → 都拿 No.4。
-       实测模拟确认会撞。
-
-     做法：发号后**验一次有没有别人已经占了这个号**，
-     撞了就往后挪一位，最多重试 5 次。
-     并发注册在这个用户量下极少见，5 次足够；
-     真撞满 5 次也不阻断登录 —— 下次登录会再补一次。 */
+     🔴v1130 **但要防撞号**：两人几乎同时注册会数到同一个号。
+     发号后**验一次有没有别人已经占了这个号**，撞了就往后挪一位，最多重试 5 次；
+     真撞满 5 次也不阻断登录 —— 下次登录会再补一次。
+     🔴v1164：count 出错返回的是 {code}（没有 total）→ 这次不发号，绝不按 0 人算。 */
+  function cntOk(r) { return !!(r && !r.code && typeof r.total === 'number'); }
   function assignCid(db, docRef, createdAt, attempt) {
     if (!createdAt) return Promise.resolve(null);
     var tries = attempt || 0;
     return db.collection(COL_PROFILE).where({ createdAt: db.command.lt(createdAt) }).count()
       .then(function (r) {
-        var cid = ((r && r.total) || 0) + 1 + tries;
+        if (!cntOk(r)) return null;
+        var cid = r.total + 1 + tries;
         /* 校验这个号有没有被占 —— 只有确实空着才写 */
         return db.collection(COL_PROFILE).where({ cid: cid }).count().then(function (c) {
-          if ((c && c.total) > 0) {
+          if (!cntOk(c)) return null;
+          if (c.total > 0) {
             if (tries >= 5) return null;          /* 让下次登录再补，不阻断本次 */
             return assignCid(db, docRef, createdAt, tries + 1);
           }
-          return docRef.update({ cid: cid, updatedAt: db.serverDate() }).then(function () {
-            return { cid: cid };
+          return docRef.update({ cid: cid, updatedAt: db.serverDate() }).then(function (u) {
+            return (u && u.code) ? null : { cid: cid };
           });
         });
       })
@@ -972,6 +990,10 @@
         uid: r.uid || '',
         notReady: !!r.notReady,
         expired: !!r.expired,
+        slow: !!r.slow,
+        noCredentials: !!r.noCredentials,
+        kind: r.kind || (r.ok ? '' : 'other'),
+        uidFrom: r.uidFrom || '',
         tries: r.tries || 1,
         reason: r.reason || ''
       };
@@ -1044,23 +1066,96 @@
     }).join('\n');
   }
 
+  /* 🔴v1164：会话判定按 SDK 2.30.0 的真实行为重写（读源码 + 模拟云端逐条实测）：
+
+       getLoginState() 为 null 时，看本机还有没有 credentials_<env>：
+         · 凭证还在 → 只是暂时连不上（刷新网络失败等）→ 尚未就绪，稍后重试；
+         · 凭证没了 → 先请凭证守护用影子副本救一次；救不了 → **确凿过期**，
+           去重新登录（60 秒新鲜期内仍只当"尚未就绪"，防刚登录就被踢出）。
+           以前一律说"尚未就绪"，于是凭证被 invalid_grant 删掉的人永远在"稍候再试"。
+       getLoginState() 有值却没 uid（user_info 缓存被删）→ getCurrentUser() 向云端补取，
+         再不行就从登录令牌（JWT sub）取。以前直接判"尚未就绪"，已登录的人也进不了天梯。
+       user_info 缓存坏了 → getLoginState 会抛 SyntaxError（它唯一会抛错的情况），
+         以前被 /token/ 误判成"确凿过期"把人登出。现在删掉坏缓存再探一次。
+       刷新请求没有超时 → 整个探测限 10 秒，超时就报"网络太慢"（不判过期）。
+
+     返回值（房间/天梯/云存档都靠它）：
+       成功 {ok:true, uid, tries}
+       失败 {ok:false, kind, reason, notReady, expired, definite, slow?, noCredentials?, notSignedIn?}
+         kind: 'signin' 没登录 | 'expired' 确凿过期 | 'session' 暂时没就绪 |
+               'slow' 超时 | 'network' 断网类 | 'config' 云服务没配 | 'other' */
+  var SESSION_TIMEOUT_MS = 10000;
+  var USER_FETCH_TIMEOUT_MS = 6000;
+
+  function isFresh() {
+    try {
+      var lc0 = readLocal();
+      return !!(lc0 && lc0.signedAt && (Date.now() - lc0.signedAt) < 60000);
+    } catch (e0) { return false; }
+  }
+
+  /* 从登录态里挑 uid（v1163：不同 SDK 版本放的位置不一样，挨个找） */
+  function pickUid(st) {
+    var uid = '';
+    try {
+      var cands = [
+        st && st.uid,
+        st && st.user && st.user.uid,
+        st && st.user && st.user.userId,
+        st && st.credential && st.credential.uid,
+        st && st.userInfo && st.userInfo.uid,
+        st && st.loginState && st.loginState.uid,
+        st && st.data && st.data.uid
+      ];
+      for (var _c = 0; _c < cands.length; _c++) {
+        var v = cands[_c];
+        if (typeof v === 'number' && isFinite(v)) v = String(v);
+        if (v && typeof v === 'string') { uid = v; break; }
+      }
+      if (!uid && st && typeof st === 'object') {
+        T('结构', '拿不到 uid，顶层键=[' + Object.keys(st).join(',').slice(0, 120) + ']');
+      }
+    } catch (e) {}
+    return uid;
+  }
+
+  /* 有会话、缓存里没 uid：先问云端（getCurrentUser 会重新拉 /user/me 并补回缓存），
+     不行再读登录令牌里的 sub。两个都限时，网卡住也不会把探测拖死。 */
+  function recoverUid(a) {
+    var first = (typeof a.getCurrentUser === 'function')
+      ? withTimeout(Promise.resolve().then(function () { return a.getCurrentUser(); }), USER_FETCH_TIMEOUT_MS, '取账号信息')
+          .then(function (u) {
+            var id = u && (u.uid || u.sub);
+            return id ? String(id) : '';
+          }, function (e) { T('补 uid', 'getCurrentUser 没成功：' + errText(e).slice(0, 80)); return ''; })
+      : Promise.resolve('');
+    return first.then(function (id) {
+      if (id) return { uid: id, from: '云端账号信息' };
+      if (typeof a.getClaims !== 'function') return { uid: '' };
+      return withTimeout(Promise.resolve().then(function () { return a.getClaims(); }), USER_FETCH_TIMEOUT_MS, '读登录令牌')
+        .then(function (c) {
+          var cl = (c && c.data && c.data.claims) || (c && c.claims) || c;
+          var sub = cl && cl.sub;
+          if (!sub) T('补 uid', '❗登录令牌里也没有 sub');
+          return sub ? { uid: String(sub), from: '登录令牌' } : { uid: '' };
+        }, function (e) { T('补 uid', 'getClaims 没成功：' + errText(e).slice(0, 80)); return { uid: '' }; });
+    });
+  }
+
   function ensureSession() {
     T('ensureSession 开始', 'isSignedIn=' + isSignedIn());
-    if (!isSignedIn()) return Promise.resolve({ ok: false, reason: 'not-signed-in' });
+    if (!isSignedIn()) {
+      T('结论', '本机没有登录记录 → 需要先登录');
+      return Promise.resolve({ ok: false, notSignedIn: true, expired: false, notReady: false,
+                               definite: false, kind: 'signin', reason: 'not-signed-in' });
+    }
     try {
       var _lc = readLocal();
       T('本地登录记录', 'method=' + (_lc.method || '无') +
         ' 距登录=' + (_lc.signedAt ? Math.round((Date.now() - _lc.signedAt) / 1000) + '秒' : '未知'));
     } catch (e) {}
 
-    /* 🔴v1079：把**SDK 自己的凭证键**也列出来。
-
-       v1078 的轨迹已证明：登录 62 秒后 getLoginState() 仍连续 5 次返回 null。
-       这不是"还没落定"（v1077 的假设被推翻），是**凭证根本不在**。
-       只剩两种可能，必须分辨清楚，否则又是在猜：
-         · SDK 压根没把凭证写进 localStorage（登录其实没真正完成 / 持久化没生效）
-         · 写进去了但被谁清掉了
-       列出实际存在的相关键即可一眼看穿。 */
+    /* 🔴v1079：把 SDK 自己的凭证键也列出来 —— 一眼分辨"凭证根本不在"还是"在但用不了"。 */
     try {
       var _ks = [], _n = 0;
       lsKeys().forEach(function (_k) {
@@ -1073,103 +1168,137 @@
       });
       T('SDK 凭证键', _n ? (_n + ' 个 → ' + _ks.slice(0, 4).join('  ')) :
         '❗一个都没有 —— SDK 从未把凭证写进本地存储');
+      var _uk = userInfoKey();
+      if (_uk) {
+        var _uv = localStorage.getItem(_uk);
+        T('用户信息缓存', _uv == null ? '没有（uid 要向云端补取）' :
+          (userInfoCorrupt() ? '❗已损坏（' + String(_uv).length + '字节）' : '有（' + String(_uv).length + '字节）'));
+      }
+      var _G = window.HansenCredGuard;
+      if (_G && typeof _G.status === 'function') {
+        var _gs = _G.status();
+        T('凭证守护', '影子副本=' + (_gs.hasShadow ? ('有(' + _gs.shadowAge + '秒前)') : '无') +
+          ' 已救=' + _gs.rescued + '/' + (_gs.maxRescue || 3));
+      }
     } catch (e) {}
 
-    var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒，足够 SDK 落定 */
+    var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒 */
 
-    function onErr(e) {
-      var t = errText(e);
-      /* 只有云端明确说「你没通过鉴权」才算确凿 ——
-         用户截图里那句 credentials not found 正属此类。 */
-      var authErr = /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
-      T('探测抛错', (authErr ? '确凿鉴权错误：' : '非鉴权错误：') + t.slice(0, 90));
-      return { ok: false, expired: authErr, definite: authErr, reason: t };
-    }
-
-    return auth().then(function (a) {
+    var core = auth().then(function (a) {
       if (typeof a.getLoginState !== 'function')
-        return { ok: false, definite: false, reason: 'no-api' };
+        return { ok: false, notReady: true, expired: false, definite: false, kind: 'other', reason: 'no-api' };
+      var rescued = false, fixedInfo = false;
+
+      /* 还没拿到会话：按 RETRY_DELAYS 再问；问到底仍没有就说"尚未就绪"（不判过期） */
+      function again(i, why) {
+        if (i < RETRY_DELAYS.length) {
+          return new Promise(function (res) { setTimeout(res, RETRY_DELAYS[i]); })
+            .then(function () { return probe(i + 1); });
+        }
+        T('结论', '⏳ 重试 ' + (i + 1) + ' 次仍没拿到会话（' + why + '）→ 尚未就绪，不判过期');
+        return {
+          ok: false, notReady: true, expired: false, definite: false, kind: 'session', tries: i + 1,
+          reason: '云端会话尚未就绪（已重试 ' + (i + 1) + ' 次），请稍候再试'
+        };
+      }
+
+      function onErr(e, i) {
+        var t = errText(e);
+        if (!fixedInfo && userInfoCorrupt()) {
+          fixedInfo = true;
+          try { localStorage.removeItem(userInfoKey()); } catch (e2) {}
+          T('缓存修复', '❗SDK 的 user_info 缓存坏了（' + t.slice(0, 60) + '）→ 已删掉，再探一次');
+          return probe(i + 1);
+        }
+        /* SyntaxError/TypeError 是程序层面的坏数据，不是"云端说你没登录" */
+        var nm = String((e && e.name) || '');
+        var codeBug = /SyntaxError|TypeError/.test(nm) || /unexpected token|in json/i.test(t);
+        /* 只有云端明确说「你没通过鉴权」才算确凿（用户截图里的 credentials not found 正属此类） */
+        var authErr = !codeBug && /unauthenticated|credentials|token|expired|unauthorized|40[13]/i.test(t);
+        T('探测抛错', (authErr ? '确凿鉴权错误：' : '非鉴权错误：') + t.slice(0, 90));
+        if (authErr) return { ok: false, expired: true, definite: true, notReady: false, kind: 'expired', tries: i + 1, reason: t };
+        return { ok: false, expired: false, definite: false, notReady: true,
+                 kind: netLike(t) ? 'network' : 'session', tries: i + 1, reason: t };
+      }
 
       function probe(i) {
-        return Promise.resolve(a.getLoginState()).then(function (st) {
-          /* 🔴v1163（用户真机反复报"天梯用不了"）：**uid 取法太窄。**
-
-             会话探测只认两种位置：`st.uid` 和 `st.user.uid`。
-             而 CloudBase 的 `getLoginState()` 在不同 SDK 版本 /
-             不同登录方式（手机号、匿名、自定义登录）下，
-             uid 可能落在 `credential.uid`、`userInfo.uid`、
-             `user.userId`、`loginState.uid` 等好几个位置。
-
-             取不到就判「尚未就绪」，重试五次后放弃 ——
-             用户看到的是「连不上网络」，而其实**已经登录了**，
-             只是我们没在对的地方找。
-
-             > 从别人的 SDK 里取一个字段，
-             > **它可能在几个位置之一** —— 只认一种写法，
-             > 等于把"这个版本恰好这么放"当成了永久契约。
-
-             改成挨个位置找，并把实际拿到的结构记进日志 ——
-             万一还是取不到，用户截个图就知道它到底长什么样。 */
-          var uid = '';
-          try {
-            var cands = [
-              st && st.uid,
-              st && st.user && st.user.uid,
-              st && st.user && st.user.userId,
-              st && st.credential && st.credential.uid,
-              st && st.userInfo && st.userInfo.uid,
-              st && st.loginState && st.loginState.uid,
-              st && st.data && st.data.uid
-            ];
-            for (var _c = 0; _c < cands.length; _c++) {
-              if (cands[_c] && typeof cands[_c] === 'string') { uid = cands[_c]; break; }
-            }
-            /* 还是没有？把顶层键名记下来 —— 这是排查时唯一的线索 */
-            if (!uid && st && typeof st === 'object') {
-              T('结构', '拿不到 uid，顶层键=[' + Object.keys(st).join(',').slice(0, 120) + ']');
-            }
-          } catch (e) {}
+        return Promise.resolve().then(function () { return a.getLoginState(); }).then(function (st) {
+          var uid = pickUid(st);
           T('探测#' + (i + 1),
             st == null ? '返回 null' :
             ('类型=' + (typeof st) + ' 键=[' + Object.keys(st).slice(0, 6).join(',') + ']' +
              ' uid=' + (uid || '(无)')));
           if (uid) { T('结论', '✅ 有效 uid=' + uid + '（第 ' + (i + 1) + ' 次探到）'); return { ok: true, uid: uid, tries: i + 1 }; }
-          if (i < RETRY_DELAYS.length) {
-            return new Promise(function (res) { setTimeout(res, RETRY_DELAYS[i]); })
-              .then(function () { return probe(i + 1); });
+
+          if (st) {
+            T('判定', '有会话但本机缓存里没有 uid → 向云端补取');
+            return recoverUid(a).then(function (got) {
+              if (got.uid) {
+                T('结论', '✅ 有效 uid=' + got.uid + '（从' + got.from + '补回，第 ' + (i + 1) + ' 次探测）');
+                return { ok: true, uid: got.uid, tries: i + 1, uidFrom: got.from };
+              }
+              return again(i, '有会话但补不到 uid');
+            });
           }
-          /* 重试到底仍是空 —— 仍**不能**断言"已过期"：
-             断网、SDK 版本差异同样会给空。
-             只说"尚未就绪"，并明确下一步是**稍候重试**而非重新登录。 */
-          T('结论', '⏳ 重试 ' + (i + 1) + ' 次仍为空 → 尚未就绪（不判过期）');
+          if (credentialsPresent()) {
+            T('判定', '本机云端凭证还在 → 多半是网络慢或刷新没成功，再等等');
+            return again(i, '凭证还在');
+          }
+          if (!rescued && credGuardRescue()) {
+            rescued = true;
+            T('凭证守护', '🛟 本机凭证不在，已用影子副本救回 → 马上再探一次');
+            return probe(i + 1);
+          }
+          if (isFresh()) {
+            T('判定', '本机没有云端凭证，但刚登录不到 60 秒 → 先不判过期');
+            return again(i, '刚登录');
+          }
+          T('结论', '❌ 本机没有云端凭证（credentials_ 不在，守护也救不回）→ 确凿过期，需要重新登录');
           return {
-            ok: false, notReady: true, expired: false, definite: false, tries: i + 1,
-            reason: '云端会话尚未就绪（已重试 ' + (i + 1) + ' 次），请稍候再试'
+            ok: false, expired: true, definite: true, notReady: false, noCredentials: true,
+            kind: 'expired', tries: i + 1,
+            reason: '云端登录已过期：这台设备上的登录凭证没有了，请重新登录'
           };
-        }, onErr);
+        }, function (e) { return onErr(e, i); });
       }
       return probe(0);
     }).catch(function (e) {
-      return { ok: false, definite: false, reason: errText(e) };
+      var t = errText(e);
+      T('结论', '❗云端模块没准备好：' + t.slice(0, 90));
+      return { ok: false, expired: false, definite: false, notReady: true,
+               kind: /未配置/.test(t) ? 'config' : (netLike(t) ? 'network' : 'session'), reason: t };
     }).then(function (r) {
       if (!r.ok && r.definite) {
-        /* 🔴v1063 竞态防线（保留）：刚登录完的一小段时间内**绝不清本地标记**。
-           登录成功写下 signedAt → 后台开机恢复几乎同时调 ensureSession()
-           → 此刻 SDK 会话可能还没落定 → 按"确凿失效"处理会把
-              **刚刚建立的登录态**抹掉，用户看到"刚登录成功一转眼又退出"。
-           60 秒新鲜期内只拒绝本次操作、不动标记；真过期了下次自然会再判。 */
-        var fresh = false;
-        try {
-          var lc0 = readLocal();
-          fresh = !!(lc0 && lc0.signedAt && (Date.now() - lc0.signedAt) < 60000);
-        } catch (e0) {}
-        if (fresh) return r;
+        /* 🔴v1063 竞态防线（保留）：刚登录 60 秒内**绝不清本地标记**，只拒绝本次操作。 */
+        if (isFresh()) { T('结论', '刚登录不到 60 秒 → 这次先不清本地登录记录'); return r; }
         writeLocal({ method: '', signedAt: 0, uid: '' });
-        /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」
-           会一直挂到下次刷新 —— 界面说登录着、每次读写却都失败。 */
+        T('结论', '已清除本地"已登录"记录并通知界面 → 请重新登录');
+        /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」会一直挂到下次刷新 */
         try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e1) {}
       }
       return r;
+    });
+
+    /* 整个探测限时：SDK 的刷新请求没有超时，网卡住时以前会一直转圈 */
+    return new Promise(function (resolve) {
+      var settled = false;
+      var cancel = timeoutAfter(SESSION_TIMEOUT_MS, function () {
+        if (settled) return;
+        settled = true;
+        T('结论', '⌛ ' + (SESSION_TIMEOUT_MS / 1000) + ' 秒没等到云端回应 → 网络太慢（不判过期，稍后重试）');
+        resolve({
+          ok: false, notReady: true, slow: true, timeout: true, expired: false, definite: false, kind: 'slow',
+          reason: '连接云端超时（' + (SESSION_TIMEOUT_MS / 1000) + ' 秒没有回应），网络可能太慢，请稍后再试'
+        });
+      });
+      core.then(function (r) {
+        if (settled) return;
+        settled = true; cancel(); resolve(r);
+      }, function (e) {
+        if (settled) return;
+        settled = true; cancel();
+        resolve({ ok: false, notReady: true, expired: false, definite: false, kind: 'other', reason: errText(e) });
+      });
     });
   }
 
@@ -1318,6 +1447,8 @@
     localProgressSize: localProgressSize,
     pullSave: pullSave,
     _setAuthForTest: function (a) { _authOverride = a; },
+    /* v1164：给诊断面板 / 测试看的判据（与 ensureSession 同一份） */
+    credentialsPresent: credentialsPresent,
     _app: app,
     /* v1093: 供子框借用顶层已建好的 auth 对象 */
     _authObj: function () { return _auth; }

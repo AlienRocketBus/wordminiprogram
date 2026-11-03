@@ -40,6 +40,12 @@
  *   · 只在「本地明确记着已登录」时才救，绝不凭空造凭证
  *   · 影子副本超过 12 小时不再使用（避免拿一个真过期的凭证反复送死）
  *   · 每次登录会话最多救 3 次，之后不再干预（防止死循环）
+ *
+ * 🔴v1164：「每次登录会话最多 3 次」以前**从没重置过** —— reset() 没人调用，
+ *   计数一辈子只增不减，一台设备救满 3 次之后守护就永久失效了。
+ *   现在：SDK 拿到**新的 refresh_token**（新登录或刷新成功）就说明会话是活的，计数清零；
+ *   账号模块在登录成功时 reset()+backup()，退出时 reset()。
+ *   救回来的还是同一个 refresh_token，所以死掉的会话最多仍只救 3 次，不会转圈。
  */
 (function () {
   'use strict';
@@ -87,6 +93,10 @@
     } catch (e) { return false; }
   }
 
+  function rtOf(v) {
+    try { var o = JSON.parse(v); return (o && o.refresh_token) ? String(o.refresh_token) : ''; } catch (e) { return ''; }
+  }
+
   /* ── ① 持续备份 ───────────────────────────────────────── */
   function backup() {
     var k = credKey();
@@ -94,6 +104,10 @@
     var v = ls(rawGet, k);
     if (!v || String(v).length < 50) return;      /* 太短的不像真凭证 */
     try {
+      var old = null;
+      try { old = JSON.parse(ls(rawGet, SHADOW) || 'null'); } catch (e) {}
+      /* v1164：refresh_token 换了 = 新登录或刷新成功 → 会话是活的，救援次数重新计 */
+      if (!old || !old.val || rtOf(old.val) !== rtOf(String(v))) ls(rawRemove, RESCUE_COUNT);
       ls(rawSet, SHADOW, JSON.stringify({ key: k, val: String(v), at: Date.now() }));
     } catch (e) {}
   }
@@ -202,7 +216,8 @@
         hasCred: !!(credKey() && String(ls(rawGet, credKey()) || '').length > 50),
         hasShadow: !!(sh && sh.val),
         shadowAge: sh ? Math.round((Date.now() - (sh.at || 0)) / 1000) : -1,
-        rescued: Number(ls(rawGet, RESCUE_COUNT) || 0)
+        rescued: Number(ls(rawGet, RESCUE_COUNT) || 0),
+        maxRescue: MAX_RESCUE
       };
     },
     reset: function () { try { ls(rawRemove, RESCUE_COUNT); ls(rawRemove, SHADOW); } catch (e) {} }
