@@ -124,6 +124,9 @@
      Speculation Rules(Chrome/Edge): 后台完整预渲染 index, 跳转=瞬时激活;
      不支持则 <link rel=prefetch> 进 HTTP 缓存。延迟 1.5s 注入, 不抢岛首屏带宽。 */
   setTimeout(function(){
+    /* 🔴v1165 在首页外壳的岛框（iframe）里不预取首页：首页就是外壳自己（回首页是收起岛框、不跳页），
+       以前每进一个岛都让微信在后台再下载一份 index.html（约 210 KB），一点用都没有。单独打开的岛（顶层页）照旧预取 */
+    if(!_vtTop) return;
     try{
       /* v570: 低内存防护——prerender 会在后台多养一个完整 index 实例(内存翻倍压力)。
          低内存设备(deviceMemory<4)或微信内置浏览器(X5 内存紧张, "玩着玩着崩"高发区)
