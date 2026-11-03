@@ -207,11 +207,25 @@
   }
   markSelfIfStarSea();
 
+  /* v1165：本页在任何页面框里（首页外壳的 #islandFrame、预热框、房间）都不预热。
+     首页外壳里从来不会打开这些房间（换岛走 openIsland），预热只会多开隐藏页面、多下载、
+     还让藏着的星海岛照常存档（首页「最近探险」因此指错岛）。按需 open()/warm() 照旧能用。 */
+  function inAnyFrame() {
+    try { return !!(window.parent && window.parent !== window); } catch (e) { return true; }
+  }
+  function ownFile() {
+    try { return String(location.pathname || '').split('/').pop().toLowerCase(); } catch (e) { return ''; }
+  }
+
   /* 空闲时预热（不与首屏抢资源） */
   function scheduleWarm() {
     if (inWarmContext()) return;   /* ① 绝不套娃 */
+    if (inAnyFrame()) return;      /* ④ 页面框里不预热（见上） */
+    var self = ownFile();
     var keys = Object.keys({ land: 1, season: 1 }).filter(function (k) {
-      var c = cfgOf(k); return c && c.warm && wasOpened(k);   /* ③ 只预热孩子真的打开过的房间 */
+      var c = cfgOf(k);
+      if (c && c.url.toLowerCase() === self) return false;    /* 星海岛自己不再在里面预热一个星海岛 */
+      return c && c.warm && wasOpened(k);   /* ③ 只预热孩子真的打开过的房间 */
     });
     var assetsOk = kidHasPlayed();
     var i = 0;
