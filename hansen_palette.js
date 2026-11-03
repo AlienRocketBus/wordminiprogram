@@ -588,7 +588,8 @@
     // \U0001f534v1010: \u6d45\u8584\u8377\u7eff #bbf7d0 \u538b\u767d\u5e95 \u5bf9\u6bd4\u5ea6\u4ec5 1.03(\u7b49\u4e8e\u9690\u5f62)
     // \u5ba1\u8ba1\u673a\u5728\u8bbe\u7f6e\u9875/\u6211\u7684\u5b66\u4e60/\u9519\u9898\u603b\u89c8\u4e09\u5904\u62d3\u51fa; \u5f69\u5e95\u5361\u5185\u7684\u6d45\u7eff\u4e0d\u53d7\u5f71\u54cd
     css+=_LS+'[style*="color:#bbf7d0"]:not(.boss-opt):not(.boss-opt *){color:#15803d!important}\n';
-    css+=_LS+'.listen-reveal .lr-pn{color:#15803d!important}\n';
+    /* v1165: 揭晓卡在亮色主题下仍是深绿底，音标用深绿等于看不见(实测)；改回浅薄荷绿 */
+    css+=_LS+'.listen-reveal .lr-pn{color:#bbf7d0!important}\n';
     /* \u4f46\u5f69\u5e95\u5361\u7247\u5185\u7684\u6d45\u7eff\u8981\u4fdd\u7559\u2014\u2014\u5b83\u672c\u6765\u5c31\u538b\u5728\u7eff\u6e10\u53d8\u4e0a\uff0c
        \u8f6c\u6df1\u7eff\u53cd\u800c\u53d8\u6210\u7eff\u5e95\u7eff\u5b57(\u5ba1\u8ba1\u673a\u5b9e\u6d4b 1.82)\u3002\u540e\u4f4d\u540e\u4ee3\u9009\u62e9\u5668\u7279\u5f02\u6027\u66f4\u9ad8\uff0c\u53ef\u590d\u4f4d\u3002 */
     css+=_LS+'[style*="linear-gradient"] [style*="color:#bbf7d0"]{color:#bbf7d0!important}\n';

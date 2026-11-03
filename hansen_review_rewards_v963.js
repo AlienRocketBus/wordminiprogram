@@ -282,7 +282,8 @@
        所以改成**转发**：有统一实现就用它，没有才走本地这份。
        这样样式立刻统一，而每个模块的调用一行都不用动。 */
     try {
-      if (window.HansenToast && HansenToast.say) { HansenToast.say(msg); return; }
+      /* v1165: 统一提示按纯文字显示，这里的 <b> 会原样露出来（「<b>+20 金币</b>」），先去掉标签 */
+      if (window.HansenToast && HansenToast.say) { HansenToast.say(String(msg).replace(/<[^>]*>/g, '')); return; }
     } catch (e) {}
 
     try{
