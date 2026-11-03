@@ -10,6 +10,8 @@
  *     打字大师还会被重新打开（typeActive=true）。
  *   Q 完形填空：池里剩下的词例句对不上（动物岛 pig/eagle/cow 的例句是复数 Pigs…）时，
  *     nextClozeQ 直接结算，错词根本没再考（v1165 自己的测试因此时过时不过）。
+ *   M 一键静音开着时点小课卡片继续：下一题立刻出、立刻自动读词，正好落在 hansen_mute「点了就算想听」的
+ *     120ms 放行窗口里 → 静音漏声。
  *   G 同一个词发两次 +15 毕业金：错题本隔天清零那天发一次；复习计划后来在「今日复习」自评毕业又发一次。
  */
 import { chromium } from './playwright_loader.mjs';
@@ -208,6 +210,33 @@ try {
   ok(v.card && v.goneFast, '换屏后小课卡片马上收起（不留在主页上）');
   ok(v.home && !v.typeActive, `打字大师没有被小课的定时器重新打开（typeActive=${v.typeActive}）`);
   ok(v.said.length === 0, '离开后没有再替游戏读下一个词 ' + JSON.stringify(v.said));
+
+  console.log('\n▶ M 一键静音开着：点小课卡片继续，下一题的自动朗读不能漏声');
+  const m = await page.evaluate(async () => {
+    localStorage.setItem('hansen_muted', '1');
+    startSpeed(); startSpeedLevel('easy'); spTime = 9999;
+    await new Promise(r => setTimeout(r, 400));
+    /* 只数真正发出去的声音：mp3 播放 + 系统朗读 */
+    window.__plays = [];
+    const P = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () { window.__plays.push(String(this.currentSrc || this.src).split('/').pop()); return P.apply(this, arguments); };
+    let S0 = null; try { S0 = speechSynthesis.speak; speechSynthesis.speak = function (u) { window.__plays.push('tts:' + (u && u.text)); return S0.call(speechSynthesis, u); }; } catch (e) {}
+    spAnswer(window._spOpts.findIndex(o => o.en !== window._spCorrect));
+    await __w(__card, 3000);
+    await new Promise(r => setTimeout(r, 400));
+    const during = window.__plays.splice(0);
+    const before = window._spIdx;
+    __tapCard();                                        // 点卡片：hansen_mute 会开 120ms「点了就算想听」的窗口
+    await new Promise(r => setTimeout(r, 700));
+    const res = { during, after: window.__plays.splice(0), moved: window._spIdx !== before };
+    HTMLMediaElement.prototype.play = P; if (S0) speechSynthesis.speak = S0;
+    localStorage.setItem('hansen_muted', '0');
+    stopSpeed(); showScreen('home');
+    return res;
+  });
+  ok(m.moved, '静音：点卡片照样进下一题');
+  ok(m.during.length === 0, '静音：小课自己的重读没有出声 ' + JSON.stringify(m.during));
+  ok(m.after.length === 0, '静音：点卡片后下一题的自动朗读没有出声（以前在放行窗口里读，漏声） ' + JSON.stringify(m.after));
   ok(errs.length === 0, '页面无报错 ' + errs.join(' | '));
   await ctx.close();
 

@@ -149,13 +149,21 @@
     // 小课开始时孩子在哪个游戏屏；他切走了（返回/换屏），卡片马上收起，也不再替那个游戏出下一题、读下一个词
     var host = null;
     try{ host = document.querySelector('.screen.active'); }catch(e){}
-    function finish(left){
-      if(finished) return; finished = true; busy = false;
+    function goNext(){ try{ if(typeof next === 'function') next(); }catch(e){} }
+    function finish(left, tapped){
+      if(finished) return; finished = true;
       if(timer){ clearTimeout(timer); timer = null; }
       if(watch){ try{ watch.disconnect(); }catch(e){} watch = null; }
       if(el && el.parentNode) el.remove();
-      if(left === true) return;
-      try{ if(typeof next === 'function') next(); }catch(e){}
+      if(left === true){ busy = false; return; }
+      /* 点卡片那一下会给「一键静音」开 120ms 放行窗口（hansen_mute：点了就算想听）。下一题一出来就自动读词，
+         在窗口里读就漏声 → 等窗口关上再出下一题（极速的钟这 160ms 也照样停着）；这期间孩子离开了游戏屏就不出了 */
+      if(tapped === true){
+        setTimeout(function(){ busy = false; if(host && !host.classList.contains('active')) return; goNext(); }, 160);
+        return;
+      }
+      busy = false;
+      goNext();
     }
     function spoken(){   // 整句读完：再停一下（至少凑满约 2.5 秒）；开了静音 speak 会立刻回调
       if(finished) return;
@@ -182,7 +190,7 @@
             + (opts.exCn ? '<div class="hml-excn">' + esc(opts.exCn) + '</div>' : '') : '')
         + '<div class="hml-tap">点一下继续</div>'
         + '</div>';
-      el.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); finish(); });
+      el.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); finish(false, true); });
       document.body.appendChild(el);
       busy = true;
       if(host && window.MutationObserver){

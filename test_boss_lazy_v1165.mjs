@@ -58,7 +58,9 @@ async function openIsland(file, extra = {}) {
   await page.goto(BASE + file, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => typeof window.startBoss === 'function' && typeof window.hansenStartRebattle === 'function' &&
     typeof window.__hansenBossFXReady === 'function' && document.readyState === 'complete', null, { timeout: 30000 });
-  await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find(b => /开始冒险/.test(b.textContent) && b.offsetParent); if (b) b.click(); });
+  /* 新孩子的欢迎弹窗是开机后才弹的，常常晚于这一刻（复查实测 4 次里 2 次）→ 弹出来又挡住后面的真手指点按。
+     等它出来再点掉；没有弹窗的孩子最多多等 2.5 秒 */
+  await page.waitForFunction(() => { const b = [...document.querySelectorAll('button')].find(b => /开始冒险/.test(b.textContent) && b.offsetParent); if (b) { b.click(); return true; } return false; }, null, { timeout: 2500, polling: 100 }).catch(() => {});
   await page.waitForTimeout(400);
   return { ctx, page, errs, reqs };
 }
