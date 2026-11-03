@@ -128,6 +128,133 @@
     return null;
   }
 
+  /* ── 🔴v1164 会话判定用的小工具 ─────────────────────────
+     SDK 2.30.0 的事实（读源码 + 模拟云端实测）：
+       · getLoginState() 几乎从不抛错，没会话一律给 null；
+       · uid 只来自本机缓存 user_info_<env>，缓存没了 st.user.uid 就是空的；
+       · 凭证只存在 credentials_<env>，被 invalid_grant 删掉就再也回不来；
+       · 刷新请求没有超时，网卡住时会一直挂着。
+     所以"有没有凭证""缓存坏没坏""等了多久"都要我们自己看。 */
+  function envId() { var c = cfg(); return c ? String(c.envId) : ''; }
+  function userInfoKey() { var e = envId(); return e ? ('user_info_' + e) : ''; }
+
+  /* 本机有没有 SDK 写下的云端凭证。
+     v1132：先取键名快照再遍历（别的模块随时会改 localStorage，边遍历边读会漏键）。 */
+  function credentialsPresent() {
+    var _credOk = false;
+    try {
+      var _keys = [];
+      for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
+        var _kk = localStorage.key(_i2);
+        if (_kk) _keys.push(_kk);
+      }
+      for (var _i3 = 0; _i3 < _keys.length; _i3++) {
+        var _k2 = _keys[_i3];
+        if (/^credentials/i.test(_k2) && String(localStorage.getItem(_k2) || '').length > 50) {
+          _credOk = true; break;
+        }
+      }
+    } catch (e3) { _credOk = true; }   /* 读不了存储就别下"没凭证"的结论 */
+    return _credOk;
+  }
+
+  /* SDK 的 user_info 缓存坏了没有：含 localCachev1 却不是合法 JSON、或 content 为空，
+     getLoginState() 会直接抛 SyntaxError/TypeError（这是它唯一会抛错的情况）。 */
+  function userInfoCorrupt() {
+    var k = userInfoKey();
+    if (!k) return false;
+    try {
+      var raw = localStorage.getItem(k);
+      if (!raw || String(raw).indexOf('localCachev1') < 0) return false;
+      var o = JSON.parse(raw);
+      return !(o && typeof o === 'object' && o.content != null);
+    } catch (e) { return true; }
+  }
+
+  /* 定时器保险：有的 WebView / 测试桩会让定时器提前触发，
+     到点时用真实时间再核一次，没到就续上 —— 超时只按真实时间算。 */
+  function timeoutAfter(ms, onFire) {
+    var t0 = Date.now(), done = false;
+    function tick() {
+      if (done) return;
+      var left = ms - (Date.now() - t0);
+      if (left > 20) { setTimeout(tick, left); return; }
+      done = true;
+      try { onFire(); } catch (e) {}
+    }
+    setTimeout(tick, ms);
+    return function () { done = true; };
+  }
+  function withTimeout(p, ms, what) {
+    return new Promise(function (res, rej) {
+      var cancel = timeoutAfter(ms, function () {
+        var e = new Error(what + '超时（' + Math.round(ms / 1000) + ' 秒没有回应）');
+        e.timeout = true; e.friendly = true;
+        rej(e);
+      });
+      Promise.resolve(p).then(function (v) { cancel(); res(v); }, function (e) { cancel(); rej(e); });
+    });
+  }
+  function netLike(t) {
+    return /network|fetch|unreachable|load failed|timed? ?out|abort|ERR_|超时|断网|网络/i.test(String(t || ''));
+  }
+
+  /* 凭证守护（hansen_cred_guard_v1092.js）：
+     新登录 = 新会话 → 救援次数、影子副本都从这次重新算；退出登录 → 清掉影子，别把退掉的会话救回来。 */
+  function credGuardFresh() {
+    try {
+      var G = window.HansenCredGuard;
+      if (G && typeof G.reset === 'function') G.reset();
+      if (G && typeof G.backup === 'function') G.backup();
+    } catch (e) {}
+  }
+  function credGuardReset() {
+    try { var G = window.HansenCredGuard; if (G && typeof G.reset === 'function') G.reset(); } catch (e) {}
+  }
+  /* 凭证不见了时先请守护用影子副本救一次；救不了才算真过期 */
+  function credGuardRescue() {
+    try {
+      var G = window.HansenCredGuard;
+      if (G && typeof G.rescue === 'function') return !!G.rescue('会话探测发现凭证不在');
+    } catch (e) {}
+    return false;
+  }
+
+  /* 登录 / 注册 resolve 之后：凭证真的在，才算登录成功。
+     SDK 在响应缺 expires_in 时会删掉凭证却照样 resolve —— "没报错"不等于"登录了"。 */
+  function credentialsCheck(res, where) {
+    try {
+      var _has = res && typeof res === 'object';
+      T(where + '返回', res == null ? '❗返回 null/undefined（SDK 会据此删除凭证）'
+        : ('类型=' + (typeof res) + ' 键=[' + Object.keys(res).slice(0, 8).join(',') + ']'
+           + ' expires_in=' + (_has && res.expires_in != null ? res.expires_in : '❗无')
+           + ' access_token=' + (_has && res.access_token ? '有' : '❗无')));
+      var _c = 0;
+      lsKeys().forEach(function (_k) {
+        if (/cloudbase|tcb|credential|access_token|refresh_token/i.test(_k)) _c++;
+      });
+      T(where + '后凭证键', _c ? (_c + ' 个') : '❗0 个 —— SDK 没有把凭证写进本地存储');
+    } catch (e) {}
+    if (!credentialsPresent()) {
+      T('登录判定', '❗' + where + '后云端凭证不存在 → 不写"已登录"，如实报错');
+      try {
+        if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
+          HansenCredTrap.mark('❗登录后凭证不存在', where + '：拒绝写入登录态');
+      } catch (e) {}
+      var eNoCred = new Error(
+        '登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）。'
+        + '请把自检面板的「会话探测轨迹」截图给开发者。');
+      eNoCred.friendly = true; eNoCred.noCredentials = true;
+      throw eNoCred;
+    }
+    T('登录判定', '✅ ' + where + '：云端凭证已就位，写入本地登录态');
+    try {
+      if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
+        HansenCredTrap.mark('🔑 登录成功', where + '：凭证已就位');
+    } catch (e) {}
+    credGuardFresh();
+  }
+
   /* ── CloudBase 应用与鉴权 ─────────────────────────── */
   var _app = null, _auth = null;
   var _bgOnly = false;   /* v1091: 仅后台自动行为置为 true */
@@ -216,6 +343,7 @@
      导致 v1004 那个写错的 SDK 文件名一直没被任何测试发现。
      有了注入口，回归测试就能用假 SDK 跑完整条链，不必依赖网络。 */
   var _authOverride = null;
+  var _authFor = null, _authCached = null;
   function auth() {
     if (_authOverride) return Promise.resolve(_authOverride);
     /* 🔴v1093：**用 app() 返回的那个实例去取 auth，而不是本地的 _auth。**
@@ -229,22 +357,25 @@
 
        改为：拿 app() 实际给回的实例现取 auth；
        本地 _auth 只作为顶层自己的缓存。 */
+    /* 🔴v1164：子框里**每调一次就 a.auth() 一次**会造出一串鉴权对象
+       （各自一份内存凭证，又是并发刷新的口子）。
+       改为：先用顶层建好的那个；没有才自己取一次，并按 app 实例缓存。 */
     return app().then(function (a) {
-      if (_auth) return _auth;
-      if (a && typeof a.auth === 'function') {
-        try {
-          var got = a.auth({ persistence: 'local' });
-          if (got) return got;
-        } catch (e) {}
-      }
-      /* 最后再试一次顶层已经建好的（同源时可直接借用） */
+      if (_auth && a === _app) return _auth;
+      if (_authCached && _authFor === a) return _authCached;
       try {
         var topA = window.top && window.top.HansenAuth;
         if (topA && topA !== window.HansenAuth && typeof topA._authObj === 'function') {
           var t = topA._authObj();
-          if (t) return t;
+          if (t) { _authFor = a; _authCached = t; return t; }
         }
       } catch (e) {}
+      if (a && typeof a.auth === 'function') {
+        try {
+          var got = a.auth({ persistence: 'local' });
+          if (got) { _authFor = a; _authCached = got; return got; }
+        } catch (e) {}
+      }
       throw new Error('鉴权不可用');
     });
   }
@@ -286,6 +417,8 @@
 
   /* 友好错误文案：把云端英文错误翻成人话 */
   function friendly(err) {
+    /* v1164：已经是人话的错误（friendly）原样给人看，别再截断或改写 */
+    if (err && err.friendly && err.message) return String(err.message);
     var m = String((err && (err.message || err.error_description || err.code)) || err || '');
     if (/domain|origin|not.*allow|403/i.test(m)) return '这个网址还没加进安全域名白名单（控制台改完要等约 10 分钟生效）';
     /* 🔴v1009: 原正则过宽, 把注册参数错误也误报成"验证码不对", 误导排查。
@@ -347,93 +480,11 @@
           return a.signIn({ username: st.pendingPhone, verification_token: token });
         });
     }).then(function (res) {
-      /* 🔴v1079：登录成功那一刻的现场也记进轨迹。
-         此前这里**完全不看 signUp/signIn 返回了什么**就直接写本地标记 ——
-         于是"界面显示已登录"与"云端真的有会话"之间没有任何校验。
-         v1078 的轨迹已证明：登录 62 秒后凭证仍为空。
-         把返回值形状与写入后的凭证键数一并记下，即可分辨
-         "SDK 压根没给凭证" 还是 "给了但没落盘"。 */
-      try {
-        /* 🔴v1080：重点看返回值里**有没有 expires_in**。
-           SDK 的 setCredentials 是这么写的：
-             if (t?.expires_in) { 存起来 }
-             else { storage.removeItem(...); credentials = null }   ← 直接删！
-           而 signUp/signIn 把服务端返回值**原样**丢给 setCredentials。
-           所以只要那次响应缺 expires_in，已存的凭证就被整个删掉，
-           而 Promise 依然 resolve —— 我们看到"没报错"就写下"已登录"。
-           用户现场正是如此：+1ms 凭证 1314 字节还在，+2143ms 就没了。 */
-        var _has = res && typeof res === 'object';
-        T('登录返回', res == null ? '❗返回 null/undefined（SDK 会据此删除凭证）'
-          : ('类型=' + (typeof res) + ' 键=[' + Object.keys(res).slice(0, 8).join(',') + ']'
-             + ' expires_in=' + (_has && res.expires_in != null ? res.expires_in : '❗无')
-             + ' access_token=' + (_has && res.access_token ? '有' : '❗无')));
-        var _c = 0;
-        lsKeys().forEach(function (_k) {
-          if (/cloudbase|tcb|credential|access_token|refresh_token/i.test(_k)) _c++;
-        });
-        T('登录后凭证键', _c ? (_c + ' 个') : '❗0 个 —— SDK 没有把凭证写进本地存储');
-      } catch (e) {}
-      /* 🔴v1080 防线：**登录后必须确认云端凭证真的在**，否则不许写"已登录"。
-
-         此前这一步只要 Promise 没 reject 就标记成功，于是出现
-         「③ 已登录 / ③b 会话失效」这种自相矛盾的显示 ——
-         界面说登录着，每一次云端读写却都失败，用户被反复推去重新登录。
-
-         SDK 的 setCredentials 在返回值缺 expires_in 时会**删掉已存凭证**，
-         而 signUp/signIn 依然 resolve。所以"没报错"根本不等于"登录成功"。
-         这里直接查 localStorage 里 SDK 自己的凭证键还在不在 ——
-         那是唯一能证明会话真的建立起来的东西。 */
-      var _credOk = false;
-      try {
-        /* 🔴v1132：**先取键名快照，再遍历。**
-
-           原来是边遍历边读 `localStorage.key(i)` —— 而这个页面上同时跑着
-           凭证守护、版本守望者、心跳等好几个模块，它们随时会写/删键。
-           **集合一变动，索引就错位，正好跳过凭证键那一格** ——
-           于是"登录成功了却说凭证不在"，本地登录态不写，
-           界面显示未登录。
-
-           这就是 `test_phone_signup` 随机失败的真凶：
-           **不是测试的竞态，是产品代码遍历时不做快照。**
-           （我上一版误判成"测试自身的问题"，四轮没修好 —— 因为方向就错了。）
-
-           顺带：能直接命中就不必遍历。先按已知前缀直查一次，
-           找不到再退回遍历快照。 */
-        var _keys = [];
-        for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
-          var _kk = localStorage.key(_i2);
-          if (_kk) _keys.push(_kk);
-        }
-        for (var _i3 = 0; _i3 < _keys.length; _i3++) {
-          var _k2 = _keys[_i3];
-          if (/^credentials/i.test(_k2) && String(localStorage.getItem(_k2) || '').length > 50) {
-            _credOk = true; break;
-          }
-        }
-      } catch (e3) { _credOk = true; }   /* 读不到就别拦人，保守放行 */
-
-      if (!_credOk) {
-        T('登录判定', '❗云端凭证不存在 → 不写"已登录"，如实报错');
-        try {
-          if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
-            HansenCredTrap.mark('❗登录后凭证不存在', '拒绝写入登录态');
-        } catch (e) {}
-        var eNoCred = new Error(
-          '登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）。'
-          + '请把自检面板的「会话探测轨迹」截图给开发者。');
-        eNoCred.friendly = true; eNoCred.noCredentials = true;
-        throw eNoCred;
-      }
-      T('登录判定', '✅ 云端凭证已就位，写入本地登录态');
-      /* 🔴v1087：把登录这一刻也写进**持久**日志。
-         轨迹是内存态、一重载就没；而用户现场恰恰是
-         「凭证生死簿说本次会话没人动过凭证，但登录记录显示 49 秒前登录过」——
-         说明登录与凭证消失都发生在上一次页面会话里。
-         只有持久记录才串得起完整时间线。 */
-      try {
-        if (window.HansenCredTrap && typeof HansenCredTrap.mark === 'function')
-          HansenCredTrap.mark('🔑 登录成功', '凭证已就位');
-      } catch (e) {}
+      /* 🔴v1079/v1080/v1132：登录 resolve ≠ 登录成功。
+         SDK 在响应缺 expires_in 时会删掉凭证却照样 resolve（真机：+1ms 凭证 1314 字节，+2143ms 没了）。
+         所以先确认 credentials_ 真的在、轨迹记下返回值形状，才写"已登录"；
+         否则抛「登录未真正完成」。手机号和用户名登录共用 credentialsCheck 这一处判据。 */
+      credentialsCheck(res, '手机号登录');
       writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
       return afterSignIn();
     });
@@ -454,18 +505,20 @@
           return Promise.resolve(a.signIn({ username: mail, password: p }))
             .catch(function () { throw e1; });
         });
-    }).then(function () {
+    }).then(function (res) {
+      /* 🔴v1164：用户名登录以前**完全不查凭证**就写"已登录"——
+         响应缺 expires_in 时 SDK 删了凭证照样 resolve，界面说已登录、云端却没会话。
+         和手机号登录用同一处判据。 */
+      credentialsCheck(res, '用户名登录');
       writeLocal({ method: 'password', username: u, signedAt: Date.now() });
       return afterSignIn();
     });
   }
 
   /* ── ②b 用户名 + 密码「注册」 ────────────────────────
-     背景：CloudBase 的注册只支持 email+password 或 phone+验证码，
-     **没有"纯用户名+密码"这种注册方式**。
-     做法：把用户名确定性地映射成一个内部邮箱（用户完全看不到），
-     用它完成注册，随后再把真正的用户名设上去。
-     这样用户体验上就是"用户名+密码注册"，而底层走的是官方支持的路径。 */
+     背景：CloudBase 没有"纯用户名+密码"注册。v1058 曾把用户名映射成内部邮箱去注册，
+     但 SDK 对邮箱只发验证码、不建账号（见下方 v1164）。
+     映射函数仍保留：用户名登录失败时会用它再试一次。 */
   var INNER_MAIL_DOMAIN = 'u.wordadventure.local';
 
   function normUsername(raw) {
@@ -487,32 +540,19 @@
     return safe + '_' + ((h1 >>> 0).toString(16)) + ((h2 >>> 0).toString(16)) + '@' + INNER_MAIL_DOMAIN;
   }
 
-  function registerByPassword(username, password, password2) {
-    var v = normUsername(username);
-    if (!v.ok) return Promise.reject(new Error(v.reason));
-    var pw = String(password == null ? '' : password);
-    if (pw.length < 6) return Promise.reject(new Error('密码至少 6 位'));
-    if (password2 !== undefined && String(password2) !== pw)
-      return Promise.reject(new Error('两次输入的密码不一样'));
-    var mail = mailOfUsername(v.name);
-    return auth().then(function (a) {
-      var fn = a.signUpWithEmailAndPassword || a.signUp;
-      if (typeof fn !== 'function') throw new Error('当前环境不支持用户名注册');
-      /* 两种调用签名都兼容：新版是 (email, password)，旧版是 ({email, password}) */
-      var p1;
-      try { p1 = a.signUpWithEmailAndPassword ? a.signUpWithEmailAndPassword(mail, pw)
-                                              : a.signUp({ email: mail, password: pw }); }
-      catch (e) { p1 = Promise.reject(e); }
-      return Promise.resolve(p1).then(function () {
-        /* 注册成功后把真正的用户名设上，便于以后直接用它登录 */
-        return Promise.resolve(
-          (typeof a.updateUsername === 'function') ? a.updateUsername(v.name) : null
-        ).catch(function () { return null; });
-      });
-    }).then(function () {
-      writeLocal({ method: 'password', username: v.name, signedAt: Date.now() });
-      return afterSignIn();
-    });
+  /* 🔴v1164：**用户名注册从来没有建出过云端账号。**
+     SDK 2.30.0 的 signUpWithEmailAndPassword 其实只是往那个内部邮箱"发一封验证码"，
+     不调 /auth/v1/signup、不给凭证（模拟云端实测：1 次 verification、0 次 signup）。
+     而这里以前照样写下"已登录" → 界面说登录了，云端永远「会话尚未就绪」。
+     CloudBase 网页端只能用手机号（或真实邮箱收码）注册，所以这里如实拒绝、什么都不写，
+     并告诉孩子/老师该怎么办。用户名**登录**保留（控制台建的用户名账号仍能用）。 */
+  var USERNAME_SIGNUP_MSG = '用户名不能直接注册：云端只支持用手机号注册。'
+    + '请点上面的「手机号」，收验证码注册（孩子没有手机号，用家长的手机号也可以）。';
+  function registerByPassword() {
+    T('用户名注册', '❗云端不支持用户名注册 → 如实拒绝，不写登录态');
+    var e = new Error(USERNAME_SIGNUP_MSG);
+    e.friendly = true; e.unsupported = true;
+    return Promise.reject(e);
   }
 
   /* ── ③ 登出 ─────────────────────────────────────── */
@@ -579,9 +619,13 @@
     /* v1145: 等上传完再真正退出 —— 否则清了登录态，上传就没凭证了。
        上传失败也继续退出（不能把人卡在登录态里）。 */
     return _bye.then(function () { return auth(); }).then(function (a) {
-      return a.signOut ? a.signOut() : null;
+      /* v1164：先清本地登录记录再让 SDK 退出 —— 凭证守护看到"已退出"，
+         就不会把 SDK 刚删掉的凭证又救回来；退出请求限 6 秒，网卡住也退得出去。 */
+      writeLocal({ method: '', signedAt: 0, uid: '' });
+      return a.signOut ? withTimeout(Promise.resolve().then(function () { return a.signOut(); }), 6000, '退出登录') : null;
     }).catch(function () { return null; }).then(function () {
       writeLocal({ method: '', signedAt: 0, uid: '' });
+      credGuardReset();
       return { ok: true };
     });
   }
