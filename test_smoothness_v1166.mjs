@@ -506,7 +506,7 @@ if (want('S5') || want('S6')) {
       console.log(`    ${rv.game} 答对揭晓 1.5 秒：${rv.frames} 帧，最长一帧 ${rv.maxFrameMs}ms，掉帧 ${rv.dropped}，长任务 ${rv.longTaskMs}ms（最长 ${rv.longestTask}）`);
     }
     const worst = k => Math.max(...reveals.map(r => r[k]));
-    const med = k => median(reveals.map(r => r[k]));
+    const med = k => r1(median(reveals.map(r => r[k])));
     ok(reveals.length >= 5, `S6 至少量到 5 次答对揭晓（实测 ${reveals.length}）`);
     ok(med('longTaskMs') <= CAPS.revealMedLongTaskMs, `S6 答对揭晓长任务合计（中位）≤ ${CAPS.revealMedLongTaskMs}ms（实测 ${med('longTaskMs')}ms）`);
     ok(med('maxFrameMs') <= CAPS.revealMedMaxFrameMs, `S6 答对揭晓最长一帧（中位）≤ ${CAPS.revealMedMaxFrameMs}ms（实测 ${med('maxFrameMs')}ms）`);
