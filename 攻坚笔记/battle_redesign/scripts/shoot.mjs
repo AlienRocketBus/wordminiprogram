@@ -40,6 +40,7 @@ const GEOM = () => {
   for (const el of document.querySelectorAll('button,a[href],input,summary,[role=button],[role=radio],[role=textbox]')) {
     const r = el.getBoundingClientRect(); if (!r.width || !r.height) continue;
     const cs = getComputedStyle(el); if (cs.visibility === 'hidden') continue;
+    if (el.classList.contains('sr')) continue; // 读屏专用的隐藏输入框（#prIn），不是点击目标
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     if (cy > innerHeight + 2000) continue;
     // 被弹层盖住的东西点不到，不算
@@ -84,13 +85,14 @@ for (const [W, H] of SIZES) {
       return ['CartoonBlack', 'Baloo2'].map(f => !used.has(f) || ok.has(f)); });  // 用到了这个字体就必须真的加载成功
     const m = { geom, errs, fonts };
     if (W !== 320) {
+      // 彩色 emoji 不受 color 影响：两张图之前先把 emoji 包进 span（不改样式、不改版面），隐藏文字那张再把它们藏起来
+      await pg.evaluate(() => { const re = /(\p{Extended_Pictographic}\uFE0F?(\u200D\p{Extended_Pictographic}\uFE0F?)*)/gu; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); const ns = []; let n; while ((n = w.nextNode())) if (re.test(n.nodeValue)) ns.push(n);
+        for (const t of ns) { const sp = document.createElement('span'); sp.innerHTML = t.nodeValue.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(re, '<span class="__emo">$1</span>'); t.replaceWith(...sp.childNodes); } });
       const els = await pg.evaluate(COLLECT);
       const fg = path.join(OUT, 'metrics', '.fg.png'), bg = path.join(OUT, 'metrics', '.bg.png'), jf = path.join(OUT, 'metrics', '.els.json');
       await pg.screenshot({ path: fg });
       await pg.addStyleTag({ content: HIDE });
-      // 彩色 emoji 不受 color 影响：隐藏文字那张图里把 emoji 也藏起来（visibility 不改版面），背景才是真背景
-      await pg.evaluate(() => { const re = /(\p{Extended_Pictographic}\uFE0F?(\u200D\p{Extended_Pictographic}\uFE0F?)*)/gu; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); const ns = []; let n; while ((n = w.nextNode())) if (re.test(n.nodeValue)) ns.push(n);
-        for (const t of ns) { const sp = document.createElement('span'); sp.innerHTML = t.nodeValue.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(re, '<span style="visibility:hidden">$1</span>'); t.replaceWith(...sp.childNodes); } });
+      await pg.addStyleTag({ content: '.__emo{visibility:hidden!important}' });
       await sleep(40); await pg.screenshot({ path: bg });
       fs.writeFileSync(jf, JSON.stringify(els));
       const r = JSON.parse(execFileSync('python3', ['-I', path.join(HERE, 'contrast.py'), jf, bg, fg, String(dpr)], { encoding: 'utf8', maxBuffer: 64e6 }));
