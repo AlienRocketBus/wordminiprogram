@@ -4612,6 +4612,12 @@ function getBestCombo(){
 }
 
 function showToast(msg){floatText(window.innerWidth/2,window.innerHeight/2-60,msg,'#fbbf24')}
+/* 🔴v1165 小游戏「这一局」的编号：开局、换难度、停下时都 +1。延时出下一题的回调只认自己那一局——
+   编号变了、或者游戏屏已经不在前台，就什么都不做。以前打字大师答完马上返回，0.9 秒后又锁住屏幕、在主页读词；
+   换难度后新一局的第一题被旧局的「下一题」顶掉；字母拼拼乐离开后还在主页读词。 */
+var __hsnRuns={};
+function __hsnRunNew(g){__hsnRuns[g]=(__hsnRuns[g]||0)+1;return __hsnRuns[g];}
+function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hsnRuns[g]||0)!==tok)return;if(scr){var el=document.getElementById(scr);if(!el||!el.classList.contains('active'))return;}return fn.apply(this,arguments);};}
 /* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
 function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
 function closeAlert(){document.getElementById('alertModal').classList.remove('show')}
@@ -4635,6 +4641,7 @@ if(id!=='listen'&&typeof stopListen==='function')stopListen();
 if(id!=='typing'&&typeof stopTyping==='function')stopTyping();
 if(id!=='cloze'&&typeof stopCloze==='function')stopCloze();
 if(id!=='eagle'&&typeof stopEagle==='function')stopEagle();
+if(id!=='scramble'&&typeof stopScramble==='function')stopScramble();
 document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
 document.getElementById(id+'Screen').classList.add('active');
 // v272: 打字界面隐藏底部导航栏 (它会盖住键盘底排, 导致要下拉). 其他屏幕恢复显示.
@@ -5284,7 +5291,7 @@ function molesBestSet(level,score){ var b=molesBestObj(); if(score>(b[level]||0)
 function startMoles(){
   // 入口: 显示难度选择
   showScreen('moles');
-  molesActive=false;
+  molesActive=false;__hsnRunNew('moles');
   if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
   let cards='';
   for(const k of ['easy','medium','hard']){
@@ -5312,7 +5319,7 @@ function startMolesLevel(level){
   if(!MOLES_LEVELS[level])return;
   /* 🔴 BUG#41修复(v464):空难度档守卫,别删。 */if(!([...Array(allW.length).keys()].some(MOLES_LEVELS[level].filter))){showToast('🔨 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('moles');
-  molesLevel=level;
+  molesLevel=level;__hsnRunNew('moles');
   const L=MOLES_LEVELS[level];
   molesActive=true;molesScore=0;molesLives=L.lives;molesTarget=null;molesHit=0;__hmlStart('moles');
   // 池: 该档单词洗牌, pop 到空就完成
@@ -5336,11 +5343,11 @@ function startMolesLevel(level){
       '<button class="game-btn red" onclick="startMoles()" style="font-size:13px;padding:8px 16px">🔄 换难度</button> '+
       '<button class="game-btn purple" onclick="showScreen(\'home\');stopMoles()" style="font-size:13px;padding:8px 16px">🏠 主页</button>'+
     '</div>';
-  setTimeout(startMolesWave,500);
+  setTimeout(__hsnLater('moles','molesScreen',startMolesWave),500);
 }
 
 function stopMoles(){
-  molesActive=false;
+  molesActive=false;__hsnRunNew('moles');
   if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
   // 清理屏幕上所有残留地鼠 grid
   try {
@@ -5434,7 +5441,7 @@ function molesClick(i){
     if(molesScore>=50)unlockAch('moles50');
     if(!__rtM)addXP(L.xpPerHit);__hmlMark(allW.indexOf(molesTarget),true,__rtM);
     if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
-    setTimeout(startMolesWave,900);
+    setTimeout(__hsnLater('moles','molesScreen',startMolesWave),900);
   }else{
     // WRONG
     slot.dataset.locked='1';
@@ -5447,7 +5454,7 @@ function molesClick(i){
     if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
     const ld=document.getElementById('molesLivesDisp');
     if(ld)ld.textContent='❤️'.repeat(Math.max(0,molesLives))+'🖤'.repeat(L.lives-Math.max(0,molesLives));
-    if(molesLives>0){__hmlLesson('moles',allW.indexOf(molesTarget),startMolesWave,900);}
+    if(molesLives>0){__hmlLesson('moles',allW.indexOf(molesTarget),__hsnLater('moles','molesScreen',startMolesWave),900);}
     if(molesLives<=0){
       molesActive=false;__hmlLesson('moles',allW.indexOf(molesTarget),function(){});__hmlAttach('moles','molesContent');
       if(molesWaveTimer){clearTimeout(molesWaveTimer);molesWaveTimer=null}
@@ -5591,7 +5598,7 @@ function makeFishSvg(text,palette,isTarget){
 function startFish(){
   // 入口: 显示难度选择
   showScreen('fish');
-  fishActive=false;
+  fishActive=false;__hsnRunNew('fish');
   if(fishSpawnTimer){clearTimeout(fishSpawnTimer);fishSpawnTimer=null}
   let cards='';
   for(const k of ['easy','medium','hard']){
@@ -5651,7 +5658,7 @@ function startFishLevel(level){
   if(!FISH_LEVELS[level])return;
   /* 🔴 BUG#41修复(v464):钓鱼空难度档守卫,别删。 */if(!([...Array(allW.length).keys()].some(FISH_LEVELS[level].filter))){showToast('🎣 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('fish');
-  fishLevel=level;
+  fishLevel=level;__hsnRunNew('fish');
   var L=FISH_LEVELS[level];
   fishActive=true;fishScore=0;fishLives=L.lives;fishOnscreen=0;fishCaught=0;__hmlStart('fish');
   fishPool=[];
@@ -5694,7 +5701,7 @@ function startFishLevel(level){
 }
 
 function stopFish(){
-  fishActive=false;
+  fishActive=false;__hsnRunNew('fish');
   if(fishSpawnTimer){clearTimeout(fishSpawnTimer);fishSpawnTimer=null}
   // 清理屏幕上所有残留鱼 + 重置计数
   try {
@@ -5817,7 +5824,7 @@ function spawnOneFish(){
       var sn=document.getElementById('fishScoreNum');
       if(sn)sn.textContent=fishScore;
       __hmlMark(allW.indexOf(fishTarget),true,__hmlIsRetry('fish',allW.indexOf(fishTarget)));
-      setTimeout(pickFishTarget,400);
+      setTimeout(__hsnLater('fish','fishScreen',pickFishTarget),400);
       setTimeout(function(){
         if(fish.parentElement){fish.remove();fishOnscreen=Math.max(0,fishOnscreen-1);}
       },500);
@@ -5833,7 +5840,7 @@ function spawnOneFish(){
       markAnswer(allW.indexOf(fishTarget),false);
       var ld=document.getElementById('fishLivesDisp');
       if(ld)ld.textContent='❤️'.repeat(Math.max(0,fishLives))+'🖤'.repeat(L.lives-Math.max(0,fishLives));
-      if(fishLives>0){__hmlLesson('fish',allW.indexOf(fishTarget),pickFishTarget,500);}
+      if(fishLives>0){__hmlLesson('fish',allW.indexOf(fishTarget),__hsnLater('fish','fishScreen',pickFishTarget),500);}
       setTimeout(function(){
         if(fish.parentElement){fish.remove();fishOnscreen=Math.max(0,fishOnscreen-1);}
       },500);
@@ -5993,7 +6000,7 @@ function bubbleBestSet(level,score){ var b=bubbleBestObj(); if(score>(b[level]||
 function startBubble(){
   // 入口: 难度选择
   showScreen('bubble');
-  bubbleActive=false;
+  bubbleActive=false;__hsnRunNew('bubble');
   let cards='';
   for(const k of ['easy','medium','hard']){
     const L=BUBBLE_LEVELS[k];
@@ -6020,7 +6027,7 @@ function startBubbleLevel(level){
   if(!BUBBLE_LEVELS[level])return;
   /* 🔴 BUG#41修复(v464):缺此难度档单词时会进“完成0题”空壳,此守卫拦截。别删。 */if(!([...Array(allW.length).keys()].some(BUBBLE_LEVELS[level].filter))){showToast('🫧 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('bubble');
-  bubbleLevel=level;
+  bubbleLevel=level;__hsnRunNew('bubble');
   bubbleActive=true;bubbleScore=0;bubbleCombo=0;bubbleLives=5;bubbleDone=0;__hmlStart('bubble');
   // 池: 该档全部单词索引洗牌, pop 到空就完成
   bubblePool=[...Array(allW.length).keys()].filter(BUBBLE_LEVELS[level].filter).sort(()=>Math.random()-.5);
@@ -6031,7 +6038,7 @@ function startBubbleLevel(level){
 }
 
 function stopBubble(){
-  bubbleActive=false;
+  bubbleActive=false;__hsnRunNew('bubble');
   if(window.bubbleFloatTimer){clearInterval(window.bubbleFloatTimer);window.bubbleFloatTimer=null}
   bubbleStopCountdown(); // 🆕 离开时停掉倒计时
   // 清理屏幕上所有残留泡泡
@@ -6078,7 +6085,7 @@ function bubbleTimeOut(){
   if(bubbleLives<=0){
     __hmlLesson('bubble',allW.indexOf(bubbleTarget),function(){});bubbleGameOver(); // 没命了→失败结算
   }else{
-    __hmlLesson('bubble',allW.indexOf(bubbleTarget),nextBubble,400); // 还有命→小课后跳下一题
+    __hmlLesson('bubble',allW.indexOf(bubbleTarget),__hsnLater('bubble','bubbleScreen',nextBubble),400); // 还有命→小课后跳下一题
   }
 }
 // 🆕 泡泡失败结算(命数用完): 得分对比 + 破纪录提示(照样板)
@@ -6186,19 +6193,20 @@ function bubbleGoNext(){
   if(big.parentElement){big.classList.add('exit');setTimeout(()=>{if(big.parentElement)big.remove()},400)}
   if(promptEl)promptEl.style.display='';
   // 池空 → 完成本档 (不再无限循环)
-  if(bubblePool.length===0&&!__hmlRequeue('bubble',bubblePool)){setTimeout(bubbleComplete,200);return}
-  setTimeout(nextBubble,200)
+  if(bubblePool.length===0&&!__hmlRequeue('bubble',bubblePool)){setTimeout(__hsnLater('bubble','bubbleScreen',bubbleComplete),200);return}
+  setTimeout(__hsnLater('bubble','bubbleScreen',nextBubble),200)
 }
+const __bgo=__hsnLater('bubble','bubbleScreen',bubbleGoNext);
 // 等大泡泡放大动画结束(0.6s)再读单词, 再缓冲 700ms 让小朋友看清楚
-setTimeout(function(){speak(w.en,1,function(){setTimeout(bubbleGoNext,700)})},650);
+setTimeout(__hsnLater('bubble','bubbleScreen',function(){speak(w.en,1,function(){setTimeout(__bgo,700)})}),650);
 // 5 秒保险: 万一发音回调没触发, 也不会永远卡住
-setTimeout(bubbleGoNext,5000);
+setTimeout(__bgo,5000);
 }else{b.dataset.done='1';b.classList.add('wrong-pop');playWrong();bubbleStopCountdown();bubbleCombo=0;if(!__hmlIsRetry('bubble',allW.indexOf(bubbleTarget)))bubbleLives--;
 document.getElementById('bbCombo').textContent='0';
 document.getElementById('bbLives').textContent='❤️'.repeat(Math.max(0,bubbleLives))+'🖤'.repeat(5-Math.max(0,bubbleLives));
 /* 🔴v1165: 记错的是没认出来的目标词——以前记到了点错的那个干扰词上，真正的错词进不了错题本和复习计划 */markAnswer(allW.indexOf(bubbleTarget),false);
 var _ba=document.getElementById('bbArea');if(_ba)_ba.querySelectorAll('.bubble').forEach(function(x){if(x.parentElement)x.remove()});
-if(bubbleLives>0){__hmlLesson('bubble',allW.indexOf(bubbleTarget),nextBubble,500);}
+if(bubbleLives>0){__hmlLesson('bubble',allW.indexOf(bubbleTarget),__hsnLater('bubble','bubbleScreen',nextBubble),500);}
 if(bubbleLives<=0){__hmlLesson('bubble',allW.indexOf(bubbleTarget),function(){});bubbleGameOver();}}};
 area.appendChild(b);
 b.dataset.angle=Math.random()*Math.PI*2;
@@ -6312,11 +6320,13 @@ const SCRAMBLE_LEVELS={
     filter:i=>{const en=allW[i].en;return en.length>=7 && !/[.\-]/.test(en)},
     xpPerWord:18,gemBonus:50,petXp:65}
 };
-let scrPool=[],scrIdx=0,scrWord=null,scrSlots=[],scrLevel='easy',scrTotal=0,scrCorrect=0;
+let scrPool=[],scrIdx=0,scrWord=null,scrSlots=[],scrLevel='easy',scrTotal=0,scrCorrect=0,scrActive=false;
+/* 🔴v1165 离开/换难度就停：下一词只在这一局、字母拼拼乐还在前台时出 */
+function stopScramble(){scrActive=false;__hsnRunNew('scr')}
 
 function startScramble(){
   // 入口: 难度选择
-  showScreen('scramble');
+  showScreen('scramble');stopScramble();
   let cards='';
   for(const k of ['easy','medium','hard']){
     const L=SCRAMBLE_LEVELS[k];
@@ -6346,10 +6356,12 @@ function startScrambleLevel(level){
   scrLevel=level;
   scrPool=[...Array(allW.length).keys()].filter(SCRAMBLE_LEVELS[level].filter).sort(()=>Math.random()-.5);
   scrTotal=scrPool.length;scrIdx=0;scrCorrect=0;__hmlStart('scramble');
+  __hsnRunNew('scr');scrActive=true;
   nextScramble();
 }
 
 function nextScramble(){
+  if(!scrActive)return;
   if(scrIdx>=scrPool.length&&!__hmlRequeue('scramble',scrPool)){scrComplete();return}
   const w=allW[scrPool[scrIdx]];scrWord=w;scrSlots=[];
   const letters=w.en.split('').sort(()=>Math.random()-.5);
@@ -6385,10 +6397,10 @@ const expected=targetNoSpace;
 const L=SCRAMBLE_LEVELS[scrLevel]||SCRAMBLE_LEVELS.easy;
 if(typed.toLowerCase()===expected.toLowerCase()){document.getElementById('scrMsg').innerHTML='<span style="color:#22c55e">✅ 正确！'+scrWord.en+' = '+scrWord.cn+'</span>';
 const __rtS=__hmlIsRetry('scramble',scrPool[scrIdx]);playCorrect();if(!__rtS)addXP(L.xpPerWord);confetti(window.innerWidth/2,300,12);__hmlMark(scrPool[scrIdx],true,__rtS);if(!__rtS)scrCorrect++;
-scrIdx++;setTimeout(nextScramble,1200)}
+scrIdx++;setTimeout(__hsnLater('scr','scrambleScreen',nextScramble),1200)}
 else{var _sm=document.getElementById('scrMsg');if(_sm)_sm.innerHTML='<span style="color:#ef4444">❌ 不对！正确：'+scrWord.en+'</span>';
 playWrong();markAnswer(scrPool[scrIdx],false);var _sw=document.querySelector('.scramble-word');if(_sw)_sw.classList.add('shake-screen');
-__hmlLesson('scramble',scrPool[scrIdx],clearScramble,1100)}}}
+__hmlLesson('scramble',scrPool[scrIdx],__hsnLater('scr','scrambleScreen',clearScramble),1100)}}}
 
 function clearScramble(){scrSlots=[];document.querySelectorAll('.scramble-slot').forEach(s=>{if(!s.classList.contains('space')){s.textContent='';s.classList.remove('filled')}});
 document.querySelectorAll('.scramble-letter').forEach(l=>l.classList.remove('used'));
@@ -6449,10 +6461,11 @@ function skipScramble(){
     showToast('🛑 不能再跳啦! 这道题答对才能通关 (60%)');
     return;
   }
-  markAnswer(scrPool[scrIdx],false);var __skI=scrPool[scrIdx];scrIdx++;__hmlLesson('scramble',__skI,nextScramble,0)
+  markAnswer(scrPool[scrIdx],false);var __skI=scrPool[scrIdx];scrIdx++;__hmlLesson('scramble',__skI,__hsnLater('scr','scrambleScreen',nextScramble),0)
 }
 
 function scrComplete(){
+  scrActive=false;
   const L=SCRAMBLE_LEVELS[scrLevel]||SCRAMBLE_LEVELS.easy;__hmlAttach('scramble','scrambleContent');
   const accuracy=scrTotal>0?Math.round(scrCorrect*100/scrTotal):0;
   // 必须答对至少 60% 且至少 1 个, 才算真正完成 (防止一直点跳过刷奖励)
@@ -6636,7 +6649,7 @@ let listenActive=false,listenQ=null,listenRight=0,listenTotal=0,listenLevel='eas
 // 入口: 显示难度选择
 function startListen(){
   showScreen('listen');
-  listenActive=false;listenQ=null;
+  listenActive=false;listenQ=null;__hsnRunNew('listen');
   const html='<div style="padding:14px 8px"><div style="text-align:center;font-size:14px;color:#cbd5e1;margin-bottom:6px">选择一个难度开始挑战</div><div style="text-align:center;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:18px">每档单词不重复, 全部答完后会自动重洗进入下一轮</div>'+
     Object.keys(LISTEN_LEVELS).map(k=>{
       const L=LISTEN_LEVELS[k];const cnt=LISTEN_LEVEL_IDX[k].length;
@@ -6645,14 +6658,14 @@ function startListen(){
     }).join('')+'</div>';
   document.getElementById('listenContent').innerHTML=html;
 }
-function stopListen(){listenActive=false}
+function stopListen(){listenActive=false;__hsnRunNew('listen')}
 
 // 选好难度后真正开始
 function startListenLevel(level){
   if(!LISTEN_LEVELS[level])return;
   /* 🔴v1165 这一档没有词：只提示，不进游戏（以前 nextListenQ 读不到词直接报错） */if(!LISTEN_LEVEL_IDX[level]||!LISTEN_LEVEL_IDX[level].length){showToast('🔊 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('listen');
-  listenLevel=level;
+  listenLevel=level;__hsnRunNew('listen');
   listenActive=true;listenRight=0;listenTotal=0;listenRound=1;__hmlStart('listen');
   resetPool('listen_'+level);
   nextListenQ();
@@ -6675,7 +6688,7 @@ const doneInRound=totalInLvl-poolRemaining('listen_'+listenLevel);
 document.getElementById('listenContent').innerHTML=
   '<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">第 '+listenRound+' 轮</span><span style="opacity:.7;font-weight:500">·</span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+doneInRound+' / '+totalInLvl+'</span><span onclick="startListen()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>'+
   '<div class="listen-area"><div class="listen-speaker" onclick="playListen()" id="listenSpeaker">🔊</div><div class="listen-hint">点击喇叭播放单词</div><div class="listen-controls"><button class="listen-btn" onclick="playListen(0.6)">🐢 慢速</button><button class="listen-btn" onclick="playListen(1)">🔊 正常</button></div><div style="font-size:15px;color:#fde047;text-align:center;margin:10px 0;font-weight:700">🎯 选出正确的中文意思</div><div class="listen-opts">'+opts.map((o,i)=>'<div class="boss-opt" onclick="listenAnswer('+i+')">'+o.emoji+' '+o.cn+'</div>').join('')+'</div><div style="text-align:center;margin-top:14px;font-size:12px;color:#cbd5e1">本局答对：<b style="color:#fbbf24">'+listenRight+'</b> / '+listenTotal+'</div></div>';
-setTimeout(()=>playListen(),300)}
+setTimeout(__hsnLater('listen','listenScreen',function(){playListen()}),300)}
 function playListen(r){if(!listenQ)return;const sp=document.getElementById('listenSpeaker');if(sp)sp.classList.add('playing');speak(listenQ.word.en,r||1,()=>{if(sp)sp.classList.remove('playing')})}
 function listenAnswer(i){if(!listenActive||!listenQ)return;/* 🔴 BUG#40修复(v464):听音答错后选项停留1.6s揭示正确答案,无此锁会“看答案再点”双计+双推进。别删此锁。 */if(listenQ.answered)return;listenQ.answered=true;const opts=document.querySelectorAll('#listenScreen .boss-opt');
 if(opts.length===0||!opts[i])return;
@@ -6700,16 +6713,17 @@ function listenGoNext(){if(!listenAdvanced){listenAdvanced=true;
   if(poolRemaining('listen_'+listenLevel)===0){ listenComplete(); return; }
   nextListenQ();
 }}
-setTimeout(function(){speak(w.en,1,function(){setTimeout(listenGoNext,800)})},400);
-setTimeout(listenGoNext,5000)
+const __lgo=__hsnLater('listen','listenScreen',listenGoNext);
+setTimeout(__hsnLater('listen','listenScreen',function(){speak(w.en,1,function(){setTimeout(__lgo,800)})}),400);
+setTimeout(__lgo,5000)
 }else{opts[i].classList.add('wrong');opts.forEach((o,j)=>{if(listenQ.opts[j].cn===listenQ.word.cn)o.classList.add('correct')});
 playWrong();markAnswer(listenQ.idx,false);save();
 /* 🔴v1165 答错小课：揭晓卡+重读(约2.5秒/点一下)；本档听完先把错词再考一次 */
-__hmlLesson('listen',listenQ.idx,function(){
+__hmlLesson('listen',listenQ.idx,__hsnLater('listen','listenScreen',function(){
   if(poolRemaining('listen_'+listenLevel)===0)__hmlRequeue('listen',_shuffledPools['listen_'+listenLevel]);
   if(poolRemaining('listen_'+listenLevel)===0){ listenComplete(); return; }  /* 🔴 v595/BUG#69: 答错后本档听完也走结算页 */
   nextListenQ();
-},1600)}}
+}),1600)}}
 
 function listenComplete(){
   /* 🔴 v595 / BUG#69: 听音辨义补结算页。原设计: 一轮(本档单词)听完只弹toast就自动重洗下一轮(无限循环), 玩家玩完看不到任何总结页 —— Hansen报bug。全模式排查发现仅此一模式缺结算页(match/boss/moles/fish/bubble/speed/cloze/typing/scramble/eagle 都有 xxxComplete)。修: 池空→listenComplete 结算页(答对/正确率/金币/经验/挑战下一档/再来/回主页), 与 clozeComplete/eagleComplete 风格一致。listenRight/listenTotal 由 startListenLevel 每轮清零, 故此处正好是本轮数据。 */
@@ -6796,13 +6810,13 @@ const TYPING_LEVELS={
      xpPerWord:18,gemBonus:50,petXp:70}
 };
 
-function startTyping(round){markMode('typing');showScreen('typing');typeActive=true;typeDone=0;
+function startTyping(round){markMode('typing');showScreen('typing');__hsnRunNew('type');typeActive=true;typeDone=0;
 typeRound=round||1;
 const L=TYPING_LEVELS[typeRound]||TYPING_LEVELS[1];
 typePool=[...Array(allW.length).keys()].filter(L.filter).sort(()=>Math.random()-.5);
 typeIdx=0;typeWordTimes=[];typeErrors=0;typeWrongWords=[];typeRoundStart=Date.now();__hmlStart('typing');startTypeTimer();nextTypeQ()}
 
-function showTypingMenu(){markMode('typing');showScreen('typing');typeActive=false;
+function showTypingMenu(){markMode('typing');showScreen('typing');__hsnRunNew('type');typeActive=false;
 try{document.body.classList.remove('type-lock');}catch(e){}
 const counts={};for(const k in TYPING_LEVELS){counts[k]=[...Array(allW.length).keys()].filter(TYPING_LEVELS[k].filter).length}
 let cards='';
@@ -6828,7 +6842,7 @@ document.getElementById('typingContent').innerHTML=
   '<div style="padding:2px 8px 10px;max-width:380px;margin:0 auto">'+
     recordsBlock+'<div style="display:flex;flex-direction:column;gap:10px">'+cards+'</div>'+
   '</div>';}
-function stopTyping(){typeActive=false;stopTypeTimer();try{document.body.classList.remove('type-lock');}catch(e){}}
+function stopTyping(){typeActive=false;__hsnRunNew('type');stopTypeTimer();try{document.body.classList.remove('type-lock');}catch(e){}}
 function startTypeTimer(){stopTypeTimer();typeTimerInt=setInterval(updateTypeTimer,87)}
 function stopTypeTimer(){if(typeTimerInt){clearInterval(typeTimerInt);typeTimerInt=null}}
 function updateTypeTimer(){
@@ -6914,7 +6928,7 @@ function typeCheckWord(){
     confetti(window.innerWidth/2,300,12);
     // 所有slot变绿
     for(var i=0;i<target.length;i++){var s=document.getElementById('tslot'+i);if(s){s.classList.remove('wrong');s.classList.add('filled');}}
-    typeIdx++;setTimeout(function(){typeActive=true;nextTypeQ();},900);
+    typeIdx++;setTimeout(__hsnLater('type','typingScreen',function(){typeActive=true;nextTypeQ();}),900);
   }else{
     // ❌ 拼错: 算错(markAnswer false, 不给金币), 显示对比, 停留几秒自动进下一题
     if(!__hmlIsRetry('typing',typePool[typeIdx]))typeErrors++;
@@ -6934,7 +6948,7 @@ function typeCheckWord(){
                   +'<div style="font-size:18px;color:#34d399;font-weight:800;letter-spacing:1px">✓ '+typeWord.en+'</div>';
       slotsBox.parentNode.insertBefore(div, slotsBox.nextSibling);
     }
-    var __missT=typePool[typeIdx];typeIdx++;__hmlLesson('typing',__missT,function(){typeActive=true;var c=document.getElementById('typeCompare');if(c)c.remove();nextTypeQ();},2200);
+    var __missT=typePool[typeIdx];typeIdx++;__hmlLesson('typing',__missT,__hsnLater('type','typingScreen',function(){typeActive=true;var c=document.getElementById('typeCompare');if(c)c.remove();nextTypeQ();}),2200);
   }
 }
 function typeDel(){if(!typeInput.length)return;const curIdx=typeInput.length-1;const slotEl=document.getElementById('tslot'+curIdx);if(slotEl){slotEl.textContent='';slotEl.classList.remove('filled','wrong')}typeInput=typeInput.slice(0,-1);playBeep(300,.04)}
@@ -7122,7 +7136,7 @@ let clozeActive=false,clozeQ=null,clozeDone=0,clozeLevel='easy',clozePool=[],clo
 
 // 入口: 显示难度选择
 function startCloze(){
-  showScreen('cloze');clozeActive=false;clozeQ=null;
+  showScreen('cloze');clozeActive=false;clozeQ=null;__hsnRunNew('cloze');
   let cards='';
   for(const k of ['easy','medium','hard']){
     const L=CLOZE_LEVELS[k];const cnt=CLOZE_LEVEL_IDX[k].length;
@@ -7145,13 +7159,13 @@ function startCloze(){
     '</div>';
 }
 
-function stopCloze(){clozeActive=false}
+function stopCloze(){clozeActive=false;__hsnRunNew('cloze')}
 
 // 选好难度后真正开始
 function startClozeLevel(level){
   if(!CLOZE_LEVELS[level])return;
   markMode('cloze');
-  clozeLevel=level;clozeActive=true;clozeDone=0;__hmlStart('cloze');
+  clozeLevel=level;__hsnRunNew('cloze');clozeActive=true;clozeDone=0;__hmlStart('cloze');
   // 自己管理池: 每档独立洗牌, pop 到空就完成
   clozePool=[...CLOZE_LEVEL_IDX[level]].sort(()=>Math.random()-.5);
   clozeTotal=clozePool.length;
@@ -7197,15 +7211,16 @@ const rect=opts[i].getBoundingClientRect();confetti(rect.left,rect.top,10);
 let advanced=false;
 function goNext(){if(!advanced){advanced=true;nextClozeQ()}}
 // 答对后, 读整个例句 (本地 NaturalReader mp3)
-try{speak(clozeQ.word.ex,1,function(){setTimeout(goNext,800)})}catch(e){goNext()}
+const __cgo=__hsnLater('cloze','clozeScreen',goNext);
+try{speak(clozeQ.word.ex,1,function(){setTimeout(__cgo,800)})}catch(e){__cgo()}
 // 兜底: 8 秒强制切下一题 (例句最长 ~3 秒)
-setTimeout(goNext,8000)
+setTimeout(__cgo,8000)
 }else{opts[i].classList.add('wrong');opts.forEach((o,j)=>{if(clozeQ.opts[j]&&clozeQ.opts[j].en===clozeQ.word.en)o.classList.add('correct')});
 blank.textContent=clozeQ.fill||clozeQ.word.en;blank.classList.add('wrong');
 playWrong();markAnswer(clozeQ.idx,false);save();
 /* 🔴v1165 答错小课：揭晓卡上带着这句例句（正确的词标亮），和以前一样把整句例句读一遍（教学价值高），
    读完再停一下才出下一题；点一下也能跳过。模块没加载时照旧读整句、读完进下一题 */
-__hmlLesson('cloze',clozeQ.idx,nextClozeQ,1600,{say:clozeQ.word.ex||clozeQ.word.en,ex:clozeQ.word.ex,exCn:clozeQ.word.exCn,waitSpeech:true,hl:clozeQ.fill})}}
+__hmlLesson('cloze',clozeQ.idx,__hsnLater('cloze','clozeScreen',nextClozeQ),1600,{say:clozeQ.word.ex||clozeQ.word.en,ex:clozeQ.word.ex,exCn:clozeQ.word.exCn,waitSpeech:true,hl:clozeQ.fill})}}
 
 function clozeComplete(){
 clozeActive=false;__hmlAttach('cloze','clozeContent');
@@ -8229,7 +8244,7 @@ function eagleBestSet(level,score){ var b=eagleBestObj(); if(score>(b[level]||0)
 function startEagle(){
   // 入口: 显示难度选择
   showScreen('eagle');
-  eagleActive=false;
+  eagleActive=false;__hsnRunNew('eagle');
   let cards='';
   for(const k of ['easy','medium','hard']){
     const L=EAGLE_LEVELS[k];
@@ -8257,7 +8272,7 @@ function startEagleLevel(level){
   if(!EAGLE_LEVELS[level])return;
   if([...Array(allW.length).keys()].filter(EAGLE_LEVELS[level].filter).length===0)return;
   markMode('eagle');
-  eagleLevel=level;
+  eagleLevel=level;__hsnRunNew('eagle');
   eagleActive=true;eagleScore=0;eagleRound=0;eagleCombo=0;__hmlStart('eagle');
   // 池: 该档全部单词索引洗牌, pop 到空就完成
   eaglePool=[...Array(allW.length).keys()].filter(EAGLE_LEVELS[level].filter).sort(()=>Math.random()-.5);
@@ -8276,10 +8291,10 @@ function startEagleLevel(level){
       '<button class="game-btn purple" onclick="startEagle()" style="font-size:13px;padding:8px 14px">🔄 换难度</button>'+
       ' <button class="game-btn gold" onclick="if(eagleTarget)speak(eagleTarget.en)" style="font-size:13px;padding:8px 14px;margin-left:6px">🔊 再听</button>'+
     '</div>';
-  setTimeout(eagleNextRound,400);
+  setTimeout(__hsnLater('eagle','eagleScreen',eagleNextRound),400);
 }
 
-function stopEagle(){eagleActive=false;if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}}
+function stopEagle(){eagleActive=false;__hsnRunNew('eagle');if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}}
 
 function eagleNextRound(){
   if(!eagleActive)return;
@@ -8376,13 +8391,13 @@ function eagleClick(i,isTarget){
     const cn=document.getElementById('eagleCombo');if(cn)cn.textContent=eagleCombo;
     const __rtE=__hmlIsRetry('eagle',allW.indexOf(eagleTarget));if(!__rtE)addXP(L.xpPerQ);__hmlMark(allW.indexOf(eagleTarget),true,__rtE);
     if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}
-    setTimeout(eagleNextRound,800);
+    setTimeout(__hsnLater('eagle','eagleScreen',eagleNextRound),800);
   }else{
     cells[i].classList.add('wrong');
     eagleCombo=0;
     const cn=document.getElementById('eagleCombo');if(cn)cn.textContent=0;
     playWrong();
-    markAnswer(allW.indexOf(eagleTarget),false);if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}cells.forEach(function(c){c.dataset.done='1';if(c.textContent===eagleTarget.en){c.style.background='#fbbf24';c.style.borderColor='#fde047';c.style.color='#1a1a2e'}});__hmlLesson('eagle',allW.indexOf(eagleTarget),eagleNextRound,1400);
+    markAnswer(allW.indexOf(eagleTarget),false);if(eagleTimer){clearInterval(eagleTimer);eagleTimer=null}cells.forEach(function(c){c.dataset.done='1';if(c.textContent===eagleTarget.en){c.style.background='#fbbf24';c.style.borderColor='#fde047';c.style.color='#1a1a2e'}});__hmlLesson('eagle',allW.indexOf(eagleTarget),__hsnLater('eagle','eagleScreen',eagleNextRound),1400);
   }
 }
 
@@ -8397,7 +8412,7 @@ function eagleClick(i,isTarget){
   playWrong();
   // 超时不再直接结束, 而是继续下一题 (允许学完整档)
   markAnswer(allW.indexOf(eagleTarget),false);
-  __hmlLesson('eagle',allW.indexOf(eagleTarget),eagleNextRound,1400);
+  __hmlLesson('eagle',allW.indexOf(eagleTarget),__hsnLater('eagle','eagleScreen',eagleNextRound),1400);
 }
 
 function eagleComplete(){
