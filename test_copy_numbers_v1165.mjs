@@ -6,6 +6,8 @@
  *   ③ 成就「万词王者 · 1500 个单词」永远拿不到：全游戏只有 952 个词
  *   ④ 首页 <title> 是「单词大冒险 · 单词大冒险」；首页写死「711+ 单词」「12 种」
  *   ⑤「我的学习」写死「已点亮 N / 19 座岛」，而能记进度的岛页有 27 个（会出现 22 / 19）
+ *   ⑥（v1165 补）首页统计条还写死「18 主题岛屿 / 711+ 英语单词」；进岛提示和「最近探险」用的岛名/图标和岛卡不一样
+ *      （卡片「百宝大冒险 🔤」，提示却是「正在进入 常用词岛」；卡片 🦁，最近探险是 🐯）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -17,13 +19,15 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const VERSION = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim();
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json',
   '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
+let SLOW_ISLANDS = false;   // ⑥ 用：岛页晚 800ms 才给，进岛提示一定会出来
 const srv = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/VERSION') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(VERSION); }
   if (p.endsWith('/')) p += 'index.html';
   const fp = path.join(ROOT, path.normalize(p));
   if (!fp.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
-  fs.readFile(fp, (e, d) => { if (e) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(fp).toLowerCase()] || 'application/octet-stream' }); res.end(d); });
+  const send = () => fs.readFile(fp, (e, d) => { if (e) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(fp).toLowerCase()] || 'application/octet-stream' }); res.end(d); });
+  if (SLOW_ISLANDS && /^\/island_[a-z0-9]+\.html$/.test(p)) setTimeout(send, 800); else send();
 });
 await new Promise(r => srv.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${srv.address().port}/`;
@@ -100,13 +104,39 @@ try {
       const intro = (document.querySelector('.intro') || {}).textContent || '';
       return { title: document.title, intro: intro.replace(/\s+/g, ' '), islands: k.length, words: n,
         how: [...document.querySelectorAll('.how-step .title')].map(e => e.textContent).join('|'),
-        desc: (document.querySelector('meta[name=description]') || {}).content || '' };
+        desc: (document.querySelector('meta[name=description]') || {}).content || '',
+        stats: [...document.querySelectorAll('.stats .stat')].map(e => (e.querySelector('.stat-num') || {}).textContent + ' ' + (e.querySelector('.stat-lbl') || {}).textContent) };
     });
     ok(r.title === '单词大冒险', '④ 网页标题不重复: ' + r.title);
     ok(r.intro.includes(r.islands + ' 座单词岛') && r.intro.includes(r.words + ' 个单词') && !/711\+|12 种/.test(r.intro), `④ 首页岛屿数/单词数从词库算 (${r.islands}/${r.words}): ` + r.intro.trim().slice(0, 90));
     ok(!/12 种/.test(r.how), '④ 「怎么玩」不再写死 12 种: ' + r.how);
     ok(!/27 座/.test(r.desc), '④ 分享描述不再写 27 座岛: ' + r.desc);
+    ok(r.stats.includes(r.islands + ' 主题岛屿') && r.stats.includes(r.words + ' 英语单词') && !r.stats.some(x => /711\+/.test(x)), `⑥ 统计条的岛屿数/单词数也从词库算 (${r.islands}/${r.words}): ` + r.stats.join(' | '));
     ok(errs.length === 0, '首页无报错 ' + errs.join(' | '));
+    await ctx.close();
+  }
+
+  // ⑥ 每张岛卡：进岛提示和「最近探险」用的岛名、图标和卡片一样
+  {
+    console.log('\n▶ 岛卡名字/图标');
+    const { ctx, page } = await fresh('index.html');
+    await page.waitForFunction(() => typeof window.openIsland === 'function', null, { timeout: 30000 });
+    const cards = await page.evaluate(() => [...document.querySelectorAll('a.island[href^="island_"]')].map(a => ({ file: a.getAttribute('href'), name: a.querySelector('.island-name').textContent.trim(), icon: a.querySelector('.island-icon').textContent.trim() })));
+    SLOW_ISLANDS = true;
+    const bad = [];
+    for (const c of cards) {
+      const short = c.name.replace(/大冒险$/, '');
+      await page.evaluate(f => openIsland(f), c.file);
+      await page.waitForTimeout(450);
+      const loading = await page.evaluate(() => (document.getElementById('islandLoadingText') || {}).textContent || '');
+      await page.evaluate(() => closeIsland());
+      await page.waitForTimeout(700);
+      const recent = await page.evaluate(() => ({ emoji: (document.getElementById('recentEmoji') || {}).textContent || '', num: (document.getElementById('recentNum') || {}).textContent || '' }));
+      if (loading !== '正在进入 ' + short + '岛…') bad.push(`${c.file} 提示「${loading}」应为「正在进入 ${short}岛…」`);
+      if (recent.emoji !== c.icon || recent.num !== c.icon + ' ' + short + ' · 点击继续 →') bad.push(`${c.file} 最近探险「${recent.emoji} / ${recent.num}」应为「${c.icon} ${short}」`);
+    }
+    SLOW_ISLANDS = false;
+    ok(cards.length >= 18 && bad.length === 0, `⑥ ${cards.length} 张岛卡：进岛提示、最近探险都和卡片一致` + (bad.length ? '：\n      ' + bad.join('\n      ') : ''));
     await ctx.close();
   }
 

@@ -3368,11 +3368,11 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
     <div class="stats">
       <div class="stat">
         <span class="stat-icon">🗺️</span>
-        <div><div class="stat-num">18</div><div class="stat-lbl">主题岛屿</div></div>
+        <div><div class="stat-num" data-hsn-count="islands">18</div><div class="stat-lbl">主题岛屿</div></div>
       </div>
       <div class="stat">
         <span class="stat-icon">📚</span>
-        <div><div class="stat-num">711+</div><div class="stat-lbl">英语单词</div></div>
+        <div><div class="stat-num" data-hsn-count="words">712</div><div class="stat-lbl">英语单词</div></div>
       </div>
       <div class="stat">
         <span class="stat-icon">🎮</span>
@@ -3980,6 +3980,24 @@ document.querySelectorAll('.island').forEach(el=>{
     'wordIslandLand8':    {file:'island_land8.html', emoji:'🌋', short:'星火火山口'}
   };
   window.HSN_ISLAND_META = ISLAND_META;   /* 🔴v1165 预取「最近玩过的岛」按这张表找文件名（以前按存档名拼，8 个岛全是 404） */
+  /* 🔴v1165 岛名和图标以首页岛卡为准：进岛提示、「最近探险」都和孩子点的那张卡一样（以前表里写「常用词」「代词」🐯，
+     卡片上是「百宝大冒险」「疑问大冒险」🦁）。卡片上没有的岛（单词大陆、星海）照用上面的表。 */
+  (function syncMetaFromCards(){
+    try{
+      var cards = document.querySelectorAll('a.island[href]');
+      for(var k in ISLAND_META){
+        for(var i = 0; i < cards.length; i++){
+          if(cards[i].getAttribute('href') !== ISLAND_META[k].file) continue;
+          var nm = cards[i].querySelector('.island-name'), ic = cards[i].querySelector('.island-icon');
+          var t = nm ? String(nm.textContent || '').trim().replace(/大冒险$/, '') : '';
+          var e = ic ? String(ic.textContent || '').trim() : '';
+          if(t) ISLAND_META[k].short = t;
+          if(e) ISLAND_META[k].emoji = e;
+          break;
+        }
+      }
+    }catch(e){}
+  })();
   
   // 决定最近学习的岛: 优先用 lastIslandKey, 否则扫描各岛 localStorage 找最后活动时间
   function findRecentIsland(){
