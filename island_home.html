@@ -4599,6 +4599,8 @@ function getBestCombo(){
 }
 
 function showToast(msg){floatText(window.innerWidth/2,window.innerHeight/2-60,msg,'#fbbf24')}
+/* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
+function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
 function closeAlert(){document.getElementById('alertModal').classList.remove('show')}
 
 // ============================================================
@@ -6629,6 +6631,7 @@ function startListen(){
   const html='<div style="padding:14px 8px"><div style="text-align:center;font-size:14px;color:#cbd5e1;margin-bottom:6px">选择一个难度开始挑战</div><div style="text-align:center;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:18px">每档单词不重复, 全部答完后会自动重洗进入下一轮</div>'+
     Object.keys(LISTEN_LEVELS).map(k=>{
       const L=LISTEN_LEVELS[k];const cnt=LISTEN_LEVEL_IDX[k].length;
+      if(!cnt)return __hsnLockedLevelCard(L);
       return '<div onclick="startListenLevel(\''+k+'\')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:18px 18px;margin-bottom:14px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35);display:flex;align-items:center;gap:14px;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'"><div style="font-size:46px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">'+L.icon+'</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:20px;font-weight:900;margin-bottom:4px;text-shadow:0 1px 3px rgba(0,0,0,.3)">'+L.name+'</div><div style="font-size:12px;opacity:.95;margin-bottom:8px">'+L.desc+'</div><div style="font-size:13px;font-weight:600;font-weight:700;background:rgba(0,0,0,.5);color:#fff;display:inline-block;padding:4px 10px;border-radius:10px">📚 '+cnt+' 个单词</div></div><div style="font-size:26px;color:#fff;opacity:.85">→</div></div>';
     }).join('')+'</div>';
   document.getElementById('listenContent').innerHTML=html;
@@ -6638,6 +6641,7 @@ function stopListen(){listenActive=false}
 // 选好难度后真正开始
 function startListenLevel(level){
   if(!LISTEN_LEVELS[level])return;
+  /* 🔴v1165 这一档没有词：只提示，不进游戏（以前 nextListenQ 读不到词直接报错） */if(!LISTEN_LEVEL_IDX[level]||!LISTEN_LEVEL_IDX[level].length){showToast('🔊 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('listen');
   listenLevel=level;
   listenActive=true;listenRight=0;listenTotal=0;listenRound=1;__hmlStart('listen');
