@@ -168,6 +168,27 @@ async function fetchNavigationWithTimeout(request, timeoutMs) {
   }
 }
 
+/* v1165 冷页面：只限「响应头」到达的时间（连接根本建不起来才算失败）；头一到就清掉计时器，正文不限时、不缓冲。 */
+async function fetchColdNavigation(request, headerTimeoutMs) {
+  headerTimeoutMs = Math.max(1, Number(headerTimeoutMs) || COLD_NAVIGATION_TIMEOUT_MS);
+  if (typeof AbortController === 'undefined') {
+    let legacyTimer;
+    try {
+      return await Promise.race([
+        fetch(request),
+        new Promise((_, reject) => { legacyTimer = setTimeout(() => reject(new Error('navigation header timeout')), headerTimeoutMs); })
+      ]);
+    } finally { clearTimeout(legacyTimer); }
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), headerTimeoutMs);
+  try {
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);   // 头到了：之后不管正文多慢都不会再被掐断
+  }
+}
+
 function scopeRootPath() {
   try {
     const scope = self.registration && self.registration.scope;
@@ -186,24 +207,36 @@ function homeShellRequest() {
   catch (error) { return new Request(self.location.origin + '/index.html'); }
 }
 
-function offlineNavigationResponse() {
-  // 不再把未缓存的岛 URL 偷偷显示成首页。URL 与内容必须一致：
-  // 当前岛没有缓存时就明确告知用户，联网打开一次后才可离线使用。
+/* v1165：离线页 / 网慢页都给孩子一个能点的「返回首页」。在首页外壳的岛框里，返回首页 = 关掉这个岛；
+   单独打开时回首页。以前只有「重试连接」，孩子只能按手机返回键。 */
+function kidNavigationPage(title, emoji, heading, text, status) {
   const html = '<!doctype html><html lang="zh-CN"><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<title>当前页面尚未下载</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;' +
+    '<title>' + title + '</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;' +
     'font-family:system-ui,-apple-system,Microsoft YaHei,sans-serif;background:#eef6ff;color:#172033">' +
-    '<main style="max-width:28rem;padding:32px;text-align:center"><div style="font-size:52px">📡</div>' +
-    '<h1 style="font-size:22px">当前页面尚未下载</h1><p style="line-height:1.7">请联网打开这个页面一次，' +
-    '之后就能从本机缓存中访问。</p><button onclick="location.reload()" style="font:inherit;font-weight:700;' +
-    'padding:12px 20px;border:0;border-radius:12px;background:#4f46e5;color:white">重试连接</button></main></body></html>';
+    '<main style="max-width:28rem;padding:32px;text-align:center"><div style="font-size:52px">' + emoji + '</div>' +
+    '<h1 style="font-size:22px">' + heading + '</h1><p style="line-height:1.7;font-size:17px">' + text + '</p>' +
+    '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' +
+    '<button id="hsnNavHome" onclick="try{if(parent!==window&&typeof parent.closeIsland===\'function\'){parent.closeIsland();}else{location.href=\'./index.html\';}}catch(e){location.href=\'./index.html\';}" ' +
+    'style="font:inherit;font-size:18px;font-weight:800;padding:14px 24px;border:0;border-radius:14px;background:#4f46e5;color:white">返回首页</button>' +
+    '<button id="hsnNavRetry" onclick="location.reload()" style="font:inherit;font-size:18px;font-weight:700;padding:14px 22px;border:0;' +
+    'border-radius:14px;background:#dbe4ff;color:#1e2a78">再试一次</button></div></main></body></html>';
   return new Response(html, {
-    status: 503,
+    status: status || 503,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-store'
     }
   });
+}
+function offlineNavigationResponse() {
+  // 不再把未缓存的岛 URL 偷偷显示成首页。URL 与内容必须一致：
+  // 当前岛没有缓存时就明确告知用户，联网打开一次后才可离线使用。
+  return kidNavigationPage('这个岛还没下载过', '📡', '这个岛还没下载过', '连上网再来玩吧！连网打开过一次，以后没网也能玩。');
+}
+/* v1165：有网但这次没拿到页面（连接断了、服务器没回话）——不说「没网」，说「网络有点慢」，给重试和返回 */
+function slowNavigationResponse() {
+  return kidNavigationPage('网络有点慢', '🐢', '网络有点慢，没加载完', '可能是信号不太好。点「再试一次」，或者先回首页玩别的岛。');
 }
 
 self.addEventListener('install', event => {
@@ -326,12 +359,26 @@ self.addEventListener('fetch', event => {
       if (!fallback && isHomeNavigation(url)) {
         try { fallback = await caches.match(homeShellRequest(), { ignoreSearch: true }); } catch (error) {}
       }
+      const cacheable = isHomeNavigation(url) || /\/(?:index|_frame|land_map|spelling_bee|boss_hall|season_showcase|island_[a-z0-9]+)\.html$/i.test(url.pathname);
       try {
-        const fresh = await fetchNavigationWithTimeout(request, fallback ? NAVIGATION_TIMEOUT_MS : COLD_NAVIGATION_TIMEOUT_MS);
-        const cacheable = isHomeNavigation(url) || /\/(?:index|_frame|land_map|spelling_bee|boss_hall|season_showcase|island_[a-z0-9]+)\.html$/i.test(url.pathname);
-        return { response: fresh, fresh, cacheable };
+        if (fallback) {
+          // 有本机缓存：照旧限时（连正文一起读完），慢了就先用缓存，绝不让孩子干等
+          const fresh = await fetchNavigationWithTimeout(request, NAVIGATION_TIMEOUT_MS);
+          /* v1165：服务器回 5xx（或根路径/首页 404）是服务器的事，孩子手机里明明有能玩的缓存 → 用缓存，不显示错误页 */
+          if (!fresh.ok && (fresh.status >= 500 || (fresh.status === 404 && isHomeNavigation(url)))) {
+            return { response: fallback, fresh: null, cacheable: false };
+          }
+          return { response: fresh, fresh, cacheable };
+        }
+        /* v1165：从没打开过的岛（没有缓存可退）：不再 12 秒就掐断正文 —— 网慢但能用时，等多久都比「请联网」强。
+           只给「连响应头都等不到」设上限；拿到头以后边下边显示（不整页读完），顺手克隆一份进缓存。 */
+        const fresh = await fetchColdNavigation(request, COLD_NAVIGATION_TIMEOUT_MS);
+        return { response: fresh, fresh: fresh.ok ? fresh.clone() : null, cacheable };
       } catch (e) {
-        return { response: fallback || offlineNavigationResponse(), fresh: null, cacheable: false };
+        if (fallback) return { response: fallback, fresh: null, cacheable: false };
+        let online = false;
+        try { online = !!(self.navigator && self.navigator.onLine); } catch (_) { online = false; }
+        return { response: online ? slowNavigationResponse() : offlineNavigationResponse(), fresh: null, cacheable: false };
       }
     })();
     // Cache Storage 是旁路优化：无论 put/trim 成败，都不能改变已取得的网络响应。

@@ -4066,8 +4066,26 @@ document.querySelectorAll('.island').forEach(el=>{
       el.setAttribute('aria-hidden','false');
     }catch(e){}
   }
+  /* 🔴v1165 网慢提示：加载屏改口 + 一个能点的「返回首页」（加载屏本身不接点击，按钮单独放开） */
+  function _slowIslandHint(){
+    try{
+      var el = document.getElementById('islandLoading'); if(!el) return;
+      var tx = document.getElementById('islandLoadingText'); if(tx) tx.textContent = '网络有点慢，还在加载…';
+      var b = document.getElementById('islandLoadingBack');
+      if(!b){
+        b = document.createElement('button');
+        b.id = 'islandLoadingBack'; b.type = 'button'; b.textContent = '‹ 返回首页';
+        b.style.cssText = 'margin-top:26px;pointer-events:auto;font:inherit;font-size:17px;font-weight:800;padding:12px 26px;border:0;border-radius:16px;background:rgba(255,255,255,.18);color:#fff;cursor:pointer';
+        b.onclick = function(){ try{ closeIsland(); }catch(e){} };
+        el.appendChild(b);
+      }
+      b.style.display = '';
+      el.style.transition = 'none'; el.style.opacity = '1'; el.style.display = 'flex'; el.setAttribute('aria-hidden','false');
+    }catch(e){}
+  }
   function _hideIslandLoading(immediate){
     try{
+      var _bk = document.getElementById('islandLoadingBack'); if(_bk) _bk.style.display = 'none';
       var el = document.getElementById('islandLoading'); if(!el) return;
       var bar = document.getElementById('islandLoadingBar'); if(bar){ bar.style.transition = 'width .2s ease'; bar.style.width = '100%'; }
       if(immediate){
@@ -4126,7 +4144,12 @@ document.querySelectorAll('.island').forEach(el=>{
         if(_islandPending !== file) return;   /* 用户已切走/返回 → 不揭 */
         /* 🔴v904(Hansen: 点动物/植物等大冒险有时却进了星海番外篇): iframe 里【上一个岛(常是星海)的旧内容】在新岛加载慢(>1.9s)时会被兜底 setTimeout(_revealIsland,1900) 提前揭开 → 露出上一个岛。必须先确认 iframe 真加载到了目标岛(pathname===file)才揭开; 没到就保持加载屏、120ms 后再试(岛加载完 onload/poll 自然会到), 加 10s 硬底线防极端卡死。 */
         var _u=''; try{ _u = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
-        if(_u !== file && (Date.now() - _tStart) < 10000){ setTimeout(_revealIsland, 120); return; }
+        /* 🔴v1165 网慢时绝不揭开一张白纸（以前 10 秒一到就揭，露出空白或上一个岛）：岛没到就一直留在加载屏，
+           10 秒后改口「网络有点慢，还在加载…」并给一个「返回首页」，孩子自己决定等还是回去。 */
+        if(_u !== file){
+          if((Date.now() - _tStart) >= 10000) _slowIslandHint();
+          setTimeout(_revealIsland, 120); return;
+        }
         _islandPending = null;
         try{ clearTimeout(_loadHintTimer); }catch(e){}
         /* 🔴BUG#90 瞬间完整揭开(替代 v692 的 0.3s 淡入——淡入本身被反馈为"闪一下"): 首屏图片已就绪(见 _pollReady)→ 直接【瞬时】显示完整岛, 加载提示瞬时隐藏。

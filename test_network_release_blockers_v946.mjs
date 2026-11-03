@@ -116,7 +116,9 @@ function workerHarness({installFails=false,cached=null,source=sw,fetchImpl,cache
 {
   const h=workerHarness({cached:null});
   const response=await h.fetch({method:'GET',mode:'navigate',url:'https://app.test/island_animal.html'});
-  assert.equal(response.status,503);assert.match(await response.text(),/当前页面尚未下载/);
+  /* v1165（NET-13）：离线页改成孩子看得懂的话，并多了一个能点的「返回首页」；仍是 503、仍不冒充首页 */
+  const offlineText=await response.text();
+  assert.equal(response.status,503);assert.match(offlineText,/这个岛还没下载过/);assert.match(offlineText,/返回首页/);
 }
 
 // 根路径只允许回退预缓存 index；其它未缓存岛仍不得首页冒充。
