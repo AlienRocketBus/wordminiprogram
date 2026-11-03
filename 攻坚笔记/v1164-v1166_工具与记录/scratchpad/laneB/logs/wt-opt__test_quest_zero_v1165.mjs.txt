@@ -1,0 +1,9 @@
+    {"start":{"review3":0,"moles3":0,"correct20":0},"afterReview0":{"review3":0,"moles3":0,"correct20":0},"afterMoles0":{"review3":0,"moles3":0,"correct20":0},"afterCorrect":{"review3":0,"moles3":0,"correct20":1},"afterReview2":{"review3":2,"moles3":0,"correct20":1},"day":"2026-11-3"}
+  ✅ 起点都是 0
+  ✅ 复习 0 个：任务不动（0）
+  ✅ 打地鼠 0 分：任务不动（0）
+  ✅ 答对一题（不给数量）：+1（1）
+  ✅ 复习 2 个：+2（2）
+  ✅ 零脚本错误
+
+✅ 0 分的一局不再让每日任务 +1

@@ -1,0 +1,31 @@
+{
+ "block": false,
+ "total": {
+  "n": 1309,
+  "MB": 62.31
+ },
+ "top": [
+  "2:island_season.html:webp:image n=79 MB=6.41",
+  "3:island_season.html:webp:image n=78 MB=6.25",
+  "2:island_season.html:mp3:media n=240 MB=6.05",
+  "3:island_season.html:mp3:media n=240 MB=6.05",
+  "1:island_time.html:webp:image n=80 MB=5.54",
+  "1:island_time.html:js:script n=90 MB=3.83",
+  "2:island_season.html:js:script n=90 MB=3.83",
+  "3:island_season.html:js:script n=90 MB=3.83",
+  "0:index.html:html:other n=5 MB=2.90",
+  "1:island_time.html:mp3:media n=80 MB=1.27",
+  "1:island_time.html:js:other n=1 MB=1.18",
+  "2:island_season.html:js:other n=1 MB=1.18",
+  "3:island_season.html:js:other n=1 MB=1.18",
+  "2:boss_hall.html:webp:image n=5 MB=0.70"
+ ],
+ "perf": {
+  "JSHeapUsedMB": 12.7,
+  "Documents": 9,
+  "Frames": 9,
+  "Nodes": 10926,
+  "TaskDurationS": 0,
+  "ScriptDurationS": 0
+ }
+}

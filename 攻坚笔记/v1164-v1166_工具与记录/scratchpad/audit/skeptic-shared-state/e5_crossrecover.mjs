@@ -1,0 +1,24 @@
+import fs from 'fs';
+import {setup,attach,sleep,waitIsland,dismissWelcome,bootHome} from './lib.mjs';
+const s=await setup({init:fs.readFileSync(new URL('./instr.js',import.meta.url),'utf8')});const log=[];
+const page=await bootHome(s,log);
+await page.evaluate(()=>openIsland('island_food.html'));
+const fr=await waitIsland(page,'island_food.html');await dismissWelcome(fr);
+const L=()=>fr.evaluate(()=>({charxp:localStorage.getItem('hansen_wallet_charxp'),coins:localStorage.getItem('hansen_wallet_coins'),xpPending:localStorage.getItem('hansen_quest_xp_pending_v942'),foodSaved:JSON.parse(localStorage.getItem('wordIslandFood')).totalXP,S_charXP:S.charXP,S_totalXP:S.totalXP,top:document.getElementById('xpText').textContent}));
+const t0=Date.now();
+await fr.evaluate(()=>progressQuest('learn',10));
+const qi=await fr.evaluate(()=>JSON.parse(localStorage.getItem('hansen_global_daily_quests_v941')).list.findIndex(q=>q.id==='learn10'));
+const r=await fr.evaluate(qi=>{const own=Object.prototype.hasOwnProperty.call(localStorage,"setItem");const ps=localStorage.setItem;localStorage.setItem=function(k,v){if(k==="hansen_wallet_charxp")throw new Error("Quota (simulated)");return ps.call(localStorage,k,v);};const isOwn=Object.prototype.hasOwnProperty.call(localStorage,"setItem");let out;try{out=claimQuest(qi);}catch(e){out="threw "+e.message;}finally{if(own)localStorage.setItem=ps;else delete localStorage.setItem;}return String(out)+" ownBefore="+own+" ownAfterAssign="+isOwn+" itemNamedSetItem="+localStorage.getItem("setItem");},qi);
+console.log('+'+(Date.now()-t0)+'ms claim result',r,JSON.stringify(await L()));
+console.log('pending keys',await fr.evaluate(()=>Object.keys(localStorage).filter(k=>/pending/.test(k)&&localStorage.getItem(k)).join(',')));
+await sleep(13000);
+console.log('after hidden boot',JSON.stringify(await L()));
+const W=(await page.evaluate(()=>window.__W)).filter(w=>w.t>=t0&&/charxp|xp_pending|xp_ledger/i.test(w.k));for(const w of W)console.log('  +'+((w.t-t0)/1000).toFixed(2),w.f,w.op,w.k,(w.v||'').slice(0,60));
+await fr.evaluate(()=>addXP(5));
+console.log('after food addXP(5)',JSON.stringify(await L()),'expected charxp 65');
+// heal check: go home, open another island
+await fr.evaluate(()=>goHome());await sleep(1000);
+await page.evaluate(()=>openIsland('island_animal.html'));const fa=await waitIsland(page,'island_animal.html');await dismissWelcome(fa);await sleep(1000);
+console.log('after next island boot',await fa.evaluate(()=>({charxp:localStorage.getItem('hansen_wallet_charxp'),foodTotal:JSON.parse(localStorage.getItem('wordIslandFood')).totalXP,S:S.charXP})));
+console.log(log.slice(0,8));
+await s.close();

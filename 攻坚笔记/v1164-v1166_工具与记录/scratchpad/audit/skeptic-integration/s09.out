@@ -1,0 +1,8 @@
+season bar -> "DIV#." land_map visible 560 state {"hsnIsland":"land_map.html"}
+进入学习 -> island_land1 visible 985 state {"hsnIsland":"island_land1.html"} hist 3
+PHONE BACK from island_land1 -> {"wrap":"none","op":"1","path":"land_map.html","rs":"complete","hist":3,"state":"null","scrollY":384}
+season bar -> "DIV#." land_map visible 463 state {"hsnIsland":"land_map.html"}
+进入学习 -> island_land1 visible 1521 state {"hsnIsland":"island_land1.html"} hist 3
+MAP BUTTON from island_land1 -> {"wrap":"block","op":"1","path":"land_map.html","rs":"complete","hist":3,"state":"{\"hsnIsland\":\"land_map.html\"}","scrollY":384}
+land_map 返回 -> {"wrap":"none","op":"1","path":"land_map.html","rs":"complete","hist":3,"state":"null","scrollY":384}
+pageerrors ["Transition was aborted because of invalid state. ViewTransition opt-in disabled","Transition was aborted because of invalid state. ViewTransition opt-in disabled"]

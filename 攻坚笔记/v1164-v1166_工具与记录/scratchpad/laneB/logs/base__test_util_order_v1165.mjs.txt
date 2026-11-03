@@ -1,0 +1,7 @@
+    正常：hsnDiaEntry , hsnGearEntry , 成就 , 统计 , 设置 , 我的学习
+    装备晚到：hsnGearEntry , hsnDiaEntry , 成就 , 统计 , 设置 , 我的学习
+    主题商店先到：hsnDiaEntry , hsnGearEntry , 成就 , 统计 , 设置 , 我的学习
+  ❌ 三种时序下顺序一模一样
+  ✅ 主题商店在装备前面
+
+❌ 1 项失败

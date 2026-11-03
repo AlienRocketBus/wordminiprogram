@@ -1,0 +1,10 @@
+import {setup,bootHome,tapSel,waitIsland,dismissWelcome,sleep} from './lib.mjs';
+const s=await setup();const log=[];
+const page=await bootHome(s,log);
+await tapSel(page,'a.island[href="island_food.html"]');
+const fr=await waitIsland(page,'island_food.html');await dismissWelcome(fr);
+await fr.evaluate(()=>{window.__cnt=0;let i=0;window.__iv=setInterval(()=>{if(i>=100){clearInterval(window.__iv);return;}learnWord(i);HansenCoins.add(1);window.__cnt++;i++;},150);});
+await sleep(17000);
+const r=await fr.evaluate(()=>{const raw=localStorage.getItem('wordIslandFood');const f=JSON.parse(raw||'{}');const c=JSON.parse(localStorage.getItem('hansen_canonical_progress_v941'));return {key:window.__hsnSaveKey,cnt:window.__cnt,rawLen:raw&&raw.length,keys:Object.keys(f).slice(0,40).join(','),learned:f.learned&&f.learned.length,totalXP:f.totalXP,charXP:f.charXP,S_learned:S.learned.length,canonFood:c.islands.food&&c.islands.food.learned.length,canonSeason:c.islands.season&&c.islands.season.learned.length};});
+console.log(JSON.stringify(r,null,1));
+await s.close();

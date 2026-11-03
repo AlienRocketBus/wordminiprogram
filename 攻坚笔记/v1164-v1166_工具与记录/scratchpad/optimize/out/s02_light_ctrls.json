@@ -1,0 +1,159 @@
+{
+ "H": 3589,
+ "ctrls": [
+  {
+   "t": "📍 最近探险的岛屿 快去玩",
+   "w": 205,
+   "h": 69,
+   "fixed": false,
+   "id": "recentLearnStat"
+  },
+  {
+   "t": "🦁 🐘 🦒 🦁 动物大冒险 ANIMAL ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🍕 🍔 🍎 🍔 食物大冒险 FOOD ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "⚽ 🏀 🏊 ⚽ 运动大冒险 SPORTS & HOBBIES 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "👨‍⚕️ 👨‍🚀 👨‍🏫 👨‍⚕️ 职业大冒险 PEOPLE & P",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🎨 🔢 🏅 🎨 色彩数字大冒险 COLORS & NUMBERS 进入冒",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "☀️ 🌈 🌳 🌈 自然大冒险 NATURE ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🏃 ✍️ 🗣️ 🏃 动作大冒险 ACTION VERBS 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🚗 ✈️ 🚂 🚗 交通大冒险 TRANSPORTATION 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "👁️ ❤️ 💪 👤 身体大冒险 BODY PARTS 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🏙️ 🚌 🏪 🏙️ 城市大冒险 CITY ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "👕 👖 👟 👗 服装大冒险 CLOTHES ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🏠 🛋️ 🛏️ 🏠 家居大冒险 HOUSE & FURNITURE 进入",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "👨‍👩‍👧‍👦 👶 👴 👨‍👩‍👧‍👦 家庭大冒险 FAMI",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "🏫 ✏️ 📚 🏫 学校大冒险 SCHOOL & STATIONERY 进入",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "⏰ 📅 🌙 ⏰ 时间大冒险 TIME ISLAND 进入冒险 →",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "😊 🌹 🦁 ✨ 形容大冒险 COMMON ADJECTIVES 进入冒险 ",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "✅ 💡 🔗 🔤 百宝大冒险 COMMON MISC WORDS 进入冒险 ",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "❓ 🤔 👉 ❓ 疑问大冒险 PRONOUNS & QUESTION WORD",
+   "w": 118,
+   "h": 240,
+   "fixed": false,
+   "id": ""
+  },
+  {
+   "t": "✉️ 给作者留言",
+   "w": 245,
+   "h": 70,
+   "fixed": false,
+   "id": "feedbackBtn"
+  },
+  {
+   "t": "🔒 隐私与离线说明",
+   "w": 170,
+   "h": 43,
+   "fixed": false,
+   "id": "privacyOpen"
+  },
+  {
+   "t": "沉浸欣赏主题",
+   "w": 40,
+   "h": 40,
+   "fixed": false,
+   "id": "hsnThemeEye"
+  }
+ ]
+}

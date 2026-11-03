@@ -1,0 +1,32 @@
+DIV#recentLearnStat.stat y=662 205x69 "📍 最近探险的岛屿 快去玩" onclick=continueLastIsland() href=
+A#.island animal y=918 118x240 "🦁 🐘 🦒 🦁 动物大冒险 ANIMAL ISLAN" onclick= href=island_animal.html
+A#.island food y=918 118x240 "🍕 🍔 🍎 🍔 食物大冒险 FOOD ISLAND " onclick= href=island_food.html
+A#.island sports y=918 118x240 "⚽ 🏀 🏊 ⚽ 运动大冒险 SPORTS & HOBBI" onclick= href=island_sports.html
+A#.island people hsn-offscre y=1166 118x240 "👨‍⚕️ 👨‍🚀 👨‍🏫 👨‍⚕️ 职业大冒险 " onclick= href=island_job.html
+A#.island colornum hsn-offsc y=1166 118x240 "🎨 🔢 🏅 🎨 色彩数字大冒险 COLORS & N" onclick= href=island_color.html
+A#.island nature hsn-offscre y=1166 118x240 "☀️ 🌈 🌳 🌈 自然大冒险 NATURE ISLAN" onclick= href=island_nature.html
+A#.island verbs hsn-offscree y=1414 118x240 "🏃 ✍️ 🗣️ 🏃 动作大冒险 ACTION VERB" onclick= href=island_action.html
+A#.island transport hsn-offs y=1414 118x240 "🚗 ✈️ 🚂 🚗 交通大冒险 TRANSPORTATI" onclick= href=island_traffic.html
+A#.island body hsn-offscreen y=1414 118x240 "👁️ ❤️ 💪 👤 身体大冒险 BODY PARTS " onclick= href=island_body.html
+A#.island city hsn-offscreen y=1662 118x240 "🏙️ 🚌 🏪 🏙️ 城市大冒险 CITY ISLAN" onclick= href=island_city.html
+A#.island clothes hsn-offscr y=1662 118x240 "👕 👖 👟 👗 服装大冒险 CLOTHES ISLA" onclick= href=island_clothes.html
+A#.island house hsn-offscree y=1662 118x240 "🏠 🛋️ 🛏️ 🏠 家居大冒险 HOUSE & FU" onclick= href=island_home.html
+A#.island family hsn-offscre y=1910 118x240 "👨‍👩‍👧‍👦 👶 👴 👨‍👩‍👧‍👦 " onclick= href=island_family.html
+A#.island school hsn-offscre y=1910 118x240 "🏫 ✏️ 📚 🏫 学校大冒险 SCHOOL & STA" onclick= href=island_school.html
+A#.island time hsn-offscreen y=1910 118x240 "⏰ 📅 🌙 ⏰ 时间大冒险 TIME ISLAND 进入" onclick= href=island_time.html
+A#.island adj hsn-offscreen y=2158 118x240 "😊 🌹 🦁 ✨ 形容大冒险 COMMON ADJECT" onclick= href=island_adjective.html
+A#.island misc hsn-offscreen y=2158 118x240 "✅ 💡 🔗 🔤 百宝大冒险 COMMON MISC W" onclick= href=island_treasure.html
+A#.island pronouns hsn-offsc y=2158 118x240 "❓ 🤔 👉 ❓ 疑问大冒险 PRONOUNS & QUE" onclick= href=island_question.html
+BUTTON#feedbackBtn.feedback-big-btn y=3089 245x70 "✉️ 给作者留言" onclick= href=
+BUTTON#privacyOpen. y=3478 170x43 "🔒 隐私与离线说明" onclick= href=
+BUTTON#hsnThemeEye.hsn-eye-btn y=12 40x40 "沉浸欣赏主题" onclick=window.__hsnToggleThemeOnly&&window.__hsnToggleThemeOnly() href=
+FIXED
+|bg-cosmos|z-3|0,0 390x844|
+stars|stars|z-2|0,0 390x844|
+|flyer flyer-ufo|z-1|51,121 60x59|🛸
+|flyer flyer-rocket|z-1|71,349 72x72|🚀
+|flyer flyer-satellite|z-1|95,458 47x46|🛰️
+|flyer flyer-comet|z-1|115,990 56x56|☄️
+|flyer flyer-star|z-1|188,330 49x49|🌟
+deco|deco|z-1|0,0 390x844|🍕 🐘 🦁 ⏰ 🏙️ 💎 🎁
+hsnVerStamp||z6|353,830 30x9|v1163

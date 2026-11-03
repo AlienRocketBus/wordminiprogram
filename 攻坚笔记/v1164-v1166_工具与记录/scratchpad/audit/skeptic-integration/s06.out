@@ -1,0 +1,7 @@
+close island_animal.html {"click2pop":70,"click2hidden":70}
+close island_food.html {"click2pop":26,"click2hidden":26}
+close island_sports.html {"click2pop":12,"click2hidden":12}
+close island_animal.html {"click2pop":3,"click2hidden":3}
+after in-iframe reload: {"wrap":"block","op":"1","path":"island_animal.html?_r=1793711655513","rs":"complete","hist":4,"state":"{\"hsnIsland\":\"island_animal.html\"}","scrollY":616} hist before 3
+after ONE tap on map button: {"wrap":"block","op":"1","path":"island_animal.html","rs":"complete","hist":4,"state":"{\"hsnIsland\":\"island_animal.html\"}","scrollY":616}
+after SECOND tap: {"wrap":"none","op":"1","path":"island_animal.html","rs":"complete","hist":4,"state":"null","scrollY":616}

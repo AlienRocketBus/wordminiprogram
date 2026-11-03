@@ -1,0 +1,18 @@
+{
+ "home": {
+  "busyPct": 64,
+  "scriptPct": 4
+ },
+ "home-noAnim": {
+  "busyPct": 55,
+  "scriptPct": 7
+ },
+ "island": {
+  "busyPct": 49,
+  "scriptPct": 1
+ },
+ "island-noAnim": {
+  "busyPct": 6,
+  "scriptPct": 1
+ }
+}

@@ -1,0 +1,311 @@
+{
+  "before": {
+    "top": {
+      "gate": 1163,
+      "hbu": null,
+      "path": "/",
+      "vw": "已是最新 v1163"
+    },
+    "frame": {
+      "gate": 1163,
+      "backup": 1163,
+      "hbu": "v1163",
+      "path": "/island_food.html",
+      "vw": "在 iframe 内 → 交由顶层窗口处理"
+    },
+    "ctl": "/sw_v944.js",
+    "wrap": "block"
+  },
+  "cachesBefore": [
+    "hansen-v944-shell-217",
+    "hansen-v944-assets-215",
+    "hansen-v944-icons-3",
+    "hansen-v944-pages-215"
+  ],
+  "homeLoadedMs": 857,
+  "islandWait": {
+    "p": "/island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "ver": 1163,
+    "gate": 1164,
+    "wrap": "block",
+    "op": "1",
+    "loading": null,
+    "ms": 9396
+  },
+  "timeline": [
+    {
+      "t": 16,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "shell-217,assets-215,icons-3,pages-215"
+    },
+    {
+      "t": 21,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "shell-217,assets-215,icons-3,pages-215"
+    },
+    {
+      "t": 26,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "shell-217,assets-215,icons-3,pages-215"
+    },
+    {
+      "t": 31,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 36,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 41,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 46,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 51,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 56,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 61,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 66,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    },
+    {
+      "t": 71,
+      "top": {
+        "gate": 1164,
+        "hbu": null,
+        "path": "/",
+        "vw": "已是最新 v1164"
+      },
+      "frame": {
+        "gate": 1164,
+        "backup": 1163,
+        "hbu": "v1163",
+        "path": "/island_food.html",
+        "vw": "在 iframe 内 → 交由顶层窗口处理"
+      },
+      "ctl": "/sw_v944.js",
+      "wrap": "block",
+      "caches": "icons-3,shell-218"
+    }
+  ],
+  "mainNavs": [
+    {
+      "dt": 57,
+      "u": "/"
+    },
+    {
+      "dt": 872,
+      "u": "/"
+    },
+    {
+      "dt": 1236,
+      "u": "/"
+    }
+  ],
+  "swFetches": [
+    {
+      "dt": 27103,
+      "status": 200
+    }
+  ],
+  "afterReenter": {
+    "top": {
+      "gate": 1164,
+      "hbu": null,
+      "path": "/",
+      "vw": "已是最新 v1164"
+    },
+    "frame": {
+      "gate": 1164,
+      "backup": 1163,
+      "hbu": "v1163",
+      "path": "/island_food.html",
+      "vw": "在 iframe 内 → 交由顶层窗口处理"
+    },
+    "ctl": "/sw_v944.js",
+    "wrap": "block"
+  },
+  "vwTop": {
+    "local": 1164,
+    "server": 1164,
+    "stale": false,
+    "note": "已是最新 v1164"
+  },
+  "errs": []
+}

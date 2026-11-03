@@ -1,0 +1,12 @@
+{"uid":"uid_existing_001"}
+["credentials_ambitious-d0g1d26xm740dc3d6","device_id","hansen_auth_v1004","lang_ambitious-d0g1d26xm740dc3d6","user_info_ambitious-d0g1d26xm740dc3d6","wordIsland_test"]
+-- restore backup made BEFORE login (no user_info inside):
+{"restoredItems":1}
+["credentials_ambitious-d0g1d26xm740dc3d6","hansen_auth_v1004","wordIsland_test"]
+{"label":"after pre-login backup restore","r":{"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"}}
+{"label":"after getCurrentUser repopulated","r":{"ok":true,"uid":"uid_existing_001","tries":1}}
+-- restore backup carrying ANOTHER account user_info:
+{"label":"before foreign restore","r":{"ok":true,"uid":"uid_existing_001","tries":1}}
+{"items":2}
+{"label":"after foreign restore","r":{"ok":true,"uid":"uid_OTHER_999","tries":1}}
+{"accessTokenSub":"uid_existing_001"}

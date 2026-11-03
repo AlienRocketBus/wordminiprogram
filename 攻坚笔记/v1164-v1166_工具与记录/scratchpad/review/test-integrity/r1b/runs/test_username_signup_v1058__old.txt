@@ -1,0 +1,19 @@
+用户名密码注册 v1058
+  OK  三个接口齐备(registerByPassword/normUsername/mailOfUsername)
+  OK  用户名长度校验 3-20
+  OK  拒绝空格与 @ 等非法字符
+  OK  同一用户名(忽略大小写)映射到同一内部邮箱
+  OK  不同用户名映射不同
+  OK  内部邮箱格式合法: hansen_72602c40651f0000@u.wordadventure.local
+  OK  注册成功
+  OK  走内部邮箱注册
+  OK  注册后设置真实用户名
+  OK  写入本地登录态(username=Hansen)
+  OK  两次密码不一致被拒: 两次输入的密码不一样
+  OK  密码过短被拒: 密码至少 6 位
+  OK  默认是登录态(无确认密码框)
+  OK  点切换后进入注册态(按钮="注册并登录")
+  OK  登录时用户名失败会用内部邮箱重试
+  OK  零脚本错误
+
+结果: 16 通过 / 0 失败

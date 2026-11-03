@@ -1,0 +1,40 @@
+  OK  A 登录 + 云端发号
+  OK  B 登录 + 云端发号
+  OK  HansenSbProfile.displayName() 给出真名字
+  OK  ★ 页面刚加载第一次拉榜就成功（不是 not-signed-in）
+  OK  ★ 没人上榜时是 ok + 空列表（空 ≠ 出错）
+  OK  心跳写上、各自学到自己的 _openid
+  OK  ★ A 加 B：成功，对方还没加 → 待确认
+  OK  ★ B 看到「A 想加你」
+  OK  ★ B 加回 A：直接互为好友
+  OK  ★ A 那边：B 是正式好友
+  OK  ★ B 那边：A 是正式好友
+  OK  A 看到 B 刚才还在 + 名字
+  OK  ★ 没有任何一次写别人的记录（无 updated:0 / 权限拒绝）
+  OK  ★ B 给 A 发「来一局？」
+  OK  ★ A 收到 B 的招呼（发件人可信）
+  OK  ★ 好友页 z-index 2147483500（在拼写大PK屏之上、对战屏之下）
+  OK  ★ 好友页显示好友和收到的招呼
+  OK  ★ 打开好友页不触发看门狗救援
+  OK  A 删除 B
+  OK  ★ B 那边看到 A 不再是互为好友（等他也加你）
+  OK  ★ A 的列表里没有 B 了
+  OK  ★ 删除也只删自己的记录
+  OK  ★ 缺 hansen_friend_msgs → 说清楚要建哪个集合、权限选什么
+  OK  缺集合时收件箱也报配置问题（不是假装没消息）
+  OK  ★ 缺 hansen_friends → 列表报配置问题
+  OK  ★ 好友页显示「云端设置还差一步」+ 集合名
+  OK  ★ 两人上传天梯分成功
+  OK  ★ 榜上有两个人（名字是自己起的）
+  OK  榜上找得到自己
+  OK  ★ 上传被拒要报出来（不是 ok:true）
+  OK  ★ 拉榜被拒 → 报错（不是"没人上榜"）
+  OK  ★ 刷新后第一次开天梯页：榜直接显示两个人（不是「登录之后才能看到」）
+  OK  ★ 岛屿页：好友页盖在拼写大PK屏上面（点得到）
+  OK  ★ 断网 → kind network
+
+  pageerrors: []
+  unrouted: []
+  [A console.error] Failed to load resource: net::ERR_FAILED
+
+结果(rules): 34 通过 / 0 失败

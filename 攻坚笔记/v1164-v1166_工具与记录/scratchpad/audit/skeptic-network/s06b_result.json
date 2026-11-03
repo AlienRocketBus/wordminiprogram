@@ -1,0 +1,26 @@
+{
+  "nosw": {
+    "landMapOnHome": [
+      "/land_map.html empty 200 496KB"
+    ],
+    "landMapAfterIslandTap": [
+      "/land_map.html?v=1163 iframe 200 496KB",
+      "/land_map.html?v=1163 iframe 304 0KB",
+      "/land_map.html?v=1163 iframe 304 0KB"
+    ],
+    "versionChecksHome": 1,
+    "versionChecksAfterIslandTap": 10
+  },
+  "sw": {
+    "landMapOnHome": [
+      "/land_map.html empty 200 496KB"
+    ],
+    "landMapAfterIslandTap": [
+      "/land_map.html?v=1163 empty 200 496KB",
+      "/land_map.html?v=1163 empty 304 0KB",
+      "/land_map.html?v=1163 empty 304 0KB"
+    ],
+    "versionChecksHome": 1,
+    "versionChecksAfterIslandTap": 14
+  }
+}

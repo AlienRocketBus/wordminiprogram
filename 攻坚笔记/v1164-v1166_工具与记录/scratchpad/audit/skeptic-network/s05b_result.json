@@ -1,0 +1,101 @@
+{
+  "as_shipped": {
+    "reqs": 886,
+    "kb": 15574,
+    "docs": [
+      "/island_food.html 200 174521",
+      "/land_map.html?v=1163 200 507586",
+      "/island_season.html?v=1163 200 194155",
+      "/land_map.html?v=1163 304 0",
+      "/island_season.html?v=1163 304 0",
+      "/land_map.html?v=1163 304 0",
+      "/boss_hall.html?v=1163&warm=1 200 19655",
+      "/season_showcase.html?v=1163&warm=1 200 17844",
+      "/boss_hall.html?v=1163&warm=1 304 0",
+      "/spelling_bee.html?v=1163&warm=1 200 137433",
+      "/season_showcase.html?v=1163&warm=1 304 0",
+      "/boss_hall.html?v=1163&warm=1 304 0",
+      "/spelling_bee.html?v=1163&warm=1 304 0",
+      "/season_showcase.html?v=1163&warm=1 304 0",
+      "/spelling_bee.html?v=1163&warm=1 304 0"
+    ],
+    "byType": {
+      "html": {
+        "n": 19,
+        "kb": 1720
+      },
+      "js": {
+        "n": 441,
+        "kb": 313
+      },
+      "woff2": {
+        "n": 1,
+        "kb": 18
+      },
+      "webp": {
+        "n": 58,
+        "kb": 5411
+      },
+      "other": {
+        "n": 15,
+        "kb": 0
+      },
+      "mp3": {
+        "n": 352,
+        "kb": 8123
+      }
+    },
+    "met": {
+      "Documents": 9,
+      "Frames": 9,
+      "JSEventListeners": 4239,
+      "Nodes": 11362
+    },
+    "frames": 8
+  },
+  "warm_only_in_direct_island": {
+    "reqs": 665,
+    "kb": 15574,
+    "docs": [
+      "/island_food.html 200 174521",
+      "/land_map.html?v=1163 200 507586",
+      "/island_season.html?v=1163 200 194155",
+      "/boss_hall.html?v=1163&warm=1 200 19655",
+      "/season_showcase.html?v=1163&warm=1 200 17844",
+      "/spelling_bee.html?v=1163&warm=1 200 137433"
+    ],
+    "byType": {
+      "html": {
+        "n": 10,
+        "kb": 1720
+      },
+      "js": {
+        "n": 238,
+        "kb": 313
+      },
+      "woff2": {
+        "n": 1,
+        "kb": 18
+      },
+      "webp": {
+        "n": 58,
+        "kb": 5411
+      },
+      "other": {
+        "n": 6,
+        "kb": 0
+      },
+      "mp3": {
+        "n": 352,
+        "kb": 8123
+      }
+    },
+    "met": {
+      "Documents": 5,
+      "Frames": 5,
+      "JSEventListeners": 2609,
+      "Nodes": 8479
+    },
+    "frames": 4
+  }
+}

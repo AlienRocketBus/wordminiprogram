@@ -1,0 +1,23 @@
+import fs from 'fs';
+import {setup,bootHome,tapSel,waitIsland,dismissWelcome,sleep} from './lib.mjs';
+const blockWarm=process.argv[2]==='control';
+const s=await setup({init:fs.readFileSync(new URL('./instr.js',import.meta.url),'utf8')});const log=[];
+if(blockWarm) await s.ctx.route('**/hansen_room_warm_v1023.js*',r=>r.fulfill({status:200,contentType:'text/javascript',body:'/*blocked*/'}));
+const page=await bootHome(s,log);
+await tapSel(page,'a.island[href="island_food.html"]');
+const fr=await waitIsland(page,'island_food.html');await dismissWelcome(fr);
+await sleep(15000);
+const flag=await page.evaluate(()=>localStorage.getItem('hsn_season_prologue_seen'));
+const all=(await page.evaluate(()=>window.__W||[]));
+const hiddenKeys=[...new Set(all.filter(w=>!/^0:|^1:/.test(w.f)).map(w=>w.k))].filter(k=>/seen|shown|guide|tip|intro|first|onboard|prologue|welcome|tutorial|hint|seeded|notice|dismiss/i.test(k));
+console.log(blockWarm?'CONTROL (room_warm blocked)':'NORMAL','| prologue flag after food visit =',flag,'| one-time-ish keys written by hidden frames:',hiddenKeys);
+const reader=await page.evaluate(()=>{const out=[];function walk(w,d){try{const el=w.document.querySelector('[id*=story],[class*=story]');if(el&&(el.offsetParent||getComputedStyle(el).display!=='none'))out.push(d+':'+w.location.pathname.split('/').pop()+' '+(el.id||el.className).toString().slice(0,40));}catch(e){}for(let i=0;i<w.frames.length;i++)walk(w.frames[i],d+1);}walk(window,0);return out;});
+console.log('story-reader elements visible per frame:',reader);
+// now the kid really goes to 星海 for the first time: home → 星海觉醒 banner → land_map → 前往星海 (openIsland('island_season.html'))
+await fr.evaluate(()=>goHome());await sleep(1200);
+await page.evaluate(()=>openIsland('island_season.html'));
+const fs2=await waitIsland(page,'island_season.html');await dismissWelcome(fs2);await sleep(2500);
+const shown=await fs2.evaluate(()=>{const els=[...document.querySelectorAll('body *')].filter(e=>{const st=getComputedStyle(e);return (st.position==='fixed')&&e.offsetParent!==null||st.position==='fixed'&&st.display!=='none'&&e.getBoundingClientRect().height>300;});return els.map(e=>(e.id||String(e.className).slice(0,30))+':'+(e.innerText||'').replace(/\s+/g,' ').slice(0,60)).slice(0,6);});
+console.log('visible season: full-screen fixed layers =',JSON.stringify(shown));
+await page.screenshot({path:(blockWarm?'e8_control':'e8_normal')+'_season_first_visit.png'});
+await s.close();

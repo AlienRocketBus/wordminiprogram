@@ -1,0 +1,25 @@
+import { startServer, launch, newCtx, attachLogs, sleep, OUT, external, reqLog } from './lib.mjs';
+const { srv, base } = await startServer();
+const browser = await launch();
+const errs=[];
+const ctx = await newCtx(browser,{dsf:1});
+await ctx.addInitScript(()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} });
+const page = await ctx.newPage(); attachLogs(page,'home',errs);
+await page.goto(base+'/index.html',{waitUntil:'load'});
+await sleep(2000);
+const card = page.locator('a.island.animal');
+await card.evaluate(el=>el.scrollIntoView({block:'center'})); await sleep(400);
+const bb = await card.boundingBox();
+await page.touchscreen.tap(bb.x+bb.width/2, bb.y+bb.height/2);
+await sleep(4000);
+await page.screenshot({path:OUT+'/shots/probe_island_open.png'});
+const fr = page.frames().find(f=>f.url().includes('island_animal'));
+console.log('frame', !!fr, fr&&fr.url());
+const info = await fr.evaluate(()=>{
+  const vis = el=>{const r=el.getBoundingClientRect(); const cs=getComputedStyle(el); return r.width>0&&r.height>0&&cs.display!=='none'&&cs.visibility!=='hidden';};
+  const clickable=[...document.querySelectorAll('a,button,[onclick],.util-card,[role=button]')].filter(vis).map(el=>{const r=el.getBoundingClientRect(); return {tag:el.tagName,id:el.id,cls:String(el.className).slice(0,40),y:Math.round(r.top+scrollY),x:Math.round(r.left),h:Math.round(r.height),w:Math.round(r.width),txt:el.innerText.replace(/\s+/g,' ').trim().slice(0,30)};});
+  return {h:document.documentElement.scrollHeight, theme:document.body.dataset.theme, clickable};
+});
+console.log(info.h, info.theme); info.clickable.forEach(c=>console.log(JSON.stringify(c)));
+console.log('errs',errs); console.log('ext',[...new Set(external)].slice(0,20)); console.log('404',reqLog.slice(0,20));
+await browser.close(); srv.close();

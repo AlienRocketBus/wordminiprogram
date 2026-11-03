@@ -1,0 +1,20 @@
+  ✅ 真实 canonical 模块在 Node 加载成功
+T1 真实形态采样
+  ✅ 真实API面: REGULAR_WORDS,STAR_SEA_WORDS,STORE_KEY,TOTAL_WORDS,VERSION,_blankStore,_mergeState,absorbA
+  ✅ read() 返回存储对象
+  ✅ 真实形态：顶层是 islands 容器
+  ✅ 真实形态：顶层没有扁平 wrongs/srs（v969事故形态）
+  ✅ 19岛节点齐备: 19个
+  ✅ 真实答错落入 food.wrongs[3]
+  ✅ food.srs[3] 真实写入可读回(到期日=昨天)
+T2 台架 mock 契约
+  ✅ 奖励台架 CAN_STORE 采用真实嵌套形态 islands:{…}
+  ✅ 奖励台架不存在 v969 事故的扁平形态
+T3 真机孪生覆盖
+  ✅ 走查覆盖横幅+真实答题路径（canonical 消费端的真机孪生）
+  ✅ 走查覆盖云卡片（云存档 mock 的真机孪生）
+T4 口径×真实模块合体
+  ✅ 口径函数在真实 canonical 上 ok
+  ✅ 真实写入的到期错词被口径捕获 (globalDue=1)
+
+mock contract v970: real-module shape sampled + harness mock isomorphic + real-machine twins present + gauge works on REAL canonical ✅

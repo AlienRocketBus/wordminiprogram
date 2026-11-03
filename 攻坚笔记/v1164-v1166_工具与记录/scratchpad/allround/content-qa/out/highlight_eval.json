@@ -1,0 +1,8570 @@
+[
+ {
+  "id": 1,
+  "island": "action",
+  "en": "go",
+  "cn": "去",
+  "exCn": "我们去公园吧。",
+  "hl": "去",
+  "how": "exact"
+ },
+ {
+  "id": 2,
+  "island": "action",
+  "en": "come",
+  "cn": "来",
+  "exCn": "请过来一下。",
+  "hl": "来",
+  "how": "exact"
+ },
+ {
+  "id": 3,
+  "island": "action",
+  "en": "run",
+  "cn": "跑",
+  "exCn": "我每天跑步三十分钟。",
+  "hl": "跑",
+  "how": "exact"
+ },
+ {
+  "id": 4,
+  "island": "action",
+  "en": "walk",
+  "cn": "走/步行",
+  "exCn": "我每天走路上学。",
+  "hl": "走",
+  "how": "alt"
+ },
+ {
+  "id": 5,
+  "island": "action",
+  "en": "jump",
+  "cn": "跳",
+  "exCn": "别在床上蹦跳。",
+  "hl": "跳",
+  "how": "exact"
+ },
+ {
+  "id": 6,
+  "island": "action",
+  "en": "sit",
+  "cn": "坐",
+  "exCn": "请坐下。",
+  "hl": "坐",
+  "how": "exact"
+ },
+ {
+  "id": 7,
+  "island": "action",
+  "en": "stand",
+  "cn": "站",
+  "exCn": "请站起来。",
+  "hl": "站",
+  "how": "exact"
+ },
+ {
+  "id": 8,
+  "island": "action",
+  "en": "wake",
+  "cn": "醒来/叫醒",
+  "exCn": "我每天七点醒来。",
+  "hl": "醒来",
+  "how": "alt"
+ },
+ {
+  "id": 9,
+  "island": "action",
+  "en": "sleep",
+  "cn": "睡觉",
+  "exCn": "我一般十点左右睡觉。",
+  "hl": "睡觉",
+  "how": "exact"
+ },
+ {
+  "id": 10,
+  "island": "action",
+  "en": "eat",
+  "cn": "吃",
+  "exCn": "我们去吃点东西吧。",
+  "hl": "吃",
+  "how": "exact"
+ },
+ {
+  "id": 11,
+  "island": "action",
+  "en": "drink",
+  "cn": "喝",
+  "exCn": "你应该多喝水。",
+  "hl": "喝",
+  "how": "exact"
+ },
+ {
+  "id": 12,
+  "island": "action",
+  "en": "wash",
+  "cn": "洗",
+  "exCn": "吃饭前洗手。",
+  "hl": "洗",
+  "how": "exact"
+ },
+ {
+  "id": 13,
+  "island": "action",
+  "en": "clean",
+  "cn": "打扫/弄干净",
+  "exCn": "今天请你打扫一下房间。",
+  "hl": "打扫",
+  "how": "alt"
+ },
+ {
+  "id": 14,
+  "island": "action",
+  "en": "cook",
+  "cn": "做饭/烹饪",
+  "exCn": "我爸爸每个周日做晚饭。",
+  "hl": "做",
+  "how": "fragment"
+ },
+ {
+  "id": 15,
+  "island": "action",
+  "en": "sing",
+  "cn": "唱歌",
+  "exCn": "我妹妹喜欢唱歌。",
+  "hl": "唱歌",
+  "how": "exact"
+ },
+ {
+  "id": 16,
+  "island": "action",
+  "en": "dance",
+  "cn": "跳舞",
+  "exCn": "我喜欢跟着音乐跳舞。",
+  "hl": "跳舞",
+  "how": "exact"
+ },
+ {
+  "id": 17,
+  "island": "action",
+  "en": "swim",
+  "cn": "游泳",
+  "exCn": "我六岁学会了游泳。",
+  "hl": "游泳",
+  "how": "exact"
+ },
+ {
+  "id": 18,
+  "island": "action",
+  "en": "play",
+  "cn": "玩/演奏",
+  "exCn": "我们一起玩吧。",
+  "hl": "玩",
+  "how": "alt"
+ },
+ {
+  "id": 19,
+  "island": "action",
+  "en": "ride",
+  "cn": "骑/乘坐",
+  "exCn": "我六岁学会骑自行车。",
+  "hl": "骑",
+  "how": "alt"
+ },
+ {
+  "id": 20,
+  "island": "action",
+  "en": "fly",
+  "cn": "飞/坐飞机",
+  "exCn": "你坐过飞机吗?",
+  "hl": "飞机",
+  "how": "fragment"
+ },
+ {
+  "id": 21,
+  "island": "action",
+  "en": "read",
+  "cn": "读/阅读",
+  "exCn": "我每天读英语书。",
+  "hl": "读",
+  "how": "alt"
+ },
+ {
+  "id": 22,
+  "island": "action",
+  "en": "write",
+  "cn": "写",
+  "exCn": "请在这里写下你的名字。",
+  "hl": "写",
+  "how": "exact"
+ },
+ {
+  "id": 23,
+  "island": "action",
+  "en": "draw",
+  "cn": "画画",
+  "exCn": "她画了一幅她家人的画。",
+  "hl": "画",
+  "how": "fragment"
+ },
+ {
+  "id": 24,
+  "island": "action",
+  "en": "speak",
+  "cn": "说/讲",
+  "exCn": "你会说英语吗?",
+  "hl": "说",
+  "how": "alt"
+ },
+ {
+  "id": 25,
+  "island": "action",
+  "en": "talk",
+  "cn": "说话/聊",
+  "exCn": "我们晚点再聊吧。",
+  "hl": "聊",
+  "how": "alt"
+ },
+ {
+  "id": 26,
+  "island": "action",
+  "en": "say",
+  "cn": "说",
+  "exCn": "你刚才说什么?",
+  "hl": "说",
+  "how": "exact"
+ },
+ {
+  "id": 27,
+  "island": "action",
+  "en": "ask",
+  "cn": "问",
+  "exCn": "我能问你一个问题吗?",
+  "hl": "问",
+  "how": "exact"
+ },
+ {
+  "id": 28,
+  "island": "action",
+  "en": "answer",
+  "cn": "回答",
+  "exCn": "请回答这个问题。",
+  "hl": "回答",
+  "how": "exact"
+ },
+ {
+  "id": 29,
+  "island": "action",
+  "en": "listen",
+  "cn": "听",
+  "exCn": "认真听老师讲课。",
+  "hl": "听",
+  "how": "exact"
+ },
+ {
+  "id": 30,
+  "island": "action",
+  "en": "hear",
+  "cn": "听到",
+  "exCn": "我能听到隔壁传来的音乐声。",
+  "hl": "听到",
+  "how": "exact"
+ },
+ {
+  "id": 31,
+  "island": "action",
+  "en": "think",
+  "cn": "认为/想",
+  "exCn": "让我想一想。",
+  "hl": "想",
+  "how": "alt"
+ },
+ {
+  "id": 32,
+  "island": "action",
+  "en": "know",
+  "cn": "知道",
+  "exCn": "我不知道说什么好。",
+  "hl": "知道",
+  "how": "exact"
+ },
+ {
+  "id": 33,
+  "island": "action",
+  "en": "learn",
+  "cn": "学习",
+  "exCn": "我们在学校学英语。",
+  "hl": "学",
+  "how": "fragment"
+ },
+ {
+  "id": 34,
+  "island": "action",
+  "en": "teach",
+  "cn": "教",
+  "exCn": "我妈妈教我做饭。",
+  "hl": "教",
+  "how": "exact"
+ },
+ {
+  "id": 35,
+  "island": "action",
+  "en": "open",
+  "cn": "打开",
+  "exCn": "请打开门。",
+  "hl": "打开",
+  "how": "exact"
+ },
+ {
+  "id": 36,
+  "island": "action",
+  "en": "close",
+  "cn": "关闭",
+  "exCn": "请关上窗户。",
+  "hl": "关",
+  "how": "fragment"
+ },
+ {
+  "id": 37,
+  "island": "action",
+  "en": "give",
+  "cn": "给",
+  "exCn": "请给我一支笔。",
+  "hl": "给",
+  "how": "exact"
+ },
+ {
+  "id": 38,
+  "island": "action",
+  "en": "take",
+  "cn": "拿/带",
+  "exCn": "请拿着这个包。",
+  "hl": "拿",
+  "how": "alt"
+ },
+ {
+  "id": 39,
+  "island": "action",
+  "en": "put",
+  "cn": "放",
+  "exCn": "把鞋子放在门边。",
+  "hl": "放",
+  "how": "exact"
+ },
+ {
+  "id": 40,
+  "island": "action",
+  "en": "get",
+  "cn": "得到/拿到",
+  "exCn": "我得到妈妈送的礼物。",
+  "hl": "得到",
+  "how": "alt"
+ },
+ {
+  "id": 41,
+  "island": "action",
+  "en": "buy",
+  "cn": "买",
+  "exCn": "你在哪里买的?",
+  "hl": "买",
+  "how": "exact"
+ },
+ {
+  "id": 42,
+  "island": "action",
+  "en": "sell",
+  "cn": "卖",
+  "exCn": "他们在这里卖新鲜水果。",
+  "hl": "卖",
+  "how": "exact"
+ },
+ {
+  "id": 43,
+  "island": "action",
+  "en": "make",
+  "cn": "做/制作",
+  "exCn": "我妈妈会做蛋糕。",
+  "hl": "做",
+  "how": "alt"
+ },
+ {
+  "id": 44,
+  "island": "action",
+  "en": "use",
+  "cn": "使用",
+  "exCn": "我能用一下你的手机吗?",
+  "hl": "用",
+  "how": "fragment"
+ },
+ {
+  "id": 45,
+  "island": "action",
+  "en": "catch",
+  "cn": "接/抓",
+  "exCn": "猫想抓住一只老鼠。",
+  "hl": "抓",
+  "how": "alt"
+ },
+ {
+  "id": 46,
+  "island": "action",
+  "en": "throw",
+  "cn": "扔",
+  "exCn": "别朝狗扔石头。",
+  "hl": "扔",
+  "how": "exact"
+ },
+ {
+  "id": 47,
+  "island": "action",
+  "en": "push",
+  "cn": "推",
+  "exCn": "推一下门把它打开。",
+  "hl": "推",
+  "how": "exact"
+ },
+ {
+  "id": 48,
+  "island": "action",
+  "en": "pull",
+  "cn": "拉",
+  "exCn": "使劲拉绳子。",
+  "hl": "拉",
+  "how": "exact"
+ },
+ {
+  "id": 49,
+  "island": "action",
+  "en": "carry",
+  "cn": "搬/拿/背",
+  "exCn": "你能帮我拿一下这个包吗?",
+  "hl": "拿",
+  "how": "alt"
+ },
+ {
+  "id": 50,
+  "island": "action",
+  "en": "pick",
+  "cn": "摘/拿/挑选",
+  "exCn": "从牌堆里挑一张牌。",
+  "hl": "挑",
+  "how": "fragment"
+ },
+ {
+  "id": 51,
+  "island": "action",
+  "en": "turn",
+  "cn": "转/转身",
+  "exCn": "转过身来看着我。",
+  "hl": "转",
+  "how": "alt"
+ },
+ {
+  "id": 52,
+  "island": "action",
+  "en": "like",
+  "cn": "喜欢",
+  "exCn": "我非常喜欢苹果。",
+  "hl": "喜欢",
+  "how": "exact"
+ },
+ {
+  "id": 53,
+  "island": "action",
+  "en": "love",
+  "cn": "爱",
+  "exCn": "我爱我的家人。",
+  "hl": "爱",
+  "how": "exact"
+ },
+ {
+  "id": 54,
+  "island": "action",
+  "en": "want",
+  "cn": "想要",
+  "exCn": "你想吃什么?",
+  "hl": "想",
+  "how": "fragment"
+ },
+ {
+  "id": 55,
+  "island": "action",
+  "en": "need",
+  "cn": "需要",
+  "exCn": "这件事我需要你的帮助。",
+  "hl": "需要",
+  "how": "exact"
+ },
+ {
+  "id": 56,
+  "island": "action",
+  "en": "help",
+  "cn": "帮助",
+  "exCn": "你能帮我一下吗?",
+  "hl": "帮",
+  "how": "fragment"
+ },
+ {
+  "id": 57,
+  "island": "action",
+  "en": "try",
+  "cn": "试/尝试",
+  "exCn": "我们试试不同的东西吧。",
+  "hl": "试",
+  "how": "alt"
+ },
+ {
+  "id": 58,
+  "island": "action",
+  "en": "have",
+  "cn": "有/吃",
+  "exCn": "我有个问题。",
+  "hl": "有",
+  "how": "alt"
+ },
+ {
+  "id": 59,
+  "island": "action",
+  "en": "be",
+  "cn": "是/在",
+  "exCn": "我想当一名医生。",
+  "hl": "当",
+  "how": "manual"
+ },
+ {
+  "id": 60,
+  "island": "action",
+  "en": "do",
+  "cn": "做",
+  "exCn": "你是做什么工作的?",
+  "hl": "做",
+  "how": "exact"
+ },
+ {
+  "id": 61,
+  "island": "action",
+  "en": "see",
+  "cn": "看见",
+  "exCn": "明天见!",
+  "hl": "见",
+  "how": "fragment"
+ },
+ {
+  "id": 62,
+  "island": "action",
+  "en": "look",
+  "cn": "看",
+  "exCn": "看看这张照片。",
+  "hl": "看",
+  "how": "exact"
+ },
+ {
+  "id": 63,
+  "island": "action",
+  "en": "wait",
+  "cn": "等待",
+  "exCn": "请稍等。",
+  "hl": "等",
+  "how": "fragment"
+ },
+ {
+  "id": 64,
+  "island": "action",
+  "en": "start",
+  "cn": "开始",
+  "exCn": "我们开始吧。",
+  "hl": "开始",
+  "how": "exact"
+ },
+ {
+  "id": 65,
+  "island": "action",
+  "en": "stop",
+  "cn": "停止",
+  "exCn": "上课请停止说话。",
+  "hl": "停止",
+  "how": "exact"
+ },
+ {
+  "id": 66,
+  "island": "action",
+  "en": "finish",
+  "cn": "完成",
+  "exCn": "你作业做完了吗?",
+  "hl": "完",
+  "how": "fragment"
+ },
+ {
+  "id": 67,
+  "island": "action",
+  "en": "drive",
+  "cn": "开车/驾驶",
+  "exCn": "我叔叔开出租车。",
+  "hl": "开",
+  "how": "fragment"
+ },
+ {
+  "id": 68,
+  "island": "adjective",
+  "en": "big",
+  "cn": "大的",
+  "exCn": "这是个大问题。",
+  "hl": "大",
+  "how": "fragment"
+ },
+ {
+  "id": 69,
+  "island": "adjective",
+  "en": "small",
+  "cn": "小的",
+  "exCn": "世界真小。",
+  "hl": "小",
+  "how": "fragment"
+ },
+ {
+  "id": 70,
+  "island": "adjective",
+  "en": "tall",
+  "cn": "高的",
+  "exCn": "你多高?",
+  "hl": "高",
+  "how": "fragment"
+ },
+ {
+  "id": 71,
+  "island": "adjective",
+  "en": "short",
+  "cn": "矮的/短的",
+  "exCn": "他的头发很短。",
+  "hl": "短",
+  "how": "fragment"
+ },
+ {
+  "id": 72,
+  "island": "adjective",
+  "en": "long",
+  "cn": "长的",
+  "exCn": "这是一个长长的故事。",
+  "hl": "长的",
+  "how": "exact"
+ },
+ {
+  "id": 73,
+  "island": "adjective",
+  "en": "wide",
+  "cn": "宽的",
+  "exCn": "马路又宽又平。",
+  "hl": "宽",
+  "how": "fragment"
+ },
+ {
+  "id": 74,
+  "island": "adjective",
+  "en": "thin",
+  "cn": "瘦的/薄的",
+  "exCn": "她又高又瘦。",
+  "hl": "瘦",
+  "how": "fragment"
+ },
+ {
+  "id": 75,
+  "island": "adjective",
+  "en": "thick",
+  "cn": "厚的/粗的",
+  "exCn": "这书太厚一时看不完。",
+  "hl": "厚",
+  "how": "fragment"
+ },
+ {
+  "id": 76,
+  "island": "adjective",
+  "en": "heavy",
+  "cn": "重的",
+  "exCn": "我书包今天好重。",
+  "hl": "重",
+  "how": "fragment"
+ },
+ {
+  "id": 77,
+  "island": "adjective",
+  "en": "light",
+  "cn": "轻的/明亮的",
+  "exCn": "羽毛非常轻。",
+  "hl": "轻",
+  "how": "fragment"
+ },
+ {
+  "id": 78,
+  "island": "adjective",
+  "en": "fast",
+  "cn": "快的",
+  "exCn": "别开太快。",
+  "hl": "快",
+  "how": "fragment"
+ },
+ {
+  "id": 79,
+  "island": "adjective",
+  "en": "slow",
+  "cn": "慢的",
+  "exCn": "今天网速好慢。",
+  "hl": "慢",
+  "how": "fragment"
+ },
+ {
+  "id": 80,
+  "island": "adjective",
+  "en": "hot",
+  "cn": "热的/辣的",
+  "exCn": "今天外面很热。",
+  "hl": "热",
+  "how": "fragment"
+ },
+ {
+  "id": 81,
+  "island": "adjective",
+  "en": "cold",
+  "cn": "冷的",
+  "exCn": "这里的冬天很冷。",
+  "hl": "冷",
+  "how": "fragment"
+ },
+ {
+  "id": 82,
+  "island": "adjective",
+  "en": "warm",
+  "cn": "温暖的",
+  "exCn": "这里面挺暖和的。",
+  "hl": "暖",
+  "how": "fragment"
+ },
+ {
+  "id": 83,
+  "island": "adjective",
+  "en": "cool",
+  "cn": "凉爽的/酷的",
+  "exCn": "太酷了!",
+  "hl": "酷",
+  "how": "fragment"
+ },
+ {
+  "id": 84,
+  "island": "adjective",
+  "en": "hard",
+  "cn": "难的/硬的",
+  "exCn": "数学对我来说有点难。",
+  "hl": "难",
+  "how": "fragment"
+ },
+ {
+  "id": 85,
+  "island": "adjective",
+  "en": "soft",
+  "cn": "软的/柔和的",
+  "exCn": "这个枕头真软。",
+  "hl": "软",
+  "how": "fragment"
+ },
+ {
+  "id": 86,
+  "island": "adjective",
+  "en": "new",
+  "cn": "新的",
+  "exCn": "我刚买了一部新手机。",
+  "hl": "新",
+  "how": "fragment"
+ },
+ {
+  "id": 87,
+  "island": "adjective",
+  "en": "old",
+  "cn": "旧的/老的",
+  "exCn": "我爷爷年纪很老了。",
+  "hl": "老",
+  "how": "fragment"
+ },
+ {
+  "id": 88,
+  "island": "adjective",
+  "en": "young",
+  "cn": "年轻的",
+  "exCn": "她太年轻还不能开车。",
+  "hl": "年轻",
+  "how": "fragment"
+ },
+ {
+  "id": 89,
+  "island": "adjective",
+  "en": "good",
+  "cn": "好的",
+  "exCn": "这是一本好书。",
+  "hl": "好",
+  "how": "fragment"
+ },
+ {
+  "id": 90,
+  "island": "adjective",
+  "en": "bad",
+  "cn": "糟糕的",
+  "exCn": "今天天气真糟糕。",
+  "hl": "糟糕",
+  "how": "fragment"
+ },
+ {
+  "id": 91,
+  "island": "adjective",
+  "en": "nice",
+  "cn": "好的/友好的",
+  "exCn": "她是个好女孩。",
+  "hl": "好",
+  "how": "fragment"
+ },
+ {
+  "id": 92,
+  "island": "adjective",
+  "en": "beautiful",
+  "cn": "美丽的",
+  "exCn": "多么美丽的花!",
+  "hl": "美丽的",
+  "how": "exact"
+ },
+ {
+  "id": 93,
+  "island": "adjective",
+  "en": "ugly",
+  "cn": "丑的",
+  "exCn": "别说我画的画很丑。",
+  "hl": "丑",
+  "how": "fragment"
+ },
+ {
+  "id": 94,
+  "island": "adjective",
+  "en": "happy",
+  "cn": "开心的",
+  "exCn": "我今天很开心。",
+  "hl": "开心",
+  "how": "fragment"
+ },
+ {
+  "id": 95,
+  "island": "adjective",
+  "en": "sad",
+  "cn": "难过的",
+  "exCn": "听到这事我很难过。",
+  "hl": "难过",
+  "how": "fragment"
+ },
+ {
+  "id": 96,
+  "island": "adjective",
+  "en": "angry",
+  "cn": "生气的",
+  "exCn": "别生我气。",
+  "hl": "生我气",
+  "how": "manual"
+ },
+ {
+  "id": 97,
+  "island": "adjective",
+  "en": "tired",
+  "cn": "累的",
+  "exCn": "走了那么远的路我累了。",
+  "hl": "累",
+  "how": "fragment"
+ },
+ {
+  "id": 98,
+  "island": "adjective",
+  "en": "busy",
+  "cn": "忙的",
+  "exCn": "爸爸工作总是很忙。",
+  "hl": "忙",
+  "how": "fragment"
+ },
+ {
+  "id": 99,
+  "island": "adjective",
+  "en": "lazy",
+  "cn": "懒的",
+  "exCn": "别懒了,起床!",
+  "hl": "懒",
+  "how": "fragment"
+ },
+ {
+  "id": 100,
+  "island": "adjective",
+  "en": "clever",
+  "cn": "聪明的",
+  "exCn": "真聪明。",
+  "hl": "聪明",
+  "how": "fragment"
+ },
+ {
+  "id": 101,
+  "island": "adjective",
+  "en": "kind",
+  "cn": "善良的/友好的",
+  "exCn": "你真好。",
+  "hl": "真好",
+  "how": "manual"
+ },
+ {
+  "id": 102,
+  "island": "adjective",
+  "en": "brave",
+  "cn": "勇敢的",
+  "exCn": "消防员是勇敢的人。",
+  "hl": "勇敢的",
+  "how": "exact"
+ },
+ {
+  "id": 103,
+  "island": "adjective",
+  "en": "funny",
+  "cn": "好笑的/搞笑的",
+  "exCn": "太搞笑了!",
+  "hl": "搞笑",
+  "how": "fragment"
+ },
+ {
+  "id": 104,
+  "island": "adjective",
+  "en": "quiet",
+  "cn": "安静的",
+  "exCn": "在图书馆请保持安静。",
+  "hl": "安静",
+  "how": "fragment"
+ },
+ {
+  "id": 105,
+  "island": "adjective",
+  "en": "loud",
+  "cn": "大声的",
+  "exCn": "请别这么大声。",
+  "hl": "大声",
+  "how": "fragment"
+ },
+ {
+  "id": 106,
+  "island": "adjective",
+  "en": "clean",
+  "cn": "干净的",
+  "exCn": "我的房间又干净又整洁。",
+  "hl": "干净",
+  "how": "fragment"
+ },
+ {
+  "id": 107,
+  "island": "adjective",
+  "en": "dirty",
+  "cn": "脏的",
+  "exCn": "你的鞋子真脏。",
+  "hl": "脏",
+  "how": "fragment"
+ },
+ {
+  "id": 108,
+  "island": "adjective",
+  "en": "easy",
+  "cn": "容易的",
+  "exCn": "这次考试很容易。",
+  "hl": "容易",
+  "how": "fragment"
+ },
+ {
+  "id": 109,
+  "island": "adjective",
+  "en": "difficult",
+  "cn": "困难的",
+  "exCn": "这个问题很难。",
+  "hl": "难",
+  "how": "fragment"
+ },
+ {
+  "id": 110,
+  "island": "adjective",
+  "en": "safe",
+  "cn": "安全的",
+  "exCn": "路上注意安全。",
+  "hl": "安全",
+  "how": "fragment"
+ },
+ {
+  "id": 111,
+  "island": "adjective",
+  "en": "dangerous",
+  "cn": "危险的",
+  "exCn": "玩火很危险。",
+  "hl": "危险",
+  "how": "fragment"
+ },
+ {
+  "id": 112,
+  "island": "adjective",
+  "en": "same",
+  "cn": "相同的",
+  "exCn": "我们有相同的爱好。",
+  "hl": "相同的",
+  "how": "exact"
+ },
+ {
+  "id": 113,
+  "island": "adjective",
+  "en": "different",
+  "cn": "不同的",
+  "exCn": "我们有不同的爱好。",
+  "hl": "不同的",
+  "how": "exact"
+ },
+ {
+  "id": 114,
+  "island": "adjective",
+  "en": "right",
+  "cn": "正确的/对的",
+  "exCn": "你的答案是对的。",
+  "hl": "对的",
+  "how": "alt"
+ },
+ {
+  "id": 115,
+  "island": "adjective",
+  "en": "wrong",
+  "cn": "错误的",
+  "exCn": "我写错了答案。",
+  "hl": "错",
+  "how": "fragment"
+ },
+ {
+  "id": 116,
+  "island": "adjective",
+  "en": "free",
+  "cn": "自由的/免费的",
+  "exCn": "鸟儿在天空中自由飞翔。",
+  "hl": "自由",
+  "how": "fragment"
+ },
+ {
+  "id": 117,
+  "island": "adjective",
+  "en": "sick",
+  "cn": "生病的",
+  "exCn": "她生病了,待在家里。",
+  "hl": "生病",
+  "how": "fragment"
+ },
+ {
+  "id": 118,
+  "island": "adjective",
+  "en": "healthy",
+  "cn": "健康的",
+  "exCn": "吃水果保持健康。",
+  "hl": "健康",
+  "how": "fragment"
+ },
+ {
+  "id": 119,
+  "island": "animal",
+  "en": "animal",
+  "cn": "动物",
+  "exCn": "猫是一种动物。",
+  "hl": "动物",
+  "how": "exact"
+ },
+ {
+  "id": 120,
+  "island": "animal",
+  "en": "dog",
+  "cn": "狗",
+  "exCn": "我家里有一只狗。",
+  "hl": "狗",
+  "how": "exact"
+ },
+ {
+  "id": 121,
+  "island": "animal",
+  "en": "cat",
+  "cn": "猫",
+  "exCn": "我的猫很爱睡觉。",
+  "hl": "猫",
+  "how": "exact"
+ },
+ {
+  "id": 122,
+  "island": "animal",
+  "en": "bird",
+  "cn": "鸟",
+  "exCn": "一只鸟正在树上唱歌。",
+  "hl": "鸟",
+  "how": "exact"
+ },
+ {
+  "id": 123,
+  "island": "animal",
+  "en": "fish",
+  "cn": "鱼",
+  "exCn": "鱼缸里有一条鱼。",
+  "hl": "鱼",
+  "how": "exact"
+ },
+ {
+  "id": 124,
+  "island": "animal",
+  "en": "rabbit",
+  "cn": "兔子",
+  "exCn": "兔子有长长的耳朵。",
+  "hl": "兔子",
+  "how": "exact"
+ },
+ {
+  "id": 125,
+  "island": "animal",
+  "en": "mouse",
+  "cn": "老鼠",
+  "exCn": "一只老鼠躲在床底下。",
+  "hl": "老鼠",
+  "how": "exact"
+ },
+ {
+  "id": 126,
+  "island": "animal",
+  "en": "horse",
+  "cn": "马",
+  "exCn": "我去年学会了骑马。",
+  "hl": "马",
+  "how": "exact"
+ },
+ {
+  "id": 127,
+  "island": "animal",
+  "en": "cow",
+  "cn": "牛",
+  "exCn": "牛给我们牛奶。",
+  "hl": "牛",
+  "how": "exact"
+ },
+ {
+  "id": 128,
+  "island": "animal",
+  "en": "pig",
+  "cn": "猪",
+  "exCn": "猪比看上去要聪明。",
+  "hl": "猪",
+  "how": "exact"
+ },
+ {
+  "id": 129,
+  "island": "animal",
+  "en": "sheep",
+  "cn": "羊",
+  "exCn": "绵羊有柔软的白色羊毛。",
+  "hl": "羊",
+  "how": "exact"
+ },
+ {
+  "id": 130,
+  "island": "animal",
+  "en": "goat",
+  "cn": "山羊",
+  "exCn": "山羊能爬陡峭的岩石。",
+  "hl": "山羊",
+  "how": "exact"
+ },
+ {
+  "id": 131,
+  "island": "animal",
+  "en": "chicken",
+  "cn": "鸡",
+  "exCn": "一只母鸡一天下一个蛋。",
+  "hl": "鸡",
+  "how": "exact"
+ },
+ {
+  "id": 132,
+  "island": "animal",
+  "en": "duck",
+  "cn": "鸭子",
+  "exCn": "鸭子喜欢待在水里。",
+  "hl": "鸭子",
+  "how": "exact"
+ },
+ {
+  "id": 133,
+  "island": "animal",
+  "en": "tiger",
+  "cn": "老虎",
+  "exCn": "老虎有橙色的毛和黑色的条纹。",
+  "hl": "老虎",
+  "how": "exact"
+ },
+ {
+  "id": 134,
+  "island": "animal",
+  "en": "lion",
+  "cn": "狮子",
+  "exCn": "狮子被称为百兽之王。",
+  "hl": "狮子",
+  "how": "exact"
+ },
+ {
+  "id": 135,
+  "island": "animal",
+  "en": "elephant",
+  "cn": "大象",
+  "exCn": "大象有长长的鼻子。",
+  "hl": "大象",
+  "how": "exact"
+ },
+ {
+  "id": 136,
+  "island": "animal",
+  "en": "monkey",
+  "cn": "猴子",
+  "exCn": "猴子能轻松地爬树。",
+  "hl": "猴子",
+  "how": "exact"
+ },
+ {
+  "id": 137,
+  "island": "animal",
+  "en": "panda",
+  "cn": "熊猫",
+  "exCn": "熊猫整天都在吃竹子。",
+  "hl": "熊猫",
+  "how": "exact"
+ },
+ {
+  "id": 138,
+  "island": "animal",
+  "en": "bear",
+  "cn": "熊",
+  "exCn": "熊整个冬天都在睡觉。",
+  "hl": "熊",
+  "how": "exact"
+ },
+ {
+  "id": 139,
+  "island": "animal",
+  "en": "wolf",
+  "cn": "狼",
+  "exCn": "狼生活在森林里。",
+  "hl": "狼",
+  "how": "exact"
+ },
+ {
+  "id": 140,
+  "island": "animal",
+  "en": "fox",
+  "cn": "狐狸",
+  "exCn": "狐狸是一种聪明的动物。",
+  "hl": "狐狸",
+  "how": "exact"
+ },
+ {
+  "id": 141,
+  "island": "animal",
+  "en": "deer",
+  "cn": "鹿",
+  "exCn": "一只鹿正穿过森林。",
+  "hl": "鹿",
+  "how": "exact"
+ },
+ {
+  "id": 142,
+  "island": "animal",
+  "en": "snake",
+  "cn": "蛇",
+  "exCn": "蛇的身体又长又细。",
+  "hl": "蛇",
+  "how": "exact"
+ },
+ {
+  "id": 143,
+  "island": "animal",
+  "en": "frog",
+  "cn": "青蛙",
+  "exCn": "青蛙能跳得很远。",
+  "hl": "青蛙",
+  "how": "exact"
+ },
+ {
+  "id": 144,
+  "island": "animal",
+  "en": "turtle",
+  "cn": "乌龟",
+  "exCn": "乌龟走得很慢。",
+  "hl": "乌龟",
+  "how": "exact"
+ },
+ {
+  "id": 145,
+  "island": "animal",
+  "en": "butterfly",
+  "cn": "蝴蝶",
+  "exCn": "蝴蝶有五彩缤纷的翅膀。",
+  "hl": "蝴蝶",
+  "how": "exact"
+ },
+ {
+  "id": 146,
+  "island": "animal",
+  "en": "bee",
+  "cn": "蜜蜂",
+  "exCn": "蜜蜂从花儿里采蜜。",
+  "hl": "蜜蜂",
+  "how": "exact"
+ },
+ {
+  "id": 147,
+  "island": "animal",
+  "en": "ant",
+  "cn": "蚂蚁",
+  "exCn": "蚂蚁虽小但很有力气。",
+  "hl": "蚂蚁",
+  "how": "exact"
+ },
+ {
+  "id": 148,
+  "island": "animal",
+  "en": "spider",
+  "cn": "蜘蛛",
+  "exCn": "蜘蛛有八条腿。",
+  "hl": "蜘蛛",
+  "how": "exact"
+ },
+ {
+  "id": 149,
+  "island": "animal",
+  "en": "dolphin",
+  "cn": "海豚",
+  "exCn": "海豚是非常聪明的海洋动物。",
+  "hl": "海豚",
+  "how": "exact"
+ },
+ {
+  "id": 150,
+  "island": "animal",
+  "en": "whale",
+  "cn": "鲸鱼",
+  "exCn": "鲸是地球上最大的动物。",
+  "hl": "鲸",
+  "how": "fragment"
+ },
+ {
+  "id": 151,
+  "island": "animal",
+  "en": "shark",
+  "cn": "鲨鱼",
+  "exCn": "鲨鱼有锋利的牙齿。",
+  "hl": "鲨鱼",
+  "how": "exact"
+ },
+ {
+  "id": 152,
+  "island": "animal",
+  "en": "penguin",
+  "cn": "企鹅",
+  "exCn": "企鹅不会飞,但很会游泳。",
+  "hl": "企鹅",
+  "how": "exact"
+ },
+ {
+  "id": 153,
+  "island": "animal",
+  "en": "parrot",
+  "cn": "鹦鹉",
+  "exCn": "鹦鹉能模仿你说的话。",
+  "hl": "鹦鹉",
+  "how": "exact"
+ },
+ {
+  "id": 154,
+  "island": "animal",
+  "en": "eagle",
+  "cn": "老鹰",
+  "exCn": "老鹰能飞得很高。",
+  "hl": "老鹰",
+  "how": "exact"
+ },
+ {
+  "id": 155,
+  "island": "animal",
+  "en": "owl",
+  "cn": "猫头鹰",
+  "exCn": "猫头鹰夜里才出来活动。",
+  "hl": "猫头鹰",
+  "how": "exact"
+ },
+ {
+  "id": 156,
+  "island": "animal",
+  "en": "crocodile",
+  "cn": "鳄鱼",
+  "exCn": "鳄鱼生活在河边。",
+  "hl": "鳄鱼",
+  "how": "exact"
+ },
+ {
+  "id": 157,
+  "island": "animal",
+  "en": "giraffe",
+  "cn": "长颈鹿",
+  "exCn": "长颈鹿的脖子非常长。",
+  "hl": "长颈鹿",
+  "how": "exact"
+ },
+ {
+  "id": 158,
+  "island": "animal",
+  "en": "zebra",
+  "cn": "斑马",
+  "exCn": "斑马身上有黑白条纹。",
+  "hl": "斑马",
+  "how": "exact"
+ },
+ {
+  "id": 159,
+  "island": "animal",
+  "en": "camel",
+  "cn": "骆驼",
+  "exCn": "骆驼能好几天不喝水。",
+  "hl": "骆驼",
+  "how": "exact"
+ },
+ {
+  "id": 160,
+  "island": "animal",
+  "en": "kangaroo",
+  "cn": "袋鼠",
+  "exCn": "袋鼠能跳得非常高。",
+  "hl": "袋鼠",
+  "how": "exact"
+ },
+ {
+  "id": 161,
+  "island": "body",
+  "en": "head",
+  "cn": "头",
+  "exCn": "我的头撞到门上了。",
+  "hl": "头",
+  "how": "exact"
+ },
+ {
+  "id": 162,
+  "island": "body",
+  "en": "hair",
+  "cn": "头发",
+  "exCn": "她有一头乌黑的长发。",
+  "hl": "发",
+  "how": "manual"
+ },
+ {
+  "id": 163,
+  "island": "body",
+  "en": "face",
+  "cn": "脸",
+  "exCn": "我每天早上洗脸。",
+  "hl": "脸",
+  "how": "exact"
+ },
+ {
+  "id": 164,
+  "island": "body",
+  "en": "eye",
+  "cn": "眼睛",
+  "exCn": "她的眼睛明亮又漂亮。",
+  "hl": "眼睛",
+  "how": "exact"
+ },
+ {
+  "id": 165,
+  "island": "body",
+  "en": "ear",
+  "cn": "耳朵",
+  "exCn": "兔子有长长的耳朵。",
+  "hl": "耳朵",
+  "how": "exact"
+ },
+ {
+  "id": 166,
+  "island": "body",
+  "en": "nose",
+  "cn": "鼻子",
+  "exCn": "我的鼻子痒痒的。",
+  "hl": "鼻子",
+  "how": "exact"
+ },
+ {
+  "id": 167,
+  "island": "body",
+  "en": "mouth",
+  "cn": "嘴巴",
+  "exCn": "请张开嘴。",
+  "hl": "嘴",
+  "how": "fragment"
+ },
+ {
+  "id": 168,
+  "island": "body",
+  "en": "tooth",
+  "cn": "牙齿",
+  "exCn": "我昨天掉了一颗牙。",
+  "hl": "牙",
+  "how": "fragment"
+ },
+ {
+  "id": 169,
+  "island": "body",
+  "en": "teeth",
+  "cn": "牙齿（复数）",
+  "exCn": "一天刷两次牙。",
+  "hl": "牙",
+  "how": "fragment"
+ },
+ {
+  "id": 170,
+  "island": "body",
+  "en": "lip",
+  "cn": "嘴唇",
+  "exCn": "她的嘴唇是红色的。",
+  "hl": "嘴唇",
+  "how": "exact"
+ },
+ {
+  "id": 171,
+  "island": "body",
+  "en": "chin",
+  "cn": "下巴",
+  "exCn": "他用手托着下巴。",
+  "hl": "下巴",
+  "how": "exact"
+ },
+ {
+  "id": 172,
+  "island": "body",
+  "en": "tongue",
+  "cn": "舌头",
+  "exCn": "把舌头伸出来。",
+  "hl": "舌头",
+  "how": "exact"
+ },
+ {
+  "id": 173,
+  "island": "body",
+  "en": "cheek",
+  "cn": "脸颊",
+  "exCn": "她在我脸颊上亲了一下。",
+  "hl": "脸颊",
+  "how": "exact"
+ },
+ {
+  "id": 174,
+  "island": "body",
+  "en": "neck",
+  "cn": "脖子",
+  "exCn": "长颈鹿的脖子很长。",
+  "hl": "脖子",
+  "how": "exact"
+ },
+ {
+  "id": 175,
+  "island": "body",
+  "en": "shoulder",
+  "cn": "肩膀",
+  "exCn": "他拍了拍我的肩膀。",
+  "hl": "肩膀",
+  "how": "exact"
+ },
+ {
+  "id": 176,
+  "island": "body",
+  "en": "arm",
+  "cn": "手臂",
+  "exCn": "把手臂举过头顶。",
+  "hl": "手臂",
+  "how": "exact"
+ },
+ {
+  "id": 177,
+  "island": "body",
+  "en": "elbow",
+  "cn": "手肘",
+  "exCn": "别把手肘放在桌子上。",
+  "hl": "手肘",
+  "how": "exact"
+ },
+ {
+  "id": 178,
+  "island": "body",
+  "en": "hand",
+  "cn": "手",
+  "exCn": "吃饭前要洗手。",
+  "hl": "手",
+  "how": "exact"
+ },
+ {
+  "id": 179,
+  "island": "body",
+  "en": "finger",
+  "cn": "手指",
+  "exCn": "我被刀割伤了手指。",
+  "hl": "手指",
+  "how": "exact"
+ },
+ {
+  "id": 180,
+  "island": "body",
+  "en": "thumb",
+  "cn": "大拇指",
+  "exCn": "我昨天割伤了大拇指。",
+  "hl": "大拇指",
+  "how": "exact"
+ },
+ {
+  "id": 181,
+  "island": "body",
+  "en": "wrist",
+  "cn": "手腕",
+  "exCn": "她手腕上戴了一只手镯。",
+  "hl": "手腕",
+  "how": "exact"
+ },
+ {
+  "id": 182,
+  "island": "body",
+  "en": "chest",
+  "cn": "胸膛",
+  "exCn": "我感觉胸口一阵疼。",
+  "hl": "胸",
+  "how": "fragment"
+ },
+ {
+  "id": 183,
+  "island": "body",
+  "en": "stomach",
+  "cn": "胃/肚子",
+  "exCn": "我肚子疼。",
+  "hl": "肚子",
+  "how": "alt"
+ },
+ {
+  "id": 184,
+  "island": "body",
+  "en": "back",
+  "cn": "背",
+  "exCn": "我坐久了背疼。",
+  "hl": "背",
+  "how": "exact"
+ },
+ {
+  "id": 185,
+  "island": "body",
+  "en": "leg",
+  "cn": "腿",
+  "exCn": "我走得腿都酸了。",
+  "hl": "腿",
+  "how": "exact"
+ },
+ {
+  "id": 186,
+  "island": "body",
+  "en": "knee",
+  "cn": "膝盖",
+  "exCn": "我踢足球时伤了膝盖。",
+  "hl": "膝盖",
+  "how": "exact"
+ },
+ {
+  "id": 187,
+  "island": "body",
+  "en": "foot",
+  "cn": "脚",
+  "exCn": "我的脚麻了。",
+  "hl": "脚",
+  "how": "exact"
+ },
+ {
+  "id": 188,
+  "island": "body",
+  "en": "feet",
+  "cn": "脚（复数）",
+  "exCn": "我走得脚都酸了。",
+  "hl": "脚",
+  "how": "fragment"
+ },
+ {
+  "id": 189,
+  "island": "body",
+  "en": "toe",
+  "cn": "脚趾",
+  "exCn": "我的脚趾撞到桌子上了。",
+  "hl": "脚趾",
+  "how": "exact"
+ },
+ {
+  "id": 190,
+  "island": "body",
+  "en": "heel",
+  "cn": "脚后跟",
+  "exCn": "长跑之后我的脚后跟很疼。",
+  "hl": "脚后跟",
+  "how": "exact"
+ },
+ {
+  "id": 191,
+  "island": "body",
+  "en": "skin",
+  "cn": "皮肤",
+  "exCn": "我皮肤冬天会变干。",
+  "hl": "皮肤",
+  "how": "exact"
+ },
+ {
+  "id": 192,
+  "island": "body",
+  "en": "bone",
+  "cn": "骨头",
+  "exCn": "狗很喜欢啃骨头。",
+  "hl": "骨头",
+  "how": "exact"
+ },
+ {
+  "id": 193,
+  "island": "body",
+  "en": "heart",
+  "cn": "心脏",
+  "exCn": "我的心跳得很快。",
+  "hl": "心",
+  "how": "fragment"
+ },
+ {
+  "id": 194,
+  "island": "body",
+  "en": "brain",
+  "cn": "大脑",
+  "exCn": "动动脑子!",
+  "hl": "脑",
+  "how": "fragment"
+ },
+ {
+  "id": 195,
+  "island": "body",
+  "en": "blood",
+  "cn": "血液",
+  "exCn": "我是 O 型血。",
+  "hl": "血",
+  "how": "fragment"
+ },
+ {
+  "id": 196,
+  "island": "city",
+  "en": "city",
+  "cn": "城市",
+  "exCn": "我住在一座大城市里。",
+  "hl": "城市",
+  "how": "exact"
+ },
+ {
+  "id": 197,
+  "island": "city",
+  "en": "town",
+  "cn": "城镇",
+  "exCn": "我住的小镇又小又安静。",
+  "hl": "镇",
+  "how": "fragment"
+ },
+ {
+  "id": 198,
+  "island": "city",
+  "en": "village",
+  "cn": "村庄",
+  "exCn": "我爷爷住在一个小村庄里。",
+  "hl": "村庄",
+  "how": "exact"
+ },
+ {
+  "id": 199,
+  "island": "city",
+  "en": "country",
+  "cn": "国家",
+  "exCn": "你来自哪个国家?",
+  "hl": "国家",
+  "how": "exact"
+ },
+ {
+  "id": 200,
+  "island": "city",
+  "en": "farm",
+  "cn": "农场",
+  "exCn": "我叔叔的农场上有几头奶牛。",
+  "hl": "农场",
+  "how": "exact"
+ },
+ {
+  "id": 201,
+  "island": "city",
+  "en": "hospital",
+  "cn": "医院",
+  "exCn": "我昨晚不得不去医院。",
+  "hl": "医院",
+  "how": "exact"
+ },
+ {
+  "id": 202,
+  "island": "city",
+  "en": "bank",
+  "cn": "银行",
+  "exCn": "我等会儿要去银行。",
+  "hl": "银行",
+  "how": "exact"
+ },
+ {
+  "id": 203,
+  "island": "city",
+  "en": "post office",
+  "cn": "邮局",
+  "exCn": "我在邮局寄了封信。",
+  "hl": "邮局",
+  "how": "exact"
+ },
+ {
+  "id": 204,
+  "island": "city",
+  "en": "police station",
+  "cn": "警察局",
+  "exCn": "警察局就在街那边。",
+  "hl": "警察局",
+  "how": "exact"
+ },
+ {
+  "id": 205,
+  "island": "city",
+  "en": "fire station",
+  "cn": "消防站",
+  "exCn": "一辆红色卡车从消防站开出来。",
+  "hl": "消防站",
+  "how": "exact"
+ },
+ {
+  "id": 206,
+  "island": "city",
+  "en": "shop",
+  "cn": "商店",
+  "exCn": "我在商店买了一个小玩具。",
+  "hl": "商店",
+  "how": "exact"
+ },
+ {
+  "id": 207,
+  "island": "city",
+  "en": "supermarket",
+  "cn": "超市",
+  "exCn": "我们在超市买东西。",
+  "hl": "超市",
+  "how": "exact"
+ },
+ {
+  "id": 208,
+  "island": "city",
+  "en": "market",
+  "cn": "市场",
+  "exCn": "周末市场很热闹。",
+  "hl": "市场",
+  "how": "exact"
+ },
+ {
+  "id": 209,
+  "island": "city",
+  "en": "hotel",
+  "cn": "酒店",
+  "exCn": "我们住在一家海边的酒店。",
+  "hl": "酒店",
+  "how": "exact"
+ },
+ {
+  "id": 210,
+  "island": "city",
+  "en": "cinema",
+  "cn": "电影院",
+  "exCn": "今晚我们去电影院吧。",
+  "hl": "电影院",
+  "how": "exact"
+ },
+ {
+  "id": 211,
+  "island": "city",
+  "en": "museum",
+  "cn": "博物馆",
+  "exCn": "我们周末去参观了博物馆。",
+  "hl": "博物馆",
+  "how": "exact"
+ },
+ {
+  "id": 212,
+  "island": "city",
+  "en": "zoo",
+  "cn": "动物园",
+  "exCn": "我在动物园看到了一只真老虎。",
+  "hl": "动物园",
+  "how": "exact"
+ },
+ {
+  "id": 213,
+  "island": "city",
+  "en": "factory",
+  "cn": "工厂",
+  "exCn": "这家工厂生产汽车。",
+  "hl": "工厂",
+  "how": "exact"
+ },
+ {
+  "id": 214,
+  "island": "city",
+  "en": "office",
+  "cn": "办公室",
+  "exCn": "我爸在市区的一间办公室工作。",
+  "hl": "办公室",
+  "how": "exact"
+ },
+ {
+  "id": 215,
+  "island": "city",
+  "en": "church",
+  "cn": "教堂",
+  "exCn": "我们每周日去教堂。",
+  "hl": "教堂",
+  "how": "exact"
+ },
+ {
+  "id": 216,
+  "island": "city",
+  "en": "temple",
+  "cn": "庙宇",
+  "exCn": "山上有一座古老的寺庙。",
+  "hl": "庙",
+  "how": "fragment"
+ },
+ {
+  "id": 217,
+  "island": "city",
+  "en": "north",
+  "cn": "北",
+  "exCn": "北京在中国的北方。",
+  "hl": "北",
+  "how": "exact"
+ },
+ {
+  "id": 218,
+  "island": "city",
+  "en": "south",
+  "cn": "南",
+  "exCn": "南方比较暖和。",
+  "hl": "南",
+  "how": "exact"
+ },
+ {
+  "id": 219,
+  "island": "city",
+  "en": "east",
+  "cn": "东",
+  "exCn": "太阳从东方升起。",
+  "hl": "东",
+  "how": "exact"
+ },
+ {
+  "id": 220,
+  "island": "city",
+  "en": "west",
+  "cn": "西",
+  "exCn": "太阳在西方落下。",
+  "hl": "西",
+  "how": "exact"
+ },
+ {
+  "id": 221,
+  "island": "city",
+  "en": "centre",
+  "cn": "中心",
+  "exCn": "喷泉在广场的中央。",
+  "hl": "中央",
+  "how": "manual"
+ },
+ {
+  "id": 222,
+  "island": "city",
+  "en": "upstairs",
+  "cn": "楼上",
+  "exCn": "我的房间在楼上。",
+  "hl": "楼上",
+  "how": "exact"
+ },
+ {
+  "id": 223,
+  "island": "city",
+  "en": "downstairs",
+  "cn": "楼下",
+  "exCn": "厨房在楼下。",
+  "hl": "楼下",
+  "how": "exact"
+ },
+ {
+  "id": 224,
+  "island": "city",
+  "en": "inside",
+  "cn": "里面",
+  "exCn": "房子里很暖和。",
+  "hl": "里",
+  "how": "fragment"
+ },
+ {
+  "id": 225,
+  "island": "city",
+  "en": "outside",
+  "cn": "外面",
+  "exCn": "孩子们在外面玩。",
+  "hl": "外面",
+  "how": "exact"
+ },
+ {
+  "id": 226,
+  "island": "clothes",
+  "en": "clothes",
+  "cn": "衣服",
+  "exCn": "我每周日洗衣服。",
+  "hl": "衣服",
+  "how": "exact"
+ },
+ {
+  "id": 227,
+  "island": "clothes",
+  "en": "shirt",
+  "cn": "衬衫",
+  "exCn": "他穿白衬衫去上班。",
+  "hl": "衬衫",
+  "how": "exact"
+ },
+ {
+  "id": 228,
+  "island": "clothes",
+  "en": "T-shirt",
+  "cn": "T恤衫",
+  "exCn": "这件 T 恤现在我穿太小了。",
+  "hl": "T 恤",
+  "how": "manual"
+ },
+ {
+  "id": 229,
+  "island": "clothes",
+  "en": "sweater",
+  "cn": "毛衣",
+  "exCn": "奶奶给我织了一件暖和的毛衣。",
+  "hl": "毛衣",
+  "how": "exact"
+ },
+ {
+  "id": 230,
+  "island": "clothes",
+  "en": "jacket",
+  "cn": "夹克",
+  "exCn": "穿上夹克吧,外面冷。",
+  "hl": "夹克",
+  "how": "exact"
+ },
+ {
+  "id": 231,
+  "island": "clothes",
+  "en": "coat",
+  "cn": "外套",
+  "exCn": "我的外套有六颗大纽扣。",
+  "hl": "外套",
+  "how": "exact"
+ },
+ {
+  "id": 232,
+  "island": "clothes",
+  "en": "raincoat",
+  "cn": "雨衣",
+  "exCn": "带上雨衣,可能会下雨。",
+  "hl": "雨衣",
+  "how": "exact"
+ },
+ {
+  "id": 233,
+  "island": "clothes",
+  "en": "dress",
+  "cn": "连衣裙",
+  "exCn": "她穿了一条红裙子去参加聚会。",
+  "hl": "裙",
+  "how": "fragment"
+ },
+ {
+  "id": 234,
+  "island": "clothes",
+  "en": "skirt",
+  "cn": "短裙",
+  "exCn": "我妹妹很喜欢她的新蓝裙子。",
+  "hl": "裙",
+  "how": "fragment"
+ },
+ {
+  "id": 235,
+  "island": "clothes",
+  "en": "pants",
+  "cn": "裤子",
+  "exCn": "这条裤子我穿有点长。",
+  "hl": "裤子",
+  "how": "exact"
+ },
+ {
+  "id": 236,
+  "island": "clothes",
+  "en": "jeans",
+  "cn": "牛仔裤",
+  "exCn": "我每个周末都穿牛仔裤。",
+  "hl": "牛仔裤",
+  "how": "exact"
+ },
+ {
+  "id": 237,
+  "island": "clothes",
+  "en": "shorts",
+  "cn": "短裤",
+  "exCn": "他穿短裤打篮球。",
+  "hl": "短裤",
+  "how": "exact"
+ },
+ {
+  "id": 238,
+  "island": "clothes",
+  "en": "socks",
+  "cn": "袜子",
+  "exCn": "我需要一双新袜子。",
+  "hl": "袜子",
+  "how": "exact"
+ },
+ {
+  "id": 239,
+  "island": "clothes",
+  "en": "shoes",
+  "cn": "鞋子",
+  "exCn": "请在门口脱鞋。",
+  "hl": "鞋",
+  "how": "fragment"
+ },
+ {
+  "id": 240,
+  "island": "clothes",
+  "en": "boots",
+  "cn": "靴子",
+  "exCn": "我的靴子能让脚在雨里保持干燥。",
+  "hl": "靴子",
+  "how": "exact"
+ },
+ {
+  "id": 241,
+  "island": "clothes",
+  "en": "sneakers",
+  "cn": "运动鞋",
+  "exCn": "我穿运动鞋跑得更快。",
+  "hl": "运动鞋",
+  "how": "exact"
+ },
+ {
+  "id": 242,
+  "island": "clothes",
+  "en": "gloves",
+  "cn": "手套",
+  "exCn": "下雪天出门戴手套。",
+  "hl": "手套",
+  "how": "exact"
+ },
+ {
+  "id": 243,
+  "island": "clothes",
+  "en": "hat",
+  "cn": "帽子",
+  "exCn": "她买了顶遮阳帽去海滩。",
+  "hl": "帽",
+  "how": "fragment"
+ },
+ {
+  "id": 244,
+  "island": "clothes",
+  "en": "cap",
+  "cn": "鸭舌帽",
+  "exCn": "他戴着棒球帽去上学。",
+  "hl": "帽",
+  "how": "fragment"
+ },
+ {
+  "id": 245,
+  "island": "clothes",
+  "en": "scarf",
+  "cn": "围巾",
+  "exCn": "妈妈给我织了条红围巾。",
+  "hl": "围巾",
+  "how": "exact"
+ },
+ {
+  "id": 246,
+  "island": "clothes",
+  "en": "belt",
+  "cn": "腰带",
+  "exCn": "他有一条棕色的皮带。",
+  "hl": "带",
+  "how": "fragment"
+ },
+ {
+  "id": 247,
+  "island": "clothes",
+  "en": "tie",
+  "cn": "领带",
+  "exCn": "爸爸每天上班都戴领带。",
+  "hl": "领带",
+  "how": "exact"
+ },
+ {
+  "id": 248,
+  "island": "clothes",
+  "en": "uniform",
+  "cn": "制服",
+  "exCn": "我们每天都穿校服。",
+  "hl": "服",
+  "how": "fragment"
+ },
+ {
+  "id": 249,
+  "island": "clothes",
+  "en": "pajamas",
+  "cn": "睡衣",
+  "exCn": "我睡前换上睡衣。",
+  "hl": "睡衣",
+  "how": "exact"
+ },
+ {
+  "id": 250,
+  "island": "clothes",
+  "en": "swimsuit",
+  "cn": "泳衣",
+  "exCn": "她的新泳衣是鲜粉色的。",
+  "hl": "泳衣",
+  "how": "exact"
+ },
+ {
+  "id": 251,
+  "island": "clothes",
+  "en": "pocket",
+  "cn": "口袋",
+  "exCn": "我口袋里有一枚硬币。",
+  "hl": "口袋",
+  "how": "exact"
+ },
+ {
+  "id": 252,
+  "island": "clothes",
+  "en": "button",
+  "cn": "纽扣",
+  "exCn": "我衬衫上一颗纽扣掉了。",
+  "hl": "纽扣",
+  "how": "exact"
+ },
+ {
+  "id": 253,
+  "island": "clothes",
+  "en": "zipper",
+  "cn": "拉链",
+  "exCn": "我的拉链卡住了。",
+  "hl": "拉链",
+  "how": "exact"
+ },
+ {
+  "id": 254,
+  "island": "clothes",
+  "en": "sleeve",
+  "cn": "袖子",
+  "exCn": "他卷起袖子开始干活。",
+  "hl": "袖子",
+  "how": "exact"
+ },
+ {
+  "id": 255,
+  "island": "clothes",
+  "en": "collar",
+  "cn": "衣领",
+  "exCn": "请把衣领翻下来。",
+  "hl": "衣领",
+  "how": "exact"
+ },
+ {
+  "id": 256,
+  "island": "color",
+  "en": "color",
+  "cn": "颜色",
+  "exCn": "你最喜欢什么颜色?",
+  "hl": "颜色",
+  "how": "exact"
+ },
+ {
+  "id": 257,
+  "island": "color",
+  "en": "red",
+  "cn": "红色",
+  "exCn": "红灯亮了。",
+  "hl": "红",
+  "how": "fragment"
+ },
+ {
+  "id": 258,
+  "island": "color",
+  "en": "blue",
+  "cn": "蓝色",
+  "exCn": "今天天空很蓝。",
+  "hl": "蓝",
+  "how": "fragment"
+ },
+ {
+  "id": 259,
+  "island": "color",
+  "en": "green",
+  "cn": "绿色",
+  "exCn": "春天叶子变绿了。",
+  "hl": "绿",
+  "how": "fragment"
+ },
+ {
+  "id": 260,
+  "island": "color",
+  "en": "yellow",
+  "cn": "黄色",
+  "exCn": "香蕉成熟时变黄。",
+  "hl": "黄",
+  "how": "fragment"
+ },
+ {
+  "id": 261,
+  "island": "color",
+  "en": "orange",
+  "cn": "橙色",
+  "exCn": "我喜欢那件橙色的衬衫。",
+  "hl": "橙色",
+  "how": "exact"
+ },
+ {
+  "id": 262,
+  "island": "color",
+  "en": "purple",
+  "cn": "紫色",
+  "exCn": "葡萄可以是紫色的。",
+  "hl": "紫色",
+  "how": "exact"
+ },
+ {
+  "id": 263,
+  "island": "color",
+  "en": "pink",
+  "cn": "粉色",
+  "exCn": "她的连衣裙是粉色的。",
+  "hl": "粉色",
+  "how": "exact"
+ },
+ {
+  "id": 264,
+  "island": "color",
+  "en": "white",
+  "cn": "白色",
+  "exCn": "墙刷成白色的。",
+  "hl": "白色",
+  "how": "exact"
+ },
+ {
+  "id": 265,
+  "island": "color",
+  "en": "black",
+  "cn": "黑色",
+  "exCn": "我穿黑色的鞋去上学。",
+  "hl": "黑色",
+  "how": "exact"
+ },
+ {
+  "id": 266,
+  "island": "color",
+  "en": "brown",
+  "cn": "棕色",
+  "exCn": "她是棕色头发。",
+  "hl": "棕色",
+  "how": "exact"
+ },
+ {
+  "id": 267,
+  "island": "color",
+  "en": "gray",
+  "cn": "灰色",
+  "exCn": "我的猫毛是灰色的。",
+  "hl": "灰色",
+  "how": "exact"
+ },
+ {
+  "id": 268,
+  "island": "color",
+  "en": "zero",
+  "cn": "零",
+  "exCn": "比分是二比零。",
+  "hl": "零",
+  "how": "exact"
+ },
+ {
+  "id": 269,
+  "island": "color",
+  "en": "one",
+  "cn": "一",
+  "exCn": "我有一个弟弟。",
+  "hl": "一",
+  "how": "exact"
+ },
+ {
+  "id": 270,
+  "island": "color",
+  "en": "two",
+  "cn": "二",
+  "exCn": "一加一等于二。",
+  "hl": "二",
+  "how": "exact"
+ },
+ {
+  "id": 271,
+  "island": "color",
+  "en": "three",
+  "cn": "三",
+  "exCn": "桌上有三支笔。",
+  "hl": "三",
+  "how": "exact"
+ },
+ {
+  "id": 272,
+  "island": "color",
+  "en": "four",
+  "cn": "四",
+  "exCn": "猫有四条腿。",
+  "hl": "四",
+  "how": "exact"
+ },
+ {
+  "id": 273,
+  "island": "color",
+  "en": "five",
+  "cn": "五",
+  "exCn": "我们每只手有五根手指。",
+  "hl": "五",
+  "how": "exact"
+ },
+ {
+  "id": 274,
+  "island": "color",
+  "en": "six",
+  "cn": "六",
+  "exCn": "学校六点上课。",
+  "hl": "六",
+  "how": "exact"
+ },
+ {
+  "id": 275,
+  "island": "color",
+  "en": "seven",
+  "cn": "七",
+  "exCn": "一周有七天。",
+  "hl": "七",
+  "how": "exact"
+ },
+ {
+  "id": 276,
+  "island": "color",
+  "en": "eight",
+  "cn": "八",
+  "exCn": "我每天八点起床。",
+  "hl": "八",
+  "how": "exact"
+ },
+ {
+  "id": 277,
+  "island": "color",
+  "en": "nine",
+  "cn": "九",
+  "exCn": "据说猫有九条命。",
+  "hl": "九",
+  "how": "exact"
+ },
+ {
+  "id": 278,
+  "island": "color",
+  "en": "ten",
+  "cn": "十",
+  "exCn": "从一数到十。",
+  "hl": "十",
+  "how": "exact"
+ },
+ {
+  "id": 279,
+  "island": "color",
+  "en": "eleven",
+  "cn": "十一",
+  "exCn": "我哥哥十一岁。",
+  "hl": "十一",
+  "how": "exact"
+ },
+ {
+  "id": 280,
+  "island": "color",
+  "en": "twelve",
+  "cn": "十二",
+  "exCn": "一年有十二个月。",
+  "hl": "十二",
+  "how": "exact"
+ },
+ {
+  "id": 281,
+  "island": "color",
+  "en": "thirteen",
+  "cn": "十三",
+  "exCn": "他刚满十三岁。",
+  "hl": "十三",
+  "how": "exact"
+ },
+ {
+  "id": 282,
+  "island": "color",
+  "en": "twenty",
+  "cn": "二十",
+  "exCn": "我们班有二十个学生。",
+  "hl": "二十",
+  "how": "exact"
+ },
+ {
+  "id": 283,
+  "island": "color",
+  "en": "thirty",
+  "cn": "三十",
+  "exCn": "九月有三十天。",
+  "hl": "三十",
+  "how": "exact"
+ },
+ {
+  "id": 284,
+  "island": "color",
+  "en": "forty",
+  "cn": "四十",
+  "exCn": "我父亲四十岁。",
+  "hl": "四十",
+  "how": "exact"
+ },
+ {
+  "id": 285,
+  "island": "color",
+  "en": "fifty",
+  "cn": "五十",
+  "exCn": "这本书五十元。",
+  "hl": "五十",
+  "how": "exact"
+ },
+ {
+  "id": 286,
+  "island": "color",
+  "en": "hundred",
+  "cn": "百",
+  "exCn": "这里有一百多人。",
+  "hl": "百",
+  "how": "exact"
+ },
+ {
+  "id": 287,
+  "island": "color",
+  "en": "thousand",
+  "cn": "千",
+  "exCn": "夜晚有成千上万颗星星闪烁。",
+  "hl": "千",
+  "how": "exact"
+ },
+ {
+  "id": 288,
+  "island": "color",
+  "en": "first",
+  "cn": "第一",
+  "exCn": "她在班里是第一名。",
+  "hl": "第一",
+  "how": "exact"
+ },
+ {
+  "id": 289,
+  "island": "color",
+  "en": "second",
+  "cn": "第二",
+  "exCn": "我在比赛中得了第二名。",
+  "hl": "第二",
+  "how": "exact"
+ },
+ {
+  "id": 290,
+  "island": "color",
+  "en": "third",
+  "cn": "第三",
+  "exCn": "三月是一年中的第三个月。",
+  "hl": "第三",
+  "how": "exact"
+ },
+ {
+  "id": 291,
+  "island": "family",
+  "en": "family",
+  "cn": "家庭",
+  "exCn": "我非常爱我的家人。",
+  "hl": "家",
+  "how": "fragment"
+ },
+ {
+  "id": 292,
+  "island": "family",
+  "en": "parents",
+  "cn": "父母",
+  "exCn": "我父母每天努力工作。",
+  "hl": "父母",
+  "how": "exact"
+ },
+ {
+  "id": 293,
+  "island": "family",
+  "en": "dad",
+  "cn": "爸爸",
+  "exCn": "爸爸帮我做作业。",
+  "hl": "爸爸",
+  "how": "exact"
+ },
+ {
+  "id": 294,
+  "island": "family",
+  "en": "mom",
+  "cn": "妈妈",
+  "exCn": "我妈妈做饭很厉害。",
+  "hl": "妈妈",
+  "how": "exact"
+ },
+ {
+  "id": 295,
+  "island": "family",
+  "en": "father",
+  "cn": "父亲",
+  "exCn": "我父亲很高。",
+  "hl": "父亲",
+  "how": "exact"
+ },
+ {
+  "id": 296,
+  "island": "family",
+  "en": "mother",
+  "cn": "母亲",
+  "exCn": "我母亲非常善良。",
+  "hl": "母亲",
+  "how": "exact"
+ },
+ {
+  "id": 297,
+  "island": "family",
+  "en": "son",
+  "cn": "儿子",
+  "exCn": "他们有一个儿子和两个女儿。",
+  "hl": "儿子",
+  "how": "exact"
+ },
+ {
+  "id": 298,
+  "island": "family",
+  "en": "daughter",
+  "cn": "女儿",
+  "exCn": "我女儿现在上初中。",
+  "hl": "女儿",
+  "how": "exact"
+ },
+ {
+  "id": 299,
+  "island": "family",
+  "en": "brother",
+  "cn": "兄弟",
+  "exCn": "我有一个兄弟。",
+  "hl": "兄弟",
+  "how": "exact"
+ },
+ {
+  "id": 300,
+  "island": "family",
+  "en": "sister",
+  "cn": "姐妹",
+  "exCn": "我姐姐比我大。",
+  "hl": "姐姐",
+  "how": "manual"
+ },
+ {
+  "id": 301,
+  "island": "family",
+  "en": "sibling",
+  "cn": "兄弟姐妹",
+  "exCn": "你有兄弟姐妹吗?",
+  "hl": "兄弟姐妹",
+  "how": "exact"
+ },
+ {
+  "id": 302,
+  "island": "family",
+  "en": "twin",
+  "cn": "双胞胎",
+  "exCn": "我有一个双胞胎弟弟。",
+  "hl": "双胞胎",
+  "how": "exact"
+ },
+ {
+  "id": 303,
+  "island": "family",
+  "en": "grandpa",
+  "cn": "爷爷",
+  "exCn": "爷爷给我讲精彩的故事。",
+  "hl": "爷爷",
+  "how": "exact"
+ },
+ {
+  "id": 304,
+  "island": "family",
+  "en": "grandma",
+  "cn": "奶奶",
+  "exCn": "奶奶做的饼干最好吃。",
+  "hl": "奶奶",
+  "how": "exact"
+ },
+ {
+  "id": 305,
+  "island": "family",
+  "en": "grandfather",
+  "cn": "祖父",
+  "exCn": "我祖父今年七十岁了。",
+  "hl": "祖父",
+  "how": "exact"
+ },
+ {
+  "id": 306,
+  "island": "family",
+  "en": "grandmother",
+  "cn": "祖母",
+  "exCn": "我祖母织温暖的帽子。",
+  "hl": "祖母",
+  "how": "exact"
+ },
+ {
+  "id": 307,
+  "island": "family",
+  "en": "grandparents",
+  "cn": "祖父母",
+  "exCn": "我每周日都去看望祖父母。",
+  "hl": "祖父母",
+  "how": "exact"
+ },
+ {
+  "id": 308,
+  "island": "family",
+  "en": "uncle",
+  "cn": "叔叔",
+  "exCn": "我叔叔是医生。",
+  "hl": "叔叔",
+  "how": "exact"
+ },
+ {
+  "id": 309,
+  "island": "family",
+  "en": "aunt",
+  "cn": "姑姑",
+  "exCn": "我玛丽姑姑住在隔壁。",
+  "hl": "姑姑",
+  "how": "exact"
+ },
+ {
+  "id": 310,
+  "island": "family",
+  "en": "cousin",
+  "cn": "表兄弟姐妹",
+  "exCn": "我表哥住在另一个城市。",
+  "hl": "表哥",
+  "how": "manual"
+ },
+ {
+  "id": 311,
+  "island": "family",
+  "en": "nephew",
+  "cn": "侄子",
+  "exCn": "我的侄子才两岁。",
+  "hl": "侄子",
+  "how": "exact"
+ },
+ {
+  "id": 312,
+  "island": "family",
+  "en": "niece",
+  "cn": "侄女",
+  "exCn": "她是我最喜欢的侄女。",
+  "hl": "侄女",
+  "how": "exact"
+ },
+ {
+  "id": 313,
+  "island": "family",
+  "en": "relative",
+  "cn": "亲戚",
+  "exCn": "我们邀请了所有亲戚来。",
+  "hl": "亲戚",
+  "how": "exact"
+ },
+ {
+  "id": 314,
+  "island": "family",
+  "en": "husband",
+  "cn": "丈夫",
+  "exCn": "她丈夫是一名老师。",
+  "hl": "丈夫",
+  "how": "exact"
+ },
+ {
+  "id": 315,
+  "island": "family",
+  "en": "wife",
+  "cn": "妻子",
+  "exCn": "他妻子是医生。",
+  "hl": "妻子",
+  "how": "exact"
+ },
+ {
+  "id": 316,
+  "island": "family",
+  "en": "baby",
+  "cn": "婴儿",
+  "exCn": "婴儿正在床上睡觉。",
+  "hl": "婴儿",
+  "how": "exact"
+ },
+ {
+  "id": 317,
+  "island": "family",
+  "en": "child",
+  "cn": "孩子",
+  "exCn": "每个孩子都需要爱。",
+  "hl": "孩子",
+  "how": "exact"
+ },
+ {
+  "id": 318,
+  "island": "family",
+  "en": "children",
+  "cn": "孩子们",
+  "exCn": "孩子们在外面玩。",
+  "hl": "孩子们",
+  "how": "exact"
+ },
+ {
+  "id": 319,
+  "island": "family",
+  "en": "stepfather",
+  "cn": "继父",
+  "exCn": "他的继父待他如亲生儿子。",
+  "hl": "继父",
+  "how": "exact"
+ },
+ {
+  "id": 320,
+  "island": "family",
+  "en": "stepmother",
+  "cn": "继母",
+  "exCn": "她继母对她很好。",
+  "hl": "继母",
+  "how": "exact"
+ },
+ {
+  "id": 321,
+  "island": "family",
+  "en": "only child",
+  "cn": "独生子女",
+  "exCn": "我是独生子女。",
+  "hl": "独生子女",
+  "how": "exact"
+ },
+ {
+  "id": 322,
+  "island": "food",
+  "en": "apple",
+  "cn": "苹果",
+  "exCn": "我每天吃一个苹果。",
+  "hl": "苹果",
+  "how": "exact"
+ },
+ {
+  "id": 323,
+  "island": "food",
+  "en": "banana",
+  "cn": "香蕉",
+  "exCn": "香蕉又黄又甜。",
+  "hl": "香蕉",
+  "how": "exact"
+ },
+ {
+  "id": 324,
+  "island": "food",
+  "en": "orange",
+  "cn": "橙子",
+  "exCn": "这个橙子非常甜。",
+  "hl": "橙子",
+  "how": "exact"
+ },
+ {
+  "id": 325,
+  "island": "food",
+  "en": "grape",
+  "cn": "葡萄",
+  "exCn": "我喜欢在夏天吃葡萄。",
+  "hl": "葡萄",
+  "how": "exact"
+ },
+ {
+  "id": 326,
+  "island": "food",
+  "en": "strawberry",
+  "cn": "草莓",
+  "exCn": "我喜欢新鲜草莓配奶油。",
+  "hl": "草莓",
+  "how": "exact"
+ },
+ {
+  "id": 327,
+  "island": "food",
+  "en": "watermelon",
+  "cn": "西瓜",
+  "exCn": "夏天没什么比冰西瓜更爽了。",
+  "hl": "西瓜",
+  "how": "exact"
+ },
+ {
+  "id": 328,
+  "island": "food",
+  "en": "pear",
+  "cn": "梨",
+  "exCn": "熟透的梨又甜又多汁。",
+  "hl": "梨",
+  "how": "exact"
+ },
+ {
+  "id": 329,
+  "island": "food",
+  "en": "peach",
+  "cn": "桃子",
+  "exCn": "这个桃子又多汁又甜。",
+  "hl": "桃子",
+  "how": "exact"
+ },
+ {
+  "id": 330,
+  "island": "food",
+  "en": "lemon",
+  "cn": "柠檬",
+  "exCn": "我喜欢茶里加柠檬。",
+  "hl": "柠檬",
+  "how": "exact"
+ },
+ {
+  "id": 331,
+  "island": "food",
+  "en": "mango",
+  "cn": "芒果",
+  "exCn": "芒果是我最喜欢的水果。",
+  "hl": "芒果",
+  "how": "exact"
+ },
+ {
+  "id": 332,
+  "island": "food",
+  "en": "pineapple",
+  "cn": "菠萝",
+  "exCn": "菠萝放披萨上很好吃。",
+  "hl": "菠萝",
+  "how": "exact"
+ },
+ {
+  "id": 333,
+  "island": "food",
+  "en": "vegetable",
+  "cn": "蔬菜",
+  "exCn": "蔬菜对身体有益。",
+  "hl": "蔬菜",
+  "how": "exact"
+ },
+ {
+  "id": 334,
+  "island": "food",
+  "en": "tomato",
+  "cn": "西红柿",
+  "exCn": "我喜欢沙拉里加西红柿。",
+  "hl": "西红柿",
+  "how": "exact"
+ },
+ {
+  "id": 335,
+  "island": "food",
+  "en": "potato",
+  "cn": "土豆",
+  "exCn": "我喜欢吃土豆泥。",
+  "hl": "土豆",
+  "how": "exact"
+ },
+ {
+  "id": 336,
+  "island": "food",
+  "en": "carrot",
+  "cn": "胡萝卜",
+  "exCn": "我削了几根胡萝卜煮汤。",
+  "hl": "胡萝卜",
+  "how": "exact"
+ },
+ {
+  "id": 337,
+  "island": "food",
+  "en": "onion",
+  "cn": "洋葱",
+  "exCn": "切洋葱总让我流眼泪。",
+  "hl": "洋葱",
+  "how": "exact"
+ },
+ {
+  "id": 338,
+  "island": "food",
+  "en": "cucumber",
+  "cn": "黄瓜",
+  "exCn": "我在三明治里加黄瓜。",
+  "hl": "黄瓜",
+  "how": "exact"
+ },
+ {
+  "id": 339,
+  "island": "food",
+  "en": "cabbage",
+  "cn": "白菜",
+  "exCn": "奶奶在花园里种白菜。",
+  "hl": "白菜",
+  "how": "exact"
+ },
+ {
+  "id": 340,
+  "island": "food",
+  "en": "corn",
+  "cn": "玉米",
+  "exCn": "夏天的甜玉米很好吃。",
+  "hl": "玉米",
+  "how": "exact"
+ },
+ {
+  "id": 341,
+  "island": "food",
+  "en": "food",
+  "cn": "食物",
+  "exCn": "意大利食物是我的最爱。",
+  "hl": "食物",
+  "how": "exact"
+ },
+ {
+  "id": 342,
+  "island": "food",
+  "en": "rice",
+  "cn": "米饭",
+  "exCn": "大多数中国人每天都吃米饭。",
+  "hl": "米饭",
+  "how": "exact"
+ },
+ {
+  "id": 343,
+  "island": "food",
+  "en": "noodles",
+  "cn": "面条",
+  "exCn": "我想要一碗面条。",
+  "hl": "面条",
+  "how": "exact"
+ },
+ {
+  "id": 344,
+  "island": "food",
+  "en": "bread",
+  "cn": "面包",
+  "exCn": "我早餐吃面包配牛奶。",
+  "hl": "面包",
+  "how": "exact"
+ },
+ {
+  "id": 345,
+  "island": "food",
+  "en": "pizza",
+  "cn": "披萨",
+  "exCn": "披萨最初来自意大利。",
+  "hl": "披萨",
+  "how": "exact"
+ },
+ {
+  "id": 346,
+  "island": "food",
+  "en": "hamburger",
+  "cn": "汉堡",
+  "exCn": "我们午饭吃个汉堡吧。",
+  "hl": "汉堡",
+  "how": "exact"
+ },
+ {
+  "id": 347,
+  "island": "food",
+  "en": "sandwich",
+  "cn": "三明治",
+  "exCn": "三明治做起来又快又简单。",
+  "hl": "三明治",
+  "how": "exact"
+ },
+ {
+  "id": 348,
+  "island": "food",
+  "en": "egg",
+  "cn": "鸡蛋",
+  "exCn": "我每天早上吃一个鸡蛋。",
+  "hl": "鸡蛋",
+  "how": "exact"
+ },
+ {
+  "id": 349,
+  "island": "food",
+  "en": "meat",
+  "cn": "肉",
+  "exCn": "我不太吃肉。",
+  "hl": "肉",
+  "how": "exact"
+ },
+ {
+  "id": 350,
+  "island": "food",
+  "en": "beef",
+  "cn": "牛肉",
+  "exCn": "牛肉配土豆很好吃。",
+  "hl": "牛肉",
+  "how": "exact"
+ },
+ {
+  "id": 351,
+  "island": "food",
+  "en": "pork",
+  "cn": "猪肉",
+  "exCn": "我妈妈做猪肉做得特别好。",
+  "hl": "猪肉",
+  "how": "exact"
+ },
+ {
+  "id": 352,
+  "island": "food",
+  "en": "chicken",
+  "cn": "鸡肉",
+  "exCn": "炸鸡真好吃。",
+  "hl": "鸡",
+  "how": "fragment"
+ },
+ {
+  "id": 353,
+  "island": "food",
+  "en": "fish",
+  "cn": "鱼",
+  "exCn": "奶奶做的鱼最好吃。",
+  "hl": "鱼",
+  "how": "exact"
+ },
+ {
+  "id": 354,
+  "island": "food",
+  "en": "water",
+  "cn": "水",
+  "exCn": "你每天应该多喝水。",
+  "hl": "水",
+  "how": "exact"
+ },
+ {
+  "id": 355,
+  "island": "food",
+  "en": "milk",
+  "cn": "牛奶",
+  "exCn": "牛奶能让你长得强壮。",
+  "hl": "牛奶",
+  "how": "exact"
+ },
+ {
+  "id": 356,
+  "island": "food",
+  "en": "juice",
+  "cn": "果汁",
+  "exCn": "我想要一杯橙汁。",
+  "hl": "汁",
+  "how": "fragment"
+ },
+ {
+  "id": 357,
+  "island": "food",
+  "en": "tea",
+  "cn": "茶",
+  "exCn": "你想喝杯茶吗?",
+  "hl": "茶",
+  "how": "exact"
+ },
+ {
+  "id": 358,
+  "island": "food",
+  "en": "coffee",
+  "cn": "咖啡",
+  "exCn": "我爸爸每天早上喝咖啡。",
+  "hl": "咖啡",
+  "how": "exact"
+ },
+ {
+  "id": 359,
+  "island": "food",
+  "en": "cake",
+  "cn": "蛋糕",
+  "exCn": "我们吃点蛋糕吧。",
+  "hl": "蛋糕",
+  "how": "exact"
+ },
+ {
+  "id": 360,
+  "island": "food",
+  "en": "cookie",
+  "cn": "饼干",
+  "exCn": "我和妈妈一起烤饼干。",
+  "hl": "饼干",
+  "how": "exact"
+ },
+ {
+  "id": 361,
+  "island": "food",
+  "en": "candy",
+  "cn": "糖果",
+  "exCn": "糖果吃多了对牙齿不好。",
+  "hl": "糖果",
+  "how": "exact"
+ },
+ {
+  "id": 362,
+  "island": "food",
+  "en": "chocolate",
+  "cn": "巧克力",
+  "exCn": "巧克力总是让我开心。",
+  "hl": "巧克力",
+  "how": "exact"
+ },
+ {
+  "id": 363,
+  "island": "food",
+  "en": "ice cream",
+  "cn": "冰淇淋",
+  "exCn": "冰淇淋是夏天最棒的东西。",
+  "hl": "冰淇淋",
+  "how": "exact"
+ },
+ {
+  "id": 364,
+  "island": "food",
+  "en": "butter",
+  "cn": "黄油",
+  "exCn": "在面包上抹点黄油。",
+  "hl": "黄油",
+  "how": "exact"
+ },
+ {
+  "id": 365,
+  "island": "food",
+  "en": "cheese",
+  "cn": "奶酪",
+  "exCn": "奶酪配面包很好吃。",
+  "hl": "奶酪",
+  "how": "exact"
+ },
+ {
+  "id": 366,
+  "island": "food",
+  "en": "yogurt",
+  "cn": "酸奶",
+  "exCn": "我每餐之后都吃酸奶。",
+  "hl": "酸奶",
+  "how": "exact"
+ },
+ {
+  "id": 367,
+  "island": "food",
+  "en": "soup",
+  "cn": "汤",
+  "exCn": "一碗热汤让我暖和起来。",
+  "hl": "汤",
+  "how": "exact"
+ },
+ {
+  "id": 368,
+  "island": "food",
+  "en": "salad",
+  "cn": "沙拉",
+  "exCn": "沙拉新鲜又健康。",
+  "hl": "沙拉",
+  "how": "exact"
+ },
+ {
+  "id": 369,
+  "island": "food",
+  "en": "salt",
+  "cn": "盐",
+  "exCn": "能把盐递给我吗?",
+  "hl": "盐",
+  "how": "exact"
+ },
+ {
+  "id": 370,
+  "island": "food",
+  "en": "sugar",
+  "cn": "糖",
+  "exCn": "糖吃太多对牙齿不好。",
+  "hl": "糖",
+  "how": "exact"
+ },
+ {
+  "id": 371,
+  "island": "food",
+  "en": "breakfast",
+  "cn": "早饭",
+  "exCn": "早餐是最重要的一餐。",
+  "hl": "早餐",
+  "how": "manual"
+ },
+ {
+  "id": 372,
+  "island": "food",
+  "en": "lunch",
+  "cn": "午饭",
+  "exCn": "我通常中午吃午饭。",
+  "hl": "午饭",
+  "how": "exact"
+ },
+ {
+  "id": 373,
+  "island": "food",
+  "en": "dinner",
+  "cn": "晚饭",
+  "exCn": "我们六点吃晚饭。",
+  "hl": "晚饭",
+  "how": "exact"
+ },
+ {
+  "id": 374,
+  "island": "food",
+  "en": "meal",
+  "cn": "餐",
+  "exCn": "我们今晚吃了一顿大餐。",
+  "hl": "餐",
+  "how": "exact"
+ },
+ {
+  "id": 375,
+  "island": "food",
+  "en": "snack",
+  "cn": "零食",
+  "exCn": "我们去吃点零食吧。",
+  "hl": "零食",
+  "how": "exact"
+ },
+ {
+  "id": 376,
+  "island": "food",
+  "en": "restaurant",
+  "cn": "餐厅",
+  "exCn": "这家餐厅总是很热闹。",
+  "hl": "餐厅",
+  "how": "exact"
+ },
+ {
+  "id": 377,
+  "island": "food",
+  "en": "menu",
+  "cn": "菜单",
+  "exCn": "请把菜单给我看看。",
+  "hl": "菜单",
+  "how": "exact"
+ },
+ {
+  "id": 378,
+  "island": "home",
+  "en": "house",
+  "cn": "房子",
+  "exCn": "他们住在一栋大房子里。",
+  "hl": "房子",
+  "how": "exact"
+ },
+ {
+  "id": 379,
+  "island": "home",
+  "en": "home",
+  "cn": "家",
+  "exCn": "没有地方比得上家。",
+  "hl": "家",
+  "how": "exact"
+ },
+ {
+  "id": 380,
+  "island": "home",
+  "en": "room",
+  "cn": "房间",
+  "exCn": "我的房间在二楼。",
+  "hl": "房间",
+  "how": "exact"
+ },
+ {
+  "id": 381,
+  "island": "home",
+  "en": "bedroom",
+  "cn": "卧室",
+  "exCn": "我的卧室虽小但很温馨。",
+  "hl": "卧室",
+  "how": "exact"
+ },
+ {
+  "id": 382,
+  "island": "home",
+  "en": "bathroom",
+  "cn": "浴室",
+  "exCn": "浴室在楼上。",
+  "hl": "浴室",
+  "how": "exact"
+ },
+ {
+  "id": 383,
+  "island": "home",
+  "en": "kitchen",
+  "cn": "厨房",
+  "exCn": "妈妈在厨房做饭。",
+  "hl": "厨房",
+  "how": "exact"
+ },
+ {
+  "id": 384,
+  "island": "home",
+  "en": "living room",
+  "cn": "客厅",
+  "exCn": "我们在客厅看电视。",
+  "hl": "客厅",
+  "how": "exact"
+ },
+ {
+  "id": 385,
+  "island": "home",
+  "en": "dining room",
+  "cn": "餐厅",
+  "exCn": "我们在餐厅吃晚饭。",
+  "hl": "餐厅",
+  "how": "exact"
+ },
+ {
+  "id": 386,
+  "island": "home",
+  "en": "garden",
+  "cn": "花园",
+  "exCn": "奶奶在她的花园里种玫瑰。",
+  "hl": "花园",
+  "how": "exact"
+ },
+ {
+  "id": 387,
+  "island": "home",
+  "en": "door",
+  "cn": "门",
+  "exCn": "请随手关门。",
+  "hl": "门",
+  "how": "exact"
+ },
+ {
+  "id": 388,
+  "island": "home",
+  "en": "window",
+  "cn": "窗户",
+  "exCn": "开窗透透气吧。",
+  "hl": "窗",
+  "how": "manual"
+ },
+ {
+  "id": 389,
+  "island": "home",
+  "en": "wall",
+  "cn": "墙",
+  "exCn": "我们把画挂到墙上吧。",
+  "hl": "墙",
+  "how": "exact"
+ },
+ {
+  "id": 390,
+  "island": "home",
+  "en": "floor",
+  "cn": "地板",
+  "exCn": "地板是木头做的。",
+  "hl": "地板",
+  "how": "exact"
+ },
+ {
+  "id": 391,
+  "island": "home",
+  "en": "ceiling",
+  "cn": "天花板",
+  "exCn": "这个房间的天花板很高。",
+  "hl": "天花板",
+  "how": "exact"
+ },
+ {
+  "id": 392,
+  "island": "home",
+  "en": "roof",
+  "cn": "屋顶",
+  "exCn": "冬天雪覆盖着屋顶。",
+  "hl": "屋顶",
+  "how": "exact"
+ },
+ {
+  "id": 393,
+  "island": "home",
+  "en": "stairs",
+  "cn": "楼梯",
+  "exCn": "慢慢走上楼梯。",
+  "hl": "楼梯",
+  "how": "exact"
+ },
+ {
+  "id": 394,
+  "island": "home",
+  "en": "bed",
+  "cn": "床",
+  "exCn": "该铺床了。",
+  "hl": "床",
+  "how": "exact"
+ },
+ {
+  "id": 395,
+  "island": "home",
+  "en": "sofa",
+  "cn": "沙发",
+  "exCn": "猫睡在沙发上。",
+  "hl": "沙发",
+  "how": "exact"
+ },
+ {
+  "id": 396,
+  "island": "home",
+  "en": "table",
+  "cn": "桌子",
+  "exCn": "我们摆桌子吃晚饭吧。",
+  "hl": "桌子",
+  "how": "exact"
+ },
+ {
+  "id": 397,
+  "island": "home",
+  "en": "chair",
+  "cn": "椅子",
+  "exCn": "搬把椅子和我们一起坐。",
+  "hl": "椅子",
+  "how": "exact"
+ },
+ {
+  "id": 398,
+  "island": "home",
+  "en": "cupboard",
+  "cn": "橱柜",
+  "exCn": "杯子在橱柜里。",
+  "hl": "橱柜",
+  "how": "exact"
+ },
+ {
+  "id": 399,
+  "island": "home",
+  "en": "wardrobe",
+  "cn": "衣柜",
+  "exCn": "把外套挂到衣柜里。",
+  "hl": "衣柜",
+  "how": "exact"
+ },
+ {
+  "id": 400,
+  "island": "home",
+  "en": "fridge",
+  "cn": "冰箱",
+  "exCn": "冰箱里有吃的吗?",
+  "hl": "冰箱",
+  "how": "exact"
+ },
+ {
+  "id": 401,
+  "island": "home",
+  "en": "stove",
+  "cn": "炉子",
+  "exCn": "汤在炉子上慢炖着。",
+  "hl": "炉子",
+  "how": "exact"
+ },
+ {
+  "id": 402,
+  "island": "home",
+  "en": "microwave",
+  "cn": "微波炉",
+  "exCn": "把食物放进微波炉加热。",
+  "hl": "微波炉",
+  "how": "exact"
+ },
+ {
+  "id": 403,
+  "island": "home",
+  "en": "washing machine",
+  "cn": "洗衣机",
+  "exCn": "把脏衣服放进洗衣机。",
+  "hl": "洗衣机",
+  "how": "exact"
+ },
+ {
+  "id": 404,
+  "island": "home",
+  "en": "TV",
+  "cn": "电视",
+  "exCn": "我晚饭后看电视。",
+  "hl": "电视",
+  "how": "exact"
+ },
+ {
+  "id": 405,
+  "island": "home",
+  "en": "telephone",
+  "cn": "电话",
+  "exCn": "请接电话。",
+  "hl": "电话",
+  "how": "exact"
+ },
+ {
+  "id": 406,
+  "island": "home",
+  "en": "lamp",
+  "cn": "台灯",
+  "exCn": "能把台灯打开吗?",
+  "hl": "台灯",
+  "how": "exact"
+ },
+ {
+  "id": 407,
+  "island": "home",
+  "en": "mirror",
+  "cn": "镜子",
+  "exCn": "我每天早上照镜子。",
+  "hl": "镜子",
+  "how": "exact"
+ },
+ {
+  "id": 408,
+  "island": "home",
+  "en": "clock",
+  "cn": "时钟",
+  "exCn": "墙上的时钟滴答声很响。",
+  "hl": "时钟",
+  "how": "exact"
+ },
+ {
+  "id": 409,
+  "island": "home",
+  "en": "fan",
+  "cn": "风扇",
+  "exCn": "把风扇打开吧,太热了。",
+  "hl": "风扇",
+  "how": "exact"
+ },
+ {
+  "id": 410,
+  "island": "home",
+  "en": "air conditioner",
+  "cn": "空调",
+  "exCn": "空调让我们夏天凉爽。",
+  "hl": "空调",
+  "how": "exact"
+ },
+ {
+  "id": 411,
+  "island": "home",
+  "en": "key",
+  "cn": "钥匙",
+  "exCn": "我把家门钥匙弄丢了。",
+  "hl": "钥匙",
+  "how": "exact"
+ },
+ {
+  "id": 412,
+  "island": "home",
+  "en": "lock",
+  "cn": "锁",
+  "exCn": "确认门锁好了。",
+  "hl": "锁",
+  "how": "exact"
+ },
+ {
+  "id": 413,
+  "island": "job",
+  "en": "person",
+  "cn": "人",
+  "exCn": "她是个很善良的人。",
+  "hl": "人",
+  "how": "exact"
+ },
+ {
+  "id": 414,
+  "island": "job",
+  "en": "man",
+  "cn": "男人",
+  "exCn": "那个男人是谁?",
+  "hl": "男人",
+  "how": "exact"
+ },
+ {
+  "id": 415,
+  "island": "job",
+  "en": "woman",
+  "cn": "女人",
+  "exCn": "我妈妈是个坚强的女人。",
+  "hl": "女人",
+  "how": "exact"
+ },
+ {
+  "id": 416,
+  "island": "job",
+  "en": "boy",
+  "cn": "男孩",
+  "exCn": "那个男孩在外面踢足球。",
+  "hl": "男孩",
+  "how": "exact"
+ },
+ {
+  "id": 417,
+  "island": "job",
+  "en": "girl",
+  "cn": "女孩",
+  "exCn": "那个女孩非常喜欢跳舞。",
+  "hl": "女孩",
+  "how": "exact"
+ },
+ {
+  "id": 418,
+  "island": "job",
+  "en": "friend",
+  "cn": "朋友",
+  "exCn": "他是我最好的朋友。",
+  "hl": "朋友",
+  "how": "exact"
+ },
+ {
+  "id": 419,
+  "island": "job",
+  "en": "classmate",
+  "cn": "同学",
+  "exCn": "汤姆是我的同学。",
+  "hl": "同学",
+  "how": "exact"
+ },
+ {
+  "id": 420,
+  "island": "job",
+  "en": "neighbour",
+  "cn": "邻居",
+  "exCn": "我们的邻居非常友好。",
+  "hl": "邻居",
+  "how": "exact"
+ },
+ {
+  "id": 421,
+  "island": "job",
+  "en": "doctor",
+  "cn": "医生",
+  "exCn": "我昨天去看医生了。",
+  "hl": "医生",
+  "how": "exact"
+ },
+ {
+  "id": 422,
+  "island": "job",
+  "en": "nurse",
+  "cn": "护士",
+  "exCn": "这位护士对病人非常照顾。",
+  "hl": "护士",
+  "how": "exact"
+ },
+ {
+  "id": 423,
+  "island": "job",
+  "en": "teacher",
+  "cn": "老师",
+  "exCn": "我的英语老师非常棒。",
+  "hl": "老师",
+  "how": "exact"
+ },
+ {
+  "id": 424,
+  "island": "job",
+  "en": "police",
+  "cn": "警察",
+  "exCn": "快报警!",
+  "hl": "报警",
+  "how": "manual"
+ },
+ {
+  "id": 425,
+  "island": "job",
+  "en": "firefighter",
+  "cn": "消防员",
+  "exCn": "消防员是勇敢的英雄。",
+  "hl": "消防员",
+  "how": "exact"
+ },
+ {
+  "id": 426,
+  "island": "job",
+  "en": "soldier",
+  "cn": "军人/士兵",
+  "exCn": "我叔叔是军人。",
+  "hl": "军人",
+  "how": "alt"
+ },
+ {
+  "id": 427,
+  "island": "job",
+  "en": "driver",
+  "cn": "司机",
+  "exCn": "公交车司机非常友好。",
+  "hl": "司机",
+  "how": "exact"
+ },
+ {
+  "id": 428,
+  "island": "job",
+  "en": "farmer",
+  "cn": "农民",
+  "exCn": "农民在田间辛勤劳作。",
+  "hl": "农民",
+  "how": "exact"
+ },
+ {
+  "id": 429,
+  "island": "job",
+  "en": "cook",
+  "cn": "厨师",
+  "exCn": "我叔叔是个很棒的厨师。",
+  "hl": "厨师",
+  "how": "exact"
+ },
+ {
+  "id": 430,
+  "island": "job",
+  "en": "waiter",
+  "cn": "服务员",
+  "exCn": "服务员记下了我们点的菜。",
+  "hl": "服务员",
+  "how": "exact"
+ },
+ {
+  "id": 431,
+  "island": "job",
+  "en": "engineer",
+  "cn": "工程师",
+  "exCn": "我叔叔是个软件工程师。",
+  "hl": "工程师",
+  "how": "exact"
+ },
+ {
+  "id": 432,
+  "island": "job",
+  "en": "lawyer",
+  "cn": "律师",
+  "exCn": "我姑姑是律师。",
+  "hl": "律师",
+  "how": "exact"
+ },
+ {
+  "id": 433,
+  "island": "job",
+  "en": "scientist",
+  "cn": "科学家",
+  "exCn": "居里夫人是一位著名的科学家。",
+  "hl": "科学家",
+  "how": "exact"
+ },
+ {
+  "id": 434,
+  "island": "job",
+  "en": "reporter",
+  "cn": "记者",
+  "exCn": "记者采访了我们老师。",
+  "hl": "记者",
+  "how": "exact"
+ },
+ {
+  "id": 435,
+  "island": "job",
+  "en": "singer",
+  "cn": "歌手",
+  "exCn": "她是我最喜欢的歌手。",
+  "hl": "歌手",
+  "how": "exact"
+ },
+ {
+  "id": 436,
+  "island": "job",
+  "en": "dancer",
+  "cn": "舞蹈家/舞者",
+  "exCn": "她是一名专业舞者。",
+  "hl": "舞者",
+  "how": "manual"
+ },
+ {
+  "id": 437,
+  "island": "job",
+  "en": "artist",
+  "cn": "艺术家",
+  "exCn": "毕加索是最伟大的艺术家之一。",
+  "hl": "艺术家",
+  "how": "exact"
+ },
+ {
+  "id": 438,
+  "island": "job",
+  "en": "writer",
+  "cn": "作家",
+  "exCn": "马克·吐温是我最喜欢的作家。",
+  "hl": "作家",
+  "how": "exact"
+ },
+ {
+  "id": 439,
+  "island": "job",
+  "en": "actor",
+  "cn": "演员",
+  "exCn": "成龙是世界闻名的演员。",
+  "hl": "演员",
+  "how": "exact"
+ },
+ {
+  "id": 440,
+  "island": "job",
+  "en": "athlete",
+  "cn": "运动员",
+  "exCn": "刘翔是著名的运动员。",
+  "hl": "运动员",
+  "how": "exact"
+ },
+ {
+  "id": 441,
+  "island": "job",
+  "en": "pilot",
+  "cn": "飞行员",
+  "exCn": "飞行员安全降落了飞机。",
+  "hl": "飞行员",
+  "how": "exact"
+ },
+ {
+  "id": 442,
+  "island": "job",
+  "en": "astronaut",
+  "cn": "宇航员",
+  "exCn": "宇航员在月球上行走。",
+  "hl": "宇航员",
+  "how": "exact"
+ },
+ {
+  "id": 443,
+  "island": "nature",
+  "en": "sun",
+  "cn": "太阳",
+  "exCn": "今天阳光灿烂。",
+  "hl": "阳",
+  "how": "fragment"
+ },
+ {
+  "id": 444,
+  "island": "nature",
+  "en": "moon",
+  "cn": "月亮",
+  "exCn": "今晚是满月。",
+  "hl": "月",
+  "how": "fragment"
+ },
+ {
+  "id": 445,
+  "island": "nature",
+  "en": "star",
+  "cn": "星星",
+  "exCn": "我能看到天上有许多星星。",
+  "hl": "星星",
+  "how": "exact"
+ },
+ {
+  "id": 446,
+  "island": "nature",
+  "en": "sky",
+  "cn": "天空",
+  "exCn": "快看天空!",
+  "hl": "天空",
+  "how": "exact"
+ },
+ {
+  "id": 447,
+  "island": "nature",
+  "en": "cloud",
+  "cn": "云",
+  "exCn": "今天天空云层很厚。",
+  "hl": "云",
+  "how": "exact"
+ },
+ {
+  "id": 448,
+  "island": "nature",
+  "en": "rainbow",
+  "cn": "彩虹",
+  "exCn": "雨后出现了一道彩虹。",
+  "hl": "彩虹",
+  "how": "exact"
+ },
+ {
+  "id": 449,
+  "island": "nature",
+  "en": "weather",
+  "cn": "天气",
+  "exCn": "今天天气怎么样?",
+  "hl": "天气",
+  "how": "exact"
+ },
+ {
+  "id": 450,
+  "island": "nature",
+  "en": "rain",
+  "cn": "雨",
+  "exCn": "外面下大雨。",
+  "hl": "雨",
+  "how": "exact"
+ },
+ {
+  "id": 451,
+  "island": "nature",
+  "en": "snow",
+  "cn": "雪",
+  "exCn": "这里冬天经常下雪。",
+  "hl": "雪",
+  "how": "exact"
+ },
+ {
+  "id": 452,
+  "island": "nature",
+  "en": "wind",
+  "cn": "风",
+  "exCn": "今天风很大。",
+  "hl": "风",
+  "how": "exact"
+ },
+ {
+  "id": 453,
+  "island": "nature",
+  "en": "storm",
+  "cn": "暴风雨",
+  "exCn": "有场暴风雨要来了。",
+  "hl": "暴风雨",
+  "how": "exact"
+ },
+ {
+  "id": 454,
+  "island": "nature",
+  "en": "thunder",
+  "cn": "雷",
+  "exCn": "我们能听到远处的雷声。",
+  "hl": "雷",
+  "how": "exact"
+ },
+ {
+  "id": 455,
+  "island": "nature",
+  "en": "lightning",
+  "cn": "闪电",
+  "exCn": "闪电照亮了夜空。",
+  "hl": "闪电",
+  "how": "exact"
+ },
+ {
+  "id": 456,
+  "island": "nature",
+  "en": "fog",
+  "cn": "雾",
+  "exCn": "今天早上雾很浓。",
+  "hl": "雾",
+  "how": "exact"
+ },
+ {
+  "id": 457,
+  "island": "nature",
+  "en": "season",
+  "cn": "季节",
+  "exCn": "秋天是我最喜欢的季节。",
+  "hl": "季节",
+  "how": "exact"
+ },
+ {
+  "id": 458,
+  "island": "nature",
+  "en": "spring",
+  "cn": "春天",
+  "exCn": "春天百花盛开。",
+  "hl": "春天",
+  "how": "exact"
+ },
+ {
+  "id": 459,
+  "island": "nature",
+  "en": "summer",
+  "cn": "夏天",
+  "exCn": "夏天又热又晒。",
+  "hl": "夏天",
+  "how": "exact"
+ },
+ {
+  "id": 460,
+  "island": "nature",
+  "en": "autumn",
+  "cn": "秋天",
+  "exCn": "秋天树叶变红了。",
+  "hl": "秋天",
+  "how": "exact"
+ },
+ {
+  "id": 461,
+  "island": "nature",
+  "en": "winter",
+  "cn": "冬天",
+  "exCn": "我们在冬天堆雪人。",
+  "hl": "冬天",
+  "how": "exact"
+ },
+ {
+  "id": 462,
+  "island": "nature",
+  "en": "flower",
+  "cn": "花",
+  "exCn": "我喜欢花香。",
+  "hl": "花",
+  "how": "exact"
+ },
+ {
+  "id": 463,
+  "island": "nature",
+  "en": "tree",
+  "cn": "树",
+  "exCn": "我们坐到那棵树下吧。",
+  "hl": "树",
+  "how": "exact"
+ },
+ {
+  "id": 464,
+  "island": "nature",
+  "en": "grass",
+  "cn": "草",
+  "exCn": "请不要践踏草坪。",
+  "hl": "草",
+  "how": "exact"
+ },
+ {
+  "id": 465,
+  "island": "nature",
+  "en": "leaf",
+  "cn": "叶子",
+  "exCn": "一片绿叶落在了我的书上。",
+  "hl": "叶",
+  "how": "fragment"
+ },
+ {
+  "id": 466,
+  "island": "nature",
+  "en": "forest",
+  "cn": "森林",
+  "exCn": "我们在森林里迷路了。",
+  "hl": "森林",
+  "how": "exact"
+ },
+ {
+  "id": 467,
+  "island": "nature",
+  "en": "field",
+  "cn": "田野",
+  "exCn": "农民们在田里劳作。",
+  "hl": "田",
+  "how": "manual"
+ },
+ {
+  "id": 468,
+  "island": "nature",
+  "en": "mountain",
+  "cn": "山",
+  "exCn": "去年夏天我们爬了一座高山。",
+  "hl": "山",
+  "how": "exact"
+ },
+ {
+  "id": 469,
+  "island": "nature",
+  "en": "river",
+  "cn": "河流",
+  "exCn": "一条长河穿过这座城市。",
+  "hl": "河",
+  "how": "fragment"
+ },
+ {
+  "id": 470,
+  "island": "nature",
+  "en": "lake",
+  "cn": "湖泊",
+  "exCn": "我们在湖边野餐。",
+  "hl": "湖",
+  "how": "fragment"
+ },
+ {
+  "id": 471,
+  "island": "nature",
+  "en": "sea",
+  "cn": "海",
+  "exCn": "今天海面很平静。",
+  "hl": "海",
+  "how": "exact"
+ },
+ {
+  "id": 472,
+  "island": "nature",
+  "en": "ocean",
+  "cn": "海洋",
+  "exCn": "鲸生活在海洋里。",
+  "hl": "海洋",
+  "how": "exact"
+ },
+ {
+  "id": 473,
+  "island": "nature",
+  "en": "island",
+  "cn": "岛屿",
+  "exCn": "他们住在一座小岛上。",
+  "hl": "岛",
+  "how": "fragment"
+ },
+ {
+  "id": 474,
+  "island": "nature",
+  "en": "beach",
+  "cn": "沙滩",
+  "exCn": "夏天的沙滩很美。",
+  "hl": "沙滩",
+  "how": "exact"
+ },
+ {
+  "id": 475,
+  "island": "nature",
+  "en": "desert",
+  "cn": "沙漠",
+  "exCn": "沙漠里几乎没什么植物。",
+  "hl": "沙漠",
+  "how": "exact"
+ },
+ {
+  "id": 476,
+  "island": "nature",
+  "en": "earth",
+  "cn": "地球",
+  "exCn": "我们应该爱护地球。",
+  "hl": "地球",
+  "how": "exact"
+ },
+ {
+  "id": 477,
+  "island": "nature",
+  "en": "stone",
+  "cn": "石头",
+  "exCn": "他把一块小石头扔进了河里。",
+  "hl": "石头",
+  "how": "exact"
+ },
+ {
+  "id": 478,
+  "island": "nature",
+  "en": "sand",
+  "cn": "沙子",
+  "exCn": "沙子踩在脚下很暖和。",
+  "hl": "沙子",
+  "how": "exact"
+ },
+ {
+  "id": 479,
+  "island": "nature",
+  "en": "soil",
+  "cn": "土壤",
+  "exCn": "植物在肥沃的土壤里长得好。",
+  "hl": "土壤",
+  "how": "exact"
+ },
+ {
+  "id": 480,
+  "island": "nature",
+  "en": "air",
+  "cn": "空气",
+  "exCn": "山里的空气真新鲜。",
+  "hl": "空气",
+  "how": "exact"
+ },
+ {
+  "id": 481,
+  "island": "nature",
+  "en": "fire",
+  "cn": "火",
+  "exCn": "我们生了堆火取暖。",
+  "hl": "火",
+  "how": "exact"
+ },
+ {
+  "id": 482,
+  "island": "nature",
+  "en": "ice",
+  "cn": "冰",
+  "exCn": "冬天湖面结了冰。",
+  "hl": "冰",
+  "how": "exact"
+ },
+ {
+  "id": 483,
+  "island": "question",
+  "en": "who",
+  "cn": "谁",
+  "exCn": "那是谁?",
+  "hl": "谁",
+  "how": "exact"
+ },
+ {
+  "id": 484,
+  "island": "question",
+  "en": "what",
+  "cn": "什么",
+  "exCn": "你叫什么名字?",
+  "hl": "什么",
+  "how": "exact"
+ },
+ {
+  "id": 485,
+  "island": "question",
+  "en": "where",
+  "cn": "哪里",
+  "exCn": "你住在哪里?",
+  "hl": "哪里",
+  "how": "exact"
+ },
+ {
+  "id": 486,
+  "island": "question",
+  "en": "when",
+  "cn": "什么时候",
+  "exCn": "学校什么时候开学?",
+  "hl": "什么时候",
+  "how": "exact"
+ },
+ {
+  "id": 487,
+  "island": "question",
+  "en": "why",
+  "cn": "为什么",
+  "exCn": "你为什么迟到了?",
+  "hl": "为什么",
+  "how": "exact"
+ },
+ {
+  "id": 488,
+  "island": "question",
+  "en": "how",
+  "cn": "怎样/怎么",
+  "exCn": "怎么样?",
+  "hl": "怎么",
+  "how": "manual"
+ },
+ {
+  "id": 489,
+  "island": "question",
+  "en": "which",
+  "cn": "哪个/哪些",
+  "exCn": "哪本书是你的?",
+  "hl": "哪",
+  "how": "fragment"
+ },
+ {
+  "id": 490,
+  "island": "question",
+  "en": "whose",
+  "cn": "谁的",
+  "exCn": "这是谁的笔?",
+  "hl": "谁的",
+  "how": "exact"
+ },
+ {
+  "id": 491,
+  "island": "question",
+  "en": "how many",
+  "cn": "多少（可数）",
+  "exCn": "你有多少本书?",
+  "hl": "多少",
+  "how": "fragment"
+ },
+ {
+  "id": 492,
+  "island": "question",
+  "en": "how much",
+  "cn": "多少（钱/不可数）",
+  "exCn": "这个包多少钱?",
+  "hl": "多少",
+  "how": "manual"
+ },
+ {
+  "id": 493,
+  "island": "question",
+  "en": "how old",
+  "cn": "多大（年龄）",
+  "exCn": "你多大了?",
+  "hl": "多大",
+  "how": "manual"
+ },
+ {
+  "id": 494,
+  "island": "question",
+  "en": "how long",
+  "cn": "多长/多久",
+  "exCn": "需要多长时间?",
+  "hl": "多长",
+  "how": "manual"
+ },
+ {
+  "id": 495,
+  "island": "question",
+  "en": "how far",
+  "cn": "多远",
+  "exCn": "你家离学校有多远?",
+  "hl": "多远",
+  "how": "exact"
+ },
+ {
+  "id": 496,
+  "island": "question",
+  "en": "this",
+  "cn": "这个",
+  "exCn": "这真好吃!",
+  "hl": "这",
+  "how": "fragment"
+ },
+ {
+  "id": 497,
+  "island": "question",
+  "en": "that",
+  "cn": "那个",
+  "exCn": "那是一朵漂亮的花。",
+  "hl": "那",
+  "how": "fragment"
+ },
+ {
+  "id": 498,
+  "island": "question",
+  "en": "these",
+  "cn": "这些",
+  "exCn": "这些书是我的。",
+  "hl": "这些",
+  "how": "exact"
+ },
+ {
+  "id": 499,
+  "island": "question",
+  "en": "those",
+  "cn": "那些",
+  "exCn": "那些学生很聪明。",
+  "hl": "那些",
+  "how": "exact"
+ },
+ {
+  "id": 500,
+  "island": "question",
+  "en": "here",
+  "cn": "这里",
+  "exCn": "现在到这里来。",
+  "hl": "这里",
+  "how": "exact"
+ },
+ {
+  "id": 501,
+  "island": "question",
+  "en": "there",
+  "cn": "那里",
+  "exCn": "看那里!",
+  "hl": "那里",
+  "how": "exact"
+ },
+ {
+  "id": 502,
+  "island": "question",
+  "en": "I",
+  "cn": "我",
+  "exCn": "我来自中国。",
+  "hl": "我",
+  "how": "exact"
+ },
+ {
+  "id": 503,
+  "island": "question",
+  "en": "you",
+  "cn": "你/你们",
+  "exCn": "你来自哪里?",
+  "hl": "你",
+  "how": "alt"
+ },
+ {
+  "id": 504,
+  "island": "question",
+  "en": "he",
+  "cn": "他",
+  "exCn": "他是我哥哥。",
+  "hl": "他",
+  "how": "exact"
+ },
+ {
+  "id": 505,
+  "island": "question",
+  "en": "she",
+  "cn": "她",
+  "exCn": "她是医院的护士。",
+  "hl": "她",
+  "how": "exact"
+ },
+ {
+  "id": 506,
+  "island": "question",
+  "en": "it",
+  "cn": "它",
+  "exCn": "我有一只猫,它是白色的。",
+  "hl": "它",
+  "how": "exact"
+ },
+ {
+  "id": 507,
+  "island": "question",
+  "en": "we",
+  "cn": "我们",
+  "exCn": "我们要去公园。",
+  "hl": "我们",
+  "how": "exact"
+ },
+ {
+  "id": 508,
+  "island": "question",
+  "en": "they",
+  "cn": "他们/她们/它们",
+  "exCn": "他们是我父母。",
+  "hl": "他们",
+  "how": "alt"
+ },
+ {
+  "id": 509,
+  "island": "question",
+  "en": "my",
+  "cn": "我的",
+  "exCn": "这是我的新钢笔。",
+  "hl": "我的",
+  "how": "exact"
+ },
+ {
+  "id": 510,
+  "island": "question",
+  "en": "your",
+  "cn": "你的/你们的",
+  "exCn": "你最喜欢什么颜色?",
+  "hl": "你",
+  "how": "manual"
+ },
+ {
+  "id": 511,
+  "island": "question",
+  "en": "his",
+  "cn": "他的",
+  "exCn": "他的名字叫汤姆。",
+  "hl": "他的",
+  "how": "exact"
+ },
+ {
+  "id": 512,
+  "island": "question",
+  "en": "her",
+  "cn": "她的",
+  "exCn": "她的头发很长。",
+  "hl": "她的",
+  "how": "exact"
+ },
+ {
+  "id": 513,
+  "island": "question",
+  "en": "our",
+  "cn": "我们的",
+  "exCn": "我们的学校很大。",
+  "hl": "我们的",
+  "how": "exact"
+ },
+ {
+  "id": 514,
+  "island": "question",
+  "en": "their",
+  "cn": "他们/她们/它们的",
+  "exCn": "他们的房子是新的。",
+  "hl": "他们的",
+  "how": "manual"
+ },
+ {
+  "id": 515,
+  "island": "school",
+  "en": "school",
+  "cn": "学校",
+  "exCn": "我的学校在公园附近。",
+  "hl": "学校",
+  "how": "exact"
+ },
+ {
+  "id": 516,
+  "island": "school",
+  "en": "class",
+  "cn": "班级",
+  "exCn": "我们班有三十个学生。",
+  "hl": "班",
+  "how": "fragment"
+ },
+ {
+  "id": 517,
+  "island": "school",
+  "en": "classroom",
+  "cn": "教室",
+  "exCn": "我们的教室在二楼。",
+  "hl": "教室",
+  "how": "exact"
+ },
+ {
+  "id": 518,
+  "island": "school",
+  "en": "teacher",
+  "cn": "老师",
+  "exCn": "我们的英语老师非常善良。",
+  "hl": "老师",
+  "how": "exact"
+ },
+ {
+  "id": 519,
+  "island": "school",
+  "en": "student",
+  "cn": "学生",
+  "exCn": "她是一个很努力的学生。",
+  "hl": "学生",
+  "how": "exact"
+ },
+ {
+  "id": 520,
+  "island": "school",
+  "en": "book",
+  "cn": "书",
+  "exCn": "我每晚睡前看书。",
+  "hl": "书",
+  "how": "exact"
+ },
+ {
+  "id": 521,
+  "island": "school",
+  "en": "notebook",
+  "cn": "笔记本",
+  "exCn": "请翻开你的笔记本。",
+  "hl": "笔记本",
+  "how": "exact"
+ },
+ {
+  "id": 522,
+  "island": "school",
+  "en": "pencil",
+  "cn": "铅笔",
+  "exCn": "我能借你的铅笔用一下吗?",
+  "hl": "铅笔",
+  "how": "exact"
+ },
+ {
+  "id": 523,
+  "island": "school",
+  "en": "pen",
+  "cn": "钢笔",
+  "exCn": "我的笔没墨水了。",
+  "hl": "笔",
+  "how": "fragment"
+ },
+ {
+  "id": 524,
+  "island": "school",
+  "en": "eraser",
+  "cn": "橡皮",
+  "exCn": "我需要一块橡皮擦铅笔字。",
+  "hl": "橡皮",
+  "how": "exact"
+ },
+ {
+  "id": 525,
+  "island": "school",
+  "en": "ruler",
+  "cn": "尺子",
+  "exCn": "我需要一把尺子量一下这个。",
+  "hl": "尺子",
+  "how": "exact"
+ },
+ {
+  "id": 526,
+  "island": "school",
+  "en": "bag",
+  "cn": "书包",
+  "exCn": "我今天书包很重。",
+  "hl": "书包",
+  "how": "exact"
+ },
+ {
+  "id": 527,
+  "island": "school",
+  "en": "scissors",
+  "cn": "剪刀",
+  "exCn": "用剪刀要小心。",
+  "hl": "剪刀",
+  "how": "exact"
+ },
+ {
+  "id": 528,
+  "island": "school",
+  "en": "glue",
+  "cn": "胶水",
+  "exCn": "用胶水把纸粘在一起。",
+  "hl": "胶水",
+  "how": "exact"
+ },
+ {
+  "id": 529,
+  "island": "school",
+  "en": "crayon",
+  "cn": "蜡笔",
+  "exCn": "她用黄色蜡笔画了个太阳。",
+  "hl": "蜡笔",
+  "how": "exact"
+ },
+ {
+  "id": 530,
+  "island": "school",
+  "en": "chalk",
+  "cn": "粉笔",
+  "exCn": "老师拿起一支粉笔。",
+  "hl": "粉笔",
+  "how": "exact"
+ },
+ {
+  "id": 531,
+  "island": "school",
+  "en": "blackboard",
+  "cn": "黑板",
+  "exCn": "老师正在黑板上写字。",
+  "hl": "黑板",
+  "how": "exact"
+ },
+ {
+  "id": 532,
+  "island": "school",
+  "en": "desk",
+  "cn": "课桌",
+  "exCn": "走之前把课桌收拾干净。",
+  "hl": "课桌",
+  "how": "exact"
+ },
+ {
+  "id": 533,
+  "island": "school",
+  "en": "chair",
+  "cn": "椅子",
+  "exCn": "请坐到这把椅子上。",
+  "hl": "椅子",
+  "how": "exact"
+ },
+ {
+  "id": 534,
+  "island": "school",
+  "en": "homework",
+  "cn": "家庭作业",
+  "exCn": "我已经做完作业了。",
+  "hl": "作业",
+  "how": "fragment"
+ },
+ {
+  "id": 535,
+  "island": "school",
+  "en": "exam",
+  "cn": "考试",
+  "exCn": "我们明天有英语考试。",
+  "hl": "考试",
+  "how": "exact"
+ },
+ {
+  "id": 536,
+  "island": "school",
+  "en": "lesson",
+  "cn": "课",
+  "exCn": "今天的课非常有趣。",
+  "hl": "课",
+  "how": "exact"
+ },
+ {
+  "id": 537,
+  "island": "school",
+  "en": "subject",
+  "cn": "科目",
+  "exCn": "英语是我最喜欢的科目。",
+  "hl": "科目",
+  "how": "exact"
+ },
+ {
+  "id": 538,
+  "island": "school",
+  "en": "grade",
+  "cn": "年级",
+  "exCn": "我今年上七年级。",
+  "hl": "年级",
+  "how": "exact"
+ },
+ {
+  "id": 539,
+  "island": "school",
+  "en": "term",
+  "cn": "学期",
+  "exCn": "新学期九月开始。",
+  "hl": "学期",
+  "how": "exact"
+ },
+ {
+  "id": 540,
+  "island": "school",
+  "en": "math",
+  "cn": "数学",
+  "exCn": "我数学相当不错。",
+  "hl": "数学",
+  "how": "exact"
+ },
+ {
+  "id": 541,
+  "island": "school",
+  "en": "English",
+  "cn": "英语",
+  "exCn": "我们每天都有英语课。",
+  "hl": "英语",
+  "how": "exact"
+ },
+ {
+  "id": 542,
+  "island": "school",
+  "en": "Chinese",
+  "cn": "中文/语文",
+  "exCn": "中文是我的母语。",
+  "hl": "中文",
+  "how": "alt"
+ },
+ {
+  "id": 543,
+  "island": "school",
+  "en": "science",
+  "cn": "科学",
+  "exCn": "科学课总是很有趣。",
+  "hl": "科学",
+  "how": "exact"
+ },
+ {
+  "id": 544,
+  "island": "school",
+  "en": "art",
+  "cn": "美术",
+  "exCn": "她非常喜欢上美术课。",
+  "hl": "美术",
+  "how": "exact"
+ },
+ {
+  "id": 545,
+  "island": "school",
+  "en": "music",
+  "cn": "音乐",
+  "exCn": "音乐总是让我开心。",
+  "hl": "音乐",
+  "how": "exact"
+ },
+ {
+  "id": 546,
+  "island": "school",
+  "en": "PE",
+  "cn": "体育",
+  "exCn": "体育课在星期四。",
+  "hl": "体育",
+  "how": "exact"
+ },
+ {
+  "id": 547,
+  "island": "school",
+  "en": "history",
+  "cn": "历史",
+  "exCn": "我觉得历史非常迷人。",
+  "hl": "历史",
+  "how": "exact"
+ },
+ {
+  "id": 548,
+  "island": "school",
+  "en": "geography",
+  "cn": "地理",
+  "exCn": "地理让我们了解世界。",
+  "hl": "地理",
+  "how": "exact"
+ },
+ {
+  "id": 549,
+  "island": "school",
+  "en": "computer",
+  "cn": "电脑",
+  "exCn": "我们每天都在课上用电脑。",
+  "hl": "电脑",
+  "how": "exact"
+ },
+ {
+  "id": 550,
+  "island": "school",
+  "en": "map",
+  "cn": "地图",
+  "exCn": "在地图上指给我看在哪里。",
+  "hl": "地图",
+  "how": "exact"
+ },
+ {
+  "id": 551,
+  "island": "school",
+  "en": "dictionary",
+  "cn": "词典",
+  "exCn": "在词典里查一下这个词。",
+  "hl": "词典",
+  "how": "exact"
+ },
+ {
+  "id": 552,
+  "island": "school",
+  "en": "library",
+  "cn": "图书馆",
+  "exCn": "我周末在图书馆学习。",
+  "hl": "图书馆",
+  "how": "exact"
+ },
+ {
+  "id": 553,
+  "island": "season",
+  "en": "nervous",
+  "cn": "紧张的",
+  "exCn": "重要考试前我总是很紧张。",
+  "hl": "紧张",
+  "how": "fragment"
+ },
+ {
+  "id": 554,
+  "island": "season",
+  "en": "anxious",
+  "cn": "焦虑的",
+  "exCn": "等成绩的时候她很焦虑。",
+  "hl": "焦虑",
+  "how": "fragment"
+ },
+ {
+  "id": 555,
+  "island": "season",
+  "en": "curious",
+  "cn": "好奇的",
+  "exCn": "孩子们对磁铁的原理很好奇。",
+  "hl": "好奇",
+  "how": "fragment"
+ },
+ {
+  "id": 556,
+  "island": "season",
+  "en": "proud",
+  "cn": "自豪的",
+  "exCn": "我得奖时父母为我感到骄傲。",
+  "hl": "骄傲",
+  "how": "manual"
+ },
+ {
+  "id": 557,
+  "island": "season",
+  "en": "grateful",
+  "cn": "感激的",
+  "exCn": "我非常感激你给予我的所有帮助。",
+  "hl": "感激",
+  "how": "fragment"
+ },
+ {
+  "id": 558,
+  "island": "season",
+  "en": "disappointed",
+  "cn": "失望的",
+  "exCn": "旅行取消了,他很失望。",
+  "hl": "失望",
+  "how": "fragment"
+ },
+ {
+  "id": 559,
+  "island": "season",
+  "en": "embarrassed",
+  "cn": "尴尬的",
+  "exCn": "她忘了他的名字,觉得很尴尬。",
+  "hl": "尴尬",
+  "how": "fragment"
+ },
+ {
+  "id": 560,
+  "island": "season",
+  "en": "frightened",
+  "cn": "害怕的",
+  "exCn": "小男孩被巨大的雷声吓到了。",
+  "hl": "的",
+  "how": "fragment"
+ },
+ {
+  "id": 561,
+  "island": "season",
+  "en": "satisfied",
+  "cn": "满意的",
+  "exCn": "顾客们对这顿饭的质量很满意。",
+  "hl": "满意",
+  "how": "fragment"
+ },
+ {
+  "id": 562,
+  "island": "season",
+  "en": "confused",
+  "cn": "困惑的",
+  "exCn": "这些复杂的说明让我完全搞糊涂了。",
+  "hl": "的",
+  "how": "fragment"
+ },
+ {
+  "id": 563,
+  "island": "season",
+  "en": "lonely",
+  "cn": "孤独的",
+  "exCn": "朋友都搬走后,他感到很孤独。",
+  "hl": "孤独",
+  "how": "fragment"
+ },
+ {
+  "id": 564,
+  "island": "season",
+  "en": "jealous",
+  "cn": "嫉妒的",
+  "exCn": "她嫉妒姐姐的新自行车。",
+  "hl": "嫉妒",
+  "how": "fragment"
+ },
+ {
+  "id": 565,
+  "island": "season",
+  "en": "relaxed",
+  "cn": "放松的",
+  "exCn": "考完试后,我终于放松了下来。",
+  "hl": "放松",
+  "how": "fragment"
+ },
+ {
+  "id": 566,
+  "island": "season",
+  "en": "ashamed",
+  "cn": "羞愧的",
+  "exCn": "他为对妈妈撒了谎而感到羞愧。",
+  "hl": "羞愧",
+  "how": "fragment"
+ },
+ {
+  "id": 567,
+  "island": "season",
+  "en": "eager",
+  "cn": "渴望的",
+  "exCn": "学生们急切地想开始新项目。",
+  "hl": "急切",
+  "how": "manual"
+ },
+ {
+  "id": 568,
+  "island": "season",
+  "en": "miserable",
+  "cn": "痛苦的",
+  "exCn": "我病倒在床上一整周,难受极了。",
+  "hl": "难受",
+  "how": "manual"
+ },
+ {
+  "id": 569,
+  "island": "season",
+  "en": "delighted",
+  "cn": "欣喜的",
+  "exCn": "听说自己通过了,她欣喜万分。",
+  "hl": "欣喜",
+  "how": "fragment"
+ },
+ {
+  "id": 570,
+  "island": "season",
+  "en": "furious",
+  "cn": "狂怒的",
+  "exCn": "爸爸看到打碎的窗户时勃然大怒。",
+  "hl": "怒",
+  "how": "fragment"
+ },
+ {
+  "id": 571,
+  "island": "season",
+  "en": "amazed",
+  "cn": "惊讶的",
+  "exCn": "山顶的美景让我们惊叹不已。",
+  "hl": "惊",
+  "how": "fragment"
+ },
+ {
+  "id": 572,
+  "island": "season",
+  "en": "comfort",
+  "cn": "安慰",
+  "exCn": "她抱了抱我来安慰我。",
+  "hl": "安慰",
+  "how": "exact"
+ },
+ {
+  "id": 573,
+  "island": "season",
+  "en": "polite",
+  "cn": "有礼貌的",
+  "exCn": "别人帮你时说声谢谢是有礼貌的。",
+  "hl": "有礼貌的",
+  "how": "exact"
+ },
+ {
+  "id": 574,
+  "island": "season",
+  "en": "humble",
+  "cn": "谦虚的",
+  "exCn": "即使出了名,他依然很谦逊。",
+  "hl": "谦",
+  "how": "fragment"
+ },
+ {
+  "id": 575,
+  "island": "season",
+  "en": "stubborn",
+  "cn": "固执的",
+  "exCn": "我弟弟太固执了,死活不肯承认错误。",
+  "hl": "固执",
+  "how": "fragment"
+ },
+ {
+  "id": 576,
+  "island": "season",
+  "en": "reliable",
+  "cn": "可靠的",
+  "exCn": "她是个可靠的朋友,总是说话算话。",
+  "hl": "可靠的",
+  "how": "exact"
+ },
+ {
+  "id": 577,
+  "island": "season",
+  "en": "cautious",
+  "cn": "谨慎的",
+  "exCn": "过这条繁忙的马路时要小心。",
+  "hl": "的",
+  "how": "fragment"
+ },
+ {
+  "id": 578,
+  "island": "season",
+  "en": "optimistic",
+  "cn": "乐观的",
+  "exCn": "尽管遭遇挫折,她对未来依然乐观。",
+  "hl": "乐观",
+  "how": "fragment"
+ },
+ {
+  "id": 579,
+  "island": "season",
+  "en": "sincere",
+  "cn": "真诚的",
+  "exCn": "请接受我对迟到的真诚道歉。",
+  "hl": "真诚",
+  "how": "fragment"
+ },
+ {
+  "id": 580,
+  "island": "season",
+  "en": "loyal",
+  "cn": "忠诚的",
+  "exCn": "狗是忠诚的伙伴,永远不会离开你。",
+  "hl": "忠诚的",
+  "how": "exact"
+ },
+ {
+  "id": 581,
+  "island": "season",
+  "en": "strict",
+  "cn": "严格的",
+  "exCn": "我们数学老师对作业要求很严格。",
+  "hl": "严格",
+  "how": "fragment"
+ },
+ {
+  "id": 582,
+  "island": "season",
+  "en": "selfish",
+  "cn": "自私的",
+  "exCn": "他把零食全留给自己,太自私了。",
+  "hl": "自私",
+  "how": "fragment"
+ },
+ {
+  "id": 583,
+  "island": "season",
+  "en": "mature",
+  "cn": "成熟的",
+  "exCn": "她比同龄人成熟得多。",
+  "hl": "成熟",
+  "how": "fragment"
+ },
+ {
+  "id": 584,
+  "island": "season",
+  "en": "energetic",
+  "cn": "精力充沛的",
+  "exCn": "这只小狗精力旺盛,跑个不停。",
+  "hl": "精力",
+  "how": "fragment"
+ },
+ {
+  "id": 585,
+  "island": "season",
+  "en": "modest",
+  "cn": "谦逊的",
+  "exCn": "他对自己的成就很谦虚,很少提起。",
+  "hl": "谦",
+  "how": "fragment"
+ },
+ {
+  "id": 586,
+  "island": "season",
+  "en": "cheerful",
+  "cn": "开朗的",
+  "exCn": "她带着开朗的微笑跟每个人打招呼。",
+  "hl": "开朗的",
+  "how": "exact"
+ },
+ {
+  "id": 587,
+  "island": "season",
+  "en": "hardworking",
+  "cn": "勤奋的",
+  "exCn": "他是个勤奋的学生,从不放弃。",
+  "hl": "勤奋的",
+  "how": "exact"
+ },
+ {
+  "id": 588,
+  "island": "season",
+  "en": "sensitive",
+  "cn": "敏感的",
+  "exCn": "她很敏感,看悲伤的电影容易哭。",
+  "hl": "敏感",
+  "how": "fragment"
+ },
+ {
+  "id": 589,
+  "island": "season",
+  "en": "determined",
+  "cn": "坚定的",
+  "exCn": "他下定决心无论如何都要跑完比赛。",
+  "hl": "定",
+  "how": "fragment"
+ },
+ {
+  "id": 590,
+  "island": "season",
+  "en": "outgoing",
+  "cn": "外向的",
+  "exCn": "她性格外向,走到哪儿都能交到朋友。",
+  "hl": "外向",
+  "how": "fragment"
+ },
+ {
+  "id": 591,
+  "island": "season",
+  "en": "talkative",
+  "cn": "健谈的",
+  "exCn": "我奶奶很健谈,喜欢聊天。",
+  "hl": "健谈",
+  "how": "fragment"
+ },
+ {
+  "id": 592,
+  "island": "season",
+  "en": "calm",
+  "cn": "冷静的",
+  "exCn": "即使在紧急情况下他也保持冷静。",
+  "hl": "冷静",
+  "how": "fragment"
+ },
+ {
+  "id": 593,
+  "island": "season",
+  "en": "important",
+  "cn": "重要的",
+  "exCn": "每天早上吃早餐很重要。",
+  "hl": "重要",
+  "how": "fragment"
+ },
+ {
+  "id": 594,
+  "island": "season",
+  "en": "possible",
+  "cn": "可能的",
+  "exCn": "明天之前完成这个有可能吗?",
+  "hl": "可能",
+  "how": "fragment"
+ },
+ {
+  "id": 595,
+  "island": "season",
+  "en": "useful",
+  "cn": "有用的",
+  "exCn": "这个应用对学新单词真的很有用。",
+  "hl": "有用",
+  "how": "fragment"
+ },
+ {
+  "id": 596,
+  "island": "season",
+  "en": "valuable",
+  "cn": "有价值的",
+  "exCn": "时间是我们拥有的最宝贵的东西。",
+  "hl": "有",
+  "how": "fragment"
+ },
+ {
+  "id": 597,
+  "island": "season",
+  "en": "similar",
+  "cn": "相似的",
+  "exCn": "这两幅画看起来很相似。",
+  "hl": "相似",
+  "how": "fragment"
+ },
+ {
+  "id": 598,
+  "island": "season",
+  "en": "modern",
+  "cn": "现代的",
+  "exCn": "他们住在市中心一套现代化的公寓里。",
+  "hl": "现代",
+  "how": "fragment"
+ },
+ {
+  "id": 599,
+  "island": "season",
+  "en": "ancient",
+  "cn": "古代的",
+  "exCn": "我们参观了山里一座古老的寺庙。",
+  "hl": "古",
+  "how": "fragment"
+ },
+ {
+  "id": 600,
+  "island": "season",
+  "en": "popular",
+  "cn": "受欢迎的",
+  "exCn": "这首歌在青少年中很受欢迎。",
+  "hl": "受欢迎",
+  "how": "fragment"
+ },
+ {
+  "id": 601,
+  "island": "season",
+  "en": "ordinary",
+  "cn": "普通的",
+  "exCn": "那只是平常的一天,没发生什么特别的事。",
+  "hl": "的",
+  "how": "fragment"
+ },
+ {
+  "id": 602,
+  "island": "season",
+  "en": "famous",
+  "cn": "著名的",
+  "exCn": "巴黎以埃菲尔铁塔闻名。",
+  "hl": "名",
+  "how": "fragment"
+ },
+ {
+  "id": 603,
+  "island": "season",
+  "en": "comfortable",
+  "cn": "舒适的",
+  "exCn": "这张沙发太舒服了,我都能在上面睡着。",
+  "hl": "舒",
+  "how": "fragment"
+ },
+ {
+  "id": 604,
+  "island": "season",
+  "en": "convenient",
+  "cn": "方便的",
+  "exCn": "住在车站附近很方便。",
+  "hl": "方便",
+  "how": "fragment"
+ },
+ {
+  "id": 605,
+  "island": "season",
+  "en": "complex",
+  "cn": "复杂的",
+  "exCn": "人脑极其复杂。",
+  "hl": "复杂",
+  "how": "fragment"
+ },
+ {
+  "id": 606,
+  "island": "season",
+  "en": "typical",
+  "cn": "典型的",
+  "exCn": "那是伦敦典型的雨天。",
+  "hl": "典型的",
+  "how": "exact"
+ },
+ {
+  "id": 607,
+  "island": "season",
+  "en": "flexible",
+  "cn": "灵活的",
+  "exCn": "我的时间很灵活,所以我们随时都能见面。",
+  "hl": "灵活",
+  "how": "fragment"
+ },
+ {
+  "id": 608,
+  "island": "season",
+  "en": "accurate",
+  "cn": "准确的",
+  "exCn": "她对那个男人的描述准确得令人吃惊。",
+  "hl": "准确",
+  "how": "fragment"
+ },
+ {
+  "id": 609,
+  "island": "season",
+  "en": "essential",
+  "cn": "必不可少的",
+  "exCn": "水对一切生物都是必不可少的。",
+  "hl": "必不可少的",
+  "how": "exact"
+ },
+ {
+  "id": 610,
+  "island": "season",
+  "en": "available",
+  "cn": "可获得的;可用的",
+  "exCn": "今晚演出的票还有。",
+  "hl": "的",
+  "how": "fragment"
+ },
+ {
+  "id": 611,
+  "island": "season",
+  "en": "suitable",
+  "cn": "合适的",
+  "exCn": "这部电影不适合小孩子看。",
+  "hl": "合",
+  "how": "fragment"
+ },
+ {
+  "id": 612,
+  "island": "season",
+  "en": "practical",
+  "cn": "实用的",
+  "exCn": "她给了我一些面试的实用建议。",
+  "hl": "实用",
+  "how": "fragment"
+ },
+ {
+  "id": 613,
+  "island": "season",
+  "en": "suddenly",
+  "cn": "突然地",
+  "exCn": "突然,灯灭了,一切陷入黑暗。",
+  "hl": "突然",
+  "how": "fragment"
+ },
+ {
+  "id": 614,
+  "island": "season",
+  "en": "immediately",
+  "cn": "立即",
+  "exCn": "一有问题就立刻给我打电话。",
+  "hl": "立",
+  "how": "fragment"
+ },
+ {
+  "id": 615,
+  "island": "season",
+  "en": "recently",
+  "cn": "最近",
+  "exCn": "我最近一直觉得挺累的。",
+  "hl": "最近",
+  "how": "exact"
+ },
+ {
+  "id": 616,
+  "island": "season",
+  "en": "finally",
+  "cn": "终于",
+  "exCn": "等了几个小时,火车终于到了。",
+  "hl": "终于",
+  "how": "exact"
+ },
+ {
+  "id": 617,
+  "island": "season",
+  "en": "occasionally",
+  "cn": "偶尔",
+  "exCn": "我们偶尔周末出去吃晚饭。",
+  "hl": "偶尔",
+  "how": "exact"
+ },
+ {
+  "id": 618,
+  "island": "season",
+  "en": "eventually",
+  "cn": "最终",
+  "exCn": "一开始很难,但他最终还是成功了。",
+  "hl": "最终",
+  "how": "exact"
+ },
+ {
+  "id": 619,
+  "island": "season",
+  "en": "meanwhile",
+  "cn": "与此同时",
+  "exCn": "你摆桌子,与此同时我来做晚饭。",
+  "hl": "与此同时",
+  "how": "exact"
+ },
+ {
+  "id": 620,
+  "island": "season",
+  "en": "nowadays",
+  "cn": "如今",
+  "exCn": "如今,几乎人人都有智能手机。",
+  "hl": "如今",
+  "how": "exact"
+ },
+ {
+  "id": 621,
+  "island": "season",
+  "en": "rarely",
+  "cn": "很少",
+  "exCn": "他很少看电视,因为他总是很忙。",
+  "hl": "很少",
+  "how": "exact"
+ },
+ {
+  "id": 622,
+  "island": "season",
+  "en": "constantly",
+  "cn": "不断地",
+  "exCn": "她不停地看手机有没有消息。",
+  "hl": "不",
+  "how": "fragment"
+ },
+ {
+  "id": 623,
+  "island": "season",
+  "en": "temporary",
+  "cn": "暂时的",
+  "exCn": "这只是个暑假的临时工作。",
+  "hl": "时",
+  "how": "fragment"
+ },
+ {
+  "id": 624,
+  "island": "season",
+  "en": "permanent",
+  "cn": "永久的",
+  "exCn": "他们搬到了加拿大,把那里当作永久的家。",
+  "hl": "永久的",
+  "how": "exact"
+ },
+ {
+  "id": 625,
+  "island": "season",
+  "en": "instantly",
+  "cn": "立刻",
+  "exCn": "照片瞬间就发到了我手机上。",
+  "hl": "瞬间",
+  "how": "manual"
+ },
+ {
+  "id": 626,
+  "island": "season",
+  "en": "currently",
+  "cn": "目前",
+  "exCn": "她目前正在澳大利亚留学。",
+  "hl": "目前",
+  "how": "exact"
+ },
+ {
+  "id": 627,
+  "island": "season",
+  "en": "previously",
+  "cn": "以前",
+  "exCn": "在成为作家之前,他曾当过老师。",
+  "hl": "前",
+  "how": "fragment"
+ },
+ {
+  "id": 628,
+  "island": "season",
+  "en": "seldom",
+  "cn": "很少",
+  "exCn": "这个地区很少下雪。",
+  "hl": "很少",
+  "how": "exact"
+ },
+ {
+  "id": 629,
+  "island": "season",
+  "en": "regularly",
+  "cn": "定期地",
+  "exCn": "你应该定期锻炼以保持健康。",
+  "hl": "定期",
+  "how": "fragment"
+ },
+ {
+  "id": 630,
+  "island": "season",
+  "en": "decade",
+  "cn": "十年",
+  "exCn": "这个小镇在过去十年里变化很大。",
+  "hl": "十年",
+  "how": "exact"
+ },
+ {
+  "id": 631,
+  "island": "season",
+  "en": "period",
+  "cn": "时期",
+  "exCn": "暑假是一段长长的休息时间。",
+  "hl": "时",
+  "how": "fragment"
+ },
+ {
+  "id": 632,
+  "island": "season",
+  "en": "schedule",
+  "cn": "日程",
+  "exCn": "我这周的日程排得满满当当。",
+  "hl": "日程",
+  "how": "exact"
+ },
+ {
+  "id": 633,
+  "island": "season",
+  "en": "explain",
+  "cn": "解释",
+  "exCn": "你能解释一下这台机器是怎么运作的吗?",
+  "hl": "解释",
+  "how": "exact"
+ },
+ {
+  "id": 634,
+  "island": "season",
+  "en": "describe",
+  "cn": "描述",
+  "exCn": "你能描述一下你在门口看到的那个人吗?",
+  "hl": "描述",
+  "how": "exact"
+ },
+ {
+  "id": 635,
+  "island": "season",
+  "en": "suggest",
+  "cn": "建议",
+  "exCn": "我建议我们早点出发以避开交通拥堵。",
+  "hl": "建议",
+  "how": "exact"
+ },
+ {
+  "id": 636,
+  "island": "season",
+  "en": "persuade",
+  "cn": "说服",
+  "exCn": "我试图说服他改变主意,但他拒绝了。",
+  "hl": "说服",
+  "how": "exact"
+ },
+ {
+  "id": 637,
+  "island": "season",
+  "en": "argue",
+  "cn": "争论",
+  "exCn": "他们经常争论哪支队伍更厉害。",
+  "hl": "争论",
+  "how": "exact"
+ },
+ {
+  "id": 638,
+  "island": "season",
+  "en": "discuss",
+  "cn": "讨论",
+  "exCn": "我们午饭时讨论一下这个计划吧。",
+  "hl": "讨论",
+  "how": "exact"
+ },
+ {
+  "id": 639,
+  "island": "season",
+  "en": "compare",
+  "cn": "比较",
+  "exCn": "把这两部手机比一比,这部明显更好。",
+  "hl": "比",
+  "how": "fragment"
+ },
+ {
+  "id": 640,
+  "island": "season",
+  "en": "imagine",
+  "cn": "想象",
+  "exCn": "想象一下有一天住在月球上。",
+  "hl": "想象",
+  "how": "exact"
+ },
+ {
+  "id": 641,
+  "island": "season",
+  "en": "predict",
+  "cn": "预测",
+  "exCn": "科学家现在能相当准确地预测天气。",
+  "hl": "预测",
+  "how": "exact"
+ },
+ {
+  "id": 642,
+  "island": "season",
+  "en": "realize",
+  "cn": "意识到",
+  "exCn": "我没意识到这家店这么早就关门。",
+  "hl": "意识到",
+  "how": "exact"
+ },
+ {
+  "id": 643,
+  "island": "season",
+  "en": "recognize",
+  "cn": "认出",
+  "exCn": "她换了发型,我都没认出她来。",
+  "hl": "认出",
+  "how": "exact"
+ },
+ {
+  "id": 644,
+  "island": "season",
+  "en": "consider",
+  "cn": "考虑",
+  "exCn": "做决定前你应该考虑所有的选择。",
+  "hl": "考虑",
+  "how": "exact"
+ },
+ {
+  "id": 645,
+  "island": "season",
+  "en": "express",
+  "cn": "表达",
+  "exCn": "她觉得很难用言语表达自己的感受。",
+  "hl": "表达",
+  "how": "exact"
+ },
+ {
+  "id": 646,
+  "island": "season",
+  "en": "mention",
+  "cn": "提到",
+  "exCn": "请不要向别人提到这件事。",
+  "hl": "提到",
+  "how": "exact"
+ },
+ {
+  "id": 647,
+  "island": "season",
+  "en": "doubt",
+  "cn": "怀疑",
+  "exCn": "我怀疑他到底会不会来参加聚会。",
+  "hl": "怀疑",
+  "how": "exact"
+ },
+ {
+  "id": 648,
+  "island": "season",
+  "en": "admit",
+  "cn": "承认",
+  "exCn": "你应该承认自己的错误并道歉。",
+  "hl": "承认",
+  "how": "exact"
+ },
+ {
+  "id": 649,
+  "island": "season",
+  "en": "indicate",
+  "cn": "表明",
+  "exCn": "这些标志表明前方道路封闭。",
+  "hl": "表明",
+  "how": "exact"
+ },
+ {
+  "id": 650,
+  "island": "season",
+  "en": "comment",
+  "cn": "评论",
+  "exCn": "老师让我们互相评论对方的作文。",
+  "hl": "评论",
+  "how": "exact"
+ },
+ {
+  "id": 651,
+  "island": "season",
+  "en": "debate",
+  "cn": "辩论",
+  "exCn": "明天我们将辩论是否该取消家庭作业。",
+  "hl": "辩论",
+  "how": "exact"
+ },
+ {
+  "id": 652,
+  "island": "season",
+  "en": "assume",
+  "cn": "假设",
+  "exCn": "别因为答案看起来奇怪就想当然地认为它是错的。",
+  "hl": "想当然地认为",
+  "how": "manual"
+ },
+ {
+  "id": 653,
+  "island": "season",
+  "en": "attempt",
+  "cn": "尝试",
+  "exCn": "她勇敢地尝试攀登那座山。",
+  "hl": "尝试",
+  "how": "exact"
+ },
+ {
+  "id": 654,
+  "island": "season",
+  "en": "avoid",
+  "cn": "避免",
+  "exCn": "我们提早出发以避开高峰期。",
+  "hl": "避",
+  "how": "fragment"
+ },
+ {
+  "id": 655,
+  "island": "season",
+  "en": "prevent",
+  "cn": "预防",
+  "exCn": "勤洗手可以预防疾病。",
+  "hl": "预防",
+  "how": "exact"
+ },
+ {
+  "id": 656,
+  "island": "season",
+  "en": "provide",
+  "cn": "提供",
+  "exCn": "学校将为每个学生提供免费午餐。",
+  "hl": "提供",
+  "how": "exact"
+ },
+ {
+  "id": 657,
+  "island": "season",
+  "en": "produce",
+  "cn": "生产",
+  "exCn": "这些工厂每年生产数千辆汽车。",
+  "hl": "生产",
+  "how": "exact"
+ },
+ {
+  "id": 658,
+  "island": "season",
+  "en": "reduce",
+  "cn": "减少",
+  "exCn": "关灯有助于减少浪费。",
+  "hl": "减少",
+  "how": "exact"
+ },
+ {
+  "id": 659,
+  "island": "season",
+  "en": "increase",
+  "cn": "增加",
+  "exCn": "用户数量持续增长。",
+  "hl": "增",
+  "how": "fragment"
+ },
+ {
+  "id": 660,
+  "island": "season",
+  "en": "develop",
+  "cn": "发展;发育",
+  "exCn": "孩子在幼年时期发育很快。",
+  "hl": "发育",
+  "how": "fragment"
+ },
+ {
+  "id": 661,
+  "island": "season",
+  "en": "invent",
+  "cn": "发明",
+  "exCn": "托马斯·爱迪生尝试了很多次才发明出电灯。",
+  "hl": "发明",
+  "how": "exact"
+ },
+ {
+  "id": 662,
+  "island": "season",
+  "en": "destroy",
+  "cn": "摧毁;毁坏",
+  "exCn": "一场大火几分钟就能摧毁整栋楼。",
+  "hl": "摧毁",
+  "how": "fragment"
+ },
+ {
+  "id": 663,
+  "island": "season",
+  "en": "repair",
+  "cn": "修理",
+  "exCn": "我爸爸一小时就能修理好这辆坏了的自行车。",
+  "hl": "修理",
+  "how": "exact"
+ },
+ {
+  "id": 664,
+  "island": "season",
+  "en": "prepare",
+  "cn": "准备",
+  "exCn": "这个周末我们得准备考试。",
+  "hl": "准备",
+  "how": "exact"
+ },
+ {
+  "id": 665,
+  "island": "season",
+  "en": "establish",
+  "cn": "建立",
+  "exCn": "他们计划在村里建立一所新学校。",
+  "hl": "建立",
+  "how": "exact"
+ },
+ {
+  "id": 666,
+  "island": "season",
+  "en": "maintain",
+  "cn": "维持",
+  "exCn": "保持健康的饮食很重要。",
+  "hl": "持",
+  "how": "fragment"
+ },
+ {
+  "id": 667,
+  "island": "season",
+  "en": "manage",
+  "cn": "管理",
+  "exCn": "她能把一个十人的团队管理得很好。",
+  "hl": "管理",
+  "how": "exact"
+ },
+ {
+  "id": 668,
+  "island": "season",
+  "en": "handle",
+  "cn": "处理",
+  "exCn": "他知道如何冷静地处理困难的局面。",
+  "hl": "处理",
+  "how": "exact"
+ },
+ {
+  "id": 669,
+  "island": "season",
+  "en": "perform",
+  "cn": "表演",
+  "exCn": "乐队将在一大群观众面前表演。",
+  "hl": "表演",
+  "how": "exact"
+ },
+ {
+  "id": 670,
+  "island": "season",
+  "en": "contribute",
+  "cn": "贡献",
+  "exCn": "人人都应该为保护环境出一份力。",
+  "hl": "出一份力",
+  "how": "manual"
+ },
+ {
+  "id": 671,
+  "island": "season",
+  "en": "struggle",
+  "cn": "奋斗;挣扎",
+  "exCn": "许多学生一开始都在数学上很吃力。",
+  "hl": "吃力",
+  "how": "manual"
+ },
+ {
+  "id": 672,
+  "island": "season",
+  "en": "succeed",
+  "cn": "成功",
+  "exCn": "只要坚持努力,你最终会成功。",
+  "hl": "成功",
+  "how": "exact"
+ },
+ {
+  "id": 673,
+  "island": "season",
+  "en": "several",
+  "cn": "几个",
+  "exCn": "这本书我读过好几遍了。",
+  "hl": "几",
+  "how": "fragment"
+ },
+ {
+  "id": 674,
+  "island": "season",
+  "en": "plenty",
+  "cn": "大量",
+  "exCn": "别急,我们有充足的时间。",
+  "hl": "充足",
+  "how": "manual"
+ },
+ {
+  "id": 675,
+  "island": "season",
+  "en": "enormous",
+  "cn": "巨大的",
+  "exCn": "大象是一种巨大的动物。",
+  "hl": "巨大的",
+  "how": "exact"
+ },
+ {
+  "id": 676,
+  "island": "season",
+  "en": "tiny",
+  "cn": "微小的",
+  "exCn": "一只小小的昆虫爬过桌子。",
+  "hl": "小的",
+  "how": "fragment"
+ },
+ {
+  "id": 677,
+  "island": "season",
+  "en": "huge",
+  "cn": "巨大的",
+  "exCn": "演唱会上有一大群人。",
+  "hl": "大",
+  "how": "fragment"
+ },
+ {
+  "id": 678,
+  "island": "season",
+  "en": "major",
+  "cn": "主要的",
+  "exCn": "污染是大城市的一个主要问题。",
+  "hl": "主要",
+  "how": "fragment"
+ },
+ {
+  "id": 679,
+  "island": "season",
+  "en": "minor",
+  "cn": "次要的",
+  "exCn": "只是点小伤,没什么大碍。",
+  "hl": "小伤",
+  "how": "manual"
+ },
+ {
+  "id": 680,
+  "island": "season",
+  "en": "average",
+  "cn": "平均的",
+  "exCn": "夏天的平均气温约为30度。",
+  "hl": "平均",
+  "how": "fragment"
+ },
+ {
+  "id": 681,
+  "island": "season",
+  "en": "entire",
+  "cn": "整个的",
+  "exCn": "她整个周末都在学习。",
+  "hl": "整个",
+  "how": "fragment"
+ },
+ {
+  "id": 682,
+  "island": "season",
+  "en": "amount",
+  "cn": "数量",
+  "exCn": "为慈善募集到了一大笔钱。",
+  "hl": "一大笔",
+  "how": "manual"
+ },
+ {
+  "id": 683,
+  "island": "season",
+  "en": "quantity",
+  "cn": "数量",
+  "exCn": "这个项目我们需要大量的纸。",
+  "hl": "量",
+  "how": "fragment"
+ },
+ {
+  "id": 684,
+  "island": "season",
+  "en": "majority",
+  "cn": "大多数",
+  "exCn": "大多数学生都通过了考试。",
+  "hl": "大多数",
+  "how": "exact"
+ },
+ {
+  "id": 685,
+  "island": "season",
+  "en": "approximately",
+  "cn": "大约",
+  "exCn": "这段旅程大约需要两个小时。",
+  "hl": "大约",
+  "how": "exact"
+ },
+ {
+  "id": 686,
+  "island": "season",
+  "en": "sufficient",
+  "cn": "足够的",
+  "exCn": "确保你带了足够的水去徒步。",
+  "hl": "足够的",
+  "how": "exact"
+ },
+ {
+  "id": 687,
+  "island": "season",
+  "en": "numerous",
+  "cn": "许多的",
+  "exCn": "学英语有很多理由。",
+  "hl": "多",
+  "how": "fragment"
+ },
+ {
+  "id": 688,
+  "island": "season",
+  "en": "multiple",
+  "cn": "多个的",
+  "exCn": "这道题有多个正确答案。",
+  "hl": "多个",
+  "how": "fragment"
+ },
+ {
+  "id": 689,
+  "island": "season",
+  "en": "additional",
+  "cn": "额外的",
+  "exCn": "超重行李要额外收费。",
+  "hl": "额外",
+  "how": "fragment"
+ },
+ {
+  "id": 690,
+  "island": "season",
+  "en": "maximum",
+  "cn": "最大值;最大的",
+  "exCn": "这条路的最高限速是每小时60公里。",
+  "hl": "最",
+  "how": "fragment"
+ },
+ {
+  "id": 691,
+  "island": "season",
+  "en": "minimum",
+  "cn": "最小值;最小的",
+  "exCn": "开始游戏至少需要三名玩家。",
+  "hl": "至少",
+  "how": "manual"
+ },
+ {
+  "id": 692,
+  "island": "season",
+  "en": "dozen",
+  "cn": "一打",
+  "exCn": "她在市场上买了一打鸡蛋。",
+  "hl": "一打",
+  "how": "exact"
+ },
+ {
+  "id": 693,
+  "island": "season",
+  "en": "however",
+  "cn": "然而",
+  "exCn": "这个计划听起来不错,然而可能花费太高。",
+  "hl": "然而",
+  "how": "exact"
+ },
+ {
+  "id": 694,
+  "island": "season",
+  "en": "therefore",
+  "cn": "因此",
+  "exCn": "他病了,因此待在了家里。",
+  "hl": "因此",
+  "how": "exact"
+ },
+ {
+  "id": 695,
+  "island": "season",
+  "en": "although",
+  "cn": "尽管",
+  "exCn": "虽然下着雨,我们还是出门了。",
+  "hl": "虽然",
+  "how": "manual"
+ },
+ {
+  "id": 696,
+  "island": "season",
+  "en": "instead",
+  "cn": "反而;作为替代",
+  "exCn": "我们没坐公交,而是走着去的。",
+  "hl": "而",
+  "how": "fragment"
+ },
+ {
+  "id": 697,
+  "island": "season",
+  "en": "besides",
+  "cn": "此外",
+  "exCn": "我不想去,再说,现在也太晚了。",
+  "hl": "再说",
+  "how": "manual"
+ },
+ {
+  "id": 698,
+  "island": "season",
+  "en": "otherwise",
+  "cn": "否则",
+  "exCn": "快点,否则我们会赶不上火车。",
+  "hl": "否则",
+  "how": "exact"
+ },
+ {
+  "id": 699,
+  "island": "season",
+  "en": "moreover",
+  "cn": "此外",
+  "exCn": "这家酒店很便宜,而且既干净又安静。",
+  "hl": "而且",
+  "how": "manual"
+ },
+ {
+  "id": 700,
+  "island": "season",
+  "en": "perhaps",
+  "cn": "也许",
+  "exCn": "也许我们该请老师帮忙。",
+  "hl": "也许",
+  "how": "exact"
+ },
+ {
+  "id": 701,
+  "island": "season",
+  "en": "probably",
+  "cn": "可能",
+  "exCn": "今天下午很可能会下雨。",
+  "hl": "可能",
+  "how": "exact"
+ },
+ {
+  "id": 702,
+  "island": "season",
+  "en": "certainly",
+  "cn": "当然",
+  "exCn": "如果你需要,我一定会帮你。",
+  "hl": "一定",
+  "how": "manual"
+ },
+ {
+  "id": 703,
+  "island": "season",
+  "en": "especially",
+  "cn": "尤其",
+  "exCn": "我喜欢水果,尤其是草莓。",
+  "hl": "尤其",
+  "how": "exact"
+ },
+ {
+  "id": 704,
+  "island": "season",
+  "en": "exactly",
+  "cn": "确切地",
+  "exCn": "那正是我所想的。",
+  "hl": "正是",
+  "how": "manual"
+ },
+ {
+  "id": 705,
+  "island": "season",
+  "en": "nearly",
+  "cn": "几乎",
+  "exCn": "我们快要完成这个项目了。",
+  "hl": "快要",
+  "how": "manual"
+ },
+ {
+  "id": 706,
+  "island": "season",
+  "en": "actually",
+  "cn": "实际上",
+  "exCn": "它看起来很难,但实际上相当简单。",
+  "hl": "实际上",
+  "how": "exact"
+ },
+ {
+  "id": 707,
+  "island": "season",
+  "en": "furthermore",
+  "cn": "此外",
+  "exCn": "这个产品很便宜,此外还很好用。",
+  "hl": "此外",
+  "how": "exact"
+ },
+ {
+  "id": 708,
+  "island": "season",
+  "en": "nevertheless",
+  "cn": "尽管如此",
+  "exCn": "这是段艰难的旅程,尽管如此,还是值得的。",
+  "hl": "尽管如此",
+  "how": "exact"
+ },
+ {
+  "id": 709,
+  "island": "season",
+  "en": "consequently",
+  "cn": "因此;结果",
+  "exCn": "他没学习,结果考试不及格。",
+  "hl": "结果",
+  "how": "fragment"
+ },
+ {
+  "id": 710,
+  "island": "season",
+  "en": "similarly",
+  "cn": "同样地",
+  "exCn": "猫需要运动,同样,狗也需要每天散步。",
+  "hl": "同样",
+  "how": "fragment"
+ },
+ {
+  "id": 711,
+  "island": "season",
+  "en": "generally",
+  "cn": "通常;一般来说",
+  "exCn": "总的来说,这里的天气很温和。",
+  "hl": "来说",
+  "how": "fragment"
+ },
+ {
+  "id": 712,
+  "island": "season",
+  "en": "fortunately",
+  "cn": "幸好;幸运的是",
+  "exCn": "幸运的是,事故中没有人受伤。",
+  "hl": "幸运",
+  "how": "fragment"
+ },
+ {
+  "id": 713,
+  "island": "season",
+  "en": "research",
+  "cn": "研究",
+  "exCn": "她正在做关于气候变化的研究。",
+  "hl": "研究",
+  "how": "exact"
+ },
+ {
+  "id": 714,
+  "island": "season",
+  "en": "education",
+  "cn": "教育",
+  "exCn": "教育对孩子的未来起着关键作用。",
+  "hl": "教育",
+  "how": "exact"
+ },
+ {
+  "id": 715,
+  "island": "season",
+  "en": "experiment",
+  "cn": "实验",
+  "exCn": "我们做了一个实验来验证这个理论。",
+  "hl": "实验",
+  "how": "exact"
+ },
+ {
+  "id": 716,
+  "island": "season",
+  "en": "theory",
+  "cn": "理论",
+  "exCn": "爱因斯坦的理论改变了我们看待宇宙的方式。",
+  "hl": "理论",
+  "how": "exact"
+ },
+ {
+  "id": 717,
+  "island": "season",
+  "en": "concept",
+  "cn": "概念",
+  "exCn": "时间旅行的概念很难理解。",
+  "hl": "概念",
+  "how": "exact"
+ },
+ {
+  "id": 718,
+  "island": "season",
+  "en": "analyze",
+  "cn": "分析",
+  "exCn": "我们先分析数据再下结论。",
+  "hl": "分析",
+  "how": "exact"
+ },
+ {
+  "id": 719,
+  "island": "season",
+  "en": "conclude",
+  "cn": "得出结论",
+  "exCn": "从结果来看,我们可以得出这个计划奏效了的结论。",
+  "hl": "得出",
+  "how": "fragment"
+ },
+ {
+  "id": 720,
+  "island": "season",
+  "en": "summarize",
+  "cn": "总结",
+  "exCn": "请用三句话总结这篇文章。",
+  "hl": "总结",
+  "how": "exact"
+ },
+ {
+  "id": 721,
+  "island": "season",
+  "en": "achieve",
+  "cn": "实现",
+  "exCn": "通过努力,你可以实现自己的梦想。",
+  "hl": "实现",
+  "how": "exact"
+ },
+ {
+  "id": 722,
+  "island": "season",
+  "en": "review",
+  "cn": "复习",
+  "exCn": "考试前我总会复习笔记。",
+  "hl": "复习",
+  "how": "exact"
+ },
+ {
+  "id": 723,
+  "island": "season",
+  "en": "memorize",
+  "cn": "记住",
+  "exCn": "光背单词不够,你还得会用。",
+  "hl": "背",
+  "how": "manual"
+ },
+ {
+  "id": 724,
+  "island": "season",
+  "en": "translate",
+  "cn": "翻译",
+  "exCn": "你能把这句话翻译成英文吗?",
+  "hl": "翻译",
+  "how": "exact"
+ },
+ {
+  "id": 725,
+  "island": "season",
+  "en": "solution",
+  "cn": "解决方案",
+  "exCn": "我们终于找到了这个问题的解决办法。",
+  "hl": "解决",
+  "how": "fragment"
+ },
+ {
+  "id": 726,
+  "island": "season",
+  "en": "standard",
+  "cn": "标准",
+  "exCn": "这家工厂保持着很高的质量标准。",
+  "hl": "标准",
+  "how": "exact"
+ },
+ {
+  "id": 727,
+  "island": "season",
+  "en": "method",
+  "cn": "方法",
+  "exCn": "这是解这个方程最简单的方法。",
+  "hl": "方法",
+  "how": "exact"
+ },
+ {
+  "id": 728,
+  "island": "season",
+  "en": "principle",
+  "cn": "原则",
+  "exCn": "诚实是人生中一条重要的原则。",
+  "hl": "原则",
+  "how": "exact"
+ },
+ {
+  "id": 729,
+  "island": "season",
+  "en": "define",
+  "cn": "定义",
+  "exCn": "你能给这个词下个定义吗?",
+  "hl": "定义",
+  "how": "exact"
+ },
+ {
+  "id": 730,
+  "island": "season",
+  "en": "examine",
+  "cn": "检查",
+  "exCn": "医生会仔细检查这位病人。",
+  "hl": "检查",
+  "how": "exact"
+ },
+ {
+  "id": 731,
+  "island": "season",
+  "en": "observe",
+  "cn": "观察",
+  "exCn": "科学家通过望远镜观察星星。",
+  "hl": "观察",
+  "how": "exact"
+ },
+ {
+  "id": 732,
+  "island": "season",
+  "en": "calculate",
+  "cn": "计算",
+  "exCn": "你能在脑子里计算出总花费吗?",
+  "hl": "计算",
+  "how": "exact"
+ },
+ {
+  "id": 733,
+  "island": "season",
+  "en": "society",
+  "cn": "社会",
+  "exCn": "教育造福整个社会。",
+  "hl": "社会",
+  "how": "exact"
+ },
+ {
+  "id": 734,
+  "island": "season",
+  "en": "tradition",
+  "cn": "传统",
+  "exCn": "吃饺子是春节的传统。",
+  "hl": "传统",
+  "how": "exact"
+ },
+ {
+  "id": 735,
+  "island": "season",
+  "en": "custom",
+  "cn": "习俗",
+  "exCn": "见面握手是一种常见的习俗。",
+  "hl": "习俗",
+  "how": "exact"
+ },
+ {
+  "id": 736,
+  "island": "season",
+  "en": "government",
+  "cn": "政府",
+  "exCn": "政府建了许多新学校。",
+  "hl": "政府",
+  "how": "exact"
+ },
+ {
+  "id": 737,
+  "island": "season",
+  "en": "public",
+  "cn": "公共的;公众的",
+  "exCn": "公共场所禁止吸烟。",
+  "hl": "公共",
+  "how": "fragment"
+ },
+ {
+  "id": 738,
+  "island": "season",
+  "en": "citizen",
+  "cn": "公民",
+  "exCn": "每个公民都有投票的权利。",
+  "hl": "公民",
+  "how": "exact"
+ },
+ {
+  "id": 739,
+  "island": "season",
+  "en": "neighbor",
+  "cn": "邻居",
+  "exCn": "我们的新邻居非常友好。",
+  "hl": "邻居",
+  "how": "exact"
+ },
+ {
+  "id": 740,
+  "island": "season",
+  "en": "stranger",
+  "cn": "陌生人",
+  "exCn": "一个陌生人向我打听去火车站的路。",
+  "hl": "陌生人",
+  "how": "exact"
+ },
+ {
+  "id": 741,
+  "island": "season",
+  "en": "customer",
+  "cn": "顾客",
+  "exCn": "服务员问这位顾客想点些什么。",
+  "hl": "顾客",
+  "how": "exact"
+ },
+ {
+  "id": 742,
+  "island": "season",
+  "en": "population",
+  "cn": "人口",
+  "exCn": "这座城市的人口增长很快。",
+  "hl": "人口",
+  "how": "exact"
+ },
+ {
+  "id": 743,
+  "island": "season",
+  "en": "charity",
+  "cn": "慈善",
+  "exCn": "他们通过跑马拉松为慈善筹款。",
+  "hl": "慈善",
+  "how": "exact"
+ },
+ {
+  "id": 744,
+  "island": "season",
+  "en": "volunteer",
+  "cn": "志愿者",
+  "exCn": "她在动物收容所做志愿者。",
+  "hl": "志愿者",
+  "how": "exact"
+ },
+ {
+  "id": 745,
+  "island": "season",
+  "en": "economy",
+  "cn": "经济",
+  "exCn": "强劲的经济会创造更多就业机会。",
+  "hl": "经济",
+  "how": "exact"
+ },
+ {
+  "id": 746,
+  "island": "season",
+  "en": "industry",
+  "cn": "工业",
+  "exCn": "汽车工业对这个国家非常重要。",
+  "hl": "工业",
+  "how": "exact"
+ },
+ {
+  "id": 747,
+  "island": "season",
+  "en": "organization",
+  "cn": "组织",
+  "exCn": "她在一家非营利组织工作。",
+  "hl": "组织",
+  "how": "exact"
+ },
+ {
+  "id": 748,
+  "island": "season",
+  "en": "generation",
+  "cn": "一代人",
+  "exCn": "每一代人都面临着自己的挑战。",
+  "hl": "一代人",
+  "how": "exact"
+ },
+ {
+  "id": 749,
+  "island": "season",
+  "en": "individual",
+  "cn": "个人",
+  "exCn": "每个人都有自己的学习方式。",
+  "hl": "个人",
+  "how": "exact"
+ },
+ {
+  "id": 750,
+  "island": "season",
+  "en": "private",
+  "cn": "私人的",
+  "exCn": "这是封私人信件,请不要看。",
+  "hl": "私人",
+  "how": "fragment"
+ },
+ {
+  "id": 751,
+  "island": "season",
+  "en": "official",
+  "cn": "官方的",
+  "exCn": "官方结果将于明天公布。",
+  "hl": "官方",
+  "how": "fragment"
+ },
+ {
+  "id": 752,
+  "island": "season",
+  "en": "ceremony",
+  "cn": "典礼",
+  "exCn": "数百万人观看了开幕式。",
+  "hl": "开幕式",
+  "how": "manual"
+ },
+ {
+  "id": 753,
+  "island": "season",
+  "en": "energy",
+  "cn": "能量",
+  "exCn": "太阳给我们光和能量。",
+  "hl": "能量",
+  "how": "exact"
+ },
+ {
+  "id": 754,
+  "island": "season",
+  "en": "electricity",
+  "cn": "电",
+  "exCn": "我们用电为家庭供能。",
+  "hl": "电",
+  "how": "exact"
+ },
+ {
+  "id": 755,
+  "island": "season",
+  "en": "gravity",
+  "cn": "重力",
+  "exCn": "重力把一切都拉向地面。",
+  "hl": "重力",
+  "how": "exact"
+ },
+ {
+  "id": 756,
+  "island": "season",
+  "en": "planet",
+  "cn": "行星",
+  "exCn": "火星是距太阳第四近的行星。",
+  "hl": "行星",
+  "how": "exact"
+ },
+ {
+  "id": 757,
+  "island": "season",
+  "en": "universe",
+  "cn": "宇宙",
+  "exCn": "宇宙中充满了无数的星星。",
+  "hl": "宇宙",
+  "how": "exact"
+ },
+ {
+  "id": 758,
+  "island": "season",
+  "en": "climate",
+  "cn": "气候",
+  "exCn": "这里的气候温暖干燥。",
+  "hl": "气候",
+  "how": "exact"
+ },
+ {
+  "id": 759,
+  "island": "season",
+  "en": "temperature",
+  "cn": "温度",
+  "exCn": "夜里气温骤降。",
+  "hl": "温",
+  "how": "fragment"
+ },
+ {
+  "id": 760,
+  "island": "season",
+  "en": "oxygen",
+  "cn": "氧气",
+  "exCn": "我们需要氧气来呼吸。",
+  "hl": "氧气",
+  "how": "exact"
+ },
+ {
+  "id": 761,
+  "island": "season",
+  "en": "surface",
+  "cn": "表面",
+  "exCn": "湖面平静而光滑。",
+  "hl": "面",
+  "how": "fragment"
+ },
+ {
+  "id": 762,
+  "island": "season",
+  "en": "material",
+  "cn": "材料",
+  "exCn": "这件夹克是用防水材料做的。",
+  "hl": "材料",
+  "how": "exact"
+ },
+ {
+  "id": 763,
+  "island": "season",
+  "en": "chemical",
+  "cn": "化学物质;化学的",
+  "exCn": "这种化学物质很危险,千万不要碰。",
+  "hl": "化学",
+  "how": "fragment"
+ },
+ {
+  "id": 764,
+  "island": "season",
+  "en": "natural",
+  "cn": "自然的",
+  "exCn": "蜂蜜是一种天然的甜味剂。",
+  "hl": "然的",
+  "how": "fragment"
+ },
+ {
+  "id": 765,
+  "island": "season",
+  "en": "resource",
+  "cn": "资源",
+  "exCn": "水是一种宝贵的自然资源。",
+  "hl": "资源",
+  "how": "exact"
+ },
+ {
+  "id": 766,
+  "island": "season",
+  "en": "creature",
+  "cn": "生物",
+  "exCn": "蓝鲸是海洋里最大的生物。",
+  "hl": "生物",
+  "how": "exact"
+ },
+ {
+  "id": 767,
+  "island": "season",
+  "en": "atmosphere",
+  "cn": "大气",
+  "exCn": "地球的大气层保护我们免受太阳光线的伤害。",
+  "hl": "大气",
+  "how": "exact"
+ },
+ {
+  "id": 768,
+  "island": "season",
+  "en": "scientific",
+  "cn": "科学的",
+  "exCn": "这一发现是一项重大的科学突破。",
+  "hl": "科学",
+  "how": "fragment"
+ },
+ {
+  "id": 769,
+  "island": "season",
+  "en": "technology",
+  "cn": "技术",
+  "exCn": "现代科技改变了我们的生活方式。",
+  "hl": "技",
+  "how": "fragment"
+ },
+ {
+  "id": 770,
+  "island": "season",
+  "en": "particle",
+  "cn": "粒子",
+  "exCn": "一个尘埃粒子太小了,根本看不见。",
+  "hl": "粒子",
+  "how": "exact"
+ },
+ {
+  "id": 771,
+  "island": "season",
+  "en": "invention",
+  "cn": "发明",
+  "exCn": "电话是一项改变生活的发明。",
+  "hl": "发明",
+  "how": "exact"
+ },
+ {
+  "id": 772,
+  "island": "season",
+  "en": "galaxy",
+  "cn": "星系",
+  "exCn": "我们的太阳系是银河系的一部分。",
+  "hl": "系",
+  "how": "fragment"
+ },
+ {
+  "id": 773,
+  "island": "season",
+  "en": "career",
+  "cn": "职业生涯",
+  "exCn": "她作为医生事业有成。",
+  "hl": "业",
+  "how": "fragment"
+ },
+ {
+  "id": 774,
+  "island": "season",
+  "en": "profession",
+  "cn": "职业",
+  "exCn": "教书是一份受人尊敬的职业。",
+  "hl": "职业",
+  "how": "exact"
+ },
+ {
+  "id": 775,
+  "island": "season",
+  "en": "business",
+  "cn": "生意;商业",
+  "exCn": "他在镇上经营着一家小生意。",
+  "hl": "生意",
+  "how": "fragment"
+ },
+ {
+  "id": 776,
+  "island": "season",
+  "en": "success",
+  "cn": "成功",
+  "exCn": "努力是成功的关键。",
+  "hl": "成功",
+  "how": "exact"
+ },
+ {
+  "id": 777,
+  "island": "season",
+  "en": "failure",
+  "cn": "失败",
+  "exCn": "失败不过是学习的一部分。",
+  "hl": "失败",
+  "how": "exact"
+ },
+ {
+  "id": 778,
+  "island": "season",
+  "en": "effort",
+  "cn": "努力",
+  "exCn": "再努力一点,你就能通过了。",
+  "hl": "努力",
+  "how": "exact"
+ },
+ {
+  "id": 779,
+  "island": "season",
+  "en": "responsibility",
+  "cn": "责任",
+  "exCn": "喂狗是你的责任。",
+  "hl": "责任",
+  "how": "exact"
+ },
+ {
+  "id": 780,
+  "island": "season",
+  "en": "talent",
+  "cn": "才能",
+  "exCn": "她在音乐上很有天赋。",
+  "hl": "天赋",
+  "how": "manual"
+ },
+ {
+  "id": 781,
+  "island": "season",
+  "en": "ability",
+  "cn": "能力",
+  "exCn": "他有快速解决问题的能力。",
+  "hl": "能力",
+  "how": "exact"
+ },
+ {
+  "id": 782,
+  "island": "season",
+  "en": "progress",
+  "cn": "进步",
+  "exCn": "这学期你的英语进步很大。",
+  "hl": "进步",
+  "how": "exact"
+ },
+ {
+  "id": 783,
+  "island": "season",
+  "en": "goal",
+  "cn": "目标",
+  "exCn": "我的目标是这个赛季学会240个新单词。",
+  "hl": "目标",
+  "how": "exact"
+ },
+ {
+  "id": 784,
+  "island": "season",
+  "en": "skill",
+  "cn": "技能",
+  "exCn": "做饭是一项有用的生活技能。",
+  "hl": "技能",
+  "how": "exact"
+ },
+ {
+  "id": 785,
+  "island": "season",
+  "en": "position",
+  "cn": "职位",
+  "exCn": "她得到了一家大公司的职位。",
+  "hl": "职位",
+  "how": "exact"
+ },
+ {
+  "id": 786,
+  "island": "season",
+  "en": "salary",
+  "cn": "薪水",
+  "exCn": "这份新工作薪水更高。",
+  "hl": "薪水",
+  "how": "exact"
+ },
+ {
+  "id": 787,
+  "island": "season",
+  "en": "employee",
+  "cn": "员工;雇员",
+  "exCn": "他是公司里最勤奋的员工。",
+  "hl": "员工",
+  "how": "fragment"
+ },
+ {
+  "id": 788,
+  "island": "season",
+  "en": "interview",
+  "cn": "面试",
+  "exCn": "求职面试前他很紧张。",
+  "hl": "面试",
+  "how": "exact"
+ },
+ {
+  "id": 789,
+  "island": "season",
+  "en": "project",
+  "cn": "项目",
+  "exCn": "我们团队正在做一个激动人心的新项目。",
+  "hl": "项目",
+  "how": "exact"
+ },
+ {
+  "id": 790,
+  "island": "season",
+  "en": "promotion",
+  "cn": "晋升",
+  "exCn": "多年的努力后她得到了晋升。",
+  "hl": "晋升",
+  "how": "exact"
+ },
+ {
+  "id": 791,
+  "island": "season",
+  "en": "reputation",
+  "cn": "声誉",
+  "exCn": "这家餐厅以食材新鲜而享有好名声。",
+  "hl": "声",
+  "how": "fragment"
+ },
+ {
+  "id": 792,
+  "island": "season",
+  "en": "colleague",
+  "cn": "同事",
+  "exCn": "我的同事帮我按时完成了报告。",
+  "hl": "同事",
+  "how": "exact"
+ },
+ {
+  "id": 793,
+  "island": "sports",
+  "en": "sport",
+  "cn": "运动",
+  "exCn": "运动让你保持健康。",
+  "hl": "运动",
+  "how": "exact"
+ },
+ {
+  "id": 794,
+  "island": "sports",
+  "en": "football",
+  "cn": "足球",
+  "exCn": "我每个周末都踢足球。",
+  "hl": "足球",
+  "how": "exact"
+ },
+ {
+  "id": 795,
+  "island": "sports",
+  "en": "basketball",
+  "cn": "篮球",
+  "exCn": "姚明是著名的篮球运动员。",
+  "hl": "篮球",
+  "how": "exact"
+ },
+ {
+  "id": 796,
+  "island": "sports",
+  "en": "volleyball",
+  "cn": "排球",
+  "exCn": "排球是一项受欢迎的团体运动。",
+  "hl": "排球",
+  "how": "exact"
+ },
+ {
+  "id": 797,
+  "island": "sports",
+  "en": "tennis",
+  "cn": "网球",
+  "exCn": "放学后我们去打网球吧。",
+  "hl": "网球",
+  "how": "exact"
+ },
+ {
+  "id": 798,
+  "island": "sports",
+  "en": "badminton",
+  "cn": "羽毛球",
+  "exCn": "羽毛球在中国非常受欢迎。",
+  "hl": "羽毛球",
+  "how": "exact"
+ },
+ {
+  "id": 799,
+  "island": "sports",
+  "en": "ball",
+  "cn": "球",
+  "exCn": "把球扔给我!",
+  "hl": "球",
+  "how": "exact"
+ },
+ {
+  "id": 800,
+  "island": "sports",
+  "en": "swimming",
+  "cn": "游泳",
+  "exCn": "游泳是很好的运动。",
+  "hl": "游泳",
+  "how": "exact"
+ },
+ {
+  "id": 801,
+  "island": "sports",
+  "en": "running",
+  "cn": "跑步",
+  "exCn": "每天早上跑步让我感觉很棒。",
+  "hl": "跑步",
+  "how": "exact"
+ },
+ {
+  "id": 802,
+  "island": "sports",
+  "en": "jumping",
+  "cn": "跳跃",
+  "exCn": "跳跃是一项好运动。",
+  "hl": "跳跃",
+  "how": "exact"
+ },
+ {
+  "id": 803,
+  "island": "sports",
+  "en": "cycling",
+  "cn": "骑车",
+  "exCn": "骑车上学是一种很好的锻炼。",
+  "hl": "骑车",
+  "how": "exact"
+ },
+ {
+  "id": 804,
+  "island": "sports",
+  "en": "skating",
+  "cn": "滑冰",
+  "exCn": "冬天滑冰很有意思。",
+  "hl": "滑冰",
+  "how": "exact"
+ },
+ {
+  "id": 805,
+  "island": "sports",
+  "en": "skiing",
+  "cn": "滑雪",
+  "exCn": "从坡上滑雪下来非常刺激。",
+  "hl": "滑雪",
+  "how": "exact"
+ },
+ {
+  "id": 806,
+  "island": "sports",
+  "en": "hiking",
+  "cn": "远足",
+  "exCn": "我们上周末去远足了。",
+  "hl": "远足",
+  "how": "exact"
+ },
+ {
+  "id": 807,
+  "island": "sports",
+  "en": "yoga",
+  "cn": "瑜伽",
+  "exCn": "瑜伽让我在一天的疲惫后放松下来。",
+  "hl": "瑜伽",
+  "how": "exact"
+ },
+ {
+  "id": 808,
+  "island": "sports",
+  "en": "dancing",
+  "cn": "跳舞",
+  "exCn": "她喜欢随着流行音乐跳舞。",
+  "hl": "跳舞",
+  "how": "exact"
+ },
+ {
+  "id": 809,
+  "island": "sports",
+  "en": "singing",
+  "cn": "唱歌",
+  "exCn": "唱歌总是让我开心。",
+  "hl": "唱歌",
+  "how": "exact"
+ },
+ {
+  "id": 810,
+  "island": "sports",
+  "en": "drawing",
+  "cn": "画画",
+  "exCn": "她画得非常棒。",
+  "hl": "画",
+  "how": "fragment"
+ },
+ {
+  "id": 811,
+  "island": "sports",
+  "en": "reading",
+  "cn": "阅读",
+  "exCn": "阅读是我最喜欢的爱好。",
+  "hl": "阅读",
+  "how": "exact"
+ },
+ {
+  "id": 812,
+  "island": "sports",
+  "en": "cooking",
+  "cn": "烹饪",
+  "exCn": "我喜欢在周末烹饪。",
+  "hl": "烹饪",
+  "how": "exact"
+ },
+ {
+  "id": 813,
+  "island": "sports",
+  "en": "fishing",
+  "cn": "钓鱼",
+  "exCn": "我爷爷每周日去钓鱼。",
+  "hl": "钓鱼",
+  "how": "exact"
+ },
+ {
+  "id": 814,
+  "island": "sports",
+  "en": "game",
+  "cn": "比赛/游戏",
+  "exCn": "我们昨晚看了一场篮球赛。",
+  "hl": "赛",
+  "how": "fragment"
+ },
+ {
+  "id": 815,
+  "island": "sports",
+  "en": "match",
+  "cn": "比赛",
+  "exCn": "足球比赛三点开始。",
+  "hl": "比赛",
+  "how": "exact"
+ },
+ {
+  "id": 816,
+  "island": "sports",
+  "en": "player",
+  "cn": "运动员",
+  "exCn": "他是队里最好的球员。",
+  "hl": "员",
+  "how": "fragment"
+ },
+ {
+  "id": 817,
+  "island": "sports",
+  "en": "team",
+  "cn": "队/球队",
+  "exCn": "我们队赢了!",
+  "hl": "队",
+  "how": "alt"
+ },
+ {
+  "id": 818,
+  "island": "sports",
+  "en": "win",
+  "cn": "赢",
+  "exCn": "我相信我们会赢得比赛。",
+  "hl": "赢",
+  "how": "exact"
+ },
+ {
+  "id": 819,
+  "island": "sports",
+  "en": "lose",
+  "cn": "输",
+  "exCn": "偶尔输了也没关系。",
+  "hl": "输",
+  "how": "exact"
+ },
+ {
+  "id": 820,
+  "island": "sports",
+  "en": "gym",
+  "cn": "体育馆",
+  "exCn": "体育馆在我们学校旁边。",
+  "hl": "体育馆",
+  "how": "exact"
+ },
+ {
+  "id": 821,
+  "island": "sports",
+  "en": "park",
+  "cn": "公园",
+  "exCn": "孩子们在公园里玩。",
+  "hl": "公园",
+  "how": "exact"
+ },
+ {
+  "id": 822,
+  "island": "sports",
+  "en": "playground",
+  "cn": "操场",
+  "exCn": "学生们在操场上奔跑。",
+  "hl": "操场",
+  "how": "exact"
+ },
+ {
+  "id": 823,
+  "island": "time",
+  "en": "time",
+  "cn": "时间",
+  "exCn": "快乐的时光总是过得很快。",
+  "hl": "时",
+  "how": "fragment"
+ },
+ {
+  "id": 824,
+  "island": "time",
+  "en": "second",
+  "cn": "秒",
+  "exCn": "我一秒钟就到。",
+  "hl": "秒",
+  "how": "exact"
+ },
+ {
+  "id": 825,
+  "island": "time",
+  "en": "minute",
+  "cn": "分钟",
+  "exCn": "等我十分钟。",
+  "hl": "分钟",
+  "how": "exact"
+ },
+ {
+  "id": 826,
+  "island": "time",
+  "en": "hour",
+  "cn": "小时",
+  "exCn": "我每晚睡大约八个小时。",
+  "hl": "小时",
+  "how": "exact"
+ },
+ {
+  "id": 827,
+  "island": "time",
+  "en": "day",
+  "cn": "天",
+  "exCn": "祝你度过愉快的一天!",
+  "hl": "天",
+  "how": "exact"
+ },
+ {
+  "id": 828,
+  "island": "time",
+  "en": "week",
+  "cn": "周",
+  "exCn": "我每周都见她。",
+  "hl": "周",
+  "how": "exact"
+ },
+ {
+  "id": 829,
+  "island": "time",
+  "en": "month",
+  "cn": "月",
+  "exCn": "我下个月过生日。",
+  "hl": "月",
+  "how": "exact"
+ },
+ {
+  "id": 830,
+  "island": "time",
+  "en": "year",
+  "cn": "年",
+  "exCn": "新年快乐!",
+  "hl": "年",
+  "how": "exact"
+ },
+ {
+  "id": 831,
+  "island": "time",
+  "en": "morning",
+  "cn": "早上",
+  "exCn": "我喜欢早上看书。",
+  "hl": "早上",
+  "how": "exact"
+ },
+ {
+  "id": 832,
+  "island": "time",
+  "en": "noon",
+  "cn": "中午",
+  "exCn": "我们中午左右吃午饭。",
+  "hl": "中午",
+  "how": "exact"
+ },
+ {
+  "id": 833,
+  "island": "time",
+  "en": "afternoon",
+  "cn": "下午",
+  "exCn": "我通常下午看书。",
+  "hl": "下午",
+  "how": "exact"
+ },
+ {
+  "id": 834,
+  "island": "time",
+  "en": "evening",
+  "cn": "晚上",
+  "exCn": "我一般晚上学习。",
+  "hl": "晚上",
+  "how": "exact"
+ },
+ {
+  "id": 835,
+  "island": "time",
+  "en": "night",
+  "cn": "夜晚",
+  "exCn": "星星在夜晚出来。",
+  "hl": "夜晚",
+  "how": "exact"
+ },
+ {
+  "id": 836,
+  "island": "time",
+  "en": "midnight",
+  "cn": "午夜",
+  "exCn": "灰姑娘必须午夜前回家。",
+  "hl": "午夜",
+  "how": "exact"
+ },
+ {
+  "id": 837,
+  "island": "time",
+  "en": "today",
+  "cn": "今天",
+  "exCn": "今天星期几?",
+  "hl": "今天",
+  "how": "exact"
+ },
+ {
+  "id": 838,
+  "island": "time",
+  "en": "yesterday",
+  "cn": "昨天",
+  "exCn": "我昨天看了一部电影。",
+  "hl": "昨天",
+  "how": "exact"
+ },
+ {
+  "id": 839,
+  "island": "time",
+  "en": "tomorrow",
+  "cn": "明天",
+  "exCn": "明天见!",
+  "hl": "明天",
+  "how": "exact"
+ },
+ {
+  "id": 840,
+  "island": "time",
+  "en": "Monday",
+  "cn": "星期一",
+  "exCn": "我讨厌星期一早上。",
+  "hl": "星期一",
+  "how": "exact"
+ },
+ {
+  "id": 841,
+  "island": "time",
+  "en": "Tuesday",
+  "cn": "星期二",
+  "exCn": "我们星期二有音乐课。",
+  "hl": "星期二",
+  "how": "exact"
+ },
+ {
+  "id": 842,
+  "island": "time",
+  "en": "Wednesday",
+  "cn": "星期三",
+  "exCn": "我们每个星期三开会。",
+  "hl": "星期三",
+  "how": "exact"
+ },
+ {
+  "id": 843,
+  "island": "time",
+  "en": "Thursday",
+  "cn": "星期四",
+  "exCn": "我星期四有足球训练。",
+  "hl": "星期四",
+  "how": "exact"
+ },
+ {
+  "id": 844,
+  "island": "time",
+  "en": "Friday",
+  "cn": "星期五",
+  "exCn": "星期五是我一周中最爱的一天。",
+  "hl": "星期五",
+  "how": "exact"
+ },
+ {
+  "id": 845,
+  "island": "time",
+  "en": "Saturday",
+  "cn": "星期六",
+  "exCn": "我每个星期六睡懒觉。",
+  "hl": "星期六",
+  "how": "exact"
+ },
+ {
+  "id": 846,
+  "island": "time",
+  "en": "Sunday",
+  "cn": "星期日",
+  "exCn": "星期天是休息的日子。",
+  "hl": "星期",
+  "how": "fragment"
+ },
+ {
+  "id": 847,
+  "island": "time",
+  "en": "January",
+  "cn": "一月",
+  "exCn": "一月是一年的第一个月。",
+  "hl": "一月",
+  "how": "exact"
+ },
+ {
+  "id": 848,
+  "island": "time",
+  "en": "February",
+  "cn": "二月",
+  "exCn": "二月是一年中最短的月份。",
+  "hl": "二月",
+  "how": "exact"
+ },
+ {
+  "id": 849,
+  "island": "time",
+  "en": "March",
+  "cn": "三月",
+  "exCn": "春天三月开始。",
+  "hl": "三月",
+  "how": "exact"
+ },
+ {
+  "id": 850,
+  "island": "time",
+  "en": "April",
+  "cn": "四月",
+  "exCn": "四月带来春雨。",
+  "hl": "四月",
+  "how": "exact"
+ },
+ {
+  "id": 851,
+  "island": "time",
+  "en": "May",
+  "cn": "五月",
+  "exCn": "花儿在五月盛开。",
+  "hl": "五月",
+  "how": "exact"
+ },
+ {
+  "id": 852,
+  "island": "time",
+  "en": "June",
+  "cn": "六月",
+  "exCn": "我的生日在六月。",
+  "hl": "六月",
+  "how": "exact"
+ },
+ {
+  "id": 853,
+  "island": "time",
+  "en": "July",
+  "cn": "七月",
+  "exCn": "七月是暑假。",
+  "hl": "七月",
+  "how": "exact"
+ },
+ {
+  "id": 854,
+  "island": "time",
+  "en": "August",
+  "cn": "八月",
+  "exCn": "八月是我最喜欢的月份。",
+  "hl": "八月",
+  "how": "exact"
+ },
+ {
+  "id": 855,
+  "island": "time",
+  "en": "September",
+  "cn": "九月",
+  "exCn": "九月开学。",
+  "hl": "九月",
+  "how": "exact"
+ },
+ {
+  "id": 856,
+  "island": "time",
+  "en": "October",
+  "cn": "十月",
+  "exCn": "十月树叶变色。",
+  "hl": "十月",
+  "how": "exact"
+ },
+ {
+  "id": 857,
+  "island": "time",
+  "en": "November",
+  "cn": "十一月",
+  "exCn": "十一月天气转凉。",
+  "hl": "十一月",
+  "how": "exact"
+ },
+ {
+  "id": 858,
+  "island": "time",
+  "en": "December",
+  "cn": "十二月",
+  "exCn": "十二月是一年的最后一个月。",
+  "hl": "十二月",
+  "how": "exact"
+ },
+ {
+  "id": 859,
+  "island": "time",
+  "en": "birthday",
+  "cn": "生日",
+  "exCn": "祝你生日快乐!",
+  "hl": "生日",
+  "how": "exact"
+ },
+ {
+  "id": 860,
+  "island": "time",
+  "en": "holiday",
+  "cn": "假日",
+  "exCn": "我喜欢长假。",
+  "hl": "假",
+  "how": "fragment"
+ },
+ {
+  "id": 861,
+  "island": "time",
+  "en": "weekend",
+  "cn": "周末",
+  "exCn": "周末愉快!",
+  "hl": "周末",
+  "how": "exact"
+ },
+ {
+  "id": 862,
+  "island": "time",
+  "en": "date",
+  "cn": "日期",
+  "exCn": "今天是什么日期?",
+  "hl": "日期",
+  "how": "exact"
+ },
+ {
+  "id": 863,
+  "island": "traffic",
+  "en": "car",
+  "cn": "汽车",
+  "exCn": "我爸爸的车是红色的。",
+  "hl": "车",
+  "how": "fragment"
+ },
+ {
+  "id": 864,
+  "island": "traffic",
+  "en": "bus",
+  "cn": "公共汽车",
+  "exCn": "我每天坐公交车去上学。",
+  "hl": "公交车",
+  "how": "manual"
+ },
+ {
+  "id": 865,
+  "island": "traffic",
+  "en": "taxi",
+  "cn": "出租车",
+  "exCn": "我们打个出租车去机场吧。",
+  "hl": "出租车",
+  "how": "exact"
+ },
+ {
+  "id": 866,
+  "island": "traffic",
+  "en": "truck",
+  "cn": "卡车",
+  "exCn": "那辆卡车真大!",
+  "hl": "卡车",
+  "how": "exact"
+ },
+ {
+  "id": 867,
+  "island": "traffic",
+  "en": "van",
+  "cn": "面包车",
+  "exCn": "校车七点接我们。",
+  "hl": "校车",
+  "how": "manual"
+ },
+ {
+  "id": 868,
+  "island": "traffic",
+  "en": "bike",
+  "cn": "自行车",
+  "exCn": "我每个周末都骑自行车。",
+  "hl": "自行车",
+  "how": "exact"
+ },
+ {
+  "id": 869,
+  "island": "traffic",
+  "en": "motorcycle",
+  "cn": "摩托车",
+  "exCn": "他骑摩托车上班。",
+  "hl": "摩托车",
+  "how": "exact"
+ },
+ {
+  "id": 870,
+  "island": "traffic",
+  "en": "train",
+  "cn": "火车",
+  "exCn": "火车六点到。",
+  "hl": "火车",
+  "how": "exact"
+ },
+ {
+  "id": 871,
+  "island": "traffic",
+  "en": "metro",
+  "cn": "地铁",
+  "exCn": "你住在城里的哪个区?那儿有地铁站吗?",
+  "hl": "地铁",
+  "how": "exact"
+ },
+ {
+  "id": 872,
+  "island": "traffic",
+  "en": "plane",
+  "cn": "飞机",
+  "exCn": "飞机正在起飞。",
+  "hl": "飞机",
+  "how": "exact"
+ },
+ {
+  "id": 873,
+  "island": "traffic",
+  "en": "helicopter",
+  "cn": "直升机",
+  "exCn": "我从没坐过直升机。",
+  "hl": "直升机",
+  "how": "exact"
+ },
+ {
+  "id": 874,
+  "island": "traffic",
+  "en": "ship",
+  "cn": "船",
+  "exCn": "一艘大船在海上。",
+  "hl": "船",
+  "how": "exact"
+ },
+ {
+  "id": 875,
+  "island": "traffic",
+  "en": "boat",
+  "cn": "小船",
+  "exCn": "我们在湖上划着小船。",
+  "hl": "小船",
+  "how": "exact"
+ },
+ {
+  "id": 876,
+  "island": "traffic",
+  "en": "road",
+  "cn": "道路",
+  "exCn": "这条路又长又直。",
+  "hl": "路",
+  "how": "fragment"
+ },
+ {
+  "id": 877,
+  "island": "traffic",
+  "en": "street",
+  "cn": "街道",
+  "exCn": "这条街上有很多商店。",
+  "hl": "街",
+  "how": "fragment"
+ },
+ {
+  "id": 878,
+  "island": "traffic",
+  "en": "bridge",
+  "cn": "桥",
+  "exCn": "我们开车过了桥。",
+  "hl": "桥",
+  "how": "exact"
+ },
+ {
+  "id": 879,
+  "island": "traffic",
+  "en": "traffic",
+  "cn": "交通",
+  "exCn": "今天交通真堵。",
+  "hl": "交通",
+  "how": "exact"
+ },
+ {
+  "id": 880,
+  "island": "traffic",
+  "en": "airport",
+  "cn": "机场",
+  "exCn": "我会在机场接你。",
+  "hl": "机场",
+  "how": "exact"
+ },
+ {
+  "id": 881,
+  "island": "traffic",
+  "en": "station",
+  "cn": "车站",
+  "exCn": "在公交站等我。",
+  "hl": "站",
+  "how": "fragment"
+ },
+ {
+  "id": 882,
+  "island": "traffic",
+  "en": "ticket",
+  "cn": "票",
+  "exCn": "我买了两张去上海的票。",
+  "hl": "票",
+  "how": "exact"
+ },
+ {
+  "id": 883,
+  "island": "traffic",
+  "en": "seat",
+  "cn": "座位",
+  "exCn": "请坐到你的座位上。",
+  "hl": "座位",
+  "how": "exact"
+ },
+ {
+  "id": 884,
+  "island": "traffic",
+  "en": "map",
+  "cn": "地图",
+  "exCn": "出门前看看地图。",
+  "hl": "地图",
+  "how": "exact"
+ },
+ {
+  "id": 885,
+  "island": "traffic",
+  "en": "direction",
+  "cn": "方向",
+  "exCn": "图书馆在哪个方向?",
+  "hl": "方向",
+  "how": "exact"
+ },
+ {
+  "id": 886,
+  "island": "traffic",
+  "en": "driver",
+  "cn": "司机",
+  "exCn": "出租车司机非常友好。",
+  "hl": "司机",
+  "how": "exact"
+ },
+ {
+  "id": 887,
+  "island": "traffic",
+  "en": "passenger",
+  "cn": "乘客",
+  "exCn": "公交车上挤满了乘客。",
+  "hl": "乘客",
+  "how": "exact"
+ },
+ {
+  "id": 888,
+  "island": "traffic",
+  "en": "left",
+  "cn": "左",
+  "exCn": "在下个路口往左拐。",
+  "hl": "左",
+  "how": "exact"
+ },
+ {
+  "id": 889,
+  "island": "traffic",
+  "en": "right",
+  "cn": "右",
+  "exCn": "医院在你的右边。",
+  "hl": "右",
+  "how": "exact"
+ },
+ {
+  "id": 890,
+  "island": "traffic",
+  "en": "straight",
+  "cn": "直走",
+  "exCn": "直走两个街区。",
+  "hl": "直走",
+  "how": "exact"
+ },
+ {
+  "id": 891,
+  "island": "traffic",
+  "en": "turn",
+  "cn": "转弯",
+  "exCn": "在红绿灯处右转。",
+  "hl": "转",
+  "how": "fragment"
+ },
+ {
+  "id": 892,
+  "island": "traffic",
+  "en": "stop",
+  "cn": "停",
+  "exCn": "车在红灯时必须停下来。",
+  "hl": "停",
+  "how": "exact"
+ },
+ {
+  "id": 893,
+  "island": "treasure",
+  "en": "yes",
+  "cn": "是的/对",
+  "exCn": "是的,你说得对。",
+  "hl": "是的",
+  "how": "alt"
+ },
+ {
+  "id": 894,
+  "island": "treasure",
+  "en": "no",
+  "cn": "不/不是",
+  "exCn": "不用,谢谢。",
+  "hl": "不用",
+  "how": "manual"
+ },
+ {
+  "id": 895,
+  "island": "treasure",
+  "en": "OK",
+  "cn": "好的/行",
+  "exCn": "好,我们开始吧。",
+  "hl": "好",
+  "how": "manual"
+ },
+ {
+  "id": 896,
+  "island": "treasure",
+  "en": "please",
+  "cn": "请",
+  "exCn": "请把盐递给我。",
+  "hl": "请",
+  "how": "exact"
+ },
+ {
+  "id": 897,
+  "island": "treasure",
+  "en": "thank you",
+  "cn": "谢谢",
+  "exCn": "谢谢你的帮助。",
+  "hl": "谢谢",
+  "how": "exact"
+ },
+ {
+  "id": 898,
+  "island": "treasure",
+  "en": "sorry",
+  "cn": "对不起/抱歉",
+  "exCn": "抱歉我迟到了。",
+  "hl": "抱歉",
+  "how": "alt"
+ },
+ {
+  "id": 899,
+  "island": "treasure",
+  "en": "hello",
+  "cn": "你好",
+  "exCn": "你好,很高兴认识你!",
+  "hl": "你好",
+  "how": "exact"
+ },
+ {
+  "id": 900,
+  "island": "treasure",
+  "en": "goodbye",
+  "cn": "再见",
+  "exCn": "再见,明天见。",
+  "hl": "再见",
+  "how": "exact"
+ },
+ {
+  "id": 901,
+  "island": "treasure",
+  "en": "and",
+  "cn": "和/并且",
+  "exCn": "我喜欢茶和咖啡。",
+  "hl": "和",
+  "how": "manual"
+ },
+ {
+  "id": 902,
+  "island": "treasure",
+  "en": "but",
+  "cn": "但是",
+  "exCn": "我喜欢苹果,但不喜欢橙子。",
+  "hl": "但",
+  "how": "fragment"
+ },
+ {
+  "id": 903,
+  "island": "treasure",
+  "en": "or",
+  "cn": "或者/还是",
+  "exCn": "你想要茶还是咖啡?",
+  "hl": "还是",
+  "how": "manual"
+ },
+ {
+  "id": 904,
+  "island": "treasure",
+  "en": "because",
+  "cn": "因为",
+  "exCn": "我迟到是因为交通堵塞。",
+  "hl": "因为",
+  "how": "exact"
+ },
+ {
+  "id": 905,
+  "island": "treasure",
+  "en": "so",
+  "cn": "所以/那么",
+  "exCn": "下雨了,所以我待在家。",
+  "hl": "所以",
+  "how": "alt"
+ },
+ {
+  "id": 906,
+  "island": "treasure",
+  "en": "if",
+  "cn": "如果",
+  "exCn": "如果明天下雨,我们就待在家里。",
+  "hl": "如果",
+  "how": "exact"
+ },
+ {
+  "id": 907,
+  "island": "treasure",
+  "en": "when",
+  "cn": "当...时",
+  "exCn": "我小时候住在北京。",
+  "hl": "小时候",
+  "how": "manual"
+ },
+ {
+  "id": 908,
+  "island": "treasure",
+  "en": "very",
+  "cn": "非常/很",
+  "exCn": "非常感谢。",
+  "hl": "非常",
+  "how": "manual"
+ },
+ {
+  "id": 909,
+  "island": "treasure",
+  "en": "too",
+  "cn": "也/太",
+  "exCn": "我也是!",
+  "hl": "也",
+  "how": "manual"
+ },
+ {
+  "id": 910,
+  "island": "treasure",
+  "en": "also",
+  "cn": "也",
+  "exCn": "她也喜欢古典音乐。",
+  "hl": "也",
+  "how": "exact"
+ },
+ {
+  "id": 911,
+  "island": "treasure",
+  "en": "not",
+  "cn": "不",
+  "exCn": "我不确定。",
+  "hl": "不",
+  "how": "exact"
+ },
+ {
+  "id": 912,
+  "island": "treasure",
+  "en": "never",
+  "cn": "从不",
+  "exCn": "我从没去过美国。",
+  "hl": "从",
+  "how": "fragment"
+ },
+ {
+  "id": 913,
+  "island": "treasure",
+  "en": "always",
+  "cn": "总是",
+  "exCn": "他老是迟到。",
+  "hl": "老是",
+  "how": "manual"
+ },
+ {
+  "id": 914,
+  "island": "treasure",
+  "en": "often",
+  "cn": "经常",
+  "exCn": "我经常打篮球。",
+  "hl": "经常",
+  "how": "exact"
+ },
+ {
+  "id": 915,
+  "island": "treasure",
+  "en": "sometimes",
+  "cn": "有时",
+  "exCn": "有时候我坐公交车上学。",
+  "hl": "有时",
+  "how": "exact"
+ },
+ {
+  "id": 916,
+  "island": "treasure",
+  "en": "again",
+  "cn": "再/又",
+  "exCn": "能再说一遍吗?",
+  "hl": "再",
+  "how": "manual"
+ },
+ {
+  "id": 917,
+  "island": "treasure",
+  "en": "already",
+  "cn": "已经",
+  "exCn": "我已经做完作业了。",
+  "hl": "已经",
+  "how": "exact"
+ },
+ {
+  "id": 918,
+  "island": "treasure",
+  "en": "still",
+  "cn": "仍然/还",
+  "exCn": "他还在办公室。",
+  "hl": "还",
+  "how": "alt"
+ },
+ {
+  "id": 919,
+  "island": "treasure",
+  "en": "now",
+  "cn": "现在",
+  "exCn": "你现在在哪里?",
+  "hl": "现在",
+  "how": "exact"
+ },
+ {
+  "id": 920,
+  "island": "treasure",
+  "en": "then",
+  "cn": "然后/那时",
+  "exCn": "先吃饭,然后再玩。",
+  "hl": "然后",
+  "how": "manual"
+ },
+ {
+  "id": 921,
+  "island": "treasure",
+  "en": "soon",
+  "cn": "很快",
+  "exCn": "我很快就回来。",
+  "hl": "很快",
+  "how": "exact"
+ },
+ {
+  "id": 922,
+  "island": "treasure",
+  "en": "late",
+  "cn": "迟/晚的",
+  "exCn": "对不起我迟到了。",
+  "hl": "迟",
+  "how": "alt"
+ },
+ {
+  "id": 923,
+  "island": "treasure",
+  "en": "early",
+  "cn": "早/早的",
+  "exCn": "我每天早上都早起。",
+  "hl": "早",
+  "how": "alt"
+ },
+ {
+  "id": 924,
+  "island": "treasure",
+  "en": "well",
+  "cn": "好",
+  "exCn": "我昨晚睡得真好。",
+  "hl": "好",
+  "how": "exact"
+ },
+ {
+  "id": 925,
+  "island": "treasure",
+  "en": "hard",
+  "cn": "努力地",
+  "exCn": "努力工作,尽情玩乐。",
+  "hl": "努力",
+  "how": "fragment"
+ },
+ {
+  "id": 926,
+  "island": "treasure",
+  "en": "together",
+  "cn": "一起",
+  "exCn": "我们一起去吧。",
+  "hl": "一起",
+  "how": "exact"
+ },
+ {
+  "id": 927,
+  "island": "treasure",
+  "en": "alone",
+  "cn": "独自/一个人",
+  "exCn": "他一个人住在城里。",
+  "hl": "一个人",
+  "how": "alt"
+ },
+ {
+  "id": 928,
+  "island": "treasure",
+  "en": "only",
+  "cn": "只/只有",
+  "exCn": "我只是开玩笑。",
+  "hl": "只",
+  "how": "alt"
+ },
+ {
+  "id": 929,
+  "island": "treasure",
+  "en": "most",
+  "cn": "最/最多",
+  "exCn": "你最喜欢他什么?",
+  "hl": "最",
+  "how": "manual"
+ },
+ {
+  "id": 930,
+  "island": "treasure",
+  "en": "more",
+  "cn": "更/更多",
+  "exCn": "我想要更多米饭。",
+  "hl": "更多",
+  "how": "alt"
+ },
+ {
+  "id": 931,
+  "island": "treasure",
+  "en": "less",
+  "cn": "较少",
+  "exCn": "你应该少吃糖。",
+  "hl": "少",
+  "how": "fragment"
+ },
+ {
+  "id": 932,
+  "island": "treasure",
+  "en": "about",
+  "cn": "关于/大约",
+  "exCn": "这本书是关于什么的?",
+  "hl": "关于",
+  "how": "manual"
+ },
+ {
+  "id": 933,
+  "island": "treasure",
+  "en": "for",
+  "cn": "为了/给",
+  "exCn": "这是给你的。",
+  "hl": "给",
+  "how": "alt"
+ },
+ {
+  "id": 934,
+  "island": "treasure",
+  "en": "with",
+  "cn": "和",
+  "exCn": "我和你一起去。",
+  "hl": "和",
+  "how": "exact"
+ },
+ {
+  "id": 935,
+  "island": "treasure",
+  "en": "without",
+  "cn": "没有/不带",
+  "exCn": "别不穿外套就出门。",
+  "hl": "不",
+  "how": "manual"
+ },
+ {
+  "id": 936,
+  "island": "treasure",
+  "en": "at",
+  "cn": "在",
+  "exCn": "我在门口等你。",
+  "hl": "在",
+  "how": "exact"
+ },
+ {
+  "id": 937,
+  "island": "treasure",
+  "en": "in",
+  "cn": "在...里",
+  "exCn": "在我包里。",
+  "hl": "在",
+  "how": "fragment"
+ },
+ {
+  "id": 938,
+  "island": "treasure",
+  "en": "on",
+  "cn": "在...上",
+  "exCn": "钥匙在桌子上。",
+  "hl": "在",
+  "how": "fragment"
+ },
+ {
+  "id": 939,
+  "island": "treasure",
+  "en": "under",
+  "cn": "在...下",
+  "exCn": "狗在桌子底下。",
+  "hl": "在",
+  "how": "fragment"
+ },
+ {
+  "id": 940,
+  "island": "treasure",
+  "en": "next to",
+  "cn": "在...旁边",
+  "exCn": "银行在学校旁边。",
+  "hl": "旁边",
+  "how": "fragment"
+ },
+ {
+  "id": 941,
+  "island": "treasure",
+  "en": "between",
+  "cn": "在...之间",
+  "exCn": "银行在学校和医院之间。",
+  "hl": "之间",
+  "how": "fragment"
+ },
+ {
+  "id": 942,
+  "island": "treasure",
+  "en": "number",
+  "cn": "数字/号码",
+  "exCn": "你的电话号码是多少?",
+  "hl": "号码",
+  "how": "alt"
+ },
+ {
+  "id": 943,
+  "island": "treasure",
+  "en": "letter",
+  "cn": "字母/信",
+  "exCn": "我收到了朋友的来信。",
+  "hl": "信",
+  "how": "alt"
+ },
+ {
+  "id": 944,
+  "island": "treasure",
+  "en": "word",
+  "cn": "单词/话",
+  "exCn": "这个词是什么意思?",
+  "hl": "词",
+  "how": "fragment"
+ },
+ {
+  "id": 945,
+  "island": "treasure",
+  "en": "sentence",
+  "cn": "句子",
+  "exCn": "你能用这个词造个句吗?",
+  "hl": "句",
+  "how": "fragment"
+ },
+ {
+  "id": 946,
+  "island": "treasure",
+  "en": "story",
+  "cn": "故事",
+  "exCn": "请给我讲个故事。",
+  "hl": "故事",
+  "how": "exact"
+ },
+ {
+  "id": 947,
+  "island": "treasure",
+  "en": "name",
+  "cn": "名字",
+  "exCn": "你叫什么名字?",
+  "hl": "名字",
+  "how": "exact"
+ },
+ {
+  "id": 948,
+  "island": "treasure",
+  "en": "thing",
+  "cn": "东西/事情",
+  "exCn": "我有好多事要做。",
+  "hl": "事",
+  "how": "fragment"
+ },
+ {
+  "id": 949,
+  "island": "treasure",
+  "en": "idea",
+  "cn": "想法",
+  "exCn": "我有一个好想法!",
+  "hl": "想法",
+  "how": "exact"
+ },
+ {
+  "id": 950,
+  "island": "treasure",
+  "en": "way",
+  "cn": "方式/路",
+  "exCn": "告诉我去学校的路。",
+  "hl": "路",
+  "how": "alt"
+ },
+ {
+  "id": 951,
+  "island": "treasure",
+  "en": "problem",
+  "cn": "问题",
+  "exCn": "没问题!",
+  "hl": "问题",
+  "how": "exact"
+ },
+ {
+  "id": 952,
+  "island": "treasure",
+  "en": "answer",
+  "cn": "答案",
+  "exCn": "你知道答案吗?",
+  "hl": "答案",
+  "how": "exact"
+ }
+]

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>答题揭晓 · 主题2.0 样稿</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="common.css">
+<style>
+.app{padding-bottom:24px}
+.head{display:flex;align-items:center;gap:10px;margin:12px 0 8px}
+.back{display:inline-flex;align-items:center;justify-content:center;min-width:var(--tap);height:var(--tap);padding:0 14px;border-radius:var(--r-pill);
+  background:var(--surface-2);border:1.5px solid var(--line-strong);color:var(--ink-1);font:900 15px/1 var(--font-display)}
+.head h2{flex:1;font:900 22px/1.1 var(--font-display);color:var(--ink-1)}
+.combo{display:inline-flex;align-items:center;gap:4px;height:36px;padding:0 12px 0 8px;border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--line);font:800 15px/1 var(--font-latin);color:var(--ink-1)}
+.combo svg{width:22px;height:22px}
+.steps{display:flex;gap:4px;margin:6px 2px 2px}
+.steps i{flex:1;height:8px;border-radius:9px;background:var(--surface-3)}
+.steps i.ok{background:var(--good)} .steps i.no{background:var(--bad)} .steps i.cur{background:var(--accent-1)}
+.stepnum{font:800 14px/1 var(--font-latin);color:var(--ink-2);margin:8px 2px 0}
+.spk{display:block;margin:18px auto 8px;width:148px;height:148px;border-radius:50%;border:0;position:relative;
+  background:radial-gradient(circle at 50% 40%,var(--surface-2),var(--surface-1));box-shadow:var(--e-2),inset 0 0 0 3px var(--line-strong)}
+.spk img{position:absolute;inset:14px;width:120px;height:120px}
+.ctl{display:flex;justify-content:center;gap:10px}
+.ctl .btn{min-height:44px;font-size:15px;padding:0 16px}
+.ask{text-align:center;margin:14px 0 10px;font:900 var(--fs-lg)/1.3 var(--font-display);color:var(--ink-1)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{position:relative;display:flex;align-items:center;gap:10px;min-height:74px;padding:10px 14px;border-radius:var(--r-lg);
+  background:var(--surface-1);border:2px solid var(--line);box-shadow:var(--e-1);font:900 21px/1.15 var(--font-display);color:var(--ink-1)}
+.opt .e{font-size:30px;line-height:1}
+.opt .mk{position:absolute;top:-9px;right:-7px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:var(--e-1)}
+.opt .mk svg{width:18px;height:18px}
+.opt.right{background:var(--good-surface);border-color:var(--good);color:var(--on-good-surface)}
+.opt.right .mk{background:var(--good)}
+.opt.wrong{background:var(--bad-surface);border-color:var(--bad);color:var(--on-bad-surface)}
+.opt.wrong .mk{background:var(--bad)}
+.opt.dim{color:var(--ink-3);background:var(--surface-2);box-shadow:none;border-color:var(--line)}
+.reveal{margin-top:14px;border-radius:var(--r-xl);padding:16px;text-align:center;background:var(--surface-1);border:2px solid var(--good);box-shadow:var(--e-3)}
+.reveal.calm{border-color:var(--line-strong)}
+.reveal .lbl{font-size:var(--fs-sm);font-weight:800;color:var(--ink-2)}
+.reveal .row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:4px}
+.reveal .e{font-size:54px;line-height:1}
+.reveal .en{font:800 var(--fs-display)/1 var(--font-latin);color:var(--ink-1);letter-spacing:.5px}
+.reveal .pn{font:700 17px/1.3 var(--font-body);color:var(--ink-2);margin-top:2px}
+.reveal .cn{font:900 24px/1.2 var(--font-display);color:var(--hi);margin-top:4px}
+.reveal .xpchip{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 14px;border-radius:var(--r-pill);background:var(--good-surface);color:var(--on-good-surface);font:900 15px/1 var(--font-display)}
+.reveal .acts{display:flex;gap:10px;margin-top:12px}
+.reveal .acts .btn{flex:1}
+.reveal .note{margin-top:10px;font-size:var(--fs-sm);font-weight:700;color:var(--ink-2)}
+.say{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:var(--fs-sm);font-weight:800;color:var(--ink-2)}
+.say svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="ava"><img src="assets/01.webp" alt=""><span class="lv">3</span></div>
+    <div class="who"><b>小明 · 森林小队</b><div class="xp" id="xp" style="--p:.70"><i></i></div><div class="xp-t" id="xpt">175 / 250 经验</div></div>
+    <div class="chips"><span class="chip" id="coins"><script>document.write(ICON.coin)</script><span id="coinN">1,280</span></span></div>
+  </header>
+  <div class="head"><span class="back">‹ 返回</span><h2>听音辨义</h2><span class="combo"><script>document.write(ICON.flame)</script><span id="combo">3</span> 连对</span></div>
+  <div class="steps"><i class="ok"></i><i class="ok"></i><i class="no"></i><i class="ok"></i><i class="ok"></i><i class="cur"></i><i></i><i></i><i></i><i></i></div>
+  <div class="stepnum">第 6 / 10 题</div>
+  <button class="spk" aria-label="再听一次"><img src="assets/speaker_3d.webp" alt=""></button>
+  <div class="ctl"><button class="btn btn-ghost">🔊 再听</button><button class="btn btn-ghost">🐢 慢速</button></div>
+  <div class="ask">选出它的中文意思</div>
+  <div class="opts" id="opts"></div>
+  <div id="rv"></div>
+</div>
+<script src="fx.js"></script>
+<script>
+var S=(/[?&]s=([a-z]+)/.exec(location.search)||[])[1]||'q';
+var W={emoji:'🐟',en:'fish',pn:'/fɪʃ/',cn:'鱼'}, WR={emoji:'🧂',en:'salt',pn:'/sɔːlt/',cn:'盐'};
+function render(state){
+  S=state;
+  var opts=S==='wrong'?[{e:'🍚',t:'米饭'},{e:'🧂',t:'盐',ok:1},{e:'🌽',t:'玉米'},{e:'🍖',t:'肉'}]:[{e:'💧',t:'水'},{e:'🍴',t:'餐'},{e:'🍵',t:'茶'},{e:'🐟',t:'鱼',ok:1}];
+  var pick=S==='wrong'?0:3, box=document.getElementById('opts'); box.innerHTML='';
+  opts.forEach(function(o,i){var d=document.createElement('div');d.className='opt';d.innerHTML='<span class="e">'+o.e+'</span>'+o.t;
+    if(S!=='q'){ if(o.ok){d.className+=' right';d.innerHTML+='<span class="mk">'+ICON.check+'</span>';}
+      else if(i===pick){d.className+=' wrong';d.innerHTML+='<span class="mk">'+ICON.cross+'</span>';}
+      else d.className+=' dim'; }
+    box.appendChild(d);});
+  var rv=document.getElementById('rv');
+  if(S==='right'){
+    rv.innerHTML='<div class="reveal" id="card"><div class="row"><span class="e">'+W.emoji+'</span><div><div class="en latin">'+W.en+'</div><div class="pn">'+W.pn+'</div></div></div><div class="cn">'+W.cn+'</div><div class="say">'+ICON.speaker+' 正在读：fish</div><br><span class="xpchip" id="xpchip">+5 经验 · 4 连对！</span></div>';
+  }else if(S==='wrong'){
+    rv.innerHTML='<div class="reveal calm" id="card"><div class="lbl">正确答案是</div><div class="row"><span class="e">'+WR.emoji+'</span><div><div class="en latin">'+WR.en+'</div><div class="pn">'+WR.pn+'</div></div></div><div class="cn">'+WR.cn+'</div><div class="acts"><button class="btn btn-ghost">🔊 再听一次</button><button class="btn btn-gold">下一题 ›</button></div><div class="note">没关系！这个词等会儿再考你一次 💪</div></div>';
+  }else rv.innerHTML='';
+}
+/* event: the answer was just given → run the moment once, then everything is static */
+function play(){
+  var card=document.getElementById('card'); if(!card) return;
+  FX.rise(card,28,60,380);
+  var o=document.querySelector('.opt.right'), r=o.getBoundingClientRect();
+  if(S==='right'){
+    FX.pop(o,1.07,340); FX.burst(r.left+r.width/2,r.top+r.height/2,{n:12});
+    setTimeout(function(){ var c=document.getElementById('xpchip'); FX.fly(c,document.getElementById('xp'),{n:3,html:'<div style="width:24px;height:24px">'+ICON.star+'</div>',dur:640,onArrive:function(i,n){ if(i===n-1){ document.getElementById('xp').style.setProperty('--p','.72'); document.getElementById('xpt').textContent='180 / 250 经验'; }}}); FX.pop(document.querySelector('.combo'),1.2,300); document.getElementById('combo').textContent='4'; },420);
+  }else{
+    FX.pop(o,1.04,300); /* calm: no burst, no red flash, no shake */
+  }
+}
+window.answer=function(state){ render(state); play(); };
+render(S);
+if(S!=='q') requestAnimationFrame(function(){ setTimeout(play, 80); });
+</script>
+</body>
+</html>

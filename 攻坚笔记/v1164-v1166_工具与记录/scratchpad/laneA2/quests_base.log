@@ -1,0 +1,26 @@
+
+▶ ① 两个母版的任务代码逐字一样
+  ❌ ① 任务定义 + __hsnQuestDefinition + __hsnNormalizeQuests + rollDailyQuests 两边一样（8101 / 6278 字）
+  ✅ ① progressQuest 两边一样
+  ✅ ① setQuest 两边一样
+  ✅ ① claimQuest 两边一样
+  ✅ ① updateQuestBadge 两边一样
+  ❌ ① 打地鼠/钓鱼/火眼金睛/翻牌的上报写法两边一样 ["progressQuest('moles',1);","progressQuest('fish',1);","progressQuest('eagle',1);","progressQuest('match',1);"]
+  ❌ ① 单词大陆复习完成也上报「复习单词」「清空今日复习」
+  ❌ ① 27 个岛页的任务代码都一样（不一样的：island_land1.html,island_land2.html,island_land3.html,island_land4.html,island_land5.html,island_land6.html,island_land7.html,island_land8.html）
+
+▶ ② 外壳（index.html）里打开 island_land1 的任务页
+  ❌ ② 任务页 12 张任务卡（不是「暂无任务」） {"cards":0,"empty":true,"sub":"0/12"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+frame.evaluate: TypeError: Cannot read properties of undefined (reading 'type')
+    at eval (eval at evaluate (:311:30), <anonymous>:1:45)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/laneA/base/test_land_quests_v1165.mjs:97:27 {
+  log: []
+}
+
+Node.js v22.23.4

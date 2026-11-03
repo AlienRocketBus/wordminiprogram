@@ -1,0 +1,32 @@
+{
+ "samples": [
+  {
+   "hdr": "已收集 0 / 20",
+   "hall": "已收藏 0/1",
+   "trial": true,
+   "key": "set",
+   "t": "8s"
+  },
+  {
+   "hdr": "已收集 0 / 20",
+   "hall": "已收藏 0/1",
+   "trial": true,
+   "key": "missing",
+   "t": "11s"
+  },
+  {
+   "hdr": "已收集 20 / 20",
+   "hall": "已收藏 1/1",
+   "trial": true,
+   "key": "set",
+   "t": "16s"
+  },
+  {
+   "hdr": "已收集 20 / 20",
+   "hall": "已收藏 1/1",
+   "trial": true,
+   "key": "set",
+   "t": "24s"
+  }
+ ]
+}

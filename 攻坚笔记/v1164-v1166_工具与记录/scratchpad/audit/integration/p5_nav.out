@@ -1,0 +1,94 @@
+T0 home {
+  top: 'index.html',
+  wrap: 'none',
+  op: '',
+  u: 'blank',
+  rs: 'complete',
+  load: 'none',
+  hlen: 2,
+  hst: 'null',
+  sy: 0
+}
+A open 1699 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_animal.html"}',
+  sy: 616
+}
+A back -> 73 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 616
+}
+B forward -> 77 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_animal.html"}',
+  sy: 616
+}
+B keepalive marker 42
+C reload -> 35 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_animal.html"}',
+  sy: 616
+}
+C frame true { marker: undefined, scr: 'homeScreen' }
+C2 back after reload -> 22 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 616
+}
+C3 reopen 32 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_animal.html"}',
+  sy: 618
+}
+C3 in game speedScreen ← 返回 | ⚡ 极速60秒 | 选一个难度开始 | 越难选项越多 · 时间越短 · 奖励越高 | 🌱 | 初级 | 60 秒 · 4 选 1 · 倒计时结束 = 完成挑战 | ⏱️ 60 秒 · 答对越多经验越多 · 🐾宠物经验 +25 · 🪙答对得金币 | → | ⚡ | 中级 | 60 秒 · 6 选 1 · 倒计时结束 = 完成挑战 | ⏱️ 60 秒 · 答对越多经验越多 · 🐾宠物经验 +40 · 🪙答对得金币 | → | 🔥 | 
+C3 back from game -> 67 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 618
+}
+errors [
+  'console: Failed to load resource: the server responded with a status of 404 (Not Found)'
+]

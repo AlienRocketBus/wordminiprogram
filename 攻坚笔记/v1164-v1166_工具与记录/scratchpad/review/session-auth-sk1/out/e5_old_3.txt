@@ -1,0 +1,47 @@
+{
+  "ver": "v1163",
+  "login": true,
+  "p2first": {
+    "ok": true,
+    "kind": "",
+    "reason": ""
+  },
+  "tokensBefore": 0,
+  "simultaneous": {
+    "p1": {
+      "ok": false,
+      "kind": "",
+      "reason": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+    },
+    "p2": {
+      "ok": true,
+      "kind": "",
+      "reason": ""
+    }
+  },
+  "after": {
+    "signed": true,
+    "p1overlay": null,
+    "p2overlay": null,
+    "p1again": {
+      "ok": false,
+      "kind": "",
+      "reason": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+    },
+    "p2again": {
+      "ok": true,
+      "kind": "",
+      "reason": ""
+    },
+    "p1db": "ERR credentials not found",
+    "p2db": "ok",
+    "credsLen": 0
+  },
+  "tokens": [
+    "200",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ]
+}

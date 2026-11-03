@@ -1,0 +1,15 @@
+test_theme_motion_v943 rc=0 :: ✅ v943 theme motion regression passed (normal + reduced-motion mobile profiles) 
+test_theme_scroll_v944 rc=0 :: ✅ v944 theme scroll regression passed (6 themes × normal/reduced-motion × real CDP touch) 
+test_boss_timer_hf5_v946 rc=0 :: Boss timer HF5: 4 motion/theme states + touch + HP isolation + answer/reset/stop ✅ 
+test_boss_round_ledger_hf6_v946 rc=0 :: ✅ HF6 独立轮次账本：损坏 fail-closed、旧进度隔离、跨轮/跨岛隔离、roundNo 稳定来源全部通过 
+test_boss_round_bar_theme_hf6_v946 rc=0 :: Boss Round Bar HF6: cloud+晨曦 1/20 清晰可读，dark/light/cinema 独立且无行内色污染 ✅ 
+test_real_path_smoke_v1163 rc=0 ::  结果: 14 通过 / 0 失败 
+test_mistake_lesson_v1165 rc=1 ::  ❌ 失败 1 项 
+test_network_release_blockers_v946 rc=0 :: ✅ v951 网络阻断：land_map 30s≤1、3G/Save-Data 后台媒体0、SW半包不激活/慢网快速回退 
+test_boss_admin_entry_v953 rc=0 :: ✅ v953 Boss 管理员入口：fresh settings 唤醒 + footer 单次 gate + 图片不阻塞 + 失败可重试 + 密码/360关/弗沙欧/28页懒加载合约全通过 
+test_room_warm_v1023 rc=0 ::  结果: 11 通过 / 0 失败 
+test_island_prefetch_v1025 rc=0 ::  结果: 7 通过 / 0 失败 
+test_preload_policy_v942 rc=0 :: ✅ v942 预载策略：未知/弱网/省流/离线零后台请求，4G仅当前岛且音频并发≤3、Boss≤8、例句按需 
+test_preload_budget_v1165 rc=0 ::  ✅ 预载流量预算：新孩子首页/进岛不乱下、去过星海才预热且不套娃、预热页不写进度、3G 不预热全通过 
+test_ui_mobile_hf2_v946 rc=0 :: UI/mobile HF2: 320px + landscape pointer gate + onboarding a11y + precise reduced-motion + zoom ✅ 
+test_light_contrast_v989 rc=0 :: ── overlay/land-hall: (未触发,跳过) ERRORS: 0  

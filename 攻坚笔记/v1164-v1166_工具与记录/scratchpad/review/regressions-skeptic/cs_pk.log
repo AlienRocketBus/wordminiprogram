@@ -1,0 +1,7 @@
+login true
+first explicit sync {"ok":true,"bytes":1304}
+frames 1 frames with HansenCloudSave 1
+A) idle 20 s, no data change: uploads 1 reads 0
+B) same value rewritten every 2 s for 60 s (+9 s tail): uploads 8 reads 0 | hsn-data-changed events by frame: {"/spelling_pk.html":30}
+C) one backgrounding (nothing changed): uploads 2
+errors none

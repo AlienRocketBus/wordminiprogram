@@ -1,0 +1,1 @@
+/* 🔴v856 配色防闪: 首帧前同步把配色类加到<html>(v855教训:同步加不闪·亮色系加hsn-pal-light) */try{var _hp=localStorage.getItem("hansen_palette_global");if(_hp&&_hp!=="cosmos"&&/^[a-z]+$/.test(_hp)){var _hl={cloud:1,sakura:1,cream:1,mint:1};document.documentElement.className+=" hsn-pal-"+_hp+(_hl[_hp]?" hsn-pal-light":"");}}catch(e){}

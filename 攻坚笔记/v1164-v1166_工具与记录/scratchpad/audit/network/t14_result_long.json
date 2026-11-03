@@ -1,0 +1,137 @@
+{
+  "timeline": [
+    {
+      "t": 5,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 10,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 15,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 20,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 25,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 30,
+      "swScriptFetches": 1,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 35,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-shell-217,hansen-v944-assets-215,hansen-v944-icons-3,hansen-v944-pages-215,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 40,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-icons-3,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 45,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-icons-3,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 50,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-icons-3,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 55,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-icons-3,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    },
+    {
+      "t": 60,
+      "swScriptFetches": 2,
+      "caches": "hansen-v944-icons-3,hansen-v944-shell-218",
+      "installing": false,
+      "waiting": false,
+      "frameVer": 1163
+    }
+  ],
+  "state": {
+    "top": {
+      "gate": 1164,
+      "vw": {
+        "local": 1164,
+        "server": 1164,
+        "stale": false,
+        "note": "已是最新 v1164"
+      }
+    },
+    "frame": {
+      "gate": 1164,
+      "backup": 1163,
+      "vwNote": "在 iframe 内 → 交由顶层窗口处理",
+      "firstScript": "http://127.0.0.1:43763/hansen_sw_upgrade_gate_v944.js?v=1163"
+    }
+  },
+  "sw": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1164,
+      "ready": true,
+      "controller": "sw_v944.js"
+    }
+  },
+  "cacheNames": [
+    "hansen-v944-icons-3",
+    "hansen-v944-shell-218"
+  ]
+}

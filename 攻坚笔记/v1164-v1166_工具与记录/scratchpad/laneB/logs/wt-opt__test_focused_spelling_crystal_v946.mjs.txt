@@ -1,0 +1,1 @@
+focused Spelling Bee v946: 10/7/5 boundary + proof/ACK/replay + channel isolation + boost ✅

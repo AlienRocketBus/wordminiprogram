@@ -1,0 +1,8 @@
+复习奖励飘字：同一题的几条合成一条
+
+间隔复习吸收器接通后，一次答对会同时有「+2 复习金币」和「📦 记忆盒 +1」，
+连答两题就是 4 条飘字，第 4 条叠在第 3 条上（test_ui_walkthrough_v969 S4「级联错位」报红）。
+现在同一题的飘字合成一条（「+2 复习金币 💰 · 📦 记忆盒 +1 · 2天后再见」），连答两题占两档。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

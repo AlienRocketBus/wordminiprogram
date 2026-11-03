@@ -1,0 +1,10 @@
+test_cloudbase_emulator_v1164.mjs rc=0 1s
+test_auth_session_v1164.mjs rc=0 22s
+test_friends_board_cloud_v1164.mjs rc=0 63s
+test_auth_cloud_v1164.mjs rc=0 73s
+test_cloud_errors_v1164.mjs rc=0 100s
+test_rooms_lifecycle_cloud_v1164.mjs rc=0 156s
+test_ladder_cloud_v1164.mjs rc=0 157s
+test_rooms_cloud_v1164.mjs rc=0 186s
+test_real_path_smoke_v1163.mjs rc=0 13s
+DONE

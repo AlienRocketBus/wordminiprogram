@@ -1,0 +1,19 @@
+  ✅ SW 接管了首页
+
+▶ 1. 再开食物岛：带版本号的脚本不联网
+  ✅ 带 ?v= 的脚本联网 0 次（）
+
+▶ 2. 页面缓存按路径存
+    /island_animal.html , /island_sports.html , /island_food.html , /index.html
+  ✅ island_animal.html 在页面缓存里正好一份
+  ✅ island_food.html 在页面缓存里正好一份
+  ✅ island_sports.html 在页面缓存里正好一份
+  ✅ 页面缓存没有带 ? 的键
+
+▶ 3. 断网后打开三个岛
+  ✅ 断网打开 island_animal.html：岛正常
+  ✅ 断网打开 island_food.html：岛正常
+  ✅ 断网打开 island_sports.html：岛正常
+  ✅ 代码地址 504/出错 0 个（）
+
+✅ 打开过的岛离线照样能玩、脚本不再白下载

@@ -1,0 +1,85 @@
+{
+  "withSW": {
+    "seen": [
+      {
+        "dt": 794,
+        "t": "",
+        "p": "blank",
+        "rs": "complete",
+        "op": "0"
+      },
+      {
+        "dt": 10847,
+        "t": "",
+        "p": "blank",
+        "rs": "complete",
+        "op": "1"
+      },
+      {
+        "dt": 12981,
+        "t": "当前页面尚未下载",
+        "p": "/island_animal.html",
+        "rs": "complete",
+        "op": "1"
+      }
+    ],
+    "serverAttempts": [
+      {
+        "status": 200,
+        "abortedAtBytes": 354000
+      }
+    ]
+  },
+  "noSW": {
+    "seen": [
+      {
+        "dt": 295,
+        "t": "",
+        "p": "blank",
+        "rs": "complete",
+        "op": "0"
+      },
+      {
+        "dt": 608,
+        "t": "",
+        "p": "/island_animal.html",
+        "rs": "loading",
+        "op": "0"
+      },
+      {
+        "dt": 913,
+        "t": "动物大冒险 · Animal Word Adventure",
+        "p": "/island_animal.html",
+        "rs": "loading",
+        "op": "0"
+      },
+      {
+        "dt": 2434,
+        "t": "动物大冒险 · Animal Word Adventure",
+        "p": "/island_animal.html",
+        "rs": "loading",
+        "op": "1"
+      },
+      {
+        "dt": 20871,
+        "t": "动物大冒险 · Animal Word Adventure",
+        "p": "/island_animal.html",
+        "rs": "interactive",
+        "op": "1"
+      },
+      {
+        "dt": 21179,
+        "t": "动物大冒险 · Animal Word Adventure",
+        "p": "/island_animal.html",
+        "rs": "complete",
+        "op": "1"
+      }
+    ],
+    "serverAttempts": [
+      {
+        "status": 200,
+        "doneMs": 20314
+      }
+    ]
+  }
+}

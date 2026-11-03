@@ -1,0 +1,3698 @@
+{
+ "cosmos": {
+  "name": "深空蓝",
+  "mode": "dark",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 4.56,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 13.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 11.82,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 9.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 8.43,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.01,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 5.93,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 10.49,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 8.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 17.26,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 13.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 9.15,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 12.31,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 9.6,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.53,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 12.95,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 16.52,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 15.18,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 10.82,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 12.22,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 7.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 4.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 9.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 13.31,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 6.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 7.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 5.5,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 10.49,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 4.56,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 10.22,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 7.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star",
+    "bg": "surface_1",
+    "ratio": 10.49,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin",
+    "bg": "surface_1",
+    "ratio": 9.64,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 12.95,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "violet": {
+  "name": "暗夜紫",
+  "mode": "dark",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 4.58,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 15.41,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 13.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 11.27,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 9.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.55,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.52,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 11.47,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 9.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 17.92,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 14.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 10.72,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 13.1,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 10.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 7.84,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 13.34,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 17.41,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 16.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 10.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 12.76,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 7.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 4.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 11.19,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 13.58,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 6.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 8.43,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 6.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 11.47,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 4.58,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 11.17,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 8.43,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star",
+    "bg": "surface_1",
+    "ratio": 11.47,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin",
+    "bg": "surface_1",
+    "ratio": 10.55,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 13.34,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "aurora": {
+  "name": "极光青",
+  "mode": "dark",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 5.23,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 14.49,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 11.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 11.65,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 9.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 8.12,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.67,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 10.51,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 8.63,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 17.47,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 12.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 7.61,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 14.05,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 10.44,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.12,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 12.68,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 16.93,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 14.74,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 12.28,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 11.71,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 7.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 4.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 10.54,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 13.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 6.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 7.72,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 5.52,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 10.51,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 5.23,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 10.25,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 7.72,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star",
+    "bg": "surface_1",
+    "ratio": 10.51,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin",
+    "bg": "surface_1",
+    "ratio": 9.67,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 12.68,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "woods": {
+  "name": "森野绿",
+  "mode": "dark",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 4.59,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 14.26,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 11.75,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 11.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 9.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.84,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 11.22,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 9.25,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 17.25,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 12.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 8.04,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 13.77,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 9.85,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 13.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 16.79,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 14.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 12.06,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 12.85,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 7.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 4.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.73,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 9.79,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 13.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 6.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 7.61,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 5.44,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 10.36,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 4.59,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 10.09,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 7.61,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star",
+    "bg": "surface_1",
+    "ratio": 11.22,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin",
+    "bg": "surface_1",
+    "ratio": 9.53,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 12.53,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "cloud": {
+  "name": "云端白",
+  "mode": "light",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.3,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 16.99,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 15.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 9.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 8.64,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 6.15,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 5.68,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 9.93,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 9.18,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 14.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 16.24,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 13.6,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 8.18,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 8.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 7.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 8.69,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 13.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 16.99,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 7.4,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 7.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 7.9,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 7.9,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.5,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 6.91,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "sakura": {
+  "name": "樱花粉",
+  "mode": "light",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.3,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 15.49,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 14.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 8.89,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 8.28,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.16,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.66,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 8.02,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 7.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 13.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 14.61,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 11.76,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 7.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 8.39,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.75,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 6.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 12.14,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 15.49,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 8.89,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 6.04,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 7.88,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 6.04,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.47,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 5.23,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "cream": {
+  "name": "奶油杏",
+  "mode": "light",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.3,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 15.75,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 14.92,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 8.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 7.91,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 6.6,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.25,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 8.72,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 8.26,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 14.05,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 15.03,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 12.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 7.45,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.56,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 7.78,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 12.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 15.75,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 8.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 6.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.17,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 6.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 5.98,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "mint": {
+  "name": "薄荷绿",
+  "mode": "light",
+  "kind": "free",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.09,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 14.21,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 13.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 7.81,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 7.34,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 6.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.03,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 7.68,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 7.22,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 12.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 13.5,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 11.41,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 6.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 7.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.28,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 6.83,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 11.85,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 14.21,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 7.81,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 5.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.47,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 7.58,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 5.48,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.09,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "lantern": {
+  "name": "新春灯笼",
+  "mode": "dark",
+  "kind": "season",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 5.33,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 14.58,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 12.66,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 11.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 10.39,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 9.15,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 7.95,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 10.68,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 9.27,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 17.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 13.19,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 8.56,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 14.53,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 10.83,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 7.03,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 12.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 16.84,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 16.17,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 12.04,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 12.65,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 9.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 7.37,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.15,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 7.82,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 9.79,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 13.85,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 6.48,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 8.01,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 8.14,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 10.9,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 5.33,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 10.62,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 8.01,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star",
+    "bg": "surface_1",
+    "ratio": 10.9,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin",
+    "bg": "surface_1",
+    "ratio": 10.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 13.23,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "snow": {
+  "name": "冬日雪国",
+  "mode": "light",
+  "kind": "season",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.13,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 15.61,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 14.6,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 9.1,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 8.51,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 6.41,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 5.99,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 6.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 6.27,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 13.94,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 15.02,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 12.5,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 8.12,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 8.75,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 7.29,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 5.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 12.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 15.61,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 9.1,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 6.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.17,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 6.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 6.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.13,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 5.98,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "kidsday": {
+  "name": "六一派对",
+  "mode": "light",
+  "kind": "season",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.15,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 16.99,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 16.05,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 9.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 9.32,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.46,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 7.05,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 6.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 6.6,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 15.15,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 16.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 13.87,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 8.8,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 9.53,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 8.05,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 6.23,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 14.26,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 16.99,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 9.86,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 6.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 5.45,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 7.88,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 5.02,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.7,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 6.98,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.15,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.68,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.3,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.87,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 6.23,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ },
+ "boss_light": {
+  "name": "打Boss·晨曦",
+  "mode": "light",
+  "kind": "boss",
+  "pairs": 37,
+  "fail": 0,
+  "min_text": 4.57,
+  "min_nontext": 3.01,
+  "bad": [],
+  "all": [
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_1",
+    "ratio": 14.1,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_2",
+    "ratio": 13.22,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_1",
+    "ratio": 9.98,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "surface_2",
+    "ratio": 9.36,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_1",
+    "ratio": 7.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_3",
+    "bg": "surface_2",
+    "ratio": 6.85,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_1",
+    "ratio": 8.4,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "surface_2",
+    "ratio": 7.88,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_1",
+    "ratio": 14.63,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_2",
+    "ratio": 11.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "bg_3",
+    "ratio": 9.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_1",
+    "ratio": 10.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_2",
+    "ratio": 8.28,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_2",
+    "bg": "bg_3",
+    "ratio": 6.58,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "hi",
+    "bg": "bg_1",
+    "ratio": 8.72,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "ink_1",
+    "bg": "surface_3",
+    "ratio": 11.27,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "chrome_ink",
+    "bg": "chrome",
+    "ratio": 14.63,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink",
+    "bg": "nav",
+    "ratio": 10.35,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "nav_ink_on",
+    "bg": "nav",
+    "ratio": 8.72,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_1",
+    "ratio": 10.62,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_accent",
+    "bg": "accent_2",
+    "ratio": 8.2,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_1",
+    "ratio": 9.93,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_brand",
+    "bg": "brand_2",
+    "ratio": 11.42,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_good_surface",
+    "bg": "good_surface",
+    "ratio": 8.3,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_bad_surface",
+    "bg": "bad_surface",
+    "ratio": 7.97,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_badge",
+    "bg": "badge_bg",
+    "ratio": 4.7,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "hero-a (white text)",
+    "ratio": 4.57,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "text",
+    "fg": "on_plate",
+    "bg": "plate∘lightest-feature",
+    "ratio": 5.38,
+    "need": 4.5,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "good",
+    "bg": "surface_1",
+    "ratio": 4.83,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "bad",
+    "bg": "surface_1",
+    "ratio": 4.53,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "surface_1",
+    "ratio": 8.4,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "line_strong",
+    "bg": "surface_1",
+    "ratio": 3.01,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "gem",
+    "bg": "surface_1",
+    "ratio": 3.55,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "xp_1",
+    "bg": "surface_1",
+    "ratio": 3.18,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "star_rim",
+    "bg": "surface_1",
+    "ratio": 4.69,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "coin_rim",
+    "bg": "surface_1",
+    "ratio": 4.69,
+    "need": 3.0,
+    "ok": true
+   },
+   {
+    "kind": "non-text",
+    "fg": "focus",
+    "bg": "bg_1",
+    "ratio": 8.72,
+    "need": 3.0,
+    "ok": true
+   }
+  ]
+ }
+}

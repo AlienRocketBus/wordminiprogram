@@ -1,0 +1,14 @@
+boss hall open in island: false
+after Android back: {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 616
+} hall still in island DOM: false
+after re-entering island: hall visible? false
+errors []

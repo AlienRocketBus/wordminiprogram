@@ -1,0 +1,958 @@
+{
+ "totals": {
+  "ci": {
+   "runs": 400,
+   "failingRuns": 85,
+   "perInv": {
+    "I3": 41,
+    "I9": 60,
+    "I6": 53,
+    "I8": 24,
+    "I2": 12,
+    "I5": 19,
+    "I4": 17,
+    "I7": 4,
+    "I10": 7
+   },
+   "summary": "SUMMARY profile=ci runs=400 seeds=1..400 failing_runs=85 clusters=80 (fail-level 58) | runs-with-violation per invariant: ERR:0 I1:0 I2:12 I3:41 I4:17 I5:19 I6:53 I7:4 I8:24 I9:60 I10:7 | matches=386 settled_pairs=331 virtual=53.9h events=816635 real=38s"
+  },
+  "clean": {
+   "runs": 200,
+   "failingRuns": 0,
+   "perInv": {
+    "I6": 10,
+    "I3": 2
+   },
+   "summary": "SUMMARY profile=clean runs=200 seeds=1..200 failing_runs=0 clusters=2 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:2 I4:0 I5:0 I6:10 I7:0 I8:0 I9:0 I10:0 | matches=227 settled_pairs=221 virtual=23.9h events=364780 real=28s"
+  }
+ },
+ "groups": [
+  {
+   "root": "L-adv-forged-docs",
+   "sev": "high",
+   "runs": 36,
+   "sigs": [
+    {
+     "sig": "I8:adv-win-doc-accepted",
+     "sev": "high",
+     "count": 14,
+     "seeds": [
+      "ci:9",
+      "ci:43",
+      "ci:65",
+      "ci:96",
+      "ci:127",
+      "ci:128"
+     ]
+    },
+    {
+     "sig": "I3:claim-won-not-mine",
+     "sev": "high",
+     "count": 9,
+     "seeds": [
+      "ci:96",
+      "ci:127",
+      "ci:128",
+      "ci:190",
+      "ci:250",
+      "ci:275"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I3:claim-won-not-mine",
+     "sev": "high",
+     "count": 9,
+     "seeds": [
+      "ci:96",
+      "ci:127",
+      "ci:128",
+      "ci:190",
+      "ci:250",
+      "ci:275"
+     ]
+    },
+    {
+     "sig": "I8:impersonated-guest-accepted",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:183",
+      "ci:245",
+      "ci:264"
+     ]
+    },
+    {
+     "sig": "I4:score-vs-rounds:claim-ok-but-scored-100-vs-60",
+     "sev": "medium",
+     "count": 5,
+     "seeds": [
+      "ci:96",
+      "ci:128",
+      "ci:275",
+      "ci:302",
+      "ci:340"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I4:score-vs-rounds:claim-ok-but-scored-100-vs-60",
+     "sev": "medium",
+     "count": 5,
+     "seeds": [
+      "ci:96",
+      "ci:128",
+      "ci:275",
+      "ci:302",
+      "ci:340"
+     ]
+    },
+    {
+     "sig": "I4:score-vs-rounds:claim-ok-but-scored-100-vs-0",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:127",
+      "ci:250",
+      "ci:340",
+      "ci:356"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I4:score-vs-rounds:claim-ok-but-scored-100-vs-0",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:127",
+      "ci:250",
+      "ci:340",
+      "ci:356"
+     ]
+    },
+    {
+     "sig": "I4:score-vs-rounds:claim-ok-but-scored-100-vs-80",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:190"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I4:score-vs-rounds:claim-ok-but-scored-100-vs-80",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:190"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "P-wording",
+   "sev": "low",
+   "runs": 26,
+   "sigs": [
+    {
+     "sig": "I6:full-room-reported-gone:findByCode",
+     "sev": "low",
+     "count": 23,
+     "seeds": [
+      "ci:6",
+      "ci:17",
+      "ci:30",
+      "ci:33",
+      "ci:41",
+      "ci:129",
+      "clean:22",
+      "clean:64",
+      "clean:79",
+      "clean:103",
+      "clean:127",
+      "clean:151"
+     ]
+    },
+    {
+     "sig": "I6:taken-but-nobody-else:room-holds-my-own-key",
+     "sev": "low",
+     "count": 2,
+     "seeds": [
+      "ci:132",
+      "ci:395"
+     ]
+    },
+    {
+     "sig": "I6:full-room-reported-gone:joinRoom",
+     "sev": "low",
+     "count": 1,
+     "seeds": [
+      "ci:337"
+     ]
+    },
+    {
+     "sig": "I9:I6:full-room-reported-gone:joinRoom",
+     "sev": "low",
+     "count": 1,
+     "seeds": [
+      "ci:337"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "M-adv-dos",
+   "sev": "high",
+   "runs": 25,
+   "sigs": [
+    {
+     "sig": "I8:matchmaking-blocked",
+     "sev": "high",
+     "count": 9,
+     "seeds": [
+      "ci:11",
+      "ci:91",
+      "ci:183",
+      "ci:214",
+      "ci:217",
+      "ci:236"
+     ]
+    },
+    {
+     "sig": "I5:stuck-at-end:waiting",
+     "sev": "high",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I5:stuck-at-end:waiting",
+     "sev": "high",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I5:too-long:waiting",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I7:ghost-room-listed",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I5:too-long:waiting",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I7:ghost-room-listed",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I5:too-long:result-wait",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:183",
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I5:too-long:result-wait",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:183"
+     ]
+    },
+    {
+     "sig": "I9:I5:too-long:result-wait",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I8:adv-seat-accepted",
+     "sev": "low",
+     "count": 2,
+     "seeds": [
+      "ci:217",
+      "ci:236"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "F-skew-freshness",
+   "sev": "high",
+   "runs": 24,
+   "sigs": [
+    {
+     "sig": "I6:gone-but-room-open:findByCode:skew",
+     "sev": "high",
+     "count": 9,
+     "seeds": [
+      "ci:63",
+      "ci:78",
+      "ci:81",
+      "ci:209",
+      "ci:212",
+      "ci:223"
+     ]
+    },
+    {
+     "sig": "I9:I6:gone-but-room-open:findByCode:skew",
+     "sev": "high",
+     "count": 9,
+     "seeds": [
+      "ci:63",
+      "ci:78",
+      "ci:81",
+      "ci:209",
+      "ci:212",
+      "ci:223"
+     ]
+    },
+    {
+     "sig": "I10:no-convergence:skew",
+     "sev": "high",
+     "count": 7,
+     "seeds": [
+      "ci:103",
+      "ci:133",
+      "ci:206",
+      "ci:261",
+      "ci:317",
+      "ci:321"
+     ]
+    },
+    {
+     "sig": "I9:I10:no-convergence:skew",
+     "sev": "high",
+     "count": 7,
+     "seeds": [
+      "ci:103",
+      "ci:133",
+      "ci:206",
+      "ci:261",
+      "ci:317",
+      "ci:321"
+     ]
+    },
+    {
+     "sig": "I6:gone-but-room-open:joinRoom:skew",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:140"
+     ]
+    },
+    {
+     "sig": "I9:I6:gone-but-room-open:joinRoom:skew",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:140"
+     ]
+    },
+    {
+     "sig": "I6:ack-timeout-host-alive:skew",
+     "sev": "low",
+     "count": 7,
+     "seeds": [
+      "ci:54",
+      "ci:80",
+      "ci:100",
+      "ci:192",
+      "ci:257",
+      "ci:279"
+     ]
+    },
+    {
+     "sig": "I9:I6:ack-timeout-host-alive:skew",
+     "sev": "low",
+     "count": 7,
+     "seeds": [
+      "ci:54",
+      "ci:80",
+      "ci:100",
+      "ci:192",
+      "ci:257",
+      "ci:279"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "C-deadline-skew",
+   "sev": "high",
+   "runs": 24,
+   "sigs": [
+    {
+     "sig": "I4:clean-match-false-abandon:H:result-wait-idle0G:report",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle0G:report",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I3:skip-beat-correct-answer:A:skew",
+     "sev": "medium",
+     "count": 14,
+     "seeds": [
+      "ci:5",
+      "ci:32",
+      "ci:67",
+      "ci:92",
+      "ci:120",
+      "ci:225"
+     ]
+    },
+    {
+     "sig": "I9:I3:skip-beat-correct-answer:A:skew",
+     "sev": "medium",
+     "count": 14,
+     "seeds": [
+      "ci:5",
+      "ci:32",
+      "ci:67",
+      "ci:92",
+      "ci:120",
+      "ci:225"
+     ]
+    },
+    {
+     "sig": "I5:battle-too-long",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:330",
+      "ci:382"
+     ]
+    },
+    {
+     "sig": "I9:I5:battle-too-long",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:330",
+      "ci:382"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I3:skip-beat-correct-answer:A:skew",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:250"
+     ]
+    },
+    {
+     "sig": "I3:skip-beat-correct-answer:BC:skew",
+     "sev": "low",
+     "count": 7,
+     "seeds": [
+      "ci:9",
+      "ci:43",
+      "ci:128",
+      "ci:184",
+      "ci:210",
+      "ci:218"
+     ]
+    },
+    {
+     "sig": "I9:I3:skip-beat-correct-answer:BC:skew",
+     "sev": "low",
+     "count": 7,
+     "seeds": [
+      "ci:9",
+      "ci:43",
+      "ci:128",
+      "ci:184",
+      "ci:210",
+      "ci:218"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I3:skip-beat-correct-answer:BC:skew",
+     "sev": "low",
+     "count": 4,
+     "seeds": [
+      "ci:9",
+      "ci:43",
+      "ci:128",
+      "ci:227"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "A-dup-as-config",
+   "sev": "high",
+   "runs": 21,
+   "sigs": [
+    {
+     "sig": "I6:config:claimRound:DATABASE_REQUEST_FAILED",
+     "sev": "high",
+     "count": 6,
+     "seeds": [
+      "ci:12",
+      "ci:73",
+      "ci:105",
+      "ci:175",
+      "ci:344",
+      "ci:379"
+     ]
+    },
+    {
+     "sig": "I6:config:skipRound:DATABASE_REQUEST_FAILED",
+     "sev": "high",
+     "count": 4,
+     "seeds": [
+      "ci:101",
+      "ci:136",
+      "ci:177",
+      "ci:185"
+     ]
+    },
+    {
+     "sig": "I6:config:joinRoom:DATABASE_REQUEST_FAILED",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:40",
+      "ci:139",
+      "ci:319"
+     ]
+    },
+    {
+     "sig": "I9:I6:config:claimRound:DATABASE_REQUEST_FAILED",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:175",
+      "ci:344",
+      "ci:379"
+     ]
+    },
+    {
+     "sig": "I6:config:joinRoom:DATABASE_DUPLICATE_WRITE",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:183",
+      "ci:331",
+      "ci:356"
+     ]
+    },
+    {
+     "sig": "I6:config:claimRound:DATABASE_DUPLICATE_WRITE",
+     "sev": "high",
+     "count": 2,
+     "seeds": [
+      "ci:8",
+      "ci:33"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I6:config:joinRoom:DATABASE_DUPLICATE_WRITE",
+     "sev": "high",
+     "count": 2,
+     "seeds": [
+      "ci:183",
+      "ci:356"
+     ]
+    },
+    {
+     "sig": "I9:I6:config:claimRound:DATABASE_DUPLICATE_WRITE",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:33"
+     ]
+    },
+    {
+     "sig": "I9:I6:config:skipRound:DATABASE_REQUEST_FAILED",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:101"
+     ]
+    },
+    {
+     "sig": "I6:config:skipRound:DATABASE_DUPLICATE_WRITE",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:131"
+     ]
+    },
+    {
+     "sig": "I4:score-vs-rounds:own-win-doc-landed-but-scored-0:config",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:33"
+     ]
+    },
+    {
+     "sig": "I9:I4:score-vs-rounds:own-win-doc-landed-but-scored-0:config",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:33"
+     ]
+    },
+    {
+     "sig": "I4:score-vs-rounds:claim-failed:config",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:379"
+     ]
+    },
+    {
+     "sig": "I9:I4:score-vs-rounds:claim-failed:config",
+     "sev": "medium",
+     "count": 1,
+     "seeds": [
+      "ci:379"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "B-deadline-desync",
+   "sev": "medium",
+   "runs": 21,
+   "sigs": [
+    {
+     "sig": "I3:skip-beat-correct-answer:A",
+     "sev": "medium",
+     "count": 12,
+     "seeds": [
+      "ci:18",
+      "ci:73",
+      "ci:87",
+      "ci:105",
+      "ci:126",
+      "ci:127"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I3:skip-beat-correct-answer:A",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:127",
+      "ci:340"
+     ]
+    },
+    {
+     "sig": "I3:skip-beat-correct-answer:BC",
+     "sev": "low",
+     "count": 9,
+     "seeds": [
+      "ci:26",
+      "ci:65",
+      "ci:96",
+      "ci:146",
+      "ci:165",
+      "ci:275",
+      "clean:147",
+      "clean:167"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I3:skip-beat-correct-answer:BC",
+     "sev": "low",
+     "count": 5,
+     "seeds": [
+      "ci:65",
+      "ci:96",
+      "ci:165",
+      "ci:275",
+      "ci:340"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "N-opponent-abandon-not-noticed",
+   "sev": "low",
+   "runs": 13,
+   "sigs": [
+    {
+     "sig": "I5:played-on-after-opponent-claimed-abandon:guest",
+     "sev": "low",
+     "count": 5,
+     "seeds": [
+      "ci:42",
+      "ci:67",
+      "ci:164",
+      "ci:239",
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I9:I5:played-on-after-opponent-claimed-abandon:guest",
+     "sev": "low",
+     "count": 5,
+     "seeds": [
+      "ci:42",
+      "ci:67",
+      "ci:164",
+      "ci:239",
+      "ci:330"
+     ]
+    },
+    {
+     "sig": "I5:played-on-after-opponent-claimed-abandon:guest-after-resume",
+     "sev": "low",
+     "count": 4,
+     "seeds": [
+      "ci:12",
+      "ci:55",
+      "ci:75",
+      "ci:241"
+     ]
+    },
+    {
+     "sig": "I5:played-on-after-opponent-claimed-abandon:host-after-resume",
+     "sev": "low",
+     "count": 3,
+     "seeds": [
+      "ci:45",
+      "ci:154",
+      "ci:178"
+     ]
+    },
+    {
+     "sig": "I5:played-on-after-opponent-claimed-abandon:host",
+     "sev": "low",
+     "count": 1,
+     "seeds": [
+      "ci:31"
+     ]
+    },
+    {
+     "sig": "I9:I5:played-on-after-opponent-claimed-abandon:guest-after-resume",
+     "sev": "low",
+     "count": 1,
+     "seeds": [
+      "ci:75"
+     ]
+    },
+    {
+     "sig": "I9:I5:played-on-after-opponent-claimed-abandon:host-after-resume",
+     "sev": "low",
+     "count": 1,
+     "seeds": [
+      "ci:178"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "R-sweep-vs-forged",
+   "sev": "low",
+   "runs": 12,
+   "sigs": [
+    {
+     "sig": "I2:remove:adv-forged-target",
+     "sev": "low",
+     "count": 12,
+     "seeds": [
+      "ci:11",
+      "ci:44",
+      "ci:183",
+      "ci:214",
+      "ci:217",
+      "ci:234"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "J-ack-handshake-stale",
+   "sev": "medium",
+   "runs": 5,
+   "sigs": [
+    {
+     "sig": "I6:ack-timeout-but-host-had-acked",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:52",
+      "ci:361"
+     ]
+    },
+    {
+     "sig": "I9:I6:ack-timeout-but-host-had-acked",
+     "sev": "medium",
+     "count": 2,
+     "seeds": [
+      "ci:52",
+      "ci:361"
+     ]
+    },
+    {
+     "sig": "I6:ack-timeout-host-alive",
+     "sev": "low",
+     "count": 3,
+     "seeds": [
+      "ci:76",
+      "ci:192",
+      "ci:282"
+     ]
+    },
+    {
+     "sig": "I9:I6:ack-timeout-host-alive",
+     "sev": "low",
+     "count": 2,
+     "seeds": [
+      "ci:76",
+      "ci:192"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "I-zombie-heartbeat",
+   "sev": "medium",
+   "runs": 4,
+   "sigs": [
+    {
+     "sig": "I5:zombie-heartbeat-after-leave",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    },
+    {
+     "sig": "I8:adv-caused:I5:zombie-heartbeat-after-leave",
+     "sev": "medium",
+     "count": 4,
+     "seeds": [
+      "ci:44",
+      "ci:91",
+      "ci:214",
+      "ci:295"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "G-twin-sweep",
+   "sev": "high",
+   "runs": 3,
+   "sigs": [
+    {
+     "sig": "I4:clean-match-unsettled:live-doc-swept-by-same-account-device",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:42",
+      "ci:239",
+      "ci:381"
+     ]
+    },
+    {
+     "sig": "I9:I4:clean-match-unsettled:live-doc-swept-by-same-account-device",
+     "sev": "high",
+     "count": 3,
+     "seeds": [
+      "ci:42",
+      "ci:239",
+      "ci:381"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "D-checkStillThere-failed-check",
+   "sev": "high",
+   "runs": 1,
+   "sigs": [
+    {
+     "sig": "I4:clean-match-false-abandon:H:result-wait-checkfail:slowG:report",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:164"
+     ]
+    },
+    {
+     "sig": "I9:I4:clean-match-false-abandon:H:result-wait-checkfail:slowG:report",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:164"
+     ]
+    }
+   ]
+  },
+  {
+   "root": "E-abandon-stale-read/both-win",
+   "sev": "high",
+   "runs": 1,
+   "sigs": [
+    {
+     "sig": "I4:results-win-win:ab:opp-gone/real",
+     "sev": "high",
+     "count": 1,
+     "seeds": [
+      "ci:167"
+     ]
+    }
+   ]
+  }
+ ]
+}

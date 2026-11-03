@@ -1,0 +1,38 @@
+[
+ {
+  "round": 1,
+  "lvl": "🌱 初级 常见人物 & 基础职业 📚 12 个单词 →",
+  "result": "🌱 🌱 初级 完成！ 12 个单词全部听完 · 答对 12 / 12 · 正确率 100% 🪙 金币 +12 🎓 经验 +125 🐾 宠物经验 +15 ⚡ 挑战中级 🔄 再来一轮 🏠 回主页",
+  "walletDelta": 19,
+  "bySource": {
+   "at window.addGem hansen_island_upgrade.js:109:21) < at window.triggerMilestone hansen_island_upgrade.js:550:42)": 7
+  }
+ },
+ {
+  "round": 2,
+  "lvl": "🌱 初级 常见人物 & 基础职业 📚 12 个单词 →",
+  "result": "🌱 🌱 初级 完成！ 12 个单词全部听完 · 答对 12 / 12 · 正确率 100% 🪙 金币 +12 🎓 经验 +182 🐾 宠物经验 +15 ⚡ 挑战中级 🔄 再来一轮 🏠 回主页",
+  "walletDelta": 22,
+  "bySource": {
+   "at window.addGem hansen_island_upgrade.js:109:21) < at window.triggerMilestone hansen_island_upgrade.js:550:42)": 10
+  }
+ },
+ {
+  "round": 3,
+  "lvl": "🌱 初级 常见人物 & 基础职业 📚 12 个单词 →",
+  "result": "🌱 🌱 初级 完成！ 12 个单词全部听完 · 答对 12 / 12 · 正确率 100% 🪙 金币 +12 🎓 经验 +216 🐾 宠物经验 +15 ⚡ 挑战中级 🔄 再来一轮 🏠 回主页",
+  "walletDelta": 27,
+  "bySource": {
+   "at window.addGem hansen_island_upgrade.js:109:21) < at window.triggerMilestone hansen_island_upgrade.js:550:42)": 15
+  }
+ },
+ {
+  "round": 4,
+  "lvl": "🌱 初级 常见人物 & 基础职业 📚 12 个单词 →",
+  "result": "🌱 🌱 初级 完成！ 12 个单词全部听完 · 答对 11 / 12 · 正确率 92% 🪙 金币 +0 🎓 经验 +216 🐾 宠物经验 +15 ⚡ 挑战中级 🔄 再来一轮 🏠 回主页",
+  "walletDelta": 5,
+  "bySource": {
+   "at window.addGem hansen_island_upgrade.js:109:21) < at window.triggerMilestone hansen_island_upgrade.js:550:42)": 5
+  }
+ }
+]

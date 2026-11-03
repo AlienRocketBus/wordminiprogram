@@ -1,0 +1,11 @@
+import {serve,launch,newCtx,attach,sleep} from './kit.mjs';
+import fs from 'node:fs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await newCtx(b,base); const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/island_animal.html',{waitUntil:'load'}); await sleep(3500);
+const r=await p.evaluate(()=>({ach:(window.ACHIEVEMENTS||[]).map(a=>({id:a.id,cat:a.cat,name:a.name,desc:a.desc})), statTypes:Object.fromEntries(['speedBest','bubbleBest','eagleBest','molesBest','fishBest','clozeRight','listenRight','typeCount','matchPerfect','scrPerfectTotal','daysPlayed','chestClaimed','bossBeaten','reviewDay','reviewTotal','modesPlayed'].map(k=>[k, JSON.stringify(S.stats[k])]))}));
+fs.writeFileSync('ach_list.json', JSON.stringify(r,null,1));
+console.log(r.ach.length, JSON.stringify(r.statTypes));
+const cats={}; r.ach.forEach(a=>cats[a.cat]=(cats[a.cat]||0)+1); console.log(JSON.stringify(cats));
+await c.close(); await b.close(); srv.close();

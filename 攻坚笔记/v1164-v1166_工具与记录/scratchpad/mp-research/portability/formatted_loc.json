@@ -1,0 +1,469 @@
+{
+ "learning": {
+  "code": 8264,
+  "comment": 705,
+  "files": 14
+ },
+ "_per_file": {
+  "click_setting.js": {
+   "code": 110,
+   "comment": 22
+  },
+  "click_sound.js": {
+   "code": 357,
+   "comment": 107
+  },
+  "copy_protect.js": {
+   "code": 22,
+   "comment": 7
+  },
+  "hansen_accessibility.js": {
+   "code": 154,
+   "comment": 7
+  },
+  "hansen_ach_wallet.js": {
+   "code": 210,
+   "comment": 20
+  },
+  "hansen_addiction.js": {
+   "code": 1135,
+   "comment": 62
+  },
+  "hansen_auth_ui_v1004.js": {
+   "code": 448,
+   "comment": 44
+  },
+  "hansen_auth_v1004.js": {
+   "code": 937,
+   "comment": 445
+  },
+  "hansen_avatar.js": {
+   "code": 498,
+   "comment": 24
+  },
+  "hansen_backup_bootstrap_v944.js": {
+   "code": 292,
+   "comment": 31
+  },
+  "hansen_backup_v944.js": {
+   "code": 1240,
+   "comment": 106
+  },
+  "hansen_boot_check_v1156.js": {
+   "code": 97,
+   "comment": 64
+  },
+  "hansen_boss_anim.js": {
+   "code": 470,
+   "comment": 44
+  },
+  "hansen_boss_attack.js": {
+   "code": 42307,
+   "comment": 1179
+  },
+  "hansen_boss_lock.js": {
+   "code": 2047,
+   "comment": 502
+  },
+  "hansen_boss_progress.js": {
+   "code": 234,
+   "comment": 126
+  },
+  "hansen_boss_theme.js": {
+   "code": 554,
+   "comment": 104
+  },
+  "hansen_canonical_progress.js": {
+   "code": 1044,
+   "comment": 49
+  },
+  "hansen_cardbook_wallet.js": {
+   "code": 614,
+   "comment": 35
+  },
+  "hansen_cards.js": {
+   "code": 3075,
+   "comment": 223
+  },
+  "hansen_change_notify_v1134.js": {
+   "code": 64,
+   "comment": 41
+  },
+  "hansen_checkin_global.js": {
+   "code": 909,
+   "comment": 58
+  },
+  "hansen_cinema_themes.js": {
+   "code": 3886,
+   "comment": 86
+  },
+  "hansen_cloud_config_v965.js": {
+   "code": 4,
+   "comment": 4
+  },
+  "hansen_cloud_diag_v1027.js": {
+   "code": 463,
+   "comment": 62
+  },
+  "hansen_cloud_restore_v1048.js": {
+   "code": 228,
+   "comment": 45
+  },
+  "hansen_cloud_save_v965.js": {
+   "code": 1035,
+   "comment": 351
+  },
+  "hansen_coin_wallet.js": {
+   "code": 707,
+   "comment": 25
+  },
+  "hansen_cred_guard_v1092.js": {
+   "code": 194,
+   "comment": 54
+  },
+  "hansen_cred_trap_v1085.js": {
+   "code": 244,
+   "comment": 46
+  },
+  "hansen_crystal.js": {
+   "code": 1659,
+   "comment": 93
+  },
+  "hansen_diamond_shop.js": {
+   "code": 1795,
+   "comment": 76
+  },
+  "hansen_download_fix_v1140.js": {
+   "code": 106,
+   "comment": 40
+  },
+  "hansen_early.js": {
+   "code": 48,
+   "comment": 11
+  },
+  "hansen_econ_guide.js": {
+   "code": 184,
+   "comment": 2
+  },
+  "hansen_ex_audio.js": {
+   "code": 485,
+   "comment": 6
+  },
+  "hansen_explore_progress_v945.js": {
+   "code": 1131,
+   "comment": 59
+  },
+  "hansen_focused_typing_v946.js": {
+   "code": 717,
+   "comment": 14
+  },
+  "hansen_freepass.js": {
+   "code": 121,
+   "comment": 26
+  },
+  "hansen_friends_ui_v1107.js": {
+   "code": 499,
+   "comment": 90
+  },
+  "hansen_friends_v1106.js": {
+   "code": 520,
+   "comment": 118
+  },
+  "hansen_gacha.js": {
+   "code": 799,
+   "comment": 66
+  },
+  "hansen_game_antifreeze.js": {
+   "code": 233,
+   "comment": 38
+  },
+  "hansen_gear.js": {
+   "code": 848,
+   "comment": 50
+  },
+  "hansen_gem_system.js": {
+   "code": 475,
+   "comment": 48
+  },
+  "hansen_home_link.js": {
+   "code": 160,
+   "comment": 41
+  },
+  "hansen_island_prefetch_v1025.js": {
+   "code": 122,
+   "comment": 19
+  },
+  "hansen_island_upgrade.js": {
+   "code": 1249,
+   "comment": 94
+  },
+  "hansen_ladder_board_v1156.js": {
+   "code": 145,
+   "comment": 67
+  },
+  "hansen_ladder_ui_v1108.js": {
+   "code": 797,
+   "comment": 242
+  },
+  "hansen_land_cards.js": {
+   "code": 2072,
+   "comment": 41
+  },
+  "hansen_land_scene_manifest_v972.js": {
+   "code": 42,
+   "comment": 8
+  },
+  "hansen_mute.js": {
+   "code": 148,
+   "comment": 49
+  },
+  "hansen_mylearning.js": {
+   "code": 314,
+   "comment": 27
+  },
+  "hansen_onboarding.js": {
+   "code": 298,
+   "comment": 37
+  },
+  "hansen_palette.js": {
+   "code": 1496,
+   "comment": 230
+  },
+  "hansen_perf_v944.js": {
+   "code": 108,
+   "comment": 24
+  },
+  "hansen_pet_showcase.js": {
+   "code": 1326,
+   "comment": 109
+  },
+  "hansen_pk_record_v1103.js": {
+   "code": 231,
+   "comment": 102
+  },
+  "hansen_pk_room_ui_v1065.js": {
+   "code": 1771,
+   "comment": 594
+  },
+  "hansen_pk_room_v1065.js": {
+   "code": 1032,
+   "comment": 539
+  },
+  "hansen_pk_watchdog_v1155.js": {
+   "code": 207,
+   "comment": 98
+  },
+  "hansen_preload.js": {
+   "code": 772,
+   "comment": 99
+  },
+  "hansen_quest_global.js": {
+   "code": 1250,
+   "comment": 49
+  },
+  "hansen_review.js": {
+   "code": 1239,
+   "comment": 129
+  },
+  "hansen_review_rewards_v963.js": {
+   "code": 888,
+   "comment": 83
+  },
+  "hansen_room_warm_v1023.js": {
+   "code": 178,
+   "comment": 37
+  },
+  "hansen_round_bar.js": {
+   "code": 215,
+   "comment": 2
+  },
+  "hansen_round_reward.js": {
+   "code": 1075,
+   "comment": 28
+  },
+  "hansen_sb_ladder_v1002.js": {
+   "code": 128,
+   "comment": 27
+  },
+  "hansen_sb_pk_v1022.js": {
+   "code": 370,
+   "comment": 35
+  },
+  "hansen_sb_profile_v1002.js": {
+   "code": 635,
+   "comment": 107
+  },
+  "hansen_season.js": {
+   "code": 1035,
+   "comment": 113
+  },
+  "hansen_selfrescue_v1141.js": {
+   "code": 40,
+   "comment": 23
+  },
+  "hansen_signup_gate_v1030.js": {
+   "code": 221,
+   "comment": 40
+  },
+  "hansen_silent_watch_v1155.js": {
+   "code": 49,
+   "comment": 26
+  },
+  "hansen_spell_practice.js": {
+   "code": 595,
+   "comment": 58
+  },
+  "hansen_spellbee.js": {
+   "code": 464,
+   "comment": 33
+  },
+  "hansen_spellbee_gems.js": {
+   "code": 681,
+   "comment": 21
+  },
+  "hansen_stability.js": {
+   "code": 70,
+   "comment": 9
+  },
+  "hansen_sw_upgrade_gate_v944.js": {
+   "code": 74,
+   "comment": 11
+  },
+  "hansen_theme_lock.js": {
+   "code": 554,
+   "comment": 38
+  },
+  "hansen_theme_shop.js": {
+   "code": 558,
+   "comment": 58
+  },
+  "hansen_toast_v1156.js": {
+   "code": 197,
+   "comment": 51
+  },
+  "hansen_totals_wallet.js": {
+   "code": 82,
+   "comment": 19
+  },
+  "hansen_tts_volume_v1038.js": {
+   "code": 108,
+   "comment": 46
+  },
+  "hansen_upgrade.js": {
+   "code": 365,
+   "comment": 55
+  },
+  "hansen_version_watch_v1083.js": {
+   "code": 217,
+   "comment": 53
+  },
+  "hansen_weapon_fx.js": {
+   "code": 628,
+   "comment": 29
+  },
+  "hansen_wrong_overview.js": {
+   "code": 580,
+   "comment": 34
+  },
+  "highlight_helper.js": {
+   "code": 187,
+   "comment": 11
+  },
+  "inline___frame.js": {
+   "code": 130,
+   "comment": 5
+  },
+  "inline___sw_upgrade_v944.js": {
+   "code": 105,
+   "comment": 0
+  },
+  "inline__boss_hall.js": {
+   "code": 779,
+   "comment": 30
+  },
+  "inline__index.js": {
+   "code": 723,
+   "comment": 90
+  },
+  "inline__land_map.js": {
+   "code": 737,
+   "comment": 4
+  },
+  "inline__season_showcase.js": {
+   "code": 833,
+   "comment": 11
+  },
+  "inline__spelling_bee.js": {
+   "code": 11025,
+   "comment": 91
+  },
+  "inline__spelling_pk.js": {
+   "code": 482,
+   "comment": 95
+  },
+  "inline__template.js": {
+   "code": 13717,
+   "comment": 784
+  },
+  "perf_boost.js": {
+   "code": 307,
+   "comment": 100
+  },
+  "sentence_map.js": {
+   "code": 711,
+   "comment": 1
+  },
+  "sw_v944.js": {
+   "code": 321,
+   "comment": 133
+  },
+  "vocab_all.js": {
+   "code": 5961,
+   "comment": 2
+  },
+  "word_map.js": {
+   "code": 698,
+   "comment": 16
+  }
+ },
+ "web_platform_plumbing": {
+  "code": 3866,
+  "comment": 897,
+  "files": 22
+ },
+ "economy": {
+  "code": 10772,
+  "comment": 629,
+  "files": 16
+ },
+ "cloud_account_backup": {
+  "code": 6325,
+  "comment": 1436,
+  "files": 13
+ },
+ "collections": {
+  "code": 15846,
+  "comment": 985,
+  "files": 9
+ },
+ "boss_fx": {
+  "code": 47088,
+  "comment": 2034,
+  "files": 7
+ },
+ "spellbee_pk_ladder": {
+  "code": 6639,
+  "comment": 1902,
+  "files": 12
+ },
+ "inline": {
+  "code": 28531,
+  "comment": 1110,
+  "files": 9
+ },
+ "data": {
+  "code": 7370,
+  "comment": 19,
+  "files": 3
+ }
+}

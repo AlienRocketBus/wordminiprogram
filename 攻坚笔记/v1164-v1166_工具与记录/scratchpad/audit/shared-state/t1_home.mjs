@@ -1,0 +1,10 @@
+import {setup,attach,sleep} from './lib.mjs';
+const s=await setup();const log=[];
+const page=await s.ctx.newPage();attach(page,log);
+await page.goto(s.base+'index.html',{waitUntil:'load'});
+await sleep(3000);
+await page.screenshot({path:'home1.png'});
+const ls=await page.evaluate(()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);o[k]=localStorage.getItem(k).slice(0,200);}return o;});
+console.log(JSON.stringify(ls,null,1));
+console.log(log.join('\n'));console.log('EXT',[...s.external]);
+await s.close();

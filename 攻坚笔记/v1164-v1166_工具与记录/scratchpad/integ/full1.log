@@ -1,0 +1,18 @@
+=== batch 1 12:47:58
+已有 0 个结果，本批最多跑 540 秒，待跑 187 个
+
+进度 111/187 · 失败 2 · 剩余 76
+  失败: test_boss_timer_hf5_v946.mjs  AssertionError [ERR_ASSERTION]: reduce/dark/500ms: 彩虹条不在可见倒计时范围 0.7312616136338975
+  失败: test_explore_ui_v945.mjs  name: 'TimeoutError'
+→ 先跑 python3 分批跑测试.py --recheck 排除并行假失败
+=== batch 2 12:57:25
+已有 114 个结果，本批最多跑 540 秒，待跑 73 个
+
+进度 187/187 · 失败 5 · 剩余 0
+  失败: test_boss_timer_hf5_v946.mjs  AssertionError [ERR_ASSERTION]: reduce/dark/500ms: 彩虹条不在可见倒计时范围 0.7312616136338975
+  失败: test_explore_ui_v945.mjs  name: 'TimeoutError'
+  失败: test_pk_inpage_v1022.mjs  XX  [亮] 打开耗时 362ms(<250ms)
+  失败: test_room_warm_v1023.mjs  XX  打开耗时 580ms(<250ms)
+  失败: test_theme_scroll_v944.mjs  globalTimer = setTimeout(() => reject(new Error(
+→ 先跑 python3 分批跑测试.py --recheck 排除并行假失败
+FULLDONE

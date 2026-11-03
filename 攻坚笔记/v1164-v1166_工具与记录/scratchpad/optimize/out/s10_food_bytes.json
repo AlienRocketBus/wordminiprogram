@@ -1,0 +1,2193 @@
+{
+ "marks": {
+  "2000": 1161963,
+  "5000": 3276132,
+  "15000": 10333378
+ },
+ "cat": {
+  "html": {
+   "n": 5,
+   "kb": 931
+  },
+  "js": {
+   "n": 207,
+   "kb": 2622
+  },
+  "icons/": {
+   "n": 46,
+   "kb": 1257
+  },
+  "woff2": {
+   "n": 2,
+   "kb": 407
+  },
+  "avatars/": {
+   "n": 1,
+   "kb": 25
+  },
+  "ui/": {
+   "n": 1,
+   "kb": 6
+  },
+  "pets/": {
+   "n": 2,
+   "kb": 91
+  },
+  "bosses/": {
+   "n": 39,
+   "kb": 3643
+  },
+  "bossfx/": {
+   "n": 7,
+   "kb": 310
+  },
+  "words/": {
+   "n": 36,
+   "kb": 558
+  },
+  "sentences/": {
+   "n": 7,
+   "kb": 151
+  },
+  "x": {
+   "n": 1,
+   "kb": 0
+  },
+  "bosses_bg/": {
+   "n": 1,
+   "kb": 91
+  }
+ },
+ "arr": [
+  {
+   "url": "land_map.html?v=1163",
+   "phase": "island",
+   "t": 9560.956191,
+   "bytes": 507871
+  },
+  {
+   "url": "cartoon_font.woff2",
+   "phase": "island",
+   "t": 9557.091802,
+   "bytes": 398386
+  },
+  {
+   "url": "bosses/zb_fists_all.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893178,
+   "bytes": 325866
+  },
+  {
+   "url": "hansen_boss_attack.js?v=1163",
+   "phase": "island",
+   "t": 9554.212635,
+   "bytes": 318893
+  },
+  {
+   "url": "hansen_boss_attack.js?v=1163",
+   "phase": "island",
+   "t": 9563.448878,
+   "bytes": 318893
+  },
+  {
+   "url": "bosses/zf_fists_all.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893606,
+   "bytes": 270314
+  },
+  {
+   "url": "bosses/lv10.webp?v=1163",
+   "phase": "island",
+   "t": 9561.930989,
+   "bytes": 199794
+  },
+  {
+   "url": "island_season.html?v=1163",
+   "phase": "island",
+   "t": 9562.252732,
+   "bytes": 194440
+  },
+  {
+   "url": "island_food.html",
+   "phase": "island",
+   "t": 9551.206168,
+   "bytes": 174806
+  },
+  {
+   "url": "bosses/lv09.webp?v=1163",
+   "phase": "island",
+   "t": 9561.116894,
+   "bytes": 172872
+  },
+  {
+   "url": "bosses/lv08.webp?v=1163",
+   "phase": "island",
+   "t": 9560.614947,
+   "bytes": 171452
+  },
+  {
+   "url": "bosses/rexclaw_r.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892877,
+   "bytes": 166160
+  },
+  {
+   "url": "bosses/tl_bolt.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893692,
+   "bytes": 162202
+  },
+  {
+   "url": "bosses/rexclaw_l.webp?v=1163",
+   "phase": "island",
+   "t": 9554.89284,
+   "bytes": 145876
+  },
+  {
+   "url": "bosses/lv11.webp?v=1163",
+   "phase": "island",
+   "t": 9562.518273,
+   "bytes": 139820
+  },
+  {
+   "url": "bosses/lv12.webp?v=1163",
+   "phase": "island",
+   "t": 9564.042296,
+   "bytes": 132418
+  },
+  {
+   "url": "bosses/lv20.webp?v=1163",
+   "phase": "island",
+   "t": 9565.347919,
+   "bytes": 129330
+  },
+  {
+   "url": "bosses/lv07.webp?v=1163",
+   "phase": "island",
+   "t": 9560.19022,
+   "bytes": 126756
+  },
+  {
+   "url": "bosses/lv03.webp?v=1163",
+   "phase": "island",
+   "t": 9558.833644,
+   "bytes": 123346
+  },
+  {
+   "url": "bosses/lv02.webp?v=1163",
+   "phase": "island",
+   "t": 9558.484867,
+   "bytes": 122204
+  },
+  {
+   "url": "bosses/lv02.webp?v=1163",
+   "phase": "island",
+   "t": 9565.184693,
+   "bytes": 122204
+  },
+  {
+   "url": "bosses/lv04.webp?v=1163",
+   "phase": "island",
+   "t": 9559.178584,
+   "bytes": 120150
+  },
+  {
+   "url": "bosses/lv01.webp?v=1163",
+   "phase": "island",
+   "t": 9558.152862,
+   "bytes": 113884
+  },
+  {
+   "url": "bosses/chaoswave_real.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892457,
+   "bytes": 112194
+  },
+  {
+   "url": "bossfx/renyi_spear.webp",
+   "phase": "island",
+   "t": 9554.894407,
+   "bytes": 101498
+  },
+  {
+   "url": "bossfx/renyi_spear.webp",
+   "phase": "island",
+   "t": 9563.450453,
+   "bytes": 101498
+  },
+  {
+   "url": "bosses_bg/level2.webp?v=1163",
+   "phase": "island",
+   "t": 9565.348516,
+   "bytes": 93037
+  },
+  {
+   "url": "bosses/zf_fist_r.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893396,
+   "bytes": 86209
+  },
+  {
+   "url": "bosses/lv06.webp?v=1163",
+   "phase": "island",
+   "t": 9559.827082,
+   "bytes": 82595
+  },
+  {
+   "url": "bosses/zf_fist_l.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893355,
+   "bytes": 80003
+  },
+  {
+   "url": "bosses/lv05.webp?v=1163",
+   "phase": "island",
+   "t": 9559.530752,
+   "bytes": 70365
+  },
+  {
+   "url": "bosses/zb_fist3.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893315,
+   "bytes": 68811
+  },
+  {
+   "url": "vocab_all.js?v=1163",
+   "phase": "island",
+   "t": 9551.53284,
+   "bytes": 65221
+  },
+  {
+   "url": "vocab_all.js?v=1163",
+   "phase": "island",
+   "t": 9562.57998,
+   "bytes": 65221
+  },
+  {
+   "url": "index.html",
+   "phase": "island",
+   "t": 9554.804649,
+   "bytes": 56266
+  },
+  {
+   "url": "bosses/rexjaw_top.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892923,
+   "bytes": 53253
+  },
+  {
+   "url": "hansen_cards.js?v=1163",
+   "phase": "island",
+   "t": 9551.537646,
+   "bytes": 53222
+  },
+  {
+   "url": "hansen_cards.js?v=1163",
+   "phase": "island",
+   "t": 9562.585984,
+   "bytes": 53222
+  },
+  {
+   "url": "bosses/alienbeam_real.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892517,
+   "bytes": 53121
+  },
+  {
+   "url": "hansen_boss_lock.js?v=1163",
+   "phase": "island",
+   "t": 9551.535491,
+   "bytes": 50453
+  },
+  {
+   "url": "hansen_boss_lock.js?v=1163",
+   "phase": "island",
+   "t": 9562.584536,
+   "bytes": 50453
+  },
+  {
+   "url": "pets/pet_00.webp?v=1163",
+   "phase": "island",
+   "t": 9554.134228,
+   "bytes": 46369
+  },
+  {
+   "url": "pets/pet_00.webp?v=1163",
+   "phase": "island",
+   "t": 9563.026289,
+   "bytes": 46369
+  },
+  {
+   "url": "icons/eagle_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.351148,
+   "bytes": 45383
+  },
+  {
+   "url": "icons/eagle_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.403406,
+   "bytes": 45383
+  },
+  {
+   "url": "bosses/rexjaw_bot.webp?v=1163",
+   "phase": "island",
+   "t": 9554.89297,
+   "bytes": 45107
+  },
+  {
+   "url": "bosses/zb_fist1.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893225,
+   "bytes": 44703
+  },
+  {
+   "url": "icons/mole_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350854,
+   "bytes": 42211
+  },
+  {
+   "url": "icons/mole_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.402253,
+   "bytes": 42211
+  },
+  {
+   "url": "bosses/zb_talisman.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893051,
+   "bytes": 40169
+  },
+  {
+   "url": "icons/ic_equip.webp",
+   "phase": "island",
+   "t": 9554.555008,
+   "bytes": 38657
+  },
+  {
+   "url": "bosses/zb_fist2.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893274,
+   "bytes": 37431
+  },
+  {
+   "url": "hansen_pk_room_ui_v1065.js?v=1163",
+   "phase": "island",
+   "t": 9551.550023,
+   "bytes": 36413
+  },
+  {
+   "url": "hansen_pk_room_ui_v1065.js?v=1163",
+   "phase": "island",
+   "t": 9562.605677,
+   "bytes": 36413
+  },
+  {
+   "url": "icons/map_home.webp?v=1163",
+   "phase": "island",
+   "t": 9551.957462,
+   "bytes": 36311
+  },
+  {
+   "url": "icons/map_home.webp?v=1163",
+   "phase": "island",
+   "t": 9563.023932,
+   "bytes": 36311
+  },
+  {
+   "url": "icons/speed_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.351068,
+   "bytes": 34713
+  },
+  {
+   "url": "icons/speed_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.403337,
+   "bytes": 34713
+  },
+  {
+   "url": "bosses/mechfist_real.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892224,
+   "bytes": 34527
+  },
+  {
+   "url": "bosses/hammer_real.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892799,
+   "bytes": 34357
+  },
+  {
+   "url": "icons/gacha_joker_v594.webp?v=1163",
+   "phase": "island",
+   "t": 9551.959989,
+   "bytes": 33295
+  },
+  {
+   "url": "icons/gacha_joker_v594.webp?v=1163",
+   "phase": "island",
+   "t": 9563.067417,
+   "bytes": 33295
+  },
+  {
+   "url": "icons/spelling_bee.webp?v=1163",
+   "phase": "island",
+   "t": 9551.35077,
+   "bytes": 31005
+  },
+  {
+   "url": "icons/spelling_bee.webp?v=1163",
+   "phase": "island",
+   "t": 9562.402179,
+   "bytes": 31005
+  },
+  {
+   "url": "icons/chest_gold.webp?v=1163",
+   "phase": "island",
+   "t": 9551.354058,
+   "bytes": 30739
+  },
+  {
+   "url": "icons/chest_gold.webp?v=1163",
+   "phase": "island",
+   "t": 9562.404381,
+   "bytes": 30739
+  },
+  {
+   "url": "bosses/sunball_real.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892388,
+   "bytes": 30735
+  },
+  {
+   "url": "bosses/genielamp.webp?v=1163",
+   "phase": "island",
+   "t": 9554.893949,
+   "bytes": 30633
+  },
+  {
+   "url": "icons/fish_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350922,
+   "bytes": 30553
+  },
+  {
+   "url": "icons/fish_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.402336,
+   "bytes": 30553
+  },
+  {
+   "url": "icons/explore_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.359098,
+   "bytes": 29477
+  },
+  {
+   "url": "icons/explore_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.419753,
+   "bytes": 29477
+  },
+  {
+   "url": "icons/ic_home.webp",
+   "phase": "island",
+   "t": 9552.048289,
+   "bytes": 29253
+  },
+  {
+   "url": "icons/ic_home.webp",
+   "phase": "island",
+   "t": 9563.070102,
+   "bytes": 29253
+  },
+  {
+   "url": "icons/spell_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350704,
+   "bytes": 28979
+  },
+  {
+   "url": "icons/spell_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.401219,
+   "bytes": 28979
+  },
+  {
+   "url": "icons/ic_cards.webp",
+   "phase": "island",
+   "t": 9552.050698,
+   "bytes": 27617
+  },
+  {
+   "url": "icons/cloze_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350633,
+   "bytes": 27121
+  },
+  {
+   "url": "icons/cloze_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.401157,
+   "bytes": 27121
+  },
+  {
+   "url": "words/peach.mp3?v215",
+   "phase": "island",
+   "t": 9560.284955,
+   "bytes": 26943
+  },
+  {
+   "url": "sentences/sentence_0327.mp3?v91",
+   "phase": "island",
+   "t": 9562.779157,
+   "bytes": 26643
+  },
+  {
+   "url": "hansen_pk_room_v1065.js?v=1163",
+   "phase": "island",
+   "t": 9551.549937,
+   "bytes": 26342
+  },
+  {
+   "url": "hansen_pk_room_v1065.js?v=1163",
+   "phase": "island",
+   "t": 9562.605098,
+   "bytes": 26342
+  },
+  {
+   "url": "icons/ic_settings.webp",
+   "phase": "island",
+   "t": 9551.960724,
+   "bytes": 25719
+  },
+  {
+   "url": "icons/ic_settings.webp",
+   "phase": "island",
+   "t": 9563.070026,
+   "bytes": 25719
+  },
+  {
+   "url": "icons/bubble_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350976,
+   "bytes": 25517
+  },
+  {
+   "url": "icons/bubble_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.403252,
+   "bytes": 25517
+  },
+  {
+   "url": "hansen_auth_v1004.js?v=1163",
+   "phase": "island",
+   "t": 9551.549329,
+   "bytes": 25500
+  },
+  {
+   "url": "hansen_auth_v1004.js?v=1163",
+   "phase": "island",
+   "t": 9562.601221,
+   "bytes": 25500
+  },
+  {
+   "url": "bossfx/hand2.webp",
+   "phase": "island",
+   "t": 9554.894521,
+   "bytes": 25485
+  },
+  {
+   "url": "avatars/01.webp?v=1163",
+   "phase": "island",
+   "t": 9552.257157,
+   "bytes": 25237
+  },
+  {
+   "url": "hansen_cinema_themes.js?v=1163",
+   "phase": "island",
+   "t": 9551.538733,
+   "bytes": 24935
+  },
+  {
+   "url": "hansen_cinema_themes.js?v=1163",
+   "phase": "island",
+   "t": 9562.58836,
+   "bytes": 24935
+  },
+  {
+   "url": "bossfx/hand4.webp",
+   "phase": "island",
+   "t": 9554.894622,
+   "bytes": 24413
+  },
+  {
+   "url": "icons/ic_review.webp",
+   "phase": "island",
+   "t": 9552.049641,
+   "bytes": 24207
+  },
+  {
+   "url": "sentences/sentence_0326.mp3?v91",
+   "phase": "island",
+   "t": 9561.776765,
+   "bytes": 23955
+  },
+  {
+   "url": "bosses/shuriken.webp?v=1163",
+   "phase": "island",
+   "t": 9554.89276,
+   "bytes": 23897
+  },
+  {
+   "url": "bossfx/hand1.webp",
+   "phase": "island",
+   "t": 9554.894482,
+   "bytes": 23527
+  },
+  {
+   "url": "icons/typer_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.350572,
+   "bytes": 23485
+  },
+  {
+   "url": "icons/typer_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.401057,
+   "bytes": 23485
+  },
+  {
+   "url": "icons/ic_achieve.webp",
+   "phase": "island",
+   "t": 9551.960575,
+   "bytes": 23315
+  },
+  {
+   "url": "icons/ic_achieve.webp",
+   "phase": "island",
+   "t": 9563.068564,
+   "bytes": 23315
+  },
+  {
+   "url": "hansen_cloud_save_v965.js?v=1163",
+   "phase": "island",
+   "t": 9551.550359,
+   "bytes": 23196
+  },
+  {
+   "url": "hansen_cloud_save_v965.js?v=1163",
+   "phase": "island",
+   "t": 9562.608828,
+   "bytes": 23196
+  },
+  {
+   "url": "hansen_palette.js?v=1163",
+   "phase": "island",
+   "t": 9551.539655,
+   "bytes": 23049
+  },
+  {
+   "url": "hansen_palette.js?v=1163",
+   "phase": "island",
+   "t": 9562.590451,
+   "bytes": 23049
+  },
+  {
+   "url": "icons/ic_study.webp",
+   "phase": "island",
+   "t": 9554.593199,
+   "bytes": 23011
+  },
+  {
+   "url": "icons/boss_arcade.webp?v=1163",
+   "phase": "island",
+   "t": 9551.959324,
+   "bytes": 22919
+  },
+  {
+   "url": "hansen_pet_showcase.js?v=1163",
+   "phase": "island",
+   "t": 9551.550699,
+   "bytes": 22909
+  },
+  {
+   "url": "hansen_pet_showcase.js?v=1163",
+   "phase": "island",
+   "t": 9562.611606,
+   "bytes": 22909
+  },
+  {
+   "url": "sentences/sentence_0328.mp3?v91",
+   "phase": "island",
+   "t": 9564.173345,
+   "bytes": 22803
+  },
+  {
+   "url": "hansen_land_cards.js?v=1163",
+   "phase": "island",
+   "t": 9551.53822,
+   "bytes": 21983
+  },
+  {
+   "url": "hansen_land_cards.js?v=1163",
+   "phase": "island",
+   "t": 9562.587598,
+   "bytes": 21983
+  },
+  {
+   "url": "hansen_land_cards.js?v=1163",
+   "phase": "island",
+   "t": 9564.703098,
+   "bytes": 21983
+  },
+  {
+   "url": "bossfx/hand5.webp",
+   "phase": "island",
+   "t": 9554.894662,
+   "bytes": 21905
+  },
+  {
+   "url": "hansen_crystal.js?v=1163",
+   "phase": "island",
+   "t": 9551.544157,
+   "bytes": 21805
+  },
+  {
+   "url": "hansen_crystal.js?v=1163",
+   "phase": "island",
+   "t": 9562.594189,
+   "bytes": 21805
+  },
+  {
+   "url": "sentences/sentence_0323.mp3?v91",
+   "phase": "island",
+   "t": 9560.372152,
+   "bytes": 21459
+  },
+  {
+   "url": "sentences/sentence_0325.mp3?v91",
+   "phase": "island",
+   "t": 9561.166361,
+   "bytes": 20499
+  },
+  {
+   "url": "hansen_diamond_shop.js?v=1163",
+   "phase": "island",
+   "t": 9551.538819,
+   "bytes": 20475
+  },
+  {
+   "url": "hansen_diamond_shop.js?v=1163",
+   "phase": "island",
+   "t": 9562.588428,
+   "bytes": 20475
+  },
+  {
+   "url": "icons/speaker_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.349815,
+   "bytes": 20389
+  },
+  {
+   "url": "icons/speaker_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.398783,
+   "bytes": 20389
+  },
+  {
+   "url": "boss_hall.html?v=1163&warm=1",
+   "phase": "island",
+   "t": 9564.512904,
+   "bytes": 19939
+  },
+  {
+   "url": "icons/ic_stats.webp",
+   "phase": "island",
+   "t": 9551.960643,
+   "bytes": 19657
+  },
+  {
+   "url": "icons/ic_stats.webp",
+   "phase": "island",
+   "t": 9563.069479,
+   "bytes": 19657
+  },
+  {
+   "url": "words/strawberry.mp3?v215",
+   "phase": "island",
+   "t": 9560.107769,
+   "bytes": 19564
+  },
+  {
+   "url": "sentences/sentence_0322.mp3?v91",
+   "phase": "island",
+   "t": 9559.964669,
+   "bytes": 19539
+  },
+  {
+   "url": "words/noodles.mp3?v215",
+   "phase": "island",
+   "t": 9561.514133,
+   "bytes": 19424
+  },
+  {
+   "url": "sentences/sentence_0324.mp3?v91",
+   "phase": "island",
+   "t": 9560.734278,
+   "bytes": 19347
+  },
+  {
+   "url": "bossfx/hand3.webp",
+   "phase": "island",
+   "t": 9554.894563,
+   "bytes": 19203
+  },
+  {
+   "url": "words/cucumber.mp3?v215",
+   "phase": "island",
+   "t": 9560.892729,
+   "bytes": 19008
+  },
+  {
+   "url": "baloo2.woff2",
+   "phase": "island",
+   "t": 9551.775127,
+   "bytes": 18877
+  },
+  {
+   "url": "words/cabbage.mp3?v215",
+   "phase": "island",
+   "t": 9560.905613,
+   "bytes": 18588
+  },
+  {
+   "url": "icons/ic_wrong.webp",
+   "phase": "island",
+   "t": 9552.04955,
+   "bytes": 18399
+  },
+  {
+   "url": "icons/ic_wrong.webp",
+   "phase": "island",
+   "t": 9563.13865,
+   "bytes": 18399
+  },
+  {
+   "url": "words/watermelon.mp3?v215",
+   "phase": "island",
+   "t": 9560.114794,
+   "bytes": 18310
+  },
+  {
+   "url": "hansen_review.js?v=1163",
+   "phase": "island",
+   "t": 9551.534305,
+   "bytes": 18251
+  },
+  {
+   "url": "hansen_review.js?v=1163",
+   "phase": "island",
+   "t": 9562.582522,
+   "bytes": 18251
+  },
+  {
+   "url": "words/vegetable.mp3?v215",
+   "phase": "island",
+   "t": 9560.53547,
+   "bytes": 18174
+  },
+  {
+   "url": "words/milk.mp3?v215",
+   "phase": "island",
+   "t": 9563.926353,
+   "bytes": 18164
+  },
+  {
+   "url": "words/pineapple.mp3?v215",
+   "phase": "island",
+   "t": 9560.501989,
+   "bytes": 17892
+  },
+  {
+   "url": "words/potato.mp3?v215",
+   "phase": "island",
+   "t": 9560.687516,
+   "bytes": 17892
+  },
+  {
+   "url": "hansen_ladder_ui_v1108.js?v=1163",
+   "phase": "island",
+   "t": 9551.549609,
+   "bytes": 17848
+  },
+  {
+   "url": "hansen_ladder_ui_v1108.js?v=1163",
+   "phase": "island",
+   "t": 9562.602984,
+   "bytes": 17848
+  },
+  {
+   "url": "words/hamburger.mp3?v215",
+   "phase": "island",
+   "t": 9561.834622,
+   "bytes": 17756
+  },
+  {
+   "url": "hansen_season.js?v=1163",
+   "phase": "island",
+   "t": 9551.539487,
+   "bytes": 17731
+  },
+  {
+   "url": "hansen_season.js?v=1163",
+   "phase": "island",
+   "t": 9562.588512,
+   "bytes": 17731
+  },
+  {
+   "url": "hansen_backup_v944.js?v=1163",
+   "phase": "island",
+   "t": 9551.547758,
+   "bytes": 17466
+  },
+  {
+   "url": "hansen_backup_v944.js?v=1163",
+   "phase": "island",
+   "t": 9562.599619,
+   "bytes": 17466
+  },
+  {
+   "url": "click_sound.js?v=1163",
+   "phase": "island",
+   "t": 9551.357334,
+   "bytes": 17378
+  },
+  {
+   "url": "click_sound.js?v=1163",
+   "phase": "island",
+   "t": 9562.41043,
+   "bytes": 17378
+  },
+  {
+   "url": "words/tomato.mp3?v215",
+   "phase": "island",
+   "t": 9560.683798,
+   "bytes": 17332
+  },
+  {
+   "url": "words/mango.mp3?v215",
+   "phase": "island",
+   "t": 9560.481628,
+   "bytes": 17330
+  },
+  {
+   "url": "icons/ic_diamond.webp",
+   "phase": "island",
+   "t": 9554.530448,
+   "bytes": 16717
+  },
+  {
+   "url": "words/rice.mp3?v215",
+   "phase": "island",
+   "t": 9561.213804,
+   "bytes": 16492
+  },
+  {
+   "url": "words/fish.mp3?v215",
+   "phase": "island",
+   "t": 9563.92492,
+   "bytes": 16220
+  },
+  {
+   "url": "hansen_island_upgrade.js?v=1163",
+   "phase": "island",
+   "t": 9551.543245,
+   "bytes": 15721
+  },
+  {
+   "url": "hansen_island_upgrade.js?v=1163",
+   "phase": "island",
+   "t": 9562.593886,
+   "bytes": 15721
+  },
+  {
+   "url": "words/tea.mp3?v215",
+   "phase": "island",
+   "t": 9565.387769,
+   "bytes": 15654
+  },
+  {
+   "url": "hansen_explore_progress_v945.js?v=1163",
+   "phase": "island",
+   "t": 9551.550809,
+   "bytes": 15398
+  },
+  {
+   "url": "hansen_explore_progress_v945.js?v=1163",
+   "phase": "island",
+   "t": 9562.612593,
+   "bytes": 15398
+  },
+  {
+   "url": "words/onion.mp3?v215",
+   "phase": "island",
+   "t": 9560.890585,
+   "bytes": 15384
+  },
+  {
+   "url": "words/banana.mp3?v215",
+   "phase": "island",
+   "t": 9559.773022,
+   "bytes": 15243
+  },
+  {
+   "url": "words/pizza.mp3?v215",
+   "phase": "island",
+   "t": 9561.525016,
+   "bytes": 15241
+  },
+  {
+   "url": "words/food.mp3?v215",
+   "phase": "island",
+   "t": 9561.21059,
+   "bytes": 15239
+  },
+  {
+   "url": "words/juice.mp3?v215",
+   "phase": "island",
+   "t": 9565.028807,
+   "bytes": 14966
+  },
+  {
+   "url": "words/orange.mp3?v215",
+   "phase": "island",
+   "t": 9559.773469,
+   "bytes": 14825
+  },
+  {
+   "url": "words/meat.mp3?v215",
+   "phase": "island",
+   "t": 9562.356626,
+   "bytes": 14821
+  },
+  {
+   "url": "words/water.mp3?v215",
+   "phase": "island",
+   "t": 9563.92598,
+   "bytes": 14405
+  },
+  {
+   "url": "words/grape.mp3?v215",
+   "phase": "island",
+   "t": 9560.103226,
+   "bytes": 14130
+  },
+  {
+   "url": "words/sandwich.mp3?v215",
+   "phase": "island",
+   "t": 9561.869326,
+   "bytes": 14130
+  },
+  {
+   "url": "words/pear.mp3?v215",
+   "phase": "island",
+   "t": 9560.284503,
+   "bytes": 13985
+  },
+  {
+   "url": "words/beef.mp3?v215",
+   "phase": "island",
+   "t": 9562.448233,
+   "bytes": 13985
+  },
+  {
+   "url": "words/pork.mp3?v215",
+   "phase": "island",
+   "t": 9562.571533,
+   "bytes": 13985
+  },
+  {
+   "url": "words/egg.mp3?v215",
+   "phase": "island",
+   "t": 9561.934761,
+   "bytes": 13983
+  },
+  {
+   "url": "words/corn.mp3?v215",
+   "phase": "island",
+   "t": 9561.200769,
+   "bytes": 13567
+  },
+  {
+   "url": "bosses/vfang_bl.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892682,
+   "bytes": 13337
+  },
+  {
+   "url": "hansen_gacha.js?v=1163",
+   "phase": "island",
+   "t": 9551.538155,
+   "bytes": 13186
+  },
+  {
+   "url": "hansen_gacha.js?v=1163",
+   "phase": "island",
+   "t": 9562.58745,
+   "bytes": 13186
+  },
+  {
+   "url": "bosses/vfang_br.webp?v=1163",
+   "phase": "island",
+   "t": 9554.89272,
+   "bytes": 12977
+  },
+  {
+   "url": "words/apple.mp3?v215",
+   "phase": "island",
+   "t": 9559.772428,
+   "bytes": 12876
+  },
+  {
+   "url": "words/bread.mp3?v215",
+   "phase": "island",
+   "t": 9561.519029,
+   "bytes": 12876
+  },
+  {
+   "url": "bosses/vfang_tl.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892586,
+   "bytes": 12783
+  },
+  {
+   "url": "words/chicken.mp3?v215",
+   "phase": "island",
+   "t": 9563.073036,
+   "bytes": 12737
+  },
+  {
+   "url": "bosses/vfang_tr.webp?v=1163",
+   "phase": "island",
+   "t": 9554.892638,
+   "bytes": 12723
+  },
+  {
+   "url": "hansen_review_rewards_v963.js?v=1163",
+   "phase": "island",
+   "t": 9551.534363,
+   "bytes": 12654
+  },
+  {
+   "url": "hansen_review_rewards_v963.js?v=1163",
+   "phase": "island",
+   "t": 9562.583026,
+   "bytes": 12654
+  },
+  {
+   "url": "hansen_addiction.js?v=1163",
+   "phase": "island",
+   "t": 9551.546937,
+   "bytes": 12592
+  },
+  {
+   "url": "hansen_addiction.js?v=1163",
+   "phase": "island",
+   "t": 9562.598071,
+   "bytes": 12592
+  },
+  {
+   "url": "hansen_preload.js?v=1163",
+   "phase": "island",
+   "t": 9551.35626,
+   "bytes": 12271
+  },
+  {
+   "url": "hansen_preload.js?v=1163",
+   "phase": "island",
+   "t": 9562.408858,
+   "bytes": 12271
+  },
+  {
+   "url": "hansen_quest_global.js?v=1163",
+   "phase": "island",
+   "t": 9551.550476,
+   "bytes": 11784
+  },
+  {
+   "url": "hansen_quest_global.js?v=1163",
+   "phase": "island",
+   "t": 9562.609622,
+   "bytes": 11784
+  },
+  {
+   "url": "icons/task_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9551.353409,
+   "bytes": 11739
+  },
+  {
+   "url": "icons/task_3d.webp?v=1163",
+   "phase": "island",
+   "t": 9562.404282,
+   "bytes": 11739
+  },
+  {
+   "url": "hansen_gear.js?v=1163",
+   "phase": "island",
+   "t": 9551.544073,
+   "bytes": 11576
+  },
+  {
+   "url": "hansen_gear.js?v=1163",
+   "phase": "island",
+   "t": 9562.594123,
+   "bytes": 11576
+  },
+  {
+   "url": "words/lemon.mp3?v215",
+   "phase": "island",
+   "t": 9560.285497,
+   "bytes": 11205
+  },
+  {
+   "url": "hansen_checkin_global.js?v=1163",
+   "phase": "island",
+   "t": 9551.546867,
+   "bytes": 11081
+  },
+  {
+   "url": "hansen_checkin_global.js?v=1163",
+   "phase": "island",
+   "t": 9562.597932,
+   "bytes": 11081
+  },
+  {
+   "url": "hansen_sb_profile_v1002.js?v=1163",
+   "phase": "island",
+   "t": 9551.549663,
+   "bytes": 10876
+  },
+  {
+   "url": "hansen_sb_profile_v1002.js?v=1163",
+   "phase": "island",
+   "t": 9562.603097,
+   "bytes": 10876
+  },
+  {
+   "url": "sentence_map.js?v=1163",
+   "phase": "island",
+   "t": 9551.354666,
+   "bytes": 10827
+  },
+  {
+   "url": "sentence_map.js?v=1163",
+   "phase": "island",
+   "t": 9562.405061,
+   "bytes": 10827
+  },
+  {
+   "url": "hansen_canonical_progress.js?v=1163",
+   "phase": "island",
+   "t": 9551.535725,
+   "bytes": 10525
+  },
+  {
+   "url": "hansen_canonical_progress.js?v=1163",
+   "phase": "island",
+   "t": 9562.585844,
+   "bytes": 10525
+  },
+  {
+   "url": "hansen_avatar.js?v=1163",
+   "phase": "island",
+   "t": 9551.550859,
+   "bytes": 10303
+  },
+  {
+   "url": "hansen_avatar.js?v=1163",
+   "phase": "island",
+   "t": 9562.612664,
+   "bytes": 10303
+  },
+  {
+   "url": "hansen_boss_theme.js?v=1163",
+   "phase": "island",
+   "t": 9551.540535,
+   "bytes": 10262
+  },
+  {
+   "url": "hansen_boss_theme.js?v=1163",
+   "phase": "island",
+   "t": 9562.591375,
+   "bytes": 10262
+  },
+  {
+   "url": "hansen_round_reward.js?v=1163",
+   "phase": "island",
+   "t": 9551.545839,
+   "bytes": 9969
+  },
+  {
+   "url": "hansen_round_reward.js?v=1163",
+   "phase": "island",
+   "t": 9562.59626,
+   "bytes": 9969
+  },
+  {
+   "url": "words/carrot.mp3?v215",
+   "phase": "island",
+   "t": 9560.691883,
+   "bytes": 9530
+  },
+  {
+   "url": "hansen_ex_audio.js?v=1163",
+   "phase": "island",
+   "t": 9551.356121,
+   "bytes": 9346
+  },
+  {
+   "url": "hansen_ex_audio.js?v=1163",
+   "phase": "island",
+   "t": 9562.407411,
+   "bytes": 9346
+  },
+  {
+   "url": "hansen_friends_ui_v1107.js?v=1163",
+   "phase": "island",
+   "t": 9551.549813,
+   "bytes": 9324
+  },
+  {
+   "url": "hansen_friends_ui_v1107.js?v=1163",
+   "phase": "island",
+   "t": 9562.604199,
+   "bytes": 9324
+  },
+  {
+   "url": "hansen_cloud_diag_v1027.js?v=1163",
+   "phase": "island",
+   "t": 9551.550201,
+   "bytes": 8979
+  },
+  {
+   "url": "hansen_cloud_diag_v1027.js?v=1163",
+   "phase": "island",
+   "t": 9562.607084,
+   "bytes": 8979
+  },
+  {
+   "url": "hansen_spell_practice.js?v=1163",
+   "phase": "island",
+   "t": 9551.534206,
+   "bytes": 8655
+  },
+  {
+   "url": "hansen_spell_practice.js?v=1163",
+   "phase": "island",
+   "t": 9562.581042,
+   "bytes": 8655
+  },
+  {
+   "url": "hansen_friends_v1106.js?v=1163",
+   "phase": "island",
+   "t": 9551.549753,
+   "bytes": 8419
+  },
+  {
+   "url": "hansen_friends_v1106.js?v=1163",
+   "phase": "island",
+   "t": 9562.604119,
+   "bytes": 8419
+  },
+  {
+   "url": "hansen_focused_typing_v946.js?v=1163",
+   "phase": "island",
+   "t": 9551.550752,
+   "bytes": 7984
+  },
+  {
+   "url": "hansen_focused_typing_v946.js?v=1163",
+   "phase": "island",
+   "t": 9562.612511,
+   "bytes": 7984
+  },
+  {
+   "url": "hansen_boss_anim.js?v=1163",
+   "phase": "island",
+   "t": 9551.535407,
+   "bytes": 7715
+  },
+  {
+   "url": "hansen_boss_anim.js?v=1163",
+   "phase": "island",
+   "t": 9562.583172,
+   "bytes": 7715
+  },
+  {
+   "url": "hansen_wrong_overview.js?v=1163",
+   "phase": "island",
+   "t": 9551.547679,
+   "bytes": 7505
+  },
+  {
+   "url": "hansen_wrong_overview.js?v=1163",
+   "phase": "island",
+   "t": 9562.598168,
+   "bytes": 7505
+  },
+  {
+   "url": "hansen_auth_ui_v1004.js?v=1163",
+   "phase": "island",
+   "t": 9551.549418,
+   "bytes": 7402
+  },
+  {
+   "url": "hansen_auth_ui_v1004.js?v=1163",
+   "phase": "island",
+   "t": 9562.601297,
+   "bytes": 7402
+  },
+  {
+   "url": "perf_boost.js?v=1163",
+   "phase": "island",
+   "t": 9551.356199,
+   "bytes": 7213
+  },
+  {
+   "url": "perf_boost.js?v=1163",
+   "phase": "island",
+   "t": 9562.407472,
+   "bytes": 7213
+  },
+  {
+   "url": "hansen_coin_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9551.539552,
+   "bytes": 7197
+  },
+  {
+   "url": "hansen_coin_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9562.589508,
+   "bytes": 7197
+  },
+  {
+   "url": "hansen_spellbee_gems.js?v=1163",
+   "phase": "island",
+   "t": 9551.542218,
+   "bytes": 6990
+  },
+  {
+   "url": "hansen_spellbee_gems.js?v=1163",
+   "phase": "island",
+   "t": 9562.593707,
+   "bytes": 6990
+  },
+  {
+   "url": "hansen_theme_lock.js?v=1163",
+   "phase": "island",
+   "t": 9551.539604,
+   "bytes": 6952
+  },
+  {
+   "url": "hansen_theme_lock.js?v=1163",
+   "phase": "island",
+   "t": 9562.590325,
+   "bytes": 6952
+  },
+  {
+   "url": "hansen_boss_progress.js?v=1163",
+   "phase": "island",
+   "t": 9551.535606,
+   "bytes": 6921
+  },
+  {
+   "url": "hansen_boss_progress.js?v=1163",
+   "phase": "island",
+   "t": 9562.585205,
+   "bytes": 6921
+  },
+  {
+   "url": "hansen_sb_pk_v1022.js?v=1163",
+   "phase": "island",
+   "t": 9551.549859,
+   "bytes": 6634
+  },
+  {
+   "url": "hansen_sb_pk_v1022.js?v=1163",
+   "phase": "island",
+   "t": 9562.604254,
+   "bytes": 6634
+  },
+  {
+   "url": "hansen_gem_system.js?v=1163",
+   "phase": "island",
+   "t": 9551.543328,
+   "bytes": 6625
+  },
+  {
+   "url": "hansen_gem_system.js?v=1163",
+   "phase": "island",
+   "t": 9562.593965,
+   "bytes": 6625
+  },
+  {
+   "url": "hansen_spellbee.js?v=1163",
+   "phase": "island",
+   "t": 9551.550641,
+   "bytes": 6425
+  },
+  {
+   "url": "hansen_spellbee.js?v=1163",
+   "phase": "island",
+   "t": 9562.611474,
+   "bytes": 6425
+  },
+  {
+   "url": "hansen_pk_record_v1103.js?v=1163",
+   "phase": "island",
+   "t": 9551.549551,
+   "bytes": 6423
+  },
+  {
+   "url": "hansen_pk_record_v1103.js?v=1163",
+   "phase": "island",
+   "t": 9562.602876,
+   "bytes": 6423
+  },
+  {
+   "url": "hansen_pk_watchdog_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9551.346948,
+   "bytes": 6238
+  },
+  {
+   "url": "hansen_pk_watchdog_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9561.077778,
+   "bytes": 6238
+  },
+  {
+   "url": "hansen_pk_watchdog_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9562.391499,
+   "bytes": 6238
+  },
+  {
+   "url": "hansen_pk_watchdog_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9564.700249,
+   "bytes": 6238
+  },
+  {
+   "url": "hansen_upgrade.js?v=1163",
+   "phase": "island",
+   "t": 9551.533476,
+   "bytes": 5944
+  },
+  {
+   "url": "hansen_upgrade.js?v=1163",
+   "phase": "island",
+   "t": 9562.580878,
+   "bytes": 5944
+  },
+  {
+   "url": "hansen_cardbook_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9551.53566,
+   "bytes": 5843
+  },
+  {
+   "url": "hansen_cardbook_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9562.585761,
+   "bytes": 5843
+  },
+  {
+   "url": "word_map.js?v=1163",
+   "phase": "island",
+   "t": 9551.355332,
+   "bytes": 5763
+  },
+  {
+   "url": "word_map.js?v=1163",
+   "phase": "island",
+   "t": 9562.406267,
+   "bytes": 5763
+  },
+  {
+   "url": "hansen_mylearning.js?v=1163",
+   "phase": "island",
+   "t": 9551.534417,
+   "bytes": 5746
+  },
+  {
+   "url": "hansen_mylearning.js?v=1163",
+   "phase": "island",
+   "t": 9562.583096,
+   "bytes": 5746
+  },
+  {
+   "url": "hansen_weapon_fx.js?v=1163",
+   "phase": "island",
+   "t": 9551.546355,
+   "bytes": 5659
+  },
+  {
+   "url": "hansen_weapon_fx.js?v=1163",
+   "phase": "island",
+   "t": 9562.597107,
+   "bytes": 5659
+  },
+  {
+   "url": "ui/brain_rest.webp?v=1163",
+   "phase": "island",
+   "t": 9553.495404,
+   "bytes": 5658
+  },
+  {
+   "url": "hansen_backup_bootstrap_v944.js?v=1163",
+   "phase": "island",
+   "t": 9551.349018,
+   "bytes": 5608
+  },
+  {
+   "url": "hansen_backup_bootstrap_v944.js?v=1163",
+   "phase": "island",
+   "t": 9561.080704,
+   "bytes": 5608
+  },
+  {
+   "url": "hansen_backup_bootstrap_v944.js?v=1163",
+   "phase": "island",
+   "t": 9562.397775,
+   "bytes": 5608
+  },
+  {
+   "url": "hansen_backup_bootstrap_v944.js?v=1163",
+   "phase": "island",
+   "t": 9564.704598,
+   "bytes": 5608
+  },
+  {
+   "url": "bosses/dragonlance.webp?v=1163",
+   "phase": "island",
+   "t": 9554.8939,
+   "bytes": 5526
+  },
+  {
+   "url": "hansen_version_watch_v1083.js?v=1163",
+   "phase": "island",
+   "t": 9551.548529,
+   "bytes": 5037
+  },
+  {
+   "url": "hansen_version_watch_v1083.js?v=1163",
+   "phase": "island",
+   "t": 9561.080745,
+   "bytes": 5037
+  },
+  {
+   "url": "hansen_version_watch_v1083.js?v=1163",
+   "phase": "island",
+   "t": 9562.599819,
+   "bytes": 5037
+  },
+  {
+   "url": "hansen_version_watch_v1083.js?v=1163",
+   "phase": "island",
+   "t": 9564.704816,
+   "bytes": 5037
+  },
+  {
+   "url": "hansen_cloud_restore_v1048.js?v=1163",
+   "phase": "island",
+   "t": 9551.550311,
+   "bytes": 4860
+  },
+  {
+   "url": "hansen_cloud_restore_v1048.js?v=1163",
+   "phase": "island",
+   "t": 9562.608731,
+   "bytes": 4860
+  },
+  {
+   "url": "hansen_signup_gate_v1030.js?v=1163",
+   "phase": "island",
+   "t": 9551.550255,
+   "bytes": 4802
+  },
+  {
+   "url": "hansen_signup_gate_v1030.js?v=1163",
+   "phase": "island",
+   "t": 9562.607158,
+   "bytes": 4802
+  },
+  {
+   "url": "hansen_cred_trap_v1085.js?v=1163",
+   "phase": "island",
+   "t": 9551.348175,
+   "bytes": 4572
+  },
+  {
+   "url": "hansen_cred_trap_v1085.js?v=1163",
+   "phase": "island",
+   "t": 9561.078052,
+   "bytes": 4572
+  },
+  {
+   "url": "hansen_cred_trap_v1085.js?v=1163",
+   "phase": "island",
+   "t": 9562.392837,
+   "bytes": 4572
+  },
+  {
+   "url": "hansen_cred_trap_v1085.js?v=1163",
+   "phase": "island",
+   "t": 9564.702921,
+   "bytes": 4572
+  },
+  {
+   "url": "hansen_home_link.js?v=1163",
+   "phase": "island",
+   "t": 9551.550581,
+   "bytes": 4451
+  },
+  {
+   "url": "hansen_home_link.js?v=1163",
+   "phase": "island",
+   "t": 9562.61071,
+   "bytes": 4451
+  },
+  {
+   "url": "hansen_game_antifreeze.js?v=1163",
+   "phase": "island",
+   "t": 9551.535543,
+   "bytes": 4366
+  },
+  {
+   "url": "hansen_game_antifreeze.js?v=1163",
+   "phase": "island",
+   "t": 9562.58461,
+   "bytes": 4366
+  },
+  {
+   "url": "hansen_econ_guide.js?v=1163",
+   "phase": "island",
+   "t": 9551.541337,
+   "bytes": 4364
+  },
+  {
+   "url": "hansen_econ_guide.js?v=1163",
+   "phase": "island",
+   "t": 9562.592632,
+   "bytes": 4364
+  },
+  {
+   "url": "highlight_helper.js?v=1163",
+   "phase": "island",
+   "t": 9551.355411,
+   "bytes": 4253
+  },
+  {
+   "url": "highlight_helper.js?v=1163",
+   "phase": "island",
+   "t": 9562.407314,
+   "bytes": 4253
+  },
+  {
+   "url": "hansen_mute.js?v=1163",
+   "phase": "island",
+   "t": 9551.357546,
+   "bytes": 4126
+  },
+  {
+   "url": "hansen_mute.js?v=1163",
+   "phase": "island",
+   "t": 9562.412545,
+   "bytes": 4126
+  },
+  {
+   "url": "hansen_cred_guard_v1092.js?v=1163",
+   "phase": "island",
+   "t": 9551.348916,
+   "bytes": 4124
+  },
+  {
+   "url": "hansen_cred_guard_v1092.js?v=1163",
+   "phase": "island",
+   "t": 9561.080653,
+   "bytes": 4124
+  },
+  {
+   "url": "hansen_cred_guard_v1092.js?v=1163",
+   "phase": "island",
+   "t": 9562.393141,
+   "bytes": 4124
+  },
+  {
+   "url": "hansen_cred_guard_v1092.js?v=1163",
+   "phase": "island",
+   "t": 9564.703026,
+   "bytes": 4124
+  },
+  {
+   "url": "hansen_ladder_board_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9551.348102,
+   "bytes": 4105
+  },
+  {
+   "url": "hansen_ladder_board_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9561.077967,
+   "bytes": 4105
+  },
+  {
+   "url": "hansen_ladder_board_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9562.392769,
+   "bytes": 4105
+  },
+  {
+   "url": "hansen_ladder_board_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9564.702855,
+   "bytes": 4105
+  },
+  {
+   "url": "hansen_toast_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9551.34758,
+   "bytes": 4046
+  },
+  {
+   "url": "hansen_toast_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9561.077933,
+   "bytes": 4046
+  },
+  {
+   "url": "hansen_toast_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9562.392626,
+   "bytes": 4046
+  },
+  {
+   "url": "hansen_toast_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9564.701938,
+   "bytes": 4046
+  },
+  {
+   "url": "hansen_room_warm_v1023.js?v=1163",
+   "phase": "island",
+   "t": 9551.550081,
+   "bytes": 3984
+  },
+  {
+   "url": "hansen_room_warm_v1023.js?v=1163",
+   "phase": "island",
+   "t": 9562.606476,
+   "bytes": 3984
+  },
+  {
+   "url": "hansen_boot_check_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9551.34752,
+   "bytes": 3776
+  },
+  {
+   "url": "hansen_boot_check_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9561.077889,
+   "bytes": 3776
+  },
+  {
+   "url": "hansen_boot_check_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9562.392379,
+   "bytes": 3776
+  },
+  {
+   "url": "hansen_boot_check_v1156.js?v=1163",
+   "phase": "island",
+   "t": 9564.70179,
+   "bytes": 3776
+  },
+  {
+   "url": "hansen_perf_v944.js?v=1163",
+   "phase": "island",
+   "t": 9551.541253,
+   "bytes": 3332
+  },
+  {
+   "url": "hansen_perf_v944.js?v=1163",
+   "phase": "island",
+   "t": 9562.592137,
+   "bytes": 3332
+  },
+  {
+   "url": "hansen_perf_v944.js?v=1163",
+   "phase": "island",
+   "t": 9564.704744,
+   "bytes": 3332
+  },
+  {
+   "url": "hansen_round_bar.js?v=1163",
+   "phase": "island",
+   "t": 9551.542128,
+   "bytes": 3308
+  },
+  {
+   "url": "hansen_round_bar.js?v=1163",
+   "phase": "island",
+   "t": 9562.592724,
+   "bytes": 3308
+  },
+  {
+   "url": "hansen_sb_ladder_v1002.js?v=1163",
+   "phase": "island",
+   "t": 9551.549491,
+   "bytes": 3263
+  },
+  {
+   "url": "hansen_sb_ladder_v1002.js?v=1163",
+   "phase": "island",
+   "t": 9562.601381,
+   "bytes": 3263
+  },
+  {
+   "url": "hansen_tts_volume_v1038.js?v=1163",
+   "phase": "island",
+   "t": 9551.345825,
+   "bytes": 3209
+  },
+  {
+   "url": "hansen_tts_volume_v1038.js?v=1163",
+   "phase": "island",
+   "t": 9561.077667,
+   "bytes": 3209
+  },
+  {
+   "url": "hansen_tts_volume_v1038.js?v=1163",
+   "phase": "island",
+   "t": 9562.390039,
+   "bytes": 3209
+  },
+  {
+   "url": "hansen_tts_volume_v1038.js?v=1163",
+   "phase": "island",
+   "t": 9564.700047,
+   "bytes": 3209
+  },
+  {
+   "url": "hansen_download_fix_v1140.js?v=1163",
+   "phase": "island",
+   "t": 9551.550141,
+   "bytes": 3080
+  },
+  {
+   "url": "hansen_download_fix_v1140.js?v=1163",
+   "phase": "island",
+   "t": 9561.080829,
+   "bytes": 3080
+  },
+  {
+   "url": "hansen_download_fix_v1140.js?v=1163",
+   "phase": "island",
+   "t": 9562.606536,
+   "bytes": 3080
+  },
+  {
+   "url": "hansen_download_fix_v1140.js?v=1163",
+   "phase": "island",
+   "t": 9564.704678,
+   "bytes": 3080
+  },
+  {
+   "url": "hansen_accessibility.js?v=1163",
+   "phase": "island",
+   "t": 9551.554297,
+   "bytes": 2900
+  },
+  {
+   "url": "hansen_accessibility.js?v=1163",
+   "phase": "island",
+   "t": 9562.613454,
+   "bytes": 2900
+  },
+  {
+   "url": "hansen_change_notify_v1134.js?v=1163",
+   "phase": "island",
+   "t": 9551.548439,
+   "bytes": 2853
+  },
+  {
+   "url": "hansen_change_notify_v1134.js?v=1163",
+   "phase": "island",
+   "t": 9562.59975,
+   "bytes": 2853
+  },
+  {
+   "url": "hansen_freepass.js?v=1163",
+   "phase": "island",
+   "t": 9551.545303,
+   "bytes": 2772
+  },
+  {
+   "url": "hansen_freepass.js?v=1163",
+   "phase": "island",
+   "t": 9562.596167,
+   "bytes": 2772
+  },
+  {
+   "url": "hansen_ach_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9551.542764,
+   "bytes": 2714
+  },
+  {
+   "url": "hansen_ach_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9562.593807,
+   "bytes": 2714
+  },
+  {
+   "url": "click_setting.js?v=1163",
+   "phase": "island",
+   "t": 9551.357423,
+   "bytes": 2460
+  },
+  {
+   "url": "click_setting.js?v=1163",
+   "phase": "island",
+   "t": 9562.411864,
+   "bytes": 2460
+  },
+  {
+   "url": "hansen_land_scene_manifest_v972.js?v=1163",
+   "phase": "island",
+   "t": 9564.703162,
+   "bytes": 2174
+  },
+  {
+   "url": "hansen_sw_upgrade_gate_v944.js?v=1163",
+   "phase": "island",
+   "t": 9551.343065,
+   "bytes": 2131
+  },
+  {
+   "url": "hansen_sw_upgrade_gate_v944.js?v=1163",
+   "phase": "island",
+   "t": 9561.077363,
+   "bytes": 2131
+  },
+  {
+   "url": "hansen_sw_upgrade_gate_v944.js?v=1163",
+   "phase": "island",
+   "t": 9562.388148,
+   "bytes": 2131
+  },
+  {
+   "url": "hansen_sw_upgrade_gate_v944.js?v=1163",
+   "phase": "island",
+   "t": 9564.698635,
+   "bytes": 2131
+  },
+  {
+   "url": "hansen_silent_watch_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9551.345966,
+   "bytes": 1758
+  },
+  {
+   "url": "hansen_silent_watch_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9561.077734,
+   "bytes": 1758
+  },
+  {
+   "url": "hansen_silent_watch_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9562.390131,
+   "bytes": 1758
+  },
+  {
+   "url": "hansen_silent_watch_v1155.js?v=1163",
+   "phase": "island",
+   "t": 9564.70013,
+   "bytes": 1758
+  },
+  {
+   "url": "hansen_stability.js?v=1163",
+   "phase": "island",
+   "t": 9551.550532,
+   "bytes": 1736
+  },
+  {
+   "url": "hansen_stability.js?v=1163",
+   "phase": "island",
+   "t": 9562.609717,
+   "bytes": 1736
+  },
+  {
+   "url": "hansen_totals_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9551.535785,
+   "bytes": 1596
+  },
+  {
+   "url": "hansen_totals_wallet.js?v=1163",
+   "phase": "island",
+   "t": 9562.585911,
+   "bytes": 1596
+  },
+  {
+   "url": "hansen_early.js?v=1163",
+   "phase": "island",
+   "t": 9551.35894,
+   "bytes": 1427
+  },
+  {
+   "url": "hansen_early.js?v=1163",
+   "phase": "island",
+   "t": 9562.414074,
+   "bytes": 1427
+  },
+  {
+   "url": "copy_protect.js?v=1163",
+   "phase": "island",
+   "t": 9551.356323,
+   "bytes": 1085
+  },
+  {
+   "url": "copy_protect.js?v=1163",
+   "phase": "island",
+   "t": 9562.408928,
+   "bytes": 1085
+  },
+  {
+   "url": "hansen_cloud_config_v965.js?v=1163",
+   "phase": "island",
+   "t": 9551.54924,
+   "bytes": 749
+  },
+  {
+   "url": "hansen_cloud_config_v965.js?v=1163",
+   "phase": "island",
+   "t": 9562.599882,
+   "bytes": 749
+  },
+  {
+   "url": "VERSION?_vw=1793698629380",
+   "phase": "island",
+   "t": 9562.005529,
+   "bytes": 196
+  }
+ ]
+}

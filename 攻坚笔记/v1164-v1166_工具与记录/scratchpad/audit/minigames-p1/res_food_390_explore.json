@@ -1,0 +1,249 @@
+{
+ "island": "food",
+ "games": {
+  "explore": {
+   "notes": [
+    "cards=56 allW=56",
+    "after learn {\"modal\":false,\"learned\":1,\"firstLearned\":true}"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "modal": "✕ 🍎 apple /ˈæpl/ 苹果 📝 I eat an apple every day. 我每天吃一个苹果。 🔊 发音 🐢 慢速 📝 例句 📚 加入学习！+10 经验 这个单词的两条真实进度 🐾 宠物掌握 0 / 3 还需在打字大师中无提示、整词精确拼对 3 次。选择题、听音选项和看提示拼写都不增加这条进度。 💎 知识结晶 ☆☆☆☆☆ 打开聚焦 Spelling Bee 后可",
+   "modalOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 10,
+    "answers": 0
+   },
+   "ms": 16228,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/strawberry.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/watermelon.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/pear.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/pear.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/watermelon.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/words/strawberry.mp3?v215 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv16.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv03.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv10.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv18.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv17.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv14.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv15.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv09.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv12.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv04.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv11.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv19.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv06.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv01.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv05.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv08.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv13.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "requestfailed",
+     "text": "http://127.0.0.1:46485/bosses/lv07.webp?v=1163 net::ERR_ABORTED"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "food:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "food:explore:close",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "food:explore:close",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  }
+ },
+ "notes": [
+  "home card tap: {\"ok\":true,\"hit\":\"DIV.island-en \\\"FOOD ISLAND\\\"\"}",
+  "welcome btn tap ok=true"
+ ],
+ "ext": [
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously"
+ ],
+ "openMs": 1101,
+ "welcome": "🎮 欢迎来到食物大冒险！ 🗺️ 8 大食物岛屿等你探索 📚 56 个英语单词随你学 🎮 12 种超酷玩法等你来 🐉 36 阶进化宠物 🎁 每日宝箱 + 签到奖励 🏆 144 个成就等你解锁 🎒 小冒险家秘籍： 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 开始冒险！",
+ "cards": [
+  "探索单词",
+  "听音辨义",
+  "🃏 记忆翻牌",
+  "打字大师",
+  "完形填空",
+  "字母拼拼乐",
+  "spelling bee",
+  "⚔️ 拼写大PK",
+  "打地鼠",
+  "钓鱼大师",
+  "泡泡大作战",
+  "极速60秒",
+  "火眼金睛",
+  "抽卡"
+ ],
+ "homeOverflow": {
+  "docOverflow": false,
+  "items": []
+ },
+ "start": {
+  "coins": 300,
+  "xp": 0
+ },
+ "vis": "visible/true",
+ "extCount": 4,
+ "allEvents": [],
+ "end": {
+  "coins": 300,
+  "xp": 10,
+  "answers": 0,
+  "learned": 1
+ },
+ "totalMs": 23333
+}

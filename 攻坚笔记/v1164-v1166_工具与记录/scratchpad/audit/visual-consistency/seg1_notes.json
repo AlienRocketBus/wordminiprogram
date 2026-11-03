@@ -1,0 +1,20 @@
+{
+ "notes": [
+  "eye tapped",
+  "island_animal.html {\"home\":{\"x\":326,\"y\":-1,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_food.html {\"home\":{\"x\":326,\"y\":0,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_sports.html {\"home\":{\"x\":326,\"y\":0,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_job.html {\"home\":{\"x\":326,\"y\":0,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_color.html {\"home\":{\"x\":326,\"y\":1,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_school.html {\"home\":{\"x\":326,\"y\":0,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_time.html {\"home\":{\"x\":326,\"y\":2,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "island_question.html {\"home\":{\"x\":326,\"y\":2,\"w\":58,\"h\":58,\"bg\":\"none\"},\"avatar\":{\"x\":14,\"y\":1,\"w\":60,\"h\":60,\"bg\":\"none\"},\"nav\":{\"x\":0,\"y\":774,\"w\":390,\"h\":70,\"bg\":\"linear-gradient(rgba(30, 27, 75, 0.94), rgba(15, 23, 42, 0.97))\"}}",
+  "LANDMAP [\n \"BUTTON spot  @47,118 ① 迷雾心湖 30词 · 5boss\",\n \"BUTTON spot  @161,85 ② 风纹草原 30词 · 5boss\",\n \"BUTTON spot  @275,118 ③ 时之钟谷 30词 · 5boss\",\n \"BUTTON spot  @307,372 ④ 铸剑锻炉山 30词 · 5boss\",\n \"BUTTON spot  @275,625 ⑤ 晶石回廊 30词 · 5boss\",\n \"BUTTON spot  @155,658 ⑥ 智慧藏书林 30词 · 5boss\",\n \"BUTTON spot  @42,625 ⑦ 万邦港城 30词 · 5boss\",\n \"BUTTON spot  @3,372 ⑧ 星火火山口 30词 · 4boss\",\n \"BUTTON spot locked  @146,351 🔒 ★ 星海女帝 ★ 8岛全通后解锁\",\n \"BUTTON  goBack() @10,8 ← 返回\"\n]"
+ ],
+ "errs": [
+  "[top] PAGE Transition was aborted because of invalid state. ViewTransition opt-in disabled",
+  "[top] PAGE Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+ ],
+ "external": [],
+ "r404": []
+}

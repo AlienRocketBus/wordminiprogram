@@ -1,0 +1,32 @@
+{
+  "ver": "v1163",
+  "case": "login",
+  "beforeLogin": {
+    "overlay": null,
+    "state": {
+      "url": "/island_food.html",
+      "frameHasAuth": true,
+      "signed": false,
+      "uid": "",
+      "frameText": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 食物大冒险 FOOD ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 \ud83c"
+    }
+  },
+  "frameLogin": {
+    "ok": true,
+    "uid": "1527283253218073236",
+    "sync": "nothing-to-sync"
+  },
+  "overlay": {
+    "text": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+    "z": "2147483646",
+    "full": true
+  },
+  "after": {
+    "url": "/island_food.html",
+    "frameHasAuth": true,
+    "signed": true,
+    "uid": "1527283253218073236",
+    "frameText": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 食物大冒险 FOOD ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 \ud83c"
+  },
+  "errors": []
+}

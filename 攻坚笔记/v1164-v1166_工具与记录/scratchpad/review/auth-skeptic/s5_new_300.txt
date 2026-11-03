@@ -1,0 +1,1 @@
+{"ver":"v1164","gap":300,"login":{"ok":true},"warm":[true,true],"simultaneous":[{"ok":true,"kind":"","tries":1},{"ok":true,"kind":"","tries":1}],"after":{"signed":true,"creds":1,"shadow":"yes"},"again":[{"ok":true,"kind":"","tries":1},{"ok":true,"kind":"","tries":1}],"tab1db":"ok rows=1","tokens":["200"]}

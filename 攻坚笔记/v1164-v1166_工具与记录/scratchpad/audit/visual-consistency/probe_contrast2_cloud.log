@@ -1,0 +1,30 @@
+wrong overview footnote | "💡 点击任意岛屿 = 进入该岛错题复习\n点\"一" | 11px | rgb(71,85,105) | rgb(28,26,71) | mean=2.15 | p10=2.13 | 
+wrong overview subtitle | "每个岛屿待复习单词" | 12px | rgb(148,163,184) | rgb(17,24,47) | mean=6.86 | p10=6.83 | 
+boss header text | "已击败 boss 0/20" | 14px | rgb(241,245,249) | rgb(192,214,226) | mean=1.37 | p10=1.35 | 
+boss header text | "特效\nON" | 16px | rgb(30,41,59) | rgb(128,195,165) | mean=7.13 | p10=4.26 | 
+boss header text | "特效" | 13px | rgb(254,243,199) | rgb(196,208,231) | mean=1.39 | p10=1.37 | 
+cards all-collected line | "✨ 全部集齐 · 卡牌大师" | 12px | rgb(134,239,172) | rgb(214,229,252) | mean=1.11 | p10=1.09 | 
+cards collected count | "📚 已收集 20 / 20 张" | 13px | rgb(28,41,66) | rgb(217,225,252) | mean=11.2 | p10=11.08 | 
+mylearning mastered numbers | "0 / 42" | 12px | rgb(203,213,225) | rgb(251,252,255) | mean=1.45 | p10=1.45 | 
+mylearning mastered numbers | "0%" | 12px | rgb(203,213,225) | rgb(251,252,255) | mean=1.45 | p10=1.45 | 
+listen difficulty card text | "🌱" | 46px | rgb(28,41,66) | rgb(31,189,89) | mean=5.89 | p10=5.75 | 
+listen difficulty card text | "初级\n常见单音节动物\n📚 14 个单词" | 16px | rgb(28,41,66) | rgb(57,189,105) | mean=5.96 | p10=4.94 | 
+listen difficulty card text | "初级" | 20px | rgb(28,41,66) | rgb(28,181,85) | mean=5.38 | p10=5.05 | 
+listen round bar text | "🔊" | 22px | rgb(28,41,66) | rgb(143,157,210) | mean=5.48 | p10=1.41 | 
+listen round bar text | "🌱" | 20px | rgb(255,255,255) | rgb(183,219,221) | mean=1.48 | p10=1.47 | 
+listen round bar text | "初级" | 13px | rgb(255,255,255) | rgb(183,219,222) | mean=1.48 | p10=1.45 | 
+listen round bar text | "第 1 轮" | 13px | rgb(255,255,255) | rgb(183,220,223) | mean=1.47 | p10=1.45 | 
+listen round bar text | "1 / 14" | 12px | rgb(255,255,255) | rgb(243,250,250) | mean=1.06 | p10=1.04 | 
+listen round bar text | "换难度" | 13px | rgb(255,255,255) | rgb(192,229,231) | mean=1.35 | p10=1.33 | 
+typing difficulty card text | "🌱" | 30px | rgb(28,41,66) | rgb(32,185,88) | mean=5.65 | p10=5.46 | 
+typing difficulty card text | "初级 · 3-4 字母短词\n17 词 · 🎓经" | 16px | rgb(28,41,66) | rgb(27,161,77) | mean=4.33 | p10=3.58 | 
+typing difficulty card text | "初级 · 3-4 字母短词" | 16px | rgb(15,23,42) | rgb(28,164,78) | mean=5.48 | p10=4.56 | 
+typing difficulty card text | "17 词 · 🎓经验 +97 · 🐾宠物经验" | 11px | rgb(21,128,61) | rgb(27,159,76) | mean=1.46 | p10=1.21 | 
+typing difficulty card text | "▶" | 18px | rgb(74,222,128) | rgb(23,138,66) | mean=2.53 | p10=2.48 | 
+typing difficulty card text | "⚡" | 30px | rgb(26,18,0) | rgb(239,173,31) | mean=9.4 | p10=8.92 | 
+typing medal 尚无记录 | "尚无记录" | 11px | rgb(100,116,139) | rgb(223,229,252) | mean=3.81 | p10=3.76 | 
+gacha collected count | "📚 已收集 0 / 20 张卡" | 15px | rgb(226,232,240) | rgb(217,226,252) | mean=1.05 | p10=1.04 | 
+gacha rate rows | "普通" | 13px | rgb(28,41,66) | rgb(130,140,155) | mean=4.28 | p10=4.26 | 
+gacha rate rows | "55%" | 13px | rgb(203,213,225) | rgb(131,140,155) | mean=2.3 | p10=2.28 | 
+gacha rate rows | "稀有" | 13px | rgb(96,165,250) | rgb(129,140,155) | mean=1.34 | p10=1.33 | 
+gacha rate rows | "27%" | 13px | rgb(203,213,225) | rgb(131,139,155) | mean=2.3 | p10=2.29 | 

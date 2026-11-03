@@ -1,0 +1,132 @@
+{
+ "home": {
+  "busyPct": 62,
+  "scriptPct": 2,
+  "layoutPct": 2,
+  "recalcPct": 15,
+  "rafPerSec": 15.2,
+  "canvases": 0,
+  "anims": {
+   "total": 188,
+   "running": 120,
+   "top": [
+    [
+     "twinkle",
+     80
+    ],
+    [
+     "floaty",
+     14
+    ],
+    [
+     "slowFloat",
+     9
+    ],
+    [
+     "charBounce",
+     5
+    ],
+    [
+     "shoot",
+     2
+    ],
+    [
+     "flyUfo",
+     1
+    ],
+    [
+     "bobSlow",
+     1
+    ],
+    [
+     "flyRocket",
+     1
+    ],
+    [
+     "flySatellite",
+     1
+    ],
+    [
+     "flyComet",
+     1
+    ],
+    [
+     "flyStar",
+     1
+    ],
+    [
+     "pulse",
+     1
+    ]
+   ]
+  }
+ },
+ "island": {
+  "busyPct": 77,
+  "scriptPct": 8,
+  "layoutPct": 0,
+  "recalcPct": 6,
+  "rafPerSec": 0.6,
+  "canvases": 0,
+  "anims": {
+   "total": 5,
+   "running": 5,
+   "top": [
+    [
+     "twinkle",
+     1
+    ],
+    [
+     "worldMapFloat",
+     1
+    ],
+    [
+     "wmbGlowD",
+     1
+    ],
+    [
+     "hsnPetFloatSlow",
+     1
+    ],
+    [
+     "chestSlowGlow",
+     1
+    ]
+   ]
+  }
+ },
+ "island-noWarm": {
+  "busyPct": 61,
+  "scriptPct": 2,
+  "layoutPct": 0,
+  "recalcPct": 9,
+  "rafPerSec": 0.7,
+  "canvases": 0,
+  "anims": {
+   "total": 5,
+   "running": 5,
+   "top": [
+    [
+     "twinkle",
+     1
+    ],
+    [
+     "worldMapFloat",
+     1
+    ],
+    [
+     "wmbGlowD",
+     1
+    ],
+    [
+     "hsnPetFloatSlow",
+     1
+    ],
+    [
+     "chestSlowGlow",
+     1
+    ]
+   ]
+  }
+ }
+}

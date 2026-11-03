@@ -1,0 +1,456 @@
+{
+ "360": {
+  "hall_lv": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 淘气小幽灵 ◆ ◆ ◆ 白银·普通 ◆ ◆ ‹ Lv.1淘气小幽灵 › ◆ Lv.1 · 白 银 · 普 通 ◆ 「飘忽不定的初见之敌, 总在云雾间嬉戏。」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左右滑动切换 boss · 左上角",
+   "common": {
+    "scrollW": 395,
+    "vw": 395,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.1淘气小幽灵",
+    "after": "Lv.2暗影忍者"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_2={\"bgIdx\":12}"
+    ]
+   },
+   "events": []
+  },
+  "hall_season": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 统御天使 · 圣光之翼 ◆ ◆ ◆ 鎏金·传说 ◆ ◆ ‹ Lv.2统御天使 · 圣光之翼 › ◆ Lv.2 · 鎏 金 · 传 说 ◆ 「圣光之翼展开即是裁决，无人能在审判之光下隐藏。」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左",
+   "common": {
+    "scrollW": 395,
+    "vw": 395,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.2统御天使 · 圣光之翼",
+    "after": "Lv.3无光之渊 · 暗噬君主"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_3={\"bgIdx\":12}",
+     "bs_hall_2={\"bgIdx\":12}"
+    ]
+   },
+   "events": []
+  },
+  "hall_land": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 未成形之神·万形之胚 ◆ ◆ ◆ 翠玉·优秀 ◆ ◆ ‹ Lv.2未成形之神·万形之胚 › ◆ Lv.2 · 翠 玉 · 优 秀 ◆ 「undefined」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左右滑动切换 boss · 左上角",
+   "common": {
+    "scrollW": 395,
+    "vw": 395,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.2未成形之神·万形之胚",
+    "after": "Lv.3逆相之影·镜渊领主"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_3={\"bgIdx\":12}",
+     "bs_hall_2={\"bgIdx\":12}"
+    ]
+   },
+   "events": []
+  },
+  "showcase_S1": {
+   "text": "× ◆ 神秘殿堂 ◆ 绝版限定卡 · 收藏的荣耀 ★ 主形象 ◆ 星海女帝 · 赛尔娅 ◆ ◆ ◆ ◆ 传说限定 ◆ ◆ ◆ ‹ › 形 象 1 / 3 ✓ 当前主形象 ◆ 第一赛季 · 星海觉醒 ◆ 「繁星为我加冕，银河在我足下流淌。」 光 效 关闭 卡 面 背 景",
+   "common": {
+    "scrollW": 390,
+    "vw": 390,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "zoom": true,
+   "closePg": {
+    "disp": "flex",
+    "vis": "visible",
+    "x": 352,
+    "y": 36,
+    "hit": "closePg"
+   },
+   "zoomClosed": true,
+   "toggles": [],
+   "events": []
+  },
+  "showcase_S1B3": {
+   "text": "× ◆ 神秘殿堂 ◆ 绝版限定卡 · 收藏的荣耀 ★ 主形象 ◆ 无光之渊 · 暗噬君主 ◆ ◆ ◆ ◆ 传说限定 ◆ ◆ ◆ ◆ 第一赛季 · 星海觉醒 ◆ 「坠入无光之渊的灵魂，永世再难回返。」 光 效 关闭 卡 面 背 景",
+   "common": {
+    "scrollW": 390,
+    "vw": 390,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "zoom": true,
+   "closePg": {
+    "disp": "flex",
+    "vis": "visible",
+    "x": 352,
+    "y": 36,
+    "hit": "closePg"
+   },
+   "zoomClosed": true,
+   "toggles": [],
+   "events": []
+  },
+  "bee_standalone": {
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "和机器人比赛拼单词 · 谁先拼对谁得分 🏆 赢的题多就获胜",
+    "words": 936,
+    "chips": [
+     "🌱 初级 3–4 字母短词 · 286个",
+     "⭐ 中级 5–6 字母 · 302个",
+     "🔥 高级 7+ 字母长词 · 348个",
+     "🌈 全部 全难度混合 · 936个"
+    ],
+    "backEls": [
+     "‹ 返回|",
+     "返回设置|"
+    ]
+   },
+   "common": {
+    "scrollW": 360,
+    "vw": 360,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "started": true,
+   "game": {
+    "stt": "拼写中…",
+    "target": "menu",
+    "kb": 27
+   },
+   "backToSetup": true,
+   "sbBack": {
+    "txt": "‹ 返回",
+    "oc": null,
+    "href": "index.html",
+    "vis": true
+   },
+   "events": []
+  },
+  "bee_land3": {
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "【时之钟谷岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+    "words": 30,
+    "chips": [
+     "🌱 初级 本岛暂无此难度",
+     "⭐ 中级 5–6 字母 · 5个",
+     "🔥 高级 7+ 字母长词 · 25个",
+     "🌈 全部 全难度混合 · 30个"
+    ],
+    "backEls": [
+     "‹ 返回|",
+     "返回设置|"
+    ]
+   },
+   "common": {
+    "scrollW": 360,
+    "vw": 360,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "started": true,
+   "game": {
+    "stt": "拼写中…",
+    "target": "decade",
+    "kb": 27
+   },
+   "backToSetup": true,
+   "sbBack": {
+    "txt": "‹ 返回",
+    "oc": null,
+    "href": "index.html",
+    "vis": true
+   },
+   "events": []
+  }
+ },
+ "390": {
+  "hall_lv": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 淘气小幽灵 ◆ ◆ ◆ 白银·普通 ◆ ◆ ‹ Lv.1淘气小幽灵 › ◆ Lv.1 · 白 银 · 普 通 ◆ 「飘忽不定的初见之敌, 总在云雾间嬉戏。」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左右滑动切换 boss · 左上角",
+   "common": {
+    "scrollW": 410,
+    "vw": 410,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.1淘气小幽灵",
+    "after": "Lv.2暗影忍者"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_2={\"bgIdx\":8}"
+    ]
+   },
+   "events": []
+  },
+  "hall_season": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 统御天使 · 圣光之翼 ◆ ◆ ◆ 鎏金·传说 ◆ ◆ ‹ Lv.2统御天使 · 圣光之翼 › ◆ Lv.2 · 鎏 金 · 传 说 ◆ 「圣光之翼展开即是裁决，无人能在审判之光下隐藏。」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左",
+   "common": {
+    "scrollW": 410,
+    "vw": 410,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.2统御天使 · 圣光之翼",
+    "after": "Lv.3无光之渊 · 暗噬君主"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_3={\"bgIdx\":8}",
+     "bs_hall_2={\"bgIdx\":8}"
+    ]
+   },
+   "events": []
+  },
+  "hall_land": {
+   "title": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 未成形之神·万形之胚 ◆ ◆ ◆ 翠玉·优秀 ◆ ◆ ‹ Lv.2未成形之神·万形之胚 › ◆ Lv.2 · 翠 玉 · 优 秀 ◆ 「undefined」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左右滑动切换 boss · 左上角",
+   "common": {
+    "scrollW": 410,
+    "vw": 410,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "next": {
+    "tap": true,
+    "before": "Lv.2未成形之神·万形之胚",
+    "after": "Lv.3逆相之影·镜渊领主"
+   },
+   "zoom": true,
+   "zoomAfterCenterTap": true,
+   "zoomAfterCornerTap": {
+    "hit": "zbd",
+    "shown": false
+   },
+   "views": [
+    "none/flex",
+    "none/flex",
+    "block/flex"
+   ],
+   "light": "关闭",
+   "swatch": {
+    "n": 13,
+    "tap": true,
+    "pref": [
+     "bs_hall_3={\"bgIdx\":8}",
+     "bs_hall_2={\"bgIdx\":8}"
+    ]
+   },
+   "events": []
+  },
+  "showcase_S1": {
+   "text": "× ◆ 神秘殿堂 ◆ 绝版限定卡 · 收藏的荣耀 ★ 主形象 ◆ 星海女帝 · 赛尔娅 ◆ ◆ ◆ ◆ 传说限定 ◆ ◆ ◆ ‹ › 形 象 1 / 3 ✓ 当前主形象 ◆ 第一赛季 · 星海觉醒 ◆ 「繁星为我加冕，银河在我足下流淌。」 光 效 关闭 卡 面 背 景",
+   "common": {
+    "scrollW": 405,
+    "vw": 405,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "zoom": true,
+   "closePg": {
+    "disp": "flex",
+    "vis": "visible",
+    "x": 367,
+    "y": 36,
+    "hit": "closePg"
+   },
+   "zoomClosed": true,
+   "toggles": [],
+   "events": []
+  },
+  "showcase_S1B3": {
+   "text": "× ◆ 神秘殿堂 ◆ 绝版限定卡 · 收藏的荣耀 ★ 主形象 ◆ 无光之渊 · 暗噬君主 ◆ ◆ ◆ ◆ 传说限定 ◆ ◆ ◆ ◆ 第一赛季 · 星海觉醒 ◆ 「坠入无光之渊的灵魂，永世再难回返。」 光 效 关闭 卡 面 背 景",
+   "common": {
+    "scrollW": 405,
+    "vw": 405,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "zoom": true,
+   "closePg": {
+    "disp": "flex",
+    "vis": "visible",
+    "x": 367,
+    "y": 36,
+    "hit": "closePg"
+   },
+   "zoomClosed": true,
+   "toggles": [],
+   "events": []
+  },
+  "bee_standalone": {
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "和机器人比赛拼单词 · 谁先拼对谁得分 🏆 赢的题多就获胜",
+    "words": 936,
+    "chips": [
+     "🌱 初级 3–4 字母短词 · 286个",
+     "⭐ 中级 5–6 字母 · 302个",
+     "🔥 高级 7+ 字母长词 · 348个",
+     "🌈 全部 全难度混合 · 936个"
+    ],
+    "backEls": [
+     "‹ 返回|",
+     "返回设置|"
+    ]
+   },
+   "common": {
+    "scrollW": 390,
+    "vw": 390,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "started": true,
+   "game": {
+    "stt": "拼写中…",
+    "target": "big",
+    "kb": 27
+   },
+   "backToSetup": true,
+   "sbBack": {
+    "txt": "‹ 返回",
+    "oc": null,
+    "href": "index.html",
+    "vis": true
+   },
+   "events": []
+  },
+  "bee_land3": {
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "【时之钟谷岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+    "words": 30,
+    "chips": [
+     "🌱 初级 本岛暂无此难度",
+     "⭐ 中级 5–6 字母 · 5个",
+     "🔥 高级 7+ 字母长词 · 25个",
+     "🌈 全部 全难度混合 · 30个"
+    ],
+    "backEls": [
+     "‹ 返回|",
+     "返回设置|"
+    ]
+   },
+   "common": {
+    "scrollW": 390,
+    "vw": 390,
+    "canScrollX": false,
+    "broken": [],
+    "offscreenText": []
+   },
+   "started": true,
+   "game": {
+    "stt": "拼写中…",
+    "target": "seldom",
+    "kb": 27
+   },
+   "backToSetup": true,
+   "sbBack": {
+    "txt": "‹ 返回",
+    "oc": null,
+    "href": "index.html",
+    "vis": true
+   },
+   "events": []
+  }
+ }
+}

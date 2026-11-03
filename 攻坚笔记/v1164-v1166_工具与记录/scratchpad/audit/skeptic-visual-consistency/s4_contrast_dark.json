@@ -1,0 +1,501 @@
+{
+ "mode": "dark",
+ "m": [
+  {
+   "label": "daily 每日任务",
+   "text": "每日任务",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    76,
+    217,
+    123
+   ],
+   "ratio": 1.82,
+   "fs": "15px",
+   "fw": "700",
+   "shadow": "none",
+   "rect": {
+    "x": 143,
+    "y": 377,
+    "w": 104,
+    "h": 20
+   }
+  },
+  {
+   "label": "daily 每日宝箱",
+   "text": "每日宝箱",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    96,
+    150,
+    235
+   ],
+   "ratio": 2.97,
+   "fs": "15px",
+   "fw": "700",
+   "shadow": "none",
+   "rect": {
+    "x": 29,
+    "y": 377,
+    "w": 104,
+    "h": 20
+   }
+  },
+  {
+   "label": "mode 听音辨义",
+   "text": "听音辨义",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    251,
+    160,
+    53
+   ],
+   "ratio": 2.06,
+   "fs": "13px",
+   "fw": "800",
+   "shadow": "none",
+   "rect": {
+    "x": 169,
+    "y": 415,
+    "w": 52,
+    "h": 14
+   }
+  },
+  {
+   "label": "mode 探索单词",
+   "text": "探索单词",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    233,
+    110,
+    149
+   ],
+   "ratio": 2.95,
+   "fs": "13px",
+   "fw": "800",
+   "shadow": "none",
+   "rect": {
+    "x": 54,
+    "y": 415,
+    "w": 52,
+    "h": 14
+   }
+  },
+  {
+   "label": "错题 empty text",
+   "text": "所有岛屿都没有错题 继续探险吧!",
+   "fg": "rgb(148, 163, 184)",
+   "op": 1,
+   "bg": [
+    24,
+    25,
+    63
+   ],
+   "ratio": 6.55,
+   "fs": "14px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 36,
+    "y": 293,
+    "w": 318,
+    "h": 45
+   }
+  },
+  {
+   "label": "错题 back arrow",
+   "text": "←",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    34,
+    41,
+    61
+   ],
+   "ratio": 9.74,
+   "fs": "18px",
+   "fw": "900",
+   "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+   "rect": {
+    "x": 16,
+    "y": 28,
+    "w": 36,
+    "h": 36
+   }
+  },
+  {
+   "label": "错题 footnote .hwo_btm",
+   "text": "💡 点击任意岛屿 = 进入该岛错题复习 点\"一起复习全部\" = 跨岛混合复习",
+   "fg": "rgb(71, 85, 105)",
+   "op": 1,
+   "bg": [
+    28,
+    26,
+    71
+   ],
+   "ratio": 2.15,
+   "fs": "11px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 16,
+    "y": 422,
+    "w": 358,
+    "h": 35
+   }
+  },
+  {
+   "label": "卡册 已收集 line",
+   "text": "📚 已收集 20 / 20 张",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    60,
+    44,
+    122
+   ],
+   "ratio": 7.71,
+   "fs": "13px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 18,
+    "y": 121,
+    "w": 130,
+    "h": 22
+   }
+  },
+  {
+   "label": "卡册 全部集齐",
+   "text": "✨ 全部集齐 · 卡牌大师",
+   "fg": "rgb(134, 239, 172)",
+   "op": 1,
+   "bg": [
+    50,
+    53,
+    126
+   ],
+   "ratio": 7.68,
+   "fs": "12px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 18,
+    "y": 150,
+    "w": 354,
+    "h": 17
+   }
+  },
+  {
+   "label": "神秘殿堂 title",
+   "text": "神秘殿堂",
+   "fg": "rgb(226, 232, 240)",
+   "op": 1,
+   "bg": [
+    57,
+    55,
+    65
+   ],
+   "ratio": 9.48,
+   "fs": "18px",
+   "fw": "900",
+   "shadow": "none",
+   "rect": {
+    "x": 102,
+    "y": 410,
+    "w": 74,
+    "h": 24
+   }
+  },
+  {
+   "label": "神秘殿堂 desc",
+   "text": "历代赛季限定卡的殿堂 · 已收藏 6/6。点亮的卡可点击进入全屏观赏。",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    24,
+    35,
+    90
+   ],
+   "ratio": 9.91,
+   "fs": "12px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 40,
+    "y": 105,
+    "w": 310,
+    "h": 36
+   }
+  },
+  {
+   "label": "神秘殿堂 card name",
+   "text": "铸星者·原初匠人",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    63,
+    59,
+    64
+   ],
+   "ratio": 10.99,
+   "fs": "13px",
+   "fw": "900",
+   "shadow": "none",
+   "rect": {
+    "x": 52,
+    "y": 411,
+    "w": 125,
+    "h": 16
+   }
+  },
+  {
+   "label": "boss 已击败",
+   "text": "已击败 boss 0/20",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    40,
+    70,
+    110
+   ],
+   "ratio": 9.58,
+   "fs": "14px",
+   "fw": "800",
+   "shadow": "none",
+   "rect": {
+    "x": 76,
+    "y": 32,
+    "w": 116,
+    "h": 19
+   }
+  },
+  {
+   "label": "boss 特效",
+   "text": "特效",
+   "fg": "rgb(254, 243, 199)",
+   "op": 1,
+   "bg": [
+    44,
+    65,
+    116
+   ],
+   "ratio": 8.92,
+   "fs": "13px",
+   "fw": "800",
+   "shadow": "none",
+   "rect": {
+    "x": 213,
+    "y": 32,
+    "w": 27,
+    "h": 18
+   }
+  },
+  {
+   "label": "listen 1 / N",
+   "text": "1 / 16",
+   "fg": "rgb(255, 255, 255)",
+   "op": 1,
+   "bg": [
+    50,
+    53,
+    79
+   ],
+   "ratio": 11.95,
+   "fs": "12px",
+   "fw": "700",
+   "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2px, rgba(0, 0, 0, 0.5) 0px 0px",
+   "rect": {
+    "x": 242,
+    "y": 133,
+    "w": 46,
+    "h": 21
+   }
+  },
+  {
+   "label": "listen 第 1 轮",
+   "text": "第 1 轮",
+   "fg": "rgb(255, 255, 255)",
+   "op": 0.9,
+   "bg": [
+    89,
+    71,
+    106
+   ],
+   "ratio": 7.11,
+   "fs": "13px",
+   "fw": "700",
+   "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2px, rgba(0, 0, 0, 0.5) 0px 0px",
+   "rect": {
+    "x": 116,
+    "y": 134,
+    "w": 38,
+    "h": 18
+   }
+  },
+  {
+   "label": "typing 尚无记录",
+   "text": "尚无记录",
+   "fg": "rgb(100, 116, 139)",
+   "op": 1,
+   "bg": [
+    62,
+    52,
+    125
+   ],
+   "ratio": 2.22,
+   "fs": "11px",
+   "fw": "500",
+   "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2px, rgba(0, 0, 0, 0.5) 0px 0px",
+   "rect": {
+    "x": 55,
+    "y": 218,
+    "w": 44,
+    "h": 14
+   }
+  },
+  {
+   "label": "typing reward",
+   "text": "17 词 · 🎓经验 +97 · 🐾宠物经验 +25 · 🪙金币 +17",
+   "fg": "rgb(187, 247, 208)",
+   "op": 1,
+   "bg": [
+    27,
+    159,
+    76
+   ],
+   "ratio": 2.84,
+   "fs": "11px",
+   "fw": "500",
+   "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2px, rgba(0, 0, 0, 0.5) 0px 0px",
+   "rect": {
+    "x": 86,
+    "y": 291,
+    "w": 238,
+    "h": 29
+   }
+  },
+  {
+   "label": "gacha 已收集",
+   "text": "📚 已收集 0 / 20 张卡",
+   "fg": "rgb(226, 232, 240)",
+   "op": 1,
+   "bg": [
+    59,
+    45,
+    122
+   ],
+   "ratio": 9.25,
+   "fs": "15px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 16,
+    "y": 122,
+    "w": 148,
+    "h": 20
+   }
+  },
+  {
+   "label": "gacha rate row",
+   "text": "当前至尊概率 0.5%",
+   "fg": "rgb(226, 232, 240)",
+   "op": 1,
+   "bg": [
+    20,
+    24,
+    53
+   ],
+   "ratio": 14.06,
+   "fs": "13px",
+   "fw": "700",
+   "shadow": "none",
+   "rect": {
+    "x": 242,
+    "y": 171,
+    "w": 115,
+    "h": 21
+   }
+  },
+  {
+   "label": "gacha rate row 2",
+   "text": "55%",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    40,
+    49,
+    93
+   ],
+   "ratio": 8.38,
+   "fs": "13px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 329,
+    "y": 413,
+    "w": 29,
+    "h": 18
+   }
+  },
+  {
+   "label": "我的学习 0 / 42",
+   "text": "0 / 42",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    41,
+    38,
+    85
+   ],
+   "ratio": 9.41,
+   "fs": "12px",
+   "fw": "700",
+   "shadow": "none",
+   "rect": {
+    "x": 70,
+    "y": 461,
+    "w": 34,
+    "h": 15
+   }
+  },
+  {
+   "label": "我的学习 已掌握",
+   "text": "个单词已掌握 🌟",
+   "fg": "rgb(203, 213, 225)",
+   "op": 1,
+   "bg": [
+    39,
+    43,
+    93
+   ],
+   "ratio": 8.9,
+   "fs": "14px",
+   "fw": "500",
+   "shadow": "none",
+   "rect": {
+    "x": 33,
+    "y": 151,
+    "w": 324,
+    "h": 19
+   }
+  }
+ ],
+ "notes": [
+  "listen easy tap {\"ok\":true,\"x\":195,\"y\":362.5,\"w\":362,\"h\":485,\"hitOk\":true,\"hit\":\"DIV\",\"tapped\":true}"
+ ],
+ "htmlClass": "hsn-bt-dark",
+ "errs": [
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "external": []
+}

@@ -1,0 +1,17 @@
+手机号注册登录链路 v1057
+  OK  引用的 SDK 文件都存在（引用 vendor_cloudbase_esm_v965.js）
+  OK  提供测试注入口（此前无法脱离云端验证，正是漏检主因）
+  OK  发码成功并存下 verificationId(VID)
+  OK  新用户走注册(signUp)分支
+  OK  注册传的是**原始验证码**(非 token)
+  OK  注册登录成功
+  OK  写入本地登录态(method=phone)
+  OK  老用户走登录(signIn)分支
+  OK  老用户先 verify 换 token
+  OK  老用户登录成功
+  OK  零脚本错误
+  OK  ★ 云端没下发凭证 → 明确报错而非假装成功：登录未真正完成：云端没有下发有效凭证（响应缺 expires_in / access_token）。
+  OK  ★ 此时**不得**写入本地登录态（否则界面会说"已登录"而实际没会话）
+  OK  ★ isSignedIn() 保持 false
+
+结果: 14 通过 / 0 失败

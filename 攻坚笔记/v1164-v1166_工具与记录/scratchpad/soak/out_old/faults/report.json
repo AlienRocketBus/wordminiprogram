@@ -1,0 +1,310 @@
+{
+ "summary": "SUMMARY profile=faults runs=600 seeds=1..600 failing_runs=66 clusters=23 (fail-level 19) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:61 I4:9 I5:2 I6:49 I7:0 I8:0 I9:6 I10:0 | matches=632 settled_pairs=559 virtual=74.7h events=1095347 real=31s",
+ "profile": "faults",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I6": 49,
+  "I3": 61,
+  "I9": 6,
+  "I4": 9,
+  "I5": 2
+ },
+ "failingRuns": 66,
+ "clusters": [
+  {
+   "sig": "I6:config:claimRound:DATABASE_REQUEST_FAILED",
+   "inv": "I6",
+   "sev": "high",
+   "count": 7,
+   "seeds": [
+    26,
+    85,
+    124,
+    294,
+    402,
+    449,
+    593
+   ],
+   "example": "claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I4:clean-match-unsettled",
+   "inv": "I4",
+   "sev": "high",
+   "count": 3,
+   "seeds": [
+    72,
+    95,
+    129
+   ],
+   "example": "rmk0gedstzgbqdw both phones stayed on and connected, but host result-failed / guest result-failed"
+  },
+  {
+   "sig": "I9:I4:clean-match-unsettled",
+   "inv": "I9",
+   "sev": "high",
+   "count": 3,
+   "seeds": [
+    72,
+    95,
+    129
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gedstzgbqdw both phones stayed on and connected, but host result-failed / guest result-failed"
+  },
+  {
+   "sig": "I6:config:skipRound:DATABASE_REQUEST_FAILED",
+   "inv": "I6",
+   "sev": "high",
+   "count": 3,
+   "seeds": [
+    183,
+    338,
+    444
+   ],
+   "example": "skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I6:config:joinRoom:DATABASE_REQUEST_FAILED",
+   "inv": "I6",
+   "sev": "high",
+   "count": 3,
+   "seeds": [
+    314,
+    503,
+    582
+   ],
+   "example": "joinRoom → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I6:config:skipRound:DATABASE_DUPLICATE_WRITE",
+   "inv": "I6",
+   "sev": "high",
+   "count": 3,
+   "seeds": [
+    318,
+    389,
+    585
+   ],
+   "example": "skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0geyayti6lew_w1 | req reqph⟩」"
+  },
+  {
+   "sig": "I6:config:claimRound:DATABASE_DUPLICATE_WRITE",
+   "inv": "I6",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    250,
+    316
+   ],
+   "example": "claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0giecsf32lnj_w9 | req req18u⟩」"
+  },
+  {
+   "sig": "I9:I6:config:skipRound:DATABASE_DUPLICATE_WRITE",
+   "inv": "I9",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    318,
+    389
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0geyayti6lew_w1 | req reqph⟩」"
+  },
+  {
+   "sig": "I6:config:createRoom:DATABASE_REQUEST_FAILED",
+   "inv": "I6",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    131
+   ],
+   "example": "createRoom → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I3:skip-beat-correct-answer:A",
+   "inv": "I3",
+   "sev": "medium",
+   "count": 37,
+   "seeds": [
+    16,
+    34,
+    45,
+    61,
+    63,
+    70,
+    74,
+    78,
+    96,
+    99,
+    104,
+    126
+   ],
+   "example": "word 6: P1 spelled it right 9.7s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 16.0s after its word appeared, deadline in 15.7s)"
+  },
+  {
+   "sig": "I6:gone-but-room-open:findByCode:lag",
+   "inv": "I6",
+   "sev": "medium",
+   "count": 5,
+   "seeds": [
+    173,
+    208,
+    284,
+    402,
+    443
+   ],
+   "example": "findByCode(8R3E) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff 0s)"
+  },
+  {
+   "sig": "I4:score-vs-rounds:own-win-doc-landed-but-scored-0",
+   "inv": "I4",
+   "sev": "medium",
+   "count": 3,
+   "seeds": [
+    70,
+    110,
+    432
+   ],
+   "example": "rmk0gezk15ygkex word 6: P2 spelled it right; round doc {\"winner\":\"guest\",\"by\":\"k2x70\",\"at\":1767574925011.9758} ⇒ 100 points, the UI scored 0 (claimRound ok won=true)"
+  },
+  {
+   "sig": "I5:too-long:joining",
+   "inv": "I5",
+   "sev": "medium",
+   "count": 2,
+   "seeds": [
+    96,
+    523
+   ],
+   "example": "P3 spent 74s on 「joining」 (limit 45s)"
+  },
+  {
+   "sig": "I9:I3:skip-beat-correct-answer:A",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    61
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) word 6: P1 spelled it right 3.4s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 20.0s after its word appeared, deadline in 20.0s)"
+  },
+  {
+   "sig": "I4:score-vs-rounds:own-win-doc-landed-but-scored-0:config",
+   "inv": "I4",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    250
+   ],
+   "example": "rmk0giecsf32lnj word 9: P0 spelled it right; round doc {\"winner\":\"guest\",\"by\":\"k0x250\",\"at\":1767575198200.3801} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=config)"
+  },
+  {
+   "sig": "I6:ack-timeout-but-host-had-acked",
+   "inv": "I6",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    493
+   ],
+   "example": "joinRoom(rmk0gedjlik8d83) gave up 「房主没有回应」 although the host had written guestId=me at 63.8s"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:host-reopened-my-seat",
+   "inv": "I6",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    523
+   ],
+   "example": "joinRoom(rmk0geso8d5bmcb) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I4:score-vs-rounds:claim-failed:session",
+   "inv": "I4",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    534
+   ],
+   "example": "rmk0gedtpogxc25 word 2: P2 spelled it right; round doc {\"winner\":\"host\",\"by\":\"k0x534\",\"at\":1767574843709.6113} ⇒ 80 points, the UI scored 0 (claimRound FAILED kind=session)"
+  },
+  {
+   "sig": "I4:score-vs-rounds:own-win-doc-landed-but-scored-0:network",
+   "inv": "I4",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    580
+   ],
+   "example": "rmk0gedmyq5anhh word 2: P2 spelled it right; round doc {\"winner\":\"guest\",\"by\":\"k2x580\",\"at\":1767574847259.643} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=network)"
+  },
+  {
+   "sig": "I3:skip-beat-correct-answer:BC",
+   "inv": "I3",
+   "sev": "low",
+   "count": 24,
+   "seeds": [
+    35,
+    60,
+    101,
+    143,
+    220,
+    245,
+    261,
+    267,
+    276,
+    277,
+    346,
+    374
+   ],
+   "example": "word 3: P0 spelled it right 4.7s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:findByCode",
+   "inv": "I6",
+   "sev": "low",
+   "count": 16,
+   "seeds": [
+    7,
+    51,
+    94,
+    133,
+    158,
+    161,
+    192,
+    208,
+    244,
+    395,
+    402,
+    445
+   ],
+   "example": "findByCode(NJMA) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I6:ack-timeout-host-alive",
+   "inv": "I6",
+   "sev": "low",
+   "count": 5,
+   "seeds": [
+    111,
+    142,
+    164,
+    204,
+    391
+   ],
+   "example": "joinRoom(rmk0gf0anipub9y) 「房主没有回应」 while host P2 was online and waiting"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:room-holds-my-own-key",
+   "inv": "I6",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    471,
+    582
+   ],
+   "example": "joinRoom(rmk0gedsc0l4lby) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  }
+ ],
+ "minimal": []
+}

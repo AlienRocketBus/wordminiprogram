@@ -1,0 +1,4 @@
+① after one 15 s refresh while typing: {"sameNode":false,"value":"2","focused":true,"blurEventsOnOldInput":1}
+② button while add in flight: before refresh {"text":"添加中…","disabled":true}  after refresh {"text":"加好友","disabled":false}
+② add requests sent while the first was still pending: 2 (pending in hold: 2)
+② friend rows A→B in DB after release: 2

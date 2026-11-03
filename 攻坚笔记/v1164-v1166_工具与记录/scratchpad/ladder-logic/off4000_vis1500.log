@@ -1,0 +1,31 @@
++  9890ms A clicks 开始排位
++  9907ms P1 LISTOPEN -> []
++ 12415ms P1 LISTOPEN -> []
++ 13910ms B clicks 开始排位
++ 13923ms P2 LISTOPEN -> []
++ 13931ms A screen: × ⚡ 正在找对手… 🔍 正在找 900 ~ 1100 分的对手 已等 3 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯
++ 13931ms B screen: × ⚡ 正在找对手… 🔍 正在找 900 ~ 1100 分的对手 已等 0 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯
++ 14920ms P1 LISTOPEN -> []
++ 16429ms P2 LISTOPEN -> []
++ 17426ms P1 LISTOPEN -> []
++ 18934ms P2 LISTOPEN -> []
++ 19931ms P1 LISTOPEN -> []
++ 21438ms P2 LISTOPEN -> []
++ 22437ms P1 LISTOPEN -> []
++ 23944ms P2 LISTOPEN -> []
++ 24943ms P1 LISTOPEN -> []
++ 26451ms P2 LISTOPEN -> []
++ 27449ms P1 LISTOPEN -> []
++ 28979ms P2 LISTOPEN -> []
++ 29958ms P1 LISTOPEN -> []
++ 29969ms P1 ADD rmw0dkdm41euqlx mode=A rating=1000
++ 30174ms A screen: ← 关掉房间 ⏳ 等对手进来 ⏳ 已等 0 秒 房间已经开好了，别人在列表里就能看到你。 等人进来就自动开打。 你开的是 ⚡抢答赛 · 10 个词 （关掉这一页，房间也会一起关掉）
++ 31493ms P2 LISTOPEN -> [rmw0dkdm41euqlx(P1)]
++ 31504ms P2 CLAIM rmw0dkdm41euqlx OK
++ 31590ms B screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 20s 演员 a _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k 
++ 32296ms A screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 20s 演员 a _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k 
++ 42881ms B screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 9s 演员 a _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l
++ 43588ms A screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 9s 演员 a _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l
++ 44293ms rooms in store: [{"id":"rmw0dkdm41euqlx","host":"P1","guest":"P2","status":"playing","round":0,"hs":null,"gs":null}]
++ 44293ms records A={"total":0,"rating":1000,"pg":0} B={"total":0,"rating":1000,"pg":0}
++ 44293ms pageerrors A=[] B=[]

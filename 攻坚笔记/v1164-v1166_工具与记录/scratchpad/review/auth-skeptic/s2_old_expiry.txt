@@ -1,0 +1,35 @@
+{
+  "ver": "v1163",
+  "case": "expiry",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "beforeIsland": {
+    "overlay": null,
+    "state": {
+      "url": "blank",
+      "frameHasAuth": false,
+      "signed": true,
+      "uid": "1527283253218073236",
+      "frameText": ""
+    }
+  },
+  "overlayAfterMs": null,
+  "overlay": null,
+  "after": {
+    "url": "/island_food.html",
+    "frameHasAuth": true,
+    "signed": true,
+    "uid": "1527283253218073236",
+    "frameText": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 食物大冒险 FOOD ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 \ud83c"
+  },
+  "topScreen": "跳过 🎯 欢迎来到单词大冒险！ 这里用打 Boss 的方式背单词—— 答对题目就能击败怪兽，越打越强！ 下一步 →",
+  "tokenCalls": [
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ],
+  "errors": []
+}

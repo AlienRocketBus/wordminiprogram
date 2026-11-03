@@ -1,0 +1,1 @@
+explore progress API v945: canonical batch/fail-closed + Land alias + cumulative pet thresholds ✅

@@ -1,0 +1,161 @@
+{
+ "correct": {
+  "island": "school",
+  "word": "bag",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "homeScreen",
+   "lock": true,
+   "typeActive": true,
+   "menu": false
+  },
+  "after_2_8s": {
+   "scr": "homeScreen",
+   "lock": true,
+   "pos": "fixed",
+   "typeActive": true,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "",
+   "sp": [
+    {
+     "t": "bag",
+     "ms": 6257,
+     "scr": "typingScreen"
+    },
+    {
+     "t": "art",
+     "ms": 9533,
+     "scr": "homeScreen"
+    }
+   ],
+   "scrollY": 0
+  },
+  "swipeScroll": {
+   "before": 0,
+   "after": 0
+  },
+  "errors": []
+ },
+ "wrong": {
+  "island": "school",
+  "word": "desk",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "homeScreen",
+   "lock": false,
+   "typeActive": false,
+   "menu": false
+  },
+  "after_2_8s": {
+   "scr": "homeScreen",
+   "lock": true,
+   "pos": "fixed",
+   "typeActive": true,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "",
+   "sp": [
+    {
+     "t": "desk",
+     "ms": 5729,
+     "scr": "typingScreen"
+    },
+    {
+     "t": "math",
+     "ms": 8797,
+     "scr": "homeScreen"
+    }
+   ],
+   "scrollY": 0
+  },
+  "swipeScroll": {
+   "before": 0,
+   "after": 0
+  },
+  "errors": []
+ },
+ "menu": {
+  "island": "school",
+  "word": "book",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "typingScreen",
+   "lock": false,
+   "typeActive": false,
+   "menu": true
+  },
+  "after_2_8s": {
+   "scr": "typingScreen",
+   "lock": true,
+   "pos": "fixed",
+   "typeActive": true,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "none",
+   "sp": [
+    {
+     "t": "book",
+     "ms": 5844,
+     "scr": "typingScreen"
+    },
+    {
+     "t": "map",
+     "ms": 7661,
+     "scr": "typingScreen"
+    }
+   ],
+   "scrollY": 0
+  },
+  "swipeScroll": {
+   "before": 0,
+   "after": 0
+  },
+  "errors": []
+ },
+ "control": {
+  "island": "school",
+  "word": "map",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "homeScreen",
+   "lock": false,
+   "typeActive": false,
+   "menu": false
+  },
+  "after_2_8s": {
+   "scr": "homeScreen",
+   "lock": false,
+   "pos": "static",
+   "typeActive": false,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "",
+   "sp": [
+    {
+     "t": "map",
+     "ms": 6166,
+     "scr": "typingScreen"
+    }
+   ],
+   "scrollY": 283
+  },
+  "swipeScroll": {
+   "before": 283,
+   "after": 283
+  },
+  "errors": []
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "learning": [
+  371510,
+  308673
+ ],
+ "web_platform_plumbing": [
+  191823,
+  116488
+ ],
+ "economy": [
+  364272,
+  304123
+ ],
+ "cloud_account_backup": [
+  316318,
+  199418
+ ],
+ "collections": [
+  628936,
+  511809
+ ],
+ "boss_fx": [
+  1498181,
+  1279713
+ ],
+ "spellbee_pk_ladder": [
+  347605,
+  199962
+ ],
+ "data": [
+  357977,
+  356542
+ ],
+ "vendor": [
+  916285,
+  916285
+ ],
+ "inline:template.html": [
+  447444,
+  447444
+ ],
+ "inline:index.html": [
+  35106,
+  21679
+ ],
+ "inline:spelling_bee.html": [
+  528576,
+  514587
+ ],
+ "inline:spelling_pk.html": [
+  21913,
+  14405
+ ],
+ "inline:boss_hall.html": [
+  26126,
+  21791
+ ],
+ "inline:season_showcase.html": [
+  24066,
+  21188
+ ],
+ "inline:land_map.html": [
+  678540,
+  677595
+ ]
+}

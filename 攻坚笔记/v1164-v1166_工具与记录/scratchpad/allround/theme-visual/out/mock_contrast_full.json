@@ -1,0 +1,395 @@
+{
+ "home_cosmos": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "island_cosmos": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_q_cosmos": {
+  "summary": {
+   "n": 16,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 6.97,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_right_cosmos_action": {
+  "particles": 15
+ },
+ "answer_right_cosmos": {
+  "summary": {
+   "n": 21,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.93,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_wrong_cosmos": {
+  "summary": {
+   "n": 23,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.93,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "chest_cosmos": {
+  "summary": {
+   "n": 11,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 8.43,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "chestopen_cosmos_action": {
+  "particles": 25
+ },
+ "chestopen_cosmos": {
+  "summary": {
+   "n": 17,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 8.43,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "result_cosmos_action": {
+  "particles": 41
+ },
+ "result_cosmos": {
+  "summary": {
+   "n": 33,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.6,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_cloud": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "island_cloud": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_q_cloud": {
+  "summary": {
+   "n": 16,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 7.5,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_right_cloud_action": {
+  "particles": 15
+ },
+ "answer_right_cloud": {
+  "summary": {
+   "n": 21,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.68,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "answer_wrong_cloud": {
+  "summary": {
+   "n": 23,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.68,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "chest_cloud": {
+  "summary": {
+   "n": 11,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 8.3,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "chestopen_cloud_action": {
+  "particles": 25
+ },
+ "chestopen_cloud": {
+  "summary": {
+   "n": 17,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 8.3,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "result_cloud_action": {
+  "particles": 40
+ },
+ "result_cloud": {
+  "summary": {
+   "n": 33,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 6.57,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_lantern": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "island_lantern": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_snow": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "island_snow": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_kidsday": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "island_kidsday": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_violet": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_sakura": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "home_mint": {
+  "summary": {
+   "n": 30,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 4.7,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Baloo2",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ }
+}

@@ -1,0 +1,28 @@
+
+▶ 常规岛（island_animal.html）
+  ✅ A 答错 → 错题本 +1
+  ❌ A 答错当场进计划：盒0、今天到期 null
+  ❌ A 计划同时写进权威账本 null
+  ✅ A 今日复习数到它 (due=1)
+  ✅ B 当天答对 → 错题本清掉（允许）
+  ❌ B 计划还在：盒1、2 天后再见 {"box":0,"due":"2026-11-03","last":""}
+  ❌ B 权威账本也是盒1 null
+  ✅ B 今天不再到期（间隔开始生效）
+  ❌ B 刷新后计划仍在（错题本仍空）null
+  ✅ C 错题本是空的
+  ❌ C 到期那天今日复习照样数到它 (count=0)
+  ❌ C 首页横幅口径（canonical 全局到期）也数到它 (localDue=0)
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: HansenWrongOverview._open is not a function
+    at eval (eval at evaluate (:311:30), <anonymous>:6:81)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at scenario (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/rev/base_main/test_srs_plan_v1165.mjs:113:25)
+    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/rev/base_main/test_srs_plan_v1165.mjs:210:3 {
+  log: []
+}
+
+Node.js v22.23.4

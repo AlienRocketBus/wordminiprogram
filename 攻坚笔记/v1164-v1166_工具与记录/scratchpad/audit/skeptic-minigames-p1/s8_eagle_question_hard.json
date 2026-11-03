@@ -1,0 +1,51 @@
+{
+ "allRounds": 20,
+ "phraseRounds": 20,
+ "found": [
+  {
+   "target": "how much",
+   "twinRaw": "\"how  much\"",
+   "cells": [
+    "ho wmuch",
+    "how much",
+    "how mush",
+    "how much",
+    "huw much",
+    "how muuch",
+    "hoow much",
+    "how mcuh",
+    "hwo much"
+   ]
+  },
+  {
+   "target": "how many",
+   "twinRaw": "\"how  many\"",
+   "cells": [
+    "hw many",
+    "how many",
+    "how nany",
+    "ho wmany",
+    "huw many",
+    "how mmany",
+    "how many",
+    "how man",
+    "how mnay"
+   ]
+  },
+  {
+   "target": "how much",
+   "twinRaw": "\"how  much\"",
+   "cells": [
+    "how mmuch",
+    "howm uch",
+    "how much",
+    "howmuch",
+    "hoow much",
+    "how mukh",
+    "how muhc",
+    "how much",
+    "now much"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+=== clean 16:44:53
+    rc=0 SUMMARY profile=clean runs=200 seeds=1..200 failing_runs=0 clusters=2 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:2 I4:0 I5:0 I6:10 I7:0 I8:0 I9:0 I10:0 | matches=227 settled_pairs=221 virtual=23.9h events=364780 real=28s
+=== ci 16:45:21
+    rc=1 SUMMARY profile=ci runs=400 seeds=1..400 failing_runs=85 clusters=80 (fail-level 58) | runs-with-violation per invariant: ERR:0 I1:0 I2:12 I3:41 I4:17 I5:19 I6:53 I7:4 I8:24 I9:60 I10:7 | matches=386 settled_pairs=331 virtual=53.9h events=816635 real=38s
+=== lag 16:45:59
+    rc=1 SUMMARY profile=lag runs=600 seeds=1..600 failing_runs=30 clusters=26 (fail-level 16) | runs-with-violation per invariant: ERR:0 I1:2 I2:2 I3:17 I4:4 I5:8 I6:38 I7:0 I8:0 I9:0 I10:0 | matches=623 settled_pairs=563 virtual=73.8h events=1062965 real=25s
+=== faults 16:46:24
+    rc=1 SUMMARY profile=faults runs=600 seeds=1..600 failing_runs=50 clusters=24 (fail-level 15) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:40 I4:8 I5:11 I6:50 I7:0 I8:0 I9:7 I10:0 | matches=632 settled_pairs=554 virtual=74.9h events=1100114 real=29s
+=== skew 16:46:53
+    rc=1 SUMMARY profile=skew runs=600 seeds=1..600 failing_runs=122 clusters=57 (fail-level 40) | runs-with-violation per invariant: ERR:0 I1:1 I2:1 I3:51 I4:20 I5:24 I6:59 I7:0 I8:0 I9:132 I10:22 | matches=464 settled_pairs=419 virtual=78.5h events=1029248 real=55s
+=== ladder 16:47:48
+    rc=1 SUMMARY profile=ladder runs=600 seeds=1..600 failing_runs=150 clusters=77 (fail-level 60) | runs-with-violation per invariant: ERR:0 I1:1 I2:33 I3:95 I4:25 I5:58 I6:30 I7:11 I8:44 I9:110 I10:19 | matches=748 settled_pairs=609 virtual=103.0h events=2286642 real=105s
+=== adversary 16:49:33

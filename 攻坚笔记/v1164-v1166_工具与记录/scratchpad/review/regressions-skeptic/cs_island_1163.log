@@ -1,0 +1,7 @@
+login true
+first explicit sync {"ok":true,"bytes":36324}
+frames 7 frames with HansenCloudSave 3
+A) idle 20 s, no data change: uploads 5 reads 0
+B) same value rewritten every 2 s for 60 s (+9 s tail): uploads 16 reads 0 | hsn-data-changed events by frame: {"/island_animal.html":39,"/island_season.html":17}
+C) one backgrounding (nothing changed): uploads 9
+errors none

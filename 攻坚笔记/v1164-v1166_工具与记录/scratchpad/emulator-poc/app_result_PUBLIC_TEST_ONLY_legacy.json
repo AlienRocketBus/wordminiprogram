@@ -1,0 +1,286 @@
+{
+  "roomsAcl": "PUBLIC_TEST_ONLY",
+  "mode": "legacy",
+  "A_login": {
+    "login": {
+      "ok": true,
+      "x": {
+        "ok": true,
+        "uid": "1413817086540188137",
+        "cid": 1,
+        "pendingId": false,
+        "sync": {
+          "ok": true,
+          "action": "nothing-to-sync"
+        }
+      }
+    },
+    "session": {
+      "ok": true,
+      "uid": "1413817086540188137",
+      "tries": 1
+    },
+    "local": {
+      "method": "password",
+      "username": "alice_poc",
+      "signedAt": 1793692695725,
+      "uid": "1413817086540188137"
+    }
+  },
+  "A_create": {
+    "ok": true,
+    "roomId": "rmw0ebi42ttb203",
+    "room": {
+      "_id": "rmw0ebi42ttb203",
+      "status": "open",
+      "code": "",
+      "hostRating": 1000,
+      "isPrivate": false,
+      "hostId": "alice_poc",
+      "hostName": "无名蜂",
+      "hostTier": "",
+      "guestId": "",
+      "guestName": "",
+      "seed": 3220349949,
+      "wordCount": 10,
+      "createdAt": 1793692696178,
+      "heartbeatAt": 1793692696178,
+      "hostBeat": 1793692696178,
+      "guestBeat": 0,
+      "hostScore": null,
+      "guestScore": null,
+      "mode": "A",
+      "askMode": "cn",
+      "round": 0,
+      "roundAt": 0,
+      "winners": [],
+      "hostReady": false,
+      "guestReady": false
+    },
+    "words": [
+      {
+        "en": "sky",
+        "cn": "天空",
+        "pn": "/skaɪ/"
+      },
+      {
+        "en": "police",
+        "cn": "警察",
+        "pn": "/pəˈliːs/"
+      },
+      {
+        "en": "tall",
+        "cn": "高的",
+        "pn": "/tɔːl/"
+      },
+      {
+        "en": "Saturday",
+        "cn": "星期六",
+        "pn": "/ˈsætədeɪ/"
+      },
+      {
+        "en": "jeans",
+        "cn": "牛仔裤",
+        "pn": "/dʒiːnz/"
+      },
+      {
+        "en": "knee",
+        "cn": "膝盖",
+        "pn": "/niː/"
+      },
+      {
+        "en": "cake",
+        "cn": "蛋糕",
+        "pn": "/keɪk/"
+      },
+      {
+        "en": "duck",
+        "cn": "鸭子",
+        "pn": "/dʌk/"
+      },
+      {
+        "en": "dancing",
+        "cn": "跳舞",
+        "pn": "/ˈdɑːnsɪŋ/"
+      },
+      {
+        "en": "van",
+        "cn": "面包车",
+        "pn": "/væn/"
+      }
+    ]
+  },
+  "rooms_in_emulator": [
+    {
+      "_id": "rmw0ebi42ttb203",
+      "status": "open",
+      "mode": "A",
+      "hostId": "alice_poc",
+      "guestId": "",
+      "_openid": "1413817086540188137",
+      "keys": 26
+    }
+  ],
+  "B_login": {
+    "login": {
+      "ok": true,
+      "x": {
+        "ok": true,
+        "uid": "1701680553610173459",
+        "cid": 2,
+        "pendingId": false,
+        "sync": {
+          "ok": true,
+          "action": "nothing-to-sync"
+        }
+      }
+    },
+    "session": {
+      "ok": true,
+      "uid": "1701680553610173459",
+      "tries": 1
+    },
+    "local": {
+      "method": "password",
+      "username": "bob_poc",
+      "signedAt": 1793692698155,
+      "uid": "1701680553610173459"
+    }
+  },
+  "B_list": {
+    "ok": true,
+    "rooms": [
+      {
+        "id": "rmw0ebi42ttb203",
+        "hostName": "无名蜂",
+        "hostTier": "",
+        "wordCount": 10,
+        "mine": false,
+        "ageSec": 3,
+        "_id": "rmw0ebi42ttb203",
+        "mode": "A",
+        "hostRating": 1000
+      }
+    ]
+  },
+  "B_join": {
+    "ok": true,
+    "roomId": "rmw0ebi42ttb203",
+    "room": {
+      "_id": "rmw0ebi42ttb203",
+      "status": "playing",
+      "code": "",
+      "hostRating": 1000,
+      "isPrivate": false,
+      "hostId": "alice_poc",
+      "hostName": "无名蜂",
+      "hostTier": "",
+      "guestId": "bob_poc",
+      "guestName": "无名蜂",
+      "seed": 3220349949,
+      "wordCount": 10,
+      "createdAt": 1793692696178,
+      "heartbeatAt": 1793692696178,
+      "hostBeat": 1793692696178,
+      "guestBeat": 0,
+      "hostScore": null,
+      "guestScore": null,
+      "mode": "A",
+      "askMode": "cn",
+      "round": 0,
+      "roundAt": 0,
+      "winners": [],
+      "hostReady": false,
+      "guestReady": false,
+      "_openid": "1413817086540188137",
+      "startedAt": 1793692698758
+    },
+    "words": [
+      {
+        "en": "sky",
+        "cn": "天空",
+        "pn": "/skaɪ/"
+      },
+      {
+        "en": "police",
+        "cn": "警察",
+        "pn": "/pəˈliːs/"
+      },
+      {
+        "en": "tall",
+        "cn": "高的",
+        "pn": "/tɔːl/"
+      },
+      {
+        "en": "Saturday",
+        "cn": "星期六",
+        "pn": "/ˈsætədeɪ/"
+      },
+      {
+        "en": "jeans",
+        "cn": "牛仔裤",
+        "pn": "/dʒiːnz/"
+      },
+      {
+        "en": "knee",
+        "cn": "膝盖",
+        "pn": "/niː/"
+      },
+      {
+        "en": "cake",
+        "cn": "蛋糕",
+        "pn": "/keɪk/"
+      },
+      {
+        "en": "duck",
+        "cn": "鸭子",
+        "pn": "/dʌk/"
+      },
+      {
+        "en": "dancing",
+        "cn": "跳舞",
+        "pn": "/ˈdɑːnsɪŋ/"
+      },
+      {
+        "en": "van",
+        "cn": "面包车",
+        "pn": "/væn/"
+      }
+    ]
+  },
+  "room_after_join": [
+    {
+      "status": "playing",
+      "guestId": "bob_poc",
+      "guestBeat": 0
+    }
+  ],
+  "B_trace": [
+    "+  157ms  结论  ✅ 有效 uid=1701680553610173459（第 1 次探到）",
+    "+  205ms  ensureSession 开始  isSignedIn=true",
+    "+  205ms  本地登录记录  method=password 距登录=1秒",
+    "+  205ms  SDK 凭证键  2 个 → credentials_ambitious-d0g1d26xm740dc3d6(759字节)  hansen_auth_v1004(95字节)",
+    "+  205ms  探测#1  类型=object 键=[cache,oauthInstance,user] uid=1701680553610173459",
+    "+  205ms  结论  ✅ 有效 uid=1701680553610173459（第 1 次探到）"
+  ],
+  "unrouted": [],
+  "endpoints": [
+    "POST /auth/v1/signin",
+    "GET /auth/v1/user/me",
+    "POST /web database.queryDocument sb_profile",
+    "POST /web database.updateDocument sb_profile",
+    "POST /web database.countDocument sb_profile",
+    "POST /web database.queryDocument hansen_saves",
+    "POST /web database.addDocument hansen_pk_rooms",
+    "POST /web database.queryDocument hansen_pk_rooms",
+    "POST /web database.updateDocument hansen_pk_rooms"
+  ],
+  "dbErrorsReturned": [
+    "database.queryDocument hansen_pk_rooms -> undefined",
+    "database.queryDocument hansen_pk_rooms -> undefined"
+  ],
+  "deniedWrites": [
+    "database.updateDocument sb_profile q={\"_id\":\"1413817086540188137\"} -> 0",
+    "database.updateDocument sb_profile q={\"_id\":\"1701680553610173459\"} -> 0"
+  ]
+}

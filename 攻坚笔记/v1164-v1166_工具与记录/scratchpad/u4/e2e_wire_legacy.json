@@ -1,0 +1,827 @@
+[
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"03480b72b2fdc5f8\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"data\":{\"updated\":0,\"upserted_id\":\"1998508766540243070\"},\"requestId\":\"915993b114fb98b8\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"data\":{\"list\":[{\"uid\":\"1998508766540243070\",\"name\":\"\",\"cid\":0,\"createdAt\":{\"$date\":{\"offset\":0}},\"updatedAt\":{\"$date\":{\"offset\":0}},\"_id\":\"1998508766540243070\",\"_openid\":\"1998508766540243070\"}],\"lim"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "createdAt": {
+    "$lt": {
+     "$date": null
+    }
+   }
+  },
+  "r": "{\"data\":{\"total\":0},\"requestId\":\"e762f314938b661e\"}"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "cid": 1
+  },
+  "r": "{\"data\":{\"total\":0},\"requestId\":\"91525b91167969fe\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"f81a5bda5840ebe5\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "276f1efc2562a3d35a54cd4596b41457503a76d064d873cfe37b94a39413c1cb"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"e55613168b452d46\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "276f1efc2562a3d35a54cd4596b41457503a76d064d873cfe37b94a39413c1cb"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"f166a7bf07fe7796\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"9dcbecc6f9402a3f\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 1
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"adb9ffe890fc2a50\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"updated\":0,\"upserted_id\":\"1073797816452166595\"},\"requestId\":\"620d4b65f0ecfbb9\"}"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friends",
+  "r": "{\"data\":{\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\"},\"requestId\":\"a1870f8ccc39b2e3\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"list\":[{\"uid\":\"1073797816452166595\",\"name\":\"\",\"cid\":0,\"createdAt\":{\"$date\":{\"offset\":0}},\"updatedAt\":{\"$date\":{\"offset\":0}},\"_id\":\"1073797816452166595\",\"_openid\":\"1073797816452166595\"}],\"lim"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "11fe6bd639426f5b99a1763c4f3631b4"
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700524157,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"340ad1d7f37d9"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "createdAt": {
+    "$lt": {
+     "$date": null
+    }
+   }
+  },
+  "r": "{\"data\":{\"total\":0},\"requestId\":\"1b50aca3f7a53611\"}"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "cid": 1
+  },
+  "r": "{\"data\":{\"total\":1},\"requestId\":\"93f685d23c929ccb\"}"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "createdAt": {
+    "$lt": {
+     "$date": null
+    }
+   }
+  },
+  "r": "{\"data\":{\"total\":0},\"requestId\":\"715aac0c33c8b484\"}"
+ },
+ {
+  "a": "database.countDocument",
+  "c": "sb_profile",
+  "q": {
+   "cid": 2
+  },
+  "r": "{\"data\":{\"total\":0},\"requestId\":\"7536fe0189b96d7d\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"0a909e40a51c00bf\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"bf2edfac0bc0c3a6\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"f7c3749385bcbfc0\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "276f1efc2562a3d35a54cd4596b41457503a76d064d873cfe37b94a39413c1cb"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"5a99999235aad95b\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "r": "{\"data\":{\"list\":[{\"uid\":\"1998508766540243070\",\"name\":\"\",\"cid\":1,\"createdAt\":{\"$date\":{\"offset\":0}},\"updatedAt\":{\"$date\":{\"offset\":0}},\"_id\":\"1998508766540243070\",\"_openid\":\"1998508766540243070\"},{\"uid"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "276f1efc2562a3d35a54cd4596b41457503a76d064d873cfe37b94a39413c1cb"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"6123352999ba75c0\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700524157,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"b1fb7a4b51708"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "11fe6bd639426f5b99a1763c4f3631b4"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"9f32e8f1b518248f\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"3f85a5650b2134b0\"}"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friends",
+  "r": "{\"data\":{\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\"},\"requestId\":\"f1cc7be69daadb5a\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "9f56d914d3af2739b57f65de8f1020fc"
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525101,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"3faaed3adf262"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"396b0d7821ad46ab\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525101,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"cc85614ef06a8"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "9f56d914d3af2739b57f65de8f1020fc"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"f40a44dd1af28667\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1,
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"1c32f572a40591cb\"}"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friends",
+  "r": "{\"data\":{\"_id\":\"a58603baf208341070bca23137b13819\"},\"requestId\":\"4452f23c4b2e4c1b\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2,
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"35e43dec54a1f90e\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"323eb4b36716d24b\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"e8"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     1
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700525013,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":300,\"offset\":0},\"requestId\":\"49ddd2174f49a"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"ba083e82872093c0\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700525013,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"aa3b0798b764d"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2,
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"36aa71665aa97889\"}"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friends",
+  "r": "{\"data\":{\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\"},\"requestId\":\"5655193308c0fa66\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1,
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"5d"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"df"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"f5"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     2
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525267,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":300,\"offset\":0},\"requestId\":\"f763e851840ce"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"cf"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"18"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     1
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700525013,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":300,\"offset\":0},\"requestId\":\"b1c4e9e65dcb5"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friend_msgs",
+  "r": "{\"data\":{\"_id\":\"abd0d109d535e5045d1007b9e57124da\"},\"requestId\":\"d9cd7fd24a414711\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "from": 2,
+   "at": {
+    "$lt": 1793095725976
+   }
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":20,\"offset\":0},\"requestId\":\"f86c7a3ab7aa796e\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"from\":2,\"fromName\":\"小博\",\"to\":1,\"fromOpenid\":\"1073797816452166595\",\"qid\":\"pk\",\"at\":1793700525935,\"read\":false,\"_id\":\"abd0d109d535e5045d1007b9e57124da\",\"_openid\":\"1073797816452166595\""
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"7b"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"f5"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     2
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525267,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":300,\"offset\":0},\"requestId\":\"98c3b26837ba9"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"from\":2,\"fromName\":\"小博\",\"to\":1,\"fromOpenid\":\"1073797816452166595\",\"qid\":\"pk\",\"at\":1793700525935,\"read\":false,\"_id\":\"abd0d109d535e5045d1007b9e57124da\",\"_openid\":\"1073797816452166595\""
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "11fe6bd639426f5b99a1763c4f3631b4"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"c7876081ca35b031\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"68"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"68"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     2
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525267,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":300,\"offset\":0},\"requestId\":\"5d5cb1e6a8667"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"from\":2,\"fromName\":\"小博\",\"to\":1,\"fromOpenid\":\"1073797816452166595\",\"qid\":\"pk\",\"at\":1793700525935,\"read\":false,\"_id\":\"abd0d109d535e5045d1007b9e57124da\",\"_openid\":\"1073797816452166595\""
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1,
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":1,\"friend\":2,\"name\":\"小博\",\"at\":1793700525320,\"_id\":\"a58603baf208341070bca23137b13819\",\"_openid\":\"1998508766540243070\"}],\"limit\":100,\"offset\":0},\"requestId\":\"4e"
+ },
+ {
+  "a": "database.deleteDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "a58603baf208341070bca23137b13819"
+  },
+  "r": "{\"data\":{\"deleted\":1},\"requestId\":\"90cc0d1d0788e467\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"72"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"38e1674728ba2e1d\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     1
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":1,\"name\":\"小爱\",\"at\":1793700527775,\"_id\":\"11fe6bd639426f5b99a1763c4f3631b4\",\"_openid\":\"1998508766540243070\"}],\"limit\":300,\"offset\":0},\"requestId\":\"ef6daa9ac6b81"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"8297993695f562ff\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"friend\",\"owner\":2,\"friend\":1,\"name\":\"小爱\",\"at\":1793700525647,\"_id\":\"79f9ee8f5f811d0ec225b24cc8e928ee\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"74"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": {
+    "$in": [
+     2
+    ]
+   }
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700525267,\"_id\":\"9f56d914d3af2739b57f65de8f1020fc\",\"_openid\":\"1073797816452166595\"}],\"limit\":300,\"offset\":0},\"requestId\":\"4b69ebbff6c40"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friend_msgs",
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs\",\"requestId"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs\",\"requestId"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs\",\"requestId"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friends\",\"requestId\":\"9"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friends\",\"requestId\":\"c"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friends\",\"requestId\":\"2"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 1
+  },
+  "r": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friends\",\"requestId\":\"0"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"cedad5e0704e7899\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"769f37223b7d951c\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "r": "{\"data\":{\"list\":[{\"uid\":\"1998508766540243070\",\"name\":\"小爱\",\"cid\":1,\"createdAt\":{\"$date\":{\"offset\":0}},\"updatedAt\":{\"$date\":{\"offset\":0}},\"_id\":\"1998508766540243070\",\"_openid\":\"1998508766540243070\",\"lad"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1998508766540243070"
+  },
+  "r": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "r": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "q": {
+   "ladderRating": {
+    "$gt": 0
+   }
+  },
+  "r": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"0c51b30b29320851\"}"
+ },
+ {
+  "a": "database.updateDocument",
+  "c": "sb_profile",
+  "q": {
+   "_id": "1073797816452166595"
+  },
+  "r": "{\"data\":{\"updated\":1},\"requestId\":\"dcae8c0bc8dd2bb8\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"d92589efeca1b3b6\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "sb_profile",
+  "r": "{\"data\":{\"list\":[{\"uid\":\"1998508766540243070\",\"name\":\"小爱\",\"cid\":1,\"createdAt\":{\"$date\":{\"offset\":0}},\"updatedAt\":{\"$date\":{\"offset\":0}},\"_id\":\"1998508766540243070\",\"_openid\":\"1998508766540243070\",\"lad"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"fdb650b3b632c9ae\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"5347c363a3f42b5f\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "presence",
+   "cid": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"e337c1a0d1a1b673\"}"
+ },
+ {
+  "a": "database.addDocument",
+  "c": "hansen_friends",
+  "r": "{\"data\":{\"_id\":\"0811fa6e3626ba5c1ac60442a5199e88\"},\"requestId\":\"dc32ce215a3b4a5b\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "_id": "0811fa6e3626ba5c1ac60442a5199e88"
+  },
+  "r": "{\"data\":{\"list\":[{\"kind\":\"presence\",\"cid\":2,\"name\":\"小博\",\"at\":1793700544543,\"_id\":\"0811fa6e3626ba5c1ac60442a5199e88\",\"_openid\":\"1073797816452166595\"}],\"limit\":100,\"offset\":0},\"requestId\":\"408ed7e588ae7"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "owner": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"787d6f02c3b67dcb\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friends",
+  "q": {
+   "kind": "friend",
+   "friend": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"10b81e4f86bb03d6\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_friend_msgs",
+  "q": {
+   "to": 2
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":50,\"offset\":0},\"requestId\":\"ae01d468d09aaddb\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"268cce51556a89c8\"}"
+ },
+ {
+  "a": "database.queryDocument",
+  "c": "hansen_saves",
+  "q": {
+   "_id": "2b1bfdd4c7600dc92b453cf7300b93f3691b12e62a608e513713e18d16605c1f"
+  },
+  "r": "{\"data\":{\"list\":[],\"limit\":1,\"offset\":0},\"requestId\":\"9605f4051e27a9ba\"}"
+ }
+]

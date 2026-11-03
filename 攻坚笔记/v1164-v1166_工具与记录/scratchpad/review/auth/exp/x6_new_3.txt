@@ -1,0 +1,40 @@
+{
+  "root": "user/wordminiprogram",
+  "login": true,
+  "tab2first": {
+    "ok": true,
+    "kind": ""
+  },
+  "simultaneous": {
+    "tab1": {
+      "ok": true,
+      "kind": "",
+      "reason": ""
+    },
+    "tab2": {
+      "ok": false,
+      "kind": "expired",
+      "reason": "云端登录已过期：这台设备上的登录凭证没有了，请重新登录"
+    }
+  },
+  "after": {
+    "signed": false,
+    "tab1overlay": null,
+    "tab2overlay": null,
+    "tab1again": {
+      "ok": false,
+      "kind": "signin"
+    },
+    "tab2again": {
+      "ok": false,
+      "kind": "signin"
+    },
+    "creds": 0
+  },
+  "tab1db": "ok rows=1",
+  "tokenLog": [
+    "200",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ]
+}

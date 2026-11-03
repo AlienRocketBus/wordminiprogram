@@ -1,0 +1,14 @@
+{
+  "root": "user/wordminiprogram",
+  "login": true,
+  "beforeTop": null,
+  "overlayAfterMs": 3061,
+  "afterTop": {
+    "text": "🔄 别的窗口退出了登录 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+    "z": "2147483646",
+    "full": true
+  },
+  "afterIsland": null,
+  "signed": false,
+  "whatKidSees": "🔄 别的窗口退出了登录 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口"
+}

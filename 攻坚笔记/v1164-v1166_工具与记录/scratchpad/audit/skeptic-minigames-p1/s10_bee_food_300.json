@@ -1,0 +1,43 @@
+{
+ "island": "food",
+ "setup": {
+  "sub": "【食物岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+  "tip": "动物大冒险词库",
+  "mode": "listen",
+  "bot": "mid"
+ },
+ "word1": {
+  "len": 4,
+  "botCalls": 4,
+  "firstStepAfterShownMs": 1558,
+  "gaps": [
+   1168,
+   1328,
+   1021
+  ],
+  "finishedAfterMs": 5094
+ },
+ "word2": {
+  "len": 4,
+  "confirmShown": true,
+  "duringConfirm": {
+   "botProg": 0,
+   "paused": true,
+   "bs": 0
+  },
+  "botCalls": 4,
+  "stepsAfterResume": [
+   1047,
+   1198,
+   2211,
+   2593
+  ],
+  "gaps": [
+   151,
+   1013,
+   382
+  ],
+  "finishedAfterResumeMs": 2594
+ },
+ "errors": []
+}

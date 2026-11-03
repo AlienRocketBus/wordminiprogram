@@ -1,0 +1,6 @@
+home version state: null
+island visible after 673 ms
+could not start game: frame.$: Frame was detached
+game started: false | top navigations: [{"dtFromDeploy":-10422,"dtFromGameStart":-12581,"url":"index.html"},{"dtFromDeploy":149,"dtFromGameStart":-2010,"url":"index.html"},{"dtFromDeploy":1944,"dtFromGameStart":-215,"url":"index.html?_fresh=1793711733209"}]
+final state: {"wrap":"none","op":"","path":"blank","rs":"complete","hist":3,"state":"null","scrollY":0}
+VERSION requests: 4

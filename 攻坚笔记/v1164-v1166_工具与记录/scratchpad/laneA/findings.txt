@@ -1,0 +1,869 @@
+====================================================================================================
+confirmed INT-04
+{
+ "id": "INT-04",
+ "title": "Android/iOS back from any in-island screen or overlay (except spelling bee) exits the whole island to the home map",
+ "severity": "major",
+ "area": "index.html popstate handler / island screens (showScreen), PK screen, boss hall and showcase overlays",
+ "repro": "Open 动物 → tap any mode card (探索单词, 听音辨义, 记忆翻牌, 打字大师, 完形填空, 字母拼拼乐, 拼写大PK…) → press the phone's back button (history.back()).",
+ "observed": "The whole island closes to the home map, and the island stays hidden on that game screen (p18.out rows 0–5 and 7; for PK, hsn_pk_screen stays open inside the hidden island). Only the spelling bee overlay steps back correctly (row 6), because it pushes its own history entry.",
+ "expected": "Back goes one step: game → island home, overlay → closed. Only from the island home screen should back return to the map. That is how the spelling bee overlay and the in-game '← 返回' buttons already behave.",
+ "evidence": "Only hansen_spellbee.js:87 pushes history inside islands. index.html:4171-4174: popstate always calls _closeIslandNow(). The boss hall and showcase masks (hansen_cards.js:993-1016, hansen_season.js:707-745) and the PK screen register no back handling.",
+ "fix": "Add a back-handler stack in the island (window.__hsnBack = [] used by overlays, games and showScreen). In the index popstate handler: if the island is visible and the iframe reports something to close (active screen ≠ homeScreen or an overlay is open), let the iframe close it, re-push {hsnIsland:file} and return. Set a flag when the 🗺️ button starts the close so that path still closes directly.",
+ "dim": "integration-nav",
+ "verdict": "confirmed",
+ "vreason": "Reproduced (s04.out). Calling history.back() on the top window from 探索单词, 听音辨义, 记忆翻牌, 打字大师, 完形填空, 字母拼拼乐, 拼写大PK, 打地鼠, 极速60秒, 火眼金睛 or 抽卡 closes the whole island (wrap none, history.state null). The hidden island stays on that screen; for PK, hsn_pk_screen is still open. Tapping the card again shows the same game screen (first island, kept alive). Spelling bee is the exception: back closes only hsnSbOverlay, because hansen_spellbee.js:87 pushes its own entry. In the 2nd+ island, INT-01 then reloads the first island into the hidden frame, so the game is lost. This is a long-standing design gap rather than a regression, but phone back/swipe is the most common way children navigate in WeChat, so I keep major.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed INT-09
+{
+ "id": "INT-09",
+ "title": "Back button from a land island skips 单词大陆地图, while the 🗺️ button goes to the map",
+ "severity": "minor",
+ "area": "land_map.html goIsland → index openIsland (replaceState)",
+ "repro": "Home → 星海觉醒 bar → land_map → spot 1 → 进入学习 → island_land1 → press the phone's back button.",
+ "observed": "Returns straight to the home map (wrap none). The in-island 🗺️ button returns to land_map instead (p8.out).",
+ "expected": "Phone back and 🗺️ behave the same (land island → land map → home).",
+ "evidence": "index.html:4133-4142: switching islands inside the shell uses replaceState, so land_map has no history entry of its own. hansen_home_link.js:72-75 sends 🗺️ to land_map.",
+ "fix": "When opening island_landN from land_map, push a new entry instead of replacing it (or handle it in the INT-04 back stack: in a land island, back goes to openIsland('land_map.html')).",
+ "dim": "integration-nav",
+ "verdict": "confirmed",
+ "vreason": "Reproduced (s09.out). Home → 星海觉醒 bar → land_map → spot → 进入学习 → island_land1. Phone back goes straight home (wrap none), and INT-01 also restores the hidden iframe to land_map.html. The 🗺️ button instead goes to land_map (state hsnIsland:land_map.html), and land_map's 返回 then goes home. The two exits behave differently because land_map→island_land1 uses replaceState (index.html:4133-4142).",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed CB-03
+{
+ "id": "CB-03",
+ "title": "Phone back gesture during a mini-game hides the island but the game keeps running and keeps speaking words on the home page",
+ "severity": "major",
+ "area": "index.html island shell (_closeIslandNow / popstate) + template.html games",
+ "repro": "Home → open 动物岛 → 开始冒险 → start 打地鼠 (startMoles → easy). Press the phone/WeChat back button (top-level history.back). Stay on the home page and listen for 12 s.",
+ "observed": "islandFrameWrap is display:none and the home page is visible. The hidden iframe stays on molesScreen and plays dog.mp3 at +5.5 s and +11 s (audio play hook log). 极速60秒 likewise keeps its timer running while hidden.",
+ "expected": "Leaving the island (any path) stops the game timers and audio, as showScreen() does. The comment at index.html:4144 claims 「隐藏时不会响」.",
+ "evidence": "t5_hidden_game.mjs output (audio log grows 3→5 while wrap hidden). index.html:4146 _closeIslandNow only hides the wrap. showScreen (template.html, function showScreen) contains the stopMoles/stopSpeed/…/speechSynthesis.cancel cleanup, which is never called on this path.",
+ "fix": "In _closeIslandNow: `try{var w=document.getElementById('islandFrame').contentWindow; var a=w.document.querySelector('.screen.active'); if(a&&a.id!=='homeScreen'&&typeof w.showScreen==='function') w.showScreen('home'); if(w.speechSynthesis) w.speechSynthesis.cancel(); }catch(e){}`. Also fix the misleading comment.",
+ "dim": "code-bugs",
+ "verdict": "confirmed",
+ "vreason": "s09_hidden_game.mjs, all real taps: home card → 开始冒险 → 打地鼠 card → 简单, then a top-level history back (the phone back key). islandFrameWrap becomes display:none while the iframe stays on molesScreen with molesActive=true. cow.mp3 played at +2.3 s and +7.8 s. A 60-second run (s09b_hidden_long.mjs) logged 11 word plays, one every ~5.5 s, with the round stuck at 1 and lives full. The hidden round never ends, so a ghost voice keeps speaking on the home page. Island pages push no history entries of their own (only the spelling bee overlay does), so the back key always takes this _closeIslandNow path. The comment at index.html:4144 (「隐藏时不会响」) is false. The proposed fix is fine.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed INT-07
+{
+ "id": "INT-07",
+ "title": "The 60-second speed game (极速60秒) keeps counting down while the island is hidden on the home page",
+ "severity": "minor",
+ "area": "template.html speed game + index.html _closeIslandNow keep-alive",
+ "repro": "Open 动物 → 极速60秒 → 初级. After about 2 s press back (or 🗺️). Wait 10 s on home, then re-enter 动物 (forward or tap the card).",
+ "observed": "Timer 58 → 48 while the island was hidden; spActive stays true (p6.out). After about 60 s on home the round ends in the background. Other games stay frozen while hidden (p25.out).",
+ "expected": "A hidden island is paused, like the other games, or the round is stopped when leaving.",
+ "evidence": "template.html:6406 spTimer=setInterval runs regardless of visibility. _closeIslandNow (index.html:4146) only hides the wrapper; nothing pauses the island.",
+ "fix": "On close, call the iframe's stopSpeed() (or showScreen('home'), which stops all game timers). Better: send a 'hsn-island-hidden'/'hsn-island-shown' event that the speed game uses to pause and resume spTimer.",
+ "dim": "integration-nav",
+ "verdict": "confirmed",
+ "vreason": "Reproduced (s07.out). 极速60秒 初级, phone back after about 2 s: spTime went 58 → 47 during 10 s on home, with spActive true and the timer still running. After re-entry it continued at 46. Cause: template.html:6406 uses a plain setInterval, and the hidden iframe's visibilityState stays 'visible', so nothing pauses it.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed P2-01
+{
+ "id": "P2-01",
+ "title": "听音辨义 crashes on land3–8 (0 words in every level); land2 has only 3/2/5 words",
+ "severity": "blocker",
+ "area": "island_land1–8 / land_template.html · 听音辨义",
+ "repro": "Fresh user → home 星海觉醒 banner → land_map → tap ③时之钟谷 → 进入学习 → 开始冒险！ → tap 听音辨义 → tap 🌱 初级 (or 中级/高级)",
+ "observed": "All three levels show '📚 0 个单词'. Tapping one throws 'TypeError: Cannot read properties of undefined (reading \\'en\\')' at nextListenQ (island_land3.html:6351, called from startListenLevel :6340). The screen stays on the level menu, so the kid sees nothing happen. Reproduced at runtime on land3, land4, land5, land7, land8; land6 has 0/0/0 counts statically. On land2 the rounds are 3, 2 and 5 words.",
+ "expected": "Each land island's listen levels should be built from that island's 30 words, like every other island (season 80/80/80, sports 8/16/6).",
+ "evidence": "land_template.html:1906 and island_landN.html:1936–1945: LISTEN_LEVELS.words is hard-coded to land1's list (calm, eager, loyal… / comfort, curious… / reliable…); LISTEN_LEVEL_IDX filters these against allW, so the lists end up empty. generate_land.py treats text that is identical on all 8 pages as template content, which baked land1's data in. Runtime evidence: res_land3_390.json listen events, r2_land3_390.log, res_land4/7/8_390_med.json",
+ "fix": "In land_template.html, compute LISTEN_LEVELS from allW (sort by en.length and split into thirds, or use the same ≤7/8/9+ split as land TYPING_LEVELS), then regenerate the 8 pages with generate_land.py. Also add the BUG#41-style guard in startListenLevel: if(!LISTEN_LEVEL_IDX[level].length){showToast('🔊 本岛暂时没有这个难度的单词，换一档试试~');return;} and draw empty levels as 🔒, as 火眼金睛 already does.",
+ "dim": "island-sweep-2",
+ "verdict": "confirmed",
+ "vreason": "Reproduced with real taps on the real path: home → 星海觉醒 banner → land_map → ③ → 进入学习 → 开始冒险！ → 听音辨义. All three levels read '📚 0 个单词'. Tapping 初级 or 高级 throws 'TypeError: Cannot read properties of undefined (reading 'en')' at island_land3.html:6351:172, and the screen stays on the level menu with no toast. land6 and land8 behave the same. land2's levels have 3/2/5 words and do play. Static check: island_landN.html:1936-1940 on all 8 pages carries land1's 40-word list. Matched against land_data.json that gives land1 10/11/9, land2 3/2/5 and land3-8 0/0/0. listenActive stays true after the crash, but the antifreeze watchdog needs options to be present, so there is no knock-on effect. Downgraded from blocker: one of 14 games is dead on 6 islands, but the page does not crash and no data is lost. Still a must-fix. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-minigames-p2/p01_listen_390.json and shots/p01_land3_390_after_easy.png.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed MG-02
+{
+ "id": "MG-02",
+ "title": "完形填空: card and result count questions that are never asked — 100% is impossible on 18 levels of 10 islands",
+ "severity": "major",
+ "area": "island_* 完形填空 (template.html nextClozeQ / clozeComplete; CLOZE_LEVELS word lists)",
+ "repro": "island_body → 完形填空 → 初级 (card says '📚 20 题 · 全对得…'). Answer every question correctly.",
+ "observed": "Only 12 questions are asked. The counter jumps (1/20 → 4/20 → 5/20 → 8/20 → 11/20 …). The result says '答对 12 / 20 题 · 正确率 60%' although the kid got everything right. Cause: words whose example sentence uses an inflected form don't match `\\bword\\b`, so they are silently skipped (eye→eyes, ear→ears, cook→cooks, fly→flown, cow→Cows…), while clozeTotal still counts them. Affected (shown → really askable): action easy 30→28, medium 27→23, hard 10→9; animal easy 13→10, hard 14→13; body easy 20→12 (max 60%), medium 13→12; clothes medium 12→11; color hard 9→8; family medium 11→10, hard 10→9; food medium 24→22, hard 15→9 (max 60%); job easy/medium/hard −1 each; nature easy 15→13, medium 15→13; school hard 15→14.",
+ "expected": "The card's question count, the progress counter and '答对 x / y' all use the same set of askable questions; answering everything correctly shows 100%.",
+ "evidence": "p5_misc.mjs [a] body: 'questions actually asked=12 (all answered correctly) … result=\"答对 12 / 20 题 · 正确率 60%\"'. p14_cloze_levels.mjs gives the full per-level list. Sweep: action '答对 27 / 30 (90%)' after 28 asked; animal 9/13 after 10; job 10/12 after 11; nature 12/15 after 13. Code: template.html:6927 clozeTotal=clozePool.length; :6935-6942 skip loop; :6999 result text. Screenshot shots/cloze_total_body.png.",
+ "fix": "Build CLOZE_LEVEL_IDX only from words whose sentence contains a blankable form, and compute clozeTotal after filtering. Better: blank inflected forms too (match `\\b(word|word+s|word+es|word+ed|word+ing|irregular)\\b`, or add a per-word 'blank' field) so these words stay in the game. Add a generate.py check that every CLOZE_LEVELS word is askable.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s2_cloze_data.mjs ran nextClozeQ's own regex over CLOZE_LEVEL_IDX on all 14 islands and reproduced the auditor's per-level list exactly (body easy 20→12, food hard 15→9, action medium 27→23, …). The count is 19 level×island combinations, not 18: action 3, animal 2, body 2, clothes 1, color 1, family 2, food 2, job 3, nature 2, school 1. Play-through s2b_cloze_play.mjs on body 初级 with real taps, all answers correct: the card says '📚 20 题 · … 🪙金币 +20' but only 12 questions were asked. The counter jumped 1→3→5→7→10→11→15→16…→20, and the result read '答对 12 / 20 题 · 正确率 60%'. Cause confirmed at template.html:6927 (clozeTotal set before filtering) and :6935-6942 (silent skip loop).",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed MG-01
+{
+ "id": "MG-01",
+ "title": "打字大师: leaving or tapping 换难度 right after finishing a word re-locks the island (can't scroll) and restarts the old round",
+ "severity": "major",
+ "area": "island_* 打字大师 (template.html typeCheckWord)",
+ "repro": "Island (e.g. food) → 打字大师 → 初级. Type a whole word (right or wrong). Within 0.9 s (right) or 2.2 s (wrong), tap '← 返回'. Wait 3 s and try to scroll the island home. Variant: tap the header '换难度' instead of 返回.",
+ "observed": "After 返回: back on the island home, but 2.2 s later body.type-lock (position:fixed) is added, typeActive=true, the next word ('pear', 'meal', 'corn') is spoken on the home screen, and the home cannot scroll (wheel scroll stays at 0). The 畅玩模式 cards below the fold can't be reached until the kid opens some other screen. After 换难度: the difficulty menu appears, then is replaced ~2 s later by the old round's next word ('egg') and the lock comes back.",
+ "expected": "After 返回 or 换难度 the old round is fully stopped: no type-lock, no spoken word, the menu stays.",
+ "evidence": "p4_typelock.mjs output: 'right after back: {screen:homeScreen, lock:false, typeActive:false}' → '2.6s later: {screen:homeScreen, lock:true, bodyPos:fixed, typeActive:true, canScroll:false, spoken:[…{t:\"meal\",screen:\"homeScreen\"}], afterWheelScrollY:0}'. Menu variant: menuShown:false, wordShown:true. Code: template.html:6732 `typeIdx++;setTimeout(function(){typeActive=true;nextTypeQ();},900)`, :6752 (same, 2200 ms), :6669 nextTypeQ adds 'type-lock'. Screenshot shots/typelock_correct.png.",
+ "fix": "Give each typing run a token (typeRun++ in startTyping / stopTyping / showTypingMenu). In both setTimeout callbacks, return early unless the token is unchanged and #typingScreen is still active; never set typeActive=true blindly. Alternatively keep the timeout ids and clearTimeout them in stopTyping() and showTypingMenu().",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "Reproduced with my own server and real taps (s1_typelock.mjs, islands school and food, 390x844). Started 打字大师 初级, typed the whole word, then tapped ← 返回 0.2 s later. 150 ms later the screen was homeScreen with no lock, but 2.8 s later body had type-lock, position:fixed and typeActive=true. The next word ('art' on school, 'milk' on food) was spoken while the screen was homeScreen. A real CDP touch swipe gave scrollY 0→0; the control run (back without just finishing a word) scrolled 0→435. Wrong-word variant: the same lock, and 'math' was spoken after the 2.2 s timer. 换难度 variant: the difficulty menu was replaced by the old round's next word ('map') and the lock came back. Root cause is as cited: template.html:6732/6752 set typeActive=true unconditionally before nextTypeQ(), which re-adds type-lock at :6669. This hits any showScreen() during the 0.9/2.2 s window, including bottom-nav taps, not only 返回. The kid can recover only by switching screens (e.g. the bottom-nav 主页 calls showScreen('home') and removes the lock), so major stands. Screenshot: audit/skeptic-minigames-p1/shots_s1_correct.png.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed MG-03
+{
+ "id": "MG-03",
+ "title": "Leftover 'next question' timers from the previous run skip a question after switching difficulty (listen / cloze / bubble verified)",
+ "severity": "minor",
+ "area": "听音辨义, 完形填空, 泡泡大作战 (same pattern in 打地鼠, 钓鱼, 火眼金睛, 字母拼拼乐)",
+ "repro": "island_animal → 听音辨义 → 初级. Answer Q1 correctly, immediately tap '换难度', tap 初级 again. Don't touch anything for 9 s. Same for 完形填空 (header 换难度) and 泡泡 (🔄 换难度 button).",
+ "observed": "The new run's first question is replaced without any tap, and that word is never asked, so the round can't finish complete. 听音辨义: 'fox' (1/14) → 'bird' (2/14) after 4.3 s. 完形填空: 'parrot' (1/13) → 'rabbit' (2/13) after 6.5 s. 泡泡: 'duck' → 'lion' after 4.2 s with the counter still at '1 / 17'.",
+ "expected": "Restarting a level starts clean; old timers never act on the new run.",
+ "evidence": "p6_stale.mjs output: 'question timeline with NO taps: [{ms:24,c:\"fox\",p:\"1/14\"},{ms:4269,c:\"bird\",p:\"2/14\"}]' (listen); cloze '[{ms:5,c:\"parrot\",p:\"1/13\"},{ms:6461,c:\"rabbit\",p:\"2/13\"}]'; bubble '[{ms:71,c:\"duck\"…},{ms:4207,c:\"lion\"…}]'. Code: template.html:6535 setTimeout(listenGoNext,5000); :6976/:6985 setTimeout(goNext/goNextWrong,8000); :6031 setTimeout(bubbleGoNext,5000). Same pattern, not run-tested: :5274/:5287 startMolesWave 900 ms, :5657 pickFishTarget 400 ms, :8156 eagleNextRound 800 ms, :6224 nextScramble 1200 ms.",
+ "fix": "Add a per-game run id incremented in startXLevel() and stopX()/startX(), captured by every delayed callback, which must return if it no longer matches. Or keep the timeout ids and clear them in stopX() and in the level-select function.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s3_stale.mjs on animal: answer Q1 with a real tap, tap 换难度 after 0.35 s, re-pick 初级, then touch nothing for 9 s. 听音辨义: 'pig 1/14' → 'dog 2/14' after 0.7 s. 完形填空: 'panda 1/13' → 'fox 2/13' after 6.6 s. 泡泡: 'bee' → 'dog' after 3.6 s while the counter stayed '1 / 17'. Also hit on the wrong-answer path of 听音辨义 (the 1.6 s setTimeout at the end of listenAnswer): 'bee' → 'frog' after 0.2 s. The skipped word is popped and never asked, so bubble/cloze can't reach full marks and listen says '全部听完' without having played it. Risky windows: about 5 s for listen and bubble, 8 s for cloze, 1.6 s for wrong answers in listen. The moles, fish, eagle and scramble windows are ≤1.2 s, so low-risk.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed NET-03
+{
+ "id": "NET-03",
+ "title": "When a word mp3 fails to load the kid hears nothing — no TTS fallback and no message (listening game unplayable)",
+ "severity": "major",
+ "area": "template.html / land_template.html speak() local-mp3 branch (all 27 islands)",
+ "repro": "1) Open island_food. 2) Make /words/*.mp3 return 404 (or go offline / use iPhone, where nothing is preloaded). 3) Open 听音辨义 → 初级. Script: t4_audio.mjs.",
+ "observed": "The 404 case: play('/words/cake.mp3') errored after 380 ms and speechSynthesis.speak was called 0 times. The screen still shows 「点击喇叭播放单词」 with no hint, and tapping 🔊 again is also silent. Offline: error after 3 ms, silent. Only words already pulled into the HTTP cache by hansen_preload play, and that preload only runs when navigator.connection reports 4g (never on iOS WeChat).",
+ "expected": "If the recorded mp3 cannot play, fall back to browser TTS (as _tryAudioUrl and spelling_bee.html:1941 already do), and optionally show a small 「声音没下载下来，已用手机朗读」 toast.",
+ "evidence": "t4_result.json (mp3_404.aud: play→error, no tts; offline.aud: error dt 3); t4_mp3_404.png. template.html:2577-2585 and land_template.html:2566-2574 — onerror and play().catch only call cb. Same pattern for __HANSEN_EX_AUDIO example sentences, template.html:2564-2567.",
+ "fix": "In both branches: on a.onerror, on play() rejection other than NotAllowedError, and on a ~2.5 s timer with a.readyState<2, call _browserTTS(text, rate, cb) (with a done-guard so the sound never plays twice). Regenerate the 27 islands.",
+ "dim": "offline-update",
+ "verdict": "confirmed",
+ "vreason": "Reproduced with s03_audio.mjs in a fresh profile with the fault active from the start. With /words/*.mp3 returning 404: the listening game's auto-play of 'pork' errored at 67 ms. A real touchscreen tap on 🔊 errored at 386 ms. speechSynthesis.speak was never called, the hint stayed 「点击喇叭播放单词」 and no toast appeared. With the connection reset (drop) the result was the same: errors at 7 ms and 220 ms, no TTS. Offline with the SW, the word only played because headless Chromium reports 4g, so hansen_preload had already pulled it into the HTTP cache. On iOS there is no navigator.connection, so the preload policy skips it (hansen_preload.js:141-158). All 696 WORD_MAP files exist on disk, so this is a network-failure path, not missing files. Code verified: template.html:2574-2587 and land_template.html:2563-2576 only call cb on error. spelling_bee.html:1941-1944 does fall back to ttsSpeak. __HANSEN_EX_AUDIO sentences have the same flaw (template.html:2557-2568). Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-network/s03_result.json",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed P2-03
+{
+ "id": "P2-03",
+ "title": "New-user trial lets a kid skip to the guardian, and the win permanently marks the island 已通关 while progress stays 0",
+ "severity": "major",
+ "area": "land boss progress (island_landN bossVictory) + land_map + empress unlock",
+ "repro": "Fresh user (the 72h freepass starts automatically) → open island_land3 → 开始冒险！ → 挑战BOSS → zone picker shows every boss as 🆓 → tap Lv.5 克罗诺斯之影 → win → open land_map → tap ③",
+ "observed": "localStorage hsn_landmap_cleared_3='1' while land3_prog is still unset (0). land_map: spot class 'spot done', label '已通关', '进度 1 / 8', panel '✅已全部击败' — but the boss list in the same panel shows ▶ Boss1 and 🔒 Boss2–4. Beating the 8 guardians this way unlocks the empress permanently; the clear flags are treated as permanent progress (code comments call them 真实旗, 'real flags').",
+ "expected": "The comment at hansen_cards.js:652 says trial play must not touch real progress or clear flags (真实前沿prog/通关旗零污染). The island should only count as cleared once the guardian is beaten as the real next boss in order (prog reaches BOSSES.length).",
+ "evidence": "island_land3.html:4805 and land_template.html:4770: `if(_smm && (window._s1Idx==null || window._s1Idx===(BOSSES.length-1))) localStorage.setItem('hsn_landmap_cleared_'+N,'1')` — no progress check, while the prog advance on the next line does check `_s1Idx===prog`. hansen_cards.js:652 unlocks every boss during the trial. These flags feed land_map.html:120, __hsnSeasonGot (hansen_cards.js:523), round rewards (hansen_round_reward.js:69–74) and the empress gate. Runtime: boss_land3.json (after.cleared='1', prog=null, mapAfter)",
+ "fix": "Set the cleared flag only after the prog advance, and only when the new prog ≥ BOSSES.length (i.e. `_s1Idx===prog && prog===BOSSES.length-1`). Optionally also have land_map clearedN() require landN_prog ≥ the island's boss count.",
+ "dim": "island-sweep-2",
+ "verdict": "confirmed",
+ "vreason": "Reproduced end to end with real taps. Fresh user (freepass auto-started, HansenFreepass.active()=true) → land_map → island_land3 → boss card. The picker shows '▶ Lv.1 … 🆓 Lv.2-5'. I tapped Lv.5 克罗诺斯之影 and answered 32 questions → VICTORY. The win also paid '首次通关奖励 🪙 金币 +30 · 🎓 经验 +95' during the trial. Afterwards hsn_landmap_cleared_3='1' while land3_prog is null. Through the world-map button, land_map spot ③ shows class 'spot done', '已通关' and '进度 1 / 8'. Its panel says '✅已全部击败' but lists ▶ Boss1, 🔒 Boss2-4 and 🔒 ★守关. After I simulated trial expiry the flag was still set. Code: island_land3.html:4805 and land_template.html:4770 set the flag with no prog check, contradicting the comment at hansen_cards.js:652. The flags feed the empress gate (land_map openEmpress, renderSeasonBossPicker) and __hsnSeasonGot. Evidence: p03_trialclear_land3.json, shots/p03_map_panel.png.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed CB-01
+{
+ "id": "CB-01",
+ "title": "单词大陆 (Land 1-8) 每日任务面板永远显示「暂无任务，稍后再来！」，徽章却显示 0/12",
+ "severity": "major",
+ "area": "land_template.html / island_land1-8.html daily quests",
+ "repro": "New user → home → open any 单词大陆 island (e.g. openIsland('island_land1.html'), or 单词大陆 map → ①迷雾心湖) → 跳过 onboarding → 开始冒险！ → tap the 每日任务 card (real touchscreen tap, verified with elementFromPoint).",
+ "observed": "Card badge shows 0/12, but questsScreen lists 「暂无任务，稍后再来！」 with 0 quest cards. S.quests.list becomes [] after rendering. The same steps on island_animal show 12 quests.",
+ "expected": "The same 12 global daily quests as on every other island, claimable there.",
+ "evidence": "t1_land_quests.mjs and t23_land_quest_tap.mjs output, screenshot /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/codebug/land_quests.png. Cause: land_template.html:3113 `if(!Array.isArray(raw.list)||raw.list.length>7)return out;` and :3116 `if(!def){valid=false;return;}`, plus :3108 __hsnQuestDefinition ignores HansenQuestGlobal. hansen_quest_global.js:633 wraps renderQuests to ensure() (mirrors the 12-item list), then calls this old renderer, which drops the list. template.html:3126-3146 has the v1000/v1032 fixes (≤12, ask HansenQuestGlobal.definition, skip unknown ids).",
+ "fix": "Port the template.html quest block (the __hsnQuestDefinition global lookup, the ≤12 limit, skipping unknown ids, the 12-quest roll) into land_template.html, then run generate_land.py. Better: delete the page-local normalizer and make renderQuests read HansenQuestGlobal.status(). Add a guard that diffs the shared shell of template.html against land_template.html.",
+ "dim": "code-bugs",
+ "verdict": "confirmed",
+ "vreason": "Reproduced with real taps through the home shell (audit/skeptic-codebug/s01_land_quests.mjs). On island_land1 and island_land5 the card badge reads 0/12 and the global ledger holds 12 quests, but tapping 每日任务 shows 「暂无任务，稍后再来！」 and S.quests.list drops to 0. island_animal shows 12 cards. The cause is as cited: land_template.html:3108 never asks HansenQuestGlobal, :3113 rejects lists longer than 7, and :3116 sets valid=false; template.html:3126-3146 has all three fixes. Progress still accrues in the global ledger, so kids can claim on regular islands, but never on the 8 Land islands. The proposed fix (port the block, regenerate) is right.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed SS-3
+{
+ "id": "SS-3",
+ "title": "Island top bar not refreshed after the spelling-bee overlay: 🪙 count and 每日任务 '可领' red dot stay stale, even after going home and re-entering",
+ "severity": "minor",
+ "area": "hansen_spellbee.js (sbAwardReward / doClose); index.html openIsland kept-alive branch; island pages have no storage listener",
+ "repro": "1) index → tap 食物大冒险 → 开始冒险！. 2) Tap the spelling bee mode card (opens #hsnSbOverlay). 3) Win a bee match. Equivalent: in the bee iframe run sbQueueCappedReward(10,0,'match') and progressQuest('sbwin',1), exactly what spelling_bee.html:2247/2266 run on a win. 4) Press the bee's 返回 (parent.HansenSpellBee.close()). 5) Tap the world-map button (goHome), then tap 食物大冒险 again.",
+ "observed": "Wallet hansen_wallet_coins=310 while the island top bar shows 🪙300, both right after closing and after home → re-enter (same frame object reused; screenshot reshow_stale.png). The quest store has sbWin1 progress 1/1 (claimable), but #questDot stays display:none until something calls updateTopBar(); calling it manually makes the dot appear.",
+ "expected": "When the child comes back from the bee, the coins and the 可领 dot should match the stored values immediately.",
+ "evidence": "hansen_spellbee.js:142-152 sbAwardReward calls HansenCoins.award without updateTopBar when xp=0 (match bonus); doClose (lines 25-50) does not refresh the parent UI. index.html:4066-4071 kept-alive re-show only toggles display and refreshes nothing. Scripts t8_sb.mjs, t13_reshow.mjs, t14_questbadge.mjs; screenshot /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/shared-state/reshow_stale.png",
+ "fix": "In hansen_spellbee.js doClose(): `try{if(typeof window.updateTopBar==='function')updateTopBar();}catch(e){}` (updateTopBar also runs updateQuestBadge and updatePetHero). Also call it after a successful sbAwardReward. In index.html openIsland's `cur===file` branch, call `try{var w=frame.contentWindow;w.updateTopBar&&w.updateTopBar();}catch(e){}`. The general fix: one storage listener per island for hansen_wallet_coins, hansen_wallet_gems, hansen_wallet_charxp and hansen_global_daily_quests_v941 that calls updateTopBar() and the gem-badge refresh.",
+ "dim": "shared-state",
+ "verdict": "confirmed",
+ "vreason": "e6_bee.mjs: real touch tap on the spelling bee mode card, then calls inside the bee iframe. A word reward sbQueueCappedReward(3,2,'word') did update the island bar (🪙303, XP 2), because xpAward → applyOriginXP → updateTopBar. The match bonus sbQueueCappedReward(10,0,'match') plus progressQuest('sbwin',1), which is what endMatch runs, left the wallet at 313 while #coinCount showed 303. #questDot stayed display:none even though sbWin1 was claimable. Still stale after HansenSpellBee.close(), and still stale after goHome and a real tap back into 食物大冒险 (the kept-alive frame). A manual updateTopBar() fixed both (313, dot shown). Precision: in a real match the per-word XP rewards keep refreshing the bar, so the stale amount equals the match bonus (5–15 coins) plus the hidden quest dot.",
+ "sev2": "minor"
+}
+====================================================================================================
+refuted CB-05
+{
+ "id": "CB-05",
+ "title": "Pre-warmed 星海 room (and kept-alive island) show stale coins/XP/level",
+ "severity": "minor",
+ "area": "hansen_room_warm_v1023.js open(), index.html openIsland keep-alive branch, island top bar",
+ "repro": "A) Home → 动物岛, wait about 9 s for warm-up → earn coins/XP in the island (here HansenCoins.award 150 + addXP 120) → open the 星海 room (HansenRoom.open('season'), the island's season entry). B) Home → 动物岛 → back → a wallet change happens on the top window → re-enter 动物岛 (instant keep-alive).",
+ "observed": "A) The 星海 room top bar shows 「Lv.1 新手探险家 0/100 XP 💎0 🪙300」 while the wallet is 450 coins and charXP 120 (should be Lv.2), still stale after 4 s. B) The re-entered island still shows 💎0 🪙300 while the wallet is 💎40 🪙200, after 5 s.",
+ "expected": "Every room shows the live global wallet/level when it becomes visible.",
+ "evidence": "t21_room_stale.mjs and t20_stale.mjs outputs. room_warm close/open only toggles display (hansen_room_warm_v1023.js:90-100). Island pages listen to the 'storage' event only for 'theme' (template.html:8263).",
+ "fix": "In island pages add `window.addEventListener('storage',e=>{ if(/^hansen_wallet_/.test(e.key||'')){ try{updateTopBar()}catch(_){} } })`. Storage events do fire across same-origin iframes. Also call contentWindow.updateTopBar() in HansenRoom.open and in index openIsland's keep-alive branch.",
+ "dim": "code-bugs",
+ "verdict": "refuted",
+ "vreason": "The mechanism is real: a kept-alive document never refreshes. With the auditor's synthetic API calls I got the same stale numbers (s11_stale.mjs): the season room showed 🪙300 Lv.1 while the wallet was 450 with charxp 120, and the re-entered island showed 💎0 🪙450 while the wallet was 💎40 🪙400. But a user cannot reach either trigger in v1163. (A) Nothing in the shell calls HansenRoom.open. template.html:1848 only runs on island_season1-5.html, which don't exist. hansen_boss_attack.js:15345 __hsnJumpS1 has no caller. hansen_season.js:439 runs on home, where its openIsland branch wins. hansen_home_link.js:84 is a catch fallback. (B) The home page has no wallet-changing UI and shows no wallet (s20_home_wallet_ui.mjs). Opening any other island, land_map or boss_hall replaces the iframe with a fresh load. Cloud restore and login call location.reload(). The issue is latent only; a storage listener is cheap hardening.",
+ "sev2": "n/a"
+}
+====================================================================================================
+confirmed SS-2
+{
+ "id": "SS-2",
+ "title": "XP lost update: addXP writes the island's cached S.charXP + n over the global XP wallet, erasing XP written by any other live page (proven in one tab via hidden-frame recovery, and with two tabs)",
+ "severity": "major",
+ "area": "template.html / land_template.html addXP → hansen_wallet_charxp (all 27 island pages); hansen_quest_global.js recoverXP/applyOriginXP",
+ "repro": "A (one tab, uses the app's own recovery path): 1) index → openIsland('island_food.html'); immediately dismiss 开始冒险！. 2) Within ~1 s: progressQuest('learn',10), then claimQuest(i) for learn10 while localStorage.setItem throws for 'hansen_wallet_charxp' (simulated storage-quota error). Coins are paid (300→335) and the quest transaction stays pending. 3) Wait ~3 s: the hidden warm 2:island_season frame boots, runs quest recoverXP and writes hansen_wallet_charxp=60, removing the pending entry. 4) The child answers one more word correctly in food (addXP(5)). B (two tabs): open island_food.html and island_animal.html standalone; in food addXP(5)×4; then in animal addXP(5).",
+ "observed": "A: after step 3, wallet charxp=60, but food's S.charXP=0 and the top bar still shows 0/100 XP. After step 4, charxp=5. The 60 quest XP is permanently lost (the quest is marked claimed, so it can never be retried). B: charxp went 0→20 (food), then 5 (animal); 20 XP lost. Coins in the same two-tab test were correct (300→310) because HansenCoins re-reads storage on every call.",
+ "expected": "XP behaves like coins: every award adds to the current stored value. After A, charxp=65; after B, charxp=25.",
+ "evidence": "template.html:2706 `var beforeChar=Math.max(0,Math.floor(Number(S.charXP)||0))` then writes beforeChar+n (same in land_template.html:2695, island_food.html:2786, island_season.html:2978, island_land1.html:2725). hansen_quest_global.js:432 only updates window.S when currentOriginKey()===p.originKey, so a recovery done by another frame leaves the visible island's cache stale. Island pages have no 'storage' listener that would resync S.charXP. Scripts t18_crossrecover.mjs (writer log shows 3.02s `2:island_season.html set hansen_wallet_charxp 60`) and t10_twotab.mjs.",
+ "fix": "In addXP (template.html and land_template.html, then run generate.py), base the update on the stored value: `var stored=Number(localStorage.getItem('hansen_wallet_charxp')); var beforeChar=(isFinite(stored)&&stored>=0&&Math.floor(stored)===stored)?stored:Math.max(0,Math.floor(Number(S.charXP)||0));`. In each island add `addEventListener('storage',function(e){if(e.key==='hansen_wallet_charxp'){var n=Number(e.newValue);if(isFinite(n)&&n>=0){S.charXP=n;S.level=getAdvLevel().lv;S.xp=getXpInCurrentLevel();updateTopBar();}}})`. Fixing SS-1 also removes the hidden recovering frames, but the addXP fix is still needed for multiple tabs and WeChat webviews.",
+ "dim": "shared-state",
+ "verdict": "confirmed",
+ "vreason": "The mechanism is real, but the auditor overstates the loss. Scenario A (e5_crossrecover.mjs, using the auditor's own-property localStorage.setItem patch; localStorage already had an own setItem): the failed learn10 claim returned false, paid coins (300→335) and left the quest-claim and XP pending entries. The hidden 2:island_season frame recovered it at +1.1 s and charxp became 60. Food's S.charXP stayed 0 and the top bar showed 0. Food addXP(5) then set charxp to 5. Scenario B (e4_twotab.mjs): food +20 brought charxp to 20, and animal addXP(5) brought it back to 5. Correction to the auditor: the next island boot recomputes the wallet at template.html:7902-7909 as max(wallet, the sum of every island's totalXP, the page's own saved charXP/totalXP). After that boot, B healed to 25 with no loss. A healed to 60 instead of the expected 65, because the hidden 3:island_season copy had saved charXP=60 into wordIslandSeason. So the permanent loss in A was 5 XP, not 60, and the 60 quest XP was not permanently lost. Trigger A needs a storage write failure in the middle of a quest claim. Trigger B needs two tabs, which is rare in WeChat. With no failures, the one-tab race test lost nothing. What remains is a temporary wrong number plus a small permanent loss in rare cases, so I rate it minor. The suggested fix (base addXP on the stored value, plus a storage listener) is still correct and cheap.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed CB-06
+{
+ "id": "CB-06",
+ "title": "Land islands count quest progress in the wrong units and never report review quests",
+ "severity": "minor",
+ "area": "land_template.html game end hooks",
+ "repro": "Set the global quest list to review3, moles1 (打地鼠·累计得30分), fish1, eagle1, match1 (配对成功8组). On island_land1 call molesComplete() with molesScore=25. Compare with island_animal. Finish a review round on Land.",
+ "observed": "Land: a 25-point moles round gives moles1 +1 (2/30 after two rounds). Regular island: +25 (26/30). Land sends no 'review'/'reviewClear' progress at all, and 复习 is one of the 4 quests guaranteed every day.",
+ "expected": "Same rules on every island: score-based for moles/fish/eagle, pair-based for match, correct-answer-based for review.",
+ "evidence": "t13_quest_zero.mjs output. land_template.html:5147 progressQuest('moles',1), :5589 ('fish',1), :6414 ('match',1), :7994 ('eagle',1). There is no equivalent of template.html:7333-7337 (progressQuest('review',correctCount)/setQuest('reviewClear',1)).",
+ "fix": "Port the v1000/v1001 progress lines from template.html into land_template.html and run generate_land.py (same root cause as CB-01).",
+ "dim": "code-bugs",
+ "verdict": "confirmed",
+ "vreason": "s02_quest_units.mjs with global quests review3, moles1, fish1, eagle1 and match1. On island_land1, molesComplete with score 25 gives moles1 +1, and fishComplete with score 20 gives fish1 +1. On island_animal the same rounds give +25 and +20. land_template.html reviewComplete (:7143-7170) has no progressQuest('review') or setQuest('reviewClear'), and no module reports review progress (grep). So on Land the 30/60-point moles/fish/eagle quests need 30–60 rounds, and the daily 复习 cornerstone quest never moves. Fix: port the template lines and run generate_land.py.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed CB-12
+{
+ "id": "CB-12",
+ "title": "Land islands' settings lack the 🔊 发音音量 slider; admin level setter says 「当前页面没有等级表」 inside a Land island",
+ "severity": "minor",
+ "area": "land_template.html renderSettings / ADVENTURE_LEVELS export",
+ "repro": "Open island_land1 → 设置 (showScreen('settings')). Compare with island_animal.",
+ "observed": "island_animal has the section 「🔊 发音音量」 (#ttsVolSlider). island_land1 does not. window.ADVENTURE_LEVELS is undefined on Land, so hansen_boss_attack.js:15634 shows 「当前页面没有等级表，请在岛屿页内使用」 while in an island.",
+ "expected": "Same settings and admin tools on all 27 islands.",
+ "evidence": "t3_settings.mjs output. template.html:7712-7745 (slider), :2851-2852 (ADVENTURE_LEVELS export) are absent from land_template.html.",
+ "fix": "Port both blocks into land_template.html and run generate_land.py (same root cause as CB-01/CB-06).",
+ "dim": "code-bugs",
+ "verdict": "confirmed",
+ "vreason": "s08_settings.mjs: island_land1 and island_land8 settings have no 「🔊 发音音量」 heading and no #ttsVolSlider, which island_animal has. window.ADVENTURE_LEVELS is undefined on Land (30 entries on animal). The ADVENTURE_LEVELS half only affects the password-gated admin panel (hansen_boss_attack.js:15634), so that part is polish. The slider gap is minor.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-15
+{
+ "id": "MG-15",
+ "title": "Empty difficulty levels look playable (0 题 card + toast); copy says '每档大约 20 词左右'",
+ "severity": "polish",
+ "area": "打地鼠 / 钓鱼 / 泡泡 / 字母拼拼乐 level menus (island_action)",
+ "repro": "island_action → 打地鼠 (or 钓鱼/泡泡/字母拼拼乐) and look at 高级.",
+ "observed": "A normal red card: '🎯 0 题 · 全对得 🎓经验 +45 · 🐾宠物经验 +65 · 🪙金币 +0 →'. Tapping it only shows a toast. 火眼金睛 shows the same empty level as a grey 🔒 card. The 泡泡 menu says '每档大约 20 词左右' while action 初级 has 48.",
+ "expected": "Empty levels are shown consistently as locked/greyed (like 火眼金睛); copy states real counts.",
+ "evidence": "res_action_390.json levelText for moles/fish/bubble/scramble (0 题/0 条/0 词) vs eagle '🔒 高级 本岛暂时没有这个难度的单词'. template.html:5851 bubble copy.",
+ "fix": "Reuse startEagle's cnt===0 locked-card branch in startMoles/startFish/startBubble/startScramble, and drop or compute the '大约 20 词' text.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "Code re-read: among startMoles/startFish/startBubble/startScramble/startCloze/startListen/startEagle, only startEagle has a cnt===0 greyed-card branch. The others render a normal tappable card, and only startXLevel's guard shows a toast. startBubble's copy '每档大约 20 词左右' is static. Not re-run for island_action.",
+ "sev2": "polish"
+}
+====================================================================================================
+confirmed P2-02
+{
+ "id": "P2-02",
+ "title": "Land islands: 初级 levels have 0–2 words but still show a tappable card promising '金币 +0'",
+ "severity": "major",
+ "area": "island_land1–8 · 打地鼠/钓鱼大师/泡泡大作战/字母拼拼乐 (also 火眼金睛 and spelling bee chips)",
+ "repro": "Open island_land1 (or land3/4/6/7) → tap 打地鼠 (or 钓鱼大师, 泡泡大作战, 字母拼拼乐) → look at 🌱 初级 → tap it. On land2 or land8 → 打地鼠 → 初级",
+ "observed": "land1/3/4/6/7 show '🎯 0 题 · 全对得 🎓经验 +15 · 🪙金币 +0' (fish '🐟 0 条', bubble and scramble '📚 0 词'). The card stays fully colored and tappable; tapping only shows the toast '本岛暂时没有这个难度的单词'. On land2/land8 a whole 初级 round is one word ('打中全部 1 个 · 金币 +0'); land5 has 2 words. 火眼金睛 shows a proper 🔒 card and the spelling bee shows '本岛暂无此难度', so the same situation is presented three different ways.",
+ "expected": "Every land island should offer 3 playable levels sized to its long words, or empty levels should clearly look locked.",
+ "evidence": "Land words are long: ≤4 letters = land1 0, land2 1, land3 0, land4 0, land5 2, land6 0, land7 0, land8 1 (out of 30 each). The filters use en.length<=4 / 5–6 / ≥7 (land_template MOLES/FISH/BUBBLE/SCRAMBLE/EAGLE_LEVELS). Runtime: res_land1_390.json levelText; res_land2_390.json moles/fish/bubble/eagle RES 'X 1 个'; shots/land1_bubble_error_390.png",
+ "fix": "On land pages, split the words into three groups by the island's own word lengths (for example ≤7 / 8 / 9+, as land TYPING_LEVELS and CLOZE_LEVELS already do), or compute the cut points from allW. In every level menu, draw 0-word levels as the eagle-style 🔒 card with no onclick.",
+ "dim": "island-sweep-2",
+ "verdict": "confirmed",
+ "vreason": "Runtime on land1: the 初级 card of 打地鼠/钓鱼/泡泡/拼拼乐 is full colour and clickable, and reads '🎯 0 题 / 🐟 0 条 / 📚 0 词 · 🪙金币 +0'. Tapping it only shows '…本岛暂时没有这个难度的单词，换一档试试~' (captured with a showToast hook). 火眼金睛 shows a greyed 🔒 card instead. On land2 every 初级 round is '第 1/1', a single word (calm). Static count of words with ≤4 letters: land1 0, land2 1, land3 0, land4 0, land5 2, land6 0, land7 0, land8 1. Downgraded to minor: the BUG#41 guard explains the empty level and 中级/高级 work, so this is level balance and presentation, not a broken feature. Evidence: p02_levels.json.",
+ "sev2": "minor"
+}
+====================================================================================================
+uncertain P2-13
+{
+ "id": "P2-13",
+ "title": "Level menus show hard-coded examples and claims that don't match the island",
+ "severity": "minor",
+ "area": "字母拼拼乐 / 泡泡大作战 level menus (all islands)",
+ "repro": "Any island (e.g. land3, traffic) → 字母拼拼乐; → 泡泡大作战",
+ "observed": "Scramble examples are always 'man · cat · cow / tiger · friend · old / children · gentleman' (family-island words; 'old' has 3 letters but is listed as a 5–6 letter example), even on 时之钟谷 where the easy level has 0 words. The bubble menu says '每档大约 20 词左右' but levels are 0/8/22 (land1), 4/50/186 (season), 8/6/16 (sports).",
+ "expected": "Examples taken from the island's own pool for that level; the stated size matches the real count.",
+ "evidence": "template.html:6139 and land_template.html:5954 example:'man · cat · cow'…; bubble text at land_template.html:5666 / template.html:5851",
+ "fix": "Build examples with allW.filter(level.filter).slice(0,3).map(w=>w.en).join(' · ') and drop the '大约 20 词' sentence, or print the real count.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+====================================================================================================
+confirmed MG-04
+{
+ "id": "MG-04",
+ "title": "打地鼠 / 钓鱼 result says 「打中全部 N 个」/「钓上全部 N 条」 even when the kid missed",
+ "severity": "minor",
+ "area": "打地鼠 molesComplete / 钓鱼 fishComplete (all islands)",
+ "repro": "Any island → 打地鼠 → 初级. Tap one wrong mole (lose 1 life), hit all the others. Same in 钓鱼.",
+ "observed": "action: 47 hit + 1 wrong → '初级 完成！ 打中全部 48 个'. 钓鱼: 47 caught + 1 wrong → '钓上全部 48 条'. Same on all 14 islands (e.g. city '打中全部 8 个' after 7/8).",
+ "expected": "Shows the real count, e.g. '打中 47 / 48 个'; '全部' only when every target was hit.",
+ "evidence": "res_action_390.json moles.result / fish.result; played {right:47, wrong:1}. Code: template.html:5341 '打中全部 '+molesTotal; :5783 '钓上全部 '+fishTotal.",
+ "fix": "Render molesHit+' / '+molesTotal (and fishCaught / fishTotal), and use '全部' only when molesHit===molesTotal. Also show the miss count. The in-game counter '第 N / total' lags after a miss; consider showing answered/total instead.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s4_moles_fish.mjs on city 初级 (8 targets), real taps, first target wrong and the rest right. 打地鼠 gave 7 right + 1 wrong → '初级 完成！ 打中全部 8 个 本局得分 70'. 钓鱼 gave 7 + 1 → '钓上全部 8 条 本局得分 60'. The code confirms that a wrong tap moves on to the next target (setTimeout(startMolesWave,900) / pickFishTarget), so the missed word is never hit, while template.html:5341/:5783 print molesTotal/fishTotal. The in-game '第 N/total' also repeats a number after a miss (prog = molesHit+1).",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-05
+{
+ "id": "MG-05",
+ "title": "字母拼拼乐: the letters are often shown already in the correct order (biased shuffle)",
+ "severity": "minor",
+ "area": "字母拼拼乐 nextScramble (all islands)",
+ "repro": "Play 字母拼拼乐 初级 on island_question (or any island) and watch the letter tiles.",
+ "observed": "In the sweep, 21 of 178 easy questions showed the tiles already spelling the answer (question island 5/20: he, who, how, why, she; body: toe, eye, heel; clothes: hat, cap; family: mom, son…). Screenshot: action 'open' shown as o-p-e-n. In V8 (same engine as WeChat Android), `w.en.split('').sort(()=>Math.random()-.5)` leaves 2-letter words unchanged 50% of the time, 3-letter 37%, 4-letter 19%.",
+ "expected": "Tiles are always scrambled (different from the answer) whenever the word has ≥2 distinct letters.",
+ "evidence": "res_<island>_390.json scramble.played.unscrambled / unscrW; node simulation in this run ('eat 37.3% unshuffled, open 18.7%, go 49.9%'); shots/action_scramble_q_390.png. Code: template.html:6191.",
+ "fix": "Use a Fisher–Yates shuffle and re-shuffle while the result equals the target (bounded loop; skip when all letters are identical). The same random comparator is used elsewhere (options, match board); a shared shuffle() helper would fix all of them.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s7_scramble.mjs on question 初级, 2 full rounds solved with real taps: 6 of 40 questions (15%) showed the tiles already in answer order: it, her, why, my, who, our. Node simulation of the exact comparator at template.html:6191 (s7_shuffle_sim.mjs): 2-letter words stay unchanged 50%, 3-letter 37.5%, 4-letter 18.7%, 'mom' 68.6%. There is no re-shuffle guard.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-06
+{
+ "id": "MG-06",
+ "title": "火眼金睛: for phrase words a fake with a double space looks identical to the correct answer",
+ "severity": "minor",
+ "area": "火眼金睛 makeFakeSpelling (islands city, family, food, home, question)",
+ "repro": "island_question → 火眼金睛 → 高级. Play rounds for how many / how much / how old / how long / how far.",
+ "observed": "Two cells read 'how far' identically (one is the fake 'how  far' with a doubled space, which HTML collapses). Tapping the fake is judged wrong although it looks right. Simulated with the real makeFakeSpelling: 11–24% of 高级 rounds for the 14 multi-word entries (city: post office, police station, fire station; family: only child; food: ice cream; home: living room, dining room, washing machine, air conditioner; question: how many/much/old/long/far) contain such an invisible duplicate.",
+ "expected": "Every distractor is visibly different from the correct spelling.",
+ "evidence": "shots/w360_question_eagle_hard.png (two 'how far' cells). p11_360.mjs eagleCells list includes 'how  far@23px' and 'how far@23px'. Code: template.html:7952 `ops.push(word.slice(0,i+1)+word[i]+word.slice(i+1))` also duplicates spaces; the dedupe uses raw toLowerCase, not whitespace-normalized text.",
+ "fix": "In makeFakeSpelling skip positions where word[i]===' ' for the duplicate, delete and substitute ops (and swaps involving a space). Dedupe with `o.replace(/\\s+/g,' ').trim().toLowerCase()` and reject anything that normalizes to the target.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "Observed in the real UI (s8_eagle_dup.mjs, question 火眼金睛 高级, 4 rounds = 20 phrase questions). In 3 rounds two cells rendered identically: innerText 'how much' twice where one textContent is 'how  much', and 'how many' twice. .eagle-cell has white-space:nowrap (template.html:1364), which collapses spaces. makeFakeSpelling's 'duplicate a letter' op also duplicates the space, and the dedupe isn't whitespace-normalized.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-09
+{
+ "id": "MG-09",
+ "title": "记忆翻牌 quest: a perfect 8-pair game counts as 1 toward 「配对成功 8/16 组」",
+ "severity": "minor",
+ "area": "记忆翻牌 matchComplete → global daily quests",
+ "repro": "Fresh user whose daily quests include '记忆翻牌 · 配对成功 16 组' (match3). Play one full 记忆翻牌 game (8 pairs). Open 每日任务.",
+ "observed": "match3 progress is 1/16 after 8 successful pairs. The comment says '按配对成功组数' but the code passes 1, because matchPairs is an array, not a number.",
+ "expected": "Progress 8/16 (8 pairs matched).",
+ "evidence": "p5b.mjs: '{txt:\"💯 完美通关！ 步数：8 · 失误：0…\", matched:8, pq:[[\"match\",1]], quests:[… \"match3:1/16\" …]}'. Code: template.html:6601 `progressQuest('match',(typeof matchPairs==='number'?matchPairs:1))`. Quest pool: hansen_quest_global.js:40-41 ('配对成功 8 组' / '16 组').",
+ "fix": "progressQuest('match', matchMatched) (=8), or progress by 1 per pair inside the match branch of matchFlip.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s5_match.mjs on food: a perfect real-tap game (8 pairs, 0 mistakes, '💯 完美通关！'). The only match quest call was progressQuest('match',1), and the global ledger hansen_global_daily_quests_v941 went match3:0 → match3:1 against a goal of 16. template.html:6601 tests typeof matchPairs==='number', but matchPairs is the card array declared at :6565, so the amount is always 1.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-10
+{
+ "id": "MG-10",
+ "title": "打地鼠 / 钓鱼: points from a game that ends by losing all lives never count toward 「累计得 30 分」 quests",
+ "severity": "minor",
+ "area": "打地鼠 game-over (molesClick lives<=0), 钓鱼 fishGameOver",
+ "repro": "Fresh user with daily quest '钓鱼大师 · 累计得 30 分' (fish1). 钓鱼 初级: catch 4 fish (40 points), then catch wrong fish until 游戏结束.",
+ "observed": "Game-over screen shows '本局得分 40' but fish1 stays 0/30, and no progressQuest('fish') call is made. Same for 打地鼠 (molesScore 40, no 'moles' progress).",
+ "expected": "Points earned count toward the '累计得分' quest even when the round ends in game over.",
+ "evidence": "p5b.mjs: '[fish game over] {txt:\"🎣 游戏结束 本局钓上 4 条鱼 本局得分 40…\", pq:[], quests:[… \"fish1:0/30\" …]}'. p5_misc.mjs [c] moles: pq only 'correct'. Code: progressQuest('moles'/'fish') exists only in molesComplete (template.html:5332) and fishComplete (:5774); none in the game-over paths at :5288 or :5717.",
+ "fix": "Call progressQuest('moles', molesScore) / progressQuest('fish', fishScore) in the game-over branches too, or report points per hit.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s4_moles_fish.mjs on city: played 3 right, then wrong taps until 游戏结束. 打地鼠 showed '本局打中 3 / 8 个 本局得分 30' and 钓鱼 showed '本局钓上 3 条鱼 本局得分 30'. Both games logged zero progressQuest('moles'/'fish') calls (only 'correct'). Only molesComplete/fishComplete report points, and the quests are worded '累计得 30/60 分' (hansen_quest_global.js:42-45).",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-11
+{
+ "id": "MG-11",
+ "title": "Result screens' 「🪙 金币 +N」 leave out streak-bonus coins; later games show +0 while the wallet still grows",
+ "severity": "minor",
+ "area": "All mini-game result screens (window._sessionCoins); level cards '🪙金币 +N'",
+ "repro": "Fresh nature island → 火眼金睛 初级, answer all correctly. Compare the result's 金币 with the coin counter. Then replay games on the same island the same day.",
+ "observed": "Fresh nature eagle: result '金币 +17', wallet +24 (7 coins from streak milestones via addGem). action 泡泡: result '🪙 金币 +0' while wallet +43; action 火眼金睛: '+0' vs +47; adjective 泡泡: '+1' vs +22. Level cards still promise '🪙金币 +48' although the per-word daily cap (3 coins per word per day) has already been used up by earlier games; the kid is never told.",
+ "expected": "The coins shown on the result screen equal the coins actually received in that game; the cap is explained.",
+ "evidence": "p9_coins.mjs: {result:'金币 +17', walletDelta:24, bySource:{'award answer …':17, 'add @ window.addGem (hansen_island_upgrade.js:109)':7}}. Sweep deltas vs results in res_action_390.json (bubble delta 43 / '金币 +0'). Code: template.html:4567 _sessionCoins counts only earnCoinOnCorrect; :4203 triggerMilestone addGem(m.gems) is not counted; earnCoinOnCorrect PER_WORD_CAP=3.",
+ "fix": "Count every coin awarded during the session (increment _sessionCoins in addGem/triggerMilestone too, or snapshot HansenCoins.get() at markMode and diff at the end), and optionally show '连胜奖励 +X' separately. On level cards say '答对得金币（每个词每天最多 3 次）' instead of a fixed '+N'.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s6_coins.mjs on job, 听音辨义 初级 ×4 with all answers correct (HansenCoins.add hooked). Result screens showed '🪙 金币 +12', '+12', '+12', '+0'. The wallet actually rose by 19, 22, 27 and 5. Each difference equals the window.triggerMilestone → addGem streak coins (7/10/15/5) that _sessionCoins (template.html:4567, reset in markMode :3732) never counts. The +0 round is the 3-per-word daily cap, which nothing explains to the kid.",
+ "sev2": "minor"
+}
+====================================================================================================
+uncertain P2-16
+{
+ "id": "P2-16",
+ "title": "Menus promise '🪙金币 +N' but a perfect round often shows '金币 +0' with no explanation",
+ "severity": "minor",
+ "area": "coin display on result screens (all islands)",
+ "repro": "sports: play 听音辨义, 记忆翻牌, 打字, 完形填空, 拼拼乐 初级, then 钓鱼大师 初级 and catch all 8",
+ "observed": "Fish menu promised '🐟 8 条 · 🪙金币 +8'; the result shows '钓上全部 8 条 … 🪙 金币 +0'. Same for bubble and eagle on sports and for moles/fish/bubble/eagle on time. The only hint is the '🪙满' pill.",
+ "expected": "Tell the kid why (each word pays at most 3 coins per day), or present the menu number as a maximum.",
+ "evidence": "earnCoinOnCorrect (island_sports.html:4617, PER_WORD_CAP=3/day); result uses window._sessionCoins. res_sports_390.json fish/bubble/eagle RES; res_time_390.json; shots/sports_fish_result_390.png",
+ "fix": "When _sessionCoins===0 and the cap was hit, show '今天这些词的金币已领满，换个难度或明天再来～'. In menus write '最多 +N'.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+====================================================================================================
+confirmed MG-12
+{
+ "id": "MG-12",
+ "title": "打地鼠: long Chinese meanings are cut off in the mole cards (how many vs how much become unreadable)",
+ "severity": "minor",
+ "area": "打地鼠 .mole-cn (island_question; island_family at 360)",
+ "repro": "island_question → 打地鼠 → 高级 (390×844 or 360×640).",
+ "observed": "Labels are truncated to '多大（年…', '多少（钱/…', '多少（可…' (scrollWidth 93–126px vs 86px box), so the part that tells how many from how much is hidden. At 360 on family, the '祖父母' card's emoji wraps to two lines and pushes the label out of the card.",
+ "expected": "The full meaning is readable (wrapping to two lines or shrinking the font).",
+ "evidence": "p11_360.mjs (390 and 360): 'CLIP 多少（钱/不可数） sw=126 cw=86', 'CLIP 多大（年龄） sw=93 cw=86'. Screenshots shots/w360_question_moles.png and shots/w360_family_moles.png. CSS template.html:1028 .mole-cn.",
+ "fix": "Allow .mole-cn to wrap (white-space:normal; -webkit-line-clamp:2) and step the font down when scrollWidth>clientWidth (like eagle's fitting). Constrain .mole-emoji to one line (white-space:nowrap; smaller font for ZWJ sequences).",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s11_moles_clip.mjs on question 打地鼠 高级 at 390x844 and 360x640. Clipped labels (scrollWidth > clientWidth 86): '多少（钱/不可数）' 126, '多少（可数）' 93, '多大（年龄）' 93, '他们/她们/它们' 104. The screenshot (audit/skeptic-minigames-p1/shots_s11_moles_question_360.png) shows the target 'how many' with cards '多少（钱/…' and '多少（可…', so the part that tells them apart is cut by .mole-cn's nowrap + ellipsis (template.html:1028). The 360 family emoji wrap was not re-checked.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed MG-16
+{
+ "id": "MG-16",
+ "title": "360×640: typing keyboard ends 2px below the screen; bubbles clipped at the right edge / long words overflow the bubble",
+ "severity": "polish",
+ "area": "打字大师, 泡泡大作战 at 360px width",
+ "repro": "360×640 viewport. 打字大师 高级 (any island), and 泡泡 高级 on island_family.",
+ "observed": "Keyboard bottom = 642px with the body locked (type-lock), so the bottom row is cut by 2px. 泡泡: a bubble at the right edge is half outside the play area ('grandma'), and 'grandmother' text is wider than its bubble (86 > 81px). 'washing machine' typing slots shrink to 8px wide.",
+ "expected": "Keyboard fully visible; bubbles fully inside the area; text fits.",
+ "evidence": "p11_360.mjs: typingLong kbBottom 642 vs vh 640; bubbleText 'grandmother sw=86 cw=81'; minSlotW 8 for 'washing machine'. Screenshots shots/w360_question_typing_long.png, shots/w360_family_bubble.png, shots/w360_home_typing_long.png.",
+ "fix": "Size the typing keyboard with dvh/safe-area (or reduce key height under 680px). Clamp bubble left to 100% − size − margin using px, and shrink the bubble font for long words.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "s16_kb360.mjs on question, 打字大师 高级 at 360x640: lowest key bottom 642 vs viewport 640 with body.type-lock, so 2 px of the bottom row is cut and can't be scrolled to. At 390x844 it fits. The bubble edge clipping and the 8 px 'washing machine' slots were not re-checked; minimum slot width for 'how long' was 14 px.",
+ "sev2": "polish"
+}
+====================================================================================================
+confirmed MG-13
+{
+ "id": "MG-13",
+ "title": "打字大师 「准确率」 mixes units (correct letters vs number of wrong words)",
+ "severity": "polish",
+ "area": "打字大师 typeComplete",
+ "repro": "Any island → 打字大师 初级. Type 2 words completely wrong and the rest right.",
+ "observed": "action: 27 right, 2 wrong → '准确率 98%'. city: 6 right, 2 wrong (75% of words) → '准确率 92%'. Formula is correctLetters / (correctLetters + wrongWordCount).",
+ "expected": "A number that makes sense: letter accuracy (correct keystrokes / all keystrokes) or word accuracy (27/29).",
+ "evidence": "res_action_390.json typing.result '成功打出 27 个单词 … 准确率 98% … 这局拼错的词 (2个)'; res_city_390.json '准确率 92%' with 6 right / 2 wrong. Code: template.html:6810.",
+ "fix": "Track keystrokes typed vs correct keystrokes (or right/attempted words) and compute accuracy from one unit.",
+ "dim": "island-sweep-1",
+ "verdict": "confirmed",
+ "vreason": "Code re-read: template.html:6810 computes accuracy=totalLetters/(totalLetters+typeErrors). totalLetters is the letters of correct words; typeErrors is the count of wrong words, so the units are mixed. Not re-run in a browser.",
+ "sev2": "polish"
+}
+====================================================================================================
+confirmed P2-15
+{
+ "id": "P2-15",
+ "title": "打字大师 '准确率' mixes letter counts with wrong-word counts and ignores timeouts",
+ "severity": "minor",
+ "area": "typing result (all islands)",
+ "repro": "sports → 打字大师 → 初级: type 5 words right, 2 words wrong, let 1 word time out",
+ "observed": "Result shows '准确率 90%' (land1: 15 right / 2 wrong / 1 timeout → 98%).",
+ "expected": "An accuracy the kid can understand, e.g. 5/8 words = 63%, or a real letter-level rate.",
+ "evidence": "template.html:6810 `accuracy = totalLetters/(totalLetters+typeErrors)` where totalLetters counts correct letters but typeErrors counts wrong words; typeTimeout (≈template line 6743) records nothing. res_sports_390.json typing",
+ "fix": "Use word accuracy: typeDone/(typeDone+typeErrors+timeouts), or count wrong letters per wrong word.",
+ "dim": "island-sweep-2",
+ "verdict": "confirmed",
+ "vreason": "Confirmed from code, not replayed. island_sports.html:6891-6892 computes accuracy = correctLetters/(correctLetters + wrongWordCount) and labels it '准确率'. typeTimeout (line 6743) records nothing, so timeouts never lower the figure.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed VC-08
+{
+ "id": "VC-08",
+ "title": "探索单词 screen highlights the 错题 tab",
+ "severity": "minor",
+ "area": "Bottom nav state",
+ "repro": "Island → tap 探索单词 mode card.",
+ "observed": "The bottom tab '错题' turns yellow/active. showScreen's navMap maps explore→navExplore (template.html:4528, land_template.html:4310), but hansen_wrong_overview.js:200-218 relabelled navExplore as 错题.",
+ "expected": "No tab active, or 主页 active, while in a game screen.",
+ "evidence": "/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d61_game_explore_start.png",
+ "fix": "Remove `explore:'navExplore'` from navMap in both templates and regenerate the islands.",
+ "dim": "visual-consistency",
+ "verdict": "confirmed",
+ "vreason": "After tapping the 探索单词 mode card, the active screen is exploreScreen and the active nav item is navExplore, whose label is now '错题' (yellow). Data: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s1_home_island.json (navAfterExplore). Screenshot: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s1_pink_explore.png. Cause: template.html:4528 navMap explore→navExplore plus the relabel at hansen_wrong_overview.js:200-218.",
+ "sev2": "minor"
+}
+====================================================================================================
+confirmed VC-15
+{
+ "id": "VC-15",
+ "title": "All 8 单词大陆 islands show the land-1 English subtitle 'STAR SEA I: EMOTION & CHARACTER ISLAND'",
+ "severity": "minor",
+ "area": "land_template.html",
+ "repro": "Open island_land4.html or island_land8.html.",
+ "observed": "'单词大陆·④铸剑锻炉山' / '⑧星火火山口' are each subtitled 'STAR SEA I: EMOTION & CHARACTER ISLAND', using the retired 'Star Sea' name; their <title> says 'Word Continent 4: 思考行动' etc.",
+ "expected": "A per-island subtitle, e.g. 'WORD CONTINENT 4 · THINK & ACT'.",
+ "evidence": "/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d31_island_land4_top.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d31_island_land8_top.png; land_template.html:1464 (hard-coded)",
+ "fix": "Add a ⟦⟦LAND_EN⟧⟧ placeholder at land_template.html:1464 and fill it in generate_land.py from land_data.json.",
+ "dim": "visual-consistency",
+ "verdict": "confirmed",
+ "vreason": "At runtime island_land4.html shows '单词大陆·④铸剑锻炉山' with the subtitle 'STAR SEA I: EMOTION & CHARACTER ISLAND' (visible, y=117). Data: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s5_misc.json. Screenshot: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s5_land4_top.png. grep finds the same string in all 8 generated land pages. It is hard-coded at land_template.html:1464.",
+ "sev2": "minor"
+}
+====================================================================================================
+uncertain P2-07
+{
+ "id": "P2-07",
+ "title": "Every land island's header subtitle says 'STAR SEA I: EMOTION & CHARACTER ISLAND'",
+ "severity": "minor",
+ "area": "land_template.html header",
+ "repro": "Open island_land3 (时之钟谷) or island_land5 (晶石回廊) home",
+ "observed": "Title '单词大陆·③时之钟谷' with subtitle 'STAR SEA I: EMOTION & CHARACTER ISLAND' (land1's theme). The same text appears on all 8 pages.",
+ "expected": "A per-island English subtitle (e.g. TIME & EXPRESSIONS).",
+ "evidence": "land_template.html:1464 (inside the shared template, not a LAND_SLOT). Runtime: r2_land3_390.log 'island home head'",
+ "fix": "Move the subtitle into a LAND_SLOT, fill it from land_data.json, and regenerate.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+====================================================================================================
+confirmed VC-06
+{
+ "id": "VC-06",
+ "title": "Island showToast (27 call sites) renders off-centre in the right half and vanishes in 1.2 s; at least 6 toast styles app-wide",
+ "severity": "major",
+ "area": "Toasts",
+ "repro": "In an island run showToast('⚠️ 签到账本尚未加载，本次未扣/发任何奖励，请稍后重试'). This is a real message at template.html; the same function shows '任务完成' rewards and check-in errors. Then open 抽卡 with fewer than 1000 coins and tap 抽一张.",
+ "observed": "floatText starts at left = innerWidth/2. The measured box is left 195 → right 390, so the text occupies only the right half, wraps to 3 lines over the 挑战BOSS card, reaches the screen edge and is removed after 1.2 s (template.html:4497, 2645, 1304). Other toast styles:\n- HansenToast: bottom, over the tab bar\n- dia-toast: top 28%\n- gacha-toast: top 30%, covering the 抽一张 button\n- hansen_review showToast: full-screen dimmed modal\n- card-unlock and tier toasts: top 80px\n- achievement toast: purple card near the bottom",
+ "expected": "One toast component (HansenToast), centred, readable for about 2.5 s or more, never covering the primary CTA.",
+ "evidence": "/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/t1_template_showToast_paused300ms.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/t3_gacha_toast.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/toasts.json; hansen_diamond_shop.js:554, hansen_gacha.js:437, hansen_review.js:106-117, hansen_cards.js:328, hansen_spellbee_gems.js:292, land_template.html:4279",
+ "fix": "Point template/land_template showToast at HansenToast.say/good/bad. Keep floatText only for short '+5' coin or XP pops. Forward shopToast, showGachaToast and the review showToast the same way the other 9 modules already forward (see the comment in hansen_gear.js:235).",
+ "dim": "visual-consistency",
+ "verdict": "confirmed",
+ "vreason": "Called the island's own showToast('⚠️ 签到账本尚未加载，本次未扣/发任何奖励，请稍后重试'). The .float-text box:\n- at 100 ms: x 193→392, y 358→440 (3 lines in the right half, already 2px past the 390 viewport)\n- at 300 ms: opacity 0.70, scaled to x 183→402 (clipped at the right edge)\n- removed at 1.3 s\nCode: template.html:2645, 4497, 1304 (left=innerWidth/2, no translateX(-50%)). Screenshot: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s3_dark_toast_300ms.png.\nGacha toast with 300 coins: it sits at y 253-317 over the '抽一张' button (y 268-361) and hides its label for 2.2 s. Screenshot: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s6_gacha_toast_crop.png.\nhansen_review's showToast is a full-screen 0.85 scrim modal (hansen_review.js:106-117). HansenToast never replaces window.showToast.",
+ "sev2": "major"
+}
+====================================================================================================
+confirmed SS-5
+{
+ "id": "SS-5",
+ "title": "Top bar shows a nonsensical 'N/0 XP' at max level (Lv.30)",
+ "severity": "polish",
+ "area": "template.html updateTopBar / getXpForNextLevel (all islands)",
+ "repro": "In any island, reach Lv.30 (charXP ≥ 52200; e.g. addXP(52300)). Look at the XP line under the name.",
+ "observed": "The top bar reads '100/0 XP'. xpText keeps growing (charXP − 52200) while xpMax stays 0 (screenshot top360.png).",
+ "expected": "A meaningful max-level label such as '已满级 MAX' (house rule: never show numbers that don't make sense).",
+ "evidence": "template.html:2797-2799: xpText=getXpInCurrentLevel(), xpMax=getXpForNextLevel(), which returns 0 when getNextAdvLevel() is null. Script t20_360.mjs; /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/shared-state/top360.png",
+ "fix": "In updateTopBar: `if(!getNextAdvLevel()){xpText.textContent='已满级';xpMax.parentNode... show 'MAX'}`, or render `<span id=xpText>MAX</span>` and hide the '/xpMax XP' part. Run generate.py afterwards.",
+ "dim": "shared-state",
+ "verdict": "confirmed",
+ "vreason": "e11_misc.mjs: addXP(52300) in food gives lvl 30, name 冒险之王, and the XP line reads '100/0 XP'. After +500 more it reads '600/0 XP'. Code: template.html:2797-2798 together with getXpForNextLevel returning 0 when there is no next level (template.html:2889-2893).",
+ "sev2": "polish"
+}
+====================================================================================================
+uncertain P2-19
+{
+ "id": "P2-19",
+ "title": "Combo pill '🎯3 · 🪙满' stays on screen after leaving a game and covers other screens' titles",
+ "severity": "polish",
+ "area": "#comboBadge (island pages)",
+ "repro": "land1 → play 极速60秒 to a 3+ streak → back to home → open 抽卡",
+ "observed": "The combo pill stays pinned under the XP bar and covers the '单词大陆抽卡' title. It is also visible on result screens.",
+ "expected": "Hide it outside game screens (the streak count can be kept).",
+ "evidence": "shots/land1_gacha_draw_390.png, shots/sports_fish_result_390.png; hideComboUI is only called on a miss or break (island_land1.html:4257, 4111, 4127)",
+ "fix": "Call hideComboUI() in the showScreen wrapper whenever the target screen is not a game screen.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+====================================================================================================
+confirmed INT-10
+{
+ "id": "INT-10",
+ "title": "Every island greets a new player as if it were a separate app, and mode counts disagree (12 vs 14)",
+ "severity": "minor",
+ "area": "template.html welcome modal; index.html intro copy",
+ "repro": "New user: open any 2 islands.",
+ "observed": "Each island shows '欢迎来到X大冒险！… 12 种超酷玩法 … 36 阶进化宠物 … 每日宝箱 + 签到奖励 … 144 个成就 … 开始冒险！' (all 18 cards showed it; p3_all.out welcome:true). Home says '12 学习模式' / '12 种玩法' / '12 种超酷挑战', but each island has 14 mode cards (p18.out list).",
+ "expected": "The app-wide introduction appears once (the home onboarding already does this). Per island, at most a short 'X岛 · N 个单词' note. Counts on screen match what is shown, per the project's 不要乱写 rule.",
+ "evidence": "template.html:7923 (condition S.totalAnswers===0 per island), index.html:3353, 3369, 3761.",
+ "fix": "Show the full welcome only if a global flag (e.g. hansen_island_intro_seen) is unset; otherwise a one-line toast. Compute or align the mode count (or say 12 learning modes + 拼写大PK + 抽卡).",
+ "dim": "integration-nav",
+ "verdict": "confirmed",
+ "vreason": "Confirmed. The full app-wide welcome ('开始冒险！') appeared on both 动物 and 食物 (s01.out) and on island_season (s03 screenshot). It is shown per island while S.totalAnswers===0 (template.html:7923), and INT-01/02 reloads bring it back again. island_animal.html has 14 .mode-card entries, while index.html:3353, 3369 and 3761 and the welcome text say 12. This is a copy/UX problem with no functional effect, so I lowered it to polish.",
+ "sev2": "polish"
+}
+####################################################################################################
+MISSED
+-- missed #1
+{
+ "dim": "integration-nav",
+ "text": "MINOR – the 'recent island' prefetch requests files that do not exist. hansen_island_prefetch_v1025.js:73-83 builds 'island_'+lastIslandKey+'.html', i.e. island_wordIslandAnimal.html. Repro: visit 动物, reload home, wait 14 s; the server logs GET /island_wordIslandAnimal.html?v=1163 → 404 (skeptic-integration/s05.out). The localStorage-key scan also turns save keys into wrong file names: wordIslandAdj/Misc/Pronouns/Verbs/House/ColorNum → island_adj, island_misc, island_pronouns, island_verbs, island_house, island_colornum (.html), none of which exist; the real files are adjective/treasure/question/action/home/color. It also prefetches island_season.html for every player, because the hidden warm copy (INT-02) creates the wordIslandSeason key. Fix: map keys to files through index.html's ISLAND_META, or store lastIslandFile when an island is opened."
+}
+-- missed #2
+{
+ "dim": "integration-nav",
+ "text": "POLISH – the same island has different names and icons on the home card, the loading screen and the 最近探险 card. Observed (s13.out): tapping 百宝大冒险 shows '正在进入 常用词岛…' and later the card '🔤 常用词'; 疑问大冒险 → '正在进入 代词岛…'; 动作大冒险 → '正在进入 动词岛…'. From the code, 家居 shows as 房屋 and 色彩数字 as 颜色数字. 9 of 18 recent-card emojis differ from the card icons (动物 🦁 vs 🐯, 职业 👨‍⚕️ vs 🦸, 学校 🏫 vs 🎒, and 色彩数字 uses 🌈, which is the 自然 card's icon). Cause: index.html ISLAND_META (lines 3928-3955) short/emoji vs the .island-name/.island-icon markup. Fix: build both from one table."
+}
+-- missed #3
+{
+ "dim": "integration-nav",
+ "text": "MAJOR (part of INT-03, but the auditor's analysis misses it) – the 最近探险 card has a second, independent trigger: INT-01's background reload of the first island writes a newer lastSaveTime. After the child actually plays 食物 (2 answers) the card points to 星海终战 (s03b.out); after 疑问 and after 动作 it points to the first island, 常用词 (s13.out). So removing room warming (INT-02) alone will not fix the card. Either findRecentIsland must prefer lastIslandKey/lastIslandTime, or INT-01 must be fixed as well."
+}
+-- missed #4
+{
+ "dim": "integration-nav",
+ "text": "NOTE for the orchestrator (measurement, not an app bug) – every byte and request count in the auditor's INT-01/INT-02 comes from a harness that routes all requests through Playwright's ctx.route('**/*') (audit/integration/lib.mjs). That turns off Chromium's HTTP cache, so the numbers are cold-cache worst cases on every load. Cached numbers without routing are in skeptic-integration/s02e.out and s01b.out. On home after visiting just 2 islands, the renderer held 10 frames and 22 live documents (s01b.out)."
+}
+-- missed #5
+{
+ "dim": "shared-state",
+ "text": "[major] A hidden warmed 星海 copy uses up the one-time 星海 prologue story. Repro (e8_prologue.mjs): fresh profile, index → 跳过 → tap 食物大冒险 → 开始冒险！ → wait 15 s. localStorage.hsn_season_prologue_seen is now '1', set by the hidden 2:island_season frame (hansen_cards.js:620, which also calls hansenStoryReader('prologue') inside the invisible frame). Then home → openIsland('island_season.html') (the 前往星海 path) → 开始冒险！: no story appears, only the boss hub (screenshot /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-shared-state/e8_normal_season_first_visit.png). Control, the same steps with hansen_room_warm_v1023.js stubbed out: the flag stays null and the first real 星海 visit shows #hsnStoryModal '星 海 的 回 响 · 序章 · 那一夜，最远的星亮了一下' (e8_control_season_first_visit.png). This hits essentially every child who opens any island before 星海. Expected: the prologue auto-plays on the first visible visit. Fix: stop warming the season room, which is never opened (SS-1). Defensively, in hansen_cards.js only auto-play and set the flag when the page is not inside a hidden room or prefetch frame (!(window.frameElement && (frameElement.closest('[id^=\"hsn_room_\"]') || /[?&]warm=1/.test(location.search)))). Better still, set the flag when the reader is actually closed."
+}
+-- missed #6
+{
+ "dim": "shared-state",
+ "text": "[major] The home card 最近探险 is taken over by the hidden 星海 copies, and tapping it opens the wrong island. Repro (e9_recent_tap.mjs): index → 跳过 → tap 动物大冒险 → 开始冒险！ → 3 correct answers at +3 s (markAnswer + addXP + save) → leave with goHome at +20 s. The card shows '👑 星海终战 · 点击继续 →', and a real touch tap on #recentLearnStat opens island_season.html. Last activity at +25 s gives the correct '🐯 动物'. Control with room_warm stubbed and the +3 s/+20 s timing gives '🐯 动物' (e10_cost.mjs control). So any short visit, or any visit whose last save falls within about 15 s of entry, points the child to 星海终战. Cause: the hidden island_season copies run hansen_upgrade.js:120-128, which stamps wordIslandSeason.lastSaveTime=Date.now() and hansen_lastIslandMeta. index.html:3959-3977 findRecentIsland picks the largest lastSaveTime across all islands and ignores the lastIslandKey/lastIslandTime that openIsland just wrote. Fix: SS-1. Also skip the hansen_upgrade.js stamp inside hidden room/prefetch frames, and have findRecentIsland prefer lastIslandKey when lastIslandTime is at least the scanned time (the shell knows which island was actually opened)."
+}
+-- missed #7
+{
+ "dim": "island-sweep-1",
+ "text": "MISSED-1 (minor) 字母拼拼乐 leaves its 'next word' timer running after the kid leaves (same class as MG-01, without the scroll lock). There is no scrActive flag. A correct word runs `scrIdx++;setTimeout(nextScramble,1200)` (template.html:6224), and nextScramble (:6188) has no active or screen guard. Repro (s13_scramble_leave.mjs, island school, real taps): 初级 → spell 'bag' correctly → tap ← 返回 0.25 s later. 1.8 s later the next word 'map' was rendered into the hidden screen and spoken while the screen was homeScreen. Variant: tap the header 换难度 instead. The difficulty menu appears and about 1.2 s later is replaced by the old round's next word ('exam'), so the kid is pushed back into the old round. On the last word, scrComplete would run off-screen. Expected: leaving or changing difficulty stops the round. Fix: add scrActive plus a run token, set in startScrambleLevel and cleared in startScramble/showScreen; nextScramble returns early unless active and #scrambleScreen is active. Shots: audit/skeptic-minigames-p1/shots_s13_scramble_back.png, shots_s13_scramble_menu.png."
+}
+-- missed #8
+{
+ "dim": "island-sweep-1",
+ "text": "MISSED-2 (minor) The auditor's coverage claim '0 HTTP ≥400' is wrong. hansen_island_prefetch_v1025.js:73-81 builds 'island_'+lastIslandKey+'.html', but index.html:4060 stores ISLAND_META keys such as 'wordIslandPeople'. It also lower-cases the suffix of every wordIsland* key. Repro (s12_prefetch.mjs): play one question on 职业岛, then open index.html in a new tab. The home requests /island_wordIslandPeople.html?v=1163 and /island_people.html?v=1163, and both return 404. The same pattern was seen during my island runs: /island_wordIslandFood.html, /island_wordIslandPronouns.html and /island_pronouns.html, which are timing-dependent on first use and happen on every launch for returning users. As a result the 'recently played island' prefetch never fetches the real file, and 2 of its 6 prefetch slots go to 404s. Fix: map through ISLAND_META (expose it, e.g. window.HSN_ISLAND_META) or a key→file table, and skip *_bak keys."
+}
+-- missed #9
+{
+ "dim": "island-sweep-1",
+ "text": "MISSED-3 (minor; separate symptom of MG-08) Spelling bee keeps racing while 'paused'. Tapping ✕ during '🔊 听单词…' pauses and clears botTimer (spelling_bee.html:2335). When speakThen's callback _startRace (:2142) fires later (on audio end or the 3.5 s guard), it restarts the player timer and the robot without checking `paused`. Repro (s10_bee.mjs food 4000): ✕ during listening, wait 4 s on the 退出 confirm: botProg went to 3/4 with paused=true, and the word finished 0.4 s after tapping 继续比赛. Expected: nothing advances while the confirm is open. Fix: _startRace and botStep return or queue while paused, and exitNo starts the race only if it had started."
+}
+-- missed #10
+{
+ "dim": "island-sweep-1",
+ "text": "MISSED-4 (minor, perf/memory; the auditor listed it as not checked, now observed) The warm-room module recurses. hansen_room_warm_v1023.js:155-184 runs scheduleWarm in every page that includes it, including island_season.html, which is itself loaded as a hidden warm room by every island, and it has no guard for 'I am inside a room iframe'. Repro (s14_frames.mjs): open island_food from the home and watch frames for 30 s. island_food warms land_map and island_season. That island_season warms its own land_map and island_season (nested island_season inside island_season, at 8.7 s), which warms land_map again; Chrome blocked a 3rd level, leaving a blank frame. Each of the 3 island pages also cycles the boss_hall, season_showcase and spelling_bee prefetch iframes. That is 14 hidden page loads (about 5.4 MB of HTML parsed and executed) within about 19 s of opening one island, with 8 frames still alive after 30 s. s15_warm_cost.mjs, same run with the module stubbed out: JS heap 11.3 MB vs 5.7 MB, 9 vs 3 documents, 11.3k vs 5.4k DOM nodes. Side effect: after a kid opened only 职业岛, localStorage held wordIslandSeason and wordIslandSeason_bak (most likely written by the hidden season page), which then fed the prefetch 'recent' list (island_season.html [recent]). Fix: bail out of scheduleWarm when window.frameElement sits inside an #hsn_room_* wrapper (or pass ?room=1 and skip), so only the top island page warms rooms."
+}
+-- missed #11
+{
+ "dim": "island-sweep-2",
+ "text": "[minor-major] The 72h trial's card unlock keeps getting deleted, so the 卡册 and 神秘殿堂 counts jump during the trial. hansen_boss_progress.js:132 (the v330 per-island migration in ensureFields) calls localStorage.removeItem('hansen_card_temp_unlock_until'), the key that hansen_freepass.js uses to show all cards during the trial. The migration runs on the first boot of every island's save, including the hidden warm island_season iframe. I logged the stack: removeItem ← ensureFields (hansen_boss_progress.js:132) in island_time.html (frame depth 1) and island_season.html (depth 2, hidden). Repro: fresh user → home → tap 时间 island → 开始冒险 → open 卡册 at ~8s and ~11s: '已收集 0 / 20', 神秘殿堂 '已收藏 0/1'. Reopen at ~16s and ~24s: '已收集 20 / 20', '1/1'. HansenFreepass.active() is true throughout. A card drawn as unlocked can also silently fail to open if the key disappears before the tap (hansenShowCardDetail re-checks; seen once). Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-minigames-p2/m_flip.json and m_hidden.json. Fix: don't delete the key in the v330 migration (or skip it while the value equals hansen_freepass_until), and have the card UIs also accept HansenFreepass.active()."
+}
+-- missed #12
+{
+ "dim": "island-sweep-2",
+ "text": "[minor] A hidden background copy of the season page uses up the 星海 prologue before the kid sees it. hansen_room_warm_v1023.js loads island_season.html into a hidden room iframe on every island page. That copy renders the season boss picker, and hansen_cards.js:620 sets hsn_season_prologue_seen='1' and plays the prologue inside the invisible frame. Repro: fresh user → tap 时间 island → wait ~15s → then open 星海终战 (openIsland('island_season.html')): no prologue appears (hsnStoryModal absent). The setItem log shows the write came from island_season.html?v=1163 at frame depth 2 with hidden=true. If island_season is opened before any other island, the prologue does show (p05 run). Evidence: m_hidden.json. Fix: skip story, migration and other side effects in warm or hidden room iframes (pass ?warm=1 or detect the hidden frameElement), and set the seen flag only when the kid closes the story."
+}
+-- missed #13
+{
+ "dim": "island-sweep-2",
+ "text": "[major, performance and mobile data] The hidden pre-load iframes nest inside each other and multiply. Every island page loads hansen_room_warm_v1023.js, which puts land_map.html (690 KB) and island_season.html (657 KB plus 90 scripts) into hidden iframes. island_season loads the same module again, so a second hidden island_season and another land_map appear one level deeper. Chrome allows one level of self-reference and blocks the next, which leaves a blank frame. Measured after a real tap on 时间 island as a fresh user (16s): 9 documents, 1,309 requests and 62.3 MB downloaded. That includes 2 × 240 season mp3 (6 MB each) and 2 × ~79 webp (6.4 MB each) from the hidden season frames, plus boss_hall/showcase/spelling_bee prefetch frames. With the module stubbed out: 3 documents, 261 requests, 16.6 MB; JS heap 12.7 vs 7.6 MB; DOM nodes 10.9k vs 5.6k. Caveats: my static server sends no cache headers, so the deeper duplicate re-downloaded everything, and headless audio preload may be more aggressive than WeChat's. For a kid who has not cleared 8 islands the season page is locked anyway. Evidence: m_net_normal.json, m_net_block.json, m_hidden.json (frames list). Fix: don't run the room module inside a room iframe (e.g. return early when window.frameElement is inside a #hsn_room_* wrapper, or when window.parent !== window.top), and don't pre-load the season room before all 8 islands are cleared."
+}
+-- missed #14
+{
+ "dim": "page-health",
+ "text": "[major] The home 「最近探险的岛屿 · 点击继续」 card sends the child to the wrong island, often to 星海终战, which they never opened. Repro A, new user (s3_seq.mjs): index → 跳过 → tap 食物 → wait 9 s → tap the island 🏠. The card reads '👑 最近探险的岛屿 👑 星海终战 · 点击继续 →' with _target island_season.html (s3_seq_390.json, step 1). Repro B, a child who plays (s4_recent.mjs PLAY=1; an answer is simulated by calling the island's own save() after warm-up): after 食物 → 🏠 the card correctly shows 🍔 食物. After 动物 → answer → 🏠 it shows 👑 星海终战, and tapping it opens island_season.html at 「星海女帝·终战」 with its welcome popup (s4_recent_asis_play.json; /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-page-health/shots/s4_after_card_asis_play.png). That is the endgame the land map marks '8岛全通后解锁'. There are two independent causes. (a) The hidden island_season warm frames call save() at init, so wordIslandSeason.lastSaveTime is the newest. (b) PH-03's background reload of the first island saves it again: with warm switched off the card shows 食物 instead of 动物 (s4_recent_nowarm_play.json), and with PH-03 fixed but warm on it still shows 星海终战 (s3_seq_390_deferpush.json). Code: index.html:3959-3977, where findRecentIsland lets the newest lastSaveTime among all wordIsland* saves override lastIslandKey/lastIslandTime; template.html:2128-2130, where save() stamps Date.now(). Fix: findRecentIsland should prefer lastIslandKey/lastIslandTime, which only real openIsland/continue taps write, whenever they exist. Fix PH-01 and PH-03 so background documents never save. Re-run s4_recent.mjs and expect '动物 => island_animal.html'."
+}
+-- missed #15
+{
+ "dim": "page-health",
+ "text": "[minor] The home page's idle island-HTML prefetch keeps downloading while an island is loading. Tapping 食物 at 390 (warm disabled to isolate it), index.html fetched /island_color.html?v=1163 (614778 B) at +206 ms and /island_nature.html?v=1163 (604796 B) at +942 ms after the tap (s1_nowarm_390.json 'docs'); the as-is run shows island_nature at +470 ms. openIsland sets window.__hsnIslandBusyUntil for 12 s specifically to pause home preloads during island entry (index.html:4079), but hansen_island_prefetch_v1025.js prefetchVisible/step (lines 93-102) and prefetchRecent never check it. Per PH-04 these pages cannot be reused anyway, so this is ~1.2 MB competing with the island's own first load on a phone network. Fix: in step() and prefetchRecent, skip or reschedule while Date.now() < (window.__hsnIslandBusyUntil||0), or stop idle prefetch once any island has been opened."
+}
+-- missed #16
+{
+ "dim": "visual-consistency",
+ "text": "MAJOR — the home '最近探险的岛屿' card points to an island the child never opened. Repro: fresh user (hansen_onboarded=1) → home → tap 动物大冒险 → 开始冒险 → wait about 10 s → tap the map button (回首页). The card then reads '👑 星海终战 · 点击继续 →'; expected '🐯 动物 · 点击继续'. Cause: hansen_room_warm_v1023.js:27 warms 'season' (island_season.html, warm:true) in a hidden iframe inside every island. That page runs fully: save() writes wordIslandSeason.lastSaveTime, and hansen_mylearning writes hsn_progress:星海词汇大冒险. Observed: animal lastSaveTime 1793716266520 < season 1793716271876. index.html findRecentIsland (about lines 3958-3975) takes the maximum lastSaveTime across ISLAND_META keys and so overrides lastIslandKey='wordIslandAnimal'. The same leak makes 我的学习 say '已点亮 2 / 19 座岛' and list '星海词汇大冒险 · 今天' for a one-island user. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s8_recent.json, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s8_recent_crop.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s7_season_leak.json (shows the hidden frames land_map, island_season, boss_hall?warm=1, season_showcase?warm=1). Fix: give warmed rooms a ?warm=1 flag and have island_season skip save() and writeSnapshot while hidden and warm. In findRecentIsland, prefer lastIslandKey/lastIslandTime, which openIsland writes, over lastSaveTime."
+}
+-- missed #17
+{
+ "dim": "visual-consistency",
+ "text": "MINOR — the 我的学习 island count is wrong in both directions. All 8 单词大陆 islands write the same key 'hsn_progress:单词大陆': islandTitle() takes document.title.split('·')[0], so they overwrite each other. The warmed season island adds a phantom entry. The denominator is hard-coded TOTAL_ISLANDS=19 (hansen_mylearning.js:24), while 27 island pages exist and home says 18 主题岛屿. Repro: open island_land1.html, island_land4.html, then island_animal.html → 我的学习 shows '已点亮 3 / 19 座岛'; keys are 星海词汇大冒险, 单词大陆, 动物大冒险. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s9_land_snap.json. Fix: key snapshots by file name or ISLAND_META key, count only islands with real activity, and derive the total from the island list."
+}
+-- missed #18
+{
+ "dim": "visual-consistency",
+ "text": "MINOR — 神秘殿堂 shows two different counts for the same collection. The 卡册 entry card says '历代赛季限定卡 · 已收藏 0/1' (hansen_cards.js:943-953 counts seasons via allSeasons().length). The hall it opens says '历代赛季限定卡的殿堂 · 已收藏 0/6' (hansen_season.js:600/683 counts cards). Because of free-pass timing, one first-visit run showed entry 0/1 next to hall 6/6 with every card marked '✓ 已收藏'. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s3_island_dark.json and /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/shots/s3_dark_season_hall.png. Fix: one shared counter and the same wording."
+}
+-- missed #19
+{
+ "dim": "visual-consistency",
+ "text": "MINOR — overlay back/close controls are smaller than the 44px touch target that .back-btn (63x44) meets. Measured: 错题总览 '←' 36x36 (hansen_wrong_overview.js:338), 复习中心 '←' 36x36, 我的学习 '‹' 38x38, 神秘殿堂 '×' 23x22 drawn in #64748b on navy (hansen_season.js:682). For a kid audience this compounds VC-05. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-visual-consistency/s6_targets.json."
+}
+-- missed #20
+{
+ "dim": "offline-update",
+ "text": "MISSED-A (minor, perf): the SW asset cache is constantly rewritten. sw_v944.js:355-357 starts fetch(request) and putIfReasonable for every code request before it checks the exact cache, so even a hit on a versioned ?v= URL (unchanged by definition) triggers a network revalidation and a full Cache Storage rewrite. Repro: an instrumented copy of sw_v944.js (same logic plus logging), served in place of the original. Open home, open 食物岛, wait 15 s. Observed: 657 cache.put and 5,377 cache.delete calls (193 effective) in ~30 s, with trim snapshots at 77–91 entries in a 72-entry cache. That is wasted disk I/O, CPU and battery on phones, and it is also what evicts island scripts (NET-04). Fix: when an exact match exists for a ?v= URL, return it and skip the fetch and put; serialize trim once per batch; raise or remove the cap for versioned code. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-network/s04c_result.json"
+}
+-- missed #21
+{
+ "dim": "offline-update",
+ "text": "MISSED-B (minor): land_map.html (496 KB gzipped) is downloaded twice in the first session on 4G. Home warms 'land_map.html' (hansen_season.js:345, force-cache), but the island room loads 'land_map.html?v=1163' (hansen_room_warm_v1023.js:60), a different URL, so it is a cache miss. Repro: fresh profile, open home, wait 15 s, tap 食物岛, wait 20 s. Observed with and without the SW: '/land_map.html 200 496KB' on home, then '/land_map.html?v=1163 200 496KB' after the tap. Fix: use one URL for both (drop ?v= in room-warm or add it in the home warm). Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-network/s06b_result.json"
+}
+-- missed #22
+{
+ "dim": "offline-update",
+ "text": "MISSED-C (polish, extends NET-06): prefetchRecent's wordIsland* key scan (hansen_island_prefetch_v1025.js:77-83) turns 5 of the 18 save keys into files that don't exist. wordIslandPeople → island_people.html (real file island_job), ColorNum → island_colornum (island_color), Verbs → island_verbs (island_action), Transport → island_transport (island_traffic), House → island_house (island_home). Repro: a returning kid with those keys in localStorage loads home. Observed 404 prefetches for island_people, island_colornum, island_verbs and island_wordIslandPeople on every home load. Fix: map keys through ISLAND_META[key].file. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-network/s06_result.json (returning_kid_nosw)"
+}
+-- missed #23
+{
+ "dim": "offline-update",
+ "text": "MISSED-D (polish): /VERSION is fetched 10–14 times per island open. Every island, room and warm-prefetch document's watcher calls window.top.HansenVersionWatch.check(), and check() always does a fresh no-store fetch with no dedupe or throttle (hansen_version_watch_v1083.js:153-157; checkedAt is only consulted by the visibilitychange handler). Repro: open home, tap 食物岛, wait 20 s, count /VERSION requests. Observed 1 on home, then 10 (SW blocked) or 14 (SW allowed) after the tap. Fix: in check(), reuse an in-flight promise and skip if checkedAt is within the last ~60 s unless opts.manual. Evidence: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/skeptic-network/s06b_result.json"
+}
+-- missed #24
+{
+ "dim": "code-bugs",
+ "text": "[major · performance, all 27 islands] Every island visit boots 5 hidden documents that no one ever shows. hansen_room_warm_v1023.js warms land_map + island_season inside each island. The warmed island_season loads the same module and nests a second island_season + land_map inside itself. Frame tree (audit/skeptic-codebug/s17_frametree.mjs): index → island_food → {land_map?v=1163, island_season?v=1163 → {land_map, island_season → land_map}}. No live shell UI calls HansenRoom.open (call sites listed under CB-05). CDP metrics 16 s after opening island_food (s18_warm_cost.mjs, desktop Chromium), compared with the module stubbed out: Documents 14 vs 3, JS heap 13.0 vs 4.6 MB, DOM nodes 13,034 vs 5,868, ScriptDuration 1.38 vs 0.52 s, TaskDuration 10.2 vs 7.1 s. Each warm island_season also prefetches index.html (s19_index_fetch.mjs). This is the root cause of CB-04, of island_season appearing in the CB-11 prefetch list, and of the storage-event storms described at hansen_explore_progress_v945.js:450-460. Fix: in hansen_room_warm_v1023.js return before scheduleWarm when window.top !== window (inside the home shell or another room), or drop the module from island pages. The shell already opens land_map/island_season by replacing the island iframe. Not tested: WebKit (iOS WeChat) same-URL nesting limits, because only Chromium is installed; Chromium stopped the recursion at depth 3."
+}
+-- missed #25
+{
+ "dim": "code-bugs",
+ "text": "[fix guidance for CB-02 — the auditor's proposed fix would regress] template.html checkAch is dead today but carries 2 latent bugs that chaining it would switch on. (1) wrongClear (错词清零) unlocks on the very first word learned; reproduced in s16_fix_regress.mjs. The override requires the hansen_wrong_seen_v942 flag; the template rule does not. (2) All 25 best-score achievements stay dead: spd500, spd1000, bub100, eag100, mol100, fsh100 + speedS×3, bubbleS×4, eagleS×4, molesS×4, fishS×4. S.stats.speedBest, bubbleBest, eagleBest, molesBest and fishBest are normalized to {easy,medium,hard} (template.html:2184), but the template compares `_st.speedBest>=200` and `_n(_st.speedBest)` as numbers; reproduced in s06_tplcheck.mjs, where speedBest={easy:250} leaves speedS200 locked. The real fix must port only the series rules into hansen_island_upgrade.js and use __hsnBestStatValue()."
+}
+-- missed #26
+{
+ "dim": "code-bugs",
+ "text": "[impact upgrade for CB-09] index.html has no link to land_map.html, island_land1-8 or island_season apart from the season-gated #hsnSeasonBar (s13_season.mjs link scan). From 2027-01-01 the whole 单词大陆 (8 islands) and 星海终战 can't be reached from home. The only exception is the 最近探险 card when it happens to point there."
+}
+####################################################################################################
+UNCERTAIN
+-- uncertain #1
+{
+ "id": "P2-07",
+ "title": "Every land island's header subtitle says 'STAR SEA I: EMOTION & CHARACTER ISLAND'",
+ "severity": "minor",
+ "area": "land_template.html header",
+ "repro": "Open island_land3 (时之钟谷) or island_land5 (晶石回廊) home",
+ "observed": "Title '单词大陆·③时之钟谷' with subtitle 'STAR SEA I: EMOTION & CHARACTER ISLAND' (land1's theme). The same text appears on all 8 pages.",
+ "expected": "A per-island English subtitle (e.g. TIME & EXPRESSIONS).",
+ "evidence": "land_template.html:1464 (inside the shared template, not a LAND_SLOT). Runtime: r2_land3_390.log 'island home head'",
+ "fix": "Move the subtitle into a LAND_SLOT, fill it from land_data.json, and regenerate.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #2
+{
+ "id": "P2-10",
+ "title": "boss_hall and season_showcase pages are wider than the phone (can pan sideways; right edge cut)",
+ "severity": "minor",
+ "area": "boss_hall.html, season_showcase.html",
+ "repro": "Open boss_hall.html?lv=1&own=1,2,5 or season_showcase.html?boss=S1 at 390 or 360 width (also opened inside islands from 卡册 / 神秘殿堂)",
+ "observed": "Page width 410 on a 390 screen (395 on 360; showcase 405/390). The controls panel's right border is off-screen at 360 (shots/ovf_360_boss_hall.png), and a horizontal drag can pan the page, which competes with the left/right swipe that switches bosses.",
+ "expected": "No horizontal overflow.",
+ "evidence": "r7_ovf.mjs: .spot (position:absolute, width 430/420, left −20/−35) and #bgA/#bgB Ken-Burns layers (−25..435) push the layout width out",
+ "fix": "Add html,body{overflow-x:hidden} (or overflow:hidden on the stage wrapper), and give .spot left:50%;transform:translateX(-50%);max-width:100vw.",
+ "dim": "island-sweep-2",
+ "verdict": "uncertain",
+ "vreason": "Opened standalone (direct URL), it reproduces: the layout viewport widens to 410 at 390 and 395 at 360, and a real touch swipe pans the page by 20/35px, cutting off the eye button. The real entry points open boss_hall and season_showcase only inside iframe overlays (hansen_cards.js:1006, hansen_season.js:713/735, hansen_land_cards.js:234), and there it does not reproduce in Chromium. Opened through 卡册 → owned card: iframe innerWidth is 390/360, touch swipes left and right keep scrollX at 0, and the controls .panel sits fully inside (45-345 / 30-330). Only the decorative #bgA/#bgB/.spot layers overflow, and they are clipped. I could not test the iframe behaviour of the iOS WeChat in-app browser here. html{overflow-x:hidden} would still be a harmless fix. Evidence: p10_embedded_hall.json, p_misc.json.",
+ "sev2": "polish"
+}
+-- uncertain #3
+{
+ "id": "P2-13",
+ "title": "Level menus show hard-coded examples and claims that don't match the island",
+ "severity": "minor",
+ "area": "字母拼拼乐 / 泡泡大作战 level menus (all islands)",
+ "repro": "Any island (e.g. land3, traffic) → 字母拼拼乐; → 泡泡大作战",
+ "observed": "Scramble examples are always 'man · cat · cow / tiger · friend · old / children · gentleman' (family-island words; 'old' has 3 letters but is listed as a 5–6 letter example), even on 时之钟谷 where the easy level has 0 words. The bubble menu says '每档大约 20 词左右' but levels are 0/8/22 (land1), 4/50/186 (season), 8/6/16 (sports).",
+ "expected": "Examples taken from the island's own pool for that level; the stated size matches the real count.",
+ "evidence": "template.html:6139 and land_template.html:5954 example:'man · cat · cow'…; bubble text at land_template.html:5666 / template.html:5851",
+ "fix": "Build examples with allW.filter(level.filter).slice(0,3).map(w=>w.en).join(' · ') and drop the '大约 20 词' sentence, or print the real count.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #4
+{
+ "id": "P2-16",
+ "title": "Menus promise '🪙金币 +N' but a perfect round often shows '金币 +0' with no explanation",
+ "severity": "minor",
+ "area": "coin display on result screens (all islands)",
+ "repro": "sports: play 听音辨义, 记忆翻牌, 打字, 完形填空, 拼拼乐 初级, then 钓鱼大师 初级 and catch all 8",
+ "observed": "Fish menu promised '🐟 8 条 · 🪙金币 +8'; the result shows '钓上全部 8 条 … 🪙 金币 +0'. Same for bubble and eagle on sports and for moles/fish/bubble/eagle on time. The only hint is the '🪙满' pill.",
+ "expected": "Tell the kid why (each word pays at most 3 coins per day), or present the menu number as a maximum.",
+ "evidence": "earnCoinOnCorrect (island_sports.html:4617, PER_WORD_CAP=3/day); result uses window._sessionCoins. res_sports_390.json fish/bubble/eagle RES; res_time_390.json; shots/sports_fish_result_390.png",
+ "fix": "When _sessionCoins===0 and the cap was hit, show '今天这些词的金币已领满，换个难度或明天再来～'. In menus write '最多 +N'.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #5
+{
+ "id": "P2-19",
+ "title": "Combo pill '🎯3 · 🪙满' stays on screen after leaving a game and covers other screens' titles",
+ "severity": "polish",
+ "area": "#comboBadge (island pages)",
+ "repro": "land1 → play 极速60秒 to a 3+ streak → back to home → open 抽卡",
+ "observed": "The combo pill stays pinned under the XP bar and covers the '单词大陆抽卡' title. It is also visible on result screens.",
+ "expected": "Hide it outside game screens (the streak count can be kept).",
+ "evidence": "shots/land1_gacha_draw_390.png, shots/sports_fish_result_390.png; hideComboUI is only called on a miss or break (island_land1.html:4257, 4111, 4127)",
+ "fix": "Call hideComboUI() in the showScreen wrapper whenever the target screen is not a game screen.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #6
+{
+ "id": "P2-20",
+ "title": "Trial shows a brand-new user '已收集 20 / 20 · ✨ 全部集齐 · 卡牌大师'",
+ "severity": "polish",
+ "area": "卡册 header during 72h freepass",
+ "repro": "Fresh user → any island → 卡册",
+ "observed": "Header claims every card is collected and awards the '卡牌大师' title. After 72h it silently drops to the real count (by design, no notice).",
+ "expected": "Clearly label it as a trial ('试玩期 · 全部开放').",
+ "evidence": "hansen_freepass.js syncOn sets hansen_card_temp_unlock_until; hansen_cards.js:881 __tmpAll → collected = all. boss_sports.json H.cardsText",
+ "fix": "When the freepass is active, show '🆓 试玩期 · 全部卡牌开放（剩 N 小时）' instead of 集齐/卡牌大师.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #7
+{
+ "id": "P2-21",
+ "title": "View-transition opt-in inside the island iframe throws an unhandled rejection on every iframe navigation",
+ "severity": "polish",
+ "area": "hansen_home_link.js",
+ "repro": "Inside an island (iframe#islandFrame) navigate island → land_map (e.g. world-map button on a land island)",
+ "observed": "pageerror / unhandledrejection: 'Transition was aborted because of invalid state. ViewTransition opt-in disabled'",
+ "expected": "No errors; cross-document view transitions don't apply inside the iframe shell.",
+ "evidence": "hansen_home_link.js:17 injects @view-transition{navigation:auto} unconditionally; boss_land3.json ev (tag 'hall')",
+ "fix": "Skip the injection when window.parent!==window.",
+ "dim": "island-sweep-2",
+ "verdict": "unverified"
+}
+-- uncertain #8
+{
+ "id": "VC-23",
+ "title": "Same patterns built many different ways (difficulty pickers, modals, scrims); token sprawl",
+ "severity": "polish",
+ "area": "Design system",
+ "repro": "Compare the difficulty choosers in 听音辨义, 完形填空, 打字大师, 钓鱼/打地鼠 and spelling bee; compare the modal and scrim styles.",
+ "observed": "At least 4 difficulty-picker designs: big cards with a word-count pill, cards with sample sentence and reward pill, slim cards with a ▶, and white radio cards. Modal styles: .modal (r22), cream gear sheet, gold-border 神秘殿堂, parchment land panel, review full-screen. Static counts: 19 border-radius values in template.html, 48 font sizes, 386 @keyframes, 73 z-index values (up to 2147483647), 13+ scrim colours. Home has no player HUD (level, coins, pet); it appears only after entering an island.",
+ "expected": "A small component set reused everywhere.",
+ "evidence": "/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/m_g2.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/m_g3.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d62_game_listen_start.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d65_game_cloze_play2.png",
+ "fix": "Adopt the token and component list in the summary:\n- --pal-* colours (hansen_palette.js)\n- --font-cartoon / --font-body\n- radius 8/12/16/22/999\n- .game-btn, .back-btn, .modal-bg/.modal, HansenToast\n- one DifficultyPicker (the listen version as the base)\n- one scrim (rgba(6,10,22,.86))\n- motion .15s/.3s\nAlso add a slim HUD strip (level / 🪙 / 💎 / streak) to the home page so the main hall and the rooms share the same top bar.",
+ "dim": "visual-consistency",
+ "verdict": "unverified"
+}

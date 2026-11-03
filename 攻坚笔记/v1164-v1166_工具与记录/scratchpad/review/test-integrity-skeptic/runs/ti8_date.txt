@@ -1,0 +1,2 @@
+numeric $lt matches: [ 'dateDoc', 'numDoc' ]  (MongoDB would match only numDoc)
+Date $lt matches   : [ 'dateDoc', 'numDoc' ]  (MongoDB would match only dateDoc)

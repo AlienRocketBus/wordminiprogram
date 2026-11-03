@@ -1,0 +1,16 @@
+test_tap_targets_v1120.mjs rc=0 34s 结果: 8 通过 / 0 失败
+test_ui_walkthrough_v969.mjs rc=1 79s ❌ 真机大补考未过：1 项
+test_roundtrip_diag_v1037.mjs rc=0 0s 结果: 11 通过 / 0 失败
+test_ladder_board_v1156.mjs rc=0 15s 结果: 72 通过 / 0 失败
+test_pk_record_v1103.mjs rc=0 0s 结果: 19 通过 / 0 失败
+test_addr_consistency_v1046.mjs rc=0 0s 结果: 7 通过 / 0 失败
+test_cross_page_wallet_v942.mjs rc=0 0s cross-page wallet v942: index sync order + award recovery before immediate home 
+test_land_sync_v942.mjs rc=0 1s land sync v942: 8-page shell contract + CSS + identities + Land3 slice + Land8 b
+test_sw_upgrade_v944.mjs rc=0 10s ✅ v944 SW upgrade regression passed (v943 profile → index + direct island, s
+test_explore_template_v945.mjs rc=0 0s explore template v945/v946: 27-page wiring + spelling-only routes + isolated pro
+test_reset_forensic_export_v942.mjs rc=0 0s reset forensic v960: read-only evidence + non-restorable schema + export-gated d
+test_purchase_transactions_v942.mjs rc=0 1s ✅ v942 商店事务：主题同源、钱包不覆盖、Land 确定抽卡、装
+test_core_purchase_transactions_v942.mjs rc=0 0s ✅ v942 核心购买红队：正片抽卡/分享幂等/钻石商店的假成功
+test_crystal_schema_v942.mjs rc=0 0s crystal schema v942: strict done type/state + canonical range + full-island rewa
+test_auth_session_v1164.mjs rc=0 22s 结果: 49 通过 / 0 失败
+DONE

@@ -1,0 +1,9 @@
+
+EXP5 已等 N 秒 smoothness
+
+  changes (ms since tap: value @ screen M=matching W=waiting):
+  2:0@M  1039:1@M  2001:2@M  3037:3@M  4075:4@M  5006:5@M  6040:6@M  7069:7@M  8099:8@M  9027:9@M  10072:10@M  10999:11@M  12031:12@M  13059:13@M  14094:14@M  15024:15@M  16071:16@M  17001:17@M  18032:18@M  19072:19@M  19689:null@?  20219:0@W  21255:21@W  22287:22@W  23218:23@W  24249:24@W  25288:25@W  26215:26@W  27249:27@W  28281:28@W  29207:29@W  30239:30@W  31271:31@W  32204:32@W  33236:33@W
+  non +1 steps: ["19@M -> 0@W (at 20219 ms)","0@W -> 21@W (at 21255 ms)"]
+  XX  the counter only ever goes up by 1 per second
+
+RESULT: 0 as-expected, 1 unexpected

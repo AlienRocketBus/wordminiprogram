@@ -1,0 +1,20 @@
++  9081ms A clicks 开始排位 (will self-host after 2s)
++  9098ms P1 LISTOPEN -> []
++ 11607ms P1 LISTOPEN -> []
++ 11613ms P1 ADD rmw0dqtegenqdyw mode=A rating=1000
++131741ms P1 LISTOPEN -> [rmw0dqtegenqdyw(P1)]
++137107ms A screen after 128s: ← 返回 🏠 大PK · 公开房间 出了点问题，再试一次吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码
++137108ms store after A timeout: [{"id":"rmw0dqtegenqdyw","host":"P1","status":"open","beatAgeMs":5488}]
++137613ms B clicks 开始排位
++137623ms P2 LISTOPEN -> [rmw0dqtegenqdyw(P1)]
++137628ms P2 CLAIM rmw0dqtegenqdyw OK
++137630ms A screen: ← 返回 🏠 大PK · 公开房间 出了点问题，再试一次吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码
++137630ms B screen: 正在开房间…
++138335ms B screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 20s 慢的 s _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l 
++148920ms B screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 9s 慢的 s _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z
++158097ms B screen: 你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 0s 慢的 s _ _ _ ⏱ 超时了 〔slow 慢的〕 q w e r t y u i o p a s d f g h
++159510ms B screen: 你 0 ⚡抢答赛 0 对手 第 2 / 10 词 · ⏱ 20s 地球 e _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k 
++170099ms B screen: 你 0 ⚡抢答赛 0 对手 第 2 / 10 词 · ⏱ 9s 地球 e _ _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l
++177864ms rooms in store: [{"id":"rmw0dqtegenqdyw","host":"P1","guest":"P2","status":"playing","round":1,"hs":null,"gs":null}]
++177864ms records A={"total":0,"rating":1000,"pg":0} B={"total":0,"rating":1000,"pg":0}
++177864ms pageerrors A=[] B=[]

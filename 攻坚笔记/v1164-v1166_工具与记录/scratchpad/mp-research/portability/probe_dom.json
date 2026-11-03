@@ -1,0 +1,74 @@
+{
+ "/index.html": {
+  "dom_nodes": 1169,
+  "svg_nodes": 515,
+  "style_tags": 11,
+  "running_animations": 188,
+  "window_own_keys": 314,
+  "iframes": 1,
+  "page_errors": []
+ },
+ "/island_food.html": {
+  "dom_nodes": 954,
+  "svg_nodes": 13,
+  "style_tags": 30,
+  "running_animations": 4,
+  "window_own_keys": 823,
+  "iframes": 2,
+  "page_errors": []
+ },
+ "/island_land1.html": {
+  "dom_nodes": 954,
+  "svg_nodes": 13,
+  "style_tags": 30,
+  "running_animations": 4,
+  "window_own_keys": 823,
+  "iframes": 2,
+  "page_errors": []
+ },
+ "/spelling_bee.html": {
+  "dom_nodes": 370,
+  "svg_nodes": 0,
+  "style_tags": 1,
+  "running_animations": 0,
+  "window_own_keys": 412,
+  "iframes": 0,
+  "page_errors": []
+ },
+ "/boss_hall.html": {
+  "dom_nodes": 131,
+  "svg_nodes": 3,
+  "style_tags": 1,
+  "running_animations": 27,
+  "window_own_keys": 309,
+  "iframes": 0,
+  "page_errors": []
+ },
+ "/land_map.html": {
+  "dom_nodes": 91,
+  "svg_nodes": 0,
+  "style_tags": 1,
+  "running_animations": 8,
+  "window_own_keys": 268,
+  "iframes": 0,
+  "page_errors": []
+ },
+ "/spelling_pk.html": {
+  "dom_nodes": 101,
+  "svg_nodes": 0,
+  "style_tags": 2,
+  "running_animations": 0,
+  "window_own_keys": 278,
+  "iframes": 0,
+  "page_errors": []
+ },
+ "/season_showcase.html": {
+  "dom_nodes": 134,
+  "svg_nodes": 3,
+  "style_tags": 1,
+  "running_animations": 3,
+  "window_own_keys": 285,
+  "iframes": 0,
+  "page_errors": []
+ }
+}

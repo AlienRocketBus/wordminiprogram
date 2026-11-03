@@ -1,0 +1,22 @@
+
+▶ 1. 真点动物 → 🗺️；后台把星海、常用词岛存档的 lastSaveTime 写得更新
+  ✅ 真点「动物」进岛再 🗺️ 回首页
+  ❌ 卡片仍是动物岛（🔤 常用词 · 点击继续 → → island_treasure.html）
+  ✅ 真点卡片
+  ❌ 「点击继续」进的是动物岛（island_treasure.html）
+  ✅ 零脚本错误
+
+▶ 2. 动物 → 食物 → 疑问 依次真点：卡片跟着最后一个
+  ✅ 真点 island_animal.html 再回首页
+  ✅ 卡片指向 island_animal.html（🐯 动物 · 点击继续 → → island_animal.html）
+  ✅ 真点 island_food.html 再回首页
+  ✅ 卡片指向 island_food.html（🍔 食物 · 点击继续 → → island_food.html）
+  ✅ 真点 island_question.html 再回首页
+  ✅ 卡片指向 island_question.html（❓ 代词 · 点击继续 → → island_question.html）
+  ❌ 零脚本错误：Transition was aborted because of invalid state. ViewTransition opt-in disabled
+
+▶ 3. 从没真点过岛的老孩子：照旧扫存档
+  ✅ 没有 lastIslandKey：挑存档最新的运动岛（⚽ 运动 · 点击继续 → → island_sports.html）
+  ✅ 零脚本错误
+
+❌ 3 项失败

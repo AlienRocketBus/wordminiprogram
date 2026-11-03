@@ -1,0 +1,19 @@
+间隔复习：错词留在复习计划里直到真正毕业
+
+以前错一次、当天任意玩法答对一次，错题数归零就把复习计划删了，词再也不会复习；
+真实答题吸收器只认字符串下标，玩法传数字，所以上线以来从没真正跑过。
+
+- hansen_review.js：计划只在升满 5 盒（到期那天答对）时删除；吸收器接受数字下标；
+  先把这一题交给权威账本再同步（否则刚扣的错题数会被冲回去）；答错当场入计划；
+  开岛时老错词补进计划；自评失败清掉旧证据
+- hansen_canonical_progress.js：复习计划不再跟着错题数删除；rp 证据在同盒同日时保留
+- hansen_review_rewards_v963.js：到期统计算上错题本已清的计划词；错题清零时还在计划里
+  就不排巡检（等真正毕业再排，不会排两轮）；毕业金没发成也照样进巡检
+- hansen_wrong_overview.js：补上 open/_open（首页横幅点过来以前打开的是本岛复习中心）；
+  总览列出只剩计划到期的岛
+- hansen_palette.js：错题总览亮色主题改亮底黑字（以前深底深字看不清）
+- 新测试 test_srs_plan_v1165.mjs（真浏览器、常规岛+单词大陆）；旧代码 36 项失败
+- test_canonical_srs_hf2_v946.mjs：按新合同改写「答对清零」一段，墓碑检查移到毕业路径
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

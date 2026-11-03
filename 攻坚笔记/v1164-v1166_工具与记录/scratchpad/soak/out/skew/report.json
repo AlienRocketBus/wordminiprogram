@@ -1,0 +1,768 @@
+{
+ "summary": "SUMMARY profile=skew runs=600 seeds=1..600 failing_runs=122 clusters=57 (fail-level 40) | runs-with-violation per invariant: ERR:0 I1:1 I2:1 I3:51 I4:20 I5:24 I6:59 I7:0 I8:0 I9:132 I10:22 | matches=464 settled_pairs=419 virtual=78.5h events=1029248 real=55s",
+ "profile": "skew",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I3": 51,
+  "I5": 24,
+  "I9": 132,
+  "I6": 59,
+  "I4": 20,
+  "I10": 22,
+  "I2": 1,
+  "I1": 1
+ },
+ "failingRuns": 122,
+ "clusters": [
+  {
+   "sig": "I6:gone-but-room-open:findByCode:skew",
+   "inv": "I6",
+   "sev": "high",
+   "count": 37,
+   "seeds": [
+    6,
+    9,
+    26,
+    36,
+    46,
+    62,
+    69,
+    71,
+    111,
+    115,
+    119,
+    121
+   ],
+   "example": "findByCode(9N4H) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff -41s)"
+  },
+  {
+   "sig": "I9:I6:gone-but-room-open:findByCode:skew",
+   "inv": "I9",
+   "sev": "high",
+   "count": 37,
+   "seeds": [
+    6,
+    9,
+    26,
+    36,
+    46,
+    62,
+    69,
+    71,
+    111,
+    115,
+    119,
+    121
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(9N4H) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff -41s)"
+  },
+  {
+   "sig": "I10:no-convergence:skew",
+   "inv": "I10",
+   "sev": "high",
+   "count": 22,
+   "seeds": [
+    43,
+    70,
+    88,
+    102,
+    116,
+    122,
+    140,
+    145,
+    173,
+    182,
+    361,
+    365
+   ],
+   "example": "4 kids pressed 开始排位 within 1.2s, only 1/2 matches formed within 150s (skews P0:-103s P1:43s P2:-97s P3:-115s)"
+  },
+  {
+   "sig": "I9:I10:no-convergence:skew",
+   "inv": "I9",
+   "sev": "high",
+   "count": 22,
+   "seeds": [
+    43,
+    70,
+    88,
+    102,
+    116,
+    122,
+    140,
+    145,
+    173,
+    182,
+    361,
+    365
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) 4 kids pressed 开始排位 within 1.2s, only 1/2 matches formed within 150s (skews P0:-103s P1:43s P2:-97s P3:-115s)"
+  },
+  {
+   "sig": "I4:clean-match-unsettled:live-doc-swept-by-same-account-device",
+   "inv": "I4",
+   "sev": "high",
+   "count": 7,
+   "seeds": [
+    12,
+    108,
+    232,
+    384,
+    385,
+    456,
+    553
+   ],
+   "example": "rmk0gf4ed30dgmr both phones stayed on and connected, but host result-failed / guest result-failed"
+  },
+  {
+   "sig": "I9:I4:clean-match-unsettled:live-doc-swept-by-same-account-device",
+   "inv": "I9",
+   "sev": "high",
+   "count": 7,
+   "seeds": [
+    12,
+    108,
+    232,
+    384,
+    385,
+    456,
+    553
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gf4ed30dgmr both phones stayed on and connected, but host result-failed / guest result-failed"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-idle0G:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 4,
+   "seeds": [
+    24,
+    209,
+    291,
+    401
+   ],
+   "example": "rmk0gt6rc.7c8hvxkw both phones stayed on and connected, yet host win by abandon (result-wait-idle0) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle0G:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 4,
+   "seeds": [
+    24,
+    209,
+    291,
+    401
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gt6rc.7c8hvxkw both phones stayed on and connected, yet host win by abandon (result-wait-idle0) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-checkfail:slowG:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    145,
+    587
+   ],
+   "example": "rmk0gu6ougo32a3 both phones stayed on and connected, yet host win by abandon (result-wait-checkfail:slow) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-checkfail:slowG:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    145,
+    587
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gu6ougo32a3 both phones stayed on and connected, yet host win by abandon (result-wait-checkfail:slow) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-idle4G:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    234,
+    312
+   ],
+   "example": "rmk0gojgxnmnkkb both phones stayed on and connected, yet host win by abandon (result-wait-idle4) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle4G:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 2,
+   "seeds": [
+    234,
+    312
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gojgxnmnkkb both phones stayed on and connected, yet host win by abandon (result-wait-idle4) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I6:gone-but-room-open:joinRoom:skew",
+   "inv": "I6",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    10
+   ],
+   "example": "joinRoom(rmk0gf11kum64w6) → 「房主已经离开了，换一间吧」 while host P1 was online and waiting with the room open (clock diff -28s)"
+  },
+  {
+   "sig": "I9:I6:gone-but-room-open:joinRoom:skew",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    10
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gf11kum64w6) → 「房主已经离开了，换一间吧」 while host P1 was online and waiting with the room open (clock diff -28s)"
+  },
+  {
+   "sig": "I2:update",
+   "inv": "I2",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    50
+   ],
+   "example": "update rmk0gkk0kr6iecf_s0 owned by P2"
+  },
+  {
+   "sig": "I2:remove",
+   "inv": "I2",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    50
+   ],
+   "example": "remove rmk0gkk0kr6iecf_s0 owned by P2"
+  },
+  {
+   "sig": "I9:I2:update",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    50
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) update rmk0gkk0kr6iecf_s0 owned by P2"
+  },
+  {
+   "sig": "I9:I2:remove",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    50
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) remove rmk0gkk0kr6iecf_s0 owned by P2"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-idle2G:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    90
+   ],
+   "example": "rmk0gklw2x95ue2 both phones stayed on and connected, yet host win by abandon (result-wait-idle2) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle2G:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    90
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gklw2x95ue2 both phones stayed on and connected, yet host win by abandon (result-wait-idle2) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-idle6G:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    106
+   ],
+   "example": "rmk0gnmqhcqywa3 both phones stayed on and connected, yet host win by abandon (result-wait-idle6) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle6G:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    106
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gnmqhcqywa3 both phones stayed on and connected, yet host win by abandon (result-wait-idle6) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I6:config:claimRound:DATABASE_DUPLICATE_WRITE",
+   "inv": "I6",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    153
+   ],
+   "example": "claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0giqww0r2ql5_w2 | req req86⟩」"
+  },
+  {
+   "sig": "I9:I6:config:claimRound:DATABASE_DUPLICATE_WRITE",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    153
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0giqww0r2ql5_w2 | req req86⟩」"
+  },
+  {
+   "sig": "I4:clean-match-false-abandon:H:result-wait-idle5G:report",
+   "inv": "I4",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    214
+   ],
+   "example": "rmk0gsjdd9ovcst both phones stayed on and connected, yet host win by abandon (result-wait-idle5) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I9:I4:clean-match-false-abandon:H:result-wait-idle5G:report",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    214
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gsjdd9ovcst both phones stayed on and connected, yet host win by abandon (result-wait-idle5) guest lose by abandon (report)"
+  },
+  {
+   "sig": "I6:config:claimRound:DATABASE_REQUEST_FAILED",
+   "inv": "I6",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    576
+   ],
+   "example": "claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I9:I6:config:claimRound:DATABASE_REQUEST_FAILED",
+   "inv": "I9",
+   "sev": "high",
+   "count": 1,
+   "seeds": [
+    576
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」"
+  },
+  {
+   "sig": "I3:skip-beat-correct-answer:A:skew",
+   "inv": "I3",
+   "sev": "medium",
+   "count": 49,
+   "seeds": [
+    2,
+    12,
+    20,
+    24,
+    48,
+    50,
+    67,
+    116,
+    126,
+    127,
+    137,
+    175
+   ],
+   "example": "word 7: P1 spelled it right 5.4s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 20.0s after its word appeared, deadline in 20.0s)"
+  },
+  {
+   "sig": "I9:I3:skip-beat-correct-answer:A:skew",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 49,
+   "seeds": [
+    2,
+    12,
+    20,
+    24,
+    48,
+    50,
+    67,
+    116,
+    126,
+    127,
+    137,
+    175
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) word 7: P1 spelled it right 5.4s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 20.0s after its word appeared, deadline in 20.0s)"
+  },
+  {
+   "sig": "I5:battle-too-long",
+   "inv": "I5",
+   "sev": "medium",
+   "count": 19,
+   "seeds": [
+    2,
+    24,
+    90,
+    106,
+    127,
+    145,
+    209,
+    213,
+    214,
+    234,
+    260,
+    291
+   ],
+   "example": "P1 battle lasted 365s for 10 words (limit 350s)"
+  },
+  {
+   "sig": "I9:I5:battle-too-long",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 19,
+   "seeds": [
+    2,
+    24,
+    90,
+    106,
+    127,
+    145,
+    209,
+    213,
+    214,
+    234,
+    260,
+    291
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) P1 battle lasted 365s for 10 words (limit 350s)"
+  },
+  {
+   "sig": "I5:too-long:result-wait",
+   "inv": "I5",
+   "sev": "medium",
+   "count": 7,
+   "seeds": [
+    145,
+    209,
+    213,
+    312,
+    327,
+    401,
+    419
+   ],
+   "example": "P1 spent 581s on 「result-wait」 (limit 420s)"
+  },
+  {
+   "sig": "I9:I5:too-long:result-wait",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 7,
+   "seeds": [
+    145,
+    209,
+    213,
+    312,
+    327,
+    401,
+    419
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) P1 spent 581s on 「result-wait」 (limit 420s)"
+  },
+  {
+   "sig": "I4:score-vs-rounds:claim-failed:config",
+   "inv": "I4",
+   "sev": "medium",
+   "count": 2,
+   "seeds": [
+    153,
+    576
+   ],
+   "example": "rmk0giqww0r2ql5 word 2: P0 spelled it right; round doc {\"winner\":\"guest\",\"by\":\"k1x153\",\"at\":1767574861885.9502} ⇒ 60 points, the UI scored 0 (claimRound FAILED kind=config)"
+  },
+  {
+   "sig": "I9:I4:score-vs-rounds:claim-failed:config",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 2,
+   "seeds": [
+    153,
+    576
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) rmk0giqww0r2ql5 word 2: P0 spelled it right; round doc {\"winner\":\"guest\",\"by\":\"k1x153\",\"at\":1767574861885.9502} ⇒ 60 points, the UI scored 0 (claimRound FAILED kind=config)"
+  },
+  {
+   "sig": "I6:gone-but-room-open:joinRoom:lag",
+   "inv": "I6",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    171
+   ],
+   "example": "joinRoom(rmk0ged0ml3d6bv) → 「房主已经离开了，换一间吧」 while host P0 was online and waiting with the room open (clock diff -24s)"
+  },
+  {
+   "sig": "I9:I6:gone-but-room-open:joinRoom:lag",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    171
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0ged0ml3d6bv) → 「房主已经离开了，换一间吧」 while host P0 was online and waiting with the room open (clock diff -24s)"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:no-seat",
+   "inv": "I6",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    321
+   ],
+   "example": "joinRoom(rmk0gooakql0xui) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:no-seat",
+   "inv": "I9",
+   "sev": "medium",
+   "count": 1,
+   "seeds": [
+    321
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gooakql0xui) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:findByCode",
+   "inv": "I6",
+   "sev": "low",
+   "count": 15,
+   "seeds": [
+    3,
+    36,
+    40,
+    46,
+    165,
+    189,
+    201,
+    205,
+    212,
+    278,
+    279,
+    369
+   ],
+   "example": "findByCode(HEPN) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I5:played-on-after-opponent-claimed-abandon:guest",
+   "inv": "I5",
+   "sev": "low",
+   "count": 15,
+   "seeds": [
+    24,
+    49,
+    90,
+    106,
+    145,
+    209,
+    213,
+    214,
+    232,
+    234,
+    291,
+    312
+   ],
+   "example": "P2 (guest) kept answering 7 more words after the opponent had claimed the win by abandon at 701.2s — it is only told at the very end"
+  },
+  {
+   "sig": "I9:I5:played-on-after-opponent-claimed-abandon:guest",
+   "inv": "I9",
+   "sev": "low",
+   "count": 15,
+   "seeds": [
+    24,
+    49,
+    90,
+    106,
+    145,
+    209,
+    213,
+    214,
+    232,
+    234,
+    291,
+    312
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) P2 (guest) kept answering 7 more words after the opponent had claimed the win by abandon at 701.2s — it is only told at the very end"
+  },
+  {
+   "sig": "I6:ack-timeout-host-alive:skew",
+   "inv": "I6",
+   "sev": "low",
+   "count": 8,
+   "seeds": [
+    36,
+    50,
+    99,
+    141,
+    229,
+    384,
+    430,
+    524
+   ],
+   "example": "joinRoom(rmk0gedmy3dmlbh) 「房主没有回应」 while host P0 was online and waiting"
+  },
+  {
+   "sig": "I9:I6:ack-timeout-host-alive:skew",
+   "inv": "I9",
+   "sev": "low",
+   "count": 8,
+   "seeds": [
+    36,
+    50,
+    99,
+    141,
+    229,
+    384,
+    430,
+    524
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedmy3dmlbh) 「房主没有回应」 while host P0 was online and waiting"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:findByCode",
+   "inv": "I9",
+   "sev": "low",
+   "count": 6,
+   "seeds": [
+    40,
+    46,
+    165,
+    278,
+    554,
+    579
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(HJ7R) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:joinRoom",
+   "inv": "I6",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    215,
+    592
+   ],
+   "example": "joinRoom(rmk0gf8qumg45l6) → 「房主已经离开了，换一间吧」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:joinRoom",
+   "inv": "I9",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    215,
+    592
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gf8qumg45l6) → 「房主已经离开了，换一间吧」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:room-holds-my-own-key",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    142
+   ],
+   "example": "joinRoom(rmk0gbz8inav0rc) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I3:skip-beat-correct-answer:BC",
+   "inv": "I3",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    211
+   ],
+   "example": "word 5: P3 spelled it right 14.3s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)"
+  },
+  {
+   "sig": "I9:I3:skip-beat-correct-answer:BC",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    211
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) word 5: P3 spelled it right 14.3s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)"
+  },
+  {
+   "sig": "I3:skip-beat-correct-answer:BC:skew",
+   "inv": "I3",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    385
+   ],
+   "example": "word 8: P0 spelled it right 13.0s after the word appeared (local deadline in 15.0s) but the skip W doc of P2 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)"
+  },
+  {
+   "sig": "I9:I3:skip-beat-correct-answer:BC:skew",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    385
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) word 8: P0 spelled it right 13.0s after the word appeared (local deadline in 15.0s) but the skip W doc of P2 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)"
+  },
+  {
+   "sig": "I5:played-on-after-opponent-claimed-abandon:guest-after-resume",
+   "inv": "I5",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    434
+   ],
+   "example": "P3 (guest) kept answering 6 more words after the opponent had claimed the win by abandon at 187.7s — it is only told at the very end"
+  },
+  {
+   "sig": "I1:phantom-seat",
+   "inv": "I1",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    516
+   ],
+   "example": "guest P2 got joinRoom ok for rmk0gedc0d2rymc seat 0 but host P0 never started with it; guest played 5 words, wrote W[0,1,2,3,4], ended: result-failed"
+  },
+  {
+   "sig": "I9:I1:phantom-seat",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    516
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) guest P2 got joinRoom ok for rmk0gedc0d2rymc seat 0 but host P0 never started with it; guest played 5 words, wrote W[0,1,2,3,4], ended: result-failed"
+  },
+  {
+   "sig": "I5:played-on-after-opponent-claimed-abandon:host-after-resume",
+   "inv": "I5",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    555
+   ],
+   "example": "P3 (host) kept answering 7 more words after the opponent had claimed the win by abandon at 156.0s — it is only told at the very end"
+  }
+ ],
+ "minimal": []
+}

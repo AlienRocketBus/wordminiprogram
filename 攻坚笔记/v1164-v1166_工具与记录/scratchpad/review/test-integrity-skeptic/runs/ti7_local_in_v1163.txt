@@ -1,0 +1,26 @@
+会话判定 / 凭证守护 / 备份 v1164
+  XX  ★ 本机没有凭证 → 确凿过期（以前永远是"尚未就绪"，不让人重新登录）
+  XX  kind=expired / noCredentials（实为 undefined）
+  XX  文案让人去重新登录：云端会话尚未就绪（已重试 5 次），请稍候再试
+  XX  ★ 凭证都没了就不白白重试（问了 5 次）
+  XX  ★ 清掉了撒谎的本地"已登录"记录
+  XX  ★ 广播 hsn-auth-changed，界面立刻跟上
+  XX  ★ 凭证还在 → notReady / kind=session（实为 undefined）
+  OK  重试到底才下结论（问了 5 次）
+  OK  ★ 不登出、不广播（网慢≠过期）
+  XX  ★ 凭证不在 → 守护用影子副本救回 → 成功（救了 0 次）
+  XX  轨迹里记下了"救回"
+  XX  ★ 救回来也不管用 → 判过期；一次探测只救一次（救了 0 次）
+  XX  ★ user_info 没了 → getCurrentUser 补回 uid（undefined）
+  XX  ★ 取不到账号信息 → 用登录令牌 sub（undefined / undefined）
+  XX  ★ getCurrentUser 卡住 → 6 秒后改用令牌（33ms）
+  XX  ★ 坏缓存删掉再探 → 成功
+  XX  坏缓存已删、人没被登出
+  XX  ★ 「Unexpected token」是程序错误，不是"令牌过期" —— 不登出（以前 /token/ 一匹配就把人登出）
+Warning: Detected unsettled top-level await at file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity-skeptic/v1163/test_auth_session_v1164__local.mjs:175
+  const r = await A.ensureSession();
+            ^
+
+
+
+rc=13

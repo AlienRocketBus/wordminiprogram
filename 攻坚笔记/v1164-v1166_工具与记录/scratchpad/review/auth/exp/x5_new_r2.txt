@@ -1,0 +1,58 @@
+{
+  "root": "user/wordminiprogram",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "up1": {
+    "ok": true,
+    "reason": ""
+  },
+  "s1": {
+    "signed": true,
+    "learned": 5,
+    "ladderWins": 3,
+    "ladderGames": 3,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 ›"
+  },
+  "up2": {
+    "winsBeforeSync": 5,
+    "ok": false,
+    "reason": "upload-failed",
+    "error": "云端登录已过期，请重新登录后再同步"
+  },
+  "s3": {
+    "signed": false,
+    "learned": 12,
+    "ladderWins": 0,
+    "ladderGames": 0,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 未定级 ›"
+  },
+  "s4": {
+    "signed": false,
+    "learned": 15,
+    "ladderWins": 0,
+    "ladderGames": 0,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 未定级 ›"
+  },
+  "relogin": {
+    "ok": true,
+    "uid": "1527283253218073236",
+    "sync": {
+      "ok": true,
+      "action": "restored",
+      "needReload": true,
+      "autoPicked": "cloud",
+      "localWords": 15,
+      "cloudWords": 0
+    }
+  },
+  "s5": {
+    "signed": true,
+    "learned": 5,
+    "ladderWins": 3,
+    "ladderGames": 3,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›"
+  },
+  "errors": []
+}

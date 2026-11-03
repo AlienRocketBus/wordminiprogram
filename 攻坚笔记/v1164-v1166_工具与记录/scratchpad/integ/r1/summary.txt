@@ -1,0 +1,7 @@
+test_cloudbase_emulator_v1164.mjs rc=0 1s
+test_rooms_lifecycle_cloud_v1164.mjs rc=1 230s
+test_auth_cloud_v1164.mjs rc=1 69s
+test_cloud_errors_v1164.mjs rc=0 97s
+test_ladder_cloud_v1164.mjs rc=0 147s
+test_rooms_cloud_v1164.mjs rc=0 155s
+DONE

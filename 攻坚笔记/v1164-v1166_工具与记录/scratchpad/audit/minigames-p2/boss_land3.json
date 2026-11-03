@@ -1,0 +1,110 @@
+{
+ "R": {
+  "key": "land3",
+  "notes": [
+   "boss card tap {\"x\":309,\"y\":339.375,\"ok\":true,\"hit\":\"IMG.boss-card-img\"}",
+   "fight tap {\"x\":195,\"y\":294.5,\"ok\":true,\"hit\":\"IMG.\"}",
+   "typing question realize",
+   "typing question discuss",
+   "typing question persuade",
+   "typing question temporary",
+   "typing question eventually",
+   "typing question permanent",
+   "typing question explain",
+   "typing question immediately",
+   "typing question regularly",
+   "typing question constantly",
+   "typing question recently",
+   "typing question rarely",
+   "typing question suggest",
+   "typing question predict",
+   "typing question finally",
+   "typing question previously"
+  ],
+  "before": {
+   "coins": 300,
+   "xp": 0,
+   "level": 1,
+   "bossBeaten": 0,
+   "prog": null
+  },
+  "picker": "已击败 boss 0/5 特效 ON ▶ Lv.1 原初线条 🆓 Lv.2 永夜之壁 🆓 Lv.3 未被写下的故事 🆓 Lv.4 四季轮转 🆓 Lv.5 克罗诺斯之影 🎨 boss 背景 (点击切换) 🌑 经典暗夜 ✓",
+  "end": "🏆 VICTORY! 击败了 时之君主·克罗诺斯之影 ⭐⭐⭐ 完美胜利！ 🎉 首次通关奖励 🪙 金币 +30 · 🎓 经验 +95 ⚔️ 再来一局 🏠 回主页",
+  "dismissed": [
+   "收下!"
+  ],
+  "played": {
+   "q": 30,
+   "right": 30,
+   "wrong": 0,
+   "tmo": 0,
+   "types": {
+    "typing": 16,
+    "listen": 3,
+    "en2cn": 5,
+    "cloze": 3,
+    "cn2en": 2,
+    "spellFill": 1
+   },
+   "secs": 95,
+   "maxWait": 3629
+  },
+  "endScreen": "🏆 VICTORY! 击败了 时之君主·克罗诺斯之影 ⭐⭐⭐ 完美胜利！ 🎉 首次通关奖励 🪙 金币 +30 · 🎓 经验 +95 ⚔️ 再来一局 🏠 回主页",
+  "overlays": [],
+  "after": {
+   "coins": 392,
+   "xp": 456,
+   "level": 4,
+   "bossBeaten": 1,
+   "prog": null,
+   "cleared": "1"
+  }
+ },
+ "backBtns": [
+  "← :: hansenBossBackBtn()",
+  "⚔️ 再来一局 :: startBoss()",
+  "🏠 回主页 :: showScreen('home')"
+ ],
+ "H": {
+  "navTap": {
+   "x": 341.25,
+   "y": 809.5,
+   "ok": true,
+   "hit": "IMG."
+  },
+  "cardsText": "cardsScreen :: ← 返回 🎴 收藏卡册 📚 已收集 20 / 20 张 20 / 20 ✨ 全部集齐 · 卡牌大师 普通卡 4/4 淘气小幽灵 暗影忍者 百战兽人 史前霸王龙 稀有卡 4/4 千年僵尸 暗夜吸血鬼 蒙面大魔王 地狱犬王 史诗卡 4/4 黑森林巫婆 异次元巫师 龙骑士统帅 暗黑灯神 传说卡 4/4 海底巨怪 寒冰女王 烈焰魔神 雷电之主 至尊卡 4/4 · 仅限抽中 机械泰坦 外星霸主 混沌魔尊 上古太阳神 🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 1/1 进入 › 🌏 单词大陆图鉴 0 / 40 🎴 单词大陆抽卡 · 集齐 40 位强敌 花金币抽 · 独立卡池 · 稀有度越高",
+  "cardTap": {
+   "found": false
+  },
+  "hallFrame": null,
+  "mapAfter": {
+   "cls": "spot done",
+   "label": "时之钟谷，30个单词，5位Boss，已通关",
+   "ptext": "进度 1 / 8",
+   "panel": "⚔ 岛上盘踞的 5 位 Boss · ✅已全部击败 ▶ Boss1 火柴人·原初线条 🔒 Boss2 影守·永夜之壁 🔒 Boss3 万典之灵·未被写下的故事 🔒 Boss4 凋零与新生之龙·四季轮转 🔒 ★守关 时之君主·克罗诺斯之影 | 重进这座岛"
+  }
+ },
+ "ev": [
+  {
+   "tag": "boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:38367/icons/ic_wrong.webp net::ERR_ABORTED"
+  },
+  {
+   "tag": "boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:38367/icons/ic_review.webp net::ERR_ABORTED"
+  },
+  {
+   "tag": "hall",
+   "kind": "console.error",
+   "text": "UNHANDLED_REJECTION Transition was aborted because of invalid state. ViewTransition opt-in disabled",
+   "loc": ""
+  },
+  {
+   "tag": "hall",
+   "kind": "pageerror",
+   "text": "Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+  }
+ ]
+}

@@ -1,0 +1,242 @@
+[
+ {
+  "w": "when",
+  "tiles": "whne",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "my",
+  "tiles": "ym",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "who",
+  "tiles": "ohw",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "your",
+  "tiles": "royu",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "we",
+  "tiles": "ew",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "she",
+  "tiles": "seh",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "how",
+  "tiles": "who",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "he",
+  "tiles": "eh",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "I",
+  "tiles": "I",
+  "inOrder": true,
+  "uniq": false
+ },
+ {
+  "w": "it",
+  "tiles": "it",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "this",
+  "tiles": "isht",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "they",
+  "tiles": "htey",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "you",
+  "tiles": "oyu",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "what",
+  "tiles": "waht",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "that",
+  "tiles": "tath",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "her",
+  "tiles": "her",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "why",
+  "tiles": "hwy",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "his",
+  "tiles": "shi",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "here",
+  "tiles": "eehr",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "our",
+  "tiles": "rou",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "why",
+  "tiles": "why",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "that",
+  "tiles": "thta",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "my",
+  "tiles": "my",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "his",
+  "tiles": "shi",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "when",
+  "tiles": "whne",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "this",
+  "tiles": "hist",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "your",
+  "tiles": "uyro",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "how",
+  "tiles": "owh",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "what",
+  "tiles": "hwat",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "we",
+  "tiles": "ew",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "I",
+  "tiles": "I",
+  "inOrder": true,
+  "uniq": false
+ },
+ {
+  "w": "it",
+  "tiles": "ti",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "here",
+  "tiles": "reeh",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "who",
+  "tiles": "who",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "they",
+  "tiles": "yeht",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "our",
+  "tiles": "our",
+  "inOrder": true,
+  "uniq": true
+ },
+ {
+  "w": "she",
+  "tiles": "hse",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "he",
+  "tiles": "eh",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "you",
+  "tiles": "yuo",
+  "inOrder": false,
+  "uniq": true
+ },
+ {
+  "w": "her",
+  "tiles": "ehr",
+  "inOrder": false,
+  "uniq": true
+ }
+]

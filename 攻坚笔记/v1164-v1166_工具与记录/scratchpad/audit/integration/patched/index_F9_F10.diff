@@ -1,0 +1,42 @@
+--- /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/v1163_snapshot/index.html	2026-11-03 06:54:43.000000000 +0000
++++ index_F10.html	2026-11-03 09:32:02.675069963 +0000
+@@ -4123,7 +4123,16 @@
+         setTimeout(_pollReady, 40);
+       }
+       frame.onload = function(){ frame.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
+-      try{ frame.contentWindow.location.replace(file); }catch(e){ try{ frame.src = file; }catch(e2){} }
++      /* AUDIT-F9: 每换一座岛就换一个新的、名字唯一的 iframe —— 联合会话历史里旧条目记的是旧 iframe 的名字，返回时不会再把新 iframe 导回旧岛 */
++      try{
++        var _nf = document.createElement('iframe');
++        _nf.id = 'islandFrame'; _nf.title = frame.title; _nf.setAttribute('aria-label', frame.getAttribute('aria-label')||'');
++        _nf.setAttribute('style', frame.getAttribute('style')||''); _nf.style.transition='none'; _nf.style.opacity='0';
++        _nf.name = 'hsnIsland_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
++        _nf.src = file;
++        _nf.onload = function(){ _nf.onload = null; _revealIsland(); };
++        frame.parentNode.replaceChild(_nf, frame); frame = _nf;
++      }catch(e){ try{ frame.contentWindow.location.replace(file); }catch(e1){ try{ frame.src = file; }catch(e2){} } }
+       setTimeout(_pollReady, 40);
+       setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */
+     }
+@@ -4159,10 +4168,17 @@
+     _islandPending = null;
+     var wrap = document.getElementById('islandFrameWrap');
+     if(wrap && wrap.style.display !== 'none'){
+-      if(history.state && history.state.hsnIsland){
+-        try{ history.back(); return; }catch(e){}
+-      }
+-      _closeIslandNow();
++      _closeIslandNow();   /* AUDIT-F10: 先当场关掉(不等异步的返回) */
++      /* 再把岛那条历史弹掉; 如果弹掉的只是 iframe 内部的条目(顶层仍是岛状态), 再弹一次, 最多 3 次 */
++      var tries = 0;
++      (function popToHome(){
++        try{
++          if(history.state && history.state.hsnIsland && tries++ < 3){
++            history.back();
++            setTimeout(popToHome, 350);
++          }
++        }catch(e){}
++      })();
+     }
+   }
+   window.openIsland = openIsland;

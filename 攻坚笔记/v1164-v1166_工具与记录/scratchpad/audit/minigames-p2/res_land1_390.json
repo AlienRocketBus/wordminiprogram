@@ -1,0 +1,946 @@
+{
+ "island": "land1",
+ "games": {
+  "explore": {
+   "notes": [
+    "cards=30 allW=30",
+    "after learn {\"modal\":false,\"learned\":1,\"firstLearned\":true}"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "modal": "✕ 😰 nervous /ˈnɜːvəs/ 紧张的 📝 I always feel nervous before a big exam. 重要考试前我总是很紧张。 🔊 发音 🐢 慢速 📝 例句 📚 加入学习！+10 经验 这个单词的两条真实进度 🐾 宠物掌握 0 / 3 还需在打字大师中无提示、整词精确拼对 3 次。选择题、听音选项和看提示拼写都不增加这条进度。 💎 知识结晶 ☆☆",
+   "modalOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 10,
+    "answers": 0
+   },
+   "ms": 12740,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "land1:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  },
+  "listen": {
+   "notes": [
+    "levels=3"
+   ],
+   "levelText": [
+    "🌱 初级 较短的词 📚 10 个单词 →",
+    "⚡ 中级 中等长度 📚 11 个单词 →",
+    "🔥 高级 较长的词 📚 9 个单词 →"
+   ],
+   "result": "🌱 🌱 初级 完成！ 10 个单词全部听完 · 答对 8 / 10 · 正确率 80% 🪙 金币 +8 🎓 经验 +64 🐾 宠物经验 +15 ⚡ 挑战中级 🔄 再来一轮 🏠 回主页",
+   "played": {
+    "q": 10,
+    "right": 8,
+    "wrong": 2,
+    "avgWait": 2341,
+    "maxWait": 3355
+   },
+   "delta": {
+    "coins": 10,
+    "xp": 64,
+    "answers": 10
+   },
+   "ms": 27321,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "land1:listen",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  },
+  "match": {
+   "notes": [
+    "cards=16"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "🃏 🌟 极佳记忆！ 步数：9 · 失误：1 🪙 金币 +8 🎓 经验 +91 🔄 再来一轮 🏠 回主页",
+   "delta": {
+    "coins": 13,
+    "xp": 91,
+    "answers": 8
+   },
+   "ms": 9386,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "typing": {
+   "notes": [
+    "timeout test: advanced=true after 30233ms",
+    "typing: no next word in 6s at q=18"
+   ],
+   "levelText": [
+    "🌱 初级 · 7 字母以内 18 词 · 🎓经验 +102 · 🐾宠物经验 +25 · 🪙金币 +18 ▶",
+    "⚡ 中级 · 8 字母词 5 词 · 🎓经验 +75 · 🐾宠物经验 +40 · 🪙金币 +5 ▶",
+    "🔥 高级 · 9+ 字母长词 7 词 · 🎓经验 +176 · 🐾宠物经验 +70 · 🪙金币 +7 ▶"
+   ],
+   "kbLayout": {
+    "n": 30,
+    "maxBottom": 642,
+    "minW": 36,
+    "vh": 844,
+    "scrollY": 0,
+    "bodyPos": "fixed"
+   },
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "🥉 初级 · 铜牌 🌱 初级 · 7 字母以内 完成！ 成功打出 15 个单词 打字速度 468 字母/分钟 ⚡ 神速! 总用时 16.94秒 准确率 98% 最快 468 🎉 新纪录! 你的第一个速度记录! 🚀 📝 这局拼错的词 (2个) · 记得复习哦 proud lonely ⏱️ 每个词用时 curious 0.80⚡ amazed 1.46s anxious 1.57s humble 1.22s nervous 1.32s selfish 1.41s jealous 0.86s furious 0.81s polite 0.81s relaxed 0.98s comfort 1.10s strict 0.95s eager 0.85s loyal 1.43s sincere 1.39s 🪙 金币 +15 🎓 经验 +122 🐾 宠物经验 +25 ⚡ 挑战中级 🔄",
+   "played": {
+    "q": 18,
+    "right": 15,
+    "wrongN": 2,
+    "timeouts": 1,
+    "untypeable": []
+   },
+   "resultOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 26,
+    "xp": 159,
+    "answers": 17
+   },
+   "ms": 75259,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "cloze": {
+   "notes": [],
+   "levelText": [
+    "🌱 初级 · 7 字母以内 \"I always feel nervous before a big exam.\" 📚 18 题 · 全对得 🎓经验 +105 · 🐾宠物经验 +30 · 🪙金币 +18 →",
+    "⚡ 中级 · 8 字母词 \"I'm so grateful for all the help you've given me.\" 📚 5 题 · 全对得 🎓经验 +65 · 🐾宠物经验 +45 · 🪙金币 +5 →",
+    "🔥 高级 · 9+ 字母长词 \"He was disappointed that the trip had been cancelled.\" 📚 7 题 · 全对得 🎓经验 +138 · 🐾宠物经验 +65 · 🪙金币 +7 →"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "📝 🌱 初级 完成！ 答对 17 / 18 题 · 正确率 94% 🪙 金币 +15 🎓 经验 +217 🐾 宠物经验 +30 ⚡ 挑战中级 📝 换难度 🏠 主页",
+   "played": {
+    "q": 18,
+    "right": 17,
+    "wrong": 1,
+    "counters": [
+     "1/18",
+     "2/18",
+     "3/18",
+     "4/18",
+     "5/18",
+     "6/18",
+     "7/18",
+     "8/18",
+     "9/18",
+     "10/18",
+     "11/18",
+     "12/18",
+     "13/18",
+     "14/18",
+     "15/18",
+     "16/18",
+     "17/18",
+     "18/18"
+    ],
+    "avgWait": 3772,
+    "maxWait": 4670
+   },
+   "delta": {
+    "coins": 26,
+    "xp": 217,
+    "answers": 18
+   },
+   "ms": 75583,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "scramble": {
+   "notes": [],
+   "levelText": [
+    "🌱 初级 · 3-4 字母短词 man · cat · cow 📚 0 词 · 全对得 🎓经验 +15 · 🐾宠物经验 +25 · 🪙金币 +0 →",
+    "⚡ 中级 · 5-6 字母中等词 tiger · friend · old 📚 8 词 · 全对得 🎓经验 +105 · 🐾宠物经验 +40 · 🪙金币 +8 →",
+    "🔥 高级 · 7+ 字母长词 children · gentleman 📚 22 词 · 全对得 🎓经验 +446 · 🐾宠物经验 +65 · 🪙金币 +22 →"
+   ],
+   "result": "选择难度开始挑战 每档单词不重复, 完成一档=完成一次任务 🌱 初级 · 3-4 字母短词 man · cat · cow 📚 0 词 · 全对得 🎓经验 +15 · 🐾宠物经验 +25 · 🪙金币 +0 → ⚡ 中级 · 5-6 字母中等词 tiger · friend · old 📚 8 词 · 全对得 🎓经验 +105 · 🐾宠物经验 +40 · 🪙金币 +8 → 🔥 高级 · 7+ 字母长词 children · gentleman 📚 22 词 · 全对得 🎓经验 +446 · 🐾宠物经验 +65 · 🪙金币 +22 →",
+   "played": {
+    "q": 0,
+    "right": 0,
+    "wrong": 0,
+    "skips": 0,
+    "hint": 0
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 1190,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "spellbee": {
+   "notes": [],
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "【迷雾心湖岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+    "words": 30,
+    "chips": [
+     "🌱 初级 本岛暂无此难度",
+     "⭐ 中级 5–6 字母 · 8个[sel]",
+     "🔥 高级 7+ 字母长词 · 22个",
+     "🌈 全部 全难度混合 · 30个"
+    ],
+    "qCount": 100,
+    "diff": "inter",
+    "mode": "listen"
+   },
+   "totalQ": 8,
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "kbBottom": {
+    "max": 794,
+    "vh": 844
+   },
+   "resPanel": "🎉 你赢了 拼对又赢 +8🪙 本局已得 8🪙 正确答案 amazed /əˈmeɪzd/ 惊讶的 下一题 ›",
+   "played": {
+    "q": 4,
+    "right": 3,
+    "lost": 1,
+    "over": false
+   },
+   "delta": {
+    "coins": 24,
+    "xp": 12,
+    "answers": 0
+   },
+   "ms": 22648,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "pk": {
+   "notes": [],
+   "text": "← 返回 ⚔️ 拼写大PK 和真人比拼写，不是机器人 🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 › 🔐 注册 / 登录 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 🏠 大PK · 公开房间 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 🏆 天梯排位 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 📊 我的战绩 0 最快速度(字符/分) — 对战胜率 1 已掌握单词 1 连续学习(天) 🩺 遇到问题？ ☁️ 云同步自检（把结果截图发给开发者）",
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 540,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "moles": {
+   "notes": [],
+   "levelText": [
+    "🌱 初级 · 简单短词 ❤️ 5 命 · 5 秒洗一次牌 🎯 0 题 · 全对得 🎓经验 +15 · 🐾宠物经验 +30 · 🪙金币 +0 →",
+    "⚡ 中级 · 中等词 ❤️ 4 命 · 4 秒洗一次牌 🎯 8 题 · 全对得 🎓经验 +89 · 🐾宠物经验 +45 · 🪙金币 +8 →",
+    "🔥 高级 · 长词挑战 ❤️ 3 命 · 3 秒洗一次牌 🎯 22 题 · 全对得 🎓经验 +353 · 🐾宠物经验 +65 · 🪙金币 +22 →"
+   ],
+   "result": "🎯 选择难度开始打地鼠 每个目标只出现一次, 全部打中即完成本档 🌱 初级 · 简单短词 ❤️ 5 命 · 5 秒洗一次牌 🎯 0 题 · 全对得 🎓经验 +15 · 🐾宠物经验 +30 · 🪙金币 +0 → ⚡ 中级 · 中等词 ❤️ 4 命 · 4 秒洗一次牌 🎯 8 题 · 全对得 🎓经验 +89 · 🐾宠物经验 +45 · 🪙金币 +8 → 🔥 高级 · 长词挑战 ❤️ 3 命 · 3 秒洗一次牌 🎯 22 题 · 全对得 🎓经验 +353 · 🐾宠物经验 +65 · 🪙金币 +22 →",
+   "played": {
+    "q": 0,
+    "right": 0,
+    "wrong": 0,
+    "reshuf": 0
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 1023,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "fish": {
+   "notes": [
+    "DRIVER ERROR: frame.evaluate: TypeError: Cannot read properties of null (reading 'scrollIntoView')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:40)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+    "AFTER CLOSE: active screen=fishScreen | home cannot scroll"
+   ],
+   "levelText": [
+    "🌱 初级 · 简单短词 ❤️ 5 条命 · 海底生物悠游 🐟 0 条 · 全对得 🎓经验 +15 · 🐾宠物经验 +30 · 🪙金币 +0 →",
+    "⚡ 中级 · 中等词 ❤️ 4 条命 · 速度稍快 🐟 8 条 · 全对得 🎓经验 +89 · 🐾宠物经验 +45 · 🪙金币 +8 →",
+    "🔥 高级 · 长词挑战 ❤️ 3 条命 · 满海大场面 🐟 22 条 · 全对得 🎓经验 +353 · 🐾宠物经验 +65 · 🪙金币 +22 →"
+   ],
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 9036,
+   "home": {
+    "active": "fishScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": false,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "bubble": {
+   "notes": [
+    "DRIVER ERROR: frame.evaluate: TypeError: Cannot read properties of null (reading 'scrollIntoView')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:38)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+    "AFTER CLOSE: active screen=bubbleScreen | home cannot scroll"
+   ],
+   "levelText": [
+    "🌱 初级 · 简单常见词 每词只出一次, 答完该档结束 📚 0 词 · 全对得 🎓经验 +15 · 🐾宠物经验 +30 · 🪙金币 +0 →",
+    "⚡ 中级 · 中等难度词 每词只出一次, 答完该档结束 📚 8 词 · 全对得 🎓经验 +65 · 🐾宠物经验 +45 · 🪙金币 +8 →",
+    "🔥 高级 · 长词 / 复杂词 每词只出一次, 答完该档结束 📚 22 词 · 全对得 🎓经验 +216 · 🐾宠物经验 +65 · 🪙金币 +22 →"
+   ],
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 9150,
+   "home": {
+    "active": "bubbleScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": false,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "speed": {
+   "notes": [],
+   "levelText": [
+    "🌱 初级 60 秒 · 4 选 1 · 倒计时结束 = 完成挑战 ⏱️ 60 秒 · 答对越多经验越多 · 🐾宠物经验 +25 · 🪙答对得金币 →",
+    "⚡ 中级 60 秒 · 6 选 1 · 倒计时结束 = 完成挑战 ⏱️ 60 秒 · 答对越多经验越多 · 🐾宠物经验 +40 · 🪙答对得金币 →",
+    "🔥 高级 60 秒 · 9 选 1 · 倒计时结束 = 完成挑战 ⏱️ 60 秒 · 答对越多经验越多 · 🐾宠物经验 +60 · 🪙答对得金币 →"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "⏱️ 🌱 初级 时间到！ 🌟🌟🌟🌟🌟 本局得分 1410 🏆 历史最高 1410 🎉 新纪录！太厉害啦 🪙 金币 +42 🎓 经验 +250 🐾 宠物经验 +25 本局最大连击 5 ⚡ 换难度 🔄 再来 🏠 主页",
+   "played": {
+    "q": 96,
+    "right": 80,
+    "wrong": 16,
+    "secs": 60
+   },
+   "delta": {
+    "coins": 92,
+    "xp": 303,
+    "answers": 96
+   },
+   "ms": 61861,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "eagle": {
+   "notes": [],
+   "levelText": [
+    "选择难度开始挑战",
+    "每档单词不重复, 完成一档=完成一次任务",
+    "🔒 初级 本岛暂时没有这个难度的单词 🔒",
+    "⚡ 中级 6 选 1 · 9 秒 · 中等单词 📚 8 词 · 全对得 🎓经验 +110 · 🐾宠物经验 +50 · 🪙金币 +8 →",
+    "🔥 高级 9 选 1 · 7 秒 · 长词挑战 📚 22 词 · 全对得 🎓经验 +451 · 🐾宠物经验 +75 · 🪙金币 +22 →"
+   ],
+   "result": "选择难度开始挑战 每档单词不重复, 完成一档=完成一次任务 🔒 初级 本岛暂时没有这个难度的单词 🔒 ⚡ 中级 6 选 1 · 9 秒 · 中等单词 📚 8 词 · 全对得 🎓经验 +110 · 🐾宠物经验 +50 · 🪙金币 +8 → 🔥 高级 9 选 1 · 7 秒 · 长词挑战 📚 22 词 · 全对得 🎓经验 +451 · 🐾宠物经验 +75 · 🪙金币 +22 →",
+   "played": {
+    "q": 0,
+    "right": 0,
+    "wrong": 0,
+    "tmo": 0
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 1306,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "gacha": {
+   "notes": [
+    "AFTER CLOSE: blockers landGachaScreen z=9800 | body pos/overflow static/hidden"
+   ],
+   "text": "NOT OPEN",
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "afterDraw": {
+    "toast": [],
+    "coins": 491,
+    "overlays": [
+     "hansenFxLayer",
+     "hansenFxLayerBack",
+     "landGachaScreen"
+    ]
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 5687,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden",
+    "bodyPos": "static",
+    "blockers": [
+     "landGachaScreen z=9800"
+    ],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  }
+ },
+ "notes": [
+  "opened via window.openIsland (no home card for this island)",
+  "welcome btn tap ok=true"
+ ],
+ "ext": [
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously"
+ ],
+ "openMs": 547,
+ "welcome": "🎮 欢迎来到单词大陆·①迷雾心湖！ 🗺️ 2 大单词岛屿等你探索 📚 30 个英语单词随你学 🎮 12 种超酷玩法等你来 🐉 36 阶进化宠物 🎁 每日宝箱 + 签到奖励 🏆 144 个成就等你解锁 🎒 小冒险家秘籍： 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 开始冒险！",
+ "cards": [
+  "探索单词",
+  "听音辨义",
+  "🃏 记忆翻牌",
+  "打字大师",
+  "完形填空",
+  "字母拼拼乐",
+  "spelling bee",
+  "⚔️ 拼写大PK",
+  "打地鼠",
+  "钓鱼大师",
+  "泡泡大作战",
+  "极速60秒",
+  "火眼金睛",
+  "抽卡"
+ ],
+ "homeOverflow": {
+  "docOverflow": false,
+  "items": []
+ },
+ "start": {
+  "coins": 300,
+  "xp": 0
+ },
+ "extCount": 9,
+ "allEvents": [],
+ "end": {
+  "coins": 491,
+  "xp": 856,
+  "answers": 149,
+  "learned": 1
+ },
+ "totalMs": 323658
+}

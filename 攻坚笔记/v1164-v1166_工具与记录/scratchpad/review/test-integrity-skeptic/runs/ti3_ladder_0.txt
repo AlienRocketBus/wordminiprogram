@@ -1,0 +1,14 @@
+{
+ "OFF": 0,
+ "timeline": [
+  "27s A hosting (等对手进来)",
+  "28s B pressed 开始排位",
+  "28s B 正在找对手",
+  "29s B other"
+ ],
+ "skew": -2,
+ "metAfterSecFromB": 4,
+ "openRooms": [],
+ "finalA": "你 0 ⚡抢答赛 0 小蜂B 第 1 / 10 词 · ⏱ 20s 熊猫 p _ _ _ _ 对手：正在拼… q w e",
+ "finalB": "你 0 ⚡抢答赛 0 小蜂A 第 1 / 10 词 · ⏱ 19s 熊猫 p _ _ _ _ 对手：正在拼… q w e"
+}

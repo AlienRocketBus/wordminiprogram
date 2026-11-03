@@ -1,0 +1,81 @@
+{
+ "tLoad": 1863,
+ "steps": [],
+ "bodyText": "🛸\n🚀\n🛰️\n☄️\n🌟\n🎁\n🏆\n🦋\n🎮\n💎\n📚\n🎮\n🦋\n🌙\n💎\n🎮\n📚\n🌙\n🎮\nv1163\n🎒 单词大冒险家联盟 · 招募中\n单 词 大 冒 险 · 一 段 神 奇 旅 程\n单词大冒险\nWORD ADVENTURES\n\n🦸 Hey 勇敢的小冒险家, 欢迎加入！\n快穿越 18 关神奇大冒险, 收集 711+ 单词宝藏,\n玩转 12 种超酷挑战, 还能孵化你专属的 36 阶进化宠物 🐣！\n\n🗺️\n18\n主题岛屿\n📚\n711+\n英语单词\n🎮\n12\n学习模式\n🐾\n36\n宠物阶段\n📍\n最近探险的岛屿\n快去玩\n🌌\n✦ 番外篇 EXTRA\n第 19 座秘境\n星海觉醒\n通关副本 · 赢取星海限定收藏卡 →\n进入\n副本\n🦁\n🐘\n🦒\n🦁\n动物大冒险\nANIMAL ISLAND\n进入冒险\n→\n🍕\n🍔\n🍎\n🍔\n食物大冒险\nFOOD ISLAND\n进入冒险\n→\n⚽\n🏀\n🏊\n⚽\n运动大冒险\nSPORTS & HOBBIES\n进入冒险\n→\n👨‍⚕️\n👨‍🚀\n👨‍🏫\n👨‍⚕️\n职业大冒险\nPEOPLE & PROFESSIONS\n进入冒险\n→\n🎨\n🔢\n🏅\n🎨\n色彩数字大冒险\nCOLORS & NUMBERS\n进入冒险\n→\n☀️\n🌈\n🌳\n🌈\n自然大冒险\nNATURE ISLAND\n进入冒险\n→\n🏃\n✍️\n🗣️\n🏃\n动作大冒险\nACTION VERBS\n进入冒险\n→\n🚗\n✈️\n🚂\n🚗\n交通大冒险\nTRANSPORTATION\n进入冒险\n→\n👁️\n❤️\n💪\n👤\n身体大冒险\nBODY PARTS\n进入冒险\n→\n🏙️\n🚌\n🏪\n🏙️\n城市大冒险\nCITY ISLAND\n进入冒险\n→\n👕\n👖\n👟\n👗\n服装大冒险\nCLOTHES ISLAND\n进入冒险\n→\n🏠\n🛋️\n🛏️\n🏠\n家居大冒险\nHOUSE & FURNITURE\n进入冒险\n→\n👨‍👩‍👧‍👦\n👶\n👴\n👨‍👩‍👧‍👦\n家庭大冒险\nFAMILY ISLAND\n进入冒险\n→\n🏫\n✏️\n📚\n🏫\n学校大冒险\nSCHOOL & STATIONERY\n进入冒险\n→\n⏰\n📅\n🌙\n⏰\n时间大冒险\nTIME ISLAND\n进入冒险\n→\n😊\n🌹\n🦁\n✨\n形容大冒险\nCOMMON ADJECTIVES\n进入冒险\n→\n✅\n💡\n🔗\n🔤\n百宝大冒险\nCOMMON MISC WORDS\n进入冒险\n→\n❓\n🤔\n👉\n❓\n疑问大冒险\nPRONOUNS & QUESTION WORDS\n进入冒险\n→\n🎯 在大冒险, 你会收获什么\nWHAT AWAITS YOU\n01\n📖\n自然学习\n主题分组 · 听音 · 看图 · 例句 一站式掌握\n02\n🎮\n12 种玩法\n打地鼠 · 钓鱼 · 拼词 · 打字 · 完形填空…\n03\n🐾\n宠物养成\n36 阶进化 · 每天练习让宠物更强大\n04\n🏆\n每日挑战\n任务 · 宝箱 · 成就 · 连续打卡奖励\n✉️\n给作者留言\nBug · 建议 · 表扬, 都告诉我\n🌟 单词大冒险 🎮\n学渣的快乐 · 学霸的秘密\n💡 每天玩 10 分钟, 一个月后你会发现自己超厉害！\n🎒 进度保存在当前浏览器 · 已访问的基础页面可离线打开\n🔒 隐私与离线说明\n跳过\n🎯\n欢迎来到单词大冒险！\n这里用打 Boss 的方式背单词——\n答对题目就能击败怪兽，越打越强！\n下一步 →",
+ "clickables": [
+  {
+   "t": "📍 最近探险的岛屿 快去玩",
+   "w": 205,
+   "h": 69,
+   "x": 92,
+   "y": 661,
+   "tag": "DIV",
+   "id": "recentLearnStat",
+   "cls": "stat"
+  },
+  {
+   "t": "跳过",
+   "w": 56,
+   "h": 44,
+   "x": 297,
+   "y": 238,
+   "tag": "BUTTON",
+   "id": "__hsOnbSkip",
+   "cls": ""
+  },
+  {
+   "t": "下一步 →",
+   "w": 288,
+   "h": 53,
+   "x": 51,
+   "y": 537,
+   "tag": "BUTTON",
+   "id": "__hsOnbBtn",
+   "cls": ""
+  },
+  {
+   "t": "沉浸欣赏主题",
+   "w": 40,
+   "h": 40,
+   "x": 12,
+   "y": 12,
+   "tag": "BUTTON",
+   "id": "hsnThemeEye",
+   "cls": "hsn-eye-btn"
+  }
+ ],
+ "ls": [
+  "setItem",
+  "removeItem",
+  "clear",
+  "hansen_credtrap_log",
+  "hansen_wallet_coins_earned",
+  "hansen_vocab_wordIslandClothes",
+  "hansen_vocab_wordIslandFood",
+  "hansen_coin_awards_v942",
+  "hansen_vocab_wordIslandAdj",
+  "hansen_vocab_wordIslandSports",
+  "hansen_vocab_wordIslandNature",
+  "hansen_vocab_wordIslandHouse",
+  "hansen_vocab_wordIslandPeople",
+  "hansen_vocab_wordIslandBody",
+  "hansen_vocab_wordIslandSchool",
+  "hansen_wallet_coins",
+  "hansen_vocab_wordIslandFamily",
+  "hansen_vocab_wordIslandTransport",
+  "hansen_gems_cleared_v1",
+  "hansen_palette_global",
+  "hansen_vocab_wordIslandTime",
+  "hansen_vocab_wordIslandColorNum",
+  "hansen_vocab_wordIslandPronouns",
+  "hansen_starter_coins_given",
+  "hansen_coins_migrated_v1",
+  "hansen_vocab_wordIslandCity",
+  "hansen_vocab_wordIslandVerbs",
+  "hansen_vocab_wordIslandMisc",
+  "hansen_vocab_wordIslandAnimal",
+  "hansen_wallet_gems"
+ ],
+ "errs": [],
+ "ext": []
+}

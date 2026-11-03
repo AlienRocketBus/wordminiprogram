@@ -1,0 +1,24 @@
+import { setup, sleep, log } from './lib.mjs';
+const {srv, browser, ctx, base, external} = await setup();
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message)); page.on('console', m=>{ if(m.type()==='error') errs.push('console: '+m.text().slice(0,200)); });
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+const t0=Date.now();
+await page.goto(base+'index.html', {waitUntil:'load'});
+console.log('load ms', Date.now()-t0);
+await sleep(2500);
+await page.screenshot({path:'/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/integration/home_new.png'});
+const info = await page.evaluate(()=>{
+  const r={};
+  r.onb = !!document.getElementById('__hansen_onboarding');
+  r.cards = [...document.querySelectorAll('a.island')].map(a=>a.getAttribute('href'));
+  r.seasonBar = !!document.getElementById('hsnSeasonBar');
+  r.title = document.title;
+  r.fixed = [...document.querySelectorAll('body *')].filter(e=>{const s=getComputedStyle(e); return (s.position==='fixed') && s.display!=='none' && e.offsetWidth>0}).map(e=>e.id+'|'+e.className.toString().slice(0,30)+'|z'+getComputedStyle(e).zIndex).slice(0,40);
+  r.iframes = [...document.querySelectorAll('iframe')].map(f=>f.id+'|'+(f.src||'').slice(-60));
+  return r;
+});
+console.log(JSON.stringify(info,null,1));
+console.log('errors', errs);
+console.log('external', [...external]);
+await browser.close(); srv.close();

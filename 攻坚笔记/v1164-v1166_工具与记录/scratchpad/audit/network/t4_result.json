@@ -1,0 +1,326 @@
+{
+  "ok": {
+    "aud": [
+      {
+        "k": "play",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "t": 1793707402366
+      },
+      {
+        "k": "tts",
+        "text": " ",
+        "t": 1793707402370
+      },
+      {
+        "k": "error",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "dt": 174
+      },
+      {
+        "k": "play",
+        "src": "/words/water.mp3?v215",
+        "t": 1793707403910
+      },
+      {
+        "k": "playing",
+        "src": "/words/water.mp3?v215",
+        "dt": 48
+      }
+    ],
+    "word": "water",
+    "hint": "点击喇叭播放单词",
+    "speakerPlaying": false,
+    "visibleText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n🥚 鸡蛋\n💧 水\n 食物\n🍲 汤\n本局答对：0 / 0",
+    "wordMap": "object",
+    "speakApple": [
+      {
+        "k": "play",
+        "src": "/words/apple.mp3?v215",
+        "t": 1793707411101
+      },
+      {
+        "k": "playing",
+        "src": "/words/apple.mp3?v215",
+        "dt": 172
+      }
+    ],
+    "events": [
+      {
+        "tag": "ok",
+        "kind": "requestfailed",
+        "text": "/words/salt.mp3?v215 net::ERR_ABORTED"
+      }
+    ]
+  },
+  "mp3_404": {
+    "aud": [
+      {
+        "k": "play",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "t": 1793707424134
+      },
+      {
+        "k": "tts",
+        "text": " ",
+        "t": 1793707424135
+      },
+      {
+        "k": "error",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "dt": 286
+      },
+      {
+        "k": "play",
+        "src": "/words/cake.mp3?v215",
+        "t": 1793707425781
+      },
+      {
+        "k": "error",
+        "src": "/words/cake.mp3?v215",
+        "dt": 380
+      }
+    ],
+    "word": "cake",
+    "hint": "点击喇叭播放单词",
+    "speakerPlaying": false,
+    "visibleText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n🥩 牛肉\n🎂 蛋糕\n🍚 米饭\n🧂 盐\n本局答对：0 / 0",
+    "wordMap": "object",
+    "speakApple": [
+      {
+        "k": "play",
+        "src": "/words/apple.mp3?v215",
+        "t": 1793707433401
+      },
+      {
+        "k": "playing",
+        "src": "/words/apple.mp3?v215",
+        "dt": 142
+      }
+    ],
+    "events": [
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/pizza.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/hamburger.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/sandwich.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/egg.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/meat.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/beef.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/pork.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/chicken.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/fish.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/water.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/milk.mp3?v215",
+        "fromSW": false
+      },
+      {
+        "tag": "mp3_404",
+        "kind": "http404",
+        "text": "/words/juice.mp3?v215",
+        "fromSW": false
+      }
+    ]
+  },
+  "mp3_slow6s": {
+    "aud": [
+      {
+        "k": "play",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "t": 1793707446405
+      },
+      {
+        "k": "tts",
+        "text": " ",
+        "t": 1793707446405
+      },
+      {
+        "k": "error",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "dt": 371
+      },
+      {
+        "k": "play",
+        "src": "/words/water.mp3?v215",
+        "t": 1793707448043
+      },
+      {
+        "k": "playing",
+        "src": "/words/water.mp3?v215",
+        "dt": 48
+      }
+    ],
+    "word": "water",
+    "hint": "点击喇叭播放单词",
+    "speakerPlaying": false,
+    "visibleText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n 猪肉\n🍞 面包\n💧 水\n🍚 米饭\n本局答对：0 / 0",
+    "wordMap": "object",
+    "speakApple": [
+      {
+        "k": "play",
+        "src": "/words/apple.mp3?v215",
+        "t": 1793707455862
+      },
+      {
+        "k": "playing",
+        "src": "/words/apple.mp3?v215",
+        "dt": 95
+      }
+    ],
+    "events": [
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/cake.mp3?v215 net::ERR_ABORTED"
+      },
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/cookie.mp3?v215 net::ERR_ABORTED"
+      },
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/candy.mp3?v215 net::ERR_ABORTED"
+      },
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/candy.mp3?v215 net::ERR_ABORTED"
+      },
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/cookie.mp3?v215 net::ERR_ABORTED"
+      },
+      {
+        "tag": "mp3_slow6s",
+        "kind": "requestfailed",
+        "text": "/words/cake.mp3?v215 net::ERR_ABORTED"
+      }
+    ]
+  },
+  "offline": {
+    "aud": [
+      {
+        "k": "play",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "t": 1793707468248
+      },
+      {
+        "k": "tts",
+        "text": " ",
+        "t": 1793707468248
+      },
+      {
+        "k": "playing",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "dt": 34
+      },
+      {
+        "k": "error",
+        "src": "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+        "dt": 109
+      },
+      {
+        "k": "play",
+        "src": "/words/juice.mp3?v215",
+        "t": 1793707469804
+      },
+      {
+        "k": "error",
+        "src": "/words/juice.mp3?v215",
+        "dt": 3
+      }
+    ],
+    "word": "juice",
+    "hint": "点击喇叭播放单词",
+    "speakerPlaying": false,
+    "visibleText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n🥚 鸡蛋\n🧃 果汁\n🍚 米饭\n🍴 餐\n本局答对：0 / 0",
+    "wordMap": "object",
+    "speakApple": [
+      {
+        "k": "play",
+        "src": "/words/apple.mp3?v215",
+        "t": 1793707476826
+      },
+      {
+        "k": "playing",
+        "src": "/words/apple.mp3?v215",
+        "dt": 49
+      }
+    ],
+    "events": [
+      {
+        "tag": "offline",
+        "kind": "requestfailed",
+        "text": "/words/juice.mp3?v215 net::ERR_INTERNET_DISCONNECTED"
+      },
+      {
+        "tag": "offline",
+        "kind": "requestfailed",
+        "text": "/words/tea.mp3?v215 net::ERR_INTERNET_DISCONNECTED"
+      },
+      {
+        "tag": "offline",
+        "kind": "requestfailed",
+        "text": "/words/coffee.mp3?v215 net::ERR_INTERNET_DISCONNECTED"
+      },
+      {
+        "tag": "offline",
+        "kind": "requestfailed",
+        "text": "/words/juice.mp3?v215 net::ERR_INTERNET_DISCONNECTED"
+      }
+    ]
+  }
+}

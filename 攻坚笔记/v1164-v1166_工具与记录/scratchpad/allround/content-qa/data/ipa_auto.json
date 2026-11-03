@@ -1,0 +1,514 @@
+{
+ "fmt": [
+  [
+   281,
+   "thirteen",
+   "/ˌθɜːˈtiːn/",
+   "double mark"
+  ],
+  [
+   699,
+   "moreover",
+   "/mɔːrˈəʊvə/",
+   "post-vocalic r (rhotic, AmE?)"
+  ],
+  [
+   854,
+   "August",
+   "/ɔːˈɡʌst/",
+   "double mark"
+  ]
+ ],
+ "cmp": [
+  [
+   97,
+   "tired",
+   "/ˈtaɪəd/",
+   "MISMATCH syl 1/2 stress 0/0 skel td/td",
+   "T AY1 ER0 D"
+  ],
+  [
+   104,
+   "quiet",
+   "/ˈkwaɪət/",
+   "MISMATCH syl 1/2 stress 0/0 skel kt/kt",
+   "K W AY1 AH0 T"
+  ],
+  [
+   111,
+   "dangerous",
+   "/ˈdeɪndʒərəs/",
+   "MISMATCH syl 3/3 stress 0/0 skel dndʒrs/dndʒs",
+   "D EY1 N JH ER0 AH0 S"
+  ],
+  [
+   134,
+   "lion",
+   "/ˈlaɪən/",
+   "MISMATCH syl 1/2 stress 0/0 skel ln/ln",
+   "L AY1 AH0 N"
+  ],
+  [
+   157,
+   "giraffe",
+   "/dʒəˈrɑːf/",
+   "MISMATCH syl 2/2 stress 1/1 skel dʒrf/dʒf",
+   "JH ER0 AE1 F"
+  ],
+  [
+   160,
+   "kangaroo",
+   "/ˌkæŋɡəˈruː/",
+   "MISMATCH syl 3/3 stress 2/2 skel kŋɡr/kŋɡ",
+   "K AE2 NG G ER0 UW1"
+  ],
+  [
+   204,
+   "police station",
+   "/pəˈliːs steɪʃn/",
+   "MISMATCH syl 2/2 stress None/0 skel stʃn/stʃn",
+   "S T EY1 SH AH0 N"
+  ],
+  [
+   205,
+   "fire station",
+   "/ˈfaɪə steɪʃn/",
+   "MISMATCH syl 2/2 stress None/0 skel stʃn/stʃn",
+   "S T EY1 SH AH0 N"
+  ],
+  [
+   211,
+   "museum",
+   "/mjuˈziːəm/",
+   "MISMATCH syl 2/3 stress 1/1 skel mzm/mzm",
+   "M Y UW0 Z IY1 AH0 M"
+  ],
+  [
+   213,
+   "factory",
+   "/ˈfæktri/",
+   "MISMATCH syl 2/3 stress 0/0 skel fktr/fkt",
+   "F AE1 K T ER0 IY0"
+  ],
+  [
+   223,
+   "downstairs",
+   "/ˌdaʊnˈsteəz/",
+   "MISMATCH syl 2/2 stress 1/0 skel dnstz/dnstz",
+   "D AW1 N S T EH1 R Z"
+  ],
+  [
+   225,
+   "outside",
+   "/ˌaʊtˈsaɪd/",
+   "MISMATCH syl 2/2 stress 1/0 skel tsd/tsd",
+   "AW1 T S AY1 D"
+  ],
+  [
+   281,
+   "thirteen",
+   "/ˌθɜːˈtiːn/",
+   "MISMATCH syl 2/2 stress 1/0 skel θtn/θtn",
+   "TH ER1 T IY1 N"
+  ],
+  [
+   303,
+   "grandpa",
+   "/ˈɡrænpɑː/",
+   "MISMATCH syl 2/2 stress 0/0 skel ɡrnp/ɡrndp",
+   "G R AE1 N D P AA2"
+  ],
+  [
+   304,
+   "grandma",
+   "/ˈɡrænmɑː/",
+   "MISMATCH syl 2/2 stress 0/0 skel ɡrnm/ɡrndm",
+   "G R AE1 N D M AA0"
+  ],
+  [
+   306,
+   "grandmother",
+   "/ˈɡrænmʌðə/",
+   "MISMATCH syl 3/3 stress 0/0 skel ɡrnmð/ɡrndmð",
+   "G R AE1 N D M AH2 DH ER0"
+  ],
+  [
+   307,
+   "grandparents",
+   "/ˈɡrænpeərənts/",
+   "MISMATCH syl 3/3 stress 0/0 skel ɡrnprnts/ɡrndprnts",
+   "G R AE1 N D P EH2 R AH0 N T S"
+  ],
+  [
+   347,
+   "sandwich",
+   "/ˈsænwɪdʒ/",
+   "MISMATCH syl 2/2 stress 0/0 skel sndʒ/sndtʃ",
+   "S AE1 N D W IH0 CH"
+  ],
+  [
+   407,
+   "mirror",
+   "/ˈmɪrə/",
+   "MISMATCH syl 2/2 stress 0/0 skel mr/m",
+   "M IH1 R ER0"
+  ],
+  [
+   431,
+   "engineer",
+   "/ˌendʒɪˈnɪə/",
+   "MISMATCH syl 3/3 stress 2/0 skel ndʒn/ndʒn",
+   "EH1 N JH AH0 N IH1 R"
+  ],
+  [
+   433,
+   "scientist",
+   "/ˈsaɪəntɪst/",
+   "MISMATCH syl 2/3 stress 0/0 skel sntst/sntst",
+   "S AY1 AH0 N T IH0 S T"
+  ],
+  [
+   462,
+   "flower",
+   "/ˈflaʊə/",
+   "MISMATCH syl 1/2 stress 0/0 skel fl/fl",
+   "F L AW1 ER0"
+  ],
+  [
+   524,
+   "eraser",
+   "/ɪˈreɪzə/",
+   "MISMATCH syl 3/3 stress 1/1 skel rz/rs",
+   "IH0 R EY1 S ER0"
+  ],
+  [
+   529,
+   "crayon",
+   "/ˈkreɪən/",
+   "MISMATCH syl 1/2 stress 0/0 skel krn/krn",
+   "K R EY1 AA2 N"
+  ],
+  [
+   543,
+   "science",
+   "/ˈsaɪəns/",
+   "MISMATCH syl 1/2 stress 0/0 skel sns/sns",
+   "S AY1 AH0 N S"
+  ],
+  [
+   551,
+   "dictionary",
+   "/ˈdɪkʃənri/",
+   "MISMATCH syl 3/4 stress 0/0 skel dkʃnr/dkʃnr",
+   "D IH1 K SH AH0 N EH2 R IY0"
+  ],
+  [
+   555,
+   "curious",
+   "/ˈkjʊəriəs/",
+   "MISMATCH syl 2/3 stress 0/0 skel krs/krs",
+   "K Y UH1 R IY0 AH0 S"
+  ],
+  [
+   570,
+   "furious",
+   "/ˈfjʊəriəs/",
+   "MISMATCH syl 2/3 stress 0/0 skel frs/frs",
+   "F Y UH1 R IY0 AH0 S"
+  ],
+  [
+   576,
+   "reliable",
+   "/rɪˈlaɪəbl/",
+   "MISMATCH syl 3/4 stress 1/1 skel rlbl/rlbl",
+   "R IH0 L AY1 AH0 B AH0 L"
+  ],
+  [
+   580,
+   "loyal",
+   "/ˈlɔɪəl/",
+   "MISMATCH syl 1/2 stress 0/0 skel ll/ll",
+   "L OY1 AH0 L"
+  ],
+  [
+   587,
+   "hardworking",
+   "/ˌhɑːdˈwɜːkɪŋ/",
+   "MISMATCH syl 3/3 stress 1/0 skel dkŋ/dkŋ",
+   "HH AA1 R D W ER2 K IH0 NG"
+  ],
+  [
+   590,
+   "outgoing",
+   "/ˌaʊtˈɡəʊɪŋ/",
+   "MISMATCH syl 2/3 stress 1/0 skel tɡŋ/tɡŋ",
+   "AW1 T G OW2 IH0 NG"
+  ],
+  [
+   601,
+   "ordinary",
+   "/ˈɔːdnri/",
+   "MISMATCH syl 3/4 stress 0/0 skel dnr/dnr",
+   "AO1 R D AH0 N EH2 R IY0"
+  ],
+  [
+   603,
+   "comfortable",
+   "/ˈkʌmftəbl/",
+   "MISMATCH syl 3/4 stress 0/0 skel kmftbl/kmftbl",
+   "K AH1 M F ER0 T AH0 B AH0 L"
+  ],
+  [
+   608,
+   "accurate",
+   "/ˈækjərət/",
+   "MISMATCH syl 3/3 stress 0/0 skel krt/kt",
+   "AE1 K Y ER0 AH0 T"
+  ],
+  [
+   614,
+   "immediately",
+   "/ɪˈmiːdiətli/",
+   "MISMATCH syl 4/5 stress 1/1 skel mdtl/mdtl",
+   "IH2 M IY1 D IY2 AH0 T L IY0"
+  ],
+  [
+   618,
+   "eventually",
+   "/ɪˈventʃuəli/",
+   "MISMATCH syl 4/5 stress 1/1 skel vntʃl/vntʃl",
+   "IH0 V EH1 N CH AH0 W AH0 L IY0"
+  ],
+  [
+   620,
+   "nowadays",
+   "/ˈnaʊədeɪz/",
+   "MISMATCH syl 2/3 stress 0/0 skel ndz/ndz",
+   "N AW1 AH0 D EY2 Z"
+  ],
+  [
+   623,
+   "temporary",
+   "/ˈtemprəri/",
+   "MISMATCH syl 3/4 stress 0/0 skel tmprr/tmpr",
+   "T EH1 M P ER0 EH2 R IY0"
+  ],
+  [
+   626,
+   "currently",
+   "/ˈkʌrəntli/",
+   "MISMATCH syl 3/3 stress 0/0 skel krntl/kntl",
+   "K ER1 AH0 N T L IY0"
+  ],
+  [
+   627,
+   "previously",
+   "/ˈpriːviəsli/",
+   "MISMATCH syl 3/4 stress 0/0 skel prvsl/prvsl",
+   "P R IY1 V IY0 AH0 S L IY0"
+  ],
+  [
+   631,
+   "period",
+   "/ˈpɪəriəd/",
+   "MISMATCH syl 2/3 stress 0/0 skel prd/prd",
+   "P IH1 R IY0 AH0 D"
+  ],
+  [
+   632,
+   "schedule",
+   "/ˈʃedjuːl/",
+   "MISMATCH syl 2/2 stress 0/0 skel ʃdl/skdʒl",
+   "S K EH1 JH UH0 L"
+  ],
+  [
+   642,
+   "realize",
+   "/ˈrɪəlaɪz/",
+   "MISMATCH syl 2/3 stress 0/0 skel rlz/rlz",
+   "R IY1 AH0 L AY2 Z"
+  ],
+  [
+   680,
+   "average",
+   "/ˈævərɪdʒ/",
+   "MISMATCH syl 3/3 stress 0/0 skel vrdʒ/vdʒ",
+   "AE1 V ER0 IH0 JH"
+  ],
+  [
+   681,
+   "entire",
+   "/ɪnˈtaɪə/",
+   "MISMATCH syl 2/3 stress 1/1 skel nt/nt",
+   "IH0 N T AY1 ER0"
+  ],
+  [
+   687,
+   "numerous",
+   "/ˈnjuːmərəs/",
+   "MISMATCH syl 3/3 stress 0/0 skel nmrs/nms",
+   "N UW1 M ER0 AH0 S"
+  ],
+  [
+   699,
+   "moreover",
+   "/mɔːrˈəʊvə/",
+   "MISMATCH syl 3/3 stress 1/1 skel mv/mrv",
+   "M AO0 R OW1 V ER0"
+  ],
+  [
+   706,
+   "actually",
+   "/ˈæktʃuəli/",
+   "MISMATCH syl 3/4 stress 0/0 skel ktʃl/ktʃl",
+   "AE1 K CH UW2 AH0 L IY0"
+  ],
+  [
+   707,
+   "furthermore",
+   "/ˌfɜːðəˈmɔː/",
+   "MISMATCH syl 3/3 stress 2/0 skel fðm/fðm",
+   "F ER1 DH ER0 M AO2 R"
+  ],
+  [
+   720,
+   "summarize",
+   "/ˈsʌməraɪz/",
+   "MISMATCH syl 3/3 stress 0/0 skel smrz/smz",
+   "S AH1 M ER0 AY2 Z"
+  ],
+  [
+   723,
+   "memorize",
+   "/ˈmeməraɪz/",
+   "MISMATCH syl 3/3 stress 0/0 skel mmrz/mmz",
+   "M EH1 M ER0 AY2 Z"
+  ],
+  [
+   733,
+   "society",
+   "/səˈsaɪəti/",
+   "MISMATCH syl 3/4 stress 1/1 skel sst/sst",
+   "S AH0 S AY1 AH0 T IY0"
+  ],
+  [
+   748,
+   "generation",
+   "/ˌdʒenəˈreɪʃn/",
+   "MISMATCH syl 4/4 stress 2/2 skel dʒnrʃn/dʒnʃn",
+   "JH EH2 N ER0 EY1 SH AH0 N"
+  ],
+  [
+   749,
+   "individual",
+   "/ˌɪndɪˈvɪdʒuəl/",
+   "MISMATCH syl 4/5 stress 2/2 skel ndvdʒl/ndvdʒl",
+   "IH2 N D AH0 V IH1 JH AH0 W AH0 L"
+  ],
+  [
+   762,
+   "material",
+   "/məˈtɪəriəl/",
+   "MISMATCH syl 3/4 stress 1/1 skel mtrl/mtrl",
+   "M AH0 T IH1 R IY0 AH0 L"
+  ],
+  [
+   765,
+   "resource",
+   "/rɪˈsɔːs/",
+   "MISMATCH syl 2/2 stress 1/0 skel rss/rss",
+   "R IY1 S AO0 R S"
+  ],
+  [
+   768,
+   "scientific",
+   "/ˌsaɪənˈtɪfɪk/",
+   "MISMATCH syl 3/4 stress 1/2 skel sntfk/sntfk",
+   "S AY2 AH0 N T IH1 F IH0 K"
+  ],
+  [
+   773,
+   "career",
+   "/kəˈrɪə/",
+   "MISMATCH syl 2/2 stress 1/1 skel kr/k",
+   "K ER0 IH1 R"
+  ],
+  [
+   786,
+   "salary",
+   "/ˈsæləri/",
+   "MISMATCH syl 3/3 stress 0/0 skel slr/sl",
+   "S AE1 L ER0 IY0"
+  ],
+  [
+   787,
+   "employee",
+   "/ɪmˈplɔɪiː/",
+   "MISMATCH syl 2/3 stress 1/1 skel mpl/mpl",
+   "EH0 M P L OY1 IY0"
+  ],
+  [
+   805,
+   "skiing",
+   "/ˈskiːɪŋ/",
+   "MISMATCH syl 1/2 stress 0/0 skel skŋ/skŋ",
+   "S K IY1 IH0 NG"
+  ],
+  [
+   810,
+   "drawing",
+   "/ˈdrɔːɪŋ/",
+   "MISMATCH syl 1/2 stress 0/0 skel drŋ/drŋ",
+   "D R AO1 IH0 NG"
+  ],
+  [
+   816,
+   "player",
+   "/ˈpleɪə/",
+   "MISMATCH syl 1/2 stress 0/0 skel pl/pl",
+   "P L EY1 ER0"
+  ],
+  [
+   847,
+   "January",
+   "/ˈdʒænjuəri/",
+   "MISMATCH syl 3/4 stress 0/0 skel dʒnr/dʒnr",
+   "JH AE1 N Y UW0 EH2 R IY0"
+  ],
+  [
+   848,
+   "February",
+   "/ˈfebruəri/",
+   "MISMATCH syl 3/4 stress 0/0 skel fbrr/fbrr",
+   "F EH1 B R UW0 EH2 R IY0"
+  ],
+  [
+   854,
+   "August",
+   "/ɔːˈɡʌst/",
+   "MISMATCH syl 2/2 stress 1/0 skel ɡst/ɡst",
+   "AA1 G AH0 S T"
+  ],
+  [
+   861,
+   "weekend",
+   "/ˌwiːkˈend/",
+   "MISMATCH syl 2/2 stress 1/0 skel knd/knd",
+   "W IY1 K EH2 N D"
+  ],
+  [
+   895,
+   "OK",
+   "/ˌəʊˈkeɪ/",
+   "MISMATCH syl 2/2 stress 1/0 skel k/k",
+   "OW1 K EY1"
+  ],
+  [
+   949,
+   "idea",
+   "/aɪˈdɪə/",
+   "MISMATCH syl 2/3 stress 1/1 skel d/d",
+   "AY0 D IY1 AH0"
+  ]
+ ]
+}

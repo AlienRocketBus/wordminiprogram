@@ -1,0 +1,5 @@
+moles menu: ← 返回 🎯 打地鼠 🎯 选择难度开始打地鼠 每个目标只出现一次, 全部打中 | clicked: startMolesLevel('easy') | before hide: ← 返回 🎯 打地鼠 🌱 初级 第 1/17 得分 0 ❤️❤️❤️❤️❤️ 🔊 找出: duck 🔊 听 🐦 | after 8s hidden:  ← 返回 🎯 打地鼠 🌱 初级第 1/17得分 0❤️❤️❤️❤️❤️🔊 找出: duck 🔊 听🐺狼🐝蜜
+fish menu: ← 返回 🎣 钓鱼大师 🎣 选择难度开始钓鱼 每条目标鱼只出现一次, 全部钓 | clicked: startFishLevel('easy') | before hide: ← 返回 🎣 钓鱼大师 🌱 初级 第 1/17 得分 0 ❤️❤️❤️❤️❤️ 🎣 钓出: 🦉 猫头鹰 🦑 o | after 8s hidden:  ← 返回 🎣 钓鱼大师 🌱 初级第 1/17得分 0❤️❤️❤️❤️❤️🎣 钓出: 🦉 猫头鹰🦑owl🦑o
+bubble menu: ← 返回 🫧 泡泡大作战 🫧 选择难度开始 每档大约 20 词左右, 顺序随 | clicked: startBubbleLevel('easy') | before hide: ← 返回 🫧 泡泡大作战 🌱 初级 得分 0 连击 0 ❤️❤️❤️❤️❤️ 🌱 初级 · 1 / 17 🐮 牛 | after 8s hidden:  ← 返回 🫧 泡泡大作战 🌱 初级得分 0连击 0❤️❤️❤️❤️❤️🌱 初级 · 1 / 17🐮 牛cowb
+listen menu: ← 返回 🔊 听音辨义 选择一个难度开始挑战 每档单词不重复, 全部答完后会自 | clicked: startListenLevel('easy') | before hide: ← 返回 🔊 听音辨义 🌱 初级 · 第 1 轮 · 1 / 14 换难度 🔊 点击喇叭播放单词 🐢 慢速 🔊 | after 8s hidden:  ← 返回 🔊 听音辨义 🌱初级·第 1 轮·1 / 14换难度🔊点击喇叭播放单词🐢 慢速🔊 正常🎯 选出正
+eagle menu: ← 返回 👀 火眼金睛 选择难度开始挑战 每档单词不重复, 完成一档=完成一次 | clicked: startEagleLevel('easy') | before hide: ← 返回 👀 火眼金睛 第 1/17 ⭐ 0 🔥 0 🌱 初级 👀 找出 🦉 猫头鹰 的正确拼写 owll o | after 8s hidden:  ← 返回 👀 火眼金睛 第 1/17⭐ 0🔥 0🌱 初级👀 找出 🦉 猫头鹰 的正确拼写owllowloow

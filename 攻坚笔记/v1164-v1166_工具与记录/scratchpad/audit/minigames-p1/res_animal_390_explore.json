@@ -1,0 +1,123 @@
+{
+ "island": "animal",
+ "games": {
+  "explore": {
+   "notes": [
+    "cards=42 allW=42",
+    "after learn {\"modal\":false,\"learned\":1,\"firstLearned\":true}"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "modal": "✕ 🐾 animal /ˈænɪml/ 动物 📝 A cat is an animal. 猫是一种动物。 🔊 发音 🐢 慢速 📝 例句 📚 加入学习！+10 经验 这个单词的两条真实进度 🐾 宠物掌握 0 / 3 还需在打字大师中无提示、整词精确拼对 3 次。选择题、听音选项和看提示拼写都不增加这条进度。 💎 知识结晶 ☆☆☆☆☆ 打开聚焦 Spelling Bee 后可调机器人速",
+   "modalOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 10,
+    "answers": 0
+   },
+   "ms": 13969,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "animal:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "animal:explore:close",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "animal:explore:close",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  }
+ },
+ "notes": [
+  "home card tap: {\"ok\":true,\"hit\":\"DIV.island-en \\\"ANIMAL ISLAND\\\"\"}",
+  "welcome btn tap ok=true"
+ ],
+ "ext": [
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously"
+ ],
+ "openMs": 1230,
+ "welcome": "🎮 欢迎来到动物大冒险！ 🗺️ 5 大动物岛屿等你探索 📚 42 个英语单词随你学 🎮 12 种超酷玩法等你来 🐉 36 阶进化宠物 🎁 每日宝箱 + 签到奖励 🏆 144 个成就等你解锁 🎒 小冒险家秘籍： 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 开始冒险！",
+ "cards": [
+  "探索单词",
+  "听音辨义",
+  "🃏 记忆翻牌",
+  "打字大师",
+  "完形填空",
+  "字母拼拼乐",
+  "spelling bee",
+  "⚔️ 拼写大PK",
+  "打地鼠",
+  "钓鱼大师",
+  "泡泡大作战",
+  "极速60秒",
+  "火眼金睛",
+  "抽卡"
+ ],
+ "homeOverflow": {
+  "docOverflow": false,
+  "items": []
+ },
+ "start": {
+  "coins": 300,
+  "xp": 0
+ },
+ "vis": "visible/true",
+ "extCount": 3,
+ "allEvents": [],
+ "end": {
+  "coins": 300,
+  "xp": 10,
+  "answers": 0,
+  "learned": 1
+ },
+ "totalMs": 21957
+}

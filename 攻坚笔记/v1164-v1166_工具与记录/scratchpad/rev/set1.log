@@ -1,0 +1,17 @@
+test_review_rewards_v963 exit=0 fails=0
+test_canonical_srs_hf2_v946 exit=0 fails=0
+test_mock_contract_v970 exit=0 fails=0
+test_answer_coin_v941 exit=0 fails=0
+test_round_economy_v941 exit=0 fails=0
+test_land_mode_xp_v941 exit=0 fails=0
+test_focused_typing_v946 exit=0 fails=0
+test_explore_spelling_gate_v946 exit=0 fails=0
+test_real_path_smoke_v1163 exit=0 fails=0
+test_boss_timer_hf5_v946 exit=0 fails=0
+test_boss_round_ledger_hf6_v946 exit=0 fails=0
+test_canonical_progress_v941 exit=0 fails=0
+test_canonical_economy_v941 exit=0 fails=0
+test_mistake_lesson_v1165 exit=1 fails=2
+test_srs_plan_v1165 exit=0 fails=0
+test_spelling_pic_v1165 exit=0 fails=0
+SETDONE

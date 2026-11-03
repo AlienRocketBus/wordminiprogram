@@ -1,0 +1,6 @@
+login {"ok":true,"uid":"1728325321807323665","session":{"ok":true,"uid":"1728325321807323665","tries":1}} cid 0
+
+=== signed-in, island_animal.html opened directly (60 s) total=0 frames=7 [island_animal.html, land_map.html, island_season.html, land_map.html, island_season.html, land_map.html, ]
+  frames with HansenFriends: 3 island_animal.html, island_season.html, island_season.html
+  per frame:
+  page errors: none | console errors: none

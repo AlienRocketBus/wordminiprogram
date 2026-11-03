@@ -1,0 +1,15 @@
+{
+  "root": "user/wordminiprogram",
+  "openPK": "ok",
+  "tapLadder": "ok",
+  "ladderText": [
+    "天梯排位 系统按分数匹配对手，赢了涨分升段"
+  ],
+  "tapStart": "missing #ldGo",
+  "tapGoLogin": "missing #ldGoLogin",
+  "tapSend": "ok",
+  "tapGo": "ok",
+  "panelMsg": "",
+  "topOverlay": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+  "whatKidSees": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口"
+}

@@ -1,0 +1,4 @@
+[A] placed, rating 1045 push {"ok":true}
+[A] fetchTop (STALE=60): ok=true list=[] myRank=null
+[A] myRoughRank: {"ok":true,"rank":63}
+[A] ladder page 排行榜 box says: 🌱 还没有人上榜 打满 3 局定级赛就能上榜，你可能是第一个

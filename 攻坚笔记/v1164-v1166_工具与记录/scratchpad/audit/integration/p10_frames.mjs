@@ -1,0 +1,22 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message));
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+const tree = ()=>page.frames().map(f=>{ let d=0,p=f; while(p.parentFrame()){d++;p=p.parentFrame();} return '  '.repeat(d)+f.url().replace(base,''); }).join('\n');
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(3000);
+const o = await openCard(page, 'island_animal.html');
+let fr = islandFrame(page, 'island_animal.html'); await dismissWelcome(page, fr);
+for(const t of [1000,3000,6000,10000]){ await sleep(t===1000?1000:t-[1000,3000,6000,10000][[1000,3000,6000,10000].indexOf(t)-1]); console.log('t+'+t+'ms frames:\n'+tree()); }
+const nested = await fr.evaluate(()=>[...document.querySelectorAll('iframe')].map(f=>({src:f.getAttribute('src'), vis:getComputedStyle(f.parentElement).display, id:f.parentElement.id})));
+console.log('island iframes', nested);
+const hl0 = await page.evaluate(()=>history.length);
+await tapEl(page, fr, '.world-map-btn');
+const w = await waitFor(page, s=>s.wrap==='none', 3000); console.log('close', w.ms, w.s.wrap, 'hlen', hl0, '->', w.s.hlen);
+await sleep(1500);
+console.log('after close frames:\n'+tree());
+console.log('islandFrame url', await page.evaluate(()=>{try{return document.getElementById('islandFrame').contentWindow.location.href}catch(e){return e.message}}));
+console.log('errors', errs);
+await browser.close(); srv.close();

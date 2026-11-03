@@ -1,0 +1,150 @@
+{
+  "food_only": {
+    "swActive": 1,
+    "cacheCounts": {
+      "hansen-v944-shell-217": 48,
+      "hansen-v944-assets-215": 47,
+      "hansen-v944-icons-3": 26,
+      "hansen-v944-pages-215": 7
+    },
+    "distinctCodeUrlsRequestedOnline": 93,
+    "offline": {
+      "tap": {
+        "ok": true
+      },
+      "wait": {
+        "title": "食物大冒险 · Food Word Adventure",
+        "timeout": false
+      },
+      "globals": {
+        "WORD_MAP": "object",
+        "SENTENCE_MAP": "undefined",
+        "smartHighlight": "undefined",
+        "EX_AUDIO": "undefined",
+        "HansenBossAnim": "undefined",
+        "title": "食物大冒险 · Food Word Adventure",
+        "bootBad": null
+      },
+      "homeBootBanner": null,
+      "failedCode": [
+        "http504 /hansen_island_prefetch_v1025.js",
+        "reqfail /hansen_island_prefetch_v1025.js",
+        "http504 /hansen_cloud_config_v965.js",
+        "reqfail /hansen_cloud_config_v965.js",
+        "http504 /hansen_auth_v1004.js",
+        "reqfail /hansen_auth_v1004.js",
+        "http504 /hansen_auth_ui_v1004.js",
+        "reqfail /hansen_auth_ui_v1004.js",
+        "http504 /hansen_signup_gate_v1030.js",
+        "reqfail /hansen_signup_gate_v1030.js",
+        "http504 /sentence_map.js",
+        "reqfail /sentence_map.js",
+        "http504 /highlight_helper.js",
+        "reqfail /highlight_helper.js",
+        "http504 /hansen_ex_audio.js",
+        "reqfail /hansen_ex_audio.js",
+        "http504 /hansen_mute.js",
+        "reqfail /hansen_mute.js",
+        "http504 /hansen_early.js",
+        "reqfail /hansen_early.js",
+        "http504 /hansen_boss_anim.js",
+        "reqfail /hansen_boss_anim.js",
+        "http504 /hansen_game_antifreeze.js",
+        "reqfail /hansen_game_antifreeze.js",
+        "http504 /hansen_review_rewards_v963.js",
+        "reqfail /hansen_review_rewards_v963.js",
+        "http504 /hansen_sb_ladder_v1002.js",
+        "reqfail /hansen_sb_ladder_v1002.js",
+        "http504 /hansen_pk_record_v1103.js",
+        "reqfail /hansen_pk_record_v1103.js",
+        "http504 /hansen_ladder_ui_v1108.js",
+        "reqfail /hansen_ladder_ui_v1108.js",
+        "http504 /hansen_sb_profile_v1002.js",
+        "reqfail /hansen_sb_profile_v1002.js",
+        "http504 /hansen_friends_v1106.js",
+        "reqfail /hansen_friends_v1106.js",
+        "http504 /hansen_friends_ui_v1107.js",
+        "reqfail /hansen_friends_ui_v1107.js",
+        "http504 /hansen_sb_pk_v1022.js",
+        "reqfail /hansen_sb_pk_v1022.js",
+        "http504 /hansen_pk_room_v1065.js",
+        "reqfail /hansen_pk_room_v1065.js",
+        "http504 /hansen_pk_room_ui_v1065.js",
+        "reqfail /hansen_pk_room_ui_v1065.js",
+        "http504 /hansen_room_warm_v1023.js",
+        "reqfail /hansen_room_warm_v1023.js",
+        "http504 /hansen_cloud_diag_v1027.js",
+        "reqfail /hansen_cloud_diag_v1027.js",
+        "http504 /hansen_cloud_restore_v1048.js",
+        "reqfail /hansen_cloud_restore_v1048.js",
+        "http504 /hansen_cloud_save_v965.js",
+        "reqfail /hansen_cloud_save_v965.js"
+      ],
+      "pageerrors": [],
+      "listen": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n🧂 盐\n🍴 餐\n 食物\n🍐 梨\n本局答对：0 / 0"
+    }
+  },
+  "food_then_animal_sports": {
+    "swActive": 202,
+    "cacheCounts": {
+      "hansen-v944-shell-217": 48,
+      "hansen-v944-assets-215": 66,
+      "hansen-v944-icons-3": 26,
+      "hansen-v944-pages-215": 9
+    },
+    "distinctCodeUrlsRequestedOnline": 93,
+    "offline": {
+      "tap": {
+        "ok": true
+      },
+      "wait": {
+        "title": "食物大冒险 · Food Word Adventure",
+        "timeout": false
+      },
+      "globals": {
+        "WORD_MAP": "undefined",
+        "SENTENCE_MAP": "undefined",
+        "smartHighlight": "undefined",
+        "EX_AUDIO": "undefined",
+        "HansenBossAnim": "undefined",
+        "title": "食物大冒险 · Food Word Adventure",
+        "bootBad": null
+      },
+      "homeBootBanner": null,
+      "failedCode": [
+        "http504 /hansen_island_prefetch_v1025.js",
+        "reqfail /hansen_island_prefetch_v1025.js",
+        "http504 /hansen_auth_v1004.js",
+        "reqfail /hansen_auth_v1004.js",
+        "http504 /hansen_signup_gate_v1030.js",
+        "reqfail /hansen_signup_gate_v1030.js",
+        "http504 /sentence_map.js",
+        "reqfail /sentence_map.js",
+        "http504 /word_map.js",
+        "reqfail /word_map.js",
+        "http504 /highlight_helper.js",
+        "reqfail /highlight_helper.js",
+        "http504 /hansen_ex_audio.js",
+        "reqfail /hansen_ex_audio.js",
+        "http504 /hansen_mute.js",
+        "reqfail /hansen_mute.js",
+        "http504 /hansen_early.js",
+        "reqfail /hansen_early.js",
+        "http504 /hansen_pk_room_v1065.js",
+        "reqfail /hansen_pk_room_v1065.js",
+        "http504 /hansen_cloud_diag_v1027.js",
+        "reqfail /hansen_cloud_diag_v1027.js",
+        "http504 /hansen_cloud_restore_v1048.js",
+        "reqfail /hansen_cloud_restore_v1048.js",
+        "http504 /hansen_cloud_save_v965.js",
+        "reqfail /hansen_cloud_save_v965.js",
+        "http504 /hansen_boss_attack.js",
+        "reqfail /hansen_boss_attack.js",
+        "http504 /hansen_land_scene_manifest_v972.js",
+        "reqfail /hansen_land_scene_manifest_v972.js"
+      ],
+      "pageerrors": [],
+      "listen": "🌱\n初级\n·\n第 1 轮\n·\n1 / 20\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n 食物\n💧 水\n🍴 餐\n🌽 玉米\n本局答对：0 / 0"
+    }
+  }
+}

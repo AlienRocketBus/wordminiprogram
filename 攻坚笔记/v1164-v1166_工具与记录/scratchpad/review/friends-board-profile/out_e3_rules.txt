@@ -1,0 +1,11 @@
+[A] login=true cid=1 openid=073236
+[B] login=true cid=2 openid=737095
+[C] login=true cid=3 openid=361929
+A add B {"ok":true,"cid":2,"name":"小博","mutual":false,"pending":true}
+B add A {"ok":true,"cid":1,"name":"小爱","mutual":true,"pending":false}
+A friends: [{"cid":2,"name":"小博","mutual":true}]
+C forged writes: {"r1":true,"r2":true,"r3":true,"bOpenid":"737095"}  foreign-writes recorded by emulator: 0
+A inbox (onlyFrom=[B]): [{"from":2,"fromName":"置顶的冒充消息","text":"我赢啦～","suspicious":false},{"from":2,"fromName":"加QQ12345678找我","text":"来一局？","suspicious":false},{"from":0,"fromName":"(来源不明)","text":"(来源不明的消息)","suspicious":true}]
+A friends screen 收到的招呼: ["🎉 我赢啦～新 置顶的冒充消息 · No.2 · 刚刚","⚔️ 来一局？新 加QQ12345678找我 · No.2 · 刚刚","⚠️ (来源不明的消息)新 (来源不明) · 刚刚"]
+A inbox after markSeen (already viewed): {"unread":1,"first":{"fromName":"置顶的冒充消息","isNew":true}}
+RESULT: FORGED message shown to A as coming from B (No.2) with stranger-chosen sender text

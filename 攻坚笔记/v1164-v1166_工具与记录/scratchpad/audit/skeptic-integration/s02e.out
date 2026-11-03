@@ -1,0 +1,6 @@
+A island_animal.html visibleMs 3888 | 20s: server requests 131 MB 10.73 html 7 | ScriptDur s 3.08 TaskDur s 17.98 heapMB 14.2 docs 17 frames 6
+A island_food.html visibleMs 3332 | 20s: server requests 78 MB 1.86 html 1 | ScriptDur s 3.12 TaskDur s 16.77 heapMB 25.9 docs 33 frames 6
+A island_sports.html visibleMs 3841 | 20s: server requests 55 MB 1.50 html 1 | ScriptDur s 2.47 TaskDur s 18.20 heapMB 19.4 docs 18 frames 7
+B island_animal.html visibleMs 2668 | 20s: server requests 127 MB 7.83 html 1 | ScriptDur s 1.11 TaskDur s 14.58 heapMB 7.8 docs 3 frames 2
+B island_food.html visibleMs 4201 | 20s: server requests 79 MB 1.90 html 1 | ScriptDur s 2.63 TaskDur s 16.23 heapMB 7.5 docs 3 frames 2
+B island_sports.html visibleMs 4296 | 20s: server requests 53 MB 1.48 html 1 | ScriptDur s 1.76 TaskDur s 17.37 heapMB 8.1 docs 3 frames 2

@@ -1,0 +1,1 @@
+storage/reset v942: scoped fail-closed snapshots + CAS rollback + crash journal phases + authoritative reset recovery ✅

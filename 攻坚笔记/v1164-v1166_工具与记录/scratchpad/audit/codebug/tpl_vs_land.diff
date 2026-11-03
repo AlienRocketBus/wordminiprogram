@@ -1,0 +1,613 @@
+54,55c54
+< })();</script><script src="hansen_cred_trap_v1085.js?v=1163"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才
+< <!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
+---
+> })();</script><script src="hansen_cred_trap_v1085.js?v=1163"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才
+76c75
+< <title>⟦⟦ISLE_ZH⟧⟧ · ⟦⟦ISLE_ENTITLE⟧⟧</title>
+---
+> ⟦⟦LAND_SLOT_00⟧⟧
+702d700
+< html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !important}
+891,895c889
+< /* 🔴v905(Hansen: boss战下半部横向割裂+暗色不统一): boss内容短, 下方露出body渐变(deep→mid→deep)的更亮中段=割裂。给#bossScreen一个填满视口的纯暗渐变背景, 整屏统一暗色、无割裂。 */
+< /* ⭐v912(Hansen真机: 龙骑士统帅的巨翼展开特效没了): v905 这层暗底原本直接涂在 #bossScreen 自身上=普通内容层, 而【背景特效层 __hansenFxLayerBack 是 z-index:-1】——
+<    CSS 绘制顺序(负z层 → 内容块背景 → 内容)决定了 v905 的不透明底会【盖死整个背景特效层】。挂在背景层的两个特效(BUG#70/v536 钦定: 龙骑士统帅的巨翼必须从背后展开、
+<    三头犬的地狱之门必须在 boss 身后升起)因此双双消失。修法: #bossScreen 自身改透明, 把这层暗底移到 #bossScreen::before(position:fixed 铺满视口, z-index:-2)
+<    → 暗底沉到背景特效层(-1)【之下】: 割裂照样不出现(仍铺满视口), 而巨翼/地狱之门重新可见。绝不可再把不透明底直接涂回 #bossScreen 自身(check_resources 已加守卫钉死)。 */
+---
+> /* 🔴v905 boss战暗色统一+消割裂 */
+897c891
+< #bossScreen::before{content:'';position:fixed;left:0;top:0;right:0;bottom:0;background:linear-gradient(180deg,#243769 0%,#1b2750 55%,#141c3c 100%);z-index:-2;pointer-events:none}
+---
+> #bossScreen::before{content:"";position:fixed;left:0;top:0;right:0;bottom:0;background:linear-gradient(180deg,#0f1a38 0%,#0a1122 60%,#080d1c 100%);z-index:-2;pointer-events:none}
+1386,1392d1379
+< .fd-icon svg{width:100%;height:100%;display:block;overflow:visible}
+< .fd-icon img{width:100%;height:100%;display:block;object-fit:contain;object-position:center;transform:scale(var(--fd-photo-scale,1));transform-origin:center;pointer-events:none}
+< .fd-photo img{filter:drop-shadow(0 1px 1px rgba(15,23,42,.38))}
+< .fd-photo-cabbage{--fd-photo-scale:1.08}
+< .fd-photo-sugar{--fd-photo-scale:1.30}
+< .fd-photo-yogurt{--fd-photo-scale:1.18}
+< .fd-icon{display:inline-block;width:1em;height:1em;vertical-align:-0.15em;line-height:1}
+1394d1380
+< .exp-card .emoji .fd-icon{width:46px;height:46px;vertical-align:middle}
+1402d1387
+< .modal .m-emoji .fd-icon{width:72px;height:72px;vertical-align:middle}
+1417c1402
+< ⟦⟦ISLE_EXTRACSS⟧⟧
+---
+> .boss-arena .boss-sprite svg{width:230px;height:230px;display:block;margin:0 auto}.daily-card.boss-card{background:#38BDF8!important}
+1426,1434c1411,1414
+< /* 🔴v1060 还原：v1011「根治触屏粘滞hover」用自动替换把所有 hover 规则包进
+<    @media(hover:hover) and (pointer:fine){}，但替换器**连这个 @media (hover:none)
+<    块内部的规则和上面的注释文本一起打穿了**：
+<      · 留下一个多余的 } （CSS 结构失衡）
+<      · 把三条规则各自包进 @media(hover:hover)，而外层是 @media (hover:none)
+<        —— 两个条件互斥，里面的规则【永远不会生效】
+<    后果：v928 修好的「触屏一闪一闪一闪」在 25 个岛屿页上全部复发，且无人发现，
+<    因为 test_template_css_v942 从那时起就一直是红的、被带着红灯提交了。
+<    此处按 v986 的原始形态还原。 */
+---
+> /* 🔴v1060 还原（同 template.html）：v1011 的自动替换把本块内部规则与注释一起打穿——
+>    多一个 }，且把三条规则包进 @media(hover:hover)，而外层是 @media (hover:none)，
+>    两者互斥 → 规则永不生效，v928 修好的触屏「一闪一闪」在 Land 页同样复发。
+>    Land 页手工调过、不能从 template 重新生成，故此处按同一形态精确还原。 */
+1483,1484c1463,1464
+<   <div style="font-size:26px;font-weight:900;background:linear-gradient(90deg,#fbbf24,#ef4444,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(251,191,36,.3))">⟦⟦ISLE_ZH⟧⟧</div>
+<   <div style="font-size:13px;font-weight:600;color:var(--pal-ink-2,#cbd5e1);margin-top:2px;letter-spacing:1px">⟦⟦ISLE_ENISLE⟧⟧</div>
+---
+> ⟦⟦LAND_SLOT_01⟧⟧
+>   <div style="font-size:13px;font-weight:600;color:var(--pal-ink-2,#cbd5e1);margin-top:2px;letter-spacing:1px">STAR SEA I: EMOTION & CHARACTER ISLAND</div>
+1513,1514c1493,1494
+<     <img loading=lazy decoding=async class="boss-card-img" src="icons/⟦⟦ISLE_BOSSICON⟧⟧?v=1163" alt="" draggable="false" onerror="window.hansenImgErr&&window.hansenImgErr(this)">
+<     <div class="d-label boss-card-label" style="color:⟦⟦ISLE_BLABEL⟧⟧!important;-webkit-text-fill-color:⟦⟦ISLE_BLABEL⟧⟧!important;background:none!important;-webkit-background-clip:border-box!important;filter:none!important">挑战BOSS</div>
+---
+>     <img loading=lazy decoding=async class="boss-card-img" src="data:image/webp;base64,UklGRiJBAABXRUJQVlA4WAoAAAAQAAAAxwAAxwAAQUxQSM0MAAAB76embQOmKX/k64+IFHFzZrYTDtu2kSTZ8b2z/Tc87+KugIj+TwA3l9aTmb1h/6W2dU1qS8rI3vPAR3xMv+JDvoVDANHJ6oDWECNoDD+laaBK08CCzGfJXrJ
+>     <div class="d-label boss-card-label" style="color:#0f172a!important;-webkit-text-fill-color:#0f172a!important;background:none!important;-webkit-background-clip:border-box!important;filter:none!important">挑战BOSS</div>
+1548c1528
+< <div class="mode-card" style="background:#fff;border:1px solid #e2e8f0" onclick="HansenSpellBee.open('⟦⟦ISLE_SHORTKEY⟧⟧')">
+---
+> ⟦⟦LAND_SLOT_02⟧⟧
+1552c1532
+< <div class="mode-card" style="--c1:#4f46e5;--c2:#4338ca" onclick="openSpellPK()"><!--🔴v1002: 拼写大PK(真人对战),与打机器人的拼写蜂彻底分开-->
+---
+> <!--🔴v1072: 补齐拼写大PK 入口卡，与常规岛 10 个玩法完全一致--><div class="mode-card" style="--c1:#4f46e5;--c2:#4338ca" onclick="openSpellPK()"><!--🔴v1002: 拼写大PK(真人对战),与打机器人的拼写蜂彻底分开-->
+1555,1556c1535
+<   </div>
+< <div class="mode-card" style="--c1:#84cc16;--c2:#65a30d" onclick="startMoles()"><!-- 🔴 v585: 打地鼠 emoji🎯→新3D打地鼠图 -->
+---
+>   </div><div class="mode-card" style="--c1:#84cc16;--c2:#65a30d" onclick="startMoles()"><!-- 🔴 v585: 打地鼠 emoji🎯→新3D打地鼠图 -->
+1628,1629c1607,1608
+<       <div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:8px">9 个洞同时出⟦⟦ISLE_THEME⟧⟧！</div>
+<       <div style="font-size:13px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:16px;line-height:1.7">听英文发音 🔊<br>从 9 个⟦⟦ISLE_THEME⟧⟧里找出正确的那一只<br>每只都有图像 + 中文意思<br>5 秒不答会自动换位置！</d
+---
+>       <div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:8px">9 个洞同时出单词！</div>
+>       <div style="font-size:13px;color:var(--pal-ink-2,#cbd5e1);margin-bottom:16px;line-height:1.7">听英文发音 🔊<br>从 9 个单词里找出正确的那一只<br>每只都有图像 + 中文意思<br>5 秒不答会自动换位置！</div>
+1831,1832c1810,1811
+<       if(/island_season[1-5]\.html/.test(location.pathname||'') && typeof window.parent.openIsland === 'function'){
+<         window.parent.openIsland('island_season.html');
+---
+>       if(/island_land[1-8]\.html/.test(location.pathname||'') && typeof window.parent.openIsland === 'function'){
+>         window.parent.openIsland('land_map.html');
+1847,1848c1826,1827
+<     if(/island_season[1-5]\.html/.test(location.pathname||'')){
+<       (function(){ if(window.HansenRoom){ HansenRoom.open('season'); return; } window.location.href='island_season.html'; })();
+---
+>     if(/island_land[1-8]\.html/.test(location.pathname||'')){
+>       window.location.href = 'land_map.html';
+1915c1894,1899
+< ⟦⟦ISLE_DATA⟧⟧
+---
+> const DATA=[
+> ⟦⟦LAND_SLOT_03⟧⟧
+> ]},
+> ⟦⟦LAND_SLOT_04⟧⟧
+> ]}
+> ];
+1919c1903
+< window.__ISLAND_LOCAL_AUDIO = ⟦⟦ISLE_LOCALAUDIO⟧⟧;
+---
+> window.__ISLAND_LOCAL_AUDIO = {nervous:'words/nervous_season.mp3', anxious:'words/anxious_season.mp3', curious:'words/curious_season.mp3', proud:'words/proud_season.mp3', grateful:'words/grateful_season.mp3', disappointed:'words/disappointed_season.mp3', emb
+1922c1906,1910
+< ⟦⟦ISLE_LISTEN⟧⟧
+---
+> const LISTEN_LEVELS={
+>   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#16a34a',desc:'较短的词',words:['calm','eager','loyal','proud','amazed','humble','lonely','mature','modest','polite','strict','anxious','ashamed']},
+>   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#f59e0b',desc:'中等长度',words:['comfort','curious','furious','jealous','nervous','relaxed','selfish','sincere','cautious','cheerful','confused','grateful','outgoing']},
+>   hard:{name:'高级',icon:'🔥',c1:'#ef4444',c2:'#dc2626',desc:'较长的词',words:['reliable','stubborn','delighted','energetic','miserable','satisfied','sensitive','talkative','determined','frightened','optimistic','embarrassed','hardworking','disappoin
+> };
+1935a1924
+> <!--🔴v1071: v1034 把成就从 36 扩到 144 时**又漏了 8 个 Land 页**——这是 Land 页第五次被漏(账号v1021/门槛v1030/音量v1038/云恢复v1048/成就v1034)。后果：同一账号在常规岛看到 144 条、进 Land 页只剩 36 条�
+2121c2110
+< var __hsnSaveKey='⟦⟦ISLE_KEY⟧⟧',__hsnSaveWarnAt=0;
+---
+> ⟦⟦LAND_SLOT_05⟧⟧
+2150c2139
+< try{ window.__hsnSaveKey = '⟦⟦ISLE_KEY⟧⟧'; }catch(e){}
+---
+> ⟦⟦LAND_SLOT_06⟧⟧
+2757c2746
+<      但下面的飘字照样显示 "宠物 +undefined 经验" -- 用户看到提示, 实际啥也没得到。
+---
+>      但飘字照样显示 "宠物 +undefined 经验" -- 用户看到提示, 实际啥也没得到。
+2804c2793
+< ⟦⟦ISLE_AVATARS⟧⟧
+---
+> const avatars=['⚔️','🗡️','🛡️','🏹','👑','🐉','🌟','🌌','🔥','💫'];
+2851,2853d2839
+< /* 🔴v1055: 导出给后台面板用（等级调节需要读阈值表）。const 不会自动挂到 window。 */
+< try{ window.ADVENTURE_LEVELS = ADVENTURE_LEVELS; }catch(e){}
+< 
+3073,3076d3058
+< // ==== 复习单词 (3) ====
+< {id:'review3',icon:'🔄',title:'复习单词 · 巩固 3 个',goal:3,type:'review',reward:{xp:25,gems:3}},
+< {id:'review6',icon:'🧠',title:'复习单词 · 巩固 6 个',goal:6,type:'review',reward:{xp:50,gems:6}},
+< {id:'reviewClear',icon:'✨',title:'复习单词 · 清空今日复习',goal:1,type:'reviewClear',reward:{xp:70,gems:9}},
+3083,3085c3065,3067
+< {id:'listen10',icon:'🔊',title:'听音辨义 · 答对 10 次',goal:10,type:'listen',reward:{xp:25,gems:3}},
+< {id:'listen20',icon:'🎧',title:'听音辨义 · 答对 20 次',goal:20,type:'listen',reward:{xp:60,gems:6}},
+< {id:'listen40',icon:'📻',title:'听音辨义 · 答对 40 次',goal:40,type:'listen',reward:{xp:130,gems:14}},
+---
+> {id:'listen10',icon:'🔊',title:'听音模式答对 10 次',goal:10,type:'listen',reward:{xp:25,gems:3}},
+> {id:'listen20',icon:'🎧',title:'听音模式答对 20 次',goal:20,type:'listen',reward:{xp:60,gems:6}},
+> {id:'listen40',icon:'📻',title:'听音模式答对 40 次',goal:40,type:'listen',reward:{xp:130,gems:14}},
+3087,3089c3069,3071
+< {id:'cloze5',icon:'📝',title:'完形填空 · 答对 5 题',goal:5,type:'cloze',reward:{xp:25,gems:3}},
+< {id:'cloze10',icon:'✍️',title:'完形填空 · 答对 10 题',goal:10,type:'cloze',reward:{xp:55,gems:6}},
+< {id:'cloze20',icon:'📋',title:'完形填空 · 答对 20 题',goal:20,type:'cloze',reward:{xp:120,gems:13}},
+---
+> {id:'cloze5',icon:'📝',title:'填空答对 5 题',goal:5,type:'cloze',reward:{xp:25,gems:3}},
+> {id:'cloze10',icon:'✍️',title:'填空答对 10 题',goal:10,type:'cloze',reward:{xp:55,gems:6}},
+> {id:'cloze20',icon:'📋',title:'填空答对 20 题',goal:20,type:'cloze',reward:{xp:120,gems:13}},
+3091,3092c3073,3074
+< {id:'scramble1',icon:'🔤',title:'🌟 字母拼拼乐 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50,gems:6},isSpelling:true},
+< {id:'scramble2',icon:'⭐',title:'🌟 字母拼拼乐 · 完成 2 轮',goal:2,type:'scramble',reward:{xp:90,gems:11},isSpelling:true},
+---
+> {id:'scramble1',icon:'🔤',title:'🌟 拼词游戏 · 完成 1 轮',goal:1,type:'scramble',reward:{xp:50,gems:6},isSpelling:true},
+> {id:'scramble2',icon:'⭐',title:'🌟 拼词游戏 · 完成 2 轮',goal:2,type:'scramble',reward:{xp:90,gems:11},isSpelling:true},
+3099,3100c3081,3082
+< {id:'type5',icon:'⌨️',title:'⌨️ 打字大师 · 完成 5 词',goal:5,type:'type',reward:{xp:30,gems:3},isSpelling:true},
+< {id:'type15',icon:'⚡',title:'⌨️ 打字大师 · 完成 15 词',goal:15,type:'type',reward:{xp:80,gems:9},isSpelling:true},
+---
+> {id:'type5',icon:'⌨️',title:'⌨️ 打字模式完成 5 词',goal:5,type:'type',reward:{xp:30,gems:3},isSpelling:true},
+> {id:'type15',icon:'⚡',title:'⌨️ 打字模式完成 15 词',goal:15,type:'type',reward:{xp:80,gems:9},isSpelling:true},
+3104,3105c3086,3087
+< {id:'match1',icon:'🃏',title:'记忆翻牌 · 完成 1 轮',goal:1,type:'match',reward:{xp:20,gems:2}},
+< {id:'match3',icon:'🎴',title:'记忆翻牌 · 完成 3 轮',goal:3,type:'match',reward:{xp:65,gems:7}},
+---
+> {id:'match1',icon:'🃏',title:'完成 1 次翻牌游戏',goal:1,type:'match',reward:{xp:20,gems:2}},
+> {id:'match3',icon:'🎴',title:'完成 3 次翻牌游戏',goal:3,type:'match',reward:{xp:65,gems:7}},
+3119,3121c3101,3103
+< {id:'bubble30',icon:'🫧',title:'泡泡大作战 · 得 30 分',goal:30,type:'bubble',reward:{xp:20,gems:2}},
+< {id:'bubble60',icon:'💧',title:'泡泡大作战 · 得 60 分',goal:60,type:'bubble',reward:{xp:60,gems:7}},
+< {id:'bubble100',icon:'🌊',title:'泡泡大作战 · 得 100 分',goal:100,type:'bubble',reward:{xp:120,gems:14}},
+---
+> {id:'bubble30',icon:'🫧',title:'泡泡模式得 30 分',goal:30,type:'bubble',reward:{xp:20,gems:2}},
+> {id:'bubble60',icon:'💧',title:'泡泡模式得 60 分',goal:60,type:'bubble',reward:{xp:60,gems:7}},
+> {id:'bubble100',icon:'🌊',title:'泡泡模式得 100 分',goal:100,type:'bubble',reward:{xp:120,gems:14}},
+3123,3124c3105,3106
+< {id:'speed200',icon:'⚡',title:'极速60秒 · 得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
+< {id:'speed500',icon:'⚡⚡',title:'极速60秒 · 得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
+---
+> {id:'speed200',icon:'⚡',title:'极速模式得 200 分',goal:200,type:'speed',reward:{xp:35,gems:4}},
+> {id:'speed500',icon:'⚡⚡',title:'极速模式得 500 分',goal:500,type:'speed',reward:{xp:100,gems:12}},
+3126,3137c3108
+< function __hsnQuestDefinition(id){
+<   /* 🔴v1032: 任务定义的真源是 hansen_quest_global.js 的 POOL(v1000/v1001 新增了
+<      review3/review6/reviewClear/sbWin1/sbWin2 等)。template 自带的表不认识它们，
+<      若在此返回 null，下游 __hsnNormalizeQuests 会把**整份任务清空** → 面板显示「暂无任务」。
+<      所以先向全局模块问一次。 */
+<   try {
+<     var _G = window.HansenQuestGlobal;
+<     if (_G && typeof _G.definition === 'function') {
+<       var _d = _G.definition(id);
+<       if (_d) return _d;
+<     }
+<   } catch (e) {}return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
+---
+> function __hsnQuestDefinition(id){return DAILY_QUEST_POOL.find(function(q){return q.id===id;})||null;}
+3143c3114
+<   if(!Array.isArray(raw.list)||raw.list.length>12)return out;/*\U0001f534v1000: 7\u21924212\u4efb\u52a1*/
+---
+>   if(!Array.isArray(raw.list)||raw.list.length>7)return out;
+3146c3117
+<     var def=__hsnQuestDefinition(saved.id);if(!def){return;}/*🔴v1032: 认不出就跳过这一条, 不再 valid=false 清空整份(与 v1018 同型教训)*/seen[saved.id]=1;
+---
+>     var def=__hsnQuestDefinition(saved.id);if(!def){valid=false;return;}seen[saved.id]=1;
+3154,3176d3124
+< /*🔴v1002: 拼写大PK 入口——独立页面, 不碰原拼写蜂逻辑*/
+< function openSpellPK(){
+<   /*🔴v1022: 原先用 iframe 加载 spelling_pk.html —— 每次点开都要走一次网页加载，必然有延迟。
+<     改为调用页面内屏: 模块已随本页加载完毕, 点击即渲染, 零网络往返。
+<     仍保留 iframe 兜底: 万一模块没加载上, 不至于点了没反应。 */
+<   try{
+<     if(window.HansenSbPK && typeof HansenSbPK.open==='function'){ HansenSbPK.open(); return; }
+<   }catch(e){}
+<   try{
+<     if(document.getElementById('__hsn_pk_ov')) return;
+<     var ov=document.createElement('div'); ov.id='__hsn_pk_ov';
+<     ov.style.cssText='position:fixed;inset:0;z-index:2147483600;background:#0f172a;overflow:hidden';
+<     var ifr=document.createElement('iframe'); ifr.title='拼写大PK';
+<     ifr.src='spelling_pk.html?v=1163&embed=1';
+<     ifr.style.cssText='display:block;width:100%;height:100%;border:0;background:#0f172a';
+<     ov.appendChild(ifr);
+<     var bk=document.createElement('button'); bk.textContent='✕';
+<     bk.style.cssText='position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;font-size:18px;font-weight:900;cursor:pointer';
+<     bk.onclick=function(){ try{ ov.remove(); }catch(e){} };
+<     ov.appendChild(bk);
+<     document.body.appendChild(ov);
+<   }catch(e){}
+< }
+3179,3180c3127
+< // \U0001f534v1000 \u79d1\u5b66\u91cd\u8bbe: \u6bcf\u5929 12 \u4e2a\u4efb\u52a1 = 3 \u56fa\u5b9a\u57fa\u77f3 + 9 \u968f\u673a
+< // \u57fa\u77f3: \u5b66\u65b0\u8bcd + \u590d\u4e60\u5355\u8bcd + \u6253Boss (\u7528\u6237\u660e\u786e\u8981\u6c42\u6bcf\u5929\u5fc5\u6709)
+---
+> // 抽取策略: 每天 7 个任务, 类型不重复(7 种不同活动, 更不腻/覆盖更多玩法), 拼写重头戏含 1 拼词+1 打字
+3184,3193c3131,3132
+< const pickFrom=(types)=>{for(const ty of types){const arr=byType(ty);for(const q of arr){if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);return true;}}}return false;};
+< // \u2605 \u57fa\u77f3 1: \u5b66\u65b0\u8bcd(\u5df2\u5b66\u5b8c\u5219\u8df3\u8fc7\uff0c\u6539\u7531\u968f\u673a\u8865\u4f4d)
+< if(!_noNew)pickFrom(['learn']);
+< // \u2605 \u57fa\u77f3 2: \u590d\u4e60\u5355\u8bcd(review \u4e0e reviewClear \u5747\u5c5e\u590d\u4e60\uff0c\u4efb\u9009\u4e00\u6863)
+< {const rv=pool.filter(q=>q.type==='review'||q.type==='reviewClear').slice().sort(()=>Math.random()-.5)[0];
+<  if(rv&&!usedTypes.has(rv.type)){usedTypes.add(rv.type);picked.push(rv);}}
+< // \u2605 \u57fa\u77f3 3: \u6253Boss(\u4ece\u5934\u5230\u5c3e\u6253\u4e00\u8f6e)
+< pickFrom(['boss']);
+< // \u5176\u4f59 9 \u4e2a: \u7c7b\u578b\u4e0d\u91cd\u590d\u968f\u673a\uff0c\u62fc\u5199\u91cd\u5934\u620f\u4f18\u5148\u5404\u62bd 1
+< pickFrom(['scramble']);pickFrom(['type']);
+---
+> const pickOne=(arr)=>{for(const q of arr){if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);return;}}};
+> pickOne(byType('scramble'));pickOne(byType('type'));
+3195,3196c3134,3135
+< for(const q of others){if(picked.length>=12)break;if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);}}
+< S.quests.list=picked.slice(0,12).sort(()=>Math.random()-.5).map(q=>({...q,progress:0,claimed:false}));
+---
+> for(const q of others){if(picked.length>=7)break;if(!usedTypes.has(q.type)){usedTypes.add(q.type);picked.push(q);}}
+> S.quests.list=picked.slice(0,7).sort(()=>Math.random()-.5).map(q=>({...q,progress:0,claimed:false}));
+3438,3440c3377,3378
+<   /*🔴v1034: v1020 新增的「复习/精通/速度/对决」四类共 22 个成就此前未列入渲染清单，做了但页面根本不显示 —— 用户反映「成就太少」有一部分正是这个原因。*/
+<   var cats=['背单词','复习','精通','速度','打Boss','对决','游戏模式','连胜','里程碑','签到','卡牌收藏','宠物','隐藏'];
+<   var catIcon={'背单词':'📖','复习':'🔄','精通':'🎯','速度':'⚡','打Boss':'⚔️','对决':'🐝','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};
+---
+>   var cats=['背单词','打Boss','卡牌收藏','连胜','签到','宠物','游戏模式','里程碑','隐藏'];
+>   var catIcon={'背单词':'📖','打Boss':'⚔️','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};
+3524,3525c3462
+<     // 上报学习数据到全局汇总(⟦⟦ISLE_THEME⟧⟧岛key固定 ⟦⟦ISLE_KEY⟧⟧)
+<     try{ if(window.HansenTotals) HansenTotals.report('⟦⟦ISLE_KEY⟧⟧',{learned:(S.learned||[]).length, maxCombo:(S.stats&&S.stats.maxCombo)||0, level:S.level||1}); }catch(e){}
+---
+> ⟦⟦LAND_SLOT_07⟧⟧
+3538,3692d3474
+<     if(mc>=200)unlockAch('combo200');
+<     // ═══ 🔴v1020 新增成就的解锁判定 ═══
+<     var _st = S.stats || {};
+<     var _n = function(v){ v = +v; return (isFinite(v) && v > 0) ? v : 0; };
+<     // 复习
+<     var rvDay = _n(_st.reviewDay), rvTot = _HT && _HT.reviewTotal ? _n(_HT.reviewTotal()) : _n(_st.reviewTotal);
+<     if(rvTot>=1 || rvDay>=1) unlockAch('rv1');
+<     if(rvDay>=7) unlockAch('rv7');
+<     if(rvDay>=30) unlockAch('rv30');
+<     if(_n(_st.reviewToday)>0 && _n(_st.reviewTodayLeft)===0) unlockAch('rvClear');
+<     if(rvTot>=100) unlockAch('rv100');
+<     if(rvTot>=500) unlockAch('rv500');
+<     // 精通
+<     if(_n(_st.matchPerfect)>=1) unlockAch('perfMatch');
+<     if(_n(_st.scrPerfectTotal)>=3) unlockAch('perfScr3');
+<     if(_n(_st.scrPerfectTotal)>=10) unlockAch('perfScr10');
+<     if(_n(_st.clozeRight)>=50) unlockAch('clz50');
+<     if(_n(_st.clozeRight)>=200) unlockAch('clz200');
+<     if(_n(_st.listenRight)>=50) unlockAch('lsn50');
+<     if(_n(_st.listenRight)>=200) unlockAch('lsn200');
+<     if(_n(_st.typeCount)>=100) unlockAch('typ100');
+<     if(_n(_st.typeCount)>=500) unlockAch('typ500');
+<     // 速度(拼写蜂 CPM)
+<     var _cpm = 0;
+<     try { var _b = JSON.parse(localStorage.getItem('sb_best_cpm'));
+<       if(typeof _b === 'number') _cpm = _b;
+<       else if(_b && typeof _b === 'object') ['easy','mid','hard'].forEach(function(k){ _cpm = Math.max(_cpm, _n(_b[k])); });
+<     } catch(e) { _cpm = _n(localStorage.getItem('sb_best_cpm')); }
+<     if(_cpm>=40) unlockAch('cpm40');
+<     if(_cpm>=60) unlockAch('cpm60');
+<     if(_cpm>=80) unlockAch('cpm80');
+<     if(_cpm>=100) unlockAch('cpm100');
+<     // 各玩法
+<     if(_n(_st.speedBest)>=500) unlockAch('spd500');
+<     if(_n(_st.speedBest)>=1000) unlockAch('spd1000');
+<     if(_n(_st.bubbleBest)>=100) unlockAch('bub100');
+<     if(_n(_st.eagleBest)>=100) unlockAch('eag100');
+<     if(_n(_st.molesBest)>=100) unlockAch('mol100');
+<     if(_n(_st.fishBest)>=100) unlockAch('fsh100');
+<     try { var _mp = _st.modesPlayed;
+<       var _cnt = Array.isArray(_mp) ? _mp.length : (_mp && typeof _mp === 'object' ? Object.keys(_mp).length : 0);
+<       if(_cnt>=10) unlockAch('allMode');
+<     } catch(e) {}
+<     // Boss
+<     var _bb = _HT && _HT.bossBeaten ? Math.max(_n(_HT.bossBeaten()), _n(_st.bossBeaten)) : _n(_st.bossBeaten);
+<     if(_bb>=20) unlockAch('bossWin20');
+<     if(_bb>=50) unlockAch('boss50');
+<     try { var _slam = JSON.parse(localStorage.getItem('hansen_boss_slam_round')||'null');
+<       if(_slam && _n(_slam.done)>=20) unlockAch('bossSlam'); } catch(e) {}
+<     // 拼写蜂对决
+<     try { var _L = JSON.parse(localStorage.getItem('hansen_sb_ladder_v1002')||'null');
+<       var _w = _L ? _n(_L.wins) : 0;
+<       if(_w>=1) unlockAch('sbWin1');
+<       if(_w>=10) unlockAch('sbWin10');
+<       if(_w>=50) unlockAch('sbWin50');
+<     } catch(e) {}
+<     // 探索广度
+<     var _isl = 0;
+<     try { for(var _i=0;_i<localStorage.length;_i++){ var _k=localStorage.key(_i);
+<       if(_k && _k.indexOf('wordIsland')===0){ var _o=JSON.parse(localStorage.getItem(_k));
+<         if(_o && _o.learned && _o.learned.length) _isl++; } } } catch(e) {}
+<     if(_isl>=3) unlockAch('isl3');
+<     if(_isl>=10) unlockAch('isl10');
+<     if(_isl>=19) unlockAch('islAll');
+<     // 毅力与收集
+<     var _days = _n(_st.daysPlayed);
+<     if(_days>=30) unlockAch('day30');
+<     if(_days>=100) unlockAch('day100');
+<     if(_days>=365) unlockAch('day365');
+<     if(_n(_st.chestClaimed)>=30) unlockAch('chest30');
+<     // ═══ 🔴v1034 阶梯系列判定：先补齐所需变量 ═══
+<     var wrongFixed = 0;
+<     try {
+<       var _fx = JSON.parse(localStorage.getItem('hansen_wrong_fixed_total') || 'null');
+<       wrongFixed = _n(_fx && _fx.total) || _n(_st.wrongFixed);
+<       if (!wrongFixed && lw > 0 && S.wrongs && Object.keys(S.wrongs).length === 0) wrongFixed = lw;
+<     } catch (e) {}
+<     var slamRounds = 0;
+<     try {
+<       var _sr = JSON.parse(localStorage.getItem('hansen_boss_slam_round') || 'null');
+<       slamRounds = _n(_sr && (_sr.rounds || _sr.round)) ;
+<     } catch (e) {}
+<     var sbWins = 0;
+<     try {
+<       var _sl = JSON.parse(localStorage.getItem('hansen_sb_ladder_v1002') || 'null');
+<       sbWins = _n(_sl && _sl.wins);
+<     } catch (e) {}
+<     if(lw>=600)unlockAch('vocabS600');
+<     if(lw>=1500)unlockAch('vocabS1500');
+<     if(rvTot>=20)unlockAch('reviewS20');
+<     if(rvTot>=2000)unlockAch('reviewS2000');
+<     if(rvDay>=90)unlockAch('rvdayS90');
+<     if(rvDay>=180)unlockAch('rvdayS180');
+<     if(wrongFixed>=10)unlockAch('wrongS10');
+<     if(wrongFixed>=50)unlockAch('wrongS50');
+<     if(wrongFixed>=200)unlockAch('wrongS200');
+<     if(wrongFixed>=500)unlockAch('wrongS500');
+<     if(_st.clozeRight>=10)unlockAch('clozeS10');
+<     if(_st.clozeRight>=800)unlockAch('clozeS800');
+<     if(_st.clozeRight>=2000)unlockAch('clozeS2000');
+<     if(_st.listenRight>=10)unlockAch('listenS10');
+<     if(_st.listenRight>=800)unlockAch('listenS800');
+<     if(_st.listenRight>=2000)unlockAch('listenS2000');
+<     if(_st.typeCount>=20)unlockAch('typingS20');
+<     if(_st.typeCount>=2000)unlockAch('typingS2000');
+<     if(_st.typeCount>=5000)unlockAch('typingS5000');
+<     if(_st.scrPerfectTotal>=1)unlockAch('scrperfS1');
+<     if(_st.scrPerfectTotal>=60)unlockAch('scrperfS60');
+<     if(_st.scrPerfectTotal>=150)unlockAch('scrperfS150');
+<     if(_st.matchPerfect>=5)unlockAch('matchpS5');
+<     if(_st.matchPerfect>=20)unlockAch('matchpS20');
+<     if(_st.matchPerfect>=60)unlockAch('matchpS60');
+<     if(_cpm>=30)unlockAch('cpmS30');
+<     if(_cpm>=120)unlockAch('cpmS120');
+<     if(_st.speedBest>=200)unlockAch('speedS200');
+<     if(_st.speedBest>=1800)unlockAch('speedS1800');
+<     if(_st.speedBest>=3000)unlockAch('speedS3000');
+<     if(_bb>=10)unlockAch('bossNS10');
+<     if(_bb>=30)unlockAch('bossNS30');
+<     if(_bb>=120)unlockAch('bossNS120');
+<     if(_bb>=300)unlockAch('bossNS300');
+<     if(slamRounds>=3)unlockAch('slamS3');
+<     if(slamRounds>=10)unlockAch('slamS10');
+<     if(slamRounds>=30)unlockAch('slamS30');
+<     if(mc>=150)unlockAch('comboNS150');
+<     if(mc>=300)unlockAch('comboNS300');
+<     if(_st.bubbleBest>=50)unlockAch('bubbleS50');
+<     if(_st.bubbleBest>=200)unlockAch('bubbleS200');
+<     if(_st.bubbleBest>=400)unlockAch('bubbleS400');
+<     if(_st.bubbleBest>=800)unlockAch('bubbleS800');
+<     if(_st.eagleBest>=50)unlockAch('eagleS50');
+<     if(_st.eagleBest>=200)unlockAch('eagleS200');
+<     if(_st.eagleBest>=400)unlockAch('eagleS400');
+<     if(_st.eagleBest>=800)unlockAch('eagleS800');
+<     if(_st.molesBest>=50)unlockAch('molesS50');
+<     if(_st.molesBest>=200)unlockAch('molesS200');
+<     if(_st.molesBest>=400)unlockAch('molesS400');
+<     if(_st.molesBest>=800)unlockAch('molesS800');
+<     if(_st.fishBest>=50)unlockAch('fishS50');
+<     if(_st.fishBest>=200)unlockAch('fishS200');
+<     if(_st.fishBest>=400)unlockAch('fishS400');
+<     if(_st.fishBest>=800)unlockAch('fishS800');
+<     if(sbWins>=150)unlockAch('sbwinS150');
+<     if(sbWins>=500)unlockAch('sbwinS500');
+<     if(_isl>=5)unlockAch('islNS5');
+<     if(_isl>=15)unlockAch('islNS15');
+<     if(_days>=3)unlockAch('dayNS3');
+<     if(_days>=15)unlockAch('dayNS15');
+<     if(_days>=60)unlockAch('dayNS60');
+<     if(_days>=180)unlockAch('dayNS180');
+<     if(_days>=500)unlockAch('dayNS500');
+<     if(_st.chestClaimed>=5)unlockAch('chestS5');
+<     if(_st.chestClaimed>=100)unlockAch('chestS100');
+<     if(_st.chestClaimed>=300)unlockAch('chestS300');
+<     if(_st.chestClaimed>=1000)unlockAch('chestS1000');
+4580c4362,4364
+< ⟦⟦ISLE_BOSSES⟧⟧
+---
+> const BOSSES=[
+> ⟦⟦LAND_SLOT_08⟧⟧
+> ];
+4618c4402
+<   var __isS1=/island_season1\.html/.test(location.pathname||''); var __s1p=0; if(__isS1){try{__s1p=parseInt(localStorage.getItem('season1_prog')||'0',10)||0;}catch(e){}}
+---
+> ⟦⟦LAND_SLOT_09⟧⟧
+4819a4604
+> 
+4951c4736
+<     var _lv; if(window._hansenRebattleLv!=null){_lv=Math.max(1,Math.min(20,window._hansenRebattleLv|0));}else{_lv=Math.max(1,Math.min(20,(S.bossCurrentLv||S.level||1)|0));}
+---
+>     var _lv; if(/island_land[1-8]\.html/.test(location.pathname||'') && window._s1Idx!=null){ _lv=Math.max(1,Math.min(20,((window._s1Idx|0)+1)*4)); /*🔴v876 大陆反击=关序×4档(4/8/12/16/20→固定26/50/80/112/145×(1-甲%))*/ } else if(window._hans
+4985,4987c4770,4771
+<   try{ var _smm=(location.pathname||'').match(/island_season([1-5])\.html/); if(_smm && (window._s1Idx==null || window._s1Idx===(BOSSES.length-1))){ localStorage.setItem('hsn_seasonmap_cleared_'+_smm[1],'1'); } }catch(e){}
+<   /* 🔴v869 第一星域6关顺序闯关: 打赢当前前沿boss→推进 season1_prog。仅season1(其余季岛单boss·hub·主岛不受影响)。 */
+<   try{ if(/island_season1\.html/.test(location.pathname||'')){ var __p1=parseInt(localStorage.getItem('season1_prog')||'0',10)||0; if(window._s1Idx===__p1){ localStorage.setItem('season1_prog', String(Math.min(__p1+1, BOSSES.length))); } } }catch(e){}
+---
+>   try{ var _smm=(location.pathname||'').match(/island_land([1-8])\.html/); if(_smm && (window._s1Idx==null || window._s1Idx===(BOSSES.length-1))){ localStorage.setItem('hsn_landmap_cleared_'+_smm[1],'1'); } }catch(e){}
+> ⟦⟦LAND_SLOT_10⟧⟧
+4999c4783
+<     /* v941 Land 用实际展示的本地 Boss 序号，不再拿玩家等级冒充关卡。 */
+---
+>     /* v941 Land 用实际展示的本地 Boss 序号，旧 numeric bossWon 不得压掉新的物理首胜。 */
+5079c4863,4872
+< function bossDefeat(){bossActive=false;try{document.body.classList.remove('hsn-boss-battle')}catch(e){}document.getElementById('bossContent').innerHTML='<div class="boss-victory"><div style="font-size:72px">😢</div><h2 style="color:#ef4444">战败...</h2><
+---
+> //🔴v881(Hansen重大bug: 失败后点重试永远回到第一个boss): 战败重试=重打【当前失败的这一关】·不是回前沿。
+> //  根因: 原战败按钮onclick=startBoss()·而startBoss里_s1FightIdx已被清空→fallback到进度前沿(__front)→永远回第一个boss。
+> //  修复: 重试前把 _s1FightIdx 设回 _s1Idx(当前正在打的关·战败时仍保留该值)·让startBoss重打这一关。
+> function __landRetryBoss(){
+>   try{
+>     if(window._s1Idx!=null){ window._s1FightIdx=window._s1Idx; }
+>   }catch(e){}
+>   startBoss();
+> }
+> function bossDefeat(){bossActive=false;try{document.body.classList.remove('hsn-boss-battle')}catch(e){}document.getElementById('bossContent').innerHTML='<div class="boss-victory"><div style="font-size:72px">😢</div><h2 style="color:#ef4444">战败...</h2><
+5084c4877
+< // WHACK-A-MOLE 改版: 9 格全显示⟦⟦ISLE_THEME⟧⟧, 找正确答案
+---
+> // WHACK-A-MOLE 改版: 9 格全显示单词, 找正确答案
+5122c4915,4937
+< function startMoles(){
+---
+> function openSpellPK(){
+>   /*🔴v1022: 原先用 iframe 加载 spelling_pk.html —— 每次点开都要走一次网页加载，必然有延迟。
+>     改为调用页面内屏: 模块已随本页加载完毕, 点击即渲染, 零网络往返。
+>     仍保留 iframe 兜底: 万一模块没加载上, 不至于点了没反应。 */
+>   try{
+>     if(window.HansenSbPK && typeof HansenSbPK.open==='function'){ HansenSbPK.open(); return; }
+>   }catch(e){}
+>   try{
+>     if(document.getElementById('__hsn_pk_ov')) return;
+>     var ov=document.createElement('div'); ov.id='__hsn_pk_ov';
+>     ov.style.cssText='position:fixed;inset:0;z-index:2147483600;background:#0f172a;overflow:hidden';
+>     var ifr=document.createElement('iframe'); ifr.title='拼写大PK';
+>     ifr.src='spelling_pk.html?v=1163&embed=1';
+>     ifr.style.cssText='display:block;width:100%;height:100%;border:0;background:#0f172a';
+>     ov.appendChild(ifr);
+>     var bk=document.createElement('button'); bk.textContent='✕';
+>     bk.style.cssText='position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:2;width:38px;height:38px;border:0;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;font-size:18px;font-weight:900;cursor:pointer';
+>     bk.onclick=function(){ try{ ov.remove(); }catch(e){} };
+>     ov.appendChild(bk);
+>     document.body.appendChild(ov);
+>   }catch(e){}
+> }
+>     function startMoles(){
+5332c5147
+<   progressQuest('moles',(typeof molesScore==='number'?molesScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.molesCleared)S.stats.molesCleared=0;S.stats.molesCleared++;
+---
+>   progressQuest('moles',1);if(!S.stats.molesCleared)S.stats.molesCleared=0;S.stats.molesCleared++;
+5774c5589
+<   progressQuest('fish',(typeof fishScore==='number'?fishScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.fishCleared)S.stats.fishCleared=0;S.stats.fishCleared++;
+---
+>   progressQuest('fish',1);if(!S.stats.fishCleared)S.stats.fishCleared=0;S.stats.fishCleared++;
+6448,6449d6262
+<   /* \U0001f534v1000: \u6781\u901f60\u79d2\u4efb\u52a1\u4e0a\u62a5(\u6309\u672c\u5c40\u5f97\u5206) */
+<   try{ if(typeof setQuest==='function')setQuest('speed',spScore); }catch(e){}
+6601c6414
+< addXP(bonus);progressQuest('match',(typeof matchPairs==='number'?matchPairs:1));/*🔴v1001 含金量: 按配对成功组数*/save();
+---
+> addXP(bonus);progressQuest('match',1);save();
+6613c6426,6439
+< ⟦⟦ISLE_TYPING⟧⟧
+---
+> const TYPING_LEVELS={
+>   1:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#15803d',cb:'#4ade80',ct:'#bbf7d0',ct2:'#86efac',
+>      desc:'7 字母以内',example:'当前星海领域的较短词',
+>      filter:i=>allW[i].en.length<=7,
+>      xpPerWord:5,gemBonus:12,petXp:25},
+>   2:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#b45309',cb:'#fde047',ct:'#fef3c7',ct2:'#fcd34d',
+>      desc:'8 字母词',example:'当前星海领域的中等词',
+>      filter:i=>allW[i].en.length>7&&allW[i].en.length<=8,
+>      xpPerWord:10,gemBonus:25,petXp:40},
+>   3:{name:'高级',icon:'🔥',c1:'#ef4444',c2:'#b91c1c',cb:'#fca5a5',ct:'#fecaca',ct2:'#f87171',
+>      desc:'9+ 字母长词',example:'当前星海领域的长词挑战',
+>      filter:i=>allW[i].en.length>8,
+>      xpPerWord:18,gemBonus:50,petXp:70}
+> };
+6884c6710,6723
+< ⟦⟦ISLE_CLOZE⟧⟧
+---
+> const CLOZE_LEVELS={
+>   easy:{name:'初级',icon:'🌱',c1:'#22c55e',c2:'#16a34a',cb:'#4ade80',ct:'#bbf7d0',
+>     desc:'7 字母以内',example:(allW.find(w=>w.en.length<=7)||allW[0]).ex,
+>     xpPerQ:5,gemBonus:15,petXp:30,
+>     words:allW.filter(w=>w.en.length<=7).map(w=>w.en)},
+>   medium:{name:'中级',icon:'⚡',c1:'#fbbf24',c2:'#f59e0b',cb:'#fde047',ct:'#fef3c7',
+>     desc:'8 字母词',example:(allW.find(w=>w.en.length>7&&w.en.length<=8)||allW[0]).ex,
+>     xpPerQ:8,gemBonus:25,petXp:45,
+>     words:allW.filter(w=>w.en.length>7&&w.en.length<=8).map(w=>w.en)},
+>   hard:{name:'高级',icon:'🔥',c1:'#ef4444',c2:'#dc2626',cb:'#fca5a5',ct:'#fecaca',
+>     desc:'9+ 字母长词',example:(allW.find(w=>w.en.length>8)||allW[0]).ex,
+>     xpPerQ:14,gemBonus:40,petXp:65,
+>     words:allW.filter(w=>w.en.length>8).map(w=>w.en)}
+> };
+7333,7337d7171
+< /* \U0001f534v1000: \u590d\u4e60\u4efb\u52a1\u4e0a\u62a5 \u2014\u2014 \u672c\u8f6e\u590d\u4e60\u8bcd\u6570\u8ba1\u5165 review; \u82e5\u4eca\u65e5\u590d\u4e60\u5df2\u6e05\u7a7a\u5219\u89e6\u53d1 reviewClear */
+< try{ if(typeof progressQuest==='function'&&totalCount>0){progressQuest('review',correctCount);/*🔴v1001 含金量: 只计答对数, 答错不算*/
+<      /* \u672c\u8f6e\u5168\u90e8\u7b54\u5bf9 = \u628a\u8fd9\u6279\u5230\u671f\u8bcd\u6e05\u5149\uff0c\u89c6\u4e3a\u5b8c\u6210"\u6e05\u7a7a\u4eca\u65e5\u590d\u4e60" */
+<      if(correctCount>0&&correctCount===totalCount&&typeof setQuest==='function')setQuest('reviewClear',1);}
+< }catch(e){}
+7712,7724d7545
+<   /*🔴v1032: 发音音量滑杆绑定(渲染后执行)*/
+<   setTimeout(function(){
+<     var sl=document.getElementById('ttsVolSlider'), num=document.getElementById('ttsVolNum');
+<     if(!sl||!window.HansenTTSVolume) return;
+<     sl.oninput=function(){ if(num) num.textContent=sl.value+'%'; };
+<     var commit=function(){
+<       HansenTTSVolume.set(+sl.value||0);   /* 模块用 0-100 刻度 */
+<       try{ HansenTTSVolume.preview('hello'); }catch(e){}
+<     };
+<     sl.onchange=commit;
+<     sl.addEventListener('touchend', commit, {passive:true});
+<   }, 0);
+< 
+7730,7745d7550
+<     /*🔴v1032: 发音音量调节——全站统一，滑动即生效并试听*/
+<     '<div class="settings-section">'+
+<       '<h3>🔊 发音音量</h3>'+
+<       '<div style="padding:6px 2px 2px">'+
+<         '<input type="range" id="ttsVolSlider" min="0" max="100" step="5" value="'+
+<           (window.HansenTTSVolume? HansenTTSVolume.get() : 100)+
+<           '" style="width:100%;height:34px" aria-label="发音音量">'+
+<         '<div style="display:flex;justify-content:space-between;font-size:11.5px;opacity:.7;font-weight:700;margin-top:2px">'+
+<           '<span>轻</span><span id="ttsVolNum">'+
+<           (window.HansenTTSVolume? HansenTTSVolume.get() : 100)+'%</span><span>响</span>'+
+<         '</div>'+
+<         '<div style="font-size:11.5px;opacity:.66;line-height:1.6;margin-top:8px;font-weight:600">'+
+<           '这个音量对所有玩法的单词发音都生效（拼写蜂、听音辨义、闪卡等全部统一）。松手会试听一次。'+
+<         '</div>'+
+<       '</div>'+
+<     '</div>'+
+7788c7593
+<     '<div style="text-align:center;color:#cbd5e1;font-size:13px;font-weight:600;padding:14px 0">⟦⟦ISLE_ZH⟧⟧ · 进度自动保存到本设备</div>';
+---
+> ⟦⟦LAND_SLOT_11⟧⟧
+7923c7728
+< if(S.totalAnswers===0&&S.learned.length===0){setTimeout(()=>{const d=document.getElementById('alertInner');if(!d)return;d.innerHTML='<div style="font-size:64px">🎮</div><div style="font-size:22px;font-weight:800;color:#fbbf24;margin:10px 0">欢迎来到⟦
+---
+> ⟦⟦LAND_SLOT_12⟧⟧
+8189c7994
+<   progressQuest('eagle',(typeof eagleScore==='number'?eagleScore:1));/*🔴v1001 含金量: 按得分*/if(!S.stats.eagleCleared)S.stats.eagleCleared=0;S.stats.eagleCleared++;
+---
+>   progressQuest('eagle',1);if(!S.stats.eagleCleared)S.stats.eagleCleared=0;S.stats.eagleCleared++;
+8272c8077
+< <script defer src="hansen_review_rewards_v963.js?v=1163"></script><!-- 🔴v963样机 错词猎人复习奖励:纠错+2/隔天毕业+15/清空+30/今日复习+20/连击钻石·仅美食岛激活·幂等收据防刷 -->
+---
+> <script defer src="hansen_review_rewards_v963.js?v=1163"></script><!-- 🔴v963迭代3 错词猎人复习奖励+今日复习触发横幅:27岛全量·幂等收据防刷 -->
+8442c8247
+< <script defer src="hansen_cloud_config_v965.js?v=1163"></script><!--🔴v1021: 账号模块必须与云存档同页——此前岛屿页只有云存档、没有账号，ensureKey() 读不到登录态就退回**设备密钥**，导致换设备找不回进度-
+---
+> <script defer src="hansen_cloud_config_v965.js?v=1163"></script><!--🔴v1061: 账号模块必须与云存档同页。v1021 为 19 个常规岛屿页修过这个问题，但 8 个 Land 页是手工维护、不由 generate.py 分发，被漏到今天：Land �
+8444c8249
+< <script>/* [COIN-WALLET-DISPLAY-OK] v437 金币一致性修复: HansenCoins(全局钱包)在内联主脚本之后才加载, 导致⟦⟦ISLE_THEME⟧⟧岛【初始顶栏】曾显示旧的本地 S.coins(而非全局钱包), 与其余18岛(靠升级补丁脚�
+---
+> <script>/* [COIN-WALLET-DISPLAY-OK] v437 金币一致性修复: HansenCoins(全局钱包)在内联主脚本之后才加载, 导致单词岛【初始顶栏】曾显示旧的本地 S.coins(而非全局钱包), 与其余18岛(靠升级补丁脚本在钱包后�

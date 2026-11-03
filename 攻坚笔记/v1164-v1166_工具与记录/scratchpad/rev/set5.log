@@ -1,0 +1,16 @@
+test_lesson_review_fix_v1165 exit=0 fails=0
+test_srs_plan_v1165 exit=0 fails=0
+test_land_sync_v942 exit=0 fails=0
+test_storage_reset_v942 exit=0 fails=0
+test_canonical_srs_hf2_v946 exit=0 fails=0
+test_explore_dual_progress_v945 exit=0 fails=0
+test_today_overlay_fixed_v1006 exit=0 fails=0
+test_backup_v942 exit=0 fails=0
+test_backup_coverage_v1019 exit=0 fails=0
+test_camel_runtime_v1015 exit=0 fails=0
+test_explore_progress_api_v945 exit=0 fails=0
+test_explore_template_v945 exit=0 fails=0
+test_answer_coin_transaction_v942 exit=0 fails=0
+test_mistake_lesson_v1165 exit=0 fails=0
+test_real_path_smoke_v1163 exit=0 fails=0
+SETDONE

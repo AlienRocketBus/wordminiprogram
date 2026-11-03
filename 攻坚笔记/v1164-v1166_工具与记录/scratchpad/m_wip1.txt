@@ -1,0 +1,7 @@
+WIP 备份：v1164 天梯/房间对战重做进行中（登录会话部分改动）
+
+还没改完、还没测完，只是备份，不要部署。
+完成后会在 main 上正式发布 v1164。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

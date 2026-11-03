@@ -1,0 +1,27 @@
+import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+import { makeMock } from './mock.mjs';
+const ENV='ambitious-d0g1d26xm740dc3d6';
+const browser=await chromium.launch(); const ctx=await browser.newContext();
+const {st,handler}=makeMock(); await ctx.route(u=>u.hostname!=='127.0.0.1', handler);
+const page=await ctx.newPage(); page.on('pageerror',e=>console.log('  [pageerror]',e.message));
+const show=x=>console.log(JSON.stringify(x));
+const boot=async()=>{await page.goto('http://127.0.0.1:8765/__s/top.html');await page.waitForFunction(()=>!!window.HansenAuth);};
+const keys=()=>page.evaluate(()=>{const o=[];for(let i=0;i<localStorage.length;i++)o.push(localStorage.key(i));return o.sort();});
+const ens=(label)=>page.evaluate(async(label)=>{const r=await HansenAuth.ensureSession();return {label,r};},label);
+await boot();
+const preCode=await page.evaluate(()=>{localStorage.setItem('wordIsland_test',JSON.stringify({learned:[1,2,3]}));return HansenBackup.exportCode();});
+show(await page.evaluate(async()=>{await HansenAuth.sendPhoneCode('13800000001');const b=await HansenAuth.loginByPhoneCode('123456');return {uid:b.uid};}));
+show(await keys());
+console.log('-- restore backup made BEFORE login (no user_info inside):');
+show(await page.evaluate((c)=>{try{const r=HansenBackup.restore(c);return {restoredItems:r.items};}catch(e){return {err:e.message};}},preCode));
+show(await keys());
+show(await ens('after pre-login backup restore'));
+await page.evaluate(async()=>{await HansenAuth.currentUserAsync();});  // repopulate via getCurrentUser
+show(await ens('after getCurrentUser repopulated'));
+console.log('-- restore backup carrying ANOTHER account user_info:');
+const foreign=await page.evaluate((ENV)=>{const keep=localStorage.getItem('user_info_'+ENV);localStorage.setItem('user_info_'+ENV,JSON.stringify({version:'localCachev1',content:{sub:'uid_OTHER_999',uid:'uid_OTHER_999'}}));const c=HansenBackup.exportCode();localStorage.setItem('user_info_'+ENV,keep);return c;},ENV);
+show(await ens('before foreign restore'));
+show(await page.evaluate((c)=>{try{return {items:HansenBackup.restore(c).items};}catch(e){return {err:e.message};}},foreign));
+show(await ens('after foreign restore'));
+show(await page.evaluate(async()=>{const a=await HansenAuth._app();const c=await a.auth().getClaims();return {accessTokenSub:c.data.claims&&c.data.claims.sub};}));
+await browser.close();

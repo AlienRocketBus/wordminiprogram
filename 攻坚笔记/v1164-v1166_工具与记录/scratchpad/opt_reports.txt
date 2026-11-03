@@ -1,0 +1,77 @@
+
+######## performance
+SUMMARY: None
+COMMITS:
+TESTS:
+GUARDS: None
+DEFERRED:
+RISKS:
+PHONE:
+
+######## review
+SUMMARY: I reviewed both batches in the worktree (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/wt-opt, branch opt/learning-perf). I found 9 real problems and fixed all of them in 3 commits on top of 36b3a86. Nothing was pushed, and the working tree is clean.
+
+**What checked out fine:**
+- The generated pages are reproducible. Running generate.py and generate_land.py gives a clean diff, and generate_land --verify reports 8/8.
+- All 7 new tests from the two batches fail on a git-archive copy of origin/main, for the reasons they claim: srs_plan 7, mistake_lesson 22, spelling_pic 25, copy_numbers 15, boss_lazy 11, preload_budget 15, idle_motion 11.
+- With real touch taps, the lesson card is the top layer in 9 games on island_animal and island_land2, and tapping it continues the game.
+- In Boss fights, the card is drawn above the attack effects, because those effects sit inside #hansenFxLayer at z-index 9980.
+- The perf, warm-up and prefetch tests pass on the current tree.
+
+**What I fixed:**
+1. The end-of-round re-ask was paid as a full correction. It cleared the 错题本 (1 to 0), moved the review box from 0 to 1, and paid +2 纠错金. On the batch HEAD, one deliberate miss plus the re-ask paid +23 coins, against +1 for a right answer. A re-ask now counts as a normal right answer only.
+2. 极速 60 秒: once a word had been re-asked, it scored 0 every time it came back for the rest of the round.
+3. 听音辨义: a re-ask added one extra pet practice count.
+4. 完形填空: the lesson card hid the sentence and read only the bare word. Before, a wrong answer read the whole example sentence.
+5. 完形填空: when the words left in the pool cannot be shown (pig, eagle and cow on the animal island, whose example sentences use the plural), the round ended without re-asking the missed word. This also made the batch's own test fail on some runs.
+6. Leaving the game while the card was showing: the card stayed on screen, and its timer then started the next question and read words aloud. In 打字大师 it also switched typing back on.
+7. With 一键静音 on, tapping the card made the next word's auto-read audible.
+8. A word could earn +15 毕业金 twice: once when its 错题本 count reached 0, and again when its review plan graduated in 今日复习.
+9. 单词大陆③ and 星海 share the same words. After a word was cleared on 星海, opening 单词大陆③ brought it back as wrong, dropped its review box back to 0, and also corrupted the 星海 side. The 错题本 part of this already happens on origin/main; the review box part is new in this batch.
+
+I also made three of the batches' tests stable. In each case the assertion is unchanged, and each still fails on origin/main.
+
+Guards are green and check_resources passes. In the 64-item walkthrough, 74 checks pass. The one failure is the same net::ERR_TUNNEL_CONNECTION_FAILED console error that the learning batch already reported.
+COMMITS:
+  - e22e72b 复查修复：再考题不算纠错、极速不白丢分、完形照旧读整句、离开游戏就收卡、毕业金只发一次
+  - 1120ca8 静音不漏声：点小课卡片后等放行窗口关上再出下一题；Boss 测试等欢迎弹窗出来再点掉
+  - 64def8a 同一批词的两个入口不再互相冲掉：单词大陆③ 回来不会把星海刚清掉的错词、升过的复习盒冲回去
+TESTS:
+  - test_lesson_review_fix_v1165.mjs (new: retry R on animal and land2, speed S, listen P, cloze sentence C, cloze leftover-pool Q, leave-screen V, mute M, 单词大陆③/星海 sync A, graduation G with time-shifted Date) => PASS on the final tree. On the pre-fix HEAD 36b3a86: 23 failures.
+  - The batches' 7 new tests against a git-archive copy of origin/main => All fail for the stated reasons: srs_plan 7, mistake_lesson 22, spelling_pic 25, copy_numbers 15, boss_lazy 11, preload_budget 15, idle_motion 11.
+  - Updated test_mistake_lesson_v1165, test_boss_lazy_v1165, test_srs_plan_v1165 => PASS on the final tree. Each still fails on origin/main: bubble target +0 / distractor +1; boss_lazy 11 failures; srs_plan 7 failures.
+  - Ledger set on the final code: test_canonical_progress_v941, canonical_economy_v941, canonical_input_safety_v946, canonical_srs_hf2_v946, canonical_partial_backup_v942, canonical_clear_crystal_v942, canonical_backup_schema_v942, mock_contract_v970, legacy_economy_v941 => PASS. Two intermediate versions of my gate broke progress_v941, clear_crystal_v942 and mock_contract_v970; the gate was narrowed until all three passed.
+  - test_land_sync_v942, storage_reset_v942, backup_v942, backup_coverage_v1019, camel_runtime_v1015, explore_dual_progress_v945, explore_progress_api_v945, explore_template_v945, answer_coin_v941, answer_coin_transaction_v942, today_overlay_fixed_v1006, review_rewards_v963, real_path_smoke_v1163, land_mode_xp_v941, mistake_lesson_v1165, srs_plan_v1165 => PASS on the final tree.
+  - test_round_economy_v941, focused_typing_v946, explore_spelling_gate_v946, boss_timer_hf5_v946, boss_round_ledger_hf6_v946, spelling_pic_v1165 => PASS after commit e22e72b.
+  - test_boss_lazy_v1165, preload_budget_v1165, idle_motion_v1165, room_warm_v1023, copy_numbers_v1165, light_contrast_v989, island_prefetch_v1025, network_release_blockers_v946 => PASS. boss_lazy L8 failed once before the hardening and passes after it.
+  - test_ui_walkthrough_v969 (full) => 74 pass. 1 failure: the console error net::ERR_TUNNEL_CONNECTION_FAILED, the same one the learning batch reported. I did not trace its URL.
+  - Probes (scratchpad rev/probes) => - Real-tap card visibility: 9 games on island_animal and island_land2.
+- Boss card vs attack effects: Lv1, 6, 12, 20, with screenshots.
+- Result block in dark and light themes.
+- Per-answer ledger reads, origin/main vs worktree: miss 8 vs 14; correct after a miss 29 vs 39; plain correct 26 vs 30.
+  - Release minifier (_strip_js_comments_safe + node --check) on the changed JS; _minify_entry inline scripts on island_animal, island_land2, island_season => OK. 0 broken.
+GUARDS: - hansen_guards_v1068.py exits 0 after every commit.
+- check_resources.py: all passed, 0 ❌.
+- generate.py and generate_land.py were re-run after each template change; generate_land --verify shows all 8 pages identical.
+- No guard or jarvis_selftest sample references anything I changed, so neither was edited. The only existing literal locked by check_resources, `markAnswer(allW.indexOf(molesTarget),false)`, is kept.
+- Untouched: version stamps (?v=1163), VERSION, hansen_audio_lock.json, hansen_bug_registry.py, vendor_*, all battle and login files, hansen_boss_attack.js.
+- package_release.py and
+DEFERRED:
+  - Per-answer main-thread cost (already there before; this batch makes it worse). Every answer re-reads the whole ledger many times (readStore parses main + backup and merges them). markAnswer measured about 100–200 ms unthrottled for a kid with heavy progress on this loaded machine, and about 350–410 ms at 4× CPU throttling, on both origin/main and the worktree. The profile is dominated by readStore
+  - CLOZE_LEVEL_IDX includes words that can never be asked (animal easy: pig, eagle, cow; hard: duck; their example sentences use the plural). clozeTotal still counts them, so a perfect animal-easy round shows 10/13 = 77%. Already there before this batch; I only made sure the re-ask still happens.
+  - Boss: the lesson card appears 1.1 s after a wrong answer, while the counterattack is still playing. The hit lands at 1.7–6.3 s depending on the boss (dealDelay). The card stays readable above the effects, but the hit plays behind it. At Lv20 one wrong answer can lose the fight, and the card then shows over the defeat page. This is a design choice for Hansen; it is not broken.
+  - hansen_mistake_lesson_v1165.js is still not in the sw_v944 shell precache. That is a release step. Offline, the games fall back to the old timed advance without a card.
+  - The batch's own 'found, not fixed' items still stand: the v1034 achievement ladder never unlocks; 听音 on land3 and land5 has 0 words and crashes; HansenMyLearning only exports `_open`; SVG text labels in vocab_all reach the PK battle (battle files are off-limits); opening the settings page still loads the 1.23 MB engine plus attack sprites.
+  - Two 单词大陆/星海 pages open at the same time in two tabs could still overwrite each other. My fix covers a page's own outdated save when it opens.
+RISKS:
+  - Product-policy change for Hansen to confirm: words missed in a round now stay in the 错题本 after a correct re-ask, and the home banner and 复习 badge show them as due today. If he wants the re-ask to clear the word, the +2 纠错金 incentive problem (a deliberate miss pays more than a right answer) has to be solved some other way.
+  - There is now a 160 ms pause between tapping the lesson card and the next question, so that 一键静音 holds. It is small but noticeable to a fast tapper.
+  - New cross-module contract: the templates' load() sets `window.__hsnLoadedSaveTime`, and the ledger relies on it during its first migrate and to block early absorbs. Pages that load S from a save without setting it fall back to the old behaviour. The full ledger, backup, reset and explore test set passes.
+  - In 完形, a wrong answer now holds the card until the sentence finishes plus 0.8 s (cap 8 s), as the old wrong path did. If a phone's speech callback never fires, each 完形 miss waits up to 8 s unless the kid taps.
+  - All timing observations come from a shared machine whose load average ranged from about 1 to 12. Pass/fail results are deterministic, but none of the ms figures should be quoted as phone performance.
+PHONE:
+  - With 一键静音 on in WeChat (iOS and Android): tap a lesson card and confirm the next word stays silent. The fix assumes hansen_mute's 120 ms touchstart/click tap window, and WeChat's touch-to-click timing may differ.
+  - 完形 on a phone: the example sentence plays (local mp3), and the card closes when it finishes. Check whether the speak end callback fires in XWeb, or whether every miss hits the 8 s cap.
+  - 单词大陆③ ↔ 星海 round trip on a real phone: miss on one, fix on the other, reopen the first. Real storage timing and the perf_boost save debounce were only exercised in headless Chromium.
+  - Per-answer delay for a kid with lots of progress on a low-end Android (each answer re-reads the ledger many times), especially in 极速 and 打字大师.
+  - Lesson card stacking on XWeb above the fish and bubble animations and above the Boss effects layer (#hansenFxLayer z-index 9980 vs the card's 9990).

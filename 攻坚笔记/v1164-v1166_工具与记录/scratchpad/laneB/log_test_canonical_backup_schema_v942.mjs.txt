@@ -1,0 +1,1 @@
+canonical backup/schema v942: empty-main recovery + strict crystal done migration ✅

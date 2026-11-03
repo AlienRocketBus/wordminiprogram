@@ -1,0 +1,851 @@
+{
+  "firstLoadMs": 621,
+  "sw_first": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1163,
+      "ready": true,
+      "controller": "none"
+    }
+  },
+  "swActivateMs": 1,
+  "sw_afterActivate": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1163,
+      "ready": true,
+      "controller": "none"
+    }
+  },
+  "log_first": 201,
+  "preheatReqs": [
+    "/island_animal.html?v=1163 empty 304",
+    "/bosses/lv02.webp?v=1163 image 200",
+    "/bosses/lv03.webp?v=1163 image 200",
+    "/island_food.html?v=1163 empty 200",
+    "/island_sports.html?v=1163 empty 200",
+    "/island_job.html?v=1163 empty 200",
+    "/island_color.html?v=1163 empty 200",
+    "/island_nature.html?v=1163 empty 200"
+  ],
+  "cache_afterFirst": {
+    "hansen-v944-shell-217": {
+      "n": 48,
+      "kb": 2385,
+      "urls": [
+        "/index.html [text/html; charset=utf-8]",
+        "/_frame.html [text/html; charset=utf-8]",
+        "/_sw_upgrade_v944.html [text/html; charset=utf-8]",
+        "/manifest.webmanifest [application/manifest+json]",
+        "/favicon.ico [image/x-icon]",
+        "/cartoon_font.woff2 [font/woff2]",
+        "/hansen_sw_upgrade_gate_v944.js [text/javascript; charset=utf-8]",
+        "/hansen_backup_bootstrap_v944.js [text/javascript; charset=utf-8]",
+        "/hansen_coin_wallet.js [text/javascript; charset=utf-8]",
+        "/copy_protect.js [text/javascript; charset=utf-8]",
+        "/perf_boost.js [text/javascript; charset=utf-8]",
+        "/hansen_preload.js?v=1163 [text/javascript; charset=utf-8]",
+        "/click_sound.js [text/javascript; charset=utf-8]",
+        "/click_setting.js [text/javascript; charset=utf-8]",
+        "/vocab_all.js [text/javascript; charset=utf-8]",
+        "/hansen_upgrade.js [text/javascript; charset=utf-8]",
+        "/hansen_boss_lock.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_onboarding.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_theme_shop.js [text/javascript; charset=utf-8]",
+        "/hansen_season.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cinema_themes.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_diamond_shop.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gem_system.js [text/javascript; charset=utf-8]",
+        "/hansen_canonical_progress.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_crystal.js [text/javascript; charset=utf-8]",
+        "/hansen_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gacha.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_land_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_reward.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_bar.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pet_showcase.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_quest_global.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_island_upgrade.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_focused_typing_v946.js [text/javascript; charset=utf-8]",
+        "/hansen_explore_progress_v945.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spell_practice.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_review.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_wrong_overview.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_backup_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_accessibility.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_stability.js [text/javascript; charset=utf-8]",
+        "/hansen_home_link.js [text/javascript; charset=utf-8]",
+        "/hansen_addiction.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_mylearning.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_palette.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_theme.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_econ_guide.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_perf_v944.js?v=1163 [text/javascript; charset=utf-8]"
+      ]
+    },
+    "hansen-v944-assets-215": {
+      "n": 72,
+      "kb": 2502,
+      "urls": [
+        "/click_sound.js?v=1163 [text/javascript; charset=utf-8]",
+        "/click_setting.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_mute.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_early.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_upgrade.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spell_practice.js?v=1163 [text/javascript; charset=utf-8]",
+        "/vocab_all.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_review.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_review_rewards_v963.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_mylearning.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_anim.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_game_antifreeze.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_lock.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_progress.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cardbook_wallet.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_canonical_progress.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_totals_wallet.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gacha.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_land_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cinema_themes.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_diamond_shop.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_season.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_coin_wallet.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_theme_lock.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_theme.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_perf_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_econ_guide.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_palette.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_bar.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spellbee_gems.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_ach_wallet.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_island_upgrade.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gem_system.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gear.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_crystal.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_freepass.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_reward.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_weapon_fx.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_checkin_global.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_addiction.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_wrong_overview.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_backup_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_change_notify_v1134.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_version_watch_v1083.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_config_v965.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_auth_v1004.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_auth_ui_v1004.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sb_ladder_v1002.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_record_v1103.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_ladder_ui_v1108.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sb_profile_v1002.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_friends_v1106.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_friends_ui_v1107.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sb_pk_v1022.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_room_v1065.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_room_warm_v1023.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_room_ui_v1065.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_download_fix_v1140.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_signup_gate_v1030.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_diag_v1027.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_restore_v1048.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_save_v965.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_quest_global.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_stability.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_home_link.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spellbee.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pet_showcase.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_focused_typing_v946.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_explore_progress_v945.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_avatar.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_accessibility.js?v=1163 [text/javascript; charset=utf-8]"
+      ]
+    },
+    "hansen-v944-icons-3": {
+      "n": 23,
+      "kb": 621,
+      "urls": [
+        "/icons/chest_gold.webp?v=1163 [image/webp]",
+        "/icons/map_home.webp?v=1163 [image/webp]",
+        "/icons/task_3d.webp?v=1163 [image/webp]",
+        "/icons/boss_arcade.webp?v=1163 [image/webp]",
+        "/icons/explore_3d.webp?v=1163 [image/webp]",
+        "/icons/speaker_3d.webp?v=1163 [image/webp]",
+        "/icons/typer_3d.webp?v=1163 [image/webp]",
+        "/icons/cloze_3d.webp?v=1163 [image/webp]",
+        "/icons/spell_3d.webp?v=1163 [image/webp]",
+        "/icons/spelling_bee.webp?v=1163 [image/webp]",
+        "/icons/mole_3d.webp?v=1163 [image/webp]",
+        "/icons/fish_3d.webp?v=1163 [image/webp]",
+        "/icons/bubble_3d.webp?v=1163 [image/webp]",
+        "/icons/speed_3d.webp?v=1163 [image/webp]",
+        "/icons/eagle_3d.webp?v=1163 [image/webp]",
+        "/icons/gacha_joker_v594.webp?v=1163 [image/webp]",
+        "/icons/ic_achieve.webp [image/webp]",
+        "/icons/ic_stats.webp [image/webp]",
+        "/icons/ic_settings.webp [image/webp]",
+        "/icons/ic_home.webp [image/webp]",
+        "/icons/ic_wrong.webp [image/webp]",
+        "/icons/ic_review.webp [image/webp]",
+        "/icons/ic_cards.webp [image/webp]"
+      ]
+    }
+  },
+  "vw1": {
+    "local": 1163,
+    "server": 1163,
+    "stale": false,
+    "note": "已是最新 v1163"
+  },
+  "sw_second": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1163,
+      "ready": true,
+      "controller": "sw_v944.js"
+    }
+  },
+  "tapFood": {
+    "ok": true
+  },
+  "waitFood": {
+    "p": "island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "wrap": "block",
+    "op": "1",
+    "ms": 4091
+  },
+  "islandReqCount": 245,
+  "islandHtmlReqs": [
+    "/island_animal.html?v=1163 empty no-cors 304",
+    "/island_food.html empty same-origin 200",
+    "/island_food.html?v=1163 empty no-cors 304",
+    "/island_sports.html?v=1163 empty no-cors 304",
+    "/island_job.html?v=1163 empty no-cors 304",
+    "/island_color.html?v=1163 empty no-cors 304",
+    "/island_nature.html?v=1163 empty no-cors 304",
+    "/island_action.html?v=1163 empty no-cors 200",
+    "/land_map.html?v=1163 empty same-origin 200",
+    "/island_land1.html empty cors 200",
+    "/island_season.html?v=1163 empty same-origin 200"
+  ],
+  "cache_afterIsland": {
+    "hansen-v944-shell-217": {
+      "n": 48,
+      "kb": 2385,
+      "urls": [
+        "/index.html [text/html; charset=utf-8]",
+        "/_frame.html [text/html; charset=utf-8]",
+        "/_sw_upgrade_v944.html [text/html; charset=utf-8]",
+        "/manifest.webmanifest [application/manifest+json]",
+        "/favicon.ico [image/x-icon]",
+        "/cartoon_font.woff2 [font/woff2]",
+        "/hansen_sw_upgrade_gate_v944.js [text/javascript; charset=utf-8]",
+        "/hansen_backup_bootstrap_v944.js [text/javascript; charset=utf-8]",
+        "/hansen_coin_wallet.js [text/javascript; charset=utf-8]",
+        "/copy_protect.js [text/javascript; charset=utf-8]",
+        "/perf_boost.js [text/javascript; charset=utf-8]",
+        "/hansen_preload.js?v=1163 [text/javascript; charset=utf-8]",
+        "/click_sound.js [text/javascript; charset=utf-8]",
+        "/click_setting.js [text/javascript; charset=utf-8]",
+        "/vocab_all.js [text/javascript; charset=utf-8]",
+        "/hansen_upgrade.js [text/javascript; charset=utf-8]",
+        "/hansen_boss_lock.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_onboarding.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_theme_shop.js [text/javascript; charset=utf-8]",
+        "/hansen_season.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cinema_themes.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_diamond_shop.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gem_system.js [text/javascript; charset=utf-8]",
+        "/hansen_canonical_progress.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_crystal.js [text/javascript; charset=utf-8]",
+        "/hansen_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_gacha.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_land_cards.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_reward.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_round_bar.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pet_showcase.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_quest_global.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_island_upgrade.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_focused_typing_v946.js [text/javascript; charset=utf-8]",
+        "/hansen_explore_progress_v945.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spell_practice.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_review.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_wrong_overview.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_backup_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_accessibility.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_stability.js [text/javascript; charset=utf-8]",
+        "/hansen_home_link.js [text/javascript; charset=utf-8]",
+        "/hansen_addiction.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_mylearning.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_palette.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_theme.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_econ_guide.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_perf_v944.js?v=1163 [text/javascript; charset=utf-8]"
+      ]
+    },
+    "hansen-v944-assets-215": {
+      "n": 39,
+      "kb": 952,
+      "urls": [
+        "/hansen_boss_anim.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boss_lock.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_game_antifreeze.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_palette.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_quest_global.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_stability.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_home_link.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_spellbee.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_avatar.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_accessibility.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_config_v965.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_auth_ui_v1004.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sb_ladder_v1002.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sb_pk_v1022.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_room_warm_v1023.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_diag_v1027.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_signup_gate_v1030.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_restore_v1048.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cloud_save_v965.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pet_showcase.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_focused_typing_v946.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_explore_progress_v945.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_auth_v1004.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_room_v1065.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_room_ui_v1065.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_land_scene_manifest_v972.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_sw_upgrade_gate_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_tts_volume_v1038.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cred_trap_v1085.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_cred_guard_v1092.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_backup_bootstrap_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_perf_v944.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_silent_watch_v1155.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_pk_watchdog_v1155.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_boot_check_v1156.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_toast_v1156.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_ladder_board_v1156.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_download_fix_v1140.js?v=1163 [text/javascript; charset=utf-8]",
+        "/hansen_version_watch_v1083.js?v=1163 [text/javascript; charset=utf-8]"
+      ]
+    },
+    "hansen-v944-icons-3": {
+      "n": 26,
+      "kb": 697,
+      "urls": [
+        "/icons/speaker_3d.webp?v=1163 [image/webp]",
+        "/icons/typer_3d.webp?v=1163 [image/webp]",
+        "/icons/cloze_3d.webp?v=1163 [image/webp]",
+        "/icons/spell_3d.webp?v=1163 [image/webp]",
+        "/icons/spelling_bee.webp?v=1163 [image/webp]",
+        "/icons/mole_3d.webp?v=1163 [image/webp]",
+        "/icons/fish_3d.webp?v=1163 [image/webp]",
+        "/icons/bubble_3d.webp?v=1163 [image/webp]",
+        "/icons/speed_3d.webp?v=1163 [image/webp]",
+        "/icons/eagle_3d.webp?v=1163 [image/webp]",
+        "/icons/task_3d.webp?v=1163 [image/webp]",
+        "/icons/explore_3d.webp?v=1163 [image/webp]",
+        "/icons/map_home.webp?v=1163 [image/webp]",
+        "/icons/boss_arcade.webp?v=1163 [image/webp]",
+        "/icons/gacha_joker_v594.webp?v=1163 [image/webp]",
+        "/icons/ic_achieve.webp [image/webp]",
+        "/icons/ic_stats.webp [image/webp]",
+        "/icons/ic_settings.webp [image/webp]",
+        "/icons/ic_home.webp [image/webp]",
+        "/icons/ic_review.webp [image/webp]",
+        "/icons/ic_cards.webp [image/webp]",
+        "/icons/ic_equip.webp [image/webp]",
+        "/icons/ic_study.webp [image/webp]",
+        "/icons/ic_diamond.webp [image/webp]",
+        "/icons/chest_gold.webp?v=1163 [image/webp]",
+        "/icons/ic_wrong.webp [image/webp]"
+      ]
+    },
+    "hansen-v944-pages-215": {
+      "n": 7,
+      "kb": 2774,
+      "urls": [
+        "/ [text/html; charset=utf-8]",
+        "/island_food.html [text/html; charset=utf-8]",
+        "/spelling_bee.html?v=1163&warm=1 [text/html; charset=utf-8]",
+        "/land_map.html?v=1163 [text/html; charset=utf-8]",
+        "/island_season.html?v=1163 [text/html; charset=utf-8]",
+        "/boss_hall.html?v=1163&warm=1 [text/html; charset=utf-8]",
+        "/season_showcase.html?v=1163&warm=1 [text/html; charset=utf-8]"
+      ]
+    }
+  },
+  "offlineReloadMs": 2432,
+  "offlineHome": {
+    "title": "单词大冒险 · 单词大冒险",
+    "islands": 18,
+    "bodyText": "🛸\n🚀\n🛰️\n☄️\n🌟\n🍕\n📅\n🚌\n⭐\n🎯\n🏙️\n🏙️\n🍔\n🚌\n🐘\n🌙\n🚌\n🐘\n🐉\nv1163\n🎒 单词大冒险家联盟 · 招募中\n单 词 大 冒 险 · 一 段 神 奇 旅 程\n单词大冒险\nWORD ADVENTURES\n\n🦸 Hey 勇敢的小冒险家, 欢迎加入！\n快穿越 18 关神奇大冒险, 收集 711+ 单词宝藏,\n玩转 12 种超酷挑战, 还能孵化你专属的 36 阶进化宠物 🐣！\n\n🗺️\n18\n主题岛屿\n📚\n711+\n英语单词\n🎮\n12\n学习模式\n🐾\n36\n宠物阶段\n🍔\n最近探险的岛屿\n🍔 食物 · 点击继续 →\n🌌\n✦ 番外篇 E",
+    "globals": [
+      "HansenVersionWatch=object",
+      "HansenIslandPrefetch=undefined",
+      "HansenToast=object",
+      "HansenBootCheck=object",
+      "HansenSilentWatch=object",
+      "HansenAuth=undefined",
+      "HansenDownloadFix=object",
+      "HansenPreloadPolicy=object",
+      "openIsland=function"
+    ]
+  },
+  "tapFoodOff": {
+    "err": "blocked by islandFrame",
+    "box": {
+      "x": 195,
+      "y": 421.78125,
+      "hitOk": false,
+      "hit": "islandFrame"
+    }
+  },
+  "waitFoodOff": {
+    "p": "island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "wrap": "block",
+    "op": "1",
+    "ms": 8
+  },
+  "foodOffline": {
+    "title": "食物大冒险 · Food Word Adventure",
+    "text": "Lv.\n1\n新手探险家\n打卡天数 1\n0/100 XP\n💎\n0\n🪙\n300\n食物大冒险\nFOOD ADVENTURE ISLAND\n星灵\n星雾之卵\n裹着流动星雾的蛋, 壳上微光符纹缓缓游动\n可领\n每日宝箱\n0/12\n每日任务\n挑战BOSS\n今天没有要复习的单词\n大脑正在悄悄记牢它们\n精学模式\n探索单词\n听音辨义\n🃏\n记忆翻牌\n打字大师\n完形填空\n字母拼拼乐\n畅玩模式\nspelling bee",
+    "imgsBroken": [],
+    "nImgs": 30
+  },
+  "tapAnimalOff": {
+    "ok": true
+  },
+  "waitAnimalOff": {
+    "p": "island_animal.html",
+    "rs": "complete",
+    "title": "当前页面尚未下载",
+    "wrap": "block",
+    "op": "1",
+    "ms": 270
+  },
+  "animalOffline": {
+    "title": "当前页面尚未下载",
+    "text": "📡\n当前页面尚未下载\n\n请联网打开这个页面一次，之后就能从本机缓存中访问。\n\n重试连接",
+    "wrap": "block",
+    "backButtonsInFrame": [
+      "重试连接"
+    ]
+  },
+  "events": [
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_pk_record_v1103.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_ladder_ui_v1108.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_sb_profile_v1002.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_friends_v1106.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "---",
+      "kind": "mark",
+      "text": "OFFLINE from here"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_island_prefetch_v1025.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_island_prefetch_v1025.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_island_prefetch_v1025.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_auth_v1004.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_auth_v1004.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_auth_v1004.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_signup_gate_v1030.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_signup_gate_v1030.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_signup_gate_v1030.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/sentence_map.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/sentence_map.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/sentence_map.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/word_map.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/word_map.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/word_map.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/highlight_helper.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/highlight_helper.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/highlight_helper.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_ex_audio.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_ex_audio.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_ex_audio.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_spellbee.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_spellbee.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_spellbee.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_avatar.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_avatar.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_avatar.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_auth_v1004.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_auth_v1004.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_auth_v1004.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_pk_room_v1065.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_pk_room_v1065.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_pk_room_v1065.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_pk_room_ui_v1065.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_pk_room_ui_v1065.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_pk_room_ui_v1065.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_room_warm_v1023.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_room_warm_v1023.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_room_warm_v1023.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_cloud_diag_v1027.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_cloud_diag_v1027.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_cloud_diag_v1027.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_signup_gate_v1030.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_signup_gate_v1030.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_signup_gate_v1030.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_cloud_restore_v1048.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_cloud_restore_v1048.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_cloud_restore_v1048.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "http504",
+      "text": "/hansen_cloud_save_v965.js?v=1163",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 504 ()",
+      "url": "http://127.0.0.1:46671/hansen_cloud_save_v965.js?v=1163"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/hansen_cloud_save_v965.js?v=1163 net::ERR_ABORTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/VERSION?_vw=1793706945393 net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "url": "http://127.0.0.1:46671/VERSION?_vw=1793706945393"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/VERSION?_vw=1793706945393 net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "url": "http://127.0.0.1:46671/VERSION?_vw=1793706945393"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/VERSION?_vw=1793706945501 net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "url": "http://127.0.0.1:46671/VERSION?_vw=1793706945501"
+    },
+    {
+      "tag": "home1",
+      "kind": "requestfailed",
+      "text": "/VERSION?_vw=1793706945501 net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "url": "http://127.0.0.1:46671/VERSION?_vw=1793706945501"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.warning",
+      "text": "JS error: [启动自检] 核心模块缺失：账号",
+      "url": "http://127.0.0.1:46671/island_food.html"
+    },
+    {
+      "tag": "home1",
+      "kind": "console.warning",
+      "text": "JS error: [启动自检] 核心模块缺失：账号",
+      "url": "http://127.0.0.1:46671/"
+    },
+    {
+      "tag": "home1",
+      "kind": "http503",
+      "text": "/island_animal.html",
+      "fromSW": true
+    },
+    {
+      "tag": "home1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 503 ()",
+      "url": "http://127.0.0.1:46671/island_animal.html"
+    },
+    {
+      "tag": "home1",
+      "kind": "pageerror",
+      "text": "Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+    }
+  ]
+}

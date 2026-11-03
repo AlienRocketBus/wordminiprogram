@@ -1,0 +1,346 @@
+{
+ "method": "busy % over 3 s after an in-page trigger, CPU 4x, room_warm blocked",
+ "summary": {
+  "answer_right.real": {
+   "busyPct3sMedian": 53.2,
+   "all": [
+    53.2,
+    35.5,
+    54.6
+   ],
+   "runningAfter4_5s": [
+    5,
+    5,
+    5
+   ],
+   "longtasks": [
+    2,
+    1,
+    2
+   ],
+   "particlesAt3s": [
+    0,
+    0,
+    0
+   ]
+  },
+  "answer_right.mock": {
+   "busyPct3sMedian": 9.6,
+   "all": [
+    15.3,
+    9.6,
+    8.9
+   ],
+   "runningAfter4_5s": [
+    0,
+    0,
+    0
+   ],
+   "longtasks": [
+    0,
+    0,
+    0
+   ],
+   "particlesAt3s": [
+    0,
+    0,
+    0
+   ]
+  },
+  "round_result.real": {
+   "busyPct3sMedian": 83.3,
+   "all": [
+    76.1,
+    84.7,
+    83.3
+   ],
+   "runningAfter4_5s": [
+    3,
+    3,
+    3
+   ],
+   "longtasks": [
+    1,
+    6,
+    8
+   ],
+   "particlesAt3s": [
+    51,
+    54,
+    54
+   ]
+  },
+  "round_result.mock": {
+   "busyPct3sMedian": 20.7,
+   "all": [
+    17.9,
+    20.7,
+    23.5
+   ],
+   "runningAfter4_5s": [
+    0,
+    0,
+    0
+   ],
+   "longtasks": [
+    0,
+    0,
+    0
+   ],
+   "particlesAt3s": [
+    0,
+    0,
+    0
+   ]
+  },
+  "chest_open.real": {
+   "busyPct3sMedian": 93.2,
+   "all": [
+    98.4,
+    91.9,
+    93.2
+   ],
+   "runningAfter4_5s": [
+    24,
+    21,
+    18
+   ],
+   "longtasks": [
+    14,
+    2,
+    2
+   ],
+   "particlesAt3s": [
+    174,
+    165,
+    171
+   ]
+  },
+  "chest_open.mock": {
+   "busyPct3sMedian": 25.1,
+   "all": [
+    26.7,
+    20,
+    25.1
+   ],
+   "runningAfter4_5s": [
+    0,
+    0,
+    0
+   ],
+   "longtasks": [
+    2,
+    0,
+    3
+   ],
+   "particlesAt3s": [
+    0,
+    0,
+    0
+   ]
+  }
+ },
+ "raw": {
+  "answer_right.real": [
+   {
+    "busyPct3s": 53.2,
+    "runningAt3s": 7,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 5,
+    "animsAt4_5s": 5,
+    "fxLayerLeft": false,
+    "longtasks": 2
+   },
+   {
+    "busyPct3s": 35.5,
+    "runningAt3s": 7,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 5,
+    "animsAt4_5s": 5,
+    "fxLayerLeft": false,
+    "longtasks": 1
+   },
+   {
+    "busyPct3s": 54.6,
+    "runningAt3s": 7,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 5,
+    "animsAt4_5s": 5,
+    "fxLayerLeft": false,
+    "longtasks": 2
+   }
+  ],
+  "answer_right.mock": [
+   {
+    "busyPct3s": 15.3,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   },
+   {
+    "busyPct3s": 9.6,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   },
+   {
+    "busyPct3s": 8.9,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   }
+  ],
+  "round_result.real": [
+   {
+    "busyPct3s": 76.1,
+    "runningAt3s": 51,
+    "particlesAt3s": 51,
+    "runningAt4_5s": 3,
+    "animsAt4_5s": 3,
+    "fxLayerLeft": false,
+    "longtasks": 1
+   },
+   {
+    "busyPct3s": 84.7,
+    "runningAt3s": 57,
+    "particlesAt3s": 54,
+    "runningAt4_5s": 3,
+    "animsAt4_5s": 3,
+    "fxLayerLeft": false,
+    "longtasks": 6
+   },
+   {
+    "busyPct3s": 83.3,
+    "runningAt3s": 48,
+    "particlesAt3s": 54,
+    "runningAt4_5s": 3,
+    "animsAt4_5s": 3,
+    "fxLayerLeft": false,
+    "longtasks": 8
+   }
+  ],
+  "round_result.mock": [
+   {
+    "busyPct3s": 17.9,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   },
+   {
+    "busyPct3s": 20.7,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   },
+   {
+    "busyPct3s": 23.5,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   }
+  ],
+  "chest_open.real": [
+   {
+    "busyPct3s": 98.4,
+    "runningAt3s": 143,
+    "particlesAt3s": 174,
+    "runningAt4_5s": 24,
+    "animsAt4_5s": 27,
+    "fxLayerLeft": false,
+    "longtasks": 14
+   },
+   {
+    "busyPct3s": 91.9,
+    "runningAt3s": 152,
+    "particlesAt3s": 165,
+    "runningAt4_5s": 21,
+    "animsAt4_5s": 21,
+    "fxLayerLeft": false,
+    "longtasks": 2
+   },
+   {
+    "busyPct3s": 93.2,
+    "runningAt3s": 149,
+    "particlesAt3s": 171,
+    "runningAt4_5s": 18,
+    "animsAt4_5s": 21,
+    "fxLayerLeft": false,
+    "longtasks": 2
+   }
+  ],
+  "chest_open.mock": [
+   {
+    "busyPct3s": 26.7,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 2
+   },
+   {
+    "busyPct3s": 20,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 0
+   },
+   {
+    "busyPct3s": 25.1,
+    "runningAt3s": 0,
+    "particlesAt3s": 0,
+    "runningAt4_5s": 0,
+    "animsAt4_5s": 0,
+    "fxLayerLeft": false,
+    "longtasks": 3
+   }
+  ]
+ },
+ "reducedMotion": {
+  "chest": {
+   "reduced": true,
+   "anims": 0,
+   "fxLayer": false,
+   "opened": true,
+   "coin": "1,316",
+   "card": false
+  },
+  "result": {
+   "reduced": true,
+   "anims": 0,
+   "fxLayer": false,
+   "opened": null,
+   "coin": "1,292",
+   "right": "7",
+   "card": false
+  },
+  "answer": {
+   "reduced": true,
+   "anims": 0,
+   "fxLayer": false,
+   "opened": null,
+   "coin": "1,280",
+   "card": true
+  }
+ }
+}

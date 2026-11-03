@@ -1,0 +1,82 @@
+
+══ clusters (39) ══
+  [high  ]    5× I6:gone-but-room-open:findByCode:skew   seeds 175,268,308,521,559
+           e.g. findByCode(H4R3) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff -37s)
+  [high  ]    5× I9:I6:gone-but-room-open:findByCode:skew   seeds 175,268,308,521,559
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(H4R3) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff -37s)
+  [high  ]    2× I4:results-win-win:ab:opp-gone/ab:opp-gone   seeds 52,400
+           e.g. rmk0gedt5x8cj7y host win 200:100 vs guest win 360:200 [H-abandon(opp-gone)/G-abandon(opp-gone)] disrupted(partition)
+  [high  ]    1× I2:remove   seeds 16
+           e.g. remove rmk0gedflf2ce3j_s0 owned by P1
+  [high  ]    1× I6:config:joinRoom:DATABASE_REQUEST_FAILED   seeds 16
+           e.g. joinRoom → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    1× I9:I4:results-win-win:ab:opp-gone/ab:opp-gone   seeds 400
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0ged7ks6lwtd host win 300:120 vs guest win 120:300 [H-abandon(opp-gone)/G-abandon(opp-gone)] disrupted(freeze,session)
+  [high  ]    1× I6:config:claimRound:DATABASE_DUPLICATE_WRITE   seeds 409
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0ggnu7qbqnem_w4 | req reqez⟩」
+  [high  ]    1× I9:I6:config:claimRound:DATABASE_DUPLICATE_WRITE   seeds 409
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0ggnu7qbqnem_w4 | r
+  [high  ]    1× I6:config:claimRound:DATABASE_REQUEST_FAILED   seeds 540
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [medium]    7× I3:skip-beat-correct-answer:A:skew   seeds 125,156,207,375,417,541
+           e.g. word 3: P3 spelled it right 23.3s after the word appeared (local deadline in 27.1s) but the skip W doc of P2 was already there (the other phone timed out 19.0s after its word appeared, deadline in 18.0s)
+  [medium]    7× I9:I3:skip-beat-correct-answer:A:skew   seeds 125,156,207,375,417,541
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) word 3: P3 spelled it right 23.3s after the word appeared (local deadline in 27.1s) but the skip W doc of P2 was already there (the other phone timed out 
+  [medium]    7× I3:skip-beat-correct-answer:A   seeds 149,179,191,347,397,497
+           e.g. word 4: P1 spelled it right 19.0s after the word appeared (local deadline in 20.0s) but the skip W doc of P3 was already there (the other phone timed out 20.0s after its word appeared, deadline in 20.0s)
+  [medium]    4× I4:score-vs-rounds:own-win-doc-landed-but-scored-0   seeds 9,77,473,556
+           e.g. rmk0gexr9m8l5te word 4: P3 spelled it right; round doc {"winner":"guest","by":"k3x9","at":1767574892163.6262} ⇒ 100 points, the UI scored 0
+  [medium]    2× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:slow   seeds 296,562
+           e.g. rmk0gedl6wyjgec word 2: P0 spelled it right; round doc {"winner":"host","by":"k0x296","at":1767574841136.441} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=slow)
+  [medium]    1× I6:taken-but-nobody-else:host-reopened-my-seat   seeds 181
+           e.g. joinRoom(rmk0gedh51mjrp5) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [medium]    1× I6:opp-never-came-but-was-playing:kicked   seeds 363
+           e.g. P0 was told 「对手刚才没进来」 in rmk0gevm0xd91il while P2 had played 4 words
+  [medium]    1× I9:I6:opp-never-came-but-was-playing:kicked   seeds 363
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) P0 was told 「对手刚才没进来」 in rmk0gevm0xd91il while P2 had played 4 words
+  [medium]    1× I4:score-vs-rounds:claim-failed:config   seeds 409
+           e.g. rmk0ggnu7qbqnem word 4: P1 spelled it right; round doc {"winner":"guest","by":"k2x409","at":1767574885525.3557} ⇒ 80 points, the UI scored 0 (claimRound FAILED kind=config)
+  [medium]    1× I9:I4:score-vs-rounds:claim-failed:config   seeds 409
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0ggnu7qbqnem word 4: P1 spelled it right; round doc {"winner":"guest","by":"k2x409","at":1767574885525.3557} ⇒ 80 points, the UI scored 0 (claimRound F
+  [medium]    1× I9:I3:skip-beat-correct-answer:A   seeds 498
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) word 4: P1 spelled it right 11.3s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 
+  [medium]    1× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:network   seeds 546
+           e.g. rmk0ge5psfksx09 word 2: P0 spelled it right; round doc {"winner":"host","by":"k0x546","at":1767574897332.397} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=network)
+  [medium]    1× I9:I4:score-vs-rounds:own-win-doc-landed-but-scored-0:network   seeds 546
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0ge5psfksx09 word 2: P0 spelled it right; round doc {"winner":"host","by":"k0x546","at":1767574897332.397} ⇒ 100 points, the UI scored 0 (claimRound FA
+  [medium]    1× I9:I4:score-vs-rounds:own-win-doc-landed-but-scored-0   seeds 556
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0geufgdp9tkk word 5: P1 spelled it right; round doc {"winner":"host","by":"k1x556","at":1767574894709.2456} ⇒ 100 points, the UI scored 0
+  [medium]    1× I9:I4:score-vs-rounds:own-win-doc-landed-but-scored-0:slow   seeds 562
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gel3d3ih528 word 0: P0 spelled it right; round doc {"winner":"host","by":"k0x562","at":1767574839500.029} ⇒ 100 points, the UI scored 0 (claimRound FA
+  [low   ]   18× I5:played-on-after-opponent-claimed-abandon:host-after-resume   seeds 19,50,65,79,112,123
+           e.g. P0 (host) kept answering 4 more words after the opponent had claimed the win by abandon at 151.2s — it is only told at the very end
+  [low   ]   15× I6:full-room-reported-gone:findByCode   seeds 28,44,85,87,100,148
+           e.g. findByCode(UJZD) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]   14× I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 118,136,162,211,234,280
+           e.g. P0 (guest) kept answering 6 more words after the opponent had claimed the win by abandon at 123.0s — it is only told at the very end
+  [low   ]    9× I3:skip-beat-correct-answer:BC   seeds 89,164,218,270,288,389
+           e.g. word 6: P1 spelled it right 14.5s after the word appeared (local deadline in 15.0s) but the skip W doc of P0 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)
+  [low   ]    3× I9:I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 136,479,529
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) P1 (guest) kept answering 3 more words after the opponent had claimed the win by abandon at 147.2s — it is only told at the very end
+  [low   ]    3× I9:I6:full-room-reported-gone:findByCode   seeds 175,379,559
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(H4R3) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    2× I5:played-on-after-opponent-claimed-abandon:guest   seeds 51,148
+           e.g. P1 (guest) kept answering 2 more words after the opponent had claimed the win by abandon at 176.8s — it is only told at the very end
+  [low   ]    2× I5:played-on-after-opponent-claimed-abandon:host   seeds 134,408
+           e.g. P1 (host) kept answering 4 more words after the opponent had claimed the win by abandon at 160.2s — it is only told at the very end
+  [low   ]    2× I6:taken-but-nobody-else:room-holds-my-own-key   seeds 170,258
+           e.g. joinRoom(rmk0gfr610ecizt) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I9:I5:played-on-after-opponent-claimed-abandon:host-after-resume   seeds 276,399
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) P1 (host) kept answering 8 more words after the opponent had claimed the win by abandon at 98.0s — it is only told at the very end
+  [low   ]    2× I6:ack-timeout-host-alive   seeds 357,375
+           e.g. joinRoom(rmk0gecsa4yhazm) 「房主没有回应」 while host P1 was online and waiting
+  [low   ]    1× I9:I6:taken-but-nobody-else:room-holds-my-own-key   seeds 170
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gfr610ecizt) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I3:skip-beat-correct-answer:BC   seeds 288
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) word 0: P0 spelled it right 12.0s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 
+  [low   ]    1× I3:skip-beat-correct-answer:BC:skew   seeds 409
+           e.g. word 1: P1 spelled it right 9.4s after the word appeared (local deadline in 15.0s) but the skip W doc of P2 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)
+  [low   ]    1× I9:I3:skip-beat-correct-answer:BC:skew   seeds 409
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) word 1: P1 spelled it right 9.4s after the word appeared (local deadline in 15.0s) but the skip W doc of P2 was already there (the other phone timed out 1
+
+SUMMARY profile=disrupt runs=600 seeds=1..600 failing_runs=33 clusters=39 (fail-level 24) | runs-with-violation per invariant: ERR:0 I1:0 I2:1 I3:24 I4:10 I5:35 I6:27 I7:0 I8:0 I9:27 I10:0 | matches=559 settled_pairs=363 virtual=79.2h events=952777 real=30s

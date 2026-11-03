@@ -1,0 +1,285 @@
+{
+ "animal_menu": {
+  "violet": 3.4,
+  "aurora": 28.2,
+  "woods": 41.0,
+  "cloud": 69.5,
+  "sakura": 69.5,
+  "cream": 69.5,
+  "mint": 69.5
+ },
+ "boss_fight": {
+  "violet": 9.4,
+  "aurora": 1.0,
+  "woods": 9.9,
+  "cloud": 91.4,
+  "sakura": 89.9,
+  "cream": 91.4,
+  "mint": 91.4
+ },
+ "boss_hall": {
+  "violet": 0.0,
+  "aurora": 0.0,
+  "woods": 0.0,
+  "cloud": 0.0,
+  "sakura": 0.0,
+  "cream": 0.0,
+  "mint": 0.0
+ },
+ "boss_list": {
+  "violet": 0.0,
+  "aurora": 0.0,
+  "woods": 1.9,
+  "cloud": 59.4,
+  "sakura": 62.2,
+  "cream": 59.3,
+  "mint": 57.9
+ },
+ "boss_victory": {
+  "violet": 0.3,
+  "aurora": 0.3,
+  "woods": 0.3,
+  "cloud": 53.4,
+  "sakura": 53.3,
+  "cream": 53.3,
+  "mint": 55.4
+ },
+ "chest": {
+  "violet": 0.6,
+  "aurora": 39.7,
+  "woods": 51.4,
+  "cloud": 89.5,
+  "sakura": 89.6,
+  "cream": 89.4,
+  "mint": 89.4
+ },
+ "chest_open": {
+  "violet": 11.7,
+  "aurora": 44.1,
+  "woods": 60.1,
+  "cloud": 79.8,
+  "sakura": 80.0,
+  "cream": 85.4,
+  "mint": 79.4
+ },
+ "food_menu": {
+  "violet": 0.0,
+  "aurora": 25.5,
+  "woods": 38.5,
+  "cloud": 66.7,
+  "sakura": 66.7,
+  "cream": 66.8,
+  "mint": 66.7,
+  "coin_rainbow": 33.8,
+  "coin_pink": 26.0,
+  "imax_candy": 42.3,
+  "gallery_fairy": 35.8
+ },
+ "food_modes": {
+  "violet": 0.2,
+  "aurora": 21.7,
+  "woods": 34.8,
+  "cloud": 77.1,
+  "sakura": 77.3,
+  "cream": 75.7,
+  "mint": 77.2,
+  "coin_rainbow": 26.3,
+  "coin_pink": 25.8,
+  "imax_candy": 36.7,
+  "gallery_fairy": 29.6
+ },
+ "home_cards": {
+  "violet": 0.3,
+  "aurora": 9.6,
+  "woods": 12.0,
+  "cloud": 26.2,
+  "sakura": 26.2,
+  "cream": 26.2,
+  "mint": 26.3,
+  "coin_rainbow": 17.2,
+  "coin_pink": 18.6,
+  "imax_candy": 18.6,
+  "gallery_fairy": 15.1
+ },
+ "home_top": {
+  "violet": 5.1,
+  "aurora": 49.0,
+  "woods": 58.4,
+  "cloud": 75.4,
+  "sakura": 76.3,
+  "cream": 76.7,
+  "mint": 76.7,
+  "coin_rainbow": 81.9,
+  "coin_pink": 86.6,
+  "imax_candy": 73.1,
+  "gallery_fairy": 60.7
+ },
+ "land1_menu": {
+  "violet": 3.4,
+  "aurora": 27.5,
+  "woods": 40.1,
+  "cloud": 69.2,
+  "sakura": 69.2,
+  "cream": 69.2,
+  "mint": 69.2,
+  "coin_rainbow": 56.1,
+  "coin_pink": 50.7,
+  "imax_candy": 65.1,
+  "gallery_fairy": 59.8
+ },
+ "land1_modes": {
+  "violet": 2.2,
+  "aurora": 21.9,
+  "woods": 35.0,
+  "cloud": 77.2,
+  "sakura": 77.3,
+  "cream": 77.2,
+  "mint": 77.2
+ },
+ "land5_menu": {
+  "violet": 3.4,
+  "aurora": 27.8,
+  "woods": 40.0,
+  "cloud": 69.3,
+  "sakura": 69.3,
+  "cream": 69.2,
+  "mint": 69.5
+ },
+ "land_map": {
+  "violet": 60.2,
+  "aurora": 60.2,
+  "woods": 60.2,
+  "cloud": 60.2,
+  "sakura": 60.2,
+  "cream": 60.2,
+  "mint": 60.3
+ },
+ "listen_q": {
+  "violet": 0.4,
+  "aurora": 43.1,
+  "woods": 61.1,
+  "cloud": 94.6,
+  "sakura": 94.6,
+  "cream": 94.6,
+  "mint": 94.7,
+  "coin_rainbow": 57.1,
+  "coin_pink": 57.2,
+  "imax_candy": 73.9,
+  "gallery_fairy": 64.2
+ },
+ "listen_result": {
+  "violet": 0.0,
+  "aurora": 41.9,
+  "woods": 63.5,
+  "cloud": 93.9,
+  "sakura": 94.0,
+  "cream": 93.9,
+  "mint": 93.9,
+  "coin_rainbow": 62.4,
+  "coin_pink": 63.7,
+  "imax_candy": 77.1,
+  "gallery_fairy": 67.2
+ },
+ "listen_right": {
+  "violet": 1.1,
+  "aurora": 31.2,
+  "woods": 49.5,
+  "cloud": 76.2,
+  "sakura": 76.4,
+  "cream": 75.4,
+  "mint": 76.4,
+  "coin_rainbow": 49.2,
+  "coin_pink": 46.3,
+  "imax_candy": 64.2,
+  "gallery_fairy": 54.9
+ },
+ "listen_wrong": {
+  "violet": 5.5,
+  "aurora": 43.2,
+  "woods": 61.3,
+  "cloud": 94.8,
+  "sakura": 94.6,
+  "cream": 94.6,
+  "mint": 94.6,
+  "coin_rainbow": 57.5,
+  "coin_pink": 57.4,
+  "imax_candy": 75.8,
+  "gallery_fairy": 67.5
+ },
+ "pop_ach": {
+  "violet": 0.0,
+  "aurora": 25.3,
+  "woods": 37.8,
+  "cloud": 64.2,
+  "sakura": 64.2,
+  "cream": 64.2,
+  "mint": 64.1
+ },
+ "pop_levelup": {
+  "violet": 0.1,
+  "aurora": 24.1,
+  "woods": 36.7,
+  "cloud": 65.6,
+  "sakura": 65.5,
+  "cream": 65.9,
+  "mint": 65.4
+ },
+ "pop_petevolve": {
+  "violet": 2.9,
+  "aurora": 26.5,
+  "woods": 39.4,
+  "cloud": 64.9,
+  "sakura": 65.0,
+  "cream": 64.8,
+  "mint": 64.5
+ },
+ "school_menu": {
+  "violet": 3.5,
+  "aurora": 28.2,
+  "woods": 41.1,
+  "cloud": 69.5,
+  "sakura": 69.5,
+  "cream": 69.5,
+  "mint": 69.5
+ },
+ "season_showcase": {
+  "violet": 0.5,
+  "aurora": 0.5,
+  "woods": 0.5,
+  "cloud": 0.5,
+  "sakura": 0.5,
+  "cream": 0.5,
+  "mint": 0.5
+ },
+ "settings": {
+  "violet": 0.8,
+  "aurora": 15.2,
+  "woods": 22.7,
+  "cloud": 84.8,
+  "sakura": 85.1,
+  "cream": 84.9,
+  "mint": 85.2,
+  "coin_rainbow": 14.9,
+  "coin_pink": 13.4,
+  "imax_candy": 52.8,
+  "gallery_fairy": 16.2
+ },
+ "settings_themes": {
+  "violet": 0.1,
+  "aurora": 8.8,
+  "woods": 13.4,
+  "cloud": 60.4,
+  "sakura": 60.4,
+  "cream": 60.3,
+  "mint": 60.3
+ },
+ "shop": {
+  "violet": 0.1,
+  "aurora": 28.8,
+  "woods": 40.2,
+  "cloud": 88.8,
+  "sakura": 89.0,
+  "cream": 88.8,
+  "mint": 89.0
+ }
+}

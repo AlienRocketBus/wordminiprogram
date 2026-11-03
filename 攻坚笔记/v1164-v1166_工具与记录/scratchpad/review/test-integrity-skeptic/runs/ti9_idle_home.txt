@@ -1,0 +1,1 @@
+{"WHERE":"ladderHome","samples":[],"rescueText":"🛠️ 这一局卡住了 界面已经 25 秒没有任何变化。 多半是网络断了或者对手那边出了问题。 你的进度和天梯分都还在，没有丢。 回到大PK首页 重新找对手","rescueAfterSec":26,"hitLdGo":"手指下面不是它，而是 div < div#pkRescue < body < html"}

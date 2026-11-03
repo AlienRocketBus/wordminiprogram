@@ -1,0 +1,301 @@
+
+######## impl:auth-backup
+SUMMARY: SPEC §4 is implemented and tested against the real SDK 2.30.0 talking to the emulator. Scratchpad validation script: 19/19 PASS, two stable runs. Run against the v1163 files it gets 4/17 PASS: the uid, credentials, invalid_grant, hang, register, login-marker, backup and guard-counter checks all fail, and the hang check never returns.
+
+Changes:
+- ensureSession: 10 s overall timeout. A null login state is now judged by whether credentials_<env> is still on the device: credentials there means "not ready yet" (retry); credentials gone means the guard gets one rescue try, then a definite expiry, except inside the existing 60 s fresh-login window. A missing user_info cache recovers the uid through getCurrentUser (6 s limit), then the login-token (JWT) sub. A corrupt user_info cache is deleted and the probe runs once more. Every failure carries a `kind`; every branch writes a trace line. Concurrent calls share one probe.
+- loginByPassword: same credentials check as phone login before writing the "signed in" marker.
+- registerByPassword: refuses honestly (no SDK call, no marker) and points to phone registration. The UI's username tab is now login-only with a "用手机号注册" button; the signup gate opens the phone tab.
+- iframe: the auth object is cached per app instance and the top window's object is preferred.
+- cred guard: the rescue counter now resets when the SDK gets a new refresh_token; previously it never reset. A dead session is still rescued at most 3 times.
+- Backup and bootstrap: SDK keys are never exported, restored or deleted. Old snapshots and old journals that contain them are still accepted; those keys are dropped but still counted in the checksum.
+- ensureProfile/assignCid: check `{code}` replies.
+- hansen_cloud_save_v965.js put/get (outside the §4 list; I changed it because of the 「查不到≠没有」 risk below): a `{code}` reply is now an error. Before, a permission-denied read looked like "no cloud save", the login sync uploaded over it, and the upload reported ok.
+- Diagnostics panel ③b now names the kind and shows the guard's state.
+
+All owned tests, test_real_path_smoke_v1163 and the guards are green.
+FILES: ['/home/user/wordminiprogram/hansen_auth_v1004.js', '/home/user/wordminiprogram/hansen_auth_ui_v1004.js', '/home/user/wordminiprogram/hansen_signup_gate_v1030.js', '/home/user/wordminiprogram/hansen_backup_v944.js', '/home/user/wordminiprogram/hansen_backup_bootstrap_v944.js', '/home/user/wordminiprogram/hansen_cred_guard_v1092.js', '/home/user/wordminiprogram/hansen_cloud_save_v965.js', '/home/user/wordminiprogram/hansen_cloud_diag_v1027.js', '/home/user/wordminiprogram/test_username_signup_v1058.mjs', '/home/user/wordminiprogram/test_auth_session_v1164.mjs (new)']
+TESTS:
+  - test_auth_session_v1164.mjs (new, VM, ~22 s) => 51 passed / 0 failed. The same test fed the v1163 files fails ~16 checks, then hangs at the timeout case.
+  - test_session_truth_v1059.mjs => 50/0
+  - test_session_retry_v1077.mjs => 13/0
+  - test_session_persist_v1031.mjs => 6/0
+  - test_username_signup_v1058.mjs (updated) => 24/0
+  - test_phone_signup_v1057.mjs => 14/0
+  - test_auth_errors_v1009.mjs => 13/0
+  - test_cloud_identity_v1028.mjs => 18/0
+  - test_backup_coverage_v1019 / crash_journal_v942 / limits_v942 / no_credentials_v1090 / pending_v942 / restore_v1043 / backup_v942 => all pass (2/0, ok, ok, 11/0, ok, ok, ok)
+  - test_account_save_v1017 / account_switch_v1142 / account_wiring_v1021 => 5/0, 60/0, 11/0
+  - test_login_no_prompt_v1154 / login_restore_v1026 => 47/0, 7/0
+  - test_signup_gate_v1030 / gate_login_v1054 => 12/0, pass
+  - test_cred_guard_v1092 / cred_scan_v1132 / cred_trap_v1085 => 16/0, 12/0, 20/0
+  - test_iframe_login_v1091 / single_instance_v1088 => 13/0, 12/0
+  - test_cloud_save_v965 / cloud_diag_v1027 / roundtrip_diag_v1037 => pass, 7/0, 11/0 (re-run after the cloud_save edit)
+  - test_cjk_key_backup_v1095 / anon_migration_v1029 / no_anon_clobber_v1076 / key_roundtrip_v1033 / stable_ident_v1047 / legacy_fetch_v1036 / addr_consistency_v1046 / cid_order_v1130 / pk_account_v1016 / ladder_board_v1156 / reset_forensic_export_v942 => all pass (7,13,11,7,9,7,7,16,17,72 checks, ok)
+  - test_real_path_smoke_v1163.mjs => 14/0 (also re-run after the last edit)
+  - other touching tests: tap_targets_v1120, pk_record_v1103, cross_page_wallet_v942, land_sync_v942, sw_upgrade_v944, explore_template_v945, purchase_transactions_v942, core_purchase_transactions_v942, crystal_schema_v942 => all pass
+  - test_ui_walkthrough_v969.mjs (not mine) => FAIL 1 item, caused by the sandbox network, not my changes: hansen_cloud_save_v965.js's not-signed-in anonymous login POST /auth/v1/signin/anonymously gets net::ERR_TUNNEL_CONNECTION_FAILED from the proxy, and the test's CLOUD_NET_NOISE filter only exempts ERR_FAILED / tcb-api text. That path is unt
+  - REAL SDK + emulator: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u2/validate_auth.mjs (real spelling_pk.html, no stubs) => 19 PASS / 0 FAIL, two consecutive runs. Covers: user_info removed → same uid via getCurrentUser and cache refilled; corrupt user_info (content:null and bad JSON) → repaired, still signed in; credentials removed + reload with a fresh shadow → guard rescue → ok; credentials + shadow removed → definite
+GUARDS: `python3 hansen_guards_v1068.py` → rc=0, 「✅ 新时代守卫全部通过」, 90 guards green; final run after all edits. hansen_guards_v1068.py and jarvis_selftest.py were not edited; no existing guard blocked the correct change. Kept compatible: '三态不分' (notReady/RETRY within 3000 chars of `function ensureSession`, which is now a thin single-flight wrapper followed by ensureSessionOnce), '无凭据即成功' ('credentials' in the loginByPhoneCode window via credentialsCheck), '备份不碰凭证' (credentialKey in the ownedKey/rawEntryAllowed windows), 'app/auth 同步', '登录被拦死', '换账号' (single localStorage.setItem(LKEY)), '诊断键污染', '中文键备份'.
+TEST_CHANGES:
+  - test_username_signup_v1058.mjs: the fake SDK made signUpWithEmailAndPassword return {user:{uid}}, as if it created an account. The real SDK 2.30.0 only sends an email code and never creates a session (source plus emulator: 1 /auth/v1/verification, 0 /signup). The fake now behaves like the real SDK ({data:{verifyOtp}}, no credentials). Assertions changed from 「注册成功/写入本地登录态」 to: rejects honestly with a message about 手机号 and 家长, flags unsupported, friendly() shows it verbatim, makes 0 SDK calls, wr
+  - test_username_signup_v1058.mjs: removed the 「两次密码不一致被拒」 and 「注册时密码过短被拒」 checks (the registration form they validated no longer exists). The password-length intent moved to the login path (loginByPassword('Bob','123') → /6 位/). Added behavioural checks: username login without credentials is rejected with no marker; with credentials it succeeds.
+  - test_username_signup_v1058.mjs UI part: was 「有注册↔登录切换与确认密码框」, now: no auPwd2/auPwToggle, button text 「登录」 only, an #auPwToPhone entry whose text explains 不支持 and 家长, and clicking it opens the phone tab (#auPhone present, tab 'phone'). Header comment explains why the fake was wrong.
+  - test_auth_session_v1164.mjs: new VM test (no network, ~22 s, 51 checks) for every new branch: no-credentials expiry, credentials present, guard rescue once, getCurrentUser/getClaims recovery, 6 s user/me timeout, corrupt cache, SyntaxError not counted as auth failure, 10 s whole-call timeout, single-flight, signin kind, guard counter reset/cap, backup/bootstrap SDK keys, ensureProfile/assignCid {code}, iframe auth caching, signOut order and timeout.
+OPEN:
+  - test_ui_walkthrough_v969.mjs fails in this sandbox: net::ERR_TUNNEL_CONNECTION_FAILED on the anonymous-signin request from cloud_save's not-signed-in path. Not caused by me, and I don't own that test. Fix: add ERR_TUNNEL_CONNECTION_FAILED to its CLOUD_NET_NOISE filter, or route Tencent hosts to the emulator / route.abort.
+  - SDK behaviour, not a bug: the SDK keeps valid credentials in memory and ignores localStorage until they expire. So 'credentials_ removed' only becomes expired after a reload or an access-token expiry. ensureSession reports what the SDK actually does.
+  - Not verifiable here (no access to the real server): that JWT sub equals the /user/me uid on the real server (the getClaims fallback is only used after getCurrentUser fails); the real invalid_grant flow; the real {code} for denied cloud_save writes. The emulator matches SPEC.md assumptions.
+  - cloud_save get(): when doc().get() returns empty without a code, the first where() fallback still maps a {code} to null ('no save'). The main path's empty answer stands; left as is on purpose.
+  - The SDK's own fetch retry (the 'unreachable' retry also fires for non-JSON bodies) means a single bad signin response can be retried by the SDK and succeed; validation ⑥b injects the fault 12 times to cover all retries. Expected SDK behaviour.
+NOTES:
+  - Room/ladder layer (hansen_pk_room_v1065.js db(), hansen_ladder_ui_v1108.js): route ensureSession failures by `kind`, not by regex on reason. 'session'-kind reasons contain 会话, so the old /登录|会话|session/ regex would still send signed-in users to 「排位要先登录」. expired → login screen 「云端登录过期了」; signin → login screen; session → silent retry with 「正在连接云端…」; slow → retry. Reason texts: notReady '云端会话尚未就绪（已重试 N 次），请稍候再试'; expired '云端登录已过期：这台设备上的登录凭证没有了，请重新登录' or a raw auth error; slow '连接云端超时（10 秒没有回应）…' (contains 超时).
+  - ensureSession is single-flight: concurrent callers share one result object, so do not mutate it. Healthy calls are cheap and write one trace line each, but please still cache the uid in the room layer instead of calling ensureSession on every poll, so the 60-line phone trace keeps the failure lines.
+  - For login screens opened from room/ladder/friends UI: call HansenAuthUI.open({mode:'phone'}). Username registration no longer exists in the UI; username login still works.
+  - Wanted guards (not added, per rules): (1) ensureSessionOnce must contain SESSION_TIMEOUT_MS + timeoutAfter; (2) registerByPassword must not call writeLocal or any SDK signUp; (3) loginByPassword must call credentialsCheck before writeLocal; (4) hansen_backup_v944.js credentialKey must call sdkKey, and SDK_KEY_RE must cover user_info|lang|device_id|x-tcb; the bootstrap must have the same SDK_KEY_RE; (5) hansen_cred_guard_v1092.js backup() must clear RESCUE_COUNT on a refresh_token change; (6) assignCid must use cntOk, i.e. no `(r && r.total) || 0`; (7) cloud_save put/get must call dbChk. Suggest the '三态不分' guard also look at `function ensureSessionOnce`, since `function ensureSession` is now 
+  - To port the real-SDK validation into the repo once `_cloudbase_emulator.mjs` exists: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u2/validate_auth.mjs. It needs only emulator.mjs + harness.mjs (copies in the same dir), serves the real spelling_pk.html and takes ~2.5 min. Env OLD=1 / OLDCS=1 serve the v1163 files from /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u2/old/ to prove the checks discriminate. It covers the SPEC §7 items 'expired → login, user_info missing → auto recover, registerByPassword honest, backup excludes SDK keys'.
+  - I edited hansen_cloud_save_v965.js (allowed: needed for the 「查不到≠没有」 safety). The change is only in cloudbaseProvider put/get plus a dbChk helper; the mock-provider seam is untouched.
+  - Expected effect on the phone: a user whose credentials_ was deleted by invalid_grant now gets 「云端登录过期了 / 请重新登录」 after one guard rescue attempt, instead of endless 「尚未就绪」. A user whose user_info cache was lost now gets the uid back automatically.
+  - The orchestrator's WIP commits (1831a63 etc.) already contain all my files, test_auth_session_v1164.mjs included. I made no commits. One thing to know: I ran `git update-index --really-refresh` once by mistake. It only refreshes git's index stat cache; no content or commit changed.
+
+######## impl:data-layer
+SUMMARY: Rebuilt the room/ladder DATA LAYER (hansen_pk_room_v1065.js) per SPEC §2+§3. Every player now writes only documents it created: Room R (host), Seat R_s<epoch> (guest), Win R_w<i> (creator). Seat claims and round decisions use add with a deterministic _id plus read-back by _id and nonce (5 tries over ~3 s on failure, 1 read on success). Other pieces: host ACK handshake, seat epochs (stale/left seat leads to a bump), a monotonic merged view with the legacy field names, skew-proof opponentGone, role-aware leave/unload, deferred removal so the guest can read the result, sweep of own leftovers only (max 10), and realTransport checking r.code on every op. E()/kindOf classify errors as network/slow/session/expired/config/gone/taken/self/other, returned as '人话 ⟨原话⟩'. Identity key is 'u'+uid; room docs hold no phone number or username, and the name comes from HansenSbProfile.displayName(). listRooms/findByCode/joinRoom filter on proto:2. waitForOpponent takes opts.ladder (rescan every 3rd tick, oldest-wins tie-break by createdAt then _id, emits {switchTo}). listRooms returns a sameAccount count. Validated with the REAL SDK 2.30.0 + real spelling_pk.html against the emulator: 4 accounts under READONLY in both 'legacy' and 'rules' modes, at 80±60 ms latency / 400 ms lag and 250±190 ms / 1500 ms lag: 46/46 checks in all four runs, zero cross-account writes, zero multi updates. All owned tests, the smoke test and the guards are green. The only foreign test that breaks is test_ladder_e2e_v1155 (②④⑥); its fake still encodes the old protocol.
+FILES: ['/home/user/wordminiprogram/hansen_pk_room_v1065.js', '/home/user/wordminiprogram/test_pk_room_v1065.mjs', '/home/user/wordminiprogram/test_pk_room_code_v1105.mjs', '/home/user/wordminiprogram/test_room_match_v1135.mjs', '/home/user/wordminiprogram/test_pk_abandon_v1104.mjs', '/home/user/wordminiprogram/test_pk_modes_v1100.mjs', '/home/user/wordminiprogram/hansen_guards_v1068.py (minimal edit: guard_atomic_room_claim)', '/home/user/wordminiprogram/jarvis_selftest.py (minimal edit: _inj_room sample)', 'scratch (not repo): /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1/e2e_room.mjs, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1/selftest_room.py, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1/e2e_result_{legacy,rules}_{80_400,250_1500}.json, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1/hansen_pk_room_v1065.orig.js (v1163 backup)']
+TESTS:
+  - test_pk_room_v1065.mjs => 67 通过 / 0 失败
+  - test_pk_room_code_v1105.mjs => 21 通过 / 0 失败
+  - test_room_match_v1135.mjs => 41 通过 / 0 失败
+  - test_pk_abandon_v1104.mjs => 28 通过 / 0 失败
+  - test_pk_modes_v1100.mjs => 25 通过 / 0 失败
+  - test_pk_ask_mode_v1102.mjs (unchanged) => 18 通过 / 0 失败
+  - test_pk_record_v1103.mjs (unchanged) => 19 通过 / 0 失败
+  - test_real_path_smoke_v1163.mjs => 14 通过 / 0 失败
+  - REAL SDK E2E: cd /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1 && node e2e_room.mjs legacy 80 400 => 46/0 (READONLY legacy updated:0 semantics, 80±60ms latency, 400ms read lag)
+  - REAL SDK E2E: node e2e_room.mjs rules 80 400 => 46/0 (READONLY rules DATABASE_PERMISSION_DENIED semantics)
+  - REAL SDK E2E: node e2e_room.mjs legacy 250 1500 => 46/0
+  - REAL SDK E2E: node e2e_room.mjs rules 250 1500 => 46/0
+  - E2E scenarios covered (each run) => 4 accounts log in. Full match: create → list → join with ACK → markReady → round 0 simultaneous claim (exactly one first) → round 1 skip vs claim (one outcome) → round 2 guest first → same winners on both sides → oppName/oppRating on both sides → report → both see the same result. Guest leaves while
+  - test_pk_room_v1065.mjs vs ORIGINAL v1163 module (sanity: new tests can fail) => With a permission-faithful fake the old protocol fails the race test (0 of 2 guests join, room never becomes playing), i.e. the real-phone bug is reproduced and caught.
+  - Foreign tests (not owned) run for impact => ladder_board 72/0, ladder_contrast 4/0, tap_targets 8/0, page_wiring 22/0, ladder_v1108 45/0, pk_watchdog 21/0; test_ladder_e2e_v1155 22/3 (②④⑥ fail: fake encodes the old protocol; see notes)
+GUARDS: python3 hansen_guards_v1068.py: ✅ 新时代守卫全部通过 (all green).
+
+One existing guard encoded the old broken protocol and was minimally edited:
+- guard_atomic_room_claim (抢房原子性) used to require 'claim(' AND 'updated' (conditional update) in joinRoom, which can never work under 「修改本人数据」. It now requires joinRoom to call claim(…), and function claim( must contain T().add( and T().read( (fixed-_id insert + read-back). The read→patch "先读再写" check is kept unchanged. The reason is written in the guard comment and message.
+- Matching self-test sample jarvis_selftest.py:_inj_room now replaces '        return claim(seat).then(function (c) {' with a read-then-patch of the room. It returns None if the anchor is missing.
+
+In-memory verification (no file mutation; script /tmp/claude-0/-home-user/b052e910-3530-5
+TEST_CHANGES:
+  - test_pk_room_v1065.mjs: the fake DB let two adds of the same _id both succeed (it ignored doc._id and generated 'r'+seq) and let anyone patch/remove anyone's doc. It now mirrors the real DB: _id unique (duplicate add throws {code:DATABASE_DUPLICATE_WRITE, cloud:true}), owner-only patch/remove through cloud.as(uid), updated:0 when nothing changed. mkCtx's fake ensureSession now returns {ok:true, uid} like the real one, and the profile is read through readProfile.
+  - test_pk_room_v1065.mjs ②: the host now runs waitForOpponent, because joining needs host confirmation. Same assertions (exactly one wins, loser taken, room playing with one guest, same words, 3rd guest refused), plus: no orphan seat, guests never write the host doc, mySide.
+  - test_pk_room_v1065.mjs ③: the heartbeat is aged through the host's own transport. Added cases: old-proto room hidden, sameAccount count.
+  - test_pk_room_v1065.mjs ④: 'guest leaves → room reopens' now means the guest leaves while waiting for confirmation (seat removed, join resolves cancelled, next guest gets in). Added the dead-seat epoch bump. Changed per spec: a host leaving after the match started marks the room done instead of deleting it, and the guest is told immediately. Kept: a host leaving before anyone joined deletes the room.
+  - test_pk_room_v1065.mjs ⑤: same assertions through the ACK flow, plus 'host finished and left first → guest still gets the real result'.
+  - test_pk_room_v1065.mjs ⑥: same readable-failure assertions, plus kind=expired/network/session checks and realTransport {code} handling through _setDbForTest (permission denied / missing collection → config naming hansen_pk_rooms).
+  - test_pk_room_v1065.mjs ⑦: the static check for T().claim + 'updated' (old protocol) became 'joinRoom uses claim(seat) (add + read-back + nonce)'. Added: no where().update(), and realTransport calls chk() >= 6 times. ⑧ (new): no phone number or username in docs; real names.
+  - test_pk_room_code_v1105.mjs: the fake now rejects duplicate _id and allows owner-only writes. ② was trivially true (the host never sees its own rooms, and the second createRoom closed the first); it now lists from a third account and asserts the public room is shown and the private one hidden (strengthened). ④⑤: the code is looked up by a friend account; the host looking up its own code now correctly gives kind=self, which is asserted. Added: old-proto private room ignored.
+  - test_room_match_v1135.mjs: same fake fix; boot(rooms, who) ties the fake owner to the identity. Seeded rooms marked proto:2 to match real new-version docs; an old-proto room R5 is now expected to be hidden.
+  - test_room_match_v1135.mjs sweep: the cap assertion went from <=3 to the spec's 10, made exact (12 dead → 10, then 2). Added: done-within-grace room kept, own stale seat/win removed, others' docs untouched.
+  - test_room_match_v1135.mjs ⑥/⑦/⑪: joins now run against a real host module running waitForOpponent. ⑪ no longer writes guestId into the host doc from the test; a real guest claims the seat at 2.5 s, same detection window, and the guest side is asserted too. Added: ACK-timeout message + seat cleanup, ladder switchTo convergence, exact createdAt tie-break (smaller _id wins), band/mode/private filters.
+  - test_pk_abandon_v1104.mjs: the fake answered every id with one room doc. It now has a host-owned room and a guest-owned seat. The idle checks compared the opponent's timestamp with the local clock, which the spec replaces with skew-proof local observation. The test now uses a controllable local clock (FakeDate): same thresholds (5/30/59 s → not gone, 61 s → gone, idleSecs >= 60, no-beat-yet → not gone). Added ±10 min clock-skew cases. ⑤: the host writes only its own score (seat untouched) and th
+  - test_pk_modes_v1100.mjs: the fake (one doc for every id, every add succeeds, single context switching identity) became a real-semantics store with two player contexts. ① same intent (exactly one first, same winner) plus 'only one W doc' and 'guest didn't write host doc'. Added: ①b guest claims first, ①c skip vs claim race gives one outcome, out-of-range round refused. ② and the rest unchanged.
+  - test_pk_ask_mode_v1102.mjs, test_pk_record_v1103.mjs: unchanged (only the static askMode: check touches the data layer).
+OPEN:
+  - The real server's duplicate-_id add error is unverified (no Tencent network here). It is handled by read-back with a nonce, but real-device confirmation is still needed.
+  - A guest that dies holding a seat whose beat is <15 s old when the host first sees it gets confirmed; the host then waits 60 s and claims an abandon win. Mitigated by unload cleanup, ACK-timeout cleanup and the 15 s first-sight window.
+  - A dead seat blocks its room for up to seatStaleMs (20 s) until the host bumps the epoch; other guests get kind 'taken' during that time (the ladder should simply move on).
+  - Still clock-dependent: list freshness (host heartbeatAt vs local clock, 30 s) and round-0 roundAt (max of the two ready times). Skew above 30 s hides rooms from the list. opponentGone and seat staleness are skew-proof.
+  - roundState costs 3–5 reads per poll (R, S, up to 3 W probes; a list every 6th call). The UI polls about once a second during a match.
+  - If both sides claim an abandon win (network partition), the merged view prefers abandonWin 'host'.
+NOTES:
+  - test_ladder_e2e_v1155.mjs (UI-owned) fails ②④⑥ only because its wire() fake encodes the old protocol. Fake changes needed:
+(a) seeded rooms need proto:2, kind:'room', seat:0;
+(b) add must store under d._id and reject a duplicate _id by throwing Object.assign(new Error('dup'), {code:'DATABASE_DUPLICATE_WRITE', cloud:true});
+(c) simulate the host: when a doc with kind:'seat' is added for room X, set X.guestId=d.guestId, X.status='playing', X.seat=d.epoch, so ②'s check (__rooms[0].guestId==='ME') holds;
+(d) for ④ (claimFails), pre-insert a seat 'TAKEN_s0' owned by someone else so the add is rejected → kind 'taken';
+(e) read must look up BY ID (it returns the room doc for every id today);
+(f) ⑥:
+  - Other UI-test fakes (ladder_contrast, tap_targets, ladder_board, e2e ⑦) still pass, but they return the room doc for every id. With the new layer the host-side opponentGone counts the missing seat and reports gone after 3 checks (~12 s); their checks finish before that today.
+  - UI agent:
+(1) joinRoom can take up to 15 s (waiting for host confirmation); show '正在等房主确认…' and allow cancel through leaveRoom(roomId), which resolves the join with {cancelled:true}.
+(2) Pass the guest rating: joinRoom(rid, {rating}). Without it the data layer reads HansenPkRecord.summary().rating.
+(3) Ladder: sort listRooms().rooms by createdAt ascending; call waitForOpponent(rid, cb, ms, {ladder:{rating, band:(waitedSec)=>diff}}) and handle {switchTo}.
+(4) On {timeout} the room is already left.
+(5) Use r.kind for routing; reasons keep the ⟨⟩ format.
+(6) sameAccount>0 → hint '同一个账号在另一台设备上开着房，要用另一个账号才能对战'.
+(7) The ladder must create rooms with askMode 'cn' explicitly.
+  - Profile agent's HansenSbProfile.displayName() is already used first by the room layer (profName()).
+  - No console change is required: works under READONLY in both legacy (updated:0) and rules (DATABASE_PERMISSION_DENIED) semantics. Old-version rooms (no proto:2) are ignored.
+  - Wanted guards (not added per rules):
+(1) every realTransport method calls chk( (count >= 6);
+(2) no `.where(...).update(` in hansen_pk_room_v1065.js;
+(3) the room module never reads lc.phone/lc.username for identity (the key is 'u'+uid);
+(4) function claim( uses add + read-back with a nonce;
+(5) joinRoom waits for the host confirmation (waitAck).
+  - To port the real-SDK E2E into the repo (tests agent): /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u1/e2e_room.mjs uses emulator-poc/emulator.mjs + harness.mjs and _setTimingForTest({waitPollMs:500, ackPollMs:400}). The ownership checker decodes the JWT sub per op and tracks creators in log order.
+  - The orchestrator's WIP backup commits (baba07b, 1831a63, …) already contain earlier states of my files. Compare against baseline 73e1b69 for the full change: hansen_pk_room_v1065.js was rewritten, guard and selftest are a ~12-line edit each.
+  - Deferred removal: done rooms and left seats stay 2 min (TM.doneGraceMs) and are removed by sweepMyDeadRooms, which runs 1.5 s after each listRooms.
+
+######## impl:friends-board-profile
+SUMMARY: I finished SPEC §5: friends, the ladder board and the profile name getter. Each user now writes only their own rows. A friendship is mutual when both users' own rows exist. Removing a friend deletes only your own row, and the other side then shows 「等他也加你为好友」. Before the fix, the real-SDK E2E (real vendored SDK, real spelling_pk.html and island page, network answered by the emulator in u4) passed 4/32 on v1163. After it, 34/34 pass in both READONLY permission modes (legacy and rules), including high latency + jitter. Baseline cause on v1163: friends always failed with 「云服务未就绪」 (it relied on HansenCloudSave._app). The board's first call returned not-signed-in, push swallowed {code}, every name showed as 无名蜂, and opening friends caused a watchdog rescue screen. What changed:
+1) Friends: uses HansenAuth's app instance plus ensureSession, and checks {code} on every call. It learns its own server-stamped _openid by reading back its own presence row, and ignores rows that someone else forged. It shows incoming requests (想加你为好友 with 加他 / 不加). The inbox only shows messages from mutual friends and tracks 已读 on this device. If a collection is missing or its permission is wrong, the error names the collection and 「读取全部数据，修改本人数据」.
+2) Board: db() is ready on the first call (it waits for the app and the session). It checks {code}, keeps an empty board (ok:true, list []) separate from errors, and reports push errors. If orderBy is refused it falls back to an unsorted query and sorts locally. If update changes 0 docs it calls ensureProfile and retries once. A score that failed to upload earlier is pushed again before the next board fetch.
+3) Friends UI: z-index is 2147483500. It closes only peer screens that are actually open and then calls HansenPkWatchdog.disarm(). It shows pending / accepted / incoming, a 「云端设置还差一步」 screen with 技术信息, and a 「正在连接云端…」 screen that retries for about 20 s and then shows 「云端还没连上」. Refreshes no longer wipe the half-typed ID, steal focus, or erase the 加好友 result tip.
+4) Profile: added displayName() and status(). status() was already being called by others but never existed.
+One limit: when the emulator makes reads lag behind writes by 300 ms, screens are stale until the next refresh, and auth's ensureProfile assigns no cid at all (that file is not mine, see notes).
+FILES: ['/home/user/wordminiprogram/hansen_friends_v1106.js', '/home/user/wordminiprogram/hansen_friends_ui_v1107.js', '/home/user/wordminiprogram/hansen_ladder_board_v1156.js', '/home/user/wordminiprogram/hansen_sb_profile_v1002.js', '/home/user/wordminiprogram/test_friends_v1106.mjs', '/home/user/wordminiprogram/test_friends_ui_v1107.mjs', '/home/user/wordminiprogram/test_ladder_board_v1156.mjs']
+TESTS:
+  - test_friends_v1106.mjs => 47 passed / 0 failed. Mutation check: with the original v1163 friends module it fails (XX on pending/openid assertions, then a TypeError).
+  - test_friends_ui_v1107.mjs => 35 passed / 0 failed, including the new browser section. Mutation check: with the original UI it fails on z-index, watchdog, 待确认, 想加你 and inbox.
+  - test_ladder_board_v1156.mjs => 91 passed / 0 failed. Mutation check: with the original board module the new behaviour section fails (first call not-signed-in, {code} shown as an empty board, push ok:true …).
+  - test_cid_order_v1130.mjs => 16 passed / 0 failed (unchanged)
+  - test_account_switch_v1142.mjs => 60 passed / 0 failed (unchanged)
+  - test_real_path_smoke_v1163.mjs => 14 passed / 0 failed
+  - test_theme_v1110.mjs / test_tap_targets_v1120.mjs / test_ladder_contrast_v1156.mjs / test_backup_coverage_v1019.mjs (also touch my modules) => 17/0, 8/0, 4/0, 2/0
+  - u4/friends_board_e2e.mjs legacy (real SDK 2.30.0 + emulator) => 34 passed / 0 failed in about 28 s. v1163 baseline: 4 passed / 28 failed (u4/baseline_v1163_legacy.txt)
+  - u4/friends_board_e2e.mjs rules => 34 passed / 0 failed. With EMU_LATENCY=150 EMU_JITTER=250 also 34/0.
+  - u4/friends_board_e2e.mjs with MUT_UI = old z-index => 2 failures, as expected (z-index, island overlay not on top). Shows the E2E catches the regression.
+  - u4/friends_board_e2e.mjs with EMU_LAG_AFTER=300 (reads lag writes) => 25/34. All failures are immediate reads right after a write that has not appeared yet; they correct on the next 15 s refresh. With lag from the start (EMU_LAG=300), auth's ensureProfile assigns no cid (see notes).
+GUARDS: `python3 hansen_guards_v1068.py`: exit 0, ends with 「✅ 新时代守卫全部通过」; no non-green lines. I made no edits to hansen_guards_v1068.py or jarvis_selftest.py. I did not run jarvis_selftest.py, because it writes injected bugs into the real repo files in place, which is unsafe while other agents edit the checkout. Instead I checked in a copied sandbox (u4/gsand.py) that the three self-test injections on my files still apply and still trip their guards: _inj_n_plus_one → 循环查库 fires; _inj_load_order → 加载顺序依赖 fires; _inj_theme_fg string is still present in the friends UI.
+TEST_CHANGES:
+  - test_friends_v1106.mjs, fake transport: it now behaves like the real 「读取全部数据，修改本人数据」 database. add stamps the writer's _openid. patch/remove of another user's doc returns updated/deleted 0 and is recorded in `denied`. list supports $in and $lt; removeMsg was added. Why: the old fake let anyone change anyone's rows, which is exactly why the broken cross-user accept/delete protocol stayed green.
+  - test_friends_v1106.mjs ②: a repeated add while the other side has not added back now expects 「已经加过他了…」. The old expectation, 「已经是好友了」, was untrue in that state. A repeated add after both sides added still expects 「已经是好友了」.
+  - test_friends_v1106.mjs ③ rewritten. Old assertions: a separate 'request' row, state:'pending', and 「删好友两边都删」 (deleting the other user's row is impossible under the real permission). New assertions keep the intent (a stranger cannot get into your list; no one-sided leftovers that look like a friendship): only own rows are written; the other side sees an incoming request, not a friend; mutual once both add; removing deletes your own row and the other side shows pending; zero attempts to write othe
+  - test_friends_v1106.mjs new sections: ③b forged rows are ignored; ③c a missing collection or wrong permission gives kind config with the collection name, the permission text and the raw code in ⟨⟩; ⑥b inbox shows only friends' messages, and the seen state is local.
+  - test_friends_ui_v1107.mjs: added a browser section on spelling_pk.html with an injected fake DB that has real ownership semantics (outside network aborted). It checks: z-index 2147483500; watchdog not armed after ladder → friends; mutual / 待确认 / 想加你 display; inbox hides strangers; 加他 writes only your own row; a pending friend cannot be messaged; the 「云端设置还差一步」 screen with 技术信息. All existing static checks are unchanged.
+  - test_ladder_board_v1156.mjs: the `claim(` assertion now also requires `'_w'` (the deterministic win-doc id from SPEC §3). Its message was rewritten: it described a conditional update of the host's doc, which a guest cannot do under READONLY. The comment block on the two-browser test was updated the same way.
+  - test_ladder_board_v1156.mjs: added a vm behaviour section for the board data layer. The module is real; only the SDK database is fake, and like the real SDK it resolves {code} and rejects 'network request error'. It covers: first call ok with a slow _app; empty list ok; {code} → config with sb_profile and the permission text; orderBy refused → fallback plus local sort and filters; network → kind network; not-signed-in reason; push {code} → error plus lastPushError; push writes only doc(uid) and 
+  - test_cid_order_v1130.mjs and test_account_switch_v1142.mjs: no changes needed; both pass.
+OPEN:
+  - Read-after-write lag: the friends/board code self-corrects on the next refresh, but hansen_auth_v1004.js ensureProfile (not my file) runs set → get → assignCid(row2.createdAt). If the get does not see the doc yet, no cid is assigned, and friends then shows 「先登录并设置竞赛 ID」. Reproduced with the emulator's consistencyLagMs=300. Real CloudBase is probably read-your-writes, but this is unconfirmed.
+  - We still do not know the real _openid value for web (v2 oauth) users. The friends code does not assume it equals the uid; it learns it by reading back its own row. If the real server stamps no _openid at all, isMine() falls back to trusting the owner field, and own presence rows are tracked by the cached _id.
+  - Identity is still client-claimed (cid values in presence and friend rows). A determined forger who writes both a fake presence row and a fake friend row for someone's cid can still fake an 'incoming' entry. Binding a cid to an _openid via sb_profile would close this; out of scope here.
+  - Under READONLY, hansen_friend_msgs is readable by every user (fixed phrases plus from/to cids only). This is the same as before.
+  - The board name now comes from sb_profile.name, which push() updates. Players who have not played a ladder game since v1164 show their old name (or 无名蜂) until their next push or board open.
+NOTES:
+  - hansen_ladder_ui_v1108.js renderBoard() (not mine): please route by r.kind instead of showing 「可能是网络不太顺」 for everything. config → 「云端设置还差一步」 + r.text + 技术信息 (the ⟨⟩ part of r.reason). network/slow → 连不上网络. session → 「云端还没连上…」 with a retry. reason==='not-signed-in' → keep 「登录之后就能看到大家的排名」. Optionally show HansenLadderBoard.lastPushError()?.text as a small 「你的最新分数还没传上榜」 line.
+  - hansen_ladder_ui_v1108.js close() calls HansenPkWatchdog.arm('排位') unconditionally, including on × and when a peer closes it. The friends screen now neutralises this (it disarms after closePeers), but ladder close() should arm only when it is actually handing off to a room screen (_createForLadder / join). The rescue quit() → HansenLadderUI.close() loop is also in that file plus hansen_pk_watchdog_v1155.js.
+  - hansen_ladder_ui_v1108.js closePeers() calls HansenFriendsUI.close() — fine. HansenFriendsUI.close is now a full reset (closeAll).
+  - hansen_pk_room_ui_v1065.js ~L1733 ignores the result of HansenLadderBoard.push(). Errors are now real results; consider showing or logging them. The board also re-pushes on the next board open, so a lost push is not permanent. doCreate's `P.status().rating` now works because HansenSbProfile.status() exists.
+  - hansen_auth_v1004.js ensureProfile(): after docRef.set, retry docRef.get a few times (e.g. 4 × 500 ms) when it is empty, before assignCid. This fixes cid=0 under read lag (see open_issues).
+  - Wanted guards (I did not add them): (1) hansen_friends_v1106.js and hansen_ladder_board_v1156.js must route every DB result through a function that checks `r.code` (no bare `.get().then(function (r) { return r.data`). (2) the friends module must not write rows it does not own: no `kind: 'request'`, no patch with `state: 'accepted'`, no remove after a list with `owner: target`. (3) the #hsn_friends_screen z-index must be > 2147483400 and < 2147483600. (4) the ladder board must not contain `return null` inside cloud/db, and must call ensureSession. (5) friends closePeers must call HansenPkWatchdog.disarm.
+  - Port the E2E to the repo once the emulator helper exists: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u4/friends_board_e2e.mjs (about 28 s, args legacy|rules). It imports ./emulator.mjs and ./harness.mjs from u4; change these to the repo helper (e.g. _cloudbase_emulator.mjs) and name the test test_friends_board_v1164.mjs. Env knobs: EMU_LATENCY, EMU_JITTER, EMU_LAG, EMU_LAG_AFTER, MUT_UI.
+  - Records for research/ (per CLAUDE.md; I did not edit docs): baseline /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u4/baseline_v1163_legacy.txt (v1163: 4/32). Results e2e_result_legacy.txt and e2e_result_rules.txt (34/34). Wire logs e2e_wire_legacy.json and e2e_wire_rules.json. Originals of my 4 modules and 2 tests are in u4/orig/. Rejected alternatives: a deterministic _id for friend/presence rows (anyone could squat someone else's id first; read-time dedup is used instead); a new presence row on every page load (bloats the collection; the cached own _openid is reused instead); patching the recipient's message row to mark it read (impossible under READONLY; read s
+  - Console setup the teacher needs: create collections hansen_friends and hansen_friend_msgs, and set both (and sb_profile) to 「读取全部数据，修改本人数据」. Indexes on hansen_friend_msgs.at and sb_profile.ladderRating are optional; both queries fall back when orderBy is refused.
+  - Docs to update (教学手册 / 开发记录 / 时间线): new friends protocol (mutual = both own rows exist; removing deletes your own row; incoming requests shown; inbox shows friends only); board error kinds; HansenSbProfile.displayName() / status().
+
+######## impl:e2e-tests
+SUMMARY: I built the real-SDK end-to-end test setup and the SPEC §7 tests. Only the network is fake: a local CloudBase emulator answers Tencent's hosts. The real vendored SDK 2.30.0 and the real pages (spelling_pk.html, island_animal.html) run in 2–4 browser contexts, one per phone. Taps go through page.touchscreen.tap, and only after an elementFromPoint check that nothing covers the button. No app test hooks are used.
+
+Latest results on the current checkout: ladder 41/0, rooms 51/0, lifecycle 30/0, emulator self-test 42/0. Cloud-errors is 22/1 and auth is 27/1; both remaining failures are real app bugs in files I don't own.
+
+To prove the tests can fail, I ran all five browser tests against the v1163 snapshot. All went red at the known real-phone bugs: ladder never matches, island ladder hidden behind #hsn_pk_screen, ADMINONLY shown as 「房间已经不在了」, username sign-up sends a verification request, nobody ever gets a seat, names show 「无名蜂」. I also broke the emulator on purpose twice (let duplicate _id adds succeed; let anyone write anyone's doc); its self-test went red both times.
+
+The tests also found real bugs:
+- PK keyboard cannot type words with a space or hyphen.
+- Closing the ladder after the first-time name screen leaves the PK home blank.
+- A missing expires_in is reported to the user as 「没找到这个用户名」.
+- B/C modes force-submitted the slower player. This has since been fixed in hansen_pk_room_ui_v1065.js, and rooms now passes.
+
+Guards are green with no edits to shared files.
+FILES: ['/home/user/wordminiprogram/cloudbase_emulator.mjs', '/home/user/wordminiprogram/cloudbase_e2e_harness.mjs', '/home/user/wordminiprogram/test_ladder_cloud_v1164.mjs', '/home/user/wordminiprogram/test_rooms_cloud_v1164.mjs', '/home/user/wordminiprogram/test_rooms_lifecycle_cloud_v1164.mjs', '/home/user/wordminiprogram/test_cloud_errors_v1164.mjs', '/home/user/wordminiprogram/test_auth_cloud_v1164.mjs', '/home/user/wordminiprogram/test_cloudbase_emulator_v1164.mjs']
+TESTS:
+  - test_cloudbase_emulator_v1164.mjs => PASS 42/0 (~1 s). Mutation check: allowing duplicate _id, or making owns() always true, turns it red.
+  - test_ladder_cloud_v1164.mjs => PASS 41/0 (143 s). On the v1163 snapshot: 12 pass / 7 fail (never matches, island ladder covered by #hsn_pk_screen, no login gate).
+  - test_rooms_cloud_v1164.mjs => PASS 51/0 (153 s, latest run). An earlier run failed 4 B/C score checks: the slower player was force-submitted the moment the opponent claimed the word, so 后拼对 60/80 was never awarded. hansen_pk_room_ui_v1065.js no longer has that line, and the test now passes. On the v1163 snapshot: 17 pass / 11 fa
+  - test_rooms_lifecycle_cloud_v1164.mjs => PASS 30/0 (162 s; two runs). On the v1163 snapshot: 4 pass / 3 fail.
+  - test_cloud_errors_v1164.mjs => FAIL 22/1 (101 s). Real bug, not yet fixed, in spelling_pk.html askName(): after the first-time name screen, #pkHome keeps inline display:none, so closing the ladder with × leaves a blank page. Printed diagnosis: #pkHome {cls:'pk_screen on', inline:'none'}. An earlier run instead showed the watchdog
+  - test_auth_cloud_v1164.mjs => FAIL 27/1 (70 s). Real bug in hansen_auth_v1004.js: when the login response lacks expires_in, the SDK rejects with {error:'unauthenticated', error_description:'credentials not found'}, the app retries with the mail alias (which gets 404), and friendly() shows 「没找到这个用户名」 although the username and pas
+  - test_real_path_smoke_v1163.mjs => PASS 14/0
+  - python3 hansen_guards_v1068.py => rc=0 「✅ 新时代守卫全部通过」
+  - python3 防下载总闸.py => PASS 「七条路径全部堵死」 (non-underscore helper names do not trip the deploy-junk check)
+GUARDS: python3 hansen_guards_v1068.py → rc=0, 「✅ 新时代守卫全部通过 —— v1000+ 的教训均未复发」. python3 防下载总闸.py → all seven paths green. I made no edits to hansen_guards_v1068.py or jarvis_selftest.py. The new test files avoid every test-file guard pattern: no ok(true,…), no assertions after process.exit/browser.close, they exit non-zero on failure, no comment-only Chinese regex asserts, no indexOf+slice windows, and Playwright is imported only via playwright_loader.mjs.
+TEST_CHANGES:
+  - None. I edited no existing test; all eight files are new.
+OPEN:
+  - Not yet fixed in spelling_pk.html askName(): after 「先起个名字」 it sets every .pk_screen (including #pkHome) to inline display:none and only hides itself on 开始吧. Closing the ladder or room UI afterwards leaves a blank page. Fix: restore the other screens' inline display, or toggle .on via show('pkHome') before calling after(). Seen in test_cloud_errors ①.
+  - Not yet fixed in hansen_auth_v1004.js: (a) loginByPassword retries the mail alias even when the first signIn failed for a reason other than not_found; (b) friendly() maps {error:'unauthenticated', error_description:'credentials not found'} to 「没找到这个用户名」. It should say login didn't really complete (云端没给有效凭证), try again, else send the self-check screenshot to the teacher. Seen in test_auth ④.
+  - Not in the spec: the PK on-screen keyboard (and the physical-key handler, /^[a-zA-Z]$/) cannot type words with a space or hyphen. That is 17 of 712 vocab words (2.4%: ice cream, post office, fire station, T-shirt, living room…), so about 22% of 10-word games contain an unanswerable word that always times out. Fix in hansen_pk_room_v1065.js wordsFromSeed (skip non-[a-zA-Z] words; both sides use the same filter, so it stays deterministic) or add keys. The tests skip such words (they time out), so they stay deterministic either way.
+  - Not covered: the 'slow' path (hanging requests → 网络太慢 → 连不上网络 after about 4×12 s), and deferred removal of done rooms by the sweep after the 120 s grace. The sweep is covered only for old leftovers seeded on the server.
+  - Re-entry paths from the result screen (再来一局 / 再找一次对手) on the island page are not exercised; only entry, matching, waiting room and battle visibility are.
+NOTES:
+  - Helper naming: I did not use `_cloudbase_emulator.mjs`. .gitignore ignores `_*.mjs`, so it would never be committed, and 防下载总闸.py check_deploy fails the release gate if any root `_*.mjs` exists. The helpers are root-level cloudbase_emulator.mjs and cloudbase_e2e_harness.mjs. Discovery globs are test_*.mjs / test_*v*.mjs, so neither runs as a test. The deploy zip already excludes them (package_release DEPLOY_ALLOWED_EXT has no .mjs).
+  - Two optional one-line additions in files I don't own: (1) add both names to the cloudbaserc.json `ignore` list, as playwright_loader.mjs already is; (2) add both to package_release.py SOURCE_REQUIRED_FILES, so the source archive can never ship the tests without their helpers.
+  - CI and build.py run every test_*v*.mjs, so these add about 10.5 min sequentially (ladder ~143 s, rooms ~153 s, lifecycle ~162 s, errors ~101 s, auth ~70 s, emulator ~1 s). They use the real product timings (20 s ladder self-host, 60 s abandon) and no __hsnLadderWaitSec, _setTimingForTest or other hooks.
+  - The tests take ROOT from import.meta.url (they work in build.py's stage) and need HANSEN_PLAYWRIGHT_MODULE / playwright_loader.mjs like the other browser tests. They never touch the network: Tencent hosts go to the emulator, every other host is aborted and recorded in phone.leaks, which is asserted empty in the ladder test.
+  - uids repeat across separately created emulators (seeded PRNG), so logs from different sections can show the same uid. This is intentional, for reproducibility.
+  - If the UI agent renames selectors or texts listed in api_contract (e.g. the redesign in task #8), the tests will fail with a 点不到 / 没看到 message naming the selector. Update the selector in the test files, not the assertion intent.
+  - Evidence and logs: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/e2e/final/ (ladder, lifecycle), /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/e2e/final2/ (rooms, errors), /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/e2e/r4/ (auth), /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/e2e/old_run/ (all five browser tests against the v1163 snapshot, all red).
+  - Guards I'd like added (I did not add them): (1) no _setTransportForTest/_setAuthForTest/_setMeForTest/_setDbForTest/_setTimingForTest/__hsnLadderWaitSec in test_*_cloud_*.mjs; (2) test files must not install page.route/context.route to non-emulator hosts; (3) wordsFromSeed output must be typeable on the PK keyboard (/^[a-z]+$/i); (4) in waitAll modes (B/C) the UI must not force-submit on the opponent's claim (regression guard for the fix that just landed); (5) friendly() must not map unauthenticated / credentials not found to 用户名不存在; (6) askName() must restore #pkHome; (7) keep test_cloudbase_emulator_v1164.mjs in the gate so the emulator stays strict (duplicate _id rejected, owner-only writ
+
+######## impl:ui
+SUMMARY: I rebuilt the UI layer for SPEC §6: the ladder UI, the room UI, the watchdog, the island 拼写大PK screen, and spelling_pk.html. Everything owned is green: 9 owned tests, the real-path smoke test, and the guards. The other agent's real-SDK tests pass, except 2 checks in test_rooms_lifecycle_cloud_v1164 caused by a data-layer race (see open_issues), and 1 check in test_auth_cloud_v1164 about login-panel wording (auth agent's files). I also ran a real-SDK two-player UI test against the emulator (real SDK 2.30.0, real pages, only Tencent network emulated, driven by touch taps): 48/48 checks in each of 4 runs (READONLY legacy and rules, each at 80±60 ms latency with 400 ms read lag and at 250±190 ms with 1500 ms lag).
+- In every run, two players pressed 开始排位 at the same moment. Player A was on the island page and player B on spelling_pk.html. Each opened its own room, then the newer one switched into the older one, so they converged into one room with no ghost room left behind.
+- They played a full ranked game, and it settled on both sides.
+- The ELO change used the real opponent rating (1000 → 1028 against 1150; it would be 1020 if it had used 1000).
+- The guest's win in round 2 is counted on both sides, and each side records the other's real name.
+Also covered in each run:
+- Public room and private room code play end to end.
+- When the host leaves mid-game, the guest wins within about 5 s.
+- Ladder and lobby wait timeouts close the room and show the right message.
+- ADMINONLY shows 云端设置还差一步 with the collection name and the technical info.
+- Network abort shows 连不上网络 with 'network request error' in the technical info.
+- A rejected token shows 云端登录过期了.
+- The same account on two devices gets a hint.
+- No script errors, and no multi-document writes.
+Running the new checks against the original v1163 UI catches the old bugs. On the island page, a tap on 开始排位 lands on #kRooms. The watchdog close/rescue loop reappears. Join failures and the stop-and-wait screen are back.
+FILES: ['/home/user/wordminiprogram/hansen_ladder_ui_v1108.js', '/home/user/wordminiprogram/hansen_pk_room_ui_v1065.js', '/home/user/wordminiprogram/hansen_pk_watchdog_v1155.js', '/home/user/wordminiprogram/hansen_sb_pk_v1022.js', '/home/user/wordminiprogram/spelling_pk.html', '/home/user/wordminiprogram/test_ladder_e2e_v1155.mjs', '/home/user/wordminiprogram/test_pk_watchdog_v1155.mjs', '/home/user/wordminiprogram/test_ladder_contrast_v1156.mjs', '/home/user/wordminiprogram/test_tap_targets_v1120.mjs', 'scratch (not repo): /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u5ui/ui_e2e.mjs (real-SDK two-player UI E2E) + ui_result_{legacy,rules}_{80_400,250_1500}.json + fin_*.log; originals of all owned files in /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u5ui/orig/']
+TESTS:
+  - test_ladder_e2e_v1155.mjs (owned; extended with ⑩ island tap/z-index/re-entry, ⑪ routing by kind, ⑫ create-failure routing, ⑬ wait timeouts, ⑭ real join reason + pollResult) => 55 通过 / 0 失败
+  - test_ladder_v1108.mjs (owned) => 45 通过 / 0 失败
+  - test_ladder_contrast_v1156.mjs (owned) => 4 通过 / 0 失败
+  - test_pk_watchdog_v1155.mjs (owned; +⑤b close/friends/quit don't arm, start arms) => 27 通过 / 0 失败
+  - test_pk_inpage_v1022.mjs (owned; run alone — it has a <250 ms timing check that fails when 12 browsers run in parallel) => 13 通过 / 0 失败
+  - test_pk_battle_ui_v1101.mjs (owned) => 18 通过 / 0 失败
+  - test_pk_keyboard_v1118.mjs (owned) => 19 通过 / 0 失败
+  - test_tap_targets_v1120.mjs (owned) => 8 通过 / 0 失败
+  - test_real_path_smoke_v1163.mjs (owned) => 14 通过 / 0 失败
+  - Real-SDK two-player UI E2E (scratch u5ui/ui_e2e.mjs; legacy 80/400, rules 80/400, legacy 250/1500, rules 250/1500) => 48/0 in each of the 4 runs. The simultaneous start opened 2 rooms and converged into 1 in every run.
+  - Can-fail check: new assertions run against the original v1163 UI files in a symlink mirror => watchdog 24/3 failed (close arms, quit re-arms, close() contains arm). ladder_e2e failed ④⑥⑩: island tap hits kRooms, z 2147482000 < 2147483400, no auto-continue; then the script crashed because _fromRoom does not exist.
+  - test_ladder_cloud_v1164.mjs (other agent, real SDK, drives my UI) => 41 通过，0 失败
+  - test_rooms_cloud_v1164.mjs (other agent) => 51 通过，0 失败 (4 B/C-scoring failures fixed in my UI)
+  - test_cloud_errors_v1164.mjs (other agent) => 23 通过，0 失败 (2 earlier failures fixed: rescue after ×, blank pkHome after name prompt)
+  - test_rooms_lifecycle_cloud_v1164.mjs (other agent) => 28 通过，2 失败 — data-layer race, see open_issues
+  - test_auth_cloud_v1164.mjs (other agent) => 27 通过，1 失败 — login-panel wording in the auth UI, not my files
+  - Foreign tests that read or load my files => All green: ladder_board 91/0, friends_ui 35/0, account_switch 60/0, account_wiring 11/0, page_wiring 22/0, pk_abandon 28/0, pk_account 17/0, pk_ask_mode 18/0, pk_modes 25/0, pk_record 19/0, pk_room_code 21/0, room_match 41/0, pk_room 67/0, silent_watch 14/0, startup_restore 12/0, theme 17/0, toast 2
+  - python3 hansen_guards_v1068.py => ✅ 新时代守卫全部通过
+GUARDS: python3 hansen_guards_v1068.py: ✅ 新时代守卫全部通过. No guard edits were needed: no existing guard encodes the old protocol in my files. I did not touch hansen_guards_v1068.py or jarvis_selftest.py.
+TEST_CHANGES:
+  - test_ladder_e2e_v1155.mjs wire(). The old fake let anyone patch any doc, accepted duplicate _id adds, read returned the room for every id, and had a claim() method — the old broken protocol. It now behaves like the real READONLY DB:
+- _id is unique; a duplicate add throws {code:'DATABASE_DUPLICATE_WRITE', cloud:true}.
+- Only the owner (_openid ME) can patch or remove; other attempts count as __denied.
+- read is by id; list is an equality filter; no claim.
+- The other phone is simulated on the ne
+  - test_ladder_e2e ②: seeded rooms gained proto:2/kind:'room'/seat:0; the remote host acknowledges. Same assertion (__rooms[0].guestId==='ME'), plus: only my own seat was written (0 denied writes), and the player lands on the battle screen.
+  - test_ladder_e2e ③: counts kind:'room' docs, because seat and win docs now live in the same store. Same intent.
+  - test_ladder_e2e ④: 'taken' is now a foreign seat TAKEN_s0, not claimFails. Spec §6 changes the behaviour: there is no dead-end 再找一次 screen any more; the ladder moves on automatically. The test samples the screen every 200 ms and asserts that 被别人抢走 was shown, that the flow ended on 正在找对手/等对手进来 without a tap, and that no orphan seat of mine is left. Same intent ('say it clearly'), now stronger.
+  - test_ladder_e2e ⑥/⑦: the single 'every id returns the room' fake became by-id room + seat (+ win R_w0 for ⑥). Same assertions; ⑥ also checks the opponent name (prOppName) and _oppRating=1200.
+  - test_ladder_e2e: new sections ⑩–⑭ (island z-index and touch hit-test with re-entry paths, routing by kind, create-failure routing, wait timeouts, real join reason, pollResult ReferenceError). No existing assertion was removed or weakened.
+  - test_pk_watchdog_v1155.mjs: added ⑤b (behavioural: ladder close, friends open and rescue quit do not arm; starting a match arms and painting disarms) and a static check that the ladder's close() contains no arm. Nothing removed.
+  - test_ladder_contrast_v1156.mjs and test_tap_targets_v1120.mjs: the battle-screen fakes returned one room doc for every id and exposed claim. They are now by-id room + seat docs with proto/kind, owner-only patch, and duplicate-aware add. The intent (contrast and tap sizes on the same screens) and all assertions are unchanged.
+OPEN:
+  - DATA LAYER (blocks 2 checks of test_rooms_lifecycle_cloud_v1164 ①): a guest claims a seat, then cancels (seat removed) while the host's requests are stalled. When the host's requests resume, waitForOpponent still ACKs the stale seat: room status 'playing' with a guestId that is gone. The UI cannot reopen the room because R is host-owned and has no API. Suggested fix in hansen_pk_room_v1065.js waitForOpponent: after ack() patches R, do not emit {joined} yet. Wait up to ~8 s for proof of life after the ACK: S.guestReady === true (the guest calls markReady right after its join resolves) or S.guestBeat changing. If the seat is missing, left, or silent → patch R back to {status:'open', guestId:''
+  - True 'both answered before the next word' for B/C modes needs a data-layer signal; the UI cannot see whether the opponent answered word i, because the loser's claimRound writes nothing. Until then each player gets their own 15 s per word (rule 「同一个词，两个人各有 15 秒」) and scoring is correct (first 100, second 60/80), but the faster player can finish earlier and waits on 「正在等对手交卷…」 (now with a live counter, capped at ~5 min while the opponent's heartbeat lives). Suggested API: claimRound/skipRound also patch the caller's own doc {hostAns:i | guestAns:i}, and roundState returns oppAnswered:i. The UI would then advance when both answered or at the deadline.
+  - test_auth_cloud_v1164 has 1 failure in the auth panel wording (「失败原因要说实话」); it is unrelated to my files.
+  - I did not test the island page inside index.html's iframe (#islandFrame). The ladder lives inside the island document, so the same z-index applies there; I verified island_animal.html directly with touchscreen.tap, both with fakes and with the real-SDK emulator.
+NOTES:
+  - Wanted guards (not added, per the rules):
+(1) #hsn_ladder_screen z-index is > 2147483400 and < 2147483600 (same check for the friends overlay).
+(2) The ladder's close() body contains no HansenPkWatchdog.arm, and the watchdog's quit sets _armed = null after its close calls.
+(3) In hansen_pk_room_ui_v1065.js no identifier is used in a function that does not declare it (would have caught the pollResult `st` bug); at minimum: pollResult takes st as a parameter.
+(4) The ladder sorts candidate rooms by createdAt ascending (`fit.sort` with createdAt) and does not use fit[0] without sorting.
+(5) The ladder routes failures by kind (kindOf) and does not regex-match 登录|会话 against reason text.
+(6) hanse
+  - To port the real-SDK UI E2E: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/u5ui/ui_e2e.mjs. It uses emulator-poc/emulator.mjs and harness.mjs through EMU_DIR. Usage: node ui_e2e.mjs [legacy|rules] [latency] [lag]; ONLY=ladder,lobby,code,timeout,config,offline,same,expired runs a subset. Runtime is about 6–8 min because the B/C game plays the slow player's full 15 s windows. The repo now has cloudbase_emulator.mjs + cloudbase_e2e_harness.mjs from the tests agent, so it could be rewritten on top of those as test_ladder_ui_v1164.mjs.
+  - Behaviour changes worth noting in the docs / 教学手册 (I did not edit the docs):
+- Ladder join failures continue automatically; there is no 「再找一次对手」 screen.
+- Two simultaneous starters converge into one room within about 6–10 s after the 20 s self-host.
+- B/C modes no longer drag the slower kid to the next word.
+- The 30 s background auto-leave applies only while waiting for an opponent.
+- The island 天梯排位 entry now requires sign-in, like 公开房间.
+  - Changes to other agents' tests: none. Every foreign test listed in tests[] passes, except the lifecycle and auth items in open_issues.
+  - Friends UI z-index is already 2147483500 in hansen_friends_ui_v1107.js (other agent), matching the ladder.

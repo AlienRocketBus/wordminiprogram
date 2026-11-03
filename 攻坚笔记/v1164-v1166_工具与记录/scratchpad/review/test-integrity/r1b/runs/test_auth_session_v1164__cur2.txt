@@ -1,0 +1,57 @@
+会话判定 / 凭证守护 / 备份 v1164
+  OK  ★ 本机没有凭证 → 确凿过期（以前永远是"尚未就绪"，不让人重新登录）
+  OK  kind=expired / noCredentials（实为 expired）
+  OK  文案让人去重新登录：云端登录已过期：这台设备上的登录凭证没有了，请重新登录
+  OK  ★ 凭证都没了就不白白重试（问了 1 次）
+  OK  ★ 清掉了撒谎的本地"已登录"记录
+  OK  ★ 广播 hsn-auth-changed，界面立刻跟上
+  OK  ★ 凭证还在 → notReady / kind=session（实为 session）
+  OK  重试到底才下结论（问了 5 次）
+  OK  ★ 不登出、不广播（网慢≠过期）
+  OK  ★ 凭证不在 → 守护用影子副本救回 → 成功（救了 1 次）
+  OK  轨迹里记下了"救回"
+  OK  ★ 救回来也不管用 → 判过期；一次探测只救一次（救了 1 次）
+  OK  ★ user_info 没了 → getCurrentUser 补回 uid（G1）
+  OK  ★ 取不到账号信息 → 用登录令牌 sub（S1 / 登录令牌）
+  OK  ★ getCurrentUser 卡住 → 6 秒后改用令牌（5988ms）
+  OK  ★ 坏缓存删掉再探 → 成功
+  OK  坏缓存已删、人没被登出
+  OK  ★ 「Unexpected token」是程序错误，不是"令牌过期" —— 不登出（以前 /token/ 一匹配就把人登出）
+  OK  ★ 挂死 → {notReady, slow, kind:slow}（slow）
+  OK  ★ 按真实时间约 10 秒返回（9988ms；测试桩把定时器压到 8ms 也不会提前）
+  OK  文案说"超时"，且不登出：连接云端超时（10 秒没有回应），网络可能太慢，请稍后再试
+  OK  ★ 三处同时问 → 共用一次探测（问了 1 次）
+  OK  上一次结束后再问 → 重新探测（不吃旧结果）
+  OK  没登录 → kind=signin
+  OK  守护在，封顶 3 次
+  OK  ★ 同一个 refresh_token 再备份 → 次数不清零（死会话不会被无限救）
+  OK  ★ SDK 换了新 refresh_token（登录/刷新成功）→ 次数清零（以前一辈子不清，救满 3 次守护永久失效）
+[凭证守护] 凭证被删，已用影子副本救回：test
+[凭证守护] 凭证被删，已用影子副本救回：test
+[凭证守护] 凭证被删，已用影子副本救回：test
+  OK  ★ 死会话最多救 3 次（救了 3 次）
+  OK  凭证不在时备份什么也不做
+  OK  reset 清次数和影子
+  OK  ★ 备份不收 SDK 键（user_info/device_id/lang/x-tcb/凭证）
+  OK  ★ 玩家数据一个不少（language / langPref 这种普通键不被误伤）
+  OK  isOwnedKey 对 SDK 键为 false
+  OK  ★ 带着 SDK 键的老快照照样能恢复（拒收会让所有老云存档都恢复不了）
+  OK  ★ 本机的 user_info / device_id / 凭证原样不动（以前恢复会删掉或盖成快照里的）
+  OK  玩家数据正常恢复
+  OK  解析结果不含 SDK 键，且自身校验和自洽（可再次解析）
+  OK  被丢掉的 SDK 键也计入校验和（改了照样能发现）
+  OK  ★ 带 SDK 键的旧日志不会拦停启动（{"recovered":true,"rolledBack":true,"committed":false}）
+  OK  ★ 回滚不写回、不删 SDK 键
+  OK  玩家数据照常回滚到恢复前
+  OK  ★ 读资料返回 {code} → 报错，不去建档（get）
+  OK  ★ count 返回 {code} → 不发号（以前当成 0 人，发出 No.1）
+  OK  正常时发号 = 比我早的人数 + 1（No.5）
+  OK  ★ 写号返回 {code} → 不当成发号成功
+  OK  ★ 子框用顶层那一个 auth 对象，不新造（新造 0 次）
+  OK  ★ 顶层没有现成的 → 只取一次并缓存（以前每次调用都 a.auth() 一次；实为 1 次）
+  OK  退出成功
+  OK  ★ SDK 退出前本地记录已清（守护不会把刚删的凭证救回来）
+  OK  ★ SDK 退出卡住也只等约 6 秒（5987ms）
+  OK  ★ 退出时清掉凭证守护的影子副本
+
+结果: 51 通过 / 0 失败

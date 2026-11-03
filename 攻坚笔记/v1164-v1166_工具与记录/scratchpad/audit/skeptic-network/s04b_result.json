@@ -1,0 +1,17 @@
+{
+  "A_new_only": {
+    "cap": 72,
+    "distinctUrlsEverPut": 82,
+    "left": 72
+  },
+  "B_new_plus_refresh": {
+    "cap": 72,
+    "distinctUrlsEverPut": 82,
+    "left": 72
+  },
+  "C_refresh_only_after_1_new": {
+    "cap": 72,
+    "distinctUrlsEverPut": 73,
+    "left": 72
+  }
+}

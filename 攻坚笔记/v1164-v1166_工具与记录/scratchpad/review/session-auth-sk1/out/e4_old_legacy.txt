@@ -1,0 +1,60 @@
+{
+  "ver": "v1163",
+  "perm": "legacy",
+  "uidB": "1527283253218073236",
+  "uidA": "1650936123503737095",
+  "upA": {
+    "ok": true,
+    "reason": "",
+    "error": ""
+  },
+  "identA": "p:13800000731",
+  "markerAfterSignout": {
+    "pendingPhone": "+86 13800000731",
+    "verificationId": "",
+    "isUser": false,
+    "method": "",
+    "phone": "+86 13800000731",
+    "signedAt": 0,
+    "uid": ""
+  },
+  "loginBPanel": "登录成功！ 竞赛 ID No.002 已从云端找回你的全部进度，正在载入…",
+  "markerB": {
+    "pendingPhone": "+86 13800000731",
+    "verificationId": "",
+    "isUser": false,
+    "method": "password",
+    "phone": "+86 13800000731",
+    "signedAt": 1793730086805,
+    "uid": "1527283253218073236",
+    "username": "kidb01"
+  },
+  "identB": "p:13800000731",
+  "sessionB": {
+    "ok": true,
+    "uid": "1650936123503737095"
+  },
+  "deviceNow": [
+    "wordIsland_A:8"
+  ],
+  "signedInPanelB": "👤 已登录 ✕ 手机号：+86 13800000731 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录",
+  "upB": {
+    "ok": true,
+    "reason": "",
+    "error": ""
+  },
+  "writesByB": [],
+  "foreignByB": [
+    {
+      "by": "B",
+      "collection": "hansen_saves",
+      "owners": [
+        "A"
+      ]
+    }
+  ],
+  "savesDocsOwners": [
+    "A"
+  ],
+  "errors": []
+}

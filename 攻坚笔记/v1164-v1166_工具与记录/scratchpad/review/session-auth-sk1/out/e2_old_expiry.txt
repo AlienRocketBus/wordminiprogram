@@ -1,0 +1,18 @@
+{
+  "ver": "v1163",
+  "case": "expiry",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "signedAtOpen": true,
+  "topOverlayBefore": null,
+  "overlayAfterEnterMs": null,
+  "topOverlay": null,
+  "signedNow": true,
+  "kidSees": "跳过 🎯 欢迎来到单词大冒险！ 这里用打 Boss 的方式背单词—— 答对题目就能击败怪兽，越打越强！ 下一步 →",
+  "islandSays": null,
+  "dialogs": [],
+  "errors": [],
+  "elapsed": 112504
+}

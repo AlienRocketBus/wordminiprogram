@@ -1,0 +1,265 @@
+
+房间对战 · 真 SDK 端到端（v1164）
+
+
+── ① 公开房 · 同步赛 C（READONLY · legacy） ──
+  OK  [一] 手机号验证码登录 uid=1728325321807323665
+  OK  [二] 手机号验证码登录 uid=1373709596117908056
+  XX  顺手清掉了自己上次留下的旧房和旧座位，别人的旧房一下没碰（剩下：roldmine1, roldother1_s0, roldother1, rmw0y40ri473bvc）
+      [一 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 10 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [二 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000021　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y40ri473bvc 建者=小蜂一 {"_id":"rmw0y40ri473bvc","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000020","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      房间 roldmine1 建者=小蜂一 status=done mode=C seat=0 host=小蜂一 guest=- hostScore=undefined endedBy=- private=false code=-
+      房间 roldother1 建者=0001 status=done mode=C seat=0 host=别人 guest=- hostScore=undefined endedBy=- private=false code=-
+      座位 roldother1_s0 建者=小蜂一 guest=小蜂一 ready=false score=undefined left=false abandonWin=-
+      [最近的云端请求]
+      12:18.571 小蜂二 POST /web queryDocument hansen_saves → 200
+      12:18.688 小蜂二 POST /web queryDocument hansen_saves → 200
+      12:19.007 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:19.503 小蜂一 POST /web addDocument hansen_pk_rooms → 200
+      12:19.616 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:20.495 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:21.713 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:23.824 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:25.920 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.570 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.633 小蜂一 POST /web updateDocument hansen_pk_rooms → 200
+      12:27.998 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+  OK  开一间同步赛 → 「等对手进来」，并说明开的是什么房（看到：← 关掉房间 ⏳ 等对手进来 ⏳ 已等 0 秒 房间已经开好了，别人在列表里就能看到你。 等人进来就自动开打。 你开的是 🔥同步赛 · 10 个词 （关掉这一页，房间也会一起关掉）
+  XX  数据库：公开、同步赛、新协议、房主名字对
+      [一 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 10 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [二 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000021　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y40ri473bvc 建者=小蜂一 {"_id":"rmw0y40ri473bvc","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000020","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      房间 roldmine1 建者=小蜂一 status=done mode=C seat=0 host=小蜂一 guest=- hostScore=undefined endedBy=- private=false code=-
+      房间 roldother1 建者=0001 status=done mode=C seat=0 host=别人 guest=- hostScore=undefined endedBy=- private=false code=-
+      座位 roldother1_s0 建者=小蜂一 guest=小蜂一 ready=false score=undefined left=false abandonWin=-
+      [最近的云端请求]
+      12:18.571 小蜂二 POST /web queryDocument hansen_saves → 200
+      12:18.688 小蜂二 POST /web queryDocument hansen_saves → 200
+      12:19.007 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:19.503 小蜂一 POST /web addDocument hansen_pk_rooms → 200
+      12:19.616 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:20.495 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:21.713 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:23.824 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:25.920 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.570 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.633 小蜂一 POST /web updateDocument hansen_pk_rooms → 200
+      12:27.998 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+  XX  别人在公开列表里看到这间房：房主名字 + 玩法（看到：← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 无名蜂 🔥同步赛未定级 · 10 个词 · 11秒前 进去打 🔑 有朋友给的房间码？点这里输入）
+      [一 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 10 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [二 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 11秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y40ri473bvc 建者=小蜂一 {"_id":"rmw0y40ri473bvc","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000020","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      房间 roldmine1 建者=小蜂一 status=done mode=C seat=0 host=小蜂一 guest=- hostScore=undefined endedBy=- private=false code=-
+      房间 roldother1 建者=0001 status=done mode=C seat=0 host=别人 guest=- hostScore=undefined endedBy=- private=false code=-
+      座位 roldother1_s0 建者=小蜂一 guest=小蜂一 ready=false score=undefined left=false abandonWin=-
+      [最近的云端请求]
+      12:19.007 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:19.503 小蜂一 POST /web addDocument hansen_pk_rooms → 200
+      12:19.616 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:20.495 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:21.713 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:23.824 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:25.920 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.570 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:27.633 小蜂一 POST /web updateDocument hansen_pk_rooms → 200
+      12:27.998 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+      12:29.980 小蜂二 POST /web queryDocument hansen_pk_rooms → 200
+      12:30.079 小蜂一 POST /web queryDocument hansen_pk_rooms → 200
+
+── ② 私密房码 · 回合赛 B（READONLY · rules） ──
+  OK  [三] 手机号验证码登录 uid=1728325321807323665
+  OK  [四] 手机号验证码登录 uid=1373709596117908056
+  XX  私密回合赛开好了，屏幕上大字显示房间码「ZF7S」，和库里一致（库里 undefined）
+      [三 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 0 秒 ⏎ 把这个码发给好友 ⏎ ZF7S ⏎ 📋 复制房间码 ⏎ 私密房不出现在公开列表，只有拿到码的人能进 ⏎ 你开的是 🎯回合赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [四 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000023　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y4dj6q9mlf4 建者=小蜂三 {"_id":"rmw0y4dj6q9mlf4","status":"open","code":"ZF7S","hostRating":0,"isPrivate":true,"hostId":"+86 13800000022","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [最近的云端请求]
+      12:34.490 - POST /auth/v1/verification → 200
+      12:34.565 - POST /auth/v1/signup → 200
+      12:34.672 小蜂四 GET /auth/v1/user/me → 200
+      12:34.782 小蜂四 GET /auth/v1/user/me → 200
+      12:34.896 小蜂四 POST /web queryDocument sb_profile → 200
+      12:34.979 小蜂四 POST /web updateDocument sb_profile → 200
+      12:35.106 小蜂四 POST /web queryDocument sb_profile → 200
+      12:35.190 小蜂四 POST /web queryDocument hansen_saves → 200
+      12:35.315 小蜂四 POST /web queryDocument hansen_saves → 200
+      12:35.576 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      12:36.062 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      12:36.186 小蜂三 POST /web addDocument hansen_pk_rooms → 200
+  OK  私密房不出现在公开列表里
+  OK  输错码 → 人话提示「没找到这间房」（看到：← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 进房 没找到这间房，可能已经关）
+  XX  输对房间码（小写也行）→ 两部手机都进了对战屏
+      [三 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 35 秒 ⏎ 把这个码发给好友 ⏎ ZF7S ⏎ 📋 复制房间码 ⏎ 私密房不出现在公开列表，只有拿到码的人能进 ⏎ 你开的是 🎯回合赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [四 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入 ⏎ 进去打
+      [四 弹窗] 这间房刚被别人占了，换一间吧
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y4dj6q9mlf4 建者=小蜂三 {"_id":"rmw0y4dj6q9mlf4","status":"open","code":"ZF7S","hostRating":0,"isPrivate":true,"hostId":"+86 13800000022","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [改别人文档的尝试] 小蜂四 database.updateDocument hansen_pk_rooms rmw0y4dj6q9mlf4
+      [最近的云端请求]
+      12:52.427 小蜂三 POST /web updateDocument hansen_pk_rooms → 200
+      12:52.949 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      12:56.032 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      12:59.151 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:00.308 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:00.436 小蜂三 POST /web updateDocument hansen_pk_rooms → 200
+      13:02.274 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:05.387 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:08.277 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:08.383 小蜂三 POST /web updateDocument hansen_pk_rooms → 200
+      13:08.512 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+      13:11.625 小蜂三 POST /web queryDocument hansen_pk_rooms → 200
+
+── ③ 三人同时抢一个座位（rules · 重复 _id → DATABASE_REQUEST_FAILED / E11000） ──
+  OK  [房主] 手机号验证码登录 uid=1728325321807323665
+  OK  [抢1] 手机号验证码登录 uid=1373709596117908056
+  OK  [抢2] 手机号验证码登录 uid=1926851022307533012
+  OK  [抢3] 手机号验证码登录 uid=1873696563598928069
+  XX  三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 30 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y5dvxjmefvo 建者=小蜂房主 {"_id":"rmw0y5dvxjmefvo","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000024","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      14:27.461 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:30.783 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.343 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.434 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:35.871 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:41.010 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.352 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.500 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:46.091 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.183 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.373 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.489 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+  XX  过了几秒也没有第二个人被拉进对战（在对战屏的：无）
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 34 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y5dvxjmefvo 建者=小蜂房主 {"_id":"rmw0y5dvxjmefvo","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000024","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      14:30.783 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.343 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.434 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:35.871 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:41.010 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.352 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.500 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:46.091 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.183 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.373 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.489 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:56.268 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+  XX  库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 0 个）
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 34 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y5dvxjmefvo 建者=小蜂房主 {"_id":"rmw0y5dvxjmefvo","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000024","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      14:30.783 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.343 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:35.434 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:35.871 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:41.010 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.352 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:43.500 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:46.091 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.183 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.373 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      14:51.489 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      14:56.268 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      （这一轮重复 _id 被数据库拒绝 0 次）
+  OK  没有人去改别人的文档（尝试 0 次）
+
+── ③ 三人同时抢一个座位（rules · 重复 _id → HTTP 500（SDK 只看到 network request error）） ──
+  OK  [房主] 手机号验证码登录 uid=1728325321807323665
+  OK  [抢1] 手机号验证码登录 uid=1373709596117908056
+  OK  [抢2] 手机号验证码登录 uid=1926851022307533012
+  OK  [抢3] 手机号验证码登录 uid=1873696563598928069
+  XX  三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 30 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y7nubn3jeny 建者=小蜂房主 {"_id":"rmw0y7nubn3jeny","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000028","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      16:13.669 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:17.057 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.551 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.644 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:22.144 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:27.286 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.568 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.720 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:32.368 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.458 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.579 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.699 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+  XX  过了几秒也没有第二个人被拉进对战（在对战屏的：无）
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 34 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y7nubn3jeny 建者=小蜂房主 {"_id":"rmw0y7nubn3jeny","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000028","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      16:17.057 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.551 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.644 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:22.144 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:27.286 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.568 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.720 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:32.368 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.458 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.579 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.699 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:42.542 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+  XX  库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 0 个）
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 34 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [抢1 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 49秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y7nubn3jeny 建者=小蜂房主 {"_id":"rmw0y7nubn3jeny","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000028","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      16:17.057 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.551 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:21.644 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:22.144 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:27.286 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.568 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:29.720 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:32.368 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.458 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.579 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      16:37.699 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      16:42.542 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      （这一轮重复 _id 被数据库拒绝 0 次）
+  OK  没有人去改别人的文档（尝试 0 次）
+
+17 通过，11 失败（271 秒）
+失败的：
+  · 顺手清掉了自己上次留下的旧房和旧座位，别人的旧房一下没碰（剩下：roldmine1, roldother1_s0, roldother1, rmw0y40ri473bvc）
+  · 数据库：公开、同步赛、新协议、房主名字对
+  · 别人在公开列表里看到这间房：房主名字 + 玩法（看到：← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 无名蜂 🔥同步赛未定级 · 10 个词 · 11秒前 进去打 🔑 有朋友给的房间码？点这里输入）
+  · 私密回合赛开好了，屏幕上大字显示房间码「ZF7S」，和库里一致（库里 undefined）
+  · 输对房间码（小写也行）→ 两部手机都进了对战屏
+  · 三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+  · 过了几秒也没有第二个人被拉进对战（在对战屏的：无）
+  · 库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 0 个）
+  · 三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+  · 过了几秒也没有第二个人被拉进对战（在对战屏的：无）
+  · 库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 0 个）

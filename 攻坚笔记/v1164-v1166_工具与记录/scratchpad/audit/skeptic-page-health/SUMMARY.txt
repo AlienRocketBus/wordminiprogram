@@ -1,0 +1,16 @@
+Skeptic re-run of page-health findings (v1163 snapshot, Chromium only, one browser at a time).
+Server: srv.mjs (no-cache+ETag, byte counts at the server). No request interception (lib.mjs blocks external hosts via --host-resolver-rules).
+S1 open 食物 from home, 25 s (s1_open.mjs):
+  as-is            1359 req / 18.96 MB, 9 documents, 11164 nodes, 4284 listeners   (s1_asis_390.json)
+  warm disabled     296 req /  9.86 MB, 3 documents,  5525 nodes, 1037 listeners   (s1_nowarm_390.json)
+  as-is, no navigator.connection   673 req / 10.82 MB (s1_asis_390_noconn.json)
+  warm off, no navigator.connection 159 req / 9.02 MB (s1_nowarm_390_noconn.json)
+  as-is WITH ctx.route('**/*') (auditor's setup) 1365 req / 47.06 MB, 476x304 (s1_asis_390_route.json)  -> cache-off artifact
+S3 sequence 食物/动物/运动/动物 with real 🏠 taps (s3_seq.mjs): iframe falls back to island_food after each 🏠 (s3_seq_390.json);
+  with pushState deferred until iframe commit: iframe keeps the island just closed, 0 background requests (s3_seq_390_deferpush.json).
+  re-enter just-closed island: s3_reenter.json
+S4 home 「最近探险」 card (s4_recent.mjs): shows 星海终战 / opens island_season.html (s4_recent_asis_play.json, shots/s4_after_card_asis_play.png);
+  warm off: shows 食物 instead of 动物 (s4_recent_nowarm_play.json)
+S5 returning player prefetch 404s (s5_returning.json); S6 land_map clipping (s6_land.json, shots/land_map_iframe_360.png);
+S7 showcase/boss_hall widths + 14 mode cards vs '12 种' (s7_misc.json); S8 map8 reload loop (s8_map8.mjs).
+Snapshot verified untouched (find -mmin: 0 files modified).

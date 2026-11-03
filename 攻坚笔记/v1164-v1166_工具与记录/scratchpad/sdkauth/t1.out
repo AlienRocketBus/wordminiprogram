@@ -1,0 +1,86 @@
+=== S0 fresh boot (no login)
+{"lang_ambitious-d0g1d26xm740dc3d6":"zh-CN"}
+{"label":"fresh","getLoginState":null,"currentUserGetter":null,"claimsSub":null,"claimsErr":"credentials not found"}
+  net: []
+  typeof signUpWithEmailAndPassword: function  typeof updateUsername: undefined
+=== S1 phone NEW user: getVerification + signUp({phone_number, verification_code})
+{"v":{"verification_id":"vid_1793690410172","is_user":false,"expires_in":600},"rType":"t","rKeys":["cache","oauthInstance","user"],"rUserUid":"uid_new_100"}
+  net: [
+  'POST ambitiou… /auth/v1/verification',
+  'POST ambitiou… /auth/v1/signup',
+  'GET ambitiou… /auth/v1/user/me [auth]'
+]
+{"user_info_ambitious-d0g1d26xm740dc3d6":"{\"version\":\"localCachev1\",\"content\":{\"sub\":\"uid_new_100\",\"name\":\"\",\"phone_number\":\"\",\"username\":\"\",\"groups\":[{\"id\":\"user\"}],\"created_from\":\"","credentials_ambitious-d0g1d26xm740dc3d6":"{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIn0.eyJpc3MiOiJodHRwczovL21vY2siLCJzdWIiOiJ1aWRfbmV3XzEwMCIsImF1ZCI6I","lang_ambitious-d0g1d26xm740dc3d6":"zh-CN","device_id":"f932c042765f4df5924296bfe7db0ccc"}
+{"label":"after S1","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userUid":"uid_new_100","userKeys":["uid","name","phone_number","sub","created_from","providers","username"]},"currentUserGetter":"uid_new_100","claimsSub":"uid_new_100","claimsErr":null}
+=== S1b reload page
+{"label":"after reload","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userUid":"uid_new_100","userKeys":["uid","name","phone_number","sub","created_from","providers","username"]},"currentUserGetter":"uid_new_100","claimsSub":"uid_new_100","claimsErr":null}
+  net: []
+=== S1c remove user_info key, keep credentials
+{"label":"no user_info","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userKeys":["sub"]},"currentUserGetter":null,"claimsSub":"uid_new_100","claimsErr":null}
+  net: []
+{"label":"getCurrentUser repopulates?","getCurrentUserUid":"uid_new_100","afterLoginStateUid":"uid_new_100"}
+  net: [ 'GET ambitiou… /auth/v1/user/me [auth]' ]
+{"user_info_ambitious-d0g1d26xm740dc3d6":"{\"version\":\"localCachev1\",\"content\":{\"sub\":\"uid_new_100\",\"name\":\"\",\"phone_number\":\"\",\"username\":\"\",\"groups\":[{\"id\":\"user\"}],\"created_from\":\"","credentials_ambitious-d0g1d26xm740dc3d6":"{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIn0.eyJpc3MiOiJodHRwczovL21vY2siLCJzdWIiOiJ1aWRfbmV3XzEwMCIsImF1ZCI6I","lang_ambitious-d0g1d26xm740dc3d6":"zh-CN","device_id":"f932c042765f4df5924296bfe7db0ccc"}
+=== S2 phone EXISTING user: verify + signIn({username, verification_token})
+{"isUser":true,"rType":"t","rUserUid":"uid_existing_001"}
+  net: [
+  'POST ambitiou… /auth/v1/verification',
+  'POST ambitiou… /auth/v1/verification/verify',
+  'POST ambitiou… /auth/v1/signin',
+  'GET ambitiou… /auth/v1/user/me [auth]'
+]
+{"label":"after S2","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userUid":"uid_existing_001","userKeys":["uid","name","phone_number","sub","created_from","providers","username"]},"currentUserGetter":"uid_existing_001","claimsSub":"uid_existing_001","claimsErr":null}
+=== S3 password signIn({username,password}) (existing phone user w/ password)
+{"ok":1,"rUserUid":"uid_existing_001"}
+  net: [
+  'POST ambitiou… /auth/v1/signin',
+  'GET ambitiou… /auth/v1/user/me [auth]'
+]
+{"label":"after S3","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userUid":"uid_existing_001","userKeys":["uid","name","phone_number","sub","created_from","providers","username"]},"currentUserGetter":"uid_existing_001","claimsSub":"uid_existing_001","claimsErr":null}
+=== S4 registerByPassword path: signUp({email,password}) (no signUpWithEmailAndPassword)
+{"resolved":1,"keys":["data","error"],"dataKeys":["verifyOtp"],"error":null}
+  net: [ 'POST ambitiou… /auth/v1/verification' ]
+{"lang_ambitious-d0g1d26xm740dc3d6":"zh-CN","device_id":"e969788d21874abeb87b6361d9d5d5e1"}
+{"label":"after S4","getLoginState":null,"currentUserGetter":null,"claimsSub":null,"claimsErr":"credentials not found"}
+=== S5 signIn where /user/me fails (abort) -> does signIn reject? are creds stored?
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+{"rejected":"{\"error\":\"unreachable\",\"error_description\":\"Failed to fetch\",\"error_uri\":\"/auth/v1/user/me\",\"requestId\":\"eef169219e9d4519ae8f316296672b17\"}"}
+  net: [
+  'POST ambitiou… /auth/v1/verification',
+  'POST ambitiou… /auth/v1/verification/verify',
+  'POST ambitiou… /auth/v1/signin',
+  'GET ambitiou… /auth/v1/user/me [auth]',
+  'GET ambitiou… /auth/v1/user/me [auth]',
+  'GET ambitiou… /auth/v1/user/me [auth]'
+]
+{"credentials_ambitious-d0g1d26xm740dc3d6":"{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImsxIn0.eyJpc3MiOiJodHRwczovL21vY2siLCJzdWIiOiJ1aWRfZXhpc3RpbmdfMDAxIiwiY","lang_ambitious-d0g1d26xm740dc3d6":"zh-CN","device_id":"bfd7306ed76945fc80163999bf33d0fc"}
+{"label":"after S5 (user/me down)","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userKeys":["sub"]},"currentUserGetter":null,"claimsSub":"uid_existing_001","claimsErr":null}
+{"label":"S5 getCurrentUser once user/me back","getCurrentUserUid":"uid_existing_001","afterLoginStateUid":"uid_existing_001"}
+  net: [ 'GET ambitiou… /auth/v1/user/me [auth]' ]
+=== S6 expired access token: refresh OK
+{"label":"expired+refresh ok","getLoginState":{"ctor":"t","keys":["cache","oauthInstance","user"],"userUid":"uid_existing_001","userKeys":["uid","name","phone_number","sub","created_from","providers","username"]},"currentUserGetter":"uid_existing_001","claimsSub":"uid_existing_001","claimsErr":null}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+=== S7 expired access token: refresh network failure
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+  [console] error Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+{"label":"expired+refresh abort","getLoginState":null,"currentUserGetter":"uid_existing_001","claimsSub":null,"claimsErr":"Failed to fetch"}
+  net: [
+  'POST ambitiou… /auth/v1/token grant=refresh_token',
+  'POST ambitiou… /auth/v1/token grant=refresh_token',
+  'POST ambitiou… /auth/v1/token grant=refresh_token',
+  'POST ambitiou… /auth/v1/token grant=refresh_token',
+  'POST ambitiou… /auth/v1/token grant=refresh_token',
+  'POST ambitiou… /auth/v1/token grant=refresh_token'
+]
+["user_info_ambitious-d0g1d26xm740dc3d6","credentials_ambitious-d0g1d26xm740dc3d6","lang_ambitious-d0g1d26xm740dc3d6","device_id"]
+=== S8 expired access token: refresh invalid_grant
+  [console] error Failed to load resource: the server responded with a status of 400 (Bad Request)
+{"label":"expired+invalid_grant","getLoginState":null,"currentUserGetter":null,"claimsSub":null,"claimsErr":"credentials not found"}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+["user_info_ambitious-d0g1d26xm740dc3d6","lang_ambitious-d0g1d26xm740dc3d6","device_id"]

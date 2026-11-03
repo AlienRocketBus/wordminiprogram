@@ -1,0 +1,16 @@
+空登录态重试与三态区分 v1077
+  OK  ★ 空了两次后拿到 uid → 判定成功（uid=U-OK）
+  OK  ★ 确实重试了（共问了 3 次，不是问一次就下结论）
+  OK  一直空 → 不放行云端操作
+  OK  ★ 标记为 notReady（尚未就绪）
+  OK  ★ **不得**标记为 expired —— 这正是让用户陷入死循环的那一步
+  OK  ★ 文案是"稍候重试"而非"重新登录"：云端会话尚未就绪（已重试 5 次），请稍候再试
+  OK  ★ 确凿鉴权错误 → expired + definite
+  OK  ★ 确凿错误不重试（只问了 1 次）
+  OK  错误可读：credentials not found | unauthenticated
+  OK  ★ 刚登录 60 秒内即使确凿失效也不清本地标记（v1063 防线仍在）
+  OK  ★ 新鲜期内不发登出广播
+  OK  ★ verifySession 同样受益于重试（面板 ③b 不再误报）
+  OK  ★ verifySession 直接复用 ensureSession（不许两处各写一套判据）
+
+结果: 13 通过 / 0 失败

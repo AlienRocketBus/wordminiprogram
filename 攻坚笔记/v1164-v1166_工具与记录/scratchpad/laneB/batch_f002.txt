@@ -1,0 +1,14 @@
+test_srs_plan_v1165.mjs rc=0 15s :: ✅ v1165 错词留在间隔复习计划里直到真正毕业：常规岛 + 单词大陆全过
+test_lesson_review_fix_v1165.mjs rc=0 61s :: ✅ v1165 复查修复：再考不算纠错 / 极速不白丢分 / 听音不多记 / 完形读整句 / 离开就收卡 / 毕业金只发一次 全过
+test_backup_coverage_v1019.mjs rc=0 7s :: 结果: 2 通过 / 0 失败
+test_backup_crash_journal_v942.mjs rc=0 0s :: backup crash journal v960: prepared rollback + committed cleanup + skipped-version fail-closed + pre-load ordering ✅
+test_backup_limits_v942.mjs rc=0 6s :: backup limits v942: build/parse same contract + exact item/value/total boundaries ✅
+test_backup_no_credentials_v1090.mjs rc=0 0s :: 结果: 11 通过 / 0 失败
+test_backup_pending_v942.mjs rc=0 0s :: backup pending v942: top-level/nested/corrupt transaction refusal + committed-only export ✅
+test_backup_restore_v1043.mjs rc=0 10s :: ✅ 备份→恢复能带回等级
+test_backup_v942.mjs rc=0 0s :: backup v960: semantic whitelist + explicit version/checksum/duplicate validation + exact replace rollback ✅
+test_explore_dual_progress_v945.mjs rc=0 0s :: explore dual progress v945/v946: ledger truth + aliases + badge semantics + spelling-only thresholds ✅
+test_explore_progress_api_v945.mjs rc=0 0s :: explore progress API v945: canonical batch/fail-closed + Land alias + cumulative pet thresholds ✅
+test_explore_spelling_gate_v946.mjs rc=0 1s :: explore spelling gate v946: no quiz bypass + isolated one-shot proofs + Bee 10/7/5 + same-day launch lock ✅
+test_explore_template_v945.mjs rc=0 0s :: explore template v945/v946: 27-page wiring + spelling-only routes + isolated progress contract ✅
+test_explore_ui_v945.mjs rc=0 7s :: explore UI v945/v946: responsive layout + dialog a11y + quiz bypass closed + real-game routing ✅

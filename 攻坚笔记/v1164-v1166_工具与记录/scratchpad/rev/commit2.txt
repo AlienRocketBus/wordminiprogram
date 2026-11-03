@@ -1,0 +1,12 @@
+静音不漏声：点小课卡片后等放行窗口关上再出下一题；Boss 测试等欢迎弹窗出来再点掉
+
+- 一键静音开着时，点小课卡片「继续」会立刻出下一题并自动读词，正好落在 hansen_mute
+  「点了就算想听」的 120ms 放行窗口里 → 静音漏声（实测极速/打字下一题的 mp3 照样播放）。
+  改为点卡片后 160ms 再出下一题；这 160ms 极速的钟照样停着；期间离开游戏屏就不出了。
+  test_lesson_review_fix_v1165 加 M 项：修后通过；修之前的 HEAD 上漏出 strict_season.mp3（共 21 项失败）。
+- test_boss_lazy_v1165：新孩子的欢迎弹窗常常晚于 openIsland 那一次「点掉」才弹出来
+  （复查实测 4 次里 2 次），随后挡住 L8 的真手指点按 → 时过时不过。改为等它出来再点掉
+  （最多多等 2.5 秒）。断言不变：修后通过，在 origin/main 上照样 11 项失败。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

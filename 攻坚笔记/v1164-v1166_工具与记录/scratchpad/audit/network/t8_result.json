@@ -1,0 +1,45 @@
+{
+  "framesHome": [
+    "/",
+    "about:blank"
+  ],
+  "framesAfterIsland": [
+    "/",
+    "  /island_food.html",
+    "    /land_map.html?v=1163",
+    "    /island_season.html?v=1163",
+    "      /land_map.html?v=1163",
+    "      /island_season.html?v=1163",
+    "        /land_map.html?v=1163",
+    "        "
+  ],
+  "docsLoaded": [
+    "/island_food.html iframe 200",
+    "/island_sports.html?v=1163 empty 200",
+    "/island_job.html?v=1163 empty 200",
+    "/land_map.html?v=1163 iframe 200",
+    "/island_land1.html empty 200",
+    "/island_color.html?v=1163 empty 200",
+    "/island_season.html?v=1163 iframe 200",
+    "/island_nature.html?v=1163 empty 200",
+    "/land_map.html?v=1163 iframe 304",
+    "/island_season.html?v=1163 iframe 304",
+    "/boss_hall.html?v=1163&warm=1 iframe 200",
+    "/land_map.html?v=1163 iframe 304",
+    "/season_showcase.html?v=1163&warm=1 iframe 200",
+    "/boss_hall.html?v=1163&warm=1 iframe 304",
+    "/spelling_bee.html?v=1163&warm=1 iframe 200",
+    "/season_showcase.html?v=1163&warm=1 iframe 304",
+    "/boss_hall.html?v=1163&warm=1 iframe 304",
+    "/spelling_bee.html?v=1163&warm=1 iframe 304",
+    "/season_showcase.html?v=1163&warm=1 iframe 304",
+    "/spelling_bee.html?v=1163&warm=1 iframe 304"
+  ],
+  "reqCount": 885,
+  "metrics": {
+    "Documents": 9,
+    "Frames": 9,
+    "Nodes": 10891,
+    "JSHeapUsedSize": "10MB"
+  }
+}

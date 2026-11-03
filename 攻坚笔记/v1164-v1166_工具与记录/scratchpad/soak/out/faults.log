@@ -1,0 +1,52 @@
+
+══ clusters (24) ══
+  [high  ]    6× I6:config:claimRound:DATABASE_REQUEST_FAILED   seeds 26,85,124,294,449,593
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    5× I4:clean-match-unsettled:live-doc-swept-by-same-account-device   seeds 72,95,129,244,302
+           e.g. rmk0gedstzgbqdw both phones stayed on and connected, but host result-failed / guest result-failed
+  [high  ]    5× I9:I4:clean-match-unsettled:live-doc-swept-by-same-account-device   seeds 72,95,129,244,302
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gedstzgbqdw both phones stayed on and connected, but host result-failed / guest result-failed
+  [high  ]    3× I6:config:skipRound:DATABASE_REQUEST_FAILED   seeds 183,338,444
+           e.g. skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    3× I6:config:joinRoom:DATABASE_REQUEST_FAILED   seeds 314,503,582
+           e.g. joinRoom → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    3× I6:config:skipRound:DATABASE_DUPLICATE_WRITE   seeds 318,389,585
+           e.g. skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0geyayti6lew_w1 | req reqph⟩」
+  [high  ]    2× I6:config:claimRound:DATABASE_DUPLICATE_WRITE   seeds 250,316
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0giecsf32lnj_w9 | req req18u⟩」
+  [high  ]    2× I9:I6:config:skipRound:DATABASE_DUPLICATE_WRITE   seeds 318,389
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0geyayti6lew_w1 | re
+  [high  ]    1× I6:config:createRoom:DATABASE_REQUEST_FAILED   seeds 131
+           e.g. createRoom → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [medium]   24× I3:skip-beat-correct-answer:A   seeds 16,43,63,70,78,99
+           e.g. word 6: P1 spelled it right 9.7s after the word appeared (local deadline in 20.0s) but the skip W doc of P0 was already there (the other phone timed out 16.0s after its word appeared, deadline in 15.7s)
+  [medium]    1× I4:score-vs-rounds:claim-failed:network   seeds 18
+           e.g. rmk0ged3mes7z6h word 4: P0 spelled it right; round doc {"winner":"","by":"k1x18","at":1767574880863.7559} ⇒ 60 points, the UI scored 0 (claimRound FAILED kind=network)
+  [medium]    1× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:config   seeds 250
+           e.g. rmk0giecsf32lnj word 9: P0 spelled it right; round doc {"winner":"guest","by":"k0x250","at":1767575198200.3801} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=config)
+  [medium]    1× I6:ack-timeout-but-host-had-acked   seeds 493
+           e.g. joinRoom(rmk0gedjlik8d83) gave up 「房主没有回应」 although the host had written guestId=me at 63.8s
+  [medium]    1× I6:taken-but-nobody-else:host-reopened-my-seat   seeds 523
+           e.g. joinRoom(rmk0geso8d5bmcb) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [medium]    1× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:network   seeds 580
+           e.g. rmk0gedmyq5anhh word 2: P2 spelled it right; round doc {"winner":"guest","by":"k2x580","at":1767574847259.643} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=network)
+  [low   ]   23× I6:full-room-reported-gone:findByCode   seeds 7,51,68,94,133,139
+           e.g. findByCode(NJMA) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]   16× I3:skip-beat-correct-answer:BC   seeds 18,35,60,220,261,267
+           e.g. word 4: P0 spelled it right 6.6s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)
+  [low   ]    6× I6:ack-timeout-host-alive   seeds 111,142,164,204,386,391
+           e.g. joinRoom(rmk0gf0anipub9y) 「房主没有回应」 while host P2 was online and waiting
+  [low   ]    5× I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 96,317,403,456,515
+           e.g. P0 (guest) kept answering 2 more words after the opponent had claimed the win by abandon at 107.5s — it is only told at the very end
+  [low   ]    3× I5:played-on-after-opponent-claimed-abandon:host-after-resume   seeds 188,322,329
+           e.g. P0 (host) kept answering 6 more words after the opponent had claimed the win by abandon at 111.6s — it is only told at the very end
+  [low   ]    2× I5:played-on-after-opponent-claimed-abandon:guest   seeds 95,129
+           e.g. P0 (guest) kept answering 5 more words after the opponent had claimed the win by abandon at 75.5s — it is only told at the very end
+  [low   ]    2× I9:I5:played-on-after-opponent-claimed-abandon:guest   seeds 95,129
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) P0 (guest) kept answering 5 more words after the opponent had claimed the win by abandon at 75.5s — it is only told at the very end
+  [low   ]    2× I6:taken-but-nobody-else:room-holds-my-own-key   seeds 471,582
+           e.g. joinRoom(rmk0gedsc0l4lby) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:host   seeds 28
+           e.g. P0 (host) kept answering 3 more words after the opponent had claimed the win by abandon at 121.1s — it is only told at the very end
+
+SUMMARY profile=faults runs=600 seeds=1..600 failing_runs=50 clusters=24 (fail-level 15) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:40 I4:8 I5:11 I6:50 I7:0 I8:0 I9:7 I10:0 | matches=632 settled_pairs=554 virtual=74.9h events=1100114 real=29s

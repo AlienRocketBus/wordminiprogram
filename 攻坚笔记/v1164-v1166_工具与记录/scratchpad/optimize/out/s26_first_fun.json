@@ -1,0 +1,59 @@
+{
+ "log": [
+  [
+   "2.2",
+   "ready: onboarding visible (2157ms)"
+  ],
+  [
+   "4.1",
+   "tap: onboarding 1"
+  ],
+  [
+   "6.6",
+   "tap: onboarding 2"
+  ],
+  [
+   "9.0",
+   "tap: onboarding 3"
+  ],
+  [
+   "10.4",
+   "swipe"
+  ],
+  [
+   "11.8",
+   "tap: animal island"
+  ],
+  [
+   "14.2",
+   "ready: island welcome (2357ms)"
+  ],
+  [
+   "17.8",
+   "tap: welcome 开始冒险"
+  ],
+  [
+   "19.4",
+   "tap: listen card"
+  ],
+  [
+   "19.5",
+   "ready: difficulty list (119ms)"
+  ],
+  [
+   "20.9",
+   "tap: easy"
+  ],
+  [
+   "21.3",
+   "ready: first word audio playing (400ms)"
+  ],
+  [
+   "21.3",
+   "DONE"
+  ]
+ ],
+ "total": "21.3",
+ "taps": 7,
+ "waitSys": 5033
+}

@@ -1,0 +1,28 @@
+
+▶ ① 打字大师（island_food）
+  ❌ ①a 拼对「pork」后马上返回：3 秒后没有被重新锁屏、typeActive 仍是 false {"lock":true,"pos":"fixed","typeActive":true,"scr":"homeScreen"}
+  ❌ ①a 返回主页后 3 秒内没有读任何词 [{"t":1793725874762,"src":"corn.mp3?v215","scr":"homeScreen"}]
+  ❌ ①a 主页还能往下滑（scrollY=0）
+  ❌ ①b 拼对「egg」后马上换难度：3 秒后还是难度菜单、没被旧局的下一个词顶掉 {"menu":false,"slots":true,"lock":true,"typeActive":true}
+  ❌ ①b 菜单上没有读旧局的下一个词 [{"t":1793725879364,"src":"meal.mp3?v215","scr":"typingScreen"}]
+  ✅ ①c 拼错「corn」后马上换难度：3.6 秒后还是难度菜单 {"menu":true,"slots":false,"lock":false,"typeActive":false}
+  ✅ ① 页面无报错 
+
+▶ ② 听音辨义（island_animal）：答完第 1 题 → 换难度 → 再点初级 → 9 秒不动
+  ❌ ② 听音辨义：新一局第 1 题「pig」9 秒内没被旧局换掉 ["pig","horse","horse","horse","horse","horse","horse","horse","horse","horse"]
+  ✅ ② 页面无报错 
+
+▶ ② 完形填空（island_animal）：答完第 1 题 → 换难度 → 再点初级 → 9 秒不动
+  ❌ ② 完形填空：新一局第 1 题「panda」9 秒内没被旧局换掉 ["panda","panda","panda","panda","panda","panda","panda","rabbit","rabbit","rabbit"]
+  ✅ ② 页面无报错 
+
+▶ ② 泡泡（island_animal）：答完第 1 题 → 换难度 → 再点初级 → 9 秒不动
+  ❌ ② 泡泡：新一局第 1 题「bee」9 秒内没被旧局换掉 ["bee","bee","bee","bee","goat","goat","goat","goat","goat","goat"]
+  ✅ ② 页面无报错 
+
+▶ ③ 字母拼拼乐（island_school）
+  ❌ ③a 拼对「book」后马上返回：主页上 2.6 秒内没读下一个词 {"scr":"homeScreen","sounds":[{"t":1793725936199,"src":"term.mp3?v215","scr":"homeScreen"}]}
+  ❌ ③b 拼对「math」后马上换难度：2.6 秒后还是难度菜单、没读旧局的词 {"menu":false,"letters":true,"sounds":[{"t":1793725940130,"src":"pen.mp3?v215","scr":"scrambleScreen"}]}
+  ✅ ③ 页面无报错 
+
+❌ 失败 10 项

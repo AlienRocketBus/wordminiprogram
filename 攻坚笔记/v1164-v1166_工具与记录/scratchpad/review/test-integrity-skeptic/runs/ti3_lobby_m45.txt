@@ -1,0 +1,22 @@
+{
+ "OFF": -45000,
+ "skew": {
+  "offsetMs": -45003,
+  "newDateOffset": -45003,
+  "explicitOk": true,
+  "instanceofOk": true
+ },
+ "loginA": true,
+ "roomA": {
+  "id": "rmw12l62owt1kcm",
+  "heartbeatAgeBySrvClock": 45259
+ },
+ "public_lobbyListsA_afterSec": null,
+ "public_lobbyTextB": "← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入",
+ "privateCode": "MS74",
+ "private_joinResultB": "← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 进房 没找到这间房，可能已经关了或码输错了",
+ "pageErrors": [
+  0,
+  0
+ ]
+}

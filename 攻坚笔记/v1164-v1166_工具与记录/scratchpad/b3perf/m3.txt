@@ -1,0 +1,11 @@
+Boss 开打时一定先备好引擎；首页彩虹标语也歇着；星海横幅不再反复重画
+
+- 真开打（startBoss）时就开始准备 Boss 引擎和攻击图，不只靠 navigator.userActivation（旧 iOS 没有）；
+  单词大陆的选关墙直接调 startBoss，也能提前备好，第一次反击时攻击图多半已解码。
+- 首页待机：彩虹标语（每帧改背景位置 + 滤镜，是首页最贵的一项）一起歇着，一碰就醒。
+- 首页挂载轮询每 150ms 重写一次星海横幅 innerHTML，内容没变就不再重写。
+- kidHasPlayed 先看小快照再翻大岛存档。
+- test_boss_lazy_v1165 加单词大陆打赢、星海岛只看墙不加载；test_idle_motion_v1165 加彩虹标语。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

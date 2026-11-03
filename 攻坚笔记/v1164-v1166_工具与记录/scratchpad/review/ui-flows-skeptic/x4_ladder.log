@@ -1,0 +1,9 @@
+
+=== UI-4 skeptic · ladder · consistencyLag 0 ms ===
+  ranked room rmw11f0tibqqivc — waiting for the 2-minute timeout
+  ladder home shows the timeout note
+  tap 开始排位 0 ms after the note: warning samples 4:n 258:n 511:n 766:n 1020:n 1273:n 1530:n 1783:n 2037:n 2291:n 2546:n 2798:n 3052:n 3304:n 3557:n 3813:n
+  own room in DB: removed
+  THREW Error: [孩子] 点不到「#ldGo」：等了 10000ms 也没看到「#ldGo」
+    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:133:17)
+    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/ui-flows-skeptic/x4_same_account.mjs:38:7

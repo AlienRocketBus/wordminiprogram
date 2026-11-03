@@ -1,0 +1,17 @@
+{
+ "log": [
+  {
+   "taps": 1,
+   "label": "close_welcome",
+   "t": 3145,
+   "txt": ""
+  },
+  {
+   "taps": 2,
+   "label": "explore",
+   "t": 6270,
+   "txt": ""
+  }
+ ],
+ "errs": []
+}

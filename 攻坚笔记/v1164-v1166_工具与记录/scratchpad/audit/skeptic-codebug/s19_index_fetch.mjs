@@ -1,0 +1,11 @@
+import {serve,launch,newCtx,attach,sleep} from './kit.mjs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await newCtx(b,base); const p=await c.newPage(); const log=[]; attach(p,log);
+const reqs=[];
+p.on('request',r=>{ const u=r.url().replace(base,''); if(/\.html/.test(u)) reqs.push({u, type:r.resourceType(), frame:(r.frame()?r.frame().url().replace(base,''):'?')}); });
+await p.goto(base+'/index.html',{waitUntil:'load'}); await sleep(2500);
+await p.evaluate(()=>{ const e=[...document.querySelectorAll('button,div,span,a')].find(x=>x.textContent.trim()==='跳过'&&x.offsetParent&&x.children.length===0); if(e) e.click(); });
+await p.evaluate(()=>openIsland('island_food.html')); await sleep(15000);
+console.log(reqs.filter(x=>/index\.html|island_season|land_map/.test(x.u)).map(x=>x.type+' '+x.u+'  <= '+x.frame).join('\n'));
+await c.close(); await b.close(); srv.close();

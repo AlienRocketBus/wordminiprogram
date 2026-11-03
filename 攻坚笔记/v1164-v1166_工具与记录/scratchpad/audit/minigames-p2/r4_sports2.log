@@ -1,0 +1,74 @@
+NOTE boss card tap {"x":309,"y":339.375,"ok":true,"hit":"IMG.boss-card-img"}
+NOTE fight tap {"x":74,"y":145.5,"ok":true,"hit":"IMG."}
+{
+ "key": "sports",
+ "notes": [
+  "boss card tap {\"x\":309,\"y\":339.375,\"ok\":true,\"hit\":\"IMG.boss-card-img\"}",
+  "fight tap {\"x\":74,\"y\":145.5,\"ok\":true,\"hit\":\"IMG.\"}"
+ ],
+ "before": {
+  "coins": 300,
+  "xp": 0,
+  "level": 1,
+  "bossBeaten": 0,
+  "prog": null
+ },
+ "picker": "已击败 boss 0/20 特效 ON Lv.1 淘气小幽灵 Lv.2 暗影忍者 Lv.3 百战兽人 Lv.4 史前霸王龙 Lv.5 千年僵尸 Lv.6 暗夜吸血鬼 Lv.7 蒙面大魔王 Lv.8 地狱犬王 Lv.9 黑森林巫婆 Lv.10 异次元巫师 Lv.11 龙骑士统帅 Lv.12 暗黑灯神 Lv.13 海底巨怪 Lv.14 寒冰女王 Lv.15 烈焰魔神 Lv.16 雷电之主 Lv.17 机械泰坦 Lv.18 外星霸主 Lv.19 混沌魔尊 Lv.20 上古太阳神 🎨 boss 背景 (点击切换) 🌑 经典暗夜 ✓",
+ "end": "🏆 VICTORY! 击败了 淘气小幽灵 ⭐⭐ 漂亮胜利！ 🎉 首次通关奖励 🪙 金币 +20 · 🎓 经验 +80 ⚔️ 再次挑战 ← 选其他 boss",
+ "dismissed": [
+  "收下!"
+ ],
+ "played": {
+  "q": 6,
+  "right": 4,
+  "wrong": 2,
+  "tmo": 0,
+  "types": {
+   "cn2en": 2,
+   "listen": 3,
+   "en2cn": 1
+  },
+  "secs": 22,
+  "maxWait": 4018
+ },
+ "endScreen": "🏆 VICTORY! 击败了 淘气小幽灵 ⭐⭐ 漂亮胜利！ 🎉 首次通关奖励 🪙 金币 +20 · 🎓 经验 +80 ⚔️ 再次挑战 ← 选其他 boss",
+ "overlays": [],
+ "after": {
+  "coins": 324,
+  "xp": 100,
+  "level": 2,
+  "bossBeaten": 1,
+  "prog": null,
+  "cleared": null
+ }
+}
+end buttons ["← :: hansenBossBackBtn()","⚔️ 再次挑战 :: hansenStartRebattle(1)","← 选其他 boss :: hansenBackToBossPicker()"]
+HALL {
+ "navTap": {
+  "x": 341.25,
+  "y": 809.5,
+  "ok": true,
+  "hit": "IMG."
+ },
+ "cardsText": "cardsScreen :: ← 返回 🎴 收藏卡册 📚 已收集 20 / 20 张 20 / 20 ✨ 全部集齐 · 卡牌大师 ⚔️ Boss 挑战厅 可重新挑战 1 个已通关 boss 普通卡 4/4 淘气小幽灵 暗影忍者 百战兽人 史前霸王龙 稀有卡 4/4 千年僵尸 暗夜吸血鬼 蒙面大魔王 地狱犬王 史诗卡 4/4 黑森林巫婆 异次元巫师 龙骑士统帅 暗黑灯神 传说卡 4/4 海底巨怪 寒冰女王 烈焰魔神 雷电之主 至尊卡 4/4 · 仅限抽中 机械泰坦 外星霸主 混沌魔尊 上古太阳神 🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 1/1 进入 › 🌏 单词大陆图鉴 0 / 40 🎴 单词大陆抽卡 ·",
+ "cardTap": {
+  "x": 56.625,
+  "y": 342.625,
+  "ok": true,
+  "hit": "IMG."
+ },
+ "hallFrame": "http://127.0.0.1:42771/boss_hall.html?v=1163&lv=1&own=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
+ "hallText": "长按截图 · 收下专属壁纸 ◆ BOSS 殿堂 ◆ 图鉴典藏 · 专属秘境 ◆ 淘气小幽灵 ◆ ◆ ◆ 白银·普通 ◆ ◆ ‹ Lv.1淘气小幽灵 › ◆ Lv.1 · 白 银 · 普 通 ◆ 「飘忽不定的初见之敌, 总在云雾间嬉戏。」 光 效 关闭 卡 面 背 景 点击卡牌放大 · 左右滑动切换 boss · 左上角 👁 进入秘境",
+ "hallOverflow": true,
+ "imgs": [],
+ "zoomShown": true,
+ "zoomClosed": false,
+ "closeTap": {
+  "x": 354,
+  "y": 34,
+  "ok": true,
+  "hit": "DIV."
+ },
+ "hallGone": true
+}
+EVENTS [{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:42771/hansen_crystal.js?v=1163 net::ERR_ABORTED"},{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:42771/hansen_freepass.js?v=1163 net::ERR_ABORTED"},{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:42771/hansen_round_reward.js?v=1163 net::ERR_ABORTED"},{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:42771/hansen_weapon_fx.js?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv17.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv15.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv20.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv16.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv05.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv11.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv19.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv03.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv06.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv04.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv08.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv18.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv09.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv12.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv14.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv13.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv07.webp?v=1163 net::ERR_ABORTED"},{"tag":"fight","kind":"requestfailed","text":"http://127.0.0.1:42771/bosses/lv10.webp?v=1163 net::ERR_ABORTED"}]

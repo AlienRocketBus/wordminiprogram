@@ -1,0 +1,266 @@
+{
+ "steps": {
+  "cards": {
+   "tap": true,
+   "nav": {
+    "navVisible": true,
+    "hitNav": "IMG",
+    "hudVisible": true,
+    "active": [
+     "navCards"
+    ]
+   },
+   "texts": [
+    "📚 已收集 0 / 20 张 0 / 20",
+    "📚 已收集 0 / 20 张",
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1 进入 ›",
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1 进入 ›",
+    "神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1",
+    "历代赛季限定卡 · 已收藏 0/1"
+   ]
+  },
+  "seasonHall": {
+   "tap": true,
+   "texts": [
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1 进入 ›",
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1 进入 ›",
+    "神秘殿堂 限定 历代赛季限定卡 · 已收藏 0/1",
+    "神秘殿堂 限定",
+    "神秘殿堂",
+    "历代赛季限定卡 · 已收藏 0/1",
+    "🏛️ 神秘殿堂 × 历代赛季限定卡的殿堂 · 已收藏 0/6。点亮的卡可点击进入全屏观赏。 限定卡绝版后无法再获得，把握每个赛季！ 📖 星海纪事 《星海的回响》· 拿到守关卡回",
+    "🏛️ 神秘殿堂 ×"
+   ]
+  },
+  "cards2": {
+   "tap": true,
+   "texts": [
+    "📚 已收集 20 / 20 张 20 / 20",
+    "📚 已收集 20 / 20 张",
+    "✨ 全部集齐 · 卡牌大师",
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 1/1 进入 ›",
+    "🏛️ 神秘殿堂 限定 历代赛季限定卡 · 已收藏 1/1 进入 ›",
+    "神秘殿堂 限定 历代赛季限定卡 · 已收藏 1/1",
+    "历代赛季限定卡 · 已收藏 1/1"
+   ],
+   "ls": {
+    "fp": "1793974707094",
+    "temp": "1793974707094"
+   }
+  },
+  "gacha": {
+   "tap": true,
+   "texts": [
+    "← 返回 🎴 抽卡寻宝 📚 已收集 0 / 20 张卡 🪙 300 🌟 距「至尊卡」保底还差 100 抽 当前至尊概率 0.5% 抽得越多，越接近至尊卡 抽一张 🪙 10",
+    "📚 已收集 0 / 20 张卡 🪙 300",
+    "📚 已收集 0 / 20 张卡"
+   ],
+   "nav": {
+    "navVisible": true,
+    "hitNav": "IMG",
+    "hudVisible": true,
+    "active": []
+   }
+  },
+  "wrong": {
+   "tap": true,
+   "nav": {
+    "navVisible": false,
+    "hitNav": "hwo_overlay",
+    "hudVisible": false,
+    "active": [
+     "navHome"
+    ]
+   },
+   "overlay": {
+    "pos": "fixed",
+    "z": "9999",
+    "top": 0,
+    "bottom": 844,
+    "h": 844
+   },
+   "back": {
+    "text": "←",
+    "x": 16,
+    "y": 28,
+    "w": 36,
+    "h": 36
+   }
+  },
+  "review": {
+   "tap": true,
+   "nav": {
+    "navVisible": false,
+    "hitNav": "hr_card",
+    "hudVisible": false,
+    "active": [
+     "navHome"
+    ]
+   },
+   "overlays": [
+    {
+     "id": "hr_center",
+     "pos": "fixed",
+     "top": 0,
+     "bottom": 844
+    }
+   ],
+   "backBtns": [
+    "←"
+   ]
+  },
+  "mylearning": {
+   "tap": true,
+   "nav": {
+    "navVisible": false,
+    "hitNav": "hsn-ml",
+    "hudVisible": false,
+    "active": [
+     "navHome"
+    ]
+   },
+   "back": [
+    {
+     "t": "‹",
+     "x": 16,
+     "y": 17,
+     "w": 38,
+     "h": 38
+    }
+   ],
+   "texts": [
+    "‹ 我的学习 你的成长足迹 0 个单词已掌握 🌟 1 连续学习(天) — 总正确率 0 击败 Boss 🎉 本岛今日复习已完成! 做得很棒,休息一下也没关系 探索进度 已点亮 ",
+    "动物大冒险 今天 已掌握 0 / 42 词 正确率 0%",
+    "已掌握 0 / 42 词 正确率 0%",
+    "已掌握 0 / 42 词",
+    "0 / 42"
+   ]
+  },
+  "settings": {
+   "tap": true,
+   "headings": [
+    "🔊 点击音效",
+    "🎨 整体配色",
+    "🥊 打Boss 主题",
+    "🔊 发音音量",
+    "📊 当前进度概览",
+    "🎨 主题选择 (跨岛同步)",
+    "🧹 单项清除 (温和)",
+    "🗑️ 危险操作",
+    "💎 钻石悬浮球",
+    "☁️ 云存档（换手机不丢档） 已就绪 · 点「立即同步」开启云存档 你的记忆水晶",
+    "💾 完整备份与恢复"
+   ],
+   "themeBox": [
+    {
+     "text": "🌌 星空夜 蓝紫深空 ✓ 已选择",
+     "w": 104,
+     "h": 128,
+     "fullOverlay": false,
+     "ovText": null
+    },
+    {
+     "text": "🌸 樱花粉 梦幻浪漫",
+     "w": 104,
+     "h": 128,
+     "fullOverlay": false,
+     "ovText": null
+    },
+    {
+     "text": "🌊 海洋蓝 深海冒险 🔒 💰300",
+     "w": 104,
+     "h": 128,
+     "fullOverlay": true,
+     "ovText": "🔒 💰300"
+    },
+    {
+     "text": "🌳 森林绿 清新自然 🔒 💰1000",
+     "w": 104,
+     "h": 105,
+     "fullOverlay": true,
+     "ovText": "🔒 💰1000"
+    },
+    {
+     "text": "🌈 彩虹云朵 童话奇幻 🔒 💰2000",
+     "w": 104,
+     "h": 105,
+     "fullOverlay": true,
+     "ovText": "🔒 💰2000"
+    },
+    {
+     "text": "🍑 桃子糖果 甜美可爱 🔒 💰3000",
+     "w": 104,
+     "h": 105,
+     "fullOverlay": true,
+     "ovText": "🔒 💰3000"
+    }
+   ],
+   "pickers": [
+    "整体配色:1",
+    "打Boss主题:0",
+    "Boss主题:0",
+    "主题选择:1",
+    "樱花粉:2",
+    "森野绿:1",
+    "森林绿:1"
+   ]
+  },
+  "toast": [
+   {
+    "ms": 100,
+    "s": {
+     "l": 193,
+     "r": 392,
+     "t": 358,
+     "b": 440,
+     "op": "0.953792"
+    }
+   },
+   {
+    "ms": 300,
+    "s": {
+     "l": 183,
+     "r": 402,
+     "t": 333,
+     "b": 424,
+     "op": "0.699637"
+    }
+   },
+   {
+    "ms": 600,
+    "s": null
+   },
+   {
+    "ms": 900,
+    "s": null
+   },
+   {
+    "ms": 1250,
+    "s": null
+   }
+  ],
+  "spellbee": {
+   "tap": true,
+   "overlay": {
+    "disp": "block",
+    "w": 390,
+    "h": 844
+   },
+   "sbTheme": {
+    "theme": "sky",
+    "bg": "radial-gradient(900px 520px at 50% -6%, rgb(240, 250, 255), rgba(0, 0, 0, 0) 60%), linear-gradient(170deg, rgb(230, 245,",
+    "font": "\"PingFang SC\", \"Microsoft YaHei\", \"HarmonyOS Sans SC\", MiSans, \"Source Han Sans ",
+    "back": "‹ 返回"
+   }
+  }
+ },
+ "errs": [
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "external": []
+}

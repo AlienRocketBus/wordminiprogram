@@ -1,0 +1,132 @@
+{
+  "root": "chpad/v1163_snapshot",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "up1": {
+    "ok": true,
+    "reason": ""
+  },
+  "s1": {
+    "signed": true,
+    "learned": 5,
+    "ladderWins": 3,
+    "ladderGames": 3,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 ›"
+  },
+  "up2": {
+    "winsBeforeSync": 5,
+    "ok": false,
+    "reason": "upload-failed",
+    "error": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+  },
+  "s3": {
+    "signed": true,
+    "learned": 12,
+    "ladderWins": 5,
+    "ladderGames": 5,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1090 分 ›"
+  },
+  "s4": {
+    "signed": true,
+    "learned": 15,
+    "ladderWins": 5,
+    "ladderGames": 5,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1090 分 ›"
+  },
+  "relogin": {
+    "ok": true,
+    "uid": "1527283253218073236",
+    "sync": {
+      "ok": true,
+      "action": "restored",
+      "needReload": true,
+      "autoPicked": "cloud",
+      "localWords": 15,
+      "cloudWords": 0
+    }
+  },
+  "s5": {
+    "signed": true,
+    "learned": 5,
+    "ladderWins": 3,
+    "ladderGames": 3,
+    "me": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›"
+  },
+  "errors": [],
+  "t0": 1793714030250,
+  "marks": {
+    "up1done": 2601,
+    "beforeStep3": 9103,
+    "s3": 12565,
+    "beforeRelogin": 12572,
+    "reloginDone": 12903
+  },
+  "saveWrites": [
+    {
+      "dt": 2591,
+      "op": "upsert"
+    },
+    {
+      "dt": 12879,
+      "op": "set"
+    }
+  ],
+  "tokenLog": [
+    {
+      "dt": 2072,
+      "path": "/auth/v1/verification",
+      "st": 200,
+      "code": ""
+    },
+    {
+      "dt": 2117,
+      "path": "/auth/v1/signup",
+      "st": 200,
+      "code": ""
+    },
+    {
+      "dt": 9145,
+      "path": "/auth/v1/token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "dt": 9563,
+      "path": "/auth/v1/token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "dt": 10107,
+      "path": "/auth/v1/token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "dt": 11053,
+      "path": "/auth/v1/token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "dt": 12607,
+      "path": "/auth/v1/verification",
+      "st": 200,
+      "code": ""
+    },
+    {
+      "dt": 12642,
+      "path": "/auth/v1/verification/verify",
+      "st": 200,
+      "code": ""
+    },
+    {
+      "dt": 12678,
+      "path": "/auth/v1/signin",
+      "st": 200,
+      "code": ""
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+
+▶ island_animal.html
+  ✅ 岛页提供 __hsnIslandBack / __hsnIslandHidden / __hsnBackStack {"back":"function","hidden":"function","stack":true}
+  ✅ 开始在本岛主页
+  ✅ ① 本岛主页按返回 → false（外壳去退岛）
+  ✅ ② 点卡片进了听音辨义
+  ✅ ② 游戏里按返回 → true，回到本岛主页 (true, homeScreen)
+  ✅ ③ 先调登记的关闭函数（后进先出，返回 false 的跳过），屏幕不动 {"calls":["B-已关","A"],"first":true,"scr1":"exploreScreen","second":true,"scr2":"homeScreen","third":false,"left":0}
+  ✅ ③ 登记用完后再按返回：从探索单词回主页
+  ✅ ③ 登记调用后已移除、撤销登记的不会被调用
+  ✅ ④ 弹窗开着按返回 → 关掉弹窗 {"shown":true,"r":true,"still":false,"scr":"homeScreen"}
+  ✅ ⑤ 打地鼠开始了
+  ✅ ⑤ 藏起来 → 打地鼠停了，回本岛主页 {"active":false,"scr":"homeScreen"}
+  ✅ ⑤ 藏起来后 12 秒没有任何声音 []
+  ✅ ⑥ 极速60秒藏起来 → 停表、不再出题出声 {"a1":true,"t1":58,"a2":false,"t2":58,"timer":null,"scr":"homeScreen","sounds":0}
+  ✅ 页面无报错 
+
+▶ island_land1.html
+  ✅ 岛页提供 __hsnIslandBack / __hsnIslandHidden / __hsnBackStack {"back":"function","hidden":"function","stack":true}
+  ✅ 开始在本岛主页
+  ✅ ① 本岛主页按返回 → false（外壳去退岛）
+  ✅ ② 点卡片进了听音辨义
+  ✅ ② 游戏里按返回 → true，回到本岛主页 (true, homeScreen)
+  ✅ ③ 先调登记的关闭函数（后进先出，返回 false 的跳过），屏幕不动 {"calls":["B-已关","A"],"first":true,"scr1":"exploreScreen","second":true,"scr2":"homeScreen","third":false,"left":0}
+  ✅ ③ 登记用完后再按返回：从探索单词回主页
+  ✅ ③ 登记调用后已移除、撤销登记的不会被调用
+  ✅ ④ 弹窗开着按返回 → 关掉弹窗 {"shown":true,"r":true,"still":false,"scr":"homeScreen"}
+  ✅ ⑤ 打地鼠开始了
+  ✅ ⑤ 藏起来 → 打地鼠停了，回本岛主页 {"active":false,"scr":"homeScreen"}
+  ✅ ⑤ 藏起来后 12 秒没有任何声音 []
+  ✅ ⑥ 极速60秒藏起来 → 停表、不再出题出声 {"a1":true,"t1":58,"a2":false,"t2":58,"timer":null,"scr":"homeScreen","sounds":0}
+  ✅ 页面无报错 
+
+✅ v1165 岛页「返回一步」和「藏起来就停」：两个接口在常规岛和单词大陆都可用

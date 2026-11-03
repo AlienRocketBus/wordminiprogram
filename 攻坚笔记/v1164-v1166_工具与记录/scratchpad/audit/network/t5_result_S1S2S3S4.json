@@ -1,0 +1,101 @@
+{
+  "S1": {
+    "tap": {
+      "ok": true
+    },
+    "samples": [
+      {
+        "p": "blank",
+        "title": "",
+        "frameOpacity": "0",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 743
+      },
+      {
+        "p": "blank",
+        "title": "",
+        "frameOpacity": "0",
+        "loading": "flex",
+        "loadingText": "正在进入 动物岛…",
+        "dt": 1025
+      },
+      {
+        "p": "island_animal.html",
+        "title": "",
+        "frameOpacity": "0",
+        "loading": "flex",
+        "loadingText": "正在进入 动物岛…",
+        "dt": 5735
+      },
+      {
+        "p": "island_animal.html",
+        "title": "",
+        "frameOpacity": "1",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 6163
+      },
+      {
+        "p": "island_animal.html",
+        "title": "动物大冒险 · Animal Word Adventure",
+        "frameOpacity": "1",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 6989
+      }
+    ]
+  },
+  "S2": {
+    "tap": {
+      "ok": true
+    },
+    "samples": [
+      {
+        "p": "blank",
+        "title": "",
+        "frameOpacity": "0",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 500
+      },
+      {
+        "p": "blank",
+        "title": "",
+        "frameOpacity": "0",
+        "loading": "flex",
+        "loadingText": "正在进入 动物岛…",
+        "dt": 809
+      },
+      {
+        "p": "blank",
+        "title": "",
+        "frameOpacity": "1",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 10713
+      },
+      {
+        "p": "island_animal.html",
+        "title": "当前页面尚未下载",
+        "frameOpacity": "1",
+        "loading": "none",
+        "loadingText": "",
+        "dt": 12687
+      }
+    ]
+  },
+  "S3": {
+    "commitMs": 8076,
+    "loadMs": 9072,
+    "servedVersion": "http://127.0.0.1:33537/hansen_sw_upgrade_gate_v944.js?v=1163"
+  },
+  "S4": {
+    "banner": false,
+    "auth": "object",
+    "after": {
+      "banner": false,
+      "auth": "object"
+    }
+  }
+}

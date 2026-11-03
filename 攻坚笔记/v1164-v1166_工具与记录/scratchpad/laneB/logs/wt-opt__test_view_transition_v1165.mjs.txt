@@ -1,0 +1,11 @@
+  ✅ 第 1 轮：真点「动物」
+  ✅ 第 1 轮：真点 🗺️
+  ✅ 第 2 轮：真点「动物」
+  ✅ 第 2 轮：真点 🗺️
+  ✅ 第 3 轮：真点「动物」
+  ✅ 第 3 轮：真点 🗺️
+  ✅ 没有 ViewTransition 错误（0 个：）
+  ✅ 顶层首页仍有 @view-transition 规则
+  ✅ 岛框里的岛页没有 @view-transition 规则
+
+✅ 换岛不再冒 ViewTransition 错误

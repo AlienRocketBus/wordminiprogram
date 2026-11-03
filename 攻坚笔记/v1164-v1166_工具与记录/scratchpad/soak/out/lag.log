@@ -1,0 +1,56 @@
+
+══ clusters (26) ══
+  [high  ]    4× I6:config:claimRound:DATABASE_DUPLICATE_WRITE   seeds 448,489,534,599
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_DUPLICATE_WRITE），请把技术信息发给负责的老师 ⟨DATABASE_DUPLICATE_WRITE | duplicate key: _id rmk0gedwa6gnghr_w2 | req req4u⟩」
+  [high  ]    3× I6:config:claimRound:DATABASE_REQUEST_FAILED   seeds 133,430,461
+           e.g. claimRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    3× I6:config:skipRound:DATABASE_REQUEST_FAILED   seeds 381,422,468
+           e.g. skipRound → kind config 「云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors」
+  [high  ]    2× I2:update   seeds 120,156
+           e.g. update rmk0gedkna36hyj_s0 owned by P3
+  [high  ]    1× I6:config:leaveRoom:DATABASE_PERMISSION_DENIED   seeds 120
+           e.g. leaveRoom → kind config 「云端设置还差一步：数据库集合「hansen_pk_rooms」的权限不允许这样读写，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | Permission denied | req req23⟩」
+  [high  ]    1× I2:remove   seeds 156
+           e.g. remove rmk0ged0q5n9rn3_s0 owned by P2
+  [high  ]    1× I4:results-win-win:ab:opp-gone/ab:opp-gone   seeds 304
+           e.g. rmk0geusdnddn6i host win 100:100 vs guest win 200:100 [H-abandon(opp-gone)/G-abandon(opp-gone)] disrupted(outage)
+  [medium]   10× I3:skip-beat-correct-answer:A   seeds 73,161,230,248,287,328
+           e.g. word 4: P0 spelled it right 19.1s after the word appeared (local deadline in 20.0s) but the skip W doc of P1 was already there (the other phone timed out 16.0s after its word appeared, deadline in 15.0s)
+  [medium]    4× I6:own-room-reported-gone   seeds 118,246,445,503
+           e.g. waitForOpponent(rmk0gecwgc4dpjx) → {gone} but the room exists (status open)
+  [medium]    1× I6:gone-but-room-open:findByCode:lag   seeds 217
+           e.g. findByCode(Y32A) → 「没找到这间房，可能已经关了或码输错了」 while host P0 was online and waiting with the room open (clock diff 0s)
+  [medium]    1× I5:zombie-heartbeat-after-leave   seeds 386
+           e.g. P2 (screen 「home」, idle since 46.8s) still patches rmk0gedg0j69ies_s0 {"guestBeat":1767574870157,"acked":true} at 70.2s
+  [medium]    1× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:slow   seeds 438
+           e.g. rmk0geth31t6f06 word 0: P0 spelled it right; round doc {"winner":"host","by":"k0x438","at":1767574830714.0615} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=slow)
+  [medium]    1× I4:score-vs-rounds:own-win-doc-landed-but-scored-0:config   seeds 489
+           e.g. rmk0ggv78b0nqsk word 9: P2 spelled it right; round doc {"winner":"host","by":"k2x489","at":1767575057851.4783} ⇒ 100 points, the UI scored 0 (claimRound FAILED kind=config)
+  [medium]    1× I6:taken-but-nobody-else:no-seat   seeds 518
+           e.g. joinRoom(rmk0gedabetxwr1) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [medium]    1× I6:ack-timeout-but-host-had-acked   seeds 523
+           e.g. joinRoom(rmk0geuj9d5bmcb) gave up 「房主没有回应」 although the host had written guestId=me at 51.7s
+  [medium]    1× I4:score-vs-rounds:claim-failed:config   seeds 599
+           e.g. rmk0gedtvjdg48n word 2: P0 spelled it right; round doc {"winner":"guest","by":"k3x599","at":1767574848565.3982} ⇒ 60 points, the UI scored 0 (claimRound FAILED kind=config)
+  [low   ]   15× I6:full-room-reported-gone:findByCode   seeds 16,112,117,122,160,189
+           e.g. findByCode(C6QN) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    7× I3:skip-beat-correct-answer:BC   seeds 5,277,333,473,477,491
+           e.g. word 0: P0 spelled it right 11.8s after the word appeared (local deadline in 15.0s) but the skip W doc of P1 was already there (the other phone timed out 15.0s after its word appeared, deadline in 15.0s)
+  [low   ]    4× I5:played-on-after-opponent-claimed-abandon:host-after-resume   seeds 46,58,239,255
+           e.g. P1 (host) kept answering 5 more words after the opponent had claimed the win by abandon at 175.9s — it is only told at the very end
+  [low   ]    3× I6:taken-but-nobody-else:room-holds-my-own-key   seeds 70,72,411
+           e.g. joinRoom(rmk0gedjxn6q0iy) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I6:ack-timeout-host-alive   seeds 77,156
+           e.g. joinRoom(rmk0gedhafbq42r) 「房主没有回应」 while host P0 was online and waiting
+  [low   ]    2× I1:phantom-seat   seeds 171,369
+           e.g. guest P3 got joinRoom ok for rmk0gedjyl3d6bv seat 0 but host P0 never started with it; guest played 1 words, wrote W[], ended: lobby
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 212
+           e.g. P3 (guest) kept answering 9 more words after the opponent had claimed the win by abandon at 85.8s — it is only told at the very end
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:host   seeds 430
+           e.g. P1 (host) kept answering 2 more words after the opponent had claimed the win by abandon at 131.6s — it is only told at the very end
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:guest   seeds 466
+           e.g. P1 (guest) kept answering 2 more words after the opponent had claimed the win by abandon at 149.6s — it is only told at the very end
+  [low   ]    1× I6:gone-but-room-open:joinRoom:room-just-created   seeds 503
+           e.g. joinRoom(rmk0gedhuikr2wh) → 「这个房间已经没有了，换一间吧 ⟨房间已不存在⟩」 while host P0 was online and waiting with the room open (clock diff 0s)
+
+SUMMARY profile=lag runs=600 seeds=1..600 failing_runs=30 clusters=26 (fail-level 16) | runs-with-violation per invariant: ERR:0 I1:2 I2:2 I3:17 I4:4 I5:8 I6:38 I7:0 I8:0 I9:0 I10:0 | matches=623 settled_pairs=563 virtual=73.8h events=1062965 real=25s

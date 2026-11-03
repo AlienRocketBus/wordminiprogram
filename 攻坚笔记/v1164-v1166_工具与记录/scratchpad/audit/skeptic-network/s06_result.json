@@ -1,0 +1,64 @@
+{
+  "fresh_nosw": {
+    "homeHtmlRequests": [
+      "/land_map.html dest=empty purpose=- status=200 kb=496",
+      "/island_animal.html?v=1163 dest=empty purpose=- status=200 kb=169",
+      "/island_animal.html?v=1163 dest=empty purpose=prefetch status=304 kb=0",
+      "/island_food.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_sports.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_job.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_color.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_nature.html?v=1163 dest=empty purpose=prefetch status=200 kb=169"
+    ],
+    "islandOpenRequests": [
+      "/island_food.html dest=iframe status=200 kb=170"
+    ],
+    "waitMs": 1011,
+    "lastIslandKeyAfter": "wordIslandFood",
+    "secondHomeLoad": [
+      "/island_wordIslandFood.html?v=1163 status=404",
+      "/island_food.html?v=1163 status=304",
+      "/island_season.html?v=1163 status=304",
+      "/island_season.html?v=1163 status=304",
+      "/island_animal.html?v=1163 status=304",
+      "/island_sports.html?v=1163 status=304",
+      "/island_job.html?v=1163 status=304"
+    ]
+  },
+  "returning_kid_nosw": {
+    "homeHtmlRequests": [
+      "/island_wordIslandPeople.html?v=1163 dest=empty purpose=prefetch status=404 kb=0",
+      "/island_colornum.html?v=1163 dest=empty purpose=prefetch status=404 kb=0",
+      "/island_food.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_verbs.html?v=1163 dest=empty purpose=prefetch status=404 kb=0",
+      "/island_people.html?v=1163 dest=empty purpose=prefetch status=404 kb=0",
+      "/land_map.html dest=empty purpose=- status=200 kb=496",
+      "/island_job.html?v=1163 dest=empty purpose=- status=200 kb=170",
+      "/island_animal.html?v=1163 dest=empty purpose=prefetch status=200 kb=169"
+    ],
+    "islandOpenRequests": [
+      "/island_food.html dest=iframe status=200 kb=170"
+    ],
+    "waitMs": 881,
+    "lastIslandKeyAfter": "wordIslandFood"
+  },
+  "fresh_sw": {
+    "homeHtmlRequests": [
+      "/_frame.html dest=empty purpose=- status=200 kb=3",
+      "/_sw_upgrade_v944.html dest=empty purpose=- status=200 kb=2",
+      "/land_map.html dest=empty purpose=- status=200 kb=496",
+      "/island_animal.html?v=1163 dest=empty purpose=- status=200 kb=169",
+      "/island_animal.html?v=1163 dest=empty purpose=prefetch status=304 kb=0",
+      "/island_food.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_sports.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_job.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_color.html?v=1163 dest=empty purpose=prefetch status=200 kb=170",
+      "/island_nature.html?v=1163 dest=empty purpose=prefetch status=200 kb=169"
+    ],
+    "islandOpenRequests": [
+      "/island_food.html dest=empty status=200 kb=170"
+    ],
+    "waitMs": 2117,
+    "lastIslandKeyAfter": "wordIslandFood"
+  }
+}

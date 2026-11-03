@@ -1,0 +1,91 @@
+{
+  "sw": {
+    "seen": [
+      {
+        "dt": 138,
+        "p": "blank",
+        "rs": "complete",
+        "title": "",
+        "op": "0",
+        "loading": null
+      },
+      {
+        "dt": 453,
+        "p": "blank",
+        "rs": "complete",
+        "title": "",
+        "op": "0",
+        "loading": "正在进入…"
+      },
+      {
+        "dt": 10235,
+        "p": "blank",
+        "rs": "complete",
+        "title": "",
+        "op": "1",
+        "loading": null
+      },
+      {
+        "dt": 12247,
+        "p": "/land_map.html",
+        "rs": "complete",
+        "title": "当前页面尚未下载",
+        "op": "1",
+        "loading": null
+      }
+    ],
+    "nav": [
+      {
+        "path": "/land_map.html",
+        "dest": "empty",
+        "size": 507586,
+        "aborted": 348000,
+        "abortedMs": 12017
+      }
+    ]
+  },
+  "nosw": {
+    "seen": [
+      {
+        "dt": 49,
+        "p": "blank",
+        "rs": "complete",
+        "title": "",
+        "op": "0",
+        "loading": null
+      },
+      {
+        "dt": 356,
+        "p": "/land_map.html",
+        "rs": "loading",
+        "title": "单词大陆 · 冒险地图",
+        "op": "0",
+        "loading": "正在进入…"
+      },
+      {
+        "dt": 2197,
+        "p": "/land_map.html",
+        "rs": "loading",
+        "title": "单词大陆 · 冒险地图",
+        "op": "1",
+        "loading": null
+      },
+      {
+        "dt": 17416,
+        "p": "/land_map.html",
+        "rs": "complete",
+        "title": "单词大陆 · 冒险地图",
+        "op": "1",
+        "loading": null
+      }
+    ],
+    "nav": [
+      {
+        "path": "/land_map.html",
+        "dest": "iframe",
+        "size": 507586,
+        "doneMs": 17173
+      }
+    ]
+  }
+}

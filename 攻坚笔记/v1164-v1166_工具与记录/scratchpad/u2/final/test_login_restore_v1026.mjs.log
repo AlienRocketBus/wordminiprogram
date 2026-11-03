@@ -1,0 +1,10 @@
+登录后云端恢复 v1026
+  OK  syncOnLogin 已导出
+  OK  云端有档+本机空 → 调用了恢复
+  OK  返回 action=restored
+  OK  **恢复成功必须要求刷新页面**(否则内存仍是旧数据)
+  OK  云端无档 → 上传, 不刷新
+  OK  UI 依据 needReload 调用 location.reload()
+  OK  冲突分支选「用云端」后同样刷新
+
+结果: 7 通过 / 0 失败
