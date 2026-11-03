@@ -5,7 +5,8 @@
  *   （多半是 👑星海终战）。
  *
  * 合同（首页外壳，真点）：
- *   1. 真点「动物」→ 🗺️，再往 wordIslandSeason / wordIslandMisc 里写更新的 lastSaveTime：卡片仍是 🐯 动物，点卡片进 island_animal.html
+ *   1. 真点「动物」→ 🗺️，再往 wordIslandSeason / wordIslandMisc 里写更新的 lastSaveTime：卡片仍是动物岛（图标和首页动物岛卡一样，
+ *      v1165 起是卡片上的 🦁，不再是旧表里的 🐯），点卡片进 island_animal.html
  *   2. 动物 → 食物 → 疑问（代词岛）依次真点：卡片跟着最后一个（island_question.html）
  *   3. 从没真点过岛（没有 lastIslandKey）的老孩子：照旧扫存档，挑 lastSaveTime 最新的那个岛
  */
@@ -86,9 +87,11 @@ try {
       localStorage.setItem('wordIslandMisc', JSON.stringify({ learned: [2], mc: {}, wrongs: {}, lastSaveTime: now + 1000 }));
       renderRecent();
     });
-    await sleep(2300);   // 首页每 2 秒还会自己重画一次
+    await sleep(10500);   // 首页露着时每 10 秒还会自己重画一次（v1165 F043：以前是 2 秒）
     const s = await shell(page);
-    ok(s.target === 'island_animal.html' && /🐯/.test(s.num), `卡片仍是动物岛（${s.num} → ${s.target}）`);
+    /* v1165（F069）：「最近探险」的图标和名字以首页岛卡为准（动物岛卡是 🦁），所以从卡片上读，不写死旧表里的 🐯 */
+    const icon = await page.evaluate(() => document.querySelector('a.island[href="island_animal.html"] .island-icon').textContent.trim());
+    ok(s.target === 'island_animal.html' && s.num.startsWith(icon + ' 动物'), `卡片仍是动物岛（${s.num} → ${s.target}）`);
     ok(await tapAt(page, page.mainFrame(), '#recentLearnStat'), '真点卡片');
     await sleep(2500);   // 等换岛（如果真要换）落定
     const s2 = await shell(page);
