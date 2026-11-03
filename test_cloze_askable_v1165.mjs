@@ -143,12 +143,19 @@ try {
     const r = await page.evaluate(async () => {
       const i = allW.findIndex(w => w.en === 'eye');
       showScreen('boss'); startBoss();
-      await new Promise(r => setTimeout(r, 900));
-      const R = Math.random; Math.random = () => 0.05;           // 让下一题走完形分支
-      bossPool.length = 0; bossPool.push(i);
-      const bo = document.getElementById('bossOpts'); if (bo) bo.dataset.done = '1';   // 当作上一题已答完，放行出下一题
-      nextBossQ(); Math.random = R;
-      const q = { type: window._bossQType, word: window._bossWord && window._bossWord.en, prompt: (document.getElementById('bossQ') || {}).textContent || '' };
+      let q = null;
+      for (let a = 0; a < 4; a++) {
+        // 等这一题出来，再多等 1 秒：Boss 有「800ms 内不许换题」的防覆盖锁，太早调用会被它挡掉
+        for (let k = 0; k < 60 && !window._bossQType; k++) await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 1000));
+        // 只让「抽题型」那一下走完形分支；其余照常随机（全部固定会让选项抽取永远抽到同一个词、死循环）
+        const R = Math.random; let n = 0; Math.random = function () { return n++ === 0 ? 0.05 : R(); };
+        bossPool.length = 0; bossPool.push(i);
+        const bo = document.getElementById('bossOpts'); if (bo) bo.dataset.done = '1';   // 当作上一题已答完，放行出下一题
+        try { nextBossQ(); } finally { Math.random = R; }
+        q = { type: window._bossQType, word: window._bossWord && window._bossWord.en, prompt: (document.getElementById('bossQ') || {}).textContent || '' };
+        if (q.type === 'cloze') break;
+      }
       try { stopBoss(); } catch (e) {}
       showScreen('home');
       return q;
