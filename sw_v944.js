@@ -30,6 +30,23 @@ async function trim(cacheName, maxEntries) {
   const keys = await cache.keys();
   while (keys.length > maxEntries) await cache.delete(keys.shift());
 }
+/* v1165：同一个缓存同时只跑一次修剪（以前每存一条就各自修剪一遍，并发时互相踩），跑的期间又有新写入就再跑一次 */
+const trimState = {};
+function scheduleTrim(cacheName, maxEntries) {
+  const st = trimState[cacheName] || (trimState[cacheName] = { running: null, again: false });
+  if (st.running) { st.again = true; return st.running; }
+  st.running = (async () => {
+    try { do { st.again = false; await trim(cacheName, maxEntries); } while (st.again); }
+    finally { st.running = null; }
+  })();
+  return st.running;
+}
+/* v1165：页面缓存按「路径」存一份（去掉 ?v / ?warm / _fresh / _r），同一个岛不再因为地址后缀不同占好几格，
+   把别的岛挤出 12 格的页面缓存（离线时就打不开了）。 */
+function pageCacheKey(request) {
+  try { const u = new URL(request.url, self.location.origin); return new Request(u.origin + u.pathname); }
+  catch (error) { return request; }
+}
 
 async function putIfReasonable(cacheName, request, response, maxEntries) {
   if (!response || !response.ok || response.type === 'opaque') return false;
@@ -76,8 +93,8 @@ async function putIfReasonable(cacheName, request, response, maxEntries) {
     if (!_toStore) _toStore = response.clone();
 
     const cache = await caches.open(cacheName);
-    await cache.put(request, _toStore);
-    await trim(cacheName, maxEntries);
+    await cache.put(cacheName === PAGE_CACHE ? pageCacheKey(request) : request, _toStore);
+    await scheduleTrim(cacheName, maxEntries);
     return true;
   } catch (error) {
     // 缓存配额不足/隐私模式禁止 Cache Storage 时，联网成功的业务响应仍必须交给页面。
@@ -291,7 +308,24 @@ self.addEventListener('activate', event => {
    仅当 Content-Type 明确是"会触发下载"的类型（octet-stream / 缺失 /
    带 attachment）时才改写，且改写只换 headers、直接复用原 body 流，
    不做任何读取与克隆。其余情况原样返回，零开销、零风险。 */
-function fixHtmlType(response) {
+/* v1165：按地址后缀给出正确的类型。以前一律改成 text/html —— JS、字体、图片被服务器发错类型时也被标成网页。
+   只有「/」、目录和 .html 才是网页；认不出的后缀就不改（原样交出去，不添乱）。 */
+const MIME_BY_EXT = {
+  html: 'text/html; charset=utf-8', htm: 'text/html; charset=utf-8',
+  js: 'application/javascript; charset=utf-8', mjs: 'application/javascript; charset=utf-8',
+  css: 'text/css; charset=utf-8', json: 'application/json; charset=utf-8', webmanifest: 'application/manifest+json',
+  woff2: 'font/woff2', woff: 'font/woff', ico: 'image/x-icon', webp: 'image/webp', png: 'image/png',
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml', gif: 'image/gif'
+};
+function typeForUrl(url) {
+  let p = '';
+  try { p = new URL(String(url), self.location.href).pathname; } catch (error) { return 'text/html; charset=utf-8'; }
+  if (!p || p === '/' || p.endsWith('/')) return 'text/html; charset=utf-8';
+  const m = p.match(/\.([a-z0-9]+)$/i);
+  if (!m) return 'text/html; charset=utf-8';   // 没有后缀的地址（部署根/伪静态）按网页
+  return MIME_BY_EXT[m[1].toLowerCase()] || null;
+}
+function fixHtmlType(response, url) {
   try {
     if (!response || !response.ok) return response;
     const ct = (response.headers.get('content-type') || '').toLowerCase();
@@ -311,8 +345,10 @@ function fixHtmlType(response) {
       ct.startsWith('text/plain') ||
       dispo.includes('attachment');
     if (!looksDownload) return response;   /* 正常响应一律不碰 */
+    const type = typeForUrl(url || response.url || '');
+    if (!type) return response;
     const headers = new Headers(response.headers);
-    headers.set('content-type', 'text/html; charset=utf-8');
+    headers.set('content-type', type);
     headers.delete('content-disposition');
     return new Response(response.body, {
       status: response.status, statusText: response.statusText, headers: headers
@@ -389,7 +425,7 @@ self.addEventListener('fetch', event => {
        浏览器不会渲染而是直接下载——用户打开网址就变成下载文件。
        这属服务端配置问题，但我们可以在 SW 里把响应头改回 text/html，
        让已装过 SW 的用户立刻恢复正常（首次访问仍需服务端配置正确）。 */
-    event.respondWith(navigation.then(result => fixHtmlType(result.response)));
+    event.respondWith(navigation.then(result => fixHtmlType(result.response, url)));
     return;
   }
 
@@ -400,10 +436,16 @@ self.addEventListener('fetch', event => {
   if (!isCode && !isSmallIcon) return;
 
   const cacheName = isSmallIcon ? ICON_CACHE : ASSET_CACHE;
-  const maxEntries = isSmallIcon ? 36 : 72;
-  const network = fetch(request);
+  /* v1165：带版本号的代码（?v=1163）一个版本只有一份内容 —— 300 多个脚本地址，72 格根本装不下，离线进岛就缺核心脚本。
+     加到 400 格（每次发版换缓存代号，旧代整个删掉，不会越攒越多）。图标照旧 36 格。 */
+  const maxEntries = isSmallIcon ? 36 : 400;
+  const versioned = /(?:^|&)v=\d+(?:&|$)/.test(url.search.slice(1));
+  /* v1165：带版本号、缓存里有一模一样的地址 → 直接用缓存，不再每次都联网重下、重写缓存（以前每个脚本每次都下一遍）。
+     没带版本号的照旧：先给缓存、后台联网更新。 */
+  const hit = caches.match(request).catch(() => null);
+  const network = hit.then(found => (found && versioned) ? null : fetch(request));
   const refresh = network.catch(() => null);
-  event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
+  event.waitUntil(network.then(response => response ? putIfReasonable(cacheName, request, response, maxEntries) : false).catch(() => false));
   if (isCode) {
     // v946: code cache keys include the version query.  The former
     // ignoreSearch:true could answer ?v=1163 with stale prior-version JavaScript on
@@ -419,12 +461,12 @@ self.addEventListener('fetch', event => {
        三处读缓存的地方现在都过一遍 fixHtmlType：
        导航 / 精确命中 / 离线兜底。 */
     event.respondWith((async () => {
-      const exact = await caches.match(request);
-      if (exact) return fixHtmlType(exact);
+      const exact = await hit;
+      if (exact) return fixHtmlType(exact, url);
       const fresh = await refresh;
-      if (fresh) return fixHtmlType(fresh);
+      if (fresh) return fixHtmlType(fresh, url);
       const bare = await caches.match(new Request(url.origin + url.pathname));
-      return (bare ? fixHtmlType(bare) : null) ||
+      return (bare ? fixHtmlType(bare, url) : null) ||
         new Response('', { status: 504 });
     })());
   } else {
@@ -439,11 +481,16 @@ self.addEventListener('fetch', event => {
        > 查了七轮才把三条路径凑齐 —— 这正说明
        > **"改一处就以为修好了"是这类问题最大的陷阱**。
        > 凡是"能把响应交给浏览器"的地方，一条都不能漏。 */
-    event.respondWith(caches.match(request, { ignoreSearch: true }).then(async cached => {
-      if (cached) return fixHtmlType(cached);
+    /* v1165：图标先找一模一样的地址（?v= 也一样），再联网；忽略 ?v= 的旧副本只在断网时兜底 ——
+       以前先按忽略 ?v= 去找，图标换了新图（新 ?v=）老玩家也一直看到旧图。 */
+    event.respondWith((async () => {
+      const exact = await hit;
+      if (exact) return fixHtmlType(exact, url);
       const fresh2 = await refresh;
-      if (fresh2) return fixHtmlType(fresh2);
+      if (fresh2) return fixHtmlType(fresh2, url);
+      const cached = await caches.match(request, { ignoreSearch: true }).catch(() => null);
+      if (cached) return fixHtmlType(cached, url);
       return new Response('', { status: 504 });
-    }));
+    })());
   }
 });
