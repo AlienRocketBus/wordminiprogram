@@ -404,6 +404,20 @@
       css+=_L+ov+' .hr_stat .num{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
       css+=_L+ov+' .hr_stat .lbl{color:#475569!important}\n';
     });
+    // v1165 错题总览(#hwo_overlay) 也翻成亮底黑字：首页横幅现在真的会打开它，以前亮色主题下深底配深字看不清
+    css+=_L+'#hwo_overlay{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 60%,#e0e7ff 100%)!important}\n';
+    css+=_L+'#hwo_overlay, '+_L+'#hwo_overlay *{--pal-ink:#0f172a;--pal-ink-hi:#020617;--pal-ink-2:#334155;--pal-ink-3:#64748b}\n';
+    css+=_L+'#hwo_overlay .hwo_title{color:var(--pal-accent-text,#1e40af)!important}\n';
+    css+=_L+'#hwo_overlay .hwo_sub,'+_L+'#hwo_overlay .hwo_btm,'+_L+'#hwo_overlay [style*="color:#94a3b8"]{color:#475569!important}\n';
+    css+=_L+'#hwo_overlay [style*="color:#cbd5e1"]{color:#334155!important}\n';
+    css+=_L+'#hwo_overlay [style*="color:#22c55e"]{color:#15803d!important}\n';
+    css+=_L+'#hwo_overlay .hwo_back{background:rgba(15,23,42,.08)!important;color:#334155!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_card{background:rgba(255,255,255,.75)!important;border-color:rgba(15,23,42,.10)!important;color:#0f172a!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_name{color:#0f172a!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_hint{color:#475569!important}\n';
+    /* 红色计数块 / 红总数卡 / 紫色「一起复习」本身是深色块：字保持浅色 */
+    css+=_L+'#hwo_overlay .hwo_island_count,'+_L+'#hwo_overlay .hwo_island_count *,'+_L+'#hwo_overlay .hwo_total,'+_L+'#hwo_overlay .hwo_total *,'+_L+'#hwo_overlay .hwo_review_all,'+_L+'#hwo_overlay .hwo_review_all *{color:#fff!important}\n';
+    css+=_L+'#hwo_overlay .hwo_total_n{color:#fde047!important}\n';
     // \U0001f534v992\u325d \u6211\u7684\u5b66\u4e60\u9875(#hsn-ml) \u771f\u53cc\u8272\u8c03\u5206\u79bb\u2014\u2014\u540c\u65cf\u6700\u540e\u4e00\u4e2a\u6df1\u5e95\u6d6e\u5c42
     // v988\u3257 \u66fe\u53ea\u6539\u6587\u5b57\u8272(\u5e95\u4ecd\u6df1\u7d2b) \u2192 \u5c9b\u5c7f\u540d\u6df1\u5b57\u538b\u6df1\u5e95\u5168\u7cca; \u672c\u7248\u6539\u4e3a\u6574\u5c42\u7ffb\u4eae
     css+=_L+'#hsn-ml{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 55%,#e0e7ff 100%)!important}\n';

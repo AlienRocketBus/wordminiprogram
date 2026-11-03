@@ -242,6 +242,9 @@
   //   新错词 → 盒子0(今天到期); 记住升一盒(间隔拉长), 没记住回盒0(明天再见)
   //   盒子间隔(天) = [1,2,4,7,15]; 升满即毕业(从计划/错题中移除)
   //   数据存在 S.srs = { idx: {box, due:'YYYY-MM-DD', last} }, 随 save() 持久化
+  //   🔴v1165: 计划和错题本分开记。答对一次只让错题本 -1；词留在计划里，
+  //   要在到期那天一次次答对、升满 5 盒才算毕业。以前错题数一归零就把计划删了，
+  //   错一次、当天答对一次 → 再也不会复习（间隔复习根本跑不起来）。
   // ─────────────────────────────────────────────
   var SRS_GAP = [1, 2, 4, 7, 15];
   var SRS_GRAD = SRS_GAP.length; // 升到第 5 盒 = 毕业
@@ -261,17 +264,23 @@
     // 回填当前切片，防止两个入口各自维护 due/box，也防止已清错词继续到期。
     try{if(window.HansenCanonical&&typeof HansenCanonical.syncCurrent==='function')HansenCanonical.syncCurrent();}catch(e){}
     if(!window.S.srs || typeof window.S.srs !== 'object') window.S.srs = {};
-    var srs = window.S.srs, wr = window.S.wrongs || {}, changed = false, t = _todayYMD();
+    var srs = window.S.srs, wr = window.S.wrongs || {}, changed = false, t = _todayYMD(), seeded = [];
     Object.keys(srs).forEach(function(idx){
+      // 🔴v1165: 只清掉坏索引。错题数归零不等于记住了，计划要留着。
       var i=canonicalWrongIndex(idx,Array.isArray(window.allW)?window.allW.length:0);
-      if(i<0||safeWrongCount(wr[i])===0){delete srs[idx];changed=true;}
+      if(i<0){delete srs[idx];changed=true;}
     });
     normalizeStoredWrongs(wr, window.allW).forEach(function(entry){
       var idx = String(entry.idx);
       if(!srs[idx]){
         srs[idx] = { box: 0, due: t, last: '' };
+        seeded.push(entry.idx);
         changed = true;
       }
+    });
+    // 新入计划的词马上写进权威账本：save() 可能被防抖，下一次同步会拿账本覆盖 S.srs
+    seeded.forEach(function(i){
+      try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, srs[String(i)]); }catch(_seedSync){}
     });
     if(changed && typeof save === 'function'){ try { save(); } catch(e){} }
     return srs;
@@ -287,7 +296,8 @@
       var box = e && typeof e.box === 'number' && Number.isInteger(e.box) ? e.box : -1;
       var due = e && typeof e.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.due) ? e.due : '';
       var wrong=safeWrongCount(wr[i]);
-      if(i >= 0 && wrong>0 && box >= 0 && box < SRS_GRAD && due && due <= t && vocab[i]){
+      // 🔴v1165: 错题本清空了也照样到期（还没毕业）
+      if(i >= 0 && box >= 0 && box < SRS_GRAD && due && due <= t && vocab[i]){
         out.push({ idx: i, word: vocab[i], box: box, wrong: wrong });
       }
     });
@@ -330,6 +340,7 @@
       }
     } else {
       e.box = 0; e.due = _addDaysYMD(SRS_GAP[0]); e.last = _todayYMD();
+      delete e.rp;   // 回到盒0，旧的答对证据作废
       srs[idx] = e;
     }
     try{
@@ -349,27 +360,21 @@
    * 答错不降盒(错误次数已由 markAnswer 加一,词继续到期;避免限时玩法误伤)。 */
   function _absorbRealAnswer(idx, correct){
     try{
-      if(correct !== true) return null;
       if(!window.S || !Array.isArray(window.allW)) return null;
-      var i = canonicalWrongIndex(idx, window.allW.length);
+      /* 🔴v1165: 玩法传进来的是数字下标(markAnswer(3,true))。以前只认字符串 → 永远 -1 →
+       * 这个吸收器上线以来一次都没真正跑过（测试里它被桩替换了，所以没人发现）。 */
+      var i = normalizeContextIndex(idx, window.allW.length);
       if(i < 0) return null;
-      var srs = _ensureSrs();
+      /* 先把这一题交给权威账本，再同步：markAnswer 刚扣掉的错题数还没进账本，
+       * 直接 _ensureSrs()→syncCurrent() 会用账本旧值把它冲回去。 */
+      try{ if(window.HansenCanonical && typeof HansenCanonical.absorbAnswer === 'function') HansenCanonical.absorbAnswer(i); }catch(_preSync){}
+      var srs = _ensureSrs();   // 答错的词在这里进计划（盒0，今天到期）
       if(!srs) return null;
+      if(correct !== true) return { advanced:false, reason:'missed', planned: !!srs[String(i)] };
       var key = String(i), t = _todayYMD();
       var wrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[i] : 0);
       var e = srs[key];
-      if(!e || typeof e !== 'object'){
-        if(wrong <= 0) return null;           // 无错无计划 → 与 SRS 无关
-        e = { box: 0, due: t, last: '' };     // 兜底(理论上 _ensureSrs 已种)
-      }
-      /* 🔴v966修复：错词已被清零(如答题归零毕业金路径)但计划残留 →
-       * 静默剪除(与 _ensureSrs 一致)，绝不在毕业金后再弹"📦盒子+1"僵尸反馈 */
-      if(wrong <= 0){
-        delete srs[key];
-        try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, null); }catch(_zz){}
-        if(typeof save === 'function'){ try{ save(); }catch(_zz2){} }
-        return null;
-      }
+      if(!e || typeof e !== 'object') return null;   // 不在计划里 → 与 SRS 无关
       var box = (typeof e.box === 'number' && e.box >= 0) ? e.box : 0;
       if(box >= SRS_GRAD) return null;
       if(e.last === t) return { advanced:false, reason:'daily-lock' };
@@ -1162,6 +1167,20 @@
       });
     });
   }
+
+  /* 🔴v1165: 开岛时把已有错词都放进复习计划。否则老错词第一次答对就先把错题数扣到 0，
+   * 还没来得及进计划就从间隔复习里漏掉。等权威账本(DOMContentLoaded)先启动完再做。 */
+  var _bootSeeded = false;
+  function _seedPlanAtBoot(){
+    if(_bootSeeded) return; _bootSeeded = true;
+    try{
+      if(typeof window.__hsnHasResetPending === 'function' && window.__hsnHasResetPending()) return;
+      _ensureSrs();
+    }catch(_bootSeed){}
+  }
+  // 本文件是 defer 脚本：此时 DOMContentLoaded 还没发，监听排在账本之后；load 只是保险
+  if(document.readyState === 'complete') setTimeout(_seedPlanAtBoot, 0);
+  else { document.addEventListener('DOMContentLoaded', _seedPlanAtBoot); window.addEventListener('load', _seedPlanAtBoot); }
 
   console.log('%c[HansenReview]%c 复习中心已就绪',
               'color:#06b6d4;font-weight:bold', 'color:#94a3b8');

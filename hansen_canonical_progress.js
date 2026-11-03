@@ -236,9 +236,10 @@
         cur[field]=merged;
       });
       var currentSrs=cur.srs||{},previousSrs=prev.srs||{},mergedSrs={};
-      Object.keys(currentSrs).forEach(function(k){var e=safeSrsEntry(currentSrs[k]);if(e&&cur.wrongs[k])mergedSrs[k]=e;});
+      // v1165: 复习计划不再跟着错题数走——错题本清零后词还在计划里，直到毕业。
+      Object.keys(currentSrs).forEach(function(k){var e=safeSrsEntry(currentSrs[k]);if(e)mergedSrs[k]=e;});
       Object.keys(previousSrs).forEach(function(k){
-        if(!Object.prototype.hasOwnProperty.call(mergedSrs,k)&&!cur.cleared.srs[k]&&cur.wrongs[k]){
+        if(!Object.prototype.hasOwnProperty.call(mergedSrs,k)&&!cur.cleared.srs[k]){
           var e=safeSrsEntry(previousSrs[k]);if(e)mergedSrs[k]=e;
         }
       });
@@ -297,7 +298,7 @@
       });
       var srs={};
       Object.keys(p.srs||{}).forEach(function(k){
-        if(!canonicalIndexKey(k,def.words)||!safeProgressCount(p.wrongs&&p.wrongs[k]))return;
+        if(!canonicalIndexKey(k,def.words))return;
         var e=safeSrsEntry(p.srs[k]);if(e)srs[Number(k)]=e;
       });
       p.srs=srs;
@@ -358,7 +359,7 @@
       if(!canonicalIndexKey(local,a.length))return;
       var i=toCanonicalIndex(ref,Number(local)),publicEntry=publicSrsEntry(localSrs[local]);
       var e=publicEntry?safeSrsEntry(publicEntry,stamp):null;
-      if(i<0||!e||!allowed('srs',i)||!safeProgressCount(p.wrongs[i]))return;
+      if(i<0||!e||!allowed('srs',i))return;
       var merged=newerSrs(p.srs[i],e);
       if(JSON.stringify(p.srs[i]||null)!==JSON.stringify(merged)){p.srs[i]=merged;changed=true;}
     });
@@ -431,10 +432,14 @@
       if(JSON.stringify((state[field]&&typeof state[field]==='object'&&!Array.isArray(state[field]))?state[field]:{})!==JSON.stringify(exact))changed=true;
       state[field]=exact;
     });
-    var exactSrs={};
+    var exactSrs={},localSrs=(state.srs&&typeof state.srs==='object'&&!Array.isArray(state.srs))?state.srs:{};
     Object.keys(p.srs||{}).forEach(function(ci){
       var li=fromCanonicalIndex(ref,ci),e=publicSrsEntry(p.srs[ci]);
-      if(li>=0&&e&&safeProgressCount(p.wrongs&&p.wrongs[ci]))exactSrs[li]=e;
+      if(li<0||!e)return;
+      // rp=玩法里真答对过的证据(v963 毕业闸门要看)。账本格式不收它，只在本岛同一盒同一天时原样保留。
+      var old=localSrs[li];
+      if(old&&old.rp===1&&old.box===e.box&&old.due===e.due)e.rp=1;
+      exactSrs[li]=e;
     });
     if(JSON.stringify((state.srs&&typeof state.srs==='object'&&!Array.isArray(state.srs))?state.srs:{})!==JSON.stringify(exactSrs))changed=true;
     state.srs=exactSrs;
@@ -475,10 +480,9 @@
         if(wrong!==safeProgressCount(p.wrongs[ci])){p.wrongs[ci]=wrong;changed=true;}
       }else{
         if(Object.prototype.hasOwnProperty.call(p.wrongs,ci)){delete p.wrongs[ci];changed=true;}
-        if(Object.prototype.hasOwnProperty.call(p.srs,ci)){delete p.srs[ci];changed=true;}
         // 答对把错词降到 0 是一条权威删除，给旧别名存档立墓碑。
+        // v1165: 只清错题本，不动复习计划——计划要等到期那天一次次答对、升满盒子才毕业。
         var ts=Date.now(); if((Number(p.cleared.wrongs[ci])||0)<ts){p.cleared.wrongs[ci]=ts;changed=true;}
-        if((Number(p.cleared.srs[ci])||0)<ts){p.cleared.srs[ci]=ts;changed=true;}
       }
       if(changed&&!writeStore(store))return false;
       return changed;
@@ -498,8 +502,7 @@
     var e=entry===null?null:(publicEntry?safeSrsEntry(publicEntry,ts):null);
     if(entry!==null&&!e)return false;
     if(e){
-      if(!safeProgressCount(p.wrongs[ci]))return false;
-      p.srs[ci]=e;
+      p.srs[ci]=e;   // v1165: 错题本清零后计划仍可升盒
     }else{
       delete p.srs[ci];
       if((Number(p.cleared.srs[ci])||0)<ts)p.cleared.srs[ci]=ts;

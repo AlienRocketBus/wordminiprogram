@@ -349,6 +349,13 @@
           if((e.box|0) >= 5) return;
           if(dayNum(e.due) <= today) due++;
         });
+        /* 🔴v1165: 错题本清零的词仍在复习计划里，到期一样要算 */
+        Object.keys(sr).forEach(function(k){
+          if(Number(wr[k]) > 0) return;                              // 上面已算过
+          var e = sr[k];
+          if(!e || typeof e !== 'object' || (e.box|0) >= 5) return;
+          if(dayNum(e.due) > 0 && dayNum(e.due) <= today) due++;
+        });
         if(due > 0){
           out.globalDue += due;
           out.islandsWithDue++;
@@ -361,7 +368,14 @@
     return out;
   }
 
-  function payGraduation(slot){
+  /* 🔴v1165: 这个词还在复习计划里吗(错题本清零≠毕业)。还在 → 巡检等真正毕业时再排 */
+  function stillPlanned(idx){
+    try{
+      var e = window.S && S.srs && S.srs[idx];
+      return !!(e && typeof e === 'object' && (e.box|0) < 5);
+    }catch(e2){ return false; }
+  }
+  function payGraduation(slot, planned){
     if(!gradEligible(slot)){ clearSince(slot); return false; }
     var gid = 'rvrw:'+ymd()+':'+slot+':grad';
     if(!payCoinOnce(gid, 15)){ clearSince(slot); return false; }
@@ -381,7 +395,7 @@
       floatCoin('+15 毕业金 🎓');
     }
     bumpLife('grads');
-    schedulePatrol(slot, 1);
+    if(!planned) schedulePatrol(slot, 1);   // 还在计划里：等升满盒子毕业时(吸收器路径)再进巡检，不排两次
     if(st.grads >= 3 && islandWrongsEmpty()){
       if(payCoinOnce('rvrw:'+ymd()+':clearall', 30)){
         bumpDay(0, 30);
@@ -401,7 +415,7 @@
       break;
     }
     if(paidAny) bumpDay(0, paidAny);
-    if(nowZero) payGraduation(slot);
+    if(nowZero) payGraduation(slot, stillPlanned(idx));
     refreshUI();
   }
 
@@ -432,8 +446,8 @@
           if(ab && ab.advanced){
             if(ab.graduated){
               floatCoin('🎓 复习毕业！');
-              if(ab.hadWrong) payGraduation(slotOf(idx));
-              else schedulePatrol(slotOf(idx), 1);   /* 🔴刺二：纯SRS收尾毕业同样入巡检 */
+              /* 🔴刺二：纯SRS收尾毕业同样入巡检；🔴v1165 毕业金没发成(隔天规则/收据)也照样进巡检 */
+              if(!(ab.hadWrong && payGraduation(slotOf(idx)))) schedulePatrol(slotOf(idx), 1);
               refreshUI();
             }else{
               floatCoin('📦 记忆盒 +1 · '+(ab.gapDays||'?')+'天后再见');
