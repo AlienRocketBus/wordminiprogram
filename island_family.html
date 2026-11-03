@@ -8533,6 +8533,18 @@ window.addEventListener('storage', function(e){
       return orig.apply(this, arguments);
     };
   })();
+  /* v1165：真开打（startBoss）时一定开始准备引擎和攻击图 —— 不依赖 navigator.userActivation（旧 iOS 没有它），
+     这样第一次反击时攻击图多半已经解码好（BUG#67 拳头空白就是图没到位）。只是提前开始下载，不改开打的先后顺序。 */
+  (function hookStart(){
+    if(typeof window.startBoss!=='function'){ return setTimeout(hookStart, 40); }
+    if(window.__hansenBossFXStartHooked) return;
+    window.__hansenBossFXStartHooked=true;
+    var origStart=window.startBoss;
+    window.startBoss=function(){
+      try{ if(!window.__hansenBossFXLoaded) window.__hansenBossFXReady(); }catch(e){}
+      return origStart.apply(this, arguments);
+    };
+  })();
 })();
 </script>
 <script src="hansen_boss_progress.js?v=1163"></script>

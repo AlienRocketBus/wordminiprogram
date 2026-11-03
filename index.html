@@ -1290,11 +1290,13 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
   100%{opacity:0;transform:translate(-400px,180px) rotate(-25deg)}
 }
 
-/* v1165 待机动画预算：孩子 12 秒没碰屏幕，首页这些装饰（80 颗星星、漂浮表情、岛卡背景小图、标题跳字、光点）先歇着，
+/* v1165 待机动画预算：孩子 12 秒没碰屏幕，首页这些装饰（80 颗星星、漂浮表情、岛卡背景小图、标题跳字、彩虹标语、光点）先歇着，
+   （彩虹标语 .tagline 每帧改 background-position + filter，是首页待机时最贵的一项）
    一碰屏幕/滚动就接着动。实测它们在首页待机时每帧都要重新合成上百个图层。
    主题演员 .flyer 不在此列（v943/v944：主题动画必须一直在跑）。流星直接隐藏，免得停在半空。 */
 html.hsn-deco-rest .star,html.hsn-deco-rest .deco-emoji,html.hsn-deco-rest .island .float-bg span,
-html.hsn-deco-rest .logo-char,html.hsn-deco-rest .brand .dot,html.hsn-deco-rest .title-block::before{animation-play-state:paused!important}
+html.hsn-deco-rest .logo-char,html.hsn-deco-rest .brand .dot,html.hsn-deco-rest .title-block::before,
+html.hsn-deco-rest .tagline,html.hsn-deco-rest h1.main{animation-play-state:paused!important}
 html.hsn-deco-rest .shooter{animation:none!important;opacity:0!important}
 
 /* ─────────────  FLOATING DECO EMOJIS  ───────────── */

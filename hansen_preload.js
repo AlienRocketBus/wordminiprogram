@@ -194,9 +194,15 @@
   /* 玩过 = 任意一个岛答过题或学会过词（「我的学习」快照 / 岛存档）。只读不写。 */
   function _hsnKidHasPlayed(){
     var keys = _hsnLsKeys();
+    /* 先看小小的「我的学习」快照，看不出来再翻岛存档（岛存档大，少解析几份） */
+    var snaps = [], saves = [];
+    for(var j = 0; j < keys.length; j++){
+      if(keys[j].indexOf('hsn_progress:') === 0) snaps.push(keys[j]);
+      else if(/^wordIsland[A-Z][A-Za-z0-9]*$/.test(keys[j])) saves.push(keys[j]);
+    }
+    keys = snaps.concat(saves);
     for(var i = 0; i < keys.length; i++){
       var k = keys[i];
-      if(k.indexOf('hsn_progress:') !== 0 && !/^wordIsland[A-Z][A-Za-z0-9]*$/.test(k)) continue;
       var o = null;
       try { o = JSON.parse(localStorage.getItem(k) || 'null'); } catch(e){ o = null; }
       if(!o || typeof o !== 'object') continue;

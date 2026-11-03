@@ -203,6 +203,36 @@ console.log('\n▶ L7 伪装管理员入口（引擎未加载时第一次点）'
   await ctx.close();
 }
 
+/* ── L8：单词大陆岛（选关墙直接调 startBoss，不经过 showScreen） ── */
+console.log('\n▶ L8 单词大陆②：点「挑战BOSS」→ 选关 → 打赢');
+{
+  const { ctx, page, errs } = await openIsland('island_land2.html');
+  await page.waitForTimeout(1500);
+  ok(!(await engineState(page)).loaded, '进岛停在菜单：引擎没加载');
+  ok(await tap(page, '.daily-card.boss-card'), '「挑战BOSS」卡片能被手指点中');
+  await page.waitForFunction(() => document.querySelectorAll('#bossContent [onclick^="window.__hsnZoneFight"]').length > 0, null, { timeout: 15000 }).catch(() => {});
+  ok(await tap(page, '#bossContent [onclick="window.__hsnZoneFight(0)"]'), '第一关卡片能被手指点中');
+  await page.waitForFunction(() => (typeof bossActive !== 'undefined' && bossActive) && document.querySelectorAll('#bossOpts .boss-opt').length > 0, null, { timeout: 15000 }).catch(() => {});
+  ok(await page.evaluate(() => !!(typeof bossActive !== 'undefined' && bossActive)), '单词大陆 Boss 战开打');
+  await page.waitForFunction(() => !!window.__hansenBossFXLoaded, null, { timeout: 20000 }).catch(() => {});
+  ok(await page.evaluate(() => !!window.__hansenBossFXLoaded), '开打时引擎就开始准备并就位');
+  const win = await fight(page, 'win');
+  ok(!win.active && win.bossHP <= 0, `一直答对 → 打赢（Boss HP ${win.bossHP}）`);
+  ok(errs.length === 0, '零脚本错误' + (errs.length ? '：' + errs[0] : ''));
+  await ctx.close();
+}
+
+/* ── L9：星海岛开机就落在选关墙 ── */
+console.log('\n▶ L9 星海岛：开机自动落在选关墙');
+{
+  const { ctx, page, errs } = await openIsland('island_season.html');
+  await page.waitForTimeout(8000);
+  const st = await engineState(page);
+  ok(!st.loaded && !st.scriptTag, `只看选关墙（没有点按）不加载引擎（loaded=${st.loaded}）`);
+  ok(errs.length === 0, '零脚本错误' + (errs.length ? '：' + errs[0] : ''));
+  await ctx.close();
+}
+
 await browser.close(); srv.close();
 console.log(fails ? `\n❌ Boss 按需加载：${fails} 项失败` : '\n✅ Boss 按需加载：菜单不加载引擎/攻击图、头像按进度、设置页/选关墙按需、赢/输/大满贯/全开放/管理员门全通过');
 process.exit(fails ? 1 : 0);

@@ -401,7 +401,8 @@
           '<div class="hsn-ex-enter">进入<div style="font-size:9px;margin-top:1px;opacity:.85">副本</div></div>'+
         '</div>';
       var bar=document.getElementById('hsnSeasonBar');
-      if(bar){ bar.innerHTML=inner; armLandMapWarm(bar); return; }
+      /* v1165：挂载轮询每 150ms 调一次这里，内容没变就别重写（以前开机 15 秒里每次都整块重排星海横幅） */
+      if(bar){ if(bar.__hsnInner!==inner){ bar.innerHTML=inner; bar.__hsnInner=inner; } armLandMapWarm(bar); return; }
       // 一次性注入CSS(星海副本卡专属·无旋转/闪烁/震动/透明度循环, 遵守动效禁令)
       if(!document.getElementById('hsnExtraCss')){
         var st=document.createElement('style'); st.id='hsnExtraCss';
@@ -455,7 +456,7 @@
         }
       };
       bar.removeAttribute('onclick');  //🔴v874(Hansen定稿): 番外篇星海觉醒=单词大陆冒险地图 //🔴v875(Hansen·彻底打通): 横幅在index上直接走壳(openIsland·iframe换装零白屏零历史污染)·无壳环境才整页跳(保留 window.(function(){ if(window.HansenRoom){ HansenRoom.open('land'); return; } location.href='land_map.html'; })() 兜底)
-      bar.innerHTML=inner;
+      bar.innerHTML=inner; bar.__hsnInner=inner;
       anchor.parentElement.insertBefore(bar, anchor);
       armLandMapWarm(bar);
     }catch(e){}

@@ -131,7 +131,9 @@ console.log('\n▶ M5/M6/M7 首页待机');
     cls: document.documentElement.classList.contains('hsn-deco-rest'),
     starRunning: document.getAnimations().filter(x => x.playState === 'running' && x.effect && x.effect.target && x.effect.target.classList && x.effect.target.classList.contains('star')).length,
     flyerRunning: document.getAnimations().filter(x => x.playState === 'running' && x.effect && x.effect.target && x.effect.target.closest && x.effect.target.closest('.flyer')).length,
+    taglineRunning: document.getAnimations().filter(x => x.playState === 'running' && x.effect && x.effect.target && x.effect.target.classList && x.effect.target.classList.contains('tagline')).length,
   }));
+  ok(rest.taglineRunning === 0, `彩虹标语（每帧改背景位置 + 滤镜，最贵）也歇着（还在跑 ${rest.taglineRunning} 个）`);
   ok(rest.cls && rest.starRunning === 0, `12 秒没碰屏幕：星星等装饰歇着（还在闪的星星 ${rest.starRunning} 颗）`);
   ok(rest.flyerRunning > 0, `主题演员照常飞（${rest.flyerRunning} 个动画）`);
   const box = await page.evaluate(() => { const e = document.querySelector('.title-block') || document.body; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: Math.max(10, r.y + 10) }; });
