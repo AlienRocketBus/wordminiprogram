@@ -338,9 +338,10 @@
     var isLeg = result.rarity==='legendary';
     var isHigh = (result.rarity==='epic'||result.rarity==='legendary');
     var tier = {common:0,uncommon:1,rare:2,epic:3,legendary:4}[result.rarity]||0;
-    // 分享区: 只在花钱抽 + 今天分享次数没满 时显示
+    // 分享区: 只在花钱抽 + 今天分享次数没满 + 真的能分享（小程序提供了分享桥）时显示
+    // v1165: 网页（H5、微信里打开的网页）没有 wxShareForGacha，以前照样显示按钮，孩子点了只看到「暂不可用」
     var shareHtml='';
-    if(isPaid && canShareForDraw()){
+    if(isPaid && canShareForDraw() && typeof window.wxShareForGacha === 'function'){
       var left = shareLeftToday();
       shareHtml='<div class="gr-share"><button class="gr-share-btn" onclick="window.__hsnShareForDraw()">📤 分享给好友，免费再抽 1 次</button>'+
                 '<div class="gr-share-tip">今天还可分享 '+left+' 次</div></div>';
