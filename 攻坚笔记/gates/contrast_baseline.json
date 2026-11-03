@@ -1,0 +1,1532 @@
+{
+ "_说明": "对比度基线：v1166 时已知不达标的字（主题 2.0 要一个个消掉）。test_contrast_scan_v1166.mjs 只拦「新冒出来的」和「比这里更差的」。更新方法见 攻坚笔记/gates/GATES.md。",
+ "version": "1163",
+ "generated": "2026-11-03",
+ "tolerance": 0.25,
+ "presets": [
+  "cosmos",
+  "violet",
+  "aurora",
+  "woods",
+  "cloud",
+  "sakura",
+  "cream",
+  "mint",
+  "coin_pink_dark",
+  "coin_pink_light",
+  "gallery_fairy"
+ ],
+ "screens": [
+  "home_top",
+  "island_menu",
+  "listen_q",
+  "listen_reveal",
+  "listen_lesson",
+  "cloze_q",
+  "cloze_reveal",
+  "speed_q",
+  "result",
+  "settings"
+ ],
+ "totals": {
+  "runs": 2877,
+  "failingRuns": 276,
+  "failingKeys": 166
+ },
+ "entries": {
+  "aurora|home_top|span.logo-char.c1": {
+   "ratio": 2.3,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#185559",
+   "shadow": true
+  },
+  "aurora|home_top|span.logo-char.c3": {
+   "ratio": 2.07,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#245966",
+   "shadow": true
+  },
+  "aurora|home_top|span.logo-char.c5": {
+   "ratio": 1.96,
+   "need": 3,
+   "n": 1,
+   "text": "险",
+   "fg": "#a855f7",
+   "bg": "#22596c",
+   "shadow": true
+  },
+  "aurora|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "aurora|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "aurora|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "aurora|island_menu|span#heroPetName": {
+   "ratio": 3.3,
+   "need": 4.5,
+   "n": 1,
+   "text": "星灵",
+   "fg": "#fbbf24",
+   "bg": "#3b726c",
+   "shadow": true
+  },
+  "aurora|island_menu|span#heroPetStage.pet-stage": {
+   "ratio": 4,
+   "need": 4.5,
+   "n": 1,
+   "text": "星雾之卵",
+   "fg": "#ffffff",
+   "bg": "#6f865f",
+   "shadow": true
+  },
+  "aurora|result|#listenContent div>div>b": {
+   "ratio": 3.52,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#22c55e",
+   "bg": "#145867",
+   "shadow": true
+  },
+  "aurora|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "aurora|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "aurora|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "aurora|result|#listenContent div>div>span": {
+   "ratio": 4.32,
+   "need": 4.5,
+   "n": 2,
+   "text": "🐾 宠物经验 +15",
+   "fg": "#a78bfa",
+   "bg": "#0d3d4b",
+   "shadow": true
+  },
+  "aurora|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "aurora|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "cloud|cloze_q|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fbfc",
+   "shadow": false
+  },
+  "cloud|cloze_reveal|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fbfc",
+   "shadow": false
+  },
+  "cloud|home_top|span.logo-char.c1": {
+   "ratio": 2.77,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#dbdef9",
+   "shadow": true
+  },
+  "cloud|home_top|span.logo-char.c2": {
+   "ratio": 1.68,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#dcdbf4",
+   "shadow": true
+  },
+  "cloud|home_top|span.logo-char.c3": {
+   "ratio": 2.76,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#dddbed",
+   "shadow": true
+  },
+  "cloud|home_top|span.logo-char.c4": {
+   "ratio": 1.13,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#d7ddf6",
+   "shadow": true
+  },
+  "cloud|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": true
+  },
+  "cloud|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": true
+  },
+  "cloud|listen_q|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f6fcfc",
+   "shadow": false
+  },
+  "cloud|listen_reveal|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f6fcfc",
+   "shadow": false
+  },
+  "cloud|result|#listenContent div>div>b": {
+   "ratio": 4.03,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#15803d",
+   "bg": "#dde7fa",
+   "shadow": false
+  },
+  "cloud|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.25,
+   "need": 4.5,
+   "n": 3,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce7f8",
+   "shadow": true
+  },
+  "cloud|settings|#hsnPalPicker .hsn-pal-sw>div>span": {
+   "ratio": 3.89,
+   "need": 4.5,
+   "n": 1,
+   "text": "(默认)",
+   "fg": "#737e8e",
+   "bg": "#f5f9fc",
+   "shadow": false
+  },
+  "cloud|settings|#hsnPalPicker div": {
+   "ratio": 4.48,
+   "need": 4.5,
+   "n": 1,
+   "text": "整个游戏换个颜色 · 全部免费 · 全岛通用",
+   "fg": "#64748b",
+   "bg": "#f7f8fc",
+   "shadow": false
+  },
+  "cloud|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "coin_pink_dark|cloze_q|#clozeContent .cloze-area>div": {
+   "ratio": 3.83,
+   "need": 4.5,
+   "n": 1,
+   "text": "选一个最合适的单词填入空白",
+   "fg": "#cbd5e1",
+   "bg": "#9049a7",
+   "shadow": true
+  },
+  "coin_pink_dark|cloze_q|#clozeContent .cloze-area>div>b": {
+   "ratio": 4.16,
+   "need": 4.5,
+   "n": 1,
+   "text": "0",
+   "fg": "#fbbf24",
+   "bg": "#7a438f",
+   "shadow": true
+  },
+  "coin_pink_dark|cloze_reveal|#clozeContent .cloze-area>div": {
+   "ratio": 3.89,
+   "need": 4.5,
+   "n": 1,
+   "text": "选一个最合适的单词填入空白",
+   "fg": "#cbd5e1",
+   "bg": "#904a9b",
+   "shadow": true
+  },
+  "coin_pink_dark|cloze_reveal|#clozeContent .cloze-area>div>b": {
+   "ratio": 4.23,
+   "need": 4.5,
+   "n": 1,
+   "text": "0",
+   "fg": "#fbbf24",
+   "bg": "#77438d",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|b": {
+   "ratio": 3.13,
+   "need": 4.5,
+   "n": 4,
+   "text": "座单词岛",
+   "fg": "#be185d",
+   "bg": "#f2a4c4",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|div.subtitle": {
+   "ratio": 1.61,
+   "need": 4.5,
+   "n": 1,
+   "text": "Word Adventures",
+   "fg": "#fef3c7",
+   "bg": "#f2b0bf",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|div.tagline": {
+   "ratio": 1.22,
+   "need": 4.5,
+   "n": 1,
+   "text": "单 词 大 冒 险 · 一 段 神 奇 旅 程",
+   "fg": "#fde047",
+   "bg": "#f3bce2",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span": {
+   "ratio": 3.11,
+   "need": 4.5,
+   "n": 2,
+   "text": "18",
+   "fg": "#be185d",
+   "bg": "#f5a1c9",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span.logo-char.c1": {
+   "ratio": 2.07,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#f7acd4",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span.logo-char.c2": {
+   "ratio": 1.28,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#f4add8",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span.logo-char.c3": {
+   "ratio": 2.16,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#f5b1cd",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span.logo-char.c4": {
+   "ratio": 1.11,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#f2b4da",
+   "shadow": true
+  },
+  "coin_pink_dark|home_top|span.logo-char.c5": {
+   "ratio": 2.39,
+   "need": 3,
+   "n": 1,
+   "text": "险",
+   "fg": "#a855f7",
+   "bg": "#f0b9df",
+   "shadow": true
+  },
+  "coin_pink_dark|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "coin_pink_dark|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "coin_pink_dark|island_menu|#homeScreen div.section-label": {
+   "ratio": 4.4,
+   "need": 4.5,
+   "n": 1,
+   "text": "精学模式",
+   "fg": "#cbd5e1",
+   "bg": "#864683",
+   "shadow": true
+  },
+  "coin_pink_dark|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "coin_pink_dark|island_menu|div#heroPetText.pet-text": {
+   "ratio": 4.36,
+   "need": 4.5,
+   "n": 1,
+   "text": "裹着流动星雾的蛋, 壳上微光符纹缓缓游动",
+   "fg": "#e2e8f0",
+   "bg": "#935299",
+   "shadow": true
+  },
+  "coin_pink_dark|island_menu|span#heroPetName": {
+   "ratio": 3.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "星灵",
+   "fg": "#fbbf24",
+   "bg": "#935486",
+   "shadow": true
+  },
+  "coin_pink_dark|island_menu|span#heroPetStage.pet-stage": {
+   "ratio": 3.77,
+   "need": 4.5,
+   "n": 1,
+   "text": "星雾之卵",
+   "fg": "#ffffff",
+   "bg": "#b2736d",
+   "shadow": true
+  },
+  "coin_pink_dark|listen_q|#listenContent .listen-area>div": {
+   "ratio": 4.09,
+   "need": 4.5,
+   "n": 2,
+   "text": "🎯 选出正确的中文意思",
+   "fg": "#fde047",
+   "bg": "#994ca0",
+   "shadow": true
+  },
+  "coin_pink_dark|listen_q|#listenContent .listen-area>div.listen-hint": {
+   "ratio": 3.91,
+   "need": 4.5,
+   "n": 1,
+   "text": "点击喇叭播放单词",
+   "fg": "#cbd5e1",
+   "bg": "#94469c",
+   "shadow": true
+  },
+  "coin_pink_dark|listen_q|#listenContent .listen-area>div>b": {
+   "ratio": 3.9,
+   "need": 4.5,
+   "n": 1,
+   "text": "0",
+   "fg": "#fbbf24",
+   "bg": "#804694",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div": {
+   "ratio": 4.4,
+   "need": 4.5,
+   "n": 1,
+   "text": "20 个单词全部听完 · 答对",
+   "fg": "#cbd5e1",
+   "bg": "#8e3f88",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div>b": {
+   "ratio": 2.73,
+   "need": 4.5,
+   "n": 2,
+   "text": "7",
+   "fg": "#22c55e",
+   "bg": "#8f4391",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "coin_pink_dark|result|#listenContent div>div>span": {
+   "ratio": 3.46,
+   "need": 4.5,
+   "n": 2,
+   "text": "🐾 宠物经验 +15",
+   "fg": "#a78bfa",
+   "bg": "#67306f",
+   "shadow": true
+  },
+  "coin_pink_dark|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "coin_pink_dark|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 2,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "coin_pink_light|cloze_q|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fbfc",
+   "shadow": false
+  },
+  "coin_pink_light|cloze_reveal|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fbfc",
+   "shadow": false
+  },
+  "coin_pink_light|home_top|span.logo-char.c2": {
+   "ratio": 1.88,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#efe7f1",
+   "shadow": true
+  },
+  "coin_pink_light|home_top|span.logo-char.c4": {
+   "ratio": 1.27,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#eee7f6",
+   "shadow": true
+  },
+  "coin_pink_light|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": true
+  },
+  "coin_pink_light|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": true
+  },
+  "coin_pink_light|listen_q|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f6fcfc",
+   "shadow": false
+  },
+  "coin_pink_light|listen_reveal|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f6fcfc",
+   "shadow": false
+  },
+  "coin_pink_light|result|#listenContent div>div>b": {
+   "ratio": 4.03,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#15803d",
+   "bg": "#dde7fa",
+   "shadow": false
+  },
+  "coin_pink_light|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.25,
+   "need": 4.5,
+   "n": 3,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce7f8",
+   "shadow": true
+  },
+  "coin_pink_light|settings|#hsnPalPicker .hsn-pal-sw>div>span": {
+   "ratio": 3.89,
+   "need": 4.5,
+   "n": 1,
+   "text": "(默认)",
+   "fg": "#737e8e",
+   "bg": "#f5f9fc",
+   "shadow": false
+  },
+  "coin_pink_light|settings|#hsnPalPicker div": {
+   "ratio": 4.48,
+   "need": 4.5,
+   "n": 1,
+   "text": "整个游戏换个颜色 · 全部免费 · 全岛通用",
+   "fg": "#64748b",
+   "bg": "#f7f8fc",
+   "shadow": false
+  },
+  "coin_pink_light|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "cosmos|home_top|span.logo-char.c1": {
+   "ratio": 2.87,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#433180",
+   "shadow": true
+  },
+  "cosmos|home_top|span.logo-char.c3": {
+   "ratio": 2.55,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#403b86",
+   "shadow": true
+  },
+  "cosmos|home_top|span.logo-char.c5": {
+   "ratio": 2.39,
+   "need": 3,
+   "n": 1,
+   "text": "险",
+   "fg": "#a855f7",
+   "bg": "#353f88",
+   "shadow": true
+  },
+  "cosmos|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "cosmos|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "cosmos|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "cosmos|island_menu|span#heroPetName": {
+   "ratio": 4.24,
+   "need": 4.5,
+   "n": 1,
+   "text": "星灵",
+   "fg": "#fbbf24",
+   "bg": "#5a508d",
+   "shadow": true
+  },
+  "cosmos|result|#listenContent div>div>b": {
+   "ratio": 4.41,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#22c55e",
+   "bg": "#373a82",
+   "shadow": true
+  },
+  "cosmos|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "cosmos|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "cosmos|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "cosmos|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "cosmos|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "cream|cloze_q|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#fbfbf6",
+   "shadow": false
+  },
+  "cream|cloze_reveal|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#fbfbf6",
+   "shadow": false
+  },
+  "cream|home_top|span.logo-char.c1": {
+   "ratio": 2.87,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#f8dfc9",
+   "shadow": true
+  },
+  "cream|home_top|span.logo-char.c2": {
+   "ratio": 1.74,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#f7dcc6",
+   "shadow": true
+  },
+  "cream|home_top|span.logo-char.c3": {
+   "ratio": 2.86,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#f9dbc7",
+   "shadow": true
+  },
+  "cream|home_top|span.logo-char.c4": {
+   "ratio": 1.18,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#f8ddc2",
+   "shadow": true
+  },
+  "cream|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": true
+  },
+  "cream|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": true
+  },
+  "cream|listen_q|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#fbfbf6",
+   "shadow": false
+  },
+  "cream|listen_reveal|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#fbfbf6",
+   "shadow": false
+  },
+  "cream|result|#listenContent div>div>b": {
+   "ratio": 4.16,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#15803d",
+   "bg": "#fbe7cf",
+   "shadow": false
+  },
+  "cream|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.25,
+   "need": 4.5,
+   "n": 3,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce7f8",
+   "shadow": true
+  },
+  "cream|settings|#hsnPalPicker .hsn-pal-sw>div>span": {
+   "ratio": 3.91,
+   "need": 4.5,
+   "n": 1,
+   "text": "(默认)",
+   "fg": "#747e8b",
+   "bg": "#fcf9f1",
+   "shadow": false
+  },
+  "cream|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "gallery_fairy|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "gallery_fairy|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "gallery_fairy|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "gallery_fairy|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "gallery_fairy|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "gallery_fairy|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "gallery_fairy|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "gallery_fairy|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "mint|cloze_q|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fcfa",
+   "shadow": false
+  },
+  "mint|cloze_reveal|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#f6fcfa",
+   "shadow": false
+  },
+  "mint|home_top|span.logo-char.c1": {
+   "ratio": 2.92,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#d1ebe1",
+   "shadow": true
+  },
+  "mint|home_top|span.logo-char.c2": {
+   "ratio": 1.76,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#d4e7d8",
+   "shadow": true
+  },
+  "mint|home_top|span.logo-char.c3": {
+   "ratio": 2.89,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#d2e6df",
+   "shadow": true
+  },
+  "mint|home_top|span.logo-char.c4": {
+   "ratio": 1.18,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#cee7e2",
+   "shadow": true
+  },
+  "mint|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": true
+  },
+  "mint|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": true
+  },
+  "mint|listen_q|#listenContent div>span": {
+   "ratio": 1.03,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f5fdfa",
+   "shadow": false
+  },
+  "mint|listen_reveal|#listenContent div>span": {
+   "ratio": 1.03,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#f5fdfa",
+   "shadow": false
+  },
+  "mint|result|#listenContent div>div>b": {
+   "ratio": 4.22,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#15803d",
+   "bg": "#d0f3e9",
+   "shadow": false
+  },
+  "mint|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.25,
+   "need": 4.5,
+   "n": 3,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce7f8",
+   "shadow": true
+  },
+  "mint|settings|#hsnPalPicker .hsn-pal-sw>div>span": {
+   "ratio": 3.92,
+   "need": 4.5,
+   "n": 1,
+   "text": "(默认)",
+   "fg": "#727f8c",
+   "bg": "#f4fcf6",
+   "shadow": false
+  },
+  "mint|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "sakura|cloze_q|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#fafafb",
+   "shadow": false
+  },
+  "sakura|cloze_reveal|#clozeContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 17",
+   "fg": "#ffffff",
+   "bg": "#fafafb",
+   "shadow": false
+  },
+  "sakura|home_top|span.logo-char.c1": {
+   "ratio": 2.73,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#f9d4e7",
+   "shadow": true
+  },
+  "sakura|home_top|span.logo-char.c2": {
+   "ratio": 1.66,
+   "need": 3,
+   "n": 1,
+   "text": "词",
+   "fg": "#22c55e",
+   "bg": "#f8d2e2",
+   "shadow": true
+  },
+  "sakura|home_top|span.logo-char.c3": {
+   "ratio": 2.75,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#f7d2e9",
+   "shadow": true
+  },
+  "sakura|home_top|span.logo-char.c4": {
+   "ratio": 1.13,
+   "need": 3,
+   "n": 1,
+   "text": "冒",
+   "fg": "#facc15",
+   "bg": "#f6d4e9",
+   "shadow": true
+  },
+  "sakura|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": true
+  },
+  "sakura|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": true
+  },
+  "sakura|listen_q|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#fafafb",
+   "shadow": false
+  },
+  "sakura|listen_reveal|#listenContent div>span": {
+   "ratio": 1.04,
+   "need": 4.5,
+   "n": 4,
+   "text": "1 / 20",
+   "fg": "#ffffff",
+   "bg": "#fafafb",
+   "shadow": false
+  },
+  "sakura|result|#listenContent div>div>b": {
+   "ratio": 4.02,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#15803d",
+   "bg": "#f7e0ec",
+   "shadow": false
+  },
+  "sakura|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.25,
+   "need": 4.5,
+   "n": 3,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce7f8",
+   "shadow": true
+  },
+  "sakura|settings|#hsnPalPicker .hsn-pal-sw>div>span": {
+   "ratio": 3.88,
+   "need": 4.5,
+   "n": 1,
+   "text": "(默认)",
+   "fg": "#747e8d",
+   "bg": "#faf7fa",
+   "shadow": false
+  },
+  "sakura|settings|#hsnPalPicker div": {
+   "ratio": 4.49,
+   "need": 4.5,
+   "n": 1,
+   "text": "整个游戏换个颜色 · 全部免费 · 全岛通用",
+   "fg": "#64748b",
+   "bg": "#fcf7f8",
+   "shadow": false
+  },
+  "sakura|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "violet|home_top|span.logo-char.c1": {
+   "ratio": 2.68,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#53337b",
+   "shadow": true
+  },
+  "violet|home_top|span.logo-char.c3": {
+   "ratio": 2.47,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#593878",
+   "shadow": true
+  },
+  "violet|home_top|span.logo-char.c5": {
+   "ratio": 2.47,
+   "need": 3,
+   "n": 1,
+   "text": "险",
+   "fg": "#a855f7",
+   "bg": "#4b377e",
+   "shadow": true
+  },
+  "violet|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "violet|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "violet|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "violet|island_menu|span#heroPetName": {
+   "ratio": 3.87,
+   "need": 4.5,
+   "n": 1,
+   "text": "星灵",
+   "fg": "#fbbf24",
+   "bg": "#6d5389",
+   "shadow": true
+  },
+  "violet|island_menu|span#heroPetStage.pet-stage": {
+   "ratio": 4.39,
+   "need": 4.5,
+   "n": 1,
+   "text": "星雾之卵",
+   "fg": "#ffffff",
+   "bg": "#93706d",
+   "shadow": true
+  },
+  "violet|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "violet|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "violet|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "violet|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "violet|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  },
+  "woods|home_top|span.logo-char.c1": {
+   "ratio": 2.18,
+   "need": 3,
+   "n": 1,
+   "text": "单",
+   "fg": "#3b82f6",
+   "bg": "#2a5a38",
+   "shadow": true
+  },
+  "woods|home_top|span.logo-char.c3": {
+   "ratio": 1.96,
+   "need": 3,
+   "n": 1,
+   "text": "大",
+   "fg": "#ef4444",
+   "bg": "#3e5e33",
+   "shadow": true
+  },
+  "woods|home_top|span.logo-char.c5": {
+   "ratio": 1.88,
+   "need": 3,
+   "n": 1,
+   "text": "险",
+   "fg": "#a855f7",
+   "bg": "#405d2c",
+   "shadow": true
+  },
+  "woods|island_menu|#chestCard div.d-label": {
+   "ratio": 2.97,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日宝箱",
+   "fg": "#ffffff",
+   "bg": "#6096eb",
+   "shadow": false
+  },
+  "woods|island_menu|#homeScreen .mode-grid>.mode-card>div.m-title": {
+   "ratio": 2.08,
+   "need": 4.5,
+   "n": 5,
+   "text": "听音辨义",
+   "fg": "#ffffff",
+   "bg": "#fb9f35",
+   "shadow": false
+  },
+  "woods|island_menu|#questCard div.d-label": {
+   "ratio": 1.82,
+   "need": 4.5,
+   "n": 1,
+   "text": "每日任务",
+   "fg": "#ffffff",
+   "bg": "#4cd97b",
+   "shadow": false
+  },
+  "woods|island_menu|span#heroPetName": {
+   "ratio": 3.15,
+   "need": 4.5,
+   "n": 1,
+   "text": "星灵",
+   "fg": "#fbbf24",
+   "bg": "#4c7648",
+   "shadow": true
+  },
+  "woods|island_menu|span#heroPetStage.pet-stage": {
+   "ratio": 3.77,
+   "need": 4.5,
+   "n": 1,
+   "text": "星雾之卵",
+   "fg": "#ffffff",
+   "bg": "#80893d",
+   "shadow": true
+  },
+  "woods|result|#listenContent div>div>b": {
+   "ratio": 3.23,
+   "need": 4.5,
+   "n": 1,
+   "text": "7",
+   "fg": "#22c55e",
+   "bg": "#34602d",
+   "shadow": true
+  },
+  "woods|result|#listenContent div>div>button.game-btn.gold": {
+   "ratio": 2.59,
+   "need": 4.5,
+   "n": 1,
+   "text": "🔄 再来一轮",
+   "fg": "#ffffff",
+   "bg": "#e78b08",
+   "shadow": true
+  },
+  "woods|result|#listenContent div>div>button.game-btn.purple": {
+   "ratio": 4.38,
+   "need": 4.5,
+   "n": 1,
+   "text": "🏠 回主页",
+   "fg": "#ffffff",
+   "bg": "#7263f3",
+   "shadow": true
+  },
+  "woods|result|#listenContent div>div>button.game-btn.red": {
+   "ratio": 4.26,
+   "need": 4.5,
+   "n": 1,
+   "text": "⚡ 挑战中级",
+   "fg": "#ffffff",
+   "bg": "#e63535",
+   "shadow": true
+  },
+  "woods|result|#listenContent div>div>span": {
+   "ratio": 3.98,
+   "need": 4.5,
+   "n": 2,
+   "text": "🐾 宠物经验 +15",
+   "fg": "#a78bfa",
+   "bg": "#29441e",
+   "shadow": true
+  },
+  "woods|settings|#hsnBossThemePicker div>.hsn-bt-sw>div": {
+   "ratio": 1.24,
+   "need": 4.5,
+   "n": 2,
+   "text": "晨曦",
+   "fg": "#ffffff",
+   "bg": "#dce8f8",
+   "shadow": true
+  },
+  "woods|speed_q|#speedContent div>div": {
+   "ratio": 3.28,
+   "need": 4.5,
+   "n": 1,
+   "text": "🌱 初级 · 60 秒 · 4 选 1",
+   "fg": "#ffffff",
+   "bg": "#1ca34e",
+   "shadow": true
+  }
+ }
+}
