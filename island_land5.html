@@ -4440,6 +4440,16 @@ var __hsnRuns={};
 function __hsnRunNew(g){__hsnRuns[g]=(__hsnRuns[g]||0)+1;return __hsnRuns[g];}
 function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hsnRuns[g]||0)!==tok)return;if(scr){var el=document.getElementById(scr);if(!el||!el.classList.contains('active'))return;}return fn.apply(this,arguments);};}
 /* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
+/* 🔴v1165 选项里不能同时出现「意思一样」的两个词：两个都对，孩子选对也可能被判错。
+   ① 中文有一个义项相同（因此 / 因此/结果）就算撞车；② 星海里几组近义词中文写法不同，也算撞车。 */
+var __HSN_SYN={however:1,nevertheless:1,therefore:2,consequently:2,besides:3,moreover:3,furthermore:3,rarely:4,seldom:4,immediately:5,instantly:5,finally:6,eventually:6,huge:7,enormous:7};
+function __hsnSenses(w){return String((w&&w.cn)||'').split(/[\/;；]/).map(function(s){return s.trim();}).filter(Boolean);}
+function __hsnClash(a,b){
+  if(!a||!b)return false;if(a.en===b.en||a.cn===b.cn)return true;
+  var g=__HSN_SYN[String(a.en||'').toLowerCase()];if(g&&g===__HSN_SYN[String(b.en||'').toLowerCase()])return true;
+  var sa=__hsnSenses(a),sb=__hsnSenses(b);for(var i=0;i<sa.length;i++)if(sb.indexOf(sa[i])>=0)return true;
+  return false;
+}
 /* 🔴v1165 难度卡上的例词：本档真实的前 3 个词 */
 function __hsnLevelExample(filter){var out=[];for(var i=0;i<allW.length&&out.length<3;i++){try{if(filter(i))out.push(allW[i].en);}catch(e){}}return out.join(' · ');}
 function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
@@ -4762,7 +4772,7 @@ function nextBossQ(){if(!bossActive)return;
   document.getElementById('bossQSub').innerHTML = sub;
   
   const opts=[w];
-  /*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+  /*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
   opts.sort(function(){return Math.random()-.5});
   const correctIdx=opts.findIndex(function(o){return o.en===w.en});
   window._bossOpts=opts;window._bossIdx=idx;window._bossCorrectIdx=correctIdx;window._bossWord=w;window._bossQType=qType;
@@ -6018,8 +6028,8 @@ bubbleStartCountdown(); // 🆕 出题即启动30秒倒计时
 const sameLvlIdxs=[...Array(allW.length).keys()].filter(L.filter).filter(i=>i!==idx);
 const opts=[target];
 const shuffledSame=sameLvlIdxs.sort(()=>Math.random()-.5);
-for(const i of shuffledSame){if(opts.length>=5)break;const c=allW[i];if(!opts.find(o=>o.en===c.en))opts.push(c)}
-/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<5&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<5){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+for(const i of shuffledSame){if(opts.length>=5)break;const c=allW[i];if(!opts.find(o=>__hsnClash(o,c)))opts.push(c)}
+/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<5&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<5){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
 const colors=['#6366f1','#ef4444','#22c55e','#f59e0b','#ec4899','#0ea5e9'].sort(()=>Math.random()-.5);
 // 5 个泡泡分配到 5 个不重叠的初始位置 (网格分区, 每区内随机抖动)
@@ -6476,7 +6486,7 @@ const L=SPEED_LEVELS[spLevel]||SPEED_LEVELS.easy;
 const optCount=L.optCount;
 if(spPool2.length===0)spPool2=[...Array(allW.length).keys()].sort(()=>Math.random()-.5);
 const idx=spPool2.pop();window._spRetry=__hmlTakeRetry('speed',idx);/* v1165 只有插回来的那一份算再考 */const w=allW[idx];
-const opts=[w];/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<optCount&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<optCount){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+const opts=[w];/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<optCount&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<optCount){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
 window._spCorrect=w.en;window._spOpts=opts;window._spIdx=idx;
 document.getElementById('spQ').innerHTML='<div style="font-size:52px">'+w.emoji+'</div><div style="font-size:24px;font-weight:800;color:#fff;margin:8px 0">'+w.en+'</div><div style="display:grid;grid-template-columns:repeat('+L.gridCols+',1fr);gap:8px;max-width:480px;margin:12px auto" id="spOpts">'+opts.map((o,i)=>'<div class="boss-opt" onclick="spAnswer('+i+')">'+o.cn+'</div>').join('')+'</div>';
@@ -6557,8 +6567,8 @@ const w=allW[idx];
 // 干扰项优先从同级别词中抽, 不够再从全集补
 const opts=[w];
 const shuffledLvl=lvlPool.filter(i=>i!==idx).sort(()=>Math.random()-.5);
-for(const di of shuffledLvl){if(opts.length>=4)break;const cand=allW[di];if(!opts.find(o=>o.en===cand.en))opts.push(cand)}
-/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+for(const di of shuffledLvl){if(opts.length>=4)break;const cand=allW[di];if(!opts.find(o=>__hsnClash(o,cand)))opts.push(cand)}
+/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
 listenQ={word:w,opts:opts,idx:idx};
 const L=LISTEN_LEVELS[listenLevel];
@@ -7075,8 +7085,8 @@ const sentence=w.ex.slice(0,cm.index)+'<span class="cloze-blank" id="clozeBlank"
 // 干扰项优先从同档单词抽 (难度更一致), 不够再从全集补
 const opts=[w];
 const sameLvl=CLOZE_LEVEL_IDX[clozeLevel].filter(i=>i!==idx).sort(()=>Math.random()-.5);
-for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>o.en===c.en))opts.push(c)}
-/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>__hsnClash(o,c)))opts.push(c)}
+/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
 clozeQ={word:w,opts:opts,idx:idx,fill:cm.text};
 const L=CLOZE_LEVELS[clozeLevel];
