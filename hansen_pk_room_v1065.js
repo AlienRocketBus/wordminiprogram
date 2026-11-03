@@ -7,11 +7,18 @@
  *   假传输层什么都让写，所以测试一直是绿的。
  *
  * 新规矩：**每个人只写自己建的文档。**
- *   房间 R  r…           房主建、房主写（status、心跳、确认客人、房主分）
- *   座位 S  R_s<轮次>     客人建、客人写（心跳、就绪、客人分、离开）
- *   回合 W  R_w<i>        谁先建算谁的（这一词谁先拼对 / 超时没人拿下）
+ *   房间 R  r…                 房主建、房主写（status、心跳、确认客人、房主分）
+ *   座位 S  R_s<轮次>           客人建、客人写（心跳、就绪、客人分、离开）
+ *   回合 W  R_w<i> / R_w<轮次>_<i>  谁先拼对谁建（只记「谁先拼对」；超时不建）
  * 「抢」靠的是固定 _id 的 add：数据库保证 _id 唯一，几个人同时 add 只有一个成功。
- * add 失败的报错文本没人在真机上见过，所以失败后一律按 _id 读回来再下结论。
+ * add 失败的报错文本没人在真机上见过，所以失败后一律按 _id 读回来再下结论；
+ * 读不回来（主从延迟大、读也失败）就说「没抢到 / 结果待定」，**绝不说成「云端设置不对」**。
+ *
+ * 🔴v1164（第一轮审查后）几条新原则：
+ *   · **不拿别人手机的时间和本机比**：房间是不是活的，看「本机亲眼看到心跳在动」；
+ *     时间戳只在两边钟差不多时用，未来时间（对方钟快 / 伪造）一律不信
+ *   · **回合文档只认这局两个人建的**（看数据库盖的 _openid），陌生人抢先建的不算数
+ *   · 一次轮询一个请求：房间 + 座位 + 这一局所有回合，用 _id in [...] 一起读（省配额）
  *
  * 两条老规矩不变：
  *   ① 绝不自建云端实例 —— 一律 HansenAuth.ensureSession() + HansenAuth._app()
@@ -30,21 +37,31 @@
   var PROTO        = 2;         /* v1164 新存储；没有它的是旧版本的房，协议不通 */
   var HEARTBEAT_MS = 8000;      /* 每 8 秒续一次命 */
   var STALE_MS     = 30000;     /* 房间 30 秒没心跳 → 不再展示 */
+  var FUTURE_MS    = 60000;     /* 心跳时间比本机还快 1 分钟以上：对方钟不准或是伪造的 → 不信时间戳，只信亲眼看到它在动 */
+  var LIST_WINDOW_MS = 600000;  /* 列房只查最近 10 分钟有过心跳的（容得下 ±10 分钟钟差；几天前的死房不占名额） */
+  var LIST_LIMIT   = 100;
   var WORDS_PER_ROUND = 10;
   var ABANDON_MS   = 60000;     /* 对手 1 分钟没动静判离场（切后台、接电话都常见，不能更短） */
 
   /* 时间参数集中放（测试可以调短） */
   var TM = {
-    ackMs: 15000,        /* 客人抢到座位后等房主确认多久 */
+    ackMs: 25000,        /* 客人抢到座位后等房主确认多久（主从延迟几秒时 15 秒不够） */
+    ackExtraMs: 10000,   /* 等的时候看到房主心跳在动 = 房主还在，再多给 10 秒 */
     ackPollMs: 1000,
     ackBeatMs: 3000,     /* 等确认时客人心跳更勤，房主才分得清座位是不是活的 */
     seatStaleMs: 20000,  /* 座位心跳 20 秒没变（按本机时钟看）→ 当死座位 */
     firstSightMs: 15000, /* 第一次看到座位时心跳在 15 秒内 → 直接确认；更旧的要先看到心跳在动（时钟差大的活人 3 秒内就会动） */
-    doneGraceMs: 120000, /* 打完/离开后留 2 分钟再删，对方才读得到结果 */
+    doneGraceMs: 600000, /* 打完/离开后留 10 分钟再删 —— 切出去很久才回来的那一方还读得到结论 */
     winTtlMs: 1200000,   /* 回合文档 20 分钟后清掉 */
     lagMs: 600,          /* 最终一致：读不到时隔多久再读 */
     lagTries: 5,
-    waitPollMs: 2000     /* 房主等人时的轮询间隔（之后逐步拉长） */
+    waitPollMs: 2000,    /* 房主等人时的轮询间隔（之后拉长到 2.5、3 秒） */
+    ownGraceMs: 20000,   /* 自己刚建的房 20 秒内读不到不算没了（主从延迟大时头几次常读不到） */
+    outageMs: 16000,     /* 我这边连续读失败超过 16 秒 = 我断网了：这段时间不算在对手头上 */
+    observeMs: 9000,     /* 时间戳看着过期的房：多看几秒，心跳在动就是活的（对方手机钟慢） */
+    otherDevMs: 1800000, /* 同账号、不是这台设备建的剩余文档：30 分钟没动才清（另一台手机钟慢时不误删活房） */
+    verdictMs: 1500,     /* 判了「对手离场」后隔一会儿再读一次：两边同时判 = 这局不算 */
+    settleMs: 6000       /* 回合抢写结果待定时，再等多久 */
   };
 
   var _transport = null;        /* 测试注入口 */
@@ -52,10 +69,15 @@
   var _hb = null, _hbRoom = ''; /* 心跳定时器 */
   /* 本机正在用的那间房：房主还是客人、座位号、是否已开打 —— 离开时按身份收尾 */
   var _myRoomId = '', _myRole = '', _mySeatId = '', _myStarted = false;
-  var _joining = {};            /* roomId → 正在等房主确认 */
+  var _joining = {};            /* roomId → 正在进房（1）/ 已经点了取消（'cancel'） */
+  var _myAcked = {};            /* roomId → 房主已经写了确认（客人可能已经进了对战屏） */
+  var _myCodes = {};            /* roomId → 我开的私密房的码（码不上云，只有房主本机知道） */
   var _rc = {};                 /* roomId → 只增不减的合并缓存 */
+  var _obs = {};                /* roomId → 本机看到的心跳值和它最后一次变化的时刻 */
+  var _noOrder = false;         /* 云端拒绝过 orderBy（没建索引）→ 这次打开页面不再试 */
   var _seq = 0;
   var _dev = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function noop() {}
 
   /* ══ 错误：一律「人话 ⟨原话⟩」，并给出 kind 让界面分流 ══════════════
      kind: network 断网 / slow 太慢 / session 会话还没好（稍后重试）/ expired 确定没登录
@@ -71,6 +93,7 @@
     gone: '这个房间已经没有了，换一间吧',
     taken: '这间房刚被别人占了，换一间吧',
     self: '这是你自己账号开的房，要用另一个账号才能对战',
+    busy: '云端这次没处理成功，再试一次',
     other: '操作失败'
   };
 
@@ -98,21 +121,27 @@
     return '';
   }
 
+  /* 🔴v1164（审查 F1）：只有「权限 / 集合没建 / 环境 / 配额 / 参数」才是云端设置问题。
+     DATABASE_REQUEST_FAILED 是数据库「这一次没办成」的统称 —— 重复 _id 抢座失败也是它。
+     以前一律当成「云端设置还差一步」，抢座慢了一步的孩子被叫去截图找老师。 */
+  var CONFIG_CODE = /PERMISSION|DENIED|NOT_?EXIST|INVALID_PARAM|INVALID_ENV|ENV_NOT|QUOTA|LIMIT_EXCEED|ARREAR|SUSPEND|FORBIDDEN/i;
   function codeKind(code) {
     /* 令牌被云端拒 = SDK 已经续不上了，只能重新登录 */
     if (/TOKEN|UNAUTH|CREDENTIAL|LOGIN/i.test(code)) return 'expired';
-    return 'config';
+    if (CONFIG_CODE.test(code)) return 'config';
+    return 'other';
   }
   function textKind(t) {
     if (!t) return 'other';
     if (/自己账号开的房/.test(t)) return 'self';
-    if (/DATABASE_[A-Z_]+|PERMISSION_DENIED|COLLECTION_NOT_EXIST|INVALID_PARAM|云端设置还差一步/.test(t)) return 'config';
+    if (/PERMISSION_DENIED|COLLECTION_NOT_EXIST|INVALID_PARAM|云端设置还差一步/.test(t)) return 'config';
     if (/not-signed-in|unauthenticated|credentials not found|invalid_grant|refresh token|请先登录|还没登录|登录已过期|登录过期/i.test(t)) return 'expired';
     if (/尚未就绪|not ?ready|会话|session|云端还在准备/i.test(t)) return 'session';
     if (/网络太慢|timeout|timed out|内未完成|超时/i.test(t)) return 'slow';
     if (/network request error|failed to fetch|networkerror|network request failed|load failed|unreachable|net::|连不上网络/i.test(t)) return 'network';
     if (/被别人占了|抢走/.test(t)) return 'taken';
     if (/已经没有了|不存在|不在了|已经离开|已经结束|没找到这间房/.test(t)) return 'gone';
+    if (/DATABASE_[A-Z_]+/.test(t) && CONFIG_CODE.test(t)) return 'config';
     return 'other';
   }
   /* 给界面用：传错误对象、失败结果或 reason 字符串都行 */
@@ -125,6 +154,11 @@
       if (e.ok === false && typeof e.reason === 'string') return textKind(e.reason);
     }
     return textKind(rawText(e));
+  }
+  /* 重复 _id 的 add 报错（文本没人在真机上见过 —— 按 MongoDB / SDK 常见写法认） */
+  function dupLike(e) {
+    var t = rawText(e);
+    return /E11000|duplicate|DUPLICATE/.test(t) || !!(e && e.cloud && /REQUEST_FAILED/.test(String(e.code || '')));
   }
   function configHuman(e, t) {
     var code = String((e && typeof e.code === 'string' && e.code) || (/[A-Z][A-Z_]{6,}/.exec(t) || [])[0] || '');
@@ -145,7 +179,7 @@
     var human = (e && typeof e === 'object' && typeof e.human === 'string') ? e.human : '';
     if (!human) {
       if (k === 'config') human = configHuman(e, t);
-      else if (k === 'other') human = t || HUMAN.other;
+      else if (k === 'other') human = (e && e.cloud) ? HUMAN.busy : (t || HUMAN.other);
       else human = HUMAN[k];
     }
     /* 格式：`人话 ⟨原话⟩` —— 调用方按 ⟨⟩ 切开（不能换成 String 对象，有人做 typeof 判断） */
@@ -159,6 +193,7 @@
     if (k === 'taken') r.taken = true;
     if (k === 'gone') r.gone = true;
     if (k === 'self') r.self = true;
+    if (e && typeof e === 'object' && e.reload) r.reload = true;
     if (extra) for (var x in extra) if (Object.prototype.hasOwnProperty.call(extra, x)) r[x] = extra[x];
     return r;
   }
@@ -230,8 +265,11 @@
     var human = signin ? '还没登录，先登录再来对战'
               : k === 'config' ? '云端设置还差一步：这个版本还没配好云开发环境，请把技术信息发给负责的老师'
               : k === 'other' ? '云端没准备好，刷新一下页面再试' : HUMAN[k];
+    /* 审查 AUTH-3：SDK 文件没下载完整（浏览器会记住那次失败）—— 说「刷新一下页面」，别说「检查 Wi-Fi」 */
+    if (s.reload) human = '云端组件没下载完整，刷新一下页面就好';
     var e = kErr(k, human, '云端会话不可用：' + why);
     e.sessionDead = true; e.expired = (k === 'expired');
+    if (s.reload) e.reload = true;
     return e;
   }
 
@@ -242,7 +280,7 @@
       var A = window.HansenAuth;
       if (!A || typeof A.ensureSession !== 'function' || typeof A._app !== 'function')
         return Promise.reject(kErr('other', '账号模块没加载好，刷新一下页面再试', '账号模块未加载'));
-      /* 🔴v1164：会话 20 秒内刚确认过就不再问 —— 对战时每秒好几次读写，
+      /* 🔴v1164：会话 20 秒内刚确认过就不再问 —— 对战时每秒都在读写，
          每次都问一遍会把手机上的诊断轨迹（只留 60 行）刷满，真出错时那几行就被挤掉了 */
       if (_ses.db && Date.now() - _ses.at < 20000) return Promise.resolve(_ses.db);
       return A.ensureSession().then(function (s) {
@@ -260,7 +298,7 @@
     }
     function C(d) { return d.collection(COLLECTION); }
     function sortNewest(rows) {
-      /* v1157: 降级路径没有 orderBy，本地排一次（40 条毫无压力） */
+      /* v1157: 降级路径没有 orderBy，本地排一次 */
       return (rows || []).slice().sort(function (a, b) {
         return (Number(b && b.createdAt) || 0) - (Number(a && a.createdAt) || 0);
       });
@@ -281,6 +319,16 @@
             if (Array.isArray(rows)) return rows[0] || null;
             return (rows && typeof rows === 'object' && rows._id) ? rows : null;
           });
+        });
+      },
+      /* 🔴v1164（审查 SE-1）：一次请求取回好几条（房间 + 座位 + 这一局的回合）。
+         云开发按「调用次数」计费 —— 对战时每秒读三四次，一个班一天就把套餐用完了。 */
+      getMany: function (ids) {
+        return db().then(function (d) {
+          var list = (ids || []).filter(Boolean);
+          if (!list.length) return [];
+          return C(d).where({ _id: d.command['in'](list) }).limit(Math.min(100, list.length)).get()
+            .then(chk('getMany')).then(function (r) { return (r && r.data) || []; });
         });
       },
       /* 只用来改自己的文档；updated:0 = 文档不在了（每次都带心跳时间戳，值一定会变） */
@@ -310,30 +358,36 @@
           });
         });
       },
+      /* 🔴v1164（审查 TI-1）：查询里就只要「新协议、最近 10 分钟有心跳」的房 ——
+         以前只按 status/isPrivate 查、取 40 条，orderBy 没索引时退成「不排序取 40 条」，
+         攒够 40 间死房（房主手机没电的、旧版本的）以后，**活房一间都排不进来**，天梯永远配不到人。
+         proto:2 的房从建房那一刻就带 heartbeatAt，不存在「字段缺失查不出来」的问题。 */
       listOpen: function (nowTs) {
         return db().then(function (d) {
-          /* 🔴v1154：查询只留每间房都有的字段（status + isPrivate），其余放本地判 ——
-             字段缺失 ≠ 空字符串，where 里多一个条件就可能整批查不出来。 */
+          var _ = d.command || {};
+          var since = (Number(nowTs) || Date.now()) - LIST_WINDOW_MS;
           function plain() {
-            return C(d).where({ status: 'open', isPrivate: false }).limit(40).get();
+            return C(d).where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: _.gt ? _.gt(since) : undefined })
+              .limit(LIST_LIMIT).get();
           }
-          /* 🔴v1157：orderBy 要建索引，没建就整个查询报错 —— 失败就降级成不排序的查询。
-             报错可能是 reject，也可能是 resolve 一个 {code}，两种都要降级。 */
-          return C(d)
-            .where({ status: 'open', isPrivate: false })
-            .orderBy('createdAt', 'desc').limit(40).get()
+          /* 🔴v1157：orderBy 要建索引，没建就整个查询报错 —— 失败就降级成不排序的查询（本地排）。
+             报错可能是 reject，也可能是 resolve 一个 {code}，两种都要降级；云端明确拒过一次就记住，别每次都白问。 */
+          var first = _noOrder ? plain() : C(d)
+            .where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: _.gt ? _.gt(since) : undefined })
+            .orderBy('createdAt', 'desc').limit(LIST_LIMIT).get()
             .then(function (r) {
               if (r && r.code) throw cloudErr(r, 'listOpen');
               return r;
             })
             ['catch'](function (indexErr) {
+              if (indexErr && indexErr.cloud) _noOrder = true;
               try {
                 console.warn('[房间] orderBy 失败，降级为不排序查询（多半是云端没建 createdAt 索引）：'
                   + rawText(indexErr).slice(0, 120));
               } catch (e) {}
               return plain();
-            })
-            .then(chk('listOpen'))
+            });
+          return first.then(chk('listOpen'))
             .then(function (r) { return sortNewest((r && r.data) || []); });
         });
       }
@@ -370,7 +424,7 @@
   /* 给传输层的每个方法套上超时 + 断网重试 —— 包括测试注入的假实现 */
   function wrapTimeout(tx) {
     if (!tx || tx.__wrapped) return tx;
-    var FAST = { read: 1, patch: 1 };
+    var FAST = { read: 1, patch: 1, getMany: 1 };
     var out = { __wrapped: true };
     Object.keys(tx).forEach(function (k) {
       var fn = tx[k];
@@ -381,7 +435,7 @@
            能重试的标准是**幂等**：读天然幂等；add 带固定 _id（重复会被拒，
            再由调用方读回判定）、patch 是 $set、remove 删两次也一样 ——
            v1164 起不再有「条件更新」这种重试会出事的写法。 */
-        var READ_ONLY = { read: 1, list: 1, listOpen: 1, add: 1, patch: 1, remove: 1 };
+        var READ_ONLY = { read: 1, list: 1, listOpen: 1, getMany: 1, add: 1, patch: 1, remove: 1 };
         var once = function () {
           return withTimeout(fn.apply(tx, args), FAST[k] ? NET_TIMEOUT_FAST_MS : NET_TIMEOUT_MS)['catch'](function (e) {
             var ek = kindOf(e);
@@ -403,6 +457,29 @@
     if (_transport) return _transport;
     _transport = wrapTimeout(realTransport());
     return _transport;
+  }
+
+  /* 一次取回好几条。假传输层没有 getMany 时逐条读（测试注入的旧桩照样能跑）；
+     返回 {map: id → 文档|null, err: id → 读失败的错误} */
+  function fetchMany(ids) {
+    var list = [];
+    (ids || []).forEach(function (id) { if (id && list.indexOf(id) < 0) list.push(id); });
+    var t = T();
+    if (typeof t.getMany === 'function') {
+      return t.getMany(list).then(function (rows) {
+        var map = {};
+        list.forEach(function (id) { map[id] = null; });
+        (rows || []).forEach(function (d) { if (d && d._id && Object.prototype.hasOwnProperty.call(map, d._id)) map[d._id] = d; });
+        return { map: map, err: {} };
+      });
+    }
+    var map = {}, err = {};
+    return Promise.all(list.map(function (id, n) {
+      return t.read(id).then(function (d) { map[id] = d || null; }, function (e) {
+        if (n === 0) throw e;          /* 第一条（房间）读不到：整次失败，和以前一样 */
+        err[id] = e; map[id] = null;
+      });
+    })).then(function () { return { map: map, err: err }; });
   }
 
   /* ══ 身份 ══════════════════════════════════════════════════════════
@@ -467,9 +544,15 @@
 
   /* ══ 小工具 ═════════════════════════════════════════════════════════ */
   function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+  function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function nonce() { return _dev + '.' + (++_seq); }
   function seatIdOf(rid, ep) { return rid + '_s' + (ep || 0); }
-  function winIdOf(rid, i) { return rid + '_w' + i; }
+  /* 回合文档按轮次分开（R_w<轮次>_<i>）：房主换过客人，上一个客人留下的回合文档不会算进新的一局。
+     第 0 轮沿用 R_w<i>。同一个 _id 被陌生人抢先建了（伪造的）→ 换备用号 b、c。 */
+  var ALT = ['', 'b', 'c'];
+  function winIdOf(rid, ep, i, k) {
+    return (ep ? (rid + '_w' + ep + '_' + i) : (rid + '_w' + i)) + (ALT[k || 0] || '');
+  }
   function capOf(R) {
     var n = Number(R && R.wordCount);
     if (!isFinite(n) || n < 1) n = WORDS_PER_ROUND;
@@ -488,38 +571,148 @@
   function isSeatDoc(d, rid, ep) {
     return !!(d && d.kind === 'seat' && d.roomId === rid && num(d.epoch) === ep && d.guestId);
   }
-  function isWinDoc(d, rid, i) {
-    return !!(d && d.kind === 'win' && d.roomId === rid && num(d.i) === i);
-  }
   function setMine(id, role, sid, started) {
     _myRoomId = id || ''; _myRole = role || ''; _mySeatId = sid || ''; _myStarted = !!started;
   }
   function mySeatId(rid, R) {
     if (_myRoomId === rid && _mySeatId) return _mySeatId;
+    var c = _rc[rid];
+    if (c && c.mySeat) return c.mySeat;
     return seatIdOf(rid, num(R && R.seat));
+  }
+  /* 这一局是第几轮的座位（房主确认时 / 客人抢到时定下来；之前按房间当前的轮次） */
+  function matchEp(c) { return (c && c.ep != null) ? c.ep : num(c && c.meta && c.meta.seat); }
+
+  /* ── 本机建过的文档（只记在这一页的会话里，不进备份、不跨设备）──
+     清理死房时，本机建的按正常宽限期清；同账号**别的设备**建的要 30 分钟没动才清 ——
+     那台手机的钟要是慢了，按它写的时间戳看「两分钟没心跳」，其实它正开着房等人（审查 F8）。 */
+  var MINE_KEY = 'hsnPkDevDocs_v1164';
+  var _mineMem = {};
+  function mineMap() {
+    try { var o = JSON.parse(sessionStorage.getItem(MINE_KEY) || '{}'); return (o && typeof o === 'object') ? o : {}; }
+    catch (e) { return {}; }
+  }
+  function noteMine(id) {
+    if (!id) return;
+    _mineMem[id] = Date.now();
+    try {
+      var o = mineMap(); o[id] = Date.now();
+      var ks = Object.keys(o);
+      if (ks.length > 80) ks.sort(function (a, b) { return o[a] - o[b]; }).slice(0, ks.length - 80).forEach(function (k) { delete o[k]; });
+      sessionStorage.setItem(MINE_KEY, JSON.stringify(o));
+    } catch (e) {}
+  }
+  function isMineDev(id) {
+    if (_mineMem[id]) return true;
+    try { return !!mineMap()[id]; } catch (e) { return false; }
+  }
+
+  /* ── 私密房的码：码本身不上云（集合所有人都能读），只放一个摘要供输码查房；
+     进房的客人还要在座位上交一个只有知道码才算得出来的凭证，房主核对了才放行（审查 SEC-7）。
+     ⚠️ 4 位码一共 92 万种，懂编程的人照样能硬算 —— 这只防「顺手绕过」，挡不住专门来捣乱的。 */
+  function h53(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function codeHash(code) { return 'c' + h53('hansen-pk-code:' + String(code || '').toUpperCase()); }
+  function codeProof(code, seatId) { return 'p' + h53('hansen-pk-proof:' + String(code || '').toUpperCase() + ':' + seatId); }
+
+  /* ── 房间还活着吗（审查 F8/F10/TI-3）─────────────────────────────
+     以前：本机时间 − 房主写的心跳时间 < 30 秒。房主手机慢 1 分钟 → 他的房谁都看不见、码也找不到；
+     快 10 分钟 → 他关了 App，房还「活」10 分钟。现在两条路，任一条成立就算活：
+       ① 本机亲眼看到它的心跳值在变（最近 30 秒内变过）—— 不看对方的钟，钟差多少都对；
+       ② 时间戳在 30 秒内、且不在未来 1 分钟以外 —— 两边钟差不多时，第一眼就能判。
+     未来很远的时间戳（伪造的 / 钟快的）只认 ①：不动的假房永远不展示。 */
+  function observe(x, t) {
+    var id = String((x && x._id) || '');
+    var b = num(x && x.heartbeatAt) || num(x && x.createdAt);
+    var o = _obs[id];
+    if (!o) o = _obs[id] = { v: b, at: t, chg: 0 };
+    else if (b > o.v) { o.v = b; o.at = t; o.chg = t; }   /* 心跳只会往后走：变大了才算「在动」 */
+    else if (b !== o.v) { o.v = b; o.at = t; }            /* 变小了（旧快照 / 改了钟）不算 */
+    return o;
+  }
+  function roomAlive(x, t) {
+    if (!x) return false;
+    var b = num(x.heartbeatAt) || num(x.createdAt);
+    var o = observe(x, t);
+    if (o.chg && (t - o.chg) < STALE_MS) return true;
+    return (t - b) < STALE_MS && (b - t) < FUTURE_MS;
+  }
+  function pruneObs(t) {
+    for (var k in _obs) if (has(_obs, k) && (t - _obs[k].at) > LIST_WINDOW_MS) delete _obs[k];
   }
 
   /* ══ 合并视图：把 R + S + W 拼回界面熟悉的旧字段名 ═══════════════════
      🔴最终一致：某一次读可能拿到旧快照。合并必须**只进不退** ——
-     状态 open→playing→done 不回退、已定的回合只增不减、见过的比分不丢。 */
+     状态 open→playing→done 不回退、已定的回合只增不减、见过的比分不丢、
+     见过的「判离场」结论不丢（审查 F12：一次旧快照会把「判负」读回成正常的 500:1「胜」）。 */
   var RANK = { open: 0, playing: 1, done: 2 };
   var RANK_NAME = ['open', 'playing', 'done'];
   function rc(id) {
     return _rc[id] || (_rc[id] = { rank: 0, guestId: '', hs: null, gs: null, wins: [],
-                                   seat: null, meta: null, calls: 0, opp: {}, missR: 0, missS: 0 });
+                                   seat: null, meta: null, calls: 0, opp: {}, missR: 0, missS: 0,
+                                   awH: false, awG: false, eb: '', ep: null, sq: {}, mySeat: '',
+                                   lastOk: 0, failSince: 0, outageAt: 0, lastL: null, createdLocal: 0 });
   }
   function setWin(rid, i, d) {
     var c = rc(rid);
     if (c.wins[i] || !d) return;
-    c.wins[i] = { winner: (d.winner === 'host' || d.winner === 'guest') ? d.winner : '',
-                  at: num(d.at), by: String(d.by || '') };
+    if (d.winner !== 'host' && d.winner !== 'guest') return;
+    c.wins[i] = { winner: d.winner, at: num(d.at), by: String(d.by || '') };
   }
-  function decided(rid) { var c = rc(rid), n = 0; while (c.wins[n]) n++; return n; }
+  /* 已定的最大一词 +1（中间没人拼对的词是空着的 ''） */
+  function decided(rid) { return winnersOf(rid).length; }
   function winnersOf(rid) {
-    var c = rc(rid), cap = capOf(c.meta), out = [];
+    var c = rc(rid), cap = capOf(c.meta), out = [], last = -1;
     /* v1163：赢家名单最多 N 条、每项只认 host/guest —— 别人写的数据不可信 */
-    for (var i = 0; i < cap && c.wins[i]; i++) out.push(c.wins[i].winner);
+    for (var i = 0; i < cap; i++) if (c.wins[i]) last = i;
+    for (var j = 0; j <= last; j++) out.push(c.wins[j] ? c.wins[j].winner : '');
     return out;
+  }
+  /* 回合文档是不是这一局两个人自己建的（审查 F9）：
+     · winner 只能是 host / guest，by 必须是那一方的身份键；
+     · 数据库盖的 _openid 必须是那一方的（房主 = 房间文档的创建者，客人 = 当前座位的创建者）。
+     陌生人抢先建的同 _id 文档 → 不算数（再换备用号写）。云端读不回 _openid 时只能退回看 by。 */
+  function validWin(d, rid, ep, i) {
+    if (!d || d.kind !== 'win' || d.roomId !== rid || num(d.i) !== i || num(d.ep) !== ep) return false;
+    var c = rc(rid), R = c.meta || {}, S = c.seat || {};
+    var w = d.winner;
+    if (w !== 'host' && w !== 'guest') return false;
+    var key = (w === 'host') ? String(R.hostId || '') : String(S.guestId || c.guestId || '');
+    if (!key || String(d.by || '') !== key) return false;
+    var maker = (w === 'host') ? R._openid : S._openid;
+    if (d._openid && maker && d._openid !== maker) return false;
+    if (d._openid && !maker && w === 'guest') return false;   /* 客人座位还没读到：先不认，下次再看 */
+    return true;
+  }
+  function winIdsAll(rid) {
+    var c = rc(rid), ep = matchEp(c), cap = capOf(c.meta), ids = [];
+    for (var i = 0; i < cap; i++) {
+      if (c.wins[i]) continue;
+      for (var k = 0; k <= Math.min(ALT.length - 1, c.sq[i] || 0); k++) ids.push(winIdOf(rid, ep, i, k));
+    }
+    return ids;
+  }
+  function absorbWins(rid, map) {
+    var c = rc(rid), ep = matchEp(c), cap = capOf(c.meta);
+    for (var i = 0; i < cap; i++) {
+      if (c.wins[i]) continue;
+      for (var k = 0; k < ALT.length; k++) {
+        var d = map[winIdOf(rid, ep, i, k)];
+        if (!d) continue;
+        if (validWin(d, rid, ep, i)) { setWin(rid, i, d); break; }
+        if (d.kind === 'win' && d.roomId === rid && num(d.i) === i && num(d.ep) === ep && d._openid)
+          c.sq[i] = Math.max(c.sq[i] || 0, Math.min(ALT.length - 1, k + 1));   /* 被陌生人占了：下次连备用号一起读 */
+      }
+    }
   }
 
   function view(rid, R, S) {
@@ -532,11 +725,15 @@
     var s = (S && S.kind === 'seat' && gid && S.guestId === gid) ? S : null;
     if (s) c.seat = s; else if (c.seat && c.seat.guestId === gid) s = c.seat;
     s = s || {};
+    if (R.abandonWin === 'host') c.awH = true;
+    if (s.abandonWin === 'guest') c.awG = true;
+    if (!c.eb && R.endedBy) c.eb = sText(R.endedBy, 12);
+    var aw = (c.awH && c.awG) ? 'both' : (c.awH ? 'host' : (c.awG ? 'guest' : ''));
     var hs = scoreOf(R.hostScore), gs = scoreOf(s.guestScore);
-    if (hs == null && R.abandonWin === 'host') hs = 1;
-    if (gs == null && s.abandonWin === 'guest') gs = 1;
-    if (gs == null && R.abandonWin === 'host') gs = 0;
-    if (hs == null && s.abandonWin === 'guest') hs = 0;
+    if (hs == null && c.awH) hs = 1;
+    if (gs == null && c.awG) gs = 1;
+    if (gs == null && c.awH && !c.awG) gs = 0;
+    if (hs == null && c.awG && !c.awH) hs = 0;
     if (hs != null) c.hs = hs;
     if (gs != null) c.gs = gs;
     /* 「答完第几词 / 当前几分」只增不减（旧快照不许把进度拉回去） */
@@ -548,23 +745,26 @@
     var winners = winnersOf(rid);
     var n = winners.length, roundAt = 0;
     if (n === 0) roundAt = (R.hostReady && s.guestReady) ? Math.max(num(R.hostReadyAt), num(s.guestReadyAt)) : 0;
-    else roundAt = c.wins[n - 1].at;
+    else roundAt = c.wins[n - 1] ? c.wins[n - 1].at : 0;
+    /* 「房主报到了」只算这一局的：房主换了别的客人（我被撤回了），他的报到跟我无关（审查 F11） */
+    var hostReady = !!R.hostReady && (!gid || !R.guestId || String(R.guestId) === gid);
     return {
       _id: rid, id: rid, proto: num(R.proto), kind: 'room',
-      status: RANK_NAME[rank], isPrivate: !!R.isPrivate, code: sText(R.code, 8),
+      status: RANK_NAME[rank], isPrivate: !!R.isPrivate, code: sText(_myCodes[rid] || '', 8),
       mode: modeOf(R.mode).key, askMode: (R.askMode === 'tts') ? 'tts' : 'cn',
       seed: R.seed, wordCount: capOf(R),
-      hostId: String(R.hostId || ''), hostName: sText(R.hostName, 16) || '无名蜂',
-      hostRating: sNum(R.hostRating, 0, 4000, 0), hostTier: sText(R.hostTier, 12),
+      hostId: String(R.hostId || ''), hostName: cloudName(R.hostName),
+      hostRating: sNum(R.hostRating, 0, 4000, 0), hostElo: sNum(R.hostElo, 0, 4000, 0),
+      hostTier: sText(R.hostTier, 12),
       createdAt: num(R.createdAt), heartbeatAt: num(R.heartbeatAt), hostBeat: num(R.hostBeat),
-      hostReady: !!R.hostReady, hostReadyAt: num(R.hostReadyAt), seat: num(R.seat),
-      guestId: gid, guestName: sText(s.guestName || R.guestName, 16) || (gid ? '无名蜂' : ''),
+      hostReady: hostReady, hostReadyAt: num(R.hostReadyAt), seat: num(R.seat),
+      guestId: gid, guestName: gid ? cloudName(s.guestName || R.guestName) : '',
       guestRating: sNum(s.guestRating || R.guestRating, 0, 4000, 0),
       guestBeat: num(s.guestBeat), guestReady: !!s.guestReady, guestReadyAt: num(s.guestReadyAt),
       guestLeft: !!s.left,
       hostScore: c.hs, guestScore: c.gs,
-      startedAt: num(R.startedAt), endedAt: num(R.endedAt), endedBy: sText(R.endedBy, 12),
-      abandonWin: R.abandonWin === 'host' ? 'host' : (s.abandonWin === 'guest' ? 'guest' : ''),
+      startedAt: num(R.startedAt), endedAt: num(R.endedAt), endedBy: c.eb,
+      abandonWin: aw,
       winners: winners, round: n, roundAt: roundAt,
       hostAns: c.ans.h, guestAns: c.ans.g, hostPts: c.ans.hp, guestPts: c.ans.gp
     };
@@ -581,24 +781,40 @@
       return sleep(TM.lagMs).then(function () { return readRoomLag(rid, tries - 1); });
     });
   }
-  /* 房间 + 当前座位；房间读不到先用缓存，连续 3 次读不到才算没了 */
-  function loadView(rid) {
+  /* 房间 + 当前座位（+ 这一局所有回合）一次读回来；房间读不到先用缓存，连续 3 次读不到才算没了。
+     🔴审查 F4：记下「我这边从什么时候开始读不到」—— 恢复时如果断了很久，那段时间不能算在对手头上。 */
+  function loadView(rid, o) {
     var c = rc(rid);
-    var ERR = {};   /* 座位读失败（网络）和「座位不在」要分开：前者不能算对手走了 */
-    var rdS = function (ep) { return T().read(seatIdOf(rid, ep))['catch'](function () { return ERR; }); };
-    var ep0 = c.meta ? num(c.meta.seat) : -1;
-    var pS = ep0 >= 0 ? rdS(ep0) : null;
-    return readRoom(rid).then(function (R) {
+    var ep0 = c.meta ? num(c.meta.seat) : 0;
+    var sid0 = mySeatId(rid, c.meta);
+    var ids = [rid, sid0].concat((o && o.wins) ? winIdsAll(rid) : []);
+    return fetchMany(ids).then(function (got) {
+      var t = Date.now();
+      var R = isRoomDoc(got.map[rid], rid) ? got.map[rid] : null;
       if (!R) {
-        c.missR++;
+        var young = c.createdLocal && (t - c.createdLocal) < TM.ownGraceMs;
+        if (!young) c.missR++;
         if (c.missR >= 3 || !c.meta) throw kErr('gone', HUMAN.gone, '房间已不存在');
       } else c.missR = 0;
+      if (c.failSince && (t - c.failSince) > TM.outageMs) c.outageAt = t;
+      c.failSince = 0; c.lastOk = t;
       var RR = R || c.meta;
-      var ep = num(RR.seat);
-      return ((pS && ep === ep0) ? pS : rdS(ep)).then(function (S) {
-        var seat = (S && S !== ERR && S.kind === 'seat' && S.roomId === rid) ? S : null;
-        return { R: RR, S: seat, sErr: S === ERR, fresh: !!R, v: view(rid, R, seat) };
+      var sid = mySeatId(rid, RR);
+      var more = (sid !== sid0 && !(_myRoomId === rid && _mySeatId)) ? fetchMany([sid]) : null;
+      return Promise.resolve(more).then(function (g2) {
+        var src = g2 || got;
+        var S = src.map[sid];
+        var sErr = !!src.err[sid];
+        var seat = (!sErr && S && S.kind === 'seat' && S.roomId === rid) ? S : null;
+        view(rid, R, seat);
+        if (o && o.wins) absorbWins(rid, got.map);
+        var L = { R: RR, S: seat, sErr: sErr, fresh: !!R, v: view(rid, null, null), at: t, ep0: ep0 };
+        c.lastL = L;
+        return L;
       });
+    }, function (e) {
+      if (!c.failSince) c.failSince = Date.now();
+      throw e;
     });
   }
   function metaOf(rid) {
@@ -634,33 +850,58 @@
   }
 
   /* ══ 原子抢占：固定 _id 的 add ════════════════════════════════════════
-     几个人同时 add 同一个 _id，数据库只让一个成功。
-     ⚠️ 不能只信 add 的结果：重复 _id 的报错文本没人见过、网络断在半路时
-        也可能「其实写进去了」—— 所以失败后按 _id 读回来（隔一会儿多读几次，
-        最终一致），看 nonce 是不是我这一次的：是 → 我的；不是 → 被别人抢了；
-        读不到 → 真的写失败了，按原错误分类。 */
-  function claim(doc) {
+     几个人同时 add 同一个 _id，数据库只让一个成功。不能只信 add 的结果 ——
+       · add 成功：读回来看 nonce（万一后端是覆盖写 / 悄悄吞掉重复，两个人都会以为自己赢了，审查 F13）。
+         读不到（主从延迟）就多读几次，读到为止（有上限）；一直读不到才信 add。
+       · add 失败：重复 _id 的报错文本没人见过、网络断在半路时也可能「其实写进去了」——
+         按 _id 隔一会儿多读几次（读失败就再读，**一次读失败不能当成「没有」**，审查 F1）：
+           读到、nonce 是我的 → 我的（我刚才那次重试写进去了）；不是我的 → 被别人抢了；
+           一直读不到 → **结果待定**（unknown）：多半是别人的还没同步过来，也可能是我的。
+           调用方自己决定怎么说（座位 = 被占了、房间 = 网不稳再试、回合 = 等下一次读）。
+           绝不把它说成「云端设置还差一步」。
+     opts.fresh：_id 是我随机生成的（开房）—— 重复 _id 只可能是我自己刚才那次重试写进去了。 */
+  function rbDelays(failPath) {
+    var f = failPath ? [0.5, 0.8, 1.3, 2, 2.7, 3.3, 4.3] : [0, 0.4, 0.8, 1.5, 2.3];
+    return f.map(function (x) { return Math.round(x * TM.lagMs); });
+  }
+  function claim(doc, opts) {
+    opts = opts || {};
     var id = doc._id;
-    function same(d) { return !!(d && d.kind === doc.kind && d.roomId === doc.roomId); }
-    function readBack(tries) {
-      return T().read(id).then(function (d) {
-        if (same(d) || tries <= 1) return same(d) ? d : null;
-        return sleep(TM.lagMs).then(function () { return readBack(tries - 1); });
-      });
+    function same(d) { return !!(d && d.kind === doc.kind && d.roomId === doc.roomId && (!d._id || d._id === id)); }
+    /* 隔一会儿读一次，读到这条就停；每一次读失败都接着读（不让一次失败结束整个判定） */
+    function readBack(delays) {
+      var lastErr = null, i = 0;
+      function step() {
+        if (i >= delays.length) return Promise.resolve({ doc: null, err: lastErr });
+        var wait = delays[i++];
+        return sleep(wait).then(function () {
+          return T().read(id).then(function (d) {
+            if (same(d)) return { doc: d, err: null };
+            return step();
+          }, function (e) {
+            lastErr = e;
+            var k = kindOf(e);
+            if (k === 'expired' || k === 'session' || k === 'config') return { doc: null, err: e, stop: true };
+            return step();
+          });
+        });
+      }
+      return step();
     }
     return T().add(doc).then(function (r) {
-      /* 成功也读一次做保险（万一后端是覆盖写）；读不到就信 add */
-      return readBack(1)['catch'](function () { return null; }).then(function (d) {
-        if (d && d.nonce && doc.nonce && d.nonce !== doc.nonce) return { mine: false, doc: d, id: id };
+      return readBack(rbDelays(false)).then(function (rb) {
+        if (rb.doc && rb.doc.nonce && doc.nonce && rb.doc.nonce !== doc.nonce) return { mine: false, doc: rb.doc, id: id };
         return { mine: true, doc: doc, id: (r && r.id) || id };
       });
     }, function (addErr) {
       var k = kindOf(addErr);
-      if (k === 'expired' || k === 'session') throw addErr;   /* 没登录：读也读不了 */
-      /* 超时的 add 可能其实写进去了 —— 同样读回来判（否则会留下一个对方会确认的孤儿座位） */
-      return readBack(k === 'slow' ? 2 : TM.lagTries)['catch'](function () { return null; }).then(function (d) {
-        if (!d) throw addErr;
-        return { mine: !!(d.nonce && d.nonce === doc.nonce), doc: d, id: id };
+      if (k === 'expired' || k === 'session' || k === 'config') throw addErr;   /* 没登录 / 云端设置不对：读也读不了 */
+      if (opts.fresh && dupLike(addErr)) return { mine: true, doc: doc, id: id, viaDup: true };
+      return readBack(rbDelays(true)).then(function (rb) {
+        if (rb.stop) throw rb.err;
+        if (rb.doc) return { mine: !!(rb.doc.nonce && rb.doc.nonce === doc.nonce), doc: rb.doc, id: id };
+        /* 一直读不回来：结果待定。读本身失败的话，报读的那个原因（断网 / 太慢），不报 add 的码 */
+        return { mine: false, unknown: true, id: id, err: rb.err || addErr, dup: dupLike(addErr) };
       });
     });
   }
@@ -677,36 +918,37 @@
     return c;
   }
 
-  function fresh(x, t) {
-    var beat = num(x.heartbeatAt) || num(x.createdAt);
-    return (t - beat) < STALE_MS;
-  }
   /* 能进的新版房：新协议、开着、没客人、房主还在 */
   function joinable(x, t) {
     return !!(x && x.proto === PROTO && x.kind === 'room' && x.status === 'open'
-              && !x.guestId && fresh(x, t));
+              && !x.guestId && roomAlive(x, t));
   }
 
-  /* 按房间码找房 —— 朋友输码进房走这里 */
+  /* 按房间码找房 —— 朋友输码进房走这里。
+     🔴v1164（审查 F8）：码对上了但时间戳看着过期 → 多看几秒（房主手机钟慢的话，心跳照样在动） */
   function findByCode(code) {
     var c = String(code || '').trim().toUpperCase();
     if (!/^[0-9A-Z]{4}$/.test(c)) {
       return Promise.resolve(failK('other', '房间码是 4 位，检查一下'));
     }
     return ident().then(function (u) {
-      return T().list({ code: c, status: 'open' }).then(function (rows) {
-        var t = Date.now(), mine = false;
-        var alive = (rows || []).filter(function (x) {
-          if (!joinable(x, t)) return false;
-          if (u.id && x.hostId === u.id) { mine = true; return false; }
-          return true;
-        });
-        if (!alive.length) {
+      var H = codeHash(c);
+      function look(n) {
+        return T().list({ codeH: H, status: 'open' }).then(function (rows) {
+          var t = Date.now(), mine = false, cand = 0;
+          var ok = (rows || []).filter(function (x) {
+            if (!(x && x.proto === PROTO && x.kind === 'room' && x.status === 'open' && !x.guestId)) return false;
+            if (u.id && x.hostId === u.id) { mine = true; return false; }
+            cand++;
+            return roomAlive(x, t);
+          });
+          if (ok.length) return { ok: true, room: listItem(ok[0]), roomId: String(ok[0]._id) };
+          if (cand && n > 0) return sleep(Math.round(TM.observeMs / 3)).then(function () { return look(n - 1); });
           return mine ? failK('self', HUMAN.self)
                       : failK('gone', '没找到这间房，可能已经关了或码输错了');
-        }
-        return { ok: true, room: listItem(alive[0]), roomId: String(alive[0]._id) };
-      });
+        });
+      }
+      return look(3);
     })['catch'](function (e) { return fail(e); });
   }
 
@@ -731,18 +973,21 @@
       var seed = (now ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0;
       /* 🔴v1163：客户端定好 _id —— add 重试写的一定是同一条，不会一次点击开出两间房 */
       var _newId = 'r' + now.toString(36) + Math.random().toString(36).slice(2, 8);
+      var code = '';
       var doc = {
         _id: _newId, proto: PROTO, kind: 'room', nonce: nonce(),
         status: 'open',
-        code: '',      /* v1136: 私密房的码在下面查重后再写 */
+        codeH: '',     /* 私密房的码只存摘要（码本身不上云）；下面查重后再写 */
         isPrivate: !!opts.private,
         mode: modeOf(opts.mode).key,
         askMode: (opts.askMode === 'tts') ? 'tts' : 'cn',   /* v1102: 看中文 / 听发音 */
         seed: seed,
         wordCount: capOf({ wordCount: opts.wordCount || WORDS_PER_ROUND }),
         hostId: u.id, hostName: u.name,
-        /* v1114: 夹到 ELO 的合理区间 */
+        /* v1114: 夹到 ELO 的合理区间。hostRating 只给天梯匹配用（自由房写 0，免得被排位配进来）；
+           hostElo 是房主真实的天梯分，算 ELO 用（审查 UI-12：自由房的抢答赛客人以前按 1000 分算） */
         hostRating: Math.max(0, Math.min(4000, Math.floor(Number(opts.hostRating) || 0))),
+        hostElo: myRating(opts.elo),
         hostTier: sText(opts.tier || '', 12),
         guestId: '', guestName: '', guestRating: 0,
         seat: 0,                         /* 座位轮次：死座位删不掉（不是我的文档），就换下一号 */
@@ -754,15 +999,24 @@
       var _prep = opts.private
         ? (function pickCode(tries) {
             var c = makeCode();
-            return T().list({ code: c, status: 'open' }).then(function (rows) {
+            return T().list({ codeH: codeHash(c), status: 'open' }).then(function (rows) {
               if (rows && rows.length && tries < 5) return pickCode(tries + 1);
-              doc.code = c;
+              code = c; doc.codeH = codeHash(c);
               return doc;
-            })['catch'](function () { doc.code = c; return doc; });
+            })['catch'](function () { code = c; doc.codeH = codeHash(c); return doc; });
           })(0)
         : Promise.resolve(doc);
-      return _prep.then(function () { return claim(doc); }).then(function (r) {
-        if (!r.mine) return failK('other', '房号撞车了，再点一次开房就好');
+      return _prep.then(function () { return claim(doc, { fresh: true }); }).then(function (r) {
+        if (!r.mine) {
+          /* 🔴审查 F1：读不回来 = 不知道开没开成 → 顺手删一下（真写进去了就删掉，没写进去删了也无妨），
+             按读的原因说（断网 / 太慢），绝不说成「云端设置还差一步」 */
+          if (r.unknown) {
+            T().remove(doc._id)['catch'](noop);
+            var ue = r.err && kindOf(r.err) !== 'other' ? r.err : kErr('slow', '网络不太稳，房没开成，再点一次开房', '开房后读不回房间');
+            return fail(ue);
+          }
+          return failK('other', '房号撞车了，再点一次开房就好');
+        }
         /* 🔴v1163：拿不到有效房间号就不算建成（否则界面说"开好了"，其实没有房） */
         var _rid = r && r.id;
         if (typeof _rid === 'number' && isFinite(_rid)) _rid = String(_rid);
@@ -771,7 +1025,10 @@
         }
         doc._id = _rid;
         setMine(_rid, 'host', '', false);
-        rc(_rid).meta = doc;
+        if (code) _myCodes[_rid] = code;
+        noteMine(_rid);
+        var c0 = rc(_rid);
+        c0.meta = doc; c0.createdLocal = Date.now();
         startHeartbeat(_rid);
         return { ok: true, roomId: _rid, room: view(_rid, doc, null), mySide: 'host',
                  words: wordsFromSeed(seed, doc.wordCount) };
@@ -785,16 +1042,26 @@
   }
 
   /* ── 🔴v1135 顺手清死房 ── 没有服务端定时任务，所以每个人顺手清**自己的**剩余文档：
-     打完/离开超过宽限期的房间和座位、过期的回合文档。别人的本来也删不掉。
-     每次最多删 10 条，不拖慢列房。 */
+     打完/离开超过宽限期的房间和座位、过期的回合文档。别人的本来也删不掉。每次最多删 10 条。
+     🔴v1164（审查 SE-3）：以前每次列房都跑三次查询（天梯找人时每 2.5 秒一次，占了找人读次数的四分之三）——
+       现在打开页面后跑一次，之后 10 分钟内不再跑；同一时间只跑一个。
+     🔴v1164（审查 F8）：同账号**别的设备**建的（不在本机记录里），30 分钟没动才清 ——
+       那台手机钟慢的话，「两分钟没心跳」其实是它正开着房在等人。 */
+  var _sweepAt = 0, _sweeping = null;
+  function maybeSweep() {
+    if (_sweeping || (_sweepAt && Date.now() - _sweepAt < 600000)) return;
+    _sweepAt = Date.now();
+    try { setTimeout(function () { sweepMyDeadRooms(); }, 1500); } catch (e) {}
+  }
   function sweepMyDeadRooms() {
+    if (_sweeping) return _sweeping;
     /* v1163：这个函数是延迟跑的，那时传输层可能已经换了 —— 拿不到就安静跳过 */
     try {
       var _t = T();
       if (!_t || typeof _t.list !== 'function') return Promise.resolve(0);
     } catch (e) { return Promise.resolve(0); }
     var none = function () { return []; };
-    return ident().then(function (u) {
+    var p = ident().then(function (u) {
       if (!u.id) return 0;
       var t = Date.now(), kill = [];
       return Promise.all([
@@ -805,16 +1072,20 @@
         (L[0] || []).forEach(function (r) {
           if (!r || !r._id || r._id === _myRoomId || (r.kind && r.kind !== 'room')) return;
           var beat = num(r.heartbeatAt) || num(r.createdAt);
+          if (!isMineDev(r._id)) { if ((t - beat) > TM.otherDevMs) kill.push(r._id); return; }
           var done = r.status === 'done' && (t - (num(r.endedAt) || beat)) > TM.doneGraceMs;
-          if (done || (t - beat) > STALE_MS * 4) kill.push(r._id);   /* 2 分钟以上没心跳 */
+          if (done || (r.status !== 'done' && (t - beat) > STALE_MS * 4)) kill.push(r._id);   /* 2 分钟以上没心跳 */
         });
         (L[1] || []).forEach(function (s) {
           if (!s || !s._id || s._id === _mySeatId || s.guestId !== u.id) return;
           var beat = num(s.guestBeat) || num(s.createdAt);
-          if ((t - beat) > Math.max(TM.doneGraceMs, STALE_MS * 4)) kill.push(s._id);
+          var need = isMineDev(s._id) ? Math.max(TM.doneGraceMs, STALE_MS * 4) : TM.otherDevMs;
+          if ((t - beat) > need) kill.push(s._id);
         });
         (L[2] || []).forEach(function (w) {
-          if (w && w._id && w.by === u.id && (t - num(w.at)) > TM.winTtlMs) kill.push(w._id);
+          if (!w || !w._id || w.by !== u.id) return;
+          var need = isMineDev(w._id) ? TM.winTtlMs : Math.max(TM.winTtlMs, TM.otherDevMs);
+          if ((t - num(w.at)) > need) kill.push(w._id);
         });
         kill = kill.slice(0, 10);
         if (!kill.length) return 0;
@@ -823,6 +1094,10 @@
         })).then(function () { return kill.length; });
       });
     })['catch'](function () { return 0; });
+    _sweeping = p;
+    var clear = function () { if (_sweeping === p) _sweeping = null; };
+    p.then(clear, clear);
+    return p;
   }
 
   /* ── 列房：清洗工具（房间数据来自别的手机，字段可能是任何类型 —— v1163） ── */
@@ -846,26 +1121,41 @@
     if (!isFinite(t) || t > now + 60000 || t < 1577808000000) return 0;
     return Math.max(0, Math.round((now - t) / 1000));
   }
+  /* 🔴v1164（审查 SEC-4）：云端来的名字是别人自己写的 —— 可能是广告、联系方式。
+     资料模块有一份统一的过滤（safeName）；它没加载时用这里的同一条规则兜底。 */
+  var AD_NAME = /微信|威信|薇信|v信|vx|wx|qq|扣扣|公众号|加我|加群|进群|扫码|二维码|领皮肤|免费领|福利|红包|代练|http|www|\.com|@|\d{5,}|admin|管理员|官方|客服|系统/i;
+  function cloudName(v) {
+    var P = window.HansenSbProfile;
+    try { if (P && typeof P.safeName === 'function') return P.safeName(v, '无名蜂'); } catch (e) {}
+    var s = sText(v, 16).trim();
+    if (!s) return '无名蜂';
+    return AD_NAME.test(s.replace(/\s+/g, '')) ? '小蜜蜂' : s;
+  }
 
   /* 列出别人开着的公开房（新版协议、没满、房主还在）。
-     另外数一下「同账号在别的设备开着的房」—— 一个账号两台设备永远匹配不上，界面要提醒。 */
+     另外数一下「同账号在别的设备开着的房」—— 一个账号两台设备永远匹配不上，界面要提醒。
+     🔴审查 UI-4：这台设备自己刚关掉的房（删除还在路上 / 读有延迟）不算「别的设备」。
+     🔴审查 F10：一个账号只列一间（最新的）—— 陌生人一个号开 40 间假房，也只占一格。 */
   function listRooms() {
     return ident().then(function (u) {
-      /* 列房时顺手清掉自己留下的死房（不阻塞列表返回） */
-      try { setTimeout(function () { sweepMyDeadRooms(); }, 1500); } catch (e) {}
+      /* 列房时顺手清掉自己留下的死房（不阻塞列表返回；10 分钟最多一次） */
+      maybeSweep();
       return T().listOpen(Date.now()).then(function (rows) {
-        var _now = Date.now(), same = 0;
+        var _now = Date.now(), same = 0, seenBy = {};
+        pruneObs(_now);
         rows = (rows || []).filter(function (x) {
           if (!x || x.proto !== PROTO || x.kind !== 'room') return false;   /* 旧版本的房：协议不通 */
           if (x.status !== 'open' || x.isPrivate === true) return false;
           if (x.guestId) return false;                 /* 满员的点进去必然失败 */
-          /* 🔴v1154：心跳过滤放本地；没有 heartbeatAt 时退回 createdAt */
-          var beat = x.heartbeatAt || x.createdAt || 0;
-          if ((_now - beat) >= STALE_MS) return false;
+          /* 🔴v1154：心跳过滤放本地；🔴v1164：看心跳在不在动，不拿对方的钟和本机比 */
+          if (!roomAlive(x, _now)) return false;
           if (u.id && x.hostId === u.id) {             /* 自己的房点进去毫无意义 */
-            if (x._id !== _myRoomId) same++;
+            if (x._id !== _myRoomId && !isMineDev(x._id)) same++;
             return false;
           }
+          var by = String(x._openid || x.hostId || x._id);
+          if (seenBy[by]) return false;
+          seenBy[by] = 1;
           return true;
         });
         return { ok: true, sameAccount: same, rooms: (rows || []).map(listItem) };
@@ -876,7 +1166,7 @@
   function listItem(x) {
     return {
       id: sText(x._id || x.id, 40),
-      hostName: sText(x.hostName, 16) || '无名蜂',
+      hostName: cloudName(x.hostName),
       hostTier: sText(x.hostTier, 12),
       wordCount: sNum(x.wordCount, 1, 50, WORDS_PER_ROUND),
       mine: false,
@@ -885,76 +1175,124 @@
       _id: sText(x._id || x.id, 40),
       mode: (x.mode === 'A' || x.mode === 'B' || x.mode === 'C') ? x.mode : 'C',
       hostRating: sNum(x.hostRating, 0, 4000, 0),
+      hostElo: sNum(x.hostElo, 0, 4000, 0),
       askMode: (x.askMode === 'tts') ? 'tts' : 'cn',
       createdAt: sNum(x.createdAt, 0, 9e15, 0),    /* 天梯按它「先开的先配」 */
       isPrivate: !!x.isPrivate
     };
   }
 
+  /* 时间戳看着过期的房：多读几次，看心跳动不动（房主手机钟慢的情况）。动了 = 活的 */
+  function ensureAlive(rid, R) {
+    if (roomAlive(R, Date.now())) return Promise.resolve(R);
+    var n = 0, step = Math.max(10, Math.round(TM.observeMs / 3));
+    function again() {
+      if (n++ >= 3) return Promise.resolve(null);
+      return sleep(step).then(function () { return readRoom(rid); }).then(function (R2) {
+        if (!R2) return null;
+        if (roomAlive(R2, Date.now())) return R2;
+        return again();
+      });
+    }
+    return again();
+  }
+
   /* ── 进房：抢座位 + 等房主确认 ────────────────────────────────────────
      客人不能写房主的文档，所以「进房」分两步：
        ① add 一个固定 _id 的座位文档 R_s<轮次> —— 只有一个人抢得到
        ② 等房主读到座位、在自己的房间文档里写上「客人是谁」（确认）
-     房主确认了才算进房；房没了 / 换了别人 / 轮次变了 → 收回座位、说清原因。 */
+     房主确认了才算进房；房没了 / 换了别人 / 轮次变了 → 收回座位、说清原因。
+     opts.code：私密房的房间码（审查 SEC-7：以前知道房号就能绕过码直接进私密房）。 */
   function joinRoom(roomId, opts) {
     opts = opts || {};
     if (!roomId) return Promise.resolve(failK('other', '房间号为空'));
+    _joining[roomId] = 1;      /* 从这一刻起就能取消（审查 UI-3：以前抢座还在路上时点取消没用） */
+    var cancelled = function () { delete _joining[roomId]; return failK('other', '已经退出这间房了', '', { cancelled: true }); };
+    var done = function (r) { delete _joining[roomId]; return r; };
     return ident().then(function (u) {
       return readRoomLag(roomId).then(function (R) {
+        if (_joining[roomId] === 'cancel') return cancelled();
         if (!R) return failK('gone', HUMAN.gone, '房间已不存在');
         if (R.proto !== PROTO || R.kind !== 'room') return failK('gone', '这间房是旧版本开的，换一间吧');
         if (u.id && R.hostId === u.id) return failK('self', HUMAN.self);
         if (R.status === 'done') return failK('gone', '这一局已经结束了，换一间吧');
         if (R.guestId || R.status !== 'open') return failK('taken', HUMAN.taken);
-        /* 🔴v1135：房主已经跑了就别让人进（进去只能对着空房干等） */
-        if ((Date.now() - (R.heartbeatAt || 0)) > STALE_MS) {
-          return failK('gone', '房主已经离开了，换一间吧');
+        var code = String(opts.code || '').trim().toUpperCase();
+        if (R.isPrivate && (!code || codeHash(code) !== R.codeH)) {
+          return failK('gone', '这是私密房，要输对朋友给的房间码才能进');
         }
         /* 🔴v1163：房间里的词数夹在 1~30；取不到词就先别占座 */
         var _ws = wordsFromSeed(R.seed, capOf(R));
         if (!_ws || !_ws.length) return failK('other', '词库还没加载好，刷新一下页面再进房');
-        var ep = num(R.seat), seat = null;
-        function mkSeat() {
-          var t = Date.now();
-          return {
-            _id: seatIdOf(roomId, ep), proto: PROTO, kind: 'seat', nonce: nonce(),
-            roomId: roomId, epoch: ep,
-            guestId: u.id, guestName: u.name, guestRating: myRating(opts.rating),
-            createdAt: t, guestBeat: t,
-            guestReady: false, guestReadyAt: 0, guestScore: null, left: false, abandonWin: ''
-          };
-        }
-        /* 座位被占时再读几次房间：读到的可能是旧快照，房主其实已经换了新轮次（死座位） */
-        function grab(retries) {
-          seat = mkSeat();
-          return claim(seat).then(function (c) {
-            if (c.mine || retries <= 0) return c;
-            var look = function (n) {
-              return sleep(TM.lagMs).then(function () { return readRoom(roomId); }).then(function (R2) {
-                if (R2 && !R2.guestId && R2.status === 'open' && num(R2.seat) > ep) { ep = num(R2.seat); return grab(retries - 1); }
-                return (n > 1 && R2 && !R2.guestId) ? look(n - 1) : c;
-              });
-            };
-            return look(2);
-          });
-        }
-        return grab(2).then(function (c) {
-          if (!c.mine) return failK('taken', HUMAN.taken);
-          /* 🔴v1136：进别人的房之前，先收掉自己开着的那间（否则别人进去房主不在） */
-          if (_myRoomId && _myRoomId !== roomId) leaveMine();
-          setMine(roomId, 'guest', seat._id, false);
-          rc(roomId).meta = R;
-          /* v1104：客人也发心跳（写自己的座位），房主才知道客人还在 */
-          startHeartbeat(roomId);
-          return waitAck(roomId, u, ep, seat).then(function (res) {
-            if (!res.ok) return res;
-            if (_myRoomId === roomId) _myStarted = true;
-            return { ok: true, roomId: roomId, room: view(roomId, res.R, seat),
-                     words: _ws, mySide: 'guest' };
-          });
+        /* 🔴v1135：房主已经跑了就别让人进；🔴v1164：时间戳看着过期时先看看心跳动不动（钟慢的房主） */
+        return ensureAlive(roomId, R).then(function (RA) {
+          if (_joining[roomId] === 'cancel') return cancelled();
+          if (!RA) return failK('gone', '房主已经离开了，换一间吧');
+          R = RA;
+          return grabSeat(roomId, R, u, opts, code, _ws);
         });
       });
-    })['catch'](function (e) { return fail(e); });
+    }).then(done, function (e) { return done(fail(e)); });
+
+    /* 抢座位 → 等房主确认（写在 joinRoom 里面：它就是「进房」的后半段） */
+    function grabSeat(roomId, R, u, opts, code, _ws) {
+      var ep = num(R.seat), seat = null;
+      function mkSeat() {
+        var t = Date.now(), sid = seatIdOf(roomId, ep);
+        return {
+          _id: sid, proto: PROTO, kind: 'seat', nonce: nonce(),
+          roomId: roomId, epoch: ep,
+          guestId: u.id, guestName: u.name, guestRating: myRating(opts.rating),
+          proof: code ? codeProof(code, sid) : '',
+          createdAt: t, guestBeat: t,
+          guestReady: false, guestReadyAt: 0, guestScore: null, left: false, abandonWin: ''
+        };
+      }
+      /* 座位被占时再读几次房间：读到的可能是旧快照，房主其实已经换了新轮次（死座位） */
+      function grab(retries) {
+        seat = mkSeat();
+        return claim(seat).then(function (c) {
+          if (c.mine || c.unknown || retries <= 0) return c;
+          var look = function (n) {
+            return sleep(TM.lagMs).then(function () { return readRoom(roomId); }).then(function (R2) {
+              if (R2 && !R2.guestId && R2.status === 'open' && num(R2.seat) > ep) { ep = num(R2.seat); return grab(retries - 1); }
+              return (n > 1 && R2 && !R2.guestId) ? look(n - 1) : c;
+            });
+          };
+          return look(2);
+        });
+      }
+      return grab(2).then(function (c) {
+        if (c.unknown) {
+          /* 🔴审查 F1：抢座结果待定（多半是别人的还没同步过来）→ 当成被占了，换一间；
+             万一其实是我的（回包丢了）就顺手删掉 —— 别人的座位删不掉，删了也无妨 */
+          T().remove(seat._id)['catch'](noop);
+          var ek = kindOf(c.err);
+          if (ek === 'network' || ek === 'slow') return fail(c.err);
+          return failK('taken', HUMAN.taken, rawText(c.err).slice(0, 120));
+        }
+        if (!c.mine) return failK('taken', HUMAN.taken);
+        noteMine(seat._id);
+        if (_joining[roomId] === 'cancel') {
+          T().remove(seat._id)['catch'](noop);
+          delete _joining[roomId];
+          return failK('other', '已经退出这间房了', '', { cancelled: true });
+        }
+        /* 🔴v1136：进别人的房之前，先收掉自己开着的那间（否则别人进去房主不在） */
+        if (_myRoomId && _myRoomId !== roomId) leaveMine();
+        setMine(roomId, 'guest', seat._id, false);
+        var c0 = rc(roomId);
+        c0.meta = R; c0.ep = ep; c0.mySeat = seat._id;
+        /* v1104：客人也发心跳（写自己的座位），房主才知道客人还在 */
+        startHeartbeat(roomId);
+        return waitAck(roomId, u, ep, seat).then(function (res) {
+          if (!res.ok) return res;
+          if (_myRoomId === roomId) _myStarted = true;
+          return { ok: true, roomId: roomId, room: view(roomId, res.R, seat),
+                   words: _ws, mySide: 'guest' };
+        });
+      });
+    }
   }
 
   /* ── 心跳：各写各的文档 ──
@@ -979,10 +1317,13 @@
   }
   function stopHeartbeat() { if (_hb) { clearInterval(_hb); _hb = null; } _hbRoom = ''; }
 
-  /* 客人等房主确认（读房主的房间文档，看「客人」那一栏是不是我） */
+  /* 客人等房主确认（读房主的房间文档，看「客人」那一栏是不是我）。
+     🔴审查 F6：主从延迟大时 15 秒不够（房主读到座位要几秒、我读到确认又要几秒）——
+       给 25 秒；等的时候看到房主心跳在动（他还在），再多给 10 秒。 */
   function waitAck(rid, u, ep, seat) {
     var t0 = Date.now(), lastBeat = t0, miss = 0, lastErr = null;
-    _joining[rid] = 1;
+    var budget = TM.ackMs, hb0 = null, extended = false;
+    if (_joining[rid] !== 'cancel') _joining[rid] = 1;   /* 已经点了取消的，不能被这里改回来 */
     function giveUp(res, removed) {
       delete _joining[rid];
       if (_myRoomId === rid && _myRole === 'guest') { stopHeartbeat(); setMine('', '', '', false); }
@@ -998,6 +1339,9 @@
         if (!R) { miss++; return miss >= 3 ? giveUp(failK('gone', '房主已经离开了，换一间吧')) : null; }
         miss = 0;
         rc(rid).meta = R;
+        var hb = num(R.heartbeatAt) || num(R.hostBeat);
+        if (hb0 == null) hb0 = hb;
+        else if (!extended && hb !== hb0) { extended = true; budget = TM.ackMs + TM.ackExtraMs; }
         if (_joining[rid] === 'cancel') return null;   /* 已经点了退出：确认来了也不进 */
         if (R.guestId === u.id && num(R.seat) === ep) {
           delete _joining[rid];
@@ -1013,7 +1357,7 @@
         if (_joining[rid] === 'cancel') return cancelled();
         if (res) return res;
         var t = Date.now();
-        if (t - t0 > TM.ackMs) {
+        if (t - t0 > budget) {
           return giveUp(lastErr ? fail(lastErr) : failK('other', '房主没有回应，换一间吧'));
         }
         if (t - lastBeat >= TM.ackBeatMs) {
@@ -1028,19 +1372,22 @@
 
   /* ══ 离开 ══════════════════════════════════════════════════════════
      只动自己的文档：
-       房主 · 还没人进  → 删房
-       房主 · 已开打    → 房间标 done（留着，客人还要读结果；过了宽限期由清理删）
-       客人 · 还没确认  → 删自己的座位
-       客人 · 已开打    → 座位标 left（同样留着给房主读） */
+       房主 · 还没人进        → 删房
+       房主 · 已写确认 / 已开打 → 房间标 done（留着，客人可能已经进了对战屏，要读到「房主走了」；
+                                 过了宽限期由清理删）—— 审查 F3：以前确认写了、客人回话还没到时点「关掉房间」
+                                 会直接删房，客人那边一整局都只看到「网络不稳」
+       客人 · 还没确认        → 删自己的座位
+       客人 · 已开打          → 座位标 left（同样留着给房主读） */
   function leaveMine() {
     var id = _myRoomId, role = _myRole, sid = _mySeatId, started = _myStarted;
     if (!id) return Promise.resolve({ ok: true });
     if (_hbRoom === id) stopHeartbeat();
     setMine('', '', '', false);
     if (_joining[id]) _joining[id] = 'cancel';
-    var t = Date.now(), c = rc(id), p;
+    var t = Date.now(), c = rc(id), p, acked = !!_myAcked[id];
+    delete _myAcked[id];
     if (role === 'host') {
-      if (!started) p = T().remove(id);
+      if (!started && !acked) p = T().remove(id);
       else if (c.rank >= 2) p = T().patch(id, { endedAt: t, heartbeatAt: t });
       else p = T().patch(id, { status: 'done', endedAt: t, heartbeatAt: t,
                                endedBy: (c.hs != null) ? 'finished' : 'leave' });
@@ -1087,12 +1434,14 @@
   } catch (e) {}
 
   /* ── 房主等人（TCB 的 watch 在部分环境不稳，用轮询） ─────────────────
-     每一轮：读自己的房间 + 当前轮次的座位。
-       座位在、人还在 → 在房间里写上客人（确认）→ {joined}
-       座位标了离开 / 心跳 20 秒不动 → 轮次 +1（别人的座位删不掉，就换一个号）
+     每一轮：一次读回自己的房间 + 当前轮次的座位。
+       座位在、人还在 → 在房间里写上客人（确认）→ 等客人回话 → {joined}
+       座位标了离开 / 心跳 20 秒不动 / 私密房凭证不对 → 换一个轮次号（别人的座位删不掉）
      天梯（opts.ladder）：每 3 轮扫一次列表，发现**更早开的**合适的房 → {switchTo}，
        由界面退出自己的房去进那间。两个人同时开房时，按「先开的赢」收敛到同一间。
-     🔴v1137：轮询间隔递增（省读次数）；网络抖一下不放弃，连续失败 3 次才报错。 */
+     🔴v1137：轮询间隔递增（省读次数）；网络抖一下不放弃，连续失败 3 次才报错。
+     🔴v1164（审查 F6）：自己刚建的房 20 秒内读不到不算没了；间隔最长 3 秒（以前 5 秒，客人等确认会超时）。
+     🔴v1164（审查 F10）：换轮次号时随机跳一段 —— 陌生人预先占好一串座位号也堵不住门。 */
   function waitForOpponent(roomId, onChange, timeoutMs, opts) {
     opts = opts || {};
     var missCount = 0;   /* v1163: 连续读不到房间的次数（最终一致：读不到 ≠ 不存在） */
@@ -1101,10 +1450,11 @@
     var fails = 0, ticks = 0, epoch = -1, seen = null;
     var pend = null;     /* 已经写了确认、还在等客人「回个话」 */
     var lad = opts.ladder || null;
+    var c0 = rc(roomId);
 
     function nextDelay() {
       var waited = Date.now() - t0, b = TM.waitPollMs;
-      return waited < 10000 ? b : (waited < 40000 ? Math.round(b * 1.5) : Math.round(b * 2.5));
+      return waited < 10000 ? b : (waited < 40000 ? Math.round(b * 1.25) : Math.round(b * 1.5));
     }
     function emit(ev) {
       if (stop) return;
@@ -1113,6 +1463,7 @@
     }
     /* 🔴v1163：递归式轮询 —— 每条提前 return 之前都要先把下一棒交出去 */
     function again(ms) { if (!stop) setTimeout(tick, ms == null ? nextDelay() : ms); }
+    function jump() { return epoch + 1 + Math.floor(Math.random() * 1000); }
 
     function judgeSeat(S) {
       var t = Date.now(), beat = num(S.guestBeat), key = S._id + '|' + (S.nonce || '');
@@ -1124,8 +1475,16 @@
       if (beat !== seen.beat) return 'ack';                 /* 心跳在动 = 人还在 */
       return (t - seen.at > TM.seatStaleMs) ? 'stale' : 'wait';   /* 按本机时钟看，不怕两台手机时间不一样 */
     }
+    /* 私密房：客人得交出只有知道房间码才算得出来的凭证 */
+    function proofOk(R, S) {
+      if (!R || !R.isPrivate) return true;
+      var code = _myCodes[roomId];
+      if (!code) return true;
+      return S.proof === codeProof(code, S._id);
+    }
     function joined(R, S) {
       setMine(roomId, 'host', '', true);
+      rc(roomId).ep = epoch;
       emit({ joined: true, room: view(roomId, R, S) });
     }
     function merged(R, p) {
@@ -1142,6 +1501,7 @@
       return T().patch(roomId, p).then(function (r) {
         if (stop) return;
         if (r && r.updated === 0) { again(); return; }
+        _myAcked[roomId] = 1;
         /* 🔴v1164：确认写进去了还不算数 —— 我读到的座位可能是旧快照（客人其实已经点了返回）。
            等客人回个话（座位上写 acked / 就绪）才开打；座位没了、一直不回话就撤回确认、重新开门。
            「心跳在动」不算回话：读有延迟时，旧快照里的心跳也会「动」。 */
@@ -1150,17 +1510,20 @@
       });
     }
     function bump() {
-      var nx = epoch + 1, t = Date.now();
+      var nx = jump(), t = Date.now();
       return T().patch(roomId, { seat: nx, heartbeatAt: t, hostBeat: t }).then(function () {
         epoch = nx; seen = null; again();
       });
     }
-    /* 撤回确认：房间重新开门，换下一个座位号（走掉的人的座位删不掉） */
+    /* 撤回确认：房间重新开门，换一个座位号（走掉的人的座位删不掉） */
     function unack() {
-      var nx = epoch + 1, t = Date.now();
+      var nx = jump(), t = Date.now();
       return T().patch(roomId, { status: 'open', guestId: '', guestName: '', guestRating: 0, seat: nx,
                                  startedAt: 0, heartbeatAt: t, hostBeat: t }).then(function () {
-        epoch = nx; seen = null; pend = null; again();
+        epoch = nx; seen = null; pend = null;
+        delete _myAcked[roomId];
+        var c = rc(roomId); c.guestId = ''; c.seat = null; c.rank = 0;
+        again();
       });
     }
     function confirm(R, S) {
@@ -1197,15 +1560,28 @@
         again();
       }, function () { again(); });
     }
+    /* 房间 + 当前轮次的座位，一次读回来（轮次刚变过时再补读一次座位） */
+    function readBoth() {
+      var e0 = Math.max(epoch, 0);
+      return fetchMany([roomId, seatIdOf(roomId, e0)]).then(function (g) {
+        var R = isRoomDoc(g.map[roomId], roomId) ? g.map[roomId] : null;
+        if (!R) return { R: null };
+        var ep = Math.max(epoch, num(R.seat));
+        if (ep === e0) return { R: R, S: g.map[seatIdOf(roomId, e0)], ep: ep };
+        return T().read(seatIdOf(roomId, ep)).then(function (S) { return { R: R, S: S, ep: ep }; });
+      });
+    }
 
     function tick() {
       if (stop) return;
       ticks++;
       ident().then(function (u) {
-        return readRoom(roomId).then(function (R) {
+        return readBoth().then(function (P) {
           if (stop) return;
           fails = 0;
+          var R = P.R;
           if (!R) {
+            if (c0.createdLocal && Date.now() - c0.createdLocal < TM.ownGraceMs) { again(); return; }
             missCount++;
             if (missCount >= 3) { emit({ gone: true }); return; }
             again(); return;
@@ -1213,31 +1589,31 @@
           missCount = 0;
           rc(roomId).meta = R;
           if (R.status === 'done') { emit({ gone: true }); return; }
-          epoch = Math.max(epoch, num(R.seat));
-          return T().read(seatIdOf(roomId, epoch)).then(function (S) {
-            if (stop) return;
-            var ok = isSeatDoc(S, roomId, epoch);
-            /* 确认已经写进去了（可能是上一轮回包丢了）→ 同样等客人回话；guestId 只有我自己会写 */
-            if (!pend && R.guestId && num(R.seat) === epoch) {
-              pend = { gid: String(R.guestId), at: Date.now(), miss: 0, R: R };
-            }
-            if (pend) return confirm(R, S);
-            if (ok && S.guestId !== u.id) {
-              var d = judgeSeat(S);
-              if (d === 'ack') return ack(R, S);
-              if (d === 'stale') return bump();
-              again(); return;
-            }
-            if (ok) return bump();   /* 同账号别的设备占的座：不能自己打自己 */
-            if (Date.now() - t0 > limit) {
-              /* 等不到人就收房 —— 否则留下一间「看得见、进去没人」的幽灵房 */
-              emit({ timeout: true });
-              leaveRoom(roomId);
-              return;
-            }
-            if (lad && ticks % 3 === 0) return rescan(u, R);
-            again();
-          });
+          epoch = P.ep;
+          var S = P.S;
+          var ok = isSeatDoc(S, roomId, epoch);
+          /* 确认已经写进去了（可能是上一轮回包丢了）→ 同样等客人回话；guestId 只有我自己会写 */
+          if (!pend && R.guestId && num(R.seat) === epoch) {
+            pend = { gid: String(R.guestId), at: Date.now(), miss: 0, R: R };
+            _myAcked[roomId] = 1;
+          }
+          if (pend) return confirm(R, S);
+          if (ok && S.guestId !== u.id) {
+            if (!proofOk(R, S)) return bump();   /* 私密房：没拿码就想进来的 */
+            var d = judgeSeat(S);
+            if (d === 'ack') return ack(R, S);
+            if (d === 'stale') return bump();
+            again(); return;
+          }
+          if (ok) return bump();   /* 同账号别的设备占的座：不能自己打自己 */
+          if (Date.now() - t0 > limit) {
+            /* 等不到人就收房 —— 否则留下一间「看得见、进去没人」的幽灵房 */
+            emit({ timeout: true });
+            leaveRoom(roomId);
+            return;
+          }
+          if (lad && ticks % 3 === 0) return rescan(u, R);
+          again();
         });
       })['catch'](function (e) {
         if (stop) return;
@@ -1257,51 +1633,84 @@
   /* ── 🔴v1104 对手离场判定 ─────────────────────────────────────────────
      🔴v1164：**不拿对方手机的时间和本机比**（两台手机差几分钟很常见）。
      记住对手心跳的「值」和本机看到它变化的时刻：本机时钟上超过 1 分钟没变 → 离场。
-     对手已交卷 = 正常打完，不算逃跑；对手明确离开（座位 left / 房主中途退出）→ 立刻算。 */
+     判定顺序（审查 F2/F3/F4/F11）：
+       ① 已经有人判了「离场」→ 按那个结论（我被判了负就是负；两边都判了 = 这局不算）
+       ② 我被房主撤回了（他换了别的客人）→ 不是我的这一局，没有输赢
+       ③ 对手已交卷 = 正常打完；④ 对手明确离开 → 立刻算
+       ⑤ 心跳 1 分钟没动 → 离场。**我自己断网的那段时间不算在对手头上**（两边同时断网 70 秒，以前两边都判自己赢）
+     对战中房间被删了（房主那边已经收了）→ 客人这边说清楚「房主走了」，不再一整局挂「网络不稳」。 */
   function opponentGone(roomId) {
     return ident().then(function (u) {
-      return loadView(roomId).then(function (L) {
-        var v = L.v, host = (v.hostId === u.id), c = rc(roomId), t = Date.now();
+      var c = rc(roomId);
+      var L0 = c.lastL;
+      var p = (L0 && Date.now() - L0.at < 2500) ? Promise.resolve(L0) : loadView(roomId);
+      return p.then(function (L) {
+        var v = view(roomId, null, null), host = (v.hostId === u.id), t = Date.now();
+        var my = host ? 'host' : 'guest';
         var lim = Math.round(ABANDON_MS / 1000);
+        var out = function (o) { o.ok = true; o.idleSecs = o.idleSecs || 0; o.limitSecs = lim; return o; };
+        if (v.abandonWin === 'both') return out({ gone: false, ended: true, endedBy: 'abandon', abandonWin: 'both', void: true });
+        if (v.abandonWin && v.abandonWin !== my) return out({ gone: false, ended: true, endedBy: 'abandon', abandonWin: v.abandonWin });
+        if (v.abandonWin === my) return out({ gone: true, mine: true, abandonWin: my });
         /* v1163：「对手离场」的前提是对手曾经在过 —— 还没人进来就谈不上 */
-        if (host && !v.guestId) return { ok: true, gone: false, waitingForGuest: true };
-        if (host ? v.guestScore != null : v.hostScore != null)
-          return { ok: true, gone: false, oppFinished: true, idleSecs: 0, limitSecs: lim };
-        if (!host && v.endedBy === 'abandon')
-          return { ok: true, gone: false, ended: true, endedBy: 'abandon', abandonWin: v.abandonWin, idleSecs: 0, limitSecs: lim };
+        if (host && !v.guestId) return out({ gone: false, waitingForGuest: true });
+        if (!host && L.fresh && c._kickL !== L) {
+          /* 房主撤回了确认（他读不到我的座位、以为我走了）或换了别人：连续 3 次新鲜读到才算 */
+          c._kickL = L;
+          var rS = num(L.R.seat), rG = String(L.R.guestId || ''), me = matchEp(c);
+          c.kick = ((rS > me) || (rS === me && rG && rG !== u.id)) ? (c.kick || 0) + 1 : 0;
+        }
+        if (!host && c.kick >= 3) return out({ gone: false, kicked: true });
+        if (host ? v.guestScore != null : v.hostScore != null) return out({ gone: false, oppFinished: true });
         if (host) {
-          if (L.S && L.S.guestId === v.guestId) c.missS = 0; else if (!L.sErr) c.missS++;
-          if (v.guestLeft || c.missS >= 3) return { ok: true, gone: true, left: true, idleSecs: 0, limitSecs: lim };
-        } else {
-          if (v.status === 'done' && v.endedBy === 'leave')
-            return { ok: true, gone: true, left: true, idleSecs: 0, limitSecs: lim };
-          /* 房主撤回了确认（它读不到我的座位、以为我走了）或换了别人：
-             连续 3 次读到才算，防止把一次旧快照当真 */
-          if (L.fresh) c.kick = (String(L.R.guestId || '') !== u.id) ? (c.kick || 0) + 1 : 0;
-          if (c.kick >= 3) return { ok: true, gone: true, left: true, kicked: true, idleSecs: 0, limitSecs: lim };
+          if (c._missL !== L) { c._missL = L; if (L.S && L.S.guestId === v.guestId) c.missS = 0; else if (!L.sErr) c.missS++; }
+          if (v.guestLeft || c.missS >= 3) return out({ gone: true, left: true });
+        } else if (v.status === 'done' && v.endedBy !== 'finished' && v.endedBy !== 'abandon') {
+          return out({ gone: true, left: true });
         }
         var side = host ? 'g' : 'h', beat = host ? v.guestBeat : v.hostBeat;
         var o = c.opp[side];
         if (!o || o.val !== beat) o = c.opp[side] = { val: beat, at: t };
+        if (c.outageAt && o.at < c.outageAt) o.at = c.outageAt;   /* 我断网的那段时间不算 */
         var idle = t - o.at;
-        return { ok: true, gone: idle > ABANDON_MS, idleSecs: Math.round(idle / 1000), limitSecs: lim };
+        return out({ gone: idle > ABANDON_MS, idleSecs: Math.round(idle / 1000) });
       });
-    })['catch'](function (e) { return fail(e); });
+    }).then(null, function (e) {
+      var c = rc(roomId), u = meSync();
+      if (kindOf(e) === 'gone' && c.meta && (!u.id || c.meta.hostId !== u.id)) {
+        return { ok: true, gone: true, left: true, roomGone: true, idleSecs: 0, limitSecs: Math.round(ABANDON_MS / 1000) };
+      }
+      return fail(e);
+    });
   }
 
-  /* 对手离场 → 本局记为我方胜（只写自己的文档；对方得 0 分由合并视图推出来） */
+  /* 对手离场 → 本局记为我方胜（只写自己的文档；对方得 0 分由合并视图推出来）。
+     🔴审查 F4：写完隔一会儿再读一次 —— 对手同时也判了我离场（两边都断过网）→ 这局不算（void），
+     两边看到同一个结论，不会两个人都拿一场胜。 */
   function claimAbandonWin(roomId) {
     return ident().then(function (u) {
       return loadView(roomId).then(function (L) {
-        var t = Date.now(), c = rc(roomId);
-        if (L.v.hostId === u.id) {
-          c.hs = 1; c.gs = (c.gs == null) ? 0 : c.gs; c.rank = 2;
-          return patchOwn(roomId, { status: 'done', endedBy: 'abandon', abandonWin: 'host',
-                                    hostScore: 1, endedAt: t, heartbeatAt: t, hostBeat: t });
+        var t = Date.now(), c = rc(roomId), host = (L.v.hostId === u.id), my = host ? 'host' : 'guest';
+        if (L.v.abandonWin && L.v.abandonWin !== my) return { pre: L.v.abandonWin };
+        var w;
+        if (host) {
+          c.hs = 1; c.gs = (c.gs == null) ? 0 : c.gs; c.rank = 2; c.awH = true;
+          w = patchOwn(roomId, { status: 'done', endedBy: 'abandon', abandonWin: 'host',
+                                 hostScore: 1, endedAt: t, heartbeatAt: t, hostBeat: t });
+        } else {
+          c.gs = 1; c.hs = (c.hs == null) ? 0 : c.hs; c.awG = true;
+          w = patchOwn(mySeatId(roomId, L.R), { abandonWin: 'guest', guestScore: 1, guestBeat: t });
         }
-        c.gs = 1; c.hs = (c.hs == null) ? 0 : c.hs;
-        return patchOwn(mySeatId(roomId, L.R), { abandonWin: 'guest', guestScore: 1, guestBeat: t });
-      }).then(function () { return { ok: true, result: 'win', byAbandon: true }; });
+        return w.then(function () { return sleep(TM.verdictMs); })
+          .then(function () { return loadView(roomId)['catch'](function () { return null; }); })
+          .then(function () { return { my: my }; });
+      }).then(function (o) {
+        var aw = view(roomId, null, null).abandonWin;
+        if (o.pre) return o.pre === 'both' ? { ok: true, result: 'void', byAbandon: true, void: true }
+                                           : { ok: true, result: 'lose', byAbandon: true };
+        if (aw === 'both') return { ok: true, result: 'void', byAbandon: true, void: true };
+        return { ok: true, result: 'win', byAbandon: true };
+      });
     })['catch'](function (e) { return fail(e); });
   }
 
@@ -1359,30 +1768,40 @@
 
   /* ── 🔴v1100 回合判定：「谁先拼对」必须原子 ──
      🔴v1164：以前是在房间文档上做条件更新 —— 客人写不了房主的文档，客人永远「慢一步」。
-     现在每一词一个固定 _id 的回合文档 R_w<i>，谁先 add 成功谁拿下这一词。 */
-  /* 🔴v1164 B/C「两人都答完才翻篇」：各自在自己的文档上记「我答完了第 i 词、现在共几分」。
-     回合文档只记「谁先拼对」—— 后拼对的、超时的，对手原来根本看不到，
-     于是快的那位先跑去下一词（下一词的「抢先」就成了谁领先谁拿），对手的 60/80 分也从不显示。 */
-  function noteAns(rid, i, R, u, pts) {
+     现在每一词一个固定 _id 的回合文档，谁先 add 成功谁拿下这一词。
+     🔴v1164（审查 F5/UI-2）：**只有拼对才建回合文档。** 以前超时也建一个 winner:'' 的 ——
+     两边计时差一两秒，先超时的那边一写，另一个孩子钟上还剩 2 秒、拼对了却只拿 60/80，抢答赛干脆「⏱ 超时了」0 分。 */
+  /* 🔴v1164 「两人都答完才翻篇」：各自在自己的文档上记「我答完了第 i 词、现在共几分」。
+     回合文档只记「谁先拼对」—— 后拼对的、超时的，对手原来根本看不到。
+     抢答赛只在超时时记（有人拼对就翻篇，用不着）；同步赛 / 回合赛拼对、超时都记。 */
+  function noteAns(rid, i, R, u, pts, o) {
+    o = o || {};
     var c = rc(rid);
     c.pts = c.pts || {};
-    if (c.pts[i] == null) c.pts[i] = num(pts);
-    if (!modeOf(R.mode).waitAll || i <= (c.myAns == null ? -1 : c.myAns)) return;
-    c.myAns = i;
+    var prev = c.pts[i];
+    if (prev == null || o.fix) c.pts[i] = num(pts);
+    if (!modeOf(R.mode).waitAll && !o.any) return;
+    var cur = (c.myAns == null ? -1 : c.myAns);
+    if (i < cur || (i === cur && !(o.fix && prev !== c.pts[i]))) return;
+    c.myAns = Math.max(cur, i);
     var sum = 0;
-    for (var k in c.pts) if (Object.prototype.hasOwnProperty.call(c.pts, k)) sum += num(c.pts[k]);
-    var t = Date.now(), host = (R.hostId === u.id);
-    var p = host ? T().patch(rid, { hostAns: i, hostPts: sum, hostBeat: t, heartbeatAt: t })
-                 : T().patch(mySeatId(rid, R), { guestAns: i, guestPts: sum, guestBeat: t });
-    p['catch'](function () { if (c.myAns === i) c.myAns = i - 1; });   /* 没写上：下一词再补 */
+    for (var k in c.pts) if (has(c.pts, k)) sum += num(c.pts[k]);
+    var t = Date.now(), host = (R.hostId === u.id), at = c.myAns;
+    var p = host ? T().patch(rid, { hostAns: at, hostPts: sum, hostBeat: t, heartbeatAt: t })
+                 : T().patch(mySeatId(rid, R), { guestAns: at, guestPts: sum, guestBeat: t });
+    p['catch'](function () { if (c.myAns === at) c.myAns = at - 1; });   /* 没写上：下一词再补 */
   }
+  /* 这一局已经结束（有人判了离场 / 房主走了）：不再受理抢答（审查 F2：以前回来的那一方照样一词一个 +100） */
+  function ended(c) { return c.rank >= 2 || c.awH || c.awG; }
 
   function claimRound(roomId, roundIdx) {
     var i = Math.floor(Number(roundIdx));
     return ident().then(function (u) {
       return metaOf(roomId).then(function (R) {
-        var M = modeOf(R.mode), side = (R.hostId === u.id) ? 'host' : 'guest';
+        var c = rc(roomId), M = modeOf(R.mode), side = (R.hostId === u.id) ? 'host' : 'guest';
         if (!(i >= 0 && i < capOf(R))) return failK('other', '这一局的词已经打完了', 'round ' + roundIdx);
+        if (ended(c)) return failK('gone', '这一局已经结束了', 'room done', { ended: true });
+        var ep = matchEp(c);
         var res = function (won, winner) {
           /* 🔴v1100：慢了不等于没分 —— A 慢的 0 分，B/C 慢的照样拿 secondScore */
           var sc = won ? M.firstScore : M.secondScore;
@@ -1390,77 +1809,96 @@
           return { ok: true, won: won, first: won, score: sc,
                    winner: winner, round: decided(roomId), winners: winnersOf(roomId), mode: M.key };
         };
-        var known = rc(roomId).wins[i];
+        var known = c.wins[i];
         if (known) return res(known.winner === side && known.by === u.id, known.winner);
-        var w = { _id: winIdOf(roomId, i), proto: PROTO, kind: 'win', nonce: nonce(),
-                  roomId: roomId, i: i, winner: side, by: u.id, at: Date.now() };
-        return claim(w).then(function (r) {
-          setWin(roomId, i, r.doc);
-          return res(r.mine, rc(roomId).wins[i].winner);
-        });
+        function attempt(k) {
+          var w = { _id: winIdOf(roomId, ep, i, k), proto: PROTO, kind: 'win', nonce: nonce(),
+                    roomId: roomId, ep: ep, i: i, winner: side, by: u.id, at: Date.now() };
+          return claim(w).then(function (r) {
+            if (r.mine) { setWin(roomId, i, w); noteMine(w._id); return res(true, side); }
+            /* 判断「是不是这局两个人写的」要先知道两个人是谁（房间 + 座位至少读过一次） */
+            var need = r.doc && !validWin(r.doc, roomId, ep, i) && !(c.seat && c.meta && c.guestId);
+            return Promise.resolve(need ? loadView(roomId)['catch'](noop) : null).then(function () { return decide(r, k); });
+          });
+        }
+        function decide(r, k) {
+          if (r.doc && validWin(r.doc, roomId, ep, i)) { setWin(roomId, i, r.doc); return res(false, c.wins[i].winner); }
+          if (r.doc && k < ALT.length - 1) {
+            /* 🔴审查 F9：这个 _id 被陌生人抢先建了（不是这局两个人写的）→ 换备用号写 */
+            c.sq[i] = Math.max(c.sq[i] || 0, k + 1);
+            return attempt(k + 1);
+          }
+          if (r.doc) return failK('other', '这一词没记上，接着拼下一词吧', 'win ids squatted');
+          /* 🔴审查 F1：读不回来 → 结果待定，不能当成「输了 0 分」。再看几秒；还不知道就让界面之后补算 */
+          return settleRound(roomId, i).then(function (st) {
+            if (st && st.settled) return st;
+            noteAns(roomId, i, R, u, M.secondScore);
+            return { ok: true, pending: true, won: false, first: false, score: 0, winner: '',
+                     round: decided(roomId), winners: winnersOf(roomId), mode: M.key };
+          });
+        }
+        return attempt(Math.min(c.sq[i] || 0, ALT.length - 1));
       });
     })['catch'](function (e) { return fail(e); });
   }
 
-  /* ── 🔴v1124 超时推进 ── 两人都没拼对也是一个回合的结束：写一个 winner:'' 的回合文档。
-     同样靠 _id 唯一保证两边同时超时也只推进一次。 */
+  /* 回合结果待定时：再读几次，看第 i 词到底是谁拿下的（审查 F1：网断在半路时我的那条可能其实写进去了） */
+  function settleRound(roomId, roundIdx, waitMs) {
+    var i = Math.floor(Number(roundIdx));
+    return ident().then(function (u) {
+      var c = rc(roomId), R = c.meta || {}, M = modeOf(R.mode), side = (R.hostId === u.id) ? 'host' : 'guest';
+      var t0 = Date.now(), limit = (waitMs == null) ? TM.settleMs : waitMs;
+      function look() {
+        if (c.wins[i]) {
+          var won = c.wins[i].winner === side && c.wins[i].by === u.id;
+          var sc = won ? M.firstScore : M.secondScore;
+          noteAns(roomId, i, R, u, sc, { fix: true });
+          return { ok: true, settled: true, won: won, first: won, score: sc, winner: c.wins[i].winner,
+                   round: decided(roomId), winners: winnersOf(roomId), mode: M.key };
+        }
+        if (Date.now() - t0 >= limit) return { ok: true, settled: false };
+        return sleep(Math.max(10, TM.lagMs)).then(function () {
+          return loadView(roomId, { wins: true })['catch'](function () {});
+        }).then(look);
+      }
+      return loadView(roomId, { wins: true })['catch'](function () {}).then(look);
+    })['catch'](function (e) { return fail(e); });
+  }
+
+  /* ── 🔴v1124 超时：这一词我答完了（0 分）。
+     🔴v1164：只记在自己的文档上（「我答完第 i 词了」），**不再写回合文档** ——
+     超时不能抢走对手的「先拼对」（审查 F5/UI-2）。两人都答完 / 超时，各自在本机翻篇。 */
   function skipRound(roomId, roundIdx) {
     var i = Math.floor(Number(roundIdx));
     return ident().then(function (u) {
       return metaOf(roomId).then(function (R) {
-        var done = function (sk) { return { ok: true, skipped: sk, round: decided(roomId), winners: winnersOf(roomId) }; };
-        if (!(i >= 0 && i < capOf(R))) return done(false);
-        noteAns(roomId, i, R, u, 0);   /* 没拼对 / 超时：这一词我也答完了（0 分） */
-        if (rc(roomId).wins[i]) return done(false);
-        var w = { _id: winIdOf(roomId, i), proto: PROTO, kind: 'win', nonce: nonce(),
-                  roomId: roomId, i: i, winner: '', by: u.id, at: Date.now() };
-        return claim(w).then(function (r) { setWin(roomId, i, r.doc); return done(r.mine); });
+        var done = function () { return { ok: true, skipped: false, round: decided(roomId), winners: winnersOf(roomId) }; };
+        if (!(i >= 0 && i < capOf(R))) return done();
+        if (!ended(rc(roomId))) noteAns(roomId, i, R, u, 0, { any: true });
+        return done();
       });
     })['catch'](function (e) { return fail(e); });
   }
 
-  /* 已定回合：从缓存的数目往后探（每次最多 3 个）；偶尔整批查一次补漏 */
-  function probeWins(rid, max) {
-    var k = decided(rid), cap = capOf(rc(rid).meta);
-    function step(n) {
-      if (n >= max || k >= cap) return null;
-      return T().read(winIdOf(rid, k)).then(function (d) {
-        if (!isWinDoc(d, rid, k)) return null;
-        setWin(rid, k, d); k++;
-        return step(n + 1);
-      });
-    }
-    return Promise.resolve().then(function () { return step(0); })['catch'](function () {});
-  }
-  function backfill(rid) {
-    return T().list({ roomId: rid, kind: 'win' }).then(function (rows) {
-      (rows || []).forEach(function (d) {
-        var i = num(d && d.i);
-        if (i >= 0 && i < 30 && isWinDoc(d, rid, i)) setWin(rid, i, d);
-      });
-    })['catch'](function () {});
-  }
-
-  /* 轮询本回合状态：第几词、谁拿下了、对手是谁 */
+  /* 轮询本回合状态：第几词、谁拿下了、对手是谁 —— 一次请求读回房间 + 座位 + 这一局所有回合 */
   function roundState(roomId) {
     return ident().then(function (u) {
       var c = rc(roomId); c.calls++;
-      return Promise.all([loadView(roomId), probeWins(roomId, 3),
-                          (c.calls % 6 === 0) ? backfill(roomId) : null]).then(function (a) {
-        var L = a[0], v = view(roomId, L.fresh ? L.R : null, L.S), host = (v.hostId === u.id);
-        /* 对手答完到第几词：他自己记的，或者某一词的回合文档是他写的（抢到 / 超时都算答完） */
+      return loadView(roomId, { wins: true }).then(function (L) {
+        var v = L.v, host = (v.hostId === u.id);
+        /* 对手答完到第几词：他自己记的，或者某一词的回合文档是他写的（拼对了 = 答完了） */
         var oppKey = host ? v.guestId : v.hostId, oa = host ? v.guestAns : v.hostAns, ws = c.wins;
         for (var wi = 0; wi < ws.length; wi++) if (ws[wi] && oppKey && ws[wi].by === oppKey && wi > oa) oa = wi;
         /* v1122/v1156：我是哪一方、对手是谁、对手几分（算 ELO 用）—— 两边都给 */
         return { ok: true, mode: v.mode, mySide: host ? 'host' : 'guest',
                  oppId: host ? v.guestId : v.hostId,
                  oppName: host ? v.guestName : v.hostName,
-                 oppRating: host ? v.guestRating : v.hostRating,
+                 oppRating: host ? v.guestRating : (v.hostElo || v.hostRating),
                  round: v.round, winners: v.winners, roundAt: v.roundAt,
                  hostReady: v.hostReady, guestReady: v.guestReady,
                  heartbeatAt: v.heartbeatAt, wordCount: v.wordCount,
                  status: v.status, hostScore: v.hostScore, guestScore: v.guestScore,
-                 endedBy: v.endedBy, room: v,
+                 endedBy: v.endedBy, abandonWin: v.abandonWin, room: v,
                  oppAns: oa, oppPts: host ? v.guestPts : v.hostPts };
       });
     })['catch'](function (e) { return fail(e); });
@@ -1471,7 +1909,8 @@
   function markReady(roomId) {
     return ident().then(function (u) {
       return loadView(roomId).then(function (L) {
-        var t = Date.now(), host = (L.v.hostId === u.id);
+        var t = Date.now(), host = (L.v.hostId === u.id), c = rc(roomId);
+        if (c.ep == null) c.ep = num(L.R.seat);
         if (host) setMine(roomId, 'host', '', true);
         else setMine(roomId, 'guest', mySeatId(roomId, L.R), true);
         startHeartbeat(roomId);
@@ -1482,23 +1921,24 @@
   }
 
   /* ── 交卷：各写各的文档，两边都齐了才判胜负 ──
-     写入重试 3 次；同一个分已经写成功就不再重复写，只读。 */
+     写入重试 3 次；同一个分已经写成功就不再重复写，只读（一次请求读回房间 + 座位）。 */
   function reportResult(roomId, score) {
     var sc = scoreOf(score) || 0;
     return ident().then(function (u) {
       var c = rc(roomId);
-      return loadView(roomId).then(function (L) {
-        var host = (L.v.hostId === u.id);
+      return metaOf(roomId).then(function (R) {
+        var host = (R.hostId === u.id);
         var write = (c.reported === sc) ? Promise.resolve() : retry3(function () {
           var t = Date.now();
           return host ? patchOwn(roomId, { hostScore: sc, hostBeat: t, heartbeatAt: t })
-                      : patchOwn(mySeatId(roomId, L.R), { guestScore: sc, guestBeat: t });
+                      : patchOwn(mySeatId(roomId, R), { guestScore: sc, guestBeat: t });
         }).then(function () { c.reported = sc; if (host) c.hs = sc; else c.gs = sc; });
         return write.then(function () { return loadView(roomId); }).then(function (L2) {
-          var v = L2.v;
-          /* 已经有一方判了「对手离场」→ 两边都按这个结论，不再拿 1 分去和真实得分比 */
+          var v = L2.v, my = host ? 'host' : 'guest';
+          /* 已经有一方判了「对手离场」→ 两边都按这个结论，不再拿 1 分去和真实得分比；两边都判了 = 这局不算 */
+          if (v.abandonWin === 'both') return { ok: true, waiting: false, result: 'void', byAbandon: true, void: true, mine: sc, theirs: 0 };
           if (v.abandonWin) {
-            var iWin = (v.abandonWin === (host ? 'host' : 'guest'));
+            var iWin = (v.abandonWin === my);
             return { ok: true, waiting: false, mine: iWin ? 1 : 0, theirs: iWin ? 0 : 1,
                      result: iWin ? 'win' : 'lose', byAbandon: true };
           }
@@ -1531,6 +1971,7 @@
     modeOf: modeOf,
     claimRound: claimRound,
     skipRound: skipRound,
+    settleRound: settleRound,
     roundState: roundState,
     markReady: markReady,
     /* v1104 对手掉线 / v1105 房间码 */
@@ -1546,9 +1987,11 @@
     /* v1164：错误分类（network/slow/session/expired/config/gone/taken/self/other） */
     kindOf: kindOf,
     errorText: E,
+    cloudName: cloudName,
     PROTO: PROTO,
     _collection: COLLECTION,
     _staleMs: STALE_MS,
+    _codeHash: codeHash,
     /* 测试注入口：换成假传输层即可在本地跑完整链路（含抢座竞态） */
     _setTransportForTest: function (t) { _transport = wrapTimeout(t); },
     _setTimingForTest: function (o) {

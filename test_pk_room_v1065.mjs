@@ -249,7 +249,9 @@ const until = async (fn, ms = 2000) => { const t0 = Date.now(); while (!fn() && 
   host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
   await tick(400);
   ok(hostEv === null, '★ 死座位（心跳早就不动了）不会被房主当成对手确认');
-  ok(cloud.docs.get(made.roomId).seat === 1, `★ 房主把座位轮次换到 1（别人的死座位删不掉，就换号）`);
+  /* 🔴v1164（审查 F10）：换号是随机往后跳一段 —— 陌生人预先占好 1、2、3…号座位也堵不住门 */
+  const seatNo = cloud.docs.get(made.roomId).seat;
+  ok(seatNo > 0, `★ 房主把座位轮次换掉了（现在是 ${seatNo}；别人的死座位删不掉，就换号）`);
   const j = await gw.joinRoom(made.roomId);
   await until(() => hostEv);
   ok(j.ok === true && hostEv && hostEv.joined && hostEv.room.guestId === 'uguestW',
@@ -274,12 +276,12 @@ const until = async (fn, ms = 2000) => { const t0 = Date.now(); while (!fn() && 
   await cloud.as('ghostK').remove(made.roomId + '_s0');   /* 客人已经走了（座位收回） */
   await until(() => cloud.docs.get(made.roomId).status === 'open', 1500);
   const R0 = cloud.docs.get(made.roomId);
-  ok(hostEv === null && R0.status === 'open' && !R0.guestId && R0.seat === 1,
-     `★ 座位没了 → 房主撤回确认、房间重新开门、换到 1 号座位（status=${R0.status} guestId=${R0.guestId || '空'} seat=${R0.seat}）`);
+  ok(hostEv === null && R0.status === 'open' && !R0.guestId && R0.seat > 0,
+     `★ 座位没了 → 房主撤回确认、房间重新开门、换了座位号（status=${R0.status} guestId=${R0.guestId || '空'} seat=${R0.seat}）`);
   const j = await gz.joinRoom(made.roomId);
   await until(() => hostEv);
   ok(j.ok === true && hostEv && hostEv.joined && hostEv.room.guestId === 'uguestZ', '★ 下一个客人照常进来开打');
-  const seatZ = cloud.docs.get(made.roomId + '_s1');
+  const seatZ = cloud.docs.get(made.roomId + '_s' + cloud.docs.get(made.roomId).seat);
   ok(seatZ && seatZ.acked === true && seatZ._openid === 'guestZ', '客人看到确认后在自己的座位上回了话（acked）');
 }
 {
@@ -294,9 +296,9 @@ const until = async (fn, ms = 2000) => { const t0 = Date.now(); while (!fn() && 
     guestId: 'umute', guestName: '不说话', guestBeat: now, createdAt: now, left: false });
   let hostEv = null;
   host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
-  await until(() => cloud.docs.get(made.roomId).seat === 1, 2000);
+  await until(() => cloud.docs.get(made.roomId).seat > 0, 2000);
   const R1 = cloud.docs.get(made.roomId);
-  ok(hostEv === null && R1.status === 'open' && !R1.guestId && R1.seat === 1,
+  ok(hostEv === null && R1.status === 'open' && !R1.guestId && R1.seat > 0,
      `★ 确认后客人始终没回话 → 撤回、重新开门（status=${R1.status} seat=${R1.seat}）`);
   host._setTimingForTest({ seatStaleMs: 20000 });
 }
@@ -402,7 +404,9 @@ async function pair(hn, gn) {
   function sdkDb(code) {
     const r = () => Promise.resolve({ code, message: code === 'DATABASE_PERMISSION_DENIED' ? 'Permission denied' : 'Db or Table not exist', requestId: 'rq1' });
     const q = { where: () => q, orderBy: () => q, limit: () => q, get: r };
-    return { collection: () => ({ where: () => q, limit: () => q, add: r, doc: () => ({ get: r, update: r, remove: r }) }) };
+    /* 真 SDK 的 db 带 command（gt / in …）—— 假的也得有，查询条件里会用到 */
+    const command = { gt: (x) => ({ $gt: x }), lt: (x) => ({ $lt: x }), in: (x) => ({ $in: x }) };
+    return { command, collection: () => ({ where: () => q, limit: () => q, add: r, doc: () => ({ get: r, update: r, remove: r }) }) };
   }
   for (const [code, want] of [['DATABASE_PERMISSION_DENIED', /权限/], ['DATABASE_COLLECTION_NOT_EXIST', /还没有建/]]) {
     const m = mkCtx('userC');

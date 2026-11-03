@@ -4143,11 +4143,28 @@ document.querySelectorAll('.island').forEach(el=>{
   /* 纯显示关闭: 只隐藏外壳 + 刷新首页(幂等)。🔴 保活岛——【不卸载岛】(不 replace about:blank), 只隐藏 →
      再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。岛无后台音乐(只按需单词发音),
      隐藏时不会响; 切到别的岛时 openIsland 会 replace 覆盖掉旧岛(内存恒 1 岛)。 */
+  /* 🔴v1164(审查 UI-1): 岛只隐藏不卸载 —— 岛里要是正开着房等人、正在进房、正在找对手或正在对战,
+     藏起来以后它照样在后台跑: 房还挂在列表里、对局还在打, 别的孩子会被配进来跟一个不在的人打。
+     所以收起岛之前先问岛"是不是在联机", 是的话把联机流程收掉(同源 iframe, 直接调它的 close)。 */
+  function _islandOnline(){
+    try{
+      var f = document.getElementById('islandFrame'), w = f && f.contentWindow;
+      var U = w && w.HansenPkRoomUI, b = (U && typeof U.isBusy === 'function') ? U.isBusy() : null;
+      var ls = w && w.document && w.document.getElementById('hsn_ladder_screen');
+      return { w: w, room: b, ladder: !!(ls && ls.classList.contains('on')) };
+    }catch(e){ return null; }
+  }
+  function _endIslandOnline(){
+    var o = _islandOnline(); if(!o || !o.w) return;
+    try{ if(o.room && (o.room.on || o.room.joining)) o.w.HansenPkRoomUI.close(); }catch(e){}
+    try{ if(o.ladder && o.w.HansenLadderUI) o.w.HansenLadderUI.close(); }catch(e){}
+  }
   function _closeIslandNow(){
     _islandPending = null;  /* 取消任何"换岛加载途中待显示"的岛(用户在新岛就绪前就返回了) */
     _hideIslandLoading();
     var wrap = document.getElementById('islandFrameWrap');
     if(!wrap || wrap.style.display === 'none') return;
+    _endIslandOnline();
     wrap.style.display = 'none';
     try{ document.body.style.overflow = ''; }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
@@ -4169,8 +4186,21 @@ document.querySelectorAll('.island').forEach(el=>{
   window.closeIsland = closeIsland;
   /* 返回关闭岛；前进则恢复同一条岛状态。两种操作都不新增历史条目。 */
   window.addEventListener('popstate', function(e){
-    if(e.state && _validIslandFile(e.state.hsnIsland)) openIsland(e.state.hsnIsland, true);
-    else _closeIslandNow();
+    if(e.state && _validIslandFile(e.state.hsnIsland)) { openIsland(e.state.hsnIsland, true); return; }
+    /* 🔴v1164(审查 UI-1): 正在对战时按返回键 —— 先在岛里问一句"要退出这一局吗"(孩子常常手滑),
+       把岛的那条历史压回去; 选"退出"才真的回首页, 选"继续打"就接着打。 */
+    var wrap = document.getElementById('islandFrameWrap');
+    var o = (wrap && wrap.style.display !== 'none') ? _islandOnline() : null;
+    if(o && o.room && o.room.battle && o.w && o.w.HansenPkRoomUI && typeof o.w.HansenPkRoomUI.askQuit === 'function'){
+      var file = '';
+      try{ file = document.getElementById('islandFrame').contentWindow.location.pathname.split('/').pop(); }catch(e2){}
+      if(_validIslandFile(file)){
+        try{ history.pushState({ hsnIsland:file }, '', location.href); }catch(e3){}
+        try{ o.w.HansenPkRoomUI.askQuit(function(){ closeIsland(); }); }catch(e4){ _closeIslandNow(); }
+        return;
+      }
+    }
+    _closeIslandNow();
   });
 
   // 给每个岛卡加 click handler 记录"最近访问"

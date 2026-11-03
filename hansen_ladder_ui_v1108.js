@@ -222,6 +222,16 @@
 
   var _netFail = 0;
   var _lastReason = '';   /* v1156: 失败原因，显示在断网屏上供排查 */
+  /* 🔴审查 UI-5：「开始排位」和「取消，回天梯」在同一个位置 —— 孩子手快点两下，
+     第二下正好点在新冒出来的那个按钮上：开始了又马上取消 / 取消了又马上重新开始。
+     上一个按钮点下去 0.6 秒内，这一屏的按钮不认。 */
+  var _lastTapAt = 0;
+  function tapOk() {
+    var now = Date.now();
+    if (now - _lastTapAt < 600) return false;
+    _lastTapAt = now;
+    return true;
+  }
 
   /* opts（可选）：{ note: 顶上一行提示, autoStart: 打开就开始匹配 }。
      ⚠️ 也会被当 onclick 直接调 —— 那时传进来的是事件对象，要认得出来、不当 opts 用。 */
@@ -360,7 +370,7 @@
     renderBoard();
 
     if (q('ldX')) q('ldX').onclick = close;
-    if (q('ldGo')) q('ldGo').onclick = function () { startMatching(); };
+    if (q('ldGo')) q('ldGo').onclick = function () { if (tapOk()) startMatching(); };
     if (opts.autoStart) startMatching();
   }
 
@@ -702,7 +712,7 @@
       +     '没人的时候会自动开一间等着<br>有人进来就立刻开打</div>'
       + '</div>'
       + '<button class="ld_btn ld_btn2" id="ldCancel2">取消，回天梯</button>');
-    var cancel = function () { stopRun(); open(); };
+    var cancel = function () { if (!tapOk()) return; stopRun(); open(); };
     if (q('ldCancel')) q('ldCancel').onclick = cancel;
     if (q('ldCancel2')) q('ldCancel2').onclick = cancel;
     if (run.note) setLine('ldNote', run.note);
@@ -711,7 +721,7 @@
   /* 每秒刷一次「已等 N 秒」和分数范围 —— 只改文字，不重画（重画会丢焦点、闪屏） */
   function updateClock(run) {
     if (run.stop) return;
-    var waited = Math.round((Date.now() - run.t0) / 1000);
+    var waited = Math.max(0, Math.floor((Date.now() - run.t0) / 1000));   /* 和等人那一屏同一个算法，交接时数字不跳 */
     var band = bandOf(waited), sm = run.sm;
     setLine('ldWaited', '已等 ' + waited + ' 秒 · 等得越久范围放得越宽');
     var b = q('ldBand');
@@ -762,13 +772,25 @@
 
   function tick(run) {
     if (run.stop || run.busy) return;
+    /* 🔴审查 UI-10：页面在后台时不找房、不开房 —— 以前切到微信 20 秒后，后台照样自己开了一间排位房，
+       别的孩子被配进来，对着一个不在的人打。回到前台再接着找；离开太久就先停下。 */
+    if (document.visibilityState === 'hidden') {
+      if (!run.hidAt) run.hidAt = Date.now();
+      later(run, 1000);
+      return;
+    }
+    if (run.hidAt) {
+      var away = Date.now() - run.hidAt;
+      run.hidAt = 0;
+      if (away > 30000) { stopRun(); open({ note: '你切出去太久，先停下了。回来点「开始排位」再找对手。' }); return; }
+    }
     var waited = Math.round((Date.now() - run.t0) / 1000);
     S().listRooms().then(function (lr) {
       if (run.stop || run.busy) return;
       /* 🔴v1154：**listRooms 失败时不抛异常，而是返回 `{ok:false}`** —— 判据要落在返回值上 */
       if (lr && lr.ok === false) { onFail(run, lr); return; }
       if (!lr) { onFail(run, { ok: false, reason: '没有拿到房间列表' }); return; }
-      run.netFail = 0; _netFail = 0; run.sessT0 = 0;
+      run.netFail = 0; _netFail = 0; run.sessT0 = 0; _sessShown = 0;
       setLine('ldStatus', '');
       /* 同一个账号在另一台手机上开着房：永远配不上（自己不能打自己），要说出来 */
       setLine('ldSame', (lr.sameAccount > 0)
@@ -877,10 +899,13 @@
 
   /* 🔴v1164：**按失败原因分流**（原来按字面找「登录 / 会话」，
      已经登录、只是云端会话还没好的孩子被告知「排位要先登录」）。 */
+  var _probeSeq = 0;
   function onFail(run, r) {
     if (run.stop) return;
     var k = kindOf(r);
     _lastReason = rawOf(r);
+    /* 审查 AUTH-3：SDK 文件上次没下载完整，浏览器把失败记住了 —— 重试多少次都一样，只有刷新页面有用 */
+    if (r && r.reload) { showProblem('reload', r); return; }
     if (k === 'expired') { showNeedLogin(true); return; }
     if (k === 'config') { showProblem('config', r); return; }
     if (k === 'session') {
@@ -896,7 +921,19 @@
     }
     run.netFail++;
     _netFail = run.netFail;
-    if (run.netFail >= 4) { if (k === 'other') showProblem('other', r); else showOffline(); return; }
+    if (run.netFail >= 4) {
+      if (k === 'other') { showProblem('other', r); return; }
+      /* 🔴审查 TI-4：数据库回了个非 200（集合没建 / 权限 / 安全域名），SDK 只会说 network request error ——
+         看着像断网。问一下登录服务：它能通，网就是通的，问题在数据库那边，别让老师去查 Wi-Fi。 */
+      stopRun();
+      var tok = ++_probeSeq;
+      setLine('ldStatus', '正在看看是哪里不通…');
+      probeCloud().then(function (reach) {
+        if (tok !== _probeSeq) return;
+        if (reach) showProblem('dbblocked', r); else showOffline();
+      });
+      return;
+    }
     setLine('ldStatus', k === 'other' ? '刚才没成功，正在重试…' : '网络不太顺，正在重试…');
     later(run, 3000);
   }
@@ -967,11 +1004,28 @@
                body: '你已经登录了，只是云端这会儿还没准备好。<br>等几秒再点「再试一次」。', btn: '再试一次' },
     config:  { icon: '🛠️', title: '云端设置还差一步',
                body: '', btn: '再试一次' },
+    dbblocked: { icon: '🛠️', title: '云端连得上，但数据库拒绝了',
+               body: '登录服务是通的，网没有断；是数据库那边不让读写 ——<br>多半是集合没建、权限不对，或者这个网址还没加进「安全域名」。'
+                   + '<br><br>这不是你的问题，把这一屏截图发给负责的老师就好。', btn: '再试一次' },
+    reload:  { icon: '🔄', title: '云端组件没下载完整',
+               body: '刚才网络不好，有个文件没下载完整，浏览器记住了那次失败。<br>刷新一下页面就好（进度不会丢）。', btn: '刷新页面' },
     other:   { icon: '⚠️', title: '这次没成功',
                body: '', btn: '再试一次' }
   };
+  /* 登录服务通不通（同一个云端域名）：通 = 网没断。6 秒没回应就当不通 */
+  function probeCloud() {
+    var A = window.HansenAuth;
+    if (!A || typeof A.probeCloud !== 'function') return Promise.resolve(false);
+    return Promise.race([
+      Promise.resolve().then(function () { return A.probeCloud(); })['catch'](function () { return false; }),
+      new Promise(function (r) { setTimeout(function () { r(false); }, 6000); })
+    ]).then(function (v) { return !!v; });
+  }
+  var _sessShown = 0;   /* 审查 TI-5：「云端还没连上」出现第几次了 —— 第二次起给「重新登录」这条出路 */
   function showProblem(kind, r) {
     stopRun();
+    _probeSeq++;
+    if (kind === 'session') _sessShown++;
     var P = PROBLEM[kind] || PROBLEM.other;
     var human = humanOf(r);
     var body = P.body;
@@ -991,6 +1045,8 @@
         + '<div style="font-size:16px;font-weight:800;margin-top:10px">' + P.title + '</div>'
         + '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">' + body + '</div>'
         + '<button class="ld_btn" id="ldRetry" style="margin-top:16px">' + P.btn + '</button>'
+        + ((kind === 'session' && _sessShown >= 2)
+            ? '<button class="ld_btn ld_btn2" id="ldRelogin" style="margin-top:2px">🔑 还是不行？重新登录一次</button>' : '')
         /* 🔴v1156（真机报的）：**把真实原因显示出来** —— 小字、灰色、不吓人，截个图就知道是哪一类 */
         + (_lastReason
             ? '<div style="margin-top:14px;font-size:11px;color:var(--hpk-faint);'
@@ -999,7 +1055,18 @@
             : '')
         + '</div>');
       var rb = q('ldRetry');
-      if (rb) rb.onclick = function () { startMatching(); };
+      if (rb) rb.onclick = (kind === 'reload')
+        ? function () { try { location.reload(); } catch (e) {} }
+        : function () { startMatching(); };
+      var lb = q('ldRelogin');
+      if (lb) lb.onclick = function () {
+        /* 凭证还在、却一直换不到会话（云端不认这张凭证了）：退出再登一次是唯一的出路 */
+        var A = window.HansenAuth;
+        Promise.resolve(A && A.signOut ? A.signOut() : null)['catch'](function () {}).then(function () {
+          close();
+          try { if (window.HansenAuthUI && HansenAuthUI.open) HansenAuthUI.open(); } catch (e) {}
+        });
+      };
       var cx = q('ldCancel');
       if (cx) cx.onclick = close;
     } catch (e2) {}

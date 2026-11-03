@@ -86,7 +86,8 @@ const now = Date.now();
   ok(!list.some(x => (now - x.heartbeatAt) > 30000), '★ 不列心跳过期的房');
   {
     const src2 = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
-    ok(/var beat = x\.heartbeatAt \|\| x\.createdAt \|\| 0;/.test(src2),
+    /* v1164：判活的地方换成 roomAlive（看心跳在不在动），兜底规则不变：没有 heartbeatAt 就用 createdAt */
+    ok(/num\(x\.heartbeatAt\) \|\| num\(x\.createdAt\)/.test(src2),
        '★ 本地判心跳时，老房间没有 heartbeatAt 就退回 createdAt —— ' +
        '别让它们凭空消失');
   }
@@ -111,8 +112,15 @@ const now = Date.now();
      改为：**查询只留每间房都有的字段**（status + isPrivate），
      其余判断放本地。把过滤下推给数据库省的那点流量，
      **不值得用"老数据全看不见"来换**。 */
-  ok(!/heartbeatAt:\s*d\.command\.gt\(/.test(code),
-     '★ 查询条件里**不带** heartbeatAt —— 老房间没这个字段，带上就全查不出来');
+  /* 🔴v1164（审查 TI-1）**又推翻一次**：v1154 不让 heartbeatAt 进查询，理由是「老房间没这个字段」。
+     现在只查新协议的房（proto:2）—— 它们从建房那一刻就带 heartbeatAt，不存在字段缺失；
+     而不按心跳查的代价是：orderBy 没建索引、退成「不排序取前 N 条」时，攒够 N 间死房，**活房一间都排不进来**。
+     所以：心跳条件要和 proto:2 写在同一个查询里，并且窗口要宽（≥10 分钟），房主手机钟慢几分钟也查得到。 */
+  const wh = [...code.matchAll(/\.where\(\{([^}]*heartbeatAt[^}]*)\}\)/g)].map(m => m[1]);
+  ok(wh.length >= 1 && wh.every(c => /proto:\s*PROTO/.test(c)),
+     '★ 查询里带 heartbeatAt 的地方都同时限定 proto:2（只有新协议的房才保证有这个字段）');
+  const win = Number((/LIST_WINDOW_MS\s*=\s*(\d+)/.exec(code) || [])[1] || 0);
+  ok(win >= 600000, `★ 心跳查询窗口够宽（${win / 60000} 分钟）—— 两台手机钟差几分钟也不会把活房漏掉`);
   ok(!/where\(\{ status: 'open', isPrivate: false, guestId: ''/.test(code),
      '★ 查询条件里**不带** guestId —— 同上，字段缺失匹配不上空字符串');
   ok(/orderBy\('createdAt'/.test(code),
@@ -122,8 +130,11 @@ const now = Date.now();
 /* ② 死房清理 —— 只清**自己的**剩余文档；v1164 起一次最多 10 条 */
 {
   const rooms = [];
-  for (let i = 0; i < 12; i++) rooms.push(room({ _id:'D'+i, hostId:'H', status:'open', heartbeatAt: now-300000-i*1000 }));
+  /* 🔴v1164（审查 F8）：这些死房不是这台设备建的（同账号别的设备 / 上次打开页面留下的）——
+     要 30 分钟没心跳才清：另一台手机的钟慢的话，「几分钟没心跳」其实是它正开着房在等人 */
+  for (let i = 0; i < 12; i++) rooms.push(room({ _id:'D'+i, hostId:'H', status:'open', heartbeatAt: now-1860000-i*1000 }));
   rooms.push(room({ _id:'A1', hostId:'H', status:'open', heartbeatAt: now-1000 }));            /* 活的 */
+  rooms.push(room({ _id:'K1', hostId:'H', status:'open', heartbeatAt: now-300000 }));          /* 5 分钟没心跳、别的设备建的：先不动 */
   rooms.push(room({ _id:'O1', hostId:'X', status:'open', heartbeatAt: now-500000 }));          /* 别人的 */
   rooms.push(room({ _id:'F1', hostId:'H', status:'done', heartbeatAt: now-20000, endedAt: now-20000 })); /* 刚打完：客人可能还在读结果 */
   const S = boot(rooms, 'H');
@@ -133,13 +144,14 @@ const now = Date.now();
   ok(left.includes('O1'), '★ 不删别人的房（权限上也删不掉）');
   ok(left.includes('A1'), '★ 不删还活着的房');
   ok(left.includes('F1'), '★ 刚打完的房留着（宽限期内客人还要读结果）');
+  ok(left.includes('K1'), '★ 同账号别的设备的房 5 分钟没心跳 → 不删（那台手机钟慢时它其实还活着）');
   const n2 = await S.sweepMyDeadRooms();
   ok(n2 === 2 && !rooms.some(r => /^D/.test(r._id)), `下一次把剩下的死房清完（实得 ${n2}）`);
 }
 {
   /* 自己的座位、回合文档也要清（过了宽限期）；别人的一律不碰 */
   const rooms = [
-    { _id:'Z_s0', proto:2, kind:'seat', roomId:'Z', guestId:'H', guestBeat: now-600000, _openid:'H' },
+    { _id:'Z_s0', proto:2, kind:'seat', roomId:'Z', guestId:'H', guestBeat: now-1900000, _openid:'H' },
     { _id:'Z_s1', proto:2, kind:'seat', roomId:'Z', guestId:'H', guestBeat: now-5000, _openid:'H' },
     { _id:'Z_w0', proto:2, kind:'win', roomId:'Z', i:0, by:'H', at: now-3600000, _openid:'H' },
     { _id:'Y_w0', proto:2, kind:'win', roomId:'Y', i:0, by:'X', at: now-3600000, _openid:'X' }

@@ -72,10 +72,25 @@
      只要 uid 变了就在这里发信号，**不管调用方是谁、走的哪条路**。
 
      > 与其把每条路都堵一遍（总会漏），不如守住必经之地。 */
+  /* 🔴v1164（审查 AUTH-2）：这一个浏览器标签页的编号。同一个标签页里的几层页面（首页外壳 + 岛 iframe）
+     共用一个 window.top，所以编号一样；另一个标签页是另一份内存，编号不同。
+     写登录记录时带上它，别的页面收到 storage 通知时就分得清「是别的标签页改的」还是「我自己这页里的岛改的」。 */
+  function tabId() {
+    var mk = function () { return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); };
+    try {
+      var t = window.top;
+      if (!t.__hsnTabId) t.__hsnTabId = mk();
+      return t.__hsnTabId;
+    } catch (e) {
+      if (!window.__hsnTabId) window.__hsnTabId = mk();
+      return window.__hsnTabId;
+    }
+  }
   function writeLocal(patch) {
     var o = readLocal();
     var _before = o.uid || '';
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) o[k] = patch[k];
+    o._tab = tabId();
     try { localStorage.setItem(LKEY, JSON.stringify(o)); } catch (e) {}
     var _after = o.uid || '';
     if (_before !== _after) {
@@ -256,7 +271,29 @@
   }
 
   /* ── CloudBase 应用与鉴权 ─────────────────────────── */
-  var _app = null, _auth = null;
+  var _app = null, _auth = null, _sdkLoad = null;
+
+  /* 🔴v1164（审查 AUTH-3）：SDK 文件（548 KB）在弱网下没下载完整时，浏览器会把这次失败**记住** ——
+     之后同一个地址再 import 都是立刻失败，网好了也一样，只有刷新页面才行；
+     而界面一直说「连不上网络 · 检查一下 Wi-Fi」，重试多少次都没用。
+     改为：失败就换个地址（加 ?r=时间）再取一次 —— 第一次没加载成，这时页面上还没有任何 SDK，
+     不会分裂成两份（v1059 的坑）；全站只有这一处取 SDK（云存档没登录时也借这里）。
+     还是失败，就明确告诉大家「刷新一下页面」。 */
+  function loadSdk() {
+    if (_sdkLoad) return _sdkLoad;
+    var p = import('./vendor_cloudbase_esm_v965.js')['catch'](function (e1) {
+      T('加载云端组件', '❗第一次没下载成功（' + errText(e1).slice(0, 70) + '）→ 换个地址再取一次');
+      return import('./vendor_cloudbase_esm_v965.js?r=' + Date.now());
+    })['catch'](function (e2) {
+      if (_sdkLoad === p) _sdkLoad = null;
+      T('加载云端组件', '❗换了地址还是没下载成功 → 只能刷新页面');
+      var e = new Error('云端组件没下载完整，刷新一下页面就好 ⟨' + errText(e2).slice(0, 90) + '⟩');
+      e.reload = true; e.friendly = true;
+      throw e;
+    });
+    _sdkLoad = p;
+    return p;
+  }
   var _bgOnly = false;   /* v1091: 仅后台自动行为置为 true */
 
   function app() {
@@ -323,7 +360,7 @@
       }
     }
 
-    return import('./vendor_cloudbase_esm_v965.js').then(function (mod) {
+    return loadSdk().then(function (mod) {
       var cb = mod && (mod.default || mod);
       var init = cb && (cb.init || (cb.default && cb.default.init));
       if (typeof init !== 'function') throw new Error('云 SDK 加载失败');
@@ -431,7 +468,11 @@
     if (/unauthenticated|credentials not found|invalid_grant/i.test(m))
       return '登录没真正完成：云端没有给出有效的登录凭证。再点一次登录试试；还不行，就打开自检面板截图发给老师';
     /* v1164：「用户不存在」要排在 /exist/ 前面，否则 "User not exist" 会被说成"用户名有人用了" */
-    if (/user.*not.*(found|exist)|not[_ ]found|no.*such.*user|用户不存在/i.test(m)) return '没找到这个用户名，检查一下拼写；还没有账号的话，点下面用手机号注册';
+    if (/user.*not.*(found|exist)|not[_ ]found|no.*such.*user|用户不存在/i.test(m)) {
+      /* 审查 AUTH-7：旧版本「用户名注册」的孩子 —— 账号从来不存在，不是拼错了 */
+      try { if (readLocal().legacyUser) return LEGACY_USERNAME_MSG; } catch (e) {}
+      return '没找到这个用户名，检查一下拼写；还没有账号的话，点下面用手机号注册';
+    }
     if (/password/i.test(m)) return '密码不对';
     if (/exist|already/i.test(m)) return '这个用户名已经有人用了，换一个吧（或点下面切到登录）';
     if (/weak|password.*(short|length)/i.test(m)) return '密码太简单了，换一个长一点的';
@@ -490,7 +531,8 @@
          所以先确认 credentials_ 真的在、轨迹记下返回值形状，才写"已登录"；
          否则抛「登录未真正完成」。手机号和用户名登录共用 credentialsCheck 这一处判据。 */
       credentialsCheck(res, '手机号登录');
-      writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, signedAt: Date.now() });
+      /* 审查 AUTH-4：上一个人用用户名登录过的话，username 还在记录里 —— 换成手机号登录要清掉 */
+      writeLocal({ verificationId: '', method: 'phone', phone: st.pendingPhone, username: '', legacyUser: '', signedAt: Date.now() });
       return afterSignIn();
     });
   }
@@ -519,7 +561,9 @@
          响应缺 expires_in 时 SDK 删了凭证照样 resolve，界面说已登录、云端却没会话。
          和手机号登录用同一处判据。 */
       credentialsCheck(res, '用户名登录');
-      writeLocal({ method: 'password', username: u, signedAt: Date.now() });
+      /* 🔴审查 AUTH-4：**上一个账号的手机号要清掉。** 以前只写了用户名，手机号还是上一个人的 ——
+         云存档按手机号认人，于是用户名账号读写的是上一个人的存档，面板上也显示着他的手机号。 */
+      writeLocal({ method: 'password', username: u, phone: '', pendingPhone: '', verificationId: '', legacyUser: '', signedAt: Date.now() });
       return afterSignIn();
     });
   }
@@ -555,6 +599,8 @@
      而这里以前照样写下"已登录" → 界面说登录了，云端永远「会话尚未就绪」。
      CloudBase 网页端只能用手机号（或真实邮箱收码）注册，所以这里如实拒绝、什么都不写，
      并告诉孩子/老师该怎么办。用户名**登录**保留（控制台建的用户名账号仍能用）。 */
+  var LEGACY_USERNAME_MSG = '以前版本的「用户名注册」其实没能在云端建好账号，不是你的错。'
+    + '请用手机号注册（家长的也可以），这台手机上的进度会自动带过去。';
   var USERNAME_SIGNUP_MSG = '用户名不能直接注册：云端只支持用手机号注册。'
     + '请点上面的「手机号」，收验证码注册（孩子没有手机号，用家长的手机号也可以）。';
   function registerByPassword() {
@@ -630,10 +676,10 @@
     return _bye.then(function () { return auth(); }).then(function (a) {
       /* v1164：先清本地登录记录再让 SDK 退出 —— 凭证守护看到"已退出"，
          就不会把 SDK 刚删掉的凭证又救回来；退出请求限 6 秒，网卡住也退得出去。 */
-      writeLocal({ method: '', signedAt: 0, uid: '' });
+      writeLocal({ method: '', signedAt: 0, uid: '', phone: '', username: '', pendingPhone: '', verificationId: '' });
       return a.signOut ? withTimeout(Promise.resolve().then(function () { return a.signOut(); }), 6000, '退出登录') : null;
     }).catch(function () { return null; }).then(function () {
-      writeLocal({ method: '', signedAt: 0, uid: '' });
+      writeLocal({ method: '', signedAt: 0, uid: '', phone: '', username: '', pendingPhone: '', verificationId: '' });
       credGuardReset();
       return { ok: true };
     });
@@ -983,13 +1029,24 @@
   function pushSave() {
     if (!window.HansenCloudSave || typeof HansenCloudSave.syncNow !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
-    return HansenCloudSave.syncNow({ force: true });
+    /* 「立即把进度存到云端」是孩子自己点的：内容没变也真写一次（rewrite），他要的就是「现在就在云上」 */
+    return HansenCloudSave.syncNow({ force: true, rewrite: true });
   }
   /* 换设备登录后把云端进度拉下来（需要 16 位密钥，沿用现有恢复通道） */
   function pullSave(key) {
     if (!window.HansenCloudSave || typeof HansenCloudSave.restoreWithKey !== 'function')
       return Promise.resolve({ ok: false, reason: 'cloudsave-unavailable' });
     return HansenCloudSave.restoreWithKey(key, true);
+  }
+
+  /* 🔴v1164（审查 TI-4）：问一下登录服务（同一个云端域名的 /auth/v1/user/me）—— 它能回话，网就是通的。
+     数据库回非 200 时 SDK 只会说「network request error」，看着和断网一模一样。 */
+  function probeCloud() {
+    return auth().then(function (a) {
+      if (typeof a.getCurrentUser !== 'function') return false;
+      return withTimeout(Promise.resolve().then(function () { return a.getCurrentUser(); }), 6000, '探测云端')
+        .then(function (u) { return !!(u && (u.uid || u.sub)); }, function () { return false; });
+    })['catch'](function () { return false; });
   }
 
   /* 🔴v1031: 本地标记 ≠ 云端会话仍在。提供真实探测，避免"以为登录着其实没有"。 */
@@ -1295,6 +1352,9 @@
     }).catch(function (e) {
       var t = errText(e);
       T('结论', '❗云端模块没准备好：' + t.slice(0, 90));
+      if (e && e.reload) {
+        return { ok: false, expired: false, definite: false, notReady: true, reload: true, kind: 'network', reason: t };
+      }
       return { ok: false, expired: false, definite: false, notReady: true,
                kind: /未配置/.test(t) ? 'config' : (netLike(t) ? 'network' : 'session'), reason: t };
     }).then(function (r) {
@@ -1302,7 +1362,19 @@
       if (!r.ok && r.definite) {
         /* 🔴v1063 竞态防线（保留）：刚登录 60 秒内**绝不清本地标记**，只拒绝本次操作。 */
         if (isFresh()) { T('结论', '刚登录不到 60 秒 → 这次先不清本地登录记录'); return r; }
-        writeLocal({ method: '', signedAt: 0, uid: '' });
+        var _lcX = readLocal();
+        /* 🔴v1164（审查 AUTH-7）：v1058~v1163 的「用户名注册」其实从没在云端建出账号，只在本机写了「已登录」。
+           这些孩子第一次打开新版本就会走到这里 —— 说实话，别让他们去改一个本来没拼错的用户名。 */
+        if (_lcX.method === 'password' && !_lcX.uid) {
+          r.legacy = true;
+          r.reason = LEGACY_USERNAME_MSG;
+          T('结论', '❗这是旧版本「用户名注册」留下的登录记录（云端从来没有这个账号）');
+        }
+        /* 🔴v1164（审查 AUTH-1）：**只清「登录着」这一条，不清 uid。**
+           uid 一变，全站都会当成「换了个人」：天梯战绩当场清零、重新登录后对账又拿云端的旧档盖掉
+           这段时间玩的进度。会话过期 ≠ 换账号。手机号 / 用户名一起清掉（下一次登录重新写，别留给下一个人）。 */
+        writeLocal({ method: '', signedAt: 0, phone: '', username: '', pendingPhone: '', verificationId: '',
+                     legacyUser: r.legacy ? (_lcX.username || '') : '' });
         T('结论', '已清除本地"已登录"记录并通知界面 → 请重新登录');
         /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」会一直挂到下次刷新 */
         try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e1) {}
@@ -1481,6 +1553,10 @@
     /* v1164：给诊断面板 / 测试看的判据（与 ensureSession 同一份） */
     credentialsPresent: credentialsPresent,
     _app: app,
+    /* v1164：取 SDK 模块只有这一个出口（云存档没登录时也走这里，别各自 import 出第二份） */
+    _sdk: loadSdk,
+    /* 审查 TI-4：登录服务通不通 —— 数据库报 network request error 时，用它分辨「真断网」还是「数据库拒绝」 */
+    probeCloud: probeCloud,
     /* v1093: 供子框借用顶层已建好的 auth 对象 */
     _authObj: function () { return _auth; }
   };

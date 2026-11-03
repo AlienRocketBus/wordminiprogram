@@ -243,7 +243,7 @@
                   setTimeout(function(){ try{ location.reload(); }catch(e){} }, 1200); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             } else {
-              CS.syncNow({force:true})
+              CS.syncNow({force:true, rewrite:true})   /* 孩子选了「留本机」：内容没变也要真写一次 */
                 .then(function(){ msg('已用本机进度覆盖云端。', 'ok'); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             }

@@ -43,6 +43,33 @@
   function sha256(str){ return crypto.subtle.digest('SHA-256', enc.encode(str)); }
   function hex(buf){ var u=new Uint8Array(buf), s=''; for(var i=0;i<u.length;i++) s+=('0'+u[i].toString(16)).slice(-2); return s; }
   function fnv(str){ var h=0x811c9dc5; for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h*0x01000193)>>>0; } return ('0000000'+h.toString(16)).slice(-8); }
+  /* 🔴v1164（审查 SE-4）：「内容有没有变」不能拿整份导出比 —— 导出里带着生成时间（每次都不同），
+     各岛的进度记录里还有个每几秒就刷新一次的 ts。按这两样比永远是「变了」：
+     岛屿页什么都不做，一分钟也要真传十几次，一个班一天就把云开发的套餐用完了（用完整个站点停服）。
+     比之前把这两样去掉：真正学到的东西变了才算变。 */
+  function syncHash(code){
+    try{
+      var o = JSON.parse(decodeURIComponent(escape(atob(String(code || '')))));
+      var items = (o && Array.isArray(o.items)) ? o.items : null;
+      if(!items) return fnv(String(code || ''));
+      return fnv(items.map(function(x){
+        return String(x && x.key) + '\u0000' + String(x && x.value).replace(/"ts":\d+/g, '"ts":0');
+      }).join('\u0001'));
+    }catch(e){ return fnv(String(code || '')); }
+  }
+  /* 这一层页面是不是正显示着（被藏起来的预热页面 display:none，它的定时写入不该触发上传） */
+  function frameShown(){
+    try{
+      var w = window, n = 0;
+      while(w && w !== w.top && n++ < 6){
+        var fe = w.frameElement;
+        if(!fe) return true;
+        if(!fe.getClientRects().length) return false;
+        w = w.parent;
+      }
+    }catch(e){}
+    return true;
+  }
 
   /* ---------- 密钥：生成 / 规范化 / 展示 ---------- */
   function genKey(){
@@ -85,13 +112,17 @@
       var A = window.HansenAuth;
       if (!(A && typeof A.isSignedIn === 'function' && A.isSignedIn())) return '';
       var lc = (typeof A.readLocal === 'function') ? A.readLocal() : null;
+      /* 🔴v1164（审查 AUTH-4）：**按这次登录的方式挑标识。** 以前不看方式、手机号优先 ——
+         同一台手机上 A 用手机号登过、退出，B 再用用户名登录，记录里还留着 A 的手机号，
+         于是 B 读写的是 A 的云存档（把 A 的进度恢复到自己身上，自己的上传又写不进 A 的那条）。 */
+      if (lc && lc.method === 'password' && lc.username) return 'n:' + String(lc.username).trim().toLowerCase();
       /* 手机号归一：去掉空格与 +86 等前缀差异，保证两端拼出的字符串完全一致 */
-      if (lc && lc.phone) {
+      if (lc && lc.phone && lc.method !== 'password') {
         var ph = String(lc.phone).replace(/[\s\-()]/g, '');
         ph = ph.replace(/^\+?86/, '');
         if (/^\d{6,15}$/.test(ph)) return 'p:' + ph;
       }
-      if (lc && lc.username) return 'n:' + String(lc.username).trim().toLowerCase();
+      if (lc && lc.username && lc.method !== 'phone') return 'n:' + String(lc.username).trim().toLowerCase();
       var u = (typeof A.currentUser === 'function') ? A.currentUser() : null;
       if (u && u.uid) return 'u:' + String(u.uid);
       if (lc && lc.uid) return 'u:' + String(lc.uid);
@@ -181,19 +212,11 @@
            登录对账要拿它和本机比 —— 本机明显更少就直接用云端、不弹框。
            以前只返回"有没有档"，于是没法判断哪边更值钱，
            只能把选择推给用户（用户原话：「每次还得点个 ok」）。 */
-        var _cw = 0, _ci = 0;
-        try {
-          var _items = (pl.items || pl.data || {});
-          for (var _k in _items) {
-            if (!Object.prototype.hasOwnProperty.call(_items, _k)) continue;
-            if (_k.indexOf('wordIsland') !== 0) continue;
-            var _o = null;
-            try { _o = JSON.parse(_items[_k]); } catch (e) { _o = null; }
-            if (_o && _o.learned && _o.learned.length) { _ci++; _cw += _o.learned.length; }
-          }
-        } catch (e) {}
+        /* 🔴v1164（审查 AUTH-6）：云端那一份是**加密的**（{v, iv, ct}），从密文里数单词永远是 0 ——
+           登录面板于是说「已自动取回云端进度（0 个单词）」，老师以为云端是空的。
+           这里不再报数字；要数就解密之后数（cloudSummary）。iv 每次上传都不同，用来认「云端这份是不是我上次传的」。 */
         return { exists:true, updatedAt: row.updatedAt || pl.ts || 0,
-                 appVersion: pl.appVersion || '', learned: _cw, islands: _ci };
+                 appVersion: pl.appVersion || '', iv: String(pl.iv || '') };
       })
       .catch(function(e){ return { exists:null, reason:String(e && e.message || e) }; });
   }
@@ -290,7 +313,11 @@
            所以**每升一次版就会重新制造一次这个分裂**。
            这里去掉查询串（bump_version 只替换已有的 ?v=，不会补新的），
            两处从此保证是同一个模块实例。 */
-        return import('./vendor_cloudbase_esm_v965.js').then(function(m){
+        /* 🔴v1164（审查 AUTH-3）：SDK 模块只从账号模块那一个出口取（它会在第一次没下载完整时换地址再取一次）——
+           自己 import 的话，第一次失败后浏览器记住了，网好了也一直失败；还可能取出第二份 SDK */
+        var _A0 = window.HansenAuth;
+        var _sdk = (_A0 && typeof _A0._sdk === 'function') ? _A0._sdk() : import('./vendor_cloudbase_esm_v965.js');
+        return _sdk.then(function(m){
           var cloudbase = m.default || m;
           var initOpt = { env: envId };
           if(cfg().region) initOpt.region = String(cfg().region);
@@ -449,7 +476,17 @@
       put: function(docId, data){
         return this._app().then(function(app){
           return app.database().collection(COLLECTION).doc(docId).set(data).then(function(r){
-            return dbChk(r, '写入云存档 ' + COLLECTION);
+            dbChk(r, '写入云存档 ' + COLLECTION);
+            /* 🔴v1164（审查 AUTH-4）：写入带着 updatedAt（每次都不同），真写进去了一定是 updated≥1 或新建了一条。
+               updated:0 又没新建 = 那条存档不是这个账号建的，云端悄悄没写 —— 不能报「已同步」 */
+            var up = (r && r.updated != null) ? Number(r.updated) : null;
+            var ups = r && (r.upserted_id || r.upsertedId || (r.upserted && r.upserted.length));
+            if (up === 0 && !ups) {
+              var e0 = new Error('写入云存档没有生效 ⟨updated:0⟩：这条存档不是这个账号建的，云端没让写');
+              e0.code = 'WRITE_NOT_APPLIED'; e0.cloud = true;
+              throw e0;
+            }
+            return r;
           });
         });
       },
@@ -624,7 +661,7 @@
     if (!opts.allowEmpty && !localHasAnyProgress()) {
       return Promise.resolve({ ok:false, reason:'local-empty-refuse-upload' });
     }
-    var h = fnv(code);
+    var h = syncHash(code);
     /* 内容未变→无条件跳过(force 只绕过冷却,不制造重复流量) */
     /* 🔴v1039 关键修复：原判据只看"内容有没有变"，**连 force 也照样跳过**，
        于是出现最致命的一种假象——
@@ -637,16 +674,30 @@
              ② 非 force 时，除内容指纹外还要比对**上次写入的地址**，
                 地址变了(算法变更/换账号)必须重写。 */
     var key = normalizeKey(ensureKey()) || ensureKey();
+    /* 🔴v1164（审查 SE-4）：岛屿页里同时有好几层页面（预热的、嵌着的）都装了云存档，
+       切一次后台每层各传一遍。同一份内容，别的那层刚开始传（15 秒内），这层就不传了 ——
+       同源的几层页面跑在同一条线程上，这一读一写中间不会被打断。 */
+    var lk = st.upLock;
+    if (!opts.rewrite && lk && lk.h === h && lk.k === key && (Date.now() - (lk.at || 0)) < 15000) {
+      return Promise.resolve({ ok:true, skipped:true, reason:'uploading-elsewhere' });
+    }
+    writeState({ upLock: { h: h, k: key, at: Date.now() } });
     _busy = true;
     /* v1146: 把这一次记下来，force 的调用方要能排在它后面 */
     var run = docIdOf(key).then(function(targetId){
-      if (!opts.force && st.lastHash === h && st.lastDocId === targetId) {
+      /* 🔴v1164（审查 SE-4）：force 只是「不管冷却、排在前一次后面」，**内容没变照样跳过** ——
+         以前 force 一律真写：切一次后台传 9 次、每 8 秒整份重传一次。
+         地址变了（换了账号 / 算法）照样重写（v1039 的教训：地址没变才算没变）。
+         rewrite 才是「不管变没变都写一次」（「立即同步」按钮用）。 */
+      if (!opts.rewrite && st.lastHash === h && st.lastDocId === targetId) {
         _busy = false;
+        writeState({ upLock: null });
         return { ok:true, skipped:true, reason:'unchanged' };
       }
       return doUpload(key, code, h, targetId);
     }).catch(function(e){
       _busy = false;
+      writeState({ upLock: null });
       return { ok:false, reason:'upload-failed', error: friendly(e) };
     });
     _busyTail = run.then(function(){ _busyTail = null; },
@@ -657,13 +708,18 @@
   /* 真正的写入（从 syncNow 抽出，便于上面先算地址再决定是否要写） */
   function doUpload(key, code, h, targetId){
     var p = provider();
+    var iv = '';
     return sealPayload(key, code).then(function(envelope){
+      iv = envelope && envelope.iv;
       return p.put(targetId, { payload: envelope, updatedAt: Date.now(), app: 'wordadventure' });
     }).then(function(){
-      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, enabled: true });  /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写 */  /* 🔴v1003: 首次成功即开启自动同步 */
+      /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写；🔴v1003: 首次成功即开启自动同步；
+         🔴v1164（审查 AUTH-1）：记下这次密文的 iv —— 下次登录时认得出「云端那份是不是我最后传的」 */
+      writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, lastIv: iv, enabled: true, upLock: null });
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){
+      writeState({ upLock: null });
       _busy = false; renderCard();
       return { ok:false, reason:'upload-failed', error: friendly(err) };
     });
@@ -714,9 +770,10 @@
       if (i >= cands.length) {
         throw new Error('云端没有这把密钥对应的存档（已尝试 ' + tried.length + ' 个历史地址）');
       }
-      var cand = cands[i];
+      var cand = cands[i], candId = '';
       return docIdOf(cand).then(function (id) {
         tried.push(id.slice(0, 8));
+        candId = id;
         return p.get(id);
       }).then(function (row) {
         if (!row || !row.payload) return attempt(i + 1);
@@ -733,6 +790,7 @@
             } catch (e) {}
           }
           return { key: cand, code: code, updatedAt: row.updatedAt || (row.payload && row.payload.ts) || 0,
+                   iv: String((row.payload && row.payload.iv) || ''), docId: (i === 0) ? candId : '',
                    migratedFrom: i > 0 ? i : 0 };
         }).catch(function () { return attempt(i + 1); });
       }).catch(function (e) {
@@ -779,7 +837,9 @@
       var r;
       try{ r = HansenBackup.restore(parsed); }
       catch(e1){ r = HansenBackup.restore(got.code); }   // 兼容字符串签名
-      writeState({ key: got.key, lastHash: fnv(got.code), lastUpAt: Date.now(), enabled: true });
+      /* 恢复完本机 = 云端那一份：记下它的内容指纹、地址和 iv（之后没改过就不用再传；下次登录认得出「云端还是这份」） */
+      writeState({ key: got.key, lastHash: syncHash(got.code), lastUpAt: Date.now(), enabled: true,
+                   lastIv: got.iv || '', lastDocId: got.docId || readState().lastDocId || '' });
       renderCard();
       return { ok:true, result:r };
     }).then(_done, _fail);
@@ -803,61 +863,32 @@
   /* ---------- 自动同步节律 ---------- */
   function autoHooks(){
     try{
-      document.addEventListener('visibilitychange', function(){
-        /* 🔴v1154：**离开这一刻必须 force —— 冷却不能挡住"最后一次"。**
-
-           用户要的很明确：「我突然要退出，下次登录拿到的
-           就是我退出那一刻的最新数据。」
-
-           而原来这里是 `syncNow({})`（不带 force），会被两道东西挡住：
-             · 45 秒冷却 —— 玩一会儿刚同步过，30 秒后关掉 App 就被拒
-             · `_busy` —— 正好有一次同步在跑，这次直接放弃
-
-           结果就是**最后那段进度丢了**，而用户以为存上了。
-
-           例行同步（每 5 分钟那次）晚一轮没关系，所以不带 force；
-           **但"人要走了"这一刻只有一次机会，必须 force。** */
-        if(document.hidden) syncNow({force:true});
-      });
-      window.addEventListener('pagehide', function(){ syncNow({force:true}); });
-      setInterval(function(){ syncNow({}); }, 5 * 60 * 1000);
+      /* 🔴v1154：**离开这一刻必须 force —— 冷却不能挡住"最后一次"。**
+         用户要的很明确：「我突然要退出，下次登录拿到的就是我退出那一刻的最新数据。」
+         例行同步（每 5 分钟那次）晚一轮没关系，所以不带 force；
+         **但"人要走了"这一刻只有一次机会，必须 force。**
+         🔴v1164（审查 SE-4）：以前这里和下面的 _flushPending 各挂了一个「切后台」，
+         两个都 force，再乘上岛屿页里好几层页面 —— 切一次后台传 9 次。现在一处兑现、
+         内容没变就跳过、藏起来的预热页面不传。 */
+      var _pending = null, _firstAt = 0;
+      var flush = function () {
+        if (_pending) { clearTimeout(_pending); _pending = null; }
+        _firstAt = 0;
+        if (!frameShown()) return;
+        syncNow({force:true});
+      };
+      document.addEventListener('visibilitychange', function(){ if(document.hidden) flush(); });
+      window.addEventListener('pagehide', flush);
+      setInterval(function(){ if (frameShown()) syncNow({}); }, 5 * 60 * 1000);
 
       /* ── 🔴v1134 数据一变就排队上传 ──────────────────────────
-
-         查覆盖时发现：备份**内容**是全的（15 个玩法模块 100% 覆盖），
-         但**同步时机**只有三个：切后台 / 关页面 / 每 5 分钟。
-
-         也就是说：孩子打完一局、拿了奖励、开了张卡，
-         **如果这时候直接杀掉微信或断网，这 5 分钟内的进度就丢了。**
-         而"打完一局就切出去"恰恰是最常见的用法。
-
-         做法：任何模块改完数据，派发一个 `hsn-data-changed` 事件，
-         这里收到就**延迟 8 秒**上传（延迟是为了把连续几次改动合并成一次，
-         否则连开五个宝箱就要传五次，白烧云开发的写次数）。
-
-         为什么是 8 秒而不是立刻：
-           · 连续操作很常见（连答十题、连开宝箱），合并能省一大截写入
-           · 8 秒足够短 —— 用户很难在 8 秒内做完事就杀进程
-           · 而切后台/关页面本来就会立刻触发一次，两条路互补 */
-      /* 🔴v1154：**这个防抖会被"持续写入"饿死。**
-
-         原来的写法是每次变更都 `clearTimeout` 重新计时 ——
-         经典的 debounce。但页面上有模块在**持续写 localStorage**
-         （心跳、状态刷新、进度记录），于是定时器**被无限重置，
-         永远等不到 8 秒**。
-
-         真浏览器实测抓到现场：
-           8 秒定时器创建 2 次，**到期 0 次**。
-
-         也就是说 v1134 承诺的"数据一变 8 秒就同步"，
-         **从写下那天起就没有真正生效过** —— 玩的过程中根本不存云端，
-         全靠切后台/关页面那两条路兜着。
-
-         改法：加一条**最长等待上限**（`_firstAt` 记下第一次变更的时刻）——
-         合并可以，但**最多合并 8 秒**，到点必须传，
-         不管中间又变了多少次。这叫 throttle 而不是 debounce。 */
-      var _pending = null, _firstAt = 0;
+         任何模块改完数据，派发一个 `hsn-data-changed` 事件，这里收到就**延迟 8 秒**上传
+         （把连续几次改动合并成一次，否则连开五个宝箱就要传五次）。
+         🔴v1154：防抖会被"持续写入"饿死 —— 加一条**最长等待上限**（最多合并 8 秒，到点必须传）。
+         🔴v1154：要 force —— 否则被 45 秒冷却挡掉（8 秒合并已经在控制频率）。
+         🔴v1164：藏起来的那几层预热页面（它们自己隔几秒就刷一次进度时间戳）不排队 —— 正在用的那层会传。 */
       document.addEventListener('hsn-data-changed', function () {
+        if (!frameShown()) return;
         var now = Date.now();
         if (!_firstAt) _firstAt = now;
         /* 已经攒够 8 秒 → 立刻传，不再往后推 */
@@ -871,42 +902,9 @@
         _pending = setTimeout(function () {
           _pending = null;
           _firstAt = 0;
-          /* 🔴v1154：**这里要 force —— 否则被 45 秒冷却挡掉。**
-
-             实测（真浏览器）：改数据后等满 9 秒，**上传一次都没发生**。
-             追下去是 `SYNC_MIN_GAP = 45 秒` 把它拒了 ——
-             页面加载时刚同步过，8 秒后这次正好落在冷却窗口内。
-
-             后果很实在：**你玩的过程中数据一直在变，
-             但最快也要 45 秒才可能存一次云端** ——
-             而"数据一变 8 秒就同步"这个承诺就是空的。
-
-             冷却本来是防"连续改动疯狂上传"的，
-             **而 8 秒合并延迟已经做了这件事**（连开五个宝箱只传一次）。
-             两道防抖叠在一起，等于把功能关掉了。
-
-             所以这里带 force（绕过冷却），
-             靠 8 秒合并 + "内容没变就跳过"来控制真实频率。 */
           syncNow({force:true});
         }, Math.max(500, 8000 - (now - _firstAt)));
       });
-      /* 🔴v1154：**人要走了，8 秒定时器立刻兑现，不能等。**
-
-         这个合并延迟本身是对的（连开五个宝箱不该传五次），
-         但它留了个缺口：**在这 8 秒之内关掉 App，那笔改动就没了。**
-         而"拿到奖励顺手就切出去"恰恰是最常见的动作。
-
-         所以离开时不只是"再同步一次"，还要**把挂着的那次立刻兑现**。 */
-      var _flushPending = function () {
-        if (_pending) { clearTimeout(_pending); _pending = null; }
-        syncNow({force:true});
-      };
-      try {
-        window.addEventListener('pagehide', _flushPending);
-        document.addEventListener('visibilitychange', function () {
-          if (document.hidden) _flushPending();
-        });
-      } catch (e) {}
     }catch(e){}
   }
 
@@ -1103,6 +1101,28 @@
       });
     },
     accountHasCloudSave: accountHasCloudSave, accountCloudInfo: accountCloudInfo, accountUid: accountUid,
+    /* v1164（审查 AUTH-1）：登录对账要知道「本机这份是不是已经传上去过、云端那份是不是我最后传的」 */
+    uploadState: function(){
+      var st = readState();
+      return { lastHash: st.lastHash || '', lastDocId: st.lastDocId || '', lastIv: st.lastIv || '', lastUpAt: st.lastUpAt || 0 };
+    },
+    localHash: function(){
+      try { return (window.HansenBackup && typeof HansenBackup.exportCode === 'function') ? syncHash(HansenBackup.exportCode()) : ''; }
+      catch(e){ return ''; }
+    },
+    /* 云端那一份里学会了多少词（要解密才数得出来 —— 审查 AUTH-6） */
+    cloudLearned: function(){
+      return fetchWithKey(ensureKey()).then(function(got){
+        var n = 0, P = (window.HansenBackup && HansenBackup.parse) ? HansenBackup.parse(got.code) : null;
+        ((P && P.items) || []).forEach(function(x){
+          if (!x || String(x.key).indexOf('wordIsland') !== 0) return;
+          try { var o = JSON.parse(x.value); if (o && o.learned && o.learned.length) n += o.learned.length; } catch(e){}
+        });
+        return n;
+      });
+    },
+    _frameShownForTest: frameShown,
+    _syncHashForTest: syncHash,
     getKey: function(){ return readState().key || ''; },
     _debug: { genKey: genKey, normalizeKey: normalizeKey, prettyKey: prettyKey,
               docIdOf: docIdOf, sealPayload: sealPayload, openPayload: openPayload,

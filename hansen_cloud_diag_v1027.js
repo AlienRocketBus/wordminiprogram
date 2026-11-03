@@ -337,7 +337,7 @@
     document.getElementById('dTest').onclick = function () {
       say('上传中…');
       if (!CS || !CS.syncNow) { say('云存档模块不可用', 'bad'); return; }
-      CS.syncNow({ force: true }).then(function (r) {
+      CS.syncNow({ force: true, rewrite: true }).then(function (r) {   /* 自检要真写一次，不能因为内容没变就跳过 */
         say(r && r.ok ? ('上传成功 ✔ ' + short(r, 120)) : ('上传未成功：' + short(r, 160)),
           (r && r.ok) ? 'ok' : 'bad');
         setTimeout(run, 1200);
