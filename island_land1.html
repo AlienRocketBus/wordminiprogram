@@ -4911,7 +4911,9 @@ function triggerBossRage(){
 
 function bossVictory(){bossActive=false;try{document.body.classList.remove('hsn-boss-battle')}catch(e){}S.stats.bossBeaten++;
   //🔴v851 星海子岛(season1-5)打赢boss → 置跨页解锁标记(供星海宇宙地图hub顺序解锁下一星域): 子岛=普通完整岛(自己40-60词+专属boss)·打赢它的boss就是"通关这个星域"。
-  try{ var _smm=(location.pathname||'').match(/island_land([1-8])\.html/); if(_smm && (window._s1Idx==null || window._s1Idx===(BOSSES.length-1))){ localStorage.setItem('hsn_landmap_cleared_'+_smm[1],'1'); } }catch(e){}
+  /* 🔴v1165 「已通关」只在按顺序打赢最后一关时才记（这里先读进度，下面才推进）。72 小时体验期能跳着挑战任何一关，
+     跳打赢了最后一关不算通关——以前这样会把岛永久标成「已通关」，进度却还是 0，还能解锁女帝终战。 */
+  try{ var _smm=(location.pathname||'').match(/island_land([1-8])\.html/); if(_smm){ var __clp=parseInt(localStorage.getItem('land'+_smm[1]+'_prog')||'0',10)||0; if(window._s1Idx===__clp && __clp===(BOSSES.length-1)){ localStorage.setItem('hsn_landmap_cleared_'+_smm[1],'1'); } } }catch(e){}
   /* 🔴v869 第一星域6关顺序闯关: 打赢当前前沿boss→推进 land1_prog。仅season1(其余季岛单boss·hub·主岛不受影响)。 */
   try{ if(/island_land1\.html/.test(location.pathname||'')){ var __p1=parseInt(localStorage.getItem('land1_prog')||'0',10)||0; if(window._s1Idx===__p1){ localStorage.setItem('land1_prog', String(Math.min(__p1+1, BOSSES.length))); } } }catch(e){}
   const hpPct=heroHP/heroMaxHP;
