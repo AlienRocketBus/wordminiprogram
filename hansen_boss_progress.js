@@ -129,7 +129,9 @@
       try {
         localStorage.removeItem('hansen_card_data');
         localStorage.removeItem('hansen_card_data_bak');
-        localStorage.removeItem('hansen_card_temp_unlock_until');  // 临时全解锁标记也清掉
+        /* 🔴v1165 不再删 hansen_card_temp_unlock_until：它现在是 72 小时体验期（hansen_freepass.js）的「卡册全开」标记。
+           这段迁移在每个岛第一次打开时都会跑，以前一跑就把它删掉、体验期再写回来 → 卡册/神秘殿堂的数字来回跳。
+           过期的标记由 hansen_freepass.js 到期清理。 */
       } catch(e){}
       try { if(typeof window.save === 'function') window.save(); } catch(e){}
       try { console.log('[HBP] 🔴 v330 每岛独立迁移完成: 已删除旧全局卡牌存档, 本岛 boss 进度从第1关独立重新开始'); } catch(e){}
