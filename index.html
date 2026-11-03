@@ -4469,7 +4469,15 @@ document.querySelectorAll('.island').forEach(el=>{
   /* 有限离线层：只缓存外壳、必要脚本与最近访问页面，不预下载完整媒体库。 */
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.addEventListener('load',function(){
+      /* 🔴v1165 升级门这次已经注册过、或这个标签页 10 分钟内装失败过（hsn_sw_fail_at）→ 不再注册，免得每次刷新重下整份外壳 */
+      try{
+        var _g = window.__hansenSwUpgradeGateV944;
+        if(_g && _g.registered) return;
+        var _f = Number(sessionStorage.getItem('hsn_sw_fail_at')) || 0;
+        if(_f && Date.now() - _f < 10 * 60 * 1000) return;
+      }catch(e){}
       navigator.serviceWorker.register('./sw_v944.js',{scope:'./',updateViaCache:'none'}).catch(function(err){
+        try{ sessionStorage.setItem('hsn_sw_fail_at', String(Date.now())); }catch(e){}
         try{ console.warn('[离线基础] Service Worker 注册失败:',err&&err.message); }catch(e){}
       });
     },{once:true});
