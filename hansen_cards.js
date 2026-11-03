@@ -942,7 +942,11 @@
     //   金紫渐变描边 + 双层径向高光底(不再黑沉沉) + 发光图标徽章 + 金色渐变标题 + 进入提示; 点击 __hsnOpenHall() 打开历代赛季限定卡陈列馆。
     //   注: 集卡进度/"卡牌大师"达成状态仍在本页顶部(已收集 N/20 + 全部集齐提示)展示, 故此处换成神秘殿堂入口不丢信息。
     var hallOwned=0, hallTotal=0;
-    try{ if(window.HansenSeason){ hallTotal=(window.HansenSeason.allSeasons()||[]).length; hallOwned=__tmpAll?hallTotal:((window.HansenSeason.data()||{}).unlockedCards||[]).length; } }catch(e){}
+    /* v1165: 以前数的是「赛季个数」（0/1），点进殿堂却写 0/6 —— 改成和殿堂同一个算法 */
+    try{ if(window.HansenSeason){
+      if(typeof window.HansenSeason.totalCardCount==='function'){ hallTotal=window.HansenSeason.totalCardCount(); hallOwned=window.HansenSeason.ownedCardCount(); }
+      else { hallTotal=(window.HansenSeason.allSeasons()||[]).length; hallOwned=__tmpAll?hallTotal:((window.HansenSeason.data()||{}).unlockedCards||[]).length; }
+    } }catch(e){}
     html += '<div style="margin:14px 4px 80px;background:linear-gradient(135deg,#fbbf24,#c084fc 50%,#fbbf24);padding:1.6px;border-radius:18px;box-shadow:0 12px 32px rgba(124,58,237,.32),0 4px 16px rgba(251,191,36,.20)">'+
       '<div onclick="if(window.__hsnOpenHall)__hsnOpenHall()" style="position:relative;border-radius:16.4px;padding:16px 15px;cursor:pointer;overflow:hidden;display:flex;align-items:center;gap:13px;'+
         'background:radial-gradient(130% 120% at 0% 0%,rgba(251,191,36,.17),transparent 52%),radial-gradient(130% 120% at 100% 100%,rgba(167,139,250,.22),transparent 52%),linear-gradient(135deg,#2a1f55,#191338 55%,#2e2417)">'+

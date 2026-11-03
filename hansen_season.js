@@ -299,6 +299,9 @@
     addPoints: addSeasonPoints,
     pointsReadOnly: true,
     nextMilestone: function(){ return null; }, // 旧里程碑已停用，不能再向调用方宣传“下一笔可领取奖励”。
+    /* v1165: 神秘殿堂「已收藏 X/Y」只有这一个算法（限定卡 + 守关 Boss 卡；体验期全算已收藏），卡册入口和殿堂里都用它 */
+    ownedCardCount: ownedCardCount,
+    totalCardCount: totalCardCount,
     data: loadData
   };
 
