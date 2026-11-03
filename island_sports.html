@@ -185,7 +185,7 @@ setTimeout(function(){shown=false;show();},1200);
   box-shadow: none;
   transition: transform .12s ease-out;
   -webkit-tap-highlight-color: transparent;
-  animation: worldMapFloat 3.5s ease-in-out infinite;
+  animation: worldMapFloat 3.5s ease-in-out 3;   /* v1165 待机预算：招手 3 下就停（只动 transform） */
 }
 
 /* 飘浮动画 (轻轻摇晃, 像招手) */
@@ -241,12 +241,31 @@ setTimeout(function(){shown=false;show();},1200);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-  animation: wmbGlowD 2.8s ease-in-out infinite;
 }
-/* 金光呼吸 v573: 改 drop-shadow(贴图标轮廓, 无框也不会显出矩形) */
+/* 金光呼吸 v573: 改 drop-shadow(贴图标轮廓, 无框也不会显出矩形)
+   v1165 待机预算：原来每帧改 filter（整张图每帧重画）。改成一张叠在上面、自带强金光的同图层，
+   只动它的 opacity —— 看起来一样（光还是贴着藏宝图轮廓），但不用重画；呼吸 3 下就停。 */
+.wmb-socket::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('icons/map_home.webp?v=1163') center / contain no-repeat;
+  filter: drop-shadow(0 0 13px rgba(251,191,36,.75));
+  opacity: 0;
+  pointer-events: none;
+  animation: wmbGlowD 2.8s ease-in-out 3;
+}
+.world-map-btn:active .wmb-socket::after{ opacity: 0; animation: none; }
 @keyframes wmbGlowD{
-  0%, 100% { filter: drop-shadow(0 2px 4px rgba(0,0,0,.55)) drop-shadow(0 0 6px rgba(251,191,36,.35)) }
-  50%      { filter: drop-shadow(0 2px 4px rgba(0,0,0,.55)) drop-shadow(0 0 13px rgba(251,191,36,.75)) }
+  0%, 100% { opacity: 0 }
+  50%      { opacity: .7 }
+}
+
+/* v1165: 系统打开「减少动态效果」时，菜单上的装饰动画一律不动（hansen_accessibility.js 也会再补一层；
+   这里写在页面里，脚本还没跑完时就生效）。只列装饰，不碰游戏里靠动画移动位置的东西（鱼、地鼠、泡泡）。 */
+@media (prefers-reduced-motion: reduce){
+  .world-map-btn, .wmb-img, .wmb-socket::after, .daily-card.chest-pending::after, .daily-card .d-dot,
+  html body #heroPet, .pet-emoji, .pet-big, .streak-fire{ animation: none !important; }
 }
 
 /* 弹窗打开时自动滑走 (避免和 ✕ 重叠) */
@@ -687,8 +706,8 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 
 /* Animated starfield background */
 body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 15% 5%,var(--th-cosmos-1),transparent 55%),radial-gradient(ellipse at 85% 10%,var(--th-cosmos-2),transparent 55%),radial-gradient(ellipse at 65% 75%,var(--th-cosmos-3),transparent 60%),radial-gradient(ellipse at 30% 90%,var(--th-cosmos-4),transparent 55%),linear-gradient(180deg,var(--th-bg-deep) 0%,var(--th-bg-mid) 50%,var(--th-bg-deep) 100%);z-index:-2;transition:background .6s ease}
-body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,#fff,transparent),radial-gradient(1px 1px at 60% 70%,#fff,transparent),radial-gradient(1px 1px at 80% 20%,#fff,transparent),radial-gradient(2px 2px at 40% 80%,#fbbf24,transparent),radial-gradient(1px 1px at 90% 60%,#fff,transparent),radial-gradient(1px 1px at 15% 85%,#fff,transparent);background-size:100% 100%;opacity:.4;z-index:-1;animation:twinkle 8s linear infinite}
-@keyframes twinkle{0%,100%{opacity:.45}50%{opacity:.45}}/* 🔴v788 禁闪:全局背景星空twinkle脉动改恒定静态(原.3↔.6不停闪·铺满全屏小圆点="小片片")·主页等屏背景不再闪 */
+body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,#fff,transparent),radial-gradient(1px 1px at 60% 70%,#fff,transparent),radial-gradient(1px 1px at 80% 20%,#fff,transparent),radial-gradient(2px 2px at 40% 80%,#fbbf24,transparent),radial-gradient(1px 1px at 90% 60%,#fff,transparent),radial-gradient(1px 1px at 15% 85%,#fff,transparent);background-size:100% 100%;opacity:.4;z-index:-1}
+/* 🔴v788 禁闪:全局背景星空twinkle脉动改恒定静态(原.3↔.6不停闪·铺满全屏小圆点="小片片")·主页等屏背景不再闪 */ /* v1165: 那条首尾都是 .45 的 twinkle 关键帧什么都不改却每帧都在跑，连同 body::after 上的 animation 一起删掉，星空本来就是静态的 */
 
 .app{max-width:500px;margin:0 auto;padding:0 0 90px;position:relative}
 
@@ -787,8 +806,9 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 .daily-card.claimed{opacity:.5;cursor:default}
 .daily-card.claimed:active{transform:none}
 /* 🔴 v575: 每日宝箱未签到 — 极缓慢柔光闪烁(6s周期, 只动box-shadow微光, 不缩放不刺眼) */
-.daily-card.chest-pending{animation:chestSlowGlow 6s ease-in-out infinite}
-@keyframes chestSlowGlow{0%,100%{box-shadow:0 0 0 rgba(251,191,36,0)}50%{box-shadow:0 0 16px 2px rgba(251,191,36,.55)}}
+/* v1165 待机预算：box-shadow 动画每帧要重画整张卡（实测菜单待机时最贵的一项）。改成光圈层只动 opacity，闪 3 轮后停在淡淡常亮，仍提醒「还没签到」 */
+.daily-card.chest-pending::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 16px 2px rgba(251,191,36,.55);opacity:.3;animation:chestSlowGlow 6s ease-in-out 3}
+@keyframes chestSlowGlow{0%,100%{opacity:.3}50%{opacity:1}}
 /* 🔴 v575: 每日宝箱已领取 — 整卡转绿(翡翠渐变), 礼物盒变开盒, 不再闪烁 */
 .daily-card.chest-claimed{background:linear-gradient(135deg,#FF2444,#FF2444)!important;border-color:rgba(255,255,255,.1);animation:none}
 .daily-card.chest-claimed .d-sub{color:rgba(255,255,255,.92)}

@@ -1250,9 +1250,10 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 }
 
 /* 共用浮动动画 */
-@keyframes bobSlow{0%,100%{margin-top:0}50%{margin-top:-14px}}
-@keyframes bobMed{0%,100%{margin-top:0}50%{margin-top:-10px}}
-@keyframes bobFast{0%,100%{margin-top:0}50%{margin-top:-7px}}
+/* v1165: 原来改 margin-top（每帧重新排版整页）；改用独立的 translate 属性，和飞行轨迹的 transform 叠加，效果一样但不排版 */
+@keyframes bobSlow{0%,100%{translate:0 0}50%{translate:0 -14px}}
+@keyframes bobMed{0%,100%{translate:0 0}50%{translate:0 -10px}}
+@keyframes bobFast{0%,100%{translate:0 0}50%{translate:0 -7px}}
 
 /* ─────────────  STARRY BACKGROUND  ───────────── */
 .bg-cosmos{
@@ -1288,6 +1289,13 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
   92%{opacity:1}
   100%{opacity:0;transform:translate(-400px,180px) rotate(-25deg)}
 }
+
+/* v1165 待机动画预算：孩子 12 秒没碰屏幕，首页这些装饰（80 颗星星、漂浮表情、岛卡背景小图、标题跳字、光点）先歇着，
+   一碰屏幕/滚动就接着动。实测它们在首页待机时每帧都要重新合成上百个图层。
+   主题演员 .flyer 不在此列（v943/v944：主题动画必须一直在跑）。流星直接隐藏，免得停在半空。 */
+html.hsn-deco-rest .star,html.hsn-deco-rest .deco-emoji,html.hsn-deco-rest .island .float-bg span,
+html.hsn-deco-rest .logo-char,html.hsn-deco-rest .brand .dot,html.hsn-deco-rest .title-block::before{animation-play-state:paused!important}
+html.hsn-deco-rest .shooter{animation:none!important;opacity:0!important}
 
 /* ─────────────  FLOATING DECO EMOJIS  ───────────── */
 .deco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
@@ -3897,19 +3905,34 @@ window.addEventListener('unhandledrejection', function(e){
   if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   const deco=document.getElementById('deco');
   const stars=document.getElementById('stars');
-  let tx=0,ty=0,cx=0,cy=0;
-  document.addEventListener('mousemove',e=>{
-    tx=(e.clientX/window.innerWidth-.5)*20;
-    ty=(e.clientY/window.innerHeight-.5)*20;
-  });
+  let tx=0,ty=0,cx=0,cy=0,running=false;
+  /* v1165 待机预算：以前这个循环每秒 60 次给两层全屏背景改 transform，鼠标不动也一直跑 ——
+     首页什么都不做时它一个就占主线程近一半（实测 4 倍慢 CPU）。手机上根本没有 mousemove。
+     现在：鼠标动了才开始跑，追上目标就停。 */
   function tick(){
     cx+=(tx-cx)*.05;
     cy+=(ty-cy)*.05;
+    var settled=Math.abs(tx-cx)<.25&&Math.abs(ty-cy)<.25;   /* 差不到 0.25px 就算追上，直接对齐后停 */
+    if(settled){cx=tx;cy=ty;}
     stars.style.transform=`translate(${cx*.3}px,${cy*.3}px)`;
     deco.style.transform=`translate(${cx}px,${cy}px)`;
+    if(settled){running=false;return;}
     requestAnimationFrame(tick);
   }
-  tick();
+  document.addEventListener('mousemove',e=>{
+    tx=(e.clientX/window.innerWidth-.5)*20;
+    ty=(e.clientY/window.innerHeight-.5)*20;
+    if(!running){running=true;requestAnimationFrame(tick);}
+  });
+})();
+
+// ───── v1165 待机动画预算：12 秒没碰屏幕就让首页装饰歇着（见 CSS html.hsn-deco-rest），一碰就醒 ─────
+(function(){
+  var REST_MS=12000, timer=0, root=document.documentElement;
+  function rest(){ root.classList.add('hsn-deco-rest'); }
+  function wake(){ if(root.classList.contains('hsn-deco-rest')) root.classList.remove('hsn-deco-rest'); clearTimeout(timer); timer=setTimeout(rest,REST_MS); }
+  ['pointerdown','touchstart','keydown','wheel','scroll'].forEach(function(ev){ try{ window.addEventListener(ev,wake,{passive:true,capture:true}); }catch(e){} });
+  wake();
 })();
 
 // ───── click feedback ─────
