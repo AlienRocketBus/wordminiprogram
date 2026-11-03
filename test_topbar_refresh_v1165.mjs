@@ -9,6 +9,7 @@
  *   ① 同一来源的另一个页面写金币 / 人物经验 / 每日任务 → 本页 #coinCount、经验行、#questDot 500ms 内跟着变；不会两页来回刷个不停
  *   ② 两个页面：食物岛 addXP(5)×4，动物岛 addXP(5) → 全局经验 25，两边顶栏一致
  *   ③ addXP(52300) 到满级 → 顶栏「已满级 MAX」，页面上没有「/0 XP」
+ *   ④ 被收起来（看不见）的岛不跟着刷新，重新露出来时 0.6 秒内补上
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -23,6 +24,8 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
 const srv = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/VERSION') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(VERSION); }
+  // 一个装着「藏起来的岛」的外壳页（像首页把岛收起来那样：外面一层 display:none）
+  if (p === '/__host.html') { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end('<!doctype html><meta charset=utf-8><div id="wrap" style="display:none"><iframe id="f" src="island_animal.html" style="width:390px;height:700px;border:0"></iframe></div>'); }
   if (p.endsWith('/')) p += 'index.html';
   const fp = path.join(ROOT, path.normalize(p));
   if (!fp.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
@@ -97,6 +100,28 @@ try {
     ok(w - w0 === 25, `② 食物岛 +5×4、动物岛 +5 → 全局经验 +25（实际 +${w - w0}）`);
     ok(a.charXP === w && f.charXP === w && a.xp === f.xp && a.lvl === f.lvl, `② 两边顶栏一致（动物「${a.xp}」Lv${a.lvl} / 食物「${f.xp}」Lv${f.lvl}）`);
     ok(A.errs.length === 0 && F.errs.length === 0, '② 页面无报错 ' + A.errs.concat(F.errs).join(' | '));
+    await ctx.close();
+  }
+
+  // ───────────── ④ 藏起来的岛不跟着白忙，露出来时补一次 ─────────────
+  console.log('\n▶ ④ 被收起来的岛（外层 display:none）');
+  {
+    const ctx = await newCtx();
+    const H = await ctx.newPage();
+    const herrs = []; H.on('pageerror', e => herrs.push(String(e.message).slice(0, 160)));
+    await H.goto(BASE + '__host.html', { waitUntil: 'domcontentloaded' });
+    const fr = await (async () => { for (let k = 0; k < 100; k++) { const f = H.frames().find(x => /island_animal\.html/.test(x.url())); if (f) { try { if (await f.evaluate(() => typeof updateTopBar === 'function' && !!window.HansenCoins)) return f; } catch (e) {} } await H.waitForTimeout(200); } return null; })();
+    await H.waitForTimeout(1500);
+    await fr.evaluate(() => { window.__runs = 0; const U = window.updateTopBar; window.updateTopBar = function () { window.__runs++; return U.apply(this, arguments); }; });
+    const B = await open(ctx, 'island_food.html');
+    const now = await B.page.evaluate(() => { HansenCoins.add(40); return String(HansenCoins.get()); });
+    await H.waitForTimeout(800);
+    const hid = await fr.evaluate(() => ({ runs: window.__runs, coins: document.getElementById('coinCount').textContent }));
+    ok(hid.runs === 0, `④ 收起来的时候不刷新（刷新了 ${hid.runs} 次）`);
+    await H.evaluate(() => { document.getElementById('wrap').style.display = 'block'; });
+    const shown = await within(fr, c => document.getElementById('coinCount').textContent === c, now, 600);
+    ok(shown, `④ 露出来后 0.6 秒内补上：#coinCount = ${now}`);
+    ok(herrs.length === 0 && B.errs.length === 0, '④ 页面无报错 ' + herrs.concat(B.errs).join(' | '));
     await ctx.close();
   }
 

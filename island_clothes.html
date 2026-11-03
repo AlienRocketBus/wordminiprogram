@@ -8618,7 +8618,13 @@ window.addEventListener('storage', function(e){
     try{var g=document.getElementById('__hs_gem_count');if(g&&window.HansenGems)g.textContent=HansenGems.get();}catch(e){}
     try{var qs=document.getElementById('questsScreen');if(qs&&qs.classList.contains('active')&&typeof renderQuests==='function')renderQuests();}catch(e){}
   }
-  window.addEventListener('storage',function(e){if(!e||!e.key||!KEYS[e.key])return;if(t)clearTimeout(t);t=setTimeout(sync,120);});
+  /* 藏起来的页面（回首页后被收起的岛、后台预热的页）先不刷新，等它再露出来时补一次：孩子每答一题都会写这些键，不能让看不见的页面跟着白忙 */
+  var pend=false;
+  function hiddenNow(){try{return document.hidden||!window.innerWidth||!window.innerHeight;}catch(e){return false;}}
+  function later(){if(hiddenNow()){pend=true;return;}if(t)clearTimeout(t);t=setTimeout(sync,120);}
+  function wake(){if(pend&&!hiddenNow()){pend=false;later();}}
+  window.addEventListener('storage',function(e){if(!e||!e.key||!KEYS[e.key])return;later();});
+  window.addEventListener('resize',wake);document.addEventListener('visibilitychange',wake);window.addEventListener('pageshow',wake);
 })();
 
 </script>
