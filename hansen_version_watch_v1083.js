@@ -298,12 +298,13 @@
     var topV = 0;
     try { topV = Number(window.top.HansenVersionWatch && window.top.HansenVersionWatch.stamp) || 0; } catch (e) { return false; }
     if (!topV || STAMP >= topV) return false;
-    var key = 'hansen_vw_frame_fix', mark = location.pathname + '@' + topV, done = '';
-    try { done = sessionStorage.getItem(key) || ''; } catch (e) {}
-    if (done === mark) { log('岛页 v' + STAMP + ' 比外壳 v' + topV + ' 旧，已重载过一次 → 不再重载'); return false; }
+    var key = 'hansen_vw_frame_fix', done = {};   /* {页面路径: 已为哪个外壳版本重载过} */
+    try { done = JSON.parse(sessionStorage.getItem(key) || '{}') || {}; } catch (e) { done = {}; }
+    if (Number(done[location.pathname]) === topV) { log('岛页 v' + STAMP + ' 比外壳 v' + topV + ' 旧，已重载过一次 → 不再重载'); return false; }
     var age = freshAge();
     if (age >= 0 && age < GAP) return false;
-    try { sessionStorage.setItem(key, mark); } catch (e) {}
+    done[location.pathname] = topV;
+    try { sessionStorage.setItem(key, JSON.stringify(done)); } catch (e) {}
     log('岛页 v' + STAMP + ' 比外壳 v' + topV + ' 旧 → 重新载一次');
     try { location.replace(freshUrl({ v: String(topV) })); return true; } catch (e) { return false; }
   }
