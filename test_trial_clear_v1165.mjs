@@ -38,6 +38,9 @@ page.on('pageerror', e => errs.push(String(e.message).slice(0, 160)));
 page.on('dialog', d => d.dismiss().catch(() => {}));
 
 // 从选关网格真点第 k 关，等开打，再把 Boss 打到 0 血
+// hansen_season.js 把「距上次胜利结算不到 3 秒」的 bossVictory 当成同一局的重复触发整个挡掉（真孩子两场之间远不止 3 秒）。
+// 以前第一场赢了会弹「🔓新 Boss 解锁」，点掉它正好拖过了 3 秒；那个提示现在只在真开了下一关时才弹，所以这里明着等够 3 秒。
+let lastWinAt = 0;
 async function fightAndWin(k) {
   await page.evaluate(() => { try { closeAlert(); } catch (e) {} showScreen('home'); showScreen('boss'); });
   await page.waitForTimeout(600);
@@ -46,7 +49,10 @@ async function fightAndWin(k) {
   if (!n) return { started: false };
   await card.tap();
   await page.waitForFunction(k => window._s1Idx === k && bossActive === true, k, { timeout: 15000 }).catch(() => {});
+  const wait = 3200 - (Date.now() - lastWinAt);
+  if (lastWinAt && wait > 0) await page.waitForTimeout(wait);
   const st = await page.evaluate(() => { const st = { started: bossActive === true, idx: window._s1Idx }; bossHP = 0; bossVictory(); return st; });
+  lastWinAt = Date.now();
   // 打赢后会弹「🔓新 Boss 解锁」之类的领奖卡：真点「收下!」把它关掉，免得挡住下一次选关
   for (let k = 0; k < 6; k++) {
     await page.waitForTimeout(700);
