@@ -79,6 +79,17 @@
     } catch (e) { return ''; }
   }
 
+  /* 🔴v1164（审查 X1）：「25 秒没变化 = 卡住了」只对**对战屏**成立（倒计时每秒都在跳）。
+     以前按屏幕上有没有「⏱」判 —— 天梯首页给新人看的说明里就有「⏱ 平均用时」，
+     孩子读说明读了 25 秒，就被盖上「这一局卡住了」，手指下面的按钮还被挡住。 */
+  var FROZEN_RE = /⏱ ?\d+ ?s|第 \d+ \//;
+  function onBattle() {
+    try {
+      var c = document.querySelector('.pr_wrap #prClock');
+      return !!(c && c.offsetParent !== null);
+    } catch (e) { return false; }
+  }
+
   /* 盖一层"救援屏" —— 说清楚发生了什么，给一个能点的出口 */
   function rescue(title, why) {
     if (_rescued) return;
@@ -198,7 +209,7 @@
       }
 
       /* 对战界面里有倒计时，正常情况下每秒都在变 —— 25 秒不变就是僵了 */
-      if (/⏱|第 \d+ \//.test(scr) && still > FROZEN_MS) {
+      if (onBattle() && FROZEN_RE.test(scr) && still > FROZEN_MS) {
         rescue('这一局卡住了',
                '界面已经 25 秒没有任何变化。<br>多半是网络断了或者对手那边出了问题。');
         _lastPaintAt = now;
@@ -278,7 +289,7 @@
         if (/正在找对手|等对手进来|等对手交卷|正在拼/.test(scr)) {
           return still > WAIT_MS;
         }
-        return /⏱|第 \d+ \//.test(scr) && still > FROZEN_MS;
+        return onBattle() && FROZEN_RE.test(scr) && still > FROZEN_MS;
       } catch (e) { return false; }
     },
     _tickForTest: tick,

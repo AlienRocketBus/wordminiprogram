@@ -83,13 +83,15 @@ try {
   const R1b = H.roomDocs(emu).find((d) => d._id === R1._id);
   const hostScr = await Hh.screen();
   await t.ok(R1b && !R1b.guestId && R1b.status === 'open' && has(hostScr, /等对手进来/), `房主没有跟走掉的客人开打，还在「等对手进来」（库里 guestId=${R1b && R1b.guestId || '空'} status=${R1b && R1b.status}）`, () => explain());
-  await t.ok(!(await H.battleView(G1)), '走掉的客人过了一会儿也没有被拉回对战屏', () => explain());
+  /* 「没在对战屏」要先确认页面活着 —— 页面崩了 battleView 也是 null（审查 TI-9） */
+  await t.ok(await H.alive(G1) && !(await H.battleView(G1)), '走掉的客人过了一会儿也没有被拉回对战屏（页面还活着）', () => explain());
   await joinRoom(G2, R1._id);
   const ok2 = await battling(Hh, G2);
   const R1c = H.roomDocs(emu).find((d) => d._id === R1._id);
   await t.ok(ok2 && R1c && R1c.guestId === 'u' + G2.cloudUid, '下一个人进来，房主确认的是他，两人开打', () => explain());
-  await t.ok(!(await H.battleView(G1)), '先来又走的那个人始终没有出现在这局里', () => explain());
+  await t.ok(await H.alive(G1) && !(await H.battleView(G1)), '先来又走的那个人始终没有出现在这局里（页面还活着）', () => explain());
   await t.ok(H.foreignWrites(emu).length === 0, `没有人去改别人的文档（尝试 ${H.foreignWrites(emu).length} 次）`, () => explain());
+  await H.cleanPhones(t, [Hh, G1, G2]);
   for (const p of [Hh, G1, G2]) await p.close();
   live.length = 0;
 
@@ -126,6 +128,7 @@ try {
   await t.ok(rx && rx.abandonWin === 'host' && rx.endedBy === 'abandon' && rx._openid === X1.cloudUid, '房主判胜写在自己的房间文档上（abandonWin=host）', () => explain());
   await t.ok(sy2 && sy2.abandonWin === 'guest', '客人判胜写在自己的座位文档上（abandonWin=guest），没去动房主的房', () => explain());
   await t.ok(H.foreignWrites(emu).length === 0, `安全规则模式下没有越权写（被拒 ${H.foreignWrites(emu).length} 次）`, () => explain());
+  await H.cleanPhones(t, [X1, X2, Y1, Y2]);
   for (const p of [X1, X2, Y1, Y2]) await p.close();
   live.length = 0;
 

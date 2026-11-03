@@ -1814,19 +1814,28 @@ def guard_query_no_optional_field():
     > **不值得用"老数据全看不见"来换**。
 
     判据：房间查询的 where 里只允许出现**每条记录必有**的字段。
+
+    🔴v1164（审查 TI-1 / F10）：以前只看文件里**第一个** `.where({...})` ——
+    v1164 第一个 where 换成了按 _id 读，这道守卫就悄悄失灵了（往列房查询里塞 guestId 也全绿）。
+    现在每个 where 都看。`heartbeatAt` 只有和 `proto: PROTO` 一起才允许：
+    proto 2 的房每条都写着心跳；旧版本的房本来就被 proto 挡在外面。
     """
     src = _code_only(_read('hansen_pk_room_v1065.js') or '')
     if not src:
         return
-    m = re.search(r"\.where\(\{([^}]*)\}\)", src)
-    if not m:
+    conds = re.findall(r"\.where\(\{([^}]*)\}\)", src)
+    if not conds:
         return
-    cond = m.group(1)
-    for risky in ('guestId', 'heartbeatAt', 'winners', 'round'):
-        if risky in cond:
+    for cond in conds:
+        for risky in ('guestId', 'winners', 'round'):
+            if re.search(r'\b%s\s*:' % risky, cond):
+                bad('查询条件',
+                    '房间查询的 where 里带了 `%s` —— 旧记录可能没有这个字段，'
+                    '带上就整批查不出来（用户现场："房间功能根本不能用"）' % risky)
+        if re.search(r'\bheartbeatAt\s*:', cond) and not re.search(r'\bproto\s*:\s*PROTO\b', cond):
             bad('查询条件',
-                '房间查询的 where 里带了 `%s` —— 旧记录可能没有这个字段，'
-                '带上就整批查不出来（用户现场："房间功能根本不能用"）' % risky)
+                '房间查询按 `heartbeatAt` 过滤，却没同时限定 `proto: PROTO` —— '
+                '没有心跳字段的旧记录会整批查不出来')
     if "orderBy('heartbeatAt'" in src:
         bad('查询条件',
             "按 heartbeatAt 排序需要在云开发建索引，没建整个查询会报错；"
@@ -4117,6 +4126,26 @@ def guard_backup_skips_sdk_keys():
         bad('备份不收 SDK 键', 'hansen_backup_v944.js 的 credentialKey() 没有调 sdkKey() —— SDK 的键会被当成普通数据备份')
 
 
+def guard_tests_no_hardcoded_root():
+    """测试不许写死仓库路径。
+
+    事故（v1164 审查 TI-7）：90 个测试读产品文件用的是写死的 /home/claude/work/repo/ ——
+    在别的检出目录（worktree、并行会话）里跑，测的其实是主目录那一份代码：
+    把一份 v1163 的代码放进去跑新测试，照样「51 通过 / 0 失败」。绿灯给错了代码作保。
+
+    判据：test_*.mjs 和 *_harness.mjs 里不许出现 /home/claude/work/repo 或 /home/user/wordminiprogram。
+    仓库根目录要从测试文件自己的位置算（import.meta.url）。
+    """
+    pat = re.compile(r'/home/claude/work/repo|/home/user/wordminiprogram')
+    for p in sorted(glob.glob(os.path.join(ROOT, 'test_*.mjs')) + glob.glob(os.path.join(ROOT, '*_harness.mjs'))):
+        src = _read(os.path.basename(p)) or ''
+        m = pat.search(src)
+        if m:
+            bad('测试不写死路径', '%s 写死了仓库路径 %s —— 在别的检出目录里跑，测的是另一份代码；'
+                '用 new URL(\'.\', import.meta.url) 算根目录' % (os.path.basename(p), m.group(0)))
+            return
+
+
 def guard_cloud_tests_no_stubs():
     """真 SDK 端到端测试里不许出现测试钩子。
 
@@ -4285,6 +4314,7 @@ GUARDS = [
     ('同步赛不强翻', guard_waitall_no_force_skip),
     ('备份不收 SDK 键', guard_backup_skips_sdk_keys),
     ('真 SDK 测试无桩', guard_cloud_tests_no_stubs),
+    ('测试不写死路径', guard_tests_no_hardcoded_root),
     ('friendly 说实话', guard_friendly_tells_truth),
 ]
 

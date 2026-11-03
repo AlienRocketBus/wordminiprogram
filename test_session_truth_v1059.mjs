@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_session_truth_v1059.mjs —— 「登录状态的真假」回归台架
  *
  * 事故复盘（横跨 v1017 → v1058，整整 40 版没打中）：
@@ -31,7 +32,7 @@
 import vm from 'node:vm'; import fs from 'node:fs';
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
-const R = '/home/claude/work/repo/';
+const R = (__HSN_ROOT + '');
 /* 结构类断言必须只看**代码**：本仓注释里大量引用旧代码原文
    （如 `import('...?v=1058')`、`if(_cb) return ...`），
    不剥注释会让测试对着散文下结论——那种"通过"毫无意义。 */

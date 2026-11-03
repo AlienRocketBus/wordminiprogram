@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_ladder_v1108.mjs —— 天梯排位：实力匹配 + 战绩页
  *
  * 三件事：
@@ -34,8 +35,8 @@ function mkRecord() {
                     setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } },
     console, Date, Math, JSON, Object, Array, String, Number, Error };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8'), ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_pk_record_v1103.js', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_ladder_v1002.js'), 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_pk_record_v1103.js'), 'utf8'), ctx);
   return ctx.window.HansenPkRecord;
 }
 
@@ -69,7 +70,7 @@ function mkRecord() {
 
 /* ③ 排位固定 A 模式 */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/_createForLadder/.test(ui) && /_pickedMode = 'A'/.test(ui),
      '★ 排位开房固定 A 抢答赛，玩家不能选（排位就该纯竞技）');
   ok(/hostRating/.test(ui), '★ 开排位房时把自己的分写进房间，供对方匹配');
@@ -77,7 +78,7 @@ function mkRecord() {
 
 /* ④ 匹配范围随等待放宽 */
 {
-  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');  /* hansen_ladder_ui_v1108 */
+  const ld = fs.readFileSync((__HSN_ROOT + 'hansen_ladder_ui_v1108.js'), 'utf8');  /* hansen_ladder_ui_v1108 */
   ok(/matchBand\(waited\)/.test(ld), '★ 用 matchBand 按等待时间算范围');
   ok(/gap <= band/.test(ld), '★ 只匹配范围内的房间');
   /* 🔴v1114：hostRating 是客户端填的，不能全信 */
@@ -88,14 +89,14 @@ function mkRecord() {
      产品默认仍是 20 秒。断言改为查"有这个默认值"而不是查写死的 20。 */
   ok(/waited >= \(window\.__hsnLadderWaitSec \|\| 20\)/.test(ld),
      '★ 等满 20 秒还没找到就自己开一间（不让人永远空等）· 门槛可配置但默认 20');
-  const svc = fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8');
+  const svc = fs.readFileSync((__HSN_ROOT + 'hansen_sb_ladder_v1002.js'), 'utf8');
   const m = svc.match(/function matchBand[\s\S]{0,220}/);
   ok(m && /Math\.floor\(s \/ 5\) \* 50/.test(m[0]), '★ 每等 5 秒放宽 50 分');
 }
 
 /* ⑤ 战绩页展示项齐全 */
 {
-  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');
+  const ld = fs.readFileSync((__HSN_ROOT + 'hansen_ladder_ui_v1108.js'), 'utf8');
   for (const k of ['胜率', '抢先率', '平均用时', '最快一次', '正确率', '最高连胜']) {
     ok(ld.includes(k), `★ 战绩页有「${k}」`);
   }
@@ -106,10 +107,10 @@ function mkRecord() {
 
 /* ⑥ 入口都接上了 */
 {
-  const sb = fs.readFileSync('/home/claude/work/repo/hansen_sb_pk_v1022.js', 'utf8');
+  const sb = fs.readFileSync((__HSN_ROOT + 'hansen_sb_pk_v1022.js'), 'utf8');
   ok(/kLadder'\)\.onclick = openLadder/.test(sb),
      '★ sb_pk 的天梯按钮接到 HansenLadderUI（不再是 soon 敬请期待）');
-  const pk = fs.readFileSync('/home/claude/work/repo/spelling_pk.html', 'utf8');
+  const pk = fs.readFileSync((__HSN_ROOT + 'spelling_pk.html'), 'utf8');
   ok(/HansenLadderUI/.test(pk), '★ spelling_pk 页的天梯入口也接上了');
 }
 
@@ -132,7 +133,7 @@ function mkRecord() {
  * 所以从代码看、从日志看都正常，**只有真的点一遍才会发现**。
  */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
 
   const iCreate = code.indexOf('function _createForLadder');
@@ -166,8 +167,8 @@ function mkRecord() {
 
 /* 天梯 UI 调的那两个方法必须真的存在 */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
-  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
+  const ld = fs.readFileSync((__HSN_ROOT + 'hansen_ladder_ui_v1108.js'), 'utf8');
   for (const m of ['_createForLadder', '_joinForLadder']) {
     ok(new RegExp(m + '\\s*:').test(ui),
        `★ HansenPkRoomUI 导出了 ${m}（天梯 UI 靠它开房/进房）`);
@@ -179,7 +180,7 @@ function mkRecord() {
 
 /* ── 🔴v1154 追加：对战中的两个真问题 ────────────────────── */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* ① 对手比分从来没更新过 */
@@ -211,7 +212,7 @@ function mkRecord() {
 
 /* 天梯的防重入 */
 {
-  const ld = fs.readFileSync('/home/claude/work/repo/hansen_ladder_ui_v1108.js', 'utf8');
+  const ld = fs.readFileSync((__HSN_ROOT + 'hansen_ladder_ui_v1108.js'), 'utf8');
   const c2 = ld.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = c2.indexOf('function startMatching');
   ok(/if \(_cancel\) \{ try \{ _cancel\(\); \}/.test(c2.slice(i, i + 400)),

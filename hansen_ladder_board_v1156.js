@@ -42,6 +42,14 @@
 
   var COL = 'sb_profile';
   var TOP_N = 20;              /* 榜单显示前多少名 */
+  var RATING_CAP = 4000;       /* 天梯分的上限（hansen_sb_ladder 的 RATING_MAX） */
+  function boardName(v) {
+    var P = window.HansenSbProfile;
+    try { if (P && typeof P.safeName === 'function') return P.safeName(v, '无名蜂'); } catch (e) {}
+    var s = (typeof v === 'string') ? v.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 16) : '';
+    if (/微信|vx|wx|qq|加我|扫码|http|www|@|\d{5,}/i.test(s)) return '小蜜蜂';
+    return s || '无名蜂';
+  }
   var STALE_DAYS = 30;         /* 多久没打过就不上榜 */
   var MIN_GAMES = 3;           /* 至少打满定级赛 */
   var NET_TIMEOUT_MS = 12000;  /* 单次云端请求的上限：弱信号下请求会挂住不返回 */
@@ -278,6 +286,10 @@
         if (!x || !Number(x.ladderRating)) return false;
         if ((Number(x.ladderGames) || 0) < MIN_GAMES) return false;
         if ((Number(x.ladderAt) || 0) < alive) return false;
+        /* 🔴v1164（审查 SEC-4）：分数是各人手机自己算、自己写的 —— 明显不可能的不上榜：
+           超过天梯上限 4000，或者涨得比「每局最多涨四十来分」快得多（打 3 局就 9999 分）。留足余量，正常打的绝不会被滤掉 */
+        var rt = Number(x.ladderRating) || 0, gm = Number(x.ladderGames) || 0;
+        if (rt < 0 || rt > RATING_CAP || rt - 1000 > 60 * gm + 100) return false;
         return true;
       }).sort(function (a, b) {
         return (Number(b.ladderRating) || 0) - (Number(a.ladderRating) || 0);
@@ -285,7 +297,8 @@
         return {
           rank: i + 1,
           uid: x.uid || x._id,
-          name: String(x.name || '').slice(0, 16) || '无名蜂',
+          /* 名字是各人自己写的：广告 / 联系方式换成「小蜜蜂」（审查 SEC-4） */
+          name: boardName(x.name),
           cid: Number(x.cid) || 0,
           rating: Number(x.ladderRating) || 0,
           games: Number(x.ladderGames) || 0

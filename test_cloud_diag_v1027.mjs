@@ -1,12 +1,13 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cloud_diag_v1027.mjs —— 云同步自检面板回归
  * 背景：开发环境连不上腾讯云，跨设备存档已连修多版仍未解决。
  *       与其继续盲改，不如把整条链路每一步的**真实结果**呈现在用户设备上，
  *       一张截图即可定位断点。
  * 合同：面板能打开、逐环项齐全(模块/envId/登录态/uid/密钥/本机进度/备份打包/上次上传/自动开关)、
  *       含「立刻上传」「从云端拉取」两个实测按钮、零脚本错误。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -16,7 +17,7 @@ let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else
 const errs=[];
 const page=await browser.newPage({viewport:{width:390,height:900}});
 page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
-await page.addInitScript(()=>{ localStorage.clear();
+await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
   localStorage.setItem('wordIslandAnimal', JSON.stringify({learned:[1,2,3,4,5],stats:{daysPlayed:9}}));
   localStorage.setItem('hansen_auth_v1004', JSON.stringify({method:'phone',phone:'+8613800138000',signedAt:Date.now(),uid:'UID-DIAG'}));
 });

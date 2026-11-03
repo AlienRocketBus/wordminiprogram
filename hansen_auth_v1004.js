@@ -226,11 +226,12 @@
   function credGuardReset() {
     try { var G = window.HansenCredGuard; if (G && typeof G.reset === 'function') G.reset(); } catch (e) {}
   }
-  /* 凭证不见了时先请守护用影子副本救一次；救不了才算真过期 */
-  function credGuardRescue() {
+  /* 凭证不见了时先请守护用影子副本救一次；救不了才算真过期。
+     newerThan：只认这个时刻之后才备份的影子（别的页面刚换到的新凭证，审查 AUTH-5） */
+  function credGuardRescue(newerThan) {
     try {
       var G = window.HansenCredGuard;
-      if (G && typeof G.rescue === 'function') return !!G.rescue('会话探测发现凭证不在');
+      if (G && typeof G.rescue === 'function') return !!G.rescue('会话探测发现凭证不在', newerThan);
     } catch (e) {}
     return false;
   }
@@ -1002,15 +1003,43 @@
          ⚠️ 唯一保留的例外：**云端读不到**（网断了、权限出错）——
          那种情况在前面 `info.exists === null` 就返回了，
          走不到这里。不会出现"云端是空的却把本机清了"。 */
-      if (hasCloud && hasLocal) {
+      /* 🔴v1164（审查 AUTH-1）：「云端永远是最新的」有一个例外 —— **这台手机后来玩的、没传上去的**。
+         会话死掉的那段时间里，孩子照样在玩，上传一直失败；重新登录时再拿云端那份旧的一盖，这段进度就没了。
+         认法（不看两台手机的钟）：本机这份是这个账号的（归属标记），内容和最后一次传成功的不一样，
+         而且云端那一份还是我最后传的那份（密文的 iv 对得上 —— 没有别的设备在这之后传过）→ 传本机这份。
+         云端那份已经被别的设备更新过（两边都有新东西）→ 解密数一下，谁学会的词多用谁。 */
+      var us = (typeof CS.uploadState === 'function') ? CS.uploadState() : null;
+      var lh = (typeof CS.localHash === 'function') ? CS.localHash() : '';
+      var mineLocal = !!(hasCloud && hasLocal && uidNow && localOwner() === uidNow);
+      var unsynced = !!(mineLocal && us && us.lastHash && lh && lh !== us.lastHash);
+      if (unsynced) {
+        var cloudIsMine = !!(us.lastIv && info && info.iv && info.iv === us.lastIv);
+        var pick = cloudIsMine ? Promise.resolve('local')
+          : (typeof CS.cloudLearned === 'function'
+              ? CS.cloudLearned().then(function (n) { return ((local && local.learned) || 0) > n ? 'local' : 'cloud'; },
+                                       function () { return 'cloud'; })
+              : Promise.resolve('cloud'));
+        return pick.then(function (who) {
+          if (who !== 'local') return restoreCloud();
+          T('登录对账', '本机有没传上去的进度（' + (cloudIsMine ? '云端还是上次那份' : '本机学会的词更多') + '）→ 传本机这份');
+          return CS.syncNow({ force: true, rewrite: true }).then(function (r) {
+            if (r && r.ok) markLocalOwner(uidNow);
+            return { ok: !!(r && r.ok), action: (r && r.ok) ? 'uploaded' : 'upload-failed', autoPicked: 'local',
+                     localWords: (local && local.learned) || 0 };
+          }, function () { return { ok: false, action: 'upload-failed' }; });
+        });
+      }
+      if (hasCloud && hasLocal) return restoreCloud();
+      function restoreCloud() {
         return CS.restoreWithKey(CS.ensureKey(), true)
           .then(function (r) {
             if (r && r.ok) {
               markLocalOwner(uidNow);
+              /* 审查 AUTH-6：数恢复之后本机学会的词（= 云端那份），别从密文里数（永远是 0） */
               return { ok: true, action: 'restored', needReload: true,
                        autoPicked: 'cloud',
                        localWords: (local && local.learned) || 0,
-                       cloudWords: (info && info.learned) || 0 };
+                       cloudWords: localProgressSize().learned || 0 };
             }
             /* 恢复失败：**什么都不动**，本机原样留着。
                宁可这次没同步上，也不能把人的进度清成半截。 */
@@ -1043,9 +1072,18 @@
      数据库回非 200 时 SDK 只会说「network request error」，看着和断网一模一样。 */
   function probeCloud() {
     return auth().then(function (a) {
-      if (typeof a.getCurrentUser !== 'function') return false;
-      return withTimeout(Promise.resolve().then(function () { return a.getCurrentUser(); }), 6000, '探测云端')
-        .then(function (u) { return !!(u && (u.uid || u.sub)); }, function () { return false; });
+      if (typeof a.getLoginState !== 'function') return false;
+      var ask = Promise.resolve().then(function () { return a.getLoginState(); }).then(function (ls) {
+        var u = ls && ls.user;
+        if (!u || typeof u.refresh !== 'function') return false;
+        /* ⚠️ 不能用 getCurrentUser()：它把网络错误吞掉、拿本机缓存的用户信息当结果 —— 断网也说「通」
+           （实测：/auth/v1/user/me 三次都没发出去，它照样回了用户）。
+           user.refresh() 真去问 /auth/v1/user/me：回了话（哪怕是「令牌不对」）= 通；SDK 报 unreachable = 不通 */
+        return Promise.resolve().then(function () { return u.refresh(); }).then(function () { return true; }, function (e) {
+          return !!(e && ((e.error && e.error !== 'unreachable') || e.code));
+        });
+      });
+      return withTimeout(ask, 6000, '探测云端').then(function (v) { return !!v; }, function () { return false; });
     })['catch'](function () { return false; });
   }
 
@@ -1273,7 +1311,7 @@
         T('结论', '❗云端 SDK 没有 getLoginState（版本不对？）');
         return { ok: false, notReady: true, expired: false, definite: false, kind: 'other', reason: 'no-api' };
       }
-      var rescued = false, fixedInfo = false;
+      var rescued = false, fixedInfo = false, looked = false;
 
       /* 还没拿到会话：按 RETRY_DELAYS 再问；问到底仍没有就说"尚未就绪"（不判过期） */
       function again(i, why) {
@@ -1340,13 +1378,27 @@
             T('判定', '本机没有云端凭证，但刚登录不到 60 秒 → 先不判过期');
             return again(i, '刚登录');
           }
+          if (!looked) {
+            /* 🔴v1164（审查 AUTH-5）：两个页面同时刷新令牌时，另一个页面可能刚换到新凭证、马上就写回来 ——
+               等 1.5 秒再看一眼，别把两个页面一起判成「登录过期」 */
+            looked = true;
+            var lookAt = Date.now();
+            T('判定', '凭证不在 —— 等 1.5 秒再看一眼（另一个页面可能正在换新凭证）');
+            return new Promise(function (res) { setTimeout(res, 1500); }).then(function () {
+              if (credentialsPresent() || credGuardRescue(lookAt)) { T('判定', '凭证又回来了 → 再探一次'); return probe(i + 1); }
+              return expiredNow(i);
+            });
+          }
+          return expiredNow(i);
+        }, function (e) { return onErr(e, i); });
+      }
+      function expiredNow(i) {
           T('结论', '❌ 本机没有云端凭证（credentials_ 不在，守护也救不回）→ 确凿过期，需要重新登录');
           return {
             ok: false, expired: true, definite: true, notReady: false, noCredentials: true,
             kind: 'expired', tries: i + 1,
             reason: '云端登录已过期：这台设备上的登录凭证没有了，请重新登录'
           };
-        }, function (e) { return onErr(e, i); });
       }
       return probe(0);
     }).catch(function (e) {
@@ -1458,8 +1510,12 @@
     try {
       window.addEventListener('storage', function (ev) {
         if (!ev || ev.key !== LKEY) return;
-        var now = '';
-        try { now = (JSON.parse(ev.newValue || '{}') || {}).uid || ''; } catch (e) {}
+        var now = '', nv = null;
+        try { nv = JSON.parse(ev.newValue || '{}') || {}; now = nv.uid || ''; } catch (e) {}
+        /* 🔴v1164（审查 AUTH-2）：同一个标签页里的岛（iframe）改了登录记录，首页外壳也会收到这个通知 ——
+           那不是「别的窗口」：孩子就在这个岛里登录 / 发现过期的。以前一律盖上「别的窗口退出了登录 · 刷新这个窗口」，
+           把岛自己的「重新登录」整个挡住。是这个标签页写的就只更新记下的 uid，不提示。 */
+        if (nv && nv._tab && nv._tab === tabId()) { mine = now; return; }
         if (now === mine) return;              /* 没变 */
         var was = mine;
         mine = now;

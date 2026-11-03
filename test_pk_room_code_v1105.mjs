@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_room_code_v1105.mjs —— 房间码：邀请好友来打
  *
  * 产品需求：「可以邀请自己的好友到房间里面来进行对战。」
@@ -26,7 +27,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('房间码 v1105');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
 
 /* 🔴v1164：假数据库照真数据库的能力做 —— _id 唯一（重复 add 被拒）、
    只能改/删自己建的文档。以前的假实现什么都让写，真机上的权限问题因此一直没被测出来。 */
@@ -122,7 +123,7 @@ function boot(shared, me) {
 
 /* ⑥ 界面 */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/prCodeBig/.test(ui), '★ 等待屏把码显示得最显眼');
   ok(/font-size:44px/.test(ui), '★ 码是大字号（要一眼看见才好念给朋友听）');
   ok(/prCopy/.test(ui), '★ 有一键复制');

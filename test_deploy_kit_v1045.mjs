@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_deploy_kit_v1045.mjs —— 部署工具包随包交付回归
  * 事故：用户打开网址被下载 `file.html`。经完整排查确认代码与包结构均正常，
  *   真因是**上传时丢了文件类型信息**，COS 把 index.html 标成 application/octet-stream。
@@ -35,7 +36,7 @@ function zipNames(buf){
    有包就验（那是它真正的价值：验包的内容对不对），
    没包就说明"这轮还没打包"，跳过即可。
    `package_release.py` 本身有完整的出包契约校验，那一层不会漏。 */
-const zpath = fs.readdirSync('/home/claude/work/repo/release-assets')
+const zpath = fs.readdirSync((__HSN_ROOT + 'release-assets'))
   .filter(f=>f.includes('可直接部署')&&f.endsWith('.zip'))[0];
 if (!zpath) {
   console.log('  ⏭  release-assets 里还没有部署包 —— 跳过（打包后会真正验一遍）');
@@ -43,15 +44,15 @@ if (!zpath) {
   process.exit(0);
 }
 ok(!!zpath, '找到部署包: '+zpath);
-const names = zipNames(fs.readFileSync('/home/claude/work/repo/release-assets/'+zpath));
+const names = zipNames(fs.readFileSync((__HSN_ROOT + 'release-assets/')+zpath));
 ok(names.length>2000, `包内文件 ${names.length} 个`);
 ok(names.includes('index.html'), 'index.html 在包根层');
 ok(names.includes('cloudbaserc.json'), 'cloudbaserc.json 已随包交付（一键部署配置）');
 ok(names.some(n=>n.includes('部署说明')), '部署说明已随包交付');
 
 /* 配置内容正确性 */
-const cfg = JSON.parse(fs.readFileSync('/home/claude/work/repo/cloudbaserc.json','utf8'));
-const live = fs.readFileSync('/home/claude/work/repo/hansen_cloud_config_v965.js','utf8');
+const cfg = JSON.parse(fs.readFileSync((__HSN_ROOT + 'cloudbaserc.json'),'utf8'));
+const live = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_config_v965.js'),'utf8');
 const liveEnv = (live.match(/envId:\s*'([^']+)'/)||[])[1];
 ok(cfg.envId === liveEnv, `配置里的 envId 与线上一致（${cfg.envId}）`);
 ok(cfg.framework && cfg.framework.plugins && cfg.framework.plugins.site, '含 website 插件配置');
@@ -60,7 +61,7 @@ ok(ig.some(x=>x.includes('release-assets')) && ig.some(x=>x.includes('test_')),
    '忽略清单排除了发布产物与测试文件（不会被传上线）');
 
 /* 说明文档要把"必须解压"和"SW 兜底的边界"讲清楚 */
-const doc = fs.readFileSync('/home/claude/work/repo/部署说明_解决打开变下载.md','utf8');
+const doc = fs.readFileSync((__HSN_ROOT + '部署说明_解决打开变下载.md'),'utf8');
 ok(/必须先解压/.test(doc), '说明强调"必须先解压"（直接传 zip 会下载压缩包）');
 ok(/tcb hosting deploy/.test(doc), '说明给出命令行一键上传命令');
 ok(/Content-Disposition/.test(doc) && /inline/.test(doc), '说明给出单文件应急修法(Content-Disposition: inline)');

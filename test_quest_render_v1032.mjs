@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_quest_render_v1032.mjs —— 每日任务「面板真的渲染出来」回归
  * 事故：数据层 rollDailyQuests() 明明返回 12 条，面板却显示「暂无任务，稍后再来！」。
  *   根因：template 里的 __hsnNormalizeQuests 在渲染前规整数据，
@@ -6,9 +7,9 @@
  *   template 自带的查表函数不认识 → 全清 → 面板空白。
  *   （v1018 修的是 hansen_quest_global.js 里的同型校验，没料到 template 还有第二道。）
  * 合同：① rollDailyQuests 返回 12 条；② 面板必须真的渲染出 12 条；③ 不得出现「暂无任务」。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -17,7 +18,7 @@ const browser=await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_
 const page=await browser.newPage({viewport:{width:390,height:844}});
 const errs=[]; page.on('pageerror',e=>errs.push(String(e.message).slice(0,110)));
 page.on('console',m=>{if(m.type()==='error'){const t=m.text(); if(!/tcb-api|net::ERR_|Failed to fetch|Access to fetch/i.test(t)) errs.push('C:'+t.slice(0,110));}});
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(3000);
 /* 找每日任务入口并点开 */

@@ -421,7 +421,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       var err=document.getElementById('pkNameErr');
       if(!v){ if(err) err.textContent='名字不能是空的'; return; }
       try{
-        P.saveProfile ? P.saveProfile({name:v}) : P.setName && P.setName(v);
+        /* 🔴v1164（审查 UI-8）：资料模块不收的名字（一个字、带「管理员」……）要当场说出来 ——
+           以前不看返回值就放人进去，孩子以为起好了，对手看到的却是「无名蜂」，下次又让他起名 */
+        var res = P.saveProfile ? P.saveProfile({name:v}) : (P.setName ? P.setName(v) : null);
+        if(res && res.ok === false){
+          if(err) err.textContent = res.reason || '这个名字用不了，换一个吧';
+          try{ inp.focus(); inp.select(); }catch(e2){}
+          return;
+        }
         P.ensureCid && P.ensureCid();
       }catch(e){ if(err) err.textContent='存不下来，刷新一下再试'; return; }
       host.style.display='none';

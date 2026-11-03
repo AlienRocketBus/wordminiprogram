@@ -1078,24 +1078,26 @@
     /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完。
        🔴v1164（审查 F7）：**第一词也按本机时间起算**，不再拿对方手机写的时间戳当起点 ——
        对方钟快 10 分钟时我这边倒计时是 617 秒，慢 15 秒时一进来只剩 2 秒。
-       做法：看到对手也报到了（读到他的「就绪」）就开第一词；最多等 4 秒（对手断网也不会把人卡住）。
-       两边各自「看到对方报到」的时刻只差一次轮询，比拿两台手机的钟去比准得多。 */
+       做法：看到对手也报到了（读到他的「就绪」）就开第一词；最多等 2 秒（对手断网也不会把人卡住，
+       v1127 的教训：开局不能拖）。两边各自「看到对方报到」的时刻只差一次轮询，比拿两台手机的钟去比准得多。 */
     var started = false;
     var go = function () { if (started) return; started = true; askRound(0); };
     try {
       S().markReady(st.roomId);
       if (st.roomId && st.roomId !== 'test' && S().roundState) {
-        var t0 = Date.now();
+        paint('<div class="pr_top"><div class="pr_h">⚡ 对手到了</div></div>'
+          + '<div class="pr_empty" style="padding:34px 12px;font-size:16px">准备好，马上开始…</div>');
+        var t0 = Date.now(), CAP = 2000;
         var poll = function () {
           if (started || !stillLive(st)) return;
           S().roundState(st.roomId).then(function (r) {
             if (started || !stillLive(st)) return;
             var oppReady = r && r.ok && (r.mySide === 'host' ? r.guestReady : r.hostReady);
-            if (oppReady || Date.now() - t0 >= 4000) { go(); return; }
-            setTimeout(poll, 500);
-          }, function () { if (Date.now() - t0 >= 4000) go(); else setTimeout(poll, 500); });
+            if (oppReady || Date.now() - t0 >= CAP) { go(); return; }
+            setTimeout(poll, 400);
+          }, function () { if (Date.now() - t0 >= CAP) go(); else setTimeout(poll, 400); });
         };
-        setTimeout(function () { if (stillLive(st)) go(); }, 4500);   /* 兜底：轮询卡住也照样开打 */
+        setTimeout(function () { if (stillLive(st)) go(); }, CAP + 500);   /* 兜底：轮询卡住也照样开打 */
         poll();
         return;
       }

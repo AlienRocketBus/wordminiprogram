@@ -44,7 +44,11 @@ async function openRoom(p, mode, priv) {
   await p.tap(`.pr_mode[data-mode="${mode}"]`);
   return p.waitScreen(/等对手进来/, { timeout: 15000 }).catch((e) => e.lastText || '');
 }
-function hostRoom(p) { return H.roomDocs(emu).find((d) => d.kind === 'room' && d._openid === p.cloudUid && d.status !== 'done'); }
+/* 这个人刚开的那间（最新的；库里可能还躺着他以前的房） */
+function hostRoom(p) {
+  return H.roomDocs(emu).filter((d) => d.kind === 'room' && d._openid === p.cloudUid && d.status !== 'done')
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];
+}
 /* 列表里那间房的「进去打」—— 列表可能晚一两秒才出现（读有延迟），刷新着等 */
 async function findRoomButton(p, rid) {
   return H.until(async () => {
@@ -96,16 +100,20 @@ try {
   names = {};
   const A = await phone('一', '小蜂一'), B = await phone('二', '小蜂二');
   const recA0 = await H.ladderRecord(A);
-  /* 上次没收干净的旧文档（服务端本来就有）：甲自己的旧房、旧座位，还有别人的旧房 */
-  const old = Date.now() - 10 * 60000;
-  emu.seedDoc('hansen_pk_rooms', { _id: 'roldmine1', proto: 2, kind: 'room', status: 'done', isPrivate: false, mode: 'C', hostId: 'u' + A.cloudUid, hostName: '小蜂一', createdAt: old, heartbeatAt: old, endedAt: old, seat: 0 }, A.cloudUid, 600000);
-  emu.seedDoc('hansen_pk_rooms', { _id: 'roldother1_s0', proto: 2, kind: 'seat', roomId: 'roldother1', epoch: 0, guestId: 'u' + A.cloudUid, guestName: '小蜂一', createdAt: old, guestBeat: old }, A.cloudUid, 600000);
-  emu.seedDoc('hansen_pk_rooms', { _id: 'roldother1', proto: 2, kind: 'room', status: 'done', isPrivate: false, mode: 'C', hostId: 'u1999', hostName: '别人', createdAt: old, heartbeatAt: old, endedAt: old, seat: 0 }, '1999000000000000001', 600000);
+  /* 上次没收干净的旧文档（服务端本来就有）：甲自己的旧房、旧座位，还有别人的旧房。
+     🔴v1164（审查 F8）：不是这台设备这次建的，要 30 分钟没动才清（另一台手机钟慢时它可能正活着）—— 种 40 分钟前的 */
+  const old = Date.now() - 40 * 60000;
+  emu.seedDoc('hansen_pk_rooms', { _id: 'roldmine1', proto: 2, kind: 'room', status: 'done', isPrivate: false, mode: 'C', hostId: 'u' + A.cloudUid, hostName: '小蜂一', createdAt: old, heartbeatAt: old, endedAt: old, seat: 0 }, A.cloudUid, 2400000);
+  emu.seedDoc('hansen_pk_rooms', { _id: 'roldother1_s0', proto: 2, kind: 'seat', roomId: 'roldother1', epoch: 0, guestId: 'u' + A.cloudUid, guestName: '小蜂一', createdAt: old, guestBeat: old }, A.cloudUid, 2400000);
+  emu.seedDoc('hansen_pk_rooms', { _id: 'roldother1', proto: 2, kind: 'room', status: 'done', isPrivate: false, mode: 'C', hostId: 'u1999', hostName: '别人', createdAt: old, heartbeatAt: old, endedAt: old, seat: 0 }, '1999000000000000001', 2400000);
+  /* 同账号「另一台设备」上 5 分钟没心跳的房：那台手机钟慢的话它其实还活着 —— 不许删 */
+  const fiveMin = Date.now() - 5 * 60000;
+  emu.seedDoc('hansen_pk_rooms', { _id: 'rtwinA', proto: 2, kind: 'room', status: 'open', isPrivate: false, mode: 'C', hostId: 'u' + A.cloudUid, hostName: '小蜂一', createdAt: fiveMin, heartbeatAt: fiveMin, seat: 0 }, A.cloudUid, 300000);
   await toLobby(A);
   let txt = await openRoom(A, 'C', false);
   const swept = await H.until(() => { const ids = H.roomDocs(emu).map((d) => d._id); return !ids.includes('roldmine1') && !ids.includes('roldother1_s0') ? ids : null; }, { timeout: 10000 });
-  await t.ok(swept && swept.includes('roldother1') && H.foreignWrites(emu).length === 0,
-    `顺手清掉了自己上次留下的旧房和旧座位，别人的旧房一下没碰（剩下：${H.roomDocs(emu).map((d) => d._id).join(', ')}）`, () => explain());
+  await t.ok(swept && swept.includes('roldother1') && swept.includes('rtwinA') && H.foreignWrites(emu).length === 0,
+    `顺手清掉了自己上次留下的旧房和旧座位，别人的旧房一下没碰，同账号另一台设备 5 分钟没心跳的房也没删（剩下：${H.roomDocs(emu).map((d) => d._id).join(', ')}）`, () => explain());
   await t.ok(has(txt, /等对手进来/) && has(txt, /同步赛/), `开一间同步赛 → 「等对手进来」，并说明开的是什么房（看到：${txt.replace(/\s+/g, ' ').slice(0, 90)}）`, () => explain());
   const RA = hostRoom(A);
   await t.ok(RA && RA.mode === 'C' && RA.isPrivate === false && RA.proto === 2 && RA.hostName === '小蜂一', '数据库：公开、同步赛、新协议、房主名字对', () => explain());
@@ -126,6 +134,7 @@ try {
       await t.ok(recA1 && recA0 && recA1.rating === recA0.rating && recA1.total === recA0.total + 1, `同步赛只记战绩不动天梯分（${recA0 && recA0.rating} → ${recA1 && recA1.rating}，场次 +1）`);
     }
   }
+  await H.cleanPhones(t, [A, B]);
   await A.close(); await B.close(); live.length = 0;
 
   /* ══ ② 私密房码 · 回合赛 ════════════════════════════════════════ */
@@ -137,8 +146,10 @@ try {
   txt = await openRoom(C, 'B', true);
   const code = ((await C.eval(() => (document.getElementById('prCodeBig') || {}).innerText || '')) || '').trim();
   const RC = hostRoom(C);
-  await t.ok(/^[0-9A-Z]{4}$/.test(code) && RC && RC.isPrivate === true && RC.code === code && RC.mode === 'B',
-    `私密回合赛开好了，屏幕上大字显示房间码「${code}」，和库里一致（库里 ${RC && RC.code}）`, () => explain());
+  /* 🔴v1164（审查 SEC-7）：码不上云（集合谁都能读），库里只放一个摘要 —— 输码查房、核对凭证都用它 */
+  const codeH = await C.eval((c) => window.HansenPkRoom._codeHash(c), code);
+  await t.ok(/^[0-9A-Z]{4}$/.test(code) && RC && RC.isPrivate === true && RC.codeH === codeH && !('code' in RC) && RC.mode === 'B',
+    `私密回合赛开好了，屏幕上大字显示房间码「${code}」；库里只有它的摘要、没有码本身（库里 ${RC && RC.codeH}）`, () => explain());
   await toLobby(D);
   await H.sleep(2500);
   await D.tap('#prRef').catch(() => {});
@@ -159,6 +170,7 @@ try {
     await playToEnd(C, D, RC._id, 'B', 0.4);
     await ownershipChecks('回合赛', C, D, RC._id);
   }
+  await H.cleanPhones(t, [C, D]);
   await C.close(); await D.close(); live.length = 0;
 
   /* ══ ③ 三人同时抢一个座位 ════════════════════════════════════════ */
@@ -183,20 +195,22 @@ try {
     }, { timeout: 30000, interval: 600 });
     await t.ok(settled, '三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」', () => explain());
     await H.sleep(4000);
-    const stillOne = []; for (const g of G) if (await H.battleView(g)) stillOne.push(g.name);
-    await t.ok(stillOne.length === 1, `过了几秒也没有第二个人被拉进对战（在对战屏的：${stillOne.join(',') || '无'}）`, () => explain());
+    const stillOne = [], dead = []; for (const g of G) { if (!(await H.alive(g))) dead.push(g.name); if (await H.battleView(g)) stillOne.push(g.name); }
+    await t.ok(stillOne.length === 1 && !dead.length, `过了几秒也没有第二个人被拉进对战（在对战屏的：${stillOne.join(',') || '无'}；页面都活着${dead.length ? '，挂了：' + dead.join(',') : ''}）`, () => explain());
     const seats = H.roomDocs(emu).filter((d) => d.kind === 'seat' && d.roomId === (RE && RE._id));
     const R2 = H.roomDocs(emu).find((d) => d._id === (RE && RE._id));
     const winner = settled && settled.inB[0];
     await t.ok(seats.length === 1 && winner && seats[0]._openid === winner.cloudUid && R2 && R2.guestId === 'u' + winner.cloudUid,
       `库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 ${seats.length} 个）`, () => explain());
     const dups = emu.log.filter((e) => e.action === 'database.addDocument' && (e.code === 'DATABASE_REQUEST_FAILED' || e.status === 500)).length;
-    console.log(`      （这一轮重复 _id 被数据库拒绝 ${dups} 次）`);
+    /* 审查 TI-9：这一段就是为「重复 _id 被拒 → 读回来判定」写的 —— 要真走到那条路 */
+    await t.ok(dups > 0, `重复 _id 被数据库拒绝过（${dups} 次）—— 抢座真的撞上了，读回判定那条路走到了`);
     await t.ok(H.foreignWrites(emu).length === 0, `没有人去改别人的文档（尝试 ${H.foreignWrites(emu).length} 次）`, () => explain());
     if (settled) for (const l of settled.losers) {
       const s = await l.screen();
       await t.ok(!has(s, /连不上网络|云端设置/), `[${l.name}] 抢输了说的是「被占了」，不是「连不上网络」（看到：${s.replace(/\s+/g, ' ').slice(0, 80)}）`, () => explain());
     }
+    await H.cleanPhones(t, live);
     for (const p of live) await p.close();
     live.length = 0;
   }

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_gear_swap_v1035.mjs —— 装备「自由切换」与血量上限回归
  * 缺口：武器/血量/护甲原本各只有一个 xxxLvl 字段，既表示"拥有"又表示"装备"，
  *       买了新的直接把旧的顶掉 —— 用户买过的武器换不回去。
@@ -16,7 +17,7 @@ const win={ localStorage:store,
     documentElement:{classList:{contains:()=>false}},body:{appendChild(){}},head:{appendChild(){}}},
   addEventListener(){}, setTimeout:(f)=>{f&&f();return 0;}, setInterval:()=>0 };
 win.window=win; const ctx={...win, window:win}; vm.createContext(ctx);
-try{ vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_gear.js','utf8'), ctx); }
+try{ vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_gear.js'),'utf8'), ctx); }
 catch(e){ console.log('load:', String(e.message).slice(0,80)); }
 const G=win.HansenGear;
 ok(!!G, '装备模块已加载');

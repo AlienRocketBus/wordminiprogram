@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_username_signup_v1058.mjs —— 用户名 + 密码「注册」
  * 需求：提供不依赖手机号的注册方式。
  * 实现要点：CloudBase 的注册只支持 email+password 或 phone+验证码，
@@ -14,9 +15,9 @@
  *   （读源码 + 模拟云端实测：1 次 /auth/v1/verification，0 次 /auth/v1/signup）。
  *   假替身比真东西能干，于是这条测试一直绿着，而真机上用户名注册的人永远连不上云端。
  *   现在替身按真 SDK 的行为来，测试的意图（用户名这条路要么真能用、要么说实话）不变。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html; charset=utf-8','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -27,7 +28,7 @@ console.log('用户名密码注册 v1058');
 const page=await browser.newPage({viewport:{width:390,height:844}});
 const errs=[]; page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
 page.on('dialog',async d=>{ await d.dismiss().catch(()=>{}); });
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2600);
 
@@ -111,7 +112,7 @@ await page.close();
 const page2=await browser.newPage({viewport:{width:390,height:844}});
 page2.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
 page2.on('dialog',async d=>{ await d.dismiss().catch(()=>{}); });
-await page2.addInitScript(()=>{localStorage.clear();});
+await page2.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page2.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page2.waitForTimeout(2600);
 await page2.evaluate(()=>{ HansenAuthUI.open(); });
@@ -134,7 +135,7 @@ await page2.waitForTimeout(600);
 const ui2 = await page2.evaluate(()=>({ phone: !!document.getElementById('auPhone'),
   tabOn: (document.querySelector('.au_tab.on')||{}).getAttribute ? document.querySelector('.au_tab.on').getAttribute('data-m') : '' }));
 ok(ui2.phone && ui2.tabOn==='phone', '★ 点了就切到手机号页，能直接填手机号注册');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'),'utf8');
 ok(/mailOfUsername\(u\)/.test(src), '登录时用户名失败会用内部邮箱重试');
 ok(errs.length===0, '零脚本错误'+(errs.length?': '+errs[0]:''));
 await browser.close(); srv.close();

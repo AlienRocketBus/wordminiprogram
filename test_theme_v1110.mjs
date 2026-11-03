@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_theme_v1110.mjs —— 亮色/暗色两套主题
  *
  * 问题：v1107/v1108 新做的好友页、天梯页、对战屏**全是写死的深色十六进制**。
@@ -34,7 +35,7 @@ const FILES = [
 ];
 
 for (const [fn, pfx] of FILES) {
-  const src = fs.readFileSync('/home/claude/work/repo/' + fn, 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + '') + fn, 'utf8');
   /* 变量定义是 JS 字符串拼接（'xx' + 'yy'），先把引号和加号剥掉再匹配，
      否则跨行的定义块永远匹配不到 —— 第一版就栽在这，
      测试报"没有亮色定义"而实际是有的（守卫查形不查实的又一例）。 */
@@ -58,10 +59,10 @@ for (const [fn, pfx] of FILES) {
 
 /* ④ 不与全站 palette 撞名 */
 {
-  const pal = fs.readFileSync('/home/claude/work/repo/hansen_palette.js', 'utf8');
+  const pal = fs.readFileSync((__HSN_ROOT + 'hansen_palette.js'), 'utf8');
   const mine = new Set();
   for (const [fn] of FILES) {
-    const s = fs.readFileSync('/home/claude/work/repo/' + fn, 'utf8');
+    const s = fs.readFileSync((__HSN_ROOT + '') + fn, 'utf8');
     (s.match(/--(?:hpk|pk)-[a-z0-9-]+/g) || []).forEach(v => mine.add(v));
   }
   const clash = [...mine].filter(v => pal.includes(v));
@@ -74,7 +75,7 @@ for (const [fn, pfx] of FILES) {
 /* ⑤ 亮色定义里的文字色必须是深色（否则白底白字） */
 {
   for (const [fn, pfx] of FILES) {
-    const s = fs.readFileSync('/home/claude/work/repo/' + fn, 'utf8');
+    const s = fs.readFileSync((__HSN_ROOT + '') + fn, 'utf8');
     /* 只在**亮色块内部**找 —— 之前的正则会跨过块边界匹到暗色的值，
        报"亮色下文字是浅色"其实是误判。先切出亮色那一段再查。 */
     const code2 = s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/'\s*\+\s*'/g, '');

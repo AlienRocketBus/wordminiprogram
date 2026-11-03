@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 import { chromium } from './playwright_loader.mjs';
 
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
@@ -5,7 +6,7 @@ import http from 'node:http'; import fs from 'node:fs'; import path from 'node:p
    套件里其他测试都是自己 srv.listen(0) 起临时服务。
    这个隐藏的外部依赖让它一直 ERR_CONNECTION_REFUSED、长期红着没人管。
    改为自托管：与其余测试一致，随处可跑。 */
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = {'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json',
   '.css':'text/css','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.mp3':'audio/mpeg','.svg':'image/svg+xml'};
 const srv = http.createServer((req,res)=>{

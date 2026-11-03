@@ -9,8 +9,10 @@
  *   ① 集合权限是「无权限」（ADMINONLY）→ 天梯和公开房间都显示「云端设置还差一步」，
  *      说清是哪个集合、该改成什么权限，并带技术信息（原始错误码）
  *   ② 没建 hansen_pk_rooms 集合 → 同一屏，说清要新建哪个集合
- *   ③ 断网（数据库请求全被掐断）→ 重试几次后「连不上网络」+ 技术信息（network request error）；
- *      网回来点「重新找对手」就接着找 —— 中途绝不说「排位要先登录」
+ *   ③ 断网（这台手机的所有请求都被掐断，登录服务也连不上）→ 重试几次后「连不上网络」+ 技术信息
+ *      （network request error）；网回来点「重新找对手」就接着找 —— 中途绝不说「排位要先登录」
+ *   ③b 网是通的、登录服务也通，只有数据库回了非 200（没权限 403 / 没集合 404，SDK 只说 network request error）
+ *      →「云端连得上，但数据库拒绝了」+ 技术信息；绝不说「连不上网络 · 检查 Wi-Fi」（审查 TI-4：v1163 的原症状）
  *   ④ 登录令牌该刷新了、刷新请求却发不出去 → 「云端还没连上」或「连不上网络」+ 重试；
  *      绝不说「排位要先登录」「登录过期」（凭证还在，不是没登录）；网回来就好
  */
@@ -104,12 +106,13 @@ try {
   await B.close(); live.length = 0;
 
   /* ══ ③ 断网 ════════════════════════════════════════════════════ */
-  t.section('③ 断网：数据库请求全被掐断（legacy）');
+  t.section('③ 断网：这台手机的请求全被掐断（数据库 + 登录服务，legacy）');
   emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
   names = {};
   const C = await phone('丙', '小蜂丙');
   await toLadderHome(C);
-  const cut = emu.fault({ uid: C.cloudUid, db: true, do: 'abort' });
+  /* 真断网：不光数据库，登录服务也连不上（审查 TI-4 以后，「只有数据库不通」是另一种情况，见 ③b） */
+  const cut = emu.fault({ uid: C.cloudUid, do: 'abort' });
   await C.tap('#ldGo');
   w = await watch(C, /连不上网络/, 60000);
   await t.ok(has(w.last, /连不上网络/), `重试几次后显示「连不上网络」（用了 ${Math.round(w.ms / 1000)} 秒；看到：${flat(w.last).slice(0, 140)}）`, () => explain());
@@ -120,6 +123,27 @@ try {
   const back = await C.waitScreen(/正在找对手|等对手进来/, { timeout: 15000 }).catch((e) => e.lastText || '');
   await t.ok(has(back, /正在找对手|等对手进来/), `网回来了点「重新找对手」→ 接着找（看到：${flat(back).slice(0, 80)}）`, () => explain());
   await C.close(); live.length = 0;
+
+  /* ══ ③b 数据库回非 200、登录服务是通的 ══════════════════════════ */
+  for (const v of [
+    { tag: '没权限 · HTTP 403', cols: H.defaultCollections({ hansen_pk_rooms: H.ACL.ADMINONLY }), knobs: { permissionMode: 'rules', deniedStatus: 403 } },
+    { tag: '没建集合 · HTTP 404', cols: (() => { const c = H.defaultCollections(); delete c.hansen_pk_rooms; return c; })(), knobs: { permissionMode: 'legacy', missingStatus: 404 } },
+  ]) {
+    t.section(`③b 数据库回了非 200（${v.tag}），登录服务是通的`);
+    emu = H.makeEmulator({ collections: v.cols, knobs: Object.assign({ latencyMs: 40 }, v.knobs) });
+    names = {};
+    const E = await phone('戊', '小蜂戊');
+    await toLadderHome(E);
+    await E.tap('#ldGo');
+    w = await watch(E, /数据库拒绝了|连不上网络/, 70000);
+    await t.ok(has(w.last, /云端连得上，但数据库拒绝了/) && has(w.last, /安全域名|权限|集合/), `显示「云端连得上，但数据库拒绝了」并说可能的原因（用了 ${Math.round(w.ms / 1000)} 秒；看到：${flat(w.last).slice(0, 150)}）`, () => explain());
+    await t.ok(!has(w.last, /连不上网络|检查一下 Wi-Fi/), '没有让老师去查 Wi-Fi（网是通的）', () => explain());
+    await t.ok(has(w.last, /技术信息/) && has(w.last, /network request error/i), '技术信息里是原始错误「network request error」', () => explain());
+    const probed = emu.log.some((x) => x.uid === E.cloudUid && /\/auth\/v1\/user\/me/.test(x.path) && x.status === 200);
+    await t.ok(probed, '真的问过一次登录服务（/auth/v1/user/me 回了 200）才下的结论', () => explain());
+    await t.ok(!w.seen.some((k) => /排位要先登录|登录过期/.test(k)), `没有说成「要登录」（出现过：${w.seen.join('、')}）`, () => explain());
+    await E.close(); live.length = 0;
+  }
 
   /* ══ ④ 刷新令牌发不出去 ═════════════════════════════════════════ */
   t.section('④ 登录令牌过期要刷新、刷新请求却发不出去（legacy）');

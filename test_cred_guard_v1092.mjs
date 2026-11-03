@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cred_guard_v1092.mjs —— 凭证守护：刷新失败时把凭证救回来
  *
  * 读 SDK 源码确认的链条（不是推测）：
@@ -25,7 +26,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('凭证守护 v1092');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cred_guard_v1092.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cred_guard_v1092.js'), 'utf8');
 const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ① 备份 */
@@ -63,7 +64,7 @@ ok(/auth.{1,3}v1.{1,3}token/.test(code), '★ 锁只作用于刷新请求，不�
 
 /* ⑦ 必须在账号模块之前加载 */
 {
-  const html = fs.readFileSync('/home/claude/work/repo/island_animal.html', 'utf8');
+  const html = fs.readFileSync((__HSN_ROOT + 'island_animal.html'), 'utf8');
   const g = html.indexOf('hansen_cred_guard_v1092');
   const a = html.indexOf('hansen_auth_v1004');
   ok(g >= 0, '岛屿页已装守护');

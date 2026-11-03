@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_account_v1016.mjs —— 拼写大PK 账号管理三态回归
  * 缺口：此前只能点身份条才能登录(不可发现)，登录后也没有切换账号/退出登录的入口。
  * 合同：未登录 → 显式「注册/登录」按钮且不显示切换/退出；
  *       已登录 → 出现「切换账号」「退出登录」并显示当前账号，不再显示注册按钮；
  *       两种色调下按钮文字方向均正确。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -17,7 +18,7 @@ const errs=[];
 for(const [tag,pal] of [['亮','cloud'],['暗',null]]){
   const page=await browser.newPage({viewport:{width:390,height:900}});
   page.on('pageerror',e=>errs.push(tag+':'+String(e.message).slice(0,70)));
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/spelling_pk.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(1800);
   /* 未登录: 应有注册/登录按钮 */

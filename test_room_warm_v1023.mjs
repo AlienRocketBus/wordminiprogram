@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_room_warm_v1023.mjs —— 「房间预热常驻」回归：子页面切换零延迟
  * 背景：星海觉醒(land_map)/赛季岛(island_season) 原为整页跳转，每次点开完整加载 → 明显等待。
  *       直接合并 600+KB 代码会撞变量/样式并拖慢首屏，故改为**后台预热 + 常驻不销毁**。
  * 合同：① 岛屿页空闲后自动预热两个房间；② 预热完成后打开耗时极短；
  *       ③ 关闭只隐藏不销毁，二次打开同样瞬开；④ 不发生整页跳转(仍留在岛屿页)。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -16,7 +17,7 @@ const errs=[];
 console.log('房间预热常驻 v1023');
 const page=await browser.newPage({viewport:{width:390,height:844}});
 page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 const startUrl = `http://127.0.0.1:${port}/island_animal.html`;
 await page.goto(startUrl,{waitUntil:'domcontentloaded'});
   /* 🔴v1158：**固定等 2600ms 不够 —— 岛屿页有 89 个 script。**

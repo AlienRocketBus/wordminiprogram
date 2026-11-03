@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_today_overlay_fixed_v1006.mjs —— 今日复习「完成态」浮层定位回归
  * 事故：finish() 里 overlay.innerHTML=... 会冲掉内部 <style> 中的
  *       #hr_today{position:fixed;inset:0}，浮层退化为普通块元素掉到页面底部，
  *       用户在成就页/卡册页底部看到一条绿色长条。
  * 合同：走完整轮复习到「今日复习完成」后，浮层必须仍是 fixed 且铺满视口。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -14,7 +15,7 @@ const browser=await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_
 const page=await browser.newPage({viewport:{width:390,height:844}});
 const errs=[];
 page.on('pageerror',e=>errs.push('P:'+String(e.message).slice(0,90)));
-await page.addInitScript(()=>{ localStorage.clear();
+await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
   /* 种到期错词, 让今日复习有内容可做 */
   const wr={}; for(let i=0;i<2;i++) wr[String(i)]=1;
   localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr,srs:{}}}}));

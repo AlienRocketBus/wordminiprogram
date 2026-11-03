@@ -60,7 +60,9 @@ def fingerprint():
     """必须和 jarvis_gate.py 里的 _fingerprint() 完全一致，否则闸门不认这份存档。"""
     h = hashlib.sha256()
     srcs = []
-    for pat in ('hansen_*.js', 'sw_*.js', 'test_*.mjs', 'template.html', '*.py'):
+    # 🔴v1164（审查 TI-6）：模拟云端（cloudbase_*.mjs）、测试公共件（*.mjs）、发给手机的 SDK（vendor_*.js）
+    #   以前都不算进指纹 —— 模拟云端放宽了 / SDK 换了，旧的「全绿」照样作数。现在 *.js / *.mjs 全算。
+    for pat in ('*.js', '*.mjs', 'template.html', '*.py'):
         srcs += glob.glob(os.path.join(ROOT, pat))
     for f in sorted(set(srcs)):
         try:

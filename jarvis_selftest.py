@@ -394,10 +394,26 @@ def _inj_no_browser_test(s):
 
 def _inj_query_optional_field(s):
     """把可能缺失的字段塞回查询条件 —— 旧记录会整批查不出来。"""
-    m = ".where({ status: 'open', isPrivate: false })"
+    m = ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })"
     if m not in s:
         return None
-    return s.replace(m, ".where({ status: 'open', isPrivate: false, guestId: '' })", 1)
+    return s.replace(m, ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat, guestId: '' })", 1)
+
+
+def _inj_hardcoded_root(s):
+    """测试里写死仓库路径 —— 在别的检出目录里跑，测的是主目录那一份代码。"""
+    m = "const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);"
+    if m not in s:
+        return None
+    return s.replace(m, "const __HSN_ROOT = '/home/claude/work/repo/';", 1)
+
+
+def _inj_query_beat_without_proto(s):
+    """列房查询按心跳过滤、却把 proto 限定拿掉 —— 没心跳字段的旧记录整批查不出来。"""
+    m = ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })"
+    if m not in s:
+        return None
+    return s.replace(m, ".where({ status: 'open', isPrivate: false, heartbeatAt: beat })", 1)
 
 
 
@@ -750,7 +766,7 @@ def _inj_pk_vocab(s):
 
 def _inj_room_sanitize(s):
     """把房间名的清洗去掉 —— 云端给个对象就会印出 [object Object]。"""
-    m = "hostName: sText(x.hostName, 16) || '\u65e0\u540d\u8702',"
+    m = "hostName: cloudName(x.hostName),"
     if m not in s:
         return None
     return s.replace(m, "hostName: x.hostName || '\u65e0\u540d\u8702',", 1)
@@ -996,6 +1012,8 @@ CASES = [
     ('自打脸检查',   'check_resources.py',          _inj_self_defeating),
     ('要真跑过',     'test_login_no_prompt_v1154.mjs', _inj_no_browser_test),
     ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_optional_field),
+    ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_beat_without_proto),
+    ('测试不写死路径', 'test_pk_room_v1065.mjs',     _inj_hardcoded_root),
     ('天梯E2E',      'test_ladder_e2e_v1155.mjs',   _inj_ladder_e2e),
     ('对战看门狗',   'hansen_pk_watchdog_v1155.js', _inj_watchdog),
     ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
@@ -1166,7 +1184,10 @@ def main():
     _t_start = time.time()
 
     for name, target, inject in CASES:
-        if name in _done_names:
+        # 🔴v1164：同一道守卫可以有好几份样本（各咬一处）—— 续跑按「守卫名/样本名」记，
+        #          只按守卫名记的话，第一份过了，后面几份就被当成「验过了」直接跳过。
+        _key = name + '/' + getattr(inject, '__name__', '')
+        if _key in _done_names:
             continue
         # 🔴v1156：**预算要在"下一道会不会超时"之前判，不是之后。**
         #
@@ -1250,7 +1271,7 @@ def main():
             if not bit:
                 dead.append(name)
             else:
-                _mark_ok(name)
+                _mark_ok(_key)
         finally:
             # ⚠️ 备份可能已经被上一轮的"自动修残局"删掉了 ——
             #    那时这里会抛 FileNotFoundError，把整个自证带崩。

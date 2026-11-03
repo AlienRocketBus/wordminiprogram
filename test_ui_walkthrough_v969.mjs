@@ -262,7 +262,7 @@ async function gotoIsland(page, file='island_animal.html'){
 {
   console.log('S7 大脑五态横幅');
   const pgA = await freshPage();
-  await pgA.addInitScript(()=>localStorage.clear());
+  await pgA.addInitScript(()=>{ if (window.top === window) localStorage.clear(); });
   await gotoIsland(pgA);
   await pgA.waitForSelector('#hr_review_banner', { timeout: 15000 });
   await pgA.waitForTimeout(900);
@@ -289,7 +289,7 @@ async function gotoIsland(page, file='island_animal.html'){
   await pgA.close();
   const pgB = await freshPage();
   await pgB.addInitScript(()=>{
-    localStorage.clear();
+    if (window.top === window) localStorage.clear();
     const wr={}; for(let i=0;i<30;i++) wr[String(i)]=1;
     localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
   });
@@ -313,7 +313,7 @@ async function gotoIsland(page, file='island_animal.html'){
 {
   console.log('S8 亮色板补装修');
   const pg = await freshPage();
-  await pg.addInitScript(()=>{ localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud'); });
+  await pg.addInitScript(()=>{ if (window.top === window) localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud'); });
   await gotoIsland(pg);
   const r = await pg.evaluate(()=>{
     const probe=document.createElement('div');
@@ -347,7 +347,7 @@ async function gotoIsland(page, file='island_animal.html'){
   const lum=(c)=>{const m=(c||'').match(/(\d+),\s*(\d+),\s*(\d+)/); return m? (+m[1]*.299+ +m[2]*.587+ +m[3]*.114) : -1;};
   for(const [pal, wantLightBg] of [['cloud', true], [null, false]]){
     const pg = await freshPage();
-    await pg.addInitScript(p=>{ localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
+    await pg.addInitScript(p=>{ if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
       const wr={}; for(let i=0;i<7;i++) wr[String(i)]=1;
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);

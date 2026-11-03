@@ -133,7 +133,26 @@
     for (var i = 0; i < BANNED.length; i++) {
       if (low.indexOf(BANNED[i]) >= 0) return { ok: false, reason: '这个名字不能用，换一个吧' };
     }
+    /* 名字里带联系方式 / 广告：别人看到的会是「小蜜蜂」—— 起名时就说清楚 */
+    if (AD_NAME.test(low.replace(/\s+/g, ''))) return { ok: false, reason: '名字里不能有联系方式或长串数字，换一个吧' };
     return { ok: true, name: n };
+  }
+  /* 🔴v1164（审查 SEC-4）：**别人的名字**（排行榜、房间、好友、招呼）是他们自己写进云端的 ——
+     改一下前端就能起「加微信8888领皮肤」这种名字，挂在排行榜第一给全班孩子看。
+     显示之前统一过一遍：广告 / 联系方式 / 冒充官方的，一律换成「小蜜蜂」。
+     这是**唯一一份**规则，房间、好友、排行榜都来这里调（它们只在本模块没加载时用自己那份同样的兜底）。 */
+  var AD_NAME = /微信|威信|薇信|v信|vx|wx|qq|扣扣|公众号|加我|加群|进群|扫码|二维码|领皮肤|免费领|福利|红包|代练|http|www|\.com|@|\d{5,}/i;
+  function safeName(v, fallback) {
+    var fb = (typeof fallback === 'string') ? fallback : '无名蜂';
+    if (typeof v !== 'string') {
+      if (typeof v === 'number' && isFinite(v)) v = String(v); else return fb;
+    }
+    var n = v.replace(/[\u0000-\u001f<>"'`\\]/g, '').trim().slice(0, 16);
+    if (!n) return fb;
+    var flat = n.replace(/\s+/g, '').toLowerCase();
+    if (AD_NAME.test(flat)) return '小蜜蜂';
+    for (var i = 0; i < BANNED.length; i++) if (flat.indexOf(BANNED[i]) >= 0) return '小蜜蜂';
+    return n;
   }
   function renameCooldownLeft(p) {
     if (!p.nameChangedAt) return 0;
@@ -281,7 +300,10 @@
   function ensureStyle() {
     if (document.getElementById('hsp_prof_css')) return;
     var css = [
-      '#hsb_prof{position:fixed;inset:0;z-index:70;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;',
+      /* 🔴v1164（审查 UI-9）：岛上从「拼写大PK」屏（2147483400）点「设置名字」打开的就是这一层 ——
+         以前 z-index 70 开在大PK屏**后面**，孩子点了什么都看不见，只能一直叫「无名蜂」。
+         放在大PK屏、天梯 / 好友（2147483500）之上，对战屏（2147483600）之下。 */
+      '#hsb_prof{position:fixed;inset:0;z-index:2147483550;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;',
       '  background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 55%,#312e81 100%);color:#e8eefc;padding:14px 12px 30px}',
       '#hsb_prof.on{display:block}',
       '#hsb_prof .pf_top{display:flex;align-items:center;gap:10px;margin-bottom:12px}',
@@ -610,6 +632,7 @@
     readProfile: readProfile,
     setName: setName,
     validateName: validateName,
+    safeName: safeName,
     fullName: fullName,
     displayName: displayName,
     status: status,

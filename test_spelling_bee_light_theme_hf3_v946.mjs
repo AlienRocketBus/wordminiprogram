@@ -50,7 +50,7 @@ async function run(){
   await listen(server);const origin=`http://127.0.0.1:${server.address().port}`;
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:390,height:844},screen:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,serviceWorkers:'block'});
-  await context.addInitScript(()=>{localStorage.clear();localStorage.setItem('hansen_sb_theme','sky');});
+  await context.addInitScript(()=>{if (window.top === window) localStorage.clear();localStorage.setItem('hansen_sb_theme','sky');});
   const page=await context.newPage();page.setDefaultTimeout(15_000);
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(origin+'/spelling_bee.html',{waitUntil:'domcontentloaded'});

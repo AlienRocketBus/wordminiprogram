@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_account_switch_v1142.mjs —— 换账号时资料要跟着换
  *
  * 用户现场（真机）：
@@ -37,7 +38,7 @@ function boot(init) {
     localStorage: { getItem: k => (k in store ? store[k] : null),
       setItem(k, v) { store[k] = String(v); }, removeItem(k) { delete store[k]; } } };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_sb_profile_v1002.js', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_profile_v1002.js'), 'utf8'), ctx);
   return ctx.window.HansenSbProfile;
 }
 
@@ -75,7 +76,7 @@ function boot(init) {
   ok(p.cid === 0 && p.cidLocked === false, '★ 重置后没有号（等下次登录云端发）');
   ok(p.name === '' && p.nameChangedAt === 0, '★ 重置后名字和冷却都清了');
 
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const i = auth.indexOf('function signOut');
   /* 🔴v1146：窗口按**剥掉注释后**的代码算 ——
      否则加几段说明注释就会把断言挤出窗口，测试莫名其妙变红。
@@ -88,7 +89,7 @@ function boot(init) {
 
 /* ④ 界面要立刻跟上 */
 {
-  const html = fs.readFileSync('/home/claude/work/repo/spelling_pk.html', 'utf8');
+  const html = fs.readFileSync((__HSN_ROOT + 'spelling_pk.html'), 'utf8');
   ok(/hsn-profile-reset/.test(html), '★ 界面监听 hsn-profile-reset');
   const i = html.indexOf("hsn-profile-reset");
   const j = html.indexOf('function renderMe');
@@ -118,7 +119,7 @@ function boot(init) {
  * 而且很容易把**别人的进度传到自己账号上**。
  */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
 
   ok(/OWNER_KEY\s*=\s*'hansen_local_progress_owner_v1143'/.test(code),
@@ -162,7 +163,7 @@ function boot(init) {
 
 /* ① 标记绝不能进备份 */
 {
-  const bk = fs.readFileSync('/home/claude/work/repo/hansen_backup_v944.js', 'utf8');
+  const bk = fs.readFileSync((__HSN_ROOT + 'hansen_backup_v944.js'), 'utf8');
   ok(/hansen_local_progress_owner_/.test(bk) &&
      /DENY=\/\^\(\?:hansen_local_progress_owner_/.test(bk.replace(/\s/g,'')),
      '★ 归属标记在备份的 DENY 名单里 —— ' +
@@ -172,7 +173,7 @@ function boot(init) {
 
 /* ② 标记只能在对账**成功**之后打 */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const i = auth.indexOf('function syncOnLogin');
   const seg = auth.slice(i, i + 4000);
 
@@ -218,7 +219,7 @@ function boot(init) {
 
 /* ③ 这条原则本身 */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   /* 🔴v1150：**原来查的是注释里的一句话**，不是代码行为。
      这种断言只能证明"我写了这句注释"，
      把注释改个说法它就红，把代码改坏它却不红 —— 完全是反的。 */
@@ -247,7 +248,7 @@ function boot(init) {
  * **打完一局立刻退出登录，那 8 秒内的进度必丢。**
  */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = code.indexOf('function signOut');
   const seg = code.slice(i, i + 2200);
@@ -299,7 +300,7 @@ function boot(init) {
  *   ② 云端卡住不返回 → 退出永远完不成，用户退不出去
  */
 {
-  const cs = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const cs = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const code = cs.replace(/\/\*[\s\S]*?\*\//g, '');
 
   ok(/if\(!opts\.force\) return Promise\.resolve\(\{ ok:false, reason:'busy' \}\)/.test(code),
@@ -311,7 +312,7 @@ function boot(init) {
      '★ 记录进行中的那次并在完成后清空');
 }
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(/Promise\.race\(\[/.test(code) && /setTimeout\(r, 6000\)/.test(code),
      '★ **退出时的上传有 6 秒超时** —— ' +
@@ -357,7 +358,7 @@ function boot(init) {
  * 而且"一个标签停在旧页面没关"这件事本身就很普遍。
  */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
 
   ok(/addEventListener\('storage'/.test(code),
@@ -404,7 +405,7 @@ function boot(init) {
  * **打完这局的战绩记到谁头上都不对。**
  */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = code.indexOf('function notifyTabStale');
   /* 窗口要够长 —— 提示层的 HTML 拼接本身就有几百字符。
@@ -426,7 +427,7 @@ function boot(init) {
 
 /* 提示层本身的几条 */
 {
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(/if \(document\.getElementById\('hsnTabStale'\)\) return;/.test(code),
      '★ 提示层不会重复叠加（连换两次账号也只有一层）');

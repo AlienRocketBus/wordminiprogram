@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_force_upload_v1039.mjs —— 「上传显示成功但一个字都没写」回归
  * 用户自检结果给出决定性证据：
  *   · 往返自检（写探针→立刻读回）**全绿** → 会话/权限/地址算法全都正常；
@@ -13,7 +14,7 @@
 import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('强制上传必须真写 v1039');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 
 /* 源码层合同 */
 ok(/lastDocId/.test(src), '状态中记录 lastDocId(上次写到哪儿)');

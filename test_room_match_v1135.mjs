@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_room_match_v1135.mjs —— 房间匹配的六条规则
  *
  * 🔴 挑刺挑出六个问题，其中第一个会让公开房间**完全不可用**：
@@ -43,7 +44,7 @@ function boot(rooms, who) {
     { en: 'eye', cn: '眼睛' }, { en: 'cup', cn: '杯子' }, { en: 'box', cn: '盒子' },
     { en: 'map', cn: '地图' }, { en: 'sky', cn: '天空' }, { en: 'egg', cn: '鸡蛋' }] };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8'), ctx);
   const S = ctx.window.HansenPkRoom;
   const own = r => (r._openid || r.hostId || r.guestId || r.by) === me;
   S._setTransportForTest({
@@ -85,7 +86,7 @@ const now = Date.now();
   ok(!list.some(x => x.guestId), '★ 不列满员的房 —— 点进去必然失败');
   ok(!list.some(x => (now - x.heartbeatAt) > 30000), '★ 不列心跳过期的房');
   {
-    const src2 = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+    const src2 = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
     /* v1164：判活的地方换成 roomAlive（看心跳在不在动），兜底规则不变：没有 heartbeatAt 就用 createdAt */
     ok(/num\(x\.heartbeatAt\) \|\| num\(x\.createdAt\)/.test(src2),
        '★ 本地判心跳时，老房间没有 heartbeatAt 就退回 createdAt —— ' +
@@ -95,7 +96,7 @@ const now = Date.now();
 
 /* ② 查询层面先滤心跳（防僵尸房遮住活房） */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
   /* 🔴v1154 **推翻 v1135 这两条**。
      用户现场：「房间功能到现在根本就不能用。」
@@ -236,7 +237,7 @@ const now = Date.now();
   ok(/^[0-9A-Z]{4}$/.test(code || ''), `★ 私密房有 4 位码（${code}）`);
   ok(!['AB12','CD34','EF56'].includes(code),
      '★ 不与已有的码重复 —— 撞了的后果是"朋友输了码，进的却是陌生人的房"');
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
   ok(/pickCode/.test(src), '★ 生成后查一次重，撞了重来');
 }
 
@@ -252,7 +253,7 @@ const now = Date.now();
 
 /* ⑩ 轮询间隔递增（省云端读次数） */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
   ok(/function nextDelay/.test(src),
      '★ 轮询间隔递增 —— 固定 2 秒等满 2 分钟要 60 次云端读，递增后约 31 次');
   ok(/fails >= 3/.test(src),
@@ -330,7 +331,7 @@ const now = Date.now();
 
 /* ── v1138 追加：关页面时收房 ──────────────────────────── */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/pagehide/.test(ui),
      '★ 监听 pagehide —— 直接关标签页/切走时也要把房收掉，否则就是僵尸房的源头');
   ok(/visibilityState !== 'hidden'/.test(ui) && /30000/.test(ui),

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_addr_consistency_v1046.mjs —— 上传 / 拉取 / 查询「三处地址必须一致」
  * 决定性线索（用户实测）：一键往返自检 ✅、立刻上传 ✅、从云端拉取 ✅，
  *   唯独自检第 ⑩ 项「云端是否已有你的存档」显示 ❌ 没有。
@@ -11,7 +12,7 @@
 import vm from 'node:vm'; import fs from 'node:fs'; import crypto from 'node:crypto';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('三处地址一致性 v1046');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 
 /* 源码层：不得再有"直接用 keyFromUid 算地址"的写法 */
 ok(!/docIdOf\(keyFromUid\(uid\)\)/.test(src), '已无"直接用 keyFromUid 算地址"的写法');

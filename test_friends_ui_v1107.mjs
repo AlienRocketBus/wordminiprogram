@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_friends_ui_v1107.mjs —— 好友界面
  *
  * 合同：
@@ -20,7 +21,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('好友界面 v1107');
 
-const ui = fs.readFileSync('/home/claude/work/repo/hansen_friends_ui_v1107.js', 'utf8');
+const ui = fs.readFileSync((__HSN_ROOT + 'hansen_friends_ui_v1107.js'), 'utf8');
 const code = ui.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ① 在线亮 / 离线整体变灰 */
@@ -35,7 +36,7 @@ const code = ui.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ② 在线排前面 */
 {
-  const svc = fs.readFileSync('/home/claude/work/repo/hansen_friends_v1106.js', 'utf8');
+  const svc = fs.readFileSync((__HSN_ROOT + 'hansen_friends_v1106.js'), 'utf8');
   ok(/friends\.sort/.test(svc) && /b\.online \? 1 : 0/.test(svc),
      '★ 在线的排最前（你想找的就是能马上打的那个）');
 }
@@ -62,7 +63,7 @@ const code = ui.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ⑤ 措辞不骗人 */
 {
-  const svc = fs.readFileSync('/home/claude/work/repo/hansen_friends_v1106.js', 'utf8');
+  const svc = fs.readFileSync((__HSN_ROOT + 'hansen_friends_v1106.js'), 'utf8');
   ok(/刚才还在/.test(svc), '★ 用「刚才还在」');
   ok(!/在线中/.test(ui.replace(/\/\*[\s\S]*?\*\//g, '')),
      '★ 不用「在线中」这种斩钉截铁的说法（网页没有真正的长连接）');
@@ -72,7 +73,7 @@ const code = ui.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ⑥ 入口 */
 {
-  const pk = fs.readFileSync('/home/claude/work/repo/spelling_pk.html', 'utf8');
+  const pk = fs.readFileSync((__HSN_ROOT + 'spelling_pk.html'), 'utf8');
   ok(/pkFriends/.test(pk), '★ PK 页有好友入口（做了功能没入口等于没做）');
   ok(/HansenFriendsUI/.test(pk), '★ 入口接到了好友界面');
 }
@@ -97,7 +98,7 @@ const code = ui.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
  *   · 打开好友页不能让看门狗盖「这一步没能打开」
  */
 {
-  const ROOT = '/home/claude/work/repo';
+  const ROOT = __HSN_ROOT.replace(/\/$/, '');
   const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css',
     '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml' };
   const srv = http.createServer((q, r) => {

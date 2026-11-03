@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_room_v1065.mjs —— 在线对战房间匹配台架
  *
  * 为什么这个测试重要：
@@ -29,7 +30,7 @@ import fs from 'node:fs';
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
-const R = '/home/claude/work/repo/';
+const R = (__HSN_ROOT + '');
 console.log('在线对战 · 房间匹配 v1065（v1164 新存储）');
 
 const src = fs.readFileSync(R + 'hansen_pk_room_v1065.js', 'utf8');

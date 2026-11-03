@@ -29,6 +29,13 @@
     });
   }
   function q(id) { return document.getElementById(id); }
+  /* 🔴v1164（审查 SEC-1）：竞赛 ID 是别人写进云端的 —— 不是正整数就不显示原文。
+     以前 'No.' + f.cid 原样拼进页面，一个写成 <img onerror=…> 的「ID」就能在孩子的好友页里执行脚本
+     （读走本机存的手机号和云端登录凭证）。 */
+  function cidText(v) {
+    var n = Number(v);
+    return (isFinite(n) && n > 0 && Math.floor(n) === n && n < 1e9) ? String(n) : '—';
+  }
 
 
   /* ── 🔴v1110 亮色/暗色主题 ──────────────────────────────────
@@ -415,7 +422,7 @@
         + '<div class="fr_av">🐝' + (f.online ? '<span class="fr_dot"></span>' : '') + '</div>'
         + '<div style="flex:1;min-width:0">'
         +   '<div class="fr_nm">' + esc(f.name) + '</div>'
-        +   '<div class="fr_sub">No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
+        +   '<div class="fr_sub">No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
         + '</div>'
         + '<button class="fr_mini" data-acc="' + i + '">加他</button>'
         + '<button class="fr_mini no" data-ign="' + i + '">不加</button>'
@@ -462,7 +469,7 @@
           var ago = Math.max(0, Math.floor((now - (m.at || 0)) / 60000));
           return '<div class="fr_msg"><div style="font-size:22px">' + esc(m.emoji) + '</div>'
             + '<div class="t">' + esc(m.text) + (m.isNew ? '<span class="fr_new">新</span>' : '')
-            +   '<div class="w">' + esc(m.fromName) + (m.from ? ' · No.' + m.from : '') + ' · '
+            +   '<div class="w">' + esc(m.fromName) + (m.from ? ' · No.' + cidText(m.from) : '') + ' · '
             +   (ago < 1 ? '刚刚' : ago < 60 ? ago + ' 分钟前' : Math.floor(ago / 60) + ' 小时前') + '</div></div>'
             + '</div>';
         }).join('')
@@ -489,7 +496,7 @@
         + '<div class="fr_av">🐝' + (f.online ? '<span class="fr_dot"></span>' : '') + '</div>'
         + '<div style="flex:1;min-width:0">'
         +   '<div class="fr_nm">' + esc(f.name) + (f.pending ? ' <span style="font-size:12px;font-weight:600;color:var(--hpk-faint)">（待确认）</span>' : '') + '</div>'
-        +   '<div class="fr_sub">No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
+        +   '<div class="fr_sub">No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
         + '</div>'
         + '<div style="font-size:18px;color:var(--hpk-faint)">›</div>'
         + '</div>';
@@ -600,7 +607,7 @@
       +   '</div>'
       +   '<div style="font-size:18px;font-weight:800;color:var(--hpk-txt)">' + esc(f.name) + '</div>'
       +   '<div style="font-size:13px;color:' + (f.online ? 'var(--hpk-ok)' : 'var(--hpk-faint)') + ';margin-top:4px">'
-      +     'No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
+      +     'No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
       + '</div>'
 
       + '<div class="fr_card">'

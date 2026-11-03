@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_html_mime_guard_v1044.mjs —— 「网页变成下载」的客户端兜底
  * 事故：用户在浏览器打开站点根地址，浏览器**直接下载页面而不是渲染**。
  *   经查代码与部署包均正常（index.html 在包根层、DOCTYPE 完整、标签配对），
@@ -7,9 +8,9 @@
  *   （首次访问仍取决于服务端配置）。
  * 合同：① 错误 MIME 下页面仍能渲染、不触发下载；② 正确 MIME 下行为不变；
  *       ③ 非 HTML 内容不得被误判改写。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('网页变下载·客户端兜底 v1044');
 
@@ -67,7 +68,7 @@ ok(bad.ctrl ? (bad.kids>0 && bad.dlAfter===0) : true,
    bad.ctrl ? `SW 上岗后即便服务端 MIME 错误也能正常渲染(${bad.kids} 个子元素)、零下载`
             : 'SW 未能上岗(坏 MIME 下首访即下载, 属服务端问题, 见 README 修法)');
 /* 源码合同 */
-const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js','utf8');
+const sw = fs.readFileSync((__HSN_ROOT + 'sw_v944.js'),'utf8');
 ok(/function fixHtmlType/.test(sw), 'SW 提供 fixHtmlType 纠正函数');
 ok(/looksDownload/.test(sw) && !/clone\(\)/.test(sw.slice(sw.indexOf('function fixHtmlType'), sw.indexOf('function fixHtmlType')+1200)), 'v1049 起改为只看响应头判断(不读 body、不 clone)，仅对会触发下载的响应改写');
 ok(/content-disposition/.test(sw), '同时清除 Content-Disposition(被标成附件时)');

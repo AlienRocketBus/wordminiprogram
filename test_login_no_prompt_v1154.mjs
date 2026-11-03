@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_login_no_prompt_v1154.mjs —— 登录时能自动就别弹框
  *
  * 🔴 用户现场（截图）：每次登录都弹一个对话框——
@@ -35,11 +36,11 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('登录不弹框 v1154');
 
-const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
 const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
-const cs = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8')
+const cs = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '');
-const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'utf8')
+const ui = fs.readFileSync((__HSN_ROOT + 'hansen_auth_ui_v1004.js'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '');
 
 /* ① "有进度"不再把答题统计算进去 */
@@ -77,7 +78,7 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 {
   ok(/autoPicked === 'cloud'/.test(ui),
      '★ 界面识别"自动取回"这种情况');
-  ok(/已自动取回云端进度/.test(fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'utf8')),
+  ok(/已自动取回云端进度/.test(fs.readFileSync((__HSN_ROOT + 'hansen_auth_ui_v1004.js'), 'utf8')),
      '★ 在提示条里说一声 —— 不该让人"进度突然变了却不知道为什么"');
   ok(!/confirm\([\s\S]{0,120}autoPicked/.test(ui),
      '★ **自动路径上没有 confirm** —— 不拦人');
@@ -122,7 +123,7 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * 就触发同步 → **把空白盖到云端** → 用户几百个词的进度没了。
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
 
   ok(/if \(_restoring\) \{/.test(csc),
@@ -168,7 +169,7 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * 逐环查下来，**离开那一刻有两个缺口**：
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* 缺口一：离开时的同步不带 force，会被 45 秒冷却挡掉 */
@@ -198,8 +199,8 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 
 /* 整条链的完整性 */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const links = [
     [/autoPicked: 'cloud'/.test(auth), '登录 → 自动取回云端（不弹框）'],
     [/hsn-data-changed/.test(csRaw), '玩的过程中 → 数据一变就排队上传'],
@@ -241,9 +242,9 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * **从写下那天起就没有真正生效过**。
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
-  const cn = fs.readFileSync('/home/claude/work/repo/hansen_change_notify_v1134.js', 'utf8')
+  const cn = fs.readFileSync((__HSN_ROOT + 'hansen_change_notify_v1134.js'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* ① 钩子要能重装，确保自己在最外层 */

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_battle_ui_v1101.mjs —— 对战屏必须是回合制（一次一个词）
  *
  * 用户原话：
@@ -21,7 +22,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('对战屏回合制 v1101');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
 
 /* 🔴v1156：**抠出完整函数体，不再数字符。**
 
@@ -111,7 +112,7 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   /* 🔴v1164：小结后先经 nextWord —— B/C 要等对手也答完这一词再一起翻篇（A 直接翻）；
      nextWord 里最终一定走到 askRound(idx + 1)，等对手也有上限（截止时间 + 3 秒） */
   const nw = bodyOf(code, 'nextWord');
-  ok(/askRound\(idx \+ 1\)/.test(seg) || (/nextWord\(st, idx\)/.test(seg) && /askRound\(idx \+ 1\)/.test(nw) && /cap/.test(nw)),
+  ok(/askRound\(idx \+ 1\)/.test(seg) || (/nextWord\(st, idx(, how)?\)/.test(seg) && /askRound\(idx \+ 1\)/.test(nw) && /cap/.test(nw)),
      '★ 小结后自动进下一词（B/C 等对手答完，但有上限）');
   ok(/toFixed\(1\)/.test(seg), '★ 显示本词用时（让人看见"我快了多少"，正反馈）');
 }

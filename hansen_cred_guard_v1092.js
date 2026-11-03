@@ -112,8 +112,32 @@
     } catch (e) {}
   }
 
+  /* 🔴v1164（审查 AUTH-5）：刷新成功的那一刻，直接从回复里把新凭证存进影子副本 ——
+     不能等 SDK 写进存储再去抄：另一个页面拿旧票刷新被拒时，它的 SDK 会把存储里的凭证删掉，
+     连这个页面刚写进去的新票一起删（实测：两个页面同一毫秒刷新，30 毫秒后去抄已经抄不到了）。
+     存储里这时要是没有凭证，就把这张新票写回去 —— 这正是这个页面的 SDK 手里正在用的那一张。
+     格式和 SDK 自己存的一样：回复原样 + expires_at（SDK 的算法：expires_in 减 30 秒）。 */
+  function keepFresh(j) {
+    try {
+      if (!j || !j.access_token || !j.refresh_token || !j.expires_in) return;
+      var k = credKey();
+      if (!k) return;
+      var o = {};
+      for (var x in j) if (Object.prototype.hasOwnProperty.call(j, x)) o[x] = j[x];
+      if (!o.expires_at) o.expires_at = new Date(Date.now() + 1000 * (Number(o.expires_in) - 30));
+      var v = JSON.stringify(o);
+      ls(rawSet, SHADOW, JSON.stringify({ key: k, val: v, at: Date.now() }));
+      ls(rawRemove, RESCUE_COUNT);
+      var cur = ls(rawGet, k);
+      if (!cur || String(cur).length < 50) ls(rawSet, k, v);
+    } catch (e) {}
+  }
+
   /* ── ② 失败即救回 ─────────────────────────────────────── */
-  function rescue(why) {
+  /* newerThan（v1164 审查 AUTH-5）：「再看一眼」时只救**别的票** —— 影子副本是这个时刻之后备份的，
+     或者里面的 refresh_token 和上一次救回去的那张不一样（别的页面刚换到的）。同一张作废的票不救第二次。 */
+  var _lastRt = '';
+  function rescue(why, newerThan) {
     if (!signedInLocally()) return false;          /* 本地都没登录，不救 */
     var k = credKey();
     if (k && String(ls(rawGet, k) || '').length > 50) return false;   /* 凭证还在，不用救 */
@@ -126,9 +150,11 @@
     try { shadow = JSON.parse(ls(rawGet, SHADOW) || 'null'); } catch (e) {}
     if (!shadow || !shadow.key || !shadow.val) return false;
     if (Date.now() - (shadow.at || 0) > SHADOW_TTL) return false;     /* 太老了，不信 */
+    if (newerThan && (shadow.at || 0) <= newerThan && rtOf(shadow.val) === _lastRt) return false;   /* 还是那张作废的票 */
 
     try {
       ls(rawSet, shadow.key, shadow.val);
+      _lastRt = rtOf(shadow.val);
       ls(rawSet, RESCUE_COUNT, String(n + 1));
       try {
         if (window.HansenCredTrap && HansenCredTrap.mark)
@@ -174,6 +200,12 @@
                 /* 刷新失败 → SDK 马上就会删凭证，抢在它前面备份、随后救回 */
                 setTimeout(function () { rescue('刷新失败 HTTP ' + r.status); }, 300);
                 setTimeout(function () { rescue('刷新失败 HTTP ' + r.status); }, 1500);
+              } else if (r && r.status >= 200 && r.status < 300) {
+                /* 🔴v1164（审查 AUTH-5）：刷新成功 = 换到了新的 refresh_token，旧的那张从此作废。
+                   马上备份（以前要等 3 秒一次的巡查）—— 影子里留的要是旧的那张，另一个页面同时刷新失败、
+                   SDK 把凭证删掉时，救回来的就是一张作废的票，两个页面一起被判「登录过期」。 */
+                try { r.clone().json().then(keepFresh, function () {}); } catch (e3) {}
+                [30, 120, 300, 800].forEach(function (ms) { setTimeout(backup, ms); });
               }
             } catch (e) {}
             return r;

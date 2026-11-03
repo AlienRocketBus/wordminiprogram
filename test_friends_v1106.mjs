@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_friends_v1106.mjs —— 好友 · 在线状态 · 隐身 · 快捷语
  *
  * 产品定义：
@@ -27,7 +28,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('好友系统 v1106');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_friends_v1106.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_friends_v1106.js'), 'utf8');
 
 /* 🔴v1164：假云端要和真数据库一个脾气 ——
    集合权限「读取全部数据，修改本人数据」：谁都能读；add 时服务端盖上写入者的 _openid；
@@ -177,6 +178,8 @@ const S = () => ({ rows: [], msgs: [], denied: [] });
   await A.F._beat();
   /* 和真传输层一样：SDK 回了 {code}，传输层抛出带 code 和集合名的错误 */
   const cloudErr = (code, coll) => Object.assign(new Error('失败 ⟨' + code + '⟩'), { code, cloud: true, collection: coll });
+  /* v1164（审查 SEC-3）：招呼只能发给自己加过的人 —— 先加上 No.2，才走得到「发招呼」那一步 */
+  await A.t.add({ kind: 'friend', owner: 1, friend: 2, name: '小红', at: Date.now() });
   A.t.addMsg = async () => { throw cloudErr('DATABASE_COLLECTION_NOT_EXIST', 'hansen_friend_msgs'); };
   A.F._setTransportForTest(A.t);      /* 注入时会包一层超时，改了方法要重新注入 */
   const r = await A.F.sendQuick(2, 'pk');
@@ -213,6 +216,10 @@ const S = () => ({ rows: [], msgs: [], denied: [] });
 {
   const s = { rows: [], msgs: [] };
   const A = boot(s); A.F._setMeForTest({ cid: 1, name: '小明' });
+  /* 🔴v1164（审查 SEC-3）：没加过的人发不了（以前任何竞赛 ID 都能发，改前端就能给陌生孩子发招呼） */
+  const nf = await A.F.sendQuick(2, 'pk');
+  ok(nf.ok === false && /好友/.test(nf.reason || '') && s.msgs.length === 0, `★ 没加过的人发不了招呼：${nf.reason}`);
+  await A.t.add({ kind: 'friend', owner: 1, friend: 2, name: '小红', at: Date.now() });
   ok((await A.F.sendQuick(2, 'pk')).ok === true, '预设快捷语能发');
   for (const bad of ['我要自己打字', '<script>x</script>', '', null, 'PK']) {
     const r = await A.F.sendQuick(2, bad);
@@ -229,6 +236,9 @@ const S = () => ({ rows: [], msgs: [], denied: [] });
   const B = boot(s, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
   const M = boot(s, 'oM'); M.F._setMeForTest({ cid: 9, name: '陌生人' });
   await A.F._beat(); await B.F._beat(); await M.F._beat();
+  /* 两个人都先「加了」A（发招呼要先加对方）—— A 只加了 B，陌生人 M 是单方面加的 */
+  await B.t.add({ kind: 'friend', owner: 2, friend: 1, name: '小明', at: Date.now() });
+  await M.t.add({ kind: 'friend', owner: 9, friend: 1, name: '小明', at: Date.now() });
   ok((await B.F.sendQuick(1, 'pk')).ok && (await M.F.sendQuick(1, 'hi')).ok, '两个人都发了招呼');
   const ib = await A.F.inbox({ onlyFrom: [2] });
   ok(ib.ok && ib.msgs.length === 1 && ib.msgs[0].from === 2 && /来一局/.test(ib.msgs[0].text),
@@ -259,6 +269,42 @@ const S = () => ({ rows: [], msgs: [], denied: [] });
   ok(A.F.QUICK.length >= 8, `★ 快捷语够用（${A.F.QUICK.length} 条）`);
   ok(A.F.QUICK.every(x => x.id && x.text && x.emoji), '每条都有 id/文本/表情');
   ok(A.F.QUICK.some(x => /来一局/.test(x.text)), '★ 有"来一局？"（约战是核心场景）');
+}
+
+/* ⑧ 🔴v1164（审查 SEC-1 / SEC-5）：别人写进集合的「好友记录」不可信 ——
+   ① owner 不是数字（'x'）的伪造记录：以前整页「没读到好友」，孩子永远进不去好友页；
+   ② 往我名下塞一条 friend 是 HTML 的记录：以前在「还不知道我自己的 _openid」时当成我的、原样拼进页面（存储型 XSS）；
+   ③ 服务端不回 _openid 时也不能「谁写的都算我的」 */
+{
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  await A.F._beat();
+  s.rows.push({ _id: 'X1', kind: 'friend', owner: 'x', friend: 1, at: Date.now(), _openid: 'oEvil' });
+  s.rows.push({ _id: 'X2', kind: 'friend', owner: { $gt: 0 }, friend: 1, at: Date.now(), _openid: 'oEvil' });
+  s.rows.push({ _id: 'X3', kind: 'friend', owner: 1, friend: '<img src=x onerror=alert(1)>', at: Date.now(), _openid: 'oEvil' });
+  s.rows.push({ _id: 'X4', kind: 'presence', cid: '<b>9</b>', name: '<img src=x>', at: Date.now(), _openid: 'oEvil' });
+  const la = await A.F.listFriends();
+  ok(la && la.ok, `★ 伪造的好友记录（owner 不是数字）不会让整页读不出来（${la && (la.ok ? 'ok' : la.reason)}）`);
+  const all = JSON.stringify(la && [la.friends, la.incoming, la.pending]);
+  ok(la && la.ok && !/<img|<b>|onerror/.test(all), `★ 别人写的 HTML 一个字也进不了好友列表（${all.slice(0, 120)}）`);
+  ok(la && la.ok && !(la.friends || []).length && !(la.pending || []).length, '★ 别人往我名下塞的记录不算我的好友');
+  /* 服务端不回 _openid（或我自己的 _openid 还没读回来）：也不能把别人的记录当成我的 */
+  const s2 = S();
+  const B = boot(s2, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
+  s2.rows.push({ _id: 'Y1', kind: 'friend', owner: 2, friend: 7, at: Date.now() });   /* 没有 _openid */
+  s2.rows.push({ _id: 'P7', kind: 'presence', cid: 7, name: '陌生人', at: Date.now(), _openid: 'o7' });
+  const lb = await B.F.listFriends();
+  ok(lb && lb.ok && !(lb.friends || []).concat(lb.pending || []).some((x) => x.cid === 7),
+     `★ 不知道是谁写的记录（没有 _openid）不当成我的（${JSON.stringify(lb && [lb.friends, lb.pending])}）`);
+}
+
+/* ⑨ 🔴v1164（审查 SEC-6）：在线记录只存到「分钟」—— 别人看不出我几点几分几秒在线 */
+{
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  await A.F._beat();
+  const p = s.rows.find((x) => x.kind === 'presence' && x._openid === 'oA');
+  ok(p && p.at > 0 && p.at % 60000 === 0, `★ 在线时间只到分钟（at=${p && p.at}，除以 60 秒余 ${p && p.at % 60000}）`);
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

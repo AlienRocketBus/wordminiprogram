@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_ladder_board_v1156.mjs —— 天梯排行榜
  *
  * 原来天梯页只显示「我 1062 分」，**看不到自己排第几** ——
@@ -12,7 +13,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -308,16 +309,13 @@ async function open(seedBoard) {
   const ui = fs.readFileSync(ROOT + '/hansen_pk_room_ui_v1065.js', 'utf8');
   const code = ui.replace(/\/\*[\s\S]*?\*\//g, '');
 
-  ok(/_rt\.bgLeft = Math\.max\(0, _rt\.deadline - Date\.now\(\)\)/.test(code),
-     '★ **切到后台时记下"还剩多少"** —— ' +
-     '原来的注释写着"时间不该白扣"，而实际做的是"白扣了但不给你看"：' +
-     '只 return 掉不更新显示，而 deadline 是绝对时刻，照样在走。' +
-     '实测切走 8 秒回来少了 6 秒');
-  ok(/_rt\.deadline = Date\.now\(\) \+ _rt\.bgLeft/.test(code),
-     '★ **回来时把时间还回去** —— ' +
-     '手机上切出去太常见了（来个消息、看一眼时间），' +
-     '回来发现时间被吃掉一大截，人是会恼的 —— ' +
-     '尤其抢答赛本来就只有 20 秒');
+  /* 🔴v1164（审查 UI-11）**改回 v1126 的规矩**：v1156 在这里把切后台的时间整段还回去，
+     把「宽限最多 3 秒、只给一次」整个推翻了 —— 切出去 8 秒回来还剩满满的时间，对手那边早就超时了，
+     他拼对的那一词在我这边成了「后拼对」。时间不白扣的部分由 onVis 的 3 秒宽限负责。 */
+  ok(!/_rt\.bgLeft/.test(code),
+     '★ **切后台的时间不整段还回去**（以前回来就补满，两边的倒计时对不上，对手吃亏）');
+  ok(/Math\.min\(away, GRACE_MS\)/.test(code) && /GRACE_MS = 3000/.test(code) && /_rt\.graced = true/.test(code),
+     '★ **只给一次、最多 3 秒的宽限** —— 接个消息马上回来几乎不吃亏，切出去很久该超时还是超时');
 }
 
 
@@ -530,7 +528,8 @@ async function open(seedBoard) {
      '★ **orderBy 失败要降级** —— ' +
      '云开发的 orderBy 需要手动建索引，没建就整个查询报错；' +
      '而一个功能不该依赖某个人记得去后台点一下');
-  ok(/\.limit\(40\)\.get\(\);/.test(code),
+  const plainFn = (/function plain\(\) \{([\s\S]*?)\n          \}/.exec(code) || [])[1] || '';
+  ok(/\.limit\(LIST_LIMIT\)\.get\(\)/.test(plainFn) && !/orderBy/.test(plainFn),
      '★ 降级查询不带 orderBy（那样才不需要索引）');
   ok(/\.sort\(function \(a, b\)/.test(code),
      '★ **排序放本地做** —— 降级路径没有 orderBy，' +

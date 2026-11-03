@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_auth_session_v1164.mjs —— 会话判定 / 凭证守护 / 备份不碰 SDK 键（v1164）
  *
  * 背景（读 SDK 2.30.0 源码 + 用真 SDK 对着模拟云端逐条跑出来的事实）：
@@ -32,7 +33,7 @@ import fs from 'node:fs';
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('会话判定 / 凭证守护 / 备份 v1164');
-const R = '/home/claude/work/repo/';
+const R = (__HSN_ROOT + '');
 const authSrc = fs.readFileSync(R + 'hansen_auth_v1004.js', 'utf8');
 const guardSrc = fs.readFileSync(R + 'hansen_cred_guard_v1092.js', 'utf8');
 const backupSrc = fs.readFileSync(R + 'hansen_backup_v944.js', 'utf8');
@@ -116,7 +117,9 @@ const counter = (states) => { let n = 0; const f = () => { const s = states[Math
 {
   const { A, win } = loadAuth({ hansen_auth_v1004: marker(OLD) });
   let rescues = 0;
-  win.HansenCredGuard = { rescue: () => { rescues++; return true; } };   /* 救回的是死凭证：SDK 又删掉了 */
+  /* 救回的是死凭证：SDK 又删掉了。v1164（审查 AUTH-5）：等 1.5 秒「再看一眼」时只认**更新的**影子 ——
+     真守护的 rescue(why, newerThan) 在影子没换过时不救；这里照着真货的能力做 */
+  win.HansenCredGuard = { rescue: (why, newerThan) => { if (newerThan) return false; rescues++; return true; } };
   A._setAuthForTest({ getLoginState: () => Promise.resolve(null) });
   const r = await A.ensureSession();
   ok(r.expired === true && rescues === 1, `★ 救回来也不管用 → 判过期；一次探测只救一次（救了 ${rescues} 次）`);

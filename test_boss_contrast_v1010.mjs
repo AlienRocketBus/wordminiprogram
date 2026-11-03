@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_boss_contrast_v1010.mjs —— 打Boss 屏双色调对比度回归
  * 事故：Boss 屏有独立主题系统(hansen_boss_theme.js)，默认锁死"暗"主题且不跟随全局色调；
  *       其选择器特异性高于配色引擎，导致亮色调下选项白底白字、背景近黑，且 #bossScreen
  *       长期在审计机豁免名单里，从未被扫出。
  * 合同：亮板亮底+选项高对比+零低对比文字；暗板底色不得再近黑，同样零低对比。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -18,7 +19,7 @@ for(const [tag,pal] of [['light','cloud'],['dark',null]]){
   page.on('pageerror',e=>errs.push(tag+'/P:'+String(e.message).slice(0,80)));
   page.on('console',m=>{if(m.type()==='error'){const t=m.text();
     if(!/tcb-api|net::ERR_|Failed to fetch|Access to fetch/i.test(t)) errs.push(tag+'/C:'+t.slice(0,80));}});
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2500);
   await page.evaluate(()=>{ try{ showScreen('boss'); if(typeof startBoss==='function') startBoss(); }catch(e){} });

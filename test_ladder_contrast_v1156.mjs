@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_ladder_contrast_v1156.mjs —— 天梯各屏的文字对比度
  *
  * ═══ 为什么要有这个 ═══
@@ -34,7 +35,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -111,9 +112,11 @@ await pg.evaluate(() => {
   };
 });
 
-async function screen(label, sel, setup) {
+async function screen(label, sel, setup, waitFor) {
   await pg.evaluate(setup);
   await pg.waitForTimeout(1700);
+  /* v1164：对战屏要等两边都报到（最多 2 秒）才画出来 —— 等它真出来再量，别量到「准备开始」那一屏 */
+  if (waitFor) { try { await pg.waitForSelector(waitFor, { timeout: 8000 }); await pg.waitForTimeout(300); } catch (e) {} }
   const bad = await pg.evaluate(s => window.__contrast(s), sel);
   ok(bad.length === 0,
      `★ ${label} 所有文字对比度达标` +
@@ -157,7 +160,7 @@ await screen('对战屏', '.pr_wrap', () => {
                       docs[d._id] = JSON.parse(JSON.stringify(d)); return { id: d._id }; },
     list: async () => [], remove: async () => ({ deleted: 0 }), listOpen: async () => [] });
   window.HansenPkRoomUI._startMatchForTest([{ en: 'cat', cn: '猫' }], '小明', 'cn', 'A', 'C');
-});
+}, '#prIn');
 
 await screen('房间列表', '.pr_wrap', () => {
   const now = Date.now();

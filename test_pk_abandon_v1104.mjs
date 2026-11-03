@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_abandon_v1104.mjs —— 对手掉线判负
  *
  * 产品定的规则：**对手超过 1 分钟没回来就判他负。**
@@ -27,7 +28,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('对手掉线判负 v1104');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
 
 /* 🔴v1164：两处跟着真实情况改了
    ① 假数据库照真数据库的能力做：房间是房主的、座位是客人的，谁建的谁才能改
@@ -209,7 +210,7 @@ const now = clock.t;
 
 /* ⑦ 界面提示与结算文案 */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/checkOpponentAlive/.test(ui), '★ 对战屏定期检查对手是否还在');
   ok(/掉线了…/.test(ui), '★ 有倒计时提示（不让人干等着不知道发生了什么）');
   /* 🔴v1156 更新：文案统一成「对手已离场」了。

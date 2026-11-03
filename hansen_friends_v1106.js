@@ -52,8 +52,12 @@
   var COLLECTION = 'hansen_friends';     /* 好友关系 + 在线状态 */
   var MSG_COLL = 'hansen_friend_msgs';   /* 快捷语消息 */
   var PERM_TEXT = '读取全部数据，修改本人数据';
-  var ONLINE_MS = 60000;                 /* 60 秒内有心跳算"刚才还在" */
-  var BEAT_MS = 20000;                   /* 每 20 秒续一次 */
+  /* 🔴v1164（审查 SE-2）：心跳从 20 秒一次改成 60 秒一次，而且只在正显示着的那一层页面里跳 ——
+     岛屿页里有三层页面各跳一次、回到首页后藏起来的岛还在跳：一个孩子什么都不干，每分钟写 9 次云端，
+     一个班一天就是几千次，套餐用完整个站点停服。界面本来就只说「刚才还在」，60 秒足够。 */
+  var ONLINE_MS = 150000;                /* 两分半内有心跳算"刚才还在" */
+  var BEAT_MS = 60000;                   /* 每 60 秒续一次 */
+  var IDLE_STOP_MS = 600000;             /* 10 分钟没碰屏幕就不再续（人多半已经走开了） */
   var MAX_FRIENDS = 50;
   var STALE_ROW_MS = 10 * 60000;         /* 自己留下的旧在线记录，10 分钟没动就清掉 */
   var MSG_KEEP_MS = 7 * 86400000;        /* 自己发出的招呼留 7 天，之后发件人自己删 */
@@ -290,6 +294,21 @@
 
   function noop() {}
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  /* 🔴v1164（审查 SEC-1/SEC-5）：好友 / 在线记录是**别人自己写的**，字段可能是任何东西 ——
+     一条 owner:'x' 的记录就能让整个好友页报错打不开（还删不掉，那是别人的记录）；
+     friend 写成一段 <img onerror=…> 还会在孩子的好友页里执行。竞赛 ID 只认正整数，别的整条丢掉。 */
+  function cidOf(v) {
+    if (typeof v === 'number') return (isFinite(v) && v > 0 && Math.floor(v) === v && v < 1e9) ? v : 0;
+    if (typeof v === 'string' && /^[1-9]\d{0,8}$/.test(v)) return Number(v);
+    return 0;
+  }
+  /* 名字是别人自己起的：可能是广告 / 联系方式 —— 和资料模块同一条过滤（审查 SEC-4） */
+  function safeName(v, fb) {
+    var P = window.HansenSbProfile;
+    try { if (P && typeof P.safeName === 'function') return P.safeName(v, fb); } catch (e) {}
+    var s2 = (typeof v === 'string') ? v.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 16) : '';
+    return s2 || fb || '';
+  }
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
@@ -323,7 +342,11 @@
   function isMine(m, r) {
     if (!r) return false;
     if (m.openid) return r._openid === m.openid;
-    return true;     /* 云端不盖 _openid 的环境：只能信 owner 字段 */
+    /* 🔴v1164（审查 SEC-1）：还不知道自己的 _openid 时（刚打开、在线记录还没读回来），
+       以前一律当成「我的」—— 别人替我写的一条 owner=我 的假记录就混进了我的好友列表。
+       现在：读回来的行带着 _openid 却对不上号 → 不是我的；整个云端都不回 _openid 时才只能信 owner 字段。 */
+    if (r._openid) return false;
+    return true;
   }
   function myOpenid() { return _id.openid; }
 
@@ -352,7 +375,7 @@
         return m;
       }
       /* 没有自己的在线记录 → 写一条（隐身时 at=0，对别人就是不在线） */
-      var at = myStatus() === 'online' ? Date.now() : 0;
+      var at = myStatus() === 'online' ? coarseNow() : 0;
       return T().add({ kind: 'presence', cid: u.cid, name: u.name, at: at }).then(function (r) {
         var id = r && r.id;
         if (!id) throw kErr('other', '在线状态没写上，等会儿再试', 'add 没有返回 _id');
@@ -401,14 +424,42 @@
     return v;
   }
 
+  /* 这一层页面该不该跳心跳：同源的上一层页面也装了好友模块（岛 iframe、预热页）→ 让它跳；
+     自己被藏起来了（display:none 的预热页、回到首页后藏起来的岛）→ 不跳 */
+  function beatHere() {
+    try { if (document.visibilityState === 'hidden') return false; } catch (e) {}
+    try {
+      var w = window, n = 0;
+      while (w && w !== w.top && n++ < 6) {
+        var fe = w.frameElement;
+        if (!fe) break;
+        if (!fe.getClientRects().length) return false;
+        try { if (w.parent && w.parent.HansenFriends && w.parent.HansenFriends !== window.HansenFriends && w.parent.HansenFriends._beatsHere && w.parent.HansenFriends._beatsHere()) return false; } catch (e2) {}
+        w = w.parent;
+      }
+    } catch (e) {}
+    if (Date.now() - _lastInput > IDLE_STOP_MS) return false;
+    return true;
+  }
+  var _lastInput = Date.now();
+  try {
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+      document.addEventListener(t, function () { _lastInput = Date.now(); }, { passive: true, capture: true });
+    });
+  } catch (e) {}
+  /* 🔴v1164（审查 SEC-6）：在线时间只记到分钟（不是精确到毫秒的时刻）—— 少给别人一点「几点几分在线」的追踪信息 */
+  function coarseNow() { return Math.floor(Date.now() / 60000) * 60000; }
+
   /* 心跳：只有"在线"才写，而且只写我自己那条。隐身 = 完全不写 = 对别人就是离线 */
   function beat() {
     if (myStatus() !== 'online') return Promise.resolve({ ok: true, hidden: true });
+    if (!beatHere()) return Promise.resolve({ ok: true, skipped: true });
     var u = me();
     if (!u.cid) return Promise.resolve({ ok: false, kind: 'expired', reason: '先登录' });
     return ensureMe(u).then(function (m) {
       if (m.fresh) { m.fresh = false; return { updated: 1 }; }     /* 刚写的那条已经带着现在的时间 */
-      return T().patch(m.presenceId, { at: Date.now(), name: u.name }).then(function (r) {
+      /* b：每次都不一样的随机数 —— 同一分钟里再跳一次时值也会变（updated:0 在这里表示「那条没了」） */
+      return T().patch(m.presenceId, { at: coarseNow(), name: u.name, b: Math.floor(Math.random() * 1e9) }).then(function (r) {
         if (r && r.updated > 0) return r;
         /* 改了 0 条 = 那条没了（被清理过）→ 重新写一条 */
         m.presenceId = '';
@@ -460,10 +511,16 @@
 
   /* 在线记录按竞赛 ID 分组；同一个号有好几条时，优先认和他好友记录同一个 _openid 的那条 */
   function groupPresence(rows) {
-    var by = {};
+    var by = {}, cidsOf = {};
     (rows || []).forEach(function (r) {
-      if (!r || !r.cid) return;
-      (by[r.cid] = by[r.cid] || []).push(r);
+      var c = cidOf(r && r.cid);
+      if (!c) return;
+      if (r._openid) { (cidsOf[r._openid] = cidsOf[r._openid] || {})[c] = 1; }
+      (by[c] = by[c] || []).push(r);
+    });
+    /* 🔴审查 SEC-3：一个账号（同一个 _openid）只该对应一个竞赛 ID —— 一个号替好几个 ID 写在线记录 = 冒充，全部不认 */
+    Object.keys(by).forEach(function (c) {
+      by[c] = by[c].filter(function (r) { return !r._openid || Object.keys(cidsOf[r._openid] || {}).length <= 1; });
     });
     return by;
   }
@@ -477,11 +534,17 @@
     cand.forEach(function (r) { if (!best || (r.at || 0) > (best.at || 0)) best = r; });
     return best;
   }
-  /* 别人的记录是不是真是那个号本人写的：他有在线记录、而且没有一条和这条同一个 _openid → 冒充的 */
-  function ownerTrusted(row, presList) {
-    if (!row || !row._openid || !presList || !presList.length) return true;
-    var withId = presList.filter(function (p) { return !!p._openid; });
-    if (!withId.length) return true;
+  /* 别人的记录是不是真是那个号本人写的：他的在线记录和这条记录是同一个 _openid 写的才算。
+     🔴v1164（审查 SEC-3）：以前「核对不了就当真的」—— 陌生人随手写一条「No.90001 想加你」，孩子就看到一排陌生人。
+     现在：云端会回 _openid（strict）时，核对不了 = 不显示；云端根本不回 _openid 时只能退回老办法。 */
+  function ownerTrusted(row, presList, strict) {
+    if (!row) return false;
+    var withId = (presList || []).filter(function (p) { return p && !!p._openid; });
+    if (!strict) {
+      if (!row._openid || !withId.length) return true;
+      return withId.some(function (p) { return p._openid === row._openid; });
+    }
+    if (!row._openid || !withId.length) return false;
     return withId.some(function (p) { return p._openid === row._openid; });
   }
 
@@ -519,7 +582,7 @@
       return T().list({ kind: 'presence', cid: target }).then(function (p) {
         if (!p || !p.length) return { ok: false, kind: 'other', reason: '没找到 No.' + target + ' 这个人，看看号码对不对' };
         var best = pickPresence(p, '');
-        nm = String((best && best.name) || '').slice(0, 16) || ('No.' + target);
+        nm = safeName((best && best.name) || '', 'No.' + target);
         /* 🔴v1113：**写之前贴着写再查一次，防并发重复。**
            两边同时点、或连点两下，都可能写出两条；读取时也按 friend 去重做最终兜底。 */
         return T().list({ kind: 'friend', owner: u.cid, friend: target }).then(function (dup) {
@@ -572,39 +635,44 @@
         T().list({ kind: 'friend', friend: u.cid })
       ]);
     }).then(function (two) {
-      /* 🔴v1113：**按 friend 去重** —— 并发写入、历史脏数据都可能让同一个人出现多条 */
+      /* 🔴v1113：**按 friend 去重** —— 并发写入、历史脏数据都可能让同一个人出现多条。
+         🔴v1164（审查 SEC-5）：ID 不是正整数的行整条丢掉（别人写的，可能是任何东西） */
       var seen = {};
       mine = (two[0] || []).filter(function (r) {
-        if (!r || !r.friend || seen[r.friend] || !isMine(m, r)) return false;
-        seen[r.friend] = 1; return true;
+        var f = cidOf(r && r.friend);
+        if (!f || seen[f] || !isMine(m, r)) return false;
+        seen[f] = 1; r.friend = f; return true;
       });
       toMe = (two[1] || []).filter(function (r) {
-        return r && r.owner && r.owner !== u.cid && !(m.openid && r._openid === m.openid);
+        var o = cidOf(r && r.owner);
+        if (!o || o === u.cid || (m.openid && r._openid === m.openid)) return false;
+        r.owner = o; return true;
       });
       var cids = {};
       mine.forEach(function (r) { cids[r.friend] = 1; });
       toMe.forEach(function (r) { cids[r.owner] = 1; });
-      var list = Object.keys(cids).map(Number);
+      var list = Object.keys(cids).map(Number).filter(function (c) { return c > 0; });
       if (!list.length) return [];
       /* 🔴v1121：**一次查回所有在线状态，不要逐个查**（50 个好友 = 51 次读，会真的产生费用） */
       return T().list({ kind: 'presence', cid: { $in: list } }, { limit: 300 })['catch'](function () { return []; });
     }).then(function (pres) {
       var byCid = groupPresence(pres);
       var now = Date.now();
+      var strict = !!m.openid;       /* 云端会回 _openid（我自己的读回来就有）→ 冒充的记录能认出来 */
       /* 对方加我的那条（同一个人多条取最新的；冒充的不算） */
       var theirBy = {};
       toMe.forEach(function (r) {
-        if (!ownerTrusted(r, byCid[r.owner])) return;
+        if (!ownerTrusted(r, byCid[r.owner], strict)) return;
         var cur = theirBy[r.owner];
         if (!cur || (r.at || 0) > (cur.at || 0)) theirBy[r.owner] = r;
       });
       function card(cid, fallbackName, openid) {
         var p = pickPresence(byCid[cid], openid);
-        var at = (p && p.at) || 0;
+        var at = Number(p && p.at) || 0;
         /* 隐身的人 at 会被抹成 0 —— 对我们来说和离线完全一样，这正是隐身该有的效果 */
         return {
           cid: cid,
-          name: String((p && p.name) || fallbackName || ('No.' + cid)).slice(0, 16),
+          name: safeName((p && p.name) || fallbackName || '', 'No.' + cid),
           online: at > 0 && (now - at) < ONLINE_MS,
           lastSeen: at
         };
@@ -621,13 +689,14 @@
       });
       var ign = ignMap(u.cid);
       var incoming = Object.keys(theirBy).map(Number).filter(function (cid) {
-        if (seenFriend(mine, cid)) return false;
+        if (!cid || seenFriend(mine, cid)) return false;
         var r = theirBy[cid];
+        if (!r) return false;
         return !(ign[cid] && (r.at || 0) <= ign[cid]);
       }).map(function (cid) {
         var r = theirBy[cid];
         var c = card(cid, '', r._openid);
-        c.at = r.at || 0;
+        c.at = Number(r.at) || 0;
         c.sub = '想加你为好友';
         return c;
       });
@@ -638,7 +707,8 @@
             || b.lastSeen - a.lastSeen;
       });
       incoming.sort(function (a, b) { return b.at - a.at; });
-      return { ok: true, friends: friends, incoming: incoming };
+      /* 最多给 20 个「想加你」—— 再多就是有人在刷（审查 SEC-3） */
+      return { ok: true, friends: friends, incoming: incoming.slice(0, 20), incomingTotal: incoming.length };
     })['catch'](function (e) {
       var r = fail(e); r.friends = []; r.incoming = []; return r;
     });
@@ -665,15 +735,23 @@
     var item = QUICK.filter(function (x) { return x.id === quickId; })[0];
     if (!item) return Promise.resolve({ ok: false, kind: 'other', reason: '只能发预设的快捷语' });
     if (!u.cid) return Promise.resolve({ ok: false, kind: 'expired', reason: '先登录' });
-    var target = Math.floor(Number(toCid) || 0);
+    var target = cidOf(Math.floor(Number(toCid) || 0));
     if (!target) return Promise.resolve({ ok: false, kind: 'other', reason: '对方不存在' });
     /* 只存 id，不存文本 —— 展示时再查表。
-       fromOpenid 记"我声称的身份"，收件人拿它和数据库盖的 _openid 比对 —— 冒充者填不出别人的 _openid。 */
+       fromOpenid 记"我声称的身份"，收件人拿它和数据库盖的 _openid 比对 —— 冒充者填不出别人的 _openid。
+       🔴v1164（审查 SEC-3）：只发给我加过的人（以前任何竞赛 ID 都能发 —— 改前端就能给陌生孩子发招呼） */
+    var mm = null;
     return ensureMe(u).then(function (m) {
+      mm = m;
+      return T().list({ kind: 'friend', owner: u.cid, friend: target });
+    }).then(function (rows) {
+      var mine = (rows || []).filter(function (r) { return isMine(mm, r); });
+      if (!mine.length) throw kErr('other', '只能给好友发招呼', 'not-a-friend');
       return T().addMsg({ from: u.cid, fromName: u.name, to: target,
-                          fromOpenid: m.openid || '', qid: item.id,
-                          at: Date.now(), read: false }).then(function () { return m; });
-    }).then(function (m) {
+                          fromOpenid: mm.openid || '', qid: item.id,
+                          at: Date.now(), read: false });
+    }).then(function () {
+      var m = mm;
       sweepMyMsgs(u, m);
       return { ok: true, sent: item };
     })['catch'](function (e) { return fail(e); });
@@ -713,15 +791,22 @@
          两者对不上就显示为「(来源不明的消息)」，不显示发件人名字 ——
          让人知道有这么一条，但不被它欺骗。 */
       var strangers = 0;
+      var myOid = myOpenid();
       var msgs = (rows || []).map(function (r) {
-        var trusted = !r._openid || !r.fromOpenid || (r._openid === r.fromOpenid);
+        /* 🔴v1164（审查 SEC-3）：以前「消息上没写 fromOpenid 就当真的」—— 陌生人发一条不写这一栏的，
+           就能冒充孩子的好友（名字还随便写）。现在必须两个都在、而且对得上；
+           云端根本不回 _openid（我连自己的都读不到）时，才退回只看 from。 */
+        var trusted = myOid ? !!(r._openid && r.fromOpenid && r._openid === r.fromOpenid)
+                            : (!r._openid || !r.fromOpenid || r._openid === r.fromOpenid);
+        if (trusted && !cidOf(r.from)) trusted = false;
         if (!trusted) {
           return { id: r._id, from: 0, fromName: '(来源不明)', at: r.at || 0,
                    read: !!r.read, emoji: '⚠️', text: '(来源不明的消息)', suspicious: true };
         }
         var item = QUICK.filter(function (x) { return x.id === r.qid; })[0];
+        var fc = cidOf(r.from);
         return {
-          id: r._id, from: r.from, fromName: String(r.fromName || ('No.' + r.from)).slice(0, 16),
+          id: r._id, from: fc, fromName: safeName(r.fromName, 'No.' + fc),
           at: r.at || 0, read: !!r.read,
           emoji: item ? item.emoji : '❓',
           text: item ? item.text : '(未知消息)'    /* 查不到就显示未知，绝不渲染原始内容 */
@@ -768,6 +853,7 @@
     },
     _myOpenid: myOpenid,
     _beat: beat, _startBeat: startBeat, _stopBeat: stopBeat,
+    _beatsHere: function () { return myStatus() === 'online' && beatHere(); },
     _setTransportForTest: function (t) { _tx = wrapTimeout(t); _id = { cid: 0, openid: '', pid: '', presenceId: '' }; },
     _setMeForTest: function (u) { me = function () { return u; }; }
   };

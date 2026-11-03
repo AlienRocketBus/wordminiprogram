@@ -188,10 +188,22 @@ export class Phone {
 
 function indent(s, p = '      ') { return String(s || '').split('\n').map((l) => p + l).join('\n'); }
 
-export async function openPhone(browser, emu, origin, { name = 'A', path: urlPath = '/spelling_pk.html', viewport = { width: 390, height: 844 }, ready } = {}) {
+/* clockOffsetMs（审查 TI-3）：这部手机的钟比别人快 / 慢多少毫秒（孩子会自己改手机时间，平板没联网对时）——
+   只改 Date / Date.now，定时器照常走，和真手机钟不准一模一样。 */
+export async function openPhone(browser, emu, origin, { name = 'A', path: urlPath = '/spelling_pk.html', viewport = { width: 390, height: 844 }, ready, clockOffsetMs = 0 } = {}) {
   const ctx = await browser.newContext({ viewport, hasTouch: true, isMobile: true, deviceScaleFactor: 2, serviceWorkers: 'block', locale: 'zh-CN', timezoneId: 'Asia/Shanghai', userAgent: UA });
+  if (clockOffsetMs) {
+    await ctx.addInitScript((off) => {
+      const RD = Date; const now0 = RD.now.bind(RD);
+      function D(...a) { if (!(this instanceof D)) return new RD(now0() + off).toString(); return a.length ? new RD(...a) : new RD(now0() + off); }
+      D.prototype = RD.prototype; D.now = () => now0() + off; D.parse = RD.parse; D.UTC = RD.UTC;
+      Object.defineProperty(D, 'name', { value: 'Date' });
+      window.Date = D;
+    }, clockOffsetMs);
+  }
   const page = await ctx.newPage();
   const ph = new Phone(name, ctx, page, emu);
+  ph.clockOffsetMs = clockOffsetMs;
   if (emu) await emu.attach(ctx);
   /* 别的外网一律掐断并记下来 —— 测试绝不联网 */
   await ctx.route((u) => { const h = new URL(u).hostname; return !LOCAL.test(h) && !TENCENT.test(h); }, (r) => { try { ph.leaks.push(r.request().url()); r.abort('blockedbyclient').catch(() => {}); } catch (e) { /* 页面已关 */ } });
@@ -204,6 +216,66 @@ export async function openPhone(browser, emu, origin, { name = 'A', path: urlPat
   await page.waitForFunction(want, null, { timeout: 45000 });
   await sleep(600);
   return ph;
+}
+
+// ─── 直接调页面里真的房间模块（不换任何东西：真模块、真 SDK、只有网络是模拟的） ─────
+export async function room(ph, fn, ...args) {
+  const r = await ph.eval(async ([fn, args]) => {
+    try { return await window.HansenPkRoom[fn](...args); } catch (e) { return { __threw: String((e && e.message) || e) }; }
+  }, [fn, args]);
+  return r;
+}
+/* 同时发起（结果先留在页面里，之后用 roomResult 取）—— 测「几个人同时点」 */
+export async function roomLaunch(ph, tag, fn, ...args) {
+  return ph.eval(([tag, fn, args]) => {
+    window.__hsnPend = window.__hsnPend || {};
+    window.__hsnPend[tag] = { done: false };
+    Promise.resolve().then(() => window.HansenPkRoom[fn](...args)).then(
+      (r) => { window.__hsnPend[tag] = { done: true, r, at: Date.now() }; },
+      (e) => { window.__hsnPend[tag] = { done: true, err: String((e && e.message) || e), at: Date.now() }; });
+    return true;
+  }, [tag, fn, args]);
+}
+export async function roomResult(ph, tag, ms = 60000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    const r = await ph.eval((tag) => (window.__hsnPend || {})[tag], tag);
+    if (r && r.done) return r;
+    await sleep(150);
+  }
+  return { done: false, timeout: true };
+}
+/* 房主等人：事件落在页面的 window.__hsnEv 里 */
+export async function roomWait(ph, rid, { ms = 120000, ladder = null } = {}) {
+  return ph.eval(([rid, ms, ladder]) => {
+    window.__hsnEv = [];
+    window.__hsnCancelWait = window.HansenPkRoom.waitForOpponent(rid, (e) => window.__hsnEv.push(Object.assign({ at: Date.now() }, e)), ms,
+      ladder ? { ladder: { rating: ladder.rating, band: () => ladder.band } } : undefined);
+    return true;
+  }, [rid, ms, ladder]);
+}
+export async function roomEvent(ph, ms = 20000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    const e = await ph.eval(() => (window.__hsnEv || []).slice());
+    if (Array.isArray(e) && e.length) return e[0];
+    await sleep(200);
+  }
+  return null;
+}
+/* 页面还活着吗（「没被拉进对战屏」这类否定判断，页面崩了也会成立 —— 先确认页面在，审查 TI-9） */
+export async function alive(ph) {
+  const r = await ph.eval(() => 'alive');
+  return r === 'alive';
+}
+/* 每部手机：没有页面报错、没去连别的外网（审查 TI-9：以前两个房间测试从来不查） */
+export async function cleanPhones(t, phones, srvRef) {
+  for (const p of phones) {
+    if (!p) continue;
+    await t.ok(!p.errors.length && !p.leaks.length,
+      `[${p.name}] 没有页面报错、没有去连别的外网（报错 ${p.errors.length}：${p.errors.slice(0, 2).join(' | ')}；外网 ${p.leaks.length}）`);
+  }
+  if (srvRef) await t.ok(!srvRef.missing.length, `页面要的文件都在（缺 ${srvRef.missing.length}：${srvRef.missing.slice(0, 3).join(', ')}）`);
 }
 
 // ─── 登录：走真的 HansenAuth（真 SDK 发真请求，由模拟云端应答） ──────

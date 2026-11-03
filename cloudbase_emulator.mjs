@@ -66,7 +66,12 @@ export function createEmulator(opts = {}) {
     consistencyLagMs: 0,       // 读（get/where/count）只看得到这么多毫秒以前的写；写永远落在最新状态上
     permissionMode: 'legacy',  // 默认的越权写回法；单个集合可以覆盖
     legacyMulti: 'own',        // legacy 下 where().update/remove：'own' 只动自己的 | 'deny' 整个拒
-    duplicateStyle: 'request_failed',   // 'request_failed' | 'duplicate_write' | 'http500'
+    duplicateStyle: 'request_failed',   // 'request_failed' | 'duplicate_write' | 'http500' | 'silent'（假装成功、不写）| 'overwrite'（覆盖）
+    // 🔴v1164（审查 TI-1/TI-4/TI-5）：真云端几处没人观察到的行为，做成可切换的，App 每一种都要对
+    orderByNeedsIndex: false,  // true：带 orderBy 的查询一律回 {code}（控制台没建索引）—— App 要退成不排序的查询
+    deniedStatus: 200,         // 没权限时回的 HTTP 状态（≠200 时 SDK 只会说 network request error）
+    missingStatus: 200,        // 集合没建时回的 HTTP 状态
+    refreshErrorCode: 'invalid_grant',   // 作废的 refresh_token 被拒时回的 error（≠invalid_grant 时 SDK 不删凭证）
     accessTokenTtlSec: 7200,   // SDK 把 expires_at 记成 now + (ttl-30) 秒，过了就去刷新
     verificationCode: '123456',
     refreshTokenRotation: true,// refresh_token 只能用一次（真云端：invalid_grant "...may be has been refreshed by"）
@@ -115,7 +120,7 @@ export function createEmulator(opts = {}) {
   }
   const json = (req, status, body) => ({ status, headers: cors(req, { 'content-type': 'application/json; charset=utf-8', 'x-request-id': req.headers['x-request-id'] || rid() }), body: JSON.stringify(body) });
   const authErr = (req, status, error, error_code, error_description) => json(req, status, { error, error_code, error_description });
-  const dbErr = (req, code, message) => json(req, 200, { code, message, requestId: rid() });
+  const dbErr = (req, code, message, status) => json(req, status || 200, { code, message, requestId: rid() });
 
   function newUid() { let s = '1'; for (let i = 0; i < 18; i++) s += Math.floor(rnd() * 10); return users.has(s) ? newUid() : s; }
   function mkJwt(uid, exp) {
@@ -209,8 +214,11 @@ export function createEmulator(opts = {}) {
     if (path === '/v1/token' && req.method === 'POST') {
       if (body.grant_type !== 'refresh_token') return authErr(req, 400, 'unsupported_grant_type', 3, 'unsupported grant_type');
       const r = refresh.get(body.refresh_token);
-      if (!r || r.revoked || (knobs.refreshTokenRotation && r.used))
+      if (!r || r.revoked || (knobs.refreshTokenRotation && r.used)) {
+        if (knobs.refreshErrorCode && knobs.refreshErrorCode !== 'invalid_grant')
+          return authErr(req, 401, knobs.refreshErrorCode, 16, 'refresh rejected (emulated ' + knobs.refreshErrorCode + ')');
         return authErr(req, 400, 'invalid_grant', 3, 'invalid refresh token. for it may be has been refreshed by (emulated)');
+      }
       r.used = true;
       return json(req, 200, issueTokens(r.uid));
     }
@@ -253,12 +261,16 @@ export function createEmulator(opts = {}) {
     }
     return v;
   }
-  const norm = (v) => (v && typeof v === 'object' && !Array.isArray(v) && typeof v.$date === 'number') ? v.$date : v;
-  const eq = (a, b) => JSON.stringify(norm(a)) === JSON.stringify(norm(b));
+  const isDate = (v) => !!(v && typeof v === 'object' && !Array.isArray(v) && typeof v.$date === 'number');
+  const norm = (v) => (isDate(v) ? v.$date : v);
+  const eq = (a, b) => isDate(a) === isDate(b) && JSON.stringify(norm(a)) === JSON.stringify(norm(b));
+  /* 🔴审查 TI-8：类型不同就不比（MongoDB 里 Date 和数字永远比不上）—— 以前这里把 Date 当数字比，
+     App 要是哪天拿数字去查 serverDate() 写的字段，测试会是绿的、真机上一条都查不出来 */
+  const sameType = (v, a) => isDate(v) === isDate(a) && (v == null || a == null || typeof norm(v) === typeof norm(a));
   function cmpVal(fieldVal, op, arg) {
     const vals = Array.isArray(fieldVal) && op !== '$size' ? [fieldVal, ...fieldVal] : [fieldVal];
     const a = norm(arg);
-    const any = (f) => vals.some((v) => f(norm(v)));
+    const any = (f) => vals.some((v) => ((op === '$gt' || op === '$gte' || op === '$lt' || op === '$lte') && !sameType(v, arg)) ? false : f(norm(v)));
     switch (op) {
       case '$eq': return any((v) => eq(v, a));
       case '$ne': case '$neq': return !any((v) => eq(v, a));
@@ -355,7 +367,7 @@ export function createEmulator(opts = {}) {
     const uid = tok.uid;
     const colName = body.collectionName;
     const c = cols.get(colName);
-    if (!c) return dbErr(req, 'DATABASE_COLLECTION_NOT_EXIST', `[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: ${colName}`);
+    if (!c) return dbErr(req, 'DATABASE_COLLECTION_NOT_EXIST', `[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: ${colName}`, knobs.missingStatus);
     const acl = c.acl;
     const mode = c.mode || knobs.permissionMode;
     const canRead = acl !== ACL.ADMINONLY;
@@ -369,7 +381,7 @@ export function createEmulator(opts = {}) {
     const readFilter = (d) => acl !== ACL.PRIVATE || d._openid === uid;
     const docsVisible = () => [...c.docs.values()].map((v) => visible(v, t)).filter(Boolean);
     const docsPrimary = () => [...c.docs.entries()].map(([id, v]) => [id, latest(v)]).filter(([, d]) => d);
-    const denied = () => dbErr(req, 'DATABASE_PERMISSION_DENIED', 'Permission denied');
+    const denied = () => dbErr(req, 'DATABASE_PERMISSION_DENIED', 'Permission denied', knobs.deniedStatus);
 
     switch (action) {
       case 'database.addDocument': {
@@ -379,7 +391,18 @@ export function createEmulator(opts = {}) {
         for (const raw of list) {
           const d = clone(raw) || {};
           d._id = (Array.isArray(data) ? d._id : (body._id || d._id)) || crypto.randomBytes(16).toString('hex');
-          if (c.docs.has(d._id) && latest(c.docs.get(d._id))) { ctx.dup = d._id; return duplicateRes(req, colName, d._id); }
+          if (c.docs.has(d._id) && latest(c.docs.get(d._id))) {
+            ctx.dup = d._id;
+            /* 审查 F13：假如真云端对重复 _id 不报错 —— 悄悄吞掉 / 直接覆盖 —— App 也不能两个人都算「先拼对」 */
+            if (knobs.duplicateStyle === 'silent') { ids.push(d._id); continue; }
+            if (knobs.duplicateStyle === 'overwrite') {
+              d._openid = uid;
+              c.docs.get(d._id).push({ at: t, doc: d });
+              writes.push({ t, uid, op: 'overwrite', collection: colName, id: d._id });
+              ids.push(d._id); continue;
+            }
+            return duplicateRes(req, colName, d._id);
+          }
           d._openid = uid;   // 服务端盖创建者章，客户端伪造不了
           c.docs.set(d._id, (c.docs.get(d._id) || []).concat([{ at: t, doc: d }]));
           writes.push({ t, uid, op: 'add', collection: colName, id: d._id });
@@ -391,6 +414,8 @@ export function createEmulator(opts = {}) {
       case 'database.queryDocument': {
         if (!canRead) return denied();
         if (acl === ACL.PRIVATE && mode === 'rules' && !queryPinsOwner(query, uid)) return denied();
+        if (knobs.orderByNeedsIndex && body.order && body.order.length)
+          return dbErr(req, 'DATABASE_REQUEST_FAILED', '[InvalidParameter] sort field has no index (emulated): ' + body.order.map((o) => o.field).join(','));
         let rows = docsVisible().filter(readFilter).filter((d) => match(d, query));
         rows = sortDocs(rows, body.order);
         const offset = body.offset || 0, limit = body.limit || 100;

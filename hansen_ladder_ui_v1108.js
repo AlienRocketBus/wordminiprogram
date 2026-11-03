@@ -590,7 +590,10 @@
         + (ranked.length === 1
             ? '<div style="font-size:12px;color:var(--hpk-dim);text-align:center;'
               + 'padding:8px 4px 4px">还没什么人上榜，你是第一个 🎈</div>'
-            : '');
+            : '')
+        /* 🔴v1164（审查 SEC-4）：榜上的分是各人手机自己上传的，云端核对不了 —— 说实话 */
+        + '<div style="font-size:11px;color:var(--hpk-faint);text-align:center;padding:6px 4px 0">'
+        +   '排行榜是大家手机上传的分数，仅供参考</div>';
 
       /* 不在前 20 → 单独数一次自己的名次，
          否则第 21 名看到的是一个和自己无关的榜 */
@@ -658,9 +661,12 @@
   function bandOf(waited) {
     return (L() && L().matchBand) ? L().matchBand(waited) : 200;
   }
+  var _probeSeq = 0;   /* 「看看是哪里不通」的轮次：停下 / 换屏就作废，晚回来的结论不再画 */
   function stopRun() {
     var run = _run;
     _run = null;
+    /* 正在「看看是哪里不通」（最多 6 秒）时孩子点了 × / 回了天梯首页：那个结论回来也不许再画到屏幕上 */
+    _probeSeq++;
     if (!run) return;
     run.stop = true;
     if (run.timer) { clearTimeout(run.timer); run.timer = null; }
@@ -899,7 +905,6 @@
 
   /* 🔴v1164：**按失败原因分流**（原来按字面找「登录 / 会话」，
      已经登录、只是云端会话还没好的孩子被告知「排位要先登录」）。 */
-  var _probeSeq = 0;
   function onFail(run, r) {
     if (run.stop) return;
     var k = kindOf(r);

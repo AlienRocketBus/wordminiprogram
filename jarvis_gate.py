@@ -301,7 +301,9 @@ def main():
             #   读大小是元数据操作，几乎不花时间，
             #   而手改内容几乎必然改变大小。
             _srcs = []
-            for _pat in ('hansen_*.js', 'sw_*.js', 'test_*.mjs', 'template.html', '*.py'):
+            # 🔴v1164（审查 TI-6）：模拟云端 / 测试公共件（*.mjs）、发给手机的 SDK（vendor_*.js）也算进指纹 ——
+            #   它们一变，旧的「全绿」就不作数。必须和 分批跑测试.py 的 fingerprint() 完全一致。
+            for _pat in ('*.js', '*.mjs', 'template.html', '*.py'):
                 _srcs += _glob.glob(os.path.join(ROOT, _pat))
             for f in sorted(set(_srcs)):
                 try:

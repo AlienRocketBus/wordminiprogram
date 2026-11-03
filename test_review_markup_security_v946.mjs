@@ -37,7 +37,7 @@ try{
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
   await context.addInitScript(()=>{
-    localStorage.clear();sessionStorage.clear();
+    if (window.top === window) localStorage.clear();sessionStorage.clear();
     localStorage.setItem('hsnViewMode','desktop');
       localStorage.setItem('hansen_onboarded','1');
       if(/island_sports\.html$/i.test(location.pathname)){

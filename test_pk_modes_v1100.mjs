@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_modes_v1100.mjs —— 三种对战模式
  *
  * 产品定义（用户原话）：
@@ -26,7 +27,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('三种对战模式 v1100');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
 
 /* 🔴v1164：以前的假实现一个对象答所有 id、什么都让写 ——
    真数据库里客人改不了房主的文档，于是"客人抢答"在真机上永远写不进去，测试却一直绿。
@@ -159,7 +160,7 @@ for (const [mode, wantSlow] of [['A', 0], ['B', 80], ['C', 60]]) {
     const m = S.MODES[k];
     ok(Array.isArray(m.rules) && m.rules.length >= 3, `${k} 有完整的规则说明（供界面直接读）`);
   }
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/S\(\)\s*&&\s*S\(\)\.MODES|MODES\s*=\s*\(S\(\)/.test(ui),
      '★ 界面从 MODES 读规则，**不另抄一份**（本项目已因两处真源栽过八次）');
   ok(!/抢答赛[\s\S]{0,200}先拼对 100/.test(ui.replace(/\/\*[\s\S]*?\*\//g, '')),

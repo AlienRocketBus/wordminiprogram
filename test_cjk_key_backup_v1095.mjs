@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cjk_key_backup_v1095.mjs —— 备份必须支持中文键名
  *
  * 事故（用户真机，卡了多个版本）：
@@ -29,7 +30,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('备份支持中文键名 v1095');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_backup_v944.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_backup_v944.js'), 'utf8');
 
 function mk(seed) {
   const d = { ...seed };

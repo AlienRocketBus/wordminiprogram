@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_session_retry_v1077.mjs —— 空登录态必须重试，且「尚未就绪」≠「已过期」
  *
  * 事故（用户真机，明确确认「刚退出登录、重新用手机号登录成功了」）：
@@ -28,7 +29,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('空登录态重试与三态区分 v1077');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
 
 function mk(loginStates) {
   const store = { _d: {}, getItem(k) { return this._d[k] ?? null; },

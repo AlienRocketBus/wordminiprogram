@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_sb_ladder_math_v1002.mjs —— 天梯分数算法单测（纯函数，无需浏览器/云端）
  * 验证：段位映射 / 期望胜率 / K值递减 / 输分阻尼 / 段位地板 / 定级预估 / 赛季重置 / 匹配带 */
 import fs from 'node:fs';
@@ -6,7 +7,7 @@ import vm from 'node:vm';
 const ctx = { window: {} };
 ctx.window.window = ctx.window;
 vm.createContext(ctx);
-vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8'), ctx);
+vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_ladder_v1002.js'), 'utf8'), ctx);
 const L = ctx.window.HansenSbLadder;
 
 let pass = 0, fail = 0;

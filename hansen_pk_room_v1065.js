@@ -38,7 +38,8 @@
   var HEARTBEAT_MS = 8000;      /* 每 8 秒续一次命 */
   var STALE_MS     = 30000;     /* 房间 30 秒没心跳 → 不再展示 */
   var FUTURE_MS    = 60000;     /* 心跳时间比本机还快 1 分钟以上：对方钟不准或是伪造的 → 不信时间戳，只信亲眼看到它在动 */
-  var LIST_WINDOW_MS = 600000;  /* 列房只查最近 10 分钟有过心跳的（容得下 ±10 分钟钟差；几天前的死房不占名额） */
+  var LIST_WINDOW_MS = 1800000; /* 列房只查心跳在 ±30 分钟以内的（容得下手机钟差半小时；几天前的死房、「一年以后」的假房都不占名额）
+                                   实测：±10 分钟时，钟快 10 分钟的孩子和钟准的孩子互相查不到，天梯各开一间房等到超时 */
   var LIST_LIMIT   = 100;
   var WORDS_PER_ROUND = 10;
   var ABANDON_MS   = 60000;     /* 对手 1 分钟没动静判离场（切后台、接电话都常见，不能更短） */
@@ -365,15 +366,19 @@
       listOpen: function (nowTs) {
         return db().then(function (d) {
           var _ = d.command || {};
-          var since = (Number(nowTs) || Date.now()) - LIST_WINDOW_MS;
+          var t0 = Number(nowTs) || Date.now();
+          var since = t0 - LIST_WINDOW_MS, until = t0 + LIST_WINDOW_MS;
+          /* 🔴审查 F10：心跳时间两头都卡在服务端 —— 陌生人建 40 间「心跳在一年以后」的假房，
+             以前能把查询名额全占满、真房一间都列不出来。±30 分钟容得下手机钟不准。 */
+          var beat = _.gt ? (_.lt && _.gt(since).and ? _.gt(since).and(_.lt(until)) : _.gt(since)) : undefined;
           function plain() {
-            return C(d).where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: _.gt ? _.gt(since) : undefined })
+            return C(d).where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })
               .limit(LIST_LIMIT).get();
           }
           /* 🔴v1157：orderBy 要建索引，没建就整个查询报错 —— 失败就降级成不排序的查询（本地排）。
              报错可能是 reject，也可能是 resolve 一个 {code}，两种都要降级；云端明确拒过一次就记住，别每次都白问。 */
           var first = _noOrder ? plain() : C(d)
-            .where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: _.gt ? _.gt(since) : undefined })
+            .where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })
             .orderBy('createdAt', 'desc').limit(LIST_LIMIT).get()
             .then(function (r) {
               if (r && r.code) throw cloudErr(r, 'listOpen');
@@ -1791,8 +1796,9 @@
                  : T().patch(mySeatId(rid, R), { guestAns: at, guestPts: sum, guestBeat: t });
     p['catch'](function () { if (c.myAns === at) c.myAns = at - 1; });   /* 没写上：下一词再补 */
   }
-  /* 这一局已经结束（有人判了离场 / 房主走了）：不再受理抢答（审查 F2：以前回来的那一方照样一词一个 +100） */
-  function ended(c) { return c.rank >= 2 || c.awH || c.awG; }
+  /* 这一局已经结束（有人判了离场 / 房主走了 / 房间连续 3 次读不到 = 已被删）：不再受理抢答
+     （审查 F2：以前回来的那一方照样一词一个 +100） */
+  function ended(c) { return c.rank >= 2 || c.awH || c.awG || c.missR >= 3; }
 
   function claimRound(roomId, roundIdx) {
     var i = Math.floor(Number(roundIdx));

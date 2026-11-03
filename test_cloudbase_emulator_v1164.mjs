@@ -159,5 +159,59 @@ console.log('── serverDate / 故障注入 ──');
   ok(off.abort, '断网：登录和数据库请求都被掐断');
 }
 
+console.log('── 查询规矩（审查 TI-8：以前这几条放宽了也没人发现）──');
+{
+  const emu = mk({});
+  const a = await signup(emu, '+86 13900000061'), b = await signup(emu, '+86 13900000062');
+  for (let n = 1; n <= 5; n++) await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'q' + n, kind: 'k', n, odd: n % 2 } });
+  await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'other', kind: 'z', n: 99 } });
+  const w = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: { kind: 'k', odd: 1 }, queryType: 'WHERE' });
+  ok(w.json.data && w.json.data.list.map((d) => d._id).sort().join(',') === 'q1,q3,q5', `where 只回匹配的（${w.json.data && w.json.data.list.map((d) => d._id).join(',')}）`);
+  const o = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: { kind: 'k' }, queryType: 'WHERE', order: [{ field: 'n', direction: 'desc' }], limit: 2 });
+  ok(o.json.data && o.json.data.list.map((d) => d.n).join(',') === '5,4', `orderBy desc + limit 2 → 5,4（${o.json.data && o.json.data.list.map((d) => d.n).join(',')}）`);
+  const g = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: { n: { $gt: 3 } }, queryType: 'WHERE' });
+  ok(g.json.data && g.json.data.list.map((d) => d._id).sort().join(',') === 'other,q4,q5', 'range 查询（$gt）按数值比');
+  const forged = await db(emu, b, 'addDocument', { collectionName: 'rooms', data: { _id: 'fz', _openid: a.sub, v: 1 } });
+  ok(forged.json.data && emu.dump('rooms').find((d) => d._id === 'fz')._openid === b.sub, '★ add 时客户端自己填的 _openid 不算数，盖的是调用者的章');
+  const ups = await db(emu, b, 'updateDocument', { collectionName: 'rooms', query: { _id: 'up1' }, queryType: 'DOC', multi: false, merge: false, upsert: true, data: { v: 2 } });
+  ok(ups.json.data && ups.json.data.upserted_id === 'up1' && emu.dump('rooms').find((d) => d._id === 'up1')._openid === b.sub, '★ doc().set() 新建的文档也盖调用者的章');
+  await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'dt', at: { $date: { offset: 0 } } } });
+  const dn = await db(emu, a, 'queryDocument', { collectionName: 'rooms', query: { at: { $lt: Date.now() + 100000 } }, queryType: 'WHERE' });
+  const dd = await db(emu, a, 'queryDocument', { collectionName: 'rooms', query: { at: { $lt: { $date: Date.now() + 100000 } } }, queryType: 'WHERE' });
+  ok(dn.json.data.list.length === 0 && dd.json.data.list.length === 1, '★ Date 字段只和 Date 比（拿数字查 serverDate 写的字段，真库一条都查不出来）');
+  const locked = mk({}, { locked: ACL.ADMINONLY });
+  const c = await signup(locked, '+86 13900000063');
+  const den = await db(locked, c, 'queryDocument', { collectionName: 'locked', query: {}, queryType: 'WHERE' });
+  ok(den.status === 200 && den.json.code === 'DATABASE_PERMISSION_DENIED', '★ 没权限默认回 HTTP 200 + code（SDK 会 resolve 它）');
+}
+
+console.log('── 没人见过的真云端行为：可切换（审查 TI-1/TI-4/TI-5/F13）──');
+{
+  const emu = mk({ orderByNeedsIndex: true });
+  const a = await signup(emu, '+86 13900000071');
+  await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'o1', n: 1 } });
+  const o = await db(emu, a, 'queryDocument', { collectionName: 'rooms', query: {}, queryType: 'WHERE', order: [{ field: 'n', direction: 'desc' }] });
+  const p0 = await db(emu, a, 'queryDocument', { collectionName: 'rooms', query: {}, queryType: 'WHERE' });
+  ok(o.json.code && p0.json.data && p0.json.data.list.length === 1, 'orderByNeedsIndex：带排序的查询回 {code}，不排序的照常');
+  const st = mk({ deniedStatus: 403, missingStatus: 404 }, { locked: ACL.ADMINONLY });
+  const b = await signup(st, '+86 13900000072');
+  const d403 = await db(st, b, 'queryDocument', { collectionName: 'locked', query: {} });
+  const d404 = await db(st, b, 'queryDocument', { collectionName: 'nope', query: {} });
+  ok(d403.status === 403 && d404.status === 404, 'deniedStatus / missingStatus：没权限 / 没集合可以回非 200（SDK 只会看到 network request error）');
+  const rf = mk({ refreshErrorCode: 'unauthenticated' });
+  const c = await signup(rf, '+86 13900000073');
+  rf.revokeSessions(c.sub);
+  const r = await call(rf, '/auth/v1/token', { client_id: ENV, grant_type: 'refresh_token', refresh_token: c.refresh_token });
+  ok(r.status === 401 && r.json.error === 'unauthenticated', 'refreshErrorCode：作废的 refresh_token 可以回 invalid_grant 以外的码');
+  for (const style of ['silent', 'overwrite']) {
+    const e = mk({ duplicateStyle: style });
+    const x = await signup(e, '+86 1390000008' + (style === 'silent' ? '1' : '2')), y = await signup(e, '+86 1390000009' + (style === 'silent' ? '1' : '2'));
+    await db(e, x, 'addDocument', { collectionName: 'rooms', data: { _id: 'w1', who: 'x' } });
+    const r2 = await db(e, y, 'addDocument', { collectionName: 'rooms', data: { _id: 'w1', who: 'y' } });
+    const kept = e.dump('rooms').find((d) => d._id === 'w1');
+    ok(r2.json.data && r2.json.data._id === 'w1' && kept.who === (style === 'silent' ? 'x' : 'y'), `duplicateStyle=${style}：第二个 add 也回成功，库里是 ${kept.who}`);
+  }
+}
+
 console.log(`\n${pass} 通过，${fail} 失败`);
 assert.equal(fail, 0, `${fail} 条没过`);

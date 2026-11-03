@@ -27,7 +27,7 @@ async function run(){
   await listen(server);const origin=`http://127.0.0.1:${server.address().port}`;
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:390,height:844},screen:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,serviceWorkers:'block'});
-  await context.addInitScript(()=>{localStorage.clear();sessionStorage.clear();localStorage.setItem('hsnViewMode','desktop');localStorage.setItem('hansen_onboarded','1');});
+  await context.addInitScript(()=>{if (window.top === window) localStorage.clear();sessionStorage.clear();localStorage.setItem('hsnViewMode','desktop');localStorage.setItem('hansen_onboarded','1');});
   const page=await context.newPage();page.setDefaultTimeout(12_000);page.setDefaultNavigationTimeout(20_000);
   const pageErrors=[],consoleErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});
   await page.goto(origin+'/island_action.html',{waitUntil:'domcontentloaded'});
