@@ -4244,10 +4244,28 @@ document.querySelectorAll('.island').forEach(el=>{
   }
   window.openIsland = openIsland;
   window.closeIsland = closeIsland;
-  /* 返回关闭岛；前进则恢复同一条岛状态。两种操作都不新增历史条目。 */
+  /* 返回关闭岛；前进则恢复同一条岛状态。
+     🔴v1165 手机「返回」只退一步：岛开着时先问岛页（__hsnIslandBack：关最上面的浮层/弹窗，或从游戏回本岛主页），
+     岛页说「我处理了」就把岛那条历史补回去、岛照常开着；单词大陆的岛退回大陆地图；都不是才关岛回首页。
+     （🗺️ 走 closeIsland：它先把岛藏起来再退历史，所以到这里时岛已经不显示，不会再问岛页。） */
   window.addEventListener('popstate', function(e){
-    if(e.state && _validIslandFile(e.state.hsnIsland)) openIsland(e.state.hsnIsland, true);
-    else _closeIslandNow();
+    if(e.state && _validIslandFile(e.state.hsnIsland)){ openIsland(e.state.hsnIsland, true); return; }
+    var wrap = document.getElementById('islandFrameWrap');
+    if(wrap && wrap.style.display !== 'none' && !_islandPending){
+      var _f = document.getElementById('islandFrame'), _w = null, _cur = '';
+      try{ _w = _f.contentWindow; _cur = _w.location.pathname.split('/').pop(); }catch(err){ _w = null; }
+      if(_validIslandFile(_cur)){
+        var _handled = false;
+        try{ if(_w && typeof _w.__hsnIslandBack === 'function') _handled = _w.__hsnIslandBack() === true; }catch(err){}
+        if(_handled){ try{ history.pushState({ hsnIsland:_cur }, '', location.href); }catch(err){} return; }
+        if(/^island_land[1-8]\.html$/.test(_cur)){
+          openIsland('land_map.html', true);
+          try{ history.pushState({ hsnIsland:'land_map.html' }, '', location.href); }catch(err){}
+          return;
+        }
+      }
+    }
+    _closeIslandNow();
   });
 
   // 给每个岛卡加 click handler 记录"最近访问"

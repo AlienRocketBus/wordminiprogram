@@ -142,4 +142,106 @@
       }
     }catch(e){}
   }, 1500);
+
+  /* ---- 🔴v1165 手机「返回」只退一步：先关岛里最上面那个浮层 ----
+     首页外壳（index.html）收到返回键时先问岛页 __hsnIslandBack()（模板提供：先调 __hsnBackStack 里登记的关闭函数，
+     再关弹窗，再从游戏回本岛主页）。这里负责「登记」：错题总览、复习中心、我的学习、答错小课、星海面板/神秘殿堂、
+     抽卡揭晓、装备/主题商店……这些浮层都是各模块临时挂在 <body> 上的全屏层，一出现就登记一个关闭函数，消失就撤销。
+     关闭时点它自己的关闭按钮（和孩子亲手点一样，各模块的收尾照常做）；找不到按钮才点空白处，还关不掉才拿掉。 */
+  (function backOverlays(){
+    /* 已知浮层：id → 它自己的关闭按钮（null = 点浮层本身，答错小课就是「点一下继续」） */
+    var KNOWN = {
+      hml_lesson: null,
+      hwo_overlay: '[onclick*="HansenWrongOverview._close"]',
+      hr_center: '[onclick*="HansenReview._close()"]',
+      hr_flashcard: '[onclick*="_closeAndBack"]',
+      hr_wrongbook: '[onclick*="_closeAndBack"]',
+      'hsn-ml': '[onclick*="HansenMyLearning._close"]',
+      __hs_season_panel: '#__hs_close',
+      __hs_hall_panel: '#__hs_hall_close',
+      __hs_showcase: '[aria-label="关闭"]',
+      __hs_bcv: '#__hs_bcv_close',
+      hsnGearMask: '#hgClose'
+    };
+    /* 模板自己管的（弹窗、游戏界面），这里不碰 */
+    var SKIP = /^(?:alertModal|wordModal|islandLoading|hansenFxLayer|hsnBootBad)$/;
+    var CLOSE_TEXT = /^(?:✕|×|✖|╳|关闭|取消|返回|知道了|我知道了|好的)$/;
+    function shown(el){
+      try{
+        if(!el || !el.isConnected || el.nodeType !== 1) return false;
+        if(SKIP.test(el.id || '') || (el.classList && el.classList.contains('screen'))) return false;
+        var cs = getComputedStyle(el);
+        if(cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
+        if(parseFloat(cs.opacity) < 0.05) return false;
+        var r = el.getBoundingClientRect();
+        return r.width >= (window.innerWidth || 1) * 0.85 && r.height >= (window.innerHeight || 1) * 0.85;
+      }catch(e){ return false; }
+    }
+    function topOverlay(){
+      var kids = document.body ? document.body.children : [], best = null, bestZ = -Infinity;
+      for(var i = 0; i < kids.length; i++){
+        var el = kids[i]; if(!shown(el)) continue;
+        var z = parseInt(getComputedStyle(el).zIndex, 10); if(!isFinite(z)) z = 0;
+        if(z >= bestZ){ best = el; bestZ = z; }   /* 同层取后挂上去的（在上面） */
+      }
+      return best;
+    }
+    function closeButton(el){
+      var sel = Object.prototype.hasOwnProperty.call(KNOWN, el.id) ? KNOWN[el.id] : undefined;
+      if(sel === null) return el;
+      if(sel){ var k = el.querySelector(sel); if(k) return k; }
+      var c = el.querySelectorAll('button,[role="button"],[aria-label],[onclick],div,span,a');
+      for(var i = 0; i < c.length && i < 400; i++){
+        var b = c[i], lab = b.getAttribute('aria-label') || '', oc = b.getAttribute('onclick') || '', id = b.id || '';
+        var txt = (b.children.length ? '' : (b.textContent || '').trim());
+        if(/^(?:关闭|返回|close)$/i.test(lab) || /(?:^|_)close/i.test(id) || /Close$/.test(id) || /_close\w*\(|\bclose\w*\(/i.test(oc) || CLOSE_TEXT.test(txt)) {
+          if(b.getClientRects().length) return b;
+        }
+      }
+      return null;
+    }
+    function closeEl(el){
+      if(!shown(el)) return false;   /* 它已经关了：让返回键去管下一层 */
+      var b = closeButton(el);
+      try{ (b || el).click(); }catch(e){}
+      /* 点了还在（没有关闭按钮、也不认点空白处）就直接拿掉：宁可少一层，也不能一按返回就退出整个岛 */
+      if(shown(el) && !b){ try{ el.remove(); }catch(e){} }
+      return true;
+    }
+    function closeTop(){ var el = topOverlay(); return el ? closeEl(el) : false; }
+    function pushBack(fn){
+      if(typeof window.__hsnPushBack === 'function') return window.__hsnPushBack(fn);
+      var st = window.__hsnBackStack = window.__hsnBackStack || [];
+      st.push(fn);
+      return function(){ var i = st.lastIndexOf(fn); if(i >= 0) st.splice(i, 1); };
+    }
+    var tracked = [];   /* {el, unreg} —— 每个开着的浮层在栈里占一格（后开的在上面），按一次返回关一个 */
+    function track(el){
+      for(var i = 0; i < tracked.length; i++) if(tracked[i].el === el) return;
+      tracked.push({ el: el, unreg: pushBack(function(){ return closeEl(el); }) });
+    }
+    function untrack(el){
+      tracked = tracked.filter(function(t){ if(t.el !== el) return true; try{ t.unreg(); }catch(e){} return false; });
+    }
+    var toggles = typeof WeakSet === 'function' ? new WeakSet() : null;
+    function check(el){
+      if(shown(el)) track(el); else untrack(el);
+      /* 用 class/style 开关的浮层（比如装备商店）：盯住它自己的开关 */
+      if(toggles && shown(el) && !toggles.has(el)){
+        toggles.add(el);
+        try{ new MutationObserver(function(){ check(el); }).observe(el, { attributes: true, attributeFilter: ['class', 'style'] }); }catch(e){}
+      }
+    }
+    function start(){
+      if(!document.body || typeof MutationObserver !== 'function') return;
+      new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          Array.prototype.forEach.call(m.removedNodes, function(n){ if(n.nodeType === 1) untrack(n); });
+          Array.prototype.forEach.call(m.addedNodes, function(n){ if(n.nodeType === 1) setTimeout(function(){ check(n); }, 0); });
+        });
+      }).observe(document.body, { childList: true });
+    }
+    window.__hsnBackOverlays = { top: topOverlay, closeTop: closeTop, _tracked: function(){ return tracked.map(function(t){ return t.el.id || t.el.className || t.el.tagName; }); } };
+    if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  })();
 })();
