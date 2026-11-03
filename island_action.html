@@ -4682,11 +4682,11 @@ function showToast(msg){
     setTimeout(function(){try{d.remove();}catch(e){}},ms);
   }catch(e){}
 }
+/* 🔴v1165 均匀洗牌（Fisher–Yates）。sort(()=>Math.random()-.5) 洗得很不匀：短词常常一出来就是正确顺序 */
+function __hsnShuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 /* 🔴v1165 小游戏「这一局」的编号：开局、换难度、停下时都 +1。延时出下一题的回调只认自己那一局——
    编号变了、或者游戏屏已经不在前台，就什么都不做。以前打字大师答完马上返回，0.9 秒后又锁住屏幕、在主页读词；
    换难度后新一局的第一题被旧局的「下一题」顶掉；字母拼拼乐离开后还在主页读词。 */
-/* 🔴v1165 均匀洗牌（Fisher–Yates）。sort(()=>Math.random()-.5) 洗得很不匀：短词常常一出来就是正确顺序 */
-function __hsnShuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 var __hsnRuns={};
 function __hsnRunNew(g){__hsnRuns[g]=(__hsnRuns[g]||0)+1;return __hsnRuns[g];}
 function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hsnRuns[g]||0)!==tok)return;if(scr){var el=document.getElementById(scr);if(!el||!el.classList.contains('active'))return;}return fn.apply(this,arguments);};}
