@@ -130,7 +130,24 @@ function layoutStage(){
 }
 layoutStage();
 var _layoutTimer=null;
-window.addEventListener('resize',function(){clearTimeout(_layoutTimer);_layoutTimer=setTimeout(layoutStage,100)});
+window.addEventListener('resize',function(){clearTimeout(_layoutTimer);_layoutTimer=setTimeout(function(){layoutStage();fitSpots();},100)});
+/* v1165 窄屏（320/360/375 宽）上地图按高度铺满、左右各切掉一截，④、⑧ 两个岛连名字被切到屏幕外：
+   每次排版后，被切到的岛（连名字标签）挪回屏幕里、左右各留 8px；没被切到的（390、414 宽）原地不动。只改位置，不加动画。 */
+function fitSpots(){
+  try{
+    const vw=window.innerWidth, w=parseFloat(stage.style.width)||vw, left=(vw-w)/2;
+    stage.querySelectorAll('.spot').forEach(function(s){
+      const x0=Number(s.dataset.x); if(!isFinite(x0)) return;
+      s.style.left=x0+'%';
+      const half=s.getBoundingClientRect().width/2, c=left+x0/100*w;
+      if(c-half>=0 && c+half<=vw) return;
+      const fit=Math.min(Math.max(c,8+half),vw-8-half);
+      s.style.left=((fit-left)/w*100)+'%';
+    });
+  }catch(e){}
+}
+window.addEventListener('load',fitSpots);
+try{ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitSpots); }catch(e){}
 
 /*🔴v875(Hansen·彻底打通): 壳内(index的iframe)走 parent.openIsland 换装=零白屏零历史污染; 无壳才整页跳。*/
 function goIsland(n){
@@ -153,7 +170,7 @@ G.forEach(function(g){
   s.type='button';
   s.className='spot'+(isDone?' done':'');
   s.setAttribute('aria-label',g.name+'，30个单词，'+g.bosses.length+'位Boss'+(isDone?'，已通关':'，查看详情'));
-  s.style.left=p[0]+'%'; s.style.top=p[1]+'%';
+  s.style.left=p[0]+'%'; s.style.top=p[1]+'%'; s.dataset.x=p[0];
   s.style.setProperty('--sz','54px');
   s.innerHTML=(isDone?'':'<div class="pulse" style="--sz:54px"></div>')+
     '<div class="ring"><span class="num">'+NUM[n-1]+'</span>'+(isDone?'<span class="flag">🚩</span>':'')+'</div>'+
@@ -168,13 +185,14 @@ const em=document.createElement('button');
 em.type='button';
 em.className='spot'+(allDone?'':' locked'); em.id='empress';
 em.setAttribute('aria-label',allDone?'星海女帝赛尔娅，已解锁，查看详情':'星海女帝赛尔娅，需通关八座岛屿后解锁');
-em.style.left='50%'; em.style.top='49%';
+em.style.left='50%'; em.style.top='49%'; em.dataset.x='50';
 em.innerHTML=(allDone?'<div class="pulse" style="--sz:78px;border-color:rgba(255,210,120,.7)"></div>':'')+
   '<div class="ring"><span class="crown">'+(allDone?'👑':'🔒')+'</span></div>'+
   '<div class="name" style="'+(allDone?'background:rgba(150,50,90,.9);border-color:#f0a0c0':'background:rgba(70,60,66,.9)')+'">★ 星海女帝 ★</div>'+
   '<div class="sub">'+(allDone?'赛尔娅 · 点击挑战':'8岛全通后解锁')+'</div>';
 em.onclick=openEmpress;
 stage.appendChild(em);
+fitSpots();
 
 (function updP(){ var c=0; G.forEach(function(g){if(clearedN(g.id))c++;});
   document.getElementById('ptext').textContent='进度 '+c+' / 8'+(c===8?' · 女帝已解锁!':''); })();
