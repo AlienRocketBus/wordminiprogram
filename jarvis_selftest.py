@@ -861,6 +861,120 @@ def _inj_handoff_stale(s):
     return _re.sub(r'(<!--\s*交接版本:\s*)\d+', r'\g<1>1000', s, count=1)
 
 
+
+
+# ── 🔴v1165 全站修复的守卫自证样本：每个都把那一处改回修之前的样子（或同一种病的另一种写法）──
+
+def _inj_nav_explore(s):
+    """点「探索单词」又点亮「错题」格：去掉点亮那一行对 explore 的跳过。"""
+    m = "if(navMap[id]&&id!=='explore')document.getElementById(navMap[id]).classList.add('active');"
+    return s.replace(m, "if(navMap[id])document.getElementById(navMap[id]).classList.add('active');", 1) if m in s else None
+
+
+def _inj_synonym_loop(s):
+    """完形同档抽干扰项改回只按英文去重 —— 近义词又能同时当选项。"""
+    m = 'for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>__hsnClash(o,c)))opts.push(c)}'
+    return s.replace(m, 'for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>o.en===c.en))opts.push(c)}', 1) if m in s else None
+
+
+def _inj_island_api(s):
+    """岛页丢了「藏起来就停」接口 —— 回首页后藏着的岛还在出声。"""
+    m = 'window.__hsnIslandHidden=function(){'
+    return s.replace(m, 'window.__hsnIslandHiddenOld=function(){', 1) if m in s else None
+
+
+def _inj_typing_timer(s):
+    """打字大师答对后的定时器改回不认局号 —— 返回后又锁屏、在主页读词。"""
+    m = "setTimeout(__hsnLater('type','typingScreen',function(){typeActive=true;nextTypeQ();}),900);"
+    return s.replace(m, 'setTimeout(function(){typeActive=true;nextTypeQ();},900);', 1) if m in s else None
+
+
+def _inj_cloze_idx(s):
+    """CLOZE_LEVEL_IDX 改回不看能不能挖空 —— 变形词照算总数，全对到不了 100%。"""
+    m = '.filter(i=>i>=0&&!!__hsnClozeMatch(allW[i]));'
+    return s.replace(m, '.filter(i=>i>=0);', 1) if m in s else None
+
+
+def _inj_land_quests(s):
+    """单词大陆母版的任务规整改回「超过 7 个就判坏」—— 大陆岛又「暂无任务」。"""
+    m = 'if(!Array.isArray(raw.list)||raw.list.length>12)return out;'
+    return s.replace(m, 'if(!Array.isArray(raw.list)||raw.list.length>7)return out;', 1) if m in s else None
+
+
+def _inj_trial_clear(s):
+    """「已通关」改回只看是不是最后一关 —— 体验期跳打赢了就永久标成已通关。"""
+    m = 'if(window._s1Idx===__clp && __clp===(BOSSES.length-1)){'
+    return s.replace(m, 'if(window._s1Idx==null || window._s1Idx===(BOSSES.length-1)){', 1) if m in s else None
+
+
+def _inj_audio_fallback(s):
+    """例句录音分支改回只在出错时回调 —— 录音没下载下来孩子什么都听不到。"""
+    m = '__hsnPlayLocal(_exA, text, rate, cb, 9000);'
+    return s.replace(m, '_exA.onended = function(){ if(cb) cb(); }; _exA.onerror = function(){ if(cb) cb(); }; _exA.play();', 1) if m in s else None
+
+
+def _inj_stale_copy(s):
+    """单词大陆岛的英文副标题改回星海时代的旧字。"""
+    m = 'WORD CONTINENT ③'
+    return s.replace(m, 'STAR SEA I: EMOTION & CHARACTER ISLAND', 1) if m in s else None
+
+
+def _inj_toast_float(s):
+    """showToast 改回借 floatText 显示 —— 长句贴边截断、1.2 秒就没。"""
+    m = 'function showToast(msg){\n'
+    return s.replace(m, "function showToast(msg){floatText(window.innerWidth/2,window.innerHeight/2-60,msg,'#fbbf24');return;\n", 1) if m in s else None
+
+
+def _inj_refresh_path(s):
+    """刷新地址改回只留路径 —— ?u=… 和 #… 全丢。"""
+    m = "u.searchParams.set('_fresh', now);"
+    return s.replace(m, "location.replace(location.pathname + '?_fresh=' + now); return '';", 1) if m in s else None
+
+
+def _inj_shell_lesson(s):
+    """SW 外壳预缓存里拿掉答错小课模块 —— 离线时小课卡悄悄没了。"""
+    import re as _re
+    if not _re.search(r"\s*'\./hansen_mistake_lesson_v1165\.js\?v=\d+'", s):
+        return None
+    return _re.sub(r",?\s*(?://[^\n]*\n\s*)?'\./hansen_mistake_lesson_v1165\.js\?v=\d+'", '', s, count=1)
+
+
+def _inj_island_url(s):
+    """进岛改回用不带 ?v= 的地址 —— 预取的那份永远用不上。"""
+    m = '_nf.src = _islandUrl(file);'
+    return s.replace(m, '_nf.src = file;', 1) if m in s else None
+
+
+def _inj_home_poll(s):
+    """首页主题改回每 1.5 秒轮询（岛开着也照跑）。"""
+    m = "setInterval(function(){ if(!_shown() && document.visibilityState !== 'hidden') applyTheme(); }, 10000);"
+    return s.replace(m, 'setInterval(applyTheme, 1500);', 1) if m in s else None
+
+
+def _inj_title_demo(s):
+    """Boss 殿堂标题改回「· 演示」。"""
+    m = '<title>BOSS 殿堂</title>'
+    return s.replace(m, '<title>BOSS 殿堂 · 演示</title>', 1) if m in s else None
+
+
+def _inj_bee_bot(s):
+    """拼写蜂 botStep 改回不看 paused —— 停在退出确认框时机器人还在打字。"""
+    m = 'if(raceOver||paused)return;'
+    return s.replace(m, 'if(raceOver)return;', 1) if m in s else None
+
+
+def _inj_land_map_fit(s):
+    """单词大陆地图改尺寸时不再 fitSpots —— 转一下屏岛又被切掉。"""
+    m = 'layoutStage();fitSpots();},100)'
+    return s.replace(m, 'layoutStage();},100)', 1) if m in s else None
+
+
+def _inj_ledger_cache(s):
+    """账本读取不再先比原文 —— 每答一题又整份重读账本。"""
+    m = 'if(cacheHit(mainRaw,bakRaw)){perf.hits++;return cache;}'
+    return s.replace(m, '', 1) if m in s else None
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -955,6 +1069,27 @@ CASES = [
     ('别绑两次', 'spelling_pk.html',            _inj_double_bind),
     ('音频清单完整', 'hansen_audio_lock.json',      _inj_audio_lock),
     ('交接文件要跟上', '交接_必读_给下一个对话.md', _inj_handoff_stale),
+    # 🔴v1165：手机框模式的顶层页（_frame.html）也装着版本守望者 —— 拆掉它，「版本守望」必须报红
+    ('版本守望',        '_frame.html',                _inj_no_version_watch),
+    # 🔴v1165 全站修复（两条线合并）
+    ('底栏高亮对',   'template.html',                  _inj_nav_explore),
+    ('近义词不同框', 'template.html',                  _inj_synonym_loop),
+    ('岛页接口齐',   'island_animal.html',             _inj_island_api),
+    ('定时器认局',   'template.html',                  _inj_typing_timer),
+    ('完形认变形',   'land_template.html',             _inj_cloze_idx),
+    ('大陆任务一致', 'land_template.html',             _inj_land_quests),
+    ('跳打不算通关', 'land_template.html',             _inj_trial_clear),
+    ('录音兜底',     'template.html',                  _inj_audio_fallback),
+    ('旧文案不回潮', 'island_land3.html',              _inj_stale_copy),
+    ('提示条居中',   'land_template.html',             _inj_toast_float),
+    ('刷新不循环',   'hansen_version_watch_v1083.js',  _inj_refresh_path),
+    ('新模块进外壳', 'sw_v944.js',                     _inj_shell_lesson),
+    ('岛页地址统一', 'index.html',                     _inj_island_url),
+    ('首页不轮询',   'index.html',                     _inj_home_poll),
+    ('标题不写演示', 'boss_hall.html',                 _inj_title_demo),
+    ('一个机器人',   'spelling_bee.html',              _inj_bee_bot),
+    ('大陆地图不切岛', 'land_map.html',                _inj_land_map_fit),
+    ('账本缓存',     'hansen_canonical_progress.js',   _inj_ledger_cache),
 ]
 
 
