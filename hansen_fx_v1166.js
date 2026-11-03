@@ -57,6 +57,11 @@
   function bigElement(el) {
     try { var r = el.getBoundingClientRect(); return r.width * r.height > 0.6 * W.innerWidth * W.innerHeight; } catch (e) { return false; }
   }
+  /* 粒子是引擎自己建的小方块，不用量尺寸（量尺寸会强制排版，粒子多了就费电） */
+  function isParticle(el) {
+    function is(n) { return !!(n && n.classList && n.classList.contains('t2-fx-p')); }
+    return is(el) || is(el.parentNode);
+  }
   var running = [];
   function anim(el, frames, opts) {
     if (!el || !el.animate || reduced()) return null;
@@ -65,7 +70,7 @@
     opts = opts || {};
     if (opts.iterations != null && opts.iterations !== 1) { refused.push('只许播 1 次'); return null; }
     var fades = false; for (var i = 0; i < frames.length; i++) if (frames[i].opacity != null && frames[i].opacity < 0.95) fades = true;
-    if (fades && bigElement(el)) { refused.push('大面积元素不做淡入淡出（防闪屏 / 切页淡入）'); return null; }
+    if (fades && !isParticle(el) && bigElement(el)) { refused.push('大面积元素不做淡入淡出（防闪屏 / 切页淡入）'); return null; }
     var o = { duration: Math.min(opts.duration || 320, 2200), delay: Math.min(opts.delay || 0, 1500), easing: opts.easing || 'cubic-bezier(.2,.8,.2,1)', iterations: 1 };
     if (opts.fill) o.fill = opts.fill;
     var a; try { a = el.animate(frames, o); } catch (e) { return null; }

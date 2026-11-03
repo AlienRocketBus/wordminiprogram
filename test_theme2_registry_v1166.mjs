@@ -102,6 +102,7 @@ t.ok(R.inSeason('winter', '2026-12-05T12:00:00') && R.inSeason('winter', '2027-0
 t.ok(R.inSeason('kidsday', '2027-06-01T12:00:00') && R.inSeason('kidsday', '2027-05-25T12:00:00') && !R.inSeason('kidsday', '2027-06-08T12:00:00'), '六一派对：5/25–6/7');
 const yrs = Object.keys(R.CNY).map(Number);
 t.ok(Math.max(...yrs) >= 2035 && yrs.every((y, i) => i === 0 || y === yrs[i - 1] + 1), '春节日期表连续写到 2035');
+t.ok(Math.max(...yrs) >= new Date().getFullYear() + 1, '春节日期表至少写到明年（快用完时这条会红，提醒补表）', Math.max(...yrs));
 t.ok(JSON.stringify(R.seasonal('2027-02-01T12:00:00').sort()) === '["lantern","snow"]', '2027-02-01 同时可选：新春灯笼 + 冬日雪国');
 
 console.log('④ 运行时代码风格（旧手机内核）');
