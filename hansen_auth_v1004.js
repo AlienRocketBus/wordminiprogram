@@ -419,7 +419,7 @@
   function friendly(err) {
     /* v1164：我们自己写的中文提示（friendly 且含汉字）原样给人看，别再截断或改写；
        _readable 包过的英文原话仍往下翻译 */
-    if (err && err.friendly && /[一-鿿]/.test(String(err.message || ''))) return String(err.message);
+    if (err && err.friendly && /[\u4e00-\u9fff]/.test(String(err.message || ''))) return String(err.message);
     var m = String((err && (err.message || err.error_description || err.code)) || err || '');
     if (/domain|origin|not.*allow|403/i.test(m)) return '这个网址还没加进安全域名白名单（控制台改完要等约 10 分钟生效）';
     /* 🔴v1009: 原正则过宽, 把注册参数错误也误报成"验证码不对", 误导排查。
@@ -427,10 +427,11 @@
     if (/invalid.*(verification[_ ]?code|verify[_ ]?code|sms[_ ]?code)|verification[_ ]?code.*(invalid|expired|incorrect|wrong)|code.*(expired|incorrect)|验证码(错误|不正确|已过期)/i.test(m))
       return '验证码不对或已过期，重新获取一次';
     if (/frequent|too many|限频|频繁/i.test(m)) return '发得太频繁了，等一会儿再试';
+    /* v1164：「用户不存在」要排在 /exist/ 前面，否则 "User not exist" 会被说成"用户名有人用了" */
+    if (/user.*not.*(found|exist)|not[_ ]found|no.*such.*user|用户不存在/i.test(m)) return '没找到这个用户名，检查一下拼写；还没有账号的话，点下面用手机号注册';
     if (/password/i.test(m)) return '密码不对';
     if (/exist|already/i.test(m)) return '这个用户名已经有人用了，换一个吧（或点下面切到登录）';
     if (/weak|password.*(short|length)/i.test(m)) return '密码太简单了，换一个长一点的';
-    if (/user.*not.*found|no.*such.*user/i.test(m)) return '没找到这个用户名，检查一下拼写，或点下面去注册';
     if (/network|fetch|ERR_/i.test(m)) return '连不上服务器，检查一下网络';
     if (/sms|短信/i.test(m)) return '短信服务还没开通或余额不足（控制台看一下）';
     /* 未识别的错误保留原文——宁可显示英文, 也别用错误的中文误导排查 */

@@ -120,17 +120,30 @@
 
     /* 🔴v1031: 本地标记 ≠ 云端会话仍在 —— 这一项专门戳破"以为登录着其实没有" */
     out += '<div class="d_row"><div class="d_k">③b 云端会话(真实探测)</div>'
-      + '<div class="d_v warn" id="dSess">检测中…</div></div>';
+      + '<div class="d_v warn" id="dSess" style="white-space:pre-wrap">检测中…</div></div>';
     setTimeout(function () {
       var v = document.getElementById('dSess');
       if (!v) return;
       if (!A || typeof A.verifySession !== 'function') { v.textContent = '(旧版本，无此探测)'; return; }
       A.verifySession().then(function (s) {
-        v.textContent = s.ok
-          ? ('✅ 有效 uid=' + s.uid + (s.tries > 1 ? '（重试 ' + s.tries + ' 次后就绪）' : ''))
-          : (s.notReady
-              ? ('⏳ ' + (s.reason || '云端会话尚未就绪') + ' —— 请稍候再试，不必重新登录')
-              : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请退出后重新登录'));
+        /* v1164：按 kind 说清楚是哪一种（超时 / 凭证没了 / 暂时没就绪），再附凭证守护的状态 */
+        var guard = '';
+        try {
+          var G = window.HansenCredGuard;
+          if (G && typeof G.status === 'function') {
+            var gs = G.status();
+            guard = '\n凭证守护：本机凭证' + (gs.hasCred ? '在' : '❗不在') + ' · 影子副本' +
+              (gs.hasShadow ? ('有（' + gs.shadowAge + ' 秒前）') : '无') + ' · 已救 ' + gs.rescued + '/' + (gs.maxRescue || 3) + ' 次';
+          }
+        } catch (e) {}
+        v.textContent = (s.ok
+          ? ('✅ 有效 uid=' + s.uid + (s.uidFrom ? '（uid 从' + s.uidFrom + '补回）' : '') +
+             (s.tries > 1 ? '（重试 ' + s.tries + ' 次后就绪）' : ''))
+          : (s.slow
+              ? ('⌛ ' + (s.reason || '连接云端超时') + ' —— 网络太慢，换个网络或稍后再试，不必重新登录')
+              : (s.notReady
+                  ? ('⏳ ' + (s.reason || '云端会话尚未就绪') + ' —— 请稍候再试，不必重新登录')
+                  : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请重新登录')))) + guard;
         v.className = 'd_v ' + (s.ok ? 'ok' : 'bad');
       }).catch(function (e) { v.textContent = '探测出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
     }, 60);

@@ -54,7 +54,6 @@
   }
 
   var mode = 'phone';   /* phone | password */
-  var _pwReg = false;   /* 🔴v1058: 用户名密码页签内的「登录/注册」开关 */
 
   function html() {
     var A = window.HansenAuth;
@@ -74,7 +73,7 @@
       + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone">手机号</button>'
-      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">用户名密码</button>'
+      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">用户名登录</button>'
       + '</div>';
     if (mode === 'phone') {
       h += '<div class="au_row"><div class="au_lb">手机号</div>'
@@ -83,23 +82,20 @@
         + '<input class="au_in" id="auCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="收到的数字" maxlength="8">'
         + '<button class="au_send" id="auSend">获取验证码</button></div></div>'
         + '<button class="au_go" id="auGo">登录 / 注册</button>'
-        + '<div class="au_tip">第一次用这个手机号 = 自动注册，不用另外填表。</div>';
+        + '<div class="au_tip">第一次用这个手机号 = 自动注册，不用另外填表。<br>孩子没有手机号的话，用家长的手机号也可以。</div>';
     } else {
-      /* 🔴v1058: 用户名密码支持**直接注册**（此前只能登录，必须先用手机号注册过）。
-         登录/注册用一个开关切换，注册时多一个确认密码框。 */
-      var reg = (mode === 'password' && _pwReg);
+      /* 🔴v1164：这一页**只能登录，不能注册**。
+         v1058 在这里加过「用户名注册」，但云端 SDK 对它只发一封验证码到内部邮箱、
+         从不建账号 —— 点了「注册并登录」会显示已登录，云端却永远连不上（天梯用不了）。
+         所以注册入口换成「去手机号注册」，并把原因说清楚。 */
       h += '<div class="au_row"><div class="au_lb">用户名</div>'
-        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="3-20 个字，不含空格"></div>'
+        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="已有账号的用户名"></div>'
         + '<div class="au_row"><div class="au_lb">密码</div>'
-        + '<input class="au_in" id="auPwd" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="至少 6 位"></div>'
-        + (reg ? ('<div class="au_row"><div class="au_lb">确认密码</div>'
-            + '<input class="au_in" id="auPwd2" type="password" autocomplete="new-password" placeholder="再输一次"></div>') : '')
-        + '<button class="au_go" id="auGo">' + (reg ? '注册并登录' : '登录') + '</button>'
-        + '<button class="au_skip" id="auPwToggle" style="color:#a5b4fc">'
-        + (reg ? '已有账号？去登录' : '还没有账号？点这里注册') + '</button>'
-        + '<div class="au_tip">' + (reg
-            ? '用户名 3-20 个字，密码至少 6 位。注册后进度会存到云端，换设备用同一账号即可找回。'
-            : '没有账号可以点上面直接注册，不需要手机号。') + '</div>';
+        + '<input class="au_in" id="auPwd" type="password" autocomplete="current-password" placeholder="至少 6 位"></div>'
+        + '<button class="au_go" id="auGo">登录</button>'
+        + '<button class="au_skip" id="auPwToPhone" style="color:#a5b4fc">还没有账号？用手机号注册 →</button>'
+        + '<div class="au_tip">这里只能登录已经有用户名和密码的账号。<br>'
+        + '新账号请用手机号注册（家长的手机号也可以）—— 云端不支持只用用户名注册。</div>';
     }
     h += '<button class="au_skip" id="auSkip">先不登录，直接玩</button>'
       + '<div class="au_msg" id="auMsg"></div></div>';
@@ -165,8 +161,8 @@
       });
     };
 
-    /* 用户名密码：登录 ↔ 注册 切换 */
-    if (q('auPwToggle')) q('auPwToggle').onclick = function () { _pwReg = !_pwReg; render(); };
+    /* 用户名页签没有注册：引去手机号那一页 */
+    if (q('auPwToPhone')) q('auPwToPhone').onclick = function () { mode = 'phone'; render(); };
 
     /* 登录 / 注册 */
     if (q('auGo')) q('auGo').onclick = function () {
@@ -176,10 +172,6 @@
       var task;
       if (mode === 'phone') {
         task = A.loginByPhoneCode((q('auCode') || {}).value || '');
-      } else if (_pwReg) {
-        task = A.registerByPassword((q('auUser') || {}).value || '',
-                                    (q('auPwd') || {}).value || '',
-                                    (q('auPwd2') || {}).value || '');
       } else {
         task = A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
       }
@@ -360,11 +352,13 @@
     bind();
   }
 
-  function open() {
+  /* opts.mode：'phone' | 'password'，比如注册门槛要直接打开手机号那一页 */
+  function open(opts) {
     if (!window.HansenAuth || !HansenAuth.ready()) {
       alert('云服务还没配置好，暂时不能登录。');
       return;
     }
+    if (opts && (opts.mode === 'phone' || opts.mode === 'password')) mode = opts.mode;
     render();
     host().classList.add('on');
   }

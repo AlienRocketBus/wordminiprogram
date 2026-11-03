@@ -21,7 +21,17 @@
     for(var i=0;i<PREFIXES.length;i++)if(k.indexOf(PREFIXES[i])===0)return /^[A-Za-z0-9_:\-.]+$/.test(k);
     return false;
   }
-  function allowed(k){return k!==KEY&&(ownedKey(k)||transientKey(k));}
+  /* 🔴v1164：云端 SDK 自己的键（凭证、user_info_<env>、device_id、lang_<env>、x-tcb-*）不是玩家数据。
+     v1163 及以前写下的恢复日志里可能带着它们：认得它们（校验和要算、不能因此拦停整个应用），
+     但回滚时**绝不删、绝不写** —— 写回旧的凭证/缓存会打掉当前登录。与 hansen_backup_v944.js 同一判据。 */
+  var SDK_KEY_RE=/^(?:credentials|user_info|lang|access_token|access_token_expire|refresh_token|login_type|anonymous_uuid|token_type)_|^device_id$|^x[-_]tcb[-_]|^tcb[_-]|^cloudbase/i;
+  function sdkKey(k){
+    if(typeof k!=='string'||!k)return false;
+    if(SDK_KEY_RE.test(k))return true;
+    var env='';try{var c=root.HANSEN_CLOUD_CONFIG;env=(c&&c.envId)?String(c.envId):'';}catch(e){}
+    return !!(env&&k.indexOf(env)>=0);
+  }
+  function allowed(k){return k!==KEY&&(ownedKey(k)||transientKey(k)||sdkKey(k));}
   function stableItems(items){return items.map(function(x){return x.key+'\u0000'+x.value;}).join('\u0001');}
   function checksum(s){var h=2166136261;s=String(s||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return 'fnv1a32-'+(h>>>0).toString(16).padStart(8,'0');}
   function validateSnapshot(list){
@@ -65,9 +75,11 @@
     var n;
     try { n = localStorage.length; }
     catch(e){ return; }              /* 存储用不了：没有旧存档要恢复 */
-    for(var i=0;i<n;i++){var k=localStorage.key(i);if(allowed(k))remove.push(k);}
+    /* v1133 同理：先取键名快照再删，别边遍历边改 */
+    var snap=[];for(var i=0;i<n;i++){var k=localStorage.key(i);if(k)snap.push(k);}
+    snap.forEach(function(k){if(allowed(k)&&!sdkKey(k))remove.push(k);});
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('原始玩家快照清理失败：'+k);});
-    list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
+    list.forEach(function(x){if(sdkKey(x.key))return;localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
   function readJournal(){
     /* 🔴v1156：**读不到 ≠ 数据坏了。**

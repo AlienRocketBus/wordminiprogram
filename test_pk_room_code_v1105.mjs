@@ -28,19 +28,27 @@ console.log('房间码 v1105');
 
 const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
 
-function boot() {
-  const rooms = [];
+/* 🔴v1164：假数据库照真数据库的能力做 —— _id 唯一（重复 add 被拒）、
+   只能改/删自己建的文档。以前的假实现什么都让写，真机上的权限问题因此一直没被测出来。 */
+function boot(shared, me) {
+  const rooms = shared || [];
+  const uid = (me && me.id) || 'H';
+  const clone = o => JSON.parse(JSON.stringify(o));
   const t = {
-    read: async id => rooms.find(x => x._id === id) || null,
-    claim: async () => ({ updated: 1 }), patch: async () => ({ updated: 1 }),
-    add: async d => { const doc = Object.assign({ _id: 'R' + rooms.length }, d); rooms.push(doc); return { id: doc._id }; },
-    list: async w => rooms.filter(x => Object.keys(w || {}).every(k => x[k] === w[k])),
-    listOpen: async () => rooms.filter(x => x.status === 'open' && x.isPrivate === false),
-    remove: async () => ({})
+    read: async id => { const d = rooms.find(x => x._id === id); return d ? clone(d) : null; },
+    patch: async (id, p) => { const d = rooms.find(x => x._id === id); if (!d || d._openid !== uid) return { updated: 0 }; Object.assign(d, clone(p)); return { updated: 1 }; },
+    add: async d => {
+      const id = d._id || ('R' + rooms.length);
+      if (rooms.some(x => x._id === id)) throw Object.assign(new Error('duplicate key'), { code: 'DATABASE_DUPLICATE_WRITE', cloud: true });
+      rooms.push(Object.assign(clone(d), { _id: id, _openid: uid })); return { id };
+    },
+    list: async w => rooms.filter(x => Object.keys(w || {}).every(k => x[k] === w[k])).map(clone),
+    listOpen: async () => rooms.filter(x => x.status === 'open' && x.isPrivate === false).map(clone),
+    remove: async id => { const i = rooms.findIndex(x => x._id === id && x._openid === uid); if (i >= 0) rooms.splice(i, 1); return { deleted: i >= 0 ? 1 : 0 }; }
   };
   const ctx = { window: {}, document: { addEventListener() {} }, console, Date, Math, JSON,
     Promise, Error, String, Number, Array, Object, setTimeout, clearTimeout,
-    setInterval: () => 0, clearInterval() {},
+    setInterval: () => 0, clearInterval() {}, isFinite, isNaN,
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
   /* 🔴v1158：**沙箱里也要有词库。**
      v1158 起 createRoom 会先探一次词表，取不到就拒绝建房
@@ -55,7 +63,7 @@ function boot() {
     { en: 'map', cn: '地图' }, { en: 'sky', cn: '天空' }, { en: 'egg', cn: '鸡蛋' }] };
   ctx.window = ctx; vm.createContext(ctx); vm.runInContext(src, ctx);
   const S = ctx.window.HansenPkRoom;
-  S._setTransportForTest(t); S._setMeForTest({ id: 'H', name: '房主' });
+  S._setTransportForTest(t); S._setMeForTest(me || { id: 'H', name: '房主' });
   return { S, rooms };
 }
 
@@ -69,13 +77,17 @@ function boot() {
   ok(pri.room.isPrivate === true, '私密房标记正确');
 }
 
-/* ② 私密房不进公开列表 —— 否则"邀请"没意义 */
+/* ② 私密房不进公开列表 —— 否则"邀请"没意义
+   v1164：从**第三个账号**看（房主本来就看不到自己的房，原写法恒为真） */
 {
-  const { S } = boot();
-  await S.createRoom({ mode: 'C' });
-  await S.createRoom({ mode: 'A', private: true });
-  const lr = await S.listRooms();
-  const list = lr.rooms || lr || [];
+  const { S: A, rooms } = boot();
+  const { S: B } = boot(rooms, { id: 'B', name: '乙' });
+  const { S: F } = boot(rooms, { id: 'F', name: '朋友' });
+  await A.createRoom({ mode: 'C' });
+  await B.createRoom({ mode: 'A', private: true });
+  const lr = await F.listRooms();
+  const list = lr.rooms || [];
+  ok(lr.ok && list.length === 1 && list[0].hostName === '房主', `公开房照常列出（实得 ${list.length} 间）`);
   ok(!list.some(x => x.isPrivate), '★ 私密房不出现在公开列表（否则谁都能进，邀请就没意义）');
 }
 
@@ -87,18 +99,25 @@ function boot() {
   ok(bad === 0, `★ 300 次生成都不含易混字符 0/O/1/I/L（看错就进错房）`);
 }
 
-/* ④⑤ 查码 */
+/* ④⑤ 查码 —— 输码的是**朋友**（另一个账号），房主自己查自己的码要明说"这是你自己的房" */
 {
-  const { S } = boot();
+  const { S, rooms } = boot();
   const pri = await S.createRoom({ mode: 'A', private: true });
   const code = pri.room.code;
-  ok((await S.findByCode(code)).ok === true, '★ 按码能找到房间');
-  ok((await S.findByCode(code.toLowerCase())).ok === true, '★ 小写码也认（用户不会记得切大写）');
-  ok((await S.findByCode(' ' + code + ' ')).ok === true, '★ 前后空格也认（复制粘贴常带空格）');
-  const bad1 = await S.findByCode('AB');
+  const { S: F } = boot(rooms, { id: 'F', name: '朋友' });
+  ok((await F.findByCode(code)).ok === true, '★ 按码能找到房间');
+  ok((await F.findByCode(code)).roomId === pri.roomId, '★ 找到的就是那一间');
+  ok((await F.findByCode(code.toLowerCase())).ok === true, '★ 小写码也认（用户不会记得切大写）');
+  ok((await F.findByCode(' ' + code + ' ')).ok === true, '★ 前后空格也认（复制粘贴常带空格）');
+  const bad1 = await F.findByCode('AB');
   ok(/4 位/.test(bad1.reason || ''), `★ 位数不对提示具体：${bad1.reason}`);
-  const bad2 = await S.findByCode('ZZZZ');
+  const bad2 = await F.findByCode('ZZZZ');
   ok(/没找到/.test(bad2.reason || ''), `★ 码不存在提示具体：${bad2.reason}`);
+  const self = await S.findByCode(code);
+  ok(self.ok === false && self.kind === 'self' && /自己账号/.test(self.reason),
+     `★ 房主输自己的码 → 明说"这是你自己账号开的房"（kind=self）：${self.reason}`);
+  rooms.push({ _id: 'OLD1', status: 'open', isPrivate: true, code: 'QQQQ', hostId: 'X', heartbeatAt: Date.now() });
+  ok((await F.findByCode('QQQQ')).ok === false, '★ 旧版本开的私密房（没有 proto:2）不认 —— 新旧协议不通，进去只会干等');
 }
 
 /* ⑥ 界面 */

@@ -240,9 +240,15 @@ def guard_atomic_room_claim():
     if i < 0:
         return
     body = r[i:r.find('function startHeartbeat', i)]
-    if 'claim(' not in body or 'updated' not in body:
-        bad('抢房原子性', 'joinRoom 未用「条件更新 + 检查影响行数」—— '
-            '"先读再写"必然让两人进同一间房（v1065）')
+    # v1164：集合权限「修改本人数据」下客人改不了房主的文档，旧判据要的
+    #   「条件更新 claim + 影响行数 updated」在真机上永远失败。
+    #   现在抢座 = 固定 _id 的 add（数据库保证 _id 唯一）+ 失败后按 _id 读回判定。
+    j = r.find('function claim(')
+    cb = r[j:j + 1600] if j >= 0 else ''
+    if 'claim(' not in body or 'T().add(' not in cb or 'T().read(' not in cb:
+        bad('抢房原子性', 'joinRoom 未用「固定 _id 的 add + 读回校验」抢座 —— '
+            '"先读再写"必然让两人进同一间房（v1065）；'
+            '客人去改房主的文档在「修改本人数据」权限下永远失败（v1164）')
     if re.search(r'read\([^)]*\)[\s\S]{0,200}patch\(', body):
         bad('抢房原子性', 'joinRoom 出现"先读再写"形态')
 

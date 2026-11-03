@@ -66,10 +66,14 @@ def _inj_freereward(s):
                      'item.progress = Math.min(Math.floor(saved.progress), item.goal);\n      } else {\n        item.progress = Math.floor(saved.progress);', 1)
 
 def _inj_room(s):
-    """守卫判据：joinRoom 里不得出现 read(...) 后紧跟 patch(...) 的"先读再写"形态。
-       故样本要在 joinRoom 内真的写成那种形态。"""
-    return s.replace("    return T().claim(roomId, { status: 'open', guestId: '' }, {",
-                     "    return T().read(roomId).then(function(){ return T().patch(roomId, {status:'playing'}); }).then(function(){ return {updated:1}; });\n    return T().claim(roomId, { status: 'open', guestId: '' }, {", 1)
+    """守卫判据：joinRoom 必须用固定 _id 的 add 抢座（claim），不得出现 read(...) 后紧跟
+       patch(...) 的"先读再写"形态（v1164：客人去改房主的文档在真机上永远失败）。
+       故样本把抢座换回"读房间再改房间"那种形态。"""
+    m = "        return claim(seat).then(function (c) {"
+    if m not in s:
+        return None
+    return s.replace(m, "        return T().read(roomId).then(function () { return T().patch(roomId, { guestId: u.id }); })"
+                        ".then(function () { return { mine: true }; }).then(function (c) {", 1)
 
 def _inj_dead_assert(s):
     return s + "\nok(true, '这条永远不会跑');\n"

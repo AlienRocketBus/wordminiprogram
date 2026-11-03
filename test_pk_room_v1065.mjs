@@ -7,14 +7,22 @@
  *   `_setTransportForTest()` 换上假实现后，抢房竞态、心跳过期、断线回收
  *   这些**真机上最难复现**的场景全部可以在本地跑真实断言。
  *
+ * 🔴v1164：假数据库以前**什么都让写**（两个人 add 同一个 _id 都成功、
+ *   客人随便改房主的文档）—— 而真数据库的权限是「修改本人数据」。
+ *   测试绿、真机上天梯从来没成功过一次，根子就在这里：
+ *   > 桩要照着真货的能力做，不能照着"我需要什么"做。
+ *   现在的假数据库：_id 唯一、只能改/删自己建的文档、值没变 updated:0。
+ *
  * 覆盖的合同：
  *   ① 同一个种子在任何设备上给出同一批词（否则两人做的题不一样）
- *   ② 两人同时抢同一间房，**有且只有一个**成功，另一个收到明确提示
- *   ③ 心跳过期的房间不再被列出（房主直接关页面来不及删房）
- *   ④ 房主离房 = 删房；客人离房 = 房间回到可加入
- *   ⑤ 交卷双方齐了才判胜负，先交的人处于 waiting
- *   ⑥ 会话失效时明确失败，且错误可读（不得出现 [object Object]）
+ *   ② 两人同时抢同一间房，**有且只有一个**成功，另一个收到明确提示（房主确认后才算进）
+ *   ③ 心跳过期 / 旧版本的房不再被列出；同账号别的设备开的房要数出来提醒
+ *   ④ 离房语义：等确认时退出 → 座位收回、下一个人能进；死座位 → 换轮次；
+ *      房主没开打就走 = 删房；开打后走 = 标 done 留给客人读结果
+ *   ⑤ 交卷双方齐了才判胜负，先交的人处于 waiting；房主先打完走了客人照样拿到结果
+ *   ⑥ 失败一律可读，并带 kind（network/expired/config…）；真实传输层会查 r.code
  *   ⑦ 绝不自建云端实例——必须走 HansenAuth.ensureSession + _app
+ *   ⑧ 文档里没有手机号/用户名；名字是资料里的真名字
  */
 import vm from 'node:vm';
 import fs from 'node:fs';
@@ -22,49 +30,70 @@ import fs from 'node:fs';
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 const R = '/home/claude/work/repo/';
-console.log('在线对战 · 房间匹配 v1065');
+console.log('在线对战 · 房间匹配 v1065（v1164 新存储）');
 
 const src = fs.readFileSync(R + 'hansen_pk_room_v1065.js', 'utf8');
 const codeOnly = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-/* ── 假传输层：一个内存里的"云数据库"，行为对齐 TCB 的语义 ── */
+/* ── 假云数据库：行为对齐 CloudBase「读取全部数据，修改本人数据」──
+   ① _id 唯一：重复 add 被拒（真传输层把 {code} 变成抛错，这里直接抛）
+   ② 谁建的文档只有谁能改/删（别人改 → updated:0，和真机 legacy 权限一样）
+   ③ 值没变时 updated:0（MongoDB 语义） */
 function fakeCloud() {
-  const rows = new Map();
-  let seq = 0;
-  const api = {
-    _rows: rows,
-    add(doc) { const id = 'r' + (++seq); rows.set(id, { ...doc, _id: id }); return Promise.resolve({ id }); },
-    listOpen(now) {
-      const out = [...rows.values()]
-        .filter(x => x.status === 'open' && (now - (x.heartbeatAt || 0)) < 30000)
-        .sort((a, b) => b.createdAt - a.createdAt);
-      return Promise.resolve(out);
-    },
-    /* 条件更新，返回影响行数 —— 抢房原子性完全靠它 */
-    claim(id, guard, patch) {
-      const r = rows.get(id);
-      if (!r) return Promise.resolve({ updated: 0 });
-      for (const k of Object.keys(guard || {})) if (r[k] !== guard[k]) return Promise.resolve({ updated: 0 });
-      rows.set(id, { ...r, ...patch });
-      return Promise.resolve({ updated: 1 });
-    },
-    patch(id, data) { const r = rows.get(id); if (r) rows.set(id, { ...r, ...data }); return Promise.resolve(true); },
-    remove(id) { rows.delete(id); return Promise.resolve(true); },
-    read(id) { return Promise.resolve(rows.get(id) ? { ...rows.get(id) } : null); }
+  const docs = new Map();
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const dup = () => Object.assign(new Error('E11000 duplicate key error: _id'),
+    { code: 'DATABASE_DUPLICATE_WRITE', cloud: true });
+  const writes = [];
+  return {
+    docs, writes,
+    as(uid) {
+      return {
+        add: async d => {
+          const id = d._id || ('auto' + docs.size);
+          writes.push({ uid, op: 'add', id });
+          if (docs.has(id)) throw dup();
+          docs.set(id, { ...clone(d), _id: id, _openid: uid });
+          return { id };
+        },
+        read: async id => (docs.has(id) ? clone(docs.get(id)) : null),
+        patch: async (id, data) => {
+          writes.push({ uid, op: 'patch', id });
+          const d = docs.get(id);
+          if (!d || d._openid !== uid) return { updated: 0 };
+          const n = { ...d, ...clone(data) };
+          const ch = JSON.stringify(n) !== JSON.stringify(d);
+          docs.set(id, n);
+          return { updated: ch ? 1 : 0 };
+        },
+        remove: async id => {
+          writes.push({ uid, op: 'remove', id });
+          const d = docs.get(id);
+          if (!d || d._openid !== uid) return { deleted: 0 };
+          docs.delete(id);
+          return { deleted: 1 };
+        },
+        list: async q => [...docs.values()].filter(d => Object.keys(q || {}).every(k => d[k] === q[k])).slice(0, 50).map(clone),
+        listOpen: async () => [...docs.values()]
+          .filter(d => d.status === 'open' && d.isPrivate === false)
+          .sort((a, b) => b.createdAt - a.createdAt).slice(0, 40).map(clone)
+      };
+    }
   };
-  return api;
 }
 
-function mkCtx(who) {
+function mkCtx(who, extraLocal) {
   const win = {
     HANSEN_VOCAB_ALL: {
       wordIslandFood: Array.from({ length: 40 }, (_, i) => ({ en: 'food' + i, cn: '食' + i })),
       wordIslandAnimal: Array.from({ length: 40 }, (_, i) => ({ en: 'ani' + i, cn: '兽' + i }))
     },
-    HansenAuth: { readLocal: () => ({ phone: who }), ensureSession: () => Promise.resolve({ ok: true }), _app: () => ({}) },
-    HansenSbProfile: { status: () => ({ name: who + '的名字' }) },
+    /* 真 ensureSession 成功时返回 {ok:true, uid} —— 假的也得给 uid */
+    HansenAuth: { readLocal: () => ({ uid: who, ...(extraLocal || {}) }),
+                  ensureSession: () => Promise.resolve({ ok: true, uid: who }), _app: () => Promise.resolve({}) },
+    HansenSbProfile: { readProfile: () => ({ name: who + '的名字' }) },
     setInterval: () => 0, clearInterval() {}, setTimeout: (f, ms) => setTimeout(f, Math.min(ms || 0, 5)), clearTimeout,
-    console, Date, Math, JSON, Object, Promise, Error, String, Number, Array
+    console, Date, Math, JSON, Object, Promise, Error, String, Number, Array, isFinite, isNaN
   };
   win.window = win;
   const ctx = { ...win, window: win };
@@ -72,6 +101,7 @@ function mkCtx(who) {
   vm.runInContext(src, ctx);
   return ctx.window.HansenPkRoom;
 }
+const tick = ms => new Promise(z => setTimeout(z, ms));
 
 /* ═══ ① 同种子 → 同词表 ═══ */
 {
@@ -88,78 +118,147 @@ function mkCtx(who) {
 {
   const cloud = fakeCloud();
   const host = mkCtx('host'), g1 = mkCtx('guest1'), g2 = mkCtx('guest2');
-  [host, g1, g2].forEach(m => m._setTransportForTest(cloud));
+  host._setTransportForTest(cloud.as('host'));
+  g1._setTransportForTest(cloud.as('guest1'));
+  g2._setTransportForTest(cloud.as('guest2'));
 
   const made = await host.createRoom({ tier: '工蜂' });
   ok(made.ok === true, '房主开房成功');
   ok(!!made.roomId, `拿到房间号 ${made.roomId}`);
   ok(made.words.length === 10, '房主拿到本局词表');
+  ok(made.mySide === 'host', '开房结果标明我是房主');
+
+  /* 房主在等人（真协议：客人抢到座位后要房主确认才算进） */
+  let hostEv = null;
+  host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
 
   /* 两个客人**同时**发起进房 */
   const [r1, r2] = await Promise.all([g1.joinRoom(made.roomId), g2.joinRoom(made.roomId)]);
   const wins = [r1, r2].filter(r => r.ok);
   const loses = [r1, r2].filter(r => !r.ok);
   ok(wins.length === 1, `★ 两人同抢一间房，有且只有一个成功（实得 ${wins.length}）`);
-  ok(loses.length === 1 && loses[0].taken === true, '★ 失败方明确收到"刚被别人占了"，不是含糊报错');
+  ok(loses.length === 1 && loses[0].taken === true && loses[0].kind === 'taken',
+     '★ 失败方明确收到"刚被别人占了"（kind=taken），不是含糊报错');
   ok(!/\[object Object\]/.test(String(loses[0].reason)), `失败原因可读："${loses[0].reason}"`);
 
-  const room = await cloud.read(made.roomId);
-  ok(room.status === 'playing', '房间状态已置为 playing');
-  ok(!!room.guestId && room.guestId !== room.hostId, '房间里只记了一位客人');
+  const room = cloud.docs.get(made.roomId);
+  ok(room.status === 'playing', '房间状态已置为 playing（房主自己写的）');
+  const winnerKey = (r1.ok ? 'uguest1' : 'uguest2');
+  ok(room.guestId === winnerKey && room.guestId !== room.hostId, '房间里只记了一位客人，就是抢到座位的那位');
+  ok(hostEv && hostEv.joined === true && hostEv.room.guestId === winnerKey, '★ 房主等到的就是抢到座位的那位');
+  ok(wins[0].mySide === 'guest' && wins[0].room.hostId === 'uhost', '客人拿到合并后的房间（旧字段名照用）');
+  const seats = [...cloud.docs.values()].filter(d => d.kind === 'seat');
+  ok(seats.length === 1, `★ 只留下一个座位文档，没抢到的人不留孤儿（实得 ${seats.length}）`);
+  ok(!cloud.writes.some(w => w.uid !== 'host' && w.id === made.roomId && w.op !== 'add'),
+     '★ 客人从头到尾没碰过房主的房间文档（权限「修改本人数据」下本来也写不进去）');
 
   /* 房主与获胜的客人必须拿到同一批词 */
   ok(JSON.stringify(made.words) === JSON.stringify(wins[0].words), '★ 房主与客人拿到完全相同的词表');
 
   /* 第三个人再来 → 房已满 */
-  const g3 = mkCtx('guest3'); g3._setTransportForTest(cloud);
+  const g3 = mkCtx('guest3'); g3._setTransportForTest(cloud.as('guest3'));
   const r3 = await g3.joinRoom(made.roomId);
   ok(r3.ok === false && r3.taken === true, '房满后第三人被明确拒绝');
 }
 
-/* ═══ ③ 心跳过期的房间不再被列出 ═══ */
+/* ═══ ③ 列表：过期 / 旧版本的房不列；同账号别的设备的房要数出来 ═══ */
 {
   const cloud = fakeCloud();
   const host = mkCtx('host'), other = mkCtx('other');
-  [host, other].forEach(m => m._setTransportForTest(cloud));
+  host._setTransportForTest(cloud.as('host')); other._setTransportForTest(cloud.as('other'));
   const made = await host.createRoom({});
   let ls = await other.listRooms();
   ok(ls.ok && ls.rooms.length === 1, '新开的房能被别人看到');
 
-  /* 模拟房主直接关掉页面：心跳停在 40 秒前 */
-  await cloud.patch(made.roomId, { heartbeatAt: Date.now() - 40000 });
+  /* 模拟房主直接关掉页面：心跳停在 40 秒前（房主自己的文档，房主才改得动） */
+  await cloud.as('host').patch(made.roomId, { heartbeatAt: Date.now() - 40000 });
   ls = await other.listRooms();
   ok(ls.rooms.length === 0, '★ 心跳过期(>30s)的房间不再展示（房主关页面来不及删房）');
+
+  /* 旧版本客户端开的房（没有 proto:2）：协议不通，进去只会干等 → 不列 */
+  await cloud.as('old').add({ _id: 'rOLD', status: 'open', isPrivate: false, hostId: '13800001111',
+                              guestId: '', heartbeatAt: Date.now(), createdAt: Date.now(), mode: 'A' });
+  ls = await other.listRooms();
+  ok(ls.rooms.length === 0, '★ 旧版本的房不列（新旧协议不通，点进去只会干等）');
+
+  /* 同一个账号在另一台设备开的房：自己看不到，但要数出来让界面提醒 */
+  const twin = mkCtx('other'); twin._setTransportForTest(cloud.as('other'));
+  await twin.createRoom({});
+  ls = await other.listRooms();
+  ok(ls.ok && ls.rooms.length === 0 && ls.sameAccount === 1,
+     `★ 同账号别的设备开的房不列，但 sameAccount=1 让界面提醒（实得 ${ls.sameAccount}）`);
 }
 
-/* ═══ ④ 离房语义：房主删房 / 客人退出后房间可再加入 ═══ */
+/* ═══ ④ 离房语义 ═══ */
 {
   const cloud = fakeCloud();
-  const host = mkCtx('hostX'), guest = mkCtx('guestX');
-  [host, guest].forEach(m => m._setTransportForTest(cloud));
+  const host = mkCtx('hostX'), gx = mkCtx('guestX'), gy = mkCtx('guestY');
+  host._setTransportForTest(cloud.as('hostX')); gx._setTransportForTest(cloud.as('guestX')); gy._setTransportForTest(cloud.as('guestY'));
   const made = await host.createRoom({});
-  await guest.joinRoom(made.roomId);
 
-  await guest.leaveRoom(made.roomId);
-  let room = await cloud.read(made.roomId);
-  ok(room && room.status === 'open' && !room.guestId, '★ 客人退出后房间回到可加入状态（房主还能等下一个）');
+  /* 客人抢到座位、还在等房主确认时就退出了 → 座位收回，下一个人还能进 */
+  const pending = gx.joinRoom(made.roomId);
+  await tick(30);
+  ok([...cloud.docs.values()].some(d => d.kind === 'seat' && d.guestId === 'uguestX'), '客人先占上了座位');
+  await gx.leaveRoom(made.roomId);
+  const gone = await pending;
+  ok(gone.ok === false && gone.cancelled === true, '★ 等确认时退出 → 进房明确失败（cancelled），不会半进半不进');
+  ok(![...cloud.docs.values()].some(d => d.kind === 'seat'), '★ 退出后座位被收回（自己的文档自己删）');
 
-  const guest2 = mkCtx('guestY'); guest2._setTransportForTest(cloud);
-  const rejoin = await guest2.joinRoom(made.roomId);
-  ok(rejoin.ok === true, '新的客人能进这间空出来的房');
+  let hostEv = null;
+  host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
+  const rejoin = await gy.joinRoom(made.roomId);
+  ok(rejoin.ok === true, '★ 新的客人能进这间空出来的房');
+  ok(hostEv && hostEv.joined && hostEv.room.guestId === 'uguestY', '房主等到的是新客人');
 
+  /* 房主开打后离开 → 房间标 done 但不删（客人还要读结果） */
   await host.leaveRoom(made.roomId);
-  room = await cloud.read(made.roomId);
-  ok(room === null, '★ 房主离房 = 房间被删除，不留幽灵房');
+  const r1 = cloud.docs.get(made.roomId);
+  ok(r1 && r1.status === 'done' && r1.endedBy === 'leave', '★ 开打后房主离开：房间标 done/leave，**不删**（客人还要读结果）');
+  const og = await gy.opponentGone(made.roomId);
+  ok(og.ok && og.gone === true, '★ 客人立刻知道房主走了（不用干等 60 秒）');
+}
+{
+  /* 死座位：客人占了座位就没了动静（页面被杀、来不及收）→ 房主换下一个轮次 */
+  const cloud = fakeCloud();
+  const host = mkCtx('hostD'), gw = mkCtx('guestW');
+  host._setTransportForTest(cloud.as('hostD')); gw._setTransportForTest(cloud.as('guestW'));
+  host._setTimingForTest({ seatStaleMs: 150 });
+  const made = await host.createRoom({});
+  const old = Date.now() - 300000;
+  await cloud.as('ghost').add({ _id: made.roomId + '_s0', proto: 2, kind: 'seat', roomId: made.roomId, epoch: 0,
+    guestId: 'ughost', guestName: '幽灵', guestBeat: old, createdAt: old, left: false });
+  let hostEv = null;
+  host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
+  await tick(400);
+  ok(hostEv === null, '★ 死座位（心跳早就不动了）不会被房主当成对手确认');
+  ok(cloud.docs.get(made.roomId).seat === 1, `★ 房主把座位轮次换到 1（别人的死座位删不掉，就换号）`);
+  const j = await gw.joinRoom(made.roomId);
+  ok(j.ok === true && hostEv && hostEv.joined && hostEv.room.guestId === 'uguestW',
+     '★ 换号之后新客人照常进房');
+}
+{
+  /* 房主还没等到人就走 = 删房 */
+  const cloud = fakeCloud();
+  const host = mkCtx('hostL'); host._setTransportForTest(cloud.as('hostL'));
+  const made = await host.createRoom({});
+  await host.leaveRoom(made.roomId);
+  ok(!cloud.docs.has(made.roomId), '★ 没人进来时房主离房 = 房间被删除，不留幽灵房');
 }
 
 /* ═══ ⑤ 交卷：两边齐了才判胜负 ═══ */
-{
+async function pair(hn, gn) {
   const cloud = fakeCloud();
-  const host = mkCtx('h2'), guest = mkCtx('g2b');
-  [host, guest].forEach(m => m._setTransportForTest(cloud));
-  const made = await host.createRoom({});
-  await guest.joinRoom(made.roomId);
-
+  const host = mkCtx(hn), guest = mkCtx(gn);
+  host._setTransportForTest(cloud.as(hn)); guest._setTransportForTest(cloud.as(gn));
+  const made = await host.createRoom({ mode: 'A' });
+  host.waitForOpponent(made.roomId, () => {});
+  const j = await guest.joinRoom(made.roomId);
+  return { cloud, host, guest, made, j };
+}
+{
+  const { host, guest, made, j } = await pair('h2', 'g2b');
+  ok(j.ok, '双人进房');
   const first = await host.reportResult(made.roomId, 80);
   ok(first.ok === true && first.waiting === true, '先交卷的一方处于等待状态，不提前判负');
 
@@ -170,38 +269,119 @@ function mkCtx(who) {
   const hostView = await host.reportResult(made.roomId, 80);
   ok(hostView.result === 'lose', '★ 同一局在两边看到互补的结论（一方胜则另一方负）');
 }
-
-/* ═══ ⑥ 会话失效 → 明确失败且错误可读 ═══ */
 {
-  const m = mkCtx('userZ');
-  /* 不注入假传输层，走真实路径；但把会话探测置为失效 */
-  const ctxWin = { ok: false, expired: true, reason: '云端会话已失效' };
-  const mod = m;
-  mod._setTransportForTest({
-    add: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' }),
-    listOpen: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' }),
-    claim: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' }),
-    patch: () => Promise.resolve(true), remove: () => Promise.resolve(true), read: () => Promise.resolve(null)
-  });
-  const made = await mod.createRoom({});
-  ok(made.ok === false, '会话失效时开房明确失败');
-  ok(!/\[object Object\]/.test(String(made.reason)), `开房失败原因可读："${made.reason}"`);
-  ok(/credentials not found/.test(made.reason), '挖出了云端的真实错因');
-  const ls = await mod.listRooms();
-  ok(ls.ok === false && Array.isArray(ls.rooms) && ls.rooms.length === 0, '列房失败时返回空列表而非崩溃');
+  /* 房主先打完、交卷、离开 —— 客人后交卷照样拿到结果（以前房主一走就删房） */
+  const { cloud, host, guest, made } = await pair('h3', 'g3');
+  await host.reportResult(made.roomId, 300);
+  await host.leaveRoom(made.roomId);
+  ok(cloud.docs.has(made.roomId), '★ 房主打完离开后房间还在（延后清理）');
+  ok(cloud.docs.get(made.roomId).endedBy === 'finished', '房主是打完走的（endedBy=finished），不是逃跑');
+  const og = await guest.opponentGone(made.roomId);
+  ok(og.ok && og.gone === false, '★ 房主交了卷再走 ≠ 逃跑，客人不会白捡「对手离场」');
+  const r = await guest.reportResult(made.roomId, 200);
+  ok(r.ok && r.waiting === false && r.result === 'lose' && r.theirs === 300,
+     `★ 客人后交卷也拿到真实结果（${r.mine}:${r.theirs} ${r.result}）`);
 }
 
-/* ═══ ⑦ 静态合同：绝不自建云端实例 ═══ */
+/* ═══ ⑥ 失败一律可读，并带 kind ═══ */
+{
+  const m = mkCtx('userZ');
+  m._setTransportForTest({
+    add: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' }),
+    listOpen: () => Promise.reject({ error: 'unauthenticated', error_description: 'credentials not found' }),
+    patch: () => Promise.resolve({ updated: 1 }), remove: () => Promise.resolve({}), read: () => Promise.resolve(null),
+    list: () => Promise.resolve([])
+  });
+  const made = await m.createRoom({});
+  ok(made.ok === false, '会话失效时开房明确失败');
+  ok(!/\[object Object\]/.test(String(made.reason)), `开房失败原因可读："${made.reason}"`);
+  ok(/credentials not found/.test(made.reason), '挖出了云端的真实错因（在 ⟨⟩ 里）');
+  ok(made.kind === 'expired' && made.expired === true, '★ kind=expired —— 界面才知道该去登录，而不是说"连不上网络"');
+  const ls = await m.listRooms();
+  ok(ls.ok === false && Array.isArray(ls.rooms) && ls.rooms.length === 0, '列房失败时返回空列表而非崩溃');
+}
+{
+  /* 断网：SDK 的原话是 network request error（以前没被认出来） */
+  const m = mkCtx('userN');
+  let calls = 0;
+  m._setTransportForTest({ listOpen: () => { calls++; return Promise.reject(new Error('network request error')); },
+    read: async () => null, add: async () => ({}), patch: async () => ({}), remove: async () => ({}), list: async () => [] });
+  const ls = await m.listRooms();
+  ok(ls.ok === false && ls.kind === 'network' && /连不上网络/.test(ls.reason) && /network request error/.test(ls.reason),
+     `★ "network request error" → kind=network，原话留在 ⟨⟩：${ls.reason}`);
+  ok(calls === 3, `断网时读类自动重试两次（共 ${calls} 次）`);
+  ok(m.kindOf(ls.reason) === 'network' && m.kindOf(ls) === 'network', 'kindOf 认得结果对象，也认得 reason 字符串');
+}
+{
+  /* 会话还没好（有凭证但 SDK 还没落定）≠ 没登录 */
+  const m = mkCtx('userS');
+  m._setTransportForTest(fakeCloud().as('userS'));
+  const ctxAuth = { readLocal: () => ({}), ensureSession: () => Promise.resolve({ ok: false, notReady: true, reason: '云端会话尚未就绪（已重试 5 次），请稍候再试' }), _app: () => Promise.resolve({}) };
+  const m2 = (() => {
+    const win = { HansenAuth: ctxAuth, HANSEN_VOCAB_ALL: { a: [{ en: 'cat', cn: '猫' }] }, setInterval: () => 0, clearInterval() {},
+      setTimeout, clearTimeout, console, Date, Math, JSON, Object, Promise, Error, String, Number, Array, isFinite, isNaN };
+    win.window = win; vm.createContext(win); vm.runInContext(src, win); return win.HansenPkRoom;
+  })();
+  const ls = await m2.listRooms();
+  ok(ls.ok === false && ls.kind === 'session' && ls.expired === false,
+     `★ 会话尚未就绪 → kind=session（稍后重试），不是"去登录"：${ls.reason}`);
+  const win3 = { HansenAuth: { readLocal: () => ({}), ensureSession: () => Promise.resolve({ ok: false, reason: 'not-signed-in' }), _app: () => Promise.resolve({}) },
+    HANSEN_VOCAB_ALL: { a: [{ en: 'cat', cn: '猫' }] }, setInterval: () => 0, clearInterval() {}, setTimeout, clearTimeout,
+    console, Date, Math, JSON, Object, Promise, Error, String, Number, Array, isFinite, isNaN };
+  win3.window = win3; vm.createContext(win3); vm.runInContext(src, win3);
+  const c3 = await win3.HansenPkRoom.createRoom({});
+  ok(c3.ok === false && c3.kind === 'expired', `★ 没登录 → kind=expired：${c3.reason}`);
+}
+{
+  /* 真实传输层：SDK 遇到权限/集合问题是 resolve 一个 {code}，必须查出来 */
+  function sdkDb(code) {
+    const r = () => Promise.resolve({ code, message: code === 'DATABASE_PERMISSION_DENIED' ? 'Permission denied' : 'Db or Table not exist', requestId: 'rq1' });
+    const q = { where: () => q, orderBy: () => q, limit: () => q, get: r };
+    return { collection: () => ({ where: () => q, limit: () => q, add: r, doc: () => ({ get: r, update: r, remove: r }) }) };
+  }
+  for (const [code, want] of [['DATABASE_PERMISSION_DENIED', /权限/], ['DATABASE_COLLECTION_NOT_EXIST', /还没有建/]]) {
+    const m = mkCtx('userC');
+    m._setDbForTest(sdkDb(code));
+    const ls = await m.listRooms();
+    ok(ls.ok === false && ls.kind === 'config' && /hansen_pk_rooms/.test(ls.reason) && want.test(ls.reason) && ls.reason.includes(code),
+       `★ 云端回 {code:${code}} → kind=config，说清是哪个集合、哪里不对：${ls.reason.slice(0, 60)}…`);
+    const cr = await m.createRoom({});
+    ok(cr.ok === false && cr.kind === 'config', `★ 开房也查 r.code（以前当成功，界面说"房开好了"）`);
+  }
+}
+
+/* ═══ ⑦ 静态合同 ═══ */
 {
   ok(/ensureSession/.test(codeOnly), '★ 云端访问经过 ensureSession（真实会话探测）');
   ok(/HansenAuth\._app|A\._app\(\)/.test(codeOnly), '★ 复用账号的 CloudBase 实例');
   ok(!/cloudbase\.init|signInAnonymously|vendor_cloudbase/.test(codeOnly),
      '★ 绝不自建实例、不自行 import SDK（v1028/v1059 两次事故的成因）');
   ok(/_setTransportForTest/.test(codeOnly), '★ 保留传输层注入口，云端逻辑可在本地验证');
-  /* 抢房必须是条件更新，不得"先读再写" */
   const joinBody = codeOnly.slice(codeOnly.indexOf('function joinRoom'), codeOnly.indexOf('function startHeartbeat'));
-  ok(/claim\(/.test(joinBody), '★ 进房走条件更新 claim()');
-  ok(/updated/.test(joinBody), '★ 依据影响行数判定抢房成败（不是先读再写）');
+  ok(/claim\(seat\)/.test(joinBody), '★ 进房 = 用固定 _id 的 add 抢座位（claim）');
+  const cl = codeOnly.slice(codeOnly.indexOf('function claim('), codeOnly.indexOf('function claim(') + 1500);
+  ok(/T\(\)\.add\(/.test(cl) && /T\(\)\.read\(/.test(cl) && /nonce/.test(cl),
+     '★ 抢占失败后按 _id 读回、看 nonce 判定（重复 _id 的报错文本没人见过，不能只信 add）');
+  ok(!/\.where\([^)]*\)\s*\.update\(/.test(codeOnly), '★ 没有 where().update()（基础权限下客户端批量更新会被拒）');
+  const rt = codeOnly.slice(codeOnly.indexOf('function realTransport'), codeOnly.indexOf('var NET_TIMEOUT_MS'));
+  ok((rt.match(/chk\('/g) || []).length >= 6, '★ 真实传输层每个操作都查 r.code（chk）');
+}
+
+/* ═══ ⑧ 隐私与名字 ═══ */
+{
+  const cloud = fakeCloud();
+  const host = mkCtx('h8', { phone: '13800001111', username: 'kid_h8' });
+  const guest = mkCtx('g8', { phone: '13900002222', username: 'kid_g8' });
+  host._setTransportForTest(cloud.as('h8')); guest._setTransportForTest(cloud.as('g8'));
+  const made = await host.createRoom({ mode: 'A' });
+  host.waitForOpponent(made.roomId, () => {});
+  await guest.joinRoom(made.roomId);
+  const all = JSON.stringify([...cloud.docs.values()]);
+  ok(!/13800001111|13900002222|kid_h8|kid_g8/.test(all),
+     '★ 所有人都能读的房间集合里**没有手机号、没有用户名**（身份键是 u+uid）');
+  const r = cloud.docs.get(made.roomId);
+  ok(r.hostId === 'uh8' && r.hostName === 'h8的名字' && r.guestName === 'g8的名字',
+     `★ 名字是资料里的真名字（以前人人都叫「无名蜂」）：${r.hostName} / ${r.guestName}`);
 }
 
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

@@ -91,7 +91,7 @@
      快照里没有 user_info 的（老快照、或缓存已丢后上传的），**每次登录都把本机 uid 缓存删掉**，
      之后会话探测拿不到 uid，天梯一直「云端会话尚未就绪」。
      它们和凭证一样是"这台设备、这次登录"的状态，不是玩家数据。 */
-  var SDK_KEY_RE=/^(?:credentials|user_info|lang|access_token(?:_expire)?|refresh_token|login_type|anonymous_uuid|token_type|device_id|x-tcb-|x_tcb_|tcb[_-]|cloudbase)/i;
+  var SDK_KEY_RE=/^(?:credentials|user_info|lang|access_token|access_token_expire|refresh_token|login_type|anonymous_uuid|token_type)_|^device_id$|^x[-_]tcb[-_]|^tcb[_-]|^cloudbase/i;
   function sdkKey(k){
     if(typeof k!=='string'||!k)return false;
     if(SDK_KEY_RE.test(k))return true;
@@ -458,7 +458,8 @@
     items.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
     sumItems.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
     if(o.checksum!==checksum(stableItems(sumItems)))throw new Error('校验和不匹配，备份可能不完整或被改动');
-    return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:o.checksum};
+    /* 丢掉 SDK 键后按剩下的条目重算校验和，返回的对象自己也能再通过校验 */
+    return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:checksum(stableItems(items))};
   }
   /* 🔴v1090 双保险：恢复/回滚同样不许碰凭证。
      ownedKey 已经排除了，但 transientKey/derivedKey 是另外两条通路，
@@ -473,7 +474,8 @@
     if(!Array.isArray(list)||list.length>MAX_ITEMS*2)throw new Error('恢复日志快照数量无效');
     var seen={},total=0,out=[];
     list.forEach(function(x){
-      if(!x||typeof x!=='object'||!rawEntryAllowed(x.key)||typeof x.value!=='string')throw new Error('恢复日志含非法玩家键');
+      /* v1164：v1163 及以前的日志里可能带着 SDK 键 —— 认它（校验和要算），但 restoreRaw 绝不写回 */
+      if(!x||typeof x!=='object'||!(rawEntryAllowed(x.key)||sdkKey(x.key))||typeof x.value!=='string')throw new Error('恢复日志含非法玩家键');
       if(seen[x.key])throw new Error('恢复日志含重复键：'+x.key);seen[x.key]=1;
       var bytes=x.value.length*2;if(bytes>MAX_VALUE)throw new Error('恢复日志单项过大：'+x.key);total+=bytes;
       if(total>MAX_TOTAL*2)throw new Error('恢复日志快照总体积过大');
@@ -506,7 +508,7 @@
     var remove=[];
     /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk4=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk4.length;i++){var k=_lsk4[i];if(rawEntryAllowed(k))remove.push(k);}
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('原始玩家快照清理失败：'+k);});
-    list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
+    list.forEach(function(x){if(credentialKey(x.key))return;localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
   function readJournal(){
     var raw=localStorage.getItem(RESTORE_JOURNAL);if(raw===null)return null;

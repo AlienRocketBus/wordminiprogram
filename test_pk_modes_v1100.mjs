@@ -28,43 +28,84 @@ console.log('三种对战模式 v1100');
 
 const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
 
-function mk(mode) {
-  const doc = { _id: 'R1', hostId: 'H', guestId: 'G', mode, round: 0, winners: [], wordCount: 3, roundAt: 0 };
-  const db = {
-    read: async () => JSON.parse(JSON.stringify(doc)),
-    claim: async (id, g, p) => {
-      for (const k of Object.keys(g)) if (doc[k] !== g[k]) return { updated: 0 };
-      Object.assign(doc, p); return { updated: 1 };
-    },
-    patch: async (id, d) => { Object.assign(doc, d); return { updated: 1 }; },
-    add: async () => ({ id: 'R1' }), list: async () => [], remove: async () => ({})
+/* 🔴v1164：以前的假实现一个对象答所有 id、什么都让写 ——
+   真数据库里客人改不了房主的文档，于是"客人抢答"在真机上永远写不进去，测试却一直绿。
+   现在：一个照真数据库能力做的存储（_id 唯一、只能改自己建的），两个玩家各一个模块实例。 */
+function store() {
+  const docs = new Map();
+  const clone = o => JSON.parse(JSON.stringify(o));
+  return {
+    docs,
+    as(uid) {
+      return {
+        read: async id => (docs.has(id) ? clone(docs.get(id)) : null),
+        add: async d => { await null; if (docs.has(d._id)) throw Object.assign(new Error('E11000 duplicate key'), { code: 'DATABASE_DUPLICATE_WRITE', cloud: true });
+          docs.set(d._id, { ...clone(d), _openid: uid }); return { id: d._id }; },
+        patch: async (id, d) => { const x = docs.get(id); if (!x || x._openid !== uid) return { updated: 0 }; docs.set(id, { ...x, ...clone(d) }); return { updated: 1 }; },
+        remove: async id => { const x = docs.get(id); if (!x || x._openid !== uid) return { deleted: 0 }; docs.delete(id); return { deleted: 1 }; },
+        list: async q => [...docs.values()].filter(d => Object.keys(q || {}).every(k => d[k] === q[k])).map(clone),
+        listOpen: async () => []
+      };
+    }
   };
+}
+function player(db, who) {
   const ctx = { window: {}, document: { addEventListener() {} }, console, Date, Math, JSON,
-    Promise, Error, String, Number, Array, Object, setTimeout, clearTimeout, setInterval, clearInterval,
-    localStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
+    Promise, Error, String, Number, Array, Object, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
+    isFinite, isNaN, localStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
   ctx.window = ctx; vm.createContext(ctx); vm.runInContext(src, ctx);
   const S = ctx.window.HansenPkRoom;
-  S._setTransportForTest(db);
-  return { S, doc };
+  S._setTransportForTest(db.as(who)); S._setMeForTest({ id: who, name: who });
+  return S;
+}
+/* 一局已经开打的房：房间归房主 H，座位归客人 G */
+function mk(mode) {
+  const db = store();
+  db.docs.set('R1', { _id: 'R1', proto: 2, kind: 'room', _openid: 'H', hostId: 'H', guestId: 'G', status: 'playing',
+                      seat: 0, mode, wordCount: 3, createdAt: Date.now(), heartbeatAt: Date.now() });
+  db.docs.set('R1_s0', { _id: 'R1_s0', proto: 2, kind: 'seat', _openid: 'G', roomId: 'R1', epoch: 0, guestId: 'G', guestBeat: Date.now() });
+  return { db, H: player(db, 'H'), G: player(db, 'G'), S: player(db, 'H') };
 }
 
-/* ① 抢答原子性 —— 命门 */
+/* ① 抢答原子性 —— 命门（两台设备同时提交） */
 {
-  const { S } = mk('C');
-  const grab = (who) => { S._setMeForTest({ id: who, name: who }); return S.claimRound('R1', 0); };
-  const [a, b] = await Promise.all([grab('H'), grab('G')]);
+  const { H, G, db } = mk('C');
+  const [a, b] = await Promise.all([H.claimRound('R1', 0), G.claimRound('R1', 0)]);
   const firsts = [a, b].filter(x => x.first).length;
   ok(firsts === 1, `★ 两人同时提交，只有一个算"先"（实得 ${firsts} 个）—— 抢答原子性`);
-  ok(a.winner === b.winner, '★ 双方看到的赢家一致（不会各说各话）');
+  ok(a.winner === b.winner && !!a.winner, '★ 双方看到的赢家一致（不会各说各话）');
+  ok([...db.docs.keys()].filter(k => /_w0$/.test(k)).length === 1, '★ 这一词只留下一条裁决（固定 _id，重复写被数据库拒绝）');
+  ok(db.docs.get('R1').winners === undefined, '★ 客人没有去改房主的房间文档（各写各的）');
+}
+
+/* ①b 客人先拼对 —— 以前客人写不进房主的文档，在真机上永远"慢一步" */
+{
+  const { H, G } = mk('A');
+  const g = await G.claimRound('R1', 0);
+  const h = await H.claimRound('R1', 0);
+  ok(g.ok && g.first === true && g.score === 100, '★ 客人先拼对 → 客人拿下这一词');
+  ok(h.ok && h.first === false && h.winner === 'guest', '★ 房主随后提交 → 看到是客人赢的');
+  const st = await H.roundState('R1');
+  ok(st.ok && st.round === 1 && st.winners[0] === 'guest' && st.mySide === 'host', '★ 房主轮询到的回合和赢家与客人一致');
+}
+
+/* ①c 一边超时推进、一边刚好拼对 —— 只能有一个结论 */
+{
+  const { H, G } = mk('C');
+  const [sk, cl] = await Promise.all([H.skipRound('R1', 0), G.claimRound('R1', 0)]);
+  const hs = await H.roundState('R1'), gs = await G.roundState('R1');
+  ok(hs.winners.length === 1 && JSON.stringify(hs.winners) === JSON.stringify(gs.winners),
+     `★ 超时推进和抢答撞在一起，两边看到同一个结论（${JSON.stringify(hs.winners)}）`);
+  ok((sk.skipped === true) !== (cl.first === true), '★ 要么算超时、要么算客人拿下，不会两个都成立');
+  const over = await H.claimRound('R1', 3);
+  ok(over.ok === false, '★ 超出本局词数的回合不受理（一局最多 N 词）');
 }
 
 /* ② 各模式的计分 */
 for (const [mode, wantSlow] of [['A', 0], ['B', 80], ['C', 60]]) {
-  const { S } = mk(mode);
-  S._setMeForTest({ id: 'H', name: '快' });
-  const fast = await S.claimRound('R1', 0);
-  S._setMeForTest({ id: 'G', name: '慢' });
-  const slow = await S.claimRound('R1', 0);
+  const { H, G } = mk(mode);
+  const fast = await H.claimRound('R1', 0);
+  const slow = await G.claimRound('R1', 0);
   ok(fast.score === 100, `${mode}: 先拼对拿 100 分`);
   ok(slow.score === wantSlow,
      `★ ${mode}: 慢的拿 ${slow.score} 分` + (wantSlow === 0 ? '（纯竞技，天梯用它）' : '（拼对就有分，弱者不至于 0 分退坑）'));
