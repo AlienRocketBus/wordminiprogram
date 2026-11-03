@@ -20,7 +20,9 @@ const SHELL = [
   './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1163', './hansen_onboarding.js?v=1163', './hansen_theme_shop.js',
   './hansen_season.js?v=1163', './hansen_cinema_themes.js?v=1163', './hansen_diamond_shop.js?v=1163', './hansen_gem_system.js',
   './hansen_canonical_progress.js?v=1163', './hansen_crystal.js', './hansen_cards.js?v=1163', './hansen_gacha.js?v=1163', './hansen_land_cards.js?v=1163', './hansen_round_reward.js?v=1163', './hansen_round_bar.js?v=1163', './hansen_pet_showcase.js?v=1163', './hansen_quest_global.js?v=1163', './hansen_island_upgrade.js?v=1163', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1163', './hansen_spell_practice.js?v=1163', './hansen_review.js?v=1163', './hansen_wrong_overview.js?v=1163', './hansen_backup_v944.js?v=1163', './hansen_accessibility.js?v=1163',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1163', './hansen_mylearning.js?v=1163', './hansen_palette.js?v=1163', './hansen_boss_theme.js?v=1163', './hansen_econ_guide.js?v=1163', './hansen_perf_v944.js?v=1163'
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1163', './hansen_mylearning.js?v=1163', './hansen_palette.js?v=1163', './hansen_boss_theme.js?v=1163', './hansen_econ_guide.js?v=1163', './hansen_perf_v944.js?v=1163',
+  // v1165 答错小课：岛页用这个精确地址加载。不在外壳里时，离线进岛（运行时缓存被挤掉后）小课卡就悄悄没了。
+  './hansen_mistake_lesson_v1165.js?v=1163'
 ];
 
 async function trim(cacheName, maxEntries) {
