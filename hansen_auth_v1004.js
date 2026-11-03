@@ -1144,14 +1144,23 @@
   }
 
   var _lastOkAt = 0;   /* 上次探测成功的时间：30 秒内又来问就少记几行，别把出错时的轨迹挤掉 */
+  var _inflight = null;
+  /* 同一时刻只探一次：房间心跳、轮询、云存档常常同时来问，共用这一次的结果 */
   function ensureSession() {
-    T('ensureSession 开始', 'isSignedIn=' + isSignedIn());
+    if (_inflight) return _inflight;
+    var p = ensureSessionOnce();
+    _inflight = p;
+    p.then(function () { if (_inflight === p) _inflight = null; });
+    return p;
+  }
+  function ensureSessionOnce() {
+    var quiet = (Date.now() - _lastOkAt) < 30000;
+    if (!quiet) T('ensureSession 开始', 'isSignedIn=' + isSignedIn());
     if (!isSignedIn()) {
       T('结论', '本机没有登录记录 → 需要先登录');
       return Promise.resolve({ ok: false, notSignedIn: true, expired: false, notReady: false,
                                definite: false, kind: 'signin', reason: 'not-signed-in' });
     }
-    var quiet = (Date.now() - _lastOkAt) < 30000;
     if (!quiet) try {
       var _lc = readLocal();
       T('本地登录记录', 'method=' + (_lc.method || '无') +
@@ -1188,8 +1197,10 @@
     var RETRY_DELAYS = [120, 260, 500, 900];   /* 累计约 1.8 秒 */
 
     var core = auth().then(function (a) {
-      if (typeof a.getLoginState !== 'function')
+      if (typeof a.getLoginState !== 'function') {
+        T('结论', '❗云端 SDK 没有 getLoginState（版本不对？）');
         return { ok: false, notReady: true, expired: false, definite: false, kind: 'other', reason: 'no-api' };
+      }
       var rescued = false, fixedInfo = false;
 
       /* 还没拿到会话：按 RETRY_DELAYS 再问；问到底仍没有就说"尚未就绪"（不判过期） */
@@ -1227,7 +1238,8 @@
       function probe(i) {
         return Promise.resolve().then(function () { return a.getLoginState(); }).then(function (st) {
           var uid = pickUid(st);
-          T('探测#' + (i + 1),
+          /* 刚成功过、这次又一次就成：只记一行结论 */
+          if (!(quiet && uid && i === 0)) T('探测#' + (i + 1),
             st == null ? '返回 null' :
             ('类型=' + (typeof st) + ' 键=[' + Object.keys(st).slice(0, 6).join(',') + ']' +
              ' uid=' + (uid || '(无)')));

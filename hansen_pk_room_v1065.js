@@ -883,15 +883,31 @@
         /* 🔴v1163：房间里的词数夹在 1~30；取不到词就先别占座 */
         var _ws = wordsFromSeed(R.seed, capOf(R));
         if (!_ws || !_ws.length) return failK('other', '词库还没加载好，刷新一下页面再进房');
-        var ep = num(R.seat), t = Date.now();
-        var seat = {
-          _id: seatIdOf(roomId, ep), proto: PROTO, kind: 'seat', nonce: nonce(),
-          roomId: roomId, epoch: ep,
-          guestId: u.id, guestName: u.name, guestRating: myRating(opts.rating),
-          createdAt: t, guestBeat: t,
-          guestReady: false, guestReadyAt: 0, guestScore: null, left: false, abandonWin: ''
-        };
-        return claim(seat).then(function (c) {
+        var ep = num(R.seat), seat = null;
+        function mkSeat() {
+          var t = Date.now();
+          return {
+            _id: seatIdOf(roomId, ep), proto: PROTO, kind: 'seat', nonce: nonce(),
+            roomId: roomId, epoch: ep,
+            guestId: u.id, guestName: u.name, guestRating: myRating(opts.rating),
+            createdAt: t, guestBeat: t,
+            guestReady: false, guestReadyAt: 0, guestScore: null, left: false, abandonWin: ''
+          };
+        }
+        /* 座位被占时再读几次房间：读到的可能是旧快照，房主其实已经换了新轮次（死座位） */
+        function grab(retries) {
+          seat = mkSeat();
+          return claim(seat).then(function (c) {
+            if (c.mine || retries <= 0) return c;
+            return (function look(n) {
+              return sleep(TM.lagMs).then(function () { return readRoom(roomId); }).then(function (R2) {
+                if (R2 && !R2.guestId && R2.status === 'open' && num(R2.seat) > ep) { ep = num(R2.seat); return grab(retries - 1); }
+                return (n > 1 && R2 && !R2.guestId) ? look(n - 1) : c;
+              });
+            })(2);
+          });
+        }
+        return grab(2).then(function (c) {
           if (!c.mine) return failK('taken', HUMAN.taken);
           /* 🔴v1136：进别人的房之前，先收掉自己开着的那间（否则别人进去房主不在） */
           if (_myRoomId && _myRoomId !== roomId) leaveMine();

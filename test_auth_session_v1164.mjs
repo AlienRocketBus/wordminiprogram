@@ -18,7 +18,7 @@
  *   ③ 凭证没了先请守护救一次，救回就成功；救不回才过期；每次探测只救一次
  *   ④ 有会话没 uid → getCurrentUser 补；不行用令牌 sub；都限时
  *   ⑤ user_info 缓存坏了 → 删掉再探，不登出；程序错误不算"鉴权失败"
- *   ⑥ 整个探测限 10 秒 → {notReady, slow, kind:'slow'}
+ *   ⑥ 整个探测限 10 秒 → {notReady, slow, kind:'slow'}；同时来问只探一次
  *   ⑦ 没登录 → kind 'signin'
  *   ⑧ 凭证守护：同一个 refresh_token 救援次数不清零、换了新 token 才清零、封顶 3 次
  *   ⑨ 备份不收、不恢复、不删 SDK 自己的键；老快照带着它们也能恢复（静默丢掉）；启动恢复日志同理
@@ -178,6 +178,17 @@ const counter = (states) => { let n = 0; const f = () => { const s = states[Math
      `★ 挂死 → {notReady, slow, kind:slow}（${r.kind}）`);
   ok(ms >= 9800 && ms < 12500, `★ 按真实时间约 10 秒返回（${ms}ms；测试桩把定时器压到 8ms 也不会提前）`);
   ok(/超时/.test(r.reason) && A.isSignedIn() === true, '文案说"超时"，且不登出：' + r.reason);
+}
+
+/* ═══ ⑥b 同时来问只探一次 ═══ */
+{
+  const { A } = loadAuth({ hansen_auth_v1004: marker(OLD), [CR]: CREDVAL });
+  let n = 0;
+  A._setAuthForTest({ getLoginState: () => { n++; return new Promise((r) => setTimeout(() => r({ user: { uid: 'P1' } }), 30)); } });
+  const rs = await Promise.all([A.ensureSession(), A.ensureSession(), A.ensureSession()]);
+  ok(rs.every((r) => r.ok && r.uid === 'P1') && n === 1, `★ 三处同时问 → 共用一次探测（问了 ${n} 次）`);
+  const again = await A.ensureSession();
+  ok(again.ok && n === 2, '上一次结束后再问 → 重新探测（不吃旧结果）');
 }
 
 /* ═══ ⑦ 没登录 ═══ */

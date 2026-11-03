@@ -440,9 +440,17 @@
           }).then(function(){ _cb = app; return app; });
         });
       },
+      /* 🔴v1164：数据库出错时 SDK **不抛错**，而是照常返回 {code, message}
+         （权限不够、集合没建、服务端忙都是这样）。以前：
+           · 写入返回 {code} 被当成"上传成功"→ 界面说已存到云端，其实一个字没写；
+           · 读取返回 {code} 被当成"云端没有存档"→ 登录对账以为云端是空的，
+             接着把本机进度传上去 —— 正好踩了 v1029 的红线「查不到 ≠ 没有」。
+         现在两处都把 {code} 变成真正的错误：写入如实失败；读取走"查不到"(exists:null)，什么都不动。 */
       put: function(docId, data){
         return this._app().then(function(app){
-          return app.database().collection(COLLECTION).doc(docId).set(data);
+          return app.database().collection(COLLECTION).doc(docId).set(data).then(function(r){
+            return dbChk(r, '写入云存档 ' + COLLECTION);
+          });
         });
       },
       get: function(docId){
@@ -457,6 +465,7 @@
         return self._app().then(function(app){
           var col = app.database().collection(COLLECTION);
           return col.doc(docId).get().then(function(res){
+            dbChk(res, '读取云存档 ' + COLLECTION);
             var row = res && res.data;
             if(Array.isArray(row)) row = row[0];
             if(row) return row;
@@ -469,6 +478,7 @@
           }).catch(function(e){
             /* 主路抛错 → 同样尝试 where，全失败才把原始错误抛出 */
             return col.where({ _id: docId }).limit(1).get().then(function(r2){
+              dbChk(r2, '读取云存档 ' + COLLECTION);
               var rows = r2 && r2.data;
               var one = Array.isArray(rows) ? rows[0] : rows;
               if(one) return one;
@@ -478,6 +488,15 @@
         });
       }
     };
+  }
+  /* v1164：{code} 结果 → 抛出人话 + 原话（⟨⟩ 里是云端原文，诊断面板显示它） */
+  function dbChk(r, what){
+    if(r && r.code){
+      var e = new Error(what + '失败 ⟨' + r.code + (r.message ? ' ' + String(r.message).slice(0, 80) : '') + '⟩');
+      e.code = r.code; e.cloud = true;
+      throw e;
+    }
+    return r;
   }
   function provider(){
     if(window.__HSN_CLOUD_MOCK_PROVIDER) return window.__HSN_CLOUD_MOCK_PROVIDER;  // 测试缝
