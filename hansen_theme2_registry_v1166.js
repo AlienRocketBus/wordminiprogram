@@ -5,7 +5,7 @@
  *   · 每个老主题（金币 6、钻石 IMAX 8 / 画廊 18、打Boss 3、拼写蜂 6、卡册底色 9、殿堂卡面 13）
  *     都映射到一个 2.0 主题；已买的东西一个不丢，老存档键一个不改。
  * 怎么用：
- *   · 浏览器：<script src="hansen_theme2_registry_vXXXX.js"> → window.HansenTheme2
+ *   · 浏览器：在 head 里用 script 标签同步引入本文件 → window.HansenTheme2
  *     HansenTheme2.apply() 在 <html> 上写 data-t2-theme / data-t2-base / data-t2-mode，
  *     配合 theme2_tokens.css 生效。只写属性，不改任何老样式 → 接入前对画面零影响。
  *   · node：createRequire 引入（构建 CSS、对比度门禁都读这一份）。
