@@ -1,0 +1,12 @@
+import { newCtx, closeBrowser, sleep, BASE, TV } from './lib.mjs';
+const ctx = await newCtx({}); const pg = await ctx.newPage();
+pg.on('console', m => console.log('console', m.text()));
+await pg.goto(BASE + '__mock/answer.html?theme=cosmos&s=q', { waitUntil: 'load' }); await sleep(800);
+await pg.evaluate(() => answer('right'));
+await sleep(180);
+const info = await pg.evaluate(() => [...document.querySelectorAll('.fx-p')].slice(0, 5).map(e => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return { cls: e.className, x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), op: cs.opacity, bg: cs.backgroundColor, tr: cs.transform.slice(0, 60), anims: e.getAnimations().length }; }));
+console.log(JSON.stringify(info, null, 1));
+const layer = await pg.evaluate(() => { const l = document.querySelector('.fx-layer'); if (!l) return null; const r = l.getBoundingClientRect(); const cs = getComputedStyle(l); return { r: [r.x, r.y, r.width, r.height], z: cs.zIndex, pos: cs.position, kids: l.children.length }; });
+console.log('layer', JSON.stringify(layer));
+await pg.screenshot({ path: `${TV}/out/dbg_fx.png` });
+await closeBrowser();

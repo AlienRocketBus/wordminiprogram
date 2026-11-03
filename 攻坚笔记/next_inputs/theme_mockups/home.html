@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>首页 · 主题2.0 样稿</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="common.css">
+<style>
+.hello{margin:16px 2px 12px}
+.hello h1{font:900 var(--fs-h1)/1.15 var(--font-display);color:var(--ink-1)}
+.hello p{margin-top:6px;font-size:var(--fs-lg);color:var(--ink-2);font-weight:600}
+.hello p b{color:var(--hi);font-weight:900}
+.go{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:18px 16px 18px 126px;min-height:176px;
+  background:linear-gradient(150deg,var(--hero-a),var(--hero-b));box-shadow:var(--e-2)}
+.go::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -4px 0 rgba(0,0,0,.14);pointer-events:none}
+.go .art{position:absolute;left:-2px;bottom:6px;width:122px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.28))}
+.go .glow{position:absolute;left:-40px;bottom:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,213,74,.55),transparent)}
+.spark{position:absolute;width:14px;height:14px;background:#fff;opacity:.85;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+.go .plate{display:inline-block;background:var(--plate);color:var(--on-plate);border-radius:var(--r-pill);padding:4px 12px;font-size:var(--fs-cap);font-weight:800}
+.go h2{margin-top:8px;font:900 24px/1.15 var(--font-display);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.22)}
+.go .sub{margin-top:4px;font-size:var(--fs-sm);font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.go .btn{margin-top:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mini{display:flex;align-items:center;gap:10px;padding:12px;min-height:76px}
+.mini img{width:52px;height:52px;flex:none}
+.mini b{display:block;font:900 17px/1.2 var(--font-display);color:var(--ink-1)}
+.mini span{font-size:var(--fs-sm);color:var(--ink-2);font-weight:600}
+.pet{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:12px}
+.pet img{width:64px;height:64px;flex:none}
+.pet .bar{height:10px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin-top:6px}
+.pet .bar i{display:block;height:100%;width:100%;transform-origin:left;transform:scaleX(.62);background:linear-gradient(90deg,var(--accent-1),var(--accent-2));border-radius:99px}
+.pet b{font:900 17px/1.2 var(--font-display)}
+.pet .t{font-size:var(--fs-sm);color:var(--ink-2);font-weight:600}
+.isles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.isle{border-radius:var(--r-lg);padding:12px 10px 10px;min-height:112px;background:linear-gradient(160deg,var(--a),var(--b));position:relative;box-shadow:var(--e-1);overflow:hidden}
+.isle .e{font-size:34px;line-height:1}
+.isle .n{position:absolute;left:8px;right:8px;bottom:8px;background:var(--plate);color:var(--on-plate);border-radius:12px;padding:6px 8px}
+.isle .n b{display:block;font:900 14px/1.15 var(--font-display)}
+.isle .n s{display:block;text-decoration:none;height:5px;border-radius:9px;background:rgba(255,255,255,.28);margin-top:5px;overflow:hidden}
+.isle .n s i{display:block;height:100%;width:100%;transform-origin:left;background:#fff;border-radius:9px}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true"></div>
+<div class="app">
+  <header class="topbar">
+    <div class="ava"><img src="assets/01.webp" alt=""><span class="lv">3</span></div>
+    <div class="who"><b>小明 · 森林小队</b><div class="xp" style="--p:.72"><i></i></div><div class="xp-t">180 / 250 经验</div></div>
+    <div class="chips"><span class="chip" id="coins"><script>document.write(ICON.coin)</script>1,280</span><span class="chip"><script>document.write(ICON.flame)</script>5天</span></div>
+  </header>
+
+  <section class="hello">
+    <h1 class="t-display">今天也来冒险吧！</h1>
+    <p><b>6</b> 个词等你复习 · <b>8</b> 个新词在食物岛</p>
+  </section>
+
+  <section class="go">
+    <span class="glow"></span><img class="art" src="assets/speaker_3d.webp" alt=""><i class="spark" style="right:18px;top:16px"></i><i class="spark" style="right:44px;top:40px;width:9px;height:9px;opacity:.7"></i><i class="spark" style="left:104px;top:20px;width:10px;height:10px;opacity:.6"></i>
+    <span class="plate">上次玩到 · 听音辨义</span>
+    <h2>继续：食物大冒险</h2>
+    <div class="sub">已掌握 23 / 56 个词</div>
+    <button class="btn btn-gold btn-lg" id="goBtn">▶ 开始冒险</button>
+  </section>
+
+  <div class="two">
+    <div class="card mini"><img src="assets/brain_explorer.webp" alt=""><div><b>今日复习</b><span>6 个词 · 约 3 分钟</span></div></div>
+    <div class="card mini"><img src="assets/chest_gold.webp" alt=""><div><b>每日宝箱</b><span class="hi" style="font-weight:800">可以领取！</span></div></div>
+  </div>
+
+  <div class="card pet"><img src="assets/pet_01.webp" alt=""><div style="flex:1"><b>星灵 · 裂晓微光</b><div class="t">再拿 <b class="hi">120</b> 经验就能进化</div><div class="bar"><i></i></div></div></div>
+
+  <div class="sec"><h3>我的岛屿</h3><a href="#">全部 27 座 ›</a></div>
+  <div class="isles">
+    <div class="isle t-green"><div class="e">🦁</div><div class="n"><b>动物</b><s><i style="transform:scaleX(.8)"></i></s></div></div>
+    <div class="isle t-orange"><div class="e">🍔</div><div class="n"><b>食物</b><s><i style="transform:scaleX(.41)"></i></s></div></div>
+    <div class="isle t-red"><div class="e">⚽</div><div class="n"><b>运动</b><s><i style="transform:scaleX(.12)"></i></s></div></div>
+  </div>
+</div>
+<nav class="nav">
+  <a class="on" href="#"><img src="assets/ic_home.webp" alt="">主页</a>
+  <a href="#"><img src="assets/ic_wrong.webp" alt="">错题<span class="dot">3</span></a>
+  <a href="#"><img src="assets/ic_review.webp" alt="">复习</a>
+  <a href="#"><img src="assets/ic_cards.webp" alt="">卡册</a>
+</nav>
+</body>
+</html>

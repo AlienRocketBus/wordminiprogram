@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="cosmos" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>主题 2.0 · 全部主题</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="common.css">
+<style>
+body{background:#d9dde8}body::before{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.th{border-radius:18px;overflow:hidden;color:var(--ink-1);box-shadow:0 4px 14px rgba(0,0,0,.18);
+  background:radial-gradient(120% 60% at 12% 0%,var(--neb-1),transparent 60%),radial-gradient(90% 50% at 100% 18%,var(--neb-2),transparent 60%),linear-gradient(180deg,var(--bg-3),var(--bg-2) 40%,var(--bg-1))}
+.th .bar{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;background:var(--chrome);color:var(--chrome-ink);font:900 13px/1.2 var(--font-display)}
+.th .bar .c{display:inline-flex;align-items:center;gap:3px;font:800 12px/1 var(--font-latin);padding:3px 7px;border-radius:99px;background:var(--surface-2);color:var(--ink-1)}
+.th .bar .c svg{width:14px;height:14px}
+.th .in{padding:8px 9px 10px}
+.th h4{font:900 16px/1.2 var(--font-display)}
+.th .s{font-size:12px;font-weight:700;color:var(--ink-2)}
+.th .cd{margin-top:6px;padding:7px 8px;border-radius:12px;background:var(--surface-1);border:1px solid var(--line)}
+.th .cd .a{font-size:13px;font-weight:800;color:var(--ink-1)} .th .cd .b{font-size:12px;font-weight:700;color:var(--ink-2)} .th .cd .x{font-size:12px;font-weight:700;color:var(--ink-3)} .th .cd .h{font:800 15px/1 var(--font-latin);color:var(--hi)}
+.th .bt{display:flex;gap:6px;margin-top:6px}
+.th .bt span{flex:1;text-align:center;padding:7px 0;border-radius:10px;font:900 13px/1 var(--font-display)}
+.th .g{background:linear-gradient(180deg,var(--accent-1),var(--accent-2));color:var(--on-accent)} .th .p{background:linear-gradient(180deg,var(--brand-1),var(--brand-2));color:var(--on-brand)}
+.th .ok{display:flex;gap:6px;margin-top:6px}
+.th .ok span{flex:1;text-align:center;padding:5px 0;border-radius:10px;font:900 12px/1 var(--font-display)}
+.th .ok .y{background:var(--good-surface);color:var(--on-good-surface);border:1.5px solid var(--good)} .th .ok .n{background:var(--bad-surface);color:var(--on-bad-surface);border:1.5px solid var(--bad)}
+.th .tl{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}
+.th .tl div{height:46px;border-radius:10px;background:linear-gradient(160deg,var(--a),var(--b));display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.th .tl div span{background:var(--plate);color:var(--on-plate);font:900 10.5px/1 var(--font-display);padding:3px 5px;border-radius:99px}
+.th .m{margin-top:6px;font:800 11px/1.3 var(--font-latin);color:var(--ink-2)}
+.hdr{padding:12px 12px 0;font:900 18px/1.3 var(--font-display);color:#1b2240}
+.hdr small{display:block;font:700 12px/1.4 var(--font-body);color:#3b4664}
+</style>
+</head>
+<body>
+<div class="hdr">主题 2.0 · 一套颜色角色，12 种主题<small>每个主题 35 对文字/图标配色都过了对比度门槛（文字 ≥ 4.5，图标/边框 ≥ 3）</small></div>
+<div class="grid" id="g"></div>
+<script src="theme.js"></script>
+<script>
+fetch('tokens_contrast.json').then(r=>r.json()).then(function(rep){
+  var order=['cosmos','violet','aurora','woods','cloud','sakura','cream','mint','lantern','snow','kidsday','boss_light'];
+  var em={cosmos:'🌌',violet:'🔮',aurora:'🌊',woods:'🌲',cloud:'☁️',sakura:'🌸',cream:'🍦',mint:'🌿',lantern:'🏮',snow:'❄️',kidsday:'🎈',boss_light:'🌤️'};
+  var h='';
+  order.forEach(function(k){var r=rep[k];
+    h+='<div class="th" data-theme="'+k+'"><div class="bar"><span>'+em[k]+' '+r.name+'</span><span class="c">'+ICON.coin+'1,280</span></div><div class="in">'
+     +'<h4>今天也来冒险吧！</h4><div class="s">6 个词等你复习</div>'
+     +'<div class="cd"><div class="a">fish /fɪʃ/</div><div class="b">中文：鱼</div><div class="x">第 6 / 10 题</div><div class="h">+12</div></div>'
+     +'<div class="bt"><span class="g">开始</span><span class="p">挑战</span></div>'
+     +'<div class="ok"><span class="y">✓ 答对</span><span class="n">✗ 再练</span></div>'
+     +'<div class="tl"><div class="t-orange"><span>听音辨义</span></div><div class="t-yellow"><span>挑战BOSS</span></div><div class="t-teal"><span>记忆翻牌</span></div></div>'
+     +'<div class="m">'+(r.kind==='season'?'新 · 季节主题 · ':r.kind==='boss'?'打Boss · ':'免费 · ')+(r.mode==='dark'?'暗色':'亮色')+' · 最低文字 '+r.min_text+' · 图标 '+r.min_nontext+' · '+(r.fail?('✗ '+r.fail):'✓ 全部达标')+'</div></div></div>';
+  });
+  document.getElementById('g').innerHTML=h;
+});
+</script>
+</body>
+</html>
