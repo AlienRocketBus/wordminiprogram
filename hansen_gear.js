@@ -366,6 +366,18 @@
   }
 
   // ===== 自动注入入口(用户菜单，仿主题商店) =====
+  /* v1165: 工具菜单按固定位置排（主题商店 10、装备 20），不再「谁的定时器后到谁插最前面」——以前两个模块都插在第一张卡前面，
+     手机慢一点顺序就可能对调。规则：插在第一张「没有位置号、或位置号比我大」的卡前面。 */
+  function placeBySlot(row, entry, slot){
+    entry.setAttribute('data-hsn-slot', String(slot));
+    var kids = row.children, before = null;
+    for(var i = 0; i < kids.length; i++){
+      var k = kids[i]; if(k === entry || !k.classList || !k.classList.contains('util-card')) continue;
+      var s = parseFloat(k.getAttribute('data-hsn-slot'));
+      if(isNaN(s) || s > slot){ before = k; break; }
+    }
+    row.insertBefore(entry, before);
+  }
   function injectEntry(){
     try{
       if(document.getElementById('hsnGearEntry')) return;
@@ -375,7 +387,7 @@
       entry.setAttribute('onclick','HansenGear.open()');
       // 🔴v648 装备菜单图标 emoji⚔️→新3D装备宝箱图(适中48px·高清512源·onerror回退⚔️)
       entry.innerHTML='<span class="u-icon"><img src="icons/ic_equip.webp" alt="" draggable="false" style="width:70px;height:70px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,-1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">装备</div>';
-      anyCard.parentElement.insertBefore(entry, anyCard);
+      placeBySlot(anyCard.parentElement, entry, 20);
     }catch(e){}
   }
 

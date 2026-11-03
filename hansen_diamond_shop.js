@@ -629,6 +629,18 @@
   }
 
   // ===== 自动注入入口 + 开机应用已装备主题 =====
+  /* v1165: 工具菜单按固定位置排（主题商店 10、装备 20），不再「谁的定时器后到谁插最前面」——以前两个模块都插在第一张卡前面，
+     手机慢一点顺序就可能对调。规则：插在第一张「没有位置号、或位置号比我大」的卡前面。 */
+  function placeBySlot(row, entry, slot){
+    entry.setAttribute('data-hsn-slot', String(slot));
+    var kids = row.children, before = null;
+    for(var i = 0; i < kids.length; i++){
+      var k = kids[i]; if(k === entry || !k.classList || !k.classList.contains('util-card')) continue;
+      var s = parseFloat(k.getAttribute('data-hsn-slot'));
+      if(isNaN(s) || s > slot){ before = k; break; }
+    }
+    row.insertBefore(entry, before);
+  }
   function injectEntry(){
     try{
       if(document.getElementById('hsnDiaEntry')) return;
@@ -637,7 +649,7 @@
       entry.className='util-card'; entry.id='hsnDiaEntry';
       entry.setAttribute('onclick','HansenDiamondShop.open()');
       entry.innerHTML='<span class="u-icon"><img src="icons/ic_diamond.webp" alt="" draggable="false" style="width:72px;height:72px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">主题商店</div>';
-      anyCard.parentElement.insertBefore(entry, anyCard);
+      placeBySlot(anyCard.parentElement, entry, 10);
     }catch(e){}
   }
   /* 🔴 v543: v540-542 旧 IMAX id → 嘉年华新 id 一次性迁移(按相同价位对位, 已购/已装备无损平移) */
