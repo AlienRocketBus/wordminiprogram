@@ -65,7 +65,7 @@ setTimeout(function(){shown=false;show();},1200);
   document.addEventListener('error',function(e){var x=e&&e.target;if(x&&x.tagName==='IMG'){try{retry(x);}catch(_e){}}},true);
 })();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🐝 拼写对战 Spelling Bee · 原型</title>
+<title>🐝 拼写蜂 Spelling Bee</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--gold:#fbbf24;--gold2:#f59e0b;--ink:#eef2f7;--ink2:#aebbd4;--ink3:#7e8aa6;
@@ -1883,6 +1883,8 @@ var curWord=null,target='',yourInput='',botProg=0,botTimer=null,raceOver=false,s
 var wKeys=0,wFirst=0,wLast=0,youIntervals=0,youSpan=0,youCorrectTotal=0,youRaceTime=0;
 var missedWords=[],_botStumbled=false,_bestMem=0;
 var youStreak=0,isReplay=false,paused=false,pausedAt=0,curMs=600;
+/* 🔴v1165 这一题真开赛了没有（听单词那一段还没开赛）；停着的时候单词念完了，开赛先攒着，点「继续比赛」再开 */
+var raceStarted=false,_pendingStart=null;
 /* ===== 音效(仅声音·不加震动) ===== */
 var _ac=null;
 function _audio(){if(!_ac){try{_ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(_ac&&_ac.state==='suspended'){try{_ac.resume();}catch(e){}}return _ac;}
@@ -2125,7 +2127,7 @@ function nextWord(){
   if(_sbFocus){if(_sbFocus.pending||_sbFocus.acked)return;curWord=_sbFocus.word;}
   else{if(qIdx>=totalQ){endMatch();return;}curWord=pool[qIdx];}
   target=letters(curWord);
-  yourInput='';botProg=0;raceOver=false;wKeys=0;wFirst=0;wLast=0;_botStumbled=false;
+  yourInput='';botProg=0;raceOver=false;wKeys=0;wFirst=0;wLast=0;_botStumbled=false;raceStarted=false;_pendingStart=null;
   $('qPill').textContent=_sbFocus?('💎 已拼对 '+_sbFocus.wins+' / '+_sbFocus.required+' · 第 '+(_sbFocus.attempts+1)+' 轮'):(isReplay?'🔁 复习 '+(qIdx+1)+' / '+totalQ:'第 '+(qIdx+1)+' / '+totalQ+' 题');
   $('laneYou').className='lane you';$('laneBot').className='lane bot';
   $('sttYou').textContent='拼写中…';$('sttBot').textContent='拼写中…';
@@ -2145,8 +2147,12 @@ function nextWord(){
      兜底: 音频坏了/TTS不响 → speakThen 内 3.5 秒强制开赛, 绝不卡死。
      "🔊 再听一次" 只是重播, 不会重开赛(speakThen 的回调按题序号只认最后一次·且只触发一次)。 */
   var _startRace=function(){
+    if(raceOver) return;
+    if(paused){ _pendingStart=_startRace; return; }      /* 🔴v1165 退出确认框开着：等「继续比赛」再开赛 */
+    raceStarted=true; _pendingStart=null;
     started=Date.now(); startTimer();                    /* 玩家计时从【听完】才开始 */
     $('sttYou').textContent='拼写中…'; $('sttBot').textContent='拼写中…';
+    clearTimeout(botTimer);                              /* 🔴v1165 永远只有一条机器人计时器 */
     botTimer=setTimeout(function(){botStep(msPerChar);},500+Math.random()*500);
   };
   if(S.mode==='listen'){
@@ -2158,7 +2164,7 @@ function nextWord(){
   }
 }
 function botStep(ms){
-  if(raceOver)return;
+  if(raceOver||paused)return;                            /* 🔴v1165 停着时机器人也不打字 */
   if(S.bot==='easy'&&!_botStumbled&&botProg>0&&botProg<target.length-1&&Math.random()<0.2){
     _botStumbled=true;botProg=Math.max(0,botProg-1);renderBot();
     botTimer=setTimeout(function(){botStep(ms);},ms*(1.6+Math.random()*0.8));return;
@@ -2340,8 +2346,12 @@ $('startBtn').onclick=function(){_unlockSbAudio();startMatch();};
   try{ var _tip=document.getElementById('sbWordTip'); if(_tip) _tip.textContent=(_sbIsland&&ISLAND_CN[_sbIsland])?(ISLAND_CN[_sbIsland]+'岛词库'):'全部词库'; }catch(_te){}
 })();
 $('exitBtn').onclick=function(){if(!raceOver){paused=true;pausedAt=Date.now();clearTimeout(botTimer);stopTimer();}$('exitConfirm').classList.add('on');};
-$('exitNo').onclick=function(){$('exitConfirm').classList.remove('on');if(paused){paused=false;started+=Date.now()-pausedAt;startTimer();botTimer=setTimeout(function(){botStep(curMs);},curMs);}};
-$('exitYes').onclick=function(){$('exitConfirm').classList.remove('on');paused=false;raceOver=true;clearTimeout(botTimer);stopTimer();$('laneRes').classList.remove('on');show('setup');};
+/* 🔴v1165 继续比赛：还没开赛（停在听单词那一段）就不碰计时器和机器人；停着时单词念完了 → 现在开赛；
+   已经开赛 → 接着计时、机器人接着打（先清掉旧的，永远只有一条，以前会多开一条、机器人快一倍） */
+$('exitNo').onclick=function(){$('exitConfirm').classList.remove('on');if(paused){paused=false;
+  if(_pendingStart){var f=_pendingStart;_pendingStart=null;f();}
+  else if(raceStarted&&!raceOver){started+=Date.now()-pausedAt;startTimer();clearTimeout(botTimer);botTimer=setTimeout(function(){botStep(curMs);},curMs);}}};
+$('exitYes').onclick=function(){$('exitConfirm').classList.remove('on');paused=false;_pendingStart=null;raceOver=true;clearTimeout(botTimer);stopTimer();$('laneRes').classList.remove('on');show('setup');};
 $('againBtn').onclick=function(){_unlockSbAudio();$('over').classList.remove('on');startMatch();};
 $('redrillBtn').onclick=function(){_unlockSbAudio();var snap=missedWords.slice();if(!snap.length)return;$('over').classList.remove('on');startMatch(snap);};
 $('backBtn').onclick=function(){$('over').classList.remove('on');show('setup');};
