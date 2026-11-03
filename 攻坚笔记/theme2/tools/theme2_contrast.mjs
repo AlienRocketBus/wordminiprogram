@@ -2,7 +2,7 @@
 // 主题 2.0 对比度门禁：每个主题 × 每对“字/图标压在什么上”的组合算 WCAG 对比度。
 //   正文 ≥ 4.5，大字（≥24px 或 ≥18.66px 加粗）≥ 3，图标/边框/焦点框 ≥ 3。
 //   有一对不达标 → 退出码 1（不让上线）。
-// 用法：node 攻坚笔记/theme2/tools/theme2_contrast.mjs [--json 报告路径] [--quiet]
+// 用法：node 攻坚笔记/theme2/tools/theme2_contrast.mjs [--json 报告路径 [--full]] [--quiet]
 // 放在 攻坚笔记/ 下：不会被部署。
 import fs from 'node:fs';
 import path from 'node:path';
@@ -107,7 +107,11 @@ if (isMain) {
   if (ji > 0) {
     const out = path.resolve(process.argv[ji + 1]);
     fs.mkdirSync(path.dirname(out), { recursive: true });
-    const slim = { ...rep, themes: Object.fromEntries(Object.entries(rep.themes).map(([k, v]) => [k, { ...v, all: v.all.map(({ fgColor, bgColor, ...x }) => ({ ...x, fgColor, bgColor })) }])) };
+    // 默认只写每个主题的汇总和不达标项（几 KB）；--full 才写全部 4842 对（约 1 MB，别提交）
+    const full = process.argv.includes('--full');
+    const slim = { ok: rep.ok, fails: rep.fails, pairs: rep.pairs, notDistinct: rep.notDistinct,
+      minDistinct: rep.distinct.reduce((a, b) => (a && a.deltaE < b.deltaE ? a : b), null),
+      themes: Object.fromEntries(Object.entries(rep.themes).map(([k, v]) => [k, full ? v : { name: v.name, family: v.family, mode: v.mode, base: v.base, pairs: v.pairs, fail: v.fail, minText: v.minText, minIcon: v.minIcon, bad: v.bad }])) };
     fs.writeFileSync(out, JSON.stringify(slim, null, 1));
     fs.writeFileSync(out.replace(/\.json$/, '.md'), toMarkdown(rep));
   }
