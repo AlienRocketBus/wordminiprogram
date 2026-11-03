@@ -3985,7 +3985,11 @@ document.querySelectorAll('.island').forEach(el=>{
     // 1) 显式记录的 lastIslandKey
     let lastKey = localStorage.getItem('lastIslandKey');
     let lastTime = parseInt(localStorage.getItem('lastIslandTime')||'0');
-    
+    /* 🔴v1165 孩子真点过的岛说了算：lastIslandKey 只有 openIsland / continueLastIsland（孩子真点岛）会写。
+       以前还要和各岛存档的 lastSaveTime 比谁新 —— 而后台也会写存档（星海预热、云端恢复、升级盖时间戳……），
+       卡片就常常指向孩子根本没玩的岛（多半是 👑星海终战）。有记录就直接用；没有记录才扫存档猜一个。 */
+    if(lastKey && ISLAND_META[lastKey]) return {key: lastKey, time: lastTime};
+
     // 2) 扫描所有岛的进度数据, 找最近更新的
     let bestKey = null, bestTime = lastTime;
     for(const k in ISLAND_META){
