@@ -121,9 +121,12 @@ const DRIVERS = {
     await __w(() => document.querySelector('#bbArea .bubble'), 3000);
     const miss = bubbleTarget, wrongB = [...document.querySelectorAll('#bbArea .bubble')].find(b => b.dataset.en !== miss.en);
     const wrongEn = wrongB.dataset.en, wrongIdx = allW.findIndex(w => w.en === wrongEn);
+    /* 只看这一次答错让两个词各多了几次。同一页前面几个游戏答错的词（再考不清错题本）可能正好就是这里的
+       目标词或干扰词，直接比绝对数会时过时不过（复查时实测 distractor=2、target=3） */
+    const before = { target: S.wrongs[allW.indexOf(miss)] || 0, distractor: S.wrongs[wrongIdx] || 0 };
     wrongB.click();
     const card = await __w(__card, 2000);
-    const marks = { target: S.wrongs[allW.indexOf(miss)] || 0, distractor: S.wrongs[wrongIdx] || 0 };
+    const marks = { target: (S.wrongs[allW.indexOf(miss)] || 0) - before.target, distractor: (S.wrongs[wrongIdx] || 0) - before.distractor };
     __tapCard();
     const seen = [];
     for (let k = 0; k < 4 && bubbleActive; k++) {
@@ -218,7 +221,7 @@ try {
   ok(res.cloze.r.score.done === 1, '完形：再考题不算进「答对」 ' + JSON.stringify(res.cloze.r.score));
   ok(res.moles.r.lives[1] === res.moles.r.lives[0] - 1, '地鼠：第一次答错照常扣 1 命');
   ok(res.moles.r.score.hit === 1 && res.moles.r.score.score === 10, '地鼠：再考题不加分 ' + JSON.stringify(res.moles.r.score));
-  ok(res.bubble.r.marks.target === 1 && res.bubble.r.marks.distractor === 0, '泡泡：答错记到没认出的目标词上，不记干扰词 ' + JSON.stringify(res.bubble.r.marks));
+  ok(res.bubble.r.marks.target === 1 && res.bubble.r.marks.distractor === 0, '泡泡：答错记到没认出的目标词上(+1)，干扰词不变(+0) ' + JSON.stringify(res.bubble.r.marks));
   ok(res.bubble.r.score.done === 1, '泡泡：再考题不算进完成数 ' + JSON.stringify(res.bubble.r.score));
   ok(res.scramble.r.score.correct === 2, '拼词：原地拼对照旧算 1 个 + 另一题 1 个，本轮末再考不再加 (=2) ' + JSON.stringify(res.scramble.r.score));
   ok(res.typing.r.score.done === 1 && res.typing.r.score.times === 1, '打字：再考题不进速度纪录 ' + JSON.stringify(res.typing.r.score));

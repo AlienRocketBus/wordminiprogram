@@ -329,11 +329,13 @@
           if(typeof save === 'function'){ try{ save(); }catch(_gateSave){} }
           return false;
         }
+        /* 🔴v1165: 毕业这一刻错题本里还有没有它。早就清零的词，清零那天已经发过 +15 毕业金，这次不能再发 */
+        var hadWrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[idx] : 0) > 0;
         delete srs[idx];
         if(window.S.wrongs) delete window.S.wrongs[idx];
         graduated = true;
         /* 🔴v963刺二：毕业统一事件(自评+证据路径)→奖励模块发毕业金并调度幽灵巡检 */
-        try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.onGraduated === 'function') HansenReviewRewardsV963.onGraduated(idx); }catch(_gradEvt){}
+        try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.onGraduated === 'function') HansenReviewRewardsV963.onGraduated(idx, { hadWrong: hadWrong }); }catch(_gradEvt){}
       } else {
         e.box = nb; e.due = _addDaysYMD(SRS_GAP[nb]); e.last = _todayYMD();
         srs[idx] = e;
@@ -371,6 +373,8 @@
       var srs = _ensureSrs();   // 答错的词在这里进计划（盒0，今天到期）
       if(!srs) return null;
       if(correct !== true) return { advanced:false, reason:'missed', planned: !!srs[String(i)] };
+      /* 🔴v1165: 本轮末「再考一次」是刚看过答案马上再答，不算记住了 → 不升盒（模板 __hmlMark 打的标记） */
+      if(window.__hmlRetryAns) return { advanced:false, reason:'retry' };
       var key = String(i), t = _todayYMD();
       var wrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[i] : 0);
       var e = srs[key];

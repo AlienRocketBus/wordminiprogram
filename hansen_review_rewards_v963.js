@@ -518,10 +518,15 @@
   }
 
   /* 🔴刺二：毕业统一事件(hansen_review自评毕业分支调用)——毕业金+巡检调度一站式 */
-  function onGraduated(idx){
+  function onGraduated(idx, info){
     try{
       var slot = slotOf(idx);
-      payGraduation(slot);          /* 内部自带隔天资格+幂等收据+巡检调度 */
+      /* 🔴v1165: 复习计划和错题本分开以后，一个词会「毕业」两次：错题本隔天清零那天（发过 +15），
+       * 和后来复习计划升满盒子（今日复习自评）。后一次错题本里已经没有它 → 只排巡检，不再发第二份毕业金。
+       * 没发成（当天造的错词 / 当天已发）也照样进巡检，与真实答题毕业(吸收器)同一规则。
+       * 不带 info 的老调用照旧按「有错词」发。 */
+      var paid = !(info && info.hadWrong === false) && payGraduation(slot);   /* 内部自带隔天资格+幂等收据+巡检调度 */
+      if(!paid) schedulePatrol(slot, 1);
       refreshUI();
     }catch(e){}
   }

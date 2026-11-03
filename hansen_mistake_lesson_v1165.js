@@ -7,7 +7,8 @@
  *   1. lesson(idx, next)  答错后显示和答对一样的揭晓卡（图/英文/音标/中文）并重读，
  *                          约 2.5 秒或点一下就继续。重读走 window.speak()（全局静音、音量规则照旧）。
  *   2. miss / requeue     记下本轮答错的词；本轮题目做完时，把每个错词再考一次（只一次）。
- *   3. isRetry            再考的那道题不算进本轮得分/命数/正确率/纪录（金币、错题本照原规则走 markAnswer）。
+ *   3. isRetry            再考的那道题不算进本轮得分/命数/正确率/纪录。它是「刚看过答案马上再答」，
+ *                          所以也不算纠错：不扣错题本、复习计划不升盒、没有 +2 纠错金（见模板 __hmlMark）。
  *   4. attach(mode, el)   结算页列出这次答错的词（每个带 🔊），加「练这 N 个词」按钮，
  *                          进入现成的复习中心（只练这几个词）。
  * 缺了这个文件，各游戏退回原来的定时推进，不会卡住。
@@ -32,11 +33,11 @@
   }
   function round(mode){
     mode = String(mode || 'game');
-    if(!rounds[mode]) rounds[mode] = { missed: [], retried: {} };
+    if(!rounds[mode]) rounds[mode] = { missed: [], retried: {}, pending: {} };
     return rounds[mode];
   }
 
-  function start(mode){ rounds[String(mode || 'game')] = { missed: [], retried: {} }; }
+  function start(mode){ rounds[String(mode || 'game')] = { missed: [], retried: {}, pending: {} }; }
   function miss(mode, idx){
     var i = validIdx(idx); if(i < 0) return;
     var r = round(mode);
@@ -70,7 +71,15 @@
     var r = round(mode);
     if(r.retried[i]) return false;
     r.retried[i] = 1;
+    r.pending[i] = 1;   // 插回去的这一份才是「再考」；题池洗回来再出现时照常算分
     pool.splice(Math.max(0, pool.length - Math.max(1, gap|0)), 0, i);
+    return true;
+  }
+  // 极速：题从池里取出来那一刻问「这道是不是插回来的再考题」，问一次就作废（只认一次）
+  function takeRetry(mode, idx){
+    var i = validIdx(idx), r = round(mode);
+    if(i < 0 || !r.pending[i]) return false;
+    delete r.pending[i];
     return true;
   }
   function pendingRetries(mode){
@@ -89,6 +98,9 @@
       '#hml_lesson .listen-reveal{z-index:9991}',
       '#hml_lesson .hml-tag{display:inline-block;font-size:14px;font-weight:900;color:#0f172a;background:#fde047;border-radius:999px;padding:3px 12px;margin-bottom:8px}',
       '#hml_lesson .hml-tap{font-size:12px;color:rgba(255,255,255,.8);margin-top:8px}',
+      '#hml_lesson .hml-ex{font-size:16px;line-height:1.5;font-weight:700;color:#ecfdf5;margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22)}',
+      '#hml_lesson .hml-ex b{color:#fde047;font-weight:900}',
+      '#hml_lesson .hml-excn{font-size:14px;line-height:1.5;color:#d1fae5;margin-top:4px}',
       '.hml-retry-pill{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9989;pointer-events:none;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;font-size:14px;font-weight:900;padding:7px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(67,56,202,.45);white-space:nowrap;animation:hmlPill 2.2s ease forwards}',
       '@keyframes hmlPill{0%{opacity:0;transform:translate(-50%,-8px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}',
       '.hml-result{margin:12px auto 4px;max-width:340px;background:rgba(15,23,42,.55);border:1px solid rgba(148,163,184,.35);border-radius:14px;padding:10px 12px;text-align:center}',
@@ -118,18 +130,40 @@
     }catch(e){}
   }
 
-  /* ---------- 1. 答错小课 ---------- */
+  /* 例句里把正确的词标亮：先拆成三段再各自转义，句子里的字一律当文字 */
+  function exHtml(ex, en){
+    ex = String(ex || ''); en = String(en || '');
+    var m = null;
+    try{ if(en) m = new RegExp('\\b' + en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').exec(ex); }catch(e){ m = null; }
+    if(!m) return esc(ex);
+    return esc(ex.slice(0, m.index)) + '<b>' + esc(m[0]) + '</b>' + esc(ex.slice(m.index + m[0].length));
+  }
+
+  /* ---------- 1. 答错小课 ----------
+   * opts.say / opts.ex / opts.exCn / opts.waitSpeech：完形填空用——卡片上带着例句，读完整句再继续
+   * （以前完形答错就读整句例句，教学价值高；小课不能把它弄丢）。 */
   function lesson(idx, next, opts){
     opts = opts || {};
     var i = validIdx(idx), w = i >= 0 ? words()[i] : null;
-    var finished = false, timer = null, el = null;
-    function finish(){
+    var finished = false, timer = null, el = null, watch = null, t0 = Date.now();
+    // 小课开始时孩子在哪个游戏屏；他切走了（返回/换屏），卡片马上收起，也不再替那个游戏出下一题、读下一个词
+    var host = null;
+    try{ host = document.querySelector('.screen.active'); }catch(e){}
+    function finish(left){
       if(finished) return; finished = true; busy = false;
       if(timer){ clearTimeout(timer); timer = null; }
+      if(watch){ try{ watch.disconnect(); }catch(e){} watch = null; }
       if(el && el.parentNode) el.remove();
+      if(left === true) return;
       try{ if(typeof next === 'function') next(); }catch(e){}
     }
+    function spoken(){   // 整句读完：再停一下（至少凑满约 2.5 秒）；开了静音 speak 会立刻回调
+      if(finished) return;
+      if(timer) clearTimeout(timer);
+      timer = setTimeout(finish, Math.max(800, LESSON_MS - (Date.now() - t0)));
+    }
     if(!w){ timer = setTimeout(finish, opts.fallbackMs || 1200); return finish; }
+    var say = (typeof opts.say === 'string' && opts.say.trim()) ? opts.say : w.en;
     try{
       ensureStyle();
       var prev = document.getElementById('hml_lesson'); if(prev) prev.remove();
@@ -144,18 +178,24 @@
         + '<div class="lr-en">' + esc(w.en) + '</div>'
         + (w.pn ? '<div class="lr-pn">' + esc(w.pn) + '</div>' : '')
         + '<div class="lr-cn">' + esc(w.cn) + '</div>'
+        + (opts.ex ? '<div class="hml-ex">' + exHtml(opts.ex, w.en) + '</div>'
+            + (opts.exCn ? '<div class="hml-excn">' + esc(opts.exCn) + '</div>' : '') : '')
         + '<div class="hml-tap">点一下继续</div>'
         + '</div>';
       el.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); finish(); });
       document.body.appendChild(el);
       busy = true;
+      if(host && window.MutationObserver){
+        watch = new MutationObserver(function(){ if(!host.classList.contains('active')) finish(true); });
+        watch.observe(host, { attributes: true, attributeFilter: ['class'] });
+      }
       // 自动重读：故意晚于点击 120ms 放行窗口，开了「一键静音」就不出声
       setTimeout(function(){
         if(finished) return;
-        try{ if(typeof window.speak === 'function') window.speak(w.en); }catch(e){}
+        try{ if(typeof window.speak === 'function') window.speak(say, 1, opts.waitSpeech ? spoken : undefined); }catch(e){}
       }, 200);
     }catch(e){}
-    timer = setTimeout(finish, opts.ms || LESSON_MS);
+    timer = setTimeout(finish, opts.waitSpeech ? (opts.maxMs || 8000) : (opts.ms || LESSON_MS));
     return finish;
   }
 
@@ -226,7 +266,7 @@
   window.HansenMistakeLesson = {
     LESSON_MS: LESSON_MS,
     start: start, miss: miss, missed: missed, isRetry: isRetry,
-    requeue: requeue, requeueLater: requeueLater, pendingRetries: pendingRetries,
+    requeue: requeue, requeueLater: requeueLater, takeRetry: takeRetry, pendingRetries: pendingRetries,
     lesson: lesson, busy: function(){ return busy; },
     resultHtml: resultHtml, attach: attach, practice: practice
   };
