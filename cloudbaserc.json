@@ -30,7 +30,9 @@
             "当前进度.md",
             "贾维斯_知识库.md",
             "playwright_loader.mjs",
-            "_*.py"
+            "_*.py",
+            "map8/**",
+            "newboss/**"
           ],
           "indexPath": "index.html",
           "errorPath": "index.html"
