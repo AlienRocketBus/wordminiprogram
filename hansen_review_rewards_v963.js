@@ -251,7 +251,11 @@
    * 逐条向下级联错位显示(245/293/341px,最多3档后并档)，金币音效每爆发只响一次——
    * 奖励瀑布可读又不吵。纯同步时间戳判断,零定时器,行为可测。 */
   var _fcLastAt = 0, _fcBurst = 0;
+  /* 🔴v1165: 真实答题吸收器接通后，一次答对可能同时有「+2 复习金币」和「📦 记忆盒 +1」。
+     同一题的几条合成一条飘字，连答两题也只占两档，不叠在一起、不刷屏。 */
+  var _fcBatch = null;
   function floatCoin(text){
+    if(_fcBatch){ _fcBatch.push(text); return; }
     try{
       var now = Date.now();
       if(now - _fcLastAt > 1200) _fcBurst = 0;
@@ -427,6 +431,13 @@
       var w0 = 0;
       try{ w0 = safeWrong(window.S && S.wrongs ? S.wrongs[idx] : 0); }catch(e){}
       var r = orig.apply(this, arguments);
+      var _outerBatch = _fcBatch; if(!_outerBatch) _fcBatch = [];
+      try{ return afterAnswer(idx, correct, w0, r); }
+      finally{
+        if(!_outerBatch){ var msgs = _fcBatch; _fcBatch = null; if(msgs && msgs.length) floatCoin(msgs.join(' · ')); }
+      }
+    }
+    function afterAnswer(idx, correct, w0, r){
       try{
         var w1 = safeWrong(window.S && S.wrongs ? S.wrongs[idx] : 0);
         if(w1 > w0 && w0 === 0) stampSince(slotOf(idx));
