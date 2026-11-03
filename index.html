@@ -4102,6 +4102,10 @@ document.querySelectorAll('.island').forEach(el=>{
   function _validIslandFile(file){
     return /^(?:island_[a-z0-9]+|land_map|season_showcase|boss_hall)\.html$/.test(String(file||''));
   }
+  /* 🔴v1165 页面的版本戳（脚本 ?v=）。保活的岛和外壳不是同一版（发版后网慢留下的旧岛页）就不再拿出来用 */
+  function _docStamp(doc){
+    try{ var s = doc.querySelector('script[src*="hansen_version_watch"]') || doc.querySelector('script[src*="?v="]'); var m = s && s.getAttribute('src').match(/[?&]v=(\d+)/); return m ? m[1] : ''; }catch(e){ return ''; }
+  }
   function openIsland(file, fromHistory){
     if(!_validIslandFile(file)) return;
     try{ for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ localStorage.setItem('lastIslandKey', k); localStorage.setItem('lastIslandTime', String(Date.now())); break; } } }catch(e){}
@@ -4110,6 +4114,7 @@ document.querySelectorAll('.island').forEach(el=>{
     if(!wrap || !frame){ window.location.href = file; return; }  /* 兜底: 无外壳则退回原生跳转 */
     var cur = '';
     try{ cur = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
+    if(cur === file){ var _fs = ''; try{ _fs = _docStamp(frame.contentDocument); }catch(e){} var _hs = _docStamp(document); if(_fs && _hs && _fs !== _hs) cur = ''; }
     if(cur === file){
       /* 🔴 保活: iframe 当前就是这个岛(上次进的·没卸载)→ 瞬时显示, 零重载零淡入(内容本就在·真·瞬时再进)。 */
       _islandPending = null;
@@ -4229,6 +4234,7 @@ document.querySelectorAll('.island').forEach(el=>{
       if(_w && typeof _w.__hsnIslandHidden === 'function') _w.__hsnIslandHidden();
     }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
+    try{ if(typeof window.__hsnAfterIslandClose === 'function') window.__hsnAfterIslandClose(); }catch(e){}   /* 🔴v1165 版本守望者：孩子在岛里时攒着的更新，回到首页再做 */
   }
   /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
      岛内 spelling bee 等覆盖层有自己的历史条目, 返回键会先关覆盖层再关岛(嵌套返回); 覆盖层开着时 goHome 按钮被
