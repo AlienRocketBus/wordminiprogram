@@ -132,35 +132,42 @@ await screen('天梯页', '.ld_wrap', () => {
     { rank: 1, uid: 'ME', name: '我', cid: 1, rating: 1108, games: 6 },
     { rank: 2, uid: 'B', name: '阿强', cid: 2, rating: 1000, games: 9 }] });
   window.HansenPkRoom._setMeForTest({ id: 'ME', name: '我' });
+  /* v1164：假库按真库的脾气来（按 id 查、没有 claim 这种「改别人文档」的口子） */
   window.HansenPkRoom._setTransportForTest({
-    read: async () => null, claim: async () => ({ updated: 1 }),
-    patch: async () => ({ updated: 1 }), add: async () => ({ id: 'R' }),
-    list: async () => [], remove: async () => true, listOpen: async () => [] });
+    read: async () => null,
+    patch: async () => ({ updated: 0 }), add: async d => ({ id: d._id }),
+    list: async () => [], remove: async () => ({ deleted: 0 }), listOpen: async () => [] });
   window.HansenLadderUI.open();
 });
 
 await screen('对战屏', '.pr_wrap', () => {
   window.HansenLadderUI.close();
-  const doc = { _id: 'C', hostId: 'ME', guestId: 'G', mode: 'A', askMode: 'cn',
-    round: 0, winners: [], wordCount: 2, hostBeat: Date.now(), guestBeat: Date.now(),
-    createdAt: Date.now(), roundAt: Date.now() };
+  /* v1164：房间 / 座位 / 回合各是各的文档，按 id 查 —— 和真库一样 */
+  const t = Date.now();
+  const docs = {
+    C: { _id: 'C', proto: 2, kind: 'room', seat: 0, status: 'playing', hostId: 'ME', guestId: 'G',
+         guestName: '小明', mode: 'A', askMode: 'cn', wordCount: 2, hostBeat: t, heartbeatAt: t, createdAt: t },
+    C_s0: { _id: 'C_s0', proto: 2, kind: 'seat', roomId: 'C', epoch: 0, guestId: 'G', guestName: '小明',
+            guestBeat: t, createdAt: t }
+  };
   window.HansenPkRoom._setTransportForTest({
-    read: async () => { doc.guestBeat = Date.now(); return JSON.parse(JSON.stringify(doc)); },
-    claim: async (i, g, p) => { Object.assign(doc, p); return { updated: 1 }; },
-    patch: async () => ({ updated: 1 }), add: async () => ({ id: 'C' }),
-    list: async () => [], remove: async () => true, listOpen: async () => [] });
+    read: async id => { docs.C_s0.guestBeat = Date.now(); return docs[id] ? JSON.parse(JSON.stringify(docs[id])) : null; },
+    patch: async id => ({ updated: id === 'C' ? 1 : 0 }),
+    add: async d => { if (docs[d._id]) throw Object.assign(new Error('dup'), { code: 'DATABASE_DUPLICATE_WRITE', cloud: true });
+                      docs[d._id] = JSON.parse(JSON.stringify(d)); return { id: d._id }; },
+    list: async () => [], remove: async () => ({ deleted: 0 }), listOpen: async () => [] });
   window.HansenPkRoomUI._startMatchForTest([{ en: 'cat', cn: '猫' }], '小明', 'cn', 'A', 'C');
 });
 
 await screen('房间列表', '.pr_wrap', () => {
   const now = Date.now();
-  const rooms = [{ _id: '1', status: 'open', isPrivate: false, guestId: '', hostId: 'A',
+  const rooms = [{ _id: '1', proto: 2, kind: 'room', seat: 0, status: 'open', isPrivate: false, guestId: '', hostId: 'A',
     hostName: '小红', hostRating: 1450, mode: 'A', wordCount: 5,
     heartbeatAt: now, createdAt: now }];
   window.HansenPkRoom._setTransportForTest({
     read: async id => rooms.find(x => x._id === id) || null,
-    claim: async () => ({ updated: 1 }), patch: async () => ({ updated: 1 }),
-    add: async () => ({ id: 'N' }), list: async () => [], remove: async () => true,
+    patch: async () => ({ updated: 0 }),
+    add: async d => ({ id: d._id }), list: async () => [], remove: async () => ({ deleted: 0 }),
     listOpen: async () => rooms });
   window.HansenPkRoomUI.open();
 });

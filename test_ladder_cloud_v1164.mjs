@@ -1,0 +1,212 @@
+#!/usr/bin/env node
+/* test_ladder_cloud_v1164.mjs —— 天梯排位：两部手机、真页面、真 SDK，只有网络是模拟的
+ *
+ * 为什么要有它：天梯在真机上从来没成功过一次，而以前的天梯测试全绿 ——
+ *   它们注入假传输层，假的什么都让写（客人改房主的文档也行），真云端不让。
+ *   这里一行 App 代码都不换：spelling_pk.html / 岛屿页 + 账号 + 房间 + vendor SDK 全是真的，
+ *   腾讯云由 cloudbase_emulator.mjs 按真规矩应答（谁建的文档只有谁能改、_id 唯一、读有延迟）。
+ *   手指点按钮前先确认按钮没被别的层盖住（天梯藏在大PK屏后面的 bug 就是这样抓的）。
+ *
+ * 三段（各用一个干净的模拟云端）：
+ *   ① 两人打一局排位（权限「读取全部、修改本人」· 越权写静默失败的老模式）：
+ *      匹配屏「已等 N 秒」每秒走；没人时 20 秒自动开房；对手进来开打；对战屏两边都显示对方名字；
+ *      打满 10 个词到结算；两边的天梯分都按**对方真实分数**算 ELO；数据库里每人只写了自己的文档、
+ *      没有手机号；打完没有留下开着的房。
+ *   ② 两人同时点「开始排位」（安全规则模式 · 越权写直接报错）：最后进同一间房，另一间收掉。
+ *   ③ 岛屿页入口：没登录点「天梯排位」要被引去登录；登录后天梯页、匹配屏、等人屏、对战屏
+ *      都在拼写大PK屏**上面**、按钮点得到。
+ */
+import * as H from './cloudbase_e2e_harness.mjs';
+
+const t = H.checker('天梯排位 · 真 SDK 端到端（v1164）');
+const srv = await H.startStatic();
+const browser = await H.launchBrowser();
+const live = [];
+let emu = null, names = {};
+const explain = (extra) => H.explainer(emu, () => live, () => names)(extra);
+const has = (txt, re) => re.test(String(txt || ''));
+
+async function phone(name, number, urlPath, nick) {
+  const p = await H.openPhone(browser, emu, srv.origin, { name, path: urlPath || '/spelling_pk.html',
+    ready: urlPath && urlPath.startsWith('/island_') ? () => !!(window.HansenAuth && window.HansenSbPK && window.HansenLadderUI && window.HansenPkRoom && window.HansenPkRoomUI) : undefined });
+  live.push(p);
+  if (number) {
+    const r = await H.loginPhone(p, number);
+    await t.ok(r && r.ok && r.uid, `[${name}] 用手机号验证码登录（真 SDK → 模拟云端）uid=${r && r.uid}`, () => explain(JSON.stringify(r)));
+    names[r.uid] = nick || name;
+    p.nick = nick || name;
+  }
+  return p;
+}
+async function toLadderHome(p) {
+  await p.tap('#pkLadder');
+  await H.answerNameIfAsked(p, p.nick);
+  await p.waitScreen(/开始排位/, { timeout: 8000 });
+}
+
+try {
+  /* ══ ① 两人打一局排位 ═══════════════════════════════════════════ */
+  t.section('① 两人打一局排位（READONLY · legacy）');
+  emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 50, jitterMs: 60, consistencyLagMs: 400 } });
+  names = {};
+  const A = await phone('甲', '13800000001', null, '小蜂甲');
+  const B = await phone('乙', '13800000002', null, '小蜂乙');
+  /* 乙是老玩家：打完定级赛、1080 分（他自己账号的战绩，不是测试桩） */
+  await B.eval(() => localStorage.setItem('hansen_pk_record_v1', JSON.stringify({ rating: 1080, peakRating: 1080, placementGames: 3, wins: 3, losses: 1, history: [] })));
+  const recA0 = await H.ladderRecord(A), recB0 = await H.ladderRecord(B);
+  await t.ok(recA0 && recA0.rating === 1000 && recB0 && recB0.rating === 1080, `开局分：甲 ${recA0 && recA0.rating}，乙 ${recB0 && recB0.rating}`);
+
+  await toLadderHome(A);
+  await A.tap('#ldGo');
+  /* 匹配屏的「已等 N 秒」要每秒走（以前每 2.5 秒才重画一次，网慢时整屏冻住） */
+  const ticks = [];
+  for (let i = 0; i < 4; i++) {
+    const s = await A.screen(); const m = /已等\s*(\d+)\s*秒/.exec(s);
+    ticks.push(m ? Number(m[1]) : null);
+    await H.sleep(1100);
+  }
+  const distinct = new Set(ticks.filter((x) => x != null)).size;
+  await t.ok(distinct >= 3, `匹配屏「已等 N 秒」每秒在走（4 次取样：${ticks.join(', ')}）`, () => explain());
+  let txt = await A.waitScreen(/等对手进来/, { timeout: 40000 }).catch((e) => e.lastText || '');
+  await t.ok(has(txt, /等对手进来/), '没有对手 → 20 秒后自动开一间排位房、显示「等对手进来」', () => explain());
+  const uA = A.cloudUid, uB = B.cloudUid;
+  const myRoom = H.roomDocs(emu).find((d) => d.kind === 'room' && d._openid === uA);
+  await t.ok(myRoom && myRoom.mode === 'A' && myRoom.isPrivate === false && myRoom.proto === 2 && myRoom.status === 'open' && myRoom.hostName === '小蜂甲',
+    `数据库：甲开的排位房（抢答赛、公开、新协议、名字是「小蜂甲」）`, () => explain());
+
+  await toLadderHome(B);
+  await B.tap('#ldGo');
+  const inBattle = await H.until(async () => (await H.battleView(A)) && (await H.battleView(B)), { timeout: 40000 });
+  await t.ok(inBattle, '乙点「开始排位」→ 进了甲的房，两部手机都到了对战屏', () => explain());
+  if (inBattle) {
+    const vA = await H.battleView(A), vB = await H.battleView(B);
+    await t.ok(vA.oppName === '小蜂乙' && vB.oppName === '小蜂甲', `对战屏两边都显示对手的真名字（甲看到「${vA.oppName}」，乙看到「${vB.oppName}」）`, () => explain());
+    const room = H.roomDocs(emu).find((d) => d.kind === 'room' && d._id === (myRoom && myRoom._id)) || H.roomDocs(emu).find((d) => d.kind === 'room');
+    const words = await H.wordsOfRoom(A, room), wordsB = await H.wordsOfRoom(B, room);
+    await t.ok(words.length === 10 && JSON.stringify(words) === JSON.stringify(wordsB), `两边用同一套 10 个词（${words.map((w) => w.en).join(', ')}）`);
+    /* 剧本：能拼的词里，前一半多一个归甲、其余归乙 —— 甲赢 */
+    const ok = words.map((w, i) => (H.typeable(w) ? i : -1)).filter((i) => i >= 0);
+    const aCount = Math.floor(ok.length / 2) + 1;
+    const plan = (i) => (ok.indexOf(i) < 0 ? {} : { first: ok.indexOf(i) < aCount ? 'host' : 'guest' });
+    const M = await A.eval(() => window.HansenPkRoom.modeOf('A'));
+    const exp = H.expectedScores(words, plan, M);
+    const run = await H.playMatch({ host: A, guest: B }, words, plan);
+    await t.ok(!run.wrongCn.length, `每一词两边屏幕上的中文都对、键盘点得到（${run.wrongCn.slice(0, 3).join('；') || '无问题'}）`);
+    const rA = await H.waitResult(A, 60000), rB = await H.waitResult(B, 60000);
+    await t.ok(rA && rA.win && rA.mine === exp.host && rA.theirs === exp.guest,
+      `甲的结算：你赢了 · 你 ${exp.host} 分 · 对手 ${exp.guest} 分（看到：${rA ? rA.text.split('\n').slice(0, 2).join(' / ') : '没到结算屏'}）`, () => explain());
+    await t.ok(rB && rB.lose && rB.mine === exp.guest && rB.theirs === exp.host,
+      `乙的结算：这局输了 · 你 ${exp.guest} 分 · 对手 ${exp.host} 分（看到：${rB ? rB.text.split('\n').slice(0, 2).join(' / ') : '没到结算屏'}）`, () => explain());
+
+    /* ELO：两边都要按对方的**真实**分数算（以前房主拿不到客人的分，一律按 1000 算） */
+    const recA1 = await H.ladderRecord(A), recB1 = await H.ladderRecord(B);
+    const eloA = await A.eval(([my, opp, g]) => ({ real: HansenSbLadder.nextRating({ myRating: my, oppRating: opp, won: true, games: g }).rating, dflt: HansenSbLadder.nextRating({ myRating: my, oppRating: 1000, won: true, games: g }).rating }), [1000, 1080, (recA0.placementGames || 0) + 1]);
+    const eloB = await B.eval(([my, opp, g]) => ({ real: HansenSbLadder.nextRating({ myRating: my, oppRating: opp, won: false, games: g }).rating }), [1080, 1000, (recB0.placementGames || 0) + 1]);
+    await t.ok(recA1 && recA1.rating === eloA.real && recA1.rating > 1000,
+      `甲赢了按乙的真实分 1080 算 ELO：1000 → ${recA1 && recA1.rating}（应为 ${eloA.real}；若按默认 1000 算会是 ${eloA.dflt}）`, () => explain());
+    await t.ok(rA && rA.delta === (eloA.real - 1000), `甲的结算屏写着「+${eloA.real - 1000} 天梯分」（看到 ${rA && rA.delta}）`);
+    await t.ok(recB1 && recB1.rating === eloB.real && recB1.rating < 1080,
+      `乙输了按甲的真实分 1000 算 ELO：1080 → ${recB1 && recB1.rating}（应为 ${eloB.real}）`, () => explain());
+    await t.ok(rB && (rB.delta === (eloB.real - 1080) || (rB.floor && eloB.real === 1080)), `乙的结算屏写着「${eloB.real - 1080} 天梯分」（看到 ${rB && rB.delta}${rB && rB.floor ? ' 段位保护' : ''}）`);
+
+    /* 数据库：每个人只写自己建的文档 */
+    await H.sleep(1500);
+    const docs = H.roomDocs(emu).filter((d) => String(d._id).startsWith(room._id));
+    const R = docs.find((d) => d.kind === 'room'), S = docs.find((d) => d.kind === 'seat'), W = docs.filter((d) => d.kind === 'win');
+    await t.ok(R && R._openid === uA && S && S._openid === uB, `房间是甲建的、座位是乙建的`, () => explain());
+    const badWins = W.filter((w) => (w.winner === 'host' && w._openid !== uA) || (w.winner === 'guest' && w._openid !== uB));
+    await t.ok(W.length === 10 && !badWins.length, `10 个回合文档，每个都是拿下那一词的人自己建的（共 ${W.length}，不对的 ${badWins.length}）`, () => explain());
+    await t.ok(H.foreignWrites(emu).length === 0, `没有任何人去改别人的文档（尝试 ${H.foreignWrites(emu).length} 次）`, () => explain());
+    await t.ok(R && R.hostId === 'u' + uA && S && S.guestId === 'u' + uB, `房间里的身份是 'u'+云端编号（host=${R && R.hostId}, guest=${S && S.guestId}）`);
+    const leaked = H.leakedIdentity(emu, ['13800000001', '13800000002']);
+    await t.ok(!leaked.length, `所有人都读得到的房间集合里没有手机号（漏了：${leaked.join(',') || '无'}）`);
+    await t.ok(R && R.status === 'done' && R.hostScore === exp.host && S && S.guestScore === exp.guest, `房间标记打完、两边分数都在（status=${R && R.status} ${R && R.hostScore}:${S && S.guestScore}）`, () => explain());
+    const open = H.roomDocs(emu).filter((d) => d.kind === 'room' && d.status === 'open');
+    await t.ok(!open.length, `打完没有留下还开着的房（${open.length} 间）`, () => explain());
+  }
+  for (const p of [A, B]) await t.ok(!p.errors.length && !p.leaks.length, `[${p.name}] 没有页面报错、没有去连别的外网（报错 ${p.errors.length}：${p.errors.slice(0, 2).join(' | ')}；外网 ${p.leaks.length}）`);
+  await A.close(); await B.close();
+  live.length = 0;
+
+  /* ══ ② 两人同时点「开始排位」 ════════════════════════════════════ */
+  t.section('② 两人同时开始排位（READONLY · rules）');
+  emu = H.makeEmulator({ knobs: { permissionMode: 'rules', latencyMs: 60, jitterMs: 60, consistencyLagMs: 500 } });
+  names = {};
+  const C = await phone('丙', '13800000003', null, '小蜂丙');
+  const D = await phone('丁', '13800000004', null, '小蜂丁');
+  await toLadderHome(C); await toLadderHome(D);
+  await Promise.all([C.tap('#ldGo'), D.tap('#ldGo')]);
+  const both = await H.until(async () => (await H.battleView(C)) && (await H.battleView(D)), { timeout: 75000, interval: 500 });
+  await t.ok(both, '同时开始的两个人最后都进了对战屏（没有各自守着一间空房干等）', () => explain());
+  const rooms = H.roomDocs(emu).filter((d) => d.kind === 'room');
+  const playing = rooms.filter((d) => d.status === 'playing');
+  const stillOpen = rooms.filter((d) => d.status === 'open');
+  await t.ok(playing.length === 1 && !stillOpen.length, `数据库：只剩一间在打的房，另一间收掉了（在打 ${playing.length}，空着开着 ${stillOpen.length}）`, () => explain());
+  if (playing.length === 1) {
+    const P = playing[0], S2 = H.roomDocs(emu).find((d) => d.kind === 'seat' && d.roomId === P._id && d.epoch === P.seat);
+    await t.ok(S2 && S2._openid !== P._openid && [C.cloudUid, D.cloudUid].includes(S2._openid), '房主和客人是这两个人、各写各的文档', () => explain());
+  }
+  await t.ok(H.foreignWrites(emu).length === 0, `安全规则模式下也没有越权写（被拒 ${H.foreignWrites(emu).length} 次）`, () => explain());
+  await C.close(); await D.close();
+  live.length = 0;
+
+  /* ══ ③ 岛屿页入口 ══════════════════════════════════════════════ */
+  t.section('③ 岛屿页「拼写大PK → 天梯排位」看得见、点得到（READONLY · legacy）');
+  emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40, jitterMs: 40, consistencyLagMs: 300 } });
+  names = {};
+  const E = await phone('戊', null, '/island_animal.html');
+  await H.dismissIslandWelcome(E);
+  await E.tap('.mode-card[onclick*="openSpellPK"]');
+  await E.waitScreen(/天梯排位/, { timeout: 8000 }).catch(() => '');
+  await E.tap('#kLadder');
+  await H.sleep(900);
+  const gate = (await E.screen()) + E.dialogs.map((d) => d.message).join(' ');
+  const authUp = (await E.hitTest('#auPhone', { timeout: 1500 })).ok;
+  await t.ok(authUp, `没登录点「天梯排位」→ 登录面板出现在最上层、手机号框点得到（看到：${gate.replace(/\s+/g, ' ').slice(0, 120)}）`, () => explain());
+  let lr = null;
+  if (authUp) {
+    /* 就在这个登录面板上登录 —— 孩子就是这么做的 */
+    await E.tap('#auPhone'); await E.type('13800000005');
+    await E.tap('#auSend'); await E.waitScreen(/验证码已发送/, { timeout: 15000 }).catch(() => '');
+    await E.tap('#auCode'); await E.type(emu.knobs.verificationCode);
+    await E.tap('#auGo');
+    await H.authPanelMsg(E);
+    E.cloudUid = await E.uid();
+    lr = { ok: !!E.cloudUid, uid: E.cloudUid };
+    await E.tap('#auX').catch(() => {});
+  } else {
+    lr = await H.loginPhone(E, '13800000005');   // 入口没把人引去登录：照样登上，接着测后面的
+  }
+  names[lr.uid] = '戊';
+  await t.ok(lr.ok, `[戊] 在岛屿页登录 uid=${lr.uid}`);
+  await H.sleep(600);
+  const pkUp = await E.hitTest('#kLadder', { timeout: 3000 });
+  await t.ok(pkUp.ok, `登录完回到拼写大PK屏，「天梯排位」点得到（${pkUp.why || pkUp.hit}）`, () => explain());
+  if (!pkUp.ok) { await E.page.reload({ waitUntil: 'domcontentloaded' }); await H.sleep(4000); await H.dismissIslandWelcome(E); await E.tap('.mode-card[onclick*="openSpellPK"]'); }
+  await E.tap('#kLadder');
+  const goHit = await E.hitTest('#ldGo', { timeout: 6000 });
+  await t.ok(goHit.ok, `天梯页在拼写大PK屏上面、「开始排位」点得到（${goHit.why || goHit.hit}）`, () => explain());
+  let waitHit = { ok: false, why: '没走到这一步' }, battleHit = { ok: false, why: '没走到这一步' };
+  if (goHit.ok) {
+    await E.tap('#ldGo');
+    const mt = await E.waitScreen(/正在找对手/, { timeout: 5000 }).catch((e) => e.lastText || '');
+    await t.ok(has(mt, /正在找对手/), `匹配屏在最上层（看到：${mt.replace(/\s+/g, ' ').slice(0, 80)}）`, () => explain());
+    await E.waitScreen(/等对手进来/, { timeout: 40000 }).catch(() => '');
+    waitHit = await E.hitTest('#prBack', { timeout: 3000 });
+    await t.ok(waitHit.ok && has(await E.screen(), /等对手进来/), `没人时自动开房，「等对手进来」屏在最上层（${waitHit.why || waitHit.hit}）`, () => explain());
+    const F = await phone('己', '13800000006', null, '小蜂己');
+    await toLadderHome(F);
+    await F.tap('#ldGo');
+    const vb = await H.until(async () => (await H.battleView(E)) && (await H.battleView(F)), { timeout: 40000 });
+    battleHit = vb ? await E.hitTest('#prKb .pr_key[data-k="a"]', { timeout: 3000 }) : battleHit;
+    await t.ok(vb && battleHit.ok, `对手从拼写大PK页进来，岛屿页上的对战屏在最上层、键盘点得到（${battleHit.why || battleHit.hit || ''}）`, () => explain());
+  }
+  for (const p of live) await t.ok(!p.errors.length, `[${p.name}] 没有页面报错（${p.errors.slice(0, 2).join(' | ') || '无'}）`);
+} catch (e) {
+  await t.ok(false, '测试脚本自己出错：' + String(e && e.stack || e).slice(0, 600), () => explain());
+}
+t.summary();
+for (const p of live) { try { await p.close(); } catch (e) { /* 已关 */ } }
+srv.close();
+await browser.close();
+process.exit(t.failed ? 1 : 0);

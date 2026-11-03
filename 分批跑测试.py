@@ -47,6 +47,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 RESUME_FILE = os.path.join(ROOT, '.jarvis_resume.json')
 PARALLEL = 3          # 再多 CPU 就抢不过来，假失败会变多
 PER_TEST = 300        # 单个测试最多 5 分钟
+# 🔴v1164：真 SDK 端到端（*_cloud_v1164.mjs）用的是产品真实时长（天梯 20 秒自己开房、掉线 60 秒判负），
+#   单跑就要 1~4 分钟，三个并行时会被挤过 5 分钟 —— 给它们 10 分钟，超时仍算失败。
+LONG_TEST = 600
+
+
+def _limit(name):
+    return LONG_TEST if '_cloud_v1164' in name else PER_TEST
 
 
 def fingerprint():
@@ -90,7 +97,7 @@ def run_one(name):
     """返回 None 表示通过；否则返回一小段失败原因。"""
     try:
         r = subprocess.run(['node', os.path.join(ROOT, name)], cwd=ROOT,
-                           capture_output=True, timeout=PER_TEST)
+                           capture_output=True, timeout=_limit(name))
         if r.returncode == 0:
             return None
         out = (r.stdout or b'').decode('utf-8', 'replace') + (r.stderr or b'').decode('utf-8', 'replace')

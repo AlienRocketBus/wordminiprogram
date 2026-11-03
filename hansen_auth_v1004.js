@@ -427,6 +427,9 @@
     if (/invalid.*(verification[_ ]?code|verify[_ ]?code|sms[_ ]?code)|verification[_ ]?code.*(invalid|expired|incorrect|wrong)|code.*(expired|incorrect)|验证码(错误|不正确|已过期)/i.test(m))
       return '验证码不对或已过期，重新获取一次';
     if (/frequent|too many|限频|频繁/i.test(m)) return '发得太频繁了，等一会儿再试';
+    /* v1164：云端说「没有凭证」= 登录没真正完成（账号密码其实没错），不能翻成「用户名不存在」 */
+    if (/unauthenticated|credentials not found|invalid_grant/i.test(m))
+      return '登录没真正完成：云端没有给出有效的登录凭证。再点一次登录试试；还不行，就打开自检面板截图发给老师';
     /* v1164：「用户不存在」要排在 /exist/ 前面，否则 "User not exist" 会被说成"用户名有人用了" */
     if (/user.*not.*(found|exist)|not[_ ]found|no.*such.*user|用户不存在/i.test(m)) return '没找到这个用户名，检查一下拼写；还没有账号的话，点下面用手机号注册';
     if (/password/i.test(m)) return '密码不对';
@@ -503,6 +506,10 @@
          这样无论账号是用哪种方式建的，用户都只需记住用户名。 */
       return Promise.resolve(a.signIn({ username: u, password: p }))
         .catch(function (e1) {
+          /* 🔴v1164：只有「没这个用户」才值得换内部邮箱再试 —— 密码错、云端没给凭证时再试一次，
+             第二次的 404 会把第一手原因盖掉，孩子看到「没找到这个用户名」去改一个本来没错的东西 */
+          var t1 = errText(e1);
+          if (/credential|unauthenticated/i.test(t1) || !/not[_ ]?found|not[_ ]?exist|no such user|用户不存在/i.test(t1)) throw e1;
           var mail = mailOfUsername(u);
           return Promise.resolve(a.signIn({ username: mail, password: p }))
             .catch(function () { throw e1; });
@@ -691,11 +698,19 @@
       }).then(function (w) {
         var bad2 = dbFail(w, '建立资料 sb_profile');
         if (bad2) throw bad2;
-        return docRef.get();
-      }).then(function (r2) {
-        var bad3 = dbFail(r2, '读取资料 sb_profile');
-        if (bad3) throw bad3;
-        var row2 = r2 && r2.data && r2.data[0];
+        /* 🔴v1164：刚写进去马上读，未必读得到（主从同步有延迟）—— 读不到就隔半秒再读，
+           最多 4 次；否则这次就发不出竞赛 ID，好友页一直说「先设置竞赛 ID」 */
+        var readBack = function (n) {
+          return docRef.get().then(function (r2) {
+            var bad3 = dbFail(r2, '读取资料 sb_profile');
+            if (bad3) throw bad3;
+            var row2 = r2 && r2.data && r2.data[0];
+            if ((row2 && row2.createdAt) || n <= 1) return row2;
+            return new Promise(function (ok) { setTimeout(ok, 500); }).then(function () { return readBack(n - 1); });
+          });
+        };
+        return readBack(4);
+      }).then(function (row2) {
         return assignCid(db, docRef, row2 && row2.createdAt);
       });
     }).then(function (prof) {

@@ -28,6 +28,9 @@ const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROM
 const errors = [];
 async function freshPage(){
   const page = await browser.newPage({ viewport:{width:390,height:844}, isMobile:true, hasTouch:true, serviceWorkers:'block' });
+  /* 🔴v1164：测试绝不联网 —— 腾讯云的请求就地掐断（以前真的往外发，走代理时报
+     ERR_TUNNEL_CONNECTION_FAILED，换个网络环境结果就不一样）。掐断报的是 net::ERR_FAILED，仍在下面的豁免里。 */
+  await page.route(u => /(tencentcloudapi\.com|tcloudbase\.com|tcloudbasegateway\.com|tcloudbaseapp\.com|myqcloud\.com|qcloud\.com)$/.test(new URL(u).hostname), r => r.abort().catch(()=>{}));
   page.on('pageerror', e=>errors.push('PAGE:'+String(e.message).slice(0,160)));
   /* 🔴v1003: 容器网络白名单不含 tencentcloudapi.com, 点自检必然报连接失败——
      属测试环境限制而非产品缺陷。仅豁免"指向腾讯云端点的网络类错误", 其余一律照抓。 */

@@ -125,6 +125,33 @@ for (const [mode, wantSlow] of [['A', 0], ['B', 80], ['C', 60]]) {
   ok(S.MODES.B.waitAll === true && S.MODES.C.waitAll === true, '★ B/C: 等两人都答完才翻篇');
 }
 
+/* ④b 🔴v1164 B/C「两人都答完才翻篇」要有数据可依：回合文档只记「谁先拼对」，
+   对手后拼对 / 超时，以前我这边根本看不到 —— 快的那位就先跑去下一词了。 */
+{
+  const nap = () => new Promise(r => setTimeout(r, 30));
+  const { H, G, db } = mk('C');
+  await H.claimRound('R1', 0); await nap();               /* 房主先拼对：100 */
+  let hs = await H.roundState('R1');
+  ok(hs.ok && hs.oppAns === -1, `对手还没答完第 1 词 → oppAns=-1，房主要等他（实得 ${hs.oppAns}）`);
+  const gs0 = await G.roundState('R1');
+  ok(gs0.oppAns === 0 && gs0.oppPts === 100, `客人看得到房主答完第 1 词、共 100 分（oppAns=${gs0.oppAns} oppPts=${gs0.oppPts}）`);
+  await G.claimRound('R1', 0); await nap();               /* 客人后拼对：60 */
+  hs = await H.roundState('R1');
+  ok(hs.oppAns === 0 && hs.oppPts === 60, `★ 客人后拼对 → 房主看到他也答完了、对手 60 分（oppAns=${hs.oppAns} oppPts=${hs.oppPts}）`);
+  ok(db.docs.get('R1').guestAns === undefined && db.docs.get('R1_s0').guestAns === 0 && db.docs.get('R1').hostAns === 0,
+     '★ 各记在自己的文档上（客人记在座位上，没去改房主的房间）');
+  await H.skipRound('R1', 1); await nap();                 /* 房主第 2 词超时 */
+  const gs1 = await G.roundState('R1');
+  ok(gs1.oppAns === 1 && gs1.oppPts === 100, `房主超时也算答完这一词（oppAns=${gs1.oppAns}），分数不变（${gs1.oppPts}）`);
+}
+{
+  const { H, G, db } = mk('A');
+  await H.claimRound('R1', 0); await G.claimRound('R1', 0);
+  await new Promise(r => setTimeout(r, 30));
+  ok(db.docs.get('R1').hostAns === undefined && db.docs.get('R1_s0').guestAns === undefined,
+     'A 抢答赛不多写（有人拼对就翻篇，不用等）');
+}
+
 /* ⑤ 规则说明是单一真源 */
 {
   const { S } = mk('C');

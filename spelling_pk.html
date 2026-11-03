@@ -425,6 +425,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
         P.ensureCid && P.ensureCid();
       }catch(e){ if(err) err.textContent='存不下来，刷新一下再试'; return; }
       host.style.display='none';
+      /* v1164：起名屏打开时把别的屏都设成了 display:none（写在元素上）——起完名要还原，
+         否则从这里进天梯、再关掉天梯，底下的大PK首页是空白的（首页按钮全都点不到） */
+      document.querySelectorAll('.pk_screen').forEach(function(e){ if(e!==host) e.style.display=''; });
       if(typeof after==='function') { try{ after(); }catch(e){} }
     };
   }

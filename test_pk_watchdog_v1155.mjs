@@ -317,6 +317,64 @@ const MAKE_BATTLE = `
   await ctx.close();
 }
 
+/* ⑤b 🔴v1164：**关天梯 / 开好友页 / 点救援屏的出口，都不许上哨。**
+ *
+ * 实测（v1155~v1163）：天梯的 close() 里 arm('排位') ——
+ *   · 点 × 关掉天梯，6 秒后冒出「这一步没能打开」
+ *   · 开好友页（它会先关天梯）同样被盖住
+ *   · 救援屏的「回到大PK首页」又调 close() 再上哨 → 6 秒后又来，**死循环**
+ * 只有真正开始匹配（startMatching）才该上哨。 */
+{
+  const { pg, ctx, errs } = await fresh();
+  const r = await pg.evaluate(async () => {
+    const W = window.HansenPkWatchdog, out = {};
+    W._resetForTest();
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    window.HansenLadderUI.close();
+    out.afterClose = W._stateForTest().armed;
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    if (window.HansenFriendsUI) window.HansenFriendsUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    out.afterFriends = W._stateForTest().armed;
+    try { window.HansenFriendsUI && window.HansenFriendsUI.close(); } catch (e) {}
+    /* 救援屏的出口：点完必须是「没上哨」—— 否则 6 秒后同一屏又回来 */
+    W._rescueForTest('测试', '说明');
+    await new Promise(z => setTimeout(z, 100));
+    document.getElementById('pkRescueBack').click();
+    await new Promise(z => setTimeout(z, 200));
+    out.afterQuit = W._stateForTest().armed;
+    /* 真正开始匹配才上哨（登录态 + 本地假库，不联网） */
+    localStorage.setItem('hansen_auth_v1004', JSON.stringify({ uid: 'U1', method: 'phone', signedAt: Date.now() }));
+    window.HansenPkRoom._setMeForTest({ id: 'U1', name: '我' });
+    window.HansenPkRoom._setTransportForTest({ read: async () => null, patch: async () => ({ updated: 0 }),
+      add: async d => ({ id: d._id }), list: async () => [], remove: async () => ({ deleted: 0 }),
+      listOpen: async () => [] });
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    document.getElementById('ldGo').click();
+    out.afterGo = W._stateForTest().armed;
+    W._tickForTest();
+    out.afterPaint = W._stateForTest().armed;     /* 画出来了就撤哨 */
+    window.HansenLadderUI.close();
+    return out;
+  });
+  ok(r.afterClose === false, '★🔒 关掉天梯不上哨（原来 6 秒后冒出「这一步没能打开」）');
+  ok(r.afterFriends === false, '★🔒 打开好友页（会先关天梯）不上哨');
+  ok(r.afterQuit === false, '★🔒 **点救援屏的「回到大PK首页」后不再上哨** —— 原来点了又来，死循环');
+  ok(r.afterGo === true && r.afterPaint === false,
+     `★ 真正开始匹配才上哨，画出来就撤（开始后 ${r.afterGo} / 画完 ${r.afterPaint}）`);
+  ok(errs.length === 0, '★ 这一串零脚本错误' + (errs.length ? '：' + errs[0] : ''));
+  await ctx.close();
+}
+{
+  const ld = fs.readFileSync(path.join(ROOT, 'hansen_ladder_ui_v1108.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = ld.indexOf('function close()');
+  const seg = ld.slice(i, ld.indexOf('\n  }', i));
+  ok(i > 0 && !/HansenPkWatchdog\.arm/.test(seg), '★🔒 天梯 close() 里没有上哨');
+}
+
 /* ⑥ 必须接到页面上 —— 否则等于没做 */
 {
   for (const pg of ['index.html', 'spelling_pk.html']) {

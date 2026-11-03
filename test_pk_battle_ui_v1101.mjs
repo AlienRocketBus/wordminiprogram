@@ -108,7 +108,11 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   ok(/function submitRound/.test(code), '存在 submitRound');
   const seg = bodyOf(code, 'submitRound');
   ok(/claimRound/.test(seg), '★ 判分交给已验证过原子性的 claimRound');
-  ok(/askRound\(idx \+ 1\)/.test(seg), '★ 小结后自动进下一词');
+  /* 🔴v1164：小结后先经 nextWord —— B/C 要等对手也答完这一词再一起翻篇（A 直接翻）；
+     nextWord 里最终一定走到 askRound(idx + 1)，等对手也有上限（截止时间 + 3 秒） */
+  const nw = bodyOf(code, 'nextWord');
+  ok(/askRound\(idx \+ 1\)/.test(seg) || (/nextWord\(st, idx\)/.test(seg) && /askRound\(idx \+ 1\)/.test(nw) && /cap/.test(nw)),
+     '★ 小结后自动进下一词（B/C 等对手答完，但有上限）');
   ok(/toFixed\(1\)/.test(seg), '★ 显示本词用时（让人看见"我快了多少"，正反馈）');
 }
 

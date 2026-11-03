@@ -93,11 +93,14 @@ await page.evaluate(() => { if (window.HansenLadderUI) HansenLadderUI.close(); }
 await check('好友页', () => page.click('#pkFriends'));
 await page.evaluate(() => { if (window.HansenFriendsUI) HansenFriendsUI.close(); });
 await check('对战屏', () => page.evaluate(() => {
-  const doc = { _id:'R1', hostId:'H', guestId:'G', mode:'C', askMode:'cn',
-                round:0, winners:[], wordCount:1 };
-  window.HansenPkRoom._setTransportForTest({ read: async () => doc, claim: async () => ({updated:1}),
-    patch: async () => ({updated:1}), add: async () => ({id:'R1'}),
-    list: async () => [], listOpen: async () => [], remove: async () => ({}) });
+  /* v1164：按 id 查（真库就是这样）；房间和座位是两份文档 */
+  const t = Date.now();
+  const docs = { R1: { _id:'R1', proto:2, kind:'room', seat:0, status:'playing', hostId:'H', guestId:'G',
+                       mode:'C', askMode:'cn', wordCount:1, heartbeatAt:t, hostBeat:t, createdAt:t },
+                 R1_s0: { _id:'R1_s0', proto:2, kind:'seat', roomId:'R1', epoch:0, guestId:'G', guestBeat:t, createdAt:t } };
+  window.HansenPkRoom._setTransportForTest({ read: async id => docs[id] || null,
+    patch: async id => ({updated: id === 'R1' ? 1 : 0}), add: async d => ({id: d._id}),
+    list: async () => [], listOpen: async () => [], remove: async () => ({deleted:0}) });
   window.HansenPkRoom._setMeForTest({ id:'H', name:'我' });
   window.HansenPkRoomUI._startMatchForTest([{en:'cat',cn:'猫'}], '对手', 'cn', 'C', 'R1');
 }));
@@ -108,11 +111,13 @@ for (const W of [320, 360, 390, 430]) {
   await p2.goto(`http://127.0.0.1:${port}/spelling_pk.html`, { waitUntil: 'domcontentloaded' });
   await p2.waitForTimeout(3500);
   await p2.evaluate(() => {
-    const doc = { _id:'R1', hostId:'H', guestId:'G', mode:'C', askMode:'cn',
-                  round:0, winners:[], wordCount:1 };
-    window.HansenPkRoom._setTransportForTest({ read: async () => doc, claim: async () => ({updated:1}),
-      patch: async () => ({updated:1}), add: async () => ({id:'R1'}),
-      list: async () => [], listOpen: async () => [], remove: async () => ({}) });
+    const t = Date.now();
+    const docs = { R1: { _id:'R1', proto:2, kind:'room', seat:0, status:'playing', hostId:'H', guestId:'G',
+                         mode:'C', askMode:'cn', wordCount:1, heartbeatAt:t, hostBeat:t, createdAt:t },
+                   R1_s0: { _id:'R1_s0', proto:2, kind:'seat', roomId:'R1', epoch:0, guestId:'G', guestBeat:t, createdAt:t } };
+    window.HansenPkRoom._setTransportForTest({ read: async id => docs[id] || null,
+      patch: async id => ({updated: id === 'R1' ? 1 : 0}), add: async d => ({id: d._id}),
+      list: async () => [], listOpen: async () => [], remove: async () => ({deleted:0}) });
     window.HansenPkRoom._setMeForTest({ id:'H', name:'我' });
     window.HansenPkRoomUI._startMatchForTest([{en:'cat',cn:'猫'}], '对手', 'cn', 'C', 'R1');
   });

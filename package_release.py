@@ -89,6 +89,8 @@ SOURCE_REQUIRED_FILES = {
     "img_guard.py", "font_guard.py", "e2e_guard.py", "impact_guard.py",
     "pet_guard.py", "sb_guard.py", "hansen_nav_guard.py",
     "playwright_loader.mjs", "fx_probe.mjs", "light_probe.mjs", "perf_probe.mjs",
+    # 🔴v1164: 真 SDK 端到端测试的模拟云端和公共步骤 —— 源码包里少了它们，test_*_v1164 一个都跑不起来
+    "cloudbase_emulator.mjs", "cloudbase_e2e_harness.mjs",
     "img_size_audit.mjs", "font_probe.mjs", "e2e_probe.mjs", "dep_map.mjs",
     "pet_probe.mjs", "sb_audit.mjs", "sb_race.mjs",
     "hansen_audio_lock.py", "hansen_audio_lock.json", "hansen_fx_lock.json",

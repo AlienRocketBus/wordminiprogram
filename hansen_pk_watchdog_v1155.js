@@ -118,13 +118,18 @@
         _lastPaint = ''; _lastPaintAt = Date.now();
         try { if (window.HansenPkRoomUI && HansenPkRoomUI.close) HansenPkRoomUI.close(); } catch (e) {}
         try { if (window.HansenLadderUI && HansenLadderUI.close) HansenLadderUI.close(); } catch (e) {}
+        /* 🔴v1164：**关完再撤一次哨。** 用户点「回到大PK首页」就是要离开对战 ——
+           要是哪个 close() 顺手上了哨（v1155~v1163 的天梯 close 就会），
+           6 秒后这一屏又会冒出来，点了又来，没完没了（实测死循环）。 */
+        _armed = null;
       };
       var b1 = document.getElementById('pkRescueBack');
       if (b1) b1.onclick = quit;
       var b2 = document.getElementById('pkRescueRetry');
       if (b2) b2.onclick = function () {
         quit();
-        try { if (window.HansenLadderUI && HansenLadderUI.open) HansenLadderUI.open(); } catch (e) {}
+        /* 「重新找对手」就是接着找 —— 打开天梯直接开始匹配，不用再点一次 */
+        try { if (window.HansenLadderUI && HansenLadderUI.open) HansenLadderUI.open({ autoStart: true }); } catch (e) {}
       };
     } catch (e) {}
   }

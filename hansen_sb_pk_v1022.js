@@ -242,8 +242,24 @@
     /* 🔴v1108: 天梯排位不再是「敬请期待」—— v1103 已把分数/段位/定级赛做出来，
        v1108 补上实力匹配与战绩页。做了功能没入口等于没做。 */
     var soon = function () { if (window.HansenToast) HansenToast.say('这个玩法还在做，先玩别的吧 🙂'); };
+    /* 🔴v1164：天梯和公开房间是同一种联机 —— 进门前过同一道检查（云端开通了没有、登录了没有）。
+       原来天梯这里什么都不查：没登录的孩子点进去，岛屿页上又看不见天梯（被大PK屏盖住），
+       等于点了完全没反应。 */
+    var needOnline = function () {
+      if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return false; }
+      try {
+        var A = window.HansenAuth;
+        if (!A || !A.isSignedIn || !A.isSignedIn()) {
+          alert('联机需要先登录，登录后进度和战绩都会跟着账号走。');
+          if (window.HansenAuthUI) HansenAuthUI.open();
+          return false;
+        }
+      } catch (e) {}
+      return true;
+    };
     var openLadder = function () {
       if (!window.HansenLadderUI) { notReadyOr('天梯'); return; }
+      if (!needOnline()) return;
       HansenLadderUI.open();
     };
     if (q('kDiag')) q('kDiag').onclick = function () {
@@ -253,15 +269,7 @@
        天梯排位仍在做，保留 soon()。 */
     if (q('kRooms')) q('kRooms').onclick = function () {
       if (!window.HansenPkRoomUI) { notReadyOr('对战房间'); return; }
-      if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return; }
-      try {
-        var A = window.HansenAuth;
-        if (!A || !A.isSignedIn || !A.isSignedIn()) {
-          alert('联机需要先登录，登录后进度和战绩都会跟着账号走。');
-          if (window.HansenAuthUI) HansenAuthUI.open();
-          return;
-        }
-      } catch (e) {}
+      if (!needOnline()) return;
       HansenPkRoomUI.open();
     };
     if (q('kLadder')) q('kLadder').onclick = openLadder;

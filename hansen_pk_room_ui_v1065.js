@@ -20,8 +20,24 @@
   var _state = null;      /* { roomId, words, isHost, idx, correct, startAt } */
 
   function E(e) {
+    /* v1164：数据层的失败结果自带 `人话 ⟨原话⟩`，直接用 ——
+       交给 HBErrText 会把 code 拼到人话前面（「DATABASE_… | 云端设置…」），人话就脏了 */
+    if (e && typeof e === 'object' && e.ok === false && typeof e.reason === 'string') return e.reason;
     try { if (window.HBErrText) return window.HBErrText(e); } catch (_) {}
     return (e && (e.reason || e.message)) ? String(e.reason || e.message) : String(e || '');
+  }
+  /* v1164：失败的种类（network/slow/session/expired/config/gone/taken/self/other）——
+     界面按种类分流，不再按字面猜「有没有登录两个字」 */
+  function kindOf(r) {
+    try {
+      if (r && typeof r.kind === 'string' && r.kind) return r.kind;
+      if (S() && S().kindOf) return S().kindOf(r);
+    } catch (e) {}
+    return 'other';
+  }
+  function rawOf(t) {
+    var m = /⟨([^⟩]+)⟩/.exec(String(t || ''));
+    return m ? m[1] : '';
   }
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -137,6 +153,7 @@
 
   function close() {
     stopKb();
+    stopPoll();
     /* v1163: 等待屏的「已等 N 秒」计时器 —— 离开这屏必须停掉。
        不停的话它会一直每秒查一次 DOM，
        而且下次进等待屏会有两个计时器同时刷同一个元素。 */
@@ -146,12 +163,47 @@
         _state._waitTimer = null;
       }
     } catch (e) {}
+    stopTicker();
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
+    /* v1164：正在等房主确认的那次进房也要撤掉（数据层会收回座位） */
+    cancelJoin();
     try { if (S()) S().stopHeartbeat(); } catch (e) {}
     if (_state && _state.roomId) { try { S().leaveRoom(_state.roomId); } catch (e) {} }
     _state = null;
+    /* v1164：天梯带进来的那些「这一次」的设定，关掉就清，别带到下一次 */
+    _fromLadder = false; _ladderCfg = null; _pickedMode = 'C'; _wantPrivate = false;
+    /* 自己关的不用救：开排位房时上的哨，看门狗还没看到屏幕就被关掉了，6 秒后会误报「没能打开」 */
+    try { if (window.HansenPkWatchdog && HansenPkWatchdog.disarm) HansenPkWatchdog.disarm(); } catch (e) {}
     var el = q(ID);
     if (el) { el.classList.remove('on'); el.innerHTML = ''; }
+  }
+
+  /* v1164：排位那边要接着找对手时，只把这一层收起来（这一次没进成房，没有东西要退） */
+  function hideShell() {
+    stopTicker();
+    var el = q(ID);
+    if (el) { el.classList.remove('on'); el.innerHTML = ''; }
+  }
+
+  /* 「已等 N 秒」这类每秒跳一次的小计时器 —— 同一时刻只留一个 */
+  var _ticker = null;
+  function startTicker(id, t0, fmt) {
+    stopTicker();
+    _ticker = setInterval(function () {
+      var el = q(id);
+      if (!el) { stopTicker(); return; }
+      el.textContent = fmt(Math.round((Date.now() - t0) / 1000));
+    }, 1000);
+  }
+  function stopTicker() { if (_ticker) { clearInterval(_ticker); _ticker = null; } }
+
+  /* 进房要等房主确认（最多 15 秒）—— 这段时间里随时能取消 */
+  var _joinSeq = 0, _joiningRid = '';
+  function cancelJoin() {
+    _joinSeq++;
+    var rid = _joiningRid;
+    _joiningRid = '';
+    if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
   }
 
   /* 错误块：会话过期时给出「重新登录」这条出路，而不是让人干瞪眼 */
@@ -185,6 +237,13 @@
       t = _m[2];
     }
     if (!t) return '出了点问题，再试一次吧';
+    /* 🔴v1164：**本来就是写给人看的中文句子，原样给人看。**
+       数据层没有原话时只给人话（「房主没有回应，换一间吧」），
+       界面自己的提示也是（「等了两分钟还没人来，房间先关掉了」）——
+       原来它们全被下面这串规则兜成「出了点问题，再试一次吧」，信息丢光了。 */
+    var _plain = t.replace(/「[^」]*」/g, '');      /* 「hansen_pk_rooms」这种是写给老师看的名字 */
+    if (/[一-龥]/.test(_plain) && !/[A-Za-z_]{4,}|\{|\[/.test(_plain)) return t;
+    if (/没人来|暂时没有对手|房间先关掉/.test(t)) return t;
     /* ⚠️ 原文不能丢 —— 翻译是给用户看的，排查时要的是原话。
        走 console.warn：真机上连电脑调试时看得到，
        而且不会像 console.error 那样被当成新故障统计。
@@ -214,9 +273,22 @@
   }
 
   function errBlock(r) {
-    var expired = !!(r && r.expired) || /过期|unauthenticated|credentials|登录/i.test(E(r));
-    return '<div class="pr_err">' + esc(sayHuman(E(r)))
-      + (expired ? '<br><br>云端登录已过期，重新登录一次就能继续。' : '') + '</div>'
+    var t = E(r);
+    var k = (r && r.kind) ? r.kind : '';
+    /* v1164：有 kind 就按 kind 判；老的 {reason} 才退回按字面猜 */
+    var expired = !!(r && r.expired) || k === 'expired'
+                  || (!k && /过期|unauthenticated|credentials|登录/i.test(t));
+    var human = sayHuman(t);
+    /* 断网 / 云端设置 / 说不清的问题：把原话小字放出来，截个图就知道是哪一类（v1156 教训） */
+    var raw = rawOf(t);
+    var tech = (raw && k && k !== 'taken' && k !== 'gone' && k !== 'self')
+      ? '<div style="margin-top:8px;font-size:11px;opacity:.75;word-break:break-all">技术信息：'
+        + esc(raw.slice(0, 130)) + '</div>'
+      : '';
+    var tip = (k === 'config') ? '<br>这不是你的问题，把这一屏截图发给负责的老师就好。' : '';
+    return '<div class="pr_err">' + esc(human) + tip
+      + ((expired && !/登录/.test(human)) ? '<br><br>云端登录已过期，重新登录一次就能继续。' : '')
+      + tech + '</div>'
       + (expired ? '<button class="pr_btn pr_btn2" id="prLogin">🔑 重新登录</button>' : '');
   }
   function wireErr() {
@@ -274,6 +346,11 @@
   }
 
   function lobby(err) {
+    /* v1164：到了房间列表就是自由房这条路了 —— 天梯带来的设定清掉，别串到下一局 */
+    _fromLadder = false; _ladderCfg = null; _cameFromLadder = false;
+    stopTicker();
+    /* 点事件对象不是错误（v1156 教训：onclick = lobby 会把事件当 err 画出来） */
+    if (err && typeof err === 'object' && 'isTrusted' in err && !('reason' in err)) err = null;
     paint(
       '<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
       + '<div class="pr_h">🏠 大PK · 公开房间</div></div>'
@@ -354,8 +431,13 @@
       if (!box) return;
       if (!r.ok) { box.innerHTML = errBlock(r); wireErr(); return; }
       var rooms = (r.rooms || []).filter(function (x) { return !x.mine; });
+      /* v1164：同一个账号在另一台设备开的房，自己看不到也进不去 —— 说出来，别让人干等 */
+      var same = (r.sameAccount > 0)
+        ? '<div class="pr_empty" style="padding:8px 6px;font-size:12.5px;color:var(--pk-warn)">'
+          + '同一个账号在另一台设备上开着房，要用另一个账号才能对战</div>'
+        : '';
       if (!rooms.length) {
-        box.innerHTML = '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间」，等别人来打。</div>';
+        box.innerHTML = same + '<div class="pr_empty">现在还没有人开房。<br>点上面的「➕ 开一间」，等别人来打。</div>';
         return;
       }
       /* 🔴v1156：**房间列表也要截断。**
@@ -395,6 +477,7 @@
           + (x.ageSec < 60 ? x.ageSec + '秒前' : Math.round(x.ageSec / 60) + '分钟前') + '</span></div>'
           + '<button data-rid="' + esc(x.id) + '">进去打</button></div>';
       }).join('');
+      if (same) box.innerHTML = same + box.innerHTML;
       if (more > 0) {
         box.innerHTML += '<div class="pr_empty" style="padding:12px 8px;font-size:13px">'
           + '还有 ' + more + ' 间房没显示 —— 先从上面这些挑一间打吧</div>';
@@ -410,7 +493,11 @@
      说明文案直接读 HansenPkRoom.MODES，**不在这里另抄一份** ——
      本项目已因"同一件事两处真源"栽过八次。 */
   var _wantPrivate = false;
-  var _ladderRating = 0;   /* v1108: 开排位房时把自己的分写进房间，供匹配用 */
+  /* v1164：排位这一次的设定（分数、匹配范围、成功/失败回调）。
+     原来是散落的全局变量（_ladderRating / _askMode…），排完一局会串到下一次自由房里 ——
+     比如自由房选过「听发音」，排位房也跟着变成听发音。现在每次显式传、用完就清。 */
+  var _ladderCfg = null;
+  var _waitMs = 120000;      /* 开房后等人的上限（测试可调短，产品默认 2 分钟） */
 
   /* 输房间码进房 */
   function joinByCode() {
@@ -453,10 +540,20 @@
     if (!code) { say('先输入好友给你的 4 位房间码'); if (ci) ci.focus(); return; }
     if (btn) { btn.disabled = true; btn.textContent = '找房中…'; }
     var restore = function () { if (btn) { btn.disabled = false; btn.textContent = '进房'; } };
-    S().findByCode(code).then(function (r) {
+    /* v1164：刚开的房，别的手机要过一两秒才查得到（云数据库主从同步有延迟）——
+       「没找到」先悄悄再查两次，别让朋友以为码给错了 */
+    var find = function (left) {
+      return S().findByCode(code).then(function (r) {
+        if (r && !r.ok && r.kind === 'gone' && left > 0) {
+          return new Promise(function (z) { setTimeout(z, 1200); }).then(function () { return find(left - 1); });
+        }
+        return r;
+      });
+    };
+    find(2).then(function (r) {
       if (!r.ok) {
         restore();
-        say(r.reason || '没找到这间房 —— 房间码可能过期了，让朋友再发一次');
+        say(r.reason ? sayHuman(E(r)) : '没找到这间房 —— 房间码可能过期了，让朋友再发一次');
         if (ci) { ci.focus(); try { ci.select(); } catch (e) {} }
         return;
       }
@@ -545,28 +642,59 @@
     if (b) b.onclick = function () { lobby(); };
   }
 
-function doCreate() {
+  /* cfg（v1164）：这一次开房的全部设定，显式传进来 ——
+       自由房：{ mode, askMode, private }（来自选玩法那一屏）
+       排位房：{ ladder:true, mode:'A', askMode:'cn', private:false, rating, t0, band, onOk, onFail } */
+  function doCreate(cfg) {
+    cfg = cfg || { mode: _pickedMode, askMode: _askMode, private: _wantPrivate };
+    var lad = !!cfg.ladder;
     var btn = q('prNew');
     if (btn) { btn.disabled = true; btn.textContent = '正在开房…'; }
-    var tier = '';
-    try { var L = window.HansenSbLadder, P = window.HansenSbProfile;
-          if (L && P) tier = L.tierOf(P.status().rating || 0).name; } catch (e) {}
-    S().createRoom({ tier: tier, mode: _pickedMode, askMode: _askMode, private: _wantPrivate,
-                     hostRating: _ladderRating }).then(function (r) {
-      if (!r.ok) { lobby(r); return; }
-      /* v1163: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」，
-         而 waiting() 只收 (roomId, code)，不存这里就拿不到。 */
-      _state = { roomId: r.roomId, words: r.words, isHost: true,
-                 mode: (r.room && r.room.mode) || mode };
-      waiting(r.roomId, (r.room && r.room.code) || '');
+    var tier = '', rating = 0;
+    /* v1164：分数从战绩模块读（资料模块没有 status()，原来这里永远取不到段位） */
+    try { var L = window.HansenSbLadder, R = window.HansenPkRecord;
+          rating = (R && R.summary) ? Number(R.summary().rating) || 0 : 0;
+          if (L && L.tierOf && rating) tier = L.tierOf(rating).name; } catch (e) {}
+    S().createRoom({ tier: tier, mode: cfg.mode, askMode: cfg.askMode, private: !!cfg.private,
+                     /* 排位房写上自己的分供别人匹配；自由房不写（免得被排位的人当成排位房配进来） */
+                     hostRating: lad ? (Number(cfg.rating) || rating || 1000) : 0 }).then(function (r) {
+      if (!r || !r.ok) {
+        if (lad) { ladderFail(cfg, r || { ok: false, reason: '房没开成' }); return; }
+        lobby(r); return;
+      }
+      /* v1163: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」 */
+      _state = { roomId: r.roomId, words: r.words, isHost: true, ladder: lad,
+                 mode: (r.room && r.room.mode) || cfg.mode || 'C',
+                 askMode: (r.room && r.room.askMode) || cfg.askMode || 'cn' };
+      if (lad && typeof cfg.onOk === 'function') { try { cfg.onOk(); } catch (e) {} }
+      waiting(r.roomId, (r.room && r.room.code) || '', cfg);
     });
   }
 
-  function waiting(roomId, code) {
-    /* 🔴v1105：私密房把**房间码大大地显示出来**，并给一键复制。
-       邀请朋友的整个流程就靠这四个字符：
-         开房 → 看到码 → 复制 → 微信发过去 → 朋友输码进来
-       所以它必须是这一屏最显眼的东西，而不是藏在角落的小字。 */
+  /* 排位流程在这边走不下去了：交回天梯，由天梯决定接着找还是说清楚原因 */
+  function ladderFail(cfg, r) {
+    _fromLadder = false;
+    hideShell();
+    _state = null;
+    if (cfg && typeof cfg.onFail === 'function') { try { cfg.onFail(r); } catch (e) {} return; }
+    try {
+      if (window.HansenLadderUI && HansenLadderUI._fromRoom) HansenLadderUI._fromRoom('rematch', '', r);
+      else if (window.HansenLadderUI) HansenLadderUI.open();
+    } catch (e) {}
+  }
+  /* 排位：回天梯（接着找 / 回首页）。先把这一层彻底关掉（停计时、退房），再交过去 */
+  function ladderBack(how, text, r) {
+    close();
+    try {
+      if (window.HansenLadderUI && HansenLadderUI._fromRoom) HansenLadderUI._fromRoom(how, text, r);
+      else if (window.HansenLadderUI) HansenLadderUI.open();
+    } catch (e) {}
+  }
+
+  function waiting(roomId, code, cfg) {
+    cfg = cfg || null;
+    var lad = !!(cfg && cfg.ladder);
+    /* 🔴v1105：私密房把**房间码大大地显示出来**，并给一键复制。 */
     var codeBox = code
       ? '<div style="margin:18px 0;text-align:center">'
         + '<div style="font-size:13px;color:var(--pk-dim);margin-bottom:6px">把这个码发给好友</div>'
@@ -577,29 +705,13 @@ function doCreate() {
         + '<div style="font-size:12px;color:var(--pk-faint);margin-top:6px">'
         +   '私密房不出现在公开列表，只有拿到码的人能进</div>'
         + '</div>'
-      : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
-        + '等人进来就自动开打。</div>';
+      : (lad
+          ? '<div class="pr_empty">暂时没找到对手，已经开好一间排位房。<br>'
+            + '有人来就自动开打；先开好的房也会自动配给你。</div>'
+          : '<div class="pr_empty">房间已经开好了，别人在列表里就能看到你。<br>'
+            + '等人进来就自动开打。</div>');
 
-    /* 🔴v1163：**等待屏原来一动不动，也不说等了多久。**
-
-       截图看到的就是一句静态的「房间已经开好了」——
-       等 3 秒和等 3 分钟长得一模一样，屏幕上没有任何东西在动。
-
-       用户会开始怀疑：是不是卡了？是不是没开成功？
-       而天梯的等待屏早就有转动的放大镜和「已等 N 秒」，
-       **同样是等待，这一屏什么都没有**。
-
-       > 让人等，就得让他看见时间在走。
-       > 一个不动的等待画面，和一个死掉的界面没有区别。
-
-       补三样：
-         · 转动的沙漏（CSS 动画，不耗电）
-         · 「已等 N 秒」，每秒刷新
-         · 「开的是什么房」—— 玩法和词数，他才知道自己开对没有 */
-    /* ⚠️ waiting() 只收 (roomId, code)，拿不到 mode ——
-       第一版直接写 S().modeOf(mode)，那个 mode 是 undefined，
-       于是整块房间信息静默消失（不报错，就是不显示）。
-       改从 _state 里取 —— 那是刚建房时存下来的（roomId/words/isHost）。 */
+    /* 🔴v1163：**等待屏原来一动不动，也不说等了多久。** 让人等，就得让他看见时间在走。 */
     var _modeName = '';
     var _wc = 0;
     try {
@@ -618,8 +730,8 @@ function doCreate() {
     paint('<style>@keyframes hsnWaitSpin{0%,100%{transform:rotate(0deg)}'
       + '45%{transform:rotate(175deg)}50%{transform:rotate(180deg)}'
       + '95%{transform:rotate(355deg)}}</style>'
-      + '<div class="pr_top"><button class="pr_back" id="prBack">← 关掉房间</button>'
-      + '<div class="pr_h">⏳ 等对手进来</div></div>'
+      + '<div class="pr_top"><button class="pr_back" id="prBack">' + (lad ? '← 不等了' : '← 关掉房间') + '</button>'
+      + '<div class="pr_h">' + (lad ? '⚡ 排位 · 等对手进来' : '⏳ 等对手进来') + '</div></div>'
       + '<div style="text-align:center;font-size:38px;margin:14px 0 4px;'
       +   'display:inline-block;width:100%">'
       +   '<span style="display:inline-block;'
@@ -631,10 +743,9 @@ function doCreate() {
       + '<div class="pr_empty" style="font-size:12.5px;margin-top:10px">'
       + '（关掉这一页，房间也会一起关掉）</div>');
 
-    /* 每秒把「已等多久」刷一次 —— 只改一个文本节点，几乎不耗性能。
-       计时器挂在 _state 上，关房时统一清掉（见 close()）。 */
+    /* 每秒把「已等多久」刷一次 —— 排位从点「开始排位」那一刻算起，接得上前面的等待 */
     try {
-      var _t0 = Date.now();
+      var _t0 = (lad && cfg.t0) || Date.now();
       if (_state && _state._waitTimer) clearInterval(_state._waitTimer);
       var _wt = setInterval(function () {
         var el = q('prWaited');
@@ -646,13 +757,16 @@ function doCreate() {
       }, 1000);
       if (_state) _state._waitTimer = _wt;
     } catch (e) {}
-    if (q('prBack')) q('prBack').onclick = close;
+    if (q('prBack')) q('prBack').onclick = function () {
+      if (lad) { ladderBack('home', ''); return; }
+      close();
+    };
 
     if (code) {
       var doCopy = function () {
         var okMsg = function () {
           var b = q('prCopy');
-          if (b) { b.textContent = '✅ 已复制，去微信发给好友'; 
+          if (b) { b.textContent = '✅ 已复制，去微信发给好友';
                    setTimeout(function () { if (b) b.textContent = '📋 复制房间码'; }, 2200); }
         };
         try {
@@ -663,8 +777,7 @@ function doCreate() {
         } catch (e) {}
         fallback();
         function fallback() {
-          /* 微信内置浏览器有时拿不到 clipboard 权限 —— 退回选中文本让用户长按复制，
-             而不是弹一句"复制失败"就没了。 */
+          /* 微信内置浏览器有时拿不到 clipboard 权限 —— 退回选中文本让用户长按复制 */
           try {
             var el = q('prCodeBig');
             if (el && window.getSelection && document.createRange) {
@@ -679,64 +792,154 @@ function doCreate() {
       if (q('prCopy')) q('prCopy').onclick = doCopy;
       if (q('prCodeBig')) q('prCodeBig').onclick = doCopy;
     }
+
+    /* 等多久：默认 2 分钟；排位里从「先开的房」那儿退回来接着等时，用剩下的时间 */
+    var WAIT_MS = _waitMs;
+    if (_state && !_state._waitStart) _state._waitStart = Date.now();
+    var left = WAIT_MS - (Date.now() - ((_state && _state._waitStart) || Date.now()));
+    var st = _state;
+    var wopts = lad ? { ladder: {
+      rating: Number(cfg.rating) || 0,
+      /* 匹配范围按「这一次排位一共等了多久」放宽，接得上前面 20 秒 */
+      band: function () { return (typeof cfg.band === 'function') ? cfg.band() : 400; }
+    } } : undefined;
     _cancelWait = S().waitForOpponent(roomId, function (ev) {
-      if (ev.joined) { startMatch(); return; }
-      if (ev.gone) { lobby({ reason: '房间已经不在了' }); return; }
-      if (ev.timeout) { lobby({ reason: '等了两分钟没人来，先散了吧' }); return; }
-      if (ev.error) { lobby({ reason: ev.error }); }
-    });
+      if (st !== _state) return;              /* 这一屏已经换掉了 */
+      if (ev.joined) {
+        /* v1164：对手是谁、多少分 —— 房主这边原来从来不知道（结算按 1000 分算 ELO） */
+        try {
+          var rm = ev.room || {};
+          if (rm.guestName) st.oppName = rm.guestName;
+          if (Number(rm.guestRating) > 0) st._oppRating = Number(rm.guestRating);
+        } catch (e) {}
+        startMatch(); return;
+      }
+      if (ev.switchTo && lad) {
+        /* 🔴v1164：两个人差不多同时开始排位 → 各自开了一间房、互相干等两分钟（真机现象）。
+           数据层发现有**更早开的**合适的房：去进那间（进成了自己这间会被收掉）。 */
+        clearWait(st);
+        switchRoom(roomId, code, cfg, ev.switchTo);
+        return;
+      }
+      if (ev.gone) {
+        clearWait(st);
+        if (lad) { ladderBack('rematch', '刚才那间房没了，接着帮你找…'); return; }
+        endWait(st); lobby({ reason: '房间已经不在了' }); return;
+      }
+      if (ev.timeout) {
+        /* 数据层已经把房收掉了（不留「看得见、进去没人」的幽灵房）—— 这边只停心跳、清状态 */
+        endWait(st);
+        if (lad) { ladderBack('home', '暂时没有对手，等会儿再来'); return; }
+        lobby({ reason: '等了两分钟还没人来，房间先关掉了。想玩就再开一间吧。' });
+        return;
+      }
+      if (ev.error) {
+        var fr = { ok: false, reason: ev.error, kind: ev.kind || kindOf({ reason: ev.error }), expired: !!ev.expired };
+        clearWait(st);
+        if (lad) { ladderBack('rematch', '', fr); return; }
+        endWait(st, true); lobby(fr);
+      }
+    }, Math.max(Math.min(15000, WAIT_MS), left), wopts);
   }
 
-  /* ── 进房 ── */
-  function doJoin(rid, btn) {
-    if (btn) { btn.disabled = true; btn.textContent = '进入中…'; }
-    S().joinRoom(rid).then(function (r) {
-      if (!r.ok) {
-        /* 🔴v1154：**排位进不去房要说人话，不能默默甩回列表。**
+  /* 停掉等待屏自己的东西（计时器、轮询） */
+  function clearWait(st) {
+    try { if (st && st._waitTimer) { clearInterval(st._waitTimer); st._waitTimer = null; } } catch (e) {}
+    if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
+  }
+  /* 等待结束、回列表：心跳停掉；还开着的房（报错退出时）收掉 */
+  function endWait(st, leave) {
+    clearWait(st);
+    try { S().stopHeartbeat(); } catch (e) {}
+    if (leave && st && st.roomId) { try { S().leaveRoom(st.roomId); } catch (e) {} }
+    if (_state === st) _state = null;
+  }
 
-           实测（"进房那一刻被别人抢走"场景）：抢不到时直接 `lobby(r)`，
-           用户从"正在找对手"一下子跳到「🏠 大PK · 公开房间」列表，
-           **完全不知道刚才发生了什么** —— 以为天梯坏了。
-
-           而"房刚好被别人抢走"在排位里很常见：
-           大家都在抢同一批空房，慢一步就没了。这不是故障，是正常竞争。 */
-        if (_fromLadder) {
-          _fromLadder = false;
-          paint('<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
-            + '<div class="pr_h">⚡ 排位</div></div>'
-            + '<div style="text-align:center;padding:26px 12px">'
-            + '<div style="font-size:40px">\ud83d\udca8</div>'
-            + '<div style="font-size:16px;font-weight:800;margin-top:10px">这间房刚被别人抢走了</div>'
-            + '<div style="font-size:13px;color:var(--pk-dim);margin-top:8px;line-height:1.8">'
-            +   '排位时大家都在抢空房，慢一步就没了。<br>再找一次就好。</div>'
-            + '<button class="pr_btn" id="prReMatch" style="margin-top:16px">\u26a1 再找一次对手</button>'
-            + '</div>');
-          var _rb = document.getElementById('prReMatch');
-          if (_rb) _rb.onclick = function () {
-            try { close(); if (window.HansenLadderUI) HansenLadderUI.open(); } catch (e) {}
-          };
-          var _bk = document.getElementById('prBack');
-          if (_bk) _bk.onclick = close;
-          return;
-        }
-        if (r.taken) { refresh(); alert(E(r)); if (btn) { btn.disabled = false; btn.textContent = '进去打'; } return; }
-        lobby(r); return;
+  /* 排位：换到更早开的那间房。进不去时 ——
+       自己这间还在（座位都没抢到）→ 回自己这间接着等
+       自己这间已经收了（抢到座位、但房主没确认）→ 回天梯接着找 */
+  function switchRoom(myRid, myCode, cfg, target) {
+    var mine = _state;
+    paint('<div class="pr_top"><div class="pr_h">⚡ 排位</div></div>'
+      + '<div class="pr_empty" style="padding:30px 12px">找到一间先开好的房，正在进去…</div>');
+    var join = {};
+    for (var k in cfg) if (Object.prototype.hasOwnProperty.call(cfg, k)) join[k] = cfg[k];
+    join.onOk = null;
+    join.onFail = function (r) {
+      var stillMine = false;
+      try { stillMine = (S()._currentRoomId() === myRid && S()._currentRole() === 'host'); } catch (e) {}
+      if (r && r.cancelled) { ladderBack('home', ''); return; }
+      if (stillMine && mine) {
+        _state = mine;
+        _fromLadder = true;
+        var el = host(); el.classList.add('on');
+        waiting(myRid, myCode, cfg);
+        return;
       }
-      /* 🔴v1163：**客人也要拿到房主选的玩法。**
+      ladderBack('rematch', '那间房没进去，接着帮你找…', r);
+    };
+    _state = null;
+    doJoin(target, null, join);
+  }
 
-         实测（两个浏览器对打）：房主屏上是「⚡抢答赛」，
-         客人屏上却是「🔥同步赛」—— **同一间房，两个人在玩不同的规则**。
-
-         根因：客人的 _state 里没有 mode，
-         startMatch 里 `st.mode = st.mode || _pickedMode || 'C'`
-         就回落到了默认的 C（同步赛）。
-         而房间数据里本来就有 mode（房主建房时写的）。
-
-         > 玩法是这间房的属性，不是各人的偏好。
-         > 谁进来都该按房主定的规则打。 */
-      _state = { roomId: r.roomId, words: r.words, isHost: false,
-                 mode: (r.room && r.room.mode) || (r.mode) || '',
-                 askMode: (r.room && r.room.askMode) || '' };
+  /* ── 进房 ──
+     🔴v1164：进别人的房要**等房主确认**（客人不能改房主的文档，只能占个座位等他点头）——
+     最多 15 秒。这段时间给一屏「正在进房」和一个取消键，别让人对着按钮发呆。
+     进不去要说**真实原因**：被别人抢了 / 房没了 / 断网 / 云端设置… 原来一律说「被抢走了」。 */
+  function doJoin(rid, btn, cfg) {
+    cfg = cfg || null;
+    var lad = !!(cfg && cfg.ladder);
+    if (btn) { btn.disabled = true; btn.textContent = '进入中…'; }
+    cancelJoin();
+    var my = _joinSeq;
+    _joiningRid = rid;
+    paint('<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
+      + '<div class="pr_h">' + (lad ? '⚡ 排位 · 进房中' : '🚪 进房中') + '</div></div>'
+      + '<div style="text-align:center;padding:26px 12px">'
+      +   '<div style="font-size:40px">🚪</div>'
+      +   '<div style="font-size:16px;font-weight:800;margin-top:10px">正在进房，等房主确认…</div>'
+      +   '<div id="prJoinWait" style="font-size:13px;color:var(--pk-dim);margin-top:8px">已等 0 秒</div>'
+      +   '<div style="font-size:12px;color:var(--pk-faint);margin-top:8px;line-height:1.7">'
+      +     '房主那边点头了就开打，一般几秒钟</div>'
+      +   '<button class="pr_btn pr_btn2" id="prJoinCancel" style="margin-top:18px">取消</button>'
+      + '</div>');
+    startTicker('prJoinWait', Date.now(), function (s) { return '已等 ' + s + ' 秒'; });
+    /* 取消：退座位，数据层会让这次进房以「已经退出」结束。
+       ⚠️ 座位还没抢到时点的取消，数据层那边可能接着抢到 —— 记下来，进成了也马上退 */
+    var userCancel = false;
+    var onCancel = function () { userCancel = true; try { S().leaveRoom(rid); } catch (e) {} };
+    if (q('prJoinCancel')) q('prJoinCancel').onclick = onCancel;
+    if (q('prBack')) q('prBack').onclick = onCancel;
+    var myRating = 0;
+    try { myRating = Number(cfg && cfg.rating) || Number(window.HansenPkRecord.summary().rating) || 0; } catch (e) {}
+    S().joinRoom(rid, { rating: myRating }).then(function (r) {
+      /* 已经取消 / 换了一次进房：界面不再管它；万一数据层那边还是进成了，马上退出来（别留一个房主在等的空座位） */
+      if (my !== _joinSeq) { if (r && r.ok) { try { S().leaveRoom(r.roomId); } catch (e) {} } return; }
+      _joiningRid = '';
+      stopTicker();
+      if (userCancel) {
+        if (r && r.ok) { try { S().leaveRoom(r.roomId); } catch (e) {} }
+        r = { ok: false, cancelled: true, kind: 'other', reason: '已经退出这间房了' };
+      }
+      if (!r || !r.ok) {
+        r = r || { ok: false, reason: '没进去' };
+        if (lad) { ladderFail(cfg, r); return; }
+        _fromLadder = false;
+        if (r.cancelled) { lobby(); return; }
+        /* 🔴v1154：进不去要说人话，不能默默甩回列表 —— 列表顶上说原因，下面是刷新过的房间 */
+        lobby(r);
+        return;
+      }
+      _fromLadder = false;
+      if (lad && typeof cfg.onOk === 'function') { try { cfg.onOk(); } catch (e) {} }
+      /* 🔴v1163：**客人也要拿到房主选的玩法。** 玩法是这间房的属性，不是各人的偏好。
+         v1164：对手名字和分数也从房间里拿（结算算 ELO 要用真实分数） */
+      var rm = r.room || {};
+      _state = { roomId: r.roomId, words: r.words, isHost: false, ladder: lad,
+                 mode: rm.mode || r.mode || '',
+                 askMode: rm.askMode || 'cn',
+                 oppName: rm.hostName || '',
+                 _oppRating: Number(rm.hostRating) || 0 };
       startMatch();
     });
   }
@@ -809,6 +1012,7 @@ function doCreate() {
   var _lastStats = null;   /* v1156: 结算屏要用的本局统计 —— _state 那时已被清空 */
   var _netMiss = 0;   /* v1154: 连续拿不到房间状态的次数 */
   var _waitResult = 0; /* v1154: 等对手交卷的轮询次数，防止无限等待 */
+  var _resultFail = 0; /* v1164: 交卷连续失败的次数（失败先重试，不立刻把人踢走） */
 
   function stopKb() {
     if (_kbKeyHandler) { try { document.removeEventListener('keydown', _kbKeyHandler); } catch (e) {} _kbKeyHandler = null; }
@@ -823,9 +1027,16 @@ function doCreate() {
     if (_cancelWait) { try { _cancelWait(); } catch (e) {} _cancelWait = null; }
     var st = _state;
     if (!st) return;
+    stopTicker();
+    try { if (st._waitTimer) { clearInterval(st._waitTimer); st._waitTimer = null; } } catch (e) {}
     st.startAt = Date.now();
-    st.myScore = 0; st.oppScore = 0;
+    st.myScore = 0; st.oppScore = 0; st.oppAns = -1;
     st.mode = st.mode || _pickedMode || 'C';
+    st.oppName = st.oppName || '';
+    /* 🔴v1164：**每一局的计数器从零开始。** 原来是模块级的、从不清零 ——
+       上一局断网攒下的 4 次失败，会让这一局第一次读不到就挂「网络不稳」；
+       上一局等交卷数到 20 次，这一局等两次就被判「对手离场」。 */
+    _netMiss = 0; _waitResult = 0; _goneChecked = 0; _resultFail = 0;
     /* 报到 —— 双方都进屏了才开打，避免一方还在加载就被抢完。
        🔴v1126：**先把房间的 roundAt 拿到手再开第一回合。**
        否则首回合各按各的本地时间起算 —— 实测两人开局差 6 秒，
@@ -930,7 +1141,11 @@ function doCreate() {
        它只有在"这一回合刚刚开始"时才代表本回合的起点。
        超出一个回合时长就说明它是陈旧的（对手还没来、或刚推进还没同步到），
        这时退回本地计时 —— **宁可两边差一两秒，也不能让人一进来就 0 秒**。 */
-    var shared = (st.roundAt && idx === st.roundIdxOfRoundAt) ? st.roundAt : 0;
+    /* 🔴v1164：B/C 模式里两人各拼各的（慢的那位拼完上一词才来到这一词），
+       共享的 roundAt 记的是「先拼对的那一刻」—— 拿它当起点，慢的孩子一进新词就只剩几秒。
+       所以 B/C 从第 2 词起按自己看到这一词的时刻算 15 秒；第 1 词和 A 抢答赛仍用共享起点。 */
+    var useShared = (idx === 0) || !M.waitAll;
+    var shared = (useShared && st.roundAt && idx === st.roundIdxOfRoundAt) ? st.roundAt : 0;
     var fresh = shared && (Date.now() - shared) < span;
     var base = fresh ? shared : Date.now();
     _rt = { idx: idx, answered: false, t0: Date.now(), deadline: base + span };
@@ -972,7 +1187,7 @@ function doCreate() {
       +     'gap:5px;justify-content:flex-end">'
       +     '<b id="prOpp" style="font-size:22px;font-variant-numeric:tabular-nums;'
       +       'display:inline-block">' + st.oppScore + '</b>'
-      +     '<span style="font-size:12.5px;color:var(--pk-dim);overflow:hidden;'
+      +     '<span id="prOppName" style="font-size:12.5px;color:var(--pk-dim);overflow:hidden;'
       +       'text-overflow:ellipsis;white-space:nowrap">'
       +       esc(st.oppName || '对手') + '</span>'
       +   '</span>'
@@ -1165,6 +1380,25 @@ function doCreate() {
       if (!stillLive(st)) return;
       if (!g || !g.ok || !_rt || _rt.idx !== idx) return;
       var el = q('prOppSt');
+      /* v1164：房主那边已经判了「对手离场」（多半是我切后台太久）—— 两边按同一个结论收尾 */
+      if (g.ended && g.endedBy === 'abandon' && g.abandonWin && g.abandonWin !== (st.isHost ? 'host' : 'guest')) {
+        stopPoll();
+        showResult({ result: 'lose', byAbandon: true, mine: st.myScore, theirs: st.oppScore });
+        return;
+      }
+      if (g.gone && !st._oppSeen) {
+        /* 🔴v1164：**对手根本没进来（一次都没报到）就不算赢。**
+           客人刚抢到座位就退了、房主那边恰好已经点了头 —— 房主进了对战屏，对面是空的。
+           原来 12 秒后判「对手已离场，本局你胜」：白送一局胜、排位还加分。
+           现在：说清楚，房收掉，回去重新找（排位）/ 回列表（自由房）。 */
+        stopPoll(); stopKb();
+        var lad0 = !!st.ladder, rid0 = st.roomId;
+        _state = null;
+        try { S().leaveRoom(rid0); } catch (e) {}
+        if (lad0) { ladderBack('rematch', '对手刚才没进来，接着帮你找…'); return; }
+        lobby({ reason: '对手刚才没进来，这间房先关掉了。再开一间吧。' });
+        return;
+      }
       if (g.gone) {
         if (el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = 'var(--pk-ok)'; }
         stopPoll();
@@ -1207,9 +1441,18 @@ function doCreate() {
       try {
         if (r && r.ok && typeof r.oppId === 'string') {
           if (!st._oppId && r.oppId) st._oppId = r.oppId;
-          /* v1156: 记下对手分数，结算时算加减分要用 */
-          if (!st._oppRating && Number(r.oppRating) > 0) st._oppRating = Number(r.oppRating);
-          else if (st._oppId && r.oppId && r.oppId !== st._oppId && !st._oppSwapped) {
+          /* v1156: 记下对手分数，结算时算加减分要用。
+             v1164：名字和分数都以房间合并视图为准（两边都给了），拿到就更新 ——
+             原来 `if … else if` 写法让「对手换人」那条在拿到分数后永远进不去。 */
+          if (Number(r.oppRating) > 0) st._oppRating = Number(r.oppRating);
+          if (r.oppName && r.oppName !== st.oppName) {
+            st.oppName = String(r.oppName);
+            var _on = q('prOppName');
+            if (_on) _on.textContent = st.oppName;
+          }
+          /* 对手真的进了对战屏（报过到 / 拼过词）—— 之后他不见了才算「离场」 */
+          if ((r.mySide === 'host' ? r.guestReady : r.hostReady) || (r.winners || []).some(function (x) { return x && x !== r.mySide; })) st._oppSeen = true;
+          if (st._oppId && r.oppId && r.oppId !== st._oppId && !st._oppSwapped) {
             st._oppSwapped = true;
             try {
               var _h = q('prHint');
@@ -1322,6 +1565,9 @@ function doCreate() {
           var _oppWon = _meIsHost ? (_who === 'guest') : (_who === 'host');
           if (_oppWon) _opp += (_mm.firstScore || 100);
         }
+        /* v1164：B/C 后拼对的分只在对手自己记的总分里；比分只增不减 */
+        if (_mm.waitAll && isFinite(Number(r.oppPts)) && Number(r.oppPts) > _opp) _opp = Number(r.oppPts);
+        if (_opp < (st.oppScore || 0)) _opp = st.oppScore || 0;
         if (_opp !== st.oppScore) {
           var _gained = _opp > st.oppScore;
           st.oppScore = _opp;
@@ -1347,6 +1593,9 @@ function doCreate() {
           }
         }
       } catch (e) {}
+      /* v1164 B/C：对手答到第几词、自己记的总分（含后拼对的 60/80） */
+      if (r.oppAns != null && isFinite(Number(r.oppAns))) st.oppAns = Math.max(st.oppAns == null ? -1 : st.oppAns, Number(r.oppAns));
+      if (_mm && _mm.waitAll) oppPtsShow(st, r);
       if (!_rt || _rt.idx !== idx) return;
       /* v1126: 记下房间共享的回合开始时间，供下一回合算截止点 */
       if (r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
@@ -1363,41 +1612,26 @@ function doCreate() {
       var mySide = r.mySide || (st.isHost ? 'host' : 'guest');
       var oppGot = (w !== mySide);
       var el = q('prOppSt');
-      if (oppGot && el) { el.textContent = '🔥 你抢先拼对！'; el.style.color = 'var(--pk-warn)'; }
       var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { waitAll: true };
+      /* v1164：这一行前面是「对手：」—— 原来写的是「🔥 你抢先拼对！」，读出来成了「对手：你抢先拼对」 */
+      if (oppGot && el && !_rt.answered) {
+        el.textContent = M.waitAll && M.secondScore
+          ? '⚡ 先拼对了 —— 你拼对还能得 ' + M.secondScore + ' 分'
+          : '⚡ 先拼对了';
+        el.style.color = 'var(--pk-warn)';
+      }
       /* A 模式：对手抢到就立刻翻篇，不等我 */
       if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); return; }
 
-      /* 🔴v1123：**对手已经跑到下一词了，我不能还停在上一词。**
+      /* 🔴v1164：**B/C 模式（waitAll）里对手先拼对，我还能接着拼 —— 不再被强行翻篇。**
 
-         实测两人对战：A 抢到第 1 词后推进到第 2 词，
-         B 那边只显示"对手抢先拼对了"，**却一直卡在第 1 词** ——
-         因为 C 模式是"等两人都答完"，而 B 没答就只能干等 15 秒超时。
-         结果 B 全程慢一拍，后面每一词都对不上，分数永远是 0。
-
-         判据：房间的 `round` 已经超过我当前这一词 ——
-         说明这一词的胜负已定、对手也走了，我该跟上。
-         仍按 `secondScore` 记分（B/C 模式下"慢了但还是拼对了"有分），
-         没拼对就是 0 分。 */
-      /* ⚠️ 判据要看**这一词有没有人抢到**，不是看 round 跑多远。
-         第一版写成 `r.round > idx + 1` —— 而第 0 词被抢后 round 正好是 1，
-         条件不成立，B 永远跟不上（实测卡在第 1 词、分数一直 0）。
-         正确判据：`winners[idx]` 已经有人 = 这一词已定胜负，我该跟上。 */
-      if (oppGot && !_rt.answered) {
-        /* 🔴v1125：**立刻标记本回合已结束，再走结算。**
-
-           实测 A 模式：A 抢到后 B 那边输入框被清空、
-           却只显示「对手：正在拼…」—— B 完全不知道刚才发生了什么。
-
-           原因是这里等了 0.7 秒才调 submitRound，
-           而那 0.7 秒里 B 可能还在敲键盘、轮询也可能再次触发，
-           结果"对手抢先了"这句话没机会显示出来就被下一回合盖掉。
-
-           改为**马上结算**（submitRound 内部本来就有 1.4 秒的小结停留，
-           足够看清"对手抢先了 〔apple 苹果〕"）——
-           不需要在外面再加一层延迟。 */
-        submitRound(idx, false, true);
-      }
+         v1123 为了「B 卡在第 1 词、后面每一词都对不上、分数永远是 0」，
+         改成了对手一拼对就把我也推到下一词。那个「对不上」是旧协议的毛病
+         （抢答要求房间的回合号正好等于这一词，慢一拍就永远写不进去）。
+         v1164 起每一词是一个独立的回合文档，慢几秒也照样记得上 ——
+         而强行翻篇反倒让「后拼对 60 / 80 分」这条规则从来没兑现过：
+         慢的那个孩子还在拼，词就被收走了，记 0 分。
+         现在：对手先拼对，我这边提示一句、接着拼，到自己的截止时间为止（每词 15 秒）。 */
     })['catch'](function () {});
   }
 
@@ -1514,7 +1748,7 @@ function doCreate() {
           : (forced ? '对手抢先了' : '⏱ 超时了')) + answer;
       }
       setTimeout(function () {
-      if (!stillLive(st)) return; askRound(idx + 1); }, 1400);
+      if (!stillLive(st)) return; nextWord(st, idx); }, 1400);
     };
 
     if (!correct) {
@@ -1537,77 +1771,158 @@ function doCreate() {
     })['catch'](function () { after(0, false); });
   }
 
+  /* 🔴v1164 B/C「两人都答完才翻篇」：我答完了、对手还在拼这一词 → 等他。
+     原来各翻各的：快的那位先跑到下一词，下一词的「抢先 100 分」就成了谁领先谁拿。
+     最多等到这一词的截止时间再加 3 秒（对手断网也不会把我卡住）；最后一词不等，交卷屏会等。 */
+  function nextWord(st, idx) {
+    var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { waitAll: false };
+    var last = idx + 1 >= (st.words || []).length;
+    if (!M.waitAll || last || !st.roomId || st.roomId === 'test' || (st.oppAns != null && st.oppAns >= idx)) {
+      askRound(idx + 1); return;
+    }
+    var rt = _rt;
+    var cap = Math.max((rt && rt.deadline) || 0, Date.now()) + 3000;
+    var go = function () { if (stillLive(st) && _rt === rt) askRound(idx + 1); };
+    var poll = function () {
+      if (!stillLive(st) || _rt !== rt) return;
+      if (Date.now() >= cap) { go(); return; }
+      /* 秒数在走：孩子知道是在等对手，不是卡住了（提示行放在本词结果下面，下一词重画时自然消失） */
+      try {
+        var el = q('prWaitOpp'), h = q('prHint');
+        if (!el && h && h.parentNode) {
+          el = document.createElement('div');
+          el.id = 'prWaitOpp';
+          el.setAttribute('style', 'font-size:12.5px;color:var(--pk-dim);margin-top:4px;text-align:center');
+          h.parentNode.insertBefore(el, h.nextSibling);
+        }
+        if (el) el.textContent = '⏳ 对手还在拼这一词，等他一下（最多 ' + Math.max(1, Math.ceil((cap - Date.now()) / 1000)) + ' 秒）';
+      } catch (e) {}
+      S().roundState(st.roomId).then(function (r) {
+        if (!stillLive(st) || _rt !== rt) return;
+        if (r && r.ok) {
+          oppPtsShow(st, r);
+          if (Number(r.oppAns) >= idx) { st.oppAns = Number(r.oppAns); go(); return; }
+        }
+        setTimeout(poll, 900);
+      }, function () { setTimeout(poll, 900); });
+    };
+    poll();
+  }
+  /* B/C 里对手后拼对的 60/80 分不写进回合文档 —— 用对手自己记的总分（只增不减） */
+  function oppPtsShow(st, r) {
+    var n = Number(r && r.oppPts);
+    if (!isFinite(n) || n <= (st.oppScore || 0)) return;
+    st.oppScore = n;
+    var ob = q('prOpp');
+    if (ob) ob.textContent = String(n);
+  }
+
   function finish() {
     var st = _state;
     if (!st) return;
     stopPoll(); stopKb();
     var secs = Math.max(1, Math.round((Date.now() - st.startAt) / 1000));
 
-    /* 🔴v1122：**改用回合制的实际得分。**
-
-       这里一直沿用 v1099 的算法 `st.correct * 100 + ...` ——
-       而 `st.correct` 是"一次给全套题"那版留下的字段，
-       **回合制下从来没被赋过值**（现在记分记在 `st.myScore` 和 `st.st` 里）。
-
-       后果：打完 3 局，战绩记了 **0 局**、答题数 **0 个** ——
-       整局白打，天梯分也不会动。实测才发现。
-
-       教训：**改了计分方式，就要顺着链条查到最后一环。**
-       v1101 改对战屏时只顾着回合逻辑，忘了结算这一头还在读旧字段。 */
+    /* 🔴v1122：**改用回合制的实际得分。** 改了计分方式，就要顺着链条查到最后一环。 */
     var stat = st.st || { words: 0, correct: 0 };
     var score = Number(st.myScore) || 0;
 
     paint('<div class="pr_top"><div class="pr_h">📨 交卷了</div></div>'
       + '<div class="pr_empty">你答对 ' + stat.correct + ' / ' + (st.words || []).length
       + ' 个，得 ' + score + ' 分，用时 ' + secs + ' 秒。<br>'
-      + '正在等对手交卷…</div>');
-    S().reportResult(st.roomId, score).then(function (r) {
-      if (!stillLive(st)) return;
-      if (!r.ok) { lobby(r); return; }
-      if (r.waiting) { setTimeout(function () {
-      if (!stillLive(st)) return; pollResult(st.roomId, score); }, 2000); return; }
-      showResult(r);
+      + '正在等对手交卷…</div>'
+      /* v1164：同步赛 / 回合赛里两人各有每词 15 秒，快的那位可能要等慢的一两分钟 ——
+         让他看见时间在走、知道对面还在拼（不动的等待屏和死掉的界面没区别，看门狗也会当成卡住） */
+      + '<div id="prResWait" style="text-align:center;font-size:12.5px;color:var(--pk-dim);margin-top:6px">'
+      +   '已等 0 秒</div>');
+    startTicker('prResWait', Date.now(), function (sec) {
+      return '已等 ' + sec + ' 秒' + (sec >= 8 ? ' · 对手可能还在拼后面几个词' : '');
     });
+    _waitResult = 0; _resultFail = 0;
+    /* 🔴v1164：第一次交卷失败也走同一条重试路（原来 `!r.ok` 直接回列表，这一局就白打了） */
+    pollResult(st, score);
   }
 
-  function pollResult(roomId, score) {
-    S().reportResult(roomId, score).then(function (r) {
-      if (!r.ok) { lobby(r); return; }
-      if (r.waiting) {
-        /* 🔴v1154：**等对手交卷不能没有上限。**
-
-           两人真机对打实测抓到：A 已经看到"🤝 打平"的结算屏了，
-           **B 还卡在"正在等对手交卷…"** —— 而且会一直卡下去。
-
-           原来这里只是每 2 秒重试一次，**没有任何超时**：
-           对手中途关掉页面、网断了、或者结算写入丢了一次，
-           这一边就**永远停在等待屏**，只能自己退出去 ——
-           而退出去这一局的战绩和天梯分就都没了。
-
-           给 45 秒上限：正常情况下对手交卷只要几秒，
-           45 秒还没等到，多半是他不会再交了。
-           超时按"对手离场"结算 —— 和 v1104 对手掉线的处理一致，
-           **让这一局有个交代，而不是把人吊在那儿**。 */
-        _waitResult = (_waitResult || 0) + 1;
-        if (_waitResult > 22) {                 /* 22 次 × 2 秒 ≈ 45 秒 */
-          _waitResult = 0;
-          showResult({ ok: true, result: 'win', byAbandon: true,
-                       mine: score, theirs: 0 });
+  /* 交卷 + 等对手交卷。st 是这一局的状态 ——
+     🔴v1164：原来这里用了一个没定义的 `st`（只传了 roomId），一断网就 ReferenceError，
+     等交卷这条链当场断掉，人卡在「正在等对手交卷…」。 */
+  function pollResult(st, score) {
+    if (!stillLive(st)) return;
+    S().reportResult(st.roomId, score).then(function (r) {
+      if (!stillLive(st)) return;
+      if (!r || !r.ok) {
+        /* 🔴v1164：**交卷失败先重试，不立刻放弃。** 网抖一下就把人甩回列表，
+           这一局的战绩和天梯分就都没了。登录过期、云端设置不对这种重试也没用 —— 直接说。 */
+        _resultFail = (_resultFail || 0) + 1;
+        var k = kindOf(r);
+        if (_resultFail < 5 && k !== 'expired' && k !== 'config') {
+          setTimeout(function () { pollResult(st, score); }, 2000);
           return;
         }
-        setTimeout(function () { pollResult(roomId, score); }, 2000);
+        resultFailed(st, r || { ok: false, reason: '交卷没成功' });
+        return;
+      }
+      _resultFail = 0;
+      if (r.waiting) {
+        /* 🔴v1154：**等对手交卷不能没有上限。**
+           给 45 秒：正常情况下对手交卷只要几秒。
+           v1164：到点先问一句对手还在不在 —— 还在（心跳在跳，只是慢）就再多等一会儿，
+           真不在了才判离场，并且把「离场」写进自己的文档，两边看到同一个结论。 */
+        _waitResult = (_waitResult || 0) + 1;
+        if (_waitResult > 22) {                 /* 22 次 × 2 秒 ≈ 45 秒 */
+          checkStillThere(st, score);
+          return;
+        }
+        setTimeout(function () { pollResult(st, score); }, 2000);
         return;
       }
       _waitResult = 0;
+      /* 对手离场判的胜负：比分显示这一局实际拿到的分（数据层那边是 1:0 的记号） */
+      if (r.byAbandon) r = { ok: true, result: r.result, byAbandon: true,
+                             mine: st.myScore, theirs: st.oppScore };
       showResult(r);
     })['catch'](function () {
       /* 网络抖动也算一次等待，别让异常把这条链断掉 */
       _waitResult = (_waitResult || 0) + 1;
-      if (_waitResult > 22) { _waitResult = 0;
-        showResult({ ok: true, result: 'win', byAbandon: true, mine: score, theirs: 0 }); return; }
-      setTimeout(function () {
-      if (!stillLive(st)) return; pollResult(roomId, score); }, 2500);
+      if (_waitResult > 22) { checkStillThere(st, score); return; }
+      setTimeout(function () { pollResult(st, score); }, 2500);
     });
+  }
+
+  /* 等了 45 秒还没交卷：对手还在就再等（最多约 2 分钟），不在了就判他离场 */
+  function checkStillThere(st, score) {
+    var give = function () {
+      _waitResult = 0;
+      var fin = function () {
+        if (!stillLive(st)) return;
+        showResult({ ok: true, result: 'win', byAbandon: true, mine: score, theirs: 0 });
+      };
+      S().claimAbandonWin(st.roomId).then(fin, fin);
+    };
+    S().opponentGone(st.roomId).then(function (g) {
+      if (!stillLive(st)) return;
+      var alive = g && g.ok && !g.gone && (g.idleSecs || 0) < 30;
+      /* B/C 模式两人各拼各的，慢的那位最多可能晚 10 词 × 15 秒 —— 心跳还在跳就等够它（约 5 分钟封顶） */
+      if (alive && _waitResult < 150) { setTimeout(function () { pollResult(st, score); }, 2000); return; }
+      give();
+    }, give);
+  }
+
+  /* 结果实在拿不到：说清楚，并给回去的路（排位回天梯，自由房回列表） */
+  function resultFailed(st, r) {
+    var lad = !!(st && st.ladder);
+    var rid = st && st.roomId;
+    _state = null;
+    if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
+    paint('<div class="pr_top"><div class="pr_h">📨 这一局的结果没拿到</div></div>'
+      + errBlock(r)
+      + '<div class="pr_empty" style="font-size:13px">网好了以后，下一局会照常记分。</div>'
+      + '<button class="pr_btn" id="prResBack">' + (lad ? '← 回天梯' : '← 回到房间列表') + '</button>');
+    wireErr();
+    if (q('prResBack')) q('prResBack').onclick = function () {
+      if (lad) { ladderBack('home', ''); return; }
+      lobby();
+    };
   }
 
   /* ── 🔴v1156 结算屏：本局打得怎么样 ────────────────
@@ -1713,9 +2028,14 @@ function doCreate() {
   }
 
   function showResult(r) {
+    stopTicker();
     /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
-    var txt = r.byAbandon ? '🏆 对手已离场，本局你胜'
+    /* v1164：「离场」也可能是我这边 —— 切后台太久被判了负，不能说成「本局你胜」 */
+    var txt = (r.byAbandon && r.result === 'lose') ? '⌛ 你离开太久，这局判给了对手'
+            : r.byAbandon ? '🏆 对手已离场，本局你胜'
             : (r.result === 'win' ? '🎉 你赢了！' : (r.result === 'lose' ? '💪 这局输了' : '🤝 打平'));
+    /* 这一局是不是排位来的 —— 决定「再来一局」和「返回」去哪 */
+    var wasLadder = _state ? !!_state.ladder : _cameFromLadder;
 
     /* 🔴v1103：**打完必须留下痕迹** —— 赢了没记录，那为什么要打？
        只有 A 抢答赛动天梯分（v1100 定的规矩：排位就该纯竞技），
@@ -1730,7 +2050,10 @@ function doCreate() {
         try {
           setTimeout(function () {
             try {
-              if (window.HansenLadderBoard && HansenLadderBoard.push) HansenLadderBoard.push();
+              /* v1164：传失败要留个记录（下次打开天梯页会自动补传，原因在 lastPushError 里） */
+              if (window.HansenLadderBoard && HansenLadderBoard.push) Promise.resolve(HansenLadderBoard.push()).then(function (pr) {
+                if (pr && pr.ok === false && !pr.skipped) console.warn('[天梯榜] 这局的分没传上榜，下次打开天梯页会补传：' + String(pr.reason || '').slice(0, 120));
+              })['catch'](function () {});
             } catch (e) {}
           }, 300);
         } catch (e) {}
@@ -1806,10 +2129,14 @@ function doCreate() {
       + extra
       + nextTierLine()
       + '<button class="pr_btn" id="prAgain">再来一局</button>'
-      + '<button class="pr_btn pr_btn2" id="prBack2">← 回到房间列表</button>');
+      + '<button class="pr_btn pr_btn2" id="prBack2">' + (wasLadder ? '← 回天梯' : '← 回到房间列表') + '</button>');
     var rid = _state && _state.roomId;
     _state = null;
+    stopPoll(); stopKb();
+    /* v1164：离开 = 房主把房标成「打完了」、客人把座位标成「走了」——都只改自己的文档；
+       房间留 2 分钟再清，晚交卷的那一方还读得到结果 */
     if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
+    _cameFromLadder = wasLadder;
     /* 🔴v1156：**两个 bug 一起修。**
 
        ① `onclick = lobby` 会把**点击事件对象**当成 `err` 传进去，
@@ -1844,7 +2171,10 @@ function doCreate() {
         lobby();                       /* 自由房来的：回房间列表 */
       };
     }
-    if (q('prBack2')) q('prBack2').onclick = function () { lobby(); };
+    if (q('prBack2')) q('prBack2').onclick = function () {
+      if (_cameFromLadder) { _cameFromLadder = false; ladderBack('home', ''); return; }
+      lobby();
+    };
   }
 
   /* 🔴v1108 天梯专用入口：排位固定用 A 抢答赛，玩家不能选模式。
@@ -1870,65 +2200,41 @@ function doCreate() {
   var _fromLadder = false;
   var _cameFromLadder = false;   /* v1156: 打完后「再来一局」该回哪 */
 
-  function _createForLadder(rating) {
+  function _createForLadder(rating, opts) {
+    opts = opts || {};
     _cameFromLadder = true;
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('开排位房'); } catch (e) {}
-    _pickedMode = 'A'; _askMode = _askMode || 'cn'; _wantPrivate = false;
-    _ladderRating = Number(rating) || 1000;
-    /* 🔴v1156：**只让容器可见，不画房间列表。**
-
-       v1155 为了修"自动开房后白屏"，这里调了 `lobby()` ——
-       白屏是治好了，但引入了新毛病：
-       **lobby() 会去拉房间列表，而那一刻我们的房还没建好，
-       于是它先画出一个「房间已经不在了」的错误列表**，
-       几百毫秒后才被等待屏盖掉。
-
-       用户在等满 20 秒之后看到的第一眼是一句报错 ——
-       比白屏好不了多少。
-
-       真正需要的只是"把容器打开"，让后面 doCreate 画的
-       等待屏有地方可画。 */
+    _pickedMode = 'A'; _wantPrivate = false; _fromLadder = true;
     try {
       var _h = host();
       if (_h) {
         _h.classList.add('on');
-        if (!_h.querySelector('.pr_wrap')) {
-          _h.innerHTML = '<div class="pr_wrap">'
-            + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
-        }
+        _h.innerHTML = '<div class="pr_wrap">'
+          + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
       }
     } catch (e) {}
-    doCreate();
+    /* 🔴v1156：**只让容器可见，不画房间列表**（lobby() 会先画出「房间已经不在了」）。
+       🔴v1164：排位房的设定全部显式传 —— 固定抢答赛、固定看中文（不沿用自由房选过的「听发音」）、
+       写上自己的分；等人时让数据层顺便看看有没有更早开的房（两人同时开始时能配到一起）。 */
+    _ladderCfg = { ladder: true, mode: 'A', askMode: 'cn', private: false,
+                   rating: Number(rating) || 1000,
+                   t0: Number(opts.t0) || Date.now(), band: opts.band,
+                   onOk: opts.onOk, onFail: opts.onFail };
+    doCreate(_ladderCfg);
   }
-  function _joinForLadder(roomId) {
+  function _joinForLadder(roomId, opts) {
+    opts = opts || {};
     _cameFromLadder = true;
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('进排位房'); } catch (e) {}
     _pickedMode = 'A';
     _fromLadder = true;      /* v1154: 记住这次是排位来的，进不去时好说人话 */
+    try { var _h = host(); if (_h) { _h.classList.add('on'); } } catch (e) {}
     /* 🔴v1156：**只让容器可见，不画房间列表。**
-
-       v1155 为了修"自动开房后白屏"，这里调了 `lobby()` ——
-       白屏是治好了，但引入了新毛病：
-       **lobby() 会去拉房间列表，而那一刻我们的房还没建好，
-       于是它先画出一个「房间已经不在了」的错误列表**，
-       几百毫秒后才被等待屏盖掉。
-
-       用户在等满 20 秒之后看到的第一眼是一句报错 ——
-       比白屏好不了多少。
-
-       真正需要的只是"把容器打开"，让后面 doCreate 画的
-       等待屏有地方可画。 */
-    try {
-      var _h = host();
-      if (_h) {
-        _h.classList.add('on');
-        if (!_h.querySelector('.pr_wrap')) {
-          _h.innerHTML = '<div class="pr_wrap">'
-            + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
-        }
-      }
-    } catch (e) {}
-    doJoin(roomId, null);
+       🔴v1164：进不去时不再停在「被抢走了 / 再找一次」那一屏 —— 原因交回天梯，
+       天梯自动试下一间（孩子不用再点）；没有天梯回调时（老调用方）也自动回去接着找。 */
+    _ladderCfg = { ladder: true, rating: Number(opts.rating) || 0,
+                   onOk: opts.onOk, onFail: opts.onFail };
+    doJoin(roomId, null, _ladderCfg);
   }
 
   /* ── 🔴v1138 关页面时尽量把房间收掉 ────────────────────────
@@ -1963,9 +2269,18 @@ function doCreate() {
       /* 切到后台超过一会儿也算离开 —— 手机上"划掉 App"往往只触发 visibilitychange */
       document.addEventListener('visibilitychange', function () {
         if (document.visibilityState !== 'hidden') return;
+        var st0 = _state;
         setTimeout(function () {
-          /* 30 秒后还没回来才收房 —— 只是切出去看一眼不该把房关了 */
-          if (document.visibilityState === 'hidden') bye();
+          /* 30 秒后还没回来才收房 —— 只是切出去看一眼不该把房关了。
+             🔴v1164：**只收「还在等人」的房。** 打到一半切出去，交给对手那边的 60 秒离场判定；
+             原来这里一视同仁，切出去 30 秒就把正在打的这局退掉了，回来界面还停在对战屏。
+             收了房也要把界面带回去，并说清楚为什么（回来看到的不能是一个已经没了的等待屏）。 */
+          if (document.visibilityState !== 'hidden') return;
+          if (!_state || _state !== st0 || _state.startAt || _state.roomId === 'test') return;
+          var lad = !!_state.ladder;
+          endWait(_state, true);
+          if (lad) { ladderBack('home', '你切出去太久，房间先关掉了。回来点「开始排位」再找对手。'); return; }
+          lobby({ reason: '你切出去太久，房间先关掉了。想玩就再开一间吧。' });
         }, 30000);
       });
     } catch (e) {}
@@ -1984,6 +2299,8 @@ function doCreate() {
        > 但要验"流程能不能走完"，得能拿到内部状态。
        > 两者都要有，缺了后者就只能靠猜。 */
     _stateForTest: function () { return _state; },
+    /* v1164：测试把「等人两分钟」调短，才验得到等不到人时的收尾（产品默认不变） */
+    _setWaitMsForTest: function (ms) { _waitMs = Number(ms) || 120000; },
     _rtForTest: function () { return _rt; },
     _createForLadder: _createForLadder,
     _joinForLadder: _joinForLadder,

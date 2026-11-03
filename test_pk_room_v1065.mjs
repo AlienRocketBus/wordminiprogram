@@ -82,11 +82,17 @@ function fakeCloud() {
   };
 }
 
+/* 0 → 'aa'、1 → 'ab' …：编号换成字母，词仍然唯一 */
+function LETTERS(i) { return String.fromCharCode(97 + Math.floor(i / 26)) + String.fromCharCode(97 + (i % 26)); }
+
 function mkCtx(who, extraLocal) {
   const win = {
+    /* 真词库的词只有字母（外加少数带空格/连字符的词组）—— 假词库也照这个样子：
+       纯字母的 80 个，外加两个对战键盘打不出来的词组（数据层必须跳过它们） */
     HANSEN_VOCAB_ALL: {
-      wordIslandFood: Array.from({ length: 40 }, (_, i) => ({ en: 'food' + i, cn: '食' + i })),
-      wordIslandAnimal: Array.from({ length: 40 }, (_, i) => ({ en: 'ani' + i, cn: '兽' + i }))
+      wordIslandFood: Array.from({ length: 40 }, (_, i) => ({ en: 'food' + LETTERS(i), cn: '食' + i }))
+        .concat([{ en: 'ice cream', cn: '冰淇淋' }, { en: 'T-shirt', cn: 'T恤' }]),
+      wordIslandAnimal: Array.from({ length: 40 }, (_, i) => ({ en: 'ani' + LETTERS(i), cn: '兽' + i }))
     },
     /* 真 ensureSession 成功时返回 {ok:true, uid} —— 假的也得给 uid */
     HansenAuth: { readLocal: () => ({ uid: who, ...(extraLocal || {}) }),
@@ -102,6 +108,9 @@ function mkCtx(who, extraLocal) {
   return ctx.window.HansenPkRoom;
 }
 const tick = ms => new Promise(z => setTimeout(z, ms));
+/* 🔴v1164：房主写了确认之后还要等客人「回个话」（座位上的 acked）才算开打 ——
+   客人那边 joinRoom 先返回，房主的 {joined} 晚一次轮询才到。和真机一样，等它到了再断言。 */
+const until = async (fn, ms = 2000) => { const t0 = Date.now(); while (!fn() && Date.now() - t0 < ms) await tick(5); return fn(); };
 
 /* ═══ ① 同种子 → 同词表 ═══ */
 {
@@ -112,6 +121,12 @@ const tick = ms => new Promise(z => setTimeout(z, ms));
   const wc = A.wordsFromSeed(999, 10);
   ok(JSON.stringify(wa) !== JSON.stringify(wc), '不同种子给出不同词表（不是常量）');
   ok(new Set(wa.map(w => w.en)).size === wa.length, '同一局内不重复出词');
+  /* 🔴v1164：对战键盘只有 26 个字母 —— 带空格/连字符的词抽到就只能白白超时 */
+  let typeableAll = true;
+  for (let sd = 1; sd <= 300; sd++) {
+    if (!A.wordsFromSeed(sd, 30).every(w => /^[a-zA-Z]+$/.test(w.en))) { typeableAll = false; break; }
+  }
+  ok(typeableAll, '300 个种子 × 30 词：抽到的词全是键盘能打出来的纯字母词（ice cream / T-shirt 不会出现）');
 }
 
 /* ═══ ② 抢房竞态：两人同时进同一间，只能有一个成功 ═══ */
@@ -145,6 +160,7 @@ const tick = ms => new Promise(z => setTimeout(z, ms));
   ok(room.status === 'playing', '房间状态已置为 playing（房主自己写的）');
   const winnerKey = (r1.ok ? 'uguest1' : 'uguest2');
   ok(room.guestId === winnerKey && room.guestId !== room.hostId, '房间里只记了一位客人，就是抢到座位的那位');
+  await until(() => hostEv);
   ok(hostEv && hostEv.joined === true && hostEv.room.guestId === winnerKey, '★ 房主等到的就是抢到座位的那位');
   ok(wins[0].mySide === 'guest' && wins[0].room.hostId === 'uhost', '客人拿到合并后的房间（旧字段名照用）');
   const seats = [...cloud.docs.values()].filter(d => d.kind === 'seat');
@@ -209,6 +225,7 @@ const tick = ms => new Promise(z => setTimeout(z, ms));
   host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
   const rejoin = await gy.joinRoom(made.roomId);
   ok(rejoin.ok === true, '★ 新的客人能进这间空出来的房');
+  await until(() => hostEv);
   ok(hostEv && hostEv.joined && hostEv.room.guestId === 'uguestY', '房主等到的是新客人');
 
   /* 房主开打后离开 → 房间标 done 但不删（客人还要读结果） */
@@ -234,8 +251,54 @@ const tick = ms => new Promise(z => setTimeout(z, ms));
   ok(hostEv === null, '★ 死座位（心跳早就不动了）不会被房主当成对手确认');
   ok(cloud.docs.get(made.roomId).seat === 1, `★ 房主把座位轮次换到 1（别人的死座位删不掉，就换号）`);
   const j = await gw.joinRoom(made.roomId);
+  await until(() => hostEv);
   ok(j.ok === true && hostEv && hostEv.joined && hostEv.room.guestId === 'uguestW',
      '★ 换号之后新客人照常进房');
+}
+{
+  /* 🔴v1164（真 SDK 端到端抓到）：房主读到的座位是旧快照 —— 客人其实已经点了返回。
+     房主写了确认，但座位没了：不许跟空气开打，要撤回确认、重新开门。 */
+  const cloud = fakeCloud();
+  const host = mkCtx('hostK'), gz = mkCtx('guestZ');
+  host._setTransportForTest(cloud.as('hostK')); gz._setTransportForTest(cloud.as('guestZ'));
+  const made = await host.createRoom({});
+  const now = Date.now();
+  /* 客人的座位（心跳刚刚）—— 不经 joinRoom，所以没人会回「acked」 */
+  await cloud.as('ghostK').add({ _id: made.roomId + '_s0', proto: 2, kind: 'seat', roomId: made.roomId, epoch: 0,
+    guestId: 'ughostK', guestName: '走了的人', guestBeat: now, createdAt: now, left: false });
+  let hostEv = null;
+  host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
+  await until(() => cloud.docs.get(made.roomId).guestId === 'ughostK', 1000);
+  ok(cloud.docs.get(made.roomId).guestId === 'ughostK', '房主看到座位、写了确认');
+  ok(hostEv === null, '★ 写了确认还不算开打：要等客人回话');
+  await cloud.as('ghostK').remove(made.roomId + '_s0');   /* 客人已经走了（座位收回） */
+  await until(() => cloud.docs.get(made.roomId).status === 'open', 1500);
+  const R0 = cloud.docs.get(made.roomId);
+  ok(hostEv === null && R0.status === 'open' && !R0.guestId && R0.seat === 1,
+     `★ 座位没了 → 房主撤回确认、房间重新开门、换到 1 号座位（status=${R0.status} guestId=${R0.guestId || '空'} seat=${R0.seat}）`);
+  const j = await gz.joinRoom(made.roomId);
+  await until(() => hostEv);
+  ok(j.ok === true && hostEv && hostEv.joined && hostEv.room.guestId === 'uguestZ', '★ 下一个客人照常进来开打');
+  const seatZ = cloud.docs.get(made.roomId + '_s1');
+  ok(seatZ && seatZ.acked === true && seatZ._openid === 'guestZ', '客人看到确认后在自己的座位上回了话（acked）');
+}
+{
+  /* 写了确认之后客人一直不回话、心跳也不动（页面被杀）→ 过了死座位的时限同样撤回 */
+  const cloud = fakeCloud();
+  const host = mkCtx('hostS');
+  host._setTransportForTest(cloud.as('hostS'));
+  host._setTimingForTest({ seatStaleMs: 200 });
+  const made = await host.createRoom({});
+  const now = Date.now();
+  await cloud.as('mute').add({ _id: made.roomId + '_s0', proto: 2, kind: 'seat', roomId: made.roomId, epoch: 0,
+    guestId: 'umute', guestName: '不说话', guestBeat: now, createdAt: now, left: false });
+  let hostEv = null;
+  host.waitForOpponent(made.roomId, ev => { hostEv = ev; });
+  await until(() => cloud.docs.get(made.roomId).seat === 1, 2000);
+  const R1 = cloud.docs.get(made.roomId);
+  ok(hostEv === null && R1.status === 'open' && !R1.guestId && R1.seat === 1,
+     `★ 确认后客人始终没回话 → 撤回、重新开门（status=${R1.status} seat=${R1.seat}）`);
+  host._setTimingForTest({ seatStaleMs: 20000 });
 }
 {
   /* 房主还没等到人就走 = 删房 */
@@ -252,8 +315,10 @@ async function pair(hn, gn) {
   const host = mkCtx(hn), guest = mkCtx(gn);
   host._setTransportForTest(cloud.as(hn)); guest._setTransportForTest(cloud.as(gn));
   const made = await host.createRoom({ mode: 'A' });
-  host.waitForOpponent(made.roomId, () => {});
+  let ev = null;
+  host.waitForOpponent(made.roomId, (e) => { ev = e; });
   const j = await guest.joinRoom(made.roomId);
+  await until(() => ev);   /* 房主也确认开打了，才算两人都进了对战屏 */
   return { cloud, host, guest, made, j };
 }
 {
