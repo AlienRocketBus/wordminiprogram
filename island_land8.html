@@ -1481,7 +1481,8 @@ body::after{content:"";position:fixed;inset:0;background-image:radial-gradient(1
 
 <div style="text-align:center;padding:4px 0 2px">
   <div style="font-size:26px;font-weight:900;background:linear-gradient(90deg,#fbbf24,#ef4444,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(251,191,36,.3))">单词大陆·⑧星火火山口</div>
-  <div style="font-size:13px;font-weight:600;color:var(--pal-ink-2,#cbd5e1);margin-top:2px;letter-spacing:1px">STAR SEA I: EMOTION & CHARACTER ISLAND</div>
+  <!-- 🔴v1165 英文副标题按岛填（以前 8 个岛都写着星海时代留下的同一句旧英文）；只写第几块大陆，不写主题名 -->
+  <div style="font-size:13px;font-weight:600;color:var(--pal-ink-2,#cbd5e1);margin-top:2px;letter-spacing:1px">WORD CONTINENT ⑧</div>
 </div>
 
 <!-- Pet hero -->
@@ -4548,6 +4549,10 @@ function earnCoinOnCorrect(wordIdx){var DAILY_CAP=2000;var PER_WORD_CAP=3;var t=
 // BOSS BATTLE 4.0 — 真正考察英语 (无花里胡哨)
 // ============================================================
 let bossHP=0,bossMaxHP=0,heroHP=0,heroMaxHP=100,bossPool=[],bossActive=false;
+/* 🔴v1165 bossActive 是 let 变量，不会自己挂到 window 上。外面好几段保护写的是 window.bossActive
+   （战斗中再切到 Boss 屏要保留战场、不重画选关；战斗中等特效引擎；战斗中隐藏底栏），以前读到的永远是 undefined，从来没生效。
+   这里把 window.bossActive 接到同一个变量上（读写都是它）。 */
+try{Object.defineProperty(window,'bossActive',{configurable:true,get:function(){return bossActive;},set:function(v){bossActive=!!v;}});}catch(e){}
 let bossCombo=0,bossRageMode=false,bossCurrent=null,bossPhase=1;
 let bossQuestionsAsked=0;
 
