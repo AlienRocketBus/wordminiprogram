@@ -1930,11 +1930,16 @@ function speak(text){
     try{a.pause();}catch(e){}
     /* 🔴v896/v897(Hansen: 星海spelling bee没声音·深挖根因): 拼写页原来只朴素派生 words/<word>.mp3, 不查主游戏用的 WORD_MAP(word_map.js) → 多词短语(how many/how much/old/long/far/washing machine/next to)和带符号词(T-shirt)的音频当时存成编号/带连字符文件 → 拼写页全找不到 → 静默 TTS。音频从没丢, 只是拼写页没按正确文件名找。解析改成与主游戏同款: 先查 WORD_MAP, 再 land 词 _season, 再朴素派生。v897 进一步把这些编号文件全部改名成规范名(how_many.mp3/washing_machine.mp3/next_to.mp3/tshirt.mp3 等), 现在派生也能直接命中, 并加了 v897 全量守卫钉死每个词的音频。 */
     var _lo=String(text).toLowerCase();
-    var src=(window.WORD_MAP && (window.WORD_MAP[_lo]||window.WORD_MAP[text]))||'';
+    /* 🔴v1165: 嵌在岛里时先用岛自己的录音表（__ISLAND_LOCAL_AUDIO），和岛上播的是同一个文件。
+       以前直接查 WORD_MAP：cook / turn / have / stop / orange / gloves… 14 个词在拼写蜂里播的是另一段录音；
+       星海终战的词还会去要不存在的 words/xxx.mp3（404），只好退成机器音。 */
+    var src='';
+    try{ if(window.parent && window.parent!==window && window.parent.__ISLAND_LOCAL_AUDIO) src=window.parent.__ISLAND_LOCAL_AUDIO[_lo]||''; }catch(e){ src=''; }
+    if(!src) src=(window.WORD_MAP && (window.WORD_MAP[_lo]||window.WORD_MAP[text]))||'';
     if(!src){
       var file=_lo.replace(/[^a-z ]/g,'').trim().replace(/ +/g,'_');
-      /* 🔴v895: land岛(单词大陆)单词音频带 _season 后缀(与主游戏 __ISLAND_LOCAL_AUDIO 岛隔离一致) */
-      try{ if(typeof curWord!=='undefined' && curWord && /^land[1-8]$/.test(curWord.isl||'')) file += '_season'; }catch(e){}
+      /* 🔴v895/v1165: 单词大陆 8 岛和星海终战的单词音频都带 _season 后缀(与主游戏 __ISLAND_LOCAL_AUDIO 岛隔离一致) */
+      try{ if(typeof curWord!=='undefined' && curWord && (/^land[1-8]$/.test(curWord.isl||'') || curWord.isl==='season')) file += '_season'; }catch(e){}
       src='words/'+file+'.mp3';
     }
     var fb=false;
