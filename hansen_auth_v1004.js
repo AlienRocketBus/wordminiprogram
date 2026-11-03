@@ -1055,7 +1055,7 @@
   function T(step, detail) {
     try {
       _trace.push({ t: Date.now(), step: step, detail: detail });
-      if (_trace.length > 40) _trace.shift();
+      if (_trace.length > 60) _trace.shift();
     } catch (e) {}
   }
   function traceText() {
@@ -1143,6 +1143,7 @@
     });
   }
 
+  var _lastOkAt = 0;   /* 上次探测成功的时间：30 秒内又来问就少记几行，别把出错时的轨迹挤掉 */
   function ensureSession() {
     T('ensureSession 开始', 'isSignedIn=' + isSignedIn());
     if (!isSignedIn()) {
@@ -1150,14 +1151,15 @@
       return Promise.resolve({ ok: false, notSignedIn: true, expired: false, notReady: false,
                                definite: false, kind: 'signin', reason: 'not-signed-in' });
     }
-    try {
+    var quiet = (Date.now() - _lastOkAt) < 30000;
+    if (!quiet) try {
       var _lc = readLocal();
       T('本地登录记录', 'method=' + (_lc.method || '无') +
         ' 距登录=' + (_lc.signedAt ? Math.round((Date.now() - _lc.signedAt) / 1000) + '秒' : '未知'));
     } catch (e) {}
 
     /* 🔴v1079：把 SDK 自己的凭证键也列出来 —— 一眼分辨"凭证根本不在"还是"在但用不了"。 */
-    try {
+    if (!quiet) try {
       var _ks = [], _n = 0;
       lsKeys().forEach(function (_k) {
         if (/cloudbase|tcb|credential|access_token|refresh_token|auth/i.test(_k)) {
@@ -1269,6 +1271,7 @@
       return { ok: false, expired: false, definite: false, notReady: true,
                kind: /未配置/.test(t) ? 'config' : (netLike(t) ? 'network' : 'session'), reason: t };
     }).then(function (r) {
+      _lastOkAt = r.ok ? Date.now() : 0;
       if (!r.ok && r.definite) {
         /* 🔴v1063 竞态防线（保留）：刚登录 60 秒内**绝不清本地标记**，只拒绝本次操作。 */
         if (isFresh()) { T('结论', '刚登录不到 60 秒 → 这次先不清本地登录记录'); return r; }
@@ -1285,7 +1288,7 @@
       var settled = false;
       var cancel = timeoutAfter(SESSION_TIMEOUT_MS, function () {
         if (settled) return;
-        settled = true;
+        settled = true; _lastOkAt = 0;
         T('结论', '⌛ ' + (SESSION_TIMEOUT_MS / 1000) + ' 秒没等到云端回应 → 网络太慢（不判过期，稍后重试）');
         resolve({
           ok: false, notReady: true, slow: true, timeout: true, expired: false, definite: false, kind: 'slow',
