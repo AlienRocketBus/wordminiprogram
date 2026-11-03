@@ -4240,6 +4240,7 @@ document.querySelectorAll('.island').forEach(el=>{
       if(_w && typeof _w.__hsnIslandHidden === 'function') _w.__hsnIslandHidden();
     }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
+    try{ if(typeof window.__hsnApplyHomeTheme === 'function') window.__hsnApplyHomeTheme(); }catch(e){}   /* 🔴v1165 岛里换过的主题回首页马上生效（岛开着时首页不再轮询主题） */
     try{ if(typeof window.__hsnAfterIslandClose === 'function') window.__hsnAfterIslandClose(); }catch(e){}   /* 🔴v1165 版本守望者：孩子在岛里时攒着的更新，回到首页再做 */
   }
   /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
@@ -4334,10 +4335,19 @@ document.querySelectorAll('.island').forEach(el=>{
   window.renderRecent = renderRecent;
   
   // === 关键: 各种场景下重新渲染 "最近探险的岛屿" 卡片 ===
+  /* 🔴v1165 岛开着时首页根本看不见，卡片不用算（关岛时 _closeIslandNow 会算一次）。
+     以前岛开着也每 2 秒算一次、岛里每存一次档再算一次 —— 同源 iframe 和首页共用一个主线程，岛里会周期性地卡一下。 */
+  function _islandShown(){ try{ var w = document.getElementById('islandFrameWrap'); return !!w && w.style.display !== 'none'; }catch(e){ return false; } }
+  window.__hsnIslandShown = _islandShown;
+  var _rrTimer = 0;
+  function _renderRecentSoon(){
+    if(_rrTimer) return;
+    _rrTimer = setTimeout(function(){ _rrTimer = 0; if(!_islandShown()) renderRecent(); }, 300);   /* 一下子存好几个档只算一次 */
+  }
   
-  // 1) 页面变为可见 (从 iframe 退出 / 切回标签页 / 浏览器返回) → 立刻刷新
+  // 1) 页面变为可见 (切回标签页 / 浏览器返回) → 刷新（岛开着就等关岛时再算）
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'visible') renderRecent();
+    if(document.visibilityState === 'visible' && !_islandShown()) renderRecent();
   });
   
   // 2) 浏览器 back/forward 缓存 (BFCache) 恢复页面 → 立刻刷新
@@ -4345,18 +4355,17 @@ document.querySelectorAll('.island').forEach(el=>{
     renderRecent();
   });
   
-  // 3) localStorage 改变 (其他标签页 / iframe 内更新) → 立刻刷新
+  // 3) localStorage 改变 (其他标签页、首页外壳里的岛 iframe 存档都会触发首页的 storage 事件) → 合并成一次刷新
   window.addEventListener('storage', function(e){
     if(e.key && (e.key.startsWith('wordIsland') || e.key === 'lastIslandKey' || e.key === 'lastIslandTime')){
-      renderRecent();
+      _renderRecentSoon();
     }
   });
   
-  // 4) 高频轮询: 当 iframe 打开时, 每 2 秒检查一次 localStorage
-  //    (storage 事件在同窗口不会触发, 所以需要轮询)
+  // 4) 慢速兜底: 每 10 秒（只在首页露着的时候）—— iOS 上 iframe 的 storage 事件没在真机验证过，留一道慢的保险
   setInterval(function(){
-    renderRecent();
-  }, 2000);
+    if(!_islandShown() && document.visibilityState !== 'hidden') renderRecent();
+  }, 10000);
   
 })();
 
@@ -4380,12 +4389,19 @@ document.querySelectorAll('.island').forEach(el=>{
     document.body.dataset.theme = name;
   }
   applyTheme();
-  // 跨标签页同步
+  /* 🔴v1165 岛开着时首页看不见，主题不用每 1.5 秒重算：岛里换主题/钻石主题（storage 事件）时先不算，关岛时
+     （_closeIslandNow 调 __hsnApplyHomeTheme）一定算一次；首页露着时照常马上换。留一个 10 秒的慢兜底（钻石主题试用到期等）。 */
+  function _shown(){ try{ return typeof window.__hsnIslandShown === 'function' && window.__hsnIslandShown(); }catch(e){ return false; } }
+  window.__hsnApplyHomeTheme = function(){ applyTheme(); };
+  // 跨标签页 / 岛 iframe 同步
   window.addEventListener('storage', function(e){
-    if(e.key === 'theme') applyTheme(e.newValue || 'cosmos');
+    if(e.key !== 'theme' && e.key !== 'hansen_diamond_shop' && e.key !== 'hansen_dia_trial') return;
+    if(_shown()) return;   /* 关岛时再算 */
+    applyTheme(e.key === 'theme' ? (e.newValue || 'cosmos') : undefined);
   });
-  // 1.5 秒兜底轮询 (防 iframe 内变更没触发 storage)
-  setInterval(applyTheme, 1500);
+  window.addEventListener('pageshow', function(){ applyTheme(); });
+  // 10 秒慢兜底（只在首页露着的时候）
+  setInterval(function(){ if(!_shown() && document.visibilityState !== 'hidden') applyTheme(); }, 10000);
 })();
 
 
