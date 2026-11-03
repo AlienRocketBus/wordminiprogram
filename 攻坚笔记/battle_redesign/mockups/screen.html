@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>对战 2.0 样稿</title>
+<!-- 主题 2.0（已获批）：同步设置 data-theme / data-mode，?theme=cosmos（暗）| cloud（亮）| 其它 10 套 -->
+<script src="../../next_inputs/theme_mockups/theme.js"></script>
+<link rel="stylesheet" href="../../next_inputs/theme_mockups/tokens.css">
+<link rel="stylesheet" href="../../next_inputs/theme_mockups/common.css">
+<link rel="stylesheet" href="battle.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="../../next_inputs/theme_mockups/fx.js"></script>
+<script src="screens.js"></script>
+<script>
+renderScreen();
+/* 事件型庆祝：结算「赢」进来时播一次（彩纸 + 比分往上数），播完节点全部删除 */
+(function(){
+  var s=new URLSearchParams(location.search).get('s');
+  if((s==='rs_win'||s==='rs_forfeit') && !/[?&]freeze=1/.test(location.search)){
+    requestAnimationFrame(function(){setTimeout(function(){
+      FX.rise(document.querySelector('.scorebig'),18,0); FX.rise(document.querySelector('.reward'),18,160);
+      var n=document.getElementById('rsMy'); if(n) FX.count(n,0,+n.textContent,700);
+      FX.confetti({n:24,dur:1100});
+    },60);});
+  }
+  if(s==='bt_A_mine' && !/[?&]freeze=1/.test(location.search)){
+    var p=document.querySelector('.plus'); if(p&&!FX.reduced()) p.animate([{transform:'translate(-50%,14px) scale(.6)',opacity:0},{transform:'translate(-50%,0) scale(1)',opacity:1}],{duration:320,easing:'cubic-bezier(.34,1.56,.64,1)'});
+    var sl=document.getElementById('bSlots'); if(sl){var r=sl.getBoundingClientRect(); FX.burst(r.left+r.width/2,r.top+r.height/2,{n:12,spread:70,dur:700});}
+  }
+})();
+</script>
+</body>
+</html>

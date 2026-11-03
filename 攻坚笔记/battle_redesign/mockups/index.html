@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>对战界面 2.0 · 样稿目录</title>
+<script src="../../next_inputs/theme_mockups/theme.js"></script>
+<link rel="stylesheet" href="../../next_inputs/theme_mockups/tokens.css">
+<link rel="stylesheet" href="../../next_inputs/theme_mockups/common.css">
+<link rel="stylesheet" href="battle.css">
+<style>
+.g{max-width:960px;margin:0 auto;padding:16px}
+.g h1{font:900 26px/1.2 var(--font-display)}
+.g h2{font:900 19px/1.2 var(--font-display);margin:22px 0 8px}
+.g ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.g li{background:var(--surface-1);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:700;color:var(--ink-1)}
+.g li code{display:block;font:700 12px/1.4 ui-monospace,monospace;color:var(--ink-2)}
+.g a{color:var(--hi);font-weight:800;margin-right:10px;display:inline-block;min-height:44px;line-height:44px}
+</style>
+</head>
+<body>
+<div class="g"><h1>拼写大PK · 对战界面 2.0 样稿目录</h1><p class="p">每个状态都能看暗色（深空蓝）和亮色（云端白）。加 <code>&amp;theme=</code> 任何 2.0 主题名也行。</p><div id="list"></div></div>
+<script src="../../next_inputs/theme_mockups/fx.js"></script>
+<script src="screens.js"></script>
+<script>
+var by={};Object.keys(SCREENS).forEach(function(k){var s=SCREENS[k];(by[s.g]=by[s.g]||[]).push([k,s.n]);});
+document.getElementById('list').innerHTML=Object.keys(by).map(function(g){return '<h2>'+g+'</h2><ul>'+by[g].map(function(x){return '<li>'+x[1]+'<code>'+x[0]+'</code><a href="screen.html?s='+x[0]+'&theme=cosmos">暗色</a><a href="screen.html?s='+x[0]+'&theme=cloud">亮色</a></li>';}).join('')+'</ul>';}).join('');
+</script>
+</body>
+</html>
