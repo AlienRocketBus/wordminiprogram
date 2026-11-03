@@ -4641,6 +4641,13 @@ function __hmlRequeueLater(m,pool,idx,gap){var M=__hml();return !!(M&&M.requeueL
 function __hmlIsRetry(m,idx){var M=__hml();return !!(M&&M.isRetry(m,idx))}
 function __hmlAttach(m,el){var M=__hml();if(M)setTimeout(function(){M.attach(m,el)},0)}
 function __hmlResult(m){var M=__hml();return M?M.resultHtml(m):''}
+/* 🔴v1165 题目要孩子自己想出/拼出英文时，配图不能印着答案（身体岛「脚趾」的图上写着 TOE）。
+   去掉图里带英文字母的 <text> 标签；去掉后图太空(少于 3 个图形)就不放图，只看中文。
+   认词类玩法（单词卡、答对揭晓卡、打地鼠英文题面）照旧显示原图。 */
+function __hsnQuizPic(w){var e=String((w&&w.emoji)||'');if(e.indexOf('<svg')<0)return e;
+  var out=e.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,function(t){return /[A-Za-z]/.test(t.replace(/<[^>]*>/g,''))?'':t});
+  return (out.match(/<(circle|rect|path|ellipse|line|polygon|polyline)\b/g)||[]).length>=3?out:''}
+window.__hsnQuizPic=__hsnQuizPic;
 /* 💰 答对1题给1金币。完美方案: 每个词每天最多给3次(防盯着一个词刷) + 每天总上限2000(防换词刷太多); 跨天自动重置(金币不枯竭); 不影响签到/boss/任务给的钱。 */
 function earnCoinOnCorrect(wordIdx){var DAILY_CAP=2000;var PER_WORD_CAP=3;var t=today();var ga;try{if(localStorage.getItem('hsn_ans_coin_day')!==t){localStorage.setItem('hsn_ans_coin_day',t);localStorage.setItem('hsn_ans_coin_today','0');ga=0;}else{ga=parseInt(localStorage.getItem('hsn_ans_coin_today'),10)||0;}}catch(e){ga=0;}if(ga>=DAILY_CAP)return false;if(S.coinDay!==t){S.coinDay=t;S.coinWordCount={};}S.coinWordCount=__hsnNormalizeCoinWordCount(S.coinWordCount);var wc=__hsnSafeCoinWordCount(S.coinWordCount[wordIdx]);if(wc>=PER_WORD_CAP)return false;if(window.HansenCoins){HansenCoins.add(1);}else{S.coins=(S.coins||0)+1;}try{localStorage.setItem('hsn_ans_coin_today',String(ga+1));}catch(e){}S.coinWordCount[wordIdx]=wc+1;updateTopBar();save();if(typeof playCoin==='function'){try{playCoin()}catch(e){}}return true;}
 
@@ -5658,7 +5665,7 @@ function pickFishTarget(){
   var _fp=document.getElementById('fishPond');
   if(_fp){/* 🔴 BUG#47修复(v467):换目标后重同步全鱼光效,防旧目标鱼残留发光误导。别删。 */_fp.querySelectorAll('[data-en]').forEach(function(_f){var _t=(_f.dataset.en===fishTarget.en);_f.dataset.target=_t?'1':'0';if(_f.children[0])_f.children[0].style.filter=_t?'drop-shadow(0 0 8px #fde047)':'';});}
   var el=document.getElementById('fishPrompt');
-  if(el)el.innerHTML='🎣 钓出: <span style="font-size:24px">'+fishTarget.emoji+'</span> <b>'+fishTarget.cn+'</b>';
+  if(el)el.innerHTML='🎣 钓出: <span style="font-size:24px">'+__hsnQuizPic(fishTarget)+'</span> <b>'+fishTarget.cn+'</b>';
   var prog=document.getElementById('fishProg');
   if(prog)prog.textContent=(fishCaught+1);
   try{speak(fishTarget.en)}catch(e){}
@@ -6066,7 +6073,7 @@ const target=allW[idx];bubbleTarget=target;
 const L=BUBBLE_LEVELS[bubbleLevel]||BUBBLE_LEVELS.easy;
 // 进度显示
 const promptEl=document.getElementById('bbPrompt');
-if(promptEl){promptEl.style.display='';promptEl.innerHTML='<div style="font-size:13px;font-weight:600;opacity:.65;margin-bottom:3px;font-weight:600">'+L.icon+' '+L.name+' · '+(bubbleDone+1)+' / '+bubbleTotal+'</div><div>'+target.emoji+' '+target.cn+'</div>'}
+if(promptEl){promptEl.style.display='';promptEl.innerHTML='<div style="font-size:13px;font-weight:600;opacity:.65;margin-bottom:3px;font-weight:600">'+L.icon+' '+L.name+' · '+(bubbleDone+1)+' / '+bubbleTotal+'</div><div>'+__hsnQuizPic(target)+' '+target.cn+'</div>'}
 speak(target.en);
 bubbleStartCountdown(); // 🆕 出题即启动30秒倒计时
 // 干扰泡泡: 优先从同档抽取, 不够再从全集补
@@ -6302,7 +6309,7 @@ function nextScramble(){
   }).join('');
   // 随机字母里也排除空格, 因为空格已经预设
   const lettersFiltered=letters.filter(l=>l!==' ');
-  document.getElementById('scrambleContent').innerHTML=headBar+'<div class="scramble-emoji">'+w.emoji+'</div><div class="scramble-cn">'+w.cn+'</div><div class="scramble-hint">听发音，拼出单词</div><div class="scramble-word" id="scrSlots">'+slotsHTML+'</div><div class="scramble-letters" id="scrLetters">'+lettersFiltered.map((l,i)=>'<div class="scramble-letter" id="sl'+i+'" onclick="pickLetter('+i+')">'+l+'</div>').join('')+'</div><div style="text-align:center;margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center"><button class="game-btn red" onclick="delLastScramble()" style="font-size:13px;padding:8px 14px">⌫ 删一个</button><button class="game-btn purple" onclick="clearScramble()" style="font-size:13px;padding:8px 14px">🔄 全部清除</button><button class="game-btn gold" onclick="speak(allW['+scrPool[scrIdx]+'].en)" style="font-size:13px;padding:8px 14px">🔊 再听</button><button class="game-btn purple" onclick="scrambleHint()" style="font-size:13px;padding:8px 14px">💡 提示</button><button class="game-btn red" onclick="skipScramble()" style="font-size:13px;padding:8px 14px">⏭️ 跳过</button></div><div id="scrMsg" style="text-align:center;margin-top:12px;min-height:22px;font-weight:700"></div>';
+  document.getElementById('scrambleContent').innerHTML=headBar+'<div class="scramble-emoji">'+__hsnQuizPic(w)+'</div><div class="scramble-cn">'+w.cn+'</div><div class="scramble-hint">听发音，拼出单词</div><div class="scramble-word" id="scrSlots">'+slotsHTML+'</div><div class="scramble-letters" id="scrLetters">'+lettersFiltered.map((l,i)=>'<div class="scramble-letter" id="sl'+i+'" onclick="pickLetter('+i+')">'+l+'</div>').join('')+'</div><div style="text-align:center;margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center"><button class="game-btn red" onclick="delLastScramble()" style="font-size:13px;padding:8px 14px">⌫ 删一个</button><button class="game-btn purple" onclick="clearScramble()" style="font-size:13px;padding:8px 14px">🔄 全部清除</button><button class="game-btn gold" onclick="speak(allW['+scrPool[scrIdx]+'].en)" style="font-size:13px;padding:8px 14px">🔊 再听</button><button class="game-btn purple" onclick="scrambleHint()" style="font-size:13px;padding:8px 14px">💡 提示</button><button class="game-btn red" onclick="skipScramble()" style="font-size:13px;padding:8px 14px">⏭️ 跳过</button></div><div id="scrMsg" style="text-align:center;margin-top:12px;min-height:22px;font-weight:700"></div>';
   speak(w.en)
 }
 
@@ -6794,7 +6801,7 @@ const letters=w.en.split('');
 let slots='';letters.forEach((l,i)=>{if(l===' ')slots+='<div class="typing-slot space" id="tslot'+i+'"></div>';else slots+='<div class="typing-slot" id="tslot'+i+'"></div>'});
 const L=TYPING_LEVELS[typeRound]||TYPING_LEVELS[1];
 const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">⏱️ <b id="typeTimer" style="color:#fde047;font-variant-numeric:tabular-nums;font-size:15px">0.0s</b></span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+(typeIdx+1)+' / '+typePool.length+'</span><span onclick="showTypingMenu()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
-document.getElementById('typingContent').innerHTML=headBar+'<div class="typing-area"><div class="typing-emoji">'+w.emoji+'</div><div class="typing-cn">'+w.cn+'</div><div class="typing-pn">'+w.pn+'</div><div class="typing-slots" id="typeSlots"><div class="typing-slots-inner">'+slots+'</div></div><div style="text-align:center;margin:4px 0"><button class="listen-btn" onclick="speak(typeWord.en)">🔊 听发音</button> <button class="listen-btn" onclick="typeHint()">💡 提示</button></div>'+renderKeyboard()+'</div>';
+document.getElementById('typingContent').innerHTML=headBar+'<div class="typing-area"><div class="typing-emoji">'+__hsnQuizPic(w)+'</div><div class="typing-cn">'+w.cn+'</div><div class="typing-pn">'+w.pn+'</div><div class="typing-slots" id="typeSlots"><div class="typing-slots-inner">'+slots+'</div></div><div style="text-align:center;margin:4px 0"><button class="listen-btn" onclick="speak(typeWord.en)">🔊 听发音</button> <button class="listen-btn" onclick="typeHint()">💡 提示</button></div>'+renderKeyboard()+'</div>';
 try{window.HansenFitSlots(document.getElementById('typeSlots'))}catch(e){}/* 🔴 BUG#53 */
 speak(w.en)}
 function renderKeyboard(){const rows=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m']];
@@ -7095,7 +7102,7 @@ clozeQ={word:w,opts:opts,idx:idx};
 const L=CLOZE_LEVELS[clozeLevel];
 const doneNum=clozeTotal-clozePool.length; // 含当前题
 const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">每题 +'+L.xpPerQ+' 经验</span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+doneNum+' / '+clozeTotal+'</span><span onclick="startCloze()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
-document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-area"><div class="cloze-emoji">'+w.emoji+'</div><div class="cloze-sentence">'+sentence+'</div><div class="cloze-cn">'+window.smartHighlight(w.cn, w.exCn, w.en)+'</div><div style="text-align:center;font-size:14px;color:#cbd5e1;margin:10px 0;font-weight:600">选一个最合适的单词填入空白</div><div class="cloze-opts">'+opts.map((o,i)=>'<div class="cloze-opt" onclick="clozeAnswer('+i+')">'+(isAtStart?(o.en.charAt(0).toUpperCase()+o.en.slice(1)):o.en)+'</div>').join('')+'</div><div style="text-align:center;margin-top:14px;font-size:14px;color:#cbd5e1;font-weight:700">本档已答对：<b style="color:#fbbf24">'+clozeDone+'</b> 题</div></div>';
+document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-area"><div class="cloze-emoji">'+__hsnQuizPic(w)+'</div><div class="cloze-sentence">'+sentence+'</div><div class="cloze-cn">'+window.smartHighlight(w.cn, w.exCn, w.en)+'</div><div style="text-align:center;font-size:14px;color:#cbd5e1;margin:10px 0;font-weight:600">选一个最合适的单词填入空白</div><div class="cloze-opts">'+opts.map((o,i)=>'<div class="cloze-opt" onclick="clozeAnswer('+i+')">'+(isAtStart?(o.en.charAt(0).toUpperCase()+o.en.slice(1)):o.en)+'</div>').join('')+'</div><div style="text-align:center;margin-top:14px;font-size:14px;color:#cbd5e1;font-weight:700">本档已答对：<b style="color:#fbbf24">'+clozeDone+'</b> 题</div></div>';
 }
 function clozeAnswer(i){if(!clozeActive||!clozeQ)return;const opts=document.querySelectorAll('#clozeScreen .cloze-opt');if(opts.length===0||opts[0].dataset.done)return;opts.forEach(o=>o.dataset.done='1');
 const blank=document.getElementById('clozeBlank');
@@ -8249,7 +8256,7 @@ function eagleNextRound(){
     });
   },20);
   const promptEl=document.getElementById('eaglePrompt');
-  if(promptEl)promptEl.innerHTML='👀 找出 <b>'+eagleTarget.emoji+' '+eagleTarget.cn+'</b> 的<u>正确</u>拼写';
+  if(promptEl)promptEl.innerHTML='👀 找出 <b>'+__hsnQuizPic(eagleTarget)+' '+eagleTarget.cn+'</b> 的<u>正确</u>拼写';
   const re=document.getElementById('eagleRound');if(re)re.textContent=eagleRound;
   speak(eagleTarget.en);
   // 启动倒计时

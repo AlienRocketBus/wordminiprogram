@@ -182,7 +182,8 @@
 
     var modeIcon  = curMode === 'listen' ? '🎧' : '✍️';
     var modeTitle = curMode === 'listen' ? '听音拼词' : '看汉意拼单词';
-    var wordEmoji = w.emoji || (curMode === 'listen' ? '🎧' : '📝');
+    // v1165: 拼写题配图不能印着答案（去掉图里的英文标签，太空就用默认图标）
+    var wordEmoji = (window.__hsnQuizPic ? window.__hsnQuizPic(w) : w.emoji) || (curMode === 'listen' ? '🎧' : '📝');
     var target = (w.en || '').toLowerCase();
     var targetLetters = target.replace(/ /g, '').length;
     var typed = '';   // 已输入字母 (不含空格)
