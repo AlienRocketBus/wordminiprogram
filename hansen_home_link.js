@@ -11,10 +11,14 @@
 (function(){
   'use strict';
 
-  /* ---- 双端: 跨文档平滑过渡(②) ---- */
+  /* ---- 双端: 跨文档平滑过渡(②) ----
+     🔴v1165 只在顶层页面开：首页外壳的岛框（iframe）里开了它，每次换岛/回首页浏览器都会抛一个没人接的
+     「ViewTransition opt-in disabled」错误（iframe 里的跨文档过渡本来就不生效）。 */
+  var _vtTop = true;
+  try{ _vtTop = (window.top === window); }catch(e){ _vtTop = false; }
   try{
     var st = document.createElement('style');
-    st.textContent = '@view-transition{navigation:auto}'
+    st.textContent = (_vtTop ? '@view-transition{navigation:auto}' : '')
       /* v568: 过渡更利落(默认 .25s → .16s), 杜绝"飘"感 */
       + '::view-transition-old(root),::view-transition-new(root){animation-duration:.16s}'
       /* v568: 返回按钮触控即时(消除任何 tap 合成延迟) + 按压立显 */
