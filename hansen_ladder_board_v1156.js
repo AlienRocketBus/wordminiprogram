@@ -139,7 +139,7 @@
   function call(p, what) {
     return withTimeout(p, NET_TIMEOUT_MS, what).then(function (r) {
       if (r && r.code) {
-        var e = new Error(what + '失败 ⟨' + r.code + (r.message ? ' ' + String(r.message).slice(0, 80) : '') + '⟩');
+        var e = new Error(what + '：' + String(r.message || '云端拒绝').slice(0, 100));
         e.code = String(r.code); e.cloud = true; e.collection = COL;
         throw e;
       }

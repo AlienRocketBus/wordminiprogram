@@ -111,7 +111,7 @@
     if (/网络太慢|timeout|timed out|内未完成|超时/i.test(t)) return 'slow';
     if (/network request error|failed to fetch|networkerror|network request failed|load failed|unreachable|net::|连不上网络/i.test(t)) return 'network';
     if (/被别人占了|抢走/.test(t)) return 'taken';
-    if (/已经没有了|不存在|不在了|已经离开|已经结束/.test(t)) return 'gone';
+    if (/已经没有了|不存在|不在了|已经离开|已经结束|没找到这间房/.test(t)) return 'gone';
     return 'other';
   }
   /* 给界面用：传错误对象、失败结果或 reason 字符串都行 */
@@ -627,8 +627,9 @@
       });
     }, function (addErr) {
       var k = kindOf(addErr);
-      if (k === 'expired' || k === 'session' || k === 'slow') throw addErr;
-      return readBack(TM.lagTries)['catch'](function () { return null; }).then(function (d) {
+      if (k === 'expired' || k === 'session') throw addErr;   /* 没登录：读也读不了 */
+      /* 超时的 add 可能其实写进去了 —— 同样读回来判（否则会留下一个对方会确认的孤儿座位） */
+      return readBack(k === 'slow' ? 2 : TM.lagTries)['catch'](function () { return null; }).then(function (d) {
         if (!d) throw addErr;
         return { mine: !!(d.nonce && d.nonce === doc.nonce), doc: d, id: id };
       });
@@ -1394,6 +1395,12 @@
         }).then(function () { c.reported = sc; if (host) c.hs = sc; else c.gs = sc; });
         return write.then(function () { return loadView(roomId); }).then(function (L2) {
           var v = L2.v;
+          /* 已经有一方判了「对手离场」→ 两边都按这个结论，不再拿 1 分去和真实得分比 */
+          if (v.abandonWin) {
+            var iWin = (v.abandonWin === (host ? 'host' : 'guest'));
+            return { ok: true, waiting: false, mine: iWin ? 1 : 0, theirs: iWin ? 0 : 1,
+                     result: iWin ? 'win' : 'lose', byAbandon: true };
+          }
           var mine = host ? v.hostScore : v.guestScore, theirs = host ? v.guestScore : v.hostScore;
           if (mine == null) mine = sc;
           if (theirs == null) {

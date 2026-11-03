@@ -13,7 +13,9 @@
  * 合同：
  *   ① 用竞赛 ID 互加，**绝不用手机号**（那是隐私）
  *   ② 加不存在的号 / 加自己 / 重复加，都要有明确提示
- *   ③ 双向各写一条关系，删好友两边都删（单向残留会让对方以为还是好友）
+ *   ③ 🔴v1164：**每人只写自己的记录**（集合权限「读取全部数据，修改本人数据」，
+ *      改/删别人的记录在真云端是静默失败的）。互为好友 = 两边各自那条都在；
+ *      删好友 = 删自己那条，对方那边随之变回「待确认」（不会以为还是好友）
  *   ④ 隐身 = 心跳抹成 0 = 对别人和离线完全一样，看不出差别
  *   ⑤ **快捷语必须在服务层校验** —— 即使改前端也发不出自定义内容
  *   ⑥ 收到未知 qid 只显示"(未知消息)"，绝不渲染原始内容
@@ -27,17 +29,52 @@ console.log('好友系统 v1106');
 
 const src = fs.readFileSync('/home/claude/work/repo/hansen_friends_v1106.js', 'utf8');
 
-function boot(shared) {
+/* 🔴v1164：假云端要和真数据库一个脾气 ——
+   集合权限「读取全部数据，修改本人数据」：谁都能读；add 时服务端盖上写入者的 _openid；
+   **只有创建者能改、能删**，改/删别人的记录不报错、只是改了 0 条（真云端就是这样静默失败的）。
+   旧的假云端谁都能改谁 → 测试一直绿，真机上「互为好友」却从来没成立过。 */
+const clone = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)));
+function matcher(w) {
+  return (x) => Object.keys(w || {}).every((k) => {
+    const v = w[k];
+    if (v && typeof v === 'object' && Array.isArray(v.$in)) return v.$in.includes(x[k]);
+    if (v && typeof v === 'object' && typeof v.$lt === 'number') return typeof x[k] === 'number' && x[k] < v.$lt;
+    return x[k] === v;
+  });
+}
+let _seq = 0;
+function boot(shared, openid) {
   const rows = (shared && shared.rows) || [];
   const msgs = (shared && shared.msgs) || [];
+  const denied = (shared && shared.denied) || [];
+  const who = openid || ('o' + (++_seq));
+  const own = (r) => r && r._openid === who;
   const t = {
-    read: async id => rows.find(x => x._id === id) || null,
-    list: async w => rows.filter(x => Object.keys(w || {}).every(k => x[k] === w[k])),
-    add: async d => { const doc = Object.assign({ _id: 'D' + rows.length + Math.random() }, d); rows.push(doc); return { id: doc._id }; },
-    patch: async (id, d) => { const r = rows.find(x => x._id === id); if (r) Object.assign(r, d); return { updated: 1 }; },
-    remove: async id => { const i = rows.findIndex(x => x._id === id); if (i >= 0) rows.splice(i, 1); return {}; },
-    addMsg: async d => { const doc = Object.assign({ _id: 'M' + msgs.length }, d); msgs.push(doc); return { id: doc._id }; },
-    listMsg: async w => msgs.filter(x => Object.keys(w || {}).every(k => x[k] === w[k]))
+    read: async id => clone(rows.find(x => x._id === id) || null),
+    list: async (w, o) => rows.filter(matcher(w)).slice(0, (o && o.limit) || 100).map(clone),
+    add: async d => {
+      const doc = Object.assign({}, clone(d), { _id: d._id || ('D' + rows.length + '_' + Math.random().toString(36).slice(2, 7)), _openid: who });
+      rows.push(doc); return { id: doc._id };
+    },
+    patch: async (id, d) => {
+      const r = rows.find(x => x._id === id);
+      if (!r) return { updated: 0 };
+      if (!own(r)) { denied.push(['patch', id, who]); return { updated: 0 }; }
+      Object.assign(r, clone(d)); return { updated: 1 };
+    },
+    remove: async id => {
+      const i = rows.findIndex(x => x._id === id);
+      if (i < 0) return { deleted: 0 };
+      if (!own(rows[i])) { denied.push(['remove', id, who]); return { deleted: 0 }; }
+      rows.splice(i, 1); return { deleted: 1 };
+    },
+    addMsg: async d => { const doc = Object.assign({}, clone(d), { _id: 'M' + msgs.length, _openid: who }); msgs.push(doc); return { id: doc._id }; },
+    listMsg: async (w, o) => msgs.filter(matcher(w)).slice(0, (o && o.limit) || 100).map(clone),
+    removeMsg: async id => {
+      const i = msgs.findIndex(x => x._id === id);
+      if (i < 0 || msgs[i]._openid !== who) return { deleted: 0 };
+      msgs.splice(i, 1); return { deleted: 1 };
+    }
   };
   const store = {};
   const ctx = { window: {}, document: { addEventListener() {}, readyState: 'complete' },
@@ -48,8 +85,9 @@ function boot(shared) {
                     removeItem: k => { delete store[k]; } } };
   ctx.window = ctx; vm.createContext(ctx); vm.runInContext(src, ctx);
   const F = ctx.window.HansenFriends; F._setTransportForTest(t);
-  return { F, rows, msgs };
+  return { F, rows, msgs, denied, openid: who, t };
 }
+const S = () => ({ rows: [], msgs: [], denied: [] });
 
 /* ① 不用手机号 */
 {
@@ -59,38 +97,98 @@ function boot(shared) {
 
 /* ② 加好友的各种情况 */
 {
-  const s = { rows: [], msgs: [] };
+  const s = S();
   const A = boot(s); A.F._setMeForTest({ cid: 1, name: '小明' });
   await A.F._beat();
   s.rows.push({ _id: 'P2', kind: 'presence', cid: 2, name: '小红', at: Date.now() });
   ok((await A.F.addFriend(999)).reason.includes('没找到'), '★ 加不存在的号 → 明确提示');
   ok((await A.F.addFriend(1)).reason === '不能加自己', '★ 不能加自己');
   const r = await A.F.addFriend(2);
-  ok(r.ok && r.name === '小红', `★ 加 No.2 成功（${r.name}）`);
-  ok((await A.F.addFriend(2)).reason === '已经是好友了', '★ 重复加 → 明确提示');
+  ok(r.ok && r.name === '小红' && r.pending === true && r.mutual === false,
+     `★ 加 No.2 成功（${r.name}），对方还没加我 → 待确认`);
+  /* v1164：重复加要说准 —— 对方还没加回来时不能说「已经是好友了」（那是骗人） */
+  const dup = await A.F.addFriend(2);
+  ok(!dup.ok && /已经加过他了/.test(dup.reason), `★ 重复加（对方还没加我）→ 明确提示：${dup.reason}`);
+  const B = boot(s, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
+  await B.F.addFriend(1);
+  ok((await A.F.addFriend(2)).reason === '已经是好友了', '★ 重复加（已互为好友）→「已经是好友了」');
 }
 
-/* ③ 双向关系 */
+/* ③ 双向关系：每人只写自己的记录 */
 {
-  const s = { rows: [], msgs: [] };
-  const A = boot(s); A.F._setMeForTest({ cid: 1, name: '小明' });
-  await A.F._beat();
-  s.rows.push({ _id: 'P2', kind: 'presence', cid: 2, name: '小红', at: Date.now() });
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  const B = boot(s, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
+  await A.F._beat(); await B.F._beat();
+  ok(A.F._myOpenid() === 'oA' && B.F._myOpenid() === 'oB',
+     '★ 各自学到数据库盖的 _openid（写一条自己的在线记录再读回来）');
   await A.F.addFriend(2);
-  /* 🔴v1114 契约变更：**不再单方面写进对方的好友表**。
-     实测发现陌生人单方面就能进孩子的好友列表 —— 对儿童产品不能接受。
-     改为：只写我这边(state=pending) + 给对方留一条 request；
-     对方也加我时双方自动转 accepted（仍然不用手动点通过）。 */
+  /* 🔴v1114：**不单方面写进对方的好友表** —— 陌生人不能单方面进孩子的列表 */
   const mine = s.rows.filter(x => x.kind === 'friend' && x.owner === 1);
   const theirs = s.rows.filter(x => x.kind === 'friend' && x.owner === 2);
-  ok(mine.length === 1, '★ 只写自己这边一条');
+  ok(mine.length === 1 && mine[0]._openid === 'oA', '★ 只写自己这边一条（盖的是自己的 _openid）');
   ok(theirs.length === 0, '★ **不往对方好友表里塞** —— 陌生人不能单方面进孩子的列表');
-  ok(mine[0].state === 'pending', '★ 标记为 pending，等对方也加我');
-  ok(s.rows.some(x => x.kind === 'request' && x.from === 1 && x.to === 2),
-     '★ 给对方留了一条请求记录');
+  const lb1 = await B.F.listFriends();
+  ok(lb1.ok && lb1.friends.length === 0 && lb1.incoming.some(x => x.cid === 1),
+     '★ 对方那边：不是好友，只显示「想加你为好友」（等他自己决定）');
+  const la1 = await A.F.listFriends();
+  ok(la1.ok && la1.friends.length === 1 && la1.friends[0].pending === true,
+     '★ 我这边：标成待确认（「我加了他」和「互为好友」是两回事）');
+
+  const back = await B.F.addFriend(1);
+  ok(back.ok && back.mutual === true, '★ 对方加回来 → 当场互为好友（不用谁去改谁的记录）');
+  const la2 = await A.F.listFriends(), lb2 = await B.F.listFriends();
+  ok(la2.friends[0] && la2.friends[0].pending === false && la2.friends[0].mutual === true, '★ 我这边变成正式好友');
+  ok(lb2.friends[0] && lb2.friends[0].pending === false && lb2.incoming.length === 0, '★ 对方那边也是正式好友，请求消失');
+
   await A.F.removeFriend(2);
-  const left = s.rows.filter(x => x.kind === 'friend');
-  ok(left.length === 0, '★ 删好友两边都删（单向残留会让对方以为还是好友）');
+  ok(!s.rows.some(x => x.kind === 'friend' && x.owner === 1), '★ 删好友：我自己那条删掉了');
+  ok(s.rows.some(x => x.kind === 'friend' && x.owner === 2),
+     '对方那条还在（那是他的记录，别人删不了 —— 真云端也是这样）');
+  const lb3 = await B.F.listFriends();
+  ok(lb3.friends[0] && lb3.friends[0].pending === true,
+     '★ 对方那边自动变回「等他也加你」—— 不会以为还是好友');
+  const la3 = await A.F.listFriends();
+  ok(la3.friends.length === 0 && la3.incoming.length === 0,
+     '★ 我这边：列表里没有他了，也不会马上冒出「他想加你」（刚删的）');
+  ok(s.denied.length === 0, `★ **全程没有一次去改/删别人的记录**（实得 ${s.denied.length} 次）`);
+}
+
+/* ③b 冒充：别人替我写的「我的好友」、替他写的「他加了我」都不算 */
+{
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  const B = boot(s, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
+  const M = boot(s, 'oM'); M.F._setMeForTest({ cid: 9, name: '坏人' });
+  await A.F._beat(); await B.F._beat(); await M.F._beat();
+  await M.t.add({ kind: 'friend', owner: 1, friend: 9, name: '坏人', at: Date.now() });   /* 冒充 A 加 M */
+  await A.F.addFriend(2);
+  await M.t.add({ kind: 'friend', owner: 2, friend: 1, name: '小明', at: Date.now() });   /* 冒充 B 加回 A */
+  const la = await A.F.listFriends();
+  ok(!la.friends.some(f => f.cid === 9), '★ 别人替我写的"好友"不算 —— 只认我自己盖章的记录');
+  const fb = la.friends.find(f => f.cid === 2);
+  ok(fb && fb.pending === true, '★ 冒充 B 写的「B 加了我」不算 —— B 的在线记录不是这个 _openid');
+}
+
+/* ③c 集合没建 / 权限不对：要说清楚去控制台改哪里 */
+{
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  await A.F._beat();
+  /* 和真传输层一样：SDK 回了 {code}，传输层抛出带 code 和集合名的错误 */
+  const cloudErr = (code, coll) => Object.assign(new Error('失败 ⟨' + code + '⟩'), { code, cloud: true, collection: coll });
+  A.t.addMsg = async () => { throw cloudErr('DATABASE_COLLECTION_NOT_EXIST', 'hansen_friend_msgs'); };
+  A.F._setTransportForTest(A.t);      /* 注入时会包一层超时，改了方法要重新注入 */
+  const r = await A.F.sendQuick(2, 'pk');
+  ok(!r.ok && r.kind === 'config', '★ 缺集合 → kind=config（不是"网络不好"）');
+  ok(/hansen_friend_msgs/.test(r.reason) && /读取全部数据，修改本人数据/.test(r.reason),
+     `★ 说清楚建哪个集合、权限选什么：${r.text}`);
+  ok(/DATABASE_COLLECTION_NOT_EXIST/.test(r.reason), '★ 原话留在 ⟨⟩ 里（界面的技术信息那行显示它）');
+  A.t.list = async () => { throw cloudErr('DATABASE_PERMISSION_DENIED', 'hansen_friends'); };
+  A.F._setTransportForTest(A.t);
+  const l = await A.F.listFriends();
+  ok(!l.ok && l.kind === 'config' && /hansen_friends/.test(l.reason) && /权限/.test(l.text),
+     '★ 权限不对 → 说是哪个集合的权限要改');
 }
 
 /* ④ 隐身 */
@@ -122,6 +220,27 @@ function boot(shared) {
   }
   ok(s.msgs.every(m => !m.text),
      '★ 数据库里只存 qid 不存文本（即使被写入奇怪的值，界面也只显示"未知消息"）');
+}
+
+/* ⑥b 只看好友发来的招呼：陌生人发的不给孩子看 */
+{
+  const s = S();
+  const A = boot(s, 'oA'); A.F._setMeForTest({ cid: 1, name: '小明' });
+  const B = boot(s, 'oB'); B.F._setMeForTest({ cid: 2, name: '小红' });
+  const M = boot(s, 'oM'); M.F._setMeForTest({ cid: 9, name: '陌生人' });
+  await A.F._beat(); await B.F._beat(); await M.F._beat();
+  ok((await B.F.sendQuick(1, 'pk')).ok && (await M.F.sendQuick(1, 'hi')).ok, '两个人都发了招呼');
+  const ib = await A.F.inbox({ onlyFrom: [2] });
+  ok(ib.ok && ib.msgs.length === 1 && ib.msgs[0].from === 2 && /来一局/.test(ib.msgs[0].text),
+     '★ 只显示好友 No.2 的「来一局？」');
+  ok(ib.strangers === 1, '★ 陌生人那条没显示（只计数）');
+  ok(ib.msgs[0].isNew === true && ib.unread === 1, '★ 新招呼标成"新"');
+  A.F.markSeen();
+  await new Promise(r => setTimeout(r, 5));
+  const ib2 = await A.F.inbox({ onlyFrom: [2] });
+  ok(ib2.unread === 0, '★ 看过之后不再算新的（已读记在本机 —— 别人的记录我改不了）');
+  ok(s.msgs.every(m => m._openid === (m.from === 2 ? 'oB' : 'oM') && m.fromOpenid === m._openid),
+     '★ 每条招呼都带着发件人自己的可信身份');
 }
 
 /* ⑥ 未知消息不渲染原始内容 */

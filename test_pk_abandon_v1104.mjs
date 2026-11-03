@@ -159,6 +159,10 @@ const now = clock.t;
   ok(doc.hostScore === 1 && db.docs.get('R1_s0').guestScore == null, '★ 房主只写自己的分（客人的座位一个字没碰）');
   const st = await S.roundState('R1');
   ok(st.hostScore === 1 && st.guestScore === 0, `★ 合并后比分记为 1:0（实得 ${st.hostScore}:${st.guestScore}）`);
+  /* 客人其实还在、后来交了卷 —— 两边也得是同一个结论（房主已经判了） */
+  const G = mod(db, 'G');
+  const gr = await G.reportResult('R1', 300);
+  ok(gr.ok && gr.result === 'lose' && gr.byAbandon === true, `★ 房主判了离场后，客人那边也是同一个结论（${gr.result}），不会拿 300 分去比 1 分`);
 }
 {
   /* 反过来：房主跑了，客人判赢 —— 客人只写自己的座位 */

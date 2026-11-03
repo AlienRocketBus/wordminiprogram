@@ -283,6 +283,23 @@ const now = Date.now();
   ok(!rooms.some(r => r._id === rb.roomId), '★ B 自己那间被收掉（不留幽灵房）');
 }
 {
+  /* 同一毫秒开房（createdAt 完全相同）→ 按 _id 小的赢，两边结论一致 */
+  const t = Date.now();
+  const rooms = [
+    room({ _id:'rTIEa', status:'open', isPrivate:false, hostId:'A', guestId:'', mode:'A', hostRating: 1000, heartbeatAt: t, createdAt: t, seed:1, wordCount:3 }),
+    room({ _id:'rTIEb', status:'open', isPrivate:false, hostId:'B', guestId:'', mode:'A', hostRating: 1000, heartbeatAt: t, createdAt: t, seed:1, wordCount:3 })
+  ];
+  const A = boot(rooms, 'A'), B = boot(rooms, 'B');
+  [A, B].forEach(m => m._setTimingForTest({ waitPollMs: 30 }));
+  let ea = null, eb = null;
+  const lad = { ladder: { rating: 1000, band: () => 100 } };
+  const ca = A.waitForOpponent('rTIEa', ev => { ea = ev; }, 20000, lad);
+  const cb = B.waitForOpponent('rTIEb', ev => { eb = ev; }, 20000, lad);
+  await new Promise(z => setTimeout(z, 300));
+  ca(); cb();
+  ok(ea === null && eb && eb.switchTo === 'rTIEa', `★ 同一毫秒开房 → _id 大的去进 _id 小的（A=${JSON.stringify(ea)} B→${eb && eb.switchTo}）`);
+}
+{
   /* 分差太大、不是抢答赛、私密房 —— 都不能当成天梯对手 */
   const rooms = [
     room({ _id:'r0far', status:'open', isPrivate:false, hostId:'F', mode:'A', hostRating: 2000, heartbeatAt: Date.now(), createdAt: 1 }),
