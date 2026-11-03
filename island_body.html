@@ -3877,7 +3877,7 @@ function checkAch(){
     }
   }catch(e){}
 }
-function markMode(m){window._sessionCoins=0;window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
+function markMode(m){window._sessionCoins=0;window._sessionStreakCoins=0;window._sessionCapHits=0;window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
 
 // ============================================================
 // TOAST
@@ -4488,7 +4488,10 @@ function checkComboMilestone(){
   }
   if(m){
     window._lastMilestone = c;
+    /* 🔴v1165 连胜奖励也算进这一局的金币：发奖前后看钱包实际多了多少（发奖的是外挂模块里的 triggerMilestone） */
+    var __w0=null;try{__w0=window.HansenCoins?HansenCoins.get():null;}catch(e){}
     triggerMilestone(m);
+    try{if(__w0!==null){var __dw=HansenCoins.get()-__w0;if(__dw>0){window._sessionCoins=(window._sessionCoins||0)+__dw;window._sessionStreakCoins=(window._sessionStreakCoins||0)+__dw;}}}catch(e){}
     return true;   // v313: 告诉调用方"本回合触发了里程碑", 别再用 showComboUI 覆盖掉里程碑显示
   }
   return false;
@@ -4675,6 +4678,14 @@ function __hsnClash(a,b){
   var sa=__hsnSenses(a),sb=__hsnSenses(b);for(var i=0;i<sa.length;i++)if(sb.indexOf(sa[i])>=0)return true;
   return false;
 }
+/* 🔴v1165 结算页的「🪙 金币 +N」= 这一局钱包里真正多出来的：答对给的金币 + 连胜奖励（以前连胜奖励不算进来，后几局写 +0 钱包却在涨）。
+   每个词每天最多给 3 次金币（防刷），这一局一个币都没拿到时，告诉孩子是怎么回事。 */
+function __hsnRoundCoins(){
+  var n=window._sessionCoins||0,st=window._sessionStreakCoins||0,cap=window._sessionCapHits||0;
+  var h='🪙 金币 +'+n+(st>0?'（含连胜奖励 +'+st+'）':'');
+  if(n-st<=0&&cap>0)h+='<br><span style="font-size:12.5px;color:#fde68a;font-weight:700">今天这些词的金币领满啦，换个难度或明天再来～</span>';
+  return h;
+}
 /* 🔴v1165 难度卡上的例词：本档真实的前 3 个词 */
 function __hsnLevelExample(filter){var out=[];for(var i=0;i<allW.length&&out.length<3;i++){try{if(filter(i))out.push(allW[i].en);}catch(e){}}return out.join(' · ');}
 function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
@@ -4751,7 +4762,7 @@ if(c>=1)unlockAch('w1');if(c>=10)unlockAch('w10');if(c>=25)unlockAch('w25');if(c
 save()}closeModal();renderExplore();updatePetHero()}
 
 // Track answer stats & wrongs
-function markAnswer(idx,correct){var _wrong=__hsnSafeWrongCount(S.wrongs[idx]);S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(_wrong&&!window.__hmlRetryAns){_wrong--;if(_wrong)S.wrongs[idx]=_wrong;else delete S.wrongs[idx]}}else{S.wrongs[idx]=Math.min(__HSN_MAX_WRONG_COUNT,_wrong+1)}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
+function markAnswer(idx,correct){var _wrong=__hsnSafeWrongCount(S.wrongs[idx]);S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(_wrong&&!window.__hmlRetryAns){_wrong--;if(_wrong)S.wrongs[idx]=_wrong;else delete S.wrongs[idx]}}else{S.wrongs[idx]=Math.min(__HSN_MAX_WRONG_COUNT,_wrong+1)}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}else{window._sessionCapHits=(window._sessionCapHits||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
 /* 🔴v1165 答错小课的统一入口（hansen_mistake_lesson_v1165.js）。模块没加载就退回原来的定时推进，不会卡住。 */
 function __hml(){return window.HansenMistakeLesson||null}
 function __hmlStart(m){var M=__hml();if(M)M.start(m)}
@@ -5370,7 +5381,7 @@ function startMoles(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.92;margin-bottom:6px">'+L.detail+'</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">🎯 '+cnt+' 题 · 全对得 🎓经验 +'+(L.xpPerHit*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">🎯 '+cnt+' 题 · 全对得 🎓经验 +'+(L.xpPerHit*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -5586,7 +5597,7 @@ function molesComplete(){
         '</div>'+
         (molesIsNewRecord?'<div style="margin-top:8px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(molesScore>0&&molesScore===molesPrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(molesPrevBest>molesScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(molesPrevBest-molesScore)+' 分, 加油！</div>':'')))+
       '</div>'+
-      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
       '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startMoles()" style="margin-left:6px">🎯 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>'+
     '</div>';
 }
@@ -5679,7 +5690,7 @@ function startFish(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.92;margin-bottom:6px">'+L.detail+'</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">🐟 '+cnt+' 条 · 全对得 🎓经验 +'+(L.xpPerCatch*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">🐟 '+cnt+' 条 · 全对得 🎓经验 +'+(L.xpPerCatch*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -6029,7 +6040,7 @@ function fishComplete(){
         '</div>'+
         (fishIsNewRecord?'<div style="margin-top:8px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(fishScore>0&&fishScore===fishPrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(fishPrevBest>fishScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(fishPrevBest-fishScore)+' 分, 加油！</div>':'')))+
       '</div>'+
-      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
       '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startFish()" style="margin-left:6px">🎣 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>'+
     '</div>';
 }
@@ -6082,7 +6093,7 @@ function startBubble(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.92;margin-bottom:6px">每词只出一次, 答完该档结束</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerHit*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerHit*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -6367,7 +6378,7 @@ function bubbleComplete(){
         '</div>'+
         (bubbleIsNewRecord?'<div style="margin-top:8px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(bubbleScore>0&&bubbleScore===bubblePrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(bubblePrevBest>bubbleScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(bubblePrevBest-bubbleScore)+' 分, 加油！</div>':'')))+
       '</div>'+
-      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
       '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startBubble()" style="margin-left:6px">🫧 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>'+
     '</div>';
 }
@@ -6409,7 +6420,7 @@ function startScramble(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.85;margin-bottom:6px;font-style:italic">'+__hsnLevelExample(L.filter)+'</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerWord*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerWord*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -6576,7 +6587,7 @@ function scrComplete(){
       '<div style="font-size:80px">🔄</div>'+
       '<div style="font-size:24px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 全部拼完！</div>'+
       '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">答对 '+scrCorrect+' / '+scrTotal+' 个 · 正确率 '+accuracy+'%</div>'+
-      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+      '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
       '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startScramble()" style="margin-left:6px">🔄 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>';
   } else {
     const partGem=scrCorrect>0?Math.max(1,Math.floor(L.gemBonus*scrCorrect/scrTotal/2)):0;
@@ -6709,7 +6720,7 @@ function endSpeed(){
     +'</div>'
     +(spIsNewRecord?'<div style="margin-top:6px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(spScore>0&&spScore===spPrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(spPrevBest>spScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(spPrevBest-spScore)+' 分, 加油！</div>':'')))
     +'</div>';
-  document.getElementById('speedContent').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:72px">⏱️</div><div style="font-size:26px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 时间到！</div><div style="font-size:32px;margin:6px 0">'+stars2+'</div>'+spCompare+'<div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div><div style="font-size:12px;color:#cbd5e1;margin:8px 0">本局最大连击 '+spSessionMaxCombo+'</div><button class="game-btn gold" onclick="startSpeed()" style="margin-top:12px">⚡ 换难度</button> <button class="game-btn purple" onclick="startSpeedLevel(\''+spLevel+'\')" style="margin-top:12px">🔄 再来</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 主页</button></div>';
+  document.getElementById('speedContent').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:72px">⏱️</div><div style="font-size:26px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 时间到！</div><div style="font-size:32px;margin:6px 0">'+stars2+'</div>'+spCompare+'<div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div><div style="font-size:12px;color:#cbd5e1;margin:8px 0">本局最大连击 '+spSessionMaxCombo+'</div><button class="game-btn gold" onclick="startSpeed()" style="margin-top:12px">⚡ 换难度</button> <button class="game-btn purple" onclick="startSpeedLevel(\''+spLevel+'\')" style="margin-top:12px">🔄 再来</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 主页</button></div>';
   for(let i=0;i<8;i++)setTimeout(()=>confetti(Math.random()*window.innerWidth,Math.random()*200,6),i*150);
   addXP(gemReward);
   petTaskComplete('⚡ 极速挑战 '+L.name,L.petXp,'speed');
@@ -6816,7 +6827,7 @@ function listenComplete(){
   save();
   var nextLvlBtn = listenLevel==='easy' ? `<button class="game-btn red" onclick="startListenLevel('medium')">⚡ \u6311\u6218\u4e2d\u7ea7</button> ` : (listenLevel==='medium' ? `<button class="game-btn red" onclick="startListenLevel('hard')">🔥 \u6311\u6218\u9ad8\u7ea7</button> ` : `<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 \u4f60\u5b8c\u6210\u4e86\u6700\u9ad8\u96be\u5ea6\uff01\u592a\u5389\u5bb3\u5566</div>`);
   var ct=document.getElementById('listenContent');
-  if(ct) ct.innerHTML = `<div style="text-align:center;padding:24px 16px"><div style="font-size:72px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">${L.icon}</div><div style="font-size:24px;font-weight:800;color:#fbbf24;margin:10px 0">${L.icon} ${L.name} \u5b8c\u6210\uff01</div><div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">${total} \u4e2a\u5355\u8bcd\u5168\u90e8\u542c\u5b8c \u00b7 \u7b54\u5bf9 <b style="color:#22c55e">${listenRight}</b> / ${listenTotal} \u00b7 \u6b63\u786e\u7387 <b style="color:#fbbf24">${acc}%</b></div><div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 \u91d1\u5e01 +${sc}</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 \u7ecf\u9a8c +${(S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0))}</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 \u5ba0\u7269\u7ecf\u9a8c +${petXp}</span></div><div style="margin-top:18px">${nextLvlBtn}<button class="game-btn gold" onclick="startListenLevel('${listenLevel}')" style="margin-left:6px">🔄 \u518d\u6765\u4e00\u8f6e</button> <button class="game-btn purple" onclick="showScreen('home')" style="margin-left:6px">🏠 \u56de\u4e3b\u9875</button></div></div>`;
+  if(ct) ct.innerHTML = `<div style="text-align:center;padding:24px 16px"><div style="font-size:72px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">${L.icon}</div><div style="font-size:24px;font-weight:800;color:#fbbf24;margin:10px 0">${L.icon} ${L.name} \u5b8c\u6210\uff01</div><div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">${total} \u4e2a\u5355\u8bcd\u5168\u90e8\u542c\u5b8c \u00b7 \u7b54\u5bf9 <b style="color:#22c55e">${listenRight}</b> / ${listenTotal} \u00b7 \u6b63\u786e\u7387 <b style="color:#fbbf24">${acc}%</b></div><div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">${__hsnRoundCoins()}</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 \u7ecf\u9a8c +${(S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0))}</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 \u5ba0\u7269\u7ecf\u9a8c +${petXp}</span></div><div style="margin-top:18px">${nextLvlBtn}<button class="game-btn gold" onclick="startListenLevel('${listenLevel}')" style="margin-left:6px">🔄 \u518d\u6765\u4e00\u8f6e</button> <button class="game-btn purple" onclick="showScreen('home')" style="margin-left:6px">🏠 \u56de\u4e3b\u9875</button></div></div>`;
 }
 
 // ============================================================
@@ -6859,7 +6870,7 @@ else if(matchMistakes<=3){msg='🌟 极佳记忆！';bonus=10;unlockAch('match0'
 else if(matchMistakes<=12){msg='👍 很棒！';bonus=5;unlockAch('match0')}else{bonus=3}
 bumpGameCount('match');
 addXP(bonus);progressQuest('match',(matchMatched|0)||1);/*🔴v1001 含金量: 按配对成功组数（🔴v1165 matchPairs 是牌的数组，组数是 matchMatched）*/save();
-document.getElementById('matchContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:80px">🃏</div><div style="font-size:26px;font-weight:800;color:#fbbf24;margin:12px 0">'+msg+'</div><div style="font-size:14px;color:#cbd5e1">步数：'+matchMoves+' · 失误：'+matchMistakes+'</div><div style="font-size:16px;margin:10px 0;font-weight:700"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#22c55e">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span></div><button class="game-btn green" onclick="startMatch()" style="margin-top:12px">🔄 再来一轮</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 回主页</button></div>';
+document.getElementById('matchContent').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:80px">🃏</div><div style="font-size:26px;font-weight:800;color:#fbbf24;margin:12px 0">'+msg+'</div><div style="font-size:14px;color:#cbd5e1">步数：'+matchMoves+' · 失误：'+matchMistakes+'</div><div style="font-size:16px;margin:10px 0;font-weight:700"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#22c55e">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span></div><button class="game-btn green" onclick="startMatch()" style="margin-top:12px">🔄 再来一轮</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 回主页</button></div>';
 bigConfetti()}
 
 // ============================================================
@@ -6911,7 +6922,7 @@ for(const k of [1,2,3]){
   const L=TYPING_LEVELS[k];
   if(!counts[k]){cards+=__hsnLockedLevelCard(L);continue;}
   cards+='<div onclick="startTyping('+k+')" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');padding:12px 14px;border-radius:14px;cursor:pointer;border:2px solid '+L.cb+';box-shadow:0 4px 12px '+L.c1+'55;transition:transform .15s" ontouchstart="this.style.transform=\'scale(.97)\'" ontouchend="this.style.transform=\'\'">'+
-    '<div style="display:flex;align-items:center;gap:11px"><div style="font-size:30px">'+L.icon+'</div><div style="flex:1;text-align:left"><div style="font-size:16px;font-weight:900;color:#fff">'+L.name+' · '+L.desc+'</div><div style="font-size:11px;color:'+L.ct+';margin-top:2px">'+counts[k]+' 词 · 🎓经验 +'+(L.xpPerWord*counts[k]+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+counts[k]+'</div></div><div style="font-size:18px;color:'+L.cb+';opacity:.75">▶</div></div>'+
+    '<div style="display:flex;align-items:center;gap:11px"><div style="font-size:30px">'+L.icon+'</div><div style="flex:1;text-align:left"><div style="font-size:16px;font-weight:900;color:#fff">'+L.name+' · '+L.desc+'</div><div style="font-size:11px;color:'+L.ct+';margin-top:2px">'+counts[k]+' 词 · 🎓经验 +'+(L.xpPerWord*counts[k]+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+counts[k]+'</div></div><div style="font-size:18px;color:'+L.cb+';opacity:.75">▶</div></div>'+
   '</div>';
 }
 document.getElementById('typingContent').innerHTML=
@@ -7144,7 +7155,7 @@ document.getElementById('typingContent').innerHTML='<div style="text-align:cente
   +'<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:14px;color:#94a3b8;flex-wrap:wrap"><span>总用时 <b style="color:#fff;font-variant-numeric:tabular-nums">'+fmtTypeTime(totalMs)+'</b></span><span>拼对率 <b style="color:'+(accuracy>=95?'#22c55e':'#fbbf24')+'">'+accuracy+'%</b></span><span>最快 <b style="color:#fbbf24">'+bestCpm+'</b></span></div>'
 +'</div>'
 +recordBanner+wrongReview+perWord
-+'<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.5);color:#fff;padding:8px 16px;border-radius:10px;display:inline-block;margin:9px 0 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'
++'<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.5);color:#fff;padding:8px 16px;border-radius:10px;display:inline-block;margin:9px 0 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'
 +'<div style="margin-top:11px;display:flex;flex-direction:column;gap:8px;align-items:center"><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+nextRoundBtn+'<button class="game-btn green" onclick="startTyping('+typeRound+')" style="font-size:15px;padding:9px 18px">🔄 再来一局</button></div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="game-btn purple" onclick="showTypingMenu()" style="font-size:15px;padding:9px 18px">⌨️ 换难度</button><button class="game-btn gold" onclick="showScreen(\'home\')" style="font-size:15px;padding:9px 18px">🏠 主页</button></div></div>'
 +'</div>';
 addXP(gemReward);bigConfetti();
@@ -7224,7 +7235,7 @@ function startCloze(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+' · '+L.desc+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.85;margin-bottom:6px;font-style:italic">"'+L.example+'"</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 题 · 全对得 🎓经验 +'+(L.xpPerQ*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 题 · 全对得 🎓经验 +'+(L.xpPerQ*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -7314,7 +7325,7 @@ document.getElementById('clozeContent').innerHTML=
     '<div style="font-size:80px">📝</div>'+
     '<div style="font-size:24px;font-weight:800;color:'+L.cb+';margin:10px 0">'+L.icon+' '+L.name+' 完成！</div>'+
     '<div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">答对 '+clozeDone+' / '+clozeTotal+' 题 · 正确率 '+accuracy+'%</div>'+
-    '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+    '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
     '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startCloze()" style="margin-left:6px">📝 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>'+
   '</div>';
 }
@@ -8349,7 +8360,7 @@ function startEagle(){
       '<div style="flex:1;min-width:0;color:#fff">'+
         '<div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div>'+
         '<div style="font-size:13px;font-weight:600;opacity:.92;margin-bottom:6px">'+L.desc+'</div>'+
-        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerQ*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 +'+cnt+'</div>'+
+        '<div style="font-size:13px;font-weight:600;background:rgba(0,0,0,.5);color:#fff;padding:4px 9px;border-radius:8px;display:inline-block;font-weight:700">📚 '+cnt+' 词 · 全对得 🎓经验 +'+(L.xpPerQ*cnt+L.gemBonus)+' · 🐾宠物经验 +'+L.petXp+' · 🪙金币 最多 +'+cnt+'</div>'+
       '</div>'+
       '<div style="font-size:24px;color:#fff;opacity:.85">→</div>'+
     '</div>';
@@ -8535,7 +8546,7 @@ function eagleComplete(){
       '</div>'+
       (eagleIsNewRecord?'<div style="margin-top:8px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(eagleScore>0&&eagleScore===eaglePrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(eaglePrevBest>eagleScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(eaglePrevBest-eagleScore)+' 分, 加油！</div>':'')))+
     '</div>'+
-    '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">🪙 金币 +'+(window._sessionCoins||0)+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
+    '<div style="font-size:15px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div>'+
     '<div style="margin-top:20px">'+nextLvlBtn+'<button class="game-btn purple" onclick="startEagle()" style="margin-left:6px">👀 换难度</button> <button class="game-btn gold" onclick="showScreen(\'home\')" style="margin-left:6px">🏠 主页</button></div>'+
   '</div>';
 }
