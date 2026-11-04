@@ -694,7 +694,7 @@
   var RANK = { open: 0, playing: 1, done: 2 };
   var RANK_NAME = ['open', 'playing', 'done'];
   function rc(id) {
-    return _rc[id] || (_rc[id] = { rank: 0, guestId: '', hs: null, gs: null, wins: [],
+    return _rc[id] || (_rc[id] = { rank: 0, guestId: '', hs: null, gs: null, fin: null, wins: [],
                                    seat: null, meta: null, calls: 0, opp: {}, missR: 0, missS: 0,
                                    awH: false, awG: false, eb: '', ep: null, sq: {}, mySeat: '',
                                    lastOk: 0, failSince: 0, outageAt: 0, lastL: null, createdLocal: 0 });
@@ -1549,13 +1549,19 @@
     cancelJoins(id);
     var t = Date.now(), c = rc(id), p, acked = !!_myAcked[id];
     delete _myAcked[id];
+    /* 🔴审查 F-R2-1 / FX-5：交了卷马上点「先离开」—— 交卷那一下（reportResult）可能还在路上。
+       以前这里只看「交卷写成功了没有」（c.hs），没写完就记成「中途走了」（endedBy:'leave'），
+       对手最后一词拼对了也被拒收、这一局判成对手「对方离场」。现在：交了卷的分（c.fin，交卷时当场记下）
+       和「走了」**写在同一次里** —— 要么都写上、要么都没写上，不会出现「走了、却没交卷」 */
+    var fin = (role === 'host') ? (c.hs != null ? c.hs : c.fin) : (c.gs != null ? c.gs : c.fin);
+    var withFin = function (o, field, have) { if (fin != null && have == null) o[field] = fin; return o; };
     if (role === 'host') {
       if (!started && !acked) p = T().remove(id);
-      else if (c.rank >= 2) p = T().patch(id, { endedAt: t, heartbeatAt: t });
-      else p = T().patch(id, { status: 'done', endedAt: t, heartbeatAt: t,
-                               endedBy: (c.hs != null) ? 'finished' : 'leave' });
+      else if (c.rank >= 2) p = T().patch(id, withFin({ endedAt: t, heartbeatAt: t }, 'hostScore', c.hs));
+      else p = T().patch(id, withFin({ status: 'done', endedAt: t, heartbeatAt: t,
+                                       endedBy: (fin != null) ? 'finished' : 'leave' }, 'hostScore', c.hs));
     } else {
-      if (started) p = T().patch(sid, { left: true, leftAt: t, guestBeat: t });
+      if (started) p = T().patch(sid, withFin({ left: true, leftAt: t, guestBeat: t }, 'guestScore', c.gs));
       else { p = T().remove(sid); _seatGone[id] = p.then(noop, noop); }   /* 下一次进这间房要等它删完 */
     }
     return p.then(function () { return { ok: true }; }, function (e) { return fail(e); });
@@ -2178,6 +2184,8 @@
      写入重试 3 次；同一个分已经写成功就不再重复写，只读（一次请求读回房间 + 座位）。 */
   function reportResult(roomId, score) {
     var sc = scoreOf(score) || 0;
+    /* 交卷这一刻就记下（同步记，不等写完）：马上离开时 leaveMine 要把它和「走了」一起写上（审查 F-R2-1/FX-5） */
+    try { if (roomId) rc(roomId).fin = sc; } catch (e) {}
     return ident().then(function (u) {
       var c = rc(roomId);
       return metaOf(roomId).then(function (R) {

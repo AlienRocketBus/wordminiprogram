@@ -1,0 +1,210 @@
+#!/usr/bin/env node
+/* test_island_r2_cloud_v1164.mjs —— 首页（index.html）里的岛：返回键、云存档、拼写大PK首页
+ *（审查第二轮 T1、FX-2、FX-3、R2-2（账号）、R2-1（回归）、R2-6（回归）、R2-UI-11）
+ *
+ * 孩子最常走的路：首页 → 点一个岛（岛开在首页里的 iframe 里，按返回只是藏起来、不卸载）。
+ * 真页面、真 SDK；只有腾讯云由 cloudbase_emulator.mjs 应答。
+ *
+ *   ① 岛里「公开房间 → 开一间 → 选玩法」，房还没开好就按手机返回键 —— 房不许开出来、别人列不到（T1）
+ *   ② 岛里「天梯 → 开始排位」，等了 20 秒自己开房「正在开房间…」时按返回键 —— 同样（FX-2）
+ *   ③ 岛里学了东西、8 秒内点返回回到首页、马上切出 App —— 这一局要传上云，而且只传一次（FX-3 / R2-2 / R2-1）；
+ *      之后在首页改了进度（首页本身没有云存档模块）再切出 App —— 也要传上去
+ *   ④ 去过岛以后再打开首页：不再预取一个不存在的 island_wordIslandAnimal.html（404，R2-6）
+ *   ⑤ 岛上的「拼写大PK」首页：打过排位以后显示真的段位分和胜率（R2-UI-11：以前「未定级」「— 对战胜率」）
+ */
+import * as H from './cloudbase_e2e_harness.mjs';
+
+const t = H.checker('首页里的岛：返回键 / 云存档 / 拼写大PK首页 · 真 SDK（审查 T1、FX-2、FX-3、R2-1/2/6、R2-UI-11）');
+const srv = await H.startStatic();
+const browser = await H.launchBrowser();
+const live = [];
+let emu = null, names = {};
+const explain = (extra) => H.explainer(emu, () => live, () => names)(extra);
+const flat = (s) => String(s || '').replace(/\s+/g, ' ');
+const has = (s, re) => re.test(String(s || ''));
+let seq = 10;
+
+const HOME = { path: '/index.html', ready: () => typeof window.openIsland === 'function' && !!window.HansenAuth };
+async function phone(name, nick, opts = {}, login = true) {
+  const p = await H.openPhone(browser, emu, srv.origin, Object.assign({ name }, opts));
+  live.push(p);
+  p.nick = nick;
+  if (!login) return p;
+  const r = await H.loginPhone(p, '135000000' + (seq++));
+  await t.ok(r && r.ok && r.uid, `[${name}] 手机号验证码登录 uid=${r && r.uid}`, () => explain(JSON.stringify(r)));
+  names[r.uid] = nick; p.key = 'u' + r.uid; p.uid = r.uid;
+  return p;
+}
+async function closeAll() {
+  await H.cleanPhones(t, live);
+  for (const p of live) await p.close();
+  live.length = 0;
+}
+async function part(title, fn) {
+  t.section(title);
+  try { await fn(); }
+  catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }
+  try { await closeAll(); } catch (e) { /* 已关 */ }
+}
+const liveRooms = (p) => H.roomDocs(emu).filter((d) => d.kind === 'room' && d.hostId === p.key && (d.status === 'open' || d.status === 'away'));
+const writesBy = (uid, col) => emu.writes.filter((w) => w.uid === uid && w.collection === col);
+/* 首页 → 打开动物岛，等岛里的模块就绪；返回岛的 frame */
+async function openAnimalIsland(G) {
+  if ((await G.hitTest('#__hansen_onboarding button', { hasText: '跳过', timeout: 3000 })).ok) await G.tap('#__hansen_onboarding button', { hasText: '跳过' });
+  await H.sleep(400);
+  await G.eval(() => { window.openIsland('island_animal.html'); return true; });
+  const fr = await H.until(async () => {
+    const f = G.page.frames().find((x) => /island_animal/.test(x.url()) && x.parentFrame() === G.page.mainFrame());
+    if (!f) return null;
+    const ok = await f.evaluate(() => !!(window.HansenPkRoomUI && window.HansenPkRoom && window.HansenSbProfile && window.HansenCloudSave && window.HansenLadderUI)).catch(() => false);
+    return ok ? f : null;
+  }, { timeout: 45000, interval: 500 });
+  await t.ok(!!fr, '首页里的岛打开了（iframe 里的模块就绪）', () => explain());
+  if (fr) await fr.evaluate((nm) => { try { window.HansenSbProfile.setName(nm); } catch (e) { /* 起过 */ } return true; }, G.nick);
+  return fr;
+}
+const wrapHidden = (G) => G.eval(() => (document.getElementById('islandFrameWrap') || {}).style.display === 'none');
+/* 整个 App 切到后台 / 回到前台：首页和里面每一层 iframe 都会收到 visibilitychange */
+async function appHidden(G, hidden) {
+  const set = (h) => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (h ? 'hidden' : 'visible') });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => h });
+    document.dispatchEvent(new Event('visibilitychange'));
+    return true;
+  };
+  for (const f of G.page.frames()) { try { await f.evaluate(set, hidden); } catch (e) { /* 跨域 / 已卸载 */ } }
+}
+
+{
+  /* ══ ① 开一间、还没开好就按返回 ═══════════════════════════════════ */
+  await part('① 岛里「开一间 → 选玩法」，房还没开好就按手机返回键：房不许开出来（T1）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'rules', latencyMs: 40, jitterMs: 20, consistencyLagMs: 300 } });
+    names = {};
+    const G = await phone('首页', '小蜂首页', HOME);
+    const K = await phone('别人', '小蜂别人');
+    const fr = await openAnimalIsland(G);
+    if (!fr) return;
+    await fr.evaluate(() => { window.HansenPkRoomUI.open(); return true; });
+    await fr.locator('#prNew').tap();
+    const hold = emu.hold({ uid: G.uid, db: true, action: 'database.addDocument' });
+    await fr.locator('.pr_mode[data-mode="C"]').tap();
+    await H.sleep(500);
+    await G.page.goBack();
+    await H.sleep(800);
+    hold.release();
+    await H.sleep(5000);
+    const hidden = await wrapHidden(G);
+    const uiOn = await fr.evaluate(() => !!document.querySelector('#hsn_pkroom_screen.on')).catch(() => null);
+    const lr = await H.room(K, 'listRooms');
+    const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === G.nick));
+    await t.ok(hidden && uiOn === false, `按返回键：岛收起来了，藏起来的岛里也没有「等对手进来」（岛收起：${hidden}；房间层开着：${uiOn}）`, () => explain());
+    await t.ok(liveRooms(G).length === 0 && !listed, `云端没有开着的房、别人也列不到（开着 ${liveRooms(G).length} 间；别人列表里${listed ? '有' : '没有'}）`, () => explain());
+  });
+
+  /* ══ ② 天梯自己开房时按返回 ═══════════════════════════════════════ */
+  await part('② 岛里「天梯 → 开始排位」，自己开房「正在开房间…」时按返回键：房不许开出来（FX-2）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'rules', latencyMs: 40, jitterMs: 20, consistencyLagMs: 2000 } });
+    names = {};
+    const G = await phone('首页', '小蜂首页', HOME);
+    const K = await phone('别人', '小蜂别人');
+    const fr = await openAnimalIsland(G);
+    if (!fr) return;
+    await fr.evaluate(() => { window.HansenLadderUI.open(); return true; });
+    await fr.locator('#ldGo').tap();
+    const hold = emu.hold({ uid: G.uid, db: true, action: 'database.addDocument' });
+    const creating = await H.until(async () => {
+      const txt = await fr.evaluate(() => document.body.innerText).catch(() => '');
+      return /正在开房间/.test(txt) ? txt : null;
+    }, { timeout: 45000, interval: 300 });
+    await t.ok(!!creating, '没人可配：天梯自己开房「正在开房间…」', () => explain());
+    await G.page.goBack();
+    await H.sleep(800);
+    hold.release();
+    await H.sleep(6000);
+    const hidden = await wrapHidden(G);
+    const lr = await H.room(K, 'listRooms', { ladder: true });
+    const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === G.nick));
+    await t.ok(hidden, '按返回键：岛收起来了', () => explain());
+    await t.ok(liveRooms(G).length === 0 && !listed, `排位房没开出来（开着 ${liveRooms(G).length} 间；别人${listed ? '列得到' : '列不到'}）—— 以前藏起来的岛里开着一间排位房等人、别人被配进来跟空气打`, () => explain());
+  });
+
+  /* ══ ③ 学了东西、返回、切出 App ═══════════════════════════════════ */
+  await part('③ 岛里学了东西、8 秒内点返回、马上切出 App：传上云，只传一次；首页上改的也传（FX-3 / R2-2 / R2-1）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40, consistencyLagMs: 200 } });
+    names = {};
+    const G = await phone('首页', '小蜂首页', HOME);
+    const fr = await openAnimalIsland(G);
+    if (!fr) return;
+    await H.sleep(4000);   /* 登录 / 开岛时的那几次同步先做完 */
+    const n0 = writesBy(G.uid, 'hansen_saves').length;
+    await fr.evaluate(() => {
+      localStorage.setItem('wordIslandFood', JSON.stringify({ learned: [1, 2, 3, 4, 5, 6] }));
+      document.dispatchEvent(new Event('hsn-data-changed'));
+      return true;
+    });
+    await H.sleep(1500);
+    await G.page.goBack();               /* 8 秒的合并窗口还没到 */
+    await H.sleep(700);
+    await appHidden(G, true);
+    await H.sleep(6000);
+    const n1 = writesBy(G.uid, 'hansen_saves').length - n0;
+    await appHidden(G, false);
+    await t.ok(await wrapHidden(G), '回到了首页（岛藏起来了）', () => explain());
+    await t.ok(n1 === 1, `学了东西、点返回、切出 App：云存档传了 ${n1} 次（该是 1 次）—— 以前 0 次，这一局没上云`, () => explain());
+    /* 首页上改了进度（首页本身没有云存档模块，由藏起来的岛替它传） */
+    await H.sleep(1500);
+    const n2 = writesBy(G.uid, 'hansen_saves').length;
+    await G.eval(() => { localStorage.setItem('wordIslandFood', JSON.stringify({ learned: [1, 2, 3, 4, 5, 6, 7] })); return true; });
+    await appHidden(G, true);
+    await H.sleep(5000);
+    const n3 = writesBy(G.uid, 'hansen_saves').length - n2;
+    await appHidden(G, false);
+    await t.ok(n3 === 1, `在首页上改了进度再切出 App：传了 ${n3} 次（该是 1 次）`, () => explain());
+    /* 没改东西再切一次：不传（审查 SE-4 省下的配额还在） */
+    await H.sleep(1500);
+    const n4 = writesBy(G.uid, 'hansen_saves').length;
+    await appHidden(G, true);
+    await H.sleep(4000);
+    const n5 = writesBy(G.uid, 'hansen_saves').length - n4;
+    await appHidden(G, false);
+    await t.ok(n5 === 0, `什么都没改再切出去：一次也不传（传了 ${n5} 次）`, () => explain());
+  });
+
+  /* ══ ④ 去过岛以后的首页：不预取不存在的文件 ═════════════════════════ */
+  await part('④ 去过岛以后再打开首页：不再预取 island_wordIslandAnimal.html（R2-6）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const G = await phone('首页', '小蜂首页', HOME, false);
+    const fr = await openAnimalIsland(G);
+    if (!fr) return;
+    await G.page.goBack();
+    await H.sleep(800);
+    const last = await G.eval(() => localStorage.getItem('lastIslandKey'));
+    const m0 = srv.missing.length;
+    await G.page.reload({ waitUntil: 'domcontentloaded' });
+    await H.sleep(7000);
+    const bad = srv.missing.slice(m0).filter((p) => /island_/.test(p));
+    await t.ok(!!last, `首页记下了最近去的岛（${last}）`, () => explain());
+    await t.ok(!bad.length, `重新打开首页：没有去拿不存在的岛文件（404：${bad.join(', ') || '没有'}）`, () => explain());
+  });
+
+  /* ══ ⑤ 岛上的拼写大PK首页：段位和胜率 ═══════════════════════════════ */
+  await part('⑤ 岛上的「拼写大PK」首页：打过排位以后显示真的段位分和胜率（R2-UI-11）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const I = await phone('岛屿页', '小蜂岛', { path: '/island_animal.html' }, false);
+    await I.eval(() => { localStorage.setItem('hansen_pk_record_v1', JSON.stringify({ rating: 1095, peakRating: 1095, placementGames: 4, wins: 4, losses: 0, draws: 0, history: [] })); return true; });
+    const lad = await I.eval(() => { const s = window.HansenPkRecord.summary(); return { rating: s.rating, placed: s.placed, total: s.total, wins: s.wins }; });
+    await H.dismissIslandWelcome(I);
+    await I.tap('.mode-card[onclick*="openSpellPK"]');
+    const pk = await I.waitScreen(/拼写大PK/, { timeout: 8000 }).catch((e) => e.lastText || '');
+    await t.ok(lad && lad.placed && lad.total === 4, `战绩里是 4 胜、1095 分、已定级（${JSON.stringify(lad)}）`, () => explain());
+    await t.ok(has(pk, /1095\s*分/) && !has(pk, /未定级/), `拼写大PK首页的身份条显示「1095 分」，不是「未定级」（看到：${flat(pk).slice(0, 120)}）`, () => explain());
+    await t.ok(has(pk, /100%/), `「我的战绩」里胜率是 100%，不是「—」（看到：${(flat(pk).match(/我的战绩.{0,80}/) || [''])[0]}）`, () => explain());
+  });
+}
+t.summary();
+for (const p of live) { try { await p.close(); } catch (e) { /* 已关 */ } }
+srv.close();
+await browser.close();
+process.exit(t.failed ? 1 : 0);

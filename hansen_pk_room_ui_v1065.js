@@ -303,7 +303,7 @@
       ? '<div style="margin-top:8px;font-size:11px;opacity:.75;word-break:break-all">技术信息：'
         + esc(raw.slice(0, 130)) + '</div>'
       : '';
-    var tip = (k === 'config') ? '<br>这不是你的问题，把这一屏截图发给负责的老师就好。' : '';
+    var tip = (k === 'config' && !(r && r.dbblocked)) ? '<br>这不是你的问题，把这一屏截图发给负责的老师就好。' : '';
     var btn = !expired ? ''
       : legacy ? '<button class="pr_btn pr_btn2" id="prLogin" data-legacy="1">📱 用手机号注册</button>'
       : never ? '<button class="pr_btn pr_btn2" id="prLogin">🔐 去登录</button>'
@@ -475,9 +475,29 @@
       if (seq !== _lobbySeq) return null;
       if (d.verdict === 'ok' && d.result && d.result.ok) return d.result;
       if (d.verdict === 'expired') return { ok: false, kind: 'expired', expired: true, reason: '云端登录过期了，重新登录一次就能继续 ⟨' + (d.raw || 'unauthenticated') + '⟩' };
-      if (d.verdict === 'dbblocked') return { ok: false, kind: 'config', reason: d.text + ' ⟨' + rawOf(E(r)) + '⟩' };
+      if (d.verdict === 'dbblocked') return dbBlocked(d, r);
       return r;
     }, function () { return r; });
+  }
+
+  /* 开房 / 进房失败、说的是「网络」：同样先弄清楚是不是真断网（审查 R2-UI-8：数据库那边不让读写时，
+     开一间失败也说「连不上网络」）。这里只换说法 —— 开房 / 进房要孩子自己再点一次 */
+  function explainNet(r) {
+    var A = window.HansenAuth;
+    if (!A || typeof A.diagnose !== 'function' || kindOf(r) !== 'network') return Promise.resolve(r);
+    var d0 = Promise.resolve().then(function () { return A.diagnose([kindOf(r)], function () { return S().listRooms(); }); });
+    /* 最多看 15 秒：看不出来就照原话说，别让「正在开房…」一直挂着 */
+    var cap = new Promise(function (z) { setTimeout(function () { z(null); }, 15000); });
+    return Promise.race([d0, cap]).then(function (d) {
+      if (d && d.verdict === 'expired') return { ok: false, kind: 'expired', expired: true, reason: '云端登录过期了，重新登录一次就能继续 ⟨' + (d.raw || 'unauthenticated') + '⟩' };
+      if (d && d.verdict === 'dbblocked') return dbBlocked(d, r);
+      return r;
+    }, function () { return r; });
+  }
+  /* 「云端连得上，但数据库这次没让读写」：话里自己说了「截图发给老师」，列表这一屏的重试按钮叫「🔄 刷新」 */
+  function dbBlocked(d, r) {
+    return { ok: false, kind: 'config', dbblocked: true,
+             reason: String(d.text || '').replace(/「再试一次」/g, '「🔄 刷新」') + ' ⟨' + rawOf(E(r)) + '⟩' };
   }
 
   function refresh(auto) {
@@ -802,12 +822,18 @@
         return;
       }
       if (_createCap) { clearTimeout(_createCap); _createCap = null; }
-      _createBusy = false;
-      if (r && r.cancelled) return;
+      if (r && r.cancelled) { _createBusy = false; return; }
       if (!r || !r.ok) {
-        if (lad) { ladderFail(cfg, r || { ok: false, reason: '房没开成' }); return; }
-        lobby(r); return;
+        if (lad) { _createBusy = false; ladderFail(cfg, r || { ok: false, reason: '房没开成' }); return; }
+        /* 先弄清是不是真断网再说（「正在开房…」和「取消」留着，取消照样作废这一次） */
+        explainNet(r).then(function (x) {
+          if (seq !== _createSeq) return;
+          _createBusy = false;
+          lobby(x);
+        });
+        return;
       }
+      _createBusy = false;
       /* v1163: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」 */
       _state = { roomId: r.roomId, words: r.words, isHost: true, ladder: lad,
                  mode: (r.room && r.room.mode) || cfg.mode || 'C',
@@ -1097,8 +1123,12 @@
         if (lad) { ladderFail(cfg, r); return; }
         _fromLadder = false;
         if (r.cancelled) { lobby(); return; }
-        /* 🔴v1154：进不去要说人话，不能默默甩回列表 —— 列表顶上说原因，下面是刷新过的房间 */
-        lobby(r);
+        /* 🔴v1154：进不去要说人话，不能默默甩回列表 —— 列表顶上说原因，下面是刷新过的房间
+           （说「网络」之前先弄清是不是真断网，审查 R2-UI-8） */
+        explainNet(r).then(function (x) {
+          if (my !== _joinSeq) return;
+          lobby(x);
+        });
         return;
       }
       _fromLadder = false;
@@ -2122,13 +2152,14 @@
           /* 对手答完了这一词，或者这一词已经有人拼对了（抢答赛：对手在我超时后拼对的） */
           var oa = Number(r.oppAns);
           if (isFinite(oa)) st.oppAns = Math.max(st.oppAns == null ? -1 : st.oppAns, oa);
-          if (oa >= idx) { go(); return; }
           if (!M.waitAll && (r.winners || [])[idx]) {
             /* 🔴审查 R2-UI-10：我超时以后对手拼对了这一词 —— 他那边要停 2.1 秒才进下一词；
-               我以前一看到就马上开下一词，每次都比他早开拼 1 秒多。和「对手抢先了」那条路一样停 1.4 秒 */
+               我以前一看到就马上开下一词，每次都比他早开拼 1 秒多。和「对手抢先了」那条路一样停 1.4 秒。
+               ⚠️ 要先看这一条：对手拼对时也记了「我答完第 i 词」，先看「答完了」就又马上翻篇了 */
             if (!rt._oppWonAt) { rt._oppWonAt = Date.now(); setTimeout(go, 1400); }
             return;
           }
+          if (oa >= idx) { go(); return; }
         }
         setTimeout(poll, 900);
       }, function () { setTimeout(poll, 900); });
@@ -2403,7 +2434,9 @@
   function bgSettle(st) {
     if (!st || !st.roomId || st.roomId === 'test' || st._bg) return;
     st._bg = true;
-    var score = Number(st.finalScore != null ? st.finalScore : st.myScore) || 0;
+    /* 每次都按这一刻的分交（最后一词「结果待定」后来补上了的话，交的就是补上以后的分） */
+    var scoreNow = function () { return Number(st.finalScore != null ? st.finalScore : st.myScore) || 0; };
+    var score = scoreNow();
     var t0 = Date.now(), n = 0, fin = false;
     var done = function (r) {
       if (fin || !r) return;
@@ -2420,6 +2453,7 @@
     var step = function () {
       if (fin || Date.now() - t0 > 6 * 60000) return;
       n++;
+      score = scoreNow();
       S().reportResult(st.roomId, score).then(function (r) {
         if (r && r.ok && !r.waiting) { done(r); return; }
         if (!(r && r.ok && r.waiting) || n % 8 !== 0) { next(4000); return; }
