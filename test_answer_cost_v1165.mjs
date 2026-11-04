@@ -9,6 +9,15 @@
  *      用「解析超过 20KB 的字符串次数 ÷ 3」近似 —— 旧 readStore 每次解析 main + _bak + 合并时的副本共 3 份）
  *   2. 点选项那一下的主线程处理时间（Event Timing：click 的 processingEnd - processingStart）中位数 ≤ 120ms
  *   3. 岛单独打开、在首页外壳 iframe 里打开，两种都要过
+ *   4. （v1165 复查 TEST-01）每一题从点下去到下一题出来，这中间主线程最长的一段（PerformanceObserver 'longtask'）：
+ *      10 题里最多 1 题超过 200ms（测试机忙的时候偶尔抖一下），而且没有一题超过 300ms。
+ *      （实测：现在单独打开最卡 103~138ms、外壳里 165~197ms，负载 4.5 的测试机上偶尔有一题 254ms；
+ *       v1163 是 10 题里 8 题超 200ms、最卡 531 / 609ms；云存档自动同步不挡时 2~6 题超 200ms、最卡 341 / 449ms —— 都过不了）
+ *      只看点击处理的中位数，看不见点完以后才跑的活（存档防抖、下一题准备），也看不见最卡的那一题
+ *      （复查实测：点击处理 83~202ms 都算过，可同一题里有 253~573ms 的长任务）。
+ *   ⚠️ 对战/登录组的 hansen_cloud_save_v965.js 收到 'hsn-data-changed' 后最多 8 秒整份导出一次备份（没登录、没开云存档也导出，
+ *      4 倍慢 CPU 下 250~570ms，deferred_battle-01，还没修）。这条上限只管我们自己的代码，所以夹具里先把这个监听挡掉；
+ *      对战组修好以后去掉 BLOCK_AUTOSYNC。
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -37,6 +46,10 @@ const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? 
 
 /* 每个页面框都装：大字符串 JSON.parse 计数 + Event Timing（click 处理时间） */
 const PROBE = () => {
+  try {
+    window.__lt = [];
+    new PerformanceObserver(l => { for (const e of l.getEntries()) window.__lt.push({ t: e.startTime, d: e.duration }); }).observe({ type: 'longtask', buffered: true });
+  } catch (e) {}
   try {
     const orig = JSON.parse; window.__bigParse = 0;
     JSON.parse = function (s) { if (typeof s === 'string' && s.length > 20000) window.__bigParse++; return orig.apply(this, arguments); };
@@ -93,12 +106,22 @@ async function buildHeavyFixture() {
   return seed;
 }
 
+/* 见文件头 ⚠️：只挡云存档的「数据一变就排队上传」监听，别的监听照常 */
+const BLOCK_AUTOSYNC = () => {
+  try {
+    const add = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (type) { if (type === 'hsn-data-changed') return; return add.apply(this, arguments); };
+  } catch (e) {}
+};
+const LONG_SOFT = 200, LONG_HARD = 300;   /* 见文件头 4.：最多 1 题超过 200ms，没有一题超过 300ms */
+
 async function runCase(label, shell, seedAll) {
   console.log(`\n▶ ${label}`);
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
   await ctx.route('**/*', r => r.request().url().startsWith(BASE) ? r.continue() : r.abort());
   await ctx.addInitScript(seed => { try { if (!sessionStorage.getItem('__s')) { localStorage.clear(); for (const k in seed) localStorage.setItem(k, seed[k]); sessionStorage.setItem('__s', '1'); } } catch (e) {} }, seedAll);
   await ctx.addInitScript(PROBE);
+  await ctx.addInitScript(BLOCK_AUTOSYNC);
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(String(e.message).slice(0, 160)));
   page.on('dialog', d => d.dismiss().catch(() => {}));
@@ -139,11 +162,11 @@ async function runCase(label, shell, seedAll) {
 
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   const WRONG = new Set([2, 5, 8]);
-  const handler = [], rebuilds = [];
+  const handler = [], rebuilds = [], longest = [];
   for (let n = 0; n < 10; n++) {
     await F.waitForFunction(() => typeof listenQ !== 'undefined' && listenQ && !listenQ.answered && document.querySelectorAll('#listenScreen .boss-opt').length === 4 && !document.getElementById('hml_lesson'), null, { timeout: 20000 });
     await page.waitForTimeout(350);
-    const before = await F.evaluate(() => ({ big: window.__bigParse, rb: (window.HansenCanonical && HansenCanonical._perf) ? HansenCanonical._perf().rebuilds : null, evt: window.__evt.length, total: listenTotal, q: listenQ.idx }));
+    const before = await F.evaluate(() => ({ big: window.__bigParse, rb: (window.HansenCanonical && HansenCanonical._perf) ? HansenCanonical._perf().rebuilds : null, evt: window.__evt.length, total: listenTotal, q: listenQ.idx, now: performance.now() }));
     const pick = await F.evaluate(wrong => listenQ.opts.findIndex(o => wrong ? o.cn !== listenQ.word.cn : o.cn === listenQ.word.cn), WRONG.has(n));
     const tapped = await tapIn(`#listenScreen .listen-opts .boss-opt:nth-child(${pick + 1})`);
     if (!tapped) { ok(false, `第 ${n + 1} 题选项点不到`); break; }
@@ -154,7 +177,10 @@ async function runCase(label, shell, seedAll) {
     }
     await F.waitForFunction(q => typeof listenQ !== 'undefined' && listenQ && (listenQ.idx !== q || !listenQ.answered) && !document.getElementById('hml_lesson'), before.q, { timeout: 20000 }).catch(() => {});
     await page.waitForTimeout(400);
-    const after = await F.evaluate(() => ({ big: window.__bigParse, rb: (window.HansenCanonical && HansenCanonical._perf) ? HansenCanonical._perf().rebuilds : null, evt: window.__evt.slice(), total: listenTotal }));
+    const after = await F.evaluate(() => ({ big: window.__bigParse, rb: (window.HansenCanonical && HansenCanonical._perf) ? HansenCanonical._perf().rebuilds : null, evt: window.__evt.slice(), total: listenTotal, now: performance.now(), lt: window.__lt.slice() }));
+    /* 这一题（点下去 → 下一题出来 + 400ms）里主线程最长的一段 */
+    const lts = after.lt.filter(e => e.t >= before.now && e.t <= after.now).map(e => e.d);
+    longest.push(+(lts.length ? Math.max(...lts) : 0).toFixed(1));
     const clicks = after.evt.slice(before.evt).filter(e => e.pe - e.ps > 0);
     const ms = clicks.length ? Math.max(...clicks.map(e => e.pe - e.ps)) : 0;   // 没进 Event Timing（<16ms）就记 0
     handler.push(+ms.toFixed(1));
@@ -165,9 +191,12 @@ async function runCase(label, shell, seedAll) {
   const avgRb = rebuilds.reduce((a, b) => a + b, 0) / Math.max(1, rebuilds.length);
   console.log(`    每题点击处理 ms: ${handler.join(', ')}`);
   console.log(`    每题账本重建: ${rebuilds.map(x => +x.toFixed(2)).join(', ')}`);
+  console.log(`    每题最长主线程任务 ms: ${longest.join(', ')}`);
   ok(rebuilds.length === 10 && avgRb <= 1, `平均每题整份账本重建 ≤ 1 次（实测 ${avgRb.toFixed(2)}）`);
   const med = median(handler);
   ok(handler.length === 10 && med <= 120, `4 倍慢 CPU：点选项的主线程处理中位数 ≤ 120ms（实测 ${med.toFixed(1)}ms）`);
+  const worst = longest.length ? Math.max(...longest) : NaN, over = longest.filter(x => x > LONG_SOFT).length;
+  ok(longest.length === 10 && over <= 1 && worst <= LONG_HARD, `4 倍慢 CPU：每一题从点下去到下一题出来，主线程最长一段：超过 ${LONG_SOFT}ms 的 ${over} 题（最多 1 题）、最卡那题 ${worst}ms（≤ ${LONG_HARD}ms）`);
   ok(errs.length === 0, `页面无报错 ${errs.slice(0, 2).join(' | ')}`);
   await ctx.close();
   return { med, avgRb };
