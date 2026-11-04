@@ -80,5 +80,36 @@ def repeat():
     return emit(out, ok)
 
 
+def soak():
+    import re
+    base = {}
+    for f in glob.glob('logs/*/soak_baseline.json'):
+        base = {k: v for k, v in json.load(open(f, encoding='utf-8')).items() if not k.startswith('_')}
+        break
+    rows, ok, seen = [], bool(base), set()
+    for f in sorted(glob.glob('logs/*/soak_*.txt')):
+        line = open(f, encoding='utf-8').read().strip()
+        m = re.search(r'profile=(\w+) runs=(\d+).*?failing_runs=(\d+) clusters=(\d+) \(fail-level (\d+)\).*?real=(\d+)s', line)
+        if not m:
+            continue
+        p, runs, failing, _, lvl, real = m.groups()
+        seen.add(p)
+        cap = base.get(p)
+        good = cap is not None and int(lvl) <= cap
+        ok = ok and good
+        note = '✅' if good else '❌ 超过上限'
+        if good and cap is not None and int(lvl) < cap:
+            note = '✅ 比上限还少 —— 可以把上限改小'
+        rows.append('| %s | %s | %s | %s | %s | %ss | %s |' % (p, runs, failing, lvl, cap, real, note))
+    missing = sorted(set(base) - seen)
+    if missing:
+        ok = False
+    out = ['## ' + ('✅ 联机压力测试通过' if ok else '❌ 联机压力测试没通过'), '',
+           '| 场景 | 局数 | 出问题的局 | 高/中问题簇 | 上限 | 用时 | 结论 |', '|---|---|---|---|---|---|---|'] + rows
+    if missing:
+        out += ['', '没交回结果的场景：' + '、'.join(missing)]
+    return emit(out, ok)
+
+
 if __name__ == '__main__':
-    sys.exit({'tests': tests, 'repeat': repeat}[sys.argv[1]]())
+    sys.exit({'tests': tests, 'repeat': repeat, 'soak': soak}[sys.argv[1]]())

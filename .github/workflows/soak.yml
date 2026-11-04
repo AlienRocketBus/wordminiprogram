@@ -1,0 +1,50 @@
+# 联机压力测试：随机模拟 6904 局联机对战（10 种场景：网络延迟、丢包、断网、手机时间不准、捣乱的对手……），
+# 10 台机器同时跑，每种场景一台。以前在沙盒里一台机器串行跑要 15 分钟左右，还占着 AI 的工作机。
+# 判定：每种场景的「高/中」问题簇不许超过 .github/soak_baseline.json 里的上限（只许减少）。
+# 怎么跑：提交说明以 [压力测试] 开头；或 Actions 页手动点。说明见 攻坚笔记/v1164/联机压力测试_fuzz.md。
+name: 联机压力测试
+
+on:
+  push:
+    branches: ['claude/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  soak:
+    name: 场景 ${{ matrix.profile }}
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[压力测试]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [clean, ci, lag, faults, skew, ladder, adversary, disrupt, chaos, sweep]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: 跑这一种场景（结果由「结论」统一判定，每次运行只发一条通知）
+        env: { P: '${{ matrix.profile }}' }
+        run: |
+          mkdir -p .siphon
+          cp .github/scripts/siphon_summary.py .github/soak_baseline.json .siphon/
+          node "攻坚笔记/v1164-v1166_工具与记录/scratchpad/soak/fuzz.mjs" "$GITHUB_WORKSPACE" --profile "$P" --no-shrink --quiet --out "soak_out/$P" > ".siphon/soak_$P.log" 2>&1 || true
+          grep '^SUMMARY' ".siphon/soak_$P.log" | tail -1 > ".siphon/soak_$P.txt" || true
+          tail -c 300000 ".siphon/soak_$P.log" > ".siphon/soak_$P.tail.log"; rm -f ".siphon/soak_$P.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: 'soak-${{ matrix.profile }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
+
+  summary:
+    name: 结论
+    needs: soak
+    if: always() && needs.soak.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'soak-*', path: logs }
+      - name: 汇总成一张表
+        run: python3 logs/soak-ci/siphon_summary.py soak
