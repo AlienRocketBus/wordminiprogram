@@ -661,6 +661,19 @@
     if (!opts.allowEmpty && !localHasAnyProgress()) {
       return Promise.resolve({ ok:false, reason:'local-empty-refuse-upload' });
     }
+    /* 🔴审查 R2-3 / R2-4：登录对账还没做完、或者没做成，就**不许上传** ——
+         · 正在登录 / 对账（慢网下要好几秒）：换账号时数据一变就排的那次上传，会把上一个人留在本机的进度传进新账号；
+         · 本机这份进度的主人是别的账号：同上；
+         · 登录时没读到云端（网断了一下）：本机这几个词会把云端几十个词整个盖掉 ——
+           登录面板还说着「稍后会自动重试」。重试（账号模块在打开页面、切回来、网通了时做）成功之前一律不传。
+       只有对账自己（reconciled）能传。 */
+    if (!opts.reconciled) {
+      try {
+        var A0 = window.HansenAuth;
+        var gate = (A0 && typeof A0.uploadGate === 'function') ? A0.uploadGate() : null;
+        if (gate && gate.ok === false) return Promise.resolve({ ok:false, reason: gate.reason });
+      } catch (eG) {}
+    }
     var h = syncHash(code);
     /* 内容未变→无条件跳过(force 只绕过冷却,不制造重复流量) */
     /* 🔴v1039 关键修复：原判据只看"内容有没有变"，**连 force 也照样跳过**，
@@ -876,9 +889,13 @@
          内容没变就跳过、藏起来的预热页面不传。 */
       var _pending = null, _firstAt = 0;
       var flush = function () {
+        /* 🔴审查 R2-2 / FX-3：这一层已经排着一次上传（是它还显示着时排的）—— 藏起来了也照传。
+           以前先把排着的那次取消、再因为「藏起来了」不传：孩子打完一局点返回、8 秒内切出 App，那一局就没上云。
+           从来没排过的藏起来的预热页面照旧不传（审查 SE-4 省下的配额还在）。 */
+        var had = !!_pending;
         if (_pending) { clearTimeout(_pending); _pending = null; }
         _firstAt = 0;
-        if (!frameShown()) return;
+        if (!had && !frameShown()) return;
         syncNow({force:true});
       };
       document.addEventListener('visibilitychange', function(){ if(document.hidden) flush(); });
@@ -967,7 +984,9 @@
       kEl.onkeydown = function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); reveal(); } };
       document.getElementById('hsnCloudSync').onclick = function(){
         msg('同步中…');
-        syncNow({force:true}).then(function(r){
+        /* 🔴审查 FX-7 / R2-4：「立即同步」是孩子 / 老师自己点的 —— 内容没变也真写一次（rewrite）：
+           别的设备刚把云端盖掉、或者云端那条被删了，这一下就是要把这台的传上去 */
+        syncNow({force:true, rewrite:true}).then(function(r){
           if(r.ok) msg(r.skipped ? '内容没变化，无需上传 ✅' : '已上云 ✅', true);
           else msg(r.reason==='not-configured' ? '云端待开通（见指南）' : ('同步失败：'+(r.error||r.reason)), false);
         });
@@ -1110,6 +1129,9 @@
       var st = readState();
       return { lastHash: st.lastHash || '', lastDocId: st.lastDocId || '', lastIv: st.lastIv || '', lastUpAt: st.lastUpAt || 0 };
     },
+    /* 审查 R2-3：登录时没对上账（读不到云端 / 恢复失败）的账号 —— 对上之前不许上传 */
+    reconcileState: function(){ return String(readState().notReconciled || ''); },
+    setReconcileState: function(uid){ writeState({ notReconciled: uid ? String(uid) : '' }); },
     localHash: function(){
       try { return (window.HansenBackup && typeof HansenBackup.exportCode === 'function') ? syncHash(HansenBackup.exportCode()) : ''; }
       catch(e){ return ''; }

@@ -54,11 +54,15 @@
   }
 
   var mode = 'phone';   /* phone | password */
+  /* 🔴审查 R2-UI-7 / R2-5：「重新登录」要直接给登录表单 —— 以前本机还记着「已登录」（云端其实不认了），
+     打开的是「👤 已登录」面板，没有表单，孩子卡死在那儿。relogin 时不管本机记录，直接给表单；登成功了就照常。
+     legacy：旧版本「用户名注册」的账号（云端从来没有），去手机号注册那一页，并说清原因。 */
+  var _relogin = null;   /* null | { legacy } */
 
   function html() {
     var A = window.HansenAuth;
     var signed = A && A.isSignedIn && A.isSignedIn();
-    if (signed) {
+    if (signed && !_relogin) {
       var lc = A.readLocal();
       return '<div class="au_card"><div class="au_hd"><span class="au_t">👤 已登录</span>'
         + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
@@ -69,8 +73,16 @@
         + '<button class="au_skip" id="auOut">退出登录</button>'
         + '<div class="au_msg" id="auMsg"></div></div>';
     }
-    var h = '<div class="au_card"><div class="au_hd"><span class="au_t">🔐 登录 / 注册</span>'
+    var h = '<div class="au_card"><div class="au_hd"><span class="au_t">'
+      + (_relogin ? (_relogin.legacy ? '📱 用手机号注册' : '🔑 重新登录') : '🔐 登录 / 注册') + '</span>'
       + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
+      + (_relogin
+          ? '<div class="au_tip" style="opacity:.92;font-size:12.5px;margin:-4px 0 12px">'
+            + (_relogin.legacy
+                ? '以前版本的「用户名注册」其实没能在云端建好账号，不是你的错。用手机号注册一下就好（家长的手机号也可以），这台手机上的进度会自动带过去。'
+                : '云端登录过期了，重新登录一次就好 —— 这台手机上的进度不会丢。')
+            + '</div>'
+          : '')
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone">手机号</button>'
       + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">用户名登录</button>'
@@ -194,6 +206,7 @@
         if (s && s.autoPicked === 'cloud') {
           syncTxt = '，已自动取回云端进度（' + (s.cloudWords || 0) + ' 个单词）';
         }
+        _relogin = null;
         msg('登录成功！' + idTxt + syncTxt, 'ok');
         /* 🔴v1026: 恢复成功后必须重新加载页面, 否则内存里仍是旧数据,
            用户会看到"什么都没变", 且下一次存档会把恢复的进度覆盖掉 */
@@ -262,7 +275,7 @@
       var btn = this; btn.disabled = true; msg('正在上传…');
       A.pushSave().then(function (r) {
         if (r && r.ok) msg('已存到云端。换设备登录同一账号即可找回。', 'ok');
-        else msg('上传没成功：' + ((r && r.reason) || '未知原因'), 'err');
+        else msg('上传没成功：' + pushWhy(r), 'err');
         btn.disabled = false;
       }).catch(function (e) { msg(A.friendly(e), 'err'); btn.disabled = false; });
     };
@@ -272,6 +285,28 @@
   }
 
   function pad(n) { var s = String(n); while (s.length < 3) s = '0' + s; return s; }
+
+  /* 🔴审查 R2-6：上传没成功的原因要说人话（以前直接印「local-empty-refuse-upload」「upload-failed」这种内部代号）——
+     说清为什么、怎么办；数据层已经写好的人话（r.error）原样给 */
+  var PUSH_WHY = {
+    'local-empty-refuse-upload': '这台手机上还没有学会的单词，先玩一会儿再存',
+    'restoring-refuse-upload': '正在从云端取回进度，等几秒再点',
+    'not-configured': '云端还没开通，暂时存不了',
+    'cloudsave-unavailable': '云存档还没加载好，刷新一下页面再试',
+    'busy': '正在上传，等几秒再点',
+    'cooldown': '刚刚才存过，等一会儿再点',
+    'not-enabled': '云存档还没开启，先登录一次',
+    'backup-unavailable': '本机的进度读不出来，刷新一下页面再试',
+    'export-failed': '本机的进度读不出来，刷新一下页面再试',
+    'reconciling': '正在和云端对账，等几秒再点',
+    'not-reconciled': '刚才没读到云端的存档，先不上传（免得把云端的进度盖掉）—— 网好了会自动再对一次，等一会儿再点',
+    'owner-mismatch': '这台手机上的进度是另一个账号的，不能存进这个账号'
+  };
+  function pushWhy(r) {
+    var why = (r && r.reason) || '';
+    if (why === 'upload-failed') return (r && r.error) || '网络不太顺，等会儿再点一次';
+    return PUSH_WHY[why] || (r && r.error) || why || '原因不明，等会儿再点一次';
+  }
 
   function notify() {
     try { document.dispatchEvent(new CustomEvent('hsn-auth-changed')); } catch (e) {}
@@ -352,13 +387,16 @@
     bind();
   }
 
-  /* opts.mode：'phone' | 'password'，比如注册门槛要直接打开手机号那一页 */
+  /* opts.mode：'phone' | 'password'，比如注册门槛要直接打开手机号那一页；
+     opts.relogin：直接给登录表单（本机还记着「已登录」也一样）；opts.legacy：旧版本用户名注册的账号 */
   function open(opts) {
     if (!window.HansenAuth || !HansenAuth.ready()) {
       alert('云服务还没配置好，暂时不能登录。');
       return;
     }
     if (opts && (opts.mode === 'phone' || opts.mode === 'password')) mode = opts.mode;
+    _relogin = (opts && opts.relogin) ? { legacy: !!opts.legacy } : null;
+    if (_relogin && _relogin.legacy) mode = 'phone';
     render();
     host().classList.add('on');
   }
@@ -366,6 +404,7 @@
     var el = document.getElementById(ID);
     if (el) el.classList.remove('on');
     if (_tick) { clearInterval(_tick); _tick = null; }
+    _relogin = null;
   }
 
   window.HansenAuthUI = { open: open, close: close, _render: render };

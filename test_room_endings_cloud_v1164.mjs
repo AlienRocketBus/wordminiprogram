@@ -33,7 +33,8 @@ async function phone(name, nick) {
   await p.eval((nm) => { try { window.HansenSbProfile.setName(nm); } catch (e) { /* 起过名了 */ } return true; }, nick);
   return p;
 }
-async function closeAll() { for (const p of live) await p.close(); live.length = 0; }
+/* 审查 T8：每一段关手机之前都看一眼页面报错 / 外网（以前只有 ⑤ 看 —— opponentGone 每次都抛错，这个测试照样 49/0） */
+async function closeAll() { await H.cleanPhones(t, live); for (const p of live) await p.close(); live.length = 0; }
 async function seeRoom(p, rid, ms = 20000) {
   return H.until(async () => { const lr = await H.room(p, 'listRooms'); return lr && lr.ok && lr.rooms.some((x) => x._id === rid) ? lr : null; }, { timeout: ms, interval: 700 });
 }
@@ -208,11 +209,20 @@ try {
     const A = await phone('房主', '小蜂房主'), B = await phone('客人', '小蜂客人');
     const rid = await pairUp(A, B, 'A');
     await H.sleep(3000);
+    const tAbandon = Date.now();
     await H.room(A, 'claimAbandonWin', rid);
     const seen = await H.until(async () => { const x = await H.room(B, 'roundState', rid); return x && x.ok && x.abandonWin === 'host' ? x : null; }, { timeout: 10000 });
     await t.ok(seen, `客人读到了「判给房主」（${seen && seen.abandonWin}）`, () => explain());
-    /* 之后的读都落到一个落后 2 秒以上的副本上（判离场之前的样子） */
-    emu.knobs.consistencyLagMs = 30000;
+    /* 之后的读都落到一个**停在判离场之前**的旧副本上（审查 T3：以前用 30 秒延迟 —— 10 秒前才建的房干脆读不到，
+       测的是「房没了」而不是「旧快照」；把「判离场的结论只进不退」拿掉，这一段照样绿） */
+    emu.knobs.consistencyLagMs = () => Date.now() - (tAbandon - 1500);
+    const raw = await B.eval(async (rid) => {
+      const app = await window.HansenAuth._app();
+      const r = await app.database().collection('hansen_pk_rooms').doc(rid).get();
+      const d = r && r.data && r.data[0];
+      return d ? { status: d.status, abandonWin: d.abandonWin || '' } : null;
+    }, rid);
+    await t.ok(raw && raw.status === 'playing' && !raw.abandonWin, `现在读到的确实是判离场之前的旧样子（${JSON.stringify(raw)}）`, () => explain());
     const rr = await H.room(B, 'reportResult', rid, 500);
     await t.ok(rr && rr.ok && rr.result === 'lose' && rr.byAbandon, `交卷：还是「判给了对手」，没有倒回去变成 500:1 赢（${JSON.stringify(rr)}）`, () => explain());
     emu.knobs.consistencyLagMs = 200;

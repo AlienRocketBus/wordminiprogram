@@ -4156,15 +4156,31 @@ document.querySelectorAll('.island').forEach(el=>{
   }
   function _endIslandOnline(){
     var o = _islandOnline(); if(!o || !o.w) return;
-    try{ if(o.room && (o.room.on || o.room.joining)) o.w.HansenPkRoomUI.close(); }catch(e){}
+    /* 🔴审查 T1/R2-UI-1: 正在开房(creating)也要收 —— 开房那一下还在路上时按返回键, 以前房照样开出来、在藏起来的岛里等人 */
+    try{ if(o.room && (o.room.on || o.room.joining || o.room.creating)) o.w.HansenPkRoomUI.close(); }catch(e){}
     try{ if(o.ladder && o.w.HansenLadderUI) o.w.HansenLadderUI.close(); }catch(e){}
   }
+  /* 🔴审查 R2-2/FX-3: 首页外壳自己没有云存档模块 —— 由保活的岛(藏起来的 iframe)替它上传。
+     岛里刚排着的那次上传、孩子在首页改的东西(商店、签到…), 收起岛时和切出 App / 关页面时都要传上去
+     (以前: 打完一局点返回、8 秒内切出 App, 那一局就没上云)。岛里的云存档"内容没变就跳过", 所以这里最多多传一次。 */
+  function _flushCloudFromIsland(){
+    try{
+      var f = document.getElementById('islandFrame'), w = f && f.contentWindow;
+      var CS = w && w.HansenCloudSave;
+      if(CS && typeof CS.syncNow === 'function') CS.syncNow({ force:true });
+    }catch(e){}
+  }
+  try{
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) _flushCloudFromIsland(); });
+    window.addEventListener('pagehide', _flushCloudFromIsland);
+  }catch(e){}
   function _closeIslandNow(){
     _islandPending = null;  /* 取消任何"换岛加载途中待显示"的岛(用户在新岛就绪前就返回了) */
     _hideIslandLoading();
     var wrap = document.getElementById('islandFrameWrap');
     if(!wrap || wrap.style.display === 'none') return;
     _endIslandOnline();
+    _flushCloudFromIsland();
     wrap.style.display = 'none';
     try{ document.body.style.overflow = ''; }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */

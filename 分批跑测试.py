@@ -71,10 +71,12 @@ def fingerprint():
             h.update(open(f, 'rb').read())
         except Exception:
             pass
+    # 🔴v1164（审查 T9）：HTML 读内容，不只看大小 —— 手改的 index.html / spelling_pk.html 改一个字符、大小不变，
+    #   以前旧结果照样作数。必须和 jarvis_gate.py 的 _fingerprint() 完全一致。
     for f in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
         try:
             h.update(os.path.basename(f).encode())
-            h.update(str(os.path.getsize(f)).encode())
+            h.update(open(f, 'rb').read())
         except Exception:
             pass
     return h.hexdigest()[:16]

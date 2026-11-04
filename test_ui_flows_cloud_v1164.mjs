@@ -275,6 +275,7 @@ async function setHidden(p, hidden) {
   } catch (e) {
     await t.ok(false, '这一段测试脚本自己出错：' + String(e && e.stack || e).slice(0, 400), () => explain());
   }
+  await H.cleanPhones(t, live);   /* 审查 T8：⑨ 以前关手机之前不看页面报错 */
   for (const p of live) { try { await p.close(); } catch (e2) { /* 已关 */ } }
   live.length = 0;
 }

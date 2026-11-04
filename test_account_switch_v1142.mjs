@@ -76,15 +76,36 @@ function boot(init) {
   ok(p.cid === 0 && p.cidLocked === false, '★ 重置后没有号（等下次登录云端发）');
   ok(p.name === '' && p.nameChangedAt === 0, '★ 重置后名字和冷却都清了');
 
+  /* 🔴v1164 第二轮（审查 R2-1/FX-1）：重置**不再挂在退出登录上**，而是挂在「换了一个人登录」上（uid 变了）——
+     同一个人退出再登回来，资料要原样在（以前退出时清成空白，登回来对账又把空白传上云，名字头像全没了）。
+     这里按行为验：资料模块记着资料属于谁，uid 变成另一个人才清；退出（uid 变空）、同一个人登回来都不清。 */
   const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
-  const i = auth.indexOf('function signOut');
-  /* 🔴v1146：窗口按**剥掉注释后**的代码算 ——
-     否则加几段说明注释就会把断言挤出窗口，测试莫名其妙变红。
-     （本版就撞上了：加了超时的注释，三条断言同时失效。） */
   const codeOnly = auth.replace(/\/\*[\s\S]*?\*\//g, '');
   const ci = codeOnly.indexOf('function signOut');
-  ok(codeOnly.slice(ci, ci + 1200).includes('resetForAccountSwitch'),
-     '★ 退出登录时会调这个重置 —— 否则换账号后还是上一个人的资料');
+  ok(!codeOnly.slice(ci, ci + 1500).includes('resetForAccountSwitch'),
+     '★ 退出登录**不**清资料 —— 同一个人登回来名字、头像、展柜都还在（清了会被对账当成新改动传上云）');
+  const st = {};
+  const handlers = {};
+  const ctx = { window: {}, document: { addEventListener(t, f) { (handlers[t] = handlers[t] || []).push(f); }, dispatchEvent() { return true; } },
+    CustomEvent: class { constructor(t) { this.type = t; } }, setTimeout, clearTimeout,
+    console, Date, Math, JSON, Object, Array, String, Number, Error,
+    localStorage: { getItem: k => (k in st ? st[k] : null), setItem(k, v) { st[k] = String(v); }, removeItem(k) { delete st[k]; } } };
+  ctx.window = ctx; vm.createContext(ctx);
+  st['hansen_sb_profile_v1002'] = JSON.stringify({ name: '小明', cid: 2, cidLocked: true, avatar: '🦊', showcase: ['a'], privacy: 'friends', nameChangedAt: 5 });
+  st['hansen_auth_v1004'] = JSON.stringify({ uid: 'A' });
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_profile_v1002.js'), 'utf8'), ctx);
+  const fire = () => (handlers['hsn-account-uid-changed'] || []).forEach((f) => f());
+  const prof = () => JSON.parse(st['hansen_sb_profile_v1002']);
+  fire();
+  ok(prof().name === '小明', '★ 资料记下属于 A，不清');
+  st['hansen_auth_v1004'] = JSON.stringify({ uid: '' }); fire();
+  ok(prof().name === '小明' && prof().avatar === '🦊', '★ A 退出（uid 变空）→ 资料还在');
+  st['hansen_auth_v1004'] = JSON.stringify({ uid: 'A' }); fire();
+  ok(prof().name === '小明' && prof().privacy === 'friends' && prof().showcase.length === 1, '★ A 登回来 → 资料原样在');
+  st['hansen_auth_v1004'] = JSON.stringify({ uid: '' }); fire();
+  st['hansen_auth_v1004'] = JSON.stringify({ uid: 'B' }); fire();
+  ok(prof().name === '' && prof().cid === 0 && prof().nameChangedAt === 0,
+     '★ 换成 B 登录 → 上一个人的名字、竞赛 ID、改名冷却全清掉（不会顶着别人的名字）');
 }
 
 /* ④ 界面要立刻跟上 */

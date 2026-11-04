@@ -36,12 +36,39 @@ function zipNames(buf){
    有包就验（那是它真正的价值：验包的内容对不对），
    没包就说明"这轮还没打包"，跳过即可。
    `package_release.py` 本身有完整的出包契约校验，那一层不会漏。 */
+/* 🔴v1164（审查 R2-3）：部署包里不许混进开发记录（攻坚笔记/ 里的工作流脚本、改过的代码副本、截图）——
+   以前 263 个记录文件跟着「可直接部署」包上了静态托管，人人都能下载。
+   不依赖构建产物：直接用 package_release.py 自己挑部署文件的那段代码数一遍。 */
+{
+  const { execFileSync } = await import('node:child_process');
+  const py = `import sys, json\nsys.path.insert(0, ${JSON.stringify(__HSN_ROOT)})\nimport package_release as pr\nfrom pathlib import Path\n`
+    + `names=[rel for _, rel in pr._iter_files('deploy', Path('/nonexistent-release-out'))]\n`
+    + `print(json.dumps({'n': len(names), 'tops': sorted({r.split('/')[0] for r in names if '/' in r}), 'allow': sorted(pr.DEPLOY_ALLOWED_TOP_DIRS)}))`;
+  let info = null, err = '';
+  try { info = JSON.parse(execFileSync('python3', ['-c', py], { encoding: 'utf8' }).trim().split('\n').pop()); }
+  catch (e) { err = String((e && e.stderr) || e).slice(0, 300); }
+  ok(info && info.n > 2000, `部署文件清单算得出来（${info ? info.n + ' 个' : err}）`);
+  ok(info && !info.tops.includes('攻坚笔记'), '★ 部署包里没有「攻坚笔记」—— 开发记录不上网站');
+  ok(info && info.tops.every((t) => info.allow.includes(t)), `★ 部署包的顶层文件夹全在运行时白名单里（${info ? info.tops.join(',') : ''}）`);
+  /* 合同本身会咬：往仓库里放一个新的记录文件夹 + .js，打包必须报错，而不是悄悄发布出去 */
+  const probeDir = __HSN_ROOT + '_tmp_records_probe_v1164';
+  let threw = false;
+  try {
+    fs.mkdirSync(probeDir, { recursive: true });
+    fs.writeFileSync(probeDir + '/leak.js', '/* 记录 */');
+    try { execFileSync('python3', ['-c', py], { encoding: 'utf8', stdio: 'pipe' }); }
+    catch (e) { threw = /unknown top-level folder/.test(String(e.stderr || '')); }
+  } finally { try { fs.rmSync(probeDir, { recursive: true, force: true }); } catch (e) { /* 清掉 */ } }
+  ok(threw, '★ 新冒出来的非运行时文件夹（带 .js）会让打包直接报错，不会被发布出去');
+}
+
 const zpath = fs.readdirSync((__HSN_ROOT + 'release-assets'))
   .filter(f=>f.includes('可直接部署')&&f.endsWith('.zip'))[0];
 if (!zpath) {
-  console.log('  ⏭  release-assets 里还没有部署包 —— 跳过（打包后会真正验一遍）');
-  console.log(`\n结果: 0 通过 / 0 失败（已跳过）`);
-  process.exit(0);
+  console.log('  ⏭  release-assets 里还没有部署包 —— 包内容那几条跳过（打包后会真正验一遍）');
+  /* 上面「部署清单不带开发记录」那几条不依赖包，照样算数 */
+  console.log(`\n结果: ${pass} 通过 / ${fail} 失败（包内容已跳过）`);
+  process.exit(fail ? 1 : 0);
 }
 ok(!!zpath, '找到部署包: '+zpath);
 const names = zipNames(fs.readFileSync((__HSN_ROOT + 'release-assets/')+zpath));

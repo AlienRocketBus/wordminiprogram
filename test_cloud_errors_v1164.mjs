@@ -12,7 +12,8 @@
  *   ③ 断网（这台手机的所有请求都被掐断，登录服务也连不上）→ 重试几次后「连不上网络」+ 技术信息
  *      （network request error）；网回来点「重新找对手」就接着找 —— 中途绝不说「排位要先登录」
  *   ③b 网是通的、登录服务也通，只有数据库回了非 200（没权限 403 / 没集合 404，SDK 只说 network request error）
- *      →「云端连得上，但数据库拒绝了」+ 技术信息；绝不说「连不上网络 · 检查 Wi-Fi」（审查 TI-4：v1163 的原症状）
+ *      →「云端连得上，但数据库这次没让读写」+ 可能的原因 + 再试一次 + 技术信息；
+ *      绝不说「连不上网络 · 检查 Wi-Fi」（审查 TI-4：v1163 的原症状），也不一口咬定「网没有断」（审查 FX-8）
  *   ④ 登录令牌该刷新了、刷新请求却发不出去 → 「云端还没连上」或「连不上网络」+ 重试；
  *      绝不说「排位要先登录」「登录过期」（凭证还在，不是没登录）；网回来就好
  */
@@ -89,6 +90,7 @@ try {
   await A.tap('.pr_mode[data-mode="C"]').catch(() => {});
   const mk = await A.waitScreen(/云端设置还差一步|等对手进来/, { timeout: 15000 }).catch((e) => e.lastText || '');
   await t.ok(has(mk, /云端设置还差一步/) && !has(mk, /等对手进来/), `开房：说「云端设置还差一步」，没有假装开好了（看到：${flat(mk).slice(0, 120)}）`, () => explain());
+  await H.cleanPhones(t, [A]);   /* 审查 T8：关手机之前看一眼页面报错 */
   await A.close(); live.length = 0;
 
   /* ══ ② 没建集合 ════════════════════════════════════════════════ */
@@ -103,6 +105,7 @@ try {
   await t.ok(has(w.last, /云端设置还差一步/) && has(w.last, /hansen_pk_rooms/) && has(w.last, /新建|建/), `天梯：「云端设置还差一步」，说清要新建 hansen_pk_rooms（看到：${flat(w.last).slice(0, 160)}）`, () => explain());
   await t.ok(has(w.last, /技术信息/) && has(w.last, /DATABASE_COLLECTION_NOT_EXIST/), '带着技术信息（DATABASE_COLLECTION_NOT_EXIST）', () => explain());
   await t.ok(!w.seen.some((k) => /排位要先登录|连不上网络|等对手进来/.test(k)), `没有说成「要登录」「断网」，也没有假装开了房（出现过：${w.seen.join('、')}）`, () => explain());
+  await H.cleanPhones(t, [B]);
   await B.close(); live.length = 0;
 
   /* ══ ③ 断网 ════════════════════════════════════════════════════ */
@@ -122,6 +125,7 @@ try {
   await C.tap('#ldRetry').catch(() => C.tap('button', { hasText: '重新找对手' }));
   const back = await C.waitScreen(/正在找对手|等对手进来/, { timeout: 15000 }).catch((e) => e.lastText || '');
   await t.ok(has(back, /正在找对手|等对手进来/), `网回来了点「重新找对手」→ 接着找（看到：${flat(back).slice(0, 80)}）`, () => explain());
+  await H.cleanPhones(t, [C]);
   await C.close(); live.length = 0;
 
   /* ══ ③b 数据库回非 200、登录服务是通的 ══════════════════════════ */
@@ -135,13 +139,17 @@ try {
     const E = await phone('戊', '小蜂戊');
     await toLadderHome(E);
     await E.tap('#ldGo');
-    w = await watch(E, /数据库拒绝了|连不上网络/, 70000);
-    await t.ok(has(w.last, /云端连得上，但数据库拒绝了/) && has(w.last, /安全域名|权限|集合/), `显示「云端连得上，但数据库拒绝了」并说可能的原因（用了 ${Math.round(w.ms / 1000)} 秒；看到：${flat(w.last).slice(0, 150)}）`, () => explain());
+    w = await watch(E, /数据库这次没让读写|数据库拒绝了|连不上网络/, 70000);
+    /* 🔴审查 FX-8：话说成「可能」、先给「再试一次」—— 断网刚恢复时也会走到这里，不能一口咬定「网没有断」 */
+    await t.ok(has(w.last, /云端连得上，但数据库这次没让读写/) && has(w.last, /安全域名|权限|集合/) && has(w.last, /可能/) && !has(w.last, /网没有断/),
+      `显示「云端连得上，但数据库这次没让读写」并说可能的原因（用了 ${Math.round(w.ms / 1000)} 秒；看到：${flat(w.last).slice(0, 150)}）`, () => explain());
+    await t.ok((await E.hitTest('#ldRetry', { timeout: 1000 })).ok, '有「再试一次」按钮、点得到', () => explain());
     await t.ok(!has(w.last, /连不上网络|检查一下 Wi-Fi/), '没有让老师去查 Wi-Fi（网是通的）', () => explain());
     await t.ok(has(w.last, /技术信息/) && has(w.last, /network request error/i), '技术信息里是原始错误「network request error」', () => explain());
     const probed = emu.log.some((x) => x.uid === E.cloudUid && /\/auth\/v1\/user\/me/.test(x.path) && x.status === 200);
     await t.ok(probed, '真的问过一次登录服务（/auth/v1/user/me 回了 200）才下的结论', () => explain());
     await t.ok(!w.seen.some((k) => /排位要先登录|登录过期/.test(k)), `没有说成「要登录」（出现过：${w.seen.join('、')}）`, () => explain());
+    await H.cleanPhones(t, [E]);
     await E.close(); live.length = 0;
   }
 

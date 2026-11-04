@@ -198,6 +198,16 @@ console.log('── 没人见过的真云端行为：可切换（审查 TI-1/TI-
   const d403 = await db(st, b, 'queryDocument', { collectionName: 'locked', query: {} });
   const d404 = await db(st, b, 'queryDocument', { collectionName: 'nope', query: {} });
   ok(d403.status === 403 && d404.status === 404, 'deniedStatus / missingStatus：没权限 / 没集合可以回非 200（SDK 只会看到 network request error）');
+  /* 审查 T5：tokenErrStatus —— 被撤的令牌，数据库回非 200（真云端回什么没人见过）；默认还是 200 + {code} */
+  const ts = mk({ tokenErrStatus: 401 });
+  const tu = await signup(ts, '+86 13900000074');
+  const t0 = await db(ts, tu, 'queryDocument', { collectionName: 'rooms', query: {} });
+  ts.revokeSessions(tu.sub);
+  const t1 = await db(ts, tu, 'queryDocument', { collectionName: 'rooms', query: {} });
+  ts.knobs.tokenErrStatus = 200;
+  const t2 = await db(ts, tu, 'queryDocument', { collectionName: 'rooms', query: {} });
+  ok(t0.status === 200 && t0.json.data && t1.status === 401 && t1.json.code === 'ACCESS_TOKEN_EXPIRED'
+     && t2.status === 200 && t2.json.code === 'ACCESS_TOKEN_EXPIRED', '★ tokenErrStatus：被撤的令牌数据库回 HTTP 401（默认 200 + {code}）；没撤之前照常');
   const rf = mk({ refreshErrorCode: 'unauthenticated' });
   const c = await signup(rf, '+86 13900000073');
   rf.revokeSessions(c.sub);
@@ -211,6 +221,64 @@ console.log('── 没人见过的真云端行为：可切换（审查 TI-1/TI-
     const kept = e.dump('rooms').find((d) => d._id === 'w1');
     ok(r2.json.data && r2.json.data._id === 'w1' && kept.who === (style === 'silent' ? 'x' : 'y'), `duplicateStyle=${style}：第二个 add 也回成功，库里是 ${kept.who}`);
   }
+}
+
+console.log('── 审查 T12：以前放宽了也没人发现的那 12 条（每条一个断言）──');
+{
+  const emu = mk({}, { rooms: ACL.READONLY, priv: ACL.PRIVATE, aw: ACL.ADMINWRITE });
+  const a = await signup(emu, '+86 13900000101'), b = await signup(emu, '+86 13900000102');
+  for (let n = 1; n <= 4; n++) await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'm' + n, n, tag: n % 2 ? 'odd' : 'even', extra: 'x' + n } });
+  /* $in 只回列表里的 */
+  const qin = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: { _id: { $in: ['m1', 'm3', 'nope'] } }, queryType: 'WHERE' });
+  ok(qin.json.data && qin.json.data.list.map((d) => d._id).sort().join(',') === 'm1,m3', `★ $in 只回列表里的（${qin.json.data && qin.json.data.list.map((d) => d._id).join(',')}）`);
+  /* count 要按条件数（cid 编号、名次都靠它） */
+  const cnt = await db(emu, b, 'countDocument', { collectionName: 'rooms', query: { tag: 'odd' } });
+  ok(cnt.json.data && cnt.json.data.total === 2, `★ count 按条件数（${cnt.json.data && cnt.json.data.total}，应是 2）`);
+  /* offset / projection */
+  const off = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: {}, queryType: 'WHERE', order: [{ field: 'n', direction: 'asc' }], offset: 2, limit: 10 });
+  ok(off.json.data && off.json.data.list.map((d) => d.n).join(',') === '3,4', `★ offset 跳过前面的（${off.json.data && off.json.data.list.map((d) => d.n).join(',')}）`);
+  const pj = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: { _id: 'm2' }, queryType: 'WHERE', projection: { n: true } });
+  const pd = pj.json.data && pj.json.data.list[0];
+  ok(pd && pd.n === 2 && !('extra' in pd) && !('tag' in pd), `★ projection 只回要的字段（${JSON.stringify(pd)}）`);
+  /* PRIVATE：别人的读不到 */
+  await db(emu, a, 'addDocument', { collectionName: 'priv', data: { _id: 'p1', v: 1 } });
+  const pr = await db(emu, b, 'queryDocument', { collectionName: 'priv', query: {}, queryType: 'WHERE' });
+  const pa = await db(emu, a, 'queryDocument', { collectionName: 'priv', query: {}, queryType: 'WHERE' });
+  ok(pr.json.data && pr.json.data.list.length === 0 && pa.json.data.list.length === 1, '★ PRIVATE：别人读不到，自己读得到');
+  /* ADMINWRITE：读得到、写不了 */
+  const aw = await db(emu, a, 'addDocument', { collectionName: 'aw', data: { _id: 'w' } });
+  const ar = await db(emu, a, 'queryDocument', { collectionName: 'aw', query: {}, queryType: 'WHERE' });
+  ok(aw.json.code === 'DATABASE_PERMISSION_DENIED' && ar.json.data, '★ ADMINWRITE：客户端写被拒、读照常');
+  /* set()（merge:false）是整条替换：旧字段没了 */
+  await db(emu, a, 'updateDocument', { collectionName: 'rooms', query: { _id: 'm1' }, queryType: 'DOC', multi: false, merge: false, data: { only: 1 } });
+  const m1 = emu.dump('rooms').find((d) => d._id === 'm1');
+  ok(m1 && m1.only === 1 && !('n' in m1) && !('extra' in m1) && m1._openid === a.sub, `★ set() 整条替换，旧字段不留（${JSON.stringify(m1)}）`);
+  /* legacyMulti:'deny'：where().update 整个拒 */
+  emu.knobs.legacyMulti = 'deny';
+  const lm = await db(emu, a, 'updateDocument', { collectionName: 'rooms', query: { tag: 'even' }, queryType: 'WHERE', multi: true, merge: true, data: { $set: { z: 1 } } });
+  emu.knobs.legacyMulti = 'own';
+  ok(lm.json.code === 'DATABASE_PERMISSION_DENIED', `★ legacyMulti=deny：where().update 被拒（${lm.json.code || 'updated ' + (lm.json.data && lm.json.data.updated)}）`);
+  /* 验证码错了：verify 和 signup 都不认 */
+  const v = await call(emu, '/auth/v1/verification', { phone_number: '+86 13900000103' });
+  const vv = await call(emu, '/auth/v1/verification/verify', { verification_id: v.json.verification_id, verification_code: '000000' });
+  ok(vv.status === 400 && vv.json.error === 'invalid_verification_code', '★ 验证码填错：verify 不认');
+  const su = await call(emu, '/auth/v1/signup', { phone_number: '+86 13900000103', verification_code: '000000' });
+  ok(su.status === 400 && !su.json.access_token, '★ 验证码填错：signup 不建账号');
+  /* access_token 过期：/user/me 不认 */
+  const c = await signup(emu, '+86 13900000104');
+  emu.expireAccessTokens(c.sub);
+  const me = await call(emu, 'GET /auth/v1/user/me', null, { authorization: 'Bearer ' + c.access_token });
+  ok(me.status === 401 && me.json.error === 'unauthenticated', '★ 过期的 access_token：/user/me 回 401（App 靠它分辨「登录过期」）');
+  /* commitThenAbort：写进去了、回包断了 */
+  const f = emu.fault({ uid: a.sub, db: true, action: 'database.addDocument', do: 'commitThenAbort', times: 1 });
+  const ct = await db(emu, a, 'addDocument', { collectionName: 'rooms', data: { _id: 'cta' } });
+  ok(ct.abort && f.hits === 1 && emu.dump('rooms').some((d) => d._id === 'cta'), '★ commitThenAbort：手机收不到回包，但那条已经落库');
+  /* 审查 T7：orderByStatus —— 带排序的查询回非 200，不排序的照常 */
+  emu.knobs.orderByStatus = 500;
+  const os1 = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: {}, queryType: 'WHERE', order: [{ field: 'n', direction: 'desc' }] });
+  const os2 = await db(emu, b, 'queryDocument', { collectionName: 'rooms', query: {}, queryType: 'WHERE' });
+  emu.knobs.orderByStatus = 0;
+  ok(os1.status === 500 && os2.json.data && os2.json.data.list.length >= 4, '★ orderByStatus：排序查询回 HTTP 500（SDK 只看到 network request error），不排序的照常');
 }
 
 console.log(`\n${pass} 通过，${fail} 失败`);

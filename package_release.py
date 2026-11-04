@@ -50,6 +50,16 @@ DEPLOY_EXCLUDE_DIRS = {
     ".git", ".github", "__pycache__", ".pytest_cache", ".mypy_cache",
     ".ruff_cache", "node_modules", "releases", "release-assets",
     "evolution_reports", ".evolution_backups", "map8", "newboss",
+    # 🔴v1164（审查 R2-3）：开发记录（工作流脚本、审查提示词、改过的代码副本、截图）不是网站的一部分 ——
+    #   以前它们的 .js/.png 照样进了「可直接部署」包，传上静态托管后人人都能下载。源码包照旧带着。
+    "攻坚笔记",
+}
+# 🔴v1164（审查 R2-3）：部署包里**只许出现这些顶层文件夹**（运行时的图片、音频、词库）。
+#   以后谁再往仓库里加一个记录 / 工具文件夹，打包会直接报错，而不是悄悄把它发布到网上。
+#   真是新的运行时素材文件夹，就把名字加到这里。
+DEPLOY_ALLOWED_TOP_DIRS = {
+    "words", "sentences", "avatars", "bosses", "bosses_bg", "icons", "themes",
+    "pets", "weapons", "bossfx", "ui", "speed", "robots",
 }
 DEPLOY_EXCLUDE_FILES = {"evolution_dashboard.html", "_viewer_js.js"}
 # 🔴v1045: 随部署包交付的辅助文件（非运行时资源，但用户部署时需要）
@@ -296,6 +306,11 @@ def _iter_files(mode: str, out_dir: Path):
             if mode == "deploy":
                 if name.startswith(".") or not _deploy_allowed(rel):
                     continue
+                if len(rel.parts) > 1 and rel.parts[0] not in DEPLOY_ALLOWED_TOP_DIRS:
+                    raise RuntimeError(
+                        f"deploy package would publish an unknown top-level folder '{rel.parts[0]}' ({rel}): "
+                        "add it to DEPLOY_ALLOWED_TOP_DIRS if it is a runtime asset folder, "
+                        "or to DEPLOY_EXCLUDE_DIRS if it is records / tools")
             else:
                 if rel.as_posix() in SOURCE_EXCLUDE_FILES:
                     continue

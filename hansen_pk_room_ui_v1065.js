@@ -154,7 +154,10 @@
   function close() {
     stopKb();
     stopPoll();
-    _lobbySeq++; _createBusy = false;
+    _lobbySeq++;
+    /* 🔴审查 R2-UI-1 / T1：正在开房时离开（返回键、关掉、回首页）—— 开房那一下回来时不许再画「等对手进来」，
+       开出来的房也要马上收掉（以前藏起来的岛里照样开了一间房、发着心跳，别的孩子被配进来跟空气打） */
+    cancelCreating();
     hideQuit();
     /* v1163: 等待屏的「已等 N 秒」计时器 —— 离开这屏必须停掉。
        不停的话它会一直每秒查一次 DOM，
@@ -206,6 +209,16 @@
     var rid = _joiningRid;
     _joiningRid = '';
     if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
+  }
+
+  /* 「重新登录」：直接打开登录表单（审查 R2-UI-7：以前打开的是「👤 已登录」面板，没有表单，孩子卡死在那儿）；
+     旧版本用户名注册的账号（R2-5）：云端从来没有这个账号，去手机号注册那一页 */
+  function openRelogin(legacy) {
+    try {
+      if (!window.HansenAuthUI) return;
+      var A = window.HansenAuth, signed = !!(A && A.isSignedIn && A.isSignedIn());
+      HansenAuthUI.open(legacy ? { mode: 'phone', relogin: true, legacy: true } : (signed ? { relogin: true } : undefined));
+    } catch (e) {}
   }
 
   /* 错误块：会话过期时给出「重新登录」这条出路，而不是让人干瞪眼 */
@@ -283,20 +296,25 @@
     var human = sayHuman(t);
     /* 断网 / 云端设置 / 说不清的问题：把原话小字放出来，截个图就知道是哪一类（v1156 教训） */
     var raw = rawOf(t);
-    var tech = (raw && k && k !== 'taken' && k !== 'gone' && k !== 'self')
+    /* 🔴审查 R2-UI-13：从没登录过的孩子不是「登录过期」—— 按钮叫「去登录」，也不放一行看不懂的 not-signed-in */
+    var never = expired && /not-signed-in|还没登录/.test(t);
+    var legacy = !!(r && r.legacy);
+    var tech = (raw && k && k !== 'taken' && k !== 'gone' && k !== 'self' && !never && !legacy)
       ? '<div style="margin-top:8px;font-size:11px;opacity:.75;word-break:break-all">技术信息：'
         + esc(raw.slice(0, 130)) + '</div>'
       : '';
     var tip = (k === 'config') ? '<br>这不是你的问题，把这一屏截图发给负责的老师就好。' : '';
+    var btn = !expired ? ''
+      : legacy ? '<button class="pr_btn pr_btn2" id="prLogin" data-legacy="1">📱 用手机号注册</button>'
+      : never ? '<button class="pr_btn pr_btn2" id="prLogin">🔐 去登录</button>'
+      : '<button class="pr_btn pr_btn2" id="prLogin">🔑 重新登录</button>';
     return '<div class="pr_err">' + esc(human) + tip
-      + ((expired && !/登录/.test(human)) ? '<br><br>云端登录已过期，重新登录一次就能继续。' : '')
-      + tech + '</div>'
-      + (expired ? '<button class="pr_btn pr_btn2" id="prLogin">🔑 重新登录</button>' : '');
+      + ((expired && !never && !legacy && !/登录/.test(human)) ? '<br><br>云端登录已过期，重新登录一次就能继续。' : '')
+      + tech + '</div>' + btn;
   }
   function wireErr() {
-    if (q('prLogin')) q('prLogin').onclick = function () {
-      try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
-    };
+    var b = q('prLogin');
+    if (b) b.onclick = function () { openRelogin(b.getAttribute('data-legacy') === '1'); };
   }
 
   /* ── 屏 1：房间列表 ── */
@@ -350,13 +368,19 @@
   /* 🔴v1164（审查 F8）：列表每 8 秒自己刷一次 —— 房主手机钟慢的话，要多看一眼「心跳在动」才认得出他的房活着；
      页面切到后台就不刷（省配额），离开列表这一屏就停 */
   var _lobbySeq = 0;
+  var _lobbyErrKind = '';   /* 顶上已经画了哪一种错误（列表那块就不再画一遍同样的 —— 审查 R2-UI-13） */
+  var _rowOrder = [];       /* 列表里房间的显示顺序：自动刷新时已有的房不挪位置（审查 FX-9） */
+  var _listTouchAt = 0;     /* 孩子手指刚碰过列表：先别刷（防止正要点的那一行被挤走） */
   function lobby(err) {
     /* v1164：到了房间列表就是自由房这条路了 —— 天梯带来的设定清掉，别串到下一局 */
     _fromLadder = false; _ladderCfg = null; _cameFromLadder = false;
     stopTicker();
+    cancelCreating();
     var seq = ++_lobbySeq;
+    _rowOrder = [];
     /* 点事件对象不是错误（v1156 教训：onclick = lobby 会把事件当 err 画出来） */
     if (err && typeof err === 'object' && 'isTrusted' in err && !('reason' in err)) err = null;
+    _lobbyErrKind = err ? (kindOf(err) || 'other') : '';
     paint(
       '<div class="pr_top"><button class="pr_back" id="prBack">← 返回</button>'
       + '<div class="pr_h">🏠 大PK · 公开房间</div></div>'
@@ -426,23 +450,61 @@
       ci.onkeydown = function (ev) { if (ev.key === 'Enter') joinByCode(); };
     }
     if (q('prJoinCode')) q('prJoinCode').onclick = joinByCode;
-    if (q('prRef')) q('prRef').onclick = function () { refresh(); };
+    if (q('prRef')) q('prRef').onclick = function () { _rowOrder = []; refresh(); };
+    try {
+      var pl = q('prList');
+      if (pl) ['pointerdown', 'touchstart'].forEach(function (t) {
+        pl.addEventListener(t, function () { _listTouchAt = Date.now(); }, { passive: true });
+      });
+    } catch (e) {}
     refresh();
     var autoRef = function () {
       if (seq !== _lobbySeq || !q('prList')) return;
-      if (document.visibilityState !== 'hidden') refresh();
+      if (document.visibilityState !== 'hidden' && Date.now() - _listTouchAt > 2500) refresh(true);
       setTimeout(autoRef, 8000);
     };
     setTimeout(autoRef, 8000);
   }
 
-  function refresh() {
+  /* 列表刷不出来是「断网」还是「数据库那边不让读」？（审查 R2-UI-8：以前一律说「连不上网络，检查一下 Wi-Fi」，
+     老师去查一个好好的 Wi-Fi）—— 交给账号模块看一眼登录服务，再试一次列表，按结论换说法 */
+  function diagnoseList(r, seq) {
+    var A = window.HansenAuth;
+    if (!A || typeof A.diagnose !== 'function' || kindOf(r) !== 'network') return Promise.resolve(r);
+    return A.diagnose([kindOf(r)], function () { return S().listRooms(); }).then(function (d) {
+      if (seq !== _lobbySeq) return null;
+      if (d.verdict === 'ok' && d.result && d.result.ok) return d.result;
+      if (d.verdict === 'expired') return { ok: false, kind: 'expired', expired: true, reason: '云端登录过期了，重新登录一次就能继续 ⟨' + (d.raw || 'unauthenticated') + '⟩' };
+      if (d.verdict === 'dbblocked') return { ok: false, kind: 'config', reason: d.text + ' ⟨' + rawOf(E(r)) + '⟩' };
+      return r;
+    }, function () { return r; });
+  }
+
+  function refresh(auto) {
     if (!S()) return;
+    var seq = _lobbySeq;
     S().listRooms().then(function (r) {
+      return (r && !r.ok) ? diagnoseList(r, seq) : r;
+    }).then(function (r) {
       var box = q('prList');
-      if (!box) return;
-      if (!r.ok) { box.innerHTML = errBlock(r); wireErr(); return; }
+      if (!box || !r || seq !== _lobbySeq) return;
+      if (!r.ok) {
+        /* 顶上（开房 / 进房失败）已经说了同一种错误：列表这块只说一句短的，别把同一个大红框画两遍 */
+        if (_lobbyErrKind && kindOf(r) === _lobbyErrKind) {
+          box.innerHTML = '<div class="pr_empty" style="padding:12px 8px">房间列表这会儿也刷不出来，好了以后点「🔄 刷新」</div>';
+          return;
+        }
+        box.innerHTML = errBlock(r); wireErr(); return;
+      }
       var rooms = (r.rooms || []).filter(function (x) { return !x.mine; });
+      /* 🔴审查 FX-9：自动刷新时，已经在列表里的房不挪位置（新开的房接在最后）——
+         以前新房插到最上面，孩子正要点的那一行被挤下去，「进去打」点进了别人的房 */
+      var byId = {};
+      rooms.forEach(function (x) { byId[x.id] = x; });
+      var order = _rowOrder.filter(function (id) { return !!byId[id]; });
+      rooms.forEach(function (x) { if (order.indexOf(x.id) < 0) order.push(x.id); });
+      _rowOrder = order;
+      rooms = order.map(function (id) { return byId[id]; });
       /* v1164：同一个账号在另一台设备开的房，自己看不到也进不去 —— 说出来，别让人干等 */
       var same = (r.sameAccount > 0)
         ? '<div class="pr_empty" style="padding:8px 6px;font-size:12.5px;color:var(--pk-warn)">'
@@ -552,17 +614,22 @@
     if (!code) { say('先输入好友给你的 4 位房间码'); if (ci) ci.focus(); return; }
     if (btn) { btn.disabled = true; btn.textContent = '找房中…'; }
     var restore = function () { if (btn) { btn.disabled = false; btn.textContent = '进房'; } };
+    /* 🔴审查 R2-UI-2：查码要一两秒 —— 这期间孩子点了「← 返回」（或岛上按了返回键），查到了也不许再进房
+       （以前照样进了朋友的房：岛藏起来了还在后台打，朋友对着「无名蜂」打完一局） */
+    var seq0 = _lobbySeq;
+    var stale = function () { return seq0 !== _lobbySeq || !q('prCode'); };
     /* v1164：刚开的房，别的手机要过一两秒才查得到（云数据库主从同步有延迟）——
        「没找到」先悄悄再查两次，别让朋友以为码给错了 */
     var find = function (left) {
       return S().findByCode(code).then(function (r) {
-        if (r && !r.ok && r.kind === 'gone' && left > 0) {
+        if (r && !r.ok && r.kind === 'gone' && left > 0 && !stale()) {
           return new Promise(function (z) { setTimeout(z, 1200); }).then(function () { return find(left - 1); });
         }
         return r;
       });
     };
     find(2).then(function (r) {
+      if (stale()) return;
       if (!r.ok) {
         restore();
         say(r.reason ? sayHuman(E(r)) : '没找到这间房 —— 房间码可能过期了，让朋友再发一次');
@@ -571,6 +638,7 @@
       }
       doJoin(r.roomId, btn, null, code);
     })['catch'](function (e) {
+      if (stale()) return;
       restore();
       say(String((e && e.message) || e) || '网络不太顺，再试一次');
     });
@@ -658,13 +726,66 @@
        自由房：{ mode, askMode, private }（来自选玩法那一屏）
        排位房：{ ladder:true, mode:'A', askMode:'cn', private:false, rating, t0, band, onOk, onFail } */
   var _createBusy = false;   /* 🔴审查 UI-6：连点两下「选个玩法」会开出两条等人的轮询 */
+  /* 🔴审查 R2-UI-1 / R2-UI-6 / T1：开房要几秒（慢网下更久）。这一次开房的编号 —— 离开了（取消、返回、关掉、
+     回列表）就作废：开房回来时不许再画「等对手进来」，开出来的房马上收掉。 */
+  var _createSeq = 0, _createCap = null;
+  var CREATE_CAP_MS = 25000;   /* 开房最多等这么久（以前请求卡住时要等 77 秒） */
+  function cancelCreating() {
+    if (_createCap) { clearTimeout(_createCap); _createCap = null; }
+    if (!_createBusy) return;
+    _createSeq++; _createBusy = false;
+    try { if (S() && S().cancelCreate) S().cancelCreate(); } catch (e) {}
+  }
+  /* 「正在开房…」要看得见，还要能取消（审查 R2-UI-6：以前点了玩法屏幕一动不动，孩子只好狂点、按返回） */
+  function showCreating(lad, cfg) {
+    var cancel = function () {
+      cancelCreating();
+      if (lad) { ladderBack('home', ''); return; }
+      lobby();
+    };
+    if (lad) {
+      if (q('prCreateCancel')) q('prCreateCancel').onclick = cancel;
+      return;
+    }
+    var host0 = q(ID);
+    var cards = host0 ? host0.querySelectorAll('.pr_mode') : [];
+    if (!cards.length) return;
+    [].slice.call(cards).forEach(function (el) {
+      var mine = el.getAttribute('data-mode') === cfg.mode;
+      el.style.opacity = mine ? '1' : '.45';
+      el.style.pointerEvents = 'none';
+      el.setAttribute('aria-disabled', 'true');
+      if (mine) el.style.borderColor = '#6366f1';
+    });
+    if (!q('prCreating')) {
+      var box = document.createElement('div');
+      box.id = 'prCreating';
+      box.setAttribute('role', 'status');
+      box.setAttribute('style', 'text-align:center;margin:12px 0;font-size:14px;color:var(--pk-txt)');
+      box.innerHTML = '⏳ 正在开房…（网慢的时候要等几秒）'
+        + '<button class="pr_btn pr_btn2" id="prCreateCancel" style="margin-top:10px">取消</button>';
+      var back = q('prBack');
+      if (back && back.parentNode) back.parentNode.insertBefore(box, back);
+      else host0.querySelector('.pr_wrap').appendChild(box);
+    }
+    if (q('prCreateCancel')) q('prCreateCancel').onclick = cancel;
+  }
   function doCreate(cfg) {
     cfg = cfg || { mode: _pickedMode, askMode: _askMode, private: _wantPrivate };
     var lad = !!cfg.ladder;
     if (_createBusy) return;
     _createBusy = true;
-    var btn = q('prNew');
-    if (btn) { btn.disabled = true; btn.textContent = '正在开房…'; }
+    var seq = ++_createSeq;
+    showCreating(lad, cfg);
+    if (_createCap) clearTimeout(_createCap);
+    _createCap = setTimeout(function () {
+      _createCap = null;
+      if (seq !== _createSeq) return;
+      cancelCreating();
+      var slow = { ok: false, kind: 'slow', reason: '网络太慢，房没开成，再点一次开房 ⟨开房 ' + (CREATE_CAP_MS / 1000) + ' 秒没有回应⟩' };
+      if (lad) { ladderFail(cfg, slow); return; }
+      lobby(slow);
+    }, CREATE_CAP_MS);
     var tier = '', rating = 0;
     /* v1164：分数从战绩模块读（资料模块没有 status()，原来这里永远取不到段位） */
     try { var L = window.HansenSbLadder, R = window.HansenPkRecord;
@@ -675,7 +796,14 @@
                         elo：真实天梯分，客人算 ELO 用（审查 UI-12：自由房的抢答赛也计天梯） */
                      hostRating: lad ? (Number(cfg.rating) || rating || 1000) : 0,
                      elo: Number(cfg.rating) || rating || 0 }).then(function (r) {
+      if (seq !== _createSeq) {
+        /* 这一次已经作废（取消 / 返回键 / 关掉 / 超时）：数据层会把开出来的房收掉，这里再收一次保险；不画任何东西 */
+        if (r && r.ok) { try { S().leaveRoom(r.roomId); } catch (e) {} }
+        return;
+      }
+      if (_createCap) { clearTimeout(_createCap); _createCap = null; }
       _createBusy = false;
+      if (r && r.cancelled) return;
       if (!r || !r.ok) {
         if (lad) { ladderFail(cfg, r || { ok: false, reason: '房没开成' }); return; }
         lobby(r); return;
@@ -683,10 +811,11 @@
       /* v1163: 把玩法一起存下来 —— 等待屏要显示「你开的是什么房」 */
       _state = { roomId: r.roomId, words: r.words, isHost: true, ladder: lad,
                  mode: (r.room && r.room.mode) || cfg.mode || 'C',
-                 askMode: (r.room && r.room.askMode) || cfg.askMode || 'cn' };
+                 askMode: (r.room && r.room.askMode) || cfg.askMode || 'cn',
+                 isPrivate: !!cfg.private };
       if (lad && typeof cfg.onOk === 'function') { try { cfg.onOk(); } catch (e) {} }
       waiting(r.roomId, (r.room && r.room.code) || '', cfg);
-    })['catch'](function () { _createBusy = false; });
+    })['catch'](function () { if (seq === _createSeq) { _createBusy = false; if (_createCap) { clearTimeout(_createCap); _createCap = null; } } });
   }
 
   /* 排位流程在这边走不下去了：交回天梯，由天梯决定接着找还是说清楚原因 */
@@ -924,7 +1053,7 @@
       +   '<div style="font-size:40px">🚪</div>'
       +   '<div style="font-size:16px;font-weight:800;margin-top:10px">正在进房，等房主确认…</div>'
       +   '<div id="prJoinWait" style="font-size:13px;color:var(--pk-dim);margin-top:8px">已等 0 秒</div>'
-      +   '<div style="font-size:12px;color:var(--pk-faint);margin-top:8px;line-height:1.7">'
+      +   '<div id="prJoinWhy" style="font-size:12px;color:var(--pk-faint);margin-top:8px;line-height:1.7">'
       +     '房主那边点头了就开打，一般几秒钟</div>'
       +   '<button class="pr_btn pr_btn2" id="prJoinCancel" style="margin-top:18px">取消</button>'
       + '</div>');
@@ -948,7 +1077,13 @@
     if (q('prBack')) q('prBack').onclick = onCancel;
     var myRating = 0;
     try { myRating = Number(cfg && cfg.rating) || Number(window.HansenPkRecord.summary().rating) || 0; } catch (e) {}
-    S().joinRoom(rid, { rating: myRating, code: code || '' }).then(function (r) {
+    /* 房主暂时切出去了（私密房的房主多半在微信里发码）：说一声，让孩子知道为什么还没开打（审查 R2-UI-3） */
+    var onWait = function (info) {
+      if (my !== _joinSeq || !info || !info.hostAway) return;
+      var el = q('prJoinWhy');
+      if (el) el.textContent = '房主刚切出去了一下（可能在发房间码），他回来就开打，再等一会儿…';
+    };
+    S().joinRoom(rid, { rating: myRating, code: code || '', onWait: onWait }).then(function (r) {
       /* 已经取消 / 换了一次进房：界面不再管它；万一数据层那边还是进成了，马上退出来（别留一个房主在等的空座位） */
       if (my !== _joinSeq) { if (r && r.ok) { try { S().leaveRoom(r.roomId); } catch (e) {} } return; }
       _joiningRid = '';
@@ -1093,6 +1228,8 @@
           S().roundState(st.roomId).then(function (r) {
             if (started || !stillLive(st)) return;
             var oppReady = r && r.ok && (r.mySide === 'host' ? r.guestReady : r.hostReady);
+            /* 审查 R2-UI-5：看到对手报到 = 他真的进了对战屏（之后他走了算「离场」，不是「没进来」） */
+            if (oppReady) st._oppSeen = true;
             if (oppReady || Date.now() - t0 >= CAP) { go(); return; }
             setTimeout(poll, 400);
           }, function () { if (Date.now() - t0 >= CAP) go(); else setTimeout(poll, 400); });
@@ -1401,6 +1538,11 @@
         }
       }
       if (left <= 0 && !_rt.answered) { submitRound(idx, false); return; }
+      /* 🔴审查 R2-5（配额）：同步赛 / 回合赛这一词前 6 秒每秒看一次对手，之后两秒一次 ——
+         这两种玩法翻篇看的是「两人都答完」，晚一秒看到对手没关系；抢答赛照旧每秒（谁先拼对要马上看到）。
+         对战轮询占了一个班每天云端调用的八成。 */
+      _rt.pn = (_rt.pn || 0) + 1;
+      if (M.waitAll && Date.now() - _rt.t0 > 6000 && (_rt.pn % 2)) return;
       pollOpponent(idx);
     }, 1000);
   }
@@ -1451,7 +1593,7 @@
         lobby({ reason: '房主那边没收到你的回应，这一局没开成。换一间吧。' });
         return;
       }
-      if (g.gone && !st._oppSeen) {
+      if (g.gone && !st._oppSeen && !g.oppSeen) {
         /* 🔴v1164：**对手根本没进来（一次都没报到）就不算赢。**
            客人刚抢到座位就退了、房主那边恰好已经点了头 —— 房主进了对战屏，对面是空的。
            原来 12 秒后判「对手已离场，本局你胜」：白送一局胜、排位还加分。
@@ -1531,7 +1673,8 @@
             if (_on) _on.textContent = st.oppName;
           }
           /* 对手真的进了对战屏（报过到 / 拼过词）—— 之后他不见了才算「离场」 */
-          if ((r.mySide === 'host' ? r.guestReady : r.hostReady) || (r.winners || []).some(function (x) { return x && x !== r.mySide; })) st._oppSeen = true;
+          if ((r.mySide === 'host' ? r.guestReady : r.hostReady) || (r.winners || []).some(function (x) { return x && x !== r.mySide; })
+              || Number(r.oppAns) >= 0 || Number(r.oppPts) > 0) st._oppSeen = true;
           if (st._oppId && r.oppId && r.oppId !== st._oppId && !st._oppSwapped) {
             st._oppSwapped = true;
             try {
@@ -1647,8 +1790,9 @@
           var _oppWon = _meIsHost ? (_who === 'guest') : (_who === 'host');
           if (_oppWon) _opp += (_mm.firstScore || 100);
         }
-        /* v1164：B/C 后拼对的分只在对手自己记的总分里；比分只增不减 */
-        if (_mm.waitAll && isFinite(Number(r.oppPts)) && Number(r.oppPts) > _opp) _opp = Number(r.oppPts);
+        /* v1164：B/C 后拼对的分只在对手自己记的总分里；比分只增不减。
+           抢答赛也看（审查 F-R2-7：回合号被陌生人占满的那一词不分先后、拼对都算分，分只记在对手自己的文档上） */
+        if (isFinite(Number(r.oppPts)) && Number(r.oppPts) > _opp) _opp = Number(r.oppPts);
         if (_opp < (st.oppScore || 0)) _opp = st.oppScore || 0;
         if (_opp !== st.oppScore) {
           var _gained = _opp > st.oppScore;
@@ -1679,7 +1823,7 @@
       settlePending(st, r);
       /* v1164 B/C：对手答到第几词、自己记的总分（含后拼对的 60/80） */
       if (r.oppAns != null && isFinite(Number(r.oppAns))) st.oppAns = Math.max(st.oppAns == null ? -1 : st.oppAns, Number(r.oppAns));
-      if (_mm && _mm.waitAll) oppPtsShow(st, r);
+      oppPtsShow(st, r);
       if (!_rt || _rt.idx !== idx) return;
       /* v1126: 记下房间共享的回合开始时间，供下一回合算截止点 */
       if (r.roundAt) { st.roundAt = r.roundAt; st.roundIdxOfRoundAt = r.round; }
@@ -1739,7 +1883,28 @@
 
      > 拿到的东西可能已经过期了 ——
      > 异步回调里的每一个引用都要当"可能没了"来写。 */
-  /* 抢写结果待定的词（回包丢了、读不回来）：之后的轮询看到这一词是谁拿下的，再补算我的分 */
+  /* 抢写结果待定的词（回包丢了、读不回来）：之后的轮询看到这一词是谁拿下的，再补算我的分。
+     🔴审查 F-R2-6：8 秒还是不知道 → 再写一次（同一个 _id、同一个 nonce：上一次其实写进去了就认得出是我的；
+     真没写进去就这次写上 —— 没有别人先拼对的话，这一词就是我的）。以前就一直干等，一分钟后这一词白白作废。 */
+  function pendGain(st, i, sc, first) {
+    if (!sc) return;
+    st.myScore += sc;
+    st.st = st.st || { words: 0, correct: 0, totalMs: 0, firstWins: 0, fastestMs: 0 };
+    if (first) st.st.firstWins++;     /* 拼对的那一次在提交时已经记过了 */
+    var my = q('prMy'); if (my) my.textContent = st.myScore;
+  }
+  function retryPending(st, i) {
+    st.pendTry = st.pendTry || {};
+    if (st.pendTry[i]) return Promise.resolve(null);
+    st.pendTry[i] = 1;
+    return Promise.resolve().then(function () { return S().claimRound(st.roomId, i); }).then(function (r) {
+      if (!st.pendingR || !(i in st.pendingR)) return null;      /* 轮询那边已经补过了 */
+      if (!r || !r.ok || r.pending) return null;
+      delete st.pendingR[i];
+      pendGain(st, i, Number(r.score) || 0, !!r.first);
+      return r;
+    }, function () { return null; });
+  }
   function settlePending(st, r) {
     try {
       var pend = st.pendingR || {}, ws = (r && r.winners) || [];
@@ -1748,19 +1913,33 @@
       Object.keys(pend).forEach(function (k) {
         var i = Number(k), w = ws[i];
         if (!w) {
+          if (Date.now() - pend[k] > 8000) retryPending(st, i);
           if (Date.now() - pend[k] > 60000) delete pend[k];   /* 一分钟还不知道：不等了 */
           return;
         }
         delete pend[k];
         var gain = (w === mySide) ? (M.firstScore || 100) : (M.waitAll ? (M.secondScore || 0) : 0);
         try { S().settleRound(st.roomId, i, 0); } catch (e) {}
-        if (!gain) return;
-        st.myScore += gain;
-        st.st = st.st || { words: 0, correct: 0, totalMs: 0, firstWins: 0, fastestMs: 0 };
-        if (w === mySide) st.st.firstWins++;     /* 拼对的那一次在提交时已经记过了 */
-        var my = q('prMy'); if (my) my.textContent = st.myScore;
+        pendGain(st, i, gain, w === mySide);
       });
     } catch (e) {}
+  }
+  /* 交卷前把还没定下来的词定下来（审查 FX-10：最后一词结果待定时，以前交上去的分里没有它 ——
+     对手那边却给我记了这一词，结果可能翻过来）。最多等 capMs，等不到就按现有的分交 */
+  function resolvePending(st, capMs) {
+    var keys = Object.keys(st.pendingR || {});
+    if (!keys.length) return Promise.resolve();
+    var t0 = Date.now();
+    var one = function (i) {
+      return Promise.resolve().then(function () { return S().settleRound(st.roomId, i, 2500); }).then(function (r) {
+        if (!st.pendingR || !(i in st.pendingR)) return null;
+        if (r && r.ok && r.settled) { delete st.pendingR[i]; pendGain(st, i, Number(r.score) || 0, !!r.first); return null; }
+        if (Date.now() - t0 > capMs) return null;
+        return retryPending(st, i);
+      }, function () { return null; });
+    };
+    var all = Promise.all(keys.map(function (k) { return one(Number(k)); }));
+    return Promise.race([all, new Promise(function (z) { setTimeout(z, capMs); })]);
   }
 
   function stillLive(st) {
@@ -1857,7 +2036,9 @@
           ? ((first ? '🔥 你抢先拼对！' : '✅ 拼对了') + ' +' + gain + ' 分 · ' + secs + 's')
           : (how === 'second' ? '✅ 拼对了，可惜对手先拼对 · ' + secs + 's'
             : how === 'pending' ? '📨 拼对了，网络有点慢，分数马上补上'
+            /* 审查安全 R2-1：拼对了却没记上分，只有真断网才说「网络不稳」（以前回合号被人占满也这么说） */
             : how === 'failed' ? '📶 网络不稳，这一词没记上'
+            : how === 'failed-other' ? '这一词没记上，接着拼下一词吧'
             : how === 'ended' ? '这一局已经结束了'
             : (forced ? '对手抢先了' : '⏱ 超时了'))) + answer;
       }
@@ -1880,7 +2061,14 @@
       after(0, false, forced ? 'lost' : 'timeout'); return;
     }
 
+    /* 🔴审查 FX-10：网慢时确认要几秒 —— 2.5 秒还没结果就先说一声，别让孩子对着「已提交」干等 */
+    var slowT = setTimeout(function () {
+      if (!stillLive(st) || !_rt || _rt.idx !== idx) return;
+      var h1 = q('prHint');
+      if (h1 && /已提交/.test(h1.textContent || '')) h1.textContent = '📨 网络有点慢，正在确认这一词…';
+    }, 2500);
     S().claimRound(st.roomId, idx).then(function (r) {
+      clearTimeout(slowT);
       if (!stillLive(st)) return;
       if (r && r.ok && r.pending) {
         /* 网断在半路：这一词是不是我先拼对还不知道 —— 先往下走，知道了再补分（审查 F1：以前直接记 0 分「超时了」） */
@@ -1888,10 +2076,12 @@
         after(0, false, 'pending'); return;
       }
       if (r && !r.ok && r.ended) { after(0, false, 'ended'); checkOpponentAlive(idx, true); return; }
-      if (!r || !r.ok) { after(0, false, 'failed'); return; }
+      if (!r || !r.ok) { after(0, false, (r && r.kind !== 'network' && r.kind !== 'slow') ? 'failed-other' : 'failed'); return; }
       var sc = Number(r.score) || 0;
+      /* 回合号被人占满的那一词（审查 F-R2-7）：不分先后，拼对就算分；抢答赛要等对手也答完这一词再一起翻篇 */
+      if (r.squatted) { after(sc, false, 'squat'); return; }
       after(sc, !!r.first, r.first ? 'won' : (sc ? 'second-scored' : 'second'));
-    })['catch'](function () { after(0, false, 'failed'); });
+    })['catch'](function () { clearTimeout(slowT); after(0, false, 'failed'); });
   }
 
   /* 🔴v1164 B/C「两人都答完才翻篇」：我答完了、对手还在拼这一词 → 等他。
@@ -1903,7 +2093,7 @@
   function nextWord(st, idx, how) {
     var M = (S() && S().modeOf) ? S().modeOf(st && st.mode) : { waitAll: false };
     var last = idx + 1 >= (st.words || []).length;
-    var mustWait = M.waitAll || (how === 'timeout' || how === 'failed');
+    var mustWait = M.waitAll || (how === 'timeout' || how === 'failed' || how === 'failed-other' || how === 'squat');
     if (!mustWait || last || !st.roomId || st.roomId === 'test' || (st.oppAns != null && st.oppAns >= idx)) {
       askRound(idx + 1); return;
     }
@@ -1932,7 +2122,13 @@
           /* 对手答完了这一词，或者这一词已经有人拼对了（抢答赛：对手在我超时后拼对的） */
           var oa = Number(r.oppAns);
           if (isFinite(oa)) st.oppAns = Math.max(st.oppAns == null ? -1 : st.oppAns, oa);
-          if (oa >= idx || (!M.waitAll && (r.winners || [])[idx])) { go(); return; }
+          if (oa >= idx) { go(); return; }
+          if (!M.waitAll && (r.winners || [])[idx]) {
+            /* 🔴审查 R2-UI-10：我超时以后对手拼对了这一词 —— 他那边要停 2.1 秒才进下一词；
+               我以前一看到就马上开下一词，每次都比他早开拼 1 秒多。和「对手抢先了」那条路一样停 1.4 秒 */
+            if (!rt._oppWonAt) { rt._oppWonAt = Date.now(); setTimeout(go, 1400); }
+            return;
+          }
         }
         setTimeout(poll, 900);
       }, function () { setTimeout(poll, 900); });
@@ -1953,28 +2149,39 @@
     if (!st) return;
     stopPoll(); stopKb();
     var secs = Math.max(1, Math.round((Date.now() - st.startAt) / 1000));
+    var pendN = Object.keys(st.pendingR || {}).length;
 
     /* 🔴v1122：**改用回合制的实际得分。** 改了计分方式，就要顺着链条查到最后一环。 */
     var stat = st.st || { words: 0, correct: 0 };
-    var score = Number(st.myScore) || 0;
-
+    var line = function () {
+      return '你答对 ' + stat.correct + ' / ' + (st.words || []).length
+        + ' 个，得 ' + (Number(st.myScore) || 0) + ' 分，用时 ' + secs + ' 秒。';
+    };
+    st.finished = true;
     paint('<div class="pr_top"><div class="pr_h">📨 交卷了</div></div>'
-      + '<div class="pr_empty">你答对 ' + stat.correct + ' / ' + (st.words || []).length
-      + ' 个，得 ' + score + ' 分，用时 ' + secs + ' 秒。<br>'
-      + '正在等对手交卷…</div>'
+      + '<div class="pr_empty"><span id="prResLine">' + line() + '</span><br>'
+      + '<span id="prResWho">' + (pendN ? '正在确认最后一词的分…' : '正在等对手交卷…') + '</span></div>'
       /* v1164：同步赛 / 回合赛里两人各有每词 15 秒，快的那位可能要等慢的一两分钟 ——
          让他看见时间在走、知道对面还在拼（不动的等待屏和死掉的界面没区别，看门狗也会当成卡住） */
       + '<div id="prResWait" style="text-align:center;font-size:12.5px;color:var(--pk-dim);margin-top:6px">'
       +   '已等 0 秒</div>'
-      /* 审查 UI-1：等交卷这一屏也要能走（以前只能按手机返回键，而首页外壳里那什么都没结束） */
-      + '<button class="pr_btn pr_btn2" id="prQuit" style="margin-top:16px">不等了，退出这一局</button>');
+      /* 审查 UI-1：等交卷这一屏也要能走。🔴审查 R2-UI-4/FX-5：已经交了卷，走了**不算认输** ——
+         结果在后台接着等，出来了照样记进战绩（以前点了它，赢了的一局就没了，对话框还说「就算对手赢」） */
+      + '<button class="pr_btn pr_btn2" id="prQuit" style="margin-top:16px">先离开，结果出来会自动记上</button>');
     if (q('prQuit')) q('prQuit').onclick = function () { askQuit(); };
     startTicker('prResWait', Date.now(), function (sec) {
       return '已等 ' + sec + ' 秒' + (sec >= 8 ? ' · 对手可能还在拼后面几个词' : '');
     });
     _waitResult = 0; _resultFail = 0;
-    /* 🔴v1164：第一次交卷失败也走同一条重试路（原来 `!r.ok` 直接回列表，这一局就白打了） */
-    pollResult(st, score);
+    /* 🔴v1164：第一次交卷失败也走同一条重试路（原来 `!r.ok` 直接回列表，这一局就白打了）。
+       🔴审查 FX-10：最后一词「结果待定」的，先定下来再交（最多 8 秒）—— 不然交上去的分里没有它 */
+    resolvePending(st, 8000).then(function () {
+      if (!stillLive(st)) return;
+      var el = q('prResLine'); if (el) el.textContent = line();
+      var who = q('prResWho'); if (who) who.textContent = '正在等对手交卷…';
+      st.finalScore = Number(st.myScore) || 0;
+      pollResult(st, st.finalScore);
+    });
   }
 
   /* 交卷 + 等对手交卷。st 是这一局的状态 ——
@@ -2162,6 +2369,71 @@
     return Math.round(n);
   }
 
+  /* 把一局记进战绩 + 传榜（结算屏、中途退出、交了卷先离开后补记都走这里 —— 审查 R2-UI-4/FX-6）。
+     一局只记一次。传榜只在这里传、不主动轮询；传失败不影响任何事（下次打开天梯页会补传）。 */
+  function recordGame(st, r) {
+    var R = window.HansenPkRecord;
+    if (!R || !st || !r || r.result === 'void' || st._recorded) return null;
+    st._recorded = true;
+    try {
+      setTimeout(function () {
+        try {
+          if (window.HansenLadderBoard && HansenLadderBoard.push) Promise.resolve(HansenLadderBoard.push()).then(function (pr) {
+            if (pr && pr.ok === false && !pr.skipped) console.warn('[天梯榜] 这局的分没传上榜，下次打开天梯页会补传：' + String(pr.reason || '').slice(0, 120));
+          })['catch'](function () {});
+        } catch (e) {}
+      }, 300);
+    } catch (e) {}
+    var s2 = st.st || {};
+    return R.record({
+      result: r.result,
+      mode: st.mode || _pickedMode,
+      oppName: st.oppName || '对手',
+      /* 🔴v1156：**把对手分数传给战绩，别让它默认成 1000** —— 排位的意义有一半在于「赢强的人涨得多」 */
+      oppRating: st._oppRating || 0,
+      myScore: r.mine, oppScore: r.theirs,
+      words: s2.words || 0, correct: s2.correct || 0, totalMs: s2.totalMs || 0,
+      firstWins: s2.firstWins || 0, fastestMs: s2.fastestMs || 0
+    });
+  }
+
+  /* 已经交了卷、不想干等的孩子点了「先离开」：结果在后台接着等，出来了照样记进战绩（审查 R2-UI-4/FX-5）。
+     最多等 6 分钟（同步赛 / 回合赛对手最多还要 10 词 × 15 秒）；对手的心跳停了一分钟 → 和结算屏同一条规则判离场。
+     页面关掉了就没法记了（那一局只在对手那边有结论）。 */
+  function bgSettle(st) {
+    if (!st || !st.roomId || st.roomId === 'test' || st._bg) return;
+    st._bg = true;
+    var score = Number(st.finalScore != null ? st.finalScore : st.myScore) || 0;
+    var t0 = Date.now(), n = 0, fin = false;
+    var done = function (r) {
+      if (fin || !r) return;
+      fin = true;
+      var rr = r.byAbandon ? { result: r.result, mine: score, theirs: (r.result === 'win') ? 0 : (Number(st.oppScore) || 0) } : r;
+      if (rr.result === 'void') return;
+      try { recordGame(st, rr); } catch (e) {}
+      try {
+        var txt = rr.result === 'win' ? '你赢了 🎉' : (rr.result === 'lose' ? '这局输了' : '打平');
+        if (window.HansenToast && HansenToast.say) HansenToast.say('刚才那一局：' + txt + '（' + numOr0(rr.mine) + ' : ' + numOr0(rr.theirs) + '），已经记进战绩');
+      } catch (e) {}
+    };
+    var next = function (ms) { if (!fin) setTimeout(step, ms); };
+    var step = function () {
+      if (fin || Date.now() - t0 > 6 * 60000) return;
+      n++;
+      S().reportResult(st.roomId, score).then(function (r) {
+        if (r && r.ok && !r.waiting) { done(r); return; }
+        if (!(r && r.ok && r.waiting) || n % 8 !== 0) { next(4000); return; }
+        S().opponentGone(st.roomId).then(function (g) {
+          if (!(g && g.ok && g.gone && !g.oppFinished)) { next(4000); return; }
+          S().claimAbandonWin(st.roomId).then(function (w) {
+            done({ result: (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win', byAbandon: true });
+          }, function () { done({ result: 'win', byAbandon: true }); });
+        }, function () { next(4000); });
+      }, function () { next(6000); });
+    };
+    step();
+  }
+
   function showResult(r) {
     stopTicker();
     /* v1104：对手离场赢的要说清楚 —— 不能让人以为自己实打实赢了 */
@@ -2177,48 +2449,11 @@
     var wasLadder = _state ? !!_state.ladder : _cameFromLadder;
 
     /* 🔴v1103：**打完必须留下痕迹** —— 赢了没记录，那为什么要打？
-       只有 A 抢答赛动天梯分（v1100 定的规矩：排位就该纯竞技），
-       B/C 只记战绩。 */
+       只有 A 抢答赛动天梯分（v1100 定的规矩：排位就该纯竞技），B/C 只记战绩。 */
     var rec = null;
-    try {
-      var R = isVoid ? null : window.HansenPkRecord;
-      if (R) {
-        /* v1156: 打完排位把分数传上榜。
-           只在这里传，不主动轮询 —— 没必要给云端加负担。
-           传失败不影响任何事：榜上暂时是旧分而已。 */
-        try {
-          setTimeout(function () {
-            try {
-              /* v1164：传失败要留个记录（下次打开天梯页会自动补传，原因在 lastPushError 里） */
-              if (window.HansenLadderBoard && HansenLadderBoard.push) Promise.resolve(HansenLadderBoard.push()).then(function (pr) {
-                if (pr && pr.ok === false && !pr.skipped) console.warn('[天梯榜] 这局的分没传上榜，下次打开天梯页会补传：' + String(pr.reason || '').slice(0, 120));
-              })['catch'](function () {});
-            } catch (e) {}
-          }, 300);
-        } catch (e) {}
-
-        try { _lastStats = Object.assign({}, (_state && _state.st) || {}); } catch (e) {}
-        rec = R.record({
-          result: r.result,
-          mode: (_state && _state.mode) || _pickedMode,
-          oppName: (_state && _state.oppName) || '对手',
-          /* 🔴v1156：**把对手分数传给战绩，别让它默认成 1000。**
-             实测：这里原来一个字都没传，于是战绩模块每次都按
-             `opts.oppRating || 1000` 算 —— 打赢 1400 分的高手
-             和打赢新手加一样的分。
-             **排位的意义有一半在于"赢强的人涨得多"**，
-             这个字段没传就等于那一半没了。
-             拿不到时仍然回落到 1000（比不算好）。 */
-          oppRating: (_state && _state._oppRating) || 0,
-          myScore: r.mine, oppScore: r.theirs,
-          words: ((_state && _state.st) || {}).words || 0,
-          correct: ((_state && _state.st) || {}).correct || 0,
-          totalMs: ((_state && _state.st) || {}).totalMs || 0,
-          firstWins: ((_state && _state.st) || {}).firstWins || 0,
-          fastestMs: ((_state && _state.st) || {}).fastestMs || 0
-        });
-      }
-    } catch (e) {}
+    try { _lastStats = Object.assign({}, (_state && _state.st) || {}); } catch (e) {}
+    try { if (!isVoid) rec = recordGame(_state, r); } catch (e) {}
+    hideQuit();
 
     var extra = '';
     if (rec) {
@@ -2348,8 +2583,11 @@
       var _h = host();
       if (_h) {
         _h.classList.add('on');
+        /* 审查 R2-UI-6：网慢时这一屏要停好几秒 —— 给一个「取消」，别让孩子只能按手机的返回键 */
         _h.innerHTML = '<div class="pr_wrap">'
-          + '<div class="pr_empty" style="padding:30px 12px">正在开房间…</div></div>';
+          + '<div class="pr_empty" style="padding:30px 12px">⏳ 正在开房间…<br>'
+          + '<span style="font-size:12.5px">网慢的时候要等几秒</span></div>'
+          + '<button class="pr_btn pr_btn2" id="prCreateCancel">取消，回天梯</button></div>';
       }
     } catch (e) {}
     /* 🔴v1156：**只让容器可见，不画房间列表**（lobby() 会先画出「房间已经不在了」）。
@@ -2406,11 +2644,27 @@
       /* pagehide 比 beforeunload 可靠：iOS Safari 上 beforeunload 常常不触发 */
       window.addEventListener('pagehide', bye);
       /* 切到后台超过一会儿也算离开 —— 手机上"划掉 App"往往只触发 visibilitychange */
-      var hidSeq = 0;
+      var hidSeq = 0, hidAt = 0;
       document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState !== 'hidden') { hidSeq++; return; }
+        var hid = document.visibilityState === 'hidden';
+        /* 🔴审查 R2-UI-3：等人的时候切到别的 App → **马上**停止收人（公开房 / 排位房先下架，私密房不点头）；
+           以前要等 30 秒才收房，这期间照样把人确认进来、在后台开打，进来的孩子对着空气打完一局。回来接着等。 */
+        try {
+          if (_cancelWait && _state && !_state.startAt) {
+            if (hid && typeof _cancelWait.pause === 'function') _cancelWait.pause();
+            if (!hid && typeof _cancelWait.resume === 'function') _cancelWait.resume();
+          }
+        } catch (e) {}
+        if (!hid) { hidSeq++; return; }
         var my = ++hidSeq;
-        setTimeout(function () {
+        hidAt = Date.now();
+        var later = function () {
+          if (my !== hidSeq || document.visibilityState !== 'hidden') return;
+          /* 私密房：房主多半是切到微信发房间码去了 —— 等人期间不会开打（上面已经停止收人），多留一会儿（3 分钟） */
+          if (_state && _state.isPrivate && !_state.startAt && Date.now() - hidAt < 180000) { setTimeout(later, 15000); return; }
+          bye30();
+        };
+        var bye30 = function () {
           /* 30 秒后还没回来才收房 —— 只是切出去看一眼不该把房关了。
              🔴v1164：**只收「还在等人」的房。** 打到一半切出去，交给对手那边的 60 秒离场判定；
              原来这里一视同仁，切出去 30 秒就把正在打的这局退掉了，回来界面还停在对战屏。
@@ -2423,7 +2677,8 @@
           endWait(_state, true);
           if (lad) { ladderBack('home', '你切出去太久，房间先关掉了。回来点「开始排位」再找对手。'); return; }
           lobby({ reason: '你切出去太久，房间先关掉了。想玩就再开一间吧。' });
-        }, 30000);
+        };
+        setTimeout(later, 30000);
       });
     } catch (e) {}
   }
@@ -2438,26 +2693,42 @@
   function hideQuit() { var d = q('prQuitAsk'); if (d && d.parentNode) d.parentNode.removeChild(d); }
   function askQuit(onLeave) {
     hideQuit();
-    var el = host();
+    host();
     var d = document.createElement('div');
     d.id = 'prQuitAsk';
     d.setAttribute('role', 'alertdialog');
     d.setAttribute('style', 'position:fixed;inset:0;z-index:2147483601;background:rgba(11,16,32,.86);'
       + 'display:flex;align-items:center;justify-content:center;padding:20px');
-    var battle = !!(_state && _state.startAt);
+    var st0 = _state;
+    var battle = !!(st0 && st0.startAt);
+    var handedIn = battle && !!st0.finished;
+    /* 🔴审查 R2-UI-4/FX-6：对话框说什么、就记什么 ——
+         对战中退出 = 这一局记一场输（以前什么都不记：落后的孩子点「退出」就能保住天梯分，对手却 +20）；
+         已经交了卷 = 走了也不影响结果，结果出来自动记上（以前赢下来的一局就这么没了） */
+    var title = handedIn ? '先离开吗？' : (battle ? '要退出这一局吗？' : '要退出吗？');
+    var body = handedIn ? '你已经交卷了，现在离开不影响这一局 ——<br>对手交卷以后，结果会自动记进战绩。'
+             : battle ? '现在退出，这一局就算对手赢（记一场输）。' : '房间会关掉。';
     d.innerHTML = '<div style="background:var(--pk-card);border:1px solid var(--pk-in-line);border-radius:16px;'
       + 'padding:18px 16px;max-width:340px;width:100%;text-align:center;color:var(--pk-txt)">'
       + '<div style="font-size:30px">🚪</div>'
-      + '<div style="font-size:16px;font-weight:800;margin-top:8px">' + (battle ? '要退出这一局吗？' : '要退出吗？') + '</div>'
-      + '<div style="font-size:13px;color:var(--pk-dim);margin-top:8px;line-height:1.7">'
-      + (battle ? '现在退出，这一局就算对手赢。' : '房间会关掉。') + '</div>'
-      + '<button class="pr_btn" id="prQuitNo" style="margin-top:14px">继续打</button>'
-      + '<button class="pr_btn pr_btn2" id="prQuitYes" style="margin-bottom:0">退出</button></div>';
-    el.appendChild(d);
+      + '<div style="font-size:16px;font-weight:800;margin-top:8px">' + title + '</div>'
+      + '<div style="font-size:13px;color:var(--pk-dim);margin-top:8px;line-height:1.7">' + body + '</div>'
+      + '<button class="pr_btn" id="prQuitNo" style="margin-top:14px">' + (handedIn ? '接着等' : '继续打') + '</button>'
+      + '<button class="pr_btn pr_btn2" id="prQuitYes" style="margin-bottom:0">' + (handedIn ? '先离开' : '退出') + '</button></div>';
+    /* 🔴审查 R2-UI-9：挂在页面最外层 —— 以前挂在对战屏里，下一词一画屏它就没了，孩子点的「退出」悄悄丢了 */
+    (document.body || document.documentElement).appendChild(d);
     if (q('prQuitNo')) q('prQuitNo').onclick = function () { hideQuit(); };
     if (q('prQuitYes')) q('prQuitYes').onclick = function () {
       hideQuit();
-      var lad = !!(_state && _state.ladder);
+      var st = _state;
+      var lad = !!(st && st.ladder);
+      if (st && st.startAt && st.roomId !== 'test') {
+        if (st.finished) bgSettle(st);
+        else {
+          try { recordGame(st, { result: 'lose', mine: Number(st.myScore) || 0, theirs: Number(st.oppScore) || 0 }); } catch (e) {}
+          try { if (window.HansenToast && HansenToast.say) HansenToast.say('这一局记了一场输'); } catch (e) {}
+        }
+      }
       close();
       if (typeof onLeave === 'function') { try { onLeave(); } catch (e) {} return; }
       if (lad) { try { if (window.HansenLadderUI) HansenLadderUI.open(); } catch (e) {} return; }
@@ -2469,7 +2740,7 @@
     var el = q(ID);
     var on = !!(el && el.classList.contains('on'));
     return { on: on, battle: !!(_state && _state.startAt && on), waiting: !!(_state && !_state.startAt && on),
-             joining: !!_joiningRid };
+             joining: !!_joiningRid, creating: !!_createBusy };
   }
 
   window.HansenPkRoomUI = {

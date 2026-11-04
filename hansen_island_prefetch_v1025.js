@@ -67,18 +67,39 @@
   }
 
   /* ① 最近玩过的岛：命中率最高，优先预取 */
-  function prefetchRecent() {
-    var picked = [];
+  /* 🔴审查 R2-6：首页记的 lastIslandKey 是存储键（'wordIslandAnimal'），以前直接拼成 island_wordIslandAnimal.html ——
+     每次回首页都白请求一个 404，控制台还多一条报错。存储键的名字也不一定就是文件名（People → island_job.html）。
+     现在只预取页面上真有入口的那几个岛文件：拼出来的名字对不上任何入口就不请求。 */
+  function islandFiles() {
+    var known = {};
     try {
-      var last = localStorage.getItem('lastIslandKey');
-      if (last) picked.push('island_' + String(last).replace(/[^a-z0-9]/gi, '') + '.html');
+      var links = document.querySelectorAll('a[href*="island_"]');
+      for (var i = 0; i < links.length; i++) {
+        var h = String(links[i].getAttribute('href') || '').split('?')[0].split('#')[0];
+        if (/^island_[a-z0-9]+\.html$/.test(h)) known[h] = 1;
+      }
+    } catch (e) {}
+    return known;
+  }
+  function fileOfKey(k, known) {
+    var name = String(k || '');
+    if (name.indexOf('wordIsland') === 0) name = name.slice('wordIsland'.length);
+    name = name.replace(/^island_/, '').replace(/\.html$/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    var f = name ? ('island_' + name + '.html') : '';
+    return (f && known[f]) ? f : '';
+  }
+  function prefetchRecent() {
+    var picked = [], known = islandFiles();
+    try {
+      var last = fileOfKey(localStorage.getItem('lastIslandKey'), known);
+      if (last) picked.push(last);
     } catch (e) {}
     try {
       /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
         var k = _lsk1[i];
         if (k && k.indexOf('wordIsland') === 0) {
-          var name = k.slice('wordIsland'.length).toLowerCase();
-          if (name) picked.push('island_' + name + '.html');
+          var f2 = fileOfKey(k, known);
+          if (f2 && picked.indexOf(f2) < 0) picked.push(f2);
         }
       }
     } catch (e) {}

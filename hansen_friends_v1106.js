@@ -233,19 +233,31 @@
   }
 
   /* 传输层单独一层，便于测试注入（与 pk_room 同样的做法） */
+  var _noOrder = {};   /* 集合 → 云端拒过 orderBy（没建索引）：这次打开页面不再试 */
   function realTransport() {
     function listIn(coll, what, where, opts) {
       return db().then(function (d) {
         var lim = (opts && opts.limit) || 100;
         var base = d.collection(coll).where(conv(d, where));
+        var plain = function () {
+          return call(d.collection(coll).where(conv(d, where)).limit(Math.max(lim, 100)).get(), what, coll);
+        };
         if (!(opts && opts.newestFirst)) {
           return call(base.limit(lim).get(), what, coll).then(function (r) { return (r && r.data) || []; });
         }
-        /* 按时间倒序：云端没建排序索引时 orderBy 会被拒 → 退回不排序的查询，本地排 */
-        return call(base.orderBy('at', 'desc').limit(lim).get(), what, coll)['catch'](function (indexErr) {
-          if (kindOf(indexErr) !== 'config') throw indexErr;
-          return call(d.collection(coll).where(conv(d, where)).limit(Math.max(lim, 100)).get(), what, coll);
-        }).then(function (r) { return (r && r.data) || []; });
+        /* 按时间倒序：云端没建排序索引时 orderBy 会被拒 → 退回不排序的查询，本地排。
+           🔴审查 T7：拒绝的方式不一定是 {code} —— 云端回个非 200，SDK 只会说 network request error。
+           以前只在 config 时退回，于是招呼一条都读不出来、界面一直说「连不上网络」。
+           现在除了「登录过期 / 会话没好」，什么错都先退回不排序的查询试一次；拒过一次就记住。 */
+        var first = _noOrder[coll] ? plain() : call(base.orderBy('at', 'desc').limit(lim).get(), what, coll)['catch'](function (indexErr) {
+          var k = kindOf(indexErr);
+          if (k === 'expired' || k === 'session') throw indexErr;
+          return plain().then(function (r) { _noOrder[coll] = true; return r; });
+        });
+        return first.then(function (r) {
+          var rows = (r && r.data) || [];
+          return rows.slice().sort(function (a, b) { return (Number(b && b.at) || 0) - (Number(a && a.at) || 0); });
+        });
       });
     }
     function addIn(coll, what, doc) {
@@ -280,6 +292,14 @@
         });
       },
       remove: function (id) { return removeIn(COLLECTION, '删除好友记录', id); },
+      /* 审查 FX-4：自己的资料那条（_id = 我的 uid，登录时就建好了）—— 读它的 _openid 认出「我是谁」 */
+      readProfile: function (uid) {
+        return db().then(function (d) {
+          return call(d.collection('sb_profile').doc(uid).get(), '读取资料', 'sb_profile').then(function (r) {
+            return (r && r.data && r.data[0]) || null;
+          });
+        });
+      },
       addMsg: function (doc) { return addIn(MSG_COLL, '发招呼', doc); },
       listMsg: function (where, opts) { return listIn(MSG_COLL, '读取招呼', where, opts); },
       removeMsg: function (id) { return removeIn(MSG_COLL, '清理旧招呼', id); }
@@ -358,10 +378,34 @@
     });
   }
 
+  function myUid() {
+    try { return String((window.HansenAuth && HansenAuth.readLocal && HansenAuth.readLocal().uid) || ''); } catch (e) { return ''; }
+  }
+  /* 🔴审查 FX-4：刚写的在线记录读不回来（主从延迟两三秒很常见）时，以前就**这一整页都不知道自己的 _openid** ——
+     自己的好友记录全被当成「不是我的」：好友列表是空的、加了好友不显示、给好友发招呼被拒，刷新页面才好。
+     现在：① 再读一次自己那条在线记录；② 还没有就读自己的资料那条（sb_profile 里 _id = 我的 uid，
+     登录时早就建好了，数据库盖的也是我的 _openid）；③ 都没读到就下次再试（不再一次读不到就放弃）。 */
+  var _learnAt = 0;
+  function learnOpenid(m) {
+    if (m.openid || Date.now() - _learnAt < 4000) return Promise.resolve(m.openid);
+    _learnAt = Date.now();
+    return Promise.resolve().then(function () { return m.presenceId ? T().read(m.presenceId) : null; })['catch'](function () { return null; })
+      .then(function (doc) {
+        if (doc && doc._openid) return doc._openid;
+        var uid = myUid();
+        if (!uid || typeof T().readProfile !== 'function') return '';
+        return T().readProfile(uid).then(function (p) { return (p && p._openid) || ''; }, function () { return ''; });
+      }).then(function (oid) {
+        if (oid && !m.openid) { m.openid = String(oid); saveId(m); }
+        return m.openid;
+      });
+  }
+
   /* 保证我有一条自己的在线记录，并知道自己的 _openid */
   function ensureMe(u) {
     var m = idFor(u);
-    if (m.presenceId) return Promise.resolve(m);
+    if (m.presenceId && m.openid) return Promise.resolve(m);
+    if (m.presenceId) return learnOpenid(m).then(function () { return m; }, function () { return m; });
     if (_ensuring && _ensuring.cid === u.cid) return _ensuring.p;
     var p = T().list({ kind: 'presence', cid: u.cid }).then(function (rows) {
       var own = (rows || []).filter(function (r) {
@@ -383,12 +427,14 @@
           m.presenceId = id;
           if (doc && doc._openid) m.openid = doc._openid;
           m.fresh = true;
-          saveId(m);
-          /* 以前留下的、确认是我自己的旧记录顺手清掉 */
-          if (m.openid) {
-            sweepPresence(m, (rows || []).filter(function (x) { return x._openid === m.openid && x._id !== id; }));
-          }
-          return m;
+          return (m.openid ? Promise.resolve() : learnOpenid(m)['catch'](noop)).then(function () {
+            saveId(m);
+            /* 以前留下的、确认是我自己的旧记录顺手清掉 */
+            if (m.openid) {
+              sweepPresence(m, (rows || []).filter(function (x) { return x._openid === m.openid && x._id !== id; }));
+            }
+            return m;
+          });
         });
       });
     });
@@ -677,6 +723,11 @@
           lastSeen: at
         };
       }
+      /* 审查安全 R2-2：记下「这个好友本人是哪个账号」（写「他加了我」那条好友记录的 _openid）——
+         招呼要是这个账号发的才算他发的 */
+      var oids = {};
+      Object.keys(theirBy).forEach(function (cid) { if (theirBy[cid] && theirBy[cid]._openid) oids[cid] = String(theirBy[cid]._openid); });
+      _friendOids = { at: Date.now(), cid: u.cid, map: oids };
       var friends = mine.map(function (r) {
         var theirs = theirBy[r.friend];
         var c = card(r.friend, r.name, theirs && theirs._openid);
@@ -781,11 +832,15 @@
   }
 
   /* opts.onlyFrom：只收这些竞赛 ID 发来的（界面传"互为好友"的人 —— 陌生人的招呼不给孩子看） */
+  var _friendOids = null;   /* { at, cid, map: 好友竞赛 ID → 他本人的 _openid }（listFriends 认过的） */
   function inbox(opts) {
     var u = me();
     if (!u.cid) return Promise.resolve({ ok: false, kind: 'expired', reason: '先登录', msgs: [] });
     var only = (opts && Array.isArray(opts.onlyFrom)) ? opts.onlyFrom : null;
-    return T().listMsg({ to: u.cid }, { newestFirst: true, limit: 50 }).then(function (rows) {
+    var fresh = _friendOids && _friendOids.cid === u.cid && Date.now() - _friendOids.at < 120000;
+    return Promise.resolve(fresh ? null : listFriends()).then(function () {
+      return T().listMsg({ to: u.cid }, { newestFirst: true, limit: 50 });
+    }).then(function (rows) {
       /* 🔴v1114：**用 _openid 校验发件人，防冒充。**
          消息里的 `from` 是客户端自己填的，数据库注入的 `_openid` 才可信：
          两者对不上就显示为「(来源不明的消息)」，不显示发件人名字 ——
@@ -799,6 +854,13 @@
         var trusted = myOid ? !!(r._openid && r.fromOpenid && r._openid === r.fromOpenid)
                             : (!r._openid || !r.fromOpenid || r._openid === r.fromOpenid);
         if (trusted && !cidOf(r.from)) trusted = false;
+        /* 🔴审查安全 R2-2：上面只证明了「发件人没谎报自己的 _openid」，没证明「他就是 No.from 那个人」——
+           陌生人填上孩子好友的竞赛 ID、写上自己真的 _openid，以前就成了「好友发来的」。
+           现在还要对上：写这条招呼的账号 = 写「No.from 加了我」那条好友记录的账号（列好友时认过的那个人）。 */
+        if (trusted && myOid) {
+          var fo = (_friendOids && _friendOids.map) ? _friendOids.map[cidOf(r.from)] : '';
+          if (!fo || fo !== r._openid) trusted = false;
+        }
         if (!trusted) {
           return { id: r._id, from: 0, fromName: '(来源不明)', at: r.at || 0,
                    read: !!r.read, emoji: '⚠️', text: '(来源不明的消息)', suspicious: true };

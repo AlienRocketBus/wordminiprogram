@@ -73,6 +73,7 @@ try {
   await t.ok(!has(bTxt, /9999|第一名9999/), `9999 分的不上榜（榜上：${flat(bTxt).slice(0, 120)}）—— 以前排第一`, () => explain());
   await t.ok(!has(bTxt, /微信|8888|领皮肤/) && has(bTxt, /小蜜蜂/), '广告名字换成了「小蜜蜂」，联系方式一个字也不显示', () => explain());
   await t.ok(has(board, /仅供参考/), '榜上写明「排行榜是大家手机上传的分数，仅供参考」', () => explain());
+  await H.cleanPhones(t, [X, Y]);   /* 审查 T8：关手机之前看一眼页面报错 */
   await X.close(); await Y.close(); live.splice(live.indexOf(X), 1); live.splice(live.indexOf(Y), 1);
 
   /* ══ ② 列房时清死房 ════════════════════════════════════════════ */

@@ -147,6 +147,7 @@ try {
     await t.ok(S2 && S2._openid !== P._openid && [C.cloudUid, D.cloudUid].includes(S2._openid), '房主和客人是这两个人、各写各的文档', () => explain());
   }
   await t.ok(H.foreignWrites(emu).length === 0, `安全规则模式下也没有越权写（被拒 ${H.foreignWrites(emu).length} 次）`, () => explain());
+  await H.cleanPhones(t, [C, D]);   /* 审查 T8：关手机之前看一眼页面报错 */
   await C.close(); await D.close();
   live.length = 0;
 
@@ -184,6 +185,9 @@ try {
   await t.ok(pkUp.ok, `登录完回到拼写大PK屏，「天梯排位」点得到（${pkUp.why || pkUp.hit}）`, () => explain());
   if (!pkUp.ok) { await E.page.reload({ waitUntil: 'domcontentloaded' }); await H.sleep(4000); await H.dismissIslandWelcome(E); await E.tap('.mode-card[onclick*="openSpellPK"]'); }
   await E.tap('#kLadder');
+  /* 🔴审查 R2-UI-12：岛屿页这条主路以前没有起名这一步，没起过名的孩子在对手那边叫「无名蜂」 */
+  const askedName = await H.answerNameIfAsked(E, '小蜂戊', { timeout: 4000 });
+  await t.ok(askedName, '岛屿页第一次进「天梯排位」先让起个名字（对手会看到这个名字）', () => explain());
   const goHit = await E.hitTest('#ldGo', { timeout: 6000 });
   await t.ok(goHit.ok, `天梯页在拼写大PK屏上面、「开始排位」点得到（${goHit.why || goHit.hit}）`, () => explain());
   let waitHit = { ok: false, why: '没走到这一步' }, battleHit = { ok: false, why: '没走到这一步' };
@@ -200,6 +204,8 @@ try {
     const vb = await H.until(async () => (await H.battleView(E)) && (await H.battleView(F)), { timeout: 40000 });
     battleHit = vb ? await E.hitTest('#prKb .pr_key[data-k="a"]', { timeout: 3000 }) : battleHit;
     await t.ok(vb && battleHit.ok, `对手从拼写大PK页进来，岛屿页上的对战屏在最上层、键盘点得到（${battleHit.why || battleHit.hit || ''}）`, () => explain());
+    const fv = await H.battleView(F);
+    await t.ok(fv && fv.oppName === '小蜂戊', `对手那边看到的是刚起的名字「小蜂戊」，不是「无名蜂」（看到：${fv && fv.oppName}）`, () => explain());
   }
   for (const p of live) await t.ok(!p.errors.length, `[${p.name}] 没有页面报错（${p.errors.slice(0, 2).join(' | ') || '无'}）`);
 } catch (e) {

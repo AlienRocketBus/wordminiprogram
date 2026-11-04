@@ -901,7 +901,11 @@
       '<div style="font-size:13px;color:#cbd5e1">📚 已收集 <b style="color:#fbbf24;font-size:18px">'+owned+'</b> / 20 张</div>'+
       '<div style="font-size:13px;font-weight:900;color:#fbbf24;background:rgba(251,191,36,.15);padding:4px 11px;border-radius:13px">'+owned+' / 20</div></div>';
     if(allDone){
-      html += '<div style="font-size:12px;color:#86efac;margin:0 4px 14px">✨ 全部集齐 · 卡牌大师</div>';
+      /* 🔴审查 R2-2（回归）：浅色主题下这行是浅绿字配浅色底（对比度 1.26，几乎看不见）——新来的孩子头 3 天
+         「全开放」时卡册就是这一行。改成浅绿底小牌子 + 深绿字（4.6:1）：深色、浅色主题下都看得清
+         （浅色主题会把浅色字自动换成深色 —— 所以字本身就用深色，底用浅色，换不换都一样） */
+      html += '<div style="margin:0 4px 14px"><span style="display:inline-block;font-size:12px;font-weight:800;'+
+        'color:#15803d;background:#dcfce7;padding:3px 10px;border-radius:12px">✨ 全部集齐 · 卡牌大师</span></div>';
     }else{
       html += '<div style="height:8px;background:rgba(15,23,42,.7);border-radius:5px;margin:0 4px 14px;overflow:hidden;border:1px solid rgba(251,191,36,.2)">'+
         '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:5px"></div></div>';

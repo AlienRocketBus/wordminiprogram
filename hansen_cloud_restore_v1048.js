@@ -156,8 +156,22 @@
     }).catch(function (e) { return { skip: 'error', reason: EText(e).slice(0, 200) }; });
   }
 
+  /* 🔴审查 R2-5（配额）：岛屿页里同时装着好几层页面（岛 + 几个预热的），以前每层开机都去云端读一次存档 ——
+     打开一个岛 6 次读。只让最上面那一层（上一层没有本模块的那一层）去看；藏起来的预热页面不看。 */
+  function topRestoreFrame() {
+    try {
+      var w = window, n = 0;
+      while (w && w !== w.top && n++ < 6) {
+        var fe = w.frameElement;
+        if (fe && !fe.getClientRects().length && w.parent && w.parent.HansenCloudRestore) return false;
+        w = w.parent;
+        if (w && w.HansenCloudRestore) return false;
+      }
+    } catch (e) {}
+    return true;
+  }
   function boot() {
-    var run = function () { check(); };
+    var run = function () { if (topRestoreFrame()) check(); };
     if (typeof window.requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 6000 });
     else setTimeout(run, 3500);
     /* 登录状态变化后再查一次（刚登录的设备也能立刻收到提示） */

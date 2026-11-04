@@ -428,7 +428,8 @@ async function pair(hn, gn) {
      '★ 绝不自建实例、不自行 import SDK（v1028/v1059 两次事故的成因）');
   ok(/_setTransportForTest/.test(codeOnly), '★ 保留传输层注入口，云端逻辑可在本地验证');
   const joinBody = codeOnly.slice(codeOnly.indexOf('function joinRoom'), codeOnly.indexOf('function startHeartbeat'));
-  ok(/claim\(seat\)/.test(joinBody), '★ 进房 = 用固定 _id 的 add 抢座位（claim）');
+  /* v1164 第二轮：claim(seat, {stop}) —— 进房可以中途取消，抢座那次读回也跟着停 */
+  ok(/claim\(seat\b/.test(joinBody), '★ 进房 = 用固定 _id 的 add 抢座位（claim）');
   const cl = codeOnly.slice(codeOnly.indexOf('function claim('), codeOnly.indexOf('function claim(') + 1500);
   ok(/T\(\)\.add\(/.test(cl) && /T\(\)\.read\(/.test(cl) && /nonce/.test(cl),
      '★ 抢占失败后按 _id 读回、看 nonce 判定（重复 _id 的报错文本没人见过，不能只信 add）');

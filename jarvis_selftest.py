@@ -69,10 +69,10 @@ def _inj_room(s):
     """守卫判据：joinRoom 必须用固定 _id 的 add 抢座（claim），不得出现 read(...) 后紧跟
        patch(...) 的"先读再写"形态（v1164：客人去改房主的文档在真机上永远失败）。
        故样本把抢座换回"读房间再改房间"那种形态。"""
-    m = "        return claim(seat).then(function (c) {"
+    m = "      return claim(seat, { stop: function () { return tok.cancel; } }).then(function (c) {"
     if m not in s:
         return None
-    return s.replace(m, "        return T().read(roomId).then(function () { return T().patch(roomId, { guestId: u.id }); })"
+    return s.replace(m, "      return T().read(roomId).then(function () { return T().patch(roomId, { guestId: u.id }); })"
                         ".then(function () { return { mine: true }; }).then(function (c) {", 1)
 
 def _inj_dead_assert(s):
@@ -919,7 +919,7 @@ def _inj_marker_no_creds(s):
 
 def _inj_join_no_confirm(s):
     """进房要等确认：房主读到房间里有客人就直接开打（不等客人回话）。"""
-    m = 'if (pend) return confirm(R, S);'
+    m = 'if (pend) return confirm(R, S, u);'
     return s.replace(m, 'if (R.guestId) { joined(R, S); return; }', 1) if m in s else None
 
 def _inj_watchdog_close(s):
@@ -929,8 +929,8 @@ def _inj_watchdog_close(s):
 
 def _inj_ladder_gate(s):
     """排位按种类分流：岛上的天梯入口不过登录那道门。"""
-    m = "if (!needOnline()) return;\n      HansenLadderUI.open();"
-    return s.replace(m, "HansenLadderUI.open();", 1) if m in s else None
+    m = "if (!needOnline()) return;\n      needName(function () { HansenLadderUI.open(); });"
+    return s.replace(m, "needName(function () { HansenLadderUI.open(); });", 1) if m in s else None
 
 def _inj_untypeable(s):
     """对战键盘打得出：取词不再跳过带空格 / 连字符的词。"""

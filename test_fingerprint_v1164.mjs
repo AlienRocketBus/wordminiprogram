@@ -50,6 +50,21 @@ try {
     const after = fp();
     ok(after !== before, `★ 改了 ${f} → 指纹变了（${before} → ${after}），旧的「全绿」不再作数`);
   }
+  /* 🔴审查 T9：手改的 HTML（index.html / spelling_pk.html）改一个字符、大小不变 —— 指纹也必须变
+     （以前只算 HTML 的大小：把返回键收房那一处的 `||` 改成 `&&`，旧的全绿照样作数） */
+  {
+    fs.writeFileSync(path.join(tmp, 'index.html'), '<script>if (a || b) close();</script>');
+    const before = fp();
+    fs.writeFileSync(path.join(tmp, 'index.html'), '<script>if (a && b) close();</script>');
+    const after = fp();
+    ok(after !== before, `★ index.html 改了一个字符、大小没变 → 指纹也变了（${before} → ${after}）`);
+  }
+  /* 两份文件里 HTML 的算法也得一样：都要读内容（任一份只算大小，闸门和跑测试的人就对不上） */
+  for (const f of ['分批跑测试.py', 'jarvis_gate.py']) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    const i = src.indexOf("'*.html'"), seg = src.slice(i, i + 400);
+    ok(i >= 0 && /open\(f, 'rb'\)\.read\(\)/.test(seg) && !/getsize/.test(seg), `★ ${f} 的指纹读 HTML 的内容（不只看大小）`);
+  }
   /* 两份文件的文件清单必须一模一样（闸门和跑测试的人对「哪些文件算代码」要说同一句话） */
   const pats = (src) => {
     const m = /for\s+\w+\s+in\s+\(([^)]*template\.html[^)]*)\)/.exec(src);

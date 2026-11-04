@@ -66,11 +66,14 @@ export function createEmulator(opts = {}) {
     consistencyLagMs: 0,       // 读（get/where/count）只看得到这么多毫秒以前的写；写永远落在最新状态上
     permissionMode: 'legacy',  // 默认的越权写回法；单个集合可以覆盖
     legacyMulti: 'own',        // legacy 下 where().update/remove：'own' 只动自己的 | 'deny' 整个拒
-    duplicateStyle: 'request_failed',   // 'request_failed' | 'duplicate_write' | 'http500' | 'silent'（假装成功、不写）| 'overwrite'（覆盖）
+    duplicateStyle: 'request_failed',   // 'request_failed' | 'duplicate_write' | 'http500' | 'code'（回 duplicateCode）| 'silent'（假装成功、不写）| 'overwrite'（覆盖）
+    duplicateCode: 'DATABASE_PERMISSION_DENIED',   // 🔴审查 T6：duplicateStyle='code' 时重复 _id 回这个码（看着像「权限不对」的那种）
     // 🔴v1164（审查 TI-1/TI-4/TI-5）：真云端几处没人观察到的行为，做成可切换的，App 每一种都要对
     orderByNeedsIndex: false,  // true：带 orderBy 的查询一律回 {code}（控制台没建索引）—— App 要退成不排序的查询
+    orderByStatus: 0,          // 🔴审查 T7：≠0 时带 orderBy 的查询回这个 HTTP 状态（SDK 只会看到 network request error）—— App 照样要退回
     deniedStatus: 200,         // 没权限时回的 HTTP 状态（≠200 时 SDK 只会说 network request error）
     missingStatus: 200,        // 集合没建时回的 HTTP 状态
+    tokenErrStatus: 200,       // 🔴审查 T5：数据库不认令牌（过期 / 被撤）时回的 HTTP 状态（≠200 时 SDK 只会说 network request error）
     refreshErrorCode: 'invalid_grant',   // 作废的 refresh_token 被拒时回的 error（≠invalid_grant 时 SDK 不删凭证）
     accessTokenTtlSec: 7200,   // SDK 把 expires_at 记成 now + (ttl-30) 秒，过了就去刷新
     verificationCode: '123456',
@@ -353,6 +356,8 @@ export function createEmulator(opts = {}) {
   function duplicateRes(req, colName, id) {
     if (knobs.duplicateStyle === 'duplicate_write')
       return dbErr(req, 'DATABASE_DUPLICATE_WRITE', `duplicate key: _id ${id}`);
+    if (knobs.duplicateStyle === 'code')
+      return dbErr(req, knobs.duplicateCode || 'DATABASE_PERMISSION_DENIED', `write rejected (emulated, _id ${id} exists)`);
     if (knobs.duplicateStyle === 'http500')
       return { status: 500, headers: cors(req, { 'content-type': 'text/plain' }), body: 'E11000 duplicate key error' };
     return dbErr(req, 'DATABASE_REQUEST_FAILED',
@@ -362,8 +367,8 @@ export function createEmulator(opts = {}) {
   function handleDb(req, body, ctx) {
     const action = body.action;
     const tok = access.get(body.access_token);
-    if (!body.access_token || !tok) return dbErr(req, 'INVALID_ACCESS_TOKEN', 'access token invalid or missing');
-    if (tok.exp < nowMs()) return dbErr(req, 'ACCESS_TOKEN_EXPIRED', 'access_token expired');
+    if (!body.access_token || !tok) return dbErr(req, 'INVALID_ACCESS_TOKEN', 'access token invalid or missing', knobs.tokenErrStatus);
+    if (tok.exp < nowMs()) return dbErr(req, 'ACCESS_TOKEN_EXPIRED', 'access_token expired', knobs.tokenErrStatus);
     const uid = tok.uid;
     const colName = body.collectionName;
     const c = cols.get(colName);
@@ -414,6 +419,8 @@ export function createEmulator(opts = {}) {
       case 'database.queryDocument': {
         if (!canRead) return denied();
         if (acl === ACL.PRIVATE && mode === 'rules' && !queryPinsOwner(query, uid)) return denied();
+        if (knobs.orderByStatus && body.order && body.order.length)
+          return { status: knobs.orderByStatus, headers: cors(req, { 'content-type': 'text/plain' }), body: 'sort refused (emulated status ' + knobs.orderByStatus + ')' };
         if (knobs.orderByNeedsIndex && body.order && body.order.length)
           return dbErr(req, 'DATABASE_REQUEST_FAILED', '[InvalidParameter] sort field has no index (emulated): ' + body.order.map((o) => o.field).join(','));
         let rows = docsVisible().filter(readFilter).filter((d) => match(d, query));

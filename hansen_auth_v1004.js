@@ -501,6 +501,9 @@
     if (!st.verificationId) return Promise.reject(new Error('请先获取验证码'));
     var c = String(code == null ? '' : code).trim();
     if (!/^\d{4,8}$/.test(c)) return Promise.reject(new Error('验证码是几位数字，检查一下'));
+    return reconcilingWhile(loginByPhoneCode0(st, c));
+  }
+  function loginByPhoneCode0(st, c) {
     /* 🔴v1009 关键修正：注册与登录走**不同**的参数形状，此前混用导致
        "验证码明明输对却报错"——
          · 新用户注册：signUp({phone_number, verification_code}) 收**原始短信码**，
@@ -544,7 +547,7 @@
     var p = String(password == null ? '' : password);
     if (u.length < 2) return Promise.reject(new Error('用户名太短'));
     if (p.length < 6) return Promise.reject(new Error('密码至少 6 位'));
-    return auth().then(function (a) {
+    return reconcilingWhile(auth().then(function (a) {
       /* 🔴v1058: 先用用户名登录；失败再用"用户名映射出的内部邮箱"重试。
          这样无论账号是用哪种方式建的，用户都只需记住用户名。 */
       return Promise.resolve(a.signIn({ username: u, password: p }))
@@ -566,7 +569,7 @@
          云存档按手机号认人，于是用户名账号读写的是上一个人的存档，面板上也显示着他的手机号。 */
       writeLocal({ method: 'password', username: u, phone: '', pendingPhone: '', verificationId: '', legacyUser: '', signedAt: Date.now() });
       return afterSignIn();
-    });
+    }));
   }
 
   /* ── ②b 用户名 + 密码「注册」 ────────────────────────
@@ -649,23 +652,12 @@
       }
     } catch (e) {}
 
-    /* 🔴v1142：**退出登录时把本地资料也清掉。**
-
-       用户现场：退出 A 号、登 B 号（B 的竞赛 ID 是 003），
-       页面上还显示 A 的名字和 No.002，而且点了也改不了名字。
-
-       根子是这里什么都没清：
-         · 名字和 cid 还是 A 的
-         · `cidLocked` 锁死 → B 的 003 写不进去
-         · `nameChangedAt` 是 A 留下的 → B 改名被告知"冷却中"
-
-       这违反了本项目最核心的一条：**所有数据必须跟着账号走。**
-       资料（名字、竞赛 ID）当然也是数据。 */
-    try {
-      if (window.HansenSbProfile && HansenSbProfile.resetForAccountSwitch) {
-        HansenSbProfile.resetForAccountSwitch();
-      }
-    } catch (e) {}
+    /* 🔴v1142 → 🔴审查第二轮 R2-1/FX-1：**退出登录时不再清资料。**
+       v1142 在这里清名字 / 竞赛 ID，是为了「换账号后还显示上一个人的名字」。那件事 v1154 起由资料模块自己管：
+       它记着资料属于哪个 uid，**换了一个人登录**（uid 变了）才清（hsn-account-uid-changed → syncOwner）。
+       这里再清一次反而坏事：同一个人退出再登回来，对账看到「本机资料和上次传的不一样」（被这里清成了空白），
+       就把空白传上了云 —— 名字、头像、展柜、隐私设置全没了，换台设备也找不回来。
+       退出时的提示本来就说「这台手机上玩到哪儿了都还在」，资料也一样留着。 */
     /* 🔴v1143：**不清归属标记。**
        退出后本机这份进度**仍然是刚才那个人的** ——
        清了的话，下一个人登录时会被当成"我自己没登录时玩的"，
@@ -908,6 +900,78 @@
     return !!(o && uid && o !== uid);
   }
 
+  /* ── 🔴审查 R2-3 / R2-4：对账没做完 / 没做成之前，不许上传 ─────────────────────
+     · 正在登录 + 对账（reconciling）：慢网下要好几秒。这期间换账号引出的那一串写入（资料重置、战绩换主人）
+       会让云存档排上一次上传 —— 以前它抢在对账前面，把上一个人留在本机的进度传进了新账号的存档。
+       同一个标签页里的几层页面（首页外壳、岛、预热页）共用 sessionStorage，记在那里大家都看得到。
+     · 本机这份进度的主人是别的账号（owner-mismatch）：同上。
+     · 登录时没读到云端 / 恢复失败（not-reconciled，记在云存档自己的状态里）：本机这几个词会把云端几十个词整个盖掉。
+       面板说的「稍后会自动重试」由下面的 reconcileLater() 兑现：打开页面、切回来、网通了时再对一次账，对上了才放开。 */
+  var RECON_KEY = 'hsnLoginRecon_v1164';
+  var _reconN = 0;
+  function reconcilingWhile(p) {
+    _reconN++;
+    try { sessionStorage.setItem(RECON_KEY, String(Date.now())); } catch (e) {}
+    var done = function () {
+      _reconN = Math.max(0, _reconN - 1);
+      if (!_reconN) { try { sessionStorage.removeItem(RECON_KEY); } catch (e) {} }
+    };
+    return Promise.resolve(p).then(function (v) { done(); return v; }, function (e) { done(); throw e; });
+  }
+  function reconcilingNow() {
+    if (_reconN > 0) return true;
+    try {
+      var at = Number(sessionStorage.getItem(RECON_KEY) || 0);
+      return !!(at && Date.now() - at < 90000);     /* 那一页对账到一半被关了：90 秒后自动作废 */
+    } catch (e) { return false; }
+  }
+  function uploadGate() {
+    if (reconcilingNow()) return { ok: false, reason: 'reconciling' };
+    try {
+      var uid = (readLocal() || {}).uid || '';
+      if (!uid || !isSignedIn()) return { ok: true };
+      if (localBelongsToOther(uid)) return { ok: false, reason: 'owner-mismatch' };
+      var CS = window.HansenCloudSave;
+      var nr = (CS && typeof CS.reconcileState === 'function') ? CS.reconcileState() : '';
+      if (nr && nr === uid) { reconcileLater(); return { ok: false, reason: 'not-reconciled' }; }
+    } catch (e) {}
+    return { ok: true };
+  }
+  function setNotReconciled(uid) {
+    try { var CS = window.HansenCloudSave; if (CS && CS.setReconcileState) CS.setReconcileState(uid || ''); } catch (e) {}
+  }
+  /* 登录时没对上账的，过一会儿再对一次（最多每 20 秒一次；对战中不打扰）。
+     对上了：云端那份恢复到本机（要刷新页面才生效 —— 和登录时一样）、或者本机这份传上去 */
+  var _laterBusy = false, _laterAt = 0, _laterHooked = false;
+  function reconcileLater() {
+    if (!_laterHooked) {
+      _laterHooked = true;
+      try {
+        document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') setTimeout(reconcileLater, 1500); });
+        window.addEventListener('online', function () { setTimeout(reconcileLater, 1500); });
+      } catch (e) {}
+    }
+    if (_laterBusy || Date.now() - _laterAt < 20000) return;
+    try {
+      var CS = window.HansenCloudSave, uid = (readLocal() || {}).uid || '';
+      if (!CS || !CS.reconcileState || !uid || !isSignedIn() || CS.reconcileState() !== uid) return;
+      var U = window.HansenPkRoomUI, b = (U && typeof U.isBusy === 'function') ? U.isBusy() : null;
+      if (b && (b.battle || b.waiting)) return;   /* 正在对战 / 等人：下次再说 */
+    } catch (e) { return; }
+    _laterBusy = true; _laterAt = Date.now();
+    T('登录对账', '上次登录时没对上账 → 再对一次');
+    reconcilingWhile(syncOnLogin()).then(function (s) {
+      _laterBusy = false;
+      T('登录对账', '再对一次：' + ((s && s.action) || (s && s.reason) || '?'));
+      if (s && s.needReload) {
+        try { if (window.HansenToast && HansenToast.say) HansenToast.say('☁️ 已从云端取回你的进度，正在载入…'); } catch (e) {}
+        setTimeout(function () { try { location.reload(); } catch (e) {} }, 1200);
+      }
+    }, function () { _laterBusy = false; });
+  }
+  /* 打开页面时：上次没对上账的，等页面稳定了再对一次 */
+  try { setTimeout(function () { try { uploadGate(); } catch (e) {} }, 5000); } catch (e) {}
+
   function syncOnLogin() {
     var CS = window.HansenCloudSave;
     if (!CS || typeof CS.accountCloudInfo !== 'function')
@@ -941,6 +1005,10 @@
          网络抖动或权限问题都会让查询失败，此时若当成"云端没有"就去上传，
          可能用本机(甚至是空的)覆盖掉云端的真实存档。查不到就什么都不做。 */
       if (info && info.exists === null) {
+        /* 🔴审查 R2-3：记下「这个账号在这台手机上还没对上账」—— 对上之前一律不上传（不然本机这几个词会盖掉云端的），
+           面板说的「稍后会自动重试」由 reconcileLater() 兑现 */
+        setNotReconciled(uidNow);
+        reconcileLater();
         return { ok: false, action: 'cloud-unreachable', reason: info.reason || '' };
       }
       var hasCloud = !!(info && info.exists);
@@ -949,6 +1017,7 @@
          设备A 之后登录就会看到"云端有档"，一旦选错就全丢了。 */
       if (!hasCloud && !hasLocal) {
         markLocalOwner(uidNow);   /* v1144: 对账完成才算归他 */
+        setNotReconciled('');
         return { ok: true, action: 'nothing-to-sync' };
       }
       if (hasCloud && !hasLocal) {
@@ -961,13 +1030,15 @@
                所以恢复成功必须重新加载页面，让新数据真正生效。 */
             if (r && r.ok) {
               markLocalOwner(uidNow);   /* v1144: 恢复成功，本机这份确实是他的了 */
+              setNotReconciled('');
               return { ok: true, action: 'restored', needReload: true };
             }
             /* 恢复失败 —— **不标记**。本机这份还是上一个人的，
                标了的话下次登录会被当成他自己的传上去。 */
+            setNotReconciled(uidNow); reconcileLater();
             return { ok: false, action: 'restore-failed' };
           })
-          .catch(function () { return { ok: false, action: 'restore-failed' }; });
+          .catch(function () { setNotReconciled(uidNow); reconcileLater(); return { ok: false, action: 'restore-failed' }; });
       }
       /* 🔴v1154：**本机明显比云端少 → 直接用云端，不问。**
 
@@ -1030,8 +1101,8 @@
         return pick.then(function (who) {
           if (who !== 'local') return restoreCloud();
           T('登录对账', '本机有没传上去的进度（' + (cloudIsMine ? '云端还是上次那份' : '本机学会的词更多') + '）→ 传本机这份');
-          return CS.syncNow({ force: true, rewrite: true }).then(function (r) {
-            if (r && r.ok) markLocalOwner(uidNow);
+          return CS.syncNow({ force: true, rewrite: true, reconciled: true }).then(function (r) {
+            if (r && r.ok) { markLocalOwner(uidNow); setNotReconciled(''); }
             return { ok: !!(r && r.ok), action: (r && r.ok) ? 'uploaded' : 'upload-failed', autoPicked: 'local',
                      localWords: (local && local.learned) || 0 };
           }, function () { return { ok: false, action: 'upload-failed' }; });
@@ -1043,6 +1114,7 @@
           .then(function (r) {
             if (r && r.ok) {
               markLocalOwner(uidNow);
+              setNotReconciled('');
               /* 审查 AUTH-6：数恢复之后本机学会的词（= 云端那份），别从密文里数（永远是 0） */
               return { ok: true, action: 'restored', needReload: true,
                        autoPicked: 'cloud',
@@ -1051,13 +1123,20 @@
             }
             /* 恢复失败：**什么都不动**，本机原样留着。
                宁可这次没同步上，也不能把人的进度清成半截。 */
+            setNotReconciled(uidNow); reconcileLater();
             return { ok: false, action: 'restore-failed' };
           })['catch'](function () {
+            setNotReconciled(uidNow); reconcileLater();
             return { ok: false, action: 'restore-failed' };
           });
       }
-      return CS.syncNow({ force: true })
-        .then(function (r) { return { ok: !!(r && r.ok), action: 'uploaded' }; })
+      /* 云端没有、本机有：传上去。🔴审查 FX-7：这里明明知道云端是空的 —— 内容「没变」也要真写（rewrite），
+         以前本机记着「这份传过了」就跳过，面板说「进度已存到云端」，云端其实一个字都没有 */
+      return CS.syncNow({ force: true, rewrite: true, reconciled: true })
+        .then(function (r) {
+          if (r && r.ok) setNotReconciled('');
+          return { ok: !!(r && r.ok), action: (r && r.ok) ? 'uploaded' : 'upload-failed' };
+        })
         .catch(function () { return { ok: false, action: 'upload-failed' }; });
     }).catch(function () { return { ok: false, reason: 'sync-error' }; });
   }
@@ -1078,21 +1157,131 @@
 
   /* 🔴v1164（审查 TI-4）：问一下登录服务（同一个云端域名的 /auth/v1/user/me）—— 它能回话，网就是通的。
      数据库回非 200 时 SDK 只会说「network request error」，看着和断网一模一样。 */
-  function probeCloud() {
+  function probeDetail() {
     return auth().then(function (a) {
-      if (typeof a.getLoginState !== 'function') return false;
+      if (typeof a.getLoginState !== 'function') return { reachable: false };
       var ask = Promise.resolve().then(function () { return a.getLoginState(); }).then(function (ls) {
         var u = ls && ls.user;
-        if (!u || typeof u.refresh !== 'function') return false;
+        if (!u || typeof u.refresh !== 'function') return { reachable: false };
         /* ⚠️ 不能用 getCurrentUser()：它把网络错误吞掉、拿本机缓存的用户信息当结果 —— 断网也说「通」
            （实测：/auth/v1/user/me 三次都没发出去，它照样回了用户）。
-           user.refresh() 真去问 /auth/v1/user/me：回了话（哪怕是「令牌不对」）= 通；SDK 报 unreachable = 不通 */
-        return Promise.resolve().then(function () { return u.refresh(); }).then(function () { return true; }, function (e) {
-          return !!(e && ((e.error && e.error !== 'unreachable') || e.code));
+           user.refresh() 真去问 /auth/v1/user/me：回了话 = 通；SDK 报 unreachable = 不通。
+           🔴审查 T5：回的是「令牌不对」（401）也是通的，但那是**登录的问题**，不是数据库 —— 单独标出来 */
+        return Promise.resolve().then(function () { return u.refresh(); }).then(function () { return { reachable: true }; }, function (e) {
+          var reach = !!(e && ((e.error && e.error !== 'unreachable') || e.code));
+          var raw = errText(e);
+          return { reachable: reach, unauth: reach && /unauthenticated|unauthori[sz]ed|invalid_token|access.?token|credential|401/i.test(raw),
+                   raw: raw.slice(0, 90) };
         });
       });
-      return withTimeout(ask, 6000, '探测云端').then(function (v) { return !!v; }, function () { return false; });
-    })['catch'](function () { return false; });
+      return withTimeout(ask, 6000, '探测云端').then(function (v) { return v || { reachable: false }; },
+                                                     function () { return { reachable: false, slow: true }; });
+    })['catch'](function () { return { reachable: false }; });
+  }
+  function probeCloud() { return probeDetail().then(function (p) { return !!(p && p.reachable); }); }
+
+  /* 🔴审查 TI-4 / T5 / FX-8 / R2-UI-8：数据库那边接连失败时，弄清到底是哪一种（天梯、公开房间共用这一个判法）：
+       登录服务也连不上（很快报错）→ 'offline'；登录服务也一样慢 → 'slow'；
+       刚才的失败里有「太慢」（我们自己的超时）、登录服务又回话了 → 'slow'：网太慢，不怪数据库；
+       登录服务说「令牌不对」→ 先换一张令牌：换到了就再试一次数据库，换不到 → 'expired'（去重新登录）；
+       登录服务好好的 → **马上再试一次数据库**（多半是网刚刚恢复）：成了 → 'ok'（带回结果，接着用）；
+         还是连不上 → 'dbblocked'（话说成「可能」，给「再试一次」—— 以前一口咬定「网没有断、是数据库拒绝了」）。
+     kinds：刚才那几次失败各是什么种类；retry()：再试一次数据库，返回 Promise<{ok, kind?, ...}> */
+  var DB_BLOCKED_TEXT = '云端连得上，但数据库这次没让读写：可能是网络刚好又断了一下，'
+    + '也可能是云端设置还差一步（集合没建、权限不对，或者这个网址还没加进「安全域名」）。'
+    + '先点「再试一次」；一直这样的话，把这一屏截图发给负责的老师';
+  function diagnose(kinds, retry) {
+    kinds = Array.isArray(kinds) ? kinds : [];
+    /* 刚才的失败里有「太慢」（我们自己的超时）：也先问一下登录服务再说 ——
+       它很快就回「连不上」= 是断网（比如刷新令牌的请求根本发不出去，SDK 一直重试直到我们超时）；
+       它回话了 / 它也一样慢 → 才是「网太慢」。 */
+    var slowSeen = kinds.some(function (k) { return k === 'slow'; });
+    return probeDetail().then(function (p) {
+      if (!p || !p.reachable) return { verdict: p && p.slow ? 'slow' : 'offline' };
+      var again = function () {
+        if (typeof retry !== 'function') return { verdict: 'dbblocked', text: DB_BLOCKED_TEXT };
+        return Promise.resolve().then(retry).then(function (r) {
+          if (r && r.ok !== false) return { verdict: 'ok', result: r };
+          var k = String((r && r.kind) || '');
+          if (k === 'network') return { verdict: 'dbblocked', text: DB_BLOCKED_TEXT, result: r };
+          return { verdict: 'other', result: r };
+        }, function () { return { verdict: 'dbblocked', text: DB_BLOCKED_TEXT }; });
+      };
+      if (p.unauth) {
+        return recoverSession('登录服务说令牌不对：' + (p.raw || '')).then(function (rr) {
+          if (rr && rr.ok) return again();
+          return { verdict: 'expired', raw: p.raw || 'unauthenticated' };
+        });
+      }
+      if (slowSeen) return { verdict: 'slow' };
+      return again();
+    }, function () { return { verdict: 'offline' }; });
+  }
+
+  /* 会话确实死了：清本机「登录着」这一条并通知界面（ensureSession 的确凿过期、recoverSession 换不到新令牌都走这里） */
+  function clearSignedIn(r) {
+    r = r || {};
+    var _lcX = readLocal();
+    /* 🔴v1164（审查 AUTH-7）：v1058~v1163 的「用户名注册」其实从没在云端建出账号，只在本机写了「已登录」。
+       这些孩子第一次打开新版本就会走到这里 —— 说实话，别让他们去改一个本来没拼错的用户名。 */
+    if (_lcX.method === 'password' && !_lcX.uid) {
+      r.legacy = true;
+      r.reason = LEGACY_USERNAME_MSG;
+      T('结论', '❗这是旧版本「用户名注册」留下的登录记录（云端从来没有这个账号）');
+    }
+    /* 🔴v1164（审查 AUTH-1）：**只清「登录着」这一条，不清 uid。**
+       uid 一变，全站都会当成「换了个人」：天梯战绩当场清零、重新登录后对账又拿云端的旧档盖掉
+       这段时间玩的进度。会话过期 ≠ 换账号。手机号 / 用户名一起清掉（下一次登录重新写，别留给下一个人）。 */
+    writeLocal({ method: '', signedAt: 0, phone: '', username: '', pendingPhone: '', verificationId: '',
+                 legacyUser: r.legacy ? (_lcX.username || '') : '' });
+    T('结论', '已清除本地"已登录"记录并通知界面 → 请重新登录');
+    /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」会一直挂到下次刷新 */
+    try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e1) {}
+    return r;
+  }
+  /* 别的模块确认「云端不认这个会话了」时调：刚登录 60 秒内照样不清（v1063 竞态防线） */
+  function markExpired(why) {
+    if (!isSignedIn()) return false;
+    if (isFresh()) { T('结论', '刚登录不到 60 秒 → 先不清本地登录记录（' + String(why || '').slice(0, 60) + '）'); return false; }
+    clearSignedIn({ reason: String(why || '') });
+    return true;
+  }
+
+  /* 🔴审查 R2-UI-7：数据库回「令牌过期 / 不对」，SDK 自己却还觉得令牌好好的（手机钟被往回调过、云端撤了这张令牌）。
+     以前就这样一直错下去：天梯说「云端登录过期了」，「重新登录」打开的却是「已登录」面板，没有登录表单。
+     现在：让 SDK 拿 refresh_token 换一张新令牌（refreshSession）；换到了 → 调用方再试一次；
+     换不到、而且凭证没了 / 云端明说不认 → 会话确实死了，清掉本机「已登录」（界面就会出现登录表单）。
+     网络问题不下结论。30 秒内只换一次，免得一直被拒时来回换。 */
+  var _recover = null, _recoverAt = 0;
+  function recoverSession(why) {
+    if (_recover) return _recover;
+    if (!isSignedIn()) return Promise.resolve({ ok: false, notSignedIn: true });
+    if (Date.now() - _recoverAt < 30000) return Promise.resolve({ ok: false, recent: true });
+    _recoverAt = Date.now();
+    T('会话修复', '数据库不认这张令牌（' + String(why || '').slice(0, 60) + '）→ 用 refresh_token 换一张新的');
+    var p = auth().then(function (a) {
+      if (typeof a.refreshSession !== 'function') return { ok: false, reason: 'no-api' };
+      return withTimeout(Promise.resolve().then(function () { return a.refreshSession(); }), 8000, '换新令牌').then(function (r) {
+        var err = r && r.error;
+        if (!err && r && r.data && r.data.session) { T('会话修复', '✅ 换到了新令牌'); _lastOkAt = 0; return { ok: true }; }
+        var et = errText(err) || '换不到新令牌';
+        if (!credentialsPresent() || /invalid_grant|unauthenticated|credentials|refresh token|invalid/i.test(et)) {
+          T('会话修复', '❌ 换不到（' + et.slice(0, 70) + '）→ 确实过期了，需要重新登录');
+          markExpired('令牌换不到新的：' + et);
+          return { ok: false, dead: true, reason: et };
+        }
+        T('会话修复', '⏳ 这次没换成（' + et.slice(0, 70) + '）→ 先不下结论');
+        return { ok: false, reason: et };
+      });
+    })['catch'](function (e) {
+      var et = errText(e);
+      T('会话修复', '⏳ 没换成（' + et.slice(0, 70) + '）');
+      return { ok: false, reason: et };
+    });
+    _recover = p;
+    var clr = function () { if (_recover === p) _recover = null; };
+    p.then(clr, clr);
+    return p;
   }
 
   /* 🔴v1031: 本地标记 ≠ 云端会话仍在。提供真实探测，避免"以为登录着其实没有"。 */
@@ -1422,22 +1611,7 @@
       if (!r.ok && r.definite) {
         /* 🔴v1063 竞态防线（保留）：刚登录 60 秒内**绝不清本地标记**，只拒绝本次操作。 */
         if (isFresh()) { T('结论', '刚登录不到 60 秒 → 这次先不清本地登录记录'); return r; }
-        var _lcX = readLocal();
-        /* 🔴v1164（审查 AUTH-7）：v1058~v1163 的「用户名注册」其实从没在云端建出账号，只在本机写了「已登录」。
-           这些孩子第一次打开新版本就会走到这里 —— 说实话，别让他们去改一个本来没拼错的用户名。 */
-        if (_lcX.method === 'password' && !_lcX.uid) {
-          r.legacy = true;
-          r.reason = LEGACY_USERNAME_MSG;
-          T('结论', '❗这是旧版本「用户名注册」留下的登录记录（云端从来没有这个账号）');
-        }
-        /* 🔴v1164（审查 AUTH-1）：**只清「登录着」这一条，不清 uid。**
-           uid 一变，全站都会当成「换了个人」：天梯战绩当场清零、重新登录后对账又拿云端的旧档盖掉
-           这段时间玩的进度。会话过期 ≠ 换账号。手机号 / 用户名一起清掉（下一次登录重新写，别留给下一个人）。 */
-        writeLocal({ method: '', signedAt: 0, phone: '', username: '', pendingPhone: '', verificationId: '',
-                     legacyUser: r.legacy ? (_lcX.username || '') : '' });
-        T('结论', '已清除本地"已登录"记录并通知界面 → 请重新登录');
-        /* 清了标记必须广播，否则界面上那句「已登录 +86 186xxxx」会一直挂到下次刷新 */
-        try { document.dispatchEvent(new CustomEvent('hsn-auth-changed', { detail: { expired: true } })); } catch (e1) {}
+        clearSignedIn(r);
       }
       return r;
     });
@@ -1589,6 +1763,8 @@
     /* v1163: 让测试能直接验「登录同步」的分支走向 ——
        这条规则会删本机数据，必须能自动验证，不能只靠人工点。 */
     _syncOnLoginForTest: syncOnLogin,
+    /* 审查 R2-3/R2-4：云存档上传前问一句「现在能传吗」（对账中 / 本机进度是别人的 / 没对上账 → 不能） */
+    uploadGate: uploadGate,
     ready: ready,
     isSignedIn: isSignedIn,
     ensureSession: ensureSession,
@@ -1621,6 +1797,11 @@
     _sdk: loadSdk,
     /* 审查 TI-4：登录服务通不通 —— 数据库报 network request error 时，用它分辨「真断网」还是「数据库拒绝」 */
     probeCloud: probeCloud,
+    /* 审查 T5/FX-8/R2-UI-8：数据库接连失败时到底是断网、太慢、登录过期，还是数据库那边（再试一次之后才下结论） */
+    diagnose: diagnose,
+    /* 审查 R2-UI-7：数据库不认令牌时先换一张；换不到就清本机「已登录」 */
+    recoverSession: recoverSession,
+    markExpired: markExpired,
     claimLocalProgress: claimLocalProgress,
     /* v1093: 供子框借用顶层已建好的 auth 对象 */
     _authObj: function () { return _auth; }

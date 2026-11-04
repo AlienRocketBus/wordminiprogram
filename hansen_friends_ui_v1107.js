@@ -263,14 +263,59 @@
   var _tip = null;       /* 加好友结果的提示：整屏重画后还要留着 */
   var _retryT = null;
 
+  /* 🔴审查 R2-5（配额）：好友页开着时每 15 秒刷一次（三次查库）—— 以前切到别的 App、或者手机放桌上亮着屏，
+     照样一直刷：一个孩子一小时 720 次读。现在：页面在后台不刷（回来马上刷一次）；
+     5 分钟没碰屏幕就停下，说一句「点一下刷新」（碰一下就接着刷）。 */
+  var IDLE_MS = 300000;
+  var _touchAt = Date.now(), _idle = false, _visHooked = false;
+  function tickRefresh() {
+    if (!q(ID) || !q(ID).classList.contains('on')) return;
+    if (document.visibilityState === 'hidden') return;
+    if (Date.now() - _touchAt > IDLE_MS) { if (!_idle) { _idle = true; showIdle(); } return; }
+    refresh();
+  }
+  function showIdle() {
+    var el = q(ID);
+    if (!el || q('frIdle')) return;
+    var bar = document.createElement('div');
+    bar.id = 'frIdle';
+    bar.setAttribute('role', 'status');
+    bar.setAttribute('style', 'position:sticky;top:0;z-index:3;margin:0 0 8px;padding:9px 12px;border-radius:12px;'
+      + 'background:#312e81;color:#fff;font-size:13px;text-align:center;cursor:pointer');
+    bar.textContent = '好一会儿没动了，在线状态先不刷新 —— 点一下刷新';
+    bar.onclick = function () { wake(); };
+    var wrap = el.firstElementChild || el;
+    wrap.insertBefore(bar, wrap.firstChild);
+  }
+  function wake() {
+    _touchAt = Date.now();
+    if (!_idle) return;
+    _idle = false;
+    var b = q('frIdle'); if (b && b.parentNode) b.parentNode.removeChild(b);
+    refresh();
+  }
+  function hookActivity() {
+    if (_visHooked) return;
+    _visHooked = true;
+    try {
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible' && q(ID) && q(ID).classList.contains('on') && !_idle) refresh();
+      });
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+        document.addEventListener(t, function () { if (q(ID) && q(ID).classList.contains('on')) wake(); }, { passive: true, capture: true });
+      });
+    } catch (e) {}
+  }
   function open() {
     closePeers();
     _view = null; _sessTries = 0;
+    _touchAt = Date.now(); _idle = false;
+    hookActivity();
     render({ loading: true });
     refresh();
     /* 每 15 秒刷新在线状态 —— 太频繁会烧云开发的读次数 */
     if (_timer) clearInterval(_timer);
-    _timer = setInterval(refresh, 15000);
+    _timer = setInterval(tickRefresh, 15000);
   }
 
   /* 「人话 ⟨原话⟩」拆开：人话给人看，原话放进「技术信息」那行 */
@@ -407,7 +452,11 @@
     if (q('frRetry')) q('frRetry').onclick = function () { _sessTries = 0; render({ loading: true }); refresh(); };
     if (q('frGoLogin')) q('frGoLogin').onclick = function () {
       close();
-      try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
+      /* 审查 R2-UI-7：本机还记着「已登录」、云端却不认了 → 直接给登录表单（以前打开的是「已登录」面板，没法登） */
+      try {
+        var A = window.HansenAuth, signed = !!(A && A.isSignedIn && A.isSignedIn());
+        if (window.HansenAuthUI) HansenAuthUI.open(signed ? { relogin: true } : undefined);
+      } catch (e) {}
     };
     var ci = q('frCid');
     if (ci) ci.onkeydown = function (ev) { if (ev.key === 'Enter') doAdd(); };

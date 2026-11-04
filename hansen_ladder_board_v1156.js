@@ -55,8 +55,11 @@
   var NET_TIMEOUT_MS = 12000;  /* 单次云端请求的上限：弱信号下请求会挂住不返回 */
   var PERM_TEXT = '读取全部数据，修改本人数据';
 
-  var _cache = null;           /* { at, list, myRank } */
+  var _cache = null;           /* { at, list, myRank, ttl } */
   var CACHE_MS = 60000;        /* 一分钟内不重复拉 —— 榜单不需要实时 */
+  /* 🔴审查 T11：刚传完自己的分紧接着拉的榜，读的可能是旧副本（自己那行还没进来）—— 这一份只留 5 秒，别让孩子看一分钟的旧榜 */
+  var _pushedAt = 0;
+  var _noOrder = false;        /* 云端拒过 orderBy（审查 T7）：这次打开页面不再试 */
   var _needPush = true;        /* 这次打开页面后还没成功传过分：上次传失败的分，拉榜前补传一次 */
   var _lastPushErr = null;
   var _cloudForTest = null;
@@ -247,6 +250,7 @@
     }).then(function () {
       _needPush = false; _lastPushErr = null;
       _cache = null;                 /* 自己的分变了，榜要重拉 */
+      _pushedAt = Date.now();
       return { ok: true };
     })['catch'](function (e) {
       var r = fail(e);
@@ -258,7 +262,7 @@
 
   /* ── 把榜拉下来 ──────────────────────────────────── */
   function fetchTop() {
-    if (_cache && (Date.now() - _cache.at) < CACHE_MS) {
+    if (_cache && (Date.now() - _cache.at) < (_cache.ttl || CACHE_MS)) {
       return Promise.resolve(Object.assign({ ok: true, cached: true }, _cache));
     }
     var alive = Date.now() - STALE_DAYS * 24 * 3600 * 1000;
@@ -273,13 +277,17 @@
          把 ladderGames 之类放进 where，老记录（没这个字段）会整批查不出来。
          所以只按 ladderRating 排序取一批，其余条件在本地过滤。 */
       var col = c.db.collection(COL);
-      return call(col.orderBy('ladderRating', 'desc').limit(TOP_N * 3).get(), '读取排行榜')
+      var plain = function () { return call(col.where({ ladderRating: c.db.command.gt(0) }).limit(1000).get(), '读取排行榜'); };
+      /* 云端没建排序索引时 orderBy 会被拒：退回不排序的查询，本地排。
+         🔴审查 T7：拒绝不一定是 {code} —— 回个非 200 时 SDK 只说 network request error，以前就一直「连不上网络，排行榜看不到」。
+         除了「登录过期 / 会话没好」，什么错都先退回试一次；拒过一次就记住 */
+      var first = _noOrder ? plain() : call(col.orderBy('ladderRating', 'desc').limit(TOP_N * 3).get(), '读取排行榜')
         ['catch'](function (indexErr) {
-          /* 云端没建排序索引时 orderBy 会被拒：退回不排序的查询，本地排 */
-          if (kindOf(indexErr) !== 'config') throw indexErr;
-          return call(col.where({ ladderRating: c.db.command.gt(0) }).limit(1000).get(), '读取排行榜');
-        })
-        .then(function (res) { return { c: c, res: res }; });
+          var k = kindOf(indexErr);
+          if (k === 'expired' || k === 'session') throw indexErr;
+          return plain().then(function (r) { _noOrder = true; return r; });
+        });
+      return first.then(function (res) { return { c: c, res: res }; });
     }).then(function (o) {
       var rows = (o.res && o.res.data) || [];
       var list = rows.filter(function (x) {
@@ -309,7 +317,7 @@
         if (list[i].uid === o.c.uid) { mine = list[i].rank; break; }
       }
       /* 空榜是 ok:true + 空列表 —— 和"拿不到榜"分开（界面要说不同的话） */
-      _cache = { at: Date.now(), list: list, myRank: mine };
+      _cache = { at: Date.now(), list: list, myRank: mine, ttl: (Date.now() - _pushedAt < 15000) ? 5000 : CACHE_MS };
       return { ok: true, list: list, myRank: mine };
     })['catch'](function (e) { return fail(e); });
   }
@@ -338,7 +346,7 @@
     /* 最近一次上传失败的结果（{ok:false,kind,reason,text}）；成功后清空 */
     lastPushError: function () { return _lastPushErr; },
     kindOf: kindOf,
-    _clearCacheForTest: function () { _cache = null; },
+    _clearCacheForTest: function () { _cache = null; _noOrder = false; },
     _setCloudForTest: function (c) { _cloudForTest = c || null; _cache = null; },
     _configForTest: { TOP_N: TOP_N, STALE_DAYS: STALE_DAYS, MIN_GAMES: MIN_GAMES }
   };

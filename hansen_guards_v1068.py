@@ -3517,7 +3517,9 @@ def guard_room_id_valid():
     i = src.find('function createRoom')
     if i < 0:
         return
-    seg = src[i:i + 2600]
+    # 🔴v1164（第二轮修复）：以前按「函数开头往后 2600 个字」看 —— 开房多了取消 / 重写一次的处理，
+    #   那句校验被挤出窗口，守卫就报了个假红（反过来，挪进窗口外也能藏住真问题）。按函数体看。
+    seg = _fn_body(src, 'createRoom', 12000) or src[i:i + 2600]
     if "typeof _rid !== 'string'" not in seg:
         bad('房间号要有效',
             'createRoom 不校验云端返回的房间号 —— '
@@ -4008,8 +4010,12 @@ def guard_join_waits_for_host():
     src = _code_only(_read('hansen_pk_room_v1065.js') or '')
     if not src:
         return
+    # 🔴v1164（第二轮修复）：进房拆成了 joinRoom（排队 + 取消标记）→ joinOnce（读房间、校验）→ grabSeat（抢座 + 等确认），
+    #   顺着这条链看：抢座的那一段必须等房主确认。
     jr = _fn_body(src, 'joinRoom', 9000)
-    if 'waitAck(' not in jr:
+    chain = jr + _fn_body(src, 'joinOnce', 9000) + _fn_body(src, 'grabSeat', 9000)
+    gs = _fn_body(src, 'grabSeat', 9000) or jr
+    if 'waitAck(' not in gs or 'claim(' not in gs or 'waitAck(' not in chain:
         bad('进房要等确认', 'joinRoom 抢到座位后没有等房主确认（waitAck）—— 房主还不知道你来了你就进了对战屏')
     wa = _fn_body(src, 'waitAck', 5000)
     if 'acked' not in wa:

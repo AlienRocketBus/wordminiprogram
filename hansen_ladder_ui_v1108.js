@@ -735,7 +735,8 @@
     if (run.note && Date.now() - run.noteAt > 8000) { run.note = ''; setLine('ldNote', ''); }
   }
 
-  function startMatching() {
+  function startMatching(o) {
+    o = (o && typeof o === 'object' && !('target' in o)) ? o : {};
     /* v1156: 同上 —— 说清楚 + 给个能点的，比弹窗强 */
     if (!S()) {
       var _b = q('ldGo');
@@ -766,8 +767,8 @@
     /* 🔴v1164：失败次数、开始时间都跟着「这一次」匹配 —— 原来是模块级的，
        上一次断网攒下的 3 次失败会让这一次第一下就跳「连不上网络」。 */
     _netFail = 0; _lastReason = '';
-    var run = _run = { stop: false, t0: Date.now(), netFail: 0, sessT0: 0, busy: false,
-                       sm: sm, note: '', noteAt: 0, timer: null, clock: null, tried: {} };
+    var run = _run = { stop: false, t0: Number(o.keepT0) || Date.now(), netFail: 0, sessT0: 0, busy: false,
+                       sm: sm, note: '', noteAt: 0, timer: null, clock: null, tried: {}, kinds: [] };
     _cancel = function () { stopRun(); };
     /* v1155: 上哨 —— 接下来这一串如果哪一步废了，看门狗会把人救出来 */
     try { if (window.HansenPkWatchdog) HansenPkWatchdog.arm('排位'); } catch (e) {}
@@ -911,7 +912,7 @@
     _lastReason = rawOf(r);
     /* 审查 AUTH-3：SDK 文件上次没下载完整，浏览器把失败记住了 —— 重试多少次都一样，只有刷新页面有用 */
     if (r && r.reload) { showProblem('reload', r); return; }
-    if (k === 'expired') { showNeedLogin(true); return; }
+    if (k === 'expired') { showNeedLogin(true, r); return; }
     if (k === 'config') { showProblem('config', r); return; }
     if (k === 'session') {
       /* 账号是登录着的，只是云端会话还在准备 —— 悄悄多等一会儿，别吓人 */
@@ -926,21 +927,51 @@
     }
     run.netFail++;
     _netFail = run.netFail;
+    (run.kinds = run.kinds || []).push(k);
     if (run.netFail >= 4) {
       if (k === 'other') { showProblem('other', r); return; }
-      /* 🔴审查 TI-4：数据库回了个非 200（集合没建 / 权限 / 安全域名），SDK 只会说 network request error ——
-         看着像断网。问一下登录服务：它能通，网就是通的，问题在数据库那边，别让老师去查 Wi-Fi。 */
+      /* 🔴审查 TI-4 / T5 / FX-8：数据库回了个非 200（集合没建 / 权限 / 安全域名），SDK 只会说 network request error ——
+         看着像断网。交给账号模块弄清楚：太慢 → 说太慢；登录服务也不通 → 断网；登录服务说令牌不对 → 先换令牌、
+         不行就去登录；登录服务好好的 → **马上再找一次房**（网多半刚恢复）：找到了就接着排，还不行才说「数据库这次没让读写」。 */
+      var kinds = run.kinds.slice();
       stopRun();
       var tok = ++_probeSeq;
       setLine('ldStatus', '正在看看是哪里不通…');
-      probeCloud().then(function (reach) {
+      diagnose(kinds).then(function (d) {
         if (tok !== _probeSeq) return;
-        if (reach) showProblem('dbblocked', r); else showOffline();
+        if (d.verdict === 'ok') { startMatching({ keepT0: run.t0 }); return; }
+        if (d.verdict === 'expired') { _lastReason = d.raw || _lastReason; showNeedLogin(true, r); return; }
+        if (d.verdict === 'slow') { showProblem('slow', r); return; }
+        if (d.verdict === 'dbblocked') { showProblem('dbblocked', r); return; }
+        if (d.verdict === 'other' && d.result) { onFailFresh(d.result); return; }
+        showOffline();
       });
       return;
     }
     setLine('ldStatus', k === 'other' ? '刚才没成功，正在重试…' : '网络不太顺，正在重试…');
     later(run, 3000);
+  }
+
+  /* 账号模块的「到底哪里不通」（审查 T5/FX-8）：再试一次找房，靠它分清网刚恢复 / 太慢 / 登录 / 数据库 */
+  function diagnose(kinds) {
+    var A = window.HansenAuth;
+    if (!A || typeof A.diagnose !== 'function') {
+      return probeCloud().then(function (reach) { return { verdict: reach ? 'dbblocked' : 'offline' }; });
+    }
+    return Promise.resolve().then(function () {
+      return A.diagnose(kinds, function () { return S().listRooms(); });
+    }).then(function (d) { return d || { verdict: 'offline' }; }, function () { return { verdict: 'offline' }; });
+  }
+  /* 再试的那一次失败成了别的原因（登录过期 / 云端设置……）：按原因说 */
+  function onFailFresh(r) {
+    var k = kindOf(r);
+    _lastReason = rawOf(r);
+    if (k === 'expired') { showNeedLogin(true, r); return; }
+    if (k === 'config') { showProblem('config', r); return; }
+    if (k === 'session') { showProblem('session', r); return; }
+    if (k === 'network') { showOffline(); return; }
+    if (k === 'slow') { showProblem('slow', r); return; }
+    showProblem('other', r);
   }
 
   /* 这间房本身的问题（被抢 / 关了 / 房主没回应 / 自己的房）—— 换一间就行；
@@ -963,25 +994,32 @@
     var el = q(ID); if (el) el.classList.remove('on');
   }
 
-  /* 🔴v1156：**登录问题要说登录问题，不能混进"连不上网络"。** */
-  function showNeedLogin(expired) {
+  /* 🔴v1156：**登录问题要说登录问题，不能混进"连不上网络"。**
+     🔴审查 R2-5：旧版本「用户名注册」的账号 —— 云端从来没有，「重新登录」登不回去，也没有「段位和战绩都还在」这回事：
+     照实说，按钮直接去手机号注册。🔴审查 R2-UI-7：「重新登录」打开的是登录表单（以前是「已登录」面板，没法登） */
+  function showNeedLogin(expired, r) {
     stopRun();
+    var legacy = !!(r && r.legacy);
+    try { var lc = window.HansenAuth && HansenAuth.readLocal ? HansenAuth.readLocal() : {}; if (lc && lc.legacyUser) legacy = true; } catch (e0) {}
     try {
       paint('<div class="ld_top"><button aria-label="关闭" class="ld_x" id="ldCancel">×</button>'
         + '<div class="ld_h">🏆 天梯排位</div></div>'
         + '<div style="text-align:center;padding:24px 12px">'
-        +   '<div style="font-size:40px">🔑</div>'
+        +   '<div style="font-size:40px">' + (legacy ? '📱' : '🔑') + '</div>'
         +   '<div style="font-size:16px;font-weight:800;margin-top:10px">'
-        +     (expired ? '云端登录过期了' : '排位要先登录') + '</div>'
+        +     (legacy ? '这个账号要换成手机号注册' : (expired ? '云端登录过期了' : '排位要先登录')) + '</div>'
         +   '<div style="font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
-        +     (expired
+        +     (legacy
+                ? '以前版本的「用户名注册」其实没能在云端建好账号，不是你的错。<br>'
+                  + '用手机号注册一下就好（家长的手机号也可以），<br>这台手机上的进度会自动带过去。'
+                : expired
                 ? '重新登录一次就能继续，<br>你的段位和战绩都还在。'
                 : '排位要跟别人比，<br>所以得先有个账号记住你的分数。')
         +   '</div>'
         +   '<button class="ld_btn" id="ldGoLogin" style="margin-top:16px">'
-        +     (expired ? '重新登录' : '去登录') + '</button>'
+        +     (legacy ? '📱 用手机号注册' : (expired ? '重新登录' : '去登录')) + '</button>'
         +   '<button class="ld_btn ld_btn2" id="ldLater" style="margin-top:2px">先不弄</button>'
-        +   (expired && _lastReason
+        +   (expired && !legacy && _lastReason
               ? '<div style="margin-top:14px;font-size:11px;color:var(--hpk-faint);'
                 + 'line-height:1.6;word-break:break-all">技术信息：'
                 + esc(String(_lastReason).slice(0, 130)) + '</div>'
@@ -991,7 +1029,10 @@
       if (gb) gb.onclick = function () {
         try {
           close();
-          if (window.HansenAuthUI && HansenAuthUI.open) HansenAuthUI.open();
+          if (!(window.HansenAuthUI && HansenAuthUI.open)) return;
+          if (legacy) HansenAuthUI.open({ mode: 'phone', relogin: true, legacy: true });
+          else if (expired) HansenAuthUI.open({ relogin: true });
+          else HansenAuthUI.open();
         } catch (e) {}
       };
       var lb = q('ldLater');
@@ -1009,9 +1050,14 @@
                body: '你已经登录了，只是云端这会儿还没准备好。<br>等几秒再点「再试一次」。', btn: '再试一次' },
     config:  { icon: '🛠️', title: '云端设置还差一步',
                body: '', btn: '再试一次' },
-    dbblocked: { icon: '🛠️', title: '云端连得上，但数据库拒绝了',
-               body: '登录服务是通的，网没有断；是数据库那边不让读写 ——<br>多半是集合没建、权限不对，或者这个网址还没加进「安全域名」。'
-                   + '<br><br>这不是你的问题，把这一屏截图发给负责的老师就好。', btn: '再试一次' },
+    /* 🔴审查 FX-8：先再试过一次才走到这里，话也说成「可能」—— 以前一口咬定「网没有断」，断网刚恢复时也这么说 */
+    dbblocked: { icon: '🛠️', title: '云端连得上，但数据库这次没让读写',
+               body: '登录服务能连上，可数据库那边一直没回话 ——<br>可能是网络刚好又断了一下，'
+                   + '也可能是云端设置还差一步（集合没建、权限不对，或者这个网址还没加进「安全域名」）。'
+                   + '<br><br>先点「再试一次」；一直这样的话，把这一屏截图发给负责的老师。', btn: '再试一次' },
+    /* 🔴审查 T5：是我们自己等超时了（网太慢）—— 不怪数据库 */
+    slow:    { icon: '🐢', title: '网络太慢了',
+               body: '这会儿网络很慢，云端一直没回话。<br>换个信号好一点的地方，再点「重新找对手」。', btn: '重新找对手' },
     reload:  { icon: '🔄', title: '云端组件没下载完整',
                body: '刚才网络不好，有个文件没下载完整，浏览器记住了那次失败。<br>刷新一下页面就好（进度不会丢）。', btn: '刷新页面' },
     other:   { icon: '⚠️', title: '这次没成功',
@@ -1065,12 +1111,11 @@
         : function () { startMatching(); };
       var lb = q('ldRelogin');
       if (lb) lb.onclick = function () {
-        /* 凭证还在、却一直换不到会话（云端不认这张凭证了）：退出再登一次是唯一的出路 */
-        var A = window.HansenAuth;
-        Promise.resolve(A && A.signOut ? A.signOut() : null)['catch'](function () {}).then(function () {
-          close();
-          try { if (window.HansenAuthUI && HansenAuthUI.open) HansenAuthUI.open(); } catch (e) {}
-        });
+        /* 凭证还在、却一直换不到会话（云端不认这张凭证了）：再登一次。
+           🔴审查 FX-1：直接打开登录表单，**不先退出登录** —— 退出会把资料清成空白，
+           同一个号登回来时对账又把这份空白传上云，名字、头像、展柜全没了 */
+        close();
+        try { if (window.HansenAuthUI && HansenAuthUI.open) HansenAuthUI.open({ relogin: true }); } catch (e) {}
       };
       var cx = q('ldCancel');
       if (cx) cx.onclick = close;

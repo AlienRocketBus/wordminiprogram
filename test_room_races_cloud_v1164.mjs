@@ -36,7 +36,8 @@ async function phone(name, nick) {
   await p.eval((nm) => { try { window.HansenSbProfile.setName(nm); } catch (e) { /* 起过名了 */ } return true; }, nick);
   return p;
 }
-async function closeAll() { for (const p of live) await p.close(); live.length = 0; }
+/* 审查 T8：每一段关手机之前都看一眼页面报错 / 外网 */
+async function closeAll() { await H.cleanPhones(t, live); for (const p of live) await p.close(); live.length = 0; }
 /* 列表里看得到这间房（读有延迟）—— 像界面一样一遍遍刷 */
 async function seeRoom(p, rid, ms = 20000) {
   return H.until(async () => { const lr = await H.room(p, 'listRooms'); return lr && lr.ok && lr.rooms.some((x) => x._id === rid) ? lr : null; }, { timeout: ms, interval: 700 });
@@ -115,28 +116,39 @@ try {
     emu = H.makeEmulator({ knobs: { permissionMode: 'rules', latencyMs: 50, jitterMs: 30, consistencyLagMs: 300 } });
     names = {};
     const A = await phone('房主', '小蜂房主'), B = await phone('客人', '小蜂客人');
-    /* 开房：add 写进去了、回包断了 → SDK 重试撞上自己的那条 */
+    /* 开房：add 写进去了、回包断了，**接着两次重试也都断了**（审查 T4：以前只断第一次 —— 传输层自动重试一下
+       就撞上「重复 _id」，走的是重复那条路，「写进去了但每一次都失败」这条路从来没测到） */
+    const addsBy = (uid) => emu.log.filter((e) => e.uid === uid && e.action === 'database.addDocument' && e.collection === 'hansen_pk_rooms').length;
+    const nA0 = addsBy(A.cloudUid);
     const fc = emu.fault({ uid: A.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'commitThenAbort', times: 1 });
+    const fc2 = emu.fault({ uid: A.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'abort', times: 2, test: () => fc.hits === 1 });
     const made = await H.room(A, 'createRoom', { mode: 'A' });
     const rooms = H.roomDocs(emu).filter((d) => d.kind === 'room' && d._openid === A.cloudUid);
-    await t.ok(fc.hits === 1 && made && made.ok && rooms.length === 1 && rooms[0]._id === made.roomId,
-      `开房回包丢了 → 照样「开好了」，库里正好一间就是它（${made && (made.ok ? made.roomId : made.kind + ' ' + made.reason)}，${rooms.length} 间）`, () => explain());
+    await t.ok(fc.hits === 1 && fc2.hits === 2 && addsBy(A.cloudUid) - nA0 === 3, `开房：三次 add 都到了云端、手机一次都没收到回包（${addsBy(A.cloudUid) - nA0} 次）`, () => explain());
+    await t.ok(made && made.ok && rooms.length === 1 && rooms[0]._id === made.roomId,
+      `开房回包全丢了 → 读回来认出是自己的，照样「开好了」，库里正好一间就是它（${made && (made.ok ? made.roomId : made.kind + ' ' + made.reason)}，${rooms.length} 间）`, () => explain());
     await H.roomWait(A, made.roomId);
     await seeRoom(B, made.roomId);
-    /* 进房：座位写进去了、回包断了，接着 3 次读也失败 → 以前说 config、房主却把他确认进来了 */
+    /* 进房：座位写进去了、回包断了，接着两次重试的回包也断了，再接着 3 次读也失败 → 以前说 config、房主却把他确认进来了 */
+    const nB0 = addsBy(B.cloudUid);
     const fs = emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'commitThenAbort', times: 1 });
+    const fs2 = emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'abort', times: 2, test: () => fs.hits === 1 });
     let n = 0;
-    emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.queryDocument', do: 'abort', test: () => fs.hits === 1 && (n++) < 3 });
+    emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.queryDocument', do: 'abort', test: () => fs2.hits === 2 && (n++) < 3 });
     const j = await H.room(B, 'joinRoom', made.roomId, {});
+    await t.ok(fs.hits === 1 && fs2.hits === 2 && addsBy(B.cloudUid) - nB0 === 3, `进房：占座的三次 add 都到了云端、一次回包都没收到（${addsBy(B.cloudUid) - nB0} 次）`, () => explain());
     const ev = await H.roomEvent(A, 30000);
     await t.ok(fs.hits === 1 && j && j.ok && ev && ev.joined && ev.room && ev.room.guestId === B.key,
       `进房回包丢了、接着读也失败 → 照样进去了，房主确认的也是他（${j && (j.ok ? 'ok' : j.kind + ' ' + j.reason)}）`, () => explain());
     await H.room(A, 'markReady', made.roomId); await H.room(B, 'markReady', made.roomId);
-    /* 抢答：第 1 词的回合文档写进去了、回包断了，接着 3 次读也失败 */
+    /* 抢答：第 1 词的回合文档写进去了、回包断了，两次重试也断了，接着 3 次读也失败 */
+    const nB1 = addsBy(B.cloudUid);
     const fw = emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'commitThenAbort', times: 1 });
+    const fw2 = emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.addDocument', do: 'abort', times: 2, test: () => fw.hits === 1 });
     let m = 0;
-    emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.queryDocument', do: 'abort', test: () => fw.hits === 1 && (m++) < 3 });
+    emu.fault({ uid: B.cloudUid, db: true, collection: 'hansen_pk_rooms', action: 'database.queryDocument', do: 'abort', test: () => fw2.hits === 2 && (m++) < 3 });
     const c = await H.room(B, 'claimRound', made.roomId, 0);
+    await t.ok(fw.hits === 1 && fw2.hits === 2 && addsBy(B.cloudUid) - nB1 === 3, `抢答：三次 add 都到了云端、一次回包都没收到（${addsBy(B.cloudUid) - nB1} 次）`, () => explain());
     const hs = await H.until(async () => { const r = await H.room(A, 'roundState', made.roomId); return r && r.ok && r.winners[0] ? r : null; }, { timeout: 15000 });
     const W0 = H.roomDocs(emu).find((d) => d.kind === 'win' && d.roomId === made.roomId && d.i === 0);
     const okScore = c && c.ok && (c.first === true || c.pending === true);
@@ -150,21 +162,31 @@ try {
     await closeAll();
   }
 
-  /* ══ ④ 云端对重复 _id 不报错（悄悄吞 / 覆盖）══════════════════════ */
-  for (const style of ['silent', 'overwrite']) {
-    t.section(`④ 假如云端对重复 _id ${style === 'silent' ? '悄悄吞掉' : '直接覆盖'}（主从延迟 400ms，审查 F13）`);
+  /* ══ ④ 两个人同一时刻拼对同一个词 ═════════════════════════════════
+     🔴审查 T2：以前这里测「云端对重复 _id 直接覆盖」—— 那是 MongoDB 的插入不会做的事（重复 _id 一定报错），
+     而且只看 4 个词、只断言「没有两个都先」，十次里有一次假失败、「谁都不是先」的那种分歧从来不报。
+     现在按真云端的几种回法（报重复 / 报重复的另一种码 / 回 HTTP 500 / 悄悄吞掉）各打 10 个词：
+     每个词**正好一个**人先拼对，两部手机记下的赢家一模一样。 */
+  for (const style of ['request_failed', 'duplicate_write', 'http500', 'silent']) {
+    t.section(`④ 两人同时拼对同一个词 × 10（重复 _id → ${style}，主从延迟 400ms，审查 F13/T2）`);
     emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40, jitterMs: 30, consistencyLagMs: 400, duplicateStyle: style } });
     names = {};
     const { Hst, Gst, rid } = await pairUp('A');
     let both = 0, none = 0;
-    for (let i = 0; i < 4; i++) {
+    const said = { host: [], guest: [] };
+    for (let i = 0; i < 10; i++) {
       await Promise.all([H.roomLaunch(Hst, 'c' + i, 'claimRound', rid, i), H.roomLaunch(Gst, 'c' + i, 'claimRound', rid, i)]);
       const a = await H.roomResult(Hst, 'c' + i, 30000), b = await H.roomResult(Gst, 'c' + i, 30000);
       const fa = !!(a.r && a.r.first), fb = !!(b.r && b.r.first);
       if (fa && fb) both++;
       if (!fa && !fb) none++;
+      said.host.push(fa ? 'host' : (fb ? 'guest' : '?'));
     }
-    await t.ok(both === 0, `4 个词里没有一个是「两个人都先拼对」（两个都先：${both} 个，都不是：${none} 个）`, () => explain());
+    const wh = await H.until(async () => { const r = await H.room(Hst, 'roundState', rid); return r && r.ok && r.winners.filter(Boolean).length >= 10 ? r : null; }, { timeout: 15000 });
+    const wg = await H.until(async () => { const r = await H.room(Gst, 'roundState', rid); return r && r.ok && r.winners.filter(Boolean).length >= 10 ? r : null; }, { timeout: 15000 });
+    await t.ok(both === 0 && none === 0, `10 个词每个都正好一个人「先拼对」（两个都先：${both}，都不是：${none}）`, () => explain());
+    await t.ok(wh && wg && wh.winners.join(',') === wg.winners.join(',') && wh.winners.join(',') === said.host.join(','),
+      `两部手机记下的赢家一模一样，也和当场说的一样（房主：${wh && wh.winners}；客人：${wg && wg.winners}；当场：${said.host}）`, () => explain());
     await closeAll();
   }
 
