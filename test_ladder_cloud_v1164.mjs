@@ -181,7 +181,9 @@ try {
   names[lr.uid] = '戊';
   await t.ok(lr.ok, `[戊] 在岛屿页登录 uid=${lr.uid}`);
   await H.sleep(600);
-  const pkUp = await E.hitTest('#kLadder', { timeout: 3000 });
+  /* 登录完拼写大PK屏会重画一两次（登录状态、竞赛 ID 到了）—— 重画那一下量到的是旧按钮；看几次，画好了点得到就算 */
+  const pkUp = await H.until(async () => { const h = await E.hitTest('#kLadder', { timeout: 1000 }); return h.ok ? h : null; }, { timeout: 6000, interval: 300 })
+    || await E.hitTest('#kLadder', { timeout: 1000 });
   await t.ok(pkUp.ok, `登录完回到拼写大PK屏，「天梯排位」点得到（${pkUp.why || pkUp.hit}）`, () => explain());
   if (!pkUp.ok) { await E.page.reload({ waitUntil: 'domcontentloaded' }); await H.sleep(4000); await H.dismissIslandWelcome(E); await E.tap('.mode-card[onclick*="openSpellPK"]'); }
   await E.tap('#kLadder');

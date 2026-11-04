@@ -154,7 +154,8 @@ async function appHidden(G, hidden) {
     const n1 = writesBy(G.uid, 'hansen_saves').length - n0;
     await appHidden(G, false);
     await t.ok(await wrapHidden(G), '回到了首页（岛藏起来了）', () => explain());
-    await t.ok(n1 === 1, `学了东西、点返回、切出 App：云存档传了 ${n1} 次（该是 1 次）—— 以前 0 次，这一局没上云`, () => explain());
+    /* 1 次是本意；岛里预热着的星海岛隔几秒会改一次它自己的进度，刚好赶上时会多传一次（传的是新内容，不是重复） */
+    await t.ok(n1 >= 1 && n1 <= 2, `学了东西、点返回、切出 App：云存档传了 ${n1} 次（该是 1 次，最多 2 次）—— 以前 0 次，这一局没上云`, () => explain());
     /* 首页上改了进度（首页本身没有云存档模块，由藏起来的岛替它传） */
     await H.sleep(1500);
     const n2 = writesBy(G.uid, 'hansen_saves').length;
@@ -163,7 +164,7 @@ async function appHidden(G, hidden) {
     await H.sleep(5000);
     const n3 = writesBy(G.uid, 'hansen_saves').length - n2;
     await appHidden(G, false);
-    await t.ok(n3 === 1, `在首页上改了进度再切出 App：传了 ${n3} 次（该是 1 次）`, () => explain());
+    await t.ok(n3 >= 1 && n3 <= 2, `在首页上改了进度再切出 App：传了 ${n3} 次（该是 1 次，最多 2 次）`, () => explain());
     /* 没改东西再切一次：最多传一次，不会一层页面传一次（审查 SE-4 省下的配额还在）。
        ⚠️ 岛里预热着的星海岛隔几秒会改一次它自己的进度 —— 那种时候传一次是对的，所以这里只要求「不超过一次」 */
     await H.sleep(1500);
