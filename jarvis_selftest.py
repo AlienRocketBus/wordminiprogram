@@ -499,11 +499,17 @@ def _inj_poisoned_cache(s):
 
 
 def _inj_boot_check(s):
-    """往核心清单里塞一个不存在的模块 —— 正常情况下就会天天误报。"""
-    m = "['HansenCoins', '金币'],"
-    if m not in s:
+    """往核心清单里塞一个不存在的模块 —— 正常情况下就会天天误报。
+
+    🔴v1165 复查第 2 轮：清单的行早就变成三列了（`['HansenCoins',   '金币', 'hansen_coin_wallet'],`，
+    列之间还用空格对齐），以前按 `['HansenCoins', '金币'],` 一字不差地找，找不到就「样本不适用」悄悄跳过 ——
+    这道守卫一直没有能证明它会咬人的样本。改成按正则找那一行的开头，插一行同样三列的假模块。"""
+    import re as _re
+    m = _re.search(r"^([ \t]*)\['HansenCoins',\s*'金币'", s, _re.M)
+    if not m:
         return None
-    return s.replace(m, "['HansenNotExist', '不存在'],\n    " + m, 1)
+    row = m.group(1) + "['HansenNotExist', '不存在', 'hansen_not_exist'],\n"
+    return s[:m.start()] + row + s[m.start():]
 
 
 
@@ -681,11 +687,30 @@ def _inj_backlog(s):
     这道守卫查的是 git 状态而不是代码内容，
     所以样本改的是**门槛本身**：把 25 改成 -1，
     那么"积压 0 个"也会超过门槛，守卫必须报红。
-    改不动就说明判据根本没在比较。"""
-    m = "if n > 25:"
-    if m not in s:
+    改不动就说明判据根本没在比较。
+
+    🔴v1165 复查第 2 轮：守卫早就改成 `if n > 12 and os.environ.get('JARVIS_RELEASING') != '1':`，
+    样本还在找 `if n > 25:` → 每次都「样本不适用」跳过。现在按正则把整个条件换成 `if n > -1:`
+    （连 JARVIS_RELEASING 一起去掉 —— 发版时闸门就带着它跑，留着的话注入后也不红，会被误判成守卫失灵）。
+    仓库里没有 v* 标签时守卫本来就不查（浅克隆 / 没 .git），注入了也咬不到人，这时如实跳过。"""
+    import re as _re, subprocess as _sp
+    # 只认「别攒着不发」那一道（文件里别的守卫也有 `if n > 1:` 之类，不能改错地方）
+    fn = s.find('def guard_release_backlog')
+    if fn < 0:
         return None
-    return s.replace(m, "if n > -1:", 1)
+    end = s.find('\ndef ', fn + 1)
+    m = _re.search(r"if n > \d+(?: and [^:\n]*)?:", s[fn:end if end > 0 else len(s)])
+    if not m:
+        return None
+    m0, m1 = fn + m.start(), fn + m.end()
+    try:
+        tag = _sp.run(['git', 'describe', '--tags', '--abbrev=0', '--match', 'v*'],
+                      cwd=ROOT, capture_output=True, text=True, timeout=20)
+        if tag.returncode != 0 or not (tag.stdout or '').strip():
+            return None
+    except Exception:
+        return None
+    return s[:m0] + "if n > -1:" + s[m1:]
 
 
 

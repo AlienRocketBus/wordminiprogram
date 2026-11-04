@@ -3205,7 +3205,9 @@ if(S.lastDay!==t){
   if(S.streak>=14)unlockAch('s14');
   rollDailyQuests();
   save();
-}}
+}
+__hsnNoteStudyDay(t);
+}
 
 const DAILY_QUEST_POOL=[
 // ==== 学习类 (3) ====
@@ -3872,7 +3874,7 @@ function checkAch(){
     }
   }catch(e){}
 }
-function markMode(m){window._sessionCoins=0;window._sessionStreakCoins=0;window._sessionCapHits=0;window._sessionReviewCoins=0;try{window._sessionWallet0=window.HansenCoins?HansenCoins.get():null;}catch(e){window._sessionWallet0=null;}window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
+function markMode(m){__hsnNoteRecent();window._sessionCoins=0;window._sessionStreakCoins=0;window._sessionCapHits=0;window._sessionReviewCoins=0;try{window._sessionWallet0=window.HansenCoins?HansenCoins.get():null;}catch(e){window._sessionWallet0=null;}window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
 
 // ============================================================
 // TOAST
@@ -4665,8 +4667,13 @@ function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hs
 /* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
 /* 🔴v1165 选项里不能同时出现「意思一样」的两个词：两个都对，孩子选对也可能被判错。
    ① 中文有一个义项相同（因此 / 因此/结果）就算撞车；② 星海里几组近义词中文写法不同，也算撞车。 */
-var __HSN_SYN={however:1,nevertheless:1,therefore:2,consequently:2,besides:3,moreover:3,furthermore:3,rarely:4,seldom:4,immediately:5,instantly:5,finally:6,eventually:6,huge:7,enormous:7,skirt:8,dress:8,cook:9,do:9,fly:10,ride:10};/* 🔴v1165 复查：8 裙子/连衣裙（dress 的例句译成「红裙子」）；9 cook/do（完形金色提示「做」）；10 fly/ride（「坐过」飞机 / 乘坐） */
+var __HSN_SYN={however:1,nevertheless:1,therefore:2,consequently:2,besides:3,moreover:3,furthermore:3,rarely:4,seldom:4,immediately:5,instantly:5,finally:6,eventually:6,huge:7,enormous:7,skirt:8,dress:8,cook:9,do:9,fly:10,ride:10,be:10};/* 🔴v1165 复查：「Have you ever ___ on a plane?」填 been 也最自然 *//* 🔴v1165 复查：8 裙子/连衣裙（dress 的例句译成「红裙子」）；9 cook/do（完形金色提示「做」）；10 fly/ride（「坐过」飞机 / 乘坐） */
 function __hsnSenses(w){return String((w&&w.cn)||'').split(/[\/;；]/).map(function(s){return s.trim();}).filter(Boolean);}
+/* 🔴v1165 复查：完形题下面金色亮着的那几个字（「我爸爸每个周日做晚饭」亮「做」、「你坐过飞机吗」亮「坐过」）就是空里要填的意思。
+   别的词的中文义项整个落在这几个字里（make=做/制作、sit=坐），它填进去也说得通 → 不当这道题的选项。 */
+var __hsnGoldMemo={};
+function __hsnGold(w){try{if(!w||!w.exCn||typeof window.smartHighlight!=='function')return '';var k=String(w.en)+'|'+w.exCn;if(Object.prototype.hasOwnProperty.call(__hsnGoldMemo,k))return __hsnGoldMemo[k];var m=/<span[^>]*>([^<]+)<\/span>/.exec(window.smartHighlight(w.cn,w.exCn,w.en)||'');return (__hsnGoldMemo[k]=m?m[1]:'');}catch(e){return '';}}
+function __hsnGoldClash(w,c){if(!w||!c||w.en===c.en)return false;var g=__hsnGold(w);if(!g)return false;var ss=__hsnSenses(c);for(var i=0;i<ss.length;i++){var t=ss[i].replace(/[（(][^）)]*[）)]/g,'').trim();if(t&&g.indexOf(t)>=0)return true;}return false;}
 function __hsnClash(a,b){
   if(!a||!b)return false;if(a.en===b.en||a.cn===b.cn)return true;
   var g=__HSN_SYN[String(a.en||'').toLowerCase()];if(g&&g===__HSN_SYN[String(b.en||'').toLowerCase()])return true;
@@ -4691,6 +4698,10 @@ function __hsnRoundCoins(){
 /* 🔴v1165 难度卡上的例词：本档真实的前 3 个词 */
 function __hsnLevelExample(filter){var out=[];for(var i=0;i<allW.length&&out.length<3;i++){try{if(filter(i))out.push(allW[i].en);}catch(e){}}return out.join(' · ');}
 function __hsnLockedLevelCard(L){return '<div class="hsn-level-locked" style="background:linear-gradient(135deg,'+L.c1+','+L.c2+');border-radius:18px;padding:16px;margin-bottom:12px;opacity:.42;filter:grayscale(.75);display:flex;align-items:center;gap:12px"><div style="font-size:38px;flex-shrink:0">🔒</div><div style="flex:1;min-width:0;color:#fff"><div style="font-size:18px;font-weight:900;margin-bottom:3px">'+L.name+'</div><div style="font-size:13px;font-weight:600;opacity:.92">本岛暂时没有这个难度的单词</div></div><div style="font-size:22px;opacity:.7">🔒</div></div>';}
+/* 🔴v1165 复查：结算页「⚡ 挑战中级 / 🔥 挑战高级」只给有词的那一档（菜单里 0 个词的档画成灰色 🔒，结算页以前照样给按钮：
+   火眼金睛一点没反应，别的只弹「本岛暂时没有这个难度的单词」）。下一档没词就往后找；后面都没词就写「完成了最高难度」 */
+function __hsnNextLvlBtn(cur,has,fn){var order=['easy','medium','hard'],i=order.indexOf(cur);if(i>=0)for(var j=i+1;j<order.length;j++){var ok=false;try{ok=!!has(order[j]);}catch(e){ok=false;}if(ok)return '<button class="game-btn red" onclick="'+fn+'(\''+order[j]+'\')">'+(order[j]==='medium'?'⚡ 挑战中级':'🔥 挑战高级')+'</button> ';}return '<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>';}
+function __hsnLvlHas(LV){return function(k){return !!(LV&&LV[k])&&[...Array(allW.length).keys()].some(LV[k].filter);};}
 function closeAlert(){document.getElementById('alertModal').classList.remove('show')}
 
 // ============================================================
@@ -4757,14 +4768,22 @@ m.innerHTML='<button type="button" class="close" onclick="event.stopPropagation(
 document.getElementById('wordModal').classList.add('show');
 speak(w.en)}
 function closeModal(){document.getElementById('wordModal').classList.remove('show')}
-function learnWord(idx){if(!S.learned.includes(idx)){S.learned.push(idx);addXP(10);addStar(1);progressQuest('learn',1);playCorrect();
+function learnWord(idx){__hsnNoteRecent();if(!S.learned.includes(idx)){S.learned.push(idx);addXP(10);addStar(1);progressQuest('learn',1);playCorrect();
 const rect=document.getElementById('modalInner').getBoundingClientRect();confetti(rect.left+rect.width/2,rect.top);flashScreen();
 const c=S.learned.length;
 if(c>=1)unlockAch('w1');if(c>=10)unlockAch('w10');if(c>=25)unlockAch('w25');if(c>=allW.length)unlockAch('wAll');
 save()}closeModal();renderExplore();updatePetHero()}
 
+/* 🔴v1165 复查：后台的框（首页预热的岛、藏在首页后面的岛、?warm=1）——孩子看不见它，它做的事不算孩子做的 */
+function __hsnBgFrame(){try{if(/[?&]warm=1(?:&|$)/.test(location.search||''))return true;var fe=window.frameElement;if(!fe)return false;if(fe.getAttribute&&fe.getAttribute('aria-hidden')==='true')return true;var room=fe.closest&&fe.closest('[id^="hsn_room_"]');if(room&&room.style.display!=='block')return true;var wrap=fe.closest&&fe.closest('#islandFrameWrap');return !!(wrap&&wrap.style.display==='none');}catch(e){return false;}}
+/* 🔴v1165 复查：在这个岛答题 / 学词 / 开一个游戏 = 最近探险的是这个岛（首页卡片「最近探险」看它）。
+   以前只有首页外壳点岛才记：老师分享的链接直接打开的岛，玩了也不算，卡片还指着以前那个岛。1 分钟内只写一次。 */
+function __hsnNoteRecent(){try{if(__hsnBgFrame())return;var k=__hsnSaveKey,now=Date.now();if(!k)return;if(localStorage.getItem('lastIslandKey')===k&&now-(parseInt(localStorage.getItem('lastIslandTime')||'0',10)||0)<60000)return;localStorage.setItem('lastIslandKey',k);localStorage.setItem('lastIslandTime',String(now));}catch(e){}}
+/* 🔴v1165 复查：所有岛加起来学过几天（成就「累计学习 N 天」用它；以前取单个岛的天数，每天换一个岛玩的孩子永远是 1 天）。
+   第一次记的时候从本岛已有的天数起算（只会少算、不会多算）。 */
+function __hsnNoteStudyDay(t){try{if(__hsnBgFrame())return;var K='hansen_study_days_v1165',o=null;try{o=JSON.parse(localStorage.getItem(K)||'null');}catch(e){o=null;}if(!o||typeof o!=='object'){o={n:Math.max(1,__hsnSafeStatCount(S.stats&&S.stats.daysPlayed)),last:t};localStorage.setItem(K,JSON.stringify(o));return;}if(o.last===t)return;o.n=(Math.max(0,Math.floor(Number(o.n)||0)))+1;o.last=t;localStorage.setItem(K,JSON.stringify(o));}catch(e){}}
 // Track answer stats & wrongs
-function markAnswer(idx,correct){var _wrong=__hsnSafeWrongCount(S.wrongs[idx]);S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(_wrong&&!window.__hmlRetryAns){_wrong--;if(_wrong)S.wrongs[idx]=_wrong;else delete S.wrongs[idx]}}else{S.wrongs[idx]=Math.min(__HSN_MAX_WRONG_COUNT,_wrong+1)}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}else{window._sessionCapHits=(window._sessionCapHits||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
+function markAnswer(idx,correct){__hsnNoteRecent();var _wrong=__hsnSafeWrongCount(S.wrongs[idx]);S.totalAnswers++;if(correct){S.totalCorrect++;progressQuest('correct',1);if(_wrong&&!window.__hmlRetryAns){_wrong--;if(_wrong)S.wrongs[idx]=_wrong;else delete S.wrongs[idx]}}else{S.wrongs[idx]=Math.min(__HSN_MAX_WRONG_COUNT,_wrong+1)}save();if(correct){try{var _got=earnCoinOnCorrect(idx)?1:0;window._lastCoinGain=_got;if(_got){window._sessionCoins=(window._sessionCoins||0)+1;}else{window._sessionCapHits=(window._sessionCapHits||0)+1;}}catch(e){window._lastCoinGain=0;}}if(typeof comboHit==='function'){if(correct){var _bonusMul=getComboMul();comboHit();if(_bonusMul>1){var _bonus=Math.round(5*(_bonusMul-1));if(_bonus>0){addXP(_bonus);try{floatText(window.innerWidth/2,200,'+'+_bonus+' COMBO XP','#fbbf24')}catch(e){}}}}else{comboMiss()}}try{checkAch();}catch(e){}}
 /* 🔴v1165 答错小课的统一入口（hansen_mistake_lesson_v1165.js）。模块没加载就退回原来的定时推进，不会卡住。 */
 function __hml(){return window.HansenMistakeLesson||null}
 function __hmlStart(m){var M=__hml();if(M)M.start(m)}
@@ -5012,7 +5031,7 @@ function nextBossQ(){if(!bossActive)return;
     var _cm = __hsnClozeMatch(w) || {index:0,text:''};
     var isAtStart = _cm.index === 0;
     // 单根横线 (用 nbsp 撑宽度, border-bottom 画线)
-    prompt = w.ex.slice(0,_cm.index) + '<span style="display:inline-block;min-width:60px;padding:0 8px;border-bottom:3px solid #fbbf24;color:#fbbf24;font-weight:900">&nbsp;&nbsp;&nbsp;&nbsp;</span>' + w.ex.slice(_cm.index+_cm.text.length);
+    prompt = __hsnClozeAll(w.ex, _cm, function(){ return '<span style="display:inline-block;min-width:60px;padding:0 8px;border-bottom:3px solid #fbbf24;color:#fbbf24;font-weight:900">&nbsp;&nbsp;&nbsp;&nbsp;</span>'; });   /* 🔴v1165 复查：出现几次挖几个空 */
     // sub 显示中文翻译, 让玩家理解句意 (空白处对应的中文用红色高亮)
     var cnHi = w.exCn ? window.smartHighlight(w.cn, w.exCn, w.en) : '';
     sub = cnHi ? '<span style="color:#cbd5e1;font-size:13px">' + cnHi + '</span>' : '选出填空处正确的英语单词';
@@ -5034,7 +5053,7 @@ function nextBossQ(){if(!bossActive)return;
   document.getElementById('bossQSub').innerHTML = sub;
   
   const opts=[w];
-  /*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+  /*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r))||(qType==='cloze'&&__hsnGoldClash(w,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
   opts.sort(function(){return Math.random()-.5});
   const correctIdx=opts.findIndex(function(o){return o.en===w.en});
   window._bossOpts=opts;window._bossIdx=idx;window._bossCorrectIdx=correctIdx;window._bossWord=w;window._bossQType=qType;
@@ -5106,7 +5125,8 @@ function bossAnswer(i){const opts=document.getElementById('bossOpts');if(!opts||
       var wordColor = isCorrect ? '#22c55e' : '#ef4444';
       var wordBg = isCorrect ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)';
       // 把横线 span 替换成显示单词的高亮 span
-      bossQEl.innerHTML = w.ex.slice(0,_cm2.index) + '<span style="display:inline-block;padding:0 8px;border-bottom:3px solid ' + wordColor + ';color:' + wordColor + ';background:' + wordBg + ';font-weight:900;border-radius:4px">' + displayWord + '</span>' + w.ex.slice(_cm2.index+_cm2.text.length);
+      bossQEl.innerHTML = _cm2.text ? __hsnClozeAll(w.ex, _cm2, function(t){ return '<span style="display:inline-block;padding:0 8px;border-bottom:3px solid ' + wordColor + ';color:' + wordColor + ';background:' + wordBg + ';font-weight:900;border-radius:4px">' + t + '</span>'; })
+        : (w.ex.slice(0,_cm2.index) + '<span style="display:inline-block;padding:0 8px;border-bottom:3px solid ' + wordColor + ';color:' + wordColor + ';background:' + wordBg + ';font-weight:900;border-radius:4px">' + displayWord + '</span>' + w.ex.slice(_cm2.index+_cm2.text.length));   /* 🔴v1165 复查：挖了几个空就填回几个 */
     }
   }
   
@@ -5457,11 +5477,16 @@ function pickNineAnimals(target){
   const sameLvlIdxs=[...Array(allW.length).keys()].filter(L.filter).filter(i=>allW[i].en!==target.en);
   const arr=[target];
   const shuffled=sameLvlIdxs.sort(()=>Math.random()-.5);
-  for(const i of shuffled){if(arr.length>=9)break;const a=allW[i];if(!arr.find(o=>o.en===a.en))arr.push(a)}
+  /* 🔴v1165 复查：和题目意思一样的词（rarely/seldom 都是「很少」、with/and 都是「和」）不上同一屏 —— 两只地鼠都对，
+     孩子点了另一只却扣一颗 ❤️。别的地鼠之间也不放一样的中文。 */
+  for(const i of shuffled){if(arr.length>=9)break;const a=allW[i];if(!arr.find(o=>o.en===a.en)&&!__hsnClash(target,a)&&!arr.find(o=>o.cn===a.cn))arr.push(a)}
   // 同档不够 9 个, 从全集补
+  let __g=0;
   while(arr.length<9){
     const r=allW[Math.floor(Math.random()*allW.length)];
-    if(!arr.find(function(o){return o.en===r.en}))arr.push(r);
+    if(arr.find(function(o){return o.en===r.en}))continue;
+    if(__g++<600&&(__hsnClash(target,r)||arr.find(function(o){return o.cn===r.cn})))continue;   /* 词太少时 600 次以后不再挑，绝不卡住 */
+    arr.push(r);
   }
   arr.sort(function(){return Math.random()-.5});
   return arr;
@@ -5596,7 +5621,7 @@ function molesComplete(){
   if(S.stats.molesCleared>=10)unlockAch('molesMaster');
   petTaskComplete('🎯 打地鼠 '+L.name,L.petXp,'moles');
   save();
-  const nextLvlBtn=molesLevel==='easy'?'<button class="game-btn red" onclick="startMolesLevel(\'medium\')">⚡ 挑战中级</button> ':(molesLevel==='medium'?'<button class="game-btn red" onclick="startMolesLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+  const nextLvlBtn=__hsnNextLvlBtn(molesLevel,__hsnLvlHas(MOLES_LEVELS),'startMolesLevel');
   document.getElementById('molesContent').innerHTML=
     '<div style="text-align:center;padding:30px">'+
       '<div style="font-size:80px">🎯</div>'+
@@ -5817,7 +5842,9 @@ function pickFishTarget(){
   var idx=fishPool.pop();
   fishTarget=allW[idx];
   var _fp=document.getElementById('fishPond');
-  if(_fp){/* 🔴 BUG#47修复(v467):换目标后重同步全鱼光效,防旧目标鱼残留发光误导。别删。 */_fp.querySelectorAll('[data-en]').forEach(function(_f){var _t=(_f.dataset.en===fishTarget.en);_f.dataset.target=_t?'1':'0';if(_f.children[0])_f.children[0].style.filter=_t?'drop-shadow(0 0 8px #fde047)':'';});}
+  if(_fp){/* 🔴 BUG#47修复(v467):换目标后重同步全鱼光效,防旧目标鱼残留发光误导。别删。 */_fp.querySelectorAll('[data-en]').forEach(function(_f){var _t=(_f.dataset.en===fishTarget.en);_f.dataset.target=_t?'1':'0';if(_f.children[0])_f.children[0].style.filter=_t?'drop-shadow(0 0 8px #fde047)':'';
+    /* 🔴v1165 复查：上一题游进来的鱼里，和新题意思一样的（新题 rarely，池里还游着 seldom）先收走，免得孩子钓了也算错 */
+    if(!_t&&!_f.dataset.done){var _w=null;for(var _k=0;_k<allW.length;_k++){if(allW[_k].en===_f.dataset.en){_w=allW[_k];break;}}if(_w&&__hsnClash(fishTarget,_w)){_f.dataset.done='1';if(_f.parentElement)_f.remove();fishOnscreen=Math.max(0,fishOnscreen-1);}}});}
   var el=document.getElementById('fishPrompt');
   if(el)el.innerHTML='🎣 钓出: <span style="font-size:24px">'+__hsnQuizPic(fishTarget)+'</span> <b>'+fishTarget.cn+'</b>';
   var prog=document.getElementById('fishProg');
@@ -5837,7 +5864,7 @@ function spawnOneFish(){
   var animal,isTarget;
   // 干扰池: 同档其他词
   var sameLvlIdxs=[];
-  for(var i=0;i<allW.length;i++){if(L.filter(i)&&allW[i].en!==fishTarget.en)sameLvlIdxs.push(i);}
+  for(var i=0;i<allW.length;i++){if(L.filter(i)&&allW[i].en!==fishTarget.en&&!__hsnClash(fishTarget,allW[i]))sameLvlIdxs.push(i);}   /* 🔴v1165 复查：和「钓出 很少」意思一样的 seldom 不当干扰鱼 */
   if(!haveTarget){
     animal=fishTarget;isTarget=true;
   }else{
@@ -5846,7 +5873,7 @@ function spawnOneFish(){
       if(sameLvlIdxs.length>0){
         animal=allW[sameLvlIdxs[Math.floor(Math.random()*sameLvlIdxs.length)]];
       }else{
-        do{animal=allW[Math.floor(Math.random()*allW.length)]}while(animal.en===fishTarget.en);
+        var __fg=0;do{animal=allW[Math.floor(Math.random()*allW.length)]}while(animal.en===fishTarget.en||(__fg++<400&&__hsnClash(fishTarget,animal)));
       }
       isTarget=false;
     }
@@ -6040,7 +6067,7 @@ function fishComplete(){
   if(S.stats.fishCleared>=10)unlockAch('fishMaster');
   petTaskComplete('🎣 钓鱼大师 '+L.name,L.petXp,'fish');
   save();
-  const nextLvlBtn=fishLevel==='easy'?'<button class="game-btn red" onclick="startFishLevel(\'medium\')">⚡ 挑战中级</button> ':(fishLevel==='medium'?'<button class="game-btn red" onclick="startFishLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+  const nextLvlBtn=__hsnNextLvlBtn(fishLevel,__hsnLvlHas(FISH_LEVELS),'startFishLevel');
   document.getElementById('fishContent').innerHTML=
     '<div style="text-align:center;padding:30px">'+
       '<div style="font-size:80px">🎣</div>'+
@@ -6381,7 +6408,7 @@ function bubbleComplete(){
   addXP(L.gemBonus);bigConfetti();
   petTaskComplete('🫧 泡泡大作战 '+L.name,L.petXp,'bubble');
   save();
-  const nextLvlBtn=bubbleLevel==='easy'?'<button class="game-btn red" onclick="startBubbleLevel(\'medium\')">⚡ 挑战中级</button> ':(bubbleLevel==='medium'?'<button class="game-btn red" onclick="startBubbleLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+  const nextLvlBtn=__hsnNextLvlBtn(bubbleLevel,__hsnLvlHas(BUBBLE_LEVELS),'startBubbleLevel');
   document.getElementById('bubbleContent').innerHTML=
     '<div style="text-align:center;padding:30px">'+
       '<div style="font-size:80px">🫧</div>'+
@@ -6419,7 +6446,7 @@ const SCRAMBLE_LEVELS={
     filter:i=>{const en=allW[i].en;return en.length>=7 && !/[.\-]/.test(en)},
     xpPerWord:18,gemBonus:50,petXp:65}
 };
-let scrPool=[],scrIdx=0,scrWord=null,scrSlots=[],scrLevel='easy',scrTotal=0,scrCorrect=0,scrActive=false;
+let scrPool=[],scrIdx=0,scrWord=null,scrSlots=[],scrLevel='easy',scrTotal=0,scrCorrect=0,scrActive=false,scrMissed={};
 /* 🔴v1165 离开/换难度就停：下一词只在这一局、字母拼拼乐还在前台时出 */
 function stopScramble(){scrActive=false;__hsnRunNew('scr')}
 
@@ -6455,7 +6482,7 @@ function startScrambleLevel(level){
   markMode('scramble');
   scrLevel=level;
   scrPool=[...Array(allW.length).keys()].filter(SCRAMBLE_LEVELS[level].filter).sort(()=>Math.random()-.5);
-  scrTotal=scrPool.length;scrIdx=0;scrCorrect=0;__hmlStart('scramble');
+  scrTotal=scrPool.length;scrIdx=0;scrCorrect=0;scrMissed={};__hmlStart('scramble');
   __hsnRunNew('scr');scrActive=true;
   nextScramble();
 }
@@ -6498,10 +6525,10 @@ if(scrSlots.length===targetNoSpace.length){const typed=scrSlots.map(s=>s.letter)
 const expected=targetNoSpace;
 const L=SCRAMBLE_LEVELS[scrLevel]||SCRAMBLE_LEVELS.easy;
 if(typed.toLowerCase()===expected.toLowerCase()){document.getElementById('scrMsg').innerHTML='<span style="color:#22c55e">✅ 正确！'+scrWord.en+' = '+scrWord.cn+'</span>';
-const __rtS=__hmlIsRetry('scramble',scrPool[scrIdx]);playCorrect();if(!__rtS)addXP(L.xpPerWord);confetti(window.innerWidth/2,300,12);__hmlMark(scrPool[scrIdx],true,__rtS);if(!__rtS)scrCorrect++;
+/* 🔴v1165 复查：这个词这一局拼错过（看过答案、看过小课）再拼对 = 「看过答案再答」：照常算一次答对（金币/连击），但不算纠错 —— 不扣错题本、复习计划不升盒、没有 +2；也不加经验、不算进正确率（以前故意拼错一次再拼对，正确率照样 100%、算「完美通关」，还白拿复习奖励和连续复习天数） */const __rtS=__hmlIsRetry('scramble',scrPool[scrIdx])||!!scrMissed[scrPool[scrIdx]];playCorrect();if(!__rtS)addXP(L.xpPerWord);confetti(window.innerWidth/2,300,12);__hmlMark(scrPool[scrIdx],true,__rtS);if(!__rtS)scrCorrect++;
 scrIdx++;setTimeout(__hsnLater('scr','scrambleScreen',nextScramble),1200)}
 else{var _sm=document.getElementById('scrMsg');if(_sm)_sm.innerHTML='<span style="color:#ef4444">❌ 不对！正确：'+scrWord.en+'</span>';
-playWrong();markAnswer(scrPool[scrIdx],false);var _sw=document.querySelector('.scramble-word');if(_sw)_sw.classList.add('shake-screen');
+playWrong();scrMissed[scrPool[scrIdx]]=1;markAnswer(scrPool[scrIdx],false);var _sw=document.querySelector('.scramble-word');if(_sw)_sw.classList.add('shake-screen');
 __hmlLesson('scramble',scrPool[scrIdx],__hsnLater('scr','scrambleScreen',clearScramble),1100)}}}
 
 function clearScramble(){scrSlots=[];document.querySelectorAll('.scramble-slot').forEach(s=>{if(!s.classList.contains('space')){s.textContent='';s.classList.remove('filled')}});
@@ -6596,7 +6623,7 @@ function scrComplete(){
     addXP(partGem);
   }
   save();
-  const nextLvlBtn=scrLevel==='easy'?'<button class="game-btn red" onclick="startScrambleLevel(\'medium\')">⚡ 挑战中级</button> ':(scrLevel==='medium'?'<button class="game-btn red" onclick="startScrambleLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+  const nextLvlBtn=__hsnNextLvlBtn(scrLevel,__hsnLvlHas(SCRAMBLE_LEVELS),'startScrambleLevel');
   let resultHTML;
   if(passed){
     resultHTML=
@@ -6841,7 +6868,7 @@ function listenComplete(){
   petTaskComplete('🔊 \u542c\u97f3\u8fa8\u4e49 '+L.name,petXp,'listen');
   if(typeof bigConfetti==='function')bigConfetti();
   save();
-  var nextLvlBtn = listenLevel==='easy' ? `<button class="game-btn red" onclick="startListenLevel('medium')">⚡ \u6311\u6218\u4e2d\u7ea7</button> ` : (listenLevel==='medium' ? `<button class="game-btn red" onclick="startListenLevel('hard')">🔥 \u6311\u6218\u9ad8\u7ea7</button> ` : `<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 \u4f60\u5b8c\u6210\u4e86\u6700\u9ad8\u96be\u5ea6\uff01\u592a\u5389\u5bb3\u5566</div>`);
+  var nextLvlBtn = __hsnNextLvlBtn(listenLevel, function(k){ return !!(LISTEN_LEVEL_IDX[k] && LISTEN_LEVEL_IDX[k].length); }, 'startListenLevel');
   var ct=document.getElementById('listenContent');
   if(ct) ct.innerHTML = `<div style="text-align:center;padding:24px 16px"><div style="font-size:72px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">${L.icon}</div><div style="font-size:24px;font-weight:800;color:#fbbf24;margin:10px 0">${L.icon} ${L.name} \u5b8c\u6210\uff01</div><div style="font-size:14px;color:#cbd5e1;margin-bottom:10px">${total} \u4e2a\u5355\u8bcd\u5168\u90e8\u542c\u5b8c \u00b7 \u7b54\u5bf9 <b style="color:#22c55e">${listenRight}</b> / ${listenTotal} \u00b7 \u6b63\u786e\u7387 <b style="color:#fbbf24">${acc}%</b></div><div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">${__hsnRoundCoins()}</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 \u7ecf\u9a8c +${(S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0))}</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 \u5ba0\u7269\u7ecf\u9a8c +${petXp}</span></div><div style="margin-top:18px">${nextLvlBtn}<button class="game-btn gold" onclick="startListenLevel('${listenLevel}')" style="margin-left:6px">🔄 \u518d\u6765\u4e00\u8f6e</button> <button class="game-btn purple" onclick="showScreen('home')" style="margin-left:6px">🏠 \u56de\u4e3b\u9875</button></div></div>`;
 }
@@ -6948,7 +6975,14 @@ document.getElementById('typingContent').innerHTML=
 function stopTyping(){typeActive=false;__hsnRunNew('type');stopTypeTimer();try{document.body.classList.remove('type-lock');}catch(e){}}
 function startTypeTimer(){stopTypeTimer();typeTimerInt=setInterval(updateTypeTimer,87)}
 function stopTypeTimer(){if(typeTimerInt){clearInterval(typeTimerInt);typeTimerInt=null}}
+/* 🔴v1165 复查：孩子拼到一半切去回微信 / 锁屏，页面被冻住、计时器不走，回来那一下 Date.now() 已经过了 30 秒 →
+   以前直接记成超时拼错（进错题本、复习计划、拼对率下降）。现在：页面藏着、或者两次走表之间隔了 3 秒以上（被冻住了），
+   这段时间不算进这个词的用时（总用时一起往后挪），计时从离开时的地方接着走。正常走表 87ms 一次。 */
+var __typeLastTick=0;
 function updateTypeTimer(){
+  var __now=Date.now(),__gap=__typeLastTick?__now-__typeLastTick:0;__typeLastTick=__now;
+  if(__gap>0&&typeWordStart&&(document.hidden||__gap>3000)){typeWordStart+=__gap;if(typeRoundStart)typeRoundStart+=__gap;}
+  if(document.hidden)return;
   if(!typeActive||!typeWordStart)return;
   var elapsed=(Date.now()-typeWordStart)/1000;
   var el=document.getElementById('typeTimer');
@@ -7165,7 +7199,9 @@ if(!wrongReview&&typeWrongWords.length){
   });
   wrongReview+='</div></div>';
 }
-const nextRoundBtn=typeRound<3?'<button class="game-btn red" onclick="startTyping('+(typeRound+1)+')" style="font-size:15px;padding:9px 16px">'+TYPING_LEVELS[typeRound+1].icon+' 挑战'+TYPING_LEVELS[typeRound+1].name+'</button>':'';
+/* 🔴v1165 复查：下一档 0 个词就往后找（和别的游戏一样只给有词的那一档） */
+let __nr=0;for(let r=typeRound+1;r<=3;r++){if(TYPING_LEVELS[r]&&[...Array(allW.length).keys()].some(TYPING_LEVELS[r].filter)){__nr=r;break;}}
+const nextRoundBtn=__nr?'<button class="game-btn red" onclick="startTyping('+__nr+')" style="font-size:15px;padding:9px 16px">'+TYPING_LEVELS[__nr].icon+' 挑战'+TYPING_LEVELS[__nr].name+'</button>':'';
 document.getElementById('typingContent').innerHTML='<div style="text-align:center;padding:0 8px 10px">'
 +'<div style="font-size:54px;line-height:1.05">'+medal+'</div>'
 +'<div style="font-size:15px;color:'+L.cb+';font-weight:800;margin-top:4px">'+L.name+' · '+medalName+'</div>'
@@ -7243,6 +7279,10 @@ function __hsnClozeMatch(w){
   return null;
 }
 window.__hsnClozeMatch=__hsnClozeMatch;
+/* 🔴v1165 复查：同一个词在例句里出现两次（What do you do? / Work hard, play hard.）就两个都挖掉、答完两个都填回 ——
+   以前只挖第一个，答案还明明白白印在句子里。mk(原文) 返回这一处要换成的 HTML（原文是句子自己的写法，大小写不变）。 */
+function __hsnClozeAll(ex,cm,mk){ex=String(ex||'');if(!cm||!cm.text)return ex;try{var re=new RegExp('\\b'+cm.text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi');return ex.replace(re,function(t){return mk(t);});}catch(e){return ex.slice(0,cm.index)+mk(cm.text)+ex.slice(cm.index+cm.text.length);}}
+window.__hsnClozeAll=__hsnClozeAll;
 for(const k in CLOZE_LEVELS){
   /* 🔴v1165 只收真能出题的词：卡片上的题数、进度和「答对 x / y」都用同一批 */
   CLOZE_LEVEL_IDX[k]=CLOZE_LEVELS[k].words.map(en=>allW.findIndex(w=>w.en===en)).filter(i=>i>=0&&!!__hsnClozeMatch(allW[i]));
@@ -7281,6 +7321,7 @@ function stopCloze(){clozeActive=false;__hsnRunNew('cloze')}
 // 选好难度后真正开始
 function startClozeLevel(level){
   if(!CLOZE_LEVELS[level])return;
+  /* 🔴v1165 复查：这一档没有能出题的词：只提示，不进一个 0 题的空局（和别的游戏一样） */if(!CLOZE_LEVEL_IDX[level]||!CLOZE_LEVEL_IDX[level].length){showToast('📝 本岛暂时没有这个难度的单词，换一档试试~');return;}
   markMode('cloze');
   clozeLevel=level;__hsnRunNew('cloze');clozeActive=true;clozeDone=0;__hmlStart('cloze');
   // 自己管理池: 每档独立洗牌, pop 到空就完成
@@ -7305,12 +7346,12 @@ if(!w){if(__hmlRequeue('cloze',clozePool)){nextClozeQ();return}clozeComplete();r
 // 构建挖空句子：挖掉例句里那个词本来的写法（可能是 eyes / cooks 这样的变形）
 // 目标词在句首时选项首字母大写显示
 const isAtStart=cm.index===0;
-const sentence=w.ex.slice(0,cm.index)+'<span class="cloze-blank" id="clozeBlank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'+w.ex.slice(cm.index+cm.text.length);
+let __cb=0;const sentence=__hsnClozeAll(w.ex,cm,function(t){return '<span class="cloze-blank"'+(__cb++?'':' id="clozeBlank"')+' data-fill="'+t.replace(/"/g,'&quot;')+'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';});
 // 干扰项优先从同档单词抽 (难度更一致), 不够再从全集补
 const opts=[w];
 const sameLvl=CLOZE_LEVEL_IDX[clozeLevel].filter(i=>i!==idx).sort(()=>Math.random()-.5);
-for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>__hsnClash(o,c)))opts.push(c)}
-/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r)))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
+for(const di of sameLvl){if(opts.length>=4)break;const c=allW[di];if(!opts.find(o=>__hsnClash(o,c))&&!__hsnGoldClash(w,c))opts.push(c)}
+/*⭐v915: 选项的中文也必须互不相同(否则同义词干扰项→英译汉出现两个一样的中文/完形填空两个答案都对)*/{let __g=0;while(opts.length<4&&__g++<400){const r=allW[Math.floor(Math.random()*allW.length)];if(opts.some(o=>__hsnClash(o,r))||__hsnGoldClash(w,r))continue;if(!opts.find(o=>o.en===r.en||o.cn===r.cn))opts.push(r)}}while(opts.length<4){const r=allW[Math.floor(Math.random()*allW.length)];if(!opts.find(o=>o.en===r.en))opts.push(r)}
 opts.sort(()=>Math.random()-.5);
 clozeQ={word:w,opts:opts,idx:idx,fill:cm.text};
 const L=CLOZE_LEVELS[clozeLevel];
@@ -7321,7 +7362,7 @@ document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-are
 function clozeAnswer(i){if(!clozeActive||!clozeQ)return;const opts=document.querySelectorAll('#clozeScreen .cloze-opt');if(opts.length===0||opts[0].dataset.done)return;opts.forEach(o=>o.dataset.done='1');
 const blank=document.getElementById('clozeBlank');
 const L=CLOZE_LEVELS[clozeLevel]||CLOZE_LEVELS.easy;
-if(clozeQ.opts[i].en===clozeQ.word.en){opts[i].classList.add('correct');blank.textContent=clozeQ.fill||clozeQ.word.en;blank.classList.add('filled');
+if(clozeQ.opts[i].en===clozeQ.word.en){opts[i].classList.add('correct');document.querySelectorAll('#clozeScreen .cloze-blank').forEach(function(b){b.textContent=b.getAttribute('data-fill')||clozeQ.fill||clozeQ.word.en;b.classList.add('filled');});
 const __rtC=__hmlIsRetry('cloze',clozeQ.idx);playCorrect();if(!__rtC){addXP(L.xpPerQ);clozeDone++;S.stats.clozeRight++;progressQuest('cloze',1);}__hmlMark(clozeQ.idx,true,__rtC);
 if(S.stats.clozeRight>=20)unlockAch('cloze20');save();
 const rect=opts[i].getBoundingClientRect();confetti(rect.left,rect.top,10);
@@ -7335,7 +7376,7 @@ var __cex=clozeQ.word.ex;setTimeout(__hsnLater('cloze','clozeScreen',function(){
 // 兜底: 8 秒强制切下一题 (例句最长 ~3 秒)
 setTimeout(__cgo,8000)
 }else{opts[i].classList.add('wrong');opts.forEach((o,j)=>{if(clozeQ.opts[j]&&clozeQ.opts[j].en===clozeQ.word.en)o.classList.add('correct')});
-blank.textContent=clozeQ.fill||clozeQ.word.en;blank.classList.add('wrong');
+document.querySelectorAll('#clozeScreen .cloze-blank').forEach(function(b){b.textContent=b.getAttribute('data-fill')||clozeQ.fill||clozeQ.word.en;b.classList.add('wrong');});
 playWrong();markAnswer(clozeQ.idx,false);save();
 /* 🔴v1165 答错小课：揭晓卡上带着这句例句（正确的词标亮），和以前一样把整句例句读一遍（教学价值高），
    读完再停一下才出下一题；点一下也能跳过。模块没加载时照旧读整句、读完进下一题 */
@@ -7348,7 +7389,7 @@ const accuracy=clozeTotal>0?Math.round(clozeDone*100/clozeTotal):0;
 // 任务奖励 + 宠物经验
 addXP(L.gemBonus);bigConfetti();
 petTaskComplete('📝 完形填空 '+L.name,L.petXp,'cloze');
-const nextLvlBtn=clozeLevel==='easy'?'<button class="game-btn red" onclick="startClozeLevel(\'medium\')">⚡ 挑战中级</button> ':(clozeLevel==='medium'?'<button class="game-btn red" onclick="startClozeLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+const nextLvlBtn=__hsnNextLvlBtn(clozeLevel,function(k){return !!(CLOZE_LEVEL_IDX[k]&&CLOZE_LEVEL_IDX[k].length);},'startClozeLevel');
 document.getElementById('clozeContent').innerHTML=
   '<div style="text-align:center;padding:30px">'+
     '<div style="font-size:80px">📝</div>'+
@@ -8404,7 +8445,7 @@ function startEagle(){
 
 function startEagleLevel(level){
   if(!EAGLE_LEVELS[level])return;
-  if([...Array(allW.length).keys()].filter(EAGLE_LEVELS[level].filter).length===0)return;
+  if([...Array(allW.length).keys()].filter(EAGLE_LEVELS[level].filter).length===0){showToast('👀 本岛暂时没有这个难度的单词，换一档试试~');return;}   /* 🔴v1165 复查：以前点了一点反应都没有 */
   markMode('eagle');
   eagleLevel=level;__hsnRunNew('eagle');
   eagleActive=true;eagleScore=0;eagleRound=0;eagleCombo=0;__hmlStart('eagle');
@@ -8562,7 +8603,7 @@ function eagleComplete(){
   if(S.stats.eagleCleared>=10)unlockAch('eagleMaster');
   petTaskComplete('👀 火眼金睛 '+L.name,L.petXp,'eagle');
   save();
-  const nextLvlBtn=eagleLevel==='easy'?'<button class="game-btn red" onclick="startEagleLevel(\'medium\')">⚡ 挑战中级</button> ':(eagleLevel==='medium'?'<button class="game-btn red" onclick="startEagleLevel(\'hard\')">🔥 挑战高级</button> ':'<div style="font-size:13px;color:#fbbf24;margin:10px 0;background:rgba(251,191,36,.15);padding:8px 14px;border-radius:10px;border:1px solid rgba(251,191,36,.4)">🏆 你完成了最高难度！太厉害啦</div>');
+  const nextLvlBtn=__hsnNextLvlBtn(eagleLevel,__hsnLvlHas(EAGLE_LEVELS),'startEagleLevel');
   const c=document.getElementById('eagleContent');
   if(c)c.innerHTML='<div style="text-align:center;padding:30px">'+
     '<div style="font-size:80px">👀</div>'+

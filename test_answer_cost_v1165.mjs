@@ -15,6 +15,12 @@
  *       v1163 是 10 题里 8 题超 200ms、最卡 531 / 609ms；云存档自动同步不挡时 2~6 题超 200ms、最卡 341 / 449ms —— 都过不了）
  *      只看点击处理的中位数，看不见点完以后才跑的活（存档防抖、下一题准备），也看不见最卡的那一题
  *      （复查实测：点击处理 83~202ms 都算过，可同一题里有 253~573ms 的长任务）。
+ *   5. （v1165 复查第 2 轮 R2-06）上面的毫秒上限按「这台机器此刻有多忙」换算：每一题前后各跑一段固定的活（CAL，
+ *      解析 / 序列化同一份 JSON），这台测试机正常时（负载约 4.5，上限就是在这时定的）4 倍节流下约 60ms。
+ *      每一题的上限按它前后两次 CAL 里慢的那次放宽（慢几倍放宽几倍，最少 1 倍、最多 3 倍；机器更快不收紧）——
+ *      别的进程抢 CPU 是一阵一阵的，看整局的平均数会漏掉恰好落在某一题上的那一阵；点击处理的中位数按整局 CAL 中位数放宽。
+ *      测试机很忙（3 个测试并行、别的组也在跑，负载 8~13）时以前假红：账本重建 0~1 次，可最卡的一题 314~411ms。
+ *      还是没过、而且这一局机器明显忙（倍数 > 1.25）：换个新页面重跑一次，按第二次算（输出里写明）。
  *   ⚠️ 对战/登录组的 hansen_cloud_save_v965.js 收到 'hsn-data-changed' 后最多 8 秒整份导出一次备份（没登录、没开云存档也导出，
  *      4 倍慢 CPU 下 250~570ms，deferred_battle-01，还没修）。这条上限只管我们自己的代码，所以夹具里先把这个监听挡掉；
  *      对战组修好以后去掉 BLOCK_AUTOSYNC。
@@ -24,6 +30,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const VERSION = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim();
@@ -41,6 +48,7 @@ await new Promise(r => srv.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${srv.address().port}/`;
 let fails = 0;
 const ok = (c, m) => { console.log((c ? '  ✅ ' : '  ❌ ') + m); if (!c) fails++; };
+const okOuter = ok;
 const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH, args: ['--autoplay-policy=no-user-gesture-required'] });
 const median = a => { const s = [...a].sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : NaN; };
 
@@ -114,9 +122,14 @@ const BLOCK_AUTOSYNC = () => {
   } catch (e) {}
 };
 const LONG_SOFT = 200, LONG_HARD = 300;   /* 见文件头 4.：最多 1 题超过 200ms，没有一题超过 300ms */
+/* 见文件头 5.：一段固定的活，用来量「机器此刻多忙」（4 倍节流下正常约 60ms） */
+const CAL = () => { const o = { a: [] }; for (let i = 0; i < 9000; i++) o.a.push({ i, s: 'word' + i, t: [i, i * 2, i * 3], cn: '中文词' + i, ok: i % 2 === 0 }); const t0 = performance.now(); for (let k = 0; k < 3; k++) { const s = JSON.stringify(o); const b = JSON.parse(s); let n = 0; for (const x of b.a) n += x.s.length + x.cn.length; if (n < 0) throw 0; } return performance.now() - t0; };
+const CAL_REF = 60, K_MIN = 1, K_MAX = 3;
 
-async function runCase(label, shell, seedAll) {
-  console.log(`\n▶ ${label}`);
+async function runCase(label, shell, seedAll, attempt = 1) {
+  const checks = [];
+  const ok = (c, m) => { checks.push([!!c, m]); };   // 先攒着：机器太忙要重跑时按第二次算
+  console.log(`\n▶ ${label}${attempt > 1 ? '（重跑）' : ''}`);
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
   await ctx.route('**/*', r => r.request().url().startsWith(BASE) ? r.continue() : r.abort());
   await ctx.addInitScript(seed => { try { if (!sessionStorage.getItem('__s')) { localStorage.clear(); for (const k in seed) localStorage.setItem(k, seed[k]); sessionStorage.setItem('__s', '1'); } } catch (e) {} }, seedAll);
@@ -162,10 +175,12 @@ async function runCase(label, shell, seedAll) {
 
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   const WRONG = new Set([2, 5, 8]);
-  const handler = [], rebuilds = [], longest = [];
+  const handler = [], rebuilds = [], longest = [], cal = [], kq = [];
   for (let n = 0; n < 10; n++) {
     await F.waitForFunction(() => typeof listenQ !== 'undefined' && listenQ && !listenQ.answered && document.querySelectorAll('#listenScreen .boss-opt').length === 4 && !document.getElementById('hml_lesson'), null, { timeout: 20000 });
-    await page.waitForTimeout(350);
+    await page.waitForTimeout(200);
+    const calB = await F.evaluate(CAL);   // 在这一题的计时窗口外量（窗口从下面的 before.now 开始）
+    await page.waitForTimeout(150);
     const before = await F.evaluate(() => ({ big: window.__bigParse, rb: (window.HansenCanonical && HansenCanonical._perf) ? HansenCanonical._perf().rebuilds : null, evt: window.__evt.length, total: listenTotal, q: listenQ.idx, now: performance.now() }));
     const pick = await F.evaluate(wrong => listenQ.opts.findIndex(o => wrong ? o.cn !== listenQ.word.cn : o.cn === listenQ.word.cn), WRONG.has(n));
     const tapped = await tapIn(`#listenScreen .listen-opts .boss-opt:nth-child(${pick + 1})`);
@@ -186,20 +201,36 @@ async function runCase(label, shell, seedAll) {
     handler.push(+ms.toFixed(1));
     rebuilds.push(after.rb !== null && before.rb !== null ? after.rb - before.rb : (after.big - before.big) / 3);
     if (after.total !== before.total + 1) ok(false, `第 ${n + 1} 题没记上（listenTotal ${before.total}→${after.total}）`);
+    const calA = await F.evaluate(CAL);   // 窗口已经结束（after.now 之后）
+    cal.push(calB, calA);
+    kq.push(Math.min(K_MAX, Math.max(K_MIN, Math.max(calB, calA) / CAL_REF)));
   }
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
   const avgRb = rebuilds.reduce((a, b) => a + b, 0) / Math.max(1, rebuilds.length);
+  const calMed = median(cal), k = Math.min(K_MAX, Math.max(K_MIN, calMed / CAL_REF));
+  const medCap = Math.round(120 * k);
   console.log(`    每题点击处理 ms: ${handler.join(', ')}`);
   console.log(`    每题账本重建: ${rebuilds.map(x => +x.toFixed(2)).join(', ')}`);
   console.log(`    每题最长主线程任务 ms: ${longest.join(', ')}`);
+  console.log(`    每题上限放宽倍数（前后两次 CAL 里慢的那次 ÷ ${CAL_REF}ms）: ${kq.map(x => x.toFixed(2)).join(', ')}`);
+  console.log(`    机器忙不忙：固定的活 CAL 中位数 ${calMed.toFixed(1)}ms（正常约 ${CAL_REF}ms）→ 整局 ×${k.toFixed(2)}；负载 ${os.loadavg().map(x => x.toFixed(1)).join(' / ')}（${os.cpus().length} 核）`);
   ok(rebuilds.length === 10 && avgRb <= 1, `平均每题整份账本重建 ≤ 1 次（实测 ${avgRb.toFixed(2)}）`);
   const med = median(handler);
-  ok(handler.length === 10 && med <= 120, `4 倍慢 CPU：点选项的主线程处理中位数 ≤ 120ms（实测 ${med.toFixed(1)}ms）`);
-  const worst = longest.length ? Math.max(...longest) : NaN, over = longest.filter(x => x > LONG_SOFT).length;
-  ok(longest.length === 10 && over <= 1 && worst <= LONG_HARD, `4 倍慢 CPU：每一题从点下去到下一题出来，主线程最长一段：超过 ${LONG_SOFT}ms 的 ${over} 题（最多 1 题）、最卡那题 ${worst}ms（≤ ${LONG_HARD}ms）`);
+  ok(handler.length === 10 && med <= medCap, `4 倍慢 CPU：点选项的主线程处理中位数 ≤ ${medCap}ms（120ms ×${k.toFixed(2)}；实测 ${med.toFixed(1)}ms）`);
+  const over = longest.filter((x, i) => x > LONG_SOFT * kq[i]).length;
+  const hardBad = longest.map((x, i) => [x, Math.round(LONG_HARD * kq[i])]).filter(([x, c]) => x > c);
+  const worst = longest.length ? Math.max(...longest) : NaN;
+  ok(longest.length === 10 && over <= 1 && !hardBad.length, `4 倍慢 CPU：每一题从点下去到下一题出来，主线程最长一段：超过 ${LONG_SOFT}ms×倍数 的 ${over} 题（最多 1 题）、超过 ${LONG_HARD}ms×倍数 的 ${hardBad.length} 题${hardBad.length ? '（' + hardBad.map(([x, c]) => x + '>' + c).join('、') + '）' : ''}；最卡那题 ${worst}ms`);
   ok(errs.length === 0, `页面无报错 ${errs.slice(0, 2).join(' | ')}`);
   await ctx.close();
-  return { med, avgRb };
+  const failed = checks.some(c => !c[0]);
+  if (failed && attempt === 1 && Math.max(k, ...kq) > 1.25) {
+    console.log(`    ⚠️ 这一局测试机明显忙（×${k.toFixed(2)}），没过的项先不算 —— 换个新页面重跑一次，按第二次算：`);
+    checks.filter(c => !c[0]).forEach(c => console.log('      （第一次）❌ ' + c[1]));
+    return runCase(label, shell, seedAll, 2);
+  }
+  checks.forEach(([c, m]) => okOuter(c, m));
+  return { med, avgRb, k };
 }
 
 try {

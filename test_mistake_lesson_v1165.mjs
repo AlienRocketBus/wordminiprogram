@@ -226,7 +226,10 @@ try {
   ok(res.moles.r.score.hit === 1 && res.moles.r.score.score === 10, '地鼠：再考题不加分 ' + JSON.stringify(res.moles.r.score));
   ok(res.bubble.r.marks.target === 1 && res.bubble.r.marks.distractor === 0, '泡泡：答错记到没认出的目标词上(+1)，干扰词不变(+0) ' + JSON.stringify(res.bubble.r.marks));
   ok(res.bubble.r.score.done === 1, '泡泡：再考题不算进完成数 ' + JSON.stringify(res.bubble.r.score));
-  ok(res.scramble.r.score.correct === 2, '拼词：原地拼对照旧算 1 个 + 另一题 1 个，本轮末再考不再加 (=2) ' + JSON.stringify(res.scramble.r.score));
+  /* 🔴v1165 复查第 2 轮（R2-G1）改了这条的期望：拼错以后同一题马上回来、照着刚看的答案拼对 = 「看过答案再答」，
+     和本轮末再考一样不算进答对（以前算 1 个：故意拼错一次再拼对，正确率照样 100%、算完美通关，还白拿复习奖励）。
+     现在只有另一题第一次就拼对的那 1 个算数 */
+  ok(res.scramble.r.score.correct === 1, '拼词：原地重拼、本轮末再考都不算答对，只有另一题第一次拼对的算 (=1) ' + JSON.stringify(res.scramble.r.score));
   ok(res.typing.r.score.done === 1 && res.typing.r.score.times === 1, '打字：再考题不进速度纪录 ' + JSON.stringify(res.typing.r.score));
   ok(res.eagle.r.score.round === 2 && res.eagle.r.score.total === 2, '火眼金睛：再考题不让题号超过总题数 ' + JSON.stringify(res.eagle.r.score));
 

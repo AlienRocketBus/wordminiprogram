@@ -8,6 +8,8 @@
  *      也没有中文义项相同的两个选项
  *   ② 常规岛（动物）完形、听音照样每题 4 个选项
  *   ③ 常规岛里意思挨得太近的一对（dress/skirt、cook/do、fly/ride）也不同时当选项（复查 C3 / C5）
+ *   ④ Boss 完形（从全岛 67 个动作词里抽干扰项）：金色提示写着「做」的「My dad ___ dinner」不出 make（做/制作）、do；
+ *      提示「坐过」的「Have you ever ___ on a plane?」不出 sit（坐）、be（been on a plane）、ride（复查第 2 轮 C-R2-3）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -121,6 +123,43 @@ try {
     }, pairs);
     for (const x of out) ok(x.n >= 150 && x.both === 0, `③ ${file.replace('.html', '')}：以 ${x.ans} 为答案出了 ${x.n} 道（完形 ${x.cl || '无'} / 听音 ${x.ll || '无'}），选项里同时出现 ${x.other} ${x.both} 次`);
     ok(P.errs.length === 0, `③ ${file} 页面无报错 ` + P.errs.join(' | '));
+    await P.page.close();
+  }
+  /* ④ v1165 复查第 2 轮（C-R2-3）：Boss 完形的干扰项从全岛抽（不分档），上一轮只管了同档的完形 / 听音。
+       金色提示亮着的那几个字就是空里要填的意思：别的词的义项整个落在里面（make=做、sit=坐），填进去也说得通。
+       真开一场 Boss、用真的 nextBossQ 出 200 道完形（第一下随机数固定成「完形」，题池里只放这个词）。 */
+  const BOSS = [['cook', ['make', 'do']], ['fly', ['sit', 'be', 'ride']]];
+  {
+    const P = await open(ctx, 'island_action.html', "typeof startBoss === 'function' && typeof nextBossQ === 'function'");
+    const out = await P.page.evaluate(async BOSS => {
+      window.speak = function (t, r, cb) { if (typeof cb === 'function') setTimeout(cb, 0); };
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      showScreen('boss'); startBoss();
+      for (let k = 0; k < 100 && !window._bossQType; k++) await sleep(100);
+      await sleep(1200);
+      try { const am = document.getElementById('alertModal'); if (am) am.classList.remove('show'); closeAlert(); } catch (e) {}
+      const res = [];
+      for (const [en, traps] of BOSS) {
+        const idx = allW.findIndex(w => w.en === en); let n = 0, bad = 0; const c = {}; traps.forEach(t => c[t] = 0); let ex = null;
+        for (let s = 0; s < 200; s++) {
+          bossHP = bossMaxHP; heroHP = heroMaxHP; bossRageMode = true;
+          const R = Math.random; let q = 0; Math.random = function () { return q++ === 0 ? 0.05 : R(); };
+          bossPool.length = 0; bossPool.push(idx); window._bossQType = null;
+          const bo = document.getElementById('bossOpts'); if (bo) { bo.innerHTML = ''; bo.dataset.done = '1'; }
+          try { nextBossQ(); } catch (e) {} finally { Math.random = R; }
+          if (window._bossQType !== 'cloze' || !window._bossWord || window._bossWord.en !== en) continue;
+          n++; const o = window._bossOpts.map(x => x.en); let hit = false;
+          traps.forEach(t => { if (o.includes(t)) { c[t]++; hit = true; } });
+          if (hit) { bad++; if (!ex) ex = document.getElementById('bossQ').textContent.replace(/\s+/g, ' ').trim() + ' → ' + o.join('/'); }
+        }
+        res.push({ en, n, bad, c, ex });
+      }
+      try { stopBoss(); } catch (e) {}
+      showScreen('home');
+      return res;
+    }, BOSS);
+    for (const x of out) ok(x.n >= 150 && x.bad === 0, `④ Boss 完形 ${x.en}：出了 ${x.n} 道，选项里出现 ${Object.keys(x.c).join(' / ')} ${x.bad} 次 ${JSON.stringify(x.c)}${x.ex ? '（例：' + x.ex + '）' : ''}`);
+    ok(P.errs.length === 0, '④ 页面无报错 ' + P.errs.join(' | '));
     await P.page.close();
   }
   await ctx.close();

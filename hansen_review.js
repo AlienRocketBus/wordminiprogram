@@ -422,8 +422,14 @@
   function _questReview(n){ try{ if(typeof window.progressQuest === 'function') window.progressQuest('review', n); }catch(e){} }
   function _questReviewClear(){ try{ if(typeof window.setQuest === 'function') window.setQuest('reviewClear', 1); }catch(e){} }
 
+  /* 🔴v1165 复查：子界面（今日复习 / 拼写练习 / 闪卡 / 错题本）还开着吗。「保留复习范围」的标记只在子界面开着时才有用 */
+  function _subScreenOpen(){
+    return !!(document.getElementById('hr_today') || document.getElementById('hr_flashcard') ||
+              document.getElementById('hr_wrongbook') || document.getElementById('hsp_mask'));
+  }
   function _todayBackToCenter(){
     window._huFromReview = false;
+    window._huReviewKeepContext = false;   // 🔴v1165 复查：已经回到复习中心，这个标记用过了（见 _close）
     // 🔴v794 真正无缝·保留滚动位置: 复用【活着的】复习中心(从v791起一直留底下·带着进今日复习前的滚动位置)·而非openReviewCenter重建(重建滚动归零·弹回顶部)。提到今日界面(z9999)之上→先盖主页·撤今日界面即可见·rAF复位z。
     var center = document.getElementById('hr_center');
     if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 不在才重建
@@ -448,9 +454,19 @@
       document.getElementById('hr_today_back').onclick = _todayBackToCenter;
       /* 🔴v963样机: 主动打开确认今日无到期 → 连击不断签(total=0 不发完成金) */
       try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:0, graduated:0, total:0}); }catch(e){}
+      /* 🔴v1165 复查：今天本来就没有到期的词 = 今日复习已经清空了 → 每日任务「清空今日复习」也算完成。
+         以前这种日子它永远完不成，「12 个任务全部完成」也就拿不到。别的岛还有到期的词就不算（和横幅「全部到期清零」同一个口径）。 */
+      try{
+        var _gd = -1, _RR = window.HansenReviewRewardsV963;
+        if(_RR && _RR._debug && typeof _RR._debug.globalDueInfo === 'function'){ var _gi = _RR._debug.globalDueInfo(); if(_gi && _gi.ok) _gd = _gi.globalDue | 0; }
+        if(_gd <= 0) _questReviewClear();
+      }catch(eQ){}
       return;
     }
 
+    /* 🔴v1165 复查：先让复习奖励记下「今天有词到期」（今天刚答错的词当场就到期，奖励模块以前看不到）——
+       不然孩子把它们都复习完，也不给「完成今日复习 +20」、连续复习天数不涨 */
+    try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.refresh === 'function') HansenReviewRewardsV963.refresh(); }catch(eR){}
     var i = 0, revealed = false, reviewed = 0, graduated = 0, total = due.length;
     var BOXNAME = ['新词', '第 2 阶', '第 3 阶', '第 4 阶', '冲刺阶'];
 
@@ -532,6 +548,8 @@
       var it = due[i];
       if(_grade(it.idx, ok)) graduated++;
       if(ok) _questReview(1);   // 「记住了」才算巩固了一个（和旧复习屏一样只计答对）
+      /* 🔴v1165 复查：过了一张卡 = 复习了一次（结算页写的「复习了 N 个单词」也是这么数的），成就「复习次数」「累计复习」用它 */
+      try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.noteReview === 'function') HansenReviewRewardsV963.noteReview(1); }catch(eN){}
       reviewed++;
       i++;
       if(i >= total){ finish(); return; }
@@ -816,6 +834,7 @@
         if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 不在才重建
         if(center) center.style.zIndex = '99998';   // 提到子界面之上→先盖主页·随后撤子界面即直接可见
         if(el) el.remove();                          // 撤子界面(在活复习中心之下·隐形移除)
+        window._huReviewKeepContext = false;         // 🔴v1165 复查：已经回到复习中心，这个标记用过了（见 _close）
         requestAnimationFrame(function(){ var c = document.getElementById('hr_center'); if(c) c.style.zIndex = ''; });
       } else {
         if(el) el.remove();
@@ -826,7 +845,10 @@
       const c = document.getElementById('hr_center');
       if(c) c.remove();
       // v142ag: 用户主动关 (没 keep 标记) 时清 context
-      if(!window._huReviewKeepContext){
+      /* 🔴v1165 复查：「练这 N 个词」「一起复习全部」只管这一次。从拼写练习等子界面回到复习中心后，标记早就用过了 ——
+         孩子在复习中心点 ← 关掉它，就连这次的范围一起清掉。以前标记一直留着：过后点底栏「复习」打开的还是那几个词，
+         「今日复习」卡也不见了（明明今天有词到期）。只有子界面还开着时才保留范围。 */
+      if(!window._huReviewKeepContext || !_subScreenOpen()){
         window._huReviewContext = null;
       }
       window._huReviewKeepContext = false;
@@ -869,6 +891,9 @@
       if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 万一复习中心不在了才重建
       if(center) center.style.zIndex = '99998';   // 临时提到拼写页之上→先盖住主页·随后撤拼写页即直接可见
       requestAnimationFrame(function(){ var c = document.getElementById('hr_center'); if(c) c.style.zIndex = ''; });  // 拼写页已撤·复位 z(回 CSS 的 9999)
+      /* 🔴v1165 复查：拼写页马上就撤（hansen_spell_practice 的 close 先调这里再撤）—— 回到复习中心以后这个标记就用过了，
+         下一帧清掉；复习范围本身（_huReviewContext）照旧留着，直到孩子关掉复习中心 */
+      setTimeout(function(){ if(!_subScreenOpen()) window._huReviewKeepContext = false; }, 0);
     },
     _openFlashcard: function(){
       _beep();

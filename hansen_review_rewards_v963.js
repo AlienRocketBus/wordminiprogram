@@ -152,7 +152,18 @@
     if(typeof s.grads !== 'number' || s.grads < 0) s.grads = 0;
     if(typeof s.patrols !== 'number' || s.patrols < 0) s.patrols = 0;
     if(typeof s.tier !== 'number' || s.tier < 0) s.tier = 0;
+    if(typeof s.reviews !== 'number' || !(s.reviews >= 0)) s.reviews = 0;
     return s;
+  }
+  /* 🔴v1165 复查：终身「复习了几次」—— 今日复习每过一张卡 +1、在任何玩法里答对一个到期词（记忆盒前进）+1。
+     成就「复习次数达到 20 次」「累计复习 100 个单词」以前数的是终身毕业词数（一个词要练一个月才毕业），天天复习也一直是 0。
+     纯计数，不发金币（刷不出东西）。 */
+  function noteReview(n){
+    try{
+      var s = lifeState();
+      s.reviews = (s.reviews | 0) + Math.max(1, n | 0);
+      writeJson(K_LIFE, s);
+    }catch(e){}
   }
   function hunterTitle(grads){
     var t = '新手猎人 🌱', next = HUNTER_TIERS[0].n;
@@ -460,7 +471,12 @@
         var HR = window.HansenReview;
         if(HR && typeof HR.absorbRealAnswer === 'function'){
           var ab = HR.absorbRealAnswer(idx, correct === true);
+          /* 🔴v1165 复查：答错的词当场进复习计划、今天就到期 —— 这一刻就记下「今天有过到期」（顺便让横幅显示新的到期数）。
+             以前只在开机 / 切回前台 / 答对时才记：孩子当天在复习中心把这些词都复习完，
+             不给「完成今日复习 +20」、连续复习天数不涨，「第一次回头」成就也不亮。 */
+          if(ab && ab.reason === 'missed' && ab.planned) refreshUI();
           if(ab && ab.advanced){
+            noteReview(1);   // 🔴v1165 复查：答对一个到期词 = 复习了一次
             if(ab.graduated){
               floatCoin('🎓 复习毕业！');
               /* 🔴刺二：纯SRS收尾毕业同样入巡检；🔴v1165 毕业金没发成(隔天规则/收据)也照样进巡检 */
@@ -722,6 +738,8 @@
   window.HansenReviewRewardsV963 = {
     onTodayComplete: onTodayComplete,
     onGraduated: onGraduated,
+    lifetime: lifeState,
+    noteReview: noteReview,
     fillCenterSlot: fillCenterSlot,
     refresh: refreshUI,
     _debug: { ymd: ymd, dayNum: dayNum, streak: streak, dayState: dayState, sinceMap: sinceMap,

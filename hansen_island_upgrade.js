@@ -392,9 +392,15 @@
       }
       keys.forEach(function(k){if(/^wordIsland/.test(k)&&!/_bak$|_backup$|_tmp$/i.test(k)&&k!==current)take(parsedSave(k));});
       take(S);   // 本岛用内存里最新的（存盘可能有防抖）
+      /* 🔴v1165 复查：「累计学习 N 天」= 所有岛加起来学过几天（模板 __hsnNoteStudyDay 记的）。以前取单个岛的天数：
+         每天换一个岛玩的孩子永远是 1 天。还没有这个计数的老存档照旧用「最多的那个岛」兜底（只会少算、不会多算） */
+      var sd=readJSONKey('hansen_study_days_v1165');if(sd&&typeof sd==='object')f.daysPlayed=Math.max(f.daysPlayed,nOr0(sd.n));
       var life=readJSONKey('hansen_review_lifetime_v963')||{},grads=nOr0(life.grads),patrols=nOr0(life.patrols);
       var streak=readJSONKey('hansen_review_streak_v963')||{},day=readJSONKey('hansen_review_day_v963')||{};
-      f.reviewTotal=grads+patrols;
+      /* 🔴v1165 复查：「复习次数」「累计复习 N 个单词」数真的复习了几次（今日复习每过一张卡、玩法里答对一个到期词，
+         见 hansen_review_rewards_v963 noteReview）。以前数的是终身毕业词数（一个词要练一个月才毕业），天天复习也一直是 0。
+         老存档还没有这个计数：取两者大的，已经有的进度不会变少 */
+      f.reviewTotal=Math.max(nOr0(life.reviews)+patrols,grads+patrols);
       f.reviewStreak=nOr0(streak.count);
       f.reviewAny=Math.max(f.reviewTotal,f.reviewStreak);
       f.reviewClearedToday=(day.cleared===1&&day.day===localYmd())?1:0;
@@ -484,6 +490,7 @@
         var gemNow=(window.HansenGems&&HansenGems.get())||0; if(gemNow>=1)unlockAch('gem1');
         if(S.pet&&S.pet.picked)unlockAch('petHatch');
         var gm=globalModes(),mp=gm.played;if(mp.length>=1)unlockAch('mode1'); if(mp.length>=11)unlockAch('allModes');
+        if(_judgeShare){ _judgeShare.HC=HC; _judgeShare.lw=lw; _judgeShare.mc=mc; _judgeShare.lvl=lvl; _judgeShare.gm=gm; }   // 🔴v1165 复查：成就墙重画时接着用（见 renderAch）
         if(gm.max>=10)unlockAch('modeHigh');   // v1165 同一次判定不再把所有岛存档再解析一遍
         try{if(typeof getPetStage==='function'&&window.PET_STAGES&&getPetStage()>=PET_STAGES.length-1)unlockAch('petFinal');}catch(e){}
         if(window.HansenCardbook){
@@ -500,6 +507,7 @@
         if(daily.learned&&daily.boss&&checked)unlockAch('hidPerfectDay');
         // v1165 阶梯系列（见 SERIES）：已经拿到的跳过，不重复算
         var HA=window.HansenAch,facts=achFacts(HC),have={};
+        if(_judgeShare) _judgeShare.facts=facts;
         try{ if(HA){ (HA.getClaimed()||[]).concat(HA.getPending()||[]).forEach(function(x){have[x]=1;}); } }catch(e){}   // 钱包只读一次
         SERIES.forEach(function(r){
           if(have[r[0]])return;
@@ -509,25 +517,43 @@
     }
 
     // --- 成就进度 ---
+    /* 🔴v1165 复查：成就墙一画就是一百多张没解锁的卡，每张画进度条都要这几个数。以前每张都整份重算一遍
+       （翻遍 localStorage、解析各岛存档、读账本），进度多的孩子在 4 倍慢 CPU 上每点开一栏卡 0.2~0.46 秒。
+       现在一次重画只算一遍（renderAch 开头算好、画完就丢；别的地方单独问一个成就照旧现算） */
+    var _progCtx=null, _judgeShare=null;
+    function progressCtx(seed){
+      if(_progCtx)return _progCtx;
+      /* 刚判完成就（同一次重画里）：直接用判的时候算好的数，不再翻一遍 */
+      if(seed&&seed.gm&&seed.facts){
+        return {HC:seed.HC,facts:seed.facts,lw:seed.lw,mc:seed.mc,lvl:seed.lvl,gm:seed.gm,
+          coinNow:(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0)};
+      }
+      var HT=window.HansenTotals, HC=window.HansenCanonical;
+      try{if(HC)HC.absorbCurrent();}catch(e){}
+      var c={HC:HC,facts:null};
+      c.lw = HC ? HC.totalLearned() : (HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length);
+      c.mc = HT ? Math.max(HT.maxCombo(), (S.stats&&S.stats.maxCombo)||0) : ((S.stats&&S.stats.maxCombo)||0);
+      c.lvl = HT ? Math.max(HT.maxLevel(), S.level||1) : (S.level||1);
+      c.coinNow=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0);
+      c.gm=globalModes();
+      return c;
+    }
     window.getAchProgress = function(id){
       try{
-        var HT=window.HansenTotals, HC=window.HansenCanonical;
-        try{if(HC)HC.absorbCurrent();}catch(e){}
-        var lw = HC ? HC.totalLearned() : (HT ? Math.max(HT.totalLearned(), (S.learned||[]).length) : (S.learned||[]).length);
-        var mc = HT ? Math.max(HT.maxCombo(), (S.stats&&S.stats.maxCombo)||0) : ((S.stats&&S.stats.maxCombo)||0);
-        var lvl = HT ? Math.max(HT.maxLevel(), S.level||1) : (S.level||1);
+        var C=progressCtx(), HC=C.HC;
+        var lw=C.lw, mc=C.mc, lvl=C.lvl;
         var bw=Array.isArray(S.bossWon)?S.bossWon:[];
         var bwc=function(m){var n=0;for(var i=1;i<=m;i++)if(bw.indexOf(i)>=0)n++;return n;};
         var aw=(typeof allW!=='undefined'&&allW.length)?allW.length:712;
-        var coinNow=(window.HansenCoins&&HansenCoins.getEarned)?HansenCoins.getEarned():((window.HansenCoins&&HansenCoins.get())||S.coins||0);
-        var gm=globalModes(),mp=gm.played;
+        var coinNow=C.coinNow;
+        var gm=C.gm,mp=gm.played;
         var m={w1:{cur:lw,need:1},w10:{cur:lw,need:10},w50:{cur:lw,need:50},w100:{cur:lw,need:100},w300:{cur:lw,need:300},wAll:{cur:(S.learned||[]).length,need:aw},
           combo10:{cur:mc,need:10},combo30:{cur:mc,need:30},combo50:{cur:mc,need:50},combo100:{cur:mc,need:100},
           boss1:{cur:bw.length,need:1},bossCh1:{cur:bwc(4),need:4},bossCh3:{cur:bwc(12),need:12},boss20:{cur:bwc(20),need:20},
           s3:{cur:S.streak||0,need:3},s7:{cur:S.streak||0,need:7},s14:{cur:S.streak||0,need:14},s100:{cur:S.streak||0,need:100},
           lv5:{cur:lvl,need:5},lv10:{cur:lvl,need:10},coin1000:{cur:coinNow,need:1000},allModes:{cur:mp.length,need:11},modeHigh:{cur:gm.max,need:10},
           vocabS600:{cur:lw,need:600},vocabS1500:{cur:lw,need:allWordsTotal(HC)}}[id];
-        if(!m&&SERIES_BY_ID[id]){var r=SERIES_BY_ID[id],f=achFacts(HC);m={cur:nOr0(f[r[1]]),need:seriesNeed(r,f)};}   // v1165 阶梯系列也有进度条
+        if(!m&&SERIES_BY_ID[id]){var r=SERIES_BY_ID[id],f=C.facts||(C.facts=achFacts(HC));m={cur:nOr0(f[r[1]]),need:seriesNeed(r,f)};}   // v1165 阶梯系列也有进度条（一次重画只算一遍）
         if(!m)return null; return {cur:Math.min(m.cur,m.need),need:m.need};
       }catch(e){return null;}
     };
@@ -581,9 +607,56 @@
     installAchievementSignals();
 
     // --- 覆盖 renderAch: 折叠式 + 全局钱包 ---
-    window.toggleAchCat = function(cat){ if(!window._achOpen)window._achOpen={}; window._achOpen[cat]=!window._achOpen[cat]; renderAch(); };
+    /* 🔴v1165 复查：点一栏只重画这一栏（插进 / 拿掉它的卡片）。以前整面墙重画：开着的栏越多越卡
+       （4 倍慢 CPU、开着 144 张卡时光排版就 100ms）。在成就页上什么都没变（答题、领奖不在这一页发生；领奖照旧整面重画）。
+       找不到那一栏（还没画过）就照旧整面重画。 */
+    window.toggleAchCat = function(cat){ if(!window._achOpen)window._achOpen={}; window._achOpen[cat]=!window._achOpen[cat]; if(!toggleAchPanel(cat)) renderAch(); };
+    function toggleAchPanel(cat){
+      try{
+        var al=document.getElementById('achList'); if(!al) return false;
+        var bar=null, bars=al.querySelectorAll('.ach-bar');
+        for(var i=0;i<bars.length;i++){ if(bars[i].getAttribute('onclick')==="toggleAchCat('"+cat+"')"){ bar=bars[i]; break; } }
+        if(!bar) return false;
+        var next=bar.nextElementSibling, arrow=bar.querySelector('.ach-bar-arrow');
+        if(next&&next.classList&&next.classList.contains('ach-panel')) next.parentNode.removeChild(next);
+        if(!window._achOpen[cat]){ if(arrow) arrow.textContent='▶'; return true; }
+        var list=(window.ACHIEVEMENTS||[]).filter(function(a){return a.cat===cat;});
+        _progCtx=null; _progCtx=progressCtx();
+        try{ bar.insertAdjacentHTML('afterend', achPanelHtml(list)); } finally { _progCtx=null; }
+        if(arrow) arrow.textContent='▼';
+        return true;
+      }catch(e){ return false; }
+    }
+    /* 一栏的卡片（renderAch 和 toggleAchPanel 共用同一份写法） */
+    function achPanelHtml(list){
+      var HA=window.HansenAch, T=window.__hsnTIERS;
+      var isClaimed=function(id){return HA?HA.isClaimed(id):(S.achievements||[]).includes(id);};
+      var isPending=function(id){return HA?HA.isPending(id):false;};
+      var isNew=function(id){return HA?HA.isNew(id):false;};
+      var h='<div class="ach-panel">';
+      list.forEach(function(a){
+        var cl=isClaimed(a.id), pd=isPending(a.id), nw=isNew(a.id), t=T[a.tier]||T.bronze;
+        var hid=a.hidden&&!cl&&!pd;
+        var icon=(cl||pd)?a.icon:(hid?'❓':'🔒'), name=hid?'？？？':a.name, desc=hid?'达成隐藏条件即可解锁，等你来发现！':a.desc;
+        var cls='ach-card2'+(cl?' unlocked':'')+(pd?' pending':''), stl=(cl||pd)?'border-color:'+t.color+';background:'+t.bg:'';
+        var foot;
+        if(pd){foot='<button class="ach-claim-btn" onclick="event.stopPropagation();claimAch(\''+a.id+'\')">🎁 领取 +'+a.reward.gems+'</button>';}
+        else if(cl){foot='<span class="ach-done">✅ 已领取</span>';}
+        else{var pr=hid?null:getAchProgress(a.id);
+          if(pr&&pr.need>1){var pp=Math.round(pr.cur/pr.need*100);
+            foot='<div class="ach-prog"><div class="ach-prog-bar"><div class="ach-prog-fill" style="width:'+pp+'%"></div></div><span class="ach-prog-txt">'+pr.cur+'/'+pr.need+'</span></div><span class="ach-reward">'+((a.id==='gem1')?'💎':'🪙')+a.reward.gems+'</span>';}
+          else{foot='<span class="ach-reward">'+((a.id==='gem1')?'💎':'🪙')+a.reward.gems+'</span>';}}
+        h+='<div class="'+cls+'" style="'+stl+'">'+(nw?'<span class="ach-new">NEW</span>':'')+
+           '<div class="ach-card2-top"><span class="ach-icon2">'+icon+'</span><span class="ach-tier" style="color:'+t.color+';border-color:'+t.color+'">'+t.name+'</span></div>'+
+           '<div class="ach-name2"'+((cl||pd)?' style="color:'+t.color+'"':'')+'>'+name+'</div><div class="ach-desc2">'+desc+'</div><div class="ach-foot2">'+foot+'</div></div>';
+      });
+      return h+'</div>';
+    }
     window.renderAch = function(){
+      /* 🔴v1165 复查：先判成就（新解锁的马上显示成「可领取」），判的时候算好的数留给下面的进度条用 */
+      var _share=_judgeShare={};
       try{checkAch();}catch(e){}
+      _judgeShare=null;
       var HA=window.HansenAch;
       var isClaimed=function(id){return HA?HA.isClaimed(id):(S.achievements||[]).includes(id);};
       var isPending=function(id){return HA?HA.isPending(id):false;};
@@ -598,6 +671,8 @@
       var cats=_ORDER.filter(function(x){return _have[x];});
       Object.keys(_have).forEach(function(x){ if(cats.indexOf(x)<0) cats.push(x); });
       var _unusedCats=[];
+      _progCtx=null; _progCtx=progressCtx(_share);   // 🔴v1165 复查：这一次重画共用一份（就是 checkAch 刚判时的数）
+      try{
       var ci={'背单词':'📖','复习':'🔄','精通':'🎯','速度':'⚡','打Boss':'⚔️','对决':'🐝','卡牌收藏':'🎴','连胜':'🔥','签到':'📅','宠物':'🐾','游戏模式':'🎮','里程碑':'💰','隐藏':'🎭'};   // v1165 补上复习/精通/速度/对决（以前显示 undefined）
       var ACHL=window.ACHIEVEMENTS||[], T=window.__hsnTIERS;
       var cc=claimedAll().length, tot=ACHL.length, pct=Math.round(cc/tot*100), pc=pendCount();
@@ -612,30 +687,12 @@
         h+='<div class="ach-bar" onclick="toggleAchCat(\''+cat+'\')"><span class="ach-bar-icon">'+(ci[cat]||'🏅')+'</span>'+
            '<span class="ach-bar-name">'+cat+(pin>0?' <span class="ach-bar-dot">🎁</span>':'')+'</span>'+
            '<span class="ach-bar-count">'+cin+'/'+list.length+'</span><span class="ach-bar-arrow">'+(open?'▼':'▶')+'</span></div>';
-        if(open){
-          h+='<div class="ach-panel">';
-          list.forEach(function(a){
-            var cl=isClaimed(a.id), pd=isPending(a.id), nw=isNew(a.id), t=T[a.tier]||T.bronze;
-            var hid=a.hidden&&!cl&&!pd;
-            var icon=(cl||pd)?a.icon:(hid?'❓':'🔒'), name=hid?'？？？':a.name, desc=hid?'达成隐藏条件即可解锁，等你来发现！':a.desc;
-            var cls='ach-card2'+(cl?' unlocked':'')+(pd?' pending':''), stl=(cl||pd)?'border-color:'+t.color+';background:'+t.bg:'';
-            var foot;
-            if(pd){foot='<button class="ach-claim-btn" onclick="event.stopPropagation();claimAch(\''+a.id+'\')">🎁 领取 +'+a.reward.gems+'</button>';}
-            else if(cl){foot='<span class="ach-done">✅ 已领取</span>';}
-            else{var pr=hid?null:getAchProgress(a.id);
-              if(pr&&pr.need>1){var pp=Math.round(pr.cur/pr.need*100);
-                foot='<div class="ach-prog"><div class="ach-prog-bar"><div class="ach-prog-fill" style="width:'+pp+'%"></div></div><span class="ach-prog-txt">'+pr.cur+'/'+pr.need+'</span></div><span class="ach-reward">'+((a.id==='gem1')?'💎':'🪙')+a.reward.gems+'</span>';}
-              else{foot='<span class="ach-reward">'+((a.id==='gem1')?'💎':'🪙')+a.reward.gems+'</span>';}}
-            h+='<div class="'+cls+'" style="'+stl+'">'+(nw?'<span class="ach-new">NEW</span>':'')+
-               '<div class="ach-card2-top"><span class="ach-icon2">'+icon+'</span><span class="ach-tier" style="color:'+t.color+';border-color:'+t.color+'">'+t.name+'</span></div>'+
-               '<div class="ach-name2"'+((cl||pd)?' style="color:'+t.color+'"':'')+'>'+name+'</div><div class="ach-desc2">'+desc+'</div><div class="ach-foot2">'+foot+'</div></div>';
-          });
-          h+='</div>';
-        }
+        if(open) h+=achPanelHtml(list);
       });
       var al=document.getElementById('achList'); if(al)al.innerHTML=h;
       var ec=document.getElementById('achCount'); if(ec)ec.textContent=cc;
       var et=document.getElementById('achTotal'); if(et)et.textContent=tot;
+      }finally{ _progCtx=null; }
     };
 
     // 如果当前正在成就页, 立刻重渲染
