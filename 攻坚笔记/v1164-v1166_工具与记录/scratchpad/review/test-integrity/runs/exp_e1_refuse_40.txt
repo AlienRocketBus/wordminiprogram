@@ -1,0 +1,23 @@
+{
+ "MODE": "refuse",
+ "Z": 40,
+ "loginA": true,
+ "loginB": true,
+ "created": {
+  "ok": true,
+  "roomId": "rmw0x9ebz8uz01l"
+ },
+ "list": {
+  "ok": true,
+  "n": 0,
+  "ids": []
+ },
+ "hostRoomListed": false,
+ "lobbyHasJoinButton": false,
+ "lobbyText": "← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入",
+ "refusedQueries": 2,
+ "consoleWarn": [
+  "[房间] orderBy 失败，降级为不排序查询（多半是云端没建 createdAt 索引）：DATABASE_REQUEST_FAILED | [FailedOperation] sort field has no index (emul",
+  "[房间] orderBy 失败，降级为不排序查询（多半是云端没建 createdAt 索引）：DATABASE_REQUEST_FAILED | [FailedOperation] sort field has no index (emul"
+ ]
+}

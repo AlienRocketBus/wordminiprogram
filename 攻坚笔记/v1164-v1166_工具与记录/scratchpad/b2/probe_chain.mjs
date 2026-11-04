@@ -1,0 +1,23 @@
+import { launch, sleep, BASE, O } from './lib.mjs';
+const { browser, ctx } = await launch({ init: () => { try { localStorage.setItem('hansen_onboarded','1'); } catch(e){} } });
+const page = await ctx.newPage();
+page.on('dialog', d => d.dismiss().catch(()=>{}));
+page.on('pageerror', e => console.log('PAGEERR', e.message));
+await page.goto(BASE + 'island_animal.html'); await sleep(3000);
+await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find(b => /开始冒险/.test(b.textContent) && b.offsetParent); if (b) b.click(); }); await sleep(500);
+const r = await page.evaluate(() => {
+  const log = [];
+  const HC = window.HansenCanonical, HR = window.HansenReview;
+  const oS = HC.syncState; HC.syncState = function(ref, st, p){ const before = JSON.stringify(st.wrongs); const r = oS.apply(this, arguments); log.push('syncState wrongs '+before+' -> '+JSON.stringify(st.wrongs)+' srs '+JSON.stringify(st.srs)); return r; };
+  const oA = HC.absorbAnswer; HC.absorbAnswer = function(i){ log.push('canon.absorbAnswer('+i+') S.wrongs='+JSON.stringify(S.wrongs)); return oA.apply(this, arguments); };
+  const oR = HR.absorbRealAnswer; HR.absorbRealAnswer = function(i,c){ log.push('absorbReal('+i+','+c+') pre wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs)); const r = oR.apply(this, arguments); log.push(' -> '+JSON.stringify(r)+' srs='+JSON.stringify(S.srs)); return r; };
+  const flags = { canonical: !!markAnswer.__hansenCanonical, rvrw: !!markAnswer.__rvrwWrapped };
+  const idx = 3;
+  markAnswer(idx, false); log.push('after miss wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs));
+  log.push('due='+HR._dueCount()+' srs='+JSON.stringify(S.srs));
+  markAnswer(idx, true); log.push('after correct wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs));
+  log.push('due='+HR._dueCount()+' srs='+JSON.stringify(S.srs));
+  return { flags, log, src: markAnswer.toString().slice(0,300) };
+});
+console.log(JSON.stringify(r, null, 1));
+await browser.close();

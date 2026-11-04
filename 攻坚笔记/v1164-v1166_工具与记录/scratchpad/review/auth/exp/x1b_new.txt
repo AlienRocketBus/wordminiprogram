@@ -1,0 +1,34 @@
+{
+  "root": "/home/user/wordminiprogram",
+  "q1login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "q1_topOverlay": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+  "q2login": {
+    "ok": true,
+    "uid": "1650936123503737095"
+  },
+  "q2_overlayAfterOpen": {
+    "top": null,
+    "island": null
+  },
+  "q2session": {
+    "ok": false,
+    "notSignedIn": true,
+    "expired": false,
+    "notReady": false,
+    "definite": false,
+    "kind": "signin",
+    "reason": "not-signed-in"
+  },
+  "q2_after": {
+    "top": null,
+    "island": null,
+    "signed": false
+  },
+  "errors": [
+    [],
+    []
+  ]
+}

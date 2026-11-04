@@ -1,0 +1,2 @@
+[v1075] 本页没有成就清单(ACHIEVEMENTS)，成就墙将为空 —— 这是真实状态，不用陈旧副本冒充
+answer coin v941: canonical per-word ledger + global 2000 boundary ✅

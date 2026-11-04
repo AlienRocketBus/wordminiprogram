@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_login_no_prompt_v1154.mjs —— 登录时能自动就别弹框
  *
  * 🔴 用户现场（截图）：每次登录都弹一个对话框——
@@ -35,11 +36,11 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('登录不弹框 v1154');
 
-const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
 const code = auth.replace(/\/\*[\s\S]*?\*\//g, '');
-const cs = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8')
+const cs = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '');
-const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'utf8')
+const ui = fs.readFileSync((__HSN_ROOT + 'hansen_auth_ui_v1004.js'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '');
 
 /* ① "有进度"不再把答题统计算进去 */
@@ -55,9 +56,12 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 
 /* ② 云端信息要带学习量，否则没法比 */
 {
-  ok(/learned: _cw/.test(cs) && /islands: _ci/.test(cs),
-     '★ accountCloudInfo 返回云端学过多少词');
-  ok(/_k\.indexOf\('wordIsland'\) !== 0/.test(cs),
+  /* 🔴v1164（审查 AUTH-6）：云端那份是加密的（{v, iv, ct}）—— 以前 accountCloudInfo 从密文里数单词，永远是 0，
+     登录面板说「已自动取回云端进度（0 个单词）」。现在要数就**解密之后数**（cloudLearned），
+     accountCloudInfo 带上 iv，用来认「云端这份是不是我上次传的」（审查 AUTH-1）。 */
+  ok(/cloudLearned: function\(\)\{\s*return fetchWithKey\(ensureKey\(\)\)/.test(cs) && /iv: String\(pl\.iv/.test(cs),
+     '★ 云端学过多少词：解密之后数（cloudLearned）；accountCloudInfo 带上 iv');
+  ok(/String\(x\.key\)\.indexOf\('wordIsland'\) !== 0/.test(cs),
      '★ 只统计岛屿进度键');
 }
 
@@ -77,7 +81,7 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 {
   ok(/autoPicked === 'cloud'/.test(ui),
      '★ 界面识别"自动取回"这种情况');
-  ok(/已自动取回云端进度/.test(fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'utf8')),
+  ok(/已自动取回云端进度/.test(fs.readFileSync((__HSN_ROOT + 'hansen_auth_ui_v1004.js'), 'utf8')),
      '★ 在提示条里说一声 —— 不该让人"进度突然变了却不知道为什么"');
   ok(!/confirm\([\s\S]{0,120}autoPicked/.test(ui),
      '★ **自动路径上没有 confirm** —— 不拦人');
@@ -122,7 +126,7 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * 就触发同步 → **把空白盖到云端** → 用户几百个词的进度没了。
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
 
   ok(/if \(_restoring\) \{/.test(csc),
@@ -168,27 +172,33 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * 逐环查下来，**离开那一刻有两个缺口**：
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* 缺口一：离开时的同步不带 force，会被 45 秒冷却挡掉 */
-  ok(/if\(document\.hidden\) syncNow\(\{force:true\}\)/.test(csc),
+  /* 🔴v1164（审查 SE-4）：以前「切后台」挂了两个处理（各 force 传一次）、几层页面各传各的 —— 切一次后台传 9 次。
+     现在合成**一处兑现**（flush）：清掉挂着的合并延迟、force 传一次（内容没变由 syncNow 自己跳过）。
+     下面守的还是同两个缺口，只是认的是这一处 flush。 */
+  const fl = /var flush = function \(\) \{([\s\S]{0,400}?)\n\s*\};/.exec(csc);
+  const flBody = fl ? fl[1] : '';
+  ok(/syncNow\(\{force:true\}\)/.test(flBody) && /addEventListener\('visibilitychange', function\(\)\{ if\(document\.hidden\) flush\(\); \}\)/.test(csc),
      '★🔒 **切到后台时 force 同步** —— ' +
      '原来不带 force，玩一会儿刚同步过、30 秒后关掉 App 就被 45 秒冷却拒绝，' +
      '那 30 秒的进度直接丢');
-  ok(/addEventListener\('pagehide', function\(\)\{ syncNow\(\{force:true\}\); \}\)/.test(csc),
+  ok(/addEventListener\('pagehide', flush\)/.test(csc),
      '★🔒 **关页面时 force 同步**');
 
   /* 缺口二：8 秒合并延迟里关掉 App，那笔改动没了 */
-  ok(/var _flushPending = function/.test(csc),
+  ok(/clearTimeout\(_pending\)/.test(flBody),
      '★🔒 **离开时把挂着的那次同步立刻兑现** —— ' +
      '8 秒合并延迟本身是对的（连开五个宝箱不该传五次），' +
      '但"拿到奖励顺手切出去"会正好落在这 8 秒里');
-  ok(/_flushPending[\s\S]{0,300}pagehide/.test(csc) ||
-     /pagehide[\s\S]{0,80}_flushPending/.test(csc),
+  ok(/addEventListener\('pagehide', flush\)/.test(csc) && /_pending = setTimeout/.test(csc),
      '★🔒 关页面会触发兑现');
-  ok(/if \(document\.hidden\) _flushPending\(\)/.test(csc),
+  ok(/if\(document\.hidden\) flush\(\)/.test(csc),
      '★🔒 切后台也会触发兑现（手机上划掉 App 往往只有 visibilitychange）');
+  ok((csc.match(/addEventListener\('visibilitychange'/g) || []).length === 1,
+     '★ 「切后台」只挂一个处理（审查 SE-4：以前两个处理各传一次）');
 
   /* 例行那次仍然不带 force —— 不能改成每次都强传 */
   ok(/syncNow\(\{\}\);\s*$/m.test(csc) || /syncNow\(\{\}\)/.test(csc),
@@ -198,13 +208,13 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
 
 /* 整条链的完整性 */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
-  const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
+  const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const links = [
     [/autoPicked: 'cloud'/.test(auth), '登录 → 自动取回云端（不弹框）'],
     [/hsn-data-changed/.test(csRaw), '玩的过程中 → 数据一变就排队上传'],
     [/5 \* 60 \* 1000/.test(csRaw), '玩的过程中 → 每 5 分钟兜底'],
-    [/if\(document\.hidden\) syncNow\(\{force:true\}\)/.test(csRaw), '切后台 → 强制上传'],
+    [/if\(document\.hidden\) flush\(\)/.test(csRaw) && /var flush = function[\s\S]{0,400}syncNow\(\{force:true\}\)/.test(csRaw), '切后台 → 强制上传'],
     [/pagehide/.test(csRaw), '关页面 → 强制上传'],
     [/CS\.syncNow\(\{ force: true \}\)/.test(auth), '退出登录 → 强制上传并等完成'],
   ];
@@ -241,9 +251,9 @@ const ui = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js', 'ut
  * **从写下那天起就没有真正生效过**。
  */
 {
-  const csRaw = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+  const csRaw = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
   const csc = csRaw.replace(/\/\*[\s\S]*?\*\//g, '');
-  const cn = fs.readFileSync('/home/claude/work/repo/hansen_change_notify_v1134.js', 'utf8')
+  const cn = fs.readFileSync((__HSN_ROOT + 'hansen_change_notify_v1134.js'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* ① 钩子要能重装，确保自己在最外层 */

@@ -1,0 +1,169 @@
+{
+ "seed": 9104,
+ "profile": "targeted",
+ "kind": "ladder",
+ "db": {
+  "lagMax": 300,
+  "lagShape": 2,
+  "queryLagMul": 1.2,
+  "queryLagExtra": 0,
+  "lagMode": "random",
+  "ryw": false,
+  "dupMode": "request_failed",
+  "permMode": "rules",
+  "orderByFail": false
+ },
+ "unloadSendP": 0.6,
+ "outages": [],
+ "players": [
+  {
+   "label": "P0",
+   "uid": "k0xT",
+   "name": "小明",
+   "rating": 1044,
+   "skew": 0,
+   "net": {
+    "base": 60,
+    "jitter": 60,
+    "spikeP": 0,
+    "faultRate": 0
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "hides": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.7,
+    "minMs": 2000,
+    "maxMs": 8000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 584,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  },
+  {
+   "label": "P1",
+   "uid": "k1xT",
+   "name": "小红",
+   "rating": 1081,
+   "skew": 0,
+   "net": {
+    "base": 60,
+    "jitter": 60,
+    "spikeP": 0,
+    "faultRate": 0
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "hides": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.7,
+    "minMs": 2000,
+    "maxMs": 8000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 715,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  },
+  {
+   "label": "P2",
+   "uid": "k2xT",
+   "name": "阿杰",
+   "rating": 1028,
+   "skew": 0,
+   "net": {
+    "base": 60,
+    "jitter": 60,
+    "spikeP": 0,
+    "faultRate": 0
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "hides": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.7,
+    "minMs": 2000,
+    "maxMs": 8000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 846,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  },
+  {
+   "label": "P3",
+   "uid": "k3xT",
+   "name": "朵朵",
+   "rating": 1065,
+   "skew": 0,
+   "net": {
+    "base": 60,
+    "jitter": 60,
+    "spikeP": 0,
+    "faultRate": 0
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "hides": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.7,
+    "minMs": 2000,
+    "maxMs": 8000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 977,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  }
+ ],
+ "adversary": null
+}

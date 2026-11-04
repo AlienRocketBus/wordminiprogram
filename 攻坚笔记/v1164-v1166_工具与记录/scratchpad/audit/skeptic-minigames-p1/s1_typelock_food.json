@@ -1,0 +1,88 @@
+{
+ "correct": {
+  "island": "food",
+  "word": "meal",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "homeScreen",
+   "lock": true,
+   "typeActive": true,
+   "menu": false
+  },
+  "after_2_8s": {
+   "scr": "homeScreen",
+   "lock": true,
+   "pos": "fixed",
+   "typeActive": true,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "",
+   "sp": [
+    {
+     "t": "meal",
+     "ms": 10800,
+     "scr": "typingScreen"
+    },
+    {
+     "t": "milk",
+     "ms": 13052,
+     "scr": "homeScreen"
+    }
+   ],
+   "scrollY": 0
+  },
+  "swipeScroll": {
+   "before": 0,
+   "after": 0
+  },
+  "errors": [
+   {
+    "k": "http404",
+    "t": "http://127.0.0.1:39849/island_wordIslandFood.html?v=1163"
+   },
+   {
+    "k": "console.error",
+    "t": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+   }
+  ]
+ },
+ "control": {
+  "island": "food",
+  "word": "cake",
+  "typedBackAfterMs": 200,
+  "c1": true,
+  "c2": true,
+  "backTapped": true,
+  "right_after_back": {
+   "scr": "homeScreen",
+   "lock": false,
+   "typeActive": false,
+   "menu": false
+  },
+  "after_2_8s": {
+   "scr": "homeScreen",
+   "lock": false,
+   "pos": "static",
+   "typeActive": false,
+   "menu": false,
+   "kb": true,
+   "bottomNav": "",
+   "sp": [
+    {
+     "t": "cake",
+     "ms": 6756,
+     "scr": "typingScreen"
+    }
+   ],
+   "scrollY": 283
+  },
+  "swipeScroll": {
+   "before": 0,
+   "after": 435
+  },
+  "errors": []
+ }
+}

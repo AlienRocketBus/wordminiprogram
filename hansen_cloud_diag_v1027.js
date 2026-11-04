@@ -120,17 +120,30 @@
 
     /* 🔴v1031: 本地标记 ≠ 云端会话仍在 —— 这一项专门戳破"以为登录着其实没有" */
     out += '<div class="d_row"><div class="d_k">③b 云端会话(真实探测)</div>'
-      + '<div class="d_v warn" id="dSess">检测中…</div></div>';
+      + '<div class="d_v warn" id="dSess" style="white-space:pre-wrap">检测中…</div></div>';
     setTimeout(function () {
       var v = document.getElementById('dSess');
       if (!v) return;
       if (!A || typeof A.verifySession !== 'function') { v.textContent = '(旧版本，无此探测)'; return; }
       A.verifySession().then(function (s) {
-        v.textContent = s.ok
-          ? ('✅ 有效 uid=' + s.uid + (s.tries > 1 ? '（重试 ' + s.tries + ' 次后就绪）' : ''))
-          : (s.notReady
-              ? ('⏳ ' + (s.reason || '云端会话尚未就绪') + ' —— 请稍候再试，不必重新登录')
-              : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请退出后重新登录'));
+        /* v1164：按 kind 说清楚是哪一种（超时 / 凭证没了 / 暂时没就绪），再附凭证守护的状态 */
+        var guard = '';
+        try {
+          var G = window.HansenCredGuard;
+          if (G && typeof G.status === 'function') {
+            var gs = G.status();
+            guard = '\n凭证守护：本机凭证' + (gs.hasCred ? '在' : '❗不在') + ' · 影子副本' +
+              (gs.hasShadow ? ('有（' + gs.shadowAge + ' 秒前）') : '无') + ' · 已救 ' + gs.rescued + '/' + (gs.maxRescue || 3) + ' 次';
+          }
+        } catch (e) {}
+        v.textContent = (s.ok
+          ? ('✅ 有效 uid=' + s.uid + (s.uidFrom ? '（uid 从' + s.uidFrom + '补回）' : '') +
+             (s.tries > 1 ? '（重试 ' + s.tries + ' 次后就绪）' : ''))
+          : (s.slow
+              ? ('⌛ ' + (s.reason || '连接云端超时') + ' —— 网络太慢，换个网络或稍后再试，不必重新登录')
+              : (s.notReady
+                  ? ('⏳ ' + (s.reason || '云端会话尚未就绪') + ' —— 请稍候再试，不必重新登录')
+                  : ('❌ 云端会话已失效 ' + (s.reason || '') + ' —— 读写会失败，请重新登录')))) + guard;
         v.className = 'd_v ' + (s.ok ? 'ok' : 'bad');
       }).catch(function (e) { v.textContent = '探测出错：' + short(e && e.message || e, 90); v.className = 'd_v bad'; });
     }, 60);
@@ -310,10 +323,11 @@
           + '于是返回空结果（所以不报错，只是读不到）。\n\n'
           + '【请这样修，一次就好】\n'
           + '腾讯云控制台 → 文档型数据库 → 集合 hansen_saves\n'
-          + '→ 权限设置 → 改为「读取全部数据，修改本人数据」\n'
+          + '→ 权限设置 → 选预设的「仅创建者可读写」（不要填自定义规则）\n'
           + '（改完等约 1 分钟生效，再回来点一次本自检）\n\n'
-          + '为什么这样安全：存档内容是加密的，密钥由你的账号推导；\n'
-          + '文档地址也是哈希值。别人即便读到也解不开。';
+          + '⚠️ 不要改成「读取全部数据」：存档的钥匙是从账号身份（手机号）算出来的，\n'
+          + '知道手机号的人能解开 —— 谁都能读，就谁都能拿走别的孩子的存档（审查 SEC-2）。\n'
+          + '改成「仅创建者可读写」后还读不回，多半是这份存档是用另一个登录身份写的。';
         else if (r.step === 'write-failed') verdict = '【结论】连写都失败 —— 是权限或登录会话问题，看上面的原始错误。';
         else verdict = '【结论】' + r.step;
         lines.push('');
@@ -324,7 +338,7 @@
     document.getElementById('dTest').onclick = function () {
       say('上传中…');
       if (!CS || !CS.syncNow) { say('云存档模块不可用', 'bad'); return; }
-      CS.syncNow({ force: true }).then(function (r) {
+      CS.syncNow({ force: true, rewrite: true }).then(function (r) {   /* 自检要真写一次，不能因为内容没变就跳过 */
         say(r && r.ok ? ('上传成功 ✔ ' + short(r, 120)) : ('上传未成功：' + short(r, 160)),
           (r && r.ok) ? 'ok' : 'bad');
         setTimeout(run, 1200);

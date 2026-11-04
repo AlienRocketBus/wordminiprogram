@@ -1,0 +1,10 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(5000);
+const cl = await page.evaluate(()=>[...document.querySelectorAll('a,button,[onclick],[role=button]')].filter(e=>{const r=e.getBoundingClientRect(); return r.width>0&&r.height>0&&getComputedStyle(e).visibility!=='hidden';}).map(e=>{const r=e.getBoundingClientRect(); return `${e.tagName}#${e.id}.${String(e.className).slice(0,25)} y=${Math.round(r.y+scrollY)} ${Math.round(r.width)}x${Math.round(r.height)} "${(e.innerText||e.getAttribute('aria-label')||'').trim().replace(/\s+/g,' ').slice(0,30)}" onclick=${(e.getAttribute('onclick')||'').slice(0,60)} href=${e.getAttribute('href')||''}`}));
+console.log(cl.join('\n'));
+const fixed = await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(e=>{const s=getComputedStyle(e); return (s.position==='fixed') && s.display!=='none' && e.getBoundingClientRect().width>0}).map(e=>{const r=e.getBoundingClientRect(); return e.id+'|'+String(e.className).slice(0,30)+'|z'+getComputedStyle(e).zIndex+'|'+Math.round(r.x)+','+Math.round(r.y)+' '+Math.round(r.width)+'x'+Math.round(r.height)+'|'+(e.innerText||'').slice(0,20).replace(/\n/g,' ')}));
+console.log('FIXED\n'+fixed.join('\n'));
+await browser.close(); srv.close();

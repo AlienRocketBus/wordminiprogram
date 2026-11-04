@@ -1,0 +1,33 @@
+{
+  "ver": "v1164",
+  "login": true,
+  "whileOffline": {
+    "ok": false,
+    "kind": "network",
+    "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v"
+  },
+  "onlineAgain": [
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v"
+    }
+  ],
+  "vendorReqSinceReload": 0,
+  "trace": [
+    "+  100ms  结论  ❗云端模块没准备好：Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v",
+    "+ 2967ms  结论  ❗云端模块没准备好：Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v",
+    "+12122ms  结论  ❗云端模块没准备好：Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v",
+    "+22967ms  结论  ❗云端模块没准备好：Failed to fetch dynamically imported module: http://127.0.0.1:44851/vendor_cloudbase_esm_v"
+  ]
+}

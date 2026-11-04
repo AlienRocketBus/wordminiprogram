@@ -1,0 +1,340 @@
+{
+ "notes": [],
+ "home": {
+  "theme": "pink",
+  "htmlClass": "",
+  "bgDeep": "#fce7f3",
+  "bgMid": "#f9a8d4",
+  "tagline": {
+   "color": "rgb(253, 224, 71)",
+   "fill": "rgb(253, 224, 71)",
+   "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px 2px, rgba(0, 0, 0, 0.55) 0px 0px 6px",
+   "font": "CartoonBlack, \"Microsoft YaHei UI\", \"Microsoft YaHei\", 微软雅黑, \"PingFang SC Heavy\", \"PingFang SC\", \"HarmonyOS Sans SC\", \"H",
+   "text": "单 词 大 冒 险 · 一 段 神 奇 旅 程"
+  },
+  "subtitle": {
+   "color": "rgb(254, 243, 199)",
+   "fill": "rgb(254, 243, 199)",
+   "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px 2px, rgba(0, 0, 0, 0.55) 0px 0px 6px",
+   "font": "CartoonBlack, \"PingFang SC Heavy\", \"PingFang SC\", sans-serif",
+   "text": "WORD ADVENTURES"
+  },
+  "feedbackSub": {
+   "color": "rgb(148, 163, 184)",
+   "fill": "rgb(148, 163, 184)",
+   "shadow": "none",
+   "font": "\"Microsoft YaHei\", 微软雅黑, \"Noto Sans SC\", -apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Heiti SC\", sans-serif",
+   "text": "Bug · 建议 · 表扬, 都告诉我"
+  },
+  "modesText": [
+   "12 种超酷挑战",
+   "12 种颜色 + 23 个数字，全部专属手画图标。必备基础大本营！",
+   "12 种玩法"
+  ],
+  "stat12": [
+   "🗺️ 18 主题岛屿",
+   "📚 711+ 英语单词",
+   "🎮 12 学习模式",
+   "🐾 36 宠物阶段",
+   "📍 最近探险的岛屿 快去玩"
+  ]
+ },
+ "islandEn390": [
+  {
+   "t": "Animal Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Food Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Sports & Hobbies",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "People & Professions",
+   "font": "\"Bowlby One\", serif",
+   "sw": 112,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Colors & Numbers",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Nature Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Action Verbs",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Transportation",
+   "font": "\"Bowlby One\", serif",
+   "sw": 146,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Body Parts",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "City Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Clothes Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "House & Furniture",
+   "font": "\"Bowlby One\", serif",
+   "sw": 94,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Family Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "School & Stationery",
+   "font": "\"Bowlby One\", serif",
+   "sw": 102,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Time Island",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Common Adjectives",
+   "font": "\"Bowlby One\", serif",
+   "sw": 101,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Common Misc Words",
+   "font": "\"Bowlby One\", serif",
+   "sw": 80,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  },
+  {
+   "t": "Pronouns & Question Words",
+   "font": "\"Bowlby One\", serif",
+   "sw": 89,
+   "cw": 80,
+   "ow": "visible",
+   "ws": "normal"
+  }
+ ],
+ "fontsCheck": {
+  "bowlby": true,
+  "cartoon": true,
+  "faces": [
+   "CartoonBlack:loaded"
+  ]
+ },
+ "platformFonts": [
+  [
+   {
+    "familyName": "Liberation Serif",
+    "postScriptName": "LiberationSerif",
+    "isCustomFont": false,
+    "glyphCount": 12
+   }
+  ],
+  [
+   {
+    "familyName": "Liberation Serif",
+    "postScriptName": "LiberationSerif",
+    "isCustomFont": false,
+    "glyphCount": 10
+   }
+  ],
+  [
+   {
+    "familyName": "Liberation Serif",
+    "postScriptName": "LiberationSerif",
+    "isCustomFont": false,
+    "glyphCount": 15
+   }
+  ]
+ ],
+ "tapIsland": {
+  "ok": true,
+  "x": 69,
+  "y": 421.78125,
+  "w": 118,
+  "h": 240,
+  "hitOk": true,
+  "hit": "DIV.island-en",
+  "tapped": true
+ },
+ "welcome": {
+  "shown": true,
+  "text": "🎮 | 欢迎来到动物大冒险！ | 🗺️ 5 大动物岛屿等你探索 | 📚 42 个英语单词随你学 | 🎮 12 种超酷玩法等你来 | 🐉 36 阶进化宠物 | 🎁 每日宝箱 + 签到奖励 | 🏆 144 个成就等你解锁 | 🎒 小冒险家秘籍： | 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 | 开始冒险！"
+ },
+ "modeCards": {
+  "n": 14,
+  "labels": [
+   "探索单词",
+   "听音辨义",
+   "🃏 记忆翻牌",
+   "打字大师",
+   "完形填空",
+   "字母拼拼乐",
+   "spelling bee",
+   "⚔️ 拼写大PK",
+   "打地鼠",
+   "钓鱼大师",
+   "泡泡大作战",
+   "极速60秒",
+   "火眼金睛",
+   "抽卡"
+  ]
+ },
+ "tapWelcome": {
+  "ok": true,
+  "x": 194.9921875,
+  "y": 595.890625,
+  "w": 129.515625,
+  "h": 45,
+  "hitOk": true,
+  "hit": "BUTTON.game-btn.gold",
+  "tapped": true
+ },
+ "island": {
+  "theme": "pink",
+  "htmlClass": "hsn-bt-dark",
+  "bgDeep": "#2d1b2e",
+  "bgMid": "#7c3aa0",
+  "bgImg": "radial-gradient(at 15% 5%, rgba(236, 72, 153, 0.4), rgba(0, 0, 0, 0) 55%), radial-gradient(at 85% 10%, rgba(244, 114, 182, 0.4), rgba(0, 0, 0, 0) 55%), radial-gradient(at 65% 75%, rgba(168, 85, 247, 0.3), rgba(0, 0, 0, 0) 60%), radial-gradient(at 30% 90%, rgba(253, 224, 71, 0.22), rgba(0, 0, 0, 0) 5"
+ },
+ "tapExplore": {
+  "ok": true,
+  "x": 80.328125,
+  "y": 421.703125,
+  "w": 104.65625,
+  "h": 104.65625,
+  "hitOk": true,
+  "hit": "IMG",
+  "tapped": true
+ },
+ "navAfterExplore": {
+  "active": [
+   "navExplore:错题"
+  ],
+  "navItems": [
+   "navHome:nav-item:主页",
+   "navExplore:nav-item active:错题",
+   "navReview:nav-item:复习",
+   "navCards:nav-item:卡册"
+  ],
+  "screen": [
+   "exploreScreen"
+  ]
+ },
+ "backFromExplore": {
+  "ok": true,
+  "x": 45.375,
+  "y": 97,
+  "w": 62.75,
+  "h": 44,
+  "hitOk": true,
+  "hit": "BUTTON.back-btn",
+  "tapped": true
+ },
+ "tapHome": {
+  "ok": true,
+  "x": 355,
+  "y": 30.612407684326172,
+  "w": 58,
+  "h": 58,
+  "hitOk": true,
+  "hit": "A.world-map-btn",
+  "tapped": true
+ },
+ "homeVisible": "none",
+ "after_reload_404": [
+  "/island_wordIslandAnimal.html"
+ ],
+ "prefetched": [
+  "island_wordIslandAnimal.html",
+  "island_season.html",
+  "island_animal.html",
+  "island_food.html",
+  "island_sports.html",
+  "island_job.html"
+ ],
+ "lsIslandKeys": [
+  "wordIslandSeason",
+  "lastIslandKey",
+  "wordIslandSeason_bak",
+  "wordIslandAnimal_bak",
+  "lastIslandTime",
+  "wordIslandAnimal"
+ ],
+ "errs": [
+  "[home] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[island] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "external": []
+}

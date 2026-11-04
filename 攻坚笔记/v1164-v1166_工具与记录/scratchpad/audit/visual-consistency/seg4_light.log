@@ -1,0 +1,7 @@
+
+errs [
+  '[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)',
+  '[top] PAGE Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]
+ext []
+404 [ '404 /island_wordIslandAnimal.html' ]

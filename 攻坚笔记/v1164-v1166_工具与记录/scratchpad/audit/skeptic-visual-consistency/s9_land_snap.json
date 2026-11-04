@@ -1,0 +1,17 @@
+{
+ "island_land1.html": {
+  "hsn_progress:星海词汇大冒险": 240,
+  "hsn_progress:单词大陆": 30
+ },
+ "island_land4.html": {
+  "hsn_progress:星海词汇大冒险": 240,
+  "hsn_progress:单词大陆": 30
+ },
+ "island_animal.html": {
+  "hsn_progress:星海词汇大冒险": 240,
+  "hsn_progress:单词大陆": 30,
+  "hsn_progress:动物大冒险": 42
+ },
+ "lit": "已点亮 3 / 19 座岛",
+ "errs": []
+}

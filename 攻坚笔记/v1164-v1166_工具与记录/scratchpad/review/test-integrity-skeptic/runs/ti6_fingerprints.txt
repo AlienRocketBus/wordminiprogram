@@ -1,0 +1,4 @@
+4bd17b11fecc83dd /home/user/wordminiprogram
+4bd17b11fecc83dd /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity-skeptic/head
+4bd17b11fecc83dd /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity-skeptic/mutfp
+resume-file fp: 4bd17b11fecc83dd

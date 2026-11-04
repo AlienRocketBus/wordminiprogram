@@ -1,0 +1,131 @@
+{
+  "u08": {
+    "vwBeforeDeploy": "已是最新 v1163",
+    "samples": [
+      {
+        "dt": 891,
+        "s": {
+          "bar": null,
+          "url": "/",
+          "state": {
+            "hsnIsland": "island_animal.html"
+          },
+          "wrap": "block"
+        }
+      },
+      {
+        "dt": 2486,
+        "s": {
+          "bar": "发现新版本 v1164（当前 v1163），正在更新…",
+          "url": "/",
+          "state": {
+            "hsnIsland": "island_animal.html"
+          },
+          "wrap": "block"
+        }
+      },
+      {
+        "dt": 3015,
+        "s": {
+          "err": "Error: page.evaluate: Execution context was destroyed, most "
+        }
+      },
+      {
+        "dt": 3520,
+        "s": {
+          "bar": null,
+          "url": "/?_fresh=1793716664177",
+          "state": null,
+          "wrap": "none"
+        }
+      }
+    ],
+    "navs": [
+      {
+        "dt": 299,
+        "u": "/"
+      },
+      {
+        "dt": 3073,
+        "u": "/?_fresh=1793716664177"
+      }
+    ],
+    "end": {
+      "url": "/?_fresh=1793716664177",
+      "wrap": "none",
+      "fixed": "1164",
+      "vw": {
+        "local": 1164,
+        "server": 1164,
+        "stale": false,
+        "note": "已是最新 v1164"
+      },
+      "gate": 1164
+    }
+  },
+  "u09": {
+    "navs": [
+      {
+        "dt": 19,
+        "u": "/"
+      },
+      {
+        "dt": 2092,
+        "u": "/?_fresh=1793716686851"
+      },
+      {
+        "dt": 24226,
+        "u": "/?_fresh=1793716686851"
+      }
+    ],
+    "duringCdnWindow": {
+      "url": "/?_fresh=1793716686851",
+      "vw": {
+        "local": 1163,
+        "server": 1164,
+        "stale": true,
+        "note": "已为 v1164 自动修过一次仍未生效 —— 不再自动重载，请手动点「强制更新」"
+      },
+      "fixed": "1164"
+    },
+    "recheckAfterCdnCaughtUp": {
+      "local": 1163,
+      "server": 1164,
+      "note": "已为 v1164 自动修过一次仍未生效 —— 不再自动重载，请手动点「强制更新」"
+    },
+    "pageStillOn": {
+      "url": "/?_fresh=1793716686851",
+      "gate": 1163
+    },
+    "afterManualReopen": {
+      "gate": 1164,
+      "vw": "已是最新 v1164"
+    }
+  },
+  "u10": {
+    "cachedHomeExists": true,
+    "root_404": {
+      "title": "",
+      "text": "404 fault"
+    },
+    "root_502": {
+      "title": "",
+      "text": "502 fault"
+    }
+  },
+  "u11": {
+    "topUrl": "/_frame.html?u=http%3A%2F%2F127.0.0.1%3A33471%2F",
+    "gameFrame": "/index.html",
+    "topHasWatcher": false,
+    "check": {
+      "local": 1163,
+      "server": 0,
+      "note": "在 iframe 内且拿不到顶层 → 跳过（不在子框里重载）"
+    },
+    "versionRequestsSeenByServer": 11
+  },
+  "u16": {
+    "mainFrameLoadsIn45s": 28,
+    "url": "/?_fresh=1793716776427"
+  }
+}

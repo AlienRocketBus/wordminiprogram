@@ -1,0 +1,38 @@
+  OK  A 登录 + 云端发号
+  OK  B 登录 + 云端发号
+  XX  HansenSbProfile.displayName() 给出真名字  ⟶ {"dn":"(无 displayName)","st":null}
+  XX  ★ 页面刚加载第一次拉榜就成功（不是 not-signed-in）  ⟶ {"ok":false,"reason":"not-signed-in"}
+  XX  ★ 没人上榜时是 ok + 空列表（空 ≠ 出错）  ⟶ {"ok":false,"reason":"not-signed-in"}
+  XX  心跳写上、各自学到自己的 _openid  ⟶ {"ba":"","bb":""}
+  XX  ★ A 加 B：成功，对方还没加 → 待确认  ⟶ {"ok":false,"reason":"云服务未就绪"}
+  XX  ★ B 看到「A 想加你」  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  XX  ★ B 加回 A：直接互为好友  ⟶ {"ok":false,"reason":"云服务未就绪"}
+  XX  ★ A 那边：B 是正式好友  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  XX  ★ B 那边：A 是正式好友  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  XX  A 看到 B 刚才还在 + 名字
+  OK  ★ 没有任何一次写别人的记录（无 updated:0 / 权限拒绝）
+  XX  ★ B 给 A 发「来一局？」  ⟶ {"ok":false,"reason":"云服务未就绪"}
+  XX  ★ A 收到 B 的招呼（发件人可信）  ⟶ {"ok":false,"reason":"云服务未就绪","msgs":[]}
+  XX  ★ 好友页 z-index 2147483500（在拼写大PK屏之上、对战屏之下）  ⟶ "2147482000"
+  XX  ★ 好友页显示好友和收到的招呼  ⟶ "👥 我的好友\n×\n我的状态\n🟢 在线\n🌙 隐身\n好友能看到你「刚才还在」。\n（网页不能像 App 那样一直挂着，所以这只表示你最近开着页面）\n加好友（输对方的竞赛 ID 数字）\n加好友\n竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001\n好友\n还没有好友。\n让同学告诉你他的竞赛 ID，输在上面就能加。"
+  XX  ★ 打开好友页不触发看门狗救援  ⟶ {"armed":true,"rescue":true}
+  XX  A 删除 B  ⟶ {"ok":false,"reason":"云服务未就绪"}
+  XX  ★ B 那边看到 A 不再是互为好友（等他也加你）  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  XX  ★ A 的列表里没有 B 了  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  OK  ★ 删除也只删自己的记录
+  XX  ★ 缺 hansen_friend_msgs → 说清楚要建哪个集合、权限选什么  ⟶ {"ok":false,"reason":"云服务未就绪"}
+  XX  缺集合时收件箱也报配置问题（不是假装没消息）  ⟶ {"ok":false,"reason":"云服务未就绪","msgs":[]}
+  XX  ★ 缺 hansen_friends → 列表报配置问题  ⟶ {"ok":false,"reason":"云服务未就绪","friends":[]}
+  XX  ★ 好友页显示「云端设置还差一步」+ 集合名  ⟶ "👥 我的好友\n×\n我的状态\n🟢 在线\n🌙 隐身\n好友能看到你「刚才还在」。\n（网页不能像 App 那样一直挂着，所以这只表示你最近开着页面）\n加好友（输对方的竞赛 ID 数字）\n加好友\n竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001\n好友\n还没有好友。\n让同学告诉你他的竞赛 ID，输在上面就能加。"
+  XX  ★ 两人上传天梯分成功  ⟶ {"pa":{"ok":true},"pb":{"ok":false,"reason":"not-signed-in"}}
+  XX  ★ 榜上有两个人（名字是自己起的）  ⟶ {"ok":true,"list":[{"rank":1,"uid":"1961162689598144405","name":"无名蜂","cid":1,"rating":1045,"games":4}],"myRank":null}
+  XX  榜上找得到自己  ⟶ null
+  XX  ★ 上传被拒要报出来（不是 ok:true）  ⟶ {"ok":true}
+  XX  ★ 拉榜被拒 → 报错（不是"没人上榜"）  ⟶ {"ok":true,"list":[],"myRank":null}
+  XX  ★ 断网 → kind network  ⟶ {"ok":false,"reason":"network request error"}
+  [A console.error] Failed to load resource: net::ERR_FAILED
+
+  pageerrors: []
+  unrouted: []
+
+结果(legacy): 4 通过 / 28 失败

@@ -1,0 +1,19 @@
+{
+  "ver": "v1163",
+  "signedAtLoad": true,
+  "signedAfter12s": true,
+  "marker": {
+    "method": "password",
+    "username": "xiaoming88",
+    "signedAt": 1792520381380
+  },
+  "toasts": [
+    "登录后自动分配 🐝 工蜂 · 未定级 › ✅ 已登录 xiao",
+    "登录即可找回",
+    "登录 🏠 大PK · 公开房间 看看谁开了房，点进去直接开打"
+  ],
+  "dialogs": [],
+  "ladder": "× ⚡ 正在找对手… 🔍 正在找 900 ~ 1100 分的对手 已等 0 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯",
+  "panelWhenOpened": "👤 已登录 ✕ 用户名：xiaoming88 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录",
+  "learnedStill": 6
+}

@@ -1,0 +1,6 @@
+{"pendingAfterMs":20001}
+  net: [ 'HANG token?client_id=ambitious-d0g1d26xm740dc3d6' ]
++    0ms  登录判定  ✅ 云端凭证已就位，写入本地登录态
++ 1521ms  ensureSession 开始  isSignedIn=true
++ 1521ms  本地登录记录  method=phone 距登录=2秒
++ 1521ms  SDK 凭证键  2 个 → hansen_auth_v1004(161字节)  credentials_ambitious-d0g1d26xm740dc3d6(460字节)

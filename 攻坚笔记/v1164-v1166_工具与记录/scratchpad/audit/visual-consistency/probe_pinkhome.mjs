@@ -1,0 +1,13 @@
+import { startServer, launch, newCtx, attachLogs, sleep, OUT } from './lib.mjs';
+import { seed, shot } from './lib2.mjs';
+const { srv, base } = await startServer();
+const browser = await launch();
+const errs=[];
+const ctx = await newCtx(browser,{dsf:2});
+await seed(ctx, {'theme':'pink'});
+const page = await ctx.newPage(); attachLogs(page,'top',errs);
+await page.goto(base+'/index.html',{waitUntil:'load'}); await sleep(2500);
+await shot(page,'p10_home_top_pinktheme');
+await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight)); await sleep(700); await shot(page,'p12_home_bottom_pinktheme');
+console.log(await page.evaluate(()=>({theme:document.body.dataset.theme, tag:getComputedStyle(document.querySelector('.tagline')).color})), errs);
+await browser.close(); srv.close();

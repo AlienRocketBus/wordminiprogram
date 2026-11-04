@@ -1,0 +1,114 @@
+[
+ {
+  "file": "words/birthday.mp3",
+  "word": "birthday",
+  "segments": [
+   [
+    0.05,
+    0.37,
+    -14.0
+   ],
+   [
+    0.56,
+    0.87,
+    -15.5
+   ]
+  ]
+ },
+ {
+  "file": "words/exactly_season.mp3",
+  "word": "exactly",
+  "segments": [
+   [
+    0.1,
+    0.51,
+    -14.5
+   ],
+   [
+    0.59,
+    0.84,
+    -16.8
+   ]
+  ]
+ },
+ {
+  "file": "words/fox.mp3",
+  "word": "fox",
+  "segments": [
+   [
+    0.04,
+    0.38,
+    -16.4
+   ],
+   [
+    0.52,
+    0.8,
+    -17.9
+   ]
+  ]
+ },
+ {
+  "file": "words/selfish_season.mp3",
+  "word": "selfish",
+  "segments": [
+   [
+    0.11,
+    0.41,
+    -13.0
+   ],
+   [
+    0.5,
+    0.83,
+    -20.2
+   ]
+  ]
+ },
+ {
+  "file": "words/six.mp3",
+  "word": "six",
+  "segments": [
+   [
+    0.03,
+    0.34,
+    -15.5
+   ],
+   [
+    0.46,
+    0.72,
+    -23.0
+   ]
+  ]
+ },
+ {
+  "file": "words/socks.mp3",
+  "word": "socks",
+  "segments": [
+   [
+    0.03,
+    0.35,
+    -14.7
+   ],
+   [
+    0.53,
+    0.86,
+    -21.2
+   ]
+  ]
+ },
+ {
+  "file": "words/use.mp3",
+  "word": "use",
+  "segments": [
+   [
+    0.04,
+    0.72,
+    -14.3
+   ],
+   [
+    0.87,
+    1.51,
+    -17.3
+   ]
+  ]
+ }
+]

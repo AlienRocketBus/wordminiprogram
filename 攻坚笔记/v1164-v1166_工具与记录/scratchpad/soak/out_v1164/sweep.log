@@ -1,0 +1,61 @@
+
+══ clusters (28) ══
+  [medium]    3× I4:reported-score-wrong   seeds 663,939,942
+           e.g. rmk0gf9wlkjftv0 reported host 100 / guest 300 but the round docs and answers give 160 / 300 (host saw lose, should be lose)
+  [medium]    2× I9:I4:reported-score-wrong   seeds 663,939
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gf9wlkjftv0 reported host 100 / guest 300 but the round docs and answers give 160 / 300 (host saw lose, should be lose)
+  [medium]    2× I4:score-vs-rounds:pending-scored-0-vs-80   seeds 939,942
+           e.g. rmk0gf2oyj4vkfo word 4: P0 spelled it right; round doc {"winner":"guest","by":"k3x939","at":1767574998106.3035,"id":"rmk0gf2oyj4vkfo_w4","k":""} ⇒ 80 points, the UI scored 0 (claimRound ok won=false pending)
+  [medium]    1× I9:I4:score-vs-rounds:pending-scored-0-vs-80   seeds 939
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) rmk0gf2oyj4vkfo word 4: P0 spelled it right; round doc {"winner":"guest","by":"k3x939","at":1767574998106.3035,"id":"rmk0gf2oyj4vkfo_w4","k":""} ⇒ 80 poin
+  [low   ]  373× I2:remove:adv-forged-target   seeds 292,293,294,296,302,305
+           e.g. remove rzf08380 owned by ADV
+  [low   ]  120× I8:matchmaking-blocked:seat-squatting   seeds 304,316,323,337,355,359
+           e.g. with the adversary 0 honest match(es) settled, without it 1
+  [low   ]   87× I8:adv-seat-accepted   seeds 316,333,355,357,358,359
+           e.g. host accepted rmk0gedbxslnnev_s0 created by the adversary
+  [low   ]   67× I8:impersonated-guest-accepted   seeds 304,314,323,390,426,459
+           e.g. host accepted rmk0ged6ypxympi_s0 created by the adversary claiming to be P1
+  [low   ]   12× I8:fewer-matches-settled:seat-squatting   seeds 350,439,467,529,531,537
+           e.g. with the adversary 1 honest match(es) settled, without it 2
+  [low   ]    7× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 587,657,860,1113,1207,1564
+           e.g. joinRoom(rmk0gedtmd8fojk) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    4× I6:full-room-reported-gone:findByCode   seeds 107,110,139,2123
+           e.g. findByCode(HD9C) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    4× I9:I6:full-room-reported-gone:findByCode   seeds 107,110,139,2123
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(HD9C) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    3× I6:ack-timeout-host-alive:skew   seeds 96,1091,1292
+           e.g. joinRoom(rmk0gf4efcuji3d) 「房主没有回应」 while host P0 was online and waiting
+  [low   ]    3× I9:I6:ack-timeout-host-alive:skew   seeds 96,1091,1292
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gf4efcuji3d) 「房主没有回应」 while host P0 was online and waiting
+  [low   ]    2× I6:taken-but-nobody-else:no-seat:rough-network   seeds 925,2076
+           e.g. joinRoom(rmk0ged5n41yzyg) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 1113,1564
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0g5brxp51xdp) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I6:gone-but-room-open:joinRoom:room-just-created   seeds 1300,1888
+           e.g. joinRoom(rmk0gevo3htn7iy) → 「房主已经离开了，换一间吧」 while host P0 was online and waiting with the room open (clock diff 0s)
+  [low   ]    2× I1:guest-kicked-after-playing   seeds 1822,2159
+           e.g. guest P1 got joinRoom ok for rmk0gevjvrydm90 seat 0 but host P0 never started with it; guest played 2 words, wrote W[0], ended: kicked
+  [low   ]    2× I9:I1:guest-kicked-after-playing   seeds 1822,2159
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) guest P1 got joinRoom ok for rmk0gevjvrydm90 seat 0 but host P0 never started with it; guest played 2 words, wrote W[0], ended: kicked
+  [low   ]    1× I1:phantom-seat   seeds 587
+           e.g. guest P2 got joinRoom ok for rmk0gedtmd8fojk seat 55 but host P1 never started with it; guest played 3 words, wrote W[], ended: opp-never-came
+  [low   ]    1× I6:taken-but-nobody-else:host-reopened-my-seat:rough-network   seeds 1053
+           e.g. joinRoom(rmk0gexpzw7bzn9) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I8:adv-caused:I6:ack-timeout-host-alive:skew   seeds 1091
+           e.g. (only with the adversary: absent in 3 re-runs without it) joinRoom(rmk0gh4btqervnr) 「房主没有回应」 while host P1 was online and waiting
+  [low   ]    1× I9:I2:remove:adv-forged-target   seeds 1140
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) remove rmk0gqury5scr1f_w3 owned by ADV
+  [low   ]    1× I6:ack-timeout-but-host-had-acked:rough-network   seeds 1167
+           e.g. joinRoom(rmk0gedj9anbzi3) gave up 「房主没有回应」 although the host had written guestId=me at 57.7s
+  [low   ]    1× I6:full-room-reported-gone:joinRoom   seeds 1366
+           e.g. joinRoom(rmk0gecsgehk8hi) → 「房主暂时离开了，换一间吧」 but the room is alive, just already playing with someone else
+  [low   ]    1× I9:I6:full-room-reported-gone:joinRoom   seeds 1366
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gecsgehk8hi) → 「房主暂时离开了，换一间吧」 but the room is alive, just already playing with someone else
+  [low   ]    1× I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away   seeds 1750
+           e.g. joinRoom(rmk0gecss8kwc96) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:taken-but-nobody-else:no-seat:rough-network   seeds 2076
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedpuso2gn2) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+
+SUMMARY profile=sweep runs=2304 seeds=1..2304 failing_runs=3 clusters=28 (fail-level 4) | runs-with-violation per invariant: ERR:0 I1:3 I2:373 I3:0 I4:3 I5:0 I6:22 I7:0 I8:214 I9:16 I10:0 | matches=2407 settled_pairs=1859 virtual=331.8h events=5340354 real=483s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

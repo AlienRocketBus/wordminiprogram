@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_tts_volume_v1038.mjs —— 发音音量全站统一回归
  * 事故：拼写蜂里单词读音特别小、几乎听不见，其它玩法正常——同一个单词音量不一致。
  * 根因：各处发音各自设音量。岛屿页 TTS 显式写 volume=1.0；
@@ -7,9 +8,9 @@
  *       ② 提供 get/set/gain/apply/preview；③ 音量能存取且夹在 0~100；
  *       ④ 兜底接管 utterance 与 audio.play，避免"某处忘了设"再次导致不一致；
  *       ⑤ 静音预热(volume=0)不得被接管改写。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -24,7 +25,7 @@ const vals={};
 for (const u of ['island_animal.html','spelling_bee.html']) {
   const page=await browser.newPage({viewport:{width:390,height:844}});
   page.on('pageerror',e=>errs.push(u+':'+String(e.message).slice(0,70)));
-  await page.addInitScript(()=>{ localStorage.clear(); localStorage.setItem('hansen_tts_volume','60'); });
+  await page.addInitScript(()=>{ if (window.top === window) localStorage.clear(); localStorage.setItem('hansen_tts_volume','60'); });
   await page.goto(`http://127.0.0.1:${port}/${u}`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2200);
   const r = await page.evaluate(()=>{
@@ -56,7 +57,7 @@ ok(Math.abs(vals['spelling_bee.html'].audVol - 0.6) < 0.01,
 /* ② 设置页滑块存在并能改 */
 const page=await browser.newPage({viewport:{width:390,height:844}});
 page.on('pageerror',e=>errs.push('set:'+String(e.message).slice(0,70)));
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2400);
 const s = await page.evaluate(()=>{

@@ -1,0 +1,54 @@
+t+1000ms frames:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+t+3000ms frames:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+    boss_hall.html?v=1163&warm=1
+        land_map.html?v=1163
+t+6000ms frames:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+        land_map.html?v=1163
+        
+      season_showcase.html?v=1163&warm=1
+t+10000ms frames:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+        land_map.html?v=1163
+        
+island iframes [
+  { src: 'land_map.html?v=1163', vis: 'none', id: 'hsn_room_land' },
+  {
+    src: 'island_season.html?v=1163',
+    vis: 'none',
+    id: 'hsn_room_season'
+  }
+]
+close 26 none hlen 3 -> 3
+after close frames:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+        land_map.html?v=1163
+        
+islandFrame url http://127.0.0.1:35983/island_animal.html
+errors []

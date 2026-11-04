@@ -1,0 +1,161 @@
+{
+ "notes": [
+  "listen tap1 DIV. 🌱\n初级\n常见单音节动物\n\ud83d",
+  "listen tap2 SPAN. 换难度",
+  "typing tap1 DIV. 🌱\n初级 · 3-4 字母短",
+  "typing tap2 SPAN. 换难度",
+  "moles tap1 DIV. 🌱\n初级 · 简单短词\n❤️",
+  "moles tap2 SPAN. 🔊 听",
+  "gacha tap1 BUTTON.gacha-draw-btn 抽一张\n🪙 1000",
+  "gacha tap2 BUTTON.gacha-draw-btn 抽一张\n🪙 1000"
+ ],
+ "metrics": {
+  "listen_start": {
+   "id": "listenScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🔊 听音辨义",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "listen_play": {
+   "id": "listenScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🔊 听音辨义",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "typing_start": {
+   "id": "typingScreen",
+   "back": {
+    "x": 14,
+    "y": 72,
+    "w": 65,
+    "h": 44
+   },
+   "title": {
+    "txt": "⌨️ 打字大师",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "typing_play": {
+   "id": "typingScreen",
+   "back": {
+    "x": 14,
+    "y": 72,
+    "w": 65,
+    "h": 44
+   },
+   "title": {
+    "txt": "⌨️ 打字大师",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "moles_start": {
+   "id": "molesScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🎯 打地鼠",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "moles_play": {
+   "id": "molesScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🎯 打地鼠",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "gacha_start": {
+   "id": "gachaScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🎴 抽卡寻宝",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  },
+  "gacha_play": {
+   "id": "gachaScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 61,
+    "h": 44
+   },
+   "title": {
+    "txt": "🎴 抽卡寻宝",
+    "fs": "22px",
+    "ff": "-apple-system",
+    "vis": true
+   },
+   "topbarVisible": true,
+   "modal": false
+  }
+ },
+ "errs": [
+  "[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "external": [],
+ "r404": [
+  "404 /island_wordIslandAnimal.html",
+  "404 /island_wordIslandAnimal.html",
+  "404 /island_wordIslandAnimal.html"
+ ]
+}

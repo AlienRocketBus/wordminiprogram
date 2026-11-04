@@ -1,0 +1,11 @@
+after listen header: Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 600
+bosshall card tapped true
+errs [
+  '[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)',
+  '[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)',
+  '[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)',
+  '[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)',
+  '[top] PAGE Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]
+ext []
+404 [ '404 /island_wordIslandAnimal.html' ]

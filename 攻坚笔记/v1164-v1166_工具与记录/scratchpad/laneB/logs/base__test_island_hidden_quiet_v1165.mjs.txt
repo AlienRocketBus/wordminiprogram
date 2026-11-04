@@ -1,0 +1,34 @@
+  ✅ 真点「动物」
+  ✅ 进到动物岛
+
+▶ 1. 打地鼠玩着 → 🗺️ → 首页停 12 秒
+  ✅ 真点「打地鼠」
+  ✅ 真点第一档
+  ✅ 玩的时候确实会出声（4 次，证明钩子有效）
+  ✅ 真点 🗺️
+  ✅ 回到首页
+  ❌ 藏起来 12 秒岛里没出声（2 次：play:wolf.mp3?v215, play:wolf.mp3?v215）
+
+▶ 2. 再进动物岛：是本岛主页
+  ✅ 再真点「动物」
+  ✅ 瞬开
+  ❌ 看到的是本岛主页（molesScreen）
+
+▶ 3. 极速 60 秒玩着 → 🗺️ → 停 5 秒
+  ❌ 真点「极速 60 秒」
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+frame.waitForSelector: Timeout 8000ms exceeded.
+Call log:
+[2m  - waiting for locator('#speedContent [onclick^="startSpeedLevel"]') to be visible[22m
+
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/laneB/base/test_island_hidden_quiet_v1165.mjs:111:12 {
+  log: [
+    `  - waiting for locator('#speedContent [onclick^="startSpeedLevel"]') to be visible`
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4

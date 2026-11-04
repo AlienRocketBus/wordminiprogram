@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import {serve,launch,ctx,attach} from './harness.mjs';
+const INSTR=fs.readFileSync('instr.js','utf8');
+const {srv,base}=await serve();
+const b=await launch();
+const c=await ctx(b,base);
+await c.addInitScript(INSTR);
+const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/island_animal.html',{waitUntil:'load'}); await p.waitForTimeout(3500);
+await p.evaluate(()=>{ document.querySelectorAll('button').forEach(x=>{ if(/开始冒险/.test(x.textContent)) x.click(); }); });
+const screens=await p.evaluate(()=>[...document.querySelectorAll('.screen')].map(s=>s.id.replace(/Screen$/,'')));
+const s0=await p.evaluate(()=>__snap());
+const cycle=async()=>{ await p.evaluate(async(screens)=>{ for(const id of screens){ try{ showScreen(id); }catch(e){} await new Promise(r=>setTimeout(r,30)); } showScreen('home'); },screens); await p.waitForTimeout(400); };
+await cycle(); const s1=await p.evaluate(()=>__snap());
+for(let i=0;i<4;i++) await cycle();
+const s5=await p.evaluate(()=>__snap());
+const diff={}; for(const k of new Set([...Object.keys(s1.listeners),...Object.keys(s5.listeners)])){ const d=(s5.listeners[k]||0)-(s1.listeners[k]||0); if(d) diff[k]=d; }
+const stacks=await p.evaluate((keys)=>{ const o={}; keys.forEach(k=>{ const a=__L.add[k]||[]; o[k]=[...new Set(a.slice(-8))].slice(0,3); }); return o; },Object.keys(diff));
+const ivs=await p.evaluate(()=>[...__L.ivStack.entries()].map(([id,s])=>__L.iv.get(id)+'ms '+s).slice(0,40));
+console.log(JSON.stringify({screens:screens.length,s0:{iv:s0.intervals},s1:{iv:s1.intervals},s5:{iv:s5.intervals},listenerGrowthOver4Cycles:diff,stacks,ivs,log:log.slice(0,10)},null,1));
+await b.close(); srv.close();

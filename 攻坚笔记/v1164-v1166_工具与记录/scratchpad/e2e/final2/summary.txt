@@ -1,0 +1,3 @@
+test_rooms_cloud_v1164.mjs rc=0 secs=153
+test_cloud_errors_v1164.mjs rc=1 secs=101
+DONE

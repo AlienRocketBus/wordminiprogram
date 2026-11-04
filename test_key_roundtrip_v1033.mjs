@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_key_roundtrip_v1033.mjs —— 密钥「写入 ↔ 读取」必须指向同一文档
  * 事故（用户实测定位）：自检面板点「立刻上传」显示成功，
  *   紧接着点「从云端拉取」却报「云端没有这把密钥对应的存档」。
@@ -11,7 +12,7 @@
 import vm from 'node:vm'; import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('密钥写读一致性 v1033');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 
 /* 源码层：两处字符集必须是同一份 */
 ok(/var CH = ALPHABET;/.test(src), '生成密钥直接复用 ALPHABET(不再另写一份)');

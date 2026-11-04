@@ -1,0 +1,15 @@
+
+▶ 静态：SHELL 预缓存
+  ❌ SHELL 里有 './hansen_mistake_lesson_v1165.js?v=1163'
+  ✅ 文件存在
+  ✅ template.html 用的正是这个地址
+  ✅ land_template.html 用的正是这个地址
+
+▶ 运行时：断网再开食物岛，答错一题
+  ✅ SW 接管了首页
+    从运行时缓存删掉 1 条
+  ❌ 断网再进岛：答错小课模块加载上了
+  ❌ 答错一题：小课卡出现
+  ❌ 这个模块没有出错响应（504 hansen_mistake_lesson_v1165.js?v=1163）
+
+❌ 4 项失败

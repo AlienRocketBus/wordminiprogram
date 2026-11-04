@@ -1,0 +1,413 @@
+
+######## r1:review:session-auth | I reviewed the v1164 session, auth and backup work by reading the code (current vs 73e1b69, SDK 2.30.0 slices) and by running 13 real-SDK emulator experiments (real pages and SDK, only Tencent emulated; each scenario also run against the v1163 snapshot). I did not edit any repo file.
+
+What holds up:
+- The new ensureSession logic is sound in a single page. Offline or hung refresh at wake returns 'slow' after about 10 s, keeps the marker, and recovers (X10 offline and hung cases). Slow 4G (4.5 s per request) with no user_info cache still returns ok in 9.1 s (X10).
+- No caller mutates the shared 
+
+[AUTH-1|major] A session that dies mid-play now forces a sign-out. The local ladder record is wiped at once, and the re-login overwrites everything played since then with the older cloud copy.
+  FILE: hansen_auth_v1004.js:1305 (ensureSession definite path writeLocal uid:''), 83 (hsn-account-uid-changed), 959-975 (syncOnLogin hasCloud&&hasLocal → restore); hansen_pk_record_v1103.js:297-300
+  SCENARIO: 1. A logged-in kid's cloud session dies. Field causes: the refresh token is rejected (invalid_grant / 'long unused', as the team's own test ⑧ models it).
+2. The kid keeps playing. The next background cloud call (autosync, the island's startup check, the ladder) runs ensureSession. v1164 now returns definite 'expired' and calls writeLocal({method:'',signedAt:0,uid:''}).
+3. The uid change fires hsn-account-uid-changed. HansenPkRecord.syncOwner has no empty-uid guard, so it treats this as "换人了" and deletes hansen_pk_record_v1. The 拼写大PK card immediately shows 「🐝 工蜂 · 未定级」: 5 wins become 0.
+4. The kid keeps playing islands, now signed out.
+5. When the kid logs in again with the same phone, syncOnLogin sees hasCloud && hasLocal. Under the v1163 rule it auto-restores the cloud snapshot, which dates from before the session died, and reloads.
+6. Every word, coin and ladder game since the death i
+  FIX: (a) On definite expiry clear only method/signedAt and keep uid. isSignedIn() still turns false, but no account-switch signal fires, so the ladder record and profile are not reset. This also removes the X7 overlay trigger.
+(b) Give pk_record.syncOwner the same `if (!now) return;` guard as sb_profile.
+(c) In syncOnLogin, when localOwner()===uidNow and the local export differs from the last successfully uploaded hash (HansenCloudSave state lastHash / lastUpAt), upload local (or merge) instead of auto-restoring the older cloud copy. "Cloud is always newest" is false exactly when uploads were failing because the session was dead.
+
+[AUTH-2|major] Inside index.html, an island that detects a dead session (or a kid who logs in inside an island) brings up a false, full-screen "别的窗口退出了登录 / 别的窗口登录了另一个账号 · 刷新这个窗口" overlay on the top window.
+  FILE: hansen_auth_v1004.js:1381-1401 (watchCrossTabAuth reacts to any storage event for LKEY), 1434 (message), 1305 (new v1164 trigger)
+  SCENARIO: Expiry case:
+1. A returning kid (already signed in when index.html loads) whose session has died enters any island. The island runs inside #islandFrame, same origin.
+2. With no tap at all, about 3 s later the island's own startup check (hansen_cloud_restore boot → accountCloudInfo → ensureSession) concludes 'expired' and clears the marker inside the iframe.
+3. The parent window receives a `storage` event. Its watchCrossTabAuth sees uid change from X to '' and paints the z-index 2147483646 overlay: 「🔄 别的窗口退出了登录 · 这个窗口还停在上一个账号，继续玩会把进度记到错的账号上。刷新一下就好。 [刷新这个窗口]」.
+4. Every word is false: there is no other window, and nobody logged out. The overlay covers the whole app, including the island's own 「云端登录过期了 → 重新登录」 screen. The only way out is a reload that closes the island and leaves the kid signed out, which then feeds AUTH-1.
+Login case (same root cause, already in v1163): logging in inside an
+  FIX: (a) Ignore storage events written by frames of the same tab. Stamp writeLocal with a per-tab id kept in sessionStorage (same-origin frames of one tab share it) and skip events whose newValue carries this tab's id. Alternatively, have frames compare against window.top.HansenAuth.
+(b) Apply AUTH-1 fix (a), keeping uid on expiry, so an expiry never looks like an account change.
+(c) For a real expiry, show 「云端登录过期了，重新登录一次就好」 instead of the cross-window text.
+Add an E2E test that runs through index.html + #islandFrame; test_auth_cloud only opens spelling_pk.html standalone.
+
+[AUTH-3|major] After one failed download of the SDK file, every cloud feature stays broken until the page is reloaded, while the ladder says 「连不上网络 · 检查一下 Wi-Fi」 and its retry can never work.
+  FILE: hansen_auth_v1004.js:326 (import('./vendor_cloudbase_esm_v965.js') with no retry), 1295-1299 (classified network/session); hansen_ladder_ui_v1108.js:964-965
+  SCENARIO: 1. A signed-in kid opens the game on weak or no signal. The 548 KB SDK is not in the service worker cache (the asset cache holds only 72 entries), or the request is aborted.
+2. The first app() call (the island's startup check or the autosync) fails with 'Failed to fetch dynamically imported module' (Chromium/XWeb) or 'Importing a module script failed' (WebKit).
+3. The browser's module map caches the failure. Every later import of the same URL fails instantly without a new request, even after the network is back.
+4. ensureSession returns kind 'network' on every call. The ladder ends on 「📡 连不上网络 · 排位需要联网找对手。检查一下 Wi-Fi 或数据再试 · [重新找对手]」, with 技术信息 'Failed to fetch dynamically imported module'.
+5. Retrying loops forever ('网络不太顺，正在重试…'). Cloud save, friends and rooms are also dead. Only a page reload helps, and nothing tells the kid or teacher to reload.
+  FIX: In app(), when the dynamic import rejects, retry once with a cache-busting URL ('./vendor_cloudbase_esm_v965.js?r='+Date.now()). This is safe because no SDK instance exists yet. Also clear the failed state so the next call retries.
+If it still fails, return a distinct kind or message: 「云端组件没下载完整，点这里刷新页面」 with a reload button, not 「检查一下 Wi-Fi」. hansen_cloud_save_v965.js:293 uses the same bare import for signed-out users.
+
+[AUTH-4|major] Account switch on one device from a phone account to a username account: the username account uses the previous phone account's cloud save, restores that kid's progress, shows that phone number, and its own uploads silently go nowhere.
+  FILE: hansen_auth_v1004.js:522 (loginByPassword writeLocal keeps old `phone`), 633/636 and 1305 (signOut / expiry keep phone & username); hansen_cloud_save_v965.js:89-94 (accountIdent prefers lc.phone regardless of lc.method), 449-455 (put accepts {updated:0}); hansen_auth_ui_v1004.js:66
+  SCENARIO: This is a shared family or classroom device, using the username-login tab that v1164 keeps for console-created accounts.
+1. Kid A logs in with a (parent's) phone number and plays; the cloud has A's save.
+2. A taps 退出登录. The marker keeps phone:'+86 …' and pendingPhone.
+3. Kid B logs in with a username and password. writeLocal({method:'password', username}) does not clear `phone`.
+4. accountIdent returns 'p:<A's phone>'. B's login sync restores A's cloud progress onto the device and marks it as B's.
+5. The 已登录 panel shows B 「手机号：+86 <A's number>」.
+6. B's own cloud save (key n:<username>) is never read.
+7. B's uploads target A's document, which B cannot modify under READONLY. With the inferred legacy permission semantics, set() resolves {updated:0} and syncNow reports ok:true while nothing is saved. With security rules it fails as 「数据库安全规则未放行（见开通指南第4步）」, which misleads the teacher into chan
+  FIX: (a) loginByPassword should write phone:'' and pendingPhone:''; loginByPhoneCode should write username:''.
+(b) signOut and the expiry path should clear phone, username and pendingPhone as well.
+(c) accountIdent should choose by lc.method (phone → 'p:', password → 'n:').
+(d) cloudbaseProvider.put should treat a set() result with updated===0 and no upserted_id as a failed write. The payload always carries updatedAt:Date.now(), so a real write always changes the document.
+
+[AUTH-5|minor] Two open pages refreshing at the same moment: one page's 'expired' verdict clears the shared login and signs out both pages, while the other page still holds a working session.
+  FILE: hansen_auth_v1004.js:1273-1291 and 1305; hansen_cred_guard_v1092.js:101-113 and 170-178 (shadow refreshed only by the 3 s tick)
+  SCENARIO: 1. The game is open in two pages that share localStorage (two tabs or two WeChat webviews). Both need a token refresh at once, e.g. both woke up.
+2. Refresh tokens are single-use. Page 1 rotates to RT2 (kept in its SDK memory and written to storage).
+3. Page 2's refresh with RT1 gets invalid_grant, and its SDK deletes credentials_ from storage, removing RT2.
+4. The guard's shadow still holds RT1, because backups only happen on the 3 s tick. ensureSession's rescue therefore restores a dead token, gets invalid_grant again, and declares definite 'expired'.
+5. It clears the SHARED marker, so both pages are signed out (kind 'signin'), although page 1 can still read the database.
+v1163 kept the marker (notReady), and page 2 recovered as soon as page 1 wrote its next token.
+  FIX: When a /auth/v1/token response is 2xx, have the guard back up the new credentials immediately (schedule backup() about 300 ms after the 2xx, or parse the response clone). A rescue then restores the newest refresh token instead of a consumed one.
+Also consider keeping uid on expiry (AUTH-1 fix (a)) so a sibling page whose SDK still works is not told it was logged out.
+
+[AUTH-6|minor] The login panel always says 「已自动取回云端进度（0 个单词）」 while it restores the whole save.
+  FILE: hansen_cloud_save_v965.js:184-196 (counts learned from pl.items of the encrypted envelope); hansen_auth_ui_v1004.js:194-196
+  SCENARIO: A kid logs in on a phone that has some local progress while the cloud holds 40 learned words. syncOnLogin auto-restores. The panel says 「登录成功！ 竞赛 ID No.001，已自动取回云端进度（0 个单词）」 for 1.2 s before the reload. A kid or teacher reading "0 个单词" thinks the cloud save is empty or lost.
+  FIX: Drop the number (「已自动取回云端进度」), or compute it after decrypting (fetchWithKey + parse), or store a plaintext word count in the row next to the envelope at upload time.
+
+[AUTH-7|minor] Kids who used the old 「用户名注册」 (v1058–v1163) are silently signed out on upgrade, and then told 「没找到这个用户名，检查一下拼写」.
+  FILE: hansen_auth_v1004.js:1286-1291 (generic expired), 434 (friendly user-not-found)
+  SCENARIO: These kids hold the local marker {method:'password', username, signedAt} without any cloud account; the old flow only sent an email code.
+1. On the first v1164 page load, the island or page startup check concludes 'expired' and clears the marker without telling the kid.
+2. 天梯 then shows 「排位要先登录」.
+3. When the kid enters the username and password they "registered", the panel says 「没找到这个用户名，检查一下拼写；还没有账号的话，点下面用手机号注册」. They did not misspell anything: the account never existed. Nothing explains that the old username registration never worked, or that phone registration will carry their local progress.
+  FIX: In the expiry branch, when lc.method==='password', there are no credentials and no uid was ever recorded, use an honest message. Same for username-login not_found when such a legacy marker exists: 「以前版本的「用户名注册」其实没能在云端建好账号，不是你的错。请用手机号注册（家长的也可以），这台手机上的进度会自动带过去。」
+
+######## r1:review:protocol | Lens: own-document room protocol (hansen_pk_room_v1065.js) under concurrency, plus the UI code that consumes it. Every finding below was reproduced with the real spelling_pk.html and the real SDK 2.30.0 talking to the repo's cloudbase_emulator.mjs, or traced exactly in code. No repo files were edited. All scripts and the run log are in /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/room-protocol/ (RESULTS.md lists every run and its key output). Run any script with HANSEN_PLAYWRIGHT_MODULE=/opt/node22/lib/node_modules/playwright/index.mjs node <script>.
+
+What ho
+
+[F1|major] claim() treats an inconclusive read-back after a duplicate-_id add as a real failure and reports it as kind 'config' (「云端设置还差一步」), leaving orphan seats/rooms and scoring a round winner 0
+  FILE: hansen_pk_room_v1065.js:642-666 (claim/readBack), 101-105 (codeKind), 368 + 384-396 (retry rules)
+  SCENARIO: Trigger (a): two kids race for the same seat while reads lag ≥ ~3.2 s. The loser's add fails as a duplicate. readBack makes 5 reads over 2.4 s and finds nothing, then re-throws the add error. {code:'DATABASE_REQUEST_FAILED', …E11000…} goes through codeKind() to 'config'. In the ladder, tryRooms → onFail → showProblem('config'), and the kid sees 「🛠️ 云端设置还差一步 … 这不是你的问题，把这一屏截图发给负责的老师就好」 plus E11000 技术信息; matching stops. The lobby shows the same error block. With the http500 duplicate shape it becomes 「连不上网络」.
+
+Trigger (b): flaky network, no lag needed. The add commits but the reply is lost. wrapTimeout retries and hits its own duplicate. The read-back's wrapped read then fails 3 times in about 1 s, and one rejection aborts the whole readBack. Result:
+- joinRoom says 'config', but the seat exists. The host confirms it, and the room shows as playing with a guest who has already left; it stays
+  FIX: In claim(), on add failure:
+- Read back for longer with backoff (e.g. up to ~8-10 s), and catch per read so one failed read doesn't end the loop.
+- If the doc is still not found and the error was a resolved server code on a fixed-_id add (or matches /E11000|duplicate/i), return {mine:false, unknown:true} instead of throwing.
+- Callers map that to 'taken' (seat), 'retry later' (room) or 'poll roundState' (round). Never surface 'config'.
+
+Other changes:
+- Map DATABASE_REQUEST_FAILED to a transient kind; keep PERMISSION_DENIED and COLLECTION_NOT_EXIST as 'config'.
+- After an inconclusive seat claim, best-effort remove(seatId) before failing; it is safe because a remove of someone else's doc is 
+
+[F2|major] opponentGone() returns {oppFinished} before the abandon verdict, so a player judged 'gone' who comes back keeps playing a decided match; the UI's 「两边按同一个结论收尾」 branch is dead code
+  FILE: hansen_pk_room_v1065.js:1268-1271 (check order), 1299/1303 (claimAbandonWin writes score 1), 1380-1420 (claims accepted after done); UI hansen_pk_room_ui_v1065.js:1384
+  SCENARIO: The guest switches apps or loses network for more than 60 s mid-match (very common for kids). The host's UI correctly claims the abandon win: R gets status 'done', endedBy 'abandon', abandonWin 'host', hostScore 1.
+
+When the guest comes back, checkOpponentAlive calls opponentGone. Because hostScore is 1, `host ? v.guestScore != null : v.hostScore != null` returns {oppFinished:true} first, so `ended/abandonWin` is never returned. The UI branch `if (g.ended && g.endedBy==='abandon' …)` never fires.
+
+The guest's battle screen carries on. claimRound/skipRound still accept writes in the done room, so every word reads 「🔥 你抢先拼对！ +100」. After the last word, reportResult says lose, and the kid sees 「⌛ 你离开太久，这局判给了对手 / 你 600 分 · 对手 100 分」, a screen that contradicts itself.
+
+The mirror case is the same: the guest claims the win, the host comes back, `v.guestScore != null` (1), and the host plays on.
+  FIX: In opponentGone, first check `v.abandonWin && v.abandonWin !== mySide` (or endedBy==='abandon') for both host and guest and return {ended:true, abandonWin}. Only then check oppFinished. Let the UI branch at line 1384 apply to both sides. Make claimRound/skipRound refuse when the merged status is done (cached rank 2) or abandonWin is set.
+
+[F3|major] Room disappears under the guest (host closes during the ACK window, or the done room is swept 2 min after an abandon): the guest is never told, sees 「网络不稳」 for the whole match, wins words alone, ends on 「这一局的结果没拿到」
+  FILE: hansen_pk_room_v1065.js:1042-1043 (host not started → remove), 1128/1475 (_myStarted set only at joined/markReady), 594 (loadView throws gone), 805-809 + 43 (sweep after doneGraceMs 120 s); UI hansen_pk_room_ui_v1065.js:1381, 1477-1494, 1858, 1917
+  SCENARIO: Trigger (a): the host has written the ACK (guestId set) but hasn't yet seen the guest's reply (a ~2-3 s window), and taps 「← 关掉房间/不等了」 or closes the page. close() → leaveRoom → leaveMine sees role host with started=false and removes R. The guest already saw the ACK and is in the match.
+
+Trigger (b): the host claimed the abandon win and went back to the ladder/lobby, where each listRooms runs a sweep. The done room is removed 2 min later. The guest comes back after that.
+
+In both cases loadView throws 'gone' after 3 misses, and opponentGone/roundState return {ok:false, kind:'gone', gone:true}:
+- checkOpponentAlive ignores it (`if (!g || !g.ok …) return;`).
+- pollOpponent counts it as a network miss and shows 「📶 网络不稳，正在重连…（进度不会丢）」.
+- claimRound still succeeds (+100 per word, alone).
+- After the last word, reportResult fails 'gone' 5 times, then 「📨 这一局的结果没拿到」.
+
+The kid wastes several minute
+  FIX: leaveMine for a host whose room already carries an ACK (rc meta guestId, or pend) should patch {status:'done', endedBy:'leave'} instead of removing. On the guest side, map a room missing for 3 or more reads to {ok:true, gone:true, left:true} (host left). Have the UI also act on `g.gone` when ok:false. Keep done rooms until the guest's seat shows left/score, or extend the grace (e.g. 10 min). Refuse claims when the room is missing or done.
+
+[F4|major] A shared network outage > 60 s makes BOTH kids the winner (each counts the time its own reads were failing as the opponent's idleness)
+  FILE: hansen_pk_room_v1065.js:1283-1287 (idle = now − local time the beat last changed); UI hansen_pk_room_ui_v1065.js:1401-1410 (claim then show win, no read-back)
+  SCENARIO: Classroom Wi-Fi drops for about 70 s during a ranked match. Both phones' heartbeats fail, and their opponentGone reads fail too; these return {ok:false}, the UI ignores them, and o.at is never refreshed. When the Wi-Fi comes back, each side's first successful poll (the UI polls every 4 s, heartbeats run every 8 s) still sees the other's pre-outage beat value, so idle is about 79 s and both are 'gone'. Both call claimAbandonWin, which writes R abandonWin 'host' and S abandonWin 'guest'. Both screens show 「🏆 对手已离场，本局你胜」 and both record a ranked win. The merged view's host-wins tie-break is never consulted.
+  FIX: Record the local time of the last successful observation. If my own polls failed for longer than about 2 heartbeats, set o.at = now on recovery so the outage isn't charged to the opponent. After claimAbandonWin, read the merged verdict back (host-preferred tie-break) before showing the result, and show 「这局不算」 when both sides claimed.
+
+[F5|major] Ranked A mode: the previous word's loser times out ~1.5–2 s earlier and its skip doc pre-empts a correct answer the other kid types while his clock still shows 2 s → 「⏱ 超时了」, 0 points
+  FILE: hansen_pk_room_ui_v1065.js:1147-1151 (deadline base), 1760 (skipRound), 1769 + 1748 (failed/late claim → 「⏱ 超时了」); hansen_pk_room_v1065.js:551 (roundAt = W.at), 1393-1399 / 1407-1420
+  SCENARIO: After X wins word k, the two kids' deadlines for word k+1 are computed differently:
+- Y (who saw W_k) has roundIdxOfRoundAt === k+1, so it uses the shared roundAt = W_k.at: deadline = W_k.at + 20 s.
+- X computed its deadline before seeing its own W_k in roundState, so it uses its local display time: about W_k.at + RTT + 1.4 s + 20 s.
+
+If Y can't spell word k+1, Y's timer runs out first and skipRound writes W_{k+1} = ''. X then types the word correctly with 1-2 s still on its clock. claimRound finds the skip (known or duplicate), winner '' → won false → A mode's secondScore is 0, and the UI shows 「⏱ 超时了」.
+
+B/C have the same mechanism: local deadlines differ by the start offset, so a skip by one side turns the other kid's only correct answer into 后拼对 60/80 instead of 100.
+  FIX: Give both sides the same base. The winner knows W_k.at because it wrote it, so it can use W_k.at instead of its own display time. Also delay skip writes by a grace at least as large as the maximum deadline spread (e.g. deadline + 3 s), so a correct claim within the other kid's visible time wins. In B/C don't write skip W docs at all; noteAns already marks 'answered'.
+
+[F6|major] Lag ceiling: at read lag ≥ ~4.3 s every newly created room reports {gone} to its own host; at ~6 s the 15-s ACK window times out although the host confirmed
+  FILE: hansen_pk_room_v1065.js:1208-1212 (3 consecutive own-room misses → gone) with 1105-1108 (2-s polls); 38 + 1016 (ackMs 15 s) vs 1107 (5-s polls after 40 s)
+  SCENARIO: The UI starts waitForOpponent right after createRoom. The host's own room is still invisible on the 3rd poll (about 4.3 s), so it emits {gone}:
+- Lobby: 「房间已经不在了」, and the orphan room stays listed for 30 s.
+- Ladder: ladderBack('rematch','刚才那间房没了，接着帮你找…'), which repeats every ~25 s forever. Nobody can ever host.
+
+With a host that has waited more than 40 s (polling every 5 s), a guest's 15-s ACK budget of about 2·lag + 5 s + 1 s runs out near lag 6 s. The guest gets 「房主没有回应，换一间吧」 and removes its seat even though the host had confirmed it; the ladder marks that room as tried.
+
+If the real backend lags this much (the facts say up to several seconds), rooms and the ladder stop working entirely.
+  FIX: Don't count own-room misses while this device created the room less than ~15 s ago (rc meta present); use readRoomLag-style patience. Make the ACK budget adaptive: keep waiting while the host is visibly progressing, poll faster (≤ 2 s) once the room looks claimable, and extend ackMs (e.g. 25 s). Record the backend's real lag from a phone before release.
+
+[F7|major] Clock skew still drives round deadlines: opponent clock 15 s slow → my word starts at ⏱ 2s; opponent clock 10 min fast → ⏱ 617s and I stay on the word after he times out
+  FILE: hansen_pk_room_ui_v1065.js:1148-1151 (fresh = now − shared < span passes for future stamps), 1605 (skip '' doesn't advance); hansen_pk_room_v1065.js:550-551 (roundAt from the other device's clock)
+  SCENARIO: In A mode, round k+1's deadline for the side that lost word k is based on W_k.at, which comes from the claimer's clock. A claimer whose clock is ahead by Δ gives the other kid Δ extra seconds; a claimer whose clock is behind takes Δ away.
+
+With +10 min, the kid's clock shows 617 s. When the fast-clock kid times out, the skip ('' winner) doesn't advance the other side, so that kid sits on the word with a ~10-min countdown while the opponent plays on alone.
+
+With −15 s, the kid gets about 2 s per word after each of the opponent's wins.
+
+Kids do change device clocks (to beat game timers), and a few seconds of drift shifts each word by the same amount.
+  FIX: Never compare another device's absolute timestamp with the local clock. Base word k+1's deadline on the local time this device first observed W_k (minus a small fixed allowance), or write timestamps with db.serverDate() and use a per-session client/server offset. In A mode, treat a '' winner as 'word over' for both sides.
+
+[F8|major] Clock skew still drives room freshness: a host whose clock is ≥ 30 s slow is invisible (list, room code, join refused) and two ladder hosts never converge; a fast-clock host's dead room stays 'fresh' for minutes
+  FILE: hansen_pk_room_v1065.js:680-688 (fresh/joinable), 863-864 (listRooms), 699-706 (findByCode), 910 (joinRoom), 1190 (rescan), 807-809 (same-account sweep compares another device's stamps)
+  SCENARIO: heartbeatAt is written with the host's clock and compared with the reader's clock.
+- A host 60 s slow is filtered from every list, and its private code returns 「没找到这间房，可能已经关了或码输错了」. joinRoom returns 「房主已经离开了，换一间吧」. That kid can never be found.
+- Ladder: if the slow host self-hosts first, the accurate host can't see it, and the slow host sees the other room as newer, so neither gets switchTo. Both wait 2 min, then 「暂时没有对手，等会儿再来」.
+- A dead host whose clock is 10 min fast leaves a room that looks fresh (negative age) for about 10 min. Every joiner waits 15 s for 「房主没有回应」.
+- Same account on two devices with skew: one device's sweep can remove the other's live room.
+  FIX: Judge freshness on server time: write heartbeatAt with db.serverDate() and compare against local now plus an offset measured once per session from one's own doc. Alternatively, rely on observed beat changes, like opponentGone. Clip or ignore timestamps more than ~60 s in the future. In the sweep, only delete docs whose own staleness is measured on the same device.
+
+[F9|major] A stranger can decide every round of someone else's ranked match: pre-created win docs R_w<i> are accepted with no creator/participant check, and a forged `by` hands first-score to the side the stranger picks
+  FILE: hansen_pk_room_v1065.js:491-493 (isWinDoc), 1393-1394 (known path trusts known.by), 1397-1399, 1423-1442 (probe/backfill accept any matching doc), 472 (unscoped W ids)
+  SCENARIO: Any logged-in client can add docs, because READONLY allows creates. A stranger reads R from the public list, then adds W_0..W_9 {kind:'win', roomId, i, winner:'host', by:R.hostId}.
+- Both players see every word already decided before anyone types.
+- The guest is forced off each word as soon as it appears (A mode).
+- The host's claimRound takes the known path and gets first:true, 100.
+- With any other `by`, nobody can score. With winner '', every correct answer shows 「⏱ 超时了」.
+
+The squatted doc is not ignored, and the round can never be decided because its fixed _id is taken.
+  FIX: Accept W_i only if the server-stamped creator matches:
+- 'u'+doc._openid === R.hostId with winner 'host' or '', or
+- 'u'+doc._openid === the current guestId with winner 'guest' or '',
+- and doc.by === 'u'+doc._openid.
+Scope W ids by seat epoch (R_w<epoch>_<i>). When the id is squatted, fall back to an alternate id. Verify on a real phone what _openid contains for web users. Full protection needs a security rule (create only if doc.by == auth.uid) or a cloud function.
+
+[F10|major] A stranger can block all matchmaking: 40 fake open rooms with future createdAt/heartbeatAt fill the listOpen LIMIT 40 and hide every real room; squatted seat ids block a room
+  FILE: hansen_pk_room_v1065.js:313-339 (listOpen orderBy createdAt desc limit 40), 863-864 (future stamps pass freshness), 488-490 + 1117-1157 (squatted seats → bump one epoch per poll)
+  SCENARIO: One client adds 40 docs that look like open rooms with createdAt a year in the future. Every phone's list then shows only fakes; real rooms, including ladder self-hosts, are never listed, so nobody matches. Each fake costs a joiner 15-16 s of 「房主没有回应」. The docs belong to the stranger, so no player can remove them.
+
+Squatting R_s0..R_sN marked left makes the host bump one epoch per poll (2-5 s each), and real guests keep hearing 「这间房刚被别人占了」. 1000 squats would block the room for hours.
+  FIX: Bound the query on the server: heartbeatAt between now−30 s and now+60 s (db.command), plus the existing filters. Reject future-dated rooms locally. Require 'u'+_openid === hostId for rooms and === guestId for seats; jump past squatted seats (creator mismatch) in one step instead of one epoch per poll. Long-term, per-user limits need security rules or a cloud function.
+
+[F11|minor] A guest the host replaced (unack) is awarded a ranked 「本局你胜」, and its timeout skip doc pre-decides word 1 of the host's real match with the new guest
+  FILE: hansen_pk_room_v1065.js:1280-1281 (kick → {gone,left,kicked}), 1172 (20-s pend → unack), 472 (W ids not scoped per guest/epoch); UI hansen_pk_room_ui_v1065.js:1389, 1454, 1401-1410
+  SCENARIO: G1 sees the ACK and starts playing, but its uploads fail for about 20 s while downloads work. The host never sees G1's acked/ready reply, unacks, reopens the room and plays G2, writing hostReady.
+- G1's word-1 timeout already wrote W0='', so G2, who spelled word 1 first, gets first:false and 0.
+- G1 then sees hostReady=true, which sets _oppSeen, and room.guestId≠me 3 times. opponentGone returns {gone:true, left:true, kicked:true}.
+- The UI ignores `kicked`: `if (g.gone && !st._oppSeen)` is false, so it falls through to `if (g.gone)` → 「🏆 对手已离场，本局你胜」 and claimAbandonWin. G1 gets a ranked win for a match it never played.
+  FIX: Treat `kicked` as 'not your match': no win, back to matching. Set _oppSeen only from the opponent's actions tied to my epoch. Scope W ids by epoch and require W's creator to be the current guest or the host (see F9).
+
+[F12|minor] Merged view caches hostScore=1 but not abandonWin/endedBy, so one backwards (stale) read turns 'lost by abandon' into a normal 500:1 'win'
+  FILE: hansen_pk_room_v1065.js:540-541 (c.hs cached), 566-567 (endedBy/abandonWin from the latest R only), 1500 (reportResult relies on v.abandonWin)
+  SCENARIO: The guest has seen the host's abandon claim (c.hs=1). If the read inside its reportResult is served by a replica from before the claim, v.abandonWin is '' and the verdict is computed as mine 500 vs theirs 1, so the guest records a win as well. This only happens if reads can go backwards; the spec requires merges to be monotonic against stale reads.
+  FIX: Cache abandonWin and endedBy in rc() monotonically: once seen, keep them, the same way as rank and scores.
+
+[F13|minor] If the server ever acks a duplicate-_id add (silent success or overwrite), the single immediate read-back can't detect it under lag: both kids are 'first' on the same word
+  FILE: hansen_pk_room_v1065.js:651-656 (success path: readBack(1) right after add; null → trust add)
+  SCENARIO: The comment says the read after a successful add is insurance against an overwriting backend. Under read lag that read returns null or the old version, so mine:true for every racer. In A mode both kids get +100 for the same word, and the final local-tally scores are wrong. This is conditional: MongoDB normally rejects duplicates with E11000.
+  FIX: On add success, keep reading back (bounded, with backoff) until the doc is visible, then compare nonces. Or document that duplicate rejection is required and verify it on the real backend.
+
+[X1|minor] (Incidental, outside this lens, pre-existing) Watchdog shows 「🛠️ 这一局卡住了」 over an idle ladder home for new players
+  FILE: hansen_pk_watchdog_v1155.js:196 (frozen check /⏱|第 \d+ \//) + hansen_ladder_ui_v1108.js:302 ('⏱ 平均用时' in the new-player block)
+  SCENARIO: A new player opens 天梯排位 and reads it for 25 s. The static ladder home text contains '⏱', so the watchdog treats it as a frozen battle and covers it with 「这一局卡住了 … 界面已经 25 秒没有任何变化」. This also blocked a tap in a test run (the #pkRescue overlay was under the finger).
+  FIX: Apply the frozen check only to the battle screen (.pr_wrap containing #prClock), not to .ld_wrap; or match '⏱ \d+s' instead of '⏱'.
+
+######## r1:review:ui-flows | UI-flows lens, round 1. I drove the real pages (spelling_pk.html, island_animal.html, and index.html with the island in its iframe) with the real vendored SDK and touch taps; only Tencent's network was emulated. The repo stayed clean at 47a97f9 for every run. Most flows hold up: open/close cycles leak no timers or listeners, nothing keeps polling after a full game, reload mid-flow cleans up, every error kind shows sensible text, 再来一局 and the rescue buttons land on top on the island, and B/C stay in sync with correct 100/60/80 scoring when both kids answer inside their windows.
+
+Twelve findings
+
+[UI-1|major] Android back on the main path (index.html → island iframe) hides the island but leaves the room advertised and the battle running; other kids get matched against an absent kid
+  FILE: index.html:index.html:4146-4154,4171-4174; hansen_pk_room_ui_v1065.js:2257-2287 (cleanup only on pagehide / document hidden), 1153-1228 and 1830-1837 (battle and 交卷 screens have no exit button)
+  SCENARIO: A kid opens 动物岛 from the home page → 拼写大PK → 天梯排位 → 开始排位 → sees 「⚡ 排位 · 等对手进来」, then presses the phone's back key (or iOS swipe-back). popstate → _closeIslandNow only sets #islandFrameWrap display:none; the island is kept alive by design. Its document still reports visibilityState 'visible', so neither pagehide nor the 30 s background cleanup runs. The room stays open with a fresh heartbeat. Another kid who taps 开始排位 is matched into it and plays a ranked game against nobody. If that kid spells any word, the hidden iframe's showResult → HansenPkRecord.record gives the absent kid a ranked loss. When the first kid re-opens the same island they land mid-game. The same happens from a free waiting room or mid-battle. On the island there is no exit button in the battle or on 「正在等对手交卷…」, so back is the only way out and it ends nothing. On spelling_pk.html, back navigates away (pagehide), so it i
+  FIX: When the shell hides the island (popstate/_closeIslandNow), end the island's online session: e.g. call frame.contentWindow.HansenPkRoomUI.close() and HansenLadderUI.close(), or dispatch an event the island handles like pagehide (leave the waiting room; leave or forfeit a running match). Better: push a history entry when the PK/ladder/room overlays open (as hansen_spellbee.js does), so Back closes the overlay first, with a 「退出就算这局输了」 confirm during a battle. Add a visible 退出 button to the battle and 交卷 screens.
+
+[UI-2|major] A correct answer typed after the opponent timed out is scored as second place (回合赛 80 / 同步赛 60), or 0 with 「⏱ 超时了」 in ranked 抢答赛 — published rule 先拼对 100 is violated
+  FILE: hansen_pk_room_v1065.js:hansen_pk_room_v1065.js:1388,1393-1399,1407-1418; hansen_pk_room_ui_v1065.js:1147-1151,1359,1746-1748,1754-1764
+  SCENARIO: Each phone counts the word's 15/20 s on its own clock. Word 1 always uses local time (roundAt is not known at startMatch). In B/C, words from 2 on use each phone's local start. In A, the previous word's winner starts later. The guest always starts ~1.0–1.1 s before the host, because the host only starts after reading the guest's acked. When the guest doesn't know the word, its clock runs out first, and skipRound creates W_i with winner ''. The host, whose own clock still shows ⏱ 1s, then spells it correctly. claimRound loses the _id race to the skip doc, so won=false and it returns secondScore. Nobody else spelled the word, so by MODES.B/C rules this is 先拼对 = 100. In 抢答赛 secondScore is 0, and after() prints 「⏱ 超时了」 for a correct, in-time answer in a ranked game. Coming back from the background (UI-11) widens the window to many seconds.
+  FIX: Decide 「谁先拼对」 only among correct answers. A timeout should not create the round doc W_i; it should only write the player's own answered-marker (noteAns already writes hostAns/guestAns). W_i should be created only by a correct claim, and the next word starts when W_i exists (A) or both players have answered or timed out (B/C). Alternatively, a skip may create W_i only after the later of the two players' deadlines, and claimRound must treat an existing winner:'' doc as "nobody correct yet".
+
+[UI-3|minor] 「取消」 / 「← 返回」 on 「正在进房，等房主确认…」 does nothing for ~15–17 s when tapped while the seat claim is still on the wire
+  FILE: hansen_pk_room_ui_v1065.js:hansen_pk_room_ui_v1065.js:909-912; hansen_pk_room_v1065.js:985,1016-1018,1053-1057
+  SCENARIO: On a slow phone network (~500 ms per request), the kid taps 进去打 (or the ladder auto-joins) and then taps 取消 within ~1 s. onCancel does not repaint; it only sets a flag and calls leaveRoom. leaveRoom flags `_joining[id]` only if waitAck has already started, and waitAck then sets `_joining[rid] = 1`, discarding any cancel. So the join runs on until the 15 s ACK timeout. The screen keeps saying 「正在进房，等房主确认…」 and the 「已等 N 秒」 counter keeps running after the tap, so the button looks broken.
+  FIX: In onCancel, bump _joinSeq and leave the join screen at once (lobby, or ladderFail with {cancelled:true}); the data layer can clean up in the background (doJoin already leaves a late success). In the data layer, keep a cancel requested before waitAck: leaveRoom sets `_joining[id]='cancel'` even when unset, waitAck does not overwrite 'cancel', and joinRoom checks it right after the claim.
+
+[UI-4|minor] False 「同一个账号在另一台设备上开着房，要用另一个账号才能对战」 appears right after the kid's own room closes
+  FILE: hansen_pk_room_v1065.js:hansen_pk_room_v1065.js:865-866,1039; hansen_pk_room_ui_v1065.js:435-438,480; hansen_ladder_ui_v1108.js:774-775
+  SCENARIO: Triggers: the kid's free room times out after 2 minutes (the most common no-show outcome), the 30 s background auto-close fires, or a ranked room times out and the kid taps 开始排位 again. leaveMine clears _myRoomId synchronously, but the list read that follows still returns the just-removed room (removal in flight, or read lag). listRooms then counts it as "my account's room on another device". The lobby keeps the warning until 刷新; the matching screen shows it for a tick. A teacher reading it will look for another device or create new accounts.
+  FIX: Remember the ids of rooms this device created or left in the last ~2 min and never count them in sameAccount. Or count only same-account rooms whose heartbeat is newer than the moment this device left its own room.
+
+[UI-5|minor] Double tap on 「开始排位」 cancels matching at once, and a double tap on 「取消，回天梯」 restarts it (same screen spot)
+  FILE: hansen_ladder_ui_v1108.js:284,363,704-707
+  SCENARIO: The matching screen paints 「取消，回天梯」 exactly where 「开始排位」 was, and vice versa. A 7–10-year-old's double tap (or a second impatient tap) starts matching, and the second finger hits 取消, landing back on the ladder home: the button seems not to work. Double-tapping 取消 instead restarts matching. Same code on the island and spelling_pk.html. The layout is identical in v1163, but the ladder only became usable now.
+  FIX: Don't place the cancel button where the start button was: keep the top × and move 取消 elsewhere. Or ignore taps for ~500 ms after each paint().
+
+[UI-6|minor] Double tap on a 选个玩法 card starts two waitForOpponent poll loops and two 「已等 N 秒」 timers for the same room
+  FILE: hansen_pk_room_ui_v1065.js:627-629,648-671,749,806
+  SCENARIO: doCreate has no in-flight guard. createRoom dedups (one room), but both .then callbacks run waiting(). The second call overwrites _cancelWait without cancelling the first loop and clears only the new _state's timer. Effects: twice the DB reads while waiting (quota); the orphan loop keeps polling after 关掉房间 until it sees 3 misses; both loops can ACK or bump the seat.
+  FIX: Ignore mode picks while a create is in flight (flag, or disable the cards). In waiting(), call any existing _cancelWait and clear the previous state's _waitTimer before starting a new loop.
+
+[UI-7|minor] 「已等 N 秒」 is not smooth: it jumps 20 → 0 → 22 when the ladder self-hosts
+  FILE: hansen_pk_room_ui_v1065.js:739-740,748-757
+  SCENARIO: The waiting room paints a hard-coded 「已等 0 秒」. It switches to the real elapsed time (counted from the ladder's t0) only on the first interval tick a second later. The kid sees the counter reset to 0 for about a second, then jump, with one value skipped. The same happens when switchRoom falls back to the kid's own room.
+  FIX: Paint the initial text from _t0 with the same formula as the interval, and use Math.floor, so the first tick shows the next integer.
+
+[UI-8|minor] First-time name screen silently drops a name the profile refuses (1 character, or containing 管理员/admin) and lets the kid in as 「无名蜂」
+  FILE: spelling_pk.html:419-430
+  SCENARIO: askName ignores setName's {ok:false, reason}. A kid types 「明」 (a very common one-character nickname) and taps 开始吧. They go to the ladder with no message, the opponent sees 「无名蜂」, and 「✏️ 先起个名字」 comes back next time without explanation.
+  FIX: Check setName's result: if !r || !r.ok, show r.reason in #pkNameErr and stay on the name screen.
+
+[UI-9|minor] Island: 「点这里设置名字」 on the 拼写大PK screen opens the profile page behind it (z-index 70 vs 2147483400) — nothing visible happens
+  FILE: hansen_sb_profile_v1002.js:hansen_sb_profile_v1002.js:284; hansen_sb_pk_v1022.js:54,177-181
+  SCENARIO: The island path (the main kid path) has no name prompt. The only way to set a name is the identity bar, which opens #hsb_prof at z-index 70 underneath the PK screen. Island kids therefore stay 「无名蜂」, and v1164 now shows that name to every opponent. The z-index is pre-existing but newly matters.
+  FIX: Raise #hsb_prof above the PK screen when it is opened from sb_pk (e.g. 2147483500, like ladder/friends). Or hide the PK screen while the profile is open and restore it on close.
+
+[UI-10|minor] Kid taps 开始排位 and switches to another app → the backgrounded page self-hosts a ranked room 20 s later and gets matched; the 30 s background clean-up never covers it
+  FILE: hansen_pk_room_ui_v1065.js:hansen_pk_room_ui_v1065.js:2270-2284; hansen_ladder_ui_v1108.js:804
+  SCENARIO: The visibility handler captures st0 = _state when the page goes hidden; that is null on the matching screen. After 30 s it bails out because _state !== st0. Meanwhile the ladder loop keeps running while hidden and creates the room. If the phone's WebView keeps timers running in the background, another kid is matched and the battle runs while the first kid is in WeChat. This depends on the platform: it won't happen if WeChat freezes background JS.
+  FIX: Pause the ladder run (no self-host, no join) while document.hidden. In the 30 s handler, check the current not-yet-started _state rather than the one captured at hide time.
+
+[UI-11|minor] (pre-existing, unchanged by v1164) Coming back from the background restores all the time spent away, defeating the v1126 「最多 3 秒宽限」 rule; this feeds UI-2
+  FILE: hansen_pk_room_ui_v1065.js:1293-1306 (capped onVis grace) vs 1328-1337 (bgLeft full restore)
+  SCENARIO: While hidden, the poll interval stores bgLeft. On return it sets deadline = now + bgLeft, overriding the 3 s cap that onVis applied. The returning kid keeps a full clock while the opponent's has run out. The opponent's timeout creates the skip doc, and the returning kid's correct answer then scores 0 / 60 / 80 via UI-2. The two phones also drift onto different words in 抢答赛.
+  FIX: Remove the bgLeft restore branch in the poll interval (keep only the capped onVis grace), or cap it to the same 3 s once per word.
+
+[UI-12|minor] Free-room 抢答赛 is ranked (HansenPkRecord ranks every mode 'A' game) but the guest's ELO is computed against 1000 instead of the host's real rating
+  FILE: hansen_pk_room_ui_v1065.js:hansen_pk_room_ui_v1065.js:659-660,942,1447; hansen_pk_record_v1103.js:141,165
+  SCENARIO: Free rooms deliberately write hostRating 0, so the ladder doesn't match them. The guest takes _oppRating from hostRating (0); pollOpponent only accepts a value > 0; record() then falls back to oppRating 1000. The host side is correct, since it reads the guest's real rating from the seat. Spec §6 says ELO must use the real opponent rating.
+  FIX: Store the host's real rating in a separate field that the ladder matcher ignores (e.g. hostElo) and use it for ELO. Or make free-room games unranked.
+
+######## r1:review:friends-board | The friends / leaderboard / profile / cid review is finished, and real issues were found. My detailed write-up of the findings was blocked by a safety filter, and I was told not to produce it again, so this output has no findings list. Do not read the empty findings array as a clean result. Every experiment script and its raw output is saved in /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/friends-board-profile/ (scripts e1 to e14, outputs out_e*.txt). To get the findings, either have a person read those outputs or re-run this lens with a narrower prompt. No r
+
+######## r1:review:security-privacy | Security & kids-privacy lens on the v1164 rebuild (rooms/friends/board/profile/saves), run against the real pages + real @cloudbase/js-sdk 2.30.0 + the repo emulator under the production permission READONLY (everyone reads every doc, only the server-stamped _openid creator writes). Doc contents an attacker can read today: sb_profile = roster {_id=uid, uid, name(kid-chosen, may be a real name), cid, createdAt, ladderRating/Games/At}; hansen_pk_rooms(proto2) = room/seat/win docs with keys 'u'+uid, display names, ratings, and private-room codes (NO phone/username anymore — the v1163 phone leak is
+
+[SEC-1|blocker] Stored XSS on a child's friends page → read their localStorage (phone number + cloud login) = account takeover
+  FILE: hansen_friends_ui_v1107.js:492
+  SCENARIO: Any logged-in kid with edited JS adds one hansen_friends row {kind:'friend', owner:<victimCid>, friend:'<img src=x onerror=…>'} (legal under READONLY — it is their OWN doc). When the victim opens 我的好友, listFriends() treats that row as the victim's (isMine fallback, hansen_friends_v1106.js:326 returns true whenever the victim's own _openid is not yet known — true on a fresh session before the first presence read-back lands, or on any server that does not return _openid). The victim-side renderer interpolates the attacker's string RAW as the cid: listHtml does `'No.' + f.cid` (also incomingHtml:418, inbox m.from:465, detail:603 — names/subs ARE escaped, cid/from are NOT). The <img onerror> executes in the victim's page, which can read localStorage: hansen_auth_v1004 holds {phone:'+86 138…'} (captured live) and credentials_<env> holds the CloudBase token → the attacker exfiltrates a child's
+  FIX: Code (cannot be fixed by a console rule): coerce the numeric fields before interpolation everywhere — `'No.' + (Math.floor(Number(f.cid))||0)` at hansen_friends_ui_v1107.js:418,492,603 and `m.from` at :465; and reject rows at the data layer whose owner/friend/from are not positive integers. Also fix the isMine fallback (hansen_friends_v1106.js:326): when the viewer's own _openid is unknown, do NOT treat every owner==me row as mine (that is what lets a foreign-written row into the list). Verify on the real Tencent server whether reads return _openid; if they do not, this XSS is unconditional and the whole friends anti-impersonation model needs a cloud function.
+
+[SEC-2|major] Every child's cloud save is world-readable ciphertext and its AES-GCM key/address are derivable from the phone number (or public uid)
+  FILE: hansen_cloud_save_v965.js:72
+  SCENARIO: hansen_saves is deployed READONLY, so any logged-in user can download every child's encrypted save. The code's stated isolation ('真正的隔离靠 hansen_saves 的「仅创建者可读写」权限', :71-72, README:2856) does NOT exist in production — READONLY lets everyone read. The only remaining protection is AES-GCM, but docId = SHA256('hansen-doc-v1:'+saveKey) and aesKey = SHA256('hansen-aes-v1:'+saveKey) with saveKey = keyFromUid(accountIdent()) (:146,207,202), and accountIdent() is 'p:'+phone for phone logins / 'n:'+username / 'u:'+uid fallback (:83-100). The phone space (~1.8e9 China mobile numbers) is brute-forceable offline against the world-readable docIds; the uid-fallback case uses the PUBLIC uid (sb_profile _id) so those saves are directly decryptable. Decrypting a save yields the child's display name + full learning progress and links a phone number to that child — defeating the advertised zero-knowledge gu
+  FIX: Set hansen_saves to the console preset 「仅创建者可读写」 (PRIVATE), i.e. custom rule {"read":"doc._openid==auth.openid","write":"doc._openid==auth.openid"}. No code change needed — each account already reads only its own doc by its own identity (verified: the client computes its own docId and doc().get()/where({_id}) both target own docs, which PRIVATE still allows across devices because the same account keeps the same _openid). TRADE-OFF: this breaks the anonymous 恢复码换手机回档 flow (a different device/identity can no longer READ the ciphertext to decrypt with the typed key); acceptable because the teacher's deployment is phone-login (cross-device is what the account is for). If anonymous recovery must 
+
+[SEC-3|major] A stranger can flood a child with friend requests and send quick-messages that appear to come from a trusted friend
+  FILE: hansen_friends_v1106.js:717
+  SCENARIO: (a) Friend-request flood: addFriend writes {kind:'friend', owner:me, friend:<anyCid>} and listFriends shows every row whose friend==victimCid under 🙋想加你为好友 (:623-633), verifying the owner only via ownerTrusted which returns true when the owner has no presence row (:481-486). A stranger writes many rows with attacker-chosen owner cids and names → the child sees a wall of '想加你为好友 · <ad/contact name>'. (b) Sender spoofing: inbox's trusted check `trusted = !r._openid || !r.fromOpenid || (r._openid===r.fromOpenid)` (:717) short-circuits to trusted whenever fromOpenid is ABSENT. A stranger posts a hansen_friend_msgs doc {from:<a mutual friend's cid>, fromName:'我是你同学·加我QQ', to:victim, qid:'pk'} with no fromOpenid → it passes the onlyFrom=mutual filter and is shown as a genuine quick-message from that friend. Quick-message TEXT is limited to preset phrases (good), but the sender identity and the
+  FIX: Code: in the inbox trusted check (:717) drop the `!r._openid` and `!r.fromOpenid` escape hatches — require r._openid === r.fromOpenid (a spoofer cannot produce another child's server-stamped _openid); require the incoming-request owner to have a trusted presence row before showing it (fix ownerTrusted :481-486 to return false, not true, when it cannot verify); cap and group the incoming list and treat unverified requests as '可能是陌生人'. Filter/neutralize any name read from the cloud before display (see SEC-4 fix). Verify _openid is actually returned by the real server — the entire anti-impersonation scheme assumes it. A rule {"write":"doc._openid==auth.openid"} (the preset) does not stop target
+
+[SEC-4|major] Leaderboard, ratings and match results are fully client-authoritative — a kid can forge #1 with a contact-info/ad name shown to everyone
+  FILE: hansen_ladder_board_v1156.js:224
+  SCENARIO: The 'leaderboard' is just sb_profile docs; a user writes their OWN doc, which READONLY permits. A kid (or anyone) does db.collection('sb_profile').doc(myUid).update({ladderRating:9999, ladderGames:999, ladderAt:now, name:'加微信8888领皮肤'}) and fetchTop (:268-293) shows them as rank 1 to every child. The board UI escapes the name (hansen_ladder_ui_v1108.js:567 — so no XSS) but does NOT content-filter it, so advertising/contact-grabbing names reach kids at the top of the board. Same class: room hostRating/guestRating are copied from the opponent's own doc into the ELO calc (hansen_pk_room_v1065.js:745 host, seat guestRating) and abandon/results are self-written (reportResult trusts the merged abandonWin, :1500-1503) — so a guest writing seat.abandonWin:'guest' forces the honest host to be told they LOST. The competitive ladder is meaningless and can be used to push text at children.
+  FIX: True integrity needs server-authoritative scoring in a cloud function (out of scope — say so). Proportionate mitigations for a kids' game, all client-side: (1) add a display-time name sanitizer applied to EVERY name read from the cloud (board, rooms, friends, inbox) that replaces strings matching 微信|QQ|vx|v信|公众号|加我|扫码|free|长数字串 with a neutral label like '小蜜蜂', so forged ad/contact names never render to a child; (2) present the global board as '仅供参考' or hide it, since it cannot be trusted; (3) clamp displayed ratings to a sane range. A console rule can blunt the number: sb_profile custom rule {"read":true,"write":"doc._openid==auth.openid && doc.ladderRating>=0 && doc.ladderRating<=3000"} cap
+
+[SEC-5|major] One forged friend row permanently breaks a child's entire friends page (DoS)
+  FILE: hansen_friends_v1106.js:629
+  SCENARIO: listFriends coerces cids with Object.keys(...).map(Number) (:587) and keys the incoming map by the raw owner value. A single attacker row {kind:'friend', owner:'x', friend:<victimCid>} (owner is a non-numeric string, legal under READONLY) makes Object.keys(theirBy)=['x'].map(Number)=[NaN], then the incoming .map does `var r=theirBy[NaN]` (undefined) `card(cid,'',r._openid)` → TypeError. listFriends rejects, so the victim's whole 我的好友 screen shows '没读到好友' every time they open it — and the victim cannot delete the offending row (it is the attacker's doc), so the breakage persists. Any one kid can disable any other kid's friends feature at will.
+  FIX: Code (same root as SEC-1): at the data layer drop/ignore any friend/presence row whose owner, friend or cid is not a positive integer before it enters the maps; guard the incoming .map against a missing theirBy entry. This also closes SEC-1's cid XSS, so do both coercions together.
+
+[SEC-6|major] The whole children's social graph, per-child online timestamps, and name/cid/uid roster are world-readable
+  FILE: hansen_friends_v1106.js:52
+  SCENARIO: Under READONLY any logged-in user can read: sb_profile = a roster of every child {uid, chosen name (may be a real name), cid}; hansen_friends presence rows = {cid, name, last-online epoch 'at' (:356)} letting an attacker track exactly when a specific child is online; hansen_friends friend rows = the complete who-added-whom graph; hansen_friend_msgs = who-messaged-whom and when. Combined with SEC-3 (message/friend a child directly) this is a grooming-adjacent exposure for 7–10-year-olds: an outsider can enumerate children, see who is friends with whom, watch when a target is online, and reach them.
+  FIX: Per-recipient privacy for a document-DB client needs a cloud function (out of scope — tell the teacher). Proportionate now: (1) store only a coarse online bucket, not a precise last-online epoch, to limit tracking; (2) keep display names filtered (SEC-4) and never store anything more identifying than the already-public cid+chosen name; (3) document to the teacher that friend/roster data is readable by any logged-in user so she can decide whether the friends feature is worth that exposure for her class. Positive note: v1164 correctly removed phone numbers/usernames from hansen_pk_rooms (now 'u'+uid), closing the v1163 phone leak.
+
+[SEC-7|minor] 'Private' battle rooms are not private — their code is world-readable and joinRoom ignores isPrivate
+  FILE: hansen_pk_room_v1065.js:899
+  SCENARIO: A private room stores its 4-char code in plaintext on the world-readable room doc (createRoom :739/754-762). Any logged-in user can read all room docs (including isPrivate:true ones and their codes), and joinRoom (:899-958) validates proto/status/not-mine/heartbeat but never checks isPrivate — so an attacker can join any private room directly by its _id, bypassing the code entirely. Low harm for a kids' PK (worst case: an uninvited peer joins a friends-only match), but it defeats the 'private room' promise.
+  FIX: Accept as low-risk for this product, or: do not rely on secrecy of the code; at minimum have the host's waitForOpponent reject a guest whose join did not present the right code (store a salted hash of the code, not the plaintext, and have the guest prove it). Note a determined edited client can still join, so this is cosmetic unless matching moves server-side.
+
+[SEC-8|minor] No admin/cheat password leak: 'hbafx' is a CSS prefix, not a secret (answering the task's question)
+  FILE: hansen_boss_attack.js:15188
+  SCENARIO: The task asked whether hansen_boss_attack.js contains an 'hbafx' admin-panel password in code. It does not: 'hbafx' is only a CSS class prefix (.hbafx-ovl/.hbafx-box/… at :15188+). A search for password/密码/口令/prompt()/unlock gates found no secret and no password check. hansen_boss_attack.js is also UNCHANGED by the v1164 diff (git diff --stat 73e1b69 shows no entry), so it is outside this change's scope. The pre-existing dev/fx panel is reachable client-side with no gate, but it affects only the local single-player boss animation/economy, not other kids' data, so it is not a multiplayer-privacy risk.
+  FIX: No action required for this review. If the dev panel can grant diamonds/progress locally and that later syncs to the cloud save, gate its activation behind a non-shipping build flag — but that is a separate, pre-existing item, not part of v1164.
+
+######## r1:review:regressions | Lens: regressions outside the rebuilt subsystems, whole-product side effects, and CloudBase read/write volume. Everything was measured with the real SDK and cloudbase_emulator.mjs, counting the emulator's request log per phone and per operation type.
+
+No functional regression found outside the rebuilt subsystems:
+- 66 of the 67 tests that touch these modules pass, plus test_pk_inpage, test_pk_battle_ui and test_ladder_e2e. The one failure (test_phone_signup_v1057) is a bug in the test itself, root-caused and proven with a fixed variant.
+- test_ui_walkthrough_v969 passes with 0 page or console 
+
+[SE-1|major] Match and matching polling (about 3.1 reads/s per phone) plus the new idle writers push one class to about 75k CloudBase calls a day (about 1.5M a month). That exhausts the 个人版 quota, and exhaustion stops the whole environment: game site, login and cloud save
+  FILE: hansen_pk_room_ui_v1065.js:1313
+  SCENARIO: The teacher's class has 30 signed-in kids. Each plays 5 ranked games a day (about 100 s each) and spends about 30 minutes on island pages.
+
+Measured costs:
+- About 776 calls per ranked game.
+- About 546 calls per kid per day of normal use: presence beat, cloud-save uploads, page loads.
+- Total: about 74.6k calls a day, about 1.49M per 20 school days.
+
+Against the plans:
+- 2025 个人版 package, 200k 调用次数 per month: used up after about 2.7 school days.
+- 2026 resource-point 个人版, 40,000 points with document DB at 200 points per 10k calls: DB calls alone take about 75% of the month, before static-hosting traffic.
+
+If the plan is used up and 超限按量 (pay-as-you-go overage) or a resource pack is not enabled, the environment goes into 超限停服. Everything in it stops for every user until the next billing cycle:
+- the static-hosted game website itself
+- phone login and SMS
+- cloud save and restore
+- rooms,
+  FIX: Reduce reads; every item keeps each player writing only their own docs. Expected result per budget.py: about 321 calls per game (from 776), 28.4k a day, 0.57M a month, about 28% of the resource points.
+
+1. One combined probe per tick, proven in exp_combined_probe.mjs. In loadView, roundState and waitForOpponent, replace the separate room, seat and W_k doc reads with one `where({_id: db.command.in([R, S, W_k, W_k+1, W_k+2])}).limit(5).get()`. This is the same eventual consistency as now and keeps the merge logic. Simpler alternative: apply your own patches to the _rc cache and read only the opponent's doc.
+2. opponentGone and checkOpponentAlive reuse the view from the last roundState instead 
+
+[SE-2|major] Friends presence heartbeat, newly working in v1164, runs in 3 frames on every island page and keeps running on the home map after an island visit: 9 writes a minute for every signed-in kid while idle
+  FILE: hansen_friends_v1106.js:433
+  SCENARIO: A signed-in kid who never opens friends or battles does any of the following:
+- opens an island page
+- opens one island from the home map and goes back to the map
+- keeps the island page visible while reading
+
+The app then writes hansen_friends presence 3 times every 20 s. That is 540 writes an hour per kid.
+
+For a class of 30 at 30 minutes a day that is 8.1k writes a day, about 162k a month. On the 2025 个人版 package (200k calls a month) that is already 81% of the quota with no battles at all.
+
+In v1163 the same code path never reached the network, so this is new load in production.
+  FIX: In hansen_friends_v1106.js startBeat and beat:
+- Beat only in one frame: skip when `window.parent !== window` and the parent has HansenFriends (the warm island_season frames), and skip when the frame is hidden (window.frameElement is not displayed, same origin).
+- Skip while document.hidden; beat once on visible (already wired at :748).
+- Raise BEAT_MS to 60000 and ONLINE_MS to 150000. The UI only says 「刚才还在」.
+
+Expected: island or home after an island goes from 9 to about 1 write a minute (−89%); PK pages from 3 to 1. Optionally stop the beat after 10 minutes with no user input.
+
+The same one-frame rule should also apply to SE-4.
+
+[SE-3|minor] v1164 triples the room clean-up cost: every listRooms schedules sweepMyDeadRooms with 3 `where` queries (v1163: 1), with no de-duplication. That is three-quarters of the ladder-matching reads
+  FILE: hansen_pk_room_v1065.js:855
+  SCENARIO: While a kid waits on 「正在找对手」, the ladder tick calls listRooms every 2.5 s (hansen_ladder_ui_v1108.js:766/805). Each call:
+- runs listOpen
+- 1.5 s later starts another sweep of 3 queries (hostId, guestId+seat, by+win)
+
+One kid's 20 s of matching costs about 33 queries. Each 🔄 tap in the public lobby costs 4 reads, and rapid taps stack sweeps.
+
+The sweep only needs to remove a handful of the kid's own leftovers once.
+  FIX: Run the sweep at most once per page session (or not again within 10 minutes) and keep a single in-flight promise. Do one extra sweep after a game ends, when there are known leftovers. Optionally merge the 3 queries into one `where(_.or([...]))`.
+
+Expected matching cost: 1.64 → about 0.4 reads/s. A lobby refresh: 4 → 1 read.
+
+[SE-4|minor] (Pre-existing, uses the same quota) Cloud-save uploads multiply with the warm iframes, and force bypasses the 「内容没变就跳过」 check: 19 uploads per 69 s on an island page and 9 per app backgrounding
+  FILE: hansen_cloud_save_v965.js:643
+  SCENARIO: A kid answering on an island page writes progress every few seconds. Every frame that carries cloud_save:
+- force-uploads the whole encrypted save at most every 8 s, even when nothing changed
+- force-uploads twice on each app switch, from two separate hide handlers
+
+Not introduced by v1164. It is about 200–400 calls per kid per day, the same order as a ranked game, so it decides whether the class fits the quota.
+  FIX: - Skip upload when lastHash and lastDocId match even with force; force should only bypass the cooldown and busy checks.
+- Only the top-most frame that has HansenCloudSave installs autoHooks; skip in warm iframes whose parent has HansenCloudSave.
+- Merge the two hide handlers into one flush.
+
+Expected: unchanged data → 0 uploads; active play → at most 7.5 a minute; each backgrounding 9 → 1.
+
+[SE-5|minor] (Test infrastructure, pre-existing) test_phone_signup_v1057's documented 「随机失败」 is caused by addInitScript(localStorage.clear()) running in every warm and prefetch iframe the island page creates, which wipes the login marker in the middle of the test
+  FILE: test_phone_signup_v1057.mjs:61
+  SCENARIO: This was the only failure in the 67-test run: 「写入本地登录态(method=undefined)」. The test comment calls it a race in the test itself, unresolved since v1131, with gate baselines tolerating it.
+
+What happens:
+- Playwright init scripts run in every frame.
+- The island page loads land_map and island_season iframes 1–5 s after load, plus nested ones.
+- Each of those frames runs localStorage.clear() on the shared origin storage while loginByPhoneCode is between writeLocal({method:'phone'}) and its resolve.
+
+The same pattern appears in 9 other island tests: test_boss_contrast_v1010, test_boss_settle_v1014, test_camel_runtime_v1015, test_gacha_contrast_v1013, test_moles_white_v1040, test_pk_inpage_v1022, test_quest_claimed_v1042, test_signup_gate_v1030, test_ui_walkthrough_v969 (and test_pk_account_v1016 on spelling_pk). Those can fail at random too.
+  FIX: In these tests use `await page.addInitScript(() => { if (window.top === window) localStorage.clear(); });`. Then remove the 「已知问题」 note and drop the test from the gate's failure baseline.

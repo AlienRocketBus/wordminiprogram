@@ -1,0 +1,21 @@
+import fs from 'fs';
+import {boot,dismissWelcome,topbar,ls,sleep} from './harness.mjs';
+const init=fs.readFileSync('instr.js','utf8');
+const {s,page,log}=await boot({init});
+await page.evaluate(()=>openIsland('island_season.html'));await sleep(3000);
+let fr=page.frames().find(f=>f.parentFrame()===page.mainFrame()&&f.url().includes('island_season'));
+await dismissWelcome(fr);
+await sleep(12000);
+const t0=Date.now();
+// active season: learn 5 words + answer (wrong then right) like games do
+await fr.evaluate(()=>{for(let i=0;i<5;i++)learnWord(i);markAnswer(7,false);markAnswer(8,false);markAnswer(9,true);});
+await sleep(25000);
+const activeS=await fr.evaluate(()=>({learned:S.learned.slice(),wrongs:JSON.stringify(S.wrongs),ta:S.totalAnswers}));
+await page.evaluate(()=>closeIsland());await sleep(700);
+await page.evaluate(()=>openIsland('island_food.html'));await sleep(5000);
+const W=(await page.evaluate(()=>window.__W)).filter(w=>w.t>=t0&&/^wordIslandSeason$|^hansen_canonical_progress_v941$/.test(w.k));
+for(const w of W)console.log(((w.t-t0)/1000).toFixed(1),w.f,w.k,(w.v||'').slice(0,60));
+const saved=await page.evaluate(()=>{const o=JSON.parse(localStorage.getItem('wordIslandSeason'));return {learned:o.learned,wrongs:JSON.stringify(o.wrongs),ta:o.totalAnswers};});
+console.log('active S at leave',JSON.stringify(activeS));
+console.log('saved after leave ',JSON.stringify(saved));
+await s.close();

@@ -1,0 +1,6 @@
+prefetch links on fresh home after 14s: island_animal.html?v=1163(idle) island_food.html?v=1163(idle) island_sports.html?v=1163(idle) island_job.html?v=1163(idle) island_color.html?v=1163(idle) island_nature.html?v=1163(idle)
+server html requests so far: /index.html:200 /land_map.html:200 /island_animal.html?v=1163:200 /island_food.html?v=1163:200 /island_sports.html?v=1163:200 /island_job.html?v=1163:200 /island_color.html?v=1163:200 /island_nature.html?v=1163:200
+navigator.connection.effectiveType = 4g
+requests for island_animal after the tap (should be none if prefetch were usable): ["/island_animal.html"]
+returning user home reload - island requests: /island_wordIslandAnimal.html?v=1163:404
+lastIslandKey = wordIslandAnimal

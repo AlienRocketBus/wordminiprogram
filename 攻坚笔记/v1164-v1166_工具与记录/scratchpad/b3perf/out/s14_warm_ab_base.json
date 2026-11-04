@@ -1,0 +1,35 @@
+[
+ {
+  "label": "as-is",
+  "readyMs": 2919,
+  "KB_20s": 15223,
+  "req": 439,
+  "tbt_ms": 3996,
+  "frames": 7,
+  "docs": 7,
+  "heapMB": 10.3,
+  "nodes": 8695
+ },
+ {
+  "label": "no-room-warm",
+  "readyMs": 4733,
+  "KB_20s": 9688,
+  "req": 260,
+  "tbt_ms": 4000,
+  "frames": 3,
+  "docs": 3,
+  "heapMB": 5,
+  "nodes": 5562
+ },
+ {
+  "label": "no-room-warm+no-eager-boss-engine",
+  "readyMs": 4778,
+  "KB_20s": 7015,
+  "req": 228,
+  "tbt_ms": 8841,
+  "frames": 3,
+  "docs": 3,
+  "heapMB": 5.4,
+  "nodes": 5437
+ }
+]

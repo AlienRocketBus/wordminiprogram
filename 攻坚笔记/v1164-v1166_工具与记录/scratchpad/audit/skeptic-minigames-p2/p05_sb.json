@@ -1,0 +1,149 @@
+{
+ "season": {
+  "cardTap": true,
+  "info": {
+   "sub": "【星海终战岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+   "tip": "动物大冒险词库",
+   "words": 240,
+   "isl": "season",
+   "mode": "listen",
+   "hasTTS": true
+  },
+  "audioAfterStart": [
+   {
+    "s": 200,
+    "u": "words/creature_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/atmosphere_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/scientific_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/technology_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/particle_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/invention_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/career_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/galaxy_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/profession_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/success_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/business_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/failure_season.mp3"
+   }
+  ],
+  "audio404": [
+   "words/calm.mp3"
+  ],
+  "errors": []
+ },
+ "land3": {
+  "cardTap": true,
+  "info": {
+   "sub": "【时之钟谷岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+   "tip": "动物大冒险词库",
+   "words": 30,
+   "isl": "land3",
+   "mode": "listen",
+   "hasTTS": true
+  },
+  "audioAfterStart": [
+   {
+    "s": 200,
+    "u": "words/industry_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/predict_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/organization_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/realize_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/generation_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/recognize_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/consider_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/private_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/individual_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/express_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/mention_season.mp3"
+   },
+   {
+    "s": 200,
+    "u": "words/official_season.mp3"
+   }
+  ],
+  "audio404": [],
+  "errors": []
+ },
+ "sports": {
+  "cardTap": true,
+  "info": {
+   "sub": "【运动岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+   "tip": "动物大冒险词库",
+   "words": 30,
+   "isl": "sports",
+   "mode": "listen",
+   "hasTTS": true
+  },
+  "audioAfterStart": [
+   {
+    "s": 200,
+    "u": "words/game.mp3"
+   }
+  ],
+  "audio404": [],
+  "errors": []
+ }
+}

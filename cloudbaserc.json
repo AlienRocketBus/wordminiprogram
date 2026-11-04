@@ -30,6 +30,8 @@
             "当前进度.md",
             "贾维斯_知识库.md",
             "playwright_loader.mjs",
+            "cloudbase_emulator.mjs",
+            "cloudbase_e2e_harness.mjs",
             "_*.py"
           ],
           "indexPath": "index.html",

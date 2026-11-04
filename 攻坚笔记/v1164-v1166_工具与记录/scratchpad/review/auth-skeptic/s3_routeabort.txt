@@ -1,0 +1,46 @@
+{
+  "ver": "v1164",
+  "mode": "routeabort",
+  "login": {
+    "ok": true
+  },
+  "sdkHitsBeforeReload": 1,
+  "calls": [
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v",
+      "sdkHits": 1
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v",
+      "sdkHits": 1
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v",
+      "sdkHits": 1
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v",
+      "sdkHits": 1
+    }
+  ],
+  "failedInjected": 1,
+  "reimport": "fail: Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v",
+  "sdkHitsAfterReimport": 1,
+  "bustImport": "ok function",
+  "tappedGo": true,
+  "ladderScreen": "× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：云端会话不可用：Failed to fetch dynamically imported module: http://127.0.0.1:40981/vendor_cloudbase_esm_v965.js",
+  "ladderAfterMs": 9088,
+  "afterReload": {
+    "ok": true,
+    "kind": ""
+  },
+  "signedStill": true
+}

@@ -1,0 +1,84 @@
+{
+  "U3_navs1": [
+    {
+      "dt": 38,
+      "url": "/"
+    },
+    {
+      "dt": 1453,
+      "url": "/?_fresh=1793707292844"
+    }
+  ],
+  "U3_ver1": {
+    "top": {
+      "vw": {
+        "local": 1163,
+        "server": 1164,
+        "stale": true,
+        "note": "已为 v1164 自动修过一次仍未生效 —— 不再自动重载，请手动点「强制更新」"
+      },
+      "firstStamp": "http://127.0.0.1:45631/hansen_sw_upgrade_gate_v944.js?v=1163",
+      "gate": 1163,
+      "banner": false,
+      "fixed": "1164",
+      "url": "/?_fresh=1793707292844"
+    },
+    "frame": {
+      "path": "blank",
+      "title": ""
+    }
+  },
+  "U3_navsAll": [
+    {
+      "dt": 38,
+      "url": "/"
+    },
+    {
+      "dt": 1453,
+      "url": "/?_fresh=1793707292844"
+    },
+    {
+      "dt": 20599,
+      "url": "/?_fresh=1793707292844"
+    },
+    {
+      "dt": 33328,
+      "url": "/?_fresh=1793707292844"
+    }
+  ],
+  "U3_ver2": {
+    "top": {
+      "vw": {
+        "local": 1163,
+        "server": 1164,
+        "stale": true,
+        "note": "已为 v1164 自动修过一次仍未生效 —— 不再自动重载，请手动点「强制更新」"
+      },
+      "firstStamp": "http://127.0.0.1:45631/hansen_sw_upgrade_gate_v944.js?v=1163",
+      "gate": 1163,
+      "banner": false,
+      "fixed": "1164",
+      "url": "/?_fresh=1793707292844"
+    },
+    "frame": {
+      "path": "blank",
+      "title": ""
+    }
+  },
+  "U3_sw": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1163,
+      "ready": true,
+      "controller": "sw_v944.js"
+    }
+  }
+}

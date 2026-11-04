@@ -1,0 +1,159 @@
+
+云端出错时的提示 · 真 SDK 端到端（v1164）
+
+
+── ① hansen_pk_rooms 设成了「无权限」（ADMINONLY · rules） ──
+  OK  [甲] 手机号验证码登录 uid=1527283253218073236
+  XX  天梯：显示「云端设置还差一步」（用了 30 秒；看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:05.198 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:06.248 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:07.748 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.799 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.859 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.908 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.299 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.957 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.005 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.055 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:14.557 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:16.909 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  XX  说清是哪个集合、该改成什么权限（hansen_pk_rooms →「读取全部数据，修改本人数据」）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:05.198 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:06.248 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:07.748 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.799 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.859 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.908 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.299 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.957 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.005 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.055 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:14.557 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:16.909 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  XX  带着技术信息（原始错误码 DATABASE_PERMISSION_DENIED）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:05.198 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:06.248 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:07.748 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.799 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.859 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:08.908 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.299 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:10.957 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.005 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:13.055 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:14.557 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      21:16.909 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  OK  中途没有说成「要登录」或「断网」（出现过：正在找对手、等对手进来）
+  XX  本段脚本出错：[甲] 点不到「#ldCancel」：等了 10000ms 也没看到「#ldCancel」
+
+── ② 还没建 hansen_pk_rooms 集合（legacy） ──
+  OK  [乙] 手机号验证码登录 uid=1527283253218073236
+  XX  天梯：「云端设置还差一步」，说清要新建 hansen_pk_rooms（看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [乙 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:47.989 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:49.043 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:50.544 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.597 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.649 小蜂乙 POST /web addDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.701 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.115 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.752 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.802 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.856 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:57.355 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:59.700 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+  XX  带着技术信息（DATABASE_COLLECTION_NOT_EXIST）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [乙 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:47.989 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:49.043 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:50.544 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.597 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.649 小蜂乙 POST /web addDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.701 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.115 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.752 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.802 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.856 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:57.355 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:59.700 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+  XX  没有说成「要登录」「断网」，也没有假装开了房（出现过：正在找对手、等对手进来）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [乙 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      21:47.989 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:49.043 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:50.544 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.597 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.649 小蜂乙 POST /web addDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:51.701 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.115 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:53.752 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.802 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:55.856 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:57.355 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+      21:59.700 小蜂乙 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_COLLECTION_NOT_EXIST
+
+── ③ 断网：数据库请求全被掐断（legacy） ──
+  OK  [丙] 手机号验证码登录 uid=1527283253218073236
+  OK  重试几次后显示「连不上网络」（用了 15 秒；看到：× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：network request error ）
+  OK  技术信息里是原始错误「network request error」
+  OK  断网时没有说成「要登录」或「云端设置」（出现过：正在找对手、连不上网络）
+  OK  网回来了点「重新找对手」→ 接着找（看到：× ⚡ 正在找对手… 🔍 正在找 750 ~ 1250 分的对手 已等 15 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取）
+
+── ④ 登录令牌过期要刷新、刷新请求却发不出去（legacy） ──
+  OK  [丁] 手机号验证码登录 uid=1527283253218073236
+  XX  显示「云端还没连上」或「连不上网络」并给重试按钮（用了 70 秒；看到：× ⚡ 正在找对手… 🔍 正在找 600 ~ 1400 分的对手 已等 40 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯 ）
+      [丁 屏幕] × ⏎ ⚡ 正在找对手… ⏎ 🔍 ⏎ 正在找 600 ~ 1400 分的对手 ⏎ 已等 40 秒 · 等得越久范围放得越宽 ⏎ 没人的时候会自动开一间等着 ⏎ 有人进来就立刻开打 ⏎ 取消，回天梯
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      23:29.919 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:30.966 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:31.013 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:32.061 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:33.110 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:33.157 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:34.207 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:35.254 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:35.302 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:36.349 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:37.396 小蜂丁 POST /auth/v1/token → … [故障:abort]
+      23:37.444 小蜂丁 POST /auth/v1/token → … [故障:abort]
+  OK  凭证还在，就绝不说「要登录 / 登录过期」（出现过：正在找对手）
+  XX  本机登录记录和云端凭证都还在（已登录=undefined，凭证=undefined）
+  XX  本段脚本出错：[丁] 点不到「#ldRetry」：等了 10000ms 也没看到「#ldRetry」
+
+10 通过，10 失败（183 秒）
+失败的：
+  · 天梯：显示「云端设置还差一步」（用了 30 秒；看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+  · 说清是哪个集合、该改成什么权限（hansen_pk_rooms →「读取全部数据，修改本人数据」）
+  · 带着技术信息（原始错误码 DATABASE_PERMISSION_DENIED）
+  · 本段脚本出错：[甲] 点不到「#ldCancel」：等了 10000ms 也没看到「#ldCancel」
+  · 天梯：「云端设置还差一步」，说清要新建 hansen_pk_rooms（看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+  · 带着技术信息（DATABASE_COLLECTION_NOT_EXIST）
+  · 没有说成「要登录」「断网」，也没有假装开了房（出现过：正在找对手、等对手进来）
+  · 显示「云端还没连上」或「连不上网络」并给重试按钮（用了 70 秒；看到：× ⚡ 正在找对手… 🔍 正在找 600 ~ 1400 分的对手 已等 40 秒 · 等得越久范围放得越宽 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯 ）
+  · 本机登录记录和云端凭证都还在（已登录=undefined，凭证=undefined）
+  · 本段脚本出错：[丁] 点不到「#ldRetry」：等了 10000ms 也没看到「#ldRetry」

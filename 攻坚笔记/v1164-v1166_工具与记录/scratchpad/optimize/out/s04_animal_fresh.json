@@ -1,0 +1,229 @@
+{
+ "H": 1455,
+ "ctrls": [
+  {
+   "t": "回首页",
+   "w": 58,
+   "h": 58,
+   "cls": "world-map-btn",
+   "id": ""
+  },
+  {
+   "t": "点我换头像",
+   "w": 60,
+   "h": 60,
+   "cls": "avatar hsn-av-on",
+   "id": "avatarIcon"
+  },
+  {
+   "t": "星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动",
+   "w": 334,
+   "h": 122,
+   "cls": "hero",
+   "id": ""
+  },
+  {
+   "t": "可领 每日宝箱",
+   "w": 106,
+   "h": 124,
+   "cls": "daily-card chest-pending",
+   "id": "chestCard"
+  },
+  {
+   "t": "0/12 每日任务",
+   "w": 106,
+   "h": 124,
+   "cls": "daily-card",
+   "id": "questCard"
+  },
+  {
+   "t": "挑战BOSS",
+   "w": 106,
+   "h": 124,
+   "cls": "daily-card boss-card",
+   "id": ""
+  },
+  {
+   "t": "",
+   "w": 91,
+   "h": 91,
+   "cls": "boss-card-img",
+   "id": ""
+  },
+  {
+   "t": "挑战BOSS",
+   "w": 79,
+   "h": 20,
+   "cls": "d-label boss-card-label",
+   "id": ""
+  },
+  {
+   "t": "今天没有要复习的单词 大脑正在悄悄记牢它们",
+   "w": 362,
+   "h": 90,
+   "cls": "",
+   "id": "hr_review_banner"
+  },
+  {
+   "t": "探索单词",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "听音辨义",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "🃏 记忆翻牌",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "打字大师",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "完形填空",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "字母拼拼乐",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "spelling bee",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "⚔️ 拼写大PK",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "打地鼠",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "钓鱼大师",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "泡泡大作战",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "极速60秒",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "火眼金睛",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "抽卡",
+   "w": 105,
+   "h": 105,
+   "cls": "mode-card",
+   "id": ""
+  },
+  {
+   "t": "主题商店",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card",
+   "id": "hsnDiaEntry"
+  },
+  {
+   "t": "装备",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card",
+   "id": "hsnGearEntry"
+  },
+  {
+   "t": "成就",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card",
+   "id": ""
+  },
+  {
+   "t": "统计",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card",
+   "id": ""
+  },
+  {
+   "t": "设置",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card",
+   "id": ""
+  },
+  {
+   "t": "我的学习",
+   "w": 78,
+   "h": 94,
+   "cls": "util-card hsn-ml-entry",
+   "id": ""
+  },
+  {
+   "t": "主页",
+   "w": 98,
+   "h": 69,
+   "cls": "nav-item active",
+   "id": "navHome"
+  },
+  {
+   "t": "复习",
+   "w": 98,
+   "h": 69,
+   "cls": "nav-item",
+   "id": "navReview"
+  },
+  {
+   "t": "卡册",
+   "w": 98,
+   "h": 69,
+   "cls": "nav-item",
+   "id": "navCards"
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+用户名密码注册 v1058
+  OK  三个接口齐备(registerByPassword/normUsername/mailOfUsername)
+  OK  用户名长度校验 3-20
+  OK  拒绝空格与 @ 等非法字符
+  OK  同一用户名(忽略大小写)映射到同一内部邮箱
+  OK  不同用户名映射不同
+  OK  内部邮箱格式合法: hansen_72602c40651f0000@u.wordadventure.local
+  XX  注册成功：用户名不能直接注册：云端只支持用手机号注册。请点上面的「手机号」，收验证码注册（孩子没有手机号，用家长的手机号也可以）。
+  XX  走内部邮箱注册
+  XX  注册后设置真实用户名
+  XX  写入本地登录态(username=undefined)
+  XX  两次密码不一致被拒: 用户名不能直接注册：云端只支持用手机号注册。请点上面的「手机号」，收验证码注册（
+  XX  密码过短被拒: 用户名不能直接注册：云端只支持用手机号注册。请点上面的「手机号」，收验证码注册（
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('#auPwToggle')[22m
+
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/r1b/xold/test_username_signup_v1058.mjs:87:13 {
+  log: [ "  - waiting for locator('#auPwToggle')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4

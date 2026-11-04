@@ -1,0 +1,383 @@
+{
+ "action": {
+  "easy": {
+   "shown": 30,
+   "askable": 28,
+   "maxPct": 93,
+   "skipped": [
+    "cook :: My dad cooks dinner every Sunday.",
+    "start :: Let's get started."
+   ],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 27,
+   "askable": 23,
+   "maxPct": 85,
+   "skipped": [
+    "draw :: She drew a picture of her family.",
+    "fly :: Have you ever flown on a plane?",
+    "get :: I got a gift from my mom.",
+    "teach :: My mom teaches me how to cook."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 10,
+   "askable": 9,
+   "maxPct": 90,
+   "skipped": [
+    "drive :: My uncle drives a taxi."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "adjective": {
+  "easy": {
+   "shown": 22,
+   "askable": 22,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 23,
+   "askable": 23,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 6,
+   "askable": 6,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "animal": {
+  "easy": {
+   "shown": 13,
+   "askable": 10,
+   "maxPct": 77,
+   "skipped": [
+    "pig :: Pigs are smarter than they look.",
+    "eagle :: Eagles can fly very high.",
+    "cow :: Cows give us milk."
+   ],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 15,
+   "askable": 15,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 14,
+   "askable": 13,
+   "maxPct": 93,
+   "skipped": [
+    "duck :: Ducks love being in the water."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "body": {
+  "easy": {
+   "shown": 20,
+   "askable": 12,
+   "maxPct": 60,
+   "skipped": [
+    "eye :: Her eyes are bright and beautiful.",
+    "ear :: Rabbits have long ears.",
+    "lip :: Her lips are red.",
+    "arm :: Raise your arms above your head.",
+    "hand :: Wash your hands before eating.",
+    "leg :: My legs are tired from walking.",
+    "heel :: My heels hurt after the long run.",
+    "bone :: Dogs love to chew bones."
+   ],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 13,
+   "askable": 12,
+   "maxPct": 92,
+   "skipped": [
+    "elbow :: Don't put your elbows on the table."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 2,
+   "askable": 2,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "city": {
+  "easy": {
+   "shown": 11,
+   "askable": 11,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 11,
+   "askable": 11,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 8,
+   "askable": 8,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "clothes": {
+  "easy": {
+   "shown": 12,
+   "askable": 12,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 12,
+   "askable": 11,
+   "maxPct": 92,
+   "skipped": [
+    "sleeve :: He rolled up his sleeves and got to work."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 6,
+   "askable": 6,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "color": {
+  "easy": {
+   "shown": 15,
+   "askable": 15,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 11,
+   "askable": 11,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 9,
+   "askable": 8,
+   "maxPct": 89,
+   "skipped": [
+    "thousand :: Thousands of stars shine at night."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "family": {
+  "easy": {
+   "shown": 10,
+   "askable": 10,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 11,
+   "askable": 10,
+   "maxPct": 91,
+   "skipped": [
+    "sibling :: Do you have any siblings?"
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 10,
+   "askable": 9,
+   "maxPct": 90,
+   "skipped": [
+    "relative :: We invited all our relatives over."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "food": {
+  "easy": {
+   "shown": 17,
+   "askable": 17,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 24,
+   "askable": 22,
+   "maxPct": 92,
+   "skipped": [
+    "grape :: I love eating grapes in summer.",
+    "strawberry :: I love fresh strawberries with cream."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 15,
+   "askable": 9,
+   "maxPct": 60,
+   "skipped": [
+    "vegetable :: Vegetables are good for your health.",
+    "tomato :: I like tomatoes in my salad.",
+    "potato :: I love mashed potatoes.",
+    "carrot :: I peeled some carrots for the soup.",
+    "onion :: Cutting onions always makes me cry.",
+    "cookie :: I bake cookies with my mom."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "home": {
+  "easy": {
+   "shown": 12,
+   "askable": 12,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 11,
+   "askable": 11,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 12,
+   "askable": 12,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "job": {
+  "easy": {
+   "shown": 12,
+   "askable": 11,
+   "maxPct": 92,
+   "skipped": [
+    "farmer :: Farmers work hard in the fields."
+   ],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 12,
+   "askable": 11,
+   "maxPct": 92,
+   "skipped": [
+    "artist :: Picasso was one of the greatest artists."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 6,
+   "askable": 5,
+   "maxPct": 83,
+   "skipped": [
+    "firefighter :: Firefighters are brave heroes."
+   ],
+   "missingFromAllW": []
+  }
+ },
+ "nature": {
+  "easy": {
+   "shown": 15,
+   "askable": 13,
+   "maxPct": 87,
+   "skipped": [
+    "star :: I can see lots of stars in the sky.",
+    "snow :: It snows a lot here in winter."
+   ],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 15,
+   "askable": 13,
+   "maxPct": 87,
+   "skipped": [
+    "cloud :: The sky is full of clouds today.",
+    "flower :: I love the smell of flowers."
+   ],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 10,
+   "askable": 10,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "question": {
+  "easy": {
+   "shown": 19,
+   "askable": 19,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 10,
+   "askable": 10,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 3,
+   "askable": 3,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  }
+ },
+ "school": {
+  "easy": {
+   "shown": 12,
+   "askable": 12,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "medium": {
+   "shown": 11,
+   "askable": 11,
+   "maxPct": 100,
+   "skipped": [],
+   "missingFromAllW": []
+  },
+  "hard": {
+   "shown": 15,
+   "askable": 14,
+   "maxPct": 93,
+   "skipped": [
+    "computer :: We use computers in class every day."
+   ],
+   "missingFromAllW": []
+  }
+ }
+}

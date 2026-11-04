@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_backup_no_credentials_v1090.mjs —— 备份绝不能碰云端凭证
  *
  * ═══ 用户真机凭证生死簿抓到的完整现场（确凿证据）═══
@@ -35,7 +36,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('备份绝不碰云端凭证 v1090');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_backup_v944.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_backup_v944.js'), 'utf8');
 
 function mk(seed) {
   const raw = Object.assign({}, seed);

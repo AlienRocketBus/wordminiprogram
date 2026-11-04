@@ -1,0 +1,82 @@
+[
+ {
+  "idx": 23,
+  "sentenceHTML": "I have a cat. <span class=\"cloze-blank\" id=\"clozeBlank\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> is white.",
+  "cnText": "我有一只猫,它是白色的。",
+  "highlighted": "它",
+  "opts": [
+   "she",
+   "that",
+   "it",
+   "why"
+  ],
+  "afterAnswerSentence": "I have a cat. it is white.",
+  "island": "question",
+  "word": "it",
+  "errors": []
+ },
+ {
+  "idx": 7,
+  "sentenceHTML": "Happy New <span class=\"cloze-blank\" id=\"clozeBlank\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>!",
+  "cnText": "新年快乐!",
+  "highlighted": "年",
+  "opts": [
+   "year",
+   "July",
+   "April",
+   "day"
+  ],
+  "afterAnswerSentence": "Happy New year!",
+  "island": "time",
+  "word": "year",
+  "errors": []
+ },
+ {
+  "idx": 7,
+  "sentenceHTML": "The little boy was <span class=\"cloze-blank\" id=\"clozeBlank\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> by the loud thunder.",
+  "cnText": "小男孩被巨大的雷声吓到了。",
+  "highlighted": "的",
+  "opts": [
+   "frightened",
+   "instantly",
+   "eager",
+   "proud"
+  ],
+  "afterAnswerSentence": "The little boy was frightened by the loud thunder.",
+  "island": "season",
+  "word": "frightened",
+  "errors": []
+ },
+ {
+  "idx": 219,
+  "sentenceHTML": "Our solar system is part of the Milky Way <span class=\"cloze-blank\" id=\"clozeBlank\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.",
+  "cnText": "我们的太阳系是银河系的一部分。",
+  "highlighted": "系",
+  "opts": [
+   "summarize",
+   "memorize",
+   "natural",
+   "galaxy"
+  ],
+  "afterAnswerSentence": null,
+  "island": "season",
+  "word": "galaxy",
+  "errors": []
+ },
+ {
+  "idx": 57,
+  "sentenceHTML": "Tickets are still <span class=\"cloze-blank\" id=\"clozeBlank\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> for tonight's show.",
+  "cnText": "今晚演出的票还有。",
+  "highlighted": "的",
+  "opts": [
+   "period",
+   "available",
+   "meanwhile",
+   "ordinary"
+  ],
+  "afterAnswerSentence": "Tickets are still available for tonight's show.",
+  "island": "season",
+  "word": "available",
+  "errors": []
+ }
+]

@@ -1,0 +1,169 @@
+{
+ "W": 390,
+ "steps": [
+  {
+   "isl": "island_food.html",
+   "tap": {
+    "ok": true,
+    "hitTop": "DIV#.island-en",
+    "label": "island_food.html",
+    "x": 195,
+    "y": 422
+   },
+   "revealMs": 603,
+   "openServed": [
+    "/island_food.html 200"
+   ],
+   "historyLenAfterOpen": 3,
+   "stateAfterOpen": "{\"hsnIsland\":\"island_food.html\"}",
+   "homeTap": {
+    "ok": true,
+    "hitTop": "IFRAME#islandFrame.",
+    "label": "home",
+    "x": 355,
+    "y": 28
+   },
+   "afterHome": {
+    "wrap": "none",
+    "iframe": "/island_food.html",
+    "served": [],
+    "recent": {
+     "text": "👑 最近探险的岛屿 👑 星海终战 · 点击继续 →",
+     "target": "island_season.html"
+    },
+    "historyLen": 3,
+    "state": "null"
+   },
+   "rej": []
+  },
+  {
+   "isl": "island_animal.html",
+   "tap": {
+    "ok": true,
+    "hitTop": "DIV#.island-en",
+    "label": "island_animal.html",
+    "x": 69,
+    "y": 422
+   },
+   "revealMs": 1076,
+   "openServed": [
+    "/island_animal.html 200"
+   ],
+   "historyLenAfterOpen": 3,
+   "stateAfterOpen": "{\"hsnIsland\":\"island_animal.html\"}",
+   "homeTap": {
+    "ok": true,
+    "hitTop": "IFRAME#islandFrame.",
+    "label": "home",
+    "x": 355,
+    "y": 28
+   },
+   "afterHome": {
+    "wrap": "none",
+    "iframe": "/island_animal.html",
+    "served": [],
+    "recent": {
+     "text": "👑 最近探险的岛屿 👑 星海终战 · 点击继续 →",
+     "target": "island_season.html"
+    },
+    "historyLen": 3,
+    "state": "null"
+   },
+   "rej": [
+    [
+     "/island_animal.html",
+     [
+      "InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+     ]
+    ]
+   ]
+  },
+  {
+   "isl": "island_sports.html",
+   "tap": {
+    "ok": true,
+    "hitTop": "DIV#.island-en",
+    "label": "island_sports.html",
+    "x": 321,
+    "y": 422
+   },
+   "revealMs": 1226,
+   "openServed": [
+    "/island_sports.html 200"
+   ],
+   "historyLenAfterOpen": 3,
+   "stateAfterOpen": "{\"hsnIsland\":\"island_sports.html\"}",
+   "homeTap": {
+    "ok": true,
+    "hitTop": "IFRAME#islandFrame.",
+    "label": "home",
+    "x": 355,
+    "y": 28
+   },
+   "afterHome": {
+    "wrap": "none",
+    "iframe": "/island_sports.html",
+    "served": [],
+    "recent": {
+     "text": "👑 最近探险的岛屿 👑 星海终战 · 点击继续 →",
+     "target": "island_season.html"
+    },
+    "historyLen": 3,
+    "state": "null"
+   },
+   "rej": [
+    [
+     "/island_sports.html",
+     [
+      "InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+     ]
+    ]
+   ]
+  },
+  {
+   "isl": "island_animal.html",
+   "tap": {
+    "ok": true,
+    "hitTop": "DIV#.island-en",
+    "label": "island_animal.html",
+    "x": 69,
+    "y": 422
+   },
+   "revealMs": 565,
+   "openServed": [
+    "/island_animal.html 304"
+   ],
+   "historyLenAfterOpen": 3,
+   "stateAfterOpen": "{\"hsnIsland\":\"island_animal.html\"}",
+   "homeTap": {
+    "ok": true,
+    "hitTop": "IFRAME#islandFrame.",
+    "label": "home",
+    "x": 355,
+    "y": 28
+   },
+   "afterHome": {
+    "wrap": "none",
+    "iframe": "/island_animal.html",
+    "served": [],
+    "recent": {
+     "text": "👑 最近探险的岛屿 👑 星海终战 · 点击继续 →",
+     "target": "island_season.html"
+    },
+    "historyLen": 3,
+    "state": "null"
+   },
+   "rej": [
+    [
+     "/island_animal.html",
+     [
+      "InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+     ]
+    ]
+   ]
+  }
+ ],
+ "pageerrors": [],
+ "blackbox": null,
+ "silentWatch": []
+}

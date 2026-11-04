@@ -1,0 +1,66 @@
+tap season bar DIV#.
+land_map shown 282 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'land_map.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"land_map.html"}',
+  sy: 384
+}
+tap spot IFRAME#islandFrame.
+tap enter IFRAME#islandFrame.
+land island 2231 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_land1.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_land1.html"}',
+  sy: 384
+}
+tap map btn IFRAME#islandFrame.
+after map btn 507 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'land_map.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"land_map.html"}',
+  sy: 384
+}
+land island again 2051 island_land1.html
+hardware back from land island -> 46 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_land1.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 384
+}
+land_map again 90 land_map.html complete
+tap land back IFRAME#islandFrame.
+land_map back -> 26 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'land_map.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 384
+}
+errors [
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled',
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]

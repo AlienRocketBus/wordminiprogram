@@ -1,0 +1,95 @@
+{
+ "paletteCSS": {
+  "bytes": 121690,
+  "rules": 803,
+  "selectors": 2275,
+  "attrSubstringSelectors": 637,
+  "importantDecls": 1358,
+  "totalRulesOnPage": 3044,
+  "elementsWithStyleAttr": 228
+ },
+ "paletteRecalc": {
+  "withPaletteMs": 5.4,
+  "withoutPaletteMs": 7.8,
+  "note": "html class change → full style recalc + layout read, median of 5, unthrottled"
+ },
+ "fonts": {
+  "cartoonUsedChars": 65,
+  "cartoonMissing": 0,
+  "cartoonMissingSample": "",
+  "cartoonLatinMissing": "",
+  "balooMissingOfAlnum": "",
+  "balooIPAmissing": ""
+ },
+ "chromeEmoji": [
+  "stat-badge gem:💎",
+  "stat-badge coin:🪙",
+  "SCRIPT:/*🔴BUG#84 宝"
+ ],
+ "fontSwap": [
+  {
+   "fcpMs": 940,
+   "loadMs": 8079,
+   "cartoonActiveMs": 9603
+  },
+  {
+   "fcpMs": 1148,
+   "loadMs": 9294,
+   "cartoonActiveMs": 10768
+  }
+ ],
+ "renderedFonts": {
+  ".island-en": {
+   "declared": "\"Bowlby One\", serif",
+   "rendered": [
+    "Liberation Serif x12"
+   ]
+  },
+  ".how-sub": {
+   "declared": "\"Bowlby One\", serif",
+   "rendered": [
+    "Liberation Serif x15"
+   ]
+  },
+  ".how-step .num": {
+   "declared": "\"Bowlby One\", Impact, \"Arial Black\", CartoonBlack, \"微软雅黑 Heavy\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", 微软雅黑, \"PingFang SC Heavy\", \"PingFang SC\", \"HarmonyOS Sans SC\", \"Heiti SC\", \"Noto Sans SC\", sans-serif",
+   "rendered": [
+    "OTS derived font(web) x2"
+   ]
+  },
+  ".subtitle": {
+   "declared": "CartoonBlack, \"PingFang SC Heavy\", \"PingFang SC\", sans-serif",
+   "rendered": [
+    "OTS derived font(web) x15"
+   ]
+  },
+  ".stat-num": {
+   "declared": "\"Bowlby One\", Impact, \"Arial Black\", sans-serif",
+   "rendered": [
+    "Liberation Sans x2"
+   ]
+  },
+  ".tagline": {
+   "declared": "CartoonBlack, \"Microsoft YaHei UI\", \"Microsoft YaHei\", 微软雅黑, \"PingFang SC Heavy\", \"PingFang SC\", \"HarmonyOS Sans SC\", \"Heiti SC\", sans-serif",
+   "rendered": [
+    "OTS derived font(web) x22",
+    "Liberation Sans x1"
+   ]
+  },
+  ".island-name": {
+   "declared": "CartoonBlack, \"微软雅黑 Heavy\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", 微软雅黑, \"PingFang SC Heavy\", \"PingFang SC\", \"HarmonyOS Sans SC\", \"Heiti SC\", \"Noto Sans SC\", sans-serif",
+   "rendered": [
+    "OTS derived font(web) x5"
+   ]
+  },
+  ".intro": {
+   "declared": "\"Microsoft YaHei\", 微软雅黑, \"Noto Sans SC\", -apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Heiti SC\", sans-serif",
+   "rendered": [
+    "Inter SemiBold x14",
+    "Noto Color Emoji x2",
+    "Inter Medium x17",
+    "WenQuanYi Zen Hei x48"
+   ]
+  }
+ }
+}

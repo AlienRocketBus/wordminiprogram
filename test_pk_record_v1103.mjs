@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_record_v1103.mjs —— 对战战绩与天梯分
  *
  * v1100~v1102 把玩法做好了，但**打完什么都不留下**：
@@ -31,8 +32,8 @@ function mk() {
     CustomEvent: class { constructor(t, o) { this.type = t; this.detail = (o || {}).detail; } },
     localStorage: ls, console, Date, Math, JSON, Object, Array, String, Number, Error };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_sb_ladder_v1002.js', 'utf8'), ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_pk_record_v1103.js', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_ladder_v1002.js'), 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_pk_record_v1103.js'), 'utf8'), ctx);
   return { R: ctx.window.HansenPkRecord, store };
 }
 
@@ -91,7 +92,7 @@ function mk() {
   const keys = Object.keys(store);
   ok(keys.some(k => /^hansen_/.test(k)),
      '★ 战绩键以 hansen_ 开头 → 会被备份收录、跟着账号走（换设备还在）');
-  const bk = fs.readFileSync('/home/claude/work/repo/hansen_backup_v944.js', 'utf8');
+  const bk = fs.readFileSync((__HSN_ROOT + 'hansen_backup_v944.js'), 'utf8');
   const diag = bk.match(/DIAG_KEY_RE\s*=\s*\/([^/]+)\//);
   ok(!diag || !new RegExp(diag[1]).test(keys.find(k => /^hansen_pk_record/.test(k)) || ''),
      '★ 战绩**不在**诊断键排除名单里（它是真实玩家数据，该同步）');
@@ -99,7 +100,7 @@ function mk() {
 
 /* ⑥ 结算屏接上了 */
 {
-  const ui = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+  const ui = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
   ok(/HansenPkRecord/.test(ui), '★ 结算屏调用战绩记录');
   ok(/天梯分/.test(ui), '★ 结算屏显示天梯分变化');
   ok(/只有 ⚡ 抢答赛计分|不计天梯/.test(ui), '★ B/C 模式明确告知不计天梯');

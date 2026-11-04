@@ -1,0 +1,2 @@
+test_auth_cloud_v1164.mjs rc=1 secs=70
+DONE

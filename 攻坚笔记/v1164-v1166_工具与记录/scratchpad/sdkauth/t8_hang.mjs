@@ -1,0 +1,14 @@
+import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+import { makeMock } from './mock.mjs';
+const browser=await chromium.launch(); const ctx=await browser.newContext();
+const {st,handler}=makeMock({expiresIn:31}); let hang=false;
+await ctx.route(u=>u.hostname!=='127.0.0.1', async(route)=>{ if(hang && route.request().url().includes('/auth/v1/token')){ st.log.push('HANG '+route.request().url().split('/').slice(-1)); return; /* never fulfil */ } return handler(route);});
+const page=await ctx.newPage();
+await page.goto('http://127.0.0.1:8765/__s/top.html'); await page.waitForFunction(()=>!!window.HansenAuth);
+await page.evaluate(async()=>{await HansenAuth.sendPhoneCode('13800000001');await HansenAuth.loginByPhoneCode('123456');});
+await new Promise(r=>setTimeout(r,1500)); hang=true; st.log.splice(0);
+const r=await page.evaluate(async()=>{const t0=Date.now();const p=HansenAuth.ensureSession().then(x=>({done:Date.now()-t0,x}));
+  const to=new Promise(res=>setTimeout(()=>res({pendingAfterMs:Date.now()-t0}),20000));return Promise.race([p,to]);});
+console.log(JSON.stringify(r)); console.log('  net:',st.log.splice(0));
+console.log(await page.evaluate(()=>HansenAuth._trace().split('\n').slice(-4).join('\n')));
+await browser.close();

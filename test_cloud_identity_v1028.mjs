@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cloud_identity_v1028.mjs —— 云存档必须复用**账号身份**回归
  * 事故（用户真机自检截图定位）：设备B「上次上传」显示刚刚成功，
  *   紧接着拉取却报「云端没有这把密钥对应的存档」——同一把密钥、刚写完就读不到。
@@ -10,10 +11,10 @@
 import vm from 'node:vm'; import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('云存档身份一致性 v1028');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 /* v1059: 结构断言必须只看代码——注释里引用了旧代码原文，会让断言对着散文下结论 */
 const code = src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/^\s*\/\/.*$/gm,'');
-const auth = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
+const auth = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'),'utf8');
 
 /* ① 源码层合同：已登录必须走账号会话，且不得再匿名 */
 /* 🔴v1076：原来写死截取 1800 字符，v1076 在这一段里加了「已登录禁止匿名」防线后，

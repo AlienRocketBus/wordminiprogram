@@ -1,0 +1,40 @@
+{
+ "island": "food",
+ "qBefore": [
+  "learn10:0",
+  "boss1:0",
+  "speed500:0",
+  "bubble30:0",
+  "match3:0",
+  "correct20:0",
+  "fish1:0",
+  "sbWin1:0",
+  "cloze5:0",
+  "scramble1:0",
+  "review3:0",
+  "type15:0"
+ ],
+ "txt": "🃏 💯 完美通关！ 步数：8 · 失误：0 🪙 金币 +8 🎓 经验 +68 🔄 再来一轮 🏠 回主页",
+ "matched": 8,
+ "mistakes": 0,
+ "pq": [
+  [
+   "match",
+   1
+  ]
+ ],
+ "ledger": [
+  "learn10:0",
+  "boss1:0",
+  "speed500:0",
+  "bubble30:0",
+  "match3:1",
+  "correct20:8",
+  "fish1:0",
+  "sbWin1:0",
+  "cloze5:0",
+  "scramble1:0",
+  "review3:0",
+  "type15:0"
+ ]
+}

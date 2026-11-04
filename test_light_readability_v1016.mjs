@@ -1,12 +1,13 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_light_readability_v1016.mjs —— 亮色调全站可读性总扫(23屏逐字测合成后对比度)
  * 用户要求"实测,不要凭感觉"。本扫无白名单: 逐屏逐字取实际渲染色,
  * 半透明按层合成, 按 WCAG(正文4.5:1/大字3:1)判定, 低于标准即列出。
  * 已知探针要点: ①背景须含元素自身 ②渐变填充文字的可见色是自身背景, 须从父级起算
  *              ③纯emoji跳过 ④不可见元素跳过 —— 这四点都踩过坑, 勿删。 */
 /* 亮色调可读性总扫：无白名单，逐屏逐字测合成后对比度 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -91,7 +92,7 @@ const SCREENS = [
 ];
 
 const page = await browser.newPage({viewport:{width:390,height:900}});
-await page.addInitScript(()=>{ localStorage.clear();
+await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
   localStorage.setItem('hansen_palette_global','cloud');
   const wr={}; for(let i=0;i<8;i++) wr[String(i)]=1;
   localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr,srs:{}}}}));

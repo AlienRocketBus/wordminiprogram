@@ -1,0 +1,1 @@
+✅ v943 theme motion regression passed (normal + reduced-motion mobile profiles)

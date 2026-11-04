@@ -1,0 +1,164 @@
+{
+  "instrumentationPoints": 8,
+  "swActive": 1,
+  "counts": {
+    "distinctCodeReqs": 93,
+    "assets": 68,
+    "shell": 48,
+    "missingFromBoth": 18
+  },
+  "missingSample": [
+    "/sentence_map.js?v=1163",
+    "/highlight_helper.js?v=1163",
+    "/hansen_ex_audio.js?v=1163",
+    "/perf_boost.js?v=1163",
+    "/copy_protect.js?v=1163",
+    "/click_setting.js?v=1163",
+    "/hansen_mute.js?v=1163",
+    "/hansen_early.js?v=1163",
+    "/hansen_upgrade.js?v=1163",
+    "/hansen_review_rewards_v963.js?v=1163",
+    "/hansen_crystal.js?v=1163",
+    "/hansen_cloud_config_v965.js?v=1163",
+    "/hansen_auth_ui_v1004.js?v=1163",
+    "/hansen_room_warm_v1023.js?v=1163",
+    "/hansen_cloud_diag_v1027.js?v=1163",
+    "/hansen_signup_gate_v1030.js?v=1163",
+    "/hansen_cloud_restore_v1048.js?v=1163",
+    "/baloo2.woff2"
+  ],
+  "logSummary": {
+    "puts": 657,
+    "dels": 5377,
+    "delOk": 193,
+    "skips": 0,
+    "putErr": 0,
+    "toobig": 0
+  },
+  "putErrSample": [],
+  "skipSample": [],
+  "missingHistory": [
+    {
+      "u": "/sentence_map.js?v=1163",
+      "events": "put,del(n=79),del(n=79),del(n=79),del(n=79),del(n=79),put,del(n=77),del(n=80),del(n=80),del(n=76),del(n=80),del(n=80),del(n=81),del(n=77),del(n=77),del(n=77),del(n=81),put,del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=86),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=80),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/highlight_helper.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=79),del(n=79),del(n=79),put,del(n=80),del(n=80),del(n=80),del(n=80),del(n=81),del(n=81),put,del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=86),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=80),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/hansen_ex_audio.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=79),del(n=79),del(n=79),put,del(n=80),del(n=80),del(n=80),del(n=80),del(n=81),del(n=81),put,del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=86),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=80),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/perf_boost.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=79),del(n=79),del(n=79),put,put,del(n=80),del(n=80),del(n=80),del(n=80),del(n=81),del(n=81),put,del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=86),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=80),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/copy_protect.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=79),del(n=79),del(n=79),put,put,del(n=80),del(n=80),del(n=80),del(n=80),del(n=81),del(n=81),put,del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=86),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/click_setting.js?v=1163",
+      "events": "put,put,del(n=78),del(n=79),del(n=79),del(n=79),del(n=79),put,put,del(n=84),del(n=84),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/hansen_mute.js?v=1163",
+      "events": "put,del(n=81),del(n=81),del(n=82),del(n=82),del(n=82),del(n=82),del(n=82),del(n=87),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=78),del(n=87),del(n=79),del(n=79),del(n=79),del(n=79),put,put,del(n=84),del(n=84),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=88),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/hansen_early.js?v=1163",
+      "events": "put,del(n=81),del(n=86),del(n=81),del(n=86),del(n=82),del(n=82),del(n=82),del(n=82),del(n=82),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=87),del(n=86),del(n=86),del(n=86),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=78),del(n=87),del(n=79),del(n=79),del(n=79),del(n=79),put,put,del(n=84),del(n=84),del(n=86),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),put,del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/hansen_upgrade.js?v=1163",
+      "events": "put,put,del(n=78),del(n=79),del(n=79),del(n=79),del(n=79),put,put,del(n=84),del(n=84),del(n=86),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=87),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),del(n=89),put,put,del(n=89),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=91),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=90),del(n=91),del(n=91),del(n=91)"
+    },
+    {
+      "u": "/hansen_review_rewards_v963.js?v=1163",
+      "events": "put,del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=86),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=88),del(n=87),del(n=81),del(n=81),del(n=82),del(n=82),del(n=82),del(n=82),del(n=82),del(n=87),put,put,del(n=84),del(n=85),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    },
+    {
+      "u": "/hansen_crystal.js?v=1163",
+      "events": "put,del(n=85),del(n=85),del(n=85),del(n=79),del(n=79),del(n=79),del(n=85),del(n=84),del(n=85),del(n=84),del(n=84),del(n=85),del(n=85),del(n=85),del(n=84),put,put,del(n=84),del(n=85),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    },
+    {
+      "u": "/hansen_cloud_config_v965.js?v=1163",
+      "events": "put,put,put,put,del(n=84),del(n=85),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    },
+    {
+      "u": "/hansen_auth_ui_v1004.js?v=1163",
+      "events": "put,put,put,put,del(n=84),del(n=85),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    },
+    {
+      "u": "/hansen_room_warm_v1023.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=80),del(n=79),del(n=81),del(n=81),del(n=81),del(n=84),del(n=81),del(n=84),del(n=84),del(n=84),del(n=85),del(n=81),del(n=85),del(n=81),del(n=85),put,put,put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    },
+    {
+      "u": "/hansen_cloud_diag_v1027.js?v=1163",
+      "events": "put,del(n=78),del(n=78),del(n=80),del(n=79),del(n=81),del(n=81),del(n=81),del(n=84),del(n=81),del(n=84),del(n=84),del(n=84),del(n=85),del(n=81),del(n=85),del(n=81),del(n=85),put,put,put,put,del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84),del(n=84)"
+    }
+  ],
+  "delSnapshotLens": [
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    76,
+    77,
+    76,
+    76,
+    79,
+    79,
+    77,
+    79,
+    79,
+    76,
+    79,
+    76,
+    79,
+    79,
+    77,
+    79,
+    79,
+    76,
+    79,
+    79,
+    79,
+    77,
+    79,
+    79,
+    79,
+    79,
+    79,
+    77,
+    79,
+    79,
+    79,
+    79,
+    79,
+    79,
+    79,
+    79,
+    79,
+    79
+  ]
+}

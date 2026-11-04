@@ -1,0 +1,24 @@
+import {serve,launch,ctx,attach} from './harness.mjs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await ctx(b,base);
+await c.addInitScript(()=>{ try{ localStorage.setItem('hansen_onboarding_done','1'); }catch(e){} });
+const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/index.html',{waitUntil:'load'}); await p.waitForTimeout(2500);
+await p.evaluate(()=>openIsland('island_animal.html'));
+await p.waitForTimeout(3500);
+const fr=p.frames().find(f=>/island_animal/.test(f.url()));
+await fr.evaluate(()=>{ try{ document.querySelectorAll('button').forEach(x=>{ if(/开始冒险/.test(x.textContent)) x.click(); }); }catch(e){} });
+await fr.evaluate(()=>{ startBoss(); });
+await p.waitForTimeout(1500);
+const s0=await fr.evaluate(()=>{ const bc=document.getElementById('bossContent'); const btns=[...bc.querySelectorAll('button')].map(b=>b.textContent.trim()).slice(0,8); return {btns, active:window.bossActive}; });
+// try to press a "开始战斗"-like button
+await fr.evaluate(()=>{ const bc=document.getElementById('bossContent'); const b=[...bc.querySelectorAll('button')].find(b=>/开始|挑战|战斗|出发/.test(b.textContent)); if(b) b.click(); });
+await p.waitForTimeout(2500);
+const s1=await fr.evaluate(()=>({active:window.bossActive, txt:document.getElementById('bossContent').innerText.slice(0,200)}));
+await p.evaluate(()=>history.back());
+await p.waitForTimeout(25000);
+const s2=await fr.evaluate(()=>({active:window.bossActive, txt:document.getElementById('bossContent').innerText.slice(0,300)}));
+const wrap=await p.evaluate(()=>document.getElementById('islandFrameWrap').style.display);
+console.log(JSON.stringify({s0,s1,wrap,s2,log:log.slice(0,10)},null,1));
+await b.close(); srv.close();

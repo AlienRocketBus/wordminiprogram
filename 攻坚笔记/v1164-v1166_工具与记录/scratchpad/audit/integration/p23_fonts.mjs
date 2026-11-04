@@ -1,0 +1,14 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(3000);
+const f = (fr, sels)=>fr.evaluate((sels)=>sels.map(s=>{const e=document.querySelector(s); if(!e) return s+': -'; const c=getComputedStyle(e); return s+': '+c.fontFamily.slice(0,80)+' | '+c.fontSize+' '+c.fontWeight;}), sels);
+console.log('HOME', await f(page, ['body','h1.main','.island-name, .island .name, .island-cn','.island-en','#recentNum','.stat-num']));
+console.log('HOME fonts loaded', await page.evaluate(()=>[...document.fonts].filter(x=>x.status==='loaded').map(x=>x.family)));
+await openCard(page, 'island_animal.html'); let fr = islandFrame(page,'island_animal.html'); await dismissWelcome(page, fr); await sleep(1500);
+console.log('ISLAND', await f(fr, ['body','#homeScreen>div:first-child>div:first-child','.mode-card','.top-name','.nav-item','.section-label']));
+console.log('ISLAND fonts loaded', await fr.evaluate(()=>[...document.fonts].filter(x=>x.status==='loaded').map(x=>x.family)));
+console.log('external', [...external]);
+await browser.close(); srv.close();

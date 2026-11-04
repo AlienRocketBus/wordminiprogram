@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_no_sticky_hover_v1011.mjs —— 触屏「粘滞 hover」回归
  * 事故：手机上点过一次后 :hover 会粘住；重新出题时同一位置的选项顶着 hover 态，
  *       看起来"已经被选中了"（用户在打Boss 屏报此问题，且恰好落在正确答案上，
  *       一度疑似泄露答案）。完形填空/火眼金睛/探索/拼词同样中招。
  * 合同：在触屏设备（hasTouch + pointer:coarse）上，交互项的 :hover 规则一律不得生效。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -15,7 +16,7 @@ const browser=await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_
 const ctx=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
 const page=await ctx.newPage();
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2500);
 console.log('触屏粘滞 hover v1011');

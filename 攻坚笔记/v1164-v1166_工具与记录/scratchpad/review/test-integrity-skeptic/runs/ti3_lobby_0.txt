@@ -1,0 +1,22 @@
+{
+ "OFF": 0,
+ "skew": {
+  "offsetMs": -2,
+  "newDateOffset": -2,
+  "explicitOk": true,
+  "instanceofOk": true
+ },
+ "loginA": true,
+ "roomA": {
+  "id": "rmw12m4tjga5pbl",
+  "heartbeatAgeBySrvClock": 259
+ },
+ "public_lobbyListsA_afterSec": 1,
+ "public_lobbyTextB": "← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 小蜂A 🔥同步赛工蜂 · 10 个词 · 0秒前 进去打 🔑 有朋友给的房间码？点这里输入",
+ "privateCode": "W9XY",
+ "private_joinResultB": "BATTLE",
+ "pageErrors": [
+  0,
+  0
+ ]
+}

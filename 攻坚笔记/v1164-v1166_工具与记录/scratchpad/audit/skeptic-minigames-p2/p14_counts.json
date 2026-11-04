@@ -1,0 +1,260 @@
+{
+ "season": {
+  "allW": 240,
+  "listen": {
+   "easy": 80,
+   "medium": 80,
+   "hard": 80
+  },
+  "typing": {
+   "1": 80,
+   "2": 80,
+   "3": 80
+  },
+  "cloze": {
+   "easy": 80,
+   "medium": 80,
+   "hard": 80
+  },
+  "moles": {
+   "easy": 4,
+   "medium": 50,
+   "hard": 186
+  },
+  "fish": {
+   "easy": 4,
+   "medium": 50,
+   "hard": 186
+  },
+  "bubble": {
+   "easy": 4,
+   "medium": 50,
+   "hard": 186
+  },
+  "scramble": {
+   "easy": 4,
+   "medium": 50,
+   "hard": 186
+  },
+  "eagle": {
+   "easy": 4,
+   "medium": 50,
+   "hard": 186
+  }
+ },
+ "sports": {
+  "allW": 30,
+  "listen": {
+   "easy": 8,
+   "medium": 16,
+   "hard": 6
+  },
+  "typing": {
+   "1": 8,
+   "2": 6,
+   "3": 16
+  },
+  "cloze": {
+   "easy": 8,
+   "medium": 16,
+   "hard": 6
+  },
+  "moles": {
+   "easy": 8,
+   "medium": 6,
+   "hard": 16
+  },
+  "fish": {
+   "easy": 8,
+   "medium": 6,
+   "hard": 16
+  },
+  "bubble": {
+   "easy": 8,
+   "medium": 6,
+   "hard": 16
+  },
+  "scramble": {
+   "easy": 8,
+   "medium": 6,
+   "hard": 16
+  },
+  "eagle": {
+   "easy": 8,
+   "medium": 6,
+   "hard": 16
+  }
+ },
+ "land1": {
+  "allW": 30,
+  "listen": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 9
+  },
+  "typing": {
+   "1": 18,
+   "2": 5,
+   "3": 7
+  },
+  "cloze": {
+   "easy": 18,
+   "medium": 5,
+   "hard": 7
+  },
+  "moles": {
+   "easy": 0,
+   "medium": 8,
+   "hard": 22
+  },
+  "fish": {
+   "easy": 0,
+   "medium": 8,
+   "hard": 22
+  },
+  "bubble": {
+   "easy": 0,
+   "medium": 8,
+   "hard": 22
+  },
+  "scramble": {
+   "easy": 0,
+   "medium": 8,
+   "hard": 22
+  },
+  "eagle": {
+   "easy": 0,
+   "medium": 8,
+   "hard": 22
+  }
+ },
+ "land3": {
+  "allW": 30,
+  "listen": {
+   "easy": 0,
+   "medium": 0,
+   "hard": 0
+  },
+  "typing": {
+   "1": 13,
+   "2": 6,
+   "3": 11
+  },
+  "cloze": {
+   "easy": 13,
+   "medium": 6,
+   "hard": 11
+  },
+  "moles": {
+   "easy": 0,
+   "medium": 5,
+   "hard": 25
+  },
+  "fish": {
+   "easy": 0,
+   "medium": 5,
+   "hard": 25
+  },
+  "bubble": {
+   "easy": 0,
+   "medium": 5,
+   "hard": 25
+  },
+  "scramble": {
+   "easy": 0,
+   "medium": 5,
+   "hard": 25
+  },
+  "eagle": {
+   "easy": 0,
+   "medium": 5,
+   "hard": 25
+  }
+ },
+ "time": {
+  "allW": 40,
+  "listen": {
+   "easy": 18,
+   "medium": 15,
+   "hard": 7
+  },
+  "typing": {
+   "1": 10,
+   "2": 11,
+   "3": 19
+  },
+  "cloze": {
+   "easy": 16,
+   "medium": 16,
+   "hard": 8
+  },
+  "moles": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 19
+  },
+  "fish": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 19
+  },
+  "bubble": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 19
+  },
+  "scramble": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 19
+  },
+  "eagle": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 19
+  }
+ },
+ "treasure": {
+  "allW": 60,
+  "listen": {
+   "easy": 32,
+   "medium": 22,
+   "hard": 6
+  },
+  "typing": {
+   "1": 32,
+   "2": 22,
+   "3": 6
+  },
+  "cloze": {
+   "easy": 32,
+   "medium": 22,
+   "hard": 6
+  },
+  "moles": {
+   "easy": 32,
+   "medium": 17,
+   "hard": 11
+  },
+  "fish": {
+   "easy": 32,
+   "medium": 17,
+   "hard": 11
+  },
+  "bubble": {
+   "easy": 32,
+   "medium": 17,
+   "hard": 11
+  },
+  "scramble": {
+   "easy": 32,
+   "medium": 17,
+   "hard": 11
+  },
+  "eagle": {
+   "easy": 32,
+   "medium": 17,
+   "hard": 11
+  }
+ }
+}

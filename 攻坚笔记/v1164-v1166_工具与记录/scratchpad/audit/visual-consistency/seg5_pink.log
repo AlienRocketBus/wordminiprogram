@@ -1,0 +1,53 @@
+home tagline | "单 词 大 冒 险 · 一 段 神 奇 旅 程" | 14px | rgb(253,224,71) | rgb(243,189,225) | mean=1.21 | p10=1.13 | 
+home subtitle | "WORD ADVENTURES" | 14px | rgb(254,243,199) | rgb(244,172,202) | mean=1.62 | p10=1.54 | 
+home intro | "🦸 Hey 勇敢的小冒险家, 欢迎加入！\n快穿" | 16px | rgb(131,24,67) | rgb(242,170,203) | mean=5.23 | p10=4.98 | 
+home stat label | "主题岛屿" | 13px | rgb(131,24,67) | rgb(247,214,219) | mean=7.14 | p10=6.82 | 
+home stat label | "英语单词" | 13px | rgb(131,24,67) | rgb(247,218,217) | mean=7.37 | p10=7.22 | 
+home stat number | "18" | 24px | rgb(190,24,93) | rgb(246,213,223) | mean=4.46 | p10=4.27 | 
+home stat number | "711+" | 24px | rgb(190,24,93) | rgb(247,219,224) | mean=4.64 | p10=4.6 | 
+home recent label | "最近探险的岛屿" | 17px | rgb(131,24,67) | rgb(252,224,216) | mean=7.71 | p10=7.61 | 
+home island EN label | "ANIMAL ISLAND" | 12px | rgb(198,228,215) | rgb(29,145,97) | mean=2.92 | p10=2.81 | 
+home island EN label | "FOOD ISLAND" | 12px | rgb(244,208,199) | rgb(210,68,29) | mean=3.2 | p10=3.07 | 
+home island name | "动物大冒险" | 13px | rgb(255,255,255) | rgb(35,150,98) | mean=3.74 | p10=3.68 | 
+home island name | "食物大冒险" | 13px | rgb(255,255,255) | rgb(212,76,33) | mean=4.33 | p10=4.25 | 
+home island enter btn | "进入冒险\n→" | 12px | rgb(255,255,255) | rgb(16,61,45) | mean=12.22 | p10=5.96 | 
+home island enter btn | "进入冒险\n→" | 12px | rgb(255,255,255) | rgb(88,29,13) | mean=13.18 | p10=6.66 | 
+home how-step desc | "主题分组 · 听音 · 看图 · 例句 一站式掌" | 12px | rgb(157,23,77) | rgb(249,228,241) | mean=6.53 | p10=6.31 | 
+home how-step desc | "打地鼠 · 钓鱼 · 拼词 · 打字 · 完形填" | 12px | rgb(157,23,77) | rgb(248,231,248) | mean=6.67 | p10=6.59 | 
+home how-step title | "自然学习" | 17px | rgb(131,24,67) | rgb(245,214,232) | mean=7.21 | p10=5.86 | 
+home how-step title | "12 种玩法" | 17px | rgb(131,24,67) | rgb(243,221,240) | mean=7.55 | p10=5.88 | 
+home footer tip | "💡 每天玩 10 分钟, 一个月后你会发现自己" | 12px | rgb(131,24,67) | rgb(249,197,195) | mean=6.32 | p10=6.12 | 
+home feedback sub | "Bug · 建议 · 表扬, 都告诉我" | 14px | rgb(148,163,184) | rgb(240,173,192) | mean=1.4 | p10=1.32 | 
+island header level | "Lv.\n1\n新手探险家\n打卡天数 1" | 12px | rgb(251,191,36) | rgb(38,35,98) | mean=8.4 | p10=7.96 | 
+island header xp | "0/100 XP" | 10px | rgb(203,213,225) | rgb(39,36,101) | mean=9.27 | p10=8.79 | 
+island header streak | "打卡天数 1" | 10px | rgb(203,213,225) | rgb(41,38,106) | mean=8.98 | p10=8.81 | 
+island EN subtitle | "ANIMAL ADVENTURE ISLAND" | 13px | rgb(203,213,225) | rgb(128,57,109) | mean=5.21 | p10=4.73 | 
+island pet desc | "裹着流动星雾的蛋, 壳上微光符纹缓缓游动" | 13px | rgb(226,232,240) | rgb(147,83,149) | mean=4.36 | p10=4.23 | 
+island section label | "精学模式" | 13px | rgb(203,213,225) | rgb(134,70,146) | mean=4.26 | p10=4.08 | 
+island section label | "畅玩模式" | 13px | rgb(203,213,225) | rgb(72,60,93) | mean=6.76 | p10=2.79 | 
+mode card label | "探索单词" | 13px | rgb(255,255,255) | rgb(230,108,147) | mean=3.02 | p10=2.85 | 
+mode card label | "听音辨义" | 13px | rgb(255,255,255) | rgb(251,159,52) | mean=2.07 | p10=2.02 | 
+bottom nav label | "主页" | 12px | rgb(251,191,36) | rgb(40,41,50) | mean=8.64 | p10=6.24 | 
+bottom nav label | "错题" | 12px | rgb(203,213,225) | rgb(19,24,50) | mean=11.71 | p10=11.6 | 
+daily card label | "每日宝箱" | 15px | rgb(255,255,255) | rgb(96,149,234) | mean=2.99 | p10=2.97 | 
+daily card label | "每日任务" | 15px | rgb(255,255,255) | rgb(77,216,123) | mean=1.84 | p10=1.82 | 
+util card label | "装备" | 12px | rgb(203,213,225) | rgb(46,45,67) | mean=8.97 | p10=8.74 | 
+util card label | "主题商店" | 12px | rgb(203,213,225) | rgb(45,44,68) | mean=9.06 | p10=8.63 | 
+quests subtitle | "每天 0 点刷新 · 完成领取丰厚奖励" | 12px | rgb(203,213,225) | rgb(128,56,111) | mean=5.22 | p10=4.73 | 
+quest progress text | "0 / 10" | 13px | rgb(203,213,225) | rgb(23,33,51) | mean=10.89 | p10=10.59 | 
+quest progress text | "+35🪙 +60XP" | 12px | rgb(251,191,36) | rgb(57,54,44) | mean=7.26 | p10=7.36 | 
+back button | "← 返回" | 12px | rgb(203,213,225) | rgb(50,44,68) | mean=8.98 | p10=9.2 | 
+ach subtitle | "0 / 144 已领取" | 12px | rgb(203,213,225) | rgb(128,56,111) | mean=5.22 | p10=4.73 | 
+ach desc (locked) | "词汇量达到 600 个单词" | 13px | rgb(203,213,225) | rgb(65,43,84) | mean=8.31 | p10=8.15 | 
+ach desc (locked) | "词汇量达到 1500 个单词" | 13px | rgb(203,213,225) | rgb(65,44,89) | mean=8.2 | p10=7.87 | 
+settings desc | "点击按钮时是否播放\"咔嗒\"声效。关闭后整个 ap" | 12px | rgb(203,213,225) | rgb(43,37,66) | mean=9.76 | p10=9.35 | 
+explore subtitle | "点击单词查看：🐾 宠物掌握 · 💎 知识结晶" | 12px | rgb(203,213,225) | rgb(128,56,111) | mean=5.22 | p10=4.73 | 
+wrong overview text | "←\n📕 错题总览" | 16px | rgb(226,232,240) | rgb(18,25,46) | mean=14.18 | p10=14.27 | 
+wrong overview text | "📕 错题总览" | 22px | rgb(251,191,36) | rgb(16,23,45) | mean=10.61 | p10=10.54 | 
+wrong overview text | "每个岛屿待复习单词" | 12px | rgb(148,163,184) | rgb(17,24,47) | mean=6.86 | p10=6.83 | 
+wrong overview text | "🌟\n太棒了!\n所有岛屿都没有错题\n继续探险吧!" | 16px | rgb(203,213,225) | rgb(22,25,58) | mean=11.45 | p10=11.13 | 
+wrong overview text | "🌟" | 64px | rgb(203,213,225) | rgb(21,25,55) | mean=11.57 | p10=11.48 | 
+wrong overview text | "太棒了!" | 20px | rgb(34,197,94) | rgb(23,25,60) | mean=7.42 | p10=7.36 | 
+wrong overview text | "所有岛屿都没有错题\n继续探险吧!" | 14px | rgb(148,163,184) | rgb(24,25,63) | mean=6.53 | p10=6.48 | 
+wrong overview text | "💡 点击任意岛屿 = 进入该岛错题复习\n点\"一" | 11px | rgb(71,85,105) | rgb(28,26,71) | mean=2.15 | p10=2.13 | 
+[] []

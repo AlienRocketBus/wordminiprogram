@@ -1,0 +1,42 @@
+
+=== 已登录 · 拼写大PK 首页（120 秒）cid=1 frames=1 [spelling_pk.html]
+  total=10 reads=4 (2.0/min, 0.03/s) writes=6 (3.0/min, 0.05/s) auth=0 other=0
+         5  update(id) hansen_friends
+         2  get(id) hansen_saves
+         1  where hansen_friends
+         1  add hansen_friends
+         1  get(id) hansen_friends
+  每 20 秒 读: 4 0 0 0 0 0  写: 1 1 1 1 1 1
+  页面报错: 无  控制台错误: 无  外网: 0
+
+=== 已登录 · 岛屿页（直接打开）（120 秒）cid=1 frames=7 [island_animal.html | land_map.html?v=1163 | island_season.html?v=1163 | land_map.html?v=1163 | island_season.html?v=1163 | land_map.html?v=1163 | ]
+  total=28 reads=10 (5.0/min, 0.08/s) writes=18 (9.0/min, 0.15/s) auth=0 other=0
+        17  update(id) hansen_friends
+         6  get(id) hansen_saves
+         3  where hansen_friends
+         1  add hansen_friends
+         1  get(id) hansen_friends
+  每 20 秒 读: 10 0 0 0 0 0  写: 3 3 3 3 3 3
+  页面报错: 无  控制台错误: 无  外网: 0
+
+=== 已登录 · 天梯首页开着（120 秒）cid=1 frames=1 [spelling_pk.html]
+  total=9 reads=3 (1.5/min, 0.03/s) writes=6 (3.0/min, 0.05/s) auth=0 other=0
+         5  update(id) hansen_friends
+         1  where sb_profile
+         1  where hansen_friends
+         1  add hansen_friends
+         1  get(id) hansen_friends
+  每 20 秒 读: 3 0 0 0 0 0  写: 1 1 1 1 1 1
+  屏幕：🏆 天梯排位 × 🐝 未定级 再打 3 局定级赛 定级赛 0 / 3 ⚡ 开始排位（找实力差不多的对手） 排位固定用「抢答赛」：谁先拼对谁得分 只有这个模式会加减天梯分 我的实力 🎯 还没打过排
+  页面报错: 无  控制台错误: 无  外网: 0
+
+=== 已登录 · 好友页开着（120 秒）cid=1 frames=1 [spelling_pk.html]
+  total=32 reads=26 (13.0/min, 0.22/s) writes=6 (3.0/min, 0.05/s) auth=0 other=0
+        17  where hansen_friends
+         8  where hansen_friend_msgs
+         5  update(id) hansen_friends
+         1  add hansen_friends
+         1  get(id) hansen_friends
+  每 20 秒 读: 8 3 3 6 3 3  写: 1 1 1 1 1 1
+  屏幕：👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 I
+  页面报错: 无  控制台错误: 无  外网: 0

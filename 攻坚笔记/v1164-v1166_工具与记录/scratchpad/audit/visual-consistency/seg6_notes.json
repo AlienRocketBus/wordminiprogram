@@ -1,0 +1,14 @@
+{
+ "notes": [
+  "EN overflow 360: [{\"href\":\"island_sports.html\",\"en\":\"SPORTS & HOBBIES\",\"cardRight\":350,\"enRight\":333,\"enScrollW\":72,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_job.html\",\"en\":\"PEOPLE & PROFESSIONS\",\"cardRight\":118,\"enRight\":141,\"enScrollW\":112,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_color.html\",\"en\":\"COLORS & NUMBERS\",\"cardRight\":234,\"enRight\":224,\"enScrollW\":79,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_traffic.html\",\"en\":\"TRANSPORTATION\",\"cardRight\":234,\"enRight\":291,\"enScrollW\":146,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_clothes.html\",\"en\":\"CLOTHES ISLAND\",\"cardRight\":234,\"enRight\":220,\"enScrollW\":75,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_home.html\",\"en\":\"HOUSE & FURNITURE\",\"cardRight\":350,\"enRight\":355,\"enScrollW\":94,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_school.html\",\"en\":\"SCHOOL & STATIONERY\",\"cardRight\":234,\"enRight\":247,\"enScrollW\":102,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_adjective.html\",\"en\":\"COMMON ADJECTIVES\",\"cardRight\":118,\"enRight\":130,\"enScrollW\":101,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_treasure.html\",\"en\":\"COMMON MISC WORDS\",\"cardRight\":234,\"enRight\":218,\"enScrollW\":73,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2},{\"href\":\"island_question.html\",\"en\":\"PRONOUNS & QUESTION WORDS\",\"cardRight\":350,\"enRight\":350,\"enScrollW\":89,\"enClientW\":70,\"overflow\":true,\"ff\":\"\\\"Bowlby One\\\", serif\",\"nameLines\":2}]",
+  "fonts \"Bowlby One\", serif",
+  "island horiz overflow 360: {\"sw\":360,\"cw\":360}"
+ ],
+ "errs": [
+  "[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[top] PAGE Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+ ],
+ "r404": [
+  "404 /island_wordIslandAnimal.html"
+ ]
+}

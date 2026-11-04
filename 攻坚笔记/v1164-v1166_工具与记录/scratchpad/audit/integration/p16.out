@@ -1,0 +1,55 @@
+   [islandFrame navigated] about:blank
+   [islandFrame navigated] island_sports.html
+G1 double tap -> 2435 island_sports.html hlen 2 -> 3 {"hsnIsland":"island_sports.html"}
+G1 back -> 402 none null top index.html
+   [islandFrame navigated] island_job.html
+G2 back during load -> 28 {
+  top: 'index.html',
+  wrap: 'none',
+  op: '0',
+  u: 'island_job.html',
+  rs: 'loading',
+  load: 'flex',
+  hlen: 3,
+  hst: 'null',
+  sy: 864
+}
+   [islandFrame navigated] island_sports.html
+G2 2.5s later {
+  top: 'index.html',
+  wrap: 'none',
+  op: '0',
+  u: 'island_sports.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 864
+}
+   [islandFrame navigated] island_color.html
+   [islandFrame navigated] island_nature.html
+G3 A then B -> 2331 {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_nature.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: '{"hsnIsland":"island_nature.html"}',
+  sy: 864
+}
+G3 back -> 19 null top index.html
+   [islandFrame navigated] island_sports.html
+G3 after {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_sports.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 3,
+  hst: 'null',
+  sy: 864
+}
+errors []

@@ -1,0 +1,126 @@
+{
+  "ok": {
+    "word": "soup",
+    "autoplay": [
+      {
+        "k": "play",
+        "src": "/words/soup.mp3?v215"
+      },
+      {
+        "k": "playing",
+        "src": "/words/soup.mp3?v215",
+        "dt": 95
+      }
+    ],
+    "tapSpeaker": {
+      "tapped": true,
+      "aud": [
+        {
+          "k": "play",
+          "src": "/words/soup.mp3?v215"
+        },
+        {
+          "k": "playing",
+          "src": "/words/soup.mp3?v215",
+          "dt": 91
+        }
+      ],
+      "hint": "点击喇叭播放单词",
+      "toasts": []
+    },
+    "errs": []
+  },
+  "mp3_404": {
+    "word": "pork",
+    "autoplay": [
+      {
+        "k": "play",
+        "src": "/words/pork.mp3?v215"
+      },
+      {
+        "k": "error",
+        "src": "/words/pork.mp3?v215",
+        "dt": 67
+      }
+    ],
+    "tapSpeaker": {
+      "tapped": true,
+      "aud": [
+        {
+          "k": "play",
+          "src": "/words/pork.mp3?v215"
+        },
+        {
+          "k": "error",
+          "src": "/words/pork.mp3?v215",
+          "dt": 386
+        }
+      ],
+      "hint": "点击喇叭播放单词",
+      "toasts": []
+    },
+    "errs": []
+  },
+  "mp3_drop": {
+    "word": "tea",
+    "autoplay": [
+      {
+        "k": "play",
+        "src": "/words/tea.mp3?v215"
+      },
+      {
+        "k": "error",
+        "src": "/words/tea.mp3?v215",
+        "dt": 7
+      }
+    ],
+    "tapSpeaker": {
+      "tapped": true,
+      "aud": [
+        {
+          "k": "play",
+          "src": "/words/tea.mp3?v215"
+        },
+        {
+          "k": "error",
+          "src": "/words/tea.mp3?v215",
+          "dt": 220
+        }
+      ],
+      "hint": "点击喇叭播放单词",
+      "toasts": []
+    },
+    "errs": []
+  },
+  "offline_sw": {
+    "word": "beef",
+    "autoplay": [
+      {
+        "k": "play",
+        "src": "/words/beef.mp3?v215"
+      },
+      {
+        "k": "playing",
+        "src": "/words/beef.mp3?v215",
+        "dt": 7
+      }
+    ],
+    "tapSpeaker": {
+      "tapped": true,
+      "aud": [
+        {
+          "k": "play",
+          "src": "/words/beef.mp3?v215"
+        },
+        {
+          "k": "playing",
+          "src": "/words/beef.mp3?v215",
+          "dt": 29
+        }
+      ],
+      "hint": "点击喇叭播放单词",
+      "toasts": []
+    },
+    "errs": []
+  }
+}

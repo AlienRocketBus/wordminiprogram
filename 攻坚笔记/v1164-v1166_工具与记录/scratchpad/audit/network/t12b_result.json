@@ -1,0 +1,25 @@
+{
+  "steps": [
+    {
+      "step": "first load",
+      "shellRefetch": 0,
+      "failedInstallFile": 2,
+      "total": 189,
+      "sw": []
+    },
+    {
+      "step": "reload",
+      "shellRefetch": 1,
+      "failedInstallFile": 2,
+      "total": 175,
+      "sw": []
+    },
+    {
+      "step": "open island (+warm rooms)",
+      "shellRefetch": 1,
+      "failedInstallFile": 14,
+      "total": 989,
+      "sw": []
+    }
+  ]
+}

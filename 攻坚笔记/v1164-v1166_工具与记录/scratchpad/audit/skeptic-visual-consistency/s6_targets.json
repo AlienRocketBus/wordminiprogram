@@ -1,0 +1,94 @@
+{
+ "mylearn": {
+  "lit": "已点亮 2 / 19",
+  "keys": [
+   "hsn_progress:星海词汇大冒险",
+   "hsn_progress:动物大冒险"
+  ]
+ },
+ "backML": [
+  {
+   "t": "‹",
+   "x": 16,
+   "y": 17,
+   "w": 38,
+   "h": 38
+  }
+ ],
+ "backReview": [
+  {
+   "t": "←",
+   "x": 16,
+   "y": 28,
+   "w": 36,
+   "h": 36
+  }
+ ],
+ "backWrong": [
+  {
+   "t": "←",
+   "x": 16,
+   "y": 28,
+   "w": 36,
+   "h": 36
+  }
+ ],
+ "closeHall": [
+  {
+   "t": "×",
+   "x": 327,
+   "y": 76,
+   "w": 23,
+   "h": 22
+  }
+ ],
+ "backBoss": [
+  {
+   "t": "←",
+   "x": 10,
+   "y": 8,
+   "w": 36,
+   "h": 44
+  }
+ ],
+ "backBtnIsland": [
+  {
+   "t": "←",
+   "x": 10,
+   "y": 8,
+   "w": 36,
+   "h": 44
+  }
+ ],
+ "gacha": {
+  "btn": {
+   "x": 111.234375,
+   "y": 268,
+   "w": 167.515625,
+   "h": 93,
+   "t": "抽一张 🪙 1000"
+  },
+  "tap": true,
+  "toast": {
+   "text": "金币不够啦！多答题、打Boss赚金币吧 🪙",
+   "x": 98,
+   "y": 253,
+   "w": 195,
+   "h": 64
+  },
+  "btnNow": {
+   "x": 111,
+   "y": 268,
+   "w": 168,
+   "h": 93
+  }
+ },
+ "errs": [
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "[p] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "external": []
+}

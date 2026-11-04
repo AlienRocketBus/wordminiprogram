@@ -54,7 +54,7 @@ try{
       static now(){return fixed;}
     }
     window.Date=FixedDate;
-    localStorage.clear();sessionStorage.clear();
+    if (window.top === window) localStorage.clear();sessionStorage.clear();
     window.__seasonSecuritySentinel=0;
     const pointsPayload='<img data-season-points src=x onerror="window.__seasonSecuritySentinel++">';
     localStorage.setItem('hansen_season_data',JSON.stringify({

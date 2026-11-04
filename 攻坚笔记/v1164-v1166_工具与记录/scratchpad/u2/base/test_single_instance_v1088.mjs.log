@@ -1,0 +1,15 @@
+单实例契约 v1088
+  OK  定位到 cloudbase.init
+  OK  存在账号记录判断
+  OK  ★ 账号判断在 cloudbase.init **之前**（v1076 就错在放到了后面）
+  OK  ★ 有 _hasAcct 分支
+  OK  ★ 已登录时直接 return，一行都不多跑
+  OK  ★ 复用账号实例而非另建
+  OK  ★ 该分支内完全没有 cloudbase.init
+  OK  ★ iframe 判断也在 init 之前
+  OK  ★ 用 window.top 判断是否在子框
+  OK  ★ 子框内直接拒绝，不创建实例
+  OK  ★ 账号模块没好时明确报错而非降级另建实例
+  OK  ★ 云存档里只有一处 cloudbase.init（实得 1）
+
+结果: 12 通过 / 0 失败

@@ -1,0 +1,4 @@
+in game before leaving: {"spTime":58,"spActive":true,"timerOn":true,"screen":"speedScreen","vis":"visible","xp":0}
+right after back (island hidden): {"wrap":"none","op":"1","path":"island_animal.html","rs":"complete","hist":3,"state":"null","scrollY":616} {"spTime":58,"spActive":true,"timerOn":true,"screen":"speedScreen","vis":"visible","xp":0}
+after 10 s on home: {"spTime":47,"spActive":true,"timerOn":true,"screen":"speedScreen","vis":"visible","xp":0}
+after re-enter: {"spTime":46,"spActive":true,"timerOn":true,"screen":"speedScreen","vis":"visible","xp":0}

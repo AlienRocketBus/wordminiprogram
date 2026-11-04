@@ -1,0 +1,2 @@
+① hansen_friends=PRIVATE: A adds B (No.2) -> {"ok":false,"kind":"other","reason":"没找到 No.2 这个人，看看号码对不对"}
+② hansen_friend_msgs=PRIVATE: B sends -> {"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}  A inbox -> {"ok":true,"n":0}

@@ -1,0 +1,212 @@
+
+房间对战 · 中途离开 / 掉线 / 房主先打完（v1164）
+
+
+── ① 客人等房主确认时点了返回（READONLY · legacy） ──
+  OK  [房主] 手机号验证码登录 uid=1728325321807323665
+  OK  [先来] 手机号验证码登录 uid=1373709596117908056
+  OK  [后来] 手机号验证码登录 uid=1926851022307533012
+  XX  房主开好一间同步赛
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 0 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wdt6xc3xcab 建者=小蜂房主 {"_id":"rmw0wdt6xc3xcab","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000040","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      23:55.520 - POST /auth/v1/verification → 200
+      23:55.600 - POST /auth/v1/signup → 200
+      23:55.709 小蜂后来 GET /auth/v1/user/me → 200
+      23:55.777 小蜂后来 GET /auth/v1/user/me → 200
+      23:55.881 小蜂后来 POST /web queryDocument sb_profile → 200
+      23:55.985 小蜂后来 POST /web updateDocument sb_profile → 200
+      23:56.061 小蜂后来 POST /web queryDocument sb_profile → 200
+      23:56.129 小蜂后来 POST /web queryDocument hansen_saves → 200
+      23:56.233 小蜂后来 POST /web queryDocument hansen_saves → 200
+      23:56.558 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      23:57.043 小蜂房主 POST /web addDocument hansen_pk_rooms → 200
+      23:57.147 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+  XX  客人点了「进去打」，座位已经抢到（房主还没来得及确认）
+      [房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 10 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wdt6xc3xcab 建者=小蜂房主 {"_id":"rmw0wdt6xc3xcab","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000040","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      23:55.777 小蜂后来 GET /auth/v1/user/me → 200
+      23:55.881 小蜂后来 POST /web queryDocument sb_profile → 200
+      23:55.985 小蜂后来 POST /web updateDocument sb_profile → 200
+      23:56.061 小蜂后来 POST /web queryDocument sb_profile → 200
+      23:56.129 小蜂后来 POST /web queryDocument hansen_saves → 200
+      23:56.233 小蜂后来 POST /web queryDocument hansen_saves → 200
+      23:56.558 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      23:57.043 小蜂房主 POST /web addDocument hansen_pk_rooms → 200
+      23:57.147 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      23:58.047 小蜂房主 POST /web queryDocument hansen_pk_rooms → … [故障:hold]
+      23:59.225 小蜂房主 POST /web queryDocument hansen_pk_rooms → … [故障:hold]
+      24:05.134 小蜂房主 POST /web queryDocument hansen_pk_rooms → … [故障:hold]
+  OK  客人点了返回 → 自己的座位收回了（不留孤儿座位让房主跟空气开打）
+  XX  本段脚本出错：Cannot read properties of undefined (reading '_id')
+
+── ② 掉线判负，两个方向（READONLY · rules） ──
+  OK  [X房主] 手机号验证码登录 uid=1728325321807323665
+  OK  [X客人] 手机号验证码登录 uid=1373709596117908056
+  OK  [Y房主] 手机号验证码登录 uid=1926851022307533012
+  OK  [Y客人] 手机号验证码登录 uid=1873696563598928069
+  XX  两间房都开打了
+      [房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [X房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 34 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [X客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 17秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [Y房主 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 1 分 33 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 🔥同步赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [Y客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 33秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wel3zanz781 建者=小蜂X主 {"_id":"rmw0wel3zanz781","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000043","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      room(旧) rmw0welsyyma7xf 建者=小蜂Y主 {"_id":"rmw0welsyyma7xf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000045","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      25:54.235 小蜂Y主 POST /web queryDocument hansen_pk_rooms → 200
+      25:54.321 小蜂Y主 POST /web updateDocument hansen_pk_rooms → 200
+      25:55.498 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      25:56.532 小蜂Y主 POST /web queryDocument hansen_pk_rooms → 200
+      26:00.612 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      26:01.328 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      26:01.407 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      26:01.667 小蜂Y主 POST /web queryDocument hansen_pk_rooms → 200
+      26:02.229 小蜂Y主 POST /web queryDocument hansen_pk_rooms → 200
+      26:02.349 小蜂Y主 POST /web updateDocument hansen_pk_rooms → 200
+      26:05.699 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      26:06.766 小蜂Y主 POST /web queryDocument hansen_pk_rooms → 200
+  XX  客人没电 → 房主约 1 分钟后看到「对手已离场，本局你胜」（100 秒内没等到）
+      [房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [X房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [X客人] （已关）
+      [Y房主] （已关）
+      [Y客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 33秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wel3zanz781 建者=小蜂X主 {"_id":"rmw0wel3zanz781","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000043","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      room(旧) rmw0welsyyma7xf 建者=小蜂Y主 {"_id":"rmw0welsyyma7xf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000045","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      27:05.312 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:05.415 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:13.310 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:13.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:21.306 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:21.411 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:29.311 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:29.387 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:37.342 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:37.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:45.321 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:45.427 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+  XX  房主没电 → 客人约 1 分钟后同样判胜（100 秒内没等到）
+      [房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [X房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [X客人] （已关）
+      [Y房主] （已关）
+      [Y客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 33秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wel3zanz781 建者=小蜂X主 {"_id":"rmw0wel3zanz781","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000043","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      room(旧) rmw0welsyyma7xf 建者=小蜂Y主 {"_id":"rmw0welsyyma7xf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000045","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      27:05.312 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:05.415 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:13.310 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:13.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:21.306 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:21.411 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:29.311 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:29.387 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:37.342 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:37.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:45.321 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:45.427 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+  XX  等的时候屏幕上说「对手掉线了…」，不是干等（房主那边 没说，客人那边 没说）
+  XX  房主判胜写在自己的房间文档上（abandonWin=host）
+      [房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [X房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [X客人] （已关）
+      [Y房主] （已关）
+      [Y客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 33秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wel3zanz781 建者=小蜂X主 {"_id":"rmw0wel3zanz781","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000043","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      room(旧) rmw0welsyyma7xf 建者=小蜂Y主 {"_id":"rmw0welsyyma7xf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000045","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      27:05.312 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:05.415 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:13.310 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:13.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:21.306 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:21.411 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:29.311 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:29.387 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:37.342 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:37.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:45.321 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:45.427 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+  XX  客人判胜写在自己的座位文档上（abandonWin=guest），没去动房主的房
+      [房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [先来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000041　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [后来 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000042　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [X房主 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 出了点问题，再试一次吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [X客人] （已关）
+      [Y房主] （已关）
+      [Y客人 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 32秒前 ⏎ 进去打 ⏎ 无名蜂 ⏎ 🔥同步赛未定级 · 10 个词 · 33秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wel3zanz781 建者=小蜂X主 {"_id":"rmw0wel3zanz781","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000043","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      room(旧) rmw0welsyyma7xf 建者=小蜂Y主 {"_id":"rmw0welsyyma7xf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000045","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      27:05.312 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:05.415 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:13.310 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:13.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:21.306 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:21.411 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:29.311 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:29.387 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:37.342 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:37.420 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+      27:45.321 小蜂X主 POST /web queryDocument hansen_pk_rooms → 200
+      27:45.427 小蜂X主 POST /web updateDocument hansen_pk_rooms → 200
+  OK  安全规则模式下没有越权写（被拒 0 次）
+
+── ③ 房主先打完、关了页面，客人慢几秒才交卷（READONLY · legacy） ──
+  OK  [先完] 手机号验证码登录 uid=1728325321807323665
+  OK  [后完] 手机号验证码登录 uid=1373709596117908056
+  XX  抢答赛开打
+      [先完 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 46 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [后完 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 无名蜂 ⏎ ⚡抢答赛未定级 · 10 个词 · 16秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0wix07wn4umf 建者=小蜂先完 {"_id":"rmw0wix07wn4umf","status":"open","code":"","hostRating":0,"isPrivate":false,"hostId":"+86 13800000047","hostName":"无名蜂","hostTier":"","guestId":"","gues
+      [最近的云端请求]
+      28:19.405 小蜂先完 POST /web updateDocument hansen_pk_rooms → 200
+      28:21.222 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:24.328 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:27.328 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:27.396 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:27.409 小蜂先完 POST /web updateDocument hansen_pk_rooms → 200
+      28:30.465 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:33.562 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:35.349 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:35.454 小蜂先完 POST /web updateDocument hansen_pk_rooms → 200
+      28:36.664 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+      28:41.769 小蜂先完 POST /web queryDocument hansen_pk_rooms → 200
+  OK  没有人去改别人的文档（尝试 0 次）
+
+12 通过，10 失败（293 秒）
+失败的：
+  · 房主开好一间同步赛
+  · 客人点了「进去打」，座位已经抢到（房主还没来得及确认）
+  · 本段脚本出错：Cannot read properties of undefined (reading '_id')
+  · 两间房都开打了
+  · 客人没电 → 房主约 1 分钟后看到「对手已离场，本局你胜」（100 秒内没等到）
+  · 房主没电 → 客人约 1 分钟后同样判胜（100 秒内没等到）
+  · 等的时候屏幕上说「对手掉线了…」，不是干等（房主那边 没说，客人那边 没说）
+  · 房主判胜写在自己的房间文档上（abandonWin=host）
+  · 客人判胜写在自己的座位文档上（abandonWin=guest），没去动房主的房
+  · 抢答赛开打

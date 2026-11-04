@@ -1,0 +1,18 @@
+prefetched by hansen_island_prefetch: [
+  'island_animal.html',
+  'island_food.html',
+  'island_sports.html',
+  'island_job.html',
+  'island_color.html',
+  'island_nature.html'
+]
+server hits so far for island html: [
+  '/island_animal.html?v=1163',
+  '/island_animal.html?v=1163',
+  '/island_food.html?v=1163',
+  '/island_sports.html?v=1163',
+  '/island_job.html?v=1163',
+  '/island_color.html?v=1163',
+  '/island_nature.html?v=1163'
+]
+tapped island_animal.html -> server hits after tap for it: [ '/island_animal.html' ]

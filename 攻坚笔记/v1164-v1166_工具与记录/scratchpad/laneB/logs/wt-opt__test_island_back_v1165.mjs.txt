@@ -1,0 +1,50 @@
+  ✅ 真点 island_animal.html
+  ✅ 进到 island_animal.html
+
+▶ 1. 玩法里按返回：回本岛主页，岛不关
+  ✅ 真点「探索单词」
+  ✅ 进了探索单词（exploreScreen）
+  ✅ 探索单词 里按返回：岛还开着、回到本岛主页（wrap=block 屏=homeScreen）
+  ✅ 真点「听音辨义」
+  ✅ 进了听音辨义（listenScreen）
+  ✅ 听音辨义 里按返回：岛还开着、回到本岛主页（wrap=block 屏=homeScreen）
+  ✅ 真点「打字大师」
+  ✅ 进了打字大师（typingScreen）
+  ✅ 打字大师 里按返回：岛还开着、回到本岛主页（wrap=block 屏=homeScreen）
+
+▶ 2. 浮层开着按返回：只关浮层
+  ✅ 我的学习 打开了
+  ✅ 我的学习 开着按返回：只关了它，岛还开着（浮层已关=true，wrap=block）
+  ✅ 错题总览 打开了
+  ✅ 错题总览 开着按返回：只关了它，岛还开着（浮层已关=true，wrap=block）
+  ✅ 复习中心 打开了
+  ✅ 复习中心 开着按返回：只关了它，岛还开着（浮层已关=true，wrap=block）
+  ✅ 神秘殿堂 打开了
+  ✅ 神秘殿堂 开着按返回：只关了它（还开着=false，wrap=block，屏=homeScreen）
+  ✅ 装备商店 打开了
+  ✅ 装备商店 开着按返回：只关了它（还开着=false，wrap=block，屏=homeScreen）
+  ✅ 装备商店（第二次） 打开了
+  ✅ 装备商店（第二次） 开着按返回：只关了它（还开着=false，wrap=block，屏=homeScreen）
+  ✅ 没有 id 的弹层 打开了
+  ✅ 没有 id 的弹层 开着按返回：只关了它（还开着=false，wrap=block，屏=homeScreen）
+
+▶ 1b. 本岛主页再按返回：回首页
+  ✅ 本岛主页按返回回到首页
+
+▶ 3. 单词大陆 ①号岛：返回 → 大陆地图 → 返回 → 首页
+  ✅ 打开单词大陆地图
+  ✅ 真点 ① 号岛
+  ✅ 真点「进入学习」
+  ✅ 进到 ① 号岛
+  ✅ ① 号岛按返回：回到大陆地图（不是首页）
+  ✅ 大陆地图按返回：回到首页
+
+▶ 4. 🗺️ 照旧一下回首页
+  ✅ 真点 island_food.html
+  ✅ 进到 island_food.html
+  ✅ 真点 🗺️
+  ✅ 一下回首页
+  ✅ 顶层历史退干净（null）
+  ✅ 零脚本错误
+
+✅ 手机返回只退一步

@@ -1,0 +1,1 @@
+starter coin integration v942: wallet commit → flag failure → upgrade/reload exactly-once ✅

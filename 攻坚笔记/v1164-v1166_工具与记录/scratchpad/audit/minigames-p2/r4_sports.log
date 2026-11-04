@@ -1,0 +1,60 @@
+NOTE boss card tap {"x":309,"y":339.375,"ok":true,"hit":"IMG.boss-card-img"}
+NOTE fight tap {"x":74,"y":145.5,"ok":true,"hit":"IMG."}
+NOTE timeout test: advanced=true after 60014ms hero 70 / 100
+{
+ "key": "sports",
+ "notes": [
+  "boss card tap {\"x\":309,\"y\":339.375,\"ok\":true,\"hit\":\"IMG.boss-card-img\"}",
+  "fight tap {\"x\":74,\"y\":145.5,\"ok\":true,\"hit\":\"IMG.\"}",
+  "timeout test: advanced=true after 60014ms hero 70 / 100"
+ ],
+ "before": {
+  "coins": 300,
+  "xp": 0,
+  "level": 1,
+  "bossBeaten": 0,
+  "prog": null
+ },
+ "picker": "已击败 boss 0/20 特效 ON Lv.1 淘气小幽灵 Lv.2 暗影忍者 Lv.3 百战兽人 Lv.4 史前霸王龙 Lv.5 千年僵尸 Lv.6 暗夜吸血鬼 Lv.7 蒙面大魔王 Lv.8 地狱犬王 Lv.9 黑森林巫婆 Lv.10 异次元巫师 Lv.11 龙骑士统帅 Lv.12 暗黑灯神 Lv.13 海底巨怪 Lv.14 寒冰女王 Lv.15 烈焰魔神 Lv.16 雷电之主 Lv.17 机械泰坦 Lv.18 外星霸主 Lv.19 混沌魔尊 Lv.20 上古太阳神 🎨 boss 背景 (点击切换) 🌑 经典暗夜 ✓",
+ "end": "🏆 VICTORY! 击败了 淘气小幽灵 ⭐⭐ 漂亮胜利！ 🎉 首次通关奖励 🪙 金币 +20 · 🎓 经验 +80 ⚔️ 再次挑战 ← 选其他 boss",
+ "played": {
+  "q": 7,
+  "right": 4,
+  "wrong": 2,
+  "tmo": 1,
+  "types": {
+   "en2cn": 4,
+   "cloze": 1,
+   "cn2en": 2
+  },
+  "secs": 80,
+  "maxWait": 4968
+ },
+ "endScreen": "🏆 VICTORY! 击败了 淘气小幽灵 ⭐⭐ 漂亮胜利！ 🎉 首次通关奖励 🪙 金币 +20 · 🎓 经验 +80 ⚔️ 再次挑战 ← 选其他 boss",
+ "overlays": [
+  "DIV z=99997"
+ ],
+ "after": {
+  "coins": 324,
+  "xp": 100,
+  "level": 2,
+  "bossBeaten": 1,
+  "prog": null,
+  "cleared": null
+ }
+}
+end buttons ["← :: hansenBossBackBtn()","⚔️ 再次挑战 :: hansenStartRebattle(1)","← 选其他 boss :: hansenBackToBossPicker()"]
+HALL {
+ "navTap": {
+  "x": 341.25,
+  "y": 809.5,
+  "ok": false,
+  "hit": "DIV."
+ },
+ "cardsText": "bossScreen :: ← 🏆 VICTORY! 击败了 淘气小幽灵 ⭐⭐ 漂亮胜利！ 🎉 首次通关奖励 🪙 金币 +20 · 🎓 经验 +80 ⚔️ 再次挑战 ← 选其他 boss 🏆 Boss 大满贯 第 1 轮 本轮已完成 1 / 20 个 Boss 还差 19 个 Boss，完成本轮得 +88💎 本轮已完成： Lv1 本轮还需要： Lv2、Lv3、Lv4、Lv5、Lv6、Lv7、Lv8、Lv9、Lv10、Lv11、Lv12、Lv13、Lv14、Lv15、Lv16、Lv17、Lv18、Lv19、Lv20 每个 Boss 每轮只计算 1 次；重复挑战同一关不会多算。",
+ "cardTap": {
+  "found": false
+ },
+ "hallFrame": null
+}
+EVENTS [{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:43655/hansen_explore_progress_v945.js?v=1163 net::ERR_ABORTED"},{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:43655/hansen_avatar.js?v=1163 net::ERR_ABORTED"},{"tag":"boot","kind":"requestfailed","text":"http://127.0.0.1:43655/hansen_accessibility.js?v=1163 net::ERR_ABORTED"}]

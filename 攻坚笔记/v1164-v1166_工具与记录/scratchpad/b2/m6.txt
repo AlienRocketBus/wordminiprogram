@@ -1,0 +1,11 @@
+亮色主题揭晓卡音标看得见；复习奖励提示不再露出 <b>
+
+- hansen_palette.js：揭晓卡在亮色主题下仍是深绿底，v1010 把音标改成深绿 #15803d，
+  等于看不见（答对卡和新的答错小课都用这张卡）；改回浅薄荷绿
+- hansen_review_rewards_v963.js：统一提示按纯文字显示，「全部到期清零！<b>+20 金币</b>」
+  的 <b> 原样露出来；转给统一提示前先去掉标签
+- 实测：亮色主题截图（听音辨义答错小课、错题总览）；test_light_contrast_v989、
+  test_light_readability_v1016（240，原版本身在 240~245 之间浮动）通过
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

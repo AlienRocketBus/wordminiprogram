@@ -1,0 +1,1 @@
+explore dual progress v945/v946: ledger truth + aliases + badge semantics + spelling-only thresholds ✅

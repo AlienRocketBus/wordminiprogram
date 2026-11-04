@@ -88,12 +88,15 @@ console.log('T3 同步');
   const id = await D.docIdOf(k);
   const row = cloud.get(id);
   ok(!!row && row.payload && row.payload.ct && !JSON.stringify(row).includes(exportBody), '云端仅存密文(零知识)');
-  /* 🔴v1060 更正过期契约：v1039 特意规定 **force 一律真写**。
-     原因是原逻辑"内容指纹未变就跳过，连 force 也跳"——
-     地址算法或账号变更后，用户点「立刻上传」看到成功、实际一字未写。
-     所以这里 force 第二次必须**不跳过**；而"内容未变才跳过"只适用于非 force。 */
+  /* 🔴v1060 / v1039 的教训：地址算法或账号变更后，用户点「立刻上传」看到成功、实际一字未写 ——
+     所以「地址变了」一定重写（判据里带 lastDocId）。
+     🔴v1164（审查 SE-4）契约再细一层：force 只管「不看冷却、排在前一次后面」，
+     **内容没变、地址没变就跳过**（以前 force 一律真写：切一次后台传 9 次、每 8 秒整份重传）；
+     孩子自己点的「立即同步」用 rewrite —— 不管变没变都真写一次。 */
   const r2 = await M.syncNow({ force: true });
-  ok(r2.ok === true && r2.skipped !== true, 'force 必须真写，绝不因指纹未变而跳过(v1039)');
+  ok(r2.ok === true && r2.skipped === true && r2.reason === 'unchanged', 'force + 内容没变 + 地址没变 → 跳过（审查 SE-4：不再白传一整份）');
+  const r2b = await M.syncNow({ force: true, rewrite: true });
+  ok(r2b.ok === true && r2b.skipped !== true, 'rewrite（「立即同步」）必须真写，绝不因指纹未变而跳过(v1039)');
   /* v1039 的原话是「force 只绕过冷却，不制造重复流量」。
      紧跟一次 force 之后的非 force 同步应当被**冷却**挡下 —— 这才是防刷流量的那道闸。 */
   const rSkip = await M.syncNow({});

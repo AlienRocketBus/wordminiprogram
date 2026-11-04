@@ -1,0 +1,16 @@
+{
+ "LAG": 500,
+ "READFAIL": true,
+ "STYLE": "request_failed",
+ "results": [
+  "G1: config | 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate",
+  "G2: config | 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⟨DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate",
+  "G3: OK"
+ ],
+ "winners": 1,
+ "configLosers": 2,
+ "takenLosers": 0,
+ "dupRejections": 2,
+ "aborted": 6,
+ "seatDocs": 1
+}

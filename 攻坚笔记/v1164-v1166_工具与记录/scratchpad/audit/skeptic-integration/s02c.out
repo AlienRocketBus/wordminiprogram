@@ -1,0 +1,4 @@
+A visibleMs 1802 | 20s after tap: server requests 632 MB 32.99 html 18 /island_animal.html /land_map.html?v=1163 /island_land1.html /island_season.html?v=1163 /land_map.html?v=1163 /island_land1.html /boss_hall.html?v=1163&warm=1 /island_season.html?v=1163 /season_showcase.html?v=1163&warm=1 /land_map.html?v=1163 /island_land1.html /boss_hall.html?v=1163&warm=1 /spelling_bee.html?v=1163&warm=1 /season_showcase.html?v=1163&warm=1 /boss_hall.html?v=1163&warm=1 /spelling_bee.html?v=1163&warm=1 /season_showcase.html?v=1163&warm=1 /spelling_bee.html?v=1163&warm=1
+A renderer TaskDuration s 16.82 ScriptDuration s 2.03 JSHeapUsedMB 12.8 Documents 9 Frames 9 frames() 8
+B visibleMs 3676 | 20s after tap: server requests 252 MB 13.43 html 1 /island_animal.html
+B renderer TaskDuration s 16.47 ScriptDuration s 1.73 JSHeapUsedMB 7.2 Documents 3 Frames 3 frames() 2

@@ -1,0 +1,41 @@
+{
+  "ver": "v1164",
+  "page": "pk",
+  "fail": "504",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "calls": [
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44013/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44013/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44013/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:44013/vendor_cloudbase_esm_v965.js"
+    }
+  ],
+  "vendorReqAfterReload": 1,
+  "signedStill": true,
+  "ladderScreen": "× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：云端会话不可用：Failed to fetch dynamically imported module: http://127.0.0.1:44013/vendor_cloudbase_esm_v965.js",
+  "ladderAfterMs": 9161,
+  "afterRetry": "× ⚡ 正在找对手… 🔍 正在找 900 ~ 1100 分的对手 已等 4 秒 · 等得越久范围放得越宽 网络不太顺，正在重试… 没人的时候会自动开一间等着 有人进来就立刻开打 取消，回天梯",
+  "bust": true,
+  "afterReload": {
+    "ok": true
+  },
+  "errors": []
+}

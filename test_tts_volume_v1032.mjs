@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_tts_volume_v1032.mjs —— 全站发音音量统一 + 可调回归
  * 事故：用户反映各处单词发音音量不一致（拼写蜂偏小、别处偏大）。
  *   审计发现：部分发音点显式设了音量，**另一部分从不设置**（走浏览器默认），
@@ -6,9 +7,9 @@
  *    故意为之，不得改动。）
  * 合同：① 模块在四个入口页均加载且**位置足够早**（要在其它脚本发音前完成打补丁）；
  *       ② 语音合成与 Audio 都被统一接管；③ 设置页有音量滑杆且改动能持久化。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -34,7 +35,7 @@ ok(/a\.volume = 0\.01/.test(tpl), 'iOS 音频解锁探针(0.01)保持原样');
 /* ② 运行时：模块接管语音合成与 Audio */
 const page=await browser.newPage({viewport:{width:390,height:844}});
 page.on('pageerror',e=>errs.push(String(e.message).slice(0,70)));
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2600);
 const r = await page.evaluate(()=>{

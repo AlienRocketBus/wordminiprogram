@@ -28,6 +28,9 @@ const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROM
 const errors = [];
 async function freshPage(){
   const page = await browser.newPage({ viewport:{width:390,height:844}, isMobile:true, hasTouch:true, serviceWorkers:'block' });
+  /* 🔴v1164：测试绝不联网 —— 腾讯云的请求就地掐断（以前真的往外发，走代理时报
+     ERR_TUNNEL_CONNECTION_FAILED，换个网络环境结果就不一样）。掐断报的是 net::ERR_FAILED，仍在下面的豁免里。 */
+  await page.route(u => /(tencentcloudapi\.com|tcloudbase\.com|tcloudbasegateway\.com|tcloudbaseapp\.com|myqcloud\.com|qcloud\.com)$/.test(new URL(u).hostname), r => r.abort().catch(()=>{}));
   page.on('pageerror', e=>errors.push('PAGE:'+String(e.message).slice(0,160)));
   /* 🔴v1003: 容器网络白名单不含 tencentcloudapi.com, 点自检必然报连接失败——
      属测试环境限制而非产品缺陷。仅豁免"指向腾讯云端点的网络类错误", 其余一律照抓。 */
@@ -259,7 +262,7 @@ async function gotoIsland(page, file='island_animal.html'){
 {
   console.log('S7 大脑五态横幅');
   const pgA = await freshPage();
-  await pgA.addInitScript(()=>localStorage.clear());
+  await pgA.addInitScript(()=>{ if (window.top === window) localStorage.clear(); });
   await gotoIsland(pgA);
   await pgA.waitForSelector('#hr_review_banner', { timeout: 15000 });
   await pgA.waitForTimeout(900);
@@ -286,7 +289,7 @@ async function gotoIsland(page, file='island_animal.html'){
   await pgA.close();
   const pgB = await freshPage();
   await pgB.addInitScript(()=>{
-    localStorage.clear();
+    if (window.top === window) localStorage.clear();
     const wr={}; for(let i=0;i<30;i++) wr[String(i)]=1;
     localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
   });
@@ -310,7 +313,7 @@ async function gotoIsland(page, file='island_animal.html'){
 {
   console.log('S8 亮色板补装修');
   const pg = await freshPage();
-  await pg.addInitScript(()=>{ localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud'); });
+  await pg.addInitScript(()=>{ if (window.top === window) localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud'); });
   await gotoIsland(pg);
   const r = await pg.evaluate(()=>{
     const probe=document.createElement('div');
@@ -344,7 +347,7 @@ async function gotoIsland(page, file='island_animal.html'){
   const lum=(c)=>{const m=(c||'').match(/(\d+),\s*(\d+),\s*(\d+)/); return m? (+m[1]*.299+ +m[2]*.587+ +m[3]*.114) : -1;};
   for(const [pal, wantLightBg] of [['cloud', true], [null, false]]){
     const pg = await freshPage();
-    await pg.addInitScript(p=>{ localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
+    await pg.addInitScript(p=>{ if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
       const wr={}; for(let i=0;i<7;i++) wr[String(i)]=1;
       localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr, srs:{}}}}));
     }, pal);

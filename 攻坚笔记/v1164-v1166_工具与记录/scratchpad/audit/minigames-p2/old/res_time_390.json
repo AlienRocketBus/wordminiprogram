@@ -1,0 +1,5 @@
+{
+ "island": "time",
+ "fatal": "frame.evaluate: Target page, context or browser has been closed\n    at fe (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/sweep.mjs:34:40)\n    at game (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/sweep.mjs:183:25)\n    at async runIsland (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/sweep.mjs:342:3)\n    at async file:///tmp/claude-0/-home-user/b052e910-3530-5",
+ "totalMs": 112549
+}

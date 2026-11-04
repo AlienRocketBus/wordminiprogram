@@ -1,0 +1,69 @@
+{
+ "samples": [
+  {
+   "ms": 60,
+   "real": 304,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "0",
+   "loading": "none"
+  },
+  {
+   "ms": 200,
+   "real": 945,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "0",
+   "loading": "flex"
+  },
+  {
+   "ms": 400,
+   "real": 1674,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  },
+  {
+   "ms": 700,
+   "real": 2162,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  },
+  {
+   "ms": 1100,
+   "real": 2489,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  },
+  {
+   "ms": 1600,
+   "real": 2736,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  },
+  {
+   "ms": 2200,
+   "real": 3020,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  },
+  {
+   "ms": 3000,
+   "real": 3341,
+   "wrap": "block",
+   "wrapBg": "rgb(12, 21, 56)",
+   "frameOpacity": "1",
+   "loading": "none"
+  }
+ ],
+ "errs": []
+}

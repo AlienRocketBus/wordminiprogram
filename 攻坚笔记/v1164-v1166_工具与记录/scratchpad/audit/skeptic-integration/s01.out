@@ -1,0 +1,15 @@
+onboard {"skipped":true,"r":{"ok":true,"x":325,"y":260,"topHit":"BUTTON#__hsOnbSkip."}}
+open island_animal.html tap {"ok":true,"x":69,"y":422,"topHit":"DIV#.island-en"} visibleMs 2277 {"wrap":"block","op":"1","path":"island_animal.html","rs":"interactive","hist":3,"state":"{\"hsnIsland\":\"island_animal.html\"}","scrollY":616}
+welcome {"dismissed":true,"r":{"ok":true,"x":195,"y":596,"topHit":"IFRAME#islandFrame."}}
+close animal tap {"ok":true,"x":355,"y":31,"topHit":"IFRAME#islandFrame."} hiddenMs 1394 {"wrap":"none","op":"1","path":"island_animal.html","rs":"complete","hist":3,"state":"null","scrollY":616}
+after close animal {"wrap":"none","op":"1","path":"island_animal.html","rs":"complete","hist":3,"state":"null","scrollY":616}
+open island_food.html tap {"ok":true,"x":195,"y":422,"topHit":"DIV#.island-en"} visibleMs 3875 {"wrap":"block","op":"1","path":"island_food.html","rs":"loading","hist":3,"state":"{\"hsnIsland\":\"island_food.html\"}","scrollY":618}
+welcome {"dismissed":true,"r":{"ok":true,"x":195,"y":596,"topHit":"IFRAME#islandFrame."}}
+close food tap {"ok":true,"x":355,"y":30,"topHit":"IFRAME#islandFrame."} hiddenMs 1391 {"wrap":"none","op":"1","path":"island_food.html","rs":"complete","hist":3,"state":"null","scrollY":618}
+6s after closing food: {"wrap":"none","op":"1","path":"island_animal.html","rs":"complete","hist":3,"state":"null","scrollY":618}
+iframe navigations since food close: [{"dt":1678,"url":"island_animal.html"}]
+requests in 6s on home: 311 html: /island_season.html?v=1163 /island_animal.html /land_map.html?v=1163 /island_season.html?v=1163 /island_land1.html
+wordIslandAnimal.lastSaveTime before/after: 1793710575236 1793710594265 REWRITTEN
+re-enter food visibleMs 2864 jsMarkSurvived null {"wrap":"block","op":"1","path":"island_food.html","rs":"interactive","hist":3,"state":"{\"hsnIsland\":\"island_food.html\"}","scrollY":618}
+welcome shown again on re-enter food: true
+pageerrors: []

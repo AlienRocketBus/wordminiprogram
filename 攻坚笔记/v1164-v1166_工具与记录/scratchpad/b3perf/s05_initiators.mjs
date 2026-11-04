@@ -1,0 +1,15 @@
+import { launch, sleep, BASE, O } from './lib.mjs';
+import fs from 'node:fs';
+const { browser, ctx } = await launch({ init: () => { try { localStorage.setItem('hansen_onboarded','1'); } catch(e){} } });
+const page = await ctx.newPage();
+page.on('dialog', d => d.dismiss().catch(()=>{}));
+const cdp = await ctx.newCDPSession(page);
+await cdp.send('Network.enable');
+const rows = [];
+cdp.on('Network.requestWillBeSent', e => { const i = e.initiator; let by = i.type; if (i.url) by += ' ' + i.url.replace(BASE, ''); else if (i.stack && i.stack.callFrames && i.stack.callFrames[0]) by += ' ' + i.stack.callFrames[0].url.replace(BASE, '') + ':' + i.stack.callFrames[0].lineNumber; rows.push({ url: e.request.url.replace(BASE, ''), by, frame: e.frameId, t: e.timestamp }); });
+await page.goto(BASE + 'index.html'); await sleep(12000);
+const frames = page.frames().map(f => f.url().replace(BASE, ''));
+const interesting = rows.filter(r => /land_map|island_|bosses|woff2|lv0|pk_room|boss_attack|cards\.js/.test(r.url));
+console.log('frames', frames);
+console.log(interesting.map(r => r.url.slice(0, 50) + '  <=  ' + r.by.slice(0, 110)).join('\n'));
+await browser.close();

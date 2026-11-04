@@ -1,0 +1,9 @@
+登录会话持久化 v1031
+  OK  账号模块声明 persistence:local
+  OK  云存档模块同样是 persistence:local
+  OK  两处持久化策略一致(local / local)
+  OK  提供 verifySession 真实探测并导出
+  OK  自检面板已接入会话探测
+  OK  会话失效时给出明确指引
+
+结果: 6 通过 / 0 失败

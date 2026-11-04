@@ -1,0 +1,100 @@
+MODE=claimok
+12.6s A taps 天梯排位 → 开始排位
+19.6s A screen: {"ladder":null,"room":"← 关掉房间 ⏳ 等对手进来 ⏳ 已等 4 秒 房间已经开好了，别人在列表里就能看到你。 等人进来就自动开打。 你开的是 ⚡抢答赛 · 10 个词 （关掉这一页，房间也会一起关掉）"}
+19.6s B taps 天梯排位 → 开始排位
+23.6s B screen: {"ladder":null,"room":"你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 17s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"}
+23.6s A screen: {"ladder":null,"room":"你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 18s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"}
+24.0s B typed #0 "meat" → B: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 17s 肉 m _ _ _ ⏱ 超时了 〔meat 肉〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+24.1s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 18s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+25.5s B typed #1 "computer" → B: "你 0 ⚡抢答赛 0 对手 第 2 / 10 词 · ⏱ 20s 电脑 c _ _ _ _ _ _ _ ⏱ 超时了 〔computer 电脑〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+25.5s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 16s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+26.9s B typed #2 "sweater" → B: "你 0 ⚡抢答赛 0 对手 第 3 / 10 词 · ⏱ 20s 毛衣 s _ _ _ _ _ _ ⏱ 超时了 〔sweater 毛衣〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+26.9s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 15s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+28.3s B typed #3 "orange" → B: "你 0 ⚡抢答赛 0 对手 第 4 / 10 词 · ⏱ 20s 橙子 o _ _ _ _ _ ⏱ 超时了 〔orange 橙子〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+28.3s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 13s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+29.7s B typed #4 "tongue" → B: "你 0 ⚡抢答赛 0 对手 第 5 / 10 词 · ⏱ 20s 舌头 t _ _ _ _ _ ⏱ 超时了 〔tongue 舌头〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+29.7s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 12s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+31.1s B typed #5 "weekend" → B: "你 0 ⚡抢答赛 0 对手 第 6 / 10 词 · ⏱ 20s 周末 w _ _ _ _ _ _ ⏱ 超时了 〔weekend 周末〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+31.1s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 11s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+32.5s B typed #6 "second" → B: "你 0 ⚡抢答赛 0 对手 第 7 / 10 词 · ⏱ 20s 秒 s _ _ _ _ _ ⏱ 超时了 〔second 秒〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+32.5s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 9s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+34.0s B typed #7 "skating" → B: "你 0 ⚡抢答赛 0 对手 第 8 / 10 词 · ⏱ 20s 滑冰 s _ _ _ _ _ _ ⏱ 超时了 〔skating 滑冰〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+34.0s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 8s 肉 m _ _ _ 对手：正在拼… q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+35.4s B typed #8 "owl" → B: "你 0 ⚡抢答赛 0 对手 第 9 / 10 词 · ⏱ 20s 猫头鹰 o _ _ ⏱ 超时了 〔owl 猫头鹰〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+35.4s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 6s 肉 m _ _ _ 对手：对手掉线了…44 秒后判他负 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+36.8s B typed #9 "come" → B: "你 0 ⚡抢答赛 0 对手 第 10 / 10 词 · ⏱ 20s 来 c _ _ _ ⏱ 超时了 〔come 来〕 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+36.8s       A: "你 0 ⚡抢答赛 0 对手 第 1 / 10 词 · ⏱ 5s 肉 m _ _ _ 对手：对手掉线了…44 秒后判他负 q w e r t y u i o p a s d f g h j k l z x c v b n m ⌫"
+134.0s A final: {"ladder":null,"room":"🏆 对手已离场，本局你胜 你 0 分 · 对手 0 分 这一局 答对 0/2 0% 抢先 0次 — 平均 — 每个词 最快 — 这局最快 +20 天梯分 🐝 未定级 · 再打 2 局定级赛 总战绩 1 胜 0 负 · 胜率 100% 再来一局← 回到房间列表"}
+134.0s B final: {"ladder":null,"room":"← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入"}
+A pk record: {"w":1,"l":0,"d":0,"rating":1020,"hist":[{"at":1793693450134,"result":"win","mode":"A","opp":"对手","my":0,"oc":0,"delta":20,"ranked":true}]}
+B pk record: {"w":0,"l":0,"d":0,"rating":1000,"hist":[]}
+
+── store hansen_pk_rooms ──
+
+── op log (dget suppressed) ──
+09:41.756 openid_A qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=0
+09:43.253 openid_A qget    hansen_pk_rooms {"hostId":"+86 13800000001"}  => rows=0
+09:44.263 openid_A qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=0
+09:44.269 openid_A add     hansen_pk_rooms {} {"_id":"rmw0eq91nc2k5ou","status":"open","code":"","hostRating":1000,"isPrivate":false,"ho => {"id":"rmw0eq91nc2k5ou","requestId":"x"}
+09:45.764 openid_A qget    hansen_pk_rooms {"hostId":"+86 13800000001"}  => rows=1
+09:48.779 openid_B qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=1
+09:48.784 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","status":"open","guestId":""} {"status":"playing","guestId":"+86 13800000002","guestName":"无名蜂","startedAt":179369338878 => {"updated":1,"requestId":"x"}
+09:48.795 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestReady":true,"guestBeat":1793693388794,"roundAt":1793693388794} => {"updated":0,"requestId":"x"}
+09:50.279 openid_B qget    hansen_pk_rooms {"hostId":"+86 13800000002"}  => rows=0
+09:50.308 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"hostReady":true,"hostBeat":1793693390307,"roundAt":1793693390307} => {"updated":1,"requestId":"x"}
+09:52.795 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":0} {"winners":["guest"],"round":1,"roundAt":1793693392794} => {"updated":0,"requestId":"x"}
+09:54.212 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":1} {"winners":["guest"],"round":2,"roundAt":1793693394211} => {"updated":0,"requestId":"x"}
+09:55.625 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":2} {"winners":["guest"],"round":3,"roundAt":1793693395624} => {"updated":0,"requestId":"x"}
+09:56.800 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693396799,"guestBeat":1793693396799} => {"updated":0,"requestId":"x"}
+09:57.040 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":3} {"winners":["guest"],"round":4,"roundAt":1793693397039} => {"updated":0,"requestId":"x"}
+09:58.311 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693398310,"hostBeat":1793693398310} => {"updated":1,"requestId":"x"}
+09:58.453 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":4} {"winners":["guest"],"round":5,"roundAt":1793693398451} => {"updated":0,"requestId":"x"}
+09:59.870 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":5} {"winners":["guest"],"round":6,"roundAt":1793693399869} => {"updated":0,"requestId":"x"}
+10:01.288 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":6} {"winners":["guest"],"round":7,"roundAt":1793693401287} => {"updated":0,"requestId":"x"}
+10:02.704 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":7} {"winners":["guest"],"round":8,"roundAt":1793693402702} => {"updated":0,"requestId":"x"}
+10:04.122 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":8} {"winners":["guest"],"round":9,"roundAt":1793693404121} => {"updated":0,"requestId":"x"}
+10:04.801 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693404799,"guestBeat":1793693404799} => {"updated":0,"requestId":"x"}
+10:05.544 openid_B qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":9} {"winners":["guest"],"round":10,"roundAt":1793693405543} => {"updated":0,"requestId":"x"}
+10:06.317 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693406312,"hostBeat":1793693406312} => {"updated":1,"requestId":"x"}
+10:06.957 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:08.967 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:10.325 openid_A qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":0} {"winners":[""],"round":1,"roundAt":1793693410323} => {"updated":1,"requestId":"x"}
+10:10.982 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:12.799 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693412798,"guestBeat":1793693412798} => {"updated":0,"requestId":"x"}
+10:12.992 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:14.312 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693414311,"hostBeat":1793693414311} => {"updated":1,"requestId":"x"}
+10:15.002 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:17.010 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:19.018 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:20.801 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693420799,"guestBeat":1793693420799} => {"updated":0,"requestId":"x"}
+10:21.027 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:22.311 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693422311,"hostBeat":1793693422311} => {"updated":1,"requestId":"x"}
+10:23.037 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:25.049 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:27.059 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:28.798 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693428797,"guestBeat":1793693428797} => {"updated":0,"requestId":"x"}
+10:29.067 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:30.312 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693430311,"hostBeat":1793693430311} => {"updated":1,"requestId":"x"}
+10:31.076 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:31.726 openid_A qupdate hansen_pk_rooms {"_id":"rmw0eq91nc2k5ou","round":1} {"winners":["",""],"round":2,"roundAt":1793693431725} => {"updated":1,"requestId":"x"}
+10:33.087 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:35.098 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:36.801 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693436800,"guestBeat":1793693436800} => {"updated":0,"requestId":"x"}
+10:37.107 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:38.313 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693438312,"hostBeat":1793693438312} => {"updated":1,"requestId":"x"}
+10:39.115 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:41.126 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:43.134 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:44.802 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693444799,"guestBeat":1793693444799} => {"updated":0,"requestId":"x"}
+10:45.142 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:46.311 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"heartbeatAt":1793693446310,"hostBeat":1793693446310} => {"updated":1,"requestId":"x"}
+10:47.153 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:49.161 openid_B dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"guestScore":0} => {"updated":0,"requestId":"x"}
+10:50.132 openid_A dupdate hansen_pk_rooms rmw0eq91nc2k5ou {"status":"done","endedBy":"abandon","endedAt":1793693450131,"hostScore":1,"guestScore":0} => {"updated":1,"requestId":"x"}
+10:50.155 openid_A dremove hansen_pk_rooms rmw0eq91nc2k5ou  => {"deleted":1,"requestId":"x"}
+10:51.173 openid_B qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=0
+10:52.674 openid_B qget    hansen_pk_rooms {"hostId":"+86 13800000002"}  => rows=0
+
+── page errors/dialogs ──
+A: []
+B: [ 'console: [对战] 原始错误：房间已不存在' ]

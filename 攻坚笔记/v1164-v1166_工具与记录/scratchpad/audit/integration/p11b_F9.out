@@ -1,0 +1,18 @@
+   [islandFrame navigated] about:blank 00.983
+   [islandFrame navigated] island_animal.html 06.905
+OPEN island_animal.html reveal 2640 hlen 3
+  CLOSE 170 islandFrame= island_animal.html hlen 3 state null 
+  tree after close: index.html /   island_animal.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /     spelling_bee.html?v=1163&warm=1 /       
+   [islandFrame navigated] island_food.html 19.253
+OPEN island_food.html reveal 1471 hlen 3
+  CLOSE 32 islandFrame= island_food.html hlen 3 state null 
+  tree after close: index.html /   island_food.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /     season_showcase.html?v=1163&warm=1 /       island_season.html?v=1163
+   [islandFrame navigated] island_sports.html 30.258
+OPEN island_sports.html reveal 3552 hlen 3
+  CLOSE 182 islandFrame= island_sports.html hlen 3 state null 
+  tree after close: index.html /   island_sports.html /     land_map.html?v=1163 /     island_season.html?v=1163 /     season_showcase.html?v=1163&warm=1
+   [islandFrame navigated] island_job.html 45.192
+OPEN island_job.html reveal 3525 hlen 3
+  CLOSE 104 islandFrame= island_job.html hlen 3 state null 
+  tree after close: index.html /   island_job.html /     land_map.html?v=1163 /     island_season.html?v=1163 /     boss_hall.html?v=1163&warm=1 /       land_map.html?v=1163
+errors []

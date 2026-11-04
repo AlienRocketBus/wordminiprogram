@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_ask_mode_v1102.mjs —— 两种出题形式（看中文 / 听发音）
  *
  * 用户点破：
@@ -23,7 +24,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('两种出题形式 v1102');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_ui_v1065.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_ui_v1065.js'), 'utf8');
 const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ① 两种形式都定义了 */
@@ -90,7 +91,7 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 {
   ok(/data-ask/.test(code), '★ 开房时可选出题形式');
   ok(/askMode:\s*_askMode/.test(code), '★ 出题形式随房间创建一起存下');
-  const room = fs.readFileSync('/home/claude/work/repo/hansen_pk_room_v1065.js', 'utf8');
+  const room = fs.readFileSync((__HSN_ROOT + 'hansen_pk_room_v1065.js'), 'utf8');
   ok(/askMode:/.test(room), '★ 房间文档里有 askMode 字段（双方一致）');
 }
 

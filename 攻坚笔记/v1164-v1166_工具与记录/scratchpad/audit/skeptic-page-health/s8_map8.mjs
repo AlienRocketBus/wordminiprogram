@@ -1,0 +1,16 @@
+import { startServer, log } from './srv.mjs';
+import { launch, newCtx } from './lib.mjs';
+const { srv, port } = await startServer();
+const ORIGIN = `http://127.0.0.1:${port}`;
+const browser = await launch();
+const ctx = await newCtx(browser, 390);
+const page = await ctx.newPage();
+const errs = []; let navs = 0;
+page.on('pageerror', e => errs.push(String(e.message).slice(0, 90)));
+page.on('framenavigated', f => { if (f === page.mainFrame()) navs++; });
+await page.goto(`${ORIGIN}/map8/real_map.html`, { waitUntil: 'load' }).catch(e => errs.push('goto ' + e.message.slice(0, 60)));
+await page.waitForTimeout(6000);
+const undef = log.filter(e => e.p === '/map8/undefined').length;
+const uniq = [...new Set(errs)].slice(0, 5);
+console.log(JSON.stringify({ pageerrors: errs.length, uniq, mainFrameNavigations: navs, undefined404: undef }));
+await browser.close(); srv.close();

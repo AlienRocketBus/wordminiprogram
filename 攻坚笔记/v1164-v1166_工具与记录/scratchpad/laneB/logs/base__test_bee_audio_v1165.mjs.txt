@@ -1,0 +1,27 @@
+
+▶ island_season.html 里的拼写蜂
+  ✅ 拼写蜂打开了
+  ✅ 念了 10 个本岛的词（nervous, anxious, curious, proud…）
+  ❌ /words/ 下没有出错的响应（404 words/nervous.mp3?v215 | 404 words/anxious.mp3?v215 | 404 words/curious.mp3?v215）
+  ❌ 文件都在，一次手机朗读都没用（nervous, anxious, curious）
+
+▶ island_land3.html 里的拼写蜂
+  ✅ 拼写蜂打开了
+  ✅ 念了 10 个本岛的词（suddenly, immediately, recently, finally…）
+  ✅ /words/ 下没有出错的响应（无）
+  ✅ 文件都在，一次手机朗读都没用（无）
+
+▶ island_food.html 里的拼写蜂
+  ✅ 拼写蜂打开了
+  ✅ 念了 10 个本岛的词（apple, banana, orange, grape…）
+  ✅ /words/ 下没有出错的响应（无）
+  ✅ 文件都在，一次手机朗读都没用（无）
+
+▶ island_action.html 里的拼写蜂
+  ✅ 拼写蜂打开了
+  ✅ 念了 11 个本岛的词（cook, go, come, run…）
+  ✅ /words/ 下没有出错的响应（无）
+  ✅ 文件都在，一次手机朗读都没用（无）
+  ❌ cook 要的是岛上的 words/cook_action.mp3（实际：words/cook.mp3）
+
+❌ 3 项失败

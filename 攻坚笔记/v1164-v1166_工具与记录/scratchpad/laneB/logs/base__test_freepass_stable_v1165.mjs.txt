@@ -1,0 +1,6 @@
+  ❌ island_animal.html（第一次打开，跑过 v330 迁移）：卡册全开标记还在、没被删过（删过：/island_animal.html;）
+  ❌ island_food.html（第一次打开，跑过 v330 迁移）：卡册全开标记还在、没被删过（删过：/island_animal.html;/island_food.html;）
+  ❌ island_sports.html（第一次打开，跑过 v330 迁移）：卡册全开标记还在、没被删过（删过：/island_animal.html;/island_food.html;/island_sports.html;）
+  ✅ 零脚本错误
+
+❌ 3 项失败

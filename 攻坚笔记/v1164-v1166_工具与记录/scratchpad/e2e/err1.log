@@ -1,0 +1,36 @@
+
+云端出错时的提示 · 真 SDK 端到端（v1164）
+
+
+── ① hansen_pk_rooms 设成了「无权限」（ADMINONLY · rules） ──
+  OK  [甲] 手机号验证码登录 uid=1527283253218073236
+  OK  天梯：显示「云端设置还差一步」（用了 0 秒；看到：× 🏆 天梯排位 🛠️ 云端设置还差一步 数据库集合「hansen_pk_rooms」的权限不允许这样读写，请在云开发控制台把它设成「读取全部数据，修改本人数据」 这不是你的问题，把这一屏截图发给负责的老师就好。 再试一次 技术信息：DATABASE_PERMISSION_DENIED | Permission d）
+  OK  说清是哪个集合、该改成什么权限（hansen_pk_rooms →「读取全部数据，修改本人数据」）
+  OK  带着技术信息（原始错误码 DATABASE_PERMISSION_DENIED）
+  OK  中途没有说成「要登录」或「断网」（出现过：正在找对手、云端设置还差一步）
+  XX  测试脚本自己出错：Error: [甲] 点不到「#pkRooms」：等了 10000ms 也没看到「#pkRooms」
+    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:127:17)
+    at async file:///home/user/wordminiprogram/test_cloud_errors_v1164.mjs:71:3
+      [甲 屏幕] 🛠️ ⏎ 这一步没能打开 ⏎ 刚才那个操作没有正常显示出来。 ⏎ 你的进度和天梯分都还在，没有丢。 ⏎ 回到大PK首页 ⏎ 重新找对手
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      37:31.541 小蜂甲 POST /web updateDocument sb_profile → 200
+      37:31.598 小蜂甲 POST /web queryDocument hansen_saves → 200
+      37:31.652 小蜂甲 POST /web queryDocument hansen_saves → 200
+      37:31.949 小蜂甲 POST /web queryDocument sb_profile → 200
+      37:32.410 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      37:32.463 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      37:33.001 小蜂甲 POST /web queryDocument hansen_friends → 200
+      37:33.053 小蜂甲 POST /web addDocument hansen_friends → 200
+      37:33.109 小蜂甲 POST /web queryDocument hansen_friends → 200
+      37:33.904 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      37:33.905 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      37:33.906 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+
+5 通过，1 失败（15 秒）
+失败的：
+  · 测试脚本自己出错：Error: [甲] 点不到「#pkRooms」：等了 10000ms 也没看到「#pkRooms」
+    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:127:17)
+    at async file:///home/user/wordminiprogram/test_cloud_errors_v1164.mjs:71:3
+EXIT 1

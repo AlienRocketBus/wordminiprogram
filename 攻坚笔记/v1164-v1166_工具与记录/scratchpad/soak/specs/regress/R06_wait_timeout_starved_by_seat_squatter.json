@@ -1,0 +1,100 @@
+{
+ "name": "R06_wait_timeout_starved_by_seat_squatter",
+ "bug": "R6 2-minute wait never times out while seats keep appearing",
+ "spec": {
+  "seed": 214,
+  "profile": "ci",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 3,
+   "queryLagMul": 1.31,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "duplicate_write",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.79,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x214",
+    "name": "小明",
+    "rating": 970,
+    "skew": 0,
+    "net": {
+     "base": 129,
+     "jitter": 135,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.59,
+     "minMs": 3380,
+     "maxMs": 10971,
+     "slowP": 0.02
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 794,
+      "act": "create",
+      "mode": "A",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   }
+  ],
+  "adversary": {
+   "uid": "adv214",
+   "name": "捣蛋鬼",
+   "rating": 1000,
+   "skew": 0,
+   "net": {
+    "base": 224,
+    "jitter": 128,
+    "spikeP": 0.01,
+    "faultRate": 0,
+    "faultMix": {
+     "drop": 1,
+     "lost": 1.5,
+     "e5xx": 1,
+     "slow": 0.7
+    }
+   },
+   "adv": {
+    "start": 15364,
+    "period": 3465,
+    "squatSeats": {
+     "depth": 2,
+     "acked": false,
+     "forge": true,
+     "beat": false
+    }
+   }
+  }
+ }
+}

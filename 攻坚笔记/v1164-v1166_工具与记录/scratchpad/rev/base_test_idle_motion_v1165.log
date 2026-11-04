@@ -1,0 +1,26 @@
+
+▶ M1/M2/M3 美食岛菜单待机
+  ✅ 开头几秒装饰照常动一动（twinkle,worldMapFloat,wmbGlowD,hsnPetFloatSlow,chestSlowGlow）
+  ❌ 装饰动画只动 transform/opacity（超标：wmbGlowD→filter，chestSlowGlow→boxShadow）
+  ❌ 没有永远循环的装饰动画（永远循环：twinkle,worldMapFloat,wmbGlowD,hsnPetFloatSlow,chestSlowGlow）
+  ❌ 星空不再挂什么都不改的 twinkle（animation=twinkle，关键帧还在=true）
+  ❌ 待机 45 秒后没有还在跑的动画（还在跑：twinkle,worldMapFloat,wmbGlowD,hsnPetFloatSlow,chestSlowGlow）
+  ✅ 宝箱没签到时停下来仍留着淡淡的光提醒（opacity=1）
+  ✅ 零脚本错误
+
+▶ M4 系统打开「减少动态效果」
+  ❌ 菜单装饰一开始就不动（还在动：hsnPetFloatSlow）
+  ✅ 零脚本错误
+
+▶ M5/M6/M7 首页待机
+  ❌ 鼠标不动：视差循环一帧都不跑（2 秒内排了 35 帧）
+  ✅ 鼠标动了：视差照常跟着动（11 次）
+  ❌ 鼠标停下、追上之后视差循环自己停（最后 1 秒改了 21 次）
+  ❌ 飞行演员上下浮动不改 margin（关键帧属性：offset,easing,composite,marginTop,computedOffset）
+  ❌ 彩虹标语（每帧改背景位置 + 滤镜，最贵）也歇着（还在跑 2 个）
+  ❌ 12 秒没碰屏幕：星星等装饰歇着（还在闪的星星 80 颗）
+  ✅ 主题演员照常飞（6 个动画）
+  ✅ 手指一碰：星星又动起来（80 颗）
+  ✅ 零脚本错误
+
+❌ 待机动画预算：10 项失败

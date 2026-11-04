@@ -1,0 +1,952 @@
+1	action	1917	go	/ɡəʊ/	去	Let's go to the park.	我们去公园吧。	svg:GO
+2	action	1918	come	/kʌm/	来	Please come here for a minute.	请过来一下。	svg:COME!
+3	action	1919	run	/rʌn/	跑	I run for thirty minutes every day.	我每天跑步三十分钟。	🏃
+4	action	1920	walk	/wɔːk/	走/步行	I walk to school every day.	我每天走路上学。	🚶
+5	action	1921	jump	/dʒʌmp/	跳	Try not to jump on the bed.	别在床上蹦跳。	svg:
+6	action	1922	sit	/sɪt/	坐	Please sit down.	请坐下。	svg:
+7	action	1923	stand	/stænd/	站	Stand up, please.	请站起来。	🧍
+8	action	1924	wake	/weɪk/	醒来/叫醒	I wake up at seven every day.	我每天七点醒来。	⏰
+9	action	1925	sleep	/sliːp/	睡觉	I usually go to sleep around ten.	我一般十点左右睡觉。	😴
+10	action	1928	eat	/iːt/	吃	Let's go eat something.	我们去吃点东西吧。	🍽️
+11	action	1929	drink	/drɪŋk/	喝	You should drink more water.	你应该多喝水。	🥤
+12	action	1930	wash	/wɒʃ/	洗	Wash your hands before you eat.	吃饭前洗手。	🚿
+13	action	1931	clean	/kliːn/	打扫/弄干净	Please clean your room today.	今天请你打扫一下房间。	🧹
+14	action	1932	cook	/kʊk/	做饭/烹饪	My dad cooks dinner every Sunday.	我爸爸每个周日做晚饭。	🍳
+15	action	1933	sing	/sɪŋ/	唱歌	My sister loves to sing songs.	我妹妹喜欢唱歌。	🎤
+16	action	1934	dance	/dɑːns/	跳舞	I love to dance to music.	我喜欢跟着音乐跳舞。	💃
+17	action	1935	swim	/swɪm/	游泳	I learned to swim when I was six.	我六岁学会了游泳。	🏊
+18	action	1936	play	/pleɪ/	玩/演奏	Let's play together.	我们一起玩吧。	🎮
+19	action	1937	ride	/raɪd/	骑/乘坐	I learned to ride a bike when I was six.	我六岁学会骑自行车。	🚴
+20	action	1938	fly	/flaɪ/	飞/坐飞机	Have you ever flown on a plane?	你坐过飞机吗?	✈️
+21	action	1941	read	/riːd/	读/阅读	I read English books every day.	我每天读英语书。	📖
+22	action	1942	write	/raɪt/	写	Please write your name here.	请在这里写下你的名字。	✍️
+23	action	1943	draw	/drɔː/	画画	She drew a picture of her family.	她画了一幅她家人的画。	🖌️
+24	action	1944	speak	/spiːk/	说/讲	Do you speak English?	你会说英语吗?	🗣️
+25	action	1945	talk	/tɔːk/	说话/聊	Let's talk about it later.	我们晚点再聊吧。	svg:...|...
+26	action	1946	say	/seɪ/	说	What did you just say?	你刚才说什么?	svg:Hi!
+27	action	1947	ask	/ɑːsk/	问	Can I ask you a question?	我能问你一个问题吗?	❓
+28	action	1948	answer	/ˈɑːnsə/	回答	Please answer the question.	请回答这个问题。	💬
+29	action	1949	listen	/ˈlɪsn/	听	Listen carefully to the teacher.	认真听老师讲课。	👂
+30	action	1950	hear	/hɪə/	听到	I can hear music coming from next door.	我能听到隔壁传来的音乐声。	svg:!
+31	action	1951	think	/θɪŋk/	认为/想	Let me think about it.	让我想一想。	🤔
+32	action	1952	know	/nəʊ/	知道	I don't know what to say.	我不知道说什么好。	svg:✓
+33	action	1953	learn	/lɜːn/	学习	We learn English at school.	我们在学校学英语。	📚
+34	action	1954	teach	/tiːtʃ/	教	My mom teaches me how to cook.	我妈妈教我做饭。	👨‍🏫
+35	action	1957	open	/ˈəʊpən/	打开	Please open the door.	请打开门。	🔓
+36	action	1958	close	/kləʊz/	关闭	Please close the window.	请关上窗户。	🔒
+37	action	1959	give	/ɡɪv/	给	Please give me a pen.	请给我一支笔。	🎁
+38	action	1960	take	/teɪk/	拿/带	Please take this bag.	请拿着这个包。	svg:TAKE!
+39	action	1961	put	/pʊt/	放	Put your shoes by the door.	把鞋子放在门边。	svg:
+40	action	1962	get	/ɡet/	得到/拿到	I got a gift from my mom.	我得到妈妈送的礼物。	svg:♥|✦|✦|GOT IT!
+41	action	1963	buy	/baɪ/	买	Where did you buy that?	你在哪里买的?	🛒
+42	action	1964	sell	/sel/	卖	They sell fresh fruit here.	他们在这里卖新鲜水果。	svg:$9.99|$|SALE!
+43	action	1965	make	/meɪk/	做/制作	My mom can make a cake.	我妈妈会做蛋糕。	svg:✦|✦
+44	action	1966	use	/juːz/	使用	Can I use your phone?	我能用一下你的手机吗?	svg:USE
+45	action	1967	catch	/kætʃ/	接/抓	The cat tried to catch a mouse.	猫想抓住一只老鼠。	svg:CATCH!
+46	action	1968	throw	/θrəʊ/	扔	Don't throw stones at the dog.	别朝狗扔石头。	svg:
+47	action	1969	push	/pʊʃ/	推	Push the door to open it.	推一下门把它打开。	svg:BOX|!
+48	action	1970	pull	/pʊl/	拉	Pull the rope as hard as you can.	使劲拉绳子。	svg:BOX
+49	action	1971	carry	/ˈkæri/	搬/拿/背	Can you carry this bag for me?	你能帮我拿一下这个包吗?	svg:BOX|!
+50	action	1972	pick	/pɪk/	摘/拿/挑选	Pick a card from the deck.	从牌堆里挑一张牌。	svg:
+51	action	1973	turn	/tɜːn/	转/转身	Turn around and look at me.	转过身来看着我。	svg:↻
+52	action	1976	like	/laɪk/	喜欢	I really like apples.	我非常喜欢苹果。	👍
+53	action	1977	love	/lʌv/	爱	I love my family.	我爱我的家人。	❤️
+54	action	1978	want	/wɒnt/	想要	What do you want to eat?	你想吃什么?	svg:✦|✦
+55	action	1979	need	/niːd/	需要	I need your help with this.	这件事我需要你的帮助。	svg:NEED!
+56	action	1980	help	/help/	帮助	Can you help me with this?	你能帮我一下吗?	🤝
+57	action	1981	try	/traɪ/	试/尝试	Let's try something different.	我们试试不同的东西吧。	svg:TRY!
+58	action	1982	have	/hæv/	有/吃	I have a question.	我有个问题。	svg:
+59	action	1983	be	/biː/	是/在	I want to be a doctor.	我想当一名医生。	svg:BE|am/is/are
+60	action	1984	do	/duː/	做	What do you do?	你是做什么工作的?	svg:DO IT!
+61	action	1987	see	/siː/	看见	See you tomorrow!	明天见!	👀
+62	action	1988	look	/lʊk/	看	Look at this photo.	看看这张照片。	🔍
+63	action	1989	wait	/weɪt/	等待	Wait a moment, please.	请稍等。	⏳
+64	action	1990	start	/stɑːt/	开始	Let's get started.	我们开始吧。	▶️
+65	action	1991	stop	/stɒp/	停止	Please stop talking in class.	上课请停止说话。	🛑
+66	action	1992	finish	/ˈfɪnɪʃ/	完成	Did you finish your homework?	你作业做完了吗?	🏁
+67	action	1993	drive	/draɪv/	开车/驾驶	My uncle drives a taxi.	我叔叔开出租车。	🚗
+68	adjective	1917	big	/bɪɡ/	大的	That's a big problem.	这是个大问题。	svg:
+69	adjective	1918	small	/smɔːl/	小的	It's a small world.	世界真小。	svg:
+70	adjective	1919	tall	/tɔːl/	高的	How tall are you?	你多高?	svg:
+71	adjective	1920	short	/ʃɔːt/	矮的/短的	His hair is very short.	他的头发很短。	svg:
+72	adjective	1921	long	/lɒŋ/	长的	This is a long story.	这是一个长长的故事。	svg:
+73	adjective	1922	wide	/waɪd/	宽的	The road is wide and flat.	马路又宽又平。	svg:⟵  ⟶
+74	adjective	1923	thin	/θɪn/	瘦的/薄的	She is tall and thin.	她又高又瘦。	svg:
+75	adjective	1924	thick	/θɪk/	厚的/粗的	This book is too thick to finish quickly.	这书太厚一时看不完。	svg:
+76	adjective	1927	heavy	/ˈhevi/	重的	My bag is so heavy today.	我书包今天好重。	svg:
+77	adjective	1928	light	/laɪt/	轻的/明亮的	A feather is very light.	羽毛非常轻。	svg:
+78	adjective	1929	fast	/fɑːst/	快的	Don't drive too fast.	别开太快。	svg:
+79	adjective	1930	slow	/sləʊ/	慢的	The internet is so slow today.	今天网速好慢。	svg:
+80	adjective	1931	hot	/hɒt/	热的/辣的	It's hot outside today.	今天外面很热。	svg:
+81	adjective	1932	cold	/kəʊld/	冷的	Winters are cold here.	这里的冬天很冷。	svg:
+82	adjective	1933	warm	/wɔːm/	温暖的	It feels warm in here.	这里面挺暖和的。	svg:
+83	adjective	1934	cool	/kuːl/	凉爽的/酷的	That's so cool!	太酷了!	svg:
+84	adjective	1935	hard	/hɑːd/	难的/硬的	Math can be hard for me.	数学对我来说有点难。	svg:
+85	adjective	1936	soft	/sɒft/	软的/柔和的	This pillow is really soft.	这个枕头真软。	svg:
+86	adjective	1939	new	/njuː/	新的	I just got a new phone.	我刚买了一部新手机。	svg:
+87	adjective	1940	old	/əʊld/	旧的/老的	My grandpa is very old.	我爷爷年纪很老了。	svg:
+88	adjective	1941	young	/jʌŋ/	年轻的	She's too young to drive.	她太年轻还不能开车。	svg:
+89	adjective	1942	good	/ɡʊd/	好的	This is a good book.	这是一本好书。	svg:
+90	adjective	1943	bad	/bæd/	糟糕的	The weather is bad today.	今天天气真糟糕。	svg:
+91	adjective	1944	nice	/naɪs/	好的/友好的	She is a nice girl.	她是个好女孩。	svg:
+92	adjective	1945	beautiful	/ˈbjuːtɪfl/	美丽的	What a beautiful flower!	多么美丽的花!	svg:
+93	adjective	1946	ugly	/ˈʌɡli/	丑的	Don't say my drawing is ugly.	别说我画的画很丑。	svg:
+94	adjective	1949	happy	/ˈhæpi/	开心的	I feel happy today.	我今天很开心。	svg:
+95	adjective	1950	sad	/sæd/	难过的	I'm sad to hear that.	听到这事我很难过。	svg:
+96	adjective	1951	angry	/ˈæŋɡri/	生气的	Don't be angry with me.	别生我气。	svg:
+97	adjective	1952	tired	/ˈtaɪəd/	累的	I'm tired after the long walk.	走了那么远的路我累了。	svg:Z|z|z
+98	adjective	1953	busy	/ˈbɪzi/	忙的	Dad is always busy at work.	爸爸工作总是很忙。	svg:
+99	adjective	1954	lazy	/ˈleɪzi/	懒的	Don't be lazy, get up!	别懒了,起床!	svg:Z|z
+100	adjective	1955	clever	/ˈklevə/	聪明的	That's clever.	真聪明。	svg:
+101	adjective	1956	kind	/kaɪnd/	善良的/友好的	That's so kind of you.	你真好。	svg:
+102	adjective	1957	brave	/breɪv/	勇敢的	Firefighters are brave people.	消防员是勇敢的人。	svg:
+103	adjective	1958	funny	/ˈfʌni/	好笑的/搞笑的	That's so funny!	太搞笑了!	svg:HA!
+104	adjective	1961	quiet	/ˈkwaɪət/	安静的	Please be quiet in the library.	在图书馆请保持安静。	svg:
+105	adjective	1962	loud	/laʊd/	大声的	Please don't be so loud.	请别这么大声。	svg:
+106	adjective	1963	clean	/kliːn/	干净的	My room is clean and tidy.	我的房间又干净又整洁。	svg:
+107	adjective	1964	dirty	/ˈdɜːti/	脏的	Your shoes are really dirty.	你的鞋子真脏。	svg:
+108	adjective	1965	easy	/ˈiːzi/	容易的	This test is very easy.	这次考试很容易。	svg:1+1=2
+109	adjective	1966	difficult	/ˈdɪfɪkəlt/	困难的	This question is difficult.	这个问题很难。	svg:?
+110	adjective	1967	safe	/seɪf/	安全的	Stay safe on the road.	路上注意安全。	svg:
+111	adjective	1968	dangerous	/ˈdeɪndʒərəs/	危险的	It's dangerous to play with fire.	玩火很危险。	svg:
+112	adjective	1969	same	/seɪm/	相同的	We have the same hobby.	我们有相同的爱好。	svg:
+113	adjective	1970	different	/ˈdɪfrənt/	不同的	We have different hobbies.	我们有不同的爱好。	svg:
+114	adjective	1971	right	/raɪt/	正确的/对的	Your answer is right.	你的答案是对的。	svg:
+115	adjective	1972	wrong	/rɒŋ/	错误的	I wrote the wrong answer.	我写错了答案。	svg:
+116	adjective	1973	free	/friː/	自由的/免费的	Birds are free in the sky.	鸟儿在天空中自由飞翔。	svg:
+117	adjective	1974	sick	/sɪk/	生病的	She is sick and stays home.	她生病了,待在家里。	svg:
+118	adjective	1975	healthy	/ˈhelθi/	健康的	Eat fruit to stay healthy.	吃水果保持健康。	svg:
+119	animal	1917	animal	/ˈænɪml/	动物	A cat is an animal.	猫是一种动物。	🐾
+120	animal	1918	dog	/dɒɡ/	狗	I have a dog at home.	我家里有一只狗。	🐶
+121	animal	1919	cat	/kæt/	猫	My cat loves to sleep.	我的猫很爱睡觉。	🐱
+122	animal	1920	bird	/bɜːd/	鸟	A bird is singing in the tree.	一只鸟正在树上唱歌。	🐦
+123	animal	1921	fish	/fɪʃ/	鱼	There is a fish in the bowl.	鱼缸里有一条鱼。	🐠
+124	animal	1922	rabbit	/ˈræbɪt/	兔子	A rabbit has long ears.	兔子有长长的耳朵。	🐰
+125	animal	1923	mouse	/maʊs/	老鼠	A mouse is hiding under the bed.	一只老鼠躲在床底下。	🐭
+126	animal	1926	horse	/hɔːs/	马	I learned to ride a horse last year.	我去年学会了骑马。	🐴
+127	animal	1927	cow	/kaʊ/	牛	Cows give us milk.	牛给我们牛奶。	🐮
+128	animal	1928	pig	/pɪɡ/	猪	Pigs are smarter than they look.	猪比看上去要聪明。	🐷
+129	animal	1929	sheep	/ʃiːp/	羊	A sheep has soft white wool.	绵羊有柔软的白色羊毛。	🐑
+130	animal	1930	goat	/ɡəʊt/	山羊	A goat can climb steep rocks.	山羊能爬陡峭的岩石。	🐐
+131	animal	1931	chicken	/ˈtʃɪkɪn/	鸡	A chicken lays an egg a day.	一只母鸡一天下一个蛋。	🐔
+132	animal	1932	duck	/dʌk/	鸭子	Ducks love being in the water.	鸭子喜欢待在水里。	🦆
+133	animal	1935	tiger	/ˈtaɪɡə/	老虎	A tiger has orange fur with black stripes.	老虎有橙色的毛和黑色的条纹。	🐯
+134	animal	1936	lion	/ˈlaɪən/	狮子	The lion is known as the king of animals.	狮子被称为百兽之王。	🦁
+135	animal	1937	elephant	/ˈelɪfənt/	大象	An elephant has a long trunk.	大象有长长的鼻子。	🐘
+136	animal	1938	monkey	/ˈmʌŋki/	猴子	A monkey can climb a tree easily.	猴子能轻松地爬树。	🐵
+137	animal	1939	panda	/ˈpændə/	熊猫	A panda eats bamboo all day.	熊猫整天都在吃竹子。	🐼
+138	animal	1940	bear	/beə/	熊	A bear sleeps through the winter.	熊整个冬天都在睡觉。	🐻
+139	animal	1941	wolf	/wʊlf/	狼	A wolf lives in the forest.	狼生活在森林里。	🐺
+140	animal	1942	fox	/fɒks/	狐狸	The fox is a clever animal.	狐狸是一种聪明的动物。	🦊
+141	animal	1943	deer	/dɪə/	鹿	A deer is running through the forest.	一只鹿正穿过森林。	🦌
+142	animal	1946	snake	/sneɪk/	蛇	A snake has a long thin body.	蛇的身体又长又细。	🐍
+143	animal	1947	frog	/frɒɡ/	青蛙	A frog can jump really far.	青蛙能跳得很远。	🐸
+144	animal	1948	turtle	/ˈtɜːtl/	乌龟	A turtle moves very slowly.	乌龟走得很慢。	🐢
+145	animal	1949	butterfly	/ˈbʌtəflaɪ/	蝴蝶	A butterfly has colorful wings.	蝴蝶有五彩缤纷的翅膀。	🦋
+146	animal	1950	bee	/biː/	蜜蜂	A bee makes honey from flowers.	蜜蜂从花儿里采蜜。	🐝
+147	animal	1951	ant	/ænt/	蚂蚁	An ant is small but strong.	蚂蚁虽小但很有力气。	🐜
+148	animal	1952	spider	/ˈspaɪdə/	蜘蛛	A spider has eight legs.	蜘蛛有八条腿。	🕷️
+149	animal	1955	dolphin	/ˈdɒlfɪn/	海豚	A dolphin is a very smart sea animal.	海豚是非常聪明的海洋动物。	🐬
+150	animal	1956	whale	/weɪl/	鲸鱼	A whale is the largest animal on Earth.	鲸是地球上最大的动物。	🐳
+151	animal	1957	shark	/ʃɑːk/	鲨鱼	A shark has sharp teeth.	鲨鱼有锋利的牙齿。	🦈
+152	animal	1958	penguin	/ˈpeŋɡwɪn/	企鹅	A penguin can't fly, but it swims well.	企鹅不会飞,但很会游泳。	🐧
+153	animal	1959	parrot	/ˈpærət/	鹦鹉	A parrot can repeat what you say.	鹦鹉能模仿你说的话。	🦜
+154	animal	1960	eagle	/ˈiːɡl/	老鹰	Eagles can fly very high.	老鹰能飞得很高。	🦅
+155	animal	1961	owl	/aʊl/	猫头鹰	An owl comes out at night.	猫头鹰夜里才出来活动。	🦉
+156	animal	1962	crocodile	/ˈkrɒkədaɪl/	鳄鱼	A crocodile lives near rivers.	鳄鱼生活在河边。	🐊
+157	animal	1963	giraffe	/dʒəˈrɑːf/	长颈鹿	A giraffe has a very long neck.	长颈鹿的脖子非常长。	🦒
+158	animal	1964	zebra	/ˈzebrə/	斑马	A zebra has black and white stripes.	斑马身上有黑白条纹。	🦓
+159	animal	1965	camel	/ˈkæml/	骆驼	A camel can go for days without water.	骆驼能好几天不喝水。	🐫
+160	animal	1966	kangaroo	/ˌkæŋɡəˈruː/	袋鼠	A kangaroo can jump very high.	袋鼠能跳得非常高。	🦘
+161	body	1917	head	/hed/	头	I bumped my head on the door.	我的头撞到门上了。	🗣️
+162	body	1918	hair	/heə/	头发	She has long black hair.	她有一头乌黑的长发。	💇
+163	body	1919	face	/feɪs/	脸	I wash my face every morning.	我每天早上洗脸。	😀
+164	body	1922	eye	/aɪ/	眼睛	Her eyes are bright and beautiful.	她的眼睛明亮又漂亮。	👁️
+165	body	1923	ear	/ɪə/	耳朵	Rabbits have long ears.	兔子有长长的耳朵。	👂
+166	body	1924	nose	/nəʊz/	鼻子	My nose is itchy.	我的鼻子痒痒的。	👃
+167	body	1925	mouth	/maʊθ/	嘴巴	Open your mouth, please.	请张开嘴。	👄
+168	body	1926	tooth	/tuːθ/	牙齿	I lost a tooth yesterday.	我昨天掉了一颗牙。	🦷
+169	body	1927	teeth	/tiːθ/	牙齿（复数）	Brush your teeth twice a day.	一天刷两次牙。	svg:TEETH (复数)
+170	body	1928	lip	/lɪp/	嘴唇	Her lips are red.	她的嘴唇是红色的。	💋
+171	body	1929	chin	/tʃɪn/	下巴	He rested his chin on his hand.	他用手托着下巴。	svg:CHIN|下巴
+172	body	1930	tongue	/tʌŋ/	舌头	Stick out your tongue.	把舌头伸出来。	👅
+173	body	1931	cheek	/tʃiːk/	脸颊	She kissed me on the cheek.	她在我脸颊上亲了一下。	svg:CHEEK 脸颊
+174	body	1934	neck	/nek/	脖子	A giraffe has a long neck.	长颈鹿的脖子很长。	svg:NECK|脖子
+175	body	1935	shoulder	/ˈʃəʊldə/	肩膀	He tapped me on the shoulder.	他拍了拍我的肩膀。	svg:SHOULDER 肩膀
+176	body	1936	arm	/ɑːm/	手臂	Raise your arms above your head.	把手臂举过头顶。	💪
+177	body	1937	elbow	/ˈelbəʊ/	手肘	Don't put your elbows on the table.	别把手肘放在桌子上。	svg:★|ELBOW|胳膊肘
+178	body	1938	hand	/hænd/	手	Wash your hands before eating.	吃饭前要洗手。	✋
+179	body	1939	finger	/ˈfɪŋɡə/	手指	I cut my finger on the knife.	我被刀割伤了手指。	👆
+180	body	1940	thumb	/θʌm/	大拇指	I cut my thumb yesterday.	我昨天割伤了大拇指。	👍
+181	body	1941	wrist	/rɪst/	手腕	She wears a bracelet on her wrist.	她手腕上戴了一只手镯。	svg:WRIST|手腕
+182	body	1942	chest	/tʃest/	胸膛	I felt a pain in my chest.	我感觉胸口一阵疼。	svg:★|CHEST 胸
+183	body	1943	stomach	/ˈstʌmək/	胃/肚子	My stomach hurts.	我肚子疼。	svg:★|STOMACH 胃/肚
+184	body	1944	back	/bæk/	背	My back hurts from sitting too long.	我坐久了背疼。	svg:★|BACK 背
+185	body	1947	leg	/leɡ/	腿	My legs are tired from walking.	我走得腿都酸了。	🦵
+186	body	1948	knee	/niː/	膝盖	I hurt my knee playing football.	我踢足球时伤了膝盖。	svg:★|KNEE 膝盖
+187	body	1949	foot	/fʊt/	脚	My foot has fallen asleep.	我的脚麻了。	🦶
+188	body	1950	feet	/fiːt/	脚（复数）	My feet are sore from walking.	我走得脚都酸了。	svg:×2|FEET (复数)
+189	body	1951	toe	/təʊ/	脚趾	I stubbed my toe on the table.	我的脚趾撞到桌子上了。	svg:TOE|脚趾
+190	body	1952	heel	/hiːl/	脚后跟	My heels hurt after the long run.	长跑之后我的脚后跟很疼。	svg:★|HEEL 脚后跟
+191	body	1955	skin	/skɪn/	皮肤	My skin gets dry in winter.	我皮肤冬天会变干。	svg:SKIN 皮肤
+192	body	1956	bone	/bəʊn/	骨头	Dogs love to chew bones.	狗很喜欢啃骨头。	🦴
+193	body	1957	heart	/hɑːt/	心脏	My heart is beating fast.	我的心跳得很快。	❤️
+194	body	1958	brain	/breɪn/	大脑	Use your brain!	动动脑子!	🧠
+195	body	1959	blood	/blʌd/	血液	My blood type is O.	我是 O 型血。	🩸
+196	city	1917	city	/ˈsɪti/	城市	I live in a big city.	我住在一座大城市里。	🏙️
+197	city	1918	town	/taʊn/	城镇	My town is small and quiet.	我住的小镇又小又安静。	🏘️
+198	city	1919	village	/ˈvɪlɪdʒ/	村庄	My grandpa lives in a small village.	我爷爷住在一个小村庄里。	🛖
+199	city	1920	country	/ˈkʌntri/	国家	Which country are you from?	你来自哪个国家?	🌐
+200	city	1921	farm	/fɑːm/	农场	There are cows on my uncle's farm.	我叔叔的农场上有几头奶牛。	🚜
+201	city	1924	hospital	/ˈhɒspɪtl/	医院	I had to go to the hospital last night.	我昨晚不得不去医院。	🏥
+202	city	1925	bank	/bæŋk/	银行	I'm going to the bank later.	我等会儿要去银行。	🏦
+203	city	1926	post office	/pəʊst ˈɒfɪs/	邮局	I mailed a letter at the post office.	我在邮局寄了封信。	📮
+204	city	1927	police station	/pəˈliːs steɪʃn/	警察局	The police station is just down the street.	警察局就在街那边。	🚓
+205	city	1928	fire station	/ˈfaɪə steɪʃn/	消防站	A red truck pulled out of the fire station.	一辆红色卡车从消防站开出来。	🚒
+206	city	1931	shop	/ʃɒp/	商店	I bought a small toy at the shop.	我在商店买了一个小玩具。	🛍️
+207	city	1932	supermarket	/ˈsuːpəmɑːkɪt/	超市	We do our shopping at the supermarket.	我们在超市买东西。	🛒
+208	city	1933	market	/ˈmɑːkɪt/	市场	The market is busy on weekends.	周末市场很热闹。	🥬
+209	city	1934	hotel	/həʊˈtel/	酒店	We're staying at a nice hotel by the sea.	我们住在一家海边的酒店。	🏨
+210	city	1935	cinema	/ˈsɪnəmə/	电影院	Let's go to the cinema tonight.	今晚我们去电影院吧。	🎬
+211	city	1936	museum	/mjuˈziːəm/	博物馆	We visited the museum on the weekend.	我们周末去参观了博物馆。	🏛️
+212	city	1937	zoo	/zuː/	动物园	I saw a real tiger at the zoo.	我在动物园看到了一只真老虎。	🦁
+213	city	1940	factory	/ˈfæktri/	工厂	The factory makes cars.	这家工厂生产汽车。	🏭
+214	city	1941	office	/ˈɒfɪs/	办公室	My dad works in an office downtown.	我爸在市区的一间办公室工作。	🏢
+215	city	1942	church	/tʃɜːtʃ/	教堂	We go to church every Sunday.	我们每周日去教堂。	⛪
+216	city	1943	temple	/ˈtempl/	庙宇	There is an old temple on the hill.	山上有一座古老的寺庙。	🛕
+217	city	1946	north	/nɔːθ/	北	Beijing is in the north of China.	北京在中国的北方。	⬆️
+218	city	1947	south	/saʊθ/	南	It's warmer in the south.	南方比较暖和。	⬇️
+219	city	1948	east	/iːst/	东	The sun rises in the east.	太阳从东方升起。	➡️
+220	city	1949	west	/west/	西	The sun sets in the west.	太阳在西方落下。	⬅️
+221	city	1950	centre	/ˈsentə/	中心	The fountain is at the centre of the square.	喷泉在广场的中央。	🎯
+222	city	1951	upstairs	/ˌʌpˈsteəz/	楼上	My room is upstairs.	我的房间在楼上。	🔼
+223	city	1952	downstairs	/ˌdaʊnˈsteəz/	楼下	The kitchen is downstairs.	厨房在楼下。	🔽
+224	city	1953	inside	/ɪnˈsaɪd/	里面	It's warm inside the house.	房子里很暖和。	📥
+225	city	1954	outside	/ˌaʊtˈsaɪd/	外面	The kids are playing outside.	孩子们在外面玩。	📤
+226	clothes	1917	clothes	/kləʊðz/	衣服	I wash my clothes on Sundays.	我每周日洗衣服。	svg:
+227	clothes	1918	shirt	/ʃɜːt/	衬衫	He wears a white shirt to work.	他穿白衬衫去上班。	svg:
+228	clothes	1919	T-shirt	/ˈtiː ʃɜːt/	T恤衫	This T-shirt is too small for me now.	这件 T 恤现在我穿太小了。	svg:
+229	clothes	1920	sweater	/ˈswetə/	毛衣	Grandma knitted me a warm sweater.	奶奶给我织了一件暖和的毛衣。	svg:
+230	clothes	1921	jacket	/ˈdʒækɪt/	夹克	Put on your jacket, it's chilly outside.	穿上夹克吧,外面冷。	svg:
+231	clothes	1922	coat	/kəʊt/	外套	My coat has six big buttons.	我的外套有六颗大纽扣。	svg:
+232	clothes	1923	raincoat	/ˈreɪnkəʊt/	雨衣	Take your raincoat, it might rain.	带上雨衣,可能会下雨。	svg:
+233	clothes	1926	dress	/dres/	连衣裙	She wore a red dress to the party.	她穿了一条红裙子去参加聚会。	svg:
+234	clothes	1927	skirt	/skɜːt/	短裙	My sister loves her new blue skirt.	我妹妹很喜欢她的新蓝裙子。	svg:
+235	clothes	1928	pants	/pænts/	裤子	These pants are a little long for me.	这条裤子我穿有点长。	svg:
+236	clothes	1929	jeans	/dʒiːnz/	牛仔裤	I wear jeans every weekend.	我每个周末都穿牛仔裤。	svg:
+237	clothes	1930	shorts	/ʃɔːts/	短裤	He plays basketball in shorts.	他穿短裤打篮球。	svg:
+238	clothes	1933	socks	/sɒks/	袜子	I need a new pair of socks.	我需要一双新袜子。	svg:
+239	clothes	1934	shoes	/ʃuːz/	鞋子	Please take off your shoes at the door.	请在门口脱鞋。	svg:
+240	clothes	1935	boots	/buːts/	靴子	My boots keep my feet dry in the rain.	我的靴子能让脚在雨里保持干燥。	svg:
+241	clothes	1936	sneakers	/ˈsniːkəz/	运动鞋	I run faster in my sneakers.	我穿运动鞋跑得更快。	svg:
+242	clothes	1937	gloves	/ɡlʌvz/	手套	Wear gloves when it snows outside.	下雪天出门戴手套。	svg:❄|❄
+243	clothes	1940	hat	/hæt/	帽子	She bought a sun hat for the beach.	她买了顶遮阳帽去海滩。	svg:
+244	clothes	1941	cap	/kæp/	鸭舌帽	He wears a baseball cap to school.	他戴着棒球帽去上学。	svg:B
+245	clothes	1942	scarf	/skɑːf/	围巾	Mom knitted me a red scarf.	妈妈给我织了条红围巾。	svg:
+246	clothes	1943	belt	/belt/	腰带	He has a brown leather belt.	他有一条棕色的皮带。	svg:
+247	clothes	1944	tie	/taɪ/	领带	Dad wears a tie to work every day.	爸爸每天上班都戴领带。	svg:
+248	clothes	1947	uniform	/ˈjuːnɪfɔːm/	制服	We wear a school uniform every day.	我们每天都穿校服。	svg:★
+249	clothes	1948	pajamas	/pəˈdʒɑːməz/	睡衣	I put on my pajamas before bed.	我睡前换上睡衣。	svg:★|★|☽|☽
+250	clothes	1949	swimsuit	/ˈswɪmsuːt/	泳衣	Her new swimsuit is bright pink.	她的新泳衣是鲜粉色的。	svg:
+251	clothes	1950	pocket	/ˈpɒkɪt/	口袋	There's a coin in my pocket.	我口袋里有一枚硬币。	svg:¥
+252	clothes	1951	button	/ˈbʌtn/	纽扣	A button fell off my shirt.	我衬衫上一颗纽扣掉了。	svg:
+253	clothes	1952	zipper	/ˈzɪpə/	拉链	My zipper is stuck.	我的拉链卡住了。	svg:
+254	clothes	1953	sleeve	/sliːv/	袖子	He rolled up his sleeves and got to work.	他卷起袖子开始干活。	svg:
+255	clothes	1954	collar	/ˈkɒlə/	衣领	Please fold down your collar.	请把衣领翻下来。	svg:
+256	color	1917	color	/ˈkʌlə/	颜色	What color do you like best?	你最喜欢什么颜色?	svg:
+257	color	1918	red	/red/	红色	The light just turned red.	红灯亮了。	svg:
+258	color	1919	blue	/bluː/	蓝色	The sky is blue today.	今天天空很蓝。	svg:
+259	color	1920	green	/ɡriːn/	绿色	The leaves turn green in spring.	春天叶子变绿了。	svg:
+260	color	1921	yellow	/ˈjeləʊ/	黄色	Bananas turn yellow when they ripen.	香蕉成熟时变黄。	svg:
+261	color	1922	orange	/ˈɒrɪndʒ/	橙色	I like that orange shirt.	我喜欢那件橙色的衬衫。	svg:
+262	color	1925	purple	/ˈpɜːpl/	紫色	Grapes can be purple.	葡萄可以是紫色的。	svg:
+263	color	1926	pink	/pɪŋk/	粉色	Her dress is pink.	她的连衣裙是粉色的。	svg:
+264	color	1927	white	/waɪt/	白色	The walls are painted white.	墙刷成白色的。	svg:
+265	color	1928	black	/blæk/	黑色	I wear black shoes to school.	我穿黑色的鞋去上学。	svg:
+266	color	1929	brown	/braʊn/	棕色	She has brown hair.	她是棕色头发。	svg:
+267	color	1930	gray	/ɡreɪ/	灰色	My cat has gray fur.	我的猫毛是灰色的。	svg:
+268	color	1933	zero	/ˈzɪərəʊ/	零	The score is two to zero.	比分是二比零。	svg:0
+269	color	1934	one	/wʌn/	一	I have one little brother.	我有一个弟弟。	svg:1
+270	color	1935	two	/tuː/	二	One plus one is two.	一加一等于二。	svg:2
+271	color	1936	three	/θriː/	三	There are three pens on the desk.	桌上有三支笔。	svg:3
+272	color	1937	four	/fɔː/	四	A cat has four legs.	猫有四条腿。	svg:4
+273	color	1938	five	/faɪv/	五	We have five fingers on each hand.	我们每只手有五根手指。	svg:5
+274	color	1939	six	/sɪks/	六	School starts at six.	学校六点上课。	svg:6
+275	color	1940	seven	/ˈsevn/	七	There are seven days in a week.	一周有七天。	svg:7
+276	color	1941	eight	/eɪt/	八	I get up at eight every day.	我每天八点起床。	svg:8
+277	color	1942	nine	/naɪn/	九	A cat is said to have nine lives.	据说猫有九条命。	svg:9
+278	color	1943	ten	/ten/	十	Count from one to ten.	从一数到十。	svg:10
+279	color	1946	eleven	/ɪˈlevn/	十一	My brother is eleven years old.	我哥哥十一岁。	svg:11
+280	color	1947	twelve	/twelv/	十二	There are twelve months in a year.	一年有十二个月。	svg:12
+281	color	1948	thirteen	/ˌθɜːˈtiːn/	十三	He just turned thirteen.	他刚满十三岁。	svg:13
+282	color	1949	twenty	/ˈtwenti/	二十	There are twenty students in our class.	我们班有二十个学生。	svg:20
+283	color	1950	thirty	/ˈθɜːti/	三十	September has thirty days.	九月有三十天。	svg:30
+284	color	1951	forty	/ˈfɔːti/	四十	My father is forty years old.	我父亲四十岁。	svg:40
+285	color	1952	fifty	/ˈfɪfti/	五十	The book costs fifty yuan.	这本书五十元。	svg:50
+286	color	1955	hundred	/ˈhʌndrəd/	百	There are over a hundred people here.	这里有一百多人。	svg:100
+287	color	1956	thousand	/ˈθaʊznd/	千	Thousands of stars shine at night.	夜晚有成千上万颗星星闪烁。	svg:1000
+288	color	1957	first	/fɜːst/	第一	She is the first in her class.	她在班里是第一名。	svg:1st
+289	color	1958	second	/ˈsekənd/	第二	I came in second in the race.	我在比赛中得了第二名。	svg:2nd
+290	color	1959	third	/θɜːd/	第三	March is the third month of the year.	三月是一年中的第三个月。	svg:3rd
+291	family	1917	family	/ˈfæməli/	家庭	I love my family very much.	我非常爱我的家人。	🏠
+292	family	1918	parents	/ˈpeərənts/	父母	My parents work hard every day.	我父母每天努力工作。	👫
+293	family	1919	dad	/dæd/	爸爸	My dad helps me with my homework.	爸爸帮我做作业。	👨
+294	family	1920	mom	/mɒm/	妈妈	My mom is a great cook.	我妈妈做饭很厉害。	👩
+295	family	1921	father	/ˈfɑːðə/	父亲	My father is a tall man.	我父亲很高。	🧔
+296	family	1922	mother	/ˈmʌðə/	母亲	My mother is very kind.	我母亲非常善良。	👩‍🦰
+297	family	1925	son	/sʌn/	儿子	They have one son and two daughters.	他们有一个儿子和两个女儿。	👦
+298	family	1926	daughter	/ˈdɔːtə/	女儿	My daughter is in middle school now.	我女儿现在上初中。	👧
+299	family	1927	brother	/ˈbrʌðə/	兄弟	I have one brother.	我有一个兄弟。	👦🏻
+300	family	1928	sister	/ˈsɪstə/	姐妹	My sister is older than me.	我姐姐比我大。	👧🏻
+301	family	1929	sibling	/ˈsɪblɪŋ/	兄弟姐妹	Do you have any siblings?	你有兄弟姐妹吗?	👬
+302	family	1930	twin	/twɪn/	双胞胎	I have a twin brother.	我有一个双胞胎弟弟。	👯
+303	family	1933	grandpa	/ˈɡrænpɑː/	爷爷	My grandpa tells me great stories.	爷爷给我讲精彩的故事。	👴
+304	family	1934	grandma	/ˈɡrænmɑː/	奶奶	My grandma bakes the best cookies.	奶奶做的饼干最好吃。	👵
+305	family	1935	grandfather	/ˈɡrænfɑːðə/	祖父	My grandfather turns seventy this year.	我祖父今年七十岁了。	🧓
+306	family	1936	grandmother	/ˈɡrænmʌðə/	祖母	My grandmother knits warm hats.	我祖母织温暖的帽子。	👵🏻
+307	family	1937	grandparents	/ˈɡrænpeərənts/	祖父母	I visit my grandparents every Sunday.	我每周日都去看望祖父母。	👴👵
+308	family	1940	uncle	/ˈʌŋkl/	叔叔	My uncle works as a doctor.	我叔叔是医生。	👨‍🦳
+309	family	1941	aunt	/ɑːnt/	姑姑	My aunt Mary lives next door.	我玛丽姑姑住在隔壁。	👩‍🦳
+310	family	1942	cousin	/ˈkʌzn/	表兄弟姐妹	My cousin lives in another city.	我表哥住在另一个城市。	🧒
+311	family	1943	nephew	/ˈnefjuː/	侄子	My nephew is only two years old.	我的侄子才两岁。	👶
+312	family	1944	niece	/niːs/	侄女	She is my favorite niece.	她是我最喜欢的侄女。	👶🏻
+313	family	1945	relative	/ˈrelətɪv/	亲戚	We invited all our relatives over.	我们邀请了所有亲戚来。	🫂
+314	family	1948	husband	/ˈhʌzbənd/	丈夫	Her husband is a teacher.	她丈夫是一名老师。	🤵
+315	family	1949	wife	/waɪf/	妻子	His wife is a doctor.	他妻子是医生。	👰
+316	family	1950	baby	/ˈbeɪbi/	婴儿	The baby is sleeping in bed.	婴儿正在床上睡觉。	👶
+317	family	1951	child	/tʃaɪld/	孩子	Every child needs love.	每个孩子都需要爱。	🧒🏻
+318	family	1952	children	/ˈtʃɪldrən/	孩子们	The children are playing outside.	孩子们在外面玩。	🧑‍🤝‍🧑
+319	family	1953	stepfather	/ˈstepfɑːðə/	继父	His stepfather treats him like his own son.	他的继父待他如亲生儿子。	👨‍🦲
+320	family	1954	stepmother	/ˈstepmʌðə/	继母	Her stepmother is very good to her.	她继母对她很好。	👩‍🦲
+321	family	1955	only child	/ˈəʊnli tʃaɪld/	独生子女	I am an only child.	我是独生子女。	🧒🏼
+322	food	1917	apple	/ˈæpl/	苹果	I eat an apple every day.	我每天吃一个苹果。	🍎
+323	food	1918	banana	/bəˈnɑːnə/	香蕉	A banana is yellow and sweet.	香蕉又黄又甜。	🍌
+324	food	1919	orange	/ˈɒrɪndʒ/	橙子	This orange is really sweet.	这个橙子非常甜。	🍊
+325	food	1920	grape	/ɡreɪp/	葡萄	I love eating grapes in summer.	我喜欢在夏天吃葡萄。	🍇
+326	food	1921	strawberry	/ˈstrɔːbəri/	草莓	I love fresh strawberries with cream.	我喜欢新鲜草莓配奶油。	🍓
+327	food	1922	watermelon	/ˈwɔːtəmelən/	西瓜	Nothing beats a cold watermelon in summer.	夏天没什么比冰西瓜更爽了。	🍉
+328	food	1923	pear	/peə/	梨	A ripe pear is sweet and juicy.	熟透的梨又甜又多汁。	🍐
+329	food	1924	peach	/piːtʃ/	桃子	This peach is juicy and sweet.	这个桃子又多汁又甜。	🍑
+330	food	1925	lemon	/ˈlemən/	柠檬	I like lemon in my tea.	我喜欢茶里加柠檬。	🍋
+331	food	1926	mango	/ˈmæŋɡəʊ/	芒果	Mango is my favorite fruit.	芒果是我最喜欢的水果。	🥭
+332	food	1927	pineapple	/ˈpaɪnæpl/	菠萝	Pineapple goes great on pizza.	菠萝放披萨上很好吃。	🍍
+333	food	1930	vegetable	/ˈvedʒtəbl/	蔬菜	Vegetables are good for your health.	蔬菜对身体有益。	img:
+334	food	1931	tomato	/təˈmɑːtəʊ/	西红柿	I like tomatoes in my salad.	我喜欢沙拉里加西红柿。	🍅
+335	food	1932	potato	/pəˈteɪtəʊ/	土豆	I love mashed potatoes.	我喜欢吃土豆泥。	🥔
+336	food	1933	carrot	/ˈkærət/	胡萝卜	I peeled some carrots for the soup.	我削了几根胡萝卜煮汤。	🥕
+337	food	1934	onion	/ˈʌnjən/	洋葱	Cutting onions always makes me cry.	切洋葱总让我流眼泪。	🧅
+338	food	1935	cucumber	/ˈkjuːkʌmbə/	黄瓜	I add cucumber to my sandwich.	我在三明治里加黄瓜。	🥒
+339	food	1936	cabbage	/ˈkæbɪdʒ/	白菜	Grandma grows cabbage in her garden.	奶奶在花园里种白菜。	img:
+340	food	1937	corn	/kɔːn/	玉米	Sweet corn is delicious in summer.	夏天的甜玉米很好吃。	🌽
+341	food	1940	food	/fuːd/	食物	Italian food is my favorite.	意大利食物是我的最爱。	img:
+342	food	1941	rice	/raɪs/	米饭	Most Chinese people eat rice every day.	大多数中国人每天都吃米饭。	🍚
+343	food	1942	noodles	/ˈnuːdlz/	面条	I'd like a bowl of noodles, please.	我想要一碗面条。	🍜
+344	food	1943	bread	/bred/	面包	I have bread and milk for breakfast.	我早餐吃面包配牛奶。	🍞
+345	food	1944	pizza	/ˈpiːtsə/	披萨	Pizza is originally from Italy.	披萨最初来自意大利。	🍕
+346	food	1945	hamburger	/ˈhæmbɜːɡə/	汉堡	Let's grab a hamburger for lunch.	我们午饭吃个汉堡吧。	🍔
+347	food	1946	sandwich	/ˈsænwɪdʒ/	三明治	A sandwich is quick and easy to make.	三明治做起来又快又简单。	🥪
+348	food	1949	egg	/eɡ/	鸡蛋	I have one egg every morning.	我每天早上吃一个鸡蛋。	🥚
+349	food	1950	meat	/miːt/	肉	I don't eat a lot of meat.	我不太吃肉。	🍖
+350	food	1951	beef	/biːf/	牛肉	Beef goes well with potatoes.	牛肉配土豆很好吃。	🥩
+351	food	1952	pork	/pɔːk/	猪肉	My mom cooks pork really well.	我妈妈做猪肉做得特别好。	img:
+352	food	1953	chicken	/ˈtʃɪkɪn/	鸡肉	Fried chicken is so yummy.	炸鸡真好吃。	🍗
+353	food	1954	fish	/fɪʃ/	鱼	Grandma makes the best fish.	奶奶做的鱼最好吃。	🐟
+354	food	1957	water	/ˈwɔːtə/	水	You should drink more water every day.	你每天应该多喝水。	💧
+355	food	1958	milk	/mɪlk/	牛奶	Milk helps you grow strong.	牛奶能让你长得强壮。	🥛
+356	food	1959	juice	/dʒuːs/	果汁	I'd like a glass of orange juice.	我想要一杯橙汁。	🧃
+357	food	1960	tea	/tiː/	茶	Would you like a cup of tea?	你想喝杯茶吗?	🍵
+358	food	1961	coffee	/ˈkɒfi/	咖啡	My dad drinks coffee every morning.	我爸爸每天早上喝咖啡。	☕
+359	food	1964	cake	/keɪk/	蛋糕	Let's have some cake.	我们吃点蛋糕吧。	🎂
+360	food	1965	cookie	/ˈkʊki/	饼干	I bake cookies with my mom.	我和妈妈一起烤饼干。	🍪
+361	food	1966	candy	/ˈkændi/	糖果	Too much candy is bad for your teeth.	糖果吃多了对牙齿不好。	🍬
+362	food	1967	chocolate	/ˈtʃɒklət/	巧克力	Chocolate always makes me happy.	巧克力总是让我开心。	🍫
+363	food	1968	ice cream	/ˈaɪs kriːm/	冰淇淋	Ice cream is the best part of summer.	冰淇淋是夏天最棒的东西。	🍦
+364	food	1971	butter	/ˈbʌtə/	黄油	Spread some butter on your bread.	在面包上抹点黄油。	🧈
+365	food	1972	cheese	/tʃiːz/	奶酪	Cheese goes well with bread.	奶酪配面包很好吃。	🧀
+366	food	1973	yogurt	/ˈjɒɡət/	酸奶	I have yogurt after every meal.	我每餐之后都吃酸奶。	img:
+367	food	1974	soup	/suːp/	汤	A bowl of hot soup warms me up.	一碗热汤让我暖和起来。	🍲
+368	food	1975	salad	/ˈsæləd/	沙拉	A salad is fresh and healthy.	沙拉新鲜又健康。	🥗
+369	food	1978	salt	/sɔːlt/	盐	Could you pass me the salt?	能把盐递给我吗?	🧂
+370	food	1979	sugar	/ˈʃʊɡə/	糖	Too much sugar is bad for your teeth.	糖吃太多对牙齿不好。	img:
+371	food	1980	breakfast	/ˈbrekfəst/	早饭	Breakfast is the most important meal.	早餐是最重要的一餐。	🍳
+372	food	1981	lunch	/lʌntʃ/	午饭	I usually have lunch at noon.	我通常中午吃午饭。	🍱
+373	food	1982	dinner	/ˈdɪnə/	晚饭	We have dinner at six.	我们六点吃晚饭。	img:
+374	food	1983	meal	/miːl/	餐	We had a great meal tonight.	我们今晚吃了一顿大餐。	🍴
+375	food	1984	snack	/snæk/	零食	Let's grab a snack.	我们去吃点零食吧。	img:
+376	food	1985	restaurant	/ˈrestrɒnt/	餐厅	This restaurant is always busy.	这家餐厅总是很热闹。	img:
+377	food	1986	menu	/ˈmenjuː/	菜单	Could I see the menu, please?	请把菜单给我看看。	img:
+378	home	1917	house	/haʊs/	房子	They live in a big house.	他们住在一栋大房子里。	🏠
+379	home	1918	home	/həʊm/	家	There's no place like home.	没有地方比得上家。	🏡
+380	home	1919	room	/ruːm/	房间	My room is on the second floor.	我的房间在二楼。	svg:
+381	home	1920	bedroom	/ˈbedruːm/	卧室	My bedroom is small but cozy.	我的卧室虽小但很温馨。	svg:★|★
+382	home	1921	bathroom	/ˈbɑːθruːm/	浴室	The bathroom is upstairs.	浴室在楼上。	🛁
+383	home	1922	kitchen	/ˈkɪtʃɪn/	厨房	Mom is cooking in the kitchen.	妈妈在厨房做饭。	🍳
+384	home	1923	living room	/ˈlɪvɪŋ ruːm/	客厅	We watch TV in the living room.	我们在客厅看电视。	svg:
+385	home	1924	dining room	/ˈdaɪnɪŋ ruːm/	餐厅	We eat dinner in the dining room.	我们在餐厅吃晚饭。	svg:🍝
+386	home	1925	garden	/ˈɡɑːdn/	花园	Grandma grows roses in her garden.	奶奶在她的花园里种玫瑰。	svg:
+387	home	1928	door	/dɔː/	门	Please close the door behind you.	请随手关门。	🚪
+388	home	1929	window	/ˈwɪndəʊ/	窗户	Open the window for some fresh air.	开窗透透气吧。	🪟
+389	home	1930	wall	/wɔːl/	墙	Let's hang the picture on the wall.	我们把画挂到墙上吧。	svg:
+390	home	1931	floor	/flɔː/	地板	The floor is made of wood.	地板是木头做的。	svg:
+391	home	1932	ceiling	/ˈsiːlɪŋ/	天花板	The ceiling in this room is very high.	这个房间的天花板很高。	svg:UP
+392	home	1933	roof	/ruːf/	屋顶	Snow covers the roof in winter.	冬天雪覆盖着屋顶。	svg:
+393	home	1934	stairs	/steəz/	楼梯	Walk up the stairs slowly.	慢慢走上楼梯。	svg:
+394	home	1937	bed	/bed/	床	Time to make the bed.	该铺床了。	🛏️
+395	home	1938	sofa	/ˈsəʊfə/	沙发	The cat is sleeping on the sofa.	猫睡在沙发上。	🛋️
+396	home	1939	table	/ˈteɪbl/	桌子	Let's set the table for dinner.	我们摆桌子吃晚饭吧。	svg:
+397	home	1940	chair	/tʃeə/	椅子	Pull up a chair and join us.	搬把椅子和我们一起坐。	svg:
+398	home	1941	cupboard	/ˈkʌbəd/	橱柜	The cups are in the cupboard.	杯子在橱柜里。	svg:
+399	home	1942	wardrobe	/ˈwɔːdrəʊb/	衣柜	Hang your coat in the wardrobe.	把外套挂到衣柜里。	svg:
+400	home	1945	fridge	/frɪdʒ/	冰箱	Is there anything in the fridge?	冰箱里有吃的吗?	svg:FREEZER|A|MENU
+401	home	1946	stove	/stəʊv/	炉子	The soup is simmering on the stove.	汤在炉子上慢炖着。	svg:
+402	home	1947	microwave	/ˈmaɪkrəweɪv/	微波炉	Heat the food in the microwave.	把食物放进微波炉加热。	svg:🍕|0:30
+403	home	1948	washing machine	/ˈwɒʃɪŋ məˈʃiːn/	洗衣机	Put your dirty clothes in the washing machine.	把脏衣服放进洗衣机。	svg:
+404	home	1951	TV	/ˌtiː ˈviː/	电视	I watch TV after dinner.	我晚饭后看电视。	📺
+405	home	1952	telephone	/ˈtelɪfəʊn/	电话	Please pick up the telephone.	请接电话。	☎️
+406	home	1953	lamp	/læmp/	台灯	Could you turn on the lamp?	能把台灯打开吗?	💡
+407	home	1954	mirror	/ˈmɪrə/	镜子	I look at myself in the mirror every morning.	我每天早上照镜子。	🪞
+408	home	1955	clock	/klɒk/	时钟	The clock on the wall ticks loudly.	墙上的时钟滴答声很响。	svg:12|3|6|9
+409	home	1956	fan	/fæn/	风扇	Turn on the fan, it's too hot.	把风扇打开吧,太热了。	svg:
+410	home	1957	air conditioner	/eə kənˈdɪʃənə/	空调	The air conditioner keeps us cool in summer.	空调让我们夏天凉爽。	svg:22°C|❄|❄
+411	home	1958	key	/kiː/	钥匙	I lost my house key.	我把家门钥匙弄丢了。	🔑
+412	home	1959	lock	/lɒk/	锁	Make sure the lock on the door is secure.	确认门锁好了。	🔒
+413	job	1917	person	/ˈpɜːsn/	人	She's a really kind person.	她是个很善良的人。	🧑
+414	job	1918	man	/mæn/	男人	Who is that man?	那个男人是谁?	👨
+415	job	1919	woman	/ˈwʊmən/	女人	My mom is a strong woman.	我妈妈是个坚强的女人。	👩
+416	job	1920	boy	/bɔɪ/	男孩	The boy is playing football outside.	那个男孩在外面踢足球。	👦
+417	job	1921	girl	/ɡɜːl/	女孩	The girl really loves dancing.	那个女孩非常喜欢跳舞。	👧
+418	job	1924	friend	/frend/	朋友	He's my best friend.	他是我最好的朋友。	👫
+419	job	1925	classmate	/ˈklɑːsmeɪt/	同学	Tom is my classmate.	汤姆是我的同学。	svg:1+1=2|♥|SAME CLASS
+420	job	1926	neighbour	/ˈneɪbə/	邻居	Our neighbour is really friendly.	我们的邻居非常友好。	svg:Hi!
+421	job	1929	doctor	/ˈdɒktə/	医生	I went to see the doctor yesterday.	我昨天去看医生了。	👨‍⚕️
+422	job	1930	nurse	/nɜːs/	护士	The nurse takes great care of patients.	这位护士对病人非常照顾。	👩‍⚕️
+423	job	1931	teacher	/ˈtiːtʃə/	老师	My English teacher is amazing.	我的英语老师非常棒。	👨‍🏫
+424	job	1932	police	/pəˈliːs/	警察	Call the police!	快报警!	👮
+425	job	1933	firefighter	/ˈfaɪəfaɪtə/	消防员	Firefighters are brave heroes.	消防员是勇敢的英雄。	👨‍🚒
+426	job	1934	soldier	/ˈsəʊldʒə/	军人/士兵	My uncle is a soldier.	我叔叔是军人。	🪖
+427	job	1937	driver	/ˈdraɪvə/	司机	The bus driver is really friendly.	公交车司机非常友好。	🚗
+428	job	1938	farmer	/ˈfɑːmə/	农民	Farmers work hard in the fields.	农民在田间辛勤劳作。	👨‍🌾
+429	job	1939	cook	/kʊk/	厨师	My uncle is a great cook.	我叔叔是个很棒的厨师。	👨‍🍳
+430	job	1940	waiter	/ˈweɪtə/	服务员	The waiter took our order.	服务员记下了我们点的菜。	🍽️
+431	job	1941	engineer	/ˌendʒɪˈnɪə/	工程师	My uncle is a software engineer.	我叔叔是个软件工程师。	👷
+432	job	1942	lawyer	/ˈlɔːjə/	律师	My aunt is a lawyer.	我姑姑是律师。	⚖️
+433	job	1943	scientist	/ˈsaɪəntɪst/	科学家	Marie Curie was a famous scientist.	居里夫人是一位著名的科学家。	👨‍🔬
+434	job	1944	reporter	/rɪˈpɔːtə/	记者	A reporter interviewed our teacher.	记者采访了我们老师。	📰
+435	job	1947	singer	/ˈsɪŋə/	歌手	She's my favorite singer.	她是我最喜欢的歌手。	👨‍🎤
+436	job	1948	dancer	/ˈdɑːnsə/	舞蹈家/舞者	She is a professional dancer.	她是一名专业舞者。	💃
+437	job	1949	artist	/ˈɑːtɪst/	艺术家	Picasso was one of the greatest artists.	毕加索是最伟大的艺术家之一。	👨‍🎨
+438	job	1950	writer	/ˈraɪtə/	作家	Mark Twain is my favorite writer.	马克·吐温是我最喜欢的作家。	📝
+439	job	1951	actor	/ˈæktə/	演员	Jackie Chan is a world-famous actor.	成龙是世界闻名的演员。	🎭
+440	job	1952	athlete	/ˈæθliːt/	运动员	Liu Xiang is a famous athlete.	刘翔是著名的运动员。	🏃
+441	job	1953	pilot	/ˈpaɪlət/	飞行员	The pilot landed the plane safely.	飞行员安全降落了飞机。	👨‍✈️
+442	job	1954	astronaut	/ˈæstrənɔːt/	宇航员	The astronaut walked on the moon.	宇航员在月球上行走。	👨‍🚀
+443	nature	1917	sun	/sʌn/	太阳	The sun is shining today.	今天阳光灿烂。	☀️
+444	nature	1918	moon	/muːn/	月亮	The moon is full tonight.	今晚是满月。	🌙
+445	nature	1919	star	/stɑː/	星星	I can see lots of stars in the sky.	我能看到天上有许多星星。	⭐
+446	nature	1920	sky	/skaɪ/	天空	Look at the sky!	快看天空!	🌌
+447	nature	1921	cloud	/klaʊd/	云	The sky is full of clouds today.	今天天空云层很厚。	☁️
+448	nature	1922	rainbow	/ˈreɪnbəʊ/	彩虹	A rainbow appeared after the rain.	雨后出现了一道彩虹。	🌈
+449	nature	1925	weather	/ˈweðə/	天气	How's the weather today?	今天天气怎么样?	🌦️
+450	nature	1926	rain	/reɪn/	雨	It's pouring rain outside.	外面下大雨。	🌧️
+451	nature	1927	snow	/snəʊ/	雪	It snows a lot here in winter.	这里冬天经常下雪。	❄️
+452	nature	1928	wind	/wɪnd/	风	The wind is very strong today.	今天风很大。	💨
+453	nature	1929	storm	/stɔːm/	暴风雨	There's a big storm coming.	有场暴风雨要来了。	⛈️
+454	nature	1930	thunder	/ˈθʌndə/	雷	We could hear thunder in the distance.	我们能听到远处的雷声。	🌩️
+455	nature	1931	lightning	/ˈlaɪtnɪŋ/	闪电	Lightning lit up the night sky.	闪电照亮了夜空。	⚡
+456	nature	1932	fog	/fɒɡ/	雾	The fog is very thick this morning.	今天早上雾很浓。	🌫️
+457	nature	1935	season	/ˈsiːzn/	季节	Autumn is my favorite season.	秋天是我最喜欢的季节。	🍂
+458	nature	1936	spring	/sprɪŋ/	春天	Flowers bloom in spring.	春天百花盛开。	🌸
+459	nature	1937	summer	/ˈsʌmə/	夏天	Summer is hot and sunny.	夏天又热又晒。	🌞
+460	nature	1938	autumn	/ˈɔːtəm/	秋天	Leaves turn red in autumn.	秋天树叶变红了。	🍁
+461	nature	1939	winter	/ˈwɪntə/	冬天	We build snowmen in winter.	我们在冬天堆雪人。	⛄
+462	nature	1942	flower	/ˈflaʊə/	花	I love the smell of flowers.	我喜欢花香。	🌹
+463	nature	1943	tree	/triː/	树	Let's sit under that tree.	我们坐到那棵树下吧。	🌳
+464	nature	1944	grass	/ɡrɑːs/	草	Please don't walk on the grass.	请不要践踏草坪。	🌿
+465	nature	1945	leaf	/liːf/	叶子	A green leaf fell on my book.	一片绿叶落在了我的书上。	🍃
+466	nature	1946	forest	/ˈfɒrɪst/	森林	We got lost in the forest.	我们在森林里迷路了。	🌲
+467	nature	1947	field	/fiːld/	田野	Farmers are working in the field.	农民们在田里劳作。	🌾
+468	nature	1950	mountain	/ˈmaʊntɪn/	山	We climbed a high mountain last summer.	去年夏天我们爬了一座高山。	⛰️
+469	nature	1951	river	/ˈrɪvə/	河流	A long river runs through the city.	一条长河穿过这座城市。	🏞️
+470	nature	1952	lake	/leɪk/	湖泊	We had a picnic by the lake.	我们在湖边野餐。	🏕️
+471	nature	1953	sea	/siː/	海	The sea is calm today.	今天海面很平静。	🌊
+472	nature	1954	ocean	/ˈəʊʃn/	海洋	Whales live in the ocean.	鲸生活在海洋里。	🐳
+473	nature	1955	island	/ˈaɪlənd/	岛屿	They live on a small island.	他们住在一座小岛上。	🏝️
+474	nature	1956	beach	/biːtʃ/	沙滩	The beach is beautiful in summer.	夏天的沙滩很美。	🏖️
+475	nature	1957	desert	/ˈdezət/	沙漠	Few plants grow in the desert.	沙漠里几乎没什么植物。	🏜️
+476	nature	1960	earth	/ɜːθ/	地球	We should take care of the earth.	我们应该爱护地球。	🌍
+477	nature	1961	stone	/stəʊn/	石头	He threw a small stone into the river.	他把一块小石头扔进了河里。	🪨
+478	nature	1962	sand	/sænd/	沙子	The sand feels warm under my feet.	沙子踩在脚下很暖和。	⏳
+479	nature	1963	soil	/sɔɪl/	土壤	Plants grow well in rich soil.	植物在肥沃的土壤里长得好。	🪴
+480	nature	1964	air	/eə/	空气	The mountain air is so fresh.	山里的空气真新鲜。	🎈
+481	nature	1965	fire	/ˈfaɪə/	火	We made a fire to keep warm.	我们生了堆火取暖。	🔥
+482	nature	1966	ice	/aɪs/	冰	The lake is covered with ice in winter.	冬天湖面结了冰。	🧊
+483	question	1917	who	/huː/	谁	Who's that?	那是谁?	svg:?
+484	question	1918	what	/wɒt/	什么	What's your name?	你叫什么名字?	svg:?
+485	question	1919	where	/weə/	哪里	Where do you live?	你住在哪里?	svg:?
+486	question	1920	when	/wen/	什么时候	When does school start?	学校什么时候开学?	svg:?
+487	question	1921	why	/waɪ/	为什么	Why are you late?	你为什么迟到了?	svg:?
+488	question	1922	how	/haʊ/	怎样/怎么	How's it going?	怎么样?	svg:?
+489	question	1923	which	/wɪtʃ/	哪个/哪些	Which book is yours?	哪本书是你的?	svg:?
+490	question	1924	whose	/huːz/	谁的	Whose pen is this?	这是谁的笔?	svg:
+491	question	1927	how many	/haʊ ˈmeni/	多少（可数）	How many books do you have?	你有多少本书?	svg:1|2|3|?
+492	question	1928	how much	/haʊ mʌtʃ/	多少（钱/不可数）	How much is this bag?	这个包多少钱?	svg:¥|¥|?
+493	question	1929	how old	/haʊ əʊld/	多大（年龄）	How old are you?	你多大了?	svg:?
+494	question	1930	how long	/haʊ lɒŋ/	多长/多久	How long does it take?	需要多长时间?	svg:?
+495	question	1931	how far	/haʊ fɑː/	多远	How far is the school from your home?	你家离学校有多远?	svg:A|?
+496	question	1934	this	/ðɪs/	这个	This is delicious!	这真好吃!	svg:
+497	question	1935	that	/ðæt/	那个	That's a beautiful flower.	那是一朵漂亮的花。	svg:
+498	question	1936	these	/ðiːz/	这些	These books are mine.	这些书是我的。	svg:
+499	question	1937	those	/ðəʊz/	那些	Those students are really clever.	那些学生很聪明。	svg:
+500	question	1940	here	/hɪə/	这里	Come here right now.	现在到这里来。	svg:
+501	question	1941	there	/ðeə/	那里	Look over there!	看那里!	svg:
+502	question	1944	I	/aɪ/	我	I'm from China.	我来自中国。	svg:
+503	question	1945	you	/juː/	你/你们	Where are you from?	你来自哪里?	svg:
+504	question	1946	he	/hiː/	他	He's my older brother.	他是我哥哥。	svg:
+505	question	1947	she	/ʃiː/	她	She's a nurse at the hospital.	她是医院的护士。	svg:
+506	question	1948	it	/ɪt/	它	I have a cat. It is white.	我有一只猫,它是白色的。	svg:
+507	question	1949	we	/wiː/	我们	We're going to the park.	我们要去公园。	svg:
+508	question	1950	they	/ðeɪ/	他们/她们/它们	They're my parents.	他们是我父母。	svg:
+509	question	1951	my	/maɪ/	我的	This is my new pen.	这是我的新钢笔。	svg:
+510	question	1952	your	/jɔː/	你的/你们的	What's your favorite color?	你最喜欢什么颜色?	svg:
+511	question	1953	his	/hɪz/	他的	His name is Tom.	他的名字叫汤姆。	svg:
+512	question	1954	her	/hɜː/	她的	Her hair is really long.	她的头发很长。	svg:
+513	question	1955	our	/ˈaʊə/	我们的	Our school is big.	我们的学校很大。	svg:
+514	question	1956	their	/ðeə/	他们/她们/它们的	Their house is brand new.	他们的房子是新的。	svg:
+515	school	1917	school	/skuːl/	学校	My school is near the park.	我的学校在公园附近。	🏫
+516	school	1918	class	/klɑːs/	班级	There are thirty students in our class.	我们班有三十个学生。	svg:
+517	school	1919	classroom	/ˈklɑːsruːm/	教室	Our classroom is on the second floor.	我们的教室在二楼。	svg:ABC
+518	school	1920	teacher	/ˈtiːtʃə/	老师	Our English teacher is very kind.	我们的英语老师非常善良。	👨‍🏫
+519	school	1921	student	/ˈstjuːdnt/	学生	She is a really hardworking student.	她是一个很努力的学生。	🧑‍🎓
+520	school	1924	book	/bʊk/	书	I read a book before bed every night.	我每晚睡前看书。	📕
+521	school	1925	notebook	/ˈnəʊtbʊk/	笔记本	Open your notebook, please.	请翻开你的笔记本。	📓
+522	school	1926	pencil	/ˈpensl/	铅笔	Can I borrow your pencil?	我能借你的铅笔用一下吗?	✏️
+523	school	1927	pen	/pen/	钢笔	My pen ran out of ink.	我的笔没墨水了。	🖊️
+524	school	1928	eraser	/ɪˈreɪzə/	橡皮	I need an eraser for my pencil.	我需要一块橡皮擦铅笔字。	svg:ERASER
+525	school	1929	ruler	/ˈruːlə/	尺子	I need a ruler to measure this.	我需要一把尺子量一下这个。	📏
+526	school	1930	bag	/bæɡ/	书包	My school bag is really heavy today.	我今天书包很重。	🎒
+527	school	1931	scissors	/ˈsɪzəz/	剪刀	Be careful with the scissors.	用剪刀要小心。	✂️
+528	school	1932	glue	/ɡluː/	胶水	Use glue to stick the paper together.	用胶水把纸粘在一起。	svg:GLUE|★★
+529	school	1933	crayon	/ˈkreɪən/	蜡笔	She drew a sun with a yellow crayon.	她用黄色蜡笔画了个太阳。	🖍️
+530	school	1934	chalk	/tʃɔːk/	粉笔	The teacher picked up a piece of chalk.	老师拿起一支粉笔。	svg:
+531	school	1935	blackboard	/ˈblækbɔːd/	黑板	The teacher is writing on the blackboard.	老师正在黑板上写字。	svg:ABC|1+1=2
+532	school	1938	desk	/desk/	课桌	Clean your desk before you leave.	走之前把课桌收拾干净。	svg:
+533	school	1939	chair	/tʃeə/	椅子	Please sit down on this chair.	请坐到这把椅子上。	svg:
+534	school	1942	homework	/ˈhəʊmwɜːk/	家庭作业	I've already finished my homework.	我已经做完作业了。	svg:HW:
+535	school	1943	exam	/ɪɡˈzæm/	考试	We've got an English exam tomorrow.	我们明天有英语考试。	svg:EXAM|1.|✓|2.|✓|3.|✗|4.|✓|A+
+536	school	1944	lesson	/ˈlesn/	课	Today's lesson is really interesting.	今天的课非常有趣。	svg:
+537	school	1945	subject	/ˈsʌbdʒɪkt/	科目	English is my favorite subject.	英语是我最喜欢的科目。	svg:ABC
+538	school	1946	grade	/ɡreɪd/	年级	I'm in grade seven this year.	我今年上七年级。	svg:GRADE|A+|★|★|★|★
+539	school	1947	term	/tɜːm/	学期	The new term begins in September.	新学期九月开始。	svg:TERM 1
+540	school	1950	math	/mæθ/	数学	I'm pretty good at math.	我数学相当不错。	🔢
+541	school	1951	English	/ˈɪŋɡlɪʃ/	英语	We have English class every day.	我们每天都有英语课。	svg:Abc|English|★|★
+542	school	1952	Chinese	/ˌtʃaɪˈniːz/	中文/语文	Chinese is my native language.	中文是我的母语。	svg:中|Chinese|✦|✦
+543	school	1953	science	/ˈsaɪəns/	科学	Science class is always fun.	科学课总是很有趣。	🔬
+544	school	1954	art	/ɑːt/	美术	She really enjoys art class.	她非常喜欢上美术课。	🎨
+545	school	1955	music	/ˈmjuːzɪk/	音乐	Music always makes me happy.	音乐总是让我开心。	🎵
+546	school	1956	PE	/ˌpiː ˈiː/	体育	PE class is on Thursdays.	体育课在星期四。	⚽
+547	school	1957	history	/ˈhɪstri/	历史	I find history fascinating.	我觉得历史非常迷人。	📜
+548	school	1958	geography	/dʒiˈɒɡrəfi/	地理	Geography teaches us about the world.	地理让我们了解世界。	🌍
+549	school	1959	computer	/kəmˈpjuːtə/	电脑	We use computers in class every day.	我们每天都在课上用电脑。	💻
+550	school	1960	map	/mæp/	地图	Show me where it is on the map.	在地图上指给我看在哪里。	🗺️
+551	school	1961	dictionary	/ˈdɪkʃənri/	词典	Look up the word in a dictionary.	在词典里查一下这个词。	📖
+552	school	1962	library	/ˈlaɪbrəri/	图书馆	I study in the library on weekends.	我周末在图书馆学习。	📚
+553	season	1917	nervous	/ˈnɜːvəs/	紧张的	I always feel nervous before a big exam.	重要考试前我总是很紧张。	😰
+554	season	1918	anxious	/ˈæŋkʃəs/	焦虑的	She felt anxious while waiting for the test results.	等成绩的时候她很焦虑。	😟
+555	season	1919	curious	/ˈkjʊəriəs/	好奇的	The children were curious about how the magnet worked.	孩子们对磁铁的原理很好奇。	🤔
+556	season	1920	proud	/praʊd/	自豪的	My parents were proud of me when I won the prize.	我得奖时父母为我感到骄傲。	🦚
+557	season	1921	grateful	/ˈɡreɪtfl/	感激的	I'm so grateful for all the help you've given me.	我非常感激你给予我的所有帮助。	🙏
+558	season	1922	disappointed	/ˌdɪsəˈpɔɪntɪd/	失望的	He was disappointed that the trip had been cancelled.	旅行取消了,他很失望。	😞
+559	season	1923	embarrassed	/ɪmˈbærəst/	尴尬的	She felt embarrassed when she forgot his name.	她忘了他的名字,觉得很尴尬。	😳
+560	season	1924	frightened	/ˈfraɪtnd/	害怕的	The little boy was frightened by the loud thunder.	小男孩被巨大的雷声吓到了。	😨
+561	season	1925	satisfied	/ˈsætɪsfaɪd/	满意的	The customers were satisfied with the quality of the meal.	顾客们对这顿饭的质量很满意。	😊
+562	season	1926	confused	/kənˈfjuːzd/	困惑的	I was completely confused by the complicated instructions.	这些复杂的说明让我完全搞糊涂了。	😕
+563	season	1927	lonely	/ˈləʊnli/	孤独的	He felt lonely after all his friends moved away.	朋友都搬走后,他感到很孤独。	😔
+564	season	1928	jealous	/ˈdʒeləs/	嫉妒的	She was jealous of her sister's new bike.	她嫉妒姐姐的新自行车。	😒
+565	season	1929	relaxed	/rɪˈlækst/	放松的	After the exam, I finally felt relaxed.	考完试后,我终于放松了下来。	😌
+566	season	1930	ashamed	/əˈʃeɪmd/	羞愧的	He was ashamed of having lied to his mother.	他为对妈妈撒了谎而感到羞愧。	😣
+567	season	1931	eager	/ˈiːɡə/	渴望的	The students were eager to start the new project.	学生们急切地想开始新项目。	😃
+568	season	1932	miserable	/ˈmɪzrəbl/	痛苦的	I felt miserable when I was sick in bed all week.	我病倒在床上一整周,难受极了。	😢
+569	season	1933	delighted	/dɪˈlaɪtɪd/	欣喜的	She was delighted to hear that she had passed.	听说自己通过了,她欣喜万分。	😄
+570	season	1934	furious	/ˈfjʊəriəs/	狂怒的	Dad was furious when he saw the broken window.	爸爸看到打碎的窗户时勃然大怒。	😠
+571	season	1935	amazed	/əˈmeɪzd/	惊讶的	We were amazed by the beautiful view from the top.	山顶的美景让我们惊叹不已。	😲
+572	season	1936	comfort	/ˈkʌmfət/	安慰	She gave me a hug to comfort me.	她抱了抱我来安慰我。	🤗
+573	season	1939	polite	/pəˈlaɪt/	有礼貌的	It's polite to say thank you when someone helps you.	别人帮你时说声谢谢是有礼貌的。	🙇
+574	season	1940	humble	/ˈhʌmbl/	谦虚的	Even after becoming famous, he stayed humble.	即使出了名,他依然很谦逊。	🙏
+575	season	1941	stubborn	/ˈstʌbən/	固执的	My little brother is too stubborn to admit he's wrong.	我弟弟太固执了,死活不肯承认错误。	😤
+576	season	1942	reliable	/rɪˈlaɪəbl/	可靠的	She's a reliable friend who always keeps her word.	她是个可靠的朋友,总是说话算话。	🤝
+577	season	1943	cautious	/ˈkɔːʃəs/	谨慎的	Be cautious when you cross this busy road.	过这条繁忙的马路时要小心。	⚠️
+578	season	1944	optimistic	/ˌɒptɪˈmɪstɪk/	乐观的	Despite the setback, she remained optimistic about the future.	尽管遭遇挫折,她对未来依然乐观。	🌈
+579	season	1945	sincere	/sɪnˈsɪə/	真诚的	Please accept my sincere apology for being late.	请接受我对迟到的真诚道歉。	💛
+580	season	1946	loyal	/ˈlɔɪəl/	忠诚的	A dog is a loyal companion that never leaves your side.	狗是忠诚的伙伴,永远不会离开你。	🐕
+581	season	1947	strict	/strɪkt/	严格的	Our maths teacher is very strict about homework.	我们数学老师对作业要求很严格。	📏
+582	season	1948	selfish	/ˈselfɪʃ/	自私的	It was selfish of him to keep all the snacks for himself.	他把零食全留给自己,太自私了。	🙅
+583	season	1949	mature	/məˈtʃʊə/	成熟的	She's very mature for her age.	她比同龄人成熟得多。	🌳
+584	season	1950	energetic	/ˌenəˈdʒetɪk/	精力充沛的	The puppy is so energetic that it never stops running.	这只小狗精力旺盛,跑个不停。	⚡
+585	season	1951	modest	/ˈmɒdɪst/	谦逊的	He's modest about his achievements and rarely talks about them.	他对自己的成就很谦虚,很少提起。	😌
+586	season	1952	cheerful	/ˈtʃɪəfl/	开朗的	She greeted everyone with a cheerful smile.	她带着开朗的微笑跟每个人打招呼。	😄
+587	season	1953	hardworking	/ˌhɑːdˈwɜːkɪŋ/	勤奋的	He's a hardworking student who never gives up.	他是个勤奋的学生,从不放弃。	💪
+588	season	1954	sensitive	/ˈsensətɪv/	敏感的	She's sensitive and cries easily at sad films.	她很敏感,看悲伤的电影容易哭。	🥹
+589	season	1955	determined	/dɪˈtɜːmɪnd/	坚定的	He was determined to finish the race no matter what.	他下定决心无论如何都要跑完比赛。	🔥
+590	season	1956	outgoing	/ˌaʊtˈɡəʊɪŋ/	外向的	Being outgoing, she makes friends wherever she goes.	她性格外向,走到哪儿都能交到朋友。	🤗
+591	season	1957	talkative	/ˈtɔːkətɪv/	健谈的	My grandmother is very talkative and loves a good chat.	我奶奶很健谈,喜欢聊天。	🗣️
+592	season	1958	calm	/kɑːm/	冷静的	He stayed calm even during the emergency.	即使在紧急情况下他也保持冷静。	😌
+593	season	1961	important	/ɪmˈpɔːtnt/	重要的	It's important to eat breakfast every morning.	每天早上吃早餐很重要。	⭐
+594	season	1962	possible	/ˈpɒsəbl/	可能的	Is it possible to finish this by tomorrow?	明天之前完成这个有可能吗?	🤔
+595	season	1963	useful	/ˈjuːsfl/	有用的	This app is really useful for learning new words.	这个应用对学新单词真的很有用。	🛠️
+596	season	1964	valuable	/ˈvæljuəbl/	有价值的	Time is the most valuable thing we have.	时间是我们拥有的最宝贵的东西。	💎
+597	season	1965	similar	/ˈsɪmələ/	相似的	These two paintings look quite similar.	这两幅画看起来很相似。	👯
+598	season	1966	modern	/ˈmɒdn/	现代的	They live in a modern flat in the city centre.	他们住在市中心一套现代化的公寓里。	🏙️
+599	season	1967	ancient	/ˈeɪnʃənt/	古代的	We visited an ancient temple in the mountains.	我们参观了山里一座古老的寺庙。	🏛️
+600	season	1968	popular	/ˈpɒpjələ/	受欢迎的	This song is very popular among teenagers.	这首歌在青少年中很受欢迎。	🌟
+601	season	1969	ordinary	/ˈɔːdnri/	普通的	It was just an ordinary day, and nothing special happened.	那只是平常的一天,没发生什么特别的事。	🚶
+602	season	1970	famous	/ˈfeɪməs/	著名的	Paris is famous for the Eiffel Tower.	巴黎以埃菲尔铁塔闻名。	🗼
+603	season	1971	comfortable	/ˈkʌmftəbl/	舒适的	This sofa is so comfortable that I could fall asleep on it.	这张沙发太舒服了,我都能在上面睡着。	🛋️
+604	season	1972	convenient	/kənˈviːniənt/	方便的	Living near the station is very convenient.	住在车站附近很方便。	🚇
+605	season	1973	complex	/ˈkɒmpleks/	复杂的	The human brain is incredibly complex.	人脑极其复杂。	🧩
+606	season	1974	typical	/ˈtɪpɪkl/	典型的	It was a typical rainy day in London.	那是伦敦典型的雨天。	🌧️
+607	season	1975	flexible	/ˈfleksəbl/	灵活的	My schedule is flexible, so we can meet anytime.	我的时间很灵活,所以我们随时都能见面。	🤸
+608	season	1976	accurate	/ˈækjərət/	准确的	Her description of the man was surprisingly accurate.	她对那个男人的描述准确得令人吃惊。	🎯
+609	season	1977	essential	/ɪˈsenʃl/	必不可少的	Water is essential for all living things.	水对一切生物都是必不可少的。	💧
+610	season	1978	available	/əˈveɪləbl/	可获得的;可用的	Tickets are still available for tonight's show.	今晚演出的票还有。	🎫
+611	season	1979	suitable	/ˈsuːtəbl/	合适的	This film isn't suitable for young children.	这部电影不适合小孩子看。	✅
+612	season	1980	practical	/ˈpræktɪkl/	实用的	She gave me some practical advice for the interview.	她给了我一些面试的实用建议。	🧰
+613	season	1983	suddenly	/ˈsʌdənli/	突然地	Suddenly, the lights went out and everything turned dark.	突然,灯灭了,一切陷入黑暗。	⚡
+614	season	1984	immediately	/ɪˈmiːdiətli/	立即	Call me immediately if anything goes wrong.	一有问题就立刻给我打电话。	🚨
+615	season	1985	recently	/ˈriːsntli/	最近	I've been feeling rather tired recently.	我最近一直觉得挺累的。	🕐
+616	season	1986	finally	/ˈfaɪnəli/	终于	After hours of waiting, the train finally arrived.	等了几个小时,火车终于到了。	🏁
+617	season	1987	occasionally	/əˈkeɪʒnəli/	偶尔	We occasionally go out for dinner at the weekend.	我们偶尔周末出去吃晚饭。	📅
+618	season	1988	eventually	/ɪˈventʃuəli/	最终	It was hard at first, but he eventually succeeded.	一开始很难,但他最终还是成功了。	⏳
+619	season	1989	meanwhile	/ˈmiːnwaɪl/	与此同时	You set the table; meanwhile, I'll cook the dinner.	你摆桌子,与此同时我来做晚饭。	⏱️
+620	season	1990	nowadays	/ˈnaʊədeɪz/	如今	Nowadays, almost everyone has a smartphone.	如今,几乎人人都有智能手机。	📱
+621	season	1991	rarely	/ˈreəli/	很少	He rarely watches TV because he's always busy.	他很少看电视,因为他总是很忙。	🌙
+622	season	1992	constantly	/ˈkɒnstəntli/	不断地	She's constantly checking her phone for messages.	她不停地看手机有没有消息。	🔁
+623	season	1993	temporary	/ˈtemprəri/	暂时的	This is only a temporary job for the summer.	这只是个暑假的临时工作。	⏲️
+624	season	1994	permanent	/ˈpɜːmənənt/	永久的	They moved to Canada and made it their permanent home.	他们搬到了加拿大,把那里当作永久的家。	🏠
+625	season	1995	instantly	/ˈɪnstəntli/	立刻	The photo was sent to my phone instantly.	照片瞬间就发到了我手机上。	⚡
+626	season	1996	currently	/ˈkʌrəntli/	目前	She is currently studying abroad in Australia.	她目前正在澳大利亚留学。	📍
+627	season	1997	previously	/ˈpriːviəsli/	以前	He had previously worked as a teacher before becoming a writer.	在成为作家之前,他曾当过老师。	⬅️
+628	season	1998	seldom	/ˈseldəm/	很少	It seldom snows in this part of the country.	这个地区很少下雪。	❄️
+629	season	1999	regularly	/ˈreɡjələli/	定期地	You should exercise regularly to stay healthy.	你应该定期锻炼以保持健康。	🔄
+630	season	2000	decade	/ˈdekeɪd/	十年	The town has changed a lot over the past decade.	这个小镇在过去十年里变化很大。	📆
+631	season	2001	period	/ˈpɪəriəd/	时期	The summer holiday is a long period of rest.	暑假是一段长长的休息时间。	⏳
+632	season	2002	schedule	/ˈʃedjuːl/	日程	My schedule is completely full this week.	我这周的日程排得满满当当。	🗓️
+633	season	2005	explain	/ɪkˈspleɪn/	解释	Could you explain how this machine works?	你能解释一下这台机器是怎么运作的吗?	💬
+634	season	2006	describe	/dɪˈskraɪb/	描述	Can you describe the man you saw at the door?	你能描述一下你在门口看到的那个人吗?	🗣️
+635	season	2007	suggest	/səˈdʒest/	建议	I suggest we leave early to avoid the traffic.	我建议我们早点出发以避开交通拥堵。	💡
+636	season	2008	persuade	/pəˈsweɪd/	说服	I tried to persuade him to change his mind, but he refused.	我试图说服他改变主意,但他拒绝了。	🗣️
+637	season	2009	argue	/ˈɑːɡjuː/	争论	They often argue about which team is better.	他们经常争论哪支队伍更厉害。	💢
+638	season	2010	discuss	/dɪˈskʌs/	讨论	Let's discuss the plan over lunch.	我们午饭时讨论一下这个计划吧。	🗨️
+639	season	2011	compare	/kəmˈpeə/	比较	If you compare the two phones, this one is clearly better.	把这两部手机比一比,这部明显更好。	⚖️
+640	season	2012	imagine	/ɪˈmædʒɪn/	想象	Imagine living on the moon one day.	想象一下有一天住在月球上。	🌙
+641	season	2013	predict	/prɪˈdɪkt/	预测	Scientists can predict the weather quite accurately now.	科学家现在能相当准确地预测天气。	🔮
+642	season	2014	realize	/ˈrɪəlaɪz/	意识到	I didn't realize that the shop closes so early.	我没意识到这家店这么早就关门。	💡
+643	season	2015	recognize	/ˈrekəɡnaɪz/	认出	I didn't recognize her with her new haircut.	她换了发型,我都没认出她来。	👀
+644	season	2016	consider	/kənˈsɪdə/	考虑	You should consider all the options before deciding.	做决定前你应该考虑所有的选择。	🤔
+645	season	2017	express	/ɪkˈspres/	表达	She finds it hard to express her feelings in words.	她觉得很难用言语表达自己的感受。	🗯️
+646	season	2018	mention	/ˈmenʃn/	提到	Please don't mention this to anyone else.	请不要向别人提到这件事。	💬
+647	season	2019	doubt	/daʊt/	怀疑	I doubt whether he will come to the party.	我怀疑他到底会不会来参加聚会。	❓
+648	season	2020	admit	/ədˈmɪt/	承认	You should admit your mistake and say sorry.	你应该承认自己的错误并道歉。	🙊
+649	season	2021	indicate	/ˈɪndɪkeɪt/	表明	These signs indicate that the road is closed ahead.	这些标志表明前方道路封闭。	👉
+650	season	2022	comment	/ˈkɒment/	评论	The teacher asked us to comment on each other's essays.	老师让我们互相评论对方的作文。	💬
+651	season	2023	debate	/dɪˈbeɪt/	辩论	Tomorrow we will debate whether homework should be banned.	明天我们将辩论是否该取消家庭作业。	🗣️
+652	season	2024	assume	/əˈsjuːm/	假设	Don't assume the answer is wrong just because it looks strange.	别因为答案看起来奇怪就想当然地认为它是错的。	🤷
+653	season	2027	attempt	/əˈtempt/	尝试	She made a brave attempt to climb the mountain.	她勇敢地尝试攀登那座山。	🧗
+654	season	2028	avoid	/əˈvɔɪd/	避免	We left early to avoid the rush hour.	我们提早出发以避开高峰期。	🚫
+655	season	2029	prevent	/prɪˈvent/	预防	Washing your hands can prevent illness.	勤洗手可以预防疾病。	🛡️
+656	season	2030	provide	/prəˈvaɪd/	提供	The school will provide free lunch for every student.	学校将为每个学生提供免费午餐。	🤲
+657	season	2031	produce	/prəˈdjuːs/	生产	These factories produce thousands of cars each year.	这些工厂每年生产数千辆汽车。	🏭
+658	season	2032	reduce	/rɪˈdjuːs/	减少	Turning off the lights helps reduce waste.	关灯有助于减少浪费。	📉
+659	season	2033	increase	/ɪnˈkriːs/	增加	The number of users continues to increase.	用户数量持续增长。	📈
+660	season	2034	develop	/dɪˈveləp/	发展;发育	Children develop quickly in their early years.	孩子在幼年时期发育很快。	🌱
+661	season	2035	invent	/ɪnˈvent/	发明	Thomas Edison tried many times to invent the light bulb.	托马斯·爱迪生尝试了很多次才发明出电灯。	💡
+662	season	2036	destroy	/dɪˈstrɔɪ/	摧毁;毁坏	A big fire can destroy an entire building in minutes.	一场大火几分钟就能摧毁整栋楼。	🔥
+663	season	2037	repair	/rɪˈpeə/	修理	My father can repair the broken bike in an hour.	我爸爸一小时就能修理好这辆坏了的自行车。	🔧
+664	season	2038	prepare	/prɪˈpeə/	准备	We need to prepare for the exam this weekend.	这个周末我们得准备考试。	📋
+665	season	2039	establish	/ɪˈstæblɪʃ/	建立	They plan to establish a new school in the village.	他们计划在村里建立一所新学校。	🏛️
+666	season	2040	maintain	/meɪnˈteɪn/	维持	It's important to maintain a healthy diet.	保持健康的饮食很重要。	⚙️
+667	season	2041	manage	/ˈmænɪdʒ/	管理	She can manage a team of ten people very well.	她能把一个十人的团队管理得很好。	👔
+668	season	2042	handle	/ˈhændl/	处理	He knows how to handle a difficult situation calmly.	他知道如何冷静地处理困难的局面。	🤝
+669	season	2043	perform	/pəˈfɔːm/	表演	The band will perform in front of a huge crowd.	乐队将在一大群观众面前表演。	🎭
+670	season	2044	contribute	/kənˈtrɪbjuːt/	贡献	Everyone should contribute to protecting the environment.	人人都应该为保护环境出一份力。	🤝
+671	season	2045	struggle	/ˈstrʌɡl/	奋斗;挣扎	Many students struggle with maths at first.	许多学生一开始都在数学上很吃力。	💪
+672	season	2046	succeed	/səkˈsiːd/	成功	If you keep trying, you will succeed in the end.	只要坚持努力,你最终会成功。	🏆
+673	season	2049	several	/ˈsevrəl/	几个	I've read this book several times.	这本书我读过好几遍了。	🔢
+674	season	2050	plenty	/ˈplenti/	大量	Don't rush, we have plenty of time.	别急,我们有充足的时间。	🍀
+675	season	2051	enormous	/ɪˈnɔːməs/	巨大的	The elephant is an enormous animal.	大象是一种巨大的动物。	🐘
+676	season	2052	tiny	/ˈtaɪni/	微小的	A tiny insect crawled across the table.	一只小小的昆虫爬过桌子。	🐜
+677	season	2053	huge	/hjuːdʒ/	巨大的	There was a huge crowd at the concert.	演唱会上有一大群人。	🌊
+678	season	2054	major	/ˈmeɪdʒə/	主要的	Pollution is a major problem in big cities.	污染是大城市的一个主要问题。	🔺
+679	season	2055	minor	/ˈmaɪnə/	次要的	It was only a minor injury, nothing serious.	只是点小伤,没什么大碍。	🔻
+680	season	2056	average	/ˈævərɪdʒ/	平均的	The average temperature in summer is about 30 degrees.	夏天的平均气温约为30度。	📊
+681	season	2057	entire	/ɪnˈtaɪə/	整个的	She spent the entire weekend studying.	她整个周末都在学习。	💯
+682	season	2058	amount	/əˈmaʊnt/	数量	A large amount of money was raised for charity.	为慈善募集到了一大笔钱。	💰
+683	season	2059	quantity	/ˈkwɒntəti/	数量	We need a large quantity of paper for the project.	这个项目我们需要大量的纸。	📦
+684	season	2060	majority	/məˈdʒɒrəti/	大多数	The majority of students passed the exam.	大多数学生都通过了考试。	👥
+685	season	2061	approximately	/əˈprɒksɪmətli/	大约	The journey takes approximately two hours.	这段旅程大约需要两个小时。	📐
+686	season	2062	sufficient	/səˈfɪʃnt/	足够的	Make sure you have sufficient water for the hike.	确保你带了足够的水去徒步。	✔️
+687	season	2063	numerous	/ˈnjuːmərəs/	许多的	There are numerous reasons to learn English.	学英语有很多理由。	🔢
+688	season	2064	multiple	/ˈmʌltɪpl/	多个的	The test has multiple correct answers.	这道题有多个正确答案。	✖️
+689	season	2065	additional	/əˈdɪʃənl/	额外的	There's an additional charge for extra luggage.	超重行李要额外收费。	➕
+690	season	2066	maximum	/ˈmæksɪməm/	最大值;最大的	The maximum speed on this road is 60 km/h.	这条路的最高限速是每小时60公里。	🔝
+691	season	2067	minimum	/ˈmɪnɪməm/	最小值;最小的	You need a minimum of three players to start the game.	开始游戏至少需要三名玩家。	🔅
+692	season	2068	dozen	/ˈdʌzn/	一打	She bought a dozen eggs at the market.	她在市场上买了一打鸡蛋。	🥚
+693	season	2071	however	/haʊˈevə/	然而	The plan sounds good; however, it may cost too much.	这个计划听起来不错,然而可能花费太高。	🔄
+694	season	2072	therefore	/ˈðeəfɔː/	因此	He was ill, and therefore stayed at home.	他病了,因此待在了家里。	➡️
+695	season	2073	although	/ɔːlˈðəʊ/	尽管	Although it was raining, we still went out.	虽然下着雨,我们还是出门了。	↪️
+696	season	2074	instead	/ɪnˈsted/	反而;作为替代	We didn't take the bus; we walked instead.	我们没坐公交,而是走着去的。	🔁
+697	season	2075	besides	/bɪˈsaɪdz/	此外	I don't want to go; besides, it's too late now.	我不想去,再说,现在也太晚了。	➕
+698	season	2076	otherwise	/ˈʌðəwaɪz/	否则	Hurry up, otherwise we'll miss the train.	快点,否则我们会赶不上火车。	⚠️
+699	season	2077	moreover	/mɔːrˈəʊvə/	此外	The hotel was cheap; moreover, it was clean and quiet.	这家酒店很便宜,而且既干净又安静。	➕
+700	season	2078	perhaps	/pəˈhæps/	也许	Perhaps we should ask the teacher for help.	也许我们该请老师帮忙。	🤔
+701	season	2079	probably	/ˈprɒbəbli/	可能	It will probably rain this afternoon.	今天下午很可能会下雨。	🌧️
+702	season	2080	certainly	/ˈsɜːtnli/	当然	I will certainly help you if you need me.	如果你需要,我一定会帮你。	✅
+703	season	2081	especially	/ɪˈspeʃəli/	尤其	I love fruit, especially strawberries.	我喜欢水果,尤其是草莓。	⭐
+704	season	2082	exactly	/ɪɡˈzæktli/	确切地	That's exactly what I was thinking.	那正是我所想的。	🎯
+705	season	2083	nearly	/ˈnɪəli/	几乎	We've nearly finished the project.	我们快要完成这个项目了。	📏
+706	season	2084	actually	/ˈæktʃuəli/	实际上	It looks difficult, but it's actually quite easy.	它看起来很难,但实际上相当简单。	💬
+707	season	2085	furthermore	/ˌfɜːðəˈmɔː/	此外	The product is cheap; furthermore, it's easy to use.	这个产品很便宜,此外还很好用。	➕
+708	season	2086	nevertheless	/ˌnevəðəˈles/	尽管如此	It was a hard journey; nevertheless, it was worth it.	这是段艰难的旅程,尽管如此,还是值得的。	🔄
+709	season	2087	consequently	/ˈkɒnsɪkwəntli/	因此;结果	He didn't study, and consequently failed the test.	他没学习,结果考试不及格。	➡️
+710	season	2088	similarly	/ˈsɪmələli/	同样地	Cats need exercise; similarly, dogs need daily walks.	猫需要运动,同样,狗也需要每天散步。	⚖️
+711	season	2089	generally	/ˈdʒenrəli/	通常;一般来说	Generally, the weather here is mild.	总的来说,这里的天气很温和。	🌤️
+712	season	2090	fortunately	/ˈfɔːtʃənətli/	幸好;幸运的是	Fortunately, no one was hurt in the accident.	幸运的是,事故中没有人受伤。	🍀
+713	season	2093	research	/rɪˈsɜːtʃ/	研究	She is doing research on climate change.	她正在做关于气候变化的研究。	🔬
+714	season	2094	education	/ˌedʒuˈkeɪʃn/	教育	Education plays a key role in a child's future.	教育对孩子的未来起着关键作用。	🎓
+715	season	2095	experiment	/ɪkˈsperɪmənt/	实验	We carried out an experiment to test the theory.	我们做了一个实验来验证这个理论。	🧪
+716	season	2096	theory	/ˈθɪəri/	理论	Einstein's theory changed the way we see the universe.	爱因斯坦的理论改变了我们看待宇宙的方式。	📖
+717	season	2097	concept	/ˈkɒnsept/	概念	The concept of time travel is hard to understand.	时间旅行的概念很难理解。	💡
+718	season	2098	analyze	/ˈænəlaɪz/	分析	Let's analyze the data before drawing a conclusion.	我们先分析数据再下结论。	📊
+719	season	2099	conclude	/kənˈkluːd/	得出结论	From the results, we can conclude that the plan worked.	从结果来看,我们可以得出这个计划奏效了的结论。	✅
+720	season	2100	summarize	/ˈsʌməraɪz/	总结	Please summarize the article in three sentences.	请用三句话总结这篇文章。	📝
+721	season	2101	achieve	/əˈtʃiːv/	实现	With hard work, you can achieve your dreams.	通过努力,你可以实现自己的梦想。	🏆
+722	season	2102	review	/rɪˈvjuː/	复习	I always review my notes before a test.	考试前我总会复习笔记。	📑
+723	season	2103	memorize	/ˈmeməraɪz/	记住	It's not enough to memorize words; you must use them.	光背单词不够,你还得会用。	🧠
+724	season	2104	translate	/trænzˈleɪt/	翻译	Can you translate this sentence into English?	你能把这句话翻译成英文吗?	🔤
+725	season	2105	solution	/səˈluːʃn/	解决方案	We finally found a solution to the problem.	我们终于找到了这个问题的解决办法。	🔑
+726	season	2106	standard	/ˈstændəd/	标准	The factory keeps a high standard of quality.	这家工厂保持着很高的质量标准。	📐
+727	season	2107	method	/ˈmeθəd/	方法	This is the easiest method to solve the equation.	这是解这个方程最简单的方法。	🛠️
+728	season	2108	principle	/ˈprɪnsəpl/	原则	Honesty is an important principle in life.	诚实是人生中一条重要的原则。	⚖️
+729	season	2109	define	/dɪˈfaɪn/	定义	Can you define what this word means?	你能给这个词下个定义吗?	📖
+730	season	2110	examine	/ɪɡˈzæmɪn/	检查	The doctor will examine the patient carefully.	医生会仔细检查这位病人。	🔍
+731	season	2111	observe	/əbˈzɜːv/	观察	Scientists observe the stars through a telescope.	科学家通过望远镜观察星星。	🔭
+732	season	2112	calculate	/ˈkælkjuleɪt/	计算	Can you calculate the total cost in your head?	你能在脑子里计算出总花费吗?	🧮
+733	season	2115	society	/səˈsaɪəti/	社会	Education benefits the whole society.	教育造福整个社会。	🏙️
+734	season	2116	tradition	/trəˈdɪʃn/	传统	Eating dumplings is a Spring Festival tradition.	吃饺子是春节的传统。	🎎
+735	season	2117	custom	/ˈkʌstəm/	习俗	Shaking hands is a common custom when meeting someone.	见面握手是一种常见的习俗。	🤝
+736	season	2118	government	/ˈɡʌvənmənt/	政府	The government has built many new schools.	政府建了许多新学校。	🏛️
+737	season	2119	public	/ˈpʌblɪk/	公共的;公众的	Smoking is not allowed in public places.	公共场所禁止吸烟。	📢
+738	season	2120	citizen	/ˈsɪtɪzn/	公民	Every citizen has the right to vote.	每个公民都有投票的权利。	🪪
+739	season	2121	neighbor	/ˈneɪbə/	邻居	Our new neighbor is very friendly.	我们的新邻居非常友好。	🏘️
+740	season	2122	stranger	/ˈstreɪndʒə/	陌生人	A stranger asked me the way to the train station.	一个陌生人向我打听去火车站的路。	🚶
+741	season	2123	customer	/ˈkʌstəmə/	顾客	The waiter asked the customer what he would like to order.	服务员问这位顾客想点些什么。	🛒
+742	season	2124	population	/ˌpɒpjuˈleɪʃn/	人口	The population of the city is growing fast.	这座城市的人口增长很快。	👥
+743	season	2125	charity	/ˈtʃærəti/	慈善	They raised money for charity by running a marathon.	他们通过跑马拉松为慈善筹款。	❤️
+744	season	2126	volunteer	/ˌvɒlənˈtɪə/	志愿者	She works as a volunteer at the animal shelter.	她在动物收容所做志愿者。	🙋
+745	season	2127	economy	/ɪˈkɒnəmi/	经济	A strong economy creates more jobs.	强劲的经济会创造更多就业机会。	💹
+746	season	2128	industry	/ˈɪndəstri/	工业	The car industry is very important to this country.	汽车工业对这个国家非常重要。	🏭
+747	season	2129	organization	/ˌɔːɡənaɪˈzeɪʃn/	组织	She works for a non-profit organization.	她在一家非营利组织工作。	🏢
+748	season	2130	generation	/ˌdʒenəˈreɪʃn/	一代人	Each generation faces its own challenges.	每一代人都面临着自己的挑战。	👨‍👩‍👧
+749	season	2131	individual	/ˌɪndɪˈvɪdʒuəl/	个人	Each individual has their own way of learning.	每个人都有自己的学习方式。	🧍
+750	season	2132	private	/ˈpraɪvət/	私人的	This is a private letter, so please don't read it.	这是封私人信件,请不要看。	🔒
+751	season	2133	official	/əˈfɪʃl/	官方的	The official results will be announced tomorrow.	官方结果将于明天公布。	📋
+752	season	2134	ceremony	/ˈserəməni/	典礼	The opening ceremony was watched by millions.	数百万人观看了开幕式。	🎉
+753	season	2137	energy	/ˈenədʒi/	能量	The sun gives us light and energy.	太阳给我们光和能量。	⚡
+754	season	2138	electricity	/ɪˌlekˈtrɪsəti/	电	We use electricity to power our homes.	我们用电为家庭供能。	🔌
+755	season	2139	gravity	/ˈɡrævəti/	重力	Gravity pulls everything towards the ground.	重力把一切都拉向地面。	🌍
+756	season	2140	planet	/ˈplænɪt/	行星	Mars is the fourth planet from the sun.	火星是距太阳第四近的行星。	🪐
+757	season	2141	universe	/ˈjuːnɪvɜːs/	宇宙	The universe is full of countless stars.	宇宙中充满了无数的星星。	🌌
+758	season	2142	climate	/ˈklaɪmət/	气候	The climate here is warm and dry.	这里的气候温暖干燥。	🌤️
+759	season	2143	temperature	/ˈtemprətʃə/	温度	The temperature drops sharply at night.	夜里气温骤降。	🌡️
+760	season	2144	oxygen	/ˈɒksɪdʒən/	氧气	We need oxygen to breathe.	我们需要氧气来呼吸。	🫁
+761	season	2145	surface	/ˈsɜːfɪs/	表面	The surface of the lake was calm and smooth.	湖面平静而光滑。	🌊
+762	season	2146	material	/məˈtɪəriəl/	材料	This jacket is made of waterproof material.	这件夹克是用防水材料做的。	🧵
+763	season	2147	chemical	/ˈkemɪkl/	化学物质;化学的	This chemical is dangerous, so never touch it.	这种化学物质很危险,千万不要碰。	⚗️
+764	season	2148	natural	/ˈnætʃrəl/	自然的	Honey is a natural sweetener.	蜂蜜是一种天然的甜味剂。	🍃
+765	season	2149	resource	/rɪˈsɔːs/	资源	Water is a precious natural resource.	水是一种宝贵的自然资源。	💧
+766	season	2150	creature	/ˈkriːtʃə/	生物	The blue whale is the largest creature in the ocean.	蓝鲸是海洋里最大的生物。	🐙
+767	season	2151	atmosphere	/ˈætməsfɪə/	大气	The Earth's atmosphere protects us from the sun's rays.	地球的大气层保护我们免受太阳光线的伤害。	🌫️
+768	season	2152	scientific	/ˌsaɪənˈtɪfɪk/	科学的	The discovery was a major scientific breakthrough.	这一发现是一项重大的科学突破。	🔬
+769	season	2153	technology	/tekˈnɒlədʒi/	技术	Modern technology has changed the way we live.	现代科技改变了我们的生活方式。	💻
+770	season	2154	particle	/ˈpɑːtɪkl/	粒子	A dust particle is far too small to see.	一个尘埃粒子太小了,根本看不见。	⚛️
+771	season	2155	invention	/ɪnˈvenʃn/	发明	The telephone was a life-changing invention.	电话是一项改变生活的发明。	💡
+772	season	2156	galaxy	/ˈɡæləksi/	星系	Our solar system is part of the Milky Way galaxy.	我们的太阳系是银河系的一部分。	🌠
+773	season	2159	career	/kəˈrɪə/	职业生涯	She has had a successful career as a doctor.	她作为医生事业有成。	💼
+774	season	2160	profession	/prəˈfeʃn/	职业	Teaching is a respected profession.	教书是一份受人尊敬的职业。	👩‍🏫
+775	season	2161	business	/ˈbɪznəs/	生意;商业	He runs a small business in town.	他在镇上经营着一家小生意。	🏪
+776	season	2162	success	/səkˈses/	成功	Hard work is the key to success.	努力是成功的关键。	🏆
+777	season	2163	failure	/ˈfeɪljə/	失败	Failure is simply a part of learning.	失败不过是学习的一部分。	📉
+778	season	2164	effort	/ˈefət/	努力	With a little more effort, you'll pass.	再努力一点,你就能通过了。	💪
+779	season	2165	responsibility	/rɪˌspɒnsəˈbɪləti/	责任	It's your responsibility to feed the dog.	喂狗是你的责任。	⚖️
+780	season	2166	talent	/ˈtælənt/	才能	She has a real talent for music.	她在音乐上很有天赋。	🎨
+781	season	2167	ability	/əˈbɪləti/	能力	He has the ability to solve problems quickly.	他有快速解决问题的能力。	🧠
+782	season	2168	progress	/ˈprəʊɡres/	进步	You've made great progress in English this term.	这学期你的英语进步很大。	📈
+783	season	2169	goal	/ɡəʊl/	目标	My goal is to learn 240 new words this season.	我的目标是这个赛季学会240个新单词。	🎯
+784	season	2170	skill	/skɪl/	技能	Cooking is a useful life skill.	做饭是一项有用的生活技能。	🛠️
+785	season	2171	position	/pəˈzɪʃn/	职位	She was offered a position at a big company.	她得到了一家大公司的职位。	💺
+786	season	2172	salary	/ˈsæləri/	薪水	The new job comes with a higher salary.	这份新工作薪水更高。	💵
+787	season	2173	employee	/ɪmˈplɔɪiː/	员工;雇员	He is the most hard-working employee in the company.	他是公司里最勤奋的员工。	🧑‍💼
+788	season	2174	interview	/ˈɪntəvjuː/	面试	He was nervous before the job interview.	求职面试前他很紧张。	🤝
+789	season	2175	project	/ˈprɒdʒekt/	项目	Our team is working on an exciting new project.	我们团队正在做一个激动人心的新项目。	📊
+790	season	2176	promotion	/prəˈməʊʃn/	晋升	She got a promotion after years of hard work.	多年的努力后她得到了晋升。	⬆️
+791	season	2177	reputation	/ˌrepjuˈteɪʃn/	声誉	The restaurant has a good reputation for fresh food.	这家餐厅以食材新鲜而享有好名声。	⭐
+792	season	2178	colleague	/ˈkɒliːɡ/	同事	My colleague helped me finish the report on time.	我的同事帮我按时完成了报告。	👥
+793	sports	1917	sport	/spɔːt/	运动	Playing sports keeps you fit.	运动让你保持健康。	🏆
+794	sports	1918	football	/ˈfʊtbɔːl/	足球	I play football every weekend.	我每个周末都踢足球。	⚽
+795	sports	1919	basketball	/ˈbɑːskɪtbɔːl/	篮球	Yao Ming is a famous basketball player.	姚明是著名的篮球运动员。	🏀
+796	sports	1920	volleyball	/ˈvɒlibɔːl/	排球	Volleyball is a popular team sport.	排球是一项受欢迎的团体运动。	🏐
+797	sports	1921	tennis	/ˈtenɪs/	网球	Let's play tennis after school.	放学后我们去打网球吧。	🎾
+798	sports	1922	badminton	/ˈbædmɪntən/	羽毛球	Badminton is really popular in China.	羽毛球在中国非常受欢迎。	🏸
+799	sports	1923	ball	/bɔːl/	球	Throw me the ball!	把球扔给我!	⚾
+800	sports	1926	swimming	/ˈswɪmɪŋ/	游泳	Swimming is great exercise.	游泳是很好的运动。	🏊
+801	sports	1927	running	/ˈrʌnɪŋ/	跑步	Running every morning makes me feel great.	每天早上跑步让我感觉很棒。	🏃
+802	sports	1928	jumping	/ˈdʒʌmpɪŋ/	跳跃	Jumping is a good exercise.	跳跃是一项好运动。	svg:
+803	sports	1929	cycling	/ˈsaɪklɪŋ/	骑车	Cycling to school is good exercise.	骑车上学是一种很好的锻炼。	🚴
+804	sports	1930	skating	/ˈskeɪtɪŋ/	滑冰	Ice skating is fun in winter.	冬天滑冰很有意思。	⛸️
+805	sports	1931	skiing	/ˈskiːɪŋ/	滑雪	Skiing down the slope is thrilling.	从坡上滑雪下来非常刺激。	⛷️
+806	sports	1932	hiking	/ˈhaɪkɪŋ/	远足	We went hiking last weekend.	我们上周末去远足了。	🥾
+807	sports	1933	yoga	/ˈjəʊɡə/	瑜伽	Yoga helps me relax after a long day.	瑜伽让我在一天的疲惫后放松下来。	🧘
+808	sports	1936	dancing	/ˈdɑːnsɪŋ/	跳舞	She loves dancing to pop music.	她喜欢随着流行音乐跳舞。	💃
+809	sports	1937	singing	/ˈsɪŋɪŋ/	唱歌	Singing always cheers me up.	唱歌总是让我开心。	🎤
+810	sports	1938	drawing	/ˈdrɔːɪŋ/	画画	Her drawing is really impressive.	她画得非常棒。	🖌️
+811	sports	1939	reading	/ˈriːdɪŋ/	阅读	Reading is my favorite hobby.	阅读是我最喜欢的爱好。	📖
+812	sports	1940	cooking	/ˈkʊkɪŋ/	烹饪	I love cooking on weekends.	我喜欢在周末烹饪。	🍳
+813	sports	1941	fishing	/ˈfɪʃɪŋ/	钓鱼	My grandpa goes fishing every Sunday.	我爷爷每周日去钓鱼。	🎣
+814	sports	1944	game	/ɡeɪm/	比赛/游戏	We watched a basketball game last night.	我们昨晚看了一场篮球赛。	svg:GAME ON!
+815	sports	1945	match	/mætʃ/	比赛	The football match starts at three.	足球比赛三点开始。	🏟️
+816	sports	1946	player	/ˈpleɪə/	运动员	He's the best player on the team.	他是队里最好的球员。	svg:7
+817	sports	1947	team	/tiːm/	队/球队	Our team won the game!	我们队赢了!	svg:1|10|7
+818	sports	1948	win	/wɪn/	赢	I'm sure we'll win the game.	我相信我们会赢得比赛。	🥇
+819	sports	1949	lose	/luːz/	输	It's okay to lose sometimes.	偶尔输了也没关系。	svg:FINAL SCORE|US|━━━|1|:|THEM|5|LOSE|😢|😞
+820	sports	1952	gym	/dʒɪm/	体育馆	The gym is next to our school.	体育馆在我们学校旁边。	🏋️
+821	sports	1953	park	/pɑːk/	公园	The kids are playing in the park.	孩子们在公园里玩。	🏞️
+822	sports	1954	playground	/ˈpleɪɡraʊnd/	操场	Students are running on the playground.	学生们在操场上奔跑。	🛝
+823	time	1917	time	/taɪm/	时间	Time flies when you're having fun.	快乐的时光总是过得很快。	⏰
+824	time	1918	second	/ˈsekənd/	秒	I'll be there in a second.	我一秒钟就到。	⏱️
+825	time	1919	minute	/ˈmɪnɪt/	分钟	Wait for me ten minutes.	等我十分钟。	⏲️
+826	time	1920	hour	/aʊə/	小时	I sleep about eight hours a night.	我每晚睡大约八个小时。	🕐
+827	time	1921	day	/deɪ/	天	Have a nice day!	祝你度过愉快的一天!	☀️
+828	time	1922	week	/wiːk/	周	I see her every week.	我每周都见她。	📅
+829	time	1923	month	/mʌnθ/	月	My birthday is next month.	我下个月过生日。	🗓️
+830	time	1924	year	/jɪə/	年	Happy New Year!	新年快乐!	🎊
+831	time	1927	morning	/ˈmɔːnɪŋ/	早上	I like to read in the morning.	我喜欢早上看书。	🌅
+832	time	1928	noon	/nuːn/	中午	We have lunch around noon.	我们中午左右吃午饭。	🕛
+833	time	1929	afternoon	/ˌɑːftəˈnuːn/	下午	I usually read in the afternoon.	我通常下午看书。	🌤️
+834	time	1930	evening	/ˈiːvnɪŋ/	晚上	I usually study in the evening.	我一般晚上学习。	🌆
+835	time	1931	night	/naɪt/	夜晚	The stars come out at night.	星星在夜晚出来。	🌙
+836	time	1932	midnight	/ˈmɪdnaɪt/	午夜	Cinderella has to be home by midnight.	灰姑娘必须午夜前回家。	🌌
+837	time	1933	today	/təˈdeɪ/	今天	What day is today?	今天星期几?	📍
+838	time	1934	yesterday	/ˈjestədeɪ/	昨天	I watched a movie yesterday.	我昨天看了一部电影。	⏮️
+839	time	1935	tomorrow	/təˈmɒrəʊ/	明天	See you tomorrow!	明天见!	⏭️
+840	time	1938	Monday	/ˈmʌndeɪ/	星期一	I hate Monday mornings.	我讨厌星期一早上。	1️⃣
+841	time	1939	Tuesday	/ˈtjuːzdeɪ/	星期二	We have music class on Tuesday.	我们星期二有音乐课。	2️⃣
+842	time	1940	Wednesday	/ˈwenzdeɪ/	星期三	We have a meeting every Wednesday.	我们每个星期三开会。	3️⃣
+843	time	1941	Thursday	/ˈθɜːzdeɪ/	星期四	I have soccer practice on Thursday.	我星期四有足球训练。	4️⃣
+844	time	1942	Friday	/ˈfraɪdeɪ/	星期五	Friday is my favorite day of the week.	星期五是我一周中最爱的一天。	5️⃣
+845	time	1943	Saturday	/ˈsætədeɪ/	星期六	I sleep in on Saturdays.	我每个星期六睡懒觉。	6️⃣
+846	time	1944	Sunday	/ˈsʌndeɪ/	星期日	Sunday is a day for resting.	星期天是休息的日子。	7️⃣
+847	time	1947	January	/ˈdʒænjuəri/	一月	January is the first month of the year.	一月是一年的第一个月。	❄️
+848	time	1948	February	/ˈfebruəri/	二月	February is the shortest month.	二月是一年中最短的月份。	💝
+849	time	1949	March	/mɑːtʃ/	三月	Spring begins in March.	春天三月开始。	🌷
+850	time	1950	April	/ˈeɪprəl/	四月	April brings the spring rain.	四月带来春雨。	🌧️
+851	time	1951	May	/meɪ/	五月	Flowers bloom in May.	花儿在五月盛开。	🌸
+852	time	1952	June	/dʒuːn/	六月	My birthday is in June.	我的生日在六月。	🌞
+853	time	1953	July	/dʒuˈlaɪ/	七月	July is summer vacation.	七月是暑假。	🏖️
+854	time	1954	August	/ɔːˈɡʌst/	八月	August is my favorite month.	八月是我最喜欢的月份。	🌻
+855	time	1955	September	/sepˈtembə/	九月	School starts in September.	九月开学。	🍂
+856	time	1956	October	/ɒkˈtəʊbə/	十月	The leaves change color in October.	十月树叶变色。	🎃
+857	time	1957	November	/nəʊˈvembə/	十一月	The weather gets cold in November.	十一月天气转凉。	🦃
+858	time	1958	December	/dɪˈsembə/	十二月	December is the last month of the year.	十二月是一年的最后一个月。	🎄
+859	time	1959	birthday	/ˈbɜːθdeɪ/	生日	Happy birthday to you!	祝你生日快乐!	🎂
+860	time	1960	holiday	/ˈhɒlədeɪ/	假日	I love long holidays.	我喜欢长假。	🎉
+861	time	1961	weekend	/ˌwiːkˈend/	周末	Have a great weekend!	周末愉快!	🛌
+862	time	1962	date	/deɪt/	日期	What's today's date?	今天是什么日期?	📆
+863	traffic	1917	car	/kɑː/	汽车	My dad's car is red.	我爸爸的车是红色的。	🚗
+864	traffic	1918	bus	/bʌs/	公共汽车	I take the bus to school every day.	我每天坐公交车去上学。	🚌
+865	traffic	1919	taxi	/ˈtæksi/	出租车	Let's take a taxi to the airport.	我们打个出租车去机场吧。	🚕
+866	traffic	1920	truck	/trʌk/	卡车	That's a big truck!	那辆卡车真大!	🚚
+867	traffic	1921	van	/væn/	面包车	The school van picks us up at seven.	校车七点接我们。	🚐
+868	traffic	1922	bike	/baɪk/	自行车	I ride my bike every weekend.	我每个周末都骑自行车。	🚲
+869	traffic	1923	motorcycle	/ˈməʊtəsaɪkl/	摩托车	He rides a motorcycle to work.	他骑摩托车上班。	🏍️
+870	traffic	1926	train	/treɪn/	火车	The train arrives at six.	火车六点到。	🚂
+871	traffic	1927	metro	/ˈmetrəʊ/	地铁	Which district of the city do you live in? Does it have a metro stop?	你住在城里的哪个区?那儿有地铁站吗?	🚇
+872	traffic	1928	plane	/pleɪn/	飞机	The plane is taking off now.	飞机正在起飞。	✈️
+873	traffic	1929	helicopter	/ˈhelɪkɒptə/	直升机	I've never been in a helicopter.	我从没坐过直升机。	🚁
+874	traffic	1930	ship	/ʃɪp/	船	A huge ship is out on the sea.	一艘大船在海上。	🚢
+875	traffic	1931	boat	/bəʊt/	小船	We rowed a small boat on the lake.	我们在湖上划着小船。	⛵
+876	traffic	1934	road	/rəʊd/	道路	The road is long and straight.	这条路又长又直。	svg:
+877	traffic	1935	street	/striːt/	街道	There are many shops on this street.	这条街上有很多商店。	svg:STREET
+878	traffic	1936	bridge	/brɪdʒ/	桥	We crossed the bridge by car.	我们开车过了桥。	svg:
+879	traffic	1937	traffic	/ˈtræfɪk/	交通	The traffic is really bad today.	今天交通真堵。	svg:!|!
+880	traffic	1938	airport	/ˈeəpɔːt/	机场	I'll meet you at the airport.	我会在机场接你。	🛫
+881	traffic	1939	station	/ˈsteɪʃn/	车站	Wait for me at the bus station.	在公交站等我。	🚉
+882	traffic	1942	ticket	/ˈtɪkɪt/	票	I bought two tickets to Shanghai.	我买了两张去上海的票。	🎫
+883	traffic	1943	seat	/siːt/	座位	Please take your seat.	请坐到你的座位上。	svg:
+884	traffic	1944	map	/mæp/	地图	Check the map before you head out.	出门前看看地图。	🗺️
+885	traffic	1945	direction	/dəˈrekʃn/	方向	Which direction is the library in?	图书馆在哪个方向?	svg:N|S|E|W
+886	traffic	1948	driver	/ˈdraɪvə/	司机	The taxi driver is really friendly.	出租车司机非常友好。	svg:
+887	traffic	1949	passenger	/ˈpæsɪndʒə/	乘客	The bus is packed with passengers.	公交车上挤满了乘客。	svg:✈
+888	traffic	1950	left	/left/	左	Turn left at the next corner.	在下个路口往左拐。	⬅️
+889	traffic	1951	right	/raɪt/	右	The hospital is on your right.	医院在你的右边。	➡️
+890	traffic	1952	straight	/streɪt/	直走	Go straight for two blocks.	直走两个街区。	⬆️
+891	traffic	1953	turn	/tɜːn/	转弯	Turn right at the traffic light.	在红绿灯处右转。	↩️
+892	traffic	1954	stop	/stɒp/	停	Cars must stop at red lights.	车在红灯时必须停下来。	🛑
+893	treasure	1917	yes	/jes/	是的/对	Yes, you are right.	是的,你说得对。	svg:
+894	treasure	1918	no	/nəʊ/	不/不是	No, thank you.	不用,谢谢。	svg:
+895	treasure	1919	OK	/ˌəʊˈkeɪ/	好的/行	OK, let's get started.	好,我们开始吧。	svg:
+896	treasure	1920	please	/pliːz/	请	Pass me the salt, please.	请把盐递给我。	svg:
+897	treasure	1921	thank you	/θæŋk juː/	谢谢	Thank you for your help.	谢谢你的帮助。	svg:
+898	treasure	1922	sorry	/ˈsɒri/	对不起/抱歉	I'm sorry I'm late.	抱歉我迟到了。	svg:
+899	treasure	1923	hello	/həˈləʊ/	你好	Hello, nice to meet you!	你好,很高兴认识你!	svg:
+900	treasure	1924	goodbye	/ɡʊdˈbaɪ/	再见	Goodbye, see you tomorrow.	再见,明天见。	svg:
+901	treasure	1927	and	/ænd/	和/并且	I like tea and coffee.	我喜欢茶和咖啡。	svg:
+902	treasure	1928	but	/bʌt/	但是	I like apples, but not oranges.	我喜欢苹果,但不喜欢橙子。	svg:
+903	treasure	1929	or	/ɔː/	或者/还是	Would you like tea or coffee?	你想要茶还是咖啡?	svg:?
+904	treasure	1930	because	/bɪˈkɒz/	因为	I'm late because of the heavy traffic.	我迟到是因为交通堵塞。	svg:
+905	treasure	1931	so	/səʊ/	所以/那么	It rained, so I stayed home.	下雨了,所以我待在家。	svg:
+906	treasure	1932	if	/ɪf/	如果	If it rains tomorrow, we'll stay home.	如果明天下雨,我们就待在家里。	svg:?
+907	treasure	1933	when	/wen/	当...时	When I was a kid, I lived in Beijing.	我小时候住在北京。	svg:!
+908	treasure	1936	very	/ˈveri/	非常/很	Thank you very much.	非常感谢。	svg:
+909	treasure	1937	too	/tuː/	也/太	Me too!	我也是!	svg:+1
+910	treasure	1938	also	/ˈɔːlsəʊ/	也	She also likes classical music.	她也喜欢古典音乐。	svg:
+911	treasure	1939	not	/nɒt/	不	I'm not sure.	我不确定。	svg:
+912	treasure	1942	never	/ˈnevə/	从不	I've never been to America.	我从没去过美国。	svg:
+913	treasure	1943	always	/ˈɔːlweɪz/	总是	He's always late.	他老是迟到。	svg:
+914	treasure	1944	often	/ˈɒfn/	经常	I often play basketball.	我经常打篮球。	svg:
+915	treasure	1945	sometimes	/ˈsʌmtaɪmz/	有时	Sometimes I take the bus to school.	有时候我坐公交车上学。	svg:
+916	treasure	1946	again	/əˈɡen/	再/又	Could you say that again?	能再说一遍吗?	svg:x2
+917	treasure	1947	already	/ɔːlˈredi/	已经	I've already finished my homework.	我已经做完作业了。	svg:
+918	treasure	1948	still	/stɪl/	仍然/还	He's still in the office.	他还在办公室。	svg:
+919	treasure	1949	now	/naʊ/	现在	Where are you now?	你现在在哪里?	svg:
+920	treasure	1950	then	/ðen/	然后/那时	First we eat, then we'll play.	先吃饭,然后再玩。	svg:1|2
+921	treasure	1951	soon	/suːn/	很快	I'll be back soon.	我很快就回来。	svg:
+922	treasure	1952	late	/leɪt/	迟/晚的	Sorry I'm late.	对不起我迟到了。	svg:!
+923	treasure	1953	early	/ˈɜːli/	早/早的	I get up early every morning.	我每天早上都早起。	svg:
+924	treasure	1956	well	/wel/	好	I slept really well last night.	我昨晚睡得真好。	svg:
+925	treasure	1957	hard	/hɑːd/	努力地	Work hard, play hard.	努力工作,尽情玩乐。	svg:
+926	treasure	1958	together	/təˈɡeðə/	一起	Let's go together.	我们一起去吧。	svg:
+927	treasure	1959	alone	/əˈləʊn/	独自/一个人	He lives alone in the city.	他一个人住在城里。	svg:
+928	treasure	1960	only	/ˈəʊnli/	只/只有	I'm only joking.	我只是开玩笑。	svg:
+929	treasure	1961	most	/məʊst/	最/最多	What do you like most about him?	你最喜欢他什么?	svg:
+930	treasure	1962	more	/mɔː/	更/更多	I want more rice, please.	我想要更多米饭。	svg:
+931	treasure	1963	less	/les/	较少	You should eat less sugar.	你应该少吃糖。	svg:
+932	treasure	1964	about	/əˈbaʊt/	关于/大约	What's this book about?	这本书是关于什么的?	svg:
+933	treasure	1965	for	/fɔː/	为了/给	This is for you.	这是给你的。	svg:
+934	treasure	1966	with	/wɪð/	和	I'll go with you.	我和你一起去。	svg:
+935	treasure	1967	without	/wɪˈðaʊt/	没有/不带	Don't go out without your coat.	别不穿外套就出门。	svg:
+936	treasure	1968	at	/æt/	在	I'll meet you at the door.	我在门口等你。	svg:
+937	treasure	1969	in	/ɪn/	在...里	It's in my bag.	在我包里。	svg:
+938	treasure	1970	on	/ɒn/	在...上	The keys are on the table.	钥匙在桌子上。	svg:
+939	treasure	1971	under	/ˈʌndə/	在...下	The dog is under the table.	狗在桌子底下。	svg:
+940	treasure	1972	next to	/nekst tuː/	在...旁边	The bank is next to the school.	银行在学校旁边。	svg:
+941	treasure	1973	between	/bɪˈtwiːn/	在...之间	The bank is between the school and the hospital.	银行在学校和医院之间。	svg:
+942	treasure	1976	number	/ˈnʌmbə/	数字/号码	What's your phone number?	你的电话号码是多少?	svg:1|2|3
+943	treasure	1977	letter	/ˈletə/	字母/信	I got a letter from my friend.	我收到了朋友的来信。	svg:A
+944	treasure	1978	word	/wɜːd/	单词/话	What does this word mean?	这个词是什么意思?	svg:A|B|C
+945	treasure	1979	sentence	/ˈsentəns/	句子	Can you make a sentence with this word?	你能用这个词造个句吗?	svg:
+946	treasure	1980	story	/ˈstɔːri/	故事	Tell me a story, please.	请给我讲个故事。	svg:
+947	treasure	1981	name	/neɪm/	名字	What's your name?	你叫什么名字?	svg:HI!
+948	treasure	1982	thing	/θɪŋ/	东西/事情	I have so many things to do.	我有好多事要做。	svg:
+949	treasure	1983	idea	/aɪˈdɪə/	想法	I have a good idea!	我有一个好想法!	svg:
+950	treasure	1984	way	/weɪ/	方式/路	Show me the way to school.	告诉我去学校的路。	svg:
+951	treasure	1985	problem	/ˈprɒbləm/	问题	No problem!	没问题!	svg:?
+952	treasure	1986	answer	/ˈɑːnsə/	答案	Do you know the answer?	你知道答案吗?	svg:

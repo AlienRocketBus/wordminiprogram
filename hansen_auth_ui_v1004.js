@@ -54,12 +54,15 @@
   }
 
   var mode = 'phone';   /* phone | password */
-  var _pwReg = false;   /* 🔴v1058: 用户名密码页签内的「登录/注册」开关 */
+  /* 🔴审查 R2-UI-7 / R2-5：「重新登录」要直接给登录表单 —— 以前本机还记着「已登录」（云端其实不认了），
+     打开的是「👤 已登录」面板，没有表单，孩子卡死在那儿。relogin 时不管本机记录，直接给表单；登成功了就照常。
+     legacy：旧版本「用户名注册」的账号（云端从来没有），去手机号注册那一页，并说清原因。 */
+  var _relogin = null;   /* null | { legacy } */
 
   function html() {
     var A = window.HansenAuth;
     var signed = A && A.isSignedIn && A.isSignedIn();
-    if (signed) {
+    if (signed && !_relogin) {
       var lc = A.readLocal();
       return '<div class="au_card"><div class="au_hd"><span class="au_t">👤 已登录</span>'
         + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
@@ -70,11 +73,19 @@
         + '<button class="au_skip" id="auOut">退出登录</button>'
         + '<div class="au_msg" id="auMsg"></div></div>';
     }
-    var h = '<div class="au_card"><div class="au_hd"><span class="au_t">🔐 登录 / 注册</span>'
+    var h = '<div class="au_card"><div class="au_hd"><span class="au_t">'
+      + (_relogin ? (_relogin.legacy ? '📱 用手机号注册' : '🔑 重新登录') : '🔐 登录 / 注册') + '</span>'
       + '<button class="au_x" id="auX" aria-label="关闭">✕</button></div>'
+      + (_relogin
+          ? '<div class="au_tip" style="opacity:.92;font-size:12.5px;margin:-4px 0 12px">'
+            + (_relogin.legacy
+                ? '以前版本的「用户名注册」其实没能在云端建好账号，不是你的错。用手机号注册一下就好（家长的手机号也可以），这台手机上的进度会自动带过去。'
+                : '云端登录过期了，重新登录一次就好 —— 这台手机上的进度不会丢。')
+            + '</div>'
+          : '')
       + '<div class="au_tabs">'
       + '<button class="au_tab' + (mode === 'phone' ? ' on' : '') + '" data-m="phone">手机号</button>'
-      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">用户名密码</button>'
+      + '<button class="au_tab' + (mode === 'password' ? ' on' : '') + '" data-m="password">用户名登录</button>'
       + '</div>';
     if (mode === 'phone') {
       h += '<div class="au_row"><div class="au_lb">手机号</div>'
@@ -83,23 +94,20 @@
         + '<input class="au_in" id="auCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="收到的数字" maxlength="8">'
         + '<button class="au_send" id="auSend">获取验证码</button></div></div>'
         + '<button class="au_go" id="auGo">登录 / 注册</button>'
-        + '<div class="au_tip">第一次用这个手机号 = 自动注册，不用另外填表。</div>';
+        + '<div class="au_tip">第一次用这个手机号 = 自动注册，不用另外填表。<br>孩子没有手机号的话，用家长的手机号也可以。</div>';
     } else {
-      /* 🔴v1058: 用户名密码支持**直接注册**（此前只能登录，必须先用手机号注册过）。
-         登录/注册用一个开关切换，注册时多一个确认密码框。 */
-      var reg = (mode === 'password' && _pwReg);
+      /* 🔴v1164：这一页**只能登录，不能注册**。
+         v1058 在这里加过「用户名注册」，但云端 SDK 对它只发一封验证码到内部邮箱、
+         从不建账号 —— 点了「注册并登录」会显示已登录，云端却永远连不上（天梯用不了）。
+         所以注册入口换成「去手机号注册」，并把原因说清楚。 */
       h += '<div class="au_row"><div class="au_lb">用户名</div>'
-        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="3-20 个字，不含空格"></div>'
+        + '<input class="au_in" id="auUser" type="text" autocomplete="username" placeholder="已有账号的用户名"></div>'
         + '<div class="au_row"><div class="au_lb">密码</div>'
-        + '<input class="au_in" id="auPwd" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" placeholder="至少 6 位"></div>'
-        + (reg ? ('<div class="au_row"><div class="au_lb">确认密码</div>'
-            + '<input class="au_in" id="auPwd2" type="password" autocomplete="new-password" placeholder="再输一次"></div>') : '')
-        + '<button class="au_go" id="auGo">' + (reg ? '注册并登录' : '登录') + '</button>'
-        + '<button class="au_skip" id="auPwToggle" style="color:#a5b4fc">'
-        + (reg ? '已有账号？去登录' : '还没有账号？点这里注册') + '</button>'
-        + '<div class="au_tip">' + (reg
-            ? '用户名 3-20 个字，密码至少 6 位。注册后进度会存到云端，换设备用同一账号即可找回。'
-            : '没有账号可以点上面直接注册，不需要手机号。') + '</div>';
+        + '<input class="au_in" id="auPwd" type="password" autocomplete="current-password" placeholder="至少 6 位"></div>'
+        + '<button class="au_go" id="auGo">登录</button>'
+        + '<button class="au_skip" id="auPwToPhone" style="color:#a5b4fc">还没有账号？用手机号注册 →</button>'
+        + '<div class="au_tip">这里只能登录已经有用户名和密码的账号。<br>'
+        + '新账号请用手机号注册（家长的手机号也可以）—— 云端不支持只用用户名注册。</div>';
     }
     h += '<button class="au_skip" id="auSkip">先不登录，直接玩</button>'
       + '<div class="au_msg" id="auMsg"></div></div>';
@@ -165,8 +173,8 @@
       });
     };
 
-    /* 用户名密码：登录 ↔ 注册 切换 */
-    if (q('auPwToggle')) q('auPwToggle').onclick = function () { _pwReg = !_pwReg; render(); };
+    /* 用户名页签没有注册：引去手机号那一页 */
+    if (q('auPwToPhone')) q('auPwToPhone').onclick = function () { mode = 'phone'; render(); };
 
     /* 登录 / 注册 */
     if (q('auGo')) q('auGo').onclick = function () {
@@ -176,10 +184,6 @@
       var task;
       if (mode === 'phone') {
         task = A.loginByPhoneCode((q('auCode') || {}).value || '');
-      } else if (_pwReg) {
-        task = A.registerByPassword((q('auUser') || {}).value || '',
-                                    (q('auPwd') || {}).value || '',
-                                    (q('auPwd2') || {}).value || '');
       } else {
         task = A.loginByPassword((q('auUser') || {}).value || '', (q('auPwd') || {}).value || '');
       }
@@ -202,6 +206,7 @@
         if (s && s.autoPicked === 'cloud') {
           syncTxt = '，已自动取回云端进度（' + (s.cloudWords || 0) + ' 个单词）';
         }
+        _relogin = null;
         msg('登录成功！' + idTxt + syncTxt, 'ok');
         /* 🔴v1026: 恢复成功后必须重新加载页面, 否则内存里仍是旧数据,
            用户会看到"什么都没变", 且下一次存档会把恢复的进度覆盖掉 */
@@ -251,7 +256,7 @@
                   setTimeout(function(){ try{ location.reload(); }catch(e){} }, 1200); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             } else {
-              CS.syncNow({force:true})
+              CS.syncNow({force:true, rewrite:true})   /* 孩子选了「留本机」：内容没变也要真写一次 */
                 .then(function(){ msg('已用本机进度覆盖云端。', 'ok'); })
                 .catch(function(e){ msg(A.friendly(e), 'err'); });
             }
@@ -270,7 +275,7 @@
       var btn = this; btn.disabled = true; msg('正在上传…');
       A.pushSave().then(function (r) {
         if (r && r.ok) msg('已存到云端。换设备登录同一账号即可找回。', 'ok');
-        else msg('上传没成功：' + ((r && r.reason) || '未知原因'), 'err');
+        else msg('上传没成功：' + pushWhy(r), 'err');
         btn.disabled = false;
       }).catch(function (e) { msg(A.friendly(e), 'err'); btn.disabled = false; });
     };
@@ -280,6 +285,28 @@
   }
 
   function pad(n) { var s = String(n); while (s.length < 3) s = '0' + s; return s; }
+
+  /* 🔴审查 R2-6：上传没成功的原因要说人话（以前直接印「local-empty-refuse-upload」「upload-failed」这种内部代号）——
+     说清为什么、怎么办；数据层已经写好的人话（r.error）原样给 */
+  var PUSH_WHY = {
+    'local-empty-refuse-upload': '这台手机上还没有学会的单词，先玩一会儿再存',
+    'restoring-refuse-upload': '正在从云端取回进度，等几秒再点',
+    'not-configured': '云端还没开通，暂时存不了',
+    'cloudsave-unavailable': '云存档还没加载好，刷新一下页面再试',
+    'busy': '正在上传，等几秒再点',
+    'cooldown': '刚刚才存过，等一会儿再点',
+    'not-enabled': '云存档还没开启，先登录一次',
+    'backup-unavailable': '本机的进度读不出来，刷新一下页面再试',
+    'export-failed': '本机的进度读不出来，刷新一下页面再试',
+    'reconciling': '正在和云端对账，等几秒再点',
+    'not-reconciled': '刚才没读到云端的存档，先不上传（免得把云端的进度盖掉）—— 网好了会自动再对一次，等一会儿再点',
+    'owner-mismatch': '这台手机上的进度是另一个账号的，不能存进这个账号'
+  };
+  function pushWhy(r) {
+    var why = (r && r.reason) || '';
+    if (why === 'upload-failed') return (r && r.error) || '网络不太顺，等会儿再点一次';
+    return PUSH_WHY[why] || (r && r.error) || why || '原因不明，等会儿再点一次';
+  }
 
   function notify() {
     try { document.dispatchEvent(new CustomEvent('hsn-auth-changed')); } catch (e) {}
@@ -360,11 +387,16 @@
     bind();
   }
 
-  function open() {
+  /* opts.mode：'phone' | 'password'，比如注册门槛要直接打开手机号那一页；
+     opts.relogin：直接给登录表单（本机还记着「已登录」也一样）；opts.legacy：旧版本用户名注册的账号 */
+  function open(opts) {
     if (!window.HansenAuth || !HansenAuth.ready()) {
       alert('云服务还没配置好，暂时不能登录。');
       return;
     }
+    if (opts && (opts.mode === 'phone' || opts.mode === 'password')) mode = opts.mode;
+    _relogin = (opts && opts.relogin) ? { legacy: !!opts.legacy } : null;
+    if (_relogin && _relogin.legacy) mode = 'phone';
     render();
     host().classList.add('on');
   }
@@ -372,7 +404,9 @@
     var el = document.getElementById(ID);
     if (el) el.classList.remove('on');
     if (_tick) { clearInterval(_tick); _tick = null; }
+    _relogin = null;
   }
 
-  window.HansenAuthUI = { open: open, close: close, _render: render };
+  /* pushWhy：云存档卡片的「立即同步」也用这同一份人话（审查 R3 minor-1） */
+  window.HansenAuthUI = { open: open, close: close, _render: render, pushWhy: pushWhy };
 })();

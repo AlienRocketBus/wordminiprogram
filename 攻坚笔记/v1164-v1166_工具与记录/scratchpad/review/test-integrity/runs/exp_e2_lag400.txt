@@ -1,0 +1,290 @@
+
+好友 / 天梯排行榜 / 资料名 · 真 SDK 端到端（v1164）
+
+
+── READONLY · legacy ──
+  OK  [A] 用户名登录 + 云端发了竞赛 ID（cid=1）
+  OK  [B] 用户名登录 + 云端发了竞赛 ID（cid=2）
+  OK  资料名 displayName() / status().name 是孩子起的名字（{"dn":"小爱","st":{"name":"小爱","cid":1,"rating":1000,"placed":false,"games":0}}）
+  OK  ★ 页面刚加载第一次拉榜就成功，没人上榜 = ok + 空列表（{"ok":true,"list":[],"myRank":null}）
+  OK  在线心跳写上了，各自认得出自己的记录（073236 / 737095）
+  OK  ★ A 加 B：成功，B 还没加回 → 待确认（{"ok":true,"cid":2,"name":"小博","mutual":false,"pending":true}）
+  XX  ★ B 看到「小爱想加你为好友」（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:15.668 小博 POST /web queryDocument hansen_friends → 200
+      29:15.740 小博 POST /web addDocument hansen_friends → 200
+      29:15.790 小博 POST /web queryDocument hansen_friends → 200
+      29:16.352 小博 POST /web queryDocument hansen_friends → 200
+      29:16.416 小博 POST /web updateDocument hansen_friends → 200
+      29:16.461 小爱 POST /web queryDocument hansen_friends → 200
+      29:16.516 小爱 POST /web queryDocument hansen_friends → 200
+      29:16.618 小爱 POST /web queryDocument hansen_friends → 200
+      29:16.716 小爱 POST /web addDocument hansen_friends → 200
+      29:16.790 小爱 POST /web queryDocument hansen_friends → 200
+      29:16.854 小博 POST /web queryDocument hansen_friends → 200
+      29:16.897 小博 POST /web queryDocument hansen_friends → 200
+  OK  ★ B 加回 A：直接互为好友（{"ok":true,"cid":1,"name":"小爱","mutual":true,"pending":false}）
+  XX  ★ 两边都是正式好友
+      {"lA2":{"ok":true,"friends":[{"cid":2,"name":"小博","online":true,"lastSeen":1793723356356,"mutual":false,"pending":true,"sub":"等他也加你为好友"}],"incoming":[]},"lB2":{"ok":true,"friends":[],"incoming":[{"cid":1,"name":"小爱","online":true,"lastSeen":1793723355516,"at":1793723356621,"sub":"想加你为好友"}]}}
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:16.897 小博 POST /web queryDocument hansen_friends → 200
+      29:17.010 小博 POST /web queryDocument hansen_friends → 200
+      29:17.117 小博 POST /web queryDocument hansen_friends → 200
+      29:17.217 小博 POST /web queryDocument hansen_friends → 200
+      29:17.308 小博 POST /web addDocument hansen_friends → 200
+      29:17.378 小博 POST /web queryDocument hansen_friends → 200
+      29:17.468 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.489 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.574 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.663 小博 POST /web queryDocument hansen_friends → 200
+      29:17.668 小博 POST /web queryDocument hansen_friends → 200
+      29:17.736 小博 POST /web queryDocument hansen_friends → 200
+  OK  A 看到 B 刚才还在线 + 名字（{"cid":2,"name":"小博","online":true,"lastSeen":1793723356356,"mutual":false,"pending":true,"sub":"等他也加你为好友"}）
+  OK  ★ 加好友没有去改别人的记录（尝试 0 次）
+  OK  B 给 A 发「来一局？」（{"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}）
+  XX  ★ A 收到 B 的招呼，发件人可信（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:17.217 小博 POST /web queryDocument hansen_friends → 200
+      29:17.308 小博 POST /web addDocument hansen_friends → 200
+      29:17.378 小博 POST /web queryDocument hansen_friends → 200
+      29:17.468 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.489 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.574 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.663 小博 POST /web queryDocument hansen_friends → 200
+      29:17.668 小博 POST /web queryDocument hansen_friends → 200
+      29:17.736 小博 POST /web queryDocument hansen_friends → 200
+      29:17.825 小博 POST /web addDocument hansen_friend_msgs → 200
+      29:17.932 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:17.934 小博 POST /web queryDocument hansen_friend_msgs → 200
+  OK  ★ 好友页 z-index 2147483500（大PK屏之上、对战屏之下）：2147483500
+  XX  ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 · 1 人刚才还在 🐝 ）
+      [A 屏幕] 👥 我的好友 ⏎ × ⏎ 我的状态 ⏎ 🟢 在线 ⏎ 🌙 隐身 ⏎ 好友能看到你「刚才还在」。 ⏎ （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） ⏎ 加好友（输对方的竞赛 ID 数字） ⏎ 加好友 ⏎ 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 ⏎ 你加他、他也加你，就成为好友了。 ⏎ 好友 · 1 人刚才还在 ⏎ 🐝 ⏎ 小博 ⏎ No.2 · 刚才还在 ⏎ ›
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:17.574 小爱 POST /web queryDocument hansen_friends → 200
+      29:17.663 小博 POST /web queryDocument hansen_friends → 200
+      29:17.668 小博 POST /web queryDocument hansen_friends → 200
+      29:17.736 小博 POST /web queryDocument hansen_friends → 200
+      29:17.825 小博 POST /web addDocument hansen_friend_msgs → 200
+      29:17.932 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:17.934 小博 POST /web queryDocument hansen_friend_msgs → 200
+      29:18.010 小爱 POST /web queryDocument hansen_friends → 200
+      29:18.055 小爱 POST /web queryDocument hansen_friends → 200
+      29:18.154 小爱 POST /web queryDocument hansen_friends → 200
+      29:18.203 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:18.337 小爱 POST /web updateDocument hansen_friends → 200
+  OK  ★ 先开天梯再开好友页：8 秒后不会冒出「这一步没能打开」
+  XX  ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+      {"rm":{"ok":true,"removed":1},"lB3":{"ok":true,"friends":[{"cid":1,"name":"小爱","online":true,"lastSeen":1793723358253,"mutual":true,"pending":false,"sub":"刚才还在"}],"incoming":[]},"lA3":{"ok":true,"friends":[{"cid":2,"name":"小博","online":true,"lastSeen":1793723356356,"mutual":true,"pending":false,"sub":"刚才还在"}],"incoming":[]}}
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:21.332 小爱 POST /web queryDocument hansen_friends → 200
+      29:21.361 小爱 POST /web queryDocument hansen_friends → 200
+      29:21.432 小爱 POST /web queryDocument hansen_friends → 200
+      29:21.485 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:29.822 小爱 POST /web queryDocument hansen_friends → 200
+      29:29.913 小爱 POST /web deleteDocument hansen_friends → 200
+      29:30.016 小博 POST /web queryDocument hansen_friends → 200
+      29:30.017 小博 POST /web queryDocument hansen_friends → 200
+      29:30.116 小博 POST /web queryDocument hansen_friends → 200
+      29:30.171 小爱 POST /web queryDocument hansen_friends → 200
+      29:30.220 小爱 POST /web queryDocument hansen_friends → 200
+      29:30.271 小爱 POST /web queryDocument hansen_friends → 200
+  OK  ★ 删好友也只删自己那条（尝试改别人的 0 次）
+  OK  ★ 缺 hansen_friend_msgs → 说清楚建哪个集合、权限选什么（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 发招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST"}）
+  OK  缺集合时收件箱也报配置问题，不是假装没消息（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 读取招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST","msgs":[]}）
+  OK  ★ 缺 hansen_friends → 好友页「云端设置还差一步」+ 集合名 + 技术信息（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 🛠️ 云端设置还差一步 ）
+  OK  ★ 两人上传天梯分成功（{"pa":{"ok":true},"pb":{"ok":true}}）
+  XX  ★ 榜上有两个人（名字是自己起的），也找得到自己（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:30.116 小博 POST /web queryDocument hansen_friends → 200
+      29:30.171 小爱 POST /web queryDocument hansen_friends → 200
+      29:30.220 小爱 POST /web queryDocument hansen_friends → 200
+      29:30.271 小爱 POST /web queryDocument hansen_friends → 200
+      29:30.367 小博 POST /web addDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:30.441 小爱 POST /web queryDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:30.516 小爱 POST /web queryDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:30.606 小爱 POST /web queryDocument hansen_friends → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:30.623 小爱 POST /web queryDocument hansen_friends → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:33.074 小爱 POST /web updateDocument sb_profile → 200
+      29:33.157 小博 POST /web updateDocument sb_profile → 200
+      29:33.231 小博 POST /web queryDocument sb_profile → 200
+  OK  ★ 上传被拒要报出来，不是 ok:true（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 上传天梯分：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 拉榜被拒 → 报错（不是「还没有人上榜」）（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 读取排行榜：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 刷新后第一次开天梯页：榜直接显示两个人（1 小爱 1045 1 小博 (你) 1045）
+  OK  ★ 断网 → kind network（{"ok":false,"kind":"network","expired":false,"text":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试","reason":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试 ⟨network request error⟩"}）
+  OK  ★ 岛屿页：好友页盖在拼写大PK屏上面，点得到（{"pkOn":true,"onTop":true}）
+  OK  没有页面脚本报错（无）
+  OK  没有一个请求跑到外网（无）
+
+── READONLY · rules ──
+  OK  [A] 用户名登录 + 云端发了竞赛 ID（cid=1）
+  OK  [B] 用户名登录 + 云端发了竞赛 ID（cid=2）
+  OK  资料名 displayName() / status().name 是孩子起的名字（{"dn":"小爱","st":{"name":"小爱","cid":1,"rating":1000,"placed":false,"games":0}}）
+  OK  ★ 页面刚加载第一次拉榜就成功，没人上榜 = ok + 空列表（{"ok":true,"list":[],"myRank":null}）
+  OK  在线心跳写上了，各自认得出自己的记录（073236 / 737095）
+  OK  ★ A 加 B：成功，B 还没加回 → 待确认（{"ok":true,"cid":2,"name":"小博","mutual":false,"pending":true}）
+  XX  ★ B 看到「小爱想加你为好友」（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:44.714 小博 POST /web queryDocument hansen_friends → 200
+      29:44.786 小博 POST /web addDocument hansen_friends → 200
+      29:44.835 小博 POST /web queryDocument hansen_friends → 200
+      29:45.392 小博 POST /web queryDocument hansen_friends → 200
+      29:45.454 小博 POST /web updateDocument hansen_friends → 200
+      29:45.501 小爱 POST /web queryDocument hansen_friends → 200
+      29:45.559 小爱 POST /web queryDocument hansen_friends → 200
+      29:45.660 小爱 POST /web queryDocument hansen_friends → 200
+      29:45.759 小爱 POST /web addDocument hansen_friends → 200
+      29:45.831 小爱 POST /web queryDocument hansen_friends → 200
+      29:45.893 小博 POST /web queryDocument hansen_friends → 200
+      29:45.934 小博 POST /web queryDocument hansen_friends → 200
+  OK  ★ B 加回 A：直接互为好友（{"ok":true,"cid":1,"name":"小爱","mutual":true,"pending":false}）
+  XX  ★ 两边都是正式好友
+      {"lA2":{"ok":true,"friends":[{"cid":2,"name":"小博","online":true,"lastSeen":1793723385397,"mutual":false,"pending":true,"sub":"等他也加你为好友"}],"incoming":[]},"lB2":{"ok":true,"friends":[],"incoming":[{"cid":1,"name":"小爱","online":true,"lastSeen":1793723384561,"at":1793723385664,"sub":"想加你为好友"}]}}
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:45.934 小博 POST /web queryDocument hansen_friends → 200
+      29:46.043 小博 POST /web queryDocument hansen_friends → 200
+      29:46.149 小博 POST /web queryDocument hansen_friends → 200
+      29:46.248 小博 POST /web queryDocument hansen_friends → 200
+      29:46.339 小博 POST /web addDocument hansen_friends → 200
+      29:46.409 小博 POST /web queryDocument hansen_friends → 200
+      29:46.500 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.521 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.605 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.691 小博 POST /web queryDocument hansen_friends → 200
+      29:46.696 小博 POST /web queryDocument hansen_friends → 200
+      29:46.765 小博 POST /web queryDocument hansen_friends → 200
+  OK  A 看到 B 刚才还在线 + 名字（{"cid":2,"name":"小博","online":true,"lastSeen":1793723385397,"mutual":false,"pending":true,"sub":"等他也加你为好友"}）
+  OK  ★ 加好友没有去改别人的记录（尝试 0 次）
+  OK  B 给 A 发「来一局？」（{"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}）
+  XX  ★ A 收到 B 的招呼，发件人可信（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:46.248 小博 POST /web queryDocument hansen_friends → 200
+      29:46.339 小博 POST /web addDocument hansen_friends → 200
+      29:46.409 小博 POST /web queryDocument hansen_friends → 200
+      29:46.500 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.521 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.605 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.691 小博 POST /web queryDocument hansen_friends → 200
+      29:46.696 小博 POST /web queryDocument hansen_friends → 200
+      29:46.765 小博 POST /web queryDocument hansen_friends → 200
+      29:46.852 小博 POST /web addDocument hansen_friend_msgs → 200
+      29:46.957 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:46.959 小博 POST /web queryDocument hansen_friend_msgs → 200
+  OK  ★ 好友页 z-index 2147483500（大PK屏之上、对战屏之下）：2147483500
+  XX  ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 · 1 人刚才还在 🐝 ）
+      [A 屏幕] 👥 我的好友 ⏎ × ⏎ 我的状态 ⏎ 🟢 在线 ⏎ 🌙 隐身 ⏎ 好友能看到你「刚才还在」。 ⏎ （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） ⏎ 加好友（输对方的竞赛 ID 数字） ⏎ 加好友 ⏎ 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 ⏎ 你加他、他也加你，就成为好友了。 ⏎ 好友 · 1 人刚才还在 ⏎ 🐝 ⏎ 小博 ⏎ No.2 · 刚才还在 ⏎ ›
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:46.605 小爱 POST /web queryDocument hansen_friends → 200
+      29:46.691 小博 POST /web queryDocument hansen_friends → 200
+      29:46.696 小博 POST /web queryDocument hansen_friends → 200
+      29:46.765 小博 POST /web queryDocument hansen_friends → 200
+      29:46.852 小博 POST /web addDocument hansen_friend_msgs → 200
+      29:46.957 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:46.959 小博 POST /web queryDocument hansen_friend_msgs → 200
+      29:47.036 小爱 POST /web queryDocument hansen_friends → 200
+      29:47.079 小爱 POST /web queryDocument hansen_friends → 200
+      29:47.178 小爱 POST /web queryDocument hansen_friends → 200
+      29:47.227 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:47.394 小爱 POST /web updateDocument hansen_friends → 200
+  OK  ★ 先开天梯再开好友页：8 秒后不会冒出「这一步没能打开」
+  XX  ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+      {"rm":{"ok":true,"removed":1},"lB3":{"ok":true,"friends":[{"cid":1,"name":"小爱","online":true,"lastSeen":1793723387310,"mutual":true,"pending":false,"sub":"刚才还在"}],"incoming":[]},"lA3":{"ok":true,"friends":[{"cid":2,"name":"小博","online":true,"lastSeen":1793723385397,"mutual":true,"pending":false,"sub":"刚才还在"}],"incoming":[]}}
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:50.363 小爱 POST /web queryDocument hansen_friends → 200
+      29:50.392 小爱 POST /web queryDocument hansen_friends → 200
+      29:50.463 小爱 POST /web queryDocument hansen_friends → 200
+      29:50.517 小爱 POST /web queryDocument hansen_friend_msgs → 200
+      29:58.851 小爱 POST /web queryDocument hansen_friends → 200
+      29:58.943 小爱 POST /web deleteDocument hansen_friends → 200
+      29:59.048 小博 POST /web queryDocument hansen_friends → 200
+      29:59.049 小博 POST /web queryDocument hansen_friends → 200
+      29:59.146 小博 POST /web queryDocument hansen_friends → 200
+      29:59.204 小爱 POST /web queryDocument hansen_friends → 200
+      29:59.255 小爱 POST /web queryDocument hansen_friends → 200
+      29:59.305 小爱 POST /web queryDocument hansen_friends → 200
+  OK  ★ 删好友也只删自己那条（尝试改别人的 0 次）
+  OK  ★ 缺 hansen_friend_msgs → 说清楚建哪个集合、权限选什么（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 发招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST"}）
+  OK  缺集合时收件箱也报配置问题，不是假装没消息（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 读取招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST","msgs":[]}）
+  OK  ★ 缺 hansen_friends → 好友页「云端设置还差一步」+ 集合名 + 技术信息（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 🛠️ 云端设置还差一步 ）
+  OK  ★ 两人上传天梯分成功（{"pa":{"ok":true},"pb":{"ok":true}}）
+  XX  ★ 榜上有两个人（名字是自己起的），也找得到自己（[]）
+      [A 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小爱 ⏎ 🎫 竞赛 ID No.001 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 alice_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [B 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 小博 ⏎ 🎫 竞赛 ID No.002 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 bob_fr　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      29:59.146 小博 POST /web queryDocument hansen_friends → 200
+      29:59.204 小爱 POST /web queryDocument hansen_friends → 200
+      29:59.255 小爱 POST /web queryDocument hansen_friends → 200
+      29:59.305 小爱 POST /web queryDocument hansen_friends → 200
+      29:59.400 小博 POST /web addDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:59.474 小爱 POST /web queryDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:59.548 小爱 POST /web queryDocument hansen_friend_msgs → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:59.639 小爱 POST /web queryDocument hansen_friends → 200 DATABASE_COLLECTION_NOT_EXIST
+      29:59.656 小爱 POST /web queryDocument hansen_friends → 200 DATABASE_COLLECTION_NOT_EXIST
+      30:02.116 小爱 POST /web updateDocument sb_profile → 200
+      30:02.236 小博 POST /web updateDocument sb_profile → 200
+      30:02.320 小博 POST /web queryDocument sb_profile → 200
+  OK  ★ 上传被拒要报出来，不是 ok:true（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 上传天梯分：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 拉榜被拒 → 报错（不是「还没有人上榜」）（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 读取排行榜：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 刷新后第一次开天梯页：榜直接显示两个人（1 小爱 1045 1 小博 (你) 1045）
+  OK  ★ 断网 → kind network（{"ok":false,"kind":"network","expired":false,"text":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试","reason":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试 ⟨network request error⟩"}）
+  OK  ★ 岛屿页：好友页盖在拼写大PK屏上面，点得到（{"pkOn":true,"onTop":true}）
+  OK  没有页面脚本报错（无）
+  OK  没有一个请求跑到外网（无）
+
+48 通过，12 失败（59 秒）
+失败的：
+  · ★ B 看到「小爱想加你为好友」（[]）
+  · ★ 两边都是正式好友
+  · ★ A 收到 B 的招呼，发件人可信（[]）
+  · ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 · 1 人刚才还在 🐝 ）
+  · ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+  · ★ 榜上有两个人（名字是自己起的），也找得到自己（[]）
+  · ★ B 看到「小爱想加你为好友」（[]）
+  · ★ 两边都是正式好友
+  · ★ A 收到 B 的招呼，发件人可信（[]）
+  · ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 · 1 人刚才还在 🐝 ）
+  · ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+  · ★ 榜上有两个人（名字是自己起的），也找得到自己（[]）

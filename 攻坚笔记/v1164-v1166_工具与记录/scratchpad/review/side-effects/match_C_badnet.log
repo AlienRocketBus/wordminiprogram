@@ -1,0 +1,62 @@
+
+==== 模式 C · 延迟 1200ms · 权限 legacy · 节奏 5000ms/词 · 词数 10（能拼 10）
+结算：房主 800:800  客人 800:800；对战屏 120 秒
+
+--- 房主 · 开房 · 房主（3 秒）
+  total=3 reads=2 (38.4/min, 0.64/s) writes=1 (19.2/min, 0.32/s) auth=0 other=0
+         1  add hansen_pk_rooms
+         1  where hansen_pk_rooms
+         1  get(id) hansen_pk_rooms
+
+--- 房主 · 一个人等对手 · 房主（20 秒）
+  total=11 reads=8 (24.0/min, 0.40/s) writes=3 (9.0/min, 0.15/s) auth=0 other=0
+         8  get(id) hansen_pk_rooms
+         2  update(id) hansen_pk_rooms
+         1  update(id) hansen_friends
+
+--- 房主 · 客人进房到开打 · 房主（22 秒）
+  total=14 reads=9 (24.3/min, 0.40/s) writes=5 (13.5/min, 0.22/s) auth=0 other=0
+         9  get(id) hansen_pk_rooms
+         4  update(id) hansen_pk_rooms
+         1  update(id) hansen_friends
+
+--- 客人 · 列表+进房+等确认 · 客人（22 秒）
+  total=38 reads=32 (86.4/min, 1.44/s) writes=6 (16.2/min, 0.27/s) auth=0 other=0
+        27  get(id) hansen_pk_rooms
+         5  where hansen_pk_rooms
+         4  update(id) hansen_pk_rooms
+         1  add hansen_pk_rooms
+         1  update(id) hansen_friends
+
+--- 房主 · 对战中 · 房主（120 秒）
+  total=293 reads=253 (126.1/min, 2.10/s) writes=40 (19.9/min, 0.33/s) auth=0 other=0
+       241  get(id) hansen_pk_rooms
+        27  update(id) hansen_pk_rooms
+        12  where hansen_pk_rooms
+         7  add hansen_pk_rooms
+         6  update(id) hansen_friends
+
+--- 客人 · 对战中 · 客人（120 秒）
+  total=319 reads=273 (136.0/min, 2.27/s) writes=46 (22.9/min, 0.38/s) auth=0 other=0
+       262  get(id) hansen_pk_rooms
+        28  update(id) hansen_pk_rooms
+        12  add hansen_pk_rooms
+        11  where hansen_pk_rooms
+         6  update(id) hansen_friends
+
+--- 房主 · 结算+之后30秒 · 房主（36 秒）
+  total=11 reads=5 (8.3/min, 0.14/s) writes=6 (10.0/min, 0.17/s) auth=0 other=0
+         5  get(id) hansen_pk_rooms
+         4  update(id) hansen_pk_rooms
+         2  update(id) hansen_friends
+
+--- 客人 · 结算+之后30秒 · 客人（36 秒）
+  total=8 reads=3 (5.0/min, 0.08/s) writes=5 (8.3/min, 0.14/s) auth=0 other=0
+         3  get(id) hansen_pk_rooms
+         3  update(id) hansen_pk_rooms
+         2  update(id) hansen_friends
+
+合计（一局）：房主 读277 写55；客人 读308 写57；两人 读585 写112
+对战中每部手机每秒：房主 读2.10 写0.33；客人 读2.27 写0.38
+房主对战中每 10 秒读： 27 10 32 20 19 25 21 22 16 25 17 19 0  写： 4 3 3 3 4 3 3 3 4 4 4 2 0
+报错： 无 外网： 0

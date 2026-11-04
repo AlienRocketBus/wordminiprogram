@@ -1,0 +1,1 @@
+{"N":45,"refuse":true,"roomA":{"id":"rmw134ruflxaexh","status":"open","proto":2},"lobbyListsA_afterSec":null,"lobbyText":"← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入","listRoomsB":{"ok":true,"n":0,"ids":[]},"listRoomsIncludesA":false,"refusedOrderedQueries":12,"openDocsInDb":46,"pageErrors":[0,0]}

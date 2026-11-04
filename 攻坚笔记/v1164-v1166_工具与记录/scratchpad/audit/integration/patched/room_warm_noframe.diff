@@ -1,0 +1,17 @@
+--- /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/v1163_snapshot/hansen_room_warm_v1023.js	2026-11-03 06:54:43.000000000 +0000
++++ room_warm_noframe.js	2026-11-03 09:27:43.856203226 +0000
+@@ -181,8 +181,12 @@
+     }
+   }
+ 
+-  if (document.readyState === 'complete') scheduleWarm();
+-  else window.addEventListener('load', scheduleWarm);
++  /* AUDIT: 在首页外壳(iframe)里或本身就是被预热的隐藏房间时不预热 —— 壳里换岛走 parent.openIsland, 这些房间永远用不上 */
++  var _framed = false; try { _framed = window.parent !== window; } catch (e) { _framed = true; }
++  if (!_framed) {
++    if (document.readyState === 'complete') scheduleWarm();
++    else window.addEventListener('load', scheduleWarm);
++  }
+ 
+   window.HansenRoom = {
+     open: open, close: close, warm: warm, prefetch: prefetch,

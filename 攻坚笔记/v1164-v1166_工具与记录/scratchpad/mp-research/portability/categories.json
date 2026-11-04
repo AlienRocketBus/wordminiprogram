@@ -1,0 +1,124 @@
+{
+ "learning": {
+  "files": 14,
+  "lines": 5609,
+  "bytes": 371510,
+  "dom_ops": 657,
+  "ls": 87,
+  "waapi": 0
+ },
+ "web_platform_plumbing": {
+  "files": 22,
+  "lines": 3947,
+  "bytes": 191823,
+  "dom_ops": 470,
+  "ls": 38,
+  "waapi": 0
+ },
+ "economy": {
+  "files": 16,
+  "lines": 5655,
+  "bytes": 364272,
+  "dom_ops": 362,
+  "ls": 342,
+  "waapi": 1
+ },
+ "cloud_account_backup": {
+  "files": 13,
+  "lines": 5698,
+  "bytes": 316318,
+  "dom_ops": 320,
+  "ls": 112,
+  "waapi": 0
+ },
+ "collections": {
+  "files": 9,
+  "lines": 7094,
+  "bytes": 628936,
+  "dom_ops": 881,
+  "ls": 116,
+  "waapi": 0
+ },
+ "boss_fx": {
+  "files": 7,
+  "lines": 19579,
+  "bytes": 1498181,
+  "dom_ops": 2950,
+  "ls": 91,
+  "waapi": 551
+ },
+ "spellbee_pk_ladder": {
+  "files": 12,
+  "lines": 6942,
+  "bytes": 347605,
+  "dom_ops": 323,
+  "ls": 33,
+  "waapi": 0
+ },
+ "data": {
+  "files": 3,
+  "lines": 730,
+  "bytes": 357977,
+  "dom_ops": 0,
+  "ls": 2,
+  "waapi": 0
+ },
+ "vendor_cloudbase_sdk": {
+  "files": 9,
+  "lines": 6036,
+  "bytes": 916285,
+  "dom_ops": 119,
+  "ls": 33,
+  "waapi": 0
+ },
+ "inline:template.html": {
+  "files": 1,
+  "lines": 6678,
+  "bytes": 447427
+ },
+ "inline:land_template.html(diff vs template)": {
+  "files": 1,
+  "lines": 127,
+  "bytes": 19488
+ },
+ "inline:index.html": {
+  "files": 1,
+  "lines": 554,
+  "bytes": 35094
+ },
+ "inline:spelling_bee.html": {
+  "files": 1,
+  "lines": 1784,
+  "bytes": 528568
+ },
+ "inline:spelling_pk.html": {
+  "files": 1,
+  "lines": 432,
+  "bytes": 21911
+ },
+ "inline:boss_hall.html": {
+  "files": 1,
+  "lines": 305,
+  "bytes": 26122
+ },
+ "inline:season_showcase.html": {
+  "files": 1,
+  "lines": 270,
+  "bytes": 24060
+ },
+ "inline:land_map.html": {
+  "files": 1,
+  "lines": 181,
+  "bytes": 678534
+ },
+ "inline:_frame.html": {
+  "files": 1,
+  "lines": 57,
+  "bytes": 3674
+ },
+ "inline:_sw_upgrade_v944.html": {
+  "files": 1,
+  "lines": 49,
+  "bytes": 2825
+ }
+}

@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_account_wiring_v1021.mjs —— 「账号 ↔ 云存档」同页接线回归
  * 事故：账号模块只在拼写大PK 页加载，云存档只在岛屿页加载——**两者从未同页出现**。
  *       结果：登录时没有云存档可上传；岛屿页存档时读不到登录态，
  *       ensureKey() 退回**设备密钥** → 换设备登录后一无所有(用户实测证实)。
  * 合同：凡是有云存档的页面必须同时有账号模块，且登录态下密钥必须走账号推导。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -16,7 +17,7 @@ console.log('账号↔云存档 接线 v1021');
 for (const page_url of ['island_animal.html','spelling_pk.html']) {
   const page=await browser.newPage({viewport:{width:390,height:844}});
   /* 模拟已登录 */
-  await page.addInitScript(()=>{ localStorage.clear();
+  await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
     localStorage.setItem('hansen_auth_v1004', JSON.stringify({method:'phone',phone:'+8613800138000',signedAt:Date.now(),uid:'UID-TEST-777'})); });
   await page.goto(`http://127.0.0.1:${port}/${page_url}`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2600);
@@ -42,7 +43,7 @@ for (const page_url of ['island_animal.html','spelling_pk.html']) {
 const keys=[];
 for (const u of ['island_animal.html','spelling_pk.html']) {
   const page=await browser.newPage({viewport:{width:390,height:844}});
-  await page.addInitScript(()=>{ localStorage.clear();
+  await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
     localStorage.setItem('hansen_auth_v1004', JSON.stringify({method:'phone',phone:'+8613800138000',signedAt:Date.now(),uid:'UID-SAME'})); });
   await page.goto(`http://127.0.0.1:${port}/${u}`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2400);
@@ -59,7 +60,7 @@ ok(keys[0] && keys[0]===keys[1], `同账号在不同页面推出同一密钥: ${
   for (const fakeUid of ['UID-DEVICE-A', 'UID-DEVICE-B']) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.addInitScript((u) => {
-      localStorage.clear();
+      if (window.top === window) localStorage.clear();
       localStorage.setItem('hansen_auth_v1004', JSON.stringify({
         method: 'phone', phone: '+8613800138000', signedAt: Date.now(), uid: u }));
     }, fakeUid);

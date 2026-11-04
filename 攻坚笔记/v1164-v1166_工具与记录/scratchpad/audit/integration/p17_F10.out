@@ -1,0 +1,28 @@
+   [islandFrame navigated] about:blank
+   [islandFrame navigated] island_animal.html
+   [islandFrame navigated] island_animal.html?_r=1793698330237
+after in-iframe reload {
+  top: 'index.html',
+  wrap: 'block',
+  op: '1',
+  u: 'island_animal.html?_r=1793698330237',
+  rs: 'complete',
+  load: 'none',
+  hlen: 4,
+  hst: '{"hsnIsland":"island_animal.html"}',
+  sy: 616
+}
+tap home #1 IFRAME#islandFrame.
+   [islandFrame navigated] island_animal.html
+after 1st home tap {
+  top: 'index.html',
+  wrap: 'none',
+  op: '1',
+  u: 'island_animal.html',
+  rs: 'complete',
+  load: 'none',
+  hlen: 4,
+  hst: 'null',
+  sy: 616
+}
+errors []

@@ -1,0 +1,119 @@
+{
+ "root": "#hsn_ladder_screen",
+ "present": true,
+ "text": "× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：Failed to fetch",
+ "contrastFails": [
+  {
+   "t": "技术信息：Failed to fetch",
+   "ratio": 4.08,
+   "fg": "rgb(107,117,137)",
+   "bg": "rgb(11,16,32)",
+   "size": 11,
+   "weight": "500",
+   "need": 4.5,
+   "ok": false
+  }
+ ],
+ "contrastAll": [
+  {
+   "t": "×",
+   "ratio": 9.05,
+   "fg": "rgb(169,180,199)",
+   "bg": "rgb(11,16,32)",
+   "size": 26,
+   "weight": "900",
+   "need": 3,
+   "ok": true
+  },
+  {
+   "t": "🏆 天梯排位",
+   "ratio": 16.29,
+   "fg": "rgb(232,238,252)",
+   "bg": "rgb(11,16,32)",
+   "size": 20,
+   "weight": "900",
+   "need": 3,
+   "ok": true
+  },
+  {
+   "t": "📡",
+   "ratio": 15.36,
+   "fg": "rgb(226,232,240)",
+   "bg": "rgb(11,16,32)",
+   "size": 40,
+   "weight": "500",
+   "need": 3,
+   "ok": true
+  },
+  {
+   "t": "连不上网络",
+   "ratio": 15.36,
+   "fg": "rgb(226,232,240)",
+   "bg": "rgb(11,16,32)",
+   "size": 16,
+   "weight": "800",
+   "need": 4.5,
+   "ok": true
+  },
+  {
+   "t": "排位需要联网找对手。检查一下 Wi-Fi 或",
+   "ratio": 9.05,
+   "fg": "rgb(169,180,199)",
+   "bg": "rgb(11,16,32)",
+   "size": 13,
+   "weight": "500",
+   "need": 4.5,
+   "ok": true
+  },
+  {
+   "t": "重新找对手",
+   "ratio": 6.29,
+   "fg": "rgb(255,255,255)",
+   "bg": "rgb(79,70,229)",
+   "size": 17,
+   "weight": "900",
+   "need": 4.5,
+   "ok": true
+  },
+  {
+   "t": "技术信息：Failed to fetch",
+   "ratio": 4.08,
+   "fg": "rgb(107,117,137)",
+   "bg": "rgb(11,16,32)",
+   "size": 11,
+   "weight": "500",
+   "need": 4.5,
+   "ok": false
+  }
+ ],
+ "tapFails": [],
+ "taps": [
+  {
+   "t": "×",
+   "w": 44,
+   "h": 44,
+   "ok": true,
+   "x": 14,
+   "y": 16
+  },
+  {
+   "t": "重新找对手",
+   "w": 338,
+   "h": 55,
+   "ok": true,
+   "x": 26,
+   "y": 250
+  }
+ ],
+ "overflow": {
+  "vw": 390,
+  "scrollW": 390,
+  "bodyScrollW": 390,
+  "bad": []
+ },
+ "rootScroll": {
+  "sh": 844,
+  "ch": 844
+ },
+ "errs": []
+}

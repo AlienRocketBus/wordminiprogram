@@ -1,0 +1,21 @@
+// Check the auditor's 'not checked' note: does an island page keep (re)creating hidden iframes?
+import {startServer, launch, phoneCtx, watch, tap, waitIn, openIsland, tapCard, sleep, OUT} from './lib.mjs';
+import fs from 'node:fs';
+const island = process.argv[2]||'food';
+const {srv, port} = await startServer();
+const browser = await launch();
+const {ctx} = await phoneCtx(browser, port, {init:()=>{ try{localStorage.setItem('hansen_onboarded','1')}catch(e){} }});
+const page = await ctx.newPage(); const ev=[]; watch(page, ev);
+const attached=[], detached=[];
+const t0=Date.now();
+page.on('frameattached', f=>attached.push({ms:Date.now()-t0}));
+page.on('framenavigated', f=>{ if(f!==page.mainFrame()) attached.push({ms:Date.now()-t0, nav:f.url().replace(/^http:\/\/127\.0\.0\.1:\d+\//,'').slice(0,60), parent:(f.parentFrame()&&f.parentFrame().url().replace(/^http:\/\/127\.0\.0\.1:\d+\//,'').slice(0,40))}); });
+page.on('framedetached', f=>detached.push({ms:Date.now()-t0, url:f.url().replace(/^http:\/\/127\.0\.0\.1:\d+\//,'').slice(0,60)}));
+const F = await openIsland(page, port, island);
+const tIsl = Date.now()-t0;
+await sleep(30000);
+const live = page.frames().map(f=>f.url().replace(/^http:\/\/127\.0\.0\.1:\d+\//,'').slice(0,60));
+const out={island, islandOpenedAtMs:tIsl, navs:attached.filter(a=>a.nav), detached, liveFramesAfter30s:live};
+console.log(JSON.stringify(out,null,1));
+fs.writeFileSync(`${OUT}/s14_frames_${island}.json`, JSON.stringify(out,null,1));
+await ctx.close(); await browser.close(); srv.close(); process.exit(0);

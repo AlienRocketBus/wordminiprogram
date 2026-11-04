@@ -1,0 +1,89 @@
+====================================================================================================
+P2-07 [minor->None] (island-sweep-2) verdict=unverified Every land island's header subtitle says 'STAR SEA I: EMOTION & CHARACTER ISLAND'
+  AREA: land_template.html header
+  REPRO: Open island_land3 (时之钟谷) or island_land5 (晶石回廊) home
+  OBSERVED: Title '单词大陆·③时之钟谷' with subtitle 'STAR SEA I: EMOTION & CHARACTER ISLAND' (land1's theme). The same text appears on all 8 pages.
+  EXPECTED: A per-island English subtitle (e.g. TIME & EXPRESSIONS).
+  EVIDENCE: land_template.html:1464 (inside the shared template, not a LAND_SLOT). Runtime: r2_land3_390.log 'island home head'
+  FIX: Move the subtitle into a LAND_SLOT, fill it from land_data.json, and regenerate.
+  VREASON: None
+====================================================================================================
+P2-10 [minor->polish] (island-sweep-2) verdict=uncertain boss_hall and season_showcase pages are wider than the phone (can pan sideways; right edge cut)
+  AREA: boss_hall.html, season_showcase.html
+  REPRO: Open boss_hall.html?lv=1&own=1,2,5 or season_showcase.html?boss=S1 at 390 or 360 width (also opened inside islands from 卡册 / 神秘殿堂)
+  OBSERVED: Page width 410 on a 390 screen (395 on 360; showcase 405/390). The controls panel's right border is off-screen at 360 (shots/ovf_360_boss_hall.png), and a horizontal drag can pan the page, which competes with the left/right swipe that switches bosses.
+  EXPECTED: No horizontal overflow.
+  EVIDENCE: r7_ovf.mjs: .spot (position:absolute, width 430/420, left −20/−35) and #bgA/#bgB Ken-Burns layers (−25..435) push the layout width out
+  FIX: Add html,body{overflow-x:hidden} (or overflow:hidden on the stage wrapper), and give .spot left:50%;transform:translateX(-50%);max-width:100vw.
+  VREASON: Opened standalone (direct URL), it reproduces: the layout viewport widens to 410 at 390 and 395 at 360, and a real touch swipe pans the page by 20/35px, cutting off the eye button. The real entry points open boss_hall and season_showcase only inside iframe overlays (hansen_cards.js:1006, hansen_season.js:713/735, hansen_land_cards.js:234), and there it does not reproduce in Chromium. Opened through 卡册 → owned card: iframe innerWidth is 390/360, touch swipes left and right keep scrollX at 0, and the controls .panel sits fully inside (45-345 / 30-330). Only the decorative #bgA/#bgB/.spot layers overflow, and they are clipped. I could not test the iframe behaviour of the iOS WeChat in-app browser here. html{overflow-x:hidden} would still be a harmless fix. Evidence: p10_embedded_hall.json, p_misc.json.
+====================================================================================================
+P2-13 [minor->None] (island-sweep-2) verdict=unverified Level menus show hard-coded examples and claims that don't match the island
+  AREA: 字母拼拼乐 / 泡泡大作战 level menus (all islands)
+  REPRO: Any island (e.g. land3, traffic) → 字母拼拼乐; → 泡泡大作战
+  OBSERVED: Scramble examples are always 'man · cat · cow / tiger · friend · old / children · gentleman' (family-island words; 'old' has 3 letters but is listed as a 5–6 letter example), even on 时之钟谷 where the easy level has 0 words. The bubble menu says '每档大约 20 词左右' but levels are 0/8/22 (land1), 4/50/186 (season), 8/6/16 (sports).
+  EXPECTED: Examples taken from the island's own pool for that level; the stated size matches the real count.
+  EVIDENCE: template.html:6139 and land_template.html:5954 example:'man · cat · cow'…; bubble text at land_template.html:5666 / template.html:5851
+  FIX: Build examples with allW.filter(level.filter).slice(0,3).map(w=>w.en).join(' · ') and drop the '大约 20 词' sentence, or print the real count.
+  VREASON: None
+====================================================================================================
+P2-16 [minor->None] (island-sweep-2) verdict=unverified Menus promise '🪙金币 +N' but a perfect round often shows '金币 +0' with no explanation
+  AREA: coin display on result screens (all islands)
+  REPRO: sports: play 听音辨义, 记忆翻牌, 打字, 完形填空, 拼拼乐 初级, then 钓鱼大师 初级 and catch all 8
+  OBSERVED: Fish menu promised '🐟 8 条 · 🪙金币 +8'; the result shows '钓上全部 8 条 … 🪙 金币 +0'. Same for bubble and eagle on sports and for moles/fish/bubble/eagle on time. The only hint is the '🪙满' pill.
+  EXPECTED: Tell the kid why (each word pays at most 3 coins per day), or present the menu number as a maximum.
+  EVIDENCE: earnCoinOnCorrect (island_sports.html:4617, PER_WORD_CAP=3/day); result uses window._sessionCoins. res_sports_390.json fish/bubble/eagle RES; res_time_390.json; shots/sports_fish_result_390.png
+  FIX: When _sessionCoins===0 and the cap was hit, show '今天这些词的金币已领满，换个难度或明天再来～'. In menus write '最多 +N'.
+  VREASON: None
+====================================================================================================
+P2-19 [polish->None] (island-sweep-2) verdict=unverified Combo pill '🎯3 · 🪙满' stays on screen after leaving a game and covers other screens' titles
+  AREA: #comboBadge (island pages)
+  REPRO: land1 → play 极速60秒 to a 3+ streak → back to home → open 抽卡
+  OBSERVED: The combo pill stays pinned under the XP bar and covers the '单词大陆抽卡' title. It is also visible on result screens.
+  EXPECTED: Hide it outside game screens (the streak count can be kept).
+  EVIDENCE: shots/land1_gacha_draw_390.png, shots/sports_fish_result_390.png; hideComboUI is only called on a miss or break (island_land1.html:4257, 4111, 4127)
+  FIX: Call hideComboUI() in the showScreen wrapper whenever the target screen is not a game screen.
+  VREASON: None
+====================================================================================================
+P2-20 [polish->None] (island-sweep-2) verdict=unverified Trial shows a brand-new user '已收集 20 / 20 · ✨ 全部集齐 · 卡牌大师'
+  AREA: 卡册 header during 72h freepass
+  REPRO: Fresh user → any island → 卡册
+  OBSERVED: Header claims every card is collected and awards the '卡牌大师' title. After 72h it silently drops to the real count (by design, no notice).
+  EXPECTED: Clearly label it as a trial ('试玩期 · 全部开放').
+  EVIDENCE: hansen_freepass.js syncOn sets hansen_card_temp_unlock_until; hansen_cards.js:881 __tmpAll → collected = all. boss_sports.json H.cardsText
+  FIX: When the freepass is active, show '🆓 试玩期 · 全部卡牌开放（剩 N 小时）' instead of 集齐/卡牌大师.
+  VREASON: None
+====================================================================================================
+P2-21 [polish->None] (island-sweep-2) verdict=unverified View-transition opt-in inside the island iframe throws an unhandled rejection on every iframe navigation
+  AREA: hansen_home_link.js
+  REPRO: Inside an island (iframe#islandFrame) navigate island → land_map (e.g. world-map button on a land island)
+  OBSERVED: pageerror / unhandledrejection: 'Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+  EXPECTED: No errors; cross-document view transitions don't apply inside the iframe shell.
+  EVIDENCE: hansen_home_link.js:17 injects @view-transition{navigation:auto} unconditionally; boss_land3.json ev (tag 'hall')
+  FIX: Skip the injection when window.parent!==window.
+  VREASON: None
+====================================================================================================
+VC-23 [polish->None] (visual-consistency) verdict=unverified Same patterns built many different ways (difficulty pickers, modals, scrims); token sprawl
+  AREA: Design system
+  REPRO: Compare the difficulty choosers in 听音辨义, 完形填空, 打字大师, 钓鱼/打地鼠 and spelling bee; compare the modal and scrim styles.
+  OBSERVED: At least 4 difficulty-picker designs: big cards with a word-count pill, cards with sample sentence and reward pill, slim cards with a ▶, and white radio cards. Modal styles: .modal (r22), cream gear sheet, gold-border 神秘殿堂, parchment land panel, review full-screen. Static counts: 19 border-radius values in template.html, 48 font sizes, 386 @keyframes, 73 z-index values (up to 2147483647), 13+ scrim colours. Home has no player HUD (level, coins, pet); it appears only after entering an island.
+  EXPECTED: A small component set reused everywhere.
+  EVIDENCE: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/m_g2.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/m_g3.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d62_game_listen_start.png, /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/visual-consistency/shots/d65_game_cloze_play2.png
+  FIX: Adopt the token and component list in the summary:
+- --pal-* colours (hansen_palette.js)
+- --font-cartoon / --font-body
+- radius 8/12/16/22/999
+- .game-btn, .back-btn, .modal-bg/.modal, HansenToast
+- one DifficultyPicker (the listen version as the base)
+- one scrim (rgba(6,10,22,.86))
+- motion .15s/.3s
+Also add a slim HUD strip (level / 🪙 / 💎 / streak) to the home page so the main hall and the rooms share the same top bar.
+  VREASON: None
+====================================================================================================
+CB-05 [minor->n/a] (code-bugs) verdict=refuted Pre-warmed 星海 room (and kept-alive island) show stale coins/XP/level
+  AREA: hansen_room_warm_v1023.js open(), index.html openIsland keep-alive branch, island top bar
+  REPRO: A) Home → 动物岛, wait about 9 s for warm-up → earn coins/XP in the island (here HansenCoins.award 150 + addXP 120) → open the 星海 room (HansenRoom.open('season'), the island's season entry). B) Home → 动物岛 → back → a wallet change happens on the top window → re-enter 动物岛 (instant keep-alive).
+  OBSERVED: A) The 星海 room top bar shows 「Lv.1 新手探险家 0/100 XP 💎0 🪙300」 while the wallet is 450 coins and charXP 120 (should be Lv.2), still stale after 4 s. B) The re-entered island still shows 💎0 🪙300 while the wallet is 💎40 🪙200, after 5 s.
+  EXPECTED: Every room shows the live global wallet/level when it becomes visible.
+  EVIDENCE: t21_room_stale.mjs and t20_stale.mjs outputs. room_warm close/open only toggles display (hansen_room_warm_v1023.js:90-100). Island pages listen to the 'storage' event only for 'theme' (template.html:8263).
+  FIX: In island pages add `window.addEventListener('storage',e=>{ if(/^hansen_wallet_/.test(e.key||'')){ try{updateTopBar()}catch(_){} } })`. Storage events do fire across same-origin iframes. Also call contentWindow.updateTopBar() in HansenRoom.open and in index openIsland's keep-alive branch.
+  VREASON: The mechanism is real: a kept-alive document never refreshes. With the auditor's synthetic API calls I got the same stale numbers (s11_stale.mjs): the season room showed 🪙300 Lv.1 while the wallet was 450 with charxp 120, and the re-entered island showed 💎0 🪙450 while the wallet was 💎40 🪙400. But a user cannot reach either trigger in v1163. (A) Nothing in the shell calls HansenRoom.open. template.html:1848 only runs on island_season1-5.html, which don't exist. hansen_boss_attack.js:15345 __hsnJumpS1 has no caller. hansen_season.js:439 runs on home, where its openIsland branch wins. hansen_home_link.js:84 is a catch fallback. (B) The home page has no wallet-changing UI and shows no wallet (s20_home_wallet_ui.mjs). Opening any other island, land_map or boss_hall replaces the iframe with a fresh load. Cloud restore and login call location.reload(). The issue is latent only; a storage listener is cheap hardening.

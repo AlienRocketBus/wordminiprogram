@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_page_wiring_v1063.mjs —— 页面模块接线合同（全页自动枚举）
  *
  * 事故复盘：8 个 Land 页被连续漏了**四次**
@@ -23,7 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('页面模块接线合同 v1063');

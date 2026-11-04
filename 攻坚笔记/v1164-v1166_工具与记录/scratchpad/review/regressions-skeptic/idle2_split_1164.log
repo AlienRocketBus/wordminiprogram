@@ -1,0 +1,5 @@
+login ok true cid 1
+A) all frames running, 60 s: {"updateDocument hansen_friends":9}
+stopped beat in 2 sub-frames
+B) only top-frame beat, 60 s: {"updateDocument hansen_friends":3}
+C) no beat at all, 40 s: {}

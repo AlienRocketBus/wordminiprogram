@@ -1,0 +1,60 @@
+{
+ "back": {
+  "island": "school",
+  "firstWord": "bag",
+  "tapped": true,
+  "right_after": {
+   "scr": "homeScreen",
+   "menu": false,
+   "word": "bag"
+  },
+  "after_1_8s": {
+   "scr": "homeScreen",
+   "menu": false,
+   "tiles": true,
+   "word": "map",
+   "sp": [
+    {
+     "t": "bag",
+     "ms": 3640,
+     "scr": "scrambleScreen"
+    },
+    {
+     "t": "map",
+     "ms": 5969,
+     "scr": "homeScreen"
+    }
+   ]
+  },
+  "errors": []
+ },
+ "menu": {
+  "island": "school",
+  "firstWord": "map",
+  "tapped": true,
+  "right_after": {
+   "scr": "scrambleScreen",
+   "menu": true,
+   "word": "map"
+  },
+  "after_1_8s": {
+   "scr": "scrambleScreen",
+   "menu": false,
+   "tiles": true,
+   "word": "exam",
+   "sp": [
+    {
+     "t": "map",
+     "ms": 3579,
+     "scr": "scrambleScreen"
+    },
+    {
+     "t": "exam",
+     "ms": 6209,
+     "scr": "scrambleScreen"
+    }
+   ]
+  },
+  "errors": []
+ }
+}

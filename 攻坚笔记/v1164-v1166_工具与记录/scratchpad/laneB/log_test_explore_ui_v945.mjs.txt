@@ -1,0 +1,1 @@
+explore UI v945/v946: responsive layout + dialog a11y + quiz bypass closed + real-game routing ✅

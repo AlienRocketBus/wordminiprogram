@@ -1,0 +1,11 @@
+
+══ clusters (3) ══
+  [low   ]    2× I6:gone-but-room-open:joinRoom:room-just-created   seeds 503,597
+           e.g. joinRoom(rmk0gedhuikr2wh) → 「这个房间已经没有了，换一间吧 ⟨房间已不存在⟩」 while host P0 was online and waiting with the room open (clock diff 0s)
+  [low   ]    1× I6:taken-but-nobody-else:no-seat:rough-network   seeds 438
+           e.g. joinRoom(rmk0getji1t6f06) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 578
+           e.g. joinRoom(rmk0gedi4dxqky8) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+
+SUMMARY profile=lag runs=600 seeds=1..600 failing_runs=0 clusters=3 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:0 I5:0 I6:4 I7:0 I8:0 I9:0 I10:0 | matches=624 settled_pairs=579 virtual=75.0h events=620673 real=28s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

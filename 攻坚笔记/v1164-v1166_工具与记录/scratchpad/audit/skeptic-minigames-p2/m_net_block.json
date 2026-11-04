@@ -1,0 +1,28 @@
+{
+ "block": true,
+ "total": {
+  "n": 261,
+  "MB": 16.64
+ },
+ "top": [
+  "1:island_time.html:webp:image n=80 MB=5.54",
+  "1:island_time.html:js:script n=90 MB=3.82",
+  "0:index.html:html:other n=6 MB=3.48",
+  "1:island_time.html:js:other n=1 MB=1.18",
+  "1:island_time.html:mp3:media n=72 MB=1.14",
+  "1:island_time.html:html:document n=1 MB=0.58",
+  "1:island_time.html:woff2:font n=2 MB=0.40",
+  "1:island_time.html:webp:other n=6 MB=0.20",
+  "1:island_time.html:html:other n=1 MB=0.19",
+  "0:index.html:webp:image n=1 MB=0.12",
+  "0:index.html:(none):fetch n=1 MB=0.00"
+ ],
+ "perf": {
+  "JSHeapUsedMB": 7.6,
+  "Documents": 3,
+  "Frames": 3,
+  "Nodes": 5644,
+  "TaskDurationS": 0,
+  "ScriptDurationS": 0
+ }
+}

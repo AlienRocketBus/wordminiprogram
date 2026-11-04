@@ -1,0 +1,38 @@
+{
+ "homeOnly": [],
+ "servedSeasonHome": 0,
+ "afterAnimal": [
+  "hsn_progress:动物大冒险",
+  "hsn_progress:星海词汇大冒险",
+  "wordIslandAnimal",
+  "wordIslandAnimal_bak",
+  "wordIslandSeason",
+  "wordIslandSeason_bak"
+ ],
+ "servedSeason": [
+  "200 /island_season.html",
+  "200 /island_season.html"
+ ],
+ "frames": [
+  "/index.html",
+  "attached",
+  "about:blank",
+  "/index.html",
+  "/island_animal.html",
+  "attached",
+  "/land_map.html?v=1163",
+  "attached",
+  "/island_season.html?v=1163",
+  "attached",
+  "/land_map.html?v=1163",
+  "attached",
+  "/island_season.html?v=1163",
+  "attached",
+  "/boss_hall.html?v=1163&warm=1",
+  "attached",
+  "/season_showcase.html?v=1163&warm=1",
+  "attached",
+  "/boss_hall.html?v=1163&warm=1"
+ ],
+ "errs": []
+}

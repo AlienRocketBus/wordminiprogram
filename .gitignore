@@ -28,3 +28,6 @@ releases/
 _*.py
 _*.mjs
 _*.log
+
+# 一键体检.py 的详细日志（本机用，不提交）
+.siphon/

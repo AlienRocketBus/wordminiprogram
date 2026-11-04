@@ -1,0 +1,1 @@
+✅ v942 Bee ACK：消息丢失、重复、父/子 reload、XP续做与伪造 ID/金额均 exactly-once

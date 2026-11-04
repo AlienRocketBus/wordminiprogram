@@ -1,0 +1,16 @@
+{
+  "topUrl": "/_frame.html?u=http%3A%2F%2F127.0.0.1%3A40595%2F",
+  "frames": [
+    "/_frame.html?u=http%3A%2F%2F127.0.0.1%3A40595%2F",
+    "/index.html",
+    "about:blank"
+  ],
+  "check": {
+    "local": 1163,
+    "server": 0,
+    "stale": false,
+    "note": "在 iframe 内且拿不到顶层 → 跳过（不在子框里重载）"
+  },
+  "navigatedAway": "/_frame.html?u=http%3A%2F%2F127.0.0.1%3A40595%2F",
+  "topHasWatcher": "undefined"
+}

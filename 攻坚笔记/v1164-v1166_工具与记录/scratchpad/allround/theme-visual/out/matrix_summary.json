@@ -1,0 +1,1334 @@
+{
+ "cells": {
+  "cosmos|home_top": [
+   3,
+   2.44,
+   29
+  ],
+  "cosmos|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "cosmos|food_menu": [
+   8,
+   1.82,
+   30
+  ],
+  "cosmos|food_modes": [
+   7,
+   2.08,
+   29
+  ],
+  "cosmos|animal_menu": [
+   9,
+   1.82,
+   32
+  ],
+  "cosmos|school_menu": [
+   9,
+   1.82,
+   32
+  ],
+  "cosmos|land1_menu": [
+   9,
+   1.82,
+   32
+  ],
+  "cosmos|land1_modes": [
+   8,
+   2.08,
+   30
+  ],
+  "cosmos|land5_menu": [
+   9,
+   1.82,
+   32
+  ],
+  "cosmos|listen_q": [
+   0,
+   5.77,
+   28
+  ],
+  "cosmos|listen_right": [
+   2,
+   4.47,
+   26
+  ],
+  "cosmos|listen_wrong": [
+   0,
+   5.77,
+   29
+  ],
+  "cosmos|listen_result": [
+   6,
+   2.61,
+   27
+  ],
+  "cosmos|pop_ach": [
+   12,
+   1.82,
+   32
+  ],
+  "cosmos|pop_levelup": [
+   12,
+   1.82,
+   32
+  ],
+  "cosmos|pop_petevolve": [
+   10,
+   1.82,
+   32
+  ],
+  "cosmos|chest": [
+   2,
+   2.78,
+   27
+  ],
+  "cosmos|chest_open": [
+   2,
+   2.61,
+   19
+  ],
+  "cosmos|boss_list": [
+   3,
+   2.9,
+   39
+  ],
+  "cosmos|boss_fight": [
+   0,
+   5.31,
+   12
+  ],
+  "cosmos|boss_victory": [
+   0,
+   5.83,
+   3
+  ],
+  "cosmos|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "cosmos|settings_themes": [
+   13,
+   4.25,
+   44
+  ],
+  "cosmos|shop": [
+   6,
+   2.95,
+   41
+  ],
+  "cosmos|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "cosmos|land_map": [
+   0,
+   5.97,
+   19
+  ],
+  "cosmos|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "violet|home_top": [
+   3,
+   2.53,
+   29
+  ],
+  "violet|home_cards": [
+   13,
+   2.69,
+   27
+  ],
+  "violet|food_menu": [
+   9,
+   1.82,
+   30
+  ],
+  "violet|food_modes": [
+   7,
+   2.08,
+   29
+  ],
+  "violet|animal_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "violet|school_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "violet|land1_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "violet|land1_modes": [
+   8,
+   2.08,
+   30
+  ],
+  "violet|land5_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "violet|listen_q": [
+   0,
+   6.08,
+   28
+  ],
+  "violet|listen_right": [
+   2,
+   4.47,
+   26
+  ],
+  "violet|listen_wrong": [
+   0,
+   6.08,
+   28
+  ],
+  "violet|listen_result": [
+   6,
+   2.61,
+   27
+  ],
+  "violet|pop_ach": [
+   13,
+   1.82,
+   32
+  ],
+  "violet|pop_levelup": [
+   14,
+   1.12,
+   32
+  ],
+  "violet|pop_petevolve": [
+   12,
+   1.82,
+   32
+  ],
+  "violet|chest": [
+   4,
+   2.76,
+   29
+  ],
+  "violet|chest_open": [
+   5,
+   2.45,
+   25
+  ],
+  "violet|boss_list": [
+   3,
+   2.9,
+   39
+  ],
+  "violet|boss_fight": [
+   0,
+   5.31,
+   13
+  ],
+  "violet|boss_victory": [
+   0,
+   5.83,
+   3
+  ],
+  "violet|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "violet|settings_themes": [
+   13,
+   4.25,
+   44
+  ],
+  "violet|shop": [
+   6,
+   2.95,
+   41
+  ],
+  "violet|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "violet|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "violet|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "aurora|home_top": [
+   3,
+   1.97,
+   29
+  ],
+  "aurora|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "aurora|food_menu": [
+   9,
+   1.82,
+   30
+  ],
+  "aurora|food_modes": [
+   7,
+   2.08,
+   29
+  ],
+  "aurora|animal_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "aurora|school_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "aurora|land1_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "aurora|land1_modes": [
+   8,
+   2.08,
+   30
+  ],
+  "aurora|land5_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "aurora|listen_q": [
+   0,
+   5.06,
+   28
+  ],
+  "aurora|listen_right": [
+   2,
+   4.47,
+   26
+  ],
+  "aurora|listen_wrong": [
+   0,
+   5.06,
+   28
+  ],
+  "aurora|listen_result": [
+   8,
+   2.61,
+   27
+  ],
+  "aurora|pop_ach": [
+   13,
+   1.82,
+   32
+  ],
+  "aurora|pop_levelup": [
+   14,
+   1.34,
+   32
+  ],
+  "aurora|pop_petevolve": [
+   11,
+   1.82,
+   32
+  ],
+  "aurora|chest": [
+   4,
+   2.2,
+   29
+  ],
+  "aurora|chest_open": [
+   4,
+   2.61,
+   25
+  ],
+  "aurora|boss_list": [
+   3,
+   2.9,
+   39
+  ],
+  "aurora|boss_fight": [
+   0,
+   5.31,
+   12
+  ],
+  "aurora|boss_victory": [
+   0,
+   5.83,
+   3
+  ],
+  "aurora|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "aurora|settings_themes": [
+   13,
+   4.25,
+   44
+  ],
+  "aurora|shop": [
+   6,
+   2.95,
+   41
+  ],
+  "aurora|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "aurora|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "aurora|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "woods|home_top": [
+   3,
+   1.91,
+   29
+  ],
+  "woods|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "woods|food_menu": [
+   9,
+   1.82,
+   30
+  ],
+  "woods|food_modes": [
+   7,
+   2.08,
+   29
+  ],
+  "woods|animal_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "woods|school_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "woods|land1_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "woods|land1_modes": [
+   8,
+   2.08,
+   30
+  ],
+  "woods|land5_menu": [
+   10,
+   1.82,
+   32
+  ],
+  "woods|listen_q": [
+   0,
+   4.79,
+   28
+  ],
+  "woods|listen_right": [
+   2,
+   4.47,
+   26
+  ],
+  "woods|listen_wrong": [
+   0,
+   4.78,
+   28
+  ],
+  "woods|listen_result": [
+   8,
+   2.61,
+   27
+  ],
+  "woods|pop_ach": [
+   13,
+   1.82,
+   32
+  ],
+  "woods|pop_levelup": [
+   14,
+   1.37,
+   32
+  ],
+  "woods|pop_petevolve": [
+   11,
+   1.82,
+   32
+  ],
+  "woods|chest": [
+   4,
+   2.08,
+   29
+  ],
+  "woods|chest_open": [
+   4,
+   2.61,
+   25
+  ],
+  "woods|boss_list": [
+   3,
+   2.9,
+   39
+  ],
+  "woods|boss_fight": [
+   0,
+   5.31,
+   14
+  ],
+  "woods|boss_victory": [
+   0,
+   5.83,
+   3
+  ],
+  "woods|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "woods|settings_themes": [
+   13,
+   4.25,
+   44
+  ],
+  "woods|shop": [
+   8,
+   2.95,
+   41
+  ],
+  "woods|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "woods|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "woods|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "cloud|home_top": [
+   4,
+   1.16,
+   28
+  ],
+  "cloud|home_cards": [
+   12,
+   3.04,
+   27
+  ],
+  "cloud|food_menu": [
+   2,
+   1.82,
+   30
+  ],
+  "cloud|food_modes": [
+   0,
+   5.1,
+   29
+  ],
+  "cloud|animal_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cloud|school_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cloud|land1_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cloud|land1_modes": [
+   1,
+   4.26,
+   30
+  ],
+  "cloud|land5_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cloud|listen_q": [
+   4,
+   1.04,
+   28
+  ],
+  "cloud|listen_right": [
+   9,
+   1.04,
+   26
+  ],
+  "cloud|listen_wrong": [
+   4,
+   1.04,
+   28
+  ],
+  "cloud|listen_result": [
+   3,
+   4.03,
+   27
+  ],
+  "cloud|pop_ach": [
+   6,
+   1.82,
+   32
+  ],
+  "cloud|pop_levelup": [
+   7,
+   1.82,
+   32
+  ],
+  "cloud|pop_petevolve": [
+   5,
+   1.82,
+   32
+  ],
+  "cloud|chest": [
+   4,
+   2.99,
+   29
+  ],
+  "cloud|chest_open": [
+   6,
+   1.24,
+   25
+  ],
+  "cloud|boss_list": [
+   5,
+   1.37,
+   39
+  ],
+  "cloud|boss_fight": [
+   0,
+   6.02,
+   13
+  ],
+  "cloud|boss_victory": [
+   1,
+   1.89,
+   3
+  ],
+  "cloud|settings": [
+   7,
+   1.25,
+   40
+  ],
+  "cloud|settings_themes": [
+   13,
+   3.32,
+   44
+  ],
+  "cloud|shop": [
+   2,
+   4.25,
+   42
+  ],
+  "cloud|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "cloud|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "cloud|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "sakura|home_top": [
+   4,
+   1.15,
+   28
+  ],
+  "sakura|home_cards": [
+   12,
+   3.13,
+   27
+  ],
+  "sakura|food_menu": [
+   2,
+   1.82,
+   30
+  ],
+  "sakura|food_modes": [
+   0,
+   4.96,
+   29
+  ],
+  "sakura|animal_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "sakura|school_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "sakura|land1_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "sakura|land1_modes": [
+   1,
+   4.26,
+   30
+  ],
+  "sakura|land5_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "sakura|listen_q": [
+   4,
+   1.04,
+   28
+  ],
+  "sakura|listen_right": [
+   9,
+   1.04,
+   26
+  ],
+  "sakura|listen_wrong": [
+   4,
+   1.04,
+   28
+  ],
+  "sakura|listen_result": [
+   3,
+   4.02,
+   27
+  ],
+  "sakura|pop_ach": [
+   6,
+   1.82,
+   32
+  ],
+  "sakura|pop_levelup": [
+   7,
+   1.82,
+   32
+  ],
+  "sakura|pop_petevolve": [
+   5,
+   1.82,
+   32
+  ],
+  "sakura|chest": [
+   4,
+   2.98,
+   29
+  ],
+  "sakura|chest_open": [
+   6,
+   1.24,
+   25
+  ],
+  "sakura|boss_list": [
+   5,
+   1.37,
+   39
+  ],
+  "sakura|boss_fight": [
+   0,
+   6.02,
+   12
+  ],
+  "sakura|boss_victory": [
+   1,
+   1.89,
+   3
+  ],
+  "sakura|settings": [
+   7,
+   1.25,
+   40
+  ],
+  "sakura|settings_themes": [
+   13,
+   3.31,
+   44
+  ],
+  "sakura|shop": [
+   2,
+   4.25,
+   42
+  ],
+  "sakura|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "sakura|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "sakura|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "cream|home_top": [
+   4,
+   1.17,
+   28
+  ],
+  "cream|home_cards": [
+   12,
+   3.22,
+   27
+  ],
+  "cream|food_menu": [
+   2,
+   1.82,
+   30
+  ],
+  "cream|food_modes": [
+   0,
+   5.11,
+   29
+  ],
+  "cream|animal_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cream|school_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cream|land1_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cream|land1_modes": [
+   1,
+   4.26,
+   30
+  ],
+  "cream|land5_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "cream|listen_q": [
+   4,
+   1.04,
+   28
+  ],
+  "cream|listen_right": [
+   9,
+   1.04,
+   26
+  ],
+  "cream|listen_wrong": [
+   4,
+   1.04,
+   28
+  ],
+  "cream|listen_result": [
+   3,
+   4.15,
+   27
+  ],
+  "cream|pop_ach": [
+   6,
+   1.82,
+   32
+  ],
+  "cream|pop_levelup": [
+   6,
+   1.82,
+   32
+  ],
+  "cream|pop_petevolve": [
+   6,
+   1.82,
+   32
+  ],
+  "cream|chest": [
+   3,
+   3.09,
+   29
+  ],
+  "cream|chest_open": [
+   8,
+   1.07,
+   26
+  ],
+  "cream|boss_list": [
+   5,
+   1.37,
+   39
+  ],
+  "cream|boss_fight": [
+   0,
+   6.02,
+   13
+  ],
+  "cream|boss_victory": [
+   1,
+   1.89,
+   3
+  ],
+  "cream|settings": [
+   6,
+   1.25,
+   40
+  ],
+  "cream|settings_themes": [
+   13,
+   2.86,
+   44
+  ],
+  "cream|shop": [
+   2,
+   4.25,
+   42
+  ],
+  "cream|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "cream|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "cream|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "mint|home_top": [
+   4,
+   1.17,
+   28
+  ],
+  "mint|home_cards": [
+   12,
+   3.01,
+   27
+  ],
+  "mint|food_menu": [
+   2,
+   1.82,
+   30
+  ],
+  "mint|food_modes": [
+   0,
+   4.85,
+   29
+  ],
+  "mint|animal_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "mint|school_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "mint|land1_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "mint|land1_modes": [
+   1,
+   4.26,
+   30
+  ],
+  "mint|land5_menu": [
+   3,
+   1.82,
+   32
+  ],
+  "mint|listen_q": [
+   4,
+   1.03,
+   28
+  ],
+  "mint|listen_right": [
+   7,
+   1.03,
+   24
+  ],
+  "mint|listen_wrong": [
+   4,
+   1.04,
+   28
+  ],
+  "mint|listen_result": [
+   3,
+   4.22,
+   27
+  ],
+  "mint|pop_ach": [
+   6,
+   1.82,
+   32
+  ],
+  "mint|pop_levelup": [
+   7,
+   1.82,
+   32
+  ],
+  "mint|pop_petevolve": [
+   5,
+   1.82,
+   32
+  ],
+  "mint|chest": [
+   3,
+   3.14,
+   29
+  ],
+  "mint|chest_open": [
+   5,
+   1.24,
+   25
+  ],
+  "mint|boss_list": [
+   5,
+   1.37,
+   39
+  ],
+  "mint|boss_fight": [
+   0,
+   5.99,
+   13
+  ],
+  "mint|boss_victory": [
+   1,
+   1.89,
+   3
+  ],
+  "mint|settings": [
+   6,
+   1.25,
+   40
+  ],
+  "mint|settings_themes": [
+   13,
+   3.08,
+   44
+  ],
+  "mint|shop": [
+   2,
+   4.25,
+   42
+  ],
+  "mint|boss_hall": [
+   1,
+   4.22,
+   9
+  ],
+  "mint|land_map": [
+   0,
+   5.6,
+   19
+  ],
+  "mint|season_showcase": [
+   0,
+   5.1,
+   10
+  ],
+  "coin_rainbow|home_top": [
+   12,
+   1.33,
+   29
+  ],
+  "coin_rainbow|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "coin_rainbow|food_menu": [
+   11,
+   1.82,
+   30
+  ],
+  "coin_rainbow|food_modes": [
+   8,
+   2.08,
+   29
+  ],
+  "coin_rainbow|land1_menu": [
+   12,
+   1.82,
+   31
+  ],
+  "coin_rainbow|listen_q": [
+   4,
+   3.74,
+   28
+  ],
+  "coin_rainbow|listen_right": [
+   3,
+   4.07,
+   26
+  ],
+  "coin_rainbow|listen_wrong": [
+   4,
+   3.74,
+   28
+  ],
+  "coin_rainbow|listen_result": [
+   10,
+   2.48,
+   27
+  ],
+  "coin_rainbow|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "coin_pink|home_top": [
+   11,
+   1.11,
+   29
+  ],
+  "coin_pink|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "coin_pink|food_menu": [
+   11,
+   1.82,
+   30
+  ],
+  "coin_pink|food_modes": [
+   8,
+   2.08,
+   29
+  ],
+  "coin_pink|land1_menu": [
+   12,
+   1.82,
+   31
+  ],
+  "coin_pink|listen_q": [
+   3,
+   3.9,
+   28
+  ],
+  "coin_pink|listen_right": [
+   2,
+   4.42,
+   24
+  ],
+  "coin_pink|listen_wrong": [
+   3,
+   3.9,
+   28
+  ],
+  "coin_pink|listen_result": [
+   10,
+   2.61,
+   27
+  ],
+  "coin_pink|settings": [
+   4,
+   1.24,
+   40
+  ],
+  "imax_candy|home_top": [
+   13,
+   1.03,
+   29
+  ],
+  "imax_candy|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "imax_candy|food_menu": [
+   12,
+   1.03,
+   30
+  ],
+  "imax_candy|food_modes": [
+   9,
+   1.26,
+   29
+  ],
+  "imax_candy|land1_menu": [
+   13,
+   1.03,
+   31
+  ],
+  "imax_candy|listen_q": [
+   7,
+   1.11,
+   28
+  ],
+  "imax_candy|listen_right": [
+   8,
+   1.24,
+   24
+  ],
+  "imax_candy|listen_wrong": [
+   7,
+   1.12,
+   28
+  ],
+  "imax_candy|listen_result": [
+   12,
+   1.02,
+   27
+  ],
+  "imax_candy|settings": [
+   7,
+   1.24,
+   40
+  ],
+  "gallery_fairy|home_top": [
+   10,
+   1.04,
+   29
+  ],
+  "gallery_fairy|home_cards": [
+   14,
+   2.69,
+   27
+  ],
+  "gallery_fairy|food_menu": [
+   7,
+   1.82,
+   30
+  ],
+  "gallery_fairy|food_modes": [
+   8,
+   2.08,
+   29
+  ],
+  "gallery_fairy|land1_menu": [
+   8,
+   1.82,
+   31
+  ],
+  "gallery_fairy|listen_q": [
+   4,
+   2.16,
+   28
+  ],
+  "gallery_fairy|listen_right": [
+   3,
+   1.44,
+   24
+  ],
+  "gallery_fairy|listen_wrong": [
+   5,
+   2.15,
+   28
+  ],
+  "gallery_fairy|listen_result": [
+   12,
+   2.28,
+   27
+  ],
+  "gallery_fairy|settings": [
+   4,
+   1.24,
+   40
+  ]
+ },
+ "totals": {
+  "cosmos": [
+   149,
+   742
+  ],
+  "violet": [
+   163,
+   750
+  ],
+  "aurora": [
+   164,
+   749
+  ],
+  "woods": [
+   166,
+   751
+  ],
+  "cloud": [
+   108,
+   750
+  ],
+  "sakura": [
+   108,
+   749
+  ],
+  "cream": [
+   108,
+   751
+  ],
+  "mint": [
+   103,
+   748
+  ],
+  "coin_rainbow": [
+   82,
+   295
+  ],
+  "coin_pink": [
+   78,
+   293
+  ],
+  "imax_candy": [
+   102,
+   293
+  ],
+  "gallery_fairy": [
+   75,
+   293
+  ]
+ }
+}

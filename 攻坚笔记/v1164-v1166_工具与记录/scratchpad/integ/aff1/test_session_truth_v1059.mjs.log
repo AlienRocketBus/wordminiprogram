@@ -1,0 +1,53 @@
+登录状态真源 + 错误可见性 v1059
+  OK  HansenAuth 暴露 errText
+  OK  真实云端错误不再是 [object Object] → "credentials not found | unauthenticated"
+  OK  error_description 被挖了出来（这正是被埋了 40 版的那句）
+  OK  error 字段也保留了
+  OK  9 种刁钻输入无一泄漏 [object Object]
+  OK  Error 实例取 message
+  OK  字符串原样返回
+  OK  null/undefined → 空串
+  OK  空对象给出可读兜底而非 [object Object]
+  OK  HansenAuth 暴露 ensureSession
+  OK  前置：isSignedIn() 因本地标记返回 true（它就是这么被骗的）
+  OK  ensureSession 拦住了云端操作
+  OK  ★ 空登录态不再误标 expired（那会把人推去反复重新登录）
+  OK  ★ 改标 notReady（尚未就绪）
+  OK  ★ 文案指向"稍候重试"而非"重新登录"：云端会话尚未就绪（已重试 5 次），请稍候再试
+  OK  ★ 下结论前确实重试过（tries=5）
+  OK  ★ 空登录态不算确凿结论
+  OK  ★ 空登录态绝不把用户登出（只拦操作，不清标记）
+  OK  ★ 未误发登出广播
+  OK  鉴权类错误 → expired
+  OK  ★ 云端明说 unauthenticated 才算确凿结论
+  OK  ★ 确凿失效时才清掉撒谎的本地标记
+  OK  reason 可读 → "credentials not found | unauthenticated"
+  OK  ★ 广播 hsn-auth-changed，界面不会继续挂着「已登录 +86 186…」
+  OK  断网时不放行
+  OK  断网不算会话过期
+  OK  ★ 断网绝不把用户登出（进隧道≠退出登录）
+  OK  会话有效时放行并带回真实 uid
+  OK  有效会话不会误清标记
+  OK  未登录直接拒绝
+  OK  云存档引用了 ensureSession
+  OK  定位到 _app 的三个关键点
+  OK  ★ 会话复验排在 _cb 缓存之前（缓存不得跳过复验）
+  OK  _app 内确有取账号实例的调用（2 处）
+  OK  ★ 每一次取账号实例都排在 ensureSession 之后（不存在绕过会话探测的路径）
+  OK  两边都有 import（auth 1 处 / save 1 处）
+  OK  ★ 全仓 SDK import 只有一个 URL → ["./vendor_cloudbase_esm_v965.js"]
+  OK  ★ SDK import 不带任何查询串（? 会让浏览器加载第二份 SDK，凭证互不可见）
+  OK  ★ 没有 ?v= 资源戳（bump_version 只替换已有戳，不会补新的，故去掉即永久生效）
+  OK  SDK 文件真实存在：./vendor_cloudbase_esm_v965.js
+  OK  诊断⑩ 不再直接拼 i.reason
+  OK  诊断往返自检 不再直接拼 r.error
+  OK  诊断面板改走 E() 统一出口
+  OK  恢复模块不再用 String(e.message||e)
+  OK  恢复模块提供 EText + reportFail
+  OK  ★ 会话过期时能把用户引到登录面板（不再是死路弹窗）
+  OK  PK 页复用统一报错出口
+  OK  新鲜期内依然拒绝本次云端操作
+  OK  ★ 刚登录的 60 秒内绝不清标记（防"刚登录就被登出"）
+  OK  ★ 新鲜期内不发登出广播
+
+通过 50 / 失败 0

@@ -1,0 +1,6 @@
+index title: 单词大冒险 · 单词大冒险
+home fonts: {"islandEn":"\"Bowlby One\", serif","statNum":"\"Bowlby One\", Impact, \"Arial Black\", sans-serif","loadedFonts":["CartoonBlack"],"bowlbyAvailable":true,"statusEls":[]}
+boss_hall.html {"title":"BOSS 殿堂 · 演示","navLike":["关闭 [lightBtn]"]}
+season_showcase.html {"title":"神秘殿堂","navLike":["× [closePg]","关闭 [lightBtn]"]}
+spelling_bee.html {"title":"🐝 拼写对战 Spelling Bee · 原型","navLike":["‹ 返回 [index.html]"]}
+land_map.html {"title":"单词大陆 · 冒险地图","navLike":["⑤晶石回廊30词 · 5boss []","← 返回 [goBack()]"]}

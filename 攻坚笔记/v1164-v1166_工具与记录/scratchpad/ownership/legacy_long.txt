@@ -1,0 +1,52 @@
+MODE=legacy
+12.5s A taps 天梯排位 → 开始排位
+19.6s A screen: {"ladder":null,"room":"← 关掉房间 ⏳ 等对手进来 ⏳ 已等 4 秒 房间已经开好了，别人在列表里就能看到你。 等人进来就自动开打。 你开的是 ⚡抢答赛 · 10 个词 （关掉这一页，房间也会一起关掉）"}
+19.6s B taps 天梯排位 → 开始排位
+23.6s B screen: {"ladder":null,"room":"← 返回 ⚡ 排位 💨 这间房刚被别人抢走了 排位时大家都在抢空房，慢一步就没了。 再找一次就好。 ⚡ 再找一次对手"}
+23.6s A screen: {"ladder":null,"room":"← 关掉房间 ⏳ 等对手进来 ⏳ 已等 8 秒 房间已经开好了，别人在列表里就能看到你。 等人进来就自动开打。 你开的是 ⚡抢答赛 · 10 个词 （关掉这一页，房间也会一起关掉）"}
+23.6s B taps 「⚡ 再找一次对手」 then 开始排位 again
+28.2s B screen (2nd try): {"ladder":null,"room":"← 返回 ⚡ 排位 💨 这间房刚被别人抢走了 排位时大家都在抢空房，慢一步就没了。 再找一次就好。 ⚡ 再找一次对手"}
+28.2s waiting 140s for host's waitForOpponent timeout…
+168.2s A screen: {"ladder":null,"room":"← 返回 🏠 大PK · 公开房间 出了点问题，再试一次吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入"}
+168.2s B screen: {"ladder":null,"room":"← 返回 ⚡ 排位 💨 这间房刚被别人抢走了 排位时大家都在抢空房，慢一步就没了。 再找一次就好。 ⚡ 再找一次对手"}
+
+── store hansen_pk_rooms ──
+{"_id":"rmw0dmu6cjlxolu","_openid":"openid_A","status":"open","hostId":"+86 13800000001","guestId":"","hostName":"无名蜂","round":0,"winners":[],"hostReady":false,"guestReady":false,"hostBeat":true,"guestBeat":0,"hostScore":null,"guestScore":null}
+
+── op log (dget suppressed) ──
+39:02.902 openid_A qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=0
+39:04.401 openid_A qget    hansen_pk_rooms {"hostId":"+86 13800000001"}  => rows=0
+39:05.408 openid_A qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=0
+39:05.415 openid_A add     hansen_pk_rooms {} {"_id":"rmw0dmu6cjlxolu","status":"open","code":"","hostRating":1000,"isPrivate":false,"ho => {"id":"rmw0dmu6cjlxolu","requestId":"x"}
+39:06.909 openid_A qget    hansen_pk_rooms {"hostId":"+86 13800000001"}  => rows=1
+39:09.929 openid_B qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=1
+39:09.935 openid_B qupdate hansen_pk_rooms {"_id":"rmw0dmu6cjlxolu","status":"open","guestId":""} {"status":"playing","guestId":"+86 13800000002","guestName":"无名蜂","startedAt":179369154993 => {"updated":0,"requestId":"x"}
+39:11.428 openid_B qget    hansen_pk_rooms {"hostId":"+86 13800000002"}  => rows=0
+39:13.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691553420,"hostBeat":1793691553420} => {"updated":1,"requestId":"x"}
+39:14.547 openid_B qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=1
+39:14.550 openid_B qupdate hansen_pk_rooms {"_id":"rmw0dmu6cjlxolu","status":"open","guestId":""} {"status":"playing","guestId":"+86 13800000002","guestName":"无名蜂","startedAt":179369155454 => {"updated":0,"requestId":"x"}
+39:16.048 openid_B qget    hansen_pk_rooms {"hostId":"+86 13800000002"}  => rows=0
+39:21.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691561421,"hostBeat":1793691561421} => {"updated":1,"requestId":"x"}
+39:29.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691569421,"hostBeat":1793691569421} => {"updated":1,"requestId":"x"}
+39:37.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691577421,"hostBeat":1793691577421} => {"updated":1,"requestId":"x"}
+39:45.421 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691585420,"hostBeat":1793691585420} => {"updated":1,"requestId":"x"}
+39:53.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691593421,"hostBeat":1793691593421} => {"updated":1,"requestId":"x"}
+40:01.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691601421,"hostBeat":1793691601421} => {"updated":1,"requestId":"x"}
+40:09.421 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691609421,"hostBeat":1793691609421} => {"updated":1,"requestId":"x"}
+40:17.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691617421,"hostBeat":1793691617421} => {"updated":1,"requestId":"x"}
+40:25.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691625421,"hostBeat":1793691625421} => {"updated":1,"requestId":"x"}
+40:33.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691633421,"hostBeat":1793691633421} => {"updated":1,"requestId":"x"}
+40:41.421 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691641420,"hostBeat":1793691641420} => {"updated":1,"requestId":"x"}
+40:49.421 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691649420,"hostBeat":1793691649420} => {"updated":1,"requestId":"x"}
+40:57.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691657421,"hostBeat":1793691657421} => {"updated":1,"requestId":"x"}
+41:05.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691665420,"hostBeat":1793691665420} => {"updated":1,"requestId":"x"}
+41:05.551 openid_A qget    hansen_pk_rooms {"status":"open","isPrivate":false}  => rows=1
+41:07.052 openid_A qget    hansen_pk_rooms {"hostId":"+86 13800000001"}  => rows=1
+41:13.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691673421,"hostBeat":1793691673421} => {"updated":1,"requestId":"x"}
+41:21.425 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691681424,"hostBeat":1793691681424} => {"updated":1,"requestId":"x"}
+41:29.423 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691689422,"hostBeat":1793691689422} => {"updated":1,"requestId":"x"}
+41:37.422 openid_A dupdate hansen_pk_rooms rmw0dmu6cjlxolu {"heartbeatAt":1793691697421,"hostBeat":1793691697421} => {"updated":1,"requestId":"x"}
+
+── page errors/dialogs ──
+A: [ 'console: [对战] 原始错误：等了两分钟没人来，先散了吧' ]
+B: []

@@ -1,0 +1,11 @@
+T1 数据导出
+  ✅ 导出40张Land卡: 40
+  ✅ 卡字段齐备(id/img/name/rarity/desc)
+T2 开启器
+  ✅ 已拥有卡→创建殿堂iframe
+  ✅ 殿堂URL含land模式/起始卡/已拥有集: boss_hall.html?v=1163&land=1&card=L13&lown=L11,L13
+  ✅ 未拥有卡→拒绝开殿堂
+T3 临时全解锁
+  ✅ 临时解锁→lown含全40张
+
+land hall v971: 40-card export + hall URL contract + not-owned rejected + temp-unlock full roster ✅

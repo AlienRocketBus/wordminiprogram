@@ -1,0 +1,58 @@
+{
+ "tapTime": true,
+ "frames": [
+  "0:index.html",
+  "1:island_time.html",
+  "2:land_map.html?v=1163",
+  "2:island_season.html?v=1163",
+  "3:land_map.html?v=1163",
+  "3:island_season.html?v=1163",
+  "4:land_map.html?v=1163",
+  "4:(blank)"
+ ],
+ "netAfterIslandOpen": {
+  "reqs": 1312,
+  "MB": 62.59,
+  "perFrame": {
+   "index.html": 172,
+   "island_time.html": 264,
+   "land_map.html": 56,
+   "island_season.html": 1239,
+   "boss_hall.html": 63,
+   "season_showcase.html": 42,
+   "spelling_bee.html": 51
+  }
+ },
+ "prologueSeen": "1",
+ "prologLog": [
+  {
+   "t": 1793712766609,
+   "page": "island_season.html?v=1163",
+   "depth": 2,
+   "hidden": true
+  }
+ ],
+ "rmLog": [
+  {
+   "t": 1793712763945,
+   "page": "island_time.html",
+   "inFrameDepth": 1,
+   "st": "at LS.removeItem (hansen_cred_trap_v1085.js?v=1163:160:26) <- at ls.removeItem (hansen_change_notify_v1134.js?v=1163:84:15) <- at ensureFields (hansen_boss_progress.js?v=1163:132:22)"
+  },
+  {
+   "t": 1793712766715,
+   "page": "island_season.html?v=1163",
+   "inFrameDepth": 2,
+   "st": "at LS.removeItem (hansen_cred_trap_v1085.js?v=1163:160:26) <- at ls.removeItem (hansen_change_notify_v1134.js?v=1163:84:15) <- at ensureFields (hansen_boss_progress.js?v=1163:132:22)"
+  }
+ ],
+ "tempNow": "1793971963616",
+ "perf": {
+  "JSHeapUsedMB": 13.7,
+  "Documents": 10,
+  "Frames": 10,
+  "Nodes": 11834,
+  "JSEventListeners": 4238
+ },
+ "seasonStoryShown": false
+}

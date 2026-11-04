@@ -1,0 +1,113 @@
+  OK  [alice] 登录 + ensureSession ok（uid=1049080110585497033）
+  OK  [bob] 登录 + ensureSession ok（uid=1088836005689583301）
+  OK  [carol] 登录 + ensureSession ok（uid=1634609817540007155）
+  OK  [dave] 登录 + ensureSession ok（uid=1501850939592071225）
+  OK  [erin] 登录 + ensureSession ok（uid=1017832435552936534）
+  OK  开局：A 1000 分，B 1150 分
+  OK  [A 岛屿页] 天梯开在大PK屏上面（点到 k_t）
+  OK  两边同时点到「开始排位」（A ldGo / B ldGo）
+  OK  两人同时开始 → 都进了对战屏（A true / B true）
+  OK  同一间房、一个房主一个客人（rmw0m3mrxr7xtdn / A 房主=false）
+  OK  排位固定抢答赛 + 看中文（A A/cn，B A/cn）
+  OK  没有留下幽灵房（两人名下没关的房 1 间；共 1 间：playing）
+    （这一局两人一共开过 2 间房；>1 说明走了「两人各开一间 → 换到先开的那间」）
+  OK  对战屏显示对方真名（A 看到 bob同学，B 看到 alice同学）
+  OK  两边都结算（A「🎉 你赢了！」/ B「💪 这局输了」）
+  OK  结算屏有天梯分变化（A：+28 天梯分；B：-17 天梯分）
+  OK  A 记了一局胜，ELO 按对手真实分 1150 算（1000 → 1028，期望 1028；若按 1000 会是 1020）
+  OK  B（客人）也记上了这一局负（总 4 局，1150 → 1133）
+  OK  战绩里记的是对方真名（A 记 bob同学，B 记 alice同学）
+  OK  两边比分一致（A 900:100 / B 100:900）—— 客人抢到的那一词也算上了
+  OK  [A 岛屿页]「再来一局」→ 天梯在最上面并直接开始找（× ⚡ 正在找对手… 🔍 正在找 928 ~ ）
+  OK  [B]「← 回天梯」回到天梯首页（不是房间列表）
+  OK  [C] 开一间公开房 → 等对手进来（← 关掉房间 ⏳ 等对手进来 ⏳ 已等 0 秒 房间已经开好）
+  OK  [D] 列表里看到 C 的房（rmw0m4t6sg2b2fm）
+  OK  [D] 点「进去打」→ 先显示「正在进房，等房主确认」（← 返回 🚪 进房中 🚪 正在进房，等房主确认…）
+  OK  公开房：两边都进了对战屏
+  OK  公开房打完，两边都结算（C「🎉 你赢了！」/ D「💪 这局输了」）
+  OK  同步赛不动天梯分（说清楚「只有抢答赛计分」）
+  OK  自由房打完「← 回到房间列表」
+  OK  [C] 私密房显示房间码 EB27
+  OK  输码进房：两边都进了对战屏
+  OK  房主中途离开 → 客人 5 秒内看到「🏆 对手已离场，本局你胜」
+  OK  [E] 排位等不到人 → 回天梯首页「暂时没有对手，等会儿再来」（🏆 天梯排位 × 暂时没有对手，等会儿再来 🐝 未定级 再打 3 局定级赛 ）
+  OK  [E] 等不到人的那间排位房已经收掉（还开着 0 间）
+  OK  [E] 自由房等不到人 → 回列表并说「等了两分钟还没人来，房间先关掉了。」（不再是「出了点问题」）
+  OK  [E] 自由房也收掉了（不留幽灵房、心跳停了）
+  OK  ADMINONLY → 「云端设置还差一步」+ 集合名 + 技术信息（× 🏆 天梯排位 🛠️ 云端设置还差一步 数据库集合「hansen_pk_rooms」的权限不允许这样读写，请在云开发控制台把它设成「读取全部数据，修改本人数据」 这不是你的问）
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  [erin console.error] Failed to load resource: net::ERR_FAILED
+  OK  断网 → 「连不上网络」+ 技术信息（技术信息：network request error）
+  OK  网通了点「重新找对手」→ 接着找
+  OK  [dave 第二台设备] 同一个账号登录
+  OK  同一个账号两台设备：列表上说「同一个账号在另一台设备上开着房，要用另一个账号才能对战」
+  OK  令牌被云端拒 → 「云端登录过期了 / 重新登录」（× 🏆 天梯排位 🔑 云端登录过期了 重新登录一次就能继续， 你的段位和战绩）
+  OK  [alice] 零脚本错误
+  OK  [bob] 零脚本错误
+  OK  [carol] 零脚本错误
+  OK  [dave] 零脚本错误
+  OK  [erin] 零脚本错误
+  OK  [dave2] 零脚本错误
+  OK  没有 where().update/remove 多条写（0）
+
+结果: 48 通过 / 0 失败
+exit 0

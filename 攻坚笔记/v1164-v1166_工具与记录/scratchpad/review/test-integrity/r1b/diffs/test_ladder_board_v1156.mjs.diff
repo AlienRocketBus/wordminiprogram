@@ -1,0 +1,174 @@
+diff --git a/test_ladder_board_v1156.mjs b/test_ladder_board_v1156.mjs
+index 1056935..fa25fe5 100644
+--- a/test_ladder_board_v1156.mjs
++++ b/test_ladder_board_v1156.mjs
+@@ -324,8 +324,9 @@ async function open(seedBoard) {
+ /* ── 🔴v1156 两个真浏览器对打（三项一致性）─────────────
+  *
+  * 这是最接近真实的测法：开两个独立浏览器上下文，
+- * 中间架一个真 HTTP 服务当云端（带条件更新，模拟数据库原子性），
+- * 两边各自跑完整的产品代码，谁也不知道对方存在。
++ * 中间架一个真 HTTP 服务当云端，两边各自跑完整的产品代码，谁也不知道对方存在。
++ * 🔴v1164：原子性靠的是「固定 _id 的 add」（同一个 _id 数据库只收第一条），
++ *   不再是条件更新 —— 「读取全部数据，修改本人数据」下客人改不了房主的房间记录。
+  *
+  * 实测结论（本轮人工跑通，这里固化关键契约）：
+  *   ① 房主答对 → 房主看 100:0，客人看 0:100，两边都进第 2 题
+@@ -339,10 +340,10 @@ async function open(seedBoard) {
+   const room = fs.readFileSync(ROOT + '/hansen_pk_room_v1065.js', 'utf8');
+   const code = room.replace(/\/\*[\s\S]*?\*\//g, '');
+ 
+-  ok(/claim\(/.test(code),
+-     '★ **判分走带条件的 claim** —— ' +
+-     '两人同时抢答时，靠数据库的条件更新保证只有一个人能写进去；' +
+-     '换成先读后写就会两个人都判赢');
++  ok(/claim\(/.test(code) && /'_w'/.test(code),
++     '★ **判分走 claim：写一条固定 _id 的「这题谁赢」记录（房间号_w题号）** —— ' +
++     '两人同时抢答时，数据库保证同一个 _id 只写得进一条，写进去的人赢；' +
++     '换成先读后写就会两个人都判赢（v1164 前用的是改房主的房间记录，客人根本改不了）');
+ 
+   ok(/oppId:/.test(code),
+      '★ roundState 带回对手 id —— 两边才能确认在跟同一个人打');
+@@ -539,6 +540,142 @@ async function open(seedBoard) {
+      '否则只能读代码，而读代码看不出"缺索引时会不会降级"这种运行时行为');
+ }
+ 
++/* ── 🔴v1164 数据层的真行为 ─────────────────────────────
++ *
++ * 真机上排行榜「从来没好过」，三个原因都是行为问题，读代码看不出：
++ *   ① db() 第一次调用必然返回 null（后台才开始预热）→ 页面刚打开拉榜永远是
++ *      「登录之后才能看到」，打完排位的上传也静默丢掉
++ *   ② 云端出错时 SDK **不抛错**，而是照常返回 {code, message} ——
++ *      权限不对被显示成「还没有人上榜」，上传被拒也报 ok:true
++ *   ③ 资料那条不在时 update 改了 0 条，也当成功
++ *
++ * 这里模块本身是真的，只把"云端数据库"换成一个和 SDK 一个脾气的假货：
++ * 出错时 resolve {code}（不 reject）、断网时 reject Error('network request error')。
++ * （完整的真 SDK + 本地云端模拟在 v1164 的端到端测试里另跑。）
++ */
++{
++  const vm = await import('node:vm');
++  const bsrc = fs.readFileSync(ROOT + '/hansen_ladder_board_v1156.js', 'utf8');
++  const day = 86400000;
++  function fakeDb(o) {
++    const log = { updates: [], gets: [], counts: 0, ensured: 0 };
++    let upd = (o.updates || []).slice();
++    const getRes = (kind) => {
++      log.gets.push(kind);
++      const g = o.get && o.get[kind];
++      if (g === 'net') return Promise.reject(new Error('network request error'));
++      if (g && g.code) return Promise.resolve(g);
++      return Promise.resolve({ data: JSON.parse(JSON.stringify(o.rows || [])) });
++    };
++    const chain = (kind) => ({ limit: () => chain(kind), orderBy: () => chain('orderBy'), get: () => getRes(kind),
++      count: () => { log.counts++; return Promise.resolve(o.count || { total: 4 }); } });
++    const db = {
++      command: { gt: (v) => ({ $gt: v }) },
++      collection: (name) => ({
++        doc: (id) => ({ update: (d) => { log.updates.push({ name, id, d }); return Promise.resolve(upd.length ? upd.shift() : { updated: 1 }); } }),
++        orderBy: () => chain('orderBy'),
++        where: () => chain('where')
++      })
++    };
++    return { db, log };
++  }
++  function bootBoard(o) {
++    const f = fakeDb(o);
++    const store = {};
++    const ctx = { console, Date, Math, JSON, Promise, Error, String, Number, Array, Object, setTimeout, clearTimeout,
++      localStorage: { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } } };
++    ctx.window = ctx;
++    ctx.HansenAuth = {
++      isSignedIn: () => o.signed !== false,
++      ensureSession: async () => (o.session || { ok: true, uid: 'U1' }),
++      /* _app 是异步的，而且第一次要等一会儿（真 SDK 要动态加载）—— 正是 ① 的现场 */
++      _app: () => new Promise((r) => setTimeout(() => r({ database: () => f.db }), 60)),
++      ensureProfile: async () => { f.log.ensured++; return { cid: 3 }; }
++    };
++    ctx.HansenPkRecord = { summary: () => (o.summary || { placed: true, rating: 1100, total: 5 }) };
++    ctx.HansenSbProfile = { displayName: () => '小爱' };
++    vm.createContext(ctx); vm.runInContext(bsrc, ctx);
++    return { B: ctx.window.HansenLadderBoard, log: f.log };
++  }
++  const now = Date.now();
++  const row = (uid, name, r, g, at) => ({ _id: uid, uid, name, cid: 1, ladderRating: r, ladderGames: g, ladderAt: at || now });
++
++  {
++    const { B, log } = bootBoard({ rows: [row('A', '小红', 1300, 9), row('U1', '小爱', 1100, 5)], summary: { placed: false } });
++    const r = await B.fetchTop();
++    ok(r.ok === true && r.list.length === 2,
++       '★ **页面刚打开第一次拉榜就成功** —— 以前 db() 第一次必然返回 null，永远显示「登录之后才能看到」（' + JSON.stringify(r).slice(0, 80) + '）');
++    ok(r.myRank === 2, '★ 用会话里的 uid 认出自己（第 2 名）');
++    ok(log.gets[0] === 'orderBy', '先按分数排序查');
++  }
++  {
++    const { B } = bootBoard({ rows: [], summary: { placed: false } });
++    const r = await B.fetchTop();
++    ok(r.ok === true && Array.isArray(r.list) && r.list.length === 0, '★ 没人上榜 = ok:true + 空列表（空 ≠ 出错）');
++  }
++  {
++    const denied = { code: 'DATABASE_PERMISSION_DENIED', message: 'Permission denied' };
++    const { B } = bootBoard({ get: { orderBy: denied, where: denied }, summary: { placed: false } });
++    const r = await B.fetchTop();
++    ok(r.ok === false && r.kind === 'config',
++       '★ **云端回 {code} 不能当成"还没有人上榜"** —— 以前不查 code，权限不对显示成空榜（' + (r.kind || '') + '）');
++    ok(/sb_profile/.test(r.reason) && /读取全部数据，修改本人数据/.test(r.reason) && /DATABASE_PERMISSION_DENIED/.test(r.reason),
++       '★ 说清楚是哪个集合、权限该设成什么，原话留在 ⟨⟩ 里');
++  }
++  {
++    const { B, log } = bootBoard({ get: { orderBy: { code: 'INVALID_PARAM', message: 'index not found' } },
++      rows: [row('A', '小红', 1000, 9), row('B', '阿强', 1400, 9), row('C', '老号', 1500, 9, now - 40 * day), row('D', '新手', 1600, 2)],
++      summary: { placed: false } });
++    const r = await B.fetchTop();
++    ok(r.ok && log.gets.join(',') === 'orderBy,where', '★ 排序被拒（没建索引）→ 退回不排序的查询');
++    ok(r.ok && r.list.map((x) => x.name).join(',') === '阿强,小红',
++       '★ 退回后本地排序，并照样滤掉 30 天没打的和没打满定级赛的');
++  }
++  {
++    const { B } = bootBoard({ get: { orderBy: 'net' }, summary: { placed: false } });
++    const r = await B.fetchTop();
++    ok(r.ok === false && r.kind === 'network', '★ 断网 → kind=network（界面才能说「连不上网络」）');
++  }
++  {
++    const { B } = bootBoard({ signed: false });
++    const r = await B.fetchTop();
++    ok(r.ok === false && r.reason === 'not-signed-in', '真没登录才说 not-signed-in（天梯页据此显示「登录之后就能看到」）');
++  }
++  {
++    const { B, log } = bootBoard({ updates: [{ code: 'DATABASE_PERMISSION_DENIED', message: 'Permission denied' }] });
++    const r = await B.push();
++    ok(r.ok === false && r.kind === 'config', '★ **上传被拒要报出来** —— 以前 SDK 回 {code} 也报 ok:true');
++    ok(B.lastPushError() && B.lastPushError().kind === 'config', '★ 失败原因留着（lastPushError），排查时看得到');
++    ok(log.updates[0] && log.updates[0].id === 'U1' && log.updates[0].name === 'sb_profile',
++       '★ 只写自己那条 sb_profile（_id = 自己的 uid）');
++    ok(log.updates[0] && log.updates[0].d.name === '小爱', '★ 名字跟着资料走（榜上不再全是「无名蜂」）');
++  }
++  {
++    const { B, log } = bootBoard({ updates: [{ updated: 0 }, { updated: 1 }] });
++    const r = await B.push();
++    ok(r.ok === true && log.ensured === 1 && log.updates.length === 2,
++       '★ 资料那条不在（改了 0 条）→ 先建档再写一次，而不是当成功');
++  }
++  {
++    const { B } = bootBoard({ updates: [{ updated: 0 }, { updated: 0 }] });
++    const r = await B.push();
++    ok(r.ok === false && r.kind === 'config', '★ 建档后还是写不进 → 报配置问题（不是 ok:true）');
++  }
++  {
++    const { B, log } = bootBoard({ updates: [{ updated: 1 }], rows: [row('U1', '小爱', 1100, 5)] });
++    await B.fetchTop();
++    ok(log.updates.length === 1, '★ 这次打开页面后还没传过分 → 拉榜前先补传一次（上次没传上的分不会一直丢着）');
++    B._clearCacheForTest();
++    await B.fetchTop();
++    ok(log.updates.length === 1, '传成功之后不再重复传');
++  }
++  {
++    const { B } = bootBoard({ count: { code: 'DATABASE_PERMISSION_DENIED' } });
++    const r = await B.myRoughRank();
++    ok(r.ok === false, '★ count 出错不能当成"0 个人比我高"（以前会显示第 1 名）');
++  }
++}
++
+ await browser.close();
+ srv.close();
+ console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

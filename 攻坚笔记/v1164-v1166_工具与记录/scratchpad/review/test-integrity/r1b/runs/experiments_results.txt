@@ -1,0 +1,26 @@
+# Results printed by the experiment scripts (verbatim JSON from stdout). Scripts in r1b/exp/ (xc/xk in r1b/cur/, xd in r1b/mut/).
+xa_orderby_stale.mjs refuse 40 -> {"MODE":"refuse","N":40,"loginA":true,"loginB":true,"aSelfHosted":true,"matchedAfterSec":null,"bSaw":["正在找对手","等对手进来"],"openRoomsMine":2,"refusedOrderedQueries":33}
+xa_orderby_stale.mjs ok 40     -> {"MODE":"ok","N":40,"loginA":true,"loginB":true,"aSelfHosted":true,"matchedAfterSec":6,"bSaw":["正在找对手"],"openRoomsMine":1,"refusedOrderedQueries":0}
+xa_orderby_stale.mjs refuse 10 -> {"MODE":"refuse","N":10,"loginA":true,"loginB":true,"aSelfHosted":true,"matchedAfterSec":4,"bSaw":["正在找对手"],"openRoomsMine":1,"refusedOrderedQueries":12}
+xb_status.mjs 200 admin   -> timeline ["0s 正在找对手","1s 云端设置还差一步"] final "... 云端设置还差一步 ... 技术信息：DATABASE_PERMISSION_DENIED | Permission denied"
+xb_status.mjs 403 admin   -> timeline ["0s 正在找对手","15s 连不上网络"] final "× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：network request error"
+xb_status.mjs 404 missing -> timeline ["0s 正在找对手","15s 连不上网络"] final "... 连不上网络 ... 技术信息：network request error"
+xc_race_only.mjs LAG=2500 -> 10 通过 0 失败; losers saw 「这间房刚被别人占了」   (runs/xc_lag2500_rf.txt)
+xc_race_only.mjs LAG=3500 -> 6 通过 2 失败; SEEN {"抢2":["云端设置还差一步"],"抢3":["云端设置还差一步"]}   (runs/xc_lag3500_rf.txt)
+xc_race_only.mjs STYLES=duplicate_write -> 10 通过 0 失败   (runs/xc_dupwrite.txt)
+xk_race_readfail.mjs LAG=500 READFAILS=10 -> 6 通过 2 失败; SEEN {"抢1":["云端设置还差一步"],"抢2":["云端设置还差一步"]}   (runs/xk_readfail10.txt)
+xi_ladder_race_lag.mjs 3500 -> 甲,乙 final "× 🏆 天梯排位 🛠️ 云端设置还差一步 云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 这不是你的问题，把这一屏截图发给负责的老师就好。 再试一次 技术信息：DATABASE_REQUEST_FAILED | [FailedOperation]"; 丙 in battle
+xi_ladder_race_lag.mjs 500  -> 甲,乙 saw 被别人抢走 -> 等对手进来 -> both in battle; 丙 in battle
+xl_ladder_race_readfail.mjs 500 10 -> 丙 final "🛠️ 云端设置还差一步 云端拒绝了这次操作（DATABASE_REQUEST_FAILED）…"; 乙 saw 被别人抢走 then self-hosted
+xd_friends_openid.mjs (stamped _openid = 'oWx_'+base64(uid)) -> 60 通过，0 失败   (runs/xd_friends_openid.txt)
+xe_refresh_error.mjs unauthenticated -> {"timeline":["0s 正在找对手","1s 正在连接云端","23s 云端还没连上","31s 正在找对手","33s 正在连接云端","56s 云端还没连上","57s 正在找对手","59s 正在连接云端"],"local":{"signed":true,"cred":true}}
+xf_lost_response.mjs -> {"seatLostResponse":{"faultHits":1,"bothInBattle":true,...},"winLostResponse":{"faultHits":1,"expected":{"host":1000,"guest":0},"hostSaw":[1000,0],"guestSaw":[0,1000],"winDocs":10,"hostWins":10}}
+xg_clock_skew.mjs -45000 -> {"clockA_minus_B":-45004,"lobbyListsA":false,"lobbyB":"... 现在还没有人开房。 ...","aSelfHosted":true,"ladderMetAfterSec":null,"openRooms":2}
+xg_clock_skew.mjs 0      -> {"clockA_minus_B":-3,"lobbyListsA":true,"ladderMetAfterSec":6,"openRooms":0}
+xh_boot_requests.mjs (v1163 and cur) -> {"island_animal.html":[],"spelling_pk.html":[],"index.html":[]}
+xj_emu_semantics.mjs -> {"Date-typed field vs NUMBER in $lt (real MongoDB: no match — different BSON types)":1,"Date-typed field vs Date in $lt (real: match)":1}
+xm_userinfo_null.mjs -> real SDK getLoginState throws "TypeError: Cannot read properties of null (reading 'uid')" (content:null) and "SyntaxError: Unexpected end of JSON input" (truncated); ensureSession ok both
+fp_check.py fpA fpB -> 4bd17b11fecc83dd (HEAD) == 4bd17b11fecc83dd (emulator dup-allowed + harness foreignWrites()=[] + SDK edited)
+emumut/run_mut.py -> SURVIVED: client_openid_trusted, http403_denied, match_always_true, sort_ignored, limit_ignored, upsert_no_stamp, unmodified_counts (others KILLED)
+test_auth_session_v1164__orig.mjs (unmodified, run inside the v1163 checkout) -> 结果: 51 通过 / 0 失败 (it read /home/claude/work/repo)
+jarvis_selftest (scratch copy st/, v1164 cases + 抢房原子性) -> all 16 ✅ 注入后正确报红; hansen_guards_v1068.py -> 全部通过

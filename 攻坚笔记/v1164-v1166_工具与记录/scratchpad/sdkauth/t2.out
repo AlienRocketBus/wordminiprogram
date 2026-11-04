@@ -1,0 +1,75 @@
+=== H1 phone NEW user via HansenAuth (top frame)
+{"a":{"ok":true,"isUser":false,"phone":"+86 13900000003"},"b":{"ok":true,"uid":"uid_new_100","cid":0,"pendingId":true,"sync":{"ok":false,"reason":"cloudsave-unavailable"}}}
+  net: [
+  'POST ambitiou… /auth/v1/verification',
+  'POST ambitiou… /auth/v1/signup',
+  'GET ambitiou… /auth/v1/user/me [auth]',
+  'GET ambitiou… /auth/v1/user/me [auth]',
+  'POST ambitiou… /web'
+]
+["credentials_ambitious-d0g1d26xm740dc3d6","device_id","hansen_auth_v1004","lang_ambitious-d0g1d26xm740dc3d6","user_info_ambitious-d0g1d26xm740dc3d6"]
+{"label":"H1 ensureSession","ms":1,"r":{"ok":true,"uid":"uid_new_100","tries":1},"local":{"pendingPhone":"+86 13900000003","verificationId":"","isUser":false,"method":"phone","phone":"+86 13900000003","signedAt":1793690490892,"uid":"uid_new_100"}}
+  net: []
+=== H2 remove user_info_<env>, credentials kept → ensureSession
+{"label":"H2 ensureSession (no user_info)","ms":1783,"r":{"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"},"local":{"pendingPhone":"+86 13900000003","verificationId":"","isUser":false,"method":"phone","phone":"+86 13900000003","signedAt":1793690490892,"uid":"uid_new_100"}}
+  net: []
++    0ms  登录返回  类型=object 键=[cache,oauthInstance,user] expires_in=❗无 access_token=❗无
++    0ms  登录后凭证键  1 个
++    0ms  登录判定  ✅ 云端凭证已就位，写入本地登录态
++   26ms  ensureSession 开始  isSignedIn=true
++   26ms  本地登录记录  method=phone 距登录=0秒
++   27ms  SDK 凭证键  2 个 → hansen_auth_v1004(157字节)  credentials_ambitious-d0g1d26xm740dc3d6(435字节)
++   27ms  探测#1  类型=object 键=[cache,oauthInstance,user] uid=uid_new_100
++   27ms  结论  ✅ 有效 uid=uid_new_100（第 1 次探到）
++   32ms  ensureSession 开始  isSignedIn=true
++   32ms  本地登录记录  method=phone 距登录=0秒
++   32ms  SDK 凭证键  2 个 → hansen_auth_v1004(157字节)  credentials_ambitious-d0g1d26xm740dc3d6(435字节)
++   32ms  结构  拿不到 uid，顶层键=[cache,oauthInstance,user]
++   32ms  探测#1  类型=object 键=[cache,oauthInstance,user] uid=(无)
++  153ms  结构  拿不到 uid，顶层键=[cache,oauthInstance,user]
++  153ms  探测#2  类型=object 键=[cache,oauthInstance,user] uid=(无)
++  413ms  结构  拿不到 uid，顶层键=[cache,oauthInstance,user]
++  413ms  探测#3  类型=object 键=[cache,oauthInstance,user] uid=(无)
++  914ms  结构  拿不到 uid，顶层键=[cache,oauthInstance,user]
++  914ms  探测#4  类型=object 键=[cache,oauthInstance,user] uid=(无)
++ 1815ms  结构  拿不到 uid，顶层键=[cache,oauthInstance,user]
++ 1815ms  探测#5  类型=object 键=[cache,oauthInstance,user] uid=(无)
++ 1815ms  结论  ⏳ 重试 5 次仍为空 → 尚未就绪（不判过期）
+{"currentUserAsyncUid":"uid_new_100"}
+  net: [ 'GET ambitiou… /auth/v1/user/me [auth]' ]
+{"label":"H2b ensureSession after currentUserAsync (getCurrentUser refresh)","ms":0,"r":{"ok":true,"uid":"uid_new_100","tries":1},"local":{"pendingPhone":"+86 13900000003","verificationId":"","isUser":false,"method":"phone","phone":"+86 13900000003","signedAt":1793690490892,"uid":"uid_new_100"}}
+=== H3 ensureSession inside iframe (borrowing top _app)
+{"r1":{"ok":true,"uid":"uid_new_100","tries":1},"r2":{"ok":true,"uid":"uid_new_100","tries":1},"newInstancePerCall":true,"topAuthIsAppAuthInstance":false,"sameRealmApp":true}
+  net: []
+=== H4 registerByPassword via HansenAuth (fresh storage)
+{"ok":true,"uid":"","cid":0,"pendingId":true}
+  net: [ 'POST ambitiou… /auth/v1/verification' ]
+["device_id","hansen_auth_v1004","lang_ambitious-d0g1d26xm740dc3d6"]
+{"label":"H4 ensureSession after registerByPassword","ms":1783,"r":{"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"},"local":{"method":"password","username":"bobby","signedAt":1793690492987}}
+  net: []
+=== H5 backup ownership of SDK keys + restore effect
+{"uid":"uid_existing_001"}
+{"ownedUserInfo":true,"ownedDeviceId":true,"ownedCred":false,"ownedLang":true}
+{"itemsKeys":["device_id","lang_ambitious-d0g1d26xm740dc3d6","user_info_ambitious-d0g1d26xm740dc3d6","wordIsland_test"]}
+["credentials_ambitious-d0g1d26xm740dc3d6","device_id","hansen_auth_v1004","lang_ambitious-d0g1d26xm740dc3d6","user_info_ambitious-d0g1d26xm740dc3d6","wordIsland_test"]
+  restore a backup made BEFORE login (no user_info in it):
+{"err":"不是有效的 JSON 或备份代码"}
+["credentials_ambitious-d0g1d26xm740dc3d6","device_id","hansen_auth_v1004","lang_ambitious-d0g1d26xm740dc3d6","user_info_ambitious-d0g1d26xm740dc3d6","wordIsland_test"]
+{"label":"H5 ensureSession after restoring pre-login backup","ms":0,"r":{"ok":true,"uid":"uid_existing_001","tries":1},"local":{"pendingPhone":"+86 13800000001","verificationId":"","isUser":true,"method":"phone","phone":"+86 13800000001","signedAt":1793690494936,"uid":"uid_existing_001"}}
+  restore a backup containing ANOTHER account user_info:
+{"label":"before foreign restore","ms":0,"r":{"ok":true,"uid":"uid_existing_001","tries":1},"local":{"pendingPhone":"+86 13800000001","verificationId":"","isUser":true,"method":"phone","phone":"+86 13800000001","signedAt":1793690494936,"uid":"uid_existing_001"}}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: Error: 不是有效的 JSON 或备份代码
+    at parseInput (http://127.0.0.1:8765/hansen_backup_v944.js:410:78)
+    at Object.restore (http://127.0.0.1:8765/hansen_backup_v944.js:589:33)
+    at eval (eval at evaluate (:311:30), <anonymous>:1:19)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/sdkauth/t2_hansen.mjs:71:12 {
+  log: []
+}
+
+Node.js v22.23.4

@@ -1,0 +1,12 @@
+[wt-opt] test_mistake_lesson_v1165.mjs rc=0 52s :: ✅ v1165 答错小课：揭晓卡+重读 / 本轮末再考一次 / 结算列错词 / 温和文案 全过
+[wt-opt] test_land_sync_v942.mjs rc=0 0s :: land sync v942: 8-page shell contract + CSS + identities + Land3 slice + Land8 bosses ✅
+[wt-opt] test_storage_reset_v942.mjs rc=0 0s :: storage/reset v942: scoped fail-closed snapshots + CAS rollback + crash journal phases + authoritative reset recovery ✅
+[wt-opt] test_review_rewards_v963.mjs rc=0 1s :: 🎉 v963 复习奖励逻辑回归 全部通过 (钱包终额: 281 金币 / 5 钻石)
+[wt-opt] test_answer_coin_v941.mjs rc=0 0s :: answer coin v941: canonical per-word ledger + global 2000 boundary ✅
+[wt-opt] test_answer_coin_transaction_v942.mjs rc=0 0s :: answer coin transaction v942: pending/award/authority/mirror/cleanup breakpoints + reload recovery + hard 2000 cap ✅
+[wt-opt] test_starter_coin_integration_v942.mjs rc=0 0s :: starter coin integration v942: wallet commit → flag failure → upgrade/reload exactly-once ✅
+[wt-opt] test_learning_copy_and_hint_hf2_v946.mjs rc=0 0s :: learning copy/hint HF2 v946: five-state wording + healthy-hours achievement + assisted-answer separation ✅
+[wt-opt] test_copy_numbers_v1165.mjs rc=0 20s :: ✅ v1165 文案/数字校对：任务横幅、欢迎弹窗、成就目标、首页标题与数字、我的学习分母 全过
+[wt-opt] test_camel_runtime_v1015.mjs rc=0 36s :: 合计违规 0 处 / 0 个屏次
+[wt-opt] test_mock_contract_v970.mjs rc=0 10s :: mock contract v970: real-module shape sampled + harness mock isomorphic + real-machine twins present + gauge works on REAL canonical ✅
+[wt-opt] test_today_overlay_fixed_v1006.mjs rc=0 7s :: ✅ 完成态浮层仍固定铺满, 绿块事故已修

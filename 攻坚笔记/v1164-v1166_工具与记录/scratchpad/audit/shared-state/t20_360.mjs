@@ -1,0 +1,11 @@
+import {boot,openIslandByTap,dismissWelcome,topbar,sleep} from './harness.mjs';
+const {s,page,log}=await boot({w:360});
+let {frame}=await openIslandByTap(page,'island_food.html');
+await dismissWelcome(frame);await sleep(2000);
+await frame.evaluate(()=>{localStorage.setItem('hansen_wallet_coins','1234567');localStorage.setItem('hansen_wallet_gems','98765');HansenGems.add(0);addXP(52300);});
+await frame.evaluate(()=>{updateTopBar();var g=document.getElementById('__hs_gem_count');if(g)g.textContent=HansenGems.get();});
+await sleep(3500);
+const ov=await frame.evaluate(()=>{const tb=document.querySelector('.top-bar');const r=tb.getBoundingClientRect();const out=[];tb.querySelectorAll('*').forEach(e=>{const b=e.getBoundingClientRect();if(b.width&&(b.right>window.innerWidth+0.5||b.left<-0.5))out.push((e.id||e.className)+':'+Math.round(b.left)+'-'+Math.round(b.right));if(e.scrollWidth>e.clientWidth+1&&getComputedStyle(e).overflow!=='visible')out.push('clip '+(e.id||e.className));});return {w:window.innerWidth,docW:document.documentElement.scrollWidth,tb:[r.left,r.right],out};});
+console.log(JSON.stringify(ov),JSON.stringify(await topbar(frame)));
+await page.screenshot({path:'top360.png',clip:{x:0,y:0,width:360,height:90}});
+await s.close();

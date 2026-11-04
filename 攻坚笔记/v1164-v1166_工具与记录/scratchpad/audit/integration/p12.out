@@ -1,0 +1,38 @@
+   [islandFrame navigated] about:blank
+   [islandFrame navigated] island_animal.html
+after animal {
+  card: '👑 星海终战 · 点击继续 →',
+  lastKey: 'wordIslandAnimal',
+  animalSave: 1793696993079,
+  foodSave: null
+}
+   [islandFrame navigated] island_food.html
+food played {
+  card: '🍔 食物 · 点击继续 →',
+  lastKey: 'wordIslandFood',
+  animalSave: 1793696993079,
+  foodSave: 1793697002784
+}
+   [islandFrame navigated] island_animal.html
+after closing food (+6s) {
+  card: '👑 星海终战 · 点击继续 →',
+  lastKey: 'wordIslandFood',
+  animalSave: 1793697004630,
+  foodSave: 1793697002784
+}
+requests while sitting on home after closing food: 424 html: [
+  '/island_animal.html',
+  '/land_map.html?v=1163',
+  '/island_land1.html',
+  '/island_season.html?v=1163',
+  '/boss_hall.html?v=1163&warm=1',
+  '/land_map.html?v=1163',
+  '/island_land1.html',
+  '/season_showcase.html?v=1163&warm=1',
+  '/island_season.html?v=1163'
+]
+   [islandFrame navigated] island_food.html
+reopen food reveal ms 586 (keep-alive would be ~0-50ms)
+errors [
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]

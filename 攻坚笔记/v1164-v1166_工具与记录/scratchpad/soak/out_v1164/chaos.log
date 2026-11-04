@@ -1,0 +1,39 @@
+
+══ clusters (17) ══
+  [low   ]   40× I2:remove:adv-forged-target   seeds 2,11,19,29,35,37
+           e.g. remove rzf27239 owned by ADV
+  [low   ]   15× I8:adv-seat-accepted   seeds 11,29,35,37,60,79
+           e.g. host accepted rmk0gf6zjyk3hho_s0 created by the adversary
+  [low   ]   13× I8:matchmaking-blocked:seat-squatting   seeds 11,37,127,133,136,190
+           e.g. with the adversary 0 honest match(es) settled, without it 1
+  [low   ]   10× I8:impersonated-guest-accepted   seeds 132,136,137,190,200,238
+           e.g. host accepted rmk0gedax7dcb98_s0 created by the adversary claiming to be P1
+  [low   ]    4× I6:full-room-reported-gone:findByCode   seeds 170,222,228,598
+           e.g. findByCode(24PP) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    4× I9:I6:full-room-reported-gone:findByCode   seeds 170,222,228,598
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(24PP) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    2× I6:ack-timeout-but-host-had-acked:rough-network   seeds 173,556
+           e.g. joinRoom(rmk0gedsr8q5yk3) gave up 「房主没有回应」 although the host had written guestId=me at 42.9s
+  [low   ]    2× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 192,500
+           e.g. joinRoom(rmk0gedd2q0dt4f) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 192,500
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedd2q0dt4f) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away   seeds 130
+           e.g. joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away   seeds 130
+           e.g. joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away   seeds 130
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away   seeds 130
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:no-seat:rough-network   seeds 232
+           e.g. joinRoom(rmk0gdncpvazv3h) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:taken-but-nobody-else:no-seat:rough-network   seeds 232
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gdncpvazv3h) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:ack-timeout-but-host-had-acked:rough-network   seeds 556
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gd9sr501wfn) gave up 「房主没有回应」 although the host had written guestId=me at 86.0s
+  [low   ]    1× I8:fewer-matches-settled:seat-squatting   seeds 585
+           e.g. with the adversary 1 honest match(es) settled, without it 2
+
+SUMMARY profile=chaos runs=600 seeds=1..600 failing_runs=0 clusters=17 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:40 I3:0 I4:0 I5:0 I6:10 I7:0 I8:28 I9:9 I10:0 | matches=536 settled_pairs=413 virtual=83.8h events=864130 real=73s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

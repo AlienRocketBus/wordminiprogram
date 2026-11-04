@@ -1,10 +1,11 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_auth_errors_v1009.mjs —— 登录错误翻译回归（纯函数，无需网络）
  * 事故：v1004 的翻译正则过宽，把「注册参数错误」也误报成「验证码不对」，
  *       用户明明输对验证码却看到「验证码不对」，导致排查方向被带偏。
  * 合同：① 真正的验证码错误才说验证码；② 未识别错误必须原样透出，不得编造。 */
 import vm from 'node:vm'; import fs from 'node:fs';
 const ctx={window:{HANSEN_CLOUD_CONFIG:{envId:'x'}}}; ctx.window.window=ctx.window; vm.createContext(ctx);
-vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8'), ctx);
+vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'),'utf8'), ctx);
 const A=ctx.window.HansenAuth, f=A.friendly;
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('登录错误翻译 v1009');

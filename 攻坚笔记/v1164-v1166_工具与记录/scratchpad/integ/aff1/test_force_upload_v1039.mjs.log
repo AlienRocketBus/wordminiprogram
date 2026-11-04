@@ -1,0 +1,10 @@
+强制上传必须真写 v1039
+  OK  状态中记录 lastDocId(上次写到哪儿)
+  OK  写入成功后记下目标地址
+  OK  跳过判据 = 非force + 内容未变 + **地址未变**（三者同时满足才跳）
+  OK  旧的"只看内容指纹就跳过"判据已移除
+  OK  写入逻辑已抽为 doUpload(先算地址再决定是否写)
+  OK  force:true 不可能命中跳过分支: if (!opts.force && st.lastHash === h && st.lastDocId === t
+  OK  代码注释记录了此坑的来由
+
+结果: 7 通过 / 0 失败

@@ -1,0 +1,62 @@
+
+房间对战 · 真 SDK 端到端（v1164）
+
+
+── ③ 三人同时抢一个座位（rules · 重复 _id → DATABASE_REQUEST_FAILED / E11000） ──
+  OK  [房主] 手机号验证码登录 uid=1728325321807323665
+  OK  [抢1] 手机号验证码登录 uid=1709596117908056636
+  OK  [抢2] 手机号验证码登录 uid=1022307533012918831
+  OK  [抢3] 手机号验证码登录 uid=1598928069430168888
+  XX  三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+      [房主 屏幕] 你 ⏎ 0 ⏎ 🔥同步赛 ⏎ 0 ⏎ 小蜂抢一 ⏎ 第 2 / 10 词 · ⏱ 15s ⏎ 帮助 ⏎ h _ _ _ ⏎ 对手：正在拼… ⏎ q ⏎ w ⏎ e ⏎ r ⏎ t ⏎ y ⏎ u ⏎ i ⏎ o ⏎ p ⏎ a ⏎ s ⏎ d ⏎ f ⏎ g ⏎ h ⏎ j ⏎ k ⏎ l ⏎ z ⏎ x ⏎ c ⏎ v ⏎ b ⏎ n ⏎ m ⏎ ⌫
+      [抢1 屏幕] 你 ⏎ 0 ⏎ 🔥同步赛 ⏎ 0 ⏎ 小蜂房主 ⏎ 第 2 / 10 词 · ⏱ 13s ⏎ 帮助 ⏎ h _ _ _ ⏎ 对手：正在拼… ⏎ q ⏎ w ⏎ e ⏎ r ⏎ t ⏎ y ⏎ u ⏎ i ⏎ o ⏎ p ⏎ a ⏎ s ⏎ d ⏎ f ⏎ g ⏎ h ⏎ j ⏎ k ⏎ l ⏎ z ⏎ x ⏎ c ⏎ v ⏎ b ⏎ n ⏎ m ⏎ ⌫
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⏎ 这不是你的问题，把这一屏截图发给负责的老师就好。 ⏎ 技术信息：DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate key error collection: ambiti ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 小蜂房主 ⏎ 🔥同步赛工蜂 · 10 个词 · 10秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⏎ 这不是你的问题，把这一屏截图发给负责的老师就好。 ⏎ 技术信息：DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate key error collection: ambiti ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 小蜂房主 ⏎ 🔥同步赛工蜂 · 10 个词 · 10秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      房间 rmw0y4pelnci7iu 建者=小蜂房主 status=playing mode=C seat=0 host=小蜂房主 guest=小蜂抢一 hostScore=null endedBy=- private=false code=-
+      座位 rmw0y4pelnci7iu_s0 建者=小蜂抢一 guest=小蜂抢一 ready=true score=null left=false abandonWin=-
+      回合 rmw0y4pelnci7iu_w0 建者=小蜂抢一 winner=(没人)
+      [最近的云端请求]
+      13:25.811 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      13:25.840 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      13:26.804 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      13:27.725 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:27.739 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:27.751 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:27.780 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:27.783 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:27.787 小蜂房主 POST /web updateDocument hansen_pk_rooms → 200
+      13:28.774 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:28.783 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:28.785 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+  OK  过了几秒也没有第二个人被拉进对战（在对战屏的：抢1）
+  XX  库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 1 个）
+      [房主 屏幕] 你 ⏎ 0 ⏎ 🔥同步赛 ⏎ 0 ⏎ 小蜂抢一 ⏎ 第 2 / 10 词 · ⏱ 11s ⏎ 帮助 ⏎ h _ _ _ ⏎ 对手：正在拼… ⏎ q ⏎ w ⏎ e ⏎ r ⏎ t ⏎ y ⏎ u ⏎ i ⏎ o ⏎ p ⏎ a ⏎ s ⏎ d ⏎ f ⏎ g ⏎ h ⏎ j ⏎ k ⏎ l ⏎ z ⏎ x ⏎ c ⏎ v ⏎ b ⏎ n ⏎ m ⏎ ⌫
+      [抢1 屏幕] 你 ⏎ 0 ⏎ 🔥同步赛 ⏎ 0 ⏎ 小蜂房主 ⏎ 第 2 / 10 词 · ⏱ 9s ⏎ 帮助 ⏎ h _ _ _ ⏎ 对手：正在拼… ⏎ q ⏎ w ⏎ e ⏎ r ⏎ t ⏎ y ⏎ u ⏎ i ⏎ o ⏎ p ⏎ a ⏎ s ⏎ d ⏎ f ⏎ g ⏎ h ⏎ j ⏎ k ⏎ l ⏎ z ⏎ x ⏎ c ⏎ v ⏎ b ⏎ n ⏎ m ⏎ ⌫
+      [抢2 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⏎ 这不是你的问题，把这一屏截图发给负责的老师就好。 ⏎ 技术信息：DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate key error collection: ambiti ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 小蜂房主 ⏎ 🔥同步赛工蜂 · 10 个词 · 10秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [抢3 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 云端设置还差一步：云端拒绝了这次操作（DATABASE_REQUEST_FAILED），请把技术信息发给负责的老师 ⏎ 这不是你的问题，把这一屏截图发给负责的老师就好。 ⏎ 技术信息：DATABASE_REQUEST_FAILED | [FailedOperation] multiple write errors: [{write errors: [{E11000 duplicate key error collection: ambiti ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 小蜂房主 ⏎ 🔥同步赛工蜂 · 10 个词 · 10秒前 ⏎ 进去打 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      房间 rmw0y4pelnci7iu 建者=小蜂房主 status=playing mode=C seat=0 host=小蜂房主 guest=小蜂抢一 hostScore=null endedBy=- private=false code=-
+      座位 rmw0y4pelnci7iu_s0 建者=小蜂抢一 guest=小蜂抢一 ready=true score=null left=false abandonWin=-
+      回合 rmw0y4pelnci7iu_w0 建者=小蜂抢一 winner=(没人)
+      [最近的云端请求]
+      13:31.734 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:31.735 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:31.749 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:31.781 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:31.796 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.156 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.157 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.200 小蜂房主 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.718 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.729 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.763 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      13:32.774 小蜂抢一 POST /web queryDocument hansen_pk_rooms → 200
+      （这一轮重复 _id 被数据库拒绝 2 次）
+  OK  没有人去改别人的文档（尝试 0 次）
+SEEN {"抢2":["云端设置还差一步"],"抢3":["云端设置还差一步"]}
+
+6 通过，2 失败（61 秒）
+失败的：
+  · 三个人同时点「进去打」→ 只有一个进了对战，另外两个都被告知「这间房刚被别人占了」
+  · 库里只有一个座位文档，就是进去的那个人的；房主确认的也是他（座位 1 个）

@@ -1,0 +1,2352 @@
+{
+ "W": 390,
+ "homeLoadMs": 3917,
+ "onboarding": {
+  "ok": true,
+  "hit": "BUTTON#__hsOnbSkip.",
+  "label": "skip",
+  "x": 325,
+  "y": 260
+ },
+ "homeOverflow": {
+  "sw": 390,
+  "iw": 390
+ },
+ "homeHits": [
+  "/index.html 200",
+  "/hansen_sw_upgrade_gate_v944.js 200",
+  "/hansen_tts_volume_v1038.js 200",
+  "/hansen_cred_trap_v1085.js 200",
+  "/hansen_cred_guard_v1092.js 200",
+  "/perf_boost.js 200",
+  "/hansen_backup_bootstrap_v944.js 200",
+  "/hansen_preload.js 200",
+  "/hansen_coin_wallet.js 200",
+  "/copy_protect.js 200",
+  "/click_sound.js 200",
+  "/click_setting.js 200",
+  "/vocab_all.js 200",
+  "/hansen_upgrade.js 200",
+  "/hansen_onboarding.js 200",
+  "/hansen_theme_shop.js 200",
+  "/hansen_season.js 200",
+  "/hansen_cinema_themes.js 200",
+  "/hansen_diamond_shop.js 200",
+  "/hansen_gem_system.js 200",
+  "/hansen_stability.js 200",
+  "/hansen_home_link.js 200",
+  "/hansen_palette.js 200",
+  "/hansen_perf_v944.js 200",
+  "/hansen_silent_watch_v1155.js 200",
+  "/hansen_pk_watchdog_v1155.js 200",
+  "/hansen_boot_check_v1156.js 200",
+  "/hansen_toast_v1156.js 200",
+  "/hansen_ladder_board_v1156.js 200",
+  "/hansen_download_fix_v1140.js 200",
+  "/hansen_version_watch_v1083.js 200",
+  "/hansen_island_prefetch_v1025.js 200",
+  "/hansen_cloud_config_v965.js 200",
+  "/hansen_auth_v1004.js 200",
+  "/hansen_auth_ui_v1004.js 200",
+  "/hansen_signup_gate_v1030.js 200",
+  "/cartoon_font.woff2 200",
+  "/VERSION 200",
+  "/land_map.html 200",
+  "/island_animal.html 200",
+  "/hansen_sw_upgrade_gate_v944.js 200",
+  "/hansen_tts_volume_v1038.js 200",
+  "/hansen_silent_watch_v1155.js 200",
+  "/hansen_pk_watchdog_v1155.js 200",
+  "/icons/map_home.webp 200",
+  "/icons/chest_gold.webp 200",
+  "/icons/task_3d.webp 200",
+  "/hansen_boot_check_v1156.js 200",
+  "/hansen_toast_v1156.js 200",
+  "/hansen_ladder_board_v1156.js 200",
+  "/hansen_cred_trap_v1085.js 200",
+  "/icons/boss_arcade.webp 200",
+  "/icons/explore_3d.webp 200",
+  "/icons/speaker_3d.webp 200",
+  "/hansen_cred_guard_v1092.js 200",
+  "/hansen_backup_bootstrap_v944.js 200",
+  "/word_map.js 200",
+  "/sentence_map.js 200",
+  "/icons/typer_3d.webp 200",
+  "/icons/cloze_3d.webp 200",
+  "/icons/spell_3d.webp 200",
+  "/highlight_helper.js 200",
+  "/hansen_ex_audio.js 200",
+  "/perf_boost.js 200",
+  "/hansen_preload.js 200",
+  "/icons/spelling_bee.webp 200",
+  "/icons/mole_3d.webp 200",
+  "/icons/fish_3d.webp 200",
+  "/copy_protect.js 200",
+  "/click_sound.js 200",
+  "/click_setting.js 200",
+  "/hansen_mute.js 200",
+  "/hansen_early.js 200",
+  "/icons/bubble_3d.webp 200",
+  "/icons/speed_3d.webp 200",
+  "/icons/eagle_3d.webp 200",
+  "/vocab_all.js 200",
+  "/hansen_upgrade.js 200",
+  "/hansen_spell_practice.js 200",
+  "/hansen_review.js 200",
+  "/icons/gacha_joker_v594.webp 200",
+  "/icons/ic_achieve.webp 200",
+  "/icons/ic_stats.webp 200",
+  "/hansen_review_rewards_v963.js 200",
+  "/hansen_mylearning.js 200",
+  "/hansen_boss_anim.js 200",
+  "/hansen_boss_lock.js 200",
+  "/icons/ic_settings.webp 200",
+  "/icons/ic_home.webp 200",
+  "/icons/ic_wrong.webp 200",
+  "/hansen_game_antifreeze.js 200",
+  "/hansen_boss_progress.js 200",
+  "/hansen_cardbook_wallet.js 200",
+  "/hansen_canonical_progress.js 200",
+  "/icons/ic_review.webp 200",
+  "/icons/ic_cards.webp 200",
+  "/hansen_totals_wallet.js 200",
+  "/hansen_cards.js 200",
+  "/hansen_gacha.js 200",
+  "/hansen_land_cards.js 200",
+  "/hansen_cinema_themes.js 200",
+  "/hansen_diamond_shop.js 200",
+  "/hansen_season.js 200",
+  "/hansen_coin_wallet.js 200",
+  "/hansen_theme_lock.js 200",
+  "/hansen_palette.js 200",
+  "/hansen_boss_theme.js 200",
+  "/hansen_perf_v944.js 200",
+  "/hansen_econ_guide.js 200",
+  "/hansen_round_bar.js 200",
+  "/hansen_spellbee_gems.js 200",
+  "/hansen_ach_wallet.js 200",
+  "/hansen_island_upgrade.js 200",
+  "/hansen_gem_system.js 200",
+  "/hansen_gear.js 200",
+  "/hansen_crystal.js 200",
+  "/hansen_freepass.js 200",
+  "/hansen_round_reward.js 200",
+  "/hansen_weapon_fx.js 200",
+  "/hansen_checkin_global.js 200",
+  "/hansen_addiction.js 200",
+  "/hansen_wrong_overview.js 200",
+  "/hansen_backup_v944.js 200",
+  "/hansen_change_notify_v1134.js 200",
+  "/hansen_version_watch_v1083.js 200",
+  "/hansen_cloud_config_v965.js 200",
+  "/hansen_auth_v1004.js 200",
+  "/hansen_auth_ui_v1004.js 200",
+  "/hansen_sb_ladder_v1002.js 200",
+  "/hansen_pk_record_v1103.js 200",
+  "/hansen_ladder_ui_v1108.js 200",
+  "/hansen_sb_profile_v1002.js 200",
+  "/hansen_friends_v1106.js 200",
+  "/hansen_friends_ui_v1107.js 200",
+  "/hansen_sb_pk_v1022.js 200",
+  "/hansen_pk_room_v1065.js 200",
+  "/hansen_pk_room_ui_v1065.js 200",
+  "/hansen_room_warm_v1023.js 200",
+  "/hansen_download_fix_v1140.js 200",
+  "/hansen_cloud_diag_v1027.js 200",
+  "/hansen_signup_gate_v1030.js 200",
+  "/hansen_cloud_restore_v1048.js 200",
+  "/island_animal.html 200",
+  "/hansen_cloud_save_v965.js 200",
+  "/hansen_quest_global.js 200",
+  "/hansen_stability.js 200",
+  "/hansen_home_link.js 200",
+  "/hansen_spellbee.js 200",
+  "/hansen_pet_showcase.js 200",
+  "/hansen_focused_typing_v946.js 200",
+  "/hansen_explore_progress_v945.js 200",
+  "/hansen_avatar.js 200",
+  "/hansen_accessibility.js 200",
+  "/bosses/lv01.webp 200",
+  "/bosses/lv02.webp 200",
+  "/bosses/lv03.webp 200",
+  "/island_food.html 200",
+  "/island_sports.html 200"
+ ],
+ "tap1": {
+  "ok": true,
+  "hit": "DIV#.island-en",
+  "label": "island_food.html",
+  "x": 195,
+  "y": 422
+ },
+ "frameRect": [
+  390,
+  844
+ ],
+ "revealMs": 2443,
+ "welcome": true,
+ "welcomeText": "🎮\n欢迎来到食物大冒险！\n🗺️ 8 大食物岛屿等你探索\n📚 56 个英语单词随你学\n🎮 12 种超酷玩法等你来\n🐉 36 阶进化宠物\n🎁 每日宝箱 + 签到奖励\n🏆 144 个成就等你解锁\n🎒 小冒险家秘籍：\n每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟\n开始冒险！",
+ "modeTiles": [
+  [
+   "探索单词",
+   true
+  ],
+  [
+   "听音辨义",
+   true
+  ],
+  [
+   "记忆翻牌",
+   true
+  ],
+  [
+   "打字大师",
+   true
+  ],
+  [
+   "完形填空",
+   true
+  ],
+  [
+   "字母拼拼乐",
+   true
+  ],
+  [
+   "Spelling Bee",
+   true
+  ],
+  [
+   "拼写大PK",
+   true
+  ],
+  [
+   "打地鼠",
+   true
+  ],
+  [
+   "钓鱼",
+   true
+  ],
+  [
+   "泡泡",
+   true
+  ],
+  [
+   "极速60秒",
+   true
+  ],
+  [
+   "火眼金睛",
+   true
+  ],
+  [
+   "抽卡",
+   true
+  ]
+ ],
+ "tree1": [
+  {
+   "depth": 0,
+   "url": "/index.html",
+   "nScripts": 35,
+   "vis": "top",
+   "intervals": 16,
+   "rej": [],
+   "lsKeysWritten": 31,
+   "lsWrites": 32,
+   "lsTop": [
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_coin_award_pending_v942",
+     1
+    ],
+    [
+     "hansen_wallet_coins",
+     1
+    ],
+    [
+     "hansen_wallet_coins_earned",
+     1
+    ],
+    [
+     "hansen_coin_awards_v942",
+     1
+    ],
+    [
+     "hansen_starter_coins_given",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAnimal",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSports",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandPeople",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandColorNum",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandNature",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandVerbs",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandTransport",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandBody",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandCity",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandClothes",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandHouse",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFamily",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSchool",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandTime",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAdj",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandMisc",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 1,
+   "url": "/island_food.html",
+   "nScripts": 90,
+   "vis": "shown 390x844",
+   "intervals": 29,
+   "rej": [],
+   "lsKeysWritten": 98,
+   "lsWrites": 121,
+   "lsTop": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "wordIslandFood",
+     5
+    ],
+    [
+     "wordIslandFood_bak",
+     4
+    ],
+    [
+     "hsn_progress:食物大冒险",
+     4
+    ],
+    [
+     "hansen_pet_hero_img",
+     3
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_wallet_charxp",
+     1
+    ],
+    [
+     "hansen_charxp_reset_v1",
+     1
+    ],
+    [
+     "hansen_charxp_migrated_v942",
+     1
+    ],
+    [
+     "theme",
+     1
+    ],
+    [
+     "hansen_lastIslandMeta",
+     1
+    ],
+    [
+     "hansen_lastIslandTime",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_boss_theme",
+     1
+    ],
+    [
+     "hansen_wallet_ach",
+     1
+    ],
+    [
+     "hansen_ach_migrated_v1",
+     1
+    ],
+    [
+     "hansen_freepass_until",
+     1
+    ],
+    [
+     "hansen_freepass_ver",
+     1
+    ],
+    [
+     "hansen_card_temp_unlock_until",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 2,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2,
+   "rej": [],
+   "lsKeysWritten": 1,
+   "lsWrites": 1,
+   "lsTop": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 2,
+   "url": "/island_season.html?v=1163",
+   "nScripts": 90,
+   "vis": "display:none 0x0",
+   "intervals": 28,
+   "rej": [],
+   "lsKeysWritten": 49,
+   "lsWrites": 70,
+   "lsTop": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "wordIslandSeason",
+     5
+    ],
+    [
+     "wordIslandSeason_bak",
+     4
+    ],
+    [
+     "hansen_pet_hero_img",
+     3
+    ],
+    [
+     "hsn_progress:星海词汇大冒险",
+     3
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_wallet_charxp",
+     1
+    ],
+    [
+     "hansen_charxp_reset_v1",
+     1
+    ],
+    [
+     "hansen_charxp_migrated_v942",
+     1
+    ],
+    [
+     "theme",
+     1
+    ],
+    [
+     "hansen_lastIslandMeta",
+     1
+    ],
+    [
+     "hansen_lastIslandTime",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_boss_theme",
+     1
+    ],
+    [
+     "hansen_wallet_ach",
+     1
+    ],
+    [
+     "hansen_ach_migrated_v1",
+     1
+    ],
+    [
+     "hansen_card_temp_unlock_until",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAnimal",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSports",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 3,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2,
+   "rej": [],
+   "lsKeysWritten": 1,
+   "lsWrites": 1,
+   "lsTop": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 3,
+   "url": "/island_season.html?v=1163",
+   "nScripts": 90,
+   "vis": "display:none 0x0",
+   "intervals": 28,
+   "rej": [],
+   "lsKeysWritten": 47,
+   "lsWrites": 61,
+   "lsTop": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "hansen_pet_hero_img",
+     3
+    ],
+    [
+     "wordIslandSeason",
+     2
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hsn_progress:星海词汇大冒险",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_wallet_charxp",
+     1
+    ],
+    [
+     "hansen_charxp_reset_v1",
+     1
+    ],
+    [
+     "hansen_charxp_migrated_v942",
+     1
+    ],
+    [
+     "theme",
+     1
+    ],
+    [
+     "hansen_lastIslandMeta",
+     1
+    ],
+    [
+     "hansen_lastIslandTime",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_boss_theme",
+     1
+    ],
+    [
+     "hansen_wallet_ach",
+     1
+    ],
+    [
+     "hansen_ach_migrated_v1",
+     1
+    ],
+    [
+     "hansen_card_temp_unlock_until",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAnimal",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSports",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandPeople",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 4,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2,
+   "rej": [],
+   "lsKeysWritten": 1,
+   "lsWrites": 1,
+   "lsTop": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ]
+  },
+  {
+   "depth": 4,
+   "url": "",
+   "nScripts": 0,
+   "vis": "display:none 0x0",
+   "intervals": 0,
+   "rej": [],
+   "lsKeysWritten": 0,
+   "lsWrites": 0,
+   "lsTop": []
+  },
+  {
+   "depth": 4,
+   "url": "/spelling_bee.html?v=1163&warm=1",
+   "nScripts": 0,
+   "lsKeysWritten": 0,
+   "lsWrites": 0,
+   "lsTop": []
+  }
+ ],
+ "scriptsInBoth": {
+  "count": 32,
+  "bytes": 957126,
+  "list": [
+   "hansen_sw_upgrade_gate_v944.js",
+   "hansen_tts_volume_v1038.js",
+   "hansen_silent_watch_v1155.js",
+   "hansen_pk_watchdog_v1155.js",
+   "hansen_boot_check_v1156.js",
+   "hansen_toast_v1156.js",
+   "hansen_ladder_board_v1156.js",
+   "hansen_cred_trap_v1085.js",
+   "hansen_cred_guard_v1092.js",
+   "hansen_backup_bootstrap_v944.js",
+   "hansen_coin_wallet.js",
+   "hansen_download_fix_v1140.js",
+   "perf_boost.js",
+   "hansen_preload.js",
+   "copy_protect.js",
+   "click_sound.js",
+   "click_setting.js",
+   "vocab_all.js",
+   "hansen_upgrade.js",
+   "hansen_season.js",
+   "hansen_cinema_themes.js",
+   "hansen_diamond_shop.js",
+   "hansen_gem_system.js",
+   "hansen_stability.js",
+   "hansen_home_link.js",
+   "hansen_palette.js",
+   "hansen_version_watch_v1083.js",
+   "hansen_cloud_config_v965.js",
+   "hansen_auth_v1004.js",
+   "hansen_auth_ui_v1004.js",
+   "hansen_signup_gate_v1030.js",
+   "hansen_perf_v944.js"
+  ]
+ },
+ "allScriptExecs": 341,
+ "scriptMultiExec": [
+  "hansen_sw_upgrade_gate_v944.js x7 (3KB)",
+  "hansen_tts_volume_v1038.js x7 (6KB)",
+  "hansen_silent_watch_v1155.js x7 (2KB)",
+  "hansen_pk_watchdog_v1155.js x7 (13KB)",
+  "hansen_boot_check_v1156.js x7 (7KB)",
+  "hansen_toast_v1156.js x7 (9KB)",
+  "hansen_ladder_board_v1156.js x7 (8KB)",
+  "hansen_cred_trap_v1085.js x7 (10KB)",
+  "hansen_cred_guard_v1092.js x7 (9KB)",
+  "hansen_backup_bootstrap_v944.js x7 (11KB)",
+  "hansen_download_fix_v1140.js x7 (6KB)",
+  "hansen_version_watch_v1083.js x7 (10KB)",
+  "hansen_coin_wallet.js x4 (21KB)",
+  "perf_boost.js x4 (16KB)",
+  "hansen_preload.js x4 (31KB)",
+  "copy_protect.js x4 (1KB)",
+  "click_sound.js x4 (45KB)",
+  "click_setting.js x4 (5KB)",
+  "vocab_all.js x4 (302KB)",
+  "hansen_upgrade.js x4 (18KB)",
+  "hansen_season.js x4 (52KB)",
+  "hansen_cinema_themes.js x4 (84KB)",
+  "hansen_diamond_shop.js x4 (63KB)",
+  "hansen_gem_system.js x4 (16KB)",
+  "hansen_stability.js x4 (2KB)",
+  "hansen_home_link.js x4 (9KB)",
+  "hansen_palette.js x4 (77KB)",
+  "hansen_cloud_config_v965.js x4 (1KB)",
+  "hansen_auth_v1004.js x4 (65KB)",
+  "hansen_auth_ui_v1004.js x4 (20KB)",
+  "hansen_signup_gate_v1030.js x4 (9KB)",
+  "hansen_perf_v944.js x4 (5KB)",
+  "sentence_map.js x3 (26KB)",
+  "word_map.js x3 (22KB)",
+  "highlight_helper.js x3 (8KB)",
+  "hansen_ex_audio.js x3 (30KB)",
+  "hansen_mute.js x3 (8KB)",
+  "hansen_early.js x3 (2KB)",
+  "hansen_boss_attack.js x3 (1204KB)",
+  "hansen_spell_practice.js x3 (24KB)"
+ ],
+ "islandHtmlHits": [
+  "/island_food.html 200",
+  "/island_food.html 200"
+ ],
+ "open1Hits": [
+  "/island_food.html 200",
+  "/hansen_sw_upgrade_gate_v944.js 200",
+  "/hansen_tts_volume_v1038.js 200",
+  "/hansen_cred_trap_v1085.js 200",
+  "/hansen_cred_guard_v1092.js 200",
+  "/hansen_backup_bootstrap_v944.js 200",
+  "/sentence_map.js 200",
+  "/word_map.js 200",
+  "/highlight_helper.js 200",
+  "/hansen_ex_audio.js 200",
+  "/perf_boost.js 200",
+  "/hansen_preload.js 200",
+  "/copy_protect.js 200",
+  "/click_sound.js 200",
+  "/click_setting.js 200",
+  "/hansen_mute.js 200",
+  "/hansen_early.js 200",
+  "/hansen_upgrade.js 200",
+  "/hansen_spell_practice.js 200",
+  "/hansen_mylearning.js 200",
+  "/hansen_boss_anim.js 200",
+  "/hansen_boss_lock.js 200",
+  "/hansen_game_antifreeze.js 200",
+  "/hansen_boss_progress.js 200",
+  "/hansen_cardbook_wallet.js 200",
+  "/hansen_canonical_progress.js 200",
+  "/hansen_totals_wallet.js 200",
+  "/hansen_gacha.js 200",
+  "/hansen_land_cards.js 200",
+  "/hansen_coin_wallet.js 200",
+  "/hansen_theme_lock.js 200",
+  "/hansen_palette.js 200",
+  "/hansen_boss_theme.js 200",
+  "/hansen_perf_v944.js 200",
+  "/hansen_econ_guide.js 200",
+  "/hansen_round_bar.js 200",
+  "/hansen_spellbee_gems.js 200",
+  "/hansen_ach_wallet.js 200",
+  "/hansen_gear.js 200",
+  "/hansen_freepass.js 200",
+  "/hansen_round_reward.js 200",
+  "/hansen_weapon_fx.js 200",
+  "/hansen_checkin_global.js 200",
+  "/hansen_gem_system.js 200",
+  "/hansen_addiction.js 200",
+  "/hansen_wrong_overview.js 200",
+  "/hansen_backup_v944.js 200",
+  "/hansen_change_notify_v1134.js 200",
+  "/hansen_quest_global.js 200",
+  "/hansen_stability.js 200",
+  "/hansen_home_link.js 200",
+  "/hansen_spellbee.js 200",
+  "/hansen_avatar.js 200",
+  "/hansen_accessibility.js 200",
+  "/island_job.html 200",
+  "/hansen_silent_watch_v1155.js 200",
+  "/hansen_pk_watchdog_v1155.js 200",
+  "/hansen_boot_check_v1156.js 200",
+  "/hansen_toast_v1156.js 200",
+  "/hansen_ladder_board_v1156.js 200",
+  "/icons/speaker_3d.webp 200",
+  "/icons/typer_3d.webp 200",
+  "/icons/task_3d.webp 200",
+  "/icons/spelling_bee.webp 200",
+  "/icons/cloze_3d.webp 200",
+  "/icons/spell_3d.webp 200",
+  "/icons/fish_3d.webp 200",
+  "/baloo2.woff2 200",
+  "/icons/chest_gold.webp 200",
+  "/icons/explore_3d.webp 200",
+  "/icons/mole_3d.webp 200",
+  "/icons/speed_3d.webp 200",
+  "/icons/bubble_3d.webp 200",
+  "/icons/boss_arcade.webp 200",
+  "/icons/ic_cards.webp 200",
+  "/icons/map_home.webp 200",
+  "/icons/ic_wrong.webp 200",
+  "/icons/ic_review.webp 200",
+  "/icons/ic_home.webp 200",
+  "/avatars/01.webp 200",
+  "/icons/eagle_3d.webp 200",
+  "/vocab_all.js 200",
+  "/hansen_review.js 200",
+  "/hansen_review_rewards_v963.js 200",
+  "/hansen_cards.js 200",
+  "/hansen_cinema_themes.js 200",
+  "/hansen_diamond_shop.js 200",
+  "/hansen_season.js 200",
+  "/island_color.html 200",
+  "/hansen_island_upgrade.js 200",
+  "/hansen_crystal.js 200",
+  "/hansen_version_watch_v1083.js 200",
+  "/hansen_cloud_config_v965.js 200",
+  "/hansen_auth_v1004.js 200",
+  "/hansen_auth_ui_v1004.js 200",
+  "/hansen_sb_ladder_v1002.js 200",
+  "/hansen_pk_record_v1103.js 200",
+  "/hansen_ladder_ui_v1108.js 200",
+  "/hansen_sb_profile_v1002.js 200",
+  "/hansen_friends_v1106.js 200",
+  "/hansen_friends_ui_v1107.js 200",
+  "/hansen_sb_pk_v1022.js 200",
+  "/hansen_pk_room_v1065.js 200",
+  "/hansen_pk_room_ui_v1065.js 200",
+  "/hansen_room_warm_v1023.js 200",
+  "/hansen_download_fix_v1140.js 200",
+  "/hansen_cloud_diag_v1027.js 200",
+  "/hansen_signup_gate_v1030.js 200",
+  "/hansen_cloud_restore_v1048.js 200",
+  "/hansen_cloud_save_v965.js 200",
+  "/hansen_pet_showcase.js 200",
+  "/hansen_focused_typing_v946.js 200",
+  "/hansen_explore_progress_v945.js 200",
+  "/icons/gacha_joker_v594.webp 200",
+  "/icons/ic_achieve.webp 200",
+  "/icons/ic_stats.webp 200",
+  "/icons/ic_settings.webp 200",
+  "/ui/brain_rest.webp 200",
+  "/pets/pet_00.webp 200",
+  "/hansen_boss_attack.js 200",
+  "/icons/ic_diamond.webp 200",
+  "/island_nature.html 200",
+  "/icons/ic_study.webp 200",
+  "/icons/ic_equip.webp 200",
+  "/bosses/mechfist_real.webp 200",
+  "/bosses/sunball_real.webp 200",
+  "/bosses/chaoswave_real.webp 200",
+  "/bosses/alienbeam_real.webp 200",
+  "/bosses/vfang_tl.webp 200",
+  "/bosses/vfang_tr.webp 200",
+  "/bosses/vfang_bl.webp 200",
+  "/bosses/shuriken.webp 200",
+  "/bosses/vfang_br.webp 200",
+  "/bosses/hammer_real.webp 200",
+  "/bosses/rexclaw_l.webp 200",
+  "/bosses/rexclaw_r.webp 200",
+  "/bosses/rexjaw_top.webp 200",
+  "/bosses/rexjaw_bot.webp 200",
+  "/bosses/zb_talisman.webp 200",
+  "/bosses/zb_fists_all.webp 200",
+  "/bosses/zb_fist1.webp 200",
+  "/bosses/zb_fist2.webp 200",
+  "/bosses/zb_fist3.webp 200",
+  "/bosses/zf_fist_l.webp 200",
+  "/bosses/zf_fist_r.webp 200",
+  "/bosses/zf_fists_all.webp 200",
+  "/bosses/tl_bolt.webp 200",
+  "/bosses/dragonlance.webp 200",
+  "/bosses/genielamp.webp 200",
+  "/bossfx/renyi_spear.webp 200",
+  "/bossfx/hand1.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/bossfx/hand3.webp 200",
+  "/bossfx/hand4.webp 200",
+  "/bossfx/hand5.webp 200",
+  "/cartoon_font.woff2 304",
+  "/bosses/lv01.webp 200",
+  "/bosses/lv02.webp 200",
+  "/bosses/lv03.webp 200",
+  "/bosses/lv04.webp 200",
+  "/VERSION 200",
+  "/bosses/lv05.webp 200",
+  "/land_map.html 200",
+  "/words/apple.mp3 206",
+  "/bosses/lv06.webp 200",
+  "/words/banana.mp3 206",
+  "/words/orange.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/sentences/sentence_0322.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/bosses/lv07.webp 200",
+  "/words/grape.mp3 206",
+  "/words/strawberry.mp3 206",
+  "/words/watermelon.mp3 206",
+  "/words/pear.mp3 206",
+  "/words/peach.mp3 206",
+  "/words/lemon.mp3 206",
+  "/bosses/lv08.webp 200",
+  "/words/mango.mp3 206",
+  "/words/pineapple.mp3 206",
+  "/words/vegetable.mp3 206",
+  "/sentences/sentence_0323.mp3 206",
+  "/words/tomato.mp3 206",
+  "/words/potato.mp3 206",
+  "/words/carrot.mp3 206",
+  "/bosses/lv09.webp 200",
+  "/hansen_boss_attack.js 200",
+  "/bossfx/renyi_spear.webp 200",
+  "/bossfx/hand1.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/bossfx/hand3.webp 200",
+  "/island_season.html 200",
+  "/bossfx/hand4.webp 200",
+  "/bossfx/hand5.webp 200",
+  "/sentences/sentence_0324.mp3 206",
+  "/words/onion.mp3 206",
+  "/words/cucumber.mp3 206",
+  "/words/cabbage.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/sentence_map.js 304",
+  "/word_map.js 304",
+  "/highlight_helper.js 304",
+  "/hansen_ex_audio.js 304",
+  "/hansen_preload.js 304",
+  "/perf_boost.js 304",
+  "/copy_protect.js 304",
+  "/click_sound.js 304",
+  "/click_setting.js 304",
+  "/hansen_early.js 304",
+  "/hansen_upgrade.js 304",
+  "/hansen_mute.js 304",
+  "/hansen_spell_practice.js 304",
+  "/hansen_mylearning.js 304",
+  "/hansen_boss_anim.js 304",
+  "/hansen_boss_lock.js 304",
+  "/hansen_game_antifreeze.js 304",
+  "/hansen_boss_progress.js 304",
+  "/hansen_cardbook_wallet.js 304",
+  "/hansen_canonical_progress.js 304",
+  "/hansen_totals_wallet.js 304",
+  "/hansen_gacha.js 304",
+  "/hansen_land_cards.js 304",
+  "/hansen_coin_wallet.js 304",
+  "/hansen_theme_lock.js 304",
+  "/hansen_palette.js 304",
+  "/hansen_boss_theme.js 304",
+  "/hansen_perf_v944.js 304",
+  "/hansen_econ_guide.js 304",
+  "/hansen_round_bar.js 304",
+  "/hansen_spellbee_gems.js 304",
+  "/hansen_ach_wallet.js 304",
+  "/hansen_gem_system.js 304",
+  "/hansen_gear.js 304",
+  "/hansen_freepass.js 304",
+  "/hansen_round_reward.js 304",
+  "/hansen_weapon_fx.js 304",
+  "/hansen_checkin_global.js 304",
+  "/hansen_addiction.js 304",
+  "/hansen_wrong_overview.js 304",
+  "/hansen_backup_v944.js 304",
+  "/hansen_change_notify_v1134.js 304",
+  "/hansen_quest_global.js 304",
+  "/hansen_stability.js 304",
+  "/hansen_home_link.js 304",
+  "/VERSION 200",
+  "/hansen_spellbee.js 304",
+  "/hansen_avatar.js 304",
+  "/hansen_accessibility.js 304",
+  "/bosses/lv10.webp 200",
+  "/island_land1.html 200",
+  "/words/corn.mp3 206",
+  "/words/food.mp3 206",
+  "/words/rice.mp3 206",
+  "/sentences/sentence_0325.mp3 206",
+  "/icons/spelling_bee.webp 304",
+  "/icons/speaker_3d.webp 304",
+  "/icons/chest_gold.webp 304",
+  "/icons/typer_3d.webp 304",
+  "/icons/mole_3d.webp 304",
+  "/icons/explore_3d.webp 304",
+  "/icons/task_3d.webp 304",
+  "/icons/cloze_3d.webp 304",
+  "/icons/spell_3d.webp 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/icons/fish_3d.webp 304",
+  "/icons/bubble_3d.webp 304",
+  "/icons/speed_3d.webp 304",
+  "/icons/eagle_3d.webp 304",
+  "/vocab_all.js 304",
+  "/hansen_review.js 304",
+  "/hansen_review_rewards_v963.js 304",
+  "/hansen_cards.js 304",
+  "/hansen_cinema_themes.js 304",
+  "/hansen_diamond_shop.js 304",
+  "/hansen_season.js 304",
+  "/hansen_island_upgrade.js 304",
+  "/hansen_crystal.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_cloud_config_v965.js 304",
+  "/hansen_auth_v1004.js 304",
+  "/hansen_auth_ui_v1004.js 304",
+  "/hansen_sb_ladder_v1002.js 304",
+  "/hansen_pk_record_v1103.js 304",
+  "/hansen_ladder_ui_v1108.js 304",
+  "/hansen_sb_profile_v1002.js 304",
+  "/hansen_friends_v1106.js 304",
+  "/hansen_friends_ui_v1107.js 304",
+  "/hansen_sb_pk_v1022.js 304",
+  "/hansen_pk_room_v1065.js 304",
+  "/hansen_pk_room_ui_v1065.js 304",
+  "/hansen_room_warm_v1023.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_cloud_diag_v1027.js 304",
+  "/hansen_signup_gate_v1030.js 304",
+  "/hansen_cloud_restore_v1048.js 304",
+  "/hansen_cloud_save_v965.js 304",
+  "/hansen_pet_showcase.js 304",
+  "/hansen_focused_typing_v946.js 304",
+  "/hansen_explore_progress_v945.js 304",
+  "/icons/map_home.webp 304",
+  "/pets/pet_00.webp 304",
+  "/icons/gacha_joker_v594.webp 304",
+  "/icons/ic_achieve.webp 304",
+  "/icons/ic_stats.webp 304",
+  "/icons/ic_settings.webp 304",
+  "/icons/ic_home.webp 304",
+  "/icons/ic_wrong.webp 304",
+  "/icons/ic_review.webp 304",
+  "/icons/ic_cards.webp 304",
+  "/bosses/saelya.webp 200",
+  "/avatars/01.webp 304",
+  "/ui/brain_rest.webp 304",
+  "/bosses/lv11.webp 200",
+  "/words/noodles.mp3 206",
+  "/words/bread.mp3 206",
+  "/words/pizza.mp3 206",
+  "/hansen_boss_attack.js 200",
+  "/words/hamburger.mp3 206",
+  "/icons/ic_diamond.webp 304",
+  "/boss_hall.html 200",
+  "/sentences/sentence_0326.mp3 206",
+  "/icons/ic_equip.webp 304",
+  "/icons/ic_study.webp 304",
+  "/bosses/mechfist_real.webp 304",
+  "/bosses/sunball_real.webp 304",
+  "/bosses/lv12.webp 200",
+  "/bosses/chaoswave_real.webp 304",
+  "/bosses/alienbeam_real.webp 304",
+  "/bosses/vfang_tl.webp 304",
+  "/bosses/vfang_tr.webp 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_land_scene_manifest_v972.js 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/bosses/vfang_bl.webp 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_land_cards.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/words/sandwich.mp3 206",
+  "/words/egg.mp3 206",
+  "/words/meat.mp3 206",
+  "/bosses/vfang_br.webp 304",
+  "/bosses/shuriken.webp 304",
+  "/bosses/hammer_real.webp 304",
+  "/bosses/rexclaw_r.webp 304",
+  "/bosses/rexjaw_top.webp 304",
+  "/bosses/rexclaw_l.webp 304",
+  "/bosses/rexjaw_bot.webp 304",
+  "/bosses/zb_talisman.webp 304",
+  "/bosses/zb_fists_all.webp 304",
+  "/bosses/zb_fist1.webp 304",
+  "/bosses/zb_fist2.webp 304",
+  "/bosses/zb_fist3.webp 304",
+  "/bosses/zf_fist_l.webp 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/bosses/zf_fist_r.webp 304",
+  "/bosses/zf_fists_all.webp 304",
+  "/bosses/tl_bolt.webp 304",
+  "/bossfx/renyi_spear.webp 200",
+  "/bosses/dragonlance.webp 304",
+  "/bosses/genielamp.webp 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/bossfx/hand1.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/bossfx/hand3.webp 200",
+  "/bossfx/hand4.webp 200",
+  "/bossfx/hand5.webp 200",
+  "/hansen_version_watch_v1083.js 304",
+  "/bosses_bg/level1.webp 200",
+  "/bosses/lv02.webp 304",
+  "/bosses_bg/level20.webp 200",
+  "/bosses/lv13.webp 200",
+  "/bosses/lv20.webp 200",
+  "/bosses_bg/level2.webp 200",
+  "/bosses/lv01.webp 304",
+  "/sentences/sentence_0327.mp3 206",
+  "/words/beef.mp3 206",
+  "/words/pork.mp3 206",
+  "/words/chicken.mp3 206",
+  "/words/fish.mp3 206",
+  "/words/water.mp3 206",
+  "/words/milk.mp3 206",
+  "/bosses/lv14.webp 200",
+  "/words/juice.mp3 206",
+  "/season_showcase.html 200",
+  "/sentences/sentence_0328.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/bosses/lv15.webp 200",
+  "/words/tea.mp3 206",
+  "/words/coffee.mp3 206",
+  "/bosses/lv01.webp 304",
+  "/words/cake.mp3 206",
+  "/sentences/sentence_0329.mp3 206",
+  "/bosses/lv16.webp 200",
+  "/bosses/lv02.webp 200",
+  "/words/cookie.mp3 206",
+  "/words/candy.mp3 206",
+  "/words/chocolate.mp3 206",
+  "/words/ice_cream.mp3 206",
+  "/words/butter.mp3 206",
+  "/words/cheese.mp3 206",
+  "/bosses/lv17.webp 200",
+  "/bosses/lv03.webp 200",
+  "/sentences/sentence_0330.mp3 206",
+  "/words/yogurt.mp3 206",
+  "/words/soup.mp3 206",
+  "/words/salad.mp3 206",
+  "/bosses/lv18.webp 200",
+  "/bosses/lv04.webp 200",
+  "/spelling_bee.html 200",
+  "/words/salt.mp3 206",
+  "/words/sugar.mp3 206",
+  "/words/breakfast.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/word_map.js 304",
+  "/hansen_quest_global.js 304",
+  "/click_sound.js 304",
+  "/bosses/lv19.webp 200",
+  "/bosses/lv05.webp 200",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/pets/pet_00.webp 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/sentences/sentence_0331.mp3 206",
+  "/words/nervous_season.mp3 206",
+  "/words/lunch.mp3 206",
+  "/words/anxious_season.mp3 206",
+  "/words/dinner.mp3 206",
+  "/words/meal.mp3 206",
+  "/words/curious_season.mp3 206",
+  "/bosses/lv20.webp 200",
+  "/bosses/lv06.webp 200",
+  "/words/proud_season.mp3 206",
+  "/words/snack.mp3 206",
+  "/words/restaurant.mp3 206",
+  "/words/grateful_season.mp3 206",
+  "/words/menu.mp3 206",
+  "/words/disappointed_season.mp3 206",
+  "/VERSION 200",
+  "/land_map.html 200",
+  "/bosses/lv07.webp 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/sentences/sentence_0332.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/words/embarrassed_season.mp3 206",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/bosses/lv08.webp 200",
+  "/words/frightened_season.mp3 206",
+  "/words/satisfied_season.mp3 206",
+  "/words/confused_season.mp3 206",
+  "/words/lonely_season.mp3 206",
+  "/words/jealous_season.mp3 206",
+  "/bosses/lv02.webp 304",
+  "/words/relaxed_season.mp3 206",
+  "/words/ashamed_season.mp3 206",
+  "/bosses/lv09.webp 200",
+  "/sentences/sentence_0333.mp3 206",
+  "/words/eager_season.mp3 206",
+  "/bosses/lv03.webp 304",
+  "/hansen_boss_attack.js 200",
+  "/bossfx/renyi_spear.webp 200",
+  "/bossfx/hand1.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/bossfx/hand3.webp 200",
+  "/bossfx/hand4.webp 200",
+  "/island_season.html 200",
+  "/bosses/lv10.webp 200",
+  "/bossfx/hand5.webp 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/sentence_map.js 304",
+  "/word_map.js 304",
+  "/highlight_helper.js 304",
+  "/hansen_ex_audio.js 304",
+  "/perf_boost.js 304",
+  "/hansen_preload.js 304",
+  "/copy_protect.js 304",
+  "/click_sound.js 304",
+  "/click_setting.js 304",
+  "/hansen_mute.js 304",
+  "/hansen_early.js 304",
+  "/hansen_upgrade.js 304",
+  "/hansen_spell_practice.js 304",
+  "/hansen_mylearning.js 304",
+  "/hansen_boss_anim.js 304",
+  "/hansen_boss_lock.js 304",
+  "/hansen_game_antifreeze.js 304",
+  "/hansen_boss_progress.js 304",
+  "/hansen_cardbook_wallet.js 304",
+  "/hansen_canonical_progress.js 304",
+  "/hansen_totals_wallet.js 304",
+  "/hansen_gacha.js 304",
+  "/hansen_land_cards.js 304",
+  "/hansen_coin_wallet.js 304",
+  "/hansen_theme_lock.js 304",
+  "/hansen_palette.js 304",
+  "/hansen_boss_theme.js 304",
+  "/hansen_perf_v944.js 304",
+  "/hansen_econ_guide.js 304",
+  "/hansen_round_bar.js 304",
+  "/hansen_spellbee_gems.js 304",
+  "/hansen_ach_wallet.js 304",
+  "/hansen_gem_system.js 304",
+  "/hansen_gear.js 304",
+  "/hansen_freepass.js 304",
+  "/hansen_round_reward.js 304",
+  "/hansen_weapon_fx.js 304",
+  "/hansen_checkin_global.js 304",
+  "/hansen_addiction.js 304",
+  "/hansen_wrong_overview.js 304",
+  "/hansen_backup_v944.js 304",
+  "/hansen_change_notify_v1134.js 304",
+  "/hansen_quest_global.js 304",
+  "/hansen_stability.js 304",
+  "/hansen_home_link.js 304",
+  "/hansen_spellbee.js 304",
+  "/hansen_avatar.js 304",
+  "/hansen_accessibility.js 304",
+  "/words/miserable_season.mp3 206",
+  "/words/delighted_season.mp3 206",
+  "/words/furious_season.mp3 206",
+  "/bosses/lv11.webp 200",
+  "/sentences/sentence_0334.mp3 206",
+  "/icons/spelling_bee.webp 304",
+  "/icons/speaker_3d.webp 304",
+  "/icons/chest_gold.webp 304",
+  "/icons/typer_3d.webp 304",
+  "/icons/mole_3d.webp 304",
+  "/icons/explore_3d.webp 304",
+  "/icons/task_3d.webp 304",
+  "/icons/cloze_3d.webp 304",
+  "/icons/spell_3d.webp 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/icons/fish_3d.webp 304",
+  "/icons/bubble_3d.webp 304",
+  "/icons/speed_3d.webp 304",
+  "/icons/eagle_3d.webp 304",
+  "/vocab_all.js 304",
+  "/hansen_review.js 304",
+  "/hansen_cards.js 304",
+  "/hansen_cinema_themes.js 304",
+  "/hansen_review_rewards_v963.js 304",
+  "/hansen_diamond_shop.js 304",
+  "/hansen_season.js 304",
+  "/hansen_island_upgrade.js 304",
+  "/hansen_crystal.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_cloud_config_v965.js 304",
+  "/hansen_auth_v1004.js 304",
+  "/hansen_auth_ui_v1004.js 304",
+  "/hansen_sb_ladder_v1002.js 304",
+  "/hansen_pk_record_v1103.js 304",
+  "/hansen_ladder_ui_v1108.js 304",
+  "/hansen_sb_profile_v1002.js 304",
+  "/hansen_friends_v1106.js 304",
+  "/hansen_friends_ui_v1107.js 304",
+  "/hansen_sb_pk_v1022.js 304",
+  "/hansen_pk_room_v1065.js 304",
+  "/hansen_pk_room_ui_v1065.js 304",
+  "/hansen_room_warm_v1023.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_cloud_diag_v1027.js 304",
+  "/hansen_signup_gate_v1030.js 304",
+  "/hansen_cloud_restore_v1048.js 304",
+  "/hansen_cloud_save_v965.js 304",
+  "/hansen_pet_showcase.js 304",
+  "/hansen_focused_typing_v946.js 304",
+  "/VERSION 200",
+  "/island_land1.html 200",
+  "/bosses/lv12.webp 200",
+  "/VERSION 200",
+  "/words/polite_season.mp3 206",
+  "/words/amazed_season.mp3 206",
+  "/words/comfort_season.mp3 206",
+  "/hansen_explore_progress_v945.js 304",
+  "/icons/map_home.webp 304",
+  "/pets/pet_00.webp 304",
+  "/icons/gacha_joker_v594.webp 304",
+  "/icons/ic_achieve.webp 304",
+  "/icons/ic_stats.webp 304",
+  "/icons/ic_settings.webp 304",
+  "/icons/ic_home.webp 304",
+  "/icons/ic_wrong.webp 304",
+  "/icons/ic_review.webp 304",
+  "/icons/ic_cards.webp 304",
+  "/avatars/01.webp 304",
+  "/ui/brain_rest.webp 304",
+  "/bosses/lv13.webp 200",
+  "/sentences/sentence_0335.mp3 206",
+  "/words/humble_season.mp3 206",
+  "/words/stubborn_season.mp3 206",
+  "/words/reliable_season.mp3 206",
+  "/hansen_boss_attack.js 200",
+  "/bosses/saelya.webp 304",
+  "/icons/ic_diamond.webp 304",
+  "/boss_hall.html 200",
+  "/icons/ic_equip.webp 304",
+  "/icons/ic_study.webp 304",
+  "/bosses/mechfist_real.webp 304",
+  "/bosses/sunball_real.webp 304",
+  "/bosses/chaoswave_real.webp 304",
+  "/bosses/vfang_tl.webp 304",
+  "/bosses/alienbeam_real.webp 304",
+  "/bosses/vfang_tr.webp 304",
+  "/words/cautious_season.mp3 206",
+  "/words/optimistic_season.mp3 206",
+  "/words/sincere_season.mp3 206",
+  "/bosses/vfang_bl.webp 304",
+  "/bosses/vfang_br.webp 304",
+  "/bosses/shuriken.webp 304",
+  "/bosses/hammer_real.webp 304",
+  "/bosses/rexclaw_l.webp 304",
+  "/bosses/rexclaw_r.webp 304",
+  "/hansen_land_scene_manifest_v972.js 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_land_cards.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/bosses/lv14.webp 200",
+  "/bosses/rexjaw_top.webp 304",
+  "/bosses/rexjaw_bot.webp 304",
+  "/bosses/zb_talisman.webp 304",
+  "/bosses/zb_fists_all.webp 304",
+  "/bosses/zb_fist1.webp 304",
+  "/bosses/zb_fist2.webp 304",
+  "/sentences/sentence_0336.mp3 206",
+  "/words/loyal_season.mp3 206",
+  "/words/strict_season.mp3 206",
+  "/words/selfish_season.mp3 206",
+  "/bosses/zf_fist_l.webp 304",
+  "/bosses/zb_fist3.webp 304",
+  "/bosses/zf_fist_r.webp 304",
+  "/bosses/zf_fists_all.webp 304",
+  "/bosses/tl_bolt.webp 304",
+  "/bosses/dragonlance.webp 304",
+  "/bossfx/renyi_spear.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/hansen_silent_watch_v1155.js 304",
+  "/bossfx/hand1.webp 200",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/bosses/genielamp.webp 304",
+  "/bossfx/hand3.webp 200",
+  "/bossfx/hand4.webp 200",
+  "/bossfx/hand5.webp 200",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/bosses/lv20.webp 304",
+  "/bosses/lv02.webp 304",
+  "/bosses/lv15.webp 304",
+  "/bosses_bg/level1.webp 200",
+  "/bosses_bg/level20.webp 200",
+  "/bosses_bg/level2.webp 200",
+  "/bosses/lv01.webp 304",
+  "/words/mature_season.mp3 206",
+  "/words/energetic_season.mp3 206",
+  "/words/modest_season.mp3 206",
+  "/bosses/lv16.webp 304",
+  "/sentences/sentence_0337.mp3 206",
+  "/words/cheerful_season.mp3 206",
+  "/words/hardworking_season.mp3 206",
+  "/words/sensitive_season.mp3 206",
+  "/season_showcase.html 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_perf_v944.js 304",
+  "/words/determined_season.mp3 206",
+  "/words/outgoing_season.mp3 206",
+  "/words/talkative_season.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/bosses/lv17.webp 304",
+  "/sentences/sentence_0338.mp3 206",
+  "/words/calm_season.mp3 206",
+  "/words/important_season.mp3 206",
+  "/words/possible_season.mp3 206",
+  "/bosses/lv18.webp 304",
+  "/bosses/lv01.webp 304",
+  "/words/useful_season.mp3 206",
+  "/words/valuable_season.mp3 206",
+  "/words/similar_season.mp3 206",
+  "/land_map.html 200",
+  "/words/modern_season.mp3 206",
+  "/words/ancient_season.mp3 206",
+  "/words/popular_season.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/bosses/lv19.webp 304",
+  "/bosses/lv02.webp 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/sentences/sentence_0339.mp3 206",
+  "/words/ordinary_season.mp3 206",
+  "/words/famous_season.mp3 206",
+  "/words/comfortable_season.mp3 206",
+  "/bosses/lv03.webp 304",
+  "/bosses/lv20.webp 304",
+  "/words/convenient_season.mp3 206",
+  "/words/complex_season.mp3 206",
+  "/words/typical_season.mp3 206",
+  "/words/flexible_season.mp3 206",
+  "/words/accurate_season.mp3 206",
+  "/words/essential_season.mp3 206",
+  "/bosses/lv04.webp 304",
+  "/sentences/sentence_0340.mp3 206",
+  "/spelling_bee.html 200",
+  "/bosses/lv05.webp 200",
+  "/words/available_season.mp3 206",
+  "/words/suitable_season.mp3 206",
+  "/words/practical_season.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/word_map.js 304",
+  "/hansen_quest_global.js 304",
+  "/click_sound.js 304",
+  "/sentences/sentence_0341.mp3 206",
+  "/bosses/lv06.webp 200",
+  "/words/suddenly_season.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/words/immediately_season.mp3 206",
+  "/words/recently_season.mp3 206",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/hansen_boss_attack.js 200",
+  "/bossfx/renyi_spear.webp 200",
+  "/bossfx/hand1.webp 200",
+  "/bossfx/hand2.webp 200",
+  "/bossfx/hand3.webp 200",
+  "/bossfx/hand4.webp 200",
+  "/pets/pet_00.webp 304",
+  "/bossfx/hand5.webp 200",
+  "/words/nervous_season.mp3 206",
+  "/words/anxious_season.mp3 206",
+  "/words/finally_season.mp3 206",
+  "/words/occasionally_season.mp3 206",
+  "/words/eventually_season.mp3 206",
+  "/bosses/lv07.webp 200",
+  "/words/curious_season.mp3 206",
+  "/sentences/sentence_0342.mp3 206",
+  "/words/proud_season.mp3 206",
+  "/words/meanwhile_season.mp3 206",
+  "/words/grateful_season.mp3 206",
+  "/words/nowadays_season.mp3 206",
+  "/words/disappointed_season.mp3 206",
+  "/words/rarely_season.mp3 206",
+  "/bosses/lv08.webp 200",
+  "/words/embarrassed_season.mp3 206",
+  "/sentences/sentence_0343.mp3 206",
+  "/words/constantly_season.mp3 206",
+  "/words/frightened_season.mp3 206",
+  "/words/temporary_season.mp3 206",
+  "/words/permanent_season.mp3 206",
+  "/words/satisfied_season.mp3 206",
+  "/words/confused_season.mp3 206",
+  "/bosses/lv09.webp 200",
+  "/bosses/lv10.webp 200",
+  "/words/instantly_season.mp3 206",
+  "/words/lonely_season.mp3 206",
+  "/words/currently_season.mp3 206",
+  "/words/jealous_season.mp3 206",
+  "/words/relaxed_season.mp3 206",
+  "/words/previously_season.mp3 206",
+  "/sentences/sentence_0344.mp3 206",
+  "/words/seldom_season.mp3 206",
+  "/words/ashamed_season.mp3 206",
+  "/words/regularly_season.mp3 206",
+  "/words/decade_season.mp3 206",
+  "/words/eager_season.mp3 206",
+  "/words/miserable_season.mp3 206",
+  "/bosses/lv11.webp 200",
+  "/words/period_season.mp3 206",
+  "/words/delighted_season.mp3 206",
+  "/words/furious_season.mp3 206",
+  "/words/schedule_season.mp3 206",
+  "/words/explain_season.mp3 206",
+  "/words/amazed_season.mp3 206",
+  "/boss_hall.html 200",
+  "/sentences/sentence_0345.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/words/comfort_season.mp3 206",
+  "/words/describe_season.mp3 206",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_land_scene_manifest_v972.js 200",
+  "/hansen_land_cards.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/bosses/lv12.webp 200",
+  "/words/suggest_season.mp3 206",
+  "/words/polite_season.mp3 206",
+  "/words/humble_season.mp3 206",
+  "/words/persuade_season.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/bosses_bg/level1.webp 200",
+  "/bosses/lv20.webp 200",
+  "/bosses_bg/level20.webp 200",
+  "/bosses_bg/level2.webp 200",
+  "/bosses/lv02.webp 200",
+  "/bosses/lv13.webp 200",
+  "/words/argue_season.mp3 206",
+  "/sentences/sentence_0346.mp3 206",
+  "/words/stubborn_season.mp3 206",
+  "/words/discuss_season.mp3 206",
+  "/words/reliable_season.mp3 206",
+  "/words/compare_season.mp3 206",
+  "/words/cautious_season.mp3 206",
+  "/bosses/lv14.webp 200",
+  "/words/imagine_season.mp3 206",
+  "/words/optimistic_season.mp3 206",
+  "/words/predict_season.mp3 206",
+  "/words/sincere_season.mp3 206",
+  "/words/realize_season.mp3 206",
+  "/VERSION 200",
+  "/VERSION 200",
+  "/words/loyal_season.mp3 206",
+  "/island_land1.html 200",
+  "/words/recognize_season.mp3 206",
+  "/bosses/lv15.webp 200",
+  "/words/strict_season.mp3 206",
+  "/words/consider_season.mp3 206",
+  "/sentences/sentence_0347.mp3 206",
+  "/words/selfish_season.mp3 206",
+  "/words/express_season.mp3 206",
+  "/words/mature_season.mp3 206",
+  "/words/mention_season.mp3 206",
+  "/bosses/lv16.webp 200",
+  "/words/energetic_season.mp3 206",
+  "/words/doubt_season.mp3 206",
+  "/words/admit_season.mp3 206",
+  "/words/modest_season.mp3 206",
+  "/words/indicate_season.mp3 206",
+  "/words/cheerful_season.mp3 206",
+  "/words/hardworking_season.mp3 206",
+  "/bosses/lv17.webp 200",
+  "/words/comment_season.mp3 206",
+  "/words/sensitive_season.mp3 206",
+  "/words/debate_season.mp3 206",
+  "/words/assume_season.mp3 206",
+  "/words/determined_season.mp3 206",
+  "/words/outgoing_season.mp3 206",
+  "/season_showcase.html 200",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/sentences/sentence_0348.mp3 206",
+  "/bosses/lv18.webp 200",
+  "/words/attempt_season.mp3 206",
+  "/words/talkative_season.mp3 206",
+  "/words/avoid_season.mp3 206",
+  "/words/calm_season.mp3 206",
+  "/words/prevent_season.mp3 206",
+  "/words/important_season.mp3 206",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/words/provide_season.mp3 206",
+  "/words/produce_season.mp3 206",
+  "/words/possible_season.mp3 206",
+  "/words/useful_season.mp3 206",
+  "/words/valuable_season.mp3 206",
+  "/words/reduce_season.mp3 206",
+  "/bosses/lv19.webp 200",
+  "/words/increase_season.mp3 206",
+  "/words/similar_season.mp3 206",
+  "/words/modern_season.mp3 206",
+  "/words/ancient_season.mp3 206",
+  "/words/develop_season.mp3 206",
+  "/words/invent_season.mp3 206",
+  "/words/destroy_season.mp3 206",
+  "/words/popular_season.mp3 206",
+  "/words/ordinary_season.mp3 206",
+  "/words/famous_season.mp3 206",
+  "/words/repair_season.mp3 206",
+  "/words/prepare_season.mp3 206",
+  "/sentences/sentence_0349.mp3 206",
+  "/bosses/lv20.webp 304",
+  "/words/establish_season.mp3 206",
+  "/words/comfortable_season.mp3 206",
+  "/words/convenient_season.mp3 206",
+  "/words/complex_season.mp3 206",
+  "/words/maintain_season.mp3 206",
+  "/words/manage_season.mp3 206",
+  "/words/handle_season.mp3 206",
+  "/words/typical_season.mp3 206",
+  "/words/flexible_season.mp3 206",
+  "/words/accurate_season.mp3 206",
+  "/words/perform_season.mp3 206",
+  "/words/contribute_season.mp3 206",
+  "/words/struggle_season.mp3 206",
+  "/words/essential_season.mp3 206",
+  "/sentences/sentence_0350.mp3 206",
+  "/words/available_season.mp3 206",
+  "/words/suitable_season.mp3 206",
+  "/words/succeed_season.mp3 206",
+  "/words/several_season.mp3 206",
+  "/words/plenty_season.mp3 206",
+  "/words/practical_season.mp3 206",
+  "/words/enormous_season.mp3 206",
+  "/words/tiny_season.mp3 206",
+  "/words/suddenly_season.mp3 206",
+  "/words/huge_season.mp3 206",
+  "/words/immediately_season.mp3 206",
+  "/words/recently_season.mp3 206",
+  "/words/major_season.mp3 206",
+  "/words/minor_season.mp3 206",
+  "/words/finally_season.mp3 206",
+  "/words/average_season.mp3 206",
+  "/words/eventually_season.mp3 206",
+  "/words/occasionally_season.mp3 206",
+  "/words/entire_season.mp3 206",
+  "/words/amount_season.mp3 206",
+  "/words/meanwhile_season.mp3 206",
+  "/sentences/sentence_0351.mp3 206",
+  "/words/quantity_season.mp3 206",
+  "/words/nowadays_season.mp3 206",
+  "/words/rarely_season.mp3 206",
+  "/words/majority_season.mp3 206",
+  "/words/approximately_season.mp3 206",
+  "/words/constantly_season.mp3 206",
+  "/words/sufficient_season.mp3 206",
+  "/words/temporary_season.mp3 206",
+  "/words/numerous_season.mp3 206",
+  "/words/permanent_season.mp3 206",
+  "/words/instantly_season.mp3 206",
+  "/words/multiple_season.mp3 206",
+  "/words/additional_season.mp3 206",
+  "/spelling_bee.html 200",
+  "/sentences/sentence_0352.mp3 206",
+  "/hansen_sw_upgrade_gate_v944.js 304",
+  "/hansen_tts_volume_v1038.js 304",
+  "/hansen_cred_trap_v1085.js 304",
+  "/words/currently_season.mp3 206",
+  "/hansen_cred_guard_v1092.js 304",
+  "/hansen_backup_bootstrap_v944.js 304",
+  "/hansen_perf_v944.js 304",
+  "/word_map.js 304",
+  "/words/previously_season.mp3 206",
+  "/words/maximum_season.mp3 206",
+  "/words/minimum_season.mp3 206",
+  "/words/seldom_season.mp3 206",
+  "/words/dozen_season.mp3 206",
+  "/hansen_quest_global.js 304",
+  "/click_sound.js 304",
+  "/hansen_silent_watch_v1155.js 304",
+  "/hansen_pk_watchdog_v1155.js 304",
+  "/hansen_boot_check_v1156.js 304",
+  "/hansen_toast_v1156.js 304",
+  "/hansen_ladder_board_v1156.js 304",
+  "/hansen_download_fix_v1140.js 304",
+  "/pets/pet_00.webp 304",
+  "/hansen_version_watch_v1083.js 304",
+  "/words/however_season.mp3 206",
+  "/words/regularly_season.mp3 206",
+  "/words/decade_season.mp3 206",
+  "/words/therefore_season.mp3 206",
+  "/words/period_season.mp3 206",
+  "/words/although_season.mp3 206",
+  "/words/instead_season.mp3 206",
+  "/words/schedule_season.mp3 206",
+  "/words/besides_season.mp3 206",
+  "/words/otherwise_season.mp3 206",
+  "/words/explain_season.mp3 206",
+  "/words/describe_season.mp3 206",
+  "/sentences/sentence_0353.mp3 206",
+  "/words/moreover_season.mp3 206",
+  "/words/suggest_season.mp3 206",
+  "/words/perhaps_season.mp3 206",
+  "/words/probably_season.mp3 206",
+  "/words/persuade_season.mp3 206",
+  "/words/argue_season.mp3 206",
+  "/words/certainly_season.mp3 206",
+  "/words/discuss_season.mp3 206",
+  "/words/especially_season.mp3 206",
+  "/words/exactly_season.mp3 206",
+  "/words/compare_season.mp3 206",
+  "/words/imagine_season.mp3 206",
+  "/words/nearly_season.mp3 206",
+  "/words/predict_season.mp3 206",
+  "/words/actually_season.mp3 206",
+  "/words/furthermore_season.mp3 206",
+  "/words/realize_season.mp3 206",
+  "/sentences/sentence_0354.mp3 206",
+  "/words/recognize_season.mp3 206",
+  "/words/nevertheless_season.mp3 206",
+  "/words/consider_season.mp3 206",
+  "/words/consequently_season.mp3 206",
+  "/words/similarly_season.mp3 206",
+  "/words/express_season.mp3 206",
+  "/words/mention_season.mp3 206"
+ ],
+ "dom1": {
+  "documents": 17,
+  "nodes": 12729,
+  "jsEventListeners": 3302
+ },
+ "heap1MB": 12.8,
+ "versionPollsPer30s": 0,
+ "afterClose": {
+  "wrap": "none",
+  "bodyOverflow": ""
+ },
+ "framesAfterClose": 8,
+ "tap2": {
+  "ok": true,
+  "hit": "DIV#.island-en",
+  "label": "island_animal.html",
+  "x": 69,
+  "y": 422
+ },
+ "tree2": [
+  {
+   "depth": 0,
+   "url": "/index.html",
+   "nScripts": 35,
+   "vis": "top",
+   "intervals": 16
+  },
+  {
+   "depth": 1,
+   "url": "/island_animal.html",
+   "nScripts": 90,
+   "vis": "shown 390x844",
+   "intervals": 29
+  },
+  {
+   "depth": 2,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2
+  },
+  {
+   "depth": 2,
+   "url": "/island_season.html?v=1163",
+   "nScripts": 90,
+   "vis": "display:none 0x0",
+   "intervals": 28
+  },
+  {
+   "depth": 3,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2
+  },
+  {
+   "depth": 3,
+   "url": "/island_season.html?v=1163",
+   "nScripts": 90,
+   "vis": "display:none 0x0",
+   "intervals": 28
+  },
+  {
+   "depth": 4,
+   "url": "/land_map.html?v=1163",
+   "nScripts": 12,
+   "vis": "display:none 0x0",
+   "intervals": 2
+  },
+  {
+   "depth": 4,
+   "url": "",
+   "nScripts": 0,
+   "vis": "display:none 0x0",
+   "intervals": 0
+  }
+ ],
+ "dom2": {
+  "documents": 9,
+  "nodes": 10802,
+  "jsEventListeners": 4160
+ },
+ "heap2MB": 13.2,
+ "net": {
+  "home": {
+   "n": 158,
+   "bytes": 8485782,
+   "n304": 0,
+   "docs": [
+    "/index.html 200"
+   ],
+   "byFrame": {
+    "/index.html document": [
+     1,
+     202837
+    ],
+    "/index.html script": [
+     35,
+     993523
+    ],
+    "/index.html font": [
+     1,
+     398140
+    ],
+    "/index.html fetch": [
+     115,
+     4708737
+    ],
+    "/index.html other": [
+     3,
+     1823849
+    ],
+    "/index.html image": [
+     3,
+     358696
+    ]
+   }
+  },
+  "open1": {
+   "n": 1359,
+   "bytes": 49047631,
+   "n304": 476,
+   "docs": [
+    "/island_food.html 200",
+    "/land_map.html?v=1163 200",
+    "/island_season.html?v=1163 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/spelling_bee.html?v=1163&warm=1 200",
+    "/land_map.html?v=1163 200",
+    "/island_season.html?v=1163 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/land_map.html?v=1163 200",
+    "/spelling_bee.html?v=1163&warm=1 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/spelling_bee.html?v=1163&warm=1 200"
+   ],
+   "byFrame": {
+    "/island_food.html document": [
+     1,
+     609057
+    ],
+    "/island_food.html script": [
+     90,
+     4011638
+    ],
+    "/island_food.html image": [
+     82,
+     5804588
+    ],
+    "/index.html other": [
+     3,
+     1826704
+    ],
+    "/island_food.html font": [
+     2,
+     18632
+    ],
+    "/index.html fetch": [
+     7,
+     98
+    ],
+    "/island_food.html media": [
+     112,
+     1963505
+    ],
+    "/land_map.html script": [
+     36,
+     0
+    ],
+    "/land_map.html document": [
+     3,
+     2068911
+    ],
+    "/island_food.html other": [
+     7,
+     1447655
+    ],
+    "/island_season.html document": [
+     2,
+     1313326
+    ],
+    "/island_season.html script": [
+     180,
+     2466190
+    ],
+    "/island_season.html image": [
+     176,
+     6212328
+    ],
+    "/land_map.html fetch": [
+     3,
+     1848183
+    ],
+    "/boss_hall.html document": [
+     3,
+     149814
+    ],
+    "/boss_hall.html script": [
+     45,
+     11691
+    ],
+    "/boss_hall.html image": [
+     17,
+     1816682
+    ],
+    "/season_showcase.html script": [
+     39,
+     0
+    ],
+    "/season_showcase.html document": [
+     3,
+     147588
+    ],
+    "/spelling_bee.html document": [
+     3,
+     1750659
+    ],
+    "/spelling_bee.html script": [
+     48,
+     0
+    ],
+    "/spelling_bee.html image": [
+     3,
+     0
+    ],
+    "/island_season.html media": [
+     480,
+     12685072
+    ],
+    "/island_season.html other": [
+     14,
+     2895310
+    ]
+   }
+  },
+  "open2": {
+   "n": 1325,
+   "bytes": 37765912,
+   "n304": 630,
+   "docs": [
+    "/island_animal.html 200",
+    "/land_map.html?v=1163 200",
+    "/island_season.html?v=1163 200",
+    "/land_map.html?v=1163 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/island_season.html?v=1163 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/land_map.html?v=1163 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/spelling_bee.html?v=1163&warm=1 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/spelling_bee.html?v=1163&warm=1 200",
+    "/boss_hall.html?v=1163&warm=1 200",
+    "/season_showcase.html?v=1163&warm=1 200",
+    "/spelling_bee.html?v=1163&warm=1 200"
+   ],
+   "byFrame": {
+    "/island_animal.html script": [
+     90,
+     1233095
+    ],
+    "/island_animal.html document": [
+     1,
+     604175
+    ],
+    "/island_animal.html image": [
+     80,
+     3117256
+    ],
+    "/island_animal.html font": [
+     2,
+     0
+    ],
+    "/index.html fetch": [
+     8,
+     112
+    ],
+    "/land_map.html document": [
+     3,
+     2068911
+    ],
+    "/land_map.html script": [
+     36,
+     0
+    ],
+    "/island_animal.html media": [
+     84,
+     1491014
+    ],
+    "/land_map.html fetch": [
+     3,
+     1848183
+    ],
+    "/island_animal.html other": [
+     7,
+     1447655
+    ],
+    "/island_season.html document": [
+     2,
+     1313326
+    ],
+    "/island_season.html script": [
+     180,
+     2466190
+    ],
+    "/island_season.html image": [
+     174,
+     3233836
+    ],
+    "/island_season.html media": [
+     480,
+     12685072
+    ],
+    "/boss_hall.html document": [
+     3,
+     149814
+    ],
+    "/boss_hall.html script": [
+     45,
+     104970
+    ],
+    "/boss_hall.html image": [
+     17,
+     1208746
+    ],
+    "/island_season.html other": [
+     14,
+     2895310
+    ],
+    "/season_showcase.html document": [
+     3,
+     147588
+    ],
+    "/season_showcase.html script": [
+     39,
+     0
+    ],
+    "/spelling_bee.html document": [
+     3,
+     1750659
+    ],
+    "/spelling_bee.html script": [
+     48,
+     0
+    ],
+    "/spelling_bee.html image": [
+     3,
+     0
+    ]
+   }
+  }
+ },
+ "ext": [],
+ "log": {
+  "console": [],
+  "pageerrors": [
+   "InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+  ],
+  "dialogs": []
+ },
+ "lsAfter": {
+  "keys": 118,
+  "bytesUtf16": 698452,
+  "biggest": [
+   [
+    "hansen_vocab_wordIslandMisc",
+    37992
+   ],
+   [
+    "hansen_vocab_wordIslandSeason",
+    32849
+   ],
+   [
+    "hansen_vocab_wordIslandPronouns",
+    32304
+   ],
+   [
+    "hansen_vocab_wordIslandVerbs",
+    31799
+   ],
+   [
+    "hansen_vocab_wordIslandHouse",
+    28424
+   ],
+   [
+    "hansen_vocab_wordIslandAdj",
+    24660
+   ],
+   [
+    "hansen_vocab_wordIslandClothes",
+    21833
+   ],
+   [
+    "hansen_vocab_wordIslandBody",
+    20181
+   ],
+   [
+    "hansen_vocab_wordIslandSchool",
+    17675
+   ],
+   [
+    "hansen_vocab_wordIslandColorNum",
+    14492
+   ]
+  ]
+ }
+}

@@ -1,0 +1,70 @@
+{
+  "ver": "v1164",
+  "mode": "legacy",
+  "uidB": "1527283253218073236",
+  "loginA": "登录成功！ 竞赛 ID No.001 本机还没有进度，玩一会儿就会自动存到云端。",
+  "uidA": "1650936123503737095",
+  "aSaved": [
+    {
+      "id": "2c1ca82382",
+      "owner": "A"
+    }
+  ],
+  "afterSignOut": {
+    "marker": {
+      "method": "",
+      "phone": "+86 13800009931",
+      "username": "",
+      "uid": ""
+    },
+    "ident": "",
+    "foodLearned": 6,
+    "homeLearned": 0,
+    "owner": "1650936123503737095",
+    "acct": "🔐 注册 / 登录 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。"
+  },
+  "loginBMsg": "登录成功！ 竞赛 ID No.002 已从云端找回你的全部进度，正在载入…",
+  "afterLoginB": {
+    "marker": {
+      "method": "password",
+      "phone": "+86 13800009931",
+      "username": "kidbee",
+      "uid": "1527283253218073236"
+    },
+    "ident": "p:13800009931",
+    "foodLearned": 6,
+    "homeLearned": 0,
+    "owner": "1527283253218073236",
+    "acct": "✅ 已登录 +86 13800009931 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录"
+  },
+  "panelB": "👤 已登录 ✕ 手机号：+86 13800009931 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录",
+  "bUpload": {
+    "ok": true,
+    "reason": "",
+    "error": ""
+  },
+  "foreignWritesByB": [
+    {
+      "by": "B",
+      "owners": [
+        "A"
+      ],
+      "action": "database.updateDocument"
+    },
+    {
+      "by": "B",
+      "owners": [
+        "A"
+      ],
+      "action": "database.updateDocument"
+    }
+  ],
+  "savesWritesByB": [],
+  "savesDocs": [
+    {
+      "id": "2c1ca82382",
+      "owner": "A"
+    }
+  ],
+  "errors": []
+}

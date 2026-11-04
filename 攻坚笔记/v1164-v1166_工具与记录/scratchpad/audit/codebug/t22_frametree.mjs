@@ -1,0 +1,11 @@
+import {serve,launch,ctx,attach} from './harness.mjs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await ctx(b,base);
+const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/index.html',{waitUntil:'load'}); await p.waitForTimeout(2500);
+await p.evaluate(()=>openIsland('island_animal.html')); await p.waitForTimeout(14000);
+const tree=f=>({u:f.url().replace(base,'').slice(0,60),c:f.childFrames().map(tree)});
+const mem=await p.evaluate(()=>performance.memory?Math.round(performance.memory.usedJSHeapSize/1e6)+'MB':null);
+console.log(JSON.stringify(tree(p.mainFrame()),null,1), 'heap(top only):',mem);
+await b.close(); srv.close();

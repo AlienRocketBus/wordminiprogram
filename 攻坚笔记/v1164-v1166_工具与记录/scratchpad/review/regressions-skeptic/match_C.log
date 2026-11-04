@@ -1,0 +1,102 @@
+==== MODE C LAT 80 PACE 5000 words 10 typeable 10; battle 95 s; result host 800:800 guest 800:800
+
+--- host create room [host] 1 s: reads=2 (3.34/s) writes=1 (1.67/s) other=0
+         2 READ room(id) (3.34/s)
+         1 WRITE add hansen_pk_rooms (1.67/s)
+
+--- host waiting alone [host] 20 s: reads=14 (0.70/s) writes=3 (0.15/s) other=0
+         7 READ room(id) (0.35/s)
+         7 READ seat(id) (0.35/s)
+         2 WRITE update hansen_pk_rooms room (0.10/s)
+         1 WRITE update hansen_friends room (0.05/s)
+
+--- guest find + join + ack [guest] 3 s: reads=9 (2.68/s) writes=3 (0.89/s) other=0
+         5 READ room(id) (1.49/s)
+         3 READ seat(id) (0.89/s)
+         2 WRITE update hansen_pk_rooms seat (0.60/s)
+         1 WRITE add hansen_pk_rooms (0.30/s)
+         1 READ win(id) (0.30/s)
+
+--- host while guest joins [host] 7 s: reads=11 (1.66/s) writes=3 (0.45/s) other=0
+         5 READ room(id) (0.75/s)
+         5 READ seat(id) (0.75/s)
+         3 WRITE update hansen_pk_rooms room (0.45/s)
+         1 READ win(id) (0.15/s)
+
+--- BATTLE [host] 95 s: reads=292 (3.08/s) writes=31 (0.33/s) other=0
+        96 READ room(id) (1.01/s)
+        96 READ seat(id) (1.01/s)
+        87 READ win(id) (0.92/s)
+        21 WRITE update hansen_pk_rooms room (0.22/s)
+        13 READ where[kind,roomId] hansen_pk_rooms (0.14/s)
+         5 WRITE update hansen_friends room (0.05/s)
+         5 WRITE add hansen_pk_rooms (0.05/s)
+
+--- BATTLE [guest] 95 s: reads=296 (3.12/s) writes=32 (0.34/s) other=0
+        98 READ room(id) (1.03/s)
+        98 READ seat(id) (1.03/s)
+        87 READ win(id) (0.92/s)
+        22 WRITE update hansen_pk_rooms seat (0.23/s)
+        13 READ where[kind,roomId] hansen_pk_rooms (0.14/s)
+         5 WRITE update hansen_friends room (0.05/s)
+         5 WRITE add hansen_pk_rooms (0.05/s)
+
+--- result + 20 s after [host] 23 s: reads=2 (0.09/s) writes=3 (0.13/s) other=0
+         2 WRITE update hansen_pk_rooms room (0.09/s)
+         1 READ seat(id) (0.04/s)
+         1 READ room(id) (0.04/s)
+         1 WRITE update hansen_friends room (0.04/s)
+
+--- result + 20 s after [guest] 23 s: reads=8 (0.35/s) writes=3 (0.13/s) other=0
+         4 READ seat(id) (0.17/s)
+         4 READ room(id) (0.17/s)
+         2 WRITE update hansen_pk_rooms seat (0.09/s)
+         1 WRITE update hansen_friends room (0.04/s)
+
+TOTAL calls this game: host 362, guest 355, both 717
+
+host trace (battle +6..+18 s):
+   +6.97 READ room(id)
+   +6.97 READ win(id)
+   +6.97 READ seat(id)
+   +7.62 WRITE update hansen_pk_rooms room
+   +8.16 READ room(id)
+   +8.16 READ win(id)
+   +8.16 READ seat(id)
+   +9.21 READ room(id)
+   +9.22 READ win(id)
+   +9.22 READ seat(id)
+   +10.42 READ room(id)
+   +10.42 READ seat(id)
+   +10.43 READ room(id)
+   +10.43 READ win(id)
+   +10.43 READ seat(id)
+   +11.40 READ room(id)
+   +11.41 READ win(id)
+   +11.41 READ seat(id)
+   +12.43 READ room(id)
+   +12.43 READ where[kind,roomId] hansen_pk_rooms
+   +12.43 READ win(id)
+   +12.43 READ seat(id)
+   +13.40 READ room(id)
+   +13.41 READ win(id)
+   +13.41 READ seat(id)
+   +14.42 READ room(id)
+   +14.43 READ seat(id)
+   +14.43 READ room(id)
+   +14.43 READ win(id)
+   +14.43 READ seat(id)
+   +15.41 READ room(id)
+   +15.41 READ win(id)
+   +15.41 READ seat(id)
+   +15.53 READ win(id)
+   +15.63 WRITE update hansen_pk_rooms room
+   +16.41 READ room(id)
+   +16.42 READ win(id)
+   +16.42 READ seat(id)
+   +17.45 READ room(id)
+   +17.45 READ win(id)
+   +17.46 READ seat(id)
+   +17.88 WRITE update hansen_pk_rooms room
+emulator cross-check battle window: host 321 vs my log 323; guest 328 vs my log 328
+errors none leaks 0

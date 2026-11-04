@@ -1,0 +1,29 @@
+in boss fight {
+  bossActive: undefined,
+  heroHP: '100 / 100',
+  bossHP: 'HP: 55 / 55',
+  asked: 1,
+  timer: true,
+  mapBtn: 'none/1/auto@0,0',
+  active: 'bossScreen'
+}
+tap map btn during fight -> undefined
+just left {
+  bossActive: undefined,
+  heroHP: '100 / 100',
+  bossHP: 'HP: 55 / 55',
+  asked: 1,
+  timer: true,
+  mapBtn: 'none/1/auto@0,0',
+  active: 'bossScreen'
+}
+after 30s on home {
+  bossActive: undefined,
+  heroHP: '100 / 100',
+  bossHP: 'HP: 55 / 55',
+  asked: 1,
+  timer: true,
+  mapBtn: 'none/1/auto@0,0',
+  active: 'bossScreen'
+}
+errors []

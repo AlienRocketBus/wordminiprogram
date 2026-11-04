@@ -1,0 +1,26 @@
+── home: 0 处低对比
+── explore: 0 处低对比
+── word-modal: 0 处低对比
+── chest: 0 处低对比
+── quests: 0 处低对比
+── cards: 0 处低对比
+── review: 0 处低对比
+── ach: 0 处低对比
+── stats: 2 处低对比
+    {"t":"42","fg":"rgb(226, 232, 240)","ratio":1.85,"sel":".","sz":"26px","bg":"rgb(34,197,94)|rgb(20,83,45)","sh":"rgba(0, 0, 0, 0.3) 0px 2px 4px","rs":"1.8/7.4","par":". < . < .","html":"<div  tyle=\"font- ize:26px;font-weight:900;color:#fff;margin:6px 0 2px;text- hadow:0 2px 4"}
+    {"t":"待发现","fg":"rgb(21, 128, 61)","ratio":1.82,"sel":".","sz":"13px","bg":"rgb(34,197,94)|rgb(20,83,45)","sh":"","rs":"2.2/1.8","par":". < . < .","html":"<div  tyle=\"font- ize:13px;font-weight:600;color:#bbf7d0;font-weight:700\">待发现</div>"}
+── 神秘span现场:
+<SPAN  style=> | <DIV  style=font-size:13px;font-weight:600;color:#cbd5e1;display:flex;justify-cont> | <DIV  style=background:#0f172a;border-radius:10px;padding:10px 12px;border:1px sol> | <DIV  style=background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;>
+<SPAN  style=color:#fbbf24;font-weight:700> | <DIV  style=font-size:13px;font-weight:600;color:#cbd5e1;display:flex;justify-cont> | <DIV  style=background:#0f172a;border-radius:10px;padding:10px 12px;border:1px sol> | <DIV  style=background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;>
+── pet: 0 处低对比
+── settings: 0 处低对比
+── mylearning: 0 处低对比
+── mylearning 真的打开了: true
+── mylearning/sakura: 0 处低对比
+── mylearning/cream: 0 处低对比
+── mylearning/mint: 0 处低对比
+── wrongoverview: 0 处低对比
+── overlay/today-empty: 0 处深幕暗字
+── overlay/boss-hall: (未触发,跳过)
+── overlay/land-hall: (未触发,跳过)
+ERRORS: 0 

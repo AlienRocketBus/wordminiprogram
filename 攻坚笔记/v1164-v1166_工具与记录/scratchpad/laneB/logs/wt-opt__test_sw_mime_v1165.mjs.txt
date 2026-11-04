@@ -1,0 +1,9 @@
+  ✅ SW 接管了首页
+    {"js":"application/javascript; charset=utf-8","font":"font/woff2","html":"text/html","good":"text/javascript; charset=utf-8","ran":1}
+  ✅ octet-stream 的 .js → application/javascript; charset=utf-8
+  ✅ octet-stream 的 .woff2 → font/woff2
+  ✅ text/plain 的网页（_frame.html）打开后是 text/html
+  ✅ 正常的 .js 不改（text/javascript; charset=utf-8）
+  ✅ 发错类型的脚本照样能执行（执行 1 次）
+
+✅ SW 只把网页改成 text/html，别的类型各归其位

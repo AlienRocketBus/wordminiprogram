@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>结算页 · 主题2.0 样稿</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="common.css">
+<style>
+.app{padding-bottom:28px}
+.head{display:flex;align-items:center;gap:10px;margin:12px 0 4px}
+.back{display:inline-flex;align-items:center;justify-content:center;height:var(--tap);padding:0 14px;border-radius:var(--r-pill);background:var(--surface-2);border:1.5px solid var(--line-strong);color:var(--ink-1);font:900 15px/1 var(--font-display)}
+.head h2{font:900 20px/1.1 var(--font-display);color:var(--ink-2)}
+.top{text-align:center;margin-top:6px}
+.stars{display:flex;justify-content:center;align-items:flex-end;gap:6px;height:84px}
+.stars span{display:block;width:62px;height:62px}
+.stars span:nth-child(2){width:80px;height:80px}
+.stars svg{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18))}
+.top h1{font:900 28px/1.15 var(--font-display);color:var(--ink-1);margin-top:6px}
+.top .near{font-size:var(--fs-sm);font-weight:800;color:var(--ink-2);margin-top:2px}
+.score{display:flex;align-items:center;gap:14px;margin-top:12px;padding:14px 16px}
+.score .big{font:800 44px/1 var(--font-latin);color:var(--ink-1)} .score .big small{font-size:24px;color:var(--ink-2)}
+.score .lab{font-size:var(--fs-sm);font-weight:800;color:var(--ink-2)}
+.score .acc{flex:1}
+.score .bar{height:12px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin-top:6px}
+.score .bar i{display:block;height:100%;transform-origin:left;transform:scaleX(.88);background:linear-gradient(90deg,var(--xp-1),var(--xp-2));border-radius:99px}
+.rw{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rw .it{display:flex;align-items:center;gap:8px;padding:10px;border-radius:var(--r-lg);background:var(--surface-1);border:1px solid var(--line);box-shadow:var(--e-1)}
+.rw .it svg,.rw .it img{width:30px;height:30px;flex:none}
+.rw .it b{display:block;font:800 20px/1 var(--font-latin);color:var(--ink-1)}
+.rw .it span{font-size:var(--fs-cap);font-weight:800;color:var(--ink-2)}
+.lvup{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:var(--r-lg);background:linear-gradient(120deg,var(--brand-1),var(--brand-2));color:var(--on-brand);box-shadow:var(--e-2)}
+.lvup .ava{width:50px;height:50px}
+.lvup b{display:block;font:900 18px/1.2 var(--font-display)}
+.lvup span{font-size:var(--fs-sm);font-weight:700}
+.words{margin-top:12px;padding:12px 14px}
+.words h4{font:900 16px/1.2 var(--font-display);color:var(--ink-1);display:flex;justify-content:space-between;align-items:center}
+.words .wl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.words .w{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:var(--r-pill);font:800 15px/1.2 var(--font-latin);background:var(--good-surface);color:var(--on-good-surface)}
+.words .w.bad{background:var(--bad-surface);color:var(--on-bad-surface)}
+.words .w small{font:800 13px/1 var(--font-body)}
+.words .btn{min-height:44px;font-size:14px;padding:0 12px}
+.cta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.cta .btn{min-height:56px}
+.home{display:block;text-align:center;margin-top:12px;font-size:var(--fs-body);font-weight:800;color:var(--hi);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="ava" id="ava"><img src="assets/01.webp" alt=""><span class="lv" id="lv">3</span></div>
+    <div class="who"><b>小明 · 森林小队</b><div class="xp" style="--p:.08"><i></i></div><div class="xp-t">20 / 300 经验</div></div>
+    <div class="chips"><span class="chip" id="coins"><script>document.write(ICON.coin)</script><span id="coinN">1,292</span></span></div>
+  </header>
+  <div class="head"><span class="back">‹ 返回</span><h2>听音辨义 · 初级</h2></div>
+  <section class="top">
+    <div class="stars" id="stars"><span></span><span></span><span></span></div>
+    <h1>太棒了，初级完成！</h1>
+    <div class="near">再对 1 个就是 3 颗星</div>
+  </section>
+  <div class="card score"><div><div class="lab">答对</div><div class="big"><span id="right">7</span><small> / 8</small></div></div>
+    <div class="acc"><div class="lab">正确率 88%</div><div class="bar"><i></i></div></div></div>
+  <div class="rw">
+    <div class="it"><script>document.write(ICON.coin)</script><div><b>+12</b><span>金币</span></div></div>
+    <div class="it"><script>document.write(ICON.star)</script><div><b>+18</b><span>经验</span></div></div>
+    <div class="it"><img src="assets/pet_01.webp" alt=""><div><b>+15</b><span>宠物经验</span></div></div>
+  </div>
+  <div class="lvup" id="lvup"><div class="ava"><img src="assets/01.webp" alt=""></div><div><b>升级啦！Lv.3 森林小队</b><span>新称号已经戴上，去岛上看看</span></div></div>
+  <div class="card words">
+    <h4>这次学会的 7 个词</h4>
+    <div class="wl"><span class="w">🐟 fish</span><span class="w">🍚 rice</span><span class="w">🥛 milk</span><span class="w">🍞 bread</span><span class="w">🥚 egg</span><span class="w">🍖 meat</span><span class="w">🍵 tea</span></div>
+  </div>
+  <div class="card words">
+    <h4>再练一下 <button class="btn btn-ghost">练这 1 个词</button></h4>
+    <div class="wl"><span class="w bad">🧂 salt <small>盐</small></span></div>
+  </div>
+  <div class="cta"><button class="btn btn-gold">🔄 再来一轮</button><button class="btn btn-brand">⚡ 挑战中级</button></div>
+  <a class="home" href="#">回到食物岛 ›</a>
+</div>
+<script src="fx.js"></script>
+<script>
+var st=document.getElementById('stars').children, lit=2;
+for(var i=0;i<3;i++) st[i].innerHTML=i<lit?ICON.star:ICON.starOff;
+/* event: the round just ended → one short sequence, then static */
+function play(){
+  for(var i=0;i<3;i++)(function(i){
+    if(FX.reduced()) return;
+    st[i].animate([{transform:'scale(.2)',opacity:0},{transform:'scale(1.18)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:420,delay:120+i*160,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});
+    if(i<lit) setTimeout(function(){var r=st[i].getBoundingClientRect();FX.burst(r.left+r.width/2,r.top+r.height/2,{n:8,spread:54,dur:520});},120+i*160+300);
+  })(i);
+  FX.count(document.getElementById('right'),0,7,700);
+  FX.rise(document.querySelector('.score'),18,80); FX.rise(document.querySelector('.rw'),18,180);
+  FX.rise(document.getElementById('lvup'),18,700,420);
+  setTimeout(function(){ var a=document.getElementById('ava').getBoundingClientRect(); FX.ring(a.left+a.width/2,a.top+a.height/2,90); FX.pop(document.getElementById('ava'),1.15,380); },760);
+  setTimeout(function(){ FX.confetti({n:24,dur:1200}); },260);
+}
+window.replay=play;
+requestAnimationFrame(function(){ setTimeout(play,60); });
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+拼写类题目的配图不再印着答案
+
+身体岛打字大师「脚趾」的配图上写着 TOE，孩子照着抄就「拼对」了；岛屿数据里
+34 个 SVG 图标把英文单词画在图上。宠物掌握冲刺的标题还直接写着英文答案。
+
+- template.html / land_template.html 新增 __hsnQuizPic(w)：去掉图里带英文字母的
+  <text> 标签，去掉后图太空（少于 3 个图形）就不放图只看中文；用在拼词、打字、完形、
+  火眼金睛、泡泡、钓鱼的题面（已重新生成 27 个岛）
+- hansen_spell_practice.js（看汉意拼/听音拼）、hansen_focused_typing_v946.js（宠物掌握冲刺）
+  同样处理；冲刺标题改成显示中文
+- 认词的地方（单词卡、答对揭晓卡、打地鼠英文题面）照旧显示原图
+- 新测试 test_spelling_pic_v1165.mjs（toe / knee / eraser 三个真词）；旧代码全部失败
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

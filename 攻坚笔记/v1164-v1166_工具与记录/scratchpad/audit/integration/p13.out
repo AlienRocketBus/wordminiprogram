@@ -1,0 +1,31 @@
+fresh { o: {}, card: '快去玩' }
+animal open +0 {
+  o: {
+    wordIslandAnimal_bak: 1793697035574,
+    wordIslandAnimal: 1793697036336
+  },
+  card: '🐯 动物 · 点击继续 →'
+}
+animal open +6s {
+  o: {
+    wordIslandSeason: 1793697043434,
+    wordIslandSeason_bak: 1793697042674,
+    wordIslandAnimal_bak: 1793697035574,
+    wordIslandAnimal: 1793697036336
+  },
+  card: '👑 星海终战 · 点击继续 →'
+}
+closed {
+  o: {
+    wordIslandSeason: 1793697043434,
+    wordIslandSeason_bak: 1793697042674,
+    wordIslandAnimal_bak: 1793697035574,
+    wordIslandAnimal: 1793697036336
+  },
+  card: '👑 星海终战 · 点击继续 →'
+}
+tap recent DIV#recentNum.stat-num
+recent opened -> island_season.html
+errors [
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]

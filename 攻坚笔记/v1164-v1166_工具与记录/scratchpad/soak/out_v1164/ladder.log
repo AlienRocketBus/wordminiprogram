@@ -1,0 +1,21 @@
+
+══ clusters (8) ══
+  [low   ]   18× I2:remove:adv-forged-target   seeds 27,30,80,90,165,205
+           e.g. remove rzf17719 owned by ADV
+  [low   ]    5× I8:adv-seat-accepted   seeds 30,205,326,450,578
+           e.g. host accepted rmk0gfbq75ri81g_s0 created by the adversary
+  [low   ]    5× I8:matchmaking-blocked:seat-squatting   seeds 30,205,287,463,544
+           e.g. with the adversary 0 honest match(es) settled, without it 1
+  [low   ]    3× I8:fewer-matches-settled:seat-squatting   seeds 69,188,570
+           e.g. with the adversary 1 honest match(es) settled, without it 2
+  [low   ]    3× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 94,348,357
+           e.g. joinRoom(rmk0get39usu0ad) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    3× I8:impersonated-guest-accepted   seeds 287,463,570
+           e.g. host accepted rmk0ggwm545h7or_s0 created by the adversary claiming to be P2
+  [low   ]    1× I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 357
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gca6p8i1uv4) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 595
+           e.g. P1 (guest) kept answering 2 more words after the opponent had claimed the win by abandon at 154.8s — it is only told at the very end
+
+SUMMARY profile=ladder runs=600 seeds=1..600 failing_runs=0 clusters=8 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:18 I3:0 I4:0 I5:1 I6:3 I7:0 I8:11 I9:1 I10:0 | matches=828 settled_pairs=688 virtual=92.4h events=1045970 real=67s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

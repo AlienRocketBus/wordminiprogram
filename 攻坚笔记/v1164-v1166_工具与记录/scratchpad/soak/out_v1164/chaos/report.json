@@ -1,0 +1,238 @@
+{
+ "summary": "SUMMARY profile=chaos runs=600 seeds=1..600 failing_runs=0 clusters=17 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:40 I3:0 I4:0 I5:0 I6:10 I7:0 I8:28 I9:9 I10:0 | matches=536 settled_pairs=413 virtual=83.8h events=864130 real=73s",
+ "profile": "chaos",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I2": 40,
+  "I8": 28,
+  "I6": 10,
+  "I9": 9
+ },
+ "failingRuns": 0,
+ "failingSeeds": [],
+ "clusters": [
+  {
+   "sig": "I2:remove:adv-forged-target",
+   "inv": "I2",
+   "sev": "low",
+   "count": 40,
+   "seeds": [
+    2,
+    11,
+    19,
+    29,
+    35,
+    37,
+    62,
+    66,
+    69,
+    76,
+    82,
+    86
+   ],
+   "example": "remove rzf27239 owned by ADV"
+  },
+  {
+   "sig": "I8:adv-seat-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 15,
+   "seeds": [
+    11,
+    29,
+    35,
+    37,
+    60,
+    79,
+    116,
+    127,
+    253,
+    276,
+    359,
+    430
+   ],
+   "example": "host accepted rmk0gf6zjyk3hho_s0 created by the adversary"
+  },
+  {
+   "sig": "I8:matchmaking-blocked:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 13,
+   "seeds": [
+    11,
+    37,
+    127,
+    133,
+    136,
+    190,
+    200,
+    253,
+    263,
+    276,
+    503,
+    525
+   ],
+   "example": "with the adversary 0 honest match(es) settled, without it 1"
+  },
+  {
+   "sig": "I8:impersonated-guest-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 10,
+   "seeds": [
+    132,
+    136,
+    137,
+    190,
+    200,
+    238,
+    263,
+    440,
+    514,
+    581
+   ],
+   "example": "host accepted rmk0gedax7dcb98_s0 created by the adversary claiming to be P1"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:findByCode",
+   "inv": "I6",
+   "sev": "low",
+   "count": 4,
+   "seeds": [
+    170,
+    222,
+    228,
+    598
+   ],
+   "example": "findByCode(24PP) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:findByCode",
+   "inv": "I9",
+   "sev": "low",
+   "count": 4,
+   "seeds": [
+    170,
+    222,
+    228,
+    598
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(24PP) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I6:ack-timeout-but-host-had-acked:rough-network",
+   "inv": "I6",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    173,
+    556
+   ],
+   "example": "joinRoom(rmk0gedsr8q5yk3) gave up 「房主没有回应」 although the host had written guestId=me at 42.9s"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away",
+   "inv": "I6",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    192,
+    500
+   ],
+   "example": "joinRoom(rmk0gedd2q0dt4f) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away",
+   "inv": "I9",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    192,
+    500
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedd2q0dt4f) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    130
+   ],
+   "example": "joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    130
+   ],
+   "example": "joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    130
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    130
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gedf4h3l5lq) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:no-seat:rough-network",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    232
+   ],
+   "example": "joinRoom(rmk0gdncpvazv3h) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:no-seat:rough-network",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    232
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gdncpvazv3h) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I9:I6:ack-timeout-but-host-had-acked:rough-network",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    556
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gd9sr501wfn) gave up 「房主没有回应」 although the host had written guestId=me at 86.0s"
+  },
+  {
+   "sig": "I8:fewer-matches-settled:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    585
+   ],
+   "example": "with the adversary 1 honest match(es) settled, without it 2"
+  }
+ ],
+ "minimal": []
+}

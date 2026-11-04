@@ -1,29 +1,10 @@
-/* ⚠️ 已知问题（v1131 记录，未解决）：
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
+/* ✅ v1131 记的「已知问题」已经根治（v1164，审查 SE-5）：
  *
- *   「写入本地登录态」这条断言**会随机失败**（约十次里红三四次）。
- *
- *   查证结果：
- *     · 登录本身每次都成功（`注册登录成功` 始终绿）
- *     · 只是 `loginByPhoneCode` resolve 之后，写本地状态还有一小段异步尾巴，
- *       测试立刻读会读到写入前的状态
- *     · **这是测试自身的竞态，不是产品 bug** ——
- *       它断言的那个真 bug（v1057：SDK 文件名写错）早就修好了
- *
- *   试过的办法（都没根治）：
- *     ① 给假 SDK 补 expires_in / access_token —— 概率降低但仍会红
- *     ② Node 侧拿到快照后重读 —— 无效，那时快照已经定了
- *     ③ 页内轮询等 method 出现 —— **反而更糟**（十次红七次），
- *        猜测是拉长等待触发了别的超时逻辑
- *
- *   为什么不继续修：改了四轮没根治，其中一轮还改坏了，
- *   继续耗下去的收益低于把时间花在真问题上。
- *
- *   为什么不删掉：它另外 13 条断言守着 v1057 那条真实的事故链路，
- *   删了就没人看着了。
- *
- *   影响：闸门的基线里已经算上了它（失败数基线 3 个），
- *   所以它随机红不会误伤"失败数不许变多"的判断。
- *   但**这不是解决，只是隔离** —— 后续应当彻底修掉。 */
+ *   以前「写入本地登录态」这条断言会随机失败（约十次里红三四次），当时以为是 loginByPhoneCode 的异步尾巴。
+ *   真正的原因在测试自己身上：`addInitScript(() => localStorage.clear())` 会在**每一个 frame** 里跑 ——
+ *   岛屿页里有预热的 iframe，它们晚几秒加载时又把 localStorage 清了一遍，正好清掉刚写好的登录记录。
+ *   现在只在顶层页面清（`window.top === window`）。修完连跑 6 次：6 次全绿（之前同一台机器上会随机红）。 */
 
 /* test_phone_signup_v1057.mjs —— 手机号注册登录完整链路
  * 事故：用户反复反馈手机注册不行。真机复现后抓到根因——
@@ -37,9 +18,9 @@
  *   本版为此给模块加了 `_setAuthForTest` 注入口，用假 SDK 即可跑完整条链。
  * 合同：① 不得再引用不存在的 SDK 文件；② 发码写入 verificationId；
  *       ③ 新用户走 signUp、老用户走 signIn；④ 登录后写入本地登录态。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html; charset=utf-8','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -49,16 +30,16 @@ let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else
 console.log('手机号注册登录链路 v1057');
 
 /* ① 源码合同：不得引用不存在的 SDK 文件 */
-const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'),'utf8');
 const refs = [...src.matchAll(/import\('\.\/(vendor_cloudbase_esm_v\d+\.js)/g)].map(m=>m[1]);
-const missing = refs.filter(f=>!fs.existsSync('/home/claude/work/repo/'+f));
+const missing = refs.filter(f=>!fs.existsSync((__HSN_ROOT + '')+f));
 ok(missing.length===0, `引用的 SDK 文件都存在（引用 ${refs.join(',')}）`+(missing.length?' 缺失:'+missing:''));
 ok(/_setAuthForTest/.test(src), '提供测试注入口（此前无法脱离云端验证，正是漏检主因）');
 
 const page=await browser.newPage({viewport:{width:390,height:844}});
 const errs=[]; page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
 page.on('dialog',async d=>{ await d.dismiss().catch(()=>{}); });
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2600);
 

@@ -1,0 +1,134 @@
+{
+ "summary": "SUMMARY profile=adversary runs=400 seeds=1..400 failing_runs=0 clusters=7 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:115 I3:0 I4:0 I5:0 I6:1 I7:0 I8:85 I9:1 I10:0 | matches=438 settled_pairs=295 virtual=53.2h events=1185935 real=114s",
+ "profile": "adversary",
+ "runs": 400,
+ "from": 1,
+ "perInv": {
+  "I2": 115,
+  "I8": 85,
+  "I6": 1,
+  "I9": 1
+ },
+ "failingRuns": 0,
+ "failingSeeds": [],
+ "clusters": [
+  {
+   "sig": "I2:remove:adv-forged-target",
+   "inv": "I2",
+   "sev": "low",
+   "count": 115,
+   "seeds": [
+    1,
+    2,
+    7,
+    9,
+    10,
+    11,
+    14,
+    15,
+    16,
+    17,
+    20,
+    21
+   ],
+   "example": "remove rzf05448 owned by ADV"
+  },
+  {
+   "sig": "I8:matchmaking-blocked:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 54,
+   "seeds": [
+    10,
+    19,
+    20,
+    21,
+    22,
+    31,
+    39,
+    44,
+    47,
+    51,
+    64,
+    81
+   ],
+   "example": "with the adversary 0 honest match(es) settled, without it 1"
+  },
+  {
+   "sig": "I8:impersonated-guest-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 34,
+   "seeds": [
+    26,
+    44,
+    51,
+    56,
+    64,
+    91,
+    92,
+    98,
+    101,
+    127,
+    148,
+    155
+   ],
+   "example": "host accepted rmk0gk0zo.j9xwwrxo_s0 created by the adversary claiming to be P2"
+  },
+  {
+   "sig": "I8:adv-seat-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 25,
+   "seeds": [
+    31,
+    90,
+    108,
+    123,
+    124,
+    166,
+    205,
+    208,
+    221,
+    223,
+    232,
+    235
+   ],
+   "example": "host accepted rmk0gexpsovu2q5_s0 created by the adversary"
+  },
+  {
+   "sig": "I8:fewer-matches-settled:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 4,
+   "seeds": [
+    26,
+    124,
+    355,
+    363
+   ],
+   "example": "with the adversary 1 honest match(es) settled, without it 2"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:findByCode",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    269
+   ],
+   "example": "findByCode(2GES) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:findByCode",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    269
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(2GES) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  }
+ ],
+ "minimal": []
+}

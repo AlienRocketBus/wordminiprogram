@@ -1,0 +1,6 @@
+localStorage.setItem calls in 40 s of doing nothing, by frame/key:
+     10 /island_season.html hsn_progress:星海词汇大冒险 owned=true
+      5 /island_animal.html hsn_progress:动物大冒险 owned=true
+      4 /island_season.html hansen_cloud_state_v965 owned=false
+      2 /island_animal.html hansen_cloud_state_v965 owned=false
+hansen_saves uploads in the same 40 s: 6

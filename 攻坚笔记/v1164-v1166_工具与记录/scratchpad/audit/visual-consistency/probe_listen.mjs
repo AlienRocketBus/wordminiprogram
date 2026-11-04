@@ -1,0 +1,30 @@
+import { startServer, launch, newCtx, attachLogs, sleep, OUT } from './lib.mjs';
+import { seed, shot, openIsland, dismissWelcome } from './lib2.mjs';
+const { srv, base } = await startServer();
+const browser = await launch();
+const errs=[];
+const ctx = await newCtx(browser,{dsf:1});
+await seed(ctx, {});
+const page = await ctx.newPage(); attachLogs(page,'top',errs);
+await page.goto(base+'/index.html',{waitUntil:'load'}); await sleep(1500);
+const fr = await openIsland(page,'island_animal.html'); await dismissWelcome(page,fr); await sleep(300);
+await fr.evaluate(()=>startListen()); await sleep(1200);
+const off = await page.evaluate(()=>{const r=document.getElementById('islandFrame').getBoundingClientRect(); return {x:r.left,y:r.top};});
+const r0 = await fr.evaluate(()=>{ const b=[...document.querySelectorAll('#listenScreen [onclick]')].find(e=>/初级/.test(e.innerText)); const r=b.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; });
+await page.touchscreen.tap(r0.x+off.x, r0.y+off.y); await sleep(1500);
+for(let k=0;k<4;k++){
+  const st = await fr.evaluate(()=>({dom:[...document.querySelectorAll('#listenScreen .boss-opt')].map(e=>e.innerText.trim()), q: listenQ && listenQ.opts.map(o=>o.cn), word: listenQ && listenQ.word.cn, answered: listenQ&&listenQ.answered, rects:[...document.querySelectorAll('#listenScreen .boss-opt')].map(e=>{const r=e.getBoundingClientRect(); return [Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height)];}), sy: scrollY}));
+  console.log('STATE', JSON.stringify(st));
+  const idx = st.q.indexOf(st.word);
+  const r = st.rects[idx];
+  const x=r[0]+r[2]/2+off.x, y=r[1]+r[3]/2+off.y;
+  const hit = await page.evaluate(([x,y])=>{ const f=document.getElementById('islandFrame'); const fr=f.getBoundingClientRect(); const el=f.contentDocument.elementFromPoint(x-fr.left,y-fr.top); return el? el.className+' '+el.innerText.trim() : 'none'; },[x,y]);
+  console.log('tap idx',idx,'expect',st.word,'hit',hit);
+  await page.touchscreen.tap(x,y); await sleep(300);
+  const after = await fr.evaluate(()=>[...document.querySelectorAll('#listenScreen .boss-opt')].map(e=>e.className+':'+e.innerText.trim()));
+  console.log('after', JSON.stringify(after), 'right', await fr.evaluate(()=>listenRight+'/'+listenTotal));
+  await shot(page,'probe_listen_'+k);
+  await sleep(3500);
+}
+console.log(errs);
+await browser.close(); srv.close();

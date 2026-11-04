@@ -1,0 +1,1197 @@
+{
+ "home_top": {
+  "ok": true,
+  "ms": 18520,
+  "summary": {
+   "n": 29,
+   "fail": 11,
+   "gradientText": 0,
+   "minRatio": 1.11,
+   "worst": [
+    {
+     "text": "冒",
+     "path": "span.logo-char.c4",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#facc15",
+     "bg": "#f2b5d6",
+     "ratio": 1.11,
+     "p10": 1.08,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "单 词 大 冒 险 · 一 段 神 奇 旅 程",
+     "path": "div.tagline",
+     "size": 14,
+     "weight": 900,
+     "fg": "#fde047",
+     "bg": "#f8bcdf",
+     "ratio": 1.2,
+     "p10": 1.12,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "词",
+     "path": "span.logo-char.c2",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#22c55e",
+     "bg": "#f4aed7",
+     "ratio": 1.29,
+     "p10": 1.25,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "Word Adventures",
+     "path": "div.subtitle",
+     "size": 14,
+     "weight": 900,
+     "fg": "#fef3c7",
+     "bg": "#f2b0c2",
+     "ratio": 1.6,
+     "p10": 1.56,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "单",
+     "path": "span.logo-char.c1",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#3b82f6",
+     "bg": "#f7add6",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "大",
+     "path": "span.logo-char.c3",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#ef4444",
+     "bg": "#f5b0da",
+     "ratio": 2.17,
+     "p10": 2.13,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "险",
+     "path": "span.logo-char.c5",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#a855f7",
+     "bg": "#f0b9e1",
+     "ratio": 2.4,
+     "p10": 2.32,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "18 关神奇大冒险",
+     "path": "b",
+     "size": 16,
+     "weight": 600,
+     "fg": "#be185d",
+     "bg": "#f6a2c9",
+     "ratio": 3.14,
+     "p10": 3.07,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "Microsoft YaHei"
+    },
+    {
+     "text": "12 种超酷挑战",
+     "path": "b",
+     "size": 16,
+     "weight": 600,
+     "fg": "#be185d",
+     "bg": "#f6a2cb",
+     "ratio": 3.15,
+     "p10": 3.09,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "Microsoft YaHei"
+    },
+    {
+     "text": "711+ 单词宝藏",
+     "path": "b",
+     "size": 16,
+     "weight": 600,
+     "fg": "#be185d",
+     "bg": "#f0b0cf",
+     "ratio": 3.4,
+     "p10": 3.3,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "Microsoft YaHei"
+    },
+    {
+     "text": "36 阶进化宠物",
+     "path": "b",
+     "size": 16,
+     "weight": 600,
+     "fg": "#be185d",
+     "bg": "#efb0d5",
+     "ratio": 3.4,
+     "p10": 3.22,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "Microsoft YaHei"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ },
+ "home_cards": {
+  "ok": true,
+  "ms": 10512,
+  "summary": {
+   "n": 27,
+   "fail": 14,
+   "gradientText": 0,
+   "minRatio": 2.69,
+   "worst": [
+    {
+     "text": "Body Parts",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f9d2d4",
+     "bg": "#ea4c54",
+     "ratio": 2.69,
+     "p10": 2.6,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Sports & Hobbies",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f8d1c9",
+     "bg": "#e44a29",
+     "ratio": 2.83,
+     "p10": 2.77,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Animal Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#c6e4d8",
+     "bg": "#1d9463",
+     "ratio": 2.84,
+     "p10": 2.76,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "People & Professions",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#e2e0cf",
+     "bg": "#8e8442",
+     "ratio": 2.87,
+     "p10": 2.74,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Food Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f4d0c6",
+     "bg": "#d6461e",
+     "ratio": 3.11,
+     "p10": 3.01,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Nature Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#e1dbca",
+     "bg": "#88702c",
+     "ratio": 3.46,
+     "p10": 3.33,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Action Verbs",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#d5d8f5",
+     "bg": "#5765d8",
+     "ratio": 3.53,
+     "p10": 3.37,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "动物大冒险",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#1f9a5d",
+     "ratio": 3.6,
+     "p10": 3.51,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "职业大冒险",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#5c9368",
+     "ratio": 3.6,
+     "p10": 3.5,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "身体大冒险",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#ea5057",
+     "ratio": 3.63,
+     "p10": 3.4,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "运动大冒险",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e75124",
+     "ratio": 3.75,
+     "p10": 3.69,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "Colors & Numbers",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#eacce0",
+     "bg": "#ab3385",
+     "ratio": 4.01,
+     "p10": 3.78,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "食物大冒险",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#db4d1f",
+     "ratio": 4.12,
+     "p10": 3.98,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "Transportation",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#cfd6e8",
+     "bg": "#3f5ca6",
+     "ratio": 4.39,
+     "p10": 2.74,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    }
+   ],
+   "fonts": [
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ },
+ "food_menu": {
+  "ok": true,
+  "ms": 15146,
+  "summary": {
+   "n": 30,
+   "fail": 11,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "每日任务",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "听音辨义",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "每日宝箱",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "探索单词",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "星灵",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#925489",
+     "ratio": 3.27,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "记忆翻牌",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "打字大师",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "星雾之卵",
+     "path": "span#heroPetStage.pet-stage",
+     "size": 15,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#b2736d",
+     "ratio": 3.77,
+     "p10": 3.71,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "完形填空",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "精学模式",
+     "path": "#homeScreen div.section-label",
+     "size": 13,
+     "weight": 600,
+     "fg": "#cbd5e1",
+     "bg": "#864684",
+     "ratio": 4.39,
+     "p10": 4.22,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "裹着流动星雾的蛋, 壳上微光符纹缓缓游动",
+     "path": "#homeScreen div#heroPetText.pet-text",
+     "size": 13,
+     "weight": 500,
+     "fg": "#e2e8f0",
+     "bg": "#915197",
+     "ratio": 4.45,
+     "p10": 4.34,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "food_modes": {
+  "ok": true,
+  "ms": 5859,
+  "summary": {
+   "n": 29,
+   "fail": 8,
+   "gradientText": 1,
+   "minRatio": 2.08,
+   "worst": [
+    {
+     "text": "听音辨义",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "打地鼠",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#6aa90f",
+     "ratio": 2.88,
+     "p10": 2.66,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "探索单词",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "记忆翻牌",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "打字大师",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "极速60秒",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e03f2a",
+     "ratio": 4.27,
+     "p10": 3.75,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "完形填空",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "畅玩模式",
+     "path": "#homeScreen div.section-label",
+     "size": 13,
+     "weight": 600,
+     "fg": "#cbd5e1",
+     "bg": "#8d3f89",
+     "ratio": 4.41,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One"
+   ]
+  },
+  "errs": []
+ },
+ "listen_q": {
+  "ok": true,
+  "ms": 12777,
+  "summary": {
+   "n": 28,
+   "fail": 3,
+   "gradientText": 1,
+   "minRatio": 3.9,
+   "worst": [
+    {
+     "text": "0",
+     "path": "#listenContent b",
+     "size": 12,
+     "weight": 700,
+     "fg": "#fbbf24",
+     "bg": "#804694",
+     "ratio": 3.9,
+     "p10": 3.8,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🎯 选出正确的中文意思",
+     "path": "#listenContent div",
+     "size": 15,
+     "weight": 700,
+     "fg": "#fde047",
+     "bg": "#984ba7",
+     "ratio": 4.09,
+     "p10": 3.98,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "本局答对：",
+     "path": "#listenContent div",
+     "size": 12,
+     "weight": 500,
+     "fg": "#cbd5e1",
+     "bg": "#814987",
+     "ratio": 4.37,
+     "p10": 4.28,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_right": {
+  "ok": true,
+  "ms": 5285,
+  "summary": {
+   "n": 24,
+   "fail": 2,
+   "gradientText": 1,
+   "minRatio": 4.42,
+   "worst": [
+    {
+     "text": "盐",
+     "path": "#listenContent div.lr-cn",
+     "size": 18,
+     "weight": 800,
+     "fg": "#fde047",
+     "bg": "#8f499c",
+     "ratio": 4.42,
+     "p10": 4.23,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.4) 0px 1px 4px",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🏆 成就解锁！",
+     "path": "div.t-top",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#734189",
+     "ratio": 4.42,
+     "p10": 4.3,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_wrong": {
+  "ok": true,
+  "ms": 8195,
+  "summary": {
+   "n": 28,
+   "fail": 3,
+   "gradientText": 1,
+   "minRatio": 3.9,
+   "worst": [
+    {
+     "text": "1",
+     "path": "#listenContent b",
+     "size": 12,
+     "weight": 700,
+     "fg": "#fbbf24",
+     "bg": "#804694",
+     "ratio": 3.9,
+     "p10": 3.79,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🎯 选出正确的中文意思",
+     "path": "#listenContent div",
+     "size": 15,
+     "weight": 700,
+     "fg": "#fde047",
+     "bg": "#984ba7",
+     "ratio": 4.09,
+     "p10": 3.98,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "本局答对：",
+     "path": "#listenContent div",
+     "size": 12,
+     "weight": 500,
+     "fg": "#cbd5e1",
+     "bg": "#80488e",
+     "ratio": 4.37,
+     "p10": 4.28,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_result": {
+  "ok": true,
+  "ms": 7566,
+  "summary": {
+   "n": 27,
+   "fail": 10,
+   "gradientText": 1,
+   "minRatio": 2.61,
+   "worst": [
+    {
+     "text": "🔄 再来一轮",
+     "path": "#listenContent button.game-btn.gold",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e78a09",
+     "ratio": 2.61,
+     "p10": 2.42,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "7",
+     "path": "#listenContent b",
+     "size": 14,
+     "weight": 700,
+     "fg": "#22c55e",
+     "bg": "#904291",
+     "ratio": 2.73,
+     "p10": 2.67,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🐾 宠物经验 +15",
+     "path": "#listenContent span",
+     "size": 14,
+     "weight": 700,
+     "fg": "#a78bfa",
+     "bg": "#663071",
+     "ratio": 3.47,
+     "p10": 3.39,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🎓 经验 +23",
+     "path": "#listenContent span",
+     "size": 14,
+     "weight": 700,
+     "fg": "#a78bfa",
+     "bg": "#673067",
+     "ratio": 3.51,
+     "p10": 3.44,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px",
+     "font": "-apple-system"
+    },
+    {
+     "text": "88%",
+     "path": "#listenContent b",
+     "size": 14,
+     "weight": 700,
+     "fg": "#fbbf24",
+     "bg": "#8d4493",
+     "ratio": 3.72,
+     "p10": 3.66,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "⚡ 挑战中级",
+     "path": "#listenContent button.game-btn.red",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "🏠 回主页",
+     "path": "#listenContent button.game-btn.purple",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7462f4",
+     "ratio": 4.38,
+     "p10": 4.33,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "20 个单词全部听完 · 答对",
+     "path": "#listenContent div",
+     "size": 14,
+     "weight": 500,
+     "fg": "#cbd5e1",
+     "bg": "#8d4087",
+     "ratio": 4.4,
+     "p10": 4.19,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "land1_menu": {
+  "ok": true,
+  "ms": 10891,
+  "summary": {
+   "n": 31,
+   "fail": 12,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "每日任务",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "听音辨义",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "每日宝箱",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "探索单词",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "星灵",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#925489",
+     "ratio": 3.27,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "记忆翻牌",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "打字大师",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "星雾之卵",
+     "path": "span#heroPetStage.pet-stage",
+     "size": 15,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#b2736d",
+     "ratio": 3.77,
+     "p10": 3.71,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "完形填空",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "精学模式",
+     "path": "#homeScreen div.section-label",
+     "size": 13,
+     "weight": 600,
+     "fg": "#cbd5e1",
+     "bg": "#864684",
+     "ratio": 4.39,
+     "p10": 4.22,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "裹着流动星雾的蛋, 壳上微光符纹缓缓游动",
+     "path": "#homeScreen div#heroPetText.pet-text",
+     "size": 13,
+     "weight": 500,
+     "fg": "#e2e8f0",
+     "bg": "#915197",
+     "ratio": 4.45,
+     "p10": 4.34,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "settings": {
+  "ok": true,
+  "ms": 12233,
+  "summary": {
+   "n": 40,
+   "fail": 4,
+   "gradientText": 1,
+   "minRatio": 1.24,
+   "worst": [
+    {
+     "text": "晨曦",
+     "path": "#hsnBossThemePicker div",
+     "size": 12,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#dce8f8",
+     "ratio": 1.24,
+     "p10": 1.21,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.95) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 0px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "电影场景",
+     "path": "#hsnBossThemePicker div",
+     "size": 12,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#deca36",
+     "ratio": 1.67,
+     "p10": 1.55,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.95) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 0px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ }
+}

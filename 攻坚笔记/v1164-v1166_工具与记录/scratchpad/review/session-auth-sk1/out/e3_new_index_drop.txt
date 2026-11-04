@@ -1,0 +1,44 @@
+{
+  "ver": "v1164",
+  "page": "index",
+  "fail": "drop",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "calls": [
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:39051/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:39051/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:39051/vendor_cloudbase_esm_v965.js"
+    },
+    {
+      "ok": false,
+      "kind": "network",
+      "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:39051/vendor_cloudbase_esm_v965.js"
+    }
+  ],
+  "vendorReqAfterReload": 1,
+  "signedStill": true,
+  "otherIsland": {
+    "ok": false,
+    "kind": "network",
+    "reason": "Failed to fetch dynamically imported module: http://127.0.0.1:39051/vendor_cloudbase_esm_v965.js"
+  },
+  "vendorReqAfterIslandSwitch": 1,
+  "bust": true,
+  "afterReload": {
+    "ok": true
+  },
+  "errors": []
+}

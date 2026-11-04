@@ -1,0 +1,69 @@
+
+好友 / 天梯排行榜 / 资料名 · 真 SDK 端到端（v1164）
+
+
+── READONLY · legacy ──
+  OK  [A] 用户名登录 + 云端发了竞赛 ID（cid=1）
+  OK  [B] 用户名登录 + 云端发了竞赛 ID（cid=2）
+  OK  资料名 displayName() / status().name 是孩子起的名字（{"dn":"小爱","st":{"name":"小爱","cid":1,"rating":1000,"placed":false,"games":0}}）
+  OK  ★ 页面刚加载第一次拉榜就成功，没人上榜 = ok + 空列表（{"ok":true,"list":[],"myRank":null}）
+  OK  在线心跳写上了，各自认得出自己的记录（073236 / 737095）
+  OK  ★ A 加 B：成功，B 还没加回 → 待确认（{"ok":true,"cid":2,"name":"小博","mutual":false,"pending":true}）
+  OK  ★ B 看到「小爱想加你为好友」（[{"cid":1,"name":"小爱","online":true,"lastSeen":1793725124156,"at":1793725124671,"sub":"想加你为好友"}]）
+  OK  ★ B 加回 A：直接互为好友（{"ok":true,"cid":1,"name":"小爱","mutual":true,"pending":false}）
+  OK  ★ 两边都是正式好友
+  OK  A 看到 B 刚才还在线 + 名字（{"cid":2,"name":"小博","online":true,"lastSeen":1793725124744,"mutual":true,"pending":false,"sub":"刚才还在"}）
+  OK  ★ 加好友没有去改别人的记录（尝试 0 次）
+  OK  B 给 A 发「来一局？」（{"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}）
+  OK  ★ A 收到 B 的招呼，发件人可信（[{"id":"a727c29db0cfa17a1ee9784dc824bfae","from":2,"fromName":"小博","at":1793725125833,"read":false,"emoji":"⚔️","text":"来一局？","isNew":true}]）
+  OK  ★ 好友页 z-index 2147483500（大PK屏之上、对战屏之下）：2147483500
+  OK  ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 📨 收到的招呼1 条新的 ⚔️）
+  OK  ★ 先开天梯再开好友页：8 秒后不会冒出「这一步没能打开」
+  OK  ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+  OK  ★ 删好友也只删自己那条（尝试改别人的 0 次）
+  OK  ★ 缺 hansen_friend_msgs → 说清楚建哪个集合、权限选什么（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 发招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST"}）
+  OK  缺集合时收件箱也报配置问题，不是假装没消息（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 读取招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST","msgs":[]}）
+  OK  ★ 缺 hansen_friends → 好友页「云端设置还差一步」+ 集合名 + 技术信息（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 🛠️ 云端设置还差一步 ）
+  OK  ★ 两人上传天梯分成功（{"pa":{"ok":true},"pb":{"ok":true}}）
+  OK  ★ 榜上有两个人（名字是自己起的），也找得到自己（[{"rank":1,"uid":"1527283253218073236","name":"小爱","cid":1,"rating":1045,"games":4},{"rank":2,"uid":"1650936123503737095","name":"小博","cid":2,"rating":1045,"games":4}]）
+  OK  ★ 上传被拒要报出来，不是 ok:true（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 上传天梯分：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 拉榜被拒 → 报错（不是「还没有人上榜」）（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 读取排行榜：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 刷新后第一次开天梯页：榜直接显示两个人（1 小爱 1045 1 小博 (你) 1045）
+  OK  ★ 断网 → kind network（{"ok":false,"kind":"network","expired":false,"text":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试","reason":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试 ⟨network request error⟩"}）
+  OK  ★ 岛屿页：好友页盖在拼写大PK屏上面，点得到（{"pkOn":true,"onTop":true}）
+  OK  没有页面脚本报错（无）
+  OK  没有一个请求跑到外网（无）
+
+── READONLY · rules ──
+  OK  [A] 用户名登录 + 云端发了竞赛 ID（cid=1）
+  OK  [B] 用户名登录 + 云端发了竞赛 ID（cid=2）
+  OK  资料名 displayName() / status().name 是孩子起的名字（{"dn":"小爱","st":{"name":"小爱","cid":1,"rating":1000,"placed":false,"games":0}}）
+  OK  ★ 页面刚加载第一次拉榜就成功，没人上榜 = ok + 空列表（{"ok":true,"list":[],"myRank":null}）
+  OK  在线心跳写上了，各自认得出自己的记录（073236 / 737095）
+  OK  ★ A 加 B：成功，B 还没加回 → 待确认（{"ok":true,"cid":2,"name":"小博","mutual":false,"pending":true}）
+  OK  ★ B 看到「小爱想加你为好友」（[{"cid":1,"name":"小爱","online":true,"lastSeen":1793725153005,"at":1793725153505,"sub":"想加你为好友"}]）
+  OK  ★ B 加回 A：直接互为好友（{"ok":true,"cid":1,"name":"小爱","mutual":true,"pending":false}）
+  OK  ★ 两边都是正式好友
+  OK  A 看到 B 刚才还在线 + 名字（{"cid":2,"name":"小博","online":true,"lastSeen":1793725153790,"mutual":true,"pending":false,"sub":"刚才还在"}）
+  OK  ★ 加好友没有去改别人的记录（尝试 0 次）
+  OK  B 给 A 发「来一局？」（{"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}）
+  OK  ★ A 收到 B 的招呼，发件人可信（[{"id":"716918bd2c436e76377a2d02e278af93","from":2,"fromName":"小博","at":1793725154696,"read":false,"emoji":"⚔️","text":"来一局？","isNew":true}]）
+  OK  ★ 好友页 z-index 2147483500（大PK屏之上、对战屏之下）：2147483500
+  OK  ★ 好友页上有好友和收到的招呼（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 📨 收到的招呼1 条新的 ⚔️）
+  OK  ★ 先开天梯再开好友页：8 秒后不会冒出「这一步没能打开」
+  OK  ★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」
+  OK  ★ 删好友也只删自己那条（尝试改别人的 0 次）
+  OK  ★ 缺 hansen_friend_msgs → 说清楚建哪个集合、权限选什么（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 发招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST"}）
+  OK  缺集合时收件箱也报配置问题，不是假装没消息（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」","reason":"云端设置还差一步：还没有建数据库集合「hansen_friend_msgs」。请老师在云开发控制台 → 数据库里新建它，权限选「读取全部数据，修改本人数据」 ⟨DATABASE_COLLECTION_NOT_EXIST | 读取招呼：[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be so⟩","code":"DATABASE_COLLECTION_NOT_EXIST","msgs":[]}）
+  OK  ★ 缺 hansen_friends → 好友页「云端设置还差一步」+ 集合名 + 技术信息（👥 我的好友 × 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 🛠️ 云端设置还差一步 ）
+  OK  ★ 两人上传天梯分成功（{"pa":{"ok":true},"pb":{"ok":true}}）
+  OK  ★ 榜上有两个人（名字是自己起的），也找得到自己（[{"rank":1,"uid":"1527283253218073236","name":"小爱","cid":1,"rating":1045,"games":4},{"rank":2,"uid":"1650936123503737095","name":"小博","cid":2,"rating":1045,"games":4}]）
+  OK  ★ 上传被拒要报出来，不是 ok:true（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 上传天梯分：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 拉榜被拒 → 报错（不是「还没有人上榜」）（{"ok":false,"kind":"config","expired":false,"text":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」","reason":"云端设置还差一步：数据库集合「sb_profile」的权限不对，请在云开发控制台把它设成「读取全部数据，修改本人数据」 ⟨DATABASE_PERMISSION_DENIED | 读取排行榜：Permission denied⟩","code":"DATABASE_PERMISSION_DENIED"}）
+  OK  ★ 刷新后第一次开天梯页：榜直接显示两个人（1 小爱 1045 1 小博 (你) 1045）
+  OK  ★ 断网 → kind network（{"ok":false,"kind":"network","expired":false,"text":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试","reason":"连不上网络，排行榜暂时看不到，检查一下 Wi-Fi 或数据再试 ⟨network request error⟩"}）
+  OK  ★ 岛屿页：好友页盖在拼写大PK屏上面，点得到（{"pkOn":true,"onTop":true}）
+  OK  没有页面脚本报错（无）
+  OK  没有一个请求跑到外网（无）
+
+60 通过，0 失败（60 秒）

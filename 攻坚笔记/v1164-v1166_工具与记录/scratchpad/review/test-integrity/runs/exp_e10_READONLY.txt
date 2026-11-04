@@ -1,0 +1,42 @@
+{
+ "ACL": "READONLY",
+ "kids": [
+  {
+   "nick": "小一",
+   "login": true,
+   "cid": 1
+  },
+  {
+   "nick": "小二",
+   "login": true,
+   "cid": 2
+  },
+  {
+   "nick": "小三",
+   "login": true,
+   "cid": 3
+  }
+ ],
+ "push_小一": {
+  "ok": true
+ },
+ "push_小二": {
+  "ok": true
+ },
+ "push_小三": {
+  "ok": true
+ },
+ "boardSeenByKid3": {
+  "ok": true,
+  "names": [
+   "小一",
+   "小二",
+   "小三"
+  ],
+  "myRank": 3
+ },
+ "addFriend_1_to_2": {
+  "ok": true,
+  "name": "小二"
+ }
+}

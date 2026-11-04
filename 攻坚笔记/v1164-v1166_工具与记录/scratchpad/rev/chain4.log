@@ -1,0 +1,29 @@
+new@wt exit=0 fails=0
+new@pre-fix-HEAD exit=1 fails=24
+srs@origin-main exit=1 fails=7
+test_canonical_progress_v941 exit=0 fails=0
+test_canonical_economy_v941 exit=0 fails=0
+test_canonical_input_safety_v946 exit=0 fails=0
+test_canonical_srs_hf2_v946 exit=0 fails=0
+test_canonical_partial_backup_v942 exit=0 fails=0
+test_canonical_clear_crystal_v942 exit=0 fails=0
+test_canonical_backup_schema_v942 exit=0 fails=0
+test_land_sync_v942 exit=0 fails=0
+test_storage_reset_v942 exit=0 fails=0
+test_backup_v942 exit=0 fails=0
+test_answer_coin_v941 exit=0 fails=0
+test_answer_coin_transaction_v942 exit=0 fails=0
+test_explore_dual_progress_v945 exit=0 fails=0
+test_explore_progress_api_v945 exit=0 fails=0
+test_explore_template_v945 exit=0 fails=0
+test_camel_runtime_v1015 exit=0 fails=0
+test_backup_coverage_v1019 exit=0 fails=0
+test_mock_contract_v970 exit=1 fails=2
+test_today_overlay_fixed_v1006 exit=0 fails=0
+test_review_rewards_v963 exit=0 fails=0
+test_legacy_economy_v941 exit=0 fails=0
+test_mistake_lesson_v1165 exit=0 fails=0
+test_real_path_smoke_v1163 exit=0 fails=0
+test_land_mode_xp_v941 exit=0 fails=0
+SETDONE
+CHAIN4DONE

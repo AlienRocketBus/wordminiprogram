@@ -1,0 +1,4 @@
+C setName via validateName: {"ok":true,"name":"加QQ12345678","cid":0}
+C screen after 加好友: ✅ 已发出好友请求。等 小爱 也加你，就成为好友了
+A sees: 🙋 想加你为好友（1） | 🐝 | 加QQ12345678
+foreign writes: 0

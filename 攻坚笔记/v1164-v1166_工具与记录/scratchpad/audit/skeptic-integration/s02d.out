@@ -1,0 +1,10 @@
+A island_animal.html visibleMs 3318 | 20s: server requests 158 MB 10.92 html 6 /island_animal.html /land_map.html?v=1163 /island_season.html?v=1163 /boss_hall.html?v=1163&warm=1 /season_showcase.html?v=1163&warm=1 /spelling_bee.html?v=1163&warm=1
+A frames() 6 index.html | island_animal.html | land_map.html?v=1163 | island_season.html?v=1163 | land_map.html?v=1163 | 
+A island_food.html visibleMs 4416 | 20s: server requests 95 MB 2.06 html 1 /island_food.html
+A frames() 7 index.html | island_food.html | land_map.html?v=1163 | island_season.html?v=1163 | land_map.html?v=1163 | island_season.html?v=1163 | boss_hall.html?v=1163&warm=1
+A external requests 0
+B island_animal.html visibleMs 2646 | 20s: server requests 253 MB 13.45 html 1 /island_animal.html
+B frames() 2 index.html | island_animal.html
+B island_food.html visibleMs 1192 | 20s: server requests 124 MB 7.92 html 1 /island_food.html
+B frames() 2 index.html | island_food.html
+B external requests 0

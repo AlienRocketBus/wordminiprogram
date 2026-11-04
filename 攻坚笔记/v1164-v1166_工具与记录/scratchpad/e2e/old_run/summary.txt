@@ -1,0 +1,6 @@
+test_ladder_cloud_v1164.mjs rc=1 secs=166
+test_cloud_errors_v1164.mjs rc=1 secs=45
+test_auth_cloud_v1164.mjs rc=1 secs=23
+test_rooms_lifecycle_cloud_v1164.mjs rc=1 secs=38
+test_rooms_cloud_v1164.mjs rc=1 secs=278
+DONE

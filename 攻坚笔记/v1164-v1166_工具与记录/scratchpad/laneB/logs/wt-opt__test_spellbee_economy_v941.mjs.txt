@@ -1,0 +1,1 @@
+✅ v941 Bee：专属日账硬封顶、canonical去重/新词快照、source与payload安全边界全部通过

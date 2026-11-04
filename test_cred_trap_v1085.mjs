@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cred_trap_v1085.mjs —— 凭证生死簿：抓出到底是谁删掉了云端凭证
  *
  * 现场事实（v1084 已确认部署，故证据可信）：
@@ -24,7 +25,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('凭证生死簿 v1085');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cred_trap_v1085.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cred_trap_v1085.js'), 'utf8');
 
 function mk() {
   const raw = {};
@@ -114,7 +115,7 @@ function mk() {
 
 /* ⑤ 必须最先加载 —— 否则抓不到早期动作 */
 {
-  const html = fs.readFileSync('/home/claude/work/repo/island_animal.html', 'utf8');
+  const html = fs.readFileSync((__HSN_ROOT + 'island_animal.html'), 'utf8');
   const trap = html.indexOf('hansen_cred_trap_v1085');
   const auth = html.indexOf('hansen_auth_v1004');
   ok(trap >= 0, '岛屿页已装监视器');

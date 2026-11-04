@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_watchdog_v1155.mjs —— 对战/天梯看门狗
  *
  * ═══ 为什么有这个模块 ═══
@@ -23,7 +24,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
@@ -101,7 +102,8 @@ async function fresh() {
 const MAKE_BATTLE = `
   const h=document.createElement('div');h.className='on';
   const w=document.createElement('div');w.className='pr_wrap';
-  w.innerText='你 0 ⚡抢答赛 0 对手 第 1 / 3 词 · ⏱ 8s';
+  /* v1164：和真对战屏一样，倒计时在 #prClock 里（看门狗只对有倒计时的对战屏判「卡住」—— 审查 X1） */
+  w.innerHTML='你 0 ⚡抢答赛 0 对手 第 1 / 3 词 · <span id="prClock">⏱ 8s</span>';
   h.appendChild(w);document.body.appendChild(h);
   /* 🔴v1156：**塞进 DOM 之后要逼浏览器排版一次。**
 
@@ -252,7 +254,7 @@ const MAKE_BATTLE = `
     ${MAKE_BATTLE}
     const W=window.HansenPkWatchdog;
     const scr=document.querySelector('.pr_wrap');
-    for(let i=10;i>4;i--){ scr.innerText='你 0 ⚡抢答赛 0 对手 第 1 / 3 词 · ⏱ '+i+'s';
+    for(let i=10;i>4;i--){ scr.innerHTML='你 0 ⚡抢答赛 0 对手 第 1 / 3 词 · <span id="prClock">⏱ '+i+'s</span>';
       W._tickForTest(); W._agePaintForTest(30000); }
     return new Promise(res=>setTimeout(()=>res(!!document.getElementById('pkRescue')),150));`));
   ok(r === false, '★ **正常对局（倒计时在走）不误救** —— 误救比不救更糟');
@@ -269,6 +271,25 @@ const MAKE_BATTLE = `
     W._tickForTest(); W._agePaintForTest(60000); W._tickForTest();
     return new Promise(res=>setTimeout(()=>res(!!document.getElementById('pkRescue')),150));`));
   ok(r === false, '★ **页面在后台不判定** —— 切出去本来就不刷新');
+  await ctx.close();
+}
+
+/* ③b 🔴v1164（审查 X1）：天梯首页给新人看的说明里有「⏱ 平均用时」—— 读 30 秒说明不是「卡住了」 */
+{
+  const { pg, ctx } = await fresh();
+  const r = await pg.evaluate(new Function(`
+    const h=document.createElement('div');h.className='on';
+    const w=document.createElement('div');w.className='ld_wrap';
+    w.innerText='🏆 天梯排位 🐝 未定级 ⚡ 开始排位 我的实力 打完第一局就能看到：⚡ 抢先率 —— 你有多少次抢在对手前面 ⏱ 平均用时 —— 每个词你要想多久';
+    h.appendChild(w);document.body.appendChild(h);
+    void w.offsetHeight;
+    const W=window.HansenPkWatchdog;
+    W._tickForTest(); W._agePaintForTest(40000);
+    const judged = W._shouldRescueForTest();
+    W._tickForTest();
+    return new Promise(res=>setTimeout(()=>res({ judged, shown: !!document.getElementById('pkRescue') }),150));`));
+  ok(r && r.judged === false && r.shown === false,
+     '★ 天梯首页静止 40 秒（说明里有「⏱」）不会被当成「这一局卡住了」—— 以前会盖住整屏、还挡住手指下面的按钮');
   await ctx.close();
 }
 
@@ -315,6 +336,64 @@ const MAKE_BATTLE = `
   });
   ok(r === 'ok', '★ 点「回到大PK首页」能真的关掉救援屏');
   await ctx.close();
+}
+
+/* ⑤b 🔴v1164：**关天梯 / 开好友页 / 点救援屏的出口，都不许上哨。**
+ *
+ * 实测（v1155~v1163）：天梯的 close() 里 arm('排位') ——
+ *   · 点 × 关掉天梯，6 秒后冒出「这一步没能打开」
+ *   · 开好友页（它会先关天梯）同样被盖住
+ *   · 救援屏的「回到大PK首页」又调 close() 再上哨 → 6 秒后又来，**死循环**
+ * 只有真正开始匹配（startMatching）才该上哨。 */
+{
+  const { pg, ctx, errs } = await fresh();
+  const r = await pg.evaluate(async () => {
+    const W = window.HansenPkWatchdog, out = {};
+    W._resetForTest();
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    window.HansenLadderUI.close();
+    out.afterClose = W._stateForTest().armed;
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    if (window.HansenFriendsUI) window.HansenFriendsUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    out.afterFriends = W._stateForTest().armed;
+    try { window.HansenFriendsUI && window.HansenFriendsUI.close(); } catch (e) {}
+    /* 救援屏的出口：点完必须是「没上哨」—— 否则 6 秒后同一屏又回来 */
+    W._rescueForTest('测试', '说明');
+    await new Promise(z => setTimeout(z, 100));
+    document.getElementById('pkRescueBack').click();
+    await new Promise(z => setTimeout(z, 200));
+    out.afterQuit = W._stateForTest().armed;
+    /* 真正开始匹配才上哨（登录态 + 本地假库，不联网） */
+    localStorage.setItem('hansen_auth_v1004', JSON.stringify({ uid: 'U1', method: 'phone', signedAt: Date.now() }));
+    window.HansenPkRoom._setMeForTest({ id: 'U1', name: '我' });
+    window.HansenPkRoom._setTransportForTest({ read: async () => null, patch: async () => ({ updated: 0 }),
+      add: async d => ({ id: d._id }), list: async () => [], remove: async () => ({ deleted: 0 }),
+      listOpen: async () => [] });
+    window.HansenLadderUI.open();
+    await new Promise(z => setTimeout(z, 100));
+    document.getElementById('ldGo').click();
+    out.afterGo = W._stateForTest().armed;
+    W._tickForTest();
+    out.afterPaint = W._stateForTest().armed;     /* 画出来了就撤哨 */
+    window.HansenLadderUI.close();
+    return out;
+  });
+  ok(r.afterClose === false, '★🔒 关掉天梯不上哨（原来 6 秒后冒出「这一步没能打开」）');
+  ok(r.afterFriends === false, '★🔒 打开好友页（会先关天梯）不上哨');
+  ok(r.afterQuit === false, '★🔒 **点救援屏的「回到大PK首页」后不再上哨** —— 原来点了又来，死循环');
+  ok(r.afterGo === true && r.afterPaint === false,
+     `★ 真正开始匹配才上哨，画出来就撤（开始后 ${r.afterGo} / 画完 ${r.afterPaint}）`);
+  ok(errs.length === 0, '★ 这一串零脚本错误' + (errs.length ? '：' + errs[0] : ''));
+  await ctx.close();
+}
+{
+  const ld = fs.readFileSync(path.join(ROOT, 'hansen_ladder_ui_v1108.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const i = ld.indexOf('function close()');
+  const seg = ld.slice(i, ld.indexOf('\n  }', i));
+  ok(i > 0 && !/HansenPkWatchdog\.arm/.test(seg), '★🔒 天梯 close() 里没有上哨');
 }
 
 /* ⑥ 必须接到页面上 —— 否则等于没做 */

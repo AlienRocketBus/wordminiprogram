@@ -1,0 +1,45 @@
+=== s29_warm_cpu
+{"label":"as-is","readyMs":4908,"MB_25s":14.9,"scriptSec":2.83,"taskSec":20.28,"layoutSec":1.75,"frames":8,"heapMB":10.2,"nodes":9418}
+{"label":"no-room-warm","readyMs":4357,"MB_25s":10,"scriptSec":1.79,"taskSec":19.62,"layoutSec":1.36,"frames":3,"heapMB":4.6,"nodes":5352}
+{"label":"as-is","readyMs":3583,"MB_25s":16.6,"scriptSec":2.74,"taskSec":20.31,"layoutSec":2.2,"frames":8,"heapMB":9.9,"nodes":8055}
+{"label":"no-room-warm","readyMs":2981,"MB_25s":9.7,"scriptSec":1.71,"taskSec":19.29,"layoutSec":1.19,"frames":3,"heapMB":4.6,"nodes":5561}
+=== s14_warm_ab
+{"label":"as-is","readyMs":2919,"KB_20s":15223,"req":439,"tbt_ms":3996,"frames":7,"docs":7,"heapMB":10.3,"nodes":8695}
+{"label":"no-room-warm","readyMs":4733,"KB_20s":9688,"req":260,"tbt_ms":4000,"frames":3,"docs":3,"heapMB":5,"nodes":5562}
+{"label":"no-room-warm+no-eager-boss-engine","readyMs":4778,"KB_20s":7015,"req":228,"tbt_ms":8841,"frames":3,"docs":3,"heapMB":5.4,"nodes":5437}
+=== s31_anim_ab
+home {"busyPct":63,"scriptPct":2}
+home-noAnim {"busyPct":42,"scriptPct":3}
+island {"busyPct":34,"scriptPct":1}
+island-noAnim {"busyPct":4,"scriptPct":1}
+=== s01_firstrun
+   ],
+   "clicked": "下一步 →"
+  },
+  {
+   "title": "18 个主题岛屿等你探索",
+   "body": "每个岛是一个单词主题\n（动物、食物、学校…）。\n先在岛上玩游戏认识单词，\n再去挑战守关的 Boss 💪",
+   "btns": [
+    "跳过|56x44",
+    "下一步 →|288x53"
+   ],
+   "clicked": "🚀 开始冒险！"
+  },
+  {
+   "title": "答错也没关系！",
+   "body": "答错的单词会自动进入复习，\n下次帮你重点再练一遍。\n坚持每天来，单词越背越牢！",
+   "btns": [
+    "跳过|56x44",
+    "🚀 开始冒险！|288x53"
+   ],
+   "clicked": "🚀 开始冒险！"
+  }
+ ],
+ "dialogs": [],
+ "errs": [],
+ "overlays": [
+  "bg-cosmos: ",
+  "stars: ",
+  "deco: 💎 🍔 🏙️ 📚 🐘 💎 🏙️ 🏙️ 🌟 🚌 🚌 🦋 🐾 💎"
+ ]
+}

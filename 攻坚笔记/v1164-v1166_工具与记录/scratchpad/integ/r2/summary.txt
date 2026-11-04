@@ -1,0 +1,4 @@
+test_rooms_lifecycle_cloud_v1164.mjs rc=0 168s
+test_auth_cloud_v1164.mjs rc=0 70s
+test_rooms_cloud_v1164.mjs rc=0 178s
+DONE

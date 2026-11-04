@@ -1,0 +1,17 @@
+const POC = '/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/emulator-poc';
+const { createEmulator, ACL } = await import(POC + '/emulator.mjs');
+const { startStatic, launch, newCtx, E } = await import(POC + '/harness.mjs');
+const emu = createEmulator({ collections: { hansen_pk_rooms: ACL.READONLY, hansen_saves: ACL.READONLY, sb_profile: ACL.READONLY, counters: ACL.ADMINONLY }, knobs: { latencyMs: 40 } });
+emu.seedUser({ username: 'bob_e2e', password: 'pw123456', name: 'bob' });
+const srv = await startStatic(); const ORIGIN = `http://127.0.0.1:${srv.address().port}`; const browser = await launch();
+const c = await newCtx(browser, emu, ORIGIN, { tag: 'B', url: '/spelling_pk.html', waitReady: false, ctxOpts: { serviceWorkers: 'block' } });
+const B = c.page;
+await B.waitForFunction(() => window.HansenAuth && window.HansenPkRoom, null, { timeout: 30000 }); await B.waitForTimeout(800);
+console.log(await E(B, async () => { await window.HansenAuth.loginByPassword('bob_e2e', 'pw123456'); return window.HansenAuth.ensureSession(); }));
+console.log(await E(B, async () => JSON.stringify(await window.HansenPkRoom.listRooms())));
+await E(B, () => { Object.keys(localStorage).filter((k) => /^credentials_/.test(k)).forEach((k) => localStorage.removeItem(k)); });
+await B.reload(); await B.waitForFunction(() => window.HansenAuth && window.HansenPkRoom, null, { timeout: 30000 }); await B.waitForTimeout(800);
+console.log('keys', await E(B, () => Object.keys(localStorage)));
+console.log(await E(B, async () => JSON.stringify(await window.HansenAuth.ensureSession())));
+console.log(await E(B, async () => { try { const r = await window.HansenPkRoom.listRooms(); return JSON.stringify(r); } catch (e) { return 'THREW ' + e; } }));
+await browser.close(); srv.close();

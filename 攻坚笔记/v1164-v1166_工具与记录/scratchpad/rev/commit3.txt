@@ -1,0 +1,21 @@
+同一批词的两个入口不再互相冲掉：单词大陆③ 回来不会把星海刚清掉的错词、升过的复习盒冲回去
+
+单词大陆①~⑧ 和星海共用同一批 240 个词（同一个账本槽位）。复查实测：在单词大陆③答错 →
+去星海答对（错题本清零、复习计划升到盒1）→ 回到单词大陆③：错题本又是 1、计划掉回盒0，
+账本也被它带坏，再回星海也是错的（错题数回来这一半 origin/main 就有；v1165 让复习盒也一起掉回去）。
+
+两个原因：
+- 岛页一打开先 save() 一次，hansen_upgrade 又把本岛存档的 lastSaveTime 改成「现在」——数据是上次的，
+  时间却是新的，账本开机合并本页存档时把它当成比「星海清零墓碑 / 新复习盒」更新的数据。
+  → 模板 load() 记下存档真实时间 __hsnLoadedSaveTime；账本开机那次 migrate 合并本页存档和本页 S 时用它。
+- hansen_pet_showcase 在账本开机同步之前就调了「以本页为准」的 absorbCurrent()。
+  → 本页 S 是从存档读出来的、账本又还没回填过它（syncCurrent）时，absorbCurrent 先不动作；
+    回填之后、或新孩子没有存档时照旧（Node 台架里先开机后才有 S 的情况不受影响）。
+
+test_srs_plan_v1165 的 C2（错题总览）改为等本岛词表缓存写好再打开：总览靠 hansen_upgrade 开机 1.5 秒后写的
+hansen_vocab_* 认词，刷新后 0.8 秒就打开会看不到这个岛——修改前的 HEAD 在单词大陆这一场同样失败，属于测试时序问题；断言不变。
+
+test_lesson_review_fix_v1165 加 A 项（单词大陆③ ↔ 星海往返）。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

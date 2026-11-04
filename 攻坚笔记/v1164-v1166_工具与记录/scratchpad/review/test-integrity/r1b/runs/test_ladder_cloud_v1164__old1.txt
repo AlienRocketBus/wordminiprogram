@@ -1,0 +1,145 @@
+
+天梯排位 · 真 SDK 端到端（v1164）
+
+
+── ① 两人打一局排位（READONLY · legacy） ──
+  OK  [甲] 用手机号验证码登录（真 SDK → 模拟云端）uid=1728325321807323665
+  OK  [乙] 用手机号验证码登录（真 SDK → 模拟云端）uid=1373709596117908056
+  OK  开局分：甲 1000，乙 1080
+  XX  匹配屏「已等 N 秒」每秒在走（4 次取样：0, 0, 0, 3）
+      [甲 屏幕] × ⏎ ⚡ 正在找对手… ⏎ 🔍 ⏎ 正在找 900 ~ 1100 分的对手 ⏎ 已等 3 秒 · 等得越久范围放得越宽 ⏎ 没人的时候会自动开一间等着 ⏎ 有人进来就立刻开打 ⏎ 取消，回天梯
+      [乙 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 1080 分 ⏎ › ⏎ ✅ 已登录 +86 13800000002　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ 75% ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      09:39.550 - POST /auth/v1/signup → 200
+      09:39.649 小蜂乙 GET /auth/v1/user/me → 200
+      09:39.735 小蜂乙 GET /auth/v1/user/me → 200
+      09:39.847 小蜂乙 POST /web queryDocument sb_profile → 200
+      09:39.917 小蜂乙 POST /web updateDocument sb_profile → 200
+      09:40.034 小蜂乙 POST /web queryDocument sb_profile → 200
+      09:40.109 小蜂乙 POST /web queryDocument hansen_saves → 200
+      09:40.226 小蜂乙 POST /web queryDocument hansen_saves → 200
+      09:40.958 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:42.467 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:43.576 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:45.033 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+  OK  没有对手 → 20 秒后自动开一间排位房、显示「等对手进来」
+  XX  数据库：甲开的排位房（抢答赛、公开、新协议、名字是「小蜂甲」）
+      [甲 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 0 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [乙 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 1080 分 ⏎ › ⏎ ✅ 已登录 +86 13800000002　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ 75% ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y12hlbvbt2w 建者=小蜂甲 {"_id":"rmw0y12hlbvbt2w","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000001","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [最近的云端请求]
+      09:50.257 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:51.354 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:52.867 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:53.929 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:55.437 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:56.498 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:58.035 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      09:59.096 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:00.584 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:01.682 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:01.747 小蜂甲 POST /web addDocument hansen_pk_rooms → 200
+      10:01.815 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+  XX  乙点「开始排位」→ 进了甲的房，两部手机都到了对战屏
+      [甲 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 40 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [乙 屏幕] ← 返回 ⏎ ⚡ 排位 ⏎ 💨 ⏎ 这间房刚被别人抢走了 ⏎ 排位时大家都在抢空房，慢一步就没了。 ⏎ 再找一次就好。 ⏎ ⚡ 再找一次对手
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y12hlbvbt2w 建者=小蜂甲 {"_id":"rmw0y12hlbvbt2w","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000001","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [改别人文档的尝试] 小蜂乙 database.updateDocument hansen_pk_rooms rmw0y12hlbvbt2w
+      [最近的云端请求]
+      10:24.731 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:25.849 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:25.930 小蜂甲 POST /web updateDocument hansen_pk_rooms → 200
+      10:27.822 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:30.940 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:33.861 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:33.980 小蜂甲 POST /web updateDocument hansen_pk_rooms → 200
+      10:34.014 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:37.125 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:40.189 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:41.848 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200
+      10:41.963 小蜂甲 POST /web updateDocument hansen_pk_rooms → 200
+  OK  [甲] 没有页面报错、没有去连别的外网（报错 0：；外网 0）
+  OK  [乙] 没有页面报错、没有去连别的外网（报错 0：；外网 0）
+
+── ② 两人同时开始排位（READONLY · rules） ──
+  OK  [丙] 用手机号验证码登录（真 SDK → 模拟云端）uid=1728325321807323665
+  OK  [丁] 用手机号验证码登录（真 SDK → 模拟云端）uid=1373709596117908056
+  XX  同时开始的两个人最后都进了对战屏（没有各自守着一间空房干等）
+      [丙 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 54 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [丁 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 54 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y2iugmtm3yh 建者=小蜂丙 {"_id":"rmw0y2iugmtm3yh","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000003","hostName":"无名蜂","hostTier":"","guestId":"","g
+      room(旧) rmw0y2iv72odnuo 建者=小蜂丁 {"_id":"rmw0y2iv72odnuo","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000004","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [最近的云端请求]
+      11:49.809 小蜂丙 POST /web updateDocument hansen_pk_rooms → 200
+      11:49.832 小蜂丁 POST /web updateDocument hansen_pk_rooms → 200
+      11:51.315 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:51.497 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:56.423 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:56.610 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.760 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.806 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.891 小蜂丙 POST /web updateDocument hansen_pk_rooms → 200
+      11:57.899 小蜂丁 POST /web updateDocument hansen_pk_rooms → 200
+      12:01.531 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      12:01.693 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+  XX  数据库：只剩一间在打的房，另一间收掉了（在打 0，空着开着 0）
+      [丙 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 54 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [丁 屏幕] ← 关掉房间 ⏎ ⏳ 等对手进来 ⏎ ⏳ ⏎ 已等 54 秒 ⏎ 房间已经开好了，别人在列表里就能看到你。 ⏎ 等人进来就自动开打。 ⏎ 你开的是 ⚡抢答赛 · 10 个词 ⏎ （关掉这一页，房间也会一起关掉）
+      [数据库 hansen_pk_rooms]
+      room(旧) rmw0y2iugmtm3yh 建者=小蜂丙 {"_id":"rmw0y2iugmtm3yh","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000003","hostName":"无名蜂","hostTier":"","guestId":"","g
+      room(旧) rmw0y2iv72odnuo 建者=小蜂丁 {"_id":"rmw0y2iv72odnuo","status":"open","code":"","hostRating":1000,"isPrivate":false,"hostId":"+86 13800000004","hostName":"无名蜂","hostTier":"","guestId":"","g
+      [最近的云端请求]
+      11:49.809 小蜂丙 POST /web updateDocument hansen_pk_rooms → 200
+      11:49.832 小蜂丁 POST /web updateDocument hansen_pk_rooms → 200
+      11:51.315 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:51.497 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:56.423 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:56.610 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.760 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.806 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+      11:57.891 小蜂丙 POST /web updateDocument hansen_pk_rooms → 200
+      11:57.899 小蜂丁 POST /web updateDocument hansen_pk_rooms → 200
+      12:01.531 小蜂丙 POST /web queryDocument hansen_pk_rooms → 200
+      12:01.693 小蜂丁 POST /web queryDocument hansen_pk_rooms → 200
+  OK  安全规则模式下也没有越权写（被拒 0 次）
+
+── ③ 岛屿页「拼写大PK → 天梯排位」看得见、点得到（READONLY · legacy） ──
+  XX  没登录点「天梯排位」→ 登录面板出现在最上层、手机号框点得到（看到：← 返回 ⚔️ 拼写大PK 和真人比拼写，不是机器人 🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 › 🔐 注册 / 登录 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 🏠 大PK ）
+      [戊 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ 🔐 注册 / 登录 ⏎ 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 1 ⏎ 连续学习(天) ⏎ 🩺 遇到问题？ ⏎ ☁️ 云同步自检（把结果截图发给开发者）
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      
+  OK  [戊] 在岛屿页登录 uid=1728325321807323665
+  OK  登录完回到拼写大PK屏，「天梯排位」点得到（div.k_t < button#kLadder.k_card.k_c2 < div#hsn_pk_screen.on < body < html.hsn-bt-dark）
+  XX  天梯页在拼写大PK屏上面、「开始排位」点得到（手指下面不是它，而是 div.k_t < button#kRooms.k_card.k_c1 < div#hsn_pk_screen.on < body < html.hsn-bt-dark）
+      [戊 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ 🔐 注册 / 登录 ⏎ 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 1 ⏎ 连续学习(天) ⏎ 🩺 遇到问题？ ⏎ ☁️ 云同步自检（把结果截图发给开发者）
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      12:11.262 - POST /auth/v1/verification → 200
+      12:11.351 - POST /auth/v1/signup → 200
+      12:11.431 戊 GET /auth/v1/user/me → 200
+      12:11.584 戊 GET /auth/v1/user/me → 200
+      12:11.727 戊 POST /web queryDocument sb_profile → 200
+      12:11.894 戊 POST /web updateDocument sb_profile → 200
+      12:11.985 戊 POST /web queryDocument sb_profile → 200
+      12:12.063 戊 POST /web queryDocument hansen_saves → 200
+      12:12.136 戊 POST /web queryDocument hansen_saves → 200
+      12:13.053 戊 POST /web queryDocument sb_profile → 200
+  OK  [戊] 没有页面报错（无）
+
+12 通过，7 失败（158 秒）
+失败的：
+  · 匹配屏「已等 N 秒」每秒在走（4 次取样：0, 0, 0, 3）
+  · 数据库：甲开的排位房（抢答赛、公开、新协议、名字是「小蜂甲」）
+  · 乙点「开始排位」→ 进了甲的房，两部手机都到了对战屏
+  · 同时开始的两个人最后都进了对战屏（没有各自守着一间空房干等）
+  · 数据库：只剩一间在打的房，另一间收掉了（在打 0，空着开着 0）
+  · 没登录点「天梯排位」→ 登录面板出现在最上层、手机号框点得到（看到：← 返回 ⚔️ 拼写大PK 和真人比拼写，不是机器人 🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 › 🔐 注册 / 登录 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 🏠 大PK ）
+  · 天梯页在拼写大PK屏上面、「开始排位」点得到（手指下面不是它，而是 div.k_t < button#kRooms.k_card.k_c1 < div#hsn_pk_screen.on < body < html.hsn-bt-dark）

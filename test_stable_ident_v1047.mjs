@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_stable_ident_v1047.mjs —— 账号标识必须在所有设备上一致
  * 决定性现象（用户实测）：同一账号，手机A ⑩ 显示"有存档"、
  *   手机B 却"没有"且拉取尝试 15 个地址全落空。
@@ -12,7 +13,7 @@
 import vm from 'node:vm'; import fs from 'node:fs'; import crypto from 'node:crypto';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('账号标识跨设备一致性 v1047');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 ok(/function accountIdent/.test(src), '提供 accountIdent（账号标识）');
 ok(/lc\.phone/.test(src), '优先使用手机号');
 ok(/replace\(\/\^\\\+\?86\//.test(src) || /\+\?86/.test(src), '手机号做了前缀归一(+86)');

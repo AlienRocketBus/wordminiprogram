@@ -1,0 +1,213 @@
+
+登录 / 会话 / 备份 · 真 SDK 端到端（v1164）
+
+  OK  [过期] 先登录（令牌 5 秒后要刷新）uid=1093612350373709596
+
+── ① 手机号注册：在界面上点出来 ──
+  OK  界面显示「登录成功」，云端真建了这个账号（uid=1636192914926851022；看到：登录成功！ 竞赛 ID 稍后分配。 本机还没有进度，玩一会儿就会自动存到云端。）
+  OK  本机有真凭证（703 字节）、会话可用、uid 对得上（1636192914926851022）
+  OK  登录后在 sb_profile 建了自己的档案（自己建的文档）
+
+── ② 用户名 + 密码登录 ──
+  OK  密码错了：如实说没成功，不写「已登录」（看到：密码不对）
+  OK  密码对了：登录成功，uid 是这个用户名账号（1527283253218073236）
+
+── ③ 用户名注册：如实拒绝 ──
+  XX  registerByPassword 如实拒绝，并指向手机号注册（）
+  XX  没写「已登录」、没凭证、没发注册/验证码请求（发了 1 个）
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] 👤 已登录 ⏎ ✕ ⏎ 手机号：+86 13800000082 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [用户名 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：kid_pw01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [注册 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ 🔐 注册 / 登录 ⏎ 登录后进度存到云端，换手机登录同一账号，等级、卡册、成就全都在。 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:02.223 手机号 POST /web queryDocument hansen_saves → 200
+      19:04.161 用户名小孩 POST /auth/v1/signin → 400 invalid_password
+      19:04.222 - POST /auth/v1/signin → 404 not_found
+      19:04.664 用户名小孩 POST /auth/v1/signin → 200
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+  XX  本段脚本出错：[注册] 点不到「.au_tab[data-m="password"]」：等了 10000ms 也没看到「.au_tab[data-m="password"]」
+
+── ④ 登录响应缺 expires_in（SDK 删了凭证却照样 resolve） ──
+  XX  本段脚本出错：[注册] 点不到「.au_tab[data-m="password"]」：等了 10000ms 也没看到「.au_tab[data-m="password"]」
+
+── ⑤ SDK 的 user_info 缓存没了 → 自动补回 ──
+  XX  会话照样可用、uid 从云端补回、缓存也补上了（uid=undefined）
+      {"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"}
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000082　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [用户名 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：kid_pw01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+  XX  开房照常（房主身份 undefined）
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 云端还在准备中，等一两秒再点一次 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 云端还在准备中，等一两秒再点一次 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [用户名 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：kid_pw01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+  OK  没人来就关掉房间 → 自己的房删掉了，不留幽灵房
+
+── ⑥ user_info 缓存坏了 → 修好，不登出 ──
+  XX  会话照样可用（uid=undefined）、没被登出、坏缓存修好了
+      {"ok":false,"expired":false,"definite":false,"reason":"Unexpected end of JSON input"}
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] 
+      [用户名 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 kid_pw01　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+
+── ⑦ 完整备份 / 恢复不碰 SDK 的键 ──
+  XX  本机确实有 SDK 的键（lang_ambitious-d0g1d26xm740dc3d6, device_id, credentials_ambitious-d0g1d26xm740dc3d6）
+  XX  备份里一个 SDK 键都没有（共 7 项；混进来的：device_id, lang_ambitious-d0g1d26xm740dc3d6）
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] 
+      [用户名 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 kid_pw01　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+  XX  恢复一份带 SDK 键的老快照：成功恢复，凭证/缓存一个字没动，会话照常（备份含非法键或非字符串值）
+      [过期 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 +86 13800000081　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [手机号 屏幕] 
+      [用户名 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 kid_pw01　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:04.720 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.806 用户名小孩 GET /auth/v1/user/me → 200
+      19:04.894 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:04.958 用户名小孩 POST /web updateDocument sb_profile → 200
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+
+── ⑧ 云端会话没了、过了刚登录的保护期 → 点排位被引去登录 ──
+  XX  最后出现了登录面板（手机号输入框点得到）（41 秒；看到过：无）
+      🛠️ 这一步没能打开 刚才那个操作没有正常显示出来。 你的进度和天梯分都还在，没有丢。 回到大PK首页 重新找对手 
+      [过期 屏幕] 🛠️ ⏎ 这一步没能打开 ⏎ 刚才那个操作没有正常显示出来。 ⏎ 你的进度和天梯分都还在，没有丢。 ⏎ 回到大PK首页 ⏎ 重新找对手
+      [手机号 屏幕] 
+      [用户名 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 kid_pw01　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+      20:02.582 过期 POST /auth/v1/token → 400 invalid_grant
+      20:03.043 过期 POST /auth/v1/token → 400 invalid_grant
+      20:03.616 过期 POST /auth/v1/token → 400 invalid_grant
+      20:04.060 过期 POST /auth/v1/token → 400 invalid_grant
+  OK  没有说成「断网」「云端没连上」「云端设置」（看到过：无）
+  XX  本机「已登录」记录清掉了（已登录=true），界面不再挂着假的「已登录」
+      [过期 屏幕] 🛠️ ⏎ 这一步没能打开 ⏎ 刚才那个操作没有正常显示出来。 ⏎ 你的进度和天梯分都还在，没有丢。 ⏎ 回到大PK首页 ⏎ 重新找对手
+      [手机号 屏幕] 
+      [用户名 屏幕] ← 返回 ⏎ ⚔️ 拼写大PK ⏎ 和真人比拼写，不是机器人 ⏎ 🐝 ⏎ 点这里设置名字 ⏎ 🎫 竞赛 ID 登录后自动分配 ⏎ 🐝 工蜂 · 未定级 ⏎ › ⏎ ✅ 已登录 kid_pw01　进度已跟随账号，换设备登录即可找回。 ⏎ 🔄 切换账号 ⏎ 🚪 退出登录 ⏎ 🏠 ⏎ 大PK · 公开房间 ⏎ 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 ⏎ 👥 ⏎ 我的好友 ⏎ 加同学做好友，看谁刚才还在，一句话就能约战。 ⏎ 🏆 ⏎ 天梯排位 ⏎ 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 ⏎ 📊 我的战绩 ⏎ 0 ⏎ 最快速度(字符/分) ⏎ — ⏎ 对战胜率 ⏎ 0 ⏎ 已掌握单词 ⏎ 0 ⏎ 连续学习(天)
+      [注册 屏幕] 👤 已登录 ⏎ ✕ ⏎ 用户名：newkid01 ⏎ 你的进度会保存在云端，换设备登录同一个账号就能找回。 ⏎ ☁️ 立即把进度存到云端退出登录
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      19:05.015 用户名小孩 POST /web queryDocument sb_profile → 200
+      19:05.101 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:05.192 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:06.659 - POST /auth/v1/verification → 200
+      19:07.210 手机号 POST /web queryDocument hansen_saves → 200
+      19:07.289 手机号 POST /web queryDocument hansen_saves → 200
+      19:10.160 用户名小孩 POST /web queryDocument hansen_saves → 200
+      19:10.238 用户名小孩 POST /web queryDocument hansen_saves → 200
+      20:02.582 过期 POST /auth/v1/token → 400 invalid_grant
+      20:03.043 过期 POST /auth/v1/token → 400 invalid_grant
+      20:03.616 过期 POST /auth/v1/token → 400 invalid_grant
+      20:04.060 过期 POST /auth/v1/token → 400 invalid_grant
+  OK  [过期] 没有页面报错（无）
+  OK  [手机号] 没有页面报错（无）
+  OK  [用户名] 没有页面报错（无）
+  OK  [注册] 没有页面报错（无）
+
+12 通过，12 失败（106 秒）
+失败的：
+  · registerByPassword 如实拒绝，并指向手机号注册（）
+  · 没写「已登录」、没凭证、没发注册/验证码请求（发了 1 个）
+  · 本段脚本出错：[注册] 点不到「.au_tab[data-m="password"]」：等了 10000ms 也没看到「.au_tab[data-m="password"]」
+  · 本段脚本出错：[注册] 点不到「.au_tab[data-m="password"]」：等了 10000ms 也没看到「.au_tab[data-m="password"]」
+  · 会话照样可用、uid 从云端补回、缓存也补上了（uid=undefined）
+  · 开房照常（房主身份 undefined）
+  · 会话照样可用（uid=undefined）、没被登出、坏缓存修好了
+  · 本机确实有 SDK 的键（lang_ambitious-d0g1d26xm740dc3d6, device_id, credentials_ambitious-d0g1d26xm740dc3d6）
+  · 备份里一个 SDK 键都没有（共 7 项；混进来的：device_id, lang_ambitious-d0g1d26xm740dc3d6）
+  · 恢复一份带 SDK 键的老快照：成功恢复，凭证/缓存一个字没动，会话照常（备份含非法键或非字符串值）
+  · 最后出现了登录面板（手机号输入框点得到）（41 秒；看到过：无）
+  · 本机「已登录」记录清掉了（已登录=true），界面不再挂着假的「已登录」

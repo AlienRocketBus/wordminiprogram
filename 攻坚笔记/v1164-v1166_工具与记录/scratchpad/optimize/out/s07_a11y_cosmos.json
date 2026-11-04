@@ -1,0 +1,225 @@
+[
+ {
+  "label": "home-top",
+  "nText": 29,
+  "fsBins": {
+   "lt10": 1,
+   "10-11": 2,
+   "12-13": 5,
+   "14-15": 5,
+   "16+": 16
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [
+   "✦ 番外篇 EXTRA(11)",
+   "第 19 座秘境(11)",
+   "副本(9)"
+  ],
+  "nCtrls": 2,
+  "nSmall": 1,
+  "smallSamples": [
+   {
+    "t": "沉浸欣赏主题",
+    "w": 40,
+    "h": 40
+   }
+  ]
+ },
+ {
+  "label": "home-islands",
+  "nText": 30,
+  "fsBins": {
+   "lt10": 0,
+   "10-11": 0,
+   "12-13": 30,
+   "14-15": 0,
+   "16+": 0
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [],
+  "nCtrls": 9,
+  "nSmall": 0,
+  "smallSamples": []
+ },
+ {
+  "label": "home-bottom",
+  "nText": 16,
+  "fsBins": {
+   "lt10": 0,
+   "10-11": 0,
+   "12-13": 7,
+   "14-15": 1,
+   "16+": 8
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [],
+  "nCtrls": 2,
+  "nSmall": 1,
+  "smallSamples": [
+   {
+    "t": "🔒 隐私与离线说明",
+    "w": 170,
+    "h": 43
+   }
+  ]
+ },
+ {
+  "label": "island-main",
+  "nText": 31,
+  "fsBins": {
+   "lt10": 0,
+   "10-11": 7,
+   "12-13": 18,
+   "14-15": 5,
+   "16+": 1
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [
+   "打卡天数(10)",
+   "1(10)",
+   "0(10)",
+   "100(10)",
+   "XP(10)",
+   "0(11)",
+   "300(11)"
+  ],
+  "nCtrls": 16,
+  "nSmall": 0,
+  "smallSamples": []
+ },
+ {
+  "label": "explore",
+  "nText": 40,
+  "fsBins": {
+   "lt10": 0,
+   "10-11": 20,
+   "12-13": 17,
+   "14-15": 2,
+   "16+": 1
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [
+   "打卡天数(10)",
+   "1(10)",
+   "0(10)",
+   "100(10)",
+   "XP(10)",
+   "0(11)",
+   "300(11)",
+   "每词在打字大师无提示精确拼对 3 次；计数升级后保留。(11.5)",
+   "Bee 机器人 <50 CPM 需10次、50~79 需7次(11.5)",
+   "animal · 🐾0/3(11.5)",
+   "dog · 🐾0/3(11.5)",
+   "cat · 🐾0/3(11.5)",
+   "bird · 🐾0/3(11.5)",
+   "fish · 🐾0/3(11.5)",
+   "rabbit · 🐾0/3(11.5)"
+  ],
+  "nCtrls": 16,
+  "nSmall": 6,
+  "smallSamples": [
+   {
+    "t": "🐾 animal · 🐾0/3",
+    "w": 134,
+    "h": 36
+   },
+   {
+    "t": "🐶 dog · 🐾0/3",
+    "w": 114,
+    "h": 36
+   },
+   {
+    "t": "🐱 cat · 🐾0/3",
+    "w": 110,
+    "h": 36
+   },
+   {
+    "t": "🐦 bird · 🐾0/3",
+    "w": 116,
+    "h": 36
+   },
+   {
+    "t": "🐠 fish · 🐾0/3",
+    "w": 114,
+    "h": 36
+   },
+   {
+    "t": "🐰 rabbit · 🐾0/3",
+    "w": 129,
+    "h": 36
+   }
+  ]
+ },
+ {
+  "label": "listen-q",
+  "nText": 29,
+  "fsBins": {
+   "lt10": 0,
+   "10-11": 7,
+   "12-13": 16,
+   "14-15": 6,
+   "16+": 0
+  },
+  "nKnownContrast": 0,
+  "nLowContrast": 0,
+  "lowSamples": [],
+  "smallFont": [
+   "打卡天数(10)",
+   "1(10)",
+   "0(10)",
+   "100(10)",
+   "XP(10)",
+   "0(11)",
+   "300(11)"
+  ],
+  "nCtrls": 14,
+  "nSmall": 7,
+  "smallSamples": [
+   {
+    "t": "换难度",
+    "w": 57,
+    "h": 26
+   },
+   {
+    "t": "🐢 慢速",
+    "w": 75,
+    "h": 35
+   },
+   {
+    "t": "🔊 正常",
+    "w": 75,
+    "h": 35
+   },
+   {
+    "t": "🦊 狐狸",
+    "w": 158,
+    "h": 42
+   },
+   {
+    "t": "🐠 鱼",
+    "w": 158,
+    "h": 42
+   },
+   {
+    "t": "🐻 熊",
+    "w": 158,
+    "h": 42
+   },
+   {
+    "t": "🐸 青蛙",
+    "w": 158,
+    "h": 42
+   }
+  ]
+ }
+]

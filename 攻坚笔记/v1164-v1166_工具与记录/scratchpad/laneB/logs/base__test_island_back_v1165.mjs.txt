@@ -1,0 +1,23 @@
+  ✅ 真点 island_animal.html
+  ✅ 进到 island_animal.html
+
+▶ 1. 玩法里按返回：回本岛主页，岛不关
+  ✅ 真点「探索单词」
+  ✅ 进了探索单词（exploreScreen）
+  ❌ 探索单词 里按返回：岛还开着、回到本岛主页（wrap=none 屏=exploreScreen）
+  ❌ 真点「听音辨义」
+  ✅ 进了听音辨义（exploreScreen）
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Cannot read properties of null (reading 'style')
+    at eval (eval at evaluate (:311:30), <anonymous>:4:20)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at shell (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/laneB/base/test_island_back_v1165.mjs:43:26)
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/laneB/base/test_island_back_v1165.mjs:80:21 {
+  log: []
+}
+
+Node.js v22.23.4

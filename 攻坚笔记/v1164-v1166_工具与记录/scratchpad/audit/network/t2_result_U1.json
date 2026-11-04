@@ -1,0 +1,160 @@
+{
+  "U1_before": {
+    "sw": {
+      "controller": "/sw_v944.js",
+      "regs": [
+        {
+          "scope": "/",
+          "active": "activated",
+          "waiting": false,
+          "installing": false
+        }
+      ],
+      "gate": {
+        "version": 1163,
+        "ready": true,
+        "controller": "sw_v944.js"
+      }
+    },
+    "caches": [
+      "hansen-v944-shell-217",
+      "hansen-v944-assets-215",
+      "hansen-v944-icons-3",
+      "hansen-v944-pages-215"
+    ],
+    "ver": {
+      "top": {
+        "vw": {
+          "local": 1163,
+          "server": 1163,
+          "stale": false,
+          "note": "已是最新 v1163"
+        },
+        "firstStamp": "http://127.0.0.1:32819/hansen_sw_upgrade_gate_v944.js?v=1163",
+        "gate": 1163,
+        "banner": false,
+        "fixed": null,
+        "url": "/"
+      },
+      "frame": {
+        "path": "/island_food.html",
+        "gate": 1163,
+        "backup": 1163,
+        "stamp": "http://127.0.0.1:32819/hansen_preload.js?v=1163",
+        "title": "食物大冒险 · Food Word Adventure"
+      }
+    }
+  },
+  "U1_afterCold": {
+    "navs": [
+      {
+        "t": 1793707137503,
+        "url": "/"
+      },
+      {
+        "t": 1793707153725,
+        "url": "/"
+      }
+    ],
+    "sw": {
+      "controller": "/sw_v944.js",
+      "regs": [
+        {
+          "scope": "/",
+          "active": "activated",
+          "waiting": false,
+          "installing": false
+        }
+      ],
+      "gate": {
+        "version": 1164,
+        "ready": true,
+        "controller": "sw_v944.js"
+      }
+    },
+    "caches": {
+      "hansen-v944-icons-3": 36,
+      "hansen-v944-shell-218": 48
+    },
+    "ver": {
+      "top": {
+        "vw": {
+          "local": 1164,
+          "server": 1164,
+          "stale": false,
+          "note": "已是最新 v1164"
+        },
+        "firstStamp": "http://127.0.0.1:32819/hansen_sw_upgrade_gate_v944.js?v=1164",
+        "gate": 1164,
+        "banner": false,
+        "fixed": null,
+        "url": "/"
+      },
+      "frame": {
+        "path": "blank",
+        "title": ""
+      }
+    }
+  },
+  "U1_food": {
+    "p": "island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "wrap": "block",
+    "op": "1",
+    "ms": 1513
+  },
+  "U1_afterIsland": {
+    "navs": [
+      {
+        "t": 1793707137503,
+        "url": "/"
+      },
+      {
+        "t": 1793707153725,
+        "url": "/"
+      }
+    ],
+    "ver": {
+      "top": {
+        "vw": {
+          "local": 1164,
+          "server": 1164,
+          "stale": false,
+          "note": "已是最新 v1164"
+        },
+        "firstStamp": "http://127.0.0.1:32819/hansen_sw_upgrade_gate_v944.js?v=1164",
+        "gate": 1164,
+        "banner": false,
+        "fixed": null,
+        "url": "/"
+      },
+      "frame": {
+        "path": "/island_food.html",
+        "gate": 1164,
+        "backup": 1164,
+        "stamp": "http://127.0.0.1:32819/hansen_preload.js?v=1164",
+        "title": "食物大冒险 · Food Word Adventure"
+      }
+    }
+  },
+  "U1_events": [
+    {
+      "tag": "U1",
+      "kind": "http404",
+      "text": "/island_wordIslandFood.html?v=1164",
+      "fromSW": false
+    },
+    {
+      "tag": "U1",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "url": "http://127.0.0.1:32819/island_wordIslandFood.html?v=1164"
+    },
+    {
+      "tag": "U1",
+      "kind": "requestfailed",
+      "text": "/island_wordIslandFood.html?v=1164 net::ERR_ABORTED"
+    }
+  ]
+}

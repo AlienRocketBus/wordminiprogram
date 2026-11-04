@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_iframe_login_v1091.mjs —— 子框内必须能登录
  *
  * 事故（v1090 我亲手造成）：
@@ -29,7 +30,7 @@ const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail
 console.log('子框内必须能登录 v1091');
 
 for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_save_v965.js', '云存档']]) {
-  const src = fs.readFileSync('/home/claude/work/repo/' + file, 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + '') + file, 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   const i = code.indexOf('_inFrame');
   ok(i > 0, `${label}模块有子框判断`);
@@ -55,7 +56,7 @@ for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_
 
 /* ③ 报错文案不得再出现那句会让用户以为功能坏了的话 */
 {
-  const a = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8')
+  const a = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '');
   ok(!/子页面不创建云端实例/.test(a) || /_bgOnly/.test(a),
      '★ 「子页面不创建云端实例」不再出现在用户可见的登录路径上');
@@ -67,7 +68,7 @@ for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_
    auth() 直接抛「鉴权不可用」→ 登录照样点不动。
    用户真机报的正是这句。 */
 {
-  const a = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const a = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const code = a.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = code.indexOf('function auth()');
   const seg = code.slice(i, i + 900);
@@ -79,7 +80,7 @@ for (const [file, label] of [['hansen_auth_v1004.js', '账号'], ['hansen_cloud_
 
 /* 🔴v1093：用户可见入口不得吐 [object Object] */
 {
-  const a = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const a = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   ok(/_readable\(sendPhoneCode\)/.test(a), '★ sendPhoneCode 包了可读错误');
   ok(/_readable\(loginByPhoneCode\)/.test(a), '★ loginByPhoneCode 包了可读错误');
   ok(/errText\(e\)\s*\|\|\s*'操作失败'/.test(a), '★ 错误一律经 errText 转人话');

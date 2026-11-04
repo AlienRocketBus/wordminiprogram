@@ -1,0 +1,73 @@
+{
+  "sw": {
+    "requests": 208,
+    "totalMB": 9.26,
+    "catsMB": {
+      "other": 0.41,
+      "js": 3.56,
+      "html": 4.34,
+      "img": 0.95
+    },
+    "htmlFetched": [
+      "/index.html x1 198KB empty/200",
+      "/_frame.html x1 6KB empty/200",
+      "/_sw_upgrade_v944.html x1 4KB empty/200",
+      "/land_map.html x1 673KB empty/200",
+      "/island_animal.html x2 590KB empty/200?v=1163,empty/304?v=1163",
+      "/island_food.html x1 595KB empty/200?v=1163",
+      "/island_sports.html x1 596KB empty/200?v=1163",
+      "/island_job.html x1 593KB empty/200?v=1163",
+      "/island_color.html x1 600KB empty/200?v=1163",
+      "/island_nature.html x1 591KB empty/200?v=1163"
+    ],
+    "dupBytesMB": 1.91,
+    "topDup": [
+      "/vocab_all.js x3 604KB script/200?v=1163,empty/200,empty/304?v=1163",
+      "/island_animal.html x2 590KB empty/200?v=1163,empty/304?v=1163",
+      "/hansen_cinema_themes.js x3 169KB script/200?v=1163,empty/200?v=1163,empty/304?v=1163",
+      "/hansen_cards.js x2 154KB empty/200?v=1163,empty/304?v=1163",
+      "/hansen_palette.js x3 153KB script/200?v=1163,empty/200?v=1163,empty/304?v=1163",
+      "/hansen_boss_lock.js x2 141KB empty/200?v=1163,empty/304?v=1163",
+      "/hansen_diamond_shop.js x3 126KB script/200?v=1163,empty/200?v=1163,empty/304?v=1163",
+      "/hansen_crystal.js x2 118KB empty/200,empty/200?v=1163",
+      "/hansen_season.js x3 105KB script/200?v=1163,empty/200?v=1163,empty/304?v=1163",
+      "/click_sound.js x3 90KB script/200?v=1163,empty/200,empty/304?v=1163",
+      "/hansen_land_cards.js x2 68KB empty/200?v=1163,empty/304?v=1163",
+      "/hansen_auth_v1004.js x2 65KB script/200?v=1163,empty/304?v=1163"
+    ]
+  },
+  "nosw": {
+    "requests": 160,
+    "totalMB": 8.18,
+    "catsMB": {
+      "other": 0.4,
+      "js": 2.68,
+      "html": 4.14,
+      "img": 0.95
+    },
+    "htmlFetched": [
+      "/land_map.html x1 673KB empty/200",
+      "/island_animal.html x2 590KB empty/200?v=1163,empty/304?v=1163",
+      "/island_food.html x1 595KB empty/200?v=1163",
+      "/island_sports.html x1 596KB empty/200?v=1163",
+      "/island_job.html x1 593KB empty/200?v=1163",
+      "/island_color.html x1 600KB empty/200?v=1163",
+      "/island_nature.html x1 591KB empty/200?v=1163"
+    ],
+    "dupBytesMB": 0.74,
+    "topDup": [
+      "/island_animal.html x2 590KB empty/200?v=1163,empty/304?v=1163",
+      "/vocab_all.js x2 302KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_cinema_themes.js x2 84KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_palette.js x2 77KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_auth_v1004.js x2 65KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_diamond_shop.js x2 63KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_season.js x2 52KB script/200?v=1163,empty/304?v=1163",
+      "/click_sound.js x2 45KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_preload.js x2 31KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_coin_wallet.js x2 21KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_auth_ui_v1004.js x2 20KB script/200?v=1163,empty/304?v=1163",
+      "/hansen_upgrade.js x2 18KB script/200?v=1163,empty/304?v=1163"
+    ]
+  }
+}

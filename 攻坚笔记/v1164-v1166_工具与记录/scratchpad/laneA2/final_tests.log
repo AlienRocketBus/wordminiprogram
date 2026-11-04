@@ -1,0 +1,130 @@
+=== test_game_timers_v1165.mjs exit=0 77s
+✅ v1165 小游戏定时器：离开或换难度后旧局不再锁屏、不再读词、不再顶掉新一局的题
+=== test_audio_fallback_v1165.mjs exit=0 38s
+✅ v1165 录音没下载下来时用手机朗读兜底：只读一次、不联网、静音时不出声
+=== test_trial_clear_v1165.mjs exit=0 9s
+✅ v1165 体验期跳打不算通关；按顺序打完才记「已通关」
+=== test_land_quests_v1165.mjs exit=0 32s
+✅ v1165 单词大陆每日任务：12 个任务能看能领、进度单位和常规岛一致
+=== test_topbar_refresh_v1165.mjs exit=0 22s
+✅ v1165 顶栏跟着别的页面变、经验不丢、满级显示「已满级 MAX」
+=== test_land_settings_v1165.mjs exit=0 8s
+✅ v1165 单词大陆设置页有发音音量、等级表能读到
+=== test_level_menus_v1165.mjs exit=0 59s
+✅ v1165 难度菜单：0 词档画成 🔒、单词大陆每档都有词、例词是本岛的词
+=== test_moles_fish_result_v1165.mjs exit=0 38s
+✅ v1165 打地鼠/钓鱼结算照实说打中几个
+=== test_scramble_shuffle_v1165.mjs exit=0 4s
+✅ v1165 字母拼拼乐：字母一定是打乱的
+=== test_eagle_fakes_v1165.mjs exit=0 0s
+✅ v1165 火眼金睛：词组的假选项不再只差一个空格
+=== test_typing_accuracy_v1165.mjs exit=0 15s
+✅ v1165 打字大师拼对率按词算
+=== test_nav_active_v1165.mjs exit=0 9s
+✅ v1165 底栏高亮：探索单词不再亮「错题」
+=== test_island_toast_v1165.mjs exit=0 17s
+✅ v1165 岛里的提示条居中、整句可见、留够时间
+=== test_quiz_pic_raster_v1165.mjs exit=0 3s
+✅ v1165 拼写类题目不放印着答案的位图
+=== test_combo_badge_v1165.mjs exit=0 13s
+✅ v1165 连胜小条离开游戏就收起来
+=== test_boss_active_v1165.mjs exit=0 16s
+✅ v1165 window.bossActive 接上了：战斗中切屏保留战场，打完回选关墙
+=== test_land_subtitle_v1165.mjs exit=0 1s
+✅ v1165 单词大陆副标题各是各的
+=== test_content_fixes_v1165.mjs exit=0 1s
+✅ v1165 内容更正：生成源和岛页都改对了
+=== test_island_welcome_v1165.mjs exit=0 11s
+✅ v1165 全套欢迎只在第一次进岛时出现
+=== test_distractors_v1165.mjs exit=0 8s
+✅ v1165 选项里不再同时出现近义词
+=== test_round_coins_v1165.mjs exit=0 75s
+✅ v1165 结算金币等于钱包实际变化
+=== test_narrow_fit_v1165.mjs exit=0 17s
+✅ v1165 窄屏显示完整
+=== test_island_back_api_v1165.mjs exit=0 45s
+✅ v1165 岛页「返回一步」和「藏起来就停」：两个接口在常规岛和单词大陆都可用
+=== test_land_listen_v1165.mjs exit=0 44s
+✅ v1165 单词大陆听音辨义：8 岛每档都有词、都能玩；空档画成 🔒
+=== test_cloze_askable_v1165.mjs exit=0 105s
+✅ v1165 完形填空：变形词能出题、全对 100%、大小写保留、Boss 完形同一规则
+=== test_mistake_lesson_v1165.mjs exit=0 50s
+✅ v1165 答错小课：揭晓卡+重读 / 本轮末再考一次 / 结算列错词 / 温和文案 全过
+=== test_lesson_review_fix_v1165.mjs exit=0 64s
+✅ v1165 复查修复：再考不算纠错 / 极速不白丢分 / 听音不多记 / 完形读整句 / 离开就收卡 / 毕业金只发一次 全过
+=== test_srs_plan_v1165.mjs exit=0 13s
+✅ v1165 错词留在间隔复习计划里直到真正毕业：常规岛 + 单词大陆全过
+=== test_copy_numbers_v1165.mjs exit=0 17s
+✅ v1165 文案/数字校对：任务横幅、欢迎弹窗、成就目标、首页标题与数字、我的学习分母 全过
+=== test_spelling_pic_v1165.mjs exit=0 16s
+✅ v1165 拼写/找英文题目的配图不再印着答案；认词卡片照旧
+=== test_idle_motion_v1165.mjs exit=0 67s
+✅ 待机动画预算：岛屿菜单 45 秒后全静、只动 transform/opacity、减少动态效果、首页装饰歇着/视差只随鼠标/浮动不排版 全通过
+=== test_boss_lazy_v1165.mjs exit=0 136s
+✅ Boss 按需加载：菜单不加载引擎/攻击图、头像按进度、设置页/选关墙按需、赢/输/大满贯/全开放/管理员门全通过
+=== test_season_forever_v1165.mjs exit=0 7s
+✅ 番外篇入口永远在
+=== test_preload_budget_v1165.mjs exit=0 95s
+✅ 预载流量预算：新孩子首页/进岛不乱下、去过星海才预热且不套娃、预热页不写进度、3G 不预热全通过
+=== test_island_back_v1165.mjs exit=0 25s
+✅ 手机返回只退一步
+=== test_island_hidden_quiet_v1165.mjs exit=0 32s
+✅ 藏起来的岛不再出声、不再倒计时
+=== test_recent_card_v1165.mjs exit=0 19s
+✅ 「最近探险」卡片指向孩子真点过的岛
+=== test_island_keepalive_v1165.mjs exit=0 27s
+✅ 换岛不再被导回上一个岛，🗺️ 一点就回首页
+=== test_admin_levels_v1055.mjs exit=0 5s
+结果: 9 通过 / 0 失败
+=== test_camel_runtime_v1015.mjs exit=0 38s
+合计违规 0 处 / 0 个屏次
+=== test_daily_quest_safety_v946.mjs exit=0 0s
+daily quest safety v946: 28-page authoritative definitions + rebuilt state + reward integrity ✅
+=== test_daily_quests_v1000.mjs exit=0 8s
+结果: 10 通过 / 0 失败
+=== test_economy_copy_v942.mjs exit=0 1s
+economy copy v942: four concise Chinese guides + current reward facts ✅
+=== test_focused_typing_v946.mjs exit=0 16s
+focused typing v946: proof gate + exact streak + hint/wrong reset + reload persistence + canonical settlement ✅
+=== test_island_prefetch_v1025.mjs exit=0 9s
+结果: 7 通过 / 0 失败
+=== test_land_mode_xp_v941.mjs exit=0 0s
+✅ v941 Land typing/cloze: 8 pages × 3 tiers, 30-word coverage, defined UI and XP payout paths passed
+=== test_land_sync_v942.mjs exit=0 0s
+land sync v942: 8-page shell contract + CSS + identities + Land3 slice + Land8 bosses ✅
+=== test_light_readability_v1016.mjs exit=0 30s
+  ✅ 237 处，在基线 231 ±12 之内，未变差
+=== test_moles_white_v1040.mjs exit=0 11s
+ERRORS: 0
+=== test_native_wrong_safety_v946.mjs exit=0 0s
+native persisted-data safety v946: 28-page wrong/stat normalization + numeric rendering + bounded weighting ✅
+=== test_preload_policy_v942.mjs exit=0 0s
+✅ v942 预载策略：未知/弱网/省流/离线零后台请求，4G仅当前岛且音频并发≤3、Boss≤8、例句按需
+=== test_quest_global_v941.mjs exit=0 0s
+v1060 伪造已领取防线: 全绿
+=== test_quest_render_v1032.mjs exit=0 6s
+结果: 5 通过 / 0 失败
+=== test_quest_transactions_v942.mjs exit=0 0s
+✅ v942 任务 schema/XSS、领取事务与跨午夜恢复：金币、XP、全清强化恰好一次
+=== test_reset_invalid_journal_v942.mjs exit=0 0s
+reset invalid journal v942: checksum + strict schema + fail-closed read-only evidence preservation ✅
+=== test_review_rewards_v963.mjs exit=0 0s
+🎉 v963 复习奖励逻辑回归 全部通过 (钱包终额: 281 金币 / 5 钻石)
+=== test_review_settlement_hf2_v946.mjs exit=0 0s
+review settlement HF2 v946: net rescue rewards + daily canonical receipts + 3× instant cap + bounded ledger + retry/skip locks ✅
+=== test_security_accessibility_v942.mjs exit=0 0s
+✅ v942 安全、可达性、路由、预加载、PWA 与防卡死恢复回归测试通过
+=== test_storage_reset_v942.mjs exit=0 0s
+storage/reset v942: scoped fail-closed snapshots + CAS rollback + crash journal phases + authoritative reset recovery ✅
+=== test_tts_volume_v1032.mjs exit=0 5s
+结果: 16 通过 / 0 失败
+=== test_tts_volume_v1038.mjs exit=0 10s
+结果: 12 通过 / 0 失败
+=== test_ui_walkthrough_v969.mjs exit=1 54s
+  ❌ pageerror/console.error 全程为 0（实际 1）
+❌ 真机大补考未过：1 项
+=== test_boss_settle_v1014.mjs exit=0 10s
+ERRORS: 0
+=== test_boss_timer_hf5_v946.mjs exit=0 16s
+Boss timer HF5: 4 motion/theme states + touch + HP isolation + answer/reset/stop ✅
+=== DONE

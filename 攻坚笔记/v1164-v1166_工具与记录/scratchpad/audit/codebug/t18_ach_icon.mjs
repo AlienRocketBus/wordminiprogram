@@ -1,0 +1,13 @@
+import {serve,launch,ctx,attach} from './harness.mjs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await ctx(b,base);
+const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/island_food.html',{waitUntil:'load'}); await p.waitForTimeout(3000);
+await p.evaluate(()=>{ document.querySelectorAll('button').forEach(x=>{ if(/开始冒险/.test(x.textContent)) x.click(); }); });
+await p.waitForTimeout(500);
+const r=await p.evaluate(async()=>{ showScreen('ach'); await new Promise(r=>setTimeout(r,400));
+  return [...document.querySelectorAll('#achList .ach-bar')].map(b=>b.querySelector('.ach-bar-icon').textContent+' | '+b.querySelector('.ach-bar-name').textContent+' | '+b.querySelector('.ach-bar-count').textContent); });
+await p.screenshot({path:'ach_icons.png',clip:{x:0,y:0,width:390,height:844}});
+console.log(JSON.stringify(r,null,1));
+await b.close(); srv.close();

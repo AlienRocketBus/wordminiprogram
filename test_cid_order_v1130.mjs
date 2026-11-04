@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cid_order_v1130.mjs —— 竞赛 ID 按注册顺序全局分配
  *
  * 产品定义（用户原话）：
@@ -34,7 +35,7 @@ function boot() {
     localStorage: { _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; },
       setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; } } };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_sb_profile_v1002.js', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_sb_profile_v1002.js'), 'utf8'), ctx);
   return ctx.window.HansenSbProfile;
 }
 
@@ -77,7 +78,7 @@ function boot() {
    否则给产品代码加几行说明注释，就会把要找的东西挤出窗口，
    断言莫名其妙变红 —— v1146、v1148 各撞了一次。
    这类假红比不测更糟：它让人误以为改坏了东西，进而不敢写注释。 */
-  const authRaw = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const authRaw = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const auth = authRaw.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = auth.indexOf('function assignCid');
   const seg = auth.slice(i, i + 1600);
@@ -94,7 +95,7 @@ function boot() {
    否则给产品代码加几行说明注释，就会把要找的东西挤出窗口，
    断言莫名其妙变红 —— v1146、v1148 各撞了一次。
    这类假红比不测更糟：它让人误以为改坏了东西，进而不敢写注释。 */
-  const authRaw = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+  const authRaw = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
   const auth = authRaw.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = auth.indexOf('function assignCid');
   const seg = auth.slice(i, i + 1600);

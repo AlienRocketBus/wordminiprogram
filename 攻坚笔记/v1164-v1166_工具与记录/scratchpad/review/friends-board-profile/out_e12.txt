@@ -1,0 +1,2 @@
+LAG=1500: 2.5 s after tapping 加他 -> {"tip":"✅ 已加 小爱","stillRequest":true,"list":"还没有好友。 让同学告诉你他的竞赛 ID，输在上面就能加。"}
+B→A friend rows in DB after a second tap: 1

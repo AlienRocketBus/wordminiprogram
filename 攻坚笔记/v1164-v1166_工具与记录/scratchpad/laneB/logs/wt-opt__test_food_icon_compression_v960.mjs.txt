@@ -1,0 +1,1 @@
+food icon compression v960: 3608986 → 439862 bytes (87.81% saved), dimensions + alpha + 4 surfaces locked ✅

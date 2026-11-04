@@ -1,0 +1,15 @@
+账号↔云存档 接线 v1021
+  OK  [island_animal.html] 账号/云存档/备份 三模块同页齐备
+  OK  [island_animal.html] 能读到登录态
+  OK  [island_animal.html] 账号标识为手机号派生(v1047): p:13800138000
+  OK  [island_animal.html] 密钥格式合法: 5S7W-BAVB-1EVE-6WAK
+  OK  [spelling_pk.html] 账号/云存档/备份 三模块同页齐备
+  OK  [spelling_pk.html] 能读到登录态
+  OK  [spelling_pk.html] 账号标识为手机号派生(v1047): p:13800138000
+  OK  [spelling_pk.html] 密钥格式合法: 5S7W-BAVB-1EVE-6WAK
+  OK  同账号在不同页面推出同一密钥: 5S7W-BAVB-1EVE-6WAK / 5S7W-BAVB-1EVE-6WAK
+  OK  ★ 同手机号不同 uid → 标识一致: p:13800138000 / p:13800138000
+  OK  ★ 同手机号不同 uid → 密钥一致(换设备能读回): 5S7W-BAVB-1EVE-6WAK / 5S7W-BAVB-1EVE-6WAK
+
+结果: 11 通过 / 0 失败
+exit 0

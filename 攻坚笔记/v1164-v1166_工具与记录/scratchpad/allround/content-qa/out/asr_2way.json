@@ -1,0 +1,374 @@
+[
+ {
+  "file": "words/alone.mp3",
+  "expected": "alone",
+  "island_hyp": "again",
+  "two_way": "again"
+ },
+ {
+  "file": "words/arm.mp3",
+  "expected": "arm",
+  "island_hyp": "hand",
+  "two_way": "hand"
+ },
+ {
+  "file": "words/back.mp3",
+  "expected": "back",
+  "island_hyp": "neck",
+  "two_way": "back"
+ },
+ {
+  "file": "words/ball.mp3",
+  "expected": "ball",
+  "island_hyp": "game",
+  "two_way": "game"
+ },
+ {
+  "file": "words/blue.mp3",
+  "expected": "blue",
+  "island_hyp": "two",
+  "two_way": "two"
+ },
+ {
+  "file": "words/bone.mp3",
+  "expected": "bone",
+  "island_hyp": "tongue",
+  "two_way": "tongue"
+ },
+ {
+  "file": "words/bus.mp3",
+  "expected": "bus",
+  "island_hyp": "boat",
+  "two_way": "boat"
+ },
+ {
+  "file": "words/car.mp3",
+  "expected": "car",
+  "island_hyp": "turn",
+  "two_way": "turn"
+ },
+ {
+  "file": "words/chin.mp3",
+  "expected": "chin",
+  "island_hyp": "tongue",
+  "two_way": "tongue"
+ },
+ {
+  "file": "words/city.mp3",
+  "expected": "city",
+  "island_hyp": "farm",
+  "two_way": "city"
+ },
+ {
+  "file": "words/cook_action.mp3",
+  "expected": "cook",
+  "island_hyp": "put",
+  "two_way": "put"
+ },
+ {
+  "file": "words/dance.mp3",
+  "expected": "dance",
+  "island_hyp": "talk",
+  "two_way": "talk"
+ },
+ {
+  "file": "words/door.mp3",
+  "expected": "door",
+  "island_hyp": "home",
+  "two_way": "door"
+ },
+ {
+  "file": "words/duck.mp3",
+  "expected": "duck",
+  "island_hyp": "dog",
+  "two_way": "dog"
+ },
+ {
+  "file": "words/easy.mp3",
+  "expected": "easy",
+  "island_hyp": "angry",
+  "two_way": "easy"
+ },
+ {
+  "file": "words/farm.mp3",
+  "expected": "farm",
+  "island_hyp": "town",
+  "two_way": "town"
+ },
+ {
+  "file": "words/feet.mp3",
+  "expected": "feet",
+  "island_hyp": "teeth",
+  "two_way": "feet"
+ },
+ {
+  "file": "words/fish_animal.mp3",
+  "expected": "fish",
+  "island_hyp": "frog",
+  "two_way": "frog"
+ },
+ {
+  "file": "words/fox.mp3",
+  "expected": "fox",
+  "island_hyp": "frog",
+  "two_way": "frog"
+ },
+ {
+  "file": "words/gloves_clothes.mp3",
+  "expected": "gloves",
+  "island_hyp": "coat",
+  "two_way": "coat"
+ },
+ {
+  "file": "words/hard.mp3",
+  "expected": "hard",
+  "island_hyp": "thin",
+  "two_way": "thin"
+ },
+ {
+  "file": "words/hard_treasure.mp3",
+  "expected": "hard",
+  "island_hyp": "thank",
+  "two_way": "thank"
+ },
+ {
+  "file": "words/have_action.mp3",
+  "expected": "have",
+  "island_hyp": "throw",
+  "two_way": "have"
+ },
+ {
+  "file": "words/he.mp3",
+  "expected": "he",
+  "island_hyp": "who",
+  "two_way": "who"
+ },
+ {
+  "file": "words/hello.mp3",
+  "expected": "hello",
+  "island_hyp": "way",
+  "two_way": "way"
+ },
+ {
+  "file": "words/his.mp3",
+  "expected": "his",
+  "island_hyp": "it",
+  "two_way": "his"
+ },
+ {
+  "file": "words/in.mp3",
+  "expected": "in",
+  "island_hyp": "then",
+  "two_way": "then"
+ },
+ {
+  "file": "words/it.mp3",
+  "expected": "it",
+  "island_hyp": "that",
+  "two_way": "it"
+ },
+ {
+  "file": "words/late.mp3",
+  "expected": "late",
+  "island_hyp": "not",
+  "two_way": "not"
+ },
+ {
+  "file": "words/light.mp3",
+  "expected": "light",
+  "island_hyp": "nice",
+  "two_way": "nice"
+ },
+ {
+  "file": "words/lonely_season.mp3",
+  "expected": "lonely",
+  "island_hyp": "generally",
+  "two_way": "generally"
+ },
+ {
+  "file": "words/loud.mp3",
+  "expected": "loud",
+  "island_hyp": "long",
+  "two_way": "long"
+ },
+ {
+  "file": "words/map_r2.mp3",
+  "expected": "map",
+  "island_hyp": "math",
+  "two_way": "math"
+ },
+ {
+  "file": "words/more.mp3",
+  "expected": "more",
+  "island_hyp": "no",
+  "two_way": "more"
+ },
+ {
+  "file": "words/name.mp3",
+  "expected": "name",
+  "island_hyp": "when",
+  "two_way": "name"
+ },
+ {
+  "file": "words/neck.mp3",
+  "expected": "neck",
+  "island_hyp": "leg",
+  "two_way": "leg"
+ },
+ {
+  "file": "words/no.mp3",
+  "expected": "no",
+  "island_hyp": "now",
+  "two_way": "now"
+ },
+ {
+  "file": "words/our.mp3",
+  "expected": "our",
+  "island_hyp": "who",
+  "two_way": "who"
+ },
+ {
+  "file": "words/pe.mp3",
+  "expected": "pe",
+  "island_hyp": "student",
+  "two_way": "student"
+ },
+ {
+  "file": "words/pick.mp3",
+  "expected": "pick",
+  "island_hyp": "take",
+  "two_way": "pick"
+ },
+ {
+  "file": "words/planet_season.mp3",
+  "expected": "planet",
+  "island_hyp": "plenty",
+  "two_way": "plenty"
+ },
+ {
+  "file": "words/pork.mp3",
+  "expected": "pork",
+  "island_hyp": "corn",
+  "two_way": "corn"
+ },
+ {
+  "file": "words/pull.mp3",
+  "expected": "pull",
+  "island_hyp": "come",
+  "two_way": "come"
+ },
+ {
+  "file": "words/reading.mp3",
+  "expected": "reading",
+  "island_hyp": "win",
+  "two_way": "win"
+ },
+ {
+  "file": "words/river.mp3",
+  "expected": "river",
+  "island_hyp": "winter",
+  "two_way": "winter"
+ },
+ {
+  "file": "words/safe.mp3",
+  "expected": "safe",
+  "island_hyp": "sick",
+  "two_way": "sick"
+ },
+ {
+  "file": "words/sand.mp3",
+  "expected": "sand",
+  "island_hyp": "sun",
+  "two_way": "sun"
+ },
+ {
+  "file": "words/see.mp3",
+  "expected": "see",
+  "island_hyp": "say",
+  "two_way": "see"
+ },
+ {
+  "file": "words/sell.mp3",
+  "expected": "sell",
+  "island_hyp": "throw",
+  "two_way": "throw"
+ },
+ {
+  "file": "words/she.mp3",
+  "expected": "she",
+  "island_hyp": "when",
+  "two_way": "when"
+ },
+ {
+  "file": "words/sit.mp3",
+  "expected": "sit",
+  "island_hyp": "get",
+  "two_way": "get"
+ },
+ {
+  "file": "words/sun.mp3",
+  "expected": "sun",
+  "island_hyp": "storm",
+  "two_way": "sun"
+ },
+ {
+  "file": "words/teach.mp3",
+  "expected": "teach",
+  "island_hyp": "put",
+  "two_way": "teach"
+ },
+ {
+  "file": "words/there.mp3",
+  "expected": "there",
+  "island_hyp": "their",
+  "two_way": "there"
+ },
+ {
+  "file": "words/this.mp3",
+  "expected": "this",
+  "island_hyp": "that",
+  "two_way": "that"
+ },
+ {
+  "file": "words/try.mp3",
+  "expected": "try",
+  "island_hyp": "draw",
+  "two_way": "draw"
+ },
+ {
+  "file": "words/wake.mp3",
+  "expected": "wake",
+  "island_hyp": "wait",
+  "two_way": "wait"
+ },
+ {
+  "file": "words/walk.mp3",
+  "expected": "walk",
+  "island_hyp": "need",
+  "two_way": "need"
+ },
+ {
+  "file": "words/wall.mp3",
+  "expected": "wall",
+  "island_hyp": "home",
+  "two_way": "home"
+ },
+ {
+  "file": "words/warm.mp3",
+  "expected": "warm",
+  "island_hyp": "old",
+  "two_way": "warm"
+ },
+ {
+  "file": "words/where.mp3",
+  "expected": "where",
+  "island_hyp": "when",
+  "two_way": "when"
+ },
+ {
+  "file": "words/with.mp3",
+  "expected": "with",
+  "island_hyp": "when",
+  "two_way": "when"
+ }
+]

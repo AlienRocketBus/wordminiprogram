@@ -1,0 +1,84 @@
+{
+ "log": [
+  {
+   "k": 0,
+   "t": 4174,
+   "txt": [
+    "跳过\n🗺️\n18 个主题岛屿等你探索\n每个岛是一个单词主题\n（动物、食物、学校…）。\n先在岛上玩游戏认识单词，\n再去挑战守关的 Boss 💪\n下一步 →"
+   ]
+  },
+  {
+   "k": 1,
+   "t": 6040,
+   "txt": [
+    "跳过\n⭐\n答错也没关系！\n答错的单词会自动进入复习，\n下次帮你重点再练一遍。\n坚持每天来，单词越背越牢！\n🚀 开始冒险！"
+   ]
+  },
+  {
+   "k": 2,
+   "t": 7926,
+   "txt": []
+  },
+  {
+   "after": [
+    {
+     "id": "",
+     "cls": "bg-cosmos",
+     "z": "-3",
+     "t": ""
+    },
+    {
+     "id": "stars",
+     "cls": "stars",
+     "z": "-2",
+     "t": ""
+    },
+    {
+     "id": "deco",
+     "cls": "deco",
+     "z": "-1",
+     "t": "⭐\n💎\n🦋\n🐾\n🐾\n🏆\n📅\n🌟\n📅\n🌟\n🏆\n🍔\n🐾\n💎"
+    }
+   ]
+  },
+  {
+   "dims": {
+    "sh": 3589,
+    "ih": 844
+   }
+  },
+  {
+   "ls": {
+    "hansen_credtrap_log": "[{\"at\":\"09:16:40\",\"action\":\"── 页面加载 ──\",\"key\":\"/index.html\",\"extra\":\"\",\"where\":\"",
+    "hansen_wallet_coins_earned": "300",
+    "hansen_vocab_wordIslandClothes": "[{\"en\":\"clothes\",\"cn\":\"衣服\",\"pn\":\"/kləʊðz/\",\"emoji\":\"<span class='cloth-icon'><sv",
+    "hansen_vocab_wordIslandFood": "[{\"en\":\"apple\",\"cn\":\"苹果\",\"pn\":\"/ˈæpl/\",\"emoji\":\"🍎\",\"ex\":\"I eat an apple every d",
+    "hansen_coin_awards_v942": "{\"starter:global\":{\"amount\":300,\"at\":1793697400072}}",
+    "hansen_vocab_wordIslandAdj": "[{\"en\":\"big\",\"cn\":\"大的\",\"pn\":\"/bɪɡ/\",\"emoji\":\"<span class='aj-icon'><svg viewBox=",
+    "hansen_vocab_wordIslandSports": "[{\"en\":\"sport\",\"cn\":\"运动\",\"pn\":\"/spɔːt/\",\"emoji\":\"🏆\",\"ex\":\"Playing sports keeps ",
+    "hansen_vocab_wordIslandNature": "[{\"en\":\"sun\",\"cn\":\"太阳\",\"pn\":\"/sʌn/\",\"emoji\":\"☀️\",\"ex\":\"The sun is shining today.",
+    "hansen_vocab_wordIslandHouse": "[{\"en\":\"house\",\"cn\":\"房子\",\"pn\":\"/haʊs/\",\"emoji\":\"🏠\",\"ex\":\"They live in a big hou",
+    "hansen_vocab_wordIslandPeople": "[{\"en\":\"person\",\"cn\":\"人\",\"pn\":\"/ˈpɜːsn/\",\"emoji\":\"🧑\",\"ex\":\"She's a really kind ",
+    "hansen_vocab_wordIslandBody": "[{\"en\":\"head\",\"cn\":\"头\",\"pn\":\"/hed/\",\"emoji\":\"🗣️\",\"ex\":\"I bumped my head on the ",
+    "hansen_vocab_wordIslandSchool": "[{\"en\":\"school\",\"cn\":\"学校\",\"pn\":\"/skuːl/\",\"emoji\":\"🏫\",\"ex\":\"My school is near th",
+    "hansen_wallet_coins": "300",
+    "hansen_vocab_wordIslandFamily": "[{\"en\":\"family\",\"cn\":\"家庭\",\"pn\":\"/ˈfæməli/\",\"emoji\":\"🏠\",\"ex\":\"I love my family v",
+    "hansen_onboarded": "1",
+    "hansen_vocab_wordIslandTransport": "[{\"en\":\"car\",\"cn\":\"汽车\",\"pn\":\"/kɑː/\",\"emoji\":\"🚗\",\"ex\":\"My dad's car is red.\",\"ex",
+    "hansen_gems_cleared_v1": "1",
+    "hansen_palette_global": "cosmos",
+    "hansen_vocab_wordIslandTime": "[{\"en\":\"time\",\"cn\":\"时间\",\"pn\":\"/taɪm/\",\"emoji\":\"⏰\",\"ex\":\"Time flies when you're h",
+    "hansen_vocab_wordIslandColorNum": "[{\"en\":\"color\",\"cn\":\"颜色\",\"pn\":\"/ˈkʌlə/\",\"emoji\":\"<span class='cn-icon'><svg view",
+    "hansen_vocab_wordIslandPronouns": "[{\"en\":\"who\",\"cn\":\"谁\",\"pn\":\"/huː/\",\"emoji\":\"🙋\",\"ex\":\"Who's that?\",\"exCn\":\"那是谁?\"",
+    "hansen_starter_coins_given": "1",
+    "hansen_coins_migrated_v1": "1",
+    "hansen_vocab_wordIslandCity": "[{\"en\":\"city\",\"cn\":\"城市\",\"pn\":\"/ˈsɪti/\",\"emoji\":\"🏙️\",\"ex\":\"I live in a big city.",
+    "hansen_vocab_wordIslandVerbs": "[{\"en\":\"go\",\"cn\":\"去\",\"pn\":\"/ɡəʊ/\",\"emoji\":\"<span class='vb-icon'><svg viewBox='0",
+    "hansen_vocab_wordIslandMisc": "[{\"en\":\"yes\",\"cn\":\"是的/对\",\"pn\":\"/jes/\",\"emoji\":\"✅\",\"ex\":\"Yes, you are right.\",\"ex",
+    "hansen_vocab_wordIslandAnimal": "[{\"en\":\"animal\",\"cn\":\"动物\",\"pn\":\"/ˈænɪml/\",\"emoji\":\"🐾\",\"ex\":\"A cat is an animal.",
+    "hansen_wallet_gems": "0"
+   }
+  }
+ ],
+ "errs": []
+}

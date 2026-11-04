@@ -1,0 +1,182 @@
+[
+ {
+  "name": "typing",
+  "started": "startTyping(1)",
+  "n": 36,
+  "small": 30,
+  "smallSamples": [
+   {
+    "t": "换难度",
+    "w": 57,
+    "h": 26
+   },
+   {
+    "t": "🔊 听发音",
+    "w": 89,
+    "h": 35
+   },
+   {
+    "t": "💡 提示",
+    "w": 75,
+    "h": 35
+   },
+   {
+    "t": "q",
+    "w": 36,
+    "h": 50
+   },
+   {
+    "t": "w",
+    "w": 36,
+    "h": 50
+   },
+   {
+    "t": "e",
+    "w": 36,
+    "h": 50
+   },
+   {
+    "t": "r",
+    "w": 36,
+    "h": 50
+   },
+   {
+    "t": "t",
+    "w": 36,
+    "h": 50
+   }
+  ],
+  "texts": 47,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "cloze",
+  "started": "startClozeLevel('easy')",
+  "n": 11,
+  "small": 1,
+  "smallSamples": [
+   {
+    "t": "换难度",
+    "w": 57,
+    "h": 26
+   }
+  ],
+  "texts": 30,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "scramble",
+  "started": "startScrambleLevel('easy')",
+  "n": 16,
+  "small": 5,
+  "smallSamples": [
+   {
+    "t": "换难度",
+    "w": 57,
+    "h": 26
+   },
+   {
+    "t": "a",
+    "w": 42,
+    "h": 48
+   },
+   {
+    "t": "o",
+    "w": 42,
+    "h": 48
+   },
+   {
+    "t": "t",
+    "w": 42,
+    "h": 48
+   },
+   {
+    "t": "g",
+    "w": 42,
+    "h": 48
+   }
+  ],
+  "texts": 31,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "moles",
+  "started": "startMolesLevel('easy')",
+  "n": 19,
+  "small": 1,
+  "smallSamples": [
+   {
+    "t": "🔊 听",
+    "w": 55,
+    "h": 26
+   }
+  ],
+  "texts": 36,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "fish",
+  "started": "startFishLevel('easy')",
+  "n": 9,
+  "small": 0,
+  "smallSamples": [],
+  "texts": 32,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "bubble",
+  "started": "startBubbleLevel('easy')",
+  "n": 7,
+  "small": 0,
+  "smallSamples": [],
+  "texts": 29,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "speed",
+  "started": "startSpeedLevel('easy')",
+  "n": 10,
+  "small": 4,
+  "smallSamples": [
+   {
+    "t": "蚂蚁",
+    "w": 169,
+    "h": 42
+   },
+   {
+    "t": "鹿",
+    "w": 169,
+    "h": 42
+   },
+   {
+    "t": "老鼠",
+    "w": 169,
+    "h": 42
+   },
+   {
+    "t": "长颈鹿",
+    "w": 169,
+    "h": 42
+   }
+  ],
+  "texts": 25,
+  "fsSmall": 7,
+  "minFs": 10
+ },
+ {
+  "name": "eagle",
+  "started": "startEagleLevel('easy')",
+  "n": 12,
+  "small": 0,
+  "smallSamples": [],
+  "texts": 31,
+  "fsSmall": 7,
+  "minFs": 10
+ }
+]

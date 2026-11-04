@@ -34,7 +34,7 @@ try{
   await listen();const origin=`http://127.0.0.1:${server.address().port}`;
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
-  await context.addInitScript(()=>{localStorage.clear();sessionStorage.clear();localStorage.setItem('hsnViewMode','desktop');localStorage.setItem('hansen_onboarded','1');});
+  await context.addInitScript(()=>{if (window.top === window) localStorage.clear();sessionStorage.clear();localStorage.setItem('hsnViewMode','desktop');localStorage.setItem('hansen_onboarded','1');});
   for(let number=1;number<=8;number++){
     const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(String(error)));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
     await page.goto(`${origin}/island_land${number}.html`,{waitUntil:'domcontentloaded'});

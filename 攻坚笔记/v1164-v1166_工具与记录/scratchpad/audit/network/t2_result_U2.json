@@ -1,0 +1,553 @@
+{
+  "U2_before": {
+    "top": {
+      "vw": {
+        "local": 1163,
+        "server": 1163,
+        "stale": false,
+        "note": "已是最新 v1163"
+      },
+      "firstStamp": "http://127.0.0.1:37781/hansen_sw_upgrade_gate_v944.js?v=1163",
+      "gate": 1163,
+      "banner": false,
+      "fixed": null,
+      "url": "/"
+    },
+    "frame": {
+      "path": "/island_food.html",
+      "gate": 1163,
+      "backup": 1163,
+      "stamp": "http://127.0.0.1:37781/hansen_preload.js?v=1163",
+      "title": "食物大冒险 · Food Word Adventure"
+    }
+  },
+  "U2_tap": {
+    "ok": true
+  },
+  "U2_samples": [
+    {
+      "dt": 888,
+      "top": {
+        "local": 1163,
+        "server": 1163,
+        "banner": false,
+        "url": "/",
+        "gate": 1163
+      },
+      "frame": {
+        "path": "/island_animal.html"
+      }
+    },
+    {
+      "dt": 1524,
+      "top": {
+        "local": 1163,
+        "server": 1163,
+        "banner": false,
+        "url": "/",
+        "gate": 1163
+      },
+      "frame": {
+        "path": "/island_animal.html",
+        "gate": 1164,
+        "backup": 1164
+      }
+    },
+    {
+      "dt": 2044,
+      "top": {
+        "local": 1163,
+        "server": 1163,
+        "banner": false,
+        "url": "/",
+        "gate": 1163
+      },
+      "frame": {
+        "path": "/island_animal.html",
+        "gate": 1164,
+        "backup": 1164
+      }
+    },
+    {
+      "dt": 2595,
+      "top": {
+        "local": 1163,
+        "server": 1164,
+        "banner": true,
+        "url": "/",
+        "gate": 1163
+      },
+      "frame": {
+        "path": "/island_animal.html",
+        "gate": 1164,
+        "backup": 1164
+      }
+    },
+    {
+      "dt": 3810,
+      "err": "page.evaluate: Execution context was destroyed, most likely because of a navigat"
+    },
+    {
+      "dt": 4375,
+      "top": {
+        "local": 1164,
+        "server": 0,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 5002,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 5613,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 6127,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 6642,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 7147,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 7663,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 8168,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 8676,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 9181,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 9690,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 10226,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 10740,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 11244,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 11771,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 12278,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 12818,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 13321,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 13826,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 14328,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 14832,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 15336,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 15839,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 16343,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    },
+    {
+      "dt": 16854,
+      "top": {
+        "local": 1164,
+        "server": 1164,
+        "banner": false,
+        "url": "/?_fresh=1793707257183",
+        "gate": 1164
+      },
+      "frame": {
+        "path": "blank"
+      }
+    }
+  ],
+  "U2_navs": [
+    {
+      "dt": 355,
+      "url": "/"
+    },
+    {
+      "dt": 3926,
+      "url": "/?_fresh=1793707257183"
+    }
+  ],
+  "U2_end": {
+    "sw": {
+      "controller": "/sw_v944.js",
+      "regs": [
+        {
+          "scope": "/",
+          "active": "activated",
+          "waiting": false,
+          "installing": false
+        }
+      ],
+      "gate": {
+        "version": 1164,
+        "ready": true,
+        "controller": "none"
+      }
+    },
+    "caches": {
+      "hansen-v944-shell-218": 48,
+      "hansen-v944-assets-216": 59
+    },
+    "ver": {
+      "top": {
+        "vw": {
+          "local": 1164,
+          "server": 1164,
+          "stale": false,
+          "note": "已是最新 v1164"
+        },
+        "firstStamp": "http://127.0.0.1:37781/hansen_sw_upgrade_gate_v944.js?v=1164",
+        "gate": 1164,
+        "banner": false,
+        "fixed": "1164",
+        "url": "/?_fresh=1793707257183"
+      },
+      "frame": {
+        "path": "blank",
+        "title": ""
+      }
+    }
+  },
+  "U2_food": {
+    "p": "island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "wrap": "block",
+    "op": "1",
+    "ms": 1540
+  },
+  "U2_final": {
+    "top": {
+      "vw": {
+        "local": 1164,
+        "server": 1164,
+        "stale": false,
+        "note": "已是最新 v1164"
+      },
+      "firstStamp": "http://127.0.0.1:37781/hansen_sw_upgrade_gate_v944.js?v=1164",
+      "gate": 1164,
+      "banner": false,
+      "fixed": "1164",
+      "url": "/?_fresh=1793707257183"
+    },
+    "frame": {
+      "path": "/island_food.html",
+      "gate": 1164,
+      "backup": 1164,
+      "stamp": "http://127.0.0.1:37781/hansen_preload.js?v=1164",
+      "title": "食物大冒险 · Food Word Adventure"
+    }
+  },
+  "U2_events": [
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/bossfx/hand1.webp net::ERR_ABORTED"
+    },
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/bossfx/hand4.webp net::ERR_ABORTED"
+    },
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/bossfx/hand5.webp net::ERR_ABORTED"
+    },
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/bossfx/hand3.webp net::ERR_ABORTED"
+    },
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/bossfx/hand2.webp net::ERR_ABORTED"
+    },
+    {
+      "tag": "U2",
+      "kind": "console.warning",
+      "text": "Unhandled promise: InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled",
+      "url": "http://127.0.0.1:37781/island_animal.html"
+    },
+    {
+      "tag": "U2",
+      "kind": "console.warning",
+      "text": "Unhandled promise: InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled",
+      "url": "http://127.0.0.1:37781/?_fresh=1793707257183"
+    },
+    {
+      "tag": "U2",
+      "kind": "http404",
+      "text": "/island_wordIslandAnimal.html?v=1164",
+      "fromSW": false
+    },
+    {
+      "tag": "U2",
+      "kind": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "url": "http://127.0.0.1:37781/island_wordIslandAnimal.html?v=1164"
+    },
+    {
+      "tag": "U2",
+      "kind": "requestfailed",
+      "text": "/island_wordIslandAnimal.html?v=1164 net::ERR_ABORTED"
+    }
+  ]
+}

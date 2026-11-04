@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_gacha_contrast_v1013.mjs —— 单词大陆抽卡屏双色调对比度回归
  * 事故：抽卡屏卡片用 rgba(30,41,59,.5) 半透明深底 + 浅字，亮色调下底被通用钩子钩成灰、
  *       字仍是浅色 → 灰底灰字完全看不清；且 #landGachaBody / .lg-banner 长期在审计机
  *       豁免名单里，从未被扫出（与 v1010 的 Boss 屏同型问题）。
  * 合同：亮板卡片为白底(非灰)、屏内零低对比文字；暗板保持原深色设计。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -18,7 +19,7 @@ for(const [tag,pal] of [['light','cloud'],['dark',null]]){
   page.on('pageerror',e=>errs.push(tag+'/P:'+String(e.message).slice(0,80)));
   page.on('console',m=>{if(m.type()==='error'){const t=m.text();
     if(!/tcb-api|net::ERR_|Failed to fetch|Access to fetch/i.test(t)) errs.push(tag+'/C:'+t.slice(0,80));}});
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2500);
   await page.evaluate(()=>{ try{

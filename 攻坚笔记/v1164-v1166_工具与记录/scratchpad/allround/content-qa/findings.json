@@ -1,0 +1,146 @@
+[
+ {
+  "id": "CQ-01",
+  "title": "单词大陆 ③–⑧ 听音辨义 has 0 words and crashes on tap; ①② only partly covered",
+  "severity": "high",
+  "evidence": "land_template.html:1906-1910 hard-codes LISTEN_LEVELS with 40 land1/land2 words for all 8 land pages. Playwright (shots/t1_land_listen.json, shots/t1_land3_listen_levels.png): land1 10/11/9 of 30 words, land2 3/2/5, land3 and land8 0/0/0 ('📚 0 个单词'). Tapping 初级 throws \"Cannot read properties of undefined (reading 'en')\" because nextFromPool([]) returns undefined. Data analysis gives 0/0/0 for land4–7 too.",
+  "proposal": "Build LISTEN_LEVELS from allW by word length, exactly as CLOZE_LEVELS already does in the same template (land_template.html:6746-6758: ≤7 / 8 / ≥9 letters).",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-02",
+  "title": "Wrong IPA for August",
+  "severity": "high",
+  "evidence": "island_time.html:1954 pn \"/ɔːˈɡʌst/\". This is the adjective 'august'; the month is stressed on the first syllable. The same value is in vocab_all.js HANSEN_VOCAB_ALL.wordIslandTime[31], spelling_bee.html:1268 and island_data.json[time]. It was the only real IPA error in the CMU-dictionary comparison plus manual read of 952 entries.",
+  "proposal": "pn = \"/ˈɔːɡəst/\" in island_data.json (then regenerate), vocab_all.js and spelling_bee.html.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-03",
+  "title": "Ungrammatical example sentence for 'minute'",
+  "severity": "high",
+  "evidence": "island_time.html:1919 ex \"Wait for me ten minutes.\" (exCn 等我十分钟。). Because the sentence says 'minutes', the word is also skipped by cloze.",
+  "proposal": "ex \"Please wait ten minutes for me.\", exCn 请等我十分钟。 Re-record the sentence, because SENTENCE_MAP is keyed by exact text, then rebuild sentence_map.js and hansen_audio_lock.json.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-04",
+  "title": "48 words can never appear in 完形填空 / Boss 完形 (example uses an inflected form)",
+  "severity": "medium",
+  "evidence": "The cloze regex \\bword\\b fails for cook(s), fly/flown, draw/drew, teach(es), get/got, start(ed), drive(s), cow(s), pig(s), duck(s), eagle(s), eye(s), ear(s), lip(s), arm(s), elbow(s), hand(s), leg(s), heel(s), bone(s), sleeve(s), thousand(s), sibling(s), relative(s), grape(s), strawberr(ies), vegetable(s), tomato(es), potato(es), carrot(s), onion(s), cookie(s), firefighter(s), farmer(s), artist(s), star(s), cloud(s), snow(s), flower(s), computer(s), sport(s), minute(s), hour(s), Saturday(s), holiday(s), ticket(s), passenger(s), thing(s). nextClozeQ (template.html:6931) silently pops them, so the counter jumps; for example 身体岛初级 skips 8 of 20. Boss cloze (template.html:4700-4727) falls back to 英译汉.",
+  "proposal": "Code fix rather than re-recording 48 sentences: when the exact form is missing, blank the inflected form (s/es/ies/ed/ing plus an irregular map: flown, drew, got, teaches) and show that form in the options.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-05",
+  "title": "Wrong gold Chinese highlight under the cloze sentence (12 wrong, 15 partial)",
+  "severity": "medium",
+  "evidence": "smartHighlight (highlight_helper.js) falls back to single characters: frightened→的, confused→的, cautious→的, ordinary→的, available→的, valuable→有, galaxy→系 of 太阳系, constantly→不, previously→前 of 之前, fly→飞机, determined→定, natural→然的. Verified in browser: shots/t2_season_frightened_question.png and shots/t2_cloze.json. The same function feeds Boss 完形 (template.html:4764). 53 of the 107 HIGHLIGHT_MANUAL keys are stale.",
+  "proposal": "Add HIGHLIGHT_MANUAL entries, e.g. \"frightened|小男孩被巨大的雷声吓到了。\":\"吓到\", \"available|今晚演出的票还有。\":\"还有\", \"galaxy|我们的太阳系是银河系的一部分。\":\"银河系\", \"valuable|时间是我们拥有的最宝贵的东西。\":\"宝贵\". All 27 exact values are in the CSV. Drop the stale keys.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-06",
+  "title": "Chinese meaning and translation errors",
+  "severity": "medium",
+  "evidence": "cabbage island_food.html:1936 cn 白菜, but the photo icons/food-v958/cabbage.webp shows a round head cabbage (shots/food_icons_sheet.png). sheep island_animal.html:1929 cn 羊, while goat = 山羊 on the same island. skirt island_clothes.html:1927 cn 短裙. assume island_season.html:2024 cn 假设, but the example means 想当然地认为. table island_home.html:1939 exCn 我们摆桌子吃晚饭吧。 and meanwhile island_season.html:1989 你摆桌子… both mistranslate 'set the table'. multiple island_season.html:2064: 'The test…' is translated 这道题…. Six exCn read unnaturally (old 年纪很老了, March 春天三月开始, business 一家小生意, more, how, electricity).",
+  "proposal": "cabbage→卷心菜 (exCn 奶奶在花园里种卷心菜。); sheep→绵羊; skirt→裙子; assume→认为/假定; 我们摆好碗筷准备吃晚饭吧。; 你来摆碗筷,与此同时我来做晚饭。; ex 'This question has multiple correct answers.'; 我爷爷年纪很大了。; 春天从三月开始。. Full list in the CSV.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-07",
+  "title": "Theme/category of the 8 单词大陆 islands does not match their words",
+  "severity": "medium",
+  "evidence": "The land pages take consecutive 30-word chunks of the 星海 list, which is grouped into 20-word topics. Results: land1 '情绪 Ⅱ' holds polite…selfish (性格). land2 '性格品质' holds important…practical (描述). land3 'Ⅱ' starts with seldom, regularly, decade, period, schedule. land4 'Ⅰ' ends with attempt, avoid, prevent, provide, produce. land5 'Ⅱ' starts with multiple…dozen. land6 '学习 Ⅰ' has 10 connectors. land7 '社会生活' has energy…material. land8 '自然科学' has 20 work words (career…colleague). Compare island_season.html categories with island_landN.html.",
+  "proposal": "Re-chunk the 240 words along the 12 星海 topics, or rename each land category and title to match its words. No audio impact.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-08",
+  "title": "spelling_bee.html keeps 25 old example sentences",
+  "severity": "medium",
+  "evidence": "var WORDS (spelling_bee.html:662+, shown in the review overlay at :2263) differs from the islands for describe, realize, mention, admit, indicate, comment, debate, provide, produce, invent, destroy, repair, establish, manage, handle, perform, examine, calculate, stranger, customer, chemical, creature, particle, employee, colleague. Example: 'She described the accident to the police in detail.' vs the island's 'Can you describe the man you saw at the door?'.",
+  "proposal": "Generate WORDS from island data instead of keeping a hand copy. The 25 replacement values are in the CSV (category data_mismatch_copy).",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-09",
+  "title": "Cloze correctness: capitalisation bug, near-synonym distractors that are also correct, same Chinese inside one island",
+  "severity": "medium",
+  "evidence": "isAtStart only checks index 0 (template.html:6948, land_template.html:6787, Boss :4760). Browser captures show 'I have a cat. it is white.' and 'Happy New year!' (shots/t2_cloze.json afterAnswerSentence). Same-level distractors are de-duplicated by English only (template.html:6501, :6955; land_template.html:6314, :6794), so in 星海 however/nevertheless, therefore/consequently, besides/moreover/furthermore, rarely/seldom, immediately/instantly, finally/eventually and huge/enormous can be offered together and a correct synonym is marked wrong. These pairs share identical cn inside 星海: rarely/seldom 很少, invent/invention 发明, succeed/success 成功, enormous/huge 巨大的, amount/quantity 数量, besides/moreover/furthermore 此外.",
+  "proposal": "Preserve the case of the matched text. Apply the cn check plus a synonym list in the same-level distractor loops. Give distinct glosses, e.g. invent 发明(动词)/invention 发明(名词), succeed 成功(动词)/success 成功(名词), huge 巨大的/enormous 庞大的.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-10",
+  "title": "US/UK spelling inconsistency (same word spelled two ways)",
+  "severity": "medium",
+  "evidence": "The app mostly uses American spelling and vocabulary (color ×4, favorite ×11, mom ×10, math ×3, gray, pajamas, pants, sneakers, cookie, candy, truck, eraser, yogurt, -ize) with British IPA. Exceptions: neighbour (island_job.html:1926) vs neighbor (island_season.html:2121); centre (island_city.html:1950, 'city centre' in season #598); maths (season #581, #671) vs headword math; 'soccer practice' (#843) vs headword football ⚽; 'summer vacation' vs 'summer holiday'; 'hard-working' (#787) vs headword 'hardworking'.",
+  "proposal": "The teacher picks one standard. The CSV proposes American (the majority): neighbour→neighbor (also rename the audio-map key), centre→center, maths→math. Changed sentences need re-recording.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-11",
+  "title": "Example sentences with factual, age or naturalness problems",
+  "severity": "medium",
+  "evidence": "Problems found:\n- whale (island_animal.html:1956): 'A whale is the largest animal on Earth.' Only the blue whale is.\n- six (island_color.html:1939): 'School starts at six.'\n- grade (island_school.html:1946): 'grade seven', for 7–10-year-olds.\n- July (island_time.html:1953): 'July is summer vacation.'\n- second (island_time.html:1918): 'in a second' is an idiom, not 秒.\n- citizen (season:2120): 'Every citizen has the right to vote.' Minors cannot vote.\n- 9 low items: otherwise comma splice, 'First we eat, then we'll play', 'She is sick and stays home', 'the first in her class', 'a good exercise', 'out on the sea', 'because of', 'previously…before', 'cook the dinner'.",
+  "proposal": "Exact replacements are in the CSV, e.g. 'The blue whale is the largest animal on Earth.' / 蓝鲸是地球上最大的动物。; 'I get up at six every morning.'; \"I'm in grade three this year.\"; 'Summer vacation starts in July.'; 'There are sixty seconds in a minute.'; 'Every citizen should obey the law.'. Each one needs re-recording.",
+  "effort": "M"
+ },
+ {
+  "id": "CQ-12",
+  "title": "Audio lock fingerprints files the game never plays (8 words)",
+  "severity": "medium",
+  "evidence": "The hansen_audio_lock.py _parse_island regex skips quoted __ISLAND_LOCAL_AUDIO keys. So the lock's resolution says post office→words/word_01.mp3, police station→word_02, fire station→word_03, gloves→gloves.mp3, cap→cap.mp3, chair→chair.mp3, when→when.mp3, hard→hard.mp3. speak() actually plays post_office.mp3, police_station.mp3, fire_station.mp3, gloves_clothes.mp3, cap_clothes.mp3, chair_home.mp3, when_treasure.mp3 and hard_treasure.mp3, and none of those 8 is in lock['files'] (verified).",
+  "proposal": "Parse the object literal properly (or accept quoted keys), then run --rebuild.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-13",
+  "title": "11 word pictures use Emoji 13/14 and may render as empty boxes on older phones",
+  "severity": "medium",
+  "evidence": "Emoji 14.0: sensitive 🥹, playground 🛝, citizen 🪪. Emoji 13.0: village 🛖, soldier 🪖, mirror 🪞, window 🪟, stone 🪨, soil 🪴, oxygen 🫁, relative 🫂. WeChat's in-app browser uses the system emoji font. Headless Chromium cannot show this, so it needs a real old-device check.",
+  "proposal": "Replace them with older emoji or the app's own WebP icons, as was done for the food words.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-14",
+  "title": "Pictures that contradict the word or example, and gender stereotypes",
+  "severity": "low",
+  "evidence": "- grade SVG shows 'GRADE A+ ★★★★' (score) for 年级.\n- tradition 🎎 (Japanese dolls) for a Spring Festival sentence.\n- famous 🗼 (Tokyo Tower) for 'Eiffel Tower'.\n- scientist 👨‍🔬 next to Marie Curie; singer 👨‍🎤 with \"She's my favorite singer.\"; teach 👨‍🏫 with 'My mom teaches me…'.\n- letter SVG 'A' with a mail example; vocab_all free 🆓 with 'Birds are free'.\n- Job emojis are nearly all male (nurse is the only female).\n- 10 of 16 mom/grandma sentences are about cooking, baking, knitting or gardening; \"She's a nurse at the hospital.\"\n- 'We go to church every Sunday.' (low-confidence judgement); 'I hate Monday mornings.'\n- dinner.webp shows red wine; yogurt.webp prints 'YOGURT' (spelling giveaway).",
+  "proposal": "Replacements are listed in the CSV (🥟, 👩‍🔬, 👩‍🎤, ✉️, 🕊️, alternating-gender job emoji, swap 2–3 family roles).",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-15",
+  "title": "Audio file quality and consistency",
+  "severity": "low",
+  "evidence": "- ASR: 571/949 sentence clips word-for-word, median WER 0, and no clip matches another sentence better than its own. 879/945 word clips confirmed against their island vocabulary; 66 short words are unconfirmed, a listen list rather than defects.\n- 7 sentence mp3 files (0029, 0152, 0207, 0338, 0341, 0606, 0634) have a corrupt last frame (N packets, N−1 frames decoded).\n- RMS median: classic sentences −21.5 dBFS, 星海 examples −15.5, words −17.2.\n- clean.mp3 has an extra sound at 1.83–2.31 s (peak −9 dBFS); use.mp3 contains two full utterances; her.mp3 has a blip; house.mp3 starts at 0.9 s and is quietest at −23.7 dBFS.\n- Spelling Bee plays a different recording than the island for 14 words (cook, turn, have, stop, fish, post office, police station, fire station, gloves, cap, orange, chair, firefighter, singer).\n- 13 files are unused by everything.",
+  "proposal": "Re-encode the 7 files. Loudness-normalise all three sets to one target. Listen to and trim the 4 clips. Use one shared audio resolver for islands and Spelling Bee. Delete unused files and rebuild the lock.",
+  "effort": "M"
+ },
+ {
+  "id": "CQ-16",
+  "title": "Chinese typography and sense-separator inconsistency",
+  "severity": "low",
+  "evidence": "152 of 952 exCn use half-width , ? ! next to a full-width 。 (79/58/22 occurrences; no entry uses ，？！). 14 星海 cn use ';' (e.g. available 可获得的;可用的) while all 712 classic entries use '/'. smartHighlight splits only on '/', which contributes to the available→的 highlight.",
+  "proposal": "Mechanical replace to ，？！ in exCn and '/' in cn. Update the HIGHLIGHT_MANUAL keys, which embed exCn text.",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-17",
+  "title": "Minor IPA consistency",
+  "severity": "low",
+  "evidence": "hour /aʊə/ has no stress mark although our /ˈaʊə/, fire /ˈfaɪə/ and flower /ˈflaʊə/ do. post office /pəʊst ˈɒfɪs/ and air conditioner /eə kənˈdɪʃənə/ stress the second element (OALD stresses the first). ice cream /ˈaɪs kriːm/ uses the AmE pattern (BrE /ˌaɪs ˈkriːm/).",
+  "proposal": "/ˈaʊə/, /ˈpəʊst ɒfɪs/, /ˈeə kəndɪʃənə/, /ˌaɪs ˈkriːm/",
+  "effort": "S"
+ },
+ {
+  "id": "CQ-18",
+  "title": "No part-of-speech field anywhere",
+  "severity": "low",
+  "evidence": "Entries contain only en/pn/cn/emoji/ex/exCn. Class changes across islands (cook v./n., answer v./n., clean v./adj., hard adj./adv., second 第二/秒) and within 星海 (comfort, comment, review, increase, project) can be told apart only by the Chinese.",
+  "proposal": "Add a pos field and show it on the word card.",
+  "effort": "M"
+ }
+]

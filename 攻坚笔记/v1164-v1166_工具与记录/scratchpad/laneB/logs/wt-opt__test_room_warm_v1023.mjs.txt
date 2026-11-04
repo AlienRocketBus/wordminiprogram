@@ -1,0 +1,14 @@
+房间预热常驻 v1023
+  OK  预热模块已加载
+  OK  星海觉醒已在后台预热完成(无需用户等待)
+  OK  星海觉醒已打开
+  OK  打开耗时 4ms(<250ms)
+  OK  未发生整页跳转, 仍在岛屿页
+  OK  关闭后房间常驻(未销毁)
+  OK  二次打开耗时 1ms(<120ms)
+  OK  赛季岛同样已后台预热
+  OK  三个带参数页的资源已预热进缓存: boss_hall.html, season_showcase.html, spelling_bee.html
+  OK  预热用的隐藏 iframe 已自行清理(不占内存)
+  OK  零脚本错误
+
+结果: 11 通过 / 0 失败

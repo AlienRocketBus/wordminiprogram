@@ -1,0 +1,130 @@
+{
+  "framesHome": [
+    "/",
+    "  about:blank"
+  ],
+  "homeReqs": 158,
+  "wait": {
+    "p": "/island_food.html",
+    "rs": "complete",
+    "title": "食物大冒险 · Food Word Adventure",
+    "ver": 1163,
+    "gate": 1163,
+    "wrap": "block",
+    "op": "1",
+    "loading": null,
+    "ms": 880
+  },
+  "snaps": [
+    {
+      "t": 5,
+      "frames": [
+        "/",
+        "  /island_food.html",
+        "    /land_map.html?v=1163",
+        "    /island_season.html?v=1163",
+        "      /land_map.html?v=1163",
+        "      /island_season.html?v=1163",
+        "        /land_map.html?v=1163",
+        "        "
+      ]
+    },
+    {
+      "t": 10,
+      "frames": [
+        "/",
+        "  /island_food.html",
+        "    /land_map.html?v=1163",
+        "    /island_season.html?v=1163",
+        "      /land_map.html?v=1163",
+        "      /island_season.html?v=1163",
+        "        /land_map.html?v=1163",
+        "        ",
+        "        /spelling_bee.html?v=1163&warm=1"
+      ]
+    },
+    {
+      "t": 15,
+      "frames": [
+        "/",
+        "  /island_food.html",
+        "    /land_map.html?v=1163",
+        "    /island_season.html?v=1163",
+        "      /land_map.html?v=1163",
+        "      /island_season.html?v=1163",
+        "        /land_map.html?v=1163",
+        "        "
+      ]
+    },
+    {
+      "t": 25,
+      "frames": [
+        "/",
+        "  /island_food.html",
+        "    /land_map.html?v=1163",
+        "    /island_season.html?v=1163",
+        "      /land_map.html?v=1163",
+        "      /island_season.html?v=1163",
+        "        /land_map.html?v=1163",
+        "        "
+      ]
+    }
+  ],
+  "reqAfterTap": 886,
+  "htmlDocs": [
+    "/island_food.html [iframe]",
+    "/land_map.html?v=1163 [iframe]",
+    "/island_season.html?v=1163 [iframe]",
+    "/land_map.html?v=1163 [iframe]",
+    "/island_season.html?v=1163 [iframe]",
+    "/land_map.html?v=1163 [iframe]",
+    "/boss_hall.html?v=1163&warm=1 [iframe]",
+    "/season_showcase.html?v=1163&warm=1 [iframe]",
+    "/boss_hall.html?v=1163&warm=1 [iframe]",
+    "/spelling_bee.html?v=1163&warm=1 [iframe]",
+    "/season_showcase.html?v=1163&warm=1 [iframe]",
+    "/boss_hall.html?v=1163&warm=1 [iframe]",
+    "/spelling_bee.html?v=1163&warm=1 [iframe]",
+    "/season_showcase.html?v=1163&warm=1 [iframe]",
+    "/spelling_bee.html?v=1163&warm=1 [iframe]"
+  ],
+  "bytesAfterTap": 15947772,
+  "seasonFrames": [
+    {
+      "url": "/island_season.html?v=1163",
+      "depthTopDiff": 2,
+      "rooms": [
+        "land",
+        "season"
+      ],
+      "prefetched": [
+        "boss_hall.html",
+        "season_showcase.html",
+        "spelling_bee.html"
+      ],
+      "hidden": "none"
+    },
+    {
+      "url": "/island_season.html?v=1163",
+      "depthTopDiff": 3,
+      "rooms": [
+        "land",
+        "season"
+      ],
+      "prefetched": [
+        "boss_hall.html",
+        "season_showcase.html",
+        "spelling_bee.html"
+      ],
+      "hidden": "none"
+    }
+  ],
+  "metrics": {
+    "Documents": 9,
+    "Frames": 9,
+    "JSEventListeners": 4237,
+    "Nodes": 11201,
+    "JSHeapUsedSize": "10MB"
+  },
+  "errs": []
+}

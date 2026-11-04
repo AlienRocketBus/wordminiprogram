@@ -120,7 +120,7 @@ async function preparePage(reducedMotion, theme) {
     serviceWorkers: 'block'
   });
   await context.addInitScript(() => {
-    localStorage.clear();
+    if (window.top === window) localStorage.clear();
     localStorage.setItem('hansen_onboarded', '1');
     localStorage.setItem('hsnViewMode', 'desktop');
     localStorage.setItem('wordIsland', JSON.stringify({

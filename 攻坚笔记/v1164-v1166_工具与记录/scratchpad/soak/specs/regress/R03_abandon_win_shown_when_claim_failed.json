@@ -1,0 +1,128 @@
+{
+ "name": "R03_abandon_win_shown_when_claim_failed",
+ "bug": "R3 abandon win shown although claimAbandonWin failed → both kids win",
+ "spec": {
+  "seed": 509,
+  "profile": "disrupt",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 2,
+   "queryLagMul": 1.97,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "duplicate_write",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.81,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x509",
+    "name": "小明",
+    "rating": 1069,
+    "skew": 0,
+    "net": {
+     "base": 16,
+     "jitter": 7,
+     "spikeP": 0.01,
+     "faultRate": 0.021,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [
+     {
+      "a": 137007,
+      "b": 204386,
+      "mode": "fast"
+     }
+    ],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.94,
+     "minMs": 2462,
+     "maxMs": 11857,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 14184,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P2",
+    "uid": "k2x509",
+    "name": "阿杰",
+    "rating": 879,
+    "skew": 0,
+    "net": {
+     "base": 16,
+     "jitter": 16,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 78643,
+      "dur": 77234
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.88,
+     "minMs": 1741,
+     "maxMs": 10214,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 24185,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

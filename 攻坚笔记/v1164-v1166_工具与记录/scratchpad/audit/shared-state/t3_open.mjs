@@ -1,0 +1,12 @@
+import {boot,openIslandByTap,dismissWelcome,topbar,ls,sleep} from './harness.mjs';
+const {s,page,log}=await boot();
+const {box,frame}=await openIslandByTap(page,'island_food.html');
+console.log('tap',box,'frame',!!frame);
+console.log('welcome',await dismissWelcome(frame));
+await sleep(5000);
+console.log('topbar',await topbar(frame));
+console.log('frames',page.frames().map(f=>f.url().replace(s.base,'')));
+console.log(await ls(page,['hansen_wallet_charxp','hansen_wallet_coins','hansen_wallet_gems','hansen_checkin_streak']));
+await page.screenshot({path:'food1.png'});
+console.log(log.slice(0,30).join('\n'));
+await s.close();

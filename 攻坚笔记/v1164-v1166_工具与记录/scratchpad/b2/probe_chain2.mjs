@@ -1,0 +1,21 @@
+import { launch, sleep, BASE, O } from './lib.mjs';
+const { browser, ctx } = await launch({ init: () => { try { localStorage.setItem('hansen_onboarded','1'); } catch(e){} } });
+const page = await ctx.newPage();
+page.on('dialog', d => d.dismiss().catch(()=>{}));
+page.on('pageerror', e => console.log('PAGEERR', e.message));
+await page.goto(BASE + 'island_animal.html'); await sleep(3000);
+const r = await page.evaluate(() => {
+  const log = [];
+  const HC = window.HansenCanonical, HR = window.HansenReview;
+  const can = () => { const s = HC.read(); const p = s.islands.animal; return JSON.stringify({w:p.wrongs, s:p.srs}); };
+  log.push('same S: '+(window.S===S));
+  const oR = HR.absorbRealAnswer; HR.absorbRealAnswer = function(i,c){ log.push('absorbReal('+i+','+c+') pre wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs)+' canon='+can()); const r = oR.apply(this, arguments); log.push(' -> '+JSON.stringify(r)+' S.wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs)+' winS.srs='+JSON.stringify(window.S.srs)); return r; };
+  const idx = 3;
+  markAnswer(idx, false); log.push('after miss wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs)+' canon='+can());
+  log.push('due='+HR._dueCount()+' srs='+JSON.stringify(S.srs)+' canon='+can());
+  markAnswer(idx, true); log.push('after correct wrongs='+JSON.stringify(S.wrongs)+' srs='+JSON.stringify(S.srs)+' canon='+can());
+  log.push('due='+HR._dueCount()+' srs='+JSON.stringify(S.srs)+' canon='+can());
+  return { log };
+});
+console.log(r.log.join('\n'));
+await browser.close();

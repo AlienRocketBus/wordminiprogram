@@ -1,0 +1,610 @@
+{
+ "W": 390,
+ "MODE": "asis",
+ "WAIT": 25000,
+ "ISL": "island_food.html",
+ "CACHE": "no-cache",
+ "homeLoadMs": 781,
+ "skip": {
+  "ok": true,
+  "hitTop": "BUTTON#__hsOnbSkip.",
+  "label": "skip",
+  "x": 325,
+  "y": 260
+ },
+ "home": {
+  "n": 159,
+  "bytes": 9092902,
+  "n200": 159,
+  "n304": 0,
+  "n206": 0,
+  "n404": 0,
+  "byExt": {
+   "html": [
+    7,
+    3.93
+   ],
+   "js": [
+    124,
+    3.77
+   ],
+   "woff2": [
+    1,
+    0.4
+   ],
+   "other": [
+    1,
+    0
+   ],
+   "webp": [
+    26,
+    1
+   ]
+  },
+  "byRef": {
+   "(none)": [
+    1,
+    0.2
+   ],
+   "/index.html": [
+    158,
+    8.89
+   ]
+  },
+  "MB": 9.09
+ },
+ "homeIslandHtml": [
+  "/land_map.html 200 empty",
+  "/island_animal.html?v=1163 200 empty",
+  "/island_animal.html?v=1163 200 empty",
+  "/island_food.html?v=1163 200 empty",
+  "/island_sports.html?v=1163 200 empty",
+  "/island_job.html?v=1163 200 empty"
+ ],
+ "tap": {
+  "ok": true,
+  "hitTop": "DIV#.island-en",
+  "label": "island_food.html",
+  "x": 195,
+  "y": 422
+ },
+ "revealMs": 893,
+ "tree": [
+  {
+   "depth": 0,
+   "url": "/index.html",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 42,
+   "hidden": false,
+   "setN": 32,
+   "setKeys": 31,
+   "top": [
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_coin_award_pending_v942",
+     1
+    ],
+    [
+     "hansen_wallet_coins",
+     1
+    ],
+    [
+     "hansen_wallet_coins_earned",
+     1
+    ],
+    [
+     "hansen_coin_awards_v942",
+     1
+    ],
+    [
+     "hansen_starter_coins_given",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAnimal",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSports",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandPeople",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 16
+  },
+  {
+   "depth": 1,
+   "url": "/island_food.html",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 99,
+   "hidden": false,
+   "setN": 122,
+   "setKeys": 98,
+   "top": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "wordIslandFood",
+     5
+    ],
+    [
+     "wordIslandFood_bak",
+     4
+    ],
+    [
+     "hansen_pet_hero_img",
+     4
+    ],
+    [
+     "hsn_progress:食物大冒险",
+     4
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 29
+  },
+  {
+   "depth": 2,
+   "url": "/land_map.html?v=1163",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 16,
+   "hidden": true,
+   "setN": 1,
+   "setKeys": 1,
+   "top": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 2
+  },
+  {
+   "depth": 2,
+   "url": "/island_season.html?v=1163",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 99,
+   "hidden": true,
+   "setN": 71,
+   "setKeys": 49,
+   "top": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "wordIslandSeason",
+     5
+    ],
+    [
+     "wordIslandSeason_bak",
+     4
+    ],
+    [
+     "hansen_pet_hero_img",
+     4
+    ],
+    [
+     "hsn_progress:星海词汇大冒险",
+     3
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_wallet_charxp",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 28
+  },
+  {
+   "depth": 3,
+   "url": "/land_map.html?v=1163",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 16,
+   "hidden": true,
+   "setN": 1,
+   "setKeys": 1,
+   "top": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 2
+  },
+  {
+   "depth": 3,
+   "url": "/island_season.html?v=1163",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 99,
+   "hidden": true,
+   "setN": 63,
+   "setKeys": 47,
+   "top": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "hansen_pet_hero_img",
+     4
+    ],
+    [
+     "hsn_progress:星海词汇大冒险",
+     3
+    ],
+    [
+     "wordIslandSeason",
+     2
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_wallet_charxp",
+     1
+    ],
+    [
+     "hansen_charxp_reset_v1",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 28
+  },
+  {
+   "depth": 4,
+   "url": "/land_map.html?v=1163",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 16,
+   "hidden": true,
+   "setN": 1,
+   "setKeys": 1,
+   "top": [
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 2
+  },
+  {
+   "depth": 4,
+   "url": "",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 0,
+   "hidden": true,
+   "setN": 0,
+   "setKeys": 0,
+   "top": [],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 0
+  }
+ ],
+ "open": {
+  "n": 1365,
+  "bytes": 47063023,
+  "n200": 297,
+  "n304": 476,
+  "n206": 592,
+  "n404": 0,
+  "byExt": {
+   "html": [
+    23,
+    9.51
+   ],
+   "js": [
+    441,
+    10.35
+   ],
+   "woff2": [
+    2,
+    0.02
+   ],
+   "webp": [
+    294,
+    12.53
+   ],
+   "other": [
+    13,
+    0
+   ],
+   "mp3": [
+    592,
+    14.65
+   ]
+  },
+  "byRef": {
+   "/index.html": [
+    16,
+    1.83
+   ],
+   "/island_food.html": [
+    297,
+    15.35
+   ],
+   "/land_map.html?v=1163": [
+    39,
+    1.85
+   ],
+   "/island_season.html?v=1163": [
+    860,
+    27.02
+   ],
+   "/boss_hall.html?v=1163&warm=1": [
+    63,
+    1.02
+   ],
+   "/season_showcase.html?v=1163&warm=1": [
+    39,
+    0
+   ],
+   "/spelling_bee.html?v=1163&warm=1": [
+    51,
+    0
+   ]
+  },
+  "MB": 47.06
+ },
+ "docs": [
+  "+-359ms /island_color.html?v=1163 200 614778B dest=empty ref=/index.html",
+  "+-16ms /island_food.html 200 609057B dest=iframe ref=/index.html",
+  "+684ms /island_nature.html?v=1163 200 604796B dest=empty ref=/index.html",
+  "+1658ms /land_map.html?v=1163 200 689637B dest=iframe ref=/island_food.html",
+  "+1842ms /island_land1.html 200 616061B dest=empty ref=/land_map.html?v=1163",
+  "+2265ms /index.html 200 202837B dest=empty ref=/island_food.html",
+  "+2880ms /island_season.html?v=1163 200 656663B dest=iframe ref=/island_food.html",
+  "+3865ms /land_map.html?v=1163 200 689637B dest=iframe ref=/island_season.html?v=1163",
+  "+4027ms /island_land1.html 200 616061B dest=empty ref=/land_map.html?v=1163",
+  "+4851ms /index.html 200 202837B dest=empty ref=/island_season.html?v=1163",
+  "+5113ms /boss_hall.html?v=1163&warm=1 200 49938B dest=iframe ref=/island_food.html",
+  "+5121ms /island_season.html?v=1163 200 656663B dest=iframe ref=/island_season.html?v=1163",
+  "+6223ms /land_map.html?v=1163 200 689637B dest=iframe ref=/island_season.html?v=1163",
+  "+6588ms /season_showcase.html?v=1163&warm=1 200 49196B dest=iframe ref=/island_food.html",
+  "+7095ms /index.html 304 0B dest=empty ref=/island_season.html?v=1163",
+  "+7260ms /island_land1.html 200 616061B dest=empty ref=/land_map.html?v=1163",
+  "+7277ms /boss_hall.html?v=1163&warm=1 200 49938B dest=iframe ref=/island_season.html?v=1163",
+  "+8114ms /spelling_bee.html?v=1163&warm=1 200 583553B dest=iframe ref=/island_food.html",
+  "+8827ms /season_showcase.html?v=1163&warm=1 200 49196B dest=iframe ref=/island_season.html?v=1163",
+  "+9632ms /boss_hall.html?v=1163&warm=1 200 49938B dest=iframe ref=/island_season.html?v=1163",
+  "+10310ms /spelling_bee.html?v=1163&warm=1 200 583553B dest=iframe ref=/island_season.html?v=1163",
+  "+11165ms /season_showcase.html?v=1163&warm=1 200 49196B dest=iframe ref=/island_season.html?v=1163",
+  "+12677ms /spelling_bee.html?v=1163&warm=1 200 583553B dest=iframe ref=/island_season.html?v=1163"
+ ],
+ "uniqueFiles": 539,
+ "uniqueMB": 23.55,
+ "dup200": [
+  [
+   "/VERSION",
+   13
+  ],
+  [
+   "/hansen_boss_attack.js",
+   6
+  ],
+  [
+   "/bossfx/renyi_spear.webp",
+   6
+  ],
+  [
+   "/bossfx/hand1.webp",
+   6
+  ],
+  [
+   "/bossfx/hand2.webp",
+   6
+  ],
+  [
+   "/bossfx/hand3.webp",
+   6
+  ],
+  [
+   "/bossfx/hand4.webp",
+   6
+  ],
+  [
+   "/bossfx/hand5.webp",
+   6
+  ],
+  [
+   "/bosses/lv02.webp",
+   4
+  ],
+  [
+   "/bosses/lv03.webp",
+   4
+  ],
+  [
+   "/bosses/lv04.webp",
+   4
+  ],
+  [
+   "/bosses/lv05.webp",
+   4
+  ],
+  [
+   "/bosses/lv06.webp",
+   4
+  ],
+  [
+   "/bosses/lv07.webp",
+   4
+  ],
+  [
+   "/bosses/lv08.webp",
+   4
+  ]
+ ],
+ "mp3": {
+  "n": 592,
+  "MB": 14.65
+ },
+ "ls": [
+  "hansen_lastIslandMeta",
+  "hansen_lastIslandTime",
+  "hsn_progress:星海词汇大冒险",
+  "hsn_progress:食物大冒险",
+  "lastIslandKey",
+  "lastIslandTime",
+  "wordIslandFood",
+  "wordIslandFood_bak",
+  "wordIslandSeason",
+  "wordIslandSeason_bak"
+ ],
+ "myLearning": {
+  "rows": [
+   "食物大冒险 今天 已掌握 0 / 56 词 正确率 0%",
+   "星海词汇大冒险 今天 已掌握 0 / 240 词 正确率 0%"
+  ],
+  "cnt": "已点亮 2 / 19 座岛"
+ },
+ "ev": {
+  "pageerror": [],
+  "consoleErr": [],
+  "dialogs": [],
+  "external": [],
+  "failed": []
+ },
+ "dom": {
+  "documents": 9,
+  "nodes": 11105,
+  "jsEventListeners": 4280
+ }
+}

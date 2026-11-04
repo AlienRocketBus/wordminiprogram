@@ -127,6 +127,7 @@
       + '已探索 ' + p.islands + ' 个岛 · 已学 ' + p.learned + ' 个单词</div>'
       + '<button class="g_go" id="gGo">🔐 手机号注册 / 登录</button>'
       + '<div class="g_tip">注册后本机进度会自动上传，之后在任何设备登录同一账号即可恢复。<br>'
+      + '孩子没有手机号的话，用家长的手机号也可以。<br>'
       + '这一步是必须的，完成后就能继续玩了。</div>'
       + '</div>';
     var b = document.getElementById('gGo');
@@ -141,7 +142,8 @@
       try {
         if (!window.HansenAuthUI) { notReadyOr('登录'); return; }
         hide();
-        HansenAuthUI.open();
+        /* v1164：注册只能用手机号（用户名注册云端不支持）→ 直接打开手机号那一页 */
+        HansenAuthUI.open({ mode: 'phone' });
       } catch (e) {
         try { notReadyOr('登录'); } catch (e2) {}
       }

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_gate_login_v1054.mjs —— Lv.3 门槛点注册必须能真正登录
  * 事故：升到 3 级后弹出注册门槛，点「注册/登录」**没有任何反应**，用户彻底卡死。
  * 真因：登录面板 z-index 为 2147483500，而门槛是 2147483640 ——
@@ -6,9 +7,9 @@
  * 合同：点注册后必须能**真实点击输入框并打字**，且数秒后门槛不得回来遮挡。
  * 本测试模拟真实交互(click + type)，而非只检查 DOM 属性——
  *   前者才能发现"元素在但点不到"这类遮挡问题。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html; charset=utf-8','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -16,7 +17,7 @@ await new Promise(r=>srv.listen(0,r)); const port=srv.address().port;
 const b=await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_PATH});
 const page=await b.newPage({viewport:{width:390,height:844}});
 page.on('dialog',async d=>{ await d.dismiss().catch(()=>{}); });
-await page.addInitScript(()=>{ localStorage.clear();
+await page.addInitScript(()=>{ if (window.top === window) localStorage.clear();
   localStorage.setItem('hansen_wallet_charxp','400');
   localStorage.setItem('wordIslandAnimal', JSON.stringify({learned:[1,2,3,4,5]}));
 });

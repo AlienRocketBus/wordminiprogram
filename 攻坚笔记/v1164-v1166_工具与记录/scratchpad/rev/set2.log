@@ -1,0 +1,9 @@
+test_boss_lazy_v1165 exit=1 fails=5
+test_preload_budget_v1165 exit=0 fails=0
+test_idle_motion_v1165 exit=0 fails=0
+test_room_warm_v1023 exit=0 fails=0
+test_copy_numbers_v1165 exit=0 fails=0
+test_light_contrast_v989 exit=0 fails=0
+test_island_prefetch_v1025 exit=0 fails=0
+test_network_release_blockers_v946 exit=0 fails=0
+SETDONE

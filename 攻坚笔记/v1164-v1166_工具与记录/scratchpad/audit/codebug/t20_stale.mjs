@@ -1,0 +1,21 @@
+import {serve,launch,ctx,attach} from './harness.mjs';
+const {srv,base}=await serve();
+const b=await launch();
+const c=await ctx(b,base);
+const p=await c.newPage(); const log=[]; attach(p,log);
+await p.goto(base+'/index.html',{waitUntil:'load'}); await p.waitForTimeout(2500);
+await p.evaluate(()=>openIsland('island_animal.html')); await p.waitForTimeout(4000);
+let fr=p.frames().find(f=>/island_animal/.test(f.url()));
+await fr.evaluate(()=>{ document.querySelectorAll('button').forEach(x=>{ if(/开始冒险/.test(x.textContent)) x.click(); }); });
+const read=async()=>fr.evaluate(()=>({gemBadge:(document.getElementById('__hs_gem_count')||{}).textContent, coinBadge:(document.querySelector('#coinCount,#topCoins,.top-coin,#coins')||{}).textContent, walletGems:HansenGems.get(), walletCoins:HansenCoins.get(), topbar:(document.querySelector('.top-bar,.topbar,#topBar')||document.body).innerText.slice(0,80).replace(/\s+/g,' ')}));
+const r1=await read();
+await p.evaluate(()=>history.back()); await p.waitForTimeout(800);
+// on HOME: simulate a purchase that spends coins and diamonds via the home window's wallets
+const home=await p.evaluate(()=>{ const out={}; try{ out.gAdd=HansenGems.add(40);}catch(e){out.gErr=e.message} try{ out.cSpend=HansenCoins.spend?HansenCoins.spend(100):HansenCoins.add(-100);}catch(e){out.cErr=e.message} out.g=HansenGems.get(); out.c=HansenCoins.get(); return out; });
+await p.evaluate(()=>openIsland('island_animal.html')); await p.waitForTimeout(1500);
+fr=p.frames().find(f=>/island_animal/.test(f.url()));
+const r2=await read();
+await p.waitForTimeout(5000);
+const r3=await read();
+console.log(JSON.stringify({r1,home,afterReopen:r2,after5s:r3},null,1));
+await b.close(); srv.close();

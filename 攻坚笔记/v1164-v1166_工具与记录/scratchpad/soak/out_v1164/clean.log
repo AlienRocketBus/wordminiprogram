@@ -1,0 +1,5 @@
+
+══ clusters (0) ══
+
+SUMMARY profile=clean runs=200 seeds=1..200 failing_runs=0 clusters=0 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:0 I5:0 I6:0 I7:0 I8:0 I9:0 I10:0 | matches=227 settled_pairs=220 virtual=24.1h events=198638 real=8s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

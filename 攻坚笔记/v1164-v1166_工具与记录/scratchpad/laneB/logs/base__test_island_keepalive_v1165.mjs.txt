@@ -1,0 +1,43 @@
+
+▶ 1. 动物 → 🗺️ → 食物 → 🗺️：藏着的岛不能被导回动物
+  ✅ 真点「动物」进岛
+  ✅ 真点 🗺️
+  ✅ 回到首页
+  ✅ 真点「食物」进岛
+  ✅ 真点 🗺️
+  ✅ 回到首页
+  ❌ 等 3 秒后藏着的 iframe 还是食物岛（实际 island_animal.html）
+  ❌ 这 3 秒里藏着的 iframe 没被导走（island_animal.html）
+  ✅ 再真点「食物」
+  ❌ 瞬开保活：食物岛里的标记还在（undefined）
+
+▶ 2. 岛里点两次「重新加载」（启动自检）：_r 不累加，🗺️ 一下回首页
+  ✅ 第 1 次真点「重新加载」
+  ✅ 岛页重新加载完（?_r=1793728367415）
+  ✅ 第 2 次真点「重新加载」
+  ✅ 岛页重新加载完（?_r=1793728367415&_r=1793728369279）
+  ❌ 地址里只有一个 _r（?_r=1793728367415&_r=1793728369279）
+  ✅ 真点 🗺️ 一次
+  ❌ 点一次就回到首页
+  ❌ 顶层历史也退干净了（state={"hsnIsland":"island_food.html"}，页面 index.html）
+
+▶ 3. 前进 / 整页刷新 / 单词大陆地图
+  ✅ 浏览器「前进」回到食物岛
+  ❌ 真点 🗺️
+  ❌ 回到首页
+  ❌ 真点「动物」
+  ❌ 岛开着时整页刷新：恢复到动物岛
+  ✅ 真点 🗺️
+  ❌ 回到首页
+  ✅ 打开单词大陆地图
+  ✅ 真点 ① 号岛
+  ✅ 真点「进入学习」
+  ✅ 进到 ① 号岛
+  ✅ 真点 🗺️
+  ✅ 回到单词大陆地图
+  ✅ 真点地图「← 返回」
+  ❌ 回到首页
+  ❌ 顶层还在首页、历史干净（{"hsnIsland":"land_map.html"}）
+  ❌ 零脚本错误：Transition was aborted because of invalid state. ViewTransition opt-in disabled | Transition was aborted because of invalid state. ViewTransition opt-in disabled
+
+❌ 14 项失败

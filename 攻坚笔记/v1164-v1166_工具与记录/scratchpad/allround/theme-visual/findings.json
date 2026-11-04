@@ -1,0 +1,130 @@
+[
+ {
+  "id": "TV-01",
+  "title": "7 个互不相通的主题/底色选择器、71 个选项，没有共用的颜色体系",
+  "severity": "high",
+  "evidence": "整体配色 8（hansen_palette.js:22 起，选择器 :715，键 hansen_palette_global）｜金币主题 6（首页 index.html:274-333，岛内 template.html:602-656 与 :8223，选择器 template.html:7756；价格在 hansen_theme_shop.js:33-34 和 hansen_theme_lock.js:21-22 各写一份，注释写着“必须同步”）｜钻石主题 26（hansen_diamond_shop.js:18-49：IMAX 8 + 画廊 18）｜打Boss 主题 3（hansen_boss_theme.js:44）｜卡册 Boss 背景 9（hansen_cards.js:86）｜Boss 殿堂卡面背景 13（boss_hall.html:263-278）｜拼写蜂 6（spelling_bee.html:89-115、511-516）。“樱花粉”是其中 3 个选择器的选项名（拼写蜂里另有“樱粉”）。98 个前端文件里：1,319 种十六进制颜色、63 种字号（8–230px）、32 种圆角、385 种阴影、94 种动画时长、79 种 z-index、1,409 个 !important；独立的颜色变量家族至少 12 套（--pal 17 个、--th 8、--pk 22、--hpk 16、--slot 14、--rb 14、--hg 12、--boss 6……）。",
+  "proposal": "主题 2.0：一套颜色角色（见报告 §5.1），外加可选的“场景层”（背景画）。所有旧主题都映射到角色上（§5.2 映射表）。只保留一个“主题”入口，分区为：免费配色、场景（金币）、典藏（钻石）、季节。旧存档键和已购内容全部保留。",
+  "effort": "L"
+ },
+ {
+  "id": "TV-02",
+  "title": "同一个金币主题：首页是亮色，进了岛却变暗色（6 个里有 3 个）",
+  "severity": "high",
+  "evidence": "首页和岛内各定义了一份 --th-bg-deep：pink 首页 #fce7f3（浅粉）/ 岛内 #2d1b2e（深紫）；forest 首页 #84cc16 / 岛内 #14271a；peach 首页 #fff7ed / 岛内 #451a03（index.html:284-333 对比 template.html:612-656）。截图：/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/allround/theme-visual/out/across_home_top.png（coin_pink 首页是浅粉）和 /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/allround/theme-visual/out/across_food_menu.png（coin_pink 岛内是深紫）。",
+  "proposal": "两边的变量都从同一份主题数据生成。每个金币主题声明自己是亮还是暗：pink→sakura 亮，forest→mint 亮，peach→cream 亮，ocean→aurora 暗，rainbow→violet 暗。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-03",
+  "title": "付费场景主题让字看不清，待机时主线程几乎满载",
+  "severity": "high",
+  "evidence": "IMAX“糖果乐园”：10 个画面 293 段文字，35% 不达标，其中 70 段低于 3:1，最低 1.02（界面还是按暗色设计的，却叠在亮色画布上）；画廊“童话镇”26% 不达标。岛屿菜单待机（CPU 4×，2 轮）：IMAX 97.1–99.8%，画廊 89.4–99.2%，无付费主题时 32.5–38.5%。canvas 每秒 13–29 次 rAF（全屏循环，hansen_cinema_themes.js:59-66）；停掉 canvas 后降到 60.6–62.3%。钻石主题还叠了 blur(48px) 加无限漂移的图层（hansen_diamond_shop.js:209-211）。",
+  "proposal": "每个场景声明亮/暗，界面角色跟着切换；照片场景加遮罩角色 --scrim。canvas 默认只画一帧静态图（已有 drawStatic，hansen_cinema_themes.js:55），只在进首页或过关时播 ≤6 秒招牌大场面，然后停住。漂移层改成静态。每个场景都要过对比度门禁。",
+  "effort": "M"
+ },
+ {
+  "id": "TV-04",
+  "title": "所有主题里，最常点的卡片标签和按钮字都不够清楚",
+  "severity": "high",
+  "evidence": "12 套预设全部不达标：每日任务 1.82、每日宝箱 2.97、打Boss 主题选择器的“晨曦”1.24 / “电影场景”1.67、首页岛卡岛名 3.6–4.12。4 个暗色配色和 4 个付费预设下：玩法卡“听音辨义”2.08、打地鼠 2.88、探索单词 2.98、记忆翻牌 3.29、打字大师 3.44、极速60秒 4.24；首页岛卡英文副标题 2.69–3.11；金色按钮白字“再来一轮”2.61；商店购买钮 2.95（4 个暗色配色）；复习横幅 2.38 / 2.61（8 个免费配色）。原因：标签是 13px 白字直接压在卡片底色上（template.html:807 .mode-card .m-title、:768/775 .d-label），只有亮色模式加了黑色描边（hansen_palette.js:152）；.game-btn.gold 也是白字（template.html:1293/1298）。",
+  "proposal": "标签放在深色半透明底板 --plate（rgba(9,12,36,.62)）上：按设计值计算，即使压在最亮的卡色上，白字对比也有 5.98；家里已有类似的“进入冒险 →”深色小胶囊。金色按钮改用深紫字 #3B0764，先例是星海横幅的“进入”按钮（hansen_palette.js:118）。角标底色用 #E11D48（白字 4.7）。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-05",
+  "title": "亮色模式靠补丁层撑着，每出一个新画面就冒出看不清的字",
+  "severity": "high",
+  "evidence": "亮色下注入的 #hsnPaletteCSS：121,690 字节、803 条规则、2,275 个选择器，其中 637 个 [style*=…] 行内颜色替换，1,358 个 !important，占岛页全部 3,044 条规则的 26%。hansen_palette.js 有 31 个版本标签（v855–v1042），代码注释里引用过老师的原话“配色实在太差·灰不拉几·字都看不清”（:226）。现在还有的问题：听音辨义顶栏“1/20”1.04、“换难度”1.34、“第1轮”1.42、“初级”1.49；Boss 列表顶栏 1.37 / 1.39；开箱后“经验 +23”1.24、“+23”1.95；设置页紫色按钮配深字 2.86–3.32；“收下!”1.89。亮色下玩法卡被改成白卡（v928），失去了颜色身份。",
+  "proposal": "组件改为只用角色变量，禁止写死颜色。每迁移一个组件，就删掉它对应的补丁，把 637 降到 0 作为进度指标。CI 里加两道检查：颜色门禁，和逐像素的屏幕对比度扫描（脚本已附）。",
+  "effort": "L"
+ },
+ {
+  "id": "TV-06",
+  "title": "庆祝时刻太小、会撞车，最重要的奖励数字反而最小",
+  "severity": "high",
+  "evidence": "升级：经验条下面亮 2.6 秒的小条（template.html:2781-2791，v321 老师要求不挡屏）。宠物进化：底部 toast（:2995-3001）。成就：底部 13px 小条（:1318-1323）。结算页：分数是 14px 灰字（:6559）。宝箱奖励卡：数字 .reward-amount 只有 14px，“金币”两个字却是 18px（:1210-1211）。打赢 Boss 时，VICTORY、85% 全屏遮罩的“新 Boss 解锁!”（hansen_boss_progress.js:208-216，按钮写“收下!”）和宠物进化 toast 同时出现；开箱后，奖励卡、成就、宠物进化三条同时出现（截图 m_cosmos_boss_victory.png、m_cloud_chest_open.png）。彩纸是方块（template.html:2643），一轮结算掉 120 片。",
+  "proposal": "加庆祝队列：一次只播一个，按优先级排；做题过程中只给答题反馈，升级、进化、成就都挪到结算页；做统一的结算组件（星星、大号分数、奖励、学会的词、要再练的词 +“练这 N 个词”、主按钮/次按钮）。特效用 fx.js（只在事件发生时播放）。样稿已经演示了这一套。",
+  "effort": "M"
+ },
+ {
+  "id": "TV-07",
+  "title": "现有庆祝特效本身很重，播完还有很多动画在跑",
+  "severity": "medium",
+  "evidence": "触发后 3 秒内的主线程开销（CPU 4×，3 次取中位数）：答对 53.2%（样稿 9.6%）；结算 83.3%（样稿 20.7%），3 秒时还有 51–54 片彩纸；开箱 93.2%（样稿 25.1%），3 秒时有 143–152 个动画在跑，4.5 秒时还有 18–24 个，长任务最多 14 个。现有开箱特效动画的是 filter: brightness(2.7)+drop-shadow，外加一个 230→644px、不透明度 0.96 的白色光晕；飞出来的金币是 🪙 emoji（hansen_checkin_global.js:385-420）。",
+  "proposal": "只动 transform 和 opacity；每次粒子不超过 28 个；播完立即删除节点。用静态光芒图加小粒子，代替亮度滤镜和大白光晕，也更贴合“不闪屏”红线。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-08",
+  "title": "首页的“视差”rAF 一直在空转（手机上本来就没有作用）",
+  "severity": "medium",
+  "evidence": "index.html:3895-3912 的 tick() 每一帧都改写 #stars 和 #deco 的 transform，目标值只由 mousemove 更新，手机上不会触发，所以永远写 translate(0,0)。5 秒内调用 114 次。把 CSS 动画全关掉后，首页仍然 36.1–43.6% 忙，rAF 每秒 57–59 次。另外还有 applyTheme 每 1.5 秒轮询一次（index.html:4256）、renderRecent 每 2 秒一次（:4225）。",
+  "proposal": "删掉视差，或者只在真鼠标移动时运行、到位就停。主题切换改由 storage / pageshow / visibilitychange 事件驱动，不再轮询。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-09",
+  "title": "进岛加载页写死深蓝色，亮色主题下会“亮—暗—亮”跳一下",
+  "severity": "medium",
+  "evidence": "islandFrameWrap、iframe 和加载提示的背景都写死为 #0c1538，文字 #cdd6f4（index.html:2410-2416）。云端白主题下点岛：点击后 2.3 秒那一帧平均亮度 23，之后约 124（/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/allround/theme-visual/out/transition.json，拼图 out/x13_transition_cloud.png）。老师在 BUG#91 去掉了切屏淡入，就是因为“闪一下”，这里属于同一种体验。",
+  "proposal": "加载页颜色改用主题角色 --bg-1 / --ink-2。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-10",
+  "title": "字体：一个从没打包的字体、衬线体兜底、卡通字晚到约 9 秒、Baloo2 几乎没用上",
+  "severity": "medium",
+  "evidence": "'Bowlby One' 被引用 11 次（index.html 9 次、template.html 2 次），但从未打包。.island-en、.how-sub 写的是 'Bowlby One',serif（index.html:1525-1526、1655-1658、1683-1684），实测渲染成 Liberation Serif；.stat-num 渲染成 Liberation Sans（CDP getPlatformFontsForNode）。CartoonBlack（398 KB）在岛页 window.load 之后才注入（template.html:8460）：4G + 4×CPU 下首绘 0.94–1.15 秒，卡通字到 9.6–10.8 秒才生效。Baloo2（18.6 KB）已覆盖 a–z、A–Z、0–9 和音标，只用在 1 处（template.html:1550）。全站共 63 种字号。",
+  "proposal": "三种字体角色：标题用 CartoonBlack（DOMContentLoaded 时注入，或首访后 preload）；英文单词和数字用 Baloo2；正文用系统字。删掉 Bowlby One 和 serif 兜底，字号收成 9 级。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-11",
+  "title": "金币、钻石等货币和状态图标用的是新版 emoji，旧手机可能显示成空框",
+  "severity": "medium",
+  "evidence": "顶栏的 💎 和 🪙 都是 emoji（template.html:1474）。🪙（Emoji 13.0，2020 年）在 15 个文件里出现 120 次；🫧（Emoji 14.0）42 次；🪼（Emoji 15.0，2022 年）是钓鱼游戏里的海洋生物之一（template.html:5591）。template.html 共有 1,274 个 emoji，只引用了 23 个 3D 图标。系统 emoji 字体没有这个字时会显示空框，这一点需要真机确认。",
+  "proposal": "货币和状态图标（金币、钻石、经验、星、火、对、错、喇叭）改用内联 SVG，样稿的 theme.js 里已有 ICON。功能入口继续用 3D 图。单词配图里的新版 emoji 加兜底。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-12",
+  "title": "独立页面不跟随配色；拼写蜂默认就是亮色",
+  "severity": "medium",
+  "evidence": "换不同配色后，变化超过 24/255 的像素比例：boss_hall 0.0%、season_showcase 0.4–0.5%、land_map 0–1.8%（out/honor_diff.json）；Boss 列表只分亮/暗（暗夜紫 vs 森野绿 3.7%）。spelling_bee.html 默认用 'sky' 亮色主题（:449、:2031），不看全局配色。",
+  "proposal": "这几个页面的界面元素（返回钮、面板、文字）改用角色变量，手绘背景保留；拼写蜂默认跟随全局明暗，它的 6 个主题映射到现有配色（§5.2）。",
+  "effort": "M"
+ },
+ {
+  "id": "TV-13",
+  "title": "“暗夜紫”和“深空蓝”几乎看不出区别",
+  "severity": "medium",
+  "evidence": "暗夜紫对比深空蓝：大多数画面变化超过 24/255 的像素不到 1%，全部画面在 0.0–5.5% 之间（out/honor_diff.json；out/across_food_menu.png）。",
+  "proposal": "2.0 里每个主题至少要换 bg / surface / hi 三个角色，并配有自己的场景；主题门禁里再加一条“和其他主题的最小色差”检查。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-14",
+  "title": "动画规则没有写成制度，靠一条条 BUG 守着",
+  "severity": "medium",
+  "evidence": "首页有 59 种无限动画，岛屿模板 24 种。不少动画用的是非合成器属性：left/top（flyDonut、flyLollipop、flyStarfish、flyWand）、background-position（rainbowFlow）、filter（titleBreathe、rainbowGlow、fire）、box-shadow（chestSlowGlow、achPulse、fishGlow、listenPulse、speakerPulse、badgeShine）。岛屿模板里没有 prefers-reduced-motion，只有 hansen_accessibility.js:131-136 做了部分兜底。Boss 胜利奖杯是 animation:bounce 1s infinite（template.html:5071）。老师的红线分散在：BUG#50（template.html:2646）、BUG#52（:1306）、检查24（check_resources.py:501）、v321（template.html:2783）、BUG#91（:721）、v785/788/790/846（check_resources.py:6069/6173/6234/7088）、hansen_cinema_themes.js:8。",
+  "proposal": "把红线写成动效 token 加一条 lint：只许 transform/opacity；禁止 infinite（白名单只留加载转圈）；禁止 rotate、全屏淡入和闪屏；每个特效都要有 reduced-motion 兜底；“空闲时 0 个运行中的动画”写进测试。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-15",
+  "title": "单词大陆 8 个岛的英文副标题全是同一句，外观也和普通岛一样",
+  "severity": "low",
+  "evidence": "land_template.html:1464 和 island_land1~8.html:1464 写的都是“STAR SEA I: EMOTION & CHARACTER ISLAND”。实际主题分别是：情绪心境、性格品质、时间表达、思考行动、数量逻辑、学习探究、社会生活、自然科学（land_map.html MAP_GROUPS）。",
+  "proposal": "副标题从 land_data 生成；每个大陆用一种 feature 色做主色调（标题区、进度条）。",
+  "effort": "S"
+ },
+ {
+  "id": "TV-16",
+  "title": "主题商店的说明是开发术语",
+  "severity": "low",
+  "evidence": "hansen_diamond_shop.js:287：“钻石来自 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就；普通 Bee 的旧新词位里程碑已停用……”（12px，对比 4.25）。",
+  "proposal": "改成孩子能看懂的话，比如“认真拼写、打赢 Boss 就能得钻石”，细则挪到“给家长”页。优化报告第 6 条已经覆盖了全站文案，这里只补主题商店这一处。",
+  "effort": "S"
+ }
+]
