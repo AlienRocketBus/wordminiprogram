@@ -942,10 +942,25 @@
   }
   function setNotReconciled(uid) {
     try { var CS = window.HansenCloudSave; if (CS && CS.setReconcileState) CS.setReconcileState(uid || ''); } catch (e) {}
+    if (uid) laterMark();   /* 这一次对账刚失败 —— 也算「试过一次」，20 秒内不再试 */
   }
   /* 登录时没对上账的，过一会儿再对一次（最多每 20 秒一次；对战中不打扰）。
-     对上了：云端那份恢复到本机（要刷新页面才生效 —— 和登录时一样）、或者本机这份传上去 */
+     对上了：云端那份恢复到本机（要刷新页面才生效 —— 和登录时一样）、或者本机这份传上去
+     🔴 「最多每 20 秒一次」从**上一次失败的那次对账**算起，几层页面共用（记在 sessionStorage）。
+       以前登录对账一失败就紧接着再试一次（_laterAt 还是 0）：网刚好在这几百毫秒里恢复，就在孩子玩着的时候
+       恢复云端、1.2 秒后刷新 —— 这中间孩子学的那一下把旧进度写回本机，刷新后被当成「对上了账」传上云，
+       云端 20 个词被 4 个词盖掉（慢机器上实测：传了 1 次）。 */
+  var LATER_KEY = 'hsnReconLaterAt_v1164';
   var _laterBusy = false, _laterAt = 0, _laterHooked = false;
+  function laterMark() {
+    _laterAt = Date.now();
+    try { sessionStorage.setItem(LATER_KEY, String(_laterAt)); } catch (e) {}
+  }
+  function laterLast() {
+    var a = _laterAt;
+    try { a = Math.max(a, Number(sessionStorage.getItem(LATER_KEY) || 0) || 0); } catch (e) {}
+    return a;
+  }
   function reconcileLater() {
     if (!_laterHooked) {
       _laterHooked = true;
@@ -954,14 +969,14 @@
         window.addEventListener('online', function () { setTimeout(reconcileLater, 1500); });
       } catch (e) {}
     }
-    if (_laterBusy || Date.now() - _laterAt < 20000) return;
+    if (_laterBusy || Date.now() - laterLast() < 20000) return;
     try {
       var CS = window.HansenCloudSave, uid = (readLocal() || {}).uid || '';
       if (!CS || !CS.reconcileState || !uid || !isSignedIn() || CS.reconcileState() !== uid) return;
       var U = window.HansenPkRoomUI, b = (U && typeof U.isBusy === 'function') ? U.isBusy() : null;
       if (b && (b.battle || b.waiting)) return;   /* 正在对战 / 等人：下次再说 */
     } catch (e) { return; }
-    _laterBusy = true; _laterAt = Date.now();
+    _laterBusy = true; laterMark();
     T('登录对账', '上次登录时没对上账 → 再对一次');
     reconcilingWhile(syncOnLogin()).then(function (s) {
       _laterBusy = false;

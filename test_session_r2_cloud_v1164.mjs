@@ -118,9 +118,16 @@ async function cloudWords(num, label) {
     const tLogin = Date.now();
     await setWords(N, 4);
     await N.eval(() => { window.HansenCloudSave.notifyChanged(); return true; });
+    /* 岛屿页里嵌着的几层页面（季节页）各有一份账号模块：它们这时想传，也只许排队等那 20 秒 */
+    for (const f of N.page.frames()) await f.evaluate(() => { try { if (window.HansenAuth) window.HansenAuth.uploadGate(); } catch (e) {} return true; }).catch(() => {});
     await H.sleep(10000);              /* 8 秒合并上传的时间过了 */
     const wMid = saveWrites(N.uid).length - w0;
+    const flagMid = await N.eval(() => (window.HansenCloudSave.reconcileState ? window.HansenCloudSave.reconcileState() : '(没有这一项)'));
+    const retried = await N.eval(() => /上次登录时没对上账/.test(String(window.HansenAuth._trace ? window.HansenAuth._trace() : '')));
     await t.ok(flag === N.uid, `记下了「这个账号在这台手机上还没对上账」（${flag || '没记'}）`, () => explain());
+    /* 「稍后重试」从失败的那次算起 20 秒内最多一次：以前登录一失败就紧接着再试，网刚恢复就在孩子玩着时恢复云端 + 刷新，
+       中间学的那一下把旧进度写回本机、刷新后传上云（慢机器上：传了 1 次、云端 20 → 4）。这一条不靠机器快慢，一改回去就红 */
+    await t.ok(flagMid === N.uid && !retried, `登录对账失败后 10 秒里没有马上再对一次账（${retried ? '又对了一次' : '没再对'}；还没对上账的记号：${flagMid || '已清 —— 刚失败就又对上了'}）`, () => explain());
     await t.ok(wMid === 0, `没对上账之前，孩子又学了一个词：一次也没往云端传（传了 ${wMid} 次）—— 以前 4 个词盖掉了云端的 20 个`, () => explain());
     /* 稍后自动重试（切回前台 / 网恢复都会触发；20 秒内最多一次） */
     const wait = 21000 - (Date.now() - tLogin);
