@@ -4138,7 +4138,10 @@ document.querySelectorAll('.island').forEach(el=>{
     if(!wrap || !frame){ window.location.href = file; return; }  /* 兜底: 无外壳则退回原生跳转 */
     var cur = '';
     try{ cur = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
-    if(cur === file){ var _fs = ''; try{ _fs = _docStamp(frame.contentDocument); }catch(e){} var _hs = _docStamp(document); if(_fs && _hs && _fs !== _hs) cur = ''; }
+    /* 🔴v1165 复查：藏着的框里不是一个活的岛（网慢 / 离线时 SW 给的「网络有点慢」「这个岛还没下载过」页，没有带版本号的脚本），
+       就不能拿出来再用 —— 以前孩子点「返回首页」、网好了再点同一个岛，看到的还是那张错误页，而且一个请求都不发。
+       岛页一定带 ?v= 脚本；没有版本戳、或者是 SW 错误页（有「再试一次」按钮），一律当作死框，换新框重新加载。 */
+    if(cur === file){ var _fs = '', _dead = false; try{ var _fd = frame.contentDocument; _fs = _docStamp(_fd); _dead = !!(_fd && _fd.getElementById('hsnNavRetry')); }catch(e){} var _hs = _docStamp(document); if(_dead || (!_fs && _hs) || (_fs && _hs && _fs !== _hs)) cur = ''; }
     if(cur === file){
       /* 🔴 保活: iframe 当前就是这个岛(上次进的·没卸载)→ 瞬时显示, 零重载零淡入(内容本就在·真·瞬时再进)。 */
       _islandPending = null;

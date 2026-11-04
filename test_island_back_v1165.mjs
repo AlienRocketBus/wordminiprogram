@@ -6,7 +6,7 @@
  * 合同（首页外壳；history.back() = 手机返回键 / 返回手势）：
  *   1. 探索单词 / 听音辨义 / 打字大师 里按返回：岛还开着，回到本岛主页；在本岛主页再按返回才回首页
  *   2. 我的学习 / 错题总览 / 复习中心 开着时按返回：只关这个浮层，岛还开着
- *   3. 单词大陆 ①号岛按返回 → 回大陆地图；再按返回 → 回首页
+ *   3. 单词大陆 ①号岛按返回 → 回大陆地图；地图上岛屿详情面板开着时按返回只关面板（复查 SH6）；再按返回 → 回首页
  *   4. 🗺️ 照旧一下回首页，顶层历史退干净
  */
 import { chromium } from './playwright_loader.mjs';
@@ -126,6 +126,14 @@ try {
   await back();
   ok(!!await waitShell(s => s.wrap === 'block' && s.u === 'land_map.html' && s.rs === 'complete', 15000), '① 号岛按返回：回到大陆地图（不是首页）');
   await sleep(600);
+  /* 3b（复查 SH6）：大陆地图上点开 ① 号岛的详情面板，按返回只关面板，地图还开着 */
+  ok(await tapAt(islandFrame(), 'button.spot'), '3b 真点 ① 号岛，打开详情面板');
+  await islandFrame().waitForSelector('#overlay.show', { timeout: 5000 }).catch(() => {});
+  await back();
+  await sleep(700);
+  const s3b = await shell();
+  const panelOpen = await islandFrame().evaluate(() => document.getElementById('overlay').classList.contains('show')).catch(() => null);
+  ok(s3b.wrap === 'block' && s3b.u === 'land_map.html' && panelOpen === false, `3b 详情面板开着按返回：只关了面板，大陆地图还开着（wrap=${s3b.wrap} 页=${s3b.u} 面板还开着=${panelOpen}）`);
   await back();
   ok(!!await waitShell(s => s.wrap === 'none', 3000), '大陆地图按返回：回到首页');
 

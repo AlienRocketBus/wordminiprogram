@@ -5,6 +5,7 @@
  *
  * 合同（不用 SW；服务器 /VERSION 比页面新一版，网慢、3 秒才回）：
  *   1. 首页一打开就点「动物」进岛，在岛里待 10 秒：整页一次都不刷新、岛一直开着；顶上告诉孩子「回到首页时自动更新」
+ *   1b. 还在岛里时页面藏起来 3 秒再回来（自动锁屏、看一眼微信）：照样不刷新、岛还开着（复查 SH4）
  *   2. 服务器换上新版文件，点 🗺️ 回首页：正好刷新一次，刷新后是新版页面，之后不再刷新
  */
 import { chromium } from './playwright_loader.mjs';
@@ -70,6 +71,22 @@ try {
   ok(opened, '动物岛打开了');
   ok(navs.length === 0 && !closedEarly, `在岛里 12 秒：整页一次都没刷新、岛一直开着（刷新 ${navs.length} 次）`);
   ok(!!sawHint, `顶上告诉孩子回首页时再更新（「${sawHint}」）`);
+
+  console.log('\n▶ 1b. 岛里玩着，手机自动锁屏一下（页面藏起来 3 秒再回来）');
+  /* 复查 SH4：以前页面一藏起来就执行攒着的更新 → 刷新 → 回来时岛没了、这一局丢了 */
+  const setVis = v => page.evaluate(v => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => v });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => v === 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  }, v);
+  await setVis('hidden'); await sleep(3000);
+  await setVis('visible'); await sleep(3000);
+  const st1b = await page.evaluate(() => {
+    const w = document.getElementById('islandFrameWrap'), f = document.getElementById('islandFrame');
+    let u = ''; try { u = f.contentWindow.location.pathname.split('/').pop(); } catch (e) {}
+    return { open: !!w && w.style.display === 'block' && u === 'island_animal.html' };
+  }).catch(() => ({ open: false }));
+  ok(navs.length === 0 && st1b.open, `藏起来又回来：没刷新、岛还开着（刷新 ${navs.length} 次）`);
 
   console.log('\n▶ 2. 服务器换上新版文件，点 🗺️ 回首页');
   FILES_V = NEXT;

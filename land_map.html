@@ -251,6 +251,9 @@ function closeP(){
   _lastMapFocus=null;
 }
 document.getElementById('pclose').onclick=closeP;
+/* v1165 复查：手机「返回」只退一步 —— 岛屿详情面板开着时，首页外壳先问这里：先关面板（和点 × 一样），
+   面板关着才退出大陆地图回首页。以前地图没有这个接口，外壳直接把整张地图关了。 */
+window.__hsnIslandBack=function(){ if(overlay.classList.contains('show')){ closeP(); return true; } return false; };
 // v942：仅在浏览器明确报告非省流量 4G 时，空闲预热“下一座未通关岛”；未知网络不后台下载。
 try{
   var _cn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;

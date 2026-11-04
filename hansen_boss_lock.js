@@ -2179,6 +2179,83 @@ window.__HBU_LOADED_AT__ = Date.now();
     },true);
   }catch(e){}
 
+  /* 和 template 里 Boss 引擎预取用同一条网络规则（HansenPreloadPolicy：明确 4G、没开省流量、页面看得见；网络不明按慢网）。
+     页面上没有预载策略模块、也读不到网络信息（诊断页 / 单元测试的假页面）：照旧马上加载，和以前一样 */
+  function canAutoLoadForSettings(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(p&&typeof p.canBackgroundDownload==='function') return !!p.canBackgroundDownload();
+      var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      if(!c) return true;
+      return !c.saveData&&c.effectiveType==='4g'&&navigator.onLine!==false&&
+        (!document.visibilityState||document.visibilityState==='visible');
+    }catch(e){ return true; }
+  }
+  /* 轻量行的进度：和 hansen_boss_attack.js 的 bossClearProgress 同一个算法、同一份文字
+     （test_boss_settings_slow_v1165 加载引擎后逐字对比过，两边对不上就红） */
+  var STUB_ISLES=['action','adjective','animal','body','city','clothes','color','family','food','home','job','nature','question','school','sports','time','traffic','treasure'];
+  function stubProgress(){
+    var total=STUB_ISLES.length*20, done=0;
+    try{ if(localStorage.getItem('hansen_admin_clearall_on')==='1') return {done:total,total:total,all:true}; }catch(e){}
+    for(var i=0;i<STUB_ISLES.length;i++){
+      var k='wordIsland'+STUB_ISLES[i].charAt(0).toUpperCase()+STUB_ISLES[i].slice(1), s=null;
+      try{ s=JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ s=null; }
+      if(!s||typeof s!=='object') continue;
+      for(var lv=1;lv<=20;lv++){
+        if((s.bossWins&&s.bossWins[lv]>=1)||(Array.isArray(s.bossWon)&&s.bossWon.indexOf(lv)>=0)) done++;
+      }
+    }
+    return {done:done,total:total,all:done>=total};
+  }
+  function stubCss(){
+    if(document.getElementById('hsnBossStubCss')) return;
+    var st=document.createElement('style'); st.id='hsnBossStubCss';
+    /* 和引擎 injectCSS 里 .hbafx-entry 三条一样（引擎加载后它自己的样式接手，看起来不跳） */
+    st.textContent='.hbafx-entry{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:#221531;border:1.5px solid #4c3268;border-radius:12px;margin-top:10px;cursor:pointer}'+
+      '.hbafx-entry b{color:#e9d5ff;font-size:13.5px}'+
+      '.hbafx-entry span{color:#a78bca;font-size:11px}';
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function renderStub(){
+    var sc=document.getElementById('settingsContent');
+    if(!sc||!sc.firstChild||exportedRefresh()) return;
+    var d=document.getElementById('hbafxEntry');
+    if(d&&!(d.hasAttribute&&d.hasAttribute('data-hsn-stub'))) return;   /* 真的入口已经在了 */
+    if(!d){
+      stubCss();
+      d=document.createElement('div');
+      d.className='hbafx-entry'; d.id='hbafxEntry';
+      d.setAttribute('data-hsn-stub','1'); d.setAttribute('role','button'); d.tabIndex=0;
+      d.onclick=stubTap;
+      d.addEventListener('keydown',function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); stubTap(); } });
+      sc.appendChild(d);
+    }
+    if(d.getAttribute('data-hsn-loading')==='1') return;
+    var p=stubProgress();
+    d.innerHTML=p.all?'<b>🎚️ Boss 特效调节</b><span>已解锁 ›</span>'
+                     :'<b>🔒 Boss 特效调节</b><span>通关全部 boss 解锁 '+p.done+'/'+p.total+'</span>';
+  }
+  /* 孩子点了轻量行：这时才加载引擎，换成引擎自己的那一行，再直接调它的点击函数（打开面板 / 未解锁提示）。
+     不重放 click 事件（v953 合同：轻桥不得重放 click，防双开 / 双计数） */
+  function stubTap(){
+    var d=document.getElementById('hbafxEntry');
+    if(d&&d.hasAttribute('data-hsn-stub')){
+      d.setAttribute('data-hsn-loading','1');
+      var sp=d.querySelector('span'); if(sp) sp.textContent='正在打开…';
+    }
+    ensureLoaded().then(function(ok){
+      var fn=exportedRefresh(), stub=document.getElementById('hbafxEntry');
+      if(stub&&stub.hasAttribute('data-hsn-stub')){
+        if(!ok||!fn){ stub.removeAttribute('data-hsn-loading'); renderStub(); return; }   /* 没加载成：恢复原样，再点再试 */
+        stub.remove();
+      }
+      if(!ok||!fn) return;
+      try{ fn(); }catch(e){}
+      var real=document.getElementById('hbafxEntry');
+      if(real&&!real.hasAttribute('data-hsn-stub')&&typeof real.onclick==='function'){ try{ real.onclick(); }catch(e){} }
+    });
+  }
+
   function armSettings(){
     var settings=document.getElementById('settingsContent');
     /* boss_lock 在所有岛页都位于 #settingsContent 之后；诊断页没有设置容器时直接退出，
@@ -2195,7 +2272,12 @@ window.__HBU_LOADED_AT__ = Date.now();
       try{ return !!(screen.classList&&screen.classList.contains('active')); }catch(e){ return false; }
     }
     function onSettingsContent(){
-      if(settings.firstChild&&settingsShown()) refresh();
+      if(!(settings.firstChild&&settingsShown())) return;
+      /* 🔴v1165 复查：网慢 / 省流量 / 网络不明（iOS 微信）时，只为画「Boss 特效调节」这一行就下 1.2MB 引擎，
+         引擎一执行又下约 2MB 攻击图（3G 实测打开设置 15 秒下了 3.2MB）。这时先画一个一模一样的轻量行，
+         孩子真点它才加载引擎、接着打开。快网照旧马上加载（和以前一样）。 */
+      if(exportedRefresh()||canAutoLoadForSettings()) refresh();
+      else renderStub();
     }
     onSettingsContent();
     try{

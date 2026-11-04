@@ -377,7 +377,10 @@ self.addEventListener('fetch', event => {
          根本修法在控制台设置索引文档；这里做客户端兜底：
          导航到根路径时直接改取 /index.html，让已装 SW 的用户立刻恢复正常。 */
       let fallback = null;
-      try { fallback = await caches.match(request, { ignoreSearch: true }); } catch (error) {}
+      /* v1165 复查：页面缓存按「路径」存的是一个光秃秃的 Request（不带这次导航的请求头）。服务器 / CDN 给网页加了
+         Vary: Accept 或 Vary: User-Agent 时，不加 ignoreVary 就永远对不上 → 离线时玩过的岛也打不开（「这个岛还没下载过」）。
+         Cache Storage 里存的是解压后的正文，忽略 Vary 不会拿到错的编码。 */
+      try { fallback = await caches.match(request, { ignoreSearch: true, ignoreVary: true }); } catch (error) {}
       /* 🔴v1050: 根路径 `/` 的兜底。
          用户实测：`域名/index.html` 能正常打开，只有裸根路径变成下载 ——
          说明托管的「索引文档」没指向 index.html，服务器不知道该给哪个文件。
@@ -389,11 +392,11 @@ self.addEventListener('fetch', event => {
         try {
           const indexReq = new Request(new URL('index.html', self.location.origin).href,
             { credentials: 'same-origin' });
-          fallback = await caches.match(indexReq, { ignoreSearch: true });
+          fallback = await caches.match(indexReq, { ignoreSearch: true, ignoreVary: true });
         } catch (error) {}
       }
       if (!fallback && isHomeNavigation(url)) {
-        try { fallback = await caches.match(homeShellRequest(), { ignoreSearch: true }); } catch (error) {}
+        try { fallback = await caches.match(homeShellRequest(), { ignoreSearch: true, ignoreVary: true }); } catch (error) {}
       }
       const cacheable = isHomeNavigation(url) || /\/(?:index|_frame|land_map|spelling_bee|boss_hall|season_showcase|island_[a-z0-9]+)\.html$/i.test(url.pathname);
       try {

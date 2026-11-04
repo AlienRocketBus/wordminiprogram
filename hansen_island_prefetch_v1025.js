@@ -6,11 +6,13 @@
  *
  * 为什么不全部预热常驻：18 个岛屿页加起来 10MB+，全预载会吃光流量与内存。
  *
- * 本方案三层，从省到快：
+ * 本方案两层，从省到快：
  *   ① 空闲预取「最近玩过的岛」—— 大多数人每天就在固定那一两个岛，命中率最高；
  *   ② **触碰即预取** —— 手指刚按下/鼠标刚移上卡片就开始加载，
- *      等抬手跳转时页面通常已在缓存里（人的按下到抬起约 100–200ms，够抢跑）；
- *   ③ 视口内的卡片在浏览器空闲时逐个低优先级预取，上限受控。
+ *      等抬手跳转时页面通常已在缓存里（人的按下到抬起约 100–200ms，够抢跑）。
+ *   v1165 复查：原来还有 ③「首页上其余岛卡空闲时逐个预取（最多 6 个）」—— 实测只玩过动物岛的孩子，4G 下回首页 20 秒
+ *   就多下了食物/运动/职业/色彩/自然 5 个从没去过的岛（约 3.1MB，每个约 625KB；CDN 不给缓存校验时每次回首页都再下一遍）。
+ *   没去过的岛不再空闲预取，手指碰到卡片的那一下照样立刻预取。
  */
 (function () {
   'use strict';
@@ -101,20 +103,6 @@
     return n;
   }
 
-  /* ③ 空闲时把页面上其余岛屿卡片也逐个低优先级预取（受 MAX 限制） */
-  function prefetchVisible() {
-    var links = document.querySelectorAll('a[href*="island_"]');
-    var i = 0;
-    (function step() {
-      if (i >= links.length || idleCount >= MAX) return;
-      var wait = busyFor();
-      if (wait) { setTimeout(step, wait + 200); return; }
-      var href = links[i++].getAttribute('href');
-      if (prefetch(href, 'idle')) idleCount++;
-      setTimeout(step, 900);   /* 拉开间隔，绝不与用户操作抢带宽 */
-    })();
-  }
-
   function boot() {
     bindEager();                       /* 触碰预取立刻生效 */
     /* v1165 首访流量预算：空闲预取要守和其他后台下载同一个网络策略（明确 4G、非省流量、页面可见）；
@@ -128,7 +116,7 @@
         if (!p || typeof p.canBackgroundDownload !== 'function' || !p.canBackgroundDownload()) return;
         if (typeof p.kidHasPlayed !== 'function' || !p.kidHasPlayed()) return;
       } catch (e) { return; }
-      prefetchRecent(); setTimeout(prefetchVisible, 1500);
+      prefetchRecent();   /* 只预取玩过的岛（v1165 复查：没去过的岛不再空闲预取） */
     };
     if (typeof window.requestIdleCallback === 'function') {
       requestIdleCallback(function () { run(); }, { timeout: 4000 });

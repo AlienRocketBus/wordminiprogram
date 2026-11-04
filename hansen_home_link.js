@@ -154,7 +154,10 @@
      首页外壳（index.html）收到返回键时先问岛页 __hsnIslandBack()（模板提供：先调 __hsnBackStack 里登记的关闭函数，
      再关弹窗，再从游戏回本岛主页）。这里负责「登记」：错题总览、复习中心、我的学习、答错小课、星海面板/神秘殿堂、
      抽卡揭晓、装备/主题商店……这些浮层都是各模块临时挂在 <body> 上的全屏层，一出现就登记一个关闭函数，消失就撤销。
-     关闭时点它自己的关闭按钮（和孩子亲手点一样，各模块的收尾照常做）；找不到按钮才点空白处，还关不掉才拿掉。 */
+     关闭时点它自己的关闭按钮（和孩子亲手点一样，各模块的收尾照常做）；找不到按钮才点空白处。
+     🔴v1165 复查：点空白处还关不掉的，**绝不直接拿掉**（以前会 el.remove()）—— 拿掉的只是画面，模块自己的收尾一步没做：
+     拼写大PK 对战中按返回，对战屏被删了，心跳照跳、房间没退、对手干等，下一回合对战屏又冒出来。
+     现在这种浮层返回 false，让返回键去走下一步（关弹窗 → 回本岛主页 → 退出岛）；对战/登录这些屏单独写了怎么关。 */
   (function backOverlays(){
     /* 已知浮层：id → 它自己的关闭按钮（null = 点浮层本身，答错小课就是「点一下继续」） */
     var KNOWN = {
@@ -168,8 +171,46 @@
       __hs_hall_panel: '#__hs_hall_close',
       __hs_showcase: '[aria-label="关闭"]',
       __hs_bcv: '#__hs_bcv_close',
-      hsnGearMask: '#hgClose'
+      hsnGearMask: '#hgClose',
+      /* 🔴v1165 复查：对战 / 登录这几屏（对战组的文件，这里只调它们自己公开的关闭方法，和孩子点「← 返回 / ✕」一样） */
+      hsn_pkroom_screen: pkRoomBack,
+      hsn_pk_screen: function(el){ return clickOr(el, '#kBack', function(){ return callClose(window.HansenSbPK, 'close'); }); },
+      hsb_prof: function(el){ return clickOr(el, '#pfBack', function(){ return callClose(window.HansenSbProfile, '_close'); }); },
+      hsn_ladder_screen: function(el){ return clickOr(el, '#ldX', function(){ return callClose(window.HansenLadderUI, 'close'); }); },
+      hsn_friends_screen: function(el){ return clickOr(el, '#frBack, #frX', function(){ return callClose(window.HansenFriendsUI, 'close'); }); },
+      hsn_auth_panel: function(el){ return clickOr(el, '#auX', function(){ return callClose(window.HansenAuthUI, 'close'); }); },
+      hsn_gate: function(){ return false; }   /* 注册门槛是硬门槛：返回键不关它、也不拿掉它 */
     };
+    function visibleIn(el, sel){ try{ var b = el.querySelector(sel); return b && b.getClientRects().length ? b : null; }catch(e){ return null; } }
+    function clickOr(el, sel, fallback){ var b = visibleIn(el, sel); if(b){ try{ b.click(); }catch(e){} return true; } return fallback(); }
+    function callClose(mod, name){ try{ if(mod && typeof mod[name] === 'function'){ mod[name](); return true; } }catch(e){} return false; }
+    /* 拼写大PK 公开房间屏：大厅/等人/结算页上有「← 返回 / ← 关掉房间 / ← 回到房间列表」，就点它；
+       对战正在进行：按一次只提醒，3 秒内再按一次才退出这一局 —— 走 HansenPkRoomUI.close()（停心跳、退出房间、清计时器），
+       不会一碰返回手势就把对战丢了，也不会只删掉画面留着房间。 */
+    var _pkAskAt = 0;
+    function pkRoomBack(el){
+      if(clickOr(el, '#prBack, #prBack2', function(){ return false; })) return true;
+      var now = Date.now();
+      if(now - _pkAskAt < 3000){
+        _pkAskAt = 0;
+        if(callClose(window.HansenPkRoomUI, 'close')) return true;
+        return false;
+      }
+      _pkAskAt = now;
+      hint('对战还在进行哦～ 再按一次「返回」就退出这一局');
+      return true;
+    }
+    function hint(text){
+      try{ if(window.HansenToast && typeof HansenToast.say === 'function'){ HansenToast.say(text); return; } }catch(e){}
+      try{
+        var old = document.getElementById('hsnBackHint'); if(old) old.remove();
+        var d = document.createElement('div');
+        d.id = 'hsnBackHint'; d.setAttribute('role', 'status'); d.textContent = text;
+        d.style.cssText = 'position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);z-index:2147483646;max-width:86vw;background:rgba(15,23,42,.94);color:#fff;font-size:15px;font-weight:700;line-height:1.5;padding:10px 16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;text-align:center';
+        document.body.appendChild(d);
+        setTimeout(function(){ try{ d.remove(); }catch(e){} }, 2600);
+      }catch(e){}
+    }
     /* 模板自己管的（弹窗、游戏界面），这里不碰 */
     var SKIP = /^(?:alertModal|wordModal|islandLoading|hansenFxLayer|hsnBootBad)$/;
     var CLOSE_TEXT = /^(?:✕|×|✖|╳|关闭|取消|返回|知道了|我知道了|好的)$/;
@@ -196,6 +237,7 @@
     function closeButton(el){
       var sel = Object.prototype.hasOwnProperty.call(KNOWN, el.id) ? KNOWN[el.id] : undefined;
       if(sel === null) return el;
+      if(typeof sel === 'function') return null;
       if(sel){ var k = el.querySelector(sel); if(k) return k; }
       var c = el.querySelectorAll('button,[role="button"],[aria-label],[onclick],div,span,a');
       for(var i = 0; i < c.length && i < 400; i++){
@@ -209,10 +251,12 @@
     }
     function closeEl(el){
       if(!shown(el)) return false;   /* 它已经关了：让返回键去管下一层 */
+      var own = Object.prototype.hasOwnProperty.call(KNOWN, el.id) ? KNOWN[el.id] : undefined;
+      if(typeof own === 'function'){ try{ return own(el) === true; }catch(e){ return false; } }
       var b = closeButton(el);
       try{ (b || el).click(); }catch(e){}
-      /* 点了还在（没有关闭按钮、也不认点空白处）就直接拿掉：宁可少一层，也不能一按返回就退出整个岛 */
-      if(shown(el) && !b){ try{ el.remove(); }catch(e){} }
+      /* 没有关闭按钮、点空白处也关不掉：不拿掉（拿掉不等于关掉，模块的收尾没做），这一下交给返回键的下一步 */
+      if(!b && shown(el)) return false;
       return true;
     }
     function closeTop(){ var el = topOverlay(); return el ? closeEl(el) : false; }
@@ -225,7 +269,17 @@
     var tracked = [];   /* {el, unreg} —— 每个开着的浮层在栈里占一格（后开的在上面），按一次返回关一个 */
     function track(el){
       for(var i = 0; i < tracked.length; i++) if(tracked[i].el === el) return;
-      tracked.push({ el: el, unreg: pushBack(function(){ return closeEl(el); }) });
+      var t = { el: el, unreg: null };
+      var fn = function(){
+        var r = closeEl(el);
+        /* 返回键用掉了这一下、浮层却还开着（比如对战中先提醒「再按一次」）：重新登记，下一次返回还先问它。
+           返回 false 的不重新登记（岛页 __hsnIslandBack 会接着问下一个，重新登记会原地打转） */
+        if(r === true && shown(el)) t.unreg = pushBack(fn);
+        else tracked = tracked.filter(function(x){ return x !== t; });
+        return r;
+      };
+      t.unreg = pushBack(fn);
+      tracked.push(t);
     }
     function untrack(el){
       tracked = tracked.filter(function(t){ if(t.el !== el) return true; try{ t.unreg(); }catch(e){} return false; });

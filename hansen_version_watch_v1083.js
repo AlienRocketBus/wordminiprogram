@@ -227,7 +227,7 @@
   }
 
   /* v1165：孩子正在岛里玩（首页外壳的岛框开着，手机框模式下在框里的首页上）就先不刷新 ——
-     刷新会把他踢回首页、这一局就没了。等他回首页（外壳调 __hsnAfterIslandClose）或切到后台再更新。 */
+     刷新会把他踢回首页、这一局就没了。等他回首页（外壳调 __hsnAfterIslandClose）再更新；岛开着时切到后台也不更新。 */
   function islandOpen() {
     var docs = [document];
     try { var fs = document.querySelectorAll('iframe'); for (var i = 0; i < fs.length; i++) { try { if (fs[i].contentDocument) docs.push(fs[i].contentDocument); } catch (e) {} } } catch (e) {}
@@ -318,7 +318,9 @@
     /* 从后台切回前台时再查一次 —— 用户挂着页面过夜的场景；已知落后（上次没修成）就 3 分钟后再查 */
     try {
       document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'hidden') { runDeferred(); return; }
+        /* v1165 复查：岛开着时切到后台（自动锁屏、看一眼微信消息）不更新 —— 刷新会把正在玩的这一局弄没，
+           横幅说的也是「回到首页时自动更新」。只有停在首页时切到后台才顺手更新；岛里攒着的等回首页（__hsnAfterIslandClose）。 */
+        if (document.visibilityState === 'hidden') { if (!islandOpen()) runDeferred(); return; }
         var since = Date.now() - state.checkedAt;
         if (document.visibilityState === 'visible' && (since > 10 * 60 * 1000 || (state.stale && since > GAP))) run();
       });
