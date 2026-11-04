@@ -5,14 +5,15 @@
  *   心跳照跳、房间没退、对手干等，约 15 秒后下一回合又把对战屏画出来。大厅、个人资料也被这样删掉。
  *
  * 合同（首页外壳里的动物岛；history.back() = 手机返回键；对战用测试入口直接开一局，不连云端）：
- *   ① 对战中按 1 次返回：对战还在（屏还在、局还在、没退房间），提示「再按一次就退出这一局」，岛还开着
- *   ② 3 秒内再按 1 次：真的退出这一局 —— 走 HansenPkRoomUI.close()（停心跳 + 退出房间），对战屏收起；之后 6 秒不会再冒出来
- *   ③ 再按 1 次：关掉拼写大PK 大厅（用它自己的关闭，不是删掉），岛还开着
- *   ④ 一个认不出、也关不掉的全屏浮层：按返回不把它删掉（交给下一步：回首页）
- *   ⑤ （复查第 2 轮 R2-02，对战组合并后的样子）对战屏有自己的「退出」确认 HansenPkRoomUI.askQuit（退出 = 记一场输）：
- *      按 1 次返回 → 弹它的确认框，不 close()；再按 1 次 → 等于点「继续打」，对战还在、什么都不记；
- *      再按 → 又弹确认框，孩子点「退出」→ 记一场输、才 close()。两下返回手势绝不会不记输就把一局丢掉。
- *      （这棵树里的对战屏还没有 askQuit，这里按对战组的写法临时装一个：确认框挂在页面最外层，按钮 #prQuitNo / #prQuitYes）
+ *   对战屏有自己的「退出」确认 HansenPkRoomUI.askQuit（复查第 2 轮 R2-02；v1164 对战组的真东西，合并后不再临时装一个）：
+ *   ① 对战中按 1 次返回：弹它的「要退出这一局吗？…记一场输」，不 close()：屏还在、局还在、没退房间，岛还开着
+ *   ② 再按 1 次 = 点「继续打」：确认框关了，对战还在、没退房间、什么都没记
+ *   ③ 再按 → 又弹确认框；孩子自己点「退出」才 close()（停心跳 + 退出房间），之后 6 秒对战屏不会再冒出来，回到房间列表。
+ *      两下返回手势绝不会不记输就把一局丢掉。（测试局 roomId='test' 不记战绩 —— 「退出 = 记一场输」由
+ *      test_battle_ui_r2_cloud_v1164 ① 用真房间守）
+ *   ④ 再按 1 次：关掉房间列表（它自己的「← 返回」），回到拼写大PK 大厅；⑤ 再按 1 次：关掉大厅（用它自己的关闭，不是删掉），岛还开着
+ *   ⑥ 一个认不出、也关不掉的全屏浮层：按返回不把它删掉（交给下一步：回首页）
+ *   （以前没有 askQuit 的对战屏是「提醒一次、3 秒内再按才 close()」—— 合并后对战屏都有 askQuit，那条路走不到了）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -56,8 +57,9 @@ try {
   await F().evaluate(() => { try { closeAlert(); } catch (e) {} const b = [...document.querySelectorAll('button')].find(b => /开始冒险/.test(b.textContent) && b.offsetParent); if (b) b.click(); });
   await sleep(400);
   const before = await F().evaluate(async () => {
-    window.__spy = { stopHeartbeat: 0, leaveRoom: 0 };
+    window.__spy = { stopHeartbeat: 0, leaveRoom: 0, record: 0 };
     try { const R = window.HansenPkRoom; ['stopHeartbeat', 'leaveRoom'].forEach(k => { const o = R[k]; R[k] = function () { window.__spy[k]++; try { return o.apply(this, arguments); } catch (e) {} }; }); } catch (e) {}
+    try { const P = window.HansenPkRecord; const o = P.record; P.record = function () { window.__spy.record++; return o.apply(this, arguments); }; } catch (e) {}
     HansenSbPK.open();
     await new Promise(r => setTimeout(r, 400));
     const words = (window.allW || []).slice(0, 5).map(w => ({ en: w.en, cn: w.cn }));
@@ -67,75 +69,54 @@ try {
     return { roomOn: !!(room && room.classList.contains('on')), state: !!HansenPkRoomUI._stateForTest(), lobbyOn: document.getElementById('hsn_pk_screen').classList.contains('on') };
   });
   ok(before.roomOn && before.state && before.lobbyOn, `开了一局对战（对战屏 ${before.roomOn}、局 ${before.state}、大厅 ${before.lobbyOn}）`);
-  const room = () => F().evaluate(() => { const r = document.getElementById('hsn_pkroom_screen'); return { inDom: !!r, on: !!(r && r.classList.contains('on')), state: !!HansenPkRoomUI._stateForTest(), spy: window.__spy,
-    lobbyInDom: !!document.getElementById('hsn_pk_screen'), lobbyOn: !!(document.getElementById('hsn_pk_screen') && document.getElementById('hsn_pk_screen').classList.contains('on')),
-    hint: ((document.getElementById('hsnBackHint') || {}).textContent || '') + ' ' + [...document.querySelectorAll('body > div')].map(d => d.textContent || '').filter(t => /再按一次/.test(t)).join(' ') }; });
+  const room = () => F().evaluate(() => { const r = document.getElementById('hsn_pkroom_screen'); return { inDom: !!r, on: !!(r && r.classList.contains('on')), state: !!HansenPkRoomUI._stateForTest(), spy: Object.assign({}, window.__spy),
+    battle: !!document.getElementById('prQuit'), list: !!(r && r.classList.contains('on') && /公开房间/.test(r.textContent || '')),
+    ask: ((document.getElementById('prQuitAsk') || {}).textContent || '').replace(/\s+/g, ' ').trim(),
+    lobbyInDom: !!document.getElementById('hsn_pk_screen'), lobbyOn: !!(document.getElementById('hsn_pk_screen') && document.getElementById('hsn_pk_screen').classList.contains('on')) }; });
   const wrap = () => page.evaluate(() => document.getElementById('islandFrameWrap').style.display !== 'none');
 
-  console.log('\n▶ ① 对战中按 1 次返回');
+  console.log('\n▶ ① 对战中按 1 次返回：弹出对战屏自己的「要退出这一局吗？」');
   await page.evaluate(() => history.back()); await sleep(900);
   const r1 = await room();
   console.log('     ' + JSON.stringify(r1));
-  ok(r1.inDom && r1.on && r1.state && r1.spy.leaveRoom === 0, `对战还在：屏还在（${r1.inDom}/${r1.on}）、局还在（${r1.state}）、没退房间（leaveRoom ${r1.spy.leaveRoom} 次）`);
-  ok(/再按一次/.test(r1.hint), `提示「再按一次就退出这一局」（${r1.hint.trim().slice(0, 40) || '没有提示'}）`);
+  ok(/要退出这一局吗/.test(r1.ask) && /记一场输/.test(r1.ask), `弹出它自己的确认框，说清楚退出就记一场输（${r1.ask.slice(0, 40) || '没有弹'}）`);
+  ok(r1.inDom && r1.on && r1.state && r1.battle && r1.spy.leaveRoom === 0 && r1.spy.stopHeartbeat === 0, `对战还在：屏还在（${r1.inDom}/${r1.on}）、局还在（${r1.state}）、没退房间（leaveRoom ${r1.spy.leaveRoom} 次、停心跳 ${r1.spy.stopHeartbeat} 次）`);
   ok(await wrap(), '岛还开着');
 
-  console.log('\n▶ ② 3 秒内再按 1 次');
+  console.log('\n▶ ② 再按 1 次 = 「继续打」');
   await page.evaluate(() => history.back()); await sleep(900);
   const r2 = await room();
   console.log('     ' + JSON.stringify(r2));
-  ok(!r2.state && r2.spy.stopHeartbeat >= 1 && r2.spy.leaveRoom >= 1, `真的退出了这一局：停心跳 ${r2.spy.stopHeartbeat} 次、退出房间 ${r2.spy.leaveRoom} 次、局清空（${!r2.state}）`);
-  ok(!r2.on, '对战屏收起来了');
-  let reappeared = false;
-  for (let k = 0; k < 12; k++) { await sleep(500); const x = await room(); if (x.on) { reappeared = true; break; } }
-  ok(!reappeared, '之后 6 秒对战屏没有再冒出来');
-  ok(await wrap() && r2.lobbyOn, '回到拼写大PK 大厅，岛还开着');
-
-  console.log('\n▶ ③ 再按 1 次：关大厅');
-  await page.evaluate(() => history.back()); await sleep(900);
-  const r3 = await room();
-  ok(r3.lobbyInDom && !r3.lobbyOn, `大厅用它自己的关闭收起（还在页面里 ${r3.lobbyInDom}、显示着 ${r3.lobbyOn}）`);
+  ok(!r2.ask && r2.on && r2.state && r2.battle && r2.spy.leaveRoom === 0 && r2.spy.stopHeartbeat === 0 && r2.spy.record === 0,
+    `确认框关了（${r2.ask ? '还开着' : '已关'}）、对战还在（屏 ${r2.on}、局 ${r2.state}）、没退房间（leaveRoom ${r2.spy.leaveRoom} 次）、什么都没记（记战绩 ${r2.spy.record} 次）`);
   ok(await wrap(), '岛还开着');
 
-  console.log('\n▶ ⑤ 对战屏有自己的「退出」确认（askQuit）');
-  await F().evaluate(async () => {
-    HansenSbPK.open();
-    await new Promise(r => setTimeout(r, 400));
-    const UI = window.HansenPkRoomUI;
-    window.__quit = { asked: 0, close: 0, record: [] };
-    const oc = UI.close; UI.close = function () { window.__quit.close++; return oc.apply(this, arguments); };
-    UI.askQuit = function () {   // 和对战组 hansen_pk_room_ui 重做版一样：确认框挂在页面最外层
-      window.__quit.asked++;
-      const old = document.getElementById('prQuitAsk'); if (old) old.remove();
-      const d = document.createElement('div'); d.id = 'prQuitAsk'; d.setAttribute('role', 'alertdialog');
-      d.style.cssText = 'position:fixed;inset:0;z-index:2147483601;background:rgba(11,16,32,.86);display:flex;align-items:center;justify-content:center';
-      d.innerHTML = '<div style="background:#fff;padding:18px"><div>要退出这一局吗？</div><button id="prQuitNo">继续打</button><button id="prQuitYes">退出</button></div>';
-      document.body.appendChild(d);
-      document.getElementById('prQuitNo').onclick = () => d.remove();
-      document.getElementById('prQuitYes').onclick = () => { d.remove(); window.__quit.record.push('lose'); UI.close(); };
-    };
-    const words = (window.allW || []).slice(0, 5).map(w => ({ en: w.en, cn: w.cn }));
-    UI._startMatchForTest(words, '测试对手', 'cn', 'race');
-    await new Promise(r => setTimeout(r, 700));
-  });
-  const q = () => F().evaluate(() => ({ ask: !!document.getElementById('prQuitAsk'), quit: window.__quit, state: !!HansenPkRoomUI._stateForTest(), on: !!(document.getElementById('hsn_pkroom_screen') && document.getElementById('hsn_pkroom_screen').classList.contains('on')) }));
-  const q0 = await q();
-  ok(q0.state && q0.on, `又开了一局（局 ${q0.state}、对战屏 ${q0.on}）`);
+  console.log('\n▶ ③ 再按 → 又弹确认框；孩子点「退出」才真的退出这一局');
   await page.evaluate(() => history.back()); await sleep(900);
-  const q1 = await q();
-  ok(q1.ask && q1.quit.asked === 1 && q1.quit.close === 0 && q1.state, `按 1 次返回：弹出它自己的「要退出这一局吗？」（askQuit ${q1.quit.asked} 次、close ${q1.quit.close} 次、局还在 ${q1.state}）`);
-  await page.evaluate(() => history.back()); await sleep(900);
-  const q2 = await q();
-  ok(!q2.ask && q2.quit.close === 0 && q2.state && q2.quit.record.length === 0, `再按 1 次：等于「继续打」—— 确认框关了、局还在（${q2.state}）、没 close（${q2.quit.close}）、什么都没记`);
-  await page.evaluate(() => history.back()); await sleep(900);
-  const q3 = await q();
-  ok(q3.ask && q3.quit.asked === 2 && q3.quit.close === 0, `再按：又弹确认框（askQuit ${q3.quit.asked} 次、close ${q3.quit.close} 次）`);
+  const r3 = await room();
+  ok(/要退出这一局吗/.test(r3.ask) && r3.state && r3.spy.leaveRoom === 0 && r3.spy.stopHeartbeat === 0, `又弹确认框、对战还在、还没退房间（局 ${r3.state}、leaveRoom ${r3.spy.leaveRoom} 次）`);
   await F().evaluate(() => document.getElementById('prQuitYes').click()); await sleep(900);
-  const q4 = await q();
-  ok(q4.quit.record.join() === 'lose' && q4.quit.close === 1 && !q4.state, `孩子点「退出」：记了一场输（${q4.quit.record.join() || '没记'}）、这才 close（${q4.quit.close} 次）、局清空`);
-  await page.evaluate(() => history.back()); await sleep(900);   // 关掉大厅，给 ④ 一个干净的岛
+  const r4 = await room();
+  console.log('     ' + JSON.stringify(r4));
+  ok(!r4.state && !r4.battle && r4.spy.stopHeartbeat >= 1 && r4.spy.leaveRoom >= 1, `点「退出」：走 close() 真的退出了这一局（停心跳 ${r4.spy.stopHeartbeat} 次、退出房间 ${r4.spy.leaveRoom} 次、局清空 ${!r4.state}）`);
+  let reappeared = false;
+  for (let k = 0; k < 12; k++) { await sleep(500); const x = await room(); if (x.battle || x.state) { reappeared = true; break; } }
+  ok(!reappeared, '之后 6 秒对战屏没有再冒出来');
+  ok(await wrap() && r4.list, `回到房间列表（${r4.list}），岛还开着`);
 
-  console.log('\n▶ ④ 认不出、也关不掉的全屏浮层');
+  console.log('\n▶ ④ 再按 1 次：关房间列表');
+  await page.evaluate(() => history.back()); await sleep(900);
+  const r5 = await room();
+  ok(!r5.on && r5.lobbyOn, `房间层用它自己的「← 返回」收起（显示着 ${r5.on}），回到拼写大PK 大厅（${r5.lobbyOn}）`);
+  ok(await wrap(), '岛还开着');
+
+  console.log('\n▶ ⑤ 再按 1 次：关大厅');
+  await page.evaluate(() => history.back()); await sleep(900);
+  const r6 = await room();
+  ok(r6.lobbyInDom && !r6.lobbyOn, `大厅用它自己的关闭收起（还在页面里 ${r6.lobbyInDom}、显示着 ${r6.lobbyOn}）`);
+  ok(await wrap(), '岛还开着');
+
+  console.log('\n▶ ⑥ 认不出、也关不掉的全屏浮层');
   await F().evaluate(() => { const d = document.createElement('div'); d.id = 'xUnknownLayer'; d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6)'; d.innerHTML = '<p style="color:#fff">一块别的模块的浮层</p>'; document.body.appendChild(d); });
   await sleep(400);
   await page.evaluate(() => history.back()); await sleep(1200);
@@ -144,5 +125,5 @@ try {
   ok(errs.length === 0, '零脚本错误' + (errs.length ? '：' + errs.slice(0, 2).join(' | ') : ''));
   await ctx.close();
 } finally { await browser.close(); srv.close(); }
-console.log(fails ? `\n❌ ${fails} 项失败` : '\n✅ 对战中按返回：先提醒、再按才真的退出这一局；不再只删画面');
+console.log(fails ? `\n❌ ${fails} 项失败` : '\n✅ 对战中按返回：先问「要退出这一局吗」、再按是「继续打」、孩子点「退出」才真的退出；不再只删画面');
 process.exit(fails ? 1 : 0);

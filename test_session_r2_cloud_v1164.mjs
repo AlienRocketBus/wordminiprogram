@@ -103,11 +103,18 @@ async function cloudWords(num, label) {
     names = {};
     const T = await phone('平板');
     await login(T, '13400000022');
+    /* 🔴v1165：岛页里藏着的季节页只给「真的打开过星海房间」的孩子预热（hansen_room_warm_v1023.js wasOpened('season')，
+       记号同 test_room_warm_v1023）。下面要测「季节页做的恢复」，所以这是一个去过星海的孩子。
+       记号和别的进度一样跟着账号走（云端恢复会整份换掉本机数据）：平板上有、云端有，新手机上也先写上、重新打开岛页 */
+    await T.eval(() => { localStorage.setItem('hansen_room_opened_v1165_season', '1'); return true; });
     await setWords(T, 20);
     const up = await T.eval(() => window.HansenCloudSave.syncNow({ force: true, rewrite: true }));
     await t.ok(up && up.ok, '平板上 20 个词已经在云端', () => explain());
     await T.close(); live.splice(live.indexOf(T), 1);
     const N = await phone('新手机');
+    await N.eval(() => { localStorage.setItem('hansen_room_opened_v1165_season', '1'); return true; });
+    await N.page.reload({ waitUntil: 'domcontentloaded' });
+    await N.page.waitForFunction(ISLAND.ready, null, { timeout: 45000 });
     await setWords(N, 3);
     const blk = emu.fault({ db: true, collection: 'hansen_saves', do: 'abort' });
     const ln = await login(N, '13400000022');

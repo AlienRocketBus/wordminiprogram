@@ -193,6 +193,10 @@
     var _pkAskAt = 0;
     function pkRoomBack(el){
       if(clickOr(el, '#prBack, #prBack2', function(){ return false; })) return true;
+      /* 🔴v1165 合并 v1164：天梯自己开房「⏳ 正在开房间…」那一屏只有「取消，回天梯」—— 返回键 = 点它（这一次开房作废、回天梯）。
+         以前这一屏没有「← 返回」，就被当成对战去问 askQuit：弹「要退出吗？」，房照样开出来、挂在列表上等人
+         （test_island_r2_cloud_v1164 ②）。 */
+      if(clickOr(el, '#prCreateCancel', function(){ return false; })) return true;
       /* 🔴v1165 复查第 2 轮：对战组重做后的对战屏有自己的「退出」确认（askQuit：退出 = 这一局记一场输；已经交卷的照样结算）。
          有就交给它 —— 返回键和点对战屏上的「退出」完全一样。以前直接 close()：落后的孩子按两下返回就能不记输（对手却白赢），
          已经交卷赢下来的一局也不结算。没有 askQuit 的老对战屏，才走下面「提醒一次、3 秒内再按才 close()」的老办法。 */

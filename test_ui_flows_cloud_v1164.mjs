@@ -232,12 +232,26 @@ async function setHidden(p, hidden) {
     }, { timeout: 45000, interval: 500 });
     await t.ok(!!fr, '首页里的岛打开了（iframe 里大PK模块就绪）', () => explain());
     if (fr) {
+      /* 🔴v1165 返回键「只退一步」：岛上的「欢迎来到动物大冒险！」也算一步 —— 孩子进岛先点掉它再去开房 */
+      for (let i = 0; i < 4; i++) {
+        if (!(await fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false))) break;
+        await fr.locator('#alertModal.show button').first().tap();
+        await H.sleep(500);
+      }
       await fr.evaluate((nm) => { try { window.HansenSbProfile.setName(nm); } catch (e) { /* 起过 */ } window.HansenPkRoomUI.open(); return true; }, G.nick);
       await fr.locator('#prNew').tap();
       await fr.locator('.pr_mode[data-mode="C"]').tap();
       const rid2 = await H.until(async () => (roomsBy(G).find((d) => d.status === 'open') || {})._id, { timeout: 15000 });
       const seenByK = rid2 ? await H.until(async () => { const lr = await H.room(K, 'listRooms'); return lr && lr.ok && lr.rooms.some((x) => x._id === rid2); }, { timeout: 20000, interval: 1500 }) : null;
       await t.ok(!!rid2 && !!seenByK, `在岛里开了房，别人列得到（${rid2 || '没开成'}）`, () => explain());
+      /* 🔴v1165 返回键「只退一步」：第 1 下 = 等人那一屏的「← 关掉房间」（走房间自己的 close：停心跳、退房），岛还开着；
+         第 2 下才收起岛。房必须在第 1 下就真的关掉（不是只拿掉画面） */
+      await G.page.goBack();
+      await H.sleep(2500);
+      const R1 = H.roomDocs(emu).find((d) => d._id === rid2);
+      const ui1 = await fr.evaluate(() => !!document.querySelector('#hsn_pkroom_screen.on')).catch(() => null);
+      const open1 = await G.eval(() => (document.getElementById('islandFrameWrap') || {}).style.display !== 'none');
+      await t.ok(ui1 === false && open1 && (!R1 || R1.status !== 'open'), `第 1 下返回：房间层收起、房真的关了（${R1 ? R1.status + '/' + (R1.endedBy || '-') : '已删'}），岛还开着（${open1}）`, () => explain());
       await G.page.goBack();
       await H.sleep(2500);
       const wrapHidden = await G.eval(() => (document.getElementById('islandFrameWrap') || {}).style.display === 'none');
