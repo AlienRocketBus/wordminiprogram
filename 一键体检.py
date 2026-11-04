@@ -6,6 +6,7 @@
     python3 一键体检.py --quick      # 只做三道快检（资源检查、守卫、零测试桩冒烟），几分钟
     python3 一键体检.py --shard 2/6  # 只跑第 2 份（共 6 份）测试 —— 给 GitHub 自动测试用
     python3 一键体检.py --only room  # 只跑名字里带 room 的测试
+    python3 一键体检.py --only cloud_v1164 --no-retry --tag r3   # 反复测试用：失败不重跑，一次失败就记下
 
 为什么要有它（「虹吸工作法」，见 攻坚笔记/虹吸工作法.md）：
     以前跑测试是让 AI 一条条敲命令、把几千行日志读进脑子里 —— 最费 token 的就是这一步。
@@ -174,12 +175,14 @@ def main():
     if shard or only:
         res = run_list(mod, tests, int(os.environ.get('SIPHON_PARALLEL', '2')))
         fails = sorted(t for t, r in res.items() if r)
-        if fails:  # 并行假失败很常见：失败的串行再跑一次，两次都失败才算
+        if fails and '--no-retry' not in argv:  # 并行假失败很常见：失败的串行再跑一次，两次都失败才算
             again = run_list(mod, fails, 1)
             res.update(again)
             fails = sorted(t for t, r in again.items() if r)
         os.makedirs(LOGDIR, exist_ok=True)
         tag = 'shard_%d_of_%d' % shard if shard else 'only_' + re.sub(r'\W+', '_', only)
+        if '--tag' in argv:
+            tag += '_' + re.sub(r'\W+', '_', argv[argv.index('--tag') + 1])
         json.dump(res, open(os.path.join(LOGDIR, tag + '.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
         lines.append('测试 %d 个：通过 %d · 失败 %d' % (len(res), len(res) - len(fails), len(fails)))
     else:
