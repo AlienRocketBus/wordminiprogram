@@ -253,7 +253,9 @@ async function appHidden(G, hidden) {
     const frames = await I.eval(() => { let n = 0; const walk = (w) => { try { if (w.HansenCloudRestore) n++; for (let i = 0; i < w.frames.length; i++) walk(w.frames[i]); } catch (e) { /* 跨域 */ } }; walk(window); return n; });
     const reads = emu.log.filter((x) => x.uid === I.uid && x.collection === 'hansen_saves' && x.action === 'database.queryDocument' && x.t >= t0).length;
     await t.ok(frames >= 2, `这一页里装着云存档开机检查的有 ${frames} 层（岛 + 预热的页面）`, () => explain());
-    await t.ok(reads >= 1 && reads <= 2, `打开一次岛，开机查云存档 ${reads} 次（该是 1 次；以前每层各查一次）`, () => explain());
+    /* 开机检查自己记下的结果（v1165 复查第 4 轮加的）：0 次时说清楚是没登录好、模块没到还是没跑到 */
+    const boot = await I.eval(() => { const b = window.__hsnRestoreBoot; return b ? JSON.stringify({ ago: Date.now() - b.t, top: b.top, r: b.r }) : '没跑到'; });
+    await t.ok(reads >= 1 && reads <= 2, `打开一次岛，开机查云存档 ${reads} 次（该是 1 次；以前每层各查一次）· 开机检查：${boot}`, () => explain());
   });
 }
 t.summary();

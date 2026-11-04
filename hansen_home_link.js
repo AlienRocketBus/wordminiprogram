@@ -182,7 +182,10 @@
       hsn_gate: function(){ return false; },   /* 注册门槛是硬门槛：返回键不关它、也不拿掉它 */
       /* 🔴v1165 复查第 2 轮：对战组重做后的「要退出这一局吗？」确认框（挂在页面最外层）：返回键 = 「继续打 / 接着等」，
          真要退出得孩子自己点「退出」（那一下才记输 / 结算）——两下返回手势绝不会悄悄把一局丢掉 */
-      prQuitAsk: '#prQuitNo'
+      prQuitAsk: '#prQuitNo',
+      /* 🔴v1165 复查第 4 轮（合并 v1164 后）：拼写大PK「✏️ 先起个名字」框（v1164 新加）—— 返回键 = 「先不玩联机」。
+         以前表里没有它、两个按钮又认不出是关闭，返回键跳过它把后面的大厅关了（test_pk_name_back_cloud_v1165） */
+      kNameAsk: '#pkNameBack'
     };
     function visibleIn(el, sel){ try{ var b = el.querySelector(sel); return b && b.getClientRects().length ? b : null; }catch(e){ return null; } }
     function clickOr(el, sel, fallback){ var b = visibleIn(el, sel); if(b){ try{ b.click(); }catch(e){} return true; } return fallback(); }

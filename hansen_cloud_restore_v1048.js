@@ -171,7 +171,14 @@
     return true;
   }
   function boot() {
-    var run = function () { if (topRestoreFrame()) check(); };
+    /* 🔴v1165 复查第 4 轮：开机检查跳过时记下原因（只记在内存里，不发请求、不改行为）——
+       反复测试里「开机查云存档 0 次」10 轮出了 1 次，看不出是没登录好、模块没到还是机器慢；下次再出就有原因可查 */
+    var run = function () {
+      var top = topRestoreFrame();
+      window.__hsnRestoreBoot = { t: Date.now(), top: top };
+      if (!top) return;
+      check().then(function (r) { try { window.__hsnRestoreBoot.r = r; } catch (e) {} });
+    };
     if (typeof window.requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 6000 });
     else setTimeout(run, 3500);
     /* 登录状态变化后再查一次（刚登录的设备也能立刻收到提示） */
