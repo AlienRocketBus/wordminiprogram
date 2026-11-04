@@ -1,0 +1,71 @@
+{
+  "as_shipped": {
+    "before": [
+      {
+        "pid": 5911,
+        "rssMB": 209,
+        "pssMB": 117
+      }
+    ],
+    "after": [
+      {
+        "pid": 5911,
+        "rssMB": 492,
+        "pssMB": 389
+      }
+    ],
+    "jsHeapUsedMB": 9,
+    "jsHeapTotalMB": 10,
+    "dom": {
+      "documents": 9,
+      "nodes": 10892,
+      "jsEventListeners": 4237
+    }
+  },
+  "no_recursion": {
+    "before": [
+      {
+        "pid": 6435,
+        "rssMB": 213,
+        "pssMB": 128
+      }
+    ],
+    "after": [
+      {
+        "pid": 6435,
+        "rssMB": 405,
+        "pssMB": 340
+      }
+    ],
+    "jsHeapUsedMB": 7,
+    "jsHeapTotalMB": 7,
+    "dom": {
+      "documents": 5,
+      "nodes": 8128,
+      "jsEventListeners": 2609
+    }
+  },
+  "as_shipped_again": {
+    "before": [
+      {
+        "pid": 6607,
+        "rssMB": 222,
+        "pssMB": 168
+      }
+    ],
+    "after": [
+      {
+        "pid": 6607,
+        "rssMB": 479,
+        "pssMB": 418
+      }
+    ],
+    "jsHeapUsedMB": 9,
+    "jsHeapTotalMB": 10,
+    "dom": {
+      "documents": 9,
+      "nodes": 10908,
+      "jsEventListeners": 4237
+    }
+  }
+}

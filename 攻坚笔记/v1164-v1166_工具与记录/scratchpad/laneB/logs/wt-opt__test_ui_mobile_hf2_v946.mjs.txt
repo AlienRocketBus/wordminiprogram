@@ -1,0 +1,1 @@
+UI/mobile HF2: 320px + landscape pointer gate + onboarding a11y + precise reduced-motion + zoom ✅

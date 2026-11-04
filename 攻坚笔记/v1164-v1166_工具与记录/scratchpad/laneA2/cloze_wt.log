@@ -1,0 +1,31 @@
+
+▶ ① 27 个岛的完形各档
+  ✅ ① 27 个岛每档卡片题数 = 能出题的词数 = 本档词数（没有被悄悄跳过的词）
+
+▶ ②③ island_body.html 完形 easy 全对
+  ✅ ②③ 全对 → 答对 20 / 20 题 · 正确率 100%
+  ✅ ②③ 结算总数 = 卡片上写的题数（卡片 20，结算 20）
+  ✅ ②③ 题号一题一题走、不跳号：1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+  ✅ 页面无报错 
+
+▶ ②③ island_animal.html 完形 easy 全对
+  ✅ ②③ 全对 → 答对 13 / 13 题 · 正确率 100%
+  ✅ ②③ 结算总数 = 卡片上写的题数（卡片 13，结算 13）
+  ✅ ②③ 题号一题一题走、不跳号：1,2,3,4,5,6,7,8,9,10,11,12,13
+  ✅ 页面无报错 
+
+▶ ④ 大小写和变形
+  ✅ ④ it：答完句子和原例句一字不差（「I have a cat. It is white.」 vs 「I have a cat. It is white.」）
+  ✅ 页面无报错 
+  ✅ ④ year：答完句子和原例句一字不差（「Happy New Year!」 vs 「Happy New Year!」）
+  ✅ 页面无报错 
+  ✅ ④ eye：答完句子和原例句一字不差（「Her eyes are bright and beautiful.」 vs 「Her eyes are bright and beautiful.」）
+  ✅ 页面无报错 
+  ✅ ④ cow：答完句子和原例句一字不差（「Cows give us milk.」 vs 「Cows give us milk.」）
+  ✅ 页面无报错 
+
+▶ ⑤ Boss 完形
+  ✅ ⑤ Boss 完形能出「eyes」这一题，挖掉的是 eyes {"type":"cloze","word":"eye","prompt":"Her      are bright and beautiful."}
+  ✅ 页面无报错 
+
+✅ v1165 完形填空：变形词能出题、全对 100%、大小写保留、Boss 完形同一规则

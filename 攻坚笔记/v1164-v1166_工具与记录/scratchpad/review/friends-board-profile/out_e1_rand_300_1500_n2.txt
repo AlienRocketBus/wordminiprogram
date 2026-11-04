@@ -1,0 +1,26 @@
+round 0 LAG=rand 300-1500 N=2 login 2291ms ok=true,true
+  local cids : 1,1
+  sb_profile : 7095:cid=1@+0ms  3236:cid=1@+118ms
+  => duplicates=[1] zeros=0
+round 1 LAG=rand 300-1500 N=2 login 2422ms ok=true,true
+  local cids : 1,1
+  sb_profile : 6200:cid=1@+0ms  7230:cid=1@+4ms
+  => duplicates=[1] zeros=0
+round 2 LAG=rand 300-1500 N=2 login 3122ms ok=true,true
+  local cids : 2,1
+  sb_profile : 2814:cid=2@+0ms  4871:cid=1@+62ms
+  => duplicates=[] zeros=0
+round 3 LAG=rand 300-1500 N=2 login 2420ms ok=true,true
+  local cids : 1,2
+  sb_profile : 1064:cid=1@+0ms  5857:cid=2@+178ms
+  => duplicates=[] zeros=0
+round 4 LAG=rand 300-1500 N=2 login 2398ms ok=true,true
+  local cids : 1,2
+  sb_profile : 4829:cid=1@+0ms  8604:cid=2@+88ms
+  => duplicates=[] zeros=0
+round 5 LAG=rand 300-1500 N=2 login 2499ms ok=true,true
+  local cids : 1,2
+  sb_profile : 3807:cid=1@+0ms  3734:cid=2@+15ms
+  => duplicates=[] zeros=0
+
+SUMMARY LAG=0 N=2: rounds with duplicate cid = 2/6; rounds with a kid left without cid = 0/6

@@ -1,0 +1,120 @@
+{
+ "name": "R05_session_failure_after_landed_add",
+ "bug": "R5 add landed, retry hit a transient session failure → claim failed, 0 points, never reconciled",
+ "spec": {
+  "seed": 160,
+  "profile": "chaos",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 2,
+   "queryLagMul": 1.14,
+   "queryLagExtra": 0,
+   "lagMode": "monotonic",
+   "ryw": false,
+   "dupMode": "http500",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.72,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x160",
+    "name": "小明",
+    "rating": 921,
+    "skew": -53663,
+    "net": {
+     "base": 411,
+     "jitter": 407,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.85,
+     "minMs": 2765,
+     "maxMs": 12305,
+     "slowP": 0.1
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 301,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P1",
+    "uid": "k1x160",
+    "name": "小红",
+    "rating": 755,
+    "skew": -40296,
+    "net": {
+     "base": 341,
+     "jitter": 360,
+     "spikeP": 0.01,
+     "faultRate": 0.072,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0.35,
+    "kid": {
+     "pCorrect": 0.76,
+     "minMs": 3015,
+     "maxMs": 8893,
+     "slowP": 0.01
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2901,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 2
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null
+   }
+  ],
+  "adversary": null
+ }
+}

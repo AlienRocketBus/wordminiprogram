@@ -1,0 +1,19 @@
+HOME [
+  'body: "Microsoft YaHei", 微软雅黑, "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Pin | 16px 500',
+  'h1.main: CartoonBlack, "Microsoft YaHei UI", "Microsoft YaHei", 微软雅黑, "PingFang SC Heavy" | 46.8px 900',
+  '.island-name, .island .name, .island-cn: CartoonBlack, "微软雅黑 Heavy", "Microsoft YaHei UI", "Microsoft YaHei", 微软雅黑, "Ping | 13px 900',
+  '.island-en: "Bowlby One", serif | 12px 500',
+  '#recentNum: "Bowlby One", Impact, "Arial Black", sans-serif | 15px 900',
+  '.stat-num: "Bowlby One", Impact, "Arial Black", sans-serif | 24px 900'
+]
+HOME fonts loaded [ 'CartoonBlack' ]
+ISLAND [
+  'body: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 16px 500',
+  '#homeScreen>div:first-child>div:first-child: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 26px 900',
+  '.mode-card: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 16px 500',
+  '.top-name: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 12px 700',
+  '.nav-item: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 12px 600',
+  '.section-label: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif | 13px 600'
+]
+ISLAND fonts loaded [ 'Baloo2', 'CartoonBlack' ]
+external []

@@ -1,0 +1,36 @@
+打开变下载 自查 v1140
+  OK  ★ octet-stream → 会下载
+  OK  ★ 没有 Content-Type → 会下载
+  OK  ★ binary/* → 会下载
+  OK  ★ 即使 Content-Type 是 html，带 attachment 也会下载
+  OK  ★ text/plain → 不渲染
+  OK  ★ 正常的 text/html → 会打开
+  OK  ★ 探测用 no-store
+  OK  ★ 加时间戳绕开一切缓存 —— 否则看到的是 SW 改好的那份，查不出真问题
+  OK  ★ SW 里的响应头修正还在
+  OK  ★ 认 attachment
+  OK  ★ 会把 attachment 头去掉
+  OK  ★ 正常响应一律不碰 —— 早期版本读过 body 结果把好页面弄坏了
+  OK  ★ 指引说到"索引文档设为 index.html"，而不是笼统的"服务端配置问题"
+  OK  ★ 能识别"只有根路径坏"这种最常见情况 —— 那就百分之百是索引文档没配
+  OK  ★ 说明为什么老用户感觉不到而新用户会被下载
+  OK  ★ 首页加载了自查模块
+  OK  ★🔒 cloudbaserc.json 里 indexPath = index.html —— 部署时就把索引文档带上去，不靠人记得去控制台点
+  OK  ★🔒 所有页面都有 file:// 自救代码（缺 0 个）
+  OK  ★🔒 自救代码是**内联**的（0 个写成了外部脚本）—— file:// 下外部脚本根本加载不出来，写成外部等于没写
+  OK  ★🔒 判据是 location.protocol === 'file:' —— 极其确定，正常访问永远是 http/https
+  OK  ★🔒 主逻辑可能重绘整个 body，所以补一次 —— 第一版就是被重绘冲掉了
+  OK  ★🔒 有守卫盯死这四处
+  OK  ★🔒 守卫同时检查：部署配置 + SW 兜底 + 页面内联自救
+  OK  ★🔒 **`text/plain` 也算"会被下载"** —— 线上探测到的响应正是 text/plain，而之前的判据只认 octet-stream / binary / attachment，**这道兜底形同虚设**。（浏览器对 text/plain 的处理不统一：有的显示成纯文本、有的直接下载，无论哪种对一个网页来说都是坏的。）
+  OK  ★🔒 **进缓存之前就修 Content-Type** —— 原来是"缓存时原样存、取出时才修"，这留了个大洞：服务端某次回了坏响应就被**原样存进 Cache Storage**，之后即使服务端修好了、CDN 缓存也刷了，**这个用户的浏览器里还留着那份坏的**，怎么刷新都没用（SW 缓存不吃刷新）。也就是说：**服务端的一次抽风，会被我们自己永久固化下来。**
+  OK  ★🔒 只对页面类请求做这个修正 —— 图片/音频的 Content-Type 不能乱改
+  OK  ★🔒 **修不成就存原样** —— 存一份 Content-Type 不对的，也好过因为修的过程出错而整个存不进去：取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了
+  OK  ★🔒 取出时的 fixHtmlType 保留 —— 给"缓存里已经存了坏数据"的老用户兜底
+  OK  ★ 判据里含「octet-stream」
+  OK  ★ 判据里含「binary/」
+  OK  ★ 判据里含「text/plain」
+  OK  ★ 判据里含「attachment」
+  OK  ★ **正常响应一律不碰** —— 一个"修 Content-Type"的兜底如果乱改正常响应，害处比它挡住的更大
+
+结果: 33 通过 / 0 失败

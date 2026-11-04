@@ -1,0 +1,1214 @@
+[
+ {
+  "t": 1793692867270,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/signin",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "8461eb37fc004a958652827496d3e000",
+   "x-request-id": "70c3012e71f5418ba31704ed25067bc5"
+  },
+  "body": {
+   "username": "alice_poc",
+   "password": "pw123456"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw\",\"refresh_token\":\"PAhEiR3rqExraB1hS1dBvC0XlKAoNdoT\",\"expires_in\":7200,\"scope\":\"user\",\"sub\":\"1761282801441921597\",\"groups\":[\"user\"]}"
+  }
+ },
+ {
+  "t": 1793692867282,
+  "method": "GET",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/user/me",
+  "search": "",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "8461eb37fc004a958652827496d3e000",
+   "x-request-id": "13188a6d8bc9444586f7447072447bca"
+  },
+  "body": {},
+  "res": {
+   "status": 200,
+   "body": "{\"sub\":\"1761282801441921597\",\"name\":\"Alice\",\"picture\":\"\",\"username\":\"alice_poc\",\"email\":\"\",\"email_verified\":false,\"phone_number\":\"\",\"groups\":[{\"id\":\"user\",\"expires_at\":\"\"}],\"gender\":\"\",\"birthdate\":\"\",\"zoneinfo\":\"\",\"locale\":\"\",\"created_from\":\"username\",\"created_at\":\"2026-11-03T08:01:06.912Z\",\"updated_at\":\"2026-11-03T08:01:06.912Z\",\"status\":\"ACTIVE\",\"providers\":[],\"password_updated_at\":\"\"}"
+  }
+ },
+ {
+  "t": 1793692867293,
+  "method": "GET",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/user/me",
+  "search": "",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "8461eb37fc004a958652827496d3e000",
+   "x-request-id": "e1e06ab772134807b459440308ebdfda"
+  },
+  "body": {},
+  "res": {
+   "status": 200,
+   "body": "{\"sub\":\"1761282801441921597\",\"name\":\"Alice\",\"picture\":\"\",\"username\":\"alice_poc\",\"email\":\"\",\"email_verified\":false,\"phone_number\":\"\",\"groups\":[{\"id\":\"user\",\"expires_at\":\"\"}],\"gender\":\"\",\"birthdate\":\"\",\"zoneinfo\":\"\",\"locale\":\"\",\"created_from\":\"username\",\"created_at\":\"2026-11-03T08:01:06.912Z\",\"updated_at\":\"2026-11-03T08:01:06.912Z\",\"status\":\"ACTIVE\",\"providers\":[],\"password_updated_at\":\"\"}"
+  }
+ },
+ {
+  "t": 1793692867307,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "7f7856e16fbd4"
+  },
+  "body": {
+   "action": "database.addDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "data": {
+    "status": "open",
+    "isPrivate": false,
+    "hostId": "H1",
+    "guestId": "",
+    "createdAt": 1793692867301,
+    "heartbeatAt": 1793692867301,
+    "when": {
+     "$date": 1700000000000
+    }
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "7f7856e16fbd4"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\"},\"requestId\":\"f35c18991a9eb369\"}"
+  }
+ },
+ {
+  "t": 1793692867316,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "407d1dabce04b"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "open"
+   },
+   "limit": 100,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "407d1dabce04b"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"open\",\"isPrivate\":false,\"hostId\":\"H1\",\"guestId\":\"\",\"createdAt\":1793692867301,\"heartbeatAt\":1793692867301,\"when\":{\"$date\":1700000000000},\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\",\"_openid\":\"1761282801441921597\"}],\"limit\":100,\"offset\":0},\"requestId\":\"fe23a773936ad38c\"}"
+  }
+ },
+ {
+  "t": 1793692867325,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "524d225ea62358"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "open",
+    "isPrivate": false
+   },
+   "order": [
+    {
+     "field": "createdAt",
+     "direction": "desc"
+    }
+   ],
+   "limit": 40,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "524d225ea62358"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"open\",\"isPrivate\":false,\"hostId\":\"H1\",\"guestId\":\"\",\"createdAt\":1793692867301,\"heartbeatAt\":1793692867301,\"when\":{\"$date\":1700000000000},\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\",\"_openid\":\"1761282801441921597\"}],\"limit\":40,\"offset\":0},\"requestId\":\"28075ed2695cd196\"}"
+  }
+ },
+ {
+  "t": 1793692867333,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "d8473fbd62f97"
+  },
+  "body": {
+   "action": "database.countDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "open"
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "d8473fbd62f97"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"total\":1},\"requestId\":\"f5fc151d95e8f6fc\"}"
+  }
+ },
+ {
+  "t": 1793692867340,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "96152d14342e28"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "projection": {},
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "96152d14342e28"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"open\",\"isPrivate\":false,\"hostId\":\"H1\",\"guestId\":\"\",\"createdAt\":1793692867301,\"heartbeatAt\":1793692867301,\"when\":{\"$date\":1700000000000},\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\",\"_openid\":\"1761282801441921597\"}],\"limit\":100,\"offset\":0},\"requestId\":\"6258448b73956031\"}"
+  }
+ },
+ {
+  "t": 1793692867348,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "1f0ead87b2044"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "createdAt": {
+     "$gt": 0
+    },
+    "status": {
+     "$in": [
+      "open",
+      "x"
+     ]
+    }
+   },
+   "limit": 5,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "1f0ead87b2044"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"open\",\"isPrivate\":false,\"hostId\":\"H1\",\"guestId\":\"\",\"createdAt\":1793692867301,\"heartbeatAt\":1793692867301,\"when\":{\"$date\":1700000000000},\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\",\"_openid\":\"1761282801441921597\"}],\"limit\":5,\"offset\":0},\"requestId\":\"7ef228fd728d9926\"}"
+  }
+ },
+ {
+  "t": 1793692867556,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/verification",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "f9f5c990a1af40d5a3ca8b7b5e44cedc",
+   "x-request-id": "7a02ba1bb42f4cdea46bc125cbfaf519"
+  },
+  "body": {
+   "phone_number": "+86 13800000001"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"verification_id\":\"v_f85a0d920931f188\",\"expires_in\":600,\"is_user\":false}"
+  }
+ },
+ {
+  "t": 1793692867563,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/signup",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "f9f5c990a1af40d5a3ca8b7b5e44cedc",
+   "x-request-id": "c8a7349112d742e5a8bdcf764d567404"
+  },
+  "body": {
+   "phone_number": "+86 13800000001",
+   "verification_code": "123456"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y\",\"refresh_token\":\"MDoVD0KYZiSCZkwkAaYUj7DIlaBJEsIV\",\"expires_in\":7200,\"scope\":\"user\",\"sub\":\"1759432228290293038\",\"groups\":[\"user\"]}"
+  }
+ },
+ {
+  "t": 1793692867575,
+  "method": "GET",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/user/me",
+  "search": "",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "f9f5c990a1af40d5a3ca8b7b5e44cedc",
+   "x-request-id": "012187a6384d44e8ad0221ced3de7bec"
+  },
+  "body": {},
+  "res": {
+   "status": 200,
+   "body": "{\"sub\":\"1759432228290293038\",\"name\":\"\",\"picture\":\"\",\"username\":\"\",\"email\":\"\",\"email_verified\":false,\"phone_number\":\"+86 13800000001\",\"groups\":[{\"id\":\"user\",\"expires_at\":\"\"}],\"gender\":\"\",\"birthdate\":\"\",\"zoneinfo\":\"\",\"locale\":\"\",\"created_from\":\"phone\",\"created_at\":\"2026-11-03T08:01:07.563Z\",\"updated_at\":\"2026-11-03T08:01:07.563Z\",\"status\":\"ACTIVE\",\"providers\":[],\"password_updated_at\":\"\"}"
+  }
+ },
+ {
+  "t": 1793692867588,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "8e15195fa815d"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+    "status": "open",
+    "guestId": ""
+   },
+   "queryType": "WHERE",
+   "multi": true,
+   "merge": true,
+   "upsert": false,
+   "data": {
+    "$set": {
+     "guestId": "1759432228290293038",
+     "status": "playing"
+    }
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "8e15195fa815d"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"updated\":0},\"requestId\":\"735dc075c6030c73\"}"
+  }
+ },
+ {
+  "t": 1793692867595,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "8fca0a5dfb2e88"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "data": {
+    "$set": {
+     "heartbeatAt": 1
+    }
+   },
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "merge": true,
+   "upsert": false,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "8fca0a5dfb2e88"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"updated\":0},\"requestId\":\"a242324c49dec1ab\"}"
+  }
+ },
+ {
+  "t": 1793692867602,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "b1994d106ae128"
+  },
+  "body": {
+   "action": "database.deleteDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "b1994d106ae128"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"deleted\":0},\"requestId\":\"f2c48c389b681a88\"}"
+  }
+ },
+ {
+  "t": 1793692867611,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "52cdbd38a2897"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+    "status": "open",
+    "guestId": ""
+   },
+   "queryType": "WHERE",
+   "multi": true,
+   "merge": true,
+   "upsert": false,
+   "data": {
+    "$set": {
+     "guestId": "1759432228290293038",
+     "status": "playing"
+    }
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "52cdbd38a2897"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\",\"requestId\":\"a0e15a389415b70b\"}"
+  }
+ },
+ {
+  "t": 1793692867621,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "1a5a23eeee3458"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "data": {
+    "$set": {
+     "heartbeatAt": 1
+    }
+   },
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "merge": true,
+   "upsert": false,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "1a5a23eeee3458"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\",\"requestId\":\"89785defea2ed294\"}"
+  }
+ },
+ {
+  "t": 1793692867626,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "65ff43bcf637c"
+  },
+  "body": {
+   "action": "database.deleteDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.DWgiW2hTraYi2mOi6d_u3XQanCL2ttqTf3BEFcDY60Y",
+   "seqId": "65ff43bcf637c"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\",\"requestId\":\"0e84df359bafc0f1\"}"
+  }
+ },
+ {
+  "t": 1793692867635,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "fcdf6ace4811e"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+    "status": "open",
+    "guestId": ""
+   },
+   "queryType": "WHERE",
+   "multi": true,
+   "merge": true,
+   "upsert": false,
+   "data": {
+    "$set": {
+     "guestId": "G",
+     "status": "playing"
+    }
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "fcdf6ace4811e"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"updated\":1},\"requestId\":\"2026a0705395c088\"}"
+  }
+ },
+ {
+  "t": 1793692867641,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "21b7ad9138c61"
+  },
+  "body": {
+   "action": "database.updateDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "query": {
+    "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+    "status": "open",
+    "guestId": ""
+   },
+   "queryType": "WHERE",
+   "multi": true,
+   "merge": true,
+   "upsert": false,
+   "data": {
+    "$set": {
+     "guestId": "G2"
+    }
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "21b7ad9138c61"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"updated\":0},\"requestId\":\"095db08941ca405c\"}"
+  }
+ },
+ {
+  "t": 1793692867650,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "bc3484557cb338"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_friend_msgs",
+   "queryType": "WHERE",
+   "query": {
+    "to": "x"
+   },
+   "limit": 100,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "bc3484557cb338"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs\",\"requestId\":\"fc962867bdd952d5\"}"
+  }
+ },
+ {
+  "t": 1793692867655,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "62589099a2eb28"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "counters",
+   "query": {
+    "_id": "c"
+   },
+   "queryType": "DOC",
+   "multi": false,
+   "projection": {},
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "62589099a2eb28"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_PERMISSION_DENIED\",\"message\":\"Permission denied\",\"requestId\":\"03f3c73a2a8cebed\"}"
+  }
+ },
+ {
+  "t": 1793692867661,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "7fd5b5d8ef576"
+  },
+  "body": {
+   "action": "database.addDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_friend_msgs",
+   "data": {
+    "a": 1
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.9mFSrLC5Lz_E1LUD1gFZdZm-CELCwE8pZez3toYy7yw",
+   "seqId": "7fd5b5d8ef576"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"code\":\"DATABASE_COLLECTION_NOT_EXIST\",\"message\":\"[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs\",\"requestId\":\"301097106b0f7fa9\"}"
+  }
+ },
+ {
+  "t": 1793692867742,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/token",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "8461eb37fc004a958652827496d3e000",
+   "x-request-id": "79de294e8f3d4c1e8dd9b187e74600d5"
+  },
+  "body": {
+   "client_id": "ambitious-d0g1d26xm740dc3d6",
+   "client_secret": "",
+   "grant_type": "refresh_token",
+   "refresh_token": "PAhEiR3rqExraB1hS1dBvC0XlKAoNdoT"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.dy8c_UbRU2xlp7sCKaxhBQN5eOXx3IovO5U6PJD1UTE\",\"refresh_token\":\"1BY7TdLB6hf9qSwUodLFAQhQ7j1vIo5o\",\"expires_in\":7200,\"scope\":\"user\",\"sub\":\"1761282801441921597\",\"groups\":[\"user\"]}"
+  }
+ },
+ {
+  "t": 1793692867748,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "36a5de8989af98"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "playing"
+   },
+   "limit": 100,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.dy8c_UbRU2xlp7sCKaxhBQN5eOXx3IovO5U6PJD1UTE",
+   "seqId": "36a5de8989af98"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"playing\",\"isPrivate\":false,\"hostId\":\"H1\",\"guestId\":\"G\",\"createdAt\":1793692867301,\"heartbeatAt\":1793692867301,\"when\":{\"$date\":1700000000000},\"_id\":\"039c14a4bea83afbbd7c092400ee9e3b\",\"_openid\":\"1761282801441921597\"}],\"limit\":100,\"offset\":0},\"requestId\":\"5c5ae6bc559000e6\"}"
+  }
+ },
+ {
+  "t": 1793692867921,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/verification",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "d2b46329863642339079fb97178616c2",
+   "x-request-id": "48af36a9bc914967a9bae13b550ebcb2"
+  },
+  "body": {
+   "phone_number": "+86 13800000001"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"verification_id\":\"v_6f92834516d27d42\",\"expires_in\":600,\"is_user\":true}"
+  }
+ },
+ {
+  "t": 1793692867926,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/verification/verify",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "d2b46329863642339079fb97178616c2",
+   "x-request-id": "45d05a9b430c482d9381df857fdf8c54"
+  },
+  "body": {
+   "verification_id": "v_6f92834516d27d42",
+   "verification_code": "123456"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"verification_token\":\"vt_d7fdb7828cac1826\",\"expires_in\":600}"
+  }
+ },
+ {
+  "t": 1793692867931,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/signin",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "d2b46329863642339079fb97178616c2",
+   "x-request-id": "7142809ac4ec4d5899e8d70efa5b70c7"
+  },
+  "body": {
+   "username": "+86 13800000001",
+   "verification_token": "vt_d7fdb7828cac1826"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"token_type\":\"Bearer\",\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.zc55v6i1D-Bez82NZR2svdt4GPydwiVV_c8Gvd-QGXk\",\"refresh_token\":\"JMa7_wI0J8AlGuaaM8qbMCpRQ2P9Y6s4\",\"expires_in\":7200,\"scope\":\"user\",\"sub\":\"1759432228290293038\",\"groups\":[\"user\"]}"
+  }
+ },
+ {
+  "t": 1793692867938,
+  "method": "GET",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/user/me",
+  "search": "",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzU5NDMyMjI4MjkwMjkzMDM4IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.zc55v6i1D-Bez82NZR2svdt4GPydwiVV_c8Gvd-QGXk",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "d2b46329863642339079fb97178616c2",
+   "x-request-id": "6d5335ceb9c94b24a7a6c7474b93131d"
+  },
+  "body": {},
+  "res": {
+   "status": 200,
+   "body": "{\"sub\":\"1759432228290293038\",\"name\":\"\",\"picture\":\"\",\"username\":\"\",\"email\":\"\",\"email_verified\":false,\"phone_number\":\"+86 13800000001\",\"groups\":[{\"id\":\"user\",\"expires_at\":\"\"}],\"gender\":\"\",\"birthdate\":\"\",\"zoneinfo\":\"\",\"locale\":\"\",\"created_from\":\"phone\",\"created_at\":\"2026-11-03T08:01:07.563Z\",\"updated_at\":\"2026-11-03T08:01:07.563Z\",\"status\":\"ACTIVE\",\"providers\":[],\"password_updated_at\":\"\"}"
+  }
+ },
+ {
+  "t": 1793692867946,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/signin",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "d2b46329863642339079fb97178616c2",
+   "x-request-id": "9e4ce831efbe43bc9a74e33a53eed968"
+  },
+  "body": {
+   "username": "alice_poc",
+   "password": "nope"
+  },
+  "res": {
+   "status": 400,
+   "body": "{\"error\":\"invalid_password\",\"error_code\":3,\"error_description\":\"invalid password\"}"
+  }
+ },
+ {
+  "t": 1793692868138,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/auth/v1/verification",
+  "search": "?client_id=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "content-type": "text/plain;charset=UTF-8",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-device-id": "08a0d5d4fa9740ee9611769d35767091",
+   "x-request-id": "bd4d8df913b64330a7cbfa768e2172c1"
+  },
+  "body": {
+   "email": "x_1@u.wordadventure.local"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"verification_id\":\"v_518cadf45b39de36\",\"expires_in\":600,\"is_user\":false}"
+  }
+ },
+ {
+  "t": 1793692868348,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "9d52e96763e488"
+  },
+  "body": {
+   "action": "database.addDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "data": {
+    "status": "lagtest"
+   },
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.dy8c_UbRU2xlp7sCKaxhBQN5eOXx3IovO5U6PJD1UTE",
+   "seqId": "9d52e96763e488"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"_id\":\"fd4342a7ef9d12cf93fa543d604d9e62\"},\"requestId\":\"009b0cae15009a35\"}"
+  }
+ },
+ {
+  "t": 1793692868558,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "9d8032d169ab88"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "lagtest"
+   },
+   "limit": 100,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.dy8c_UbRU2xlp7sCKaxhBQN5eOXx3IovO5U6PJD1UTE",
+   "seqId": "9d8032d169ab88"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[],\"limit\":100,\"offset\":0},\"requestId\":\"fce3ca49b0fad682\"}"
+  }
+ },
+ {
+  "t": 1793692870470,
+  "method": "POST",
+  "host": "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com",
+  "path": "/web",
+  "search": "?env=ambitious-d0g1d26xm740dc3d6",
+  "headers": {
+   "accept": "*/*",
+   "accept-language": "zh-CN",
+   "origin": "http://127.0.0.1:36323",
+   "referer": "http://127.0.0.1:36323/",
+   "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+   "x-sdk-version": "@cloudbase/js-sdk/2.30.0",
+   "content-type": "application/json;charset=UTF-8",
+   "sec-ch-ua": "\"HeadlessChrome\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+   "sec-ch-ua-mobile": "?0",
+   "sec-ch-ua-platform": "\"Linux\"",
+   "x-seqid": "8b7efeaa42a9d8"
+  },
+  "body": {
+   "action": "database.queryDocument",
+   "dataVersion": "2020-01-10",
+   "env": "ambitious-d0g1d26xm740dc3d6",
+   "collectionName": "hansen_pk_rooms",
+   "queryType": "WHERE",
+   "query": {
+    "status": "lagtest"
+   },
+   "limit": 100,
+   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImVtdSJ9.eyJpc3MiOiJodHRwczovL2FtYml0aW91cy1kMGcxZDI2eG03NDBkYzNkNi5hcC1zaGFuZ2hhaS50Y2ItYXBpLnRlbmNlbnRjbG91ZGFwaS5jb20iLCJzdWIiOiIxNzYxMjgyODAxNDQxOTIxNTk3IiwiYXVkIjoiYW1iaXRpb3VzLWQwZzFkMjZ4bTc0MGRjM2Q2IiwiZXhwIjoxNzkzNzAwMDY3LCJpYXQiOjE3OTM2OTI4NjcsInNjb3BlIjoidXNlciIsInByb2plY3RfaWQiOiJhbWJpdGlvdXMtZDBnMWQyNnhtNzQwZGMzZDYiLCJtZXRhIjp7InBsYXRmb3JtIjoiVXNlcm5hbWUifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.dy8c_UbRU2xlp7sCKaxhBQN5eOXx3IovO5U6PJD1UTE",
+   "seqId": "8b7efeaa42a9d8"
+  },
+  "res": {
+   "status": 200,
+   "body": "{\"data\":{\"list\":[{\"status\":\"lagtest\",\"_id\":\"fd4342a7ef9d12cf93fa543d604d9e62\",\"_openid\":\"1761282801441921597\"}],\"limit\":100,\"offset\":0},\"requestId\":\"559607c7ce4ea0e9\"}"
+  }
+ }
+]

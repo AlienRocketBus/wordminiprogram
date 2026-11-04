@@ -1,0 +1,7 @@
+round 0 LAG=2000 N=4 login 2897ms ok=true,true,true,true
+  local cids : 0,0,0,0
+  sb_profile : 5330:cid=0@+0ms  1929:cid=0@+1ms  3236:cid=0@+43ms  7095:cid=0@+46ms
+  => duplicates=[] zeros=4
+  P0 (cid=0) signedIn=true friends screen: 👥 我的好友 × 🔐 登录后才能加好友 好友要靠「竞赛 ID」互加， 而竞赛 ID 是登录时自动分配的。 去登录 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 先登录才能加好友
+
+SUMMARY LAG=2000 N=4: rounds with duplicate cid = 0/1; rounds with a kid left without cid = 1/1

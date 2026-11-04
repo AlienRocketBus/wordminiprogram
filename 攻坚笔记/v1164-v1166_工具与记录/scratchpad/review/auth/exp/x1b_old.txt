@@ -1,0 +1,33 @@
+{
+  "root": "/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/v1163_snapshot",
+  "q1login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "q1_topOverlay": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+  "q2login": {
+    "ok": true,
+    "uid": "1650936123503737095"
+  },
+  "q2_overlayAfterOpen": {
+    "top": null,
+    "island": null
+  },
+  "q2session": {
+    "ok": false,
+    "notReady": true,
+    "expired": false,
+    "definite": false,
+    "tries": 5,
+    "reason": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+  },
+  "q2_after": {
+    "top": null,
+    "island": null,
+    "signed": true
+  },
+  "errors": [
+    [],
+    []
+  ]
+}

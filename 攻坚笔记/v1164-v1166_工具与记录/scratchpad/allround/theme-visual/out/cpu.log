@@ -1,0 +1,406 @@
+ 13:25:07 up  6:27,  0 user,  load average: 11.09, 10.79, 13.05
+round 0 home.real.cosmos {"busyPct":63.7,"scriptPct":3,"stylePct":13.5,"layoutPct":3.2,"rafPerSec":30,"total":188,"running":120,"intervals":16,"canvases":0}
+round 0 home.mock.cosmos {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 island.real.cosmos {"busyPct":38.5,"scriptPct":1.4,"stylePct":5.1,"layoutPct":0,"rafPerSec":0.6,"total":5,"running":5,"intervals":29,"canvases":0}
+round 0 island.mock.cosmos {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 answer.real.cosmos {"busyPct":28,"scriptPct":1.4,"stylePct":4.5,"layoutPct":0,"rafPerSec":0.7,"total":5,"running":5,"intervals":29,"canvases":0}
+round 0 answer.mock.cosmos {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 chest.real.cosmos {"busyPct":25.1,"scriptPct":1.4,"stylePct":3.2,"layoutPct":0,"rafPerSec":0.6,"total":3,"running":3,"intervals":29,"canvases":0}
+round 0 chest.mock.cosmos {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 result.real.cosmos {"busyPct":24.1,"scriptPct":1.4,"stylePct":3.5,"layoutPct":0,"rafPerSec":0.6,"total":3,"running":3,"intervals":29,"canvases":0}
+round 0 result.mock.cosmos {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 home.real.cloud {"busyPct":69.2,"scriptPct":3.3,"stylePct":15,"layoutPct":4.5,"rafPerSec":25.7,"total":188,"running":120,"intervals":16,"canvases":0}
+round 0 home.mock.cloud {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 island.real.cloud {"busyPct":36.8,"scriptPct":1.3,"stylePct":5.2,"layoutPct":0,"rafPerSec":0.6,"total":5,"running":5,"intervals":29,"canvases":0}
+round 0 island.mock.cloud {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 0 island.real.imax {"busyPct":97.1,"scriptPct":4.5,"stylePct":2.7,"layoutPct":0,"rafPerSec":20.3,"total":7,"running":7,"intervals":29,"canvases":1}
+round 0 island.real.gallery {"busyPct":99.2,"scriptPct":5.5,"stylePct":3.8,"layoutPct":0,"rafPerSec":27.3,"total":7,"running":7,"intervals":29,"canvases":1}
+round 1 home.real.cosmos {"busyPct":63.2,"scriptPct":2.2,"stylePct":14.2,"layoutPct":3.7,"rafPerSec":33,"total":188,"running":120,"intervals":16,"canvases":0}
+round 1 home.mock.cosmos {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 island.real.cosmos {"busyPct":32.5,"scriptPct":1.7,"stylePct":5.5,"layoutPct":0,"rafPerSec":0.8,"total":5,"running":5,"intervals":29,"canvases":0}
+round 1 island.mock.cosmos {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 answer.real.cosmos {"busyPct":17.6,"scriptPct":1.1,"stylePct":3,"layoutPct":0,"rafPerSec":0.7,"total":5,"running":5,"intervals":29,"canvases":0}
+round 1 answer.mock.cosmos {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 chest.real.cosmos {"busyPct":19.2,"scriptPct":1,"stylePct":2.5,"layoutPct":0,"rafPerSec":0.7,"total":3,"running":3,"intervals":29,"canvases":0}
+round 1 chest.mock.cosmos {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 result.real.cosmos {"busyPct":20.9,"scriptPct":0.8,"stylePct":2.2,"layoutPct":0,"rafPerSec":0.8,"total":3,"running":3,"intervals":29,"canvases":0}
+round 1 result.mock.cosmos {"busyPct":0.1,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 home.real.cloud {"busyPct":65,"scriptPct":4.2,"stylePct":12.4,"layoutPct":4,"rafPerSec":18.1,"total":188,"running":120,"intervals":16,"canvases":0}
+round 1 home.mock.cloud {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 island.real.cloud {"busyPct":56.3,"scriptPct":1.9,"stylePct":7.9,"layoutPct":0,"rafPerSec":0.6,"total":5,"running":5,"intervals":29,"canvases":0}
+round 1 island.mock.cloud {"busyPct":0,"scriptPct":0,"stylePct":0,"layoutPct":0,"rafPerSec":0,"total":0,"running":0,"intervals":0,"canvases":0}
+round 1 island.real.imax {"busyPct":99.8,"scriptPct":4.7,"stylePct":2.1,"layoutPct":0,"rafPerSec":13.3,"total":7,"running":7,"intervals":29,"canvases":1}
+round 1 island.real.gallery {"busyPct":89.4,"scriptPct":6,"stylePct":2,"layoutPct":0,"rafPerSec":16.9,"total":7,"running":7,"intervals":29,"canvases":1}
+round 2 home.real.cosmos {"err":"Error: page.evaluate: Target page, context or browser has been closed"}
+round 2 home.mock.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.real.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.mock.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 answer.real.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 answer.mock.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 chest.real.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 chest.mock.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 result.real.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 result.mock.cosmos {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 home.real.cloud {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 home.mock.cloud {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.real.cloud {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.mock.cloud {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.real.imax {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+round 2 island.real.gallery {"err":"Error: browser.newContext: Target page, context or browser has been closed"}
+{
+ "home.real.cosmos": {
+  "busyPctMedian": 63.7,
+  "busyPctAll": [
+   63.7,
+   63.2,
+   null
+  ],
+  "runningAnims": 120,
+  "rafPerSec": 33,
+  "intervals": 16,
+  "canvases": 0
+ },
+ "home.mock.cosmos": {
+  "busyPctMedian": 0,
+  "busyPctAll": [
+   0,
+   0,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "island.real.cosmos": {
+  "busyPctMedian": 38.5,
+  "busyPctAll": [
+   38.5,
+   32.5,
+   null
+  ],
+  "runningAnims": 5,
+  "rafPerSec": 0.8,
+  "intervals": 29,
+  "canvases": 0
+ },
+ "island.mock.cosmos": {
+  "busyPctMedian": 0,
+  "busyPctAll": [
+   0,
+   0,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "answer.real.cosmos": {
+  "busyPctMedian": 28,
+  "busyPctAll": [
+   28,
+   17.6,
+   null
+  ],
+  "runningAnims": 5,
+  "rafPerSec": 0.7,
+  "intervals": 29,
+  "canvases": 0
+ },
+ "answer.mock.cosmos": {
+  "busyPctMedian": 0.1,
+  "busyPctAll": [
+   0.1,
+   0.1,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "chest.real.cosmos": {
+  "busyPctMedian": 25.1,
+  "busyPctAll": [
+   25.1,
+   19.2,
+   null
+  ],
+  "runningAnims": 3,
+  "rafPerSec": 0.7,
+  "intervals": 29,
+  "canvases": 0
+ },
+ "chest.mock.cosmos": {
+  "busyPctMedian": 0.1,
+  "busyPctAll": [
+   0.1,
+   0,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "result.real.cosmos": {
+  "busyPctMedian": 24.1,
+  "busyPctAll": [
+   24.1,
+   20.9,
+   null
+  ],
+  "runningAnims": 3,
+  "rafPerSec": 0.8,
+  "intervals": 29,
+  "canvases": 0
+ },
+ "result.mock.cosmos": {
+  "busyPctMedian": 0.1,
+  "busyPctAll": [
+   0.1,
+   0.1,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "home.real.cloud": {
+  "busyPctMedian": 69.2,
+  "busyPctAll": [
+   69.2,
+   65,
+   null
+  ],
+  "runningAnims": 120,
+  "rafPerSec": 25.7,
+  "intervals": 16,
+  "canvases": 0
+ },
+ "home.mock.cloud": {
+  "busyPctMedian": 0.1,
+  "busyPctAll": [
+   0.1,
+   0,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "island.real.cloud": {
+  "busyPctMedian": 56.3,
+  "busyPctAll": [
+   36.8,
+   56.3,
+   null
+  ],
+  "runningAnims": 5,
+  "rafPerSec": 0.6,
+  "intervals": 29,
+  "canvases": 0
+ },
+ "island.mock.cloud": {
+  "busyPctMedian": 0,
+  "busyPctAll": [
+   0,
+   0,
+   null
+  ],
+  "runningAnims": 0,
+  "rafPerSec": 0,
+  "intervals": 0,
+  "canvases": 0
+ },
+ "island.real.imax": {
+  "busyPctMedian": 99.8,
+  "busyPctAll": [
+   97.1,
+   99.8,
+   null
+  ],
+  "runningAnims": 7,
+  "rafPerSec": 20.3,
+  "intervals": 29,
+  "canvases": 1
+ },
+ "island.real.gallery": {
+  "busyPctMedian": 99.2,
+  "busyPctAll": [
+   99.2,
+   89.4,
+   null
+  ],
+  "runningAnims": 7,
+  "rafPerSec": 27.3,
+  "intervals": 29,
+  "canvases": 1
+ }
+}
+IDLEDONE
+ 13:36:19 up  6:38,  0 user,  load average: 10.76, 8.12, 10.14
+0 answer_right.real {"busyPct3s":53.2,"runningAt3s":7,"particlesAt3s":0,"runningAt4_5s":5,"animsAt4_5s":5,"fxLayerLeft":false,"longtasks":2}
+0 answer_right.mock {"busyPct3s":15.3,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+0 round_result.real {"busyPct3s":76.1,"runningAt3s":51,"particlesAt3s":51,"runningAt4_5s":3,"animsAt4_5s":3,"fxLayerLeft":false,"longtasks":1}
+0 round_result.mock {"busyPct3s":17.9,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+0 chest_open.real {"busyPct3s":98.4,"runningAt3s":143,"particlesAt3s":174,"runningAt4_5s":24,"animsAt4_5s":27,"fxLayerLeft":false,"longtasks":14}
+0 chest_open.mock {"busyPct3s":26.7,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":2}
+1 answer_right.real {"busyPct3s":35.5,"runningAt3s":7,"particlesAt3s":0,"runningAt4_5s":5,"animsAt4_5s":5,"fxLayerLeft":false,"longtasks":1}
+1 answer_right.mock {"busyPct3s":9.6,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+1 round_result.real {"busyPct3s":84.7,"runningAt3s":57,"particlesAt3s":54,"runningAt4_5s":3,"animsAt4_5s":3,"fxLayerLeft":false,"longtasks":6}
+1 round_result.mock {"busyPct3s":20.7,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+1 chest_open.real {"busyPct3s":91.9,"runningAt3s":152,"particlesAt3s":165,"runningAt4_5s":21,"animsAt4_5s":21,"fxLayerLeft":false,"longtasks":2}
+1 chest_open.mock {"busyPct3s":20,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+2 answer_right.real {"busyPct3s":54.6,"runningAt3s":7,"particlesAt3s":0,"runningAt4_5s":5,"animsAt4_5s":5,"fxLayerLeft":false,"longtasks":2}
+2 answer_right.mock {"busyPct3s":8.9,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+2 round_result.real {"busyPct3s":83.3,"runningAt3s":48,"particlesAt3s":54,"runningAt4_5s":3,"animsAt4_5s":3,"fxLayerLeft":false,"longtasks":8}
+2 round_result.mock {"busyPct3s":23.5,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":0}
+2 chest_open.real {"busyPct3s":93.2,"runningAt3s":149,"particlesAt3s":171,"runningAt4_5s":18,"animsAt4_5s":21,"fxLayerLeft":false,"longtasks":2}
+2 chest_open.mock {"busyPct3s":25.1,"runningAt3s":0,"particlesAt3s":0,"runningAt4_5s":0,"animsAt4_5s":0,"fxLayerLeft":false,"longtasks":3}
+reduced {"chest":{"reduced":true,"anims":0,"fxLayer":false,"opened":true,"coin":"1,316","card":false},"result":{"reduced":true,"anims":0,"fxLayer":false,"opened":null,"coin":"1,292","right":"7","card":false},"answer":{"reduced":true,"anims":0,"fxLayer":false,"opened":null,"coin":"1,280","card":true}}
+{
+ "answer_right.real": {
+  "busyPct3sMedian": 53.2,
+  "all": [
+   53.2,
+   35.5,
+   54.6
+  ],
+  "runningAfter4_5s": [
+   5,
+   5,
+   5
+  ],
+  "longtasks": [
+   2,
+   1,
+   2
+  ],
+  "particlesAt3s": [
+   0,
+   0,
+   0
+  ]
+ },
+ "answer_right.mock": {
+  "busyPct3sMedian": 9.6,
+  "all": [
+   15.3,
+   9.6,
+   8.9
+  ],
+  "runningAfter4_5s": [
+   0,
+   0,
+   0
+  ],
+  "longtasks": [
+   0,
+   0,
+   0
+  ],
+  "particlesAt3s": [
+   0,
+   0,
+   0
+  ]
+ },
+ "round_result.real": {
+  "busyPct3sMedian": 83.3,
+  "all": [
+   76.1,
+   84.7,
+   83.3
+  ],
+  "runningAfter4_5s": [
+   3,
+   3,
+   3
+  ],
+  "longtasks": [
+   1,
+   6,
+   8
+  ],
+  "particlesAt3s": [
+   51,
+   54,
+   54
+  ]
+ },
+ "round_result.mock": {
+  "busyPct3sMedian": 20.7,
+  "all": [
+   17.9,
+   20.7,
+   23.5
+  ],
+  "runningAfter4_5s": [
+   0,
+   0,
+   0
+  ],
+  "longtasks": [
+   0,
+   0,
+   0
+  ],
+  "particlesAt3s": [
+   0,
+   0,
+   0
+  ]
+ },
+ "chest_open.real": {
+  "busyPct3sMedian": 93.2,
+  "all": [
+   98.4,
+   91.9,
+   93.2
+  ],
+  "runningAfter4_5s": [
+   24,
+   21,
+   18
+  ],
+  "longtasks": [
+   14,
+   2,
+   2
+  ],
+  "particlesAt3s": [
+   174,
+   165,
+   171
+  ]
+ },
+ "chest_open.mock": {
+  "busyPct3sMedian": 25.1,
+  "all": [
+   26.7,
+   20,
+   25.1
+  ],
+  "runningAfter4_5s": [
+   0,
+   0,
+   0
+  ],
+  "longtasks": [
+   2,
+   0,
+   3
+  ],
+  "particlesAt3s": [
+   0,
+   0,
+   0
+  ]
+ }
+}
+EVENTDONE
+ 13:40:53 up  6:43,  0 user,  load average: 8.55, 8.74, 9.91

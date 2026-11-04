@@ -1,0 +1,42 @@
+{
+  "ver": "v1164",
+  "mode": "abort",
+  "login": {
+    "ok": true
+  },
+  "sdkHitsBeforeReload": 1,
+  "calls": [
+    {
+      "ok": true,
+      "reason": "",
+      "sdkHits": 3
+    },
+    {
+      "ok": true,
+      "reason": "",
+      "sdkHits": 3
+    },
+    {
+      "ok": true,
+      "reason": "",
+      "sdkHits": 3
+    },
+    {
+      "ok": true,
+      "reason": "",
+      "sdkHits": 3
+    }
+  ],
+  "failedInjected": 1,
+  "reimport": "ok",
+  "sdkHitsAfterReimport": 3,
+  "bustImport": "ok function",
+  "tappedGo": true,
+  "ladderScreen": "← 不等了 ⚡ 排位 · 等对手进来 ⏳ 已等 40 秒 暂时没找到对手，已经开好一间排位房。 有人来就自动开打；先开好的房也会自动配给你。 你开的是 ⚡抢答赛 · 10 个词 （关掉这一页，房间也会一起关掉）",
+  "ladderAfterMs": 40401,
+  "afterReload": {
+    "ok": true,
+    "kind": ""
+  },
+  "signedStill": true
+}

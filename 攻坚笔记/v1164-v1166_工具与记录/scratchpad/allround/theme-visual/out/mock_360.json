@@ -1,0 +1,214 @@
+{
+ "home_cosmos_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 75x30",
+   "document.w 63x30"
+  ]
+ },
+ "home_cloud_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 75x30",
+   "document.w 63x30"
+  ]
+ },
+ "island_cosmos_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 55x30",
+   "document.w 75x30"
+  ]
+ },
+ "island_cloud_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 55x30",
+   "document.w 75x30"
+  ]
+ },
+ "answer_cosmos_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 75x30"
+  ]
+ },
+ "answer_cloud_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 75x30"
+  ]
+ },
+ "chest_cosmos_360": {
+  "docW": 390,
+  "vw": 390,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 71x30"
+  ]
+ },
+ "chest_cloud_360": {
+  "docW": 390,
+  "vw": 390,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 71x30"
+  ]
+ },
+ "result_cosmos_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 73x30"
+  ]
+ },
+ "result_cloud_360": {
+  "docW": 360,
+  "vw": 360,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 73x30"
+  ]
+ },
+ "home_cosmos_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [
+   "小明 · 森林小队"
+  ],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 69x30",
+   "document.w 59x30"
+  ]
+ },
+ "home_cloud_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [
+   "小明 · 森林小队"
+  ],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 69x30",
+   "document.w 59x30"
+  ]
+ },
+ "island_cosmos_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 51x30",
+   "document.w 69x30"
+  ]
+ },
+ "island_cloud_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 51x30",
+   "document.w 69x30"
+  ]
+ },
+ "answer_cosmos_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 69x30"
+  ]
+ },
+ "answer_cloud_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 69x30"
+  ]
+ },
+ "chest_cosmos_320": {
+  "docW": 370,
+  "vw": 370,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 66x30"
+  ]
+ },
+ "chest_cloud_320": {
+  "docW": 370,
+  "vw": 370,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 66x30"
+  ]
+ },
+ "result_cosmos_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 68x30"
+  ]
+ },
+ "result_cloud_320": {
+  "docW": 320,
+  "vw": 320,
+  "hScroll": false,
+  "clipped": [],
+  "offRight": [],
+  "smallTargets": [
+   "document.w 68x30"
+  ]
+ }
+}

@@ -1,19 +1,29 @@
 name: Auto Release on Push
 
+# 🔴 2026-11-04（执行主义）：以前是「推到 main 就发」，测试全靠本机记得跑。
+#   现在改成：推到 main → GitHub「自动体检」（8 台机器跑全部测试）→ **全部通过才发**。
+#   测试没过，Release 就出不来 —— 规矩由机器执行，不靠记性。名字不改（线上哨兵靠这个名字接在后面跑）。
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['自动体检']
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   release:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
+    env:
+      # 只发「测过的那一个提交」，不发 main 上后来又推上来的
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Read VERSION file
         id: version
@@ -49,8 +59,8 @@ jobs:
           gh release create "$TAG" "${ASCII_DEPLOY}#单词大冒险_v${V}_可直接部署.zip" \
             --repo "$GITHUB_REPOSITORY" \
             --title "Release $TAG" \
-            --notes "自动发布 v${V}（commit ${GITHUB_SHA}）。附件为可直接部署包：解压后把全部文件原样上传到静态网站根目录即可（不要再套一层目录）。" \
-            --target "$GITHUB_SHA"
+            --notes "自动发布 v${V}（commit ${RELEASE_SHA}）。附件为可直接部署包：解压后把全部文件原样上传到静态网站根目录即可（不要再套一层目录）。" \
+            --target "$RELEASE_SHA"
           echo "Release $TAG created with deploy package."
 
           # 🔴v1051 只保留最新 5 个 Release，其余连同 tag 一并删除。

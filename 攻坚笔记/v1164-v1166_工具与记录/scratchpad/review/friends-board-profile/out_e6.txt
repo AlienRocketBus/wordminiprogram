@@ -1,0 +1,5 @@
+B send (clock -5min): {"ok":true,"sent":{"id":"pk","text":"来一局？","emoji":"⚔️"}}
+① A inbox right after B sent: {"unread":0,"msgs":[{"text":"来一局？","isNew":false}]}
+① A friends screen: 我的状态 | 加好友（输对方的竞赛 ID 数字） | 📨 收到的招呼 | ⚔️ 来一局？ 小博 · No.2 · 5 分钟前 | 好友 · 0 人刚才还在
+B send (clock +10min): {"ok":true,"sent":{"id":"gg","text":"打得好！","emoji":"👏"}}
+② A inbox after having viewed it: {"unread":1,"msgs":[{"text":"打得好！","isNew":true},{"text":"来一局？","isNew":false}]}

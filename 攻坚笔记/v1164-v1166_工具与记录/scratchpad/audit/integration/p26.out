@@ -1,0 +1,6 @@
+home before { theme: 'cosmos', html: '', dia: '' }
+island themes [ 'cosmos', 'pink', 'ocean', 'forest', 'rainbow', 'peach' ]
+island now { theme: 'pink', html: 'hsn-bt-dark hsn-pal-cloud hsn-pal-light' }
+home immediately after return { theme: 'pink', html: 'hsn-pal-cloud hsn-pal-light', dia: '' }
+home 1.7s after return { theme: 'pink', html: 'hsn-pal-cloud hsn-pal-light', dia: '' }
+errors []

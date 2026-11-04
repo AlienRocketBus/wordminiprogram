@@ -1,0 +1,15 @@
+文案和数字校对：任务横幅、欢迎弹窗、成就目标、首页标题与数字、我的学习分母
+
+- 任务横幅「🎯 还差 1 个! undefined」：全局任务的字段叫 title，横幅读的是 text
+- 岛里欢迎弹窗「5 大动物岛屿」→「5 个动物小组」（单词大陆在 land_data.json 里 8 份一起改）；
+  「12 种玩法」改为按页面上真有的玩法卡数（现在 14）
+- 成就「万词王者 · 1500 个单词」永远拿不到（全游戏 952 个词）→「全词王者 · 把所有岛屿的
+  单词都认识一遍」，目标从账本 TOTAL_WORDS 现算；顺便发现真正在用的 checkAch
+  （hansen_island_upgrade.js）根本没判定「词汇量」阶梯，补上 600 和全部单词两级和进度条
+- 首页 <title>「单词大冒险 · 单词大冒险」→「单词大冒险」；「18 关 / 711+ 单词」改为从词库现算
+  （18 座岛 / 712 个词）；「12 种」→「十几种」；分享描述去掉「27 座岛」
+- 我的学习「已点亮 N / 19 座岛」：27 个岛页各记一份，会出现 23 / 19；分母从账本现算（27）
+- 新测试 test_copy_numbers_v1165.mjs；旧代码 14 项失败
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

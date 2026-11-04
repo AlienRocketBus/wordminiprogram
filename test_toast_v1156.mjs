@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_toast_v1156.mjs —— 页内提示替代 alert
  *
  * 全站原有 39 处 `alert`。它在手机上有几个实实在在的毛病：
@@ -16,7 +17,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };

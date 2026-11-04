@@ -1,0 +1,13 @@
+后台预载守规矩：Boss 引擎按需加载、星海预热不套娃、新孩子首访少下载
+
+- Boss 引擎（1.23MB）和攻击图（约 2MB）不再每进一个岛就执行/下载：
+  设置页真的打开、孩子点开选关墙或真开打时才加载；空闲时仍只用 link prefetch 把文件下进缓存。
+  引擎现加载时，伪装管理员入口先从 IndexedDB 镜像补回永久锁再开门。
+- Boss 头像：没打开过选关墙只预下「能打的 + 下一关」；打开过之后预下已解锁的 + 下一关；星海/单词大陆不下。
+- 星海房间预热：预热框里不再预热（不套娃）；与 Boss 预取同一个网络策略；只给真的打开过该房间的孩子预热；
+  藏在后台的页面不写「我的学习」快照。
+- 新孩子首页：不空闲预取 6 个岛、不预取星海地图、不下 Boss 头像（手指碰到时照常预取）。
+- 新测试 test_boss_lazy_v1165 / test_preload_budget_v1165；test_room_warm_v1023 改为造「去过星海」的孩子。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

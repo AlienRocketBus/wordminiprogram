@@ -1,0 +1,186 @@
+{
+ "homeLoad": 2144,
+ "afterHomeIdle": {
+  "bytes": 4293611,
+  "nreq": 161,
+  "heapMB": 2.8,
+  "nodes": 5597,
+  "docs": 9,
+  "frames": 6,
+  "listeners": 267
+ },
+ "islands": [
+  {
+   "isl": "animal",
+   "readyMs": 2353,
+   "bytes": 3669088,
+   "nreq": 146,
+   "heapMB": 5.8,
+   "nodes": 5808,
+   "docs": 3,
+   "frames": 3,
+   "listeners": 541
+  },
+  {
+   "isl": "food",
+   "readyMs": 3279,
+   "bytes": 4447390,
+   "nreq": 153,
+   "heapMB": 6.4,
+   "nodes": 7507,
+   "docs": 4,
+   "frames": 4,
+   "listeners": 580
+  },
+  {
+   "isl": "sports",
+   "readyMs": 3451,
+   "bytes": 4787807,
+   "nreq": 165,
+   "heapMB": 6.2,
+   "nodes": 7113,
+   "docs": 4,
+   "frames": 4,
+   "listeners": 529
+  },
+  {
+   "isl": "job",
+   "readyMs": 2077,
+   "bytes": 3464828,
+   "nreq": 153,
+   "heapMB": 10.9,
+   "nodes": 10440,
+   "docs": 8,
+   "frames": 6,
+   "listeners": 1037
+  },
+  {
+   "isl": "color",
+   "readyMs": 1596,
+   "bytes": 2911352,
+   "nreq": 167,
+   "heapMB": 5.4,
+   "nodes": 5235,
+   "docs": 3,
+   "frames": 3,
+   "listeners": 525
+  },
+  {
+   "isl": "nature",
+   "readyMs": 1860,
+   "bytes": 3269596,
+   "nreq": 141,
+   "heapMB": 11.5,
+   "nodes": 9847,
+   "docs": 7,
+   "frames": 5,
+   "listeners": 1238
+  },
+  {
+   "isl": "action",
+   "readyMs": 4089,
+   "bytes": 4069677,
+   "nreq": 170,
+   "heapMB": 8,
+   "nodes": 5425,
+   "docs": 3,
+   "frames": 3,
+   "listeners": 543
+  },
+  {
+   "isl": "traffic",
+   "readyMs": 2401,
+   "bytes": 3466057,
+   "nreq": 145,
+   "heapMB": 10.3,
+   "nodes": 8781,
+   "docs": 7,
+   "frames": 5,
+   "listeners": 1064
+  },
+  {
+   "isl": "body",
+   "readyMs": 2405,
+   "bytes": 3417624,
+   "nreq": 143,
+   "heapMB": 12.5,
+   "nodes": 10281,
+   "docs": 8,
+   "frames": 6,
+   "listeners": 1018
+  },
+  {
+   "isl": "city",
+   "readyMs": 3672,
+   "bytes": 4445749,
+   "nreq": 158,
+   "heapMB": 19.1,
+   "nodes": 5504,
+   "docs": 3,
+   "frames": 3,
+   "listeners": 565
+  },
+  {
+   "isl": "clothes",
+   "readyMs": 1718,
+   "bytes": 3272305,
+   "nreq": 140,
+   "heapMB": 7.5,
+   "nodes": 7166,
+   "docs": 4,
+   "frames": 4,
+   "listeners": 535
+  },
+  {
+   "isl": "home",
+   "readyMs": 2730,
+   "bytes": 4449612,
+   "nreq": 161,
+   "heapMB": 11.4,
+   "nodes": 10573,
+   "docs": 8,
+   "frames": 6,
+   "listeners": 1057
+  },
+  {
+   "isl": "family",
+   "readyMs": 2672,
+   "bytes": 4118767,
+   "nreq": 151,
+   "heapMB": 9.6,
+   "nodes": 8580,
+   "docs": 7,
+   "frames": 5,
+   "listeners": 1033
+  },
+  {
+   "isl": "school",
+   "readyMs": 2306,
+   "bytes": 3523031,
+   "nreq": 146,
+   "heapMB": 7,
+   "nodes": 5165,
+   "docs": 3,
+   "frames": 3,
+   "listeners": 518
+  },
+  {
+   "isl": "time",
+   "readyMs": 3402,
+   "bytes": 4445865,
+   "nreq": 153,
+   "heapMB": 12.4,
+   "nodes": 8608,
+   "docs": 7,
+   "frames": 5,
+   "listeners": 1058
+  }
+ ],
+ "final": {
+  "heapMB": 3.8,
+  "nodes": 4646,
+  "docs": 3,
+  "frames": 3,
+  "listeners": 384
+ }
+}

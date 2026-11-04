@@ -1,0 +1,170 @@
+{
+ "method": "CDP Performance.getMetrics TaskDuration delta / window, Emulation.setCPUThrottlingRate=4, room_warm blocked, 390x844 DPR2 isMobile",
+ "rounds": 1,
+ "windowMs": 10000,
+ "summary": {
+  "home.mock.cosmos": {
+   "busyPctMedian": 0,
+   "busyPctAll": [
+    0
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "island.mock.cosmos": {
+   "busyPctMedian": 0.3,
+   "busyPctAll": [
+    0.3
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "answer.mock.cosmos": {
+   "busyPctMedian": 0.1,
+   "busyPctAll": [
+    0.1
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "chest.mock.cosmos": {
+   "busyPctMedian": 0,
+   "busyPctAll": [
+    0
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "result.mock.cosmos": {
+   "busyPctMedian": 0.1,
+   "busyPctAll": [
+    0.1
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "home.mock.cloud": {
+   "busyPctMedian": 0,
+   "busyPctAll": [
+    0
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  },
+  "island.mock.cloud": {
+   "busyPctMedian": 0.1,
+   "busyPctAll": [
+    0.1
+   ],
+   "runningAnims": 0,
+   "rafPerSec": 0,
+   "intervals": 0,
+   "canvases": 0
+  }
+ },
+ "raw": {
+  "home.mock.cosmos": [
+   {
+    "busyPct": 0,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "island.mock.cosmos": [
+   {
+    "busyPct": 0.3,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "answer.mock.cosmos": [
+   {
+    "busyPct": 0.1,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "chest.mock.cosmos": [
+   {
+    "busyPct": 0,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "result.mock.cosmos": [
+   {
+    "busyPct": 0.1,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "home.mock.cloud": [
+   {
+    "busyPct": 0,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ],
+  "island.mock.cloud": [
+   {
+    "busyPct": 0.1,
+    "scriptPct": 0,
+    "stylePct": 0,
+    "layoutPct": 0,
+    "rafPerSec": 0,
+    "total": 0,
+    "running": 0,
+    "intervals": 0,
+    "canvases": 0
+   }
+  ]
+ }
+}

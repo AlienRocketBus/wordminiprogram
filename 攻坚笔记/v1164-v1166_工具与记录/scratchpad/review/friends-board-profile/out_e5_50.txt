@@ -1,0 +1,4 @@
+[A] placed, rating 1045 push {"ok":true}
+[A] fetchTop (STALE=50): ok=true list=["本周活跃甲:1120","本周活跃乙:1080","小爱:1045"] myRank=3
+[A] myRoughRank: {"ok":true,"rank":53}
+[A] ladder page 排行榜 box says: 🥇 本周活跃甲 1120 🥈 本周活跃乙 1080 🥉 小爱 (你) 1045

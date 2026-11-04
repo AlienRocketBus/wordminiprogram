@@ -1,0 +1,10 @@
+密钥写读一致性 v1033
+  OK  生成密钥直接复用 ALPHABET(不再另写一份)
+  OK  写入路径也先归一化, 与读取对齐
+  OK  ALPHABET 可解析: 0123456789ABCDEFGHJKMNPQRSTVWXYZ
+  OK  ALPHABET 不含会被归一化改写的 I/L/O/U
+  OK  模块已加载
+  OK  8 个不同账号生成的密钥, 归一化后均与自身一致
+  OK  旧字符集含 L/U 而新的不含(确认修复方向正确)
+
+结果: 7 通过 / 0 失败

@@ -1,10 +1,11 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_boss_settle_v1014.mjs —— Boss 结算页(战败/胜利)双色调回归
  * 事故：标题用"渐变填充文字"(background-clip:text)，亮色调下填充被改实色而重晕仍在，
  *       标题背后糊出一团深色污迹；「选其他 boss」用 🔙 emoji(天生深灰)压蓝按钮上看不清。
  * 合同：标题亮板深色/暗板浅色、无 text-shadow；页面不得再出现 🔙。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -15,7 +16,7 @@ const R={}; const errs=[];
 for(const [tag,pal] of [['light','cloud'],['dark',null]]){
   const page=await browser.newPage({viewport:{width:390,height:844}});
   page.on('pageerror',e=>errs.push(tag+'/P:'+String(e.message).slice(0,80)));
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2400);
   await page.evaluate(()=>{ try{ showScreen('boss'); if(typeof bossDefeat==='function') bossDefeat(); }catch(e){} });

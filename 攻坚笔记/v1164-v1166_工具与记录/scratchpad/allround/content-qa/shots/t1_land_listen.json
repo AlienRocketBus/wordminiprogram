@@ -1,0 +1,78 @@
+{
+ "land1": {
+  "nWords": 30,
+  "levelCounts": {
+   "easy": 10,
+   "medium": 11,
+   "hard": 9
+  },
+  "listedWords": {
+   "easy": 13,
+   "medium": 13,
+   "hard": 14
+  },
+  "hasListenCard": true,
+  "levelCardText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 10\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n🦚 自豪的\n🙏 谦虚的\n😲 惊讶的\n😔 孤独的\n本局答对：0 / 0",
+  "errorsAfterTap": [],
+  "allErrors": []
+ },
+ "land2": {
+  "nWords": 30,
+  "levelCounts": {
+   "easy": 3,
+   "medium": 2,
+   "hard": 5
+  },
+  "listedWords": {
+   "easy": 13,
+   "medium": 13,
+   "hard": 14
+  },
+  "hasListenCard": true,
+  "levelCardText": "🌱\n初级\n·\n第 1 轮\n·\n1 / 3\n换难度\n🔊\n点击喇叭播放单词\n🐢 慢速\n🔊 正常\n🎯 选出正确的中文意思\n😌 谦逊的\n😌 冷静的\n🏙️ 现代的\n🌳 成熟的\n本局答对：0 / 0",
+  "errorsAfterTap": [],
+  "allErrors": []
+ },
+ "land3": {
+  "nWords": 30,
+  "levelCounts": {
+   "easy": 0,
+   "medium": 0,
+   "hard": 0
+  },
+  "listedWords": {
+   "easy": 13,
+   "medium": 13,
+   "hard": 14
+  },
+  "hasListenCard": true,
+  "levelCardText": "选择一个难度开始挑战\n每档单词不重复, 全部答完后会自动重洗进入下一轮\n🌱\n初级\n较短的词\n📚 0 个单词\n→\n⚡\n中级\n中等长度\n📚 0 个单词\n→\n🔥\n高级\n较长的词\n📚 0 个单词\n→",
+  "errorsAfterTap": [
+   "Cannot read properties of undefined (reading 'en')"
+  ],
+  "allErrors": [
+   "Cannot read properties of undefined (reading 'en')"
+  ]
+ },
+ "land8": {
+  "nWords": 30,
+  "levelCounts": {
+   "easy": 0,
+   "medium": 0,
+   "hard": 0
+  },
+  "listedWords": {
+   "easy": 13,
+   "medium": 13,
+   "hard": 14
+  },
+  "hasListenCard": true,
+  "levelCardText": "选择一个难度开始挑战\n每档单词不重复, 全部答完后会自动重洗进入下一轮\n🌱\n初级\n较短的词\n📚 0 个单词\n→\n⚡\n中级\n中等长度\n📚 0 个单词\n→\n🔥\n高级\n较长的词\n📚 0 个单词\n→",
+  "errorsAfterTap": [
+   "Cannot read properties of undefined (reading 'en')"
+  ],
+  "allErrors": [
+   "Cannot read properties of undefined (reading 'en')"
+  ]
+ }
+}

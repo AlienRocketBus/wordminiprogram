@@ -1,0 +1,20 @@
+全站发音音量统一 v1032
+  OK  template.html 已加载音量模块
+  OK  template.html 加载位置足够早
+  OK  index.html 已加载音量模块
+  OK  index.html 加载位置足够早
+  OK  spelling_bee.html 已加载音量模块
+  OK  spelling_bee.html 加载位置足够早
+  OK  spelling_pk.html 已加载音量模块
+  OK  spelling_pk.html 加载位置足够早
+  OK  iOS 音频解锁探针(0.01)保持原样
+  OK  音量模块运行时可用
+  OK  设置能读写(设 40 读回 40)
+  OK  ★ 新建语音实例的音量已按设置缩放(设置40 → 实得0.4000000059604645)
+  OK  ★ Audio 的 play() 已被接管 —— 播放前统一音量（构造时不动，避免和调用方打架）
+  OK  音量已持久化(60)
+  OK  设置页有音量滑杆(当前 60%)
+  OK  零脚本错误
+
+结果: 16 通过 / 0 失败
+exit 0

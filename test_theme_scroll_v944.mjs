@@ -164,7 +164,7 @@ async function run() {
     });
     try {
       await context.addInitScript(() => {
-        localStorage.clear();
+        if (window.top === window) localStorage.clear();
         sessionStorage.clear();
         localStorage.setItem('hsnViewMode', 'desktop');
         localStorage.setItem('hansen_onboarded', '1');

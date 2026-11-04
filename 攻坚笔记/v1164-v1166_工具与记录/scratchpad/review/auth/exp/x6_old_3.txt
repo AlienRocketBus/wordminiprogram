@@ -1,0 +1,42 @@
+{
+  "root": "chpad/v1163_snapshot",
+  "login": true,
+  "tab2first": {
+    "ok": true,
+    "kind": ""
+  },
+  "simultaneous": {
+    "tab1": {
+      "ok": true,
+      "kind": "",
+      "reason": ""
+    },
+    "tab2": {
+      "ok": false,
+      "kind": "",
+      "reason": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+    }
+  },
+  "after": {
+    "signed": true,
+    "tab1overlay": null,
+    "tab2overlay": null,
+    "tab1again": {
+      "ok": true,
+      "kind": ""
+    },
+    "tab2again": {
+      "ok": false,
+      "kind": ""
+    },
+    "creds": 0
+  },
+  "tab1db": "ok rows=1",
+  "tokenLog": [
+    "200",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ]
+}

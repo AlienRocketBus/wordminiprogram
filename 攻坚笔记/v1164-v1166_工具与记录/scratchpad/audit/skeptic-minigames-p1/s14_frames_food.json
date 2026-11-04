@@ -1,0 +1,134 @@
+{
+ "island": "food",
+ "islandOpenedAtMs": 6401,
+ "navs": [
+  {
+   "ms": 231,
+   "nav": "about:blank",
+   "parent": "index.html"
+  },
+  {
+   "ms": 2554,
+   "nav": "island_food.html",
+   "parent": "index.html"
+  },
+  {
+   "ms": 4160,
+   "nav": "land_map.html?v=1163",
+   "parent": "island_food.html"
+  },
+  {
+   "ms": 5472,
+   "nav": "island_season.html?v=1163",
+   "parent": "island_food.html"
+  },
+  {
+   "ms": 7432,
+   "nav": "land_map.html?v=1163",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 7586,
+   "nav": "boss_hall.html?v=1163&warm=1",
+   "parent": "island_food.html"
+  },
+  {
+   "ms": 8669,
+   "nav": "island_season.html?v=1163",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 9369,
+   "nav": "season_showcase.html?v=1163&warm=1",
+   "parent": "island_food.html"
+  },
+  {
+   "ms": 10924,
+   "nav": "spelling_bee.html?v=1163&warm=1",
+   "parent": "island_food.html"
+  },
+  {
+   "ms": 11019,
+   "nav": "boss_hall.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 11904,
+   "nav": "land_map.html?v=1163",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 12455,
+   "nav": "season_showcase.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 13942,
+   "nav": "spelling_bee.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 15225,
+   "nav": "boss_hall.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 16729,
+   "nav": "season_showcase.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  },
+  {
+   "ms": 18255,
+   "nav": "spelling_bee.html?v=1163&warm=1",
+   "parent": "island_season.html?v=1163"
+  }
+ ],
+ "detached": [
+  {
+   "ms": 8819,
+   "url": "boss_hall.html?v=1163&warm=1"
+  },
+  {
+   "ms": 10431,
+   "url": "season_showcase.html?v=1163&warm=1"
+  },
+  {
+   "ms": 12209,
+   "url": "boss_hall.html?v=1163&warm=1"
+  },
+  {
+   "ms": 12296,
+   "url": "spelling_bee.html?v=1163&warm=1"
+  },
+  {
+   "ms": 13394,
+   "url": "season_showcase.html?v=1163&warm=1"
+  },
+  {
+   "ms": 14908,
+   "url": "spelling_bee.html?v=1163&warm=1"
+  },
+  {
+   "ms": 16167,
+   "url": "boss_hall.html?v=1163&warm=1"
+  },
+  {
+   "ms": 17501,
+   "url": "season_showcase.html?v=1163&warm=1"
+  },
+  {
+   "ms": 19095,
+   "url": "spelling_bee.html?v=1163&warm=1"
+  }
+ ],
+ "liveFramesAfter30s": [
+  "index.html",
+  "island_food.html",
+  "land_map.html?v=1163",
+  "island_season.html?v=1163",
+  "land_map.html?v=1163",
+  "island_season.html?v=1163",
+  "land_map.html?v=1163",
+  ""
+ ]
+}

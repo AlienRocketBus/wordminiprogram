@@ -1,0 +1,11 @@
+rollDailyQuests: function | 返回条数: 12 
+屏幕状态: {"questsScreen":{"active":true,"items":12,"txt":"← 返回 📋 每日任务 每天 0 点刷新 · 完成领取丰厚奖励 🎓学会 10 个新单词0 / 10+35🪙 +60"}}
+当前激活屏: questsScreen | 出现"暂无任务": false
+ERRORS: 0 
+  OK  数据层返回 12 条(实得 12)
+  OK  每日任务屏已激活
+  OK  **面板真的渲染出 12 条**(实得 12)
+  OK  不再出现「暂无任务」
+  OK  零脚本错误
+
+结果: 5 通过 / 0 失败

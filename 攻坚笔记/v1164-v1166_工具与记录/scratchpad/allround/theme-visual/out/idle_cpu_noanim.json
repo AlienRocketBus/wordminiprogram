@@ -1,0 +1,219 @@
+{
+ "method": "CDP Performance.getMetrics TaskDuration delta / window, Emulation.setCPUThrottlingRate=4, room_warm blocked, 390x844 DPR2 isMobile",
+ "rounds": 2,
+ "windowMs": 10000,
+ "summary": {
+  "home.real.cosmos": {
+   "busyPctMedian": 70.6,
+   "busyPctAll": [
+    63.5,
+    70.6
+   ],
+   "runningAnims": 120,
+   "rafPerSec": 31.2,
+   "intervals": 16,
+   "canvases": 0
+  },
+  "home.real.cosmos.noanim": {
+   "busyPctMedian": 43.6,
+   "busyPctAll": [
+    43.6,
+    36.1
+   ],
+   "runningAnims": 2,
+   "rafPerSec": 58.6,
+   "intervals": 16,
+   "canvases": 0
+  },
+  "island.real.cosmos": {
+   "busyPctMedian": 38,
+   "busyPctAll": [
+    28.3,
+    38
+   ],
+   "runningAnims": 5,
+   "rafPerSec": 0.6,
+   "intervals": 29,
+   "canvases": 0
+  },
+  "island.real.cosmos.noanim": {
+   "busyPctMedian": 5.2,
+   "busyPctAll": [
+    5,
+    5.2
+   ],
+   "runningAnims": 2,
+   "rafPerSec": 0.6,
+   "intervals": 29,
+   "canvases": 0
+  },
+  "island.real.imax": {
+   "busyPctMedian": 99.3,
+   "busyPctAll": [
+    99.3,
+    98.7
+   ],
+   "runningAnims": 7,
+   "rafPerSec": 28.8,
+   "intervals": 29,
+   "canvases": 1
+  },
+  "island.real.imax.static": {
+   "busyPctMedian": 62.3,
+   "busyPctAll": [
+    60.6,
+    62.3
+   ],
+   "runningAnims": 7,
+   "rafPerSec": 0.7,
+   "intervals": 29,
+   "canvases": 0
+  }
+ },
+ "raw": {
+  "home.real.cosmos": [
+   {
+    "busyPct": 63.5,
+    "scriptPct": 5.9,
+    "stylePct": 10.7,
+    "layoutPct": 4.5,
+    "rafPerSec": 8.3,
+    "total": 188,
+    "running": 120,
+    "intervals": 16,
+    "canvases": 0
+   },
+   {
+    "busyPct": 70.6,
+    "scriptPct": 1.9,
+    "stylePct": 16.6,
+    "layoutPct": 3.4,
+    "rafPerSec": 31.2,
+    "total": 188,
+    "running": 120,
+    "intervals": 16,
+    "canvases": 0
+   }
+  ],
+  "home.real.cosmos.noanim": [
+   {
+    "busyPct": 43.6,
+    "scriptPct": 2.5,
+    "stylePct": 6,
+    "layoutPct": 1.8,
+    "rafPerSec": 58.6,
+    "total": 2,
+    "running": 2,
+    "intervals": 16,
+    "canvases": 0
+   },
+   {
+    "busyPct": 36.1,
+    "scriptPct": 1.9,
+    "stylePct": 5.2,
+    "layoutPct": 1.1,
+    "rafPerSec": 57.1,
+    "total": 2,
+    "running": 2,
+    "intervals": 16,
+    "canvases": 0
+   }
+  ],
+  "island.real.cosmos": [
+   {
+    "busyPct": 28.3,
+    "scriptPct": 1.1,
+    "stylePct": 4.8,
+    "layoutPct": 0,
+    "rafPerSec": 0.6,
+    "total": 5,
+    "running": 5,
+    "intervals": 29,
+    "canvases": 0
+   },
+   {
+    "busyPct": 38,
+    "scriptPct": 1.1,
+    "stylePct": 6,
+    "layoutPct": 0,
+    "rafPerSec": 0.6,
+    "total": 5,
+    "running": 5,
+    "intervals": 29,
+    "canvases": 0
+   }
+  ],
+  "island.real.cosmos.noanim": [
+   {
+    "busyPct": 5,
+    "scriptPct": 1.3,
+    "stylePct": 0.8,
+    "layoutPct": 0,
+    "rafPerSec": 0.6,
+    "total": 2,
+    "running": 2,
+    "intervals": 29,
+    "canvases": 0
+   },
+   {
+    "busyPct": 5.2,
+    "scriptPct": 1.3,
+    "stylePct": 0.8,
+    "layoutPct": 0,
+    "rafPerSec": 0.6,
+    "total": 2,
+    "running": 2,
+    "intervals": 29,
+    "canvases": 0
+   }
+  ],
+  "island.real.imax": [
+   {
+    "busyPct": 99.3,
+    "scriptPct": 4.1,
+    "stylePct": 1.7,
+    "layoutPct": 0,
+    "rafPerSec": 13.8,
+    "total": 7,
+    "running": 7,
+    "intervals": 29,
+    "canvases": 1
+   },
+   {
+    "busyPct": 98.7,
+    "scriptPct": 5.5,
+    "stylePct": 2.8,
+    "layoutPct": 0,
+    "rafPerSec": 28.8,
+    "total": 7,
+    "running": 7,
+    "intervals": 29,
+    "canvases": 1
+   }
+  ],
+  "island.real.imax.static": [
+   {
+    "busyPct": 60.6,
+    "scriptPct": 2.5,
+    "stylePct": 9.1,
+    "layoutPct": 0,
+    "rafPerSec": 0.7,
+    "total": 7,
+    "running": 7,
+    "intervals": 29,
+    "canvases": 0
+   },
+   {
+    "busyPct": 62.3,
+    "scriptPct": 2.3,
+    "stylePct": 8.6,
+    "layoutPct": 0,
+    "rafPerSec": 0.6,
+    "total": 7,
+    "running": 7,
+    "intervals": 29,
+    "canvases": 0
+   }
+  ]
+ }
+}

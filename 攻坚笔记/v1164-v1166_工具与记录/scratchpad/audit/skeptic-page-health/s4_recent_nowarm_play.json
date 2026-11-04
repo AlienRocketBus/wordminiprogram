@@ -1,0 +1,43 @@
+{
+ "W": 390,
+ "PLAY": true,
+ "MODE": "nowarm",
+ "steps": [
+  {
+   "after": "island_food.html",
+   "iframe": "/island_food.html",
+   "card": "🍔 最近探险的岛屿 🍔 食物 · 点击继续 → => island_food.html",
+   "times": {
+    "wordIslandFood": 1793714033612,
+    "wordIslandAnimal": null,
+    "wordIslandSeason": null,
+    "lastIslandTime": 1793714017958,
+    "lastIslandKey": "wordIslandFood"
+   }
+  },
+  {
+   "after": "island_animal.html",
+   "iframe": "/island_food.html",
+   "card": "🍔 最近探险的岛屿 🍔 食物 · 点击继续 → => island_food.html",
+   "times": {
+    "wordIslandFood": 1793714063336,
+    "wordIslandAnimal": 1793714062410,
+    "wordIslandSeason": null,
+    "lastIslandTime": 1793714046856,
+    "lastIslandKey": "wordIslandAnimal"
+   }
+  }
+ ],
+ "cardTap": {
+  "ok": true,
+  "hitTop": "DIV#recentNum.stat-num",
+  "label": "recent",
+  "x": 195,
+  "y": 422
+ },
+ "openedAfterCardTap": {
+  "wrap": "block",
+  "path": "/island_food.html",
+  "title": "食物大冒险 · Food Word Adventure"
+ }
+}

@@ -1,0 +1,13 @@
+待机动画预算：岛屿菜单和首页什么都不做时不再一直占着手机
+
+- 岛屿菜单：藏宝图招手/金光、宝箱柔光、宠物晃动只动 3 轮就停；宝箱停下后留淡淡常亮提醒签到。
+  宝箱柔光从 box-shadow、藏宝图金光从 filter 改成只动 opacity 的叠层（不再每帧重画）。
+  删掉首尾都是 .45、什么都不改却每帧在跑的星空 twinkle。模板里加上「减少动态效果」时装饰不动的样式。
+- 首页：视差循环只在鼠标动时跑、追上就停（手机上不再每秒 60 次改两层全屏 transform）；
+  12 秒没碰屏幕，星星/漂浮表情/岛卡背景/标题跳字先歇着，一碰就醒；主题演员照常飞（v943/v944）。
+  飞行演员的上下浮动从 margin-top 改成 translate，不再每帧排版。
+- check_resources 两条字面量守卫跟着新写法更新（宝箱柔光光圈层、藏宝图浮动 3 轮）。
+- 新测试 test_idle_motion_v1165。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BA1TPEBFEsrC3tPwS8yPSx

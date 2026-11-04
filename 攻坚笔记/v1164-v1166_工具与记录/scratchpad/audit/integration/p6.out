@@ -1,0 +1,29 @@
+in game ok {
+  timer: '58',
+  spActive: true,
+  active: 'speedScreen',
+  speak: 1,
+  play: 2
+}
+just closed {
+  timer: '58',
+  spActive: true,
+  active: 'speedScreen',
+  speak: 1,
+  play: 2
+}
+after 10s on home (hidden island) {
+  timer: '48',
+  spActive: true,
+  active: 'speedScreen',
+  speak: 1,
+  play: 2
+}
+reopened {
+  timer: '48',
+  spActive: true,
+  active: 'speedScreen',
+  speak: 1,
+  play: 2
+}
+errors []

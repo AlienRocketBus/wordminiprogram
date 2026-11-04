@@ -1,0 +1,43 @@
+
+▶ P1 新孩子首页 12 秒
+  ❌ 没去过星海：首页不空闲预取星海地图
+  ❌ 没玩过：不空闲预取岛卡（实取 island_animal.html,island_food.html,island_sports.html,island_job.html,island_color.html,island_nature.html）
+  ❌ 只预热推荐的第一个岛（实请求 island_animal.html,island_food.html,island_sports.html,island_job.html,island_color.html,island_nature.html）
+  ❌ 没玩过：首页不下 Boss 头像
+  ✅ 手指碰到岛卡：照样立刻预取
+  ✅ 零脚本错误
+
+▶ P2 玩过（没去过星海）的孩子首页
+  ✅ 玩过：最近玩过的岛照常空闲预取（island_food.html,island_animal.html,island_sports.html,island_job.html,island_color.html,island_nature.html）
+  ✅ 空闲预取有上限（6 个）
+  ❌ 没去过星海、没学完普通岛：不预取星海地图
+  ✅ 零脚本错误
+
+▶ P3 学完一个普通岛的孩子首页
+  ✅ 学完一个普通岛：空闲时预取星海地图
+  ✅ 零脚本错误
+
+▶ P4 新孩子从首页进美食岛，停 18 秒
+  ✅ 美食岛在首页外壳里打开
+  ❌ 没去过星海：岛里一个星海房间都不建（land,season）
+  ❌ 不请求星海页、也不请求三个带参数页
+  ❌ 「我的学习」里没有凭空多出星海
+  ❌ 星海开场故事没被标成已看过、没有星海存档
+  ✅ 零脚本错误
+
+▶ P5 去过星海、玩过的孩子直接进美食岛
+  ✅ 两个星海房间照常在后台预热好
+  ❌ 不套娃：星海岛 2 个、星海地图 3 个页面
+  ❌ 预热框里的星海岛不再预热任何东西（{"rooms":["land","season"],"pf":["boss_hall.html","season_showcase.html"]}）
+  ✅ 玩过的孩子：三个带参数页照常灌进缓存（boss_hall.html,season_showcase.html,spelling_bee.html）
+  ❌ 藏在后台的星海岛不写「我的学习」快照
+  ✅ 孩子点开星海岛之后，快照照常写进「我的学习」
+  ✅ 零脚本错误
+
+▶ P6 去过星海的孩子，但网络是 3G
+  ❌ 网络策略不允许：不预热星海房间（land,season）
+  ❌ 网络策略不允许：不灌三个带参数页
+  ✅ 孩子自己点星海：照样能打开（按需加载）
+  ✅ 零脚本错误
+
+❌ 预载流量预算：14 项失败

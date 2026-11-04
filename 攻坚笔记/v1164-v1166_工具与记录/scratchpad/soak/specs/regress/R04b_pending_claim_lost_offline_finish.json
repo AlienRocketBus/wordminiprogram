@@ -1,0 +1,131 @@
+{
+ "name": "R04b_pending_claim_lost_offline_finish",
+ "bug": "R4 same, offline at the end",
+ "spec": {
+  "seed": 531,
+  "profile": "disrupt",
+  "kind": "rooms2",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 3,
+   "queryLagMul": 1.61,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.58,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x531",
+    "name": "小明",
+    "rating": 1202,
+    "skew": 0,
+    "net": {
+     "base": 6,
+     "jitter": 6,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 84319,
+      "dur": 94446
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.88,
+     "minMs": 2671,
+     "maxMs": 9776,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1133,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 5
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P2",
+    "uid": "k2x531",
+    "name": "阿杰",
+    "rating": 1258,
+    "skew": 0,
+    "net": {
+     "base": 17,
+     "jitter": 24,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [
+     {
+      "a": 43916,
+      "b": 133679,
+      "mode": "fast"
+     }
+    ],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.87,
+     "minMs": 3337,
+     "maxMs": 9121,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 3696,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 2
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null
+   }
+  ],
+  "adversary": null
+ }
+}

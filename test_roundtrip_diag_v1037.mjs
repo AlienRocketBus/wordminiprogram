@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_roundtrip_diag_v1037.mjs —— 「写→立刻读回」往返自检回归
  * 背景：跨设备存档连修六版仍未解决。根本原因不在某个具体 bug，
  *   而在于我始终无法区分三种截然不同的故障：
@@ -10,8 +11,8 @@
 import vm from 'node:vm'; import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('往返自检 v1037');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
-const dg  = fs.readFileSync('/home/claude/work/repo/hansen_cloud_diag_v1027.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
+const dg  = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_diag_v1027.js'),'utf8');
 
 ok(/roundTrip:\s*function/.test(src), 'roundTrip 已提供');
 ok(/probe:/.test(src) && /probeSalt/.test(src), '探针使用独立且每次随机的地址(probe: 前缀 + 随机盐)，不覆盖真实存档也不受旧文档干扰');

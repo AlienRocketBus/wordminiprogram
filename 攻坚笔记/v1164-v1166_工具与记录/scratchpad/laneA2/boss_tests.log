@@ -1,0 +1,15 @@
+=== test_boss_lazy_v1165.mjs
+  ✅ 只看选关墙（没有点按）不加载引擎（loaded=false）
+  ✅ 零脚本错误
+
+✅ Boss 按需加载：菜单不加载引擎/攻击图、头像按进度、设置页/选关墙按需、赢/输/大满贯/全开放/管理员门全通过
+exit 0
+=== test_boss_timer_hf5_v946.mjs
+Boss timer HF5: 4 motion/theme states + touch + HP isolation + answer/reset/stop ✅
+exit 0
+=== test_boss_settle_v1014.mjs
+[light] 标题可见色rgb(30, 64, 175) 亮度66 | 屏底rgba(0, 0, 0, 0) 亮度0 | 阴影:none
+[dark] 标题可见色rgb(251, 191, 36) 亮度191 | 屏底rgba(0, 0, 0, 0) 亮度0 | 阴影:none
+🔙 残留: false
+ERRORS: 0
+exit 0

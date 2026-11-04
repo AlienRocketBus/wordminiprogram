@@ -1,0 +1,41 @@
+{
+  "state": {
+    "top": {
+      "gate": 1164,
+      "vw": {
+        "local": 1164,
+        "server": 1164,
+        "stale": false,
+        "note": "已是最新 v1164"
+      }
+    },
+    "frame": {
+      "gate": 1163,
+      "backup": 1163,
+      "vwNote": "在 iframe 内 → 交由顶层窗口处理",
+      "firstScript": "http://127.0.0.1:45753/hansen_sw_upgrade_gate_v944.js?v=1163"
+    }
+  },
+  "sw": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1164,
+      "ready": true,
+      "controller": "sw_v944.js"
+    }
+  },
+  "cacheNames": [
+    "hansen-v944-shell-217",
+    "hansen-v944-assets-215",
+    "hansen-v944-icons-3",
+    "hansen-v944-pages-215"
+  ]
+}

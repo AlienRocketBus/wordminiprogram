@@ -133,7 +133,26 @@
     for (var i = 0; i < BANNED.length; i++) {
       if (low.indexOf(BANNED[i]) >= 0) return { ok: false, reason: '这个名字不能用，换一个吧' };
     }
+    /* 名字里带联系方式 / 广告：别人看到的会是「小蜜蜂」—— 起名时就说清楚 */
+    if (AD_NAME.test(low.replace(/\s+/g, ''))) return { ok: false, reason: '名字里不能有联系方式或长串数字，换一个吧' };
     return { ok: true, name: n };
+  }
+  /* 🔴v1164（审查 SEC-4）：**别人的名字**（排行榜、房间、好友、招呼）是他们自己写进云端的 ——
+     改一下前端就能起「加微信8888领皮肤」这种名字，挂在排行榜第一给全班孩子看。
+     显示之前统一过一遍：广告 / 联系方式 / 冒充官方的，一律换成「小蜜蜂」。
+     这是**唯一一份**规则，房间、好友、排行榜都来这里调（它们只在本模块没加载时用自己那份同样的兜底）。 */
+  var AD_NAME = /微信|威信|薇信|v信|vx|wx|qq|扣扣|公众号|加我|加群|进群|扫码|二维码|领皮肤|免费领|福利|红包|代练|http|www|\.com|@|\d{5,}/i;
+  function safeName(v, fallback) {
+    var fb = (typeof fallback === 'string') ? fallback : '无名蜂';
+    if (typeof v !== 'string') {
+      if (typeof v === 'number' && isFinite(v)) v = String(v); else return fb;
+    }
+    var n = v.replace(/[\u0000-\u001f<>"'`\\]/g, '').trim().slice(0, 16);
+    if (!n) return fb;
+    var flat = n.replace(/\s+/g, '').toLowerCase();
+    if (AD_NAME.test(flat)) return '小蜜蜂';
+    for (var i = 0; i < BANNED.length; i++) if (flat.indexOf(BANNED[i]) >= 0) return '小蜜蜂';
+    return n;
   }
   function renameCooldownLeft(p) {
     if (!p.nameChangedAt) return 0;
@@ -158,6 +177,31 @@
   function fullName(p) {
     p = p || readProfile();
     return p.name ? (p.name + ' · No.' + fmtCid(p.cid)) : '';
+  }
+
+  /* 🔴v1164：给对战房间 / 好友 / 排行榜用的「显示名」——只有这一个出口。
+     以前房间层去调一个不存在的 status()，于是人人都叫「无名蜂」。
+     返回：起过的名字（去掉首尾空格和控制字符，最多 NAME_MAX 字）；没起名就返回 ''，
+     由调用方决定兜底（例如「无名蜂」）。不联网、不抛错。 */
+  function displayName() {
+    try {
+      var n = String(readProfile().name || '').replace(/[\u0000-\u001f<>]/g, '').trim();
+      return n.slice(0, NAME_MAX);
+    } catch (e) { return ''; }
+  }
+
+  /* 🔴v1164：status() 早被几处调用（建房时取段位），但从来没有实现过 ——
+     调用一直抛错被吞掉。补上：名字 / 竞赛 ID / 天梯分（以对战战绩为准，和天梯页同一份）。 */
+  function status() {
+    var p = readProfile();
+    var out = { name: displayName(), cid: p.cid || 0, rating: 0, placed: false, games: 0 };
+    try {
+      var R = window.HansenPkRecord;
+      var s = R && typeof R.summary === 'function' ? R.summary() : null;
+      if (s) { out.rating = Number(s.rating) || 0; out.placed = !!s.placed; out.games = Number(s.total) || 0; }
+      else { var L = readLadder(); out.rating = L.rating; out.placed = L.placed; out.games = L.games; }
+    } catch (e) {}
+    return out;
   }
 
   /* ── 跨岛战绩聚合 ─────────────────────────────────────── */
@@ -256,7 +300,10 @@
   function ensureStyle() {
     if (document.getElementById('hsp_prof_css')) return;
     var css = [
-      '#hsb_prof{position:fixed;inset:0;z-index:70;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;',
+      /* 🔴v1164（审查 UI-9）：岛上从「拼写大PK」屏（2147483400）点「设置名字」打开的就是这一层 ——
+         以前 z-index 70 开在大PK屏**后面**，孩子点了什么都看不见，只能一直叫「无名蜂」。
+         放在大PK屏、天梯 / 好友（2147483500）之上，对战屏（2147483600）之下。 */
+      '#hsb_prof{position:fixed;inset:0;z-index:2147483550;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;',
       '  background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 55%,#312e81 100%);color:#e8eefc;padding:14px 12px 30px}',
       '#hsb_prof.on{display:block}',
       '#hsb_prof .pf_top{display:flex;align-items:center;gap:10px;margin-bottom:12px}',
@@ -585,7 +632,10 @@
     readProfile: readProfile,
     setName: setName,
     validateName: validateName,
+    safeName: safeName,
     fullName: fullName,
+    displayName: displayName,
+    status: status,
     ensureCid: ensureCid,
     claimCloudId: claimCloudId,
     fmtCid: fmtCid,

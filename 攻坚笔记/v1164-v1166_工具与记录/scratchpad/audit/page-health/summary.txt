@@ -1,0 +1,126 @@
+page                                        W  cons   pe  rej  bad  ext  reqs     MB     dcl   load    sw   cut  fr notes
+_frame.html                               390     0    0    0    0    0     3   0.02      48     48   390     0   0 
+_frame.html                               360     0    0    0    0    0     3   0.02      84     84   360     0   0 
+_sw_upgrade_v944.html                     390     0    0    0    0    0     1   0.00      49     52   390     0   0 
+_sw_upgrade_v944.html                     360     0    0    0    0    0     1   0.00      26     27   360     0   0 
+_vgprev.html                              390     0    0    0    0    0    27   3.13     165    328   980     0   0 
+_vgprev.html                              360     0    0    0    0    0    27   3.13     160    346   980     0   0 
+boss_hall.html                            390     0    0    0    0    0    40   3.61     359    361   410     0   0 
+boss_hall.html                            360     0    0    0    0    0    40   3.61     284    375   395     0   0 
+check.html                                390     0    0    0    0    0     7   0.19      96     97   390     0   0 
+check.html                                360     0    0    0    0    0     7   0.19     135    135   360     0   0 
+evolution_reports/jarvis2_scan_2026-07-2  390     0    0    0    0    0     1   0.02      30     32   390     0   0 
+evolution_reports/jarvis2_scan_2026-07-2  360     0    0    0    0    0     1   0.02      32     34   360     0   0 
+index.html                                390     0    0    0    0    0   159   9.09     719    738   390     2   1 
+index.html                                360     0    0    0    0    0   159   9.09     650    672   360     1   1 
+island_action.html                        390     0    0    0    0    0  1209  38.91     831   1326   390     0   7 
+island_action.html                        360     0    0    0    0    0  1164  39.13     695   1058   360     0   6 
+island_adjective.html                     390     0    0    0    0    0  1226  39.37     760   1279   390     0   7 
+island_adjective.html                     360     0    0    0    0    0  1253  41.27     697   1060   360     0   7 
+island_animal.html                        390     0    0    0    0    0  1185  38.18     703   1010   390     0   7 
+island_animal.html                        360     0    0    0    0    0   949  33.06     690   1054   360     0   6 
+island_body.html                          390     0    0    0    0    0   885  31.88    1429   1890   390     0   7 
+island_body.html                          360     0    0    0    0    0  1030  34.99    1302   1852   360     0   7 
+island_city.html                          390     0    0    0    0    0  1121  37.34     816   1371   390     0   6 
+island_city.html                          360     0    0    0    0    0   838  30.78     905   1530   360     0   7 
+island_clothes.html                       390     0    0    0    0    0  1177  38.98    1282   2059   390     0   7 
+island_clothes.html                       360     0    0    0    0    0  1232  41.30     902   1203   360     0   7 
+island_color.html                         390     0    0    0    0    0   909  32.82     768   1475   390     0   7 
+island_color.html                         360     0    0    0    0    0   947  32.29    1246   1741   360     0   7 
+island_family.html                        390     0    0    0    0    0  1122  38.70     743   1078   390     0   7 
+island_family.html                        360     0    0    0    0    0  1108  36.94     926   1403   360     0   7 
+island_food.html                          390     0    0    0    0    0   968  32.45     931   1447   390     0   6 
+island_food.html                          360     0    0    0    0    0  1234  41.49     907   1490   360     0   8 
+island_home.html                          390     0    0    0    0    0   989  33.77     920   1426   390     0   7 
+island_home.html                          360     0    0    0    0    0  1052  37.82     934   1532   360     0   6 
+island_job.html                           390     0    0    0    0    0  1175  38.74     776   1205   390     0   8 
+island_job.html                           360     0    0    0    0    0   996  35.46     646    948   360     0   6 
+island_land1.html                         390     0    0    0    0    0  1146  37.77    1462   2089   390     0   8 
+island_land1.html                         360     0    0    0    0    0   891  31.86     805   1219   360     0   7 
+island_land2.html                         390     0    0    0    0    0   951  32.95    1445   2085   390     0   7 
+island_land2.html                         360     0    0    0    0    0  1118  36.98     995   1516   360     0   7 
+island_land3.html                         390     0    0    0    0    0   708  26.43    1451   2718   390     0   7 
+island_land3.html                         360     0    0    0    0    0   824  30.68    1405   2780   360     0   7 
+island_land4.html                         390     0    0    0    0    0   869  31.02    1779   2445   390     0   7 
+island_land4.html                         360     0    0    0    0    0  1051  35.84     875   1340   360     0   7 
+island_land5.html                         390     0    0    0    0    0  1214  40.04     624    995   390     0   7 
+island_land5.html                         360     0    0    0    0    0  1025  35.21     805   1119   360     0   7 
+island_land6.html                         390     0    0    0    0    0   826  31.63    1209   1785   390     0   7 
+island_land6.html                         360     0    0    0    0    0  1029  38.15    1744   2363   360     0   7 
+island_land7.html                         390     0    0    0    0    0  1014  36.22     980   1334   390     0   7 
+island_land7.html                         360     0    0    0    0    0   835  31.42    1628   2195   360     0   7 
+island_land8.html                         390     0    0    0    0    0   892  31.57    1783   2564   390     0   7 
+island_land8.html                         360     0    0    0    0    0   869  32.19    1177   1602   360     0   7 
+island_nature.html                        390     0    0    0    0    0   883  31.36    1118   1897   390     0   7 
+island_nature.html                        360     0    0    0    0    0  1119  39.64    1113   1754   360     0   6 
+island_question.html                      390     0    0    0    0    0  1240  42.79     565    837   390     0   7 
+island_question.html                      360     0    0    0    0    0  1237  40.83     553    789   360     0   7 
+island_school.html                        390     0    0    0    0    0  1244  41.30     637    933   390     0   7 
+island_school.html                        360     0    0    0    0    0   899  31.25     784   1101   360     0   7 
+island_season.html                        390     0    0    0    0    0   979  33.94    1728   2525   390     0   7 
+island_season.html                        360     0    0    0    0    0  1339  45.06    1544   2321   360     0   7 
+island_sports.html                        390     0    0    0    0    0  1235  41.18     647   1013   390     0   6 
+island_sports.html                        360     0    0    0    0    0   946  32.89     612    951   360     0   6 
+island_time.html                          390     0    0    0    0    0   963  32.91    1283   1856   390     0   7 
+island_time.html                          360     0    0    0    0    0   992  33.36    1124   1594   360     0   7 
+island_traffic.html                       390     0    0    0    0    0  1084  36.36    1243   1952   390     0   6 
+island_traffic.html                       360     0    0    0    0    0  1023  35.40    1098   1458   360     0   7 
+island_treasure.html                      390     0    0    0    0    0   924  31.85     930   1533   390     0   7 
+island_treasure.html                      360     0    0    0    0    0   904  31.86    1162   1750   360     0   7 
+land_map.html                             390     0    0    0    0    0    15   1.40     324    324   433     0   0 
+land_map.html                             360     0    0    0    0    0    15   1.40     477    478   418     1   0 
+land_template.html                        390     0    1    0    0    0   861  31.41    1070   1915   390     0   7 winErr:Uncaught SyntaxError: Invalid or unexpected token
+land_template.html                        360     0    1    0    0    0   748  27.41     877   1401   360     0   7 winErr:Uncaught SyntaxError: Invalid or unexpected token
+map8/adventure_map.html                   390     0    2    0    0    0     1   0.02      38     39   390     0   0 winErr:Uncaught ReferenceError: __DATA__ is not defined;Uncaught TypeError: G is not iterable
+map8/adventure_map.html                   360     0    2    0    0    0     1   0.02      35     36   360     0   0 winErr:Uncaught ReferenceError: __DATA__ is not defined;Uncaught TypeError: G is not iterable
+map8/adventure_map_full.html              390     0    0    0    0    0     1   0.03      32     34   390     0   0 
+map8/adventure_map_full.html              360     0    0    0    0    0     1   0.03      40     42   360     0   0 
+map8/puzzle_map.html                      390     0    0    0    0    0     2   0.03     101    101   390     0   0 
+map8/puzzle_map.html                      360     0    0    0    0    0     2   0.03      90     90   360     0   0 
+map8/puzzle_map2.html                     390     0    2    0    0    0     1   0.01      44     45   390     0   0 winErr:Uncaught ReferenceError: __DATA__ is not defined;Uncaught TypeError: Cannot read properties of undefined (reading 'find'
+map8/puzzle_map2.html                     360     0    2    0    0    0     1   0.01      38     39   360     0   0 winErr:Uncaught ReferenceError: __DATA__ is not defined;Uncaught TypeError: Cannot read properties of undefined (reading 'find'
+map8/puzzle_map2_full.html                390     0    0    0    0    0     1   0.03      72     73   390     0   0 
+map8/puzzle_map2_full.html                360     0    0    0    0    0     1   0.03      25     26   360     0   0 
+map8/puzzle_map_full.html                 390     0    0    0    0    0     1   0.03      40     41   390     0   0 
+map8/puzzle_map_full.html                 360     0    0    0    0    0     1   0.03      28     29   360     0   0 
+map8/real_map.html                        390    43  249    0   45    0   103   0.87       0      0     0     0   0 
+map8/real_map.html                        360    62  351    0   66    0   159   1.22       0      0     0     0   0 
+map8/real_map_full.html                   390     0    0    0    0    0     9   6.09     264    265   433     0   0 
+map8/real_map_full.html                   360     0    0    0    0    0     1   0.68     406    406   418     4   0 
+season_showcase.html                      390     0    0    0    0    0    16   0.76     251    251   405     0   0 
+season_showcase.html                      360     0    0    0    0    0    16   0.76     327    328   390     0   0 
+spelling_bee.html                         390     0    0    0    0    0    22   0.84     677    678   390     0   0 
+spelling_bee.html                         360     0    0    0    0    0    22   0.84     467    467   360     0   0 
+spelling_pk.html                          390     0    0    0    0    0    32   1.06     306    306   390     0   0 
+spelling_pk.html                          360     0    0    0    0    0    32   1.06     425    425   360     0   0 
+template.html                             390     1    1    0    1    0   741  27.35    1599   2551   390     0   5 resErr:IMG http://127.0.0.1:37197/icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163 | winErr:Uncaught SyntaxError: Invalid or unexpected token
+template.html                             360     4    1    0    4    0   833  29.52    1037   1841   360     0   7 resErr:IMG http://127.0.0.1:37197/icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163;IMG http://127.0.0.1:37197/ico | winErr:Uncaught SyntaxError: Invalid or unexpected token
+武器图鉴预览.html                               390     0    0    0    0    0     1   0.02      50     59   390     0   0 
+武器图鉴预览.html                               360     0    0    0    0    0     1   0.02      23     26   360     0   0 
+武器攻击特效演示.html                             390     0    0    0    0    0     1   0.02      69     69   390     0   0 
+武器攻击特效演示.html                             360     0    0    0    0    0     1   0.02      30     32   360     0   0 
+
+DETAIL land_template.html 390 console= [] pe= ['SyntaxError: Invalid or unexpected token'] bad= [] failed= [] ext= []
+DETAIL land_template.html 360 console= [] pe= ['SyntaxError: Invalid or unexpected token'] bad= [] failed= [] ext= []
+DETAIL map8/adventure_map.html 390 console= [] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/adventure_map.html:49:9', 'TypeError: G is not iterable\n    at http://127.0.0.1:37197/map8/adventure_map.html:166:16'] bad= [] failed= [] ext= []
+DETAIL map8/adventure_map.html 360 console= [] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/adventure_map.html:49:9', 'TypeError: G is not iterable\n    at http://127.0.0.1:37197/map8/adventure_map.html:166:16'] bad= [] failed= [] ext= []
+DETAIL map8/puzzle_map2.html 390 console= [] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/puzzle_map2.html:56:9', "TypeError: Cannot read properties of undefined (reading 'find')\n    at http://127.0.0.1:37197/map8/puzzle_map2.html:119:13"] bad= [] failed= [] ext= []
+DETAIL map8/puzzle_map2.html 360 console= [] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/puzzle_map2.html:56:9', "TypeError: Cannot read properties of undefined (reading 'find')\n    at http://127.0.0.1:37197/map8/puzzle_map2.html:119:13"] bad= [] failed= [] ext= []
+DETAIL map8/real_map.html 390 console= ['Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)'] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/real_map.html:68:9', 'ReferenceError: __BG__ is not defined\n    at http://127.0.0.1:37197/map8/real_map.html:69:9', "TypeError: Cannot read properties of undefined (reading 'forEach')\n    at http://127.0.0.1:37197/map8/real_map.html:114:3"] bad= ['404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined'] failed= [] ext= []
+DETAIL map8/real_map.html 360 console= ['Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)'] pe= ['ReferenceError: __DATA__ is not defined\n    at http://127.0.0.1:37197/map8/real_map.html:68:9', 'ReferenceError: __BG__ is not defined\n    at http://127.0.0.1:37197/map8/real_map.html:69:9', "TypeError: Cannot read properties of undefined (reading 'forEach')\n    at http://127.0.0.1:37197/map8/real_map.html:114:3"] bad= ['404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined', '404 /map8/undefined'] failed= [] ext= []
+DETAIL template.html 390 console= ['Failed to load resource: the server responded with a status of 404 (Not Found)'] pe= ['SyntaxError: Invalid or unexpected token'] bad= ['404 /icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163'] failed= [] ext= []
+DETAIL template.html 360 console= ['Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)', 'Failed to load resource: the server responded with a status of 404 (Not Found)'] pe= ['SyntaxError: Invalid or unexpected token'] bad= ['404 /icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163', '404 /icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163&__rt=1', '404 /icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163&__rt=2', '404 /icons/%E2%9F%A6%E2%9F%A6ISLE_BOSSICON%E2%9F%A7%E2%9F%A7?v=1163&__rt=3'] failed= [] ext= []
+CUT index.html 390 [('clipped', 'div.deco-emoji', 'div#deco.deco', 376, 450, '🦁'), ('clipped', 'div.deco-emoji', 'div#deco.deco', 369, 440, '⭐')]
+CUT index.html 360 [('clipped', 'div.deco-emoji', 'div#deco.deco', 315, 398, '💎')]
+CUT land_map.html 360 [('clipped', 'button.spot', 'div#stage', -12, 68, '⑧\n星火火山口\n30词 · 4boss')]
+CUT map8/real_map_full.html 360 [('clipped', 'div.name', 'div#stage', 292, 372, '铸剑锻炉山'), ('clipped', 'div.sub', 'div#stage', 298, 366, '30词 · 4boss'), ('clipped', 'div.name', 'div#stage', -12, 68, '星火火山口'), ('clipped', 'div.sub', 'div#stage', -6, 62, '30词 · 5boss')]
+HSCROLL _vgprev.html 390 scrollW 980 overflowX visible/visible
+HSCROLL _vgprev.html 360 scrollW 980 overflowX visible/visible
+HSCROLL boss_hall.html 390 scrollW 410 overflowX visible/hidden
+HSCROLL boss_hall.html 360 scrollW 395 overflowX visible/hidden
+HSCROLL land_map.html 390 scrollW 433 overflowX hidden/hidden
+HSCROLL land_map.html 360 scrollW 418 overflowX hidden/hidden
+HSCROLL map8/real_map_full.html 390 scrollW 433 overflowX hidden/hidden
+HSCROLL map8/real_map_full.html 360 scrollW 418 overflowX hidden/hidden
+HSCROLL season_showcase.html 390 scrollW 405 overflowX visible/hidden
+HSCROLL season_showcase.html 360 scrollW 390 overflowX visible/hidden

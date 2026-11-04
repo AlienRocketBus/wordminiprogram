@@ -1,0 +1,24 @@
+D1 at { p: 'island_food.html', hl: 2, hs: 'null' } frames [
+  'island_food.html',
+  'land_map.html?v=1163',
+  'island_season.html?v=1163',
+  'land_map.html?v=1163'
+]
+tap home A#.world-map-btn
+D1 after home { p: 'index.html', hl: 2, hs: 'null' }
+D1 after back { p: 'blank', hl: 2, hs: 'null' }
+D2 land_map { p: 'land_map.html', hl: 2, hs: 'null' }
+backBtn exists true
+tap back BUTTON#backBtn.
+D2 after back { p: 'index.html', hl: 2, hs: 'null' }
+D3 tap home A#.world-map-btn
+D3 after home { p: 'land_map.html', hl: 3, hs: 'null' }
+D4 boss_hall.html {"title":"BOSS 殿堂 · 演示","back":["BUTTON#lightBtn:关闭"],"bodyText":"长按截图 · 收下专属壁纸 | ◆ | BOSS 殿堂 | ◆ | 图鉴典藏 · 专属秘境 | ◆ | 淘气小幽灵 | ◆ | ◆ | ◆ | 白银·普通 | ◆ | ◆ | ‹ | Lv.1淘气小幽灵 | › | ◆ | Lv.1 · 白 银 · 普 通 | ◆ | 「飘忽不定的初见之敌, 总在云雾间嬉戏。」 | 光"}
+D4 season_showcase.html {"title":"神秘殿堂","back":["BUTTON#lightBtn:关闭"],"bodyText":"× | ◆ | 神秘殿堂 | ◆ | 绝版限定卡 · 收藏的荣耀 | ★ 主形象 | ◆ | 星海女帝 · 赛尔娅 | ◆ | ◆ | ◆ | ◆ | 传说限定 | ◆ | ◆ | ◆ | ‹ | › | 形 象 1 / 3 | ✓ 当前主形象 | ◆ | 第一赛季 · 星海觉醒 | ◆ | 「繁星为我加冕，银河在我足下流淌。」 | "}
+D4 spelling_bee.html {"title":"🐝 拼写对战 Spelling Bee · 原型","back":["A#:‹ 返回"],"bodyText":"‹ 返回 | 🐝 | 拼写对战 | SPELLING BEE | 和机器人比赛拼单词 · 谁先拼对谁得分 🏆 赢的题多就获胜 | 1 | 比赛模式 | ✓ | 🔊 | 听读音 | 听发音 | 拼出来 | 中 | 汉译英 | 看中文意思 | 拼出英文 | 2 | 单词难度 | 动物大冒险词库 | 🌱 | 初级 | 3"}
+D4 check.html {"title":"云端版本诊断","back":[],"bodyText":"🔍 单词大冒险 · 云端版本诊断 | 当前云端跑的代码版本: | v1163 | 期望版本 (跟随部署自动更新, 不写死): | v1163 | 诊断: | ✓ 云端版本正确, 跑的就是最新部署的 v1163 |  | 如果某个功能仍不对, 截图发我. | 20 个 bos"}
+D4 _frame.html {"title":"单词大冒险","back":[],"bodyText":"单词大冒险 | 检测到你在电脑上打开，请选择显示方式 | 📱 | 手机版 | 和手机上完全一样的样子 | 推荐 | 💻 | 电脑版 | 铺满整个浏览器窗口"}
+errors [
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]
+external []

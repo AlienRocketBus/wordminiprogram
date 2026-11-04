@@ -1,0 +1,37 @@
+
+▶ ① 两个母版的任务代码逐字一样
+  ✅ ① 任务定义 + __hsnQuestDefinition + __hsnNormalizeQuests + rollDailyQuests 两边一样（8101 / 8101 字）
+  ✅ ① progressQuest 两边一样
+  ✅ ① setQuest 两边一样
+  ✅ ① claimQuest 两边一样
+  ✅ ① updateQuestBadge 两边一样
+  ✅ ① 打地鼠/钓鱼/火眼金睛/翻牌的上报写法两边一样 ["progressQuest('moles',molesScore); | progressQuest('moles',(typeof molesScore==='number'?molesScore:1));","progressQuest('fish',fishScore); | progressQuest('f
+  ✅ ① 单词大陆复习完成也上报「复习单词」「清空今日复习」
+  ✅ ① 27 个岛页的任务代码都一样（不一样的：无）
+
+▶ ② 外壳（index.html）里打开 island_land1 的任务页
+  ✅ ② 任务页 12 张任务卡（不是「暂无任务」） {"cards":12,"empty":false,"sub":"0/12"}
+  ✅ ② 做满「learn」任务后真点领取：金币 300 → 335
+  ✅ ② 再点一次不再给（335 → 335），显示已领取
+  ✅ ② 页面无报错 
+
+▶ ③ island_land1.html 上报的任务进度
+     {"molesDone":["moles:25"],"review":["review:3","set reviewClear:1"],"match":["match:8"],"fishOver":["fish:40"],"molesOver":["moles:30"]}
+  ✅ ③ 打地鼠打完整档得 25 分 → 任务 +25（moles:25）
+  ✅ ③ 复习 3/3 → 复习 +3、清空今日复习（review:3,set reviewClear:1）
+  ✅ ③ 记忆翻牌 8 对全对 → +8（match:8）
+  ✅ ③ 钓鱼命用完时得了 40 分 → +40（fish:40）
+  ✅ ③ 打地鼠命用完时得了 30 分 → +30（moles:30）
+  ✅ ③ 页面无报错 
+
+▶ ③ island_animal.html 上报的任务进度
+     {"molesDone":["moles:25"],"review":["review:3","set reviewClear:1"],"match":["match:8"],"fishOver":["fish:40"],"molesOver":["moles:30"]}
+  ✅ ③ 打地鼠打完整档得 25 分 → 任务 +25（moles:25）
+  ✅ ③ 复习 3/3 → 复习 +3、清空今日复习（review:3,set reviewClear:1）
+  ✅ ③ 记忆翻牌 8 对全对 → +8（match:8）
+  ✅ ③ 钓鱼命用完时得了 40 分 → +40（fish:40）
+  ✅ ③ 打地鼠命用完时得了 30 分 → +30（moles:30）
+  ✅ ③ 页面无报错 
+  ✅ ③ 单词大陆和常规岛上报的一模一样
+
+✅ v1165 单词大陆每日任务：12 个任务能看能领、进度单位和常规岛一致

@@ -1,0 +1,134 @@
+# 自动体检：全部测试在 GitHub 的机器上跑（8 台同时跑），不占开发机、不花 AI 的 token。
+#
+# 什么时候跑：
+#   · 推送到 claude/** 开发分支时自动跑 —— 但「WIP 备份」提交不跑（省 GitHub 的免费分钟数），
+#     提交说明里写了 [测试] 的 WIP 照样跑；只改了 攻坚笔记/ 或 .md 文档的推送也不跑。
+#   · 推送到 main 时每次都跑 —— 全部通过后「Auto Release on Push」才会打包发 Release。
+#   · 在 Actions 页面点「Run workflow」手动跑（任何分支）。
+# 跑什么：和本机 `python3 一键体检.py` 完全一样的判定 —— 语法 + 三道快检 + 全部 test_*.mjs，
+#   失败的测试串行再跑一次，两次都失败才算失败（并行假失败很常见）。
+# 结果：每次运行的「Summary」页有一张中文结论表；详细日志在附件 siphon-logs-* 里。
+# 规则说明见 攻坚笔记/虹吸工作法.md。
+name: 自动体检
+
+on:
+  push:
+    branches: ['claude/**', main]
+    paths-ignore: ['攻坚笔记/**', '**.md', 'docs/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SHARDS: 8
+  SIPHON_PARALLEL: 2
+
+jobs:
+  gate:
+    name: 要不要跑
+    # main 上每次都跑（发版要靠它），不看 WIP
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      !startsWith(github.event.head_commit.message, 'WIP') ||
+      contains(github.event.head_commit.message, '[测试]')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "要跑：${{ github.sha }}"
+
+  quick:
+    name: 语法 + 三道快检
+    needs: gate
+    runs-on: ubuntu-latest
+    # 同一个分支又推了要测的新提交：旧的那次取消，只测最新的（省分钟数）。
+    # 写在任务上、不写在整个流程上 —— 否则一个不测的 WIP 备份推上来，也会把正在跑的测试取消掉（11-04 实测踩到）。
+    concurrency: { group: 'auto-tests-quick-${{ github.ref }}', cancel-in-progress: true }
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13', cache: pip, cache-dependency-path: requirements-audit.txt }
+      - name: 装依赖
+        run: |
+          python -m pip install --disable-pip-version-check -q -r requirements-audit.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: 装浏览器
+        # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
+        run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
+      - name: 把结论脚本放进日志目录（「结论」不用再拉代码，日志最后几行就是结论表）
+        run: mkdir -p .siphon && cp .github/scripts/siphon_summary.py .siphon/
+      - name: 语法 + 资源检查 + 守卫 + 零测试桩冒烟
+        # 结果写进 .siphon/quick_rc，由「结论」统一判红绿 —— 每次运行只发一条结果通知（进化主义：少叫醒一次 AI 就少花一次 token）
+        run: python3 一键体检.py --quick || echo "快检没过（退出码 $?），由「结论」判定"; mkdir -p .siphon; test -f .siphon/SUMMARY.txt && grep -q '全部通过' .siphon/SUMMARY.txt && echo 0 > .siphon/quick_rc || echo 1 > .siphon/quick_rc
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: siphon-logs-quick, path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
+
+  tests:
+    name: 测试 第 ${{ matrix.shard }} 份
+    needs: gate
+    runs-on: ubuntu-latest
+    concurrency: { group: 'auto-tests-${{ matrix.shard }}-${{ github.ref }}', cancel-in-progress: true }
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13', cache: pip, cache-dependency-path: requirements-audit.txt }
+      - name: 装依赖
+        run: |
+          python -m pip install --disable-pip-version-check -q -r requirements-audit.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: 装浏览器
+        # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
+        run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
+      - name: 跑这一份测试
+        # 这一份有失败也不在这里判红：失败名单在 .siphon/shard_*.json 里，「结论」统一判 —— 每次运行只发一条结果通知
+        run: python3 一键体检.py --shard ${{ matrix.shard }}/${{ env.SHARDS }} || echo "这一份有失败（退出码 $?），由「结论」判定"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
+
+  summary:
+    name: 结论
+    needs: [gate, quick, tests]
+    if: always() && needs.gate.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'siphon-logs-*', path: logs }
+      - name: 拿上一次的结果来对比（完美主义：修问题不许带入新问题）
+        # 同一分支上一次跑完的自动体检：哪些测试上次通过、这次失败 —— 那就是这次改动带入的新问题，单独列出来
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          prev=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow auto-tests.yml --branch "$BRANCH" --status completed --limit 10 --json databaseId,headSha --jq "[.[] | select(.databaseId != ${{ github.run_id }})][0].databaseId" 2>/dev/null || true)
+          if [ -n "$prev" ] && [ "$prev" != "null" ]; then
+            gh run download "$prev" --repo "$GITHUB_REPOSITORY" --pattern 'siphon-logs-*' --dir prev >/dev/null 2>&1 || true
+            echo "$prev" > prev_run_id
+          fi
+      - name: 汇总成一张表
+        env:
+          QUICK: ${{ needs.quick.result }}
+          TESTS: ${{ needs.tests.result }}
+        run: python3 logs/siphon-logs-quick/siphon_summary.py tests

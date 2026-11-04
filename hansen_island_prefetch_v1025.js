@@ -84,8 +84,29 @@
   }
 
   /* ① 最近玩过的岛：命中率最高，优先预取 */
+  /* 🔴审查 R2-6：首页记的 lastIslandKey 是存储键（'wordIslandAnimal'），以前直接拼成 island_wordIslandAnimal.html ——
+     每次回首页都白请求一个 404，控制台还多一条报错。存储键的名字也不一定就是文件名（People → island_job.html）。
+     现在只预取页面上真有入口的那几个岛文件：拼出来的名字对不上任何入口就不请求。 */
+  function islandFiles() {
+    var known = {};
+    try {
+      var links = document.querySelectorAll('a[href*="island_"]');
+      for (var i = 0; i < links.length; i++) {
+        var h = String(links[i].getAttribute('href') || '').split('?')[0].split('#')[0];
+        if (/^island_[a-z0-9]+\.html$/.test(h)) known[h] = 1;
+      }
+    } catch (e) {}
+    return known;
+  }
+  function fileOfKey(k, known) {
+    var name = String(k || '');
+    if (name.indexOf('wordIsland') === 0) name = name.slice('wordIsland'.length);
+    name = name.replace(/^island_/, '').replace(/\.html$/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    var f = name ? ('island_' + name + '.html') : '';
+    return (f && known[f]) ? f : '';
+  }
   function prefetchRecent() {
-    var picked = [];
+    var picked = [], known = islandFiles();
     try {
       var last = localStorage.getItem('lastIslandKey');
       if (last) picked.push(fileForKey(last));

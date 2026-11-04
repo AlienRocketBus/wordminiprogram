@@ -1,0 +1,9 @@
+login {"ok":true,"uid":"1728325321807323665","session":{"ok":true,"uid":"1728325321807323665","tries":1}} cid 1
+
+=== signed-in, home (index.html) after visiting one island and closing it (60 s) total=9 frames=8 [index.html, island_animal.html, land_map.html, island_season.html, land_map.html, island_season.html, land_map.html, ]
+  frames with HansenFriends: 3 island_animal.html, island_season.html, island_season.html
+       9 updateDocument hansen_friends(id)
+  per frame:
+       9 index.html@top :: updateDocument hansen_friends(id)
+  islandFrameWrap display=none
+  page errors: none | console errors: none

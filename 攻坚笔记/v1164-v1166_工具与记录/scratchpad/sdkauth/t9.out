@@ -1,0 +1,2 @@
+{"typeofUserSub":"function","userSubIsStringProtoSub":true,"noArgReturnsLatest":true,"noArgFirstIsHansenAuth":true,"credKeys":["token_type","access_token","refresh_token","expires_in","scope","sub","version","expires_at"],"credSub":"uid_existing_001"}
+{"getLoginStateRejected":false,"val":null,"ensure":{"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"}}

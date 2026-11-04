@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_admin_levels_v1055.mjs —— 后台面板：宠物等级 / 角色等级调节
  * 需求：设置页密码后台（boss 特效调节那个面板）里，加入宠物等级与角色等级的直接调节。
  * 合同：① 面板 HTML 含两个调节区块与对应按钮；② 宠物设定后 S.pet.stage/xp 落到目标阶段；
  *       ③ 角色设定后 charXP 落到该等级阈值、getAdvLevel() 返回目标等级；
  *       ④ 非法输入被拒且给出提示；⑤ ADVENTURE_LEVELS 已导出（const 不会自动挂 window）。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html; charset=utf-8','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -14,14 +15,14 @@ const browser=await chromium.launch({executablePath:process.env.HANSEN_CHROMIUM_
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('后台等级调节 v1055');
 /* 源码合同 */
-const src = fs.readFileSync('/home/claude/work/repo/hansen_boss_attack.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_boss_attack.js'),'utf8');
 ok(/hbafxPetGo/.test(src) && /hbafxPetLv/.test(src), '面板含宠物等级调节控件');
 ok(/hbafxLvlGo/.test(src) && /hbafxLvlIn/.test(src), '面板含角色等级调节控件');
 ok(/STAGE_XP/.test(src), '内置宠物 36 阶经验阈值表');
 
 const page=await browser.newPage({viewport:{width:390,height:900}});
 const errs=[]; page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
-await page.addInitScript(()=>{ localStorage.clear(); });
+await page.addInitScript(()=>{ if (window.top === window) localStorage.clear(); });
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2800);
 ok(await page.evaluate(()=>Array.isArray(window.ADVENTURE_LEVELS)&&window.ADVENTURE_LEVELS.length>0),

@@ -1,0 +1,108 @@
+{
+ "name": "R10b_phantom_win_10_words_mode_A",
+ "bug": "R10 targeted: host frozen in the ack window, 10-word ladder-mode match",
+ "spec": {
+  "seed": 9200,
+  "profile": "targeted",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 2,
+   "queryLagMul": 1,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.6,
+  "outages": [],
+  "adversary": null,
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0xT",
+    "name": "小明",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 60,
+     "jitter": 30,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 5700,
+      "dur": 150000
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.9,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 500,
+      "act": "create",
+      "mode": "A",
+      "private": false,
+      "wordCount": 10
+     }
+    ],
+    "isHost": true
+   },
+   {
+    "label": "P1",
+    "uid": "k1xT",
+    "name": "小红",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 60,
+     "jitter": 30,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.95,
+     "minMs": 1500,
+     "maxMs": 2500,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 3000,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 4
+     }
+    ]
+   }
+  ]
+ }
+}

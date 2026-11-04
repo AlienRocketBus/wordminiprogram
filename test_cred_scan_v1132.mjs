@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_cred_scan_v1132.mjs —— 凭证扫描必须先取快照
  *
  * 🔴 真实事故：`test_phone_signup_v1057` 随机失败（十次红三四次），
@@ -27,7 +28,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('凭证扫描快照 v1132');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'), 'utf8');
 const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /* ① 代码层面：不许边遍历边读 */
@@ -105,11 +106,11 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
    分布在 10 个模块 —— 其中备份漏键会丢用户数据、凭证守护漏键会救不回登录。
    本轮全部改为快照遍历，并抽出公用助手 hansen_lskeys_v1133.js。 */
 {
-  const glob = fs.readdirSync('/home/claude/work/repo')
+  const glob = fs.readdirSync(__HSN_ROOT.replace(/\/$/, ''))
     .filter(f => /^hansen_.*\.js$/.test(f));
   let bad = [];
   for (const f of glob) {
-    const c = fs.readFileSync('/home/claude/work/repo/' + f, 'utf8')
+    const c = fs.readFileSync((__HSN_ROOT + '') + f, 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, '');
     const loops = c.match(/for\s*\([^)]*localStorage\.length[^)]*\)\s*\{[\s\S]{0,300}?\}/g) || [];
     for (const L of loops) {
@@ -126,7 +127,7 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
      而这些模块本来就各自独立，内联一小段取快照的代码不算重复，
      **换来的是不依赖加载顺序、测试环境也能跑**。 */
   const inlined = glob.filter(f => /_o\.push\(_kq\)/.test(
-    fs.readFileSync('/home/claude/work/repo/' + f, 'utf8')));
+    fs.readFileSync((__HSN_ROOT + '') + f, 'utf8')));
   ok(inlined.length >= 8,
      `★ 快照取键已内联到各模块（${inlined.length} 个），不依赖加载顺序`);
 }

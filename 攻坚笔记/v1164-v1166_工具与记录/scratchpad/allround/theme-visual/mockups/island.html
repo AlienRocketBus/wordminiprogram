@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>岛屿菜单 · 主题2.0 样稿</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="common.css">
+<style>
+.hero{position:relative;margin-top:14px;padding:16px 16px 14px;border-radius:var(--r-xl);overflow:hidden;min-height:136px;
+  background:linear-gradient(150deg,var(--surface-2),var(--surface-1));border:1px solid var(--line);box-shadow:var(--e-1)}
+.hero h1{font:900 28px/1.1 var(--font-display);color:var(--ink-1)}
+.hero .en{font:800 14px/1.2 var(--font-latin);letter-spacing:1.5px;color:var(--ink-2);margin-top:4px;text-transform:uppercase}
+.hero .prog{display:flex;align-items:center;gap:8px;margin-top:12px;max-width:62%}
+.hero .prog .bar{flex:1;height:10px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.hero .prog .bar i{display:block;height:100%;transform-origin:left;transform:scaleX(.41);background:linear-gradient(90deg,var(--xp-1),var(--xp-2));border-radius:99px}
+.hero .prog b{font:800 14px/1 var(--font-latin);color:var(--ink-1)}
+.hero .petwrap{position:absolute;right:6px;bottom:-6px;width:128px;height:128px}
+.hero .petwrap::before{content:"";position:absolute;left:12%;right:12%;bottom:8px;height:24px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.30),transparent)}
+.hero .petwrap img{position:relative;width:100%;height:100%}
+.hero .petwrap::after{content:"";position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,213,74,.38),transparent);z-index:-1}
+.hero .petwrap{z-index:0}
+.hero .bub{display:inline-flex;margin-top:10px;padding:6px 12px;border-radius:14px;background:var(--surface-3);color:var(--ink-1);font-size:var(--fs-sm);font-weight:700;max-width:62%}
+.daily{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.daily .tile{aspect-ratio:1/1.02}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:9px;font:800 12px/18px var(--font-latin)}
+.tag.red{background:var(--badge-bg);color:var(--on-badge)}
+.tag.gold{background:var(--accent-1);color:var(--on-accent)}
+.rev{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:var(--r-lg);
+  background:linear-gradient(120deg,var(--brand-1),var(--brand-2));color:var(--on-brand);box-shadow:var(--e-2)}
+.rev img{width:48px;height:48px;flex:none}
+.rev b{display:block;font:900 17px/1.2 var(--font-display)}
+.rev span{font-size:var(--fs-sm);font-weight:700;opacity:.95}
+.rev .go{margin-left:auto;flex:none;background:rgba(0,0,0,.22);border-radius:var(--r-pill);padding:8px 14px;font:900 15px/1 var(--font-display)}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true"></div>
+<div class="app">
+  <header class="topbar">
+    <div class="ava"><img src="assets/01.webp" alt=""><span class="lv">3</span></div>
+    <div class="who"><b>小明 · 森林小队</b><div class="xp" style="--p:.72"><i></i></div><div class="xp-t">180 / 250 经验</div></div>
+    <div class="chips"><span class="chip"><script>document.write(ICON.gem)</script>12</span><span class="chip"><script>document.write(ICON.coin)</script>1,280</span></div>
+  </header>
+
+  <section class="hero">
+    <h1>食物大冒险</h1>
+    <div class="en">Food Island</div>
+    <div class="prog"><div class="bar"><i></i></div><b>23/56</b></div>
+    <div class="bub">“今天想吃什么？我们去学 8 个新词！”</div>
+    <div class="petwrap"><img src="assets/pet_01.webp" alt="星灵"></div>
+  </section>
+
+  <div class="daily">
+    <div class="tile t-blue"><span class="tag red" style="position:absolute;top:7px;right:7px;z-index:2">可领</span><img src="assets/chest_gold.webp" alt=""><span class="lab">每日宝箱</span></div>
+    <div class="tile t-green"><span class="tag gold" style="position:absolute;top:7px;right:7px;z-index:2">3/12</span><img src="assets/task_3d.webp" alt=""><span class="lab">每日任务</span></div>
+    <div class="tile t-yellow"><img src="assets/boss_arcade.webp" alt=""><span class="lab">挑战 BOSS</span></div>
+  </div>
+
+  <div class="rev"><img src="assets/brain_explorer.webp" alt=""><div><b>今日复习 6 个词</b><span>大约 3 分钟 · 完成 +20 金币</span></div><span class="go">去复习 ›</span></div>
+
+  <div class="sec"><h3>精学模式</h3><a href="#">怎么玩？</a></div>
+  <div class="tiles">
+    <div class="tile t-pink"><img src="assets/explore_3d.webp" alt=""><span class="lab">探索单词</span></div>
+    <div class="tile t-orange"><img src="assets/speaker_3d.webp" alt=""><span class="lab">听音辨义</span></div>
+    <div class="tile t-teal"><img src="assets/gacha_joker_v594.webp" alt=""><span class="lab">记忆翻牌</span></div>
+    <div class="tile t-purple"><img src="assets/typer_3d.webp" alt=""><span class="lab">打字大师</span></div>
+    <div class="tile t-red"><img src="assets/cloze_3d.webp" alt=""><span class="lab">完形填空</span></div>
+    <div class="tile t-indigo"><img src="assets/spell_3d.webp" alt=""><span class="lab">字母拼拼乐</span></div>
+  </div>
+  <div class="sec"><h3>畅玩模式</h3></div>
+  <div class="tiles">
+    <div class="tile t-yellow"><img src="assets/spelling_bee.webp" alt=""><span class="lab">拼写蜂</span></div>
+    <div class="tile t-green"><img src="assets/mole_3d.webp" alt=""><span class="lab">打地鼠</span></div>
+    <div class="tile t-blue"><img src="assets/fish_3d.webp" alt=""><span class="lab">钓鱼大师</span></div>
+  </div>
+</div>
+<nav class="nav">
+  <a class="on" href="#"><img src="assets/ic_home.webp" alt="">本岛</a>
+  <a href="#"><img src="assets/ic_wrong.webp" alt="">错题<span class="dot">3</span></a>
+  <a href="#"><img src="assets/ic_review.webp" alt="">复习</a>
+  <a href="#"><img src="assets/map_home.webp" alt="">世界地图</a>
+</nav>
+</body>
+</html>

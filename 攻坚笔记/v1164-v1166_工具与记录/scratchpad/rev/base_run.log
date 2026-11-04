@@ -1,0 +1,22 @@
+=== test_srs_plan_v1165 ===
+exit=1
+7
+=== test_mistake_lesson_v1165 ===
+exit=1
+22
+=== test_spelling_pic_v1165 ===
+exit=1
+25
+=== test_copy_numbers_v1165 ===
+exit=1
+15
+=== test_boss_lazy_v1165 ===
+exit=1
+11
+=== test_preload_budget_v1165 ===
+exit=1
+15
+=== test_idle_motion_v1165 ===
+exit=1
+11
+ALLDONE

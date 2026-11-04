@@ -1,0 +1,317 @@
+[
+  {
+    "name": "SDK loaded via dynamic import, init + auth() ok",
+    "ok": true,
+    "detail": {
+      "version": "2.30.0"
+    }
+  },
+  {
+    "name": "A signIn -> getLoginState() non-null with .user.uid",
+    "ok": true,
+    "detail": {
+      "signInType": "t",
+      "stNull": false,
+      "stKeys": [
+        "cache",
+        "oauthInstance",
+        "user"
+      ],
+      "uid": "1761282801441921597",
+      "curUid": "1761282801441921597",
+      "keys": [
+        [
+          "user_info_ambitious-d0g1d26xm740dc3d6",
+          455
+        ],
+        [
+          "credentials_ambitious-d0g1d26xm740dc3d6",
+          759
+        ],
+        [
+          "lang_ambitious-d0g1d26xm740dc3d6",
+          5
+        ],
+        [
+          "device_id",
+          32
+        ]
+      ]
+    }
+  },
+  {
+    "name": "A add() returns {id}",
+    "ok": true,
+    "detail": {
+      "id": "039c14a4bea83afbbd7c092400ee9e3b",
+      "requestId": "f35c18991a9eb369"
+    }
+  },
+  {
+    "name": "A where({status:open}).get() returns the doc with _openid=aliceUid",
+    "ok": true,
+    "detail": {
+      "status": "open",
+      "isPrivate": false,
+      "hostId": "H1",
+      "guestId": "",
+      "createdAt": 1793692867301,
+      "heartbeatAt": 1793692867301,
+      "when": "2023-11-14T22:13:20.000Z",
+      "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+      "_openid": "1761282801441921597"
+    }
+  },
+  {
+    "name": "A orderBy/limit, count, doc().get, command gt/in all work",
+    "ok": true,
+    "detail": {
+      "add": {
+        "id": "039c14a4bea83afbbd7c092400ee9e3b",
+        "requestId": "f35c18991a9eb369"
+      },
+      "qLen": 1,
+      "q0": {
+        "status": "open",
+        "isPrivate": false,
+        "hostId": "H1",
+        "guestId": "",
+        "createdAt": 1793692867301,
+        "heartbeatAt": 1793692867301,
+        "when": "2023-11-14T22:13:20.000Z",
+        "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+        "_openid": "1761282801441921597"
+      },
+      "whenIsDate": true,
+      "q2Len": 1,
+      "cnt": {
+        "requestId": "f5fc151d95e8f6fc",
+        "total": 1
+      },
+      "oneLen": 1,
+      "cmdLen": 1
+    }
+  },
+  {
+    "name": "B getVerification -> {verification_id,is_user:false}; signUp(phone,code) -> login state",
+    "ok": true,
+    "detail": {
+      "v": {
+        "verification_id": "v_f85a0d920931f188",
+        "expires_in": 600,
+        "is_user": false
+      },
+      "suType": "t",
+      "uid": "1759432228290293038"
+    }
+  },
+  {
+    "name": "[legacy] B (non-creator) where().update() on READONLY -> resolves {updated:0}, no error",
+    "ok": true,
+    "detail": {
+      "whereUpdate": {
+        "requestId": "735dc075c6030c73",
+        "updated": 0
+      },
+      "docUpdate": {
+        "updated": 0,
+        "requestId": "a242324c49dec1ab"
+      },
+      "docRemove": {
+        "deleted": 0,
+        "requestId": "f2c48c389b681a88"
+      },
+      "appClaimSees": {
+        "updated": 0
+      }
+    }
+  },
+  {
+    "name": "[legacy] B doc().update -> updated:0 ; doc().remove -> deleted:0",
+    "ok": true,
+    "detail": {
+      "whereUpdate": {
+        "requestId": "735dc075c6030c73",
+        "updated": 0
+      },
+      "docUpdate": {
+        "updated": 0,
+        "requestId": "a242324c49dec1ab"
+      },
+      "docRemove": {
+        "deleted": 0,
+        "requestId": "f2c48c389b681a88"
+      },
+      "appClaimSees": {
+        "updated": 0
+      }
+    }
+  },
+  {
+    "name": "[rules] B where().update() -> RESOLVES (not rejects) with {code:DATABASE_PERMISSION_DENIED}",
+    "ok": true,
+    "detail": {
+      "whereUpdate": {
+        "code": "DATABASE_PERMISSION_DENIED",
+        "message": "Permission denied",
+        "requestId": "a0e15a389415b70b"
+      },
+      "docUpdate": {
+        "code": "DATABASE_PERMISSION_DENIED",
+        "message": "Permission denied",
+        "requestId": "89785defea2ed294"
+      },
+      "docRemove": {
+        "code": "DATABASE_PERMISSION_DENIED",
+        "message": "Permission denied",
+        "requestId": "0e84df359bafc0f1"
+      },
+      "appClaimSees": {
+        "updated": 0
+      }
+    }
+  },
+  {
+    "name": "[rules] app claim() would read that as updated:0 (silently)",
+    "ok": true,
+    "detail": {
+      "updated": 0
+    }
+  },
+  {
+    "name": "room unchanged after B attempts",
+    "ok": true,
+    "detail": {
+      "status": "open",
+      "isPrivate": false,
+      "hostId": "H1",
+      "guestId": "",
+      "createdAt": 1793692867301,
+      "heartbeatAt": 1793692867301,
+      "when": {
+        "$date": 1700000000000
+      },
+      "_id": "039c14a4bea83afbbd7c092400ee9e3b",
+      "_openid": "1761282801441921597"
+    }
+  },
+  {
+    "name": "A (creator) conditional update -> updated:1, second identical guard -> updated:0 (atomic claim)",
+    "ok": true,
+    "detail": {
+      "r": {
+        "requestId": "2026a0705395c088",
+        "updated": 1
+      },
+      "again": {
+        "requestId": "095db08941ca405c",
+        "updated": 0
+      }
+    }
+  },
+  {
+    "name": "missing collection: get() RESOLVES with {code:DATABASE_COLLECTION_NOT_EXIST}",
+    "ok": true,
+    "detail": {
+      "resolved": {
+        "code": "DATABASE_COLLECTION_NOT_EXIST",
+        "message": "[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs",
+        "requestId": "fc962867bdd952d5"
+      }
+    }
+  },
+  {
+    "name": "ADMINONLY: get() resolves with {code:DATABASE_PERMISSION_DENIED}",
+    "ok": true,
+    "detail": {
+      "resolved": {
+        "code": "DATABASE_PERMISSION_DENIED",
+        "message": "Permission denied",
+        "requestId": "03f3c73a2a8cebed"
+      }
+    }
+  },
+  {
+    "name": "missing collection: add() resolves {code} (app realTransport.add would return {id:doc._id||\"\"})",
+    "ok": true,
+    "detail": {
+      "resolved": {
+        "code": "DATABASE_COLLECTION_NOT_EXIST",
+        "message": "[ResourceNotFound] Db or Table not exist. Please check your request, but if the problem cannot be solved, contact us.: hansen_friend_msgs",
+        "requestId": "301097106b0f7fa9"
+      }
+    }
+  },
+  {
+    "name": "expired access token -> SDK refreshes via POST /auth/v1/token and the call succeeds",
+    "ok": true,
+    "detail": {
+      "a5": "credentials_ambitious-d0g1d26xm740dc3d6",
+      "a6": {
+        "uid": "1761282801441921597",
+        "n": 1
+      },
+      "refreshCalls": 1
+    }
+  },
+  {
+    "name": "C (bob on another device) verify + signIn(verification_token) -> same uid",
+    "ok": true,
+    "detail": {
+      "isUser": true,
+      "uid": "1759432228290293038"
+    }
+  },
+  {
+    "name": "wrong password -> signIn rejects with plain object {error:\"invalid_password\",error_description,...}",
+    "ok": true,
+    "detail": {
+      "rejected": true,
+      "type": "[object Object]",
+      "keys": [
+        "error",
+        "error_code",
+        "error_description",
+        "error_uri",
+        "requestId"
+      ],
+      "error": "invalid_password",
+      "desc": "invalid password"
+    }
+  },
+  {
+    "name": "signUpWithEmailAndPassword exists but only SENDS AN EMAIL CODE (returns {data:{verifyOtp}}), creates NO session",
+    "ok": true,
+    "detail": {
+      "d1": {
+        "has": "function",
+        "resultKeys": [
+          "data",
+          "error"
+        ],
+        "dataKeys": [
+          "verifyOtp"
+        ],
+        "err": null,
+        "stNull": true,
+        "credKeys": []
+      },
+      "verificationRequests": 1,
+      "signupRequests": 0
+    }
+  },
+  {
+    "name": "knobs: latency 200ms observed, consistency lag hides fresh write then shows it",
+    "ok": true,
+    "detail": {
+      "tAdd": 208.89999999990687,
+      "immediate": 0,
+      "later": 1
+    }
+  },
+  {
+    "name": "no request escaped to an unrouted external host",
+    "ok": true,
+    "detail": []
+  }
+]

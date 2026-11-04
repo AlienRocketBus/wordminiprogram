@@ -1,0 +1,229 @@
+{
+ "method": "CDP Performance.getMetrics TaskDuration delta / 10 s, CPU throttle 4x, 390x844 DPR2 isMobile, room_warm blocked; 2 interleaved rounds; shared 4-core host (load avg 8-13)",
+ "cases": {
+  "home.real.cosmos": {
+   "busyPct": [
+    63.7,
+    63.2
+   ],
+   "mean": 63.5,
+   "runningAnims": 120,
+   "rafPerSec": [
+    30,
+    33
+   ],
+   "setIntervals": 16,
+   "canvases": 0
+  },
+  "home.mock.cosmos": {
+   "busyPct": [
+    0,
+    0
+   ],
+   "mean": 0.0,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "island.real.cosmos": {
+   "busyPct": [
+    38.5,
+    32.5
+   ],
+   "mean": 35.5,
+   "runningAnims": 5,
+   "rafPerSec": [
+    0.6,
+    0.8
+   ],
+   "setIntervals": 29,
+   "canvases": 0
+  },
+  "island.mock.cosmos": {
+   "busyPct": [
+    0,
+    0
+   ],
+   "mean": 0.0,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "answer.real.cosmos": {
+   "busyPct": [
+    28,
+    17.6
+   ],
+   "mean": 22.8,
+   "runningAnims": 5,
+   "rafPerSec": [
+    0.7,
+    0.7
+   ],
+   "setIntervals": 29,
+   "canvases": 0
+  },
+  "answer.mock.cosmos": {
+   "busyPct": [
+    0.1,
+    0.1
+   ],
+   "mean": 0.1,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "chest.real.cosmos": {
+   "busyPct": [
+    25.1,
+    19.2
+   ],
+   "mean": 22.1,
+   "runningAnims": 3,
+   "rafPerSec": [
+    0.6,
+    0.7
+   ],
+   "setIntervals": 29,
+   "canvases": 0
+  },
+  "chest.mock.cosmos": {
+   "busyPct": [
+    0.1,
+    0
+   ],
+   "mean": 0.1,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "result.real.cosmos": {
+   "busyPct": [
+    24.1,
+    20.9
+   ],
+   "mean": 22.5,
+   "runningAnims": 3,
+   "rafPerSec": [
+    0.6,
+    0.8
+   ],
+   "setIntervals": 29,
+   "canvases": 0
+  },
+  "result.mock.cosmos": {
+   "busyPct": [
+    0.1,
+    0.1
+   ],
+   "mean": 0.1,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "home.real.cloud": {
+   "busyPct": [
+    69.2,
+    65
+   ],
+   "mean": 67.1,
+   "runningAnims": 120,
+   "rafPerSec": [
+    25.7,
+    18.1
+   ],
+   "setIntervals": 16,
+   "canvases": 0
+  },
+  "home.mock.cloud": {
+   "busyPct": [
+    0.1,
+    0
+   ],
+   "mean": 0.1,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "island.real.cloud": {
+   "busyPct": [
+    36.8,
+    56.3
+   ],
+   "mean": 46.5,
+   "runningAnims": 5,
+   "rafPerSec": [
+    0.6,
+    0.6
+   ],
+   "setIntervals": 29,
+   "canvases": 0
+  },
+  "island.mock.cloud": {
+   "busyPct": [
+    0,
+    0
+   ],
+   "mean": 0.0,
+   "runningAnims": 0,
+   "rafPerSec": [
+    0,
+    0
+   ],
+   "setIntervals": 0,
+   "canvases": 0
+  },
+  "island.real.imax": {
+   "busyPct": [
+    97.1,
+    99.8
+   ],
+   "mean": 98.4,
+   "runningAnims": 7,
+   "rafPerSec": [
+    20.3,
+    13.3
+   ],
+   "setIntervals": 29,
+   "canvases": 1
+  },
+  "island.real.gallery": {
+   "busyPct": [
+    99.2,
+    89.4
+   ],
+   "mean": 94.3,
+   "runningAnims": 7,
+   "rafPerSec": [
+    27.3,
+    16.9
+   ],
+   "setIntervals": 29,
+   "canvases": 1
+  }
+ }
+}

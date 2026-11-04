@@ -1,0 +1,338 @@
+[
+ {
+  "id": 14,
+  "island": "action",
+  "line": 1932,
+  "en": "cook",
+  "ex": "My dad cooks dinner every Sunday."
+ },
+ {
+  "id": 20,
+  "island": "action",
+  "line": 1938,
+  "en": "fly",
+  "ex": "Have you ever flown on a plane?"
+ },
+ {
+  "id": 23,
+  "island": "action",
+  "line": 1943,
+  "en": "draw",
+  "ex": "She drew a picture of her family."
+ },
+ {
+  "id": 34,
+  "island": "action",
+  "line": 1954,
+  "en": "teach",
+  "ex": "My mom teaches me how to cook."
+ },
+ {
+  "id": 40,
+  "island": "action",
+  "line": 1962,
+  "en": "get",
+  "ex": "I got a gift from my mom."
+ },
+ {
+  "id": 64,
+  "island": "action",
+  "line": 1990,
+  "en": "start",
+  "ex": "Let's get started."
+ },
+ {
+  "id": 67,
+  "island": "action",
+  "line": 1993,
+  "en": "drive",
+  "ex": "My uncle drives a taxi."
+ },
+ {
+  "id": 127,
+  "island": "animal",
+  "line": 1927,
+  "en": "cow",
+  "ex": "Cows give us milk."
+ },
+ {
+  "id": 128,
+  "island": "animal",
+  "line": 1928,
+  "en": "pig",
+  "ex": "Pigs are smarter than they look."
+ },
+ {
+  "id": 132,
+  "island": "animal",
+  "line": 1932,
+  "en": "duck",
+  "ex": "Ducks love being in the water."
+ },
+ {
+  "id": 154,
+  "island": "animal",
+  "line": 1960,
+  "en": "eagle",
+  "ex": "Eagles can fly very high."
+ },
+ {
+  "id": 164,
+  "island": "body",
+  "line": 1922,
+  "en": "eye",
+  "ex": "Her eyes are bright and beautiful."
+ },
+ {
+  "id": 165,
+  "island": "body",
+  "line": 1923,
+  "en": "ear",
+  "ex": "Rabbits have long ears."
+ },
+ {
+  "id": 170,
+  "island": "body",
+  "line": 1928,
+  "en": "lip",
+  "ex": "Her lips are red."
+ },
+ {
+  "id": 176,
+  "island": "body",
+  "line": 1936,
+  "en": "arm",
+  "ex": "Raise your arms above your head."
+ },
+ {
+  "id": 177,
+  "island": "body",
+  "line": 1937,
+  "en": "elbow",
+  "ex": "Don't put your elbows on the table."
+ },
+ {
+  "id": 178,
+  "island": "body",
+  "line": 1938,
+  "en": "hand",
+  "ex": "Wash your hands before eating."
+ },
+ {
+  "id": 185,
+  "island": "body",
+  "line": 1947,
+  "en": "leg",
+  "ex": "My legs are tired from walking."
+ },
+ {
+  "id": 190,
+  "island": "body",
+  "line": 1952,
+  "en": "heel",
+  "ex": "My heels hurt after the long run."
+ },
+ {
+  "id": 192,
+  "island": "body",
+  "line": 1956,
+  "en": "bone",
+  "ex": "Dogs love to chew bones."
+ },
+ {
+  "id": 254,
+  "island": "clothes",
+  "line": 1953,
+  "en": "sleeve",
+  "ex": "He rolled up his sleeves and got to work."
+ },
+ {
+  "id": 287,
+  "island": "color",
+  "line": 1956,
+  "en": "thousand",
+  "ex": "Thousands of stars shine at night."
+ },
+ {
+  "id": 301,
+  "island": "family",
+  "line": 1929,
+  "en": "sibling",
+  "ex": "Do you have any siblings?"
+ },
+ {
+  "id": 313,
+  "island": "family",
+  "line": 1945,
+  "en": "relative",
+  "ex": "We invited all our relatives over."
+ },
+ {
+  "id": 325,
+  "island": "food",
+  "line": 1920,
+  "en": "grape",
+  "ex": "I love eating grapes in summer."
+ },
+ {
+  "id": 326,
+  "island": "food",
+  "line": 1921,
+  "en": "strawberry",
+  "ex": "I love fresh strawberries with cream."
+ },
+ {
+  "id": 333,
+  "island": "food",
+  "line": 1930,
+  "en": "vegetable",
+  "ex": "Vegetables are good for your health."
+ },
+ {
+  "id": 334,
+  "island": "food",
+  "line": 1931,
+  "en": "tomato",
+  "ex": "I like tomatoes in my salad."
+ },
+ {
+  "id": 335,
+  "island": "food",
+  "line": 1932,
+  "en": "potato",
+  "ex": "I love mashed potatoes."
+ },
+ {
+  "id": 336,
+  "island": "food",
+  "line": 1933,
+  "en": "carrot",
+  "ex": "I peeled some carrots for the soup."
+ },
+ {
+  "id": 337,
+  "island": "food",
+  "line": 1934,
+  "en": "onion",
+  "ex": "Cutting onions always makes me cry."
+ },
+ {
+  "id": 360,
+  "island": "food",
+  "line": 1965,
+  "en": "cookie",
+  "ex": "I bake cookies with my mom."
+ },
+ {
+  "id": 425,
+  "island": "job",
+  "line": 1933,
+  "en": "firefighter",
+  "ex": "Firefighters are brave heroes."
+ },
+ {
+  "id": 428,
+  "island": "job",
+  "line": 1938,
+  "en": "farmer",
+  "ex": "Farmers work hard in the fields."
+ },
+ {
+  "id": 437,
+  "island": "job",
+  "line": 1949,
+  "en": "artist",
+  "ex": "Picasso was one of the greatest artists."
+ },
+ {
+  "id": 445,
+  "island": "nature",
+  "line": 1919,
+  "en": "star",
+  "ex": "I can see lots of stars in the sky."
+ },
+ {
+  "id": 447,
+  "island": "nature",
+  "line": 1921,
+  "en": "cloud",
+  "ex": "The sky is full of clouds today."
+ },
+ {
+  "id": 451,
+  "island": "nature",
+  "line": 1927,
+  "en": "snow",
+  "ex": "It snows a lot here in winter."
+ },
+ {
+  "id": 462,
+  "island": "nature",
+  "line": 1942,
+  "en": "flower",
+  "ex": "I love the smell of flowers."
+ },
+ {
+  "id": 549,
+  "island": "school",
+  "line": 1959,
+  "en": "computer",
+  "ex": "We use computers in class every day."
+ },
+ {
+  "id": 793,
+  "island": "sports",
+  "line": 1917,
+  "en": "sport",
+  "ex": "Playing sports keeps you fit."
+ },
+ {
+  "id": 825,
+  "island": "time",
+  "line": 1919,
+  "en": "minute",
+  "ex": "Wait for me ten minutes."
+ },
+ {
+  "id": 826,
+  "island": "time",
+  "line": 1920,
+  "en": "hour",
+  "ex": "I sleep about eight hours a night."
+ },
+ {
+  "id": 845,
+  "island": "time",
+  "line": 1943,
+  "en": "Saturday",
+  "ex": "I sleep in on Saturdays."
+ },
+ {
+  "id": 860,
+  "island": "time",
+  "line": 1960,
+  "en": "holiday",
+  "ex": "I love long holidays."
+ },
+ {
+  "id": 882,
+  "island": "traffic",
+  "line": 1942,
+  "en": "ticket",
+  "ex": "I bought two tickets to Shanghai."
+ },
+ {
+  "id": 887,
+  "island": "traffic",
+  "line": 1949,
+  "en": "passenger",
+  "ex": "The bus is packed with passengers."
+ },
+ {
+  "id": 948,
+  "island": "treasure",
+  "line": 1982,
+  "en": "thing",
+  "ex": "I have so many things to do."
+ }
+]

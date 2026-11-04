@@ -1,0 +1,171 @@
+SUMMARY: I integrated the five v1164 parts and fixed every cross-module bug and open issue I could find. All tests pass on the final code: the v1164 real-SDK E2E tests twice (round r4, then again inside the full suite), and the full suite 187/187 via 分批跑测试.py. 5 tests failed in the parallel run because of CPU contention. 2 passed on the first serial recheck. The other 3 (pk_inpage, room_warm, theme_scroll) passed on a second recheck once other agents' processes had stopped loading the machine (load average was 19 on 4 cores). Under that same load the untouched v1163 baseline fails the same 3 tests. Guards are green with 15 new guards, and each one is proven to go red when its fault is injected.
+
+What I changed:
+
+1. Room data layer, reported by the lifecycle E2E. A guest could tap 返回 while the host was reading an old copy of the seat. The host then confirmed a guest who had already gone, played against nobody, and the room could never reopen. Now:
+   - The host writes its confirmation and then waits for the guest to answer: `acked` (or `guestReady`) on the guest's own seat.
+   - If the seat is missing on 3 reads, is marked left, or stays silent for 20 s, the host withdraws the confirmation: the room is `open` again with the next seat number (epoch +1).
+   - The guest writes `acked` (3 tries) as soon as it sees the confirmation, again in markReady, and again in its heartbeat.
+   - A tap on 取消 now wins over a confirmation that arrives at the same moment.
+   - A guest whose confirmation was withdrawn notices after 3 fresh reads (`opponentGone` → `kicked`). This also closes the data agent's "dead guest gets confirmed, then host gets a free abandon win" risk.
+
+2. Modes B/C ("两人都答完才进下一个词") now really wait for both players.
+   - Data layer: claimRound/skipRound write `hostAns`/`hostPts` (host's room doc) or `guestAns`/`guestPts` (guest's seat), each player on their own doc only. roundState returns `oppAns` and `oppPts`.
+   - UI: the new `nextWord()` waits for the opponent to finish the word, at most until this word's deadline + 3 s, with a live countdown line. The opponent's live score now includes their 60/80 second-place points and never goes down.
+   - New E2E check: the two phones are never more than 1 word apart.
+
+3. `wordsFromSeed` only picks letters-only words. 17 of the 712 words (ice cream, T-shirt, fire station…) cannot be typed on the PK keyboard. About 1 game in 5 used to contain one and it always timed out. Both phones use the same rule, so the word lists still match.
+
+4. `sessionErr` now routes by the `kind` that auth returns, instead of guessing from the reason text. The session is cached for 20 s and dropped on account change or on expired/session errors. Before, every database read and write called ensureSession and wrote a trace line, filling the 60-line phone trace.
+
+5. Auth:
+   - loginByPassword retries the mail alias only when the username was not found.
+   - `friendly()` turns credentials not found / unauthenticated / invalid_grant into 「登录没真正完成」 instead of 「没找到这个用户名」. This fixed the 1 failure in test_auth_cloud.
+   - ensureProfile reads its new profile back up to 4 times, 500 ms apart, so a slow read no longer leaves the child without a cid.
+
+6. The ladder home's leaderboard box shows the real problem by kind: config → 云端设置还差一步 with 技术信息; network, session and expired each get their own message. It no longer says 网络不太顺 for everything. A failed board push is now logged.
+
+7. check_resources had 2 problems: two `})(4)` / `})(2)` endings that match its forEach-bug pattern, one of them already in the data layer. I rewrote both as named functions; it now reports 0 problems.
+
+8. Release side:
+   - Both emulator helper files are added to the cloudbaserc.json ignore list and to package_release.py SOURCE_REQUIRED_FILES. They are .mjs files, so the deploy zip already leaves them out.
+   - 分批跑测试.py gives `*_cloud_v1164` tests 600 s instead of 300 s, because with 3 running in parallel they can pass 300 s.
+
+9. New test `test_friends_board_cloud_v1164.mjs`: the friends agent's real-SDK E2E rewritten on the repo's emulator and harness. It runs both permission modes and passes 60/0 in about 60 s.
+
+10. test_ui_walkthrough_v969 now blocks Tencent hosts inside the test. It used to send real requests and failed here with ERR_TUNNEL_CONNECTION_FAILED.
+
+11. 15 new guards, each with a fault sample in jarvis_selftest.py.
+
+FILES: ['/home/user/wordminiprogram/hansen_pk_room_v1065.js', '/home/user/wordminiprogram/hansen_pk_room_ui_v1065.js', '/home/user/wordminiprogram/hansen_ladder_ui_v1108.js', '/home/user/wordminiprogram/hansen_auth_v1004.js', '/home/user/wordminiprogram/hansen_guards_v1068.py', '/home/user/wordminiprogram/jarvis_selftest.py', '/home/user/wordminiprogram/cloudbaserc.json', '/home/user/wordminiprogram/package_release.py', '/home/user/wordminiprogram/分批跑测试.py', '/home/user/wordminiprogram/cloudbase_e2e_harness.mjs', '/home/user/wordminiprogram/test_pk_room_v1065.mjs', '/home/user/wordminiprogram/test_pk_modes_v1100.mjs', '/home/user/wordminiprogram/test_pk_battle_ui_v1101.mjs', '/home/user/wordminiprogram/test_rooms_cloud_v1164.mjs', '/home/user/wordminiprogram/test_ui_walkthrough_v969.mjs', '/home/user/wordminiprogram/test_friends_board_cloud_v1164.mjs (new)']
+
+IMPLEMENTED:
+ - ACK race fix, host side — hansen_pk_room_v1065.js:waitForOpponent. ack() sets `pend`. New confirm() and unack() helpers handle the wait for the guest's answer. If R.guestId is already set (the ack response was lost), the host also waits for the answer, guarded by seat === epoch.
+ - ACK race fix, guest side — hansen_pk_room_v1065.js. waitAck: writes acked/ackedAt with retry3, and a cancel beats a confirmation that arrives at the same time. markReady: also writes acked:true. startHeartbeat: the guest beat carries acked:true once started. opponentGone: the guest reports kicked after 3 consecutive fresh reads where R.guestId !== me.
+ - B/C answered signal — hansen_pk_room_v1065.js. New noteAns() is called from claimRound and skipRound. view() exposes hostAns, guestAns, hostPts and guestPts, all only-increasing. roundState returns oppAns (opponent's own field, or any W_i written by the opponent) and oppPts. Mode A writes nothing extra.
+ - B/C sync UI — hansen_pk_room_ui_v1065.js. New nextWord(st, idx) (submitRound calls it instead of askRound) and oppPtsShow(). pollOpponent tracks st.oppAns; the live opponent score includes oppPts and never decreases. startMatch resets st.oppAns = -1.
+ - Typeable words only — hansen_pk_room_v1065.js:wordsFromSeed keeps only /^[a-zA-Z]+$/ words.
+ - Session errors by kind — hansen_pk_room_v1065.js:sessionErr maps signin/expired/slow/network/config/other/session from ensureSession's `kind`.
+ - Session cache — hansen_pk_room_v1065.js:realTransport.db keeps a 20 s cache in `_ses`. It is cleared on hsn-auth-changed / hsn-account-uid-changed and on expired/session errors (wrapTimeout).
+ - Password login alias — hansen_auth_v1004.js:loginByPassword retries the mail alias only for not_found / not exist, never for credential errors.
+ - friendly() — hansen_auth_v1004.js: credentials not found / unauthenticated / invalid_grant → 「登录没真正完成…再点一次登录试试；还不行，就打开自检面板截图发给老师」, checked before the user-not-found branch.
+ - ensureProfile — hansen_auth_v1004.js: after docRef.set, docRef.get is retried up to 4 times, 500 ms apart, before assignCid.
+ - Leaderboard box — hansen_ladder_ui_v1108.js:renderBoard shows the failure by kind (config / network / slow / session / expired / not-signed-in) with a 技术信息 line.
+ - Board push log — hansen_pk_room_ui_v1065.js:showResult logs a failed HansenLadderBoard.push() with console.warn; the board re-pushes the next time it is opened.
+ - check_resources IIFE fix — hansen_pk_room_v1065.js:joinRoom.grab (look) and hansen_auth_v1004.js:ensureProfile (readBack): the numeric `})(N);` endings became named functions.
+ - Deploy and release lists — cloudbaserc.json ignore and package_release.py SOURCE_REQUIRED_FILES now include cloudbase_emulator.mjs and cloudbase_e2e_harness.mjs.
+ - Batch runner limit — 分批跑测试.py:_limit gives *_cloud_v1164 tests 600 s.
+ - Friends/board E2E port — test_friends_board_cloud_v1164.mjs (new): runs legacy and rules modes. Covers displayName, first board fetch, empty vs error, add / incoming / mutual / remove with only own writes, the inbox, the friends page z-index and no watchdog after the ladder, missing collections → config, push and fetch denied → config, the ladder home board after a reload, a network abort, the friends page above the island PK screen, no page errors and no leaks.
+ - Guards — hansen_guards_v1068.py, 15 new: 对战回包查 code, 榜单好友查 code, 房间不批量改, 房间不放手机号, 天梯好友在大PK之上, 会话总超时, 没凭证不写登录, 进房要等确认, 看门狗不乱咬, 排位按种类分流, 对战键盘打得出, 同步赛不强翻, 备份不收 SDK 键, 真 SDK 测试无桩, friendly 说实话. Each has a fault sample in jarvis_selftest.py CASES.
+
+TESTS:
+ - Round r1 (state as received, before my fixes): test_rooms_lifecycle_cloud_v1164 => 28 / 2 FAIL (host confirms a guest who already left; room stuck as playing)
+ - r1: test_auth_cloud_v1164 => 27 / 1 FAIL (「没找到这个用户名」 for a missing expires_in)
+ - r1: test_cloud_errors_v1164 / test_ladder_cloud_v1164 / test_rooms_cloud_v1164 / test_cloudbase_emulator_v1164 => 23/0, 41/0, 51/0, 42/0
+ - r2 after the ACK and auth fixes: lifecycle / auth / rooms => 30/0, 28/0, 51/0
+ - r3: test_friends_board_cloud_v1164 (new) / test_rooms_cloud_v1164 (with the B/C gap check) => 60/0 (59 s), 53/0 (183 s; gap max 1 for 同步赛 and 回合赛)
+ - r4 FINAL CODE, serial: test_cloudbase_emulator_v1164 => 42 passed / 0 failed
+ - r4: test_auth_session_v1164 => 51 / 0
+ - r4: test_friends_board_cloud_v1164 => 60 / 0 (62 s)
+ - r4: test_auth_cloud_v1164 => 28 / 0 (70 s)
+ - r4: test_cloud_errors_v1164 => 23 / 0 (98 s)
+ - r4: test_rooms_lifecycle_cloud_v1164 => 30 / 0 (154 s)
+ - r4: test_ladder_cloud_v1164 => 41 / 0 (156 s)
+ - r4: test_rooms_cloud_v1164 => 53 / 0 (185 s)
+ - r4: test_real_path_smoke_v1163 => 14 / 0
+ - test_pk_room_v1065 (final) => 74 / 0. Run against the pre-fix data layer (HEAD) the new checks go red: 68 / 6.
+ - test_pk_modes_v1100 / test_pk_room_code_v1105 / test_room_match_v1135 / test_pk_abandon_v1104 (final) => 31/0, 21/0, 41/0, 28/0
+ - test_ladder_e2e_v1155 / test_ladder_contrast_v1156 / test_tap_targets_v1120 (final, after the acked-only change) => 55/0, 4/0, 8/0
+ - test_pk_battle_ui_v1101 (after updating its static check) => 18 / 0
+ - test_ui_walkthrough_v969 (Tencent hosts blocked in the test) => PASS, 0 page/console errors (before: 1 ERR_TUNNEL_CONNECTION_FAILED)
+ - 72 other tests that touch the changed modules (2 in parallel) => 71 passed. pk_battle_ui failed on its old static check, fixed above, then 18/0.
+ - Full suite: HANSEN_PLAYWRIGHT_MODULE=… python3 分批跑测试.py 540, then --recheck => 187/187 passed. The parallel run had 5 failures: boss_timer_hf5, explore_ui, pk_inpage (<250 ms check), room_warm (<250 ms), theme_scroll (120 s overall limit). The first serial recheck passed 2. The other 3 failed again while other agents' processes kept the load average at about 19 on 4 cores; the v1163 baseline (git archive 73e1b69) fails the same 3 under that load. After the load dropped, the second --recheck passed all 3: 「进度 187/187 · 失败 0 · 剩余 0 ✅ 全部通过」.
+ - python3 check_resources.py => ✅✅✅ 全部通过 (was 1 problem: v525 numeric IIFE endings in the auth and room modules)
+ - python3 防下载总闸.py => ✅ 七条路径全部堵死
+
+GUARDS: python3 hansen_guards_v1068.py: ✅ 新时代守卫全部通过. Last run was after the final code change. All old guards plus the 15 new ones are green.
+
+New guards (written before `GUARDS = [`, registered at the end of GUARDS; each reads code through `_code_only(_read(...))`):
+- 对战回包查 code
+- 榜单好友查 code (checks with a parenthesis scan that every SDK op sits inside a `call()` that checks r.code)
+- 房间不批量改
+- 房间不放手机号
+- 天梯好友在大PK之上 (parses the z-indexes: PK 2147483400 < ladder/friends < room 2147483600)
+- 会话总超时
+- 没凭证不写登录
+- 进房要等确认
+- 看门狗不乱咬
+- 排位按种类分流 (also checks the createdAt sort and the kLadder needOnline gate)
+- 对战键盘打得出
+- 同步赛不强翻
+- 备份不收 SDK 键 (also checks the bootstrap file)
+- 真 SDK 测试无桩 (test_*cloud*_v1164.mjs plus the harness)
+- friendly 说实话
+
+Each has a matching `_inj_*` sample in jarvis_selftest.py CASES.
+
+How I proved they bite: I did not run the full jarvis_selftest.py, because it rewrites repo files in place while other agents are still using the checkout. Instead, a script loads the real hansen_guards_v1068.py and jarvis_selftest.py modules and, for each case, swaps in the injected text through `_read` and runs the guard; no file is changed.
+- Result: all 15 new guards plus 14 related existing ones (抢房原子性, 回合不推进, 前端瞎猜, 查询条件, 传输层完整, 房间列表要清洗, 没词不许建房, 读要重试, 读不到要宽限, 房间号要有效, 心跳要会停, 对战看门狗, 三态不分, 无凭据即成功) are green on clean code and red with their sample.
+- 备份不碰凭证 looked like a failure only in my script: the guard reports under the label '备份碰凭证', and my script filtered by name. Its injection anchor is still present.
+- I also bit-tested sub-checks that have no CASES sample: a board op outside call(), the friends z-index, registerByPassword writing the marker, the watchdog quit missing its final `_armed = null`, a /登录|会话/ regex in the ladder, and device_id missing from the bootstrap regex. All go red.
+
+Script: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/integ/bite_real.py
+
+No existing guard was weakened or edited.
+
+TEST_CHANGES:
+ - test_pk_room_v1065.mjs:
+- The fake vocabulary used words like 'food0'; real vocab words are letters only, plus a few phrases. It now uses letter-only words plus 'ice cream' and 'T-shirt', which the data layer must skip. Added a check: 300 seeds × 30 words never draw an untypeable word.
+- Added an `until()` helper. The test now waits for the host's {joined} event in 4 places (②, ④ next guest, ④ dead seat, pair()), because the host now waits for the guest's acked answer. It is one poll later, as on a real phone. The assertions themselves are unchanged.
+- Added 2 sections: (a) the host confirms a seat that is then removed → no {joined}, room open again on seat 1, the next guest plays, and that guest wrote acked; (b) a confirmed seat that never answers → withdrawn after seatStaleMs. Run against HEAD's data layer these fail 68/6, so they really catch the bug.
+ - test_pk_modes_v1100.mjs: added ④b. In mode C, host first (100) then guest second (60): the host sees oppAns=0 and oppPts=60, the guest sees oppAns=0 and oppPts=100, each player writes only their own doc, and a host timeout counts as finishing the word. In mode A, no extra writes. Nothing removed.
+ - test_pk_battle_ui_v1101.mjs: the static check required `askRound(idx + 1)` directly inside submitRound. submitRound now goes through nextWord(st, idx), which ends in askRound(idx + 1) and has a cap. The check now accepts that path and requires both askRound(idx + 1) and the cap inside nextWord. Same intent: the game always moves on after the summary, now with an upper limit on waiting.
+ - test_rooms_cloud_v1164.mjs and cloudbase_e2e_harness.mjs: playMatch also returns maxGap. The rooms test asserts the two phones are never more than 1 word apart in B/C, which proves both players move to the next word together. New check only; nothing changed.
+ - test_ui_walkthrough_v969.mjs: the test page used to send real requests to Tencent hosts through the sandbox proxy and failed with ERR_TUNNEL_CONNECTION_FAILED. It now blocks those hosts inside the test (the no-network rule). Blocked requests produce net::ERR_FAILED, which the existing noise exemption already covers; every other console/page error is still caught.
+ - test_friends_board_cloud_v1164.mjs: new test (see implemented).
+
+OPEN:
+ - Only a real phone and the real Tencent server can confirm:
+- the real error text for a duplicate-_id add (we never rely on it: every claim is read back by _id and nonce);
+- that the server stamps _openid on writes and that reads see your own write right away;
+- the real {code} replies for denied writes;
+- that the JWT sub equals the /user/me uid;
+- real invalid_grant behaviour;
+- the friends module's _openid learning for web users.
+ - Phone clock errors: the room list's 30 s freshness check and joinRoom's 「房主已经离开了」 check compare the host's heartbeat time with the viewer's own clock. A phone more than 30 s wrong sees no rooms or is refused entry. opponentGone, seat staleness and the new waiting step use only the local clock, so they are not affected.
+ - Read volume: during a match each phone does about 3 reads per second (room, seat, the next round doc) plus opponentGone every 4 s. That is roughly 600 reads for a mode-A game and up to about 1000 for B/C. A whole class playing many games could hit the CloudBase read quota. Possible saving: stop re-reading your own doc each poll and apply your own patches to the cache (about 1/3 fewer reads). Not done; it is a riskier change.
+ - A dead seat still blocks a room for up to 20 s (seatStaleMs) before the host moves to the next seat number. The ladder skips that room, and other guests get kind 'taken' meanwhile.
+ - Guests joining from now on see the host's {joined} about one poll later than before (the host waits for acked). Measured cost: rooms E2E went from about 155 s to about 183 s, and most of that comes from B/C waiting for both players.
+ - Not exercised end to end: the island page inside index.html's #islandFrame (only island_animal.html opened directly); the 'slow' path (hanging requests → 网络太慢 → 连不上网络 after about 4×12 s) with the real SDK; the ladder re-entry paths 再来一局 / 再找一次 on the island page (covered with fakes in test_ladder_e2e ⑩).
+ - The full jarvis_selftest.py was not run, because it rewrites repo files in place while other agents share the checkout. The bite proof was done in memory (see guards).
+
+NOTES:
+ - Before release, run `python3 jarvis_selftest.py` (or JARVIS_SELFTEST_BUDGET=300, repeated) when no other agent is using the checkout. It mutates files in place. The 15 new CASES are expected to bite; they did in memory.
+ - A code edit invalidates the .jarvis_resume.json fingerprint. The full suite passed 187/187 on the current tree. If you edit any hansen_*.js, test_*.mjs, *.py or *.html, rerun `python3 分批跑测试.py 540` and then `--recheck`, preferably when the machine is quiet. Timing-sensitive tests (pk_inpage, room_warm, theme_scroll) fail under heavy load, and the v1163 baseline fails them too.
+ - 分批跑测试.py now gives *_cloud_v1164 tests 600 s; the fingerprint rule is unchanged. jarvis_gate.py's quick tier (45 s per test) will put the v1164 E2E tests on its slow list (not counted as failures); its deep tier gives 120 s, or 360 s on the serial rerun. With JARVIS_RELEASING=1 the gate reuses the batch runner's results.
+ - I did not edit docs (handoff docs and CHANGELOG were off-limits). Behaviour changes worth writing up:
+- the host starts only after the guest answers, and withdraws the confirmation if the guest left or stays silent for 20 s;
+- B/C players move to the next word together (waiting at most this word's deadline + 3 s);
+- the opponent's live score includes 60/80 points;
+- words with spaces or hyphens are never used in battles;
+- username login no longer says 「用户名不存在」 when the cloud gave no credentials;
+- the ladder home's leaderboard box shows the real problem;
+- new test_friends_board_cloud_v1164.mjs.
+ - Guards the reports asked for that I did not add:
+- claim() nonce (partly covered by the existing 抢房原子性 guard);
+- pollResult takes st as a parameter;
+- _createForLadder passes askMode 'cn' and there is no module-level _ladderRating;
+- assignCid uses cntOk;
+- the cred guard resets RESCUE_COUNT when the refresh_token changes;
+- cloud_save put/get call dbChk;
+- friends has no `kind:'request'` and no `state:'accepted'` patch;
+- the board's cloud() has no `return null`;
+- test files do not route non-emulator hosts;
+- askName restores #pkHome;
+- the emulator stays strict (test_cloudbase_emulator_v1164 is already in discovery).
+ - Teacher console setup (unchanged): hansen_pk_rooms, hansen_friends, hansen_friend_msgs and sb_profile all set to 「读取全部数据，修改本人数据」. Rooms and ladder need no console change; friends needs the two friends collections to exist.
+ - Logs:
+- final E2E round: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/integ/r4/
+- full suite: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/integ/full1.log
+- affected tests: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/integ/aff1/
+- baseline copy used for the load comparison: /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/integ/base/

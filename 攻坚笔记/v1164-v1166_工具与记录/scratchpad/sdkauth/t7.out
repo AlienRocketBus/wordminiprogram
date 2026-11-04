@@ -1,0 +1,8 @@
+=== Q1 same realm, 6 instances created like iframe auth() (one per call), real expiry, concurrent
+{"r":["uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001"],"credPresent":true}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+=== Q2 same realm, staggered: refresh by inst A completes, then inst B (old creds in memory) refreshes
+{"a":"uid_existing_001","b":"uid_existing_001","credPresent":true}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+=== Q3 after cross-realm invalid_grant wiped storage: reload, ensureSession
+{"isSignedIn":true,"r":{"ok":false,"notReady":true,"expired":false,"definite":false,"tries":5,"reason":"云端会话尚未就绪（已重试 5 次），请稍候再试"}}

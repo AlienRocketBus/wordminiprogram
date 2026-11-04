@@ -1,0 +1,9 @@
+{
+ "STATUS": 403,
+ "timeline": [
+  "0s 正在找对手",
+  "15s 连不上网络"
+ ],
+ "login": true,
+ "final": "× 🏆 天梯排位 📡 连不上网络 排位需要联网找对手。 检查一下 Wi-Fi 或数据再试。 重新找对手 技术信息：network request error"
+}

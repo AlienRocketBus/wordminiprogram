@@ -1,0 +1,25 @@
+页面模块接线合同 v1063
+  OK  自动枚举到 37 个页面（不是写死的清单）
+  OK  8 个 Land 页在检查范围内
+  OK  spelling_pk.html 在检查范围内
+  OK  ★ 每个有云存档的页面都有账号模块（v1021）
+  OK  有云存档的页面共 30 个（19 常规岛 + 8 Land + PK 等）
+  OK  ★ 有云存档的页面都有开机恢复（v1048）
+  OK  ★ 有云存档的页面都有 Lv.3 门槛（v1030）
+  OK  会朗读单词的页面共 30 个
+  OK  ★ 每个会朗读的页面都有音量模块（v1038）
+  OK  ★ 音量模块一律不加 defer（要先于发音代码接管）
+  OK  基准页 island_animal.html 存在
+  OK  ★ 8 个 Land 页与常规岛的 auth 一致
+  OK  ★ 8 个 Land 页与常规岛的 cloudSave 一致
+  OK  ★ 8 个 Land 页与常规岛的 restore 一致
+  OK  ★ 8 个 Land 页与常规岛的 gate 一致
+  OK  ★ 8 个 Land 页与常规岛的 vol 一致
+  OK  有 PK 入口的页面共 30 个
+  OK  ★ 有 PK 入口的页面都带房间服务
+  OK  ★ 有 PK 入口的页面都带房间界面
+  OK  ★ 全仓资源戳统一为 v1163
+  OK  ★ bump_version 改为自动枚举 HTML（手工清单必然走散）
+  OK  ★ bump_version 用正则归一资源戳（能追回落后多版的戳）
+
+结果: 22 通过 / 0 失败

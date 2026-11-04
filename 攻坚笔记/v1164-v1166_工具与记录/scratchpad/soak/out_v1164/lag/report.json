@@ -1,0 +1,45 @@
+{
+ "summary": "SUMMARY profile=lag runs=600 seeds=1..600 failing_runs=0 clusters=3 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:0 I5:0 I6:4 I7:0 I8:0 I9:0 I10:0 | matches=624 settled_pairs=579 virtual=75.0h events=620673 real=28s",
+ "profile": "lag",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I6": 4
+ },
+ "failingRuns": 0,
+ "failingSeeds": [],
+ "clusters": [
+  {
+   "sig": "I6:gone-but-room-open:joinRoom:room-just-created",
+   "inv": "I6",
+   "sev": "low",
+   "count": 2,
+   "seeds": [
+    503,
+    597
+   ],
+   "example": "joinRoom(rmk0gedhuikr2wh) → 「这个房间已经没有了，换一间吧 ⟨房间已不存在⟩」 while host P0 was online and waiting with the room open (clock diff 0s)"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:no-seat:rough-network",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    438
+   ],
+   "example": "joinRoom(rmk0getji1t6f06) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    578
+   ],
+   "example": "joinRoom(rmk0gedi4dxqky8) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  }
+ ],
+ "minimal": []
+}

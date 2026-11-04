@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_quest_claimed_v1042.mjs —— 每日任务「已完成/已领取」态可读性回归
  * 事故：亮色调下点完领取，任务卡变成深墨绿底(#052e16→#14532d)，
  *   而文字已被亮色板转成深色 → **深底深字，完全看不清**。
  * 合同：亮板任务卡为浅底、标题与进度文字为深字，两者对比度足够；
  *   已完成卡同样是浅绿底深字（不得再是深绿底）；暗板保持原设计。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -18,7 +19,7 @@ console.log('每日任务已完成态可读性 v1042');
 for(const [tag,pal] of [['亮','cloud'],['暗',null]]){
   const page=await browser.newPage({viewport:{width:390,height:900}});
   page.on('pageerror',e=>errs.push(tag+':'+String(e.message).slice(0,70)));
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2600);
   R[tag]=await page.evaluate(()=>{

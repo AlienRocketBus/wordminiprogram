@@ -1,0 +1,4 @@
+打开时: {"pos":"fixed","h":844}
+完成后: {"complete":true,"pos":"fixed","top":0,"h":844,"coversScreen":true,"bodyH":1455,"viewH":844}
+ERRORS: 0 
+✅ 完成态浮层仍固定铺满, 绿块事故已修

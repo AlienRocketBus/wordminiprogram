@@ -1,0 +1,24 @@
+探索单词: opened {"screen":"exploreScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"exploreScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 786, island shows {"screen":"exploreScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+听音辨义: opened {"screen":"listenScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"listenScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 2484, island shows {"screen":"listenScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+记忆翻牌: opened {"screen":"matchScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"matchScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 1009, island shows {"screen":"matchScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+打字大师: opened {"screen":"typingScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"typingScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 1951, island shows {"screen":"typingScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+完形填空: opened {"screen":"clozeScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"clozeScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 469, island shows {"screen":"clozeScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+字母拼拼乐: opened {"screen":"scrambleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"scrambleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 490, island shows {"screen":"scrambleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+spelling bee: opened {"screen":"homeScreen","ovs":["hsnSbOverlay"],"bigFixed":["hsnSbOverlay"],"path":"island_animal.html"} | after phone-back: wrap=block topState={"hsnIsland":"island_animal.html"} hist 4->4 | inside hidden/visible island: {"screen":"homeScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+拼写大PK: opened {"screen":"homeScreen","ovs":["hsn_pk_screen"],"bigFixed":["hsn_pk_screen"],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 4->4 | inside hidden/visible island: {"screen":"homeScreen","ovs":["hsn_pk_screen"],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 1541, island shows {"screen":"homeScreen","ovs":["hsn_pk_screen"],"bigFixed":["hsn_pk_screen"],"path":"island_animal.html"}
+打地鼠: opened {"screen":"molesScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"molesScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 1479, island shows {"screen":"molesScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+极速60秒: opened {"screen":"speedScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"speedScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 918, island shows {"screen":"speedScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+火眼金睛: opened {"screen":"eagleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"eagleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 620, island shows {"screen":"eagleScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+抽卡: opened {"screen":"gachaScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"} | after phone-back: wrap=none topState=null hist 3->3 | inside hidden/visible island: {"screen":"gachaScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+   re-enter card -> visibleMs 978, island shows {"screen":"gachaScreen","ovs":[],"bigFixed":[],"path":"island_animal.html"}
+pageerrors []

@@ -1,0 +1,3 @@
+1) first board open: list [1057]  DB rating 1057
+2) after the next game: push {"ok":false,"kind":"network"}  local rating 1074  DB rating 1057
+3) next board open: re-push attempts = 0  board shows ["小爱:1057"]  local rating 1074  DB rating 1057

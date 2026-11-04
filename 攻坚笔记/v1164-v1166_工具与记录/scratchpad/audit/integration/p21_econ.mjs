@@ -1,0 +1,26 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message));
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(3000);
+const hdr = (fr)=>fr.evaluate(()=>({lvl:document.getElementById('lvl').textContent, xp:document.getElementById('xpText').textContent, coin:document.getElementById('coinCount').textContent, dia:(document.querySelector('.stat-badge.diamond, #diamondCount, [id*=iamond]')||{}).textContent, streak:(document.getElementById('streakCount')||{}).textContent, pet:(document.querySelector('.pet-name')||{}).textContent}));
+await openCard(page, 'island_animal.html'); let fr = islandFrame(page,'island_animal.html'); await dismissWelcome(page, fr);
+console.log('A start', await hdr(fr));
+// earn: learn 12 words (10xp each) 
+await fr.evaluate(()=>{ for(let i=0;i<12;i++){ try{ learnWord(i); }catch(e){} } try{ save(); }catch(e){} });
+await sleep(1500);
+await fr.evaluate(()=>{ document.querySelectorAll('.modal-bg.show,#alertModal.show').forEach(m=>m.classList.remove('show')); document.body.classList.remove('modal-open'); });
+console.log('A after learning 12 words', await hdr(fr));
+await tapEl(page, fr, '.world-map-btn'); await waitFor(page, s=>s.wrap==='none'); await sleep(800);
+await openCard(page, 'island_food.html'); fr = islandFrame(page,'island_food.html'); await dismissWelcome(page, fr); await sleep(500);
+console.log('B (food) on open', await hdr(fr));
+await tapEl(page, fr, '.world-map-btn'); await waitFor(page, s=>s.wrap==='none'); await sleep(800);
+await openCard(page, 'island_land2.html').catch(()=>{});
+await page.evaluate(()=>openIsland('island_land2.html')); await waitFor(page, s=>s.u==='island_land2.html'&&s.op==='1'&&s.rs==='complete', 9000); await sleep(1200);
+fr = islandFrame(page,'island_land2.html'); await dismissWelcome(page, fr); await sleep(500);
+console.log('C (land2) on open', await hdr(fr));
+console.log('errors', errs);
+await browser.close(); srv.close();

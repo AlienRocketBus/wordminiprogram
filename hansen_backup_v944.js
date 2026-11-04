@@ -3,7 +3,7 @@
   'use strict';
   if(!root||root.__hansenBackupLoaded)return;root.__hansenBackupLoaded=true;
 
-  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1163;
+  var SCHEMA='hansen.wordminiprogram.backup',SCHEMA_VERSION=1,CURRENT_APP_VERSION=1164;
   var FORENSIC_SCHEMA='hansen.wordminiprogram.reset-forensic',forensicExported={};
   var MAX_ITEMS=1200,MAX_VALUE=2*1024*1024,MAX_TOTAL=12*1024*1024;
   var MAX_WORD_INDEX=1000000,MAX_WORD_ENTRIES=100000,MAX_WORD_COUNT=1000000;
@@ -85,6 +85,20 @@
        · 它跟设备、跟这次登录绑定，跨设备搬过去毫无意义
        · 更糟的是**搬回来会把当前有效会话打掉**（就是本次事故）
      所以必须显式排除，且这条排除要放在最前面，先于一切收录规则。 */
+  /* 🔴v1164：**云端 SDK 自己的键一律不进备份、不被恢复。**
+     v1019 的兜底收录把 SDK 的 user_info_<env>、device_id、lang_<env>、x-tcb-trace_<env> 也收了进去。
+     恢复时（登录后自动从云端取回就会走这里）再按快照删/写这些键 ——
+     快照里没有 user_info 的（老快照、或缓存已丢后上传的），**每次登录都把本机 uid 缓存删掉**，
+     之后会话探测拿不到 uid，天梯一直「云端会话尚未就绪」。
+     它们和凭证一样是"这台设备、这次登录"的状态，不是玩家数据。 */
+  var SDK_KEY_RE=/^(?:credentials|user_info|lang|access_token|access_token_expire|refresh_token|login_type|anonymous_uuid|token_type)_|^device_id$|^x[-_]tcb[-_]|^tcb[_-]|^cloudbase/i;
+  function sdkKey(k){
+    if(typeof k!=='string'||!k)return false;
+    if(SDK_KEY_RE.test(k))return true;
+    /* 带着环境 ID 的键都是 SDK 的（credentials_<env>、user_info_<env>、lang_<env>…） */
+    var env='';try{var c=root.HANSEN_CLOUD_CONFIG;env=(c&&c.envId)?String(c.envId):'';}catch(e){}
+    return !!(env&&k.indexOf(env)>=0);
+  }
   function credentialKey(k){
     /* 🔴v1094：诊断/守护类的内部键一律不进备份。
        用户现场：登录成功后点「立即把进度存到云端」，报「备份含非法键或非字符串值」。
@@ -92,6 +106,7 @@
        它们是本机诊断状态，既非玩家进度、也不该跨设备同步，
        更不该因为格式不符就让整个备份失败。**我加的工具污染了用户的备份。** */
     if (typeof k === 'string' && DIAG_KEY_RE.test(k)) return true;
+    if (sdkKey(k)) return true;   /* v1164：SDK 的 user_info / device_id / lang / x-tcb-* 同理 */
     return typeof k === 'string' &&
       /^(?:credentials|access_token|refresh_token)|^tcb[_-]|cloudbase.*(?:token|cred)/i.test(k);
   }
@@ -417,8 +432,15 @@
     var appVersion=Number(o.appVersion);if(!isFinite(appVersion)||appVersion<=0||Math.floor(appVersion)!==appVersion)throw new Error('备份缺少有效的应用版本');
     if(!supportedJournalAppVersion(appVersion))throw new Error('备份版本 v'+appVersion+' 不受当前 v'+CURRENT_APP_VERSION+' 支持');
     if(!Array.isArray(o.items)||o.items.length>MAX_ITEMS)throw new Error('备份条目数量超限');
-    var seen={},total=0,items=[];
+    var seen={},total=0,items=[],sumItems=[];
     o.items.forEach(function(x){
+      /* v1164：v1019~v1163 上传的云端快照里带着 SDK 的键（user_info_/device_id/凭证…）。
+         校验和照算（快照是完整的），但这些键**一个都不恢复**，静默丢掉 ——
+         拒收会让所有老快照都恢复不了，写回去又会打掉当前会话。 */
+      if(x&&typeof x==='object'&&typeof x.value==='string'&&credentialKey(x.key)){
+        if(seen[x.key])throw new Error('备份含重复键：'+x.key);seen[x.key]=1;
+        sumItems.push({key:x.key,value:x.value});return;
+      }
       if(!x||typeof x!=='object'||!ownedKey(x.key)||typeof x.value!=='string')throw new Error('备份含非法键或非字符串值');
       var committed=committedValue(x.key,x.value,'import');if(committed!==x.value)throw new Error('备份含运行期 pending 字段：'+x.key);
       wordIslandValue(x.key,x.value,'import');
@@ -431,11 +453,13 @@
       if(seen[x.key])throw new Error('备份含重复键：'+x.key);seen[x.key]=1;
       var bytes=x.value.length*2;if(bytes>MAX_VALUE)throw new Error('单项数据过大：'+x.key);total+=bytes;
       if(total>MAX_TOTAL)throw new Error('备份总体积超过 12MB');
-      items.push({key:x.key,value:x.value});
+      items.push({key:x.key,value:x.value});sumItems.push({key:x.key,value:x.value});
     });
     items.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
-    if(o.checksum!==checksum(stableItems(items)))throw new Error('校验和不匹配，备份可能不完整或被改动');
-    return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:o.checksum};
+    sumItems.sort(function(a,b){return a.key<b.key?-1:a.key>b.key?1:0;});
+    if(o.checksum!==checksum(stableItems(sumItems)))throw new Error('校验和不匹配，备份可能不完整或被改动');
+    /* 丢掉 SDK 键后按剩下的条目重算校验和，返回的对象自己也能再通过校验 */
+    return {kind:'full-player-data',schema:SCHEMA,schemaVersion:SCHEMA_VERSION,appVersion:appVersion,createdAt:String(o.createdAt||''),items:items,checksum:checksum(stableItems(items))};
   }
   /* 🔴v1090 双保险：恢复/回滚同样不许碰凭证。
      ownedKey 已经排除了，但 transientKey/derivedKey 是另外两条通路，
@@ -450,7 +474,8 @@
     if(!Array.isArray(list)||list.length>MAX_ITEMS*2)throw new Error('恢复日志快照数量无效');
     var seen={},total=0,out=[];
     list.forEach(function(x){
-      if(!x||typeof x!=='object'||!rawEntryAllowed(x.key)||typeof x.value!=='string')throw new Error('恢复日志含非法玩家键');
+      /* v1164：v1163 及以前的日志里可能带着 SDK 键 —— 认它（校验和要算），但 restoreRaw 绝不写回 */
+      if(!x||typeof x!=='object'||!(rawEntryAllowed(x.key)||sdkKey(x.key))||typeof x.value!=='string')throw new Error('恢复日志含非法玩家键');
       if(seen[x.key])throw new Error('恢复日志含重复键：'+x.key);seen[x.key]=1;
       var bytes=x.value.length*2;if(bytes>MAX_VALUE)throw new Error('恢复日志单项过大：'+x.key);total+=bytes;
       if(total>MAX_TOTAL*2)throw new Error('恢复日志快照总体积过大');
@@ -483,7 +508,7 @@
     var remove=[];
     /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk4=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk4.length;i++){var k=_lsk4[i];if(rawEntryAllowed(k))remove.push(k);}
     remove.forEach(function(k){localStorage.removeItem(k);if(localStorage.getItem(k)!==null)throw new Error('原始玩家快照清理失败：'+k);});
-    list.forEach(function(x){localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
+    list.forEach(function(x){if(credentialKey(x.key))return;localStorage.setItem(x.key,x.value);if(localStorage.getItem(x.key)!==x.value)throw new Error('原始玩家快照回滚失败：'+x.key);});
   }
   function readJournal(){
     var raw=localStorage.getItem(RESTORE_JOURNAL);if(raw===null)return null;
@@ -570,7 +595,7 @@
   function downloadResetForensic(){
     try{
       var keys=currentResetKeys(),payload=buildResetForensic(),blob=new Blob([toText(payload)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1163_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
+      var a=document.createElement('a');a.href=url;a.download='单词大冒险_v1164_重置故障取证_'+new Date().toISOString().slice(0,10)+'.json';
       document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
       forensicExported[keys.journalKey]=true;status('✅ 只读重置取证包已生成；它不会修改存档，也不能直接导入。',true);return true;
     }catch(e){status('❌ 取证包未生成：'+e.message,false);return false;}
@@ -586,7 +611,37 @@
       if(root.location&&typeof root.location.reload==='function')root.location.reload();return true;
     }catch(e){status('❌ '+e.message,false);return false;}
   }
-  function restore(input){var p=parseInput(input),n=replaceAll(p.items);return {items:n,appVersion:p.appVersion,createdAt:p.createdAt};}
+  /* 🔴v1164 恢复之后、页面重新载入之前「冻结」进度：
+     恢复只改了本机存储，页面内存里还是旧进度（v1026 的教训：必须重新载入）。从写好到真正重新载入有 0.6～1.2 秒，
+     这中间孩子答一题、或者页面关掉时顺手存一下，都会把内存里的旧进度写回去 —— 重新载入后它就成了「对上了账」的进度，
+     被传上云：云端 20 个词被 4 个词盖掉。
+     所以：恢复一写完，就记一个冻结标记（sessionStorage，同一个标签页里的几层页面都看得到），
+     冻结期间所有页面往「备份管的那些键」里写 / 删都不算数（凭证、云存档自己的状态、账号标记这些不受影响）。
+     · 解冻：持有进度的那一层页面（往外数最后一层装了备份模块的）**下一次载入时清掉一次**；
+       不管怎样 30 秒后自动作废 —— 卡住了也不会让孩子一直存不了。
+     · 恢复是嵌着的那层（比如岛里的季节页）做的：它只刷新自己，外层岛页内存里也是旧的 —— 外层也要重新载入。 */
+  var FREEZE_KEY='hsnRestoreFreeze_v1164',FREEZE_MS=30000;
+  function framePath(w){var p=[];try{while(w&&w.parent&&w.parent!==w){var par=w.parent,i=-1;for(var j=0;j<par.frames.length;j++)if(par.frames[j]===w){i=j;break;}p.unshift(i);w=par;}}catch(e){p.unshift('?');}return p.join('.');}
+  function ownerWin(){var w=root;try{while(w.parent&&w.parent!==w&&w.parent.HansenBackup)w=w.parent;}catch(e){}return w;}
+  function readFreeze(ss){try{var r=JSON.parse(ss.getItem(FREEZE_KEY)||'null'),age=r&&Date.now()-r.at;return (r&&typeof r.at==='number'&&age>=0&&age<FREEZE_MS)?r:null;}catch(e){return null;}}
+  function guardRealm(w){
+    try{
+      var SP=w.Storage&&w.Storage.prototype,ss=w.sessionStorage;if(!SP||!ss||SP.setItem.__hsnFreeze)return;
+      var wrap=function(orig,keyed){var f=function(k){
+        if(this!==ss&&!w.__hsnRestoreApplying&&readFreeze(ss)&&(!keyed||ownedKey(k)||transientKey(k)||derivedKey(k)))return;   /* 冻结中：作废 */
+        return orig.apply(this,arguments);};f.__hsnFreeze=true;return f;};
+      SP.setItem=wrap(SP.setItem,true);SP.removeItem=wrap(SP.removeItem,true);SP.clear=wrap(SP.clear,false);
+    }catch(e){}
+  }
+  function freezeAfterRestore(){
+    try{
+      var o=ownerWin();root.sessionStorage.setItem(FREEZE_KEY,JSON.stringify({at:Date.now(),path:framePath(o)}));
+      (function walk(w){guardRealm(w);try{for(var i=0;i<w.frames.length;i++)walk(w.frames[i]);}catch(e){}})(o);
+      if(o!==root&&o.HansenBackup&&o.HansenBackup._reloadSoon)o.HansenBackup._reloadSoon();
+    }catch(e){}
+  }
+  function reloadSoon(){setTimeout(function(){try{root.location.reload();}catch(e){}},1500);}
+  function restore(input){var p=parseInput(input),n;root.__hsnRestoreApplying=true;try{n=replaceAll(p.items);}finally{root.__hsnRestoreApplying=false;}freezeAfterRestore();return {items:n,appVersion:p.appVersion,createdAt:p.createdAt};}
   function restoreFromArea(){
     var ta=document.getElementById('hsnBackupArea'),text=ta?ta.value:'';
     function go(){try{var r=restore(text);status('✅ 已恢复 '+r.items+' 项数据，正在刷新…',true);setTimeout(function(){location.reload();},500);}catch(e){status('❌ '+e.message,false);}}
@@ -616,7 +671,10 @@
     try{var s=document.getElementById('settingsScreen');if(s&&(s.classList.contains('active')||s.classList.contains('show')))inject();}catch(e){}
   }
 
-  var startupRecovery=null;try{startupRecovery=recoverRestoreJournal();}catch(recoveryErr){startupRecovery={recovered:false,error:recoveryErr.message};root.__hansenBackupRecoveryError=recoveryErr.message;}
-  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,/* v1081: 面板要显示版本号——此前无法确认用户手机上跑的是哪一版，改了五版都不知有没有生效 */appVersion:function(){return CURRENT_APP_VERSION;},build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL};
+  /* 新载入的这一页就是冻结时持有进度的那一层：解冻（只清这一次）；过期的也清掉 */
+  try{var _ss=root.sessionStorage,_fr=JSON.parse(_ss.getItem(FREEZE_KEY)||'null');if(_fr&&(!readFreeze(_ss)||_fr.path===framePath(root)))_ss.removeItem(FREEZE_KEY);}catch(e){}
+  guardRealm(root);
+  var startupRecovery=null;root.__hsnRestoreApplying=true;try{startupRecovery=recoverRestoreJournal();}catch(recoveryErr){startupRecovery={recovered:false,error:recoveryErr.message};root.__hansenBackupRecoveryError=recoveryErr.message;}root.__hsnRestoreApplying=false;
+  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,/* v1081: 面板要显示版本号——此前无法确认用户手机上跑的是哪一版，改了五版都不知有没有生效 */appVersion:function(){return CURRENT_APP_VERSION;},build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL,_reloadSoon:reloadSoon,restoreFrozen:function(){try{return !!readFreeze(root.sessionStorage);}catch(e){return false;}}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hookSettings);else hookSettings();
 })(typeof window!=='undefined'?window:this);

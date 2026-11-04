@@ -1,0 +1,22 @@
+
+▶ ① 单词录音没下载下来（island_body）
+  ✅ ① 先试了本地录音 ["words/leg.mp3?v215"]
+  ❌ ① 自动朗读：手机朗读正好一次、读的是「leg」 []
+  ❌ ① 点 🔊：手机朗读正好一次 []
+  ✅ ① 页面无报错 
+
+▶ ② 例句录音没下载下来（island_season 完形填空）
+  ✅ ② 先试了这句例句的本地录音 ["words/convenient_ex_season.mp3?v215"]
+  ❌ ② 手机朗读了这句例句、正好一次「Living near the station is very convenient.」 []
+  ✅ ② 页面无报错 
+
+▶ ③ 录音正常（island_body）
+  ✅ ③ 自动朗读和点 🔊 都放本地录音，手机朗读 0 次 {"tts":[],"plays":["words/ear.mp3?v215","words/ear.mp3?v215"]}
+  ✅ ③ 页面无报错 
+
+▶ ④ 一键静音（island_body，录音也没下载下来）
+  ✅ ④ 静音时自动朗读：不放录音、也不用手机朗读 {"word":"lip","tts":[],"plays":[]}
+  ✅ ④ 页面无报错 
+  ✅ ⑤ 全程没有去 gstatic / baidu / youdao 联网找发音 []
+
+❌ 失败 3 项

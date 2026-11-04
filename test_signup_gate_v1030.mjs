@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_signup_gate_v1030.mjs —— Lv.3 强制注册门槛回归
  * 产品决策：前两级自由玩(让人先看到价值)，升到 Lv.3(250XP) 必须注册才能继续；
  *   注册即把本机进度上云，之后任何设备登录同一账号都能恢复。
  * 合同：① 未达 Lv.3 不打扰；② 达到 Lv.3 且未登录 → 弹出且**无法关闭**(无 ✕、点遮罩不关)；
  *       ③ 已登录 → 不再弹；④ 云服务未开通时不得把人堵死；⑤ 弹窗要显示待保存的真实进度。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -23,7 +24,7 @@ console.log('Lv.3 强制注册门槛 v1030');
 async function scene(name, seed, force){
   const page=await browser.newPage({viewport:{width:390,height:844}});
   page.on('pageerror',e=>errs.push(name+':'+String(e.message).slice(0,70)));
-  await page.addInitScript(s=>{ localStorage.clear();
+  await page.addInitScript(s=>{ if (window.top === window) localStorage.clear();
     Object.keys(s).forEach(k=>localStorage.setItem(k, s[k])); }, seed);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2800);

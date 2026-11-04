@@ -1,0 +1,126 @@
+{
+ "name": "R12b_pending_retried_once_then_dropped_6165390",
+ "bug": "R12 (6165390): a pending claim is re-sent only once (retryPending) and dropped after 60 s; if that one re-send hits the outage the word is lost for good (0 points, score wrong)",
+ "spec": {
+  "seed": 187,
+  "profile": "disrupt",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 1500,
+   "lagShape": 1,
+   "queryLagMul": 1.62,
+   "queryLagExtra": 466,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.36,
+  "outages": [
+   {
+    "a": 57380,
+    "b": 107009,
+    "mode": "fast"
+   }
+  ],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x187",
+    "name": "小明",
+    "rating": 952,
+    "skew": 0,
+    "net": {
+     "base": 82,
+     "jitter": 62,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.83,
+     "minMs": 2130,
+     "maxMs": 8828,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2707,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P3",
+    "uid": "k3x187",
+    "name": "朵朵",
+    "rating": 999,
+    "skew": 0,
+    "net": {
+     "base": 69,
+     "jitter": 45,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [
+     {
+      "a": 99201,
+      "b": 147053,
+      "mode": "hang"
+     }
+    ],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.65,
+     "minMs": 2513,
+     "maxMs": 14942,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1895,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": null
+   }
+  ],
+  "adversary": null
+ }
+}

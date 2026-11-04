@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_real_path_smoke_v1163.mjs —— 不用任何测试桩的真实路径冒烟测试
  *
  * ═══ 为什么要有这个文件 ═══
@@ -42,7 +43,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = '/home/claude/work/repo';
+const ROOT = __HSN_ROOT.replace(/\/$/, '');
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png',
@@ -77,7 +78,7 @@ console.log('真实路径冒烟 v1163（零测试桩）\n');
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
 await ctx.addInitScript(() => {
   try {
-    localStorage.clear();
+    if (window.top === window) localStorage.clear();
     /* 只放登录态和名字 —— 这是真实用户的状态，不是测试桩 */
     localStorage.setItem('hansen_auth_v1004',
       JSON.stringify({ uid: 'U1', method: 'phone', signedAt: Date.now() }));

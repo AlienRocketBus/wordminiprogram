@@ -1,0 +1,20 @@
+{
+ "normal": {
+  "taskSec_25s": 16.28,
+  "scriptSec_25s": 1.18,
+  "layoutSec_25s": 0.42,
+  "heapMB_after": 11.3,
+  "frames": 8,
+  "documents": 9,
+  "nodes": 11330
+ },
+ "warm_blocked": {
+  "taskSec_25s": 15.56,
+  "scriptSec_25s": 0.51,
+  "layoutSec_25s": 0.31,
+  "heapMB_after": 5.7,
+  "frames": 2,
+  "documents": 3,
+  "nodes": 5410
+ }
+}

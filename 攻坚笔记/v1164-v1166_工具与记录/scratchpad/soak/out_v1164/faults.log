@@ -1,0 +1,15 @@
+
+══ clusters (5) ══
+  [high  ]    1× I4:results-win-win:real/ab:result-wait-gone   seeds 101
+           e.g. rmk0gedhlqnwxpn host win 200:100 vs guest win 100:0 [H-real/G-abandon(result-wait-gone)] disrupted(freeze)
+  [medium]    1× I4:score-vs-rounds:pending-scored-0-vs-60   seeds 28
+           e.g. rmk0geczt52fb1g word 3: P1 spelled it right; round doc {"winner":"host","by":"k0x28","at":1767574922806.2742,"id":"rmk0geczt52fb1g_w3","k":""} ⇒ 60 points, the UI scored 0 (claimRound ok won=false pending)
+  [low   ]    2× I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away   seeds 185,471
+           e.g. joinRoom(rmk0gedj18ty00q) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 523
+           e.g. joinRoom(rmk0gesp7d5bmcb) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away   seeds 582
+           e.g. joinRoom(rmk0ged0jtlaljl) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+
+SUMMARY profile=faults runs=600 seeds=1..600 failing_runs=2 clusters=5 (fail-level 2) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:2 I5:0 I6:4 I7:0 I8:0 I9:0 I10:0 | matches=636 settled_pairs=579 virtual=75.3h events=628118 real=27s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

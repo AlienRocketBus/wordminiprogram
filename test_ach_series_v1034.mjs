@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_ach_series_v1034.mjs —— 成就「阶梯系列」回归
  * 两个问题：
  *  ① v1020 新增的「复习/精通/速度/对决」四类共 22 个成就，
@@ -7,9 +8,9 @@
  * 合同：① 渲染分类必须覆盖全部实际分类，不得再有成就被藏起来；
  *       ② 成就成系列(series/step)，每系列多级递进；
  *       ③ 成就页能正常打开、零脚本错误。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -20,7 +21,7 @@ const errs=[];
 console.log('成就阶梯系列 v1034');
 const page=await browser.newPage({viewport:{width:390,height:900}});
 page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
-await page.addInitScript(()=>{localStorage.clear();});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2800);
 const r = await page.evaluate(()=>{

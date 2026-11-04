@@ -1,0 +1,84 @@
+{
+ "home": {
+  "busyPct": 58,
+  "scriptPct": 0,
+  "layoutPct": 0,
+  "recalcPct": 6,
+  "rafPerSec": 0.5,
+  "canvases": 0,
+  "anims": {
+   "total": 186,
+   "running": 8,
+   "top": [
+    [
+     "flyUfo",
+     1
+    ],
+    [
+     "bobSlow",
+     1
+    ],
+    [
+     "flyRocket",
+     1
+    ],
+    [
+     "flySatellite",
+     1
+    ],
+    [
+     "flyComet",
+     1
+    ],
+    [
+     "flyStar",
+     1
+    ],
+    [
+     "rainbowFlow",
+     1
+    ],
+    [
+     "titleBreathe",
+     1
+    ]
+   ]
+  }
+ },
+ "island": {
+  "busyPct": 5,
+  "scriptPct": 2,
+  "layoutPct": 0,
+  "recalcPct": 1,
+  "rafPerSec": 0.6,
+  "canvases": 0,
+  "anims": {
+   "total": 1,
+   "running": 1,
+   "top": [
+    [
+     "hsnPetFloatSlow",
+     1
+    ]
+   ]
+  }
+ },
+ "island-noWarm": {
+  "busyPct": 4,
+  "scriptPct": 1,
+  "layoutPct": 0,
+  "recalcPct": 1,
+  "rafPerSec": 0.6,
+  "canvases": 0,
+  "anims": {
+   "total": 1,
+   "running": 1,
+   "top": [
+    [
+     "hsnPetFloatSlow",
+     1
+    ]
+   ]
+  }
+ }
+}

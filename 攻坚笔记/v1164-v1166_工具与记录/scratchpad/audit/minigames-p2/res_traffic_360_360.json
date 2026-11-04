@@ -1,0 +1,576 @@
+{
+ "island": "traffic",
+ "games": {
+  "explore": {
+   "notes": [
+    "cards=30 allW=30",
+    "after learn {\"modal\":false,\"learned\":1,\"firstLearned\":true}"
+   ],
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "modal": "✕ 🚗 car /kɑː/ 汽车 📝 My dad's car is red. 我爸爸的车是红色的。 🔊 发音 🐢 慢速 📝 例句 📚 加入学习！+10 经验 这个单词的两条真实进度 🐾 宠物掌握 0 / 3 还需在打字大师中无提示、整词精确拼对 3 次。选择题、听音选项和看提示拼写都不增加这条进度。 💎 知识结晶 ☆☆☆☆☆ 打开聚焦 Spelling Bee 后可调机器人速度：",
+   "modalOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 10,
+    "answers": 0
+   },
+   "ms": 10295,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "traffic:explore",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:explore:close",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  },
+  "typing": {
+   "notes": [
+    "typing: no next word in 6s at q=13"
+   ],
+   "levelText": [
+    "🌱 初级 · 3-4 字母短词 13 词 · 🎓经验 +77 · 🐾宠物经验 +25 · 🪙金币 +13 ▶",
+    "⚡ 中级 · 5-6 字母中等词 9 词 · 🎓经验 +115 · 🐾宠物经验 +40 · 🪙金币 +9 ▶",
+    "🔥 高级 · 7+ 字母长词挑战 8 词 · 🎓经验 +194 · 🐾宠物经验 +70 · 🪙金币 +8 ▶"
+   ],
+   "kbLayout": {
+    "n": 30,
+    "maxBottom": 642,
+    "minW": 33,
+    "vh": 844,
+    "scrollY": 0,
+    "bodyPos": "fixed"
+   },
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "🥉 初级 · 铜牌 🌱 初级 · 3-4 字母短词 完成！ 成功打出 11 个单词 打字速度 1635 字母/分钟 ⚡ 神速! 总用时 4.43秒 准确率 95% 最快 1635 🎉 新纪录! 你的第一个速度记录! 🚀 📝 这局拼错的词 (2个) · 记得复习哦 boat road ⏱️ 每个词用时 taxi 0.40s seat 0.50s bus 0.30⚡ bike 0.49s stop 0.45s map 0.30s car 0.33s turn 0.43s van 0.34s left 0.45s ship 0.45s 🪙 金币 +11 🎓 经验 +74 🐾 宠物经验 +25 ⚡ 挑战中级 🔄 再来一局 ⌨️ 换难度 🏠 主页",
+   "played": {
+    "q": 13,
+    "right": 11,
+    "wrongN": 2,
+    "timeouts": 0,
+    "untypeable": []
+   },
+   "resultOverflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "delta": {
+    "coins": 13,
+    "xp": 111,
+    "answers": 13
+   },
+   "ms": 26711,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": [
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    },
+    {
+     "tag": "traffic:typing",
+     "kind": "console.error",
+     "text": "Failed to load resource: net::ERR_FAILED",
+     "loc": "https://ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously?client_id=ambitious-d0g1d26xm740dc3d6"
+    }
+   ]
+  },
+  "scramble": {
+   "notes": [
+    "skip advanced=true",
+    "no next word q=13"
+   ],
+   "levelText": [
+    "🌱 初级 · 3-4 字母短词 man · cat · cow 📚 13 词 · 全对得 🎓经验 +80 · 🐾宠物经验 +25 · 🪙金币 +13 →",
+    "⚡ 中级 · 5-6 字母中等词 tiger · friend · old 📚 9 词 · 全对得 🎓经验 +115 · 🐾宠物经验 +40 · 🪙金币 +9 →",
+    "🔥 高级 · 7+ 字母长词 children · gentleman 📚 8 词 · 全对得 🎓经验 +194 · 🐾宠物经验 +65 · 🪙金币 +8 →"
+   ],
+   "level": "easy",
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "🔄 🌱 初级 全部拼完！ 答对 12 / 13 个 · 正确率 92% 🪙 金币 +12 🎓 经验 +131 🐾 宠物经验 +25 ⚡ 挑战中级 🔄 换难度 🏠 主页",
+   "played": {
+    "q": 13,
+    "right": 12,
+    "wrong": 1,
+    "skips": 1,
+    "hint": 1
+   },
+   "delta": {
+    "coins": 25,
+    "xp": 131,
+    "answers": 14
+   },
+   "ms": 31605,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "spellbee": {
+   "notes": [],
+   "setup": {
+    "tip": "动物大冒险词库",
+    "sub": "【交通岛】和机器人比赛拼这个岛的单词 · 谁先拼对谁得分",
+    "words": 30,
+    "chips": [
+     "🌱 初级 3–4 字母短词 · 13个[sel]",
+     "⭐ 中级 5–6 字母 · 9个",
+     "🔥 高级 7+ 字母长词 · 8个",
+     "🌈 全部 全难度混合 · 30个"
+    ],
+    "qCount": 100,
+    "diff": "beginner",
+    "mode": "listen"
+   },
+   "totalQ": 13,
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "kbBottom": {
+    "max": 794,
+    "vh": 844
+   },
+   "resPanel": "🎉 你赢了 拼对又赢 +4🪙 本局已得 4🪙 正确答案 stop /stɒp/ 停 下一题 ›",
+   "played": {
+    "q": 4,
+    "right": 3,
+    "lost": 1,
+    "over": false
+   },
+   "delta": {
+    "coins": 12,
+    "xp": 6,
+    "answers": 0
+   },
+   "ms": 16717,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "fish": {
+   "notes": [],
+   "levelText": [
+    "🌱 初级 · 简单短词 ❤️ 5 条命 · 海底生物悠游 🐟 13 条 · 全对得 🎓经验 +80 · 🐾宠物经验 +30 · 🪙金币 +13 →",
+    "⚡ 中级 · 中等词 ❤️ 4 条命 · 速度稍快 🐟 9 条 · 全对得 🎓经验 +97 · 🐾宠物经验 +45 · 🪙金币 +9 →",
+    "🔥 高级 · 长词挑战 ❤️ 3 条命 · 满海大场面 🐟 8 条 · 全对得 🎓经验 +157 · 🐾宠物经验 +65 · 🪙金币 +8 →"
+   ],
+   "level": "easy",
+   "result": "🎣 🌱 初级 完成！ 钓上全部 13 条 本局得分 110 🏆 历史最高 110 🎉 新纪录！太厉害啦 🪙 金币 +11 🎓 经验 +139 🐾 宠物经验 +30 ⚡ 挑战中级 🎣 换难度 🏠 主页",
+   "played": {
+    "q": 13,
+    "right": 12,
+    "wrong": 1,
+    "waitMax": 6085
+   },
+   "delta": {
+    "coins": 20,
+    "xp": 139,
+    "answers": 13
+   },
+   "ms": 26519,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "eagle": {
+   "notes": [
+    "timeout advanced after 13434ms"
+   ],
+   "levelText": [
+    "选择难度开始挑战",
+    "每档单词不重复, 完成一档=完成一次任务",
+    "🌱 初级 4 选 1 · 12 秒 · 简单单词 📚 13 词 · 全对得 🎓经验 +80 · 🐾宠物经验 +30 · 🪙金币 +13 →",
+    "⚡ 中级 6 选 1 · 9 秒 · 中等单词 📚 9 词 · 全对得 🎓经验 +120 · 🐾宠物经验 +50 · 🪙金币 +9 →",
+    "🔥 高级 9 选 1 · 7 秒 · 长词挑战 📚 8 词 · 全对得 🎓经验 +199 · 🐾宠物经验 +75 · 🪙金币 +8 →"
+   ],
+   "level": "easy",
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "result": "👀 🌱 初级 完成！ 通关 13 题 本局得分 500 🏆 历史最高 500 🎉 新纪录！太厉害啦 🪙 金币 +4 🎓 经验 +131 🐾 宠物经验 +30 ⚡ 挑战中级 👀 换难度 🏠 主页",
+   "played": {
+    "q": 13,
+    "right": 11,
+    "wrong": 1,
+    "tmo": 1
+   },
+   "delta": {
+    "coins": 15,
+    "xp": 131,
+    "answers": 13
+   },
+   "ms": 28352,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  },
+  "gacha": {
+   "notes": [],
+   "text": "← 返回 🎴 抽卡寻宝 📚 已收集 0 / 20 张卡 🪙 385 🌟 距「至尊卡」保底还差 100 抽 当前至尊概率 0.5% 抽得越多，越接近至尊卡 抽一张 🪙 1000 📊 抽中概率 普通 55% 稀有 27% 史诗 12% 传说 5.5% 至尊 0.5%（100抽必出） 💠 碎片兑换 抽到重复的卡会变成碎片，攒够可以兑换没有的卡（至尊卡碎片不能兑换，只能抽）。 普通碎片 0/50 💠 兑换 稀有碎片 0/100 💠 兑换 史诗碎片 0/200 💠 兑换 传说碎片 0/400 💠 兑换 至尊碎片 0 💠 不可兑换",
+   "overflow": {
+    "docOverflow": false,
+    "items": []
+   },
+   "afterDraw": {
+    "toast": [
+     "金币不够啦！多答题、打Boss赚金币吧 🪙"
+    ],
+    "coins": 385,
+    "overlays": [
+     "hansenFxLayer",
+     "hansenFxLayerBack"
+    ]
+   },
+   "delta": {
+    "coins": 0,
+    "xp": 0,
+    "answers": 0
+   },
+   "ms": 2133,
+   "home": {
+    "active": "homeScreen",
+    "bodyCls": "",
+    "bodyOverflow": "hidden auto",
+    "bodyPos": "static",
+    "blockers": [],
+    "flags": {
+     "listenActive": false,
+     "typeActive": false,
+     "spActive": false,
+     "molesActive": false,
+     "fishActive": false,
+     "bubbleActive": false,
+     "eagleActive": false,
+     "clozeActive": false,
+     "matchActive": false
+    },
+    "timers": {
+     "spTimer": null,
+     "typeTimerInt": null,
+     "eagleTimer": null,
+     "bubbleCountdownTimer": null,
+     "bubbleFloatTimer": null,
+     "molesWaveTimer": null,
+     "fishSpawnTimer": null
+    },
+    "canScroll": true,
+    "hOverflow": false,
+    "sbOv": false,
+    "pkOn": false,
+    "pkOv": false,
+    "alertShown": false,
+    "modalShown": false
+   },
+   "events": []
+  }
+ },
+ "notes": [
+  "home card tap: {\"ok\":true,\"hit\":\"DIV.island-en \\\"TRANSPORTATION\\\"\"}",
+  "welcome btn tap ok=true"
+ ],
+ "ext": [
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signin/anonymously"
+ ],
+ "openMs": 781,
+ "landing": "homeScreen",
+ "welcome": "🎮 欢迎来到交通大冒险！ 🗺️ 5 大交通工具岛屿等你探索 📚 30 个英语单词随你学 🎮 12 种超酷玩法等你来 🐉 36 阶进化宠物 🎁 每日宝箱 + 签到奖励 🏆 144 个成就等你解锁 🎒 小冒险家秘籍： 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 开始冒险！",
+ "cards": [
+  "探索单词",
+  "听音辨义",
+  "🃏 记忆翻牌",
+  "打字大师",
+  "完形填空",
+  "字母拼拼乐",
+  "spelling bee",
+  "⚔️ 拼写大PK",
+  "打地鼠",
+  "钓鱼大师",
+  "泡泡大作战",
+  "极速60秒",
+  "火眼金睛",
+  "抽卡"
+ ],
+ "homeOverflow": {
+  "docOverflow": false,
+  "items": []
+ },
+ "start": {
+  "coins": 300,
+  "xp": 0
+ },
+ "extCount": 9,
+ "allEvents": [
+  {
+   "tag": "traffic:boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:34833/hansen_friends_ui_v1107.js?v=1163 net::ERR_ABORTED"
+  },
+  {
+   "tag": "traffic:boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:34833/hansen_sb_pk_v1022.js?v=1163 net::ERR_ABORTED"
+  },
+  {
+   "tag": "traffic:boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:34833/hansen_pk_room_v1065.js?v=1163 net::ERR_ABORTED"
+  },
+  {
+   "tag": "traffic:boot",
+   "kind": "requestfailed",
+   "text": "http://127.0.0.1:34833/hansen_pk_room_ui_v1065.js?v=1163 net::ERR_ABORTED"
+  }
+ ],
+ "end": {
+  "coins": 385,
+  "xp": 528,
+  "answers": 53,
+  "learned": 1
+ },
+ "totalMs": 150903
+}

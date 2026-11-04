@@ -1,0 +1,22 @@
+import { openIsland, done } from './h.mjs';
+const { page, errs } = await openIsland('island_animal.html');
+const r = await page.evaluate(async () => {
+  const log = [];
+  const t0 = performance.now();
+  const T = () => Math.round(performance.now() - t0);
+  const oN = window.nextClozeQ, oC = window.clozeComplete;
+  window.nextClozeQ = function () { log.push(T() + ' nextClozeQ pool=' + clozePool.length + ' active=' + clozeActive); return oN.apply(this, arguments); };
+  window.clozeComplete = function () { log.push(T() + ' clozeComplete'); return oC.apply(this, arguments); };
+  startCloze(); startClozeLevel('easy');
+  clozePool.splice(0, Math.max(0, clozePool.length - 1));
+  log.push(T() + ' first=' + clozeQ.word.en + ' pool=' + clozePool.length);
+  const miss = clozeQ.word; const opts = [...document.querySelectorAll('#clozeScreen .cloze-opt')];
+  opts[clozeQ.opts.findIndex(o => o.en !== miss.en)].click();
+  const card = await __w(__card, 2000); log.push(T() + ' card=' + !!card); __tapCard(); log.push(T() + ' tapped active=' + clozeActive + ' q=' + (clozeQ && clozeQ.word.en));
+  await new Promise(r => setTimeout(r, 300));
+  log.push(T() + ' after300 active=' + clozeActive + ' q=' + (clozeQ && clozeQ.word.en) + ' optsDone=' + (document.querySelector('#clozeScreen .cloze-opt') || {}).dataset?.done);
+  return log;
+});
+console.log(r.join('\n'));
+console.log('errs', errs);
+await done();

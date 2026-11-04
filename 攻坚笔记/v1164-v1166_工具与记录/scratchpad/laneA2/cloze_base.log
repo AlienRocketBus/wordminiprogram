@@ -1,0 +1,45 @@
+
+▶ ① 27 个岛的完形各档
+  ❌ ① 27 个岛每档卡片题数 = 能出题的词数 = 本档词数（没有被悄悄跳过的词）
+     island_action.html {"easy":{"card":30,"words":30,"ask":28},"medium":{"card":27,"words":27,"ask":23},"hard":{"card":10,"words":10,"ask":9}} 缺 easy:cook,easy:start,medium:draw,medium:fly,medium:get,medium:teach,hard:drive
+     island_animal.html {"easy":{"card":13,"words":13,"ask":10},"medium":{"card":15,"words":15,"ask":15},"hard":{"card":14,"words":14,"ask":13}} 缺 easy:pig,easy:eagle,easy:cow,hard:duck
+     island_body.html {"easy":{"card":20,"words":20,"ask":12},"medium":{"card":13,"words":13,"ask":12},"hard":{"card":2,"words":2,"ask":2}} 缺 easy:eye,easy:ear,easy:lip,easy:arm,easy:hand,easy:leg,easy:heel,easy:bone,medium:elbow
+     island_clothes.html {"easy":{"card":12,"words":12,"ask":12},"medium":{"card":12,"words":12,"ask":11},"hard":{"card":6,"words":6,"ask":6}} 缺 medium:sleeve
+     island_color.html {"easy":{"card":15,"words":15,"ask":15},"medium":{"card":11,"words":11,"ask":11},"hard":{"card":9,"words":9,"ask":8}} 缺 hard:thousand
+     island_family.html {"easy":{"card":10,"words":10,"ask":10},"medium":{"card":11,"words":11,"ask":10},"hard":{"card":10,"words":10,"ask":9}} 缺 medium:sibling,hard:relative
+     island_food.html {"easy":{"card":17,"words":17,"ask":17},"medium":{"card":24,"words":24,"ask":22},"hard":{"card":15,"words":15,"ask":9}} 缺 medium:grape,medium:strawberry,hard:vegetable,hard:tomato,hard:potato,hard:carrot,hard:onion,hard:cookie
+     island_job.html {"easy":{"card":12,"words":12,"ask":11},"medium":{"card":12,"words":12,"ask":11},"hard":{"card":6,"words":6,"ask":5}} 缺 easy:farmer,medium:artist,hard:firefighter
+     island_nature.html {"easy":{"card":15,"words":15,"ask":13},"medium":{"card":15,"words":15,"ask":13},"hard":{"card":10,"words":10,"ask":10}} 缺 easy:star,easy:snow,medium:cloud,medium:flower
+     island_school.html {"easy":{"card":12,"words":12,"ask":12},"medium":{"card":11,"words":11,"ask":11},"hard":{"card":15,"words":15,"ask":14}} 缺 hard:computer
+     island_sports.html {"easy":{"card":8,"words":8,"ask":8},"medium":{"card":16,"words":16,"ask":15},"hard":{"card":6,"words":6,"ask":6}} 缺 medium:sport
+     island_time.html {"easy":{"card":16,"words":16,"ask":16},"medium":{"card":16,"words":16,"ask":13},"hard":{"card":8,"words":8,"ask":7}} 缺 medium:hour,medium:minute,medium:Saturday,hard:holiday
+     island_traffic.html {"easy":{"card":13,"words":13,"ask":13},"medium":{"card":9,"words":9,"ask":8},"hard":{"card":8,"words":8,"ask":7}} 缺 medium:ticket,hard:passenger
+     island_treasure.html {"easy":{"card":32,"words":32,"ask":32},"medium":{"card":22,"words":22,"ask":21},"hard":{"card":6,"words":6,"ask":6}} 缺 medium:thing
+
+▶ ②③ island_body.html 完形 easy 全对
+  ❌ ②③ 全对 → 答对 12 / 20 题 · 正确率 60%
+  ✅ ②③ 结算总数 = 卡片上写的题数（卡片 20，结算 20）
+  ❌ ②③ 题号一题一题走、不跳号：1,2,6,7,9,10,11,12,15,16,17,18
+  ✅ 页面无报错 
+
+▶ ②③ island_animal.html 完形 easy 全对
+  ❌ ②③ 全对 → 答对 10 / 13 题 · 正确率 77%
+  ✅ ②③ 结算总数 = 卡片上写的题数（卡片 13，结算 13）
+  ❌ ②③ 题号一题一题走、不跳号：1,2,3,4,7,8,9,11,12,13
+  ✅ 页面无报错 
+
+▶ ④ 大小写和变形
+  ❌ ④ it：答完句子和原例句一字不差（「I have a cat. it is white.」 vs 「I have a cat. It is white.」）
+  ✅ 页面无报错 
+  ❌ ④ year：答完句子和原例句一字不差（「Happy New year!」 vs 「Happy New Year!」）
+  ✅ 页面无报错 
+  ❌ ④ eye：答完句子和原例句一字不差（「」 vs 「Her eyes are bright and beautiful.」）
+  ✅ 页面无报错 
+  ❌ ④ cow：答完句子和原例句一字不差（「」 vs 「Cows give us milk.」）
+  ✅ 页面无报错 
+
+▶ ⑤ Boss 完形
+  ❌ ⑤ Boss 完形能出「eyes」这一题，挖掉的是 eyes {"type":"en2cn","word":"chest","prompt":"chest"}
+  ✅ 页面无报错 
+
+❌ 失败 10 项

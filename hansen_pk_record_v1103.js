@@ -289,6 +289,9 @@
   function syncOwner() {
     try {
       var now = currentUid();
+      /* 🔴v1164（审查 AUTH-1）：uid 是空的 = 退出了 / 会话过期，不是「换了个人」——
+         以前这里当成换人，孩子的天梯战绩当场清零（5 胜变 0 胜）。和资料模块（sb_profile）同一条规则。 */
+      if (!now) return;
       var was = localStorage.getItem(OWNER_KEY);
       if (was === null) {                     /* 第一次：认领当前战绩 */
         localStorage.setItem(OWNER_KEY, now);

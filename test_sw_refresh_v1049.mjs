@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_sw_refresh_v1049.mjs —— 「刷新就变下载」回归
  * 事故：用户反馈刷新单词大冒险就被要求下载 HTML 文件，且明确"以前没这情况"。
  * 根因（我在 v1044 引入）：为给"服务端 MIME 配错"兜底，
@@ -10,9 +11,9 @@
  * 合同：① 正常 MIME 下连续刷新多次都不得触发下载、页面必须正常渲染；
  *       ② 改写只在"明显会触发下载"的响应上发生（octet-stream/缺失/attachment）；
  *       ③ 判断只看响应头，绝不读取 body（不得再出现 clone().text()）。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css',
  '.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon',
  '.woff2':'font/woff2','.mp3':'audio/mpeg','.webmanifest':'application/manifest+json','.svg':'image/svg+xml'};
@@ -25,7 +26,7 @@ let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else
 console.log('刷新不变下载 v1049');
 
 /* 源码合同：不得再读 body */
-const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js','utf8');
+const sw = fs.readFileSync((__HSN_ROOT + 'sw_v944.js'),'utf8');
 const fx = sw.slice(sw.indexOf('function fixHtmlType'), sw.indexOf('function fixHtmlType')+1200);
 ok(!/clone\(\)/.test(fx), 'fixHtmlType 不再 clone 响应');
 ok(!/await .*\.text\(\)/.test(fx), 'fixHtmlType 不再读取 body 全文');

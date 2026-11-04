@@ -1,0 +1,67 @@
+{
+  "root": "/home/user/wordminiprogram",
+  "mode": "rules",
+  "A": {
+    "ok": true,
+    "uid": "1650936123503737095"
+  },
+  "upA": {
+    "ok": true,
+    "ident": "p:13800000401"
+  },
+  "signOut": {
+    "pendingPhone": "+86 13800000401",
+    "verificationId": "",
+    "isUser": false,
+    "method": "",
+    "phone": "+86 13800000401",
+    "signedAt": 0,
+    "uid": ""
+  },
+  "loginB": {
+    "ok": true,
+    "uid": "1527283253218073236",
+    "sync": {
+      "ok": true,
+      "action": "restored",
+      "needReload": true
+    }
+  },
+  "B_uid": "1527283253218073236",
+  "afterB": {
+    "marker": {
+      "pendingPhone": "+86 13800000401",
+      "verificationId": "",
+      "isUser": false,
+      "method": "password",
+      "phone": "+86 13800000401",
+      "signedAt": 1793713611964,
+      "uid": "1527283253218073236",
+      "username": "kid_b01"
+    },
+    "cloudIdent": "p:13800000401",
+    "localA": "{\"learned\":[1,2,3,4,5,6,7,8]}",
+    "owner": "1527283253218073236"
+  },
+  "panel": "👤 已登录 ✕ 手机号：+86 13800000401 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录",
+  "upB": {
+    "ok": false,
+    "reason": "upload-failed",
+    "error": "数据库安全规则未放行（见开通指南第4步）"
+  },
+  "saves": [
+    {
+      "id": "5b1a2ce36d",
+      "owner": "A"
+    }
+  ],
+  "foreignWrites": [
+    {
+      "who": "B",
+      "action": "database.updateDocument",
+      "owners": [
+        "A"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.json':'application/json','.mp3':'audio/mpeg'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -10,7 +11,7 @@ const page=await browser.newPage({viewport:{width:390,height:844}});
 const errs=[];
 page.on('pageerror',e=>errs.push('P:'+String(e.message).slice(0,60)));
 page.on('console',m=>{if(m.type()==='error')errs.push('C:'+m.text().slice(0,60));});
-await page.addInitScript(()=>{localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud');});
+await page.addInitScript(()=>{if (window.top === window) localStorage.clear(); localStorage.setItem('hansen_palette_global','cloud');});
 await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
 await page.waitForTimeout(2600);
 await page.evaluate(()=>{ const w=document.querySelector('.modal .close, .modal button'); if(w) try{w.click();}catch(e){} });

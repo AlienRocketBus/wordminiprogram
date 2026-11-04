@@ -1,0 +1,22 @@
+{
+ "out": {
+  "floatRect": {
+   "l": 186,
+   "r": 399,
+   "t": 341,
+   "w": 212,
+   "h": 88,
+   "vw": 390
+  },
+  "hansenToastRect": null,
+  "gachaToast": {
+   "t": 253,
+   "b": 315,
+   "txt": "金币不够啦！多答题、打Boss赚金币吧 🪙"
+  },
+  "reviewToastExposed": true
+ },
+ "errs": [
+  "[top] CONSOLE Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "LAG": 500,
+ "READFAIL": false,
+ "STYLE": "request_failed",
+ "results": [
+  "G1: taken | 这间房刚被别人占了，换一间吧",
+  "G2: taken | 这间房刚被别人占了，换一间吧",
+  "G3: OK"
+ ],
+ "winners": 1,
+ "configLosers": 0,
+ "takenLosers": 2,
+ "dupRejections": 2,
+ "aborted": 0,
+ "seatDocs": 1
+}

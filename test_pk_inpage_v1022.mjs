@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_pk_inpage_v1022.mjs —— 拼写大PK「页面内屏·零延迟」回归
  * 缺口：PK 原为 iframe 加载独立页面 spelling_pk.html，每次点开都要走一次网页加载 → 有延迟，
  *       与"所有岛屿是一个整体、房间之间随意进出"的体验不符。
  * 合同：① 点开不产生 iframe、不发起页面级网络请求；② 打开耗时极短；
  *       ③ 内容完整(身份/账号区/两种模式/战绩速览)；④ 双色调下文字方向正确。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -23,7 +24,7 @@ for(const [tag,pal] of [['亮','cloud'],['暗',null]]){
      与本测试关心的"PK 自己是否还走网页"无关。 */
   const WARM=/land_map|island_season|boss_hall|season_showcase|spelling_bee/;
   page.on('request',r=>{ if(r.resourceType()==='document' && !r.url().includes('island_animal') && !WARM.test(r.url())) nav.push(r.url()); });
-  await page.addInitScript(p=>{localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
+  await page.addInitScript(p=>{if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);}, pal);
   await page.goto(`http://127.0.0.1:${port}/island_animal.html`,{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(2600);
   const t0=Date.now();

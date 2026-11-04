@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_download_fix_v1140.mjs —— 「网页变成下载 HTML」的自查
  *
  * 用户反馈：从浏览器打开网站，**不是显示页面，而是弹出下载一个 .html 文件**。
@@ -29,7 +30,7 @@ const ctx = { window: {}, location: { origin: 'https://x' },
   fetch: () => Promise.reject(new Error('n/a')),
   Promise, Date, String, Number, Array, Object, Error, console };
 ctx.window = ctx; vm.createContext(ctx);
-vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_download_fix_v1140.js', 'utf8'), ctx);
+vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_download_fix_v1140.js'), 'utf8'), ctx);
 const D = ctx.window.HansenDownloadFix;
 
 /* ① 判定：哪些响应会让浏览器下载 */
@@ -45,7 +46,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* ② 探测要绕开缓存 —— 要看服务器现在给什么，不是 SW 改好的那份 */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_download_fix_v1140.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_download_fix_v1140.js'), 'utf8');
   ok(/cache:\s*'no-store'/.test(src), '★ 探测用 no-store');
   ok(/_dl=.*Date\.now\(\)/.test(src) || /_dl=' \+ Date\.now\(\)/.test(src),
      '★ 加时间戳绕开一切缓存 —— 否则看到的是 SW 改好的那份，查不出真问题');
@@ -53,7 +54,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* ③ SW 的兜底还在（对已装好的用户有效） */
 {
-  const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js', 'utf8');
+  const sw = fs.readFileSync((__HSN_ROOT + 'sw_v944.js'), 'utf8');
   ok(/function fixHtmlType/.test(sw), '★ SW 里的响应头修正还在');
   ok(/dispo\.includes\('attachment'\)/.test(sw), '★ 认 attachment');
   ok(/headers\.delete\('content-disposition'\)/.test(sw), '★ 会把 attachment 头去掉');
@@ -63,7 +64,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* ④ 指引要说到具体哪一项 */
 {
-  const src = fs.readFileSync('/home/claude/work/repo/hansen_download_fix_v1140.js', 'utf8');
+  const src = fs.readFileSync((__HSN_ROOT + 'hansen_download_fix_v1140.js'), 'utf8');
   ok(/索引文档/.test(src) && /index\.html/.test(src),
      '★ 指引说到"索引文档设为 index.html"，而不是笼统的"服务端配置问题"');
   ok(/rootOnly/.test(src),
@@ -74,7 +75,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* ⑤ 首页必须有这个自查（被下载的正是首页） */
 {
-  const idx = fs.readFileSync('/home/claude/work/repo/index.html', 'utf8');
+  const idx = fs.readFileSync((__HSN_ROOT + 'index.html'), 'utf8');
   ok(/hansen_download_fix_v1140/.test(idx), '★ 首页加载了自查模块');
 }
 
@@ -90,7 +91,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* 🔒① 部署配置 */
 {
-  const cb = JSON.parse(fs.readFileSync('/home/claude/work/repo/cloudbaserc.json', 'utf8'));
+  const cb = JSON.parse(fs.readFileSync((__HSN_ROOT + 'cloudbaserc.json'), 'utf8'));
   const site = ((cb.framework || {}).plugins || {}).site || {};
   ok((site.inputs || {}).indexPath === 'index.html',
      '★🔒 cloudbaserc.json 里 indexPath = index.html —— ' +
@@ -99,13 +100,13 @@ const D = ctx.window.HansenDownloadFix;
 
 /* 🔒③ 页面内联自救（必须内联，不能是外部脚本） */
 {
-  const pages = fs.readdirSync('/home/claude/work/repo')
+  const pages = fs.readdirSync(__HSN_ROOT.replace(/\/$/, ''))
     /* 排除开发用的演示页（与守卫的规则一致）——
        它们不是用户入口，不会被当成网站首页下发。 */
     .filter(f => f.endsWith('.html') && !f.startsWith('_') && !f.startsWith('武器'));
   let missing = [], external = [];
   for (const f of pages) {
-    const html = fs.readFileSync('/home/claude/work/repo/' + f, 'utf8');
+    const html = fs.readFileSync((__HSN_ROOT + '') + f, 'utf8');
     if (!/hsnSelfRescue/.test(html)) { missing.push(f); continue; }
     let inline = false;
     const re = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g;
@@ -124,7 +125,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* 🔒③ 自救只在 file:// 下触发，不能误伤正常访问 */
 {
-  const idx = fs.readFileSync('/home/claude/work/repo/index.html', 'utf8');
+  const idx = fs.readFileSync((__HSN_ROOT + 'index.html'), 'utf8');
   ok(/location\.protocol!=='file:'/.test(idx.replace(/\s/g, '')),
      "★🔒 判据是 location.protocol === 'file:' —— 极其确定，正常访问永远是 http/https");
   ok(/setTimeout\(function\(\)\{shown=false;show\(\);\}/.test(idx.replace(/\s/g, '')) ||
@@ -134,7 +135,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* 🔒 守卫在守着 */
 {
-  const g = fs.readFileSync('/home/claude/work/repo/hansen_guards_v1068.py', 'utf8');
+  const g = fs.readFileSync((__HSN_ROOT + 'hansen_guards_v1068.py'), 'utf8');
   ok(/guard_html_never_downloads/.test(g), '★🔒 有守卫盯死这四处');
   ok(/indexPath/.test(g) && /fixHtmlType/.test(g) && /file:/.test(g),
      '★🔒 守卫同时检查：部署配置 + SW 兜底 + 页面内联自救');
@@ -149,7 +150,7 @@ const D = ctx.window.HansenDownloadFix;
  * 查代码时发现 SW 这边有两个洞，**它们会让问题从"偶尔"变成"永远"**：
  */
 {
-  const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js', 'utf8');
+  const sw = fs.readFileSync((__HSN_ROOT + 'sw_v944.js'), 'utf8');
   const code = sw.replace(/\/\*[\s\S]*?\*\//g, '');
 
   /* ① text/plain 以前直接放过去了 */
@@ -193,7 +194,7 @@ const D = ctx.window.HansenDownloadFix;
 
 /* 判据本身：坏的都要修，好的一个都不能碰 */
 {
-  const sw = fs.readFileSync('/home/claude/work/repo/sw_v944.js', 'utf8');
+  const sw = fs.readFileSync((__HSN_ROOT + 'sw_v944.js'), 'utf8');
   const m = sw.match(/const looksDownload =[\s\S]*?;/);
   const body = m ? m[0] : '';
   for (const bad of ['octet-stream', 'binary/', 'text/plain', 'attachment']) {

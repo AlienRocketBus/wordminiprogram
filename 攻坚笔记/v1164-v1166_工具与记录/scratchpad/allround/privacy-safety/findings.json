@@ -1,0 +1,98 @@
+[
+ {
+  "id": "PS-01",
+  "title": "Room docs store players' phone numbers (hostId/guestId) in a read-all collection",
+  "severity": "critical",
+  "evidence": "hansen_pk_room_v1065.js:467 me().id = String(lc.phone||lc.username||lc.uid); write at :592 hostId:u.id (open), :828 guestId:u.id (join). hansen_pk_rooms permission = 「读取全部数据，修改本人数据」 per 交接_必读_给下一个对话.md:231 and README.md:1870 — every logged-in user can read all room docs, i.e. all players' plaintext phone numbers. (In v1163 me().name is always '无名蜂' since HansenSbProfile lacks status(), so rooms expose phone-as-id, not the real name.)",
+  "proposal": "SPEC_v1164 §3 already mandates identity key 'u'+uid and NEVER writing phone/username into room docs. CONFIRM the rewrite: room docs' hostId/guestId are 'u<uid>', me().id no longer reads lc.phone, and add/keep the SPEC §8 guard 'no phone/username in room docs'.",
+  "effort": "S"
+ },
+ {
+  "id": "PS-02",
+  "title": "Cloud-save AES key and doc id are derived purely from the phone number; hansen_saves is read-all",
+  "severity": "critical",
+  "evidence": "hansen_cloud_save_v965.js:87-94 accountIdent()='p:'+phone; :139-168 ensureKey()→keyFromUid(ident) deterministically derives the 16-char save key; :201-206 docIdOf=SHA-256('hansen-doc-v1:'+key), aesKeyOf=SHA-256('hansen-aes-v1:'+key). hansen_saves = read-all (交接_必读:231). Proven in scratchpad/allround/privacy-safety/keyderiv.mjs using the app's own algorithm: phone 13900000000 → fixed docId c5f24e19… and a fixed AES key, with no secret input. Decryptable save contains self-chosen name, cid and all island progress (phone itself excluded by DENY, hansen_backup_v944.js:30). Code comment at :72-76 claims isolation relies on the collection permission — but it is read-all, so that premise fails.",
+  "proposal": "NOT covered by v1164. Pick one: (1) stop deriving the key from phone/account — generate a truly random 16-char key stored only on-device + the printable 记忆水晶密钥, and bind it to the account via a separate mapping doc rather than making the key a function of identity; or (2) tighten hansen_saves to creator-only read/write using a stable uid (not phone) as _openid/owner; or (3) at minimum add a per-account random salt (server-issued, stored on the account doc) into docIdOf/aesKeyOf so neither is computable from the phone alone. Mark legal specifics 'to confirm'.",
+  "effort": "L"
+ },
+ {
+  "id": "PS-03",
+  "title": "Leaderboard/friends/presence/messages are world-readable to all logged-in users",
+  "severity": "high",
+  "evidence": "hansen_ladder_board_v1156.js:150-166 fetchTop() reads whole sb_profile ordered by ladderRating and returns uid(=x.uid||x._id), name, cid, rating — leaks CloudBase uid. hansen_friends_v1106.js:~335 listFriends() does T().list({kind:'presence'}) — full-collection read of everyone's name/cid/at/_openid. hansen_friends & hansen_friend_msgs = 所有用户可读 (CHANGELOG.md:3285-3286). Competition IDs are sequential ('比我早注册的人数+1', hansen_auth_v1004.js:665) → enumerable. So any logged-in user can read all users' names, cids, online status, friend graph and message metadata (content limited to 10 fixed-phrase ids).",
+  "proposal": "Serve the leaderboard via a cloud function returning a de-identified Top-N (drop uid/_openid); scope presence/friends reads to one's own friends via custom security rules or a cloud function; restrict hansen_friend_msgs to the recipient. SPEC_v1164 §5 only covers write-own/{code} checks, not read-scope — add it. (Server rule acceptance: to confirm.)",
+  "effort": "L"
+ },
+ {
+  "id": "PS-04",
+  "title": "Name/username rules permit real names and phone numbers as public ladder names",
+  "severity": "high",
+  "evidence": "hansen_sb_profile_v1002.js:126-137 validateName only enforces 2–12 chars, bans <>\"'`\\/ and control chars and a tiny wordlist; a 2-char real name or an 11-digit phone passes. This name is shown publicly on the leaderboard (PS-03), profile and (v1164) room VS bar. hansen_auth_v1004.js:491-497 normUsername similarly allows phone-style usernames (username is not public, lower risk).",
+  "proposal": "For the public nickname: reject 7+ consecutive digits (phone/QQ-like), keep/extend the banned list, and add a parent-facing hint 'use a nickname, not your real name'. Not covered by v1164.",
+  "effort": "S"
+ },
+ {
+  "id": "PS-05",
+  "title": "Privacy notice is incomplete; no guardian-consent step before account/online features",
+  "severity": "medium",
+  "evidence": "index.html:3800-3812 privacy dialog covers only local save, TTS possibly hitting Baidu/Youdao/Google, offline cache, and the Tencent survey link. It does NOT disclose that registration collects a phone number/username, that cloud save uploads all progress, or that online battle/leaderboard/friends publish name+cid+online status to other users; no age/guardian notice.",
+  "proposal": "Add an 'account & online features' section to the notice (phone collection, cloud-save contents, which fields go public, Tencent CloudBase as processor) and show a parent-facing consent before first registration / first online battle, not just in a home-page corner. Legal specifics: to confirm.",
+  "effort": "M"
+ },
+ {
+  "id": "PS-06",
+  "title": "No way to delete cloud save, delete account, or leave the leaderboard",
+  "severity": "medium",
+  "evidence": "No delete-account/delete-cloud-data path anywhere; the only cloud-clear is the allowEmpty branch with no UI (hansen_cloud_save_v965.js:600-605). Once name/cid/ladderRating are on sb_profile and a save is in hansen_saves, there is no user-facing deletion.",
+  "proposal": "Add 'sign out and delete my cloud save' (remove my hansen_saves doc) and 'hide/remove me from the leaderboard' (clear my sb_profile ladder fields/name). Supports the data-subject deletion right (to confirm).",
+  "effort": "M"
+ },
+ {
+  "id": "PS-07",
+  "title": "Unsolicited contact to any (enumerable) competition ID; no block/report; inbox not wired",
+  "severity": "medium",
+  "evidence": "hansen_friends_v1106.js:393-408 sendQuick(toCid,quickId) does not check friendship — any logged-in user can send a fixed phrase to any numeric cid; friend 'request' can also target any cid. cids are enumerable (PS-03). inbox() exists but has no UI caller (confirmed: hansen_friends_ui_v1107.js never renders inbox), so a child cannot see or manage received messages. No block/report/ignore.",
+  "proposal": "Restrict sendQuick to mutual friends; wire the inbox with block/delete/report; let friend requests be declined. Content risk is low (fixed phrases) but it is unsolicited stranger contact a child cannot manage.",
+  "effort": "M"
+ },
+ {
+  "id": "PS-08",
+  "title": "TTS fallback can send the word/sentence text and device IP to Baidu/Youdao/Google",
+  "severity": "low",
+  "evidence": "Local audio covers all 696 words + 240 season words + 709 sentences (audio_cov_out.txt, 0 missing) and page load makes 0 outbound requests (out/s01_external_requests.json). But on local-mp3 load failure the word path requests ssl.gstatic.com then fanyi.baidu.com with the text in the query string (template.html:2609-2620); the settings 'test' button hits the chosen provider directly (:7823-7829). Disclosed in the privacy dialog.",
+  "proposal": "Since local coverage is 100%, make online TTS fallback default-off / parent-opt-in, or keep only the on-device speech-synthesis fallback and drop Baidu/Youdao/Google.",
+  "effort": "S"
+ },
+ {
+  "id": "PS-09",
+  "title": "Phone number stored in localStorage in cleartext (shared-device leak)",
+  "severity": "low",
+  "evidence": "hansen_auth_v1004.js:437 writeLocal({...phone: st.pendingPhone...}) stores '+86 <phone>' under key hansen_auth_v1004; shown in UI at hansen_auth_ui_v1004.js:67 and hansen_cloud_diag_v1027.js:109. Kids often share one phone → the next user (or any page script) can read the previous child's phone, and via PS-02 derive their save key.",
+  "proposal": "Store only the account uid locally, never the cleartext phone; mask when displaying (138****0000).",
+  "effort": "S"
+ },
+ {
+  "id": "PS-10",
+  "title": "6-digit client-side admin 'card' password is recoverable from client code (not a PII control)",
+  "severity": "low",
+  "evidence": "hansen_boss_attack.js:14996 CARD_SHA/CARD_DJB are in client code; checkCardPw (:15064-15076) compares SHA-256(pw)===CARD_SHA with a djb2 fallback requiring pw.length===6 numeric — a 10^6 space is offline-recoverable from the client fingerprint. The main gate is 50 chars (:14985) and not brute-forceable. Any client-side gate is also bypassable via devtools. It only unlocks a 'clear all levels / card book' cheat, not any personal data.",
+  "proposal": "Treat it as a convenience toggle, not a security boundary; if desired, raise the card password to the main gate's length/entropy or replace with a device-level hidden gesture. Low priority.",
+  "effort": "S"
+ },
+ {
+  "id": "PS-11",
+  "title": "The sb_profile `privacy` field is vestigial: stored but never enforced and has no setter",
+  "severity": "medium",
+  "evidence": "hansen_sb_profile_v1002.js:37 reads privacy ('public'|'friends'|'private') but no code anywhere gates visibility on it, and nothing writes a non-default value (only defaults at :27 and :502). A future 'set to private' switch would silently do nothing with today's code.",
+  "proposal": "Either implement it (filter leaderboard/friends/presence by privacy and add a setter UI) or remove the misleading field. Design together with PS-03.",
+  "effort": "M"
+ },
+ {
+  "id": "PS-12",
+  "title": "Good practices to keep (no regression): no trackers, strong escaping, encrypted envelope, fixed-phrase chat, no hardcoded secrets",
+  "severity": "low",
+  "evidence": "0 outbound requests on load across 8 key pages in both signed-out/in states (out/s01_external_requests.json); fonts are local .woff2; AES-GCM zero-knowledge envelope is correctly built (hansen_cloud_save_v965.js:201-223); esc()/sText()/sNum() applied to all rendered remote fields (hansen_pk_room_ui_v1065.js:374/:577, hansen_ladder_ui_v1108.js:537, hansen_friends_ui_v1107.js:338/:432, room sanitizers hansen_pk_room_v1065.js:712-735) — no unescaped remote-data sink found; messaging is fixed-phrase id only with _openid spoof check (hansen_friends_v1106.js:393-456); backup DENY excludes credentials/auth/cloud-state (hansen_backup_v944.js:30,85-94); env id ambitious-d0g1d26xm740dc3d6 is public by CloudBase design (cloudbaserc.json:3) and no API keys/tokens/private keys were found in app code (admin password plaintext not in code, only a fingerprint).",
+  "proposal": "Keep these as-is; add regression guards so the escaping, the DENY list, and the no-free-text messaging constraint are not weakened by future refactors (SPEC §8 already adds some guards — extend to these).",
+  "effort": "S"
+ }
+]

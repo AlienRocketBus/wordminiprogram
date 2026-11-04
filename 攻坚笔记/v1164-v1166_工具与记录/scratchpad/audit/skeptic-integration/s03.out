@@ -1,0 +1,4 @@
+recent card before any island: {"text":"快去玩","target":null}
+localStorage times after closing 动物 (waited 8000ms inside): {"lastIslandKey":"wordIslandAnimal","lastIslandTime":1793711287175,"wordIslandSeason":1793711299357,"wordIslandAnimal":1793711289260}
+recent card after closing 动物: {"text":"👑 星海终战 · 点击继续 →","target":"island_season.html"}
+tapped recent card -> {"ok":true,"x":195,"y":422,"topHit":"DIV#recentNum.stat-num"} {"wrap":"block","op":"1","path":"island_season.html","rs":"complete","hist":3,"state":"{\"hsnIsland\":\"island_season.html\"}","scrollY":275} title: 星海词汇大冒险 · Star Sea Vocabulary

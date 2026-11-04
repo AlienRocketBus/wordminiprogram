@@ -1,0 +1,8 @@
+[A] login ok=true, count fault hits=1
+[A] sb_profile docs: [{"cid":0,"name":"小安"}]
+[A] friends screen right after login: {"signed":true,"cid":0,"t":"👥 我的好友 × 🔐 登录后才能加好友 好友要靠「竞赛 ID」互加， 而竞赛 ID 是登录时自动分配的。 去登录 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 先登录才","goLogin":true,"authTxt":"👤 已登录 ✕ 用户名：kid_a 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录"}
+[A] sb_profile docs after reload+10s: [{"cid":0}]
+[A] friends screen after reload: {"signed":true,"cid":0,"t":"👥 我的好友 × 🔐 登录后才能加好友 好友要靠「竞赛 ID」互加， 而竞赛 ID 是登录时自动分配的。 去登录 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 先登录才","goLogin":true,"authTxt":"👤 已登录 ✕ 用户名：kid_a 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录"}
+[A] sb_profile requests during the last 15 s (reload + wait): 0
+[B] login ok=true
+[B] friends screen (sb_profile missing): {"signed":true,"cid":0,"t":"👥 我的好友 × 🔐 登录后才能加好友 好友要靠「竞赛 ID」互加， 而竞赛 ID 是登录时自动分配的。 去登录 我的状态 🟢 在线 🌙 隐身 好友能看到你「刚才还在」。 （网页不能像 App 那样一直挂着，所以这只表示你最近开着页面） 加好友（输对方的竞赛 ID 数字） 加好友 竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。 你加他、他也加你，就成为好友了。 好友 先登录才","goLogin":true,"authTxt":"👤 已登录 ✕ 用户名：kid_b 你的进度会保存在云端，换设备登录同一个账号就能找回。 ☁️ 立即把进度存到云端退出登录"}

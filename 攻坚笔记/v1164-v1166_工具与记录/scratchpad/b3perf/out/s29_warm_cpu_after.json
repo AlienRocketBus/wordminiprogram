@@ -1,0 +1,46 @@
+[
+ {
+  "label": "as-is",
+  "readyMs": 2882,
+  "MB_25s": 4.4,
+  "scriptSec": 1.87,
+  "taskSec": 20.87,
+  "layoutSec": 1.81,
+  "frames": 3,
+  "heapMB": 4.6,
+  "nodes": 5534
+ },
+ {
+  "label": "no-room-warm",
+  "readyMs": 6503,
+  "MB_25s": 4.6,
+  "scriptSec": 2.51,
+  "taskSec": 20.04,
+  "layoutSec": 1.02,
+  "frames": 3,
+  "heapMB": 4.4,
+  "nodes": 5286
+ },
+ {
+  "label": "as-is",
+  "readyMs": 2891,
+  "MB_25s": 4.5,
+  "scriptSec": 1.56,
+  "taskSec": 18.07,
+  "layoutSec": 0.89,
+  "frames": 3,
+  "heapMB": 4.4,
+  "nodes": 5315
+ },
+ {
+  "label": "no-room-warm",
+  "readyMs": 3966,
+  "MB_25s": 4.3,
+  "scriptSec": 2.01,
+  "taskSec": 19.91,
+  "layoutSec": 2.47,
+  "frames": 3,
+  "heapMB": 4.4,
+  "nodes": 5279
+ }
+]

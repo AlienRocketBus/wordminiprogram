@@ -1,0 +1,22 @@
+{
+  "ver": "v1164",
+  "case": "expiry",
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "signedAtOpen": true,
+  "topOverlayBefore": null,
+  "overlayAfterEnterMs": 7986,
+  "topOverlay": {
+    "text": "🔄 别的窗口退出了登录 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+    "z": "2147483646",
+    "full": true
+  },
+  "signedNow": false,
+  "kidSees": "🔄 别的窗口退出了登录 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+  "islandSays": null,
+  "dialogs": [],
+  "errors": [],
+  "elapsed": 95067
+}

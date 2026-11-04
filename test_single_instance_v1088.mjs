@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_single_instance_v1088.mjs —— 已登录时绝不创建第二个 CloudBase 实例
  *
  * ═══ 用户真机凭证生死簿抓到的现行（确凿证据，不是推测）═══
@@ -31,7 +32,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('单实例契约 v1088');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'), 'utf8');
 const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 const initAt = code.indexOf('cloudbase.init(initOpt)');

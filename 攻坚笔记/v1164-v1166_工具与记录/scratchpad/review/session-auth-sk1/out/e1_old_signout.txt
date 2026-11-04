@@ -1,0 +1,176 @@
+{
+  "ver": "v1163",
+  "mode": "signout",
+  "steps": [
+    {
+      "at": 2875,
+      "s": "healthy+uploaded",
+      "st": {
+        "signed": true,
+        "uid": "1527283253218073236",
+        "method": "phone",
+        "learned": 5,
+        "wins": 3,
+        "total": 3,
+        "rating": 1057,
+        "owner143": "1527283253218073236",
+        "pkOwner": "1527283253218073236"
+      },
+      "card": "🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 未定级 ›"
+    },
+    {
+      "at": 65902,
+      "s": "played-after-death(before detection)",
+      "st": {
+        "signed": true,
+        "uid": "1527283253218073236",
+        "method": "phone",
+        "learned": 12,
+        "wins": 5,
+        "total": 5,
+        "rating": 1090,
+        "owner143": "1527283253218073236",
+        "pkOwner": "1527283253218073236"
+      },
+      "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›"
+    },
+    {
+      "at": 79930,
+      "s": "after-autosync",
+      "st": {
+        "signed": true,
+        "uid": "1527283253218073236",
+        "method": "phone",
+        "learned": 12,
+        "wins": 5,
+        "total": 5,
+        "rating": 1090,
+        "owner143": "1527283253218073236",
+        "pkOwner": "1527283253218073236"
+      },
+      "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1090 分 ›",
+      "trace": [
+        "+  373ms  结论  ✅ 有效 uid=1527283253218073236（第 1 次探到）",
+        "+  452ms  结论  ✅ 有效 uid=1527283253218073236（第 1 次探到）",
+        "+  470ms  结论  ✅ 有效 uid=1527283253218073236（第 1 次探到）",
+        "+ 9116ms  结论  ⏳ 重试 5 次仍为空 → 尚未就绪（不判过期）",
+        "+73350ms  结论  ⏳ 重试 5 次仍为空 → 尚未就绪（不判过期）"
+      ]
+    },
+    {
+      "at": 80126,
+      "s": "played-more",
+      "st": {
+        "signed": true,
+        "uid": "1527283253218073236",
+        "method": "phone",
+        "learned": 15,
+        "wins": 5,
+        "total": 5,
+        "rating": 1090,
+        "owner143": "1527283253218073236",
+        "pkOwner": "1527283253218073236"
+      }
+    },
+    {
+      "at": 82037,
+      "s": "after-signout",
+      "st": {
+        "signed": false,
+        "uid": "",
+        "method": "",
+        "learned": 15,
+        "wins": 0,
+        "total": 0,
+        "rating": 1000,
+        "owner143": "1527283253218073236",
+        "pkOwner": ""
+      },
+      "card": "🐝 点这里设置名字 🎫 竞赛 ID 登录后自动分配 🐝 工蜂 · 1090 分 ›"
+    },
+    {
+      "at": 84776,
+      "s": "after-relogin+reload",
+      "st": {
+        "signed": true,
+        "uid": "1527283253218073236",
+        "method": "phone",
+        "learned": 5,
+        "wins": 3,
+        "total": 3,
+        "rating": 1057,
+        "owner143": "1527283253218073236",
+        "pkOwner": "1527283253218073236"
+      },
+      "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›"
+    }
+  ],
+  "login": {
+    "ok": true,
+    "uid": "1527283253218073236"
+  },
+  "up1": {
+    "ok": true,
+    "reason": ""
+  },
+  "signout": {
+    "ok": true
+  },
+  "relogin": {
+    "ok": true,
+    "uid": "1527283253218073236",
+    "sync": {
+      "ok": true,
+      "action": "restored",
+      "needReload": true,
+      "autoPicked": "cloud",
+      "localWords": 15,
+      "cloudWords": 0
+    }
+  },
+  "saveWrites": [
+    {
+      "at": 2869,
+      "op": "upsert"
+    }
+  ],
+  "tokens": [
+    {
+      "at": 2310,
+      "p": "signup",
+      "st": 200,
+      "code": ""
+    },
+    {
+      "at": 9552,
+      "p": "token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "at": 9978,
+      "p": "token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "at": 10529,
+      "p": "token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "at": 11471,
+      "p": "token",
+      "st": 400,
+      "code": "invalid_grant"
+    },
+    {
+      "at": 82350,
+      "p": "signin",
+      "st": 200,
+      "code": ""
+    }
+  ],
+  "errors": []
+}

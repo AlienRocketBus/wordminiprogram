@@ -1,0 +1,22 @@
+{
+ "MODE": "ok",
+ "Z": 45,
+ "loginA": true,
+ "loginB": true,
+ "created": {
+  "ok": true,
+  "roomId": "rmw0wk4dkgdiftv"
+ },
+ "list": {
+  "ok": true,
+  "n": 1,
+  "ids": [
+   "rmw0wk4dkgdiftv"
+  ]
+ },
+ "hostRoomListed": true,
+ "lobbyHasJoinButton": true,
+ "lobbyText": "← 返回 🏠 大PK · 公开房间 ➕ 开一间 🔒 私密房 🔄 刷新 无名蜂 🔥同步赛未定级 · 10 个词 · 2秒前 进去打 🔑 有朋友给的房间码？点这里输入",
+ "refusedQueries": 0,
+ "consoleWarn": []
+}

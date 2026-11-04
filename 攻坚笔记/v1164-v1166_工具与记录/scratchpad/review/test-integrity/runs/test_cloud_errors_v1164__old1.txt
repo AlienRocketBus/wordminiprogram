@@ -1,0 +1,86 @@
+
+云端出错时的提示 · 真 SDK 端到端（v1164）
+
+
+── ① hansen_pk_rooms 设成了「无权限」（ADMINONLY · rules） ──
+  OK  [甲] 手机号验证码登录 uid=1527283253218073236
+  XX  天梯：显示「云端设置还差一步」（用了 30 秒；看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      16:54.728 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:55.782 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:57.280 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.333 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.393 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.444 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:59.835 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:00.500 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.551 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.604 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:04.104 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:06.445 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  XX  说清是哪个集合、该改成什么权限（hansen_pk_rooms →「读取全部数据，修改本人数据」）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      16:54.728 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:55.782 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:57.280 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.333 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.393 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.444 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:59.835 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:00.500 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.551 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.604 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:04.104 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:06.445 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  XX  带着技术信息（原始错误码 DATABASE_PERMISSION_DENIED）
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      16:54.728 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:55.782 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:57.280 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.333 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.393 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.444 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:59.835 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:00.500 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.551 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.604 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:04.104 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:06.445 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+  OK  中途没有说成「要登录」或「断网」（出现过：正在找对手、等对手进来）
+  XX  测试脚本自己出错：Error: [甲] 点不到「#ldCancel」：等了 9999ms 也没看到「#ldCancel」
+    at Phone.tap (file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/v1163/cloudbase_e2e_harness.mjs:133:17)
+    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/v1163/test_cloud_errors_v1164.mjs:70:3
+      [甲 屏幕] ← 返回 ⏎ 🏠 大PK · 公开房间 ⏎ 这个房间已经不在了，回列表再挑一间吧 ⏎ ➕ 开一间 ⏎ 🔒 私密房 ⏎ 🔄 刷新 ⏎ 现在还没有人开房。 ⏎ 点上面的「➕ 开一间」，等别人来打。 ⏎ 🔑 有朋友给的房间码？点这里输入
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      16:55.782 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:57.280 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.333 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.393 小蜂甲 POST /web addDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:58.444 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      16:59.835 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:00.500 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.551 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:02.604 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:04.104 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:06.445 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+      17:14.443 小蜂甲 POST /web queryDocument hansen_pk_rooms → 200 DATABASE_PERMISSION_DENIED
+
+2 通过，4 失败（43 秒）
+失败的：
+  · 天梯：显示「云端设置还差一步」（用了 30 秒；看到：← 返回 🏠 大PK · 公开房间 这个房间已经不在了，回列表再挑一间吧 ➕ 开一间 🔒 私密房 🔄 刷新 现在还没有人开房。 点上面的「➕ 开一间」，等别人来打。 🔑 有朋友给的房间码？点这里输入 ）
+  · 说清是哪个集合、该改成什么权限（hansen_pk_rooms →「读取全部数据，修改本人数据」）
+  · 带着技术信息（原始错误码 DATABASE_PERMISSION_DENIED）
+  · 测试脚本自己出错：Error: [甲] 点不到「#ldCancel」：等了 9999ms 也没看到「#ldCancel」
+    at Phone.tap (file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/v1163/cloudbase_e2e_harness.mjs:133:17)
+    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/v1163/test_cloud_errors_v1164.mjs:70:3

@@ -1,0 +1,31 @@
+// INT-05: island prefetch cache-key mismatch + prefetchRecent wrong file names on a returning user
+import { sleep, tap } from './kit.mjs';
+import { boot2 } from './kit2.mjs';
+import { islandState, waitVisible, waitHidden, frameOf, dismissWelcome, tapMap, freshHome } from './nav.mjs';
+const K = await boot2({ cache: 'public, max-age=3600' });
+const page = await K.ctx.newPage();
+page.on('dialog', d => d.dismiss().catch(() => {}));
+const out = (...a) => console.log(...a);
+await freshHome(K, page);
+await sleep(14000);
+const links = await page.evaluate(() => [...document.querySelectorAll('link[rel=prefetch]')].map(l => l.getAttribute('href') + '(' + (l.dataset.why || '') + ')'));
+out('prefetch links on fresh home after 14s:', links.join(' '));
+out('server html requests so far:', K.reqs.filter(r => /\.html/.test(r.path)).map(r => r.url + ':' + r.status).join(' '));
+out('navigator.connection.effectiveType =', await page.evaluate(() => navigator.connection && navigator.connection.effectiveType));
+const mark = K.reqs.length;
+const t0 = Date.now();
+await tap(page, page, 'a.island[href="island_animal.html"]');
+await waitVisible(page, 'island_animal.html', t0);
+const after = K.reqs.slice(mark).filter(r => /island_animal\.html/.test(r.path)).map(r => r.url);
+out('requests for island_animal after the tap (should be none if prefetch were usable):', JSON.stringify(after));
+await dismissWelcome(page);
+await sleep(2000);
+await tapMap(page); await waitHidden(page, Date.now());
+// returning user: reload home, watch which islands get prefetched
+const mark2 = K.reqs.length;
+await page.goto(K.base + 'index.html', { waitUntil: 'load' });
+await sleep(14000);
+const r2 = K.reqs.slice(mark2).filter(r => /island_/.test(r.path)).map(r => r.url + ':' + r.status);
+out('returning user home reload - island requests:', r2.join(' '));
+out('lastIslandKey =', await page.evaluate(() => localStorage.getItem('lastIslandKey')));
+await K.done();

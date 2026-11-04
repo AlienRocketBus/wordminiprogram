@@ -1,0 +1,291 @@
+{
+ "W": 390,
+ "MODE": "nowarm",
+ "WAIT": 25000,
+ "ISL": "island_food.html",
+ "CACHE": "no-cache",
+ "homeLoadMs": 533,
+ "skip": {
+  "ok": true,
+  "hitTop": "BUTTON#__hsOnbSkip.",
+  "label": "skip",
+  "x": 325,
+  "y": 260
+ },
+ "home": {
+  "n": 159,
+  "bytes": 7531520,
+  "n200": 126,
+  "n304": 33,
+  "n206": 0,
+  "n404": 0,
+  "byExt": {
+   "html": [
+    7,
+    3.32
+   ],
+   "js": [
+    124,
+    2.81
+   ],
+   "woff2": [
+    1,
+    0.4
+   ],
+   "other": [
+    1,
+    0
+   ],
+   "webp": [
+    26,
+    1
+   ]
+  },
+  "byRef": {
+   "(none)": [
+    1,
+    0.2
+   ],
+   "/index.html": [
+    158,
+    7.33
+   ]
+  },
+  "MB": 7.53
+ },
+ "homeIslandHtml": [
+  "/land_map.html 200 empty",
+  "/island_animal.html?v=1163 200 empty",
+  "/island_animal.html?v=1163 304 empty",
+  "/island_food.html?v=1163 200 empty",
+  "/island_sports.html?v=1163 200 empty",
+  "/island_job.html?v=1163 200 empty"
+ ],
+ "tap": {
+  "ok": true,
+  "hitTop": "DIV#.island-en",
+  "label": "island_food.html",
+  "x": 195,
+  "y": 422
+ },
+ "revealMs": 696,
+ "tree": [
+  {
+   "depth": 0,
+   "url": "/index.html",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 42,
+   "hidden": false,
+   "setN": 32,
+   "setKeys": 31,
+   "top": [
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ],
+    [
+     "hansen_coins_migrated_v1",
+     1
+    ],
+    [
+     "hansen_coin_award_pending_v942",
+     1
+    ],
+    [
+     "hansen_wallet_coins",
+     1
+    ],
+    [
+     "hansen_wallet_coins_earned",
+     1
+    ],
+    [
+     "hansen_coin_awards_v942",
+     1
+    ],
+    [
+     "hansen_starter_coins_given",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandAnimal",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandSports",
+     1
+    ],
+    [
+     "hansen_vocab_wordIslandPeople",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 16
+  },
+  {
+   "depth": 1,
+   "url": "/island_food.html",
+   "vis": "visible",
+   "rs": "complete",
+   "nScripts": 99,
+   "hidden": false,
+   "setN": 122,
+   "setKeys": 98,
+   "top": [
+    [
+     "hansen_global_daily_quests_v941",
+     6
+    ],
+    [
+     "wordIslandFood",
+     5
+    ],
+    [
+     "wordIslandFood_bak",
+     4
+    ],
+    [
+     "hansen_pet_hero_img",
+     4
+    ],
+    [
+     "hsn_progress:食物大冒险",
+     4
+    ],
+    [
+     "hansen_palette_global",
+     2
+    ],
+    [
+     "hansen_vocab_wordIslandFood",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941",
+     2
+    ],
+    [
+     "hansen_canonical_progress_v941_bak",
+     2
+    ],
+    [
+     "hansen_canonical_migrated_v941",
+     2
+    ],
+    [
+     "hansen_wallet_totals",
+     2
+    ],
+    [
+     "hansen_credtrap_log",
+     1
+    ]
+   ],
+   "plays": [],
+   "speaks": [],
+   "dlg": [],
+   "rej": [],
+   "err": [],
+   "ivl": 29
+  }
+ ],
+ "open": {
+  "n": 296,
+  "bytes": 9861243,
+  "n200": 61,
+  "n304": 123,
+  "n206": 112,
+  "n404": 0,
+  "byExt": {
+   "html": [
+    4,
+    1.83
+   ],
+   "js": [
+    91,
+    1.24
+   ],
+   "webp": [
+    86,
+    4.81
+   ],
+   "woff2": [
+    2,
+    0.02
+   ],
+   "other": [
+    1,
+    0
+   ],
+   "mp3": [
+    112,
+    1.96
+   ]
+  },
+  "byRef": {
+   "/index.html": [
+    4,
+    1.83
+   ],
+   "/island_food.html": [
+    292,
+    8.03
+   ]
+  },
+  "MB": 9.86
+ },
+ "docs": [
+  "+-27ms /island_food.html 200 609057B dest=iframe ref=/index.html",
+  "+206ms /island_color.html?v=1163 200 614778B dest=empty ref=/index.html",
+  "+942ms /island_nature.html?v=1163 200 604796B dest=empty ref=/index.html",
+  "+2054ms /index.html 304 0B dest=empty ref=/island_food.html"
+ ],
+ "uniqueFiles": 173,
+ "uniqueMB": 9.86,
+ "dup200": [],
+ "mp3": {
+  "n": 112,
+  "MB": 1.96
+ },
+ "ls": [
+  "hansen_lastIslandMeta",
+  "hansen_lastIslandTime",
+  "hsn_progress:食物大冒险",
+  "lastIslandKey",
+  "lastIslandTime",
+  "wordIslandFood",
+  "wordIslandFood_bak"
+ ],
+ "myLearning": {
+  "rows": [
+   "食物大冒险 今天 已掌握 0 / 56 词 正确率 0%"
+  ],
+  "cnt": "已点亮 1 / 19 座岛"
+ },
+ "ev": {
+  "pageerror": [],
+  "consoleErr": [],
+  "dialogs": [],
+  "external": [],
+  "failed": []
+ },
+ "dom": {
+  "documents": 3,
+  "nodes": 5525,
+  "jsEventListeners": 1037
+ }
+}

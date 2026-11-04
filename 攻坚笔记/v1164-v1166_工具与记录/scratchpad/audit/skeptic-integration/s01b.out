@@ -1,0 +1,2 @@
+8 s on home after closing island_animal.html: iframe=island_animal.html server requests=191 (3.93 MB; html: ) ScriptDuration=1.03s TaskDuration=9.13s live docs 12->15 frames=9
+8 s on home after closing island_food.html: iframe=island_animal.html server requests=16 (0.42 MB; html: ) ScriptDuration=0.98s TaskDuration=6.92s live docs 19->22 frames=10

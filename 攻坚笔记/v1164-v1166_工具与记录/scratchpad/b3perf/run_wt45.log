@@ -1,0 +1,9 @@
+=== s29_warm_cpu
+{"label":"as-is","readyMs":2498,"MB_25s":4.6,"scriptSec":1.46,"taskSec":19.75,"layoutSec":0.88,"frames":3,"heapMB":5.1,"nodes":5463}
+{"label":"no-room-warm","readyMs":6466,"MB_25s":4.5,"scriptSec":2.11,"taskSec":21.44,"layoutSec":2.58,"frames":3,"heapMB":5.1,"nodes":5395}
+{"label":"as-is","readyMs":2070,"MB_25s":4.5,"scriptSec":2.05,"taskSec":20.45,"layoutSec":1.07,"frames":3,"heapMB":4.4,"nodes":5403}
+{"label":"no-room-warm","readyMs":1960,"MB_25s":4.7,"scriptSec":1.5,"taskSec":19.82,"layoutSec":0.93,"frames":3,"heapMB":4.5,"nodes":5399}
+=== s14_warm_ab
+{"label":"as-is","readyMs":1991,"KB_20s":4601,"req":220,"tbt_ms":1386,"frames":3,"docs":3,"heapMB":5.1,"nodes":5351}
+{"label":"no-room-warm","readyMs":2209,"KB_20s":4575,"req":218,"tbt_ms":2979,"frames":3,"docs":3,"heapMB":5.3,"nodes":5339}
+{"label":"no-room-warm+no-eager-boss-engine","readyMs":2872,"KB_20s":4189,"req":213,"tbt_ms":4915,"frames":3,"docs":3,"heapMB":5.3,"nodes":5355}

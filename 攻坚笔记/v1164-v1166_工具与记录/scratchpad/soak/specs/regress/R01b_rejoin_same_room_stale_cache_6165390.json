@@ -1,0 +1,119 @@
+{
+ "name": "R01b_rejoin_same_room_stale_cache_6165390",
+ "bug": "R1 (6165390): the guest joins the same room again at a new epoch (ladder, 4 s replica lag) → wins cached from the previous epoch are reused, screens disagree on who won, scores wrong",
+ "spec": {
+  "seed": 272,
+  "profile": "ladder",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 4000,
+   "lagShape": 3,
+   "queryLagMul": 1.34,
+   "queryLagExtra": 169,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.79,
+  "outages": [],
+  "players": [
+   {
+    "label": "P2",
+    "uid": "k2x272",
+    "name": "阿杰",
+    "rating": 987,
+    "skew": 0,
+    "net": {
+     "base": 119,
+     "jitter": 109,
+     "spikeP": 0.01,
+     "faultRate": 0.048,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 29309,
+      "dur": 90618
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.74,
+     "minMs": 3331,
+     "maxMs": 10314,
+     "slowP": 0.11
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2074,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": null
+   },
+   {
+    "label": "P3",
+    "uid": "k3x272",
+    "name": "朵朵",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 210,
+     "jitter": 303,
+     "spikeP": 0.01,
+     "faultRate": 0.035,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.88,
+     "minMs": 2851,
+     "maxMs": 9121,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2615,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

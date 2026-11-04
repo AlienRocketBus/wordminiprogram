@@ -1,0 +1,26 @@
+{
+ "/spelling_pk.html": {
+  "leaks": [],
+  "nLeaks": 0,
+  "pageErrors": [],
+  "missing": []
+ },
+ "/island_animal.html": {
+  "leaks": [],
+  "nLeaks": 0,
+  "pageErrors": [],
+  "missing": []
+ },
+ "/index.html": {
+  "leaks": [],
+  "nLeaks": 0,
+  "pageErrors": [],
+  "missing": []
+ },
+ "tencentPaths": [
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/verification",
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/signup",
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/user/me",
+  "ambitious-d0g1d26xm740dc3d6.ap-shanghai.tcb-api.tencentcloudapi.com/web"
+ ]
+}

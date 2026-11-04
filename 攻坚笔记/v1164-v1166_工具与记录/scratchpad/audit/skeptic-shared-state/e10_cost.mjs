@@ -1,0 +1,17 @@
+import {setup,bootHome,tapSel,waitIsland,dismissWelcome,sleep} from './lib.mjs';
+const control=process.argv[2]==='control';
+const s=await setup();const log=[];
+if(control) await s.ctx.route('**/hansen_room_warm_v1023.js*',r=>r.fulfill({status:200,contentType:'text/javascript',body:'/*blocked*/'}));
+const page=await bootHome(s,log);
+const cdp=await s.ctx.newCDPSession(page);await cdp.send('Performance.enable');
+await tapSel(page,'a.island[href="island_animal.html"]');
+const fr=await waitIsland(page,'island_animal.html');await dismissWelcome(fr);
+await sleep(2000);await fr.evaluate(()=>{for(let i=0;i<3;i++){markAnswer(i,true);addXP(5);}if(window.__hsnSaveNow)__hsnSaveNow();});
+await sleep(18000);
+const m=Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x=>[x.name,x.value]));
+const a=Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x=>[x.name,x.value]));
+const before=a.ScriptDuration;await sleep(10000);const b=Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x=>[x.name,x.value]));
+console.log(control?'CONTROL':'NORMAL','frames',page.frames().length,'Documents',m.Documents,'Frames',m.Frames,'JSEventListeners',m.JSEventListeners,'heapMB',(m.JSHeapUsedSize/1e6).toFixed(1),'idle script s/10s',(b.ScriptDuration-before).toFixed(3));
+await fr.evaluate(()=>goHome());await sleep(2500);
+console.log('  home card',await page.evaluate(()=>document.getElementById('recentNum')?.textContent));
+await s.close();

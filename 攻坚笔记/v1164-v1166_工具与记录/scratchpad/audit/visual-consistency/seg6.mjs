@@ -1,0 +1,32 @@
+import { startServer, launch, newCtx, attachLogs, sleep, OUT, external, reqLog } from './lib.mjs';
+import { seed, shot, openIsland, dismissWelcome, islandFrame } from './lib2.mjs';
+import fs from 'node:fs';
+const { srv, base } = await startServer();
+const browser = await launch();
+const errs=[]; const notes=[];
+const ctx = await newCtx(browser,{dsf:2,width:360,height:780});
+await seed(ctx, {'hansen_wallet_coins':'300'});
+const page = await ctx.newPage(); attachLogs(page,'top',errs);
+await page.goto(base+'/index.html',{waitUntil:'load'}); await sleep(2500);
+await shot(page,'w360_home_top');
+await page.evaluate(()=>window.scrollTo(0,760)); await sleep(600); await shot(page,'w360_home_islands');
+// overflow measurement for EN labels on home cards
+const ov = await page.evaluate(()=>[...document.querySelectorAll('a.island')].map(a=>{const card=a.getBoundingClientRect(); const en=a.querySelector('.island-en'); const nm=a.querySelector('.island-name'); const r=en.getBoundingClientRect(); return {href:a.getAttribute('href'), en:en.innerText, cardRight:Math.round(card.right), enRight:Math.round(r.left+en.scrollWidth), enScrollW:en.scrollWidth, enClientW:en.clientWidth, overflow: en.scrollWidth>en.clientWidth+1 || (r.left+en.scrollWidth)>card.right, ff:getComputedStyle(en).fontFamily, nameLines: Math.round(nm.getBoundingClientRect().height/parseFloat(getComputedStyle(nm).lineHeight||20))};}));
+notes.push('EN overflow 360: '+JSON.stringify(ov.filter(o=>o.overflow)));
+notes.push('fonts '+[...new Set(ov.map(o=>o.ff))].join(' / '));
+let fr = await openIsland(page,'island_animal.html'); await dismissWelcome(page,fr); await sleep(500);
+await shot(page,'w360_island_top');
+await fr.evaluate(()=>window.scrollTo(0,480)); await sleep(500); await shot(page,'w360_island_modes');
+const hz = await fr.evaluate(()=>({sw:document.documentElement.scrollWidth, cw:document.documentElement.clientWidth}));
+notes.push('island horiz overflow 360: '+JSON.stringify(hz));
+await fr.evaluate(()=>{ showScreen('settings'); }); await sleep(1200); await fr.evaluate(()=>{ const b=document.getElementById('themeBox'); b&&b.scrollIntoView({block:'center'}); }); await sleep(500); await shot(page,'w360_settings_themebox');
+await fr.evaluate(()=>{ showScreen('home'); }); await sleep(500);
+await fr.evaluate(()=>{ showTypingMenu(); }); await sleep(1200); await shot(page,'w360_typing_menu');
+await fr.evaluate(()=>{ showScreen('home'); }); await sleep(500);
+await fr.evaluate(()=>{ HansenSpellBee.open('animal'); }); await sleep(4000); await shot(page,'w360_spellbee');
+// land map at 360
+await page.goto(base+'/index.html',{waitUntil:'load'}); await sleep(1500);
+await page.evaluate(()=>window.openIsland('land_map.html')); await sleep(5000); await shot(page,'w360_land_map');
+fs.writeFileSync(OUT+'/seg6_notes.json', JSON.stringify({notes,errs,r404:[...new Set(reqLog)]},null,1));
+console.log(notes.join('\n')); console.log('errs',errs.slice(0,10));
+await browser.close(); srv.close();

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_account_save_v1017.mjs —— 「账号即存档」密钥推导回归
  * 缺口：云存档原按**每台设备本地随机生成**的16位密钥存取(既定位置又定加解密)，
  *       换设备即便登录同一账号也找不回来——账号建了却没用。
@@ -12,7 +13,7 @@ const win = { HANSEN_CLOUD_CONFIG:{envId:'x'},
 win.window = win;
 const ctx = { ...win, window: win };
 vm.createContext(ctx);
-try { vm.runInContext(fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8'), ctx); }
+try { vm.runInContext(fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8'), ctx); }
 catch(e){ console.log('load err:', String(e.message).slice(0,90)); }
 const CS = win.HansenCloudSave;
 if(!CS){ console.log('模块未导出'); process.exit(1); }

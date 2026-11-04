@@ -1,0 +1,35 @@
+{
+ "isl": [
+  "/island_color.html?v=1163 200 dest=empty purpose=",
+  "/island_wordIslandColorNum.html?v=1163 404 dest=empty purpose=prefetch",
+  "/island_colornum.html?v=1163 404 dest=empty purpose=prefetch",
+  "/island_food.html?v=1163 200 dest=empty purpose=prefetch",
+  "/island_verbs.html?v=1163 404 dest=empty purpose=prefetch",
+  "/island_house.html?v=1163 404 dest=empty purpose=prefetch",
+  "/land_map.html 200 dest=empty purpose=",
+  "/island_animal.html?v=1163 200 dest=empty purpose=prefetch"
+ ],
+ "n404": [
+  "/island_wordIslandColorNum.html?v=1163",
+  "/island_colornum.html?v=1163",
+  "/island_verbs.html?v=1163",
+  "/island_house.html?v=1163"
+ ],
+ "prefetched": [
+  "island_wordIslandColorNum.html",
+  "island_colornum.html",
+  "island_food.html",
+  "island_verbs.html",
+  "island_house.html",
+  "island_animal.html"
+ ],
+ "links": [
+  "island_wordIslandColorNum.html?v=1163 why=recent",
+  "island_colornum.html?v=1163 why=recent",
+  "island_food.html?v=1163 why=recent",
+  "island_verbs.html?v=1163 why=recent",
+  "island_house.html?v=1163 why=recent",
+  "island_animal.html?v=1163 why=idle"
+ ],
+ "card": "🌈 最近探险的岛屿 🌈 颜色数字 · 点击继续 → => island_color.html"
+}

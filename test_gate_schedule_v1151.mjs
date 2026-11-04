@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_gate_schedule_v1151.mjs —— 闸门的调度顺序
  *
  * 🔴 起因：闸门跑满一轮要十几分钟。
@@ -24,7 +25,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('闸门调度顺序 v1151');
 
-const gate = fs.readFileSync('/home/claude/work/repo/jarvis_gate.py', 'utf8');
+const gate = fs.readFileSync((__HSN_ROOT + 'jarvis_gate.py'), 'utf8');
 const code = gate.replace(/#[^\n]*/g, '');
 
 /* ① 机制存在 */
@@ -78,7 +79,7 @@ const code = gate.replace(/#[^\n]*/g, '');
 
 /* ⑤ 耗时缓存不进版本库 */
 {
-  const ig = fs.readFileSync('/home/claude/work/repo/.gitignore', 'utf8');
+  const ig = fs.readFileSync((__HSN_ROOT + '.gitignore'), 'utf8');
   ok(/\.jarvis_time\.json/.test(ig),
      '★ 耗时缓存在 .gitignore 里 —— 那是本机性能相关的状态，' +
      '不同机器的数值没有可比性，提交上去只会制造无谓的 diff');

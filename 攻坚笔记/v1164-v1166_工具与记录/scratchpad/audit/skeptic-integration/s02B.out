@@ -1,0 +1,14 @@
+B visibleMs 3020
+B 15s after tap: requests 239 MB 13.3 html pages 1
+B html list: /island_animal.html
+B MB by ext: {"html":0.6,"js":5.24,"woff2":0.42,"webp":6.13,"mp3":0.95,"other":0}
+B frame tree while in island:
+index.html
+  island_animal.html
+
+B frame count 2
+B frame tree on home after close:
+index.html
+  island_animal.html
+
+B frame count on home 2

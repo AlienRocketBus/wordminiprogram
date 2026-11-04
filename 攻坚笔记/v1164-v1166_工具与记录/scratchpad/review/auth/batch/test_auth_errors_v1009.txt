@@ -1,0 +1,16 @@
+登录错误翻译 v1009
+  OK  verification code invalid → 含「验证码」
+  OK  invalid verification_code → 含「验证码」
+  OK  verification_code expired → 含「验证码」
+  OK  origin not allowed 403 → 含「安全域名」
+  OK  sms service not enabled → 含「短信」
+  OK  too many requests → 含「频繁」
+  OK  user already exist → 含「有人用了」
+  OK  password incorrect → 含「密码」
+  OK  未识别错误原样透出(不编造)
+  OK  参数错误不误报为验证码错
+  OK  11位手机号归一
+  OK  带空格归一
+  OK  非法号返回 null
+
+结果: 13 通过 / 0 失败

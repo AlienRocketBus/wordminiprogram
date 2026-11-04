@@ -1,0 +1,131 @@
+{
+ "name": "R09b_leave_toctou_alone_guest_kicked",
+ "bug": "R9 alone (other fixes in place): leaveRoom reads the seat, the join in flight deletes and re-creates it, leaveRoom then deletes/patches the live seat → the host never starts, the guest is kicked (6 s replica lag)",
+ "spec": {
+  "seed": 377,
+  "profile": "lag",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 6000,
+   "lagShape": 1,
+   "queryLagMul": 1.05,
+   "queryLagExtra": 201,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "duplicate_write",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.31,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x377",
+    "name": "小明",
+    "rating": 1255,
+    "skew": 0,
+    "net": {
+     "base": 37,
+     "jitter": 30,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.77,
+     "minMs": 1215,
+     "maxMs": 5883,
+     "slowP": 0.09
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1451,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 2
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P3",
+    "uid": "k3x377",
+    "name": "朵朵",
+    "rating": 1173,
+    "skew": 0,
+    "net": {
+     "base": 69,
+     "jitter": 38,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.48,
+     "minMs": 2327,
+     "maxMs": 9119,
+     "slowP": 0.06
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2686,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 5
+     },
+     {
+      "at": 9269,
+      "act": "cancelJoin"
+     }
+    ],
+    "ladderer": false,
+    "afterReload": {
+     "at": 0,
+     "act": "join",
+     "via": "list",
+     "target": "P0",
+     "pick": "first",
+     "tries": 3
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

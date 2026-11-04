@@ -1,0 +1,62 @@
+
+▶ listen：错词 fox
+  ✅ L listen 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🦊fox/fɒks/狐狸点一下继续
+  ✅ Q listen 本轮末把错词再考一次（只一次）: [{"en":"duck","retry":false},{"en":"fox","retry":true}]
+  ✅ R listen 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 fox 狐狸练这 1 个词
+
+▶ cloze：错词 rabbit
+  ✅ L cloze 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🐰rabbit/ˈræbɪt/兔子A rabbit has long ears.兔子有长长的耳朵。点一下继续
+  ✅ Q cloze 本轮末把错词再考一次（只一次）: [{"en":"eagle","retry":false},{"en":"rabbit","retry":true}]
+  ✅ R cloze 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 rabbit 兔子练这 1 个词
+
+▶ moles：错词 bear
+  ✅ L moles 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🐻bear/beə/熊点一下继续
+  ✅ Q moles 本轮末把错词再考一次（只一次）: [{"en":"bird","retry":false},{"en":"bear","retry":true,"livesKept":true}]
+  ✅ R moles 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 bear 熊练这 1 个词
+
+▶ bubble：错词 cat
+  ✅ L bubble 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🐱cat/kæt/猫点一下继续
+  ✅ Q bubble 本轮末把错词再考一次（只一次）: [{"en":"cow","retry":false},{"en":"cat","retry":true}]
+  ✅ R bubble 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 cat 猫练这 1 个词
+
+▶ scramble：错词 cow
+  ✅ L scramble 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🐮cow/kaʊ/牛点一下继续
+  ✅ Q scramble 本轮末把错词再考一次（只一次）: [{"en":"cow","retry":false},{"en":"lion","retry":false},{"en":"cow","retry":true}]
+  ✅ R scramble 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 cow 牛练这 1 个词
+
+▶ typing：错词 bird
+  ✅ L typing 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🐦bird/bɜːd/鸟点一下继续
+  ✅ Q typing 本轮末把错词再考一次（只一次）: [{"en":"owl","retry":false},{"en":"bird","retry":true}]
+  ✅ R typing 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 bird 鸟练这 1 个词
+
+▶ eagle：错词 lion
+  ✅ L eagle 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🦁lion/ˈlaɪən/狮子点一下继续
+  ✅ Q eagle 本轮末把错词再考一次（只一次）: [{"en":"cat","retry":false,"round":2},{"en":"lion","retry":true,"round":2}]
+  ✅ R eagle 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 lion 狮子练这 1 个词
+  ✅ 听音：再考题不算进正确率 (答对 1/2) {"total":2,"right":1}
+  ✅ 完形：再考题不算进「答对」 {"done":1,"total":13}
+  ✅ 地鼠：第一次答错照常扣 1 命
+  ✅ 地鼠：再考题不加分 {"hit":1,"score":10}
+  ✅ 泡泡：答错记到没认出的目标词上(+1)，干扰词不变(+0) {"target":1,"distractor":0}
+  ✅ 泡泡：再考题不算进完成数 {"done":1,"score":13}
+  ✅ 拼词：原地拼对照旧算 1 个 + 另一题 1 个，本轮末再考不再加 (=2) {"correct":2,"total":2}
+  ✅ 打字：再考题不进速度纪录 {"done":1,"times":1}
+  ✅ 火眼金睛：再考题不让题号超过总题数 {"score":25,"round":2,"total":2}
+  ✅ 「练这 1 个词」打开只含这个词的复习中心 {"open":true,"title":"练这 1 个词","n":1,"text":" @keyframes hr_slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}} @keyframes hr_ic"}
+  ✅ 连胜断掉不说「💔 被中断」: 🌱 刚才连对 4 个，真棒！
+  ✅ 极速：答错出小课，小课期间时间不往下扣 {"card":true,"t0":60,"t1":60,"queued":true}
+  ✅ 极速：错词过几题再考一次
+  ✅ 常规岛页面无报错 
+
+▶ listen：错词 modern
+  ✅ L listen 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🏙️modern/ˈmɒdn/现代的点一下继续
+  ✅ Q listen 本轮末把错词再考一次（只一次）: [{"en":"calm","retry":false},{"en":"modern","retry":true}]
+  ✅ R listen 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 modern 现代的练这 1 个词
+
+▶ moles：错词 ancient
+  ✅ L moles 答错出揭晓卡（英文+「再听一遍 👂」）: 再听一遍 👂🏛️ancient/ˈeɪnʃənt/古代的点一下继续
+  ✅ Q moles 本轮末把错词再考一次（只一次）: [{"en":"useful","retry":false},{"en":"ancient","retry":true,"livesKept":true}]
+  ✅ R moles 结算页列出错词 + 🔊 + 「练这 N 个词」: 📒 这次答错的词（点一下听发音）🔊 ancient 古代的练这 1 个词
+  ✅ 单词大陆页面无报错 
+
+✅ v1165 答错小课：揭晓卡+重读 / 本轮末再考一次 / 结算列错词 / 温和文案 全过

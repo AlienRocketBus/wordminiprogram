@@ -1,0 +1,44 @@
+{
+  "navs": [
+    {
+      "dt": 27,
+      "url": "/"
+    }
+  ],
+  "alive": 1,
+  "trace": [
+    {
+      "k": "controllerchange",
+      "t": 1793707206887,
+      "stack": "    at ServiceWorkerContainer.<anonymous> (<anonymous>:10:78)",
+      "dt": 3448
+    }
+  ],
+  "serverNavs": [
+    {
+      "dt": 3035,
+      "path": "/sw_v944.js",
+      "dest": "serviceworker",
+      "mode": "same-origin",
+      "sw": "script",
+      "st": 200
+    }
+  ],
+  "sw": {
+    "controller": "/sw_v944.js",
+    "regs": [
+      {
+        "scope": "/",
+        "active": "activated",
+        "waiting": false,
+        "installing": false
+      }
+    ],
+    "gate": {
+      "version": 1164,
+      "ready": true,
+      "controller": "sw_v944.js"
+    }
+  },
+  "ev": []
+}

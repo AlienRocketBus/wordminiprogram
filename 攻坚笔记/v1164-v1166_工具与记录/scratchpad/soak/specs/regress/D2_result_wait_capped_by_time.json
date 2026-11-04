@@ -1,0 +1,108 @@
+{
+ "name": "D2_result_wait_capped_by_time",
+ "bug": "D2 (6165390): the result wait was capped by a poll count (150) — an opponent who keeps a heartbeat but never hands in (griefer, slow network) kept the kid waiting ~16 min; now 5 min after handing in",
+ "spec": {
+  "seed": 323,
+  "profile": "sweep",
+  "kind": "rooms2",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 1,
+   "queryLagMul": 1.54,
+   "queryLagExtra": 0,
+   "lagMode": "monotonic",
+   "ryw": true,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.79,
+  "outages": [],
+  "players": [
+   {
+    "label": "P1",
+    "uid": "k1x323",
+    "name": "小红",
+    "rating": 1169,
+    "skew": 0,
+    "net": {
+     "base": 1177,
+     "jitter": 2211,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.5,
+     "minMs": 3281,
+     "maxMs": 5201,
+     "slowP": 0.02
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 776,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   }
+  ],
+  "adversary": {
+   "uid": "adv323",
+   "name": "捣蛋鬼",
+   "rating": 1000,
+   "skew": 0,
+   "net": {
+    "base": 1199,
+    "jitter": 639,
+    "spikeP": 0.01,
+    "faultRate": 0.052,
+    "faultMix": {
+     "drop": 1,
+     "lost": 1.5,
+     "e5xx": 1,
+     "slow": 0.7
+    }
+   },
+   "adv": {
+    "start": 7874,
+    "period": 2728,
+    "flood": {
+     "n": 29,
+     "created": "future",
+     "forge": false
+    },
+    "squatSeats": {
+     "depth": 3,
+     "acked": true,
+     "forge": true,
+     "beat": true
+    },
+    "squatWins": {
+     "depth": 3
+    }
+   }
+  }
+ }
+}

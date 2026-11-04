@@ -1,0 +1,27 @@
+   [islandFrame navigated] about:blank 09.902
+   [islandFrame navigated] island_animal.html 13.913
+OPEN island_animal.html reveal 1472 hlen 3
+  tree before close: index.html /   island_animal.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /       island_season.html?v=1163 /     season_showcase.html?v=1163&warm=1 hlen 3
+  CLOSE 477 islandFrame= island_animal.html hlen 3 state null 
+  tree after close: index.html /   island_animal.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /       island_season.html?v=1163 /       boss_hall.html?v=1163&warm=1 /     spelling_bee.html?v=1163&warm=1 /         land_map.html?v=1163 /       
+   [islandFrame navigated] island_food.html 24.900
+OPEN island_food.html reveal 3211 hlen 3
+  tree before close: index.html /   island_food.html /     land_map.html?v=1163 /     island_season.html?v=1163 hlen 3
+   [islandFrame navigated] island_animal.html 35.381
+  CLOSE 32 islandFrame= island_animal.html hlen 3 state null 
+  tree after close: index.html /   island_animal.html
+   [islandFrame navigated] island_sports.html 36.538
+OPEN island_sports.html reveal 1544 hlen 3
+  tree before close: index.html /   island_sports.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /       island_season.html?v=1163 /         land_map.html?v=1163 /       boss_hall.html?v=1163&warm=1 hlen 3
+   [islandFrame navigated] island_animal.html 44.146
+  CLOSE 21 islandFrame= island_animal.html hlen 3 state null 
+  tree after close: index.html /   island_animal.html /     land_map.html?v=1163
+   [islandFrame navigated] island_job.html 45.217
+OPEN island_job.html reveal 818 hlen 3
+  tree before close: index.html /   island_job.html /     land_map.html?v=1163 /     island_season.html?v=1163 /       land_map.html?v=1163 /       island_season.html?v=1163 /         land_map.html?v=1163 hlen 3
+   [islandFrame navigated] island_animal.html 52.168
+  CLOSE 36 islandFrame= island_animal.html hlen 3 state null 
+  tree after close: index.html /   island_animal.html /     land_map.html?v=1163
+errors [
+  'pageerror: Transition was aborted because of invalid state. ViewTransition opt-in disabled'
+]

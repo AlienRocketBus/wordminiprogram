@@ -1,0 +1,266 @@
+{
+ "cloud": [
+  {
+   "t": 2310,
+   "meanLum": 23.1,
+   "f": "tr_cloud_00.png"
+  },
+  {
+   "t": 4257,
+   "meanLum": 127.4,
+   "f": "tr_cloud_01.png"
+  },
+  {
+   "t": 5271,
+   "meanLum": 123.3,
+   "f": "tr_cloud_02.png"
+  },
+  {
+   "t": 5828,
+   "meanLum": 123.7,
+   "f": "tr_cloud_03.png"
+  },
+  {
+   "t": 6269,
+   "meanLum": 123.7,
+   "f": "tr_cloud_04.png"
+  },
+  {
+   "t": 6560,
+   "meanLum": 123.7,
+   "f": "tr_cloud_05.png"
+  },
+  {
+   "t": 7113,
+   "meanLum": 123.7,
+   "f": "tr_cloud_06.png"
+  },
+  {
+   "t": 7568,
+   "meanLum": 123.7,
+   "f": "tr_cloud_07.png"
+  },
+  {
+   "t": 8077,
+   "meanLum": 123.7,
+   "f": "tr_cloud_08.png"
+  },
+  {
+   "t": 8623,
+   "meanLum": 123.7,
+   "f": "tr_cloud_09.png"
+  },
+  {
+   "t": 9233,
+   "meanLum": 123.7,
+   "f": "tr_cloud_10.png"
+  },
+  {
+   "t": 9574,
+   "meanLum": 123.7,
+   "f": "tr_cloud_11.png"
+  },
+  {
+   "t": 9836,
+   "meanLum": 123.7,
+   "f": "tr_cloud_12.png"
+  },
+  {
+   "t": 10257,
+   "meanLum": 123.7,
+   "f": "tr_cloud_13.png"
+  },
+  {
+   "t": 10709,
+   "meanLum": 123.7,
+   "f": "tr_cloud_14.png"
+  },
+  {
+   "t": 11001,
+   "meanLum": 123.7,
+   "f": "tr_cloud_15.png"
+  },
+  {
+   "t": 11308,
+   "meanLum": 123.7,
+   "f": "tr_cloud_16.png"
+  },
+  {
+   "t": 11726,
+   "meanLum": 123.7,
+   "f": "tr_cloud_17.png"
+  },
+  {
+   "t": 12148,
+   "meanLum": 123.7,
+   "f": "tr_cloud_18.png"
+  },
+  {
+   "t": 12507,
+   "meanLum": 123.7,
+   "f": "tr_cloud_19.png"
+  },
+  {
+   "t": 12960,
+   "meanLum": 123.7,
+   "f": "tr_cloud_20.png"
+  },
+  {
+   "t": 13361,
+   "meanLum": 123.7,
+   "f": "tr_cloud_21.png"
+  },
+  {
+   "t": 13684,
+   "meanLum": 123.7,
+   "f": "tr_cloud_22.png"
+  },
+  {
+   "t": 14142,
+   "meanLum": 123.7,
+   "f": "tr_cloud_23.png"
+  },
+  {
+   "t": 14687,
+   "meanLum": 123.7,
+   "f": "tr_cloud_24.png"
+  },
+  {
+   "t": 15071,
+   "meanLum": 123.7,
+   "f": "tr_cloud_25.png"
+  }
+ ],
+ "cosmos": [
+  {
+   "t": 4179,
+   "meanLum": 26.2,
+   "f": "tr_cosmos_00.png"
+  },
+  {
+   "t": 7271,
+   "meanLum": 26.9,
+   "f": "tr_cosmos_01.png"
+  },
+  {
+   "t": 8888,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_02.png"
+  },
+  {
+   "t": 10194,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_03.png"
+  },
+  {
+   "t": 11792,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_04.png"
+  },
+  {
+   "t": 13380,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_05.png"
+  },
+  {
+   "t": 14105,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_06.png"
+  },
+  {
+   "t": 14742,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_07.png"
+  },
+  {
+   "t": 15721,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_08.png"
+  },
+  {
+   "t": 16238,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_09.png"
+  },
+  {
+   "t": 17117,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_10.png"
+  },
+  {
+   "t": 17566,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_11.png"
+  },
+  {
+   "t": 18698,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_12.png"
+  },
+  {
+   "t": 20004,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_13.png"
+  },
+  {
+   "t": 20699,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_14.png"
+  },
+  {
+   "t": 21460,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_15.png"
+  },
+  {
+   "t": 22020,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_16.png"
+  },
+  {
+   "t": 23049,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_17.png"
+  },
+  {
+   "t": 24444,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_18.png"
+  },
+  {
+   "t": 25277,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_19.png"
+  },
+  {
+   "t": 26260,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_20.png"
+  },
+  {
+   "t": 26643,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_21.png"
+  },
+  {
+   "t": 27054,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_22.png"
+  },
+  {
+   "t": 27563,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_23.png"
+  },
+  {
+   "t": 27906,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_24.png"
+  },
+  {
+   "t": 28328,
+   "meanLum": 27.1,
+   "f": "tr_cosmos_25.png"
+  }
+ ]
+}

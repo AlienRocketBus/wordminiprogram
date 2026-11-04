@@ -1,0 +1,41 @@
+{
+ "root": "#hsn_pkroom_screen",
+ "present": true,
+ "text": "📨 交卷了 你答对 1 / 3 个，得 100 分，用时 14 秒。 正在等对手交卷…",
+ "contrastFails": [],
+ "contrastAll": [
+  {
+   "t": "📨 交卷了",
+   "ratio": 15.36,
+   "fg": "rgb(232,238,252)",
+   "bg": "rgb(15,23,42)",
+   "size": 19,
+   "weight": "700",
+   "need": 3,
+   "ok": true
+  },
+  {
+   "t": "你答对 1 / 3 个，得 100 分，用时",
+   "ratio": 8.54,
+   "fg": "rgb(169,180,199)",
+   "bg": "rgb(15,23,42)",
+   "size": 14,
+   "weight": "500",
+   "need": 4.5,
+   "ok": true
+  }
+ ],
+ "tapFails": [],
+ "taps": [],
+ "overflow": {
+  "vw": 390,
+  "scrollW": 390,
+  "bodyScrollW": 390,
+  "bad": []
+ },
+ "rootScroll": {
+  "sh": 844,
+  "ch": 844
+ },
+ "errs": []
+}

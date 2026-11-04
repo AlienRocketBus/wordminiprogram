@@ -1,0 +1,368 @@
+{
+ "notes": [],
+ "metrics": {
+  "d40_chest": {
+   "id": "chestScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "← 返回首页",
+     "br": "12px",
+     "bg": "rgba(255, 255, 255, 0.1)",
+     "fs": "15px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "每日宝箱",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    }
+   ]
+  },
+  "d41_quests": {
+   "id": "questsScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "📋 每日任务",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    }
+   ]
+  },
+  "d42_achievements": {
+   "id": "achScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "🏆 成就殿堂",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    }
+   ]
+  },
+  "d43_stats": {
+   "id": "statsScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "📊 学习统计",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    }
+   ]
+  },
+  "d44_settings": {
+   "id": "settingsScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "🪙\n金币怎么得\n做什么",
+     "br": "0px",
+     "bg": "rgba(0, 0, 0, 0)",
+     "fs": "16px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "💎\n钻石怎么得\n认真拼",
+     "br": "0px",
+     "bg": "rgba(0, 0, 0, 0)",
+     "fs": "16px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "🐾\n宠物怎么升级\n经验",
+     "br": "0px",
+     "bg": "rgba(0, 0, 0, 0)",
+     "fs": "16px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "⚡\n宠物经验怎么得\n所有",
+     "br": "0px",
+     "bg": "rgba(0, 0, 0, 0)",
+     "fs": "16px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "⚔️ 清 Boss 战次",
+     "br": "10px",
+     "bg": "linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "📝 清完形填空",
+     "br": "10px",
+     "bg": "linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "🔊 清听音答对",
+     "br": "10px",
+     "bg": "linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "⚙️ 设置",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    },
+    {
+     "t": "🔊 点击音效",
+     "fs": "15px",
+     "ff": "CartoonBlack",
+     "color": "rgb(251, 191, 36)"
+    },
+    {
+     "t": "🎨 整体配色",
+     "fs": "15px",
+     "ff": "CartoonBlack",
+     "color": "rgb(251, 191, 36)"
+    }
+   ]
+  },
+  "d45_themeshop": {
+   "id": "diamondshopScreen",
+   "back": {
+    "x": 14,
+    "y": 75,
+    "w": 63,
+    "h": 44,
+    "bg": "rgba(30, 41, 59, 0.82)",
+    "br": "9px",
+    "fs": "12px",
+    "color": "rgb(203, 213, 225)",
+    "txt": "← 返回"
+   },
+   "btns": [
+    {
+     "t": "← 返回",
+     "br": "9px",
+     "bg": "rgba(30, 41, 59, 0.82)",
+     "fs": "12px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "试用",
+     "br": "10px",
+     "bg": "rgba(167, 139, 250, 0.2)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "💎 688",
+     "br": "10px",
+     "bg": "linear-gradient(90deg, rgb(6, 182, 212), rgb(8, 145, 178))",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "试用",
+     "br": "10px",
+     "bg": "rgba(167, 139, 250, 0.2)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "💎 768",
+     "br": "10px",
+     "bg": "linear-gradient(90deg, rgb(6, 182, 212), rgb(8, 145, 178))",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "试用",
+     "br": "10px",
+     "bg": "rgba(167, 139, 250, 0.2)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "💎 666",
+     "br": "10px",
+     "bg": "linear-gradient(90deg, rgb(6, 182, 212), rgb(8, 145, 178))",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    },
+    {
+     "t": "试用",
+     "br": "10px",
+     "bg": "rgba(167, 139, 250, 0.2)",
+     "fs": "13px",
+     "fw": "900",
+     "ff": "CartoonBlack"
+    }
+   ],
+   "h": [
+    {
+     "t": "💎 主题商店",
+     "fs": "22px",
+     "ff": "-apple-system",
+     "color": "rgb(226, 232, 240)"
+    }
+   ]
+  },
+  "d46_gear": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  },
+  "d47_mylearning": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  },
+  "d48_pet": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  },
+  "d50_nav_wrong": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  },
+  "d51_nav_review": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  },
+  "d52_nav_cards": {
+   "id": "homeScreen",
+   "back": null,
+   "btns": [],
+   "h": []
+  }
+ },
+ "errs": [],
+ "external": [],
+ "r404": []
+}

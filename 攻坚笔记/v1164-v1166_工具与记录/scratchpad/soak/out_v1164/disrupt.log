@@ -1,0 +1,19 @@
+
+══ clusters (7) ══
+  [low   ]    4× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 26,63,388,419
+           e.g. joinRoom(rmk0gedje2makov) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    3× I6:taken-but-nobody-else:no-seat:rough-network   seeds 147,200,425
+           e.g. joinRoom(rmk0gg6dan7venc) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I9:I6:taken-but-nobody-else:no-seat:rough-network   seeds 147,200
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gg6dan7venc) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    2× I6:taken-but-nobody-else:no-seat:after-own-cancel-or-away   seeds 215,219
+           e.g. joinRoom(rmk0gedfsmg45l6) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:guest-after-resume   seeds 11
+           e.g. P1 (guest) kept answering 3 more words after the opponent had claimed the win by abandon at 115.9s — it is only told at the very end
+  [low   ]    1× I5:played-on-after-opponent-claimed-abandon:host-after-resume   seeds 199
+           e.g. P3 (host) kept answering 2 more words after the opponent had claimed the win by abandon at 189.1s — it is only told at the very end
+  [low   ]    1× I6:taken-but-nobody-else:host-reopened-my-seat:rough-network   seeds 425
+           e.g. joinRoom(rmk0gedqzz9ivv8) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+
+SUMMARY profile=disrupt runs=600 seeds=1..600 failing_runs=0 clusters=7 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:0 I5:2 I6:9 I7:0 I8:0 I9:2 I10:0 | matches=565 settled_pairs=402 virtual=81.0h events=591712 real=28s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

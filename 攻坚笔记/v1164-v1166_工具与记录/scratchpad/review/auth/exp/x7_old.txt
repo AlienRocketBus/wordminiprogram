@@ -1,0 +1,13 @@
+{
+  "root": "chpad/v1163_snapshot",
+  "login": true,
+  "beforeTop": null,
+  "islandSync": {
+    "ok": false,
+    "err": "云端会话尚未就绪（已重试 5 次），请稍候再试"
+  },
+  "afterTop": null,
+  "afterIsland": null,
+  "signed": true,
+  "whatKidSees": "跳过 🎯 欢迎来到单词大冒险！ 这里用打 Boss 的方式背单词—— 答对题目就能击败怪兽，越打越强！ 下一步 →"
+}

@@ -1,0 +1,4 @@
+listFriends after server-side token expiry: {"ok":false,"kind":"expired","reason":"云端登录过期了，重新登录一次就好 ⟨ACCESS_TOKEN_EXPIRED | 读取好友记录：access_token expired⟩"}
+requests: database.queryDocument→ACCESS_TOKEN_EXPIRED | database.queryDocument→ACCESS_TOKEN_EXPIRED
+fetchTop: {"ok":false,"kind":"expired","reason":"云端登录过期了，重新登录一次就能看到排名 ⟨ACCESS_TOKEN_EXPIRED | 读取排行榜：access_token expired⟩"}
+still signed in locally: true

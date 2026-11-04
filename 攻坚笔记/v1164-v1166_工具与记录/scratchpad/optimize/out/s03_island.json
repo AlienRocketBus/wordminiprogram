@@ -1,0 +1,173 @@
+{
+ "tl": [
+  {
+   "ms": 500,
+   "st": {
+    "rs": "loading",
+    "txt": "⚔️ Lv. 1 新手探险家 打卡天数 0 0/100 XP 🪙 0 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 可领 每日宝箱 0/3 每日任务 挑战BOSS 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling bee ⚔️ 拼写大PK 打地鼠 钓鱼大师 泡泡大作战 极速60秒 火眼金睛 抽卡 成就 统计 设置 主页 "
+   }
+  },
+  {
+   "ms": 1000,
+   "st": {
+    "rs": "loading",
+    "txt": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 🪙 0 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 可领 每日宝箱 0/12 每日任务 挑战BOSS 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling bee ⚔️ 拼写大PK 打地鼠 钓鱼大师 泡泡大作战 极速60秒 火眼金睛 抽卡 成就 统计 设置 🎮 欢迎"
+   }
+  },
+  {
+   "ms": 2000,
+   "st": {
+    "rs": "interactive",
+    "txt": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling bee ⚔️ 拼写大PK 打地鼠 钓鱼大师 泡泡大作战"
+   }
+  },
+  {
+   "ms": 3000,
+   "st": {
+    "rs": "interactive",
+    "txt": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling b"
+   }
+  },
+  {
+   "ms": 5000,
+   "st": {
+    "rs": "complete",
+    "txt": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling b"
+   }
+  },
+  {
+   "ms": 8000,
+   "st": {
+    "rs": "complete",
+    "txt": "Lv. 1 新手探险家 打卡天数 1 0/100 XP 💎 0 🪙 300 动物大冒险 ANIMAL ADVENTURE ISLAND 星灵 星雾之卵 裹着流动星雾的蛋, 壳上微光符纹缓缓游动 可领 每日宝箱 0/12 每日任务 挑战BOSS 今天没有要复习的单词 大脑正在悄悄记牢它们 精学模式 探索单词 听音辨义 🃏 记忆翻牌 打字大师 完形填空 字母拼拼乐 畅玩模式 spelling b"
+   }
+  }
+ ],
+ "nreq": 160,
+ "tot": 10718290,
+ "top": [
+  [
+   "hansen_boss_attack.js?v=1163",
+   1233294
+  ],
+  [
+   "island_color.html?v=1163",
+   614970
+  ],
+  [
+   "island_sports.html?v=1163",
+   610809
+  ],
+  [
+   "island_job.html?v=1163",
+   607322
+  ],
+  [
+   "island_nature.html?v=1163",
+   604988
+  ],
+  [
+   "island_animal.html",
+   604367
+  ],
+  [
+   "cartoon_font.woff2",
+   398318
+  ],
+  [
+   "bosses/zb_fists_all.webp?v=1163",
+   325798
+  ],
+  [
+   "vocab_all.js?v=1163",
+   309452
+  ],
+  [
+   "bosses/zf_fists_all.webp?v=1163",
+   270246
+  ],
+  [
+   "index.html",
+   203029
+  ],
+  [
+   "bosses/rexclaw_r.webp?v=1163",
+   166092
+  ],
+  [
+   "bosses/tl_bolt.webp?v=1163",
+   162134
+  ],
+  [
+   "hansen_cards.js?v=1163",
+   157858
+  ],
+  [
+   "bosses/rexclaw_l.webp?v=1163",
+   145808
+  ],
+  [
+   "hansen_boss_lock.js?v=1163",
+   144187
+  ],
+  [
+   "bosses/lv01.webp?v=1163",
+   113816
+  ],
+  [
+   "bosses/chaoswave_real.webp?v=1163",
+   112126
+  ],
+  [
+   "bossfx/renyi_spear.webp",
+   101430
+  ],
+  [
+   "hansen_pk_room_ui_v1065.js?v=1163",
+   100671
+  ],
+  [
+   "hansen_cinema_themes.js?v=1163",
+   86470
+  ],
+  [
+   "bosses/zf_fist_r.webp?v=1163",
+   86141
+  ],
+  [
+   "bosses/zf_fist_l.webp?v=1163",
+   79935
+  ],
+  [
+   "hansen_palette.js?v=1163",
+   78579
+  ],
+  [
+   "hansen_pk_room_v1065.js?v=1163",
+   71497
+  ],
+  [
+   "hansen_land_cards.js?v=1163",
+   69413
+  ],
+  [
+   "bosses/zb_fist3.webp?v=1163",
+   68743
+  ],
+  [
+   "hansen_auth_v1004.js?v=1163",
+   66624
+  ],
+  [
+   "hansen_diamond_shop.js?v=1163",
+   64544
+  ],
+  [
+   "hansen_review.js?v=1163",
+   63823
+  ]
+ ],
+ "welcome": "Lv.\n1\n新手探险家\n打卡天数 1\n0/100 XP\n💎\n0\n🪙\n300\n动物大冒险\nANIMAL ADVENTURE ISLAND\n星灵\n星雾之卵\n裹着流动星雾的蛋, 壳上微光符纹缓缓游动\n可领\n每日宝箱\n0/12\n每日任务\n挑战BOSS\n今天没有要复习的单词\n大脑正在悄悄记牢它们\n精学模式\n探索单词\n听音辨义\n🃏\n记忆翻牌\n打字大师\n完形填空\n字母拼拼乐\n畅玩模式\nspelling bee\n⚔️\n拼写大PK\n打地鼠\n钓鱼大师\n泡泡大作战\n极速60秒\n火眼金睛\n抽卡\n装备\n主题商店\n成就\n统计\n设置\n我的学习\n🎮\n欢迎来到动物大冒险！\n🗺️ 5 大动物岛屿等你探索\n📚 42 个英语单词随你学\n🎮 12 种超酷玩法等你来\n🐉 36 阶进化宠物\n🎁 每日宝箱 + 签到奖励\n🏆 144 个成就等你解锁\n🎒 小冒险家秘籍：\n每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟\n开始冒险！\n主页\n错题\n复习\n卡册\n💎",
+ "dialogs": [],
+ "errs": []
+}

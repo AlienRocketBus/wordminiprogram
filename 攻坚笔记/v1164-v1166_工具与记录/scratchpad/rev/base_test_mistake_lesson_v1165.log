@@ -1,0 +1,57 @@
+
+▶ listen：错词 horse
+  ❌ L listen 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q listen 本轮末把错词再考一次（只一次）: [{"en":"duck","retry":false}]
+  ❌ R listen 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ cloze：错词 bee
+  ❌ L cloze 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q cloze 本轮末把错词再考一次（只一次）: [{"en":"fox","retry":false}]
+  ❌ R cloze 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ moles：错词 wolf
+  ❌ L moles 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q moles 本轮末把错词再考一次（只一次）: [{"en":"pig","retry":false}]
+  ❌ R moles 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ bubble：错词 ant
+  ❌ L bubble 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q bubble 本轮末把错词再考一次（只一次）: [{"en":"deer","retry":false}]
+  ❌ R bubble 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ scramble：错词 pig
+  ❌ L scramble 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q scramble 本轮末把错词再考一次（只一次）: [{"en":"pig","retry":false},{"en":"cow","retry":false}]
+  ❌ R scramble 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ typing：错词 cow
+  ❌ L typing 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q typing 本轮末把错词再考一次（只一次）: [{"en":"wolf","retry":false}]
+  ❌ R typing 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+
+▶ eagle：错词 frog
+  ❌ L eagle 答错出揭晓卡（英文+「再听一遍 👂」）: 
+  ❌ Q eagle 本轮末把错词再考一次（只一次）: [{"en":"fox","retry":false,"round":2}]
+  ❌ R eagle 结算页列出错词 + 🔊 + 「练这 N 个词」: 
+  ✅ 听音：再考题不算进正确率 (答对 1/2) {"total":2,"right":1}
+  ✅ 完形：再考题不算进「答对」 {"done":1,"total":13}
+  ✅ 地鼠：第一次答错照常扣 1 命
+  ✅ 地鼠：再考题不加分 {"hit":1,"score":10}
+  ❌ 泡泡：答错记到没认出的目标词上，不记干扰词 {"target":0,"distractor":1}
+  ✅ 泡泡：再考题不算进完成数 {"done":1,"score":13}
+  ✅ 拼词：原地拼对照旧算 1 个 + 另一题 1 个，本轮末再考不再加 (=2) {"correct":2,"total":2}
+  ✅ 打字：再考题不进速度纪录 {"done":1,"times":1}
+  ✅ 火眼金睛：再考题不让题号超过总题数 {"score":25,"round":2,"total":2}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Cannot read properties of null (reading 'click')
+    at eval (eval at evaluate (:311:30), <anonymous>:2:64)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/rev/base_main/test_mistake_lesson_v1165.mjs:228:33 {
+  log: []
+}
+
+Node.js v22.23.4

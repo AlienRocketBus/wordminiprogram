@@ -1,0 +1,76 @@
+{
+ "learning": {
+  "deferred": [
+   "vocab_all.js: 114 of 240 SVG icons have the English word drawn in. They only reach the PK battle (spelling_pk.html and hansen_pk_room, which I may not touch); island review contexts already turn SVG icons into 📘 through safeEmoji. The battle team should strip `<text>` labels the same way `__hsnQuizPic` does.",
+   "Match (记忆翻牌) has no single missed word, so it gets no lesson card. Boss gets the lesson card but no re-ask and no result list, because the boss result screens and pool are covered by their own guards. The island review mode has no re-ask either.",
+   "Found, not fixed: the whole v1034 achievement ladder (reviewS*, clozeS*, listenS*, typingS*, wrongS*, chestS* …) is written only in the template's checkAch, which hansen_island_upgrade.js replaces entirely, so none of them has ever unlocked. I wired up only the vocab ladder.",
+   "Found, not fixed: on island_land3 and island_land5 every 听音辨义 level has 0 words, and starting one crashes nextListenQ (TypeError reading 'en').",
+   "Found, not fixed: HansenMyLearning exports `_open` only, so test_light_contrast_v989 never actually audits 「我的学习」 (same pattern as the overview bug fixed here).",
+   "hansen_mistake_lesson_v1165.js is not in the sw_v944.js shell precache. Adding it means bumping the SW cache generation, which is a release step (cache-lock guard), so I left it."
+  ],
+  "risks": [
+   "The real-answer absorber is now live in production for the first time. Kids will see 「📦 记忆盒 +1 · N天后再见」 and 「🎓 复习毕业！」 messages, and due words come back on later days. Payouts stay within the documented v963 rules (+2 correction ×3 per word per day, +15 next-day clear, +20 for clearing today's review once a day); patrols are no longer scheduled twice.",
+   "The vocabS600 achievement (15 💎) has never been checked before. Kids who already know 600 or more words will unlock it the next time checkAch runs.",
+   "The lesson card adds about 2.5 s to every wrong answer unless the kid taps. In boss, a wrong answer now takes about 3.6 s before the next question, guarded by `_bossTransUntil`, and the boss watchdog tests pass. Speed pauses its clock during the card.",
+   "Old alias saves that have plan entries but no `cleared.srs` tombstone could bring old words back into the plan once (mergeState no longer requires wrongs > 0). The effect is an extra review, not lost data.",
+   "Retry answers still go through markAnswer, so they earn coins under the normal per-word caps and can complete the 'correct' quest. They do not add game score, XP or records."
+  ],
+  "needs_real_phone": [
+   "In WeChat, the lesson-card replay should be silent when 一键静音 is on and should follow the global volume. In Chromium the 200 ms delay after the tap avoided the 120 ms 'tap allows sound' window. iOS Safari and WeChat timing still needs a check on a phone.",
+   "Card stacking order and tapping through it on a low-end Android XWeb, especially over the fish pond and bubble animations and the boss attack effects.",
+   "Light-theme look of the lesson card, the 「练这 N 个词」 block and the 错题总览 on a real phone, across the different light palettes.",
+   "Spaced review across real days (due tomorrow, in 2 days, in 4 days) on a phone's clock. Tests only moved due dates; they did not mock the date."
+  ]
+ },
+ "performance": {
+  "deferred": [
+   "Item 14, land_map.html inline base64: not moved. It is one WebP of 650,264 base64 characters (about 488 KB decoded, 508 KB on the wire). With the new gating, new kids no longer download land_map at all (0 B in the s01 after-run), so moving it saves nothing for them. Kids who open 星海 need it immediately as the full-screen map background. sw_v944.js only caches pages, code and icons/ for offline use, so a separate top-level .webp would not work offline without changing the SW cache rules and cache generation, which is a release step under the cache-lock guard. package_release would accept it (.webp is allowed and the literal-ref check covers it), so it can be done later together with an SW cache bump.",
+   "Item 14, font subsetting: deferred. fontTools is not installed ('ModuleNotFoundError: No module named fontTools'), and it cannot be installed offline. cartoon_font.woff2 (398 KB) is now the largest first-visit download.",
+   "Opening the settings page still loads the 1.23 MB engine plus about 2.1 MB of attack sprites. The public 「Boss 特效调节」 row and the admin gate live inside hansen_boss_attack.js (second IIFE, about lines 14983–15690), and I did not edit the 1.23 MB file (many literal check_resources contracts depend on it). Splitting that IIFE into a small file would let the settings page skip the sprites.",
+   "Found, not fixed (already there before this batch): template.html's showScreen boss hook checks window.bossActive, but bossActive is declared with `let`, so it is never on window. The \"wait for the engine before showing the fight\" branch and showScreen's body.hsn-boss-battle toggle (window.bossActive===true) never fire from those lines. My new code reads the bossActive binding by name.",
+   "Kids who visited 星海 before this version get no room warm until they open 星海 once more, because the flags start now. This is by design: no upgrade work.",
+   "Docs (交接_必读, BUG图鉴, 当前进度) are not updated. That belongs to the release step."
+  ],
+  "risks": [
+   "The first Boss fight in a page now runs the engine when the kid taps 挑战BOSS or when startBoss runs. That is about 0.3–0.6 s of main thread at 4× CPU, read from the HTTP cache via the prefetch. If a counterattack comes first, it waits for the engine through the existing HansenBossAttack placeholder. Sprites start loading at the same moment, so on a slow phone the very first weapon image could still be late (the BUG#67 blank-weapon pattern).",
+   "Visible changes Hansen may want tuned:\n- the map button waves and glows 3 times, then stays still;\n- the chest glow pulses 3 times, then stays faintly lit (opacity 0.3) until the chest is claimed;\n- the pet floats 3 times (about 42 s);\n- home stars, emoji, island-card decorations, logo letters and the tagline freeze mid-pose after 12 s without a touch, and resume on touch or scroll.",
+   "The map glow is now a second copy of icons/map_home.webp with a static drop-shadow on top of the image. If the image fails to load, the existing emoji fallback appears without the glow.",
+   "Flyer bobbing now uses the CSS `translate` property (Chrome 104+ / iOS 14.1+). Older engines ignore it: the flyers still fly but stop bobbing.",
+   "Behaviour change for iOS and unknown networks (no navigator.connection): no idle island prefetch and no 星海 room warm. This matches HansenPreloadPolicy; touch prefetch still works.",
+   "During the 72 h free pass, after the wall has been opened once, every island open preloads all 20 portraits (\"unlocked + next\" is 20 then). This matches what the wall shows. Whether those are cache hits depends on the CDN's cache headers.",
+   "kidHasPlayed() JSON-parses the hsn_progress snapshots and, if needed, the wordIsland* saves once per page load."
+  ],
+  "needs_real_phone": [
+   "Idle CPU and battery on a low-end Android WeChat XWeb, on the island menu and on home. All numbers here come from headless Chromium with 4× CPU throttling.",
+   "Look of the map-button glow overlay and the chest glow layer in dark and light palettes at DPR 3: alignment with the map image, and the faint resting glow.",
+   "Whether navigator.userActivation works inside WeChat (Android and iOS), so the engine starts loading when the wall opens. The fallback is startBoss.",
+   "First Boss fight on a 4G phone: time from tapping a boss to the first counterattack, and whether its weapon sprite appears (BUG#67 pattern).",
+   "Whether the CloudBase CDN sends cache headers. This decides whether preloading portraits after the wall was seen, and the engine prefetch, are cache hits or re-downloads.",
+   "Home flyers bobbing with the CSS `translate` property on the oldest supported iOS and WeChat builds."
+  ]
+ },
+ "review+fix": {
+  "deferred": [
+   "Per-answer main-thread cost (already there before; this batch makes it worse). Every answer re-reads the whole ledger many times (readStore parses main + backup and merges them). markAnswer measured about 100–200 ms unthrottled for a kid with heavy progress on this loaded machine, and about 350–410 ms at 4× CPU throttling, on both origin/main and the worktree. The profile is dominated by readStore, mergeCurrentWithPrevious and compactStore. The batch's absorber adds about 3 readStores per miss. Suggested fix: cache the parsed ledger for the duration of one markAnswer call. Not done: it is deep in the persistence layer.",
+   "CLOZE_LEVEL_IDX includes words that can never be asked (animal easy: pig, eagle, cow; hard: duck; their example sentences use the plural). clozeTotal still counts them, so a perfect animal-easy round shows 10/13 = 77%. Already there before this batch; I only made sure the re-ask still happens.",
+   "Boss: the lesson card appears 1.1 s after a wrong answer, while the counterattack is still playing. The hit lands at 1.7–6.3 s depending on the boss (dealDelay). The card stays readable above the effects, but the hit plays behind it. At Lv20 one wrong answer can lose the fight, and the card then shows over the defeat page. This is a design choice for Hansen; it is not broken.",
+   "hansen_mistake_lesson_v1165.js is still not in the sw_v944 shell precache. That is a release step. Offline, the games fall back to the old timed advance without a card.",
+   "The batch's own 'found, not fixed' items still stand: the v1034 achievement ladder never unlocks; 听音 on land3 and land5 has 0 words and crashes; HansenMyLearning only exports `_open`; SVG text labels in vocab_all reach the PK battle (battle files are off-limits); opening the settings page still loads the 1.23 MB engine plus attack sprites.",
+   "Two 单词大陆/星海 pages open at the same time in two tabs could still overwrite each other. My fix covers a page's own outdated save when it opens."
+  ],
+  "risks": [
+   "Product-policy change for Hansen to confirm: words missed in a round now stay in the 错题本 after a correct re-ask, and the home banner and 复习 badge show them as due today. If he wants the re-ask to clear the word, the +2 纠错金 incentive problem (a deliberate miss pays more than a right answer) has to be solved some other way.",
+   "There is now a 160 ms pause between tapping the lesson card and the next question, so that 一键静音 holds. It is small but noticeable to a fast tapper.",
+   "New cross-module contract: the templates' load() sets `window.__hsnLoadedSaveTime`, and the ledger relies on it during its first migrate and to block early absorbs. Pages that load S from a save without setting it fall back to the old behaviour. The full ledger, backup, reset and explore test set passes.",
+   "In 完形, a wrong answer now holds the card until the sentence finishes plus 0.8 s (cap 8 s), as the old wrong path did. If a phone's speech callback never fires, each 完形 miss waits up to 8 s unless the kid taps.",
+   "All timing observations come from a shared machine whose load average ranged from about 1 to 12. Pass/fail results are deterministic, but none of the ms figures should be quoted as phone performance."
+  ],
+  "needs_real_phone": [
+   "With 一键静音 on in WeChat (iOS and Android): tap a lesson card and confirm the next word stays silent. The fix assumes hansen_mute's 120 ms touchstart/click tap window, and WeChat's touch-to-click timing may differ.",
+   "完形 on a phone: the example sentence plays (local mp3), and the card closes when it finishes. Check whether the speak end callback fires in XWeb, or whether every miss hits the 8 s cap.",
+   "单词大陆③ ↔ 星海 round trip on a real phone: miss on one, fix on the other, reopen the first. Real storage timing and the perf_boost save debounce were only exercised in headless Chromium.",
+   "Per-answer delay for a kid with lots of progress on a low-end Android (each answer re-reads the ledger many times), especially in 极速 and 打字大师.",
+   "Lesson card stacking on XWeb above the fish and bubble animations and above the Boss effects layer (#hansenFxLayer z-index 9980 vs the card's 9990)."
+  ]
+ }
+}

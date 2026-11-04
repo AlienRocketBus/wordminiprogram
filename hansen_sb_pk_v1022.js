@@ -100,6 +100,14 @@
     var A = window.HansenAuth;
     var p = P ? P.readProfile() : { name: '', cid: 0 };
     var L = readLadder();
+    /* 🔴审查 R2-UI-11：天梯战绩在 HansenPkRecord（v1103 起的新存档）—— 以前这里只读旧存档（v1002），
+       打了几局排位，岛上的拼写大PK首页还是「🐝 工蜂 · 未定级」「— 对战胜率」，孩子以为没算上。
+       和 spelling_pk.html、天梯页读同一份 */
+    try {
+      var _R = window.HansenPkRecord;
+      var _sm = (_R && _R.summary) ? _R.summary() : null;
+      if (_sm && _sm.total) L = { rating: _sm.rating, placed: !!_sm.placed, games: _sm.total, wins: _sm.wins };
+    } catch (e) {}
     var tier = L2 ? L2.tierOf(L.rating || 1000) : null;
     var s = P ? P.collectStats() : { bestCpm: 0, learned: 0, days: 0 };
     var rate = L.games ? Math.round(L.wins / L.games * 100) : 0;
@@ -242,9 +250,25 @@
     /* 🔴v1108: 天梯排位不再是「敬请期待」—— v1103 已把分数/段位/定级赛做出来，
        v1108 补上实力匹配与战绩页。做了功能没入口等于没做。 */
     var soon = function () { if (window.HansenToast) HansenToast.say('这个玩法还在做，先玩别的吧 🙂'); };
+    /* 🔴v1164：天梯和公开房间是同一种联机 —— 进门前过同一道检查（云端开通了没有、登录了没有）。
+       原来天梯这里什么都不查：没登录的孩子点进去，岛屿页上又看不见天梯（被大PK屏盖住），
+       等于点了完全没反应。 */
+    var needOnline = function () {
+      if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return false; }
+      try {
+        var A = window.HansenAuth;
+        if (!A || !A.isSignedIn || !A.isSignedIn()) {
+          alert('联机需要先登录，登录后进度和战绩都会跟着账号走。');
+          if (window.HansenAuthUI) HansenAuthUI.open();
+          return false;
+        }
+      } catch (e) {}
+      return true;
+    };
     var openLadder = function () {
       if (!window.HansenLadderUI) { notReadyOr('天梯'); return; }
-      HansenLadderUI.open();
+      if (!needOnline()) return;
+      needName(function () { HansenLadderUI.open(); });
     };
     if (q('kDiag')) q('kDiag').onclick = function () {
       try { if (window.HansenCloudDiag) HansenCloudDiag.open(); else notReadyOr('自检'); } catch (e) {}
@@ -253,18 +277,64 @@
        天梯排位仍在做，保留 soon()。 */
     if (q('kRooms')) q('kRooms').onclick = function () {
       if (!window.HansenPkRoomUI) { notReadyOr('对战房间'); return; }
-      if (!cloudReady()) { alert('云端还没开通，联机暂时用不了'); return; }
-      try {
-        var A = window.HansenAuth;
-        if (!A || !A.isSignedIn || !A.isSignedIn()) {
-          alert('联机需要先登录，登录后进度和战绩都会跟着账号走。');
-          if (window.HansenAuthUI) HansenAuthUI.open();
-          return;
-        }
-      } catch (e) {}
-      HansenPkRoomUI.open();
+      if (!needOnline()) return;
+      needName(function () { HansenPkRoomUI.open(); });
     };
     if (q('kLadder')) q('kLadder').onclick = openLadder;
+  }
+
+  /* 🔴审查 R2-UI-12：岛上进联机（公开房间 / 天梯）之前也要先有名字 —— spelling_pk.html 早有这一步，岛上没有：
+     没起名的孩子直接进了对战，对手看到的是「无名蜂」。起好名字自动接着去刚才想去的地方，不用再点一次。 */
+  function needName(then) {
+    var P = window.HansenSbProfile, nm = '';
+    try { nm = (P && typeof P.displayName === 'function') ? P.displayName() : ((P && P.readProfile && P.readProfile().name) || ''); } catch (e) {}
+    if (nm || !P) { then(); return; }
+    askName(then);
+  }
+  function askName(then) {
+    var P = window.HansenSbProfile;
+    var box = document.getElementById('kNameAsk');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'kNameAsk';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-label', '先起个名字');
+      /* 盖在拼写大PK屏（2147483400）之上、天梯 / 对战屏之下 */
+      box.setAttribute('style', 'position:fixed;inset:0;z-index:2147483450;background:rgba(11,16,32,.94);'
+        + 'display:flex;align-items:center;justify-content:center;padding:20px;color:#e8eefc;'
+        + 'font-family:system-ui,-apple-system,"PingFang SC",sans-serif');
+      (document.body || document.documentElement).appendChild(box);
+    }
+    box.innerHTML = '<div style="width:100%;max-width:360px;background:#1e1b4b;border-radius:18px;padding:18px 16px">'
+      + '<div style="font-size:19px;font-weight:900">✏️ 先起个名字</div>'
+      + '<div style="font-size:13px;opacity:.8;margin-top:6px;line-height:1.7">对手会看到这个名字</div>'
+      + '<input id="pkNameIn" type="text" maxlength="12" placeholder="比如：小明" autocomplete="off"'
+      + ' style="width:100%;box-sizing:border-box;margin-top:12px;padding:13px 12px;font-size:17px;border-radius:12px;'
+      + 'border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff">'
+      + '<div id="pkNameErr" style="font-size:13px;color:#fca5a5;margin-top:8px;min-height:18px"></div>'
+      + '<button id="pkNameOk" style="width:100%;margin-top:6px;min-height:48px;border:0;border-radius:13px;'
+      + 'background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff;font-size:16px;font-weight:900;cursor:pointer">开始吧</button>'
+      + '<button id="pkNameBack" style="width:100%;margin-top:8px;min-height:44px;border:0;background:none;color:#a5b4fc;'
+      + 'font-size:14px;font-weight:800;cursor:pointer">先不玩联机</button></div>';
+    box.style.display = 'flex';
+    var inp = document.getElementById('pkNameIn');
+    setTimeout(function () { try { if (inp) inp.focus(); } catch (e) {} }, 120);
+    var hide = function () { box.style.display = 'none'; };
+    document.getElementById('pkNameBack').onclick = hide;
+    var go = function () {
+      var v = String((inp && inp.value) || '').trim();
+      var err = document.getElementById('pkNameErr');
+      if (!v) { if (err) err.textContent = '名字不能是空的'; return; }
+      var res = null;
+      try { res = (P && typeof P.setName === 'function') ? P.setName(v) : null; } catch (e) { res = { ok: false, reason: '存不下来，刷新一下再试' }; }
+      /* 资料模块不收的名字（太短、带「管理员」……）要当场说出来，别让孩子以为起好了 */
+      if (res && res.ok === false) { if (err) err.textContent = res.reason || '这个名字用不了，换一个吧'; try { inp.focus(); inp.select(); } catch (e) {} return; }
+      hide();
+      try { render(); } catch (e) {}
+      try { then(); } catch (e) {}
+    };
+    document.getElementById('pkNameOk').onclick = go;
+    if (inp) inp.onkeydown = function (ev) { if (ev && ev.key === 'Enter') go(); };
   }
 
   function host() {

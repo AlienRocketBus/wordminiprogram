@@ -1,0 +1,9 @@
+
+=== UI-4 skeptic · ladder · consistencyLag 0 ms ===
+  ranked room rmw11k2sj1jf397 — waiting for the 2-minute timeout
+  ladder home shows the timeout note
+  tap 开始排位 0 ms after the note: warning samples 3:n 258:n 519:n 781:n 1053:n 1307:n 1561:n 1823:n 2078:n 2331:n 2588:n 2840:n 3094:n 3348:n 3602:n 3857:n
+  own room in DB: removed
+  tap 开始排位 1500 ms after the note: warning samples 4:n 258:n 511:n 764:n 1017:n 1269:n 1522:n 1777:n 2030:n 2285:n 2538:n 2794:n 3047:n 3301:n 3554:n 3807:n
+  own room in DB: removed
+  errors []

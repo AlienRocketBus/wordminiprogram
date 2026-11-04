@@ -1,0 +1,25 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message));
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+const keys = ()=>page.evaluate(()=>{ const o={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(/^wordIsland/.test(k)){ try{ o[k]=JSON.parse(localStorage.getItem(k)).lastSaveTime; }catch(e){ o[k]='?'; } } } return {o, card:(document.getElementById('recentNum')||{}).textContent}; });
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(3000);
+console.log('fresh', await keys());
+let o = await openCard(page, 'island_animal.html'); let fr = islandFrame(page,'island_animal.html'); await dismissWelcome(page, fr);
+console.log('animal open +0', await keys());
+await sleep(6000);
+console.log('animal open +6s', await keys());
+await tapEl(page, fr, '.world-map-btn'); await waitFor(page, s=>s.wrap==='none'); await sleep(800);
+console.log('closed', await keys());
+await page.screenshot({path:'/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/integration/recent_wrong.png', clip:{x:0,y:300,width:390,height:420}});
+// tap recent card
+await page.evaluate(()=>scrollTo(0,0)); await sleep(300);
+const r = await tapEl(page, page, '#recentLearnStat'); console.log('tap recent', r.hit);
+const w = await waitFor(page, s=>s.wrap==='block'&&s.op==='1', 8000); console.log('recent opened ->', w.s.u);
+await sleep(1500);
+await page.screenshot({path:'/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/integration/recent_opened.png'});
+console.log('errors', errs);
+await browser.close(); srv.close();

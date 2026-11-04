@@ -1,0 +1,29 @@
+  [印章] generate.py: 从 template.html + island_data.json 盖章生成 19 个岛 (14槽位) ✅
+母版 land_template.html · 占位符 13 个
+  ·  island_land1.html 无变化
+  ·  island_land2.html 无变化
+  ·  island_land3.html 无变化
+  ·  island_land4.html 无变化
+  ·  island_land5.html 无变化
+  ·  island_land6.html 无变化
+  ·  island_land7.html 无变化
+  ·  island_land8.html 无变化
+
+✅ 单词大陆 8 岛盖章完成 —— 改一次母版，8 岛全部跟上，不会再漏第七次。
+✅ v1163 → v1164 原子升级完成，共 45 处：
+  · _frame.html: 资源戳 ×2
+  · boss_hall.html: 资源戳 ×16
+  · check.html: 资源戳 ×5
+  · index.html: 资源戳 ×35
+  · island_land1.html: 资源戳 ×172
+  · island_land2.html: 资源戳 ×172
+  · island_land3.html: 资源戳 ×172
+  · island_land4.html: 资源戳 ×172
+  · island_land5.html: 资源戳 ×172
+  · island_land6.html: 资源戳 ×172
+  · island_land7.html: 资源戳 ×172
+  · island_land8.html: 资源戳 ×172
+  · land_map.html: 资源戳 ×12
+  · season_showcase.html: 资源戳 ×19
+  · … 另 31 处
+下一步：填写 CHANGELOG → 提交推送 → CI 自动发布 Release v1164

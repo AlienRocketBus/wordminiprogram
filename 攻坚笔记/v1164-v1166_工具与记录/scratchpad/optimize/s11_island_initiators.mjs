@@ -1,0 +1,12 @@
+import { launch, sleep, BASE, O } from './lib.mjs';
+const { browser, ctx } = await launch({ init: () => { try { localStorage.setItem('hansen_onboarded','1'); } catch(e){} } });
+const page = await ctx.newPage();
+page.on('dialog', d => d.dismiss().catch(()=>{}));
+const cdp = await ctx.newCDPSession(page);
+await cdp.send('Network.enable');
+const rows = [];
+cdp.on('Network.requestWillBeSent', e => { const i = e.initiator; let by = i.type; if (i.url) by += ' ' + i.url.replace(BASE, ''); if (i.stack) { let s = i.stack; const fr = []; while (s) { for (const c of s.callFrames.slice(0, 3)) fr.push(c.url.replace(BASE, '').split('?')[0] + ':' + c.lineNumber + '(' + c.functionName + ')'); s = s.parent; if (fr.length > 6) break; } by += ' ' + fr.join(' < '); } rows.push({ url: e.request.url.replace(BASE, ''), by, t: e.timestamp }); });
+await page.goto(BASE + 'island_food.html'); await sleep(15000);
+const t0 = rows[0].t;
+for (const r of rows.filter(r => /bosses|bossfx|land_map|island_season|boss_attack|words\/|icons\//.test(r.url)).slice(0, 40)) console.log(((r.t - t0)).toFixed(1) + 's', r.url.slice(0, 40), ' <= ', r.by.slice(0, 220));
+await browser.close();

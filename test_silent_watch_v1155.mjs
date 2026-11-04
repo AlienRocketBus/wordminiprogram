@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_silent_watch_v1155.mjs —— 让"被吞掉的错误"能被看见
  *
  * 🔴 为什么要有这个模块：
@@ -33,7 +34,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log('  OK  ' + m); } else { fail++; console.log('  XX  ' + m); } };
 console.log('悄悄报错观察者 v1155');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_silent_watch_v1155.js', 'utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_silent_watch_v1155.js'), 'utf8');
 const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
 
 /* ① 两种错误都要接住 */
@@ -76,7 +77,7 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
 {
   const pages = ['index.html', 'spelling_pk.html', 'island_animal.html'];
   for (const pg of pages) {
-    const html = fs.readFileSync('/home/claude/work/repo/' + pg, 'utf8');
+    const html = fs.readFileSync((__HSN_ROOT + '') + pg, 'utf8');
     ok(html.includes('hansen_silent_watch_v1155.js'),
        `★ ${pg} 已加载观察者`);
   }
@@ -84,7 +85,7 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '');
 
 /* ⑥ 位置要在 SW 升级门之后 —— 那条铁律不能破 */
 {
-  const html = fs.readFileSync('/home/claude/work/repo/spelling_pk.html', 'utf8');
+  const html = fs.readFileSync((__HSN_ROOT + 'spelling_pk.html'), 'utf8');
   const iGate = html.indexOf('hansen_sw_upgrade_gate_v944.js');
   const iWatch = html.indexOf('hansen_silent_watch_v1155.js');
   ok(iGate >= 0 && iWatch > iGate,

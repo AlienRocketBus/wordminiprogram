@@ -1,0 +1,13 @@
+import { startServer, launch, newCtx, attachLogs, sleep, OUT } from './lib.mjs';
+import { seed, shot, openIsland, dismissWelcome } from './lib2.mjs';
+const { srv, base } = await startServer();
+const browser = await launch();
+const ctx = await newCtx(browser,{dsf:1});
+await seed(ctx, {});
+const page = await ctx.newPage();
+await page.goto(base+'/index.html',{waitUntil:'load'}); await sleep(1500);
+const fr = await openIsland(page,'island_animal.html'); await dismissWelcome(page,fr); await sleep(500);
+const r = await fr.evaluate(async()=>{ showToast('⚠️ 签到账本尚未加载，本次未扣/发任何奖励，请稍后重试'); await new Promise(r=>setTimeout(r,300)); const e=document.querySelector('.float-text'); e.style.animationPlayState='paused'; const b=e.getBoundingClientRect(); return {l:b.left,r:b.right,t:b.top,b:b.bottom,vw:innerWidth}; });
+await shot(page,'t1_template_showToast_paused300ms');
+console.log(JSON.stringify(r));
+await browser.close(); srv.close();

@@ -1,0 +1,45 @@
+{
+  "ver": "v1164",
+  "login": true,
+  "p2first": {
+    "ok": true,
+    "kind": "",
+    "reason": ""
+  },
+  "tokensBefore": 0,
+  "simultaneous": {
+    "p1": {
+      "ok": true,
+      "kind": "",
+      "reason": ""
+    },
+    "p2": {
+      "ok": false,
+      "kind": "expired",
+      "reason": "云端登录已过期：这台设备上的登录凭证没有了，请重新登录"
+    }
+  },
+  "after": {
+    "signed": false,
+    "p1overlay": null,
+    "p2overlay": null,
+    "p1again": {
+      "ok": false,
+      "kind": "signin",
+      "reason": "not-signed-in"
+    },
+    "p2again": {
+      "ok": false,
+      "kind": "signin",
+      "reason": "not-signed-in"
+    },
+    "p1db": "ok",
+    "p2db": "ERR credentials not found",
+    "credsLen": 0
+  },
+  "tokens": [
+    "200",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ]
+}

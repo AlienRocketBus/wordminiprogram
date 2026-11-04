@@ -1,0 +1,172 @@
+home 360x640 {
+ "home": {
+  "doc": false,
+  "items": []
+ },
+ "typingMenu": {
+  "doc": false,
+  "items": []
+ },
+ "typingLong": {
+  "word": "washing machine",
+  "kbBottom": 642,
+  "minKeyW": 33,
+  "minKeyH": 50,
+  "slotsRight": 342,
+  "slotsLeft": 18,
+  "minSlotW": 8,
+  "vw": 360,
+  "vh": 640
+ },
+ "typingOv": {
+  "doc": false,
+  "items": []
+ },
+ "eagleMenu": {
+  "doc": false,
+  "items": []
+ },
+ "eagleHard": {
+  "doc": false,
+  "items": []
+ },
+ "eagleCells": [
+  "cupboardd@16px",
+  "cupbard@20px",
+  "cuqboard@18px",
+  "cupboard@18px",
+  "cupboord@18px",
+  "cupoard@21px",
+  "ccupboard@16px",
+  "cupboart@18px",
+  "cuppboard@16px"
+ ],
+ "moles": {
+  "doc": false,
+  "items": []
+ },
+ "molesCn": [],
+ "fish": {
+  "doc": false,
+  "items": []
+ },
+ "bubble": {
+  "doc": false,
+  "items": []
+ },
+ "bubbleText": [],
+ "cloze": {
+  "doc": false,
+  "items": []
+ },
+ "speed": {
+  "doc": false,
+  "items": []
+ },
+ "explore": {
+  "doc": false,
+  "items": []
+ },
+ "modal": {
+  "doc": false,
+  "items": []
+ },
+ "beeSetup": {
+  "doc": false,
+  "items": []
+ },
+ "beeGame": {
+  "kbBottom": 590,
+  "kbTop": 430,
+  "minKeyW": 33,
+  "vh": 640,
+  "docOverflow": false
+ }
+}
+events []
+school 360x640 {
+ "home": {
+  "doc": false,
+  "items": []
+ },
+ "typingMenu": {
+  "doc": false,
+  "items": []
+ },
+ "typingLong": {
+  "word": "dictionary",
+  "kbBottom": 642,
+  "minKeyW": 33,
+  "minKeyH": 50,
+  "slotsRight": 342,
+  "slotsLeft": 18,
+  "minSlotW": 29,
+  "vw": 360,
+  "vh": 640
+ },
+ "typingOv": {
+  "doc": false,
+  "items": []
+ },
+ "eagleMenu": {
+  "doc": false,
+  "items": []
+ },
+ "eagleHard": {
+  "doc": false,
+  "items": []
+ },
+ "eagleCells": [
+  "studetn@22px",
+  "studint@24px",
+  "sdudent@21px",
+  "studnet@22px",
+  "ctudent@22px",
+  "student@22px",
+  "sstudent@19px",
+  "scudent@21px",
+  "stadent@22px"
+ ],
+ "moles": {
+  "doc": false,
+  "items": []
+ },
+ "molesCn": [],
+ "fish": {
+  "doc": false,
+  "items": []
+ },
+ "bubble": {
+  "doc": false,
+  "items": []
+ },
+ "bubbleText": [],
+ "cloze": {
+  "doc": false,
+  "items": []
+ },
+ "speed": {
+  "doc": false,
+  "items": []
+ },
+ "explore": {
+  "doc": false,
+  "items": []
+ },
+ "modal": {
+  "doc": false,
+  "items": []
+ },
+ "beeSetup": {
+  "doc": false,
+  "items": []
+ },
+ "beeGame": {
+  "kbBottom": 590,
+  "kbTop": 430,
+  "minKeyW": 33,
+  "vh": 640,
+  "docOverflow": false
+ }
+}
+events []

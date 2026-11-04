@@ -1,0 +1,22 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message));
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(3000);
+await openCard(page, 'island_animal.html'); let fr = islandFrame(page,'island_animal.html'); await dismissWelcome(page, fr); await sleep(800);
+await fr.evaluate(()=>{ for (const id of ['alertModal','hsnStoryModal']) { const e=document.getElementById(id); if(e){ e.classList.remove('show'); e.style.display='none'; } } document.body.classList.remove('modal-open'); showScreen('boss'); startBoss(); });
+await sleep(3000);
+const snap = ()=>fr.evaluate(()=>({bossActive:window.bossActive, heroHP:(document.getElementById('heroHPText')||{}).textContent, bossHP:(document.getElementById('bossHPText')||{}).textContent, asked: typeof bossQuestionsAsked!=='undefined'?bossQuestionsAsked:null, timer: !!document.getElementById('bossTimerFill'), mapBtn:(()=>{const b=document.querySelector('.world-map-btn'); const c=getComputedStyle(b); const r=b.getBoundingClientRect(); return c.display+'/'+c.opacity+'/'+c.pointerEvents+'@'+Math.round(r.x)+','+Math.round(r.y); })(), active:(document.querySelector('.screen.active')||{}).id}));
+console.log('in boss fight', await snap());
+await page.screenshot({path:'/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/integration/boss_fight.png'});
+// leave with the map button (as a kid would)
+const r = await tapEl(page, fr, '.world-map-btn'); console.log('tap map btn during fight ->', r.hit);
+await waitFor(page, s=>s.wrap==='none', 3000);
+console.log('just left', await snap());
+await sleep(30000);
+console.log('after 30s on home', await snap());
+console.log('errors', errs);
+await browser.close(); srv.close();

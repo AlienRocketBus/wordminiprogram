@@ -1,0 +1,22 @@
+{
+ "storageKeys": [
+  "wordIslandPeople_bak",
+  "wordIslandSeason",
+  "lastIslandKey=wordIslandPeople",
+  "wordIslandSeason_bak",
+  "lastIslandTime",
+  "wordIslandPeople"
+ ],
+ "prefetchLinks": [
+  "island_wordIslandPeople.html?v=1163 [recent]",
+  "island_season.html?v=1163 [recent]",
+  "island_people.html?v=1163 [recent]",
+  "island_animal.html?v=1163 [idle]",
+  "island_food.html?v=1163 [idle]",
+  "island_sports.html?v=1163 [idle]"
+ ],
+ "notFound": [
+  "/island_wordIslandPeople.html?v=1163",
+  "/island_people.html?v=1163"
+ ]
+}

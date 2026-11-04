@@ -1,0 +1,86 @@
+{
+ "listen": {
+  "island": "animal",
+  "q1": "cow",
+  "answeredTapped": true,
+  "changeTapped": true,
+  "levelTapped": true,
+  "msAnswerToRestart": 1359,
+  "timeline_no_taps": [
+   {
+    "ms": 48,
+    "q": "pig",
+    "p": "1 / 14"
+   },
+   {
+    "ms": 702,
+    "q": "dog",
+    "p": "2 / 14"
+   }
+  ],
+  "errors": []
+ },
+ "cloze": {
+  "island": "animal",
+  "q1": "panda",
+  "answeredTapped": true,
+  "changeTapped": true,
+  "levelTapped": true,
+  "msAnswerToRestart": 1428,
+  "timeline_no_taps": [
+   {
+    "ms": 16,
+    "q": "panda",
+    "p": "1 / 13"
+   },
+   {
+    "ms": 6586,
+    "q": "fox",
+    "p": "2 / 13"
+   }
+  ],
+  "errors": []
+ },
+ "bubble": {
+  "island": "animal",
+  "q1": "goat",
+  "answeredTapped": true,
+  "changeTapped": true,
+  "levelTapped": true,
+  "msAnswerToRestart": 1629,
+  "timeline_no_taps": [
+   {
+    "ms": 38,
+    "q": "bee",
+    "p": "1 / 17"
+   },
+   {
+    "ms": 3638,
+    "q": "dog",
+    "p": "1 / 17"
+   }
+  ],
+  "errors": []
+ },
+ "listenwrong": {
+  "island": "animal",
+  "q1": "pig",
+  "answeredTapped": true,
+  "changeTapped": true,
+  "levelTapped": true,
+  "msAnswerToRestart": 1501,
+  "timeline_no_taps": [
+   {
+    "ms": 94,
+    "q": "bee",
+    "p": "1 / 14"
+   },
+   {
+    "ms": 197,
+    "q": "frog",
+    "p": "2 / 14"
+   }
+  ],
+  "errors": []
+ }
+}

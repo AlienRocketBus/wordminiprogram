@@ -1,0 +1,17 @@
+{
+  "ver": "v1164",
+  "case": "login",
+  "panel": "登录成功！ 竞赛 ID No.001 本机还没有进度，玩一会儿就会自动存到云端。",
+  "overlayAfterEnterMs": 6959,
+  "topOverlay": {
+    "text": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+    "z": "2147483646",
+    "full": true
+  },
+  "signedNow": true,
+  "kidSees": "🔄 别的窗口登录了另一个账号 这个窗口还停在上一个账号， 继续玩会把进度记到错的账号上。 刷新一下就好。 刷新这个窗口",
+  "islandSays": null,
+  "dialogs": [],
+  "errors": [],
+  "elapsed": 12625
+}

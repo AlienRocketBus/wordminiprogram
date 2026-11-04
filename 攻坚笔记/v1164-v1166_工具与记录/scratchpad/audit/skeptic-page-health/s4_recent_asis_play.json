@@ -1,0 +1,43 @@
+{
+ "W": 390,
+ "PLAY": true,
+ "MODE": "asis",
+ "steps": [
+  {
+   "after": "island_food.html",
+   "iframe": "/island_food.html",
+   "card": "🍔 最近探险的岛屿 🍔 食物 · 点击继续 → => island_food.html",
+   "times": {
+    "wordIslandFood": 1793713952188,
+    "wordIslandAnimal": null,
+    "wordIslandSeason": 1793713941670,
+    "lastIslandTime": 1793713936825,
+    "lastIslandKey": "wordIslandFood"
+   }
+  },
+  {
+   "after": "island_animal.html",
+   "iframe": "/island_food.html",
+   "card": "👑 最近探险的岛屿 👑 星海终战 · 点击继续 → => island_season.html",
+   "times": {
+    "wordIslandFood": 1793713983434,
+    "wordIslandAnimal": 1793713981561,
+    "wordIslandSeason": 1793713987968,
+    "lastIslandTime": 1793713965134,
+    "lastIslandKey": "wordIslandAnimal"
+   }
+  }
+ ],
+ "cardTap": {
+  "ok": true,
+  "hitTop": "DIV#recentNum.stat-num",
+  "label": "recent",
+  "x": 195,
+  "y": 422
+ },
+ "openedAfterCardTap": {
+  "wrap": "block",
+  "path": "/island_season.html",
+  "title": "星海词汇大冒险 · Star Sea Vocabulary"
+ }
+}

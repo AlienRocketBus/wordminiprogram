@@ -1,0 +1,72 @@
+{
+  "v1163": [
+    {
+      "src": "icons/explore_3d.webp?v=1163",
+      "w": 288,
+      "h": 288
+    }
+  ],
+  "after": [
+    {
+      "visit": 1,
+      "imgs": [
+        {
+          "src": "icons/explore_3d.webp?v=1164",
+          "w": 288,
+          "h": 288
+        }
+      ],
+      "iconCache": {
+        "n": "hansen-v944-icons-3",
+        "ks": [
+          "/icons/explore_3d.webp?v=1163",
+          "/icons/explore_3d.webp?v=1164"
+        ]
+      },
+      "gate": 1164
+    },
+    {
+      "visit": 2,
+      "imgs": [
+        {
+          "src": "icons/explore_3d.webp?v=1164",
+          "w": 288,
+          "h": 288
+        }
+      ],
+      "iconCache": {
+        "n": "hansen-v944-icons-3",
+        "ks": [
+          "/icons/explore_3d.webp?v=1163",
+          "/icons/explore_3d.webp?v=1164"
+        ]
+      },
+      "gate": 1164
+    },
+    {
+      "visit": 3,
+      "imgs": [
+        {
+          "src": "icons/explore_3d.webp?v=1164",
+          "w": 288,
+          "h": 288
+        }
+      ],
+      "iconCache": {
+        "n": "hansen-v944-icons-3",
+        "ks": [
+          "/icons/explore_3d.webp?v=1163",
+          "/icons/explore_3d.webp?v=1164"
+        ]
+      },
+      "gate": 1164
+    }
+  ],
+  "newPlayer": [
+    {
+      "src": "icons/explore_3d.webp?v=1164",
+      "w": 256,
+      "h": 178
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+ "STATUS": 200,
+ "timeline": [
+  "0s 正在找对手",
+  "1s 云端设置还差一步"
+ ],
+ "login": true,
+ "final": "× 🏆 天梯排位 🛠️ 云端设置还差一步 数据库集合「hansen_pk_rooms」的权限不允许这样读写，请在云开发控制台把它设成「读取全部数据，修改本人数据」 这不是你的问题，把这一屏截图发给负责的老师就好。 再试一次 技术信息：DATABASE_PERMISSION_DENIED | Permission denied | req 7ae95d1e5fdcc606"
+}

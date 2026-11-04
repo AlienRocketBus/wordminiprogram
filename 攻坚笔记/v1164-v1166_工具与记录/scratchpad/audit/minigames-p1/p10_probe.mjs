@@ -1,0 +1,12 @@
+import {startServer, launch, newCtx, attach, sleep, OUT} from './lib.mjs';
+import {openIsland, tapIn, waitIn} from './h.mjs';
+const {srv, port} = await startServer();
+const browser = await launch();
+const {ctx} = await newCtx(browser, port, {init: ()=>{ try{localStorage.setItem('hansen_onboarded','1')}catch(e){} }});
+const page = await ctx.newPage();
+const F = await openIsland(page, port, 'animal');
+await sleep(1000);
+const r = await F.evaluate(()=>{ const el=[...document.querySelectorAll('#homeScreen .mode-card')].find(e=>e.getAttribute('onclick')==='startCloze()'); el.scrollIntoView({block:'center',behavior:'instant'}); const b=el.getBoundingClientRect(); const h=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2); let p=h, chain=[]; for(let i=0;i<5&&p;i++){ chain.push(p.tagName+'#'+p.id+'.'+String(p.className).slice(0,30)+' z='+getComputedStyle(p).zIndex+' pos='+getComputedStyle(p).position); p=p.parentElement; } return {rect:[b.left,b.top,b.width,b.height], chain, html:h.outerHTML.slice(0,300), cardOnclick: el.getAttribute('onclick'), contains: el.contains(h)}; });
+console.log(JSON.stringify(r,null,1));
+await page.screenshot({path:OUT+'/shots/probe_cloze_card.png'});
+await browser.close(); srv.close(); process.exit(0);

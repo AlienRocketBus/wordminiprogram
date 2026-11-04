@@ -47,13 +47,23 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 RESUME_FILE = os.path.join(ROOT, '.jarvis_resume.json')
 PARALLEL = 3          # 再多 CPU 就抢不过来，假失败会变多
 PER_TEST = 300        # 单个测试最多 5 分钟
+# 🔴v1164：真 SDK 端到端（*_cloud_v1164.mjs）用的是产品真实时长（天梯 20 秒自己开房、掉线 60 秒判负），
+#   单跑就要 1~4 分钟，三个并行时会被挤过 5 分钟 —— 给它们 10 分钟，超时仍算失败。
+LONG_TEST = 600
+
+
+def _limit(name):
+    # 🔴v1164（第一轮修复）：test_cloud_errors_v1164 也是真 SDK 端到端（名字里 cloud 在前面），单跑就要 2~3 分钟
+    return LONG_TEST if ('cloud' in name and '_v1164' in name) else PER_TEST
 
 
 def fingerprint():
     """必须和 jarvis_gate.py 里的 _fingerprint() 完全一致，否则闸门不认这份存档。"""
     h = hashlib.sha256()
     srcs = []
-    for pat in ('hansen_*.js', 'sw_*.js', 'test_*.mjs', 'template.html', '*.py'):
+    # 🔴v1164（审查 TI-6）：模拟云端（cloudbase_*.mjs）、测试公共件（*.mjs）、发给手机的 SDK（vendor_*.js）
+    #   以前都不算进指纹 —— 模拟云端放宽了 / SDK 换了，旧的「全绿」照样作数。现在 *.js / *.mjs 全算。
+    for pat in ('*.js', '*.mjs', 'template.html', '*.py'):
         srcs += glob.glob(os.path.join(ROOT, pat))
     for f in sorted(set(srcs)):
         try:
@@ -61,10 +71,12 @@ def fingerprint():
             h.update(open(f, 'rb').read())
         except Exception:
             pass
+    # 🔴v1164（审查 T9）：HTML 读内容，不只看大小 —— 手改的 index.html / spelling_pk.html 改一个字符、大小不变，
+    #   以前旧结果照样作数。必须和 jarvis_gate.py 的 _fingerprint() 完全一致。
     for f in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
         try:
             h.update(os.path.basename(f).encode())
-            h.update(str(os.path.getsize(f)).encode())
+            h.update(open(f, 'rb').read())
         except Exception:
             pass
     return h.hexdigest()[:16]
@@ -90,7 +102,7 @@ def run_one(name):
     """返回 None 表示通过；否则返回一小段失败原因。"""
     try:
         r = subprocess.run(['node', os.path.join(ROOT, name)], cwd=ROOT,
-                           capture_output=True, timeout=PER_TEST)
+                           capture_output=True, timeout=_limit(name))
         if r.returncode == 0:
             return None
         out = (r.stdout or b'').decode('utf-8', 'replace') + (r.stderr or b'').decode('utf-8', 'replace')

@@ -1,0 +1,54 @@
+
+天梯排位 · 真 SDK 端到端（v1164）
+
+
+── ① 两人打一局排位（READONLY · legacy） ──
+  OK  [甲] 用手机号验证码登录（真 SDK → 模拟云端）uid=1728325321807323665
+  OK  [乙] 用手机号验证码登录（真 SDK → 模拟云端）uid=1373709596117908056
+  OK  开局分：甲 1000，乙 1080
+  OK  匹配屏「已等 N 秒」每秒在走（4 次取样：0, 1, 2, 3）
+  OK  没有对手 → 20 秒后自动开一间排位房、显示「等对手进来」
+  OK  数据库：甲开的排位房（抢答赛、公开、新协议、名字是「小蜂甲」）
+  OK  乙点「开始排位」→ 进了甲的房，两部手机都到了对战屏
+  OK  对战屏两边都显示对手的真名字（甲看到「小蜂乙」，乙看到「小蜂甲」）
+  OK  两边用同一套 10 个词（how long, south, hour, fishing, face, ten, man, office, tennis, early）
+  OK  每一词两边屏幕上的中文都对、键盘点得到（无问题）
+  OK  甲的结算：你赢了 · 你 500 分 · 对手 400 分（看到：🎉 你赢了！ / 你 500 分 · 对手 400 分）
+  OK  乙的结算：这局输了 · 你 400 分 · 对手 500 分（看到：💪 这局输了 / 你 400 分 · 对手 500 分）
+  OK  甲赢了按乙的真实分 1080 算 ELO：1000 → 1025（应为 1025；若按默认 1000 算会是 1020）
+  OK  甲的结算屏写着「+25 天梯分」（看到 25）
+  OK  乙输了按甲的真实分 1000 算 ELO：1080 → 1065（应为 1065）
+  OK  乙的结算屏写着「-15 天梯分」（看到 -15）
+  OK  房间是甲建的、座位是乙建的
+  OK  10 个回合文档，每个都是拿下那一词的人自己建的（共 10，不对的 0）
+  OK  没有任何人去改别人的文档（尝试 0 次）
+  OK  房间里的身份是 'u'+云端编号（host=u1728325321807323665, guest=u1373709596117908056）
+  OK  所有人都读得到的房间集合里没有手机号（漏了：无）
+  OK  房间标记打完、两边分数都在（status=done 500:400）
+  OK  打完没有留下还开着的房（0 间）
+  OK  [甲] 没有页面报错、没有去连别的外网（报错 0：；外网 0）
+  OK  [乙] 没有页面报错、没有去连别的外网（报错 0：；外网 0）
+
+── ② 两人同时开始排位（READONLY · rules） ──
+  OK  [丙] 用手机号验证码登录（真 SDK → 模拟云端）uid=1728325321807323665
+  OK  [丁] 用手机号验证码登录（真 SDK → 模拟云端）uid=1373709596117908056
+  OK  同时开始的两个人最后都进了对战屏（没有各自守着一间空房干等）
+  OK  数据库：只剩一间在打的房，另一间收掉了（在打 1，空着开着 0）
+  OK  房主和客人是这两个人、各写各的文档
+  OK  安全规则模式下也没有越权写（被拒 0 次）
+
+── ③ 岛屿页「拼写大PK → 天梯排位」看得见、点得到（READONLY · legacy） ──
+  XX  测试脚本自己出错：Error: [戊] 点不到「.mode-card[onclick*="openSpellPK"]」：手指下面不是它，而是 div < div#alertInner.modal < div#alertModal.modal-bg.show < body.modal-open < html.hsn-bt-dark
+    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:127:17)
+    at async file:///home/user/wordminiprogram/test_ladder_cloud_v1164.mjs:158:3
+      [戊 屏幕] 🎮 ⏎ 欢迎来到动物大冒险！ ⏎ 🗺️ 5 大动物岛屿等你探索 ⏎ 📚 42 个英语单词随你学 ⏎ 🎮 12 种超酷玩法等你来 ⏎ 🐉 36 阶进化宠物 ⏎ 🎁 每日宝箱 + 签到奖励 ⏎ 🏆 144 个成就等你解锁 ⏎ 🎒 小冒险家秘籍： ⏎ 每天玩 10 分钟，一个月后你会变得超厉害, 同学们都会刮目相看! 🌟 ⏎ 开始冒险！
+      [数据库 hansen_pk_rooms]
+      (hansen_pk_rooms 是空的)
+      [最近的云端请求]
+      
+
+31 通过，1 失败（128 秒）
+失败的：
+  · 测试脚本自己出错：Error: [戊] 点不到「.mode-card[onclick*="openSpellPK"]」：手指下面不是它，而是 div < div#alertInner.modal < div#alertModal.modal-bg.show < body.modal-open < html.hsn-bt-dark
+    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:127:17)
+    at async file:///home/user/wordminiprogram/test_ladder_cloud_v1164.mjs:158:3

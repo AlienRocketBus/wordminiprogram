@@ -1,0 +1,19 @@
+
+▶ 1. 去过星海的孩子，首页外壳里真点「食物」，停 15 秒
+  ✅ 岛卡没被挡住
+  ✅ 食物岛在 #islandFrame 里打开
+  ❌ 岛里没有后台星海页 / 预取页（land_map.html?v=1163, island_season.html?v=1163）
+  ❌ 岛里 HansenRoom 一个房间都没建（["land","season"]）
+  ❌ 没人写星海存档 / 星海快照 / 开场故事标记（island_season.html?v=1163 wordIslandSeason | island_season.html?v=1163 wordIslandSeason | island_season.html?v=1163 wordIslandSeason | island_season.html?v=1163 hsn_season_prologue_seen）
+  ✅ 零脚本错误
+
+▶ 2. 直接打开 island_season.html：不预热它自己
+  ❌ 星海岛不在自己里面再开一个星海岛（{"rooms":["land","season"],"el":true}）
+  ❌ 没有套着的 island_season 页面（1 个）
+  ✅ 零脚本错误
+
+▶ 3. 单独打开食物岛（顶层页）：去过星海的孩子照旧预热两个房间
+  ✅ 顶层岛页：两个星海房间照常预热（按需打开不受影响）
+  ✅ 零脚本错误
+
+❌ 5 项失败

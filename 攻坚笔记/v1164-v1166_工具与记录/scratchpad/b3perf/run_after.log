@@ -1,0 +1,31 @@
+=== s29_warm_cpu
+{"label":"as-is","readyMs":2882,"MB_25s":4.4,"scriptSec":1.87,"taskSec":20.87,"layoutSec":1.81,"frames":3,"heapMB":4.6,"nodes":5534}
+{"label":"no-room-warm","readyMs":6503,"MB_25s":4.6,"scriptSec":2.51,"taskSec":20.04,"layoutSec":1.02,"frames":3,"heapMB":4.4,"nodes":5286}
+{"label":"as-is","readyMs":2891,"MB_25s":4.5,"scriptSec":1.56,"taskSec":18.07,"layoutSec":0.89,"frames":3,"heapMB":4.4,"nodes":5315}
+{"label":"no-room-warm","readyMs":3966,"MB_25s":4.3,"scriptSec":2.01,"taskSec":19.91,"layoutSec":2.47,"frames":3,"heapMB":4.4,"nodes":5279}
+=== s14_warm_ab
+{"label":"as-is","readyMs":2988,"KB_20s":4485,"req":214,"tbt_ms":5440,"frames":3,"docs":3,"heapMB":5.2,"nodes":5518}
+{"label":"no-room-warm","readyMs":5264,"KB_20s":4581,"req":232,"tbt_ms":11474,"frames":3,"docs":3,"heapMB":4.8,"nodes":5379}
+{"label":"no-room-warm+no-eager-boss-engine","readyMs":5042,"KB_20s":4020,"req":232,"tbt_ms":16756,"frames":3,"docs":3,"heapMB":4.9,"nodes":5476}
+=== s31_anim_ab
+home {"busyPct":64,"scriptPct":2}
+home-noAnim {"busyPct":59,"scriptPct":1}
+island {"busyPct":6,"scriptPct":1}
+island-noAnim {"busyPct":6,"scriptPct":1}
+=== s01_firstrun
+   ],
+   "clicked": "🚀 开始冒险！"
+  }
+ ],
+ "dialogs": [],
+ "errs": [],
+ "overlays": [
+  "bg-cosmos: ",
+  "stars: ",
+  "deco: 🏙️ 🍔 🎯 🦋 🐾 🏆 🐉 📚 🐉 🦁 ⏰ ⏰ 🏙️ 🦁"
+ ]
+}
+=== s30_idle
+home {"busyPct":58,"scriptPct":0,"layoutPct":0,"recalcPct":6,"rafPerSec":0.5,"canvases":0,"anims":{"total":186,"running":8,"top":[["flyUfo",1],["bobSlow",1],["flyRocket",1],["flySatellite",1],["flyComet",1],["flyStar",1],["rainbowFlow",1],["titleBreathe",1]]}}
+island {"busyPct":5,"scriptPct":2,"layoutPct":0,"recalcPct":1,"rafPerSec":0.6,"canvases":0,"anims":{"total":1,"running":1,"top":[["hsnPetFloatSlow",1]]}}
+island-noWarm {"busyPct":4,"scriptPct":1,"layoutPct":0,"recalcPct":1,"rafPerSec":0.6,"canvases":0,"anims":{"total":1,"running":1,"top":[["hsnPetFloatSlow",1]]}}

@@ -1,12 +1,13 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_camel_runtime_v1015.mjs —— 驼色/锈色「运行时」全玩法彻查
  * 背景：静态扫描只能看源码写了什么，看不到"实际渲染成什么"（变量、继承、色板覆盖都会变）。
  *       用户多次反映题目里仍有驼锈色，静态扫描却查不出——故改为真机运行时取色。
  * 判据：进入每个玩法屏，取每一段**可见文字**的 computed color，
  *       换算 HSL 后凡落在 驼/锈 区间（色相 12–48°、饱和≥30%、明度 18–52%）即判违规。
  *       两种色调各扫一遍。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -69,7 +70,7 @@ const SNIFF = `(function(){
 let violations = [];
 for (const [tag, pal] of [['亮色调','cloud'], ['暗色调',null]]) {
   const page = await browser.newPage({viewport:{width:390,height:900}});
-  await page.addInitScript(p=>{ localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
+  await page.addInitScript(p=>{ if (window.top === window) localStorage.clear(); if(p) localStorage.setItem('hansen_palette_global',p);
     const wr={}; for(let i=0;i<8;i++) wr[String(i)]=1;
     localStorage.setItem('hansen_canonical_progress_v941', JSON.stringify({islands:{animal:{wrongs:wr,srs:{}}}}));
   }, pal);

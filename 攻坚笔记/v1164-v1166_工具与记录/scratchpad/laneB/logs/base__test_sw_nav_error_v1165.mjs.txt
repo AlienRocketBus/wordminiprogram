@@ -1,0 +1,12 @@
+  ✅ SW 接管了首页
+
+▶ 服务器出错
+  ❌ '/' 回 404：显示缓存的首页（404 SERVER-ERROR-404）
+  ❌ index.html 回 502：显示缓存的首页（502 SERVER-ERROR-502）
+  ❌ 食物岛回 502：显示缓存的食物岛（502 SERVER-ERROR-502）
+  ✅ 服务器确实回了错误码（{"/":1,"/index.html":1,"/island_food.html":1}）
+
+▶ 服务器恢复
+  ✅ 恢复后照常拿新页面（200 食物大冒险 · Food Word Adventure）
+
+❌ 3 项失败

@@ -1,0 +1,46 @@
+会话判定 / 凭证守护 / 备份 v1164
+  XX  ★ 本机没有凭证 → 确凿过期（以前永远是"尚未就绪"，不让人重新登录）
+  XX  kind=expired / noCredentials（实为 undefined）
+  XX  文案让人去重新登录：云端会话尚未就绪（已重试 5 次），请稍候再试
+  XX  ★ 凭证都没了就不白白重试（问了 5 次）
+  XX  ★ 清掉了撒谎的本地"已登录"记录
+  XX  ★ 广播 hsn-auth-changed，界面立刻跟上
+  XX  ★ 凭证还在 → notReady / kind=session（实为 undefined）
+  OK  重试到底才下结论（问了 5 次）
+  OK  ★ 不登出、不广播（网慢≠过期）
+  XX  ★ 凭证不在 → 守护用影子副本救回 → 成功（救了 0 次）
+  XX  轨迹里记下了"救回"
+  XX  ★ 救回来也不管用 → 判过期；一次探测只救一次（救了 0 次）
+  XX  ★ user_info 没了 → getCurrentUser 补回 uid（undefined）
+  XX  ★ 取不到账号信息 → 用登录令牌 sub（undefined / undefined）
+  XX  ★ getCurrentUser 卡住 → 6 秒后改用令牌（33ms）
+  XX  ★ 坏缓存删掉再探 → 成功
+  XX  坏缓存已删、人没被登出
+  XX  ★ 「Unexpected token」是程序错误，不是"令牌过期" —— 不登出（以前 /token/ 一匹配就把人登出）
+  XX  ★ 三处同时问 → 共用一次探测（问了 3 次）
+  XX  上一次结束后再问 → 重新探测（不吃旧结果）
+  XX  没登录 → kind=signin
+  XX  守护在，封顶 3 次
+  OK  ★ 同一个 refresh_token 再备份 → 次数不清零（死会话不会被无限救）
+  XX  ★ SDK 换了新 refresh_token（登录/刷新成功）→ 次数清零（以前一辈子不清，救满 3 次守护永久失效）
+  XX  ★ 死会话最多救 3 次（救了 0 次）
+  OK  凭证不在时备份什么也不做
+  OK  reset 清次数和影子
+  XX  ★ 备份不收 SDK 键（user_info/device_id/lang/x-tcb/凭证）：漏了 device_id,lang_envtest-abcdef0123456789,user_info_envtest-abcdef0123456789,x-tcb-trace_envtest-abcdef0123456789
+  OK  ★ 玩家数据一个不少（language / langPref 这种普通键不被误伤）
+  XX  isOwnedKey 对 SDK 键为 false
+  XX  ★ 带着 SDK 键的老快照照样能恢复（拒收会让所有老云存档都恢复不了）：备份含非法键或非字符串值
+  OK  ★ 本机的 user_info / device_id / 凭证原样不动（以前恢复会删掉或盖成快照里的）
+  XX  玩家数据正常恢复
+evalmachine.<anonymous>:422
+      if(!x||typeof x!=='object'||!ownedKey(x.key)||typeof x.value!=='string')throw new Error('备份含非法键或非字符串值');
+                                                                                    ^
+
+Error: 备份含非法键或非字符串值
+    at evalmachine.<anonymous>:422:85
+    at Array.forEach (<anonymous>)
+    at validate (evalmachine.<anonymous>:421:13)
+    at Object.parseInput [as parse] (evalmachine.<anonymous>:412:12)
+    at file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/test-integrity/r1b/v1163/test_auth_session_v1164__iso.mjs:249:24
+
+Node.js v22.23.4

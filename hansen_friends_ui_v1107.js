@@ -29,6 +29,13 @@
     });
   }
   function q(id) { return document.getElementById(id); }
+  /* 🔴v1164（审查 SEC-1）：竞赛 ID 是别人写进云端的 —— 不是正整数就不显示原文。
+     以前 'No.' + f.cid 原样拼进页面，一个写成 <img onerror=…> 的「ID」就能在孩子的好友页里执行脚本
+     （读走本机存的手机号和云端登录凭证）。 */
+  function cidText(v) {
+    var n = Number(v);
+    return (isFinite(n) && n > 0 && Math.floor(n) === n && n < 1e9) ? String(n) : '—';
+  }
 
 
   /* ── 🔴v1110 亮色/暗色主题 ──────────────────────────────────
@@ -80,7 +87,9 @@
     var st = document.createElement('style');
     st.id = 'hsn_fr_css';
     st.textContent = THEME_VARS +
-      '#' + ID + '{position:fixed;inset:0;z-index:2147482000;background:var(--hpk-bg);' +
+      /* 🔴v1164：z-index 要在「拼写大PK」屏（2147483400）之上、对战屏（2147483600）之下 ——
+         原来是 2147482000，从岛屿的大PK屏点进来时好友页开在它**后面**，看起来像没反应。 */
+      '#' + ID + '{position:fixed;inset:0;z-index:2147483500;background:var(--hpk-bg);' +
         'display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;' +
         'font-family:system-ui,-apple-system,"PingFang SC",sans-serif}' +
       '#' + ID + '.on{display:block}' +
@@ -113,7 +122,22 @@
       'html .fr_st{display:flex;gap:8px}' +
       'html .fr_st div{flex:1;text-align:center;border:1px solid var(--hpk-in-line);border-radius:10px;' +
         'padding:9px 4px;cursor:pointer;font-size:14px;color:var(--hpk-btn2-txt)}' +
-      'html .fr_st div.sel{border-color:var(--hpk-accent);background:var(--hpk-sel-bg);color:var(--hpk-txt)!important;font-weight:700}';
+      'html .fr_st div.sel{border-color:var(--hpk-accent);background:var(--hpk-sel-bg);color:var(--hpk-txt)!important;font-weight:700}' +
+      /* v1164：想加我的人 / 收到的招呼 / 出错说明 */
+      'html .fr_mini{border:0;border-radius:9px;padding:8px 12px;min-height:36px;min-width:52px;font-size:14px;font-weight:700;cursor:pointer;' +
+        'background:linear-gradient(135deg,#4f46e5,#4338ca);color:#fff}' +
+      'html .fr_mini.no{background:var(--hpk-btn2);color:var(--hpk-btn2-txt)}' +
+      'html .fr_msg{display:flex;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--hpk-line)}' +
+      'html .fr_msg:last-child{border-bottom:0}' +
+      'html .fr_msg .t{flex:1;min-width:0;font-size:14.5px;color:var(--hpk-txt)}' +
+      'html .fr_msg .w{font-size:11.5px;color:var(--hpk-faint);margin-top:2px}' +
+      'html .fr_new{display:inline-block;font-size:11px;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:6px;' +
+        'background:var(--hpk-accent);color:#fff}' +
+      'html .fr_err{text-align:center;padding:18px 12px}' +
+      'html .fr_err .h{font-size:16px;font-weight:800;color:var(--hpk-txt)!important;margin-top:8px}' +
+      'html .fr_err .p{font-size:13px;color:var(--hpk-dim);margin-top:8px;line-height:1.8;text-align:left}' +
+      'html .fr_tech{font-size:11px;color:var(--hpk-faint);margin-top:10px;word-break:break-all;text-align:left}' +
+      'html .fr_q.off{opacity:.45;cursor:not-allowed}';
     document.head.appendChild(st);
   }
 
@@ -188,14 +212,22 @@
 
   function paint(inner) {
     var el = host();
+    /* v1164：每 15 秒刷新会整屏重画 —— 正在输的竞赛 ID 和光标不能被冲掉，
+       焦点收拢也只在第一次打开时装（重装会把焦点抢到「×」上） */
+    var ci = q('frCid'), typed = ci ? ci.value : '', had = !!(ci && document.activeElement === ci);
+    var wasOn = el.classList.contains('on');
     el.innerHTML = '<div class="fr_wrap">' + inner + '</div>';
     el.classList.add('on');
-    a11yOn(el, close);
+    if (!wasOn || !_a11y) a11yOn(el, close);
+    var ci2 = q('frCid');
+    if (ci2 && typed && !ci2.disabled) ci2.value = typed;
+    if (ci2 && had && !ci2.disabled) { try { ci2.focus(); } catch (e) {} }
   }
 
   function close() {
     a11yOff();
     if (_timer) { clearInterval(_timer); _timer = null; }
+    if (_retryT) { clearTimeout(_retryT); _retryT = null; }
     var el = q(ID);
     if (el) el.classList.remove('on');
   }
@@ -210,41 +242,141 @@
 
      这类"全屏浮层"必须互斥：打开一个就关掉另一个。
      不靠调 z-index 谁高谁低 —— 那只是把问题藏起来，
-     下面那屏仍然存在、仍在跑它的轮询定时器。 */
+     下面那屏仍然存在、仍在跑它的轮询定时器。
+
+     🔴v1164：**只关真开着的那几屏，关完把看门狗的哨撤掉。**
+     天梯页的 close() 会给看门狗上哨（"接下来要开对战屏了"），
+     而好友页不是对战屏 —— 看门狗 6 秒后看不到对战屏，就把「这一步没能打开」盖在好友页上。 */
+  var PEERS = [['HansenLadderUI', 'hsn_ladder_screen'], ['HansenPkRoomUI', 'hsn_pkroom_screen']];
   function closePeers() {
-    var peers = ['HansenFriendsUI', 'HansenLadderUI', 'HansenPkRoomUI'];
-    peers.forEach(function (n) {
+    PEERS.forEach(function (pr) {
       try {
-        var m = window[n];
-        if (m && m !== window.HansenFriendsUI && typeof m.close === 'function') m.close();
+        var m = window[pr[0]], el = q(pr[1]);
+        if (m && typeof m.close === 'function' && el && el.classList.contains('on')) m.close();
       } catch (e) {}
     });
+    try { if (window.HansenPkWatchdog && HansenPkWatchdog.disarm) HansenPkWatchdog.disarm(); } catch (e) {}
   }
 
+  var _view = null;      /* 上一次拿到的数据：刷新失败时不把已经显示的好友清空 */
+  var _sessTries = 0, SESS_MAX = 6;   /* 会话没好时自动重试的次数（约 20 秒） */
+  var _tip = null;       /* 加好友结果的提示：整屏重画后还要留着 */
+  var _retryT = null;
+
+  /* 🔴审查 R2-5（配额）：好友页开着时每 15 秒刷一次（三次查库）—— 以前切到别的 App、或者手机放桌上亮着屏，
+     照样一直刷：一个孩子一小时 720 次读。现在：页面在后台不刷（回来马上刷一次）；
+     5 分钟没碰屏幕就停下，说一句「点一下刷新」（碰一下就接着刷）。 */
+  var IDLE_MS = 300000;
+  var _touchAt = Date.now(), _idle = false, _visHooked = false;
+  function tickRefresh() {
+    if (!q(ID) || !q(ID).classList.contains('on')) return;
+    if (document.visibilityState === 'hidden') return;
+    if (Date.now() - _touchAt > IDLE_MS) { if (!_idle) { _idle = true; showIdle(); } return; }
+    refresh();
+  }
+  function showIdle() {
+    var el = q(ID);
+    if (!el || q('frIdle')) return;
+    var bar = document.createElement('div');
+    bar.id = 'frIdle';
+    bar.setAttribute('role', 'status');
+    bar.setAttribute('style', 'position:sticky;top:0;z-index:3;margin:0 0 8px;padding:9px 12px;border-radius:12px;'
+      + 'background:#312e81;color:#fff;font-size:13px;text-align:center;cursor:pointer');
+    bar.textContent = '好一会儿没动了，在线状态先不刷新 —— 点一下刷新';
+    bar.onclick = function () { wake(); };
+    var wrap = el.firstElementChild || el;
+    wrap.insertBefore(bar, wrap.firstChild);
+  }
+  function wake() {
+    _touchAt = Date.now();
+    if (!_idle) return;
+    _idle = false;
+    var b = q('frIdle'); if (b && b.parentNode) b.parentNode.removeChild(b);
+    refresh();
+  }
+  function hookActivity() {
+    if (_visHooked) return;
+    _visHooked = true;
+    try {
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible' && q(ID) && q(ID).classList.contains('on') && !_idle) refresh();
+      });
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+        document.addEventListener(t, function () { if (q(ID) && q(ID).classList.contains('on')) wake(); }, { passive: true, capture: true });
+      });
+    } catch (e) {}
+  }
   function open() {
     closePeers();
-    render([], true);
+    _view = null; _sessTries = 0;
+    _touchAt = Date.now(); _idle = false;
+    hookActivity();
+    render({ loading: true });
     refresh();
     /* 每 15 秒刷新在线状态 —— 太频繁会烧云开发的读次数 */
     if (_timer) clearInterval(_timer);
-    _timer = setInterval(refresh, 15000);
+    _timer = setInterval(tickRefresh, 15000);
   }
 
-  function render(friends, loading, notice) {
+  /* 「人话 ⟨原话⟩」拆开：人话给人看，原话放进「技术信息」那行 */
+  function splitReason(r) {
+    var t = String((r && (r.reason || r.text)) || '');
+    var m = /^([\s\S]*?)\s*⟨([\s\S]*)⟩\s*$/.exec(t);
+    return { human: (r && r.text) || (m ? m[1] : t), raw: m ? m[2] : '' };
+  }
+
+  /* 出错时的说明块：按 kind 说清楚发生了什么、该怎么办 */
+  function errBlock(r) {
+    var k = (r && r.kind) || 'other';
+    var sp = splitReason(r);
+    var tech = sp.raw ? '<div class="fr_tech">技术信息：' + esc(sp.raw) + '</div>' : '';
+    if (k === 'config') {
+      return '<div class="fr_err"><div style="font-size:34px">🛠️</div>'
+        + '<div class="h">云端设置还差一步</div>'
+        + '<div class="p">' + esc(sp.human.replace(/^云端设置还差一步[：:]\s*/, '')) + '</div>'
+        + '<div class="p" style="font-size:12px">这不是你的问题，也不是网络问题。'
+        +   '把这一屏拍给负责的老师或家长，按上面说的在腾讯云开发控制台改好就能用了。</div>'
+        + tech + '</div>';
+    }
+    if (k === 'network' || k === 'slow') {
+      return '<div class="fr_err"><div style="font-size:34px">📡</div>'
+        + '<div class="h">' + (k === 'slow' ? '网络太慢了' : '连不上网络') + '</div>'
+        + '<div class="p" style="text-align:center">' + esc(sp.human) + '</div>'
+        + '<button class="fr_btn" id="frRetry" style="margin-top:12px">再试一次</button>' + tech + '</div>';
+    }
+    if (k === 'session' && _sessTries <= SESS_MAX) {
+      return '<div class="fr_err"><div style="font-size:30px">⏳</div>'
+        + '<div class="h">正在连接云端…</div>'
+        + '<div class="p" style="text-align:center">刚打开页面时要等几秒，马上自动再试。</div>' + tech + '</div>';
+    }
+    if (k === 'session') {
+      /* 自动等了 20 秒还没连上：别再转圈，说清楚并给个按钮 */
+      return '<div class="fr_err"><div style="font-size:30px">☁️</div>'
+        + '<div class="h">云端还没连上</div>'
+        + '<div class="p" style="text-align:center">已经等了 20 秒。检查一下网络，再点「再试一次」；'
+        +   '还不行就退出登录再登一次。</div>'
+        + '<button class="fr_btn" id="frRetry" style="margin-top:12px">再试一次</button>' + tech + '</div>';
+    }
+    return '<div class="fr_err"><div class="p" style="text-align:center">' + esc(sp.human || '没读到，等会儿再试') + '</div>'
+      + '<button class="fr_btn fr_btn2" id="frRetry" style="margin-top:12px">再试一次</button>' + tech + '</div>';
+  }
+
+  function render(v) {
+    v = v || {};
+    var friends = v.friends || [], incoming = v.incoming || [];
     var st = F() ? F().myStatus() : 'online';
     /* 🔴v1129：**没登录就把整屏说清楚，别让人白填。**
+       没登录时顶部直接给一句话 + 一个去登录的按钮，下面的输入框禁用。
+       **不要让人做注定失败的操作。** */
+    var err = v.err || null;
+    var noLogin = !!(err && (err.kind === 'expired' || /登录/.test(err.reason || '')));
+    var expired = noLogin && /过期/.test((err && err.reason) || '');
+    var on = friends.filter(function (f) { return f.online && !f.pending; }).length;
 
-       实测未登录进好友页：「我的状态」能点、「加好友」输入框能填，
-       只有列表处一行小字写着"先登录才能加好友" ——
-       用户很可能填完 ID 点了按钮才发现不行。
-
-       而且这一屏还写着"竞赛 ID 在拼写大PK页面顶部"，
-       他跑过去一看是 `No.---`（v1129 一并修了）——**两头都卡住**。
-
-       改为：没登录时顶部直接给一句话 + 一个去登录的按钮，
-       下面的输入框禁用。**不要让人做注定失败的操作。** */
-    var noLogin = /登录/.test(notice || '');
-    var on = friends.filter(function (f) { return f.online; }).length;
+    var tipHtml = (_tip && Date.now() - _tip.at < 9000)
+      ? '<div id="frCidTip" style="font-size:12.5px;margin:6px 2px 0;line-height:1.6;color:'
+        + (_tip.good ? 'var(--hpk-ok)' : 'var(--hpk-bad)') + '">' + esc(_tip.msg) + '</div>'
+      : '';
 
     paint(
       '<div class="fr_top"><div class="fr_h">👥 我的好友</div>'
@@ -254,7 +386,7 @@
           ? '<div class="fr_card" style="text-align:center;padding:20px 14px">'
             + '<div style="font-size:34px">🔐</div>'
             + '<div style="font-size:15px;color:var(--hpk-txt)!important;margin-top:8px">'
-            +   '登录后才能加好友</div>'
+            +   (expired ? '云端登录过期了，重新登录一次就好' : '登录后才能加好友') + '</div>'
             + '<div style="font-size:12.5px;color:var(--hpk-dim);margin-top:8px;line-height:1.8">'
             +   '好友要靠「竞赛 ID」互加，<br>而竞赛 ID 是登录时自动分配的。</div>'
             + '<button class="fr_btn" id="frGoLogin" style="margin-top:14px">去登录</button>'
@@ -286,19 +418,29 @@
       +     '<button class="fr_btn" id="frAdd"' + (noLogin ? ' disabled style="opacity:.5"' : '')
       +     '>加好友</button>'
       +   '</div>'
+      +   tipHtml
       +   '<div style="font-size:11.5px;color:var(--hpk-faint);margin-top:7px">'
-      +     '竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001'
+      +     '竞赛 ID 在「拼写大PK」页面顶部，长这样：No.001。<br>你加他、他也加你，就成为好友了。'
       +   '</div>'
       + '</div>'
+
+      /* 想加我的人 */
+      + (incoming.length ? (
+          '<div class="fr_card">'
+        +   '<div class="fr_lbl">🙋 想加你为好友（' + incoming.length + '）</div>'
+        +   '<div id="frInc">' + incomingHtml(incoming) + '</div>'
+        + '</div>') : '')
+
+      /* 收到的招呼 */
+      + inboxHtml(v)
 
       /* 好友列表 */
       + '<div class="fr_card">'
       +   '<div class="fr_lbl">好友 ' + (friends.length ? '· ' + on + ' 人刚才还在' : '') + '</div>'
       +   '<div id="frList">'
-      +     (loading ? '<div class="fr_empty">正在读取…</div>'
-              : (notice
-                  ? '<div class="fr_empty">' + esc(notice) + '</div>'
-                  : listHtml(friends)))
+      +     (v.loading ? '<div class="fr_empty">正在读取…</div>'
+              : (err && !noLogin ? errBlock(err)
+                : (noLogin ? '<div class="fr_empty">先登录才能加好友</div>' : listHtml(friends))))
       +   '</div>'
       + '</div>'
     );
@@ -306,14 +448,81 @@
     if (q('frX')) q('frX').onclick = close;
     if (q('frOn')) q('frOn').onclick = function () { F().setStatus('online'); refresh(); };
     if (q('frHide')) q('frHide').onclick = function () { F().setStatus('hidden'); refresh(); };
-    if (q('frAdd')) q('frAdd').onclick = doAdd;
+    if (q('frAdd')) q('frAdd').onclick = function () { doAdd(); };
+    if (q('frRetry')) q('frRetry').onclick = function () { _sessTries = 0; render({ loading: true }); refresh(); };
     if (q('frGoLogin')) q('frGoLogin').onclick = function () {
       close();
-      try { if (window.HansenAuthUI) HansenAuthUI.open(); } catch (e) {}
+      /* 审查 R2-UI-7：本机还记着「已登录」、云端却不认了 → 直接给登录表单（以前打开的是「已登录」面板，没法登） */
+      try {
+        var A = window.HansenAuth, signed = !!(A && A.isSignedIn && A.isSignedIn());
+        if (window.HansenAuthUI) HansenAuthUI.open(signed ? { relogin: true } : undefined);
+      } catch (e) {}
     };
     var ci = q('frCid');
     if (ci) ci.onkeydown = function (ev) { if (ev.key === 'Enter') doAdd(); };
+    if (ci) ci.oninput = function () { _tip = null; var t = q('frCidTip'); if (t) t.textContent = ''; };
     bindList(friends);
+    bindIncoming(incoming);
+  }
+
+  function incomingHtml(list) {
+    return list.slice(0, 20).map(function (f, i) {
+      return '<div class="fr_item ' + (f.online ? 'on2' : 'off') + '" data-n="' + i + '" style="cursor:default">'
+        + '<div class="fr_av">🐝' + (f.online ? '<span class="fr_dot"></span>' : '') + '</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div class="fr_nm">' + esc(f.name) + '</div>'
+        +   '<div class="fr_sub">No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
+        + '</div>'
+        + '<button class="fr_mini" data-acc="' + i + '">加他</button>'
+        + '<button class="fr_mini no" data-ign="' + i + '">不加</button>'
+        + '</div>';
+    }).join('');
+  }
+  function bindIncoming(list) {
+    var box = q('frInc');
+    if (!box) return;
+    box.querySelectorAll('[data-acc]').forEach(function (b) {
+      b.onclick = function () {
+        var f = list[Number(b.getAttribute('data-acc'))];
+        if (!f) return;
+        b.disabled = true; b.textContent = '…';
+        F().addFriend(f.cid).then(function (r) {
+          _tip = r.ok ? { msg: r.mutual ? ('✅ 你和 ' + r.name + ' 已经互为好友了') : ('✅ 已加 ' + r.name), good: true, at: Date.now() }
+                      : { msg: splitReason(r).human || '没加上，等会儿再试', good: false, at: Date.now() };
+          refresh();
+        });
+      };
+    });
+    box.querySelectorAll('[data-ign]').forEach(function (b) {
+      b.onclick = function () {
+        var f = list[Number(b.getAttribute('data-ign'))];
+        if (f) F().ignoreRequest(f.cid);
+        refresh();
+      };
+    });
+  }
+
+  /* 收到的招呼：只显示互为好友的人发来的（陌生人的不给孩子看） */
+  function inboxHtml(v) {
+    var ib = v.inbox;
+    if (!ib) return '';
+    if (!ib.ok) {
+      if (ib.kind !== 'config') return '';      /* 网络问题列表那块已经说了，这里不重复 */
+      return '<div class="fr_card"><div class="fr_lbl">📨 收到的招呼</div>' + errBlock(ib) + '</div>';
+    }
+    if (!ib.msgs || !ib.msgs.length) return '';
+    var now = Date.now();
+    return '<div class="fr_card"><div class="fr_lbl">📨 收到的招呼'
+      + (ib.unread ? '<span class="fr_new">' + ib.unread + ' 条新的</span>' : '') + '</div>'
+      + ib.msgs.slice(0, 10).map(function (m) {
+          var ago = Math.max(0, Math.floor((now - (m.at || 0)) / 60000));
+          return '<div class="fr_msg"><div style="font-size:22px">' + esc(m.emoji) + '</div>'
+            + '<div class="t">' + esc(m.text) + (m.isNew ? '<span class="fr_new">新</span>' : '')
+            +   '<div class="w">' + esc(m.fromName) + (m.from ? ' · No.' + cidText(m.from) : '') + ' · '
+            +   (ago < 1 ? '刚刚' : ago < 60 ? ago + ' 分钟前' : Math.floor(ago / 60) + ' 小时前') + '</div></div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
   }
 
   function listHtml(friends) {
@@ -335,8 +544,8 @@
       return '<div class="fr_item ' + (f.online ? 'on2' : 'off') + '" data-i="' + i + '">'
         + '<div class="fr_av">🐝' + (f.online ? '<span class="fr_dot"></span>' : '') + '</div>'
         + '<div style="flex:1;min-width:0">'
-        +   '<div class="fr_nm">' + esc(f.name) + '</div>'
-        +   '<div class="fr_sub">No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
+        +   '<div class="fr_nm">' + esc(f.name) + (f.pending ? ' <span style="font-size:12px;font-weight:600;color:var(--hpk-faint)">（待确认）</span>' : '') + '</div>'
+        +   '<div class="fr_sub">No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
         + '</div>'
         + '<div style="font-size:18px;color:var(--hpk-faint)">›</div>'
         + '</div>';
@@ -356,19 +565,31 @@
 
   function refresh() {
     if (!F()) return;
+    if (_retryT) { clearTimeout(_retryT); _retryT = null; }
     F().listFriends().then(function (r) {
-      if (!q(ID) || !q(ID).classList.contains('on')) return;
-      /* 🔴v1109：**没登录要明说**。
-         原来只在列表处显示"还没有好友"，用户根本不知道是因为没登录，
-         会以为功能坏了 —— 这就是"界面说谎"的一种。 */
-      if (r && !r.ok && /登录/.test(r.reason || '')) {
-        render([], false, '先登录才能加好友');
-        return;
+      if (!q(ID) || !q(ID).classList.contains('on') || _inDetail) return null;
+      if (!r || !r.ok) {
+        if (r && r.kind === 'session') _sessTries++;
+        /* 🔴v1109：**没登录要明说**，别让人以为功能坏了。
+           刷新失败但之前读到过：保留已经显示的好友，只在下面说明原因 */
+        render({ friends: _view ? _view.friends : [], incoming: _view ? _view.incoming : [],
+                 inbox: _view ? _view.inbox : null, err: r || { kind: 'other' } });
+        /* 会话还没好（页面刚打开）：几秒后自动再试，不用孩子去点；最多约 20 秒 */
+        if (r && r.kind === 'session' && _sessTries <= SESS_MAX) _retryT = setTimeout(refresh, 3000);
+        return null;
       }
-      render((r && r.friends) || [], false);
+      _sessTries = 0;
+      var mutual = (r.friends || []).filter(function (f) { return !f.pending; }).map(function (f) { return f.cid; });
+      return F().inbox({ onlyFrom: mutual }).then(function (ib) {
+        if (!q(ID) || !q(ID).classList.contains('on') || _inDetail) return;
+        _view = { friends: r.friends || [], incoming: r.incoming || [], inbox: ib };
+        render(_view);
+        /* 招呼显示出来了就算看过（"新"标记下次刷新时去掉） */
+        if (ib && ib.ok && ib.unread) setTimeout(function () { try { F().markSeen(); } catch (e) {} }, 1500);
+      });
     })['catch'](function (e) {
-      if (!q(ID) || !q(ID).classList.contains('on')) return;
-      render([], false, '连不上云端：' + String((e && e.message) || e).slice(0, 40));
+      if (!q(ID) || !q(ID).classList.contains('on') || _inDetail) return;
+      render({ err: { kind: 'other', reason: '没读到好友 ⟨' + String((e && e.message) || e).slice(0, 80) + '⟩' } });
     });
   }
 
@@ -377,16 +598,10 @@
     var btn = q('frAdd');
     var cid = String((ci && ci.value) || '').trim();
 
-    /* 🔴v1156：**加好友失败不该用 alert 报。**
-
-       和房间码那处同型。alert 在手机上的毛病：
-         · 会打断输入焦点 —— 关掉弹窗还得再点一次输入框重输
-         · 微信/Safari 里样式各不相同，和 App 完全脱节
-         · 连续弹几次后，有些浏览器会给"阻止此页面再弹窗"的选项，
-           **用户一旦勾了，之后所有错误提示他都看不到了**
-
-       提示该紧贴着输入框 —— 那才是他要改的地方。 */
+    /* 🔴v1156：**加好友失败不该用 alert 报** —— 提示紧贴着输入框，那才是他要改的地方。
+       v1164：提示记在 _tip 里，整屏刷新后还在（以前一刷新就没了）。 */
     var say = function (msg, good) {
+      _tip = { msg: msg, good: !!good, at: Date.now() };
       try {
         var box = q('frCidTip');
         if (!box) {
@@ -396,14 +611,8 @@
           if (ci && ci.parentNode) ci.parentNode.parentNode.insertBefore(
             box, ci.parentNode.nextSibling);
         }
-        box.style.color = good ? '#4ade80' : '#f87171';
+        box.style.color = good ? 'var(--hpk-ok)' : 'var(--hpk-bad)';
         box.textContent = msg;
-        if (ci && !ci._tipBound) {
-          ci._tipBound = 1;
-          ci.addEventListener('input', function () {
-            var t = q('frCidTip'); if (t) t.textContent = '';
-          });
-        }
       } catch (e) {}
     };
 
@@ -411,10 +620,15 @@
     if (btn) { btn.disabled = true; btn.textContent = '添加中…'; }
     F().addFriend(cid).then(function (r) {
       if (btn) { btn.disabled = false; btn.textContent = '加好友'; }
-      if (!r.ok) { say(r.reason || '加不上 —— 检查一下竞赛 ID 对不对');
-        if (ci) { ci.focus(); try { ci.select(); } catch (e) {} } return; }
+      if (!r.ok) {
+        var sp = splitReason(r);
+        say((sp.human || '加不上 —— 检查一下竞赛 ID 对不对') + (sp.raw ? '（' + sp.raw.slice(0, 60) + '）' : ''));
+        if (ci) { ci.focus(); try { ci.select(); } catch (e) {} }
+        return;
+      }
       if (ci) ci.value = '';
-      say('✅ 已加 ' + r.name + ' 为好友', true);
+      say(r.mutual ? ('✅ 你和 ' + r.name + ' 已经互为好友了')
+                   : ('✅ 已发出好友请求。等 ' + r.name + ' 也加你，就成为好友了'), true);
       refresh();
     })['catch'](function (e) {
       if (btn) { btn.disabled = false; btn.textContent = '加好友'; }
@@ -425,8 +639,12 @@
   /* ── 好友详情：发快捷语 / 约战 ───────────────────────────
      🔴 这一屏**没有输入框** —— 这是"不能打字聊天"这条产品约束
         在界面上的直接体现，不是靠禁用某个功能藏起来的。 */
+  var _inDetail = false;
   function detail(f) {
     var QUICK = (F() && F().QUICK) || [];
+    _inDetail = true;
+    /* 只有互为好友才能互发招呼 —— 他没加你时发了他也看不到 */
+    var can = !f.pending;
     paint(
       '<div class="fr_top"><button aria-label="返回好友列表" class="fr_x" id="frBack">←</button>'
       + '<div class="fr_h">' + esc(f.name) + '</div></div>'
@@ -437,14 +655,16 @@
       +     (f.online ? '<span class="fr_dot" style="width:16px;height:16px"></span>' : '')
       +   '</div>'
       +   '<div style="font-size:18px;font-weight:800;color:var(--hpk-txt)">' + esc(f.name) + '</div>'
-      +   '<div style="font-size:13px;color:' + (f.online ? '#22c55e' : 'var(--hpk-faint)') + ';margin-top:4px">'
-      +     'No.' + f.cid + ' · ' + esc(f.sub) + '</div>'
+      +   '<div style="font-size:13px;color:' + (f.online ? 'var(--hpk-ok)' : 'var(--hpk-faint)') + ';margin-top:4px">'
+      +     'No.' + cidText(f.cid) + ' · ' + esc(f.sub) + '</div>'
       + '</div>'
 
       + '<div class="fr_card">'
       +   '<div class="fr_lbl">发个招呼（只能发这些，不能打字）</div>'
+      +   (can ? '' : '<div style="font-size:12.5px;color:var(--hpk-dim);margin-bottom:6px;line-height:1.7">'
+                    + '他还没加你。等他也加你为好友，你们就能互发招呼了。</div>')
       +   '<div>' + QUICK.map(function (x) {
-              return '<span class="fr_q" data-q="' + esc(x.id) + '">'
+              return '<span class="fr_q' + (can ? '' : ' off') + '" data-q="' + esc(x.id) + '">'
                 + x.emoji + ' ' + esc(x.text) + '</span>';
             }).join('') + '</div>'
       +   '<div id="frSent" style="font-size:13px;color:var(--hpk-ok);min-height:20px;margin-top:10px"></div>'
@@ -452,19 +672,26 @@
 
       + '<button class="fr_btn" id="frPk" style="width:100%;margin-bottom:10px">'
       +   '⚔️ 开个房间叫他来打</button>'
-      + '<button class="fr_btn fr_btn2" id="frDel" style="width:100%">删除好友</button>'
+      + '<button class="fr_btn fr_btn2" id="frDel" style="width:100%">'
+      +   (f.pending ? '不加了（撤回好友请求）' : '删除好友') + '</button>'
     );
 
-    if (q('frBack')) q('frBack').onclick = function () { open(); };
+    if (q('frBack')) q('frBack').onclick = function () { _inDetail = false; open(); };
     host().querySelectorAll('.fr_q').forEach(function (el) {
       el.onclick = function () {
+        var box0 = q('frSent');
+        if (!can) {
+          if (box0) { box0.textContent = '他还没加你，现在发不了'; box0.style.color = 'var(--hpk-bad)'; }
+          return;
+        }
         var qid = el.getAttribute('data-q');
         F().sendQuick(f.cid, qid).then(function (r) {
           var box = q('frSent');
           if (!box) return;
+          var sp = splitReason(r);
           box.textContent = r.ok
             ? ('已发出：' + r.sent.emoji + ' ' + r.sent.text)
-            : ('没发出去：' + (r.reason || '未知'));
+            : ('没发出去：' + (sp.human || '未知') + (sp.raw ? '（' + sp.raw.slice(0, 80) + '）' : ''));
           box.style.color = r.ok ? 'var(--hpk-ok)' : 'var(--hpk-bad)';
         });
       };
@@ -477,10 +704,16 @@
       } catch (e) {}
     };
     if (q('frDel')) q('frDel').onclick = function () {
-      if (!window.confirm('确定删除好友 ' + f.name + '？')) return;
-      F().removeFriend(f.cid).then(function () { open(); });
+      if (!window.confirm((f.pending ? '撤回给 ' : '确定删除好友 ') + f.name + (f.pending ? ' 的好友请求？' : '？'))) return;
+      F().removeFriend(f.cid).then(function (r) {
+        _inDetail = false;
+        if (r && !r.ok) _tip = { msg: '没删掉：' + (splitReason(r).human || '等会儿再试'), good: false, at: Date.now() };
+        open();
+      });
     };
   }
 
-  window.HansenFriendsUI = { open: open, close: close, _detail: detail };
+  function closeAll() { _inDetail = false; _view = null; if (_retryT) { clearTimeout(_retryT); _retryT = null; } close(); }
+
+  window.HansenFriendsUI = { open: function () { _inDetail = false; open(); }, close: closeAll, _detail: detail };
 })();

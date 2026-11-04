@@ -1,0 +1,64 @@
+{
+ "390x844": {
+  "cardTap": {
+   "ok": true,
+   "x": 56.625,
+   "y": 249.625,
+   "w": 85.25,
+   "h": 101.25,
+   "hit": "IMG#.",
+   "label": ""
+  },
+  "hall": true,
+  "m": {
+   "iw": 390,
+   "sw": 410,
+   "offscreen": [
+    "bgA[-24,414]",
+    "bgB[-24,414]",
+    "spot[-20,410]"
+   ],
+   "scrollX0": 0,
+   "scrollXafterRightSwipe": 0,
+   "scrollXafterLeftSwipe": 0,
+   "bossNameAfterSwipes": "淘气小幽灵",
+   "panel": {
+    "cls": "panel",
+    "l": 45,
+    "r": 345
+   }
+  },
+  "screen": "cardsScreen"
+ },
+ "360x800": {
+  "cardTap": {
+   "ok": true,
+   "x": 52.875,
+   "y": 245.875,
+   "w": 77.75,
+   "h": 93.75,
+   "hit": "IMG#.",
+   "label": ""
+  },
+  "hall": true,
+  "m": {
+   "iw": 360,
+   "sw": 395,
+   "offscreen": [
+    "bgA[-22,382]",
+    "bgB[-22,382]",
+    "spot[-35,395]"
+   ],
+   "scrollX0": 0,
+   "scrollXafterRightSwipe": 0,
+   "scrollXafterLeftSwipe": 0,
+   "bossNameAfterSwipes": "淘气小幽灵",
+   "panel": {
+    "cls": "panel",
+    "l": 30,
+    "r": 330
+   }
+  },
+  "screen": "cardsScreen"
+ }
+}

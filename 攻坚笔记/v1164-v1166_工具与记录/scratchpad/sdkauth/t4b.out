@@ -1,0 +1,10 @@
+=== R1 same realm: 5 concurrent instances (as iframe auth() does) after expiry
+{"rs":["uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001","uid_existing_001"],"credPresent":true}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+=== R2 staggered same realm: instance A refreshes, then instance B that cached old creds in memory
+{"a":"uid_existing_001","b":"uid_existing_001","credPresent":true}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+=== R3 cross realm: iframe with its OWN SDK module + top, concurrent after expiry
+{"top":"uid_existing_001","iframeOwnRealm":"uid_existing_001","credPresent":true}
+  net: [ 'POST ambitiou… /auth/v1/token grant=refresh_token' ]
+{"ok":true,"uid":"uid_existing_001","tries":1}

@@ -1,0 +1,67 @@
+{
+  "ver": "v1163",
+  "variant": "",
+  "loginMsg1": "登录成功！ 竞赛 ID No.001 本机还没有进度，玩一会儿就会自动存到云端。",
+  "afterLogin": {
+    "signed": true,
+    "uid": "1527283253218073236",
+    "method": "phone",
+    "learned": 0,
+    "wins": 0,
+    "games": 0,
+    "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 未定级 ›",
+    "acct": "✅ 已登录 +86 13800009901 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录",
+    "credKeys": [
+      "credentials_am:702"
+    ]
+  },
+  "uid": "1527283253218073236",
+  "healthy": {
+    "signed": true,
+    "uid": "1527283253218073236",
+    "method": "phone",
+    "learned": 5,
+    "wins": 3,
+    "games": 3,
+    "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›",
+    "acct": "✅ 已登录 +86 13800009901 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录",
+    "credKeys": [
+      "credentials_am:702"
+    ]
+  },
+  "healthyUploads": 1,
+  "healthyAt": "19s",
+  "revokedAt": "19s",
+  "afterDeath": {
+    "signed": true,
+    "uid": "1527283253218073236",
+    "method": "phone",
+    "learned": 12,
+    "wins": 3,
+    "games": 3,
+    "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›",
+    "acct": "✅ 已登录 +86 13800009901 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录",
+    "credKeys": []
+  },
+  "afterDeathAt": "95s",
+  "afterDeathScreen": "← 返回 ⚔️ 拼写大PK 和真人比拼写，不是机器人 🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 › ✅ 已登录 +86 13800009901 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录 🏠 大PK · 公开房间 看看谁开了房，点进去直接开打。也可以自己开一间等人来。 👥 我的好友 加同学做好友，看谁刚才还在，一句话就能约战。 🏆 天梯排位 系统按分数匹配对手，赢了涨分升段。幼蜂 → 工蜂 → 侦察蜂 → 守卫蜂 → 蜂王 → 传奇蜂王。 📊 我的战绩 0 最快速度(字符/分) 100% 对战胜率 12 已掌握单词 0",
+  "afterDeathDialogs": [],
+  "tokenCalls": [
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant",
+    "400 invalid_grant"
+  ],
+  "beforeRelogin": {
+    "signed": true,
+    "uid": "1527283253218073236",
+    "method": "phone",
+    "learned": 15,
+    "wins": 3,
+    "games": 3,
+    "card": "🐝 点这里设置名字 🎫 竞赛 ID No.001 🐝 工蜂 · 1057 分 ›",
+    "acct": "✅ 已登录 +86 13800009901 进度已跟随账号，换设备登录即可找回。 🔄 切换账号 🚪 退出登录",
+    "credKeys": []
+  },
+  "thrown": "Error: [kid] 点不到「#pkReg」：等了 10000ms 也没看到「#pkReg」\n    at Phone.tap (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:133:17)\n    at async Module.loginPhoneUI (file:///home/user/wordminiprogram/cloudbase_e2e_harness.mjs:243:3)\n    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/review/auth-skeptic/s1_expiry.mjs:77:20"
+}

@@ -1,0 +1,44 @@
+{
+ "N": 3,
+ "PICK": 4,
+ "log": [
+  "freepass {\"until\":\"1793970285474\",\"active\":true}",
+  "boss card tap {\"ok\":true,\"x\":309,\"y\":339.375,\"w\":106,\"h\":124,\"hit\":\"IMG#.boss-card-img\",\"label\":\"\"}",
+  "screen bossScreen",
+  "picker 已击败 boss 0/5 特效 ON ▶ Lv.1 原初线条 🆓 Lv.2 永夜之壁 🆓 Lv.3 未被写下的故事 🆓 Lv.4 四季轮转 🆓 Lv.5 克罗诺斯之影 🎨 boss 背景 (点击切换) 🌑 经典暗夜 ✓",
+  "cell tap {\"ok\":true,\"x\":195,\"y\":294.5,\"w\":112,\"h\":131,\"hit\":\"IMG#.\",\"label\":\"\"}",
+  "fight ended at q 32",
+  "end 🏆 VICTORY! 击败了 时之君主·克罗诺斯之影 ⭐⭐⭐ 完美胜利！ 🎉 首次通关奖励 🪙 金币 +30 · 🎓 经验 +95 ⚔️ 再来一局 🏠 回主页",
+  "after {\"cleared\":\"1\",\"prog\":null,\"freepassActive\":true}",
+  "world-map tap {\"ok\":true,\"x\":355,\"y\":29.524282455444336,\"w\":58,\"h\":58,\"hit\":\"A#.world-map-btn\",\"label\":\"\"}",
+  "map {\"cls\":\"spot done\",\"label\":\"时之钟谷，30个单词，5位Boss，已通关\",\"sub\":\"③ 🚩 时之钟谷 30词 · 5boss\",\"ptext\":\"进度 1 / 8\"}",
+  "panel ⚔ 岛上盘踞的 5 位 Boss · ✅已全部击败 ▶ Boss1 火柴人·原初线条 🔒 Boss2 影守·永夜之壁 🔒 Boss3 万典之灵·未被写下的故事 🔒 Boss4 凋零与新生之龙·四季轮转 🔒 ★守关 时之君主·克罗诺斯之影 | 重进这座岛",
+  "after expiry {\"cleared\":\"1\",\"prog\":null}",
+  "errors [\"back: Transition was aborted because of invalid state. ViewTransition opt-in disabled\"]"
+ ],
+ "freepass": {
+  "until": "1793970285474",
+  "active": true
+ },
+ "picker": "已击败 boss 0/5 特效 ON ▶ Lv.1 原初线条 🆓 Lv.2 永夜之壁 🆓 Lv.3 未被写下的故事 🆓 Lv.4 四季轮转 🆓 Lv.5 克罗诺斯之影 🎨 boss 背景 (点击切换) 🌑 经典暗夜 ✓",
+ "endScreen": "🏆 VICTORY! 击败了 时之君主·克罗诺斯之影 ⭐⭐⭐ 完美胜利！ 🎉 首次通关奖励 🪙 金币 +30 · 🎓 经验 +95 ⚔️ 再来一局 🏠 回主页",
+ "after": {
+  "cleared": "1",
+  "prog": null,
+  "freepassActive": true
+ },
+ "map": {
+  "cls": "spot done",
+  "label": "时之钟谷，30个单词，5位Boss，已通关",
+  "sub": "③ 🚩 时之钟谷 30词 · 5boss",
+  "ptext": "进度 1 / 8"
+ },
+ "panel": "⚔ 岛上盘踞的 5 位 Boss · ✅已全部击败 ▶ Boss1 火柴人·原初线条 🔒 Boss2 影守·永夜之壁 🔒 Boss3 万典之灵·未被写下的故事 🔒 Boss4 凋零与新生之龙·四季轮转 🔒 ★守关 时之君主·克罗诺斯之影 | 重进这座岛",
+ "afterExpiry": {
+  "cleared": "1",
+  "prog": null
+ },
+ "errors": [
+  "back: Transition was aborted because of invalid state. ViewTransition opt-in disabled"
+ ]
+}

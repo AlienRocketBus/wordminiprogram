@@ -1,0 +1,2409 @@
+{
+ "home_top": {
+  "ok": true,
+  "ms": 7760,
+  "summary": {
+   "n": 29,
+   "fail": 3,
+   "gradientText": 0,
+   "minRatio": 2.44,
+   "worst": [
+    {
+     "text": "\u9669",
+     "path": "span.logo-char.c5",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#a855f7",
+     "bg": "#284088",
+     "ratio": 2.44,
+     "p10": 2.37,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u5927",
+     "path": "span.logo-char.c3",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#ef4444",
+     "bg": "#3f3882",
+     "ratio": 2.66,
+     "p10": 2.51,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u5355",
+     "path": "span.logo-char.c1",
+     "size": 46.8,
+     "weight": 900,
+     "fg": "#3b82f6",
+     "bg": "#3e3180",
+     "ratio": 2.92,
+     "p10": 2.8,
+     "need": 3,
+     "shadow": "rgb(255, 255, 255) -2px -2px 0px, rgb(255, 255, 255) 2px -2p",
+     "font": "CartoonBlack"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ },
+ "home_cards": {
+  "ok": true,
+  "ms": 4481,
+  "summary": {
+   "n": 27,
+   "fail": 14,
+   "gradientText": 0,
+   "minRatio": 2.69,
+   "worst": [
+    {
+     "text": "Body Parts",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f9d2d4",
+     "bg": "#ea4c54",
+     "ratio": 2.69,
+     "p10": 2.6,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Sports & Hobbies",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f8d1c9",
+     "bg": "#e44a29",
+     "ratio": 2.83,
+     "p10": 2.77,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Animal Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#c6e4d8",
+     "bg": "#1d9463",
+     "ratio": 2.84,
+     "p10": 2.76,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "People & Professions",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#dee1d1",
+     "bg": "#7d884a",
+     "ratio": 2.89,
+     "p10": 2.79,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Food Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#f4d0c6",
+     "bg": "#d6461e",
+     "ratio": 3.11,
+     "p10": 3.01,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Nature Island",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#e1dbca",
+     "bg": "#88702c",
+     "ratio": 3.46,
+     "p10": 3.33,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "Action Verbs",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#d5d8f5",
+     "bg": "#5765d8",
+     "ratio": 3.53,
+     "p10": 3.37,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "\u52a8\u7269\u5927\u5192\u9669",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#1f9a5d",
+     "ratio": 3.6,
+     "p10": 3.51,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u804c\u4e1a\u5927\u5192\u9669",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#5c9368",
+     "ratio": 3.6,
+     "p10": 3.5,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u8eab\u4f53\u5927\u5192\u9669",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#ea5057",
+     "ratio": 3.63,
+     "p10": 3.4,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u8fd0\u52a8\u5927\u5192\u9669",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e75124",
+     "ratio": 3.75,
+     "p10": 3.69,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "Colors & Numbers",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#eacce0",
+     "bg": "#ab3385",
+     "ratio": 4.01,
+     "p10": 3.78,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    },
+    {
+     "text": "\u98df\u7269\u5927\u5192\u9669",
+     "path": "div.island-name",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#db4d1f",
+     "ratio": 4.12,
+     "p10": 3.98,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 4px 14px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "Transportation",
+     "path": "div.island-en",
+     "size": 12,
+     "weight": 500,
+     "fg": "#ced6ea",
+     "bg": "#3c5bab",
+     "ratio": 4.41,
+     "p10": 2.78,
+     "need": 4.5,
+     "shadow": "",
+     "font": "Bowlby One"
+    }
+   ],
+   "fonts": [
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ },
+ "food_menu": {
+  "ok": true,
+  "ms": 11698,
+  "summary": {
+   "n": 30,
+   "fail": 8,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5b508b",
+     "ratio": 4.24,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "food_modes": {
+  "ok": true,
+  "ms": 3164,
+  "summary": {
+   "n": 29,
+   "fail": 7,
+   "gradientText": 1,
+   "minRatio": 2.08,
+   "worst": [
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5730\u9f20",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#6aa90f",
+     "ratio": 2.88,
+     "p10": 2.66,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6781\u901f60\u79d2",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e03f2a",
+     "ratio": 4.27,
+     "p10": 3.75,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One"
+   ]
+  },
+  "errs": []
+ },
+ "listen_q": {
+  "ok": true,
+  "ms": 10228,
+  "summary": {
+   "n": 28,
+   "fail": 0,
+   "gradientText": 1,
+   "minRatio": 5.77,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_right": {
+  "ok": true,
+  "ms": 3891,
+  "summary": {
+   "n": 26,
+   "fail": 2,
+   "gradientText": 1,
+   "minRatio": 4.47,
+   "worst": [
+    {
+     "text": "\ud83c\udfc6 \u6210\u5c31\u89e3\u9501\uff01",
+     "path": "div.t-top",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#682ec8",
+     "ratio": 4.47,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\ud83c\udfc6 \u6210\u5c31\u89e3\u9501\uff01",
+     "path": "div.t-top",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#682ec8",
+     "ratio": 4.47,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_wrong": {
+  "ok": true,
+  "ms": 7632,
+  "summary": {
+   "n": 29,
+   "fail": 0,
+   "gradientText": 1,
+   "minRatio": 5.77,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "listen_result": {
+  "ok": true,
+  "ms": 6205,
+  "summary": {
+   "n": 27,
+   "fail": 6,
+   "gradientText": 1,
+   "minRatio": 2.61,
+   "worst": [
+    {
+     "text": "\ud83d\udd04 \u518d\u6765\u4e00\u8f6e",
+     "path": "#listenContent button.game-btn.gold",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e78a09",
+     "ratio": 2.61,
+     "p10": 2.42,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u26a1 \u6311\u6218\u4e2d\u7ea7",
+     "path": "#listenContent button.game-btn.red",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\ud83c\udfe0 \u56de\u4e3b\u9875",
+     "path": "#listenContent button.game-btn.purple",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7462f4",
+     "ratio": 4.38,
+     "p10": 4.33,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "7",
+     "path": "#listenContent b",
+     "size": 14,
+     "weight": 700,
+     "fg": "#22c55e",
+     "bg": "#373a83",
+     "ratio": 4.4,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "pop_ach": {
+  "ok": true,
+  "ms": 9595,
+  "summary": {
+   "n": 32,
+   "fail": 12,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u70b9\u6211\u5f00\u59cb \u00b7 \u5b8c\u6210 +20 \u91d1\u5e01",
+     "path": "#hr_review_banner span",
+     "size": 12,
+     "weight": 500,
+     "fg": "#fcf3e6",
+     "bg": "#e78a09",
+     "ratio": 2.38,
+     "p10": 2.28,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u4eca\u65e5\u590d\u4e60 \u00b7 \u672c\u5c9b 1 \u4e2a\u8bcd\u5230\u671f",
+     "path": "#hr_review_banner span",
+     "size": 15.5,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e78a08",
+     "ratio": 2.61,
+     "p10": 2.46,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5b508b",
+     "ratio": 4.24,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "pop_levelup": {
+  "ok": true,
+  "ms": 7719,
+  "summary": {
+   "n": 32,
+   "fail": 12,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u70b9\u6211\u5f00\u59cb \u00b7 \u5b8c\u6210 +20 \u91d1\u5e01",
+     "path": "#hr_review_banner span",
+     "size": 12,
+     "weight": 500,
+     "fg": "#fcf3e6",
+     "bg": "#e78a09",
+     "ratio": 2.38,
+     "p10": 2.28,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u4eca\u65e5\u590d\u4e60 \u00b7 \u672c\u5c9b 1 \u4e2a\u8bcd\u5230\u671f",
+     "path": "#hr_review_banner span",
+     "size": 15.5,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e78a08",
+     "ratio": 2.61,
+     "p10": 2.46,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7a3ee6",
+     "ratio": 3.44,
+     "p10": 3.17,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5b508b",
+     "ratio": 4.24,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "pop_petevolve": {
+  "ok": true,
+  "ms": 6814,
+  "summary": {
+   "n": 32,
+   "fail": 10,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u70b9\u6211\u5f00\u59cb \u00b7 \u5b8c\u6210 +20 \u91d1\u5e01",
+     "path": "#hr_review_banner span",
+     "size": 12,
+     "weight": 500,
+     "fg": "#fcf3e6",
+     "bg": "#e78a09",
+     "ratio": 2.38,
+     "p10": 2.28,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u4eca\u65e5\u590d\u4e60 \u00b7 \u672c\u5c9b 1 \u4e2a\u8bcd\u5230\u671f",
+     "path": "#hr_review_banner span",
+     "size": 15.5,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e78a08",
+     "ratio": 2.61,
+     "p10": 2.46,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#8044ec",
+     "ratio": 3.18,
+     "p10": 2.35,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#7f6eee",
+     "ratio": 3.91,
+     "p10": 3.7,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5b508b",
+     "ratio": 4.24,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "chest": {
+  "ok": true,
+  "ms": 12304,
+  "summary": {
+   "n": 27,
+   "fail": 2,
+   "gradientText": 1,
+   "minRatio": 2.78,
+   "worst": [
+    {
+     "text": "\u8fde\u7eed\u6253\u5361 1 \u5929",
+     "path": "#chestContent div",
+     "size": 22,
+     "weight": 900,
+     "fg": "#ef4444",
+     "bg": "#383680",
+     "ratio": 2.78,
+     "p10": 2.69,
+     "need": 3,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5f53\u524d\u5956\u52b1\u500d\u7387 \u00d71.0",
+     "path": "#chestContent div",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e96219",
+     "ratio": 3.37,
+     "p10": 2.67,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 1px 2",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "chest_open": {
+  "ok": true,
+  "ms": 4544,
+  "summary": {
+   "n": 19,
+   "fail": 2,
+   "gradientText": 1,
+   "minRatio": 2.61,
+   "worst": [
+    {
+     "text": "\ud83c\udf81 \u6536\u4e0b\u5956\u52b1",
+     "path": "#chestContent button.game-btn.gold",
+     "size": 15,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#e78a09",
+     "ratio": 2.61,
+     "p10": 2.42,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83c\udf93 \u7ecf\u9a8c +23",
+     "path": "#chestContent div",
+     "size": 14,
+     "weight": 700,
+     "fg": "#a78bfa",
+     "bg": "#6a2fcc",
+     "ratio": 2.67,
+     "p10": 2.55,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "boss_list": {
+  "ok": true,
+  "ms": 11226,
+  "summary": {
+   "n": 39,
+   "fail": 3,
+   "gradientText": 0,
+   "minRatio": 2.9,
+   "worst": [
+    {
+     "text": "ON",
+     "path": "#hsnFxSw span",
+     "size": 11,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#1dae53",
+     "ratio": 2.9,
+     "p10": 2.72,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 1px 2px",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system"
+   ]
+  },
+  "errs": []
+ },
+ "boss_fight": {
+  "ok": true,
+  "ms": 5062,
+  "summary": {
+   "n": 12,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.31,
+   "worst": [],
+   "fonts": [
+    "-apple-system"
+   ]
+  },
+  "errs": []
+ },
+ "boss_victory": {
+  "ok": true,
+  "ms": 4420,
+  "summary": {
+   "n": 3,
+   "fail": 0,
+   "gradientText": 1,
+   "minRatio": 5.83,
+   "worst": [],
+   "fonts": [
+    "-apple-system",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "animal_menu": {
+  "ok": true,
+  "ms": 10461,
+  "summary": {
+   "n": 32,
+   "fail": 9,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7940e1",
+     "ratio": 3.46,
+     "p10": 3.18,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5c508c",
+     "ratio": 4.22,
+     "p10": 4.11,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "school_menu": {
+  "ok": true,
+  "ms": 9265,
+  "summary": {
+   "n": 32,
+   "fail": 9,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7940e1",
+     "ratio": 3.46,
+     "p10": 3.18,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5c508c",
+     "ratio": 4.22,
+     "p10": 4.11,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "land1_menu": {
+  "ok": true,
+  "ms": 11962,
+  "summary": {
+   "n": 32,
+   "fail": 9,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7940e1",
+     "ratio": 3.46,
+     "p10": 3.18,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5c508c",
+     "ratio": 4.22,
+     "p10": 4.11,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "land1_modes": {
+  "ok": true,
+  "ms": 3195,
+  "summary": {
+   "n": 30,
+   "fail": 8,
+   "gradientText": 1,
+   "minRatio": 2.08,
+   "worst": [
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5730\u9f20",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#6aa90f",
+     "ratio": 2.88,
+     "p10": 2.66,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7940e1",
+     "ratio": 3.46,
+     "p10": 3.18,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6781\u901f60\u79d2",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#d64d2b",
+     "ratio": 4.24,
+     "p10": 3.74,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One"
+   ]
+  },
+  "errs": []
+ },
+ "land5_menu": {
+  "ok": true,
+  "ms": 9928,
+  "summary": {
+   "n": 32,
+   "fail": 9,
+   "gradientText": 1,
+   "minRatio": 1.82,
+   "worst": [
+    {
+     "text": "\u6bcf\u65e5\u4efb\u52a1",
+     "path": "#questCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#4cd97b",
+     "ratio": 1.82,
+     "p10": 1.82,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u542c\u97f3\u8fa8\u4e49",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#fb9f35",
+     "ratio": 2.08,
+     "p10": 2.02,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6bcf\u65e5\u5b9d\u7bb1",
+     "path": "#chestCard div.d-label",
+     "size": 15,
+     "weight": 700,
+     "fg": "#ffffff",
+     "bg": "#6096eb",
+     "ratio": 2.97,
+     "p10": 2.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u63a2\u7d22\u5355\u8bcd",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e86d95",
+     "ratio": 2.98,
+     "p10": 2.85,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u8bb0\u5fc6\u7ffb\u724c",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#0f9f91",
+     "ratio": 3.29,
+     "p10": 3.14,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u6253\u5b57\u5927\u5e08",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#fbbf24",
+     "bg": "#7940e1",
+     "ratio": 3.46,
+     "p10": 3.18,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u661f\u7075",
+     "path": "span#heroPetName",
+     "size": 13,
+     "weight": 900,
+     "fg": "#fbbf24",
+     "bg": "#5c508c",
+     "ratio": 4.22,
+     "p10": 4.11,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px ",
+     "font": "PingFang SC"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#homeScreen div.m-title",
+     "size": 13,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#df3080",
+     "ratio": 4.31,
+     "p10": 4.13,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "settings": {
+  "ok": true,
+  "ms": 9390,
+  "summary": {
+   "n": 40,
+   "fail": 4,
+   "gradientText": 1,
+   "minRatio": 1.24,
+   "worst": [
+    {
+     "text": "\u6668\u66e6",
+     "path": "#hsnBossThemePicker div",
+     "size": 12,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#dce8f8",
+     "ratio": 1.24,
+     "p10": 1.21,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.95) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 0px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u7535\u5f71\u573a\u666f",
+     "path": "#hsnBossThemePicker div",
+     "size": 12,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#deca36",
+     "ratio": 1.67,
+     "p10": 1.55,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.95) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 0px ",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack",
+    "Microsoft YaHei"
+   ]
+  },
+  "errs": []
+ },
+ "settings_themes": {
+  "ok": true,
+  "ms": 2966,
+  "summary": {
+   "n": 44,
+   "fail": 13,
+   "gradientText": 0,
+   "minRatio": 4.25,
+   "worst": [
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "\u2694\ufe0f \u6e05 Boss \u6218\u6b21\u6570",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7a60f3",
+     "ratio": 4.38,
+     "p10": 4.31,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udcdd \u6e05\u5b8c\u5f62\u586b\u7a7a",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7562f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udd0a \u6e05\u542c\u97f3\u7b54\u5bf9",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7263f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udd24 \u6e05\u62fc\u8bcd\u6b21\u6570",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7562f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u2328\ufe0f \u6e05\u6253\u5b57\u6b21\u6570",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7263f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83c\udfaf \u6e05\u6253\u5730\u9f20",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7a60f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83c\udfa3 \u6e05\u9493\u9c7c",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7263f3",
+     "ratio": 4.38,
+     "p10": 4.33,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udc40 \u6e05\u706b\u773c\u91d1\u775b",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7462f4",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83e\udee7 \u6e05\u6ce1\u6ce1\u6700\u9ad8\u5206",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7a60f3",
+     "ratio": 4.38,
+     "p10": 4.31,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u26a1 \u6e05\u6781\u901f\u6700\u9ad8\u5206",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7462f4",
+     "ratio": 4.38,
+     "p10": 4.31,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83c\udccf \u6e05\u7ffb\u724c\u5b8c\u7f8e",
+     "path": "#settingsContent button.small-btn.purple",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#7562f3",
+     "ratio": 4.38,
+     "p10": 4.32,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "shop": {
+  "ok": true,
+  "ms": 9430,
+  "summary": {
+   "n": 41,
+   "fail": 6,
+   "gradientText": 1,
+   "minRatio": 2.95,
+   "worst": [
+    {
+     "text": "\ud83d\udc8e 688",
+     "path": "#diaShopBody button.dia-btn.buy",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#07a4c3",
+     "ratio": 2.95,
+     "p10": 2.67,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udc8e 768",
+     "path": "#diaShopBody button.dia-btn.buy",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#07a4c3",
+     "ratio": 2.95,
+     "p10": 2.67,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\ud83d\udc8e 666",
+     "path": "#diaShopBody button.dia-btn.buy",
+     "size": 13,
+     "weight": 900,
+     "fg": "#ffffff",
+     "bg": "#07a4c3",
+     "ratio": 2.95,
+     "p10": 2.67,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.3) 0px 1px 2px",
+     "font": "CartoonBlack"
+    },
+    {
+     "text": "\u94bb\u77f3\u6765\u81ea focused Bee \u4e94\u661f\u7ed3\u6676\u3001\u5168\u5c9b/\u6bb5\u4f4d\u5956\u52b1\u3001Boss \u5927\u6ee1\u8d2f\u3001\u5973",
+     "path": "#diaShopBody div.dia-tip",
+     "size": 12,
+     "weight": 500,
+     "fg": "#94a3b8",
+     "bg": "#32347e",
+     "ratio": 4.25,
+     "p10": 3.97,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navReview span.hr_nav_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63636",
+     "ratio": 4.25,
+     "p10": 4.09,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    },
+    {
+     "text": "1",
+     "path": "#navExplore span.hwo_total_badge",
+     "size": 10,
+     "weight": 800,
+     "fg": "#ffffff",
+     "bg": "#e63535",
+     "ratio": 4.26,
+     "p10": 4.07,
+     "need": 4.5,
+     "shadow": "",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system",
+    "Bowlby One",
+    "CartoonBlack"
+   ]
+  },
+  "errs": []
+ },
+ "boss_hall": {
+  "ok": true,
+  "ms": 6673,
+  "summary": {
+   "n": 9,
+   "fail": 1,
+   "gradientText": 2,
+   "minRatio": 4.22,
+   "worst": [
+    {
+     "text": "Lv.1 \u00b7 \u767d \u94f6 \u00b7 \u666e \u901a",
+     "path": "span#rarline",
+     "size": 12.5,
+     "weight": 800,
+     "fg": "#cfdcec",
+     "bg": "#7f5c59",
+     "ratio": 4.22,
+     "p10": 1.53,
+     "need": 4.5,
+     "shadow": "rgba(0, 0, 0, 0.9) 0px 1px 3px, rgba(0, 0, 0, 0.8) 0px 0px 1",
+     "font": "-apple-system"
+    }
+   ],
+   "fonts": [
+    "-apple-system"
+   ]
+  },
+  "errs": []
+ },
+ "land_map": {
+  "ok": true,
+  "ms": 6187,
+  "summary": {
+   "n": 19,
+   "fail": 0,
+   "gradientText": 0,
+   "minRatio": 5.97,
+   "worst": [],
+   "fonts": [
+    "Arial",
+    "PingFang SC"
+   ]
+  },
+  "errs": []
+ },
+ "season_showcase": {
+  "ok": true,
+  "ms": 7902,
+  "summary": {
+   "n": 10,
+   "fail": 0,
+   "gradientText": 2,
+   "minRatio": 5.1,
+   "worst": [],
+   "fonts": [
+    "-apple-system"
+   ]
+  },
+  "errs": []
+ }
+}

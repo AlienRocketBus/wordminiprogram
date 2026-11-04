@@ -1,0 +1,118 @@
+{
+ "name": "R11_markready_resurrects_left_room",
+ "bug": "R11 markReady after leaving re-registers the room and restarts its heartbeat (zombie writes)",
+ "spec": {
+  "seed": 1882,
+  "profile": "sweep",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 2,
+   "queryLagMul": 1.71,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.34,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x1882",
+    "name": "小明",
+    "rating": 1031,
+    "skew": 0,
+    "net": {
+     "base": 996,
+     "jitter": 719,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.71,
+     "minMs": 1233,
+     "maxMs": 12583,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1042,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": null
+   },
+   {
+    "label": "P1",
+    "uid": "k1x1882",
+    "name": "小红",
+    "rating": 998,
+    "skew": 0,
+    "net": {
+     "base": 585,
+     "jitter": 810,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.78,
+     "minMs": 1380,
+     "maxMs": 6739,
+     "slowP": 0.14
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1523,
+      "act": "ladder"
+     },
+     {
+      "at": 53144,
+      "act": "leave"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

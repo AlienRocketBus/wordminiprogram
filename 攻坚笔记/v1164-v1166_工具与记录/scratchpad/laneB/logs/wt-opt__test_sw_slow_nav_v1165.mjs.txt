@@ -1,0 +1,3 @@
+  ✅ SW 接管了首页
+
+▶ 1. 慢网打开 island_animal.html（10 KB/s）

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_login_restore_v1026.mjs —— 登录后「云端恢复」必须刷新页面
  * 事故：用户在设备 B 登录同一账号后「等级还是没变、什么都没变」。
  *   根因：restoreWithKey 只把数据写回 localStorage，**页面从不刷新** ——
@@ -9,8 +10,8 @@ import vm from 'node:vm'; import fs from 'node:fs';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('登录后云端恢复 v1026');
 
-const src = fs.readFileSync('/home/claude/work/repo/hansen_auth_v1004.js','utf8');
-const ui  = fs.readFileSync('/home/claude/work/repo/hansen_auth_ui_v1004.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_auth_v1004.js'),'utf8');
+const ui  = fs.readFileSync((__HSN_ROOT + 'hansen_auth_ui_v1004.js'),'utf8');
 
 /* ① 逻辑层：恢复成功必须带 needReload */
 const store = { _d:{}, getItem(k){return this._d[k]||null;}, setItem(k,v){this._d[k]=String(v);},

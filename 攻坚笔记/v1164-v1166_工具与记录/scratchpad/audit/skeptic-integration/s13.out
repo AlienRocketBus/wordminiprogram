@@ -1,0 +1,9 @@
+onboard {"skipped":true,"r":{"ok":true,"x":325,"y":260,"topHit":"DIV#__hsOnbEmoji."}}
+tap {"ok":true,"x":195,"y":422,"topHit":"DIV#.island-en"}
+card "百宝大冒险" -> loading text "正在进入 常用词岛…" -> recent card "👑 星海终战 · 点击继续 →" | iframe after close: island_treasure.html
+tap {"ok":true,"x":321,"y":422,"topHit":"DIV#.island-en"}
+card "疑问大冒险" -> loading text "正在进入 代词岛…" -> recent card "🔤 常用词 · 点击继续 →" | iframe after close: island_treasure.html
+tap {"ok":true,"x":69,"y":422,"topHit":"DIV#.island-en"}
+card "动作大冒险" -> loading text "正在进入 动词岛…" -> recent card "🔤 常用词 · 点击继续 →" | iframe after close: island_treasure.html
+iframe navigation sequence: about:blank > island_treasure.html > island_question.html > island_treasure.html > island_action.html > island_treasure.html
+after reload inside 食物: visible 108 {"wrap":"block","op":"1","path":"island_food.html","rs":"complete","hist":3,"state":"{\"hsnIsland\":\"island_food.html\"}","scrollY":616}

@@ -1,0 +1,18 @@
+import { chromium } from '/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/wt-opt/playwright_loader.mjs';
+import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
+const ROOT = process.argv[2];
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2' };
+const srv = http.createServer((req, res) => { let p = decodeURIComponent(req.url.split('?')[0]); if (p === '/VERSION') { res.writeHead(200); return res.end('1163'); } const fp = path.join(ROOT, path.normalize(p)); fs.readFile(fp, (e, d) => { if (e) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(fp)] || 'application/octet-stream' }); res.end(d); }); });
+await new Promise(r => srv.listen(0, '127.0.0.1', r));
+const BASE = `http://127.0.0.1:${srv.address().port}/`;
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 360, height: 640 }, hasTouch: true, deviceScaleFactor: 2 });
+await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('__s')) { localStorage.clear(); localStorage.setItem('hansen_onboarded', '1'); sessionStorage.setItem('__s', '1'); } } catch (e) {} });
+const page = await ctx.newPage();
+await page.goto(BASE + 'island_question.html', { waitUntil: 'domcontentloaded' });
+await page.waitForFunction(() => typeof startMoles === 'function', null, { timeout: 20000 });
+await page.waitForTimeout(1200);
+await page.evaluate(async () => { try { closeAlert(); } catch (e) {} window.speak = function () {}; startMoles(); startMolesLevel('hard'); await new Promise(r => setTimeout(r, 900)); const i = allW.findIndex(w => w.en === 'how much'); molesTarget = allW[i]; molesAnimals = pickNineAnimals(molesTarget); renderMolesSlots(molesAnimals, false); });
+await page.waitForTimeout(1200);
+await page.locator('#molesGrid').screenshot({ path: process.argv[3] });
+await browser.close(); srv.close();

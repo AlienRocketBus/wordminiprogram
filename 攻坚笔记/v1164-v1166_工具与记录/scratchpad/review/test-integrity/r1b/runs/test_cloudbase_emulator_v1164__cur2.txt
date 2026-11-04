@@ -1,0 +1,53 @@
+模拟云端守规矩（v1164）
+
+── 权限回法：legacy ──
+  OK  手机号验证码注册：拿到带 expires_in 的令牌，两人 uid 不同
+  OK  甲 add 固定 _id 成功
+  OK  乙 add 同一个 _id 被拒（DATABASE_REQUEST_FAILED）
+  OK  库里还是甲那一条，创建者章是甲
+  OK  乙改甲的文档：legacy 静默 updated:0
+  OK  乙删甲的文档也不行
+  OK  文档没被动，两次越权都记下了（foreign=2）
+  OK  甲改自己的文档成功
+  OK  legacy：where().update 只动自己的
+  OK  「读取全部」：乙读得到甲的文档
+── 权限回法：rules ──
+  OK  手机号验证码注册：拿到带 expires_in 的令牌，两人 uid 不同
+  OK  甲 add 固定 _id 成功
+  OK  乙 add 同一个 _id 被拒（DATABASE_REQUEST_FAILED）
+  OK  库里还是甲那一条，创建者章是甲
+  OK  乙改甲的文档：rules 回 DATABASE_PERMISSION_DENIED
+  OK  乙删甲的文档也不行
+  OK  文档没被动，两次越权都记下了（foreign=2）
+  OK  甲改自己的文档成功
+  OK  rules：where().update 条件没锁定 _openid → 拒
+  OK  「读取全部」：乙读得到甲的文档
+── 重复 _id 的另外两种回法 ──
+  OK  duplicate_write → DATABASE_DUPLICATE_WRITE
+  OK  http500 → HTTP 500（SDK 会当成 network request error）
+  OK  三种回法下都只有一条
+── 没权限 / 没建集合 ──
+  OK  ADMINONLY：读写都 DATABASE_PERMISSION_DENIED（HTTP 200 + code）
+  OK  没建的集合：DATABASE_COLLECTION_NOT_EXIST，消息里带集合名
+  OK  伪造令牌：INVALID_ACCESS_TOKEN
+  OK  PUBLIC_TEST_ONLY（反例，真云端没有）：谁都能改谁的
+── 主从延迟 ──
+  OK  刚写进去马上读：读不到、数不到（最终一致）
+  OK  但写永远看最新状态：同 _id 再 add 立刻被拒
+  OK  过了延迟就读到了
+── 令牌 ──
+  OK  用 refresh_token 换到新令牌（也换了新的 refresh_token）
+  OK  旧 refresh_token 再用 → invalid_grant（只能用一次）
+  OK  /user/me 拿得到 sub（SDK 靠它补 uid）
+  OK  吊销后：刷新换不到、旧 access_token 也用不了
+  OK  omitExpiresIn：登录响应缺 expires_in（SDK 会删凭证）
+  OK  密码错：invalid_password
+── serverDate / 故障注入 ──
+  OK  serverDate() 由服务端填成真时间
+  OK  断开故障只生效指定次数
+  OK  HTTP 500 故障
+  OK  扣住：请求停在半路，还没落库
+  OK  放开后照常处理、落库
+  OK  断网：登录和数据库请求都被掐断
+
+42 通过，0 失败

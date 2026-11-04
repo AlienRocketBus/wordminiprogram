@@ -1,0 +1,322 @@
+{
+ "n_sent_clips": 949,
+ "n_word_clips": 945,
+ "sent_wer_median": 0.0,
+ "sent_wer_mean": 0.134,
+ "sent_wer_buckets": {
+  "0": 571,
+  "(0,0.25)": 157,
+  "[0.25,0.5)": 123,
+  "[0.5,0.75)": 79,
+  ">=0.75": 19
+ },
+ "possible_swapped_sentence_audio": [
+  {
+   "file": "sentences/sentence_0127.mp3",
+   "expected": "Cows give us milk.",
+   "hyp": "how old do was milk",
+   "own_wer": 1.0,
+   "better_match": "How many books do you have?",
+   "better_wer": 0.67
+  },
+  {
+   "file": "sentences/sentence_0258.mp3",
+   "expected": "The sky is blue today.",
+   "hyp": "this guy is booted",
+   "own_wer": 0.8,
+   "better_match": "This question is difficult.",
+   "better_wer": 0.5
+  },
+  {
+   "file": "sentences/sentence_0446.mp3",
+   "expected": "Look at the sky!",
+   "hyp": "look at this guy",
+   "own_wer": 0.5,
+   "better_match": "Look at this photo.",
+   "better_wer": 0.25
+  },
+  {
+   "file": "sentences/sentence_0471.mp3",
+   "expected": "The sea is calm today.",
+   "hyp": "the seat is home to their",
+   "own_wer": 0.8,
+   "better_match": "The score is two to zero.",
+   "better_wer": 0.5
+  },
+  {
+   "file": "sentences/sentence_0597.mp3",
+   "expected": "What day is today?",
+   "hyp": "what do you still there",
+   "own_wer": 1.0,
+   "better_match": "What color do you like best?",
+   "better_wer": 0.5
+  }
+ ],
+ "worst_sentences": [
+  {
+   "file": "sentences/sentence_0127.mp3",
+   "expected": "Cows give us milk.",
+   "hyp": "how old do was milk",
+   "wer": 1.0,
+   "dur": 1.682
+  },
+  {
+   "file": "sentences/sentence_0500.mp3",
+   "expected": "Come here right now.",
+   "hyp": "come to your weight memo",
+   "wer": 1.0,
+   "dur": 1.898
+  },
+  {
+   "file": "sentences/sentence_0577.mp3",
+   "expected": "Our team won the game!",
+   "hyp": "partly warm again",
+   "wer": 1.0,
+   "dur": 1.778
+  },
+  {
+   "file": "sentences/sentence_0597.mp3",
+   "expected": "What day is today?",
+   "hyp": "what do you still there",
+   "wer": 1.0,
+   "dur": 1.442
+  },
+  {
+   "file": "sentences/sentence_0655.mp3",
+   "expected": "Pass me the salt, please.",
+   "hyp": "paris reverse old we",
+   "wer": 1.0,
+   "dur": 1.754
+  },
+  {
+   "file": "sentences/sentence_0231.mp3",
+   "expected": "My coat has six big buttons.",
+   "hyp": "my code has snakes and the bulletins",
+   "wer": 0.833,
+   "dur": 2.69
+  },
+  {
+   "file": "sentences/sentence_0329.mp3",
+   "expected": "This peach is juicy and sweet.",
+   "hyp": "this i need to use jersey and sweet",
+   "wer": 0.833,
+   "dur": 2.786
+  },
+  {
+   "file": "sentences/sentence_0428.mp3",
+   "expected": "Farmers work hard in the fields.",
+   "hyp": "former is what hoarding fields",
+   "wer": 0.833,
+   "dur": 2.306
+  },
+  {
+   "file": "sentences/sentence_0433.mp3",
+   "expected": "Marie Curie was a famous scientist.",
+   "hyp": "not really jury was a famous growing interest",
+   "wer": 0.833,
+   "dur": 2.906
+  },
+  {
+   "file": "sentences/sentence_0074.mp3",
+   "expected": "She is tall and thin.",
+   "hyp": "she used all one friend",
+   "wer": 0.8,
+   "dur": 1.898
+  },
+  {
+   "file": "sentences/sentence_0110.mp3",
+   "expected": "Stay safe on the road.",
+   "hyp": "the stink bomb or road",
+   "wer": 0.8,
+   "dur": 1.826
+  },
+  {
+   "file": "sentences/sentence_0258.mp3",
+   "expected": "The sky is blue today.",
+   "hyp": "this guy is booted",
+   "wer": 0.8,
+   "dur": 2.282
+  },
+  {
+   "file": "sentences/sentence_0471.mp3",
+   "expected": "The sea is calm today.",
+   "hyp": "the seat is home to their",
+   "wer": 0.8,
+   "dur": 2.018
+  },
+  {
+   "file": "sentences/sentence_0149.mp3",
+   "expected": "A dolphin is a very smart sea animal.",
+   "hyp": "but often it is a very smart seen them all",
+   "wer": 0.75,
+   "dur": 2.906
+  },
+  {
+   "file": "sentences/sentence_0170.mp3",
+   "expected": "Her lips are red.",
+   "hyp": "her lips or read and",
+   "wer": 0.75,
+   "dur": 1.538
+  },
+  {
+   "file": "sentences/sentence_0274.mp3",
+   "expected": "School starts at six.",
+   "hyp": "schools are thirty six",
+   "wer": 0.75,
+   "dur": 1.898
+  },
+  {
+   "file": "sentences/sentence_0414.mp3",
+   "expected": "Who is that man?",
+   "hyp": "who was batman",
+   "wer": 0.75,
+   "dur": 1.202
+  },
+  {
+   "file": "sentences/sentence_0587.mp3",
+   "expected": "Have a nice day!",
+   "hyp": "how been nice to",
+   "wer": 0.75,
+   "dur": 1.586
+  },
+  {
+   "file": "sentences/sentence_0691.mp3",
+   "expected": "This is for you.",
+   "hyp": "there's news for you know",
+   "wer": 0.75,
+   "dur": 1.514
+  },
+  {
+   "file": "sentences/sentence_0181.mp3",
+   "expected": "She wears a bracelet on her wrist.",
+   "hyp": "she wears a portland ore know we asked",
+   "wer": 0.714,
+   "dur": 2.522
+  },
+  {
+   "file": "sentences/sentence_0336.mp3",
+   "expected": "I peeled some carrots for the soup.",
+   "hyp": "like adults and parents were the soup",
+   "wer": 0.714,
+   "dur": 2.234
+  },
+  {
+   "file": "sentences/sentence_0103.mp3",
+   "expected": "That's so funny!",
+   "hyp": "that's no money",
+   "wer": 0.667,
+   "dur": 1.586
+  },
+  {
+   "file": "sentences/sentence_0129.mp3",
+   "expected": "A sheep has soft white wool.",
+   "hyp": "the sheep has software cool",
+   "wer": 0.667,
+   "dur": 2.522
+  },
+  {
+   "file": "sentences/sentence_0143.mp3",
+   "expected": "A frog can jump really far.",
+   "hyp": "bullfrog kim jong to really far",
+   "wer": 0.667,
+   "dur": 2.546
+  },
+  {
+   "file": "sentences/sentence_0146.mp3",
+   "expected": "A bee makes honey from flowers.",
+   "hyp": "of the mix highly from flowers",
+   "wer": 0.667,
+   "dur": 2.474
+  }
+ ],
+ "sent_words_per_voiced_sec_median": 3.33,
+ "sent_rate_outliers": [
+  {
+   "file": "sentences/sentence_0100.mp3",
+   "expected": "That's clever.",
+   "words_per_sec": 1.8,
+   "dur": 1.418,
+   "voiced": 1.11
+  }
+ ],
+ "rms_words": {
+  "median": -17.2,
+  "p5": -19.6,
+  "p95": -15.7,
+  "min": -23.7,
+  "max": -13.4
+ },
+ "rms_sentences": {
+  "median": -20.9,
+  "p5": -23.3,
+  "p95": -15.2,
+  "min": -25.6,
+  "max": -14.2
+ },
+ "rms_ex_season": {
+  "median": -15.5,
+  "p5": -16.0,
+  "p95": -14.9,
+  "min": -16.4,
+  "max": -14.2
+ },
+ "rms_sentence_files": {
+  "median": -21.5,
+  "p5": -23.5,
+  "p95": -19.5,
+  "min": -25.6,
+  "max": -18.0
+ },
+ "quiet_sentences": [],
+ "long_lead_or_trail_sentences": [],
+ "empty_or_tiny": [],
+ "ffmpeg_errors": [
+  {
+   "file": "sentences/sentence_0029.mp3",
+   "err": "[mp3float @ 0x564951282140] Header missing\n[aist#0:0/mp3 @ 0x564951281fc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0152.mp3",
+   "err": "[mp3float @ 0x55752aa72140] Header missing\n[aist#0:0/mp3 @ 0x55752aa71fc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0207.mp3",
+   "err": "[mp3float @ 0x564464e3c140] Header missing\n[aist#0:0/mp3 @ 0x564464e3bfc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0338.mp3",
+   "err": "[mp3float @ 0x5643c177a140] Header missing\n[aist#0:0/mp3 @ 0x5643c1779fc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0341.mp3",
+   "err": "[mp3float @ 0x564af370d140] Header missing\n[aist#0:0/mp3 @ 0x564af370cfc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0606.mp3",
+   "err": "[mp3float @ 0x560676ca6140] Header missing\n[aist#0:0/mp3 @ 0x560676ca5fc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+   "file": "sentences/sentence_0634.mp3",
+   "err": "[mp3float @ 0x564cf9fa2140] Header missing\n[aist#0:0/mp3 @ 0x564cf9fa1fc0] Error submitting packet to decoder: Invalid data found when processing input\n"
+  }
+ ],
+ "clipped": [
+  {
+   "file": "words/chemical_season.mp3",
+   "peak": -0.1
+  },
+  {
+   "file": "words/natural_season.mp3",
+   "peak": -0.2
+  },
+  {
+   "file": "words/research_season.mp3",
+   "peak": -0.2
+  },
+  {
+   "file": "words/strict_season.mp3",
+   "peak": -0.2
+  }
+ ],
+ "word_grammar_match_rate": 0.784
+}

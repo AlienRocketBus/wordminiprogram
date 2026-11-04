@@ -1,0 +1,131 @@
+{
+ "name": "R02b_cancel_rejoin_ghost_battle_kick",
+ "bug": "R2 same: ghost battle then kick",
+ "spec": {
+  "seed": 569,
+  "profile": "skew",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 1,
+   "queryLagMul": 1.32,
+   "queryLagExtra": 0,
+   "lagMode": "monotonic",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.44,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x569",
+    "name": "小明",
+    "rating": 762,
+    "skew": 65935,
+    "net": {
+     "base": 86,
+     "jitter": 166,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.91,
+     "minMs": 1315,
+     "maxMs": 7797,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 993,
+      "act": "create",
+      "mode": "A",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P2",
+    "uid": "k2x569",
+    "name": "阿杰",
+    "rating": 1185,
+    "skew": 83519,
+    "net": {
+     "base": 52,
+     "jitter": 60,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.85,
+     "minMs": 1938,
+     "maxMs": 12241,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1833,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 2
+     },
+     {
+      "at": 4005,
+      "act": "cancelJoin"
+     }
+    ],
+    "ladderer": false,
+    "afterReload": {
+     "at": 0,
+     "act": "join",
+     "via": "list",
+     "target": "P0",
+     "pick": "first",
+     "tries": 3
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

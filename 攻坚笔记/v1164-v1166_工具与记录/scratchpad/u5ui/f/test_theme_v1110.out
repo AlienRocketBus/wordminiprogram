@@ -1,0 +1,21 @@
+亮色/暗色主题 v1110
+  OK  friends_ui_v1107: 有暗色（默认）变量定义
+  OK  ★ friends_ui_v1107: 有亮色变量定义
+  OK  ★ friends_ui_v1107: 变量定义里没有 var() 引用（实得 0 处）—— 自我引用会让颜色失控
+  OK  friends_ui_v1107: 写死的文字色 ≤2 处（实得 0）
+  OK  ladder_ui_v1108: 有暗色（默认）变量定义
+  OK  ★ ladder_ui_v1108: 有亮色变量定义
+  OK  ★ ladder_ui_v1108: 变量定义里没有 var() 引用（实得 0 处）—— 自我引用会让颜色失控
+  OK  ladder_ui_v1108: 写死的文字色 ≤2 处（实得 1）
+  OK  pk_room_ui_v1065: 有暗色（默认）变量定义
+  OK  ★ pk_room_ui_v1065: 有亮色变量定义
+  OK  ★ pk_room_ui_v1065: 变量定义里没有 var() 引用（实得 0 处）—— 自我引用会让颜色失控
+  OK  pk_room_ui_v1065: 写死的文字色 ≤2 处（实得 2）
+  OK  ★ 变量名不与全站 palette 撞名（撞了 0 个）—— 第一版用 --fr-txt 就撞了，亮色下被设成 #ffffff、标题变白底白字
+  OK  变量够用（38 个）
+  OK  ★ friends_ui_v1107.js: 亮色下文字是深色 #0f172a（亮度 23）
+  OK  ★ ladder_ui_v1108.js: 亮色下文字是深色 #0f172a（亮度 23）
+  OK  ★ pk_room_ui_v1065.js: 亮色下文字是深色 #0f172a（亮度 23）
+
+结果: 17 通过 / 0 失败
+exit 0

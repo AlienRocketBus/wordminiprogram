@@ -304,7 +304,7 @@ async function run() {
     isMobile: true, hasTouch: true, deviceScaleFactor: 2, serviceWorkers: 'block',
   });
   await context.addInitScript(() => {
-    localStorage.clear();
+    if (window.top === window) localStorage.clear();
     localStorage.setItem('hansen_palette_global', 'cloud');
     localStorage.setItem('hansen_boss_theme', 'light');
     localStorage.setItem('hansen_onboarded', '1');

@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_legacy_fetch_v1036.mjs —— 历史地址兼容读取回归
  * 事故：用户在浏览器登录后「上传显示成功」，紧接着「从云端拉取」仍报
  *   「云端没有这把密钥对应的存档」。
@@ -11,7 +12,7 @@
 import vm from 'node:vm'; import fs from 'node:fs'; import crypto from 'node:crypto';
 let pass=0,fail=0; const ok=(c,m)=>{ if(c){pass++;console.log('  OK  '+m);} else {fail++;console.log('  XX  '+m);} };
 console.log('历史地址兼容读取 v1036');
-const src = fs.readFileSync('/home/claude/work/repo/hansen_cloud_save_v965.js','utf8');
+const src = fs.readFileSync((__HSN_ROOT + 'hansen_cloud_save_v965.js'),'utf8');
 ok(/function legacyKeyFromUid/.test(src), '提供旧字符集密钥重算(legacyKeyFromUid)');
 ok(/cands\s*=\s*\[key\]/.test(src), '读取时构造候选地址列表');
 ok(/migratedFrom/.test(src), '命中旧地址后标记来源');

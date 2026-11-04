@@ -1,0 +1,10 @@
+animal open 8s frames: index.html / island_animal.html
+recent card after animal: 🐯 动物 · 点击继续 →
+after closing food: iframe= island_food.html recent card: 🍔 食物 · 点击继续 → frames: index.html / island_food.html
+forward -> 53 island_food.html
+reload -> 35 island_food.html {"hsnIsland":"island_food.html"}
+land_map 328
+land1 3491 island_land1.html {"hsnIsland":"island_land1.html"}
+land1 -> map btn -> 987 land_map.html
+land_map back -> 89 iframe now land_map.html hst null
+errors []

@@ -1,0 +1,5 @@
+{
+ "island": "land7",
+ "fatal": "browser.newContext: Target page, context or browser has been closed\n    at async newCtx (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/lib.mjs:32:15)\n    at async runIsland (/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/sweep.mjs:24:22)\n    at async file:///tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/minigames-p2/sweep.mjs:668:19",
+ "totalMs": 1
+}

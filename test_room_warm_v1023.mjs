@@ -1,11 +1,12 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_room_warm_v1023.mjs —— 「房间预热常驻」回归：子页面切换零延迟
  * 背景：星海觉醒(land_map)/赛季岛(island_season) 原为整页跳转，每次点开完整加载 → 明显等待。
  *       直接合并 600+KB 代码会撞变量/样式并拖慢首屏，故改为**后台预热 + 常驻不销毁**。
  * 合同：① 岛屿页空闲后自动预热两个房间；② 预热完成后打开耗时极短；
  *       ③ 关闭只隐藏不销毁，二次打开同样瞬开；④ 不发生整页跳转(仍留在岛屿页)。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const srv=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){res.writeHead(404);res.end();return;}
   res.writeHead(200,{'content-type':({'.html':'text/html','.js':'text/javascript','.webp':'image/webp','.mp3':'audio/mpeg','.json':'application/json','.css':'text/css'})[path.extname(p)]||'application/octet-stream'});res.end(d);});});
@@ -20,7 +21,7 @@ page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
    网络策略不允许不预热 —— 这些负面路径由 test_preload_budget_v1165.mjs 守）。
    本测试守的是「该预热时预热得好、开得快、关了不销毁」，所以造一个去过星海、玩过的孩子。
    只在第一次加载前写入，防止页面自己跳转后又被清空。 */
-await page.addInitScript(()=>{ try{ if(!sessionStorage.getItem('__rw')){ localStorage.clear();
+await page.addInitScript(()=>{ try{ if(window.top === window && !sessionStorage.getItem('__rw')){ localStorage.clear();
   localStorage.setItem('hansen_room_opened_v1165_land','1'); localStorage.setItem('hansen_room_opened_v1165_season','1');
   /* 快照写别的岛：动物岛开机会用自己的真实数据覆盖「动物大冒险」那份 */
   localStorage.setItem('hsn_progress:学校大冒险', JSON.stringify({name:'学校大冒险',totalWords:41,learned:2,ans:8,cor:6,boss:0,level:1,maxCombo:3,ts:Date.now()}));

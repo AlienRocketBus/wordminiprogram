@@ -1,0 +1,22 @@
+{
+  "frame": {
+    "p": "/island_animal.html",
+    "rs": "complete",
+    "title": "当前页面尚未下载",
+    "wrap": "block",
+    "op": "1",
+    "loading": null
+  },
+  "frameButtons": [
+    "重试连接"
+  ],
+  "parentControlsOverFrame": [],
+  "afterSystemBack": {
+    "wrap": "none",
+    "url": "/"
+  },
+  "coldStartSlowRoot": {
+    "commitMs": 8025,
+    "dclMs": 8293
+  }
+}

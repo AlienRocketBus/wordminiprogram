@@ -1,0 +1,150 @@
+HOME tree:
+index.html
+  about:blank
+
+tap {"x":195,"y":421.78125,"hit":true,"top":"island-en"}
+welcome true
+FOOD tree +14s:
+index.html
+  island_food.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+        land_map.html?v=1163
+        (blank)
+
+island instances: [
+  '1:island_food.html key=wordIslandFood vis=visible',
+  '2:island_season.html key=wordIslandSeason vis=visible',
+  '3:island_season.html key=wordIslandSeason vis=visible'
+]
+writes by hidden frames (count):
+   1 2:boss_hall.html(warm) set hansen_credtrap_log
+   1 2:island_season.html rm hansen_card_data
+   1 2:island_season.html rm hansen_card_data_bak
+   1 2:island_season.html rm hansen_card_temp_unlock_until
+   1 2:island_season.html set hansen_ach_migrated_v1
+   1 2:island_season.html set hansen_boss_awards_seeded_v942_season
+   1 2:island_season.html set hansen_boss_theme
+   2 2:island_season.html set hansen_canonical_migrated_v941
+   2 2:island_season.html set hansen_canonical_progress_v941
+   2 2:island_season.html set hansen_canonical_progress_v941_bak
+   1 2:island_season.html set hansen_card_temp_unlock_until
+   1 2:island_season.html set hansen_charxp_migrated_v942
+   1 2:island_season.html set hansen_charxp_reset_v1
+   1 2:island_season.html set hansen_checkin_migrated_v942
+   1 2:island_season.html set hansen_coins_migrated_v1
+   1 2:island_season.html set hansen_credtrap_log
+   1 2:island_season.html set hansen_crystal_migrated_v941
+   1 2:island_season.html set hansen_crystal_sources_v942
+   6 2:island_season.html set hansen_global_daily_quests_v941
+   1 2:island_season.html set hansen_lastIslandMeta
+   1 2:island_season.html set hansen_lastIslandTime
+   1 2:island_season.html set hansen_mastery_migrated_v942
+   2 2:island_season.html set hansen_palette_global
+   3 2:island_season.html set hansen_pet_hero_img
+   1 2:island_season.html set hansen_vocab_wordIslandAdj
+   1 2:island_season.html set hansen_vocab_wordIslandAnimal
+   1 2:island_season.html set hansen_vocab_wordIslandBody
+   1 2:island_season.html set hansen_vocab_wordIslandCity
+   1 2:island_season.html set hansen_vocab_wordIslandClothes
+   1 2:island_season.html set hansen_vocab_wordIslandColorNum
+   1 2:island_season.html set hansen_vocab_wordIslandFamily
+   1 2:island_season.html set hansen_vocab_wordIslandFood
+   1 2:island_season.html set hansen_vocab_wordIslandHouse
+   1 2:island_season.html set hansen_vocab_wordIslandMisc
+   1 2:island_season.html set hansen_vocab_wordIslandNature
+   1 2:island_season.html set hansen_vocab_wordIslandPeople
+   1 2:island_season.html set hansen_vocab_wordIslandPronouns
+   1 2:island_season.html set hansen_vocab_wordIslandSchool
+   1 2:island_season.html set hansen_vocab_wordIslandSeason
+   1 2:island_season.html set hansen_vocab_wordIslandSports
+   1 2:island_season.html set hansen_vocab_wordIslandTime
+   1 2:island_season.html set hansen_vocab_wordIslandTransport
+   1 2:island_season.html set hansen_vocab_wordIslandVerbs
+   1 2:island_season.html set hansen_wallet_ach
+   1 2:island_season.html set hansen_wallet_charxp
+   2 2:island_season.html set hansen_wallet_totals
+   1 2:island_season.html set hsn_crystal_gems
+   1 2:island_season.html set hsn_crystal_total
+   2 2:island_season.html set hsn_progress:星海词汇大冒险
+   1 2:island_season.html set hsn_season_prologue_seen
+   1 2:island_season.html set theme
+   5 2:island_season.html set wordIslandSeason
+   4 2:island_season.html set wordIslandSeason_bak
+   1 2:land_map.html set hansen_credtrap_log
+   1 2:season_showcase.html(warm) set hansen_credtrap_log
+   1 2:spelling_bee.html(warm) set hansen_credtrap_log
+   1 2:spelling_bee.html(warm) set hansen_global_daily_quests_v941
+   1 3:boss_hall.html(warm) set hansen_credtrap_log
+   1 3:island_season.html set hansen_ach_migrated_v1
+   1 3:island_season.html set hansen_boss_theme
+   2 3:island_season.html set hansen_canonical_migrated_v941
+   2 3:island_season.html set hansen_canonical_progress_v941
+   2 3:island_season.html set hansen_canonical_progress_v941_bak
+   1 3:island_season.html set hansen_card_temp_unlock_until
+   1 3:island_season.html set hansen_charxp_migrated_v942
+   1 3:island_season.html set hansen_charxp_reset_v1
+   1 3:island_season.html set hansen_checkin_migrated_v942
+   1 3:island_season.html set hansen_coins_migrated_v1
+   1 3:island_season.html set hansen_credtrap_log
+   1 3:island_season.html set hansen_crystal_migrated_v941
+   1 3:island_season.html set hansen_crystal_sources_v942
+   6 3:island_season.html set hansen_global_daily_quests_v941
+   1 3:island_season.html set hansen_lastIslandMeta
+   1 3:island_season.html set hansen_lastIslandTime
+   1 3:island_season.html set hansen_mastery_migrated_v942
+   2 3:island_season.html set hansen_palette_global
+   4 3:island_season.html set hansen_pet_hero_img
+   1 3:island_season.html set hansen_vocab_wordIslandAdj
+   1 3:island_season.html set hansen_vocab_wordIslandAnimal
+   1 3:island_season.html set hansen_vocab_wordIslandBody
+   1 3:island_season.html set hansen_vocab_wordIslandCity
+   1 3:island_season.html set hansen_vocab_wordIslandClothes
+   1 3:island_season.html set hansen_vocab_wordIslandColorNum
+   1 3:island_season.html set hansen_vocab_wordIslandFamily
+   1 3:island_season.html set hansen_vocab_wordIslandFood
+   1 3:island_season.html set hansen_vocab_wordIslandHouse
+   1 3:island_season.html set hansen_vocab_wordIslandMisc
+   1 3:island_season.html set hansen_vocab_wordIslandNature
+   1 3:island_season.html set hansen_vocab_wordIslandPeople
+   1 3:island_season.html set hansen_vocab_wordIslandPronouns
+   1 3:island_season.html set hansen_vocab_wordIslandSchool
+   1 3:island_season.html set hansen_vocab_wordIslandSeason
+   1 3:island_season.html set hansen_vocab_wordIslandSports
+   1 3:island_season.html set hansen_vocab_wordIslandTime
+   1 3:island_season.html set hansen_vocab_wordIslandTransport
+   1 3:island_season.html set hansen_vocab_wordIslandVerbs
+   1 3:island_season.html set hansen_wallet_ach
+   1 3:island_season.html set hansen_wallet_charxp
+   2 3:island_season.html set hansen_wallet_totals
+   1 3:island_season.html set hsn_crystal_gems
+   1 3:island_season.html set hsn_crystal_total
+   1 3:island_season.html set hsn_progress:星海词汇大冒险
+   1 3:island_season.html set theme
+   2 3:island_season.html set wordIslandSeason
+   1 3:island_season.html set wordIslandSeason_bak
+   1 3:land_map.html set hansen_credtrap_log
+   1 3:season_showcase.html(warm) set hansen_credtrap_log
+   1 3:spelling_bee.html(warm) set hansen_credtrap_log
+   1 3:spelling_bee.html(warm) set hansen_global_daily_quests_v941
+   1 4:boss_hall.html(warm) set hansen_credtrap_log
+   1 4:land_map.html set hansen_credtrap_log
+SEASON tree +14s:
+index.html
+  island_season.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+        land_map.html?v=1163
+        (blank)
+
+island instances (season): [
+  '1:island_season.html key=wordIslandSeason',
+  '2:island_season.html key=wordIslandSeason',
+  '3:island_season.html key=wordIslandSeason'
+]
+ext []
+log []

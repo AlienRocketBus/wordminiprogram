@@ -1,0 +1,35 @@
+{
+  "a_installFails": {
+    "installAttempts_bareVocabFetches": 17,
+    "attemptsWhileOnlyHome": 2,
+    "swScriptFetches": 17,
+    "failingFileHits": 18,
+    "totalRequests": 1873,
+    "totalKB": 35521,
+    "shellRefetchKB": 18448,
+    "registration": null,
+    "controller": false,
+    "seconds": 33
+  },
+  "b_firstVisit_sw": {
+    "reqs": 209,
+    "kb": 4195,
+    "swInstallStyleFetches": 135,
+    "swInstallKB": 1324,
+    "vocabFetches": [
+      "/vocab_all.js?v=1163 script 200",
+      "/vocab_all.js empty 200",
+      "/vocab_all.js?v=1163 empty 304"
+    ]
+  },
+  "b_firstVisit_nosw": {
+    "reqs": 161,
+    "kb": 3858,
+    "swInstallStyleFetches": 88,
+    "swInstallKB": 608,
+    "vocabFetches": [
+      "/vocab_all.js?v=1163 script 200",
+      "/vocab_all.js?v=1163 empty 304"
+    ]
+  }
+}

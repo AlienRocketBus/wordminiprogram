@@ -1,0 +1,10 @@
+round 0 LAG=1500 N=4 login 3154ms ok=true,true,true,true
+  local cids : 3,1,2,4
+  sb_profile : 7095:cid=1@+0ms  1929:cid=2@+83ms  3236:cid=3@+106ms  5330:cid=4@+199ms
+  => duplicates=[] zeros=0
+round 1 LAG=1500 N=4 login 3103ms ok=true,true,true,true
+  local cids : 1,3,2,4
+  sb_profile : 7230:cid=1@+0ms  8310:cid=2@+24ms  6200:cid=3@+62ms  3465:cid=4@+129ms
+  => duplicates=[] zeros=0
+
+SUMMARY LAG=1500 N=4: rounds with duplicate cid = 0/2; rounds with a kid left without cid = 0/2

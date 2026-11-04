@@ -1,0 +1,9 @@
+[X] cid=1
+[Y] cid=1
+[Z] cid=3
+Z adds No.1 (meaning 小X): {"ok":true,"cid":1,"name":"小Y","mutual":false,"pending":true}
+Y (not the intended kid) sees incoming: ["小Z No.3 想加你为好友"]
+Y taps 加他: {"ok":true,"cid":3,"name":"小Z","mutual":true,"pending":false}
+Z friend list: [{"cid":1,"name":"小Y","mutual":true}]
+Z sends 来一局？ to No.1: true
+Y inbox: ["小Z:来一局？"]  X inbox total (incl. hidden): 0 strangers: 1

@@ -1,0 +1,23 @@
+F016 test_cloze_askable_v1165        base(95e70bf) 10 fail | now pass
+F017 test_game_timers_v1165          base 10 fail          | now pass
+F018 test_audio_fallback_v1165       base 3 fail           | now pass
+F019 test_trial_clear_v1165          base 1 fail           | now pass
+F020/F047/F054 test_land_quests_v1165 base 15 fail         | now pass
+F045/F046/F074 test_topbar_refresh_v1165 base 7 fail       | now pass
+F048 test_land_settings_v1165        base 4 fail           | now pass
+F049 test_level_menus_v1165          base 3 fail (48 zero-word levels tappable) | now pass
+F051 test_moles_fish_result_v1165    base 2 fail           | now pass
+F052 test_scramble_shuffle_v1165     base 1 fail (125/475 solved boards) | now pass (0)
+F053 test_eagle_fakes_v1165          base 1 fail           | now pass
+F057 test_typing_accuracy_v1165      base 1 fail (准确率 91%) | now pass (拼对率 67%)
+F058 test_nav_active_v1165           base 2 fail           | now pass
+F062 test_island_toast_v1165         base 8 fail           | now pass
+F063 test_quiz_pic_raster_v1165      base 2 fail           | now pass
+F075 test_combo_badge_v1165          base 2 fail           | now pass
+F061 test_boss_active_v1165          base 10 fail (+pageerror after arena wiped) | now pass
+F059 test_land_subtitle_v1165        base 9 fail           | now pass
+F060 test_content_fixes_v1165        base 1 fail (42 values) | now pass
+F076 test_island_welcome_v1165       base 4 fail           | now pass
+F050 test_distractors_v1165          base 1 fail (14 clashes/600) | now pass
+F055 test_round_coins_v1165          base 7 fail           | now pass
+F056 test_narrow_fit_v1165           base 4 fail           | now pass

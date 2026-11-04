@@ -219,6 +219,16 @@ def main():
         #   深度档 120 秒。v1151 的"最长作业优先"已经把总时长压下来了，
         #   放宽单个超时不会让整体变慢多少。
         per_timeout = 120 if deep else 45
+        # 🔴v1164（审查 T10）：真 SDK 端到端（*cloud*_v1164）用的是产品真实时长（天梯 20 秒自己开房、掉线 60 秒判负），
+        #   单跑就要 2~5 分钟。以前给 45 秒（补跑 135 秒）→ 17 个里 10 个超时、记成「不计失败」、进了慢名单，
+        #   之后普通档干脆跳过它们 —— 闸门说「失败 0 个」，天梯和房间的修复一个都没验。
+        #   现在和 分批跑测试.py 同一个时限（600 秒），永不进慢名单，超时就算失败。
+        def _is_cloud(name):
+            return 'cloud' in name and '_v1164' in name
+        def _limit_for(name, heavy=False):
+            if _is_cloud(name):
+                return 600
+            return per_timeout * 3 if heavy else per_timeout
         # 🔴v1098：闸门只跑**快测试**（12 秒内能跑完的），慢的交给深度档。
         #   实测：153 个里约 50 个是浏览器测试，动辄 10~20 秒，
         #   全跑要十几分钟 —— 那样人会绕过闸门，回到"靠记性"的老路。
@@ -235,7 +245,7 @@ def main():
                 known_slow = set(json.load(open(SLOW_FILE, encoding='utf-8')))
             except Exception:
                 known_slow = set()
-        tests = [t for t in all_tests if os.path.basename(t) not in known_slow]
+        tests = [t for t in all_tests if os.path.basename(t) not in known_slow or _is_cloud(os.path.basename(t))]
 
         # 🔴v1151：**慢的先跑（最长作业优先）。**
         #
@@ -301,7 +311,9 @@ def main():
             #   读大小是元数据操作，几乎不花时间，
             #   而手改内容几乎必然改变大小。
             _srcs = []
-            for _pat in ('hansen_*.js', 'sw_*.js', 'test_*.mjs', 'template.html', '*.py'):
+            # 🔴v1164（审查 TI-6）：模拟云端 / 测试公共件（*.mjs）、发给手机的 SDK（vendor_*.js）也算进指纹 ——
+            #   它们一变，旧的「全绿」就不作数。必须和 分批跑测试.py 的 fingerprint() 完全一致。
+            for _pat in ('*.js', '*.mjs', 'template.html', '*.py'):
                 _srcs += _glob.glob(os.path.join(ROOT, _pat))
             for f in sorted(set(_srcs)):
                 try:
@@ -315,11 +327,13 @@ def main():
                     h.update(open(f, 'rb').read())
                 except Exception:
                     pass
-            # HTML 只算大小（防手改，但不付读全文的成本）
+            # 🔴v1164（审查 T9）：HTML 也读**内容** —— 以前只算大小：index.html / spelling_pk.html 是手改的，
+            #   把 `||` 改成 `&&`（返回键收房那一处）大小不变，旧的「全绿」就给改坏的代码作了保。
+            #   全部 HTML 加起来不到 20MB，读一遍不到一秒。必须和 分批跑测试.py 的 fingerprint() 完全一致。
             for f in sorted(_glob.glob(os.path.join(ROOT, '*.html'))):
                 try:
                     h.update(os.path.basename(f).encode())
-                    h.update(str(os.path.getsize(f)).encode())
+                    h.update(open(f, 'rb').read())
                 except Exception:
                     pass
             return h.hexdigest()[:16]
@@ -386,7 +400,7 @@ def main():
             _t0 = time.time()
             try:
                 r = subprocess.run(['node', t], cwd=ROOT, capture_output=True,
-                                   timeout=(per_timeout * 3 if heavy else per_timeout))
+                                   timeout=_limit_for(os.path.basename(t), heavy))
                 _spent[os.path.basename(t)] = round(time.time() - _t0, 1)
                 _res = None if r.returncode == 0 else os.path.basename(t)
                 _done[os.path.basename(t)] = _res      # v1153: 存盘供续跑
@@ -514,6 +528,9 @@ def main():
         #   于是慢名单形同虚设，而且没人发现 —— 因为它"看起来在工作"。
         slow = [x[len('~SLOW~'):] for x in raw if x.startswith('~SLOW~')]
         suspect = [x for x in raw if not x.startswith('~SLOW~')]
+        # 真 SDK 端到端跑了 10 分钟还没完 = 失败（不是「慢」）
+        suspect += [x for x in slow if _is_cloud(x)]
+        slow = [x for x in slow if not _is_cloud(x)]
         # 🔴v1098：**失败要串行复核一次再算数。**
         #   第一版 8 线程并行时 7 个测试报红，单独跑全是绿的 ——
         #   浏览器测试互相抢 CPU/端口会假失败。
@@ -523,7 +540,7 @@ def main():
         for name in suspect:
             try:
                 r = subprocess.run(['node', os.path.join(ROOT, name)], cwd=ROOT,
-                                   capture_output=True, timeout=per_timeout + 20)
+                                   capture_output=True, timeout=(_limit_for(name) if _is_cloud(name) else per_timeout + 20))
                 if r.returncode != 0:
                     failed.append(name)
             except Exception:
@@ -536,7 +553,7 @@ def main():
                   % (len(slow), per_timeout))
             if not deep:
                 try:
-                    json.dump(sorted(known_slow | set(slow)),
+                    json.dump(sorted(x for x in (known_slow | set(slow)) if not _is_cloud(x)),
                               open(SLOW_FILE, 'w', encoding='utf-8'), indent=1)
                 except Exception:
                     pass

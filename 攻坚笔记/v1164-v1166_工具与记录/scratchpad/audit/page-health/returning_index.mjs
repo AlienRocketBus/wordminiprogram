@@ -1,0 +1,21 @@
+import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+import { startServer, hits } from './server.mjs';
+const { srv, port } = await startServer(); const O = `http://127.0.0.1:${port}`;
+const b = await chromium.launch({ args: ['--no-sandbox'] });
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1, serviceWorkers: 'block' });
+await ctx.route('**/*', r => r.request().url().startsWith(O) ? r.continue() : r.abort());
+// seed a returning player who has played colour, action and food islands (keys = what the island pages really write)
+await ctx.addInitScript(() => { if (sessionStorage.getItem('seeded')) return; sessionStorage.setItem('seeded', '1');
+  const S = JSON.stringify({ totalAnswers: 5, totalCorrect: 4, learned: [0], level: 1, coins: 0, stats: {}, wrongs: {} });
+  ['wordIslandColorNum', 'wordIslandVerbs', 'wordIslandFood', 'wordIslandHouse'].forEach(k => localStorage.setItem(k, S));
+  localStorage.setItem('lastIslandKey', 'wordIslandColorNum'); localStorage.setItem('lastIslandTime', String(Date.now()));
+});
+const p = await ctx.newPage();
+const prefetchLinks = [];
+p.on('request', r => { if (/island_/.test(r.url())) prefetchLinks.push(r.resourceType() + ' ' + r.url().replace(O, '')); });
+await p.goto(`${O}/index.html`, { waitUntil: 'load' });
+await p.waitForTimeout(9000);
+console.log('404s:', JSON.stringify(hits.filter(h => h[1] === 404)));
+console.log('island requests:', JSON.stringify(prefetchLinks));
+console.log('link[rel=prefetch]:', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('link[rel=prefetch]')].map(l => l.getAttribute('href') + ' why=' + l.dataset.why))));
+await b.close(); srv.close();

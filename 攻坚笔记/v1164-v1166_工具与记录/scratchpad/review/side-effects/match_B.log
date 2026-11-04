@@ -1,0 +1,59 @@
+
+==== 模式 B · 延迟 60ms · 权限 legacy · 节奏 5000ms/词 · 词数 10（能拼 10）
+结算：房主 900:900  客人 900:900；对战屏 94 秒
+
+--- 房主 · 开房 · 房主（1 秒）
+  total=2 reads=1 (60.0/min, 1.00/s) writes=1 (60.0/min, 1.00/s) auth=0 other=0
+         1  add hansen_pk_rooms
+         1  get(id) hansen_pk_rooms
+
+--- 房主 · 一个人等对手 · 房主（20 秒）
+  total=18 reads=15 (45.0/min, 0.75/s) writes=3 (9.0/min, 0.15/s) auth=0 other=0
+        15  get(id) hansen_pk_rooms
+         2  update(id) hansen_pk_rooms
+         1  update(id) hansen_friends
+
+--- 房主 · 客人进房到开打 · 房主（6 秒）
+  total=14 reads=11 (118.9/min, 1.98/s) writes=3 (32.4/min, 0.54/s) auth=0 other=0
+        11  get(id) hansen_pk_rooms
+         3  update(id) hansen_pk_rooms
+
+--- 客人 · 列表+进房+等确认 · 客人（6 秒）
+  total=16 reads=13 (140.6/min, 2.34/s) writes=3 (32.4/min, 0.54/s) auth=0 other=0
+         9  get(id) hansen_pk_rooms
+         4  where hansen_pk_rooms
+         2  update(id) hansen_pk_rooms
+         1  add hansen_pk_rooms
+
+--- 房主 · 对战中 · 房主（94 秒）
+  total=330 reads=299 (190.4/min, 3.17/s) writes=31 (19.7/min, 0.33/s) auth=0 other=0
+       286  get(id) hansen_pk_rooms
+        21  update(id) hansen_pk_rooms
+        13  where hansen_pk_rooms
+         5  update(id) hansen_friends
+         5  add hansen_pk_rooms
+
+--- 客人 · 对战中 · 客人（94 秒）
+  total=334 reads=302 (192.3/min, 3.21/s) writes=32 (20.4/min, 0.34/s) auth=0 other=0
+       289  get(id) hansen_pk_rooms
+        22  update(id) hansen_pk_rooms
+        13  where hansen_pk_rooms
+         5  update(id) hansen_friends
+         5  add hansen_pk_rooms
+
+--- 房主 · 结算+之后30秒 · 房主（32 秒）
+  total=8 reads=4 (7.4/min, 0.12/s) writes=4 (7.4/min, 0.12/s) auth=0 other=0
+         4  get(id) hansen_pk_rooms
+         2  update(id) hansen_pk_rooms
+         2  update(id) hansen_friends
+
+--- 客人 · 结算+之后30秒 · 客人（32 秒）
+  total=7 reads=4 (7.4/min, 0.12/s) writes=3 (5.6/min, 0.09/s) auth=0 other=0
+         4  get(id) hansen_pk_rooms
+         2  update(id) hansen_pk_rooms
+         1  update(id) hansen_friends
+
+合计（一局）：房主 读330 写42；客人 读319 写38；两人 读649 写80
+对战中每部手机每秒：房主 读3.17 写0.33；客人 读3.21 写0.34
+房主对战中每 10 秒读： 30 30 36 33 32 30 34 30 36 8  写： 4 2 4 3 4 2 4 3 4 1
+报错： 无 外网： 0

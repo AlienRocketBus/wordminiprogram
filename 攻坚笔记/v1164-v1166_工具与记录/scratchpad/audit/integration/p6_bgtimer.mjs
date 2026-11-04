@@ -1,0 +1,33 @@
+import { setup, sleep, log, tapEl } from './lib.mjs';
+import { st, waitFor, islandFrame, openCard, dismissWelcome } from './nav.mjs';
+const {srv, browser, ctx, base, external} = await setup({initScript: ()=>{ try{ if(!localStorage.getItem('__seeded')){ localStorage.setItem('hansen_onboarded','1'); localStorage.setItem('__seeded','1'); } }catch(e){} }});
+const page = await ctx.newPage();
+const errs=[]; page.on('pageerror', e=>errs.push('pageerror: '+e.message));
+page.on('response', r=>{ if(r.status()>=400) errs.push('HTTP '+r.status()+' '+r.url()); });
+page.on('dialog', d=>{ errs.push('dialog: '+d.message().slice(0,100)); d.dismiss(); });
+// count speech/audio calls in all frames
+await ctx.addInitScript(()=>{ window.__speakLog=[]; try{ const o=speechSynthesis.speak.bind(speechSynthesis); speechSynthesis.speak=function(u){ try{ window.__speakLog.push([Date.now(), u&&u.text]); }catch(e){} return o(u); }; }catch(e){}
+  try{ const op=HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play=function(){ try{ (window.__playLog=window.__playLog||[]).push([Date.now(), this.src&&this.src.split('/').pop()]); }catch(e){} return op.apply(this,arguments); }; }catch(e){} });
+await page.goto(base+'index.html', {waitUntil:'load'});
+await sleep(2500);
+let o = await openCard(page,'island_animal.html');
+let fr = islandFrame(page,'island_animal.html'); await dismissWelcome(page, fr);
+await fr.evaluate(()=>{ startSpeed(); });
+await sleep(300);
+const r = await fr.evaluate(()=>{ try{ startSpeedLevel('easy'); }catch(e){ return 'err '+e.message; } return 'ok'; });
+await sleep(2500);
+const snap = ()=>fr.evaluate(()=>{ const s=document.querySelector('#speedScreen'); return {timer:(document.getElementById('spTimer')||{}).textContent, spActive: typeof spActive!=='undefined'?spActive:null, active:(document.querySelector('.screen.active')||{}).id, txt:(s?s.innerText:'').slice(0,160).replace(/\n/g,' | '), speak:(window.__speakLog||[]).length, play:(window.__playLog||[]).length}; });
+console.log('in game', r, await snap());
+await page.evaluate(()=>history.back());
+await waitFor(page, s=>s.wrap==='none', 3000);
+const t0=Date.now();
+const s1 = await snap(); console.log('just closed', s1);
+await sleep(10000);
+const s2 = await snap(); console.log('after 10s on home (hidden island)', s2);
+await page.evaluate(()=>history.forward());
+await waitFor(page, s=>s.wrap==='block', 3000);
+await sleep(300);
+console.log('reopened', await snap());
+await page.screenshot({path:'/tmp/claude-0/-home-user/b052e910-3530-51b4-ab26-f93cff834d3d/scratchpad/audit/integration/p6_reopen.png'});
+console.log('errors', errs);
+await browser.close(); srv.close();

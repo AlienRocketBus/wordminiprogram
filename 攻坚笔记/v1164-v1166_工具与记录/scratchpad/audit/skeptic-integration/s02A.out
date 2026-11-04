@@ -1,0 +1,23 @@
+A visibleMs 3653
+A 15s after tap: requests 401 MB 22.1 html pages 8
+A html list: /island_nature.html?v=1163 /island_animal.html /land_map.html?v=1163 /island_season.html?v=1163 /island_land1.html /boss_hall.html?v=1163&warm=1 /season_showcase.html?v=1163&warm=1 /spelling_bee.html?v=1163&warm=1
+A MB by ext: {"html":3.85,"js":9.83,"webp":7.66,"woff2":0.42,"other":0,"mp3":0.35}
+A frame tree while in island:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+    spelling_bee.html?v=1163&warm=1
+
+A frame count 5
+A frame tree on home after close:
+index.html
+  island_animal.html
+    land_map.html?v=1163
+    island_season.html?v=1163
+      land_map.html?v=1163
+      island_season.html?v=1163
+
+A frame count on home 6
+A season frame island_season.html?v=1163 {"rs":"complete","hasS":true,"vis":"visible"}
+A season frame island_season.html?v=1163 {"rs":"loading","hasS":true,"vis":"visible"}

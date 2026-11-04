@@ -1,0 +1,72 @@
+{
+ "m": [
+  {
+   "sel": ".tagline",
+   "text": "单 词 大 冒 险 · 一 段 神 奇 旅 程",
+   "fg": "rgb(253, 224, 71)",
+   "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px 2px, rgba(0, 0, 0, 0.55) 0px 0px 6px",
+   "bg": [
+    241,
+    187,
+    220
+   ],
+   "fillRatio": 1.24,
+   "darkHaloPixelsPct": 9,
+   "maxPixelContrast": 10.94
+  },
+  {
+   "sel": ".subtitle",
+   "text": "WORD ADVENTURES",
+   "fg": "rgb(254, 243, 199)",
+   "shadow": "rgba(0, 0, 0, 0.6) 0px 0px 1px, rgba(0, 0, 0, 0.85) 0px 1px 2px, rgba(0, 0, 0, 0.55) 0px 0px 6px",
+   "bg": [
+    244,
+    176,
+    206
+   ],
+   "fillRatio": 1.58,
+   "darkHaloPixelsPct": 11,
+   "maxPixelContrast": 9.66
+  },
+  {
+   "sel": ".feedback-sub",
+   "text": "Bug · 建议 · 表扬, 都告诉我",
+   "fg": "rgb(148, 163, 184)",
+   "shadow": "none",
+   "bg": [
+    239,
+    171,
+    190
+   ],
+   "fillRatio": 1.37,
+   "darkHaloPixelsPct": 0,
+   "maxPixelContrast": 1.38
+  },
+  {
+   "sel": ".how-step .num, .how-step [class*=\"num\"]",
+   "text": "01",
+   "fg": "rgb(251, 191, 36)",
+   "shadow": "rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(251, 191, 36, 0.5) 0px 0px 8px",
+   "bg": [
+    250,
+    211,
+    229
+   ],
+   "fillRatio": 1.23,
+   "darkHaloPixelsPct": 0,
+   "maxPixelContrast": 1.69
+  }
+ ],
+ "land4": [
+  {
+   "t": "STAR SEA I: EMOTION & CHARACTER ISLAND",
+   "vis": "visible",
+   "disp": "block",
+   "y": 117,
+   "h": 16
+  }
+ ],
+ "land4Title": "单词大陆·④铸剑锻炉山 STAR SEA I: EMOTION & CHARACTER ISLAND",
+ "errs": [],
+ "external": []
+}

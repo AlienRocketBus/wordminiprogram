@@ -1,0 +1,116 @@
+{
+ "seed": 902,
+ "profile": "hand",
+ "kind": "ladder",
+ "db": {
+  "lagMax": 0,
+  "lagShape": 2,
+  "queryLagMul": 1,
+  "queryLagExtra": 0,
+  "lagMode": "random",
+  "ryw": false,
+  "dupMode": "request_failed",
+  "permMode": "legacy",
+  "orderByFail": false
+ },
+ "unloadSendP": 0.5,
+ "outages": [],
+ "players": [
+  {
+   "label": "P0",
+   "uid": "hA",
+   "name": "小明",
+   "rating": 1000,
+   "skew": 0,
+   "net": {
+    "base": 30,
+    "jitter": 20,
+    "spikeP": 0,
+    "faultRate": 0,
+    "faultMix": {}
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.8,
+    "minMs": 2000,
+    "maxMs": 6000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 500,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  },
+  {
+   "label": "P1",
+   "uid": "hB",
+   "name": "小红",
+   "rating": 1000,
+   "skew": 0,
+   "net": {
+    "base": 30,
+    "jitter": 20,
+    "spikeP": 0,
+    "faultRate": 0,
+    "faultMix": {}
+   },
+   "partitions": [],
+   "freezes": [],
+   "reloads": [],
+   "sessionFailP": 0,
+   "kid": {
+    "pCorrect": 0.8,
+    "minMs": 2000,
+    "maxMs": 6000,
+    "slowP": 0
+   },
+   "again": {
+    "p": 0,
+    "p2": 0,
+    "max": 0
+   },
+   "intents": [
+    {
+     "at": 900,
+     "act": "ladder"
+    }
+   ],
+   "ladderer": true,
+   "afterReload": null
+  }
+ ],
+ "adversary": {
+  "uid": "evil",
+  "name": "x",
+  "rating": 1000,
+  "skew": 0,
+  "net": {
+   "base": 30,
+   "jitter": 20,
+   "spikeP": 0,
+   "faultRate": 0,
+   "faultMix": {}
+  },
+  "adv": {
+   "start": 0,
+   "period": 3000,
+   "flood": {
+    "n": 40,
+    "created": "old",
+    "forge": false
+   }
+  }
+ }
+}

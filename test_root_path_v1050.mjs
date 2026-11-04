@@ -1,3 +1,4 @@
+const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 /* test_root_path_v1050.mjs —— 根路径「/」不得变成下载
  * 决定性线索（用户实测）：
  *   · 访问 `域名/index.html` → **能正常打开**
@@ -8,9 +9,9 @@
  *   SW 遇到裸根路径导航时直接改取 /index.html。
  * 合同：① 服务器不处理根路径（根路径返回可下载响应）时，装了 SW 的页面仍能正常渲染；
  *       ② 正常服务器下行为不变、不触发下载；③ 只对裸根路径生效，不影响其它路径。 */
-import { chromium } from '/home/claude/work/repo/playwright_loader.mjs';
+import { chromium } from './playwright_loader.mjs';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const ROOT='/home/claude/work/repo';
+const ROOT=__HSN_ROOT.replace(/\/$/, '');
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css',
  '.json':'application/json','.webp':'image/webp','.png':'image/png','.ico':'image/x-icon',
  '.woff2':'font/woff2','.mp3':'audio/mpeg','.webmanifest':'application/manifest+json','.svg':'image/svg+xml'};
@@ -77,7 +78,7 @@ ok(broken.ctrl, '模拟场景下 SW 仍能上岗（兜底不破坏 SW 生命周�
    （HTTP 200 + attachment 属服务端配置问题，需在控制台设置索引文档修复。
      首版曾把兜底插在主路径上试图覆盖此场景，结果导致导航超时、刷新失败 ——
      刷新是每天都走的路，不能为一个控制台一次性可修的配置去冒险。） */
-const sw=fs.readFileSync('/home/claude/work/repo/sw_v944.js','utf8');
+const sw=fs.readFileSync((__HSN_ROOT + 'sw_v944.js'),'utf8');
 ok(/url\.pathname === '\/' \|\| url\.pathname === ''/.test(sw), '源码含裸根路径判定(在 fallback 阶段)');
 ok(/new URL\('index\.html'/.test(sw), '根路径改取 index.html');
 console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);

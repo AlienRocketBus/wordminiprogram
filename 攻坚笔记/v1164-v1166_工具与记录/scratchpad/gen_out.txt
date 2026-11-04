@@ -1,0 +1,1 @@
+  [印章] generate.py: 从 template.html + island_data.json 盖章生成 19 个岛 (14槽位) ✅

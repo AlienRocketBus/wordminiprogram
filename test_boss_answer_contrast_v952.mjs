@@ -362,7 +362,7 @@ async function optionalBrowserProbe() {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
       deviceScaleFactor: 2, serviceWorkers: 'block' });
     await context.addInitScript(() => {
-      localStorage.clear();
+      if (window.top === window) localStorage.clear();
       localStorage.setItem('hansen_onboarded', '1');
       localStorage.setItem('hansen_starter_coins_given', '1');
       localStorage.setItem('hsnViewMode', 'desktop');
