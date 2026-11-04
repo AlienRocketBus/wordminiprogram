@@ -1160,6 +1160,74 @@ def _require_jarvis_pass(version: str) -> None:
           f" · 体检 {data.get('score','?')}/100）")
 
 
+# 🔴v1165 复查（SH8）：同一个版本号，绝不能带着不一样的代码再打一次包。
+#   SW 把带 ?v=<版本号> 的脚本当成「这一版只有这一份」：缓存里有就直接用、不再联网。
+#   要是没跑 bump_version.py 就把改过的代码按老版本号发出去（比如一次「快速热修」），
+#   老孩子手机里会一直用缓存里的旧脚本，新页面配旧脚本，而且刷新也没用。
+#   以前的打包合同只查缓存代号和 ?v= 戳 —— 没升版本号的树照样能过。
+#   这里按「已发布版本 → 当时每个运行时代码文件的指纹」查：版本号一样、内容变了就拒绝打包。
+#   指纹记在 release_published_runtime.json（只进源码包，不进部署包）；v1163 = origin/main 那一版。
+#   以后每发一版，用 _record_published_runtime("<版本号>") 把那一版补进去。
+PUBLISHED_RUNTIME_FILE = "release_published_runtime.json"
+_RUNTIME_CODE_EXT = {".js", ".css", ".html", ".webmanifest"}
+
+
+def _runtime_code_digests(root: Path | None = None) -> dict[str, str]:
+    """部署包里每个运行时代码文件（.js/.css/.html/.webmanifest）→ sha256 前 16 位。按部署白名单挑文件。"""
+    root = Path(root) if root is not None else ROOT   # 调用时再取 ROOT（打包器单元测试会换 ROOT）
+    out: dict[str, str] = {}
+    for directory, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d not in DEPLOY_EXCLUDE_DIRS and not d.startswith("."))
+        for name in sorted(files):
+            path = Path(directory) / name
+            rel = PurePosixPath(*path.relative_to(root).parts)
+            if name.startswith(".") or path.is_symlink() or not path.is_file():
+                continue
+            if rel.suffix.lower() not in _RUNTIME_CODE_EXT or not _deploy_allowed(rel):
+                continue
+            out[rel.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    return out
+
+
+def _verify_published_runtime_unchanged(version: str, root: Path | None = None) -> None:
+    """这个版本号发布过，而运行时代码和发布时不一样 → RuntimeError（拒绝打包）。没发布过的版本号不查。"""
+    root = Path(root) if root is not None else ROOT
+    record_path = root / PUBLISHED_RUNTIME_FILE
+    if not record_path.is_file():
+        return
+    try:
+        published = json.loads(record_path.read_text(encoding="utf-8")).get("versions", {}).get(str(version))
+    except (OSError, ValueError, AttributeError) as exc:
+        raise RuntimeError(f"{PUBLISHED_RUNTIME_FILE} 读不出来，为了不把旧缓存钉死，先不打包：{exc}") from exc
+    if not published:
+        return
+    files = published.get("files") or {}
+    now = _runtime_code_digests(root)
+    changed = sorted(name for name, digest in files.items() if name in now and now[name] != digest)
+    if changed:
+        more = f" 等 {len(changed)} 个" if len(changed) > 8 else ""
+        raise RuntimeError(
+            f"v{version} 已经发布过，可这些运行时代码和发布时不一样了：{', '.join(changed[:8])}{more}。"
+            f"同一个版本号（?v={version}）下，孩子手机里的离线缓存不会更新，会一直用旧文件。"
+            "先运行 python3 bump_version.py <新版本号>，再打包。"
+        )
+
+
+def _record_published_runtime(version: str, root: Path | None = None, note: str = "") -> dict:
+    """发版之后调用：把这一版的运行时代码指纹记进 release_published_runtime.json（已有的版本不覆盖）。"""
+    root = Path(root) if root is not None else ROOT
+    record_path = root / PUBLISHED_RUNTIME_FILE
+    data = {"versions": {}}
+    if record_path.is_file():
+        data = json.loads(record_path.read_text(encoding="utf-8"))
+        data.setdefault("versions", {})
+    if str(version) in data["versions"]:
+        raise RuntimeError(f"v{version} 的发布指纹已经记过了，不能覆盖")
+    data["versions"][str(version)] = {"note": note, "files": _runtime_code_digests(root)}
+    record_path.write_text(json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return data["versions"][str(version)]
+
+
 def package(version: str, out_dir: Path) -> list[Path]:
     canonical_version = _version((ROOT / "VERSION").read_text(encoding="utf-8"))
     _require_jarvis_pass(canonical_version)
@@ -1167,6 +1235,7 @@ def package(version: str, out_dir: Path) -> list[Path]:
         raise RuntimeError(
             f"requested v{version} does not match canonical VERSION v{canonical_version}"
         )
+    _verify_published_runtime_unchanged(canonical_version)
     out_dir.mkdir(parents=True, exist_ok=True)
     deploy = out_dir / DEPLOY_NAME.format(version=version)
     source = out_dir / SOURCE_NAME.format(version=version)
