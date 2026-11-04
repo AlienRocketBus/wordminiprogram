@@ -922,6 +922,21 @@ def _inj_join_no_confirm(s):
     m = 'if (pend) return confirm(R, S, u);'
     return s.replace(m, 'if (R.guestId) { joined(R, S); return; }', 1) if m in s else None
 
+def _inj_leave_no_fin(s):
+    """交卷离开带上分：离开时又只看「交卷写成功了没有」。"""
+    m = "var fin = (role === 'host') ? (c.hs != null ? c.hs : c.fin) : (c.gs != null ? c.gs : c.fin);"
+    return s.replace(m, "var fin = (role === 'host') ? c.hs : c.gs;", 1) if m in s else None
+
+def _inj_flush_drop(s):
+    """排着的上传不能丢：藏起来的页面又把排着的上传丢掉。"""
+    m = 'if (!had && !frameShown()) return;'
+    return s.replace(m, 'if (!frameShown()) return;', 1) if m in s else None
+
+def _inj_signout_reset(s):
+    """退出登录不清资料：signOut 里又清了资料。"""
+    m = "    return _bye.then(function () { return auth(); }).then(function (a) {"
+    return s.replace(m, "    try { if (window.HansenSbProfile && HansenSbProfile.resetForAccountSwitch) HansenSbProfile.resetForAccountSwitch(); } catch (e) {}\n" + m, 1) if m in s else None
+
 def _inj_watchdog_close(s):
     """看门狗不乱咬：天梯 close() 里又上哨。"""
     m = 'function close() {\n    try { setTimeout(refreshEntry, 60); } catch (e) {}'
@@ -1069,6 +1084,9 @@ CASES = [
     ('备份不收 SDK 键', 'hansen_backup_v944.js',        _inj_backup_sdk),
     ('真 SDK 测试无桩', 'test_ladder_cloud_v1164.mjs',  _inj_cloud_stub),
     ('friendly 说实话', 'hansen_auth_v1004.js',         _inj_friendly_lie),
+    ('交卷离开带上分',  'hansen_pk_room_v1065.js',      _inj_leave_no_fin),
+    ('排着的上传不能丢', 'hansen_cloud_save_v965.js',    _inj_flush_drop),
+    ('退出登录不清资料', 'hansen_auth_v1004.js',         _inj_signout_reset),
 ]
 
 

@@ -4191,6 +4191,68 @@ def guard_friendly_tells_truth():
         bad('friendly 说实话', 'friendly() 没有在「用户名不存在」之前单独处理 credentials not found —— 会把「登录没完成」说成「用户名不对」')
 
 
+def guard_leave_carries_final_score():
+    """交了卷马上离开：「走了」要和交卷的分写在同一次里。
+
+    事故（v1164 第二轮审查 F-R2-1/FX-5，真 SDK 端到端抓到）：回合赛 / 同步赛里快的那位交了卷、马上点「先离开」，
+    交卷那一下（reportResult）还在路上 —— 离开时看「交卷写成功了没有」，没写完就记成「中途走了」（endedBy:'leave'），
+    慢的那位最后一词拼对了被拒收，平局判成输。
+    判据：reportResult 一进来就（同步地）记下交卷的分（.fin）；leaveMine 用它，并把 hostScore / guestScore 和「走了」写在同一个 patch 里。
+    """
+    src = _code_only(_read('hansen_pk_room_v1065.js') or '')
+    if not src:
+        return
+    rr = _fn_body(src, 'reportResult', 4000)
+    head = rr.split('ident()')[0] if 'ident()' in rr else ''
+    if not re.search(r'\.fin\s*=\s*sc', head):
+        bad('交卷离开带上分', 'reportResult 没有在一进来时就记下交卷的分（.fin = sc）—— 交完卷马上离开，离开那一下不知道已经交过卷')
+    lm = _fn_body(src, 'leaveMine', 4000)
+    if 'c.fin' not in lm or 'hostScore' not in lm or 'guestScore' not in lm:
+        bad('交卷离开带上分', 'leaveMine 没有把交卷的分（c.fin）和「走了」写在同一次里 —— 交卷还在路上时离开会被记成「中途走了」，对手最后一词被拒收')
+    if re.search(r"endedBy:\s*\(c\.hs != null\)\s*\?\s*'finished'", lm):
+        bad('交卷离开带上分', 'leaveMine 还是只看「交卷写成功了没有」（c.hs）来决定 finished / leave')
+
+
+def guard_flush_keeps_pending():
+    """切后台时，排着的那次上传不能丢；首页外壳（没有云存档）由藏起来的岛替它传。
+
+    事故（v1164 第二轮审查 R2-2/FX-3/R2-1）：孩子在岛里打完一局点返回、8 秒内切出 App ——
+    藏起来的岛先把排着的上传取消、再因为「藏起来了」不传；首页自己又没有云存档模块，那一局就没上云。
+    判据：flush 先记下有没有排着的（had），只有「没排着、又藏着」才跳过；index.html 收起岛、切后台、关页面都让岛传一次。
+    """
+    src = _code_only(_read('hansen_cloud_save_v965.js') or '')
+    if src:
+        ah = _fn_body(src, 'autoHooks', 9000)
+        if not re.search(r'var had = !!_pending;[\s\S]{0,200}if \(!had && !frameShown\(\)\) return;', ah):
+            bad('排着的上传不能丢', 'hansen_cloud_save 的 flush：藏起来的页面把排着的上传取消了又不传（要先记下 had，没排着才跳过）')
+    idx = _code_only(_read('index.html') or '')
+    if idx:
+        if 'function _flushCloudFromIsland' not in idx:
+            bad('排着的上传不能丢', 'index.html 没有 _flushCloudFromIsland —— 首页没有云存档模块，收起岛 / 切后台时没人上传')
+        else:
+            ci = _fn_body(idx, '_closeIslandNow', 3000)
+            if '_flushCloudFromIsland()' not in ci:
+                bad('排着的上传不能丢', 'index.html 收起岛（_closeIslandNow）时没让岛先传一次')
+            if not re.search(r"visibilitychange'[^\n]{0,120}_flushCloudFromIsland\(\)", idx) or not re.search(r"pagehide',\s*_flushCloudFromIsland", idx):
+                bad('排着的上传不能丢', 'index.html 切后台（visibilitychange）/ 关页面（pagehide）时没让岛上传')
+
+
+def guard_signout_keeps_profile():
+    """退出登录不清资料（名字、头像、展柜、隐私）。
+
+    事故（v1164 第二轮审查 R2-1/FX-1）：退出时把资料清空，同一个人登回来，对账看到「本机和上次传的不一样」，
+    就把空白资料传上了云 —— 每台设备都变成「点这里设置名字」。换了一个人登录才清（资料模块 syncOwner 管）。
+    """
+    src = _code_only(_read('hansen_auth_v1004.js') or '')
+    if not src:
+        return
+    so = _fn_body(src, 'signOut', 5000)
+    if not so:
+        bad('退出登录不清资料', '找不到 signOut')
+    elif 'resetForAccountSwitch' in so:
+        bad('退出登录不清资料', 'signOut 里又清了资料（resetForAccountSwitch）—— 同一个人登回来会把空白资料传上云')
+
+
 GUARDS = [
     ('单一真源·登录态', guard_single_session_truth),
     ('错误可见性',     guard_error_visibility),
@@ -4325,6 +4387,10 @@ GUARDS = [
     ('真 SDK 测试无桩', guard_cloud_tests_no_stubs),
     ('测试不写死路径', guard_tests_no_hardcoded_root),
     ('friendly 说实话', guard_friendly_tells_truth),
+    # 🔴v1164 第二轮审查
+    ('交卷离开带上分', guard_leave_carries_final_score),
+    ('排着的上传不能丢', guard_flush_keeps_pending),
+    ('退出登录不清资料', guard_signout_keeps_profile),
 ]
 
 

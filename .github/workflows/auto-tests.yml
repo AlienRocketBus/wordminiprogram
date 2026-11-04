@@ -56,12 +56,14 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: npx playwright install --with-deps chromium
+      - name: 装浏览器
+        # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
+        run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 语法 + 资源检查 + 守卫 + 零测试桩冒烟
         run: python3 一键体检.py --quick
       - if: always()
         uses: actions/upload-artifact@v4
-        with: { name: siphon-logs-quick, path: .siphon/, retention-days: 14, if-no-files-found: ignore }
+        with: { name: siphon-logs-quick, path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
 
   tests:
     name: 测试 第 ${{ matrix.shard }} 份
@@ -87,12 +89,14 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: npx playwright install --with-deps chromium
+      - name: 装浏览器
+        # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
+        run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 跑这一份测试
         run: python3 一键体检.py --shard ${{ matrix.shard }}/${{ env.SHARDS }}
       - if: always()
         uses: actions/upload-artifact@v4
-        with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore }
+        with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
 
   summary:
     name: 结论

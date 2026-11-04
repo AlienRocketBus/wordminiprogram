@@ -737,18 +737,21 @@
       }).then(function (w) {
         var bad2 = dbFail(w, '建立资料 sb_profile');
         if (bad2) throw bad2;
-        /* 🔴v1164：刚写进去马上读，未必读得到（主从同步有延迟）—— 读不到就隔半秒再读，
-           最多 4 次；否则这次就发不出竞赛 ID，好友页一直说「先设置竞赛 ID」 */
+        /* 🔴v1164：刚写进去马上读，未必读得到（主从同步有延迟）—— 读不到就隔一会儿再读；
+           否则这次就发不出竞赛 ID，好友页一直说「先设置竞赛 ID」。
+           🔴审查 FX-4（同一类）：以前只读 2 秒（4 次 × 0.5 秒），延迟两三秒的新手机第一次登录就发不出号、
+           要等下次登录。现在越隔越久，一共等到 9 秒左右（和好友的在线记录一样） */
+        var GAPS = [400, 700, 1100, 1600, 2200, 2800];
         var readBack = function (n) {
           return docRef.get().then(function (r2) {
             var bad3 = dbFail(r2, '读取资料 sb_profile');
             if (bad3) throw bad3;
             var row2 = r2 && r2.data && r2.data[0];
-            if ((row2 && row2.createdAt) || n <= 1) return row2;
-            return new Promise(function (ok) { setTimeout(ok, 500); }).then(function () { return readBack(n - 1); });
+            if ((row2 && row2.createdAt) || n >= GAPS.length) return row2;
+            return new Promise(function (ok) { setTimeout(ok, GAPS[n]); }).then(function () { return readBack(n + 1); });
           });
         };
-        return readBack(4);
+        return readBack(0);
       }).then(function (row2) {
         return assignCid(db, docRef, row2 && row2.createdAt);
       });
