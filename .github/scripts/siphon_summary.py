@@ -39,8 +39,20 @@ def tests():
            '| 项目 | 结果 |', '|---|---|',
            '| 语法 + 三道快检 | %s |' % ('通过' if quick_ok else '没过（见附件 siphon-logs-quick）'),
            '| 测试 | %d 个 · 通过 %d · 失败 %d（交回结果的有 %d/%d 份） |' % (len(res), len(res) - len(fails), len(fails), shards, want)]
+    # 完美主义：修问题不许带入新问题 —— 和同一分支上一次的结果比，「上次通过、这次失败」单独列出来
+    prev = {}
+    for f in glob.glob('prev/*/shard_*.json'):
+        prev.update(json.load(open(f, encoding='utf-8')))
+    newly = [t for t in fails if t in prev and prev[t] is None]
+    fixed = sorted(t for t, r in prev.items() if r and t in res and res[t] is None)
+    if prev:
+        pid = open('prev_run_id').read().strip() if os.path.exists('prev_run_id') else '?'
+        out.append('| 和上一次（运行 %s）比 | 🆕 新坏 %d 个 · ✅ 新好 %d 个 |' % (pid, len(newly), len(fixed)))
+    if newly:
+        out += ['', '### 🆕 新坏的测试（上次还通过，这次失败 —— 这次改动带进来的新问题，先修这些）', '']
+        out += ['- `%s` — %s' % (t, str(res[t]).replace('|', '/')) for t in newly]
     if fails:
-        out += ['', '### 失败的测试（两次都失败）', '']
+        out += ['', '### 全部失败的测试（同一次里串行重跑也失败）', '']
         out += ['- `%s` — %s' % (t, str(res[t]).replace('|', '/')) for t in fails[:40]]
     if quick and not quick_ok:
         out += ['', '### 快检输出', '', '```', quick[-1500:], '```']

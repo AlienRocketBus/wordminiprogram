@@ -108,11 +108,25 @@ jobs:
     needs: [gate, quick, tests]
     if: always() && needs.gate.result == 'success'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with: { sparse-checkout: .github/scripts }
       - uses: actions/download-artifact@v4
         with: { pattern: 'siphon-logs-*', path: logs }
+      - name: 拿上一次的结果来对比（完美主义：修问题不许带入新问题）
+        # 同一分支上一次跑完的自动体检：哪些测试上次通过、这次失败 —— 那就是这次改动带入的新问题，单独列出来
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          prev=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow auto-tests.yml --branch "$BRANCH" --status completed --limit 10 --json databaseId,headSha --jq "[.[] | select(.databaseId != ${{ github.run_id }})][0].databaseId" 2>/dev/null || true)
+          if [ -n "$prev" ] && [ "$prev" != "null" ]; then
+            gh run download "$prev" --repo "$GITHUB_REPOSITORY" --pattern 'siphon-logs-*' --dir prev >/dev/null 2>&1 || true
+            echo "$prev" > prev_run_id
+          fi
       - name: 汇总成一张表
         env:
           QUICK: ${{ needs.quick.result }}
