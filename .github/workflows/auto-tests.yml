@@ -3,6 +3,7 @@
 # 什么时候跑：
 #   · 推送到 claude/** 开发分支时自动跑 —— 但「WIP 备份」提交不跑（省 GitHub 的免费分钟数），
 #     提交说明里写了 [测试] 的 WIP 照样跑；只改了 攻坚笔记/ 或 .md 文档的推送也不跑。
+#   · 推送到 main 时每次都跑 —— 全部通过后「Auto Release on Push」才会打包发 Release。
 #   · 在 Actions 页面点「Run workflow」手动跑（任何分支）。
 # 跑什么：和本机 `python3 一键体检.py` 完全一样的判定 —— 语法 + 三道快检 + 全部 test_*.mjs，
 #   失败的测试串行再跑一次，两次都失败才算失败（并行假失败很常见）。
@@ -12,7 +13,7 @@ name: 自动体检
 
 on:
   push:
-    branches: ['claude/**']
+    branches: ['claude/**', main]
     paths-ignore: ['攻坚笔记/**', '**.md', 'docs/**']
   workflow_dispatch:
 
@@ -26,8 +27,10 @@ env:
 jobs:
   gate:
     name: 要不要跑
+    # main 上每次都跑（发版要靠它），不看 WIP
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
       !startsWith(github.event.head_commit.message, 'WIP') ||
       contains(github.event.head_commit.message, '[测试]')
     runs-on: ubuntu-latest
