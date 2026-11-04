@@ -210,30 +210,34 @@ async function cloudWords(num, label) {
     const A = await phone('甲手机');
     await setWords(A, 10);
     await login(A, '13400000066');            /* 云端是空的、本机有 10 个词 → 传上去 */
-    await settle(A, 1500);
+    await settle(A, 3000);
+    /* 甲手机这一份已经传上去了（之后甲手机上什么都没改） */
+    const ua = await A.eval(() => window.HansenCloudSave.syncNow({ force: true, rewrite: true }));
+    await H.sleep(2500);
     await setWords(B, 2);
     const ub = await B.eval(() => window.HansenCloudSave.syncNow({ force: true, rewrite: true }));
-    await t.ok(ub && ub.ok, '乙手机（2 个词）后来又把云端盖掉了', () => explain());
+    await t.ok(ua && ua.ok && ub && ub.ok, '甲手机（10 个词）传过一次以后，乙手机（2 个词）又把云端盖掉了', () => explain());
     /* 甲手机上打开设置里的云存档卡片，点「立即同步」 */
     await A.eval(() => { const d = document.createElement('div'); d.id = 'hsnBackupSection'; d.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1020;overflow:auto;padding:12px'; document.body.appendChild(d); return true; });
     const w0 = saveWrites(A.uid).length;
     await A.tap('#hsnCloudSync', { timeout: 8000 });
-    await H.sleep(3500);
-    const said = await A.eval(() => ((document.getElementById('hsnCloudCard') || {}).innerText || ''));
+    const said = await H.until(async () => { const v = await A.eval(() => ((document.getElementById('hsnCloudCard') || {}).innerText || '')); return /已上云|内容没变化|同步失败/.test(v) ? v : null; }, { timeout: 15000 }) || '';
     const wA = saveWrites(A.uid).length - w0;
-    await t.ok(wA >= 1 && !has(said, /内容没变化/), `点「立即同步」真传了一次（传了 ${wA} 次；卡片上：${flat(said).match(/(已上云|内容没变化|同步失败)[^\n]{0,20}/) || ''}）—— 以前「内容没变化，无需上传」，云端还是乙的 2 个词`, () => explain());
+    await t.ok(wA >= 1 && !has(said, /内容没变化/), `点「立即同步」真传了一次（传了 ${wA} 次；卡片上：${(flat(said).match(/(已上云|内容没变化|同步失败)[^ ]{0,16}/) || [''])[0]}）—— 以前「内容没变化，无需上传」，云端还是乙的 2 个词`, () => explain());
     const c1 = await cloudWords('13400000066', '丙手机');
     await t.ok(c1.n === 10, `另一台手机拿到的是甲刚传的 10 个词（${c1.n} 个）`, () => explain());
     /* 云端那条被删了（老师照着指南删了重建集合）→ 登录对账时要真传上去 */
     const doc = (emu.dump('hansen_saves') || []).find((d) => d._openid === A.uid);
     const rm = doc ? await A.eval(async (id) => { const db = (await window.HansenAuth._app()).database(); const r = await db.collection('hansen_saves').doc(id).remove(); return r && (r.code || 'removed=' + r.deleted); }, doc._id) : 'no-doc';
+    await H.sleep(1500);   /* 读延迟（200 毫秒）早就过了：云端确实读得到「没有」 */
     const gone = !(emu.dump('hansen_saves') || []).some((d) => d._openid === A.uid);
     await t.ok(gone, `云端那条存档删掉了（${rm}）`, () => explain());
     const w1 = saveWrites(A.uid).length;
     const s2 = await A.eval(() => window.HansenAuth.syncOnLogin());
     await H.sleep(1500);
     const back = (emu.dump('hansen_saves') || []).some((d) => d._openid === A.uid);
-    await t.ok(back && saveWrites(A.uid).length > w1, `对账发现云端没有、本机有 → 真传上去了（云端${back ? '又有了' : '还是空的'}；对账：${s2 && s2.action}）—— 以前「内容没变」跳过，嘴上说「进度已存到云端」`, () => explain());
+    const wrote = saveWrites(A.uid).length - w1;
+    await t.ok(s2 && s2.action === 'uploaded' && back && wrote >= 1, `对账发现云端没有、本机有 → 真传上去了（对账：${s2 && s2.action}；传了 ${wrote} 次；云端${back ? '又有了' : '还是空的'}）—— 以前「内容没变」跳过，嘴上说「进度已存到云端」`, () => explain());
   });
 }
 t.summary();

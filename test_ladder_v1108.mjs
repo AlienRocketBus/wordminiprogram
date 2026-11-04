@@ -215,7 +215,11 @@ function mkRecord() {
   const ld = fs.readFileSync((__HSN_ROOT + 'hansen_ladder_ui_v1108.js'), 'utf8');
   const c2 = ld.replace(/\/\*[\s\S]*?\*\//g, '');
   const i = c2.indexOf('function startMatching');
-  ok(/if \(_cancel\) \{ try \{ _cancel\(\); \}/.test(c2.slice(i, i + 400)),
+  /* 🔴v1164（第二轮修复后）：防重入还在，但前面多了参数整理和「模块还在加载」的提示，
+     离函数开头超过了 400 个字 —— 以前按 400 个字截，守卫被挤出窗口就误报。
+     真正要守住的是：在查登录、开始找对手**之前**先取消上一轮。所以截到查登录那一行为止。 */
+  const j = c2.indexOf('HansenAuth', i);
+  ok(i >= 0 && j > i && /if \(_cancel\) \{ try \{ _cancel\(\); \}/.test(c2.slice(i, j)),
      '★ **开始排位要防重入** —— ' +
      'stop 是局部变量而 _cancel 是共享的，连点两下会让几个循环互相踩');
   ok(/lr && lr\.ok === false/.test(c2),

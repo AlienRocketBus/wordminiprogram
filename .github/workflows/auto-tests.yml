@@ -109,37 +109,12 @@ jobs:
     if: always() && needs.gate.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: .github/scripts }
       - uses: actions/download-artifact@v4
         with: { pattern: 'siphon-logs-*', path: logs }
       - name: 汇总成一张表
         env:
           QUICK: ${{ needs.quick.result }}
           TESTS: ${{ needs.tests.result }}
-        run: |
-          python3 - <<'PY'
-          import glob, json, os
-          res = {}
-          for f in glob.glob('logs/*/shard_*.json'):
-              res.update(json.load(open(f, encoding='utf-8')))
-          fails = sorted(t for t, r in res.items() if r)
-          quick = ''
-          for f in glob.glob('logs/siphon-logs-quick/SUMMARY.txt'):
-              quick = open(f, encoding='utf-8').read().strip()
-          qrc = [open(f).read().strip() for f in glob.glob('logs/siphon-logs-quick/quick_rc')]
-          quick_ok = os.environ['QUICK'] == 'success' and qrc == ['0']
-          os.environ['QUICK'] = 'success' if quick_ok else 'failure'
-          shards = len(glob.glob('logs/*/shard_*.json'))
-          ok = quick_ok and os.environ['TESTS'] == 'success' and not fails and shards == int(os.environ.get('SHARDS', '8'))
-          out = ['## ' + ('✅ 全部通过' if ok else '❌ 没通过'), '',
-                 '| 项目 | 结果 |', '|---|---|',
-                 '| 语法 + 三道快检 | %s |' % ('通过' if os.environ['QUICK'] == 'success' else '没过（见附件 siphon-logs-quick）'),
-                 '| 测试 | %d 个 · 通过 %d · 失败 %d（交回结果的有 %d/%s 份） |' % (len(res), len(res) - len(fails), len(fails), shards, os.environ.get('SHARDS', '8'))]
-          if fails:
-              out += ['', '### 失败的测试（两次都失败）', '']
-              out += ['- `%s` — %s' % (t, str(res[t]).replace('|', '/')) for t in fails[:40]]
-          if quick and os.environ['QUICK'] != 'success':
-              out += ['', '### 快检输出', '', '```', quick[-1500:], '```']
-          open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8').write('\n'.join(out) + '\n')
-          print('\n'.join(out))
-          raise SystemExit(0 if ok else 1)
-          PY
+        run: python3 .github/scripts/siphon_summary.py tests

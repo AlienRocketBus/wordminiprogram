@@ -77,30 +77,12 @@ jobs:
     if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: .github/scripts }
       - uses: actions/download-artifact@v4
         with: { pattern: 'repeat-*', path: logs }
       - name: 每个测试失败了几轮
         env:
           ROUNDS: ${{ inputs.rounds || '10' }}
           ONLY: ${{ inputs.only || 'cloud_v1164' }}
-        run: |
-          python3 - <<'PY'
-          import glob, json, os, collections
-          fail = collections.defaultdict(list); seen = collections.Counter(); rounds = 0
-          for f in sorted(glob.glob('logs/*/only_*.json')):
-              rounds += 1
-              for t, r in json.load(open(f, encoding='utf-8')).items():
-                  seen[t] += 1
-                  if r:
-                      fail[t].append(str(r).replace('|', '/')[:120])
-          want = max(1, min(10, int(os.environ['ROUNDS'])))
-          ok = rounds == want and not fail and seen
-          out = ['## ' + ('✅ %d 轮全部通过' % rounds if ok else '❌ 有问题'), '',
-                 '测试片段 `%s` · 交回结果的 %d/%d 轮 · %d 个测试' % (os.environ['ONLY'], rounds, want, len(seen)), '']
-          if fail:
-              out += ['| 测试 | 失败几轮 | 第一次失败的原因 |', '|---|---|---|']
-              out += ['| `%s` | %d / %d | %s |' % (t, len(v), seen[t], v[0]) for t, v in sorted(fail.items(), key=lambda x: -len(x[1]))]
-          open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8').write('\n'.join(out) + '\n')
-          print('\n'.join(out))
-          raise SystemExit(0 if ok else 1)
-          PY
+        run: python3 .github/scripts/siphon_summary.py repeat
