@@ -232,7 +232,8 @@ export class UiR1 {
     join.onFail = (r) => {
       let stillMine = false;
       try { stillMine = (this.api._currentRoomId() === myRid && this.api._currentRole() === 'host'); } catch (e) {}
-      if (r && r.cancelled) { this.ladderBack('home', ''); return; }
+      /* v1165 复查：换房「进房中」时取消 → 自己先前开的那间也退掉（真代码同一处） */
+      if (r && r.cancelled) { if (stillMine) this.call('leaveRoom', myRid); this.ladderBack('home', ''); return; }
       if (stillMine && mine) { this._state = mine; this._fromLadder = true; this.waiting(myRid, myCode, cfg); return; }
       this.ladderBack('rematch', '那间房没进去，接着帮你找…', r);
     };
