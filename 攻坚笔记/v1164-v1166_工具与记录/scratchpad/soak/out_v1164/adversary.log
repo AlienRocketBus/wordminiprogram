@@ -1,0 +1,19 @@
+
+══ clusters (7) ══
+  [low   ]  115× I2:remove:adv-forged-target   seeds 1,2,7,9,10,11
+           e.g. remove rzf05448 owned by ADV
+  [low   ]   54× I8:matchmaking-blocked:seat-squatting   seeds 10,19,20,21,22,31
+           e.g. with the adversary 0 honest match(es) settled, without it 1
+  [low   ]   34× I8:impersonated-guest-accepted   seeds 26,44,51,56,64,91
+           e.g. host accepted rmk0gk0zo.j9xwwrxo_s0 created by the adversary claiming to be P2
+  [low   ]   25× I8:adv-seat-accepted   seeds 31,90,108,123,124,166
+           e.g. host accepted rmk0gexpsovu2q5_s0 created by the adversary
+  [low   ]    4× I8:fewer-matches-settled:seat-squatting   seeds 26,124,355,363
+           e.g. with the adversary 1 honest match(es) settled, without it 2
+  [low   ]    1× I6:full-room-reported-gone:findByCode   seeds 269
+           e.g. findByCode(2GES) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+  [low   ]    1× I9:I6:full-room-reported-gone:findByCode   seeds 269
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(2GES) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else
+
+SUMMARY profile=adversary runs=400 seeds=1..400 failing_runs=0 clusters=7 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:115 I3:0 I4:0 I5:0 I6:1 I7:0 I8:85 I9:1 I10:0 | matches=438 settled_pairs=295 virtual=53.2h events=1185935 real=114s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

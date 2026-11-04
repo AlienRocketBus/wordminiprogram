@@ -1995,7 +1995,7 @@
     if (hs == null || gs == null) return null;
     return host ? { mine: hs, theirs: gs } : { mine: gs, theirs: hs };
   }
-  function claimAbandonWin(roomId) {
+  function claimAbandonWin(roomId, opt) {
     return ident().then(function (u) {
       return loadView(roomId).then(function (L) {
         var t = Date.now(), c = rc(roomId), host = (L.v.hostId === u.id), my = host ? 'host' : 'guest';
@@ -2010,16 +2010,29 @@
         /* 我自己还没交卷（对战中判的离场）：不会有「两边都交了卷」这回事，不用多等 */
         var mineIn = host ? (L.R && L.R.hostScore != null && L.R.endedBy !== 'abandon') : (L.S && L.S.guestScore != null && !L.S.abandonWin);
         var looks = mineIn ? [TM.verdictMs, 3000, 3000] : [];
+        /* 🔴联机压力测试（R3 再续）：等交卷时判离场，判之前对手又回来了（冻住 / 切后台一分多钟以后，心跳又变了）——
+           他正要交卷：先不判，告诉界面接着等（opt.allowBack：界面会接着等的才这么问；不问的照旧）。
+           以前照判：他回来马上交了卷、按真分数是「你赢了」，我这边读得晚（主从延迟）、判他离场也是「你赢了」—— 两边都赢。
+           「变了」= 和 opponentGone 上次看到的心跳不一样（不比两台手机的钟） */
+        var oSide = host ? 'g' : 'h', o0 = (c.opp && c.opp[oSide]) ? c.opp[oSide].val : undefined;
+        var canBack = !!(mineIn && opt && opt.allowBack && o0 !== undefined);
+        var isBack = function (Lx) {
+          var b = (Lx && Lx.v) ? (host ? Lx.v.guestBeat : Lx.v.hostBeat) : undefined;
+          return canBack && b != null && b !== o0;
+        };
+        if (isBack(L)) return { back: true };
         var peek = function (k) {
           if (k >= looks.length) return Promise.resolve(null);
           return sleep(looks[k]).then(function () { return loadView(roomId)['catch'](function () { return null; }); }).then(function (L2) {
             var r2 = realScores(L2, host);
             if (r2) return r2;
             if (L2 && L2.v.abandonWin && L2.v.abandonWin !== my) return { pre: L2.v.abandonWin };
+            if (isBack(L2)) return { back: true };
             return peek(k + 1);
           });
         };
         return peek(0).then(function (seen) {
+          if (seen && seen.back) return { back: true };
           if (seen && seen.pre) return { pre: seen.pre };
           if (seen) return { real: seen };
           return doClaim();
@@ -2040,6 +2053,8 @@
         }
       }).then(function (o) {
         var aw = view(roomId, null, null).abandonWin;
+        /* 对手又回来了：没判，接着等他交卷（只有 opt.allowBack 才会这样） */
+        if (o.back) return { ok: true, back: true };
         /* 写完再读那一下看到对手的真分数（他先交的卷、我读得晚）：同样按真分数算 —— 两边结论一致 */
         if (o.real) return { ok: true, real: true, mine: o.real.mine, theirs: o.real.theirs,
                              result: o.real.mine > o.real.theirs ? 'win' : (o.real.mine < o.real.theirs ? 'lose' : 'draw') };

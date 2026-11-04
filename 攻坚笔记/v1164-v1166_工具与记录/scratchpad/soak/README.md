@@ -27,7 +27,8 @@
   `lib/ui_r1.mjs` 界面模型（新协议），`lib/ui.mjs` 老协议（47a97f9）的界面模型。
 - `specs/regress/` 回归场景（`{name, bug, spec}`），`bundle.mjs` 会把它们嵌进测试文件；`specs/targeted/` 手写的定点场景。
 - `mutants.py` 去掉一个修复的变体；`mk_r1b.mjs` / `mk_r11b.mjs` / `mk_t8.mjs` / `mkspecs.mjs` 是当时找定点场景用的脚本（结果已经在 `specs/` 里，不用再跑）。
-- `out_v1164/`：这次修好以后全部档跑一遍的结果（`progress.txt` 每档一行 SUMMARY）。
+- `out_v1164/`：R1–R12 修好以后全部档跑一遍的结果（`progress.txt` 每档一行 SUMMARY）。5 局出问题：faults 101（对手冻住一分多钟、回来交卷 → 两边都赢）
+  随后修好、成了回归场景 R03c（修好以后 faults 档重跑只剩 28）；faults 28、sweep 663 / 939 / 942 都是「交卷前后断网超过 1 分钟」那条已知限制。
 
 ## 改界面以后
 

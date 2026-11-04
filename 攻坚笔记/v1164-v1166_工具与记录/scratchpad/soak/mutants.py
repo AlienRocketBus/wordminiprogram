@@ -49,8 +49,8 @@ M['R11'] = ('data', lambda s: rep(s, "        if ((_leftGen[roomId] || 0) !== lg
 # ── UI ──
 def r3(s):   # a failed abandon claim counts as a win again (the helper behaves like the old code) + the early banner
     s = rep(s, "      if (w && w.ok) { onOk(w); return; }\n        again(w);", "      onOk(w && w.ok ? w : { result: 'win' }); return;   /* MUTANT R3 */")
-    s = rep(s, "            if (!(w && w.ok)) { next(4000); return; }\n            if (w.real) {",
-               "            if (!(w && w.ok)) { done({ result: 'win', byAbandon: true }); return; }   /* MUTANT R3 */\n            if (w.real) {")
+    s = rep(s, "            if (!(w && w.ok) || w.back) { next(4000); return; }\n            if (w.real) {",
+               "            if (w && w.back) { next(4000); return; }\n            if (!(w && w.ok)) { done({ result: 'win', byAbandon: true }); return; }   /* MUTANT R3 */\n            if (w.real) {")
     s = rep(s, "            done({ result: (w.result === 'void' || w.result === 'lose') ? w.result : 'win', byAbandon: true });\n          }, function () { next(4000); });",
                "            done({ result: (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win', byAbandon: true });\n          }, function () { done({ result: 'win', byAbandon: true }); });")
     return rep(s, "el.textContent = '📶 对手好像掉线了，正在确认这一局的结果…'; el.style.color = 'var(--pk-dim)';", "el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = 'var(--pk-ok)';")
@@ -72,6 +72,12 @@ def r12(s):
     return rep(s, "        if (st.pendTry) delete st.pendTry[i];   /* 联机压力测试 R12：交卷前一定再补写一次 */\n", "")
 M['R12'] = ('ui', r12)
 M['D2'] = ('ui', lambda s: rep(s, "if (alive && Date.now() - (st._resWaitT0 || Date.now()) < 300000)", "if (alive && _waitResult < 150)"))
+# R3 (cont.): the opponent came back before the result-wait claim → hold off (data layer: canBack; UI: asks with allowBack)
+M['R3c'] = ('data', lambda s: rep(s, "        var canBack = !!(mineIn && opt && opt.allowBack && o0 !== undefined);\n", "        var canBack = false;   /* MUTANT R3c */\n"))
+def r3cu(s):
+    s = rep(s, "return S().claimAbandonWin(st.roomId, onBack ? { allowBack: true } : undefined); })", "return S().claimAbandonWin(st.roomId); })   /* MUTANT R3cu */")
+    return rep(s, "S().claimAbandonWin(st.roomId, { allowBack: true }).then(function (w) {", "S().claimAbandonWin(st.roomId).then(function (w) {   /* MUTANT R3cu */")
+M['R3cu'] = ('ui', r3cu)
 for name, (kind, f) in M.items():
     d = os.path.join(OUT, 'M_' + name)
     os.makedirs(d, exist_ok=True)

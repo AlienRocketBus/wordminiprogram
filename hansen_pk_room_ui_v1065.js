@@ -2292,11 +2292,14 @@
       _waitResult = 0;
       /* 🔴联机压力测试 R10：对手根本没进过对战屏（没报到、没答过词）—— 他走了不算「离场」，这局不算，别白送一局胜 */
       if (!st._oppSeen && !(g && g.oppSeen)) { neverCame(st); return; }
-      /* 🔴联机压力测试 R3：判离场写上了才算赢 */
+      /* 🔴联机压力测试 R3：判离场写上了才算赢。
+         （R3 再续）判之前对手又回来了（冻住一分多钟以后心跳又变了，正要交卷）：先不判，接着等他交卷 ——
+         以前照判，他回来交了卷两边都是「你赢了」。等交卷满 5 分钟以后不再等（照判），不会无限等下去 */
+      var capped = Date.now() - (st._resWaitT0 || Date.now()) >= 300000;
       claimAbandonSure(st, function (w) {
         var res = (w.result === 'void' || w.result === 'lose') ? w.result : 'win';
         showResult({ ok: true, result: res, byAbandon: true, mine: score, theirs: 0 });
-      });
+      }, capped ? null : function () { setTimeout(function () { pollResult(st, score); }, 2000); });
     };
     S().opponentGone(st.roomId).then(function (g) {
       if (!stillLive(st)) return;
@@ -2317,7 +2320,8 @@
     lobby({ reason: '对手刚才没进来，这间房先关掉了。再开一间吧。' });
   }
   /* 联机压力测试 R3：判对手离场 —— 写上了才算数；写不上（网又断了）每 3 秒再试，6 次还不行就说「结果没拿到」 */
-  function claimAbandonSure(st, onOk) {
+  /* onBack（可选）：对手又回来了（心跳又变了）—— 数据层没判离场，交给调用的人接着等 */
+  function claimAbandonSure(st, onOk, onBack) {
     var n = 0;
     var again = function (w) {
       if (!stillLive(st)) return;
@@ -2327,10 +2331,11 @@
     };
     var go = function () {
       if (!stillLive(st)) return;
-      Promise.resolve().then(function () { return S().claimAbandonWin(st.roomId); }).then(function (w) {
+      Promise.resolve().then(function () { return S().claimAbandonWin(st.roomId, onBack ? { allowBack: true } : undefined); }).then(function (w) {
         if (!stillLive(st)) return;
         /* 对手其实交了卷（数据层按两边真分数算出的结论）：照真分数显示，不是「对手离场」 */
         if (w && w.ok && w.real) { showResult({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }); return; }
+        if (w && w.ok && w.back && onBack) { onBack(); return; }
         if (w && w.ok) { onOk(w); return; }
         again(w);
       }, function (e) { again({ ok: false, reason: String((e && e.message) || e || '') }); });
@@ -2517,8 +2522,9 @@
         S().opponentGone(st.roomId).then(function (g) {
           if (!(g && g.ok && g.gone && !g.oppFinished)) { next(4000); return; }
           /* 🔴联机压力测试 R3：写上了才算赢；写不上接着等（以前直接记一场「赢」） */
-          S().claimAbandonWin(st.roomId).then(function (w) {
-            if (!(w && w.ok)) { next(4000); return; }
+          S().claimAbandonWin(st.roomId, { allowBack: true }).then(function (w) {
+            /* 写不上，或者对手又回来了（正要交卷）：接着等（整个后台结算 6 分钟封顶） */
+            if (!(w && w.ok) || w.back) { next(4000); return; }
             if (w.real) { done({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }); return; }
             done({ result: (w.result === 'void' || w.result === 'lose') ? w.result : 'win', byAbandon: true });
           }, function () { next(4000); });

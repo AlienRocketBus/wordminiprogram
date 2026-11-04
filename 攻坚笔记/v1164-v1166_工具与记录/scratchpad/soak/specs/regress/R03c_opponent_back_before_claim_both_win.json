@@ -1,0 +1,125 @@
+{
+ "name": "R03c_opponent_back_before_claim_both_win",
+ "bug": "R3 (cont., 56b8146 + R1–R12): the host was frozen for over a minute (JS paused) and comes back; the guest, waiting for the result, decides the host is gone and claims the abandon win while the host hands in its real score (replica lag hides it) → host 「你赢了」 by real scores, guest 「你赢了」 by abandon",
+ "spec": {
+  "seed": 101,
+  "profile": "faults",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 1500,
+   "lagShape": 1,
+   "queryLagMul": 1.16,
+   "queryLagExtra": 599,
+   "lagMode": "monotonic",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "legacy",
+   "orderByFail": true
+  },
+  "unloadSendP": 0.44,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x101",
+    "name": "小明",
+    "rating": 1253,
+    "skew": 0,
+    "net": {
+     "base": 10,
+     "jitter": 16,
+     "spikeP": 0.01,
+     "faultRate": 0.074,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 37878,
+      "dur": 72890
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.54,
+     "minMs": 2709,
+     "maxMs": 14987,
+     "slowP": 0.09
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 953,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 3
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P3",
+    "uid": "k3x101",
+    "name": "朵朵",
+    "rating": 1093,
+    "skew": 0,
+    "net": {
+     "base": 11,
+     "jitter": 5,
+     "spikeP": 0.01,
+     "faultRate": 0.079,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.71,
+     "minMs": 1446,
+     "maxMs": 11411,
+     "slowP": 0.14
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 3263,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 3
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null
+   }
+  ],
+  "adversary": null
+ }
+}

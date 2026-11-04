@@ -326,7 +326,7 @@ function uiPortNote() {
     const src = fs.readFileSync(path.join(repoDir, 'hansen_pk_room_v1065.js'), 'utf8');
     if (!/settleRound/.test(src)) return;   /* pre-round-1 protocol: the 47a97f9 port (lib/ui.mjs) is used */
     const f = loadUiFlags(repoDir);
-    console.log('UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: ' + (['abandonSure', 'finishSettles', 'failedPending', 'neverCameGuard', 'neverCameGuardPoll', 'pendingKept', 'timeCap', 'resumeCheck', 'settleWhileOffline'].filter((k) => f[k]).join(', ') || 'none'));
+    console.log('UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: ' + (['abandonSure', 'finishSettles', 'failedPending', 'neverCameGuard', 'neverCameGuardPoll', 'pendingKept', 'timeCap', 'resumeCheck', 'settleWhileOffline', 'claimBack'].filter((k) => f[k]).join(', ') || 'none'));
     if (f.changed && f.changed.length) console.log('WARNING: ported UI functions differ from the version the port was checked against (56b8146 + 联机压力测试 fixes) — re-check lib/ui_r1.mjs: ' + f.changed.join(', '));
   } catch (e) {}
 }

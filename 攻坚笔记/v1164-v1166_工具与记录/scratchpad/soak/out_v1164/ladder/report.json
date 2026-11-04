@@ -1,0 +1,123 @@
+{
+ "summary": "SUMMARY profile=ladder runs=600 seeds=1..600 failing_runs=0 clusters=8 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:18 I3:0 I4:0 I5:1 I6:3 I7:0 I8:11 I9:1 I10:0 | matches=828 settled_pairs=688 virtual=92.4h events=1045970 real=67s",
+ "profile": "ladder",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I2": 18,
+  "I8": 11,
+  "I6": 3,
+  "I9": 1,
+  "I5": 1
+ },
+ "failingRuns": 0,
+ "failingSeeds": [],
+ "clusters": [
+  {
+   "sig": "I2:remove:adv-forged-target",
+   "inv": "I2",
+   "sev": "low",
+   "count": 18,
+   "seeds": [
+    27,
+    30,
+    80,
+    90,
+    165,
+    205,
+    206,
+    209,
+    271,
+    280,
+    355,
+    437
+   ],
+   "example": "remove rzf17719 owned by ADV"
+  },
+  {
+   "sig": "I8:adv-seat-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 5,
+   "seeds": [
+    30,
+    205,
+    326,
+    450,
+    578
+   ],
+   "example": "host accepted rmk0gfbq75ri81g_s0 created by the adversary"
+  },
+  {
+   "sig": "I8:matchmaking-blocked:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 5,
+   "seeds": [
+    30,
+    205,
+    287,
+    463,
+    544
+   ],
+   "example": "with the adversary 0 honest match(es) settled, without it 1"
+  },
+  {
+   "sig": "I8:fewer-matches-settled:seat-squatting",
+   "inv": "I8",
+   "sev": "low",
+   "count": 3,
+   "seeds": [
+    69,
+    188,
+    570
+   ],
+   "example": "with the adversary 1 honest match(es) settled, without it 2"
+  },
+  {
+   "sig": "I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away",
+   "inv": "I6",
+   "sev": "low",
+   "count": 3,
+   "seeds": [
+    94,
+    348,
+    357
+   ],
+   "example": "joinRoom(rmk0get39usu0ad) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I8:impersonated-guest-accepted",
+   "inv": "I8",
+   "sev": "low",
+   "count": 3,
+   "seeds": [
+    287,
+    463,
+    570
+   ],
+   "example": "host accepted rmk0ggwm545h7or_s0 created by the adversary claiming to be P2"
+  },
+  {
+   "sig": "I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    357
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gca6p8i1uv4) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else"
+  },
+  {
+   "sig": "I5:played-on-after-opponent-claimed-abandon:guest-after-resume",
+   "inv": "I5",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    595
+   ],
+   "example": "P1 (guest) kept answering 2 more words after the opponent had claimed the win by abandon at 154.8s — it is only told at the very end"
+  }
+ ],
+ "minimal": []
+}

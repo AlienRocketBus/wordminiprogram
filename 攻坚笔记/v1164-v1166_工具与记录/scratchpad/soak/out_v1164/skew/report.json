@@ -1,0 +1,59 @@
+{
+ "summary": "SUMMARY profile=skew runs=600 seeds=1..600 failing_runs=0 clusters=4 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:0 I3:0 I4:0 I5:0 I6:4 I7:0 I8:0 I9:4 I10:0 | matches=605 settled_pairs=554 virtual=74.6h events=597498 real=24s",
+ "profile": "skew",
+ "runs": 600,
+ "from": 1,
+ "perInv": {
+  "I6": 4,
+  "I9": 4
+ },
+ "failingRuns": 0,
+ "failingSeeds": [],
+ "clusters": [
+  {
+   "sig": "I6:full-room-reported-gone:findByCode",
+   "inv": "I6",
+   "sev": "low",
+   "count": 3,
+   "seeds": [
+    138,
+    251,
+    279
+   ],
+   "example": "findByCode(D35X) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:findByCode",
+   "inv": "I9",
+   "sev": "low",
+   "count": 3,
+   "seeds": [
+    138,
+    251,
+    279
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) findByCode(D35X) → 「没找到这间房，可能已经关了或码输错了」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I6:full-room-reported-gone:joinRoom",
+   "inv": "I6",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    444
+   ],
+   "example": "joinRoom(rmk0g26q1dc8sk0) → 「房主暂时离开了，换一间吧」 but the room is alive, just already playing with someone else"
+  },
+  {
+   "sig": "I9:I6:full-room-reported-gone:joinRoom",
+   "inv": "I9",
+   "sev": "low",
+   "count": 1,
+   "seeds": [
+    444
+   ],
+   "example": "(only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0g26q1dc8sk0) → 「房主暂时离开了，换一间吧」 but the room is alive, just already playing with someone else"
+  }
+ ],
+ "minimal": []
+}

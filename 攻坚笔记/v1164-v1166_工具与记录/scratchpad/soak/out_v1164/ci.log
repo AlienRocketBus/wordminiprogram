@@ -1,0 +1,19 @@
+
+══ clusters (7) ══
+  [low   ]   10× I2:remove:adv-forged-target   seeds 11,44,65,91,183,217
+           e.g. remove rzf12431 owned by ADV
+  [low   ]    5× I8:matchmaking-blocked:seat-squatting   seeds 214,217,236,295,302
+           e.g. with the adversary 0 honest match(es) settled, without it 1
+  [low   ]    4× I8:impersonated-guest-accepted   seeds 183,245,264,302
+           e.g. host accepted rmk0gik73.nu7coxy9_s0 created by the adversary claiming to be P2
+  [low   ]    3× I8:adv-seat-accepted   seeds 91,217,236
+           e.g. host accepted rmk0gftlgixjhbl_s0 created by the adversary
+  [low   ]    2× I6:taken-but-nobody-else:room-holds-my-own-key:after-own-cancel-or-away   seeds 394,395
+           e.g. joinRoom(rmk0gecsdyehhtr) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 33
+           e.g. joinRoom(rmk0gdy38av75yt) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+  [low   ]    1× I9:I6:taken-but-nobody-else:host-reopened-my-seat:after-own-cancel-or-away   seeds 33
+           e.g. (only with clock skew: absent in 3 re-runs with all clocks equal) joinRoom(rmk0gdy38av75yt) → 「这间房刚被别人占了，换一间吧」 but no other guest ever held a seat / the host never re-opened for someone else
+
+SUMMARY profile=ci runs=400 seeds=1..400 failing_runs=0 clusters=7 (fail-level 0) | runs-with-violation per invariant: ERR:0 I1:0 I2:10 I3:0 I4:0 I5:0 I6:3 I7:0 I8:9 I9:1 I10:0 | matches=434 settled_pairs=379 virtual=51.7h events=467348 real=29s
+UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: abandonSure, finishSettles, failedPending, neverCameGuard, neverCameGuardPoll, pendingKept, timeCap, resumeCheck, settleWhileOffline

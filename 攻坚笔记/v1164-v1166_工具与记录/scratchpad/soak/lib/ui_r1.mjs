@@ -713,10 +713,12 @@ export class UiR1 {
       this._waitResult = 0;
       if (this.fix.neverCameGuard && !st._oppSeen && !(g && g.oppSeen)) { this.neverCame(st, 'result-wait-' + why); return; }
       if (this.fix.abandonSure) {
+        /* patched (R3 cont.): the opponent came back before the claim (their beat changed) → no claim, keep waiting (not after the 5-min cap) */
+        const capped = this.now() - (st._resWaitT0 || this.now()) >= 300000;
         this.claimAbandonSure(st, (w) => {
           const res = (w.result === 'void' || w.result === 'lose') ? w.result : 'win';
           this.showResult({ ok: true, result: res, byAbandon: true, mine: score, theirs: 0 }, 'result-wait-' + why + (res !== 'win' ? '-' + res : ''));
-        });
+        }, (this.fix.claimBack && !capped) ? () => { this.log('abandon claim: opponent came back → keep waiting'); this.setTimeout(() => this.pollResult(st, score), 2000); } : null);
         return;
       }
       const fin = (w) => {
@@ -761,8 +763,8 @@ export class UiR1 {
         if (!(r && r.ok && r.waiting) || n % 8 !== 0) { next(4000); return; }
         this.api.opponentGone(st.roomId).then((g) => {
           if (!(g && g.ok && g.gone && !g.oppFinished)) { next(4000); return; }
-          this.api.claimAbandonWin(st.roomId).then((w) => {
-            if (this.fix.abandonSure && !(w && w.ok)) { next(4000); return; }
+          this.api.claimAbandonWin(st.roomId, this.fix.claimBack ? { allowBack: true } : undefined).then((w) => {
+            if (this.fix.abandonSure && (!(w && w.ok) || w.back)) { next(4000); return; }
             if (w && w.ok && w.real) { done({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }); return; }
             done({ result: (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win', byAbandon: true });
           }, () => { if (this.fix.abandonSure) next(4000); else done({ result: 'win', byAbandon: true }); });
@@ -782,7 +784,7 @@ export class UiR1 {
     this.lobby({ reason: '对手刚才没进来，这间房先关掉了。再开一间吧。' });
   }
   /* patched UI (R3) claimAbandonSure: the abandon win counts only once it is written; retry every 3 s, 6 tries, then 结果没拿到 */
-  claimAbandonSure(st, onOk) {
+  claimAbandonSure(st, onOk, onBack) {
     let n = 0;
     const again = (w) => {
       if (!this.stillLive(st)) return;
@@ -792,9 +794,10 @@ export class UiR1 {
     };
     const go = () => {
       if (!this.stillLive(st)) return;
-      this.call('claimAbandonWin', st.roomId).then((w) => {
+      this.call('claimAbandonWin', st.roomId, onBack ? { allowBack: true } : undefined).then((w) => {
         if (!this.stillLive(st)) return;
         if (w && w.ok && w.real) { this.showResult({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }, 'abandon-claim-real-scores'); return; }
+        if (w && w.ok && w.back && onBack) { onBack(); return; }
         if (w && w.ok) { onOk(w); return; }
         again(w);
       }, (e) => again({ ok: false, reason: String((e && e.message) || e || '') }));
