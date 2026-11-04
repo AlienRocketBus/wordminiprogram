@@ -7,7 +7,7 @@
 name: 反复测试
 
 on:
-  # 开发分支上：提交说明写 [反复测试] 就跑（默认 cloud_v1164 跑 10 轮）；手动点也行（手动要等它进了 main）
+  # 开发分支上：提交说明以 [反复测试] 开头就跑（默认 cloud_v1164 跑 10 轮）；手动点也行（手动要等它进了 main）
   push:
     branches: ['claude/**']
   workflow_dispatch:
@@ -27,7 +27,8 @@ permissions:
 jobs:
   plan:
     name: 排几轮
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[反复测试]')
+    # 提交说明必须以 [反复测试] 开头才跑 —— 只在正文里提到这个词不算（11-04 踩到：说明文字里写了它，就白跑了 10 台机器）
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[反复测试]')
     runs-on: ubuntu-latest
     outputs:
       list: ${{ steps.p.outputs.list }}
