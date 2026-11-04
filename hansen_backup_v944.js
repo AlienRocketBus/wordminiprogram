@@ -611,7 +611,37 @@
       if(root.location&&typeof root.location.reload==='function')root.location.reload();return true;
     }catch(e){status('❌ '+e.message,false);return false;}
   }
-  function restore(input){var p=parseInput(input),n=replaceAll(p.items);return {items:n,appVersion:p.appVersion,createdAt:p.createdAt};}
+  /* 🔴v1164 恢复之后、页面重新载入之前「冻结」进度：
+     恢复只改了本机存储，页面内存里还是旧进度（v1026 的教训：必须重新载入）。从写好到真正重新载入有 0.6～1.2 秒，
+     这中间孩子答一题、或者页面关掉时顺手存一下，都会把内存里的旧进度写回去 —— 重新载入后它就成了「对上了账」的进度，
+     被传上云：云端 20 个词被 4 个词盖掉。
+     所以：恢复一写完，就记一个冻结标记（sessionStorage，同一个标签页里的几层页面都看得到），
+     冻结期间所有页面往「备份管的那些键」里写 / 删都不算数（凭证、云存档自己的状态、账号标记这些不受影响）。
+     · 解冻：持有进度的那一层页面（往外数最后一层装了备份模块的）**下一次载入时清掉一次**；
+       不管怎样 30 秒后自动作废 —— 卡住了也不会让孩子一直存不了。
+     · 恢复是嵌着的那层（比如岛里的季节页）做的：它只刷新自己，外层岛页内存里也是旧的 —— 外层也要重新载入。 */
+  var FREEZE_KEY='hsnRestoreFreeze_v1164',FREEZE_MS=30000;
+  function framePath(w){var p=[];try{while(w&&w.parent&&w.parent!==w){var par=w.parent,i=-1;for(var j=0;j<par.frames.length;j++)if(par.frames[j]===w){i=j;break;}p.unshift(i);w=par;}}catch(e){p.unshift('?');}return p.join('.');}
+  function ownerWin(){var w=root;try{while(w.parent&&w.parent!==w&&w.parent.HansenBackup)w=w.parent;}catch(e){}return w;}
+  function readFreeze(ss){try{var r=JSON.parse(ss.getItem(FREEZE_KEY)||'null'),age=r&&Date.now()-r.at;return (r&&typeof r.at==='number'&&age>=0&&age<FREEZE_MS)?r:null;}catch(e){return null;}}
+  function guardRealm(w){
+    try{
+      var SP=w.Storage&&w.Storage.prototype,ss=w.sessionStorage;if(!SP||!ss||SP.setItem.__hsnFreeze)return;
+      var wrap=function(orig,keyed){var f=function(k){
+        if(this!==ss&&!w.__hsnRestoreApplying&&readFreeze(ss)&&(!keyed||ownedKey(k)||transientKey(k)||derivedKey(k)))return;   /* 冻结中：作废 */
+        return orig.apply(this,arguments);};f.__hsnFreeze=true;return f;};
+      SP.setItem=wrap(SP.setItem,true);SP.removeItem=wrap(SP.removeItem,true);SP.clear=wrap(SP.clear,false);
+    }catch(e){}
+  }
+  function freezeAfterRestore(){
+    try{
+      var o=ownerWin();root.sessionStorage.setItem(FREEZE_KEY,JSON.stringify({at:Date.now(),path:framePath(o)}));
+      (function walk(w){guardRealm(w);try{for(var i=0;i<w.frames.length;i++)walk(w.frames[i]);}catch(e){}})(o);
+      if(o!==root&&o.HansenBackup&&o.HansenBackup._reloadSoon)o.HansenBackup._reloadSoon();
+    }catch(e){}
+  }
+  function reloadSoon(){setTimeout(function(){try{root.location.reload();}catch(e){}},1500);}
+  function restore(input){var p=parseInput(input),n;root.__hsnRestoreApplying=true;try{n=replaceAll(p.items);}finally{root.__hsnRestoreApplying=false;}freezeAfterRestore();return {items:n,appVersion:p.appVersion,createdAt:p.createdAt};}
   function restoreFromArea(){
     var ta=document.getElementById('hsnBackupArea'),text=ta?ta.value:'';
     function go(){try{var r=restore(text);status('✅ 已恢复 '+r.items+' 项数据，正在刷新…',true);setTimeout(function(){location.reload();},500);}catch(e){status('❌ '+e.message,false);}}
@@ -641,7 +671,10 @@
     try{var s=document.getElementById('settingsScreen');if(s&&(s.classList.contains('active')||s.classList.contains('show')))inject();}catch(e){}
   }
 
-  var startupRecovery=null;try{startupRecovery=recoverRestoreJournal();}catch(recoveryErr){startupRecovery={recovered:false,error:recoveryErr.message};root.__hansenBackupRecoveryError=recoveryErr.message;}
-  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,/* v1081: 面板要显示版本号——此前无法确认用户手机上跑的是哪一版，改了五版都不知有没有生效 */appVersion:function(){return CURRENT_APP_VERSION;},build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL};
+  /* 新载入的这一页就是冻结时持有进度的那一层：解冻（只清这一次）；过期的也清掉 */
+  try{var _ss=root.sessionStorage,_fr=JSON.parse(_ss.getItem(FREEZE_KEY)||'null');if(_fr&&(!readFreeze(_ss)||_fr.path===framePath(root)))_ss.removeItem(FREEZE_KEY);}catch(e){}
+  guardRealm(root);
+  var startupRecovery=null;root.__hsnRestoreApplying=true;try{startupRecovery=recoverRestoreJournal();}catch(recoveryErr){startupRecovery={recovered:false,error:recoveryErr.message};root.__hansenBackupRecoveryError=recoveryErr.message;}root.__hsnRestoreApplying=false;
+  root.HansenBackup={schema:SCHEMA,schemaVersion:SCHEMA_VERSION,/* v1081: 面板要显示版本号——此前无法确认用户手机上跑的是哪一版，改了五版都不知有没有生效 */appVersion:function(){return CURRENT_APP_VERSION;},build:build,exportCode:function(){return toCode(build());},parse:parseInput,restore:restore,exportToArea:exportToArea,download:download,restoreFromArea:restoreFromArea,loadFile:loadFile,isOwnedKey:ownedKey,recoverRestoreJournal:recoverRestoreJournal,startupRecovery:startupRecovery,buildResetForensic:buildResetForensic,downloadResetForensic:downloadResetForensic,discardInvalidResetJournal:discardInvalidResetJournal,_replaceAll:replaceAll,_journalKey:RESTORE_JOURNAL,_reloadSoon:reloadSoon,restoreFrozen:function(){try{return !!readFreeze(root.sessionStorage);}catch(e){return false;}}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hookSettings);else hookSettings();
 })(typeof window!=='undefined'?window:this);

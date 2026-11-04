@@ -132,6 +132,18 @@ async function cloudWords(num, label) {
     /* 稍后自动重试（切回前台 / 网恢复都会触发；20 秒内最多一次） */
     const wait = 21000 - (Date.now() - tLogin);
     if (wait > 0) await H.sleep(wait);
+    /* 恢复一写完、页面还没重新载入（0.6～1.2 秒）：孩子又答了一题、页面关掉时也顺手存了一下 —— 用的都是内存里的旧进度。
+       不管是哪一层页面做的恢复，这两下都不许算数（以前：重新载入后本机是 4 个词，被当成对上了账传上云，云端 20 → 4） */
+    for (const f of N.page.frames()) await f.evaluate(() => {
+      const B = window.HansenBackup; if (!B || B.__r2t) return true;
+      const o = B.restore; B.__r2t = 1;
+      B.restore = function () {
+        const r = o.apply(this, arguments);
+        try { localStorage.setItem('wordIslandFood', JSON.stringify({ learned: [1, 2, 3, 4] })); window.dispatchEvent(new Event('pagehide')); } catch (e) { /* 不许抛给恢复 */ }
+        return r;
+      };
+      return true;
+    }).catch(() => {});
     await N.eval(() => {
       Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
       document.dispatchEvent(new Event('visibilitychange'));
@@ -145,6 +157,24 @@ async function cloudWords(num, label) {
     await t.ok(nN === 20 && !flag2, `网好了自动再对一次账：云端的 20 个词恢复到了这台手机（本机现在 ${nN} 个；还没对上账的记号：${flag2 || '已清'}）`, () => explain());
     const c = await cloudWords('13400000022', '第三台手机');
     await t.ok(c.n === 20, `云端还是 20 个词（另一台手机拿到 ${c.n} 个）`, () => explain());
+    /* 解冻：重新载入以后照常能存（冻结只管恢复到重新载入之间那一下） */
+    await setWords(N, 21);
+    const n21 = await words(N), frozen = await N.eval(() => !!(window.HansenBackup.restoreFrozen && window.HansenBackup.restoreFrozen()));
+    await t.ok(n21 === 21 && !frozen, `重新载入以后又能正常存进度了（写 21 个词，读回 ${n21} 个；还冻着：${frozen ? '是' : '否'}）`, () => explain());
+    /* 恢复是嵌着的季节页做的（它只会刷新自己）：外层岛页内存里也是旧的 —— 外层的写入同样作废，外层也要自己重新载入，载入后解冻 */
+    const season = N.page.frames().find((f) => /island_season/.test(f.url()));
+    await t.ok(!!season, `岛页里嵌着季节页（${season ? '有' : '没有'}）`, () => explain());
+    if (season) {
+      await N.eval(() => { window.__r2mark = 1; return true; });
+      await season.evaluate(() => { const B = window.HansenBackup; B.restore(B.exportCode()); return true; });
+      await setWords(N, 1);
+      const nFz = await words(N);
+      await settle(N, 3000);
+      const reloaded = await N.eval(() => !window.__r2mark);
+      await setWords(N, 22);
+      const n22 = await words(N), fz2 = await N.eval(() => !!window.HansenBackup.restoreFrozen());
+      await t.ok(nFz === 21 && reloaded && n22 === 22 && !fz2, `季节页做的恢复：外层岛页的旧进度没写进去（${nFz} 个）、外层自己重新载入了（${reloaded ? '是' : '否'}）、载入后又能存（${n22} 个；还冻着：${fz2 ? '是' : '否'}）`, () => explain());
+    }
   });
 
   /* ══ ③ 共用手机换账号、网很慢 ═════════════════════════════════════ */
