@@ -75,7 +75,10 @@ try {
   const went = R1 && await joinRoom(G1, R1._id);
   const seat = await H.until(() => H.roomDocs(emu).find((d) => d.kind === 'seat' && d.roomId === R1._id && d._openid === G1.cloudUid), { timeout: 10000 });
   await t.ok(went && seat, '客人点了「进去打」，座位已经抢到（房主还没来得及确认）', () => explain());
-  await G1.tap('#prBack').catch(async () => { await G1.eval(() => window.HansenPkRoomUI && HansenPkRoomUI.close()); });
+  /* 🔴审查 T13：点不到「← 返回」本身就是问题（被挡住 / 不见了）—— 要算失败，不能悄悄用 API 关掉再接着测 */
+  const backTap = await G1.tap('#prBack').then(() => '', (e) => String((e && e.message) || e));
+  await t.ok(!backTap, `「正在进房，等房主确认…」这一屏的「← 返回」点得到（${backTap || '点到了'}）`, () => explain());
+  if (backTap) await G1.eval(() => window.HansenPkRoomUI && HansenPkRoomUI.close());   /* 记过失败了；收拾一下让后面几项照样能测 */
   const gone = await H.until(() => !H.roomDocs(emu).some((d) => d.kind === 'seat' && d._openid === G1.cloudUid && d.roomId === R1._id && !d.left), { timeout: 8000 });
   await t.ok(gone, '客人点了返回 → 自己的座位收回了（不留孤儿座位让房主跟空气开打）', () => explain());
   hold.release();

@@ -116,7 +116,13 @@ async function screen(label, sel, setup, waitFor) {
   await pg.evaluate(setup);
   await pg.waitForTimeout(1700);
   /* v1164：对战屏要等两边都报到（最多 2 秒）才画出来 —— 等它真出来再量，别量到「准备开始」那一屏 */
-  if (waitFor) { try { await pg.waitForSelector(waitFor, { timeout: 8000 }); await pg.waitForTimeout(300); } catch (e) {} }
+  /* 🔴审查 T13：等不到就是这一屏没画出来 —— 要算失败，不能去量当时碰巧在屏幕上的别的东西 */
+  if (waitFor) {
+    let came = true;
+    try { await pg.waitForSelector(waitFor, { timeout: 8000 }); await pg.waitForTimeout(300); } catch (e) { came = false; }
+    ok(came, `★ ${label} 真的画出来了（等到了 ${waitFor}）`);
+    if (!came) return;
+  }
   const bad = await pg.evaluate(s => window.__contrast(s), sel);
   ok(bad.length === 0,
      `★ ${label} 所有文字对比度达标` +
