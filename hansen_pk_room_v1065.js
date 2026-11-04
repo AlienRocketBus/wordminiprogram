@@ -1827,14 +1827,7 @@
             return Promise.resolve(need ? loadView(roomId)['catch'](noop) : null).then(function () { return decide(r, k); });
           });
         }
-        function decide(r, k) {
-          if (r.doc && validWin(r.doc, roomId, ep, i)) { setWin(roomId, i, r.doc); return res(false, c.wins[i].winner); }
-          if (r.doc && k < ALT.length - 1) {
-            /* 🔴审查 F9：这个 _id 被陌生人抢先建了（不是这局两个人写的）→ 换备用号写 */
-            c.sq[i] = Math.max(c.sq[i] || 0, k + 1);
-            return attempt(k + 1);
-          }
-          if (r.doc) return failK('other', '这一词没记上，接着拼下一词吧', 'win ids squatted');
+        function pendingRound() {
           /* 🔴审查 F1：读不回来 → 结果待定，不能当成「输了 0 分」。再看几秒；还不知道就让界面之后补算 */
           return settleRound(roomId, i).then(function (st) {
             if (st && st.settled) return st;
@@ -1842,6 +1835,22 @@
             return { ok: true, pending: true, won: false, first: false, score: 0, winner: '',
                      round: decided(roomId), winners: winnersOf(roomId), mode: M.key };
           });
+        }
+        function decide(r, k) {
+          if (r.doc && validWin(r.doc, roomId, ep, i)) { setWin(roomId, i, r.doc); return res(false, c.wins[i].winner); }
+          if (r.doc && !(c.meta && c.seat && c.guestId)) {
+            /* 🔴v1164（审查 F13 · 实测）：这一词已经有人写了，可我还不知道这局的客人是谁（座位没读到 / 那一下读失败了）——
+               认不出是不是陌生人写的。**这时不能换备用号**：真是对手写的话，两个人各写一份，都成了「先拼对」
+               （压力下实测出现过：4 个词里 1 个两边都 +100）。按「结果待定」走：再读几次，读到座位就认得出 */
+            return pendingRound();
+          }
+          if (r.doc && k < ALT.length - 1) {
+            /* 🔴审查 F9：这个 _id 被陌生人抢先建了（不是这局两个人写的）→ 换备用号写 */
+            c.sq[i] = Math.max(c.sq[i] || 0, k + 1);
+            return attempt(k + 1);
+          }
+          if (r.doc) return failK('other', '这一词没记上，接着拼下一词吧', 'win ids squatted');
+          return pendingRound();
         }
         return attempt(Math.min(c.sq[i] || 0, ALT.length - 1));
       });

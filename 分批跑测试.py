@@ -53,7 +53,8 @@ LONG_TEST = 600
 
 
 def _limit(name):
-    return LONG_TEST if '_cloud_v1164' in name else PER_TEST
+    # 🔴v1164（第一轮修复）：test_cloud_errors_v1164 也是真 SDK 端到端（名字里 cloud 在前面），单跑就要 2~3 分钟
+    return LONG_TEST if ('cloud' in name and '_v1164' in name) else PER_TEST
 
 
 def fingerprint():

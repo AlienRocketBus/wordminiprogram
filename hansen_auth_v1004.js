@@ -892,6 +892,14 @@
       else localStorage.removeItem(OWNER_KEY);
     } catch (e) {}
   }
+  /* 云存档刚把本机进度传进当前账号：本机这份还没有主人时，记成这个账号的（有别的主人就不动 ——
+     那要等登录对账去认，不能因为传了一次就把别人的进度算成我的） */
+  function claimLocalProgress() {
+    try {
+      var uid = (readLocal() || {}).uid || '';
+      if (uid && !localOwner() && isSignedIn()) markLocalOwner(uid);
+    } catch (e) {}
+  }
   /* 本机这份进度是不是「别人的」——
      有主人、且不是当前这个人，才算别人的。
      没主人（从没登录过就玩的）不算别人的，那是用户自己的东西。 */
@@ -1613,6 +1621,7 @@
     _sdk: loadSdk,
     /* 审查 TI-4：登录服务通不通 —— 数据库报 network request error 时，用它分辨「真断网」还是「数据库拒绝」 */
     probeCloud: probeCloud,
+    claimLocalProgress: claimLocalProgress,
     /* v1093: 供子框借用顶层已建好的 auth 对象 */
     _authObj: function () { return _auth; }
   };

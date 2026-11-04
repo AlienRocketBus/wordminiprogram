@@ -716,6 +716,10 @@
       /* 🔴v1039: 记下写到哪儿, 地址变了下次必重写；🔴v1003: 首次成功即开启自动同步；
          🔴v1164（审查 AUTH-1）：记下这次密文的 iv —— 下次登录时认得出「云端那份是不是我最后传的」 */
       writeState({ lastUpAt: Date.now(), lastHash: h, lastDocId: targetId, lastIv: iv, enabled: true, upLock: null });
+      /* 🔴v1164（审查 AUTH-1）：本机这份进度已经传进了这个账号 —— 它就是这个账号的了。
+         还没有主人时记上（在首页登录的孩子，登录那一刻页面上没有云存档模块，对账没跑、主人一直空着；
+         之后会话死掉、重新登录时，就认不出「本机这份是我的、比云端新」，又拿云端旧档盖掉）。 */
+      try { if (window.HansenAuth && typeof HansenAuth.claimLocalProgress === 'function') HansenAuth.claimLocalProgress(); } catch (e) {}
       _busy = false; renderCard();
       return { ok:true, bytes: code.length };
     }, function(err){

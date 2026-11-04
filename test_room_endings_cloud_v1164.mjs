@@ -137,10 +137,17 @@ try {
     const A = await phone('房主', '小蜂房主'), B = await phone('客人', '小蜂客人');
     const rid = await pairUp(A, B, 'A');
     await startPolling(A, rid); await startPolling(B, rid);
-    await H.sleep(3000);
+    /* 对战屏早就在轮询了：断网之前两边都已经看到过对方的心跳（每 4 秒一次 opponentGone，这里等两轮） */
+    await H.sleep(9000);
+    const pre = await Promise.all([H.room(A, 'opponentGone', rid), H.room(B, 'opponentGone', rid)]);
+    await t.ok(pre.every((g) => g && g.ok && !g.gone), `断网前两边都在（${JSON.stringify(pre.map((g) => g && g.idleSecs))}）`, () => explain());
     emu.setOffline(true);
     await H.sleep(70000);
     emu.setOffline(false);
+    /* 网一回来，两边马上各问一次（对战屏的轮询就是这样：第一下往往抢在对方心跳续上之前） */
+    const [ga, gb] = await Promise.all([H.room(A, 'opponentGone', rid), H.room(B, 'opponentGone', rid)]);
+    await t.ok(ga && ga.ok && !ga.gone && gb && gb.ok && !gb.gone,
+      `网一回来的第一下：两边都没说「对手离场」（房主 ${JSON.stringify(ga)}，客人 ${JSON.stringify(gb)}）—— 以前两边都 idle 70 多秒、各判一场胜`, () => explain());
     await H.sleep(16000);
     const oa = await stopPolling(A), ob = await stopPolling(B);
     const goneA = oa.filter((x) => x.ok && x.gone), goneB = ob.filter((x) => x.ok && x.gone);

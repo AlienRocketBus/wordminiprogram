@@ -91,7 +91,8 @@ try {
     /* ══ ① 会话死了 ════════════════════════════════════════════════ */
     t.section('① 玩着玩着云端会话死了：岛里的检查判了「过期」（审查 AUTH-1 / AUTH-2）');
     const es = fr ? await fr.evaluate(() => window.HansenAuth.ensureSession()) : null;
-    await t.ok(es && es.expired, `岛里的检查：云端会话确实过期了（${JSON.stringify(es && { kind: es.kind, expired: es.expired })}）`, () => explain());
+    /* 岛自己的启动检查也可能抢先一步判了过期（那时本机的「登录着」已经清了，这一问就回 signin）—— 两种都是「判了过期」 */
+    await t.ok(es && !es.ok && (es.expired || es.kind === 'signin'), `岛里的检查：云端会话确实过期了（${JSON.stringify(es && { kind: es.kind, expired: es.expired })}）`, () => explain());
     await H.sleep(1500);
     let top = await X.screen();
     await t.ok(!has(top, /别的窗口/), `首页没有冒出「别的窗口退出了登录」—— 根本没有别的窗口（首页：${flat(top).slice(0, 60)}）`, () => explain());

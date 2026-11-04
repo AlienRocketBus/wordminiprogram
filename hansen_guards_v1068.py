@@ -3811,11 +3811,14 @@ def guard_room_transport_checks_code():
         return
     if not ck or 'r.code' not in ck or 'throw' not in ck:
         bad('对战回包查 code', 'chk() 没有在 r.code 存在时抛错 —— 云端拒绝会被当成成功')
-    n = len(re.findall(r'\bchk\(', rt))
-    if n < 6:
+    # 🔴v1164（第一轮修复）：以前只数 chk() 有几处（≥6）—— v1164 多了一个 getMany，
+    #   于是拿掉 read 的 chk 还剩 6 处，这道守卫就不咬了。现在按操作名逐个认。
+    missing = [op for op in ('add', 'read', 'getMany', 'patch', 'remove', 'list', 'listOpen')
+               if ("chk('%s')" % op) not in rt]
+    if missing:
         bad('对战回包查 code',
-            'realTransport 里只有 %d 处 chk()（add/read/patch/remove/list/listOpen 至少 6 处）—— '
-            '漏查的那个操作，权限被拒时会安安静静地「成功」' % n)
+            'realTransport 里这些操作没过 chk()：%s —— '
+            '漏查的那个操作，权限被拒时会安安静静地「成功」' % '、'.join(missing))
 
 
 def _sdk_ops_outside_call(src):

@@ -153,6 +153,36 @@ for (const [mode, wantSlow] of [['A', 0], ['B', 80], ['C', 60]]) {
      'A 抢答赛不多写（有人拼对就翻篇，不用等）');
 }
 
+/* ④b 🔴v1164（审查 F13 · 压力下实测）：云端对重复 _id 悄悄吞掉（假装成功、不写），
+   房主这边那一下又没读到座位（刚刷新过页面、座位那次读失败）——
+   以前房主认不出客人那份回合文档，就当成「陌生人占的」换备用号再写一份：两个人都「先拼对」。
+   现在：认不出就「结果待定」，读到座位以后照实结算，备用号不写。 */
+{
+  const db = store();
+  const base = db.as;
+  let seatFails = 3;   /* 传输层会自己重试 2 次：3 次全失败 = 这一次座位确实没读到 */
+  db.as = (uid) => {
+    const t = base(uid);
+    return Object.assign({}, t, {
+      add: async (d) => { await null; if (db.docs.has(d._id)) return { id: d._id };   /* 悄悄吞掉 */
+        db.docs.set(d._id, { ...JSON.parse(JSON.stringify(d)), _openid: uid }); return { id: d._id }; },
+      read: async (id) => {
+        if (uid === 'H' && id === 'R1_s0' && seatFails-- > 0) throw Object.assign(new Error('network request error'), { kind: 'network' });
+        return t.read(id);
+      },
+    });
+  };
+  db.docs.set('R1', { _id: 'R1', proto: 2, kind: 'room', _openid: 'H', hostId: 'H', guestId: 'G', status: 'playing',
+                      seat: 0, mode: 'A', wordCount: 3, createdAt: Date.now(), heartbeatAt: Date.now() });
+  db.docs.set('R1_s0', { _id: 'R1_s0', proto: 2, kind: 'seat', _openid: 'G', roomId: 'R1', epoch: 0, guestId: 'G', guestBeat: Date.now() });
+  const G = player(db, 'G'), H = player(db, 'H');
+  for (const P of [G, H]) P._setTimingForTest({ lagMs: 5, settleMs: 400 });
+  const g = await G.claimRound('R1', 0);
+  const h = await H.claimRound('R1', 0);
+  ok(g.ok && g.first && h.ok && !h.first, `★ 云端吞掉重复写 + 房主没读到座位：只有客人是「先拼对」（客人 first=${g.first}，房主 first=${h.first}${h.pending ? '（结果待定）' : ''}）`);
+  ok(![...db.docs.keys()].some((k) => /^R1_w0[bc]$/.test(k)), `★ 认不出是谁写的就不换备用号（库里：${[...db.docs.keys()].filter((k) => /_w/.test(k)).join(', ')}）`);
+}
+
 /* ⑤ 规则说明是单一真源 */
 {
   const { S } = mk('C');

@@ -1,4 +1,4 @@
-const __HSN_ROOT = decodeURIComponent(new URL('.', import.meta.url).pathname);   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
+const __HSN_ROOT = decodeURIComponent(new globalThis.URL('.', import.meta.url).pathname);   /* 用 globalThis.URL：下面自己声明了 const URL（页面地址） */   /* 仓库根目录跟着测试文件走，不写死路径（审查 TI-7：在别的检出目录里跑，测的得是那一份代码） */
 import { chromium } from './playwright_loader.mjs';
 
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
