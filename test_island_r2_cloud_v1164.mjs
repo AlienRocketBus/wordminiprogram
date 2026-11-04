@@ -11,6 +11,7 @@
  *      之后在首页改了进度（首页本身没有云存档模块）再切出 App —— 也要传上去
  *   ④ 去过岛以后再打开首页：不再预取一个不存在的 island_wordIslandAnimal.html（404，R2-6）
  *   ⑤ 岛上的「拼写大PK」首页：打过排位以后显示真的段位分和胜率（R2-UI-11：以前「未定级」「— 对战胜率」）
+ *   ⑥ 打开一个岛：开机「云端有没有更新的存档」只查一次（R2-5 配额：以前岛 + 几个预热页面各查一次）
  */
 import * as H from './cloudbase_e2e_harness.mjs';
 
@@ -41,6 +42,9 @@ async function closeAll() {
   live.length = 0;
 }
 async function part(title, fn) {
+  /* 只跑某几段（排查用）：R2_ONLY=①,③ node 这个文件 */
+  const only = String(process.env.R2_ONLY || '').split(',').filter(Boolean);
+  if (only.length && !only.some((x) => title.startsWith(x))) return;
   t.section(title);
   try { await fn(); }
   catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }
@@ -201,6 +205,22 @@ async function appHidden(G, hidden) {
     await t.ok(lad && lad.placed && lad.total === 4, `战绩里是 4 胜、1095 分、已定级（${JSON.stringify(lad)}）`, () => explain());
     await t.ok(has(pk, /1095\s*分/) && !has(pk, /未定级/), `拼写大PK首页的身份条显示「1095 分」，不是「未定级」（看到：${flat(pk).slice(0, 120)}）`, () => explain());
     await t.ok(has(pk, /100%/), `「我的战绩」里胜率是 100%，不是「—」（看到：${(flat(pk).match(/我的战绩.{0,80}/) || [''])[0]}）`, () => explain());
+  });
+
+  /* ══ ⑥ 开机查云存档：只有最上面那一层查 ══════════════════════════ */
+  await part('⑥ 打开一个岛：开机「云端有没有更新的存档」只查一次（R2-5 配额：以前岛 + 几个预热页面各查一次）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const I = await phone('岛屿页', '小蜂岛', { path: '/island_animal.html', ready: () => !!(window.HansenAuth && window.HansenCloudSave && window.HansenCloudRestore) });
+    await H.sleep(2000);
+    const t0 = Date.now();
+    await I.page.reload({ waitUntil: 'domcontentloaded' });
+    await I.page.waitForFunction(() => !!(window.HansenAuth && window.HansenCloudRestore), null, { timeout: 45000 });
+    await H.sleep(14000);
+    const frames = await I.eval(() => { let n = 0; const walk = (w) => { try { if (w.HansenCloudRestore) n++; for (let i = 0; i < w.frames.length; i++) walk(w.frames[i]); } catch (e) { /* 跨域 */ } }; walk(window); return n; });
+    const reads = emu.log.filter((x) => x.uid === I.uid && x.collection === 'hansen_saves' && x.action === 'database.queryDocument' && x.t >= t0).length;
+    await t.ok(frames >= 2, `这一页里装着云存档开机检查的有 ${frames} 层（岛 + 预热的页面）`, () => explain());
+    await t.ok(reads >= 1 && reads <= 2, `打开一次岛，开机查云存档 ${reads} 次（该是 1 次；以前每层各查一次）`, () => explain());
   });
 }
 t.summary();

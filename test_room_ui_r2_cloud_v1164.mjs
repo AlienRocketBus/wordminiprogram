@@ -64,6 +64,9 @@ const errBoxes = (p) => p.eval(() => [].slice.call(document.querySelectorAll('#h
 const rowNames = (p) => p.eval(() => [].slice.call(document.querySelectorAll('#prList .pr_room .n b')).map((b) => b.innerText.trim()));
 /* 每一段各管各的：前一段出错（比如旧版本弹出了不该弹的屏）不连累后面几段 */
 async function part(title, fn) {
+  /* 只跑某几段（排查用）：R2_ONLY=①,③ node 这个文件 */
+  const only = String(process.env.R2_ONLY || '').split(',').filter(Boolean);
+  if (only.length && !only.some((x) => title.startsWith(x))) return;
   t.section(title);
   try { await fn(); }
   catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }

@@ -12,6 +12,7 @@
  *      房主不在结算屏，结果出来以后照样记进他的战绩（R2-UI-4：以前点了就什么都没了）
  *   ③ 同步赛：最后一词拼对时网断在半路（这一词「结果待定」）—— 交卷前先定下来，交上去的分里有它（FX-10）
  *   ④ 抢答赛：我超时了、对手在我超时以后才拼对 —— 两边进下一词的时间差不到 1 秒（R2-UI-10：以前我早开拼 1 秒多）
+ *   ⑤ 同步赛：一个词拼了 6 秒还没人答完 —— 之后两秒看一次对手，不再每秒一次（R2-5 配额：对战轮询占一个班每天云端调用的八成）
  */
 import * as H from './cloudbase_e2e_harness.mjs';
 
@@ -69,6 +70,9 @@ async function freeMatch(hp, gp, mode) {
 const quitUp = (p) => p.eval(() => { const d = document.getElementById('prQuitAsk'); return d && d.getClientRects().length ? d.innerText : ''; });
 /* 每一段各管各的：前一段出错不连累后面几段 */
 async function part(title, fn) {
+  /* 只跑某几段（排查用）：R2_ONLY=①,③ node 这个文件 */
+  const only = String(process.env.R2_ONLY || '').split(',').filter(Boolean);
+  if (only.length && !only.some((x) => title.startsWith(x))) return;
   t.section(title);
   try { await fn(); }
   catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }
@@ -195,6 +199,23 @@ async function part(title, fn) {
   const gap = seen2.host && seen2.guest ? seen2.host - seen2.guest : null;
   await t.ok(has(tOut, /超时了/), '房主这一词超时了（客人的回合文档还没落库）', () => explain());
   await t.ok(gap != null && Math.abs(gap) < 1000, `两边进第 2 词的时间差 ${gap} 毫秒（负数 = 超时的那位先进）—— 以前超时的那位早开拼 1 秒多`, () => explain());
+  });
+
+  /* ══ ⑤ 同步赛：一个词拼得慢时少查几次 ═══════════════════════════════ */
+  await part('⑤ 同步赛：一个词 6 秒以后两秒看一次对手（R2-5 配额）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const Ah = await phone('壬', '小蜂壬');
+    const Bg = await phone('癸', '小蜂癸');
+    await freeMatch(Ah, Bg, 'C');
+    const t0 = Date.now();
+    const q = (p, a, b) => emu.log.filter((x) => x.uid === p.uid && x.collection === 'hansen_pk_rooms' && x.action === 'database.queryDocument' && x.t >= a && x.t < b).length;
+    await H.sleep(13500);
+    const early = q(Bg, t0 + 500, t0 + 5500), late = q(Bg, t0 + 7000, t0 + 13000);
+    const v = await H.battleView(Bg);
+    await t.ok(v && v.round === 0, `两个人都还在第 1 词、都没答（${v ? '第 ' + (v.round + 1) + ' 词' : '不在对战屏'}）`, () => explain());
+    await t.ok(early >= 3, `前 5 秒每秒看一次对手（查了 ${early} 次）`, () => explain());
+    await t.ok(late <= 4, `6 秒以后两秒看一次（7~13 秒这 6 秒查了 ${late} 次；以前 6 次左右）`, () => explain());
   });
 }
 t.summary();

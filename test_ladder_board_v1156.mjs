@@ -456,7 +456,9 @@ async function open(seedBoard) {
      '★ 取的是房主的分（只有房主的分可信，v1114 做过防谎报）');
   ok(/_oppRating/.test(ucode),
      '★ 对战 UI 轮询时记下对手分数');
-  ok(/oppRating: \(_state && _state\._oppRating\)/.test(ucode),
+  /* v1164 第二轮：结算屏、中途退出、交了卷先离开后补记都走同一个 recordGame(st, r) —— 那里面把对手分传给 record() */
+  ok(/\.record\(\{[\s\S]{0,600}?oppRating:\s*(?:\(_state && _state\._oppRating\)|st\._oppRating)/.test(ucode)
+     && /function showResult[\s\S]{0,4000}?(?:recordGame\(_state|\.record\(\{)/.test(ucode),
      '★ **结算时把它传给 record()** —— ' +
      '这一步漏了，前面全白做（算法早就写好了，只是数据没送到）');
   ok(!/mode: opts\.mode \|\| 'C'/.test(
@@ -631,9 +633,15 @@ async function open(seedBoard) {
        '★ 退回后本地排序，并照样滤掉 30 天没打的和没打满定级赛的');
   }
   {
-    const { B } = bootBoard({ get: { orderBy: 'net' }, summary: { placed: false } });
+    /* v1164 第二轮（审查 T7）：排序被拒时云端可能回非 200 —— SDK 只说 network request error，和断网一模一样；
+       所以排序的那次「像断网」也要退回不排序的再试一次：真断网的话那一次也失败，才说「连不上网络」 */
+    const { B } = bootBoard({ get: { orderBy: 'net', where: 'net' }, summary: { placed: false } });
     const r = await B.fetchTop();
-    ok(r.ok === false && r.kind === 'network', '★ 断网 → kind=network（界面才能说「连不上网络」）');
+    ok(r.ok === false && r.kind === 'network', '★ 断网（两种查询都发不出去）→ kind=network（界面才能说「连不上网络」）');
+    const t7 = bootBoard({ get: { orderBy: 'net' }, rows: [row('A', '小红', 1300, 9)], summary: { placed: false } });
+    const r7 = await t7.B.fetchTop();
+    ok(r7.ok === true && t7.log.gets.join(',') === 'orderBy,where' && r7.list.length === 1,
+       '★ 只有排序那次「像断网」（云端回非 200 拒绝排序）→ 退回不排序的查询，榜照样出来（审查 T7）');
   }
   {
     const { B } = bootBoard({ signed: false });

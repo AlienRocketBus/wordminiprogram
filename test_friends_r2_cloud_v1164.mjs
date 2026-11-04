@@ -42,6 +42,9 @@ async function closeAll() {
   live.length = 0;
 }
 async function part(title, fn) {
+  /* 只跑某几段（排查用）：R2_ONLY=①,③ node 这个文件 */
+  const only = String(process.env.R2_ONLY || '').split(',').filter(Boolean);
+  if (only.length && !only.some((x) => title.startsWith(x))) return;
   t.section(title);
   try { await fn(); }
   catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }
@@ -59,8 +62,12 @@ async function converge(fn, good, ms = 16000) {
 }
 const friendOf = (r, cid) => ((r && r.friends) || []).find((x) => x.cid === cid);
 async function befriend(A, B) {
-  await A.eval((c) => window.HansenFriends.addFriend(c), B.cid);
-  await B.eval((c) => window.HansenFriends.addFriend(c), A.cid);
+  /* 孩子把竞赛 ID 告诉同学要一会儿 —— 那时两边的在线记录早就写好了（读有延迟时，刚写的几秒内别人读不到） */
+  for (const p of [A, B]) await p.eval(async () => { await window.HansenFriends._beat(); return true; });
+  await H.sleep((emu.knobs.consistencyLagMs || 0) + 600);
+  const a1 = await A.eval((c) => window.HansenFriends.addFriend(c), B.cid);
+  const b1 = await B.eval((c) => window.HansenFriends.addFriend(c), A.cid);
+  await t.ok(a1 && a1.ok && b1 && b1.ok, `两个人互相加了好友（${j({ a1, b1 })}）`, () => explain());
   const la = await converge(() => A.eval(() => window.HansenFriends.listFriends()), (r) => { const f = friendOf(r, B.cid); return f && !f.pending; });
   const lb = await converge(() => B.eval(() => window.HansenFriends.listFriends()), (r) => { const f = friendOf(r, A.cid); return f && !f.pending; });
   return { la, lb };
@@ -87,7 +94,7 @@ async function setHidden(p, hidden) {
     const again = await A.eval((c) => window.HansenFriends.addFriend(c), B.cid);
     await H.sleep(3000);
     const rows = (emu.dump('hansen_friends') || []).filter((d) => d.kind === 'friend' && d._openid === A.uid && Number(d.friend) === B.cid);
-    await t.ok(again && again.ok !== false && rows.length === 1, `再点一次「加好友」不写重复的（甲名下加乙的记录 ${rows.length} 条；${j(again)}）`, () => explain());
+    await t.ok(again && (again.ok || again.already) && rows.length === 1, `再点一次「加好友」：说「已经是好友了」，不写重复的（甲名下加乙的记录 ${rows.length} 条；${j(again)}）`, () => explain());
     const sent = await A.eval((c) => window.HansenFriends.sendQuick(c, 'pk'), B.cid);
     await t.ok(sent && sent.ok, `给好友发「来一局？」成功（${j(sent)}）—— 以前「只能给好友发招呼」`, () => explain());
     const inb = await converge(() => B.eval(() => window.HansenFriends.inbox()), (r) => r && r.ok && (r.msgs || []).some((m) => m.from === A.cid));

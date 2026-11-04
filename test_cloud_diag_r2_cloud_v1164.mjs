@@ -38,6 +38,9 @@ async function closeAll() {
   live.length = 0;
 }
 async function part(title, fn) {
+  /* 只跑某几段（排查用）：R2_ONLY=①,③ node 这个文件 */
+  const only = String(process.env.R2_ONLY || '').split(',').filter(Boolean);
+  if (only.length && !only.some((x) => title.startsWith(x))) return;
   t.section(title);
   try { await fn(); }
   catch (e) { await t.ok(false, '这一段脚本出错：' + String(e && e.stack || e).slice(0, 500), () => explain()); }
