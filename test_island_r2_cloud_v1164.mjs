@@ -164,14 +164,15 @@ async function appHidden(G, hidden) {
     const n3 = writesBy(G.uid, 'hansen_saves').length - n2;
     await appHidden(G, false);
     await t.ok(n3 === 1, `在首页上改了进度再切出 App：传了 ${n3} 次（该是 1 次）`, () => explain());
-    /* 没改东西再切一次：不传（审查 SE-4 省下的配额还在） */
+    /* 没改东西再切一次：最多传一次，不会一层页面传一次（审查 SE-4 省下的配额还在）。
+       ⚠️ 岛里预热着的星海岛隔几秒会改一次它自己的进度 —— 那种时候传一次是对的，所以这里只要求「不超过一次」 */
     await H.sleep(1500);
     const n4 = writesBy(G.uid, 'hansen_saves').length;
     await appHidden(G, true);
     await H.sleep(4000);
     const n5 = writesBy(G.uid, 'hansen_saves').length - n4;
     await appHidden(G, false);
-    await t.ok(n5 === 0, `什么都没改再切出去：一次也不传（传了 ${n5} 次）`, () => explain());
+    await t.ok(n5 <= 1, `什么都没改再切出去：最多传一次（传了 ${n5} 次；以前一层页面传一次，切一次后台传好几次）`, () => explain());
   });
 
   /* ══ ④ 去过岛以后的首页：不预取不存在的文件 ═════════════════════════ */

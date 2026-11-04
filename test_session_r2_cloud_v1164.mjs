@@ -205,9 +205,11 @@ async function cloudWords(num, label) {
   await part('⑥ 「立即同步」：别的手机刚把云端盖掉也真传；云端那条被删了，登录对账时真传上去（R2-4 回归 / FX-7）', async () => {
     emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40, consistencyLagMs: 200 } });
     names = {};
-    const B = await phone('乙手机');
+    /* 用拼写大PK页：岛屿页里预热着的星海岛隔几秒就改一次自己的进度（每次都算「内容变了」），看不出「没变就跳过」 */
+    const SPK = { path: '/spelling_pk.html', ready: ISLAND.ready };
+    const B = await phone('乙手机', SPK);
     await login(B, '13400000066');            /* 云端、本机都是空的 */
-    const A = await phone('甲手机');
+    const A = await phone('甲手机', SPK);
     await setWords(A, 10);
     await login(A, '13400000066');            /* 云端是空的、本机有 10 个词 → 传上去 */
     await settle(A, 3000);
@@ -219,6 +221,8 @@ async function cloudWords(num, label) {
     await t.ok(ua && ua.ok && ub && ub.ok, '甲手机（10 个词）传过一次以后，乙手机（2 个词）又把云端盖掉了', () => explain());
     /* 甲手机上打开设置里的云存档卡片，点「立即同步」 */
     await A.eval(() => { const d = document.createElement('div'); d.id = 'hsnBackupSection'; d.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1020;overflow:auto;padding:12px'; document.body.appendChild(d); return true; });
+    const same = await A.eval(() => window.HansenCloudSave.localHash() === (window.HansenCloudSave.uploadState() || {}).lastHash);
+    await t.ok(same === true, `甲手机上的内容和它上次传的一模一样（这正是以前「内容没变化，无需上传」的情形）`, () => explain());
     const w0 = saveWrites(A.uid).length;
     await A.tap('#hsnCloudSync', { timeout: 8000 });
     const said = await H.until(async () => { const v = await A.eval(() => ((document.getElementById('hsnCloudCard') || {}).innerText || '')); return /已上云|内容没变化|同步失败/.test(v) ? v : null; }, { timeout: 15000 }) || '';
