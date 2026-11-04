@@ -109,11 +109,18 @@ const BAD_DB = /数据库这次没让读写|数据库拒绝了|云端设置还�
     const A = await phone('丙', '小蜂丙');
     await toLadderHome(A);
     const f = emu.fault({ uid: A.uid, db: true, collection: 'hansen_pk_rooms', do: 'http500', status: 502 });
-    let healed = false;
-    const heal = (txt) => { if (!healed && (/正在看看是哪里不通/.test(txt) || emu.log.some((x) => x.uid === A.uid && /\/auth\/v1\/user\/me/.test(x.path)))) { f.remove(); healed = true; } };
+    const tF = Date.now();
+    let healed = false, failsBefore = 0;
+    /* 天梯接连失败、开始「看看是哪里不通」（问登录服务）的那一下，502 消失 */
+    const heal = (txt) => {
+      if (healed) return;
+      if (/正在看看是哪里不通/.test(txt) || emu.log.some((x) => x.uid === A.uid && x.t > tF && /\/auth\/v1\/user\/me/.test(x.path))) {
+        failsBefore = f.hits; f.remove(); healed = true;
+      }
+    };
     await A.tap('#ldGo');
     const w = await watch(A, /等对手进来|数据库这次没让读写|数据库拒绝了|连不上网络|云端设置还差一步|网络太慢了/, 90000, heal);
-    await t.ok(healed, '502 是在「看看是哪里不通」那一下消失的', () => explain());
+    await t.ok(healed && failsBefore >= 4, `502 是在「看看是哪里不通」那一下消失的（在那之前找房失败了 ${failsBefore} 次）`, () => explain());
     await t.ok(has(w.last, /等对手进来|正在找对手/) && !w.seen.some((k) => BAD_DB.test(k) || /连不上网络/.test(k)),
       `接着找对手、最后自己开了房等人，什么错都没报（出现过：${w.seen.join('、')}）—— 以前直接「数据库拒绝了，截图发给老师」`, () => explain());
   });
@@ -125,11 +132,17 @@ const BAD_DB = /数据库这次没让读写|数据库拒绝了|云端设置还�
     const A = await phone('丁', '小蜂丁');
     await toLadderHome(A);
     const f = emu.fault({ uid: A.uid, db: true, do: 'abort' });
-    let healed = false;
-    const heal = (txt) => { if (!healed && (/正在看看是哪里不通/.test(txt) || emu.log.some((x) => x.uid === A.uid && /\/auth\/v1\/user\/me/.test(x.path)))) { f.remove(); healed = true; } };
+    const tF = Date.now();
+    let healed = false, failsBefore = 0;
+    const heal = (txt) => {
+      if (healed) return;
+      if (/正在看看是哪里不通/.test(txt) || emu.log.some((x) => x.uid === A.uid && x.t > tF && /\/auth\/v1\/user\/me/.test(x.path))) {
+        failsBefore = f.hits; f.remove(); healed = true;
+      }
+    };
     await A.tap('#ldGo');
     const w = await watch(A, /等对手进来|数据库这次没让读写|数据库拒绝了|连不上网络|云端设置还差一步|网络太慢了/, 90000, heal);
-    await t.ok(healed, '断网是在「看看是哪里不通」那一下恢复的', () => explain());
+    await t.ok(healed && failsBefore >= 4, `断网是在「看看是哪里不通」那一下恢复的（在那之前数据库请求失败了 ${failsBefore} 次）`, () => explain());
     await t.ok(has(w.last, /等对手进来|正在找对手/) && !w.seen.some((k) => BAD_DB.test(k)),
       `接着找对手，没说成「数据库拒绝了 / 云端设置」（出现过：${w.seen.join('、')}）`, () => explain());
   });

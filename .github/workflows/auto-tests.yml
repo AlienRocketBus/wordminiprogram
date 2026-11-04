@@ -63,7 +63,8 @@ jobs:
         # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
         run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 语法 + 资源检查 + 守卫 + 零测试桩冒烟
-        run: python3 一键体检.py --quick
+        # 结果写进 .siphon/quick_rc，由「结论」统一判红绿 —— 每次运行只发一条结果通知（进化主义：少叫醒一次 AI 就少花一次 token）
+        run: python3 一键体检.py --quick || echo "快检没过（退出码 $?），由「结论」判定"; mkdir -p .siphon; test -f .siphon/SUMMARY.txt && grep -q '全部通过' .siphon/SUMMARY.txt && echo 0 > .siphon/quick_rc || echo 1 > .siphon/quick_rc
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: siphon-logs-quick, path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
@@ -96,7 +97,8 @@ jobs:
         # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
         run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 跑这一份测试
-        run: python3 一键体检.py --shard ${{ matrix.shard }}/${{ env.SHARDS }}
+        # 这一份有失败也不在这里判红：失败名单在 .siphon/shard_*.json 里，「结论」统一判 —— 每次运行只发一条结果通知
+        run: python3 一键体检.py --shard ${{ matrix.shard }}/${{ env.SHARDS }} || echo "这一份有失败（退出码 $?），由「结论」判定"
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
@@ -123,8 +125,11 @@ jobs:
           quick = ''
           for f in glob.glob('logs/siphon-logs-quick/SUMMARY.txt'):
               quick = open(f, encoding='utf-8').read().strip()
+          qrc = [open(f).read().strip() for f in glob.glob('logs/siphon-logs-quick/quick_rc')]
+          quick_ok = os.environ['QUICK'] == 'success' and qrc == ['0']
+          os.environ['QUICK'] = 'success' if quick_ok else 'failure'
           shards = len(glob.glob('logs/*/shard_*.json'))
-          ok = os.environ['QUICK'] == 'success' and os.environ['TESTS'] == 'success' and not fails and shards == int(os.environ.get('SHARDS', '8'))
+          ok = quick_ok and os.environ['TESTS'] == 'success' and not fails and shards == int(os.environ.get('SHARDS', '8'))
           out = ['## ' + ('✅ 全部通过' if ok else '❌ 没通过'), '',
                  '| 项目 | 结果 |', '|---|---|',
                  '| 语法 + 三道快检 | %s |' % ('通过' if os.environ['QUICK'] == 'success' else '没过（见附件 siphon-logs-quick）'),

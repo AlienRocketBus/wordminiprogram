@@ -81,14 +81,14 @@ def quick():
             syn.append(os.path.basename(f))
     if syn:
         bad.append('语法错误 %d 个文件：%s' % (len(syn), '、'.join(syn[:6])))
-    # 执行主义：五个主义写在 CLAUDE.md 里，每个新对话会自动读到 —— 谁把它删了、删短了，这里就红
+    # 执行主义：六个主义写在 CLAUDE.md 里，每个新对话会自动读到 —— 谁把它删了、删短了，这里就红
     try:
         rules = open(os.path.join(ROOT, 'CLAUDE.md'), encoding='utf-8').read()
     except Exception:
         rules = ''
-    lost = [w for w in ('虹吸主义', '虫洞主义', '执行主义', '完美主义', '丝滑主义') if w not in rules]
+    lost = [w for w in ('虹吸主义', '虫洞主义', '执行主义', '完美主义', '丝滑主义', '进化主义') if w not in rules]
     if lost:
-        bad.append('CLAUDE.md 里的五个主义不全了（缺：%s）' % '、'.join(lost))
+        bad.append('CLAUDE.md 里的六个主义不全了（缺：%s）' % '、'.join(lost))
     rc, out, _ = run([sys.executable, 'check_resources.py'], 'check_resources', 900)
     if rc != 0 or '全部通过' not in out:
         tail = [l for l in out.strip().split('\n') if l.strip()][-2:]

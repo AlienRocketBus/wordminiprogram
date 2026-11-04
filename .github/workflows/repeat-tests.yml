@@ -65,7 +65,8 @@ jobs:
         run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 跑一轮（失败不重跑）
         env: { ONLY: "${{ inputs.only || 'cloud_v1164' }}" }
-        run: python3 一键体检.py --only "$ONLY" --no-retry --tag "r${{ matrix.round }}"
+        # 失败不在这里判红（只由「结论」判）—— 每次运行只发一条结果通知
+        run: python3 一键体检.py --only "$ONLY" --no-retry --tag "r${{ matrix.round }}" || echo "这一轮有失败，由「结论」判定"
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: 'repeat-${{ matrix.round }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }

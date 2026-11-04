@@ -13,6 +13,7 @@
  *      但数据库这次没让读写」；开房失败以后同一个红框不画两遍（R2-UI-8 / R2-UI-13）
  *   ⑤ 从没登录过：按钮叫「🔐 去登录」、不放一行看不懂的 not-signed-in，点了就是登录表单（R2-UI-13）
  *   ⑥ 列表自动刷新：已经在列表里的房不挪位置，新开的房接在后面（FX-9：以前新房插到最上面，孩子点进了别人的房）
+ *   ⑦ 天梯没人可配、自己开房「正在开房间…」卡住：有「取消，回天梯」，点了回天梯首页、房不许开出来（R2-UI-6 / R2-UI-1）
  */
 import * as H from './cloudbase_e2e_harness.mjs';
 
@@ -294,6 +295,31 @@ async function part(title, fn) {
   await t.ok(Array.isArray(before) && before.length === 3, `一开始列表里有三间房（${(before || []).join(' / ')}）`, () => explain());
   await t.ok(after && before && before.every((n, i) => after[i] === n) && after[3] === '房主四号',
     `自动刷新以后：原来的三间还在原位，新开的「房主四号」接在最后（刷新前：${(before || []).join(' / ')}；刷新后：${(after || []).join(' / ')}）`, () => explain());
+  });
+
+  /* ══ ⑦ 天梯自己开房时「取消，回天梯」 ══════════════════════════════ */
+  await part('⑦ 天梯「正在开房间…」卡住：「取消，回天梯」点得到，点了房不许开出来（R2-UI-6 / R2-UI-1）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const L = await phone('子', '小蜂子');
+    const O = await phone('丑', '小蜂丑');
+    await L.tap('#pkLadder');
+    await H.answerNameIfAsked(L, L.nick);
+    await L.waitScreen(/开始排位/, { timeout: 10000 });
+    const hold = emu.hold({ uid: L.uid, db: true, action: 'database.addDocument' });
+    await L.tap('#ldGo');
+    const cr = await L.waitScreen(/正在开房间/, { timeout: 45000 }).catch((e) => e.lastText || '');
+    const cbtn = await L.hitTest('#prCreateCancel', { timeout: 2000 });
+    await t.ok(has(cr, /正在开房间/) && cbtn.ok, `没人可配、自己开房：「正在开房间…」这一屏上有「取消，回天梯」、点得到（${cbtn.ok || cbtn.why}）`, () => explain());
+    if (cbtn.ok) await L.tap('#prCreateCancel');
+    await H.sleep(800);
+    hold.release();
+    await H.sleep(5000);
+    const scr = await L.screen();
+    const lr = await H.room(O, 'listRooms');
+    const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === L.nick));
+    await t.ok(has(scr, /开始排位/) && !has(scr, /等对手进来/), `回到了天梯首页，开房那一下回来以后也没有弹出「等对手进来」（看到：${flat(scr).slice(0, 80)}）`, () => explain());
+    await t.ok(liveRooms(L).length === 0 && !listed, `排位房没开出来（开着 ${liveRooms(L).length} 间；别人${listed ? '列得到' : '列不到'}）`, () => explain());
   });
 }
 t.summary();
