@@ -10,6 +10,8 @@
  *   1. 外壳忙的那 7 秒里一个都不空闲预取；忙完后预取「最近玩过的岛」：第一个是颜色数字岛，全是这 8 个岛里的，最多 6 个（流量上限），零 404
  *   2. 点已经预取好的颜色数字岛：岛页 HTML 不再从网上下第二次（服务器带 ETag，没变只回 304、不传正文）
  *   3. 手指点美食岛（按下时预取、抬手进岛）：岛页 HTML 只下一次
+ *   4. （复查第 2 轮 R2-SH-03）单词大陆地图空闲时预热「下一个没通关的岛」（①）；点进 ①：岛页 HTML 一共只下一次
+ *      （以前地图预热的是不带 ?v= 的地址，外壳打开的是带 ?v= 的，进岛又整页下一遍，约 200KB）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -106,6 +108,21 @@ try {
   await page.waitForFunction(() => { const f = document.getElementById('islandFrame'); try { return /island_food\.html$/.test(f.contentWindow.location.pathname) && f.contentDocument.readyState === 'complete'; } catch (e) { return false; } }, null, { timeout: 30000 }).catch(() => {});
   await sleep(1500);
   ok((HITS['/island_food.html'] || 0) - f0 === 1, `美食岛岛页只下了一次（${(HITS['/island_food.html'] || 0) - f0} 次）`);
+  await page.evaluate(() => closeIsland());
+  await sleep(1200);
+
+  console.log('\n▶ 4. 单词大陆地图预热的 ①，点进去用得上');
+  const l0 = HITS['/island_land1.html'] || 0;
+  await page.evaluate(() => openIsland('land_map.html'));
+  await page.waitForFunction(() => { const f = document.getElementById('islandFrame'); try { return /land_map\.html$/.test(f.contentWindow.location.pathname) && f.contentDocument.readyState === 'complete'; } catch (e) { return false; } }, null, { timeout: 30000 }).catch(() => {});
+  await sleep(6000);   // 地图空闲时（requestIdleCallback，最迟 2.2 秒）预热
+  const l1 = HITS['/island_land1.html'] || 0;
+  ok(l1 - l0 === 1, `地图预热了 ①（岛页下了 ${l1 - l0} 次）`);
+  await page.evaluate(() => openIsland('island_land1.html'));
+  await page.waitForFunction(() => { const f = document.getElementById('islandFrame'); try { return /island_land1\.html$/.test(f.contentWindow.location.pathname) && f.contentDocument.readyState === 'complete'; } catch (e) { return false; } }, null, { timeout: 30000 }).catch(() => {});
+  await sleep(1500);
+  const l2 = HITS['/island_land1.html'] || 0;
+  ok(l2 - l0 === 1, `点进 ①：岛页一共只下了一次（${l2 - l0} 次；预热的就是进岛的那个地址）`);
 } finally {
   if (ctx) await ctx.close().catch(() => {});
   srv.close();

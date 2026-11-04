@@ -7175,7 +7175,7 @@ document.getElementById('typingContent').innerHTML=
     recordsBlock+'<div style="display:flex;flex-direction:column;gap:10px">'+cards+'</div>'+
   '</div>';}
 function stopTyping(){typeActive=false;__hsnRunNew('type');stopTypeTimer();try{document.body.classList.remove('type-lock');}catch(e){}}
-function startTypeTimer(){stopTypeTimer();typeTimerInt=setInterval(updateTypeTimer,87)}
+function startTypeTimer(){stopTypeTimer();__typeLastTick=0;typeTimerInt=setInterval(updateTypeTimer,87)}   /* 🔴v1165 复查第 2 轮：新一局从头量（上一局最后那一下走表不算「冻住」） */
 function stopTypeTimer(){if(typeTimerInt){clearInterval(typeTimerInt);typeTimerInt=null}}
 /* 🔴v1165 复查：孩子拼到一半切去回微信 / 锁屏，页面被冻住、计时器不走，回来那一下 Date.now() 已经过了 30 秒 →
    以前直接记成超时拼错（进错题本、复习计划、拼对率下降）。现在：页面藏着、或者两次走表之间隔了 3 秒以上（被冻住了），

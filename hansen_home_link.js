@@ -179,7 +179,10 @@
       hsn_ladder_screen: function(el){ return clickOr(el, '#ldX', function(){ return callClose(window.HansenLadderUI, 'close'); }); },
       hsn_friends_screen: function(el){ return clickOr(el, '#frBack, #frX', function(){ return callClose(window.HansenFriendsUI, 'close'); }); },
       hsn_auth_panel: function(el){ return clickOr(el, '#auX', function(){ return callClose(window.HansenAuthUI, 'close'); }); },
-      hsn_gate: function(){ return false; }   /* 注册门槛是硬门槛：返回键不关它、也不拿掉它 */
+      hsn_gate: function(){ return false; },   /* 注册门槛是硬门槛：返回键不关它、也不拿掉它 */
+      /* 🔴v1165 复查第 2 轮：对战组重做后的「要退出这一局吗？」确认框（挂在页面最外层）：返回键 = 「继续打 / 接着等」，
+         真要退出得孩子自己点「退出」（那一下才记输 / 结算）——两下返回手势绝不会悄悄把一局丢掉 */
+      prQuitAsk: '#prQuitNo'
     };
     function visibleIn(el, sel){ try{ var b = el.querySelector(sel); return b && b.getClientRects().length ? b : null; }catch(e){ return null; } }
     function clickOr(el, sel, fallback){ var b = visibleIn(el, sel); if(b){ try{ b.click(); }catch(e){} return true; } return fallback(); }
@@ -190,6 +193,12 @@
     var _pkAskAt = 0;
     function pkRoomBack(el){
       if(clickOr(el, '#prBack, #prBack2', function(){ return false; })) return true;
+      /* 🔴v1165 复查第 2 轮：对战组重做后的对战屏有自己的「退出」确认（askQuit：退出 = 这一局记一场输；已经交卷的照样结算）。
+         有就交给它 —— 返回键和点对战屏上的「退出」完全一样。以前直接 close()：落后的孩子按两下返回就能不记输（对手却白赢），
+         已经交卷赢下来的一局也不结算。没有 askQuit 的老对战屏，才走下面「提醒一次、3 秒内再按才 close()」的老办法。 */
+      var UI = window.HansenPkRoomUI;
+      if(UI && typeof UI.askQuit === 'function'){ try{ UI.askQuit(); return true; }catch(e){} }
+      if(clickOr(el, '#prQuit', function(){ return false; })) return true;
       var now = Date.now();
       if(now - _pkAskAt < 3000){
         _pkAskAt = 0;

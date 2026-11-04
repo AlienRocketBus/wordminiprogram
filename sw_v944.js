@@ -25,6 +25,63 @@ const SHELL = [
   './hansen_mistake_lesson_v1165.js?v=1163'
 ];
 
+/* 🔴v1165 复查第 2 轮：发版上传的那几分钟（CDN 新旧混着），新页面配着还没传上去的旧脚本 —— 新 SW 这时把
+   「?v=新版本号 + 旧内容」当成这一版唯一的一份存进缓存，以后命中就不再联网：这个孩子整个版本都在跑旧脚本，刷新也没用。
+   办法：这一代缓存装好以后 1 小时内存进去的带版本号代码，先算「临时的」；命中临时的、而且存进去已经 5 分钟以上，
+   就在后台用 no-cache 问一次服务器（内容没变只回 304，几百字节），拿到的存回原来那个缓存。
+   这一问发生在装好 1 小时以后，这份就算定了，以后命中一个请求都不发（267e849 省下的流量照旧省着）。
+   每份代码存进去的时间记在它自己的响应头 x-hsn-at 里；这一代装好的时间记在外壳缓存的 __hsn_sw_installed 里。 */
+const META_INSTALLED = './__hsn_sw_installed';
+const DEPLOY_WINDOW_MS = 60 * 60 * 1000;
+const RECHECK_AFTER_MS = 5 * 60 * 1000;
+let installedAtMemo = 0;
+async function installedAt() {
+  if (installedAtMemo) return installedAtMemo;
+  try {
+    const shell = await caches.open(SHELL_CACHE);
+    const r = await shell.match(new Request(new URL(META_INSTALLED, self.location.href).href));
+    const t = r ? Number(await r.text()) : 0;
+    if (t > 0) installedAtMemo = t;
+    return t;
+  } catch (error) { return 0; }
+}
+function stampedCopy(response) {
+  /* 存进缓存的那一份带上「什么时候存的」；正文是流，不读、不复制 */
+  const h = new Headers(response.headers);
+  h.set('x-hsn-at', String(Date.now()));
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers: h });
+}
+/* 命中一份带版本号的代码：该不该在后台再问一次服务器 */
+async function needsRecheck(found, request) {
+  try {
+    const inst = await installedAt();
+    if (!inst) return false;                                  // 这一代没记装好时间（老 SW 装的）：照旧不问
+    let at = Number(found.headers.get('x-hsn-at')) || 0;
+    if (!at) {
+      /* 没有时间戳 = 装 SW 时外壳一起下的那批（addAll 加不了头），就是装好那一刻存的 */
+      const inShell = await (await caches.open(SHELL_CACHE)).match(request);
+      if (!inShell) return false;
+      at = inst;
+    }
+    if (at - inst >= DEPLOY_WINDOW_MS) return false;          // 装好 1 小时以后才存的：已经是定下来的
+    return Date.now() - at >= RECHECK_AFTER_MS;               // 刚存的先不问（同一次打开里不来回问）
+  } catch (error) { return false; }
+}
+const recheckedAt = new Map();   // 同一个地址几个页面框同时要（首页 + 岛 + 预热）：这一会儿只问一次
+async function recheckVersioned(request) {
+  const last = recheckedAt.get(request.url) || 0;
+  if (Date.now() - last < RECHECK_AFTER_MS) return false;
+  recheckedAt.set(request.url, Date.now());
+  const fresh = await fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' });
+  if (!fresh || !fresh.ok || fresh.type === 'opaque') return false;
+  const length = Number(fresh.headers.get('content-length') || 0);
+  if (length && length > 1572864) return false;
+  /* 外壳里的那份放回外壳（不会被修剪掉，离线照样有）；别的放回代码缓存 */
+  const shell = await caches.open(SHELL_CACHE);
+  if (await shell.match(request)) { await shell.put(request, stampedCopy(fresh)); return true; }
+  return putIfReasonable(ASSET_CACHE, request, fresh, 400);
+}
+
 async function trim(cacheName, maxEntries) {
   const cache = await caches.open(cacheName);
   const keys = await cache.keys();
@@ -91,6 +148,11 @@ async function putIfReasonable(cacheName, request, response, maxEntries) {
        也好过因为修的过程出错而整个存不进去**：
        取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了。 */
     if (!_toStore) _toStore = response.clone();
+    /* 🔴v1165 复查第 2 轮：带版本号的代码记下存进来的时间（见上面 META_INSTALLED 那段） */
+    try {
+      const _u2 = new URL(request.url, self.location.origin);
+      if (cacheName === ASSET_CACHE && /(?:^|&)v=\d+(?:&|$)/.test(_u2.search.slice(1))) _toStore = stampedCopy(_toStore);
+    } catch (error) {}
 
     const cache = await caches.open(cacheName);
     await cache.put(cacheName === PAGE_CACHE ? pageCacheKey(request) : request, _toStore);
@@ -281,6 +343,8 @@ self.addEventListener('install', event => {
        任何一个核心文件 404/断网都会让 install 失败，
        于是不会 skipWaiting、更不会激活一个只下到一半的应用外壳。 */
     await cache.addAll(SHELL.map(url => new Request(url, { cache: 'reload' })));
+    /* 🔴v1165 复查第 2 轮：记下这一代什么时候装好（写不进去就算了：只是不做发版窗口的复查，和以前一样） */
+    try { await cache.put(new Request(new URL(META_INSTALLED, self.location.href).href), new Response(String(Date.now()), { headers: { 'content-type': 'text/plain' } })); } catch (error) {}
     await self.skipWaiting();
   })());
 });
@@ -449,6 +513,11 @@ self.addEventListener('fetch', event => {
   const network = hit.then(found => (found && versioned) ? null : fetch(request));
   const refresh = network.catch(() => null);
   event.waitUntil(network.then(response => response ? putIfReasonable(cacheName, request, response, maxEntries) : false).catch(() => false));
+  /* 🔴v1165 复查第 2 轮：命中的是发版窗口里存的那份 → 这次照旧用它，后台再问一次服务器（见 META_INSTALLED 那段） */
+  if (isCode && versioned) {
+    event.waitUntil(hit.then(found => found ? needsRecheck(found, request) : false)
+      .then(yes => yes ? recheckVersioned(request) : false).catch(() => false));
+  }
   if (isCode) {
     // v946: code cache keys include the version query.  The former
     // ignoreSearch:true could answer ?v=1163 with stale prior-version JavaScript on

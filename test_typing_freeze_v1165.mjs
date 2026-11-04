@@ -11,6 +11,7 @@
  *   ① 回来以后：没有记超时（typeTimeouts 0）、错题本 / 复习计划里没有这个词、没出答错小课
  *   ② 计时从离开时的地方接着走（顶上的秒数 < 5 秒），还在拼同一个词、已经打的字母还在
  *   ③ 接着把这个词拼完：照常算拼对
+ *   C. 回主页停 4 秒（打字计时停了）、再进打字大师开一局：新一局的计时从 0 开始正常走（上一局最后那一下走表不能当成「冻住」）
  *   ⚠️ CDP 的 Page.setWebLifecycleState('frozen') 在无头 Chromium 里不停计时器（实测 6 秒照样每 87ms 一跳），不能拿来模拟。
  */
 import { chromium } from './playwright_loader.mjs';
@@ -93,6 +94,19 @@ try {
     await sleep(32000);
     await page.evaluate(() => { window.__fakeHidden = false; document.dispatchEvent(new Event('visibilitychange')); });
   }, 2);
+  /* C. 回到难度菜单停 4 秒，再开一局 */
+  console.log('\n▶ C. 回主页停 4 秒，再进打字大师开一局');
+  await page.evaluate(() => showScreen('home'));   // 离开打字屏：计时器停了
+  await sleep(4000);
+  await page.evaluate(() => showTypingMenu());
+  await sleep(400);
+  await page.locator('#typingContent [onclick^="startTyping("]').first().tap();
+  await page.waitForFunction(() => typeActive && typeWord && document.getElementById('typeTimer'), null, { timeout: 10000 });
+  await sleep(1200);
+  const c1 = await page.evaluate(() => parseFloat((document.getElementById('typeTimer') || {}).textContent));
+  await sleep(1000);
+  const c2 = await page.evaluate(() => parseFloat((document.getElementById('typeTimer') || {}).textContent));
+  ok(c1 >= 0.5 && c1 < 3 && c2 > c1, `新一局的计时从 0 开始正常走（${c1}s → ${c2}s）`);
   ok(errs.length === 0, '页面无报错 ' + errs.join(' | '));
   await ctx.close();
 } finally { await browser.close(); srv.close(); }

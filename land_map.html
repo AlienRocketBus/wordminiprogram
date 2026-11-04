@@ -261,7 +261,11 @@ try{
     (window.requestIdleCallback||function(f){setTimeout(f,2200);})(function(){
       var next=0; for(var i=1;i<=8;i++){if(!clearedN(i)){next=i;break;}}
       if(next){
-        try{fetch('island_land'+next+'.html',{cache:'force-cache',credentials:'same-origin',priority:'low'}).catch(function(){});}catch(_e){}
+        /* 🔴v1165 复查第 2 轮：预热的地址要和真进岛时一字不差。在首页外壳里，外壳打开的是 island_landN.html?v=版本号
+           （和首页预取同一个地址），以前这里预热的是不带 ?v= 的那个 —— 永远用不上，点进岛时整页再下一遍（约 200KB）。
+           单独打开的地图进岛走 location.assign(不带 ?v=)，就照旧预热不带的。 */
+        var _q='';try{if(window.parent!==window&&typeof window.parent.openIsland==='function')_q=window.parent.HSN_BUILD?('?v='+window.parent.HSN_BUILD):'?v=1163';}catch(_eq){}
+        try{fetch('island_land'+next+'.html'+_q,{cache:'force-cache',credentials:'same-origin',priority:'low'}).catch(function(){});}catch(_e){}
       }
     });
   }

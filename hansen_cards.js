@@ -1212,6 +1212,8 @@
   try{
     document.addEventListener('visibilitychange',wakeBackgroundMedia,{passive:true});
     window.addEventListener('online',wakeBackgroundMedia,{passive:true});
+    /* 🔴v1165 复查第 2 轮：首页外壳收起这个岛时预载规则会说「先别下」（hansen_preload），岛再露出来外壳发 hsn-shell-shown —— 接着下例句录音 / Boss 图 */
+    window.addEventListener('hsn-shell-shown',wakeBackgroundMedia,{passive:true});
     var _mediaConn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
     if(_mediaConn&&typeof _mediaConn.addEventListener==='function')_mediaConn.addEventListener('change',wakeBackgroundMedia);
     window.addEventListener('pagehide',function(){_mediaWaiters=[];},{once:true});

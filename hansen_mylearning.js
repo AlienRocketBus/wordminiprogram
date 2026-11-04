@@ -49,10 +49,20 @@
     } catch(e){ return false; }
   }
 
+  /* 🔴v1165 复查第 2 轮：首页外壳里收起来的岛（孩子回首页了，岛框 display:none）也不写 ——
+     iframe 藏起来时 visibilityState 还是 visible，以前它照样每 8 秒写一次 */
+  function hiddenInShell(){
+    try {
+      if(window.parent === window) return false;
+      if(typeof window.parent.__hsnIslandShown === 'function' && window.frameElement && window.frameElement.closest &&
+         window.frameElement.closest('#islandFrameWrap')) return !window.parent.__hsnIslandShown();
+    } catch(e){}
+    return false;
+  }
   // ── 快照: 把本岛真实学习数据写进全局命名空间 ──
   function writeSnapshot(){
     try {
-      if(hiddenWarmFrame()) return;
+      if(hiddenWarmFrame() || hiddenInShell()) return;
       var S = window.S; if(!S) return;
       var allW = window.allW;
       var snap = {
@@ -66,7 +76,14 @@
         maxCombo: (S.stats && num(S.stats.maxCombo)) || 0,
         ts: Date.now()
       };
-      localStorage.setItem(PFX + snap.name, JSON.stringify(snap));
+      /* 🔴v1165 复查第 2 轮：除了时间什么都没变就不写。以前每 8 秒写一次（只有 ts 变）→ 每次都触发「数据变了」→
+         云存档每 16 秒左右整份导出一次备份：孩子什么都没点，岛也一阵一阵地卡（4 倍慢 CPU 300~800ms）。
+         ts 现在的意思是「上次学到东西的时候」（「我的学习」写的今天 / 昨天正好就是这个） */
+      var key = PFX + snap.name, old = null;
+      try { old = JSON.parse(localStorage.getItem(key) || 'null'); } catch(eOld){ old = null; }
+      if(old && typeof old === 'object' && old.name === snap.name && old.totalWords === snap.totalWords && old.learned === snap.learned &&
+         old.ans === snap.ans && old.cor === snap.cor && old.boss === snap.boss && old.level === snap.level && old.maxCombo === snap.maxCombo) return;
+      localStorage.setItem(key, JSON.stringify(snap));
     } catch(e){}
   }
 

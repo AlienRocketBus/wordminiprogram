@@ -239,16 +239,35 @@
     }
     return false;
   }
-  function autoRefresh(sv) {
-    writeFix({ v: sv, at: Date.now(), n: (function (r) { return r && r.v === sv ? r.n + 1 : 1; })(readFix()) });
+  /* 🔴v1165 复查第 2 轮：首页上的拼写大PK / 天梯对战屏（不在岛框里，盖在首页上）开着也算「正在玩」—— 以前只看岛框，
+     对战打到一半开机检查 / 切后台检查一到就刷新，这一局没了 */
+  function overlayBusy() {
+    var ids = ['hsn_pkroom_screen', 'hsn_pk_screen', 'hsn_ladder_screen'];
+    for (var i = 0; i < ids.length; i++) {
+      try {
+        var el = document.getElementById(ids[i]);
+        if (el && el.isConnected && el.getClientRects().length && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden') return true;
+      } catch (e) {}
+    }
+    return false;
+  }
+  function busy() { return islandOpen() || overlayBusy(); }
+  function autoRefresh(sv, waitMs) {
     banner('发现新版本 v' + sv + '（当前 v' + state.local + '），正在更新…');
-    return new Promise(function (res) { setTimeout(res, 900); })
-      .then(function () { return forceRefresh(); }).then(function () { return state; });
+    return new Promise(function (res) { setTimeout(res, waitMs || 900); })
+      .then(function () {
+        /* 🔴v1165 复查第 2 轮：等的这一会儿孩子又点进了一个岛（回首页后马上点下一个，孩子常这样）/ 开了对战 →
+           不刷新，接着等下次回首页。以前不再看一眼，0.9 秒后照样刷新，把孩子从刚进的岛里踢回首页 */
+        if (busy()) { deferred = sv; banner('有新版本，回到首页时自动更新', 6000); log('孩子又开始玩了 → 先不刷新'); return state; }
+        writeFix({ v: sv, at: Date.now(), n: (function (r) { return r && r.v === sv ? r.n + 1 : 1; })(readFix()) });
+        return forceRefresh().then(function () { return state; });
+      });
   }
   function runDeferred() {
     if (!deferred) return;
     var sv = deferred; deferred = 0;
-    if (mayAuto(sv)) autoRefresh(sv);
+    /* 🔴v1165 复查第 2 轮：回到首页后先停 3 秒（孩子多半马上点下一个岛）；还在首页、没开对战才更新 */
+    if (mayAuto(sv)) autoRefresh(sv, 3000);
   }
 
   function check(opts) {
@@ -280,6 +299,11 @@
       if (islandOpen()) {
         if (deferred !== sv) { deferred = sv; banner('有新版本，回到首页时自动更新', 6000); }
         log('孩子正在岛里玩 → 回到首页时再更新到 v' + sv);
+        return state;
+      }
+      if (overlayBusy()) {   /* 🔴v1165 复查第 2 轮：首页上开着对战屏，同样等 */
+        if (deferred !== sv) { deferred = sv; banner('有新版本，打完这一局回到首页时自动更新', 6000); }
+        log('孩子正在首页上对战 → 打完再更新到 v' + sv);
         return state;
       }
       return autoRefresh(sv);
@@ -320,7 +344,7 @@
       document.addEventListener('visibilitychange', function () {
         /* v1165 复查：岛开着时切到后台（自动锁屏、看一眼微信消息）不更新 —— 刷新会把正在玩的这一局弄没，
            横幅说的也是「回到首页时自动更新」。只有停在首页时切到后台才顺手更新；岛里攒着的等回首页（__hsnAfterIslandClose）。 */
-        if (document.visibilityState === 'hidden') { if (!islandOpen()) runDeferred(); return; }
+        if (document.visibilityState === 'hidden') { if (!busy()) runDeferred(); return; }
         var since = Date.now() - state.checkedAt;
         if (document.visibilityState === 'visible' && (since > 10 * 60 * 1000 || (state.stale && since > GAP))) run();
       });

@@ -1877,7 +1877,7 @@ try{
     document.addEventListener('visibilitychange',function(){if(!document.hidden){sbFlushRewardPending();sbFlushFocusPending();}});
   }
 }catch(e){}
-var _advTimer=null, _sessionCoins=0, _sessionXp=0, _bestStreak=0;
+var _advTimer=null, _advFn=null, _pendingAdvance=null, _sessionCoins=0, _sessionXp=0, _bestStreak=0;   /* _advFn：自动跳下一题要做的事（✕ 停下时先收着） */
 var pool=[],qIdx=0,totalQ=5,scoreYou=0,scoreBot=0;
 var curWord=null,target='',yourInput='',botProg=0,botTimer=null,raceOver=false,started=0,tmTimer=null;
 var wKeys=0,wFirst=0,wLast=0,youIntervals=0,youSpan=0,youCorrectTotal=0,youRaceTime=0;
@@ -2123,6 +2123,7 @@ function startMatch(replayList){
 }
 function nextWord(){
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  _advFn=null;
   $('laneRes').classList.remove('on');
   if(_sbFocus){if(_sbFocus.pending||_sbFocus.acked)return;curWord=_sbFocus.word;}
   else{if(qIdx>=totalQ){endMatch();return;}curWord=pool[qIdx];}
@@ -2206,8 +2207,8 @@ function finishFocused(who){
     if(!proof&&btn){btn.disabled=false;btn.textContent='存档暂未写入 · 点此重试';btn.onclick=function(){var ok=sbQueueFocusComplete();if(ok){btn.disabled=true;btn.textContent='正在安全锁定记忆星…';}};}
     sndEnd(true);return;
   }
-  var go=function(){if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}qIdx++;nextWord();};$('contBtn').onclick=go;
-  if(!S.manualNext)_advTimer=setTimeout(go,who==='you'?1350:2200);
+  var go=function(){if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}_advFn=null;qIdx++;nextWord();};$('contBtn').onclick=go;
+  if(!S.manualNext){_advFn=go;_advTimer=setTimeout(go,who==='you'?1350:2200);}
 }
 function finish(who){
   if(_sbFocus){finishFocused(who);return;}
@@ -2246,9 +2247,9 @@ function finish(who){
     +'<div class="ra">正确答案 <b>'+curWord.en+'</b> <span class="rpn">'+curWord.pn+' '+curWord.cn+'</span></div>'
     +'<button class="contbtn" id="contBtn">'+(_last?'看结算 ›':'下一题 ›')+'</button>';
   r.classList.add('on');
-  var _go=function(){if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}qIdx++;nextWord();};
+  var _go=function(){if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}_advFn=null;qIdx++;nextWord();};
   $('contBtn').onclick=_go;
-  if(!S.manualNext){ _advTimer=setTimeout(_go, who==='you'?1500:2600); }    // 默认自动跳·赢1.5s/输2.6s(留时间看正确答案)
+  if(!S.manualNext){ _advFn=_go; _advTimer=setTimeout(_go, who==='you'?1500:2600); }    // 默认自动跳·赢1.5s/输2.6s(留时间看正确答案)
 }
 function endMatch(){
   stopTimer();clearTimeout(botTimer);if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
@@ -2345,13 +2346,22 @@ $('startBtn').onclick=function(){_unlockSbAudio();startMatch();};
   /* v1165 「单词难度」旁的小字以前写死「动物大冒险词库」，在哪个岛都这么写；改成本岛（独立打开写「全部词库」） */
   try{ var _tip=document.getElementById('sbWordTip'); if(_tip) _tip.textContent=(_sbIsland&&ISLAND_CN[_sbIsland])?(ISLAND_CN[_sbIsland]+'岛词库'):'全部词库'; }catch(_te){}
 })();
-$('exitBtn').onclick=function(){if(!raceOver){paused=true;pausedAt=Date.now();clearTimeout(botTimer);stopTimer();}$('exitConfirm').classList.add('on');};
+/* 🔴v1165 复查第 2 轮：一题刚结束（「你赢了 / 机器人赢了」那 1.5~2.6 秒）点 ✕ 也要停：以前只在比赛中才停，
+   自动跳下一题的计时照走 —— 确认框还开着，下一题已经念完开赛，机器人在框后面把它拼完、孩子的计时也在走。
+   现在：自动跳下一题先收着（_pendingAdvance），「继续比赛」再跳；「退出」就扔掉。 */
+$('exitBtn').onclick=function(){
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;_pendingAdvance=_advFn;_advFn=null;}
+  if(!paused){paused=true;pausedAt=Date.now();}
+  if(!raceOver){clearTimeout(botTimer);stopTimer();}
+  $('exitConfirm').classList.add('on');
+};
 /* 🔴v1165 继续比赛：还没开赛（停在听单词那一段）就不碰计时器和机器人；停着时单词念完了 → 现在开赛；
    已经开赛 → 接着计时、机器人接着打（先清掉旧的，永远只有一条，以前会多开一条、机器人快一倍） */
 $('exitNo').onclick=function(){$('exitConfirm').classList.remove('on');if(paused){paused=false;
-  if(_pendingStart){var f=_pendingStart;_pendingStart=null;f();}
+  if(_pendingAdvance){var g=_pendingAdvance;_pendingAdvance=null;g();}   /* 🔴v1165 复查第 2 轮：停下前正要跳下一题 → 现在跳 */
+  else if(_pendingStart){var f=_pendingStart;_pendingStart=null;f();}
   else if(raceStarted&&!raceOver){started+=Date.now()-pausedAt;startTimer();clearTimeout(botTimer);botTimer=setTimeout(function(){botStep(curMs);},curMs);}}};
-$('exitYes').onclick=function(){$('exitConfirm').classList.remove('on');paused=false;_pendingStart=null;raceOver=true;clearTimeout(botTimer);stopTimer();$('laneRes').classList.remove('on');show('setup');};
+$('exitYes').onclick=function(){$('exitConfirm').classList.remove('on');paused=false;_pendingStart=null;_pendingAdvance=null;_advFn=null;raceOver=true;clearTimeout(botTimer);stopTimer();$('laneRes').classList.remove('on');show('setup');};
 $('againBtn').onclick=function(){_unlockSbAudio();$('over').classList.remove('on');startMatch();};
 $('redrillBtn').onclick=function(){_unlockSbAudio();var snap=missedWords.slice();if(!snap.length)return;$('over').classList.remove('on');startMatch(snap);};
 $('backBtn').onclick=function(){$('over').classList.remove('on');show('setup');};

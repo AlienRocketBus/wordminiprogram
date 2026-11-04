@@ -149,8 +149,20 @@
       return t !== '4g';
     }catch(e){ return true; }
   }
+  /* 🔴v1165 复查第 2 轮：首页外壳里收起来的岛（孩子点 🗺️ 回首页，岛框 display:none 保活）—— iframe 藏起来时
+     visibilityState 还是 visible，以前它的单词音频预载照样跑（4G 上回首页 20 秒又下了 1.16MB 录音 + 230KB 图）。
+     外壳收起 / 再露出岛时会发 hsn-shell-hidden / hsn-shell-shown（index.html），这里同时直接看岛框露没露着。 */
+  function _hsnShellHidden(){
+    try{
+      if(window.parent === window) return false;
+      var fe = window.frameElement; if(!fe || !fe.closest) return false;
+      var wrap = fe.closest('#islandFrameWrap');
+      return !!(wrap && wrap.style.display === 'none');
+    }catch(e){ return false; }
+  }
   function _hsnPageVisible(){
     try{
+      if(_hsnShellHidden()) return false;
       if(typeof document.visibilityState==='string') return document.visibilityState==='visible';
       return !document.hidden;
     }
@@ -173,6 +185,9 @@
   try{
     document.addEventListener('visibilitychange',_wakeBackgroundWaiters,{passive:true});
     window.addEventListener('online',_wakeBackgroundWaiters,{passive:true});
+    /* 🔴v1165 复查第 2 轮：外壳收起这个岛 → 马上停下在途的预载（放回队首，再露出来时接着下）；再露出来 → 接着下 */
+    window.addEventListener('hsn-shell-hidden',function(){ for(var i=0;i<_batches.length;i++){ try{ _batches[i](); }catch(e){} } },{passive:true});
+    window.addEventListener('hsn-shell-shown',_wakeBackgroundWaiters,{passive:true});
     var _conn=_hsnConnection();if(_conn&&typeof _conn.addEventListener==='function')_conn.addEventListener('change',_wakeBackgroundWaiters);
     window.addEventListener('pagehide',function(){_backgroundWaiters=[];},{once:true});
   }catch(e){}

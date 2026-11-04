@@ -2237,16 +2237,40 @@ window.__HBU_LOADED_AT__ = Date.now();
   }
   /* 孩子点了轻量行：这时才加载引擎，换成引擎自己的那一行，再直接调它的点击函数（打开面板 / 未解锁提示）。
      不重放 click 事件（v953 合同：轻桥不得重放 click，防双开 / 双计数） */
+  /* 🔴v1165 复查第 2 轮：孩子亲手点了，就等引擎真的到（最多 30 秒）。ensureLoaded 只等 6 秒导出：网慢（约 1.5Mbps，
+     1.23MB 引擎要下 7 秒）时 6 秒一到就恢复成原来那一行、什么都没打开，引擎半秒后才到 —— 孩子只能猜着再点一次。 */
+  var TAP_WAIT_MS=30000;
+  function waitForRefreshExport(deadline){
+    return new Promise(function(resolve){
+      (function poll(){
+        if(exportedRefresh()){ resolve(true); return; }
+        if(Date.now()>=deadline){ resolve(false); return; }
+        setTimeout(poll,100);
+      })();
+    });
+  }
+  var tapPending=false;
   function stubTap(){
+    if(tapPending) return;   /* 正在打开：多点几下不重复加载 */
     var d=document.getElementById('hbafxEntry');
     if(d&&d.hasAttribute('data-hsn-stub')){
       d.setAttribute('data-hsn-loading','1');
       var sp=d.querySelector('span'); if(sp) sp.textContent='正在打开…';
     }
+    tapPending=true;
+    var deadline=Date.now()+TAP_WAIT_MS;
     ensureLoaded().then(function(ok){
+      if(ok&&exportedRefresh()) return true;
+      return waitForRefreshExport(deadline);   /* 6 秒没等到：引擎多半还在下，接着等（同一个下载，不重新加载） */
+    }).then(function(ok){
+      tapPending=false;
       var fn=exportedRefresh(), stub=document.getElementById('hbafxEntry');
       if(stub&&stub.hasAttribute('data-hsn-stub')){
-        if(!ok||!fn){ stub.removeAttribute('data-hsn-loading'); renderStub(); return; }   /* 没加载成：恢复原样，再点再试 */
+        if(!ok||!fn){   /* 30 秒还没到：恢复原样，告诉孩子再点一下 */
+          stub.removeAttribute('data-hsn-loading'); renderStub();
+          var sp2=stub.querySelector('span'); if(sp2) sp2.textContent='网有点慢，再点一下试试';
+          return;
+        }
         stub.remove();
       }
       if(!ok||!fn) return;

@@ -4150,6 +4150,7 @@ document.querySelectorAll('.island').forEach(el=>{
       _hideIslandLoading(true);
       /* 🔴v1165 保活的岛再显示时刷新一下顶栏金币/经验/任务红点：别的岛、首页、拼写蜂在这期间可能改过全局钱包和任务 */
       try{ var _kw = frame.contentWindow; if(_kw){ if(typeof _kw.updateTopBar === 'function') _kw.updateTopBar(); if(typeof _kw.updateQuestBadge === 'function') _kw.updateQuestBadge(); } }catch(e){}
+      try{ var _kw2 = frame.contentWindow; if(_kw2) _kw2.dispatchEvent(new _kw2.Event('hsn-shell-shown')); }catch(e){}   /* 🔴v1165 复查第 2 轮：岛又露出来了，预载接着下 */
     } else {
       /* 🔴BUG#90 换岛/首次进岛【真·秒进·零闪】: ①先把 iframe 瞬时设透明(transition:none)【再】显示 wrap → wrap 出现时 iframe 已隐藏·绝不闪旧岛画面;
          ②wrap/iframe 暗底已与岛 body(#0c1538)统一(BUG#89 保留)→揭岛背景零跳变; ③加载提示【延迟250ms】才显(预热后瞬时揭开根本不显·真秒进无闪); ④等首屏图标【真正加载完】再【瞬时】揭开完整岛(替代 v692 的0.3s淡入——淡入本身被反馈为"闪一下"; 图片全就绪故无图标逐个蹦)。
@@ -4259,6 +4260,8 @@ document.querySelectorAll('.island').forEach(el=>{
     try{
       var _f = document.getElementById('islandFrame'), _w = _f && _f.contentWindow;
       if(_w && typeof _w.__hsnIslandHidden === 'function') _w.__hsnIslandHidden();
+      /* 🔴v1165 复查第 2 轮：告诉岛里的预载「你被收起来了」（藏着的 iframe 自己看不出来，以前照样下单词录音） */
+      try{ if(_w) _w.dispatchEvent(new _w.Event('hsn-shell-hidden')); }catch(e2){}
     }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
     try{ if(typeof window.__hsnApplyHomeTheme === 'function') window.__hsnApplyHomeTheme(); }catch(e){}   /* 🔴v1165 岛里换过的主题回首页马上生效（岛开着时首页不再轮询主题） */
