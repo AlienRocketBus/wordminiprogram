@@ -89,6 +89,20 @@ def quick():
     lost = [w for w in ('虹吸主义', '虫洞主义', '执行主义', '完美主义', '丝滑主义', '进化主义') if w not in rules]
     if lost:
         bad.append('CLAUDE.md 里的六个主义不全了（缺：%s）' % '、'.join(lost))
+    # 执行主义：每个版本都要有一份写完整的说明（版本说明/v####.md），没写完就发不出去
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('relnote', os.path.join(ROOT, '写版本说明.py'))
+        rn = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rn)
+        bad += rn.check(open(os.path.join(ROOT, 'VERSION')).read().strip())
+    except Exception as e:
+        bad.append('版本说明检查本身出错：%s' % str(e)[:120])
+    # 工具自检（工具本身也要完美）：升版本号的 9 类位置现在都对得上 —— 有人新加/改坏了一处，今天就红，不等到发版那天
+    r = subprocess.run([sys.executable, '一键升版本.py', '--check'], cwd=ROOT, capture_output=True, text=True)
+    if r.returncode != 0:
+        tail = [l.strip() for l in (r.stdout + r.stderr).split('\n') if l.strip().startswith(('✗', '-'))]
+        bad.append('一键升版本.py 自检没过：' + '；'.join(tail[:3]))
     rc, out, _ = run([sys.executable, 'check_resources.py'], 'check_resources', 900)
     if rc != 0 or '全部通过' not in out:
         tail = [l for l in out.strip().split('\n') if l.strip()][-2:]

@@ -253,14 +253,25 @@ const S = () => ({ rows: [], msgs: [], denied: [] });
      '★ 每条招呼都带着发件人自己的可信身份');
 }
 
-/* ⑥ 未知消息不渲染原始内容 */
+/* ⑥ 未知消息不渲染原始内容
+   v1164 第二轮（审查安全 R2-2）：发件人要先对得上「写『No.2 加了我』那条好友记录的账号」才算好友发的 ——
+   所以这里让 No.2 真是互相加过的好友（他的记录、他的在线状态都是他自己的账号写的），再看未知 qid 怎么显示 */
 {
-  const s = { rows: [], msgs: [{ _id: 'M0', from: 9, fromName: 'X', to: 1,
-                                 qid: '<img onerror=alert(1)>', at: Date.now() }] };
+  const RAW = '<img onerror=alert(1)>';
+  const s = { rows: [
+      { _id: 'F21', kind: 'friend', owner: 2, friend: 1, name: '小明', at: Date.now(), _openid: 'oB' },
+      { _id: 'P2', kind: 'presence', cid: 2, name: '小红', at: Date.now(), _openid: 'oB' }],
+    msgs: [{ _id: 'M0', from: 2, fromName: '小红', to: 1, fromOpenid: 'oB', _openid: 'oB', qid: RAW, at: Date.now() },
+           { _id: 'M1', from: 9, fromName: 'X', to: 1, qid: RAW, at: Date.now() - 1 }] };
   const A = boot(s); A.F._setMeForTest({ cid: 1, name: '小明' });
+  await A.t.add({ kind: 'friend', owner: 1, friend: 2, name: '小红', at: Date.now() });
   const inb = await A.F.inbox();
-  ok(inb.msgs[0].text === '(未知消息)',
-     '★ 未知 qid 只显示"(未知消息)"，绝不把原始内容渲染出来');
+  const m0 = inb.msgs.find((m) => m.id === 'M0'), m1 = inb.msgs.find((m) => m.id === 'M1');
+  ok(m0 && m0.from === 2 && !m0.suspicious && m0.text === '(未知消息)',
+     '★ 未知 qid 只显示"(未知消息)"，绝不把原始内容渲染出来（好友发来的：' + JSON.stringify(m0 && m0.text) + '）');
+  ok(m1 && m1.suspicious && m1.text === '(来源不明的消息)',
+     '★ 认不出是谁发的（没有可信身份）→「(来源不明的消息)」，同样不渲染原始内容');
+  ok(!JSON.stringify(inb.msgs).includes('onerror'), '★ 收件箱返回的任何一个字段里都没有原始内容');
 }
 
 /* ⑦ 快捷语表本身 */
