@@ -2,19 +2,19 @@
 #
 # 为什么要有它（虫洞主义）：联机对战的毛病常常十次里才出一次。以前在沙盒里反复跑太贵（又慢又费 token），
 #   现在交给 GitHub：10 轮同时跑，**哪一轮失败都算**（不重跑、不放过），结论表列出每个测试失败了几轮。
-# 怎么用：Actions 页 → 反复测试 → Run workflow，填要跑的测试名片段（默认 cloud_v1164 = 全部真 SDK 联机测试）。
+# 怎么用：Actions 页 → 反复测试 → Run workflow，填要跑的测试名片段（默认 _cloud_v = 全部真 SDK 联机测试（v1164、v1165……都算））。
 #   AI 也可以用 GitHub 接口直接触发。
 name: 反复测试
 
 on:
-  # 开发分支上：提交说明以 [反复测试] 开头就跑（默认 cloud_v1164 跑 10 轮）；手动点也行（手动要等它进了 main）
+  # 开发分支上：提交说明以 [反复测试] 开头就跑（默认 _cloud_v 跑 10 轮）；手动点也行（手动要等它进了 main）
   push:
     branches: ['claude/**']
   workflow_dispatch:
     inputs:
       only:
-        description: '测试名里包含的片段（比如 cloud_v1164、room、ladder）'
-        default: 'cloud_v1164'
+        description: '测试名里包含的片段（比如 _cloud_v、cloud_v1165、room、ladder）'
+        default: '_cloud_v'
         required: true
       rounds:
         description: '跑几轮（1–10，每轮一台机器）'
@@ -65,7 +65,7 @@ jobs:
       - name: 装浏览器
         run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
       - name: 跑一轮（失败不重跑）
-        env: { ONLY: "${{ inputs.only || 'cloud_v1164' }}" }
+        env: { ONLY: "${{ inputs.only || '_cloud_v' }}" }
         # 失败不在这里判红（只由「结论」判）—— 每次运行只发一条结果通知
         run: python3 一键体检.py --only "$ONLY" --no-retry --tag "r${{ matrix.round }}" || echo "这一轮有失败，由「结论」判定"
       - if: always()
@@ -85,5 +85,5 @@ jobs:
       - name: 每个测试失败了几轮
         env:
           ROUNDS: ${{ inputs.rounds || '10' }}
-          ONLY: ${{ inputs.only || 'cloud_v1164' }}
+          ONLY: ${{ inputs.only || '_cloud_v' }}
         run: python3 .github/scripts/siphon_summary.py repeat

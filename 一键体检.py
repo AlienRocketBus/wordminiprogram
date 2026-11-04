@@ -6,7 +6,7 @@
     python3 一键体检.py --quick      # 只做三道快检（资源检查、守卫、零测试桩冒烟），几分钟
     python3 一键体检.py --shard 2/6  # 只跑第 2 份（共 6 份）测试 —— 给 GitHub 自动测试用
     python3 一键体检.py --only room  # 只跑名字里带 room 的测试
-    python3 一键体检.py --only cloud_v1164 --no-retry --tag r3   # 反复测试用：失败不重跑，一次失败就记下
+    python3 一键体检.py --only _cloud_v --no-retry --tag r3   # 反复测试用：失败不重跑，一次失败就记下
 
 为什么要有它（「虹吸工作法」，见 攻坚笔记/虹吸工作法.md）：
     以前跑测试是让 AI 一条条敲命令、把几千行日志读进脑子里 —— 最费 token 的就是这一步。
