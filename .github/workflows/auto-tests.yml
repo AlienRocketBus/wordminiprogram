@@ -62,6 +62,8 @@ jobs:
       - name: 装浏览器
         # 下载进度条有几百行，只在失败时才打印日志尾巴（读日志也要省）
         run: npx playwright install --with-deps chromium > /tmp/pw.log 2>&1 || { tail -30 /tmp/pw.log; exit 1; }
+      - name: 把结论脚本放进日志目录（「结论」不用再拉代码，日志最后几行就是结论表）
+        run: mkdir -p .siphon && cp .github/scripts/siphon_summary.py .siphon/
       - name: 语法 + 资源检查 + 守卫 + 零测试桩冒烟
         # 结果写进 .siphon/quick_rc，由「结论」统一判红绿 —— 每次运行只发一条结果通知（进化主义：少叫醒一次 AI 就少花一次 token）
         run: python3 一键体检.py --quick || echo "快检没过（退出码 $?），由「结论」判定"; mkdir -p .siphon; test -f .siphon/SUMMARY.txt && grep -q '全部通过' .siphon/SUMMARY.txt && echo 0 > .siphon/quick_rc || echo 1 > .siphon/quick_rc
@@ -112,8 +114,6 @@ jobs:
       contents: read
       actions: read
     steps:
-      - uses: actions/checkout@v4
-        with: { sparse-checkout: .github/scripts }
       - uses: actions/download-artifact@v4
         with: { pattern: 'siphon-logs-*', path: logs }
       - name: 拿上一次的结果来对比（完美主义：修问题不许带入新问题）
@@ -131,4 +131,4 @@ jobs:
         env:
           QUICK: ${{ needs.quick.result }}
           TESTS: ${{ needs.tests.result }}
-        run: python3 .github/scripts/siphon_summary.py tests
+        run: python3 logs/siphon-logs-quick/siphon_summary.py tests
