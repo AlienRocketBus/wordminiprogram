@@ -280,6 +280,19 @@ async function cloudWords(num, label) {
     const wrote = saveWrites(A.uid).length - w1;
     await t.ok(s2 && s2.action === 'uploaded' && back && wrote >= 1, `对账发现云端没有、本机有 → 真传上去了（对账：${s2 && s2.action}；传了 ${wrote} 次；云端${back ? '又有了' : '还是空的'}）—— 以前「内容没变」跳过，嘴上说「进度已存到云端」`, () => explain());
   });
+
+  /* ══ ⑦ 云存档卡片「立即同步」失败时说人话 ═══════════════════════════════ */
+  await part('⑦ 云存档卡片「立即同步」失败时说人话、代号放在 ⟨⟩ 里（审查 R3 minor-1）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const P = await phone('空手机', { path: '/spelling_pk.html', ready: ISLAND.ready });
+    await login(P, '13400000077');           /* 云端、本机都是空的 */
+    await P.eval(() => { const d = document.createElement('div'); d.id = 'hsnBackupSection'; d.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1020;overflow:auto;padding:12px'; document.body.appendChild(d); return true; });
+    await P.tap('#hsnCloudSync', { timeout: 8000 });
+    const said = await H.until(async () => { const v = await P.eval(() => ((document.getElementById('hsnCloudMsg') || {}).textContent || '')); return /已上云|内容没变化|同步失败/.test(v) ? v : null; }, { timeout: 15000 }) || '';
+    await t.ok(has(said, /^同步失败：这台手机上还没有学会的单词，先玩一会儿再存 ⟨local-empty-refuse-upload⟩$/),
+      `一个词都没学过就点「立即同步」：和登录面板说同一句人话，代号放在 ⟨⟩ 里（看到：${said}）—— 以前只印「同步失败：local-empty-refuse-upload」`, () => explain());
+  });
 }
 t.summary();
 for (const p of live) { try { await p.close(); } catch (e) { /* 已关 */ } }

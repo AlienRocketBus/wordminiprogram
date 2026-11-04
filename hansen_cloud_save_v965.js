@@ -988,7 +988,13 @@
            别的设备刚把云端盖掉、或者云端那条被删了，这一下就是要把这台的传上去 */
         syncNow({force:true, rewrite:true}).then(function(r){
           if(r.ok) msg(r.skipped ? '内容没变化，无需上传 ✅' : '已上云 ✅', true);
-          else msg(r.reason==='not-configured' ? '云端待开通（见指南）' : ('同步失败：'+(r.error||r.reason)), false);
+          else if(r.reason==='not-configured') msg('云端待开通（见指南）', false);
+          else {
+            /* 🔴审查 R3 minor-1：以前直接印原因代号（「同步失败：not-reconciled」）—— 和登录面板用同一份人话，代号放在 ⟨⟩ 里 */
+            var code = String(r.reason || ''), U = window.HansenAuthUI;
+            var why = String((U && typeof U.pushWhy === 'function') ? U.pushWhy(r) : (r.error || code));
+            msg('同步失败：' + why + ((code && why !== code && why.indexOf('⟨') < 0) ? ' ⟨' + code + '⟩' : ''), false);
+          }
         });
       };
       document.getElementById('hsnCloudTest').onclick = function(){

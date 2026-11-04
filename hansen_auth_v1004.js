@@ -961,6 +961,26 @@
     try { a = Math.max(a, Number(sessionStorage.getItem(LATER_KEY) || 0) || 0); } catch (e) {}
     return a;
   }
+  /* 🔴审查 R3-F1：对战可能在这个标签页的**任何一层**页面里 —— 岛和藏着的预热页（赛季岛）各是一层，只看自己这层不够：
+     藏着的那层一恢复就把外层岛重新载入（_reloadSoon），岛自己恢复也会把正在对战的那层子页面一起刷掉（实测：对战中整页重载）。
+     从最外层往下每一层都看：对战 / 等人 / 进房 / 开房 / 天梯页开着 → 这次先不对账（等下一次：切回来、网通了、自动同步时再试）。 */
+  function tabBusy() {
+    var busy = false;
+    var look = function (w, n) {
+      if (busy || !w || n > 6) return;
+      try {
+        var U = w.HansenPkRoomUI, b = (U && typeof U.isBusy === 'function') ? U.isBusy() : null;
+        if (b && (b.battle || b.waiting || b.joining || b.creating)) { busy = true; return; }
+        var ls = w.document && w.document.getElementById('hsn_ladder_screen');
+        if (ls && ls.classList.contains('on')) { busy = true; return; }
+      } catch (e) {}
+      try { for (var i = 0; i < w.frames.length; i++) look(w.frames[i], n + 1); } catch (e) {}
+    };
+    var top0 = window;
+    try { top0 = window.top || window; } catch (e) {}
+    look(top0, 0);
+    return busy;
+  }
   function reconcileLater() {
     if (!_laterHooked) {
       _laterHooked = true;
@@ -973,8 +993,7 @@
     try {
       var CS = window.HansenCloudSave, uid = (readLocal() || {}).uid || '';
       if (!CS || !CS.reconcileState || !uid || !isSignedIn() || CS.reconcileState() !== uid) return;
-      var U = window.HansenPkRoomUI, b = (U && typeof U.isBusy === 'function') ? U.isBusy() : null;
-      if (b && (b.battle || b.waiting)) return;   /* 正在对战 / 等人：下次再说 */
+      if (tabBusy()) return;   /* 哪一层在对战 / 等人 / 进房 / 开房 / 开着天梯：下次再说（不记「试过」，下一次触发照常对） */
     } catch (e) { return; }
     _laterBusy = true; laterMark();
     T('登录对账', '上次登录时没对上账 → 再对一次');

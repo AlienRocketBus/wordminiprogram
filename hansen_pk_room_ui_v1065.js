@@ -376,6 +376,9 @@
     _fromLadder = false; _ladderCfg = null; _cameFromLadder = false;
     stopTicker();
     cancelCreating();
+    /* 🔴审查 R3 minor-3：对战里点开的「要退出这一局吗？…记一场输」挂在页面最外层（R2-UI-9）——
+       这一局没打成就回了列表（对手没进来 / 房主撤回了我）时，它还盖在列表上说「记一场输」。到了列表就收掉 */
+    hideQuit();
     var seq = ++_lobbySeq;
     _rowOrder = [];
     /* 点事件对象不是错误（v1156 教训：onclick = lobby 会把事件当 err 画出来） */
@@ -2348,6 +2351,7 @@
     var lad = !!(st && st.ladder);
     var rid = st && st.roomId;
     _state = null;
+    hideQuit();   /* 审查 R3 minor-3：这一局已经结束了，等交卷时点开的「先离开吗？」别留在这一屏上 */
     if (rid) { try { S().leaveRoom(rid); } catch (e) {} }
     paint('<div class="pr_top"><div class="pr_h">📨 这一局的结果没拿到</div></div>'
       + errBlock(r)

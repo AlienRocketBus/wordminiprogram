@@ -217,6 +217,37 @@ async function part(title, fn) {
     await t.ok(early >= 3, `前 5 秒每秒看一次对手（查了 ${early} 次）`, () => explain());
     await t.ok(late <= 4, `6 秒以后两秒看一次（7~13 秒这 6 秒查了 ${late} 次；以前 6 次左右）`, () => explain());
   });
+
+  /* ══ ⑥ 对手根本没进来：退出对话框不留在列表上 ═══════════════════════════ */
+  await part('⑥ 对战屏点开「退出」时对手根本没进来 → 回到列表：对话框收掉、不多记一场输（审查 R3 minor-3）', async () => {
+    emu = H.makeEmulator({ knobs: { permissionMode: 'legacy', latencyMs: 40 } });
+    names = {};
+    const K = await phone('子', '小蜂子');
+    const G = await phone('丑', '小蜂丑');
+    await toLobby(K);
+    await K.tap('#prNew');
+    await K.tap('.pr_mode[data-mode="A"]');
+    await K.waitScreen(/等对手进来/, { timeout: 15000 });
+    const rm = liveRooms(K)[0];
+    const recK0 = await H.ladderRecord(K);
+    /* 丑只在数据层占了座位、房主点了头 —— 他没进对战屏（没报到、没拼过词），接着就走了 */
+    const j = await G.eval(async (rid) => { const r = await window.HansenPkRoom.joinRoom(rid); return { ok: !!(r && r.ok), why: String((r && (r.reason || r.kind)) || '') }; }, rm && rm._id);
+    await t.ok(j && j.ok, `丑占到了座位、房主点了头（${JSON.stringify(j)}）`, () => explain());
+    const inB = await H.until(async () => H.battleView(K), { timeout: 20000 });
+    await t.ok(!!inB, '房主子进了对战屏', () => explain());
+    await K.tap('#prQuit');
+    const ask = await quitUp(K);
+    await t.ok(has(ask, /要退出这一局吗/) && has(ask, /记一场输/), `子点了「退出」，正在读对话框（${flat(ask).slice(0, 40)}）`, () => explain());
+    await G.eval(async (rid) => { await window.HansenPkRoom.leaveRoom(rid); return true; }, rm._id);
+    const back = await K.waitScreen(/没进来/, { timeout: 60000, all: true }).catch((e) => e.lastText || '');
+    await t.ok(has(back, /没进来/), `对手没进来 → 子回到了房间列表（看到：${(() => { const f = flat(back), i = f.indexOf('没进来'); return i < 0 ? f.slice(0, 40) : f.slice(Math.max(0, i - 8), i + 16); })()}）`, () => explain());
+    await H.sleep(800);
+    const ask2 = await quitUp(K);
+    await t.ok(!ask2, `回到列表以后，「要退出这一局吗？…记一场输」不再盖在列表上（${ask2 ? '还在：' + flat(ask2).slice(0, 40) : '已收掉'}）`, () => explain());
+    const recK = await H.ladderRecord(K);
+    await t.ok(recK && recK0 && recK.losses === recK0.losses && recK.total === recK0.total,
+      `没打成的这一局不记输赢（之前 ${recK0 && recK0.total} 局 ${recK0 && recK0.losses} 负 → 现在 ${recK && recK.total} 局 ${recK && recK.losses} 负）`, () => explain());
+  });
 }
 t.summary();
 for (const p of live) { try { await p.close(); } catch (e) { /* 已关 */ } }

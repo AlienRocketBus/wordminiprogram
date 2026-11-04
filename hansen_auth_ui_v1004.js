@@ -407,5 +407,6 @@
     _relogin = null;
   }
 
-  window.HansenAuthUI = { open: open, close: close, _render: render };
+  /* pushWhy：云存档卡片的「立即同步」也用这同一份人话（审查 R3 minor-1） */
+  window.HansenAuthUI = { open: open, close: close, _render: render, pushWhy: pushWhy };
 })();
