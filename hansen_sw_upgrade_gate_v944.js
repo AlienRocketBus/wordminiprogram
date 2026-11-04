@@ -6,7 +6,7 @@
     /* v1163: 这个号只是给排查用的标记（不参与任何比较），
        但仍然要跟着 VERSION 走 —— 一个记录着旧版本号的字段
        会在排查时把人带偏，而它本身没有存在的代价。 */
-    version: 1164,
+    version: 1165,
     ready: false,
     controller: 'checking'
   };

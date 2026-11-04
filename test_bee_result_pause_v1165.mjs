@@ -66,7 +66,10 @@ try {
   console.log('    点 ✕ 后：' + JSON.stringify(a) + '\n    8 秒后：' + JSON.stringify(b));
   ok(a.confirm && b.confirm, '确认框一直开着');
   ok(b.q === s0.q && b.q === a.q, `还停在第 ${a.q + 1} 题（8 秒后 qIdx ${a.q} → ${b.q}）`);
-  ok(b.botProg === 0 && b.steps === a.steps && b.scoreBot === a.scoreBot, `机器人一个字母都没打（字母 ${a.steps} → ${b.steps}，机器人得分 ${a.scoreBot} → ${b.scoreBot}）`);
+  /* 要守的是「确认框开着时机器人一个字母都不再打」：比的是点 ✕ 那一刻和 8 秒后。
+     以前还要求那一刻 botProg === 0 —— 可机器人本来就和孩子同时拼，机器慢时孩子拼对前它已经打了 1 个字母
+     （GitHub 和本机都偶尔出现，和改动无关），那一条测的是机器快慢，不是暂停对不对，去掉。 */
+  ok(b.botProg === a.botProg && b.steps === a.steps && b.scoreBot === a.scoreBot, `机器人一个字母都没再打（字母 ${a.steps} → ${b.steps}，这一题进度 ${a.botProg} → ${b.botProg}，机器人得分 ${a.scoreBot} → ${b.scoreBot}）`);
   ok(b.timer === a.timer, `计时器不走（${a.timer} → ${b.timer}）`);
 
   console.log('\n▶ ② 点「继续比赛」');

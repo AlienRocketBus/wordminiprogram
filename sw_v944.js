@@ -8,21 +8,21 @@ const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
 // 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-212。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-218';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-216';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-216';
+const SHELL_CACHE = CACHE_PREFIX + 'shell-219';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-217';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-217';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1164', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1164', './hansen_onboarding.js?v=1164', './hansen_theme_shop.js',
-  './hansen_season.js?v=1164', './hansen_cinema_themes.js?v=1164', './hansen_diamond_shop.js?v=1164', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1164', './hansen_crystal.js', './hansen_cards.js?v=1164', './hansen_gacha.js?v=1164', './hansen_land_cards.js?v=1164', './hansen_round_reward.js?v=1164', './hansen_round_bar.js?v=1164', './hansen_pet_showcase.js?v=1164', './hansen_quest_global.js?v=1164', './hansen_island_upgrade.js?v=1164', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1164', './hansen_spell_practice.js?v=1164', './hansen_review.js?v=1164', './hansen_wrong_overview.js?v=1164', './hansen_backup_v944.js?v=1164', './hansen_accessibility.js?v=1164',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1164', './hansen_mylearning.js?v=1164', './hansen_palette.js?v=1164', './hansen_boss_theme.js?v=1164', './hansen_econ_guide.js?v=1164', './hansen_perf_v944.js?v=1164',
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1165', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1165', './hansen_onboarding.js?v=1165', './hansen_theme_shop.js',
+  './hansen_season.js?v=1165', './hansen_cinema_themes.js?v=1165', './hansen_diamond_shop.js?v=1165', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1165', './hansen_crystal.js', './hansen_cards.js?v=1165', './hansen_gacha.js?v=1165', './hansen_land_cards.js?v=1165', './hansen_round_reward.js?v=1165', './hansen_round_bar.js?v=1165', './hansen_pet_showcase.js?v=1165', './hansen_quest_global.js?v=1165', './hansen_island_upgrade.js?v=1165', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1165', './hansen_spell_practice.js?v=1165', './hansen_review.js?v=1165', './hansen_wrong_overview.js?v=1165', './hansen_backup_v944.js?v=1165', './hansen_accessibility.js?v=1165',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1165', './hansen_mylearning.js?v=1165', './hansen_palette.js?v=1165', './hansen_boss_theme.js?v=1165', './hansen_econ_guide.js?v=1165', './hansen_perf_v944.js?v=1165',
   // v1165 答错小课：岛页用这个精确地址加载。不在外壳里时，离线进岛（运行时缓存被挤掉后）小课卡就悄悄没了。
-  './hansen_mistake_lesson_v1165.js?v=1164'
+  './hansen_mistake_lesson_v1165.js?v=1165'
 ];
 
 /* 🔴v1165 复查第 2 轮：发版上传的那几分钟（CDN 新旧混着），新页面配着还没传上去的旧脚本 —— 新 SW 这时把
@@ -503,7 +503,7 @@ self.addEventListener('fetch', event => {
   if (!isCode && !isSmallIcon) return;
 
   const cacheName = isSmallIcon ? ICON_CACHE : ASSET_CACHE;
-  /* v1165：带版本号的代码（?v=1164）一个版本只有一份内容 —— 300 多个脚本地址，72 格根本装不下，离线进岛就缺核心脚本。
+  /* v1165：带版本号的代码（?v=1165）一个版本只有一份内容 —— 300 多个脚本地址，72 格根本装不下，离线进岛就缺核心脚本。
      加到 400 格（每次发版换缓存代号，旧代整个删掉，不会越攒越多）。图标照旧 36 格。 */
   const maxEntries = isSmallIcon ? 36 : 400;
   const versioned = /(?:^|&)v=\d+(?:&|$)/.test(url.search.slice(1));
@@ -520,7 +520,7 @@ self.addEventListener('fetch', event => {
   }
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1164 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1165 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     /* 🔴v1156：**这条路径以前漏了 fixHtmlType。**

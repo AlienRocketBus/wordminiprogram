@@ -786,7 +786,7 @@ def _inj_cloud_wins(s):
 
 def _inj_pk_vocab(s):
     """把对战页的词库引用去掉 —— 对战一开始就结束、房间当场被删。"""
-    m = '<script defer src="vocab_all.js?v=1164"></script>'
+    m = '<script defer src="vocab_all.js?v=1165"></script>'
     if m not in s:
         return None
     return s.replace(m, '<!-- removed -->', 1)
@@ -826,7 +826,7 @@ def _inj_read_retry(s):
 
 def _inj_app_version(s):
     """把写死的版本号改回旧值 —— 整个 App 会陷入无限刷新。"""
-    m = "CURRENT_APP_VERSION=1164"
+    m = "CURRENT_APP_VERSION=1165"
     if m not in s:
         return None
     return s.replace(m, "CURRENT_APP_VERSION=1157", 1)

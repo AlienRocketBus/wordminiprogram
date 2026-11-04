@@ -1,7 +1,7 @@
 /* test_island_prefetch_hit_v1165.mjs —— 首页预取的岛页真的用得上；「最近玩过的岛」对得上文件名；外壳忙着进岛时不预取
  *
  * 事故（v1163 审计 INT-05 / NET-06 / PH-04 / PH-05 / CB-11 …）：
- *   · 预取（手指一碰岛卡、空闲时）下的是 island_x.html?v=1164，进岛时岛框打开的却是 island_x.html ——
+ *   · 预取（手指一碰岛卡、空闲时）下的是 island_x.html?v=1165，进岛时岛框打开的却是 island_x.html ——
  *     两个地址，预取的那份永远用不上，每次进岛都白多下一份岛页；
  *   · 「最近玩过的岛」按存档名拼文件名：wordIslandColorNum → island_colornum.html …… 8 个岛全是 404；
  *   · 外壳正忙着加载岛（__hsnIslandBusyUntil）时，空闲预取照样在后台抢网。
