@@ -416,6 +416,12 @@
   // ─────────────────────────────────────────────
   // 今日复习 session(间隔重复主流程)
   // ─────────────────────────────────────────────
+  /* 🔴v1165 复查：每天必有一条「复习单词」任务（巩固 3 个 / 6 个 / 清空今日复习）。
+     以前只有模板自带的旧复习屏会上报，可底栏「复习」、首页复习卡、错题总览、结算页「练这 N 个词」现在全都进复习中心 ——
+     旧复习屏没人打开，这条任务永远是 0，「12 个任务全部完成」的每日大奖也就拿不到。现在在复习中心里真正复习的地方上报。 */
+  function _questReview(n){ try{ if(typeof window.progressQuest === 'function') window.progressQuest('review', n); }catch(e){} }
+  function _questReviewClear(){ try{ if(typeof window.setQuest === 'function') window.setQuest('reviewClear', 1); }catch(e){} }
+
   function _todayBackToCenter(){
     window._huFromReview = false;
     // 🔴v794 真正无缝·保留滚动位置: 复用【活着的】复习中心(从v791起一直留底下·带着进今日复习前的滚动位置)·而非openReviewCenter重建(重建滚动归零·弹回顶部)。提到今日界面(z9999)之上→先盖主页·撤今日界面即可见·rAF复位z。
@@ -525,6 +531,7 @@
     function grade(ok){
       var it = due[i];
       if(_grade(it.idx, ok)) graduated++;
+      if(ok) _questReview(1);   // 「记住了」才算巩固了一个（和旧复习屏一样只计答对）
       reviewed++;
       i++;
       if(i >= total){ finish(); return; }
@@ -535,6 +542,7 @@
     function finish(){
       /* 🔴v963样机: 通知复习奖励模块(今日复习完成+20/连击); 模块不存在或非试点岛时静默跳过 */
       try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:reviewed, graduated:graduated, total:total}); }catch(e){}
+      if(total > 0 && reviewed === total) _questReviewClear();   // 今天到期的词一个个都过了一遍 = 清空今日复习
       /* 🔴v1006 修复「底部绿块」事故：
          下面紧接着 overlay.innerHTML=... 会把内部那段 <style>（含
          #hr_today{position:fixed;inset:0;z-index:9999} ）一并冲掉，

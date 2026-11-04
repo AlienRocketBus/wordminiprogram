@@ -7,7 +7,10 @@
  *     飞行演员的上下浮动改 margin-top，每帧重新排版。
  *
  * 合同（真浏览器）：
- *   M1 岛屿菜单待机 45 秒后，没有任何还在跑的动画
+ *   M1 岛屿菜单待机 45 秒后，还在跑的只有老师要的四个提醒（藏宝图招手 / 金光、没签到的宝箱缓慢闪、宠物轻轻晃），
+ *      它们只动 transform / opacity；4 倍慢 CPU 下 10 秒里主线程忙的时间 ≤ 6%
+ *      （v1165 复查 REG-02：以前把这四个也改成「3 轮就停」，可 v575 老师要的是「没签到就一直缓慢闪」；
+ *       只动 transform / opacity 的动画由合成器自己画，实测一直动着主线程也只忙约 3%，没必要停）
  *   M2 星空不再挂那个什么都不改的 twinkle 动画
  *   M3 岛屿菜单上的装饰动画只动 transform / opacity
  *   M4 系统「减少动态效果」打开时，岛屿菜单装饰一开始就不动
@@ -39,6 +42,8 @@ let fails = 0;
 const ok = (c, m) => { console.log((c ? '  ✅ ' : '  ❌ ') + m); if (!c) fails++; };
 const browser = await chromium.launch({ executablePath: process.env.HANSEN_CHROMIUM_PATH });
 const CHEAP = new Set(['transform', 'opacity', 'translate', 'scale', 'rotate', 'offset', 'easing', 'composite', 'computedOffset']);
+/* 老师要的提醒：一直动（只动 transform / opacity） */
+const REMIND = new Set(['worldMapFloat', 'wmbGlowD', 'chestSlowGlow', 'hsnPetFloatSlow']);
 
 async function open(file, opts = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: opts.reduce ? 'reduce' : 'no-preference' });
@@ -72,16 +77,27 @@ console.log('\n▶ M1/M2/M3 美食岛菜单待机');
   ok(early.length > 0, `开头几秒装饰照常动一动（${early.map(a => a.name).join(',')}）`);
   const heavy = early.filter(a => a.heavy.length);
   ok(heavy.length === 0, `装饰动画只动 transform/opacity（超标：${heavy.map(a => a.name + '→' + a.heavy.join('/')).join('，') || '无'}）`);
-  const inf = early.filter(a => a.iter === Infinity);
-  ok(inf.length === 0, `没有永远循环的装饰动画（永远循环：${inf.map(a => a.name).join(',') || '无'}）`);
+  const inf = early.filter(a => a.iter === Infinity && !REMIND.has(a.name));
+  ok(inf.length === 0, `除了老师要的提醒，没有永远循环的装饰动画（永远循环：${inf.map(a => a.name).join(',') || '无'}）`);
   const star = await page.evaluate(() => ({ anim: getComputedStyle(document.body, '::after').animationName,
     noop: [...document.styleSheets].some(s => { try { return [...s.cssRules].some(r => r.type === 7 && r.name === 'twinkle'); } catch (e) { return false; } }) }));
   ok(star.anim === 'none' && !star.noop, `星空不再挂什么都不改的 twinkle（animation=${star.anim}，关键帧还在=${star.noop}）`);
   await page.waitForTimeout(42000);
   const late = await running(page);
-  ok(late.length === 0, `待机 45 秒后没有还在跑的动画（还在跑：${late.join(',') || '无'}）`);
+  const extra = late.filter(n => !REMIND.has(n));
+  ok(extra.length === 0, `待机 45 秒后，还在跑的只有老师要的提醒（还在跑：${late.join(',') || '无'}；不该跑的：${extra.join(',') || '无'}）`);
   const chest = await page.evaluate(() => { const c = document.getElementById('chestCard'); return c ? { pending: c.classList.contains('chest-pending'), op: getComputedStyle(c, '::after').opacity } : null; });
-  ok(!chest || !chest.pending || +chest.op > 0, `宝箱没签到时停下来仍留着淡淡的光提醒（opacity=${chest && chest.op}）`);
+  ok(!chest || !chest.pending || late.includes('chestSlowGlow'), `宝箱没签到：45 秒后还在一直缓慢闪（v575 老师要求，领了才停）`);
+  ok(late.includes('worldMapFloat') && late.includes('wmbGlowD'), '藏宝图按钮 45 秒后还在轻轻招手、金光还在呼吸');
+  /* 一直动着，主线程也要几乎不忙：4 倍慢 CPU、10 秒里主线程做事的时间 */
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('Performance.enable');
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  const met = async () => (await cdp.send('Performance.getMetrics')).metrics.reduce((o, m) => (o[m.name] = m.value, o), {});
+  const m0 = await met(); await page.waitForTimeout(10000); const m1 = await met();
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  const busy = (m1.TaskDuration - m0.TaskDuration) / 10 * 100;
+  ok(busy <= 6 && m1.LayoutCount === m0.LayoutCount, `提醒一直动着：4 倍慢 CPU 下主线程 10 秒里只忙 ${busy.toFixed(1)}%（≤ 6%），没有重新排版（${m1.LayoutCount - m0.LayoutCount} 次）`);
   ok(errs.length === 0, '零脚本错误' + (errs.length ? '：' + errs[0] : ''));
   await ctx.close();
 }
@@ -147,5 +163,5 @@ console.log('\n▶ M5/M6/M7 首页待机');
 }
 
 await browser.close(); srv.close();
-console.log(fails ? `\n❌ 待机动画预算：${fails} 项失败` : '\n✅ 待机动画预算：岛屿菜单 45 秒后全静、只动 transform/opacity、减少动态效果、首页装饰歇着/视差只随鼠标/浮动不排版 全通过');
+console.log(fails ? `\n❌ 待机动画预算：${fails} 项失败` : '\n✅ 待机动画预算：岛屿菜单 45 秒后只剩老师要的提醒、只动 transform/opacity、主线程几乎不忙、减少动态效果、首页装饰歇着/视差只随鼠标/浮动不排版 全通过');
 process.exit(fails ? 1 : 0);

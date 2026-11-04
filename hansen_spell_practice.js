@@ -270,6 +270,8 @@
         }else{
           stats.correct++;
           if(hintEl) hintEl.innerHTML = '<span style="color:#22c55e;font-weight:900">✓ 独立正确!</span>';
+          /* 🔴v1165 复查：自己拼对一个错词 = 复习巩固了一个 → 每日「复习单词」任务 +1（用了提示的不算） */
+          try { if(typeof window.progressQuest === 'function') window.progressQuest('review', 1); } catch(e){}
         }
         try { if(window.playCorrect) window.playCorrect(); } catch(e){}
       } else {

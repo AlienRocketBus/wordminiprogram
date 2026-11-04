@@ -5,7 +5,7 @@
  *        另外只有句首才大写：「I have a cat. It is white.」答完变成「… it is white.」，「Happy New Year!」变成「Happy New year!」。
  *
  * 合同：
- *   ① 27 个岛的每一档：卡片上的词个个都能挖空（没有被悄悄跳过的词）
+ *   ① 27 个岛的每一档：卡片上的词个个都能挖空（没有被悄悄跳过的词；例句待重录、登记在 __HSN_CLOZE_HOLD 里的词故意不出题，也不算进题数）
  *   ② 身体岛初级全对 →「答对 N / N 题 · 正确率 100%」，N = 卡片上写的题数，题号一题一题走（不跳号）
  *   ③ 动物岛初级全对 → 100%
  *   ④ 「It is white」「New Year」答完保留原来的大写；变形词填回句子自己的写法（eyes）
@@ -65,8 +65,12 @@ try {
     const r = await page.evaluate((src) => {
       const match = (new Function('return (' + src + ')'))()();
       const out = {}; const lost = [];
+      /* 复查 C4：例句有病句、还没重新录音的词（页面里 __HSN_CLOZE_HOLD 按「英文|例句」登记）是故意先不出题的，
+         卡片题数里也不算它 —— 不算「悄悄跳过」。其余的词照样必须个个能挖空 */
+      const hold = (typeof window.__HSN_CLOZE_HOLD === 'object' && window.__HSN_CLOZE_HOLD) || {};
+      const held = en => { const w = allW.find(x => x.en === en); return !!(w && hold[w.en + '|' + w.ex]); };
       for (const k of Object.keys(CLOZE_LEVELS)) {
-        const inIsland = CLOZE_LEVELS[k].words.filter(en => allW.some(w => w.en === en));
+        const inIsland = CLOZE_LEVELS[k].words.filter(en => allW.some(w => w.en === en) && !held(en));
         const ask = inIsland.filter(en => match(allW.find(w => w.en === en)));
         inIsland.filter(en => !ask.includes(en)).forEach(en => lost.push(k + ':' + en));
         out[k] = { card: CLOZE_LEVEL_IDX[k].length, words: inIsland.length, ask: ask.length };

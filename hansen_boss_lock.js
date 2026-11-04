@@ -1157,8 +1157,8 @@ window.__HBU_LOADED_AT__ = Date.now();
         '@keyframes shake{0%,100%{transform:none}}',
         '@keyframes chestShake{0%,100%{transform:none}}',
         // ─── 🔴 v573: 藏宝图去框直贴版 (Hansen 验收反馈: 金属框太丑直接去掉) — 60px 图标贴 66px 顶栏, 凹坑按压在岛内 :active 实现 ───
-        // 金光呼吸 wmbGlowD(贴图形轮廓无矩形感; v1165 起是 .wmb-socket::after 叠层只动 opacity, 3 轮即停); 按钮本体仅保留 worldMapFloat 轻浮动(3 轮即停)
-        '.world-map-btn{position:fixed !important;top:calc(env(safe-area-inset-top,0px) + 2px) !important;right:max(6px,env(safe-area-inset-right,0px)) !important;width:58px !important;height:58px !important;border-radius:16px !important;border:none !important;background:transparent !important;padding:0 !important;box-shadow:none !important;animation:worldMapFloat 3.5s ease-in-out 3 !important;z-index:101 !important;filter:none !important}',
+        // 金光呼吸 wmbGlowD(贴图形轮廓无矩形感; v1165 起是 .wmb-socket::after 叠层只动 opacity); 按钮本体仅保留 worldMapFloat 轻浮动(只动 transform)。两样都是老师定的提醒, 一直动; 只动 transform/opacity, 合成器自己动, 不占主线程
+        '.world-map-btn{position:fixed !important;top:calc(env(safe-area-inset-top,0px) + 2px) !important;right:max(6px,env(safe-area-inset-right,0px)) !important;width:58px !important;height:58px !important;border-radius:16px !important;border:none !important;background:transparent !important;padding:0 !important;box-shadow:none !important;animation:worldMapFloat 3.5s ease-in-out infinite !important;z-index:101 !important;filter:none !important}',
         '.world-map-btn:active{transform:translateY(2px) scale(.97) !important;animation:none !important}',
         // 弹窗打开时仍然隐藏地图按钮 (避免和 ✕ 重叠) — 覆盖原版 transform: scale(.4) 残留
         'body.modal-open .world-map-btn{opacity:0 !important;pointer-events:none !important;transform:none !important;animation:none !important}',

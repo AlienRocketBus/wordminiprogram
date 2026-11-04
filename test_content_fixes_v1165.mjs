@@ -2,7 +2,8 @@
  *
  * 改了什么（只改音标 / 中文 / 中文例句 / 配图，英文例句一个字不动 → 录音和音频锁不受影响）：
  *   August 音标 /ɔːˈɡʌst/（那是形容词 august「威严的」）→ /ˈɔːɡəst/；cabbage 白菜 → 卷心菜（图是卷心菜）；sheep 羊 → 绵羊（同岛有山羊）；
- *   skirt 短裙 → 裙子；set the table 不是「摆桌子」→「摆好碗筷」（table、meanwhile 两句）；「年纪很老了」→「年纪很大了」；
+ *   skirt 短裙 → 裙子；set the table 不是「摆桌子」→「摆好碗筷」（table、meanwhile 两句；v1165 复查：table 那句再改成「把餐桌摆好」，
+ *   完形的金色提示才有字可亮）；dress 的例句「红裙子」→「红色的连衣裙」；「年纪很老了」→「年纪很大了」；
  *   「春天三月开始」→「春天从三月开始」；星海 14 个词的义项分隔符「;」→「/」（高亮只认「/」）；
  *   scientist（居里夫人）、singer（She's…）配女性图；tradition（吃饺子）配 🥟，不是日本人偶 🎎。
  * 合同（静态）：island_data.json / land_data.json / 生成出来的岛页里新值都在、旧值都不在；两个生成器逐字一致。
@@ -24,7 +25,11 @@ const FIX = [
   ['island_food.html', 'cabbage', 'exCn', '奶奶在花园里种卷心菜。', '奶奶在花园里种白菜。'],
   ['island_animal.html', 'sheep', 'cn', '绵羊', '羊'],
   ['island_clothes.html', 'skirt', 'cn', '裙子', '短裙'],
-  ['island_home.html', 'table', 'exCn', '我们摆好碗筷准备吃晚饭吧。', '我们摆桌子吃晚饭吧。'],
+  /* v1165 复查（C2）：「摆好碗筷」整句没有一个字对得上 table，完形填空的金色提示就没了 → 改成「把餐桌摆好」（中文自然、提示亮「餐桌」） */
+  ['island_home.html', 'table', 'exCn', '我们把餐桌摆好,准备吃晚饭吧。', '我们摆桌子吃晚饭吧。'],
+  ['island_home.html', 'table', 'exCn', '我们把餐桌摆好,准备吃晚饭吧。', '我们摆好碗筷准备吃晚饭吧。'],
+  /* v1165 复查（C3）：dress（连衣裙）的例句以前译成「红裙子」，和 skirt=裙子 分不开 */
+  ['island_clothes.html', 'dress', 'exCn', '她穿了一条红色的连衣裙去参加聚会。', '她穿了一条红裙子去参加聚会。'],
   ['island_adjective.html', 'old', 'exCn', '我爷爷年纪很大了。', '我爷爷年纪很老了。'],
   ['island_time.html', 'March', 'exCn', '春天从三月开始。', '春天三月开始。'],
   ['island_job.html', 'scientist', 'emoji', '👩‍🔬', '👨‍🔬'],

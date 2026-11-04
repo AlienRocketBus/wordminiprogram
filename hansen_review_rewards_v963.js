@@ -82,7 +82,10 @@
     var w = coins(); if(!w) return false;
     try{
       if(typeof w.hasAward === 'function' && w.hasAward(id)) return false;
-      return w.award(id, amount) === true && (typeof w.hasAward !== 'function' || w.hasAward(id));
+      var paid = w.award(id, amount) === true && (typeof w.hasAward !== 'function' || w.hasAward(id));
+      /* 🔴v1165 复查：记进这一局的「复习奖励」，结算页写的金币才和钱包对得上（模板 markMode 开局清零） */
+      if(paid){ try{ window._sessionReviewCoins = (window._sessionReviewCoins || 0) + (amount | 0); }catch(eS){} }
+      return paid;
     }catch(e){ return false; }
   }
   function payGemOnce(id, amount){
@@ -118,6 +121,8 @@
       if(!s.hadDue || s.cleared) return false;
       s.cleared = 1; writeJson(K_DAY, s);
       if(payCoinOnce('rvrw:'+ymd()+':todaydone', 20)) bumpDay(0, 20);
+      /* 🔴v1165 复查：横幅说「全部到期清零」的同一时刻，每日任务「清空今日复习」也算完成（以前它永远停在 0） */
+      try{ if(typeof window.setQuest === 'function') window.setQuest('reviewClear', 1); }catch(eQ){}
       tickStreak();
       toast('✅ 全部到期清零！<b>+20 金币</b> · 连击已保住 🔥');
       return true;

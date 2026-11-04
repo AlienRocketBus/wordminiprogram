@@ -241,8 +241,16 @@
       var block = box.firstChild;
       // 放在结算页按钮那一排的前面（找最后一个含 .game-btn 的块），找不到就放最后
       var btns = host.querySelectorAll('.game-btn');
-      var row = btns.length ? btns[btns.length - 1].parentNode : null;
-      if(row && row !== host && host.contains(row)) row.parentNode.insertBefore(block, row);
+      var last = btns.length ? btns[btns.length - 1] : null;
+      var row = last ? last.parentNode : null;
+      if(row && row === host.firstElementChild){
+        /* 按钮直接挂在整张结算卡上（没有单独包成一排）：插在这几个按钮的第一个前面。
+           以前插到「整张卡」前面，错词块压在「时间到！」、星星和得分上面（极速60秒） */
+        var first = last;
+        while(first.previousElementSibling && first.previousElementSibling.classList && first.previousElementSibling.classList.contains('game-btn')) first = first.previousElementSibling;
+        row.insertBefore(block, first);
+      }
+      else if(row && row !== host && host.contains(row)) row.parentNode.insertBefore(block, row);
       else (host.firstElementChild || host).appendChild(block);
       return true;
     }catch(e){ return false; }

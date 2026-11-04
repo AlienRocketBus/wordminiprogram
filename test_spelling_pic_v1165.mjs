@@ -8,6 +8,7 @@
  *      图上没有答案单词（也没有任何英文标签）；标题里也不印英文答案
  *   P2 图不是被整个删掉：去掉文字后还有图形的照样显示
  *   P3 认词的地方不变：单词卡、答对揭晓卡照样显示原图（带英文）
+ *   P4 没写答案的图不删（色彩岛色块、数字牌）；不是答案的英文标签照留（1st、N/S/E/W）；写着答案一部分的照样去掉（SAME CLASS）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -103,10 +104,60 @@ async function island(file, word) {
   await ctx.close();
 }
 
+/* P4（v1165 复查 C1）：没写答案的图不能被删掉。色彩岛的红色圆点（2 个圆）、数字牌（1 个方块 + 数字）本来就不写英文，
+   以前「去掉后少于 3 个图形就不放图」连它们也查 → 打字/拼拼乐/泡泡里整张图没了，颜色词只剩中文。
+   不是答案的英文标签（1st、N/S/E/W）照留；写着答案的一部分（SAME CLASS 里的 class）照样去掉。 */
+async function keep(file, cases) {
+  console.log(`\n▶ P4 ${file}（${cases.map(c => c.word).join(' / ')}）`);
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('__s')) { localStorage.clear(); localStorage.setItem('hansen_onboarded', '1'); sessionStorage.setItem('__s', '1'); } } catch (e) {} });
+  const page = await ctx.newPage();
+  const errs = []; page.on('pageerror', e => errs.push(String(e.message).slice(0, 140)));
+  page.on('dialog', d => d.dismiss().catch(() => {}));
+  await page.goto(BASE + file, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => typeof startTyping === 'function' && document.readyState !== 'loading', null, { timeout: 20000 });
+  await page.waitForTimeout(700);
+  const rs = await page.evaluate(async (cases) => {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    window.speak = function (t, r, cb) { if (typeof cb === 'function') setTimeout(cb, 0); };
+    const b = [...document.querySelectorAll('button')].find(b => /开始冒险/.test(b.textContent) && b.offsetParent); if (b) b.click();
+    const look = sel => { const el = document.querySelector(sel); const svg = el && el.querySelector('svg'); return { svg: !!svg, labels: svg ? [...svg.querySelectorAll('text')].map(t => t.textContent.trim()) : [] }; };
+    const out = [];
+    for (const c of cases) {
+      const i = allW.findIndex(w => w.en === c.word);
+      const r = { word: c.word, idx: i, rawLabels: i >= 0 ? (allW[i].emoji.match(/<text\b[^>]*>[\s\S]*?<\/text>/g) || []).map(t => t.replace(/<[^>]*>/g, '').trim()) : [] };
+      startTyping(1); typePool = [i]; typeIdx = 0; nextTypeQ(); await sleep(120);
+      r.typing = look('#typingScreen .typing-emoji'); stopTyping();
+      startScramble(); startScrambleLevel('easy'); scrPool[scrIdx] = i; nextScramble(); await sleep(120);
+      r.scramble = look('#scrambleScreen .scramble-emoji');
+      startBubble(); startBubbleLevel('easy'); bubblePool.push(i); nextBubble(); await sleep(120);
+      r.bubble = look('#bbPrompt'); stopBubble();
+      showScreen('home');
+      out.push(r);
+    }
+    return out;
+  }, cases);
+  for (const r of rs) {
+    const c = cases.find(x => x.word === r.word);
+    ok(r.idx >= 0, `「${r.word}」在这个岛上（图上原有的字：${r.rawLabels.join(' | ') || '无'}）`);
+    for (const g of ['typing', 'scramble', 'bubble']) {
+      const v = r[g];
+      ok(v.svg, `P4 ${g}：「${r.word}」的图还在`);
+      if (c.keepLabels) ok(c.keepLabels.every(l => v.labels.includes(l)), `P4 ${g}：不是答案的标签照留（应有 ${c.keepLabels.join(' ')}，实际 ${v.labels.join(' ') || '无'}）`);
+      if (c.dropLabels) ok(c.dropLabels.every(l => !v.labels.includes(l)), `P4 ${g}：写着答案的标签去掉了（${c.dropLabels.join(' ')}，实际 ${v.labels.join(' ') || '无'}）`);
+    }
+  }
+  ok(errs.length === 0, '页面无报错 ' + errs.join(' | '));
+  await ctx.close();
+}
+
 try {
   await island('island_body.html', 'toe');
   await island('island_body.html', 'knee');
   await island('island_school.html', 'eraser');
+  await keep('island_color.html', [{ word: 'red' }, { word: 'seven', keepLabels: ['7'] }, { word: 'thousand' }, { word: 'first', keepLabels: ['1st'] }]);
+  await keep('island_traffic.html', [{ word: 'direction', keepLabels: ['N', 'S', 'E', 'W'] }]);
+  await keep('island_job.html', [{ word: 'classmate', dropLabels: ['SAME CLASS'] }]);
 } finally { await browser.close(); srv.close(); }
 console.log('');
 if (fails) { console.log('❌ 失败 ' + fails + ' 项'); process.exit(1); }

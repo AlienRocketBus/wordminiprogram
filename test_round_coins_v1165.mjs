@@ -4,8 +4,9 @@
  *        同一批词一天最多给 3 次金币，第 4 局起结算写「+0」，钱包却因为连胜奖励在涨，孩子也不知道为什么是 0。
  * 合同（island_job 听音辨义初级，连玩 4 局、题题答对，真点）：
  *   ① 每一局结算写的金币数 = 这一局开始到结束钱包的变化；有连胜奖励时写出「含连胜奖励 +X」
- *   ② 第 4 局（这些词今天的金币已领满）写「今天这些词的金币领满啦，换个难度或明天再来～」
+ *   ② 第 4 局（这些词今天的金币已领满）写「今天这些词的答题金币领满啦，换个难度或明天再来～」（v1165 复查：写明是「答题」金币，上面的数里还有奖励金币）
  *   ③ 难度卡上写「最多 +N」
+ *   ④ 带着以前的错词玩一局：复习奖励（纠错金/毕业金/清空/今日复习）也算进结算，写出「复习奖励 +X」，结算数 = 钱包变化（复查 G3）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -70,7 +71,7 @@ try {
     await page.waitForTimeout(600);
     const r = await page.evaluate(() => ({ w: HansenCoins.get(), txt: (document.getElementById('listenContent').textContent || '').replace(/\s+/g, ' ') }));
     const m = r.txt.match(/🪙 金币 \+(\d+)(（含连胜奖励 \+(\d+)）)?/);
-    rounds.push({ round, delta: r.w - w0, shown: m ? +m[1] : null, streak: m && m[3] ? +m[3] : 0, capped: /今天这些词的金币领满啦，换个难度或明天再来/.test(r.txt) });
+    rounds.push({ round, delta: r.w - w0, shown: m ? +m[1] : null, streak: m && m[3] ? +m[3] : 0, capped: /今天这些词的答题金币领满啦，换个难度或明天再来/.test(r.txt) });
     // 回到难度选择，接着下一局
     await page.evaluate(() => startListen());
     await page.waitForTimeout(300);
@@ -81,6 +82,43 @@ try {
   ok(rounds[3].capped && !rounds[0].capped, '② 第 4 局（今天这些词的金币已领满）告诉孩子为什么');
   ok(errs.length === 0, '页面无报错 ' + errs.join(' | '));
   await ctx.close();
+
+  /* ④ v1165 复查（G3）：以前的错词这一局答对了，复习奖励（+2 纠错金、+15 毕业金、+30 清空、+20 今日复习）直接进钱包，
+       结算以前只写答题和连胜的金币（实测写 +24、钱包 +125）。现在：结算数 = 钱包变化，并写出「复习奖励 +X」。 */
+  console.log('\n▶ ④ 带着 3 个以前的错词玩一局（动物岛听音辨义初级，题题答对）');
+  {
+    const ctx2 = await newCtx();
+    const { page: p2, errs: e2 } = await open(ctx2, 'island_animal.html', "typeof startListen === 'function' && window.HansenCoins && window.HansenReviewRewardsV963");
+    const seeded = await p2.evaluate(() => {
+      window.speak = function (t, r, cb) { if (typeof cb === 'function') setTimeout(cb, 0); };
+      const ids = LISTEN_LEVEL_IDX.easy.slice(0, 3);
+      ids.forEach(i => { S.wrongs[i] = 1; });   // 以前答错过的词（错题本里各 1 次）
+      save(); showScreen('home');
+      return ids.map(i => allW[i].en);
+    });
+    await p2.locator('#homeScreen .mode-card[onclick="startListen()"]').first().tap();
+    await p2.waitForTimeout(300);
+    const w0 = await p2.evaluate(() => HansenCoins.get());
+    await p2.locator('#listenContent [onclick^="startListenLevel"]', { hasText: '初级' }).first().tap();
+    for (let k = 0; k < 80; k++) {
+      const st = await p2.evaluate(() => ({ active: listenActive, ready: !!(listenQ && !listenQ.answered && document.querySelectorAll('#listenScreen .listen-opts .boss-opt').length === 4), lesson: !!document.getElementById('hml_lesson') }));
+      if (!st.active) break;
+      if (st.lesson) { await p2.locator('#hml_lesson').tap().catch(() => {}); await p2.waitForTimeout(300); continue; }
+      if (st.ready) { const i = await p2.evaluate(() => listenQ.opts.findIndex(o => o.cn === listenQ.word.cn)); await p2.locator('#listenScreen .listen-opts .boss-opt').nth(i).tap(); await p2.waitForTimeout(1300); }
+      else await p2.waitForTimeout(200);
+    }
+    await p2.waitForTimeout(800);
+    const r = await p2.evaluate(() => ({ w: HansenCoins.get(), txt: (document.getElementById('listenContent').textContent || '').replace(/\s+/g, ' '), wrongs: Object.keys(S.wrongs || {}).length }));
+    const m = r.txt.match(/🪙 金币 \+(\d+)(（含([^）]*)）)?/);
+    const shown = m ? +m[1] : null, parts = m && m[3] ? m[3] : '';
+    const rv = +((parts.match(/复习奖励 \+(\d+)/) || [])[1] || 0);
+    console.log('     ' + JSON.stringify({ seeded, delta: r.w - w0, shown, parts, wrongsLeft: r.wrongs }));
+    ok(shown === r.w - w0, `④ 结算写 +${shown}，钱包实际 +${r.w - w0}`);
+    ok(rv > 0, `④ 写出了复习奖励（${parts || '没有括号说明'}）`);
+    ok(!/领满啦/.test(r.txt), '④ 这一局答题金币没领满，不写「领满啦」');
+    ok(e2.length === 0, '④ 页面无报错 ' + e2.join(' | '));
+    await ctx2.close();
+  }
 } finally { await browser.close(); srv.close(); }
 console.log('');
 if (fails) { console.log('❌ 失败 ' + fails + ' 项'); process.exit(1); }

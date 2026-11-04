@@ -7,6 +7,7 @@
  *   ① island_season：以这 15 个词为答案，各出 20 道完形 + 20 道听音（共 600 道），选项里从不出现同组近义词、
  *      也没有中文义项相同的两个选项
  *   ② 常规岛（动物）完形、听音照样每题 4 个选项
+ *   ③ 常规岛里意思挨得太近的一对（dress/skirt、cook/do、fly/ride）也不同时当选项（复查 C3 / C5）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -90,6 +91,38 @@ try {
   });
   ok(c.every(x => x === 4), '② 动物岛完形、听音每题都是 4 个选项 ' + JSON.stringify([...new Set(c)]));
   ok(B.errs.length === 0, '② 页面无报错 ' + B.errs.join(' | '));
+  await B.page.close();
+
+  /* ③ v1165 复查（C3 / C5）：常规岛上也有「意思挨得太近」的一对，中文义项不一样，以前的去重拦不住：
+       服装岛 dress（连衣裙，例句译成「红裙子」）和 skirt（裙子）；
+       动作岛完形 cook（金色提示「做」）和 do（做）、fly（「坐过」飞机）和 ride（骑/乘坐）。
+     以这几个词为答案各出 150 道完形 + 150 道听音，选项里从不同时出现这一对。 */
+  const PAIRS = [['island_clothes.html', 'dress', 'skirt'], ['island_clothes.html', 'skirt', 'dress'],
+                 ['island_action.html', 'cook', 'do'], ['island_action.html', 'fly', 'ride']];
+  for (const file of [...new Set(PAIRS.map(p => p[0]))]) {
+    const P = await open(ctx, file, "typeof startCloze === 'function' && typeof nextListenQ === 'function'");
+    const pairs = PAIRS.filter(p => p[0] === file).map(p => p.slice(1));
+    const out = await P.page.evaluate(pairs => {
+      window.speak = function (t, r, cb) { if (typeof cb === 'function') setTimeout(cb, 0); };
+      const res = [];
+      for (const [ans, other] of pairs) {
+        const i = allW.findIndex(x => x.en === ans);
+        const cl = Object.keys(CLOZE_LEVEL_IDX).find(k => CLOZE_LEVEL_IDX[k].includes(i));
+        const ll = Object.keys(LISTEN_LEVEL_IDX).find(k => LISTEN_LEVEL_IDX[k].includes(i));
+        let n = 0, both = 0;
+        for (let t = 0; t < 150; t++) {
+          if (cl) { startCloze(); startClozeLevel(cl); clozePool.length = 0; clozePool.push(i); clozeActive = true; nextClozeQ(); if (clozeQ && clozeQ.word.en === ans) { n++; if (clozeQ.opts.some(o => o.en === other)) both++; } }
+          if (ll) { startListen(); startListenLevel(ll); _shuffledPools['listen_' + ll] = [i]; listenActive = true; nextListenQ(); if (listenQ && listenQ.word.en === ans) { n++; if (listenQ.opts.some(o => o.en === other)) both++; } }
+        }
+        res.push({ ans, other, cl: cl || '', ll: ll || '', n, both });
+      }
+      showScreen('home');
+      return res;
+    }, pairs);
+    for (const x of out) ok(x.n >= 150 && x.both === 0, `③ ${file.replace('.html', '')}：以 ${x.ans} 为答案出了 ${x.n} 道（完形 ${x.cl || '无'} / 听音 ${x.ll || '无'}），选项里同时出现 ${x.other} ${x.both} 次`);
+    ok(P.errs.length === 0, `③ ${file} 页面无报错 ` + P.errs.join(' | '));
+    await P.page.close();
+  }
   await ctx.close();
 } finally { await browser.close(); srv.close(); }
 console.log('');

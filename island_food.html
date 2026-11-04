@@ -185,7 +185,7 @@ setTimeout(function(){shown=false;show();},1200);
   box-shadow: none;
   transition: transform .12s ease-out;
   -webkit-tap-highlight-color: transparent;
-  animation: worldMapFloat 3.5s ease-in-out 3;   /* v1165 待机预算：招手 3 下就停（只动 transform） */
+  animation: worldMapFloat 3.5s ease-in-out infinite;   /* v1165 只动 transform（合成器自己动，不占主线程），一直轻轻招手（老师定的提醒，不能停） */
 }
 
 /* 飘浮动画 (轻轻摇晃, 像招手) */
@@ -244,7 +244,7 @@ setTimeout(function(){shown=false;show();},1200);
 }
 /* 金光呼吸 v573: 改 drop-shadow(贴图标轮廓, 无框也不会显出矩形)
    v1165 待机预算：原来每帧改 filter（整张图每帧重画）。改成一张叠在上面、自带强金光的同图层，
-   只动它的 opacity —— 看起来一样（光还是贴着藏宝图轮廓），但不用重画；呼吸 3 下就停。 */
+   只动它的 opacity —— 看起来一样（光还是贴着藏宝图轮廓），但不用重画（合成器自己动），所以照旧一直呼吸。 */
 .wmb-socket::after{
   content: '';
   position: absolute;
@@ -253,7 +253,7 @@ setTimeout(function(){shown=false;show();},1200);
   filter: drop-shadow(0 0 13px rgba(251,191,36,.75));
   opacity: 0;
   pointer-events: none;
-  animation: wmbGlowD 2.8s ease-in-out 3;
+  animation: wmbGlowD 2.8s ease-in-out infinite;   /* v1165 只动 opacity，一直呼吸 */
 }
 .world-map-btn:active .wmb-socket::after{ opacity: 0; animation: none; }
 @keyframes wmbGlowD{
@@ -806,8 +806,8 @@ html.hsn-pal-light .top-name{color:#1f2937 !important;text-shadow:none !importan
 .daily-card.claimed{opacity:.5;cursor:default}
 .daily-card.claimed:active{transform:none}
 /* 🔴 v575: 每日宝箱未签到 — 极缓慢柔光闪烁(6s周期, 只动box-shadow微光, 不缩放不刺眼) */
-/* v1165 待机预算：box-shadow 动画每帧要重画整张卡（实测菜单待机时最贵的一项）。改成光圈层只动 opacity，闪 3 轮后停在淡淡常亮，仍提醒「还没签到」 */
-.daily-card.chest-pending::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 16px 2px rgba(251,191,36,.55);opacity:.3;animation:chestSlowGlow 6s ease-in-out 3}
+/* v1165 待机预算：box-shadow 动画每帧要重画整张卡（实测菜单待机时最贵的一项）。改成光圈层只动 opacity（合成器自己动，不占主线程），没签到就一直缓慢闪烁（v575 老师要求：领了才停） */
+.daily-card.chest-pending::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 16px 2px rgba(251,191,36,.55);opacity:.3;animation:chestSlowGlow 6s ease-in-out infinite}
 @keyframes chestSlowGlow{0%,100%{opacity:.3}50%{opacity:1}}
 /* 🔴 v575: 每日宝箱已领取 — 整卡转绿(翡翠渐变), 礼物盒变开盒, 不再闪烁 */
 .daily-card.chest-claimed{background:linear-gradient(135deg,#FF2444,#FF2444)!important;border-color:rgba(255,255,255,.1);animation:none}
@@ -3893,7 +3893,7 @@ function checkAch(){
     }
   }catch(e){}
 }
-function markMode(m){window._sessionCoins=0;window._sessionStreakCoins=0;window._sessionCapHits=0;window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
+function markMode(m){window._sessionCoins=0;window._sessionStreakCoins=0;window._sessionCapHits=0;window._sessionReviewCoins=0;try{window._sessionWallet0=window.HansenCoins?HansenCoins.get():null;}catch(e){window._sessionWallet0=null;}window._xpAtStart=(typeof S!=='undefined'&&S.totalXP)||0;if(!S.stats.modesPlayed.includes(m)){S.stats.modesPlayed.push(m);checkModesAch();save()}}
 
 // ============================================================
 // TOAST
@@ -4686,7 +4686,7 @@ function __hsnLater(g,scr,fn){var tok=__hsnRuns[g]||0;return function(){if((__hs
 /* 🔴v1165 难度菜单里 0 个词的那一档：画成灰色 🔒 卡片、不能点（以前看着能玩，一点只弹个提示） */
 /* 🔴v1165 选项里不能同时出现「意思一样」的两个词：两个都对，孩子选对也可能被判错。
    ① 中文有一个义项相同（因此 / 因此/结果）就算撞车；② 星海里几组近义词中文写法不同，也算撞车。 */
-var __HSN_SYN={however:1,nevertheless:1,therefore:2,consequently:2,besides:3,moreover:3,furthermore:3,rarely:4,seldom:4,immediately:5,instantly:5,finally:6,eventually:6,huge:7,enormous:7};
+var __HSN_SYN={however:1,nevertheless:1,therefore:2,consequently:2,besides:3,moreover:3,furthermore:3,rarely:4,seldom:4,immediately:5,instantly:5,finally:6,eventually:6,huge:7,enormous:7,skirt:8,dress:8,cook:9,do:9,fly:10,ride:10};/* 🔴v1165 复查：8 裙子/连衣裙（dress 的例句译成「红裙子」）；9 cook/do（完形金色提示「做」）；10 fly/ride（「坐过」飞机 / 乘坐） */
 function __hsnSenses(w){return String((w&&w.cn)||'').split(/[\/;；]/).map(function(s){return s.trim();}).filter(Boolean);}
 function __hsnClash(a,b){
   if(!a||!b)return false;if(a.en===b.en||a.cn===b.cn)return true;
@@ -4696,10 +4696,17 @@ function __hsnClash(a,b){
 }
 /* 🔴v1165 结算页的「🪙 金币 +N」= 这一局钱包里真正多出来的：答对给的金币 + 连胜奖励（以前连胜奖励不算进来，后几局写 +0 钱包却在涨）。
    每个词每天最多给 3 次金币（防刷），这一局一个币都没拿到时，告诉孩子是怎么回事。 */
+/* 🔴v1165 复查：以前的错词这一局答对了，复习奖励（+2 纠错金、+15 毕业金、+30 清空、+20 今日复习）也直接进钱包，
+   这里却没算 → 结算写 +24、钱包实际 +125，还会误写「领满啦」。现在复习奖励单列；钱包比已知的还多（比如这一局解锁成就给的金币），
+   多出来的写成「其他奖励」，结算数 = 钱包真实变化。
+   答题金币一个都没拿到（这些词今天已给满 3 次）时照旧告诉孩子为什么，并写明是「答题金币」——上面的数里只剩奖励金币。 */
 function __hsnRoundCoins(){
-  var n=window._sessionCoins||0,st=window._sessionStreakCoins||0,cap=window._sessionCapHits||0;
-  var h='🪙 金币 +'+n+(st>0?'（含连胜奖励 +'+st+'）':'');
-  if(n-st<=0&&cap>0)h+='<br><span style="font-size:12.5px;color:#fde68a;font-weight:700">今天这些词的金币领满啦，换个难度或明天再来～</span>';
+  var n=window._sessionCoins||0,st=window._sessionStreakCoins||0,rv=window._sessionReviewCoins||0,cap=window._sessionCapHits||0;
+  var total=n+rv,other=0;
+  try{var w0=window._sessionWallet0;if(typeof w0==='number'&&window.HansenCoins){var d=HansenCoins.get()-w0;if(d>total){other=d-total;total=d;}}}catch(e){}
+  var parts=[];if(st>0)parts.push('连胜奖励 +'+st);if(rv>0)parts.push('复习奖励 +'+rv);if(other>0)parts.push('其他奖励 +'+other);
+  var h='🪙 金币 +'+total+(parts.length?'（含'+parts.join('、')+'）':'');
+  if(n-st<=0&&cap>0)h+='<br><span style="font-size:12.5px;color:#fde68a;font-weight:700">今天这些词的答题金币领满啦，换个难度或明天再来～</span>';
   return h;
 }
 /* 🔴v1165 难度卡上的例词：本档真实的前 3 个词 */
@@ -4798,9 +4805,16 @@ function __hmlResult(m){var M=__hml();return M?M.resultHtml(m):''}
    认词类玩法（单词卡、答对揭晓卡、打地鼠英文题面）照旧显示原图。 */
 /* 🔴v1165 有几张位图自己印着这个词（酸奶杯上写着 YOGURT），拼写类题目里也不放 */
 var __HSN_WORDY_PICS=/icons\/food-v958\/yogurt\.webp/i;
+/* 🔴v1165 复查：以前凡是带英文字母的标签都去掉、去完少于 3 个图形就整张不放 —— 可「图太空」这条连什么都没去掉的图也查：
+   色彩岛的红色圆点（2 个 circle）、数字牌（1 个 rect + 数字），整张没了，孩子只剩中文；1st、N/S/E/W、x2、BOX 这些不是答案也被去掉。
+   现在只去掉「写着答案」的标签（整个答案，或答案里连着的 3 个字母：TOE、TEETH、SAME CLASS 里的 class）；
+   什么都没去掉就原图照用；去掉后剩下的图形/文字少于 3 个才不放图。 */
+function __hsnGivesAway(l,ans){if(!l||!ans)return false;if(l.indexOf(ans)>=0)return true;if(ans.length<3)return false;for(var i=0;i+3<=ans.length;i++)if(l.indexOf(ans.substr(i,3))>=0)return true;return false}
 function __hsnQuizPic(w){var e=String((w&&w.emoji)||'');if(__HSN_WORDY_PICS.test(e))return '';if(e.indexOf('<svg')<0)return e;
-  var out=e.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,function(t){return /[A-Za-z]/.test(t.replace(/<[^>]*>/g,''))?'':t});
-  return (out.match(/<(circle|rect|path|ellipse|line|polygon|polyline)\b/g)||[]).length>=3?out:''}
+  var ans=String((w&&w.en)||'').toLowerCase().replace(/[^a-z]/g,''),cut=false;
+  var out=e.replace(/<text\b[^>]*>[\s\S]*?<\/text>/g,function(t){var l=t.replace(/<[^>]*>/g,'').toLowerCase().replace(/[^a-z]/g,'');if(__hsnGivesAway(l,ans)){cut=true;return ''}return t});
+  if(!cut)return e;
+  return (out.match(/<(circle|rect|path|ellipse|line|polygon|polyline|text|image|use)\b/g)||[]).length>=3?out:''}
 window.__hsnQuizPic=__hsnQuizPic;
 /* 💰 答对1题给1金币。完美方案: 每个词每天最多给3次(防盯着一个词刷) + 每天总上限2000(防换词刷太多); 跨天自动重置(金币不枯竭); 不影响签到/boss/任务给的钱。 */
 function earnCoinOnCorrect(wordIdx){var DAILY_CAP=2000;var PER_WORD_CAP=3;var t=today();var ga;try{if(localStorage.getItem('hsn_ans_coin_day')!==t){localStorage.setItem('hsn_ans_coin_day',t);localStorage.setItem('hsn_ans_coin_today','0');ga=0;}else{ga=parseInt(localStorage.getItem('hsn_ans_coin_today'),10)||0;}}catch(e){ga=0;}if(ga>=DAILY_CAP)return false;if(S.coinDay!==t){S.coinDay=t;S.coinWordCount={};}S.coinWordCount=__hsnNormalizeCoinWordCount(S.coinWordCount);var wc=__hsnSafeCoinWordCount(S.coinWordCount[wordIdx]);if(wc>=PER_WORD_CAP)return false;if(window.HansenCoins){HansenCoins.add(1);}else{S.coins=(S.coins||0)+1;}try{localStorage.setItem('hsn_ans_coin_today',String(ga+1));}catch(e){}S.coinWordCount[wordIdx]=wc+1;updateTopBar();save();if(typeof playCoin==='function'){try{playCoin()}catch(e){}}return true;}
@@ -5023,6 +5037,8 @@ function nextBossQ(){if(!bossActive)return;
     // sub 显示中文翻译, 让玩家理解句意 (空白处对应的中文用红色高亮)
     var cnHi = w.exCn ? window.smartHighlight(w.cn, w.exCn, w.en) : '';
     sub = cnHi ? '<span style="color:#cbd5e1;font-size:13px">' + cnHi + '</span>' : '选出填空处正确的英语单词';
+    /* 🔴v1165 复查：句子里要的是变形（flown / cooks / Cows），选项是原词 —— 提示一句，不然孩子会以为没有一个选项填得进去 */
+    if(_cm.text && _cm.text.toLowerCase() !== String(w.en).toLowerCase()) sub += '<br><span class="cloze-form-tip" style="color:#cbd5e1;font-size:12px">💡 填进句子时，这个词要变个样子（比如加 s，或变成过去的说法）</span>';
     getOptText = function(o){
       return isAtStart ? (o.en.charAt(0).toUpperCase() + o.en.slice(1)) : o.en;
     };
@@ -6741,7 +6757,7 @@ function endSpeed(){
     +'</div>'
     +(spIsNewRecord?'<div style="margin-top:6px;background:linear-gradient(135deg,#f59e0b,#dc2626);border-radius:10px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;animation:clozeFillIn .5s">🎉 新纪录！太厉害啦</div>':(spScore>0&&spScore===spPrevBest?'<div style="margin-top:6px;font-size:13px;color:#fbbf24;font-weight:700">💪 追平最高分！再冲一次破纪录</div>':(spPrevBest>spScore?'<div style="margin-top:6px;font-size:12px;color:#94a3b8">距离最高还差 '+(spPrevBest-spScore)+' 分, 加油！</div>':'')))
     +'</div>';
-  document.getElementById('speedContent').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:72px">⏱️</div><div style="font-size:26px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 时间到！</div><div style="font-size:32px;margin:6px 0">'+stars2+'</div>'+spCompare+'<div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div><div style="font-size:12px;color:#cbd5e1;margin:8px 0">本局最大连击 '+spSessionMaxCombo+'</div><button class="game-btn gold" onclick="startSpeed()" style="margin-top:12px">⚡ 换难度</button> <button class="game-btn purple" onclick="startSpeedLevel(\''+spLevel+'\')" style="margin-top:12px">🔄 再来</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 主页</button></div>';
+  document.getElementById('speedContent').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:72px">⏱️</div><div style="font-size:26px;font-weight:800;color:'+L.c1+';margin:10px 0">'+L.icon+' '+L.name+' 时间到！</div><div style="font-size:32px;margin:6px 0">'+stars2+'</div>'+spCompare+'<div style="font-size:14px;color:#fff;font-weight:700;background:rgba(0,0,0,.3);padding:8px 14px;border-radius:10px;display:inline-block;margin:6px 0"><span style="color:#fbbf24;font-size:17px">'+__hsnRoundCoins()+'</span><br><span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🎓 经验 +'+((S.totalXP||0)-(typeof window._xpAtStart==='number'?window._xpAtStart:(S.totalXP||0)))+'</span> &nbsp;<span style="color:#a78bfa;text-shadow:0 1px 3px rgba(0,0,0,.9)">🐾 宠物经验 +'+L.petXp+'</span></div><div style="font-size:12px;color:#cbd5e1;margin:8px 0">本局最大连击 '+spSessionMaxCombo+'</div><div><button class="game-btn gold" onclick="startSpeed()" style="margin-top:12px">⚡ 换难度</button> <button class="game-btn purple" onclick="startSpeedLevel(\''+spLevel+'\')" style="margin-top:12px">🔄 再来</button> <button class="game-btn purple" onclick="showScreen(\'home\')" style="margin-top:12px">🏠 主页</button></div></div>';
   for(let i=0;i<8;i++)setTimeout(()=>confetti(Math.random()*window.innerWidth,Math.random()*200,6),i*150);
   addXP(gemReward);
   petTaskComplete('⚡ 极速挑战 '+L.name,L.petXp,'speed');
@@ -6897,7 +6913,7 @@ bigConfetti()}
 // ============================================================
 // TYPING MASTER (打字大师)  ——  支持 初级 / 中级 / 高级 三档
 // ============================================================
-let typeWord=null,typePool=[],typeIdx=0,typeInput='',typeActive=false,typeDone=0;
+let typeWord=null,typePool=[],typeIdx=0,typeInput='',typeActive=false,typeDone=0,typeTotal=0;/* typeTotal：本档词数（本轮末再考的题 push 进 typePool，题号分母不能跟着涨） */
 let typeWordTimes=[],typeWordStart=0,typeRoundStart=0,typeErrors=0,typeTimerInt=null,typeWrongWords=[],typeTimeouts=0;
 let typeRound=1; // 1=初级(3-4字母), 2=中级(5-6字母), 3=高级(7+字母)
 
@@ -6923,7 +6939,7 @@ const TYPING_LEVELS={
 function startTyping(round){markMode('typing');showScreen('typing');__hsnRunNew('type');typeActive=true;typeDone=0;
 typeRound=round||1;
 const L=TYPING_LEVELS[typeRound]||TYPING_LEVELS[1];
-typePool=[...Array(allW.length).keys()].filter(L.filter).sort(()=>Math.random()-.5);
+typePool=[...Array(allW.length).keys()].filter(L.filter).sort(()=>Math.random()-.5);typeTotal=typePool.length;
 typeIdx=0;typeWordTimes=[];typeErrors=0;typeTimeouts=0;typeWrongWords=[];typeRoundStart=Date.now();__hmlStart('typing');startTypeTimer();nextTypeQ()}
 
 function showTypingMenu(){markMode('typing');showScreen('typing');__hsnRunNew('type');typeActive=false;
@@ -6968,12 +6984,19 @@ function updateTypeTimer(){
   if(elapsed>=30)typeTimeout();
 }
 function typeTimeout(){
-  // 30秒没打完: 自动跳到下一个词 (不计入速度, 没打不算). 到最后一个词会自动结束.
+  // 30秒没打完: 不计入速度，但算一次没拼对。
+  /* 🔴v1165 复查：和拼错、泡泡/火眼金睛超时一样 —— 记进错题本、出答错小课、本轮末再考一次、结算列进「这次答错的词」。
+     以前只是悄悄跳到下一个词：拼对率按没拼对算了，下面却找不到这个词，也不进复习。 */
   if(!typeActive||!typeWord)return;
   typeWordStart=0; // 防止本tick内重复触发
-  if(!__hmlIsRetry('typing',typePool[typeIdx]))typeTimeouts++;  /* 🔴v1165 超时没拼出来也算一次没拼对 */
+  var __missT=typePool[typeIdx];
+  if(!__hmlIsRetry('typing',__missT))typeTimeouts++;  /* 🔴v1165 超时没拼出来也算一次没拼对 */
+  if(typeWrongWords.indexOf(typeWord.en)===-1)typeWrongWords.push(typeWord.en);
+  typeActive=false;   /* 小课期间锁住键盘 */
+  playWrong();
+  markAnswer(__missT,false);save();
   typeIdx++;
-  nextTypeQ();
+  __hmlLesson('typing',__missT,__hsnLater('type','typingScreen',function(){typeActive=true;var c=document.getElementById('typeCompare');if(c)c.remove();nextTypeQ();}),0);
 }
 function nextTypeQ(){if(!typeActive)return;if(typeIdx>=typePool.length&&!__hmlRequeue('typing',typePool)){typeComplete();return}
 try{document.body.classList.add('type-lock');}catch(e){}
@@ -6981,7 +7004,7 @@ const w=allW[typePool[typeIdx]];typeWord=w;typeInput='';typeWordStart=Date.now()
 const letters=w.en.split('');
 let slots='';letters.forEach((l,i)=>{if(l===' ')slots+='<div class="typing-slot space" id="tslot'+i+'"></div>';else slots+='<div class="typing-slot" id="tslot'+i+'"></div>'});
 const L=TYPING_LEVELS[typeRound]||TYPING_LEVELS[1];
-const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">⏱️ <b id="typeTimer" style="color:#fde047;font-variant-numeric:tabular-nums;font-size:15px">0.0s</b></span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+(typeIdx+1)+' / '+typePool.length+'</span><span onclick="showTypingMenu()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
+const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">⏱️ <b id="typeTimer" style="color:#fde047;font-variant-numeric:tabular-nums;font-size:15px">0.0s</b></span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+Math.min(typeIdx+1,typeTotal||typePool.length)+' / '+(typeTotal||typePool.length)+'</span><span onclick="showTypingMenu()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
 document.getElementById('typingContent').innerHTML=headBar+'<div class="typing-area"><div class="typing-emoji">'+__hsnQuizPic(w)+'</div><div class="typing-cn">'+w.cn+'</div><div class="typing-pn">'+w.pn+'</div><div class="typing-slots" id="typeSlots"><div class="typing-slots-inner">'+slots+'</div></div><div style="text-align:center;margin:4px 0"><button class="listen-btn" onclick="speak(typeWord.en)">🔊 听发音</button> <button class="listen-btn" onclick="typeHint()">💡 提示</button></div>'+renderKeyboard()+'</div>';
 try{window.HansenFitSlots(document.getElementById('typeSlots'))}catch(e){}/* 🔴 BUG#53 */
 speak(w.en)}
@@ -7227,9 +7250,13 @@ function __hsnClozeForms(en){
   if(lw.slice(-2)==='fe')out.push(w.slice(0,-2)+'ves');
   return out;
 }
+/* 🔴v1165 复查：内容校对标出的病句（还没重新录音，例句和录音要一起换）先不拿来出完形题 / Boss 完形题；
+   按「英文|例句」一字不差登记，例句改好以后自动恢复出题。单词卡上照常显示、照常能听 */
+var __HSN_CLOZE_HOLD={'minute|Wait for me ten minutes.':1};
 function __hsnClozeMatch(w){
   try{
     var ex=String(w&&w.ex||'');if(!ex)return null;
+    if(__HSN_CLOZE_HOLD[String(w.en||'')+'|'+ex])return null;
     var forms=__hsnClozeForms(w&&w.en);
     for(var i=0;i<forms.length;i++){
       var f=forms[i];if(!f)continue;
@@ -7313,7 +7340,7 @@ clozeQ={word:w,opts:opts,idx:idx,fill:cm.text};
 const L=CLOZE_LEVELS[clozeLevel];
 const doneNum=clozeTotal-clozePool.length; // 含当前题
 const headBar='<div style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,'+L.c1+'33,'+L.c2+'22);border:1px solid '+L.c1+'66;border-radius:14px;padding:9px 14px;margin:0 8px 12px;font-size:13px;color:#fff;font-weight:700"><span style="font-size:20px">'+L.icon+'</span><span>'+L.name+'</span><span style="opacity:.7;font-weight:500">·</span><span style="opacity:.9">每题 +'+L.xpPerQ+' 经验</span><span style="margin-left:auto;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:8px;font-size:12px">'+doneNum+' / '+clozeTotal+'</span><span onclick="startCloze()" style="background:rgba(255,255,255,.15);padding:4px 9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-weight:700" ontouchstart="this.style.background=\'rgba(255,255,255,.3)\'" ontouchend="this.style.background=\'rgba(255,255,255,.15)\'">换难度</span></div>';
-document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-area"><div class="cloze-emoji">'+__hsnQuizPic(w)+'</div><div class="cloze-sentence">'+sentence+'</div><div class="cloze-cn">'+window.smartHighlight(w.cn, w.exCn, w.en)+'</div><div style="text-align:center;font-size:14px;color:#cbd5e1;margin:10px 0;font-weight:600">选一个最合适的单词填入空白</div><div class="cloze-opts">'+opts.map((o,i)=>'<div class="cloze-opt" onclick="clozeAnswer('+i+')">'+(isAtStart?(o.en.charAt(0).toUpperCase()+o.en.slice(1)):o.en)+'</div>').join('')+'</div><div style="text-align:center;margin-top:14px;font-size:14px;color:#cbd5e1;font-weight:700">本档已答对：<b style="color:#fbbf24">'+clozeDone+'</b> 题</div></div>';
+document.getElementById('clozeContent').innerHTML=headBar+'<div class="cloze-area"><div class="cloze-emoji">'+__hsnQuizPic(w)+'</div><div class="cloze-sentence">'+sentence+'</div><div class="cloze-cn">'+window.smartHighlight(w.cn, w.exCn, w.en)+'</div><div style="text-align:center;font-size:14px;color:#cbd5e1;margin:10px 0;font-weight:600">选一个最合适的单词填入空白</div><div class="cloze-opts">'+opts.map((o,i)=>'<div class="cloze-opt" onclick="clozeAnswer('+i+')">'+(isAtStart?(o.en.charAt(0).toUpperCase()+o.en.slice(1)):o.en)+'</div>').join('')+'</div>'+(cm.text.toLowerCase()!==String(w.en).toLowerCase()?'<div class="cloze-form-tip" style="text-align:center;font-size:13px;color:#cbd5e1;margin-top:10px;font-weight:700">💡 填进句子时，这个词要变个样子（比如加 s，或变成过去的说法）</div>':'')+'<div style="text-align:center;margin-top:14px;font-size:14px;color:#cbd5e1;font-weight:700">本档已答对：<b style="color:#fbbf24">'+clozeDone+'</b> 题</div></div>';
 }
 function clozeAnswer(i){if(!clozeActive||!clozeQ)return;const opts=document.querySelectorAll('#clozeScreen .cloze-opt');if(opts.length===0||opts[0].dataset.done)return;opts.forEach(o=>o.dataset.done='1');
 const blank=document.getElementById('clozeBlank');
@@ -7326,7 +7353,9 @@ let advanced=false;
 function goNext(){if(!advanced){advanced=true;nextClozeQ()}}
 // 答对后, 读整个例句 (本地 NaturalReader mp3)
 const __cgo=__hsnLater('cloze','clozeScreen',goNext);
-try{speak(clozeQ.word.ex,1,function(){setTimeout(__cgo,800)})}catch(e){__cgo()}
+/* 🔴v1165 复查：晚 160ms 再读。点选项那一下会给「一键静音」开 120ms 放行窗口（hansen_mute：点了就算想听），
+   在点击里同步读，开着静音也照样出声（答错小课也是这样等窗口关上再读） */
+var __cex=clozeQ.word.ex;setTimeout(__hsnLater('cloze','clozeScreen',function(){try{speak(__cex,1,function(){setTimeout(__cgo,800)})}catch(e){__cgo()}}),160);
 // 兜底: 8 秒强制切下一题 (例句最长 ~3 秒)
 setTimeout(__cgo,8000)
 }else{opts[i].classList.add('wrong');opts.forEach((o,j)=>{if(clozeQ.opts[j]&&clozeQ.opts[j].en===clozeQ.word.en)o.classList.add('correct')});

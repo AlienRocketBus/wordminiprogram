@@ -2389,8 +2389,8 @@ if 'width:72px !important' in _bl72: _s72.append('boss_lock v572 72px 金框版�
 if 'width:40px !important;height:40px !important;font-size:22px' in _bl72: _s72.append('boss_lock v144 40px emoji 版回潮')
 for _frag,_msg in [
   ('width:58px !important;height:58px !important','boss_lock 58px 新几何'),
-  # v1165 待机动画预算：单浮动动画保留，但只招手 3 下就停（不再 infinite，见 template.html .world-map-btn）
-  ('animation:worldMapFloat 3.5s ease-in-out 3 !important','boss_lock 单浮动动画(3 轮即停)'),
+  # v1165：单浮动动画一直招手（老师定的提醒）；只动 transform，见 template.html .world-map-btn
+  ('animation:worldMapFloat 3.5s ease-in-out infinite !important','boss_lock 单浮动动画(一直招手·只动 transform)'),
   ("'.world-map-btn:active{transform:translateY(2px) scale(.97) !important;animation:none !important}'",'boss_lock 按压'),
   ("'.top-bar{padding:calc(10px + env(safe-area-inset-top,0px)) calc(70px + env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px)) !important;gap:6px !important}'",'boss_lock 顶栏压高+刘海安全区+腾位70+gap6'),
   ("'.avatar{width:42px !important;height:42px !important}'",'boss_lock 头像 42 瘦身'),
@@ -2461,9 +2461,9 @@ for _fn in _no_subisle(sorted(__import__('glob').glob('island_*.html'))):
     for _frag,_msg in [
       ('id="chestCard"','宝箱卡 id'),
       ('id="chestIcon"','宝箱图标 id'),
-      # v1165 待机动画预算：柔光从「卡片 box-shadow 每帧重画」改成光圈层 ::after 只动 opacity，6 秒一轮、3 轮后停在淡淡常亮
+      # v575 老师要求：没签到就一直缓慢闪烁，领了才停。v1165 起柔光改成光圈层 ::after 只动 opacity（不再每帧重画 box-shadow）
       ('.daily-card.chest-pending::after{content:','缓慢闪烁 CSS(光圈层)'),
-      ('animation:chestSlowGlow 6s ease-in-out 3}','缓慢闪烁 6s·3 轮即停'),
+      ('animation:chestSlowGlow 6s ease-in-out infinite}','没签到就一直缓慢闪烁(6s 一轮·只动 opacity)'),
       ('@keyframes chestSlowGlow{0%,100%{opacity:','闪烁键帧(只动 opacity)'),
       ('.daily-card.chest-claimed{background:linear-gradient(135deg,#FF2444,#FF2444)!important','已领红色 CSS'),
       ("classList.toggle('chest-pending'",'updateChestBadge 闪烁切换'),
