@@ -9,6 +9,7 @@
  *   ② 进度 0 按顺序打第 1 关赢了 → 弹「Lv 2 已开放」（和以前一样）
  *   ③ 进度 2 按顺序打第 3 关赢了 → 弹「Lv 4 已开放」（写大陆真的关号）
  *   ④ 常规岛（island_animal）第一关赢了 → 照旧弹「Lv 2 已开放」
+ *   ⑤ 同一个岛按顺序连着打赢第 1、2、3 关 → 每场都弹，分别写「Lv 2 / Lv 3 / Lv 4 已开放」（复查 G2：以前第二场起就不弹了）
  */
 import { chromium } from './playwright_loader.mjs';
 import http from 'node:http';
@@ -73,7 +74,56 @@ async function firstWin(file, k, prog) {
   } finally { await ctx.close(); }
 }
 
+/* ⑤ v1165 复查（G2）：同一个岛、同一个页面里按顺序连着打赢第 1、2、3 关 —— 每一场都真开了下一关，每一场都要弹，
+   写「Lv 2 / Lv 3 / Lv 4 已开放」。以前只有这个岛的第一场会弹（大陆岛的 20 关数字一直停在第 1 关，第二场起条件就不成立了）。 */
+async function inOrderWins(file, n) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('__s')) { localStorage.clear(); localStorage.setItem('hansen_onboarded', '1'); sessionStorage.setItem('__s', '1'); } } catch (e) {} });
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(String(e.message).slice(0, 160)));
+  page.on('dialog', d => d.dismiss().catch(() => {}));
+  const out = [];
+  try {
+    await page.goto(BASE + file, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.readyState !== 'loading' && typeof startBoss === 'function' && !!window.__hbpVictoryHooked, null, { timeout: 20000 });
+    await page.waitForTimeout(1200);
+    const landN = (file.match(/island_land(\d)/) || [])[1];
+    for (let k = 0; k < n; k++) {
+      await page.evaluate(() => { try { closeAlert(); } catch (e) {} showScreen('home'); showScreen('boss'); });
+      await page.waitForTimeout(600);
+      const card = page.locator(`#bossContent [onclick="window.__hsnZoneFight(${k})"]`).first();
+      if (!(await card.count())) { out.push({ k, started: false }); break; }
+      await card.tap();
+      await page.waitForFunction(() => bossActive === true, null, { timeout: 15000 }).catch(() => {});
+      const idx = await page.evaluate(() => { const i = window._s1Idx; bossHP = 0; bossVictory(); return i; });
+      await page.waitForTimeout(900);
+      const banner = await page.evaluate(() => {
+        const el = [...document.querySelectorAll('body > div')].find(d => /新 Boss 解锁/.test(d.textContent || ''));
+        const t = el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : '';
+        if (el) { const b = el.querySelector('#hbpUnlockOk'); if (b) b.click(); else el.remove(); }
+        return t;
+      });
+      const prog = await page.evaluate(n => localStorage.getItem('land' + n + '_prog'), landN);
+      out.push({ k, idx, banner, prog });
+      await page.waitForTimeout(3300);   // hansen_season.js 有 3 秒「重复结算」挡板，下一场等它过去
+    }
+  } finally { await ctx.close(); }
+  return { out, errs };
+}
+
 try {
+  console.log('\n▶ ⑤ 同一个岛按顺序连着打赢第 1、2、3 关（island_land1）');
+  {
+    const r = await inOrderWins('island_land1.html', 3);
+    console.log('     ' + JSON.stringify(r.out));
+    r.out.forEach((x, k) => {
+      ok(x.idx === k && x.prog === String(k + 1), `⑤ 第 ${k + 1} 关按顺序打赢，进度变 ${x.prog}`);
+      ok(new RegExp('Lv ' + (k + 2) + ' 已开放').test(x.banner || ''), `⑤ 第 ${k + 1} 场弹「Lv ${k + 2} 已开放」（弹的是：「${x.banner || ''}」）`);
+    });
+    ok(r.out.length === 3, '⑤ 三场都打了');
+    ok(r.errs.length === 0, '页面无报错 ' + r.errs.join(' | '));
+  }
   console.log('\n▶ ① 进度 0：体验期跳打第 5 关赢了');
   {
     const r = await firstWin('island_land3.html', 4, null);

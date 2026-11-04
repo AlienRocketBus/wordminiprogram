@@ -197,7 +197,11 @@
     var S = getS();
     if(!ensureFields()) return;
     bossLv = Math.max(1, Math.min(20, bossLv | 0));
-    
+    /* 🔴v1165 复查：单词大陆岛弹不弹「🔓新 Boss 解锁」只看 landNext（这一仗真开了大陆的第几关）。
+       以前还套在下面 20 关的通用条件里：大陆岛的 20 关数字一直停在第 1 关，第一场胜利后 S.bossUnlocked 变成 2，
+       从第二场起条件永远不成立 → 按顺序打赢第 2、3、4 关真开了新关，却一次都不弹。 */
+    if(landNext !== undefined && landNext > 0) showUnlockBanner(landNext);
+
     // 🛡️ v328 纵深防御 — 越级校验: 即使调用方(理论上)传来一个"未解锁的高关"(bug/篡改),
     //   也绝不记录、绝不解锁. 只接受 bossLv <= 当前已解锁最高关 的胜利. 这样跳关在数据层就不可能发生.
     var curUnlocked = Math.max(1, Math.min(20, S.bossUnlocked || 1));
@@ -212,9 +216,8 @@
     var needed = getRequiredWins(bossLv);
     if(S.bossWins[bossLv] >= needed && bossLv >= curUnlocked && bossLv < 20){
       S.bossUnlocked = bossLv + 1;   // ★ 严格 +1, 一次只开一关
-      // 弹个解锁提示（单词大陆岛按大陆自己的关号；没真开新关就不弹）
+      // 弹个解锁提示（常规岛）；单词大陆岛的提示在函数开头按大陆自己的关号弹过了
       if(landNext === undefined) showUnlockBanner(bossLv + 1);
-      else if(landNext > 0) showUnlockBanner(landNext);
     }
     
     // 保存
