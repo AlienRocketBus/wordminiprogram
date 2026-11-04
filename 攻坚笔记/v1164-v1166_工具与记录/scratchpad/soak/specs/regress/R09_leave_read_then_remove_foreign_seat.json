@@ -1,0 +1,178 @@
+{
+ "name": "R09_leave_read_then_remove_foreign_seat",
+ "bug": "R9 leaveRoom read-then-remove hits a seat re-created by another guest",
+ "spec": {
+  "seed": 16,
+  "profile": "disrupt",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 3,
+   "queryLagMul": 1.48,
+   "queryLagExtra": 0,
+   "lagMode": "monotonic",
+   "ryw": true,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.39,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x16",
+    "name": "小明",
+    "rating": 1282,
+    "skew": 0,
+    "net": {
+     "base": 66,
+     "jitter": 73,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.55,
+     "minMs": 1886,
+     "maxMs": 8108,
+     "slowP": 0.06
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 881,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P1",
+    "uid": "k1x16",
+    "name": "小红",
+    "rating": 860,
+    "skew": 0,
+    "net": {
+     "base": 80,
+     "jitter": 79,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.74,
+     "minMs": 2367,
+     "maxMs": 8172,
+     "slowP": 0.04
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1903,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 4
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null
+   },
+   {
+    "label": "P2",
+    "uid": "k2x16",
+    "name": "阿杰",
+    "rating": 997,
+    "skew": 0,
+    "net": {
+     "base": 65,
+     "jitter": 110,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.72,
+     "minMs": 2802,
+     "maxMs": 9546,
+     "slowP": 0.05
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1908,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 5
+     },
+     {
+      "at": 2824,
+      "act": "cancelJoin"
+     }
+    ],
+    "ladderer": false,
+    "afterReload": {
+     "at": 0,
+     "act": "join",
+     "via": "list",
+     "target": "P0",
+     "pick": "first",
+     "tries": 3
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

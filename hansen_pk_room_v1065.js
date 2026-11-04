@@ -61,6 +61,7 @@
     outageMs: 16000,     /* 我这边连续读失败超过 16 秒 = 我断网了：这段时间不算在对手头上 */
     observeMs: 9000,     /* 时间戳看着过期的房：多看几秒，心跳在动就是活的（对方手机钟慢） */
     otherDevMs: 1800000, /* 同账号、不是这台设备建的剩余文档：30 分钟没动才清（另一台手机钟慢时不误删活房） */
+    sweepRecheckMs: 25000, /* 联机压力测试 R8：别的设备的旧文档要隔这么久再看一眼、一点没变才删（≥ 3 个心跳周期 8 秒） */
     verdictMs: 1500,     /* 判了「对手离场」后隔一会儿再读一次：两边同时判 = 这局不算 */
     settleMs: 3000,      /* 回合抢写结果待定时，再等多久（之后交给对战屏的轮询补分，审查 FX-10：以前 6 秒 + 9 秒读回，孩子对着「已提交」干等 15 秒） */
     awayAckMs: 60000     /* 房主暂时切出去了（多半是去微信发房间码）：客人占着座位多等一分钟 */
@@ -944,7 +945,10 @@
       });
     }, function (addErr) {
       var k = kindOf(addErr);
-      if (k === 'expired' || k === 'session') throw addErr;   /* 没登录 / 会话没好：读也读不了 */
+      if (k === 'expired') throw addErr;   /* 没登录：读也读不了 */
+      /* 🔴联机压力测试 R5：会话一时没好 —— 可能是第一次 add 已经写进去了、重试时才碰上 —— 结果待定，不能当成「没写上」
+         （以前回合抢写这一词记 0 分、再也不补，接近的比分会翻盘） */
+      if (k === 'session') return { mine: false, unknown: true, id: id, err: addErr, dup: false };
       return readBack(rbDelays(true, opts.fast || opts.fresh)).then(function (rb) {
         if (rb.stop) throw rb.err;
         if (rb.doc) return { mine: !!(rb.doc.nonce && rb.doc.nonce === doc.nonce), doc: rb.doc, id: id };
@@ -994,8 +998,20 @@
           });
           if (ok.length) return { ok: true, room: listItem(ok[0]), roomId: String(ok[0]._id) };
           if (cand && n > 0) return sleep(Math.round(TM.observeMs / 3)).then(function () { return look(n - 1); });
-          return mine ? failK('self', HUMAN.self)
-                      : failK('gone', '没找到这间房，可能已经关了或码输错了');
+          if (mine) return failK('self', HUMAN.self);
+          /* 🔴联机压力测试 D4：码没错、房也在，只是已经开打了（满了）或房主暂时切出去了 —— 以前一律说「码输错了」 */
+          return T().list({ codeH: H }).then(function (all) {
+            var t2 = Date.now(), busy = false, away = false;
+            (all || []).forEach(function (x) {
+              if (!(x && x.proto === PROTO && x.kind === 'room') || (u.id && x.hostId === u.id)) return;
+              var fresh = (t2 - (num(x.heartbeatAt) || num(x.createdAt))) < STALE_MS * 4;
+              if (fresh && x.status === 'playing') busy = true;
+              if (fresh && (x.status === 'away' || x.away)) away = true;
+            });
+            if (busy) return failK('taken', '这间房已经开打了（两个人都到齐了），让朋友再开一间、发新的码');
+            if (away) return failK('gone', '房主刚切出去了一下，等一会儿再输一次码');
+            return failK('gone', '没找到这间房，可能已经关了或码输错了');
+          }, function () { return failK('gone', '没找到这间房，可能已经关了或码输错了'); });
         });
       }
       return look(3);
@@ -1132,6 +1148,24 @@
      🔴v1164（审查 F8）：同账号**别的设备**建的（不在本机记录里），30 分钟没动才清 ——
        那台手机钟慢的话，「两分钟没心跳」其实是它正开着房在等人。 */
   var _sweepAt = 0, _sweeping = null;
+  /* 🔴联机压力测试 R8：同账号**别的设备**的文档，光看本机钟算的「30 分钟没动」不够 —— 那台手机钟慢 / 本机钟快 30 分钟以上时，
+     它正在打的房、座位、回合文档在本机看来都「30 分钟没动」，以前当场就删了（那一局两边都「房间已经关了，不记分」）。
+     现在：本机钟看着过期的先记下来（候选），隔 sweepRecheckMs（25 秒，三个心跳周期）再看一眼，**一点没变**才删。
+     活的房 / 座位每 8 秒写一次心跳，一定会变；回合文档自己不变，就看它那一局的房间 / 我的座位变没变。
+     第一次清理只记候选、不删；25 秒后自动复查一次（不受「10 分钟一次」的限制），到时还没变的才删（每次最多 10 条）。 */
+  var _swCand = {}, _swRecheck = null;
+  function swSeen(id, sig, t) {
+    var o = _swCand[id];
+    if (o && o.sig === sig) return (t - o.at) >= TM.sweepRecheckMs;
+    _swCand[id] = { sig: sig, at: t };
+    return false;
+  }
+  function swRecheckLater() {
+    if (_swRecheck) return;
+    try {
+      _swRecheck = setTimeout(function () { _swRecheck = null; sweepMyDeadRooms(); }, TM.sweepRecheckMs + 1000);
+    } catch (e) { _swRecheck = null; }
+  }
   function maybeSweep() {
     if (_sweeping || (_sweepAt && Date.now() - _sweepAt < 600000)) return;
     _sweepAt = Date.now();
@@ -1153,24 +1187,43 @@
         T().list({ guestId: u.id, kind: 'seat' })['catch'](none),
         T().list({ by: u.id, kind: 'win' })['catch'](none)
       ]).then(function (L) {
+        var later = false, live = {};
+        var sigR = function (r) { return 'r|' + num(r.heartbeatAt) + '|' + num(r.hostBeat) + '|' + r.status + '|' + (r.guestId || '') + '|' + num(r.seat); };
+        var sigS = function (x) { return 's|' + num(x.guestBeat) + '|' + (x.left ? 1 : 0) + '|' + (x.acked ? 1 : 0) + '|' + (x.guestScore == null ? '' : x.guestScore); };
+        (L[0] || []).forEach(function (r) { if (r && r._id) live[r._id] = sigR(r); });
+        (L[1] || []).forEach(function (x) { if (x && x.roomId) live[x.roomId] = (live[x.roomId] || '') + sigS(x); });
         (L[0] || []).forEach(function (r) {
           if (!r || !r._id || r._id === _myRoomId || (r.kind && r.kind !== 'room')) return;
           var beat = num(r.heartbeatAt) || num(r.createdAt);
-          if (!isMineDev(r._id)) { if ((t - beat) > TM.otherDevMs) kill.push(r._id); return; }
+          if (!isMineDev(r._id)) {
+            if ((t - beat) > TM.otherDevMs) { if (swSeen(r._id, sigR(r), t)) kill.push(r._id); else later = true; }
+            return;
+          }
           var done = r.status === 'done' && (t - (num(r.endedAt) || beat)) > TM.doneGraceMs;
           if (done || (r.status !== 'done' && (t - beat) > STALE_MS * 4)) kill.push(r._id);   /* 2 分钟以上没心跳 */
         });
         (L[1] || []).forEach(function (s) {
           if (!s || !s._id || s._id === _mySeatId || s.guestId !== u.id) return;
           var beat = num(s.guestBeat) || num(s.createdAt);
-          var need = isMineDev(s._id) ? Math.max(TM.doneGraceMs, STALE_MS * 4) : TM.otherDevMs;
-          if ((t - beat) > need) kill.push(s._id);
+          if (!isMineDev(s._id)) {
+            if ((t - beat) > TM.otherDevMs) { if (swSeen(s._id, sigS(s), t)) kill.push(s._id); else later = true; }
+            return;
+          }
+          if ((t - beat) > Math.max(TM.doneGraceMs, STALE_MS * 4)) kill.push(s._id);
         });
         (L[2] || []).forEach(function (w) {
           if (!w || !w._id || w.by !== u.id) return;
-          var need = isMineDev(w._id) ? TM.winTtlMs : Math.max(TM.winTtlMs, TM.otherDevMs);
-          if ((t - num(w.at)) > need) kill.push(w._id);
+          if (!isMineDev(w._id)) {
+            /* 回合文档自己不会变：连同它那一局的房间 / 我的座位一起看（那一局还在打，心跳就在变） */
+            if ((t - num(w.at)) > Math.max(TM.winTtlMs, TM.otherDevMs)) {
+              if (swSeen(w._id, 'w|' + num(w.at) + '|' + (live[w.roomId] || 'gone'), t)) kill.push(w._id); else later = true;
+            }
+            return;
+          }
+          if ((t - num(w.at)) > TM.winTtlMs) kill.push(w._id);
         });
+        for (var ck in _swCand) if (has(_swCand, ck) && (t - _swCand[ck].at) > 3600000) delete _swCand[ck];
+        if (later || kill.length > 10) swRecheckLater();
         kill = kill.slice(0, 10);
         if (!kill.length) return 0;
         return Promise.all(kill.map(function (id) {
@@ -1327,8 +1380,18 @@
   var _seatGone = {};    /* roomId → 最近一次收回我在这间房的座位（删除）的 Promise */
   function cancelJoins(rid) { (_joinToks[rid] || []).forEach(function (t) { t.cancel = true; }); }
   function joiningAny(rid) { return !!(_joinToks[rid] && _joinToks[rid].length); }
-  function removeSeat(rid, sid) {
-    var p = T().remove(sid).then(noop, noop);
+  /* 🔴联机压力测试 R9b：先读一眼、nonce 是我那一份才删 —— 以前按 _id 直接删：结果待定 / 已取消时，这个座位号上
+     常常已经是别人的座位（数据库会拒，可这正是「只写自己的文档」要杜绝的写法；权限一旦配错就真把别人的座位删了）。
+     读到是我的，就一直是我的（别人删不掉），所以「读完再删」没有空档。 */
+  function removeSeat(rid, sid, nonce0) {
+    /* 读不到（主从延迟：刚写的我自己那份还没同步过来）就隔一会儿再读，最多三次 */
+    var tryRead = function (n) {
+      return T().read(sid).then(function (d) {
+        if (d && d.nonce === nonce0) return T().remove(sid);
+        if (!d && n > 0) return sleep(TM.lagMs * (4 - n)).then(function () { return tryRead(n - 1); });
+      });
+    };
+    var p = (nonce0 ? tryRead(3) : T().remove(sid)).then(noop, noop);
     _seatGone[rid] = p;
     return p;
   }
@@ -1418,22 +1481,25 @@
       if (!c.mine) {
         /* 🔴审查 F1 / F-R2-2：结果待定（多半是别人的还没同步过来，也可能回包丢了其实是我的）、或者已经取消了 →
            顺手收回 —— 别人的座位删不掉，删了也无妨；**等它删完**再往下走，下一次进房才不会被它挡住 */
-        var rm = (c.unknown || tok.cancel) ? removeSeat(roomId, seat._id) : Promise.resolve();
+        var rm = (c.unknown || tok.cancel) ? removeSeat(roomId, seat._id, seat.nonce) : Promise.resolve();
         return rm.then(function () {
           if (tok.cancel) return cancelled();
           if (c.unknown) {
             var ek = kindOf(c.err);
-            if (ek === 'network' || ek === 'slow' || ek === 'config') return fail(c.err);
+            if (ek === 'network' || ek === 'slow' || ek === 'config' || ek === 'session') return fail(c.err);
             return failK('taken', HUMAN.taken, rawText(c.err).slice(0, 120));
           }
           return failK('taken', HUMAN.taken);
         });
       }
       noteMine(seat._id);
-      if (tok.cancel) return removeSeat(roomId, seat._id).then(cancelled);
+      if (tok.cancel) return removeSeat(roomId, seat._id).then(cancelled);   /* 刚 add 成功的就是我的：直接删 */
       /* 🔴v1136：进别人的房之前，先收掉自己开着的那间（否则别人进去房主不在） */
       if (_myRoomId && _myRoomId !== roomId) leaveMine();
       setMine(roomId, 'guest', seat._id, false);
+      /* 🔴联机压力测试 R1：同一间房换了轮次再进（对手没来、又被配回这间）—— 上一局合并缓存里的回合、比分、离场判定
+         不能带进这一局（以前直接沿用：上一局「我拼对的词」这一局不写文档就算赢，两部手机比分对不上） */
+      delete _rc[roomId];
       var c0 = rc(roomId);
       c0.meta = R; c0.ep = ep; c0.mySeat = seat._id;
       /* v1104：客人也发心跳（写自己的座位），房主才知道客人还在 */
@@ -1483,7 +1549,7 @@
     function giveUp(res, removed) {
       if (_myRoomId === rid && _myRole === 'guest') { stopHeartbeat(); setMine('', '', '', false); }
       /* 🔴L14：失败后一定收回座位，不留孤儿文档（退出时 leaveMine 已经删过就不再删）；等它删完再返回 */
-      return (removed ? Promise.resolve() : removeSeat(rid, seat._id)).then(function () { return res; });
+      return (removed ? Promise.resolve() : removeSeat(rid, seat._id)).then(function () { return res; });   /* 我 add 成功的那份 */
     }
     function cancelled() { return giveUp(failK('other', '已经退出这间房了', '', { cancelled: true }), true); }
     function tick() {
@@ -1541,9 +1607,13 @@
                                  会直接删房，客人那边一整局都只看到「网络不稳」
        客人 · 还没确认        → 删自己的座位
        客人 · 已开打          → 座位标 left（同样留着给房主读） */
+  /* 🔴联机压力测试 R11：每次离开一间房记一笔 —— 还在路上的 markReady 回来时，看到这间房已经离开过就不再「复活」它 */
+  var _leftGen = {};
+  function noteLeft(id) { if (id) _leftGen[id] = (_leftGen[id] || 0) + 1; }
   function leaveMine() {
     var id = _myRoomId, role = _myRole, sid = _mySeatId, started = _myStarted;
     if (!id) return Promise.resolve({ ok: true });
+    noteLeft(id);
     if (_hbRoom === id) stopHeartbeat();
     setMine('', '', '', false);
     cancelJoins(id);
@@ -1570,6 +1640,7 @@
   function leaveRoom(roomId) {
     var id = roomId || _myRoomId;
     if (!id) return Promise.resolve({ ok: true });
+    noteLeft(id);
     if (id === _myRoomId && _myRole) return leaveMine();
     cancelJoins(id);
     /* 不是本机记着的那间：读一下，按身份只收自己的文档 */
@@ -1587,7 +1658,7 @@
         return T().read(sid).then(function (S) {
           if (!S || S.kind !== 'seat' || S.guestId !== u.id) return null;
           if (R.guestId === u.id) return T().patch(sid, { left: true, leftAt: t, guestBeat: t });
-          return removeSeat(id, sid);
+          return removeSeat(id, sid, S.nonce);
         });
       });
     }).then(function () { return { ok: true }; }, function (e) { return fail(e); });
@@ -1625,7 +1696,7 @@
     /* 🔴审查 R2-UI-3：房主切到别的 App 时**不收人** —— 以前照样确认、在后台开打，进来的孩子对着空气打完一局，
        还要再干等 5 分钟交卷。暂停时：公开房 / 排位房先下架（status:'away'，列表里看不到、进不来）；
        私密房还能按码找到（房主多半是切到微信发码去了），朋友先占着座位等，房主回来再点头。 */
-    var paused = false;
+    var paused = false, pausedAt = 0;
 
     function nextDelay() {
       var waited = Date.now() - t0, b = TM.waitPollMs;
@@ -1795,6 +1866,10 @@
             _myAcked[roomId] = 1;
           }
           if (pend) return confirm(R, S, u);
+          /* 🔴联机压力测试 R6：两分钟的等人上限在「有座位冒出来」时也要算 —— 以前只在「没有座位」那条路上判，
+             一直有不回话的座位冒出来（有人反复占新轮次的座位）时房主永远等下去（实测 13 分钟以上）。
+             正在等客人回话的（上一行）不受影响；房主切出去暂停的那段时间不算（见 resume）。 */
+          if (Date.now() - t0 > limit) { emit({ timeout: true }); leaveRoom(roomId); return; }
           if (ok && S.guestId !== u.id) {
             if (!proofOk(R, S)) return bump();   /* 私密房：没拿码就想进来的 */
             var d = judgeSeat(S);
@@ -1831,7 +1906,7 @@
     /* 界面在页面切到后台 / 回到前台时调（审查 R2-UI-3） */
     cancel.pause = function () {
       if (stop || paused) return;
-      paused = true;
+      paused = true; pausedAt = Date.now();
       var t = Date.now(), priv = !!(c0.meta && c0.meta.isPrivate);
       var away = priv ? { away: true, awayAt: t, heartbeatAt: t, hostBeat: t }
                       : { status: 'away', away: true, awayAt: t, heartbeatAt: t, hostBeat: t };
@@ -1842,6 +1917,7 @@
     cancel.resume = function () {
       if (stop || !paused) return;
       paused = false;
+      if (pausedAt) { t0 += Date.now() - pausedAt; pausedAt = 0; }   /* 切出去的那段时间不算进两分钟 */
       seen = null;     /* 回来以后重新看座位：心跳在动的才收 */
       var t = Date.now();
       T().patch(roomId, { status: 'open', away: false, awayAt: 0, heartbeatAt: t, hostBeat: t })['catch'](noop);
@@ -1910,12 +1986,46 @@
   /* 对手离场 → 本局记为我方胜（只写自己的文档；对方得 0 分由合并视图推出来）。
      🔴审查 F4：写完隔一会儿再读一次 —— 对手同时也判了我离场（两边都断过网）→ 这局不算（void），
      两边看到同一个结论，不会两个人都拿一场胜。 */
+  /* 两边都交了真分数（不是判离场写的那个 1）：{mine, theirs}；否则 null —— 看原始文档（缓存里判离场时补过 0） */
+  function realScores(L, host) {
+    if (!L || !L.R) return null;
+    var R = L.R, S = L.S;
+    var hs = (R.hostScore != null && R.endedBy !== 'abandon' && !R.abandonWin) ? Number(R.hostScore) || 0 : null;
+    var gs = (S && S.guestScore != null && !S.abandonWin) ? Number(S.guestScore) || 0 : null;
+    if (hs == null || gs == null) return null;
+    return host ? { mine: hs, theirs: gs } : { mine: gs, theirs: hs };
+  }
   function claimAbandonWin(roomId) {
     return ident().then(function (u) {
       return loadView(roomId).then(function (L) {
         var t = Date.now(), c = rc(roomId), host = (L.v.hostId === u.id), my = host ? 'host' : 'guest';
         if (L.v.abandonWin && L.v.abandonWin !== my) return { pre: L.v.abandonWin };
-        var w;
+        /* 🔴联机压力测试（R3 续）：对手其实已经交了卷（真分数）—— 他是交完卷才不见的（或者刚回来交上）：
+           按两边的真分数算，不判他离场（以前照判：对手那边按真分数已经是「你赢了」，两边都赢） */
+        /* 判离场之前先看清楚：两边其实都交了卷（真分数都在）—— 那就按真分数算（两边都会算出同一个结论），不判离场。
+           主从延迟下刚交的卷可能读不到：读到为止，最多再读三次（1.5 秒、3 秒、3 秒）。
+           以前直接判：对手那边已经按真分数「你赢了」，我这边「对手离场，你赢了」—— 两边都赢 */
+        var real0 = realScores(L, host);
+        if (real0) return { real: real0 };
+        /* 我自己还没交卷（对战中判的离场）：不会有「两边都交了卷」这回事，不用多等 */
+        var mineIn = host ? (L.R && L.R.hostScore != null && L.R.endedBy !== 'abandon') : (L.S && L.S.guestScore != null && !L.S.abandonWin);
+        var looks = mineIn ? [TM.verdictMs, 3000, 3000] : [];
+        var peek = function (k) {
+          if (k >= looks.length) return Promise.resolve(null);
+          return sleep(looks[k]).then(function () { return loadView(roomId)['catch'](function () { return null; }); }).then(function (L2) {
+            var r2 = realScores(L2, host);
+            if (r2) return r2;
+            if (L2 && L2.v.abandonWin && L2.v.abandonWin !== my) return { pre: L2.v.abandonWin };
+            return peek(k + 1);
+          });
+        };
+        return peek(0).then(function (seen) {
+          if (seen && seen.pre) return { pre: seen.pre };
+          if (seen) return { real: seen };
+          return doClaim();
+        });
+        function doClaim() {
+        var w; t = Date.now();
         if (host) {
           c.hs = 1; c.gs = (c.gs == null) ? 0 : c.gs; c.rank = 2; c.awH = true;
           w = patchOwn(roomId, { status: 'done', endedBy: 'abandon', abandonWin: 'host',
@@ -1927,8 +2037,12 @@
         return w.then(function () { return sleep(TM.verdictMs); })
           .then(function () { return loadView(roomId)['catch'](function () { return null; }); })
           .then(function () { return { my: my }; });
+        }
       }).then(function (o) {
         var aw = view(roomId, null, null).abandonWin;
+        /* 写完再读那一下看到对手的真分数（他先交的卷、我读得晚）：同样按真分数算 —— 两边结论一致 */
+        if (o.real) return { ok: true, real: true, mine: o.real.mine, theirs: o.real.theirs,
+                             result: o.real.mine > o.real.theirs ? 'win' : (o.real.mine < o.real.theirs ? 'lose' : 'draw') };
         if (o.pre) return o.pre === 'both' ? { ok: true, result: 'void', byAbandon: true, void: true }
                                            : { ok: true, result: 'lose', byAbandon: true };
         if (aw === 'both') return { ok: true, result: 'void', byAbandon: true, void: true };
@@ -2167,8 +2281,11 @@
   /* 进入对战屏时报到 —— 双方都就绪才开打。
      🔴v1123：心跳绑在「进对战屏」上（任何进屏路径都会发心跳）。 */
   function markReady(roomId) {
+    var lg = _leftGen[roomId] || 0;
     return ident().then(function (u) {
       return loadView(roomId).then(function (L) {
+        /* 读房间的这一会儿孩子已经退出了（界面停了心跳、标了离开）：不能再把这间房设回「我的」、重开心跳 */
+        if ((_leftGen[roomId] || 0) !== lg) return { cancelled: true };
         var t = Date.now(), host = (L.v.hostId === u.id), c = rc(roomId);
         if (c.ep == null) c.ep = num(L.R.seat);
         if (host) setMine(roomId, 'host', '', true);

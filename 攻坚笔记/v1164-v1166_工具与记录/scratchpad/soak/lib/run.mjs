@@ -1,6 +1,7 @@
 /* run.mjs — build a World from a scenario spec, play it, run the end phase, return the world for checking. */
 import { World, Instance, T0 } from './world.mjs';
 import { Ui } from './ui.mjs';
+import { UiR1 } from './ui_r1.mjs';
 import { stream } from './prng.mjs';
 
 const STALE_MS = 30000;
@@ -11,6 +12,7 @@ function mkPlayer(W, ps, i, honest) {
   P.key = 'u' + P.uid;
   P.skew = Number(ps.skew) || 0;
   P.partitions = (ps.partitions || []).map((x) => Object.assign({}, x));
+  P.hides = (ps.hides || []).map((x) => Object.assign({}, x));
   P.netRng = stream(W.seedKey, 'net/' + P.label);
   P.kidRng = stream(W.seedKey, 'kid/' + P.label);
   P.lagRng = stream(W.seedKey, 'lag/' + P.label);
@@ -23,7 +25,9 @@ function mkPlayer(W, ps, i, honest) {
 export function spawn(W, P) {
   P.instNo++;
   const inst = new Instance(W, P, P.instNo);
-  inst.ui = new Ui(inst);
+  /* which UI to drive: the round-1 protocol (3b6bbd7+) has settleRound and the acked handshake; the UI port must match */
+  if (!W.proto) W.proto = (inst.api && typeof inst.api.settleRound === 'function') ? 'r1' : 'v0';
+  inst.ui = W.proto === 'r1' ? new UiR1(inst) : new Ui(inst);
   P.inst = inst; P.instances.push(inst);
   W.log(inst.label, 'page loaded (instance ' + inst.no + ')');
   P.events.push({ t: W.now, inst: inst.no, type: 'load' });
@@ -37,6 +41,8 @@ export function reload(W, P, delay) {
   old.unloading = true;
   W.log(old.label, 'pagehide / reload');
   P.events.push({ t: W.now, inst: old.no, type: 'reload' });
+  /* the match on this page is over for this kid (whatever arrives later cannot reach this page's score) */
+  try { if (old.ui && typeof old.ui.endMatch === 'function') old.ui.endMatch('page-reload'); } catch (e) {}
   try { old.fire('pagehide'); } catch (e) {}
   try { old.ui.onPageHide(); } catch (e) {}
   try { old.fire('beforeunload'); } catch (e) {}
@@ -53,10 +59,25 @@ export function reload(W, P, delay) {
 export function freeze(W, P, dur) {
   const inst = P.inst;
   if (!inst || inst.dead) return;
+  /* going to the background: visibilitychange 'hidden' runs first, then the JS is frozen */
+  try { inst.setHidden(true); } catch (e) { W.moduleError(e, inst, 'hide'); }
   inst.frozenUntil = Math.max(inst.frozenUntil, W.now + dur);
   W.log(inst.label, 'background (JS frozen) for ' + Math.round(dur / 1000) + ' s');
   W.mark(P, 'freeze', { until: W.now + dur });
   P.events.push({ t: W.now, inst: inst.no, type: 'freeze', until: W.now + dur });
+  /* back in the foreground: 'visible' fires right before the queued timers run */
+  const until = inst.frozenUntil;
+  W.at(until - 1, () => { if (!inst.dead && inst.frozenUntil <= until) { try { inst.setHidden(false); } catch (e) { W.moduleError(e, inst, 'show'); } } }, null);
+}
+/* the kid switches to another app for dur ms but the browser keeps the page's JS running (Android, short switches) */
+export function hide(W, P, dur) {
+  const inst = P.inst;
+  if (!inst || inst.dead) return;
+  W.log(inst.label, 'switched away (page hidden, JS running) for ' + Math.round(dur / 1000) + ' s');
+  W.mark(P, 'hide', { until: W.now + dur });
+  P.events.push({ t: W.now, inst: inst.no, type: 'hide', until: W.now + dur });
+  try { inst.setHidden(true); } catch (e) { W.moduleError(e, inst, 'hide'); }
+  W.at(W.now + dur, () => { if (P.inst === inst && !inst.dead) { try { inst.setHidden(false); } catch (e) { W.moduleError(e, inst, 'show'); } } }, null);
 }
 
 /* ── adversary: a logged-in stranger who edits JS; writes only its own docs (it cannot do anything else) ── */
@@ -109,12 +130,18 @@ function startAdversary(W, A) {
           }
           if (b.squatWins && (R.status === 'open' || R.status === 'playing')) {
             const wc = Math.max(1, Math.min(30, Number(R.wordCount) || 10));
+            /* round-1 ids: R_w<i> (epoch 0) / R_w<ep>_<i>, backups b, c — an adversary who read the code squats them too */
+            const ep = Number(R.seat) || 0, depth = (typeof b.squatWins === 'object' && b.squatWins.depth) || 0;
             for (let i = 0; i < wc; i++) {
-              const wid = R._id + '_w' + i;
-              if (mine.has(wid)) continue;
-              mine.add(wid);
-              req('add', { col: 'hansen_pk_rooms', doc: { _id: wid, proto: 2, kind: 'win', roomId: R._id, i,
-                winner: rnd.pick(['host', 'guest', '']), by: rnd.chance(0.5) ? R.hostId : 'u' + A.uid, at: now(), nonce: 'x' } });
+              const ids = [R._id + '_w' + i];
+              if (depth && ep) ids.push(R._id + '_w' + ep + '_' + i);
+              for (const base of ids.slice()) for (const sfx of ['b', 'c'].slice(0, Math.max(0, depth - 1))) ids.push(base + sfx);
+              for (const wid of ids) {
+                if (mine.has(wid)) continue;
+                mine.add(wid);
+                req('add', { col: 'hansen_pk_rooms', doc: { _id: wid, proto: 2, kind: 'win', roomId: R._id, i, ep,
+                  winner: rnd.pick(['host', 'guest', '']), by: rnd.chance(0.5) ? R.hostId : (rnd.chance(0.5) && R.guestId ? R.guestId : 'u' + A.uid), at: now(), nonce: 'x' } });
+              }
             }
           }
         }
@@ -161,6 +188,7 @@ export async function runSpec(spec, opts = {}) {
     }
     for (const x of (P.reloads || [])) { lastAt = Math.max(lastAt, x.at + (x.delay || 3000)); W.at(T0 + x.at, () => reload(W, P, x.delay), null); }
     for (const x of (P.freezes || [])) { lastAt = Math.max(lastAt, x.at + x.dur); W.at(T0 + x.at, () => freeze(W, P, x.dur), null); }
+    for (const x of (P.hides || [])) { lastAt = Math.max(lastAt, x.at + x.dur); W.at(T0 + x.at, () => hide(W, P, x.dur), null); }
     for (const x of P.partitions) {
       lastAt = Math.max(lastAt, x.b);
       W.at(T0 + x.a, () => { W.log(P.label, 'network lost (' + x.mode + ') for ' + Math.round((x.b - x.a) / 1000) + ' s'); W.mark(P, 'partition', { a: T0 + x.a, b: T0 + x.b }); }, null);
@@ -216,6 +244,9 @@ export function advertised(W, tObs) {
     if (!x || x.proto !== 2 || x.kind !== 'room' || x.status !== 'open' || x.isPrivate === true || x.guestId) continue;
     const beat = x.heartbeatAt || x.createdAt || 0;
     if ((tObs - beat) >= STALE_MS) continue;
+    /* round-1 protocol (roomAlive): a heartbeat more than 1 min in the future is not trusted by a fresh observer;
+       listOpen only queries heartbeats within ±30 min of the observer's clock */
+    if (W.proto === 'r1' && ((beat - tObs) >= 60000 || Math.abs(tObs - beat) >= 1800000)) continue;
     out.push(x);
   }
   return out;

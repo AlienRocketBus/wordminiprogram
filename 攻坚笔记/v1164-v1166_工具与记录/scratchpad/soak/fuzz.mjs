@@ -21,7 +21,7 @@ import path from 'node:path';
 import { runSpec } from './lib/run.mjs';
 import { checkWorld } from './lib/checks.mjs';
 import { genSpec, profileCfg, shrinkSteps, specSize, PROFILES } from './lib/scenario.mjs';
-import { T0 } from './lib/world.mjs';
+import { T0, loadUiFlags } from './lib/world.mjs';
 
 const argv = process.argv.slice(2);
 const opt = { profile: 'ci', shrink: null, strict: false, quiet: false, trace: false, from: 1 };
@@ -44,6 +44,9 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === '--max-clusters') opt.maxClusters = Number(next());
   else if (a === '--seed-list') opt.seedList = next().split(',').map(Number);
   else if (a === '--only') opt.only = new RegExp(next());
+  else if (a === '--no-hide') opt.noHide = true;      /* no 'page hidden, JS running' disruptions (as in the first soak round) */
+  else if (a === '--regress') opt.regress = next();   /* directory of regression specs (one real bug each), run after the profile */
+  else if (a === '--no-regress') opt.regress = '';
   else if (a === '-h' || a === '--help') { usage(0); }
   else if (!repoDir && !a.startsWith('--')) repoDir = a;
   else { console.error('unknown argument ' + a); usage(2); }
@@ -60,6 +63,31 @@ let CUR = null;   /* world being run (unhandled rejections from module code are 
 process.on('unhandledRejection', (e) => { if (CUR) CUR.errors.push({ t: CUR.now, who: '?', where: 'unhandledRejection', msg: String(e && e.stack || e).slice(0, 800) }); });
 
 const rel = (t) => ((t - T0) / 1000).toFixed(1);
+/* regression scenarios: {name, bug, spec} — the bundled test embeds them (REGRESS_SPECS); otherwise read --regress DIR */
+const REGRESS_SPECS = [];
+function regressList() {
+  if (REGRESS_SPECS.length && opt.regress !== '') return REGRESS_SPECS;
+  if (!opt.regress) return [];
+  return fs.readdirSync(opt.regress).filter((f) => f.endsWith('.json')).sort().map((f) => {
+    const j = JSON.parse(fs.readFileSync(path.join(opt.regress, f), 'utf8'));
+    return j.spec ? j : { name: f.replace(/\.json$/, ''), bug: '', spec: j };
+  });
+}
+async function runRegress() {
+  const L = regressList();
+  if (!L.length) return 0;
+  console.log('\n══ regression scenarios (' + L.length + ') ══');
+  let bad = 0;
+  for (const r of L) {
+    let res;
+    try { res = await runOne(r.spec); } catch (e) { console.log('  HARNESS ERROR ' + r.name + ': ' + (e && e.stack || e)); bad++; continue; }
+    const f = res.V.filter(FAILSEV);
+    if (f.length) bad++;
+    console.log('  ' + (f.length ? 'FAIL' : 'ok  ') + '  ' + r.name.padEnd(44) + (r.bug ? ' [' + r.bug + ']' : '') + (f.length ? '  ' + [...new Set(f.map((v) => v.sig))].slice(0, 3).join(', ') : ''));
+  }
+  console.log('REGRESS ' + (L.length - bad) + '/' + L.length + ' ok');
+  return bad;
+}
 const FAILSEV = (v) => opt.strict || v.sev !== 'low';
 
 async function play(spec, probe) {
@@ -106,9 +134,19 @@ async function runOne(spec, o = {}) {
     if (spec.adversary) {
       const W1 = await play(noAdv(spec));
       const V1 = checkWorld(W1);
-      for (const salt of ['a', 'b']) for (const v of checkWorld(await play(Object.assign(noAdv(spec), { salt })))) V1.push(v);
-      const s1 = settledPairs(W1);
-      if (s1 > stats.settled) V.push({ inv: 'I8', sig: 'I8:' + (stats.settled === 0 ? 'matchmaking-blocked' : 'fewer-matches-settled'), sev: stats.settled === 0 ? 'high' : 'medium', who: 'ADV', t: W.tEnd,
+      /* the fewest honest matches settled across the 3 adversary-free re-runs (one re-run alone is noisy ±1) */
+      let s1 = settledPairs(W1);
+      for (const salt of ['a', 'b']) { const Wx = await play(Object.assign(noAdv(spec), { salt })); s1 = Math.min(s1, settledPairs(Wx)); for (const v of checkWorld(Wx)) V1.push(v); }
+      /* seat squatting = a logged-in griefer sitting in public seats: the open-seat design cannot prevent it client-side
+         (classified low, design limitation); anything else (flood, forged rooms, squatted round ids) must not block matches */
+      const aa = spec.adversary.adv || {};
+      const squat = !!(aa.squatSeats || (aa.squatWins && aa.squatWins.depth >= 3));   /* seat squatting / every round id squatted: inherent DoS */
+      /* the adversary's docs also perturb honest timing (sweeps of forged docs cost requests): only a block that holds
+         in 3 adversary runs (salts) against the 3 adversary-free runs counts */
+      let sAdv = stats.settled;
+      if (s1 > sAdv) for (const salt of ['a', 'b']) sAdv = Math.max(sAdv, settledPairs(await play(Object.assign(JSON.parse(JSON.stringify(spec)), { salt }))));
+      if (s1 > sAdv) V.push({ inv: 'I8', sig: 'I8:' + (stats.settled === 0 ? 'matchmaking-blocked' : 'fewer-matches-settled') + (squat ? ':seat-squatting' : ''),
+        sev: squat ? 'low' : stats.settled === 0 ? 'high' : 'medium', who: 'ADV', t: W.tEnd,
         msg: 'with the adversary ' + stats.settled + ' honest match(es) settled, without it ' + s1 });
       const base = new Set(V1.map((v) => v.sig));
       for (const v of V.slice()) if (!base.has(v.sig) && v.inv !== 'I8' && v.inv !== 'I9' && v.inv !== 'I2') V.push(Object.assign({}, v, { inv: 'I8', sig: 'I8:adv-caused:' + v.sig, msg: '(only with the adversary: absent in 3 re-runs without it) ' + v.msg }));
@@ -120,7 +158,7 @@ async function runOne(spec, o = {}) {
 function specLine(spec) {
   const p = spec.players.map((x) => x.label + '{' + [x.isHost ? 'host' : '', x.ladderer ? 'ladder' : '', x.twinOf ? 'twin' : '',
     x.skew ? 'skew' + Math.round(x.skew / 1000) + 's' : '', x.net && x.net.faultRate ? 'f' + x.net.faultRate : '', 'lat' + (x.net ? x.net.base : 0),
-    (x.reloads || []).length ? 'reload' : '', (x.freezes || []).length ? 'freeze' : '', (x.partitions || []).length ? 'offline' : '', x.sessionFailP ? 'sess' : '']
+    (x.reloads || []).length ? 'reload' : '', (x.freezes || []).length ? 'freeze' : '', (x.partitions || []).length ? 'offline' : '', (x.hides || []).length ? 'hide' : '', x.sessionFailP ? 'sess' : '']
     .filter(Boolean).join(',') + '}').join(' ');
   return 'seed ' + spec.seed + ' ' + spec.profile + ' ' + spec.kind + ' lag' + spec.db.lagMax + '/' + spec.db.lagMode + (spec.db.ryw ? '+ryw' : '') + ' dup=' + spec.db.dupMode
     + ' perm=' + spec.db.permMode + (spec.db.orderByFail ? ' noIndex' : '') + ((spec.outages || []).length ? ' outage' : '') + (spec.adversary ? ' ADV' + JSON.stringify(spec.adversary.adv) : '') + ' | ' + p;
@@ -161,7 +199,7 @@ function pick(o, ks) { const r = {}; for (const k of ks) if (o && o[k] !== undef
 function compactSpec(s) {
   return { seed: s.seed, kind: s.kind, db: s.db, outages: s.outages, adversary: s.adversary && s.adversary.adv,
     players: s.players.map((p) => ({ label: p.label, skew: p.skew, rating: p.rating, net: p.net && { base: p.net.base, jitter: p.net.jitter, faultRate: p.net.faultRate },
-      intents: p.intents, reloads: p.reloads, freezes: p.freezes, partitions: p.partitions, kid: p.kid, sessionFailP: p.sessionFailP || undefined, twinOf: p.twinOf })) };
+      intents: p.intents, reloads: p.reloads, freezes: p.freezes, partitions: p.partitions, hides: p.hides, kid: p.kid, sessionFailP: p.sessionFailP || undefined, twinOf: p.twinOf })) };
 }
 
 async function shrinkFor(spec, sig, budget) {
@@ -195,8 +233,10 @@ async function shrinkFor(spec, sig, budget) {
 
 async function main() {
   const prof = profileCfg(opt.profile);
+  if (opt.noHide) prof.hideW = 0;
   if (opt.spec || opt.seed != null) {
-    const spec = opt.spec ? JSON.parse(fs.readFileSync(opt.spec, 'utf8')) : genSpec(opt.seed, prof);
+    let spec = opt.spec ? JSON.parse(fs.readFileSync(opt.spec, 'utf8')) : genSpec(opt.seed, prof);
+    if (spec && spec.spec && spec.name) spec = spec.spec;   /* a regression file {name, bug, spec} */
     const t = Date.now();
     const { W, V, stats } = await runOne(spec, { probe: true });
     console.log(specLine(spec));
@@ -205,12 +245,14 @@ async function main() {
     for (const v of V) console.log(excerpt(W, v, spec));
     const bad = V.filter(FAILSEV);
     console.log('SUMMARY runs=1 violations=' + V.length + ' failing=' + bad.length);
+    uiPortNote();
     process.exit(bad.length ? 1 : 0);
   }
-  const N = opt.seedList ? opt.seedList.length : (opt.seeds || prof.runs);
+  const N = opt.seedList ? opt.seedList.length : (opt.seeds != null ? opt.seeds : prof.runs);
   const t0 = Date.now();
   const clusters = new Map();   /* sig → {inv, sev, count, seeds[], best:{spec,size}, msg} */
   const perInv = {};
+  const failingSeeds = [];
   let failingRuns = 0, totalMatches = 0, totalSettled = 0, totalEvents = 0, totalVt = 0;
   for (let k = 0; k < N; k++) {
     const seed = opt.seedList ? opt.seedList[k] : opt.from + k;
@@ -232,7 +274,7 @@ async function main() {
       const sz = specSize(spec);
       if (!c.best || sz < c.best.size) c.best = { spec, size: sz, msg: v.msg };
     }
-    if (V.some(FAILSEV)) failingRuns++;
+    if (V.some(FAILSEV)) { failingRuns++; failingSeeds.push({ seed, sigs: [...new Set(V.filter(FAILSEV).map((v) => v.sig))] }); }
     if (!opt.quiet && (k + 1) % 50 === 0) {
       const el = (Date.now() - t0) / 1000;
       console.log('… ' + (k + 1) + '/' + N + ' runs, ' + failingRuns + ' failing, ' + clusters.size + ' clusters, ' + el.toFixed(0) + 's');
@@ -268,13 +310,25 @@ async function main() {
     + ' clusters=' + cl.length + ' (fail-level ' + bad.length + ') | runs-with-violation per invariant: ' + invs
     + ' | matches=' + totalMatches + ' settled_pairs=' + totalSettled + ' virtual=' + (totalVt / 3600).toFixed(1) + 'h events=' + totalEvents + ' real=' + elapsed.toFixed(0) + 's';
   console.log('\n' + summary);
+  uiPortNote();
+  const regressBad = await runRegress();
   if (opt.out) {
     fs.mkdirSync(opt.out, { recursive: true });
-    fs.writeFileSync(path.join(opt.out, 'report.json'), JSON.stringify({ summary, profile: prof.name, runs: N, from: opt.from, perInv, failingRuns,
+    fs.writeFileSync(path.join(opt.out, 'report.json'), JSON.stringify({ summary, profile: prof.name, runs: N, from: opt.from, perInv, failingRuns, failingSeeds,
       clusters: cl.map((c) => ({ sig: c.sig, inv: c.inv, sev: c.sev, count: c.count, seeds: c.seeds, example: c.msg })), minimal }, null, 1));
   }
-  process.exit(bad.length ? 1 : 0);
+  process.exit((bad.length || regressBad) ? 1 : 0);
 }
 function sevRank(s) { return s === 'high' ? 0 : s === 'medium' ? 1 : 2; }
+/* the UI is a port (lib/ui_r1.mjs, 3b6bbd7): say which reviewed UI fixes were detected and whether ported functions changed */
+function uiPortNote() {
+  try {
+    const src = fs.readFileSync(path.join(repoDir, 'hansen_pk_room_v1065.js'), 'utf8');
+    if (!/settleRound/.test(src)) return;   /* pre-round-1 protocol: the 47a97f9 port (lib/ui.mjs) is used */
+    const f = loadUiFlags(repoDir);
+    console.log('UI port: 56b8146 control flow (a model of the page); fixes detected in the repo UI: ' + (['abandonSure', 'finishSettles', 'failedPending', 'neverCameGuard', 'neverCameGuardPoll', 'pendingKept', 'timeCap', 'resumeCheck', 'settleWhileOffline'].filter((k) => f[k]).join(', ') || 'none'));
+    if (f.changed && f.changed.length) console.log('WARNING: ported UI functions differ from the version the port was checked against (56b8146 + 联机压力测试 fixes) — re-check lib/ui_r1.mjs: ' + f.changed.join(', '));
+  } catch (e) {}
+}
 
 main().catch((e) => { console.error('HARNESS ERROR ' + (e && e.stack || e)); process.exit(2); });

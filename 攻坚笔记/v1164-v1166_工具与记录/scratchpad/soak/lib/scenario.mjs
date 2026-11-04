@@ -86,7 +86,7 @@ export function genSpec(seed, prof) {
     const skew = (r.chance(skewP) && skewMax) ? Math.round((r.chance(0.5) ? 1 : -1) * skewMax * (0.3 + 0.7 * r.float())) : 0;
     spec.players.push({
       label: 'P' + i, uid: 'k' + i + 'x' + (seed % 9973), name: NAMES[i], rating: 1000, skew,
-      net: mkNet(), partitions: [], freezes: [], reloads: [], sessionFailP: r.chance(prof.sessionP) ? 0.35 : 0,
+      net: mkNet(), partitions: [], freezes: [], reloads: [], hides: [], sessionFailP: r.chance(prof.sessionP) ? 0.35 : 0,
       kid: { pCorrect: +(0.45 + 0.5 * r.float()).toFixed(2), minMs: r.int(1200, 3500), maxMs: r.int(5000, 15000), slowP: +(0.15 * r.float()).toFixed(2) },
       again: { p: 0.3, p2: 0.6, max: 2 }, intents: [], ladderer: false, afterReload: null
     });
@@ -130,11 +130,12 @@ export function genSpec(seed, prof) {
   /* disruptions */
   for (const p of P) {
     if (!r.chance(prof.disruptP)) continue;
-    const what = r.pickW({ reload: 3, freeze: 3.5, partition: 3.5 });
+    const what = r.pickW({ reload: 3, freeze: 3.5, partition: 3.5, hide: prof.hideW == null ? 2 : prof.hideW });
     const at = r.int(4000, 150000);
     const dur = r.pickW({ s: 1, l: 1 }) === 's' ? r.int(3000, 20000) : r.int(45000, 110000);
     if (what === 'reload') p.reloads.push({ at, delay: r.int(1500, 6000) });
     else if (what === 'freeze') p.freezes.push({ at, dur });
+    else if (what === 'hide') p.hides.push({ at, dur });
     else p.partitions.push({ a: at, b: at + dur, mode: r.pick(['fast', 'hang']) });
   }
   if (r.chance(prof.outageP)) { const a = r.int(5000, 120000); spec.outages.push({ a, b: a + r.int(5000, 80000), mode: r.pick(['fast', 'hang']) }); }
@@ -143,7 +144,7 @@ export function genSpec(seed, prof) {
     const o = P[0];
     const tw = JSON.parse(JSON.stringify(o));
     tw.label = 'P0b'; tw.twinOf = 'P0'; tw.intents = []; tw.ladderer = false; tw.isHost = false; tw.afterReload = null;
-    tw.reloads = []; tw.freezes = []; tw.partitions = [];
+    tw.reloads = []; tw.freezes = []; tw.partitions = []; tw.hides = [];
     tw.skew = o.skew + Math.round((r.chance(0.5) ? 1 : -1) * r.range(60000, 600000));
     for (let k = 0; k < 6; k++) tw.intents.push({ at: r.int(2000, 170000), act: 'browse' });
     P.push(tw);
@@ -155,6 +156,9 @@ export function genSpec(seed, prof) {
     if (r.chance(0.45)) b.squatWins = true;
     if (r.chance(0.3)) b.forgeHost = true;
     if (!b.flood && !b.squatSeats && !b.squatWins && !b.forgeHost) b.squatWins = true;
+    /* round-1 knobs from a separate stream (the draws above stay as in the first soak round) */
+    const r2 = new Rand(seed, 'gen2/' + prof.name);
+    if (b.squatWins) b.squatWins = { depth: r2.int(1, 3) };
     spec.adversary = { uid: 'adv' + (seed % 977), name: '捣蛋鬼', rating: 1000, skew: 0, net: mkNet(), adv: b };
   }
   return spec;
@@ -171,7 +175,7 @@ export function shrinkSteps(spec) {
     C.push(['drop player ' + p.label, () => { const s = cp(); s.players.splice(i, 1); return s; }]);
   });
   spec.players.forEach((p, i) => {
-    for (const k of ['reloads', 'freezes', 'partitions']) if ((p[k] || []).length) C.push([p.label + ' no ' + k, () => { const s = cp(); s.players[i][k] = []; return s; }]);
+    for (const k of ['reloads', 'freezes', 'partitions', 'hides']) if ((p[k] || []).length) C.push([p.label + ' no ' + k, () => { const s = cp(); s.players[i][k] = []; return s; }]);
     if (p.skew) C.push([p.label + ' skew 0', () => { const s = cp(); s.players[i].skew = 0; return s; }]);
     if (p.skew && Math.abs(p.skew) > 2000) C.push([p.label + ' skew /2', () => { const s = cp(); s.players[i].skew = Math.round(p.skew / 2); return s; }]);
     if (p.net && p.net.faultRate) C.push([p.label + ' no faults', () => { const s = cp(); s.players[i].net.faultRate = 0; return s; }]);
@@ -199,7 +203,7 @@ export function shrinkSteps(spec) {
 export function specSize(spec) {
   let n = spec.players.length * 10 + (spec.adversary ? 15 : 0) + (spec.outages || []).length * 3 + (spec.db.lagMax ? 3 : 0);
   for (const p of spec.players) {
-    n += (p.reloads || []).length * 3 + (p.freezes || []).length * 3 + (p.partitions || []).length * 3 + (p.skew ? 2 : 0)
+    n += (p.reloads || []).length * 3 + (p.freezes || []).length * 3 + (p.partitions || []).length * 3 + (p.hides || []).length * 3 + (p.skew ? 2 : 0)
       + (p.net && p.net.faultRate ? 2 : 0) + (p.intents || []).length;
     for (const it of p.intents || []) n += (it.wordCount || 0) / 3;
   }

@@ -1,0 +1,211 @@
+{
+ "name": "R01_stale_room_cache_reused_wins",
+ "bug": "R1 stale per-room cache across epochs: old wins reused in the next match of the same room",
+ "spec": {
+  "seed": 408,
+  "profile": "ladder",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 1500,
+   "lagShape": 2,
+   "queryLagMul": 1.91,
+   "queryLagExtra": 669,
+   "lagMode": "monotonic",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.53,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x408",
+    "name": "小明",
+    "rating": 1022,
+    "skew": 0,
+    "net": {
+     "base": 708,
+     "jitter": 309,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.74,
+     "minMs": 2325,
+     "maxMs": 11582,
+     "slowP": 0.13
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2523,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P1",
+    "uid": "k1x408",
+    "name": "小红",
+    "rating": 1047,
+    "skew": 0,
+    "net": {
+     "base": 388,
+     "jitter": 383,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 36882,
+      "dur": 90131
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.86,
+     "minMs": 1765,
+     "maxMs": 11315,
+     "slowP": 0.12
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1546,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": null
+   },
+   {
+    "label": "P2",
+    "uid": "k2x408",
+    "name": "阿杰",
+    "rating": 1025,
+    "skew": 0,
+    "net": {
+     "base": 427,
+     "jitter": 216,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.54,
+     "minMs": 2096,
+     "maxMs": 12812,
+     "slowP": 0.14
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2254,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P3",
+    "uid": "k3x408",
+    "name": "朵朵",
+    "rating": 1026,
+    "skew": 0,
+    "net": {
+     "base": 713,
+     "jitter": 320,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.5,
+     "minMs": 3429,
+     "maxMs": 13109,
+     "slowP": 0.07
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 3461,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

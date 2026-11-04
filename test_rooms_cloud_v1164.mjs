@@ -109,11 +109,19 @@ try {
   /* 同账号「另一台设备」上 5 分钟没心跳的房：那台手机钟慢的话它其实还活着 —— 不许删 */
   const fiveMin = Date.now() - 5 * 60000;
   emu.seedDoc('hansen_pk_rooms', { _id: 'rtwinA', proto: 2, kind: 'room', status: 'open', isPrivate: false, mode: 'C', hostId: 'u' + A.cloudUid, hostName: '小蜂一', createdAt: fiveMin, heartbeatAt: fiveMin, seat: 0 }, A.cloudUid, 300000);
+  const tSweep = Date.now();
   await toLobby(A);
   let txt = await openRoom(A, 'C', false);
-  const swept = await H.until(() => { const ids = H.roomDocs(emu).map((d) => d._id); return !ids.includes('roldmine1') && !ids.includes('roldother1_s0') ? ids : null; }, { timeout: 10000 });
+  /* 🔴联机压力测试 R8：别的设备留下的旧文档，第一次清理只记下来，隔 25 秒（真机的 sweepRecheckMs）再看一眼、一点没变才删 ——
+     那台手机钟慢 30 分钟以上时，「本机钟看着 40 分钟没动」的文档其实可能正在用（以前当场就删）。
+     所以这里从「10 秒内删掉」改成：开头几秒还在（只记了候选），45 秒内删掉（有界），别人的、5 分钟的照样不碰。 */
+  await H.sleep(Math.max(0, 5000 - (Date.now() - tSweep)));
+  const early = H.roomDocs(emu).map((d) => d._id);
+  await t.ok(early.includes('roldmine1') && early.includes('roldother1_s0'),
+    `第一次清理只记候选、先不删（开房后 5 秒时还在：${early.filter((x) => /^rold/.test(x)).join(', ')}）—— 别的设备的旧文档要隔一会儿再看一眼（R8）`, () => explain());
+  const swept = await H.until(() => { const ids = H.roomDocs(emu).map((d) => d._id); return !ids.includes('roldmine1') && !ids.includes('roldother1_s0') ? ids : null; }, { timeout: 45000, interval: 1000 });
   await t.ok(swept && swept.includes('roldother1') && swept.includes('rtwinA') && H.foreignWrites(emu).length === 0,
-    `顺手清掉了自己上次留下的旧房和旧座位，别人的旧房一下没碰，同账号另一台设备 5 分钟没心跳的房也没删（剩下：${H.roomDocs(emu).map((d) => d._id).join(', ')}）`, () => explain());
+    `${Math.round((Date.now() - tSweep) / 1000)} 秒内清掉了自己上次留下的旧房和旧座位（隔一会儿再看一眼、一点没变的），别人的旧房一下没碰，同账号另一台设备 5 分钟没心跳的房也没删（剩下：${H.roomDocs(emu).map((d) => d._id).join(', ')}）`, () => explain());
   await t.ok(has(txt, /等对手进来/) && has(txt, /同步赛/), `开一间同步赛 → 「等对手进来」，并说明开的是什么房（看到：${txt.replace(/\s+/g, ' ').slice(0, 90)}）`, () => explain());
   const RA = hostRoom(A);
   await t.ok(RA && RA.mode === 'C' && RA.isPrivate === false && RA.proto === 2 && RA.hostName === '小蜂一', '数据库：公开、同步赛、新协议、房主名字对', () => explain());

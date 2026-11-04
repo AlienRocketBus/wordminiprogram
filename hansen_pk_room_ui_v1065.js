@@ -1644,20 +1644,20 @@
       }
       if (g.gone) {
         stopPoll();
-        if (!g.roomGone && el) { el.textContent = '🏆 对手已离场，本局你胜'; el.style.color = 'var(--pk-ok)'; }
+        /* 🔴联机压力测试 R3：判离场那一条还没写上 —— 先别说「本局你胜」（写不上的话两边都会是「你赢了」） */
+        if (!g.roomGone && el) { el.textContent = '📶 对手好像掉线了，正在确认这一局的结果…'; el.style.color = 'var(--pk-dim)'; }
         if (g.roomGone) {
           /* 房间已经没了（房主那边早就收了 —— 多半是我离开太久，结论已经出过了）：
              没地方读结论，也不能凭空算谁赢 → 这局不记分，说清楚 */
           showResult({ result: 'void', roomGone: true, mine: st.myScore, theirs: st.oppScore });
           return;
         }
-        S().claimAbandonWin(st.roomId).then(function (w) {
-          if (!stillLive(st)) return;
-          /* 🔴审查 F4：写完再读一次 —— 对手同时也判了我（两边都断过网）= 这局不算 */
-          var res = (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win';
+        /* 🔴审查 F4：写完再读一次 —— 对手同时也判了我（两边都断过网）= 这局不算。
+           🔴联机压力测试 R3：判离场的那一条**写上了**才算赢（claimAbandonSure）—— 以前写失败（又断网了）也显示「你赢了」，
+           对手那边回来后照样判我离场，两部手机都是「你赢了」 */
+        claimAbandonSure(st, function (w) {
+          var res = (w.result === 'void' || w.result === 'lose') ? w.result : 'win';
           showResult({ result: res, mine: st.myScore, theirs: st.oppScore, byAbandon: true });
-        })['catch'](function () {
-          showResult({ result: 'win', mine: st.myScore, theirs: st.oppScore, byAbandon: true });
         });
         return;
       }
@@ -1925,9 +1925,12 @@
   }
   function retryPending(st, i) {
     st.pendTry = st.pendTry || {};
-    if (st.pendTry[i]) return Promise.resolve(null);
-    st.pendTry[i] = 1;
-    return Promise.resolve().then(function () { return S().claimRound(st.roomId, i); }).then(function (r) {
+    /* 🔴联机压力测试 R12：以前只补写一次 —— 那一次碰上还没恢复的网，这一词就再也不补了。隔 8 秒可以再补 */
+    if (st.pendTry[i] && Date.now() - st.pendTry[i] < 8000) return Promise.resolve(null);
+    st.pendTry[i] = Date.now();
+    st._retrying = (st._retrying || 0) + 1;
+    var doneTry = function (x) { st._retrying = Math.max(0, (st._retrying || 1) - 1); return x; };
+    return Promise.resolve().then(function () { return S().claimRound(st.roomId, i); }).then(doneTry, function (e) { doneTry(); throw e; }).then(function (r) {
       if (!st.pendingR || !(i in st.pendingR)) return null;      /* 轮询那边已经补过了 */
       if (!r || !r.ok || r.pending) return null;
       delete st.pendingR[i];
@@ -1944,7 +1947,7 @@
         var i = Number(k), w = ws[i];
         if (!w) {
           if (Date.now() - pend[k] > 8000) retryPending(st, i);
-          if (Date.now() - pend[k] > 60000) delete pend[k];   /* 一分钟还不知道：不等了 */
+          /* 🔴联机压力测试 R12：不再一分钟就扔掉 —— 交卷前 resolvePending 还会再核对、再补写一次 */
           return;
         }
         delete pend[k];
@@ -1958,13 +1961,17 @@
      对手那边却给我记了这一词，结果可能翻过来）。最多等 capMs，等不到就按现有的分交 */
   function resolvePending(st, capMs) {
     var keys = Object.keys(st.pendingR || {});
+    st._settleOffline = false;
     if (!keys.length) return Promise.resolve();
     var t0 = Date.now();
     var one = function (i) {
       return Promise.resolve().then(function () { return S().settleRound(st.roomId, i, 2500); }).then(function (r) {
         if (!st.pendingR || !(i in st.pendingR)) return null;
+        var rk = r && !r.ok ? kindOf(r) : '';
+        if (rk === 'network' || rk === 'slow') st._settleOffline = true;   /* 读不到：断网中 */
         if (r && r.ok && r.settled) { delete st.pendingR[i]; pendGain(st, i, Number(r.score) || 0, !!r.first); return null; }
         if (Date.now() - t0 > capMs) return null;
+        if (st.pendTry) delete st.pendTry[i];   /* 联机压力测试 R12：交卷前一定再补写一次 */
         return retryPending(st, i);
       }, function () { return null; });
     };
@@ -2106,7 +2113,12 @@
         after(0, false, 'pending'); return;
       }
       if (r && !r.ok && r.ended) { after(0, false, 'ended'); checkOpponentAlive(idx, true); return; }
-      if (!r || !r.ok) { after(0, false, (r && r.kind !== 'network' && r.kind !== 'slow') ? 'failed-other' : 'failed'); return; }
+      if (!r || !r.ok) {
+        /* 🔴联机压力测试 R5：没确认上不等于没写上（会话一时没好、回包丢了）—— 记成待定，轮询 / 交卷前再核对、再补写一次 */
+        var fk = kindOf(r);
+        if (fk === 'network' || fk === 'slow' || fk === 'session') { st.pendingR = st.pendingR || {}; st.pendingR[idx] = Date.now(); }
+        after(0, false, (r && r.kind !== 'network' && r.kind !== 'slow') ? 'failed-other' : 'failed'); return;
+      }
       var sc = Number(r.score) || 0;
       /* 回合号被人占满的那一词（审查 F-R2-7）：不分先后，拼对就算分；抢答赛要等对手也答完这一词再一起翻篇 */
       if (r.squatted) { after(sc, false, 'squat'); return; }
@@ -2206,11 +2218,22 @@
     _waitResult = 0; _resultFail = 0;
     /* 🔴v1164：第一次交卷失败也走同一条重试路（原来 `!r.ok` 直接回列表，这一局就白打了）。
        🔴审查 FX-10：最后一词「结果待定」的，先定下来再交（最多 8 秒）—— 不然交上去的分里没有它 */
-    resolvePending(st, 8000).then(function () {
-      if (!stillLive(st)) return;
+    /* 🔴联机压力测试 R4：交卷时还有没定下来的词（正好断网 / 补写还在路上）—— 接着核对、补写（每 2 秒，最多 60 秒），
+       定下来再交；以前 8 秒一到就按少了这几词的分交，分后来才补上（交上去的还是少的那个分） */
+    var tFin = Date.now();
+    var settle = function () { return resolvePending(st, 8000).then(function () {
+      if (!stillLive(st)) return 'gone';
+      /* 断网时等网通；网通了也要等补写的结果回来（不然交上去的分里还是没有它）—— 都以 60 秒为限 */
+      if (Object.keys(st.pendingR || {}).length && (st._settleOffline || st._retrying > 0) && Date.now() - tFin < 60000) {
+        return new Promise(function (z) { setTimeout(z, 2000); }).then(settle);
+      }
+    }); };
+    settle().then(function (gone) {
+      if (gone === 'gone' || !stillLive(st)) return;
       var el = q('prResLine'); if (el) el.textContent = line();
       var who = q('prResWho'); if (who) who.textContent = '正在等对手交卷…';
       st.finalScore = Number(st.myScore) || 0;
+      st._resWaitT0 = Date.now();   /* 联机压力测试 D2：等交卷 5 分钟封顶从这里算 */
       pollResult(st, st.finalScore);
     });
   }
@@ -2250,6 +2273,8 @@
       }
       _waitResult = 0;
       /* 对手离场判的胜负：比分显示这一局实际拿到的分（数据层那边是 1:0 的记号）；两边都判了 = 这局不算 */
+      /* 🔴联机压力测试 R10：交卷时数据层说「对手走了，你赢」—— 可他一次都没进过对战屏：这局不算 */
+      if (r.byAbandon && r.oppLeft && !st._oppSeen) { neverCame(st); return; }
       if (r.byAbandon) r = { ok: true, result: r.result, byAbandon: true,
                              mine: st.myScore, theirs: st.oppScore };
       showResult(r);
@@ -2263,22 +2288,54 @@
 
   /* 等了 45 秒还没交卷：对手还在就再等（最多约 2 分钟），不在了就判他离场 */
   function checkStillThere(st, score) {
-    var give = function () {
+    var give = function (g) {
       _waitResult = 0;
-      var fin = function (w) {
-        if (!stillLive(st)) return;
-        var res = (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win';
+      /* 🔴联机压力测试 R10：对手根本没进过对战屏（没报到、没答过词）—— 他走了不算「离场」，这局不算，别白送一局胜 */
+      if (!st._oppSeen && !(g && g.oppSeen)) { neverCame(st); return; }
+      /* 🔴联机压力测试 R3：判离场写上了才算赢 */
+      claimAbandonSure(st, function (w) {
+        var res = (w.result === 'void' || w.result === 'lose') ? w.result : 'win';
         showResult({ ok: true, result: res, byAbandon: true, mine: score, theirs: 0 });
-      };
-      S().claimAbandonWin(st.roomId).then(fin, function () { fin(null); });
+      });
     };
     S().opponentGone(st.roomId).then(function (g) {
       if (!stillLive(st)) return;
       var alive = g && g.ok && !g.gone && (g.idleSecs || 0) < 30;
-      /* B/C 模式两人各拼各的，慢的那位最多可能晚 10 词 × 15 秒 —— 心跳还在跳就等够它（约 5 分钟封顶） */
-      if (alive && _waitResult < 150) { setTimeout(function () { pollResult(st, score); }, 2000); return; }
-      give();
-    }, give);
+      /* B/C 模式两人各拼各的，慢的那位最多可能晚 10 词 × 15 秒 —— 心跳还在跳就等够它（5 分钟封顶）。
+         🔴联机压力测试 D2：按交卷以后过了多久封顶（以前数的是轮询次数：网慢时一次要 6 秒多，150 次 = 16 分钟） */
+      if (alive && Date.now() - (st._resWaitT0 || Date.now()) < 300000) { setTimeout(function () { pollResult(st, score); }, 2000); return; }
+      give(g);
+    }, function () { give(null); });
+  }
+  /* 联机压力测试 R10：对手一次都没进过对战屏 —— 不判输赢，说清楚，回列表 / 天梯 */
+  function neverCame(st) {
+    var lad0 = !!(st && st.ladder), rid0 = st && st.roomId;
+    stopPoll(); stopTicker();
+    _state = null;
+    if (rid0) { try { S().leaveRoom(rid0); } catch (e) {} }
+    if (lad0) { ladderBack('rematch', '对手刚才没进来，接着帮你找…'); return; }
+    lobby({ reason: '对手刚才没进来，这间房先关掉了。再开一间吧。' });
+  }
+  /* 联机压力测试 R3：判对手离场 —— 写上了才算数；写不上（网又断了）每 3 秒再试，6 次还不行就说「结果没拿到」 */
+  function claimAbandonSure(st, onOk) {
+    var n = 0;
+    var again = function (w) {
+      if (!stillLive(st)) return;
+      var k = kindOf(w);
+      if (++n < 6 && k !== 'expired' && k !== 'config') { setTimeout(go, 3000); return; }
+      resultFailed(st, (w && w.ok === false) ? w : { ok: false, reason: '网络不稳，这一局的结果没记上' });
+    };
+    var go = function () {
+      if (!stillLive(st)) return;
+      Promise.resolve().then(function () { return S().claimAbandonWin(st.roomId); }).then(function (w) {
+        if (!stillLive(st)) return;
+        /* 对手其实交了卷（数据层按两边真分数算出的结论）：照真分数显示，不是「对手离场」 */
+        if (w && w.ok && w.real) { showResult({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }); return; }
+        if (w && w.ok) { onOk(w); return; }
+        again(w);
+      }, function (e) { again({ ok: false, reason: String((e && e.message) || e || '') }); });
+    };
+    go();
   }
 
   /* 结果实在拿不到：说清楚，并给回去的路（排位回天梯，自由房回列表） */
@@ -2459,9 +2516,12 @@
         if (!(r && r.ok && r.waiting) || n % 8 !== 0) { next(4000); return; }
         S().opponentGone(st.roomId).then(function (g) {
           if (!(g && g.ok && g.gone && !g.oppFinished)) { next(4000); return; }
+          /* 🔴联机压力测试 R3：写上了才算赢；写不上接着等（以前直接记一场「赢」） */
           S().claimAbandonWin(st.roomId).then(function (w) {
-            done({ result: (w && w.ok && (w.result === 'void' || w.result === 'lose')) ? w.result : 'win', byAbandon: true });
-          }, function () { done({ result: 'win', byAbandon: true }); });
+            if (!(w && w.ok)) { next(4000); return; }
+            if (w.real) { done({ ok: true, result: w.result, mine: w.mine, theirs: w.theirs }); return; }
+            done({ result: (w.result === 'void' || w.result === 'lose') ? w.result : 'win', byAbandon: true });
+          }, function () { next(4000); });
         }, function () { next(4000); });
       }, function () { next(6000); });
     };
@@ -2689,6 +2749,8 @@
             if (!hid && typeof _cancelWait.resume === 'function') _cancelWait.resume();
           }
         } catch (e) {}
+        /* 🔴联机压力测试 D5：打到一半切回来 —— 马上看一眼对手（判了离场的话当场说，别让孩子接着打完才知道） */
+        try { if (!hid && _state && _state.startAt && !_state.finished && _rt) checkOpponentAlive(_rt.idx, true); } catch (e) {}
         if (!hid) { hidSeq++; return; }
         var my = ++hidSeq;
         hidAt = Date.now();

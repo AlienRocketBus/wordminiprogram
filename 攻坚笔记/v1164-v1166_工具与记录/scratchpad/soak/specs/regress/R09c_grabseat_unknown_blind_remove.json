@@ -1,0 +1,163 @@
+{
+ "name": "R09c_grabseat_unknown_blind_remove",
+ "bug": "R9b alone (other fixes in place): grabSeat result unknown → removes the seat by _id without checking it is mine (cross-owner remove)",
+ "spec": {
+  "seed": 258,
+  "profile": "lag",
+  "kind": "ladder",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 2,
+   "queryLagMul": 1.76,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "http500",
+   "permMode": "rules",
+   "orderByFail": true
+  },
+  "unloadSendP": 0.77,
+  "outages": [],
+  "players": [
+   {
+    "label": "P1",
+    "uid": "k1x258",
+    "name": "小红",
+    "rating": 1046,
+    "skew": 0,
+    "net": {
+     "base": 82,
+     "jitter": 144,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.61,
+     "minMs": 2337,
+     "maxMs": 14359,
+     "slowP": 0.1
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 1912,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P2",
+    "uid": "k2x258",
+    "name": "阿杰",
+    "rating": 965,
+    "skew": 0,
+    "net": {
+     "base": 73,
+     "jitter": 101,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.53,
+     "minMs": 1291,
+     "maxMs": 7600,
+     "slowP": 0.1
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 3727,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   },
+   {
+    "label": "P3",
+    "uid": "k3x258",
+    "name": "朵朵",
+    "rating": 1018,
+    "skew": 0,
+    "net": {
+     "base": 47,
+     "jitter": 54,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0.35,
+    "kid": {
+     "pCorrect": 0.62,
+     "minMs": 2369,
+     "maxMs": 8857,
+     "slowP": 0.03
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 3424,
+      "act": "ladder"
+     }
+    ],
+    "ladderer": true,
+    "afterReload": {
+     "at": 0,
+     "act": "ladder"
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

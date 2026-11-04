@@ -1,0 +1,146 @@
+{
+ "name": "R07b_seat_reused_stale_readback",
+ "bug": "R7 targeted: guest A cancels, guest B grabs the same seat id",
+ "spec": {
+  "seed": 9300,
+  "profile": "targeted",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 1500,
+   "lagShape": 1,
+   "queryLagMul": 1,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.6,
+  "outages": [],
+  "adversary": null,
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0xT",
+    "name": "小明",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 40,
+     "jitter": 20,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.8,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 300,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 3
+     }
+    ],
+    "isHost": true
+   },
+   {
+    "label": "P1",
+    "uid": "k1xT",
+    "name": "小红",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 40,
+     "jitter": 20,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.8,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 2000,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 1
+     },
+     {
+      "at": 3000,
+      "act": "cancelJoin"
+     }
+    ]
+   },
+   {
+    "label": "P2",
+    "uid": "k2xT",
+    "name": "阿杰",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 40,
+     "jitter": 20,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.8,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 3000,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 1
+     }
+    ]
+   }
+  ]
+ }
+}

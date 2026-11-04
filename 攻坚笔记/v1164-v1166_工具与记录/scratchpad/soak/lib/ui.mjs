@@ -266,7 +266,7 @@ export class Ui {
     const correct = kr.chance(k.pCorrect == null ? 0.75 : k.pCorrect);
     let delay = kr.range(k.minMs || 1500, k.maxMs || 9000);
     if (k.slowP && kr.chance(k.slowP)) delay = kr.range(span * 0.7, span * 1.3);
-    if (correct) this.setTimeout(() => { if (this._rt === rt && !rt.answered) { wr.typedAt = this.w.now; this.submitRound(idx, true); } }, delay);
+    if (correct) this.setTimeout(() => { if (this._rt === rt && !rt.answered && this.screen === 'battle' && this._state && this._state._match === m) { wr.typedAt = this.w.now; this.submitRound(idx, true); } }, delay);
     this._pollTimer = this.setInterval(() => {
       if (!this._rt || this._rt.idx !== idx) return;
       const left = Math.max(0, Math.ceil((this._rt.deadline - this.now()) / 1000));
@@ -759,7 +759,11 @@ export class Ui {
       if (r && !r.ok && r.kind === 'gone' && left > 0) return new Promise((z) => this.setTimeout(z, 1200)).then(() => find(left - 1));
       return r;
     });
+    const tFind = this.w.now;
     find(2).then((r) => {
+      /* the UI retries 「没找到」 twice silently (:557 find(2)) — only the last answer reaches the kid */
+      const fs = this.P.apiFails.filter((f) => f.api === 'findByCode' && f.t0 >= tFind && f.inst === this.inst.no);
+      for (let q = 0; q < fs.length - (r && r.ok ? 0 : 1); q++) fs[q].retried = true;
       if (this.screen !== 'lobby' || this.joinPlan !== jp) return;
       if (!r.ok) {
         this.ev('code-fail', { kind: this.kindOf(r), reason: r.reason });

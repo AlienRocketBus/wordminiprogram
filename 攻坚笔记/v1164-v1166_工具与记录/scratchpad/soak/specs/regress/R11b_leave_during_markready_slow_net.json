@@ -1,0 +1,106 @@
+{
+ "name": "R11b_leave_during_markready_slow_net",
+ "bug": "R11 (6165390): the guest leaves while markReady is still reading the room on a slow network → markReady re-registers the room and restarts the heartbeat (zombie writes after leaving)",
+ "spec": {
+  "seed": 9500,
+  "profile": "targeted",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 1,
+   "queryLagMul": 1,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": true,
+   "dupMode": "request_failed",
+   "permMode": "rules",
+   "orderByFail": false
+  },
+  "unloadSendP": 1,
+  "outages": [],
+  "adversary": null,
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0xT",
+    "name": "小明",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 60,
+     "jitter": 0,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.8,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 300,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 3
+     }
+    ]
+   },
+   {
+    "label": "P1",
+    "uid": "k1xT",
+    "name": "小红",
+    "rating": 1000,
+    "skew": 0,
+    "net": {
+     "base": 900,
+     "jitter": 0,
+     "spikeP": 0,
+     "faultRate": 0
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.8,
+     "minMs": 1500,
+     "maxMs": 3000,
+     "slowP": 0
+    },
+    "again": {
+     "p": 0,
+     "p2": 0,
+     "max": 0
+    },
+    "intents": [
+     {
+      "at": 2000,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "first",
+      "tries": 3
+     },
+     {
+      "at": 10050,
+      "act": "leave"
+     }
+    ]
+   }
+  ]
+ }
+}

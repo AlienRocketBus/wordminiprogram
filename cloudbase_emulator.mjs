@@ -488,6 +488,8 @@ export function createEmulator(opts = {}) {
     const b = bearerUid(req); if (b.uid) ctx.uid = b.uid;
     if (body.refresh_token && refresh.get(body.refresh_token)) ctx.uid = refresh.get(body.refresh_token).uid;
     if (!ctx.uid && body.username && byLogin.get(body.username)) ctx.uid = byLogin.get(body.username);
+    /* 请求体给 fault/hold 的 test(ctx) 看（比如只扣住「读某一间房」的请求）—— 不可枚举：不进请求日志，原有行为不变 */
+    Object.defineProperty(ctx, 'body', { value: body, enumerable: false });
     return ctx;
   }
   function faultMatches(f, ctx) {
@@ -597,7 +599,8 @@ export function createEmulator(opts = {}) {
     uidOfLogin: (login) => byLogin.get(login) || '',
     setOffline: (v) => { offline = !!v; },
     isOffline: () => offline,
-    /* 故障注入：{uid?, db?, auth?, path?, action?, collection?, test?, do, times?, ms?, code?, message?} */
+    /* 故障注入：{uid?, db?, auth?, path?, action?, collection?, test?, do, times?, ms?, code?, message?}
+       test(ctx) 里 ctx.body 是解析后的请求体（只读；比如 ctx.body.query._id 是按 _id 读的那条文档） */
     fault: (spec) => { const f = Object.assign({ times: Infinity, hits: 0 }, spec); faults.push(f); return { f, remove: () => { const i = faults.indexOf(f); if (i >= 0) faults.splice(i, 1); }, get hits() { return f.hits; } }; },
     clearFaults: () => { faults.length = 0; },
     /* 扣住匹配的请求（手机卡住）；release() 后按原样处理（abortOnRelease 则回超时） */

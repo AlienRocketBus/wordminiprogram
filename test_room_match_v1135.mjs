@@ -128,29 +128,40 @@ const now = Date.now();
      '★ 按 createdAt 排序 —— 那是每间房必有的字段');
 }
 
-/* ② 死房清理 —— 只清**自己的**剩余文档；v1164 起一次最多 10 条 */
+/* ② 死房清理 —— 只清**自己的**剩余文档；v1164 起一次最多 10 条
+   🔴联机压力测试 R8（v1164 第二轮）：同账号**别的设备**的旧文档，光看本机钟「30 分钟没动」不够 —— 那台手机钟慢 / 本机钟快
+   30 分钟以上时，它正在打的房、座位、回合文档在本机看来都「30 分钟没动」，以前当场删掉（那一局两边都「房间已经关了」）。
+   现在：第一次清理只记下候选；隔 sweepRecheckMs（真机 25 秒，这里调成 50 毫秒）再看，**一点没变**才删；心跳在动的不删。
+   所以下面的断言从「一次就删」改成「两次清理之内删（有界）」，并且多验一条：钟慢设备上的活房不删。 */
 {
   const rooms = [];
-  /* 🔴v1164（审查 F8）：这些死房不是这台设备建的（同账号别的设备 / 上次打开页面留下的）——
-     要 30 分钟没心跳才清：另一台手机的钟慢的话，「几分钟没心跳」其实是它正开着房在等人 */
+  /* 这些死房不是这台设备建的（同账号别的设备 / 上次打开页面留下的）—— 本机钟看着 31 分钟没心跳 */
   for (let i = 0; i < 12; i++) rooms.push(room({ _id:'D'+i, hostId:'H', status:'open', heartbeatAt: now-1860000-i*1000 }));
   rooms.push(room({ _id:'A1', hostId:'H', status:'open', heartbeatAt: now-1000 }));            /* 活的 */
   rooms.push(room({ _id:'K1', hostId:'H', status:'open', heartbeatAt: now-300000 }));          /* 5 分钟没心跳、别的设备建的：先不动 */
   rooms.push(room({ _id:'O1', hostId:'X', status:'open', heartbeatAt: now-500000 }));          /* 别人的 */
   rooms.push(room({ _id:'F1', hostId:'H', status:'done', heartbeatAt: now-20000, endedAt: now-20000 })); /* 刚打完：客人可能还在读结果 */
+  /* 同账号另一台手机正开着、在等人的房 —— 那台手机钟慢 40 分钟，时间戳看着是 40 分钟前，可它每 8 秒续一次心跳 */
+  rooms.push(room({ _id:'T1', hostId:'H', status:'open', heartbeatAt: now-2400000 }));
   const S = boot(rooms, 'H');
+  S._setTimingForTest({ sweepRecheckMs: 50 });
+  const n0 = await S.sweepMyDeadRooms();
+  ok(n0 === 0 && rooms.length === 17, `★ 第一次清理只记候选、一条都不删（实删 ${n0}）—— 别的设备的旧文档要隔一会儿再看一眼（R8）`);
+  rooms.find(r => r._id === 'T1').heartbeatAt += 8000;   /* 那台手机又续了一次心跳（它的钟还是慢 40 分钟） */
+  await new Promise(z => setTimeout(z, 70));
   const n = await S.sweepMyDeadRooms();
   const left = rooms.map(r => r._id);
-  ok(n === 10, `★ 单次清理封顶 10 条（实得 ${n}）—— 清理不该拖慢列房这个高频操作`);
+  ok(n === 10, `★ 隔了一会儿还一点没变的：这一次删掉，单次清理封顶 10 条（实得 ${n}）—— 清理不该拖慢列房这个高频操作`);
+  ok(left.includes('T1'), '★ 同账号另一台设备钟慢 40 分钟、心跳在动的活房 → 不删（以前当场删掉，那一局两边都「房间已经关了」—— R8）');
   ok(left.includes('O1'), '★ 不删别人的房（权限上也删不掉）');
   ok(left.includes('A1'), '★ 不删还活着的房');
   ok(left.includes('F1'), '★ 刚打完的房留着（宽限期内客人还要读结果）');
   ok(left.includes('K1'), '★ 同账号别的设备的房 5 分钟没心跳 → 不删（那台手机钟慢时它其实还活着）');
   const n2 = await S.sweepMyDeadRooms();
-  ok(n2 === 2 && !rooms.some(r => /^D/.test(r._id)), `下一次把剩下的死房清完（实得 ${n2}）`);
+  ok(n2 === 2 && !rooms.some(r => /^D/.test(r._id)), `下一次把剩下的死房清完（实得 ${n2}）—— 第一次就记过候选，不用再等`);
 }
 {
-  /* 自己的座位、回合文档也要清（过了宽限期）；别人的一律不碰 */
+  /* 自己的座位、回合文档也要清（过了宽限期）；别人的一律不碰 —— 别的设备留下的，同样隔一会儿再看一眼才删（R8） */
   const rooms = [
     { _id:'Z_s0', proto:2, kind:'seat', roomId:'Z', guestId:'H', guestBeat: now-1900000, _openid:'H' },
     { _id:'Z_s1', proto:2, kind:'seat', roomId:'Z', guestId:'H', guestBeat: now-5000, _openid:'H' },
@@ -158,9 +169,13 @@ const now = Date.now();
     { _id:'Y_w0', proto:2, kind:'win', roomId:'Y', i:0, by:'X', at: now-3600000, _openid:'X' }
   ];
   const S = boot(rooms, 'H');
+  S._setTimingForTest({ sweepRecheckMs: 50 });
+  await S.sweepMyDeadRooms();
+  ok(rooms.length === 4, '第一次只记候选，一条不删（R8）');
+  await new Promise(z => setTimeout(z, 70));
   await S.sweepMyDeadRooms();
   const left = rooms.map(r => r._id);
-  ok(!left.includes('Z_s0') && !left.includes('Z_w0'), '★ 过期的自己的座位、回合文档被清掉');
+  ok(!left.includes('Z_s0') && !left.includes('Z_w0'), '★ 过期的自己的座位、回合文档被清掉（隔一会儿再看一眼、一点没变的，第二次清理就删）');
   ok(left.includes('Z_s1') && left.includes('Y_w0'), '★ 还新鲜的座位、别人的回合文档不动');
 }
 

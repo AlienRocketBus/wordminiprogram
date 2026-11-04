@@ -1,0 +1,133 @@
+{
+ "name": "R10a_phantom_win_host_never_started",
+ "bug": "R10 guest awarded a win by abandon though the host never started",
+ "spec": {
+  "seed": 481,
+  "profile": "disrupt",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 0,
+   "lagShape": 3,
+   "queryLagMul": 1.68,
+   "queryLagExtra": 0,
+   "lagMode": "random",
+   "ryw": true,
+   "dupMode": "request_failed",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.54,
+  "outages": [],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x481",
+    "name": "小明",
+    "rating": 909,
+    "skew": 0,
+    "net": {
+     "base": 136,
+     "jitter": 89,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [
+     {
+      "a": 42312,
+      "b": 119125,
+      "mode": "hang"
+     }
+    ],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.67,
+     "minMs": 2342,
+     "maxMs": 13445,
+     "slowP": 0.02
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 275,
+      "act": "create",
+      "mode": "B",
+      "private": false,
+      "wordCount": 1
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P1",
+    "uid": "k1x481",
+    "name": "小红",
+    "rating": 866,
+    "skew": 0,
+    "net": {
+     "base": 125,
+     "jitter": 187,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.92,
+     "minMs": 1480,
+     "maxMs": 5783,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 39239,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 3
+     }
+    ],
+    "ladderer": false,
+    "afterReload": {
+     "at": 0,
+     "act": "join",
+     "via": "list",
+     "target": "P0",
+     "pick": "first",
+     "tries": 3
+    }
+   }
+  ],
+  "adversary": null
+ }
+}

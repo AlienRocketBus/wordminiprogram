@@ -4,6 +4,7 @@
 import { T0 } from './world.mjs';
 import { advertised } from './run.mjs';
 
+const IDLE = { home: 1, lobby: 1, 'ladder-home': 1, result: 1, 'result-failed': 1, 'ladder-problem': 1, 'ladder-matching': 1 };
 const MODE = { A: { first: 100, second: 0, span: 20000, waitAll: false }, B: { first: 100, second: 80, span: 15000, waitAll: true }, C: { first: 100, second: 60, span: 15000, waitAll: true } };
 const rel = (t) => ((t - T0) / 1000).toFixed(1) + 's';
 
@@ -13,6 +14,7 @@ export function disruptionsOf(W, P, a, b) {
   const out = [];
   for (const x of (P.freezes || [])) if (overlaps(T0 + x.at, T0 + x.at + x.dur + 1000, a, b)) out.push('freeze');
   for (const x of (P.partitions || [])) if (overlaps(T0 + x.a, T0 + x.b + 1000, a, b)) out.push('partition');
+  for (const x of (P.hides || [])) if (overlaps(T0 + x.at, T0 + x.at + x.dur + 1000, a, b)) out.push('hide');
   for (const x of (P.reloads || [])) if (T0 + x.at >= a - 1000 && T0 + x.at <= b) out.push('reload');
   for (const o of (W.spec.outages || [])) if (overlaps(T0 + o.a, T0 + o.b + 1000, a, b)) out.push('outage');
   for (const it of (P.intents || [])) if ((it.act === 'leave' || it.act === 'closeWaiting' || it.act === 'cancelJoin') && T0 + it.at >= a - 1000 && T0 + it.at <= b) out.push(it.act);
@@ -107,7 +109,10 @@ export function checkWorld(W) {
     if (hostJoinedMe) continue;   /* host accepted me but never started (e.g. it left) – not a phantom */
     if (mg.end && mg.end.how === 'left') continue;   /* the kid itself left right away */
     const j = G.joins.find((x) => x.ok && x.roomId === mg.roomId);
-    if (host && disruptionsOf(W, host, (j ? j.t0 : mg.startT) - 2000, (mg.result ? mg.result.t : mg.end ? mg.end.t : W.phase1End)).length) continue;   /* the host lost its network / went away: graceful kick is fine */
+    if (W.proto === 'r1' && disruptionsOf(W, G, mg.startT - 2000, mg.startT + 25000).some((d) => d === 'reload' || d === 'freeze' || d === 'partition' || d === 'outage')) continue;   /* the guest went away before the host could see its 「acked」: the host correctly never started */
+    /* the host lost its network / went away: a graceful kick / 「对手刚才没进来」 is fine — but never a WIN for a match the host never started */
+    if (host && disruptionsOf(W, host, (j ? j.t0 : mg.startT) - 2000, (mg.result ? mg.result.t : mg.end ? mg.end.t : W.phase1End)).length
+        && !(W.proto === 'r1' && mg.result && mg.result.result === 'win')) continue;
     const res = mg.result;
     const end = mg.end;
     const w = (mg.words || []).filter(Boolean).length;
@@ -116,45 +121,87 @@ export function checkWorld(W) {
     const detail = 'guest ' + G.label + ' got joinRoom ok for ' + mg.roomId + ' seat ' + mg.seat + ' but host ' + (host ? host.label : '?')
       + ' never started with it; guest played ' + w + ' words, wrote W' + JSON.stringify(ownW) + ', ended: '
       + (res ? res.result + (res.byAbandon ? ' byAbandon(' + res.why + ')' : '') : (end ? end.how + (end.kicked ? ' (kicked)' : '') : G.inst.ui.screen));
+    const kick = end && end.how === 'kicked';
+    /* calm = no network / device trouble on either phone (the kid's own taps — 取消, 退出 — do not make it «not calm») */
+    const devOnly = (L) => L.filter((d) => d !== 'cancelJoin' && d !== 'leave' && d !== 'closeWaiting');
+    const calm = !devOnly(disruptionsOf(W, G, (j ? j.t0 : mg.startT) - 2000, (res ? res.t : end ? end.t : W.phase1End))).length
+      && !faultNear(W, G, (j ? j.t0 : mg.startT), (res ? res.t : end ? end.t : W.phase1End)) && !(host && faultNear(W, host, (j ? j.t0 : mg.startT), (res ? res.t : end ? end.t : W.phase1End)));
     if (res && res.result === 'win') add('I1', 'phantom-seat-awarded-win', 'high', G.label, mg.startT, detail);
     else if (res) add('I1', 'phantom-seat-settled', 'medium', G.label, mg.startT, detail);
-    else add('I1', 'phantom-seat', 'low', G.label, mg.startT, detail);
+    else if (kick) add('I1', 'guest-kicked' + ((end.played || w) > 0 ? '-after-playing' : '') + (calm ? ':calm' : ''), calm ? 'medium' : 'low', G.label, mg.startT, detail);
+    else add('I1', 'phantom-seat', calm ? 'medium' : 'low', G.label, mg.startT, detail);
   }
 
   /* ── I3 / I4 per real match ── */
+  const r1 = W.proto === 'r1';
   for (const pr of pairs) {
     const { h, g, R } = pr;
     const M = MODE[h.mode] || MODE.C;
     const nW = Math.max(h.nWords || 0, g.nWords || 0);
+    const ep = Number(h.seat) || 0;
     const W_ = [];
-    for (let i = 0; i < nW; i++) {
-      const e = firstAdd(W, R + '_w' + i);
-      W_[i] = e ? { winner: e.v.winner, by: e.by, at: e.t } : null;
-    }
     const sideUid = { host: pr.H.uid, guest: pr.G.uid };
-    /* integrity: every decided round doc was written by one of the two players */
-    for (let i = 0; i < nW; i++) {
-      const w = W_[i];
-      if (!w) continue;
-      if (w.by !== pr.H.uid && w.by !== pr.G.uid) {
-        if (advUid && w.by === advUid) add('I8', 'adv-win-doc-accepted', 'high', pr.H.label + '/' + pr.G.label, w.at, R + '_w' + i + ' (winner ' + JSON.stringify(w.winner) + ') was created by the adversary and decided an honest round');
-        else add('I3', 'foreign-win-doc', 'high', pr.H.label + '/' + pr.G.label, w.at, R + '_w' + i + ' (winner ' + JSON.stringify(w.winner) + ') created by ' + (ownerPlayer(W, w.by) || { label: w.by }).label + ', not by either player of this match');
-      } else if (w.winner && sideUid[w.winner] !== w.by) {
-        add('I3', 'win-doc-wrong-side', 'high', '', w.at, R + '_w' + i + ' winner ' + w.winner + ' written by the other side');
+    const sideKey = { host: pr.H.key, guest: pr.G.key };
+    if (!r1) {
+      for (let i = 0; i < nW; i++) {
+        const e = firstAdd(W, R + '_w' + i);
+        W_[i] = e ? { winner: e.v.winner, by: e.by, at: e.t, id: R + '_w' + i } : null;
+      }
+      /* integrity: every decided round doc was written by one of the two players */
+      for (let i = 0; i < nW; i++) {
+        const w = W_[i];
+        if (!w) continue;
+        if (w.by !== pr.H.uid && w.by !== pr.G.uid) {
+          if (advUid && w.by === advUid) add('I8', 'adv-win-doc-accepted', 'high', pr.H.label + '/' + pr.G.label, w.at, R + '_w' + i + ' (winner ' + JSON.stringify(w.winner) + ') was created by the adversary and decided an honest round');
+          else add('I3', 'foreign-win-doc', 'high', pr.H.label + '/' + pr.G.label, w.at, R + '_w' + i + ' (winner ' + JSON.stringify(w.winner) + ') created by ' + (ownerPlayer(W, w.by) || { label: w.by }).label + ', not by either player of this match');
+        } else if (w.winner && sideUid[w.winner] !== w.by) {
+          add('I3', 'win-doc-wrong-side', 'high', '', w.at, R + '_w' + i + ' winner ' + w.winner + ' written by the other side');
+        }
+      }
+    } else {
+      /* round-1 protocol: R_w<i> (epoch 0) / R_w<ep>_<i>, backups …b / …c when a stranger squatted the id.
+         Ground truth = the lowest-k candidate whose FIRST version is a valid doc of this match
+         (kind win, this room/epoch/word, winner host|guest, written by that side: by = its key, _openid = its uid). */
+      for (let i = 0; i < nW; i++) {
+        const base = ep ? R + '_w' + ep + '_' + i : R + '_w' + i;
+        W_[i] = null;
+        for (const sfx of ['', 'b', 'c']) {
+          const e = firstAdd(W, base + sfx);
+          if (!e) continue;
+          const v = e.v;
+          const ok = v.kind === 'win' && v.roomId === R && Number(v.i) === i && (Number(v.ep) || 0) === ep
+            && (v.winner === 'host' || v.winner === 'guest') && e.by === sideUid[v.winner] && v.by === sideKey[v.winner];
+          if (ok) { W_[i] = { winner: v.winner, by: e.by, at: e.t, id: base + sfx, k: sfx }; break; }
+          if (e.by === pr.H.uid || e.by === pr.G.uid) add('I3', 'own-win-doc-invalid', 'high', pr.H.label + '/' + pr.G.label, e.t, base + sfx + ' written by a player of this match but not valid: ' + JSON.stringify({ winner: v.winner, by: v.by, ep: v.ep, i: v.i }));
+        }
+        /* a later valid doc at a lower k would flip the truth for late readers */
+        if (W_[i] && W_[i].k) {
+          const e0 = W.server.history(base).find((x) => x.v && x.t > W_[i].at && x.by !== advUid);
+          if (e0) add('I3', 'round-truth-flip', 'high', pr.H.label + '/' + pr.G.label, e0.t, base + ' re-created after the decision moved to ' + W_[i].id);
+        }
       }
     }
     for (const [m, P] of [[h, pr.H], [g, pr.G]]) {
       const side = m.side, ws = m.lastWinners || [];
       for (let i = 0; i < ws.length && i < nW; i++) {
         const truth = W_[i] ? W_[i].winner : undefined;
-        if (truth === undefined) { add('I3', 'winner-without-doc', 'high', P.label, m.startT, 'saw winners[' + i + ']=' + JSON.stringify(ws[i]) + ' but no W doc'); continue; }
-        if ((ws[i] || '') !== (truth || '')) add('I3', 'winner-mismatch', 'high', P.label, m.startT, 'winners[' + i + '] seen ' + JSON.stringify(ws[i]) + ' vs doc ' + JSON.stringify(truth));
+        if (r1 && !ws[i]) continue;   /* '' = not decided (yet) in this phone's view */
+        if (truth === undefined) {
+          const adv0 = r1 && advUid && [0, 1, 2].some((k) => { const e = firstAdd(W, (ep ? R + '_w' + ep + '_' + i : R + '_w' + i) + ['', 'b', 'c'][k]); return e && e.by === advUid; });
+          if (adv0) add('I8', 'adv-win-doc-accepted', 'high', P.label, m.startT, 'saw winners[' + i + ']=' + JSON.stringify(ws[i]) + ' — only the adversary wrote a doc for this word');
+          else add('I3', 'winner-without-doc', 'high', P.label, m.startT, 'saw winners[' + i + ']=' + JSON.stringify(ws[i]) + ' but no W doc');
+          continue;
+        }
+        if ((ws[i] || '') !== (truth || '')) {
+          const adv = r1 && advUid && W.server.history((ep ? R + '_w' + ep + '_' + i : R + '_w' + i)).some((x) => x.v && x.by === advUid && x.v.winner === ws[i]);
+          add(adv ? 'I8' : 'I3', adv ? 'adv-win-doc-accepted' : 'winner-mismatch', 'high', P.label, m.startT, 'winners[' + i + '] seen ' + JSON.stringify(ws[i]) + ' vs doc ' + JSON.stringify(truth));
+        }
       }
       for (const c of m.claims) {
         const truth = W_[c.idx];
         if (!c.ok) continue;
         if (c.won && (!truth || truth.by !== P.uid)) add('I3', 'claim-won-not-mine', 'high', P.label, c.t, 'claimRound(' + c.idx + ') said won but W doc ' + JSON.stringify(truth));
-        if (!c.won && truth && truth.winner === side && truth.by === P.uid) add('I3', 'claim-lost-but-mine', 'medium', P.label, c.t, 'claimRound(' + c.idx + ') said lost but my W doc won');
+        if (!c.won && !c.pending && truth && truth.winner === side && truth.by === P.uid) add('I3', 'claim-lost-but-mine', 'medium', P.label, c.t, 'claimRound(' + c.idx + ') said lost but my W doc won');
       }
       /* the kid spelled it right before its deadline, but a skip doc ('' = nobody) had already decided the word */
       for (let i = 0; i < nW; i++) {
@@ -189,47 +236,130 @@ export function checkWorld(W) {
     const disH = disruptionsOf(W, pr.H, a - 3000, b), disG = disruptionsOf(W, pr.G, a - 3000, b);
     const clean = !disH.length && !disG.length && !W.adversary;
     const tag = clean ? 'clean' : 'disrupted(' + [...new Set(disH.concat(disG))].join(',') + ')';
-    if (rh && rg) {
-      const comp = (rh.result === 'win' && rg.result === 'lose') || (rh.result === 'lose' && rg.result === 'win') || (rh.result === 'draw' && rg.result === 'draw');
-      if (!comp) {
-        const ab = (rh.byAbandon ? 'H-abandon(' + rh.why + ')' : 'H-real') + '/' + (rg.byAbandon ? 'G-abandon(' + rg.why + ')' : 'G-real');
-        add('I4', 'results-' + rh.result + '-' + rg.result + ':' + abSig(rh, rg), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
-          R + ' host ' + rh.result + ' ' + rh.mine + ':' + rh.theirs + ' vs guest ' + rg.result + ' ' + rg.mine + ':' + rg.theirs + ' [' + ab + '] ' + tag);
-      } else if (!rh.byAbandon && !rg.byAbandon && (rh.mine !== rg.theirs || rh.theirs !== rg.mine)) {
-        add('I4', 'scores-not-mirrored', 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t), R + ' host ' + rh.mine + ':' + rh.theirs + ' guest ' + rg.mine + ':' + rg.theirs);
+    if (!r1) {
+      if (rh && rg) {
+        const comp = (rh.result === 'win' && rg.result === 'lose') || (rh.result === 'lose' && rg.result === 'win') || (rh.result === 'draw' && rg.result === 'draw');
+        if (!comp) {
+          const ab = (rh.byAbandon ? 'H-abandon(' + rh.why + ')' : 'H-real') + '/' + (rg.byAbandon ? 'G-abandon(' + rg.why + ')' : 'G-real');
+          add('I4', 'results-' + rh.result + '-' + rg.result + ':' + abSig(rh, rg), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
+            R + ' host ' + rh.result + ' ' + rh.mine + ':' + rh.theirs + ' vs guest ' + rg.result + ' ' + rg.mine + ':' + rg.theirs + ' [' + ab + '] ' + tag);
+        } else if (!rh.byAbandon && !rg.byAbandon && (rh.mine !== rg.theirs || rh.theirs !== rg.mine)) {
+          add('I4', 'scores-not-mirrored', 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t), R + ' host ' + rh.mine + ':' + rh.theirs + ' guest ' + rg.mine + ':' + rg.theirs);
+        }
       }
-    }
-    const sweptBy = W.ops.find((o) => o.op === 'remove' && o.res === 'del' && (o.id === R || o.id.startsWith(R + '_s')) && o.t0 < b
-      && W.players.some((p) => p.twinOf && o.who.startsWith(p.label)));
-    if (clean) {
-      if (!rh || !rg) add('I4', 'clean-match-unsettled' + (sweptBy ? ':live-doc-swept-by-same-account-device' : ''), 'high', pr.H.label + '/' + pr.G.label, a,
-        R + ' both phones stayed on and connected, but host ' + (rh ? rh.result : endOf(h, pr.H)) + ' / guest ' + (rg ? rg.result : endOf(g, pr.G)));
-      else if (rh.byAbandon || rg.byAbandon) add('I4', 'clean-match-false-abandon:' + (rh.byAbandon ? 'H:' + rh.why : '') + (rg.byAbandon ? 'G:' + rg.why : ''), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
-        R + ' both phones stayed on and connected, yet ' + (rh.byAbandon ? 'host ' + rh.result + ' by abandon (' + rh.why + ') ' : '') + (rg.byAbandon ? 'guest ' + rg.result + ' by abandon (' + rg.why + ')' : ''));
-    }
-    /* I4b: every reported score agrees with the round docs and the kid's answers */
-    for (const [m, P] of [[h, pr.H], [g, pr.G]]) {
-      for (let i = 0; i < nW; i++) {
-        const wr = m.words && m.words[i];
-        if (!wr || !wr.correct) continue;
-        const w = W_[i];
-        const mineWon = !!(w && w.winner === m.side && w.by === P.uid);
-        const pts = mineWon ? M.first : M.second;
-        if (wr.gain === pts) continue;
-        const c = m.claims.find((x) => x.idx === i);
+      const sweptBy = W.ops.find((o) => o.op === 'remove' && o.res === 'del' && (o.id === R || o.id.startsWith(R + '_s')) && o.t0 < b
+        && W.players.some((p) => p.twinOf && o.who.startsWith(p.label)));
+      if (clean) {
+        if (!rh || !rg) add('I4', 'clean-match-unsettled' + (sweptBy ? ':live-doc-swept-by-same-account-device' : ''), 'high', pr.H.label + '/' + pr.G.label, a,
+          R + ' both phones stayed on and connected, but host ' + (rh ? rh.result : endOf(h, pr.H)) + ' / guest ' + (rg ? rg.result : endOf(g, pr.G)));
+        else if (rh.byAbandon || rg.byAbandon) add('I4', 'clean-match-false-abandon:' + (rh.byAbandon ? 'H:' + rh.why : '') + (rg.byAbandon ? 'G:' + rg.why : ''), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
+          R + ' both phones stayed on and connected, yet ' + (rh.byAbandon ? 'host ' + rh.result + ' by abandon (' + rh.why + ') ' : '') + (rg.byAbandon ? 'guest ' + rg.result + ' by abandon (' + rg.why + ')' : ''));
+      }
+      /* I4b: every reported score agrees with the round docs and the kid's answers */
+      for (const [m, P] of [[h, pr.H], [g, pr.G]]) {
+        for (let i = 0; i < nW; i++) {
+          const wr = m.words && m.words[i];
+          if (!wr || !wr.correct) continue;
+          const w = W_[i];
+          const mineWon = !!(w && w.winner === m.side && w.by === P.uid);
+          const pts = mineWon ? M.first : M.second;
+          if (wr.gain === pts) continue;
+          const c = m.claims.find((x) => x.idx === i);
+          const tEnd = m.result ? m.result.t : (m.end ? m.end.t : Infinity);
+          if ((c && c.t >= tEnd) || (!c && wr.subT >= tEnd)) continue;   /* the match was already over when the answer came back */
+          if (!c && disruptionsOf(W, P, wr.subT - 1000, wr.subT + 20000).length) continue;   /* the page died / froze before the answer came back */
+          if (c && !c.ok && c.kind === 'session' && W.marks.some((mk) => mk.who.startsWith(P.label) && mk.what === 'session-fault' && Math.abs(mk.t - c.t) < 25000)) continue;
+          const outage = disruptionsOf(W, P, wr.subT - 2000, (c ? c.t : wr.subT) + 500).some((d) => d === 'partition' || d === 'outage' || d === 'freeze');
+          let why;
+          if (mineWon && wr.gain === 0) why = 'own-win-doc-landed-but-scored-0' + (c && !c.ok ? ':' + c.kind : '');
+          else if (c && !c.ok) { if (outage && (c.kind === 'network' || c.kind === 'slow')) continue; why = 'claim-failed:' + c.kind; }
+          else if (!c) continue;
+          else why = 'claim-ok-but-scored-' + wr.gain + '-vs-' + pts;
+          add('I4', 'score-vs-rounds:' + why, 'medium', P.label, wr.subT,
+            R + ' word ' + i + ': ' + P.label + ' spelled it right; round doc ' + JSON.stringify(w) + ' ⇒ ' + pts + ' points, the UI scored ' + wr.gain + (c ? ' (claimRound ' + (c.ok ? 'ok won=' + c.won : 'FAILED kind=' + c.kind) + ')' : ''));
+          break;
+        }
+      }
+    } else {
+      /* ── round-1 protocol ── */
+      const comp = (x, y) => (x.result === 'win' && y.result === 'lose') || (x.result === 'lose' && y.result === 'win')
+        || (x.result === 'draw' && y.result === 'draw') || (x.result === 'void' && y.result === 'void');
+      if (rh && rg) {
+        if (!comp(rh, rg)) {
+          const ab = (rh.byAbandon || rh.roomGone ? 'H-abandon(' + rh.why + ')' : 'H-real') + '/' + (rg.byAbandon || rg.roomGone ? 'G-abandon(' + rg.why + ')' : 'G-real');
+          add('I4', 'results-' + rh.result + '-' + rg.result + ':' + abSig(rh, rg), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
+            R + ' host ' + rh.result + ' ' + rh.mine + ':' + rh.theirs + ' vs guest ' + rg.result + ' ' + rg.mine + ':' + rg.theirs + ' [' + ab + '] ' + tag);
+        } else if (!rh.byAbandon && !rg.byAbandon && rh.result !== 'void' && (rh.mine !== rg.theirs || rh.theirs !== rg.mine)) {
+          add('I4', 'scores-not-mirrored', 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t), R + ' host ' + rh.mine + ':' + rh.theirs + ' guest ' + rg.mine + ':' + rg.theirs);
+        }
+      }
+      const sweptBy = W.ops.find((o) => o.op === 'remove' && o.res === 'del' && (o.id === R || o.id.startsWith(R + '_s')) && o.t0 < b
+        && W.players.some((p) => p.twinOf && o.who.startsWith(p.label)));
+      if (clean) {
+        const ab = (r) => r && (r.byAbandon || r.roomGone || r.result === 'void');
+        if (!rh || !rg) add('I4', 'clean-match-unsettled' + (sweptBy ? ':live-doc-swept-by-same-account-device' : ''), 'high', pr.H.label + '/' + pr.G.label, a,
+          R + ' both phones stayed on and connected, but host ' + (rh ? rh.result : endOf(h, pr.H)) + ' / guest ' + (rg ? rg.result : endOf(g, pr.G)));
+        else if (ab(rh) || ab(rg)) add('I4', 'clean-match-false-abandon:' + (ab(rh) ? 'H:' + rh.result + ':' + rh.why : '') + (ab(rg) ? 'G:' + rg.result + ':' + rg.why : ''), 'high', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
+          R + ' both phones stayed on and connected, yet ' + (ab(rh) ? 'host ' + rh.result + ' (' + rh.why + ') ' : '') + (ab(rg) ? 'guest ' + rg.result + ' (' + rg.why + ')' : ''));
+      }
+      /* I4b: per word, my final points (immediate + settled later) vs the round docs; then the reported total and the outcome */
+      const exp = {};
+      for (const [m, P] of [[h, pr.H], [g, pr.G]]) {
+        let total = 0, unknown = 0;
+        /* an abandon / void ending does not use the word scores (the result says who left) — nothing to compare */
+        if (m.result && (m.result.byAbandon || m.result.roomGone || m.result.result === 'void')) { exp[m.side] = { total: 0, unknown: 1 }; continue; }
         const tEnd = m.result ? m.result.t : (m.end ? m.end.t : Infinity);
-        if ((c && c.t >= tEnd) || (!c && wr.subT >= tEnd)) continue;   /* the match was already over when the answer came back */
-        if (!c && disruptionsOf(W, P, wr.subT - 1000, wr.subT + 20000).length) continue;   /* the page died / froze before the answer came back */
-        if (c && !c.ok && c.kind === 'session' && W.marks.some((mk) => mk.who.startsWith(P.label) && mk.what === 'session-fault' && Math.abs(mk.t - c.t) < 25000)) continue;
-        const outage = disruptionsOf(W, P, wr.subT - 2000, (c ? c.t : wr.subT) + 500).some((d) => d === 'partition' || d === 'outage' || d === 'freeze');
-        let why;
-        if (mineWon && wr.gain === 0) why = 'own-win-doc-landed-but-scored-0' + (c && !c.ok ? ':' + c.kind : '');
-        else if (c && !c.ok) { if (outage && (c.kind === 'network' || c.kind === 'slow')) continue; why = 'claim-failed:' + c.kind; }
-        else if (!c) continue;
-        else why = 'claim-ok-but-scored-' + wr.gain + '-vs-' + pts;
-        add('I4', 'score-vs-rounds:' + why, 'medium', P.label, wr.subT,
-          R + ' word ' + i + ': ' + P.label + ' spelled it right; round doc ' + JSON.stringify(w) + ' ⇒ ' + pts + ' points, the UI scored ' + wr.gain + (c ? ' (claimRound ' + (c.ok ? 'ok won=' + c.won : 'FAILED kind=' + c.kind) + ')' : ''));
-        break;
+        for (let i = 0; i < nW; i++) {
+          const wr = m.words && m.words[i];
+          if (!wr) continue;
+          if (!wr.correct) continue;
+          /* a round doc written only after this kid's match was over (the kid reloaded / left / already saw the result —
+             e.g. the opponent's re-sent claim landing later) cannot be in this kid's score: for this kid the word had no doc */
+          const w = (W_[i] && W_[i].at > tEnd) ? null : W_[i];
+          const mineWon = !!(w && w.winner === m.side && w.by === P.uid);
+          const c = m.claims.find((x) => x.idx === i);
+          const fin = (wr.gain || 0) + (wr.settled || 0);
+          if (c && c.ended) { total += fin; continue; }   /* the match had already ended (opponent left / abandon decided): refused, correctly */
+          if (!w) {
+            /* spelled right but no round doc of mine exists: the add never reached the server */
+            total += fin;
+            /* 6165390 F-R2-7: every id of this word squatted by a stranger → scored without order (on my own doc) — designed */
+            if (c && c.squatted) continue;
+            const faulty = faultNear(W, P, wr.subT, (c ? c.t : wr.subT) + 12000) || disruptionsOf(W, P, wr.subT - 1000, wr.subT + 20000).length;
+            if ((c && c.t >= tEnd) || (!c && wr.subT >= tEnd)) continue;
+            /* every candidate id of this word squatted by the adversary → "这一词没记上" is the designed answer (DoS by a griefer) */
+            const allSquat = advUid && ['', 'b', 'c'].every((sfx) => { const e = firstAdd(W, (ep ? R + '_w' + ep + '_' + i : R + '_w' + i) + sfx); return e && e.by === advUid; });
+            if (!faulty) add('I4', 'score-vs-rounds:correct-answer-not-recorded' + (c ? (c.ok ? (c.pending ? ':pending' : ':ok') : ':' + c.kind) : ':no-claim-answer') + (allSquat ? ':all-ids-squatted' : ''), allSquat ? 'low' : 'medium', P.label, wr.subT,
+              R + ' word ' + i + ': ' + P.label + ' spelled it right but no round doc exists' + (c ? ' (claimRound ' + JSON.stringify(c) + ')' : ''));
+            else unknown++;
+            continue;
+          }
+          const pts = mineWon ? M.first : M.second;
+          total += pts;
+          if (fin === pts) continue;
+          if ((c && c.t >= tEnd) || (!c && wr.subT >= tEnd)) { total += fin - pts; continue; }   /* the match was already over when the answer came back */
+          if (!c && disruptionsOf(W, P, wr.subT - 1000, wr.subT + 20000).length) { total += fin - pts; continue; }   /* page died / froze before the answer came back */
+          let why;
+          if (mineWon && fin === 0) {
+            if (c && c.pending) why = (m.pendingAtFinish && m.pendingAtFinish.includes(i)) ? 'own-win-pending-at-finish' : 'own-win-pending-never-settled';
+            else why = 'own-win-doc-landed-but-scored-0' + (c && !c.ok ? ':' + c.kind : c && c.ended ? ':ended' : '');
+          } else if (c && !c.ok) why = 'claim-failed:' + c.kind;
+          else if (!c) { total += fin - pts; continue; }
+          else why = (c.pending ? 'pending-' : 'claim-ok-') + 'scored-' + fin + '-vs-' + pts;
+          add('I4', 'score-vs-rounds:' + why, 'medium', P.label, wr.subT,
+            R + ' word ' + i + ': ' + P.label + ' spelled it right; round doc ' + JSON.stringify(w) + ' ⇒ ' + pts + ' points, the UI scored ' + wr.gain + (wr.settled ? '+' + wr.settled + ' (settled later)' : '') + (c ? ' (claimRound ' + (c.ok ? 'ok won=' + c.won + (c.pending ? ' pending' : '') : 'FAILED kind=' + c.kind) + ')' : ''));
+        }
+        exp[m.side] = { total, unknown, reported: m.reported };
+      }
+      /* the outcome the two kids should have seen, from the round docs and their answers */
+      if (rh && rg && !rh.byAbandon && !rg.byAbandon && rh.result !== 'void' && h.reported != null && g.reported != null
+          && !exp.host.unknown && !exp.guest.unknown) {
+        const want = exp.host.total > exp.guest.total ? 'win' : exp.host.total < exp.guest.total ? 'lose' : 'draw';
+        if (h.reported !== exp.host.total || g.reported !== exp.guest.total) {
+          const flipped = rh.result !== want;
+          add('I4', 'reported-score-wrong' + (flipped ? ':outcome-flipped' : ''), flipped ? 'high' : 'medium', pr.H.label + '/' + pr.G.label, Math.max(rh.t, rg.t),
+            R + ' reported host ' + h.reported + ' / guest ' + g.reported + ' but the round docs and answers give ' + exp.host.total + ' / ' + exp.guest.total + ' (host saw ' + rh.result + ', should be ' + want + ')');
+        }
       }
     }
     /* I10: ratings passed */
@@ -244,7 +374,8 @@ export function checkWorld(W) {
     const seatDoc = firstAdd(W, m.roomId + '_s' + m.seat);
     if (seatDoc && advUid && seatDoc.by === advUid) {
       const forged = byKey.has(m.oppKey);
-      add('I8', forged ? 'impersonated-guest-accepted' : 'adv-seat-accepted', forged ? 'high' : 'low', P.label, m.startT,
+      /* the host cannot tell a seat written by someone else under a guestId that is not theirs (it would need uid == _openid) — design limitation */
+      add('I8', forged ? 'impersonated-guest-accepted' : 'adv-seat-accepted', W.proto === 'r1' ? 'low' : (forged ? 'high' : 'low'), P.label, m.startT,
         'host accepted ' + m.roomId + '_s' + m.seat + ' created by the adversary' + (forged ? ' claiming to be ' + byKey.get(m.oppKey).label : ''));
     } else if (m.result && m.result.result === 'win' && !m.result.byAbandon) {
       add('I1', 'host-won-vs-phantom', 'medium', P.label, m.startT, 'host played ' + m.roomId + ' vs ' + m.oppKey + ' who never played it');
@@ -254,16 +385,30 @@ export function checkWorld(W) {
   /* ── I5: liveness ── */
   for (const P of H) {
     const s1 = W.screenAtP1 && W.screenAtP1.get(P.label);
-    const LIM = { joining: 45000, creating: 45000, switching: 45000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 420000, battle: 400000 };
-    if (!W.phase1Complete && s1 && !s1.idle && (W.phase1End - s1.at) > (LIM[s1.screen] || 120000)) {
+    const LIM = W.proto === 'r1'
+      ? { joining: 60000, creating: 45000, switching: 60000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 600000, battle: 400000 }
+      : { joining: 45000, creating: 45000, switching: 45000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 420000, battle: 400000 };
+    const advOpp1 = !!(advUid && s1 && s1.screen === 'result-wait' && P.matches.some((m) => m.side === 'host' && (() => { const e = firstAdd(W, m.roomId + '_s' + m.seat); return e && e.by === advUid; })()));
+    if (!W.phase1Complete && s1 && !s1.idle && !advOpp1 && (W.phase1End - s1.at) > (LIM[s1.screen] || 120000)) {
       add('I5', 'stuck-at-end:' + s1.screen, 'high', P.label, s1.at, P.label + ' still on 「' + s1.screen + '」 since ' + rel(s1.at) + ' when the run hit the hard limit ' + rel(W.phase1End) + ' (last scripted event ' + rel(W.lastAt) + ')');
     }
     /* long non-terminal stretches */
     const segs = segments(P, W.phase1End);
     for (const s of segs) {
-      if (disruptionsOf(W, P, s.t, s.t + s.dur).some((d) => d === 'freeze' || d === 'partition' || d === 'outage' || d === 'reload')) continue;
-      const lim = { joining: 45000, creating: 45000, switching: 45000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 420000 }[s.screen];
-      if (lim && s.dur > lim) add('I5', 'too-long:' + s.screen, 'medium', P.label, s.t, P.label + ' spent ' + (s.dur / 1000).toFixed(0) + 's on 「' + s.screen + '」 (limit ' + lim / 1000 + 's)');
+      if (disruptionsOf(W, P, s.t, s.t + s.dur).some((d) => d === 'freeze' || d === 'partition' || d === 'outage' || d === 'reload'
+          /* 6165390 R2-UI-3: a host who switches away while waiting pauses the wait (private room: up to 3 min) */
+          || (d === 'hide' && s.screen === 'waiting'))) continue;
+      /* 6165390 R2-UI-3: the host of a private room switched away (sending the code) — the friend keeps the seat up to a minute longer */
+      if (W.proto === 'r1' && s.screen === 'joining' && H.some((o) => o !== P && (o.hosted || []).length
+          && disruptionsOf(W, o, s.t - 5000, s.t + s.dur).some((d) => d === 'freeze' || d === 'hide')) && s.dur < 130000) continue;
+      const advOpp = !!(advUid && s.screen === 'result-wait' && P.matches.some((m) => m.startT <= s.t && m.side === 'host' && (() => { const e = firstAdd(W, m.roomId + '_s' + m.seat); return e && e.by === advUid; })()));
+      const lim = advOpp ? 900000 : (W.proto === 'r1'
+        ? { joining: 60000, creating: 45000, switching: 60000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 600000 }
+        : { joining: 45000, creating: 45000, switching: 45000, waiting: 200000, 'ladder-matching': 240000, 'result-wait': 420000 })[s.screen];
+      /* creating / joining / switching are a handful of requests: under heavy per-request faults each can take its full timeout (8–12 s) × retries —
+         slow, not stuck (the screen has a 取消 / the request ends with an error) */
+      const slowNet = W.proto === 'r1' && (s.screen === 'creating' || s.screen === 'joining' || s.screen === 'switching') && faultNear(W, P, s.t, s.t + s.dur);
+      if (lim && s.dur > lim && !slowNet) add('I5', 'too-long:' + s.screen, 'medium', P.label, s.t, P.label + ' spent ' + (s.dur / 1000).toFixed(0) + 's on 「' + s.screen + '」 (limit ' + lim / 1000 + 's)');
       if (s.screen === 'battle') {
         const m = P.matches.find((x) => x.startT === s.t);
         const nw = m ? m.nWords : 10;
@@ -277,8 +422,13 @@ export function checkWorld(W) {
   for (const r of W.ops) {
     if (r.op !== 'update' || r.t0 < W.phase1End + 20000 || !r.data) continue;
     if (!('guestBeat' in r.data) && !('hostBeat' in r.data) && !('heartbeatAt' in r.data)) continue;
+    if (W.proto === 'r1' && ('endedAt' in r.data || 'left' in r.data || 'abandonWin' in r.data || 'status' in r.data)) continue;   /* a leave / claim write, not a heartbeat */
     const P = W.players.find((p) => p.uid === r.uid && r.who.startsWith(p.label));
     if (!P || !P.honest) continue;
+    const instNo = r.who.indexOf('#') > 0 ? Number(r.who.split('#')[1]) : 1;
+    let scrAt = null;
+    for (const e of P.events) { if (e.t > r.t0) break; if (e.type === 'screen' && e.inst === instNo) scrAt = e.screen; }
+    if (W.proto === 'r1' && scrAt && !IDLE[scrAt]) continue;   /* still legitimately on waiting / battle / result-wait */
     const key = 'zombie|' + r.who + '|' + r.id;
     if (V.some((v) => v.key === key)) continue;
     const scr = P.inst && P.inst.ui ? P.inst.ui.screen : '?';
@@ -289,7 +439,12 @@ export function checkWorld(W) {
   /* ── I6: failure kinds must describe the cause ── */
   for (const P of H) {
     for (const f of P.apiFails) {
-      if (f.cancelled) continue;
+      if (f.cancelled || f.retried) continue;   /* retried silently by the UI: the kid never saw it */
+      /* a joinRoom answer that arrives after the kid cancelled (or started another join): the UI drops a failed stale
+         answer without showing it (UI :951-953 only acts on a stale ok) — no wording to judge; only the orphan-seat
+         side effect below still matters (the host acks the seat and waits 20 s) */
+      const unseen = f.api === 'joinRoom' && (P.joins || []).some((j) => j.roomId === f.arg && j.t0 === f.t0 && j.t1 === f.t1 && (j.stale || j.cancelledByUser));
+      if (unseen && f.kind !== 'taken') continue;
       const k = f.kind;
       if (k === 'config') add('I6', 'config:' + f.api + ':' + (f.code || rawCode(f.reason)), 'high', P.label, f.t1, f.api + ' → kind config 「' + f.reason.slice(0, 140) + '」');
       else if (k === 'expired') add('I6', 'expired:' + f.api, 'high', P.label, f.t1, f.api + ' → kind expired 「' + f.reason.slice(0, 120) + '」');
@@ -297,7 +452,24 @@ export function checkWorld(W) {
       else if ((k === 'network' || k === 'slow') && !faultNear(W, P, f.t0, f.t1)) add('I6', k + '-without-fault:' + f.api, 'medium', P.label, f.t1, f.api + ' → ' + k + ' 「' + f.reason.slice(0, 100) + '」 with no network fault on this phone');
       else if (k === 'taken' && f.api === 'joinRoom') {
         const R0 = W.server.stateAt(f.arg, f.t0);
-        if (!takenTruth(W, P, f)) add('I6', 'taken-but-nobody-else:' + (R0 && R0.guestId === P.key ? 'room-holds-my-own-key' : takenWhy(W, P, f)), R0 && R0.guestId === P.key ? 'low' : 'medium', P.label, f.t1, 'joinRoom(' + f.arg + ') → 「' + f.reason.slice(0, 60) + '」 but no other guest ever held a seat / the host never re-opened for someone else');
+        /* my own add of the seat succeeded during this call (the seat is mine) and I was still told 「被别人占了」 */
+        const myAdd = W.proto === 'r1' && W.ops.find((o) => o.uid === P.uid && o.op === 'add' && o.res === 'ok' && o.id.startsWith(f.arg + '_s') && /_s\d+$/.test(o.id) && o.t0 >= f.t0 && o.t0 <= f.t1);
+        /* … and the seat was left behind (not removed by my own give-up path): the claim's read-back judged it lost — an orphaned seat.
+           (If I removed it, waitAck saw the host committed to somebody else for that epoch: an honest 「被占了」.) */
+        const orphan = myAdd && !W.ops.some((o) => o.uid === P.uid && o.op === 'remove' && o.id === myAdd.id && o.t0 >= myAdd.t0 && o.t0 <= f.t1 + 3000);
+        if (orphan) add('I6', 'taken-but-my-add-succeeded' + (unseen ? ':answer-after-own-cancel' : ''), unseen ? 'low' : 'medium', P.label, f.t1, 'joinRoom(' + f.arg + ') → 「' + f.reason.slice(0, 40) + '」 although my add of ' + myAdd.id + ' succeeded at ' + rel(myAdd.tA || myAdd.t0) + ' (orphaned seat: the host will ack it and wait 20 s)' + (unseen ? ' — the kid had cancelled; the answer is not shown' : ''));
+        if (unseen) continue;
+        /* the kid itself cancelled a join to this room a moment ago (or was away during the join): a misleading
+           「被别人占了」 in a self-inflicted race — wording, low */
+        const ownCancel = (P.intents || []).some((it) => it.act === 'cancelJoin' && T0 + it.at <= f.t0 && T0 + it.at >= f.t0 - 30000)
+          || disruptionsOf(W, P, f.t0 - 30000, f.t1).some((d) => d === 'freeze' || d === 'partition' || d === 'hide');
+        /* … or the handshake itself broke down under a rough network (lost answers, SDK timeouts, outage, a reload, ≥3 s
+           replica lag): the host gave up on my seat / left, and the guest words that as 「被别人占了」 — wording, low */
+        const hp0 = hostOfRoom(W, f.arg);
+        const rough = W.proto === 'r1' && !ownCancel && (W.spec.db.lagMax >= 3000 || faultNear(W, P, f.t0 - 30000, f.t1) || disruptionsOf(W, P, f.t0 - 30000, f.t1).length > 0
+          || (hp0 && (faultNear(W, hp0, f.t0 - 30000, f.t1) || disruptionsOf(W, hp0, f.t0 - 30000, f.t1).length > 0)));
+        if (!takenTruth(W, P, f)) add('I6', 'taken-but-nobody-else:' + (R0 && R0.guestId === P.key ? 'room-holds-my-own-key' : takenWhy(W, P, f)) + (ownCancel && W.proto === 'r1' ? ':after-own-cancel-or-away' : rough ? ':rough-network' : ''),
+          (R0 && R0.guestId === P.key) || (ownCancel && W.proto === 'r1') || rough ? 'low' : 'medium', P.label, f.t1, 'joinRoom(' + f.arg + ') → 「' + f.reason.slice(0, 60) + '」 but no other guest ever held a seat / the host never re-opened for someone else');
       } else if (k === 'gone' && (f.api === 'joinRoom' || f.api === 'findByCode') && f.arg) {
         const rid = f.api === 'joinRoom' ? f.arg : codeRoom(W, f.arg, f.t0);
         if (rid && hostAliveFor(W, rid, f.t0) && hostAliveFor(W, rid, f.t1)) {
@@ -307,14 +479,15 @@ export function checkWorld(W) {
           const open = (R) => R && R.status === 'open' && !R.guestId;
           const born = firstAdd(W, rid);
           const young = born && (f.t0 - born.t) < 8000 && !skewish;
-          if (open(R0) && open(R1)) add('I6', 'gone-but-room-open:' + f.api + (skewish ? ':skew' : young ? ':room-just-created' : ':lag'), skewish ? 'high' : young ? 'low' : 'medium', P.label, f.t1,
+          if (open(R0) && open(R1)) add('I6', 'gone-but-room-open:' + f.api + (skewish ? ':skew' : young ? ':room-just-created' : ':lag'), skewish ? 'high' : (young || (W.proto === 'r1' && W.spec.db.lagMax > 0)) ? 'low' : 'medium', P.label, f.t1,
             f.api + '(' + f.arg + ') → 「' + f.reason.slice(0, 60) + '」 while host ' + hp.label + ' was online and waiting with the room open (clock diff ' + Math.round((hp.skew - P.skew) / 1000) + 's)');
           else add('I6', 'full-room-reported-gone:' + f.api, 'low', P.label, f.t1,
             f.api + '(' + f.arg + ') → 「' + f.reason.slice(0, 60) + '」 but the room is alive, just already playing with someone else');
         }
       } else if (k === 'other' && /房主没有回应/.test(f.reason) && f.api === 'joinRoom') {
         const ackT = ackedAt(W, f.arg, P.key, f.t0, f.t1);
-        if (ackT) add('I6', 'ack-timeout-but-host-had-acked', 'medium', P.label, f.t1, 'joinRoom(' + f.arg + ') gave up 「房主没有回应」 although the host had written guestId=me at ' + rel(ackT));
+        const rough = W.spec.db.lagMax >= 3000 || faultNear(W, P, f.t0, f.t1) || disruptionsOf(W, P, f.t0, f.t1).length || (hostOfRoom(W, f.arg) && (faultNear(W, hostOfRoom(W, f.arg), f.t0, f.t1) || disruptionsOf(W, hostOfRoom(W, f.arg), f.t0, f.t1).length));
+        if (ackT) add('I6', 'ack-timeout-but-host-had-acked' + (rough ? ':rough-network' : ''), rough && W.proto === 'r1' ? 'low' : 'medium', P.label, f.t1, 'joinRoom(' + f.arg + ') gave up 「房主没有回应」 although the host had written guestId=me at ' + rel(ackT));
         else if (hostAliveFor(W, f.arg, f.t0 + 1000) && hostAliveFor(W, f.arg, f.t1 - 1000)) {
           const hp = hostOfRoom(W, f.arg);
           add('I6', 'ack-timeout-host-alive' + (hp && Math.abs(hp.skew - P.skew) > 14000 ? ':skew' : ''), 'low', P.label, f.t1, 'joinRoom(' + f.arg + ') 「房主没有回应」 while host ' + (hp && hp.label) + ' was online and waiting');
@@ -339,7 +512,10 @@ export function checkWorld(W) {
       if (!pr) continue;
       const O = pr.h === m ? pr.G : pr.H, om = pr.h === m ? pr.g : pr.h;
       const played = (om.words || []).filter((w) => w && w.submitted).length;
-      if (played > 0 && !disruptionsOf(W, O, m.startT, m.end.t).length) add('I6', 'opp-never-came-but-was-playing' + (m.end.kicked ? ':kicked' : ''), 'medium', P.label, m.end.t,
+      /* away (frozen / hidden / cut off) during the match, or in the 2 minutes before it started (a host frozen right
+         after acking: its battle starts only when it is back, by which time the guest has waited, played and left) */
+      const selfAway = disruptionsOf(W, P, m.startT - 120000, m.end.t).length > 0;
+      if (played > 0 && !disruptionsOf(W, O, m.startT, m.end.t).length) add('I6', 'opp-never-came-but-was-playing' + (m.end.kicked ? ':kicked' : '') + (selfAway ? ':i-was-away' : ''), selfAway ? 'low' : 'medium', P.label, m.end.t,
         P.label + ' was told 「对手刚才没进来」 in ' + m.roomId + ' while ' + O.label + ' had played ' + played + ' words');
     }
   }

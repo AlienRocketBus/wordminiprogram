@@ -12,7 +12,9 @@ for p in $PROFILES; do
   node fuzz.mjs "$REPO" --profile "$p" --no-shrink --quiet --out "$OUT/$p" > "$OUT/$p.log" 2>&1 &
   echo $! > "$OUT/child.pid"
   wait $!
-  echo "    rc=$? $(tail -1 "$OUT/$p.log")" >> "$OUT/progress.txt"
+  rc=$?
+  echo "    rc=$rc $(grep '^SUMMARY' "$OUT/$p.log" | tail -1)" >> "$OUT/progress.txt"
+  grep '^WARNING' "$OUT/$p.log" | tail -1 | sed 's/^/    /' >> "$OUT/progress.txt"
 done
 echo "=== done $(date +%T)" >> "$OUT/progress.txt"
 rm -f "$OUT/child.pid" "$OUT/soak.pid"

@@ -1,0 +1,136 @@
+{
+ "name": "R12_lost_pending_claim_never_resent",
+ "bug": "R12 a claim whose add never reached the server stays pending forever (never re-sent) → the kid loses the points of a word spelled right; the opponent can take the word later",
+ "spec": {
+  "seed": 594,
+  "profile": "disrupt",
+  "kind": "rooms",
+  "db": {
+   "lagMax": 1500,
+   "lagShape": 1,
+   "queryLagMul": 1.11,
+   "queryLagExtra": 504,
+   "lagMode": "monotonic",
+   "ryw": false,
+   "dupMode": "request_failed",
+   "permMode": "legacy",
+   "orderByFail": false
+  },
+  "unloadSendP": 0.59,
+  "outages": [
+   {
+    "a": 90493,
+    "b": 149787,
+    "mode": "hang"
+   }
+  ],
+  "players": [
+   {
+    "label": "P0",
+    "uid": "k0x594",
+    "name": "小明",
+    "rating": 964,
+    "skew": 0,
+    "net": {
+     "base": 495,
+     "jitter": 774,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [],
+    "reloads": [],
+    "hides": [
+     {
+      "at": 11863,
+      "dur": 46262
+     }
+    ],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.54,
+     "minMs": 2227,
+     "maxMs": 10375,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 672,
+      "act": "create",
+      "mode": "C",
+      "private": false,
+      "wordCount": 5
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null,
+    "isHost": true,
+    "private": false
+   },
+   {
+    "label": "P1",
+    "uid": "k1x594",
+    "name": "小红",
+    "rating": 1163,
+    "skew": 0,
+    "net": {
+     "base": 457,
+     "jitter": 220,
+     "spikeP": 0.01,
+     "faultRate": 0,
+     "faultMix": {
+      "drop": 1,
+      "lost": 1.5,
+      "e5xx": 1,
+      "slow": 0.7
+     }
+    },
+    "partitions": [],
+    "freezes": [
+     {
+      "at": 113256,
+      "dur": 59432
+     }
+    ],
+    "reloads": [],
+    "hides": [],
+    "sessionFailP": 0,
+    "kid": {
+     "pCorrect": 0.86,
+     "minMs": 2851,
+     "maxMs": 9765,
+     "slowP": 0.08
+    },
+    "again": {
+     "p": 0.3,
+     "p2": 0.6,
+     "max": 2
+    },
+    "intents": [
+     {
+      "at": 2090,
+      "act": "join",
+      "via": "list",
+      "target": "P0",
+      "pick": "random",
+      "tries": 5
+     }
+    ],
+    "ladderer": false,
+    "afterReload": null
+   }
+  ],
+  "adversary": null
+ }
+}
