@@ -80,7 +80,16 @@ def auto_section():
         return '（找不到 origin/main，没法自动统计 —— 先 `git fetch origin main`）'
     commits = len([l for l in git('rev-list', base + '..HEAD').split('\n') if l.strip()])
     groups = {}
-    for line in git('diff', '--numstat', base, 'HEAD').split('\n'):
+    # 和「工作区」比，不和 HEAD 比：发版时升版本号、写说明都还没提交，和 HEAD 比会漏掉这几十个文件（11-04 实测漏 63 个）
+    lines_ = git('diff', '--numstat', base).split('\n')
+    for f in git('ls-files', '--others', '--exclude-standard').split('\n'):  # 还没 git add 的新文件
+        if f.strip() and os.path.isfile(os.path.join(ROOT, f)):
+            try:
+                n = len(open(os.path.join(ROOT, f), encoding='utf-8').read().split('\n'))
+            except Exception:
+                n = 0
+            lines_.append('%d\t0\t%s' % (n, f))
+    for line in lines_:
         m = re.match(r'(\S+)\t(\S+)\t(.+)', line)
         if not m:
             continue
@@ -89,7 +98,8 @@ def auto_section():
         a = int(add) if add.isdigit() else 0
         r = int(rem) if rem.isdigit() else 0
         groups.setdefault(kind(path), []).append((a + r, a, r, path))
-    lines = ['从上一个正式版（main，%s）到现在：%d 个提交。' % (base[:7], commits), '']
+    dirty = bool(git('status', '--porcelain').strip())
+    lines = ['从上一个正式版（main，%s）到现在：%d 个提交%s。' % (base[:7], commits, '（另有还没提交的改动，也算在下面）' if dirty else ''), '']
     for k in ('产品（会部署到网站的）', '测试', '工具', '文档'):
         items = sorted(groups.get(k, []), reverse=True)
         if not items:
