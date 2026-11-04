@@ -44,10 +44,21 @@ async function phone(name, user, nick) {
   return p;
 }
 const friendForeign = () => H.foreignWrites(emu, 'hansen_friends').concat(H.foreignWrites(emu, 'hansen_friend_msgs'));
+/* 🔴审查 T11：真云端读有延迟（最终一致）—— 刚写的别人要过一会儿才读得到。这里按 300 毫秒延迟跑，
+   每一项「一次刷新（15 秒）之内收敛」就算对：好友页 15 秒刷一次，孩子看到的就是这个 */
+async function converge(fn, good, ms = 15000) {
+  const t0 = Date.now(); let last = null;
+  while (Date.now() - t0 < ms) {
+    last = await fn();
+    if (good(last)) return last;
+    await H.sleep(700);
+  }
+  return last;
+}
 
 async function run(mode) {
   t.section(`READONLY · ${mode}`);
-  emu = H.makeEmulator({ knobs: { permissionMode: mode, latencyMs: 40, jitterMs: 60 } });
+  emu = H.makeEmulator({ knobs: { permissionMode: mode, latencyMs: 40, jitterMs: 60, consistencyLagMs: 300 } });
   emu.seedUser({ username: 'alice_fr', password: 'pw123456', name: 'Alice' });
   emu.seedUser({ username: 'bob_fr', password: 'pw123456', name: 'Bob' });
   const A = await phone('A', 'alice_fr', '小爱'), B = await phone('B', 'bob_fr', '小博');
@@ -69,12 +80,12 @@ async function run(mode) {
   await t.ok(beat && beatB && beat !== beatB, `在线心跳写上了，各自认得出自己的记录（${String(beat).slice(-6)} / ${String(beatB).slice(-6)}）`, () => explain());
   const addAB = await A.eval((c) => window.HansenFriends.addFriend(c), B.cid);
   await t.ok(addAB && addAB.ok && !addAB.mutual, `★ A 加 B：成功，B 还没加回 → 待确认（${j(addAB)}）`, () => explain());
-  const lB1 = await B.eval(() => window.HansenFriends.listFriends());
+  const lB1 = await converge(() => B.eval(() => window.HansenFriends.listFriends()), (r) => r && r.ok && (r.incoming || []).some((x) => x.cid === A.cid));
   await t.ok(lB1 && lB1.ok && (lB1.incoming || []).some((x) => x.cid === A.cid), `★ B 看到「小爱想加你为好友」（${j(lB1 && lB1.incoming)}）`, () => explain());
   const addBA = await B.eval((c) => window.HansenFriends.addFriend(c), A.cid);
   await t.ok(addBA && addBA.ok && addBA.mutual === true, `★ B 加回 A：直接互为好友（${j(addBA)}）`, () => explain());
-  const lA2 = await A.eval(() => window.HansenFriends.listFriends());
-  const lB2 = await B.eval(() => window.HansenFriends.listFriends());
+  const lA2 = await converge(() => A.eval(() => window.HansenFriends.listFriends()), (r) => ((r && r.friends) || []).some((x) => x.cid === B.cid && !x.pending && x.online === true));
+  const lB2 = await converge(() => B.eval(() => window.HansenFriends.listFriends()), (r) => ((r && r.friends) || []).some((x) => x.cid === A.cid && !x.pending));
   const fa = ((lA2 && lA2.friends) || []).find((x) => x.cid === B.cid), fb = ((lB2 && lB2.friends) || []).find((x) => x.cid === A.cid);
   await t.ok(fa && !fa.pending && fb && !fb.pending, '★ 两边都是正式好友', () => explain(j({ lA2, lB2 })));
   await t.ok(fa && fa.online === true && fa.name === '小博', `A 看到 B 刚才还在线 + 名字（${j(fa)}）`);
@@ -82,7 +93,7 @@ async function run(mode) {
 
   const sent = await B.eval((c) => window.HansenFriends.sendQuick(c, 'pk'), A.cid);
   await t.ok(sent && sent.ok, `B 给 A 发「来一局？」（${j(sent)}）`, () => explain());
-  const inb = await A.eval(() => window.HansenFriends.inbox());
+  const inb = await converge(() => A.eval(() => window.HansenFriends.inbox()), (r) => r && r.ok && (r.msgs || []).some((m) => m.from === B.cid));
   await t.ok(inb && inb.ok && inb.msgs.some((m) => m.from === B.cid && /来一局/.test(m.text) && !m.suspicious), `★ A 收到 B 的招呼，发件人可信（${j(inb && inb.msgs)}）`, () => explain());
 
   /* ④ 好友页：层级、内容、看门狗 */
@@ -106,9 +117,9 @@ async function run(mode) {
   await A.eval(() => window.HansenFriendsUI.close());
 
   const rm = await A.eval((c) => window.HansenFriends.removeFriend(c), B.cid);
-  const lB3 = await B.eval(() => window.HansenFriends.listFriends());
+  const lB3 = await converge(() => B.eval(() => window.HansenFriends.listFriends()), (r) => { const f = ((r && r.friends) || []).find((x) => x.cid === A.cid); return f && f.pending === true; });
   const fb3 = ((lB3 && lB3.friends) || []).find((x) => x.cid === A.cid);
-  const lA3 = await A.eval(() => window.HansenFriends.listFriends());
+  const lA3 = await converge(() => A.eval(() => window.HansenFriends.listFriends()), (r) => r && r.ok && !(r.friends || []).some((x) => x.cid === B.cid));
   await t.ok(rm && rm.ok && fb3 && fb3.pending === true && lA3 && lA3.ok && !(lA3.friends || []).some((x) => x.cid === B.cid),
     '★ A 删 B：A 的列表里没有 B 了，B 那边变回「等他也加你」', () => explain(j({ rm, lB3, lA3 })));
   await t.ok(friendForeign().length === 0, `★ 删好友也只删自己那条（尝试改别人的 ${friendForeign().length} 次）`, () => explain(j(friendForeign().slice(0, 3))));
@@ -140,7 +151,8 @@ async function run(mode) {
   });
   const pa = await seed(A), pb = await seed(B);
   await t.ok(pa && pa.ok && pb && pb.ok, `★ 两人上传天梯分成功（${j({ pa, pb })}）`, () => explain());
-  const top = await B.eval(async () => { window.HansenLadderBoard._clearCacheForTest(); return window.HansenLadderBoard.fetchTop(); });
+  /* 不清缓存：孩子刚传完分就打开榜（以前榜在本机缓存 60 秒，刚传完那一下拿到的旧榜一挂一分钟） */
+  const top = await converge(() => B.eval(() => window.HansenLadderBoard.fetchTop()), (r) => r && r.ok && (r.list || []).length === 2 && r.myRank > 0);
   await t.ok(top && top.ok && top.list.length === 2 && top.list.some((x) => x.name === '小爱') && top.list.some((x) => x.name === '小博') && top.myRank > 0,
     `★ 榜上有两个人（名字是自己起的），也找得到自己（${j(top && top.list)}）`, () => explain());
   const f1 = emu.fault({ action: 'database.updateDocument', collection: 'sb_profile', do: 'code', code: 'DATABASE_PERMISSION_DENIED', message: 'Permission denied', times: 3 });
