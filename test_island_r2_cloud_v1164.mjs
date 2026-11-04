@@ -114,13 +114,22 @@ async function appHidden(G, hidden) {
     await t.ok(wait1 === false && liveRooms(G).length === 0 && !listed1, `第 1 下返回（房还没开好）：没画「等对手进来」、云端没有开着的房、别人列不到（等对手：${wait1}；开着 ${liveRooms(G).length} 间；别人列表里${listed1 ? '有' : '没有'}）`, () => explain());
     await G.page.goBack();
     await H.sleep(800);
-    await G.page.goBack();
-    await H.sleep(1500);
-    const hidden = await wrapHidden(G);
+    /* 第 3 下起：一直按到岛收起来（最多再按 4 下）。v1165「只退一步」下，中途岛里冒出来的弹窗（欢迎框、提示……）
+       每个都要先关掉，所以下数不是固定的 3 下（反复测试 10 轮里有 1 轮多要一下，本机常见）。
+       要守的是：每一下都不会让房开出来、最后能回到首页 —— 下数多了把多出来的那一层记下来 */
+    let hidden = false, presses = 2;
+    const extraLayers = [];
+    for (let i = 0; i < 5 && !hidden; i++) {
+      if (i > 0) extraLayers.push(await fr.evaluate(() => { const top = [...document.querySelectorAll('body > *')].filter((e) => { const cs = getComputedStyle(e); return (cs.position === 'fixed' || cs.position === 'absolute') && cs.display !== 'none' && e.getClientRects().length && +cs.zIndex > 10; }).map((e) => e.id || e.className || e.tagName); return top.slice(-2).join('+') || '（看不出）'; }).catch(() => '?'));
+      await G.page.goBack();
+      presses++;
+      await H.sleep(1500);
+      hidden = await wrapHidden(G);
+    }
     const uiOn = await fr.evaluate(() => !!document.querySelector('#hsn_pkroom_screen.on')).catch(() => null);
     const lr = await H.room(K, 'listRooms');
     const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === G.nick));
-    await t.ok(hidden && uiOn === false, `按返回键：岛收起来了，藏起来的岛里也没有「等对手进来」（岛收起：${hidden}；房间层开着：${uiOn}）`, () => explain());
+    await t.ok(hidden && uiOn === false, `按返回键：岛收起来了，藏起来的岛里也没有「等对手进来」（岛收起：${hidden}；房间层开着：${uiOn}；按了 ${presses} 下${extraLayers.length ? '，多出来的层：' + extraLayers.join(' / ') : ''}）`, () => explain());
     await t.ok(liveRooms(G).length === 0 && !listed, `云端没有开着的房、别人也列不到（开着 ${liveRooms(G).length} 间；别人列表里${listed ? '有' : '没有'}）`, () => explain());
   });
 
