@@ -105,9 +105,31 @@ jobs:
         uses: actions/upload-artifact@v4
         with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
 
+  selftest:
+    name: 守卫自证（发版闸门同款）
+    needs: gate
+    runs-on: ubuntu-latest
+    # 为什么单独一台（执行主义）：v1164 发版前在副本上跑闸门，「文案一致」的自证样本打空了 —— 这一项以前只有发版那一刻才跑，
+    #   等到合进 main 才发现就发不出版。现在每次推送都跑；约 13 分钟，和 8 份测试同时跑，不拖慢结论。
+    concurrency: { group: 'auto-tests-selftest-${{ github.ref }}', cancel-in-progress: true }
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13', cache: pip, cache-dependency-path: requirements-audit.txt }
+      - name: 装依赖
+        run: python -m pip install --disable-pip-version-check -q -r requirements-audit.txt
+      - name: 每道守卫注入故障样本，必须变红
+        run: mkdir -p .siphon; python3 jarvis_selftest.py > .siphon/selftest.log 2>&1; echo $? > .siphon/selftest_rc; tail -12 .siphon/selftest.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: siphon-logs-selftest, path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
+
   summary:
     name: 结论
-    needs: [gate, quick, tests]
+    needs: [gate, quick, tests, selftest]
     if: always() && needs.gate.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -131,4 +153,5 @@ jobs:
         env:
           QUICK: ${{ needs.quick.result }}
           TESTS: ${{ needs.tests.result }}
+          SELFTEST: ${{ needs.selftest.result }}
         run: python3 logs/siphon-logs-quick/siphon_summary.py tests

@@ -34,10 +34,18 @@ def tests():
     quick_ok = os.environ.get('QUICK') == 'success' and qrc == ['0']
     want = int(os.environ.get('SHARDS', '8'))
     shards = len(glob.glob('logs/*/shard_*.json'))
-    ok = quick_ok and os.environ.get('TESTS') == 'success' and not fails and shards == want
+    # 守卫自证（发版闸门同款）：每道守卫注入故障样本必须变红；以前只在发版那一刻跑
+    src = [open(f).read().strip() for f in glob.glob('logs/siphon-logs-selftest/selftest_rc')]
+    st_ok = os.environ.get('SELFTEST', 'success') == 'success' and src == ['0']
+    st_log = ''
+    for f in glob.glob('logs/siphon-logs-selftest/selftest.log'):
+        st_log = open(f, encoding='utf-8', errors='replace').read()
+    dead = [l.strip()[2:] for l in st_log.split('\n') if l.startswith('   - ')]
+    ok = quick_ok and st_ok and os.environ.get('TESTS') == 'success' and not fails and shards == want
     out = ['## ' + ('✅ 全部通过' if ok else '❌ 没通过'), '',
            '| 项目 | 结果 |', '|---|---|',
            '| 语法 + 三道快检 | %s |' % ('通过' if quick_ok else '没过（见附件 siphon-logs-quick）'),
+           '| 守卫自证（发版闸门同款） | %s |' % ('通过' if st_ok else ('失灵：' + '、'.join(dead[:6]) if dead else '没跑完（见附件 siphon-logs-selftest）')),
            '| 测试 | %d 个 · 通过 %d · 失败 %d（交回结果的有 %d/%d 份） |' % (len(res), len(res) - len(fails), len(fails), shards, want)]
     # 完美主义：修问题不许带入新问题 —— 和同一分支上一次的结果比，「上次通过、这次失败」单独列出来
     prev = {}
