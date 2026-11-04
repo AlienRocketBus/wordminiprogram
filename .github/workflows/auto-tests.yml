@@ -1,0 +1,134 @@
+# 自动体检：全部测试在 GitHub 的机器上跑（8 台同时跑），不占开发机、不花 AI 的 token。
+#
+# 什么时候跑：
+#   · 推送到 claude/** 开发分支时自动跑 —— 但「WIP 备份」提交不跑（省 GitHub 的免费分钟数），
+#     提交说明里写了 [测试] 的 WIP 照样跑；只改了 攻坚笔记/ 或 .md 文档的推送也不跑。
+#   · 在 Actions 页面点「Run workflow」手动跑（任何分支）。
+# 跑什么：和本机 `python3 一键体检.py` 完全一样的判定 —— 语法 + 三道快检 + 全部 test_*.mjs，
+#   失败的测试串行再跑一次，两次都失败才算失败（并行假失败很常见）。
+# 结果：每次运行的「Summary」页有一张中文结论表；详细日志在附件 siphon-logs-* 里。
+# 规则说明见 攻坚笔记/虹吸工作法.md。
+name: 自动体检
+
+on:
+  push:
+    branches: ['claude/**']
+    paths-ignore: ['攻坚笔记/**', '**.md', 'docs/**']
+  workflow_dispatch:
+
+concurrency:
+  # 同一个分支又推了新提交：旧的那次直接取消，只测最新的（省分钟数）
+  group: auto-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SHARDS: 8
+  SIPHON_PARALLEL: 2
+
+jobs:
+  gate:
+    name: 要不要跑
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      !startsWith(github.event.head_commit.message, 'WIP') ||
+      contains(github.event.head_commit.message, '[测试]')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "要跑：${{ github.sha }}"
+
+  quick:
+    name: 语法 + 三道快检
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13', cache: pip, cache-dependency-path: requirements-audit.txt }
+      - name: 装依赖
+        run: |
+          python -m pip install --disable-pip-version-check -q -r requirements-audit.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - name: 语法 + 资源检查 + 守卫 + 零测试桩冒烟
+        run: python3 一键体检.py --quick
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: siphon-logs-quick, path: .siphon/, retention-days: 14, if-no-files-found: ignore }
+
+  tests:
+    name: 测试 第 ${{ matrix.shard }} 份
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13', cache: pip, cache-dependency-path: requirements-audit.txt }
+      - name: 装依赖
+        run: |
+          python -m pip install --disable-pip-version-check -q -r requirements-audit.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - name: 跑这一份测试
+        run: python3 一键体检.py --shard ${{ matrix.shard }}/${{ env.SHARDS }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: 'siphon-logs-${{ matrix.shard }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore }
+
+  summary:
+    name: 结论
+    needs: [gate, quick, tests]
+    if: always() && needs.gate.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'siphon-logs-*', path: logs }
+      - name: 汇总成一张表
+        env:
+          QUICK: ${{ needs.quick.result }}
+          TESTS: ${{ needs.tests.result }}
+        run: |
+          python3 - <<'PY'
+          import glob, json, os
+          res = {}
+          for f in glob.glob('logs/*/shard_*.json'):
+              res.update(json.load(open(f, encoding='utf-8')))
+          fails = sorted(t for t, r in res.items() if r)
+          quick = ''
+          for f in glob.glob('logs/siphon-logs-quick/SUMMARY.txt'):
+              quick = open(f, encoding='utf-8').read().strip()
+          shards = len(glob.glob('logs/*/shard_*.json'))
+          ok = os.environ['QUICK'] == 'success' and os.environ['TESTS'] == 'success' and not fails and shards == int(os.environ.get('SHARDS', '8'))
+          out = ['## ' + ('✅ 全部通过' if ok else '❌ 没通过'), '',
+                 '| 项目 | 结果 |', '|---|---|',
+                 '| 语法 + 三道快检 | %s |' % ('通过' if os.environ['QUICK'] == 'success' else '没过（见附件 siphon-logs-quick）'),
+                 '| 测试 | %d 个 · 通过 %d · 失败 %d（交回结果的有 %d/%s 份） |' % (len(res), len(res) - len(fails), len(fails), shards, os.environ.get('SHARDS', '8'))]
+          if fails:
+              out += ['', '### 失败的测试（两次都失败）', '']
+              out += ['- `%s` — %s' % (t, str(res[t]).replace('|', '/')) for t in fails[:40]]
+          if quick and os.environ['QUICK'] != 'success':
+              out += ['', '### 快检输出', '', '```', quick[-1500:], '```']
+          open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8').write('\n'.join(out) + '\n')
+          print('\n'.join(out))
+          raise SystemExit(0 if ok else 1)
+          PY
