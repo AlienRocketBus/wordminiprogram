@@ -16,11 +16,6 @@ on:
     paths-ignore: ['攻坚笔记/**', '**.md', 'docs/**']
   workflow_dispatch:
 
-concurrency:
-  # 同一个分支又推了新提交：旧的那次直接取消，只测最新的（省分钟数）
-  group: auto-tests-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -43,6 +38,9 @@ jobs:
     name: 语法 + 三道快检
     needs: gate
     runs-on: ubuntu-latest
+    # 同一个分支又推了要测的新提交：旧的那次取消，只测最新的（省分钟数）。
+    # 写在任务上、不写在整个流程上 —— 否则一个不测的 WIP 备份推上来，也会把正在跑的测试取消掉（11-04 实测踩到）。
+    concurrency: { group: 'auto-tests-quick-${{ github.ref }}', cancel-in-progress: true }
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +67,7 @@ jobs:
     name: 测试 第 ${{ matrix.shard }} 份
     needs: gate
     runs-on: ubuntu-latest
+    concurrency: { group: 'auto-tests-${{ matrix.shard }}-${{ github.ref }}', cancel-in-progress: true }
     timeout-minutes: 120
     strategy:
       fail-fast: false
