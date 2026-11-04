@@ -137,7 +137,6 @@ const BAD_DB = /数据库这次没让读写|数据库拒绝了|云端设置还�
     names = {};
     const A = await phone('戊', '小蜂戊');
     await toLadderHome(A);
-    await H.sleep(61000 - 0);   /* 过了「刚登录 60 秒」的保护期（那 60 秒里不清登录记录） */
     emu.revokeSessions(A.uid);
     await A.tap('#ldGo');
     const w = await watch(A, /云端登录过期|排位要先登录|数据库这次没让读写|数据库拒绝了|连不上网络|云端设置还差一步/, 90000);
