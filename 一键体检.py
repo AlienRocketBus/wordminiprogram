@@ -141,7 +141,12 @@ def run_list(mod, tests, parallel):
             return t, None
         if rc == 124:
             return t, '超时'
-        bad = [ln.strip() for ln in out.split('\n') if 'XX' in ln or 'Error' in ln or '✗' in ln]
+        # 摘要要是真正的错误那一行：先找测试自己的失败标记，再找「xxxError: 原因」，最后才是带 Error 的任意一行
+        #   （11-04 实测：以前取到的是对象打印里的 name: 'Error'，看不出错在哪，只能去下载日志）
+        lines = [ln.strip() for ln in out.split('\n') if ln.strip()]
+        bad = ([ln for ln in lines if 'XX' in ln or '✗' in ln]
+               or [ln for ln in lines if re.search(r'\w*Error(\s*\[\w+\])?:\s*\S', ln)]
+               or [ln for ln in lines if 'Error' in ln])
         return t, (bad[0] if bad else 'exit %d' % rc)[:160]
 
     with ThreadPoolExecutor(max_workers=parallel) as ex:
