@@ -149,8 +149,20 @@
       return t !== '4g';
     }catch(e){ return true; }
   }
+  /* 🔴v1165 复查第 2 轮：首页外壳里收起来的岛（孩子点 🗺️ 回首页，岛框 display:none 保活）—— iframe 藏起来时
+     visibilityState 还是 visible，以前它的单词音频预载照样跑（4G 上回首页 20 秒又下了 1.16MB 录音 + 230KB 图）。
+     外壳收起 / 再露出岛时会发 hsn-shell-hidden / hsn-shell-shown（index.html），这里同时直接看岛框露没露着。 */
+  function _hsnShellHidden(){
+    try{
+      if(window.parent === window) return false;
+      var fe = window.frameElement; if(!fe || !fe.closest) return false;
+      var wrap = fe.closest('#islandFrameWrap');
+      return !!(wrap && wrap.style.display === 'none');
+    }catch(e){ return false; }
+  }
   function _hsnPageVisible(){
     try{
+      if(_hsnShellHidden()) return false;
       if(typeof document.visibilityState==='string') return document.visibilityState==='visible';
       return !document.hidden;
     }
@@ -173,6 +185,9 @@
   try{
     document.addEventListener('visibilitychange',_wakeBackgroundWaiters,{passive:true});
     window.addEventListener('online',_wakeBackgroundWaiters,{passive:true});
+    /* 🔴v1165 复查第 2 轮：外壳收起这个岛 → 马上停下在途的预载（放回队首，再露出来时接着下）；再露出来 → 接着下 */
+    window.addEventListener('hsn-shell-hidden',function(){ for(var i=0;i<_batches.length;i++){ try{ _batches[i](); }catch(e){} } },{passive:true});
+    window.addEventListener('hsn-shell-shown',_wakeBackgroundWaiters,{passive:true});
     var _conn=_hsnConnection();if(_conn&&typeof _conn.addEventListener==='function')_conn.addEventListener('change',_wakeBackgroundWaiters);
     window.addEventListener('pagehide',function(){_backgroundWaiters=[];},{once:true});
   }catch(e){}
@@ -181,9 +196,72 @@
     var until = _holdUntil();
     return Date.now() < until;
   }
+  /* ───────── v1165 流量预算：只替孩子准备"他真的会去"的地方 ─────────
+     后台预载以前不看孩子玩没玩过：新孩子一进首页就被下 6 个岛 + 星海地图 + 3 张 Boss 图，
+     每进一个岛还要后台跑一遍星海页。下面三个判断由各预载模块共用（同一处定义，不各写一份）。 */
+  var ROOM_SEEN_PREFIX = 'hansen_room_opened_v1165_';   // + land / season
+  var BOSS_WALL_SEEN = 'hansen_boss_wall_seen_v1165';
+  function _hsnLsKeys(){
+    var out = [];
+    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k) out.push(k); } } catch(e){}
+    return out;
+  }
+  /* 玩过 = 任意一个岛答过题或学会过词（「我的学习」快照 / 岛存档）。只读不写。 */
+  function _hsnKidHasPlayed(){
+    var keys = _hsnLsKeys();
+    /* 先看小小的「我的学习」快照，看不出来再翻岛存档（岛存档大，少解析几份） */
+    var snaps = [], saves = [];
+    for(var j = 0; j < keys.length; j++){
+      if(keys[j].indexOf('hsn_progress:') === 0) snaps.push(keys[j]);
+      else if(/^wordIsland[A-Z][A-Za-z0-9]*$/.test(keys[j])) saves.push(keys[j]);
+    }
+    keys = snaps.concat(saves);
+    for(var i = 0; i < keys.length; i++){
+      var k = keys[i];
+      var o = null;
+      try { o = JSON.parse(localStorage.getItem(k) || 'null'); } catch(e){ o = null; }
+      if(!o || typeof o !== 'object') continue;
+      if(Number(o.ans) > 0 || Number(o.totalAnswers) > 0 || Number(o.learned) > 0 ||
+         (Array.isArray(o.learned) && o.learned.length > 0)) return true;
+    }
+    return false;
+  }
+  /* 学完了一个普通岛 = 某个普通岛（不是星海、不是单词大陆）的快照里「已学会」达到全岛词数 */
+  function _hsnBasicIslandDone(){
+    var keys = _hsnLsKeys();
+    for(var i = 0; i < keys.length; i++){
+      var k = keys[i];
+      if(k.indexOf('hsn_progress:') !== 0) continue;
+      var name = k.slice('hsn_progress:'.length);
+      if(name.indexOf('星海') >= 0 || name.indexOf('单词大陆') === 0) continue;
+      var o = null;
+      try { o = JSON.parse(localStorage.getItem(k) || 'null'); } catch(e){ o = null; }
+      if(o && Number(o.totalWords) > 0 && Number(o.learned) >= Number(o.totalWords)) return true;
+    }
+    return false;
+  }
+  function _hsnRoomKey(key){ return /^(land|season)$/.test(String(key)) ? ROOM_SEEN_PREFIX + key : ''; }
+  function _hsnRoomOpened(key){
+    var k = _hsnRoomKey(key); if(!k) return false;
+    try { return localStorage.getItem(k) === '1'; } catch(e){ return false; }
+  }
+  function _hsnMarkRoomOpened(key){
+    var k = _hsnRoomKey(key); if(!k) return;
+    try { localStorage.setItem(k, '1'); } catch(e){}
+  }
+  function _hsnBossWallSeen(){ try { return localStorage.getItem(BOSS_WALL_SEEN) === '1'; } catch(e){ return false; } }
+  function _hsnMarkBossWallSeen(){ try { localStorage.setItem(BOSS_WALL_SEEN, '1'); } catch(e){} }
+
   try {
     window.HansenPreloadPolicy = Object.freeze({
       version: 'v960',
+      /* v1165：孩子玩过没有 / 真的打开过某个星海房间没有 / 打开过 Boss 选关墙没有 */
+      kidHasPlayed: _hsnKidHasPlayed,
+      basicIslandDone: _hsnBasicIslandDone,
+      roomOpened: _hsnRoomOpened,
+      markRoomOpened: _hsnMarkRoomOpened,
+      bossWallSeen: _hsnBossWallSeen,
+      markBossWallSeen: _hsnMarkBossWallSeen,
       /* 只有浏览器明确报告 4G、非省流量、页面可见时才允许批量后台请求。
          网络信息缺失必须保守按“未知”处理，不能把 iOS/微信默认当成 Wi-Fi。 */
       canBackgroundDownload: _hsnCanBackgroundDownload,
@@ -201,12 +279,22 @@
 
   function preloadBossImages(){
     var i = 1;
-    // 按章预载: 只预载到"当前进度 + 1 章(+4 关)", 上限 20.
-    // 新玩家只预载 lv01-05 (~1MB), 不再一上来就拉全部 17-20 张 (~3.5MB).
-    // 没预载到的高级 boss 仍会在进入那场 boss 战时按需加载 (无害, 不影响可玩性).
+    // 没预载到的 boss 仍会在选关墙 / 进入那场 boss 战时按需加载 (无害, 不影响可玩性).
     if(!_hsnCanBackgroundDownload()){_waitForBackgroundResume(preloadBossImages);return;} /* 条件改善后事件驱动恢复 */
-    var CAP = 8;
-    try { CAP = Math.min(8, maxBossUnlocked() + 2); } catch(e){ CAP = 8; }   /* v932: 20→8, +4→+2 */
+    /* v1165：只预下「现在能打的那一关 + 下一关」两张头像（旧版是 lv01 起一路下到 +2，最多 8 张）。
+       已经打过的关以前就下过了；没解锁的关在选关墙上只显示 🔒，用不到图。
+       星海 / 单词大陆的 Boss 用自己的图，lv01~20 一张也用不上；首页上还没玩过的新孩子也先不下。 */
+    try { if(/island_(?:season|land\d+)\.html/i.test(location.pathname || '')) return; } catch(e){}
+    try { if(document.getElementById('islandFrameWrap') && !_hsnKidHasPlayed()) return; } catch(e){}
+    /* 按真实进度挑（S.bossUnlocked），不按 72 小时全开放期的「全部可打」——那期间选关墙自己会按需加载 */
+    var cur = 1;
+    try {
+      cur = (window.S && typeof window.S.bossUnlocked === 'number') ? window.S.bossUnlocked : maxBossUnlocked();
+    } catch(e){ cur = 1; }
+    cur = Math.floor(cur);
+    if(!(cur >= 1)) cur = 1; if(cur > 20) cur = 20;
+    i = cur;
+    var CAP = Math.min(20, cur + 1);
     function loadNextImg(){
       if(i > CAP) return;
       if(!_hsnCanBackgroundDownload()){_waitForBackgroundResume(loadNextImg);return;} /* 事件驱动恢复，不永久停也不每秒轮询 */

@@ -82,7 +82,10 @@
     var w = coins(); if(!w) return false;
     try{
       if(typeof w.hasAward === 'function' && w.hasAward(id)) return false;
-      return w.award(id, amount) === true && (typeof w.hasAward !== 'function' || w.hasAward(id));
+      var paid = w.award(id, amount) === true && (typeof w.hasAward !== 'function' || w.hasAward(id));
+      /* 🔴v1165 复查：记进这一局的「复习奖励」，结算页写的金币才和钱包对得上（模板 markMode 开局清零） */
+      if(paid){ try{ window._sessionReviewCoins = (window._sessionReviewCoins || 0) + (amount | 0); }catch(eS){} }
+      return paid;
     }catch(e){ return false; }
   }
   function payGemOnce(id, amount){
@@ -118,6 +121,8 @@
       if(!s.hadDue || s.cleared) return false;
       s.cleared = 1; writeJson(K_DAY, s);
       if(payCoinOnce('rvrw:'+ymd()+':todaydone', 20)) bumpDay(0, 20);
+      /* 🔴v1165 复查：横幅说「全部到期清零」的同一时刻，每日任务「清空今日复习」也算完成（以前它永远停在 0） */
+      try{ if(typeof window.setQuest === 'function') window.setQuest('reviewClear', 1); }catch(eQ){}
       tickStreak();
       toast('✅ 全部到期清零！<b>+20 金币</b> · 连击已保住 🔥');
       return true;
@@ -147,7 +152,18 @@
     if(typeof s.grads !== 'number' || s.grads < 0) s.grads = 0;
     if(typeof s.patrols !== 'number' || s.patrols < 0) s.patrols = 0;
     if(typeof s.tier !== 'number' || s.tier < 0) s.tier = 0;
+    if(typeof s.reviews !== 'number' || !(s.reviews >= 0)) s.reviews = 0;
     return s;
+  }
+  /* 🔴v1165 复查：终身「复习了几次」—— 今日复习每过一张卡 +1、在任何玩法里答对一个到期词（记忆盒前进）+1。
+     成就「复习次数达到 20 次」「累计复习 100 个单词」以前数的是终身毕业词数（一个词要练一个月才毕业），天天复习也一直是 0。
+     纯计数，不发金币（刷不出东西）。 */
+  function noteReview(n){
+    try{
+      var s = lifeState();
+      s.reviews = (s.reviews | 0) + Math.max(1, n | 0);
+      writeJson(K_LIFE, s);
+    }catch(e){}
   }
   function hunterTitle(grads){
     var t = '新手猎人 🌱', next = HUNTER_TIERS[0].n;
@@ -251,7 +267,11 @@
    * 逐条向下级联错位显示(245/293/341px,最多3档后并档)，金币音效每爆发只响一次——
    * 奖励瀑布可读又不吵。纯同步时间戳判断,零定时器,行为可测。 */
   var _fcLastAt = 0, _fcBurst = 0;
+  /* 🔴v1165: 真实答题吸收器接通后，一次答对可能同时有「+2 复习金币」和「📦 记忆盒 +1」。
+     同一题的几条合成一条飘字，连答两题也只占两档，不叠在一起、不刷屏。 */
+  var _fcBatch = null;
   function floatCoin(text){
+    if(_fcBatch){ _fcBatch.push(text); return; }
     try{
       var now = Date.now();
       if(now - _fcLastAt > 1200) _fcBurst = 0;
@@ -278,7 +298,8 @@
        所以改成**转发**：有统一实现就用它，没有才走本地这份。
        这样样式立刻统一，而每个模块的调用一行都不用动。 */
     try {
-      if (window.HansenToast && HansenToast.say) { HansenToast.say(msg); return; }
+      /* v1165: 统一提示按纯文字显示，这里的 <b> 会原样露出来（「<b>+20 金币</b>」），先去掉标签 */
+      if (window.HansenToast && HansenToast.say) { HansenToast.say(String(msg).replace(/<[^>]*>/g, '')); return; }
     } catch (e) {}
 
     try{
@@ -328,7 +349,7 @@
     try{
       var HC = window.HansenCanonical;
       if(!HC || typeof HC.read !== 'function') return out;
-      var st = HC.read();
+      var st = (typeof HC.readRO === 'function') ? HC.readRO() : HC.read();   // v1165 只读，不复制整份账本
       var islands = (st && st.islands && typeof st.islands === 'object') ? st.islands : {};
       var today = dayNum(ymd());
       var curId = '';
@@ -349,6 +370,13 @@
           if((e.box|0) >= 5) return;
           if(dayNum(e.due) <= today) due++;
         });
+        /* 🔴v1165: 错题本清零的词仍在复习计划里，到期一样要算 */
+        Object.keys(sr).forEach(function(k){
+          if(Number(wr[k]) > 0) return;                              // 上面已算过
+          var e = sr[k];
+          if(!e || typeof e !== 'object' || (e.box|0) >= 5) return;
+          if(dayNum(e.due) > 0 && dayNum(e.due) <= today) due++;
+        });
         if(due > 0){
           out.globalDue += due;
           out.islandsWithDue++;
@@ -361,7 +389,14 @@
     return out;
   }
 
-  function payGraduation(slot){
+  /* 🔴v1165: 这个词还在复习计划里吗(错题本清零≠毕业)。还在 → 巡检等真正毕业时再排 */
+  function stillPlanned(idx){
+    try{
+      var e = window.S && S.srs && S.srs[idx];
+      return !!(e && typeof e === 'object' && (e.box|0) < 5);
+    }catch(e2){ return false; }
+  }
+  function payGraduation(slot, planned){
     if(!gradEligible(slot)){ clearSince(slot); return false; }
     var gid = 'rvrw:'+ymd()+':'+slot+':grad';
     if(!payCoinOnce(gid, 15)){ clearSince(slot); return false; }
@@ -381,7 +416,7 @@
       floatCoin('+15 毕业金 🎓');
     }
     bumpLife('grads');
-    schedulePatrol(slot, 1);
+    if(!planned) schedulePatrol(slot, 1);   // 还在计划里：等升满盒子毕业时(吸收器路径)再进巡检，不排两次
     if(st.grads >= 3 && islandWrongsEmpty()){
       if(payCoinOnce('rvrw:'+ymd()+':clearall', 30)){
         bumpDay(0, 30);
@@ -401,7 +436,7 @@
       break;
     }
     if(paidAny) bumpDay(0, paidAny);
-    if(nowZero) payGraduation(slot);
+    if(nowZero) payGraduation(slot, stillPlanned(idx));
     refreshUI();
   }
 
@@ -413,6 +448,13 @@
       var w0 = 0;
       try{ w0 = safeWrong(window.S && S.wrongs ? S.wrongs[idx] : 0); }catch(e){}
       var r = orig.apply(this, arguments);
+      var _outerBatch = _fcBatch; if(!_outerBatch) _fcBatch = [];
+      try{ return afterAnswer(idx, correct, w0, r); }
+      finally{
+        if(!_outerBatch){ var msgs = _fcBatch; _fcBatch = null; if(msgs && msgs.length) floatCoin(msgs.join(' · ')); }
+      }
+    }
+    function afterAnswer(idx, correct, w0, r){
       try{
         var w1 = safeWrong(window.S && S.wrongs ? S.wrongs[idx] : 0);
         if(w1 > w0 && w0 === 0) stampSince(slotOf(idx));
@@ -429,11 +471,16 @@
         var HR = window.HansenReview;
         if(HR && typeof HR.absorbRealAnswer === 'function'){
           var ab = HR.absorbRealAnswer(idx, correct === true);
+          /* 🔴v1165 复查：答错的词当场进复习计划、今天就到期 —— 这一刻就记下「今天有过到期」（顺便让横幅显示新的到期数）。
+             以前只在开机 / 切回前台 / 答对时才记：孩子当天在复习中心把这些词都复习完，
+             不给「完成今日复习 +20」、连续复习天数不涨，「第一次回头」成就也不亮。 */
+          if(ab && ab.reason === 'missed' && ab.planned) refreshUI();
           if(ab && ab.advanced){
+            noteReview(1);   // 🔴v1165 复查：答对一个到期词 = 复习了一次
             if(ab.graduated){
               floatCoin('🎓 复习毕业！');
-              if(ab.hadWrong) payGraduation(slotOf(idx));
-              else schedulePatrol(slotOf(idx), 1);   /* 🔴刺二：纯SRS收尾毕业同样入巡检 */
+              /* 🔴刺二：纯SRS收尾毕业同样入巡检；🔴v1165 毕业金没发成(隔天规则/收据)也照样进巡检 */
+              if(!(ab.hadWrong && payGraduation(slotOf(idx)))) schedulePatrol(slotOf(idx), 1);
               refreshUI();
             }else{
               floatCoin('📦 记忆盒 +1 · '+(ab.gapDays||'?')+'天后再见');
@@ -492,10 +539,15 @@
   }
 
   /* 🔴刺二：毕业统一事件(hansen_review自评毕业分支调用)——毕业金+巡检调度一站式 */
-  function onGraduated(idx){
+  function onGraduated(idx, info){
     try{
       var slot = slotOf(idx);
-      payGraduation(slot);          /* 内部自带隔天资格+幂等收据+巡检调度 */
+      /* 🔴v1165: 复习计划和错题本分开以后，一个词会「毕业」两次：错题本隔天清零那天（发过 +15），
+       * 和后来复习计划升满盒子（今日复习自评）。后一次错题本里已经没有它 → 只排巡检，不再发第二份毕业金。
+       * 没发成（当天造的错词 / 当天已发）也照样进巡检，与真实答题毕业(吸收器)同一规则。
+       * 不带 info 的老调用照旧按「有错词」发。 */
+      var paid = !(info && info.hadWrong === false) && payGraduation(slot);   /* 内部自带隔天资格+幂等收据+巡检调度 */
+      if(!paid) schedulePatrol(slot, 1);
       refreshUI();
     }catch(e){}
   }
@@ -600,7 +652,7 @@
         iconHtml = '<span style="flex:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;'
           + 'background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.22),rgba(255,255,255,.06) 62%,transparent 72%);'
           + 'border-radius:50%" aria-hidden="true">'
-          + '<img src="'+m.img+'?v=1164" alt="" style="width:70px;height:70px;object-fit:contain;display:block;'
+          + '<img src="'+m.img+'?v=1165" alt="" style="width:70px;height:70px;object-fit:contain;display:block;'
           + 'filter:drop-shadow(0 3px 7px rgba(0,0,0,.32))" '
           + 'onerror="var s=document.createElement(\'span\');s.style.cssText=\'font-size:46px;line-height:1\';s.textContent=\''+m.icon+'\';this.replaceWith(s)"></span>';
       } else {
@@ -686,6 +738,8 @@
   window.HansenReviewRewardsV963 = {
     onTodayComplete: onTodayComplete,
     onGraduated: onGraduated,
+    lifetime: lifeState,
+    noteReview: noteReview,
     fillCenterSlot: fillCenterSlot,
     refresh: refreshUI,
     _debug: { ymd: ymd, dayNum: dayNum, streak: streak, dayState: dayState, sinceMap: sinceMap,

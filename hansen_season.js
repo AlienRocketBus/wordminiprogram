@@ -178,6 +178,17 @@
     }
     return null;  // 当前没有进行中的赛季(空窗期)
   }
+  // v1165: 番外篇无时间限制(v865)，以后加新赛季再加 S2。
+  //   过了 S1 的 end 日期，入口/面板/殿堂继续用「最近开始的那个赛季」，不能让首页唯一的单词大陆入口消失。
+  //   孩子把手机时间调到 S1 开始之前也照样显示第一个赛季。
+  function latestSeason(){
+    var t = todayStr(), best = null;
+    for(var i=0;i<SEASONS.length;i++){
+      if(SEASONS[i].start <= t) best = SEASONS[i];
+    }
+    return best || SEASONS[0] || null;
+  }
+  function activeSeason(){ return getCurrentSeason() || latestSeason(); }
   function getSeasonById(id){
     return (typeof id === 'string' && SEASON_BY_ID[id]) ? SEASON_BY_ID[id] : null;
   }
@@ -188,9 +199,10 @@
     var t = todayStr();
     var d = loadData();
     var out = [];
+    var serving = activeSeason();   // v1165: 还在当「当前赛季」用的那个不算绝版
     for(var i=0;i<SEASONS.length;i++){
       var s = SEASONS[i];
-      if(t > s.end){   // 赛季已结束
+      if(t > s.end && s !== serving){   // 赛季已结束
         out.push({
           id: s.id,
           name: s.name,
@@ -201,15 +213,16 @@
     }
     return out;
   }
-  // 赛季剩余天数
+  // 赛季剩余天数。v1165: 过了 end 日期返回 null(面板就不显示倒计时)，不再显示「还剩 0 天」。
   function daysLeft(season){
-    if(!season) return 0;
+    if(!season) return null;
     try {
+      if(todayStr() > season.end) return null;
       var end = new Date(season.end + 'T23:59:59');
       var now = new Date();
       var diff = Math.ceil((end - now) / 86400000);
-      return diff > 0 ? diff : 0;
-    } catch(e){ return 0; }
+      return diff > 0 ? diff : null;
+    } catch(e){ return null; }
   }
 
   // ---- 旧赛季积分入口（v941 永久只读）----
@@ -276,9 +289,9 @@
 
   // ---- 对外接口 (供赛季面板 UI / 抽卡系统调用) ----
   window.HansenSeason = {
-    current: getCurrentSeason,
-    daysLeft: function(){ return daysLeft(getCurrentSeason()); },
-    getPoints: function(){ var s=getCurrentSeason(); return s ? (loadData().points[s.id]||0) : 0; },
+    current: activeSeason,
+    daysLeft: function(){ return daysLeft(activeSeason()); },
+    getPoints: function(){ var s=activeSeason(); return s ? (loadData().points[s.id]||0) : 0; },
     hasCard: hasCard,
     unlockCard: unlockCard,
     allSeasons: function(){ return SEASONS.slice(); },
@@ -286,6 +299,9 @@
     addPoints: addSeasonPoints,
     pointsReadOnly: true,
     nextMilestone: function(){ return null; }, // 旧里程碑已停用，不能再向调用方宣传“下一笔可领取奖励”。
+    /* v1165: 神秘殿堂「已收藏 X/Y」只有这一个算法（限定卡 + 守关 Boss 卡；体验期全算已收藏），卡册入口和殿堂里都用它 */
+    ownedCardCount: ownedCardCount,
+    totalCardCount: totalCardCount,
     data: loadData
   };
 
@@ -336,13 +352,24 @@
         (!document.visibilityState || document.visibilityState==='visible') && !document.hidden;
     }catch(e){ return false; }
   }
+  /* v1165 首访流量预算：星海地图约 0.5MB（整张背景图内嵌在页面里）。
+     还没去过星海、也还没学完一个普通岛的孩子，空闲时不替他下；手指碰到入口时照样抢先预取。 */
+  function landMapLikely(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(!p) return false;
+      return !!((p.roomOpened && p.roomOpened('land')) || (p.basicIslandDone && p.basicIslandDone()));
+    }catch(e){ return false; }
+  }
   function warmLandMap(userIntent){
     try{
       if(window.__hansenLandMapWarmAttempted) return window.__hansenLandMapWarmPromise||null;
       if(!userIntent && !canAutoWarmLandMap()) return null;
+      if(!userIntent && !landMapLikely()) return null;
       if(navigator.onLine===false || document.visibilityState==='hidden' || document.visibilityState==='prerender' || document.hidden) return null;
       window.__hansenLandMapWarmAttempted=true;  // 发请求前先上锁：失败也不在轮询中狂重试
-      var p=fetch('land_map.html',{cache:'force-cache',credentials:'same-origin'}).catch(function(){ return null; });
+      /* v1165 和首页外壳打开大陆地图的地址一字不差（带 ?v=），预热的那份进地图时才用得上 */
+      var p=fetch('land_map.html'+'?v=1165',{cache:'force-cache',credentials:'same-origin'}).catch(function(){ return null; });
       window.__hansenLandMapWarmPromise=p;
       return p;
     }catch(e){ return null; }
@@ -367,7 +394,7 @@
   // 首页(index.html)锚点是 .islands(岛屿区), 插在其上方最显眼处; 点击进度条即开面板。
   function buildProgressBar(){
     try{
-      var season=getCurrentSeason(); if(!season) return;
+      var season=activeSeason(); if(!season) return;   // v1165: 过了赛季日期也照样建(首页唯一的单词大陆入口)
       var anchor=document.querySelector('.islands'); if(!anchor||!anchor.parentElement) return;
       var d=loadData();
       var hasCard=(d.unlockedCards||[]).indexOf(season.id)>=0;
@@ -391,7 +418,8 @@
           '<div class="hsn-ex-enter">进入<div style="font-size:9px;margin-top:1px;opacity:.85">副本</div></div>'+
         '</div>';
       var bar=document.getElementById('hsnSeasonBar');
-      if(bar){ bar.innerHTML=inner; armLandMapWarm(bar); return; }
+      /* v1165：挂载轮询每 150ms 调一次这里，内容没变就别重写（以前开机 15 秒里每次都整块重排星海横幅） */
+      if(bar){ if(bar.__hsnInner!==inner){ bar.innerHTML=inner; bar.__hsnInner=inner; } armLandMapWarm(bar); return; }
       // 一次性注入CSS(星海副本卡专属·无旋转/闪烁/震动/透明度循环, 遵守动效禁令)
       if(!document.getElementById('hsnExtraCss')){
         var st=document.createElement('style'); st.id='hsnExtraCss';
@@ -434,6 +462,8 @@
          **正是 v1069 想根治的那个"点了没反应"**。
          守卫 `onclick 语法` 这次咬住了它 —— 而它已经躺了 84 个版本。 */
       bar.onclick = function () {
+        /* v1165：记下「真的去过星海」，之后进岛才值得后台预热星海页 */
+        try { if (window.HansenPreloadPolicy && HansenPreloadPolicy.markRoomOpened) HansenPreloadPolicy.markRoomOpened('land'); } catch (e) {}
         try {
           if (typeof openIsland === 'function') { openIsland('land_map.html'); return; }
           if (window.HansenRoom && typeof HansenRoom.open === 'function') { HansenRoom.open('land'); return; }
@@ -443,7 +473,7 @@
         }
       };
       bar.removeAttribute('onclick');  //🔴v874(Hansen定稿): 番外篇星海觉醒=单词大陆冒险地图 //🔴v875(Hansen·彻底打通): 横幅在index上直接走壳(openIsland·iframe换装零白屏零历史污染)·无壳环境才整页跳(保留 window.(function(){ if(window.HansenRoom){ HansenRoom.open('land'); return; } location.href='land_map.html'; })() 兜底)
-      bar.innerHTML=inner;
+      bar.innerHTML=inner; bar.__hsnInner=inner;
       anchor.parentElement.insertBefore(bar, anchor);
       armLandMapWarm(bar);
     }catch(e){}
@@ -452,7 +482,7 @@
   window.__hsnOpenHall = openHall;
 
   function openPanel(){
-    var season = getCurrentSeason();
+    var season = activeSeason();
     var d = loadData();
 
     // 星海学习岛入口(进赛季后才出现, 不在18岛列表里)
@@ -507,12 +537,12 @@
             '<div style="font-size:19px;font-weight:900;color:#fff">'+season.name+'</div>'+
             '<div id="__hs_close" style="font-size:22px;color:#64748b;cursor:pointer;line-height:1;padding:0 4px">×</div>'+
           '</div>'+
-          '<div style="font-size:13px;color:#fbbf24;font-weight:700;margin-bottom:16px">⏳ 本赛季还剩 '+dl+' 天</div>'+
+          (dl ? '<div style="font-size:13px;color:#fbbf24;font-weight:700;margin-bottom:16px">⏳ 本赛季还剩 '+dl+' 天</div>' : '<div style="height:12px"></div>')+
           islandBtn+
           '<div'+(hasThisCard?' id="__hs_curcard" data-season="'+season.id+'"':'')+' style="background:linear-gradient(135deg,'+r.glow+',rgba(12,21,56,.3));border:2px solid '+r.color+';border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 0 20px '+r.glow+';'+(hasThisCard?'cursor:pointer':'')+'">'+
             '<div style="font-size:11px;color:'+r.color+';font-weight:800;letter-spacing:1px;margin-bottom:6px">★ '+r.name+'限定卡 ★</div>'+
             (hasThisCard
-              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=1164" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1164\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
+              ? '<div class="__hs_panel_thumb" style="width:96px;height:128px;margin:0 auto 8px;border-radius:10px;overflow:hidden;background:'+pBg+'"><img src="'+pImg+'?v=1165" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1165\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom" alt=""></div>'/* 🔴v847: 立绘底对齐 */
               : '<div style="font-size:46px;margin-bottom:6px">❓</div>')+
             '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:4px">'+(hasThisCard?season.card.name:'？？？')+'</div>'+
             '<div style="font-size:12px;color:#cbd5e1;line-height:1.5">'+(hasThisCard?'✨ 已收入囊中 · 点击进入全屏观赏':season.card.desc)+'</div>'+
@@ -580,7 +610,7 @@
     var pref = readCardPref(id); if(!pref) return;
     function apply(img, box){
       // 🔴v847(Hansen): 换形象后缩略图保持【透明立绘+底对齐】(用 formPng·不回退 HD 卡面图), 与神秘殿堂初始渲染统一
-      if(img){ var _sp=(pref.formPng||'bosses/saelya.webp'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.webp?v=1164';}; img.src = _sp + '?v=1164'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
+      if(img){ var _sp=(pref.formPng||'bosses/saelya.webp'); img.onerror=function(){this.onerror=null;this.src='bosses/saelya.webp?v=1165';}; img.src = _sp + '?v=1165'; img.style.objectFit='contain'; img.style.objectPosition='center bottom'; }
       if(box && pref.bgCss){ box.style.background = pref.bgCss; }
     }
     var hall = document.getElementById('__hs_hall_panel');
@@ -602,8 +632,9 @@
     SEASONS.forEach(function(s){
       var r = RARITY_STYLE[s.card.rarity] || RARITY_STYLE.rare;
       var owned = tempUnlockAll() || d.unlockedCards.indexOf(s.id) >= 0;
-      var ended = t > s.end;
-      var notStarted = t < s.start;
+      var serving = (s === activeSeason());   // v1165: 番外篇无时间限制，在用的赛季不算绝版/未开启
+      var ended = t > s.end && !serving;
+      var notStarted = t < s.start && !serving;
       if(owned){
         ownedTotal++;
         var pref = readCardPref(s.id);
@@ -613,7 +644,7 @@
         _saelyaH +=
           '<div class="__hs_gcard" data-season="'+s.id+'" style="background:linear-gradient(160deg,'+r.glow+',rgba(12,21,56,.35));border:2px solid '+r.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+r.glow+';cursor:pointer">'+
             '<div class="__hs_thumb_box" style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+tBg+';margin-bottom:8px">'+/* 🔴v847: 框改正方形·立绘底对齐 */
-              '<img src="'+tImg+'?v=1164" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1164\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+              '<img src="'+tImg+'?v=1165" onerror="this.onerror=null;this.src=\'bosses/saelya.webp?v=1165\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
             '</div>'+
             '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+s.card.name+'</div>'+
             '<div style="font-size:10px;color:'+r.color+';font-weight:800;margin-top:3px">★ '+r.name+'限定</div>'+
@@ -651,11 +682,11 @@
           var bcOwned = tempUnlockAll() || d.unlockedCards.indexOf(bc.id) >= 0;
           if(bcOwned){
             ownedTotal++;
-            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=1164") center/cover') : bc.bg;
+            var bcBg = bc.bgImg ? ('url("'+bc.bgImg+'?v=1165") center/cover') : bc.bg;
             cardsHtml +=
               '<div class="__hs_bcard" data-bc="'+bc.id+'" style="background:linear-gradient(160deg,'+br2.glow+',rgba(12,21,56,.35));border:2px solid '+br2.color+';border-radius:14px;padding:10px 10px 12px;text-align:center;box-shadow:0 0 16px '+br2.glow+';cursor:pointer">'+
                 '<div style="width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:'+bcBg+';margin-bottom:8px">'+/* 🔴v847(Hansen): 1200x1200正方形立绘配正方形框·零顶部留白·人物最大化·零裁切 */
-                  '<img src="'+bc.img+'?v=1164" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
+                  '<img src="'+bc.img+'?v=1165" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))" alt="">'+
                 '</div>'+
                 '<div style="font-size:13px;font-weight:900;color:#fff;line-height:1.2">'+bc.name+'</div>'+
                 '<div style="font-size:10px;color:'+br2.color+';font-weight:800;margin-top:3px">★ '+br2.name+'限定</div>'+
@@ -710,7 +741,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'season_showcase.html?v=1164&boss=' + encodeURIComponent(seasonId || '');
+    iframe.src = 'season_showcase.html?v=1165&boss=' + encodeURIComponent(seasonId || '');
     iframe.setAttribute('title', '神秘殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -732,7 +763,7 @@
     mask.id = '__hs_showcase';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe = document.createElement('iframe');
-    iframe.src = 'boss_hall.html?v=1164&season=1&lv=' + lv;
+    iframe.src = 'boss_hall.html?v=1165&season=1&lv=' + lv;
     iframe.setAttribute('title', 'BOSS 殿堂');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -749,14 +780,14 @@
   function openBossCardView(card){
     if(!card || document.getElementById('__hs_bcv')) return;
     var r = RARITY_STYLE[card.rarity] || RARITY_STYLE.legend;
-    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=1164") center/cover') : card.bg;
+    var bgStyle = card.bgImg ? ('url("'+card.bgImg+'?v=1165") center/cover') : card.bg;
     var mask = document.createElement('div');
     mask.id = '__hs_bcv';
     mask.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(8,8,18,.92);display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
     mask.innerHTML =
       '<div style="width:100%;max-width:330px">'+
         '<div style="position:relative;width:100%;aspect-ratio:3/4;border-radius:20px;overflow:hidden;border:3px solid '+r.color+';box-shadow:0 0 34px '+r.glow+',0 18px 50px rgba(0,0,0,.6);background:'+bgStyle+'">'+
-          '<img src="'+card.img+'?v=1164" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
+          '<img src="'+card.img+'?v=1165" onerror="this.onerror=null;this.style.visibility=\'hidden\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))" alt="">'+
           '<div style="position:absolute;top:11px;left:11px;background:'+r.color+';color:#1a1226;font-size:11px;font-weight:900;padding:3px 11px;border-radius:8px">★ '+r.name+'</div>'+
           '<div style="position:absolute;left:0;right:0;bottom:0;padding:16px 15px 17px;background:linear-gradient(to top,rgba(8,8,18,.94),rgba(8,8,18,.55),transparent)">'+
             '<div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)">'+card.name+'</div>'+

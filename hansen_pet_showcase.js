@@ -431,6 +431,7 @@ function globalMastered(){
 /* —— 🔴v639 首页宠物图标: ①去掉背后圆形半透明背景(各岛 .pet-slot 的金色radial圆) ②上下晃动放到非常慢(2.5s→14s·约5.6倍慢)且幅度减小(-6px→-4px)·仅translateY不旋转(守防晕红线) —— */
 '.pet-slot{background:none !important}',
 '@keyframes hsnPetFloatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}',
+/* v1165 复查：宠物照旧一直轻轻上下晃（14 秒一下）。只动 transform，合成器自己动、不占主线程，没必要停（停了首页宠物像死了一样） */
 '#heroPet{animation:hsnPetFloatSlow 14s ease-in-out infinite !important}',
 /* —— 🔴v638 首页宠物卡名/阶/描述: 强制纯中文字体栈(覆盖各岛 --font-cartoon=CartoonBlack日系装饰字体·缺尊/寰等生僻汉字→那些字逐字回退到别的字体致大小参差)·全字符同一中文字体=统一 —— */
 '#heroPetName,#heroPetStage,#heroPetText{font-family:"PingFang SC","Microsoft YaHei","HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC","Heiti SC",sans-serif !important}',

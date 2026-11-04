@@ -242,6 +242,9 @@
   //   新错词 → 盒子0(今天到期); 记住升一盒(间隔拉长), 没记住回盒0(明天再见)
   //   盒子间隔(天) = [1,2,4,7,15]; 升满即毕业(从计划/错题中移除)
   //   数据存在 S.srs = { idx: {box, due:'YYYY-MM-DD', last} }, 随 save() 持久化
+  //   🔴v1165: 计划和错题本分开记。答对一次只让错题本 -1；词留在计划里，
+  //   要在到期那天一次次答对、升满 5 盒才算毕业。以前错题数一归零就把计划删了，
+  //   错一次、当天答对一次 → 再也不会复习（间隔复习根本跑不起来）。
   // ─────────────────────────────────────────────
   var SRS_GAP = [1, 2, 4, 7, 15];
   var SRS_GRAD = SRS_GAP.length; // 升到第 5 盒 = 毕业
@@ -261,17 +264,23 @@
     // 回填当前切片，防止两个入口各自维护 due/box，也防止已清错词继续到期。
     try{if(window.HansenCanonical&&typeof HansenCanonical.syncCurrent==='function')HansenCanonical.syncCurrent();}catch(e){}
     if(!window.S.srs || typeof window.S.srs !== 'object') window.S.srs = {};
-    var srs = window.S.srs, wr = window.S.wrongs || {}, changed = false, t = _todayYMD();
+    var srs = window.S.srs, wr = window.S.wrongs || {}, changed = false, t = _todayYMD(), seeded = [];
     Object.keys(srs).forEach(function(idx){
+      // 🔴v1165: 只清掉坏索引。错题数归零不等于记住了，计划要留着。
       var i=canonicalWrongIndex(idx,Array.isArray(window.allW)?window.allW.length:0);
-      if(i<0||safeWrongCount(wr[i])===0){delete srs[idx];changed=true;}
+      if(i<0){delete srs[idx];changed=true;}
     });
     normalizeStoredWrongs(wr, window.allW).forEach(function(entry){
       var idx = String(entry.idx);
       if(!srs[idx]){
         srs[idx] = { box: 0, due: t, last: '' };
+        seeded.push(entry.idx);
         changed = true;
       }
+    });
+    // 新入计划的词马上写进权威账本：save() 可能被防抖，下一次同步会拿账本覆盖 S.srs
+    seeded.forEach(function(i){
+      try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, srs[String(i)]); }catch(_seedSync){}
     });
     if(changed && typeof save === 'function'){ try { save(); } catch(e){} }
     return srs;
@@ -287,7 +296,8 @@
       var box = e && typeof e.box === 'number' && Number.isInteger(e.box) ? e.box : -1;
       var due = e && typeof e.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.due) ? e.due : '';
       var wrong=safeWrongCount(wr[i]);
-      if(i >= 0 && wrong>0 && box >= 0 && box < SRS_GRAD && due && due <= t && vocab[i]){
+      // 🔴v1165: 错题本清空了也照样到期（还没毕业）
+      if(i >= 0 && box >= 0 && box < SRS_GRAD && due && due <= t && vocab[i]){
         out.push({ idx: i, word: vocab[i], box: box, wrong: wrong });
       }
     });
@@ -319,17 +329,20 @@
           if(typeof save === 'function'){ try{ save(); }catch(_gateSave){} }
           return false;
         }
+        /* 🔴v1165: 毕业这一刻错题本里还有没有它。早就清零的词，清零那天已经发过 +15 毕业金，这次不能再发 */
+        var hadWrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[idx] : 0) > 0;
         delete srs[idx];
         if(window.S.wrongs) delete window.S.wrongs[idx];
         graduated = true;
         /* 🔴v963刺二：毕业统一事件(自评+证据路径)→奖励模块发毕业金并调度幽灵巡检 */
-        try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.onGraduated === 'function') HansenReviewRewardsV963.onGraduated(idx); }catch(_gradEvt){}
+        try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.onGraduated === 'function') HansenReviewRewardsV963.onGraduated(idx, { hadWrong: hadWrong }); }catch(_gradEvt){}
       } else {
         e.box = nb; e.due = _addDaysYMD(SRS_GAP[nb]); e.last = _todayYMD();
         srs[idx] = e;
       }
     } else {
       e.box = 0; e.due = _addDaysYMD(SRS_GAP[0]); e.last = _todayYMD();
+      delete e.rp;   // 回到盒0，旧的答对证据作废
       srs[idx] = e;
     }
     try{
@@ -349,27 +362,23 @@
    * 答错不降盒(错误次数已由 markAnswer 加一,词继续到期;避免限时玩法误伤)。 */
   function _absorbRealAnswer(idx, correct){
     try{
-      if(correct !== true) return null;
       if(!window.S || !Array.isArray(window.allW)) return null;
-      var i = canonicalWrongIndex(idx, window.allW.length);
+      /* 🔴v1165: 玩法传进来的是数字下标(markAnswer(3,true))。以前只认字符串 → 永远 -1 →
+       * 这个吸收器上线以来一次都没真正跑过（测试里它被桩替换了，所以没人发现）。 */
+      var i = normalizeContextIndex(idx, window.allW.length);
       if(i < 0) return null;
-      var srs = _ensureSrs();
+      /* 先把这一题交给权威账本，再同步：markAnswer 刚扣掉的错题数还没进账本，
+       * 直接 _ensureSrs()→syncCurrent() 会用账本旧值把它冲回去。 */
+      try{ if(window.HansenCanonical && typeof HansenCanonical.absorbAnswer === 'function') HansenCanonical.absorbAnswer(i); }catch(_preSync){}
+      var srs = _ensureSrs();   // 答错的词在这里进计划（盒0，今天到期）
       if(!srs) return null;
+      if(correct !== true) return { advanced:false, reason:'missed', planned: !!srs[String(i)] };
+      /* 🔴v1165: 本轮末「再考一次」是刚看过答案马上再答，不算记住了 → 不升盒（模板 __hmlMark 打的标记） */
+      if(window.__hmlRetryAns) return { advanced:false, reason:'retry' };
       var key = String(i), t = _todayYMD();
       var wrong = safeWrongCount(window.S.wrongs ? window.S.wrongs[i] : 0);
       var e = srs[key];
-      if(!e || typeof e !== 'object'){
-        if(wrong <= 0) return null;           // 无错无计划 → 与 SRS 无关
-        e = { box: 0, due: t, last: '' };     // 兜底(理论上 _ensureSrs 已种)
-      }
-      /* 🔴v966修复：错词已被清零(如答题归零毕业金路径)但计划残留 →
-       * 静默剪除(与 _ensureSrs 一致)，绝不在毕业金后再弹"📦盒子+1"僵尸反馈 */
-      if(wrong <= 0){
-        delete srs[key];
-        try{ if(window.HansenCanonical && typeof HansenCanonical.setCurrentSrs === 'function') HansenCanonical.setCurrentSrs(i, null); }catch(_zz){}
-        if(typeof save === 'function'){ try{ save(); }catch(_zz2){} }
-        return null;
-      }
+      if(!e || typeof e !== 'object') return null;   // 不在计划里 → 与 SRS 无关
       var box = (typeof e.box === 'number' && e.box >= 0) ? e.box : 0;
       if(box >= SRS_GRAD) return null;
       if(e.last === t) return { advanced:false, reason:'daily-lock' };
@@ -407,8 +416,20 @@
   // ─────────────────────────────────────────────
   // 今日复习 session(间隔重复主流程)
   // ─────────────────────────────────────────────
+  /* 🔴v1165 复查：每天必有一条「复习单词」任务（巩固 3 个 / 6 个 / 清空今日复习）。
+     以前只有模板自带的旧复习屏会上报，可底栏「复习」、首页复习卡、错题总览、结算页「练这 N 个词」现在全都进复习中心 ——
+     旧复习屏没人打开，这条任务永远是 0，「12 个任务全部完成」的每日大奖也就拿不到。现在在复习中心里真正复习的地方上报。 */
+  function _questReview(n){ try{ if(typeof window.progressQuest === 'function') window.progressQuest('review', n); }catch(e){} }
+  function _questReviewClear(){ try{ if(typeof window.setQuest === 'function') window.setQuest('reviewClear', 1); }catch(e){} }
+
+  /* 🔴v1165 复查：子界面（今日复习 / 拼写练习 / 闪卡 / 错题本）还开着吗。「保留复习范围」的标记只在子界面开着时才有用 */
+  function _subScreenOpen(){
+    return !!(document.getElementById('hr_today') || document.getElementById('hr_flashcard') ||
+              document.getElementById('hr_wrongbook') || document.getElementById('hsp_mask'));
+  }
   function _todayBackToCenter(){
     window._huFromReview = false;
+    window._huReviewKeepContext = false;   // 🔴v1165 复查：已经回到复习中心，这个标记用过了（见 _close）
     // 🔴v794 真正无缝·保留滚动位置: 复用【活着的】复习中心(从v791起一直留底下·带着进今日复习前的滚动位置)·而非openReviewCenter重建(重建滚动归零·弹回顶部)。提到今日界面(z9999)之上→先盖主页·撤今日界面即可见·rAF复位z。
     var center = document.getElementById('hr_center');
     if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 不在才重建
@@ -433,9 +454,19 @@
       document.getElementById('hr_today_back').onclick = _todayBackToCenter;
       /* 🔴v963样机: 主动打开确认今日无到期 → 连击不断签(total=0 不发完成金) */
       try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:0, graduated:0, total:0}); }catch(e){}
+      /* 🔴v1165 复查：今天本来就没有到期的词 = 今日复习已经清空了 → 每日任务「清空今日复习」也算完成。
+         以前这种日子它永远完不成，「12 个任务全部完成」也就拿不到。别的岛还有到期的词就不算（和横幅「全部到期清零」同一个口径）。 */
+      try{
+        var _gd = -1, _RR = window.HansenReviewRewardsV963;
+        if(_RR && _RR._debug && typeof _RR._debug.globalDueInfo === 'function'){ var _gi = _RR._debug.globalDueInfo(); if(_gi && _gi.ok) _gd = _gi.globalDue | 0; }
+        if(_gd <= 0) _questReviewClear();
+      }catch(eQ){}
       return;
     }
 
+    /* 🔴v1165 复查：先让复习奖励记下「今天有词到期」（今天刚答错的词当场就到期，奖励模块以前看不到）——
+       不然孩子把它们都复习完，也不给「完成今日复习 +20」、连续复习天数不涨 */
+    try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.refresh === 'function') HansenReviewRewardsV963.refresh(); }catch(eR){}
     var i = 0, revealed = false, reviewed = 0, graduated = 0, total = due.length;
     var BOXNAME = ['新词', '第 2 阶', '第 3 阶', '第 4 阶', '冲刺阶'];
 
@@ -516,6 +547,9 @@
     function grade(ok){
       var it = due[i];
       if(_grade(it.idx, ok)) graduated++;
+      if(ok) _questReview(1);   // 「记住了」才算巩固了一个（和旧复习屏一样只计答对）
+      /* 🔴v1165 复查：过了一张卡 = 复习了一次（结算页写的「复习了 N 个单词」也是这么数的），成就「复习次数」「累计复习」用它 */
+      try{ if(window.HansenReviewRewardsV963 && typeof HansenReviewRewardsV963.noteReview === 'function') HansenReviewRewardsV963.noteReview(1); }catch(eN){}
       reviewed++;
       i++;
       if(i >= total){ finish(); return; }
@@ -526,6 +560,7 @@
     function finish(){
       /* 🔴v963样机: 通知复习奖励模块(今日复习完成+20/连击); 模块不存在或非试点岛时静默跳过 */
       try{ if(window.HansenReviewRewardsV963) HansenReviewRewardsV963.onTodayComplete({reviewed:reviewed, graduated:graduated, total:total}); }catch(e){}
+      if(total > 0 && reviewed === total) _questReviewClear();   // 今天到期的词一个个都过了一遍 = 清空今日复习
       /* 🔴v1006 修复「底部绿块」事故：
          下面紧接着 overlay.innerHTML=... 会把内部那段 <style>（含
          #hr_today{position:fixed;inset:0;z-index:9999} ）一并冲掉，
@@ -799,6 +834,7 @@
         if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 不在才重建
         if(center) center.style.zIndex = '99998';   // 提到子界面之上→先盖主页·随后撤子界面即直接可见
         if(el) el.remove();                          // 撤子界面(在活复习中心之下·隐形移除)
+        window._huReviewKeepContext = false;         // 🔴v1165 复查：已经回到复习中心，这个标记用过了（见 _close）
         requestAnimationFrame(function(){ var c = document.getElementById('hr_center'); if(c) c.style.zIndex = ''; });
       } else {
         if(el) el.remove();
@@ -809,7 +845,10 @@
       const c = document.getElementById('hr_center');
       if(c) c.remove();
       // v142ag: 用户主动关 (没 keep 标记) 时清 context
-      if(!window._huReviewKeepContext){
+      /* 🔴v1165 复查：「练这 N 个词」「一起复习全部」只管这一次。从拼写练习等子界面回到复习中心后，标记早就用过了 ——
+         孩子在复习中心点 ← 关掉它，就连这次的范围一起清掉。以前标记一直留着：过后点底栏「复习」打开的还是那几个词，
+         「今日复习」卡也不见了（明明今天有词到期）。只有子界面还开着时才保留范围。 */
+      if(!window._huReviewKeepContext || !_subScreenOpen()){
         window._huReviewContext = null;
       }
       window._huReviewKeepContext = false;
@@ -852,6 +891,9 @@
       if(!center){ openReviewCenter(); center = document.getElementById('hr_center'); }  // 兜底: 万一复习中心不在了才重建
       if(center) center.style.zIndex = '99998';   // 临时提到拼写页之上→先盖住主页·随后撤拼写页即直接可见
       requestAnimationFrame(function(){ var c = document.getElementById('hr_center'); if(c) c.style.zIndex = ''; });  // 拼写页已撤·复位 z(回 CSS 的 9999)
+      /* 🔴v1165 复查：拼写页马上就撤（hansen_spell_practice 的 close 先调这里再撤）—— 回到复习中心以后这个标记就用过了，
+         下一帧清掉；复习范围本身（_huReviewContext）照旧留着，直到孩子关掉复习中心 */
+      setTimeout(function(){ if(!_subScreenOpen()) window._huReviewKeepContext = false; }, 0);
     },
     _openFlashcard: function(){
       _beep();
@@ -1162,6 +1204,20 @@
       });
     });
   }
+
+  /* 🔴v1165: 开岛时把已有错词都放进复习计划。否则老错词第一次答对就先把错题数扣到 0，
+   * 还没来得及进计划就从间隔复习里漏掉。等权威账本(DOMContentLoaded)先启动完再做。 */
+  var _bootSeeded = false;
+  function _seedPlanAtBoot(){
+    if(_bootSeeded) return; _bootSeeded = true;
+    try{
+      if(typeof window.__hsnHasResetPending === 'function' && window.__hsnHasResetPending()) return;
+      _ensureSrs();
+    }catch(_bootSeed){}
+  }
+  // 本文件是 defer 脚本：此时 DOMContentLoaded 还没发，监听排在账本之后；load 只是保险
+  if(document.readyState === 'complete') setTimeout(_seedPlanAtBoot, 0);
+  else { document.addEventListener('DOMContentLoaded', _seedPlanAtBoot); window.addEventListener('load', _seedPlanAtBoot); }
 
   console.log('%c[HansenReview]%c 复习中心已就绪',
               'color:#06b6d4;font-weight:bold', 'color:#94a3b8');

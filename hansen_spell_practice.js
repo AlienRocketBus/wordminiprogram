@@ -182,7 +182,8 @@
 
     var modeIcon  = curMode === 'listen' ? '🎧' : '✍️';
     var modeTitle = curMode === 'listen' ? '听音拼词' : '看汉意拼单词';
-    var wordEmoji = w.emoji || (curMode === 'listen' ? '🎧' : '📝');
+    // v1165: 拼写题配图不能印着答案（去掉图里的英文标签，太空就用默认图标）
+    var wordEmoji = (window.__hsnQuizPic ? window.__hsnQuizPic(w) : w.emoji) || (curMode === 'listen' ? '🎧' : '📝');
     var target = (w.en || '').toLowerCase();
     var targetLetters = target.replace(/ /g, '').length;
     var typed = '';   // 已输入字母 (不含空格)
@@ -269,6 +270,8 @@
         }else{
           stats.correct++;
           if(hintEl) hintEl.innerHTML = '<span style="color:#22c55e;font-weight:900">✓ 独立正确!</span>';
+          /* 🔴v1165 复查：自己拼对一个错词 = 复习巩固了一个 → 每日「复习单词」任务 +1（用了提示的不算） */
+          try { if(typeof window.progressQuest === 'function') window.progressQuest('review', 1); } catch(e){}
         }
         try { if(window.playCorrect) window.playCorrect(); } catch(e){}
       } else {

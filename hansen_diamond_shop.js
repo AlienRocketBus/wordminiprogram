@@ -284,7 +284,13 @@
     var data=_read();
     var h='';
     h+='<div class="dia-bal">💎 我的钻石：<b>'+gems+'</b></div>';
-    h+='<div class="dia-tip">钻石来自 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。</div>';
+    /* v1165: 孩子看得懂的话；精确的来源清单收进「规则」里给家长看（以前满屏 focused Bee / gem1 / 旧新词位） */
+    /* 🔴v1165 复查第 2 轮：写的必须是真的。以前写「打败 Boss、完成成就」能得钻石 —— 打普通 Boss 只给金币，144 个成就里只有
+       「第一颗钻石」给钻石；最容易拿钻石的「连续复习 7 / 14 / 30 天」（hansen_review_rewards_v963 MILESTONES）却没写。
+       test_diamond_copy_v1165 对照各模块真正发钻石的代码逐条检查。 */
+    h+='<div class="dia-tip">💎 钻石怎么来：在聚焦拼写蜂里把一个词练到 5 颗星、连续复习 7 天、一轮打败全部 Boss（大满贯）。'+
+       '<details class="dia-rules" style="margin-top:4px"><summary style="cursor:pointer;opacity:.85">规则</summary>'+
+       '钻石只来自：聚焦拼写蜂把单词练到 5 颗星（还有探险家段位、一个岛的词全记牢的奖励）、连续复习 7 / 14 / 30 天（以后每满 30 天）、Boss 大满贯、星海女帝终战、「第一颗钻石」成就。打普通 Boss、别的成就给的是金币；普通拼写蜂的旧里程碑已经停用，每日签到不直接给钻石。</details></div>';
     /* 🎬 v540: 两个系列分开陈列, IMAX 史诗系列置顶(镇店之宝) */
     h+='<div class="dia-cat">🎬 IMAX 史诗主题 · 影院级动态大场面</div>';
     h+='<div class="dia-imax-tip">每款都有一个周期上演的「招牌大场面」：梦境流星雨 / 火山糖果喷发 / 闪电劈落 / 流星雨 / 花吹雪 / 鱼群巡游 / 数据光波 / 金环冲击。建议先点「试用」亲眼看 60 秒。</div>';
@@ -315,7 +321,7 @@
                 '<button class="dia-btn buy" onclick="window.__hsnDiaBuy(\''+it.id+'\')">💎 '+it.price+'</button>'; }
       var imax=(series==='imax');
       h+='<div class="dia-item'+(imax?' dia-item-imax':'')+'">'+
-           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=1164\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
+           '<div class="dia-preview dia-prev-'+it.id+'"'+(it.img?(' style="background-image:url(\''+it.img+'?v=1165\');background-size:cover;background-position:center"'):'')+'>'+(imax?'<span class="dia-imax-badge">IMAX</span>':'')+(it.img?'':('<span class="dia-prev-emoji">'+it.emoji+'</span>'))+'</div>'+
            '<div class="dia-info"><div class="dia-name">'+it.name+(owned?' <span class="owned-tag">已拥有</span>':'')+'</div>'+
            '<div class="dia-desc">'+it.desc+'</div></div>'+
            '<div class="dia-action">'+btn+'</div>'+
@@ -478,7 +484,7 @@
     var store=_readState();if(!store.ok){shopToast('主题存档暂时无法核验，本次未扣钻石');return;}if(store.value.owned[id]){window.__hsnDiaEquip(id);return;}
     var beforeState=_walletState({type:'diamond'}),before=beforeState.ok?beforeState.value:NaN;
     if(!beforeState.ok){shopToast('钻石余额暂时无法核验，本次未扣钻石');return;}
-    if(before < it.price){ shopToast('钻石不够啦！可通过 focused Bee 五星结晶、全岛/段位奖励、Boss 大满贯、女帝终战和 gem1 成就获得；普通 Bee 的旧新词位里程碑已停用，签到本身不直接发钻。'); return; }
+    if(before < it.price){ shopToast('钻石不够啦！在聚焦拼写蜂里把单词练到 5 颗星、连续复习 7 天、一轮打败全部 Boss，都能得到钻石。'); return; }
     // 确认
     if(!confirm('用 '+it.price+' 颗钻石购买「'+it.name+'」主题？')) return;
     var txid=_beginPurchase('diamond',id,it.price,before);
@@ -585,9 +591,9 @@
     '.dia-imax-tip{font-size:11.5px;color:#c4b5fd;background:rgba(124,58,237,.12);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:8px 11px;line-height:1.6;margin:0 0 10px}'+
     '.dia-item-imax{border:1.5px solid rgba(251,191,36,.55)!important;box-shadow:0 0 14px rgba(251,191,36,.18),inset 0 1px 0 rgba(255,255,255,.06)}'+
     '.dia-imax-badge{position:absolute;top:4px;left:4px;font-size:8px;font-weight:900;letter-spacing:1px;color:#1a1206;background:linear-gradient(135deg,#fde68a,#f59e0b);padding:1.5px 5px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.4)}'+
-    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=1164) center 28%/cover}'+
-    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=1164) center 22%/cover}'+
-    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=1164) center 42%/cover}'+
+    '.dia-prev-theme_clouddream{background:url(themes/cloud_dream.jpg?v=1165) center 28%/cover}'+
+    '.dia-prev-theme_rainbowsweet{background:url(themes/rainbow_sweet.jpg?v=1165) center 22%/cover}'+
+    '.dia-prev-theme_zombiedance{background:url(themes/zombie_dance.jpg?v=1165) center 42%/cover}'+
     '.dia-prev-theme_fireworks{background:linear-gradient(160deg,#5b3fc4,#ff6b9d)}'+
     '.dia-prev-theme_candyland{background:linear-gradient(160deg,#7ec8ff,#ffb3d1)}'+
     '.dia-prev-theme_balloon{background:linear-gradient(160deg,#41b8f5,#ffe680)}'+
@@ -629,6 +635,18 @@
   }
 
   // ===== 自动注入入口 + 开机应用已装备主题 =====
+  /* v1165: 工具菜单按固定位置排（主题商店 10、装备 20），不再「谁的定时器后到谁插最前面」——以前两个模块都插在第一张卡前面，
+     手机慢一点顺序就可能对调。规则：插在第一张「没有位置号、或位置号比我大」的卡前面。 */
+  function placeBySlot(row, entry, slot){
+    entry.setAttribute('data-hsn-slot', String(slot));
+    var kids = row.children, before = null;
+    for(var i = 0; i < kids.length; i++){
+      var k = kids[i]; if(k === entry || !k.classList || !k.classList.contains('util-card')) continue;
+      var s = parseFloat(k.getAttribute('data-hsn-slot'));
+      if(isNaN(s) || s > slot){ before = k; break; }
+    }
+    row.insertBefore(entry, before);
+  }
   function injectEntry(){
     try{
       if(document.getElementById('hsnDiaEntry')) return;
@@ -637,7 +655,7 @@
       entry.className='util-card'; entry.id='hsnDiaEntry';
       entry.setAttribute('onclick','HansenDiamondShop.open()');
       entry.innerHTML='<span class="u-icon"><img src="icons/ic_diamond.webp" alt="" draggable="false" style="width:72px;height:72px;object-fit:contain;vertical-align:middle;display:inline-block;transform:translate(0px,1px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))" onerror="window.hansenImgErr&&window.hansenImgErr(this)"></span><div class="u-label">主题商店</div>';
-      anyCard.parentElement.insertBefore(entry, anyCard);
+      placeBySlot(anyCard.parentElement, entry, 10);
     }catch(e){}
   }
   /* 🔴 v543: v540-542 旧 IMAX id → 嘉年华新 id 一次性迁移(按相同价位对位, 已购/已装备无损平移) */

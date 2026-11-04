@@ -39,7 +39,12 @@ async function freshPage(){
     if(m.type()!=='error') return;
     const t = m.text();
     if(CLOUD_NET_NOISE.test(t)) return;
-    errors.push('CONSOLE:'+t.slice(0,160));
+    /* 🔴v1165：「Failed to load resource: net::…」这类消息的文字里没有地址，地址在 location 里。
+       沙盒代理拒绝连腾讯云时报的是 ERR_TUNNEL_CONNECTION_FAILED（不是 ERR_FAILED），以前就漏过了豁免。
+       这里只多认「地址是腾讯云端点的加载失败」—— 和上面豁免的范围一样，其余一律照抓。 */
+    let at = ''; try{ at = (m.location() && m.location().url) || ''; }catch(e){}
+    if(/^Failed to load resource: net::/.test(t) && /^https:\/\/[\w.-]*tencentcloudapi\.com\//.test(at)) return;
+    errors.push('CONSOLE:'+t.slice(0,160)+(at ? ' @'+at.slice(0,80) : ''));
   });
   return page;
 }

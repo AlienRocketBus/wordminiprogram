@@ -6,11 +6,13 @@
  *
  * 为什么不全部预热常驻：18 个岛屿页加起来 10MB+，全预载会吃光流量与内存。
  *
- * 本方案三层，从省到快：
+ * 本方案两层，从省到快：
  *   ① 空闲预取「最近玩过的岛」—— 大多数人每天就在固定那一两个岛，命中率最高；
  *   ② **触碰即预取** —— 手指刚按下/鼠标刚移上卡片就开始加载，
- *      等抬手跳转时页面通常已在缓存里（人的按下到抬起约 100–200ms，够抢跑）；
- *   ③ 视口内的卡片在浏览器空闲时逐个低优先级预取，上限受控。
+ *      等抬手跳转时页面通常已在缓存里（人的按下到抬起约 100–200ms，够抢跑）。
+ *   v1165 复查：原来还有 ③「首页上其余岛卡空闲时逐个预取（最多 6 个）」—— 实测只玩过动物岛的孩子，4G 下回首页 20 秒
+ *   就多下了食物/运动/职业/色彩/自然 5 个从没去过的岛（约 3.1MB，每个约 625KB；CDN 不给缓存校验时每次回首页都再下一遍）。
+ *   没去过的岛不再空闲预取，手指碰到卡片的那一下照样立刻预取。
  */
 (function () {
   'use strict';
@@ -66,6 +68,21 @@
     return links.length;
   }
 
+  /* v1165 外壳正忙着进岛（index.html 的 __hsnIslandBusyUntil）：空闲预取先等等，把网让给岛 */
+  function busyFor() {
+    try { var d = (window.__hsnIslandBusyUntil || 0) - Date.now(); return d > 0 ? d : 0; } catch (e) { return 0; }
+  }
+
+  /* v1165 存档名 → 岛页文件：查首页的岛表（wordIslandColorNum → island_color.html）；
+     表里没有的再看首页有没有这张岛卡；都没有（_bak 备份、旧名字）就跳过。以前按存档名拼，8 个岛全是 404。 */
+  function fileForKey(k) {
+    k = String(k || '');
+    try { var M = window.HSN_ISLAND_META; if (M && M[k] && M[k].file) return M[k].file; } catch (e) {}
+    var guess = 'island_' + k.replace(/^wordIsland/, '').toLowerCase() + '.html';
+    if (!/^island_[a-z0-9]+\.html$/.test(guess)) return '';
+    try { return document.querySelector('a[href="' + guess + '"]') ? guess : ''; } catch (e) { return ''; }
+  }
+
   /* ① 最近玩过的岛：命中率最高，优先预取 */
   /* 🔴审查 R2-6：首页记的 lastIslandKey 是存储键（'wordIslandAnimal'），以前直接拼成 island_wordIslandAnimal.html ——
      每次回首页都白请求一个 404，控制台还多一条报错。存储键的名字也不一定就是文件名（People → island_job.html）。
@@ -91,40 +108,37 @@
   function prefetchRecent() {
     var picked = [], known = islandFiles();
     try {
-      var last = fileOfKey(localStorage.getItem('lastIslandKey'), known);
-      if (last) picked.push(last);
+      var last = localStorage.getItem('lastIslandKey');
+      if (last) picked.push(fileForKey(last));
     } catch (e) {}
     try {
       /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
         var k = _lsk1[i];
-        if (k && k.indexOf('wordIsland') === 0) {
-          var f2 = fileOfKey(k, known);
-          if (f2 && picked.indexOf(f2) < 0) picked.push(f2);
-        }
+        if (k && /^wordIsland[A-Za-z0-9]+$/.test(k)) picked.push(fileForKey(k));
       }
     } catch (e) {}
     var n = 0;
     for (var j = 0; j < picked.length && idleCount < MAX; j++) {
-      if (prefetch(picked[j], 'recent')) { n++; idleCount++; }
+      if (picked[j] && prefetch(picked[j], 'recent')) { n++; idleCount++; }
     }
     return n;
   }
 
-  /* ③ 空闲时把页面上其余岛屿卡片也逐个低优先级预取（受 MAX 限制） */
-  function prefetchVisible() {
-    var links = document.querySelectorAll('a[href*="island_"]');
-    var i = 0;
-    (function step() {
-      if (i >= links.length || idleCount >= MAX) return;
-      var href = links[i++].getAttribute('href');
-      if (prefetch(href, 'idle')) idleCount++;
-      setTimeout(step, 900);   /* 拉开间隔，绝不与用户操作抢带宽 */
-    })();
-  }
-
   function boot() {
     bindEager();                       /* 触碰预取立刻生效 */
-    var run = function () { prefetchRecent(); setTimeout(prefetchVisible, 1500); };
+    /* v1165 首访流量预算：空闲预取要守和其他后台下载同一个网络策略（明确 4G、非省流量、页面可见）；
+       还没玩过的新孩子不猜他去哪个岛 —— 推荐的第一个岛已由 hansen_preload.js 预热，
+       旧版在这里再空闲预取 6 个岛（实测新孩子首页 12 秒内约 1MB）。手指碰到卡片时照样立刻预取。 */
+    var run = function () {
+      var wait = busyFor();
+      if (wait) { setTimeout(run, wait + 200); return; }
+      var p = window.HansenPreloadPolicy;
+      try {
+        if (!p || typeof p.canBackgroundDownload !== 'function' || !p.canBackgroundDownload()) return;
+        if (typeof p.kidHasPlayed !== 'function' || !p.kidHasPlayed()) return;
+      } catch (e) { return; }
+      prefetchRecent();   /* 只预取玩过的岛（v1165 复查：没去过的岛不再空闲预取） */
+    };
     if (typeof window.requestIdleCallback === 'function') {
       requestIdleCallback(function () { run(); }, { timeout: 4000 });
     } else {

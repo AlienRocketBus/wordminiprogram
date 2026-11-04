@@ -22,9 +22,15 @@
     doClose(true);
   }
 
+  /* v1165: 拼写蜂里赢的金币、完成的「拼写蜂获胜」任务是写进全局钱包/任务账本的，岛页自己不知道 ——
+     顶栏金币和任务红点以前一直是开拼写蜂之前的样子（回首页再进也不变）。入账后、关掉拼写蜂时都刷新一下。 */
+  function refreshIsland(){
+    try{ if(typeof window.updateTopBar === 'function') window.updateTopBar(); }catch(e){}
+    try{ if(typeof window.updateQuestBadge === 'function') window.updateQuestBadge(); }catch(e){}
+  }
   function doClose(fromPop){
     var ov = document.getElementById(OV_ID);
-    if(!ov){ activeFrame = null; activeFocus = null; return; }
+    if(!ov){ activeFrame = null; activeFocus = null; refreshIsland(); return; }
     /* 🔴BUG#98(Hansen): spelling bee 里点"返回"(以及硬件/手势返回键)听不到点击音。
        根因: "返回"=关覆盖层=移除本覆盖层 iframe → 浏览器随之销毁 iframe 文档及其【音频上下文】;
        而 spelling bee 内部的点击音(BUG#96)是在 iframe 自己的音频上下文里播的, iframe 一销毁上下文就被掐断,
@@ -47,6 +53,7 @@
       try{window.dispatchEvent(new CustomEvent('hansen-progress-changed',{detail:{source:'focused-spelling-bee',channel:'crystal'}}));}catch(e){}
       try{if(window.HansenExploreProgress&&typeof HansenExploreProgress.refresh==='function')HansenExploreProgress.refresh();}catch(e2){}
     }
+    refreshIsland();
   }
 
   function currentIslandKey(){
@@ -74,7 +81,7 @@
         + 'z-index:2147483600;background:#0a0f24;overflow:hidden;';
       var ifr = document.createElement('iframe');
       ifr.title = '拼写对战';
-      ifr.src = 'spelling_bee.html?v=1164&island=' + encodeURIComponent(islandKey || '') + '&embed=1'
+      ifr.src = 'spelling_bee.html?v=1165&island=' + encodeURIComponent(islandKey || '') + '&embed=1'
         +(focus?'&focus=crystal&index='+encodeURIComponent(focus.index)+'&session='+encodeURIComponent(focus.sessionId):'');
       ifr.style.cssText = 'display:block;width:100%;height:100%;border:0;margin:0;padding:0;background:#0a0f24;';
       ifr.setAttribute('allow', 'autoplay');
@@ -205,6 +212,6 @@
     if(!d || d.type !== 'hsn_sb_reward') return;
     var receipt=sbRewardReceipt(d);if(!receipt)return;
     if(receipt.kind==='mastery')return;
-    if(sbAwardReward(receipt))sbAck(e.source,receipt.rewardId);
+    if(sbAwardReward(receipt)){ sbAck(e.source,receipt.rewardId); refreshIsland(); }
   });
 })();

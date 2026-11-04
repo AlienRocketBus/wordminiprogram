@@ -25,6 +25,7 @@ context.window=context;context.globalThis=context;
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('hansen_canonical_progress.js','utf8'),context,{filename:'hansen_canonical_progress.js'});
 const HC=context.HansenCanonical;
+const publicPlan=e=>e?{box:e.box,due:e.due,last:e.last}:e;
 
 // 旧物理存档没有 updatedAt 时，以各自 lastSaveTime 判新旧；同一 last 日期绝不能靠更高 box 获胜。
 const legacy=HC._blankStore();legacy.islands.season.wrongs[30]=2;
@@ -53,13 +54,30 @@ storage.setItem('wordIslandSeason',j({lastSaveTime:150,wrongs:{30:2},srs:{30:{bo
 HC.migrate();store=HC.read();
 assert.equal(store.islands.season.srs[30].box,0,'stale same-day higher box must not overwrite the later failure');
 
-// A successful correction that clears the wrong must atomically remove its due plan and leave tombstones.
+// v1165: a correction that clears the wrong count clears ONLY the 错题本 (with a tombstone).
+// The review plan stays until it graduates on due days — v946 deleted it here, so one miss +
+// one same-day correct answer dropped the word from spaced review for good.
 context.S.wrongs={};context.S.srs={};
 assert.equal(HC.absorbAnswer(0),true);
 store=HC.read();
 assert.equal(store.islands.season.wrongs[30],undefined);
-assert.equal(store.islands.season.srs[30],undefined);
 assert.ok(store.islands.season.cleared.wrongs[30]>0);
+assert.deepEqual(JSON.parse(JSON.stringify(publicPlan(store.islands.season.srs[30]))),{box:0,due:'2026-07-19',last:'2026-07-18'},'clearing the wrong count must keep the review plan');
+assert.ok(!store.islands.season.cleared.srs[30],'clearing the wrong count must not tombstone the plan');
+HC.migrate();store=HC.read();
+assert.equal(store.islands.season.wrongs[30],undefined,'stale alias saves must not resurrect a cleared wrong');
+assert.equal(store.islands.season.srs[30].box,0,'stale alias saves must not raise the kept plan');
+{
+  const view={learned:[],mc:{},wrongs:{0:99},srs:{}};
+  HC.syncState('land2',view,false);
+  assert.deepEqual(JSON.parse(JSON.stringify(view.wrongs)),{});
+  assert.deepEqual(JSON.parse(JSON.stringify(view.srs)),{0:{box:0,due:'2026-07-19',last:'2026-07-18'}},'the kept plan must still reach the alias entry');
+}
+
+// Graduation (plan set to null) must atomically remove the plan and leave a tombstone.
+assert.equal(HC.setCurrentSrs(0,null),true);
+store=HC.read();
+assert.equal(store.islands.season.srs[30],undefined);
 assert.ok(store.islands.season.cleared.srs[30]>0);
 
 // Re-running migration over stale physical Season/Land saves must not resurrect either wrong or due.
@@ -71,4 +89,4 @@ HC.syncState('land2',landView,false);
 assert.deepEqual(JSON.parse(JSON.stringify(landView.wrongs)),{});
 assert.deepEqual(JSON.parse(JSON.stringify(landView.srs)),{});
 
-console.log('canonical SRS HF2 v946: alias merge + cross-entry sync + clear tombstone + stale due suppression ✅');
+console.log('canonical SRS HF2 v946: alias merge + cross-entry sync + clear tombstone + stale due suppression + v1165 plan outlives 错题本 ✅');

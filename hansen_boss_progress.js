@@ -129,7 +129,9 @@
       try {
         localStorage.removeItem('hansen_card_data');
         localStorage.removeItem('hansen_card_data_bak');
-        localStorage.removeItem('hansen_card_temp_unlock_until');  // 临时全解锁标记也清掉
+        /* 🔴v1165 不再删 hansen_card_temp_unlock_until：它现在是 72 小时体验期（hansen_freepass.js）的「卡册全开」标记。
+           这段迁移在每个岛第一次打开时都会跑，以前一跑就把它删掉、体验期再写回来 → 卡册/神秘殿堂的数字来回跳。
+           过期的标记由 hansen_freepass.js 到期清理。 */
       } catch(e){}
       try { if(typeof window.save === 'function') window.save(); } catch(e){}
       try { console.log('[HBP] 🔴 v330 每岛独立迁移完成: 已删除旧全局卡牌存档, 本岛 boss 进度从第1关独立重新开始'); } catch(e){}
@@ -176,12 +178,30 @@
     return Math.min(20, Math.max(1, S.bossUnlocked || 1));
   }
   
+  // 🔴v1165 单词大陆 8 个岛（island_landN）的关卡顺序看 landN_prog（5 关，按顺序打赢一关开下一关），不看这里的 20 关数字。
+  //   以前这里照着 20 关的数字弹「🔓新 Boss 解锁」（说第 2 关开放了）：72 小时体验期跳着打赢第 5 关也弹，
+  //   可大陆的进度一步没动（体验期一过第 2 关还锁着）。现在大陆岛只在「按顺序打赢、真的开了下一关」时弹，写真的关号。
+  function landInfo(){
+    try{
+      var m = (location.pathname || '').match(/island_land([1-8])\.html/);
+      if(!m) return null;
+      var prog = parseInt(localStorage.getItem('land' + m[1] + '_prog') || '0', 10) || 0;
+      var total = (typeof BOSSES !== 'undefined' && BOSSES && BOSSES.length) ? BOSSES.length : 0;
+      return { n: m[1], prog: prog, total: total };
+    }catch(e){ return null; }
+  }
+
   // 记一次通关, 检查是否解锁下一关
-  function recordBossWin(bossLv){
+  //   landNext（只有单词大陆岛传）：这一仗真的开了大陆的第几关；0 = 没开新关，不弹解锁提示
+  function recordBossWin(bossLv, landNext){
     var S = getS();
     if(!ensureFields()) return;
     bossLv = Math.max(1, Math.min(20, bossLv | 0));
-    
+    /* 🔴v1165 复查：单词大陆岛弹不弹「🔓新 Boss 解锁」只看 landNext（这一仗真开了大陆的第几关）。
+       以前还套在下面 20 关的通用条件里：大陆岛的 20 关数字一直停在第 1 关，第一场胜利后 S.bossUnlocked 变成 2，
+       从第二场起条件永远不成立 → 按顺序打赢第 2、3、4 关真开了新关，却一次都不弹。 */
+    if(landNext !== undefined && landNext > 0) showUnlockBanner(landNext);
+
     // 🛡️ v328 纵深防御 — 越级校验: 即使调用方(理论上)传来一个"未解锁的高关"(bug/篡改),
     //   也绝不记录、绝不解锁. 只接受 bossLv <= 当前已解锁最高关 的胜利. 这样跳关在数据层就不可能发生.
     var curUnlocked = Math.max(1, Math.min(20, S.bossUnlocked || 1));
@@ -196,8 +216,8 @@
     var needed = getRequiredWins(bossLv);
     if(S.bossWins[bossLv] >= needed && bossLv >= curUnlocked && bossLv < 20){
       S.bossUnlocked = bossLv + 1;   // ★ 严格 +1, 一次只开一关
-      // 弹个解锁提示
-      showUnlockBanner(bossLv + 1);
+      // 弹个解锁提示（常规岛）；单词大陆岛的提示在函数开头按大陆自己的关号弹过了
+      if(landNext === undefined) showUnlockBanner(bossLv + 1);
     }
     
     // 保存
@@ -265,7 +285,14 @@
           // 没有复战标记的兜底: 用 S.bossCurrentLv (该打的关), 再不行才 S.level
           curBossLv = Math.max(1, Math.min(20, (S.bossCurrentLv || S.level || 1) | 0));
         }
-        recordBossWin(curBossLv);
+        var land = landInfo();
+        if(land){
+          // 先读进度再交给原 bossVictory（它按顺序打赢才把 landN_prog +1）
+          var inOrder = (window._s1Idx === land.prog) && (land.prog + 1 < land.total);
+          recordBossWin(curBossLv, inOrder ? land.prog + 2 : 0);
+        } else {
+          recordBossWin(curBossLv);
+        }
       } catch(e){ console.warn('[HBP] recordBossWin 失败:', e); }
       
       return origVictory.apply(this, arguments);

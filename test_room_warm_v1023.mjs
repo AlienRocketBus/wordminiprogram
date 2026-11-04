@@ -17,7 +17,15 @@ const errs=[];
 console.log('房间预热常驻 v1023');
 const page=await browser.newPage({viewport:{width:390,height:844}});
 page.on('pageerror',e=>errs.push(String(e.message).slice(0,80)));
-await page.addInitScript(()=>{if (window.top === window) localStorage.clear();});
+/* 🔴v1165：预热只给「真的打开过星海房间、玩过一局」的孩子做（新孩子不预热、预热框里不套娃、
+   网络策略不允许不预热 —— 这些负面路径由 test_preload_budget_v1165.mjs 守）。
+   本测试守的是「该预热时预热得好、开得快、关了不销毁」，所以造一个去过星海、玩过的孩子。
+   只在第一次加载前写入，防止页面自己跳转后又被清空。 */
+await page.addInitScript(()=>{ try{ if(window.top === window && !sessionStorage.getItem('__rw')){ localStorage.clear();
+  localStorage.setItem('hansen_room_opened_v1165_land','1'); localStorage.setItem('hansen_room_opened_v1165_season','1');
+  /* 快照写别的岛：动物岛开机会用自己的真实数据覆盖「动物大冒险」那份 */
+  localStorage.setItem('hsn_progress:学校大冒险', JSON.stringify({name:'学校大冒险',totalWords:41,learned:2,ans:8,cor:6,boss:0,level:1,maxCombo:3,ts:Date.now()}));
+  sessionStorage.setItem('__rw','1'); } }catch(e){} });
 const startUrl = `http://127.0.0.1:${port}/island_animal.html`;
 await page.goto(startUrl,{waitUntil:'domcontentloaded'});
   /* 🔴v1158：**固定等 2600ms 不够 —— 岛屿页有 89 个 script。**

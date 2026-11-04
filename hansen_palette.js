@@ -356,6 +356,8 @@
     css+=_L+'.hr_btm_hint{color:#cbd5e1!important}\n';
     // I \u5361\u518c\u9501\u5361\u5c0f\u5b57\u52a0\u6df1
     css+=_L+'#cardsScreen [style*="color:#475569"]{color:#1f2937!important}\n';
+    /* v1165: 卡册「✨ 全部集齐 · 卡牌大师」是深底用的浅绿 #86efac，亮色底上 1.3:1 看不清（体验期卡册全开时就会出现） */
+    css+=_L+'#cardsScreen [style*="color:#86efac"]{color:#15803d!important}\n';
     // \U0001f534v991\u325a(\u91cd\u5199) \u4eca\u65e5\u590d\u4e60\u5c42(#hr_today) \u6539\u4e3a\u771f\u53cc\u8272\u8c03\u5206\u79bb
     // v990 \u66fe\u7528"\u51bb\u4f4f\u6df1\u5e95"\u4fdd\u62a4\u6587\u5b57; \u7528\u6237\u660e\u786e\u8981\u6c42\u4eae\u8272\u8c03\u5c31\u8be5\u4eae\u5e95\u9ed1\u5b57, \u6545\u6539\u4e3a\u6574\u5c42\u7ffb\u8f6c
     css+=_L+'#hr_today{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 60%,#e0e7ff 100%)!important}\n';
@@ -404,6 +406,20 @@
       css+=_L+ov+' .hr_stat .num{color:var(--pal-accent-text,#1e40af)!important;text-shadow:none!important}\n';
       css+=_L+ov+' .hr_stat .lbl{color:#475569!important}\n';
     });
+    // v1165 错题总览(#hwo_overlay) 也翻成亮底黑字：首页横幅现在真的会打开它，以前亮色主题下深底配深字看不清
+    css+=_L+'#hwo_overlay{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 60%,#e0e7ff 100%)!important}\n';
+    css+=_L+'#hwo_overlay, '+_L+'#hwo_overlay *{--pal-ink:#0f172a;--pal-ink-hi:#020617;--pal-ink-2:#334155;--pal-ink-3:#64748b}\n';
+    css+=_L+'#hwo_overlay .hwo_title{color:var(--pal-accent-text,#1e40af)!important}\n';
+    css+=_L+'#hwo_overlay .hwo_sub,'+_L+'#hwo_overlay .hwo_btm,'+_L+'#hwo_overlay [style*="color:#94a3b8"]{color:#475569!important}\n';
+    css+=_L+'#hwo_overlay [style*="color:#cbd5e1"]{color:#334155!important}\n';
+    css+=_L+'#hwo_overlay [style*="color:#22c55e"]{color:#15803d!important}\n';
+    css+=_L+'#hwo_overlay .hwo_back{background:rgba(15,23,42,.08)!important;color:#334155!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_card{background:rgba(255,255,255,.75)!important;border-color:rgba(15,23,42,.10)!important;color:#0f172a!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_name{color:#0f172a!important}\n';
+    css+=_L+'#hwo_overlay .hwo_island_hint{color:#475569!important}\n';
+    /* 红色计数块 / 红总数卡 / 紫色「一起复习」本身是深色块：字保持浅色 */
+    css+=_L+'#hwo_overlay .hwo_island_count,'+_L+'#hwo_overlay .hwo_island_count *,'+_L+'#hwo_overlay .hwo_total,'+_L+'#hwo_overlay .hwo_total *,'+_L+'#hwo_overlay .hwo_review_all,'+_L+'#hwo_overlay .hwo_review_all *{color:#fff!important}\n';
+    css+=_L+'#hwo_overlay .hwo_total_n{color:#fde047!important}\n';
     // \U0001f534v992\u325d \u6211\u7684\u5b66\u4e60\u9875(#hsn-ml) \u771f\u53cc\u8272\u8c03\u5206\u79bb\u2014\u2014\u540c\u65cf\u6700\u540e\u4e00\u4e2a\u6df1\u5e95\u6d6e\u5c42
     // v988\u3257 \u66fe\u53ea\u6539\u6587\u5b57\u8272(\u5e95\u4ecd\u6df1\u7d2b) \u2192 \u5c9b\u5c7f\u540d\u6df1\u5b57\u538b\u6df1\u5e95\u5168\u7cca; \u672c\u7248\u6539\u4e3a\u6574\u5c42\u7ffb\u4eae
     css+=_L+'#hsn-ml{background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 55%,#e0e7ff 100%)!important}\n';
@@ -421,6 +437,9 @@
     css+=_L+'#hsn-ml .hsn-ml-isl .row2,'+_L+'#hsn-ml .hsn-ml-isl .l{color:#475569!important}\n';
     css+=_L+'#hsn-ml .hsn-ml-isl .v{color:#0f172a!important}\n';
     css+=_L+'#hsn-ml .hsn-ml-bar{background:rgba(15,23,42,.12)!important}\n';
+    /* v1165: 「你的成长足迹」小字和每岛「0 / 42」数字以前还是深底用的浅紫/浅灰（亮色底上 1.4~1.8:1 看不清） */
+    css+=_L+'#hsn-ml .hsn-ml-title small{color:#4338ca!important}\n';
+    css+=_L+'#hsn-ml .hsn-ml-isl .row2 b{color:#0f172a!important}\n';
     /* \u5f69\u8272\u5361\u7247(\u6982\u89c8\u7d2b\u5361/\u7eff\u8272\u5b8c\u6210\u6761/\u91d1\u5361)\u5185\u767d\u5b57\u4fdd\u6301 */
     css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#064e3b,#065f46)"] *,'+_L+'#hsn-ml [style*="linear-gradient(135deg,#7c2d12,#9a3412)"] *{color:#fff!important}\n';
     css+=_L+'#hsn-ml [style*="linear-gradient(135deg,#1e293b,#312e81)"] .hsn-ml-bignum{color:#fde047!important}\n';
@@ -574,7 +593,8 @@
     // \U0001f534v1010: \u6d45\u8584\u8377\u7eff #bbf7d0 \u538b\u767d\u5e95 \u5bf9\u6bd4\u5ea6\u4ec5 1.03(\u7b49\u4e8e\u9690\u5f62)
     // \u5ba1\u8ba1\u673a\u5728\u8bbe\u7f6e\u9875/\u6211\u7684\u5b66\u4e60/\u9519\u9898\u603b\u89c8\u4e09\u5904\u62d3\u51fa; \u5f69\u5e95\u5361\u5185\u7684\u6d45\u7eff\u4e0d\u53d7\u5f71\u54cd
     css+=_LS+'[style*="color:#bbf7d0"]:not(.boss-opt):not(.boss-opt *){color:#15803d!important}\n';
-    css+=_LS+'.listen-reveal .lr-pn{color:#15803d!important}\n';
+    /* v1165: 揭晓卡在亮色主题下仍是深绿底，音标用深绿等于看不见(实测)；改回浅薄荷绿 */
+    css+=_LS+'.listen-reveal .lr-pn{color:#bbf7d0!important}\n';
     /* \u4f46\u5f69\u5e95\u5361\u7247\u5185\u7684\u6d45\u7eff\u8981\u4fdd\u7559\u2014\u2014\u5b83\u672c\u6765\u5c31\u538b\u5728\u7eff\u6e10\u53d8\u4e0a\uff0c
        \u8f6c\u6df1\u7eff\u53cd\u800c\u53d8\u6210\u7eff\u5e95\u7eff\u5b57(\u5ba1\u8ba1\u673a\u5b9e\u6d4b 1.82)\u3002\u540e\u4f4d\u540e\u4ee3\u9009\u62e9\u5668\u7279\u5f02\u6027\u66f4\u9ad8\uff0c\u53ef\u590d\u4f4d\u3002 */
     css+=_LS+'[style*="linear-gradient"] [style*="color:#bbf7d0"]{color:#bbf7d0!important}\n';

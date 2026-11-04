@@ -253,10 +253,10 @@
     var localPaid=snap.items.filter(paid).length;
     var cReadable=!!(snap.canonical&&snap.canonical.ok),xReadable=!!(snap.crystal&&snap.crystal.ok),pet=snap.pet;
     sec.innerHTML='<h2>🐾 宠物掌握 · 💎 知识结晶</h2>'+
-      '<div class="hxp-legend"><b>已认识</b>只是加入学习，不发宠物掌握或结晶。🐾 只认<b>打字大师的整词拼写</b>；💎 只认<b>聚焦 Spelling Bee</b>，每词每天最结算一次（普通1星、强化2星）。</div>'+
+      '<div class="hxp-legend"><b>已认识</b>只是加入学习，不发宠物掌握或结晶。🐾 只认<b>打字大师的整词拼写</b>；💎 只认<b>聚焦拼写蜂</b>，每个词每天最多点亮一次。</div>'+
       '<div class="hxp-summary">'+
         '<div class="hxp-summary-card"><b>🐾 本岛 '+(cReadable?(localMaster+' / '+snap.items.length):'状态暂不可读')+'</b><span>每词在打字大师无提示精确拼对 3 次；计数升级后保留。</span></div>'+
-        '<div class="hxp-summary-card"><b>💎 已到账 '+(xReadable?(localPaid+' / '+snap.items.length):'状态暂不可读')+'</b><span>Bee 机器人 &lt;50 CPM 需10次、50~79 需7次、≥80 需5次；达标普通锁1星、强化锁2星，5星得 4 钻。</span></div>'+
+        '<div class="hxp-summary-card"><b>💎 已到账 '+(xReadable?(localPaid+' / '+snap.items.length):'状态暂不可读')+'</b><span>在聚焦拼写蜂里赢过机器人就能点亮星星，5 颗星得 4 颗钻石。<details class="hxp-rules"><summary>规则</summary>机器人速度每分钟不到 50 个字母要赢 10 次、50~79 要赢 7 次、80 以上要赢 5 次；一次点亮 1 颗星，记忆强化时 2 颗。</details></span></div>'+
       '</div>';
     var next=document.createElement('div');next.className='hxp-next';
     if(pet&&pet.ok){
@@ -360,23 +360,25 @@
     var pawNow=item.masteryReadable?Math.min(item.masterHits,item.mastery):0;
     var pawMeta=!item.masteryReadable?'状态暂不可读；不会显示成 0/3。':item.mastered?('✅ 已计入宠物升级。打字大师累计精确拼对 '+item.mastery+' 次；宠物升级后保留。'):('还需在打字大师中无提示、整词精确拼对 '+(item.masterHits-pawNow)+' 次。选择题、听音选项和看提示拼写都不增加这条进度。');
     var stars='';for(var i=0;i<5;i++)stars+=i<(item.crystalReadable?item.lv:0)?'★':'☆';
-    var crystalMeta='';
+    var crystalMeta='',crystalRules='';   // crystalRules：固定文案的「规则」折叠块（家长看），不经过 esc
     if(item.crystalReadable){
       if(item.done)crystalMeta=rewardCopy(item,snap);
       else{
-        crystalMeta=item.lockedToday?'✅ 今天这个词已通过聚焦 Spelling Bee 完成一次锁星；为了真正间隔记忆，明天才能再加固。':'打开聚焦 Spelling Bee 后可调机器人速度：<50 CPM 需赢10次，50~79 需赢7次，≥80 需赢5次。整组达标才锁 1 星。';
-        if(!item.lockedToday&&item.boosted)crystalMeta+=' ⚡ 记忆强化还剩约 '+item.boostMinutes+' 分钟；挑战次数不减，达标后依原权益锁 '+snap.rules.boostStarGain+' 星。';
+        /* v1165: 孩子看得懂的话；机器人速度和次数门槛收进「规则」（以前写 CPM、锁星） */
+        crystalMeta=item.lockedToday?'✅ 今天这个词已经点亮过一颗星啦！明天再来，记得更牢。':'打开聚焦拼写蜂，赢过机器人就能点亮一颗星。';
+        if(!item.lockedToday)crystalRules='<details class="hxp-rules"><summary>规则</summary>机器人速度每分钟不到 50 个字母要赢 10 次、50~79 要赢 7 次、80 以上要赢 5 次，赢够了才点亮 1 颗星。</details>';
+        if(!item.lockedToday&&item.boosted)crystalMeta+=' ⚡ 记忆强化还剩约 '+item.boostMinutes+' 分钟：赢够了这次点亮 '+snap.rules.boostStarGain+' 颗星。';
         crystalMeta+=' '+rewardCopy(item,snap);
       }
     }else crystalMeta=rewardCopy(item,snap);
     var h='<section class="hxp-progress" id="hxpWordProgress" aria-label="这个单词的成长进度"><h3>这个单词的两条真实进度</h3>'+
       '<div class="hxp-prow"><div class="hxp-ptop"><span>🐾 宠物掌握</span><span>'+(item.masteryReadable?(pawNow+' / '+item.masterHits):'—')+'</span></div>'+progressBar(pawNow,item.masterHits,'宠物掌握进度',item.masteryReadable)+'<div class="hxp-pmeta">'+esc(pawMeta)+'</div></div>'+
-      '<div class="hxp-prow gem"><div class="hxp-ptop"><span>💎 知识结晶</span><span class="hxp-stars" aria-label="'+(item.crystalReadable?(item.lv+' / 5 星'):'状态暂不可读')+'">'+(item.crystalReadable?stars:'—')+'</span></div>'+progressBar(item.crystalReadable?item.lv:0,5,'知识结晶星级',item.crystalReadable)+'<div class="hxp-pmeta">'+esc(crystalMeta)+'</div></div>';
+      '<div class="hxp-prow gem"><div class="hxp-ptop"><span>💎 知识结晶</span><span class="hxp-stars" aria-label="'+(item.crystalReadable?(item.lv+' / 5 星'):'状态暂不可读')+'">'+(item.crystalReadable?stars:'—')+'</span></div>'+progressBar(item.crystalReadable?item.lv:0,5,'知识结晶星级',item.crystalReadable)+'<div class="hxp-pmeta">'+esc(crystalMeta)+crystalRules+'</div></div>';
     var buttons=[];
     if(item.masteryReadable&&!item.mastered)buttons.push('<button type="button" class="hxp-action" data-hxp-launch="pet">🐾 打字大师·掌握冲刺</button>');
     if(item.crystalReadable&&!item.done){
       if(item.lockedToday)buttons.push('<button type="button" class="hxp-action gem" disabled aria-disabled="true">🌙 今日已完成结晶加固·明天再来</button>');
-      else buttons.push('<button type="button" class="hxp-action gem" data-hxp-launch="crystal">💎 Spelling Bee·结晶加固</button>');
+      else buttons.push('<button type="button" class="hxp-action gem" data-hxp-launch="crystal">💎 拼写蜂·点亮星星</button>');
     }
     var rs=rewardState(item);if(item.done&&(rs==='pending'||rs==='unpaid'))buttons.push('<button type="button" class="hxp-action retry" data-hxp-retry="1">🔐 安全重试钻石补发</button>');
     if(buttons.length)h+='<div class="hxp-actions">'+buttons.join('')+'</div>';

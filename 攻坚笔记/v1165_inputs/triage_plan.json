@@ -1,0 +1,2429 @@
+{
+ "summary": "Triage of every input, checked against the worktree code (wt-opt, origin/main..HEAD = 12 optimization commits; greps/reads at the cited lines). The result is 128 deduplicated items:\n\n- **todo: 76**\n  - lane A: 30\n  - lane B: 46\n- **needs_owner: 19**\n- **wontfix: 11**\n- **deferred_battle: 7**\n- **deferred_theme2: 7**\n- **already_fixed: 8**\n\nEvery source ID maps into an item: all 113 confirmed findings, the 26 missed items, the 8 uncertain items plus the refuted CB-05, CQ-01..18, PS-01..12, TV-01..16, the 17 optimization-review items (OPT-n) and opt_deferred (OD-*).\n\n**Uncertain items, re-checked in code:**\n- P2-07: true → F059.\n- P2-13: true → F049.\n- P2-19: true → F075.\n- P2-21: true → F066.\n- P2-16: same as MG-11 → F055.\n- P2-20: owner-spec → F077.\n- P2-10: standalone-only → F067.\n- VC-23: theme 2.0 → F116.\n\n**Partly fixed by the batches (verified), remainder is todo:**\n- **Warm rooms (F003):** fixed for new kids. Still on inside the home shell for kids who once opened 星海/单词大陆.\n- **Island prefetch (F021):** the network-policy gate is done. The ?v= URL mismatch and the 404 key-to-file mapping remain.\n- **Welcome/title/copy:** done in b24769c. The stats strip still shows '711+' → F069. The 8 land islands still share one 我的学习 key → F041.\n- **Boss engine lazy-load:** done. The settings page path is wontfix → F097.\n\n**Lane rules:**\n- Lane A owns template.html, land_template.html, generate.py, generate_land.py, island_data.json, land_data.json and every generated island_*.html. Only lane A runs `python3 generate.py` and `python3 generate_land.py`.\n- Lane B owns everything else.\n\n**Cross-lane interfaces (split items):**\n- **Back gesture (F006 B / F013 A):** the island exposes `window.__hsnIslandBack()` (true = consumed). Overlays register closers with `(window.__hsnBackStack=window.__hsnBackStack||[]).push(fn)`.\n- **Hidden island (F007 B / F014 A):** `window.__hsnIslandHidden()` stops games and audio when the island is hidden.\n- **Top bar (F022 B / F045 A):** `window.updateTopBar()`.\n- **bossActive (F061, A only):** a window getter that mirrors the `let` binding. This makes hansen_cards.js:1068/1075 work with no B edit. It keeps the check_resources.py:756 literal `window.bossActive===true`.\n- **Content (F038 B / F060 A):** both apply the identical value table. Each lane's test compares against hard-coded expected values, not the other lane's files.\n- **Split-item tests:** lane B's tests stub the island API so each lane can prove its part alone. Re-run them unstubbed after merge.\n\n**Priorities:**\n1. F001 – the 2027-01-01 time bomb (blocker; 59 days from today).\n2. F002 – per-answer smoothness: validated ledger cache, plus F043 home polls.\n3. F003/F004/F005 – warm rooms, shared-history reload, recent card. Do F004 before F021, which picks the iframe URL.\n4. F006/F007/F013/F014 – back gesture and hidden island.\n5. F008/F009 – service worker.\n6. F010 – achievements. Port only the series rules; the template checker has latent bugs.\n7. F011, F012.\n8. Lane A majors F015–F020.\n\n**Service worker (F009):** add only the SHELL entry. Do not touch cache generation numbers or VERSION. package_release.py pins shell-217/pages-215/assets-215 for 1163, and bump_version.py rotates them at release.\n\n**Decisions to flag to the orchestrator:**\n- **F077:** VC-07/P2-20 (\"已收集 20/20 · 全部集齐\" during the trial) is Hansen's explicit freepass spec (hansen_freepass.js ③, 零提醒). It needs his decision, not a fix.\n- **F097:** splitting the settings/admin IIFE out of hansen_boss_attack.js (lines 14983–15690) is not safe now. 177 check_resources literals live only in that IIFE, and the admin 3-strike/IndexedDB gate is pinned by tests. Documented as wontfix.\n- **Content fixes:** only the certain rows are fixed (F038/F060/F039, plus the code fixes F016/F050). Every sentence change needs a new recording → F083. Medium/low-confidence rows → F084–F089.\n- **Privacy:** all battle/login code → deferred_battle. Console permission changes → needs_owner (F078, F079). Online TTS policy → F080.\n\n**New tests:** name them test_*_v1165.mjs, locate the repo via import.meta.url, and prove each fails on the current HEAD and passes after.",
+ "items": [
+  {
+   "id": "F001",
+   "sources": [
+    "CB-09",
+    "MISSED#25"
+   ],
+   "title": "2027-01-01 起首页「✦番外篇 EXTRA」入口消失，单词大陆 8 岛和星海终战从首页再也进不去",
+   "severity": "blocker",
+   "status": "todo",
+   "status_reason": "Verified hansen_season.js:39-45 S1 end '2026-12-31', :174-180 getCurrentSeason() returns null outside the window, :378-380 buildProgressBar() returns early on null; index.html has no other link to land_map/island_land*/island_season. Optimization commits only added warm gating to this file. Fires in 59 days.",
+   "lane": "B",
+   "files": [
+    "hansen_season.js",
+    "test_season_forever_v1165.mjs (new)"
+   ],
+   "fix": "Make the 番外篇 entry permanent: add latestSeason() (last configured season whose start <= today) and use getCurrentSeason()||latestSeason() in buildProgressBar/openPanel/HansenSeason.current so the bar and panel always build; daysLeft() returns null once past end and the panel hides the countdown; getPastSeasons() never lists the season serving as current (S1 card not auto-shown as 「已绝版·错过」); drop the 「秘境即将开启，敬请期待！」 branch when any season is configured. Short Chinese comment: 番外篇无时间限制(v865)，以后加新赛季再加 S2。 Tell the teacher in plain words in the release note.",
+   "acceptance": "New test_season_forever_v1165.mjs (page.clock, Asia/Shanghai) at 2026-11-03, 2026-12-31 23:30, 2027-01-01 09:00, 2030-06-01: index has #hsnSeasonBar 「✦ 番外篇 EXTRA」, a real tap opens land_map.html in #islandFrame, panel never says 敬请期待 or shows negative days, 神秘殿堂 doesn't mark S1 已绝版 for a kid without the card. Fails on HEAD at 2027-01-01, passes after; guards/check_resources green."
+  },
+  {
+   "id": "F002",
+   "sources": [
+    "OD-R1",
+    "task(a)",
+    "OD-RP(per-answer delay)"
+   ],
+   "title": "每答一题主线程卡 350–410 ms（4× 慢 CPU、进度多的孩子）：账本每次都整份读两遍、合并、再序列化",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified hansen_canonical_progress.js:250-285 readStore() parses main+_bak, normalises/compacts both, mergeCurrentWithPrevious() re-clones main via stringify/parse, then stringifies twice to compare — on every call; ~25 getters/absorbers (hansen_review*.js, hansen_island_upgrade.js checkAch, hansen_pet_showcase.js, explore) call it several times per answer. No cache exists; v1165 batches added ~3 reads per miss.",
+   "lane": "B",
+   "files": [
+    "hansen_canonical_progress.js",
+    "hansen_review.js / hansen_review_rewards_v963.js / hansen_explore_progress_v945.js (only if they parse the ledger key directly)",
+    "test_answer_cost_v1165.mjs (new)"
+   ],
+   "fix": "Validated in-memory ledger cache: keep {mainRaw,bakRaw,merged,mergedRaw}; readStore() still getItem()s both keys but when both strings are === the cached ones returns a fresh copy (structuredClone(merged), fallback JSON.parse(mergedRaw)) and skips normalise/compact/merge/stringify; writeStore() writes through; a storage listener for STORE_KEY/STORE_BAK_KEY drops the cache. Add readStoreRO() (no clone) for pure getters (countLearned/isLearned/mc/totalLearned/exploreSnapshot/read). Keep verify-after-write, fail-closed and _bak recovery unchanged. Route any direct parse of 'hansen_canonical_progress_v941' in other modules through the API. Put measured before/after ms in the commit message.",
+   "acceptance": "New test_answer_cost_v1165.mjs: heavy fixture (27 island saves + ledger ~900 learned/~200 wrongs/~300 srs + _bak), CDP CPU throttling 4x, island_food standalone and inside the shell, 10 answers via the real 听音辨义 UI. Hard gates: full ledger rebuilds per answer <= 1 on average (HansenCanonical._perf() counter or JSON.parse calls on strings >20 KB) and median main-thread time per answer <= 120 ms at 4x (HEAD ~350–410 ms). Fails on HEAD, passes after; test_canonical_*, test_srs_plan_v1165, test_lesson_review_fix_v1165, test_backup_*, test_explore_* green."
+  },
+  {
+   "id": "F003",
+   "sources": [
+    "INT-02",
+    "NET-05",
+    "PH-01",
+    "PH-02",
+    "SS-1",
+    "SS-4",
+    "MISSED#3",
+    "MISSED#4",
+    "MISSED#9",
+    "MISSED#11",
+    "MISSED#12",
+    "MISSED#23",
+    "OPT-4",
+    "OD-P5"
+   ],
+   "title": "岛里仍会在后台偷偷开整份星海页（去过星海的孩子每进一个岛都多开隐藏页面并写存档）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Partly fixed by 086259a (verified hansen_room_warm_v1023.js:155-249: no nesting in warm frames, HansenPreloadPolicy gate, rooms only after hansen_room_opened_v1165_* flags; hansen_mylearning.js hiddenWarmFrame). New kids are clean. Still open: inWarmContext() is false for an island in #islandFrame, so kids who opened 星海/大陆 get hidden land_map + island_season rooms (+3 ?warm=1 page iframes) on every island; hidden island_season still runs save()/quests/canonical init and stamps lastSaveTime (feeds F005). Rooms are never shown in the shell (HansenRoom.open only from template.html:1868 island_season1-5 pages that don't exist, hansen_home_link.js:84 catch, __hsnJumpS1 no caller); standalone island_season warms itself (SS-4). MISSED#3: audit byte numbers are cold-cache (route()) worst cases.",
+   "lane": "B",
+   "files": [
+    "hansen_room_warm_v1023.js",
+    "test_warm_rooms_shell_v1165.mjs (new)"
+   ],
+   "fix": "In scheduleWarm(): return immediately when the page is inside any frame (try{ if(window.parent&&window.parent!==window) return; }catch(e){ return; }) — API open/warm on demand stays; also skip any key whose cfg.url equals the page's own file. Keep top-level standalone behaviour so test_room_warm_v1023 and test_preload_budget_v1165 P5 stay valid. Chinese comment: 首页外壳里从来不会打开这些房间，预热只会多开隐藏页面、写存档。",
+   "acceptance": "New test_warm_rooms_shell_v1165.mjs: shell, kid with hansen_room_opened_v1165_land/season=1 and progress, 4g, real tap 食物, wait 15 s: no land_map/island_season/?warm=1 frames under #islandFrame, HansenRoom._rooms() empty, no writes to wordIslandSeason / hsn_progress:星海* / hsn_season_prologue_seen (setItem hook); standalone island_season never builds hsn_room_season. Fails on HEAD; test_room_warm_v1023 and test_preload_budget_v1165 green."
+  },
+  {
+   "id": "F004",
+   "sources": [
+    "INT-01",
+    "PH-03",
+    "INT-06",
+    "NET-17(boot-check part)",
+    "MISSED#13(cause b)"
+   ],
+   "title": "从第 2 个岛回首页，隐藏的 iframe 自己重新加载第 1 个岛（保活失效、后台重跑、再进整页重载）；🗺️ 偶尔要点两下",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified index.html:4151 iframe location.replace(file) + push/replaceState before the iframe commits (:4158-4166) + closeIsland via history.back() (:4183-4192) + popstate (:4196) → joint session history restores the first island; hansen_boot_check_v1156.js:133-134 reload uses location.href and appends _r (extra iframe history entry). Unchanged by the batches.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "hansen_boot_check_v1156.js",
+    "test_island_keepalive_v1165.mjs (new)"
+   ],
+   "fix": "Apply the auditor-tested patch (scratchpad/audit/integration/patched/index_F9_F10.diff): when switching to a different island create a new iframe id=islandFrame copying every attribute of the old one, unique name 'hsnIsland_'+Date.now()+'_'+rand, src=file, onload->_revealIsland, replaceChild and reassign the closure's frame. closeIsland: _closeIslandNow() first, then history.back() up to 3x (350 ms apart) while history.state.hsnIsland is still set. Boot-check 重新加载: URL searchParams.set('_r',Date.now()) (replace, not append) + location.replace. Do before F021 (which sets the src URL).",
+   "acceptance": "New test_island_keepalive_v1165.mjs (shell, real taps): 动物→🗺️→食物→🗺️→wait 3 s: iframe pathname /island_food.html, no framenavigated to another island, a JS marker set in 食物 survives re-entry; after an in-iframe boot-check reload one 🗺️ tap reaches home; forward, reload, land_map→island_land1→🗺️ still work; URL never accumulates _r. Fails on HEAD."
+  },
+  {
+   "id": "F005",
+   "sources": [
+    "INT-03",
+    "CB-04",
+    "MISSED#2",
+    "MISSED#5",
+    "MISSED#13",
+    "MISSED#15"
+   ],
+   "title": "首页「最近探险的岛屿 · 点击继续」指向孩子没玩的岛（常是 👑星海终战 或当天第一个岛）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified index.html:3984-4002 findRecentIsland() lets the newest lastSaveTime of any wordIsland* save override lastIslandKey/lastIslandTime that openIsland writes on a real tap (:4085); background saves (F003, F004, cloud restore, hansen_upgrade.js stamp) redirect the card. Unchanged.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "test_recent_card_v1165.mjs (new)"
+   ],
+   "fix": "findRecentIsland(): if lastIslandKey is an ISLAND_META key return it (with lastIslandTime) — only openIsland/continueLastIsland write it; run the lastSaveTime scan only when there is no explicit record. Removes the per-call JSON.parse of all saves from the common path.",
+   "acceptance": "New test_recent_card_v1165.mjs: tap 动物 → 🗺️, then write a newer lastSaveTime into wordIslandSeason and wordIslandMisc: card shows 🐯 动物 and continue opens island_animal.html; 动物→食物→疑问 shows the last; with no lastIslandKey the scan fallback works. Fails on HEAD (星海终战)."
+  },
+  {
+   "id": "F006",
+   "sources": [
+    "INT-04",
+    "INT-09"
+   ],
+   "title": "（外壳部分）手机返回键在岛里任何玩法/浮层都会直接退出整个岛；单词大陆岛返回跳过大陆地图",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified index.html:4196-4199 popstate always calls _closeIslandNow(); only hansen_spellbee.js pushes history inside islands; land islands replace land_map's entry. Unchanged. Pair with F013.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "hansen_wrong_overview.js",
+    "hansen_review.js",
+    "hansen_mylearning.js",
+    "hansen_mistake_lesson_v1165.js",
+    "hansen_season.js",
+    "hansen_cards.js",
+    "hansen_gacha.js",
+    "hansen_gear.js",
+    "hansen_diamond_shop.js",
+    "hansen_theme_shop.js",
+    "test_island_back_v1165.mjs (new)"
+   ],
+   "fix": "Interface with F013: island exposes window.__hsnIslandBack() (true = it closed an overlay or left a game screen); overlays register a closer with (window.__hsnBackStack=window.__hsnBackStack||[]).push(fn) on open and remove it on close (fn returns true if it closed something). index.html popstate: if the island wrap is visible, the new state has no hsnIsland and closeIsland didn't start it (flag), ask the iframe; true → history.pushState({hsnIsland:curFile},'',location.href) and stop; else if curFile is island_land1-8 → openIsland('land_map.html',true)+pushState; else _closeIslandNow(). Register closers at least for 错题总览 #hwo_overlay, 复习中心 #hr_center, 我的学习 #hsn-ml, the lesson card, 星海面板/殿堂/展柜 masks, Boss 殿堂/卡片详情, 抽卡揭晓, 装备/主题商店 modals. Spelling bee keeps its own entry; PK → F113.",
+   "acceptance": "New test_island_back_v1165.mjs (shell, history.back()): from 探索单词/听音辨义/打字大师 the island stays and returns to homeScreen, a second back closes to home; 我的学习/错题总览/复习中心 → back closes only the overlay; land island → back → land_map → back → home; 🗺️ still one tap. Stub __hsnIslandBack in the frame until F013 merges, then run unstubbed. Fails on HEAD."
+  },
+  {
+   "id": "F007",
+   "sources": [
+    "CB-03",
+    "INT-07"
+   ],
+   "title": "（外壳部分）岛被藏起来时游戏还在跑：打地鼠每 5 秒在首页念一个词，极速 60 秒继续倒数",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified index.html:4171-4180 _closeIslandNow() only hides the wrap; comment at :4167-4170 (「隐藏时不会响」) is false. Unchanged. Pair with F014.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "test_island_hidden_quiet_v1165.mjs (new)"
+   ],
+   "fix": "In _closeIslandNow() after hiding: try{ var w=frame.contentWindow; if(w&&typeof w.__hsnIslandHidden==='function') w.__hsnIslandHidden(); }catch(e){}; correct the comment.",
+   "acceptance": "New test_island_hidden_quiet_v1165.mjs: 打地鼠 running → 🗺️ → 12 s on home: no Audio.play/speechSynthesis.speak in the island frame, 极速60秒 spTime unchanged while hidden, re-entry shows island home (stub __hsnIslandHidden until F014 merges). Fails on HEAD (word every ~5.5 s)."
+  },
+  {
+   "id": "F008",
+   "sources": [
+    "NET-01"
+   ],
+   "title": "网慢但能用时，没打开过的岛永远打不开：SW 12 秒就掐断并显示「请联网」",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:96-100 COLD_NAVIGATION_TIMEOUT_MS=12000 with bufferedNavigationResponse() reading the whole body inside the timeout, :327-333 abort → offline page; index.html:4125 reveals a blank frame after 10 s. sw_v944.js not in the optimization diff.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "index.html",
+    "test_sw_slow_nav_v1165.mjs (new)"
+   ],
+   "fix": "Navigation branch: with no cached fallback, don't time out the body — return the network response streaming (fixHtmlType re-wraps response.body; no arrayBuffer()); keep the buffered timeout only when a cached fallback exists. If fetch rejects while navigator.onLine, return a kid page 「网络有点慢，没加载完」 with 重试 and 返回首页 (parent.closeIsland). index.html: after 10 s keep the loading overlay with 「网络有点慢，还在加载…」 + 返回 instead of revealing a blank frame. Keep fixHtmlType on every respondWith (防下载总闸.py).",
+   "acceptance": "New test_sw_slow_nav_v1165.mjs (gzip, SW controlling): island_animal.html at 10 KB/s and land_map.html at 30 KB/s both open and complete (no offline page, no blank reveal); a real fetch failure while online shows the slow page whose 返回首页 closes the island. Fails on HEAD; test_sw_upgrade_v944, test_network_release_blockers_v946, 防下载总闸.py green."
+  },
+  {
+   "id": "F009",
+   "sources": [
+    "OD-L6",
+    "OD-R4",
+    "task(b)"
+   ],
+   "title": "新模块 hansen_mistake_lesson_v1165.js 不在 SW 预缓存里：离线时答错小课消失，退回旧定时推进（离开会重锁）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:17-24 SHELL lacks it; it is the only new runtime file in git diff origin/main --stat. Without it __hmlLesson falls back to setTimeout(next,…) with no leave-screen guard.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_lesson_offline_v1165.mjs (new)"
+   ],
+   "fix": "Add './hansen_mistake_lesson_v1165.js?v=1163' (exact URL the templates load) to SHELL. Do NOT change CACHE_PREFIX generation numbers or VERSION: package_release.py release_contracts pins shell-217/pages-215/assets-215 for 1163 and bump_version.py rotates them at release.",
+   "acceptance": "New test_sw_lesson_offline_v1165.mjs: static — SHELL has the exact URL and the file exists; runtime — visit home+island_food online until the SW controls, delete the module from the asset cache, go offline, reopen 食物, answer wrong in 听音辨义 → lesson card appears, no 504 for the module. Fails on HEAD; check_resources 0 problems; test_sw_upgrade_v944 green."
+  },
+  {
+   "id": "F010",
+   "sources": [
+    "CB-02",
+    "MISSED#24",
+    "OD-L3",
+    "OD-LR(vocabS600 note)"
+   ],
+   "title": "144 个成就里 107 个永远解锁不了（真正在用的 checkAch 只判 36 个）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified hansen_island_upgrade.js ~:353-392 window.checkAch override (b24769c only added the vocab ladder) replaces template.html:3543 checkAch whose v1020/v1034 rules (:3560-3700) never run. Verifier guidance: chaining the template checker regresses (wrongClear ignores hansen_wrong_seen_v942, wrongFixed=lw fallback, *Best objects compared as numbers).",
+   "lane": "B",
+   "files": [
+    "hansen_island_upgrade.js",
+    "test_ach_series_v1165.mjs (new)"
+   ],
+   "fix": "Port only the v1020+v1034 series rules into the override: read *Best via window.__hsnBestStatValue; aggregate per-island counters like globalModes() (sum clozeRight/listenRight/typeCount/scrPerfectTotal/matchPerfect/chestClaimed over wordIsland* saves excluding *_bak plus S; max for best scores and daysPlayed); keep the module's wrongClear; wrongFixed only from hansen_wrong_fixed_total (no fallback); islands-with-progress counted once per real island. Extend getAchProgress for series ids. If one call unlocks >2, show one summary popup 「🏆 一下子解锁了 N 个成就，去成就墙领奖励吧」 and save() once.",
+   "acceptance": "New test_ach_series_v1165.mjs (island_animal): seeded clozeRight 60, listenRight 15, typeCount 25, speedBest {easy:250}, bubbleBest {easy:60}, daysPlayed 5, matchPerfect 6, chestClaimed 6, sb_best_cpm 45 → clozeS10, clz50, listenS10, typingS20, speedS200, bubbleS50, cpm40, cpmS30, dayNS3, matchpS5, chestS5, perfMatch pending; a kid with 1 word and no wrongs ever gets neither wrongClear nor wrongS10; <=1 popup for the batch; static scan: live unlock path for every ACHIEVEMENTS id (or justified allowlist). Fails on HEAD; test_ach_series_v1034 green."
+  },
+  {
+   "id": "F011",
+   "sources": [
+    "P2-04"
+   ],
+   "title": "单词大陆地图 ⑧星火火山口只列 4 个 Boss（岛里有 5 个），打 4 个就显示 4/4 ✓；通关文案写 39 位 Boss",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified land_map.html:114 MAP_GROUPS id 8 lists 4 bosses vs island_land8.html BOSSES 5 (星核帝皇·弗沙欧); :224 says 39 位 Boss; lands 1-7 match.",
+   "lane": "B",
+   "files": [
+    "land_map.html",
+    "test_land_map_bosses_v1165.mjs (new)"
+   ],
+   "fix": "Add '星核帝皇·弗沙欧' as the 5th (★守关) boss of MAP_GROUPS id 8; compute the all-cleared total from MAP_GROUPS (40).",
+   "acceptance": "New test_land_map_bosses_v1165.mjs: static — MAP_GROUPS boss names equal island_landN BOSSES for all 8; runtime — land8_prog=4 → 已击败 4/5 and spot not done; all cleared → 40 位 Boss. Fails on HEAD."
+  },
+  {
+   "id": "F012",
+   "sources": [
+    "P2-05",
+    "CQ-15(spelling-bee resolver)"
+   ],
+   "title": "星海终战的拼写蜂要的录音不存在（404）退回机器音；另 14 个词拼写蜂播的录音和岛上不同",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified spelling_bee.html:1937 adds '_season' only for isl land1-8 (season → words/calm.mp3 404 → TTS); speak() ignores the island's __ISLAND_LOCAL_AUDIO overrides. Unchanged.",
+   "lane": "B",
+   "files": [
+    "spelling_bee.html",
+    "test_bee_audio_v1165.mjs (new)"
+   ],
+   "fix": "speak(): when embedded, first parent.__ISLAND_LOCAL_AUDIO[lowercased word], then WORD_MAP, then words/<w>.mp3 with '_season' for isl land1-8 AND season; TTS last.",
+   "acceptance": "New test_bee_audio_v1165.mjs: bee from island_season, island_land3, island_food, island_action, 10 words each: 0 responses >=400 under /words/, speechSynthesis.speak never called when the file exists, CQ-15 words (e.g. cook) request the island map's file. Fails on HEAD."
+  },
+  {
+   "id": "F013",
+   "sources": [
+    "INT-04",
+    "INT-09"
+   ],
+   "title": "（岛页部分）给外壳提供「返回一步」：先关浮层/回本岛主页，再交给外壳退出",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified neither template has a back handler. Counterpart of F006.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_island_back_api_v1165.mjs (new)"
+   ],
+   "fix": "Early in both templates: window.__hsnIslandBack=function(){ pop window.__hsnBackStack closers first (return true unless fn returns false); if #alertModal shown → closeAlert(), true; if active .screen is not homeScreen → showScreen('home'), true; else false }. Leave the PK screen alone (F113). Run generate.py and generate_land.py.",
+   "acceptance": "New test_island_back_api_v1165.mjs (island_animal, island_land1): on 听音辨义 returns true and homeScreen active; on homeScreen returns false; registered closer called first and removed; alertModal closes. Fails on HEAD; generators --verify green."
+  },
+  {
+   "id": "F014",
+   "sources": [
+    "CB-03",
+    "INT-07"
+   ],
+   "title": "（岛页部分）岛被藏起时停掉正在进行的游戏和声音",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified showScreen (template.html ~:4521) is the only cleanup path; spTimer is a plain setInterval; hidden iframes report visible. Counterpart of F007.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)"
+   ],
+   "fix": "Define window.__hsnIslandHidden=function(){ if active screen isn't homeScreen → showScreen('home'); stop _activeAudio/curAudio; speechSynthesis.cancel() } in both templates; regenerate.",
+   "acceptance": "In island_animal: start 打地鼠 / 极速60秒, call __hsnIslandHidden() → molesActive/spActive false, homeScreen active, no Audio.play in 12 s. Fails on HEAD (missing); shell flow proven by F007 after merge."
+  },
+  {
+   "id": "F015",
+   "sources": [
+    "P2-01",
+    "CQ-01",
+    "OD-L4"
+   ],
+   "title": "单词大陆 ③–⑧ 的「听音辨义」三档都是 0 个词，一点就报错；①② 只覆盖一部分",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified land_template.html:1926-1934 LISTEN_LEVELS hard-codes land1/land2 words; land3-8 empty and nextListenQ throws. Listed as found-not-fixed by the batches.",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "template.html (guard only)",
+    "island_*.html (regenerated)",
+    "test_land_listen_v1165.mjs (new)"
+   ],
+   "fix": "Build land LISTEN_LEVELS from allW with the same <=7 / 8 / >=9 letter split as land TYPING/CLOZE_LEVELS; startListenLevel guard in both templates: empty level → toast 「🔊 本岛暂时没有这个难度的单词，换一档试试~」 and draw it as the eagle-style 🔒 card. Regenerate.",
+   "acceptance": "New test_land_listen_v1165.mjs: land1..8 every level non-empty, union covers all 30 words, each level starts with no pageerror. Fails on HEAD."
+  },
+  {
+   "id": "F016",
+   "sources": [
+    "MG-02",
+    "CQ-04",
+    "CQ-09(capitalisation)",
+    "OD-R2",
+    "task(e)"
+   ],
+   "title": "完形填空：例句用变形（eyes/cooks/flown…）的词永远不出题却照算总数，全对只显示 60–77%；句中大写被改成小写",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified template.html:6943-6945 CLOZE_LEVEL_IDX unchecked, :6984 clozeTotal before filtering, :6988-6999 silent skip on exact-word regex, data-cap only at index 0 (:7006-7008); same in land_template.html and Boss cloze. 48 words affected.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_cloze_askable_v1165.mjs (new)"
+   ],
+   "fix": "One helper window.__hsnClozeMatch(w) → {index,text} finding the word or an inflection in w.ex (+s/+es/+ed/+d/+ing, y→ies/ied, doubled final consonant, small irregular map: fly→flown/flew, draw→drew, get→got, teach→teaches…). Use it in CLOZE_LEVEL_IDX (askable only), nextClozeQ, clozeAnswer and Boss cloze; clozeTotal = askable count; fill the blank with the sentence's own token keeping its case. No sentence text changes (audio keys unchanged).",
+   "acceptance": "New test_cloze_askable_v1165.mjs: on all 27 pages every cloze level word is askable; body 初级 all correct → 「答对 N / N · 正确率 100%」 (HEAD 12/20 60%); animal easy 100% (HEAD 77%); 「I have a cat. It is white.」 / 「Happy New Year!」 keep capitals after answering. Fails on HEAD; test_mistake_lesson_v1165, test_lesson_review_fix_v1165 green."
+  },
+  {
+   "id": "F017",
+   "sources": [
+    "MG-01",
+    "MG-03",
+    "MISSED#6"
+   ],
+   "title": "小游戏「下一题」定时器离开后还在跑：打字大师重新锁屏读词、换难度后被旧题顶掉、字母拼拼乐在主页读词",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified template.html:6789 typing correct path sets typeActive=true unguarded after 900 ms; :6588-6589 listen, :6080-6082 bubble, cloze 8 s goNext, :6275 scramble (no active flag). Lesson card guards only the wrong path when its module loads.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_game_timers_v1165.mjs (new)"
+   ],
+   "fix": "Per-game run tokens (typeRun, listenRun, clozeRun, bubbleRun, scrRun, molesRun, fishRun, eagleRun) bumped in start*Level/stop*/show*Menu; every delayed next-question callback returns unless the token is unchanged and the game screen is still active; never set typeActive=true blindly; add scrActive.",
+   "acceptance": "New test_game_timers_v1165.mjs (real taps): finish a typing word, ← 返回 within 0.2 s → 3 s later no body.type-lock, typeActive false, nothing spoken on home, home scrolls; 换难度 keeps the menu; listen/cloze/bubble: answer Q1, 换难度, re-pick, 9 s idle → first question unchanged; scramble back → nothing spoken. Fails on HEAD."
+  },
+  {
+   "id": "F018",
+   "sources": [
+    "NET-03"
+   ],
+   "title": "单词录音没加载出来时孩子什么都听不到（没有手机朗读兜底）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified template.html:2591-2606 (word) and :2574-2589 (example) local branches only call cb on error; land_template.html same. Unchanged.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_audio_fallback_v1165.mjs (new)"
+   ],
+   "fix": "In both branches: on onerror, play() rejection other than NotAllowedError, or ~2.5 s with readyState<2 → _browserTTS(text,rate,cb) once (done-guard), respecting 一键静音 and global volume; optional once-per-session toast 「声音没下载下来，先用手机朗读～」. Add no online provider calls.",
+   "acceptance": "New test_audio_fallback_v1165.mjs: /words/*.mp3 and /sentences/*.mp3 → 404: auto-play and 🔊 each call speechSynthesis.speak exactly once; files OK → never called; 一键静音 → silent; no requests to gstatic/baidu/youdao. Fails on HEAD."
+  },
+  {
+   "id": "F019",
+   "sources": [
+    "P2-03"
+   ],
+   "title": "72 小时体验期跳打守关 Boss，赢了就把岛永久标成「已通关」，进度却还是 0（还能解锁女帝）",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified land_template.html:4818 sets hsn_landmap_cleared_N when _s1Idx is null or last, without a prog check (contradicts hansen_cards.js:652 零污染). Flags feed land_map, empress gate, __hsnSeasonGot, round rewards.",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "island_land1-8.html (regenerated)",
+    "test_trial_clear_v1165.mjs (new)"
+   ],
+   "fix": "Set the flag only when window._s1Idx===prog && prog===BOSSES.length-1 (checked before prog advances); never for an out-of-order trial fight. Consumers unchanged (admin 一键通关 still sets flags).",
+   "acceptance": "New test_trial_clear_v1165.mjs (island_land3, freepass): win Lv.5 out of order → flag unset, land3_prog unchanged; land3_prog=4 then win boss 5 in order → flag '1', prog 5. Fails on HEAD."
+  },
+  {
+   "id": "F020",
+   "sources": [
+    "CB-01"
+   ],
+   "title": "单词大陆 8 个岛的「每日任务」永远显示「暂无任务」，徽章却是 0/12",
+   "severity": "major",
+   "status": "todo",
+   "status_reason": "Verified land_template.html:3129-3138 page-local quest definition ignores HansenQuestGlobal and the normalizer rejects >7 / invalidates on unknown ids; template.html:3147-3170 has the fixes.",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "island_land1-8.html (regenerated)",
+    "test_land_quests_v1165.mjs (new)"
+   ],
+   "fix": "Port template's __hsnQuestDefinition (HansenQuestGlobal.definition), __hsnNormalizeQuests (<=12, skip unknown ids) and the 12-quest roll; add a static parity check that these function bodies are identical in both templates.",
+   "acceptance": "New test_land_quests_v1165.mjs: island_land1 in the shell shows 12 quest cards and a claimable quest pays once; parity check passes. Fails on HEAD."
+  },
+  {
+   "id": "F021",
+   "sources": [
+    "INT-05",
+    "NET-06",
+    "PH-04",
+    "PH-05",
+    "CB-11",
+    "P2-18",
+    "VC-17",
+    "MISSED#0",
+    "MISSED#7",
+    "MISSED#14",
+    "MISSED#20",
+    "MISSED#21",
+    "OPT-14(prefetch)"
+   ],
+   "title": "首页预取的岛页永远用不上（带 ?v= 打开时不带）；「最近玩过的岛」预取拼错文件名全是 404；进岛时还在后台预取",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Partly fixed by 086259a (verified hansen_island_prefetch_v1025.js:104-116 policy + kidHasPlayed gate). Open: :48 prefetches u+'?v=' while index.html:4151 navigates bare; hansen_preload.js:524-526 preheat adds ?v=; :74 'island_'+lastIslandKey and :80 lowercased save-key suffixes (Verbs/ColorNum/House/People/Pronouns/Transport/Misc/Adj) → 404; no __hsnIslandBusyUntil check; land_map fetched bare by hansen_season.js and ?v= by rooms.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "hansen_island_prefetch_v1025.js",
+    "hansen_preload.js",
+    "hansen_season.js",
+    "test_island_prefetch_hit_v1165.mjs (new)"
+   ],
+   "fix": "One URL everywhere: openIsland's iframe (F004) loads file+'?v='+BUILD (read from the page's own script ?v= like ver()); prefetch, preheat and warmLandMap use the same form. Expose window.HSN_ISLAND_META=ISLAND_META; prefetchRecent maps lastIslandKey and wordIsland* keys through it, skipping *_bak/unknown. step()/prefetchRecent reschedule while Date.now()<window.__hsnIslandBusyUntil.",
+   "acceptance": "New test_island_prefetch_hit_v1165.mjs: returning kid (wordIslandColorNum/Verbs/House/People/Pronouns/Transport/Misc/Adj, lastIslandKey='wordIslandColorNum'): zero 404s, prefetches island_color/action/home/job/question/traffic/treasure/adjective; tapping a prefetched island makes no second network download of its HTML; no prefetch while busy. Fails on HEAD; test_island_prefetch_v1025, test_preload_budget_v1165 green."
+  },
+  {
+   "id": "F022",
+   "sources": [
+    "SS-3(shell/bee part)"
+   ],
+   "title": "（外壳/拼写蜂部分）拼写蜂赢了以后岛顶栏金币和任务红点不刷新，回首页再进也不刷新",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_spellbee.js doClose (:25-50) refreshes nothing; match bonus awarded without updateTopBar; index.html keep-alive branch (~:4091) only toggles display. Writes from the island's own JS context fire no storage event there, so F045 alone isn't enough.",
+   "lane": "B",
+   "files": [
+    "hansen_spellbee.js",
+    "index.html"
+   ],
+   "fix": "hansen_spellbee.js doClose() and after a successful sbAwardReward: try{ if(typeof window.updateTopBar==='function') updateTopBar(); }catch(e){}; index.html keep-alive branch calls the iframe's updateTopBar().",
+   "acceptance": "test_topbar_refresh_v1165.mjs (shared with F045): sbQueueCappedReward(10,0,'match')+progressQuest('sbwin',1) → after close #coinCount equals hansen_wallet_coins and #questDot visible; same after 🗺️ and re-entry. Fails on HEAD."
+  },
+  {
+   "id": "F023",
+   "sources": [
+    "INT-08",
+    "NET-08"
+   ],
+   "title": "发现新版本时强制刷新把正在岛里玩的孩子踢回首页（这一局丢了）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_version_watch_v1083.js:105-136 delegate to top and immediate location.replace(pathname+'?_fresh='). Unchanged.",
+   "lane": "B",
+   "files": [
+    "hansen_version_watch_v1083.js",
+    "index.html",
+    "test_version_island_v1165.mjs (new)"
+   ],
+   "fix": "forceRefresh (top): if #islandFrameWrap is visible, defer — remember it and run it from an index hook in _closeIslandNow (window.__hsnAfterIslandClose) or on visibilitychange to hidden; banner 「有新版本，回到首页时自动更新」. Manual 强制更新 still immediate.",
+   "acceptance": "New test_version_island_v1165.mjs: home 1163, /VERSION=1164, tap 动物, play 10 s → no reload while open; closing triggers exactly one reload to 1164. Fails on HEAD."
+  },
+  {
+   "id": "F024",
+   "sources": [
+    "NET-09",
+    "NET-16",
+    "NET-17(forced refresh)",
+    "MISSED#22"
+   ],
+   "title": "版本守望者：唯一一次自动更新被 CDN 2 分钟窗口用掉；存储出错会循环刷新；刷新丢参数；每开一个岛查十几次 /VERSION",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_version_watch_v1083.js:173-182 single-version FIXED_KEY with swallowed storage errors, :135 pathname-only URL, check() always fetches. Unchanged.",
+   "lane": "B",
+   "files": [
+    "hansen_version_watch_v1083.js",
+    "test_version_watch_v1165.mjs (new)"
+   ],
+   "fix": "Store {v,at,n}; allow another auto attempt when now-at>3 min and n<3; mirror in sessionStorage and skip if location.search has a _fresh younger than 3 min; forceRefresh sets _fresh via URL searchParams keeping other params and hash; check() reuses an in-flight promise and skips if checkedAt<60 s unless opts.manual.",
+   "acceptance": "New test_version_watch_v1165.mjs: (a) 1164 VERSION with 1163 files → 1 reload; files 1164 + clock +4 min + visibilitychange → second attempt; (b) throwing Storage → <=2 loads in 45 s; (c) refresh keeps ?foo=1#x; (d) island open fetches /VERSION <=2 times. Fails on HEAD."
+  },
+  {
+   "id": "F025",
+   "sources": [
+    "NET-02"
+   ],
+   "title": "发版后慢网下，旧版岛页（混着新旧脚本）留在新版首页里没人纠正",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_version_watch_v1083.js:105-116/:156 iframes only ask the top to compare its own version; index keep-alive reuses stale documents. Don't compare the SW gate version (verifier).",
+   "lane": "B",
+   "files": [
+    "hansen_version_watch_v1083.js",
+    "index.html",
+    "test_version_mixed_v1165.mjs (new)"
+   ],
+   "fix": "Iframe branch: compare the document's own build stamp (its script ?v=) with window.top's; if different, location.replace the iframe once per version (sessionStorage guard) with ?v=<top>&_fresh=…; openIsland skips the keep-alive shortcut when stamps differ.",
+   "acceptance": "New test_version_mixed_v1165.mjs: stale v1163 island HTML inside a v1164 shell reloads itself once and ends on 1164; re-entry doesn't reuse the stale doc. Fails on HEAD."
+  },
+  {
+   "id": "F026",
+   "sources": [
+    "NET-11"
+   ],
+   "title": "电脑「手机框」模式（_frame.html）里版本守望者完全不工作",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified _frame.html loads only the SW gate and backup bootstrap.",
+   "lane": "B",
+   "files": [
+    "_frame.html",
+    "test_version_frame_v1165.mjs (new)"
+   ],
+   "fix": "Load hansen_version_watch_v1083.js (defer, ?v= stamp) in _frame.html so the top owns checks/reloads.",
+   "acceptance": "New test: 1280x800 hsnViewMode=mobile, VERSION 1164 → check() in the game frame fetches the server version and the top reloads once. Fails on HEAD."
+  },
+  {
+   "id": "F027",
+   "sources": [
+    "NET-04",
+    "MISSED#19"
+   ],
+   "title": "离线时打开过的岛缺核心脚本：资源缓存上限 72 太小，且每次请求都重新下载重写缓存",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:354-357 network fetch+put for every code request even with an exact ?v= hit, cap 72 with per-put trim; PAGE_CACHE cap 12 keyed by full URL (?warm/_fresh/_r variants). Unchanged.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_offline_islands_v1165.mjs (new)"
+   ],
+   "fix": "For ?v=NNNN code URLs with an exact hit, respond from cache and skip fetch+put; raise the versioned-code cap (~400; old generations deleted on activate) and serialize trim (one pending trim per cache); key stored pages by pathname (strip ?v/?warm/_fresh/_r). Keep fixHtmlType on every respondWith.",
+   "acceptance": "New test_sw_offline_islands_v1165.mjs: home + 3 islands online, offline reload, open each → 0 code URLs 504, cache puts <= distinct code URLs, page cache holds the 3 islands. Fails on HEAD; 防下载总闸.py green."
+  },
+  {
+   "id": "F028",
+   "sources": [
+    "NET-07"
+   ],
+   "title": "图标改了内容之后老玩家一直看到旧图（图标缓存忽略 ?v=）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified the icon branch uses caches.match(request,{ignoreSearch:true}) first; icons-3 never rotates. Latent.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_icon_fresh_v1165.mjs (new)"
+   ],
+   "fix": "Icon branch: exact match first, then network (+put), ignoreSearch only as offline fallback.",
+   "acceptance": "New test: explore_3d.webp?v=1163 cached, new bytes as ?v=1164 → new image shown next visit; offline still cached. Fails on HEAD."
+  },
+  {
+   "id": "F029",
+   "sources": [
+    "NET-10"
+   ],
+   "title": "服务器对首页/岛页回 404/502 时孩子看到错误页而不是已缓存的游戏",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:327-333 fallback only when fetch throws.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_nav_error_v1165.mjs (new)"
+   ],
+   "fix": "After fetchNavigationWithTimeout: if !fresh.ok && fallback && (status>=500 || (status===404 && isHomeNavigation(url))) return the cached fallback (not cacheable).",
+   "acceptance": "New test: cached home, '/' answers 404 and 502 → cached home renders; island 502 → cached island. Fails on HEAD."
+  },
+  {
+   "id": "F030",
+   "sources": [
+    "NET-12"
+   ],
+   "title": "SW 安装失败时每个页面框都重试注册（一次进岛十几次、每次约 1 MB）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_sw_upgrade_gate_v944.js:20-31 registers in every uncontrolled document with no backoff.",
+   "lane": "B",
+   "files": [
+    "hansen_sw_upgrade_gate_v944.js",
+    "test_sw_register_backoff_v1165.mjs (new)"
+   ],
+   "fix": "Register only when window.top===window.self; after a failed install store hsn_sw_fail_at in sessionStorage and skip for 10 min. Keep it the first script.",
+   "acceptance": "New test: one precache file 503 for install fetches → <=1 registration attempt per session, none from iframes; a normal install still controls. Fails on HEAD."
+  },
+  {
+   "id": "F031",
+   "sources": [
+    "CB-07"
+   ],
+   "title": "0 分/0 答对的一局也让每日任务 +1（三局全错就能完成「复习 3 个」）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_quest_global.js:248 uses (n || 1).",
+   "lane": "B",
+   "files": [
+    "hansen_quest_global.js",
+    "test_quest_zero_v1165.mjs (new)"
+   ],
+   "fix": "var n=(amount===undefined)?1:Math.max(0,Math.floor(+amount||0)); if(!absolute&&n===0) return false;",
+   "acceptance": "New test: progressQuest('review',0) and a 0-score molesComplete → no progress; progressQuest('correct') → +1; test_daily_quests_v1000 / test_daily_quest_safety_v946 green. Fails on HEAD."
+  },
+  {
+   "id": "F032",
+   "sources": [
+    "MISSED#10"
+   ],
+   "title": "72 小时体验期的卡册全开标记被旧迁移代码反复删掉，卡册/神秘殿堂数字来回跳",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_boss_progress.js:132 (v330 migration) removes hansen_card_temp_unlock_until on each island's first boot, fighting hansen_freepass.js. Breaks the owner's stable-trial design.",
+   "lane": "B",
+   "files": [
+    "hansen_boss_progress.js",
+    "test_freepass_stable_v1165.mjs (new)"
+   ],
+   "fix": "Don't remove the key in the v330 migration when it equals hansen_freepass_until (or drop that removal; it predates the freepass).",
+   "acceptance": "New test: freepass active, open 3 new islands → key never removed, 卡册 count stable. Fails on HEAD."
+  },
+  {
+   "id": "F033",
+   "sources": [
+    "P2-11(counts)",
+    "MISSED#17"
+   ],
+   "title": "神秘殿堂入口写「已收藏 0/1」，点进去写「0/6」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_cards.js:944-945 counts seasons; hansen_season.js hall counts 6 cards.",
+   "lane": "B",
+   "files": [
+    "hansen_cards.js",
+    "hansen_season.js",
+    "test_hall_counts_v1165.mjs (new)"
+   ],
+   "fix": "Use one shared counter (HansenSeason.ownedCardCount()/totalCardCount()) in both places with the same wording 「已收藏 X/Y」; trial display unchanged (F077).",
+   "acceptance": "New test: fresh and trial users see identical X/Y in entry and panel. Fails on HEAD."
+  },
+  {
+   "id": "F034",
+   "sources": [
+    "P2-08"
+   ],
+   "title": "单词大陆 Boss 殿堂卡片下面写着「undefined」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified boss_hall.html:301 land map lacks d.",
+   "lane": "B",
+   "files": [
+    "boss_hall.html",
+    "test_hall_quote_v1165.mjs (new)"
+   ],
+   "fix": "Add d:c.desc||'' at :301 and hide #flavor when empty; no motion changes.",
+   "acceptance": "New test: boss_hall.html?land=1&card=L12&lown=L11,L12,L13 shows the desc, never 'undefined'. Fails on HEAD."
+  },
+  {
+   "id": "F035",
+   "sources": [
+    "P2-17"
+   ],
+   "title": "抽卡揭晓页显示「📤 分享给好友，免费再抽 1 次」，H5 里用不了",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_gacha.js:343; wxShareForGacha exists nowhere.",
+   "lane": "B",
+   "files": [
+    "hansen_gacha.js",
+    "test_gacha_share_v1165.mjs (new)"
+   ],
+   "fix": "Add typeof window.wxShareForGacha==='function' to the condition at :343.",
+   "acceptance": "New test: no bridge → no share button; stub bridge → shown. Fails on HEAD."
+  },
+  {
+   "id": "F036",
+   "sources": [
+    "PH-06",
+    "P2-09"
+   ],
+   "title": "单词大陆地图在 320/360/375 宽手机上 ④、⑧ 两个岛被切掉",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified land_map.html:122 POS 8:[18,50], 4:[82,50] with a ~475 px cropped stage.",
+   "lane": "B",
+   "files": [
+    "land_map.html",
+    "test_land_map_fit_v1165.mjs (new)"
+   ],
+   "fix": "After layoutStage() shift each button.spot (and label) into [8px, innerWidth-8px]; no animations.",
+   "acceptance": "New test: 320/360/375 x 844 in an iframe: every .spot and label inside the viewport; 390/414 unchanged. Fails on HEAD."
+  },
+  {
+   "id": "F037",
+   "sources": [
+    "MG-08",
+    "MISSED#8"
+   ],
+   "title": "拼写蜂点 ✕ 再「继续比赛」多开一个机器人计时器（快一倍）；停在退出确认框时机器人还在打字",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified spelling_bee.html exitNo (~:2336) and _startRace (~:2142) both schedule botTimer; neither checks paused.",
+   "lane": "B",
+   "files": [
+    "spelling_bee.html",
+    "test_bee_pause_v1165.mjs (new)"
+   ],
+   "fix": "Track raceStarted; exitNo restarts the bot only if started; _startRace clears botTimer and queues itself while paused; botStep returns while paused.",
+   "acceptance": "New test: ✕ during 「🔊 听单词…」 then 继续 → bot gaps >=900 ms (one chain); 4 s on confirm → botProg unchanged, player timer paused. Fails on HEAD."
+  },
+  {
+   "id": "F038",
+   "sources": [
+    "CQ-02",
+    "CQ-05(12 wrong highlights)",
+    "CQ-06(certain rows)",
+    "CQ-16(separator split)"
+   ],
+   "title": "（内容·副本）确定的内容更正同步到 vocab_all.js / 拼写蜂词表 / 大陆地图，并修 12 处完形中文高亮",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Certain high-confidence rows from flagged_entries.csv; F060 applies the same values to generator sources. Verified current values in island_data.json; highlight_helper.js:29 splits cn only on '/'. No ex changes → no audio/lock impact; no guard pins these strings.",
+   "lane": "B",
+   "files": [
+    "vocab_all.js",
+    "spelling_bee.html",
+    "land_map.html",
+    "highlight_helper.js",
+    "test_content_copies_v1165.mjs (new)"
+   ],
+   "fix": "Apply only where a copy holds the old value: August pn /ɔːˈɡʌst/→/ˈɔːɡəst/; cabbage cn 白菜→卷心菜, exCn 奶奶在花园里种卷心菜。; sheep 羊→绵羊; skirt 短裙→裙子; table exCn 我们摆桌子吃晚饭吧。→我们摆好碗筷准备吃晚饭吧。; meanwhile exCn →你来摆碗筷,与此同时我来做晚饭。; old exCn 我爷爷年纪很老了。→我爷爷年纪很大了。; March exCn 春天三月开始。→春天从三月开始。; 14 星海 cn ';'→'/' (available, develop, destroy, struggle, maximum, minimum, instead, consequently, generally, fortunately, public, chemical, business, employee); scientist 👨‍🔬→👩‍🔬, singer 👨‍🎤→👩‍🎤, tradition 🎎→🥟. highlight_helper.js: add the 12 HIGHLIGHT_MANUAL keys verbatim from the CSV (frightened 吓到, confused 搞糊涂, cautious 小心, ordinary 平常, available 还有, valuable 宝贵, galaxy 银河系, constantly 不停地, previously 曾, fly 坐过, determined 下定决心, natural 天然的) and split cn on '/', ';' and '；'.",
+   "acceptance": "New test_content_copies_v1165.mjs (node, static): each corrected value present and old absent in vocab_all.js / spelling_bee.html WORDS / land_map.html MAP_GROUPS (compared to hard-coded expected values); smartHighlight returns the intended span for the 12 rows and no stray single character on changed rows. Fails on HEAD."
+  },
+  {
+   "id": "F039",
+   "sources": [
+    "CQ-08"
+   ],
+   "title": "拼写蜂词表里 25 个词的例句还是旧版（和岛上、录音都不一样）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Content-QA verified: describe, realize, mention, admit, indicate, comment, debate, provide, produce, invent, destroy, repair, establish, manage, handle, perform, examine, calculate, stranger, customer, chemical, creature, particle, employee, colleague keep old ex/exCn in spelling_bee.html WORDS (line 662+).",
+   "lane": "B",
+   "files": [
+    "spelling_bee.html",
+    "test_bee_words_sync_v1165.mjs (new)"
+   ],
+   "fix": "Copy ex/exCn for these 25 words from island_data.json season DATA (identical to land_data.json); no other fields.",
+   "acceptance": "New test_bee_words_sync_v1165.mjs: for the 25 words spelling_bee ex/exCn equal island_data.json season DATA and each has a normalised key in hansen_ex_audio.js. Fails on HEAD."
+  },
+  {
+   "id": "F040",
+   "sources": [
+    "OD-L5"
+   ],
+   "title": "HansenMyLearning 只导出了 _open，亮色对比度测试其实从没检查「我的学习」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_mylearning.js:199 exports _open/_close/_goReview while test_light_contrast_v989.mjs:125 calls .open (no-op). Exposing it surfaces the panel's light-palette contrast issue (VC-03: '0 / 42' 1.45:1), fixed here only for this panel.",
+   "lane": "B",
+   "files": [
+    "hansen_mylearning.js",
+    "hansen_palette.js (only if needed)",
+    "test_light_contrast_v989.mjs"
+   ],
+   "fix": "Export open/close aliases; give the panel readable light-palette colours (--pal-* pairs or a fixed-dark exemption in hansen_palette.js); make test_light_contrast_v989 fail if #hsn-ml did not open (strengthening).",
+   "acceptance": "test_light_contrast_v989 audits 我的学习 (asserts it opened) and passes in all light palettes; test_light_readability_v1016, test_copy_numbers_v1165 green. Fails on HEAD once the open-assertion exists."
+  },
+  {
+   "id": "F041",
+   "sources": [
+    "MISSED#16"
+   ],
+   "title": "「我的学习」把 8 个单词大陆岛记成同一个岛",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_mylearning.js:29 title.split('·')[0] → 「单词大陆」 for all 8 land titles (「单词大陆·①迷雾心湖 · …」). Denominator fixed in b24769c (27), numerator still merges.",
+   "lane": "B",
+   "files": [
+    "hansen_mylearning.js",
+    "test_mylearning_land_v1165.mjs (new)"
+   ],
+   "fix": "Key by the part before ' · ' (with spaces) or by page file; ignore the legacy hsn_progress:单词大陆 row in the panel (no migration).",
+   "acceptance": "New test: open land1, land4, animal → 3 distinct rows and 「已点亮 3 / 27」. Fails on HEAD."
+  },
+  {
+   "id": "F042",
+   "sources": [
+    "VC-16",
+    "TV-16",
+    "OPT-6(rules copy)"
+   ],
+   "title": "孩子看的界面上有开发术语（focused Bee、gem1 成就、CPM 门槛、锁星…）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_diamond_shop.js:287/:481 and hansen_explore_progress_v945.js:259/:367; no guard pins them.",
+   "lane": "B",
+   "files": [
+    "hansen_diamond_shop.js",
+    "hansen_explore_progress_v945.js",
+    "test_kid_copy_v1165.mjs (new)"
+   ],
+   "fix": "Kid Chinese, e.g. 钻石怎么来：拼写蜂认真拼对、打败 Boss、完成成就; exact CPM/次数 thresholds behind a small 「规则」 tap for parents.",
+   "acceptance": "New test: visible text of 主题商店 and 探索单词 has none of focused Bee|gem1|CPM|旧新词位|锁星 until 「规则」 is tapped; rules still reachable. Fails on HEAD."
+  },
+  {
+   "id": "F043",
+   "sources": [
+    "SS-6"
+   ],
+   "title": "首页在孩子玩岛时还每 2 秒/1.5 秒轮询，每次把所有岛存档解析一遍（岛里周期性卡一下）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified index.html:4242-4253 storage listener + setInterval(renderRecent,2000) (comment wrongly says iframe storage events don't fire) and :4281 setInterval(applyTheme,1500), running while an island is open; same-origin iframes share the main thread.",
+   "lane": "B",
+   "files": [
+    "index.html",
+    "test_home_idle_polls_v1165.mjs (new)"
+   ],
+   "fix": "Skip renderRecent/applyTheme while #islandFrameWrap is visible (renderRecent runs on close); debounce the storage handler; applyTheme driven by storage 'theme'/'hansen_diamond_shop' + pageshow/close with a 10 s fallback poll; fix the comment; keep a slow fallback (iOS storage events unverified).",
+   "acceptance": "New test: island open 20 s with saves → renderRecent/applyTheme run 0 times; after close card and theme correct; a theme change in the island shows on home after close. Fails on HEAD."
+  },
+  {
+   "id": "F044",
+   "sources": [
+    "CB-08"
+   ],
+   "title": "成就页「复习/精通/速度/对决」四栏图标显示「undefined」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified hansen_island_upgrade.js:484 ci map lacks these categories.",
+   "lane": "B",
+   "files": [
+    "hansen_island_upgrade.js"
+   ],
+   "fix": "Add '复习':'🔄','精通':'🎯','速度':'⚡','对决':'🐝' and render ci[cat]||'🏅'.",
+   "acceptance": "In test_ach_series_v1165.mjs (F010): 成就 bars on island_food and island_land2 never contain 'undefined'. Fails on HEAD."
+  },
+  {
+   "id": "F045",
+   "sources": [
+    "SS-3(island part)",
+    "CB-05"
+   ],
+   "title": "（岛页部分）别的页面改了金币/经验/钻石/任务后岛顶栏不跟着更新",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:8318 storage listener only for theme. CB-05 refuted as user-reachable today; kept as hardening.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_topbar_refresh_v1165.mjs (new)"
+   ],
+   "fix": "One debounced storage listener in both templates: hansen_wallet_coins/gems/charxp and hansen_global_daily_quests_v941 → updateTopBar() (+gem badge); for charxp also set S.charXP and recompute level/xp (with F046).",
+   "acceptance": "test_topbar_refresh_v1165.mjs: a write to coins/charxp/quest store from another same-origin document updates #coinCount, XP line and #questDot within 500 ms. Fails on HEAD."
+  },
+  {
+   "id": "F046",
+   "sources": [
+    "SS-2",
+    "OD-R6(two-tab note)"
+   ],
+   "title": "经验值会被别的页面覆盖丢失（addXP 用本页缓存的 S.charXP 写全局经验）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:2727 and land_template.html:2716 base on S.charXP. Rare (two tabs/storage failure) but cheap. Whole-ledger two-tab overwrite (OD-R6) out of scope.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_xp_wallet_v1165.mjs (new)"
+   ],
+   "fix": "addXP bases on the stored hansen_wallet_charxp (finite non-negative integer), falling back to S.charXP; keep the 1e9 cap; F045 keeps S.charXP in sync.",
+   "acceptance": "New test: two tabs, food addXP(5)x4 then animal addXP(5) → wallet 25, both bars agree. Fails on HEAD (5)."
+  },
+  {
+   "id": "F047",
+   "sources": [
+    "CB-06"
+   ],
+   "title": "单词大陆任务进度单位不对（打地鼠 25 分只 +1），复习任务从来不涨",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified land_template.html:5196/:5638/:6469/:8048 pass 1; reviewComplete (:7197) never reports review/reviewClear (template.html:7389-7391 does).",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "island_land1-8.html (regenerated)",
+    "test_land_quest_units_v1165.mjs (new)"
+   ],
+   "fix": "Port the template's score-based moles/fish/eagle, pair-based match (F054) and review+reviewClear lines; extend F020's parity check.",
+   "acceptance": "New test: island_land1 moles score 25 → +25; reviewComplete 3/3 → review +3 and reviewClear; equal to island_animal. Fails on HEAD."
+  },
+  {
+   "id": "F048",
+   "sources": [
+    "CB-12"
+   ],
+   "title": "单词大陆设置里没有「🔊 发音音量」；管理员等级工具说「没有等级表」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified land_template.html lacks template.html:7769-7800 slider block and :2873 window.ADVENTURE_LEVELS export.",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "island_land1-8.html (regenerated)",
+    "test_land_settings_v1165.mjs (new)"
+   ],
+   "fix": "Port both blocks.",
+   "acceptance": "New test: island_land1 设置 has #ttsVolSlider that updates the global volume; window.ADVENTURE_LEVELS.length===30. Fails on HEAD."
+  },
+  {
+   "id": "F049",
+   "sources": [
+    "MG-15",
+    "P2-02",
+    "P2-13"
+   ],
+   "title": "难度卡片：0 个词的难度还像能玩；单词大陆初级只有 0–2 个词；示例和「大约 20 词」写死",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified only startEagle (template.html:8061-8070) greys cnt===0; land MOLES/FISH/BUBBLE/SCRAMBLE/EAGLE_LEVELS (:4930…) use <=4/5–6/>=7 letters; template.html:5901 '每档大约 20 词左右' and :6190 example 'man · cat · cow' static.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_level_menus_v1165.mjs (new)"
+   ],
+   "fix": "All level menus reuse the eagle locked-card branch (0 words → grey 🔒, no onclick); land pages split those 5 games <=7/8/>=9 like TYPING/CLOZE; menu examples from the level pool (first 3) and the real count instead of 「大约 20 词」.",
+   "acceptance": "New test: on 27 pages every 0-word level is a non-tappable 🔒; land1..8 each of moles/fish/bubble/scramble/eagle levels has >=5 words; no 「大约 20 词」; scramble examples belong to the island. Fails on HEAD."
+  },
+  {
+   "id": "F050",
+   "sources": [
+    "CQ-09(distractors)"
+   ],
+   "title": "星海岛完形/听音把同义词同时当选项（however/nevertheless、rarely/seldom…），选对也判错",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:7012-7013 and the listen same-level loop (~:6552) de-dup by en only; land and Boss cloze same.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_distractors_v1165.mjs (new)"
+   ],
+   "fix": "Same-level loops also reject same-cn candidates and synonym groups (however/nevertheless, therefore/consequently, besides/moreover/furthermore, rarely/seldom, immediately/instantly, finally/eventually, huge/enormous).",
+   "acceptance": "New test: 300 cloze+listen questions on island_season per grouped target never offer a synonym or same-cn distractor; classic islands still 4 options. Fails on HEAD."
+  },
+  {
+   "id": "F051",
+   "sources": [
+    "MG-04"
+   ],
+   "title": "打地鼠/钓鱼漏了也显示「打中全部 N 个」「钓上全部 N 条」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:5391 and :5833 (land same).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_moles_fish_result_v1165.mjs (new)"
+   ],
+   "fix": "「打中 H / T 个」 (「全部」 only when H===T) plus misses; same for fish.",
+   "acceptance": "New test: city 初级 1 wrong → 「打中 7 / 8 个」, perfect → 「打中全部 8 个」; fish same. Fails on HEAD."
+  },
+  {
+   "id": "F052",
+   "sources": [
+    "MG-05"
+   ],
+   "title": "字母拼拼乐的字母经常一出来就是正确顺序",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:6242 sort(()=>Math.random()-.5) with no re-shuffle.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_scramble_shuffle_v1165.mjs (new)"
+   ],
+   "fix": "Shared Fisher–Yates __hsnShuffle; bounded re-shuffle while tiles spell the answer (skip if all letters identical).",
+   "acceptance": "New test: 500 draws on island_question easy → 0 solved boards for words with >=2 distinct letters. Fails on HEAD (~15%)."
+  },
+  {
+   "id": "F053",
+   "sources": [
+    "MG-06"
+   ],
+   "title": "火眼金睛：词组的假选项多一个空格，看起来和正确答案一样",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:7989-8012 ops touch space positions; de-dup not whitespace-normalised.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_eagle_fakes_v1165.mjs (new)"
+   ],
+   "fix": "Skip space positions for all ops; de-dup on whitespace-collapsed lowercase and reject fakes equal to the normalised target.",
+   "acceptance": "New test: makeFakeSpelling for every multi-word entry never returns a double space or a normalised equal. Fails on HEAD."
+  },
+  {
+   "id": "F054",
+   "sources": [
+    "MG-09",
+    "MG-10"
+   ],
+   "title": "每日任务数错：记忆翻牌完美 8 对只算 1；打地鼠/钓鱼输光命那局得分不算",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:6657 typeof matchPairs==='number' (it's an array); moles/fish progress only in molesComplete :5382 / fishComplete :5824, not game-over (:5338, :5767).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_game_quests_v1165.mjs (new)"
+   ],
+   "fix": "progressQuest('match', matched pairs); game-over branches report molesScore/fishScore when >0.",
+   "acceptance": "New test: perfect 8 pairs → match +8; fish game over with 40 points → fish1 +40; moles same. Fails on HEAD."
+  },
+  {
+   "id": "F055",
+   "sources": [
+    "MG-11",
+    "P2-16"
+   ],
+   "title": "结算页「🪙 金币 +N」不算连胜奖励，后几局 +0 钱包却在涨；每词每天 3 次上限没告诉孩子",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:4222-4226 triggerMilestone pays via addGem without _sessionCoins (reset in markMode :3754).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_round_coins_v1165.mjs (new)"
+   ],
+   "fix": "Add streak coins to window._sessionCoins and show 「连胜奖励 +X」; when the cap made a round pay 0 show 「今天这些词的金币领满啦，换个难度或明天再来～」; level cards say 「最多 +N」.",
+   "acceptance": "New test: job 听音辨义 初级 x4 all correct → each result equals that round's wallet delta; capped round shows the note. Fails on HEAD."
+  },
+  {
+   "id": "F056",
+   "sources": [
+    "MG-12",
+    "MG-16"
+   ],
+   "title": "窄屏显示不全：打地鼠长中文被截断（how many/much 分不清）；360×640 打字键盘底排切 2px、泡泡出界",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:1048 .mole-cn nowrap+ellipsis in 86 px; keyboard not dvh-sized; bubble left in %.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_narrow_fit_v1165.mjs (new)"
+   ],
+   "fix": ".mole-cn wraps to 2 lines (clamp 2, font step-down), emoji one line; keyboard sized with dvh/safe-area (smaller keys below 680 px); bubble positions clamped in px, smaller font for long words; min slot width. No animation changes.",
+   "acceptance": "New test: island_question 打地鼠 高级 at 390/360: no .mole-cn overflow; 打字大师 高级 360x640: lowest key bottom <=640; family 泡泡 高级: bubbles inside the area. Fails on HEAD."
+  },
+  {
+   "id": "F057",
+   "sources": [
+    "MG-13",
+    "P2-15"
+   ],
+   "title": "打字大师「准确率」把字母数和错词数混算（6 对 2 错显示 92%），超时不算错",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:6867; typeTimeout records nothing.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_typing_accuracy_v1165.mjs (new)"
+   ],
+   "fix": "Word accuracy typeDone/(typeDone+typeErrors+timeouts) labelled 「拼对率」; count timeouts.",
+   "acceptance": "New test: 6 right, 2 wrong, 1 timeout → 67%. Fails on HEAD."
+  },
+  {
+   "id": "F058",
+   "sources": [
+    "VC-08"
+   ],
+   "title": "点「探索单词」时底栏亮的是「错题」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:4551 navMap explore→navExplore (relabelled 错题 by hansen_wrong_overview.js); land same.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_nav_active_v1165.mjs (new)"
+   ],
+   "fix": "Remove explore:'navExplore' from navMap in both templates.",
+   "acceptance": "New test: tapping 探索单词 leaves no tab active as 错题. Fails on HEAD."
+  },
+  {
+   "id": "F059",
+   "sources": [
+    "VC-15",
+    "P2-07",
+    "TV-15"
+   ],
+   "title": "8 个单词大陆岛英文副标题都是旧的「STAR SEA I: EMOTION & CHARACTER ISLAND」",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified land_template.html:1484 hard-coded, in all 8 generated pages.",
+   "lane": "A",
+   "files": [
+    "land_template.html",
+    "land_data.json",
+    "generate_land.py",
+    "island_land1-8.html (regenerated)",
+    "test_land_subtitle_v1165.mjs (new)"
+   ],
+   "fix": "Per-island slot filled from land_data.json by generate_land.py, e.g. 'WORD CONTINENT ④' matching each <title>; no theme names (land themes don't match words, F085).",
+   "acceptance": "New test: 8 subtitles differ and match their <title> number; no 'STAR SEA I'; generate_land.py --verify green. Fails on HEAD."
+  },
+  {
+   "id": "F060",
+   "sources": [
+    "CQ-02",
+    "CQ-06(certain rows)",
+    "CQ-14(scientist/singer/tradition)",
+    "CQ-16(cn separators)"
+   ],
+   "title": "（内容·生成源）确定的内容更正：August 音标、卷心菜/绵羊/裙子、「摆桌子」误译、两句不通的中文、14 个分号、3 个配图",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Same certain rows as F038 applied to generator sources (verified island_data.json: August /ɔːˈɡʌst/, cabbage 白菜, tradition 🎎, available 可获得的;可用的). No ex text changes → no audio or hansen_audio_lock.json change.",
+   "lane": "A",
+   "files": [
+    "island_data.json",
+    "land_data.json",
+    "island_*.html (regenerated)",
+    "test_content_fixes_v1165.mjs (new)"
+   ],
+   "fix": "Same value table as F038 (August pn; cabbage cn+exCn; sheep; skirt; table exCn; meanwhile exCn in season + land3 slot; old exCn; March exCn; 14 ';'→'/' in season + land slots; scientist 👩‍🔬; singer 👩‍🎤; tradition 🥟); run python3 generate.py and python3 generate_land.py.",
+   "acceptance": "New test_content_fixes_v1165.mjs (static): corrected values present and old absent in island_data.json, land_data.json and generated pages; generators --verify and check_resources green. Fails on HEAD."
+  },
+  {
+   "id": "F061",
+   "sources": [
+    "OD-P4",
+    "task(d)"
+   ],
+   "title": "template 判断 window.bossActive，但 bossActive 是 let 变量，不在 window 上，那几段保护代码从来没执行",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:4620 / land_template.html:4401 let …bossActive; template.html:4547 (hsn-boss-battle toggle), :8433 (engine wait during a fight) and hansen_cards.js:1068/:1075 (no picker re-render in a fight) read window.bossActive (undefined). check_resources.py:756 requires the literal 'window.bossActive===true'.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_boss_active_v1165.mjs (new)"
+   ],
+   "fix": "After the let declaration: try{Object.defineProperty(window,'bossActive',{configurable:true,get:function(){return bossActive;},set:function(v){bossActive=!!v;}});}catch(e){} in both templates (keeps the literal). Then verify the now-live branches: mid-fight showScreen('boss') keeps the arena and hsn-boss-battle; picker renders after victory/defeat.",
+   "acceptance": "New test_boss_active_v1165.mjs (island_animal, island_land3): after startBoss window.bossActive===true; mid-fight showScreen('boss') keeps .boss-arena; after bossVictory/bossDefeat false and picker shown; test_boss_lazy_v1165, test_boss_settle_v1014, test_boss_timer_hf5_v946 green. Fails on HEAD."
+  },
+  {
+   "id": "F062",
+   "sources": [
+    "VC-06(minimal part)"
+   ],
+   "title": "岛里的提示（签到账本、任务完成等）只显示在右半边、贴边被截断、1.2 秒就消失",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Verified template.html:4520 showToast → floatText(innerWidth/2,…) without translateX(-50%) (:2666), ~1.2 s; land :4301 same. Toast unification stays in theme 2.0 (F116).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_island_toast_v1165.mjs (new)"
+   ],
+   "fix": "showToast: centred wrapping box (left 50% + translateX(-50%), max-width 88vw, normal wrap) kept >=2.5 s for messages longer than ~8 chars, or forward to HansenToast.say when present; '+N' floatText pops unchanged; keep no-flash/no-shake/no-rotate rules.",
+   "acceptance": "New test: the long check-in warning at 390/360 is fully inside the viewport, centred within 2 px, still visible at 2.4 s. Fails on HEAD."
+  },
+  {
+   "id": "F063",
+   "sources": [
+    "OPT-10(raster part)",
+    "CQ-14(yogurt.webp)"
+   ],
+   "title": "拼写类题目里酸奶图片印着 YOGURT（等于告诉答案）",
+   "severity": "minor",
+   "status": "todo",
+   "status_reason": "Viewed icons/food-v958/yogurt.webp (prints YOGURT); __hsnQuizPic (04d92f7) strips only SVG text.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_quiz_pic_raster_v1165.mjs (new)"
+   ],
+   "fix": "__hsnQuizPic also returns '' for raster pictures in a small set that print their own word (icons/food-v958/yogurt.webp); word cards/reveal keep it.",
+   "acceptance": "New test: island_food 打字大师/字母拼拼乐 with target yogurt show no img src*=yogurt; explore card still does. Fails on HEAD."
+  },
+  {
+   "id": "F064",
+   "sources": [
+    "NET-13"
+   ],
+   "title": "离线时全屏岛层显示「当前页面尚未下载」只有「重试连接」，没有返回按钮",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:187-205 (system back works, no on-screen exit).",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_offline_page_v1165.mjs (new)"
+   ],
+   "fix": "Add a big 「返回首页」 (parent.closeIsland, else history.back) and kid wording 「这个岛还没下载过，连上网再来玩吧」.",
+   "acceptance": "New test: offline, unvisited island → 返回首页 present and closes the island. Fails on HEAD."
+  },
+  {
+   "id": "F065",
+   "sources": [
+    "NET-15"
+   ],
+   "title": "SW 把 JS、字体等非 HTML 响应也改标成 text/html",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified sw_v944.js:259-286 rewrites without a URL check.",
+   "lane": "B",
+   "files": [
+    "sw_v944.js",
+    "test_sw_mime_v1165.mjs (new)"
+   ],
+   "fix": "Pass the URL; rewrite to text/html only for '/', directories and .html; set the right MIME for .js/.css/.woff2/.webp with a bad type; keep fixHtmlType on all respondWith paths.",
+   "acceptance": "New test: octet-stream JS/woff2 → application/javascript/font/woff2; text/plain index.html → text/html; 防下载总闸.py green. Fails on HEAD."
+  },
+  {
+   "id": "F066",
+   "sources": [
+    "INT-11",
+    "PH-08",
+    "P2-21"
+   ],
+   "title": "每次换岛/回首页都有未处理错误「ViewTransition opt-in disabled」",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified hansen_home_link.js:15-23 injects @view-transition into iframe islands too.",
+   "lane": "B",
+   "files": [
+    "hansen_home_link.js",
+    "test_view_transition_v1165.mjs (new)"
+   ],
+   "fix": "Inject the rule only when window.top===window; keep the literal in the file (check_resources.py:2149).",
+   "acceptance": "New test: unhandledrejection listener; 3 open/close cycles → 0 ViewTransition rejections; top-level index still has the rule. Fails on HEAD."
+  },
+  {
+   "id": "F067",
+   "sources": [
+    "INT-14(rest)",
+    "PH-07",
+    "P2-10"
+   ],
+   "title": "独立打开的子页面：标题带「演示/原型」，Boss 殿堂和赛季展柜没回首页的路，页面比手机宽",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified boss_hall.html:42 'BOSS 殿堂 · 演示', spelling_bee.html:68 '…· 原型', no home link when top===self, fixed 420/430 px .spot (season_showcase.html:76, boss_hall.html:68). No in-app (iframe) impact.",
+   "lane": "B",
+   "files": [
+    "boss_hall.html",
+    "season_showcase.html",
+    "spelling_bee.html",
+    "test_subpages_standalone_v1165.mjs (new)"
+   ],
+   "fix": "Titles 'BOSS 殿堂' and '🐝 拼写蜂 Spelling Bee'; when window.top===window add a small 「‹ 回地图」 link (location.replace('index.html')) on boss_hall/season_showcase; html{overflow-x:hidden}, .spot width/height min(430px,100vw); no animations.",
+   "acceptance": "New test: top-level at 360/375 → scrollWidth <= innerWidth, × fully visible, 回地图 works; none inside iframes; titles without 演示/原型. Fails on HEAD."
+  },
+  {
+   "id": "F068",
+   "sources": [
+    "MG-07",
+    "P2-06"
+   ],
+   "title": "拼写蜂设置页在每个岛都写「动物大冒险词库」",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified spelling_bee.html:479 hard-coded; only .sub updated.",
+   "lane": "B",
+   "files": [
+    "spelling_bee.html",
+    "test_bee_tip_v1165.mjs (new)"
+   ],
+   "fix": "Set '.sec-t .tip' to ISLAND_CN[_sbIsland]+'岛词库' (fallback 「全部词库」) beside the subtitle update.",
+   "acceptance": "New test: from food 「食物岛词库」, land3 「时之钟谷岛词库」, standalone 「全部词库」. Fails on HEAD."
+  },
+  {
+   "id": "F069",
+   "sources": [
+    "VC-14(stats strip)",
+    "OPT-17(remaining numbers)",
+    "MISSED#1"
+   ],
+   "title": "首页统计条还写「711+」；进岛提示和最近卡片用的岛名/图标和岛卡不一样（常用词岛、代词岛…）",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified index.html:3375 '711+' and :3371 '18' lack data-hsn-count (b24769c fixed only the intro line); ISLAND_META short/emoji (:3951-3979) differ from cards. '12 学习模式' kept: 14 cards − 抽卡 − 拼写大PK = 12 practice modes.",
+   "lane": "B",
+   "files": [
+    "index.html"
+   ],
+   "fix": "data-hsn-count words/islands on the stats strip (reuse the v1165 counter at :4321); build ISLAND_META short names/emoji from the home cards at load (href → .island-name/.island-icon), table as fallback.",
+   "acceptance": "Extend test_copy_numbers_v1165.mjs: stats show computed 712/18; for every card the loading text and 最近探险 card use the card's name/icon. Fails on HEAD."
+  },
+  {
+   "id": "F070",
+   "sources": [
+    "VC-21"
+   ],
+   "title": "岛里工具菜单「主题商店/装备」顺序每次加载可能不一样",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified by code hansen_gear.js:369-381 and hansen_diamond_shop.js:632-640 both insertBefore(first .util-card) on independent timers.",
+   "lane": "B",
+   "files": [
+    "hansen_gear.js",
+    "hansen_diamond_shop.js",
+    "test_util_order_v1165.mjs (new)"
+   ],
+   "fix": "Insert by explicit slot (data-order: 主题商店 10, 装备 20).",
+   "acceptance": "New test: either script delayed → identical util-card order. Fails on HEAD."
+  },
+  {
+   "id": "F071",
+   "sources": [
+    "PH-11"
+   ],
+   "title": "manifest 把 favicon.ico（16/32/48 的 ICO）声明成 384×384 PNG",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified manifest.webmanifest:12-18 and index.html:47-48; no 192/512 PNG in the repo; WeChat ignores the manifest.",
+   "lane": "B",
+   "files": [
+    "manifest.webmanifest",
+    "index.html"
+   ],
+   "fix": "Declare the truth: src favicon.ico, sizes '16x16 32x32 48x48', type image/x-icon, purpose any; rel=icon type image/x-icon. Real 180/192/512 PNG icons need artwork from the owner (release note).",
+   "acceptance": "New static test: declared sizes/type match the file header. Fails on HEAD."
+  },
+  {
+   "id": "F072",
+   "sources": [
+    "PH-12"
+   ],
+   "title": "map8/、newboss/ 开发页面没被部署配置排除",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified cloudbaserc.json ignore lacks them (package_release.py excludes them, official package fine).",
+   "lane": "B",
+   "files": [
+    "cloudbaserc.json"
+   ],
+   "fix": "Add 'map8/**' and 'newboss/**' to the ignore list.",
+   "acceptance": "Static check in a new test; test_deploy_kit_v1045 and test_download_fix_v1140 green. Fails on HEAD."
+  },
+  {
+   "id": "F073",
+   "sources": [
+    "CB-10"
+   ],
+   "title": "每日进度快照按字符串比日期删错了",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified hansen_addiction.js:346; only consumer has no caller → storage cleanup only.",
+   "lane": "B",
+   "files": [
+    "hansen_addiction.js",
+    "test_snapshot_cleanup_v1165.mjs (new)"
+   ],
+   "fix": "Parse date parts from the key, delete only snapshots older than 30 days, iterate a key snapshot.",
+   "acceptance": "New test (page.clock 2026-10-25): today and 2026-10-18 kept; 2025-1-5 and 2026-9-1 removed. Fails on HEAD."
+  },
+  {
+   "id": "F074",
+   "sources": [
+    "SS-5"
+   ],
+   "title": "满级（Lv.30）后顶栏显示「100/0 XP」",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Verified template.html:2820 with getXpForNextLevel() returning 0 (:2910-2915).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_max_level_v1165.mjs (new)"
+   ],
+   "fix": "When getNextAdvLevel() is null show 「已满级 MAX」 and hide '/N XP'.",
+   "acceptance": "New test: addXP(52300) → 已满级, never '/0 XP'. Fails on HEAD."
+  },
+  {
+   "id": "F075",
+   "sources": [
+    "P2-19"
+   ],
+   "title": "连胜小条「🎯3 · 🪙满」离开游戏后还留在屏幕上挡住别的标题",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Uncertain item checked in code: hideComboUI() only on miss/break (template.html:4321, :4337); showScreen never hides it.",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "island_*.html (regenerated)",
+    "test_combo_badge_v1165.mjs (new)"
+   ],
+   "fix": "showScreen calls hideComboUI() when the target isn't a game screen (streak kept).",
+   "acceptance": "New test: 3-streak then home/抽卡 → #comboBadge not .show; in-game still shows. Fails on HEAD."
+  },
+  {
+   "id": "F076",
+   "sources": [
+    "INT-10"
+   ],
+   "title": "每个新岛都弹一遍全套「欢迎来到…」大弹窗，像另一个 App",
+   "severity": "polish",
+   "status": "todo",
+   "status_reason": "Counts fixed in b24769c; still per island while S.totalAnswers===0 (template.html:7978; land welcome in land_data.json).",
+   "lane": "A",
+   "files": [
+    "template.html",
+    "land_data.json",
+    "island_*.html (regenerated)",
+    "test_island_welcome_v1165.mjs (new)"
+   ],
+   "fix": "Full welcome only the first time on this device (hansen_island_intro_seen_v1165); later new islands show a one-line toast 「欢迎来到X！这里有 N 个单词」.",
+   "acceptance": "New test: 1st new island modal, 2nd only toast; tests that dismiss 开始冒险！ if present still pass. Fails on HEAD."
+  },
+  {
+   "id": "F077",
+   "sources": [
+    "VC-07",
+    "P2-20"
+   ],
+   "title": "72 小时体验期：新孩子卡册写「已收集 20/20 · ✨全部集齐 · 卡牌大师」，抽卡页写 0/20，72 小时后悄悄消失",
+   "severity": "major",
+   "status": "needs_owner",
+   "status_reason": "This is Hansen's explicit freepass spec (hansen_freepass.js header ③ 卡册+图鉴 collected=全部, ⑤ 零提醒); inconsistency verified at hansen_cards.js:883 __tmpAll. Changing it needs his decision.",
+   "lane": "none",
+   "files": [
+    "hansen_cards.js (if approved)"
+   ],
+   "fix": "Ask: 「72 小时全开放期间，卡册顶上要不要改成『全部卡牌开放体验中 · 真正收集 0/20』（不弹窗、不倒计时），而不是『已收集 20/20 · 全部集齐 · 卡牌大师』？」 If yes → lane B hansen_cards.js:881-905 shows the real count with that neutral label; cards stay viewable.",
+   "acceptance": "Answer recorded; if approved, a test shows the label during the trial and a count equal to 抽卡."
+  },
+  {
+   "id": "F078",
+   "sources": [
+    "PS-02"
+   ],
+   "title": "云存档钥匙由手机号推出 + hansen_saves 全员可读：知道手机号就能解开整份存档",
+   "severity": "major",
+   "status": "needs_owner",
+   "status_reason": "Needs a CloudBase console permission change + key-scheme decision (legal pending); code is in hansen_cloud_save_v965.js (off-limits).",
+   "lane": "none",
+   "files": [
+    "(console) hansen_saves permission",
+    "hansen_cloud_save_v965.js (battle/login team)"
+   ],
+   "fix": "Owner: set hansen_saves to 「仅创建者可读写」 once the battle/login team confirms stable-uid ownership; choose a random per-account key or a server-issued salt in docId/aesKey.",
+   "acceptance": "Console change recorded; battle team test that a second account can't read another save; keyderiv.mjs no longer reproduces the doc id."
+  },
+  {
+   "id": "F079",
+   "sources": [
+    "PS-03"
+   ],
+   "title": "排行榜/好友/在线状态/消息对所有登录用户全表可读（含 uid/openid，编号可枚举）",
+   "severity": "major",
+   "status": "needs_owner",
+   "status_reason": "Needs console rules or cloud functions plus battle-file changes (hansen_ladder_board*, hansen_friends*).",
+   "lane": "none",
+   "files": [
+    "(console) sb_profile/presence/hansen_friends/hansen_friend_msgs rules",
+    "battle files"
+   ],
+   "fix": "Owner + battle team: de-identified Top-N via cloud function; presence/friends friend-only; friend_msgs recipient-only; verify rules on the real console.",
+   "acceptance": "Rules recorded; battle team test that a random account can't list others."
+  },
+  {
+   "id": "F080",
+   "sources": [
+    "PS-08"
+   ],
+   "title": "发音兜底会把单词/句子文字和 IP 发给百度/有道/Google",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Disclosed in the privacy popup; local audio covers 100%, but turning it off trades sound for privacy (teacher's earlier 星海 bee 没声音 report suggests browser TTS is unreliable on his phone). Policy decision.",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "land_template.html (lane A if approved)"
+   ],
+   "fix": "Ask: 「本地录音已全覆盖。要不要把『联网朗读』默认关掉，只在家长在设置里选了在线发音时才用？」 If yes → lane A speak() uses local mp3 + browser speechSynthesis (after F018) unless an online voice is chosen in 设置.",
+   "acceptance": "Answer recorded; if approved, a test sees 0 requests to gstatic/baidu/youdao across all modes."
+  },
+  {
+   "id": "F081",
+   "sources": [
+    "P2-14"
+   ],
+   "title": "星海终战一档要做 80–186 题，初级只有 4 个词",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Round length/level split is game design (changes rewards); audit counts listen/typing/cloze 80/80/80, moles/fish/bubble/scramble/eagle 4/50/186.",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "island_data.json (lane A if approved)"
+   ],
+   "fix": "Ask: 「星海终战每一档要不要像别的岛一样只抽约 20 个词，并按单词长短分三档？」 If yes → per-island length cuts via an island_data.json slot + pool cap.",
+   "acceptance": "Answer; if approved every 星海 level has 15–25 questions per round."
+  },
+  {
+   "id": "F082",
+   "sources": [
+    "P2-11(unlock text)"
+   ],
+   "title": "神秘殿堂里锁着的卡写「通关密码面板解锁」，正常玩根本拿不到",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Verifier: S1B1–S1B5 only granted by island_season boss fights Lv1–5 (island_season.html:5320), which the v874 hub no longer offers.",
+   "lane": "none",
+   "files": [
+    "hansen_season.js"
+   ],
+   "fix": "Ask: 「这 5 张赛季 Boss 卡要不要重新给孩子一个能拿到的办法？不要的话锁着的卡改成『暂时还拿不到，敬请期待』。」",
+   "acceptance": "Decision implemented; no locked card mentions 密码面板."
+  },
+  {
+   "id": "F083",
+   "sources": [
+    "CQ-03",
+    "CQ-11",
+    "CQ-06(multiple)"
+   ],
+   "title": "需要重新录音才能改的例句（语法错/不合常识/不合年龄）",
+   "severity": "major",
+   "status": "needs_owner",
+   "status_reason": "Changing ex text breaks SENTENCE_MAP/__HANSEN_EX_AUDIO exact-text keys (robot TTS) and needs a lock rebuild; no recording tool in the repo.",
+   "lane": "none",
+   "files": [
+    "island_data.json",
+    "land_data.json",
+    "vocab_all.js",
+    "spelling_bee.html",
+    "sentences/*.mp3",
+    "sentence_map.js",
+    "hansen_ex_audio.js",
+    "hansen_audio_lock.json"
+   ],
+   "fix": "For the teacher (CSV ids): must-fix minute #825 「Wait for me ten minutes.」→「Please wait ten minutes for me.」(请等我十分钟。); whale #150; multiple #688; July #853; second #824; six #274; grade seven→three #538; citizen #738; otherwise #698; then #920; sick #117; first #288; previously #627; jumping #802; ship #874; because #904; fire station #205; meanwhile cook the dinner #619; modern/centre #598; maths #581/#671; hard-working #787; church #215; she nurse #505; Monday #840. After recordings: update all copies/maps and rebuild the lock with the repo tool.",
+   "acceptance": "Teacher approves text and supplies audio; a test asserts every changed ex resolves to a local mp3."
+  },
+  {
+   "id": "F084",
+   "sources": [
+    "CQ-05(15 partial)",
+    "CQ-06(uncertain rows)",
+    "CQ-09(same-cn glosses)",
+    "CQ-17"
+   ],
+   "title": "把握不够、需要老师拍板的内容建议（释义、音标、同义中文、部分高亮）",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Medium/low confidence in flagged_entries.csv; only certain rows are fixed now.",
+   "lane": "none",
+   "files": [
+    "island_data.json",
+    "land_data.json",
+    "vocab_all.js",
+    "spelling_bee.html",
+    "land_map.html",
+    "highlight_helper.js"
+   ],
+   "fix": "For approval: assume 假设→认为/假定; chest 胸膛→胸部/胸口; temple 庙宇→寺庙; uncle/aunt/grandpa/grandma glosses; exCn how/business/more/electricity; distinct glosses for rarely/seldom, invent/invention, succeed/success, enormous/huge, amount/quantity, besides/moreover/furthermore; 15 partial highlights (temporary, maximum, instead, generally, reputation, player, Sunday, never, career, suitable, comfortable, period, in, on, under); IPA hour, post office, air conditioner, ice cream. Approved rows → lane A data + lane B copies.",
+   "acceptance": "Approved rows applied in all copies with static tests like F038/F060."
+  },
+  {
+   "id": "F085",
+   "sources": [
+    "CQ-07"
+   ],
+   "title": "单词大陆 8 个岛的主题名和词对不上（⑧「自然科学」里 20 个是职场词）",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Curriculum decision (re-chunk vs rename); no audio impact.",
+   "lane": "none",
+   "files": [
+    "land_data.json",
+    "land_map.html"
+   ],
+   "fix": "Ask: re-chunk along the 12 星海 topics, or rename each land's categories to what they contain.",
+   "acceptance": "Choice applied; static check categories vs words."
+  },
+  {
+   "id": "F086",
+   "sources": [
+    "CQ-10"
+   ],
+   "title": "美式/英式拼写不统一（neighbour/neighbor、centre、maths…）",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Teacher must choose the standard; headword changes need audio-key renames.",
+   "lane": "none",
+   "files": [
+    "island_data.json",
+    "land_data.json",
+    "vocab_all.js",
+    "spelling_bee.html",
+    "audio maps"
+   ],
+   "fix": "Ask which standard (app is mostly American), then fix neighbour #420 vs neighbor #739, centre #221, maths, soccer/football, vacation/holiday, hard-working consistently.",
+   "acceptance": "Choice applied with a static consistency test."
+  },
+  {
+   "id": "F087",
+   "sources": [
+    "CQ-12"
+   ],
+   "title": "发音锁锁错了 8 个文件（游戏实际播放的 post_office、gloves_clothes… 没被保护）",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "hansen_audio_lock.py _parse_island ignores quoted keys; the fix needs a hansen_audio_lock.json rebuild, which this batch may only do for content fixes.",
+   "lane": "none",
+   "files": [
+    "hansen_audio_lock.py",
+    "hansen_audio_lock.json"
+   ],
+   "fix": "Owner approves: fix the parser and rebuild the lock with the repo tool so post_office, police_station, fire_station, gloves_clothes, cap_clothes, chair_home, when_treasure, hard_treasure are fingerprinted.",
+   "acceptance": "Lock lists the 8 played files; lock check green."
+  },
+  {
+   "id": "F088",
+   "sources": [
+    "CQ-15(files)",
+    "OPT-16"
+   ],
+   "title": "录音文件：7 个例句末帧损坏、响度不一、4 个单词有杂音、13 个文件没人用、可降码率",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "All change audio files and the lock; need listening/approval.",
+   "lane": "none",
+   "files": [
+    "sentences/*.mp3 (0029,0152,0207,0338,0341,0606,0634)",
+    "words/clean|use|her|house.mp3",
+    "hansen_audio_lock.json"
+   ],
+   "fix": "Teacher listens to the 4 odd clips; approve re-encoding the 7 files, one loudness target (~-16 LUFS), removing/documenting 13 unused files, optional 48–64 kbps; rebuild the lock.",
+   "acceptance": "Files decode cleanly, loudness within ±1.5 dB, lock green."
+  },
+  {
+   "id": "F089",
+   "sources": [
+    "CQ-14(rest)"
+   ],
+   "title": "图片和内容取舍：年级图画成 A+、职业 emoji 几乎全男性、妈妈奶奶例句多是做饭织毛衣、晚餐图有红酒等",
+   "severity": "polish",
+   "status": "needs_owner",
+   "status_reason": "Artwork/content-policy decisions (low confidence or new images needed).",
+   "lane": "none",
+   "files": [
+    "island_data.json",
+    "vocab_all.js",
+    "icons/food-v958/dinner.webp"
+   ],
+   "fix": "For approval: grade picture, famous 🗼, teach 👨‍🏫 vs 'My mom teaches', letter 'A', free, weak pictures (head, wash, lip, stepparents, engineer, boat, passenger, admit), job emoji gender balance, mom/grandma roles, dinner.webp wine, church/Monday sentences.",
+   "acceptance": "Approved items applied and checked on a real phone."
+  },
+  {
+   "id": "F090",
+   "sources": [
+    "OD-LP",
+    "OD-PP",
+    "OD-RP",
+    "CQ-13",
+    "OPT(phone-only notes)"
+   ],
+   "title": "只能在真手机上确认的检查清单",
+   "severity": "major",
+   "status": "needs_owner",
+   "status_reason": "Headless Chromium is not WeChat XWeb/WKWebView.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "Phone run: Emoji 13/14 pictures (🥹 🛝 🪪 🛖 🪖 🪞 🪟 🪨 🪴 🫁 🫂) not boxes; 一键静音 + lesson-card tap silent; lesson card above fish/bubble/boss effects (9990 vs 9980); 完形 speech end callback; light-theme lesson card; SRS over real days; land③↔星海 round trip; per-answer delay on low-end Android after F002; idle CPU/battery; glow overlay alignment at DPR 3; navigator.userActivation in WeChat; first Boss on 4G (BUG#67); CDN cache headers; CSS translate on old iOS; iOS WeChat first-word autoplay; Android WeChat font scaling.",
+   "acceptance": "Checklist filled with phone model and WeChat version."
+  },
+  {
+   "id": "F091",
+   "sources": [
+    "OD-RR",
+    "OD-R3",
+    "OD-LR"
+   ],
+   "title": "需要老师确认的玩法规则（v1165 小课/复习带来的变化）",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Product-policy choices made by the batches; implemented and tested, decision open.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "Confirm: (1) 再考答对后错词仍留在错题本、首页仍显示要复习; (2) 点小课卡片后停 160 ms 再出题（为一键静音）; (3) 完形答错卡片等例句读完 +0.8 秒（最多 8 秒）; (4) Boss 答错 1.1 秒后出小课，可能盖在反击/战败页上; (5) F010 上线后进度多的孩子一下子能领很多成就（如 vocabS600 15 💎）.",
+   "acceptance": "Answers recorded; changes become new todos."
+  },
+  {
+   "id": "F092",
+   "sources": [
+    "OD-PR"
+   ],
+   "title": "待机动画减少后孩子能看到的变化，老师可能想微调",
+   "severity": "polish",
+   "status": "needs_owner",
+   "status_reason": "Implemented in 4d82367/36b3a86; visual taste is the teacher's call.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "Confirm: 藏宝图招手/金光 3 次后停；宝箱柔光 3 次后淡淡常亮；宠物浮动 3 次；首页 12 秒没碰屏幕装饰先歇着、一碰就动。",
+   "acceptance": "Answer recorded."
+  },
+  {
+   "id": "F093",
+   "sources": [
+    "OPT-7(economy)"
+   ],
+   "title": "抽卡 1000 金币、带概率和 100 抽保底（儿童产品里的开箱子模式）；货币十几种",
+   "severity": "minor",
+   "status": "needs_owner",
+   "status_reason": "Economy/product decision.",
+   "lane": "none",
+   "files": [
+    "hansen_gacha.js"
+   ],
+   "fix": "Ask whether to make cards earned by play and simplify to 🪙 + ⭐.",
+   "acceptance": "Decision recorded."
+  },
+  {
+   "id": "F094",
+   "sources": [
+    "OPT-9"
+   ],
+   "title": "新功能建议：家长/老师学习报告图、作业直达链接",
+   "severity": "polish",
+   "status": "needs_owner",
+   "status_reason": "New features, not defects.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "Ask whether to schedule.",
+   "acceptance": "Decision recorded."
+  },
+  {
+   "id": "F095",
+   "sources": [
+    "OPT-17(slogan)"
+   ],
+   "title": "首页页脚口号「学渣的快乐 · 学霸的秘密」把孩子叫「学渣」",
+   "severity": "polish",
+   "status": "needs_owner",
+   "status_reason": "Teacher's own slogan (index.html:3802).",
+   "lane": "none",
+   "files": [
+    "index.html"
+   ],
+   "fix": "Ask: 保留，还是换成正面说法（如「快乐学单词 · 天天有进步」）？",
+   "acceptance": "Answer recorded."
+  },
+  {
+   "id": "F096",
+   "sources": [
+    "NET-14"
+   ],
+   "title": "弱网冷启动要等 8 秒才用缓存",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "The 8 s timeout (sw_v944.js:86-95) is the deliberate v1082 trade-off against stale shells; only safe to shorten after F024/F025 are proven on phones.",
+   "lane": "none",
+   "files": [
+    "sw_v944.js"
+   ],
+   "fix": "Revisit after the version-watch fixes ship.",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F097",
+   "sources": [
+    "OD-P3",
+    "task(c)",
+    "OPT-5(settings part)"
+   ],
+   "title": "打开设置页仍会加载 1.23 MB Boss 引擎和约 2 MB 攻击图",
+   "severity": "minor",
+   "status": "wontfix",
+   "status_reason": "Checked a split: the 「Boss 特效调节」 row + admin gate are one 60 KB IIFE (hansen_boss_attack.js:14983-15690) that parses standalone and uses only window globals, but check_resources.py has 177 literals that exist only in it (+51 shared) and test_boss_admin_entry_v953/test_admin_levels_v1055 pin the 3-strike + IndexedDB lock. Moving it re-points ~180 guard contracts plus the security gate at once — not safe in this batch. Cost only when 设置 opens. Documented.",
+   "lane": "none",
+   "files": [
+    "hansen_boss_attack.js",
+    "hansen_boss_lock.js",
+    "check_resources.py"
+   ],
+   "fix": "Later release: move the IIFE to its own file, re-point the guard literals, load it from armSettings instead of ensureLoaded().",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F098",
+   "sources": [
+    "OD-P1",
+    "OD-P2",
+    "OPT-14(font/base64)"
+   ],
+   "title": "卡通字体 398 KB 没子集化；星海地图 650 KB 内嵌 base64 图没外置",
+   "severity": "minor",
+   "status": "wontfix",
+   "status_reason": "fontTools unavailable offline; moving land_map's image needs SW cache rules + offline verification, and new kids no longer download land_map (086259a).",
+   "lane": "none",
+   "files": [
+    "cartoon_font.woff2",
+    "land_map.html"
+   ],
+   "fix": "Revisit with tooling.",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F099",
+   "sources": [
+    "OPT-15"
+   ],
+   "title": "27 个岛页 98% 相同（共享引擎 + 薄岛页）",
+   "severity": "minor",
+   "status": "wontfix",
+   "status_reason": "L-size architecture change of every page and both generators; out of scope for a bug-fix release.",
+   "lane": "none",
+   "files": [
+    "generate.py",
+    "template.html"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F100",
+   "sources": [
+    "OPT-6(mastery star)"
+   ],
+   "title": "一个词 5–6 种进度信号合成一个「掌握星」",
+   "severity": "minor",
+   "status": "wontfix",
+   "status_reason": "This is the planned 复习系统 2.0 project, not a defect.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F101",
+   "sources": [
+    "CQ-16(punctuation)"
+   ],
+   "title": "152 句中文翻译用了半角标点",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "Cosmetic; 152 sentences x 5 copies plus HIGHLIGHT_MANUAL keys embedding exCn — break risk > value now; one scripted content pass later.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F102",
+   "sources": [
+    "CQ-18"
+   ],
+   "title": "没有词性字段",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "Feature request.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F103",
+   "sources": [
+    "PS-10"
+   ],
+   "title": "卡牌管理员口令 6 位数字、客户端校验",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "Client-side gates are always bypassable and this one protects no personal data; owner may change the password.",
+   "lane": "none",
+   "files": [
+    "hansen_boss_attack.js"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F104",
+   "sources": [
+    "PS-12"
+   ],
+   "title": "隐私方面要保持的好做法",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "No defect; guards belong with battle/login files.",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "Keep.",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F105",
+   "sources": [
+    "OD-L2"
+   ],
+   "title": "记忆翻牌没有答错小课；Boss 和复习模式没有本轮末再考",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "By design (match has no single missed word; boss/review flows have their own guards).",
+   "lane": "none",
+   "files": [
+    "(none)"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F106",
+   "sources": [
+    "OD-P6"
+   ],
+   "title": "交接/BUG 图鉴/当前进度文档未更新",
+   "severity": "polish",
+   "status": "wontfix",
+   "status_reason": "Release-step task for the orchestrator, not a fix-lane item.",
+   "lane": "none",
+   "files": [
+    "(docs)"
+   ],
+   "fix": "n/a",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F107",
+   "sources": [
+    "PS-01"
+   ],
+   "title": "在线对战房间文档存孩子手机号（房间表所有登录用户可读）",
+   "severity": "major",
+   "status": "deferred_battle",
+   "status_reason": "hansen_pk_room_v1065.js:467/592/828 — battle file; v1164 rebuild (u+uid) addresses it.",
+   "lane": "none",
+   "files": [
+    "hansen_pk_room*.js"
+   ],
+   "fix": "Battle team confirms room docs carry only u<uid> and adds the no-phone guard.",
+   "acceptance": "Battle team guard/test."
+  },
+  {
+   "id": "F108",
+   "sources": [
+    "PS-05"
+   ],
+   "title": "隐私说明没讲账号/云存档/在线公开信息，注册前没有家长告知",
+   "severity": "minor",
+   "status": "deferred_battle",
+   "status_reason": "Text (index.html:3800-3812) must describe the v1164 data model; consent step lives in hansen_signup_gate/hansen_auth. Lanes must not edit that section now.",
+   "lane": "none",
+   "files": [
+    "index.html (privacy section)",
+    "hansen_signup_gate*",
+    "hansen_auth*"
+   ],
+   "fix": "Battle/login team writes 「账号与在线功能」 and a guardian notice before first registration/online battle.",
+   "acceptance": "Battle team review."
+  },
+  {
+   "id": "F109",
+   "sources": [
+    "PS-04",
+    "PS-06",
+    "PS-07",
+    "PS-09",
+    "PS-11"
+   ],
+   "title": "其它在线隐私问题：昵称能用真名/手机号、不能删云存档/注销、陌生人可发消息、手机号明文存本机、privacy 字段摆设",
+   "severity": "major",
+   "status": "deferred_battle",
+   "status_reason": "All in hansen_sb_profile*, hansen_cloud_*, hansen_friends*, hansen_auth* — off-limits.",
+   "lane": "none",
+   "files": [
+    "hansen_sb_profile_v1002.js",
+    "hansen_cloud_save_v965.js",
+    "hansen_friends_v1106.js",
+    "hansen_friends_ui_v1107.js",
+    "hansen_auth_v1004.js",
+    "hansen_auth_ui_v1004.js",
+    "hansen_cloud_diag_v1027.js"
+   ],
+   "fix": "Battle team: block 7+ digit runs in public names; delete-cloud-save/leave-ladder; sendQuick friends-only + inbox with block/report; store uid not phone, mask display; implement or remove privacy.",
+   "acceptance": "Battle team tests."
+  },
+  {
+   "id": "F110",
+   "sources": [
+    "CB-13"
+   ],
+   "title": "备份文件名用 UTC 日期",
+   "severity": "polish",
+   "status": "deferred_battle",
+   "status_reason": "hansen_backup_v944.js:548/573 — hansen_backup* off-limits.",
+   "lane": "none",
+   "files": [
+    "hansen_backup_v944.js"
+   ],
+   "fix": "Local zero-padded date.",
+   "acceptance": "Owner team test."
+  },
+  {
+   "id": "F111",
+   "sources": [
+    "OD-L1"
+   ],
+   "title": "vocab_all.js 114 个 SVG 图把英文画在图上，拼写大PK 会照着抄",
+   "severity": "minor",
+   "status": "deferred_battle",
+   "status_reason": "Reaches only spelling_pk.html/hansen_pk_room; islands already strip.",
+   "lane": "none",
+   "files": [
+    "spelling_pk.html",
+    "hansen_pk_room*.js"
+   ],
+   "fix": "Strip lettered <text> like __hsnQuizPic.",
+   "acceptance": "Battle team test."
+  },
+  {
+   "id": "F112",
+   "sources": [
+    "OPT-13"
+   ],
+   "title": "Lv.3 注册墙改成面向家长的说法、可「明天再说」一次",
+   "severity": "minor",
+   "status": "deferred_battle",
+   "status_reason": "hansen_signup_gate_v1030.js off-limits.",
+   "lane": "none",
+   "files": [
+    "hansen_signup_gate_v1030.js"
+   ],
+   "fix": "Battle/login team.",
+   "acceptance": "n/a"
+  },
+  {
+   "id": "F113",
+   "sources": [
+    "INT-04(PK part)"
+   ],
+   "title": "岛里开着「拼写大PK」时按返回，整个岛被关掉、PK 页留在隐藏的岛里",
+   "severity": "minor",
+   "status": "deferred_battle",
+   "status_reason": "PK screen owned by battle files; F006/F013 provide the interface.",
+   "lane": "none",
+   "files": [
+    "hansen_pk_room_ui_v1065.js"
+   ],
+   "fix": "Register the PK close on window.__hsnBackStack (push on open, remove on close).",
+   "acceptance": "Back from PK returns to the island home."
+  },
+  {
+   "id": "F114",
+   "sources": [
+    "VC-01",
+    "VC-02",
+    "VC-04",
+    "TV-01",
+    "TV-02",
+    "TV-12",
+    "TV-13"
+   ],
+   "title": "主题/配色系统：7 个互不相通的选择器、首页亮岛里暗、拼写蜂自带亮色、暗夜紫≈深空蓝",
+   "severity": "major",
+   "status": "deferred_theme2",
+   "status_reason": "Theme-system items replaced by theme 2.0 role tokens.",
+   "lane": "none",
+   "files": [
+    "index.html",
+    "template.html",
+    "hansen_palette.js",
+    "spelling_bee.html"
+   ],
+   "fix": "Theme 2.0 phases 1–3 (allround/theme-visual/REPORT.md).",
+   "acceptance": "Theme 2.0 gate."
+  },
+  {
+   "id": "F115",
+   "sources": [
+    "VC-03",
+    "VC-11",
+    "VC-12",
+    "VC-22",
+    "TV-04",
+    "TV-05",
+    "OPT-8"
+   ],
+   "title": "对比度：亮色补丁层看不见的字、默认暗色卡片标签不达标、樱花粉首页、光晕发脏、可读性底线",
+   "severity": "major",
+   "status": "deferred_theme2",
+   "status_reason": "Light-mode patch layer/tokens (F040 fixes only 我的学习 because its test gap exposes it).",
+   "lane": "none",
+   "files": [
+    "hansen_palette.js",
+    "template.html",
+    "index.html",
+    "hansen_home_link.js"
+   ],
+   "fix": "Theme 2.0 phase 0 items 1–4 + pixel contrast scan.",
+   "acceptance": "Theme 2.0 contrast gate."
+  },
+  {
+   "id": "F116",
+   "sources": [
+    "VC-05",
+    "VC-06(unification)",
+    "VC-09",
+    "VC-23",
+    "MISSED#18"
+   ],
+   "title": "组件不统一：返回/关闭 9 种、两个底栏页盖住底栏、点击区 <44px、6 种 toast、主题锁遮名字",
+   "severity": "major",
+   "status": "deferred_theme2",
+   "status_reason": "Component system of theme 2.0 phase 2 (F062 only fixes the clipped island toast).",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "hansen_wrong_overview.js",
+    "hansen_review.js",
+    "hansen_mylearning.js",
+    "hansen_theme_lock.js"
+   ],
+   "fix": "Theme 2.0 components.",
+   "acceptance": "Theme 2.0 review."
+  },
+  {
+   "id": "F117",
+   "sources": [
+    "TV-03",
+    "TV-06",
+    "TV-07",
+    "TV-14",
+    "OPT-7(popup flood)"
+   ],
+   "title": "庆祝与动效：奖励数字小会撞车、特效重、付费场景主题待机 89–100%、10 个弹窗、动效规则未成制度",
+   "severity": "minor",
+   "status": "deferred_theme2",
+   "status_reason": "Celebration redesign / motion system (FX.queue).",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "hansen_cinema_themes.js",
+    "hansen_boss_progress.js"
+   ],
+   "fix": "Theme 2.0 phase 2.",
+   "acceptance": "Theme 2.0 idle CPU/animation checks."
+  },
+  {
+   "id": "F118",
+   "sources": [
+    "INT-13",
+    "VC-13",
+    "VC-18",
+    "VC-19",
+    "TV-10",
+    "TV-11"
+   ],
+   "title": "字体与图标：Bowlby One 未打包落成衬线体、卡通字晚到、货币图标不统一、新 emoji 空框",
+   "severity": "minor",
+   "status": "deferred_theme2",
+   "status_reason": "Typography/iconography tokens.",
+   "lane": "none",
+   "files": [
+    "index.html",
+    "template.html",
+    "land_map.html",
+    "boss_hall.html",
+    "season_showcase.html",
+    "spelling_bee.html"
+   ],
+   "fix": "Theme 2.0 phase 0 items 7–8.",
+   "acceptance": "Theme 2.0 review."
+  },
+  {
+   "id": "F119",
+   "sources": [
+    "VC-10",
+    "TV-09"
+   ],
+   "title": "亮色主题进岛时闪一下深蓝加载页",
+   "severity": "minor",
+   "status": "deferred_theme2",
+   "status_reason": "Palette-driven door colours (index.html:2410-2421), theme 2.0 phase 0 item 5.",
+   "lane": "none",
+   "files": [
+    "index.html"
+   ],
+   "fix": "Theme 2.0.",
+   "acceptance": "Theme 2.0 door check."
+  },
+  {
+   "id": "F120",
+   "sources": [
+    "INT-12",
+    "OPT-1",
+    "OPT-12",
+    "VC-20",
+    "OPT-6(settings split)"
+   ],
+   "title": "首页像落地页不像大厅、岛内「主页」其实是本岛、星海 9 个名字、英文岛名三种写法、设置页混杂",
+   "severity": "minor",
+   "status": "deferred_theme2",
+   "status_reason": "Home 「今天」 hub, naming and settings split are in the theme 2.0 mockups.",
+   "lane": "none",
+   "files": [
+    "index.html",
+    "template.html"
+   ],
+   "fix": "Theme 2.0 home/island mockups.",
+   "acceptance": "Theme 2.0 review."
+  },
+  {
+   "id": "F121",
+   "sources": [
+    "MG-14",
+    "P2-12",
+    "PH-10",
+    "VC-14(welcome)"
+   ],
+   "title": "岛内欢迎弹窗数字写错（12 种玩法、5 大动物岛屿）",
+   "severity": "polish",
+   "status": "already_fixed",
+   "status_reason": "b24769c: template.html:7978 counts .mode-card at runtime and says 「N 个…小组」; land welcome in land_data.json updated (verified generated island_land3/season/sports).",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "land_data.json"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_copy_numbers_v1165.mjs."
+  },
+  {
+   "id": "F122",
+   "sources": [
+    "PH-09",
+    "INT-14(index title)"
+   ],
+   "title": "首页标题「单词大冒险 · 单词大冒险」",
+   "severity": "polish",
+   "status": "already_fixed",
+   "status_reason": "b24769c: <title>单词大冒险</title> (verified).",
+   "lane": "none",
+   "files": [
+    "index.html"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_copy_numbers_v1165.mjs."
+  },
+  {
+   "id": "F123",
+   "sources": [
+    "OPT-2"
+   ],
+   "title": "错一次答对一次就把复习计划删了；跨岛复习入口",
+   "severity": "major",
+   "status": "already_fixed",
+   "status_reason": "572574e (+64def8a): plan kept until graduation; hansen_wrong_overview open/_open from home banner (verified diff).",
+   "lane": "none",
+   "files": [
+    "hansen_review.js",
+    "hansen_canonical_progress.js",
+    "hansen_wrong_overview.js"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_srs_plan_v1165.mjs."
+  },
+  {
+   "id": "F124",
+   "sources": [
+    "OPT-3"
+   ],
+   "title": "答错没有揭晓卡/重读/再考/结算错词",
+   "severity": "major",
+   "status": "already_fixed",
+   "status_reason": "82e448a + e22e72b + 1120ca8 (hansen_mistake_lesson_v1165.js wired in both templates; verified __hmlLesson paths). Offline gap → F009.",
+   "lane": "none",
+   "files": [
+    "hansen_mistake_lesson_v1165.js",
+    "template.html",
+    "land_template.html"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_mistake_lesson_v1165.mjs, test_lesson_review_fix_v1165.mjs."
+  },
+  {
+   "id": "F125",
+   "sources": [
+    "OPT-5"
+   ],
+   "title": "每进一个岛都执行 Boss 引擎、下 20 张头像",
+   "severity": "major",
+   "status": "already_fixed",
+   "status_reason": "086259a + 36b3a86: engine only when 设置 is shown/wall tapped/startBoss (verified hansen_boss_lock.js settingsShown, template hookStart); portraits current+next after the wall. Settings remainder → F097.",
+   "lane": "none",
+   "files": [
+    "hansen_boss_lock.js",
+    "template.html",
+    "hansen_cards.js",
+    "hansen_preload.js"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_boss_lazy_v1165.mjs."
+  },
+  {
+   "id": "F126",
+   "sources": [
+    "OPT-11",
+    "TV-08"
+   ],
+   "title": "岛屿菜单和首页待机时主线程一直忙（装饰动画、视差循环）",
+   "severity": "minor",
+   "status": "already_fixed",
+   "status_reason": "4d82367 + 36b3a86 (verified parallax only on mousemove, hsn-deco-rest after 12 s, 3-round opacity glows; check_resources literals updated).",
+   "lane": "none",
+   "files": [
+    "index.html",
+    "template.html",
+    "land_template.html",
+    "hansen_boss_lock.js"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_idle_motion_v1165.mjs."
+  },
+  {
+   "id": "F127",
+   "sources": [
+    "OPT-10(SVG)"
+   ],
+   "title": "拼写类题目的 SVG 配图印着答案（TOE/KNEE/ERASER）",
+   "severity": "minor",
+   "status": "already_fixed",
+   "status_reason": "04d92f7 __hsnQuizPic (verified in template); raster yogurt → F063; PK → F111.",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "land_template.html",
+    "hansen_spell_practice.js",
+    "hansen_focused_typing_v946.js"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_spelling_pic_v1165.mjs."
+  },
+  {
+   "id": "F128",
+   "sources": [
+    "OPT-7(unreachable goal)",
+    "OPT-17(banner/denominator)"
+   ],
+   "title": "任务横幅「还差 1 个! undefined」、拿不到的「1500 词」成就、我的学习分母 19",
+   "severity": "minor",
+   "status": "already_fixed",
+   "status_reason": "b24769c (verified q.title||q.text, vocabS1500 from TOTAL_WORDS, vocab ladder in hansen_island_upgrade.js, TOTAL_ISLANDS computed 27).",
+   "lane": "none",
+   "files": [
+    "template.html",
+    "hansen_island_upgrade.js",
+    "hansen_mylearning.js"
+   ],
+   "fix": "Done.",
+   "acceptance": "test_copy_numbers_v1165.mjs."
+  }
+ ]
+}

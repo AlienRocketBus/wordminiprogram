@@ -1051,7 +1051,10 @@
     join.onFail = function (r) {
       var stillMine = false;
       try { stillMine = (S()._currentRoomId() === myRid && S()._currentRole() === 'host'); } catch (e) {}
-      if (r && r.cancelled) { ladderBack('home', ''); return; }
+      /* 🔴v1165 合并 v1164（复查）：换房「进房中」时孩子点了「← 返回 / 取消」（手机返回键也是点它）—— 自己先前开的那间
+         也要收掉。以前只退了对方房里的座位就回天梯：自己那间留在列表上（这一页已经不等人了），别的孩子会被配进来干等。
+         （_state 在换房时已经清空，ladderBack 里的 close() 看不到这间房，所以在这里退。）test_pk_back_cloud_v1165 ② 守。 */
+      if (r && r.cancelled) { if (stillMine) { try { S().leaveRoom(myRid); } catch (e) {} } ladderBack('home', ''); return; }
       if (stillMine && mine) {
         _state = mine;
         _fromLadder = true;

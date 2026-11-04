@@ -36,7 +36,7 @@
 
 // hansen_boss_upgrade.js v152 (双保险覆盖原 cFall/lvlIn keyframes, 防止旧动画名残留)
 // v143v: 顶部立即导出版本号到 window, 不依赖 init() (诊断页面用)
-window.__HBU_VERSION__ = 'v1164';
+window.__HBU_VERSION__ = 'v1165';
 window.__HBU_LOADED_AT__ = Date.now();
 
 // Boss 战升级: 难度递增 (答错伤害 + 倒计时) + 最后 Boss 全词覆盖 + 半血惩罚 + 高奖励
@@ -1157,7 +1157,7 @@ window.__HBU_LOADED_AT__ = Date.now();
         '@keyframes shake{0%,100%{transform:none}}',
         '@keyframes chestShake{0%,100%{transform:none}}',
         // ─── 🔴 v573: 藏宝图去框直贴版 (Hansen 验收反馈: 金属框太丑直接去掉) — 60px 图标贴 66px 顶栏, 凹坑按压在岛内 :active 实现 ───
-        // 金光呼吸改挂 .wmb-img 的 drop-shadow(wmbGlowD, 贴图形轮廓无矩形感); 按钮本体仅保留 worldMapFloat 轻浮动
+        // 金光呼吸 wmbGlowD(贴图形轮廓无矩形感; v1165 起是 .wmb-socket::after 叠层只动 opacity); 按钮本体仅保留 worldMapFloat 轻浮动(只动 transform)。两样都是老师定的提醒, 一直动; 只动 transform/opacity, 合成器自己动, 不占主线程
         '.world-map-btn{position:fixed !important;top:calc(env(safe-area-inset-top,0px) + 2px) !important;right:max(6px,env(safe-area-inset-right,0px)) !important;width:58px !important;height:58px !important;border-radius:16px !important;border:none !important;background:transparent !important;padding:0 !important;box-shadow:none !important;animation:worldMapFloat 3.5s ease-in-out infinite !important;z-index:101 !important;filter:none !important}',
         '.world-map-btn:active{transform:translateY(2px) scale(.97) !important;animation:none !important}',
         // 弹窗打开时仍然隐藏地图按钮 (避免和 ✕ 重叠) — 覆盖原版 transform: scale(.4) 残留
@@ -1962,7 +1962,7 @@ window.__HBU_LOADED_AT__ = Date.now();
     // 🔴 BUG #10 关联: 下面这行 HBU_RUNTIME_VERSION 由 build.py 自动同步, 不要手改!
     // 手改会和 __HBU_VERSION__ / cache buster 形成"版本号打架"(check.html 误报)。
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    window.HBU_RUNTIME_VERSION = 'v1164';
+    window.HBU_RUNTIME_VERSION = 'v1165';
     setTimeout(function(){
       try {
         var versions = new Set();
@@ -2106,9 +2106,47 @@ window.__HBU_LOADED_AT__ = Date.now();
     });
   }
 
+  /* v1165：引擎不再开机就执行，伪装入口第一次被点时才加载。
+     重文件开机时会用 IndexedDB 镜像把「连错三次永久锁」补回 localStorage（清档也难抹），
+     但那一步是异步的，刚加载完立刻弹门可能抢在它前面。
+     所以「这次是现加载的」时，先自己读一遍镜像里的锁再开门（键名与重文件 L_N/L_LK 一致，测试锁定）。
+     最多等 800ms，读不到就照常开门（与旧版同样的行为）。 */
+  var MIRROR_FAILS='__hsn_sys_a', MIRROR_LOCK='__hsn_sys_b';
+  function syncLockMirror(){
+    return new Promise(function(resolve){
+      var done=false;
+      function fin(){ if(!done){ done=true; resolve(); } }
+      setTimeout(fin,800);
+      try{
+        if(!window.indexedDB){ fin(); return; }
+        var q=indexedDB.open('hsn_sys',1);
+        q.onupgradeneeded=function(){ try{ q.result.createObjectStore('kv'); }catch(e){} };
+        q.onerror=fin;
+        q.onsuccess=function(){
+          try{
+            var tx=q.result.transaction('kv','readonly'), st=tx.objectStore('kv');
+            var ga=st.get('a'), gb=st.get('b');
+            ga.onsuccess=function(){ try{
+              var v=parseInt(ga.result||'0',10)||0;
+              var cur=parseInt(localStorage.getItem(MIRROR_FAILS)||'0',10)||0;
+              if(v>cur) localStorage.setItem(MIRROR_FAILS,String(v));
+              if(v>=3) localStorage.setItem(MIRROR_LOCK,'1');
+            }catch(e){} };
+            gb.onsuccess=function(){ try{ if(gb.result==='1') localStorage.setItem(MIRROR_LOCK,'1'); }catch(e){} };
+            tx.oncomplete=fin; tx.onerror=fin; tx.onabort=fin;
+          }catch(e){ fin(); }
+        };
+      }catch(e){ fin(); }
+    });
+  }
+
   function open(){
     if(openPending) return openPending;
+    var hadEngine=!!exportedGate();
     openPending=ensureLoaded().then(function(ok){
+      if(!ok||hadEngine) return ok;
+      return syncLockMirror().then(function(){ return ok; });
+    }).then(function(ok){
       var fn=exportedGate();
       if(ok&&fn){ fn(); return true; }
       return false;
@@ -2141,18 +2179,136 @@ window.__HBU_LOADED_AT__ = Date.now();
     },true);
   }catch(e){}
 
+  /* 和 template 里 Boss 引擎预取用同一条网络规则（HansenPreloadPolicy：明确 4G、没开省流量、页面看得见；网络不明按慢网）。
+     页面上没有预载策略模块、也读不到网络信息（诊断页 / 单元测试的假页面）：照旧马上加载，和以前一样 */
+  function canAutoLoadForSettings(){
+    try{
+      var p=window.HansenPreloadPolicy;
+      if(p&&typeof p.canBackgroundDownload==='function') return !!p.canBackgroundDownload();
+      var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      if(!c) return true;
+      return !c.saveData&&c.effectiveType==='4g'&&navigator.onLine!==false&&
+        (!document.visibilityState||document.visibilityState==='visible');
+    }catch(e){ return true; }
+  }
+  /* 轻量行的进度：和 hansen_boss_attack.js 的 bossClearProgress 同一个算法、同一份文字
+     （test_boss_settings_slow_v1165 加载引擎后逐字对比过，两边对不上就红） */
+  var STUB_ISLES=['action','adjective','animal','body','city','clothes','color','family','food','home','job','nature','question','school','sports','time','traffic','treasure'];
+  function stubProgress(){
+    var total=STUB_ISLES.length*20, done=0;
+    try{ if(localStorage.getItem('hansen_admin_clearall_on')==='1') return {done:total,total:total,all:true}; }catch(e){}
+    for(var i=0;i<STUB_ISLES.length;i++){
+      var k='wordIsland'+STUB_ISLES[i].charAt(0).toUpperCase()+STUB_ISLES[i].slice(1), s=null;
+      try{ s=JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ s=null; }
+      if(!s||typeof s!=='object') continue;
+      for(var lv=1;lv<=20;lv++){
+        if((s.bossWins&&s.bossWins[lv]>=1)||(Array.isArray(s.bossWon)&&s.bossWon.indexOf(lv)>=0)) done++;
+      }
+    }
+    return {done:done,total:total,all:done>=total};
+  }
+  function stubCss(){
+    if(document.getElementById('hsnBossStubCss')) return;
+    var st=document.createElement('style'); st.id='hsnBossStubCss';
+    /* 和引擎 injectCSS 里 .hbafx-entry 三条一样（引擎加载后它自己的样式接手，看起来不跳） */
+    st.textContent='.hbafx-entry{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:#221531;border:1.5px solid #4c3268;border-radius:12px;margin-top:10px;cursor:pointer}'+
+      '.hbafx-entry b{color:#e9d5ff;font-size:13.5px}'+
+      '.hbafx-entry span{color:#a78bca;font-size:11px}';
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function renderStub(){
+    var sc=document.getElementById('settingsContent');
+    if(!sc||!sc.firstChild||exportedRefresh()) return;
+    var d=document.getElementById('hbafxEntry');
+    if(d&&!(d.hasAttribute&&d.hasAttribute('data-hsn-stub'))) return;   /* 真的入口已经在了 */
+    if(!d){
+      stubCss();
+      d=document.createElement('div');
+      d.className='hbafx-entry'; d.id='hbafxEntry';
+      d.setAttribute('data-hsn-stub','1'); d.setAttribute('role','button'); d.tabIndex=0;
+      d.onclick=stubTap;
+      d.addEventListener('keydown',function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); stubTap(); } });
+      sc.appendChild(d);
+    }
+    if(d.getAttribute('data-hsn-loading')==='1') return;
+    var p=stubProgress();
+    d.innerHTML=p.all?'<b>🎚️ Boss 特效调节</b><span>已解锁 ›</span>'
+                     :'<b>🔒 Boss 特效调节</b><span>通关全部 boss 解锁 '+p.done+'/'+p.total+'</span>';
+  }
+  /* 孩子点了轻量行：这时才加载引擎，换成引擎自己的那一行，再直接调它的点击函数（打开面板 / 未解锁提示）。
+     不重放 click 事件（v953 合同：轻桥不得重放 click，防双开 / 双计数） */
+  /* 🔴v1165 复查第 2 轮：孩子亲手点了，就等引擎真的到（最多 30 秒）。ensureLoaded 只等 6 秒导出：网慢（约 1.5Mbps，
+     1.23MB 引擎要下 7 秒）时 6 秒一到就恢复成原来那一行、什么都没打开，引擎半秒后才到 —— 孩子只能猜着再点一次。 */
+  var TAP_WAIT_MS=30000;
+  function waitForRefreshExport(deadline){
+    return new Promise(function(resolve){
+      (function poll(){
+        if(exportedRefresh()){ resolve(true); return; }
+        if(Date.now()>=deadline){ resolve(false); return; }
+        setTimeout(poll,100);
+      })();
+    });
+  }
+  var tapPending=false;
+  function stubTap(){
+    if(tapPending) return;   /* 正在打开：多点几下不重复加载 */
+    var d=document.getElementById('hbafxEntry');
+    if(d&&d.hasAttribute('data-hsn-stub')){
+      d.setAttribute('data-hsn-loading','1');
+      var sp=d.querySelector('span'); if(sp) sp.textContent='正在打开…';
+    }
+    tapPending=true;
+    var deadline=Date.now()+TAP_WAIT_MS;
+    ensureLoaded().then(function(ok){
+      if(ok&&exportedRefresh()) return true;
+      return waitForRefreshExport(deadline);   /* 6 秒没等到：引擎多半还在下，接着等（同一个下载，不重新加载） */
+    }).then(function(ok){
+      tapPending=false;
+      var fn=exportedRefresh(), stub=document.getElementById('hbafxEntry');
+      if(stub&&stub.hasAttribute('data-hsn-stub')){
+        if(!ok||!fn){   /* 30 秒还没到：恢复原样，告诉孩子再点一下 */
+          stub.removeAttribute('data-hsn-loading'); renderStub();
+          var sp2=stub.querySelector('span'); if(sp2) sp2.textContent='网有点慢，再点一下试试';
+          return;
+        }
+        stub.remove();
+      }
+      if(!ok||!fn) return;
+      try{ fn(); }catch(e){}
+      var real=document.getElementById('hbafxEntry');
+      if(real&&!real.hasAttribute('data-hsn-stub')&&typeof real.onclick==='function'){ try{ real.onclick(); }catch(e){} }
+    });
+  }
+
   function armSettings(){
     var settings=document.getElementById('settingsContent');
     /* boss_lock 在所有岛页都位于 #settingsContent 之后；诊断页没有设置容器时直接退出，
        不能为不存在的入口永久轮询。 */
     if(!settings) return;
+    /* v1165：设置页真的打开了才加载。
+       岛屿页一启动，静音/主题/备份/知识结晶等好几个模块就往 #settingsContent 里塞开关，
+       旧判断「里面有东西」在开机 1 秒内就成立 → 1.23MB 引擎 + 2MB 攻击图每次进岛都被执行、下载一遍，
+       跟上面 v929/v932「只在打 Boss 时才加载」的设计正好相反。
+       改为：内容有了、而且设置屏处于打开状态（.active）才加载。没有设置屏的页面沿用旧判断。 */
+    var screen=document.getElementById('settingsScreen');
+    function settingsShown(){
+      if(!screen) return true;
+      try{ return !!(screen.classList&&screen.classList.contains('active')); }catch(e){ return false; }
+    }
     function onSettingsContent(){
-      if(settings.firstChild) refresh();
+      if(!(settings.firstChild&&settingsShown())) return;
+      /* 🔴v1165 复查：网慢 / 省流量 / 网络不明（iOS 微信）时，只为画「Boss 特效调节」这一行就下 1.2MB 引擎，
+         引擎一执行又下约 2MB 攻击图（3G 实测打开设置 15 秒下了 3.2MB）。这时先画一个一模一样的轻量行，
+         孩子真点它才加载引擎、接着打开。快网照旧马上加载（和以前一样）。 */
+      if(exportedRefresh()||canAutoLoadForSettings()) refresh();
+      else renderStub();
     }
     onSettingsContent();
     try{
       watcher=new MutationObserver(onSettingsContent);
       watcher.observe(settings,{childList:true});
+      /* showScreen('settings') 先给设置屏加 .active 再重画内容；两种变化都要接住 */
+      if(screen) watcher.observe(screen,{attributes:true,attributeFilter:['class']});
     }catch(e){
       setInterval(onSettingsContent,1200);
     }

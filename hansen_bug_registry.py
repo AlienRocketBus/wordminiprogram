@@ -307,6 +307,16 @@ REGISTRY = [
      'test_battle_ui_r2_cloud_v1164.mjs'),
     ('v1164', '「立即同步」失败时只显示 local-empty-refuse-upload 这种代码，老师和孩子看不懂——改成中文原因 + ⟨原话⟩',
      'test_session_r2_cloud_v1164.mjs'),
+    ('v1165', '🔴144 个成就里 107 个永远拿不到；阶梯成就数错了东西（数终身毕业词数，复习完 5 个还是 0）',
+     'test_ach_series_v1165.mjs'),
+    ('v1165', '🔴结算页写「🪙 +21」、钱包实际 +122：复习奖励没算进结算数',
+     'test_round_coins_v1165.mjs'),
+    ('v1165', '🔴回首页收起来的岛照样下单词录音（4G 上 20 秒 1.16MB）',
+     'test_hidden_island_dl_v1165.mjs'),
+    ('v1165', '🔴合并 v1164 后：拼写大PK「先起个名字」框不在返回键的浮层表里，按返回关掉的是后面的大厅',
+     'test_pk_name_back_cloud_v1165.mjs'),
+    ('v1165', '🔴天梯换房「进房中」点取消（或按返回）：自己先前开的那间还开着、别人列得到（v1164 起就有）',
+     'test_pk_back_cloud_v1165.mjs'),
 ]
 
 # CHANGELOG 里从这一版起开始要求登记（更早的版本不追溯）

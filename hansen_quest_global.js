@@ -241,11 +241,15 @@
     try { if (typeof window.updateQuestBadge === 'function') window.updateQuestBadge(); } catch (e) {}
   }
   function progress(type, amount, absolute) {
-    var s = ensure(), n = Math.max(0, Math.floor(+amount || 0)), changed = false;
+    /* v1165：没给数量才算 1；明说 0（0 分、一个没答对、一对没配上）就是 0 —— 以前 (n || 1) 让全错的一局也 +1，
+       三局全错就能完成「复习 3 个」。 */
+    var n = (amount === undefined) ? 1 : Math.max(0, Math.floor(+amount || 0));
+    if (!absolute && n === 0) { refresh(); return false; }
+    var s = ensure(), changed = false;
     for (var i = 0; i < s.list.length; i++) {
       var q = s.list[i];
       if (q.type !== type || q.claimed) continue;
-      var next = absolute ? Math.max(q.progress, Math.min(q.goal, n)) : Math.min(q.goal, q.progress + (n || 1));
+      var next = absolute ? Math.max(q.progress, Math.min(q.goal, n)) : Math.min(q.goal, q.progress + n);
       if (next !== q.progress) { q.progress = next; changed = true; }
     }
     var ok = !changed || persist(s);

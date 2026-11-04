@@ -32,7 +32,9 @@
             "playwright_loader.mjs",
             "cloudbase_emulator.mjs",
             "cloudbase_e2e_harness.mjs",
-            "_*.py"
+            "_*.py",
+            "map8/**",
+            "newboss/**"
           ],
           "indexPath": "index.html",
           "errorPath": "index.html"

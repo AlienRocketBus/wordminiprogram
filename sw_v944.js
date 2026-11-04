@@ -8,25 +8,101 @@ const CACHE_PREFIX = 'hansen-v944-';
 // v960 使用全新缓存代际：食物图标从大体积 PNG 切换为透明 WebP，
 // 页面、引用与图标必须原子同包更新，绝不能让 ignoreSearch 命中旧 PNG。
 // 新 worker 安装失败时，旧 shell-20 仍完整服务；成功后再切换到 shell-212。
-const SHELL_CACHE = CACHE_PREFIX + 'shell-218';
-const PAGE_CACHE = CACHE_PREFIX + 'pages-216';
-const ASSET_CACHE = CACHE_PREFIX + 'assets-216';
+const SHELL_CACHE = CACHE_PREFIX + 'shell-219';
+const PAGE_CACHE = CACHE_PREFIX + 'pages-217';
+const ASSET_CACHE = CACHE_PREFIX + 'assets-217';
 const ICON_CACHE = CACHE_PREFIX + 'icons-3';
 const CURRENT_CACHES = new Set([SHELL_CACHE, PAGE_CACHE, ASSET_CACHE, ICON_CACHE]);
 
 const SHELL = [
   './index.html', './_frame.html', './_sw_upgrade_v944.html', './manifest.webmanifest', './favicon.ico', './cartoon_font.woff2',
-  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1164', './click_sound.js', './click_setting.js',
-  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1164', './hansen_onboarding.js?v=1164', './hansen_theme_shop.js',
-  './hansen_season.js?v=1164', './hansen_cinema_themes.js?v=1164', './hansen_diamond_shop.js?v=1164', './hansen_gem_system.js',
-  './hansen_canonical_progress.js?v=1164', './hansen_crystal.js', './hansen_cards.js?v=1164', './hansen_gacha.js?v=1164', './hansen_land_cards.js?v=1164', './hansen_round_reward.js?v=1164', './hansen_round_bar.js?v=1164', './hansen_pet_showcase.js?v=1164', './hansen_quest_global.js?v=1164', './hansen_island_upgrade.js?v=1164', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1164', './hansen_spell_practice.js?v=1164', './hansen_review.js?v=1164', './hansen_wrong_overview.js?v=1164', './hansen_backup_v944.js?v=1164', './hansen_accessibility.js?v=1164',
-  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1164', './hansen_mylearning.js?v=1164', './hansen_palette.js?v=1164', './hansen_boss_theme.js?v=1164', './hansen_econ_guide.js?v=1164', './hansen_perf_v944.js?v=1164'
+  './hansen_sw_upgrade_gate_v944.js', './hansen_backup_bootstrap_v944.js', './hansen_coin_wallet.js', './copy_protect.js', './perf_boost.js', './hansen_preload.js?v=1165', './click_sound.js', './click_setting.js',
+  './vocab_all.js', './hansen_upgrade.js', './hansen_boss_lock.js?v=1165', './hansen_onboarding.js?v=1165', './hansen_theme_shop.js',
+  './hansen_season.js?v=1165', './hansen_cinema_themes.js?v=1165', './hansen_diamond_shop.js?v=1165', './hansen_gem_system.js',
+  './hansen_canonical_progress.js?v=1165', './hansen_crystal.js', './hansen_cards.js?v=1165', './hansen_gacha.js?v=1165', './hansen_land_cards.js?v=1165', './hansen_round_reward.js?v=1165', './hansen_round_bar.js?v=1165', './hansen_pet_showcase.js?v=1165', './hansen_quest_global.js?v=1165', './hansen_island_upgrade.js?v=1165', './hansen_focused_typing_v946.js', './hansen_explore_progress_v945.js?v=1165', './hansen_spell_practice.js?v=1165', './hansen_review.js?v=1165', './hansen_wrong_overview.js?v=1165', './hansen_backup_v944.js?v=1165', './hansen_accessibility.js?v=1165',
+  './hansen_stability.js', './hansen_home_link.js', './hansen_addiction.js?v=1165', './hansen_mylearning.js?v=1165', './hansen_palette.js?v=1165', './hansen_boss_theme.js?v=1165', './hansen_econ_guide.js?v=1165', './hansen_perf_v944.js?v=1165',
+  // v1165 答错小课：岛页用这个精确地址加载。不在外壳里时，离线进岛（运行时缓存被挤掉后）小课卡就悄悄没了。
+  './hansen_mistake_lesson_v1165.js?v=1165'
 ];
+
+/* 🔴v1165 复查第 2 轮：发版上传的那几分钟（CDN 新旧混着），新页面配着还没传上去的旧脚本 —— 新 SW 这时把
+   「?v=新版本号 + 旧内容」当成这一版唯一的一份存进缓存，以后命中就不再联网：这个孩子整个版本都在跑旧脚本，刷新也没用。
+   办法：这一代缓存装好以后 1 小时内存进去的带版本号代码，先算「临时的」；命中临时的、而且存进去已经 5 分钟以上，
+   就在后台用 no-cache 问一次服务器（内容没变只回 304，几百字节），拿到的存回原来那个缓存。
+   这一问发生在装好 1 小时以后，这份就算定了，以后命中一个请求都不发（267e849 省下的流量照旧省着）。
+   每份代码存进去的时间记在它自己的响应头 x-hsn-at 里；这一代装好的时间记在外壳缓存的 __hsn_sw_installed 里。 */
+const META_INSTALLED = './__hsn_sw_installed';
+const DEPLOY_WINDOW_MS = 60 * 60 * 1000;
+const RECHECK_AFTER_MS = 5 * 60 * 1000;
+let installedAtMemo = 0;
+async function installedAt() {
+  if (installedAtMemo) return installedAtMemo;
+  try {
+    const shell = await caches.open(SHELL_CACHE);
+    const r = await shell.match(new Request(new URL(META_INSTALLED, self.location.href).href));
+    const t = r ? Number(await r.text()) : 0;
+    if (t > 0) installedAtMemo = t;
+    return t;
+  } catch (error) { return 0; }
+}
+function stampedCopy(response) {
+  /* 存进缓存的那一份带上「什么时候存的」；正文是流，不读、不复制 */
+  const h = new Headers(response.headers);
+  h.set('x-hsn-at', String(Date.now()));
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers: h });
+}
+/* 命中一份带版本号的代码：该不该在后台再问一次服务器 */
+async function needsRecheck(found, request) {
+  try {
+    const inst = await installedAt();
+    if (!inst) return false;                                  // 这一代没记装好时间（老 SW 装的）：照旧不问
+    let at = Number(found.headers.get('x-hsn-at')) || 0;
+    if (!at) {
+      /* 没有时间戳 = 装 SW 时外壳一起下的那批（addAll 加不了头），就是装好那一刻存的 */
+      const inShell = await (await caches.open(SHELL_CACHE)).match(request);
+      if (!inShell) return false;
+      at = inst;
+    }
+    if (at - inst >= DEPLOY_WINDOW_MS) return false;          // 装好 1 小时以后才存的：已经是定下来的
+    return Date.now() - at >= RECHECK_AFTER_MS;               // 刚存的先不问（同一次打开里不来回问）
+  } catch (error) { return false; }
+}
+const recheckedAt = new Map();   // 同一个地址几个页面框同时要（首页 + 岛 + 预热）：这一会儿只问一次
+async function recheckVersioned(request) {
+  const last = recheckedAt.get(request.url) || 0;
+  if (Date.now() - last < RECHECK_AFTER_MS) return false;
+  recheckedAt.set(request.url, Date.now());
+  const fresh = await fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' });
+  if (!fresh || !fresh.ok || fresh.type === 'opaque') return false;
+  const length = Number(fresh.headers.get('content-length') || 0);
+  if (length && length > 1572864) return false;
+  /* 外壳里的那份放回外壳（不会被修剪掉，离线照样有）；别的放回代码缓存 */
+  const shell = await caches.open(SHELL_CACHE);
+  if (await shell.match(request)) { await shell.put(request, stampedCopy(fresh)); return true; }
+  return putIfReasonable(ASSET_CACHE, request, fresh, 400);
+}
 
 async function trim(cacheName, maxEntries) {
   const cache = await caches.open(cacheName);
   const keys = await cache.keys();
   while (keys.length > maxEntries) await cache.delete(keys.shift());
+}
+/* v1165：同一个缓存同时只跑一次修剪（以前每存一条就各自修剪一遍，并发时互相踩），跑的期间又有新写入就再跑一次 */
+const trimState = {};
+function scheduleTrim(cacheName, maxEntries) {
+  const st = trimState[cacheName] || (trimState[cacheName] = { running: null, again: false });
+  if (st.running) { st.again = true; return st.running; }
+  st.running = (async () => {
+    try { do { st.again = false; await trim(cacheName, maxEntries); } while (st.again); }
+    finally { st.running = null; }
+  })();
+  return st.running;
+}
+/* v1165：页面缓存按「路径」存一份（去掉 ?v / ?warm / _fresh / _r），同一个岛不再因为地址后缀不同占好几格，
+   把别的岛挤出 12 格的页面缓存（离线时就打不开了）。 */
+function pageCacheKey(request) {
+  try { const u = new URL(request.url, self.location.origin); return new Request(u.origin + u.pathname); }
+  catch (error) { return request; }
 }
 
 async function putIfReasonable(cacheName, request, response, maxEntries) {
@@ -72,10 +148,15 @@ async function putIfReasonable(cacheName, request, response, maxEntries) {
        也好过因为修的过程出错而整个存不进去**：
        取出时还有 fixHtmlType 兜底，而存不进去就彻底没有缓存了。 */
     if (!_toStore) _toStore = response.clone();
+    /* 🔴v1165 复查第 2 轮：带版本号的代码记下存进来的时间（见上面 META_INSTALLED 那段） */
+    try {
+      const _u2 = new URL(request.url, self.location.origin);
+      if (cacheName === ASSET_CACHE && /(?:^|&)v=\d+(?:&|$)/.test(_u2.search.slice(1))) _toStore = stampedCopy(_toStore);
+    } catch (error) {}
 
     const cache = await caches.open(cacheName);
-    await cache.put(request, _toStore);
-    await trim(cacheName, maxEntries);
+    await cache.put(cacheName === PAGE_CACHE ? pageCacheKey(request) : request, _toStore);
+    await scheduleTrim(cacheName, maxEntries);
     return true;
   } catch (error) {
     // 缓存配额不足/隐私模式禁止 Cache Storage 时，联网成功的业务响应仍必须交给页面。
@@ -166,6 +247,27 @@ async function fetchNavigationWithTimeout(request, timeoutMs) {
   }
 }
 
+/* v1165 冷页面：只限「响应头」到达的时间（连接根本建不起来才算失败）；头一到就清掉计时器，正文不限时、不缓冲。 */
+async function fetchColdNavigation(request, headerTimeoutMs) {
+  headerTimeoutMs = Math.max(1, Number(headerTimeoutMs) || COLD_NAVIGATION_TIMEOUT_MS);
+  if (typeof AbortController === 'undefined') {
+    let legacyTimer;
+    try {
+      return await Promise.race([
+        fetch(request),
+        new Promise((_, reject) => { legacyTimer = setTimeout(() => reject(new Error('navigation header timeout')), headerTimeoutMs); })
+      ]);
+    } finally { clearTimeout(legacyTimer); }
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), headerTimeoutMs);
+  try {
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);   // 头到了：之后不管正文多慢都不会再被掐断
+  }
+}
+
 function scopeRootPath() {
   try {
     const scope = self.registration && self.registration.scope;
@@ -184,24 +286,36 @@ function homeShellRequest() {
   catch (error) { return new Request(self.location.origin + '/index.html'); }
 }
 
-function offlineNavigationResponse() {
-  // 不再把未缓存的岛 URL 偷偷显示成首页。URL 与内容必须一致：
-  // 当前岛没有缓存时就明确告知用户，联网打开一次后才可离线使用。
+/* v1165：离线页 / 网慢页都给孩子一个能点的「返回首页」。在首页外壳的岛框里，返回首页 = 关掉这个岛；
+   单独打开时回首页。以前只有「重试连接」，孩子只能按手机返回键。 */
+function kidNavigationPage(title, emoji, heading, text, status) {
   const html = '<!doctype html><html lang="zh-CN"><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<title>当前页面尚未下载</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;' +
+    '<title>' + title + '</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;' +
     'font-family:system-ui,-apple-system,Microsoft YaHei,sans-serif;background:#eef6ff;color:#172033">' +
-    '<main style="max-width:28rem;padding:32px;text-align:center"><div style="font-size:52px">📡</div>' +
-    '<h1 style="font-size:22px">当前页面尚未下载</h1><p style="line-height:1.7">请联网打开这个页面一次，' +
-    '之后就能从本机缓存中访问。</p><button onclick="location.reload()" style="font:inherit;font-weight:700;' +
-    'padding:12px 20px;border:0;border-radius:12px;background:#4f46e5;color:white">重试连接</button></main></body></html>';
+    '<main style="max-width:28rem;padding:32px;text-align:center"><div style="font-size:52px">' + emoji + '</div>' +
+    '<h1 style="font-size:22px">' + heading + '</h1><p style="line-height:1.7;font-size:17px">' + text + '</p>' +
+    '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' +
+    '<button id="hsnNavHome" onclick="try{if(parent!==window&&typeof parent.closeIsland===\'function\'){parent.closeIsland();}else{location.href=\'./index.html\';}}catch(e){location.href=\'./index.html\';}" ' +
+    'style="font:inherit;font-size:18px;font-weight:800;padding:14px 24px;border:0;border-radius:14px;background:#4f46e5;color:white">返回首页</button>' +
+    '<button id="hsnNavRetry" onclick="location.reload()" style="font:inherit;font-size:18px;font-weight:700;padding:14px 22px;border:0;' +
+    'border-radius:14px;background:#dbe4ff;color:#1e2a78">再试一次</button></div></main></body></html>';
   return new Response(html, {
-    status: 503,
+    status: status || 503,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-store'
     }
   });
+}
+function offlineNavigationResponse() {
+  // 不再把未缓存的岛 URL 偷偷显示成首页。URL 与内容必须一致：
+  // 当前岛没有缓存时就明确告知用户，联网打开一次后才可离线使用。
+  return kidNavigationPage('这个岛还没下载过', '📡', '这个岛还没下载过', '连上网再来玩吧！连网打开过一次，以后没网也能玩。');
+}
+/* v1165：有网但这次没拿到页面（连接断了、服务器没回话）——不说「没网」，说「网络有点慢」，给重试和返回 */
+function slowNavigationResponse() {
+  return kidNavigationPage('网络有点慢', '🐢', '网络有点慢，没加载完', '可能是信号不太好。点「再试一次」，或者先回首页玩别的岛。');
 }
 
 self.addEventListener('install', event => {
@@ -229,6 +343,8 @@ self.addEventListener('install', event => {
        任何一个核心文件 404/断网都会让 install 失败，
        于是不会 skipWaiting、更不会激活一个只下到一半的应用外壳。 */
     await cache.addAll(SHELL.map(url => new Request(url, { cache: 'reload' })));
+    /* 🔴v1165 复查第 2 轮：记下这一代什么时候装好（写不进去就算了：只是不做发版窗口的复查，和以前一样） */
+    try { await cache.put(new Request(new URL(META_INSTALLED, self.location.href).href), new Response(String(Date.now()), { headers: { 'content-type': 'text/plain' } })); } catch (error) {}
     await self.skipWaiting();
   })());
 });
@@ -256,7 +372,24 @@ self.addEventListener('activate', event => {
    仅当 Content-Type 明确是"会触发下载"的类型（octet-stream / 缺失 /
    带 attachment）时才改写，且改写只换 headers、直接复用原 body 流，
    不做任何读取与克隆。其余情况原样返回，零开销、零风险。 */
-function fixHtmlType(response) {
+/* v1165：按地址后缀给出正确的类型。以前一律改成 text/html —— JS、字体、图片被服务器发错类型时也被标成网页。
+   只有「/」、目录和 .html 才是网页；认不出的后缀就不改（原样交出去，不添乱）。 */
+const MIME_BY_EXT = {
+  html: 'text/html; charset=utf-8', htm: 'text/html; charset=utf-8',
+  js: 'application/javascript; charset=utf-8', mjs: 'application/javascript; charset=utf-8',
+  css: 'text/css; charset=utf-8', json: 'application/json; charset=utf-8', webmanifest: 'application/manifest+json',
+  woff2: 'font/woff2', woff: 'font/woff', ico: 'image/x-icon', webp: 'image/webp', png: 'image/png',
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml', gif: 'image/gif'
+};
+function typeForUrl(url) {
+  let p = '';
+  try { p = new URL(String(url), self.location.href).pathname; } catch (error) { return 'text/html; charset=utf-8'; }
+  if (!p || p === '/' || p.endsWith('/')) return 'text/html; charset=utf-8';
+  const m = p.match(/\.([a-z0-9]+)$/i);
+  if (!m) return 'text/html; charset=utf-8';   // 没有后缀的地址（部署根/伪静态）按网页
+  return MIME_BY_EXT[m[1].toLowerCase()] || null;
+}
+function fixHtmlType(response, url) {
   try {
     if (!response || !response.ok) return response;
     const ct = (response.headers.get('content-type') || '').toLowerCase();
@@ -276,8 +409,10 @@ function fixHtmlType(response) {
       ct.startsWith('text/plain') ||
       dispo.includes('attachment');
     if (!looksDownload) return response;   /* 正常响应一律不碰 */
+    const type = typeForUrl(url || response.url || '');
+    if (!type) return response;
     const headers = new Headers(response.headers);
-    headers.set('content-type', 'text/html; charset=utf-8');
+    headers.set('content-type', type);
     headers.delete('content-disposition');
     return new Response(response.body, {
       status: response.status, statusText: response.statusText, headers: headers
@@ -306,7 +441,10 @@ self.addEventListener('fetch', event => {
          根本修法在控制台设置索引文档；这里做客户端兜底：
          导航到根路径时直接改取 /index.html，让已装 SW 的用户立刻恢复正常。 */
       let fallback = null;
-      try { fallback = await caches.match(request, { ignoreSearch: true }); } catch (error) {}
+      /* v1165 复查：页面缓存按「路径」存的是一个光秃秃的 Request（不带这次导航的请求头）。服务器 / CDN 给网页加了
+         Vary: Accept 或 Vary: User-Agent 时，不加 ignoreVary 就永远对不上 → 离线时玩过的岛也打不开（「这个岛还没下载过」）。
+         Cache Storage 里存的是解压后的正文，忽略 Vary 不会拿到错的编码。 */
+      try { fallback = await caches.match(request, { ignoreSearch: true, ignoreVary: true }); } catch (error) {}
       /* 🔴v1050: 根路径 `/` 的兜底。
          用户实测：`域名/index.html` 能正常打开，只有裸根路径变成下载 ——
          说明托管的「索引文档」没指向 index.html，服务器不知道该给哪个文件。
@@ -318,18 +456,32 @@ self.addEventListener('fetch', event => {
         try {
           const indexReq = new Request(new URL('index.html', self.location.origin).href,
             { credentials: 'same-origin' });
-          fallback = await caches.match(indexReq, { ignoreSearch: true });
+          fallback = await caches.match(indexReq, { ignoreSearch: true, ignoreVary: true });
         } catch (error) {}
       }
       if (!fallback && isHomeNavigation(url)) {
-        try { fallback = await caches.match(homeShellRequest(), { ignoreSearch: true }); } catch (error) {}
+        try { fallback = await caches.match(homeShellRequest(), { ignoreSearch: true, ignoreVary: true }); } catch (error) {}
       }
+      const cacheable = isHomeNavigation(url) || /\/(?:index|_frame|land_map|spelling_bee|boss_hall|season_showcase|island_[a-z0-9]+)\.html$/i.test(url.pathname);
       try {
-        const fresh = await fetchNavigationWithTimeout(request, fallback ? NAVIGATION_TIMEOUT_MS : COLD_NAVIGATION_TIMEOUT_MS);
-        const cacheable = isHomeNavigation(url) || /\/(?:index|_frame|land_map|spelling_bee|boss_hall|season_showcase|island_[a-z0-9]+)\.html$/i.test(url.pathname);
-        return { response: fresh, fresh, cacheable };
+        if (fallback) {
+          // 有本机缓存：照旧限时（连正文一起读完），慢了就先用缓存，绝不让孩子干等
+          const fresh = await fetchNavigationWithTimeout(request, NAVIGATION_TIMEOUT_MS);
+          /* v1165：服务器回 5xx（或根路径/首页 404）是服务器的事，孩子手机里明明有能玩的缓存 → 用缓存，不显示错误页 */
+          if (!fresh.ok && (fresh.status >= 500 || (fresh.status === 404 && isHomeNavigation(url)))) {
+            return { response: fallback, fresh: null, cacheable: false };
+          }
+          return { response: fresh, fresh, cacheable };
+        }
+        /* v1165：从没打开过的岛（没有缓存可退）：不再 12 秒就掐断正文 —— 网慢但能用时，等多久都比「请联网」强。
+           只给「连响应头都等不到」设上限；拿到头以后边下边显示（不整页读完），顺手克隆一份进缓存。 */
+        const fresh = await fetchColdNavigation(request, COLD_NAVIGATION_TIMEOUT_MS);
+        return { response: fresh, fresh: fresh.ok ? fresh.clone() : null, cacheable };
       } catch (e) {
-        return { response: fallback || offlineNavigationResponse(), fresh: null, cacheable: false };
+        if (fallback) return { response: fallback, fresh: null, cacheable: false };
+        let online = false;
+        try { online = !!(self.navigator && self.navigator.onLine); } catch (_) { online = false; }
+        return { response: online ? slowNavigationResponse() : offlineNavigationResponse(), fresh: null, cacheable: false };
       }
     })();
     // Cache Storage 是旁路优化：无论 put/trim 成败，都不能改变已取得的网络响应。
@@ -340,7 +492,7 @@ self.addEventListener('fetch', event => {
        浏览器不会渲染而是直接下载——用户打开网址就变成下载文件。
        这属服务端配置问题，但我们可以在 SW 里把响应头改回 text/html，
        让已装过 SW 的用户立刻恢复正常（首次访问仍需服务端配置正确）。 */
-    event.respondWith(navigation.then(result => fixHtmlType(result.response)));
+    event.respondWith(navigation.then(result => fixHtmlType(result.response, url)));
     return;
   }
 
@@ -351,13 +503,24 @@ self.addEventListener('fetch', event => {
   if (!isCode && !isSmallIcon) return;
 
   const cacheName = isSmallIcon ? ICON_CACHE : ASSET_CACHE;
-  const maxEntries = isSmallIcon ? 36 : 72;
-  const network = fetch(request);
+  /* v1165：带版本号的代码（?v=1165）一个版本只有一份内容 —— 300 多个脚本地址，72 格根本装不下，离线进岛就缺核心脚本。
+     加到 400 格（每次发版换缓存代号，旧代整个删掉，不会越攒越多）。图标照旧 36 格。 */
+  const maxEntries = isSmallIcon ? 36 : 400;
+  const versioned = /(?:^|&)v=\d+(?:&|$)/.test(url.search.slice(1));
+  /* v1165：带版本号、缓存里有一模一样的地址 → 直接用缓存，不再每次都联网重下、重写缓存（以前每个脚本每次都下一遍）。
+     没带版本号的照旧：先给缓存、后台联网更新。 */
+  const hit = caches.match(request).catch(() => null);
+  const network = hit.then(found => (found && versioned) ? null : fetch(request));
   const refresh = network.catch(() => null);
-  event.waitUntil(network.then(response => putIfReasonable(cacheName, request, response, maxEntries)).catch(() => false));
+  event.waitUntil(network.then(response => response ? putIfReasonable(cacheName, request, response, maxEntries) : false).catch(() => false));
+  /* 🔴v1165 复查第 2 轮：命中的是发版窗口里存的那份 → 这次照旧用它，后台再问一次服务器（见 META_INSTALLED 那段） */
+  if (isCode && versioned) {
+    event.waitUntil(hit.then(found => found ? needsRecheck(found, request) : false)
+      .then(yes => yes ? recheckVersioned(request) : false).catch(() => false));
+  }
   if (isCode) {
     // v946: code cache keys include the version query.  The former
-    // ignoreSearch:true could answer ?v=1164 with stale prior-version JavaScript on
+    // ignoreSearch:true could answer ?v=1165 with stale prior-version JavaScript on
     // the first reload.  Try exact cache, then network, and use the install
     // shell's bare URL only as a true offline fallback.
     /* 🔴v1156：**这条路径以前漏了 fixHtmlType。**
@@ -370,12 +533,12 @@ self.addEventListener('fetch', event => {
        三处读缓存的地方现在都过一遍 fixHtmlType：
        导航 / 精确命中 / 离线兜底。 */
     event.respondWith((async () => {
-      const exact = await caches.match(request);
-      if (exact) return fixHtmlType(exact);
+      const exact = await hit;
+      if (exact) return fixHtmlType(exact, url);
       const fresh = await refresh;
-      if (fresh) return fixHtmlType(fresh);
+      if (fresh) return fixHtmlType(fresh, url);
       const bare = await caches.match(new Request(url.origin + url.pathname));
-      return (bare ? fixHtmlType(bare) : null) ||
+      return (bare ? fixHtmlType(bare, url) : null) ||
         new Response('', { status: 504 });
     })());
   } else {
@@ -390,11 +553,16 @@ self.addEventListener('fetch', event => {
        > 查了七轮才把三条路径凑齐 —— 这正说明
        > **"改一处就以为修好了"是这类问题最大的陷阱**。
        > 凡是"能把响应交给浏览器"的地方，一条都不能漏。 */
-    event.respondWith(caches.match(request, { ignoreSearch: true }).then(async cached => {
-      if (cached) return fixHtmlType(cached);
+    /* v1165：图标先找一模一样的地址（?v= 也一样），再联网；忽略 ?v= 的旧副本只在断网时兜底 ——
+       以前先按忽略 ?v= 去找，图标换了新图（新 ?v=）老玩家也一直看到旧图。 */
+    event.respondWith((async () => {
+      const exact = await hit;
+      if (exact) return fixHtmlType(exact, url);
       const fresh2 = await refresh;
-      if (fresh2) return fixHtmlType(fresh2);
+      if (fresh2) return fixHtmlType(fresh2, url);
+      const cached = await caches.match(request, { ignoreSearch: true }).catch(() => null);
+      if (cached) return fixHtmlType(cached, url);
       return new Response('', { status: 504 });
-    }));
+    })());
   }
 });

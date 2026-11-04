@@ -50,6 +50,9 @@ DEPLOY_EXCLUDE_DIRS = {
     ".git", ".github", "__pycache__", ".pytest_cache", ".mypy_cache",
     ".ruff_cache", "node_modules", "releases", "release-assets",
     "evolution_reports", ".evolution_backups", "map8", "newboss",
+    # 🔴v1165 复查第 2 轮：攻坚笔记是开发记录（里面有内部工作流脚本、本机路径、会话链接），绝不能上线。
+    #   cloudbaserc.json 的 ignore 早就写了「攻坚笔记/**」，可那只管 `tcb` 命令行；老师照部署说明用控制台上传整个文件夹时，
+    #   打包器以前把里面的 .js 也放进了部署包。这里和 cloudbaserc 的 ignore 目录保持一致（test_deploy_notes_v1165 逐条对照）。
     # 🔴v1164（审查 R2-3）：开发记录（工作流脚本、审查提示词、改过的代码副本、截图）不是网站的一部分 ——
     #   以前它们的 .js/.png 照样进了「可直接部署」包，传上静态托管后人人都能下载。源码包照旧带着。
     "攻坚笔记",
@@ -237,6 +240,10 @@ def _looks_like_release_output(path: Path) -> bool:
 
 def _deploy_allowed(rel: PurePosixPath) -> bool:
     if rel.name in DEPLOY_EXCLUDE_FILES:
+        return False
+    # 🔴v1165 复查第 2 轮：排除目录（攻坚笔记、map8……）里的文件一律不算可部署 —— 不只靠遍历目录时跳过，
+    #   任何按文件名判断「能不能上线」的地方（发布指纹、合同检查）也一样
+    if any(part in DEPLOY_EXCLUDE_DIRS for part in rel.parts[:-1]):
         return False
     if (len(rel.parts) == 1 and rel.name.startswith("_")
             and rel.name not in {"_frame.html", "_sw_upgrade_v944.html"}):
@@ -781,6 +788,7 @@ def _verify_hf7_runtime_contract(entries: list[tuple[str, bytes]]) -> None:
         "1156": (("shell-216", "pages-214", "assets-214", "icons-3"), "v=1156"),
         "1163": (("shell-217", "pages-215", "assets-215", "icons-3"), "v=1163"),
         "1164": (("shell-218", "pages-216", "assets-216", "icons-3"), "v=1164"),
+        "1165": (("shell-219", "pages-217", "assets-217", "icons-3"), "v=1165"),
     }
     if version not in release_contracts:
         # The packager unit tests deliberately build tiny historical v942-v945
@@ -1178,6 +1186,98 @@ def _require_jarvis_pass(version: str) -> None:
           f" · 体检 {data.get('score','?')}/100）")
 
 
+# 🔴v1165 复查（SH8）：同一个版本号，绝不能带着不一样的代码再打一次包。
+#   SW 把带 ?v=<版本号> 的脚本当成「这一版只有这一份」：缓存里有就直接用、不再联网。
+#   要是没跑 bump_version.py 就把改过的代码按老版本号发出去（比如一次「快速热修」），
+#   老孩子手机里会一直用缓存里的旧脚本，新页面配旧脚本，而且刷新也没用。
+#   以前的打包合同只查缓存代号和 ?v= 戳 —— 没升版本号的树照样能过。
+#   这里按「已发布版本 → 当时每个运行时代码文件的指纹」查：版本号一样、内容变了就拒绝打包。
+#   指纹记在 release_published_runtime.json（只进源码包，不进部署包）；v1163 = origin/main 那一版。
+#   🔴v1165 复查第 2 轮：package() 打出部署包时自动记下这一版（_remember_published_runtime），不再靠人记得补。
+PUBLISHED_RUNTIME_FILE = "release_published_runtime.json"
+_RUNTIME_CODE_EXT = {".js", ".css", ".html", ".webmanifest"}
+
+
+def _runtime_code_digests(root: Path | None = None) -> dict[str, str]:
+    """部署包里每个运行时代码文件（.js/.css/.html/.webmanifest）→ sha256 前 16 位。按部署白名单挑文件。"""
+    root = Path(root) if root is not None else ROOT   # 调用时再取 ROOT（打包器单元测试会换 ROOT）
+    out: dict[str, str] = {}
+    for directory, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d not in DEPLOY_EXCLUDE_DIRS and not d.startswith("."))
+        for name in sorted(files):
+            path = Path(directory) / name
+            rel = PurePosixPath(*path.relative_to(root).parts)
+            if name.startswith(".") or path.is_symlink() or not path.is_file():
+                continue
+            if rel.suffix.lower() not in _RUNTIME_CODE_EXT or not _deploy_allowed(rel):
+                continue
+            out[rel.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    return out
+
+
+def _verify_published_runtime_unchanged(version: str, root: Path | None = None) -> None:
+    """这个版本号发布过，而运行时代码和发布时不一样 → RuntimeError（拒绝打包）。没发布过的版本号不查。"""
+    root = Path(root) if root is not None else ROOT
+    record_path = root / PUBLISHED_RUNTIME_FILE
+    if not record_path.is_file():
+        return
+    try:
+        published = json.loads(record_path.read_text(encoding="utf-8")).get("versions", {}).get(str(version))
+    except (OSError, ValueError, AttributeError) as exc:
+        raise RuntimeError(f"{PUBLISHED_RUNTIME_FILE} 读不出来，为了不把旧缓存钉死，先不打包：{exc}") from exc
+    if not published:
+        return
+    files = published.get("files") or {}
+    now = _runtime_code_digests(root)
+    changed = sorted(name for name, digest in files.items() if name in now and now[name] != digest)
+    if changed:
+        more = f" 等 {len(changed)} 个" if len(changed) > 8 else ""
+        raise RuntimeError(
+            f"v{version} 已经发布过，可这些运行时代码和发布时不一样了：{', '.join(changed[:8])}{more}。"
+            f"同一个版本号（?v={version}）下，孩子手机里的离线缓存不会更新，会一直用旧文件。"
+            "先运行 python3 bump_version.py <新版本号>，再打包。"
+        )
+
+
+def _record_published_runtime(version: str, root: Path | None = None, note: str = "") -> dict:
+    """发版之后调用：把这一版的运行时代码指纹记进 release_published_runtime.json（已有的版本不覆盖）。"""
+    root = Path(root) if root is not None else ROOT
+    record_path = root / PUBLISHED_RUNTIME_FILE
+    data = {"versions": {}}
+    if record_path.is_file():
+        data = json.loads(record_path.read_text(encoding="utf-8"))
+        data.setdefault("versions", {})
+    if str(version) in data["versions"]:
+        raise RuntimeError(f"v{version} 的发布指纹已经记过了，不能覆盖")
+    data["versions"][str(version)] = {"note": note, "files": _runtime_code_digests(root)}
+    record_path.write_text(json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return data["versions"][str(version)]
+
+
+def _remember_published_runtime(version: str, root: Path | None = None) -> bool:
+    """🔴v1165 复查第 2 轮（R2-01）：这一版第一次打出部署包时，自动把运行时代码指纹记进 release_published_runtime.json。
+
+    以前「以后每发一版，用 _record_published_runtime(...) 补一条」全靠人记得 —— 没有任何地方调用它，
+    于是只有 v1163 受保护：v1165 发出去以后，改一个 .js 不升版本号再打包，照样放行（老孩子会一直用缓存里的旧脚本）。
+    现在打包时自动记：同一个版本号以后再打包，运行时代码必须和第一次一样，不一样就拒绝（先 bump_version.py）。
+    已经记过的版本不动。记不下来（文件坏了 / 写不进去）就拒绝打包 —— 宁可不出包，也不能让保护悄悄失效。
+    返回 True = 这次新记了一条（记录文件要随这一版一起提交）。"""
+    root = Path(root) if root is not None else ROOT
+    record_path = root / PUBLISHED_RUNTIME_FILE
+    try:
+        if record_path.is_file():
+            data = json.loads(record_path.read_text(encoding="utf-8"))
+            if str(version) in (data.get("versions") or {}):
+                return False
+        _record_published_runtime(version, root, note="打包时自动记下（package_release.py）")
+    except (OSError, ValueError, AttributeError, RuntimeError) as exc:
+        raise RuntimeError(
+            f"记不下 v{version} 的发布指纹（{PUBLISHED_RUNTIME_FILE}）：{exc}。"
+            "为了以后不会带着改过的代码按同一个版本号再发一次，先不打包。"
+        ) from exc
+    return True
+
+
 def package(version: str, out_dir: Path) -> list[Path]:
     canonical_version = _version((ROOT / "VERSION").read_text(encoding="utf-8"))
     _require_jarvis_pass(canonical_version)
@@ -1185,6 +1285,7 @@ def package(version: str, out_dir: Path) -> list[Path]:
         raise RuntimeError(
             f"requested v{version} does not match canonical VERSION v{canonical_version}"
         )
+    _verify_published_runtime_unchanged(canonical_version)
     out_dir.mkdir(parents=True, exist_ok=True)
     deploy = out_dir / DEPLOY_NAME.format(version=version)
     source = out_dir / SOURCE_NAME.format(version=version)
@@ -1211,6 +1312,10 @@ def package(version: str, out_dir: Path) -> list[Path]:
         print(f"[1/3] Building deployable archive: {deploy.name}")
         d_count, d_bytes, d_sha = _write_zip(staged_deploy, "deploy")
         print(f"      {d_count} files · {d_bytes / 1048576:.1f} MiB · sha256 {d_sha}")
+        # 🔴v1165 复查第 2 轮（R2-01）：部署包刚打好就记下这一版的运行时指纹（在源码包之前，源码包里也带着这条记录）
+        if _remember_published_runtime(canonical_version):
+            print(f"      🧾 已记下 v{canonical_version} 的发布指纹（{PUBLISHED_RUNTIME_FILE}）—— 请连同这一版一起提交；"
+                  "以后同一个版本号再打包，运行时代码必须一样")
 
         print(f"[2/3] Building source/Jarvis archive: {source.name}")
         s_count, s_bytes, s_sha = _write_zip(staged_source, "source")

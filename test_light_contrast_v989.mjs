@@ -124,6 +124,24 @@ console.log(await page.evaluate(()=>{
 await audit('pet', `showScreen('pet')`);
 await audit('settings', `showScreen('settings')`);
 await audit('mylearning', `if(window.HansenMyLearning&&HansenMyLearning.open){HansenMyLearning.open()}`);
+/* v1165（OD-L5）：以前 HansenMyLearning 只有 _open，上面那行等于没调 ——「我的学习」从没真正被审过。
+   现在必须真的打开了才算审过；没打开就算失败。另外三套亮色（樱花/奶油/薄荷）也各审一遍这个面板，审完关掉、切回云端白。 */
+{
+  const opened = await page.evaluate(()=>!!document.getElementById('hsn-ml'));
+  console.log(`── mylearning 真的打开了: ${opened}`);
+  if(!opened) globalThis.__auditReal += 99;
+  for(const pal of ['sakura','cream','mint']){
+    const ok = await page.evaluate(p=>{ try{ window.hansenApplyPalette(p, true); }catch(e){} return !!document.getElementById('hsn-ml') && document.documentElement.classList.contains('hsn-pal-'+p); }, pal);
+    await page.waitForTimeout(400);
+    if(!ok){ globalThis.__auditReal += 99; console.log(`── mylearning/${pal}: 面板没开或配色没换上`); continue; }
+    const bad = (await page.evaluate(AUDIT)).filter(o=>!WHITELIST.some(w=>w(o)));
+    globalThis.__auditReal += bad.length;
+    console.log(`── mylearning/${pal}: ${bad.length} 处低对比`);
+    bad.forEach(b=>console.log('   ', JSON.stringify(b)));
+  }
+  await page.evaluate(()=>{ try{ window.hansenApplyPalette('cloud', true); }catch(e){} try{ HansenMyLearning.close(); }catch(e){} });
+  await page.waitForTimeout(400);
+}
 await audit('wrongoverview', `if(window.HansenWrongOverview){(HansenWrongOverview.open||HansenWrongOverview._open||function(){}).call(HansenWrongOverview)}`);
 let realTotal = 0;
 

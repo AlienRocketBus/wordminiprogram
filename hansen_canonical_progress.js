@@ -128,13 +128,23 @@
     s=s.split('?')[0].split('#')[0];
     return s.toLowerCase();
   }
-  function resolve(ref){
+  // v1165: 一题里 resolve 要被调上千次（每个词换算槽位都调一次），别名表开机后不变，按原样字符串记住查表结果。
+  var resolveMemo=Object.create(null),resolveMemoSize=0;
+  function lookupAlias(ref){
+    var key=String(ref==null?'':ref);
+    if(key in resolveMemo) return resolveMemo[key];
     var raw=cleanRef(ref), a=aliases[raw];
     if(!a && /\.html?$/.test(raw)) a=aliases[raw.replace(/\.html?$/,'')];
     if(!a && raw.indexOf('hsn_crystal_')===0){
       var tail=raw.slice('hsn_crystal_'.length);
       a=aliases[tail] || aliases[tail.replace(/^island_/,'')];
     }
+    if(resolveMemoSize>500){resolveMemo=Object.create(null);resolveMemoSize=0;}
+    resolveMemo[key]=a||null;resolveMemoSize++;
+    return a||null;
+  }
+  function resolve(ref){
+    var a=lookupAlias(ref);
     if(!a) return null;
     var base=byId[a.id];
     return {
@@ -180,22 +190,23 @@
     try{ var o=JSON.parse(raw); return o && typeof o==='object' ? o : fallback; }
     catch(e){ return fallback; }
   }
+  function normaliseIsland(o,def){
+    var p=o.islands[def.id];
+    if(!p || typeof p!=='object') p=blankIsland();
+    p.learned=Array.isArray(p.learned)?p.learned:[];
+    p.mc=(p.mc&&typeof p.mc==='object'&&!Array.isArray(p.mc))?p.mc:{};
+    p.wrongs=(p.wrongs&&typeof p.wrongs==='object'&&!Array.isArray(p.wrongs))?p.wrongs:{};
+    p.srs=(p.srs&&typeof p.srs==='object'&&!Array.isArray(p.srs))?p.srs:{};
+    p.cleared=(p.cleared&&typeof p.cleared==='object'&&!Array.isArray(p.cleared))?p.cleared:{};
+    ['learned','mc','wrongs','srs'].forEach(function(field){
+      if(!p.cleared[field]||typeof p.cleared[field]!=='object'||Array.isArray(p.cleared[field]))p.cleared[field]={};
+    });
+    o.islands[def.id]=p;
+  }
   function normaliseStore(o){
     if(!o || typeof o!=='object') o=blankStore();
     if(!o.islands || typeof o.islands!=='object') o.islands={};
-    islands.forEach(function(def){
-      var p=o.islands[def.id];
-      if(!p || typeof p!=='object') p=blankIsland();
-      p.learned=Array.isArray(p.learned)?p.learned:[];
-      p.mc=(p.mc&&typeof p.mc==='object'&&!Array.isArray(p.mc))?p.mc:{};
-      p.wrongs=(p.wrongs&&typeof p.wrongs==='object'&&!Array.isArray(p.wrongs))?p.wrongs:{};
-      p.srs=(p.srs&&typeof p.srs==='object'&&!Array.isArray(p.srs))?p.srs:{};
-      p.cleared=(p.cleared&&typeof p.cleared==='object'&&!Array.isArray(p.cleared))?p.cleared:{};
-      ['learned','mc','wrongs','srs'].forEach(function(field){
-        if(!p.cleared[field]||typeof p.cleared[field]!=='object'||Array.isArray(p.cleared[field]))p.cleared[field]={};
-      });
-      o.islands[def.id]=p;
-    });
+    islands.forEach(function(def){ normaliseIsland(o,def); });
     o.version=VERSION;
     return o;
   }
@@ -236,9 +247,10 @@
         cur[field]=merged;
       });
       var currentSrs=cur.srs||{},previousSrs=prev.srs||{},mergedSrs={};
-      Object.keys(currentSrs).forEach(function(k){var e=safeSrsEntry(currentSrs[k]);if(e&&cur.wrongs[k])mergedSrs[k]=e;});
+      // v1165: 复习计划不再跟着错题数走——错题本清零后词还在计划里，直到毕业。
+      Object.keys(currentSrs).forEach(function(k){var e=safeSrsEntry(currentSrs[k]);if(e)mergedSrs[k]=e;});
       Object.keys(previousSrs).forEach(function(k){
-        if(!Object.prototype.hasOwnProperty.call(mergedSrs,k)&&!cur.cleared.srs[k]&&cur.wrongs[k]){
+        if(!Object.prototype.hasOwnProperty.call(mergedSrs,k)&&!cur.cleared.srs[k]){
           var e=safeSrsEntry(previousSrs[k]);if(e)mergedSrs[k]=e;
         }
       });
@@ -246,33 +258,90 @@
     });
     return compactStore(out);
   }
-  function readStore(){
-    try{
-      var mainRaw=root.localStorage.getItem(STORE_KEY),bakRaw=root.localStorage.getItem(STORE_BAK_KEY);
-      var main=safeParse(mainRaw,null),bak=safeParse(bakRaw,null);
-      root.__hansenCanonicalReadFailed=false;
-      if(main&&main.islands){
-        var mainSafe=compactStore(normaliseStore(main));
-        if(bak&&bak.islands){
-          var bakSafe=compactStore(normaliseStore(bak));
-          var merged=mergeCurrentWithPrevious(mainSafe,bakSafe),mergedRaw=JSON.stringify(merged);
-          // 即使主档不是全空，单岛/单字段被截断也要从 previous-good 补齐；明确
-          // 清除过的槽位有 cleared 水位，不会被备份复活。
-          if(mergedRaw!==JSON.stringify(mainSafe)){
-            root.localStorage.setItem(STORE_KEY,mergedRaw);
-            if(root.localStorage.getItem(STORE_KEY)!==mergedRaw)throw new Error('canonical partial-main recovery verify failed');
-          }
-          return merged;
-        }
-        return mainSafe;
-      }
+  /* v1165 账本内存缓存（进度多的孩子每答一题主线程卡 350~700ms 的根因）：
+     一题里 markAnswer / save 钩子 / 复习奖励 / 成就 / 宠物 要读账本二十来次，以前每次都把主账本和 _bak
+     整份解析、规整、合并、再序列化比较。现在每次仍然 getItem 两份原文，原文和上次一字不差才用内存里的结果；
+     别的页面框、备份恢复、重置直接改了 localStorage，原文对不上，就照旧整份重建（含 _bak 补齐与回写）。
+     不变式：cache.merged 永远 ≅ 「cache.mainRaw 解析后规整的结果」，且是本模块自己的一份，不交给调用方改。 */
+  var cache=null;   // {mainRaw,bakRaw,mainGood,mainHealthy,bakGood,bakHealthy,merged,mergedRaw}
+  var perf={reads:0,hits:0,rebuilds:0,writes:0};
+  function healthyObj(o){return !!(o&&o.islands&&typeof o.islands==='object'&&!Array.isArray(o.islands));}
+  function remember(mainRaw,bakRaw,main,bak,merged,mergedRaw){
+    cache={mainRaw:mainRaw,bakRaw:bakRaw,mainGood:!!(main&&main.islands),mainHealthy:healthyObj(main),
+      bakGood:!!(bak&&bak.islands),bakHealthy:healthyObj(bak),merged:merged,mergedRaw:mergedRaw};
+  }
+  function cacheHit(mainRaw,bakRaw){return !!(cache&&cache.mainRaw===mainRaw&&cache.bakRaw===bakRaw);}
+  function readStoreCore(){
+    var mainRaw=root.localStorage.getItem(STORE_KEY),bakRaw=root.localStorage.getItem(STORE_BAK_KEY);
+    perf.reads++;
+    root.__hansenCanonicalReadFailed=false;
+    if(cacheHit(mainRaw,bakRaw)){perf.hits++;return cache;}
+    cache=null;perf.rebuilds++;
+    var main=safeParse(mainRaw,null),bak=safeParse(bakRaw,null);
+    if(main&&main.islands){
+      var mainSafe=compactStore(normaliseStore(main));
       if(bak&&bak.islands){
-        var recovered=compactStore(normaliseStore(bak)),recoveredRaw2=JSON.stringify(recovered);
-        root.localStorage.setItem(STORE_KEY,recoveredRaw2);if(root.localStorage.getItem(STORE_KEY)!==recoveredRaw2)throw new Error('canonical backup recovery verify failed');
-        return recovered;
+        var bakSafe=compactStore(normaliseStore(bak));
+        var merged=mergeCurrentWithPrevious(mainSafe,bakSafe),mergedRaw=JSON.stringify(merged);
+        // 即使主档不是全空，单岛/单字段被截断也要从 previous-good 补齐；明确
+        // 清除过的槽位有 cleared 水位，不会被备份复活。
+        if(mergedRaw!==JSON.stringify(mainSafe)){
+          root.localStorage.setItem(STORE_KEY,mergedRaw);
+          var back=root.localStorage.getItem(STORE_KEY);
+          if(back!==mergedRaw)throw new Error('canonical partial-main recovery verify failed');
+          mainRaw=back;   // 记 getItem 给的那个字符串：下次比对是同一个对象，瞬间比完
+        }
+        remember(mainRaw,bakRaw,main,bak,merged,mergedRaw);
+        return cache;
       }
-      return blankStore();
-    }catch(e){root.__hansenCanonicalReadFailed=true;return null;}
+      remember(mainRaw,bakRaw,main,bak,mainSafe,JSON.stringify(mainSafe));
+      return cache;
+    }
+    if(bak&&bak.islands){
+      var recovered=compactStore(normaliseStore(bak)),recoveredRaw2=JSON.stringify(recovered);
+      root.localStorage.setItem(STORE_KEY,recoveredRaw2);var back2=root.localStorage.getItem(STORE_KEY);if(back2!==recoveredRaw2)throw new Error('canonical backup recovery verify failed');
+      remember(back2,bakRaw,recovered,bak,recovered,recoveredRaw2);
+      return cache;
+    }
+    var blank=blankStore();
+    remember(mainRaw,bakRaw,main,bak,blank,JSON.stringify(blank));
+    return cache;
+  }
+  // 给调用方一份可以随便改的副本（改完交给 writeStore）。
+  function readStore(){
+    try{var c=readStoreCore();return JSON.parse(c.mergedRaw);}
+    catch(e){cache=null;root.__hansenCanonicalReadFailed=true;return null;}
+  }
+  // 只读：直接给缓存里那一份，调用方绝不能改它（计数、查询、判断「要不要写」用）。
+  function readStoreRO(){
+    try{return readStoreCore().merged;}
+    catch(e){cache=null;root.__hansenCanonicalReadFailed=true;return null;}
+  }
+  /* 写盘后不必再整份合并的条件：mergeCurrentWithPrevious(新主档, 上一代) 的结果和新主档一字不差。
+     与合并函数逐条对应：上一代的墓碑不比新的晚、学过的词都在（或有墓碑）、mc/错词没被调低（或有墓碑）、
+     复习计划都在（或有墓碑）。有一条不满足就让下一次读取照旧整份合并、回写。 */
+  function needsMerge(main,prev){
+    var F=['learned','mc','wrongs','srs'],own=Object.prototype.hasOwnProperty;
+    for(var d=0;d<islands.length;d++){
+      var id=islands[d].id,cur=main.islands[id],old=prev.islands[id],k,f;
+      if(cur&&cur===old)continue;   // 同一份（没被改过的岛），不用比
+      if(!cur||!old||!cur.cleared||!old.cleared)return true;
+      for(f=0;f<F.length;f++){
+        var a=cur.cleared[F[f]]||{},b=old.cleared[F[f]]||{};
+        for(k in b)if(own.call(b,k)&&(Number(b[k])||0)>(Number(a[k])||0))return true;
+      }
+      var cl=cur.cleared,has={};
+      for(f=0;f<cur.learned.length;f++)has[cur.learned[f]]=1;
+      for(f=0;f<old.learned.length;f++){k=old.learned[f];if(!has[k]&&!cl.learned[k])return true;}
+      for(f=1;f<3;f++){
+        var field=F[f],c=cur[field]||{},p=old[field]||{},clr=cl[field]||{};
+        for(k in c)if(own.call(c,k)&&!clr[k]&&(Number(p[k])||0)>(Number(c[k])||0))return true;
+        for(k in p)if(own.call(p,k)&&!own.call(c,k)&&!clr[k])return true;
+      }
+      var cs=cur.srs||{},ps=old.srs||{};
+      for(k in ps)if(own.call(ps,k)&&!own.call(cs,k)&&!cl.srs[k]&&safeSrsEntry(ps[k]))return true;
+    }
+    return false;
   }
   function uniqSorted(values, limit){
     var seen={}, out=[];
@@ -283,7 +352,11 @@
     return out.sort(function(a,b){return a-b;});
   }
   function compactStore(o){
-    islands.forEach(function(def){
+    islands.forEach(function(def){ compactIsland(o,def); });
+    return o;
+  }
+  function compactIsland(o,def){
+    (function(){
       var p=o.islands[def.id];
       p.learned=uniqSorted(p.learned,def.words);
       ['mc','wrongs'].forEach(function(field){
@@ -297,7 +370,7 @@
       });
       var srs={};
       Object.keys(p.srs||{}).forEach(function(k){
-        if(!canonicalIndexKey(k,def.words)||!safeProgressCount(p.wrongs&&p.wrongs[k]))return;
+        if(!canonicalIndexKey(k,def.words))return;
         var e=safeSrsEntry(p.srs[k]);if(e)srs[Number(k)]=e;
       });
       p.srs=srs;
@@ -310,30 +383,59 @@
         });
         p.cleared[field]=dst;
       });
-    });
-    return o;
+    })();
   }
-  function writeStore(o, exactBackup){
+  /* v1165 本模块自己的「读-改-写」（每题 absorbCurrent / absorbAnswer / setSrs）：只深拷贝要改的那一个岛，
+     其余岛和缓存共用同一份（谁都不改它们）；写盘时也只规整这一个岛，写完缓存直接收下这份，不再整份解析。 */
+  function readIslandForWrite(id){
+    var base=readStoreRO();if(!base||!base.islands||!base.islands[id])return null;
+    var out={},k;
+    for(k in base)if(Object.prototype.hasOwnProperty.call(base,k))out[k]=base[k];
+    out.islands={};
+    for(k in base.islands)if(Object.prototype.hasOwnProperty.call(base.islands,k))out.islands[k]=base.islands[k];
+    out.islands[id]=JSON.parse(JSON.stringify(base.islands[id]));
+    return out;
+  }
+  function writeIsland(o,id){return writeStore(o,false,id);}
+  function writeStore(o, exactBackup, ownedIsland){
     if(!o||root.__hansenCanonicalReadFailed)return false;
-    o=compactStore(normaliseStore(o));
-    var oldMain=null,oldBak=null;
+    var owned=!!(ownedIsland&&byId[ownedIsland]&&o.islands&&typeof o.islands==='object');
+    if(owned){normaliseIsland(o,byId[ownedIsland]);compactIsland(o,byId[ownedIsland]);o.version=VERSION;}
+    else o=compactStore(normaliseStore(o));
+    var oldMain=null,oldBak=null,before=cache;
     try{
       oldMain=root.localStorage.getItem(STORE_KEY);oldBak=root.localStorage.getItem(STORE_BAK_KEY);
-      var raw=JSON.stringify(o),oldGood=safeParse(oldMain,null),snapshot=exactBackup?raw:((oldGood&&oldGood.islands)?oldMain:raw);
-      root.localStorage.setItem(STORE_KEY,raw);if(root.localStorage.getItem(STORE_KEY)!==raw)throw new Error('canonical main verify failed');
-      root.localStorage.setItem(STORE_BAK_KEY,snapshot);if(root.localStorage.getItem(STORE_BAK_KEY)!==snapshot)throw new Error('canonical backup verify failed');
+      // 旧主档就是缓存里那份原文时，不必再整份解析一遍来判断它好不好。
+      var known=!!(before&&oldMain!==null&&before.mainRaw===oldMain);
+      var raw=JSON.stringify(o),oldGood=known?before.mainGood:!!((safeParse(oldMain,null)||{}).islands),snapshot=exactBackup?raw:(oldGood?oldMain:raw);
+      root.localStorage.setItem(STORE_KEY,raw);var vMain=root.localStorage.getItem(STORE_KEY);if(vMain!==raw)throw new Error('canonical main verify failed');
+      root.localStorage.setItem(STORE_BAK_KEY,snapshot);var vBak=root.localStorage.getItem(STORE_BAK_KEY);if(vBak!==snapshot)throw new Error('canonical backup verify failed');
+      perf.writes++;
+      // 写穿：新原文 + 本模块自己解析的一份（调用方之后再改 o 也影响不到缓存）。
+      cache=null;
+      try{
+        var mainObj=owned?o:JSON.parse(raw),prevObj=snapshot===raw?mainObj:(known?before.merged:null);
+        if(prevObj&&!needsMerge(mainObj,prevObj)){
+          var same=snapshot===raw;
+          // 记 getItem 读回来的字符串（浏览器下次 getItem 给的是同一个对象，比对不用逐字）
+          cache={mainRaw:vMain,bakRaw:vBak,mainGood:true,mainHealthy:true,
+            bakGood:same?true:before.mainGood,bakHealthy:same?true:before.mainHealthy,merged:mainObj,mergedRaw:raw};
+        }
+      }catch(_c){cache=null;}
       return true;
     }catch(e){
+      cache=null;
       try{if(oldMain===null)root.localStorage.removeItem(STORE_KEY);else root.localStorage.setItem(STORE_KEY,oldMain);}catch(_e){}
       try{if(oldBak===null)root.localStorage.removeItem(STORE_BAK_KEY);else root.localStorage.setItem(STORE_BAK_KEY,oldBak);}catch(_e){}
       return false;
     }
   }
-  function mergeState(store, ref, state, authoritative){
+  // dry=true：只回答「会不会改」，绝不动 store（store 可能是缓存里的只读那份）。
+  function mergeState(store, ref, state, authoritative, stampOverride, dry){
     var a=resolve(ref);
     if(!a || !state || typeof state!=='object') return false;
     var p=store.islands[a.id], changed=false, learned={};
-    var stampRaw=Number(state.lastSaveTime),stamp=isFinite(stampRaw)?Math.max(0,Math.floor(stampRaw)):0;
+    var stampRaw=(typeof stampOverride==='number')?stampOverride:Number(state.lastSaveTime),stamp=isFinite(stampRaw)?Math.max(0,Math.floor(stampRaw)):0;
     function allowed(field,i){
       var cleared=Number(p.cleared&&p.cleared[field]&&p.cleared[field][i])||0;
       return !!authoritative || !cleared || stamp>cleared;
@@ -343,14 +445,14 @@
     p.learned.forEach(function(i){ learned[i]=1; });
     (Array.isArray(state.learned)?state.learned:[]).forEach(function(local){
       var i=toCanonicalIndex(ref,local);
-      if(i>=0&&allowed('learned',i)&&!learned[i]){ learned[i]=1; p.learned.push(i); revive('learned',i); changed=true; }
+      if(i>=0&&allowed('learned',i)&&!learned[i]){ learned[i]=1; if(!dry)p.learned.push(i); revive('learned',i); changed=true; }
     });
     ['mc','wrongs'].forEach(function(field){
       var src=(state[field]&&typeof state[field]==='object')?state[field]:{};
       Object.keys(src).forEach(function(local){
         if(!canonicalIndexKey(local,a.length))return;
         var i=toCanonicalIndex(ref,Number(local)),n=safeProgressCount(src[local]);
-        if(i>=0&&n>0&&allowed(field,i)&&n>safeProgressCount(p[field][i])){ p[field][i]=n; revive(field,i); changed=true; }
+        if(i>=0&&n>0&&allowed(field,i)&&n>safeProgressCount(p[field][i])){ if(!dry)p[field][i]=n; revive(field,i); changed=true; }
       });
     });
     var localSrs=(state.srs&&typeof state.srs==='object'&&!Array.isArray(state.srs))?state.srs:{};
@@ -358,9 +460,9 @@
       if(!canonicalIndexKey(local,a.length))return;
       var i=toCanonicalIndex(ref,Number(local)),publicEntry=publicSrsEntry(localSrs[local]);
       var e=publicEntry?safeSrsEntry(publicEntry,stamp):null;
-      if(i<0||!e||!allowed('srs',i)||!safeProgressCount(p.wrongs[i]))return;
+      if(i<0||!e||!allowed('srs',i))return;
       var merged=newerSrs(p.srs[i],e);
-      if(JSON.stringify(p.srs[i]||null)!==JSON.stringify(merged)){p.srs[i]=merged;changed=true;}
+      if(JSON.stringify(p.srs[i]||null)!==JSON.stringify(merged)){if(!dry)p.srs[i]=merged;changed=true;}
     });
     return changed;
   }
@@ -389,9 +491,15 @@
     return changed;
   }
 
+  /* v1165: 本页存档「这次打开时」的真实时间（模板 load() 记下）。岛页一打开就先 save() 一次，hansen_upgrade 还会把
+     lastSaveTime 改成现在 —— 数据还是上次的，时间却是新的。单词大陆③和星海共用同一批词：在星海清掉的错词、升过的
+     复习盒，回到单词大陆③时会被这份「看起来很新」的旧存档冲回去（错题又回来、盒子掉回 0）。开机合并本页时用真实时间。 */
+  var synced=false;   // 本页 S 已经从账本回填过（开机那次 syncCurrent，或别的模块显式调了 syncCurrent）
+  function loadedStamp(){var t=Number(root.__hsnLoadedSaveTime);return isFinite(t)&&t>=0?Math.floor(t):undefined;}
   // 每次启动都做并集合并；因此即使旧迁移标记存在，后来新增的 Land 存档也不会漏掉。
   function migrate(){
     var store=readStore(), changed=false,keys=storageKeys();
+    var curKey=String(root.__hsnSaveKey||''),early=synced?undefined:loadedStamp();
     if(!store||!keys)return {changed:false,store:null,error:'storage-read'};
     keys.forEach(function(key){
       if(/_bak$|_backup$|_tmp$/i.test(key)) return;
@@ -403,19 +511,19 @@
       var a=resolve(key);
       if(a){
         var state=safeParse(root.localStorage.getItem(key),null);
-        if(mergeState(store,key,state)) changed=true;
+        if(mergeState(store,key,state,false,(early!==undefined&&key===curKey)?early:undefined)) changed=true;
         return;
       }
     });
     // 当前内存可能比 perf_boost 延迟写盘的新；始终优先并入。
-    try{ if(root.S && mergeState(store,currentRef(),root.S)) changed=true; }catch(e){}
+    try{ if(root.S && mergeState(store,currentRef(),root.S,false,early)) changed=true; }catch(e){}
     if(!writeStore(store))return {changed:false,store:null,error:'storage-write'};
     try{ root.localStorage.setItem('hansen_canonical_migrated_v941','1'); }catch(e){}
     return {changed:changed,store:store};
   }
 
   function syncState(ref, state, persist){
-    var a=resolve(ref), store=readStore();
+    var a=resolve(ref), store=readStoreRO();   // 只读账本、只改本页 state
     if(!a || !store || !state || typeof state!=='object') return false;
     var p=store.islands[a.id], changed=false;
     var learned=[];p.learned.forEach(function(ci){var li=fromCanonicalIndex(ref,ci);if(li>=0)learned.push(li);});
@@ -431,10 +539,14 @@
       if(JSON.stringify((state[field]&&typeof state[field]==='object'&&!Array.isArray(state[field]))?state[field]:{})!==JSON.stringify(exact))changed=true;
       state[field]=exact;
     });
-    var exactSrs={};
+    var exactSrs={},localSrs=(state.srs&&typeof state.srs==='object'&&!Array.isArray(state.srs))?state.srs:{};
     Object.keys(p.srs||{}).forEach(function(ci){
       var li=fromCanonicalIndex(ref,ci),e=publicSrsEntry(p.srs[ci]);
-      if(li>=0&&e&&safeProgressCount(p.wrongs&&p.wrongs[ci]))exactSrs[li]=e;
+      if(li<0||!e)return;
+      // rp=玩法里真答对过的证据(v963 毕业闸门要看)。账本格式不收它，只在本岛同一盒同一天时原样保留。
+      var old=localSrs[li];
+      if(old&&old.rp===1&&old.box===e.box&&old.due===e.due)e.rp=1;
+      exactSrs[li]=e;
     });
     if(JSON.stringify((state.srs&&typeof state.srs==='object'&&!Array.isArray(state.srs))?state.srs:{})!==JSON.stringify(exactSrs))changed=true;
     state.srs=exactSrs;
@@ -454,8 +566,16 @@
   function absorbCurrent(){
     try{
       if(!root.S) return false;
-      var store=readStore();if(!store)return false;var changed=mergeState(store,currentRef(),root.S,true);
-      if(changed&&!writeStore(store))return false;
+      /* v1165: 账本开机同步之前，本页 S 只是刚读出来的存档（可能比账本旧，见 loadedStamp）。这时「以本页为准」并入，
+         会把别的入口刚清掉的错词、升过的复习盒冲回去（宠物模块在开机前就会调到这里）。开机那次 migrate 会按真实时间并入本页；
+         回填过（syncCurrent）之后 S 就和账本一致了，再「以本页为准」并入才安全。 */
+      if(!synced&&loadedStamp()!==undefined) return false;   // 只在「S 是从旧存档读出来的」时才拦；新孩子/没有存档时照旧并入
+      // v1165: 每次 save() 都会来这里（一题七八次）；先在只读那份上问「会不会改」，不会改就不复制、不写盘。
+      var ro=readStoreRO();if(!ro)return false;
+      if(!mergeState(ro,currentRef(),root.S,true,undefined,true))return false;
+      var cid=resolve(currentRef());if(!cid)return false;
+      var store=readIslandForWrite(cid.id);if(!store)return false;var changed=mergeState(store,currentRef(),root.S,true);
+      if(changed&&!writeIsland(store,cid.id))return false;
       return changed;
     }catch(e){ return false; }
   }
@@ -464,47 +584,53 @@
     try{
       var ref=currentRef(),a=resolve(ref),ci=toCanonicalIndex(ref,localIndex),state=root.S;
       if(!a||ci<0||!state)return false;
-      var store=readStore();if(!store)return false;var p=store.islands[a.id],changed=false;
-      if(Array.isArray(state.learned)&&state.learned.indexOf(Number(localIndex))>=0){
-        if(p.learned.indexOf(ci)<0){p.learned.push(ci);changed=true;}
-      }
-      var mc=safeProgressCount(state.mc&&state.mc[localIndex]);
-      if(mc>safeProgressCount(p.mc[ci])){p.mc[ci]=mc;changed=true;}
-      var wrong=safeProgressCount(state.wrongs&&state.wrongs[localIndex]);
-      if(wrong>0){
-        if(wrong!==safeProgressCount(p.wrongs[ci])){p.wrongs[ci]=wrong;changed=true;}
-      }else{
-        if(Object.prototype.hasOwnProperty.call(p.wrongs,ci)){delete p.wrongs[ci];changed=true;}
-        if(Object.prototype.hasOwnProperty.call(p.srs,ci)){delete p.srs[ci];changed=true;}
-        // 答对把错词降到 0 是一条权威删除，给旧别名存档立墓碑。
-        var ts=Date.now(); if((Number(p.cleared.wrongs[ci])||0)<ts){p.cleared.wrongs[ci]=ts;changed=true;}
-        if((Number(p.cleared.srs[ci])||0)<ts){p.cleared.srs[ci]=ts;changed=true;}
-      }
-      if(changed&&!writeStore(store))return false;
+      // v1165: 先在只读那份上判断要不要改（同一题会被 markAnswer 钩子和复习吸收各调一次）。
+      var ro=readStoreRO();if(!ro)return false;
+      if(!applyAnswer(ro.islands[a.id],ci,state,localIndex,true))return false;
+      var store=readIslandForWrite(a.id);if(!store)return false;
+      var changed=applyAnswer(store.islands[a.id],ci,state,localIndex,false);
+      if(changed&&!writeIsland(store,a.id))return false;
       return changed;
     }catch(e){return false;}
   }
+  function applyAnswer(p,ci,state,localIndex,dry){
+    var changed=false;
+    if(Array.isArray(state.learned)&&state.learned.indexOf(Number(localIndex))>=0){
+      if(p.learned.indexOf(ci)<0){if(!dry)p.learned.push(ci);changed=true;}
+    }
+    var mc=safeProgressCount(state.mc&&state.mc[localIndex]);
+    if(mc>safeProgressCount(p.mc[ci])){if(!dry)p.mc[ci]=mc;changed=true;}
+    var wrong=safeProgressCount(state.wrongs&&state.wrongs[localIndex]);
+    if(wrong>0){
+      if(wrong!==safeProgressCount(p.wrongs[ci])){if(!dry)p.wrongs[ci]=wrong;changed=true;}
+    }else{
+      if(Object.prototype.hasOwnProperty.call(p.wrongs,ci)){if(!dry)delete p.wrongs[ci];changed=true;}
+      // 答对把错词降到 0 是一条权威删除，给旧别名存档立墓碑。
+      // v1165: 只清错题本，不动复习计划——计划要等到期那天一次次答对、升满盒子才毕业。
+      var ts=Date.now(); if((Number(p.cleared.wrongs[ci])||0)<ts){if(!dry)p.cleared.wrongs[ci]=ts;changed=true;}
+    }
+    return changed;
+  }
   function syncCurrent(){
-    try{ return root.S ? syncState(currentRef(),root.S,true) : false; }
+    try{ if(!root.S) return false; var r=syncState(currentRef(),root.S,true); synced=true; return r; }
     catch(e){ return false; }
   }
 
   // 复习计划也必须按 canonical slot 写入。Land/Season 只是同一批词的别名入口，
   // 任一入口评分后另一入口立即看到同一 due/box；清错时同步立墓碑，旧存档不能复活。
   function setSrs(ref,localIndex,entry){
-    var a=resolve(ref),ci=toCanonicalIndex(ref,localIndex),store=readStore();
+    var a=resolve(ref),ci=toCanonicalIndex(ref,localIndex),store=a&&ci>=0?readIslandForWrite(a.id):null;
     if(!a||ci<0||!store)return false;
     var p=store.islands[a.id],ts=nextSrsRevision(),publicEntry=entry===null?null:publicSrsEntry(entry);
     var e=entry===null?null:(publicEntry?safeSrsEntry(publicEntry,ts):null);
     if(entry!==null&&!e)return false;
     if(e){
-      if(!safeProgressCount(p.wrongs[ci]))return false;
-      p.srs[ci]=e;
+      p.srs[ci]=e;   // v1165: 错题本清零后计划仍可升盒
     }else{
       delete p.srs[ci];
       if((Number(p.cleared.srs[ci])||0)<ts)p.cleared.srs[ci]=ts;
     }
-    return writeStore(store);
+    return writeIsland(store,a.id);
   }
   function setCurrentSrs(localIndex,entry){return setSrs(currentRef(),localIndex,entry);}
 
@@ -537,14 +663,14 @@
   }
   function clearCurrent(fields){return clearSlice(currentRef(),fields);}
 
-  function countLearned(id){var s=readStore();return s&&s.islands[id]?s.islands[id].learned.length:0;}
+  function countLearned(id){var s=readStoreRO();return s&&s.islands[id]?s.islands[id].learned.length:0;}
   function isLearned(ref,localIndex){
     var a=resolve(ref),i=toCanonicalIndex(ref,localIndex);if(!a||i<0)return false;
-    var s=readStore();return !!(s&&s.islands[a.id]&&s.islands[a.id].learned.indexOf(i)>=0);
+    var s=readStoreRO();return !!(s&&s.islands[a.id]&&s.islands[a.id].learned.indexOf(i)>=0);
   }
   function mastery(ref,localIndex){
     var a=resolve(ref),i=toCanonicalIndex(ref,localIndex);if(!a||i<0)return 0;
-    var s=readStore();return s&&s.islands[a.id]?safeProgressCount(s.islands[a.id].mc[i]):0;
+    var s=readStoreRO();return s&&s.islands[a.id]?safeProgressCount(s.islands[a.id].mc[i]):0;
   }
   function isMastered(ref,localIndex,hits){return mastery(ref,localIndex)>=Math.max(1,Math.floor(Number(hits)||MASTER_HITS));}
   function isCrystalDone(ref,localIndex){
@@ -553,21 +679,21 @@
   }
   function countMastered(id,hits){
     hits=Math.max(1,Math.floor(Number(hits)||MASTER_HITS));
-    var s=readStore(),mc=s&&s.islands[id]?s.islands[id].mc:{},n=0;
+    var s=readStoreRO(),mc=s&&s.islands[id]?s.islands[id].mc:{},n=0;
     Object.keys(mc).forEach(function(k){if(safeProgressCount(mc[k])>=hits)n++;});
     return n;
   }
   function totalLearned(){
-    var s=readStore(), n=0;if(!s)return 0;islands.forEach(function(i){n+=s.islands[i.id].learned.length;}); return n;
+    var s=readStoreRO(), n=0;if(!s)return 0;islands.forEach(function(i){n+=s.islands[i.id].learned.length;}); return n;
   }
   function totalMastered(hits){
     hits=Math.max(1,Math.floor(Number(hits)||MASTER_HITS));
-    var s=readStore(), n=0;if(!s)return 0;
+    var s=readStoreRO(), n=0;if(!s)return 0;
     islands.forEach(function(i){Object.keys(s.islands[i.id].mc).forEach(function(k){if(safeProgressCount(s.islands[i.id].mc[k])>=hits)n++;});});
     return n;
   }
   function counts(){
-    var out={}; islands.forEach(function(i){out[i.id]={learned:countLearned(i.id),mastered:countMastered(i.id),words:i.words};}); return out;
+    var out={}; islands.forEach(function(i){out[i.id]={learned:countLearned(i.id),mastered:countMastered(i.id),words:i.words};}); return out;   // 每次都命中缓存，只读不复制
   }
   // v945 探索页批量快照：一次 readStore() 返回当前入口全部可见词，避免卡片逐词
   // 调 mastery()/isLearned() 而把同一份大账本反复 JSON.parse。读取失败时明确
@@ -582,9 +708,11 @@
     try{
       var mainRaw=root.localStorage.getItem(STORE_KEY),bakRaw=root.localStorage.getItem(STORE_BAK_KEY);
       function healthy(raw){var o=safeParse(raw,null);return !!(o&&o.islands&&typeof o.islands==='object'&&!Array.isArray(o.islands));}
-      if((mainRaw!==null||bakRaw!==null)&&!healthy(mainRaw)&&!healthy(bakRaw))return {ok:false,reason:'corrupt-store',ref:String(ref||''),id:a.id,offset:a.offset,length:a.length,items:[]};
+      // v1165: 原文和缓存一字不差时，好坏早就判过了，不再整份解析两遍。
+      var hit=cacheHit(mainRaw,bakRaw),mh=hit?cache.mainHealthy:healthy(mainRaw),bh=hit?cache.bakHealthy:healthy(bakRaw);
+      if((mainRaw!==null||bakRaw!==null)&&!mh&&!bh)return {ok:false,reason:'corrupt-store',ref:String(ref||''),id:a.id,offset:a.offset,length:a.length,items:[]};
     }catch(e){return {ok:false,reason:'unreadable',ref:String(ref||''),id:a.id,offset:a.offset,length:a.length,items:[]};}
-    var s=readStore();
+    var s=readStoreRO();
     if(!s||!s.islands||!s.islands[a.id])return {ok:false,reason:'unreadable',ref:String(ref||''),id:a.id,offset:a.offset,length:a.length,items:[]};
     var p=s.islands[a.id],learned={};
     (p.learned||[]).forEach(function(i){learned[i]=1;});
@@ -647,6 +775,9 @@
     clear:clearSlice, clearCurrent:clearCurrent,
     setSrs:setSrs, setCurrentSrs:setCurrentSrs,
     read:readStore, write:writeStore,
+    readRO:readStoreRO,   // v1165 只读：拿到的对象绝不能改（要改请用 read()）
+    _perf:function(){return {reads:perf.reads,hits:perf.hits,rebuilds:perf.rebuilds,writes:perf.writes};},
+    _dropCache:function(){cache=null;},
     snapshot:function(){return readStore();},restoreSnapshot:function(s){return writeStore(s,true);},
     isLearned:isLearned, mastery:mastery, isMastered:isMastered, isCrystalDone:isCrystalDone,
     countLearned:countLearned, countMastered:countMastered,
@@ -655,6 +786,9 @@
     allSaveAliases:allSaveAliases,
     _mergeState:mergeState, _blankStore:blankStore
   };
+
+  // 别的页面框/标签页改了账本：缓存作废（每次读取本来也会比对原文，这里只是早点放掉内存）。
+  try{root.addEventListener('storage',function(e){if(!e||e.key===null||e.key===STORE_KEY||e.key===STORE_BAK_KEY)cache=null;});}catch(e){}
 
   if(root.document && root.document.readyState==='loading') root.document.addEventListener('DOMContentLoaded',boot);
   else boot();

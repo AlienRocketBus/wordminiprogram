@@ -11,10 +11,14 @@
 (function(){
   'use strict';
 
-  /* ---- 双端: 跨文档平滑过渡(②) ---- */
+  /* ---- 双端: 跨文档平滑过渡(②) ----
+     🔴v1165 只在顶层页面开：首页外壳的岛框（iframe）里开了它，每次换岛/回首页浏览器都会抛一个没人接的
+     「ViewTransition opt-in disabled」错误（iframe 里的跨文档过渡本来就不生效）。 */
+  var _vtTop = true;
+  try{ _vtTop = (window.top === window); }catch(e){ _vtTop = false; }
   try{
     var st = document.createElement('style');
-    st.textContent = '@view-transition{navigation:auto}'
+    st.textContent = (_vtTop ? '@view-transition{navigation:auto}' : '')
       /* v568: 过渡更利落(默认 .25s → .16s), 杜绝"飘"感 */
       + '::view-transition-old(root),::view-transition-new(root){animation-duration:.16s}'
       /* v568: 返回按钮触控即时(消除任何 tap 合成延迟) + 按压立显 */
@@ -120,6 +124,9 @@
      Speculation Rules(Chrome/Edge): 后台完整预渲染 index, 跳转=瞬时激活;
      不支持则 <link rel=prefetch> 进 HTTP 缓存。延迟 1.5s 注入, 不抢岛首屏带宽。 */
   setTimeout(function(){
+    /* 🔴v1165 在首页外壳的岛框（iframe）里不预取首页：首页就是外壳自己（回首页是收起岛框、不跳页），
+       以前每进一个岛都让微信在后台再下载一份 index.html（约 210 KB），一点用都没有。单独打开的岛（顶层页）照旧预取 */
+    if(!_vtTop) return;
     try{
       /* v570: 低内存防护——prerender 会在后台多养一个完整 index 实例(内存翻倍压力)。
          低内存设备(deviceMemory<4)或微信内置浏览器(X5 内存紧张, "玩着玩着崩"高发区)
@@ -142,4 +149,180 @@
       }
     }catch(e){}
   }, 1500);
+
+  /* ---- 🔴v1165 手机「返回」只退一步：先关岛里最上面那个浮层 ----
+     首页外壳（index.html）收到返回键时先问岛页 __hsnIslandBack()（模板提供：先调 __hsnBackStack 里登记的关闭函数，
+     再关弹窗，再从游戏回本岛主页）。这里负责「登记」：错题总览、复习中心、我的学习、答错小课、星海面板/神秘殿堂、
+     抽卡揭晓、装备/主题商店……这些浮层都是各模块临时挂在 <body> 上的全屏层，一出现就登记一个关闭函数，消失就撤销。
+     关闭时点它自己的关闭按钮（和孩子亲手点一样，各模块的收尾照常做）；找不到按钮才点空白处。
+     🔴v1165 复查：点空白处还关不掉的，**绝不直接拿掉**（以前会 el.remove()）—— 拿掉的只是画面，模块自己的收尾一步没做：
+     拼写大PK 对战中按返回，对战屏被删了，心跳照跳、房间没退、对手干等，下一回合对战屏又冒出来。
+     现在这种浮层返回 false，让返回键去走下一步（关弹窗 → 回本岛主页 → 退出岛）；对战/登录这些屏单独写了怎么关。 */
+  (function backOverlays(){
+    /* 已知浮层：id → 它自己的关闭按钮（null = 点浮层本身，答错小课就是「点一下继续」） */
+    var KNOWN = {
+      hml_lesson: null,
+      hwo_overlay: '[onclick*="HansenWrongOverview._close"]',
+      hr_center: '[onclick*="HansenReview._close()"]',
+      hr_flashcard: '[onclick*="_closeAndBack"]',
+      hr_wrongbook: '[onclick*="_closeAndBack"]',
+      'hsn-ml': '[onclick*="HansenMyLearning._close"]',
+      __hs_season_panel: '#__hs_close',
+      __hs_hall_panel: '#__hs_hall_close',
+      __hs_showcase: '[aria-label="关闭"]',
+      __hs_bcv: '#__hs_bcv_close',
+      hsnGearMask: '#hgClose',
+      /* 🔴v1165 复查：对战 / 登录这几屏（对战组的文件，这里只调它们自己公开的关闭方法，和孩子点「← 返回 / ✕」一样） */
+      hsn_pkroom_screen: pkRoomBack,
+      hsn_pk_screen: function(el){ return clickOr(el, '#kBack', function(){ return callClose(window.HansenSbPK, 'close'); }); },
+      hsb_prof: function(el){ return clickOr(el, '#pfBack', function(){ return callClose(window.HansenSbProfile, '_close'); }); },
+      hsn_ladder_screen: function(el){ return clickOr(el, '#ldX', function(){ return callClose(window.HansenLadderUI, 'close'); }); },
+      hsn_friends_screen: function(el){ return clickOr(el, '#frBack, #frX', function(){ return callClose(window.HansenFriendsUI, 'close'); }); },
+      hsn_auth_panel: function(el){ return clickOr(el, '#auX', function(){ return callClose(window.HansenAuthUI, 'close'); }); },
+      hsn_gate: function(){ return false; },   /* 注册门槛是硬门槛：返回键不关它、也不拿掉它 */
+      /* 🔴v1165 复查第 2 轮：对战组重做后的「要退出这一局吗？」确认框（挂在页面最外层）：返回键 = 「继续打 / 接着等」，
+         真要退出得孩子自己点「退出」（那一下才记输 / 结算）——两下返回手势绝不会悄悄把一局丢掉 */
+      prQuitAsk: '#prQuitNo',
+      /* 🔴v1165 复查第 4 轮（合并 v1164 后）：拼写大PK「✏️ 先起个名字」框（v1164 新加）—— 返回键 = 「先不玩联机」。
+         以前表里没有它、两个按钮又认不出是关闭，返回键跳过它把后面的大厅关了（test_pk_name_back_cloud_v1165） */
+      kNameAsk: '#pkNameBack'
+    };
+    function visibleIn(el, sel){ try{ var b = el.querySelector(sel); return b && b.getClientRects().length ? b : null; }catch(e){ return null; } }
+    function clickOr(el, sel, fallback){ var b = visibleIn(el, sel); if(b){ try{ b.click(); }catch(e){} return true; } return fallback(); }
+    function callClose(mod, name){ try{ if(mod && typeof mod[name] === 'function'){ mod[name](); return true; } }catch(e){} return false; }
+    /* 拼写大PK 公开房间屏：大厅/等人/结算页上有「← 返回 / ← 关掉房间 / ← 回到房间列表」，就点它；
+       对战正在进行：按一次只提醒，3 秒内再按一次才退出这一局 —— 走 HansenPkRoomUI.close()（停心跳、退出房间、清计时器），
+       不会一碰返回手势就把对战丢了，也不会只删掉画面留着房间。 */
+    var _pkAskAt = 0;
+    function pkRoomBack(el){
+      if(clickOr(el, '#prBack, #prBack2', function(){ return false; })) return true;
+      /* 🔴v1165 合并 v1164：天梯自己开房「⏳ 正在开房间…」那一屏只有「取消，回天梯」—— 返回键 = 点它（这一次开房作废、回天梯）。
+         以前这一屏没有「← 返回」，就被当成对战去问 askQuit：弹「要退出吗？」，房照样开出来、挂在列表上等人
+         （test_island_r2_cloud_v1164 ②）。 */
+      if(clickOr(el, '#prCreateCancel', function(){ return false; })) return true;
+      /* 🔴v1165 合并 v1164（复查）：「📨 这一局的结果没拿到」那一屏只有「← 回天梯 / ← 回到房间列表」#prResBack —— 返回键 = 点它。
+         以前也被当成对战去问 askQuit：这一局已经结束了，却弹「要退出吗？房间会关掉」；点「退出」，排位局回的是自由房列表、
+         不是天梯（没记输：到这一屏时这一局的状态已经清掉了）。test_pk_back_cloud_v1165 ① 守。 */
+      if(clickOr(el, '#prResBack', function(){ return false; })) return true;
+      /* 🔴v1165 复查第 2 轮：对战组重做后的对战屏有自己的「退出」确认（askQuit：退出 = 这一局记一场输；已经交卷的照样结算）。
+         有就交给它 —— 返回键和点对战屏上的「退出」完全一样。以前直接 close()：落后的孩子按两下返回就能不记输（对手却白赢），
+         已经交卷赢下来的一局也不结算。没有 askQuit 的老对战屏，才走下面「提醒一次、3 秒内再按才 close()」的老办法。 */
+      var UI = window.HansenPkRoomUI;
+      if(UI && typeof UI.askQuit === 'function'){ try{ UI.askQuit(); return true; }catch(e){} }
+      if(clickOr(el, '#prQuit', function(){ return false; })) return true;
+      var now = Date.now();
+      if(now - _pkAskAt < 3000){
+        _pkAskAt = 0;
+        if(callClose(window.HansenPkRoomUI, 'close')) return true;
+        return false;
+      }
+      _pkAskAt = now;
+      hint('对战还在进行哦～ 再按一次「返回」就退出这一局');
+      return true;
+    }
+    function hint(text){
+      try{ if(window.HansenToast && typeof HansenToast.say === 'function'){ HansenToast.say(text); return; } }catch(e){}
+      try{
+        var old = document.getElementById('hsnBackHint'); if(old) old.remove();
+        var d = document.createElement('div');
+        d.id = 'hsnBackHint'; d.setAttribute('role', 'status'); d.textContent = text;
+        d.style.cssText = 'position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);z-index:2147483646;max-width:86vw;background:rgba(15,23,42,.94);color:#fff;font-size:15px;font-weight:700;line-height:1.5;padding:10px 16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none;text-align:center';
+        document.body.appendChild(d);
+        setTimeout(function(){ try{ d.remove(); }catch(e){} }, 2600);
+      }catch(e){}
+    }
+    /* 模板自己管的（弹窗、游戏界面），这里不碰 */
+    var SKIP = /^(?:alertModal|wordModal|islandLoading|hansenFxLayer|hsnBootBad)$/;
+    var CLOSE_TEXT = /^(?:✕|×|✖|╳|关闭|取消|返回|知道了|我知道了|好的)$/;
+    function shown(el){
+      try{
+        if(!el || !el.isConnected || el.nodeType !== 1) return false;
+        if(SKIP.test(el.id || '') || (el.classList && el.classList.contains('screen'))) return false;
+        var cs = getComputedStyle(el);
+        if(cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
+        if(parseFloat(cs.opacity) < 0.05) return false;
+        var r = el.getBoundingClientRect();
+        return r.width >= (window.innerWidth || 1) * 0.85 && r.height >= (window.innerHeight || 1) * 0.85;
+      }catch(e){ return false; }
+    }
+    function topOverlay(){
+      var kids = document.body ? document.body.children : [], best = null, bestZ = -Infinity;
+      for(var i = 0; i < kids.length; i++){
+        var el = kids[i]; if(!shown(el)) continue;
+        var z = parseInt(getComputedStyle(el).zIndex, 10); if(!isFinite(z)) z = 0;
+        if(z >= bestZ){ best = el; bestZ = z; }   /* 同层取后挂上去的（在上面） */
+      }
+      return best;
+    }
+    function closeButton(el){
+      var sel = Object.prototype.hasOwnProperty.call(KNOWN, el.id) ? KNOWN[el.id] : undefined;
+      if(sel === null) return el;
+      if(typeof sel === 'function') return null;
+      if(sel){ var k = el.querySelector(sel); if(k) return k; }
+      var c = el.querySelectorAll('button,[role="button"],[aria-label],[onclick],div,span,a');
+      for(var i = 0; i < c.length && i < 400; i++){
+        var b = c[i], lab = b.getAttribute('aria-label') || '', oc = b.getAttribute('onclick') || '', id = b.id || '';
+        var txt = (b.children.length ? '' : (b.textContent || '').trim());
+        if(/^(?:关闭|返回|close)$/i.test(lab) || /(?:^|_)close/i.test(id) || /Close$/.test(id) || /_close\w*\(|\bclose\w*\(/i.test(oc) || CLOSE_TEXT.test(txt)) {
+          if(b.getClientRects().length) return b;
+        }
+      }
+      return null;
+    }
+    function closeEl(el){
+      if(!shown(el)) return false;   /* 它已经关了：让返回键去管下一层 */
+      var own = Object.prototype.hasOwnProperty.call(KNOWN, el.id) ? KNOWN[el.id] : undefined;
+      if(typeof own === 'function'){ try{ return own(el) === true; }catch(e){ return false; } }
+      var b = closeButton(el);
+      try{ (b || el).click(); }catch(e){}
+      /* 没有关闭按钮、点空白处也关不掉：不拿掉（拿掉不等于关掉，模块的收尾没做），这一下交给返回键的下一步 */
+      if(!b && shown(el)) return false;
+      return true;
+    }
+    function closeTop(){ var el = topOverlay(); return el ? closeEl(el) : false; }
+    function pushBack(fn){
+      if(typeof window.__hsnPushBack === 'function') return window.__hsnPushBack(fn);
+      var st = window.__hsnBackStack = window.__hsnBackStack || [];
+      st.push(fn);
+      return function(){ var i = st.lastIndexOf(fn); if(i >= 0) st.splice(i, 1); };
+    }
+    var tracked = [];   /* {el, unreg} —— 每个开着的浮层在栈里占一格（后开的在上面），按一次返回关一个 */
+    function track(el){
+      for(var i = 0; i < tracked.length; i++) if(tracked[i].el === el) return;
+      var t = { el: el, unreg: null };
+      var fn = function(){
+        var r = closeEl(el);
+        /* 返回键用掉了这一下、浮层却还开着（比如对战中先提醒「再按一次」）：重新登记，下一次返回还先问它。
+           返回 false 的不重新登记（岛页 __hsnIslandBack 会接着问下一个，重新登记会原地打转） */
+        if(r === true && shown(el)) t.unreg = pushBack(fn);
+        else tracked = tracked.filter(function(x){ return x !== t; });
+        return r;
+      };
+      t.unreg = pushBack(fn);
+      tracked.push(t);
+    }
+    function untrack(el){
+      tracked = tracked.filter(function(t){ if(t.el !== el) return true; try{ t.unreg(); }catch(e){} return false; });
+    }
+    var toggles = typeof WeakSet === 'function' ? new WeakSet() : null;
+    function check(el){
+      if(shown(el)) track(el); else untrack(el);
+      /* 用 class/style 开关的浮层（比如装备商店）：盯住它自己的开关 */
+      if(toggles && shown(el) && !toggles.has(el)){
+        toggles.add(el);
+        try{ new MutationObserver(function(){ check(el); }).observe(el, { attributes: true, attributeFilter: ['class', 'style'] }); }catch(e){}
+      }
+    }
+    function start(){
+      if(!document.body || typeof MutationObserver !== 'function') return;
+      new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          Array.prototype.forEach.call(m.removedNodes, function(n){ if(n.nodeType === 1) untrack(n); });
+          Array.prototype.forEach.call(m.addedNodes, function(n){ if(n.nodeType === 1) setTimeout(function(){ check(n); }, 0); });
+        });
+      }).observe(document.body, { childList: true });
+    }
+    window.__hsnBackOverlays = { top: topOverlay, closeTop: closeTop, _tracked: function(){ return tracked.map(function(t){ return t.el.id || t.el.className || t.el.tagName; }); } };
+    if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  })();
 })();

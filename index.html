@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1164"></script><!--🔴v1152 全站发音音量归一：首页也需要。这个引用在 index.html 里长期缺失（至少从 v1077 起），而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1164"></script><!--🔴v1155 悄悄报错观察者：对战/天梯模块有 56 处空 catch，真出错时没有任何痕迹（今天两个"根本用不了"就是这么藏住的）。这个模块把 error 和 unhandledrejection 记进环形缓冲区，云端自检面板能看到最近 30 条。--><script defer src="hansen_silent_watch_v1155.js?v=1164"></script><!--🔴v1155 对战看门狗：今天的天梯 bug 形态出奇一致 ——"界面进了废掉但没人管的状态"。与其把每条路都堵一遍（总会漏），不如守住必经之地：不管因为什么原因废掉，用户被卡住超时就把人救出来。--><script defer src="hansen_pk_watchdog_v1155.js?v=1164"></script><!--🔴v1156 启动自检：实测三种服务端故障（词库404 / JS全504 / JS被截断），三种下页面都照常渲染、按钮都能点，但核心模块 undefined、且零脚本错误 ——用户看到一个能点却什么都不工作的空壳，还不知道为什么。这个模块等页面稳定后点一次名，缺了就明说是网络问题。--><script defer src="hansen_boot_check_v1156.js?v=1164"></script><!--🔴v1156 页内提示：全站 39 处 alert 在手机上会打断输入焦点、样式和 App 脱节，连续弹几次后浏览器还会给"阻止此页面再弹窗"的选项 ——用户一旦勾了，之后所有错误提示他都看不到了。-->
-<script defer src="hansen_toast_v1156.js?v=1164"></script><!--🔴v1156 天梯排行榜：原来只显示"我 1062 分"，看不到自己排第几，而天梯的核心动力恰恰是"我比别人强多少"。复用已有的 sb_profile 集合，不新建集合。拿不到榜就安静降级 —— 排行榜是锦上添花，不能因为它拿不到就让人打不了排位。--><script defer src="hansen_ladder_board_v1156.js?v=1164"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
+<head><!--🔴v1085 凭证监视：抓出到底是谁删掉了云端凭证。必须**最先加载**（其它模块之前），否则抓不到早期动作。只观察不改行为。--><!--🔴v1139 顺序铁律：SW 升级门必须是**第一支脚本**。它的作用是在任何业务代码跑之前先升级旧 Service Worker —— 不在最前的话，前面那些脚本就是被旧 SW 缓存的版本，"做出来的东西不显示"那个拖了二十多版的问题会复发。（v1085 把凭证生死簿插到了它前面，本版调回来：生死簿是诊断工具，晚一格不影响抓凭证——凭证操作都在登录时，远在两支脚本之后。）--><script src="hansen_sw_upgrade_gate_v944.js?v=1165"></script><!--🔴v1152 全站发音音量归一：首页也需要。这个引用在 index.html 里长期缺失（至少从 v1077 起），而守着它的测试因为超时被跳过，红了很久没人知道。--><script src="hansen_tts_volume_v1038.js?v=1165"></script><!--🔴v1155 悄悄报错观察者：对战/天梯模块有 56 处空 catch，真出错时没有任何痕迹（今天两个"根本用不了"就是这么藏住的）。这个模块把 error 和 unhandledrejection 记进环形缓冲区，云端自检面板能看到最近 30 条。--><script defer src="hansen_silent_watch_v1155.js?v=1165"></script><!--🔴v1155 对战看门狗：今天的天梯 bug 形态出奇一致 ——"界面进了废掉但没人管的状态"。与其把每条路都堵一遍（总会漏），不如守住必经之地：不管因为什么原因废掉，用户被卡住超时就把人救出来。--><script defer src="hansen_pk_watchdog_v1155.js?v=1165"></script><!--🔴v1156 启动自检：实测三种服务端故障（词库404 / JS全504 / JS被截断），三种下页面都照常渲染、按钮都能点，但核心模块 undefined、且零脚本错误 ——用户看到一个能点却什么都不工作的空壳，还不知道为什么。这个模块等页面稳定后点一次名，缺了就明说是网络问题。--><script defer src="hansen_boot_check_v1156.js?v=1165"></script><!--🔴v1156 页内提示：全站 39 处 alert 在手机上会打断输入焦点、样式和 App 脱节，连续弹几次后浏览器还会给"阻止此页面再弹窗"的选项 ——用户一旦勾了，之后所有错误提示他都看不到了。-->
+<script defer src="hansen_toast_v1156.js?v=1165"></script><!--🔴v1156 天梯排行榜：原来只显示"我 1062 分"，看不到自己排第几，而天梯的核心动力恰恰是"我比别人强多少"。复用已有的 sb_profile 集合，不新建集合。拿不到榜就安静降级 —— 排行榜是锦上添花，不能因为它拿不到就让人打不了排位。--><script defer src="hansen_ladder_board_v1156.js?v=1165"></script><!--🔒 顺序：自救必须排在 SW 升级门**之后**。升级门是第一支脚本这条铁律更硬 —— 它不在最前，前面的脚本就是被旧 SW 缓存的版本。而自救只在 file:// 下才跑，晚一格毫无影响。--><!--🔴v1141 🔒第二道锁：被当成文件下载后的自救。必须**内联**——file:// 下相对路径的外部脚本根本加载不出来，而那正是要救的场景。--><script>(function(){'use strict';
 if(location.protocol!=='file:')return;/* 🔴v1152：**只在真的像"用户下载了文件"时才救。**
    实测踩到：file:// 不只出现在"下载后双击打开"这一种情况 ——
    本地开发、自动化测试也是直接用 file:// 打开页面的。
@@ -35,16 +35,16 @@ else{show();}
 window.addEventListener('load',show);
 /* 主逻辑可能在就绪后重绘整个 body，所以再补一次 */
 setTimeout(function(){shown=false;show();},1200);
-})();</script><script src="hansen_cred_trap_v1085.js?v=1164"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1164"></script>
+})();</script><script src="hansen_cred_trap_v1085.js?v=1165"></script><!--🔴v1092 凭证守护：刷新失败时把凭证救回来。SDK 源码确认：手机号登录的会话，refresh 一旦失败就没有任何兜底、直接删凭证（匿名会话才有 anonymousLogin 兜底）。这里持续备份影子副本 + 跨页面刷新锁 + 失败即救回。必须在账号模块之前加载。--><script src="hansen_cred_guard_v1092.js?v=1165"></script>
 <!--🔴v1032: 统一全站发音音量(必须尽早加载,才能在其它脚本发音前完成打补丁)-->
 <!-- v944: 必须是首支脚本，旧SW先升级再执行任何业务代码 -->
-<script src="hansen_backup_bootstrap_v944.js?v=1164"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
-<script src="hansen_coin_wallet.js?v=1164"></script><!-- v942: 首页任何金币显示/消费前同步恢复跨页奖励事务 -->
+<script src="hansen_backup_bootstrap_v944.js?v=1165"></script><!-- v944: 独立路径跨越旧SW，且必须早于任何玩家状态读取 -->
+<script src="hansen_coin_wallet.js?v=1165"></script><!-- v942: 首页任何金币显示/消费前同步恢复跨页奖励事务 -->
 <meta charset="utf-8"><script>/* 🔴v787 全局图片加载失败自动重试(自带·不依赖模块)·根治图片偶尔加载不出来一直空白 */(function(){if(window.__hsnGImgErr)return;window.__hsnGImgErr=1;function R(g){if(!g||g.__heBusy)return;g.__heBusy=true;setTimeout(function(){try{g.__heBusy=false;}catch(e){}},0);var t=+(g.dataset.imgTries||0);if(t<3){g.dataset.imgTries=t+1;var b=(g.src||"").split("#")[0].replace(/([?&])__rt=\d+/,"$1").replace(/[?&]$/,"");var s=b.indexOf("?")>=0?"&":"?";setTimeout(function(){try{g.src=b+s+"__rt="+(t+1);}catch(e){}},450*(t+1));}}document.addEventListener("error",function(e){var x=e&&e.target;if(x&&x.tagName==="IMG"){try{R(x);}catch(_e){}}},true);})();</script><!-- 🔴v658 防HTML缓存:部署后更新立即生效(配合腾讯云CDN刷新) --><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="theme-color" content="#0c1538">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="favicon.ico" type="image/png">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" href="favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -54,9 +54,9 @@ setTimeout(function(){shown=false;show();},1200);
 <meta name="x5-fullscreen" content="true">
 <meta name="screen-orientation" content="portrait">
 <meta name="x5-orientation" content="portrait">
-<title>单词大冒险 · 单词大冒险</title>
+<title>单词大冒险</title>
 <script>/* 🔴v856 配色防闪: 首帧前同步把配色类加到<html>(v855教训:同步加不闪·亮色系加hsn-pal-light) */try{var _hp=localStorage.getItem("hansen_palette_global");if(_hp&&_hp!=="cosmos"&&/^[a-z]+$/.test(_hp)){var _hl={cloud:1,sakura:1,cream:1,mint:1};document.documentElement.className+=" hsn-pal-"+_hp+(_hl[_hp]?" hsn-pal-light":"");}}catch(e){}</script>
-<meta name="description" content="27 座英语单词冒险岛 · 多种学习挑战 · 36 阶进化宠物">
+<meta name="description" content="英语单词冒险岛 · 十几种学习挑战 · 36 阶进化宠物">
 <!--
   ============================================================
   📁 部署说明
@@ -1250,9 +1250,10 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
 }
 
 /* 共用浮动动画 */
-@keyframes bobSlow{0%,100%{margin-top:0}50%{margin-top:-14px}}
-@keyframes bobMed{0%,100%{margin-top:0}50%{margin-top:-10px}}
-@keyframes bobFast{0%,100%{margin-top:0}50%{margin-top:-7px}}
+/* v1165: 原来改 margin-top（每帧重新排版整页）；改用独立的 translate 属性，和飞行轨迹的 transform 叠加，效果一样但不排版 */
+@keyframes bobSlow{0%,100%{translate:0 0}50%{translate:0 -14px}}
+@keyframes bobMed{0%,100%{translate:0 0}50%{translate:0 -10px}}
+@keyframes bobFast{0%,100%{translate:0 0}50%{translate:0 -7px}}
 
 /* ─────────────  STARRY BACKGROUND  ───────────── */
 .bg-cosmos{
@@ -1288,6 +1289,15 @@ body[data-theme="peach"] .flyer[data-flyer-theme="peach"]{display:block}
   92%{opacity:1}
   100%{opacity:0;transform:translate(-400px,180px) rotate(-25deg)}
 }
+
+/* v1165 待机动画预算：孩子 12 秒没碰屏幕，首页这些装饰（80 颗星星、漂浮表情、岛卡背景小图、标题跳字、彩虹标语、光点）先歇着，
+   （彩虹标语 .tagline 每帧改 background-position + filter，是首页待机时最贵的一项）
+   一碰屏幕/滚动就接着动。实测它们在首页待机时每帧都要重新合成上百个图层。
+   主题演员 .flyer 不在此列（v943/v944：主题动画必须一直在跑）。流星直接隐藏，免得停在半空。 */
+html.hsn-deco-rest .star,html.hsn-deco-rest .deco-emoji,html.hsn-deco-rest .island .float-bg span,
+html.hsn-deco-rest .logo-char,html.hsn-deco-rest .brand .dot,html.hsn-deco-rest .title-block::before,
+html.hsn-deco-rest .tagline,html.hsn-deco-rest h1.main{animation-play-state:paused!important}
+html.hsn-deco-rest .shooter{animation:none!important;opacity:0!important}
 
 /* ─────────────  FLOATING DECO EMOJIS  ───────────── */
 .deco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
@@ -2401,7 +2411,7 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
 .privacy-body p{font-size:13.5px;color:#dbeafe;margin:0}
 #privacyClose{display:block;width:100%;margin-top:18px;padding:11px;border:0;border-radius:11px;background:#2563eb;color:#fff;font:inherit;font-weight:800;cursor:pointer}
 </style>
-<!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1164"></script></head>
+<!--🔴v1140 「打开变下载」自查：探测各入口的真实响应头，并给出准确的控制台操作指引。首页尤其需要 —— 被下载的正是这一页--><script defer src="hansen_download_fix_v1140.js?v=1165"></script></head>
 
 <body>
 
@@ -3349,8 +3359,8 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
       <div class="subtitle">Word Adventures</div>
       <p class="intro">
         🦸 Hey 勇敢的小冒险家, 欢迎加入！<br>
-        快穿越 <b>18 关神奇大冒险</b>, 收集 <b>711+ 单词宝藏</b>, <br>
-        玩转 <b>12 种超酷挑战</b>, 还能孵化你专属的 <b>36 阶进化宠物</b> 🐣！
+        快穿越 <b><span data-hsn-count="islands">18</span> 座单词岛</b>, 收集 <b><span data-hsn-count="words">712</span> 个单词宝藏</b>, <br>
+        玩转 <b>十几种超酷挑战</b>, 还能孵化你专属的 <b>36 阶进化宠物</b> 🐣！
       </p>
     </div>
 
@@ -3358,11 +3368,11 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
     <div class="stats">
       <div class="stat">
         <span class="stat-icon">🗺️</span>
-        <div><div class="stat-num">18</div><div class="stat-lbl">主题岛屿</div></div>
+        <div><div class="stat-num" data-hsn-count="islands">18</div><div class="stat-lbl">主题岛屿</div></div>
       </div>
       <div class="stat">
         <span class="stat-icon">📚</span>
-        <div><div class="stat-num">711+</div><div class="stat-lbl">英语单词</div></div>
+        <div><div class="stat-num" data-hsn-count="words">712</div><div class="stat-lbl">英语单词</div></div>
       </div>
       <div class="stat">
         <span class="stat-icon">🎮</span>
@@ -3758,7 +3768,7 @@ html.hsn-pal-light .foot-tip{ color:#57534e !important; text-shadow:none !import
       <div class="how-step">
         <span class="num">02</span>
         <span class="icon">🎮</span>
-        <div class="title">12 种玩法</div>
+        <div class="title">十几种玩法</div>
         <div class="desc">打地鼠 · 钓鱼 · 拼词 · 打字 · 完形填空…</div>
       </div>
       <div class="how-step">
@@ -3897,19 +3907,34 @@ window.addEventListener('unhandledrejection', function(e){
   if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   const deco=document.getElementById('deco');
   const stars=document.getElementById('stars');
-  let tx=0,ty=0,cx=0,cy=0;
-  document.addEventListener('mousemove',e=>{
-    tx=(e.clientX/window.innerWidth-.5)*20;
-    ty=(e.clientY/window.innerHeight-.5)*20;
-  });
+  let tx=0,ty=0,cx=0,cy=0,running=false;
+  /* v1165 待机预算：以前这个循环每秒 60 次给两层全屏背景改 transform，鼠标不动也一直跑 ——
+     首页什么都不做时它一个就占主线程近一半（实测 4 倍慢 CPU）。手机上根本没有 mousemove。
+     现在：鼠标动了才开始跑，追上目标就停。 */
   function tick(){
     cx+=(tx-cx)*.05;
     cy+=(ty-cy)*.05;
+    var settled=Math.abs(tx-cx)<.25&&Math.abs(ty-cy)<.25;   /* 差不到 0.25px 就算追上，直接对齐后停 */
+    if(settled){cx=tx;cy=ty;}
     stars.style.transform=`translate(${cx*.3}px,${cy*.3}px)`;
     deco.style.transform=`translate(${cx}px,${cy}px)`;
+    if(settled){running=false;return;}
     requestAnimationFrame(tick);
   }
-  tick();
+  document.addEventListener('mousemove',e=>{
+    tx=(e.clientX/window.innerWidth-.5)*20;
+    ty=(e.clientY/window.innerHeight-.5)*20;
+    if(!running){running=true;requestAnimationFrame(tick);}
+  });
+})();
+
+// ───── v1165 待机动画预算：12 秒没碰屏幕就让首页装饰歇着（见 CSS html.hsn-deco-rest），一碰就醒 ─────
+(function(){
+  var REST_MS=12000, timer=0, root=document.documentElement;
+  function rest(){ root.classList.add('hsn-deco-rest'); }
+  function wake(){ if(root.classList.contains('hsn-deco-rest')) root.classList.remove('hsn-deco-rest'); clearTimeout(timer); timer=setTimeout(rest,REST_MS); }
+  ['pointerdown','touchstart','keydown','wheel','scroll'].forEach(function(ev){ try{ window.addEventListener(ev,wake,{passive:true,capture:true}); }catch(e){} });
+  wake();
 })();
 
 // ───── click feedback ─────
@@ -3954,13 +3979,36 @@ document.querySelectorAll('.island').forEach(el=>{
     'wordIslandLand7':    {file:'island_land7.html', emoji:'⛵', short:'万邦港城'},
     'wordIslandLand8':    {file:'island_land8.html', emoji:'🌋', short:'星火火山口'}
   };
+  window.HSN_ISLAND_META = ISLAND_META;   /* 🔴v1165 预取「最近玩过的岛」按这张表找文件名（以前按存档名拼，8 个岛全是 404） */
+  /* 🔴v1165 岛名和图标以首页岛卡为准：进岛提示、「最近探险」都和孩子点的那张卡一样（以前表里写「常用词」「代词」🐯，
+     卡片上是「百宝大冒险」「疑问大冒险」🦁）。卡片上没有的岛（单词大陆、星海）照用上面的表。 */
+  (function syncMetaFromCards(){
+    try{
+      var cards = document.querySelectorAll('a.island[href]');
+      for(var k in ISLAND_META){
+        for(var i = 0; i < cards.length; i++){
+          if(cards[i].getAttribute('href') !== ISLAND_META[k].file) continue;
+          var nm = cards[i].querySelector('.island-name'), ic = cards[i].querySelector('.island-icon');
+          var t = nm ? String(nm.textContent || '').trim().replace(/大冒险$/, '') : '';
+          var e = ic ? String(ic.textContent || '').trim() : '';
+          if(t) ISLAND_META[k].short = t;
+          if(e) ISLAND_META[k].emoji = e;
+          break;
+        }
+      }
+    }catch(e){}
+  })();
   
   // 决定最近学习的岛: 优先用 lastIslandKey, 否则扫描各岛 localStorage 找最后活动时间
   function findRecentIsland(){
     // 1) 显式记录的 lastIslandKey
     let lastKey = localStorage.getItem('lastIslandKey');
     let lastTime = parseInt(localStorage.getItem('lastIslandTime')||'0');
-    
+    /* 🔴v1165 孩子真点过的岛说了算：lastIslandKey 只有 openIsland / continueLastIsland（孩子真点岛）会写。
+       以前还要和各岛存档的 lastSaveTime 比谁新 —— 而后台也会写存档（星海预热、云端恢复、升级盖时间戳……），
+       卡片就常常指向孩子根本没玩的岛（多半是 👑星海终战）。有记录就直接用；没有记录才扫存档猜一个。 */
+    if(lastKey && ISLAND_META[lastKey]) return {key: lastKey, time: lastTime};
+
     // 2) 扫描所有岛的进度数据, 找最近更新的
     let bestKey = null, bestTime = lastTime;
     for(const k in ISLAND_META){
@@ -4037,8 +4085,26 @@ document.querySelectorAll('.island').forEach(el=>{
       el.setAttribute('aria-hidden','false');
     }catch(e){}
   }
+  /* 🔴v1165 网慢提示：加载屏改口 + 一个能点的「返回首页」（加载屏本身不接点击，按钮单独放开） */
+  function _slowIslandHint(){
+    try{
+      var el = document.getElementById('islandLoading'); if(!el) return;
+      var tx = document.getElementById('islandLoadingText'); if(tx) tx.textContent = '网络有点慢，还在加载…';
+      var b = document.getElementById('islandLoadingBack');
+      if(!b){
+        b = document.createElement('button');
+        b.id = 'islandLoadingBack'; b.type = 'button'; b.textContent = '‹ 返回首页';
+        b.style.cssText = 'margin-top:26px;pointer-events:auto;font:inherit;font-size:17px;font-weight:800;padding:12px 26px;border:0;border-radius:16px;background:rgba(255,255,255,.18);color:#fff;cursor:pointer';
+        b.onclick = function(){ try{ closeIsland(); }catch(e){} };
+        el.appendChild(b);
+      }
+      b.style.display = '';
+      el.style.transition = 'none'; el.style.opacity = '1'; el.style.display = 'flex'; el.setAttribute('aria-hidden','false');
+    }catch(e){}
+  }
   function _hideIslandLoading(immediate){
     try{
+      var _bk = document.getElementById('islandLoadingBack'); if(_bk) _bk.style.display = 'none';
       var el = document.getElementById('islandLoading'); if(!el) return;
       var bar = document.getElementById('islandLoadingBar'); if(bar){ bar.style.transition = 'width .2s ease'; bar.style.width = '100%'; }
       if(immediate){
@@ -4055,6 +4121,15 @@ document.querySelectorAll('.island').forEach(el=>{
   function _validIslandFile(file){
     return /^(?:island_[a-z0-9]+|land_map|season_showcase|boss_hall)\.html$/.test(String(file||''));
   }
+  /* 🔴v1165 页面的版本戳（脚本 ?v=）。保活的岛和外壳不是同一版（发版后网慢留下的旧岛页）就不再拿出来用 */
+  function _docStamp(doc){
+    try{ var s = doc.querySelector('script[src*="hansen_version_watch"]') || doc.querySelector('script[src*="?v="]'); var m = s && s.getAttribute('src').match(/[?&]v=(\d+)/); return m ? m[1] : ''; }catch(e){ return ''; }
+  }
+  /* 🔴v1165 岛框打开的地址和预取/预热的地址一字不差（都带 ?v=版本号）：以前预取下的是 island_x.html?v=…、
+     岛框打开的是 island_x.html，两个地址，预取的那份永远用不上，每次进岛都白多下一份岛页 */
+  var HSN_BUILD = _docStamp(document);
+  window.HSN_BUILD = HSN_BUILD;
+  function _islandUrl(file){ return HSN_BUILD ? (file + '?v=' + HSN_BUILD) : file; }
   function openIsland(file, fromHistory){
     if(!_validIslandFile(file)) return;
     try{ for(var k in ISLAND_META){ if(ISLAND_META[k].file === file){ localStorage.setItem('lastIslandKey', k); localStorage.setItem('lastIslandTime', String(Date.now())); break; } } }catch(e){}
@@ -4063,12 +4138,19 @@ document.querySelectorAll('.island').forEach(el=>{
     if(!wrap || !frame){ window.location.href = file; return; }  /* 兜底: 无外壳则退回原生跳转 */
     var cur = '';
     try{ cur = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
+    /* 🔴v1165 复查：藏着的框里不是一个活的岛（网慢 / 离线时 SW 给的「网络有点慢」「这个岛还没下载过」页，没有带版本号的脚本），
+       就不能拿出来再用 —— 以前孩子点「返回首页」、网好了再点同一个岛，看到的还是那张错误页，而且一个请求都不发。
+       岛页一定带 ?v= 脚本；没有版本戳、或者是 SW 错误页（有「再试一次」按钮），一律当作死框，换新框重新加载。 */
+    if(cur === file){ var _fs = '', _dead = false; try{ var _fd = frame.contentDocument; _fs = _docStamp(_fd); _dead = !!(_fd && _fd.getElementById('hsnNavRetry')); }catch(e){} var _hs = _docStamp(document); if(_dead || (!_fs && _hs) || (_fs && _hs && _fs !== _hs)) cur = ''; }
     if(cur === file){
       /* 🔴 保活: iframe 当前就是这个岛(上次进的·没卸载)→ 瞬时显示, 零重载零淡入(内容本就在·真·瞬时再进)。 */
       _islandPending = null;
       frame.style.transition = 'none'; frame.style.opacity = '1';
       wrap.style.display = 'block';
       _hideIslandLoading(true);
+      /* 🔴v1165 保活的岛再显示时刷新一下顶栏金币/经验/任务红点：别的岛、首页、拼写蜂在这期间可能改过全局钱包和任务 */
+      try{ var _kw = frame.contentWindow; if(_kw){ if(typeof _kw.updateTopBar === 'function') _kw.updateTopBar(); if(typeof _kw.updateQuestBadge === 'function') _kw.updateQuestBadge(); } }catch(e){}
+      try{ var _kw2 = frame.contentWindow; if(_kw2) _kw2.dispatchEvent(new _kw2.Event('hsn-shell-shown')); }catch(e){}   /* 🔴v1165 复查第 2 轮：岛又露出来了，预载接着下 */
     } else {
       /* 🔴BUG#90 换岛/首次进岛【真·秒进·零闪】: ①先把 iframe 瞬时设透明(transition:none)【再】显示 wrap → wrap 出现时 iframe 已隐藏·绝不闪旧岛画面;
          ②wrap/iframe 暗底已与岛 body(#0c1538)统一(BUG#89 保留)→揭岛背景零跳变; ③加载提示【延迟250ms】才显(预热后瞬时揭开根本不显·真秒进无闪); ④等首屏图标【真正加载完】再【瞬时】揭开完整岛(替代 v692 的0.3s淡入——淡入本身被反馈为"闪一下"; 图片全就绪故无图标逐个蹦)。
@@ -4097,7 +4179,12 @@ document.querySelectorAll('.island').forEach(el=>{
         if(_islandPending !== file) return;   /* 用户已切走/返回 → 不揭 */
         /* 🔴v904(Hansen: 点动物/植物等大冒险有时却进了星海番外篇): iframe 里【上一个岛(常是星海)的旧内容】在新岛加载慢(>1.9s)时会被兜底 setTimeout(_revealIsland,1900) 提前揭开 → 露出上一个岛。必须先确认 iframe 真加载到了目标岛(pathname===file)才揭开; 没到就保持加载屏、120ms 后再试(岛加载完 onload/poll 自然会到), 加 10s 硬底线防极端卡死。 */
         var _u=''; try{ _u = frame.contentWindow.location.pathname.split('/').pop(); }catch(e){}
-        if(_u !== file && (Date.now() - _tStart) < 10000){ setTimeout(_revealIsland, 120); return; }
+        /* 🔴v1165 网慢时绝不揭开一张白纸（以前 10 秒一到就揭，露出空白或上一个岛）：岛没到就一直留在加载屏，
+           10 秒后改口「网络有点慢，还在加载…」并给一个「返回首页」，孩子自己决定等还是回去。 */
+        if(_u !== file){
+          if((Date.now() - _tStart) >= 10000) _slowIslandHint();
+          setTimeout(_revealIsland, 120); return;
+        }
         _islandPending = null;
         try{ clearTimeout(_loadHintTimer); }catch(e){}
         /* 🔴BUG#90 瞬间完整揭开(替代 v692 的 0.3s 淡入——淡入本身被反馈为"闪一下"): 首屏图片已就绪(见 _pollReady)→ 直接【瞬时】显示完整岛, 加载提示瞬时隐藏。
@@ -4122,8 +4209,27 @@ document.querySelectorAll('.island').forEach(el=>{
         }
         setTimeout(_pollReady, 40);
       }
-      frame.onload = function(){ frame.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
-      try{ frame.contentWindow.location.replace(file); }catch(e){ try{ frame.src = file; }catch(e2){} }
+      /* 🔴v1165 换岛 = 换一个新的、名字唯一的 iframe（以前在同一个 iframe 里 location.replace）。
+         同一个 iframe 换页时，下面的 pushState 比 iframe 换页先生效，联合会话历史里上一条还记着「上一个岛」；
+         孩子点 🗺️（history.back）回首页时，藏着的 iframe 会被浏览器自己导回上一个岛（保活失效、后台重跑、再进又整页重载）。
+         新 iframe 名字不同，旧历史条目找不到它，就不会再被导回去。内存里仍然只有一个岛。 */
+      frame.onload = null;
+      try{
+        var _nf = document.createElement('iframe');
+        for(var _ai = 0; _ai < frame.attributes.length; _ai++){
+          var _at = frame.attributes[_ai];
+          if(_at.name !== 'src' && _at.name !== 'name') _nf.setAttribute(_at.name, _at.value);
+        }
+        _nf.name = 'hsnIsland_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        _nf.style.transition = 'none'; _nf.style.opacity = '0';
+        _nf.onload = function(){ _nf.onload = null; _revealIsland(); };   /* 兜底: 万一 poll 漏揭, onload 也揭 */
+        _nf.src = _islandUrl(file);
+        frame.parentNode.replaceChild(_nf, frame);
+        frame = _nf;
+      }catch(e){
+        frame.onload = function(){ frame.onload = null; _revealIsland(); };
+        try{ frame.contentWindow.location.replace(_islandUrl(file)); }catch(e1){ try{ frame.src = _islandUrl(file); }catch(e2){} }
+      }
       setTimeout(_pollReady, 40);
       setTimeout(_revealIsland, _DEADLINE);   /* 🔴v747(Hansen): 硬兜底=2秒(原9秒)·绝对上限·任何情况下加载页都不超过2秒 */
     }
@@ -4141,8 +4247,9 @@ document.querySelectorAll('.island').forEach(el=>{
     }
   }
   /* 纯显示关闭: 只隐藏外壳 + 刷新首页(幂等)。🔴 保活岛——【不卸载岛】(不 replace about:blank), 只隐藏 →
-     再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。岛无后台音乐(只按需单词发音),
-     隐藏时不会响; 切到别的岛时 openIsland 会 replace 覆盖掉旧岛(内存恒 1 岛)。 */
+     再进同一个岛【瞬时·无重载·无闪烁】, 且数据天然新鲜(你在首页没改岛数据)。切到别的岛时 openIsland 换一个新 iframe(内存恒 1 岛)。
+     🔴v1165 藏起来的岛并不会自己安静：打地鼠会每 5 秒在首页念一个词、极速 60 秒还在倒数。
+     所以藏起来时告诉岛一声（岛页的 __hsnIslandHidden：停掉正在玩的游戏和声音，回到本岛主页）。 */
   /* 🔴v1164(审查 UI-1): 岛只隐藏不卸载 —— 岛里要是正开着房等人、正在进房、正在找对手或正在对战,
      藏起来以后它照样在后台跑: 房还挂在列表里、对局还在打, 别的孩子会被配进来跟一个不在的人打。
      所以收起岛之前先问岛"是不是在联机", 是的话把联机流程收掉(同源 iframe, 直接调它的 close)。 */
@@ -4183,37 +4290,82 @@ document.querySelectorAll('.island').forEach(el=>{
     _flushCloudFromIsland();
     wrap.style.display = 'none';
     try{ document.body.style.overflow = ''; }catch(e){}
+    try{
+      var _f = document.getElementById('islandFrame'), _w = _f && _f.contentWindow;
+      if(_w && typeof _w.__hsnIslandHidden === 'function') _w.__hsnIslandHidden();
+      /* 🔴v1165 复查第 2 轮：告诉岛里的预载「你被收起来了」（藏着的 iframe 自己看不出来，以前照样下单词录音） */
+      try{ if(_w) _w.dispatchEvent(new _w.Event('hsn-shell-hidden')); }catch(e2){}
+    }catch(e){}
     try{ renderRecent(); }catch(e){}   /* 返回即刷新首页"最近探险"等进度 */
+    try{ if(typeof window.__hsnApplyHomeTheme === 'function') window.__hsnApplyHomeTheme(); }catch(e){}   /* 🔴v1165 岛里换过的主题回首页马上生效（岛开着时首页不再轮询主题） */
+    try{ if(typeof window.__hsnAfterIslandClose === 'function') window.__hsnAfterIslandClose(); }catch(e){}   /* 🔴v1165 版本守望者：孩子在岛里时攒着的更新，回到首页再做 */
   }
   /* goHome 调这个: 先关闭岛显示(_closeIslandNow 只隐藏不卸载——保活), 再 history.back 清掉 open 时压的那条历史。
      岛内 spelling bee 等覆盖层有自己的历史条目, 返回键会先关覆盖层再关岛(嵌套返回); 覆盖层开着时 goHome 按钮被
      盖住点不到, 所以 closeIsland 触发时岛内绝不残留打开的覆盖层。 */
+  /* 🔴v1165 点一下 🗺️ 就一定回到首页：先当场关掉（不等异步的 history.back），再把岛那条历史弹掉。
+     以前只调 history.back()：岛页自己有历史条目时（比如老的「重新加载」带 _r 跳转），弹掉的是岛页那条，
+     顶层没动 → 岛还开着，孩子得再点一次。现在弹完看一眼：岛页那边动了、顶层没动，就再弹一次（最多 3 次）；
+     顶层动了（popstate）就停。两边都没动静（极慢的手机）就不再弹 —— 宁可留一条历史，也不能一下子退出整个游戏。 */
+  function _popIslandEntry(tries){
+    try{ if(!(history.state && history.state.hsnIsland) || tries >= 3) return; }catch(e){ return; }
+    var f = document.getElementById('islandFrame'), w = null, settled = false, timer = 0;
+    /* 只在岛页已经加载完时才看「岛页那边动没动」：还在加载的岛自己会触发 load，不能当成「弹掉了岛页条目」 */
+    try{ w = (f && f.contentDocument && f.contentDocument.readyState === 'complete') ? f.contentWindow : null; }catch(e){ w = null; }
+    if(!w) f = null;
+    function finish(again){
+      if(settled) return; settled = true;
+      clearTimeout(timer);
+      window.removeEventListener('popstate', onTop);
+      try{ if(w){ w.removeEventListener('popstate', onInner); w.removeEventListener('pagehide', onInner); } }catch(e){}
+      try{ if(f) f.removeEventListener('load', onInner); }catch(e){}
+      if(again) setTimeout(function(){ _popIslandEntry(tries + 1); }, 0);
+    }
+    function onTop(){ finish(false); }
+    function onInner(){ finish(true); }   /* 弹掉的是岛页自己的条目 → 再弹一次 */
+    window.addEventListener('popstate', onTop);
+    try{ if(w){ w.addEventListener('popstate', onInner); w.addEventListener('pagehide', onInner); } }catch(e){}
+    try{ if(f) f.addEventListener('load', onInner); }catch(e){}
+    timer = setTimeout(function(){ finish(false); }, 2500);
+    try{ history.back(); }catch(e){ finish(false); }
+  }
   function closeIsland(){
     _islandPending = null;
     var wrap = document.getElementById('islandFrameWrap');
     if(wrap && wrap.style.display !== 'none'){
-      if(history.state && history.state.hsnIsland){
-        try{ history.back(); return; }catch(e){}
-      }
       _closeIslandNow();
+      _popIslandEntry(0);
     }
   }
   window.openIsland = openIsland;
   window.closeIsland = closeIsland;
-  /* 返回关闭岛；前进则恢复同一条岛状态。两种操作都不新增历史条目。 */
+  /* 返回关闭岛；前进则恢复同一条岛状态。
+     🔴v1165 手机「返回」只退一步：岛开着时先问岛页（__hsnIslandBack：关最上面的浮层/弹窗，或从游戏回本岛主页），
+     岛页说「我处理了」就把岛那条历史补回去、岛照常开着；单词大陆的岛退回大陆地图；都不是才关岛回首页。
+     （🗺️ 走 closeIsland：它先把岛藏起来再退历史，所以到这里时岛已经不显示，不会再问岛页。） */
   window.addEventListener('popstate', function(e){
-    if(e.state && _validIslandFile(e.state.hsnIsland)) { openIsland(e.state.hsnIsland, true); return; }
-    /* 🔴v1164(审查 UI-1): 正在对战时按返回键 —— 先在岛里问一句"要退出这一局吗"(孩子常常手滑),
-       把岛的那条历史压回去; 选"退出"才真的回首页, 选"继续打"就接着打。 */
+    if(e.state && _validIslandFile(e.state.hsnIsland)){ openIsland(e.state.hsnIsland, true); return; }
     var wrap = document.getElementById('islandFrameWrap');
-    var o = (wrap && wrap.style.display !== 'none') ? _islandOnline() : null;
-    if(o && o.room && o.room.battle && o.w && o.w.HansenPkRoomUI && typeof o.w.HansenPkRoomUI.askQuit === 'function'){
-      var file = '';
-      try{ file = document.getElementById('islandFrame').contentWindow.location.pathname.split('/').pop(); }catch(e2){}
-      if(_validIslandFile(file)){
-        try{ history.pushState({ hsnIsland:file }, '', location.href); }catch(e3){}
-        try{ o.w.HansenPkRoomUI.askQuit(function(){ closeIsland(); }); }catch(e4){ _closeIslandNow(); }
-        return;
+    if(wrap && wrap.style.display !== 'none' && !_islandPending){
+      var _f = document.getElementById('islandFrame'), _w = null, _cur = '';
+      try{ _w = _f.contentWindow; _cur = _w.location.pathname.split('/').pop(); }catch(err){ _w = null; }
+      if(_validIslandFile(_cur)){
+        var _handled = false;
+        try{ if(_w && typeof _w.__hsnIslandBack === 'function') _handled = _w.__hsnIslandBack() === true; }catch(err){}
+        if(_handled){ try{ history.pushState({ hsnIsland:_cur }, '', location.href); }catch(err){} return; }
+        /* 🔴v1164(审查 UI-1) + v1165 合并：岛页没接这一下（比如对战屏没登记返回）而正在对战 —— 先在岛里问「要退出这一局吗」，
+           选「退出」才回首页，选「继续打」就接着打（v1165 的「只退一步」在前，这里是兜底） */
+        var _o = _islandOnline();
+        if(_o && _o.room && _o.room.battle && _o.w && _o.w.HansenPkRoomUI && typeof _o.w.HansenPkRoomUI.askQuit === 'function'){
+          try{ history.pushState({ hsnIsland:_cur }, '', location.href); }catch(err){}
+          try{ _o.w.HansenPkRoomUI.askQuit(function(){ closeIsland(); }); }catch(err){ _closeIslandNow(); }
+          return;
+        }
+        if(/^island_land[1-8]\.html$/.test(_cur)){
+          openIsland('land_map.html', true);
+          try{ history.pushState({ hsnIsland:'land_map.html' }, '', location.href); }catch(err){}
+          return;
+        }
       }
     }
     _closeIslandNow();
@@ -4248,10 +4400,19 @@ document.querySelectorAll('.island').forEach(el=>{
   window.renderRecent = renderRecent;
   
   // === 关键: 各种场景下重新渲染 "最近探险的岛屿" 卡片 ===
+  /* 🔴v1165 岛开着时首页根本看不见，卡片不用算（关岛时 _closeIslandNow 会算一次）。
+     以前岛开着也每 2 秒算一次、岛里每存一次档再算一次 —— 同源 iframe 和首页共用一个主线程，岛里会周期性地卡一下。 */
+  function _islandShown(){ try{ var w = document.getElementById('islandFrameWrap'); return !!w && w.style.display !== 'none'; }catch(e){ return false; } }
+  window.__hsnIslandShown = _islandShown;
+  var _rrTimer = 0;
+  function _renderRecentSoon(){
+    if(_rrTimer) return;
+    _rrTimer = setTimeout(function(){ _rrTimer = 0; if(!_islandShown()) renderRecent(); }, 300);   /* 一下子存好几个档只算一次 */
+  }
   
-  // 1) 页面变为可见 (从 iframe 退出 / 切回标签页 / 浏览器返回) → 立刻刷新
+  // 1) 页面变为可见 (切回标签页 / 浏览器返回) → 刷新（岛开着就等关岛时再算）
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'visible') renderRecent();
+    if(document.visibilityState === 'visible' && !_islandShown()) renderRecent();
   });
   
   // 2) 浏览器 back/forward 缓存 (BFCache) 恢复页面 → 立刻刷新
@@ -4259,18 +4420,17 @@ document.querySelectorAll('.island').forEach(el=>{
     renderRecent();
   });
   
-  // 3) localStorage 改变 (其他标签页 / iframe 内更新) → 立刻刷新
+  // 3) localStorage 改变 (其他标签页、首页外壳里的岛 iframe 存档都会触发首页的 storage 事件) → 合并成一次刷新
   window.addEventListener('storage', function(e){
     if(e.key && (e.key.startsWith('wordIsland') || e.key === 'lastIslandKey' || e.key === 'lastIslandTime')){
-      renderRecent();
+      _renderRecentSoon();
     }
   });
   
-  // 4) 高频轮询: 当 iframe 打开时, 每 2 秒检查一次 localStorage
-  //    (storage 事件在同窗口不会触发, 所以需要轮询)
+  // 4) 慢速兜底: 每 10 秒（只在首页露着的时候）—— iOS 上 iframe 的 storage 事件没在真机验证过，留一道慢的保险
   setInterval(function(){
-    renderRecent();
-  }, 2000);
+    if(!_islandShown() && document.visibilityState !== 'hidden') renderRecent();
+  }, 10000);
   
 })();
 
@@ -4294,12 +4454,19 @@ document.querySelectorAll('.island').forEach(el=>{
     document.body.dataset.theme = name;
   }
   applyTheme();
-  // 跨标签页同步
+  /* 🔴v1165 岛开着时首页看不见，主题不用每 1.5 秒重算：岛里换主题/钻石主题（storage 事件）时先不算，关岛时
+     （_closeIslandNow 调 __hsnApplyHomeTheme）一定算一次；首页露着时照常马上换。留一个 10 秒的慢兜底（钻石主题试用到期等）。 */
+  function _shown(){ try{ return typeof window.__hsnIslandShown === 'function' && window.__hsnIslandShown(); }catch(e){ return false; } }
+  window.__hsnApplyHomeTheme = function(){ applyTheme(); };
+  // 跨标签页 / 岛 iframe 同步
   window.addEventListener('storage', function(e){
-    if(e.key === 'theme') applyTheme(e.newValue || 'cosmos');
+    if(e.key !== 'theme' && e.key !== 'hansen_diamond_shop' && e.key !== 'hansen_dia_trial') return;
+    if(_shown()) return;   /* 关岛时再算 */
+    applyTheme(e.key === 'theme' ? (e.newValue || 'cosmos') : undefined);
   });
-  // 1.5 秒兜底轮询 (防 iframe 内变更没触发 storage)
-  setInterval(applyTheme, 1500);
+  window.addEventListener('pageshow', function(){ applyTheme(); });
+  // 10 秒慢兜底（只在首页露着的时候）
+  setInterval(function(){ if(!_shown() && document.visibilityState !== 'hidden') applyTheme(); }, 10000);
 })();
 
 
@@ -4333,25 +4500,26 @@ document.querySelectorAll('.island').forEach(el=>{
 </script>
 
 
-<script src="perf_boost.js?v=1164"></script>
-<script src="hansen_preload.js?v=1164"></script>
-<script src="copy_protect.js?v=1164"></script>
-<script src="click_sound.js?v=1164"></script>
-<script src="click_setting.js?v=1164"></script>
-<script src="vocab_all.js?v=1164"></script>
-<script src="hansen_upgrade.js?v=1164"></script>
-<script src="hansen_onboarding.js?v=1164"></script>
-<script src="hansen_theme_shop.js?v=1164"></script>
-<script src="hansen_season.js?v=1164"></script>
-<script src="hansen_cinema_themes.js?v=1164"></script>
-<script src="hansen_diamond_shop.js?v=1164"></script>
-<script src="hansen_gem_system.js?v=1164"></script>
-<script src="hansen_stability.js?v=1164"></script>
-<script src="hansen_home_link.js?v=1164"></script>
-<script src="hansen_palette.js?v=1164"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1164"></script>
-<script defer src="hansen_island_prefetch_v1025.js?v=1164"></script>
-<script defer src="hansen_cloud_config_v965.js?v=1164"></script><script defer src="hansen_auth_v1004.js?v=1164"></script><script defer src="hansen_auth_ui_v1004.js?v=1164"></script><script defer src="hansen_signup_gate_v1030.js?v=1164"></script><!--🔴v1025: 主页→岛屿页 触碰即预取-->
-<script src="hansen_perf_v944.js?v=1164"></script><!-- v944 性能引擎: 图片卫生·滚动不暂停主题·新路径跨越旧SW缓存 -->
+<script src="perf_boost.js?v=1165"></script>
+<script src="hansen_preload.js?v=1165"></script>
+<script src="copy_protect.js?v=1165"></script>
+<script src="click_sound.js?v=1165"></script>
+<script src="click_setting.js?v=1165"></script>
+<script src="vocab_all.js?v=1165"></script>
+<script>/* v1165: 首页岛屿数/单词数从词库现算，不再写死（以前写 711+） */try{(function(){var v=window.HANSEN_VOCAB_ALL||{},k=Object.keys(v),n=0;k.forEach(function(x){n+=(v[x]||[]).length});if(k.length&&n){document.querySelectorAll("[data-hsn-count=islands]").forEach(function(e){e.textContent=k.length});document.querySelectorAll("[data-hsn-count=words]").forEach(function(e){e.textContent=n})}})()}catch(e){}</script>
+<script src="hansen_upgrade.js?v=1165"></script>
+<script src="hansen_onboarding.js?v=1165"></script>
+<script src="hansen_theme_shop.js?v=1165"></script>
+<script src="hansen_season.js?v=1165"></script>
+<script src="hansen_cinema_themes.js?v=1165"></script>
+<script src="hansen_diamond_shop.js?v=1165"></script>
+<script src="hansen_gem_system.js?v=1165"></script>
+<script src="hansen_stability.js?v=1165"></script>
+<script src="hansen_home_link.js?v=1165"></script>
+<script src="hansen_palette.js?v=1165"></script><!--🔴v1083 版本守望者：彻底解决「做出来的东西不显示」。SW 有缓存时导航只等几秒，超时就给旧 HTML；而 HTML 不带版本戳会被一直复用，于是用户连着几版跑旧代码而双方都看不出来。本模块去服务器问最新版本(no-store 绕开缓存)，发现落后就自动清缓存硬重载。--><script defer src="hansen_version_watch_v1083.js?v=1165"></script>
+<script defer src="hansen_island_prefetch_v1025.js?v=1165"></script>
+<script defer src="hansen_cloud_config_v965.js?v=1165"></script><script defer src="hansen_auth_v1004.js?v=1165"></script><script defer src="hansen_auth_ui_v1004.js?v=1165"></script><script defer src="hansen_signup_gate_v1030.js?v=1165"></script><!--🔴v1025: 主页→岛屿页 触碰即预取-->
+<script src="hansen_perf_v944.js?v=1165"></script><!-- v944 性能引擎: 图片卫生·滚动不暂停主题·新路径跨越旧SW缓存 -->
 <script>/* 🔴 v733(Hansen): 版本水印取值——从已加载脚本的 ?v= 戳读当前构建号(build.py 每次构建自动维护·永远=真实部署版本·无需手改)。若加载到的是旧缓存 index.html·这里读到的就是旧版号→Hansen 一眼就知道没刷新到新代码。 */
 (function(){try{var el=document.getElementById('hsnVerStamp');if(!el)return;var s=document.querySelector('script[src*="?v="]');var m=s&&s.src.match(/[?&]v=(\d+)/);el.textContent=m?('v'+m[1]):'';}catch(e){}})();</script>
 
@@ -4394,7 +4562,15 @@ document.querySelectorAll('.island').forEach(el=>{
   /* 有限离线层：只缓存外壳、必要脚本与最近访问页面，不预下载完整媒体库。 */
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.addEventListener('load',function(){
+      /* 🔴v1165 升级门这次已经注册过、或这个标签页 10 分钟内装失败过（hsn_sw_fail_at）→ 不再注册，免得每次刷新重下整份外壳 */
+      try{
+        var _g = window.__hansenSwUpgradeGateV944;
+        if(_g && _g.registered) return;
+        var _f = Number(sessionStorage.getItem('hsn_sw_fail_at')) || 0;
+        if(_f && Date.now() - _f < 10 * 60 * 1000) return;
+      }catch(e){}
       navigator.serviceWorker.register('./sw_v944.js',{scope:'./',updateViaCache:'none'}).catch(function(err){
+        try{ sessionStorage.setItem('hsn_sw_fail_at', String(Date.now())); }catch(e){}
         try{ console.warn('[离线基础] Service Worker 注册失败:',err&&err.message); }catch(e){}
       });
     },{once:true});

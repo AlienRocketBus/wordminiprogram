@@ -21,11 +21,15 @@
   if(window.__hsnMyLearning) return;
   window.__hsnMyLearning = true;
 
-  var TOTAL_ISLANDS = 19;
+  // v1165: 常规 18 岛 + 星海 + 单词大陆 8 页，各页都会记一份快照；从账本现算，算不出来用 27
+  var TOTAL_ISLANDS = (function(){ try { var HC = window.HansenCanonical; if(HC && HC.islands && typeof HC.resolve === 'function'){ var n = HC.islands.length; for(var i = 1; i <= 50 && HC.resolve('land' + i); i++) n++; return n; } } catch(e){} return 27; })();
   var PFX = 'hsn_progress:';
 
   // ── 工具 ──
-  function islandTitle(){ try { return ((document.title || '').split('·')[0] || '').trim() || (document.title || '岛屿'); } catch(e){ return '岛屿'; } }
+  /* v1165: 按「 · 」（带空格）切岛名。以前按「·」切，单词大陆 8 个岛的标题「单词大陆·①迷雾心湖 · …」都切成「单词大陆」，
+     8 个岛记成同一个岛。常规岛「动物大冒险 · Animal…」切出来还是「动物大冒险」，老快照照样认得。 */
+  function islandTitle(){ try { var t = document.title || ''; return (t.split(' · ')[0] || '').trim() || t || '岛屿'; } catch(e){ return '岛屿'; } }
+  var LEGACY_MERGED = PFX + '单词大陆';   // 旧版把 8 个大陆岛并成的那一行：不再显示（各岛下次打开会各记各的）
   function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : 0; }
   function pct(a, b){ return b > 0 ? Math.round(a / b * 100) : 0; }
   function getStreak(){ try { if(window.HansenCheckin && typeof HansenCheckin.getStreak === 'function') return num(HansenCheckin.getStreak()); } catch(e){} return 0; }
@@ -33,9 +37,32 @@
   function daysAgo(ts){ if(!ts) return ''; var d = Math.floor((Date.now() - ts) / 86400000); return d <= 0 ? '今天' : d === 1 ? '昨天' : d + ' 天前'; }
   function esc(s){ return (s == null ? '' : String(s)).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
 
+  // v1165: 本页藏在后台预热框里(孩子看不见)时不写快照 —— 否则「我的学习」会说他去过一个从没打开的岛。
+  //   预热房间被孩子点开(display:block)之后, 下一次定时快照照常写。
+  function hiddenWarmFrame(){
+    try {
+      if(/[?&]warm=1(?:&|$)/.test(location.search || '')) return true;
+      var fe = window.frameElement; if(!fe) return false;
+      if(fe.getAttribute && fe.getAttribute('aria-hidden') === 'true') return true;
+      var room = fe.closest && fe.closest('[id^="hsn_room_"]');
+      return !!(room && room.style.display !== 'block');
+    } catch(e){ return false; }
+  }
+
+  /* 🔴v1165 复查第 2 轮：首页外壳里收起来的岛（孩子回首页了，岛框 display:none）也不写 ——
+     iframe 藏起来时 visibilityState 还是 visible，以前它照样每 8 秒写一次 */
+  function hiddenInShell(){
+    try {
+      if(window.parent === window) return false;
+      if(typeof window.parent.__hsnIslandShown === 'function' && window.frameElement && window.frameElement.closest &&
+         window.frameElement.closest('#islandFrameWrap')) return !window.parent.__hsnIslandShown();
+    } catch(e){}
+    return false;
+  }
   // ── 快照: 把本岛真实学习数据写进全局命名空间 ──
   function writeSnapshot(){
     try {
+      if(hiddenWarmFrame() || hiddenInShell()) return;
       var S = window.S; if(!S) return;
       var allW = window.allW;
       var snap = {
@@ -49,7 +76,14 @@
         maxCombo: (S.stats && num(S.stats.maxCombo)) || 0,
         ts: Date.now()
       };
-      localStorage.setItem(PFX + snap.name, JSON.stringify(snap));
+      /* 🔴v1165 复查第 2 轮：除了时间什么都没变就不写。以前每 8 秒写一次（只有 ts 变）→ 每次都触发「数据变了」→
+         云存档每 16 秒左右整份导出一次备份：孩子什么都没点，岛也一阵一阵地卡（4 倍慢 CPU 300~800ms）。
+         ts 现在的意思是「上次学到东西的时候」（「我的学习」写的今天 / 昨天正好就是这个） */
+      var key = PFX + snap.name, old = null;
+      try { old = JSON.parse(localStorage.getItem(key) || 'null'); } catch(eOld){ old = null; }
+      if(old && typeof old === 'object' && old.name === snap.name && old.totalWords === snap.totalWords && old.learned === snap.learned &&
+         old.ans === snap.ans && old.cor === snap.cor && old.boss === snap.boss && old.level === snap.level && old.maxCombo === snap.maxCombo) return;
+      localStorage.setItem(key, JSON.stringify(snap));
     } catch(e){}
   }
 
@@ -59,7 +93,7 @@
     try {
       /* v1133: 走快照 —— 边遍历边读会因集合被别的模块改动而漏键 */ var _lsk1=(function(){var _o=[];try{for(var _q=0;_q<localStorage.length;_q++){var _kq=localStorage.key(_q);if(_kq)_o.push(_kq);}}catch(_e){}return _o;})();for(var i=0;i<_lsk1.length;i++){
         var k = _lsk1[i];
-        if(!k || k.indexOf(PFX) !== 0) continue;
+        if(!k || k.indexOf(PFX) !== 0 || k === LEGACY_MERGED) continue;
         var o;
         try { o = JSON.parse(localStorage.getItem(k)); } catch(e){ continue; }
         if(!o || typeof o !== 'object') continue;
@@ -182,7 +216,8 @@
     } catch(e){}
   }
 
-  window.HansenMyLearning = { _open: openPanel, _close: closePanel, _goReview: goReview };
+  /* v1165: 补上 open/close 别名（亮色对比度测试等外部调用写的是 open()，以前只有 _open，调了等于没调） */
+  window.HansenMyLearning = { open: openPanel, close: closePanel, _open: openPanel, _close: closePanel, _goReview: goReview };
 
   // ── 注入主页入口卡片(.util-row) ──
   function injectEntry(){

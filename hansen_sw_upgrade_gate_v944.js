@@ -6,7 +6,7 @@
     /* v1163: 这个号只是给排查用的标记（不参与任何比较），
        但仍然要跟着 VERSION 走 —— 一个记录着旧版本号的字段
        会在排查时把人带偏，而它本身没有存在的代价。 */
-    version: 1164,
+    version: 1165,
     ready: false,
     controller: 'checking'
   };
@@ -22,10 +22,31 @@
       // 没有旧 controller 时，当前文档和随后脚本都直接来自网络，不存在混版窗口。
       state.ready = true;
       state.controller = 'none';
+      /* v1165：只在顶层页面注册（首页外壳里的岛框不再各注册一次）；装失败了这个标签页 10 分钟内不再试 ——
+         以前装一次要下约 1MB 外壳，某个文件出错时每个页面框都重试，进一次岛就重下十几次。 */
+      var FAIL_KEY = 'hsn_sw_fail_at', FAIL_HOLD = 10 * 60 * 1000;
+      var isTop = true;
+      try { isTop = window.top === window.self; } catch (_) { isTop = false; }
+      var failedAt = 0;
+      try { failedAt = Number(sessionStorage.getItem(FAIL_KEY)) || 0; } catch (_) {}
+      var markFailed = function(){ try { sessionStorage.setItem(FAIL_KEY, String(Date.now())); } catch (_) {} };
+      if (!isTop || (failedAt && Date.now() - failedAt < FAIL_HOLD)) {
+        state.controller = isTop ? 'none-backoff' : 'none-frame';
+        return;
+      }
+      state.registered = true;   // 首页 load 时不必再注册一遍
       navigator.serviceWorker.register('./sw_v944.js', {
         scope: './',
         updateViaCache: 'none'
+      }).then(function(reg){
+        var w = reg && (reg.installing || reg.waiting);
+        if (!w) return;
+        w.addEventListener('statechange', function(){
+          if (w.state === 'redundant' && !reg.active) markFailed();   // 外壳没装上（某个文件下载失败）
+          else if (w.state === 'activated') { try { sessionStorage.removeItem(FAIL_KEY); } catch (_) {} }
+        });
       }).catch(function(error){
+        markFailed();
         try { console.warn('[v960升级门] Service Worker 注册失败:', error && error.message); } catch (_) {}
       });
       return;

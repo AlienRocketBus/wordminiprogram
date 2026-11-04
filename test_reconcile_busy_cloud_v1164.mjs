@@ -54,9 +54,14 @@ try {
   await t.ok(up && up.ok, '平板上 20 个词已经在云端', () => explain());
   await T.close(); live.splice(live.indexOf(T), 1);
 
-  /* 新手机：岛页 + 藏着的赛季岛都就绪 */
+  /* 新手机：岛页 + 藏着的赛季岛都就绪。
+     🔴v1165：藏着的赛季岛只给「真的打开过星海房间」的孩子预热（hansen_room_warm_v1023.js wasOpened('season')，
+     记号同 test_room_warm_v1023）。要测的是「每一层都看」，所以这台新手机上是一个去过星海的孩子：写上记号、重新打开岛页 */
   const N = await H.openPhone(browser, emu, srv.origin, Object.assign({ name: '新手机' }, ISLAND));
   live.push(N);
+  await N.eval(() => { localStorage.setItem('hansen_room_opened_v1165_season', '1'); return true; });
+  await N.page.reload({ waitUntil: 'domcontentloaded' });
+  await N.page.waitForFunction(ISLAND.ready, null, { timeout: 45000 });
   await setWords(N, 3);
   const seasonOf = () => N.page.frames().find((f) => /island_season\.html/.test(f.url()));
   const sReady = await H.until(async () => {

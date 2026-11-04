@@ -340,12 +340,16 @@
       }
     } catch(e){}
     // 清理 30 天前的快照
+    /* v1165：键里的日期不补零（2026-9-1），以前按字符串比大小、还取最后 10 个字符 → 「2026-10-25」<「2026-9-25」，
+       10~12 月会把今天的快照删掉。改成把年月日解析成日期再比；先拍下键的快照再删，边遍历边删会漏键。 */
     try {
-      var thirtyAgo = daysAgo(30);
-      Object.keys(localStorage).forEach(function(k){
-        if(k.startsWith('hansen_snapshot_') && k.slice(-10) < thirtyAgo){
-          localStorage.removeItem(k);
-        }
+      var cut = new Date(); cut.setHours(0,0,0,0); cut.setDate(cut.getDate() - 30);
+      var keys = []; for(var i = 0; i < localStorage.length; i++){ var kk = localStorage.key(i); if(kk) keys.push(kk); }
+      keys.forEach(function(k){
+        var m = /^hansen_snapshot_(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(k);
+        if(!m) return;
+        var day = new Date(+m[1], +m[2] - 1, +m[3]);
+        if(day.getTime() < cut.getTime()) localStorage.removeItem(k);
       });
     } catch(e){}
   }

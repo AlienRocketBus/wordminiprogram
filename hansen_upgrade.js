@@ -187,15 +187,21 @@
   // ─────────────────────────────────────────────
   // 改进 3: 错题红点徽章
   // ─────────────────────────────────────────────
+  /* v1165: 这个红点每 3 秒算一次。以前把所有 wordIsland* 连同 _bak 备份一起整份解析（错题数还算了两遍），
+     进度多的孩子在岛里每 3 秒卡一下。现在跳过备份键；存档原文没变就用上次的数。 */
+  const _wrongCountCache = {};
   function getWrongCount(){
     let total = 0;
     try {
       Object.keys(localStorage).forEach(k => {
-        if(k.startsWith('wordIsland')){
-          const d = safeJSON(k);
-          if(d && d.wrongs && typeof d.wrongs === 'object'){
-            total += Object.keys(d.wrongs).length;
-          }
+        if(k.startsWith('wordIsland') && !/_bak$|_backup$|_tmp$/i.test(k)){
+          const raw = safeGet(k);
+          const c = _wrongCountCache[k];
+          if(c && c.raw === raw){ total += c.n; return; }
+          let n = 0;
+          try { const d = raw ? JSON.parse(raw) : null; if(d && d.wrongs && typeof d.wrongs === 'object') n = Object.keys(d.wrongs).length; } catch(e){}
+          _wrongCountCache[k] = { raw: raw, n: n };
+          total += n;
         }
       });
     } catch(e){}

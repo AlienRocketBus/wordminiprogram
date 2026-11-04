@@ -42,8 +42,24 @@
     return 0;
   })();
 
-  var FIXED_KEY = 'hansen_vw_autofixed';   /* 记录"已为某个服务器版本自动修过一次" */
+  /* v1165：这份页面自己的版本戳（本脚本 src 的 ?v=）—— 岛框和外壳比版本用 */
+  var STAMP = (function () {
+    try {
+      var s = (document.currentScript && document.currentScript.src) || '';
+      if (!s) { var t = document.querySelector('script[src*="hansen_version_watch"]'); s = t ? t.getAttribute('src') : ''; }
+      var m = String(s).match(/[?&]v=(\d+)/);
+      return m ? Number(m[1]) : 0;
+    } catch (e) { return 0; }
+  })();
+
+  /* 记录「为哪个服务器版本自动修过、最近一次什么时候、修了几次」：{v, at, n}
+     v1165：以前同一版本只修一次 —— 发版头几分钟 CDN 新旧混着，这一次常常刷到的还是旧文件，之后再也不自动修。
+     现在隔 3 分钟可以再试，最多 3 次；存储写不进去时，地址里刚加的 _fresh 也能挡住循环刷新。 */
+  var FIXED_KEY = 'hansen_vw_autofixed';
+  var GAP = 3 * 60 * 1000, MAX_TRIES = 3, RECHECK = 60 * 1000;
   var state = { local: LOCAL, server: 0, stale: false, checkedAt: 0, note: '' };
+  var inflight = null;   /* 正在问服务器的那一次（同时来的检查共用它） */
+  var deferred = 0;      /* 孩子在岛里时攒着、等回首页再做的那次自动更新（服务器版本号） */
 
   function log(s) { state.note = s; try { console.info('[版本守望] ' + s); } catch (e) {} }
 
@@ -85,6 +101,61 @@
     }
     return got.then(function (t) { return Number(String(t || '').trim()) || 0; })
               .catch(function () { return 0; });    /* 取不到 → "无法判断"，绝不误报 */
+  }
+
+  function parseFix(raw) {
+    try {
+      var o = JSON.parse(raw);
+      if (o && typeof o === 'object' && Number(o.v)) return { v: Number(o.v), at: Number(o.at) || 0, n: Number(o.n) || 1 };
+    } catch (e) {}
+    return null;
+  }
+  /* 本机和本次会话各存一份，取更保守的（次数多、时间新） */
+  function readFix() {
+    var a = null, b = null;
+    try { a = parseFix(localStorage.getItem(FIXED_KEY)); } catch (e) {}
+    try { b = parseFix(sessionStorage.getItem(FIXED_KEY)); } catch (e) {}
+    if (!a || !b) return a || b;
+    if (a.v !== b.v) return a.at >= b.at ? a : b;
+    return { v: a.v, at: Math.max(a.at, b.at), n: Math.max(a.n, b.n) };
+  }
+  function writeFix(rec) {
+    var t = JSON.stringify(rec);
+    try { localStorage.setItem(FIXED_KEY, t); } catch (e) {}
+    try { sessionStorage.setItem(FIXED_KEY, t); } catch (e) {}
+  }
+  /* 地址里的 _fresh 是多久以前加的（没有就是 -1） */
+  function freshAge() {
+    try {
+      var m = String(location.search || '').match(/[?&]_fresh=(\d+)/);
+      if (m) return Math.abs(Date.now() - Number(m[1]));
+    } catch (e) {}
+    return -1;
+  }
+  /* 这次还能不能自动更新到 sv：3 分钟内修过、修满 3 次、刚刷新过，都不再动 */
+  function mayAuto(sv) {
+    var rec = readFix();
+    if (rec && rec.v === sv) {
+      if (rec.n >= MAX_TRIES) { log('已为 v' + sv + ' 自动修过 ' + rec.n + ' 次仍未生效 —— 不再自动重载，请手动点「强制更新」'); return false; }
+      if (Date.now() - rec.at < GAP) { log('刚为 v' + sv + ' 自动修过，3 分钟后再试'); return false; }
+    }
+    var age = freshAge();
+    if (age >= 0 && age < GAP) { log('刚刷新过（地址带 _fresh），这次不再自动重载'); return false; }
+    return true;
+  }
+  /* 刷新用的地址：原来的参数和 # 都留着，只换 _fresh（以前只留路径，?u=… 和 #… 全丢） */
+  function freshUrl(extra) {
+    var now = String(Date.now());
+    try {
+      var u = new URL(location.href);
+      if (extra) for (var k in extra) u.searchParams.set(k, extra[k]);
+      u.searchParams.set('_fresh', now);
+      return u.toString();
+    } catch (e) {}
+    var q = String(location.search || '').replace(/^\?/, '').split('&').filter(function (x) { return x && !/^_fresh=/.test(x) && !(extra && extra[x.split('=')[0]] !== undefined); });
+    if (extra) for (var k2 in extra) q.push(k2 + '=' + encodeURIComponent(extra[k2]));
+    q.push('_fresh=' + now);
+    return location.pathname + '?' + q.join('&') + (location.hash || '');
   }
 
   /* 🔴v1084：**只有顶层窗口才做检查与重载。**
@@ -132,29 +203,83 @@
         }));
     } catch (e) {}
     return Promise.all(jobs)['catch'](function () {}).then(function () {
-      try { location.replace(location.pathname + '?_fresh=' + Date.now()); }
+      try { location.replace(freshUrl()); }
       catch (e) { try { location.reload(); } catch (e2) {} }
     });
   }
 
-  function banner(serverV) {
+  var barTimer = 0;
+  function banner(text, ms) {
     try {
-      if (document.getElementById('hsn_vw_bar')) return;
-      var d = document.createElement('div');
-      d.id = 'hsn_vw_bar';
-      d.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483647;'
-        + 'background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;'
-        + 'padding:10px 12px;font-size:14px;text-align:center;font-family:system-ui,-apple-system,sans-serif';
-      d.textContent = '发现新版本 v' + serverV + '（当前 v' + state.local + '），正在更新…';
-      document.body.appendChild(d);
+      var d = document.getElementById('hsn_vw_bar');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = 'hsn_vw_bar';
+        d.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483647;pointer-events:none;'
+          + 'background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;'
+          + 'padding:10px 12px;font-size:14px;text-align:center;font-family:system-ui,-apple-system,sans-serif';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.textContent = text;
+      clearTimeout(barTimer);
+      if (ms) barTimer = setTimeout(function () { try { if (d.parentNode) d.parentNode.removeChild(d); } catch (e) {} }, ms);
     } catch (e) {}
+  }
+
+  /* v1165：孩子正在岛里玩（首页外壳的岛框开着，手机框模式下在框里的首页上）就先不刷新 ——
+     刷新会把他踢回首页、这一局就没了。等他回首页（外壳调 __hsnAfterIslandClose）再更新；岛开着时切到后台也不更新。 */
+  function islandOpen() {
+    var docs = [document];
+    try { var fs = document.querySelectorAll('iframe'); for (var i = 0; i < fs.length; i++) { try { if (fs[i].contentDocument) docs.push(fs[i].contentDocument); } catch (e) {} } } catch (e) {}
+    for (var j = 0; j < docs.length; j++) {
+      try {
+        var w = docs[j].getElementById('islandFrameWrap');
+        if (w && w.style.display !== 'none' && (docs[j].defaultView || window).getComputedStyle(w).display !== 'none') return true;
+      } catch (e) {}
+    }
+    return false;
+  }
+  /* 🔴v1165 复查第 2 轮：首页上的拼写大PK / 天梯对战屏（不在岛框里，盖在首页上）开着也算「正在玩」—— 以前只看岛框，
+     对战打到一半开机检查 / 切后台检查一到就刷新，这一局没了 */
+  function overlayBusy() {
+    var ids = ['hsn_pkroom_screen', 'hsn_pk_screen', 'hsn_ladder_screen'];
+    for (var i = 0; i < ids.length; i++) {
+      try {
+        var el = document.getElementById(ids[i]);
+        if (el && el.isConnected && el.getClientRects().length && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden') return true;
+      } catch (e) {}
+    }
+    return false;
+  }
+  function busy() { return islandOpen() || overlayBusy(); }
+  function autoRefresh(sv, waitMs) {
+    banner('发现新版本 v' + sv + '（当前 v' + state.local + '），正在更新…');
+    return new Promise(function (res) { setTimeout(res, waitMs || 900); })
+      .then(function () {
+        /* 🔴v1165 复查第 2 轮：等的这一会儿孩子又点进了一个岛（回首页后马上点下一个，孩子常这样）/ 开了对战 →
+           不刷新，接着等下次回首页。以前不再看一眼，0.9 秒后照样刷新，把孩子从刚进的岛里踢回首页 */
+        if (busy()) { deferred = sv; banner('有新版本，回到首页时自动更新', 6000); log('孩子又开始玩了 → 先不刷新'); return state; }
+        writeFix({ v: sv, at: Date.now(), n: (function (r) { return r && r.v === sv ? r.n + 1 : 1; })(readFix()) });
+        return forceRefresh().then(function () { return state; });
+      });
+  }
+  function runDeferred() {
+    if (!deferred) return;
+    var sv = deferred; deferred = 0;
+    /* 🔴v1165 复查第 2 轮：回到首页后先停 3 秒（孩子多半马上点下一个岛）；还在首页、没开对战才更新 */
+    if (mayAuto(sv)) autoRefresh(sv, 3000);
   }
 
   function check(opts) {
     opts = opts || {};
     /* iframe 内不自行检查 —— 交给顶层，避免多框各查各的、各重载各的 */
     if (!isTop() && !(opts && opts.fromTop)) return delegateToTop();
-    return fetchServerVersion().then(function (sv) {
+    /* v1165：每开一个岛（岛页自己也装着守望者，会来问顶层）都去问一次 /VERSION —— 现在同时来的共用一次，1 分钟内不重复问 */
+    if (!opts.manual) {
+      if (inflight) return inflight;
+      if (state.checkedAt && Date.now() - state.checkedAt < RECHECK) return Promise.resolve(state);
+    }
+    var p = fetchServerVersion().then(function (sv) {
       state.server = sv;
       state.checkedAt = Date.now();
       /* 无法判断时必须把 stale 复位 —— 否则会残留上一次的结论，
@@ -168,31 +293,60 @@
 
       if (opts.manual) return forceRefresh().then(function () { return state; });
 
-      /* 自动修复：同一个服务器版本只修一次，避免万一判断有误就陷入重载循环。
+      /* 自动修复：同一个服务器版本 3 分钟内只修一次、最多 3 次，避免万一判断有误就陷入重载循环。
          这条保守性比"修得快"重要得多 —— 卡在重载循环里比跑旧版本更糟。 */
-      var already = 0;
-      try { already = Number(localStorage.getItem(FIXED_KEY) || 0); } catch (e) {}
-      if (already === sv) {
-        log('已为 v' + sv + ' 自动修过一次仍未生效 —— 不再自动重载，请手动点「强制更新」');
+      if (!mayAuto(sv)) return state;
+      if (islandOpen()) {
+        if (deferred !== sv) { deferred = sv; banner('有新版本，回到首页时自动更新', 6000); }
+        log('孩子正在岛里玩 → 回到首页时再更新到 v' + sv);
         return state;
       }
-      try { localStorage.setItem(FIXED_KEY, String(sv)); } catch (e) {}
-      banner(sv);
-      return new Promise(function (res) { setTimeout(res, 900); })
-        .then(forceRefresh).then(function () { return state; });
+      if (overlayBusy()) {   /* 🔴v1165 复查第 2 轮：首页上开着对战屏，同样等 */
+        if (deferred !== sv) { deferred = sv; banner('有新版本，打完这一局回到首页时自动更新', 6000); }
+        log('孩子正在首页上对战 → 打完再更新到 v' + sv);
+        return state;
+      }
+      return autoRefresh(sv);
     });
+    if (!opts.manual) {
+      inflight = p;
+      p.then(function () { inflight = null; }, function () { inflight = null; });
+    }
+    return p;
+  }
+
+  /* v1165：岛框里的页面和外壳不是同一版（发版后网慢：外壳是新的、岛页还是缓存里的旧页，引用的全是旧脚本）
+     → 岛框自己带上外壳的版本号重新载一次。每个页面每个版本只试一次（会话里记着），刚刷新过的也不再动。 */
+  function fixStaleFrame() {
+    if (isTop() || !STAMP) return false;
+    var topV = 0;
+    try { topV = Number(window.top.HansenVersionWatch && window.top.HansenVersionWatch.stamp) || 0; } catch (e) { return false; }
+    if (!topV || STAMP >= topV) return false;
+    var key = 'hansen_vw_frame_fix', done = {};   /* {页面路径: 已为哪个外壳版本重载过} */
+    try { done = JSON.parse(sessionStorage.getItem(key) || '{}') || {}; } catch (e) { done = {}; }
+    if (Number(done[location.pathname]) === topV) { log('岛页 v' + STAMP + ' 比外壳 v' + topV + ' 旧，已重载过一次 → 不再重载'); return false; }
+    var age = freshAge();
+    if (age >= 0 && age < GAP) return false;
+    done[location.pathname] = topV;
+    try { sessionStorage.setItem(key, JSON.stringify(done)); } catch (e) {}
+    log('岛页 v' + STAMP + ' 比外壳 v' + topV + ' 旧 → 重新载一次');
+    try { location.replace(freshUrl({ v: String(topV) })); return true; } catch (e) { return false; }
   }
 
   /* 开机后空闲时查一次；不阻塞首屏 */
   function boot() {
+    if (fixStaleFrame()) return;
     var run = function () { check().catch(function () {}); };
     if (typeof window.requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 8000 });
     else setTimeout(run, 4000);
-    /* 从后台切回前台时再查一次 —— 用户挂着页面过夜的场景 */
+    /* 从后台切回前台时再查一次 —— 用户挂着页面过夜的场景；已知落后（上次没修成）就 3 分钟后再查 */
     try {
       document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'visible' &&
-            Date.now() - state.checkedAt > 10 * 60 * 1000) run();
+        /* v1165 复查：岛开着时切到后台（自动锁屏、看一眼微信消息）不更新 —— 刷新会把正在玩的这一局弄没，
+           横幅说的也是「回到首页时自动更新」。只有停在首页时切到后台才顺手更新；岛里攒着的等回首页（__hsnAfterIslandClose）。 */
+        if (document.visibilityState === 'hidden') { if (!busy()) runDeferred(); return; }
+        var since = Date.now() - state.checkedAt;
+        if (document.visibilityState === 'visible' && (since > 10 * 60 * 1000 || (state.stale && since > GAP))) run();
       });
     } catch (e) {}
   }
@@ -202,7 +356,16 @@
   window.HansenVersionWatch = {
     check: check,
     forceRefresh: forceRefresh,
+    stamp: STAMP,
+    islandClosed: runDeferred,
     status: function () { return { local: state.local, server: state.server,
                                    stale: state.stale, note: state.note }; }
+  };
+  /* 外壳关岛时调它（index.html 的 _closeIslandNow）：手机框模式下这里不是顶层，转给顶层 */
+  window.__hsnAfterIslandClose = function () {
+    try {
+      var w = isTop() ? window.HansenVersionWatch : window.top.HansenVersionWatch;
+      if (w && typeof w.islandClosed === 'function') setTimeout(w.islandClosed, 0);
+    } catch (e) {}
   };
 })();

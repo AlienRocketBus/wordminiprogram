@@ -65,6 +65,15 @@ async function openAnimalIsland(G) {
   }, { timeout: 45000, interval: 500 });
   await t.ok(!!fr, '首页里的岛打开了（iframe 里的模块就绪）', () => explain());
   if (fr) await fr.evaluate((nm) => { try { window.HansenSbProfile.setName(nm); } catch (e) { /* 起过 */ } return true; }, G.nick);
+  /* 🔴v1165 返回键「只退一步」：岛上的「欢迎来到动物大冒险！」也算一步（第一下返回先关它）。
+     孩子进岛先点掉它再去玩（和 H.dismissIslandWelcome 一样，只是这里的岛在首页的框里） */
+  if (fr) {
+    for (let i = 0; i < 4; i++) {
+      if (!(await fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false))) break;
+      await fr.locator('#alertModal.show button').first().tap();
+      await H.sleep(500);
+    }
+  }
   return fr;
 }
 const wrapHidden = (G) => G.eval(() => (document.getElementById('islandFrameWrap') || {}).style.display === 'none');
@@ -93,15 +102,34 @@ async function appHidden(G, hidden) {
     const hold = emu.hold({ uid: G.uid, db: true, action: 'database.addDocument' });
     await fr.locator('.pr_mode[data-mode="C"]').tap();
     await H.sleep(500);
+    /* 🔴v1165 返回键「只退一步」：第 1 下 =「选个玩法」上的「← 返回」（回房间列表，这一次开房作废）；
+       第 2 下 = 房间列表的「← 返回」（关掉房间层）；第 3 下才收起岛。房不许开出来 —— 从第 1 下起就不许 */
     await G.page.goBack();
     await H.sleep(800);
     hold.release();
     await H.sleep(5000);
-    const hidden = await wrapHidden(G);
+    const wait1 = await fr.evaluate(() => /等对手进来/.test((document.getElementById('hsn_pkroom_screen') || {}).innerText || '')).catch(() => null);
+    const lr1 = await H.room(K, 'listRooms');
+    const listed1 = !!(lr1 && lr1.ok && (lr1.rooms || []).some((x) => x.hostName === G.nick));
+    await t.ok(wait1 === false && liveRooms(G).length === 0 && !listed1, `第 1 下返回（房还没开好）：没画「等对手进来」、云端没有开着的房、别人列不到（等对手：${wait1}；开着 ${liveRooms(G).length} 间；别人列表里${listed1 ? '有' : '没有'}）`, () => explain());
+    await G.page.goBack();
+    await H.sleep(800);
+    /* 第 3 下起：一直按到岛收起来（最多再按 4 下）。v1165「只退一步」下，中途岛里冒出来的弹窗（欢迎框、提示……）
+       每个都要先关掉，所以下数不是固定的 3 下（反复测试 10 轮里有 1 轮多要一下，本机常见）。
+       要守的是：每一下都不会让房开出来、最后能回到首页 —— 下数多了把多出来的那一层记下来 */
+    let hidden = false, presses = 2;
+    const extraLayers = [];
+    for (let i = 0; i < 5 && !hidden; i++) {
+      if (i > 0) extraLayers.push(await fr.evaluate(() => { const top = [...document.querySelectorAll('body > *')].filter((e) => { const cs = getComputedStyle(e); return (cs.position === 'fixed' || cs.position === 'absolute') && cs.display !== 'none' && e.getClientRects().length && +cs.zIndex > 10; }).map((e) => e.id || e.className || e.tagName); return top.slice(-2).join('+') || '（看不出）'; }).catch(() => '?'));
+      await G.page.goBack();
+      presses++;
+      await H.sleep(1500);
+      hidden = await wrapHidden(G);
+    }
     const uiOn = await fr.evaluate(() => !!document.querySelector('#hsn_pkroom_screen.on')).catch(() => null);
     const lr = await H.room(K, 'listRooms');
     const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === G.nick));
-    await t.ok(hidden && uiOn === false, `按返回键：岛收起来了，藏起来的岛里也没有「等对手进来」（岛收起：${hidden}；房间层开着：${uiOn}）`, () => explain());
+    await t.ok(hidden && uiOn === false, `按返回键：岛收起来了，藏起来的岛里也没有「等对手进来」（岛收起：${hidden}；房间层开着：${uiOn}；按了 ${presses} 下${extraLayers.length ? '，多出来的层：' + extraLayers.join(' / ') : ''}）`, () => explain());
     await t.ok(liveRooms(G).length === 0 && !listed, `云端没有开着的房、别人也列不到（开着 ${liveRooms(G).length} 间；别人列表里${listed ? '有' : '没有'}）`, () => explain());
   });
 
@@ -121,10 +149,19 @@ async function appHidden(G, hidden) {
       return /正在开房间/.test(txt) ? txt : null;
     }, { timeout: 45000, interval: 300 });
     await t.ok(!!creating, '没人可配：天梯自己开房「正在开房间…」', () => explain());
+    /* 🔴v1165 返回键「只退一步」：第 1 下 = 这一屏的「取消，回天梯」（这一次开房作废）；第 2 下关天梯页；第 3 下才收起岛。
+       房不许开出来 —— 从第 1 下起就不许（以前第 1 下被当成对战去问「要退出吗？」，房照样开出来挂在列表上） */
     await G.page.goBack();
     await H.sleep(800);
     hold.release();
     await H.sleep(6000);
+    const lr1 = await H.room(K, 'listRooms', { ladder: true });
+    const listed1 = !!(lr1 && lr1.ok && (lr1.rooms || []).some((x) => x.hostName === G.nick));
+    await t.ok(liveRooms(G).length === 0 && !listed1, `第 1 下返回（正在开房间）：排位房没开出来（开着 ${liveRooms(G).length} 间；别人${listed1 ? '列得到' : '列不到'}）`, () => explain());
+    await G.page.goBack();
+    await H.sleep(800);
+    await G.page.goBack();
+    await H.sleep(1500);
     const hidden = await wrapHidden(G);
     const lr = await H.room(K, 'listRooms', { ladder: true });
     const listed = !!(lr && lr.ok && (lr.rooms || []).some((x) => x.hostName === G.nick));
@@ -215,6 +252,9 @@ async function appHidden(G, hidden) {
     names = {};
     const I = await phone('岛屿页', '小蜂岛', { path: '/island_animal.html', ready: () => !!(window.HansenAuth && window.HansenCloudSave && window.HansenCloudRestore) });
     await H.sleep(2000);
+    /* 🔴v1165：藏着的预热页（赛季岛）只给「真的打开过星海房间」的孩子做（hansen_room_warm_v1023.js wasOpened('season')，
+       记号同 test_room_warm_v1023）。这里要数的是「几层页面各查一次」，所以这是一个去过星海的孩子：重新打开前写上记号 */
+    await I.eval(() => { localStorage.setItem('hansen_room_opened_v1165_season', '1'); return true; });
     const t0 = Date.now();
     await I.page.reload({ waitUntil: 'domcontentloaded' });
     await I.page.waitForFunction(() => !!(window.HansenAuth && window.HansenCloudRestore), null, { timeout: 45000 });
@@ -222,7 +262,9 @@ async function appHidden(G, hidden) {
     const frames = await I.eval(() => { let n = 0; const walk = (w) => { try { if (w.HansenCloudRestore) n++; for (let i = 0; i < w.frames.length; i++) walk(w.frames[i]); } catch (e) { /* 跨域 */ } }; walk(window); return n; });
     const reads = emu.log.filter((x) => x.uid === I.uid && x.collection === 'hansen_saves' && x.action === 'database.queryDocument' && x.t >= t0).length;
     await t.ok(frames >= 2, `这一页里装着云存档开机检查的有 ${frames} 层（岛 + 预热的页面）`, () => explain());
-    await t.ok(reads >= 1 && reads <= 2, `打开一次岛，开机查云存档 ${reads} 次（该是 1 次；以前每层各查一次）`, () => explain());
+    /* 开机检查自己记下的结果（v1165 复查第 4 轮加的）：0 次时说清楚是没登录好、模块没到还是没跑到 */
+    const boot = await I.eval(() => { const b = window.__hsnRestoreBoot; return b ? JSON.stringify({ ago: Date.now() - b.t, top: b.top, r: b.r }) : '没跑到'; });
+    await t.ok(reads >= 1 && reads <= 2, `打开一次岛，开机查云存档 ${reads} 次（该是 1 次；以前每层各查一次）· 开机检查：${boot}`, () => explain());
   });
 }
 t.summary();

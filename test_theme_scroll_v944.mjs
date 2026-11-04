@@ -32,9 +32,13 @@ assert.match(swSource, new RegExp(`'\\.\\/hansen_perf_v944\\.js\\?v=${CACHE_VERS
 assert.doesNotMatch(swSource, /'\.\/hansen_perf\.js'/,
   'the old performance-script pathname must not return to the shell cache');
 const codeBranch = swSource.slice(swSource.indexOf('if (isCode)'));
-assert(codeBranch.indexOf('const exact = await caches.match(request)') >= 0,
+/* v1165：SW 先精确查一次缓存（const hit = caches.match(request)，不带 ignoreSearch）决定要不要联网，
+   代码分支直接复用这次结果（const exact = await hit），不再查第二遍。含义和原断言一样：精确键、先缓存后网络。 */
+const exactAt = Math.max(codeBranch.indexOf('const exact = await caches.match(request)'), codeBranch.indexOf('const exact = await hit'));
+const hitDecl = (swSource.match(/const hit = caches\.match\(request\)[^;\n]*/) || [''])[0];
+assert(exactAt >= 0 && (codeBranch.indexOf('const exact = await hit') < 0 || (hitDecl && !/ignoreSearch/.test(hitDecl))),
   'versioned code must use an exact cache key');
-assert(codeBranch.indexOf('const exact = await caches.match(request)') < codeBranch.indexOf('const fresh = await refresh'),
+assert(exactAt < codeBranch.indexOf('const fresh = await refresh'),
   'versioned code must check exact cache before network');
 assert(codeBranch.indexOf('const fresh = await refresh') < codeBranch.indexOf('url.origin + url.pathname'),
   'bare shell code may only be used after the network fails');

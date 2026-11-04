@@ -699,6 +699,10 @@ def guard_version_watch_everywhere():
             continue
         if mod not in (_read(base) or ''):
             miss.append(base)
+    # 🔴v1165：电脑「手机框」模式（_frame.html）里游戏在 iframe 里，岛页把检查和刷新都交给顶层 ——
+    #   顶层就是 _frame.html。上面按「_ 开头不是运行时页面」跳过了它，结果手机框模式下守望者一直没人接（F026）。
+    if mod not in (_read('_frame.html') or ''):
+        miss.append('_frame.html')
     if miss:
         bad('版本守望', '%d 个页面没装版本守望者: %s' % (len(miss), ', '.join(miss[:6])))
 
@@ -3765,6 +3769,609 @@ def guard_handoff_current():
             % (m.group(1), cur, cur - int(m.group(1))))
 
 
+# ══════════════════════════════════════════════════════════════════
+# 🔴v1165 全站修复（两条线合并后）留下的守卫
+#
+# 这一轮修了一百多处，每一处都是「同一种病」的一次发作：
+#   定时器不认局、完形只认原词、提示条贴边、选项出近义词、岛页接口缺一半、
+#   版本守望者循环刷新、新模块没进外壳、首页高频轮询……
+# 下面每一道只盯一种病，判据都落在「具体文件 + 具体位置」，并且各有自证样本。
+# ══════════════════════════════════════════════════════════════════
+
+def _g1165_args(src, i):
+    """从 src[i]（左括号后第一个字符）开始，按顶层逗号切出一次调用的各个参数（认括号/引号嵌套）。"""
+    args, depth, cur, q, j = [], 0, [], None, i
+    while j < len(src):
+        c = src[j]
+        if q:
+            cur.append(c)
+            if c == '\\' and j + 1 < len(src):
+                cur.append(src[j + 1]); j += 2; continue
+            if c == q:
+                q = None
+        elif c in '\'"`':
+            q = c; cur.append(c)
+        elif c in '([{':
+            depth += 1; cur.append(c)
+        elif c in ')]}':
+            if depth == 0:
+                args.append(''.join(cur).strip())
+                return args
+            depth -= 1; cur.append(c)
+        elif c == ',' and depth == 0:
+            args.append(''.join(cur).strip()); cur = []
+        else:
+            cur.append(c)
+        j += 1
+    return args
+
+
+def _g1165_fn(src, name):
+    """函数 name 的源码：从 function name( 起，到下一个同样缩进的 function 为止。找不到返回 ''。"""
+    m = re.search(r'(?m)^([ \t]*)function\s+' + re.escape(name) + r'\s*\(', src)
+    if not m:
+        return ''
+    nxt = re.search(r'(?m)^' + re.escape(m.group(1)) + r'function\s+\w+\s*\(', src[m.end():])
+    return src[m.start(): m.end() + (nxt.start() if nxt else len(src))]
+
+
+_G1165_TPLS = ('template.html', 'land_template.html')
+
+
+def _g1165_island_pages():
+    return sorted(os.path.basename(f) for f in glob.glob(os.path.join(ROOT, 'island_*.html')))
+
+
+def guard_nav_explore_not_wrong_tab():
+    """点「探索单词」时底栏不能亮「错题」格。
+
+    事故（v1165 全站检查 VC-08）：底栏第二格 navExplore 早被 hansen_wrong_overview.js 改成了「错题」，
+    可 showScreen('explore') 还按 v576 的 navMap 把它点亮 —— 孩子点「探索单词」，底栏亮的却是「错题」。
+    check_resources 的 v576 检查钉着 navMap 那一整行（含 explore），所以修法是在点亮那一行把 explore 排除。
+    判据（两份母版）：navMap 里没有 explore，或者点亮那一行明确跳过 explore。
+    """
+    for fn in _G1165_TPLS:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('底栏高亮对', '缺少 %s' % fn)
+            continue
+        m = re.search(r'const\s+navMap\s*=\s*\{([^}]*)\}', src)
+        if not m:
+            bad('底栏高亮对', '%s 找不到 showScreen 的 navMap —— 没法判断底栏高亮' % fn)
+            continue
+        if not re.search(r'\bexplore\s*:', m.group(1)):
+            continue
+        use = re.search(r"if\s*\(\s*navMap\[id\]([^)]*)\)\s*document\.getElementById\(\s*navMap\[id\]\s*\)\.classList\.add\(\s*'active'\s*\)", src)
+        if not use:
+            bad('底栏高亮对', '%s 找不到点亮底栏的那一行 —— 没法判断「探索单词」会不会点亮「错题」格' % fn)
+        elif "id!=='explore'" not in use.group(1).replace(' ', ''):
+            bad('底栏高亮对', "%s 的 navMap 有 explore→navExplore，点亮时又没跳过 explore —— "
+                "点「探索单词」底栏亮的是「错题」（VC-08）" % fn)
+
+
+_G1165_SYN = (('however', 'nevertheless'), ('therefore', 'consequently'), ('besides', 'moreover', 'furthermore'),
+              ('rarely', 'seldom'), ('immediately', 'instantly'), ('finally', 'eventually'), ('huge', 'enormous'))
+
+
+def guard_distractors_no_synonyms():
+    """四个选项里不能同时出现意思一样的两个词（近义词 / 同一个中文义项）。
+
+    事故（v915 起只按英文+整串中文去重）：星海终战的 however/nevertheless、rarely/seldom 这类近义词
+    会同时当选项，完形选对也判错；义项「可获得的/可用的」和「可用的」也会撞（v1165 F050，600 道题实测 14 次）。
+    判据（两份母版）：
+      ① __HSN_SYN 列着 7 组近义词，同组同号、不同组不同号；
+      ② __hsnClash 同时比英文、整串中文、近义词组和每个中文义项；
+      ③ 听音/泡泡/完形「同档抽干扰项」的循环、v915 的 400 次兜底循环都先过 __hsnClash。
+    """
+    for fn in _G1165_TPLS:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('近义词不同框', '缺少 %s' % fn)
+            continue
+        m = re.search(r'var\s+__HSN_SYN\s*=\s*\{([^}]*)\}', src)
+        if not m:
+            bad('近义词不同框', '%s 没有近义词表 __HSN_SYN —— however/nevertheless 会同时当选项' % fn)
+            continue
+        tab = dict((k.lower(), v) for k, v in re.findall(r'(\w+)\s*:\s*(\d+)', m.group(1)))
+        ids = []
+        for grp in _G1165_SYN:
+            got = set(tab.get(w) for w in grp)
+            if None in got or len(got) != 1:
+                bad('近义词不同框', '%s 的 __HSN_SYN 缺了或拆散了这一组：%s' % (fn, '/'.join(grp)))
+            ids.append(tab.get(grp[0]))
+        if len(set(ids)) != len(ids):
+            bad('近义词不同框', '%s 的 __HSN_SYN 把不同的近义词组编成了同一个号' % fn)
+        body = _g1165_fn(src, '__hsnClash')
+        if not body:
+            bad('近义词不同框', '%s 没有 __hsnClash —— 选项只按英文去重' % fn)
+        else:
+            for need, why in (('a.en===b.en', '英文'), ('a.cn===b.cn', '整串中文'), ('__HSN_SYN', '近义词组'), ('__hsnSenses', '每个中文义项')):
+                if need not in body.replace(' ', ''):
+                    bad('近义词不同框', '%s 的 __hsnClash 不再比%s' % (fn, why))
+        loops = re.findall(r'for\s*\(\s*const\s+\w+\s+of\s+(shuffledSame|shuffledLvl|sameLvl)\s*\)\s*\{([^}]*)\}', src)
+        if len(loops) < 3:
+            bad('近义词不同框', '%s 只找到 %d 个「同档抽干扰项」的循环（听音/泡泡/完形应有 3 个）—— 没法判断' % (fn, len(loops)))
+        for arr, lb in loops:
+            if '__hsnClash(' not in lb:
+                bad('近义词不同框', '%s 里 %s 的同档抽干扰项不过 __hsnClash —— 会抽到近义词' % (fn, arr))
+        fills = [src[x.end(): x.end() + 400].split('}}')[0] for x in re.finditer(r'__g\+\+<400\)\{', src)]
+        if len(fills) < 5:
+            bad('近义词不同框', '%s 只找到 %d 个 v915 的 400 次兜底循环（应有 5 个）—— 没法判断' % (fn, len(fills)))
+        for k, fb in enumerate(fills):
+            if '__hsnClash(' not in fb:
+                bad('近义词不同框', '%s 第 %d 个 v915 兜底循环不过 __hsnClash —— 补齐选项时会补进近义词' % (fn, k + 1))
+
+
+def guard_island_api_complete():
+    """岛页和首页外壳之间的两个接口必须两头都在：「返回一步」和「藏起来就停」。
+
+    事故（v1165 INT-04/CB-03）：手机返回键在岛里任何玩法都直接退出整个岛；回首页后藏起来的岛还在跑，
+    打地鼠每 5 秒在首页念一个词。修法是一对接口：岛页提供 __hsnIslandBack / __hsnIslandHidden / __hsnBackStack，
+    外壳在返回键和收起岛框时调用。少任何一头，另一头就白写。
+    另：window.bossActive 以前永远 undefined（bossActive 是 let 变量），几段战斗保护代码从来没执行。
+    判据：两份母版和 27 个岛页都定义这三样 + window.bossActive 的 getter；index.html 两处都调用。
+    """
+    need = (('window.__hsnIslandBack=function', '返回一步 __hsnIslandBack'),
+            ('window.__hsnIslandHidden=function', '藏起来就停 __hsnIslandHidden'),
+            ('window.__hsnBackStack=', '浮层登记 __hsnBackStack'),
+            ("Object.defineProperty(window,'bossActive'", 'window.bossActive 接到页面的 bossActive'))
+    pages = list(_G1165_TPLS) + _g1165_island_pages()
+    if len(pages) < 20:
+        bad('岛页接口齐', '只找到 %d 个岛页 —— 没法判断' % len(pages))
+    for fn in pages:
+        src = _code_only(_read(fn) or '').replace(' ', '')
+        miss = [why for key, why in need if key.replace(' ', '') not in src]
+        if miss:
+            bad('岛页接口齐', '%s 缺：%s' % (fn, '、'.join(miss)))
+    idx = _code_only(_read('index.html') or '')
+    if not re.search(r'\.__hsnIslandBack\(\)', idx):
+        bad('岛页接口齐', 'index.html 的返回键不先问岛页 __hsnIslandBack() —— 返回键会直接退出整个岛')
+    if not re.search(r'\.__hsnIslandHidden\(\)', idx):
+        bad('岛页接口齐', 'index.html 收起岛框时不告诉岛页 __hsnIslandHidden() —— 藏起来的岛还在出声、倒计时')
+
+
+_G1165_NEXT = ('nextListenQ', 'nextClozeQ', 'nextBubble', 'nextScramble', 'clearScramble', 'startMolesWave',
+               'pickFishTarget', 'eagleNextRound', 'nextTypeQ')
+_G1165_GAMES = ('listen', 'cloze', 'bubble', 'scramble', 'moles', 'fish', 'eagle', 'typing')
+
+
+def guard_game_timers_tokened():
+    """小游戏的「下一题」定时器只认自己那一局。
+
+    事故（v1165 MG-01/MG-03）：打字大师答完马上返回，900ms 后的定时器把 typeActive 设回 true、重新锁屏、
+    在主页读词；换难度后新菜单被旧局的定时器顶掉；字母拼拼乐离开后还在主页读词。
+    修法：每个游戏一个「局号」（__hsnRunNew），延迟出题都包一层 __hsnLater(游戏, 屏幕, fn)——局号变了或
+    离开了那个屏就不出题。
+    判据（两份母版）：
+      ① 没有裸的 setTimeout(下一题函数, …) / setTimeout(function(){…下一题()…})；
+      ② 没有 setTimeout(function(){typeActive=true…（不看局就重新打开打字）；
+      ③ 8 个小游戏答错小课的「之后做什么」都是 __hsnLater(…)（输光命的那局是空函数）；
+      ④ showScreen 离开时停掉字母拼拼乐（stopScramble）。
+    """
+    for fn in _G1165_TPLS:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('定时器认局', '缺少 %s' % fn)
+            continue
+        if 'function __hsnLater(' not in src or 'function __hsnRunNew(' not in src:
+            bad('定时器认局', '%s 没有局号工具 __hsnRunNew / __hsnLater' % fn)
+        if re.search(r'setTimeout\(\s*function\s*\(\)\s*\{\s*typeActive\s*=\s*true', src):
+            bad('定时器认局', '%s 有不看局号就把 typeActive 设回 true 的定时器 —— 返回后又锁屏、在主页读词' % fn)
+        for nf in _G1165_NEXT:
+            if re.search(r'setTimeout\(\s*' + nf + r'\s*[,)]', src):
+                bad('定时器认局', '%s 有裸的 setTimeout(%s, …) —— 离开/换难度后旧局还会出题' % (fn, nf))
+            if re.search(r'setTimeout\(\s*function\s*\(\)\s*\{[^{}]{0,80}\b' + nf + r'\(\)', src):
+                bad('定时器认局', '%s 有裸的 setTimeout(function(){…%s()…}) —— 离开/换难度后旧局还会出题' % (fn, nf))
+        seen = set()
+        for m in re.finditer(r"__hmlLesson\(\s*'(\w+)'\s*,", src):
+            game = m.group(1)
+            if game not in _G1165_GAMES:
+                continue
+            args = _g1165_args(src, m.start() + len('__hmlLesson('))
+            nxt = args[2].replace(' ', '') if len(args) > 2 else ''
+            seen.add(game)
+            if not (nxt.startswith('__hsnLater(') or nxt == 'function(){}'):
+                bad('定时器认局', "%s 的 %s 答错小课之后直接调 %s —— 不认局号，离开后还会出下一题" % (fn, game, nxt[:40] or '(空)'))
+        if len(seen) < 6:
+            bad('定时器认局', '%s 只找到 %d 个小游戏的答错小课调用 —— 没法判断' % (fn, len(seen)))
+        ss = _g1165_fn(src, 'showScreen')
+        if not ss or 'stopScramble()' not in ss:
+            bad('定时器认局', '%s 的 showScreen 离开时不停字母拼拼乐（stopScramble）—— 在主页还会读词' % fn)
+
+
+def guard_cloze_inflection():
+    """完形填空要认例句里的变形词（eyes / cooks / flown / Cows），出不了的题不能算进总数。
+
+    事故（v1165 MG-02）：只认 \\b原词\\b，例句写 eyes / cooks 的 48 个词永远出不了题却照算总数——
+    全对只显示 60%~77%；挖空填回时句中大写被改成小写；Boss 完形同一个毛病。
+    判据（两份母版）：有 __hsnClozeMatch；CLOZE_LEVEL_IDX 只收它能挖空的词；nextClozeQ 和 Boss 出题都用它；
+    再也没有拿单词的 .en 直接拼 \\b…\\b 正则找空的写法。
+    """
+    for fn in _G1165_TPLS:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('完形认变形', '缺少 %s' % fn)
+            continue
+        if 'function __hsnClozeMatch(' not in src:
+            bad('完形认变形', '%s 没有 __hsnClozeMatch —— 例句里的变形词出不了题' % fn)
+            continue
+        if not re.search(r'CLOZE_LEVEL_IDX\[\w+\]\s*=[^;]*__hsnClozeMatch\(', src):
+            bad('完形认变形', '%s 的 CLOZE_LEVEL_IDX 不按 __hsnClozeMatch 只收能挖空的词 —— 全对也到不了 100%%' % fn)
+        for f2, why in (('nextClozeQ', '完形出题'), ('nextBossQ', 'Boss 完形出题')):
+            body = _g1165_fn(src, f2)
+            if not body:
+                bad('完形认变形', '%s 找不到 %s —— 没法判断' % (fn, f2))
+            elif '__hsnClozeMatch(' not in body:
+                bad('完形认变形', '%s 的%s（%s）不用 __hsnClozeMatch 找空' % (fn, why, f2))
+        raw = re.search(r"RegExp\(\s*'\\\\b'\s*\+\s*\w+\.en\b", src)
+        if raw:
+            bad('完形认变形', "%s 又用单词的 .en 直接拼 \\b…\\b 正则找空（%s…）—— 变形词会被悄悄跳过" % (fn, raw.group(0)[:40]))
+
+
+def guard_land_quest_parity():
+    """单词大陆 8 个岛的每日任务代码必须和常规岛一字不差（拼写大PK 入口除外）。
+
+    事故（v1165 CB-01）：land_template 自己留着一份旧的任务定义——不认全站任务表、超过 7 个就判坏、
+    遇到不认识的任务 id 整份作废 → 8 个大陆岛永远「暂无任务」，徽章却是 0/12。这是 Land 页第 N 次被漏。
+    判据：两份母版从 DAILY_QUEST_POOL 到 progressQuest 之前（去掉常规岛独有的拼写大PK 入口）只看代码要完全一样，
+    progressQuest / setQuest / claimQuest / updateQuestBadge 的第一行也一样。
+    """
+    def block(src):
+        a, b = src.find('const DAILY_QUEST_POOL=['), src.find('function progressQuest(')
+        if a < 0 or b < a:
+            return ''
+        s = src[a:b]
+        p, q = s.find('/*🔴v1002: 拼写大PK 入口'), s.find('function rollDailyQuests(')
+        if p >= 0 and q > p:
+            s = s[:p] + s[q:]
+        return _code_only(s)
+    raw_t, raw_l = _read('template.html') or '', _read('land_template.html') or ''
+    t, l = block(raw_t), block(raw_l)
+    if len(t) < 1000 or len(l) < 1000:
+        bad('大陆任务一致', '找不到两份母版的每日任务代码（DAILY_QUEST_POOL…progressQuest）—— 没法判断')
+        return
+    if t != l:
+        i = next((k for k in range(min(len(t), len(l))) if t[k] != l[k]), min(len(t), len(l)))
+        bad('大陆任务一致', '单词大陆母版的每日任务代码和常规岛不一样（第 %d 个字起：「%s」 vs 「%s」）—— 大陆岛会「暂无任务」'
+            % (i, l[i:i + 30].replace('\n', ' '), t[i:i + 30].replace('\n', ' ')))
+    for f in ('progressQuest', 'setQuest', 'claimQuest', 'updateQuestBadge'):
+        a = _g1165_fn(_code_only(raw_t), f).split('\n')[0]
+        b = _g1165_fn(_code_only(raw_l), f).split('\n')[0]
+        if not a or a != b:
+            bad('大陆任务一致', '%s 两份母版不一样（或找不到）' % f)
+
+
+def guard_trial_clear_in_order():
+    """单词大陆岛「已通关」只能在按顺序打赢最后一关时记。
+
+    事故（v1165 P2-03）：bossVictory 只看「打的是不是最后一关」就写 hsn_landmap_cleared_N。72 小时体验期
+    能跳着打任何一关，新孩子直接点第 5 关打赢 → 岛被永久标成「已通关」（地图、女帝终战门、赛季纪事都认它），
+    进度却还是 0（违背体验期「零污染」的规矩）。
+    判据（land_template + 8 个大陆岛）：每一处写 hsn_landmap_cleared_ 都在
+      「读出 landN_prog → if(window._s1Idx===进度 && 进度===(BOSSES.length-1))」里面。
+    """
+    pages = ['land_template.html'] + ['island_land%d.html' % n for n in range(1, 9)]
+    pat = re.compile(r"var\s+(\w+)\s*=\s*parseInt\(\s*localStorage\.getItem\(\s*'land'\s*\+\s*\w+\[1\]\s*\+\s*'_prog'\s*\)[^;]*;\s*"
+                     r"if\s*\(\s*window\._s1Idx\s*===\s*\1\s*&&\s*\1\s*===\s*\(\s*BOSSES\.length\s*-\s*1\s*\)\s*\)\s*\{\s*"
+                     r"localStorage\.setItem\(\s*'hsn_landmap_cleared_'")
+    for fn in pages:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('跳打不算通关', '缺少 %s' % fn)
+            continue
+        writes = len(re.findall(r"setItem\(\s*'hsn_landmap_cleared_'", src))
+        good = len(pat.findall(src))
+        if writes == 0:
+            bad('跳打不算通关', '%s 找不到记「已通关」的地方 —— 没法判断' % fn)
+        elif good != writes:
+            bad('跳打不算通关', '%s 有 %d 处记「已通关」不看「按顺序打到最后一关」—— 体验期跳打赢了就永久标成已通关'
+                % (fn, writes - good))
+
+
+def guard_local_audio_fallback():
+    """单词/例句录音放不出来时，要用手机朗读兜底，而且兜底不联网。
+
+    事故（v1165 NET-03）：speak() 的本地录音分支只在出错时回调，什么都不读 —— 网慢、录音没下载下来时，
+    孩子点 🔊 什么都听不到。修法：两个本地分支都交给 __hsnPlayLocal（出错 / 播放被拒 / 2.5 秒还不响 →
+    手机朗读一次）。兜底只能用手机自己的朗读，不能把字发给在线朗读服务（隐私）。
+    判据（两份母版）：例句分支和单词分支都调 __hsnPlayLocal；__hsnPlayLocal 用 _browserTTS 兜底，
+    函数里不出现任何网址。
+    """
+    for fn in _G1165_TPLS:
+        src = _code_only(_read(fn) or '')
+        if not src:
+            bad('录音兜底', '缺少 %s' % fn)
+            continue
+        body = _g1165_fn(src, '__hsnPlayLocal')
+        if not body:
+            bad('录音兜底', '%s 没有 __hsnPlayLocal —— 录音放不出来时孩子什么都听不到' % fn)
+            continue
+        if '_browserTTS(' not in body:
+            bad('录音兜底', '%s 的 __hsnPlayLocal 不用手机朗读兜底' % fn)
+        if re.search(r'https?:|baidu|youdao|gstatic|google', body, re.I):
+            bad('录音兜底', '%s 的录音兜底里出现了网址 —— 兜底不许把字发给在线朗读服务' % fn)
+        for start, var, why in ((r'var\s+_exA\s*=\s*new\s+Audio\(', '_exA', '例句'), (r'const\s+a\s*=\s*new\s+Audio\(\s*localMp3', 'a', '单词')):
+            m = re.search(start, src)
+            if not m:
+                bad('录音兜底', '%s 找不到 speak() 的%s本地录音分支 —— 没法判断' % (fn, why))
+                continue
+            seg = src[m.end(): src.find('return;', m.end())]
+            if not re.search(r'__hsnPlayLocal\(\s*' + var + r'\s*,', seg):
+                bad('录音兜底', '%s 的%s本地录音分支不交给 __hsnPlayLocal —— 放不出来时没有兜底' % (fn, why))
+
+
+def guard_no_stale_island_copy():
+    """岛页上不许再出现已经改掉的旧文案。
+
+    事故（v1165 VC-15 / P2-13 / MG-15）：8 个单词大陆岛的英文副标题都写着星海时代的「STAR SEA I: …」；
+    泡泡大作战写死「每档大约 20 词左右」（实际 4~186 个）；字母拼拼乐的示例永远是「man · cat · cow」，
+    不管在哪个岛。都改成了从数据算出来的真话 —— 这道守卫防止从旧稿里又复制回来。
+    """
+    stale = (('STAR SEA I:', ('land_template.html',) + tuple('island_land%d.html' % n for n in range(1, 9)), '单词大陆岛的旧英文副标题'),
+             ('大约 20 词', None, '写死的「每档大约 20 词」'),
+             ('man · cat · cow', None, '写死的字母拼拼乐示例'))
+    allp = list(_G1165_TPLS) + _g1165_island_pages()
+    for text, files, why in stale:
+        for fn in (files or allp):
+            src = _code_only(_read(fn) or '')
+            if text in src:
+                bad('旧文案不回潮', '%s 又出现%s：「%s」' % (fn, why, text))
+
+
+def guard_toast_not_floattext():
+    """岛里的文字提示（showToast）要居中、整句看得见、停够时间；不能再借「+N 飘字」来显示。
+
+    事故（v1165 VC-06）：showToast 直接调 floatText(屏幕中线, …)，飘字是从左边缘起画的，长句只显示在右半边、
+    贴边被截断、1.2 秒就消失（签到账本的提醒孩子根本读不完）。「+N」飘字本身没问题，照旧用 floatText。
+    判据（两份母版 + 27 个岛页）：showToast 里没有 floatText；floatText 还在，并且别处还在用它飘「+N」。
+    """
+    for fn in list(_G1165_TPLS) + _g1165_island_pages():
+        src = _code_only(_read(fn) or '')
+        if not src:
+            continue
+        body = _g1165_fn(src, 'showToast')
+        if not body:
+            bad('提示条居中', '%s 找不到 showToast —— 没法判断' % fn)
+            continue
+        if 'floatText(' in body:
+            bad('提示条居中', '%s 的 showToast 又借 floatText 显示 —— 长句只显示右半边、贴边截断、1.2 秒就没' % fn)
+        rest = src.replace(body, '')
+        if 'function floatText(' not in rest or rest.count('floatText(') < 2:
+            bad('提示条居中', '%s 的「+N」飘字 floatText 没了或没人用了 —— 飘字和提示条要分开、各管各的' % fn)
+
+
+def guard_version_refresh_loop_safe():
+    """版本守望者自动刷新必须「能再试、不循环、不丢参数、不在孩子玩的时候刷」。
+
+    事故（v1165 NET-09/NET-16/INT-08）：唯一一次自动更新被 CDN 发版头两分钟的旧文件用掉；存储出错时
+    每次打开都刷新（45 秒 34 次）；刷新只留路径，?u=… 和 #… 全丢；孩子正在岛里玩，刷新把他踢回首页。
+    判据（hansen_version_watch_v1083.js）：
+      ① 不许 location.replace(location.pathname + '?_fresh=…')（丢参数）；刷新地址用 searchParams 设 _fresh；
+      ② 修过的记录是 {v, at, n}，次数到 MAX_TRIES 就停、3 分钟内不重来、地址里刚带过 _fresh 不再刷；
+      ③ 同时来的检查共用一次（inflight）；
+      ④ 岛开着时先攒着（islandOpen），首页外壳关岛时调 __hsnAfterIslandClose 再做。
+    """
+    src = _code_only(_read('hansen_version_watch_v1083.js') or '')
+    if not src:
+        bad('刷新不循环', '缺少 hansen_version_watch_v1083.js')
+        return
+    if re.search(r"location\.replace\(\s*location\.pathname\s*\+\s*['\"]\?_fresh=", src):
+        bad('刷新不循环', "刷新又只留路径（location.pathname + '?_fresh='）—— 地址里的参数和 # 全丢")
+    if not re.search(r"searchParams\.set\(\s*'_fresh'", src):
+        bad('刷新不循环', '刷新地址不用 searchParams 设 _fresh —— 原来的参数会丢')
+    if not re.search(r'writeFix\(\s*\{\s*v\s*:[^}]*\bat\s*:\s*Date\.now\(\)[^}]*\bn\s*:', src):
+        bad('刷新不循环', '自动修过的记录不是 {v, at, n} —— 没法「隔 3 分钟再试、最多几次」')
+    if not re.search(r'>=\s*MAX_TRIES', src):
+        bad('刷新不循环', '自动修没有次数上限（MAX_TRIES）—— 服务器一直给旧文件就一直刷')
+    if 'function freshAge(' not in src or 'freshAge()' not in src:
+        bad('刷新不循环', '不看地址里的 _fresh 是多久前加的 —— 存储坏了就每次打开都刷新')
+    if not re.search(r'if\s*\(\s*inflight\s*\)\s*return\s+inflight', src):
+        bad('刷新不循环', '同时来的检查不共用一次请求 —— 每开一个岛查十几次 /VERSION')
+    if not re.search(r'if\s*\(\s*islandOpen\(\)\s*\)', src):
+        bad('刷新不循环', '孩子在岛里玩时也直接刷新 —— 这一局就没了')
+    if not re.search(r'__hsnAfterIslandClose\s*\(\s*\)', _code_only(_read('index.html') or '')):
+        bad('刷新不循环', 'index.html 关岛时不调 __hsnAfterIslandClose() —— 攒着的更新永远不做')
+
+
+_G1165_ONLINE_ONLY = re.compile(r'^hansen_(?:pk|ladder|friends|auth|sb_pk|sb_profile|sb_ladder|cloud|backup|cred|signup)')
+
+
+def guard_new_modules_precached():
+    """v1165 起新加的运行时模块必须进 SW 外壳预缓存（用页面加载的那个精确地址）。
+
+    事故（v1165 F009）：新模块 hansen_mistake_lesson_v1165.js 没进 sw_v944.js 的 SHELL。离线时（运行时缓存
+    被挤掉后）进岛，答错小课卡片悄悄消失，各游戏退回旧的定时推进（离开会重锁）。没人会发现——直到孩子在没网的地方玩。
+    判据：template.html / land_template.html / index.html 加载的 hansen_*_vNNNN.js（NNNN ≥ 1165，
+    只能联网用的对战/登录/云存档模块除外）都以「./ + 页面上的地址」列在 SHELL 里，文件也真的存在。
+    """
+    sw = _code_only(_read('sw_v944.js') or '')
+    m = re.search(r'const\s+SHELL\s*=\s*\[([\s\S]*?)\];', sw)
+    if not m:
+        bad('新模块进外壳', 'sw_v944.js 找不到 SHELL 列表 —— 没法判断')
+        return
+    shell = set(re.findall(r"['\"]\./([^'\"]+)['\"]", m.group(1)))
+    found = 0
+    for page in ('template.html', 'land_template.html', 'index.html'):
+        for src in re.findall(r'<script[^>]*\ssrc="(hansen_[A-Za-z0-9_]+_v(\d{4})\.js[^"]*)"', _code_only(_read(page) or '')):
+            url, ver = src
+            name = url.split('?')[0]
+            if int(ver) < 1165 or _G1165_ONLINE_ONLY.match(name):
+                continue
+            found += 1
+            if not os.path.exists(os.path.join(ROOT, name)):
+                bad('新模块进外壳', '%s 加载的 %s 文件不存在' % (page, name))
+            if url not in shell:
+                bad('新模块进外壳', '%s 加载的 %s 不在 sw_v944.js 的 SHELL 里（要写成 ./%s）—— 离线时这个功能会悄悄没了'
+                    % (page, url, url))
+    if not found:
+        bad('新模块进外壳', '页面里一个 v1165 起的新模块都没找到 —— 没法判断（答错小课模块应该在）')
+
+
+def guard_island_url_one_form():
+    """首页外壳进岛、预取、预热要用同一个岛页地址；「最近玩过的岛」按岛表找文件名。
+
+    事故（v1165 INT-05/NET-06）：首页预取的是 island_x.html?v=…，进岛时却打开不带 ?v= 的地址 —— 预取的那份永远
+    用不上（白下载一遍）；「最近玩过的岛」按存档名拼文件名（wordIslandColorNum → island_colornum.html），8 个岛全是 404。
+    判据：
+      ① index.html 进岛用 _islandUrl(file)（带 ?v=），不许 location.replace(file) / .src = file；
+      ② index.html 把岛表挂到 window.HSN_ISLAND_META；
+      ③ hansen_island_prefetch_v1025.js 不许直接 push('island_' + 存档名)，存档名一律经 fileForKey 查 HSN_ISLAND_META。
+    """
+    idx = _code_only(_read('index.html') or '')
+    if not idx:
+        bad('岛页地址统一', '缺少 index.html')
+        return
+    if 'function _islandUrl(file)' not in idx or idx.count('_islandUrl(file)') < 3:
+        bad('岛页地址统一', 'index.html 进岛不走 _islandUrl(file) —— 打开的地址和预取的不一样，预取白下载')
+    if re.search(r'location\.replace\(\s*file\s*\)', idx) or re.search(r'\.src\s*=\s*file\s*;', idx):
+        bad('岛页地址统一', 'index.html 又用不带 ?v= 的 file 打开岛框 —— 预取的那份用不上')
+    if not re.search(r'window\.HSN_ISLAND_META\s*=', idx):
+        bad('岛页地址统一', 'index.html 没把岛表挂到 window.HSN_ISLAND_META —— 预取只能按存档名瞎拼文件名')
+    pf = _code_only(_read('hansen_island_prefetch_v1025.js') or '')
+    if not pf:
+        bad('岛页地址统一', '缺少 hansen_island_prefetch_v1025.js')
+        return
+    if re.search(r"push\(\s*'island_'\s*\+", pf):
+        bad('岛页地址统一', "hansen_island_prefetch_v1025.js 又按存档名拼岛页文件名（push('island_' + …)）—— 8 个岛全是 404")
+    ffk = re.search(r'function\s+fileForKey\s*\([\s\S]*?\n  \}', pf)
+    if not ffk or 'HSN_ISLAND_META' not in ffk.group(0):
+        bad('岛页地址统一', 'hansen_island_prefetch_v1025.js 的 fileForKey 不先查 HSN_ISLAND_META')
+    if "'?v='" not in pf:
+        bad('岛页地址统一', 'hansen_island_prefetch_v1025.js 预取的地址不带 ?v= —— 和进岛的地址对不上')
+
+
+def guard_home_polls_gated():
+    """孩子在岛里玩时，藏在后面的首页不许高频轮询。
+
+    事故（v1165 SS-6）：首页每 2 秒重画「最近探险」、每 1.5 秒重算主题，每次都把所有岛存档解析一遍；
+    岛开着时它们照样跑，和岛共用一个主线程 —— 20 秒里算了 30 次和 13 次，岛里周期性卡一下。
+    判据（index.html）：重画「最近探险」/主题的轮询先看岛开没开着；其他不看岛开没开着的轮询间隔都 ≥ 5 秒。
+    """
+    src = _code_only(_read('index.html') or '')
+    if not src:
+        bad('首页不轮询', '缺少 index.html')
+        return
+    n = 0
+    for m in re.finditer(r'\bsetInterval\(', src):
+        args = _g1165_args(src, m.end())
+        if len(args) < 2:
+            continue
+        n += 1
+        cb, period = args[0], args[-1].strip()
+        if not re.fullmatch(r'\d+', period):
+            bad('首页不轮询', 'index.html 有间隔不是写定数字的轮询（%s）—— 没法判断' % period[:30])
+            continue
+        gated = bool(re.search(r'_islandShown\(\)|_shown\(\)|__hsnIslandShown', cb))
+        if int(period) < 5000 and not gated:
+            bad('首页不轮询', 'index.html 有每 %s 毫秒一次、不看岛开没开着的轮询（%s…）—— 岛开着时也在抢主线程' % (period, cb[:40].replace('\n', ' ')))
+        if re.search(r'renderRecent|applyTheme', cb) and not gated:
+            bad('首页不轮询', 'index.html 重画「最近探险」/主题的轮询不先看岛开没开着（%s…）' % cb[:40].replace('\n', ' '))
+    if not n:
+        bad('首页不轮询', 'index.html 一个 setInterval 都没找到 —— 没法判断（慢兜底轮询应该在）')
+
+
+def guard_titles_not_demo():
+    """孩子看得到的页面标题不许写「演示」「原型」。
+
+    事故（v1165 INT-14/PH-07）：单独打开的 Boss 殿堂标题是「BOSS 殿堂 · 演示」，拼写蜂是「…· 原型」——
+    浏览器标签、微信转发卡片上孩子和家长都看得到，像没做完的东西。
+    判据：根目录所有 .html 的 <title> 里没有「演示」「原型」。
+    """
+    for f in sorted(glob.glob(os.path.join(ROOT, '*.html'))):
+        base = os.path.basename(f)
+        for t in re.findall(r'<title>([^<]*)</title>', _code_only(_read(base) or '')):
+            if '演示' in t or '原型' in t:
+                bad('标题不写演示', '%s 的标题「%s」写着演示/原型' % (base, t.strip()))
+
+
+def guard_bee_single_bot():
+    """拼写蜂永远只有一个机器人，停下（退出确认框开着）时机器人也停。
+
+    事故（v1165 MG-08）：点 ✕ 再「继续比赛」会多开一个机器人计时器（机器人快一倍）；停在退出确认框时
+    机器人还在打字；听单词那一段点 ✕，单词念完照样开赛。
+    判据（spelling_bee.html）：
+      ① botStep 一进来就看 paused（停着不打字）；
+      ② botStep 以外每一处 botTimer=setTimeout(…) 之前都先 clearTimeout(botTimer)；
+      ③ _startRace 停着时把自己排队（_pendingStart），等「继续比赛」再开赛。
+    """
+    src = _code_only(_read('spelling_bee.html') or '')
+    if not src:
+        bad('一个机器人', '缺少 spelling_bee.html')
+        return
+    body = _g1165_fn(src, 'botStep')
+    if not body:
+        bad('一个机器人', 'spelling_bee.html 找不到 botStep —— 没法判断')
+        return
+    if not re.match(r'function\s+botStep\s*\([^)]*\)\s*\{\s*if\s*\([^)]*\bpaused\b[^)]*\)\s*return\s*;', body.strip()):
+        bad('一个机器人', 'botStep 一进来不看 paused —— 停在退出确认框时机器人还在打字')
+    rest = src.replace(body, '')
+    sets = [x.start() for x in re.finditer(r'botTimer\s*=\s*setTimeout\(', rest)]
+    if not sets:
+        bad('一个机器人', 'spelling_bee.html 找不到机器人开打的地方 —— 没法判断')
+    for p in sets:
+        if 'clearTimeout(botTimer)' not in rest[max(0, p - 200): p]:
+            bad('一个机器人', '有一处开机器人计时器之前不先 clearTimeout(botTimer)（%s…）—— 会多开一个机器人'
+                % rest[max(0, p - 60): p + 30].replace('\n', ' '))
+    if not re.search(r'if\s*\(\s*paused\s*\)\s*\{\s*_pendingStart\s*=\s*_startRace\s*;\s*return\s*;', src):
+        bad('一个机器人', '_startRace 停着时不排队 —— 听单词时点 ✕，单词念完照样开赛')
+
+
+def guard_land_map_fit():
+    """单词大陆地图在窄屏手机上不许把岛切到屏幕外。
+
+    事故（v1165 PH-06）：地图舞台按 475px 宽排版再裁切，320/360/375 宽的手机上 ④铸剑锻炉山、⑧星火火山口
+    （连名字）一半在屏幕外。修法：排版后 fitSpots() 把被切的岛挪进 [8px, 屏宽-8px]。
+    判据（land_map.html）：有 fitSpots；改尺寸时 layoutStage() 之后接着 fitSpots()；页面加载后也调一次。
+    """
+    src = _code_only(_read('land_map.html') or '')
+    if not src:
+        bad('大陆地图不切岛', '缺少 land_map.html')
+        return
+    if 'function fitSpots(' not in src:
+        bad('大陆地图不切岛', 'land_map.html 没有 fitSpots —— 窄屏上 ④⑧ 两个岛被切到屏幕外')
+        return
+    if not re.search(r"addEventListener\(\s*'resize'[\s\S]{0,240}?layoutStage\(\)\s*;\s*fitSpots\(\)", src):
+        bad('大陆地图不切岛', 'land_map.html 改尺寸（转屏）时 layoutStage() 之后不 fitSpots() —— 转一下屏岛又被切掉')
+    calls = len(re.findall(r'\bfitSpots\(\)', src)) - len(re.findall(r'function\s+fitSpots\(\)', src))
+    if not re.search(r"addEventListener\(\s*'load'\s*,\s*fitSpots\s*\)", src) and calls < 2:
+        bad('大陆地图不切岛', 'land_map.html 页面加载后不调 fitSpots —— 一打开岛就是切掉的')
+
+
+def guard_ledger_cache():
+    """每答一题不许把整份学习账本重读重算：账本读取要走「原文没变就用内存结果」的缓存。
+
+    事故（v1165 F002）：进度多的孩子每答一题主线程卡 350~700ms（4 倍慢 CPU 实测）——一题里要读账本二十来次，
+    每次都把主账本和 _bak 整份解析、规整、合并、再序列化。修法是带校验的内存缓存：每次照样 getItem 两份原文，
+    和上次一字不差才用内存结果；别的页面框改了 localStorage（storage 事件）就作废。
+    判据（hansen_canonical_progress.js）：readStoreCore 先比原文（cacheHit 同时比主账本和 _bak）再解析；
+    readStore 给调用方的是副本；storage 事件作废缓存。其他运行时模块不许绕过它直接 getItem 账本原文
+    （备份模块是整份导出，例外）。
+    """
+    src = _code_only(_read('hansen_canonical_progress.js') or '')
+    if not src:
+        bad('账本缓存', '缺少 hansen_canonical_progress.js')
+        return
+    ch = re.search(r'function\s+cacheHit\s*\(\s*mainRaw\s*,\s*bakRaw\s*\)\s*\{([^}]*)\}', src)
+    if not ch or 'cache.mainRaw===mainRaw' not in ch.group(1).replace(' ', '') or 'cache.bakRaw===bakRaw' not in ch.group(1).replace(' ', ''):
+        bad('账本缓存', 'cacheHit 不同时比主账本和 _bak 的原文 —— 缓存会拿旧结果或者永远不中')
+    core = _g1165_fn(src, 'readStoreCore') or ''
+    i_hit, i_parse = core.find('cacheHit(mainRaw,bakRaw)'), core.find('safeParse(mainRaw')
+    if i_hit < 0 or i_parse < 0 or i_hit > i_parse:
+        bad('账本缓存', 'readStoreCore 不先比原文再解析 —— 每答一题又要整份重读账本（卡 350ms+）')
+    rs = _g1165_fn(src, 'readStore') or ''
+    if not re.search(r'JSON\.parse\(\s*c\.mergedRaw\s*\)|structuredClone\(', rs):
+        bad('账本缓存', 'readStore 不给调用方副本 —— 调用方改了就把缓存弄脏')
+    if not re.search(r"addEventListener\(\s*'storage'\s*,\s*function\s*\(\s*e\s*\)\s*\{[^}]*STORE_KEY[^}]*cache\s*=\s*null", src):
+        bad('账本缓存', '别的页面框改了账本（storage 事件）不作废缓存')
+    for f in sorted(glob.glob(os.path.join(ROOT, 'hansen_*.js'))) + [os.path.join(ROOT, x) for x in _G1165_TPLS]:
+        base = os.path.basename(f)
+        if base == 'hansen_canonical_progress.js' or base.startswith('hansen_backup'):
+            continue
+        if re.search(r"getItem\(\s*['\"]hansen_canonical_progress_v941['\"]", _code_only(_read(base) or '')):
+            bad('账本缓存', '%s 绕过账本模块直接读账本原文 —— 每次都整份解析，缓存白做' % base)
+
+
+
 # ═════════════════════════════════════════════════════════════
 # 🔴v1164 —— 天梯 / 房间对战在真机上从来没成功过的那一批教训
 #   根因：云端集合是「读取全部数据，修改本人数据」，客人去改房主的文档永远静默失败；
@@ -4370,6 +4977,25 @@ GUARDS = [
     ('别绑两次', guard_no_double_binding),
     ('音频清单完整', guard_audio_lock_intact),
     ('交接文件要跟上', guard_handoff_current),
+    # 🔴v1165 全站修复（两条线合并）
+    ('底栏高亮对',   guard_nav_explore_not_wrong_tab),
+    ('近义词不同框', guard_distractors_no_synonyms),
+    ('岛页接口齐',   guard_island_api_complete),
+    ('定时器认局',   guard_game_timers_tokened),
+    ('完形认变形',   guard_cloze_inflection),
+    ('大陆任务一致', guard_land_quest_parity),
+    ('跳打不算通关', guard_trial_clear_in_order),
+    ('录音兜底',     guard_local_audio_fallback),
+    ('旧文案不回潮', guard_no_stale_island_copy),
+    ('提示条居中',   guard_toast_not_floattext),
+    ('刷新不循环',   guard_version_refresh_loop_safe),
+    ('新模块进外壳', guard_new_modules_precached),
+    ('岛页地址统一', guard_island_url_one_form),
+    ('首页不轮询',   guard_home_polls_gated),
+    ('标题不写演示', guard_titles_not_demo),
+    ('一个机器人',   guard_bee_single_bot),
+    ('大陆地图不切岛', guard_land_map_fit),
+    ('账本缓存',     guard_ledger_cache),
     # 🔴v1164 —— 天梯 / 房间对战在真机上从来没成功过的那一批
     ('对战回包查 code', guard_room_transport_checks_code),
     ('榜单好友查 code', guard_board_friends_check_code),

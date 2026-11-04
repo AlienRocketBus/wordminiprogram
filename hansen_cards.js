@@ -17,26 +17,26 @@
 
   // 20 个 boss 卡牌数据
   var BOSS_CARDS = [
-    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=1164', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
-    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=1164', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
-    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=1164', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
-    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=1164', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
-    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=1164', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
-    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=1164', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
-    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=1164', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
-    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=1164', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
-    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=1164', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
-    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=1164', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
-    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=1164', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
-    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=1164', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
-    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=1164', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
-    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=1164', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
-    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=1164', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
-    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=1164', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
-    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=1164', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
-    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=1164', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
-    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=1164', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
-    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=1164', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
+    {lv:1,  name:'淘气小幽灵', img:'bosses/lv01.webp?v=1165', frame:'#e2e8f0', rarity:'common',    desc:'飘忽不定的初见之敌, 总在云雾间嬉戏。'},
+    {lv:2,  name:'暗影忍者',   img:'bosses/lv02.webp?v=1165', frame:'#94a3b8', rarity:'common',    desc:'潜行于阴影, 一击必杀的影舞者。'},
+    {lv:3,  name:'百战兽人',   img:'bosses/lv03.webp?v=1165', frame:'#84cc16', rarity:'common',    desc:'身经百战的兽人勇士, 战锤所向披靡。'},
+    {lv:4,  name:'史前霸王龙', img:'bosses/lv04.webp?v=1165', frame:'#ef4444', rarity:'common',    desc:'远古时代的顶级掠食者, 巨齿撕裂万物。'},
+    {lv:5,  name:'千年僵尸',   img:'bosses/lv05.webp?v=1165', frame:'#65a30d', rarity:'uncommon',  desc:'沉睡千年的古老亡灵, 咒语唤醒之时。'},
+    {lv:6,  name:'暗夜吸血鬼', img:'bosses/lv06.webp?v=1165', frame:'#dc2626', rarity:'uncommon',  desc:'城堡之主, 永生于黑夜的伯爵。'},
+    {lv:7,  name:'蒙面大魔王', img:'bosses/lv07.webp?v=1165', frame:'#a855f7', rarity:'uncommon',  desc:'面具下是谁? 黑暗之力的化身。'},
+    {lv:8,  name:'地狱犬王',   img:'bosses/lv08.webp?v=1165', frame:'#b91c1c', rarity:'uncommon',  desc:'三头看门犬, 守护地狱之门。'},
+    {lv:9,  name:'黑森林巫婆', img:'bosses/lv09.webp?v=1165', frame:'#7c3aed', rarity:'rare',      desc:'盘踞黑森林深处的老巫婆, 毒苹果与魔药的主人。'},
+    {lv:10, name:'异次元巫师', img:'bosses/lv10.webp?v=1165', frame:'#c084fc', rarity:'rare',      desc:'撕裂空间, 改写时空法则。'},
+    {lv:11, name:'龙骑士统帅', img:'bosses/lv11.webp?v=1165', frame:'#ea580c', rarity:'rare',      desc:'巨龙之翼遮天蔽日, 千年荣耀传承。'},
+    {lv:12, name:'暗黑灯神',   img:'bosses/lv12.webp?v=1165', frame:'#4f46e5', rarity:'rare',      desc:'瓶中蛰伏太久的金色烟雾, 自由是代价。'},
+    {lv:13, name:'海底巨怪',   img:'bosses/lv13.webp?v=1165', frame:'#0891b2', rarity:'epic',      desc:'深渊之触, 八爪缠绕无处可逃。'},
+    {lv:14, name:'寒冰女王',   img:'bosses/lv14.webp?v=1165', frame:'#22d3ee', rarity:'epic',      desc:'冰封万古之力, 一切在她面前都将冻结。'},
+    {lv:15, name:'烈焰魔神',   img:'bosses/lv15.webp?v=1165', frame:'#f97316', rarity:'epic',      desc:'焚尽世间的烈火, 化为灰烬是唯一结局。'},
+    {lv:16, name:'雷电之主',   img:'bosses/lv16.webp?v=1165', frame:'#facc15', rarity:'epic',      desc:'天雷轰顶, 闪电之力无可匹敌。'},
+    {lv:17, name:'机械泰坦',   img:'bosses/lv17.webp?v=1165', frame:'#64748b', rarity:'legendary', desc:'钢铁之躯, 系统在线, 目标锁定。'},
+    {lv:18, name:'外星霸主',   img:'bosses/lv18.webp?v=1165', frame:'#10b981', rarity:'legendary', desc:'征服宇宙的至高生物, 地球只是下一站。'},
+    {lv:19, name:'混沌魔尊',   img:'bosses/lv19.webp?v=1165', frame:'#6b21a8', rarity:'legendary', desc:'深渊审判, 地狱之门的守护者。'},
+    {lv:20, name:'上古太阳神',   img:'bosses/lv20.webp?v=1165', frame:'#fbbf24', rarity:'legendary', desc:'万物之始, 宇宙在掌中, 凡人终须臣服。'}
   ];
 
   // 稀有度配色 (frame + 标签)
@@ -584,7 +584,7 @@
     html+='<div style="font-size:19px;font-weight:900;background:linear-gradient(90deg,#c4b5fd,#fde047,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent">\ud83d\udc51 星海女帝 · 终战</div>';
     html+='<div style="font-size:11.5px;color:#a78bca;margin:4px 0 10px">单词大陆 8 岛全通后 · 决战赛尔娅 · 考全部 240 词</div>';
     html+='<div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:#e9d5ff;font-weight:700">特效</span>'+hansenFxSwitchHTML()+'</div>';
-    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=1164" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
+    html+='<div style="width:150px;height:150px;margin:0 auto;border-radius:20px;border:2px solid #fde047;overflow:hidden;background:'+curBg.bg+';box-shadow:0 0 22px rgba(251,191,36,.45)"><img src="bosses/saelya.webp?v=1165" style="width:100%;height:100%;object-fit:contain;display:block" onerror="hansenImgErr(this)" alt=""></div>';
     var _fp76h=false; try{ _fp76h=!!(window.HansenFreepass&&window.HansenFreepass.active()); }catch(_fe){}
     if(_lc>=8 || _fp76h){  //🔴v876: 72小时试用期女帝也可试打(限定卡/纪事解锁仍按真实进度)
       try{ if(window.S){ window.S.bossUnlocked=6; if(typeof window.save==="function") window.save(); } }catch(_se){}
@@ -699,6 +699,8 @@
     if(/^land[1-8]$/.test(__ik)){ renderSeasonZoneBossPicker(__ik); return; }  //🔴v873 单词大陆8岛(land1-8)同用星域选关网格(各岛自己的5 boss·landN_prog顺序解锁)  //🔴v871 星域子岛(season1-5)显示自己的BOSSES(非20通用卡)
     var box = document.getElementById('bossContent');
     if(!box) return;
+    /* v1165：记一笔「打开过选关墙」，之后进岛才值得预下 Boss 头像（见 preloadBossImages） */
+    try { if(window.HansenPreloadPolicy && HansenPreloadPolicy.markBossWallSeen) HansenPreloadPolicy.markBossWallSeen(); } catch(e){}
     var d = loadData(true);
     var maxLv = getMaxChallengeLv();
     
@@ -944,7 +946,11 @@
     //   金紫渐变描边 + 双层径向高光底(不再黑沉沉) + 发光图标徽章 + 金色渐变标题 + 进入提示; 点击 __hsnOpenHall() 打开历代赛季限定卡陈列馆。
     //   注: 集卡进度/"卡牌大师"达成状态仍在本页顶部(已收集 N/20 + 全部集齐提示)展示, 故此处换成神秘殿堂入口不丢信息。
     var hallOwned=0, hallTotal=0;
-    try{ if(window.HansenSeason){ hallTotal=(window.HansenSeason.allSeasons()||[]).length; hallOwned=__tmpAll?hallTotal:((window.HansenSeason.data()||{}).unlockedCards||[]).length; } }catch(e){}
+    /* v1165: 以前数的是「赛季个数」（0/1），点进殿堂却写 0/6 —— 改成和殿堂同一个算法 */
+    try{ if(window.HansenSeason){
+      if(typeof window.HansenSeason.totalCardCount==='function'){ hallTotal=window.HansenSeason.totalCardCount(); hallOwned=window.HansenSeason.ownedCardCount(); }
+      else { hallTotal=(window.HansenSeason.allSeasons()||[]).length; hallOwned=__tmpAll?hallTotal:((window.HansenSeason.data()||{}).unlockedCards||[]).length; }
+    } }catch(e){}
     html += '<div style="margin:14px 4px 80px;background:linear-gradient(135deg,#fbbf24,#c084fc 50%,#fbbf24);padding:1.6px;border-radius:18px;box-shadow:0 12px 32px rgba(124,58,237,.32),0 4px 16px rgba(251,191,36,.20)">'+
       '<div onclick="if(window.__hsnOpenHall)__hsnOpenHall()" style="position:relative;border-radius:16.4px;padding:16px 15px;cursor:pointer;overflow:hidden;display:flex;align-items:center;gap:13px;'+
         'background:radial-gradient(130% 120% at 0% 0%,rgba(251,191,36,.17),transparent 52%),radial-gradient(130% 120% at 100% 100%,rgba(167,139,250,.22),transparent 52%),linear-gradient(135deg,#2a1f55,#191338 55%,#2e2417)">'+
@@ -1007,7 +1013,7 @@
     mask.id='__hsn_bosshall';
     mask.style.cssText='position:fixed;inset:0;z-index:2147483600;background:#0a0a14';
     var iframe=document.createElement('iframe');
-    iframe.src='boss_hall.html?v=1164&lv='+lv+'&own='+own.join(',');
+    iframe.src='boss_hall.html?v=1165&lv='+lv+'&own='+own.join(',');
     iframe.setAttribute('title','BOSS 殿堂');
     iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0a0a14';
     mask.appendChild(iframe);
@@ -1210,6 +1216,8 @@
   try{
     document.addEventListener('visibilitychange',wakeBackgroundMedia,{passive:true});
     window.addEventListener('online',wakeBackgroundMedia,{passive:true});
+    /* 🔴v1165 复查第 2 轮：首页外壳收起这个岛时预载规则会说「先别下」（hansen_preload），岛再露出来外壳发 hsn-shell-shown —— 接着下例句录音 / Boss 图 */
+    window.addEventListener('hsn-shell-shown',wakeBackgroundMedia,{passive:true});
     var _mediaConn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
     if(_mediaConn&&typeof _mediaConn.addEventListener==='function')_mediaConn.addEventListener('change',wakeBackgroundMedia);
     window.addEventListener('pagehide',function(){_mediaWaiters=[];},{once:true});
@@ -1220,9 +1228,16 @@
     if(window.__hansenBossImgPreloaded) return;
     window.__hansenBossImgPreloaded = true;
     
+    /* v1165：以前每进一个岛都把 20 张 Boss 头像（≈2.9MB）全下一遍。
+       选关墙上没解锁的关只显示 🔒，根本用不到图；从没打开过选关墙的孩子更用不到。
+       改为：打开过一次选关墙之后，才预下「已解锁的 + 下一关」；星海/单词大陆用自己的 Boss 图，不下。 */
+    var pol = window.HansenPreloadPolicy;
+    if(!pol || typeof pol.bossWallSeen !== 'function' || !pol.bossWallSeen()) return;
+    try { if(/^(?:season\d*|land\d+)$/.test(getCurrentIslandKey())) return; } catch(e){}
     var imgs = [];
     try {
-      imgs = BOSS_CARDS.map(function(b){ return b.img; }).filter(Boolean);
+      var cap = Math.min(20, getMaxChallengeLv() + 1);
+      imgs = BOSS_CARDS.slice(0, cap).map(function(b){ return b.img; }).filter(Boolean);
     } catch(e){ return; }
     if(!imgs.length) return;
     

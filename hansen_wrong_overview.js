@@ -161,19 +161,38 @@
   const islandKey = getCurrentIsland();
   if(!islandKey) return;  // 只在岛内激活
 
+  /* 🔴v1165: 错题本清零的词还在间隔复习计划里。首页横幅「其它岛还有 N 个到期」会数到它们，
+   * 点过来这里也必须看得到是哪个岛，否则横幅说有、总览说没有。 */
+  function _todayYMD(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function planOnlyDueCount(data, vocab){
+    const srs = data && data.srs, wrongs = (data && data.wrongs) || {};
+    if(!vocab || !srs || typeof srs !== 'object' || Array.isArray(srs)) return 0;
+    const t = _todayYMD();
+    let n = 0;
+    Object.keys(srs).forEach(key => {
+      const i = canonicalWrongIndex(key, vocab.length), e = srs[key];
+      if(i < 0 || !vocab[i] || safeWrongCount(wrongs[key])) return;
+      if(!e || typeof e !== 'object' || !Number.isInteger(e.box) || e.box < 0 || e.box >= 5) return;
+      if(typeof e.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.due) && e.due <= t) n++;
+    });
+    return n;
+  }
   // 收集所有岛错题统计
   function collectAllIslandWrongs(){
     const result = [];
     Object.keys(ISLAND_INFO).forEach(storageKey => {
       const data = safeJSON(storageKey);
       if(!data || !data.wrongs || typeof data.wrongs !== 'object' || Array.isArray(data.wrongs)) return;
-      const entries = normalizedWrongEntries(data, getSafeStoredVocab(storageKey));
+      const vocab = getSafeStoredVocab(storageKey);
+      const entries = normalizedWrongEntries(data, vocab);
       const wrongCount = entries.length;
-      if(wrongCount > 0){
+      const dueOnly = planOnlyDueCount(data, vocab);
+      if(wrongCount > 0 || dueOnly > 0){
         result.push({
           storageKey,
           info: ISLAND_INFO[storageKey],
           wrongCount,
+          dueOnly,
           wrongs: entries,
         });
       }
@@ -250,6 +269,9 @@
 
     const wrongsList = collectAllIslandWrongs();
     const total = getTotalWrongs();
+    // 待复习 = 错题 + 错题本已清、但今天到期的计划词（与首页横幅同一口径）
+    const totalTodo = total + wrongsList.reduce((n, item) => n + (item.dueOnly || 0), 0);
+    const wrongIslands = wrongsList.filter(item => item.wrongCount > 0).length;
 
     const overlay = document.createElement('div');
     overlay.id = 'hwo_overlay';
@@ -269,11 +291,11 @@
           <span class="hwo_island_emoji">${item.info.emoji}</span>
           <div class="hwo_island_main">
             <div class="hwo_island_name">${item.info.name}</div>
-            <div class="hwo_island_hint">点击进入复习</div>
+            <div class="hwo_island_hint">${item.dueOnly > 0 && item.wrongCount > 0 ? ('还有 ' + item.dueOnly + ' 个词今天该复习 · ') : ''}点击进入复习</div>
           </div>
           <div class="hwo_island_count">
-            <div class="hwo_count_num">${item.wrongCount}</div>
-            <div class="hwo_count_lbl">个错题</div>
+            <div class="hwo_count_num">${item.wrongCount > 0 ? item.wrongCount : item.dueOnly}</div>
+            <div class="hwo_count_lbl">${item.wrongCount > 0 ? '个错题' : '个该复习'}</div>
           </div>
         </div>
       `).join('');
@@ -331,7 +353,7 @@
         #hwo_overlay .hwo_review_all .all_icon{font-size:38px;margin-bottom:6px}
         #hwo_overlay .hwo_review_all .all_name{font-size:18px;font-weight:900;letter-spacing:1px}
         #hwo_overlay .hwo_review_all .all_desc{font-size:12px;color:rgba(255,255,255,.8);margin-top:4px;line-height:1.5}
-        #hwo_overlay .hwo_btm{text-align:center;color:#475569;font-size:11px;margin-top:24px;line-height:1.6}
+        #hwo_overlay .hwo_btm{text-align:center;color:#94a3b8;font-size:12px;margin-top:24px;line-height:1.6}
       </style>
       
       <div class="hwo_header">
@@ -343,7 +365,7 @@
       ${wrongsList.length > 0 ? `
       <div class="hwo_total">
         <div>
-          <div class="hwo_total_n">${total}</div>
+          <div class="hwo_total_n">${totalTodo}</div>
           <div class="hwo_total_lbl">个待复习单词</div>
         </div>
         <div style="font-size:54px">📕</div>
@@ -352,7 +374,7 @@
       
       ${listHtml}
       
-      ${wrongsList.length > 1 ? `
+      ${wrongIslands > 1 ? `
       <div class="hwo_review_all" onclick="window.HansenWrongOverview._reviewAll()">
         <div class="all_icon">📚</div>
         <div class="all_name">一起复习全部</div>
@@ -396,6 +418,9 @@
   }
 
   window.HansenWrongOverview = {
+    /* 🔴v1165: 首页横幅「点我去错题总览」找的是 open/_open，以前两个都没有 → 实际打开的是本岛复习中心 */
+    open: function(){ openOverview(); },
+    _open: function(){ openOverview(); },
     _close: function(){
       _beep();
       const el = document.getElementById('hwo_overlay');
