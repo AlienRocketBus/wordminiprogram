@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       fail-fast: false
+      max-parallel: 9          # 同时最多 9 台（加「不停测试」小管家 1 台 = 10 台，老师 11-05 定的上限）
       matrix:
         profile: [clean, ci, lag, faults, skew, ladder, adversary, disrupt, chaos, sweep]
     steps:

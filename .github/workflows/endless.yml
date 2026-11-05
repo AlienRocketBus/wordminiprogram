@@ -1,0 +1,56 @@
+# 不停测试（老师 11-05 定的：本仓库同时最多只占 10 台机器，可以一直跑下去）。
+#
+# 小管家自己占 1 台：轮流派「反复测试（全部 317 个，9 轮）」和「联机压力测试（10 种场景，最多 9 台同时）」，
+#   一次只派一个，等它跑完再派下一个 —— 所以同时最多 1 + 9 = 10 台，留另外 10 台给同账号的其他仓库（比如小说）。
+# 每个测试自己的结论表在它自己的运行页；小管家这一页的 Summary 列出每一圈的结论和链接。
+# 一份管家最多跑 5 个半小时（GitHub 一份任务最长 6 小时），到点自己派下一份接着跑。
+# 停下来：仓库 Settings → Secrets and variables → Actions → Variables 把 ENDLESS 改成 off（这一圈跑完就停）；
+#   或者直接取消这一页的运行，再取消它正在等的那个测试。
+# 注意：不停测试运行时不要推送代码（推送会再触发「自动体检」10 台，叠起来就超过 10 台）。
+name: 不停测试（最多 10 台）
+
+on:
+  workflow_dispatch:
+
+concurrency: { group: endless, cancel-in-progress: false }
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  driver:
+    name: 小管家
+    if: vars.ENDLESS != 'off'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      REF: ${{ github.ref_name }}
+    steps:
+      - name: 轮流派测试，一次一个
+        run: |
+          set -u
+          start=$(date +%s)
+          i=0
+          echo "| 圈 | 测试 | 结论 | 链接 |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          while :; do
+            [ "$(gh api "repos/$REPO/actions/variables/ENDLESS" --jq .value 2>/dev/null || echo on)" = off ] && { echo "ENDLESS=off，停"; exit 0; }
+            [ $(( $(date +%s) - start )) -gt 15000 ] && break          # 4 小时 10 分后不再开新的一圈（一圈最长约 75 分钟）
+            i=$((i+1))
+            if [ $((i % 2)) -eq 1 ]; then wf=repeat-tests.yml; name="反复测试 全部×9"
+              gh workflow run "$wf" -R "$REPO" --ref "$REF" -f only=test_ -f rounds=9
+            else wf=soak.yml; name="联机压力测试"
+              gh workflow run "$wf" -R "$REPO" --ref "$REF"
+            fi
+            sleep 15
+            id=$(gh run list -R "$REPO" -w "$wf" -e workflow_dispatch -L 1 --json databaseId --jq '.[0].databaseId')
+            while [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" != completed ]; do sleep 60; done
+            c=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
+            echo "第 $i 圈 $name：$c"
+            echo "| $i | $name | $c | https://github.com/$REPO/actions/runs/$id |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          # 到点：派下一份管家接着跑（同一组排队，这一份结束它才开始）
+          gh workflow run endless.yml -R "$REPO" --ref "$REF"
