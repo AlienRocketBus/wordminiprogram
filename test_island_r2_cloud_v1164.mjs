@@ -68,6 +68,9 @@ async function openAnimalIsland(G) {
   /* 🔴v1165 返回键「只退一步」：岛上的「欢迎来到动物大冒险！」也算一步（第一下返回先关它）。
      孩子进岛先点掉它再去玩（和 H.dismissIslandWelcome 一样，只是这里的岛在首页的框里） */
   if (fr) {
+    /* 欢迎框是岛初始化后 300ms 才弹（setTimeout）：先等它最多 4 秒，别一看没有就走 ——
+       11-04 反复测试 10 轮里 2 轮就是没等到它，后面那一下返回关的是欢迎框、不是岛 */
+    await H.until(() => fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false), { timeout: 4000, interval: 200 });
     for (let i = 0; i < 4; i++) {
       if (!(await fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false))) break;
       await fr.locator('#alertModal.show button').first().tap();
