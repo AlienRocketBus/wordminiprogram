@@ -233,6 +233,8 @@ async function setHidden(p, hidden) {
     await t.ok(!!fr, '首页里的岛打开了（iframe 里大PK模块就绪）', () => explain());
     if (fr) {
       /* 🔴v1165 返回键「只退一步」：岛上的「欢迎来到动物大冒险！」也算一步 —— 孩子进岛先点掉它再去开房 */
+      /* 欢迎框是岛初始化后 300ms 才弹：先等它最多 4 秒（11-05 不停测试 36 轮里 9 轮就是没等到它，后面那一下返回关的是欢迎框） */
+      await H.until(() => fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false), { timeout: 4000, interval: 200 });
       for (let i = 0; i < 4; i++) {
         if (!(await fr.evaluate(() => !!document.querySelector('#alertModal.show button')).catch(() => false))) break;
         await fr.locator('#alertModal.show button').first().tap();
