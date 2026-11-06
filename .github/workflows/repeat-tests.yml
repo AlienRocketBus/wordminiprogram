@@ -68,6 +68,16 @@ jobs:
         env: { ONLY: "${{ inputs.only || '_cloud_v' }}" }
         # 失败不在这里判红（只由「结论」判）—— 每次运行只发一条结果通知
         run: python3 一键体检.py --only "$ONLY" --no-retry --tag "r${{ matrix.round }}" || echo "这一轮有失败，由「结论」判定"
+      - name: 失败的测试：把最后 60 行印出来（日志包下载不了时也能直接看到原因）
+        if: always()
+        run: |
+          for j in .siphon/only_*.json; do
+            [ -f "$j" ] || continue
+            python3 -c "import json,sys;[print(t) for t,r in json.load(open(sys.argv[1])).items() if r]" "$j" | while read -r t; do
+              f=".siphon/$(echo "test_$t" | sed 's/[^A-Za-z0-9_.-]\+/_/g').log"
+              echo "::group::✗ $t（最后 60 行）"; tail -n 60 "$f" 2>/dev/null || echo "（没有日志 $f）"; echo "::endgroup::"
+            done
+          done
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: 'repeat-${{ matrix.round }}', path: .siphon/, retention-days: 14, if-no-files-found: ignore, include-hidden-files: true }
