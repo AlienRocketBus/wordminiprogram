@@ -76,7 +76,9 @@ async function run(){
   assert(bottom.cardBottom<=bottom.navTop+1,`last card (${bottom.cardBottom}) is covered by bottom nav (${bottom.navTop})`);
 
   // Keyboard opens the only card action; modal scrolls internally and returns focus on Escape.
-  const first=page.locator('#exploreContent .exp-card').first();await first.scrollIntoViewIfNeeded();
+  const first=page.locator('#exploreContent .exp-card').first();
+  // 卡片列表刚点完筛选会重画一次：元素被换掉时重试（11-06 GitHub 不停测试 63 遍里 11 遍报 Element is not attached to the DOM）
+  for(let i=0;;i++){try{await first.scrollIntoViewIfNeeded({timeout:3000});break;}catch(e){if(i>=4)throw e;await page.waitForTimeout(300);}}
   await page.evaluate(()=>{const original=window.showWord;window.__hxpOpenCount=0;window.showWord=function(){window.__hxpOpenCount++;return original.apply(this,arguments);};});
   await first.focus();await page.keyboard.press('Enter');await page.waitForSelector('#wordModal.show');
   assert.equal(await page.evaluate(()=>window.__hxpOpenCount),1,'Enter must open one detail, not trigger duplicate accessibility handlers');
